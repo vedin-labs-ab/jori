@@ -20,10 +20,9 @@ import {
   assertCommandSucceeded,
   assertCommandsSucceeded,
   CodexRunError,
+  type CommandTrace,
   createCommandTrace,
   formatError,
-  type StoredCommandTrace,
-  type StoredRuntimeTrace,
 } from "./trace"
 
 const sandboxTimeoutMs = 5 * 60 * 1_000
@@ -36,50 +35,42 @@ export type E2BCodexRunArgs = {
 }
 
 export type E2BCodexRunResult = {
-  trace: StoredRuntimeTrace
+  trace: string
 }
 
 type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
 
 export async function runCodexInE2B(args: E2BCodexRunArgs) {
-  const trace: StoredRuntimeTrace = { harness: {} }
   let sandbox: E2BSandbox | undefined
 
   try {
     sandbox = await createE2BSandbox()
     await args.onSandboxCreated(sandbox.sandboxId)
-    trace.harness.install = await installCodex(sandbox)
-    assertCommandSucceeded(
-      trace.harness.install,
-      "Could not install Codex inside E2B.",
-      trace
-    )
-    trace.harness.bootstrap = await bootstrapCodex(sandbox, {
+    const installTrace = await installCodex(sandbox)
+    assertCommandSucceeded(installTrace, "Could not install Codex inside E2B.")
+    const bootstrapTrace = await bootstrapCodex(sandbox, {
       authJsonBase64: args.authJsonBase64,
       toolBundle: args.toolBundle,
     })
     assertCommandSucceeded(
-      trace.harness.bootstrap,
-      "Could not bootstrap Codex inside E2B.",
-      trace
+      bootstrapTrace,
+      "Could not bootstrap Codex inside E2B."
     )
-    trace.harness.preflights = await verifyPreflights(
+    const preflightTraces = await verifyPreflights(
       sandbox,
       args.toolBundle.preflights
     )
     assertCommandsSucceeded(
-      trace.harness.preflights,
-      "A preflight failed inside the E2B sandbox.",
-      trace
+      preflightTraces,
+      "A preflight failed inside the E2B sandbox."
     )
     const agentTrace = await executeCodex(sandbox, args)
-    trace.harness.agent = agentTrace
+    const trace = agentTrace.stdout
     assertCommandSucceeded(
       agentTrace,
       `Codex exited with code ${agentTrace.exitCode}.`,
       trace
     )
-    trace.agent = { jsonl: agentTrace.stdout }
 
     return { trace }
   } catch (error) {
@@ -87,8 +78,7 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
       throw error
     }
 
-    trace.harness.runtime = { error: formatError(error) }
-    throw new CodexRunError(formatError(error), trace)
+    throw new CodexRunError(formatError(error))
   } finally {
     await sandbox?.kill().catch(() => undefined)
   }
@@ -166,7 +156,7 @@ async function verifyPreflights(
   sandbox: E2BSandbox,
   preflights: ToolPreflight[]
 ) {
-  const traces: StoredCommandTrace[] = []
+  const traces: CommandTrace[] = []
 
   for (const preflight of preflights) {
     if (preflight.type === "slack") {

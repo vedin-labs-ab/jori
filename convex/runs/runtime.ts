@@ -8,7 +8,7 @@ import { runCodexInE2B } from "./e2b"
 import { assemblePrompt } from "./prompt"
 import { createExecutionToken, hashExecutionToken } from "./tokens"
 import { assembleToolsForRun, type RuntimeTarget } from "./tools"
-import { CodexRunError, formatError, type StoredRuntimeTrace } from "./trace"
+import { CodexRunError, formatError } from "./trace"
 
 export const runSlackExecution = internalAction({
   args: {
@@ -81,7 +81,7 @@ async function runExecution(
   target: RuntimeTarget
 ) {
   const executionToken = createExecutionToken()
-  const tokenHash = await hashExecutionToken(executionToken)
+  const hash = await hashExecutionToken(executionToken)
   const skills = await ctx.runQuery(internal.skills.catalog.listForRuntime, {
     tenantId: input.execution.tenantId,
   })
@@ -96,7 +96,8 @@ async function runExecution(
       target,
     },
   })
-  let trace: StoredRuntimeTrace = { harness: {} }
+  let trace: string | undefined
+  let executionError: string | undefined
   let status: "completed" | "failed" = "completed"
 
   try {
@@ -106,7 +107,7 @@ async function runExecution(
         await ctx.runMutation(internal.runs.executions.markRunning, {
           executionId: input.execution._id,
           sandboxId,
-          tokenHash,
+          hash,
         })
       },
       prompt: promptBundle.rendered,
@@ -116,22 +117,24 @@ async function runExecution(
     trace = runtimeResult.trace
   } catch (error) {
     status = "failed"
-    trace =
-      error instanceof CodexRunError
-        ? error.trace
-        : { harness: { runtime: { error: formatError(error) } } }
+    executionError = formatError(error)
+    trace = error instanceof CodexRunError ? error.trace : undefined
   }
 
-  const fileId = await ctx.storage.store(
-    new Blob([JSON.stringify(trace, null, 2)], {
-      type: "application/json",
-    })
-  )
+  const fileId =
+    trace === undefined
+      ? undefined
+      : await ctx.storage.store(
+          new Blob([trace], {
+            type: "application/x-ndjson",
+          })
+        )
 
   await ctx.runMutation(internal.runs.executions.finish, {
     tenantId: input.execution.tenantId,
     executionId: input.execution._id,
     fileId,
+    error: executionError,
     status,
   })
 }
@@ -142,23 +145,10 @@ async function finishExecutionWithError(
   executionId: CodexRuntimeInput["execution"]["_id"],
   message: string
 ) {
-  const trace: StoredRuntimeTrace = {
-    harness: {
-      runtime: {
-        error: message,
-      },
-    },
-  }
-  const fileId = await ctx.storage.store(
-    new Blob([JSON.stringify(trace, null, 2)], {
-      type: "application/json",
-    })
-  )
-
   await ctx.runMutation(internal.runs.executions.finish, {
     tenantId,
     executionId,
-    fileId,
+    error: message,
     status: "failed",
   })
 }

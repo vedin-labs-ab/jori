@@ -53,9 +53,9 @@ export async function handleMiloMcpRequest(ctx: ActionCtx, request: Request) {
   }
 
   const execution = await ctx.runQuery(
-    internal.runs.executions.getActiveByTokenHash,
+    internal.runs.executions.getActiveByHash,
     {
-      tokenHash: await hashExecutionToken(token),
+      hash: await hashExecutionToken(token),
     }
   )
 

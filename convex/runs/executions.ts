@@ -104,16 +104,14 @@ async function getScheduledInput(
   }
 }
 
-export const getActiveByTokenHash = internalQuery({
+export const getActiveByHash = internalQuery({
   args: {
-    tokenHash: v.string(),
+    hash: v.string(),
   },
   handler: async (ctx, args) => {
     const execution = await ctx.db
       .query("executions")
-      .withIndex("by_token_hash", (query) =>
-        query.eq("tokenHash", args.tokenHash)
-      )
+      .withIndex("by_hash", (query) => query.eq("hash", args.hash))
       .first()
 
     if (execution === null || execution.status !== "running") {
@@ -128,13 +126,13 @@ export const markRunning = internalMutation({
   args: {
     executionId: v.id("executions"),
     sandboxId: v.optional(v.string()),
-    tokenHash: v.string(),
+    hash: v.string(),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.executionId, {
       status: "running",
       sandboxId: args.sandboxId,
-      tokenHash: args.tokenHash,
+      hash: args.hash,
     })
   },
 })
@@ -143,21 +141,25 @@ export const finish = internalMutation({
   args: {
     tenantId: v.string(),
     executionId: v.id("executions"),
-    fileId: v.id("_storage"),
+    fileId: v.optional(v.id("_storage")),
+    error: v.optional(v.string()),
     status: v.union(v.literal("completed"), v.literal("failed")),
   },
   handler: async (ctx, args) => {
-    await ctx.db.insert("traces", {
-      tenantId: args.tenantId,
-      executionId: args.executionId,
-      fileId: args.fileId,
-      createdAt: Date.now(),
-    })
+    if (args.fileId !== undefined) {
+      await ctx.db.insert("traces", {
+        tenantId: args.tenantId,
+        executionId: args.executionId,
+        fileId: args.fileId,
+        createdAt: Date.now(),
+      })
+    }
 
     await ctx.db.patch(args.executionId, {
       status: args.status,
+      error: args.status === "failed" ? args.error : undefined,
       finishedAt: Date.now(),
-      tokenHash: undefined,
+      hash: undefined,
     })
 
     const activations = await ctx.db

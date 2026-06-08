@@ -2,17 +2,16 @@
 
 ## Responsibility
 
-Stores the Convex file pointer for raw runtime trace output.
+Stores the Convex file pointer for raw Codex agent trace output.
 
 ## Includes
 
-- One trace file per execution.
-- Raw harness command stdout, stderr, exit codes, and command errors.
-- Raw Codex agent JSONL, including reasoning events.
+- Raw Codex agent JSONL, including reasoning, tool calls, tool results, and final response events.
+- One trace file per execution where the Codex agent started.
 
 ## Boundary
 
-Execution lifecycle state, sandbox identity, prompt assembly, tool assembly, Slack identifiers, and derived final-message details belong outside the stored trace file. Trace content lives in Convex storage.
+Execution lifecycle state, sandbox identity, prompt assembly, tool assembly, Slack identifiers, harness diagnostics, failure summaries, and derived final-message details belong outside the stored trace file. Failed executions store their failure summary on the execution row. Trace content lives in Convex storage.
 
 ## Draft Schema
 

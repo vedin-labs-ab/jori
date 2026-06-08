@@ -1,40 +1,23 @@
 import { type CommandResult } from "e2b"
 
-export type StoredRuntimeTrace = {
-  harness: {
-    install?: StoredCommandTrace
-    bootstrap?: StoredCommandTrace
-    preflights?: StoredCommandTrace[]
-    agent?: StoredCommandTrace
-    runtime?: StoredErrorTrace
-  }
-  agent?: {
-    jsonl: string
-  }
-}
-
-export type StoredCommandTrace = {
+export type CommandTrace = {
   exitCode: number
   stdout: string
   stderr: string
   error?: string
 }
 
-type StoredErrorTrace = {
-  error: string
-}
-
 export class CodexRunError extends Error {
-  trace: StoredRuntimeTrace
+  trace: string | undefined
 
-  constructor(message: string, trace: StoredRuntimeTrace) {
+  constructor(message: string, trace?: string) {
     super(message)
     this.name = "CodexRunError"
     this.trace = trace
   }
 }
 
-export function createCommandTrace(result: CommandResult): StoredCommandTrace {
+export function createCommandTrace(result: CommandResult): CommandTrace {
   return {
     exitCode: result.exitCode,
     stdout: result.stdout,
@@ -48,21 +31,47 @@ export function formatError(error: unknown) {
 }
 
 export function assertCommandSucceeded(
-  commandTrace: StoredCommandTrace,
+  commandTrace: CommandTrace,
   message: string,
-  trace: StoredRuntimeTrace
+  trace?: string
 ) {
   if (commandTrace.exitCode !== 0) {
-    throw new CodexRunError(message, trace)
+    throw new CodexRunError(formatCommandError(message, commandTrace), trace)
   }
 }
 
 export function assertCommandsSucceeded(
-  commandTraces: StoredCommandTrace[],
-  message: string,
-  trace: StoredRuntimeTrace
+  commandTraces: CommandTrace[],
+  message: string
 ) {
   for (const commandTrace of commandTraces) {
-    assertCommandSucceeded(commandTrace, message, trace)
+    assertCommandSucceeded(commandTrace, message)
   }
+}
+
+function formatCommandError(message: string, commandTrace: CommandTrace) {
+  const details = [
+    `exitCode=${commandTrace.exitCode}`,
+    commandTrace.error === undefined
+      ? undefined
+      : `error=${commandTrace.error}`,
+    summarizeOutput("stderr", commandTrace.stderr),
+    summarizeOutput("stdout", commandTrace.stdout),
+  ].filter((detail) => detail !== undefined)
+
+  return details.length === 0 ? message : `${message} ${details.join(" ")}`
+}
+
+function summarizeOutput(label: string, output: string) {
+  const value = output.trim()
+
+  if (value === "") {
+    return undefined
+  }
+
+  const maxLength = 1_000
+  const summary =
+    value.length <= maxLength ? value : `...${value.slice(-maxLength)}`
+
+  return `${label}=${JSON.stringify(summary)}`
 }
