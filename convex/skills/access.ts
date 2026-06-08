@@ -4,17 +4,47 @@ export async function requireTenantAccess(
   ctx: QueryCtx | MutationCtx,
   tenantId: string
 ) {
+  const access = await checkTenantAccess(ctx, tenantId)
+
+  if (!access.ok) {
+    throw new Error(access.message)
+  }
+
+  return access.identity
+}
+
+export async function checkTenantAccess(
+  ctx: QueryCtx | MutationCtx,
+  tenantId: string
+) {
   const identity = await ctx.auth.getUserIdentity()
 
   if (identity === null) {
-    throw new Error("Unauthorized")
+    return {
+      ok: false as const,
+      message: "Unauthorized: sign in before accessing tenant data.",
+    }
   }
 
-  if (readIdentityTenantId(identity) !== tenantId) {
-    throw new Error("Unauthorized")
+  const identityTenantId = readIdentityTenantId(identity)
+
+  if (identityTenantId === undefined) {
+    return {
+      ok: false as const,
+      message:
+        'Unauthorized: Convex auth token is missing the active Clerk organization. Add {"org_id":"{{org.id}}"} to the Clerk JWT template named "convex", then refresh your session.',
+    }
   }
 
-  return identity
+  if (identityTenantId !== tenantId) {
+    return {
+      ok: false as const,
+      message:
+        "Unauthorized: active Clerk organization does not match the requested tenant. Switch organizations or refresh your session.",
+    }
+  }
+
+  return { ok: true as const, identity }
 }
 
 function readIdentityTenantId(identity: Record<string, unknown>) {

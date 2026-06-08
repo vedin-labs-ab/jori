@@ -16,10 +16,23 @@ import { SkillDialog } from "./dialog"
 import { SkillSection } from "./section"
 import { emptySkillForm, type Skill, type SkillFormValues } from "./types"
 
+type SkillListResult =
+  | {
+      status: "ready"
+      skills: Skill[]
+    }
+  | {
+      status: "unauthorized"
+      message: string
+      skills: Skill[]
+    }
+
 export function SkillsCard({ tenantId }: { tenantId: string }) {
-  const skills = useQuery(api.skills.catalog.list, { tenantId })
+  const skillList = useQuery(api.skills.catalog.list, { tenantId })
   const editor = useSkillEditor(tenantId)
+  const skills = skillList?.status === "ready" ? skillList.skills : undefined
   const groupedSkills = useMemo(() => groupSkills(skills), [skills])
+  const isAccessReady = skillList?.status === "ready"
 
   return (
     <Card className="md:col-span-2">
@@ -29,7 +42,12 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
           Teach Milo durable working habits for this organization.
         </CardDescription>
         <CardAction>
-          <Button type="button" size="sm" onClick={editor.openCreateForm}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={editor.openCreateForm}
+            disabled={!isAccessReady}
+          >
             <Plus />
             Add skill
           </Button>
@@ -37,13 +55,16 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
       </CardHeader>
       <CardContent className="grid gap-5">
         <SkillError error={editor.error} />
-        <SkillContent
-          groupedSkills={groupedSkills}
-          isLoading={skills === undefined}
-          onDelete={editor.deleteSkill}
-          onEdit={editor.openEditForm}
-          pendingSkillId={editor.pendingSkillId}
-        />
+        <SkillAccessError result={skillList} />
+        {skillList?.status !== "unauthorized" ? (
+          <SkillContent
+            groupedSkills={groupedSkills}
+            isLoading={skillList === undefined}
+            onDelete={editor.deleteSkill}
+            onEdit={editor.openEditForm}
+            pendingSkillId={editor.pendingSkillId}
+          />
+        ) : null}
       </CardContent>
       <SkillDialog
         isOpen={editor.isFormOpen}
@@ -140,6 +161,19 @@ function SkillError({ error }: { error: string | undefined }) {
     <Alert variant="destructive">
       <AlertTitle>Skill update failed</AlertTitle>
       <AlertDescription>{error}</AlertDescription>
+    </Alert>
+  )
+}
+
+function SkillAccessError({ result }: { result: SkillListResult | undefined }) {
+  if (result?.status !== "unauthorized") {
+    return null
+  }
+
+  return (
+    <Alert variant="destructive">
+      <AlertTitle>Skill access unavailable</AlertTitle>
+      <AlertDescription>{result.message}</AlertDescription>
     </Alert>
   )
 }

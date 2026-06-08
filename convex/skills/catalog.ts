@@ -6,7 +6,7 @@ import {
   query,
 } from "../_generated/server"
 import { skills as globalSkillSeed } from "../prompts/generated"
-import { requireTenantAccess } from "./access"
+import { checkTenantAccess, requireTenantAccess } from "./access"
 import {
   normalizeSkillInput,
   requireUniqueTenantSkillName,
@@ -24,7 +24,15 @@ export const list = query({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    const access = await checkTenantAccess(ctx, args.tenantId)
+
+    if (!access.ok) {
+      return {
+        status: "unauthorized" as const,
+        message: access.message,
+        skills: [],
+      }
+    }
 
     const [globalSkills, tenantSkills] = await Promise.all([
       ctx.db
@@ -37,17 +45,20 @@ export const list = query({
         .collect(),
     ])
 
-    return sortSkills([...globalSkills, ...tenantSkills]).map((skill) => ({
-      _id: skill._id,
-      tenantId: skill.tenantId,
-      name: skill.name,
-      description: skill.description,
-      body: skill.body,
-      createdAt: skill.createdAt,
-      updatedAt: skill.updatedAt,
-      scope:
-        skill.tenantId === null ? ("global" as const) : ("tenant" as const),
-    }))
+    return {
+      status: "ready" as const,
+      skills: sortSkills([...globalSkills, ...tenantSkills]).map((skill) => ({
+        _id: skill._id,
+        tenantId: skill.tenantId,
+        name: skill.name,
+        description: skill.description,
+        body: skill.body,
+        createdAt: skill.createdAt,
+        updatedAt: skill.updatedAt,
+        scope:
+          skill.tenantId === null ? ("global" as const) : ("tenant" as const),
+      })),
+    }
   },
 })
 
