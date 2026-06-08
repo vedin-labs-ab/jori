@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Owns raw company inputs before Milo turns them into traces, memory, work, triggers, or agent context.
+Owns raw company inputs before Milo turns them into traces, memory, attention, or agent context.
 
 ## Includes
 

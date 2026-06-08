@@ -2,4 +2,4 @@
 
 ## Responsibility
 
-Owns the company boundary for identity, context, work, integrations, permissions, and agent behavior.
+Owns the company boundary for identity, context, integrations, permissions, and agent behavior.

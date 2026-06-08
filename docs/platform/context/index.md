@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Owns the company signal Milo can use: sources, integrations, and durable memory.
+Owns the company information Milo can bring into an agent run: source material, connected systems, and durable memory.
 
 ## Owns
 
@@ -12,4 +12,4 @@ Owns the company signal Milo can use: sources, integrations, and durable memory.
 
 ## Boundary
 
-Agent behavior belongs to [Agents](../agents/index.md). Requests, tasks, triggers, and execution attempts belong to [Runs](../runs/index.md).
+Agent behavior belongs to [Agents](../agents/index.md). Attention decisions belong to [Attention](../attention/index.md). Execution attempts belong to [Runs](../runs/index.md).

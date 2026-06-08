@@ -12,4 +12,4 @@ Owns the organization boundary, people, and permissions that determine who can u
 
 ## Boundary
 
-Agent identity and behavior belong to [Agents](../agents/index.md). Requests, tasks, runs, and review points belong to [Runs](../runs/index.md).
+Agent identity and behavior belong to [Agents](../agents/index.md). Attention and review points belong to [Attention](../attention/index.md). Execution attempts belong to [Runs](../runs/index.md).

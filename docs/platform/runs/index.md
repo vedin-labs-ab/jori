@@ -2,17 +2,15 @@
 
 ## Responsibility
 
-Owns attempts to complete delegated work in the cloud.
+Owns execution attempts after Milo has decided to act.
 
 ## Owns
 
-- [Triggers](./triggers.md)
 - [Execution](./execution.md)
 - [Sandboxes](./sandboxes.md)
 - [Artifacts](./artifacts.md)
-- [Reviews](./reviews.md)
 - [Traces](./traces.md)
 
 ## Boundary
 
-Agent capabilities belong to [Agents](../agents/index.md). Durable memory belongs to [Context](../context/index.md). Identity and permissions belong to [Identity](../identity/index.md).
+Attention and review decisions belong to [Attention](../attention/index.md). Agent capabilities belong to [Agents](../agents/index.md). Durable memory belongs to [Context](../context/index.md). Identity and permissions belong to [Identity](../identity/index.md).

@@ -6,6 +6,7 @@ Owns the delegated AI teammates Milo can ask to reason, plan, use tools, and com
 
 ## Owns
 
+- [Profiles](./profiles.md)
 - [Skills](./skills.md)
 - [Tools](./tools.md)
 

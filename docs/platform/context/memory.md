@@ -14,4 +14,4 @@ Owns durable company understanding that agents and people can rely on.
 
 ## Boundary
 
-Evidence belongs to [Traces](../runs/traces.md). Requests, tasks, and execution attempts belong to [Runs](../runs/index.md). Agent-specific improvements belong to [Dreaming](../dreaming/index.md).
+Evidence belongs to [Traces](../runs/traces.md). Execution attempts belong to [Runs](../runs/index.md). Agent-specific improvements belong to [Dreaming](../dreaming/index.md).

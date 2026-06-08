@@ -6,8 +6,8 @@ Owns records produced around a run: what triggered it, what the agent did, what 
 
 ## Includes
 
-- Trigger inputs from messages, meetings, imports, schedules, state changes, and integrations.
-- Model calls, tool calls, sandbox activity, artifacts, and reviews.
+- Attention decisions from triggers, activations, and reviews.
+- Model calls, tool calls, sandbox activity, and artifacts.
 - Permission, policy, and autonomy decisions made during the run.
 - Evidence that supports memory updates after the run.
 
