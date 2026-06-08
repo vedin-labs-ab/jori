@@ -4,6 +4,7 @@ import { type McpServerConfig } from "./tools"
 export type SlackRuntimeInput = {
   type: "slack"
   execution: Doc<"executions">
+  trigger: Doc<"triggers">
   integration: Doc<"integrations">
   message: Doc<"messages">
 }
@@ -11,6 +12,7 @@ export type SlackRuntimeInput = {
 export type ScheduledRuntimeInput = {
   type: "scheduled"
   execution: Doc<"executions">
+  trigger: Doc<"triggers">
   integration: Doc<"integrations">
   schedule: Doc<"schedules">
 }

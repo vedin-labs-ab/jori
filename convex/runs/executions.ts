@@ -1,56 +1,108 @@
 import { v } from "convex/values"
-import { internalMutation, internalQuery } from "../_generated/server"
+import { type Doc } from "../_generated/dataModel"
+import {
+  internalMutation,
+  internalQuery,
+  type QueryCtx,
+} from "../_generated/server"
 
 export const getInput = internalQuery({
   args: {
     executionId: v.id("executions"),
-    messageId: v.id("messages"),
   },
   handler: async (ctx, args) => {
     const execution = await ctx.db.get(args.executionId)
-    const message = await ctx.db.get(args.messageId)
 
-    if (execution === null || message === null) {
+    if (execution === null) {
       return null
     }
 
-    const integration = await ctx.db.get(message.integrationId)
+    const trigger = await ctx.db.get(execution.triggerId)
 
-    if (integration === null) {
+    if (trigger === null || trigger.tenantId !== execution.tenantId) {
       return null
     }
 
-    return { execution, message, integration }
+    if (trigger.type === "message") {
+      return await getMessageInput(ctx, { execution, trigger })
+    }
+
+    if (trigger.type === "scheduled") {
+      return await getScheduledInput(ctx, { execution, trigger })
+    }
+
+    return null
   },
 })
 
-export const getScheduledInput = internalQuery({
+async function getMessageInput(
+  ctx: QueryCtx,
   args: {
-    executionId: v.id("executions"),
-    scheduleId: v.id("schedules"),
-  },
-  handler: async (ctx, args) => {
-    const execution = await ctx.db.get(args.executionId)
-    const schedule = await ctx.db.get(args.scheduleId)
+    execution: Doc<"executions">
+    trigger: Doc<"triggers">
+  }
+) {
+  if (args.trigger.messageId === undefined) {
+    return null
+  }
 
-    if (execution === null || schedule === null) {
-      return null
-    }
+  const message = await ctx.db.get(args.trigger.messageId)
 
-    if (execution.tenantId !== schedule.tenantId) {
-      return null
-    }
+  if (message === null || message.tenantId !== args.execution.tenantId) {
+    return null
+  }
 
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_provider", (query) =>
-        query.eq("tenantId", schedule.tenantId).eq("provider", "slack")
-      )
-      .first()
+  const integration = await ctx.db.get(message.integrationId)
 
-    return { execution, schedule, integration }
-  },
-})
+  if (
+    integration === null ||
+    integration.tenantId !== args.execution.tenantId ||
+    integration.provider !== "slack"
+  ) {
+    return null
+  }
+
+  return {
+    type: "slack" as const,
+    execution: args.execution,
+    trigger: args.trigger,
+    message,
+    integration,
+  }
+}
+
+async function getScheduledInput(
+  ctx: QueryCtx,
+  args: {
+    execution: Doc<"executions">
+    trigger: Doc<"triggers">
+  }
+) {
+  if (args.trigger.scheduleId === undefined) {
+    return null
+  }
+
+  const schedule = await ctx.db.get(args.trigger.scheduleId)
+
+  if (schedule === null || schedule.tenantId !== args.execution.tenantId) {
+    return null
+  }
+
+  const integration = await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_provider", (query) =>
+      query.eq("tenantId", schedule.tenantId).eq("provider", "slack")
+    )
+    .first()
+
+  return {
+    type: "scheduled" as const,
+    execution: args.execution,
+    trigger: args.trigger,
+    schedule,
+    integration,
+  }
+}
 
 export const getActiveByTokenHash = internalQuery({
   args: {

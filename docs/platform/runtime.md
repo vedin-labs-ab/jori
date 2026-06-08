@@ -6,9 +6,9 @@ Defines the minimum runtime model needed to trigger Milo from Slack and user-man
 
 ## Runtime Loop
 
-A Slack message creates a message record. If the message asks Milo to work, Milo creates a trigger, activates the conversation, starts an execution, runs Codex in an E2B sandbox, stores the full trace as a Convex file, and lets Codex reply through Slack MCP.
+A Slack message creates a message record. If the message asks Milo to work, Milo creates a trigger, starts an execution caused by that trigger, activates the conversation, runs Codex in an E2B sandbox, stores the full trace as a Convex file, and lets Codex reply through Slack MCP.
 
-A schedule stores future work, an explicit output target, and either a one-shot UTC ISO timestamp or a recurring UTC cron expression. When the schedule fires, Milo creates the same kind of execution and runs Codex in E2B with the scheduled task name, description, metadata, and output target.
+A schedule stores future work, an explicit output target, and either a one-shot UTC ISO timestamp or a recurring UTC cron expression. When the schedule fires, Milo creates a scheduled trigger, starts an execution caused by that trigger, and runs Codex in E2B with the scheduled task name, description, metadata, and output target.
 
 Identity and organizations come from Clerk. Milo stores Clerk organization IDs as `tenantId` and Clerk user IDs as `createdBy`. There are no local organization, user, membership, or identity-mapping tables.
 

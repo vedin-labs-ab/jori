@@ -53,6 +53,7 @@ export async function startMessageExecution(
 
   const executionId = await ctx.db.insert("executions", {
     tenantId: args.integration.tenantId,
+    triggerId,
     status: "queued",
     createdAt: args.now,
   })

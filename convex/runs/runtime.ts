@@ -13,12 +13,11 @@ import { CodexRunError, formatError, type StoredRuntimeTrace } from "./trace"
 export const runSlackExecution = internalAction({
   args: {
     executionId: v.id("executions"),
-    messageId: v.id("messages"),
   },
   handler: async (ctx, args) => {
     const input = await ctx.runQuery(internal.runs.executions.getInput, args)
 
-    if (input === null) {
+    if (input === null || input.type !== "slack") {
       return
     }
 
@@ -28,6 +27,7 @@ export const runSlackExecution = internalAction({
       {
         type: "slack",
         execution: input.execution,
+        trigger: input.trigger,
         integration: input.integration,
         message: input.message,
       },
@@ -39,15 +39,11 @@ export const runSlackExecution = internalAction({
 export const runScheduledExecution = internalAction({
   args: {
     executionId: v.id("executions"),
-    scheduleId: v.id("schedules"),
   },
   handler: async (ctx, args) => {
-    const input = await ctx.runQuery(
-      internal.runs.executions.getScheduledInput,
-      args
-    )
+    const input = await ctx.runQuery(internal.runs.executions.getInput, args)
 
-    if (input === null) {
+    if (input === null || input.type !== "scheduled") {
       return
     }
 
@@ -66,6 +62,7 @@ export const runScheduledExecution = internalAction({
       {
         type: "scheduled",
         execution: input.execution,
+        trigger: input.trigger,
         integration: input.integration,
         schedule: input.schedule,
       },

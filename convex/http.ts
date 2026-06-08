@@ -207,7 +207,6 @@ http.route({
     if (result.status === "started") {
       await ctx.scheduler.runAfter(0, internal.runs.runtime.runSlackExecution, {
         executionId: result.executionId,
-        messageId: result.messageId,
       })
     }
 
