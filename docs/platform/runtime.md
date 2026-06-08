@@ -54,6 +54,10 @@ Runs:
 - [Executions](./runs/executions.md)
 - [Traces](./runs/traces.md)
 
+## Code Ownership
+
+The implementation follows the domain map in [Structure](./structure.md). Framework-owned Convex entry points stay at the root, while Milo-owned backend code lives under `identity`, `context`, `attention`, `runs`, and `providers`.
+
 ## Deferred
 
 These are intentionally not first-version models:

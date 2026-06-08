@@ -1,7 +1,7 @@
 import { v } from "convex/values"
-import { action } from "./_generated/server"
+import { action } from "../_generated/server"
 
-export const updateOrganizationWebsite = action({
+export const updateWebsite = action({
   args: {
     tenantId: v.string(),
     website: v.string(),

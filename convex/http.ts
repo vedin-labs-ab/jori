@@ -1,8 +1,14 @@
 import { httpRouter } from "convex/server"
 import { internal } from "./_generated/api"
 import { httpAction } from "./_generated/server"
-import { getSlackMessage, type SlackEventPayload } from "./slackEvents"
-import { parseSignedSlackState, verifySlackRequest } from "./slackShared"
+import {
+  getSlackMessage,
+  type SlackEventPayload,
+} from "./providers/slack/events"
+import {
+  parseSignedSlackState,
+  verifySlackRequest,
+} from "./providers/slack/signing"
 
 const http = httpRouter()
 
@@ -122,14 +128,17 @@ http.route({
       return redirectWithSlackStatus(state.returnUrl, "error")
     }
 
-    await ctx.runMutation(internal.slack.recordOAuthInstallation, {
-      tenantId: state.tenantId,
-      createdBy: state.createdBy,
-      accountId: tokenResult.team.id,
-      tokenId: tokenResult.access_token,
-      teamName: tokenResult.team.name,
-      botUserId: tokenResult.bot_user_id,
-    })
+    await ctx.runMutation(
+      internal.providers.slack.install.recordOAuthInstallation,
+      {
+        tenantId: state.tenantId,
+        createdBy: state.createdBy,
+        accountId: tokenResult.team.id,
+        tokenId: tokenResult.access_token,
+        teamName: tokenResult.team.name,
+        botUserId: tokenResult.bot_user_id,
+      }
+    )
 
     return redirectWithSlackStatus(state.returnUrl, "connected")
   }),
@@ -162,20 +171,23 @@ http.route({
       return jsonResponse({ ok: true })
     }
 
-    const result = await ctx.runMutation(internal.slack.recordEventMessage, {
-      accountId: message.accountId,
-      type: message.type,
-      providerId: message.providerId,
-      actorId: message.actorId,
-      containerId: message.containerId,
-      threadId: message.threadId,
-      text: message.text,
-      occurredAt: message.occurredAt,
-      data: message.data,
-    })
+    const result = await ctx.runMutation(
+      internal.context.messages.recordSlackEvent,
+      {
+        accountId: message.accountId,
+        type: message.type,
+        providerId: message.providerId,
+        actorId: message.actorId,
+        containerId: message.containerId,
+        threadId: message.threadId,
+        text: message.text,
+        occurredAt: message.occurredAt,
+        data: message.data,
+      }
+    )
 
     if (result.status === "started") {
-      await ctx.scheduler.runAfter(0, internal.runtime.runSlackExecution, {
+      await ctx.scheduler.runAfter(0, internal.runs.runtime.runSlackExecution, {
         executionId: result.executionId,
         messageId: result.messageId,
       })

@@ -11,7 +11,7 @@ Stores the Convex file pointer for a full execution trace.
 
 ## Boundary
 
-Execution lifecycle state belongs to [Executions](./execution.md). Trace content lives in Convex storage.
+Execution lifecycle state belongs to [Executions](./executions.md). Trace content lives in Convex storage.
 
 ## Draft Schema
 

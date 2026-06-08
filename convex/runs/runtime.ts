@@ -1,6 +1,7 @@
 import { v } from "convex/values"
-import { internal } from "./_generated/api"
-import { internalAction } from "./_generated/server"
+import { internal } from "../_generated/api"
+import { internalAction } from "../_generated/server"
+import { postReply } from "../providers/slack/reply"
 
 export const runSlackExecution = internalAction({
   args: {
@@ -8,13 +9,13 @@ export const runSlackExecution = internalAction({
     messageId: v.id("messages"),
   },
   handler: async (ctx, args) => {
-    const input = await ctx.runQuery(internal.executions.getInput, args)
+    const input = await ctx.runQuery(internal.runs.executions.getInput, args)
 
     if (input === null) {
       return
     }
 
-    await ctx.runMutation(internal.executions.markRunning, {
+    await ctx.runMutation(internal.runs.executions.markRunning, {
       executionId: args.executionId,
     })
 
@@ -29,7 +30,7 @@ export const runSlackExecution = internalAction({
         result: runtimeResult,
       })
 
-      const reply = await postSlackReply({
+      const reply = await postReply({
         token: input.integration.tokenId,
         channel: input.message.containerId,
         threadId: input.message.threadId,
@@ -62,7 +63,7 @@ export const runSlackExecution = internalAction({
       })
     )
 
-    await ctx.runMutation(internal.executions.finish, {
+    await ctx.runMutation(internal.runs.executions.finish, {
       tenantId: input.execution.tenantId,
       executionId: args.executionId,
       fileId,
@@ -122,40 +123,5 @@ async function runTemporaryCodexRuntime(messageText: string | undefined) {
     input: messageText ?? "",
     reply:
       "Milo started a run for this thread. The temporary runtime completed and stored its trace.",
-  }
-}
-
-async function postSlackReply(args: {
-  token: string
-  channel: string | undefined
-  threadId: string | undefined
-  text: string
-}) {
-  if (args.channel === undefined) {
-    return { ok: false, error: "missing_channel" }
-  }
-
-  const response = await fetch("https://slack.com/api/chat.postMessage", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${args.token}`,
-      "content-type": "application/json; charset=utf-8",
-    },
-    body: JSON.stringify({
-      channel: args.channel,
-      text: args.text,
-      thread_ts: args.threadId,
-    }),
-  })
-  const result = (await response.json()) as {
-    ok?: boolean
-    error?: string
-    ts?: string
-  }
-
-  return {
-    ok: result.ok === true,
-    error: result.error,
-    ts: result.ts,
   }
 }

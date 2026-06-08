@@ -21,6 +21,7 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Toggle } from "@/components/ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { BrandMark } from "@/shared/brand"
 
 const sectionClass = "flex flex-col gap-2"
 const titleClass = "text-xs font-medium text-muted-foreground"
@@ -32,19 +33,7 @@ export function Review() {
       <div className="flex min-w-0 flex-col gap-8 text-sm">
         <div>
           <div className="mb-5 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <img
-                src="/brand/mark/mark-black.svg"
-                alt=""
-                className="block size-8 dark:hidden"
-              />
-              <img
-                src="/brand/mark/mark-white.svg"
-                alt=""
-                className="hidden size-8 dark:block"
-              />
-              <span className="text-base font-medium">Milo</span>
-            </div>
+            <BrandMark />
             <div className="ml-auto flex items-center gap-2">
               <AuthLoading>
                 <Button variant="outline" size="sm" disabled>

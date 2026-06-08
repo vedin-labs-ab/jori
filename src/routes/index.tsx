@@ -1,4 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Milo } from "@/milo"
+import { Setup } from "@/setup"
 
-export const Route = createFileRoute("/")({ component: Milo })
+export const Route = createFileRoute("/")({ component: Setup })
