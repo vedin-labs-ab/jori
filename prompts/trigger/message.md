@@ -1,9 +1,9 @@
 # Message Trigger
 
-A Slack message triggered this run.
+A {{message.provider}} message triggered this run.
 
 Message target:
-- Provider: Slack
+- Provider: {{message.provider}}
 - Channel ID: {{message.channelId}}
 - Conversation ID: {{message.conversationId}}
 

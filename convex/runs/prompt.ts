@@ -70,6 +70,7 @@ function createMessageTriggerPart(
     type: "trigger",
     content: renderTemplate(promptTemplates["trigger/message"], {
       message: {
+        provider: "Slack",
         channelId: getSlackChannelId(input.message.data) ?? "",
         conversationId:
           input.message.conversationId ?? input.message.externalId,
