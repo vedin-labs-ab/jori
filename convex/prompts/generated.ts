@@ -15,7 +15,7 @@ export const skills = {
 
 export const promptTemplates = {
   "runtime/slack-message":
-    "# Runtime Task\n\nA Slack message triggered this run.\n\nSlack target:\n- Location ID: {{sourceItem.locationId}}\n- Conversation ID: {{sourceItem.conversationId}}\n\nOriginal Slack message:\n{{sourceItem.content}}\n\nComplete the Slack task using the available tools. If a reply is warranted, send it to the Slack target above.\n",
+    "# Runtime Task\n\nA Slack message triggered this run.\n\nSlack target:\n- Channel ID: {{message.channelId}}\n- Conversation ID: {{message.conversationId}}\n\nOriginal Slack message:\n{{message.text}}\n\nComplete the Slack task using the available tools. If a reply is warranted, send it to the Slack target above.\n",
 } as const
 
 export type SkillId = keyof typeof skills

@@ -22,7 +22,7 @@ type SlackEvent = {
   client_msg_id?: string
 }
 
-export function getSlackSourceItem(payload: SlackEventPayload) {
+export function getSlackMessage(payload: SlackEventPayload) {
   const event = payload.event
 
   if (event === undefined) {
@@ -40,29 +40,29 @@ export function getSlackSourceItem(payload: SlackEventPayload) {
     return null
   }
 
-  const externalAccountId =
+  const accountId =
     payload.team_id ??
     payload.authorizations?.find((authorization) => authorization.team_id)
       ?.team_id
 
-  if (externalAccountId === undefined) {
+  if (accountId === undefined) {
     return null
   }
 
-  const externalId = `slack:${externalAccountId}:${event.client_msg_id ?? event.ts}`
+  const externalId = `slack:${accountId}:${event.client_msg_id ?? event.ts}`
 
   return {
-    externalAccountId,
-    kind: getSlackSourceItemKind(event),
+    accountId,
+    type: getSlackMessageType(event),
     externalId,
-    authorId: event.user,
-    locationId: event.channel,
+    actorId: event.user,
     conversationId: event.thread_ts ?? event.ts,
-    content: event.text,
+    text: event.text,
     observedAt: Number.isFinite(Number(event.ts))
       ? Math.round(Number(event.ts) * 1000)
       : undefined,
     data: {
+      channelId: event.channel,
       eventId: payload.event_id,
       ts: event.ts,
       threadTs: event.thread_ts,
@@ -71,7 +71,7 @@ export function getSlackSourceItem(payload: SlackEventPayload) {
   }
 }
 
-function getSlackSourceItemKind(event: SlackEvent) {
+function getSlackMessageType(event: SlackEvent) {
   if (event.type !== "message") {
     return event.type ?? "message"
   }

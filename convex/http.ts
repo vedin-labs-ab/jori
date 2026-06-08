@@ -9,7 +9,7 @@ import {
   slackUserScopes,
 } from "./providers/slack/config"
 import {
-  getSlackSourceItem,
+  getSlackMessage,
   type SlackEventPayload,
 } from "./providers/slack/events"
 import {
@@ -140,7 +140,7 @@ http.route({
       {
         tenantId: state.tenantId,
         createdBy: state.createdBy,
-        externalAccountId: tokenResult.team.id,
+        accountId: tokenResult.team.id,
         botScopes: tokenResult.scope,
         botToken,
         teamName: tokenResult.team.name,
@@ -175,31 +175,30 @@ http.route({
       return Response.json({ ok: true })
     }
 
-    const sourceItem = getSlackSourceItem(payload)
+    const message = getSlackMessage(payload)
 
-    if (sourceItem === null) {
+    if (message === null) {
       return Response.json({ ok: true })
     }
 
     const result = await ctx.runMutation(
-      internal.context.sourceItems.recordSlackSourceItem,
+      internal.context.messages.recordSlackMessage,
       {
-        externalAccountId: sourceItem.externalAccountId,
-        kind: sourceItem.kind,
-        externalId: sourceItem.externalId,
-        authorId: sourceItem.authorId,
-        locationId: sourceItem.locationId,
-        conversationId: sourceItem.conversationId,
-        content: sourceItem.content,
-        observedAt: sourceItem.observedAt,
-        data: sourceItem.data,
+        accountId: message.accountId,
+        type: message.type,
+        externalId: message.externalId,
+        actorId: message.actorId,
+        conversationId: message.conversationId,
+        text: message.text,
+        observedAt: message.observedAt,
+        data: message.data,
       }
     )
 
     if (result.status === "started") {
       await ctx.scheduler.runAfter(0, internal.runs.runtime.runSlackExecution, {
         executionId: result.executionId,
-        sourceItemId: result.sourceItemId,
+        messageId: result.messageId,
       })
     }
 

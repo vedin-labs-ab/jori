@@ -26,26 +26,26 @@ export async function findConversationActivation(
     .first()
 }
 
-export async function startSourceItemExecution(
+export async function startMessageExecution(
   ctx: MutationCtx,
   args: {
     activation: Doc<"activations"> | null
     integration: Doc<"integrations">
-    sourceItemId: Id<"sourceItems">
-    sourceKind: string
-    sourceExternalId: string
+    messageId: Id<"messages">
+    messageType: string
+    messageExternalId: string
     conversationId: string
     now: number
   }
 ) {
   const triggerId = await ctx.db.insert("triggers", {
     tenantId: args.integration.tenantId,
-    sourceItemId: args.sourceItemId,
-    type: "source_item",
+    messageId: args.messageId,
+    type: "message",
     data: {
-      source: {
-        kind: args.sourceKind,
-        externalId: args.sourceExternalId,
+      message: {
+        type: args.messageType,
+        externalId: args.messageExternalId,
       },
     },
     createdAt: args.now,
@@ -75,7 +75,7 @@ export async function startSourceItemExecution(
 
   return {
     status: "started" as const,
-    sourceItemId: args.sourceItemId,
+    messageId: args.messageId,
     triggerId,
     executionId,
     activationId,

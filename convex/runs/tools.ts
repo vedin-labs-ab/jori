@@ -30,7 +30,7 @@ export type ToolPreflight = {
 
 export type RuntimeTarget = {
   provider: "slack"
-  locationId: string
+  channelId: string
 }
 
 export function assembleToolsForRun(args: {
@@ -42,7 +42,7 @@ export function assembleToolsForRun(args: {
 
     return createSlackToolBundle({
       credentials,
-      locationId: args.target.locationId,
+      channelId: args.target.channelId,
     })
   }
 
@@ -55,7 +55,7 @@ export function assembleToolsForRun(args: {
 
 function createSlackToolBundle(args: {
   credentials: SlackCredentials
-  locationId: string
+  channelId: string
 }): ToolBundle {
   return {
     mcpServers: [
@@ -64,9 +64,9 @@ function createSlackToolBundle(args: {
         command: "node",
         args: ["/tmp/milo-workspace/milo-slack-mcp-proxy.mjs"],
         env: {
-          MILO_SLACK_ALLOWED_CHANNEL_ID: args.locationId,
-          MILO_SLACK_BOT_TOKEN: args.credentials.botToken,
-          MILO_SLACK_USER_TOKEN: args.credentials.userToken,
+          MILO_SLACK_ALLOWED_CHANNEL_ID: args.channelId,
+          MILO_SLACK_BOT_TOKEN: args.credentials.bot,
+          MILO_SLACK_USER_TOKEN: args.credentials.user,
         },
       },
     ],

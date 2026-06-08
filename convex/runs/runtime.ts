@@ -11,7 +11,7 @@ import { CodexRunError, formatError, type StoredRuntimeTrace } from "./trace"
 export const runSlackExecution = internalAction({
   args: {
     executionId: v.id("executions"),
-    sourceItemId: v.id("sourceItems"),
+    messageId: v.id("messages"),
   },
   handler: async (ctx, args) => {
     const input = await ctx.runQuery(internal.runs.executions.getInput, args)
@@ -20,7 +20,7 @@ export const runSlackExecution = internalAction({
       return
     }
 
-    const target = requireSlackTarget(input.sourceItem)
+    const target = requireSlackTarget(input.message.data)
     const skills = await ctx.runQuery(internal.skills.catalog.listForRuntime, {
       tenantId: input.execution.tenantId,
     })
@@ -79,15 +79,25 @@ function requireCodexAuthJsonBase64() {
   return authJson
 }
 
-function requireSlackTarget(sourceItem: {
-  locationId?: string
-}): RuntimeTarget {
-  if (sourceItem.locationId === undefined || sourceItem.locationId === "") {
+function requireSlackTarget(data: unknown): RuntimeTarget {
+  const channelId = getSlackChannelId(data)
+
+  if (channelId === undefined || channelId === "") {
     throw new Error("Missing Slack channel target")
   }
 
   return {
     provider: "slack",
-    locationId: sourceItem.locationId,
+    channelId,
   }
+}
+
+function getSlackChannelId(data: unknown) {
+  if (typeof data !== "object" || data === null) {
+    return undefined
+  }
+
+  const value = (data as Record<string, unknown>).channelId
+
+  return typeof value === "string" ? value : undefined
 }

@@ -1,15 +1,14 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
-export const sourceItems = defineTable({
+export const messages = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
-  kind: v.string(),
+  type: v.string(),
   externalId: v.string(),
-  authorId: v.optional(v.string()),
-  locationId: v.optional(v.string()),
+  actorId: v.optional(v.string()),
   conversationId: v.optional(v.string()),
-  content: v.optional(v.string()),
+  text: v.optional(v.string()),
   data: v.optional(v.any()),
   observedAt: v.optional(v.number()),
   createdAt: v.number(),

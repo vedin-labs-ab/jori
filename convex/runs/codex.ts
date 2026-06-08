@@ -4,7 +4,7 @@ import { type McpServerConfig } from "./tools"
 export type CodexRuntimeInput = {
   execution: Doc<"executions">
   integration: Doc<"integrations">
-  sourceItem: Doc<"sourceItems">
+  message: Doc<"messages">
 }
 
 export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {

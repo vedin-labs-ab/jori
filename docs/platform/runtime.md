@@ -6,7 +6,7 @@ Defines the minimum runtime model needed to trigger Milo from Slack.
 
 ## Runtime Loop
 
-A Slack message creates a source item record. If the source item asks Milo to work, Milo creates a trigger, activates the conversation, starts an execution, runs Codex in an E2B sandbox, stores the full trace as a Convex file, and lets Codex reply through Slack MCP.
+A Slack message creates a message record. If the message asks Milo to work, Milo creates a trigger, activates the conversation, starts an execution, runs Codex in an E2B sandbox, stores the full trace as a Convex file, and lets Codex reply through Slack MCP.
 
 Identity and organizations come from Clerk. Milo stores Clerk organization IDs as `tenantId` and Clerk user IDs as `createdBy`. There are no local organization, user, membership, or identity-mapping tables.
 
@@ -43,10 +43,9 @@ The first UI should only cover sign-up, organization creation, website entry, Sl
 - Use `tenantId` for the Clerk organization ID.
 - Use `createdBy` for the Clerk user ID when a person creates the record.
 - Use `provider` for the integration type, such as Slack, Teams, Jira, or Linear.
-- Use `externalAccountId` for the provider account connected to an integration.
-- Use `kind` for compact source item categories.
-- Use `externalId` for the provider-native source item identifier.
-- Use `locationId` for the provider-native container where the source item appeared.
+- Use `accountId` for the provider account connected to an integration.
+- Use `type` for compact message and trigger categories.
+- Use `externalId` for the provider-native message identifier.
 - Use `conversationId` for the durable discussion or work surface Milo is listening to.
 - Use `data` only for provider-specific details that do not deserve first-class columns yet.
 - Use `createdAt` for explicit creation timestamps.
@@ -55,7 +54,7 @@ The first UI should only cover sign-up, organization creation, website entry, Sl
 
 Context:
 
-- [Source Items](./context/source-items.md)
+- [Messages](./context/messages.md)
 - [Integrations](./context/integrations.md)
 
 Attention:

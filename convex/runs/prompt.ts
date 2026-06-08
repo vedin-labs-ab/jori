@@ -50,14 +50,24 @@ function createSlackRuntimePart(input: CodexRuntimeInput): PromptPart {
     id: "runtime/slack-message",
     type: "runtime",
     content: renderTemplate(promptTemplates["runtime/slack-message"], {
-      sourceItem: {
-        locationId: input.sourceItem.locationId ?? "",
+      message: {
+        channelId: getSlackChannelId(input.message.data) ?? "",
         conversationId:
-          input.sourceItem.conversationId ?? input.sourceItem.externalId,
-        content: input.sourceItem.content ?? "",
+          input.message.conversationId ?? input.message.externalId,
+        text: input.message.text ?? "",
       },
     }),
   }
+}
+
+function getSlackChannelId(data: unknown) {
+  if (typeof data !== "object" || data === null) {
+    return undefined
+  }
+
+  const value = (data as Record<string, unknown>).channelId
+
+  return typeof value === "string" ? value : undefined
 }
 
 function renderTemplate(
