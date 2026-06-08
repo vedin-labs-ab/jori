@@ -4,7 +4,7 @@ import { v } from "convex/values"
 export const integrations = defineTable({
   tenantId: v.string(),
   provider: v.string(),
-  externalAccountId: v.string(),
+  accountId: v.string(),
   credentials: v.any(),
   status: v.union(
     v.literal("active"),
@@ -16,4 +16,4 @@ export const integrations = defineTable({
   data: v.optional(v.any()),
 })
   .index("by_tenant_provider", ["tenantId", "provider"])
-  .index("by_provider_external_account", ["provider", "externalAccountId"])
+  .index("by_provider_account", ["provider", "accountId"])

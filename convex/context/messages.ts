@@ -3,48 +3,47 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import {
   findConversationActivation,
-  startSourceItemExecution,
+  startMessageExecution,
 } from "../attention/activations"
 import { getSlackBotUserId } from "../providers/slack/data"
 import { isMiloRelevantMessage } from "../providers/slack/gate"
 
-export const recordSlackSourceItem = internalMutation({
+export const recordSlackMessage = internalMutation({
   args: {
-    externalAccountId: v.string(),
-    kind: v.string(),
+    accountId: v.string(),
+    type: v.string(),
     externalId: v.string(),
-    authorId: v.optional(v.string()),
-    locationId: v.optional(v.string()),
+    actorId: v.optional(v.string()),
     conversationId: v.optional(v.string()),
-    content: v.optional(v.string()),
+    text: v.optional(v.string()),
     observedAt: v.optional(v.number()),
     data: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
     const integration = await findActiveSlackIntegration(ctx, {
-      externalAccountId: args.externalAccountId,
+      accountId: args.accountId,
     })
 
     if (integration === null) {
       return { status: "missing_integration" as const }
     }
 
-    if (isIntegrationBotSourceItem(args.authorId, integration.data)) {
+    if (isIntegrationBotMessage(args.actorId, integration.data)) {
       return { status: "ignored_bot" as const }
     }
 
-    const existingSourceItem = await ctx.db
-      .query("sourceItems")
+    const existingMessage = await ctx.db
+      .query("messages")
       .withIndex("by_external_id", (query) =>
         query.eq("externalId", args.externalId)
       )
       .first()
 
-    if (existingSourceItem !== null) {
+    if (existingMessage !== null) {
       return { status: "duplicate" as const }
     }
 
-    const sourceItemId = await insertSourceItem(ctx, {
+    const messageId = await insertMessage(ctx, {
       args,
       integration,
     })
@@ -58,22 +57,17 @@ export const recordSlackSourceItem = internalMutation({
 
     if (
       activation === null &&
-      !isMiloRelevantMessage(
-        args.content,
-        args.kind,
-        args.data,
-        integration.data
-      )
+      !isMiloRelevantMessage(args.text, args.type, args.data, integration.data)
     ) {
-      return { status: "ignored" as const, sourceItemId }
+      return { status: "ignored" as const, messageId }
     }
 
-    return await startSourceItemExecution(ctx, {
+    return await startMessageExecution(ctx, {
       activation,
       integration,
-      sourceItemId,
-      sourceKind: args.kind,
-      sourceExternalId: args.externalId,
+      messageId,
+      messageType: args.type,
+      messageExternalId: args.externalId,
       conversationId: args.conversationId ?? args.externalId,
       now,
     })
@@ -82,14 +76,12 @@ export const recordSlackSourceItem = internalMutation({
 
 async function findActiveSlackIntegration(
   ctx: MutationCtx,
-  args: { externalAccountId: string }
+  args: { accountId: string }
 ) {
   const integration = await ctx.db
     .query("integrations")
-    .withIndex("by_provider_external_account", (query) =>
-      query
-        .eq("provider", "slack")
-        .eq("externalAccountId", args.externalAccountId)
+    .withIndex("by_provider_account", (query) =>
+      query.eq("provider", "slack").eq("accountId", args.accountId)
     )
     .first()
 
@@ -100,44 +92,39 @@ async function findActiveSlackIntegration(
   return integration
 }
 
-async function insertSourceItem(
+async function insertMessage(
   ctx: MutationCtx,
   input: {
     args: {
-      kind: string
+      type: string
       externalId: string
-      authorId?: string
-      locationId?: string
+      actorId?: string
       conversationId?: string
-      content?: string
+      text?: string
       observedAt?: number
       data?: unknown
     }
     integration: Doc<"integrations">
   }
-): Promise<Id<"sourceItems">> {
-  return await ctx.db.insert("sourceItems", {
+): Promise<Id<"messages">> {
+  return await ctx.db.insert("messages", {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
-    kind: input.args.kind,
+    type: input.args.type,
     externalId: input.args.externalId,
-    authorId: input.args.authorId,
-    locationId: input.args.locationId,
+    actorId: input.args.actorId,
     conversationId: input.args.conversationId,
-    content: input.args.content,
+    text: input.args.text,
     data: input.args.data,
     observedAt: input.args.observedAt,
     createdAt: Date.now(),
   })
 }
 
-function isIntegrationBotSourceItem(
-  authorId: string | undefined,
-  data: unknown
-) {
-  if (authorId === undefined) {
+function isIntegrationBotMessage(actorId: string | undefined, data: unknown) {
+  if (actorId === undefined) {
     return false
   }
 
-  return authorId === getSlackBotUserId(data)
+  return actorId === getSlackBotUserId(data)
 }

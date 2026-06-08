@@ -28,7 +28,7 @@ export function assemblePrompt(
   const parts = [
     createSystemPart(),
     ...availableSkills.map((skill) => createSkillPart(skill)),
-    createSlackRuntimePart(input),
+    createRuntimePart(input),
   ]
 
   return {
@@ -54,19 +54,60 @@ function createSkillPart(skill: RuntimeSkill): PromptPart {
   }
 }
 
-function createSlackRuntimePart(input: CodexRuntimeInput): PromptPart {
+function createRuntimePart(input: CodexRuntimeInput): PromptPart {
+  if (input.type === "scheduled") {
+    return createScheduledRuntimePart(input)
+  }
+
+  return createSlackRuntimePart(input)
+}
+
+function createSlackRuntimePart(
+  input: Extract<CodexRuntimeInput, { type: "slack" }>
+): PromptPart {
   return {
     id: "communication/slack",
     type: "runtime",
     content: renderTemplate(promptTemplates["communication/slack"], {
-      sourceItem: {
-        locationId: input.sourceItem.locationId ?? "",
+      message: {
+        channelId: getSlackChannelId(input.message.data) ?? "",
         conversationId:
-          input.sourceItem.conversationId ?? input.sourceItem.externalId,
-        content: input.sourceItem.content ?? "",
+          input.message.conversationId ?? input.message.externalId,
+        text: input.message.text ?? "",
       },
     }),
   }
+}
+
+function createScheduledRuntimePart(
+  input: Extract<CodexRuntimeInput, { type: "scheduled" }>
+): PromptPart {
+  return {
+    id: "runtime/scheduled-task",
+    type: "runtime",
+    content: renderTemplate(promptTemplates["runtime/scheduled-task"], {
+      output: {
+        channelId: input.schedule.output.channelId,
+        threadId: input.schedule.output.threadId ?? "",
+      },
+      schedule: {
+        id: input.schedule._id,
+        name: input.schedule.name,
+        description: input.schedule.description,
+        metadata: JSON.stringify(input.schedule.metadata ?? null),
+      },
+    }),
+  }
+}
+
+function getSlackChannelId(data: unknown) {
+  if (typeof data !== "object" || data === null) {
+    return undefined
+  }
+
+  const value = (data as Record<string, unknown>).channelId
+
+  return typeof value === "string" ? value : undefined
 }
 
 function renderTemplate(

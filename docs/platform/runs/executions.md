@@ -8,6 +8,7 @@ Stores a Milo run.
 
 - Lifecycle state.
 - E2B sandbox identifier.
+- Active MCP token hash.
 - Creator and completion timestamps.
 
 ## Boundary
@@ -20,6 +21,7 @@ The active thread link belongs to [Activations](../attention/activations.md). Fu
 executions: defineTable({
   tenantId: v.string(),
   sandboxId: v.optional(v.string()),
+  tokenHash: v.optional(v.string()),
   status: v.union(v.literal("queued"), v.literal("running"), v.literal("completed"), v.literal("failed"), v.literal("stopped")),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),

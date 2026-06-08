@@ -27,7 +27,7 @@ export const recordOAuthInstallation = internalMutation({
   args: {
     tenantId: v.string(),
     createdBy: v.string(),
-    externalAccountId: v.string(),
+    accountId: v.string(),
     botScopes: v.optional(v.string()),
     botToken: v.string(),
     teamName: v.optional(v.string()),
@@ -39,16 +39,14 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_external_account", (query) =>
-        query
-          .eq("provider", "slack")
-          .eq("externalAccountId", args.externalAccountId)
+      .withIndex("by_provider_account", (query) =>
+        query.eq("provider", "slack").eq("accountId", args.accountId)
       )
       .first()
 
     const credentials = {
-      botToken: args.botToken,
-      userToken: args.userToken,
+      bot: args.botToken,
+      user: args.userToken,
     }
 
     const data = {
@@ -73,7 +71,7 @@ export const recordOAuthInstallation = internalMutation({
     return await ctx.db.insert("integrations", {
       tenantId: args.tenantId,
       provider: "slack",
-      externalAccountId: args.externalAccountId,
+      accountId: args.accountId,
       credentials,
       status: "active",
       createdBy: args.createdBy,

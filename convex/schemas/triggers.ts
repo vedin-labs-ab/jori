@@ -3,13 +3,13 @@ import { v } from "convex/values"
 
 export const triggers = defineTable({
   tenantId: v.string(),
-  sourceItemId: v.optional(v.id("sourceItems")),
+  messageId: v.optional(v.id("messages")),
   type: v.union(
     v.literal("manual"),
     v.literal("scheduled"),
-    v.literal("source_item")
+    v.literal("message")
   ),
   data: v.optional(v.any()),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
-}).index("by_source_item", ["sourceItemId"])
+}).index("by_message", ["messageId"])

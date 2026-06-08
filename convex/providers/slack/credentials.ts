@@ -1,8 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
 
 export type SlackCredentials = {
-  botToken: string
-  userToken: string
+  bot: string
+  user: string
 }
 
 export function requireSlackCredentials(
@@ -13,14 +13,14 @@ export function requireSlackCredentials(
   if (
     typeof credentials === "object" &&
     credentials !== null &&
-    "botToken" in credentials &&
-    typeof credentials.botToken === "string" &&
-    "userToken" in credentials &&
-    typeof credentials.userToken === "string"
+    "bot" in credentials &&
+    typeof credentials.bot === "string" &&
+    "user" in credentials &&
+    typeof credentials.user === "string"
   ) {
     return {
-      botToken: credentials.botToken,
-      userToken: credentials.userToken,
+      bot: credentials.bot,
+      user: credentials.user,
     }
   }
 
