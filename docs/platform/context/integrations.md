@@ -13,7 +13,7 @@ Owns connected external systems Milo can receive events from and act through.
 
 ## Boundary
 
-Concrete work and replies belong to [Execution](../runs/execution.md). Observed provider events belong to [Sources](./sources.md).
+Concrete work and replies belong to [Execution](../runs/execution.md). Observed provider events belong to [Messages](./messages.md).
 
 ## Draft Schema
 
@@ -23,5 +23,7 @@ integrations: defineTable({
   provider: v.string(),
   accountId: v.string(),
   status: v.union(v.literal("active"), v.literal("paused"), v.literal("revoked")),
+  createdById: v.optional(v.string()),
+  createdAt: v.number(),
 })
 ```

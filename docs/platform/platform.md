@@ -24,13 +24,14 @@ Milo should be useful with a simple setup: connect one collaboration tool, recei
 - Use provider-native identifiers directly, without local identity mapping tables.
 - Use `type` for compact category fields.
 - Use `data` only for provider or trace details that do not deserve first-class columns yet.
-- Rely on Convex creation time for record creation timestamps.
+- Use `createdAt` for explicit creation timestamps.
+- Use `createdById` for a Clerk or WorkOS user identifier when a person directly creates the record.
 
 ## Models
 
 Context:
 
-- [Sources](./context/sources.md)
+- [Messages](./context/messages.md)
 - [Integrations](./context/integrations.md)
 
 Attention:

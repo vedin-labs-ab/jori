@@ -2,14 +2,14 @@
 
 ## Responsibility
 
-Owns the persisted Milo run record: state, active Daytona sandbox identity, observability, and completion.
+Owns the persisted Milo run record: state, Daytona sandbox identity, observability, and completion.
 
 ## Includes
 
-- State such as queued, running, blocked, completed, or failed.
+- State such as queued, running, completed, failed, or stopped.
 - One execution record for every mention-triggered Milo run, including short conversational responses.
 - Daytona sandbox provider identifiers stored directly on the execution.
-- Console visibility for queued, running, blocked, completed, failed, and stopped executions.
+- Console visibility for queued, running, completed, failed, and stopped executions.
 - Milo runs inside Daytona sandboxes, never directly inside Milo-owned infrastructure.
 - Milo starts from a mention-triggered activation when no sandboxed run is already active for that conversation scope.
 - Actions that change Milo or external tools.
@@ -32,10 +32,10 @@ Durable listening state belongs to [Activations](../attention/activations.md). D
 ```ts
 executions: defineTable({
   tenantId: v.string(),
-  activationId: v.optional(v.id("activations")),
-  sourceId: v.optional(v.id("sources")),
   sandboxId: v.optional(v.string()),
-  status: v.union(v.literal("queued"), v.literal("running"), v.literal("blocked"), v.literal("completed"), v.literal("failed"), v.literal("stopped")),
+  status: v.union(v.literal("queued"), v.literal("running"), v.literal("completed"), v.literal("failed"), v.literal("stopped")),
+  createdById: v.optional(v.string()),
+  createdAt: v.number(),
   finishedAt: v.optional(v.number()),
 })
 ```

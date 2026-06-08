@@ -14,7 +14,7 @@ Owns append-only records produced around an execution: what triggered it, what t
 
 ## Boundary
 
-Source material belongs to [Sources](../context/sources.md). Execution lifecycle state belongs to [Execution](./execution.md).
+Message material belongs to [Messages](../context/messages.md). Execution lifecycle state belongs to [Execution](./execution.md).
 
 ## Draft Schema
 
@@ -22,9 +22,7 @@ Source material belongs to [Sources](../context/sources.md). Execution lifecycle
 traces: defineTable({
   tenantId: v.string(),
   executionId: v.id("executions"),
-  sourceId: v.optional(v.id("sources")),
-  type: v.string(),
-  text: v.optional(v.string()),
-  data: v.optional(v.any()),
+  fileId: v.id("_storage"),
+  createdAt: v.number(),
 })
 ```
