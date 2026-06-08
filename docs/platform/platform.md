@@ -4,11 +4,11 @@ Milo's platform is the runtime model behind the companyOS.
 
 ## Responsibility
 
-Defines the domains that let people bring Milo into company activity, delegate work to agents, run work in the cloud, use tools safely, remember what happened, and improve future agent behavior.
+Defines the domains that let people bring Milo into company activity, delegate work to agents, execute work in Daytona sandboxes, use tools safely, remember what happened, and improve future agent behavior.
 
 ## Runtime Loop
 
-A person, system, schedule, or signal asks Milo to pay attention. Attention can create an activation, route a review, or start a run. An agent plans and acts with tools, models, integrations, and sandboxes. The run produces artifacts and traces. Context and memory update from those traces. Dreaming studies company activity and prior runs to improve skills and future delegation.
+A person, system, schedule, or signal asks Milo to pay attention. Attention can create an activation, route a review, or start an execution. A sandboxed agent plans and acts with tools, models, integrations, and a Daytona environment. The execution produces artifacts and traces. Context and memory update from those traces. Dreaming studies company activity and prior executions to improve skills and future delegation.
 
 ## Onboarding Baseline
 

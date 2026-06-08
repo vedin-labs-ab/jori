@@ -21,7 +21,7 @@ Owns human checkpoints where people approve, reject, edit, redirect, or escalate
 ```ts
 reviews: defineTable({
   organizationId: v.id("organizations"),
-  runId: v.optional(v.id("runs")),
+  executionId: v.optional(v.id("executions")),
   requestedBy: v.optional(v.id("users")),
   status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"), v.literal("redirected")),
   reason: v.optional(v.string()),
