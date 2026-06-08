@@ -28,6 +28,19 @@ function App() {
     <div className="flex min-h-svh p-10">
       <div className="flex min-w-0 flex-col gap-8 text-sm">
         <div>
+          <div className="mb-5 flex items-center gap-2">
+            <img
+              src="/brand/mark/mark-black.svg"
+              alt=""
+              className="block size-8 dark:hidden"
+            />
+            <img
+              src="/brand/mark/mark-white.svg"
+              alt=""
+              className="hidden size-8 dark:block"
+            />
+            <span className="text-base font-medium">Milo</span>
+          </div>
           <h1 className="font-medium">Tactile component review</h1>
           <p className="text-muted-foreground">
             Filled controls have a raised same-hue edge that collapses on press.

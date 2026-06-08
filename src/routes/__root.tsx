@@ -4,6 +4,9 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 
 import appCss from "../styles.css?url"
 
+const appTitle = "Milo"
+const appDescription = "AI teammates for company work."
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -15,13 +18,59 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        title: appTitle,
+      },
+      {
+        name: "description",
+        content: appDescription,
+      },
+      {
+        property: "og:title",
+        content: appTitle,
+      },
+      {
+        property: "og:description",
+        content: appDescription,
+      },
+      {
+        property: "og:type",
+        content: "website",
+      },
+      {
+        name: "twitter:card",
+        content: "summary",
+      },
+      {
+        name: "twitter:title",
+        content: appTitle,
+      },
+      {
+        name: "twitter:description",
+        content: appDescription,
       },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "icon",
+        href: "/brand/favicon/favicon.ico",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        href: "/brand/favicon/favicon-32.png",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/brand/favicon/apple-touch-icon.png",
+      },
+      {
+        rel: "manifest",
+        href: "/manifest.json",
       },
     ],
   }),
