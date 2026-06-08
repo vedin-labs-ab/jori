@@ -1,7 +1,7 @@
-import { type Id } from "../../../convex/_generated/dataModel"
+import { type GenericId } from "convex/values"
 
 export type Skill = {
-  _id: Id<"skills">
+  _id: GenericId<"skills">
   tenantId: string | null
   name: string
   description: string
