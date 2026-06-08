@@ -1,6 +1,14 @@
 import { readdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 
+type Skill = {
+  name: string
+  description: string
+  body: string
+}
+
+type Frontmatter = Partial<Pick<Skill, "name" | "description">>
+
 const root = process.cwd()
 const skillsDir = path.join(root, "skills")
 const promptsDir = path.join(root, "prompts")
@@ -23,9 +31,9 @@ await writeFile(
   ].join("")
 )
 
-async function readSkills(directory) {
+async function readSkills(directory: string): Promise<Record<string, Skill>> {
   const entries = await readdir(directory, { withFileTypes: true })
-  const result = {}
+  const result: Record<string, Skill> = {}
 
   for (const entry of entries) {
     const entryPath = path.join(directory, entry.name)
@@ -45,9 +53,12 @@ async function readSkills(directory) {
   return sortObject(result)
 }
 
-async function readPromptTemplates(directory, prefix = "") {
+async function readPromptTemplates(
+  directory: string,
+  prefix = ""
+): Promise<Record<string, string>> {
   const entries = await readdir(directory, { withFileTypes: true })
-  let result = {}
+  let result: Record<string, string> = {}
 
   for (const entry of entries) {
     const entryPath = path.join(directory, entry.name)
@@ -69,7 +80,7 @@ async function readPromptTemplates(directory, prefix = "") {
   return sortObject(result)
 }
 
-function parseSkill(content, filePath) {
+function parseSkill(content: string, filePath: string): Skill {
   const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/)
 
   if (match === null) {
@@ -90,8 +101,8 @@ function parseSkill(content, filePath) {
   }
 }
 
-function parseFrontmatter(value, filePath) {
-  const result = {}
+function parseFrontmatter(value: string, filePath: string): Frontmatter {
+  const result: Frontmatter = {}
 
   for (const line of value.split("\n")) {
     const index = line.indexOf(":")
@@ -102,13 +113,18 @@ function parseFrontmatter(value, filePath) {
 
     const key = line.slice(0, index).trim()
     const rawValue = line.slice(index + 1).trim()
-    result[key] = rawValue.replace(/^["']|["']$/g, "")
+
+    if (key === "name" || key === "description") {
+      result[key] = rawValue.replace(/^["']|["']$/g, "")
+    }
   }
 
   return result
 }
 
-function sortObject(value) {
+function sortObject<Value>(
+  value: Record<string, Value>
+): Record<string, Value> {
   return Object.fromEntries(
     Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
   )
