@@ -4,6 +4,7 @@ import { v } from "convex/values"
 export const executions = defineTable({
   tenantId: v.string(),
   sandboxId: v.optional(v.string()),
+  tokenHash: v.optional(v.string()),
   status: v.union(
     v.literal("queued"),
     v.literal("running"),
@@ -14,4 +15,6 @@ export const executions = defineTable({
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
   finishedAt: v.optional(v.number()),
-}).index("by_tenant", ["tenantId"])
+})
+  .index("by_tenant", ["tenantId"])
+  .index("by_token_hash", ["tokenHash"])

@@ -24,15 +24,65 @@ export const getInput = internalQuery({
   },
 })
 
+export const getScheduledInput = internalQuery({
+  args: {
+    executionId: v.id("executions"),
+    scheduleId: v.id("schedules"),
+  },
+  handler: async (ctx, args) => {
+    const execution = await ctx.db.get(args.executionId)
+    const schedule = await ctx.db.get(args.scheduleId)
+
+    if (execution === null || schedule === null) {
+      return null
+    }
+
+    if (execution.tenantId !== schedule.tenantId) {
+      return null
+    }
+
+    const integration = await ctx.db
+      .query("integrations")
+      .withIndex("by_tenant_provider", (query) =>
+        query.eq("tenantId", schedule.tenantId).eq("provider", "slack")
+      )
+      .first()
+
+    return { execution, schedule, integration }
+  },
+})
+
+export const getActiveByTokenHash = internalQuery({
+  args: {
+    tokenHash: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const execution = await ctx.db
+      .query("executions")
+      .withIndex("by_token_hash", (query) =>
+        query.eq("tokenHash", args.tokenHash)
+      )
+      .first()
+
+    if (execution === null || execution.status !== "running") {
+      return null
+    }
+
+    return execution
+  },
+})
+
 export const markRunning = internalMutation({
   args: {
     executionId: v.id("executions"),
     sandboxId: v.optional(v.string()),
+    tokenHash: v.string(),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.executionId, {
       status: "running",
       sandboxId: args.sandboxId,
+      tokenHash: args.tokenHash,
     })
   },
 })
@@ -55,6 +105,7 @@ export const finish = internalMutation({
     await ctx.db.patch(args.executionId, {
       status: args.status,
       finishedAt: Date.now(),
+      tokenHash: undefined,
     })
 
     const activations = await ctx.db

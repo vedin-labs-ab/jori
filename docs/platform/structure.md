@@ -18,6 +18,7 @@ Domain code lives under folders named for responsibility:
 - `skills`: persisted runtime instructions and tenant skill management.
 - `attention`: triggers and active listening state.
 - `runs`: execution lifecycle and runtime orchestration.
+- `scheduling`: user-managed schedules and schedule MCP mutations.
 - `providers/slack`: Slack protocol code, including OAuth, signing, event parsing, and relevance checks.
 - `schemas`: one table definition per file, imported by the root schema.
 

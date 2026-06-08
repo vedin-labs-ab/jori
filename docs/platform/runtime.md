@@ -2,17 +2,19 @@
 
 ## Responsibility
 
-Defines the minimum runtime model needed to trigger Milo from Slack.
+Defines the minimum runtime model needed to trigger Milo from Slack and user-managed schedules.
 
 ## Runtime Loop
 
 A Slack message creates a message record. If the message asks Milo to work, Milo creates a trigger, activates the conversation, starts an execution, runs Codex in an E2B sandbox, stores the full trace as a Convex file, and lets Codex reply through Slack MCP.
 
+A schedule stores future work, an explicit output target, and either a one-shot UTC ISO timestamp or a recurring UTC cron expression. When the schedule fires, Milo creates the same kind of execution and runs Codex in E2B with the scheduled task name, description, metadata, and output target.
+
 Identity and organizations come from Clerk. Milo stores Clerk organization IDs as `tenantId` and Clerk user IDs as `createdBy`. There are no local organization, user, membership, or identity-mapping tables.
 
 E2B sandbox identity is stored directly on executions. There is no sandbox table. The Convex backend orchestrates the sandbox and execution lifecycle, but Slack communication belongs to Codex through Slack MCP servers.
 
-Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Slack MCP is configured per execution from the active integration. The runtime exposes a user-token MCP alias for reading/searching Slack context and a bot-token MCP alias for sending the final reply as Milo. Each sandbox only receives the Slack tokens for the tenant and workspace that triggered the execution.
+Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Slack MCP is configured per execution from the active integration. The runtime exposes a user-token MCP alias for reading/searching Slack context and a bot-token MCP alias for sending the final reply as Milo. Milo MCP is configured per execution with a one-time token whose hash is stored on the active execution; MCP requests derive `tenantId` from that token. Each sandbox only receives the MCP tokens for the tenant and workspace that triggered the execution.
 
 Required Convex environment variables:
 
@@ -67,9 +69,13 @@ Runs:
 - [Executions](./runs/executions.md)
 - [Traces](./runs/traces.md)
 
+Scheduling:
+
+- [Schedules](./scheduling.md)
+
 ## Code Ownership
 
-The implementation follows the domain map in [Structure](./structure.md). Framework-owned Convex entry points stay at the root, while Milo-owned backend code lives under `identity`, `context`, `attention`, `runs`, and `providers`.
+The implementation follows the domain map in [Structure](./structure.md). Framework-owned Convex entry points stay at the root, while Milo-owned backend code lives under `identity`, `context`, `skills`, `attention`, `runs`, `scheduling`, and `providers`.
 
 ## Deferred
 

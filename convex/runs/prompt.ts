@@ -27,7 +27,7 @@ export function assemblePrompt(
 ): PromptBundle {
   const parts = [
     ...availableSkills.map((skill) => createSkillPart(skill)),
-    createSlackRuntimePart(input),
+    createRuntimePart(input),
   ]
 
   return {
@@ -45,7 +45,17 @@ function createSkillPart(skill: RuntimeSkill): PromptPart {
   }
 }
 
-function createSlackRuntimePart(input: CodexRuntimeInput): PromptPart {
+function createRuntimePart(input: CodexRuntimeInput): PromptPart {
+  if (input.type === "scheduled") {
+    return createScheduledRuntimePart(input)
+  }
+
+  return createSlackRuntimePart(input)
+}
+
+function createSlackRuntimePart(
+  input: Extract<CodexRuntimeInput, { type: "slack" }>
+): PromptPart {
   return {
     id: "runtime/slack-message",
     type: "runtime",
@@ -55,6 +65,27 @@ function createSlackRuntimePart(input: CodexRuntimeInput): PromptPart {
         conversationId:
           input.message.conversationId ?? input.message.externalId,
         text: input.message.text ?? "",
+      },
+    }),
+  }
+}
+
+function createScheduledRuntimePart(
+  input: Extract<CodexRuntimeInput, { type: "scheduled" }>
+): PromptPart {
+  return {
+    id: "runtime/scheduled-task",
+    type: "runtime",
+    content: renderTemplate(promptTemplates["runtime/scheduled-task"], {
+      output: {
+        channelId: input.schedule.output.channelId,
+        threadId: input.schedule.output.threadId ?? "",
+      },
+      schedule: {
+        id: input.schedule._id,
+        name: input.schedule.name,
+        description: input.schedule.description,
+        metadata: JSON.stringify(input.schedule.metadata ?? null),
       },
     }),
   }

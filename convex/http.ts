@@ -16,6 +16,7 @@ import {
   parseSignedSlackState,
   verifySlackRequest,
 } from "./providers/slack/signing"
+import { handleMiloMcpRequest } from "./scheduling/mcp"
 
 const http = httpRouter()
 
@@ -43,6 +44,14 @@ http.route({
         "content-type": "text/plain; charset=utf-8",
       },
     })
+  }),
+})
+
+http.route({
+  path: "/milo/mcp",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    return await handleMiloMcpRequest(ctx, request)
   }),
 })
 

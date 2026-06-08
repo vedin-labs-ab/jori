@@ -3,6 +3,7 @@ import {
   requireSlackCredentials,
   type SlackCredentials,
 } from "../providers/slack/credentials"
+import { createMiloMcpScript } from "./milo"
 import { createSlackProxyScript } from "./proxy"
 
 export type ToolBundle = {
@@ -31,24 +32,66 @@ export type ToolPreflight = {
 export type RuntimeTarget = {
   provider: "slack"
   channelId: string
+  threadId?: string
 }
 
 export function assembleToolsForRun(args: {
-  integration: Doc<"integrations">
-  target: RuntimeTarget
+  milo: {
+    convexSiteUrl: string
+    executionToken: string
+  }
+  slack?: {
+    integration: Doc<"integrations">
+    target: RuntimeTarget
+  }
 }): ToolBundle {
-  if (args.target.provider === "slack") {
-    const credentials = requireSlackCredentials(args.integration)
+  const bundles = [
+    createMiloToolBundle({
+      convexSiteUrl: args.milo.convexSiteUrl,
+      executionToken: args.milo.executionToken,
+    }),
+  ]
 
-    return createSlackToolBundle({
-      credentials,
-      channelId: args.target.channelId,
-    })
+  if (args.slack?.target.provider === "slack") {
+    const credentials = requireSlackCredentials(args.slack.integration)
+
+    bundles.push(
+      createSlackToolBundle({
+        credentials,
+        channelId: args.slack.target.channelId,
+      })
+    )
   }
 
   return {
-    mcpServers: [],
-    sandboxFiles: [],
+    mcpServers: bundles.flatMap((bundle) => bundle.mcpServers),
+    sandboxFiles: bundles.flatMap((bundle) => bundle.sandboxFiles),
+    preflights: bundles.flatMap((bundle) => bundle.preflights),
+  }
+}
+
+function createMiloToolBundle(args: {
+  convexSiteUrl: string
+  executionToken: string
+}): ToolBundle {
+  return {
+    mcpServers: [
+      {
+        name: "milo",
+        command: "node",
+        args: ["/tmp/milo-workspace/milo-mcp.mjs"],
+        env: {
+          MILO_CONVEX_SITE_URL: args.convexSiteUrl,
+          MILO_EXECUTION_TOKEN: args.executionToken,
+        },
+      },
+    ],
+    sandboxFiles: [
+      {
+        path: "/tmp/milo-workspace/milo-mcp.mjs",
+        content: createMiloMcpScript(),
+      },
+    ],
     preflights: [],
   }
 }
