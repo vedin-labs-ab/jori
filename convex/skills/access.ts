@@ -32,7 +32,7 @@ export async function checkTenantAccess(
     return {
       ok: false as const,
       message:
-        'Unauthorized: Convex auth token is missing the active Clerk organization. Add {"org_id":"{{org.id}}"} to the Clerk JWT template named "convex", then refresh your session.',
+        'Unauthorized: Convex auth token is missing the active Clerk organization. Add {"org":"{{org.id}}"} to the Clerk JWT template named "convex", then refresh your session.',
     }
   }
 
@@ -51,6 +51,7 @@ function readIdentityTenantId(identity: Record<string, unknown>) {
   const candidates = [
     readNestedIdentityString(identity, "o", "id"),
     identity["o.id"],
+    identity.org,
     identity.orgId,
     identity.org_id,
     identity.organizationId,
