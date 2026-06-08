@@ -1,5 +1,5 @@
 ---
-name: slack-communication
+name: slack
 description: Built-in Slack communication skill for reading context and sending concise, native Slack replies.
 ---
 

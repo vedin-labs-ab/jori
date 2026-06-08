@@ -36,18 +36,14 @@ async function readSkills(directory: string): Promise<Record<string, Skill>> {
   const result: Record<string, Skill> = {}
 
   for (const entry of entries) {
-    const entryPath = path.join(directory, entry.name)
-
-    if (entry.isDirectory()) {
-      Object.assign(result, await readSkills(entryPath))
+    if (!entry.isDirectory()) {
       continue
     }
 
-    if (entry.isFile() && entry.name.endsWith(".md")) {
-      const content = await readFile(entryPath, "utf8")
-      const skill = parseSkill(content, entryPath)
-      result[skill.name] = skill
-    }
+    const skillPath = path.join(directory, entry.name, "SKILL.md")
+    const content = await readFile(skillPath, "utf8")
+    const skill = parseSkill(content, skillPath)
+    result[skill.name] = skill
   }
 
   return sortObject(result)
