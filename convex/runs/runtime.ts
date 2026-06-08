@@ -5,13 +5,13 @@ import { internal } from "../_generated/api"
 import { internalAction } from "../_generated/server"
 import { runCodexInE2B } from "./e2b"
 import { assemblePrompt } from "./prompt"
-import { assembleToolsForRun } from "./tools"
+import { assembleToolsForRun, type RuntimeTarget } from "./tools"
 import { CodexRunError, formatError, type StoredRuntimeTrace } from "./trace"
 
 export const runSlackExecution = internalAction({
   args: {
     executionId: v.id("executions"),
-    messageId: v.id("messages"),
+    sourceItemId: v.id("sourceItems"),
   },
   handler: async (ctx, args) => {
     const input = await ctx.runQuery(internal.runs.executions.getInput, args)
@@ -20,14 +20,14 @@ export const runSlackExecution = internalAction({
       return
     }
 
-    const allowedChannelId = requireSlackChannelId(input.message.containerId)
+    const target = requireSlackTarget(input.sourceItem)
     const skills = await ctx.runQuery(internal.skills.catalog.listForRuntime, {
       tenantId: input.execution.tenantId,
     })
     const promptBundle = assemblePrompt(input, skills)
     const toolBundle = assembleToolsForRun({
-      allowedChannelId,
       integration: input.integration,
+      target,
     })
     let trace: StoredRuntimeTrace = { harness: {} }
     let status: "completed" | "failed" = "completed"
@@ -79,10 +79,15 @@ function requireCodexAuthJsonBase64() {
   return authJson
 }
 
-function requireSlackChannelId(channelId: string | undefined) {
-  if (channelId === undefined || channelId === "") {
+function requireSlackTarget(sourceItem: {
+  locationId?: string
+}): RuntimeTarget {
+  if (sourceItem.locationId === undefined || sourceItem.locationId === "") {
     throw new Error("Missing Slack channel target")
   }
 
-  return channelId
+  return {
+    provider: "slack",
+    locationId: sourceItem.locationId,
+  }
 }

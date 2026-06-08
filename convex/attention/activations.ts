@@ -1,50 +1,52 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 
-export async function findThreadActivation(
+export async function findConversationActivation(
   ctx: MutationCtx,
   args: {
     tenantId: string
     integrationId: Id<"integrations">
-    threadId: string | undefined
+    conversationId: string | undefined
   }
 ) {
-  if (args.threadId === undefined) {
+  if (args.conversationId === undefined) {
     return null
   }
 
-  const threadId = args.threadId
+  const conversationId = args.conversationId
 
   return await ctx.db
     .query("activations")
-    .withIndex("by_thread", (query) =>
+    .withIndex("by_conversation", (query) =>
       query
         .eq("tenantId", args.tenantId)
         .eq("integrationId", args.integrationId)
-        .eq("threadId", threadId)
+        .eq("conversationId", conversationId)
     )
     .first()
 }
 
-export async function startMessageExecution(
+export async function startSourceItemExecution(
   ctx: MutationCtx,
   args: {
     activation: Doc<"activations"> | null
     integration: Doc<"integrations">
-    messageId: Id<"messages">
-    provider: "slack"
-    providerId: string
-    threadId: string
+    sourceItemId: Id<"sourceItems">
+    sourceKind: string
+    sourceExternalId: string
+    conversationId: string
     now: number
   }
 ) {
   const triggerId = await ctx.db.insert("triggers", {
     tenantId: args.integration.tenantId,
-    messageId: args.messageId,
-    type: "message",
+    sourceItemId: args.sourceItemId,
+    type: "source_item",
     data: {
-      provider: args.provider,
-      providerId: args.providerId,
+      source: {
+        kind: args.sourceKind,
+        externalId: args.sourceExternalId,
+      },
     },
     createdAt: args.now,
   })
@@ -61,7 +63,7 @@ export async function startMessageExecution(
           tenantId: args.integration.tenantId,
           triggerId,
           integrationId: args.integration._id,
-          threadId: args.threadId,
+          conversationId: args.conversationId,
           executionId,
           createdAt: args.now,
         })
@@ -73,7 +75,7 @@ export async function startMessageExecution(
 
   return {
     status: "started" as const,
-    messageId: args.messageId,
+    sourceItemId: args.sourceItemId,
     triggerId,
     executionId,
     activationId,

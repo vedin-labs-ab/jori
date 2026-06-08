@@ -3,10 +3,10 @@
 A Slack message triggered this run.
 
 Slack target:
-- Channel ID: {{message.channelId}}
-- Thread timestamp: {{message.threadId}}
+- Location ID: {{sourceItem.locationId}}
+- Conversation ID: {{sourceItem.conversationId}}
 
 Original Slack message:
-{{message.text}}
+{{sourceItem.content}}
 
 Complete the Slack task using the available tools. If a reply is warranted, send it to the Slack target above.

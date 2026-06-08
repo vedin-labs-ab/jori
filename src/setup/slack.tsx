@@ -70,7 +70,7 @@ export function SlackConnection({ tenantId }: { tenantId: string }) {
               {status === undefined
                 ? "Checking Slack"
                 : (status?.teamName ??
-                  status?.accountId ??
+                  status?.externalAccountId ??
                   "No workspace connected")}
             </div>
             <div className="text-xs text-muted-foreground">

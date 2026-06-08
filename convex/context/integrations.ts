@@ -25,7 +25,7 @@ export const getSlackStatus = query({
     }
 
     return {
-      accountId: integration.accountId,
+      externalAccountId: integration.externalAccountId,
       status: integration.status,
       createdAt: integration.createdAt,
       teamName:
