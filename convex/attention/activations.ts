@@ -26,9 +26,10 @@ export async function findThreadActivation(
     .first()
 }
 
-export async function startMessageActivation(
+export async function startMessageExecution(
   ctx: MutationCtx,
   args: {
+    activation: Doc<"activations"> | null
     integration: Doc<"integrations">
     messageId: Id<"messages">
     provider: "slack"
@@ -54,14 +55,21 @@ export async function startMessageActivation(
     createdAt: args.now,
   })
 
-  const activationId = await ctx.db.insert("activations", {
-    tenantId: args.integration.tenantId,
-    triggerId,
-    integrationId: args.integration._id,
-    threadId: args.threadId,
-    executionId,
-    createdAt: args.now,
-  })
+  const activationId =
+    args.activation === null
+      ? await ctx.db.insert("activations", {
+          tenantId: args.integration.tenantId,
+          triggerId,
+          integrationId: args.integration._id,
+          threadId: args.threadId,
+          executionId,
+          createdAt: args.now,
+        })
+      : args.activation._id
+
+  if (args.activation !== null) {
+    await ctx.db.patch(args.activation._id, { executionId })
+  }
 
   return {
     status: "started" as const,

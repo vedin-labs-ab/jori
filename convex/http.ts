@@ -69,6 +69,7 @@ http.route({
         "chat:write",
       ].join(",")
     )
+    slackUrl.searchParams.set("user_scope", "chat:write")
     slackUrl.searchParams.set("state", state)
     slackUrl.searchParams.set(
       "redirect_uri",
@@ -124,7 +125,10 @@ http.route({
     })
     const tokenResult = (await tokenResponse.json()) as SlackOAuthResponse
 
-    if (tokenResult.ok !== true) {
+    const mcpToken =
+      tokenResult.ok === true ? getSlackMcpUserToken(tokenResult) : undefined
+
+    if (tokenResult.ok !== true || mcpToken === undefined) {
       return redirectWithSlackStatus(state.returnUrl, "error")
     }
 
@@ -134,7 +138,7 @@ http.route({
         tenantId: state.tenantId,
         createdBy: state.createdBy,
         accountId: tokenResult.team.id,
-        tokenId: tokenResult.access_token,
+        tokenId: mcpToken,
         teamName: tokenResult.team.name,
         botUserId: tokenResult.bot_user_id,
       }
@@ -204,6 +208,9 @@ type SlackOAuthResponse =
       ok: true
       access_token: string
       bot_user_id?: string
+      authed_user?: {
+        access_token?: string
+      }
       team: {
         id: string
         name?: string
@@ -221,6 +228,14 @@ function jsonResponse(value: unknown) {
       "content-type": "application/json; charset=utf-8",
     },
   })
+}
+
+function getSlackMcpUserToken(tokenResult: {
+  authed_user?: { access_token?: string }
+}) {
+  const token = tokenResult.authed_user?.access_token
+
+  return token === "" ? undefined : token
 }
 
 function redirectWithSlackStatus(

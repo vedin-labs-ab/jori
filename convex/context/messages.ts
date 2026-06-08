@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { internalMutation } from "../_generated/server"
 import {
   findThreadActivation,
-  startMessageActivation,
+  startMessageExecution,
 } from "../attention/activations"
 import { isMiloRelevantMessage } from "../providers/slack/gate"
 
@@ -69,7 +69,8 @@ export const recordSlackEvent = internalMutation({
       return { status: "ignored" as const, messageId }
     }
 
-    return await startMessageActivation(ctx, {
+    return await startMessageExecution(ctx, {
+      activation,
       integration,
       messageId,
       provider: "slack",

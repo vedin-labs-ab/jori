@@ -6,11 +6,13 @@ Defines the minimum runtime model needed to trigger Milo from Slack.
 
 ## Runtime Loop
 
-A Slack message creates a message record. If the message asks Milo to work, Milo creates a trigger, activates the thread, starts an execution, stores the full trace as a Convex file, and replies in Slack when useful.
+A Slack message creates a message record. If the message asks Milo to work, Milo creates a trigger, activates the thread, starts an execution, runs Codex in a Daytona sandbox, stores the full trace as a Convex file, and lets Codex reply through Slack MCP.
 
 Identity and organizations come from Clerk. Milo stores Clerk organization IDs as `tenantId` and Clerk user IDs as `createdBy`. There are no local organization, user, membership, or identity-mapping tables.
 
-Daytona sandbox identity is stored directly on executions. There is no sandbox table.
+Daytona sandbox identity is stored directly on executions. There is no sandbox table. The Convex backend orchestrates the sandbox and execution lifecycle, but Slack communication belongs to Codex through the Slack MCP server.
+
+Codex authentication is stored as a Convex environment variable and copied into the ephemeral Daytona sandbox as `auth.json` at runtime. Slack MCP is configured per execution using the active integration's Slack user token, so each sandbox only receives the MCP connection for the tenant and Slack workspace that triggered the execution.
 
 ## Onboarding
 
@@ -21,6 +23,8 @@ The first onboarding flow should be simple and mostly Clerk-native:
 3. User enters the organization name.
 4. User optionally enters the organization website.
 5. User connects Slack as the first integration.
+
+Slack installs must include the MCP user-token scope needed by the runtime. V1 only needs `chat:write` for sending thread replies through Slack MCP.
 
 Use Clerk's out-of-the-box components wherever possible. Styling may be adjusted to match Milo's theme, but identity and organization behavior should remain Clerk-owned. Store organization setup details, such as website, in Clerk organization metadata unless Milo needs to query them frequently.
 
