@@ -30,6 +30,10 @@ export const recordSlackEvent = internalMutation({
       return { status: "missing_integration" as const }
     }
 
+    if (isIntegrationBotMessage(args.actorId, integration.data)) {
+      return { status: "ignored_bot" as const }
+    }
+
     const existingMessage = await ctx.db
       .query("messages")
       .withIndex("by_provider_id", (query) =>
@@ -80,3 +84,24 @@ export const recordSlackEvent = internalMutation({
     })
   },
 })
+
+function isIntegrationBotMessage(actorId: string | undefined, data: unknown) {
+  if (actorId === undefined) {
+    return false
+  }
+
+  return actorId === getBotUserId(data)
+}
+
+function getBotUserId(data: unknown) {
+  if (
+    typeof data === "object" &&
+    data !== null &&
+    "botUserId" in data &&
+    typeof data.botUserId === "string"
+  ) {
+    return data.botUserId
+  }
+
+  return undefined
+}
