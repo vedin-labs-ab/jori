@@ -2,17 +2,16 @@ import { v } from "convex/values"
 import {
   internalMutation,
   internalQuery,
-  type MutationCtx,
   mutation,
-  type QueryCtx,
   query,
 } from "../_generated/server"
 import { skills as globalSkillSeed } from "../prompts/generated"
-
-const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-const skillNameMaxLength = 64
-const skillDescriptionMaxLength = 320
-const skillBodyMaxLength = 24_000
+import { requireTenantAccess } from "./access"
+import {
+  normalizeSkillInput,
+  requireUniqueTenantSkillName,
+  sortSkills,
+} from "./data"
 
 type SeedSkill = {
   name: string
@@ -198,94 +197,3 @@ export const syncGlobalSkills = internalMutation({
     }
   },
 })
-
-function normalizeSkillInput(input: {
-  name: string
-  description: string
-  body: string
-}) {
-  const name = input.name.trim().toLowerCase()
-  const description = input.description.trim()
-  const body = input.body.trim()
-
-  if (!skillNamePattern.test(name) || name.length > skillNameMaxLength) {
-    throw new Error(
-      "Skill name must use lowercase letters, numbers, and hyphens."
-    )
-  }
-
-  if (
-    description.length === 0 ||
-    description.length > skillDescriptionMaxLength
-  ) {
-    throw new Error("Skill description must be 1-320 characters.")
-  }
-
-  if (body.length === 0 || body.length > skillBodyMaxLength) {
-    throw new Error("Skill instructions must be 1-24000 characters.")
-  }
-
-  return { name, description, body }
-}
-
-async function requireUniqueTenantSkillName(
-  ctx: MutationCtx,
-  tenantId: string,
-  name: string
-) {
-  const existingSkill = await ctx.db
-    .query("skills")
-    .withIndex("by_tenant_name", (index) =>
-      index.eq("tenantId", tenantId).eq("name", name)
-    )
-    .first()
-
-  if (existingSkill !== null) {
-    throw new Error("A tenant skill with this name already exists.")
-  }
-}
-
-async function requireTenantAccess(
-  ctx: QueryCtx | MutationCtx,
-  tenantId: string
-) {
-  const identity = await ctx.auth.getUserIdentity()
-
-  if (identity === null) {
-    throw new Error("Unauthorized")
-  }
-
-  if (readIdentityTenantId(identity) !== tenantId) {
-    throw new Error("Unauthorized")
-  }
-
-  return identity
-}
-
-function readIdentityTenantId(identity: Record<string, unknown>) {
-  const candidates = [
-    identity.orgId,
-    identity.org_id,
-    identity.organizationId,
-    identity.organization_id,
-    identity["https://clerk.com/org_id"],
-  ]
-
-  return candidates.find((candidate) => typeof candidate === "string")
-}
-
-function sortSkills<T extends { tenantId: string | null; name: string }>(
-  skills: T[]
-) {
-  return [...skills].sort((left, right) => {
-    if (left.tenantId === null && right.tenantId !== null) {
-      return -1
-    }
-
-    if (left.tenantId !== null && right.tenantId === null) {
-      return 1
-    }
-
-    return left.name.localeCompare(right.name)
-  })
-}

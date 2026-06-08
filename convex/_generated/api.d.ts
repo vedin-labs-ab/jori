@@ -46,7 +46,9 @@ import type * as schemas_schedules from "../schemas/schedules.js";
 import type * as schemas_skills from "../schemas/skills.js";
 import type * as schemas_traces from "../schemas/traces.js";
 import type * as schemas_triggers from "../schemas/triggers.js";
+import type * as skills_access from "../skills/access.js";
 import type * as skills_catalog from "../skills/catalog.js";
+import type * as skills_data from "../skills/data.js";
 
 import type {
   ApiFromModules,
@@ -93,7 +95,9 @@ declare const fullApi: ApiFromModules<{
   "schemas/skills": typeof schemas_skills;
   "schemas/traces": typeof schemas_traces;
   "schemas/triggers": typeof schemas_triggers;
+  "skills/access": typeof skills_access;
   "skills/catalog": typeof skills_catalog;
+  "skills/data": typeof skills_data;
 }>;
 
 /**

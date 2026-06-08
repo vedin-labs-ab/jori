@@ -7,6 +7,7 @@ import {
   useAuth,
   useOrganization,
 } from "@clerk/tanstack-react-start"
+import { useConvexAuth } from "convex/react"
 import { CheckCircle2, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -18,6 +19,7 @@ import { useSlackCallbackStatus } from "./status"
 
 export function Setup() {
   const { isLoaded, isSignedIn } = useAuth()
+  const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
   const slackStatus = useSlackCallbackStatus()
 
   return (
@@ -79,11 +81,56 @@ export function Setup() {
         </div>
       ) : null}
 
-      {isLoaded && !isSignedIn ? <SignedOutView /> : null}
-
-      {isLoaded && isSignedIn ? <SignedInView /> : null}
+      <SetupContent
+        isClerkLoaded={isLoaded}
+        isConvexAuthenticated={isAuthenticated}
+        isConvexAuthLoading={isConvexAuthLoading}
+        isSignedIn={isSignedIn}
+      />
     </main>
   )
+}
+
+function SetupContent({
+  isClerkLoaded,
+  isConvexAuthenticated,
+  isConvexAuthLoading,
+  isSignedIn,
+}: {
+  isClerkLoaded: boolean
+  isConvexAuthenticated: boolean
+  isConvexAuthLoading: boolean
+  isSignedIn: boolean | undefined
+}) {
+  if (!isClerkLoaded) {
+    return null
+  }
+
+  if (!isSignedIn) {
+    return <SignedOutView />
+  }
+
+  if (isConvexAuthLoading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Loading authentication
+      </div>
+    )
+  }
+
+  if (!isConvexAuthenticated) {
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Authentication unavailable</AlertTitle>
+        <AlertDescription>
+          Convex could not validate the active Clerk session.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  return <SignedInView />
 }
 
 function SignedOutView() {
