@@ -18,9 +18,11 @@ This document is the source of truth for Milo's technical stack.
 
 ## AI
 
-- OpenRouter: model access and routing.
-- Pi: Milo runtime harness for company workflows.
+- Codex: temporary Milo runtime for the first Slack-trigger prototype.
+- User subscription credentials: temporary model access for the first version.
 - Daytona: cloud sandboxes for isolated Milo execution.
+
+OpenRouter and Pi are deferred until the Slack-trigger prototype proves the runtime loop.
 
 ## Code Quality
 
