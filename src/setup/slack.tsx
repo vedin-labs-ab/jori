@@ -75,8 +75,8 @@ export function SlackConnection({ tenantId }: { tenantId: string }) {
             </div>
             <div className="text-xs text-muted-foreground">
               {status?.status === "active"
-                ? "Milo can receive signed Slack events and post thread replies."
-                : "Install the Slack app to enable the V1 runtime loop."}
+                ? "Milo can receive signed Slack events, search context, and post thread replies as Milo."
+                : "Install the Slack app once to enable context search and Milo replies."}
             </div>
           </div>
         </div>

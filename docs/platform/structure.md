@@ -17,7 +17,7 @@ Domain code lives under folders named for responsibility:
 - `context`: integrations and observed messages.
 - `attention`: triggers and active listening state.
 - `runs`: execution lifecycle and runtime orchestration.
-- `providers/slack`: Slack protocol code, including OAuth, signing, event parsing, relevance checks, and replies.
+- `providers/slack`: Slack protocol code, including OAuth, signing, event parsing, and relevance checks.
 - `schemas`: one table definition per file, imported by the root schema.
 
 ## Frontend

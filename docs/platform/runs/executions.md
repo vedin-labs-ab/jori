@@ -7,7 +7,7 @@ Stores a Milo run.
 ## Includes
 
 - Lifecycle state.
-- Daytona sandbox identifier.
+- E2B sandbox identifier.
 - Creator and completion timestamps.
 
 ## Boundary

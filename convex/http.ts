@@ -60,16 +60,23 @@ http.route({
     slackUrl.searchParams.set("client_id", slackClientId)
     slackUrl.searchParams.set(
       "scope",
+      ["app_mentions:read", "chat:write"].join(",")
+    )
+    slackUrl.searchParams.set(
+      "user_scope",
       [
-        "app_mentions:read",
         "channels:history",
+        "channels:read",
         "groups:history",
+        "groups:read",
         "im:history",
+        "im:read",
         "mpim:history",
-        "chat:write",
+        "mpim:read",
+        "search:read",
+        "users:read",
       ].join(",")
     )
-    slackUrl.searchParams.set("user_scope", "chat:write")
     slackUrl.searchParams.set("state", state)
     slackUrl.searchParams.set(
       "redirect_uri",
@@ -125,10 +132,16 @@ http.route({
     })
     const tokenResult = (await tokenResponse.json()) as SlackOAuthResponse
 
-    const mcpToken =
-      tokenResult.ok === true ? getSlackMcpUserToken(tokenResult) : undefined
+    const botToken =
+      tokenResult.ok === true ? getSlackBotToken(tokenResult) : undefined
+    const userToken =
+      tokenResult.ok === true ? getSlackUserToken(tokenResult) : undefined
 
-    if (tokenResult.ok !== true || mcpToken === undefined) {
+    if (
+      tokenResult.ok !== true ||
+      botToken === undefined ||
+      userToken === undefined
+    ) {
       return redirectWithSlackStatus(state.returnUrl, "error")
     }
 
@@ -138,9 +151,12 @@ http.route({
         tenantId: state.tenantId,
         createdBy: state.createdBy,
         accountId: tokenResult.team.id,
-        tokenId: mcpToken,
+        botScopes: tokenResult.scope,
+        botToken,
         teamName: tokenResult.team.name,
         botUserId: tokenResult.bot_user_id,
+        userScopes: tokenResult.authed_user?.scope,
+        userToken,
       }
     )
 
@@ -208,8 +224,10 @@ type SlackOAuthResponse =
       ok: true
       access_token: string
       bot_user_id?: string
+      scope?: string
       authed_user?: {
         access_token?: string
+        scope?: string
       }
       team: {
         id: string
@@ -230,7 +248,13 @@ function jsonResponse(value: unknown) {
   })
 }
 
-function getSlackMcpUserToken(tokenResult: {
+function getSlackBotToken(tokenResult: { access_token?: string }) {
+  const token = tokenResult.access_token
+
+  return token === "" ? undefined : token
+}
+
+function getSlackUserToken(tokenResult: {
   authed_user?: { access_token?: string }
 }) {
   const token = tokenResult.authed_user?.access_token

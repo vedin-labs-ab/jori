@@ -5,7 +5,8 @@ export const integrations = defineTable({
   tenantId: v.string(),
   provider: v.literal("slack"),
   accountId: v.string(),
-  tokenId: v.string(),
+  botToken: v.string(),
+  userToken: v.string(),
   status: v.union(
     v.literal("active"),
     v.literal("paused"),

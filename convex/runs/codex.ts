@@ -1,7 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
 
-const slackMcpUrl = "https://mcp.slack.com/mcp"
-
 export type CodexRuntimeInput = {
   execution: Doc<"executions">
   integration: Doc<"integrations">
@@ -14,7 +12,11 @@ export type CodexRuntimeResult = {
   finalMessage?: string
 }
 
-export function createCodexConfig() {
+export function createCodexConfig(args: {
+  allowedChannelId: string
+  botToken: string
+  userToken: string
+}) {
   return [
     'cli_auth_credentials_store = "file"',
     'approval_policy = "never"',
@@ -22,12 +24,17 @@ export function createCodexConfig() {
     'model_reasoning_effort = "low"',
     "",
     "[mcp_servers.slack]",
-    `url = "${slackMcpUrl}"`,
-    'bearer_token_env_var = "MILO_SLACK_MCP_TOKEN"',
+    'command = "node"',
+    'args = ["/tmp/milo-workspace/milo-slack-mcp-proxy.mjs"]',
     "required = true",
     'default_tools_approval_mode = "approve"',
-    "startup_timeout_sec = 20",
+    "startup_timeout_sec = 30",
     "tool_timeout_sec = 30",
+    "",
+    "[mcp_servers.slack.env]",
+    `MILO_SLACK_USER_TOKEN = ${tomlString(args.userToken)}`,
+    `MILO_SLACK_BOT_TOKEN = ${tomlString(args.botToken)}`,
+    `MILO_SLACK_ALLOWED_CHANNEL_ID = ${tomlString(args.allowedChannelId)}`,
     "",
   ].join("\n")
 }
@@ -41,9 +48,10 @@ export function createCodexPrompt(input: CodexRuntimeInput) {
     "You are Milo, a concise AI teammate responding in Slack.",
     "",
     "Task:",
-    "- Use the Slack MCP server to send exactly one witty, friendly reply.",
+    "- Send exactly one witty, friendly reply with the Slack tools.",
     "- Send it only to the Slack channel and thread listed below.",
-    "- Do not call any non-Slack tools.",
+    "- Use Slack read/search tools only if you need extra Slack context before replying.",
+    "- Do not use non-Slack tools.",
     "- Do not inspect files, run shell commands, browse the web, or ask questions.",
     "- After the Slack message is sent, stop and briefly confirm what you sent.",
     "",
@@ -54,6 +62,10 @@ export function createCodexPrompt(input: CodexRuntimeInput) {
     "Original Slack message:",
     text,
   ].join("\n")
+}
+
+function tomlString(value: string) {
+  return JSON.stringify(value)
 }
 
 export function parseFinalCodexMessage(jsonl: string) {

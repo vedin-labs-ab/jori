@@ -6,13 +6,19 @@ Defines the minimum runtime model needed to trigger Milo from Slack.
 
 ## Runtime Loop
 
-A Slack message creates a message record. If the message asks Milo to work, Milo creates a trigger, activates the thread, starts an execution, runs Codex in a Daytona sandbox, stores the full trace as a Convex file, and lets Codex reply through Slack MCP.
+A Slack message creates a message record. If the message asks Milo to work, Milo creates a trigger, activates the thread, starts an execution, runs Codex in an E2B sandbox, stores the full trace as a Convex file, and lets Codex reply through Slack MCP.
 
 Identity and organizations come from Clerk. Milo stores Clerk organization IDs as `tenantId` and Clerk user IDs as `createdBy`. There are no local organization, user, membership, or identity-mapping tables.
 
-Daytona sandbox identity is stored directly on executions. There is no sandbox table. The Convex backend orchestrates the sandbox and execution lifecycle, but Slack communication belongs to Codex through the Slack MCP server.
+E2B sandbox identity is stored directly on executions. There is no sandbox table. The Convex backend orchestrates the sandbox and execution lifecycle, but Slack communication belongs to Codex through Slack MCP servers.
 
-Codex authentication is stored as a Convex environment variable and copied into the ephemeral Daytona sandbox as `auth.json` at runtime. Slack MCP is configured per execution using the active integration's Slack user token, so each sandbox only receives the MCP connection for the tenant and Slack workspace that triggered the execution.
+Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Slack MCP is configured per execution from the active integration. The runtime exposes a user-token MCP alias for reading/searching Slack context and a bot-token MCP alias for sending the final reply as Milo. Each sandbox only receives the Slack tokens for the tenant and workspace that triggered the execution.
+
+Required Convex environment variables:
+
+- `E2B_API_KEY`: E2B API key for creating ephemeral sandboxes.
+- `CODEX_AUTH_JSON_BASE64`: base64-encoded Codex `auth.json`.
+- `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, and `SLACK_SIGNING_SECRET`: Slack app install and event verification secrets.
 
 ## Onboarding
 
@@ -24,7 +30,7 @@ The first onboarding flow should be simple and mostly Clerk-native:
 4. User optionally enters the organization website.
 5. User connects Slack as the first integration.
 
-Slack installs must include the MCP user-token scope needed by the runtime. V1 only needs `chat:write` for sending thread replies through Slack MCP.
+Slack installs use one OAuth flow that requests both bot scopes and user scopes. The bot token needs `app_mentions:read` and `chat:write`; the user token needs Slack read/search scopes such as `channels:history`, `groups:history`, `im:history`, `mpim:history`, `search:read`, and `users:read`.
 
 Use Clerk's out-of-the-box components wherever possible. Styling may be adjusted to match Milo's theme, but identity and organization behavior should remain Clerk-owned. Store organization setup details, such as website, in Clerk organization metadata unless Milo needs to query them frequently.
 

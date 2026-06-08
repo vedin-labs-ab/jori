@@ -7,7 +7,7 @@ Stores the Convex file pointer for a full execution trace.
 ## Includes
 
 - One trace file per execution trace snapshot.
-- Model calls, tool calls, Daytona events, Slack replies, errors, and final result details inside the file.
+- Model calls, tool calls, E2B events, Slack replies, errors, and final result details inside the file.
 
 ## Boundary
 

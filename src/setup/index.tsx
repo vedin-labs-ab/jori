@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button"
 import { BrandMark } from "@/shared/brand"
 import { OrganizationCard } from "./organization"
 import { SlackConnection } from "./slack"
-import { getSlackCallbackStatus } from "./status"
+import { useSlackCallbackStatus } from "./status"
 
 export function Setup() {
   const { isLoaded, isSignedIn } = useAuth()
-  const slackStatus = getSlackCallbackStatus()
+  const slackStatus = useSlackCallbackStatus()
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-5xl flex-col gap-8 px-6 py-8">

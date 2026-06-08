@@ -4,7 +4,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalAction } from "../_generated/server"
 import { createCodexPrompt } from "./codex"
-import { runCodexInDaytona } from "./daytona"
+import { runCodexInE2B } from "./e2b"
 
 export const runSlackExecution = internalAction({
   args: {
@@ -22,7 +22,8 @@ export const runSlackExecution = internalAction({
     let status: "completed" | "failed" = "completed"
 
     try {
-      const runtimeResult = await runCodexInDaytona({
+      const runtimeResult = await runCodexInE2B({
+        allowedChannelId: requireSlackChannelId(input.message.containerId),
         authJsonBase64: requireCodexAuthJsonBase64(),
         onSandboxCreated: async (sandboxId) => {
           await ctx.runMutation(internal.runs.executions.markRunning, {
@@ -31,7 +32,8 @@ export const runSlackExecution = internalAction({
           })
         },
         prompt: createCodexPrompt(input),
-        slackMcpToken: input.integration.tokenId,
+        slackBotToken: input.integration.botToken,
+        slackUserToken: input.integration.userToken,
       })
 
       trace.events.push({
@@ -73,6 +75,14 @@ function requireCodexAuthJsonBase64() {
   return authJson
 }
 
+function requireSlackChannelId(channelId: string | undefined) {
+  if (channelId === undefined || channelId === "") {
+    throw new Error("Missing Slack channel target")
+  }
+
+  return channelId
+}
+
 function createInitialTrace(input: {
   execution: { _id: string; tenantId: string; createdAt: number }
   message: {
@@ -88,8 +98,8 @@ function createInitialTrace(input: {
   return {
     version: 1,
     runtime: {
-      type: "codex-daytona",
-      sandbox: "daytona",
+      type: "codex-e2b",
+      sandbox: "e2b",
     },
     execution: {
       id: input.execution._id,

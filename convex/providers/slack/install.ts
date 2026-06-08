@@ -28,9 +28,12 @@ export const recordOAuthInstallation = internalMutation({
     tenantId: v.string(),
     createdBy: v.string(),
     accountId: v.string(),
-    tokenId: v.string(),
+    botScopes: v.optional(v.string()),
+    botToken: v.string(),
     teamName: v.optional(v.string()),
     botUserId: v.optional(v.string()),
+    userScopes: v.optional(v.string()),
+    userToken: v.string(),
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -44,12 +47,15 @@ export const recordOAuthInstallation = internalMutation({
     const data = {
       teamName: args.teamName,
       botUserId: args.botUserId,
+      botScopes: args.botScopes,
+      userScopes: args.userScopes,
     }
 
     if (existing !== null) {
       await ctx.db.patch(existing._id, {
         tenantId: args.tenantId,
-        tokenId: args.tokenId,
+        botToken: args.botToken,
+        userToken: args.userToken,
         status: "active",
         createdBy: args.createdBy,
         data,
@@ -62,7 +68,8 @@ export const recordOAuthInstallation = internalMutation({
       tenantId: args.tenantId,
       provider: "slack",
       accountId: args.accountId,
-      tokenId: args.tokenId,
+      botToken: args.botToken,
+      userToken: args.userToken,
       status: "active",
       createdBy: args.createdBy,
       createdAt: now,
