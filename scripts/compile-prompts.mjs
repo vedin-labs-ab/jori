@@ -28,14 +28,18 @@ async function readSkills(directory) {
   const result = {}
 
   for (const entry of entries) {
-    if (!entry.isDirectory()) {
+    const entryPath = path.join(directory, entry.name)
+
+    if (entry.isDirectory()) {
+      Object.assign(result, await readSkills(entryPath))
       continue
     }
 
-    const skillPath = path.join(directory, entry.name, "SKILL.md")
-    const content = await readFile(skillPath, "utf8")
-    const skill = parseSkill(content, skillPath)
-    result[skill.name] = skill
+    if (entry.isFile() && entry.name.endsWith(".md")) {
+      const content = await readFile(entryPath, "utf8")
+      const skill = parseSkill(content, entryPath)
+      result[skill.name] = skill
+    }
   }
 
   return sortObject(result)

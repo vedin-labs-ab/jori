@@ -13,7 +13,7 @@ Milo's default persona belongs to the system prompt, not the skill catalog.
 
 ## Boundary
 
-Global skills are synced from checked-in `skills/*/SKILL.md` files and are immutable through tenant-facing APIs. Tenant skills can be created, edited, and deleted only by users whose active Clerk organization matches the skill tenant.
+Global skills are synced from checked-in Markdown files under `skills/` and are immutable through tenant-facing APIs. Tenant skills can be created, edited, and deleted only by users whose active Clerk organization matches the skill tenant.
 
 Runtime prompt assembly loads the system prompt from checked-in prompt
 templates, then loads global skills plus the triggering tenant's skills from

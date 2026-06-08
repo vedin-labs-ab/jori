@@ -1,22 +1,15 @@
+---
+name: slack-communication
+description: Built-in Slack communication skill for reading context and sending concise, native Slack replies.
+---
+
 # Slack Communication
-
-A Slack message triggered this run.
-
-Slack target:
-- Channel ID: {{message.channelId}}
-- Conversation ID: {{message.conversationId}}
-
-Original Slack message:
-{{message.text}}
-
-Complete the Slack task using the available tools. If a reply is warranted,
-send it to the Slack target above.
 
 Use Slack as the communication surface:
 - Read recent context with history, replies, search, channel, or user lookup
   tools when it would improve the reply.
 - Send the final response with `conversations_add_message`.
-- Post only in the channel and thread specified by the Slack target.
+- Post only in the channel and thread specified by the trigger context.
 - Send at most one Slack message unless the task explicitly asks for multiple.
 - After sending the Slack message, stop.
 

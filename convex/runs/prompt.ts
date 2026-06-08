@@ -9,7 +9,7 @@ export type PromptBundle = {
 
 type PromptPart = {
   id: string
-  type: "system" | "skill" | "runtime"
+  type: "system" | "skill" | "trigger"
   content: string
 }
 
@@ -28,7 +28,7 @@ export function assemblePrompt(
   const parts = [
     createSystemPart(),
     ...availableSkills.map((skill) => createSkillPart(skill)),
-    createRuntimePart(input),
+    createTriggerPart(input),
   ]
 
   return {
@@ -40,9 +40,9 @@ export function assemblePrompt(
 
 function createSystemPart(): PromptPart {
   return {
-    id: "system/milo",
+    id: "system/persona",
     type: "system",
-    content: promptTemplates["system/milo"],
+    content: promptTemplates["system/persona"],
   }
 }
 
@@ -54,21 +54,21 @@ function createSkillPart(skill: RuntimeSkill): PromptPart {
   }
 }
 
-function createRuntimePart(input: CodexRuntimeInput): PromptPart {
+function createTriggerPart(input: CodexRuntimeInput): PromptPart {
   if (input.type === "scheduled") {
-    return createScheduledRuntimePart(input)
+    return createScheduledTriggerPart(input)
   }
 
-  return createSlackRuntimePart(input)
+  return createMessageTriggerPart(input)
 }
 
-function createSlackRuntimePart(
+function createMessageTriggerPart(
   input: Extract<CodexRuntimeInput, { type: "slack" }>
 ): PromptPart {
   return {
-    id: "communication/slack",
-    type: "runtime",
-    content: renderTemplate(promptTemplates["communication/slack"], {
+    id: "trigger/message",
+    type: "trigger",
+    content: renderTemplate(promptTemplates["trigger/message"], {
       message: {
         channelId: getSlackChannelId(input.message.data) ?? "",
         conversationId:
@@ -79,13 +79,13 @@ function createSlackRuntimePart(
   }
 }
 
-function createScheduledRuntimePart(
+function createScheduledTriggerPart(
   input: Extract<CodexRuntimeInput, { type: "scheduled" }>
 ): PromptPart {
   return {
-    id: "runtime/scheduled-task",
-    type: "runtime",
-    content: renderTemplate(promptTemplates["runtime/scheduled-task"], {
+    id: "trigger/schedule",
+    type: "trigger",
+    content: renderTemplate(promptTemplates["trigger/schedule"], {
       output: {
         channelId: input.schedule.output.channelId,
         threadId: input.schedule.output.threadId ?? "",
