@@ -5,7 +5,7 @@ Source documents for Milo's system design.
 ## Documents
 
 - [Tech stack](./platform/stack.md): the source of truth for Milo's core technical choices.
-- [Platform](./platform/index.md): the top-level domain ownership map.
+- [Platform](./platform/index.md): the runtime domain ownership map.
 
 ## Documentation Principles
 

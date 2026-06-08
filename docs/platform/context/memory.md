@@ -2,16 +2,16 @@
 
 ## Responsibility
 
-Owns durable company understanding: facts, assumptions, preferences, history, and where each memory is valid, visible, fresh, or expired.
+Owns durable company understanding that agents and people can rely on.
 
-## Owns
+## Includes
 
 - Facts Milo can rely on.
 - Assumptions Milo should treat as useful but uncertain.
 - Preferences for how people, teams, and the company want work to happen.
 - Histories of important activity, decisions, and outcomes.
-- Boundaries that determine where memory is valid, visible, and useful.
+- Boundaries for where memory is valid, visible, fresh, or expired.
 
 ## Boundary
 
-Raw intake belongs to [Sources](./sources.md). Evidence belongs to [Provenance](./provenance.md). Activation belongs to [Workflows](../workflows/index.md).
+Evidence belongs to [Traces](../runs/traces.md). Requests, tasks, and execution attempts belong to [Runs](../runs/index.md). Agent-specific improvements belong to [Dreaming](../dreaming/index.md).

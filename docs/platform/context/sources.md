@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Owns raw company inputs before they become memory, work, triggers, or agent context.
+Owns raw company inputs before Milo turns them into traces, memory, work, triggers, or agent context.
 
 ## Includes
 
@@ -13,4 +13,4 @@ Owns raw company inputs before they become memory, work, triggers, or agent cont
 
 ## Boundary
 
-Interpretation belongs to [Memory](./memory.md). Evidence tracking belongs to [Provenance](./provenance.md).
+Evidence and activity records belong to [Traces](../runs/traces.md). Durable interpretation belongs to [Memory](./memory.md).
