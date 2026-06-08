@@ -2,14 +2,14 @@
 
 ## Responsibility
 
-Owns events that ask Milo to pay attention, become active, resume attention, or start an execution.
+Owns events that ask Milo to pay attention, become active, route a review, or start an execution.
 
 ## Includes
 
 - Manual triggers from explicit user commands or mentions.
 - Scheduled triggers from time-based routines.
 - Signal triggers from messages, meetings, imports, and integration events.
-- State triggers from changes to memory, identity, permissions, or prior executions.
+- State triggers from prior executions.
 
 ## Boundary
 
@@ -19,7 +19,7 @@ Observed activity belongs to [Sources](../context/sources.md). Durable attention
 
 ```ts
 triggers: defineTable({
-  organizationId: v.id("organizations"),
+  externalTenantId: v.string(),
   sourceId: v.optional(v.id("sources")),
   kind: v.union(v.literal("manual"), v.literal("scheduled"), v.literal("signal"), v.literal("state")),
   payload: v.any(),

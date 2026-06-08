@@ -2,31 +2,29 @@
 
 ## Responsibility
 
-Owns connected systems and the capabilities Milo can safely use through them.
+Owns connected external systems Milo can receive events from and act through.
 
 ## Includes
 
-- Tools and products linked to Milo.
-- Core onboarding integrations such as Slack, Teams, Jira, Linear, GitHub, and similar company tools.
-- Collaboration-tool availability configured for all channels or specific channels during onboarding.
-- Authorized accounts and installation contexts.
-- Scopes that bound external access.
-- Capabilities such as read, search, create, update, comment, or execute.
-- References to external objects whose source of truth remains outside Milo.
+- Provider installation identity, such as a Slack workspace or Microsoft Teams tenant.
+- External tenant identity from Clerk or WorkOS.
+- Authorization state and provider scopes.
+- Enough provider metadata to receive events and post replies.
 
 ## Boundary
 
-Tool availability belongs here. Intentional tool use belongs to [Agents](../agents/agents.md). Tool calls inside an execution attempt belong to [Execution](../runs/execution.md).
+Intentional agent behavior belongs to [Agents](../agents/agents.md). Concrete work and replies belong to [Execution](../runs/execution.md). Observed provider events belong to [Sources](./sources.md).
 
 ## Draft Schema
 
 ```ts
 integrations: defineTable({
-  organizationId: v.id("organizations"),
+  externalTenantId: v.string(),
   provider: v.string(),
-  accountId: v.optional(v.string()),
+  externalAccountId: v.string(),
   scopes: v.array(v.string()),
   status: v.union(v.literal("active"), v.literal("paused"), v.literal("revoked")),
   createdAt: v.number(),
+  updatedAt: v.number(),
 })
 ```

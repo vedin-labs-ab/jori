@@ -4,35 +4,30 @@ Milo's platform is the runtime model behind the companyOS.
 
 ## Responsibility
 
-Defines the domains that let people bring Milo into company activity, delegate work to agents, execute work in Daytona sandboxes, use tools safely, remember what happened, and improve future agent behavior.
+Defines the smallest runtime model that lets people bring Milo into company activity, delegate work to an agent, execute work, ask for review, and understand what happened.
 
 ## Runtime Loop
 
-A person, system, schedule, or signal asks Milo to pay attention. Attention can create an activation, route a review, or start an execution. A sandboxed agent plans and acts with tools, models, integrations, and a Daytona environment. The execution produces artifacts and traces. Context and memory update from those traces. Dreaming studies company activity and prior executions to improve skills and future delegation.
+A person, system, schedule, or signal creates a trigger. A trigger may create or update an activation, start an execution, or route a review. An execution runs Milo, uses configured integrations, records traces, and replies back to the source when useful.
 
-## Onboarding Baseline
+Identity comes from Clerk or WorkOS. Milo stores external tenant and user identifiers directly on records instead of maintaining local organization, user, membership, or external-identity tables.
 
-Milo should be useful with a simple setup: connect collaboration and work tools, identify users, understand roles, choose where Milo is available, and optionally provide the organization website so Milo can gather initial company context. Company memory, organization-wide skills, and deeper customization can accumulate after the organization starts using Milo.
+Daytona sandbox identity is stored directly on executions. There is no separate sandbox model in the first version.
+
+## First Version
+
+Milo should be useful with a simple setup: connect one collaboration tool, receive messages or events, recognize when Milo is asked to work, run one default agent, ask for review when needed, and record enough trace data to debug what happened.
 
 ## Models
-
-Identity:
-
-- [Organizations](./identity/organizations.md)
-- [Users](./identity/users.md)
-- [Permissions](./identity/permissions.md)
 
 Context:
 
 - [Sources](./context/sources.md)
 - [Integrations](./context/integrations.md)
-- [Memory](./context/memory.md)
 
 Agents:
 
 - [Agents](./agents/agents.md)
-- [Skills](./agents/skills.md)
-- [Tools](./agents/tools.md)
 
 Attention:
 
@@ -43,10 +38,14 @@ Attention:
 Runs:
 
 - [Execution](./runs/execution.md)
-- [Sandboxes](./runs/sandboxes.md)
-- [Artifacts](./runs/artifacts.md)
 - [Traces](./runs/traces.md)
 
-Dreaming:
+## Deferred
 
-- [Dreams](./dreaming/dreaming.md)
+These are intentionally not first-version models:
+
+- Local organizations, users, memberships, and external identities.
+- Conversation scopes as a separate model.
+- Sandboxes as a separate model.
+- Execution events as a separate model.
+- Permissions, memory, artifacts, skills, tools, and dreaming.

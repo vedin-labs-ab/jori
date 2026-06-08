@@ -2,19 +2,17 @@
 
 ## Responsibility
 
-Owns the persisted agent-flow record: planning, model calls, tool calls, sandbox activity, state transitions, observability, and completion.
+Owns the persisted agent-flow record: state, active Daytona sandbox identity, review state, observability, and completion.
 
 ## Includes
 
 - State such as queued, running, blocked, completed, or failed.
 - One execution record for every mention-triggered agent flow, including short conversational responses.
-- One Daytona sandbox for every execution.
+- Daytona sandbox provider identifiers stored directly on the execution.
 - Console visibility for queued, running, blocked, completed, failed, and stopped executions.
 - Agent instances always run inside Daytona sandboxes, never directly inside Milo-owned infrastructure.
 - Agent instances started from a mention-triggered activation when no sandboxed agent instance is already active for that conversation scope.
 - Actions that change Milo or external tools.
-- Artifacts produced by people, agents, or systems.
-- Sandbox activity where agent work happens.
 - Communication decisions such as staying silent, acknowledging longer work, or posting a completion update back to the source conversation.
 - Steering messages sent to an existing Milo instance while work is running.
 - Mention and non-mention messages routed to the active instance when they are relevant to the running work.
@@ -27,17 +25,21 @@ Owns the persisted agent-flow record: planning, model calls, tool calls, sandbox
 
 ## Boundary
 
-Agent capabilities belong to [Agents](../agents/agents.md). Durable listening state belongs to [Activations](../attention/activations.md). Sandbox lifecycle belongs to [Sandboxes](./sandboxes.md). Review points belong to [Reviews](../attention/reviews.md). Permissions belong to [Permissions](../identity/permissions.md).
+Agent capabilities belong to [Agents](../agents/agents.md). Durable listening state belongs to [Activations](../attention/activations.md). Review points belong to [Reviews](../attention/reviews.md). Detailed observability belongs to [Traces](./traces.md).
 
 ## Draft Schema
 
 ```ts
 executions: defineTable({
-  organizationId: v.id("organizations"),
+  externalTenantId: v.string(),
   agentId: v.id("agents"),
   activationId: v.optional(v.id("activations")),
+  startedBySourceId: v.optional(v.id("sources")),
+  daytonaSandboxId: v.optional(v.string()),
+  daytonaWorkspaceId: v.optional(v.string()),
   status: v.union(v.literal("queued"), v.literal("running"), v.literal("blocked"), v.literal("completed"), v.literal("failed"), v.literal("stopped")),
   title: v.optional(v.string()),
+  summary: v.optional(v.string()),
   createdAt: v.number(),
   completedAt: v.optional(v.number()),
 })

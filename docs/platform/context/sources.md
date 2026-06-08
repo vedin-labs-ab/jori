@@ -2,28 +2,33 @@
 
 ## Responsibility
 
-Owns raw company inputs before Milo turns them into traces, memory, attention, or agent context.
+Owns provider events and messages before Milo turns them into triggers, activations, executions, or traces.
 
 ## Includes
 
-- Messages, email, comments, and threads.
-- Meetings and live conversations.
-- Files, documents, code, notes, and other artifacts.
-- Organization website content gathered during optional onboarding research.
-- Imports, migrations, and connected-tool activity.
+- Messages, comments, mentions, and provider events.
+- Direct external identifiers for channels, threads, comments, issues, or other provider objects.
+- External user identifiers from the provider event payload.
+- Raw payloads when needed for debugging or idempotency.
 
 ## Boundary
 
-Evidence and activity records belong to [Traces](../runs/traces.md). Historical outputs belong to [Artifacts](../runs/artifacts.md). Current durable interpretation belongs to [Memory](./memory.md).
+Sources are observed inputs. Decisions, model calls, tool calls, replies, and outcomes belong to [Traces](../runs/traces.md).
 
 ## Draft Schema
 
 ```ts
 sources: defineTable({
-  organizationId: v.id("organizations"),
-  integrationId: v.optional(v.id("integrations")),
+  externalTenantId: v.string(),
+  integrationId: v.id("integrations"),
   kind: v.string(),
-  externalId: v.optional(v.string()),
+  externalId: v.string(),
+  externalUserId: v.optional(v.string()),
+  externalContainerId: v.optional(v.string()),
+  externalThreadId: v.optional(v.string()),
+  text: v.optional(v.string()),
+  payload: v.optional(v.any()),
   observedAt: v.number(),
+  createdAt: v.number(),
 })
 ```
