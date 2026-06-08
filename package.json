@@ -6,13 +6,14 @@
   "packageManager": "pnpm@10.17.0",
   "scripts": {
     "dev": "vite",
-    "build": "pnpm check:typecheck && vite build",
-    "check": "pnpm check:biome && pnpm check:typecheck",
+    "build": "pnpm prompts:compile && pnpm check:typecheck && vite build",
+    "check": "pnpm prompts:compile && pnpm check:biome && pnpm check:typecheck",
     "check:biome": "biome ci --error-on-warnings .",
     "check:fix": "biome check --write .",
     "check:typecheck": "tsc --noEmit",
-    "deploy": "npx convex dev --once",
+    "deploy": "pnpm prompts:compile && npx convex dev --once",
     "preview": "vite preview",
+    "prompts:compile": "node scripts/compile-prompts.mjs && biome format --write convex/prompts/generated.ts",
     "test": "vitest run"
   },
   "dependencies": {

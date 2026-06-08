@@ -7,8 +7,8 @@ import {
   type Username,
 } from "e2b"
 import { createCodexConfig, parseFinalCodexMessage } from "./codex"
-import { createSlackProxyScript } from "./proxy"
 import { createSlackTokenPreflightCommand } from "./slack"
+import { type ToolBundle, type ToolPreflight } from "./tools"
 
 const codexHome = "/tmp/milo-codex-home"
 const workspace = "/tmp/milo-workspace"
@@ -16,12 +16,10 @@ const commandOutputLimit = 2_000
 const sandboxTimeoutMs = 5 * 60 * 1_000
 
 export type E2BCodexRunArgs = {
-  allowedChannelId: string
   authJsonBase64: string
   onSandboxCreated: (sandboxId: string) => Promise<void>
   prompt: string
-  slackBotToken: string
-  slackUserToken: string
+  toolBundle: ToolBundle
 }
 
 export type E2BCodexRunResult = {
@@ -40,15 +38,10 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
     await args.onSandboxCreated(sandbox.sandboxId)
     await installCodex(sandbox)
     await bootstrapCodex(sandbox, {
-      allowedChannelId: args.allowedChannelId,
       authJsonBase64: args.authJsonBase64,
-      slackBotToken: args.slackBotToken,
-      slackUserToken: args.slackUserToken,
+      toolBundle: args.toolBundle,
     })
-    await verifySlackTokens(sandbox, {
-      slackBotToken: args.slackBotToken,
-      slackUserToken: args.slackUserToken,
-    })
+    await verifyPreflights(sandbox, args.toolBundle.preflights)
     const jsonl = await executeCodex(sandbox, args)
 
     return {
@@ -104,22 +97,20 @@ async function installCodex(sandbox: E2BSandbox) {
 async function bootstrapCodex(
   sandbox: E2BSandbox,
   args: {
-    allowedChannelId: string
     authJsonBase64: string
-    slackBotToken: string
-    slackUserToken: string
+    toolBundle: ToolBundle
   }
 ) {
   const result = await runCommand(sandbox, createBootstrapCommand(), {
     envs: {
       CODEX_AUTH_JSON_BASE64: args.authJsonBase64,
       CODEX_CONFIG_TOML: createCodexConfig({
-        allowedChannelId: args.allowedChannelId,
-        botToken: args.slackBotToken,
-        userToken: args.slackUserToken,
+        mcpServers: args.toolBundle.mcpServers,
       }),
       CODEX_HOME: codexHome,
-      MILO_SLACK_PROXY_MJS: createSlackProxyScript(),
+      MILO_SANDBOX_FILES_BASE64: encodeBase64(
+        JSON.stringify(args.toolBundle.sandboxFiles)
+      ),
     },
     timeoutMs: 30_000,
   })
@@ -158,17 +149,25 @@ async function executeCodex(sandbox: E2BSandbox, args: E2BCodexRunArgs) {
   return result.stdout
 }
 
+async function verifyPreflights(
+  sandbox: E2BSandbox,
+  preflights: ToolPreflight[]
+) {
+  for (const preflight of preflights) {
+    if (preflight.type === "slack") {
+      await verifySlackTokens(sandbox, preflight)
+    }
+  }
+}
+
 async function verifySlackTokens(
   sandbox: E2BSandbox,
-  args: {
-    slackBotToken: string
-    slackUserToken: string
-  }
+  preflight: ToolPreflight
 ) {
   const result = await runCommand(sandbox, createSlackTokenPreflightCommand(), {
     envs: {
-      MILO_SLACK_BOT_TOKEN: args.slackBotToken,
-      MILO_SLACK_USER_TOKEN: args.slackUserToken,
+      MILO_SLACK_BOT_TOKEN: preflight.botToken,
+      MILO_SLACK_USER_TOKEN: preflight.userToken,
     },
     timeoutMs: 30_000,
   })
@@ -237,7 +236,16 @@ function createBootstrapCommand() {
     `mkdir -p "${codexHome}" "${workspace}"`,
     'printf "%s" "$CODEX_AUTH_JSON_BASE64" | base64 -d > "$CODEX_HOME/auth.json"',
     'printf "%s" "$CODEX_CONFIG_TOML" > "$CODEX_HOME/config.toml"',
-    `printf "%s" "$MILO_SLACK_PROXY_MJS" > "${workspace}/milo-slack-mcp-proxy.mjs"`,
+    'printf "%s" "$MILO_SANDBOX_FILES_BASE64" | base64 -d > /tmp/milo-sandbox-files.json',
+    "node <<'NODE'",
+    "const fs = require('fs');",
+    "const path = require('path');",
+    "const files = JSON.parse(fs.readFileSync('/tmp/milo-sandbox-files.json', 'utf8'));",
+    "for (const file of files) {",
+    "  fs.mkdirSync(path.dirname(file.path), { recursive: true });",
+    "  fs.writeFileSync(file.path, file.content);",
+    "}",
+    "NODE",
     'chmod 600 "$CODEX_HOME/auth.json"',
   ].join("\n")
 }

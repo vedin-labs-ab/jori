@@ -1,4 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
+import { type McpServerConfig } from "./tools"
 
 export type CodexRuntimeInput = {
   execution: Doc<"executions">
@@ -12,60 +13,41 @@ export type CodexRuntimeResult = {
   finalMessage?: string
 }
 
-export function createCodexConfig(args: {
-  allowedChannelId: string
-  botToken: string
-  userToken: string
-}) {
+export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {
   return [
     'cli_auth_credentials_store = "file"',
     'approval_policy = "never"',
     'sandbox_mode = "read-only"',
     'model_reasoning_effort = "low"',
     "",
-    "[mcp_servers.slack]",
-    'command = "node"',
-    'args = ["/tmp/milo-workspace/milo-slack-mcp-proxy.mjs"]',
+    ...args.mcpServers.flatMap(renderMcpServerConfig),
+  ].join("\n")
+}
+
+function renderMcpServerConfig(server: McpServerConfig) {
+  return [
+    `[mcp_servers.${server.name}]`,
+    `command = ${tomlString(server.command)}`,
+    `args = ${tomlArray(server.args)}`,
     "required = true",
     'default_tools_approval_mode = "approve"',
     "startup_timeout_sec = 30",
     "tool_timeout_sec = 30",
     "",
-    "[mcp_servers.slack.env]",
-    `MILO_SLACK_USER_TOKEN = ${tomlString(args.userToken)}`,
-    `MILO_SLACK_BOT_TOKEN = ${tomlString(args.botToken)}`,
-    `MILO_SLACK_ALLOWED_CHANNEL_ID = ${tomlString(args.allowedChannelId)}`,
+    `[mcp_servers.${server.name}.env]`,
+    ...Object.entries(server.env).map(
+      ([key, value]) => `${key} = ${tomlString(value)}`
+    ),
     "",
-  ].join("\n")
-}
-
-export function createCodexPrompt(input: CodexRuntimeInput) {
-  const channel = input.message.containerId ?? ""
-  const threadId = input.message.threadId ?? input.message.providerId
-  const text = input.message.text ?? ""
-
-  return [
-    "You are Milo, a concise AI teammate responding in Slack.",
-    "",
-    "Task:",
-    "- Send exactly one witty, friendly reply with the Slack tools.",
-    "- Send it only to the Slack channel and thread listed below.",
-    "- Use Slack read/search tools only if you need extra Slack context before replying.",
-    "- Do not use non-Slack tools.",
-    "- Do not inspect files, run shell commands, browse the web, or ask questions.",
-    "- After the Slack message is sent, stop and briefly confirm what you sent.",
-    "",
-    "Slack target:",
-    `- Channel ID: ${channel}`,
-    `- Thread timestamp: ${threadId}`,
-    "",
-    "Original Slack message:",
-    text,
-  ].join("\n")
+  ]
 }
 
 function tomlString(value: string) {
   return JSON.stringify(value)
+}
+
+function tomlArray(values: string[]) {
+  return `[${values.map(tomlString).join(", ")}]`
 }
 
 export function parseFinalCodexMessage(jsonl: string) {

@@ -3,8 +3,13 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalAction } from "../_generated/server"
-import { createCodexPrompt } from "./codex"
 import { runCodexInE2B } from "./e2b"
+import { assemblePrompt, type PromptBundle } from "./prompt"
+import {
+  assembleToolsForRun,
+  summarizeToolBundle,
+  type ToolBundle,
+} from "./tools"
 
 export const runSlackExecution = internalAction({
   args: {
@@ -18,12 +23,17 @@ export const runSlackExecution = internalAction({
       return
     }
 
-    const trace = createInitialTrace(input)
+    const allowedChannelId = requireSlackChannelId(input.message.containerId)
+    const promptBundle = assemblePrompt(input)
+    const toolBundle = assembleToolsForRun({
+      allowedChannelId,
+      integration: input.integration,
+    })
+    const trace = createInitialTrace(input, promptBundle, toolBundle)
     let status: "completed" | "failed" = "completed"
 
     try {
       const runtimeResult = await runCodexInE2B({
-        allowedChannelId: requireSlackChannelId(input.message.containerId),
         authJsonBase64: requireCodexAuthJsonBase64(),
         onSandboxCreated: async (sandboxId) => {
           await ctx.runMutation(internal.runs.executions.markRunning, {
@@ -31,9 +41,8 @@ export const runSlackExecution = internalAction({
             sandboxId,
           })
         },
-        prompt: createCodexPrompt(input),
-        slackBotToken: input.integration.botToken,
-        slackUserToken: input.integration.userToken,
+        prompt: promptBundle.rendered,
+        toolBundle,
       })
 
       trace.events.push({
@@ -83,23 +92,31 @@ function requireSlackChannelId(channelId: string | undefined) {
   return channelId
 }
 
-function createInitialTrace(input: {
-  execution: { _id: string; tenantId: string; createdAt: number }
-  message: {
-    _id: string
-    providerId: string
-    actorId?: string
-    containerId?: string
-    threadId?: string
-    text?: string
-  }
-  integration: { _id: string; accountId: string }
-}) {
+function createInitialTrace(
+  input: {
+    execution: { _id: string; tenantId: string; createdAt: number }
+    message: {
+      _id: string
+      providerId: string
+      actorId?: string
+      containerId?: string
+      threadId?: string
+      text?: string
+    }
+    integration: { _id: string; accountId: string }
+  },
+  promptBundle: PromptBundle,
+  toolBundle: ToolBundle
+) {
   return {
     version: 1,
     runtime: {
       type: "codex-e2b",
       sandbox: "e2b",
+    },
+    assembly: {
+      prompt: promptBundle,
+      tools: summarizeToolBundle(toolBundle),
     },
     execution: {
       id: input.execution._id,
