@@ -4,18 +4,12 @@ Milo's platform is the companyOS domain model.
 
 ## Responsibility
 
-Owns the top-level domain boundaries. Each child domain owns its own subdomains.
+Owns the top-level domain groups. Each group owns its child domains.
 
 ## Owns
 
 - [Company](./company/README.md)
-- [Work](./work/README.md)
-- [Sensing](./sensing/README.md)
-- [Memory](./memory/README.md)
-- [Integrations](./integrations/README.md)
-- [Triggers](./triggers/README.md)
-- [Agents](./agents/README.md)
-- [Execution](./execution/README.md)
-- [Control](./control/README.md)
-- [Dreaming](./dreaming/README.md)
+- [Context](./context/README.md)
+- [Operations](./operations/README.md)
+- [Agency](./agency/README.md)
 - [Experience](./experience/README.md)

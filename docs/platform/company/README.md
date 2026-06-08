@@ -2,17 +2,13 @@
 
 ## Responsibility
 
-Owns identity, membership, organizational boundaries, and permission assignment.
+Owns the operating boundary: identity, membership, governance, and access.
 
 ## Owns
 
-- Organizations: the top-level customer or company boundary.
-- Workspaces: bounded operating spaces inside an organization.
-- Teams: groups of people with shared work, context, and permissions.
-- People: human members, guests, and external collaborators.
-- Roles: named responsibility and access patterns.
-- Permissions: what people and agents can see, do, delegate, and approve.
+- [Identity](./identity/README.md)
+- [Governance](./governance/README.md)
 
 ## Boundary
 
-Work items belong to [Work](../work/README.md). Policy enforcement belongs to [Control](../control/README.md).
+Company work belongs to [Operations](../operations/README.md). Human-facing surfaces belong to [Experience](../experience/README.md).
