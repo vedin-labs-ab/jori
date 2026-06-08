@@ -166,8 +166,8 @@ async function verifySlackTokens(
 ) {
   const result = await runCommand(sandbox, createSlackTokenPreflightCommand(), {
     envs: {
-      MILO_SLACK_BOT_TOKEN: preflight.botToken,
-      MILO_SLACK_USER_TOKEN: preflight.userToken,
+      MILO_SLACK_BOT_TOKEN: preflight.credentials.botToken,
+      MILO_SLACK_USER_TOKEN: preflight.credentials.userToken,
     },
     timeoutMs: 30_000,
   })

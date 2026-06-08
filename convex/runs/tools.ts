@@ -1,4 +1,8 @@
 import { type Doc } from "../_generated/dataModel"
+import {
+  requireSlackCredentials,
+  type SlackCredentials,
+} from "../providers/slack/credentials"
 import { createSlackProxyScript } from "./proxy"
 
 export type ToolBundle = {
@@ -21,19 +25,24 @@ export type SandboxFile = {
 
 export type ToolPreflight = {
   type: "slack"
-  botToken: string
-  userToken: string
+  credentials: SlackCredentials
+}
+
+export type RuntimeTarget = {
+  provider: "slack"
+  locationId: string
 }
 
 export function assembleToolsForRun(args: {
-  allowedChannelId: string
   integration: Doc<"integrations">
+  target: RuntimeTarget
 }): ToolBundle {
-  if (args.integration.provider === "slack") {
+  if (args.target.provider === "slack") {
+    const credentials = requireSlackCredentials(args.integration)
+
     return createSlackToolBundle({
-      allowedChannelId: args.allowedChannelId,
-      botToken: args.integration.botToken,
-      userToken: args.integration.userToken,
+      credentials,
+      locationId: args.target.locationId,
     })
   }
 
@@ -58,9 +67,8 @@ export function summarizeToolBundle(bundle: ToolBundle) {
 }
 
 function createSlackToolBundle(args: {
-  allowedChannelId: string
-  botToken: string
-  userToken: string
+  credentials: SlackCredentials
+  locationId: string
 }): ToolBundle {
   return {
     mcpServers: [
@@ -69,9 +77,9 @@ function createSlackToolBundle(args: {
         command: "node",
         args: ["/tmp/milo-workspace/milo-slack-mcp-proxy.mjs"],
         env: {
-          MILO_SLACK_ALLOWED_CHANNEL_ID: args.allowedChannelId,
-          MILO_SLACK_BOT_TOKEN: args.botToken,
-          MILO_SLACK_USER_TOKEN: args.userToken,
+          MILO_SLACK_ALLOWED_CHANNEL_ID: args.locationId,
+          MILO_SLACK_BOT_TOKEN: args.credentials.botToken,
+          MILO_SLACK_USER_TOKEN: args.credentials.userToken,
         },
       },
     ],
@@ -84,8 +92,7 @@ function createSlackToolBundle(args: {
     preflights: [
       {
         type: "slack",
-        botToken: args.botToken,
-        userToken: args.userToken,
+        credentials: args.credentials,
       },
     ],
   }

@@ -52,10 +52,11 @@ function createSlackRuntimePart(input: CodexRuntimeInput): PromptPart {
     id: "runtime/slack-message",
     type: "runtime",
     content: renderTemplate(promptTemplates["runtime/slack-message"], {
-      message: {
-        channelId: input.message.containerId ?? "",
-        threadId: input.message.threadId ?? input.message.providerId,
-        text: input.message.text ?? "",
+      sourceItem: {
+        locationId: input.sourceItem.locationId ?? "",
+        conversationId:
+          input.sourceItem.conversationId ?? input.sourceItem.externalId,
+        content: input.sourceItem.content ?? "",
       },
     }),
   }

@@ -7,6 +7,7 @@ import { runCodexInE2B } from "./e2b"
 import { assemblePrompt, type PromptBundle } from "./prompt"
 import {
   assembleToolsForRun,
+  type RuntimeTarget,
   summarizeToolBundle,
   type ToolBundle,
 } from "./tools"
@@ -14,7 +15,7 @@ import {
 export const runSlackExecution = internalAction({
   args: {
     executionId: v.id("executions"),
-    messageId: v.id("messages"),
+    sourceItemId: v.id("sourceItems"),
   },
   handler: async (ctx, args) => {
     const input = await ctx.runQuery(internal.runs.executions.getInput, args)
@@ -23,11 +24,11 @@ export const runSlackExecution = internalAction({
       return
     }
 
-    const allowedChannelId = requireSlackChannelId(input.message.containerId)
+    const target = requireSlackTarget(input.sourceItem)
     const promptBundle = assemblePrompt(input)
     const toolBundle = assembleToolsForRun({
-      allowedChannelId,
       integration: input.integration,
+      target,
     })
     const trace = createInitialTrace(input, promptBundle, toolBundle)
     let status: "completed" | "failed" = "completed"
@@ -84,26 +85,32 @@ function requireCodexAuthJsonBase64() {
   return authJson
 }
 
-function requireSlackChannelId(channelId: string | undefined) {
-  if (channelId === undefined || channelId === "") {
+function requireSlackTarget(sourceItem: {
+  locationId?: string
+}): RuntimeTarget {
+  if (sourceItem.locationId === undefined || sourceItem.locationId === "") {
     throw new Error("Missing Slack channel target")
   }
 
-  return channelId
+  return {
+    provider: "slack",
+    locationId: sourceItem.locationId,
+  }
 }
 
 function createInitialTrace(
   input: {
     execution: { _id: string; tenantId: string; createdAt: number }
-    message: {
+    sourceItem: {
       _id: string
-      providerId: string
-      actorId?: string
-      containerId?: string
-      threadId?: string
-      text?: string
+      kind: string
+      externalId: string
+      authorId?: string
+      locationId?: string
+      conversationId?: string
+      content?: string
     }
-    integration: { _id: string; accountId: string }
+    integration: { _id: string; provider: string; externalAccountId: string }
   },
   promptBundle: PromptBundle,
   toolBundle: ToolBundle
@@ -125,16 +132,17 @@ function createInitialTrace(
     },
     integration: {
       id: input.integration._id,
-      provider: "slack",
-      accountId: input.integration.accountId,
+      provider: input.integration.provider,
+      externalAccountId: input.integration.externalAccountId,
     },
-    message: {
-      id: input.message._id,
-      providerId: input.message.providerId,
-      actorId: input.message.actorId,
-      containerId: input.message.containerId,
-      threadId: input.message.threadId,
-      text: input.message.text,
+    sourceItem: {
+      id: input.sourceItem._id,
+      kind: input.sourceItem.kind,
+      externalId: input.sourceItem.externalId,
+      authorId: input.sourceItem.authorId,
+      locationId: input.sourceItem.locationId,
+      conversationId: input.sourceItem.conversationId,
+      content: input.sourceItem.content,
     },
     events: [
       {

@@ -2,28 +2,26 @@
 
 ## Responsibility
 
-Stores connected Slack installations.
+Stores connected external system accounts.
 
 ## Includes
 
-- Slack workspace identity.
-- Slack bot token for posting replies as Milo.
-- Slack user token for reading/searching Slack context with the installing user's permissions.
+- External account identity.
+- Provider-specific credentials needed to read context and send responses.
 - Connection status.
 
 ## Boundary
 
-Slack events become [Messages](./messages.md). Milo work belongs to [Executions](../runs/executions.md).
+External events become [Source Items](./source-items.md). Milo work belongs to [Executions](../runs/executions.md).
 
 ## Draft Schema
 
 ```ts
 integrations: defineTable({
   tenantId: v.string(),
-  provider: v.literal("slack"),
-  accountId: v.string(),
-  botToken: v.string(),
-  userToken: v.string(),
+  provider: v.string(),
+  externalAccountId: v.string(),
+  credentials: v.any(),
   status: v.union(v.literal("active"), v.literal("paused"), v.literal("revoked")),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),

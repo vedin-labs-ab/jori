@@ -4,23 +4,23 @@ import { internalMutation, internalQuery } from "../_generated/server"
 export const getInput = internalQuery({
   args: {
     executionId: v.id("executions"),
-    messageId: v.id("messages"),
+    sourceItemId: v.id("sourceItems"),
   },
   handler: async (ctx, args) => {
     const execution = await ctx.db.get(args.executionId)
-    const message = await ctx.db.get(args.messageId)
+    const sourceItem = await ctx.db.get(args.sourceItemId)
 
-    if (execution === null || message === null) {
+    if (execution === null || sourceItem === null) {
       return null
     }
 
-    const integration = await ctx.db.get(message.integrationId)
+    const integration = await ctx.db.get(sourceItem.integrationId)
 
     if (integration === null) {
       return null
     }
 
-    return { execution, message, integration }
+    return { execution, sourceItem, integration }
   },
 })
 
