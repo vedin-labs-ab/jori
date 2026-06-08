@@ -14,3 +14,16 @@ Owns records produced around a run: what triggered it, what the agent did, what 
 ## Boundary
 
 Source material belongs to [Sources](../context/sources.md). Durable interpretation belongs to [Memory](../context/memory.md).
+
+## Draft Schema
+
+```ts
+traces: defineTable({
+  organizationId: v.id("organizations"),
+  runId: v.optional(v.id("runs")),
+  sourceId: v.optional(v.id("sources")),
+  kind: v.string(),
+  summary: v.string(),
+  createdAt: v.number(),
+})
+```

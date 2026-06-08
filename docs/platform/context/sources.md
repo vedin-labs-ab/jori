@@ -14,3 +14,15 @@ Owns raw company inputs before Milo turns them into traces, memory, attention, o
 ## Boundary
 
 Evidence and activity records belong to [Traces](../runs/traces.md). Durable interpretation belongs to [Memory](./memory.md).
+
+## Draft Schema
+
+```ts
+sources: defineTable({
+  organizationId: v.id("organizations"),
+  integrationId: v.optional(v.id("integrations")),
+  kind: v.string(),
+  externalId: v.optional(v.string()),
+  observedAt: v.number(),
+})
+```

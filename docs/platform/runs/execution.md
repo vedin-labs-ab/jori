@@ -13,4 +13,17 @@ Owns what happens during a run: planning, model calls, tool calls, sandbox activ
 
 ## Boundary
 
-Agent capabilities belong to [Agents](../agents/index.md). Review points belong to [Attention](../attention/index.md). Permissions belong to [Identity](../identity/index.md).
+Agent capabilities belong to [Agents](../agents/agents.md). Review points belong to [Reviews](../attention/reviews.md). Permissions belong to [Permissions](../identity/permissions.md).
+
+## Draft Schema
+
+```ts
+executions: defineTable({
+  organizationId: v.id("organizations"),
+  agentId: v.id("agents"),
+  activationId: v.optional(v.id("activations")),
+  status: v.union(v.literal("queued"), v.literal("running"), v.literal("blocked"), v.literal("completed"), v.literal("failed")),
+  createdAt: v.number(),
+  completedAt: v.optional(v.number()),
+})
+```

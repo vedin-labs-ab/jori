@@ -13,4 +13,16 @@ Owns events that ask Milo to pay attention, become active, resume attention, or 
 
 ## Boundary
 
-Observed activity belongs to [Context](../context/index.md). Durable attention state belongs to [Activations](./activations.md). Execution attempts belong to [Runs](../runs/index.md).
+Observed activity belongs to [Sources](../context/sources.md). Durable attention state belongs to [Activations](./activations.md). Execution attempts belong to [Execution](../runs/execution.md).
+
+## Draft Schema
+
+```ts
+triggers: defineTable({
+  organizationId: v.id("organizations"),
+  sourceId: v.optional(v.id("sources")),
+  kind: v.union(v.literal("manual"), v.literal("scheduled"), v.literal("signal"), v.literal("state")),
+  payload: v.any(),
+  createdAt: v.number(),
+})
+```

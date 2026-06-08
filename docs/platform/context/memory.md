@@ -14,4 +14,17 @@ Owns durable company understanding that agents and people can rely on.
 
 ## Boundary
 
-Evidence belongs to [Traces](../runs/traces.md). Execution attempts belong to [Runs](../runs/index.md). Agent-specific improvements belong to [Dreaming](../dreaming/index.md).
+Evidence belongs to [Traces](../runs/traces.md). Execution attempts belong to [Execution](../runs/execution.md). Agent-specific improvements belong to [Dreams](../dreaming/dreaming.md).
+
+## Draft Schema
+
+```ts
+memories: defineTable({
+  organizationId: v.id("organizations"),
+  kind: v.union(v.literal("fact"), v.literal("assumption"), v.literal("preference"), v.literal("history")),
+  text: v.string(),
+  confidence: v.optional(v.number()),
+  validUntil: v.optional(v.number()),
+  updatedAt: v.number(),
+})
+```

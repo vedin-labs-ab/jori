@@ -14,4 +14,17 @@ Owns connected systems and the capabilities Milo can safely use through them.
 
 ## Boundary
 
-Tool availability belongs here. Intentional tool use belongs to [Agents](../agents/index.md). Tool calls inside an execution attempt belong to [Runs](../runs/index.md).
+Tool availability belongs here. Intentional tool use belongs to [Agents](../agents/agents.md). Tool calls inside an execution attempt belong to [Execution](../runs/execution.md).
+
+## Draft Schema
+
+```ts
+integrations: defineTable({
+  organizationId: v.id("organizations"),
+  provider: v.string(),
+  accountId: v.optional(v.string()),
+  scopes: v.array(v.string()),
+  status: v.union(v.literal("active"), v.literal("paused"), v.literal("revoked")),
+  createdAt: v.number(),
+})
+```
