@@ -2,16 +2,17 @@
 
 ## Responsibility
 
-Stores the Convex file pointer for a full execution trace.
+Stores the Convex file pointer for raw runtime trace output.
 
 ## Includes
 
-- One trace file per execution trace snapshot.
-- Model calls, tool calls, E2B events, Slack replies, errors, and final result details inside the file.
+- One trace file per execution.
+- Raw harness command stdout, stderr, exit codes, and command errors.
+- Raw Codex agent JSONL, including reasoning events.
 
 ## Boundary
 
-Execution lifecycle state belongs to [Executions](./executions.md). Trace content lives in Convex storage.
+Execution lifecycle state, sandbox identity, prompt assembly, tool assembly, Slack identifiers, and derived final-message details belong outside the stored trace file. Trace content lives in Convex storage.
 
 ## Draft Schema
 

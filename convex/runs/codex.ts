@@ -7,12 +7,6 @@ export type CodexRuntimeInput = {
   message: Doc<"messages">
 }
 
-export type CodexRuntimeResult = {
-  prompt: string
-  jsonl: string
-  finalMessage?: string
-}
-
 export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {
   return [
     'cli_auth_credentials_store = "file"',
@@ -48,49 +42,4 @@ function tomlString(value: string) {
 
 function tomlArray(values: string[]) {
   return `[${values.map(tomlString).join(", ")}]`
-}
-
-export function parseFinalCodexMessage(jsonl: string) {
-  let finalMessage: string | undefined
-
-  for (const line of jsonl.split("\n")) {
-    const event = parseJsonLine(line)
-
-    if (isAgentMessageEvent(event)) {
-      finalMessage = event.item.text
-    }
-  }
-
-  return finalMessage
-}
-
-function parseJsonLine(line: string) {
-  if (line.trim() === "") {
-    return null
-  }
-
-  try {
-    return JSON.parse(line) as unknown
-  } catch {
-    return null
-  }
-}
-
-function isAgentMessageEvent(
-  event: unknown
-): event is { item: { type: "agent_message"; text: string } } {
-  if (typeof event !== "object" || event === null || !("item" in event)) {
-    return false
-  }
-
-  const item = event.item
-
-  return (
-    typeof item === "object" &&
-    item !== null &&
-    "type" in item &&
-    item.type === "agent_message" &&
-    "text" in item &&
-    typeof item.text === "string"
-  )
 }
