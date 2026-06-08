@@ -2,19 +2,16 @@
 
 ## Responsibility
 
-Owns append-only records produced around an execution: what triggered it, what the agent did, what tools changed, and why Milo reached an outcome.
+Stores the Convex file pointer for a full execution trace.
 
 ## Includes
 
-- Attention decisions from triggers and activations.
-- Model calls, tool calls, Daytona lifecycle notes, and external writes.
-- Policy and autonomy decisions made during the execution.
-- Replies sent back to the source conversation.
-- Errors, stops, confirmation requests, and completion summaries.
+- One trace file per execution trace snapshot.
+- Model calls, tool calls, Daytona events, Slack replies, errors, and final result details inside the file.
 
 ## Boundary
 
-Message material belongs to [Messages](../context/messages.md). Execution lifecycle state belongs to [Execution](./execution.md).
+Execution lifecycle state belongs to [Executions](./execution.md). Trace content lives in Convex storage.
 
 ## Draft Schema
 

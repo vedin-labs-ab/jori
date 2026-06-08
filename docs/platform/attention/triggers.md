@@ -2,17 +2,17 @@
 
 ## Responsibility
 
-Owns events that ask Milo to pay attention, become active, or start an execution.
+Stores the reason Milo may start work.
 
 ## Includes
 
-- Manual triggers from explicit user commands or mentions.
-- Scheduled triggers from time-based routines.
-- Message triggers from provider messages and events.
+- `message`: a Slack message asks Milo to work.
+- `manual`: a user starts Milo from Milo-owned UI or an admin action.
+- `scheduled`: a future scheduled job starts Milo.
 
 ## Boundary
 
-Observed activity belongs to [Messages](../context/messages.md). Durable attention state belongs to [Activations](./activations.md). Execution attempts belong to [Execution](../runs/execution.md).
+Message content belongs to [Messages](../context/messages.md). Durable listening state belongs to [Activations](./activations.md). Runs belong to [Executions](../runs/execution.md).
 
 ## Draft Schema
 

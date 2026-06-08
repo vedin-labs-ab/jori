@@ -2,26 +2,26 @@
 
 ## Responsibility
 
-Owns connected external systems Milo can receive events from and act through.
+Stores connected Slack installations.
 
 ## Includes
 
-- Provider installation identity, such as a Slack workspace or Microsoft Teams tenant.
-- Tenant identity from Clerk or WorkOS.
-- Authorization state.
-- Enough provider metadata to receive events and post replies.
+- Slack workspace identity.
+- Credential pointer for posting replies.
+- Connection status.
 
 ## Boundary
 
-Concrete work and replies belong to [Execution](../runs/execution.md). Observed provider events belong to [Messages](./messages.md).
+Slack events become [Messages](./messages.md). Milo work belongs to [Executions](../runs/execution.md).
 
 ## Draft Schema
 
 ```ts
 integrations: defineTable({
   tenantId: v.string(),
-  provider: v.string(),
+  provider: v.literal("slack"),
   accountId: v.string(),
+  tokenId: v.string(),
   status: v.union(v.literal("active"), v.literal("paused"), v.literal("revoked")),
   createdById: v.optional(v.string()),
   createdAt: v.number(),

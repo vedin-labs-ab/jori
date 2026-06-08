@@ -2,18 +2,17 @@
 
 ## Responsibility
 
-Owns provider messages and events before Milo turns them into triggers, activations, executions, or traces.
+Stores observed Slack messages and events.
 
 ## Includes
 
-- Messages, comments, mentions, and provider events.
-- Direct provider identifiers for messages, threads, comments, issues, or other provider objects.
-- Actor identifiers from the provider event payload.
-- Raw payloads when needed for debugging or idempotency.
+- Slack identifiers for dedupe and reply routing.
+- The Slack actor, channel, thread, text, and event time.
+- Raw Slack details only when needed.
 
 ## Boundary
 
-Messages are observed inputs. Decisions, model calls, tool calls, replies, and outcomes belong to [Traces](../runs/traces.md).
+Messages are inputs. Decisions, tool calls, replies, and outcomes belong to [Traces](../runs/traces.md).
 
 ## Draft Schema
 
