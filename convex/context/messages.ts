@@ -4,6 +4,7 @@ import {
   findThreadActivation,
   startMessageExecution,
 } from "../attention/activations"
+import { getSlackBotUserId } from "../providers/slack/data"
 import { isMiloRelevantMessage } from "../providers/slack/gate"
 
 export const recordSlackEvent = internalMutation({
@@ -90,18 +91,5 @@ function isIntegrationBotMessage(actorId: string | undefined, data: unknown) {
     return false
   }
 
-  return actorId === getBotUserId(data)
-}
-
-function getBotUserId(data: unknown) {
-  if (
-    typeof data === "object" &&
-    data !== null &&
-    "botUserId" in data &&
-    typeof data.botUserId === "string"
-  ) {
-    return data.botUserId
-  }
-
-  return undefined
+  return actorId === getSlackBotUserId(data)
 }

@@ -1,22 +1,13 @@
+import { slackBotScopes, slackUserScopes } from "../providers/slack/config"
+
 export function createSlackTokenPreflightCommand() {
   return slackTokenPreflightCommand
 }
 
 const slackTokenPreflightCommand = [
   "node <<'NODE'",
-  "const requiredBotScopes = ['chat:write'];",
-  "const requiredUserScopes = [",
-  "  'channels:history',",
-  "  'channels:read',",
-  "  'groups:history',",
-  "  'groups:read',",
-  "  'im:history',",
-  "  'im:read',",
-  "  'mpim:history',",
-  "  'mpim:read',",
-  "  'search:read',",
-  "  'users:read',",
-  "];",
+  `const requiredBotScopes = ${JSON.stringify(slackBotScopes)};`,
+  `const requiredUserScopes = ${JSON.stringify(slackUserScopes)};`,
   "",
   "async function main() {",
   "  await verifyToken('bot', process.env.MILO_SLACK_BOT_TOKEN, requiredBotScopes);",

@@ -2,6 +2,13 @@ import { httpRouter } from "convex/server"
 import { internal } from "./_generated/api"
 import { httpAction } from "./_generated/server"
 import {
+  slackBotScopes,
+  slackOAuthAccessUrl,
+  slackOAuthAuthorizeUrl,
+  slackOAuthCallbackPath,
+  slackUserScopes,
+} from "./providers/slack/config"
+import {
   getSlackMessage,
   type SlackEventPayload,
 } from "./providers/slack/events"
@@ -56,31 +63,14 @@ http.route({
       return new Response("Missing state", { status: 400 })
     }
 
-    const slackUrl = new URL("https://slack.com/oauth/v2/authorize")
+    const slackUrl = new URL(slackOAuthAuthorizeUrl)
     slackUrl.searchParams.set("client_id", slackClientId)
-    slackUrl.searchParams.set(
-      "scope",
-      ["app_mentions:read", "chat:write"].join(",")
-    )
-    slackUrl.searchParams.set(
-      "user_scope",
-      [
-        "channels:history",
-        "channels:read",
-        "groups:history",
-        "groups:read",
-        "im:history",
-        "im:read",
-        "mpim:history",
-        "mpim:read",
-        "search:read",
-        "users:read",
-      ].join(",")
-    )
+    slackUrl.searchParams.set("scope", slackBotScopes.join(","))
+    slackUrl.searchParams.set("user_scope", slackUserScopes.join(","))
     slackUrl.searchParams.set("state", state)
     slackUrl.searchParams.set(
       "redirect_uri",
-      `${requestUrl.origin}/slack/oauth/callback`
+      `${requestUrl.origin}${slackOAuthCallbackPath}`
     )
 
     return Response.redirect(slackUrl.toString(), 302)
@@ -118,7 +108,7 @@ http.route({
       return new Response("Missing Slack OAuth configuration", { status: 500 })
     }
 
-    const tokenResponse = await fetch("https://slack.com/api/oauth.v2.access", {
+    const tokenResponse = await fetch(slackOAuthAccessUrl, {
       method: "POST",
       headers: {
         "content-type": "application/x-www-form-urlencoded",
@@ -127,7 +117,7 @@ http.route({
         client_id: slackClientId,
         client_secret: slackClientSecret,
         code,
-        redirect_uri: `${requestUrl.origin}/slack/oauth/callback`,
+        redirect_uri: `${requestUrl.origin}${slackOAuthCallbackPath}`,
       }),
     })
     const tokenResult = (await tokenResponse.json()) as SlackOAuthResponse
@@ -178,17 +168,17 @@ http.route({
     const payload = JSON.parse(body) as SlackEventPayload
 
     if (payload.type === "url_verification") {
-      return jsonResponse({ challenge: payload.challenge ?? "" })
+      return Response.json({ challenge: payload.challenge ?? "" })
     }
 
     if (payload.type !== "event_callback") {
-      return jsonResponse({ ok: true })
+      return Response.json({ ok: true })
     }
 
     const message = getSlackMessage(payload)
 
     if (message === null) {
-      return jsonResponse({ ok: true })
+      return Response.json({ ok: true })
     }
 
     const result = await ctx.runMutation(
@@ -213,7 +203,7 @@ http.route({
       })
     }
 
-    return jsonResponse({ ok: true })
+    return Response.json({ ok: true })
   }),
 })
 
@@ -238,15 +228,6 @@ type SlackOAuthResponse =
       ok: false
       error?: string
     }
-
-function jsonResponse(value: unknown) {
-  return new Response(JSON.stringify(value), {
-    status: 200,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-    },
-  })
-}
 
 function getSlackBotToken(tokenResult: { access_token?: string }) {
   const token = tokenResult.access_token
