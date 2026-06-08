@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Owns events that ask Milo to pay attention, become active, route a review, or start an execution.
+Owns events that ask Milo to pay attention, become active, or start an execution.
 
 ## Includes
 
@@ -19,10 +19,9 @@ Observed activity belongs to [Sources](../context/sources.md). Durable attention
 
 ```ts
 triggers: defineTable({
-  externalTenantId: v.string(),
+  tenantId: v.string(),
   sourceId: v.optional(v.id("sources")),
-  kind: v.union(v.literal("manual"), v.literal("scheduled"), v.literal("signal"), v.literal("state")),
-  payload: v.any(),
-  createdAt: v.number(),
+  type: v.union(v.literal("manual"), v.literal("scheduled"), v.literal("signal"), v.literal("state")),
+  data: v.optional(v.any()),
 })
 ```
