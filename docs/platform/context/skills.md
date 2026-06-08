@@ -2,7 +2,8 @@
 
 ## Responsibility
 
-Stores durable instructions that shape Milo's runtime behavior.
+Stores durable, task-specific instructions that shape Milo's runtime behavior.
+Milo's default persona belongs to the system prompt, not the skill catalog.
 
 ## Includes
 
@@ -14,7 +15,9 @@ Stores durable instructions that shape Milo's runtime behavior.
 
 Global skills are synced from checked-in `skills/*/SKILL.md` files and are immutable through tenant-facing APIs. Tenant skills can be created, edited, and deleted only by users whose active Clerk organization matches the skill tenant.
 
-Runtime prompt assembly loads the global skills plus the triggering tenant's skills from Convex before starting Codex.
+Runtime prompt assembly loads the system prompt from checked-in prompt
+templates, then loads global skills plus the triggering tenant's skills from
+Convex before starting Codex.
 
 ## Draft Schema
 

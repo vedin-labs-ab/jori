@@ -9,7 +9,7 @@ export type PromptBundle = {
 
 type PromptPart = {
   id: string
-  type: "skill" | "runtime"
+  type: "system" | "skill" | "runtime"
   content: string
 }
 
@@ -26,6 +26,7 @@ export function assemblePrompt(
   availableSkills: RuntimeSkill[]
 ): PromptBundle {
   const parts = [
+    createSystemPart(),
     ...availableSkills.map((skill) => createSkillPart(skill)),
     createSlackRuntimePart(input),
   ]
@@ -34,6 +35,14 @@ export function assemblePrompt(
     rendered: parts.map((part) => part.content).join("\n\n"),
     parts,
     skillIds: availableSkills.map((skill) => skill.name),
+  }
+}
+
+function createSystemPart(): PromptPart {
+  return {
+    id: "system/milo",
+    type: "system",
+    content: promptTemplates["system/milo"],
   }
 }
 
@@ -47,9 +56,9 @@ function createSkillPart(skill: RuntimeSkill): PromptPart {
 
 function createSlackRuntimePart(input: CodexRuntimeInput): PromptPart {
   return {
-    id: "runtime/slack-message",
+    id: "communication/slack",
     type: "runtime",
-    content: renderTemplate(promptTemplates["runtime/slack-message"], {
+    content: renderTemplate(promptTemplates["communication/slack"], {
       sourceItem: {
         locationId: input.sourceItem.locationId ?? "",
         conversationId:

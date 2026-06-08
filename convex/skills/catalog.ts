@@ -14,6 +14,12 @@ const skillNameMaxLength = 64
 const skillDescriptionMaxLength = 320
 const skillBodyMaxLength = 24_000
 
+type SeedSkill = {
+  name: string
+  description: string
+  body: string
+}
+
 export const list = query({
   args: {
     tenantId: v.string(),
@@ -153,7 +159,7 @@ export const syncGlobalSkills = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now()
-    const seedSkills = Object.values(globalSkillSeed)
+    const seedSkills = Object.values(globalSkillSeed) as SeedSkill[]
     const seedNames = new Set<string>(seedSkills.map((skill) => skill.name))
     const existingGlobalSkills = await ctx.db
       .query("skills")
