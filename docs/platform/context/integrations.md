@@ -7,6 +7,8 @@ Owns connected systems and the capabilities Milo can safely use through them.
 ## Includes
 
 - Tools and products linked to Milo.
+- Core onboarding integrations such as Slack, Teams, Jira, Linear, GitHub, and similar company tools.
+- Collaboration-tool availability configured for all channels or specific channels during onboarding.
 - Authorized accounts and installation contexts.
 - Scopes that bound external access.
 - Capabilities such as read, search, create, update, comment, or execute.

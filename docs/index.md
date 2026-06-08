@@ -12,3 +12,4 @@ Source documents for Milo's system design.
 - Each document should own one layer of information.
 - Root documents should link to owning documents instead of restating their content.
 - Add implementation details only where they are owned.
+- Draft schemas are provisional sketches for discussing product shape, not final data contracts.

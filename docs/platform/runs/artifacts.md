@@ -2,7 +2,16 @@
 
 ## Responsibility
 
-Owns outputs produced by runs, such as summaries, files, code changes, plans, reports, comments, or proposed updates.
+Owns durable outputs produced by runs that should remain available as historical records.
+
+## Includes
+
+- Durable outputs Milo decides are useful to preserve beyond the source conversation.
+- Historical snapshots that should be accurate for when they were produced, even if they become stale later.
+- References to generated files, reports, proposed changes, plans, and other work products.
+- Conversation replies when they are important enough to preserve as run outputs.
+- Before, after, and delta attachments for dreaming proposals.
+- Raw or detailed onboarding research outputs, such as gathered organization website data.
 
 ## Draft Schema
 

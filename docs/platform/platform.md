@@ -10,6 +10,10 @@ Defines the domains that let people bring Milo into company activity, delegate w
 
 A person, system, schedule, or signal asks Milo to pay attention. Attention can create an activation, route a review, or start a run. An agent plans and acts with tools, models, integrations, and sandboxes. The run produces artifacts and traces. Context and memory update from those traces. Dreaming studies company activity and prior runs to improve skills and future delegation.
 
+## Onboarding Baseline
+
+Milo should be useful with a simple setup: connect collaboration and work tools, identify users, understand roles, choose where Milo is available, and optionally provide the organization website so Milo can gather initial company context. Company memory, organization-wide skills, and deeper customization can accumulate after the organization starts using Milo.
+
 ## Models
 
 Identity:
@@ -27,7 +31,6 @@ Context:
 Agents:
 
 - [Agents](./agents/agents.md)
-- [Profiles](./agents/profiles.md)
 - [Skills](./agents/skills.md)
 - [Tools](./agents/tools.md)
 

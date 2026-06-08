@@ -4,6 +4,11 @@
 
 Owns the human actors Milo can identify, notify, assign work to, ask for review, or represent in traces.
 
+## Includes
+
+- Users discovered or invited during organization onboarding.
+- User identity mapped from connected tools such as Slack, Teams, Jira, Linear, or GitHub.
+
 ## Draft Schema
 
 ```ts
