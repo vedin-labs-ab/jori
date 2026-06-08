@@ -6,13 +6,26 @@ import {
   Sandbox,
   type Username,
 } from "e2b"
-import { createCodexConfig, parseFinalCodexMessage } from "./codex"
+import { createCodexConfig } from "./codex"
+import {
+  codexHome,
+  createBootstrapCommand,
+  createCodexCommand,
+  createInstallCommand,
+  workspace,
+} from "./harness"
 import { createSlackTokenPreflightCommand } from "./slack"
 import { type ToolBundle, type ToolPreflight } from "./tools"
+import {
+  assertCommandSucceeded,
+  assertCommandsSucceeded,
+  CodexRunError,
+  createCommandTrace,
+  formatError,
+  type StoredCommandTrace,
+  type StoredRuntimeTrace,
+} from "./trace"
 
-const codexHome = "/tmp/milo-codex-home"
-const workspace = "/tmp/milo-workspace"
-const commandOutputLimit = 2_000
 const sandboxTimeoutMs = 5 * 60 * 1_000
 
 export type E2BCodexRunArgs = {
@@ -23,35 +36,61 @@ export type E2BCodexRunArgs = {
 }
 
 export type E2BCodexRunResult = {
-  sandboxId: string
-  exitCode: number
-  jsonl: string
-  finalMessage?: string
+  trace: StoredRuntimeTrace
 }
 
 type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
 
 export async function runCodexInE2B(args: E2BCodexRunArgs) {
-  const sandbox = await createE2BSandbox()
+  const trace: StoredRuntimeTrace = { harness: {} }
+  let sandbox: E2BSandbox | undefined
 
   try {
+    sandbox = await createE2BSandbox()
     await args.onSandboxCreated(sandbox.sandboxId)
-    await installCodex(sandbox)
-    await bootstrapCodex(sandbox, {
+    trace.harness.install = await installCodex(sandbox)
+    assertCommandSucceeded(
+      trace.harness.install,
+      "Could not install Codex inside E2B.",
+      trace
+    )
+    trace.harness.bootstrap = await bootstrapCodex(sandbox, {
       authJsonBase64: args.authJsonBase64,
       toolBundle: args.toolBundle,
     })
-    await verifyPreflights(sandbox, args.toolBundle.preflights)
-    const jsonl = await executeCodex(sandbox, args)
+    assertCommandSucceeded(
+      trace.harness.bootstrap,
+      "Could not bootstrap Codex inside E2B.",
+      trace
+    )
+    trace.harness.preflights = await verifyPreflights(
+      sandbox,
+      args.toolBundle.preflights
+    )
+    assertCommandsSucceeded(
+      trace.harness.preflights,
+      "A preflight failed inside the E2B sandbox.",
+      trace
+    )
+    const agentTrace = await executeCodex(sandbox, args)
+    trace.harness.agent = agentTrace
+    assertCommandSucceeded(
+      agentTrace,
+      `Codex exited with code ${agentTrace.exitCode}.`,
+      trace
+    )
+    trace.agent = { jsonl: agentTrace.stdout }
 
-    return {
-      sandboxId: sandbox.sandboxId,
-      exitCode: 0,
-      jsonl,
-      finalMessage: parseFinalCodexMessage(jsonl),
+    return { trace }
+  } catch (error) {
+    if (error instanceof CodexRunError) {
+      throw error
     }
+
+    trace.harness.runtime = { error: formatError(error) }
+    throw new CodexRunError(formatError(error), trace)
   } finally {
-    await sandbox.kill()
+    await sandbox?.kill().catch(() => undefined)
   }
 }
 
@@ -83,15 +122,7 @@ async function installCodex(sandbox: E2BSandbox) {
     user: "root",
   })
 
-  if (result.exitCode !== 0) {
-    throw new Error(
-      [
-        "Could not install Codex inside E2B.",
-        formatCommandOutput("stdout", result.stdout),
-        formatCommandOutput("stderr", result.stderr),
-      ].join(" ")
-    )
-  }
+  return createCommandTrace(result)
 }
 
 async function bootstrapCodex(
@@ -115,15 +146,7 @@ async function bootstrapCodex(
     timeoutMs: 30_000,
   })
 
-  if (result.exitCode !== 0) {
-    throw new Error(
-      [
-        "Could not bootstrap Codex inside E2B.",
-        formatCommandOutput("stdout", result.stdout),
-        formatCommandOutput("stderr", result.stderr),
-      ].join(" ")
-    )
-  }
+  return createCommandTrace(result)
 }
 
 async function executeCodex(sandbox: E2BSandbox, args: E2BCodexRunArgs) {
@@ -136,28 +159,22 @@ async function executeCodex(sandbox: E2BSandbox, args: E2BCodexRunArgs) {
     timeoutMs: 180_000,
   })
 
-  if (result.exitCode !== 0) {
-    throw new Error(
-      [
-        `Codex exited with code ${result.exitCode}.`,
-        formatCommandOutput("stdout", result.stdout),
-        formatCommandOutput("stderr", result.stderr),
-      ].join(" ")
-    )
-  }
-
-  return result.stdout
+  return createCommandTrace(result)
 }
 
 async function verifyPreflights(
   sandbox: E2BSandbox,
   preflights: ToolPreflight[]
 ) {
+  const traces: StoredCommandTrace[] = []
+
   for (const preflight of preflights) {
     if (preflight.type === "slack") {
-      await verifySlackTokens(sandbox, preflight)
+      traces.push(await verifySlackTokens(sandbox, preflight))
     }
   }
+
+  return traces
 }
 
 async function verifySlackTokens(
@@ -172,15 +189,7 @@ async function verifySlackTokens(
     timeoutMs: 30_000,
   })
 
-  if (result.exitCode !== 0) {
-    throw new Error(
-      [
-        "Slack tokens failed preflight inside the E2B sandbox.",
-        formatCommandOutput("stdout", result.stdout),
-        formatCommandOutput("stderr", result.stderr),
-      ].join(" ")
-    )
-  }
+  return createCommandTrace(result)
 }
 
 async function runCommand(
@@ -209,63 +218,6 @@ async function runCommand(
   }
 }
 
-function createInstallCommand() {
-  return [
-    "set -eu",
-    "if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then",
-    "  apt-get update",
-    "  apt-get install -y ca-certificates curl gnupg",
-    "  curl -fsSL https://deb.nodesource.com/setup_22.x | bash -",
-    "  apt-get install -y nodejs",
-    "fi",
-    "if ! command -v git >/dev/null 2>&1; then",
-    "  apt-get update",
-    "  apt-get install -y git",
-    "fi",
-    `mkdir -p "${workspace}"`,
-    "npm install -g @openai/codex@0.137.0 slack-mcp-server@1.3.0",
-    `npm install --prefix "${workspace}" @modelcontextprotocol/sdk@1.29.0`,
-    `chmod 777 "${workspace}"`,
-    "rm -rf /var/lib/apt/lists/*",
-  ].join("\n")
-}
-
-function createBootstrapCommand() {
-  return [
-    "set -eu",
-    `mkdir -p "${codexHome}" "${workspace}"`,
-    'printf "%s" "$CODEX_AUTH_JSON_BASE64" | base64 -d > "$CODEX_HOME/auth.json"',
-    'printf "%s" "$CODEX_CONFIG_TOML" > "$CODEX_HOME/config.toml"',
-    'printf "%s" "$MILO_SANDBOX_FILES_BASE64" | base64 -d > /tmp/milo-sandbox-files.json',
-    "node <<'NODE'",
-    "const fs = require('fs');",
-    "const path = require('path');",
-    "const files = JSON.parse(fs.readFileSync('/tmp/milo-sandbox-files.json', 'utf8'));",
-    "for (const file of files) {",
-    "  fs.mkdirSync(path.dirname(file.path), { recursive: true });",
-    "  fs.writeFileSync(file.path, file.content);",
-    "}",
-    "NODE",
-    'chmod 600 "$CODEX_HOME/auth.json"',
-  ].join("\n")
-}
-
-function createCodexCommand() {
-  return [
-    "set -eu",
-    'printf "%s" "$MILO_CODEX_PROMPT_BASE64" | base64 -d > /tmp/milo-prompt.md',
-    "codex exec --json --ephemeral --skip-git-repo-check --sandbox read-only - < /tmp/milo-prompt.md",
-  ].join("\n")
-}
-
 function encodeBase64(value: string) {
   return Buffer.from(value, "utf8").toString("base64")
-}
-
-function formatCommandOutput(label: string, value: string | undefined) {
-  if (value === undefined || value === "") {
-    return `${label}: <empty>`
-  }
-
-  return `${label}: ${value.slice(0, commandOutputLimit)}`
 }

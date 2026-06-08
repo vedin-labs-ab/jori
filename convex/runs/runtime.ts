@@ -4,12 +4,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalAction } from "../_generated/server"
 import { runCodexInE2B } from "./e2b"
-import { assemblePrompt, type PromptBundle } from "./prompt"
-import {
-  assembleToolsForRun,
-  summarizeToolBundle,
-  type ToolBundle,
-} from "./tools"
+import { assemblePrompt } from "./prompt"
+import { assembleToolsForRun } from "./tools"
+import { CodexRunError, formatError, type StoredRuntimeTrace } from "./trace"
 
 export const runSlackExecution = internalAction({
   args: {
@@ -29,7 +26,7 @@ export const runSlackExecution = internalAction({
       allowedChannelId,
       integration: input.integration,
     })
-    const trace = createInitialTrace(input, promptBundle, toolBundle)
+    let trace: StoredRuntimeTrace = { harness: {} }
     let status: "completed" | "failed" = "completed"
 
     try {
@@ -45,18 +42,13 @@ export const runSlackExecution = internalAction({
         toolBundle,
       })
 
-      trace.events.push({
-        type: "runtime.completed",
-        at: Date.now(),
-        result: runtimeResult,
-      })
+      trace = runtimeResult.trace
     } catch (error) {
       status = "failed"
-      trace.events.push({
-        type: "runtime.failed",
-        at: Date.now(),
-        error: error instanceof Error ? error.message : String(error),
-      })
+      trace =
+        error instanceof CodexRunError
+          ? error.trace
+          : { harness: { runtime: { error: formatError(error) } } }
     }
 
     const fileId = await ctx.storage.store(
@@ -90,57 +82,4 @@ function requireSlackChannelId(channelId: string | undefined) {
   }
 
   return channelId
-}
-
-function createInitialTrace(
-  input: {
-    execution: { _id: string; tenantId: string; createdAt: number }
-    message: {
-      _id: string
-      providerId: string
-      actorId?: string
-      containerId?: string
-      threadId?: string
-      text?: string
-    }
-    integration: { _id: string; accountId: string }
-  },
-  promptBundle: PromptBundle,
-  toolBundle: ToolBundle
-) {
-  return {
-    version: 1,
-    runtime: {
-      type: "codex-e2b",
-      sandbox: "e2b",
-    },
-    assembly: {
-      prompt: promptBundle,
-      tools: summarizeToolBundle(toolBundle),
-    },
-    execution: {
-      id: input.execution._id,
-      tenantId: input.execution.tenantId,
-      createdAt: input.execution.createdAt,
-    },
-    integration: {
-      id: input.integration._id,
-      provider: "slack",
-      accountId: input.integration.accountId,
-    },
-    message: {
-      id: input.message._id,
-      providerId: input.message.providerId,
-      actorId: input.message.actorId,
-      containerId: input.message.containerId,
-      threadId: input.message.threadId,
-      text: input.message.text,
-    },
-    events: [
-      {
-        type: "runtime.started",
-        at: Date.now(),
-      },
-    ] as Record<string, unknown>[],
-  }
 }

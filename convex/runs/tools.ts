@@ -44,19 +44,6 @@ export function assembleToolsForRun(args: {
   }
 }
 
-export function summarizeToolBundle(bundle: ToolBundle) {
-  return {
-    mcpServers: bundle.mcpServers.map((server) => ({
-      name: server.name,
-      command: server.command,
-      args: server.args,
-      env: Object.keys(server.env).sort(),
-    })),
-    sandboxFiles: bundle.sandboxFiles.map((file) => file.path),
-    preflights: bundle.preflights.map((preflight) => preflight.type),
-  }
-}
-
 function createSlackToolBundle(args: {
   allowedChannelId: string
   botToken: string
