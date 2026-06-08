@@ -1,6 +1,10 @@
+import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start"
+import { shadcn } from "@clerk/ui/themes"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
+import { ConvexProviderWithClerk } from "convex/react-clerk"
+import { convex } from "@/convex/client"
 
 import appCss from "../styles.css?url"
 
@@ -90,7 +94,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <ClerkProvider appearance={{ theme: shadcn }}>
+          <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+            {children}
+          </ConvexProviderWithClerk>
+        </ClerkProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",

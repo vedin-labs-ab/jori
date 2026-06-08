@@ -1,3 +1,9 @@
+import {
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/tanstack-react-start"
+import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
 import { Bold, Italic, Underline } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -25,18 +31,40 @@ export function Review() {
     <div className="flex min-h-svh p-10">
       <div className="flex min-w-0 flex-col gap-8 text-sm">
         <div>
-          <div className="mb-5 flex items-center gap-2">
-            <img
-              src="/brand/mark/mark-black.svg"
-              alt=""
-              className="block size-8 dark:hidden"
-            />
-            <img
-              src="/brand/mark/mark-white.svg"
-              alt=""
-              className="hidden size-8 dark:block"
-            />
-            <span className="text-base font-medium">Milo</span>
+          <div className="mb-5 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <img
+                src="/brand/mark/mark-black.svg"
+                alt=""
+                className="block size-8 dark:hidden"
+              />
+              <img
+                src="/brand/mark/mark-white.svg"
+                alt=""
+                className="hidden size-8 dark:block"
+              />
+              <span className="text-base font-medium">Milo</span>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <AuthLoading>
+                <Button variant="outline" size="sm" disabled>
+                  Loading
+                </Button>
+              </AuthLoading>
+              <Unauthenticated>
+                <SignInButton mode="modal">
+                  <Button variant="outline" size="sm">
+                    Sign in
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button size="sm">Sign up</Button>
+                </SignUpButton>
+              </Unauthenticated>
+              <Authenticated>
+                <UserButton />
+              </Authenticated>
+            </div>
           </div>
           <h1 className="font-medium">Tactile component review</h1>
           <p className="text-muted-foreground">
