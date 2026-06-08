@@ -4,7 +4,7 @@ Convex-owned entry points stay at this root:
 
 - `auth.config.ts`: Clerk JWT provider configuration.
 - `http.ts`: HTTP routes and Slack webhooks.
-- `schema.ts`: database schema.
+- `schema.ts`: root database schema.
 - `_generated`: generated Convex files.
 
 Milo-owned modules are organized by responsibility:
@@ -14,3 +14,4 @@ Milo-owned modules are organized by responsibility:
 - `attention`: triggers and active listening state.
 - `runs`: executions and runtime orchestration.
 - `providers/slack`: Slack protocol details.
+- `schemas`: one table definition per file.

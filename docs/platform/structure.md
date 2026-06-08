@@ -8,7 +8,7 @@ Convex-owned entry points stay at the root of `convex`:
 
 - `auth.config.ts`: Clerk JWT configuration.
 - `http.ts`: HTTP routes and webhook entry points.
-- `schema.ts`: database schema.
+- `schema.ts`: root database schema.
 - `_generated`: generated Convex code.
 
 Domain code lives under folders named for responsibility:
@@ -18,6 +18,7 @@ Domain code lives under folders named for responsibility:
 - `attention`: triggers and active listening state.
 - `runs`: execution lifecycle and runtime orchestration.
 - `providers/slack`: Slack protocol code, including OAuth, signing, event parsing, relevance checks, and replies.
+- `schemas`: one table definition per file, imported by the root schema.
 
 ## Frontend
 
