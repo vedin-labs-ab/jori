@@ -152,8 +152,8 @@ http.route({
         accountId: tokenResult.team.id,
         botScopes: tokenResult.scope,
         botToken,
-        teamName: tokenResult.team.name,
-        botUserId: tokenResult.bot_user_id,
+        team: tokenResult.team,
+        botId: tokenResult.bot_user_id,
         userScopes: tokenResult.authed_user?.scope,
         userToken,
       }

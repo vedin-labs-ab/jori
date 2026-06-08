@@ -30,8 +30,11 @@ export const recordOAuthInstallation = internalMutation({
     accountId: v.string(),
     botScopes: v.optional(v.string()),
     botToken: v.string(),
-    teamName: v.optional(v.string()),
-    botUserId: v.optional(v.string()),
+    team: v.object({
+      id: v.string(),
+      name: v.optional(v.string()),
+    }),
+    botId: v.optional(v.string()),
     userScopes: v.optional(v.string()),
     userToken: v.string(),
   },
@@ -50,10 +53,12 @@ export const recordOAuthInstallation = internalMutation({
     }
 
     const data = {
-      teamName: args.teamName,
-      botUserId: args.botUserId,
-      botScopes: args.botScopes,
-      userScopes: args.userScopes,
+      scopes: {
+        bot: args.botScopes,
+        user: args.userScopes,
+      },
+      team: args.team,
+      botId: args.botId,
     }
 
     if (existing !== null) {

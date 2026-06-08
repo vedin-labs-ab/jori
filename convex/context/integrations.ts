@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { query } from "../_generated/server"
+import { getSlackTeamName } from "../providers/slack/data"
 
 export const getSlackStatus = query({
   args: {
@@ -28,10 +29,7 @@ export const getSlackStatus = query({
       accountId: integration.accountId,
       status: integration.status,
       createdAt: integration.createdAt,
-      teamName:
-        typeof integration.data?.teamName === "string"
-          ? integration.data.teamName
-          : undefined,
+      teamName: getSlackTeamName(integration.data),
     }
   },
 })

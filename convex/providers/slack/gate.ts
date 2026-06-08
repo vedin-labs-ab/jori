@@ -1,4 +1,4 @@
-import { getSlackBotUserId, getSlackChannelType } from "./data"
+import { getSlackBotId, getSlackChannelType } from "./data"
 
 export function isMiloRelevantMessage(
   text: string | undefined,
@@ -18,9 +18,9 @@ export function isMiloRelevantMessage(
     return false
   }
 
-  const botUserId = getSlackBotUserId(integrationData)
+  const botId = getSlackBotId(integrationData)
 
-  if (botUserId !== undefined && text.includes(`<@${botUserId}>`)) {
+  if (botId !== undefined && text.includes(`<@${botId}>`)) {
     return true
   }
 

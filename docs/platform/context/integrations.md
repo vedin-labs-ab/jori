@@ -8,6 +8,7 @@ Stores connected external system accounts.
 
 - External account identity.
 - Provider-specific credentials needed to read context and send responses.
+- Provider-specific metadata. Slack stores `data` as `{ scopes: { bot, user }, team, botId }`.
 - Connection status.
 
 ## Boundary
