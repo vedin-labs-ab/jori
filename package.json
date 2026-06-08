@@ -11,8 +11,9 @@
     "check:biome": "biome ci --error-on-warnings .",
     "check:fix": "biome check --write .",
     "check:typecheck": "tsc --noEmit",
-    "deploy": "pnpm prompts:compile && npx convex dev --once",
+    "deploy": "pnpm prompts:compile && npx convex dev --once && pnpm skills:sync",
     "preview": "vite preview",
+    "skills:sync": "npx convex run skills/catalog:syncGlobalSkills",
     "prompts:compile": "node scripts/compile-prompts.mjs && biome format --write convex/prompts/generated.ts",
     "test": "vitest run"
   },

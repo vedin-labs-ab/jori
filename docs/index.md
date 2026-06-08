@@ -7,6 +7,7 @@ Source documents for Milo's system design.
 - [Tech stack](./platform/stack.md): the source of truth for Milo's core technical choices.
 - [Runtime](./platform/runtime.md): the runtime domain ownership map.
 - [Structure](./platform/structure.md): the code layout and ownership map.
+- [Skills](./platform/context/skills.md): the persisted skill model and runtime loading boundary.
 
 ## Documentation Principles
 

@@ -1,10 +1,10 @@
-import { promptTemplates, type SkillId, skills } from "../prompts/generated"
+import { promptTemplates } from "../prompts/generated"
 import { type CodexRuntimeInput } from "./codex"
 
 export type PromptBundle = {
   rendered: string
   parts: PromptPart[]
-  skillIds: SkillId[]
+  skillIds: string[]
 }
 
 type PromptPart = {
@@ -13,35 +13,33 @@ type PromptPart = {
   content: string
 }
 
-export function assemblePrompt(input: CodexRuntimeInput): PromptBundle {
-  const skillIds = selectSkillIds(input)
+export type RuntimeSkill = {
+  id: string
+  tenantId: string | null
+  name: string
+  description: string
+  body: string
+}
+
+export function assemblePrompt(
+  input: CodexRuntimeInput,
+  availableSkills: RuntimeSkill[]
+): PromptBundle {
   const parts = [
-    ...skillIds.map((skillId) => createSkillPart(skillId)),
+    ...availableSkills.map((skill) => createSkillPart(skill)),
     createSlackRuntimePart(input),
   ]
 
   return {
     rendered: parts.map((part) => part.content).join("\n\n"),
     parts,
-    skillIds,
+    skillIds: availableSkills.map((skill) => skill.name),
   }
 }
 
-function selectSkillIds(input: CodexRuntimeInput) {
-  const skillIds: SkillId[] = ["milo-persona"]
-
-  if (input.integration.provider === "slack") {
-    skillIds.push("slack-communication")
-  }
-
-  return skillIds
-}
-
-function createSkillPart(skillId: SkillId): PromptPart {
-  const skill = skills[skillId]
-
+function createSkillPart(skill: RuntimeSkill): PromptPart {
   return {
-    id: skillId,
+    id: skill.id,
     type: "skill",
     content: [`# Skill: ${skill.name}`, "", skill.body].join("\n"),
   }

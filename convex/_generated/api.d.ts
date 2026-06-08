@@ -34,8 +34,10 @@ import type * as schemas_activations from "../schemas/activations.js";
 import type * as schemas_executions from "../schemas/executions.js";
 import type * as schemas_integrations from "../schemas/integrations.js";
 import type * as schemas_messages from "../schemas/messages.js";
+import type * as schemas_skills from "../schemas/skills.js";
 import type * as schemas_traces from "../schemas/traces.js";
 import type * as schemas_triggers from "../schemas/triggers.js";
+import type * as skills_catalog from "../skills/catalog.js";
 
 import type {
   ApiFromModules,
@@ -70,8 +72,10 @@ declare const fullApi: ApiFromModules<{
   "schemas/executions": typeof schemas_executions;
   "schemas/integrations": typeof schemas_integrations;
   "schemas/messages": typeof schemas_messages;
+  "schemas/skills": typeof schemas_skills;
   "schemas/traces": typeof schemas_traces;
   "schemas/triggers": typeof schemas_triggers;
+  "skills/catalog": typeof skills_catalog;
 }>;
 
 /**

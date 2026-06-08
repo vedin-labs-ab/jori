@@ -21,7 +21,10 @@ export const runSlackExecution = internalAction({
     }
 
     const allowedChannelId = requireSlackChannelId(input.message.containerId)
-    const promptBundle = assemblePrompt(input)
+    const skills = await ctx.runQuery(internal.skills.catalog.listForRuntime, {
+      tenantId: input.execution.tenantId,
+    })
+    const promptBundle = assemblePrompt(input, skills)
     const toolBundle = assembleToolsForRun({
       allowedChannelId,
       integration: input.integration,

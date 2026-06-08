@@ -15,6 +15,7 @@ Domain code lives under folders named for responsibility:
 
 - `identity`: Clerk-backed organization behavior.
 - `context`: integrations and observed messages.
+- `skills`: persisted runtime instructions and tenant skill management.
 - `attention`: triggers and active listening state.
 - `runs`: execution lifecycle and runtime orchestration.
 - `providers/slack`: Slack protocol code, including OAuth, signing, event parsing, and relevance checks.

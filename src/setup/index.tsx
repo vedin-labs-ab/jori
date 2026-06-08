@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { BrandMark } from "@/shared/brand"
 import { OrganizationCard } from "./organization"
+import { SkillsCard } from "./skill/card"
 import { SlackConnection } from "./slack"
 import { useSlackCallbackStatus } from "./status"
 
@@ -139,6 +140,7 @@ function SignedInView() {
     <section className="grid gap-4 md:grid-cols-2">
       <OrganizationCard organization={organization} />
       <SlackConnection tenantId={organization.id} />
+      <SkillsCard tenantId={organization.id} />
     </section>
   )
 }
