@@ -8,13 +8,13 @@ export const runSlackExecution = internalAction({
     messageId: v.id("messages"),
   },
   handler: async (ctx, args) => {
-    const input = await ctx.runQuery(internal.slack.getExecutionInput, args)
+    const input = await ctx.runQuery(internal.executions.getInput, args)
 
     if (input === null) {
       return
     }
 
-    await ctx.runMutation(internal.slack.markExecutionRunning, {
+    await ctx.runMutation(internal.executions.markRunning, {
       executionId: args.executionId,
     })
 
@@ -62,7 +62,7 @@ export const runSlackExecution = internalAction({
       })
     )
 
-    await ctx.runMutation(internal.slack.finishExecution, {
+    await ctx.runMutation(internal.executions.finish, {
       tenantId: input.execution.tenantId,
       executionId: args.executionId,
       fileId,

@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server"
 import { internal } from "./_generated/api"
 import { httpAction } from "./_generated/server"
+import { getSlackMessage, type SlackEventPayload } from "./slackEvents"
 import { parseSignedSlackState, verifySlackRequest } from "./slackShared"
 
 const http = httpRouter()
@@ -57,6 +58,8 @@ http.route({
         "app_mentions:read",
         "channels:history",
         "groups:history",
+        "im:history",
+        "mpim:history",
         "chat:write",
       ].join(",")
     )
@@ -198,77 +201,6 @@ type SlackOAuthResponse =
       ok: false
       error?: string
     }
-
-type SlackEventPayload = {
-  type: string
-  challenge?: string
-  team_id?: string
-  event_id?: string
-  event?: SlackEvent
-  authorizations?: Array<{
-    team_id?: string
-  }>
-}
-
-type SlackEvent = {
-  type?: string
-  subtype?: string
-  user?: string
-  bot_id?: string
-  channel?: string
-  text?: string
-  ts?: string
-  thread_ts?: string
-  client_msg_id?: string
-}
-
-function getSlackMessage(payload: SlackEventPayload) {
-  const event = payload.event
-
-  if (event === undefined) {
-    return null
-  }
-
-  if (
-    event.type !== "app_mention" &&
-    !(event.type === "message" && event.subtype === undefined)
-  ) {
-    return null
-  }
-
-  if (event.bot_id !== undefined || event.ts === undefined) {
-    return null
-  }
-
-  const accountId =
-    payload.team_id ??
-    payload.authorizations?.find((authorization) => authorization.team_id)
-      ?.team_id
-
-  if (accountId === undefined) {
-    return null
-  }
-
-  const providerId = `slack:${accountId}:${event.client_msg_id ?? event.ts}`
-
-  return {
-    accountId,
-    type: event.type,
-    providerId,
-    actorId: event.user,
-    containerId: event.channel,
-    threadId: event.thread_ts ?? event.ts,
-    text: event.text,
-    occurredAt: Number.isFinite(Number(event.ts))
-      ? Math.round(Number(event.ts) * 1000)
-      : undefined,
-    data: {
-      eventId: payload.event_id,
-      ts: event.ts,
-      threadTs: event.thread_ts,
-    },
-  }
-}
 
 function jsonResponse(value: unknown) {
   return new Response(JSON.stringify(value), {

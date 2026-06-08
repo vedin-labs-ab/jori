@@ -2,10 +2,10 @@ import { v } from "convex/values"
 import { type Doc, type Id } from "./_generated/dataModel"
 import {
   internalMutation,
-  internalQuery,
   type MutationCtx,
   mutation,
 } from "./_generated/server"
+import { isMiloRelevantMessage } from "./slackGate"
 import { createSignedSlackState } from "./slackShared"
 
 export const createInstallState = mutation({
@@ -127,7 +127,16 @@ export const recordEventMessage = internalMutation({
       createdAt: now,
     })
 
-    if (!isMiloRelevantMessage(args.text, args.type, integration.data)) {
+    const activatedThread = await findActivatedThread(ctx, {
+      tenantId: integration.tenantId,
+      integrationId: integration._id,
+      threadId: args.threadId,
+    })
+
+    if (
+      activatedThread === null &&
+      !isMiloRelevantMessage(args.text, args.type, args.data, integration.data)
+    ) {
       return { status: "ignored" as const, messageId }
     }
 
@@ -141,97 +150,29 @@ export const recordEventMessage = internalMutation({
   },
 })
 
-export const getExecutionInput = internalQuery({
+async function findActivatedThread(
+  ctx: MutationCtx,
   args: {
-    executionId: v.id("executions"),
-    messageId: v.id("messages"),
-  },
-  handler: async (ctx, args) => {
-    const execution = await ctx.db.get(args.executionId)
-    const message = await ctx.db.get(args.messageId)
-
-    if (execution === null || message === null) {
-      return null
-    }
-
-    const integration = await ctx.db.get(message.integrationId)
-
-    if (integration === null) {
-      return null
-    }
-
-    return { execution, message, integration }
-  },
-})
-
-export const markExecutionRunning = internalMutation({
-  args: {
-    executionId: v.id("executions"),
-    sandboxId: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.executionId, {
-      status: "running",
-      sandboxId: args.sandboxId,
-    })
-  },
-})
-
-export const finishExecution = internalMutation({
-  args: {
-    tenantId: v.string(),
-    executionId: v.id("executions"),
-    fileId: v.id("_storage"),
-    status: v.union(v.literal("completed"), v.literal("failed")),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("traces", {
-      tenantId: args.tenantId,
-      executionId: args.executionId,
-      fileId: args.fileId,
-      createdAt: Date.now(),
-    })
-
-    await ctx.db.patch(args.executionId, {
-      status: args.status,
-      finishedAt: Date.now(),
-    })
-  },
-})
-
-function isMiloRelevantMessage(
-  text: string | undefined,
-  type: string,
-  data: unknown
+    tenantId: string
+    integrationId: Id<"integrations">
+    threadId: string | undefined
+  }
 ) {
-  if (type === "app_mention") {
-    return true
+  if (args.threadId === undefined) {
+    return null
   }
 
-  if (text === undefined) {
-    return false
-  }
+  const threadId = args.threadId
 
-  const botUserId = getBotUserId(data)
-
-  if (botUserId !== undefined && text.includes(`<@${botUserId}>`)) {
-    return true
-  }
-
-  return /\bmilo\b/i.test(text)
-}
-
-function getBotUserId(data: unknown) {
-  if (
-    typeof data === "object" &&
-    data !== null &&
-    "botUserId" in data &&
-    typeof data.botUserId === "string"
-  ) {
-    return data.botUserId
-  }
-
-  return undefined
+  return await ctx.db
+    .query("activations")
+    .withIndex("by_thread", (query) =>
+      query
+        .eq("tenantId", args.tenantId)
+        .eq("integrationId", args.integrationId)
+        .eq("threadId", threadId)
+    )
+    .first()
 }
 
 async function startSlackRun(
