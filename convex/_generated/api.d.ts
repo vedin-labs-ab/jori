@@ -9,6 +9,11 @@
  */
 
 import type * as http from "../http.js";
+import type * as integrations from "../integrations.js";
+import type * as onboarding from "../onboarding.js";
+import type * as runtime from "../runtime.js";
+import type * as slack from "../slack.js";
+import type * as slackShared from "../slackShared.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +23,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   http: typeof http;
+  integrations: typeof integrations;
+  onboarding: typeof onboarding;
+  runtime: typeof runtime;
+  slack: typeof slack;
+  slackShared: typeof slackShared;
 }>;
 
 /**
