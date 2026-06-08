@@ -1,4 +1,4 @@
-# Platform V1
+# Runtime V1
 
 ## Responsibility
 
@@ -8,7 +8,7 @@ Defines the minimum runtime model needed to trigger Milo from Slack.
 
 A Slack message creates a message record. If the message asks Milo to work, Milo creates a trigger, activates the thread, starts an execution, stores the full trace as a Convex file, and replies in Slack when useful.
 
-Identity and organizations come from Clerk. Milo stores Clerk organization IDs as `tenantId` and Clerk user IDs as `createdById`. There are no local organization, user, membership, or identity-mapping tables.
+Identity and organizations come from Clerk. Milo stores Clerk organization IDs as `tenantId` and Clerk user IDs as `createdBy`. There are no local organization, user, membership, or identity-mapping tables.
 
 Daytona sandbox identity is stored directly on executions. There is no sandbox table.
 
@@ -31,7 +31,7 @@ The first UI should only cover sign-up, organization creation, website entry, Sl
 ## Schema Conventions
 
 - Use `tenantId` for the Clerk organization ID.
-- Use `createdById` for the Clerk user ID when a person creates the record.
+- Use `createdBy` for the Clerk user ID when a person creates the record.
 - Use Slack-native identifiers directly.
 - Use `type` for compact category fields.
 - Use `data` only for Slack details that do not deserve first-class columns yet.
@@ -51,7 +51,7 @@ Attention:
 
 Runs:
 
-- [Executions](./runs/execution.md)
+- [Executions](./runs/executions.md)
 - [Traces](./runs/traces.md)
 
 ## Deferred

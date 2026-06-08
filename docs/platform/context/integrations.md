@@ -12,7 +12,7 @@ Stores connected Slack installations.
 
 ## Boundary
 
-Slack events become [Messages](./messages.md). Milo work belongs to [Executions](../runs/execution.md).
+Slack events become [Messages](./messages.md). Milo work belongs to [Executions](../runs/executions.md).
 
 ## Draft Schema
 
@@ -23,7 +23,7 @@ integrations: defineTable({
   accountId: v.string(),
   tokenId: v.string(),
   status: v.union(v.literal("active"), v.literal("paused"), v.literal("revoked")),
-  createdById: v.optional(v.string()),
+  createdBy: v.optional(v.string()),
   createdAt: v.number(),
 })
 ```

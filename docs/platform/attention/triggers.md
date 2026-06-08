@@ -12,7 +12,7 @@ Stores the reason Milo may start work.
 
 ## Boundary
 
-Message content belongs to [Messages](../context/messages.md). Durable listening state belongs to [Activations](./activations.md). Runs belong to [Executions](../runs/execution.md).
+Message content belongs to [Messages](../context/messages.md). Durable listening state belongs to [Activations](./activations.md). Runs belong to [Executions](../runs/executions.md).
 
 ## Draft Schema
 
@@ -22,7 +22,7 @@ triggers: defineTable({
   messageId: v.optional(v.id("messages")),
   type: v.union(v.literal("manual"), v.literal("scheduled"), v.literal("message")),
   data: v.optional(v.any()),
-  createdById: v.optional(v.string()),
+  createdBy: v.optional(v.string()),
   createdAt: v.number(),
 })
 ```

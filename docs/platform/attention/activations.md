@@ -19,7 +19,7 @@ activations: defineTable({
   integrationId: v.id("integrations"),
   threadId: v.string(),
   executionId: v.optional(v.id("executions")),
-  createdById: v.optional(v.string()),
+  createdBy: v.optional(v.string()),
   createdAt: v.number(),
 })
 ```

@@ -1,21 +1,30 @@
-# TanStack Start + shadcn/ui
+# Milo
 
-This is a template for a new TanStack Start project with React, TypeScript, and shadcn/ui.
+Milo is a companyOS runtime for bringing AI teammates into company work.
 
-## Adding components
+## Stack
 
-To add components to your app, run the following command:
+- React, TypeScript, TanStack Start, and Vite for the app.
+- Tailwind CSS and shadcn/ui for product UI.
+- Convex for backend data and coordination.
+- Biome for linting and formatting.
+
+## Commands
+
+```bash
+pnpm install
+pnpm dev
+pnpm run check
+```
+
+## Docs
+
+System design docs live in [docs](./docs/index.md).
+
+## UI Components
+
+Add shadcn/ui primitives with the official CLI:
 
 ```bash
 npx shadcn@latest add button
-```
-
-This will place the ui components in the `components` directory.
-
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
 ```
