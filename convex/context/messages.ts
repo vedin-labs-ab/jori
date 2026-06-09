@@ -5,22 +5,39 @@ import {
   findConversationActivation,
   startMessageExecution,
 } from "../attention/activations"
+import {
+  isLinearAppMessage,
+  isMiloRelevantLinearMessage,
+} from "../providers/linear/gate"
 import { getSlackBotId } from "../providers/slack/data"
 import { isMiloRelevantMessage } from "../providers/slack/gate"
 
+const observedMessageArgs = {
+  accountId: v.string(),
+  type: v.string(),
+  externalId: v.string(),
+  actorId: v.optional(v.string()),
+  conversationId: v.optional(v.string()),
+  text: v.optional(v.string()),
+  observedAt: v.optional(v.number()),
+  data: v.optional(v.any()),
+}
+
+type ObservedMessage = {
+  type: string
+  externalId: string
+  actorId?: string
+  conversationId?: string
+  text?: string
+  observedAt?: number
+  data?: unknown
+}
+
 export const recordSlackMessage = internalMutation({
-  args: {
-    accountId: v.string(),
-    type: v.string(),
-    externalId: v.string(),
-    actorId: v.optional(v.string()),
-    conversationId: v.optional(v.string()),
-    text: v.optional(v.string()),
-    observedAt: v.optional(v.number()),
-    data: v.optional(v.any()),
-  },
+  args: observedMessageArgs,
   handler: async (ctx, args) => {
-    const integration = await findActiveSlackIntegration(ctx, {
+    const integration = await findActiveIntegration(ctx, {
+      provider: "slack",
       accountId: args.accountId,
     })
 
@@ -28,60 +45,101 @@ export const recordSlackMessage = internalMutation({
       return { status: "missing_integration" as const }
     }
 
-    if (isIntegrationBotMessage(args.actorId, integration.data)) {
+    if (isSlackBotMessage(args.actorId, integration.data)) {
       return { status: "ignored_bot" as const }
     }
 
-    const existingMessage = await ctx.db
-      .query("messages")
-      .withIndex("by_external_id", (query) =>
-        query.eq("externalId", args.externalId)
-      )
-      .first()
-
-    if (existingMessage !== null) {
-      return { status: "duplicate" as const }
-    }
-
-    const messageId = await insertMessage(ctx, {
-      args,
+    return await recordProviderMessage(ctx, {
       integration,
-    })
-    const now = Date.now()
-
-    const activation = await findConversationActivation(ctx, {
-      tenantId: integration.tenantId,
-      integrationId: integration._id,
-      conversationId: args.conversationId,
-    })
-
-    if (
-      activation === null &&
-      !isMiloRelevantMessage(args.text, args.type, args.data, integration.data)
-    ) {
-      return { status: "ignored" as const, messageId }
-    }
-
-    return await startMessageExecution(ctx, {
-      activation,
-      integration,
-      messageId,
-      messageType: args.type,
-      messageExternalId: args.externalId,
-      conversationId: args.conversationId ?? args.externalId,
-      now,
+      message: args,
+      isRelevant: isMiloRelevantMessage(
+        args.text,
+        args.type,
+        args.data,
+        integration.data
+      ),
     })
   },
 })
 
-async function findActiveSlackIntegration(
+export const recordLinearMessage = internalMutation({
+  args: observedMessageArgs,
+  handler: async (ctx, args) => {
+    const integration = await findActiveIntegration(ctx, {
+      provider: "linear",
+      accountId: args.accountId,
+    })
+
+    if (integration === null) {
+      return { status: "missing_integration" as const }
+    }
+
+    if (isLinearAppMessage(args.actorId, integration.data)) {
+      return { status: "ignored_bot" as const }
+    }
+
+    return await recordProviderMessage(ctx, {
+      integration,
+      message: args,
+      isRelevant: isMiloRelevantLinearMessage(args.text, args.type),
+    })
+  },
+})
+
+async function recordProviderMessage(
   ctx: MutationCtx,
-  args: { accountId: string }
+  input: {
+    integration: Doc<"integrations">
+    message: ObservedMessage
+    isRelevant: boolean
+  }
+) {
+  const existingMessage = await ctx.db
+    .query("messages")
+    .withIndex("by_external_id", (query) =>
+      query.eq("externalId", input.message.externalId)
+    )
+    .first()
+
+  if (existingMessage !== null) {
+    return { status: "duplicate" as const }
+  }
+
+  const messageId = await insertMessage(ctx, {
+    message: input.message,
+    integration: input.integration,
+  })
+  const now = Date.now()
+
+  const activation = await findConversationActivation(ctx, {
+    tenantId: input.integration.tenantId,
+    integrationId: input.integration._id,
+    conversationId: input.message.conversationId,
+  })
+
+  if (activation === null && !input.isRelevant) {
+    return { status: "ignored" as const, messageId }
+  }
+
+  return await startMessageExecution(ctx, {
+    activation,
+    integration: input.integration,
+    messageId,
+    messageType: input.message.type,
+    messageExternalId: input.message.externalId,
+    conversationId: input.message.conversationId ?? input.message.externalId,
+    now,
+  })
+}
+
+async function findActiveIntegration(
+  ctx: MutationCtx,
+  args: { provider: string; accountId: string }
 ) {
   const integration = await ctx.db
     .query("integrations")
     .withIndex("by_provider_account", (query) =>
-      query.eq("provider", "slack").eq("accountId", args.accountId)
+      query.eq("provider", args.provider).eq("accountId", args.accountId)
     )
     .first()
 
@@ -95,33 +153,25 @@ async function findActiveSlackIntegration(
 async function insertMessage(
   ctx: MutationCtx,
   input: {
-    args: {
-      type: string
-      externalId: string
-      actorId?: string
-      conversationId?: string
-      text?: string
-      observedAt?: number
-      data?: unknown
-    }
+    message: ObservedMessage
     integration: Doc<"integrations">
   }
 ): Promise<Id<"messages">> {
   return await ctx.db.insert("messages", {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
-    type: input.args.type,
-    externalId: input.args.externalId,
-    actorId: input.args.actorId,
-    conversationId: input.args.conversationId,
-    text: input.args.text,
-    data: input.args.data,
-    observedAt: input.args.observedAt,
+    type: input.message.type,
+    externalId: input.message.externalId,
+    actorId: input.message.actorId,
+    conversationId: input.message.conversationId,
+    text: input.message.text,
+    data: input.message.data,
+    observedAt: input.message.observedAt,
     createdAt: Date.now(),
   })
 }
 
-function isIntegrationBotMessage(actorId: string | undefined, data: unknown) {
+function isSlackBotMessage(actorId: string | undefined, data: unknown) {
   if (actorId === undefined) {
     return false
   }

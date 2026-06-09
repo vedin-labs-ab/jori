@@ -63,15 +63,15 @@ function createTriggerPart(input: CodexRuntimeInput): PromptPart {
 }
 
 function createMessageTriggerPart(
-  input: Extract<CodexRuntimeInput, { type: "slack" }>
+  input: Extract<CodexRuntimeInput, { type: "message" }>
 ): PromptPart {
   return {
     id: "trigger/message",
     type: "trigger",
     content: renderTemplate(promptTemplates["trigger/message"], {
       message: {
-        provider: "Slack",
-        channelId: getSlackChannelId(input.message.data) ?? "",
+        provider: getProviderLabel(input.provider),
+        targetId: getMessageTargetId(input.provider, input.message.data),
         conversationId:
           input.message.conversationId ?? input.message.externalId,
         text: input.message.text ?? "",
@@ -101,12 +101,28 @@ function createScheduledTriggerPart(
   }
 }
 
-function getSlackChannelId(data: unknown) {
+function getProviderLabel(provider: "linear" | "slack") {
+  if (provider === "linear") {
+    return "Linear"
+  }
+
+  return "Slack"
+}
+
+function getMessageTargetId(provider: "linear" | "slack", data: unknown) {
+  if (provider === "linear") {
+    return getDataString(data, "issueId") ?? ""
+  }
+
+  return getDataString(data, "channelId") ?? ""
+}
+
+function getDataString(data: unknown, key: string) {
   if (typeof data !== "object" || data === null) {
     return undefined
   }
 
-  const value = (data as Record<string, unknown>).channelId
+  const value = (data as Record<string, unknown>)[key]
 
   return typeof value === "string" ? value : undefined
 }

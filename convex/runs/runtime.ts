@@ -3,6 +3,11 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
+import { requireLinearCredentials } from "../providers/linear/credentials"
+import {
+  getLinearTokenScope,
+  refreshLinearAccessToken,
+} from "../providers/linear/oauth"
 import { type CodexRuntimeInput } from "./codex"
 import { runCodexInE2B } from "./e2b"
 import { assemblePrompt } from "./prompt"
@@ -10,25 +15,31 @@ import { createExecutionToken, hashExecutionToken } from "./tokens"
 import { assembleToolsForRun, type RuntimeTarget } from "./tools"
 import { CodexRunError, formatError } from "./trace"
 
-export const runSlackExecution = internalAction({
+export const runMessageExecution = internalAction({
   args: {
     executionId: v.id("executions"),
   },
   handler: async (ctx, args) => {
     const input = await ctx.runQuery(internal.runs.executions.getInput, args)
 
-    if (input === null || input.type !== "slack") {
+    if (input === null || input.type !== "message") {
       return
     }
 
-    const target = requireSlackTarget(input.message.data)
+    const target = requireMessageTarget(input.provider, input.message.data)
+    const integration = await prepareIntegrationForRuntime(
+      ctx,
+      input.integration
+    )
+
     await runExecution(
       ctx,
       {
-        type: "slack",
+        type: "message",
+        provider: input.provider,
         execution: input.execution,
         trigger: input.trigger,
-        integration: input.integration,
+        integration,
         message: input.message,
       },
       target
@@ -91,7 +102,7 @@ async function runExecution(
       convexSiteUrl: requireConvexSiteUrl(),
       executionToken,
     },
-    slack: {
+    integration: {
       integration: input.integration,
       target,
     },
@@ -139,6 +150,47 @@ async function runExecution(
   })
 }
 
+async function prepareIntegrationForRuntime(
+  ctx: ActionCtx,
+  integration: CodexRuntimeInput["integration"]
+) {
+  if (integration.provider !== "linear") {
+    return integration
+  }
+
+  const credentials = requireLinearCredentials(integration)
+
+  if (credentials.expiresAt > Date.now() + 5 * 60 * 1000) {
+    return integration
+  }
+
+  const tokenResult = await refreshLinearAccessToken(credentials.refreshToken)
+
+  if ("error" in tokenResult) {
+    throw new Error(
+      `Linear token refresh failed: ${
+        tokenResult.error_description ?? tokenResult.error
+      }`
+    )
+  }
+
+  const refreshedCredentials = await ctx.runMutation(
+    internal.providers.linear.install.updateOAuthCredentials,
+    {
+      integrationId: integration._id,
+      accessToken: tokenResult.access_token,
+      refreshToken: tokenResult.refresh_token,
+      expiresAt: Date.now() + tokenResult.expires_in * 1000,
+      scope: getLinearTokenScope(tokenResult.scope),
+    }
+  )
+
+  return {
+    ...integration,
+    credentials: refreshedCredentials,
+  }
+}
+
 async function finishExecutionWithError(
   ctx: ActionCtx,
   tenantId: string,
@@ -173,8 +225,33 @@ function requireConvexSiteUrl() {
   return siteUrl
 }
 
+function requireMessageTarget(
+  provider: "linear" | "slack",
+  data: unknown
+): RuntimeTarget {
+  if (provider === "linear") {
+    return requireLinearTarget(data)
+  }
+
+  return requireSlackTarget(data)
+}
+
+function requireLinearTarget(data: unknown): RuntimeTarget {
+  const issueId = getDataString(data, "issueId")
+
+  if (issueId === undefined || issueId === "") {
+    throw new Error("Missing Linear issue target")
+  }
+
+  return {
+    provider: "linear",
+    issueId,
+    commentId: getDataString(data, "commentId"),
+  }
+}
+
 function requireSlackTarget(data: unknown): RuntimeTarget {
-  const channelId = getSlackChannelId(data)
+  const channelId = getDataString(data, "channelId")
 
   if (channelId === undefined || channelId === "") {
     throw new Error("Missing Slack channel target")
@@ -186,12 +263,12 @@ function requireSlackTarget(data: unknown): RuntimeTarget {
   }
 }
 
-function getSlackChannelId(data: unknown) {
+function getDataString(data: unknown, key: string) {
   if (typeof data !== "object" || data === null) {
     return undefined
   }
 
-  const value = (data as Record<string, unknown>).channelId
+  const value = (data as Record<string, unknown>)[key]
 
   return typeof value === "string" ? value : undefined
 }

@@ -1,8 +1,13 @@
 import { type Doc } from "../_generated/dataModel"
 import {
+  type LinearCredentials,
+  requireLinearCredentials,
+} from "../providers/linear/credentials"
+import {
   requireSlackCredentials,
   type SlackCredentials,
 } from "../providers/slack/credentials"
+import { createLinearProxyScript } from "./linear"
 import { createMiloMcpScript } from "./milo"
 import { createSlackProxyScript } from "./proxy"
 
@@ -24,23 +29,34 @@ export type SandboxFile = {
   content: string
 }
 
-export type ToolPreflight = {
-  type: "slack"
-  credentials: SlackCredentials
-}
+export type ToolPreflight =
+  | {
+      type: "linear"
+      credentials: LinearCredentials
+    }
+  | {
+      type: "slack"
+      credentials: SlackCredentials
+    }
 
-export type RuntimeTarget = {
-  provider: "slack"
-  channelId: string
-  threadId?: string
-}
+export type RuntimeTarget =
+  | {
+      provider: "linear"
+      issueId: string
+      commentId?: string
+    }
+  | {
+      provider: "slack"
+      channelId: string
+      threadId?: string
+    }
 
 export function assembleToolsForRun(args: {
   milo: {
     convexSiteUrl: string
     executionToken: string
   }
-  slack?: {
+  integration?: {
     integration: Doc<"integrations">
     target: RuntimeTarget
   }
@@ -52,13 +68,24 @@ export function assembleToolsForRun(args: {
     }),
   ]
 
-  if (args.slack?.target.provider === "slack") {
-    const credentials = requireSlackCredentials(args.slack.integration)
+  if (args.integration?.target.provider === "linear") {
+    const credentials = requireLinearCredentials(args.integration.integration)
+
+    bundles.push(
+      createLinearToolBundle({
+        credentials,
+        issueId: args.integration.target.issueId,
+      })
+    )
+  }
+
+  if (args.integration?.target.provider === "slack") {
+    const credentials = requireSlackCredentials(args.integration.integration)
 
     bundles.push(
       createSlackToolBundle({
         credentials,
-        channelId: args.slack.target.channelId,
+        channelId: args.integration.target.channelId,
       })
     )
   }
@@ -93,6 +120,37 @@ function createMiloToolBundle(args: {
       },
     ],
     preflights: [],
+  }
+}
+
+function createLinearToolBundle(args: {
+  credentials: LinearCredentials
+  issueId: string
+}): ToolBundle {
+  return {
+    mcpServers: [
+      {
+        name: "linear",
+        command: "node",
+        args: ["/tmp/milo-workspace/milo-linear-mcp.mjs"],
+        env: {
+          MILO_LINEAR_ACCESS_TOKEN: args.credentials.accessToken,
+          MILO_LINEAR_ALLOWED_ISSUE_ID: args.issueId,
+        },
+      },
+    ],
+    sandboxFiles: [
+      {
+        path: "/tmp/milo-workspace/milo-linear-mcp.mjs",
+        content: createLinearProxyScript(),
+      },
+    ],
+    preflights: [
+      {
+        type: "linear",
+        credentials: args.credentials,
+      },
+    ],
   }
 }
 

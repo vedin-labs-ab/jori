@@ -57,18 +57,23 @@ async function getMessageInput(
   if (
     integration === null ||
     integration.tenantId !== args.execution.tenantId ||
-    integration.provider !== "slack"
+    !isMessageProvider(integration.provider)
   ) {
     return null
   }
 
   return {
-    type: "slack" as const,
+    type: "message" as const,
+    provider: integration.provider,
     execution: args.execution,
     trigger: args.trigger,
     message,
     integration,
   }
+}
+
+function isMessageProvider(provider: string): provider is "linear" | "slack" {
+  return provider === "linear" || provider === "slack"
 }
 
 async function getScheduledInput(

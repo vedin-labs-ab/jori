@@ -20,6 +20,7 @@ Domain code lives under folders named for responsibility:
 - `runs`: execution lifecycle and runtime orchestration.
 - `scheduling`: user-managed schedules and schedule MCP mutations.
 - `providers/slack`: Slack protocol code, including OAuth, signing, event parsing, and relevance checks.
+- `providers/linear`: Linear protocol code, including OAuth, signing, event parsing, and relevance checks.
 - `schemas`: one table definition per file, imported by the root schema.
 
 ## Frontend
@@ -28,7 +29,7 @@ TanStack route files stay in `src/routes`, and generated router output stays in 
 
 Product code lives under folders named for responsibility:
 
-- `setup`: first-run sign-up, organization, website, and Slack connection UI.
+- `setup`: first-run sign-up, organization, website, and integration connection UI.
 - `shared`: cross-domain frontend helpers and components.
 - `design`: internal design review surfaces.
 - `components/ui`: shadcn/ui primitives.

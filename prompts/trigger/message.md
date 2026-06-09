@@ -4,7 +4,7 @@ A {{message.provider}} message triggered this run.
 
 Target:
 - Provider: {{message.provider}}
-- Channel ID: {{message.channelId}}
+- Target ID: {{message.targetId}}
 - Conversation ID: {{message.conversationId}}
 
 Message:

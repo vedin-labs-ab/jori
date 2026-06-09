@@ -14,6 +14,7 @@ import {
   createInstallCommand,
   workspace,
 } from "./harness"
+import { createLinearTokenPreflightCommand } from "./linear"
 import { createSlackTokenPreflightCommand } from "./slack"
 import { type ToolBundle, type ToolPreflight } from "./tools"
 import {
@@ -159,6 +160,10 @@ async function verifyPreflights(
   const traces: CommandTrace[] = []
 
   for (const preflight of preflights) {
+    if (preflight.type === "linear") {
+      traces.push(await verifyLinearToken(sandbox, preflight))
+    }
+
     if (preflight.type === "slack") {
       traces.push(await verifySlackTokens(sandbox, preflight))
     }
@@ -167,9 +172,27 @@ async function verifyPreflights(
   return traces
 }
 
+async function verifyLinearToken(
+  sandbox: E2BSandbox,
+  preflight: Extract<ToolPreflight, { type: "linear" }>
+) {
+  const result = await runCommand(
+    sandbox,
+    createLinearTokenPreflightCommand(),
+    {
+      envs: {
+        MILO_LINEAR_ACCESS_TOKEN: preflight.credentials.accessToken,
+      },
+      timeoutMs: 30_000,
+    }
+  )
+
+  return createCommandTrace(result)
+}
+
 async function verifySlackTokens(
   sandbox: E2BSandbox,
-  preflight: ToolPreflight
+  preflight: Extract<ToolPreflight, { type: "slack" }>
 ) {
   const result = await runCommand(sandbox, createSlackTokenPreflightCommand(), {
     envs: {

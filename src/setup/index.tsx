@@ -12,15 +12,17 @@ import { CheckCircle2, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { BrandMark } from "@/shared/brand"
+import { LinearConnection } from "./linear"
 import { OrganizationCard } from "./organization"
 import { SkillsCard } from "./skill/card"
 import { SlackConnection } from "./slack"
-import { useSlackCallbackStatus } from "./status"
+import { useIntegrationCallbackStatus } from "./status"
 
 export function Setup() {
   const { isLoaded, isSignedIn } = useAuth()
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
-  const slackStatus = useSlackCallbackStatus()
+  const linearStatus = useIntegrationCallbackStatus("linear")
+  const slackStatus = useIntegrationCallbackStatus("slack")
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-5xl flex-col gap-8 px-6 py-8">
@@ -64,12 +66,33 @@ export function Setup() {
         </Alert>
       ) : null}
 
+      {linearStatus === "connected" ? (
+        <Alert>
+          <CheckCircle2 />
+          <AlertTitle>Linear connected</AlertTitle>
+          <AlertDescription>
+            Linear can now send Milo issue and comment events for the active
+            organization.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       {slackStatus === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>Slack connection failed</AlertTitle>
           <AlertDescription>
             Slack did not return an installation token. Check the Slack app
             OAuth settings and try again.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {linearStatus === "error" ? (
+        <Alert variant="destructive">
+          <AlertTitle>Linear connection failed</AlertTitle>
+          <AlertDescription>
+            Linear did not return an installation token. Check the Linear OAuth
+            app settings and try again.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -137,11 +160,11 @@ function SignedOutView() {
   return (
     <section className="grid max-w-xl gap-3">
       <h1 className="text-2xl font-medium tracking-normal">
-        Bring Milo into Slack.
+        Bring Milo into your work.
       </h1>
       <p className="text-sm text-muted-foreground">
-        Sign up, create an organization, connect Slack, and Milo can respond to
-        relevant Slack messages.
+        Sign up, create an organization, connect Slack or Linear, and Milo can
+        respond where work is happening.
       </p>
       <div className="flex flex-wrap gap-2">
         <SignUpButton mode="modal">
@@ -187,6 +210,7 @@ function SignedInView() {
     <section className="grid gap-4 md:grid-cols-2">
       <OrganizationCard organization={organization} />
       <SlackConnection tenantId={organization.id} />
+      <LinearConnection tenantId={organization.id} />
       <SkillsCard tenantId={organization.id} />
     </section>
   )
