@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as attention_activations from "../attention/activations.js";
 import type * as context_integrations from "../context/integrations.js";
 import type * as context_messages from "../context/messages.js";
 import type * as http from "../http.js";
@@ -91,6 +92,7 @@ import type * as scheduling_data from "../scheduling/data.js";
 import type * as scheduling_mcp from "../scheduling/mcp.js";
 import type * as scheduling_schedules from "../scheduling/schedules.js";
 import type * as scheduling_timing from "../scheduling/timing.js";
+import type * as schemas_activations from "../schemas/activations.js";
 import type * as schemas_executions from "../schemas/executions.js";
 import type * as schemas_identities from "../schemas/identities.js";
 import type * as schemas_integrations from "../schemas/integrations.js";
@@ -111,6 +113,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "attention/activations": typeof attention_activations;
   "context/integrations": typeof context_integrations;
   "context/messages": typeof context_messages;
   http: typeof http;
@@ -194,6 +197,7 @@ declare const fullApi: ApiFromModules<{
   "scheduling/mcp": typeof scheduling_mcp;
   "scheduling/schedules": typeof scheduling_schedules;
   "scheduling/timing": typeof scheduling_timing;
+  "schemas/activations": typeof schemas_activations;
   "schemas/executions": typeof schemas_executions;
   "schemas/identities": typeof schemas_identities;
   "schemas/integrations": typeof schemas_integrations;

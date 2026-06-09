@@ -13,7 +13,7 @@ Stores the reason Milo may start work.
 
 ## Boundary
 
-Message content belongs to [Messages](../context/messages.md). Schedule definitions belong to [Scheduling](../scheduling.md). Runs belong to [Executions](../runs/executions.md).
+Message content belongs to [Messages](../context/messages.md). Schedule definitions belong to [Scheduling](../scheduling.md). Durable conversation activation belongs to [Activations](./activations.md). Runs belong to [Executions](../runs/executions.md).
 
 Every execution has exactly one trigger. Runtime input is resolved through that trigger, so the trigger is the canonical cause of a run.
 

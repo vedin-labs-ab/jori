@@ -2,13 +2,13 @@
 
 ## Responsibility
 
-Stores observed external messages that can start Milo work.
+Stores observed external messages that can start or continue Milo work.
 
 ## Mental Model
 
 - An integration is the connected external account.
 - A message is external content Milo observed, such as a Slack message, Teams message, Jira comment, or Linear comment.
-- A conversation is the durable external discussion or work surface the message belongs to.
+- A conversation is the durable external discussion or work surface Milo can be activated in.
 - A trigger is the reason Milo starts work from a message, manual action, or schedule.
 
 ## Includes

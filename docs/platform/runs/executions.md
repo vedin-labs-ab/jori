@@ -15,7 +15,7 @@ Stores a Milo run.
 
 ## Boundary
 
-Run cause belongs to [Triggers](../attention/triggers.md). Full run details belong to [Traces](./traces.md).
+Run cause belongs to [Triggers](../attention/triggers.md). Conversation opt-in state belongs to [Activations](../attention/activations.md). Full run details belong to [Traces](./traces.md).
 
 ## Draft Schema
 
