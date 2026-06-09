@@ -46,7 +46,7 @@ export function PermissionSection({
           )}
           aria-label={`${isOpen ? "Hide" : "Show"} ${title.toLowerCase()}`}
         >
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 transition-transform duration-200 ease-out group-hover/permission-trigger:translate-x-2 group-focus-visible/permission-trigger:translate-x-2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <div className="flex items-center gap-2 font-medium text-sm">
               <ShieldCheck className="size-4 text-muted-foreground" />
               {title}
@@ -55,7 +55,7 @@ export function PermissionSection({
           </div>
           <ChevronDown
             className={cn(
-              "size-4 shrink-0 transition-transform duration-200 ease-out group-hover/permission-trigger:-translate-x-2 group-focus-visible/permission-trigger:-translate-x-2",
+              "size-4 shrink-0 transition-transform duration-200 ease-out",
               isOpen && "rotate-180"
             )}
           />
