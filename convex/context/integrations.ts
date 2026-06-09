@@ -4,6 +4,10 @@ import {
   getLinearOrganizationName,
   getLinearOrganizationUrlKey,
 } from "../providers/linear/data"
+import {
+  getMicrosoftConnectedUser,
+  getMicrosoftTenantName,
+} from "../providers/microsoft/data"
 import { getSlackTeamName } from "../providers/slack/data"
 
 export const getSlackStatus = query({
@@ -67,6 +71,39 @@ export const getLinearStatus = query({
       createdAt: integration.createdAt,
       organizationName: getLinearOrganizationName(integration.data),
       organizationUrlKey: getLinearOrganizationUrlKey(integration.data),
+    }
+  },
+})
+
+export const getMicrosoftStatus = query({
+  args: {
+    tenantId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+
+    if (identity === null) {
+      return null
+    }
+
+    const integration = await ctx.db
+      .query("integrations")
+      .withIndex("by_tenant_provider", (query) =>
+        query.eq("tenantId", args.tenantId).eq("provider", "microsoft")
+      )
+      .order("desc")
+      .first()
+
+    if (integration === null) {
+      return null
+    }
+
+    return {
+      accountId: integration.accountId,
+      status: integration.status,
+      createdAt: integration.createdAt,
+      tenantName: getMicrosoftTenantName(integration.data),
+      connectedUser: getMicrosoftConnectedUser(integration.data),
     }
   },
 })

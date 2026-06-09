@@ -5,6 +5,12 @@ export const skills = {
       "Built-in Linear skill for reading issue context and sending concise issue comments.",
     body: "# Linear\n\nUse Linear for issue context and issue comments.\n\nContext:\n- Read the triggering issue before answering when the issue title,\n  description, status, or comments materially change the response.\n- Use `linear_get_issue` for the target issue and `linear_list_comments` when\n  the comment thread matters.\n- Treat Linear issue IDs, identifiers, URLs, and comment IDs as provider-native\n  references. Do not invent issue keys or user mentions.\n\nReplies:\n- Send the final response with `linear_add_comment` when a reply is useful.\n- Comment only on the target issue from the trigger.\n- Send one comment unless the task explicitly needs multiple.\n- After the comment succeeds, stop.\n\nFormat:\n- Keep comments concise and practical.\n- Use plain Markdown that reads naturally inside Linear.\n- Link to external context only when it helps the user act.",
   },
+  microsoft: {
+    name: "microsoft",
+    description:
+      "Built-in Microsoft Teams skill for reading Teams context and replying through Microsoft Graph.",
+    body: "# Microsoft Teams\n\nUse Microsoft Teams for context and replies.\n\nContext:\n- Start with `teams_get_context` when the Teams thread or chat history matters.\n- Use `microsoft_graph_get` only when the request needs Microsoft 365 context\n  such as recent calendar, mail, file, user, or drive data.\n- Keep Microsoft 365 reads directly tied to the Teams request. Do not browse or\n  inventory mailboxes, drives, teams, or tenant data.\n\nReplies:\n- Send the final response with `teams_reply` when a Teams reply is useful.\n- Reply only to the Teams chat or channel thread from the trigger.\n- Send one message unless the task explicitly needs multiple.\n- After the reply succeeds, stop.\n\nFormat:\n- Use concise Teams-friendly text.\n- Use simple HTML only when links, paragraphs, or light structure make the\n  message easier to scan.\n- Do not mention internal Graph paths, tokens, scopes, or tool names.",
+  },
   scheduling: {
     name: "scheduling",
     description:

@@ -9,6 +9,10 @@ import {
   isLinearAppMessage,
   isMiloRelevantLinearMessage,
 } from "../providers/linear/gate"
+import {
+  isMicrosoftConnectedUserMessage,
+  isMiloRelevantMicrosoftMessage,
+} from "../providers/microsoft/gate"
 import { getSlackBotId } from "../providers/slack/data"
 import { isMiloRelevantMessage } from "../providers/slack/gate"
 
@@ -82,6 +86,34 @@ export const recordLinearMessage = internalMutation({
       integration,
       message: args,
       isRelevant: isMiloRelevantLinearMessage(args.text, args.type),
+    })
+  },
+})
+
+export const recordMicrosoftMessage = internalMutation({
+  args: observedMessageArgs,
+  handler: async (ctx, args) => {
+    const integration = await findActiveIntegration(ctx, {
+      provider: "microsoft",
+      accountId: args.accountId,
+    })
+
+    if (integration === null) {
+      return { status: "missing_integration" as const }
+    }
+
+    if (isMicrosoftConnectedUserMessage(args.actorId, integration.data)) {
+      return { status: "ignored_bot" as const }
+    }
+
+    return await recordProviderMessage(ctx, {
+      integration,
+      message: args,
+      isRelevant: isMiloRelevantMicrosoftMessage(
+        args.text,
+        args.type,
+        args.data
+      ),
     })
   },
 })

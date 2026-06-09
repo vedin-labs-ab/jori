@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { BrandMark } from "@/shared/brand"
 import { LinearConnection } from "./linear"
+import { MicrosoftConnection } from "./microsoft"
 import { OrganizationCard } from "./organization"
 import { SkillsCard } from "./skill/card"
 import { SlackConnection } from "./slack"
@@ -22,6 +23,7 @@ export function Setup() {
   const { isLoaded, isSignedIn } = useAuth()
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
   const linearStatus = useIntegrationCallbackStatus("linear")
+  const microsoftStatus = useIntegrationCallbackStatus("microsoft")
   const slackStatus = useIntegrationCallbackStatus("slack")
 
   return (
@@ -77,6 +79,17 @@ export function Setup() {
         </Alert>
       ) : null}
 
+      {microsoftStatus === "connected" ? (
+        <Alert>
+          <CheckCircle2 />
+          <AlertTitle>Microsoft connected</AlertTitle>
+          <AlertDescription>
+            Microsoft 365 can now send Milo Teams message events for the active
+            organization.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       {slackStatus === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>Slack connection failed</AlertTitle>
@@ -93,6 +106,16 @@ export function Setup() {
           <AlertDescription>
             Linear did not return an installation token. Check the Linear OAuth
             app settings and try again.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {microsoftStatus === "error" ? (
+        <Alert variant="destructive">
+          <AlertTitle>Microsoft connection failed</AlertTitle>
+          <AlertDescription>
+            Microsoft did not complete tenant consent and account OAuth. Check
+            the Microsoft app permissions and try again.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -211,6 +234,7 @@ function SignedInView() {
       <OrganizationCard organization={organization} />
       <SlackConnection tenantId={organization.id} />
       <LinearConnection tenantId={organization.id} />
+      <MicrosoftConnection tenantId={organization.id} />
       <SkillsCard tenantId={organization.id} />
     </section>
   )

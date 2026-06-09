@@ -72,8 +72,12 @@ async function getMessageInput(
   }
 }
 
-function isMessageProvider(provider: string): provider is "linear" | "slack" {
-  return provider === "linear" || provider === "slack"
+function isMessageProvider(
+  provider: string
+): provider is "linear" | "microsoft" | "slack" {
+  return (
+    provider === "linear" || provider === "microsoft" || provider === "slack"
+  )
 }
 
 async function getScheduledInput(

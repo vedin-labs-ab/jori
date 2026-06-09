@@ -16,7 +16,7 @@ export function createInstallCommand() {
     "fi",
     `mkdir -p "${workspace}"`,
     "npm install -g @openai/codex@latest slack-mcp-server@1.3.0",
-    `npm install --prefix "${workspace}" @modelcontextprotocol/sdk@1.29.0`,
+    `npm install --prefix "${workspace}" @microsoft/microsoft-graph-client@3.0.7 @modelcontextprotocol/sdk@1.29.0`,
     `chmod 777 "${workspace}"`,
     "rm -rf /var/lib/apt/lists/*",
   ].join("\n")

@@ -15,6 +15,7 @@ import {
   workspace,
 } from "./harness"
 import { createLinearTokenPreflightCommand } from "./linear"
+import { createMicrosoftTokenPreflightCommand } from "./microsoft"
 import { createSlackTokenPreflightCommand } from "./slack"
 import { type ToolBundle, type ToolPreflight } from "./tools"
 import {
@@ -167,6 +168,10 @@ async function verifyPreflights(
     if (preflight.type === "slack") {
       traces.push(await verifySlackTokens(sandbox, preflight))
     }
+
+    if (preflight.type === "microsoft") {
+      traces.push(await verifyMicrosoftToken(sandbox, preflight))
+    }
   }
 
   return traces
@@ -201,6 +206,24 @@ async function verifySlackTokens(
     },
     timeoutMs: 30_000,
   })
+
+  return createCommandTrace(result)
+}
+
+async function verifyMicrosoftToken(
+  sandbox: E2BSandbox,
+  preflight: Extract<ToolPreflight, { type: "microsoft" }>
+) {
+  const result = await runCommand(
+    sandbox,
+    createMicrosoftTokenPreflightCommand(),
+    {
+      envs: {
+        MILO_MICROSOFT_ACCESS_TOKEN: preflight.credentials.accessToken,
+      },
+      timeoutMs: 30_000,
+    }
+  )
 
   return createCommandTrace(result)
 }

@@ -101,17 +101,33 @@ function createScheduledTriggerPart(
   }
 }
 
-function getProviderLabel(provider: "linear" | "slack") {
+function getProviderLabel(provider: "linear" | "microsoft" | "slack") {
   if (provider === "linear") {
     return "Linear"
+  }
+
+  if (provider === "microsoft") {
+    return "Microsoft Teams"
   }
 
   return "Slack"
 }
 
-function getMessageTargetId(provider: "linear" | "slack", data: unknown) {
+function getMessageTargetId(
+  provider: "linear" | "microsoft" | "slack",
+  data: unknown
+) {
   if (provider === "linear") {
     return getDataString(data, "issueId") ?? ""
+  }
+
+  if (provider === "microsoft") {
+    return (
+      getDataString(data, "chatId") ??
+      getDataString(data, "channelId") ??
+      getDataString(data, "resource") ??
+      ""
+    )
   }
 
   return getDataString(data, "channelId") ?? ""

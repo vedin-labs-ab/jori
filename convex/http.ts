@@ -6,6 +6,12 @@ import {
   handleLinearOAuthCallback,
 } from "./providers/linear/http"
 import {
+  handleMicrosoftAdminConsentCallback,
+  handleMicrosoftEvents,
+  handleMicrosoftInstall,
+  handleMicrosoftOAuthCallback,
+} from "./providers/microsoft/http"
+import {
   handleSlackEvents,
   handleSlackInstall,
   handleSlackOAuthCallback,
@@ -94,6 +100,38 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     return await handleLinearEvents(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/microsoft/install",
+  method: "GET",
+  handler: httpAction(async (_ctx, request) => {
+    return await handleMicrosoftInstall(request)
+  }),
+})
+
+http.route({
+  path: "/microsoft/admin/callback",
+  method: "GET",
+  handler: httpAction(async (_ctx, request) => {
+    return await handleMicrosoftAdminConsentCallback(request)
+  }),
+})
+
+http.route({
+  path: "/microsoft/oauth/callback",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    return await handleMicrosoftOAuthCallback(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/microsoft/events",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    return await handleMicrosoftEvents(ctx, request)
   }),
 })
 

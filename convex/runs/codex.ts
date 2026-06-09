@@ -19,6 +19,15 @@ export type LinearRuntimeInput = {
   message: Doc<"messages">
 }
 
+export type MicrosoftRuntimeInput = {
+  type: "message"
+  provider: "microsoft"
+  execution: Doc<"executions">
+  trigger: Doc<"triggers">
+  integration: Doc<"integrations">
+  message: Doc<"messages">
+}
+
 export type ScheduledRuntimeInput = {
   type: "scheduled"
   execution: Doc<"executions">
@@ -30,6 +39,7 @@ export type ScheduledRuntimeInput = {
 export type CodexRuntimeInput =
   | SlackRuntimeInput
   | LinearRuntimeInput
+  | MicrosoftRuntimeInput
   | ScheduledRuntimeInput
 
 export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {

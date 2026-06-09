@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react"
 
-export function useIntegrationCallbackStatus(provider: "linear" | "slack") {
+type IntegrationCallbackProvider = "linear" | "microsoft" | "slack"
+
+export function useIntegrationCallbackStatus(
+  provider: IntegrationCallbackProvider
+) {
   const [status, setStatus] = useState<"connected" | "error" | null>(null)
 
   useEffect(() => {
@@ -10,7 +14,7 @@ export function useIntegrationCallbackStatus(provider: "linear" | "slack") {
   return status
 }
 
-function getIntegrationCallbackStatus(provider: "linear" | "slack") {
+function getIntegrationCallbackStatus(provider: IntegrationCallbackProvider) {
   const value = new URLSearchParams(window.location.search).get(provider)
 
   if (value === "connected" || value === "error") {

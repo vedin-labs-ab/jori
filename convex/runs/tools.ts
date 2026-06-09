@@ -4,10 +4,15 @@ import {
   requireLinearCredentials,
 } from "../providers/linear/credentials"
 import {
+  type MicrosoftCredentials,
+  requireMicrosoftCredentials,
+} from "../providers/microsoft/credentials"
+import {
   requireSlackCredentials,
   type SlackCredentials,
 } from "../providers/slack/credentials"
 import { createLinearProxyScript } from "./linear"
+import { createMicrosoftGraphMcpScript } from "./microsoft"
 import { createMiloMcpScript } from "./milo"
 import { createSlackProxyScript } from "./proxy"
 
@@ -38,6 +43,10 @@ export type ToolPreflight =
       type: "slack"
       credentials: SlackCredentials
     }
+  | {
+      type: "microsoft"
+      credentials: MicrosoftCredentials
+    }
 
 export type RuntimeTarget =
   | {
@@ -49,6 +58,14 @@ export type RuntimeTarget =
       provider: "slack"
       channelId: string
       threadId?: string
+    }
+  | {
+      provider: "microsoft"
+      chatId?: string
+      teamId?: string
+      channelId?: string
+      messageId?: string
+      replyId?: string
     }
 
 export function assembleToolsForRun(args: {
@@ -90,10 +107,54 @@ export function assembleToolsForRun(args: {
     )
   }
 
+  if (args.integration?.target.provider === "microsoft") {
+    const credentials = requireMicrosoftCredentials(
+      args.integration.integration
+    )
+
+    bundles.push(
+      createMicrosoftToolBundle({
+        credentials,
+        target: args.integration.target,
+      })
+    )
+  }
+
   return {
     mcpServers: bundles.flatMap((bundle) => bundle.mcpServers),
     sandboxFiles: bundles.flatMap((bundle) => bundle.sandboxFiles),
     preflights: bundles.flatMap((bundle) => bundle.preflights),
+  }
+}
+
+function createMicrosoftToolBundle(args: {
+  credentials: MicrosoftCredentials
+  target: Extract<RuntimeTarget, { provider: "microsoft" }>
+}): ToolBundle {
+  return {
+    mcpServers: [
+      {
+        name: "microsoft",
+        command: "node",
+        args: ["/tmp/milo-workspace/milo-microsoft-mcp.mjs"],
+        env: {
+          MILO_MICROSOFT_ACCESS_TOKEN: args.credentials.accessToken,
+          MILO_MICROSOFT_TARGET_JSON: JSON.stringify(args.target),
+        },
+      },
+    ],
+    sandboxFiles: [
+      {
+        path: "/tmp/milo-workspace/milo-microsoft-mcp.mjs",
+        content: createMicrosoftGraphMcpScript(),
+      },
+    ],
+    preflights: [
+      {
+        type: "microsoft",
+        credentials: args.credentials,
+      },
+    ],
   }
 }
 
