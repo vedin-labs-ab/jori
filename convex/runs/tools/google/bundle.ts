@@ -18,7 +18,7 @@ export function createGmailToolBundle(
   return createGoogleToolBundle({
     ...args,
     name: "gmail",
-    scriptPath: "/tmp/milo-workspace/milo-gmail-mcp.mjs",
+    scriptPath: "/home/user/milo-workspace/milo-gmail-mcp.mjs",
     surface: "gmail",
   })
 }
@@ -32,7 +32,7 @@ export function createGoogleCalendarToolBundle(
     ...args,
     accountEmail: "",
     name: "googleCalendar",
-    scriptPath: "/tmp/milo-workspace/milo-google-calendar-mcp.mjs",
+    scriptPath: "/home/user/milo-workspace/milo-google-calendar-mcp.mjs",
     surface: "googleCalendar",
   })
 }

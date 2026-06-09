@@ -17,7 +17,7 @@ export function createNotionToolBundle(
       {
         name: "notion",
         command: "node",
-        args: ["/tmp/milo-workspace/milo-notion-mcp.mjs"],
+        args: ["/home/user/milo-workspace/milo-notion-mcp.mjs"],
         env: {
           MILO_NOTION_ACCESS_TOKEN: args.credentials.accessToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
@@ -26,7 +26,7 @@ export function createNotionToolBundle(
     ],
     sandboxFiles: [
       {
-        path: "/tmp/milo-workspace/milo-notion-mcp.mjs",
+        path: "/home/user/milo-workspace/milo-notion-mcp.mjs",
         content: createNotionProxyScript(),
       },
     ],

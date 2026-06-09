@@ -14,11 +14,14 @@ Identity and organizations come from Clerk. Milo stores Clerk organization IDs a
 
 E2B sandbox identity is stored directly on executions. There is no sandbox table. The Convex backend orchestrates the sandbox and execution lifecycle, but provider communication belongs to Codex through provider MCP servers.
 
+Executions use the `milo-codex` E2B sandbox template unless `E2B_SANDBOX_TEMPLATE` overrides it. The template pre-installs Node.js, git, `@openai/codex@0.139.0`, and provider MCP dependencies so each message only needs runtime credentials, config, and scoped sandbox files.
+
 Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Provider MCP is configured per execution from the active integration and target. Slack exposes context and reply tools scoped to the triggering channel. Linear exposes issue read/comment tools scoped to the triggering issue. GitHub exposes repository context and comment replies scoped to the triggering issue or pull request. Google and Microsoft expose user-scoped mail and calendar tools when those integrations are active for the resolved execution user. Notion exposes tenant-scoped workspace context, page, record, block, and comment tools for the pages and databases selected during authorization. Milo MCP is configured per execution with a one-time token whose hash is stored on the active execution; MCP requests derive `tenantId` from that token. Each sandbox only receives the MCP tokens for the tenant and workspace that triggered the execution.
 
 Required Convex environment variables:
 
 - `E2B_API_KEY`: E2B API key for creating ephemeral sandboxes.
+- `E2B_SANDBOX_TEMPLATE`: optional E2B sandbox template override. Defaults to `milo-codex`.
 - `CODEX_AUTH_JSON_BASE64`: base64-encoded Codex `auth.json`.
 - `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, and `SLACK_SIGNING_SECRET`: Slack app install and event verification secrets.
 - `LINEAR_CLIENT_ID`, `LINEAR_CLIENT_SECRET`, and `LINEAR_WEBHOOK_SECRET`: Linear OAuth install and webhook verification secrets.

@@ -22,7 +22,7 @@ export function createGitHubToolBundle(
       {
         name: "github",
         command: "node",
-        args: ["/tmp/milo-workspace/milo-github-mcp.mjs"],
+        args: ["/home/user/milo-workspace/milo-github-mcp.mjs"],
         env: {
           MILO_GITHUB_TOKEN: args.credentials.token,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
@@ -31,7 +31,7 @@ export function createGitHubToolBundle(
     ],
     sandboxFiles: [
       {
-        path: "/tmp/milo-workspace/milo-github-mcp.mjs",
+        path: "/home/user/milo-workspace/milo-github-mcp.mjs",
         content: createGitHubMcpScript(),
       },
     ],

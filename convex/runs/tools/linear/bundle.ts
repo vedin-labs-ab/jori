@@ -18,7 +18,7 @@ export function createLinearToolBundle(
       {
         name: "linear",
         command: "node",
-        args: ["/tmp/milo-workspace/milo-linear-mcp.mjs"],
+        args: ["/home/user/milo-workspace/milo-linear-mcp.mjs"],
         env: {
           MILO_LINEAR_ACCESS_TOKEN: args.credentials.accessToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
@@ -27,7 +27,7 @@ export function createLinearToolBundle(
     ],
     sandboxFiles: [
       {
-        path: "/tmp/milo-workspace/milo-linear-mcp.mjs",
+        path: "/home/user/milo-workspace/milo-linear-mcp.mjs",
         content: createLinearProxyScript(),
       },
     ],

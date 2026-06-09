@@ -20,7 +20,8 @@ import {
   codexHome,
   createBootstrapCommand,
   createCodexCommand,
-  createInstallCommand,
+  createImageCheckCommand,
+  e2bSandboxTemplate,
   workspace,
 } from "./harness"
 import {
@@ -49,8 +50,11 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
   try {
     sandbox = await createE2BSandbox()
     await args.onSandboxCreated(sandbox.sandboxId)
-    const installTrace = await installCodex(sandbox)
-    assertCommandSucceeded(installTrace, "Could not install Codex inside E2B.")
+    const imageTrace = await verifySandboxImage(sandbox)
+    assertCommandSucceeded(
+      imageTrace,
+      "The E2B sandbox image is missing a required runtime dependency."
+    )
     const bootstrapTrace = await bootstrapCodex(sandbox, {
       authJsonBase64: args.authJsonBase64,
       toolBundle: args.toolBundle,
@@ -88,15 +92,18 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
 }
 
 async function createE2BSandbox() {
-  return await Sandbox.create({
-    apiKey: requireE2BApiKey(),
-    allowInternetAccess: true,
-    metadata: {
-      app: "milo",
-      runtime: "codex",
-    },
-    timeoutMs: sandboxTimeoutMs,
-  })
+  return await Sandbox.create(
+    process.env.E2B_SANDBOX_TEMPLATE ?? e2bSandboxTemplate,
+    {
+      apiKey: requireE2BApiKey(),
+      allowInternetAccess: true,
+      metadata: {
+        app: "milo",
+        runtime: "codex",
+      },
+      timeoutMs: sandboxTimeoutMs,
+    }
+  )
 }
 
 function requireE2BApiKey() {
@@ -109,10 +116,9 @@ function requireE2BApiKey() {
   return apiKey
 }
 
-async function installCodex(sandbox: E2BSandbox) {
-  const result = await runCommand(sandbox, createInstallCommand(), {
-    timeoutMs: 120_000,
-    user: "root",
+async function verifySandboxImage(sandbox: E2BSandbox) {
+  const result = await runCommand(sandbox, createImageCheckCommand(), {
+    timeoutMs: 10_000,
   })
 
   return createCommandTrace(result)

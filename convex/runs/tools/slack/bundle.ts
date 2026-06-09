@@ -17,7 +17,7 @@ export function createSlackToolBundle(
       {
         name: "slack",
         command: "node",
-        args: ["/tmp/milo-workspace/milo-slack-mcp-proxy.mjs"],
+        args: ["/home/user/milo-workspace/milo-slack-mcp-proxy.mjs"],
         env: {
           MILO_SLACK_CACHE_KEY: args.accountId,
           MILO_SLACK_BOT_TOKEN: args.credentials.bot,
@@ -28,7 +28,7 @@ export function createSlackToolBundle(
     ],
     sandboxFiles: [
       {
-        path: "/tmp/milo-workspace/milo-slack-mcp-proxy.mjs",
+        path: "/home/user/milo-workspace/milo-slack-mcp-proxy.mjs",
         content: createSlackProxyScript(),
       },
     ],

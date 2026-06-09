@@ -1,24 +1,25 @@
 export const codexHome = "/tmp/milo-codex-home"
-export const workspace = "/tmp/milo-workspace"
+export const codexVersion = "0.139.0"
+export const e2bSandboxTemplate = "milo-codex"
+export const workspace = "/home/user/milo-workspace"
 
-export function createInstallCommand() {
+export function createImageCheckCommand() {
   return [
     "set -eu",
-    "if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then",
-    "  apt-get update",
-    "  apt-get install -y ca-certificates curl gnupg",
-    "  curl -fsSL https://deb.nodesource.com/setup_22.x | bash -",
-    "  apt-get install -y nodejs",
-    "fi",
-    "if ! command -v git >/dev/null 2>&1; then",
-    "  apt-get update",
-    "  apt-get install -y git",
-    "fi",
+    `test "$(codex --version)" = "codex-cli ${codexVersion}"`,
+    "command -v node >/dev/null",
+    "command -v npm >/dev/null",
+    "command -v git >/dev/null",
     `mkdir -p "${workspace}"`,
-    "npm install -g @openai/codex@latest slack-mcp-server@1.3.0",
-    `npm install --prefix "${workspace}" @microsoft/microsoft-graph-client@3.0.7 @modelcontextprotocol/sdk@1.29.0 @octokit/rest@22.0.1`,
-    `chmod 777 "${workspace}"`,
-    "rm -rf /var/lib/apt/lists/*",
+    `cat > "${workspace}/.milo-image-check.mjs" <<'NODE'`,
+    'import { Client } from "@microsoft/microsoft-graph-client";',
+    'import { Server } from "@modelcontextprotocol/sdk/server/index.js";',
+    'import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";',
+    'import { Octokit } from "@octokit/rest";',
+    "void [Client, Server, StdioServerTransport, Octokit];",
+    "NODE",
+    `node "${workspace}/.milo-image-check.mjs"`,
+    `rm -f "${workspace}/.milo-image-check.mjs"`,
   ].join("\n")
 }
 

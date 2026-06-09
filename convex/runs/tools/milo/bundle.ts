@@ -17,7 +17,7 @@ export function createMiloToolBundle(
       {
         name: "milo",
         command: "node",
-        args: ["/tmp/milo-workspace/milo-mcp.mjs"],
+        args: ["/home/user/milo-workspace/milo-mcp.mjs"],
         env: {
           MILO_CONVEX_SITE_URL: args.convexSiteUrl,
           MILO_EXECUTION_TOKEN: args.executionToken,
@@ -27,7 +27,7 @@ export function createMiloToolBundle(
     ],
     sandboxFiles: [
       {
-        path: "/tmp/milo-workspace/milo-mcp.mjs",
+        path: "/home/user/milo-workspace/milo-mcp.mjs",
         content: createMiloMcpScript(),
       },
     ],

@@ -19,6 +19,7 @@ Microsoft Teams tenant-scoped ingestion is not active in this version.
 ## Required Convex Environment Variables
 
 - `E2B_API_KEY`: E2B API key for ephemeral sandboxes.
+- `E2B_SANDBOX_TEMPLATE`: optional E2B sandbox template override. Defaults to `milo-codex`.
 - `CODEX_AUTH_JSON_BASE64`: base64-encoded Codex `auth.json`.
 - `SLACK_CLIENT_ID`: Slack OAuth client ID.
 - `SLACK_CLIENT_SECRET`: Slack OAuth client secret.
@@ -27,3 +28,13 @@ Microsoft Teams tenant-scoped ingestion is not active in this version.
 - `MICROSOFT_CLIENT_SECRET`: Microsoft Entra application client secret.
 - `NOTION_CLIENT_ID`: Notion public connection OAuth client ID.
 - `NOTION_CLIENT_SECRET`: Notion public connection OAuth client secret.
+
+## E2B Sandbox Image
+
+Build the pre-baked Codex sandbox image before running executions:
+
+```sh
+pnpm e2b:build
+```
+
+The image installs Node.js, git, `@openai/codex@0.139.0`, `slack-mcp-server@1.3.0`, and the workspace packages required by the provider MCP tools.

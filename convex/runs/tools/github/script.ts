@@ -19,7 +19,7 @@ import {
 
 const run = promisify(execFile);
 const token = requiredEnv("MILO_GITHUB_TOKEN");
-const workspace = "/tmp/milo-workspace";
+const workspace = "/home/user/milo-workspace";
 const defaultCloneDirectory = path.join(workspace, "repository");
 const octokit = new Octokit({
   auth: token,

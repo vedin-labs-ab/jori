@@ -17,7 +17,7 @@ export function createMicrosoftEmailToolBundle(
   return createMicrosoftToolBundle({
     ...args,
     name: "microsoftEmail",
-    scriptPath: "/tmp/milo-workspace/milo-microsoft-email-mcp.mjs",
+    scriptPath: "/home/user/milo-workspace/milo-microsoft-email-mcp.mjs",
     surface: "microsoftEmail",
   })
 }
@@ -30,7 +30,7 @@ export function createMicrosoftCalendarToolBundle(
   return createMicrosoftToolBundle({
     ...args,
     name: "microsoftCalendar",
-    scriptPath: "/tmp/milo-workspace/milo-microsoft-calendar-mcp.mjs",
+    scriptPath: "/home/user/milo-workspace/milo-microsoft-calendar-mcp.mjs",
     surface: "microsoftCalendar",
   })
 }
