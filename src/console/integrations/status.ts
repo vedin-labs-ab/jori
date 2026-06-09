@@ -7,6 +7,7 @@ export const integrationCallbackProviders = [
   "linear",
   "microsoftCalendar",
   "microsoftEmail",
+  "notion",
   "slack",
 ] as const
 

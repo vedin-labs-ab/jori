@@ -1,4 +1,5 @@
 import { type ToolPermissionRow } from "./catalog"
+import { notionToolPermissionRows } from "./notion"
 
 export const toolPermissionRows = [
   [
@@ -166,6 +167,7 @@ export const toolPermissionRows = [
     "Update a Google Calendar event.",
     "write",
   ],
+  ...notionToolPermissionRows,
   [
     "microsoftEmail",
     "microsoft_email_search_messages",

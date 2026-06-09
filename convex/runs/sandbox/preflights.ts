@@ -2,6 +2,7 @@ import { createGitHubTokenPreflightCommand } from "../tools/github"
 import { createGoogleTokenPreflightCommand } from "../tools/google"
 import { createLinearTokenPreflightCommand } from "../tools/linear"
 import { createMicrosoftTokenPreflightCommand } from "../tools/microsoft"
+import { createNotionTokenPreflightCommand } from "../tools/notion"
 import { createSlackTokenPreflightCommand } from "../tools/slack"
 import { type ToolPreflight } from "../tools/types"
 
@@ -24,6 +25,10 @@ export function createToolPreflightCommand(preflight: ToolPreflight) {
 
   if (preflight.type === "googleCalendar") {
     return createGoogleTokenPreflightCommand("googleCalendar")
+  }
+
+  if (preflight.type === "notion") {
+    return createNotionTokenPreflightCommand()
   }
 
   return createMicrosoftTokenPreflightCommand(preflight.type)
@@ -56,6 +61,12 @@ export function createToolPreflightEnv(
   if (preflight.type === "gmail" || preflight.type === "googleCalendar") {
     return {
       MILO_GOOGLE_ACCESS_TOKEN: preflight.credentials.accessToken,
+    }
+  }
+
+  if (preflight.type === "notion") {
+    return {
+      MILO_NOTION_ACCESS_TOKEN: preflight.credentials.accessToken,
     }
   }
 

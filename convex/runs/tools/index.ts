@@ -9,6 +9,7 @@ import { requireGitHubCredentials } from "../../providers/github/credentials"
 import { requireGoogleCredentials } from "../../providers/google/credentials"
 import { requireLinearCredentials } from "../../providers/linear/credentials"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
+import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
 import { getProviderSkillNames } from "../bundles"
 import { createGitHubToolBundle } from "./github"
@@ -19,6 +20,7 @@ import {
   createMicrosoftEmailToolBundle,
 } from "./microsoft"
 import { createMiloToolBundle } from "./milo"
+import { createNotionToolBundle } from "./notion"
 import { type ToolPermissionInput } from "./policy"
 import { createSlackToolBundle } from "./slack"
 import {
@@ -146,6 +148,11 @@ function createProviderToolBundle(
         credentials: requireGoogleCredentials(args.integration),
         ...permissionInput,
       })
+    case "notion":
+      return createNotionToolBundle({
+        credentials: requireNotionCredentials(args.integration),
+        ...permissionInput,
+      })
     case "microsoftEmail":
       return createMicrosoftEmailToolBundle({
         credentials: requireMicrosoftCredentials(args.integration),
@@ -231,6 +238,7 @@ function getRuntimeToolProvider(provider: string): ToolProvider | null {
     provider === "slack" ||
     provider === "gmail" ||
     provider === "googleCalendar" ||
+    provider === "notion" ||
     provider === "microsoftEmail" ||
     provider === "microsoftCalendar"
   ) {

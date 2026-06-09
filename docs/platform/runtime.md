@@ -14,7 +14,7 @@ Identity and organizations come from Clerk. Milo stores Clerk organization IDs a
 
 E2B sandbox identity is stored directly on executions. There is no sandbox table. The Convex backend orchestrates the sandbox and execution lifecycle, but provider communication belongs to Codex through provider MCP servers.
 
-Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Provider MCP is configured per execution from the active integration and target. Slack exposes context and reply tools scoped to the triggering channel. Linear exposes issue read/comment tools scoped to the triggering issue. GitHub exposes repository context and comment replies scoped to the triggering issue or pull request. Google and Microsoft expose user-scoped mail and calendar tools when those integrations are active for the resolved execution user. Milo MCP is configured per execution with a one-time token whose hash is stored on the active execution; MCP requests derive `tenantId` from that token. Each sandbox only receives the MCP tokens for the tenant and workspace that triggered the execution.
+Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Provider MCP is configured per execution from the active integration and target. Slack exposes context and reply tools scoped to the triggering channel. Linear exposes issue read/comment tools scoped to the triggering issue. GitHub exposes repository context and comment replies scoped to the triggering issue or pull request. Google and Microsoft expose user-scoped mail and calendar tools when those integrations are active for the resolved execution user. Notion exposes tenant-scoped workspace context, page, record, block, and comment tools for the pages and databases selected during authorization. Milo MCP is configured per execution with a one-time token whose hash is stored on the active execution; MCP requests derive `tenantId` from that token. Each sandbox only receives the MCP tokens for the tenant and workspace that triggered the execution.
 
 Required Convex environment variables:
 
@@ -24,6 +24,7 @@ Required Convex environment variables:
 - `LINEAR_CLIENT_ID`, `LINEAR_CLIENT_SECRET`, and `LINEAR_WEBHOOK_SECRET`: Linear OAuth install and webhook verification secrets.
 - `GITHUB_APP_SLUG`, `GITHUB_APP_ID`, `GITHUB_PRIVATE_KEY`, and `GITHUB_WEBHOOK_SECRET`: GitHub App install and webhook verification secrets.
 - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`: Google OAuth install and refresh secrets.
+- `NOTION_CLIENT_ID` and `NOTION_CLIENT_SECRET`: Notion public connection OAuth install secrets.
 - `MICROSOFT_CLIENT_ID` and `MICROSOFT_CLIENT_SECRET`: Microsoft Entra OAuth install and refresh secrets.
 
 ## Onboarding
@@ -45,6 +46,8 @@ GitHub installs use a signed GitHub App install state and send issue and pull re
 Google installs use delegated OAuth for Gmail and Calendar account access, and record a Google identity row for the connecting Clerk user.
 
 Microsoft installs use delegated OAuth for Outlook mail and calendar account access, and record a Microsoft identity row for the connecting Clerk user.
+
+Notion installs use public connection OAuth with Notion's page picker. The connection should request the minimum Notion capabilities needed for workspace context and actions: read, update, and insert content plus read and insert comments.
 
 Use Clerk's out-of-the-box components wherever possible. Styling may be adjusted to match Milo's theme, but identity and organization behavior should remain Clerk-owned. Store organization setup details, such as website, in Clerk organization metadata unless Milo needs to query them frequently.
 

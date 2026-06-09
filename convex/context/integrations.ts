@@ -17,6 +17,13 @@ import {
   getMicrosoftEmail,
   getMicrosoftTenantName,
 } from "../providers/microsoft/data"
+import {
+  getNotionBotId,
+  getNotionOwnerEmail,
+  getNotionOwnerName,
+  getNotionWorkspaceIcon,
+  getNotionWorkspaceName,
+} from "../providers/notion/data"
 import { getSlackTeamName } from "../providers/slack/data"
 
 export const getSlackStatus = query({
@@ -110,6 +117,33 @@ export const getGitHubStatus = query({
       createdAt: integration.createdAt,
       accountLogin: getGitHubAccountLogin(integration.data),
       accountType: getGitHubAccountType(integration.data),
+    }
+  },
+})
+
+export const getNotionStatus = query({
+  args: {
+    tenantId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const integration = await getTenantIntegration(ctx, {
+      provider: "notion",
+      tenantId: args.tenantId,
+    })
+
+    if (integration === null) {
+      return null
+    }
+
+    return {
+      accountId: integration.accountId,
+      status: integration.status,
+      createdAt: integration.createdAt,
+      botId: getNotionBotId(integration.data),
+      ownerEmail: getNotionOwnerEmail(integration.data),
+      ownerName: getNotionOwnerName(integration.data),
+      workspaceIcon: getNotionWorkspaceIcon(integration.data),
+      workspaceName: getNotionWorkspaceName(integration.data),
     }
   },
 })

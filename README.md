@@ -12,6 +12,8 @@ Convex does not post Slack replies through backend Slack chat APIs.
 
 Microsoft Email and Microsoft Calendar use separate delegated OAuth connections. Each connection is user-scoped to the installing Milo user and only exposes Outlook mail or calendar tools when that user's integration is active for the execution.
 
+Notion uses a public connection OAuth install. Milo stores workspace-level access for the pages and databases selected during Notion authorization, then exposes focused Notion context, page, record, block, and comment tools at runtime.
+
 Microsoft Teams tenant-scoped ingestion is not active in this version.
 
 ## Required Convex Environment Variables
@@ -23,3 +25,5 @@ Microsoft Teams tenant-scoped ingestion is not active in this version.
 - `SLACK_SIGNING_SECRET`: Slack event and install state signing secret.
 - `MICROSOFT_CLIENT_ID`: Microsoft Entra application client ID.
 - `MICROSOFT_CLIENT_SECRET`: Microsoft Entra application client secret.
+- `NOTION_CLIENT_ID`: Notion public connection OAuth client ID.
+- `NOTION_CLIENT_SECRET`: Notion public connection OAuth client secret.

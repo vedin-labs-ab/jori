@@ -3,6 +3,7 @@ import { type GitHubCredentials } from "../../providers/github/credentials"
 import { type GoogleCredentials } from "../../providers/google/credentials"
 import { type LinearCredentials } from "../../providers/linear/credentials"
 import { type MicrosoftCredentials } from "../../providers/microsoft/credentials"
+import { type NotionCredentials } from "../../providers/notion/credentials"
 import { type SlackCredentials } from "../../providers/slack/credentials"
 
 export type ToolBundle = {
@@ -50,6 +51,10 @@ export type ToolPreflight =
   | {
       type: "googleCalendar"
       credentials: GoogleCredentials
+    }
+  | {
+      type: "notion"
+      credentials: NotionCredentials
     }
   | {
       type: "microsoftEmail"

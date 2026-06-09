@@ -8,6 +8,7 @@ const providerSkillNames = {
   github: ["github"],
   gmail: ["gmail"],
   googleCalendar: ["calendar"],
+  notion: ["notion"],
   microsoftEmail: ["microsoft"],
   microsoftCalendar: ["microsoft"],
 } satisfies Record<ToolProvider, readonly string[]>

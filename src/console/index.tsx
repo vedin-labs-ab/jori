@@ -21,6 +21,7 @@ import {
   MicrosoftCalendarConnection,
   MicrosoftEmailConnection,
 } from "./integrations/microsoft"
+import { NotionConnection } from "./integrations/notion"
 import { SlackConnection } from "./integrations/slack"
 import { LoadingMessage } from "./loading"
 import { NativePermissionsCard } from "./permissions"
@@ -180,6 +181,7 @@ function IntegrationTabs({
         <SlackConnection permissions={permissions} tenantId={tenantId} />
         <LinearConnection permissions={permissions} tenantId={tenantId} />
         <GitHubConnection permissions={permissions} tenantId={tenantId} />
+        <NotionConnection permissions={permissions} tenantId={tenantId} />
       </TabsContent>
       <TabsContent value="user" className="grid gap-4 md:grid-cols-2">
         <GmailConnection permissions={permissions} tenantId={tenantId} />

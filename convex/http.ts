@@ -19,6 +19,10 @@ import {
   handleMicrosoftOAuthCallback,
 } from "./providers/microsoft/http"
 import {
+  handleNotionInstall,
+  handleNotionOAuthCallback,
+} from "./providers/notion/http"
+import {
   handleSlackEvents,
   handleSlackInstall,
   handleSlackOAuthCallback,
@@ -155,6 +159,22 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     return await handleLinearEvents(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/notion/install",
+  method: "GET",
+  handler: httpAction(async (_ctx, request) => {
+    return await handleNotionInstall(request)
+  }),
+})
+
+http.route({
+  path: "/notion/oauth/callback",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    return await handleNotionOAuthCallback(ctx, request)
   }),
 })
 

@@ -8,7 +8,7 @@ Stores connected external system accounts.
 
 - External account identity.
 - Provider-specific credentials needed to read context and send responses.
-- Provider-specific metadata. Slack stores `data` as `{ scopes: { bot, user }, team, botId }`. Linear stores `data` as `{ appUserId, appUserName, organization }`. Microsoft stores `data` as `{ scopes, tenant, user, adminConsentedAt }`.
+- Provider-specific metadata. Slack stores `data` as `{ scopes: { bot, user }, team, botId }`. Linear stores `data` as `{ appUserId, appUserName, organization }`. Notion stores `data` as `{ botId, workspaceId, workspaceName, workspaceIcon, owner, duplicatedTemplateId }`. Microsoft stores `data` as `{ scopes, tenant, user, adminConsentedAt }`.
 - Connection status.
 
 ## Boundary
