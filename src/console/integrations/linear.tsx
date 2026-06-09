@@ -1,10 +1,8 @@
 import { useMutation, useQuery } from "convex/react"
-import { ExternalLink, GitPullRequestArrow, Loader2 } from "lucide-react"
-import { useState } from "react"
+import { GitPullRequestArrow } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
-import { IntegrationConnectionCard } from "./card"
-
-const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
+import { IntegrationActionLabel, IntegrationConnectionCard } from "./card"
+import { useIntegrationInstall } from "./install"
 
 export function LinearConnection({ tenantId }: { tenantId: string }) {
   const createInstallState = useMutation(
@@ -13,35 +11,12 @@ export function LinearConnection({ tenantId }: { tenantId: string }) {
   const status = useQuery(api.context.integrations.getLinearStatus, {
     tenantId,
   })
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [error, setError] = useState<string>()
-
-  async function connectLinear() {
-    if (!convexSiteUrl) {
-      setError("Missing VITE_CONVEX_SITE_URL.")
-      return
-    }
-
-    setError(undefined)
-    setIsConnecting(true)
-
-    try {
-      const state = await createInstallState({
-        tenantId,
-        returnUrl: window.location.origin,
-      })
-      const installUrl = new URL("/linear/install", convexSiteUrl)
-      installUrl.searchParams.set("state", state)
-      window.location.assign(installUrl.toString())
-    } catch (installError) {
-      setIsConnecting(false)
-      setError(
-        installError instanceof Error
-          ? installError.message
-          : "Could not start Linear install."
-      )
-    }
-  }
+  const install = useIntegrationInstall({
+    connectError: "Could not start Linear install.",
+    createInstallState,
+    installPath: "/linear/install",
+    tenantId,
+  })
 
   return (
     <IntegrationConnectionCard
@@ -51,10 +26,16 @@ export function LinearConnection({ tenantId }: { tenantId: string }) {
       headline={getLinearHeadline(status)}
       detail={getLinearDetail(status?.status)}
       icon={<GitPullRequestArrow className="size-4" />}
-      error={error}
-      actionLabel={<LinearActionLabel isConnecting={isConnecting} />}
-      isConnecting={isConnecting}
-      onConnect={connectLinear}
+      error={install.error}
+      actionLabel={
+        <IntegrationActionLabel
+          action="Connect Linear"
+          isConnecting={install.isConnecting}
+          loading="Connecting Linear"
+        />
+      }
+      isConnecting={install.isConnecting}
+      onConnect={install.connect}
     />
   )
 }
@@ -87,22 +68,4 @@ function getLinearDetail(status: "active" | "paused" | "revoked" | undefined) {
   }
 
   return "Install Milo as a Linear app user to enable issue comments and mention-based triggers."
-}
-
-function LinearActionLabel({ isConnecting }: { isConnecting: boolean }) {
-  if (isConnecting) {
-    return (
-      <>
-        <Loader2 className="size-4 animate-spin" />
-        Connecting Linear
-      </>
-    )
-  }
-
-  return (
-    <>
-      Connect Linear
-      <ExternalLink />
-    </>
-  )
 }

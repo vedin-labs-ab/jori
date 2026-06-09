@@ -1,6 +1,6 @@
 import { CheckCircle2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { useIntegrationCallbackStatus } from "./integrations/status"
+import { useIntegrationCallbackStatuses } from "./integrations/status"
 
 const integrationCallbackAlerts = [
   {
@@ -102,9 +102,6 @@ const integrationCallbackAlerts = [
   },
 ] as const
 
-type AlertProvider = (typeof integrationCallbackAlerts)[number]["provider"]
-type AlertStatus = "connected" | "error" | null
-
 export function IntegrationCallbackAlerts() {
   const statuses = useIntegrationCallbackStatuses()
 
@@ -124,16 +121,4 @@ export function IntegrationCallbackAlerts() {
       </Alert>
     )
   })
-}
-
-function useIntegrationCallbackStatuses(): Record<AlertProvider, AlertStatus> {
-  return {
-    gmail: useIntegrationCallbackStatus("gmail"),
-    github: useIntegrationCallbackStatus("github"),
-    googleCalendar: useIntegrationCallbackStatus("googleCalendar"),
-    linear: useIntegrationCallbackStatus("linear"),
-    microsoftCalendar: useIntegrationCallbackStatus("microsoftCalendar"),
-    microsoftEmail: useIntegrationCallbackStatus("microsoftEmail"),
-    slack: useIntegrationCallbackStatus("slack"),
-  }
 }

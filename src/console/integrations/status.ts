@@ -1,28 +1,50 @@
 import { useEffect, useState } from "react"
 
-type IntegrationCallbackProvider =
-  | "gmail"
-  | "github"
-  | "googleCalendar"
-  | "linear"
-  | "microsoftCalendar"
-  | "microsoftEmail"
-  | "slack"
+export const integrationCallbackProviders = [
+  "gmail",
+  "github",
+  "googleCalendar",
+  "linear",
+  "microsoftCalendar",
+  "microsoftEmail",
+  "slack",
+] as const
 
-export function useIntegrationCallbackStatus(
-  provider: IntegrationCallbackProvider
-) {
-  const [status, setStatus] = useState<"connected" | "error" | null>(null)
+export type IntegrationCallbackProvider =
+  (typeof integrationCallbackProviders)[number]
+
+export type IntegrationCallbackStatus = "connected" | "error" | null
+
+export function useIntegrationCallbackStatuses() {
+  const [statuses, setStatuses] = useState(readIntegrationCallbackStatuses)
 
   useEffect(() => {
-    setStatus(getIntegrationCallbackStatus(provider))
-  }, [provider])
+    setStatuses(
+      readIntegrationCallbackStatuses(
+        new URLSearchParams(window.location.search)
+      )
+    )
+  }, [])
 
-  return status
+  return statuses
 }
 
-function getIntegrationCallbackStatus(provider: IntegrationCallbackProvider) {
-  const value = new URLSearchParams(window.location.search).get(provider)
+function readIntegrationCallbackStatuses(
+  params = new URLSearchParams()
+): Record<IntegrationCallbackProvider, IntegrationCallbackStatus> {
+  return Object.fromEntries(
+    integrationCallbackProviders.map((provider) => [
+      provider,
+      getIntegrationCallbackStatus(params, provider),
+    ])
+  ) as Record<IntegrationCallbackProvider, IntegrationCallbackStatus>
+}
+
+function getIntegrationCallbackStatus(
+  params: URLSearchParams,
+  provider: IntegrationCallbackProvider
+) {
+  const value = params.get(provider)
 
   if (value === "connected" || value === "error") {
     return value

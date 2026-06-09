@@ -1,45 +1,20 @@
 import { useMutation, useQuery } from "convex/react"
-import { ExternalLink, Loader2, MessageSquare } from "lucide-react"
-import { useState } from "react"
+import { MessageSquare } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
-import { IntegrationConnectionCard } from "./card"
-
-const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
+import { IntegrationActionLabel, IntegrationConnectionCard } from "./card"
+import { useIntegrationInstall } from "./install"
 
 export function SlackConnection({ tenantId }: { tenantId: string }) {
   const createInstallState = useMutation(
     api.providers.slack.install.createInstallState
   )
   const status = useQuery(api.context.integrations.getSlackStatus, { tenantId })
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [error, setError] = useState<string>()
-
-  async function connectSlack() {
-    if (!convexSiteUrl) {
-      setError("Missing VITE_CONVEX_SITE_URL.")
-      return
-    }
-
-    setError(undefined)
-    setIsConnecting(true)
-
-    try {
-      const state = await createInstallState({
-        tenantId,
-        returnUrl: window.location.origin,
-      })
-      const installUrl = new URL("/slack/install", convexSiteUrl)
-      installUrl.searchParams.set("state", state)
-      window.location.assign(installUrl.toString())
-    } catch (installError) {
-      setIsConnecting(false)
-      setError(
-        installError instanceof Error
-          ? installError.message
-          : "Could not start Slack install."
-      )
-    }
-  }
+  const install = useIntegrationInstall({
+    connectError: "Could not start Slack install.",
+    createInstallState,
+    installPath: "/slack/install",
+    tenantId,
+  })
 
   return (
     <IntegrationConnectionCard
@@ -57,22 +32,16 @@ export function SlackConnection({ tenantId }: { tenantId: string }) {
           : "Install the Slack app once to enable context search and Milo replies."
       }
       icon={<MessageSquare className="size-4" />}
-      error={error}
+      error={install.error}
       actionLabel={
-        isConnecting ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Connecting Slack
-          </>
-        ) : (
-          <>
-            Connect Slack
-            <ExternalLink />
-          </>
-        )
+        <IntegrationActionLabel
+          action="Connect Slack"
+          isConnecting={install.isConnecting}
+          loading="Connecting Slack"
+        />
       }
-      isConnecting={isConnecting}
-      onConnect={connectSlack}
+      isConnecting={install.isConnecting}
+      onConnect={install.connect}
     />
   )
 }

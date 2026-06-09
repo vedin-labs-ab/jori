@@ -1,3 +1,4 @@
+import { ExternalLink, Loader2 } from "lucide-react"
 import { type ReactNode } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -11,7 +12,33 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-type ConnectionStatus = "active" | "paused" | "revoked" | undefined
+export type ConnectionStatus = "active" | "paused" | "revoked" | undefined
+
+export function IntegrationActionLabel({
+  action,
+  isConnecting,
+  loading,
+}: {
+  action: string
+  isConnecting: boolean
+  loading: string
+}) {
+  if (isConnecting) {
+    return (
+      <>
+        <Loader2 className="size-4 animate-spin" />
+        {loading}
+      </>
+    )
+  }
+
+  return (
+    <>
+      {action}
+      <ExternalLink />
+    </>
+  )
+}
 
 export function IntegrationConnectionCard({
   actionLabel,

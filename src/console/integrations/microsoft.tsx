@@ -1,30 +1,7 @@
 import { useMutation, useQuery } from "convex/react"
-import { CalendarDays, ExternalLink, Loader2, Mail } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { CalendarDays, Mail } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
-import { IntegrationConnectionCard } from "./card"
-
-const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
-
-type MicrosoftStatus = {
-  accountId: string
-  email?: string
-  name?: string
-  status: "active" | "paused" | "revoked"
-  tenantName?: string
-} | null
-
-type MicrosoftSurfaceConfig = {
-  action: string
-  connectedDetail: string
-  connectError: string
-  description: string
-  emptyDetail: string
-  icon: ReactNode
-  installPath: string
-  label: string
-  loading: string
-}
+import { AccountConnection, type AccountConnectionConfig } from "./account"
 
 const emailConfig = {
   action: "Connect Email",
@@ -39,7 +16,7 @@ const emailConfig = {
   installPath: "/microsoft-email/install",
   label: "Microsoft Email",
   loading: "Connecting Email",
-} satisfies MicrosoftSurfaceConfig
+} satisfies AccountConnectionConfig
 
 const calendarConfig = {
   action: "Connect Calendar",
@@ -54,7 +31,7 @@ const calendarConfig = {
   installPath: "/microsoft-calendar/install",
   label: "Microsoft Calendar",
   loading: "Connecting Calendar",
-} satisfies MicrosoftSurfaceConfig
+} satisfies AccountConnectionConfig
 
 export function MicrosoftEmailConnection({ tenantId }: { tenantId: string }) {
   const createInstallState = useMutation(
@@ -65,7 +42,7 @@ export function MicrosoftEmailConnection({ tenantId }: { tenantId: string }) {
   })
 
   return (
-    <MicrosoftSurfaceConnection
+    <AccountConnection
       config={emailConfig}
       createInstallState={createInstallState}
       status={status}
@@ -87,124 +64,11 @@ export function MicrosoftCalendarConnection({
   })
 
   return (
-    <MicrosoftSurfaceConnection
+    <AccountConnection
       config={calendarConfig}
       createInstallState={createInstallState}
       status={status}
       tenantId={tenantId}
     />
-  )
-}
-
-function MicrosoftSurfaceConnection({
-  config,
-  createInstallState,
-  status,
-  tenantId,
-}: {
-  config: MicrosoftSurfaceConfig
-  createInstallState: (args: {
-    tenantId: string
-    returnUrl: string
-  }) => Promise<string>
-  status: MicrosoftStatus | undefined
-  tenantId: string
-}) {
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [error, setError] = useState<string>()
-
-  async function connectMicrosoft() {
-    if (!convexSiteUrl) {
-      setError("Missing VITE_CONVEX_SITE_URL.")
-      return
-    }
-
-    setError(undefined)
-    setIsConnecting(true)
-
-    try {
-      const state = await createInstallState({
-        tenantId,
-        returnUrl: window.location.origin,
-      })
-      const installUrl = new URL(config.installPath, convexSiteUrl)
-      installUrl.searchParams.set("state", state)
-      window.location.assign(installUrl.toString())
-    } catch (installError) {
-      setIsConnecting(false)
-      setError(
-        installError instanceof Error
-          ? installError.message
-          : config.connectError
-      )
-    }
-  }
-
-  return (
-    <IntegrationConnectionCard
-      title={config.label}
-      description={config.description}
-      status={status?.status}
-      headline={getMicrosoftHeadline(status, config.label)}
-      detail={getMicrosoftDetail(status?.status, config)}
-      icon={config.icon}
-      error={error}
-      actionLabel={
-        <MicrosoftActionLabel config={config} isConnecting={isConnecting} />
-      }
-      isConnecting={isConnecting}
-      onConnect={connectMicrosoft}
-    />
-  )
-}
-
-function getMicrosoftHeadline(
-  status: MicrosoftStatus | undefined,
-  label: string
-) {
-  if (status === undefined) {
-    return `Checking ${label}`
-  }
-
-  return (
-    status?.name ??
-    status?.email ??
-    status?.accountId ??
-    `No ${label} connected`
-  )
-}
-
-function getMicrosoftDetail(
-  status: "active" | "paused" | "revoked" | undefined,
-  config: MicrosoftSurfaceConfig
-) {
-  if (status === "active") {
-    return config.connectedDetail
-  }
-
-  return config.emptyDetail
-}
-
-function MicrosoftActionLabel({
-  config,
-  isConnecting,
-}: {
-  config: MicrosoftSurfaceConfig
-  isConnecting: boolean
-}) {
-  if (isConnecting) {
-    return (
-      <>
-        <Loader2 className="size-4 animate-spin" />
-        {config.loading}
-      </>
-    )
-  }
-
-  return (
-    <>
-      {config.action}
-      <ExternalLink />
-    </>
   )
 }
