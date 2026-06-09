@@ -1,4 +1,4 @@
-import { BrandIcon } from "@/shared/brand"
+import { MiloLogo } from "@/shared/brand"
 import { IntegrationSurface } from "../integrations/surface"
 import { type ToolPermissionController, type ToolProvider } from "./controller"
 import { PermissionSection } from "./section"
@@ -28,7 +28,7 @@ export function NativePermissionsCard({
   return (
     <IntegrationSurface
       description="Control built-in scheduling permissions for this tenant."
-      logo={{ mark: <BrandIcon className="size-8" /> }}
+      logo={{ mark: <MiloLogo aria-hidden="true" className="size-8" /> }}
       title="Milo tools"
     >
       <PermissionSection
