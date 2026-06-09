@@ -14,6 +14,7 @@
 - Commit completed work on the task branch after required checks pass.
 - Before updating `main`, rebase the task branch on latest `main`, resolve conflicts, and rerun checks.
 - Update `main` atomically with a serialized fast-forward merge from the checked task branch.
+- If no git remote is configured, stop after updating local `main` and state that there is nothing external to push.
 - If `main` moves before the update lands, repeat the rebase/check/fast-forward sequence.
 
 ### Code Quality & Architecture
