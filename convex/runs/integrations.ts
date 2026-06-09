@@ -2,6 +2,11 @@ import { internal } from "../_generated/api"
 import { type ActionCtx } from "../_generated/server"
 import { createGitHubInstallationToken } from "../providers/github/app"
 import { requireGitHubCredentials } from "../providers/github/credentials"
+import { requireGoogleCredentials } from "../providers/google/credentials"
+import {
+  getGoogleTokenScope,
+  refreshGoogleAccessToken,
+} from "../providers/google/oauth"
 import { requireLinearCredentials } from "../providers/linear/credentials"
 import {
   getLinearTokenScope,
@@ -30,6 +35,10 @@ export async function prepareIntegrationForRuntime(
 
   if (integration.provider === "linear") {
     return await prepareLinearIntegrationForRuntime(ctx, integration)
+  }
+
+  if (integration.provider === "google") {
+    return await prepareGoogleIntegrationForRuntime(ctx, integration)
   }
 
   if (integration.provider === "microsoft") {
@@ -88,6 +97,43 @@ async function prepareLinearIntegrationForRuntime(
       refreshToken: tokenResult.refresh_token,
       expiresAt: Date.now() + tokenResult.expires_in * 1000,
       scope: getLinearTokenScope(tokenResult.scope),
+    }
+  )
+
+  return {
+    ...integration,
+    credentials: refreshedCredentials,
+  }
+}
+
+async function prepareGoogleIntegrationForRuntime(
+  ctx: ActionCtx,
+  integration: CodexRuntimeInput["integration"]
+) {
+  const credentials = requireGoogleCredentials(integration)
+
+  if (credentials.expiresAt > Date.now() + 5 * 60 * 1000) {
+    return integration
+  }
+
+  const tokenResult = await refreshGoogleAccessToken(credentials.refreshToken)
+
+  if ("error" in tokenResult) {
+    throw new Error(
+      `Google Workspace token refresh failed: ${
+        tokenResult.error_description ?? tokenResult.error
+      }`
+    )
+  }
+
+  const refreshedCredentials = await ctx.runMutation(
+    internal.providers.google.install.updateOAuthCredentials,
+    {
+      integrationId: integration._id,
+      accessToken: tokenResult.access_token,
+      refreshToken: tokenResult.refresh_token,
+      expiresAt: Date.now() + tokenResult.expires_in * 1000,
+      scope: getGoogleTokenScope(tokenResult.scope),
     }
   )
 

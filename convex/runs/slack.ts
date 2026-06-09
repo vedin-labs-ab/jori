@@ -1,4 +1,37 @@
 import { slackBotScopes, slackUserScopes } from "../providers/slack/config"
+import { type SlackCredentials } from "../providers/slack/credentials"
+import { createSlackProxyScript } from "./proxy"
+import { type ToolBundle } from "./tools"
+
+export function createSlackToolBundle(args: {
+  credentials: SlackCredentials
+}): ToolBundle {
+  return {
+    mcpServers: [
+      {
+        name: "slack",
+        command: "node",
+        args: ["/tmp/milo-workspace/milo-slack-mcp-proxy.mjs"],
+        env: {
+          MILO_SLACK_BOT_TOKEN: args.credentials.bot,
+          MILO_SLACK_USER_TOKEN: args.credentials.user,
+        },
+      },
+    ],
+    sandboxFiles: [
+      {
+        path: "/tmp/milo-workspace/milo-slack-mcp-proxy.mjs",
+        content: createSlackProxyScript(),
+      },
+    ],
+    preflights: [
+      {
+        type: "slack",
+        credentials: args.credentials,
+      },
+    ],
+  }
+}
 
 export function createSlackTokenPreflightCommand() {
   return slackTokenPreflightCommand

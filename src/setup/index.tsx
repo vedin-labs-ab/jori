@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { BrandMark } from "@/shared/brand"
 import { GitHubConnection } from "./github"
+import { GoogleConnection } from "./google"
 import { LinearConnection } from "./linear"
 import { MicrosoftConnection } from "./microsoft"
 import { OrganizationCard } from "./organization"
@@ -24,9 +25,17 @@ export function Setup() {
   const { isLoaded, isSignedIn } = useAuth()
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
   const githubStatus = useIntegrationCallbackStatus("github")
+  const googleStatus = useIntegrationCallbackStatus("google")
   const linearStatus = useIntegrationCallbackStatus("linear")
   const microsoftStatus = useIntegrationCallbackStatus("microsoft")
   const slackStatus = useIntegrationCallbackStatus("slack")
+  const callbackStatuses = {
+    github: githubStatus,
+    google: googleStatus,
+    linear: linearStatus,
+    microsoft: microsoftStatus,
+    slack: slackStatus,
+  }
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-5xl flex-col gap-8 px-6 py-8">
@@ -60,87 +69,7 @@ export function Setup() {
         </div>
       </header>
 
-      {slackStatus === "connected" ? (
-        <Alert>
-          <CheckCircle2 />
-          <AlertTitle>Slack connected</AlertTitle>
-          <AlertDescription>
-            Slack can now send Milo events for the active organization.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {linearStatus === "connected" ? (
-        <Alert>
-          <CheckCircle2 />
-          <AlertTitle>Linear connected</AlertTitle>
-          <AlertDescription>
-            Linear can now send Milo issue and comment events for the active
-            organization.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {microsoftStatus === "connected" ? (
-        <Alert>
-          <CheckCircle2 />
-          <AlertTitle>Microsoft connected</AlertTitle>
-          <AlertDescription>
-            Microsoft 365 can now send Milo Teams message events for the active
-            organization.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {githubStatus === "connected" ? (
-        <Alert>
-          <CheckCircle2 />
-          <AlertTitle>GitHub connected</AlertTitle>
-          <AlertDescription>
-            GitHub can now send Milo comment events for the active organization.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {slackStatus === "error" ? (
-        <Alert variant="destructive">
-          <AlertTitle>Slack connection failed</AlertTitle>
-          <AlertDescription>
-            Slack did not return an installation token. Check the Slack app
-            OAuth settings and try again.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {linearStatus === "error" ? (
-        <Alert variant="destructive">
-          <AlertTitle>Linear connection failed</AlertTitle>
-          <AlertDescription>
-            Linear did not return an installation token. Check the Linear OAuth
-            app settings and try again.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {microsoftStatus === "error" ? (
-        <Alert variant="destructive">
-          <AlertTitle>Microsoft connection failed</AlertTitle>
-          <AlertDescription>
-            Microsoft did not complete tenant consent and account OAuth. Check
-            the Microsoft app permissions and try again.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {githubStatus === "error" ? (
-        <Alert variant="destructive">
-          <AlertTitle>GitHub connection failed</AlertTitle>
-          <AlertDescription>
-            GitHub did not return an installation. Check the GitHub App setup
-            URL and try again.
-          </AlertDescription>
-        </Alert>
-      ) : null}
+      <IntegrationCallbackAlerts statuses={callbackStatuses} />
 
       {!isLoaded ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -157,6 +86,104 @@ export function Setup() {
       />
     </main>
   )
+}
+
+const integrationCallbackAlerts = [
+  {
+    provider: "slack",
+    status: "connected",
+    title: "Slack connected",
+    description: "Slack can now send Milo events for the active organization.",
+  },
+  {
+    provider: "linear",
+    status: "connected",
+    title: "Linear connected",
+    description:
+      "Linear can now send Milo issue and comment events for the active organization.",
+  },
+  {
+    provider: "microsoft",
+    status: "connected",
+    title: "Microsoft connected",
+    description:
+      "Microsoft 365 can now send Milo Teams message events for the active organization.",
+  },
+  {
+    provider: "github",
+    status: "connected",
+    title: "GitHub connected",
+    description:
+      "GitHub can now send Milo comment events for the active organization.",
+  },
+  {
+    provider: "google",
+    status: "connected",
+    title: "Google Workspace connected",
+    description:
+      "Milo can now use Gmail and Calendar tools for the active organization when explicitly requested.",
+  },
+  {
+    provider: "slack",
+    status: "error",
+    title: "Slack connection failed",
+    description:
+      "Slack did not return an installation token. Check the Slack app OAuth settings and try again.",
+  },
+  {
+    provider: "linear",
+    status: "error",
+    title: "Linear connection failed",
+    description:
+      "Linear did not return an installation token. Check the Linear OAuth app settings and try again.",
+  },
+  {
+    provider: "microsoft",
+    status: "error",
+    title: "Microsoft connection failed",
+    description:
+      "Microsoft did not complete tenant consent and account OAuth. Check the Microsoft app permissions and try again.",
+  },
+  {
+    provider: "github",
+    status: "error",
+    title: "GitHub connection failed",
+    description:
+      "GitHub did not return an installation. Check the GitHub App setup URL and try again.",
+  },
+  {
+    provider: "google",
+    status: "error",
+    title: "Google Workspace connection failed",
+    description:
+      "Google did not return a usable OAuth token. Check the Google OAuth app settings and try again.",
+  },
+] as const
+
+function IntegrationCallbackAlerts({
+  statuses,
+}: {
+  statuses: Record<
+    (typeof integrationCallbackAlerts)[number]["provider"],
+    "connected" | "error" | null
+  >
+}) {
+  return integrationCallbackAlerts.map((alert) => {
+    if (statuses[alert.provider] !== alert.status) {
+      return null
+    }
+
+    return (
+      <Alert
+        key={`${alert.provider}-${alert.status}`}
+        variant={alert.status === "error" ? "destructive" : undefined}
+      >
+        {alert.status === "connected" ? <CheckCircle2 /> : null}
+        <AlertTitle>{alert.title}</AlertTitle>
+        <AlertDescription>{alert.description}</AlertDescription>
+      </Alert>
+    )
+  })
 }
 
 function SetupContent({
@@ -258,6 +285,7 @@ function SignedInView() {
       <LinearConnection tenantId={organization.id} />
       <MicrosoftConnection tenantId={organization.id} />
       <GitHubConnection tenantId={organization.id} />
+      <GoogleConnection tenantId={organization.id} />
       <SkillsCard tenantId={organization.id} />
     </section>
   )

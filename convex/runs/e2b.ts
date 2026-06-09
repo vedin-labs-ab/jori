@@ -7,7 +7,6 @@ import {
   type Username,
 } from "e2b"
 import { createCodexConfig } from "./codex"
-import { createGitHubTokenPreflightCommand } from "./github"
 import {
   codexHome,
   createBootstrapCommand,
@@ -15,9 +14,10 @@ import {
   createInstallCommand,
   workspace,
 } from "./harness"
-import { createLinearTokenPreflightCommand } from "./linear"
-import { createMicrosoftTokenPreflightCommand } from "./microsoft"
-import { createSlackTokenPreflightCommand } from "./slack"
+import {
+  createToolPreflightCommand,
+  createToolPreflightEnv,
+} from "./preflights"
 import { type ToolBundle, type ToolPreflight } from "./tools"
 import {
   assertCommandSucceeded,
@@ -162,90 +162,21 @@ async function verifyPreflights(
   const traces: CommandTrace[] = []
 
   for (const preflight of preflights) {
-    if (preflight.type === "github") {
-      traces.push(await verifyGitHubToken(sandbox, preflight))
-    }
-
-    if (preflight.type === "linear") {
-      traces.push(await verifyLinearToken(sandbox, preflight))
-    }
-
-    if (preflight.type === "slack") {
-      traces.push(await verifySlackTokens(sandbox, preflight))
-    }
-
-    if (preflight.type === "microsoft") {
-      traces.push(await verifyMicrosoftToken(sandbox, preflight))
-    }
+    traces.push(await verifyToolPreflight(sandbox, preflight))
   }
 
   return traces
 }
 
-async function verifyGitHubToken(
+async function verifyToolPreflight(
   sandbox: E2BSandbox,
-  preflight: Extract<ToolPreflight, { type: "github" }>
+  preflight: ToolPreflight
 ) {
   const result = await runCommand(
     sandbox,
-    createGitHubTokenPreflightCommand(),
+    createToolPreflightCommand(preflight),
     {
-      envs: {
-        MILO_GITHUB_TOKEN: preflight.credentials.token ?? "",
-        MILO_GITHUB_OWNER: preflight.owner,
-        MILO_GITHUB_REPO: preflight.repo,
-      },
-      timeoutMs: 30_000,
-    }
-  )
-
-  return createCommandTrace(result)
-}
-
-async function verifyLinearToken(
-  sandbox: E2BSandbox,
-  preflight: Extract<ToolPreflight, { type: "linear" }>
-) {
-  const result = await runCommand(
-    sandbox,
-    createLinearTokenPreflightCommand(),
-    {
-      envs: {
-        MILO_LINEAR_ACCESS_TOKEN: preflight.credentials.accessToken,
-      },
-      timeoutMs: 30_000,
-    }
-  )
-
-  return createCommandTrace(result)
-}
-
-async function verifySlackTokens(
-  sandbox: E2BSandbox,
-  preflight: Extract<ToolPreflight, { type: "slack" }>
-) {
-  const result = await runCommand(sandbox, createSlackTokenPreflightCommand(), {
-    envs: {
-      MILO_SLACK_BOT_TOKEN: preflight.credentials.bot,
-      MILO_SLACK_USER_TOKEN: preflight.credentials.user,
-    },
-    timeoutMs: 30_000,
-  })
-
-  return createCommandTrace(result)
-}
-
-async function verifyMicrosoftToken(
-  sandbox: E2BSandbox,
-  preflight: Extract<ToolPreflight, { type: "microsoft" }>
-) {
-  const result = await runCommand(
-    sandbox,
-    createMicrosoftTokenPreflightCommand(),
-    {
-      envs: {
-        MILO_MICROSOFT_ACCESS_TOKEN: preflight.credentials.accessToken,
-      },
+      envs: createToolPreflightEnv(preflight),
       timeoutMs: 30_000,
     }
   )

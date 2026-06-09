@@ -6,6 +6,10 @@ import {
   handleGitHubInstallCallback,
 } from "./providers/github/http"
 import {
+  handleGoogleInstall,
+  handleGoogleOAuthCallback,
+} from "./providers/google/http"
+import {
   handleLinearEvents,
   handleLinearInstall,
   handleLinearOAuthCallback,
@@ -81,6 +85,22 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     return await handleGitHubEvents(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/google/install",
+  method: "GET",
+  handler: httpAction(async (_ctx, request) => {
+    return await handleGoogleInstall(request)
+  }),
+})
+
+http.route({
+  path: "/google/oauth/callback",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    return await handleGoogleOAuthCallback(ctx, request)
   }),
 })
 

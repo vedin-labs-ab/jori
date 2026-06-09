@@ -4,6 +4,10 @@ import {
   requireGitHubCredentials,
 } from "../providers/github/credentials"
 import {
+  type GoogleCredentials,
+  requireGoogleCredentials,
+} from "../providers/google/credentials"
+import {
   type LinearCredentials,
   requireLinearCredentials,
 } from "../providers/linear/credentials"
@@ -16,10 +20,11 @@ import {
   type SlackCredentials,
 } from "../providers/slack/credentials"
 import { createGitHubToolBundle } from "./github"
+import { createGoogleToolBundle } from "./google"
 import { createLinearProxyScript } from "./linear"
 import { createMicrosoftToolBundle } from "./microsoft"
 import { createMiloMcpScript } from "./milo"
-import { createSlackProxyScript } from "./proxy"
+import { createSlackToolBundle } from "./slack"
 
 export type ToolBundle = {
   mcpServers: McpServerConfig[]
@@ -53,6 +58,10 @@ export type ToolPreflight =
   | {
       type: "slack"
       credentials: SlackCredentials
+    }
+  | {
+      type: "google"
+      credentials: GoogleCredentials
     }
   | {
       type: "microsoft"
@@ -161,6 +170,15 @@ function createIntegrationToolBundle(args: {
     })
   }
 
+  if (args.integration.provider === "google") {
+    const credentials = requireGoogleCredentials(args.integration)
+
+    return createGoogleToolBundle({
+      accountEmail: args.integration.accountId,
+      credentials,
+    })
+  }
+
   if (args.integration.provider === "microsoft") {
     const credentials = requireMicrosoftCredentials(args.integration)
 
@@ -226,36 +244,6 @@ function createLinearToolBundle(args: {
     preflights: [
       {
         type: "linear",
-        credentials: args.credentials,
-      },
-    ],
-  }
-}
-
-function createSlackToolBundle(args: {
-  credentials: SlackCredentials
-}): ToolBundle {
-  return {
-    mcpServers: [
-      {
-        name: "slack",
-        command: "node",
-        args: ["/tmp/milo-workspace/milo-slack-mcp-proxy.mjs"],
-        env: {
-          MILO_SLACK_BOT_TOKEN: args.credentials.bot,
-          MILO_SLACK_USER_TOKEN: args.credentials.user,
-        },
-      },
-    ],
-    sandboxFiles: [
-      {
-        path: "/tmp/milo-workspace/milo-slack-mcp-proxy.mjs",
-        content: createSlackProxyScript(),
-      },
-    ],
-    preflights: [
-      {
-        type: "slack",
         credentials: args.credentials,
       },
     ],

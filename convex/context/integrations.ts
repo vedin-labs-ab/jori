@@ -4,6 +4,7 @@ import {
   getGitHubAccountLogin,
   getGitHubAccountType,
 } from "../providers/github/data"
+import { getGoogleEmail, getGoogleName } from "../providers/google/data"
 import {
   getLinearOrganizationName,
   getLinearOrganizationUrlKey,
@@ -141,6 +142,39 @@ export const getGitHubStatus = query({
       createdAt: integration.createdAt,
       accountLogin: getGitHubAccountLogin(integration.data),
       accountType: getGitHubAccountType(integration.data),
+    }
+  },
+})
+
+export const getGoogleStatus = query({
+  args: {
+    tenantId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+
+    if (identity === null) {
+      return null
+    }
+
+    const integration = await ctx.db
+      .query("integrations")
+      .withIndex("by_tenant_provider", (query) =>
+        query.eq("tenantId", args.tenantId).eq("provider", "google")
+      )
+      .order("desc")
+      .first()
+
+    if (integration === null) {
+      return null
+    }
+
+    return {
+      accountId: integration.accountId,
+      status: integration.status,
+      createdAt: integration.createdAt,
+      email: getGoogleEmail(integration.data),
+      name: getGoogleName(integration.data),
     }
   },
 })
