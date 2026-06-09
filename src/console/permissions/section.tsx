@@ -1,10 +1,7 @@
 import { ChevronDown, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import {
-  buttonVariants,
-  defaultButtonSizeHoverPaddingClass,
-} from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Collapsible,
   CollapsibleContent,
@@ -45,8 +42,7 @@ export function PermissionSection({
           type="button"
           className={cn(
             buttonVariants({ variant: "ghost", size: "default" }),
-            defaultButtonSizeHoverPaddingClass,
-            "group/permission-trigger h-auto min-h-7 w-full justify-between px-0 py-1.5 text-left whitespace-normal shadow-none active:not-aria-[haspopup]:translate-y-0 active:not-aria-[haspopup]:shadow-none [&[aria-expanded=true]:not(:hover)]:bg-transparent"
+            "group/permission-trigger h-auto min-h-7 w-full justify-between px-0 py-1.5 text-left whitespace-normal shadow-none hover:px-2 active:not-aria-[haspopup]:translate-y-0 active:not-aria-[haspopup]:shadow-none [&[aria-expanded=true]:not(:hover)]:bg-transparent"
           )}
           aria-label={`${isOpen ? "Hide" : "Show"} ${title.toLowerCase()}`}
         >
