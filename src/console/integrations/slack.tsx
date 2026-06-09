@@ -1,12 +1,28 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../convex/_generated/api"
 import { type ToolPermissionController } from "../permissions/controller"
-import { IntegrationConnection } from "./card"
+import { getWorkspaceHeadline } from "./headline"
+import {
+  WorkspaceConnection,
+  type WorkspaceConnectionConfig,
+} from "./workspace"
 
-const slackLogo = {
-  alt: "Slack logo",
-  src: "https://svgl.app/library/slack.svg",
-}
+const slackConfig = {
+  action: "Connect Slack",
+  connectedDetail:
+    "Milo can receive signed Slack events, search context, and post thread replies as Milo.",
+  connectError: "Could not start Slack install.",
+  emptyDetail:
+    "Install the Slack app once to enable context search and Milo replies.",
+  installPath: "/slack/install",
+  label: "Slack",
+  loading: "Connecting Slack",
+  logo: {
+    alt: "Slack logo",
+    src: "https://svgl.app/library/slack.svg",
+  },
+  provider: "slack",
+} satisfies WorkspaceConnectionConfig
 
 export function SlackConnection({
   permissions,
@@ -21,28 +37,18 @@ export function SlackConnection({
   const status = useQuery(api.context.integrations.getSlackStatus, { tenantId })
 
   return (
-    <IntegrationConnection
-      action="Connect Slack"
-      connectError="Could not start Slack install."
+    <WorkspaceConnection
+      config={slackConfig}
       createInstallState={createInstallState}
-      detail={
-        status?.status === "active"
-          ? "Milo can receive signed Slack events, search context, and post thread replies as Milo."
-          : "Install the Slack app once to enable context search and Milo replies."
-      }
-      headline={
-        status === undefined
-          ? "Checking Slack"
-          : (status?.teamName ?? status?.accountId ?? "No workspace connected")
-      }
-      installPath="/slack/install"
-      loading="Connecting Slack"
-      logo={slackLogo}
+      headline={getWorkspaceHeadline(
+        status,
+        slackConfig.label,
+        "No workspace connected",
+        status?.teamName
+      )}
       permissions={permissions}
-      provider="slack"
-      status={status?.status}
+      status={status}
       tenantId={tenantId}
-      title="Slack"
     />
   )
 }

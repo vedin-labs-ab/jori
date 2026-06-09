@@ -1,12 +1,28 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../convex/_generated/api"
 import { type ToolPermissionController } from "../permissions/controller"
-import { IntegrationConnection } from "./card"
+import { getWorkspaceHeadline } from "./headline"
+import {
+  WorkspaceConnection,
+  type WorkspaceConnectionConfig,
+} from "./workspace"
 
-const notionLogo = {
-  alt: "Notion logo",
-  src: "https://svgl.app/library/notion.svg",
-}
+const notionConfig = {
+  action: "Connect Notion",
+  connectedDetail:
+    "Milo can search shared Notion content, read pages and records, update pages, append blocks, and add comments.",
+  connectError: "Could not start Notion install.",
+  emptyDetail:
+    "Connect Notion to let Milo use selected workspace pages and databases as context and action surfaces.",
+  installPath: "/notion/install",
+  label: "Notion",
+  loading: "Connecting Notion",
+  logo: {
+    alt: "Notion logo",
+    src: "https://svgl.app/library/notion.svg",
+  },
+  provider: "notion",
+} satisfies WorkspaceConnectionConfig
 
 export function NotionConnection({
   permissions,
@@ -23,52 +39,20 @@ export function NotionConnection({
   })
 
   return (
-    <IntegrationConnection
-      action="Connect Notion"
-      connectError="Could not start Notion install."
+    <WorkspaceConnection
+      config={notionConfig}
       createInstallState={createInstallState}
-      detail={getNotionDetail(status?.status)}
-      headline={getNotionHeadline(status)}
-      installPath="/notion/install"
-      loading="Connecting Notion"
-      logo={notionLogo}
+      headline={getWorkspaceHeadline(
+        status,
+        notionConfig.label,
+        "No workspace connected",
+        status?.workspaceName,
+        status?.ownerName,
+        status?.ownerEmail
+      )}
       permissions={permissions}
-      provider="notion"
-      status={status?.status}
+      status={status}
       tenantId={tenantId}
-      title="Notion"
     />
   )
-}
-
-function getNotionHeadline(
-  status:
-    | {
-        accountId: string
-        ownerEmail?: string
-        ownerName?: string
-        workspaceName?: string
-      }
-    | null
-    | undefined
-) {
-  if (status === undefined) {
-    return "Checking Notion"
-  }
-
-  return (
-    status?.workspaceName ??
-    status?.ownerName ??
-    status?.ownerEmail ??
-    status?.accountId ??
-    "No workspace connected"
-  )
-}
-
-function getNotionDetail(status: "active" | "paused" | "revoked" | undefined) {
-  if (status === "active") {
-    return "Milo can search shared Notion content, read pages and records, update pages, append blocks, and add comments."
-  }
-
-  return "Connect Notion to let Milo use selected workspace pages and databases as context and action surfaces."
 }

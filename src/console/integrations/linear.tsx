@@ -1,12 +1,28 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../convex/_generated/api"
 import { type ToolPermissionController } from "../permissions/controller"
-import { IntegrationConnection } from "./card"
+import { getWorkspaceHeadline } from "./headline"
+import {
+  WorkspaceConnection,
+  type WorkspaceConnectionConfig,
+} from "./workspace"
 
-const linearLogo = {
-  alt: "Linear logo",
-  src: "https://svgl.app/library/linear.svg",
-}
+const linearConfig = {
+  action: "Connect Linear",
+  connectedDetail:
+    "Milo can receive signed Linear issue and comment events, read issue context, and post issue comments.",
+  connectError: "Could not start Linear install.",
+  emptyDetail:
+    "Install Milo as a Linear app user to enable issue comments and mention-based triggers.",
+  installPath: "/linear/install",
+  label: "Linear",
+  loading: "Connecting Linear",
+  logo: {
+    alt: "Linear logo",
+    src: "https://svgl.app/library/linear.svg",
+  },
+  provider: "linear",
+} satisfies WorkspaceConnectionConfig
 
 export function LinearConnection({
   permissions,
@@ -23,50 +39,19 @@ export function LinearConnection({
   })
 
   return (
-    <IntegrationConnection
-      action="Connect Linear"
-      connectError="Could not start Linear install."
+    <WorkspaceConnection
+      config={linearConfig}
       createInstallState={createInstallState}
-      detail={getLinearDetail(status?.status)}
-      headline={getLinearHeadline(status)}
-      installPath="/linear/install"
-      loading="Connecting Linear"
-      logo={linearLogo}
+      headline={getWorkspaceHeadline(
+        status,
+        linearConfig.label,
+        "No workspace connected",
+        status?.organizationName,
+        status?.organizationUrlKey
+      )}
       permissions={permissions}
-      provider="linear"
-      status={status?.status}
+      status={status}
       tenantId={tenantId}
-      title="Linear"
     />
   )
-}
-
-function getLinearHeadline(
-  status:
-    | {
-        accountId: string
-        organizationName?: string
-        organizationUrlKey?: string
-      }
-    | null
-    | undefined
-) {
-  if (status === undefined) {
-    return "Checking Linear"
-  }
-
-  return (
-    status?.organizationName ??
-    status?.organizationUrlKey ??
-    status?.accountId ??
-    "No workspace connected"
-  )
-}
-
-function getLinearDetail(status: "active" | "paused" | "revoked" | undefined) {
-  if (status === "active") {
-    return "Milo can receive signed Linear issue and comment events, read issue context, and post issue comments."
-  }
-
-  return "Install Milo as a Linear app user to enable issue comments and mention-based triggers."
 }
