@@ -1,12 +1,23 @@
 import {
   OrganizationSwitcher,
   SignInButton,
+  SignOutButton,
   SignUpButton,
   UserButton,
+  useClerk,
+  useUser,
 } from "@clerk/tanstack-react-start"
 import { Link, useRouterState } from "@tanstack/react-router"
-import { Cable, LayoutDashboard, Library } from "lucide-react"
+import {
+  Cable,
+  ChevronsUpDown,
+  LayoutDashboard,
+  Library,
+  LogOut,
+  ShieldUser,
+} from "lucide-react"
 import { type ReactNode } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,6 +25,15 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import {
   Sidebar,
@@ -30,7 +50,9 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar"
+import { Skeleton } from "@/components/ui/skeleton"
 import { BrandMark } from "@/shared/brand"
 import { IntegrationCallbackAlerts } from "./alerts"
 
@@ -186,21 +208,108 @@ function SidebarOrganizationSwitcher() {
 }
 
 function SidebarUserButton() {
+  const { isMobile } = useSidebar()
+  const { user } = useUser()
+  const { openUserProfile } = useClerk()
+
+  if (!user) {
+    return <Skeleton className="h-12 w-full rounded-md" />
+  }
+
+  const initials = `${user.firstName?.at(0) ?? ""}${user.lastName?.at(0) ?? ""}`
+  const name = user.fullName ?? user.username ?? "Account"
+  const email = user.primaryEmailAddress?.emailAddress ?? ""
+  const fallback = initials || name.at(0)?.toUpperCase() || "?"
+
   return (
-    <UserButton
-      showName
-      appearance={{
-        elements: {
-          rootBox: "!w-full",
-          userButtonBox: "!w-full",
-          userButtonTrigger:
-            "!h-12 !w-full !justify-start !gap-2 !rounded-[calc(var(--radius-sm)+2px)] !px-2 !text-xs transition-[width,height,padding] !duration-200 !ease-linear hover:!bg-sidebar-accent hover:!text-sidebar-accent-foreground focus-visible:!ring-2 focus-visible:!ring-sidebar-ring group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-0",
-          userButtonAvatarBox: "!size-8",
-          userButtonOuterIdentifier:
-            "!truncate !text-xs !font-medium !text-sidebar-foreground group-data-[collapsible=icon]:!hidden",
-        },
-      }}
-    />
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              <UserAvatar
+                alt={`${name}'s avatar`}
+                fallback={fallback}
+                src={user.imageUrl}
+              />
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{name}</span>
+                {email ? (
+                  <span className="truncate text-xs">{email}</span>
+                ) : null}
+              </div>
+              <ChevronsUpDown className="ml-auto size-4" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            side={isMobile ? "bottom" : "right"}
+            align="end"
+            sideOffset={4}
+          >
+            <DropdownMenuLabel className="p-0 font-normal">
+              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                <UserAvatar
+                  alt={`${name}'s avatar`}
+                  fallback={fallback}
+                  src={user.imageUrl}
+                />
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">{name}</span>
+                  {email ? (
+                    <span className="truncate text-xs">{email}</span>
+                  ) : null}
+                </div>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem
+                onClick={() =>
+                  openUserProfile({
+                    appearance: {
+                      elements: {
+                        profileSection__connectedAccounts: "!hidden",
+                      },
+                    },
+                  })
+                }
+              >
+                <ShieldUser />
+                Identity
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <SignOutButton>
+              <DropdownMenuItem>
+                <LogOut />
+                Sign out
+              </DropdownMenuItem>
+            </SignOutButton>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  )
+}
+
+function UserAvatar({
+  alt,
+  fallback,
+  src,
+}: {
+  alt: string
+  fallback: string
+  src: string
+}) {
+  return (
+    <Avatar className="h-8 w-8 rounded-lg">
+      <AvatarImage src={src} alt={alt} />
+      <AvatarFallback className="rounded-lg">{fallback}</AvatarFallback>
+    </Avatar>
   )
 }
 
