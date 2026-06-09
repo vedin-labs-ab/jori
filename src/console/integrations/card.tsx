@@ -11,58 +11,44 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { type CreateInstallState, useIntegrationInstall } from "./install"
 
 export type ConnectionStatus = "active" | "paused" | "revoked" | undefined
 
-export function IntegrationActionLabel({
+export function IntegrationConnection({
   action,
-  isConnecting,
-  loading,
-}: {
-  action: string
-  isConnecting: boolean
-  loading: string
-}) {
-  if (isConnecting) {
-    return (
-      <>
-        <Loader2 className="size-4 animate-spin" />
-        {loading}
-      </>
-    )
-  }
-
-  return (
-    <>
-      {action}
-      <ExternalLink />
-    </>
-  )
-}
-
-export function IntegrationConnectionCard({
-  actionLabel,
+  connectError,
+  createInstallState,
   description,
   detail,
-  error,
   headline,
   icon,
-  isConnecting,
-  onConnect,
-  title,
+  installPath,
+  loading,
   status,
+  tenantId,
+  title,
 }: {
-  actionLabel: ReactNode
+  action: string
+  connectError: string
+  createInstallState: CreateInstallState
   description: string
   detail: string
-  error: string | undefined
   headline: string
   icon: ReactNode
-  isConnecting: boolean
-  onConnect: () => void
-  title: string
+  installPath: string
+  loading: string
   status: ConnectionStatus
+  tenantId: string
+  title: string
 }) {
+  const install = useIntegrationInstall({
+    connectError,
+    createInstallState,
+    installPath,
+    tenantId,
+  })
+
   return (
     <Card>
       <CardHeader>
@@ -81,20 +67,30 @@ export function IntegrationConnectionCard({
           </div>
         </div>
 
-        {error !== undefined ? (
+        {install.error !== undefined ? (
           <Alert variant="destructive">
             <AlertTitle>Connection error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{install.error}</AlertDescription>
           </Alert>
         ) : null}
 
         <Button
           type="button"
-          onClick={onConnect}
-          disabled={isConnecting}
+          onClick={install.connect}
+          disabled={install.isConnecting}
           className="w-fit"
         >
-          {actionLabel}
+          {install.isConnecting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              {loading}
+            </>
+          ) : (
+            <>
+              {action}
+              <ExternalLink />
+            </>
+          )}
         </Button>
       </CardContent>
     </Card>

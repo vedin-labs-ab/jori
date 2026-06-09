@@ -1,8 +1,7 @@
 import { useMutation, useQuery } from "convex/react"
 import { GitBranch } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
-import { IntegrationActionLabel, IntegrationConnectionCard } from "./card"
-import { useIntegrationInstall } from "./install"
+import { IntegrationConnection } from "./card"
 
 export function GitHubConnection({ tenantId }: { tenantId: string }) {
   const createInstallState = useMutation(
@@ -11,31 +10,21 @@ export function GitHubConnection({ tenantId }: { tenantId: string }) {
   const status = useQuery(api.context.integrations.getGitHubStatus, {
     tenantId,
   })
-  const install = useIntegrationInstall({
-    connectError: "Could not start GitHub install.",
-    createInstallState,
-    installPath: "/github/install",
-    tenantId,
-  })
 
   return (
-    <IntegrationConnectionCard
-      title="GitHub"
+    <IntegrationConnection
+      action="Connect GitHub"
+      connectError="Could not start GitHub install."
+      createInstallState={createInstallState}
       description="Connect the GitHub App installation Milo should watch."
-      status={status?.status}
-      headline={getGitHubHeadline(status)}
       detail={getGitHubDetail(status?.status)}
+      headline={getGitHubHeadline(status)}
       icon={<GitBranch className="size-4" />}
-      error={install.error}
-      actionLabel={
-        <IntegrationActionLabel
-          action="Connect GitHub"
-          isConnecting={install.isConnecting}
-          loading="Connecting GitHub"
-        />
-      }
-      isConnecting={install.isConnecting}
-      onConnect={install.connect}
+      installPath="/github/install"
+      loading="Connecting GitHub"
+      status={status?.status}
+      tenantId={tenantId}
+      title="GitHub"
     />
   )
 }

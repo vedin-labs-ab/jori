@@ -1,10 +1,6 @@
 import { type ReactNode } from "react"
-import {
-  type ConnectionStatus,
-  IntegrationActionLabel,
-  IntegrationConnectionCard,
-} from "./card"
-import { useIntegrationInstall } from "./install"
+import { type ConnectionStatus, IntegrationConnection } from "./card"
+import { type CreateInstallState } from "./install"
 
 export type AccountConnectionConfig = {
   action: string
@@ -32,42 +28,28 @@ export function AccountConnection({
   tenantId,
 }: {
   config: AccountConnectionConfig
-  createInstallState: (args: {
-    tenantId: string
-    returnUrl: string
-  }) => Promise<string>
+  createInstallState: CreateInstallState
   status: AccountStatus | undefined
   tenantId: string
 }) {
-  const install = useIntegrationInstall({
-    connectError: config.connectError,
-    createInstallState,
-    installPath: config.installPath,
-    tenantId,
-  })
-
   return (
-    <IntegrationConnectionCard
-      title={config.label}
+    <IntegrationConnection
+      action={config.action}
+      connectError={config.connectError}
+      createInstallState={createInstallState}
       description={config.description}
-      status={status?.status}
-      headline={getAccountHeadline(status, config.label)}
       detail={
         status?.status === "active"
           ? config.connectedDetail
           : config.emptyDetail
       }
+      headline={getAccountHeadline(status, config.label)}
       icon={config.icon}
-      error={install.error}
-      actionLabel={
-        <IntegrationActionLabel
-          action={config.action}
-          isConnecting={install.isConnecting}
-          loading={config.loading}
-        />
-      }
-      isConnecting={install.isConnecting}
-      onConnect={install.connect}
+      installPath={config.installPath}
+      loading={config.loading}
+      status={status?.status}
+      tenantId={tenantId}
+      title={config.label}
     />
   )
 }

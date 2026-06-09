@@ -3,7 +3,7 @@ import { readErrorMessage } from "../error"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 
-type CreateInstallState = (args: {
+export type CreateInstallState = (args: {
   tenantId: string
   returnUrl: string
 }) => Promise<string>

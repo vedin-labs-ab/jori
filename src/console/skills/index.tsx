@@ -33,7 +33,10 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
   const skillList = useQuery(api.skills.catalog.list, { tenantId })
   const editor = useSkillEditor(tenantId)
   const skills = skillList?.status === "ready" ? skillList.skills : undefined
-  const groupedSkills = useMemo(() => groupSkills(skills), [skills])
+  const groupedSkills = useMemo(
+    () => (skills === undefined ? emptyGroupedSkills : groupSkills(skills)),
+    [skills]
+  )
   const isAccessReady = skillList?.status === "ready"
 
   return (
@@ -219,9 +222,17 @@ function SkillContent({
   )
 }
 
-function groupSkills(skills: Skill[] | undefined) {
-  return {
-    global: skills?.filter((skill) => skill.scope === "global") ?? [],
-    tenant: skills?.filter((skill) => skill.scope === "tenant") ?? [],
-  }
+const emptyGroupedSkills = {
+  global: [],
+  tenant: [],
+} satisfies Record<Skill["scope"], Skill[]>
+
+function groupSkills(skills: Skill[]) {
+  return skills.reduce<Record<Skill["scope"], Skill[]>>(
+    (groups, skill) => {
+      groups[skill.scope].push(skill)
+      return groups
+    },
+    { global: [], tenant: [] }
+  )
 }

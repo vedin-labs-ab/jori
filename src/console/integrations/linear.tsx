@@ -1,8 +1,7 @@
 import { useMutation, useQuery } from "convex/react"
 import { GitPullRequestArrow } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
-import { IntegrationActionLabel, IntegrationConnectionCard } from "./card"
-import { useIntegrationInstall } from "./install"
+import { IntegrationConnection } from "./card"
 
 export function LinearConnection({ tenantId }: { tenantId: string }) {
   const createInstallState = useMutation(
@@ -11,31 +10,21 @@ export function LinearConnection({ tenantId }: { tenantId: string }) {
   const status = useQuery(api.context.integrations.getLinearStatus, {
     tenantId,
   })
-  const install = useIntegrationInstall({
-    connectError: "Could not start Linear install.",
-    createInstallState,
-    installPath: "/linear/install",
-    tenantId,
-  })
 
   return (
-    <IntegrationConnectionCard
-      title="Linear"
+    <IntegrationConnection
+      action="Connect Linear"
+      connectError="Could not start Linear install."
+      createInstallState={createInstallState}
       description="Connect the Linear workspace Milo should watch."
-      status={status?.status}
-      headline={getLinearHeadline(status)}
       detail={getLinearDetail(status?.status)}
+      headline={getLinearHeadline(status)}
       icon={<GitPullRequestArrow className="size-4" />}
-      error={install.error}
-      actionLabel={
-        <IntegrationActionLabel
-          action="Connect Linear"
-          isConnecting={install.isConnecting}
-          loading="Connecting Linear"
-        />
-      }
-      isConnecting={install.isConnecting}
-      onConnect={install.connect}
+      installPath="/linear/install"
+      loading="Connecting Linear"
+      status={status?.status}
+      tenantId={tenantId}
+      title="Linear"
     />
   )
 }
