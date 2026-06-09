@@ -1,4 +1,7 @@
-import { type ToolPermission } from "../../permissions/catalog"
+import {
+  type ToolPermission,
+  type ToolProvider,
+} from "../../permissions/catalog"
 import { type GitHubCredentials } from "../../providers/github/credentials"
 import { type GoogleCredentials } from "../../providers/google/credentials"
 import { type LinearCredentials } from "../../providers/linear/credentials"
@@ -15,6 +18,13 @@ export type ToolBundle = {
 
 export type RuntimeToolBundle = ToolBundle & {
   skillNames: string[]
+  capabilities: RuntimeToolCapability[]
+}
+
+export type RuntimeToolCapability = {
+  provider: ToolProvider
+  label: string
+  tools: string[]
 }
 
 export type McpServerConfig = {

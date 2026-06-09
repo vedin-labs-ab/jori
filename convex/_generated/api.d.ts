@@ -79,6 +79,7 @@ import type * as runs_bundles from "../runs/bundles.js";
 import type * as runs_codex from "../runs/codex.js";
 import type * as runs_data from "../runs/data.js";
 import type * as runs_executions from "../runs/executions.js";
+import type * as runs_instructions from "../runs/instructions.js";
 import type * as runs_integrations from "../runs/integrations.js";
 import type * as runs_prompt from "../runs/prompt.js";
 import type * as runs_runtime from "../runs/runtime.js";
@@ -215,6 +216,7 @@ declare const fullApi: ApiFromModules<{
   "runs/codex": typeof runs_codex;
   "runs/data": typeof runs_data;
   "runs/executions": typeof runs_executions;
+  "runs/instructions": typeof runs_instructions;
   "runs/integrations": typeof runs_integrations;
   "runs/prompt": typeof runs_prompt;
   "runs/runtime": typeof runs_runtime;

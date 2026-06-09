@@ -38,11 +38,80 @@ describe("runtime integration bundles", () => {
       "gmail"
     )
     expect(toolBundle.skillNames).not.toContain("gmail")
+    expect(
+      toolBundle.capabilities.map((capability) => capability.label)
+    ).not.toContain("Gmail")
     expect(prompt.skillIds).toEqual(["scheduling", "email-style"])
     expect(prompt.rendered).not.toContain("google_gmail_search_threads")
     expect(prompt.rendered).toContain("Keep email concise.")
   })
+})
 
+describe("runtime active integration availability", () => {
+  test("omits inactive integrations from tools, skills, and availability", () => {
+    const toolBundle = assembleToolsForRun({
+      milo: {
+        convexSiteUrl: "https://convex.example",
+        executionToken: "execution-token",
+      },
+      integrations: [integration("slack"), integration("notion", "paused")],
+      toolModes: resolveToolModes([]),
+    })
+    const prompt = assemblePrompt(
+      runtimeInput(),
+      filterRuntimeSkillsForBundle(
+        [
+          runtimeSkill("slack", null, "Use conversations_history."),
+          runtimeSkill("notion", null, "Use notion_search."),
+        ],
+        toolBundle.skillNames
+      ),
+      toolBundle.promptedTools,
+      toolBundle.capabilities
+    )
+
+    expect(toolBundle.mcpServers.map((server) => server.name)).toContain(
+      "slack"
+    )
+    expect(toolBundle.mcpServers.map((server) => server.name)).not.toContain(
+      "notion"
+    )
+    expect(toolBundle.skillNames).toContain("slack")
+    expect(toolBundle.skillNames).not.toContain("notion")
+    expect(prompt.skillIds).toEqual(["slack"])
+    expect(prompt.rendered).toContain("Slack: List channels")
+    expect(prompt.rendered).not.toContain("Notion:")
+    expect(prompt.rendered).not.toContain("notion_search")
+  })
+})
+
+describe("runtime available tool instructions", () => {
+  test("renders active connected capabilities for meta tool questions", () => {
+    const toolBundle = assembleToolsForRun({
+      milo: {
+        convexSiteUrl: "https://convex.example",
+        executionToken: "execution-token",
+      },
+      integrations: [integration("slack")],
+      toolModes: resolveToolModes([]),
+    })
+    const prompt = assemblePrompt(
+      runtimeInput(),
+      [],
+      toolBundle.promptedTools,
+      toolBundle.capabilities
+    )
+
+    expect(prompt.rendered).toContain("# Available Tools")
+    expect(prompt.rendered).toContain("Schedules: Search schedules")
+    expect(prompt.rendered).toContain("Slack: List channels")
+    expect(prompt.rendered).not.toContain("Notion:")
+    expect(prompt.rendered).not.toContain("Local workspace")
+    expect(prompt.rendered).not.toContain("Web/current")
+  })
+})
+
+describe("runtime shared provider bundles", () => {
   test("deduplicates shared provider skills when any bundled tool remains", () => {
     const toolBundle = assembleToolsForRun({
       milo: {
@@ -76,7 +145,10 @@ function runtimeSkill(
   }
 }
 
-function integration(provider: string): Doc<"integrations"> {
+function integration(
+  provider: string,
+  status: Doc<"integrations">["status"] = "active"
+): Doc<"integrations"> {
   return {
     _id: `${provider}-integration`,
     _creationTime: 0,
@@ -85,7 +157,7 @@ function integration(provider: string): Doc<"integrations"> {
     scope: "tenant",
     accountId: `${provider}-account`,
     credentials: credentials(provider),
-    status: "active",
+    status,
     createdAt: 0,
   } as Doc<"integrations">
 }

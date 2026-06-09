@@ -2,6 +2,11 @@ import { type ToolPermission } from "../permissions/catalog"
 import { promptTemplates } from "../prompts/generated"
 import { type CodexRuntimeInput, type MessageProvider } from "./codex"
 import { readDataNumber, readDataObject, readDataString } from "./data"
+import {
+  createAvailableToolsInstructions,
+  createToolApprovalInstructions,
+} from "./instructions"
+import { type RuntimeToolCapability } from "./tools/types"
 
 export type PromptBundle = {
   rendered: string
@@ -26,10 +31,12 @@ export type RuntimeSkill = {
 export function assemblePrompt(
   input: CodexRuntimeInput,
   availableSkills: RuntimeSkill[],
-  promptedTools: ToolPermission[] = []
+  promptedTools: ToolPermission[] = [],
+  capabilities: RuntimeToolCapability[] = []
 ): PromptBundle {
   const parts = [
     createSystemPart(),
+    createAvailableToolsPart(capabilities),
     ...createApprovalParts(promptedTools),
     ...availableSkills.map((skill) => createSkillPart(skill)),
     createTriggerPart(input),
@@ -42,6 +49,16 @@ export function assemblePrompt(
   }
 }
 
+function createAvailableToolsPart(
+  capabilities: RuntimeToolCapability[]
+): PromptPart {
+  return {
+    id: "system/available-tools",
+    type: "system",
+    content: createAvailableToolsInstructions(capabilities),
+  }
+}
+
 function createApprovalParts(promptedTools: ToolPermission[]): PromptPart[] {
   if (promptedTools.length === 0) {
     return []
@@ -51,16 +68,7 @@ function createApprovalParts(promptedTools: ToolPermission[]): PromptPart[] {
     {
       id: "system/tool-approval",
       type: "system",
-      content: [
-        "# Tool Approval",
-        "",
-        "The following tools require explicit user approval before use:",
-        "",
-        ...promptedTools.map((tool) => `- ${tool.tool}: ${tool.description}`),
-        "",
-        "When you need one of these tools, describe the exact action you want to take, ask for approval, and stop. Do not call the tool in the same turn.",
-        "If the current user message clearly approves a previously requested action, call only the approved tool with the approved arguments.",
-      ].join("\n"),
+      content: createToolApprovalInstructions(promptedTools),
     },
   ]
 }

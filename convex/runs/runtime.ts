@@ -150,7 +150,8 @@ function assembleRuntimePrompt(
   return assemblePrompt(
     input,
     filterRuntimeSkillsForBundle(skills, toolBundle.skillNames),
-    toolBundle.promptedTools
+    toolBundle.promptedTools,
+    toolBundle.capabilities
   )
 }
 
