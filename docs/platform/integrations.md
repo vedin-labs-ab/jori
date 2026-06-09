@@ -13,9 +13,9 @@ Stores connected external system accounts.
 
 ## Boundary
 
-External messages become [Messages](./messages.md). Milo work belongs to [Executions](../runs/executions.md).
+External messages become [Messages](./messages.md). Milo work belongs to [Executions](./runs/executions.md).
 
-Provider user-to-Clerk user resolution belongs to [Identities](./identities.md).
+Provider user-to-Clerk user resolution belongs to [Identity](./identity.md).
 
 ## Draft Schema
 

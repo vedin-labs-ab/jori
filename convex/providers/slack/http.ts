@@ -144,7 +144,7 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
   })
 
   const result = await ctx.runMutation(
-    internal.context.messages.recordSlackMessage,
+    internal.messages.ingest.recordSlackMessage,
     {
       accountId: message.accountId,
       type: message.type,

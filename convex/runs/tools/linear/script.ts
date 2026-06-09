@@ -1,80 +1,8 @@
-import { linearGraphqlUrl } from "../../providers/linear/config"
-import { type LinearCredentials } from "../../providers/linear/credentials"
-import {
-  enabledToolsEnv,
-  getPromptedTools,
-  type ToolPermissionInput,
-} from "./policy"
-import { type ToolBundle } from "./types"
-
-export function createLinearToolBundle(
-  args: {
-    credentials: LinearCredentials
-  } & ToolPermissionInput
-): ToolBundle {
-  return {
-    mcpServers: [
-      {
-        name: "linear",
-        command: "node",
-        args: ["/tmp/milo-workspace/milo-linear-mcp.mjs"],
-        env: {
-          MILO_LINEAR_ACCESS_TOKEN: args.credentials.accessToken,
-          MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
-        },
-      },
-    ],
-    sandboxFiles: [
-      {
-        path: "/tmp/milo-workspace/milo-linear-mcp.mjs",
-        content: createLinearProxyScript(),
-      },
-    ],
-    preflights: [
-      {
-        type: "linear",
-        credentials: args.credentials,
-      },
-    ],
-    promptedTools: getPromptedTools(args),
-  }
-}
-
-export function createLinearTokenPreflightCommand() {
-  return linearTokenPreflightCommand
-}
+import { linearGraphqlUrl } from "../../../providers/linear/config"
 
 export function createLinearProxyScript() {
   return linearProxyScript
 }
-
-const linearTokenPreflightCommand = [
-  "node <<'NODE'",
-  "async function main() {",
-  "  const token = process.env.MILO_LINEAR_ACCESS_TOKEN;",
-  "  if (!token) {",
-  "    throw new Error('Missing Linear access token');",
-  "  }",
-  "  const response = await fetch('https://api.linear.app/graphql', {",
-  "    method: 'POST',",
-  "    headers: {",
-  "      authorization: 'Bearer ' + token,",
-  "      'content-type': 'application/json',",
-  "    },",
-  "    body: JSON.stringify({ query: 'query MiloLinearPreflight { viewer { id } }' }),",
-  "  });",
-  "  const body = await response.json();",
-  "  if (!response.ok || body.errors) {",
-  "    throw new Error('Linear token preflight failed: ' + JSON.stringify(body));",
-  "  }",
-  "  console.log('Linear token preflight passed');",
-  "}",
-  "main().catch((error) => {",
-  "  console.error(error);",
-  "  process.exit(1);",
-  "});",
-  "NODE",
-].join("\n")
 
 const linearProxyScript = `
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";

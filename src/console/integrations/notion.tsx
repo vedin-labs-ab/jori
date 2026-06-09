@@ -34,7 +34,7 @@ export function NotionConnection({
   const createInstallState = useMutation(
     api.providers.notion.install.createInstallState
   )
-  const status = useQuery(api.context.integrations.getNotionStatus, {
+  const status = useQuery(api.integrations.status.getNotionStatus, {
     tenantId,
   })
 

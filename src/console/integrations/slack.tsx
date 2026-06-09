@@ -34,7 +34,7 @@ export function SlackConnection({
   const createInstallState = useMutation(
     api.providers.slack.install.createInstallState
   )
-  const status = useQuery(api.context.integrations.getSlackStatus, { tenantId })
+  const status = useQuery(api.integrations.status.getSlackStatus, { tenantId })
 
   return (
     <WorkspaceConnection

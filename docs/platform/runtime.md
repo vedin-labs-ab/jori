@@ -71,11 +71,11 @@ The first console UI should only cover sign-up, organization creation, website e
 
 ## Models
 
-Context:
+Core records:
 
-- [Messages](./context/messages.md)
-- [Integrations](./context/integrations.md)
-- [Identities](./context/identities.md)
+- [Identity](./identity.md)
+- [Integrations](./integrations.md)
+- [Messages](./messages.md)
 
 Skills:
 
@@ -97,7 +97,7 @@ Scheduling:
 
 ## Code Ownership
 
-The implementation follows the domain map in [Structure](./structure.md). Framework-owned Convex entry points stay at the root, while Milo-owned backend code lives under `identity`, `context`, `skills`, `attention`, `runs`, `scheduling`, and `providers`.
+The implementation follows the domain map in [Structure](./structure.md). Framework-owned Convex entry points stay at the root, while Milo-owned backend code lives under `identity`, `integrations`, `messages`, `skills`, `attention`, `runs`, `scheduling`, and `providers`.
 
 ## Deferred
 

@@ -34,7 +34,7 @@ export function GitHubConnection({
   const createInstallState = useMutation(
     api.providers.github.install.createInstallState
   )
-  const status = useQuery(api.context.integrations.getGitHubStatus, {
+  const status = useQuery(api.integrations.status.getGitHubStatus, {
     tenantId,
   })
 

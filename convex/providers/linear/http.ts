@@ -113,7 +113,7 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
   }
 
   const result = await ctx.runMutation(
-    internal.context.messages.recordLinearMessage,
+    internal.messages.ingest.recordLinearMessage,
     {
       accountId: message.accountId,
       type: message.type,

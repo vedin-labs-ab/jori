@@ -1,4 +1,4 @@
-# Identities
+# Identity
 
 ## Responsibility
 
@@ -13,7 +13,7 @@ Maps external provider users to Clerk users inside a tenant.
 
 ## Boundary
 
-Identities do not store provider credentials. Credentials belong to [Integrations](./integrations.md). Messages store observed external activity, while triggers and executions store the resolved Clerk user when one is known.
+Identity rows do not store provider credentials. Credentials belong to [Integrations](./integrations.md). Messages store observed external activity, while triggers and executions store the resolved Clerk user when one is known.
 
 ## Draft Schema
 

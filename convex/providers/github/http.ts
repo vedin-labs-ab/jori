@@ -90,7 +90,7 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
   }
 
   const result = await ctx.runMutation(
-    internal.context.messages.recordGitHubMessage,
+    internal.messages.ingest.recordGitHubMessage,
     {
       accountId: message.accountId,
       type: message.type,

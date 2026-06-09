@@ -34,7 +34,7 @@ export function LinearConnection({
   const createInstallState = useMutation(
     api.providers.linear.install.createInstallState
   )
-  const status = useQuery(api.context.integrations.getLinearStatus, {
+  const status = useQuery(api.integrations.status.getLinearStatus, {
     tenantId,
   })
 

@@ -1,78 +1,11 @@
-import { notionApiUrl, notionApiVersion } from "../../providers/notion/config"
-import { type NotionCredentials } from "../../providers/notion/credentials"
 import {
-  enabledToolsEnv,
-  getPromptedTools,
-  type ToolPermissionInput,
-} from "./policy"
-import { type ToolBundle } from "./types"
-
-export function createNotionToolBundle(
-  args: {
-    credentials: NotionCredentials
-  } & ToolPermissionInput
-): ToolBundle {
-  return {
-    mcpServers: [
-      {
-        name: "notion",
-        command: "node",
-        args: ["/tmp/milo-workspace/milo-notion-mcp.mjs"],
-        env: {
-          MILO_NOTION_ACCESS_TOKEN: args.credentials.accessToken,
-          MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
-        },
-      },
-    ],
-    sandboxFiles: [
-      {
-        path: "/tmp/milo-workspace/milo-notion-mcp.mjs",
-        content: createNotionProxyScript(),
-      },
-    ],
-    preflights: [
-      {
-        type: "notion",
-        credentials: args.credentials,
-      },
-    ],
-    promptedTools: getPromptedTools(args),
-  }
-}
-
-export function createNotionTokenPreflightCommand() {
-  return notionTokenPreflightCommand
-}
+  notionApiUrl,
+  notionApiVersion,
+} from "../../../providers/notion/config"
 
 export function createNotionProxyScript() {
   return notionProxyScript
 }
-
-const notionTokenPreflightCommand = [
-  "node <<'NODE'",
-  "async function main() {",
-  "  const token = process.env.MILO_NOTION_ACCESS_TOKEN;",
-  "  if (!token) {",
-  "    throw new Error('Missing Notion access token');",
-  "  }",
-  "  const response = await fetch('https://api.notion.com/v1/users/me', {",
-  "    headers: {",
-  "      authorization: 'Bearer ' + token,",
-  `      'notion-version': ${JSON.stringify(notionApiVersion)},`,
-  "    },",
-  "  });",
-  "  const body = await response.json();",
-  "  if (!response.ok) {",
-  "    throw new Error('Notion token preflight failed: ' + JSON.stringify(body));",
-  "  }",
-  "  console.log('Notion token preflight passed');",
-  "}",
-  "main().catch((error) => {",
-  "  console.error(error);",
-  "  process.exit(1);",
-  "});",
-  "NODE",
-].join("\n")
 
 const notionProxyScript = `
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";

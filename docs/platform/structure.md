@@ -14,17 +14,19 @@ Convex-owned entry points stay at the root of `convex`:
 Domain code lives under folders named for responsibility:
 
 - `identity`: Clerk-backed organization behavior.
-- `context`: integrations and observed source items.
+- `integrations`: connected account status and integration read models.
+- `messages`: observed external messages that can start or continue Milo work.
 - `skills`: persisted runtime instructions and tenant skill management.
 - `attention`: triggers and conversation activation state.
 - `runs`: execution lifecycle and runtime orchestration.
   - `sandbox`: E2B setup, Codex bootstrap commands, and token preflights.
-  - `tools`: runtime MCP server configuration, provider tool bundles, and bundled MCP scripts.
+  - `tools`: runtime MCP server configuration and provider tool bundles. Each provider folder keeps bundle assembly, token preflight commands, and bundled MCP scripts together.
 - `scheduling`: user-managed schedules and schedule MCP mutations.
 - `providers/github`: GitHub protocol code, including GitHub App auth, signing, event parsing, and relevance checks.
 - `providers/google`: Google protocol code, including OAuth, token refresh, signing, and account metadata.
 - `providers/linear`: Linear protocol code, including OAuth, signing, event parsing, and relevance checks.
 - `providers/microsoft`: Microsoft protocol code, including OAuth, token refresh, signing, and account metadata.
+- `providers/notion`: Notion protocol code, including OAuth, signing, and account metadata.
 - `providers/slack`: Slack protocol code, including OAuth, signing, event parsing, and relevance checks.
 - `schemas`: one table definition per file, imported by the root schema.
 

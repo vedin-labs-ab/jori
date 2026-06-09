@@ -20,7 +20,7 @@ Stores observed external messages that can start or continue Milo work.
 
 ## Boundary
 
-Messages are inputs. Decisions, tool calls, replies, and outcomes belong to [Traces](../runs/traces.md).
+Messages are inputs. Decisions, tool calls, replies, and outcomes belong to [Traces](./runs/traces.md).
 
 ## Draft Schema
 
