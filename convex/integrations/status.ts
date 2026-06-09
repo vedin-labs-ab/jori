@@ -1,6 +1,5 @@
 import { v } from "convex/values"
 import { type QueryCtx, query } from "../_generated/server"
-import { getClerkUserId } from "../identity/users"
 import {
   getGitHubAccountLogin,
   getGitHubAccountType,
@@ -25,6 +24,7 @@ import {
   getNotionWorkspaceName,
 } from "../providers/notion/data"
 import { getSlackTeamName } from "../providers/slack/data"
+import { getTenantIntegration, getUserIntegration } from "./data"
 
 export const getSlackStatus = query({
   args: {
@@ -217,57 +217,4 @@ async function getMicrosoftUserStatus(
     tenantName: getMicrosoftTenantName(integration.data),
     scope: "user" as const,
   }
-}
-
-async function getTenantIntegration(
-  ctx: QueryCtx,
-  args: {
-    provider: string
-    tenantId: string
-  }
-) {
-  const identity = await ctx.auth.getUserIdentity()
-
-  if (identity === null) {
-    return null
-  }
-
-  return await ctx.db
-    .query("integrations")
-    .withIndex("by_tenant_provider", (query) =>
-      query.eq("tenantId", args.tenantId).eq("provider", args.provider)
-    )
-    .order("desc")
-    .first()
-}
-
-async function getUserIntegration(
-  ctx: QueryCtx,
-  args: {
-    provider: GoogleSurfaceProvider | MicrosoftSurfaceProvider
-    tenantId: string
-  }
-) {
-  const identity = await ctx.auth.getUserIdentity()
-
-  if (identity === null) {
-    return null
-  }
-
-  const userId = getClerkUserId(identity)
-
-  if (userId === undefined) {
-    return null
-  }
-
-  return await ctx.db
-    .query("integrations")
-    .withIndex("by_tenant_provider_owner", (query) =>
-      query
-        .eq("tenantId", args.tenantId)
-        .eq("provider", args.provider)
-        .eq("ownerId", userId)
-    )
-    .order("desc")
-    .first()
 }

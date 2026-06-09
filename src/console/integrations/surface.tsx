@@ -25,20 +25,20 @@ export function IntegrationSurface({
   title,
 }: {
   action?: ReactNode
-  children: ReactNode
+  children?: ReactNode
   description: string
   logo: IntegrationLogo
   status?: ReactNode
   title: string
 }) {
   return (
-    <Card className="md:col-span-2">
-      <CardHeader className="gap-4 sm:grid-cols-[1fr_auto]">
-        <div className="flex min-w-0 items-start gap-4">
+    <Card className="gap-0 py-0 md:col-span-2">
+      <CardHeader className="gap-4 px-5 py-5 sm:grid-cols-[1fr_auto] sm:px-6">
+        <div className="flex min-w-0 items-start gap-4 sm:gap-5">
           <IntegrationLogoMark logo={logo} />
           <div className="grid min-w-0 gap-2">
             <div className="grid gap-1">
-              <CardTitle className="text-base">{title}</CardTitle>
+              <CardTitle className="text-xl">{title}</CardTitle>
               {status}
             </div>
             <p className="max-w-3xl text-sm text-muted-foreground">
@@ -52,24 +52,28 @@ export function IntegrationSurface({
           </CardAction>
         )}
       </CardHeader>
-      <CardContent className="grid gap-4">{children}</CardContent>
+      {children === undefined ? null : (
+        <div className="border-t">
+          <CardContent className="grid gap-4 px-5 py-5 sm:px-6">
+            {children}
+          </CardContent>
+        </div>
+      )}
     </Card>
   )
 }
 
 function IntegrationLogoMark({ logo }: { logo: IntegrationLogo }) {
-  return (
-    <div className="flex size-11 shrink-0 items-center justify-center rounded-md border bg-background">
-      {"src" in logo ? (
-        <img
-          alt={logo.alt}
-          className="size-7 object-contain"
-          referrerPolicy="no-referrer"
-          src={logo.src}
-        />
-      ) : (
-        logo.mark
-      )}
-    </div>
-  )
+  if ("src" in logo) {
+    return (
+      <img
+        alt={logo.alt}
+        className="size-11 shrink-0 object-contain"
+        referrerPolicy="no-referrer"
+        src={logo.src}
+      />
+    )
+  }
+
+  return logo.mark
 }

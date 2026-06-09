@@ -7,6 +7,8 @@ import {
   type ToolPermissionController,
   type ToolProvider,
 } from "../permissions/controller"
+import { DisconnectDialog } from "./disconnect"
+import { useIntegrationDisconnect } from "./disconnect-controller"
 import { type CreateInstallState, useIntegrationInstall } from "./install"
 import { type IntegrationLogo, IntegrationSurface } from "./surface"
 
@@ -48,44 +50,59 @@ export function IntegrationConnection({
     installPath,
     tenantId,
   })
+  const disconnect = useIntegrationDisconnect({
+    provider,
+    tenantId,
+    title,
+  })
   const isConnected = status === "active"
+  const error = install.error ?? disconnect.error
 
   return (
     <IntegrationSurface
       action={
-        <Button
-          type="button"
-          variant={isConnected ? "outline" : "default"}
-          onClick={install.connect}
-          disabled={install.isConnecting}
-        >
-          {install.isConnecting ? (
-            <>
-              <Loader2 className="size-4 animate-spin" />
-              {loading}
-            </>
-          ) : (
-            <>
-              {isConnected ? "Reconnect" : action}
-              <ExternalLink />
-            </>
-          )}
-        </Button>
+        isConnected ? (
+          <DisconnectDialog
+            isDisconnecting={disconnect.isDisconnecting}
+            onDisconnect={disconnect.disconnect}
+            title={title}
+          />
+        ) : (
+          <Button
+            type="button"
+            onClick={install.connect}
+            disabled={install.isConnecting}
+          >
+            {install.isConnecting ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                {loading}
+              </>
+            ) : (
+              <>
+                {action}
+                <ExternalLink />
+              </>
+            )}
+          </Button>
+        )
       }
       description={detail}
       logo={logo}
       status={<ConnectionLine headline={headline} status={status} />}
       title={title}
     >
-      <ConnectionError error={install.error} />
-      {isConnected ? (
-        <div className="border-t pt-4">
-          <IntegrationPermissions
-            controller={permissions}
-            provider={provider}
-          />
-        </div>
-      ) : null}
+      {error === undefined && !isConnected ? undefined : (
+        <>
+          <ConnectionError error={error} />
+          {isConnected ? (
+            <IntegrationPermissions
+              controller={permissions}
+              provider={provider}
+            />
+          ) : null}
+        </>
+      )}
     </IntegrationSurface>
   )
 }
