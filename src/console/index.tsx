@@ -6,7 +6,6 @@ import {
   useOrganization,
 } from "@clerk/tanstack-react-start"
 import { useConvexAuth } from "convex/react"
-import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { IntegrationCallbackAlerts } from "./alerts"
@@ -22,6 +21,7 @@ import {
   MicrosoftEmailConnection,
 } from "./integrations/microsoft"
 import { SlackConnection } from "./integrations/slack"
+import { LoadingMessage } from "./loading"
 import { PermissionsCard } from "./permissions"
 import { ConsoleHeader } from "./shell"
 import { SkillsCard } from "./skills"
@@ -35,12 +35,7 @@ export function Console() {
       <ConsoleHeader isLoaded={isLoaded} isSignedIn={isSignedIn} />
       <IntegrationCallbackAlerts />
 
-      {!isLoaded ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
-          Loading
-        </div>
-      ) : null}
+      {!isLoaded ? <LoadingMessage label="Loading" /> : null}
 
       <ConsoleContent
         isClerkLoaded={isLoaded}
@@ -72,12 +67,7 @@ function ConsoleContent({
   }
 
   if (isConvexAuthLoading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Loading authentication
-      </div>
-    )
+    return <LoadingMessage label="Loading authentication" />
   }
 
   if (!isConvexAuthenticated) {
@@ -120,12 +110,7 @@ function SignedInView() {
   const { isLoaded, organization } = useOrganization()
 
   if (!isLoaded) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Loading organization
-      </div>
-    )
+    return <LoadingMessage label="Loading organization" />
   }
 
   if (organization === undefined || organization === null) {

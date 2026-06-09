@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "convex/react"
-import { Loader2, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { api } from "../../../convex/_generated/api"
+import { readErrorMessage } from "../error"
+import { LoadingMessage } from "../loading"
 import { SkillDialog } from "./dialog"
 import { SkillSection } from "./section"
 import { emptySkillForm, type Skill, type SkillFormValues } from "./types"
@@ -192,12 +194,7 @@ function SkillContent({
   pendingSkillId: string | undefined
 }) {
   if (isLoading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Loading skills
-      </div>
-    )
+    return <LoadingMessage label="Loading skills" />
   }
 
   return (
@@ -227,8 +224,4 @@ function groupSkills(skills: Skill[] | undefined) {
     global: skills?.filter((skill) => skill.scope === "global") ?? [],
     tenant: skills?.filter((skill) => skill.scope === "tenant") ?? [],
   }
-}
-
-function readErrorMessage(error: unknown, fallback: string) {
-  return error instanceof Error ? error.message : fallback
 }

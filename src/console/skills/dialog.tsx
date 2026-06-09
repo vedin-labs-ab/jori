@@ -30,6 +30,10 @@ export function SkillDialog({
   skill: Skill | undefined
   values: SkillFormValues
 }) {
+  function updateValue(name: keyof SkillFormValues, value: string) {
+    onValuesChange({ ...values, [name]: value })
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
@@ -44,8 +48,42 @@ export function SkillDialog({
         </DialogHeader>
 
         <div className="grid gap-4">
-          <SkillTextFields values={values} onValuesChange={onValuesChange} />
-          <SkillBodyField values={values} onValuesChange={onValuesChange} />
+          <div className="grid gap-2">
+            <Label htmlFor="skill-name">Name</Label>
+            <Input
+              id="skill-name"
+              value={values.name}
+              onChange={(event) => updateValue("name", event.target.value)}
+              placeholder="customer-support"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="skill-description">Description</Label>
+            <Textarea
+              id="skill-description"
+              value={values.description}
+              onChange={(event) =>
+                updateValue("description", event.target.value)
+              }
+              placeholder="Use when Milo is handling customer support requests."
+              rows={3}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="skill-body">Instructions</Label>
+            <Textarea
+              id="skill-body"
+              className="min-h-56 font-mono text-xs"
+              value={values.body}
+              onChange={(event) => updateValue("body", event.target.value)}
+              placeholder={[
+                "# Customer Support",
+                "",
+                "- Start with the customer's goal.",
+                "- Keep replies concise and specific.",
+              ].join("\n")}
+            />
+          </div>
         </div>
 
         <DialogFooter>
@@ -56,69 +94,5 @@ export function SkillDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function SkillTextFields({
-  onValuesChange,
-  values,
-}: {
-  onValuesChange: (values: SkillFormValues) => void
-  values: SkillFormValues
-}) {
-  return (
-    <>
-      <div className="grid gap-2">
-        <Label htmlFor="skill-name">Name</Label>
-        <Input
-          id="skill-name"
-          value={values.name}
-          onChange={(event) =>
-            onValuesChange({ ...values, name: event.target.value })
-          }
-          placeholder="customer-support"
-        />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="skill-description">Description</Label>
-        <Textarea
-          id="skill-description"
-          value={values.description}
-          onChange={(event) =>
-            onValuesChange({ ...values, description: event.target.value })
-          }
-          placeholder="Use when Milo is handling customer support requests."
-          rows={3}
-        />
-      </div>
-    </>
-  )
-}
-
-function SkillBodyField({
-  onValuesChange,
-  values,
-}: {
-  onValuesChange: (values: SkillFormValues) => void
-  values: SkillFormValues
-}) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor="skill-body">Instructions</Label>
-      <Textarea
-        id="skill-body"
-        className="min-h-56 font-mono text-xs"
-        value={values.body}
-        onChange={(event) =>
-          onValuesChange({ ...values, body: event.target.value })
-        }
-        placeholder={[
-          "# Customer Support",
-          "",
-          "- Start with the customer's goal.",
-          "- Keep replies concise and specific.",
-        ].join("\n")}
-      />
-    </div>
   )
 }

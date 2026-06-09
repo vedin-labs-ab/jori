@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { readErrorMessage } from "../error"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 
@@ -45,8 +46,4 @@ export function useIntegrationInstall({
   }
 
   return { connect, error, isConnecting }
-}
-
-function readErrorMessage(error: unknown, fallback: string) {
-  return error instanceof Error ? error.message : fallback
 }

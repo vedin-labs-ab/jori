@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "convex/react"
-import { Loader2, ShieldCheck } from "lucide-react"
+import { ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -26,6 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { api } from "../../../convex/_generated/api"
+import { readErrorMessage } from "../error"
+import { LoadingMessage } from "../loading"
 
 type PermissionMode = "allowed" | "prompted" | "blocked"
 type ToolAccess = "read" | "write"
@@ -58,6 +60,11 @@ const modeLabels: Record<PermissionMode, string> = {
   blocked: "Blocked",
 }
 
+const modeOptions: Record<ToolAccess, PermissionMode[]> = {
+  read: ["allowed", "blocked"],
+  write: ["allowed", "prompted", "blocked"],
+}
+
 export function PermissionsCard({ tenantId }: { tenantId: string }) {
   const permissions = useQuery(api.permissions.tools.list, { tenantId })
   const setPermission = useMutation(api.permissions.tools.set)
@@ -71,7 +78,7 @@ export function PermissionsCard({ tenantId }: { tenantId: string }) {
     try {
       await setPermission({ tenantId, tool, mode })
     } catch (updateError) {
-      setError(readErrorMessage(updateError))
+      setError(readErrorMessage(updateError, "Could not update permission."))
     } finally {
       setPendingTool(undefined)
     }
@@ -110,12 +117,7 @@ function PermissionContent({
   onUpdate: (tool: string, mode: PermissionMode) => void
 }) {
   if (permissions === undefined) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Loading permissions
-      </div>
-    )
+    return <LoadingMessage label="Loading permissions" />
   }
 
   if (permissions === null) {
@@ -167,7 +169,7 @@ function PermissionContent({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {getModeOptions(permission.access).map((mode) => (
+                    {modeOptions[permission.access].map((mode) => (
                       <SelectItem key={mode} value={mode}>
                         {modeLabels[mode]}
                       </SelectItem>
@@ -203,16 +205,4 @@ function PermissionError({ error }: { error: string | undefined }) {
       <AlertDescription>{error}</AlertDescription>
     </Alert>
   )
-}
-
-function getModeOptions(access: ToolAccess): PermissionMode[] {
-  if (access === "read") {
-    return ["allowed", "blocked"]
-  }
-
-  return ["allowed", "prompted", "blocked"]
-}
-
-function readErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Could not update permission."
 }
