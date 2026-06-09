@@ -11,6 +11,7 @@ import { Link, useRouterState } from "@tanstack/react-router"
 import {
   Cable,
   ChevronsUpDown,
+  Component,
   LayoutDashboard,
   Library,
   LogOut,
@@ -60,6 +61,7 @@ const consoleNavigation = [
   { icon: LayoutDashboard, label: "Console", to: "/console" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
+  { icon: Component, label: "Playground", to: "/playground" },
 ] as const
 
 export function PublicConsoleFrame({
