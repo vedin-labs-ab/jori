@@ -309,16 +309,17 @@ async function replyToGmailThread(threadId, body) {
   const messages = [...(thread.messages ?? [])].sort(
     (left, right) => Number(left.internalDate ?? 0) - Number(right.internalDate ?? 0),
   );
-  const latestMessage = [...messages].reverse().find((message) => {
-    const from = getHeader(message, "from") ?? "";
-    return !from.toLowerCase().includes("<" + accountEmail.toLowerCase() + ">");
-  }) ?? messages.at(-1);
+  const latestExternalMessage = [...messages].reverse().find((message) => {
+    const from = parseOptionalEmailAddress(getHeader(message, "from"));
+    return from !== undefined && from.toLowerCase() !== accountEmail.toLowerCase();
+  });
+  const latestMessage = latestExternalMessage ?? messages.at(-1);
 
   if (latestMessage === undefined) {
     throw new McpError(ErrorCode.InvalidParams, "Cannot reply to an empty Gmail thread");
   }
 
-  const to = parseEmailAddress(getHeader(latestMessage, "from"));
+  const to = getReplyRecipient(latestMessage, latestExternalMessage !== undefined);
   const subject = ensureReplySubject(getHeader(latestMessage, "subject") ?? "");
   const messageId = getHeader(latestMessage, "message-id");
   const references = [getHeader(latestMessage, "references"), messageId]
@@ -347,13 +348,34 @@ function getHeader(message, name) {
   )?.value;
 }
 
+function getReplyRecipient(message, isExternalMessage) {
+  if (isExternalMessage) {
+    return parseEmailAddress(getHeader(message, "from"));
+  }
+
+  const to = getHeader(message, "to");
+  if (to !== undefined) {
+    return parseEmailAddress(to);
+  }
+
+  return parseEmailAddress(getHeader(message, "from"));
+}
+
 function parseEmailAddress(value) {
   if (typeof value !== "string" || value.trim() === "") {
     throw new McpError(ErrorCode.InvalidParams, "Cannot determine reply recipient");
   }
 
+  return parseOptionalEmailAddress(value) ?? value;
+}
+
+function parseOptionalEmailAddress(value) {
+  if (typeof value !== "string" || value.trim() === "") {
+    return undefined;
+  }
+
   const match = value.match(/<([^>]+)>/);
-  return match?.[1] ?? value;
+  return match?.[1] ?? value.trim();
 }
 
 function ensureReplySubject(subject) {

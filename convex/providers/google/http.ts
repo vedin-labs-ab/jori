@@ -77,18 +77,22 @@ export async function handleGoogleOAuthCallback(
     return redirectWithProviderStatus(state.returnUrl, "google", "error")
   }
 
-  await ctx.runMutation(
-    internal.providers.google.install.recordOAuthInstallation,
-    {
-      tenantId: state.tenantId,
-      createdBy: state.createdBy,
-      accessToken: tokenResult.access_token,
-      refreshToken: tokenResult.refresh_token,
-      expiresAt: Date.now() + tokenResult.expires_in * 1000,
-      scope: getGoogleTokenScope(tokenResult.scope),
-      profile,
-    }
-  )
+  try {
+    await ctx.runMutation(
+      internal.providers.google.install.recordOAuthInstallation,
+      {
+        tenantId: state.tenantId,
+        createdBy: state.createdBy,
+        accessToken: tokenResult.access_token,
+        refreshToken: tokenResult.refresh_token,
+        expiresAt: Date.now() + tokenResult.expires_in * 1000,
+        scope: getGoogleTokenScope(tokenResult.scope),
+        profile,
+      }
+    )
+  } catch {
+    return redirectWithProviderStatus(state.returnUrl, "google", "error")
+  }
 
   return redirectWithProviderStatus(state.returnUrl, "google", "connected")
 }
