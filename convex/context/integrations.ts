@@ -1,9 +1,10 @@
 import { v } from "convex/values"
-import { query } from "../_generated/server"
+import { type QueryCtx, query } from "../_generated/server"
 import {
   getGitHubAccountLogin,
   getGitHubAccountType,
 } from "../providers/github/data"
+import { type GoogleSurfaceProvider } from "../providers/google/config"
 import { getGoogleEmail, getGoogleName } from "../providers/google/data"
 import {
   getLinearOrganizationName,
@@ -146,35 +147,64 @@ export const getGitHubStatus = query({
   },
 })
 
-export const getGoogleStatus = query({
+export const getGmailStatus = query({
   args: {
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    if (identity === null) {
-      return null
-    }
-
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_provider", (query) =>
-        query.eq("tenantId", args.tenantId).eq("provider", "google")
-      )
-      .order("desc")
-      .first()
-
-    if (integration === null) {
-      return null
-    }
-
-    return {
-      accountId: integration.accountId,
-      status: integration.status,
-      createdAt: integration.createdAt,
-      email: getGoogleEmail(integration.data),
-      name: getGoogleName(integration.data),
-    }
+    return await getGoogleUserStatus(ctx, {
+      provider: "gmail",
+      tenantId: args.tenantId,
+    })
   },
 })
+
+export const getGoogleCalendarStatus = query({
+  args: {
+    tenantId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await getGoogleUserStatus(ctx, {
+      provider: "googleCalendar",
+      tenantId: args.tenantId,
+    })
+  },
+})
+
+async function getGoogleUserStatus(
+  ctx: QueryCtx,
+  args: {
+    provider: GoogleSurfaceProvider
+    tenantId: string
+  }
+) {
+  const identity = await ctx.auth.getUserIdentity()
+
+  if (identity === null) {
+    return null
+  }
+
+  const integration = await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_provider_owner", (query) =>
+      query
+        .eq("tenantId", args.tenantId)
+        .eq("provider", args.provider)
+        .eq("ownerId", identity.tokenIdentifier)
+    )
+    .order("desc")
+    .first()
+
+  if (integration === null) {
+    return null
+  }
+
+  return {
+    accountId: integration.accountId,
+    status: integration.status,
+    createdAt: integration.createdAt,
+    email: getGoogleEmail(integration.data),
+    name: getGoogleName(integration.data),
+    scope: "user" as const,
+  }
+}

@@ -1,46 +1,80 @@
 import { type GoogleCredentials } from "../providers/google/credentials"
 import { type ToolBundle } from "./tools"
 
-export function createGoogleToolBundle(args: {
+type GoogleRuntimeSurface = "gmail" | "googleCalendar"
+
+export function createGmailToolBundle(args: {
   accountEmail: string
   credentials: GoogleCredentials
+}): ToolBundle {
+  return createGoogleToolBundle({
+    ...args,
+    name: "gmail",
+    scriptPath: "/tmp/milo-workspace/milo-gmail-mcp.mjs",
+    surface: "gmail",
+  })
+}
+
+export function createGoogleCalendarToolBundle(args: {
+  credentials: GoogleCredentials
+}): ToolBundle {
+  return createGoogleToolBundle({
+    ...args,
+    accountEmail: "",
+    name: "googleCalendar",
+    scriptPath: "/tmp/milo-workspace/milo-google-calendar-mcp.mjs",
+    surface: "googleCalendar",
+  })
+}
+
+function createGoogleToolBundle(args: {
+  accountEmail: string
+  credentials: GoogleCredentials
+  name: string
+  scriptPath: string
+  surface: GoogleRuntimeSurface
 }): ToolBundle {
   return {
     mcpServers: [
       {
-        name: "google",
+        name: args.name,
         command: "node",
-        args: ["/tmp/milo-workspace/milo-google-mcp.mjs"],
+        args: [args.scriptPath],
         env: {
           MILO_GOOGLE_ACCESS_TOKEN: args.credentials.accessToken,
           MILO_GOOGLE_ACCOUNT_EMAIL: args.accountEmail,
+          MILO_GOOGLE_SURFACE: args.surface,
         },
       },
     ],
     sandboxFiles: [
       {
-        path: "/tmp/milo-workspace/milo-google-mcp.mjs",
+        path: args.scriptPath,
         content: createGoogleProxyScript(),
       },
     ],
     preflights: [
       {
-        type: "google",
+        type: args.surface,
         credentials: args.credentials,
       },
     ],
   }
 }
 
-export function createGoogleTokenPreflightCommand() {
-  return googleTokenPreflightCommand
+export function createGoogleTokenPreflightCommand(
+  surface: GoogleRuntimeSurface
+) {
+  return surface === "gmail"
+    ? gmailTokenPreflightCommand
+    : googleCalendarTokenPreflightCommand
 }
 
 export function createGoogleProxyScript() {
   return googleProxyScript
 }
 
-const googleTokenPreflightCommand = [
+const gmailTokenPreflightCommand = [
   "node <<'NODE'",
   "async function main() {",
   "  const token = process.env.MILO_GOOGLE_ACCESS_TOKEN;",
@@ -48,11 +82,38 @@ const googleTokenPreflightCommand = [
   "    throw new Error('Missing Google Workspace access token');",
   "  }",
   "  await verify('Gmail profile', 'https://gmail.googleapis.com/gmail/v1/users/me/profile');",
+  "  console.log('Gmail token preflight passed');",
+  "}",
+  "",
+  "async function verify(label, url) {",
+  "  const response = await fetch(url, {",
+  "    headers: { authorization: 'Bearer ' + process.env.MILO_GOOGLE_ACCESS_TOKEN },",
+  "  });",
+  "  const body = await response.json();",
+  "  if (!response.ok) {",
+  "    throw new Error(label + ' preflight failed: ' + JSON.stringify(body));",
+  "  }",
+  "}",
+  "",
+  "main().catch((error) => {",
+  "  console.error(error);",
+  "  process.exit(1);",
+  "});",
+  "NODE",
+].join("\n")
+
+const googleCalendarTokenPreflightCommand = [
+  "node <<'NODE'",
+  "async function main() {",
+  "  const token = process.env.MILO_GOOGLE_ACCESS_TOKEN;",
+  "  if (!token) {",
+  "    throw new Error('Missing Google Calendar access token');",
+  "  }",
   "  const eventsUrl = new URL('https://www.googleapis.com/calendar/v3/calendars/primary/events');",
   "  eventsUrl.searchParams.set('maxResults', '1');",
   "  eventsUrl.searchParams.set('timeMin', new Date().toISOString());",
   "  await verify('Google Calendar events', eventsUrl.toString());",
-  "  console.log('Google Workspace token preflight passed');",
+  "  console.log('Google Calendar token preflight passed');",
   "}",
   "",
   "async function verify(label, url) {",
@@ -83,9 +144,10 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 const accessToken = requiredEnv("MILO_GOOGLE_ACCESS_TOKEN");
-const accountEmail = requiredEnv("MILO_GOOGLE_ACCOUNT_EMAIL");
+const googleSurface = requiredEnv("MILO_GOOGLE_SURFACE");
+const accountEmail = process.env.MILO_GOOGLE_ACCOUNT_EMAIL ?? "";
 
-const tools = [
+const gmailTools = [
   {
     name: "google_gmail_search_threads",
     description: "Search Gmail threads in the connected account.",
@@ -137,6 +199,9 @@ const tools = [
       },
     },
   },
+];
+
+const calendarTools = [
   {
     name: "google_calendar_list_events",
     description: "List Google Calendar events for the connected account.",
@@ -197,6 +262,8 @@ const tools = [
     },
   },
 ];
+
+const tools = googleSurface === "gmail" ? gmailTools : calendarTools;
 
 const server = new Server(
   { name: "milo-google-workspace", version: "0.0.0" },

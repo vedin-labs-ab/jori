@@ -1,55 +1,37 @@
 import { v } from "convex/values"
 import {
   internalMutation,
-  internalQuery,
+  type MutationCtx,
   mutation,
 } from "../../_generated/server"
+import { type GoogleSurfaceProvider } from "./config"
 import { createSignedGoogleState } from "./signing"
 
-export const createInstallState = mutation({
+const googleProvider = v.union(v.literal("gmail"), v.literal("googleCalendar"))
+
+export const createGmailInstallState = mutation({
   args: {
     tenantId: v.string(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    if (identity === null) {
-      throw new Error("Unauthorized")
-    }
-
-    return await createSignedGoogleState({
-      tenantId: args.tenantId,
-      createdBy: identity.tokenIdentifier,
-      returnUrl: args.returnUrl,
-      createdAt: Date.now(),
-    })
+    return await createInstallState(ctx, "gmail", args)
   },
 })
 
-export const getActiveByTenant = internalQuery({
+export const createGoogleCalendarInstallState = mutation({
   args: {
     tenantId: v.string(),
+    returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_provider", (query) =>
-        query.eq("tenantId", args.tenantId).eq("provider", "google")
-      )
-      .order("desc")
-      .first()
-
-    if (integration === null || integration.status !== "active") {
-      return null
-    }
-
-    return integration
+    return await createInstallState(ctx, "googleCalendar", args)
   },
 })
 
 export const recordOAuthInstallation = internalMutation({
   args: {
+    provider: googleProvider,
     tenantId: v.string(),
     createdBy: v.string(),
     accessToken: v.string(),
@@ -66,8 +48,11 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_account", (query) =>
-        query.eq("provider", "google").eq("accountId", args.profile.email)
+      .withIndex("by_tenant_provider_owner", (query) =>
+        query
+          .eq("tenantId", args.tenantId)
+          .eq("provider", args.provider)
+          .eq("ownerId", args.createdBy)
       )
       .first()
 
@@ -91,6 +76,9 @@ export const recordOAuthInstallation = internalMutation({
     if (existing !== null) {
       await ctx.db.patch(existing._id, {
         tenantId: args.tenantId,
+        scope: "user",
+        ownerId: args.createdBy,
+        accountId: args.profile.email,
         credentials,
         status: "active",
         createdBy: args.createdBy,
@@ -102,7 +90,9 @@ export const recordOAuthInstallation = internalMutation({
 
     return await ctx.db.insert("integrations", {
       tenantId: args.tenantId,
-      provider: "google",
+      provider: args.provider,
+      scope: "user",
+      ownerId: args.createdBy,
       accountId: args.profile.email,
       credentials,
       status: "active",
@@ -124,7 +114,11 @@ export const updateOAuthCredentials = internalMutation({
   handler: async (ctx, args) => {
     const integration = await ctx.db.get(args.integrationId)
 
-    if (integration === null || integration.provider !== "google") {
+    if (
+      integration === null ||
+      (integration.provider !== "gmail" &&
+        integration.provider !== "googleCalendar")
+    ) {
       throw new Error("Google Workspace integration not found")
     }
 
@@ -147,6 +141,29 @@ export const updateOAuthCredentials = internalMutation({
     return credentials
   },
 })
+
+async function createInstallState(
+  ctx: MutationCtx,
+  provider: GoogleSurfaceProvider,
+  args: {
+    tenantId: string
+    returnUrl: string
+  }
+) {
+  const identity = await ctx.auth.getUserIdentity()
+
+  if (identity === null) {
+    throw new Error("Unauthorized")
+  }
+
+  return await createSignedGoogleState({
+    provider,
+    tenantId: args.tenantId,
+    createdBy: identity.tokenIdentifier,
+    returnUrl: args.returnUrl,
+    createdAt: Date.now(),
+  })
+}
 
 function readRefreshToken(credentials: unknown) {
   if (

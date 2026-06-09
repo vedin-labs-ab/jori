@@ -37,7 +37,10 @@ export async function prepareIntegrationForRuntime(
     return await prepareLinearIntegrationForRuntime(ctx, integration)
   }
 
-  if (integration.provider === "google") {
+  if (
+    integration.provider === "gmail" ||
+    integration.provider === "googleCalendar"
+  ) {
     return await prepareGoogleIntegrationForRuntime(ctx, integration)
   }
 

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 
 type IntegrationCallbackProvider =
+  | "gmail"
   | "github"
-  | "google"
+  | "googleCalendar"
   | "linear"
   | "microsoft"
   | "slack"

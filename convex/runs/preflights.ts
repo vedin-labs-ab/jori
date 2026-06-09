@@ -18,8 +18,12 @@ export function createToolPreflightCommand(preflight: ToolPreflight) {
     return createSlackTokenPreflightCommand()
   }
 
-  if (preflight.type === "google") {
-    return createGoogleTokenPreflightCommand()
+  if (preflight.type === "gmail") {
+    return createGoogleTokenPreflightCommand("gmail")
+  }
+
+  if (preflight.type === "googleCalendar") {
+    return createGoogleTokenPreflightCommand("googleCalendar")
   }
 
   return createMicrosoftTokenPreflightCommand()
@@ -49,7 +53,7 @@ export function createToolPreflightEnv(
     }
   }
 
-  if (preflight.type === "google") {
+  if (preflight.type === "gmail" || preflight.type === "googleCalendar") {
     return {
       MILO_GOOGLE_ACCESS_TOKEN: preflight.credentials.accessToken,
     }

@@ -64,7 +64,8 @@ async function getMessageInput(
 
   const integrations = await listActiveIntegrations(
     ctx,
-    args.execution.tenantId
+    args.execution.tenantId,
+    args.execution.createdBy
   )
 
   return {
@@ -106,7 +107,11 @@ async function getScheduledInput(
     return null
   }
 
-  const integrations = await listActiveIntegrations(ctx, schedule.tenantId)
+  const integrations = await listActiveIntegrations(
+    ctx,
+    schedule.tenantId,
+    schedule.createdBy
+  )
   const integration =
     integrations.find((candidate) => candidate.provider === "slack") ?? null
 
@@ -120,13 +125,25 @@ async function getScheduledInput(
   }
 }
 
-async function listActiveIntegrations(ctx: QueryCtx, tenantId: string) {
-  return await ctx.db
+async function listActiveIntegrations(
+  ctx: QueryCtx,
+  tenantId: string,
+  ownerId: string | undefined
+) {
+  const integrations = await ctx.db
     .query("integrations")
     .withIndex("by_tenant_status", (query) =>
       query.eq("tenantId", tenantId).eq("status", "active")
     )
     .collect()
+
+  return integrations.filter((integration) => {
+    if (integration.scope !== "user") {
+      return true
+    }
+
+    return ownerId !== undefined && integration.ownerId === ownerId
+  })
 }
 
 export const getActiveByHash = internalQuery({

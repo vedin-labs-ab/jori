@@ -20,7 +20,7 @@ import {
   type SlackCredentials,
 } from "../providers/slack/credentials"
 import { createGitHubToolBundle } from "./github"
-import { createGoogleToolBundle } from "./google"
+import { createGmailToolBundle, createGoogleCalendarToolBundle } from "./google"
 import { createLinearProxyScript } from "./linear"
 import { createMicrosoftToolBundle } from "./microsoft"
 import { createMiloMcpScript } from "./milo"
@@ -60,7 +60,11 @@ export type ToolPreflight =
       credentials: SlackCredentials
     }
   | {
-      type: "google"
+      type: "gmail"
+      credentials: GoogleCredentials
+    }
+  | {
+      type: "googleCalendar"
       credentials: GoogleCredentials
     }
   | {
@@ -170,11 +174,19 @@ function createIntegrationToolBundle(args: {
     })
   }
 
-  if (args.integration.provider === "google") {
+  if (args.integration.provider === "gmail") {
     const credentials = requireGoogleCredentials(args.integration)
 
-    return createGoogleToolBundle({
+    return createGmailToolBundle({
       accountEmail: args.integration.accountId,
+      credentials,
+    })
+  }
+
+  if (args.integration.provider === "googleCalendar") {
+    const credentials = requireGoogleCredentials(args.integration)
+
+    return createGoogleCalendarToolBundle({
       credentials,
     })
   }

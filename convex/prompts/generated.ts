@@ -1,15 +1,21 @@
 export const skills = {
+  calendar: {
+    name: "calendar",
+    description:
+      "Built-in Google Calendar skill for explicit calendar reads, creates, and updates.",
+    body: "# Google Calendar\n\nUse Calendar tools only when the user explicitly asks to inspect, create, or\nupdate events.\n\nEvents:\n- Prefer the `primary` calendar unless the user clearly names another calendar\n  ID.\n- Use `google_calendar_list_events` or `google_calendar_get_event` before\n  updating an existing event.\n- Ask before creating or updating an event if date, time, timezone, attendees,\n  or intent is ambiguous.\n\nFormat:\n- Keep confirmations concise and include the event title and time when useful.\n- Do not mention internal tool names in user-facing replies.",
+  },
   github: {
     name: "github",
     description:
       "Built-in GitHub skill for reading trigger context, inspecting repositories, and replying to GitHub comment threads.",
     body: "# GitHub\n\nUse GitHub for repository context and GitHub replies.\n\nContext:\n- Start with `github_get_trigger_context` when issue, pull request, comment, or\n  adjacent discussion context could change the answer.\n- Use `github_request` for target-repository GitHub REST API calls.\n- Use `github_clone_repository` when file contents, diffs, tests, or repository\n  structure matter. Inspect only what is needed.\n\nReplies:\n- Send the final response with `github_reply` when a reply is useful.\n- Reply only in the GitHub thread that triggered the run.\n- Send one comment unless the task explicitly needs multiple.\n- After the reply succeeds, stop.\n\nFormat:\n- Keep comments concise and practical.\n- Use GitHub-flavored Markdown.\n- Link to files, issues, pull requests, commits, or external context only when\n  it helps the user act.",
   },
-  google: {
-    name: "google",
+  gmail: {
+    name: "gmail",
     description:
-      "Built-in Google Workspace skill for focused Gmail thread context and explicit Google Calendar actions.",
-    body: "# Google Workspace\n\nUse Google Workspace for Gmail context, Gmail replies, and Calendar changes\nwhen the user explicitly asks for Workspace work.\n\nGmail:\n- Search Gmail with `google_gmail_search_threads` only when Gmail context is\n  relevant to the user's request.\n- Use `google_gmail_get_thread` for thread context and\n  `google_gmail_get_message` for specific messages.\n- Send a reply with `google_gmail_reply_to_thread` only when a response is\n  explicitly requested or clearly appropriate from the user's instruction.\n- Reply only to a thread you have inspected. Do not send unrelated email.\n\nCalendar:\n- Use Calendar tools only when the user explicitly asks to inspect, create, or\n  update events.\n- Prefer `primary` unless the user clearly names another calendar ID.\n- Ask before creating or updating an event if date, time, timezone, attendees,\n  or intent is ambiguous.\n\nFormat:\n- Keep Gmail replies concise and plain text.\n- Do not mention internal tool names in user-facing replies.",
+      "Built-in Gmail skill for focused thread context and explicit email replies.",
+    body: "# Gmail\n\nUse Gmail only when the user explicitly asks for email work or when email\ncontext is directly relevant to the task.\n\nContext:\n- Search Gmail with `google_gmail_search_threads` only for focused lookup.\n- Read thread context with `google_gmail_get_thread` before replying.\n- Use `google_gmail_get_message` for a specific message when needed.\n\nReplies:\n- Send `google_gmail_reply_to_thread` only when a reply is explicitly requested\n  or clearly appropriate from the user's instruction.\n- Reply only to a thread you have inspected. Do not send unrelated email.\n\nFormat:\n- Keep replies concise and plain text.\n- Do not mention internal tool names in user-facing replies.",
   },
   linear: {
     name: "linear",

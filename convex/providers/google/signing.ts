@@ -1,7 +1,9 @@
 import { createSignedState, parseSignedState } from "../signing"
+import { type GoogleSurfaceProvider } from "./config"
 import { requireGoogleClientSecret } from "./oauth"
 
 export type GoogleInstallState = {
+  provider: GoogleSurfaceProvider
   tenantId: string
   createdBy: string
   returnUrl: string

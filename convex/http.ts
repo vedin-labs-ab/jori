@@ -89,18 +89,34 @@ http.route({
 })
 
 http.route({
-  path: "/google/install",
+  path: "/gmail/install",
   method: "GET",
   handler: httpAction(async (_ctx, request) => {
-    return await handleGoogleInstall(request)
+    return await handleGoogleInstall(request, "gmail")
   }),
 })
 
 http.route({
-  path: "/google/oauth/callback",
+  path: "/gmail/oauth/callback",
   method: "GET",
   handler: httpAction(async (ctx, request) => {
-    return await handleGoogleOAuthCallback(ctx, request)
+    return await handleGoogleOAuthCallback(ctx, request, "gmail")
+  }),
+})
+
+http.route({
+  path: "/google-calendar/install",
+  method: "GET",
+  handler: httpAction(async (_ctx, request) => {
+    return await handleGoogleInstall(request, "googleCalendar")
+  }),
+})
+
+http.route({
+  path: "/google-calendar/oauth/callback",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    return await handleGoogleOAuthCallback(ctx, request, "googleCalendar")
   }),
 })
 

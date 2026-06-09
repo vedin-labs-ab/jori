@@ -13,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { BrandMark } from "@/shared/brand"
 import { GitHubConnection } from "./github"
-import { GoogleConnection } from "./google"
+import { GmailConnection, GoogleCalendarConnection } from "./google"
 import { LinearConnection } from "./linear"
 import { MicrosoftConnection } from "./microsoft"
 import { OrganizationCard } from "./organization"
@@ -24,14 +24,16 @@ import { useIntegrationCallbackStatus } from "./status"
 export function Setup() {
   const { isLoaded, isSignedIn } = useAuth()
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
+  const gmailStatus = useIntegrationCallbackStatus("gmail")
   const githubStatus = useIntegrationCallbackStatus("github")
-  const googleStatus = useIntegrationCallbackStatus("google")
+  const googleCalendarStatus = useIntegrationCallbackStatus("googleCalendar")
   const linearStatus = useIntegrationCallbackStatus("linear")
   const microsoftStatus = useIntegrationCallbackStatus("microsoft")
   const slackStatus = useIntegrationCallbackStatus("slack")
   const callbackStatuses = {
+    gmail: gmailStatus,
     github: githubStatus,
-    google: googleStatus,
+    googleCalendar: googleCalendarStatus,
     linear: linearStatus,
     microsoft: microsoftStatus,
     slack: slackStatus,
@@ -117,11 +119,18 @@ const integrationCallbackAlerts = [
       "GitHub can now send Milo comment events for the active organization.",
   },
   {
-    provider: "google",
+    provider: "gmail",
     status: "connected",
-    title: "Google Workspace connected",
+    title: "Email connected",
     description:
-      "Milo can now use Gmail and Calendar tools for the active organization when explicitly requested.",
+      "Milo can now use Gmail tools for your account when explicitly requested.",
+  },
+  {
+    provider: "googleCalendar",
+    status: "connected",
+    title: "Calendar connected",
+    description:
+      "Milo can now use Google Calendar tools for your account when explicitly requested.",
   },
   {
     provider: "slack",
@@ -152,11 +161,18 @@ const integrationCallbackAlerts = [
       "GitHub did not return an installation. Check the GitHub App setup URL and try again.",
   },
   {
-    provider: "google",
+    provider: "gmail",
     status: "error",
-    title: "Google Workspace connection failed",
+    title: "Email connection failed",
     description:
-      "Google did not return a usable OAuth token. Check the Google OAuth app settings and try again.",
+      "Google did not return a usable Gmail OAuth token. Check the Google OAuth app settings and try again.",
+  },
+  {
+    provider: "googleCalendar",
+    status: "error",
+    title: "Calendar connection failed",
+    description:
+      "Google did not return a usable Calendar OAuth token. Check the Google OAuth app settings and try again.",
   },
 ] as const
 
@@ -285,7 +301,8 @@ function SignedInView() {
       <LinearConnection tenantId={organization.id} />
       <MicrosoftConnection tenantId={organization.id} />
       <GitHubConnection tenantId={organization.id} />
-      <GoogleConnection tenantId={organization.id} />
+      <GmailConnection tenantId={organization.id} />
+      <GoogleCalendarConnection tenantId={organization.id} />
       <SkillsCard tenantId={organization.id} />
     </section>
   )
