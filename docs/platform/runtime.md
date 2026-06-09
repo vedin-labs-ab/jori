@@ -35,7 +35,7 @@ The first onboarding flow should be simple and mostly Clerk-native:
 
 Slack installs use one OAuth flow that requests both bot scopes and user scopes. The bot token needs `app_mentions:read` and `chat:write`; the user token needs Slack read/search scopes such as `channels:history`, `groups:history`, `im:history`, `mpim:history`, `search:read`, and `users:read`.
 
-Linear installs use OAuth with `actor=app` and targeted scopes for reading issue context, receiving app mentions, and creating comments. Linear webhooks should send `Issue` and `Comment` resource events to `/linear/events`.
+Linear installs use OAuth with `actor=app` and targeted scopes for reading issue context, receiving app mentions, and creating comments. Linear webhooks should send `Comment` resource events to `/linear/events`.
 
 Use Clerk's out-of-the-box components wherever possible. Styling may be adjusted to match Milo's theme, but identity and organization behavior should remain Clerk-owned. Store organization setup details, such as website, in Clerk organization metadata unless Milo needs to query them frequently.
 

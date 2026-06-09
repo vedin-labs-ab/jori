@@ -8,20 +8,10 @@ export type LinearWebhookPayload = {
     email?: string
   }
   createdAt?: string
-  data?: LinearIssue | LinearComment
+  data?: LinearComment
   organizationId?: string
   url?: string
   webhookTimestamp?: number
-}
-
-type LinearIssue = {
-  id?: string
-  identifier?: string
-  title?: string
-  description?: string
-  url?: string
-  updatedAt?: string
-  createdAt?: string
 }
 
 type LinearComment = {
@@ -51,10 +41,6 @@ export function getLinearMessage(args: {
 
   if (eventType === "Comment") {
     return getLinearCommentMessage(args.payload, accountId, args.deliveryId)
-  }
-
-  if (eventType === "Issue") {
-    return getLinearIssueMessage(args.payload, accountId, args.deliveryId)
   }
 
   return null
@@ -94,46 +80,9 @@ function getLinearCommentMessage(
   }
 }
 
-function getLinearIssueMessage(
-  payload: LinearWebhookPayload,
-  accountId: string,
-  deliveryId: string | null
-) {
-  const data = payload.data as LinearIssue | undefined
-
-  if (data?.id === undefined) {
-    return null
-  }
-
-  return {
-    accountId,
-    type: `issue.${payload.action ?? "update"}`,
-    externalId: createLinearExternalId(accountId, deliveryId, data.id),
-    actorId: payload.actor?.id,
-    conversationId: data.id,
-    text: [data.identifier, data.title, data.description]
-      .filter((value) => value !== undefined && value !== "")
-      .join("\n\n"),
-    observedAt: getObservedAt(payload, data.updatedAt ?? data.createdAt),
-    data: {
-      action: payload.action,
-      eventType: payload.type,
-      deliveryId,
-      issueId: data.id,
-      issueIdentifier: data.identifier,
-      title: data.title,
-      url: payload.url ?? data.url,
-    },
-  }
-}
-
 function isRelevantLinearEvent(type: string, action: string | undefined) {
   if (type === "Comment") {
     return action === undefined || action === "create" || action === "update"
-  }
-
-  if (type === "Issue") {
-    return action === "create" || action === "update"
   }
 
   return false

@@ -4,10 +4,6 @@ export function isMiloRelevantLinearMessage(
   text: string | undefined,
   type: string
 ) {
-  if (type.startsWith("issue.")) {
-    return mentionsMilo(text)
-  }
-
   if (type.startsWith("comment.")) {
     return mentionsMilo(text)
   }
