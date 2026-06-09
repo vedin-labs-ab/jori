@@ -25,7 +25,7 @@ export function MiloLogo({
 }: MiloLogoProps) {
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="6 6 52 52"
       xmlns="http://www.w3.org/2000/svg"
       className={cn("shrink-0 text-[#0A0A0B] dark:text-[#FBFAF8]", className)}
       fill="none"
