@@ -8,6 +8,7 @@ import {
 import { useConvexAuth } from "convex/react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IntegrationCallbackAlerts } from "./alerts"
 import { OrganizationCard } from "./identity"
 import { GitHubConnection } from "./integrations/github"
@@ -147,24 +148,54 @@ function OrganizationConsole({
   return (
     <section className="grid gap-4 md:grid-cols-2">
       <OrganizationCard organization={organization} />
-      <SlackConnection permissions={permissions} tenantId={organization.id} />
-      <LinearConnection permissions={permissions} tenantId={organization.id} />
-      <GitHubConnection permissions={permissions} tenantId={organization.id} />
-      <GmailConnection permissions={permissions} tenantId={organization.id} />
-      <GoogleCalendarConnection
-        permissions={permissions}
-        tenantId={organization.id}
-      />
-      <MicrosoftEmailConnection
-        permissions={permissions}
-        tenantId={organization.id}
-      />
-      <MicrosoftCalendarConnection
-        permissions={permissions}
-        tenantId={organization.id}
-      />
+      <IntegrationTabs permissions={permissions} tenantId={organization.id} />
       <NativePermissionsCard controller={permissions} />
       <SkillsCard tenantId={organization.id} />
     </section>
+  )
+}
+
+function IntegrationTabs({
+  permissions,
+  tenantId,
+}: {
+  permissions: ReturnType<typeof useToolPermissions>
+  tenantId: string
+}) {
+  return (
+    <Tabs defaultValue="tenant" className="gap-4 md:col-span-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid gap-1">
+          <h2 className="font-medium text-lg tracking-normal">Integrations</h2>
+          <p className="text-sm text-muted-foreground">
+            Connect shared tenant apps or personal account tools.
+          </p>
+        </div>
+        <TabsList className="w-fit">
+          <TabsTrigger value="tenant">Tenant</TabsTrigger>
+          <TabsTrigger value="user">User</TabsTrigger>
+        </TabsList>
+      </div>
+      <TabsContent value="tenant" className="grid gap-4 md:grid-cols-2">
+        <SlackConnection permissions={permissions} tenantId={tenantId} />
+        <LinearConnection permissions={permissions} tenantId={tenantId} />
+        <GitHubConnection permissions={permissions} tenantId={tenantId} />
+      </TabsContent>
+      <TabsContent value="user" className="grid gap-4 md:grid-cols-2">
+        <GmailConnection permissions={permissions} tenantId={tenantId} />
+        <GoogleCalendarConnection
+          permissions={permissions}
+          tenantId={tenantId}
+        />
+        <MicrosoftEmailConnection
+          permissions={permissions}
+          tenantId={tenantId}
+        />
+        <MicrosoftCalendarConnection
+          permissions={permissions}
+          tenantId={tenantId}
+        />
+      </TabsContent>
+    </Tabs>
   )
 }
