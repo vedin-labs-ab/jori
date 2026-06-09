@@ -1,5 +1,6 @@
 import { microsoftGraphUrl } from "./config"
 import { acquireMicrosoftApplicationToken } from "./oauth"
+import { parseTeamsMessageResource } from "./resources"
 
 export type MicrosoftGraphNotificationPayload = {
   value?: MicrosoftGraphNotification[]
@@ -120,61 +121,6 @@ export async function getMicrosoftNotificationMessage(
       mentions: normalizeMentions(message.mentions),
     },
   }
-}
-
-function parseTeamsMessageResource(resource: string) {
-  const channelReplyMatch = resource.match(
-    /^teams\/([^/]+)\/channels\/([^/]+)\/messages\/([^/]+)\/replies\/([^/]+)$/i
-  )
-
-  if (channelReplyMatch !== null) {
-    const [, teamId, channelId, messageId, replyId] = channelReplyMatch
-
-    return {
-      type: "teams.channel_reply",
-      resource,
-      teamId,
-      channelId,
-      messageId,
-      replyId,
-      conversationId: `teams:${teamId}:${channelId}:${messageId}`,
-    }
-  }
-
-  const channelMessageMatch = resource.match(
-    /^teams\/([^/]+)\/channels\/([^/]+)\/messages\/([^/]+)$/i
-  )
-
-  if (channelMessageMatch !== null) {
-    const [, teamId, channelId, messageId] = channelMessageMatch
-
-    return {
-      type: "teams.channel_message",
-      resource,
-      teamId,
-      channelId,
-      messageId,
-      conversationId: `teams:${teamId}:${channelId}:${messageId}`,
-    }
-  }
-
-  const chatMessageMatch = resource.match(
-    /^chats\/([^/]+)\/messages\/([^/]+)$/i
-  )
-
-  if (chatMessageMatch !== null) {
-    const [, chatId, messageId] = chatMessageMatch
-
-    return {
-      type: "teams.chat_message",
-      resource,
-      chatId,
-      messageId,
-      conversationId: `chats:${chatId}`,
-    }
-  }
-
-  return null
 }
 
 async function fetchMicrosoftChatMessage(

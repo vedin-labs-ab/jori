@@ -48,6 +48,7 @@ import type * as providers_microsoft_gate from "../providers/microsoft/gate.js";
 import type * as providers_microsoft_http from "../providers/microsoft/http.js";
 import type * as providers_microsoft_install from "../providers/microsoft/install.js";
 import type * as providers_microsoft_oauth from "../providers/microsoft/oauth.js";
+import type * as providers_microsoft_resources from "../providers/microsoft/resources.js";
 import type * as providers_microsoft_signing from "../providers/microsoft/signing.js";
 import type * as providers_signing from "../providers/signing.js";
 import type * as providers_slack_config from "../providers/slack/config.js";
@@ -141,6 +142,7 @@ declare const fullApi: ApiFromModules<{
   "providers/microsoft/http": typeof providers_microsoft_http;
   "providers/microsoft/install": typeof providers_microsoft_install;
   "providers/microsoft/oauth": typeof providers_microsoft_oauth;
+  "providers/microsoft/resources": typeof providers_microsoft_resources;
   "providers/microsoft/signing": typeof providers_microsoft_signing;
   "providers/signing": typeof providers_signing;
   "providers/slack/config": typeof providers_slack_config;
