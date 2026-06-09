@@ -12,6 +12,7 @@
     "check:fix": "biome check --write .",
     "check:typecheck": "tsc --noEmit",
     "deploy": "pnpm prompts:compile && npx convex dev --once && pnpm skills:sync",
+    "convex:truncate": "node --experimental-strip-types scripts/truncate.ts",
     "preview": "vite preview",
     "skills:sync": "npx convex run skills/catalog:syncGlobalSkills",
     "prompts:compile": "node scripts/prompts.ts && biome format --write convex/prompts/generated.ts",

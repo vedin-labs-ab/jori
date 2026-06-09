@@ -14,6 +14,7 @@ import type * as identity_identities from "../identity/identities.js";
 import type * as identity_organization from "../identity/organization.js";
 import type * as identity_users from "../identity/users.js";
 import type * as integrations_status from "../integrations/status.js";
+import type * as maintenance_truncate from "../maintenance/truncate.js";
 import type * as messages_ingest from "../messages/ingest.js";
 import type * as permissions_catalog from "../permissions/catalog.js";
 import type * as permissions_data from "../permissions/data.js";
@@ -149,6 +150,7 @@ declare const fullApi: ApiFromModules<{
   "identity/organization": typeof identity_organization;
   "identity/users": typeof identity_users;
   "integrations/status": typeof integrations_status;
+  "maintenance/truncate": typeof maintenance_truncate;
   "messages/ingest": typeof messages_ingest;
   "permissions/catalog": typeof permissions_catalog;
   "permissions/data": typeof permissions_data;
