@@ -150,7 +150,6 @@ function OrganizationConsole({
     <section className="grid gap-4 md:grid-cols-2">
       <OrganizationCard organization={organization} />
       <IntegrationTabs permissions={permissions} tenantId={organization.id} />
-      <NativePermissionsCard controller={permissions} />
       <SkillsCard tenantId={organization.id} />
     </section>
   )
@@ -182,6 +181,7 @@ function IntegrationTabs({
         <LinearConnection permissions={permissions} tenantId={tenantId} />
         <GitHubConnection permissions={permissions} tenantId={tenantId} />
         <NotionConnection permissions={permissions} tenantId={tenantId} />
+        <NativePermissionsCard controller={permissions} />
       </TabsContent>
       <TabsContent value="user" className="grid gap-4 md:grid-cols-2">
         <GmailConnection permissions={permissions} tenantId={tenantId} />

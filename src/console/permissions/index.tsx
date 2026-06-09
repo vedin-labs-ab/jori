@@ -61,13 +61,13 @@ export function NativePermissionsCard({
 }) {
   return (
     <IntegrationSurface
-      description="Control built-in scheduling permissions that are not tied to an external integration."
+      description="Control built-in scheduling permissions for this tenant."
       logo={{ mark: <BrandIcon className="size-7" /> }}
       title="Milo tools"
     >
       <PermissionSection
         controller={controller}
-        emptyLabel="No native tool permissions are defined yet."
+        emptyLabel="No tenant tool permissions are defined yet."
         provider="milo"
         title="Permissions"
       />
