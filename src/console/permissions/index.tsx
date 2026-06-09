@@ -19,6 +19,7 @@ import { BrandIcon } from "@/shared/brand"
 import { IntegrationSurface } from "../integrations/surface"
 import { LoadingMessage } from "../loading"
 import {
+  type ConfigurablePermissionMode,
   type PermissionMode,
   type ToolAccess,
   type ToolPermission,
@@ -27,12 +28,13 @@ import {
 } from "./controller"
 
 const modeLabels: Record<PermissionMode, string> = {
+  required: "Required",
   allowed: "Allowed",
   prompted: "Prompted",
   blocked: "Blocked",
 }
 
-const modeOptions: Record<ToolAccess, PermissionMode[]> = {
+const modeOptions: Record<ToolAccess, ConfigurablePermissionMode[]> = {
   read: ["allowed", "blocked"],
   write: ["allowed", "prompted", "blocked"],
 }
@@ -178,10 +180,15 @@ function PermissionRow({
   pendingTool,
   permission,
 }: {
-  onUpdate: (tool: string, mode: PermissionMode) => void
+  onUpdate: (tool: string, mode: ConfigurablePermissionMode) => void
   pendingTool: string | undefined
   permission: ToolPermission
 }) {
+  const modes =
+    permission.mode === "required"
+      ? (["required"] as const)
+      : modeOptions[permission.access]
+
   return (
     <div className="grid gap-3 py-3 first:pt-0 last:pb-0 sm:grid-cols-[minmax(9rem,1fr)_minmax(12rem,1.6fr)_auto] sm:items-center">
       <div className="flex flex-wrap items-center gap-2">
@@ -199,9 +206,11 @@ function PermissionRow({
       <Select
         value={permission.mode}
         onValueChange={(mode) =>
-          onUpdate(permission.tool, mode as PermissionMode)
+          onUpdate(permission.tool, mode as ConfigurablePermissionMode)
         }
-        disabled={pendingTool === permission.tool}
+        disabled={
+          permission.mode === "required" || pendingTool === permission.tool
+        }
       >
         <SelectTrigger
           aria-label={`${permission.label} permission`}
@@ -210,7 +219,7 @@ function PermissionRow({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {modeOptions[permission.access].map((mode) => (
+          {modes.map((mode) => (
             <SelectItem key={mode} value={mode}>
               {modeLabels[mode]}
             </SelectItem>

@@ -6,6 +6,13 @@ import {
 } from "./policy"
 import { type ToolBundle } from "./types"
 
+export const githubAccountToolNames = [
+  "github_list_repositories",
+  "github_get_repository",
+  "github_search_issues",
+  "github_get_file",
+] as const
+
 export function createGitHubTokenPreflightCommand() {
   return githubTokenPreflightCommand
 }
@@ -65,6 +72,43 @@ export function createGitHubToolBundle(
   }
 }
 
+export function createGitHubAccountToolBundle(
+  args: {
+    credentials: GitHubCredentials
+  } & ToolPermissionInput
+): ToolBundle {
+  if (args.credentials.token === undefined) {
+    throw new Error("Missing GitHub runtime token")
+  }
+
+  return {
+    mcpServers: [
+      {
+        name: "github",
+        command: "node",
+        args: ["/tmp/milo-workspace/milo-github-mcp.mjs"],
+        env: {
+          MILO_GITHUB_TOKEN: args.credentials.token,
+          MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
+        },
+      },
+    ],
+    sandboxFiles: [
+      {
+        path: "/tmp/milo-workspace/milo-github-mcp.mjs",
+        content: createGitHubMcpScript(),
+      },
+    ],
+    preflights: [
+      {
+        type: "github",
+        credentials: args.credentials,
+      },
+    ],
+    promptedTools: getPromptedTools(args),
+  }
+}
+
 const githubTokenPreflightCommand = [
   "node <<'NODE'",
   "async function main() {",
@@ -74,10 +118,8 @@ const githubTokenPreflightCommand = [
   "  if (!token) {",
   "    throw new Error('Missing GitHub token');",
   "  }",
-  "  if (!owner || !repo) {",
-  "    throw new Error('Missing GitHub repository scope');",
-  "  }",
-  "  const response = await fetch('https://api.github.com/repos/' + owner + '/' + repo, {",
+  "  const path = owner && repo ? '/repos/' + owner + '/' + repo : '/installation/repositories?per_page=1';",
+  "  const response = await fetch('https://api.github.com' + path, {",
   "    headers: {",
   "      accept: 'application/vnd.github+json',",
   "      authorization: 'Bearer ' + token,",
@@ -114,21 +156,81 @@ import {
 
 const run = promisify(execFile);
 const token = requiredEnv("MILO_GITHUB_TOKEN");
-const owner = requiredEnv("MILO_GITHUB_OWNER");
-const repo = requiredEnv("MILO_GITHUB_REPO");
+const owner = optionalEnv("MILO_GITHUB_OWNER");
+const repo = optionalEnv("MILO_GITHUB_REPO");
 const issueNumber = optionalNumberEnv("MILO_GITHUB_ISSUE_NUMBER");
 const pullNumber = optionalNumberEnv("MILO_GITHUB_PULL_NUMBER");
-const commentId = requiredEnv("MILO_GITHUB_COMMENT_ID");
-const commentKind = requiredEnv("MILO_GITHUB_COMMENT_KIND");
+const commentId = optionalEnv("MILO_GITHUB_COMMENT_ID");
+const commentKind = optionalEnv("MILO_GITHUB_COMMENT_KIND");
 const workspace = "/tmp/milo-workspace";
 const defaultCloneDirectory = path.join(workspace, "repository");
-const repoPathPrefix = "/repos/" + owner + "/" + repo;
+const repoPathPrefix = owner && repo ? "/repos/" + owner + "/" + repo : undefined;
 const octokit = new Octokit({
   auth: token,
   userAgent: "milo-github",
 });
 
-const allTools = [
+const accountTools = [
+  {
+    name: "github_list_repositories",
+    description: "List repositories available to this GitHub App installation.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        perPage: { type: "number", minimum: 1, maximum: 100 },
+        page: { type: "number", minimum: 1 },
+      },
+    },
+  },
+  {
+    name: "github_get_repository",
+    description: "Read GitHub repository metadata.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["owner", "repo"],
+      properties: {
+        owner: { type: "string" },
+        repo: { type: "string" },
+      },
+    },
+  },
+  {
+    name: "github_search_issues",
+    description: "Search GitHub issues and pull requests visible to the installation.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["query"],
+      properties: {
+        query: { type: "string" },
+        owner: { type: "string" },
+        repo: { type: "string" },
+        state: { type: "string", enum: ["open", "closed"] },
+        perPage: { type: "number", minimum: 1, maximum: 100 },
+        page: { type: "number", minimum: 1 },
+      },
+    },
+  },
+  {
+    name: "github_get_file",
+    description: "Read a file or directory from a GitHub repository.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["owner", "repo", "path"],
+      properties: {
+        owner: { type: "string" },
+        repo: { type: "string" },
+        path: { type: "string" },
+        ref: { type: "string" },
+      },
+    },
+  },
+];
+
+const triggerTools = hasTriggerTarget() ? [
   {
     name: "github_get_trigger_context",
     description: "Read the GitHub issue, pull request, triggering comment, and adjacent comments for this run.",
@@ -176,7 +278,9 @@ const allTools = [
       },
     },
   },
-];
+  ] : [];
+
+const allTools = [...accountTools, ...triggerTools];
 
 const tools = filterEnabledTools(allTools);
 
@@ -211,6 +315,22 @@ const transport = new StdioServerTransport();
 await server.connect(transport);
 
 async function callTool(toolName, args) {
+  if (toolName === "github_list_repositories") {
+    return await listRepositories(args);
+  }
+
+  if (toolName === "github_get_repository") {
+    return await getRepository(args);
+  }
+
+  if (toolName === "github_search_issues") {
+    return await searchIssues(args);
+  }
+
+  if (toolName === "github_get_file") {
+    return await getFile(args);
+  }
+
   if (toolName === "github_get_trigger_context") {
     return await getTriggerContext();
   }
@@ -230,7 +350,108 @@ async function callTool(toolName, args) {
   throw new McpError(ErrorCode.InvalidParams, "Unknown GitHub tool: " + toolName);
 }
 
+async function listRepositories(args) {
+  const response = await octokit.request("GET /installation/repositories", {
+    per_page: boundedNumber(args.perPage, 30, 1, 100),
+    page: boundedNumber(args.page, 1, 1, 100),
+  });
+
+  return {
+    totalCount: response.data.total_count,
+    repositories: response.data.repositories.map(summarizeRepository),
+  };
+}
+
+async function getRepository(args) {
+  return summarizeRepository(
+    await readRequest(repositoryPath(args.owner, args.repo)),
+  );
+}
+
+async function searchIssues(args) {
+  const query = requiredString(args.query, "query");
+  const scopedQuery =
+    typeof args.owner === "string" &&
+    args.owner.trim() !== "" &&
+    typeof args.repo === "string" &&
+    args.repo.trim() !== ""
+      ? query + " repo:" + args.owner.trim() + "/" + args.repo.trim()
+      : query;
+  const stateQuery =
+    args.state === "open" || args.state === "closed"
+      ? scopedQuery + " state:" + args.state
+      : scopedQuery;
+  const response = await octokit.request("GET /search/issues", {
+    q: stateQuery,
+    per_page: boundedNumber(args.perPage, 30, 1, 100),
+    page: boundedNumber(args.page, 1, 1, 100),
+  });
+
+  return {
+    totalCount: response.data.total_count,
+    items: response.data.items.map((item) => ({
+      title: item.title,
+      number: item.number,
+      state: item.state,
+      repositoryUrl: item.repository_url,
+      htmlUrl: item.html_url,
+      pullRequest: item.pull_request !== undefined,
+      updatedAt: item.updated_at,
+      user: item.user?.login,
+    })),
+  };
+}
+
+async function getFile(args) {
+  const path = requiredString(args.path, "path");
+  const parameters = {};
+
+  if (typeof args.ref === "string" && args.ref.trim() !== "") {
+    parameters.ref = args.ref.trim();
+  }
+
+  const result = await readRequest(
+    repositoryPath(args.owner, args.repo) + "/contents/" + encodeRepositoryPath(path),
+    parameters,
+  );
+
+  if (Array.isArray(result)) {
+    return {
+      type: "directory",
+      entries: result.map((entry) => ({
+        name: entry.name,
+        path: entry.path,
+        type: entry.type,
+        size: entry.size,
+        htmlUrl: entry.html_url,
+      })),
+    };
+  }
+
+  if (result.type !== "file") {
+    return result;
+  }
+
+  const encoding = result.encoding;
+  const content =
+    encoding === "base64" && typeof result.content === "string"
+      ? Buffer.from(result.content, "base64").toString("utf8")
+      : "";
+
+  return {
+    name: result.name,
+    path: result.path,
+    sha: result.sha,
+    size: result.size,
+    htmlUrl: result.html_url,
+    truncated: content.length > 100_000,
+    content: content.slice(0, 100_000),
+  };
+}
+
 async function getTriggerContext() {
+  requireTriggerTarget();
+
   if (commentKind === "pull_request_review") {
     return {
       repository: await request("GET", repoPathPrefix),
@@ -260,6 +481,8 @@ async function getTriggerContext() {
 }
 
 async function githubRequest(args) {
+  requireTriggerTarget();
+
   if (typeof args.method !== "string" || typeof args.path !== "string") {
     throw new McpError(ErrorCode.InvalidParams, "method and path are required");
   }
@@ -268,6 +491,8 @@ async function githubRequest(args) {
 }
 
 async function cloneRepository(args) {
+  requireTriggerTarget();
+
   const directory = normalizeCloneDirectory(args.directory);
   await ensureDirectoryCanBeCreated(directory);
 
@@ -293,6 +518,8 @@ async function cloneRepository(args) {
 }
 
 async function reply(args) {
+  requireTriggerTarget();
+
   if (typeof args.body !== "string" || args.body.trim() === "") {
     throw new McpError(ErrorCode.InvalidParams, "Reply body is required");
   }
@@ -332,7 +559,20 @@ async function request(method, requestPath, parameters = {}) {
   }
 }
 
+async function readRequest(requestPath, parameters = {}) {
+  try {
+    const response = await octokit.request("GET " + requestPath, parameters ?? {});
+
+    return response.data;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new McpError(ErrorCode.InternalError, "GitHub request failed: " + message);
+  }
+}
+
 function assertRepoScopedPath(requestPath) {
+  requireTriggerTarget();
+
   if (
     requestPath !== repoPathPrefix &&
     !requestPath.startsWith(repoPathPrefix + "/")
@@ -342,6 +582,60 @@ function assertRepoScopedPath(requestPath) {
       "GitHub API access is limited to " + repoPathPrefix,
     );
   }
+}
+
+function hasTriggerTarget() {
+  return (
+    owner !== undefined &&
+    repo !== undefined &&
+    commentId !== undefined &&
+    commentKind !== undefined
+  );
+}
+
+function requireTriggerTarget() {
+  if (repoPathPrefix === undefined || commentId === undefined || commentKind === undefined) {
+    throw new McpError(ErrorCode.InvalidParams, "GitHub trigger context is not available for this run");
+  }
+}
+
+function repositoryPath(ownerValue, repoValue) {
+  return "/repos/" + encodeURIComponent(requiredString(ownerValue, "owner")) + "/" + encodeURIComponent(requiredString(repoValue, "repo"));
+}
+
+function encodeRepositoryPath(value) {
+  return value
+    .split("/")
+    .map((part) => encodeURIComponent(part))
+    .join("/");
+}
+
+function summarizeRepository(repository) {
+  return {
+    id: repository.id,
+    fullName: repository.full_name,
+    private: repository.private,
+    description: repository.description,
+    defaultBranch: repository.default_branch,
+    htmlUrl: repository.html_url,
+    updatedAt: repository.updated_at,
+  };
+}
+
+function requiredString(value, name) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new McpError(ErrorCode.InvalidParams, name + " is required");
+  }
+
+  return value.trim();
+}
+
+function boundedNumber(value, fallback, min, max) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return fallback;
+  }
+
+  return Math.max(min, Math.min(max, Math.trunc(value)));
 }
 
 function isAllowedMethod(method) {
@@ -425,6 +719,12 @@ function requiredEnv(name) {
     throw new Error("Missing " + name);
   }
   return value;
+}
+
+function optionalEnv(name) {
+  const value = process.env[name];
+
+  return value === undefined || value === "" ? undefined : value;
 }
 
 function filterEnabledTools(allTools) {

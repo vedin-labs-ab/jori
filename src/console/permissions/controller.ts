@@ -3,7 +3,8 @@ import { useState } from "react"
 import { api } from "../../../convex/_generated/api"
 import { readErrorMessage } from "../error"
 
-export type PermissionMode = "allowed" | "prompted" | "blocked"
+export type PermissionMode = "required" | "allowed" | "prompted" | "blocked"
+export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
 export type ToolAccess = "read" | "write"
 
 export type ToolProvider =
@@ -37,7 +38,7 @@ export type ToolPermissionController = {
   pendingTool: string | undefined
   error: PermissionUpdateError | undefined
   getProviderPermissions: (provider: ToolProvider) => ToolPermission[]
-  updatePermission: (tool: string, mode: PermissionMode) => void
+  updatePermission: (tool: string, mode: ConfigurablePermissionMode) => void
 }
 
 export function useToolPermissions(tenantId: string): ToolPermissionController {
@@ -49,7 +50,10 @@ export function useToolPermissions(tenantId: string): ToolPermissionController {
   const [pendingTool, setPendingTool] = useState<string>()
   const [error, setError] = useState<PermissionUpdateError>()
 
-  async function updatePermission(tool: string, mode: PermissionMode) {
+  async function updatePermission(
+    tool: string,
+    mode: ConfigurablePermissionMode
+  ) {
     setPendingTool(tool)
     setError(undefined)
 

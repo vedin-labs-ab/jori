@@ -33,8 +33,8 @@ export type ToolPreflight =
   | {
       type: "github"
       credentials: GitHubCredentials
-      owner: string
-      repo: string
+      owner?: string
+      repo?: string
     }
   | {
       type: "linear"

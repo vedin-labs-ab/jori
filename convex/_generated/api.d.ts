@@ -17,6 +17,7 @@ import type * as identity_organization from "../identity/organization.js";
 import type * as identity_users from "../identity/users.js";
 import type * as permissions_catalog from "../permissions/catalog.js";
 import type * as permissions_data from "../permissions/data.js";
+import type * as permissions_github from "../permissions/github.js";
 import type * as permissions_notion from "../permissions/notion.js";
 import type * as permissions_tools from "../permissions/tools.js";
 import type * as prompts_generated from "../prompts/generated.js";
@@ -132,6 +133,7 @@ declare const fullApi: ApiFromModules<{
   "identity/users": typeof identity_users;
   "permissions/catalog": typeof permissions_catalog;
   "permissions/data": typeof permissions_data;
+  "permissions/github": typeof permissions_github;
   "permissions/notion": typeof permissions_notion;
   "permissions/tools": typeof permissions_tools;
   "prompts/generated": typeof prompts_generated;

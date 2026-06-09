@@ -12,7 +12,11 @@ import { requireMicrosoftCredentials } from "../../providers/microsoft/credentia
 import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
 import { getProviderSkillNames } from "../bundles"
-import { createGitHubToolBundle } from "./github"
+import {
+  createGitHubAccountToolBundle,
+  createGitHubToolBundle,
+  githubAccountToolNames,
+} from "./github"
 import { createGmailToolBundle, createGoogleCalendarToolBundle } from "./google"
 import { createLinearToolBundle } from "./linear"
 import {
@@ -185,7 +189,19 @@ function createGitHubIntegrationToolBundle(
   permissionInput: ToolPermissionInput
 ) {
   if (args.target.provider !== "github") {
-    return null
+    const permissions = permissionInput.permissions.filter((permission) =>
+      isGitHubAccountToolName(permission.tool)
+    )
+
+    if (permissions.length === 0) {
+      return null
+    }
+
+    return createGitHubAccountToolBundle({
+      credentials: requireGitHubCredentials(args.integration),
+      ...permissionInput,
+      permissions,
+    })
   }
 
   return createGitHubToolBundle({
@@ -198,6 +214,12 @@ function createGitHubIntegrationToolBundle(
     commentKind: args.target.commentKind,
     ...permissionInput,
   })
+}
+
+function isGitHubAccountToolName(tool: string) {
+  return githubAccountToolNames.includes(
+    tool as (typeof githubAccountToolNames)[number]
+  )
 }
 
 function createSlackIntegrationToolBundle(

@@ -1,9 +1,15 @@
 import { toolPermissionRows } from "./data"
 
-export const permissionModes = ["allowed", "prompted", "blocked"] as const
+export const permissionModes = [
+  "required",
+  "allowed",
+  "prompted",
+  "blocked",
+] as const
 export const toolAccessLevels = ["read", "write"] as const
 
 export type PermissionMode = (typeof permissionModes)[number]
+export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
 export type ToolAccess = (typeof toolAccessLevels)[number]
 export type ToolProvider =
   | "milo"
@@ -27,7 +33,7 @@ export type ToolPermission = {
 
 export type PermissionOverride = {
   tool: string
-  mode: PermissionMode
+  mode: ConfigurablePermissionMode
 }
 
 export type ToolPermissionRow = readonly [
@@ -36,16 +42,17 @@ export type ToolPermissionRow = readonly [
   label: string,
   description: string,
   access: ToolAccess,
+  defaultMode?: PermissionMode,
 ]
 
 export const toolPermissions = toolPermissionRows.map(
-  ([provider, tool, label, description, access]) => ({
+  ([provider, tool, label, description, access, defaultMode]) => ({
     provider,
     tool,
     label,
     description,
     access,
-    defaultMode: access === "read" ? "allowed" : "prompted",
+    defaultMode: defaultMode ?? (access === "read" ? "allowed" : "prompted"),
   })
 ) satisfies ToolPermission[]
 
@@ -74,7 +81,11 @@ export function resolveToolModes(overrides: PermissionOverride[]) {
   for (const override of overrides) {
     const permission = getToolPermission(override.tool)
 
-    if (permission !== undefined && isModeAllowed(permission, override.mode)) {
+    if (
+      permission !== undefined &&
+      permission.defaultMode !== "required" &&
+      isModeAllowed(permission, override.mode)
+    ) {
       modes.set(override.tool, override.mode)
     }
   }
@@ -91,7 +102,11 @@ export function resolveToolMode(
 
 export function isModeAllowed(
   permission: ToolPermission,
-  mode: PermissionMode
+  mode: ConfigurablePermissionMode
 ) {
+  if (permission.defaultMode === "required") {
+    return false
+  }
+
   return permission.access === "write" || mode !== "prompted"
 }

@@ -8,6 +8,7 @@ import {
 } from "../_generated/server"
 import { requireClerkUserId } from "../identity/users"
 import {
+  type ConfigurablePermissionMode,
   getToolPermission,
   isModeAllowed,
   type PermissionMode,
@@ -67,7 +68,7 @@ export const set = mutation({
     }
 
     if (!isModeAllowed(permission, args.mode)) {
-      throw new Error("Read-only tools can only be allowed or blocked")
+      throw new Error("This tool permission cannot be changed to that mode")
     }
 
     const existing = await getOverride(ctx, args.tenantId, args.tool)
@@ -128,4 +129,4 @@ async function getOverride(ctx: MutationCtx, tenantId: string, tool: string) {
 
 type QueryLikeCtx = QueryCtx | MutationCtx
 
-export type { PermissionMode }
+export type { ConfigurablePermissionMode, PermissionMode }

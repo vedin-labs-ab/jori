@@ -1,4 +1,5 @@
 import { type ToolPermissionRow } from "./catalog"
+import { githubToolPermissionRows } from "./github"
 import { notionToolPermissionRows } from "./notion"
 
 export const toolPermissionRows = [
@@ -60,6 +61,7 @@ export const toolPermissionRows = [
     "Send message",
     "Post a Slack message.",
     "write",
+    "required",
   ],
   [
     "linear",
@@ -82,35 +84,9 @@ export const toolPermissionRows = [
     "Add comment",
     "Add a Linear issue comment.",
     "write",
+    "required",
   ],
-  [
-    "github",
-    "github_get_trigger_context",
-    "Read trigger context",
-    "Read the GitHub item that triggered the run.",
-    "read",
-  ],
-  [
-    "github",
-    "github_request",
-    "GitHub API request",
-    "Call the GitHub repository API.",
-    "write",
-  ],
-  [
-    "github",
-    "github_clone_repository",
-    "Clone repository",
-    "Clone the triggering repository into the sandbox.",
-    "read",
-  ],
-  [
-    "github",
-    "github_reply",
-    "Reply on GitHub",
-    "Post a GitHub issue or pull request reply.",
-    "write",
-  ],
+  ...githubToolPermissionRows,
   [
     "gmail",
     "google_gmail_search_threads",

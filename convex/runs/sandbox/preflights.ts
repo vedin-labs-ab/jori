@@ -40,8 +40,8 @@ export function createToolPreflightEnv(
   if (preflight.type === "github") {
     return {
       MILO_GITHUB_TOKEN: preflight.credentials.token ?? "",
-      MILO_GITHUB_OWNER: preflight.owner,
-      MILO_GITHUB_REPO: preflight.repo,
+      MILO_GITHUB_OWNER: preflight.owner ?? "",
+      MILO_GITHUB_REPO: preflight.repo ?? "",
     }
   }
 

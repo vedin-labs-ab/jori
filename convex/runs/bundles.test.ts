@@ -70,6 +70,59 @@ describe("runtime integration bundles", () => {
   })
 })
 
+describe("runtime permission modes", () => {
+  test("keeps delivery tools required and out of approval prompts", () => {
+    const toolBundle = assembleToolsForRun({
+      milo: {
+        convexSiteUrl: "https://convex.example",
+        executionToken: "execution-token",
+      },
+      integrations: [integration("slack")],
+      target: {
+        provider: "slack",
+        channelId: "C123",
+      },
+      toolModes: resolveToolModes([
+        { tool: "conversations_add_message", mode: "blocked" },
+      ]),
+    })
+    const slackServer = toolBundle.mcpServers.find(
+      (server) => server.name === "slack"
+    )
+
+    expect(slackServer?.env.MILO_ENABLED_TOOLS.split(",")).toContain(
+      "conversations_add_message"
+    )
+    expect(toolBundle.promptedTools.map((tool) => tool.tool)).not.toContain(
+      "conversations_add_message"
+    )
+  })
+
+  test("includes GitHub account tools for non-GitHub triggers", () => {
+    const toolBundle = assembleToolsForRun({
+      milo: {
+        convexSiteUrl: "https://convex.example",
+        executionToken: "execution-token",
+      },
+      integrations: [integration("github")],
+      target: {
+        provider: "slack",
+        channelId: "C123",
+      },
+      toolModes: resolveToolModes([]),
+    })
+    const githubServer = toolBundle.mcpServers.find(
+      (server) => server.name === "github"
+    )
+    const enabledTools = githubServer?.env.MILO_ENABLED_TOOLS.split(",") ?? []
+
+    expect(enabledTools).toContain("github_list_repositories")
+    expect(enabledTools).toContain("github_search_issues")
+    expect(enabledTools).not.toContain("github_reply")
+    expect(toolBundle.skillNames).toContain("github")
+  })
+})
+
 function runtimeSkill(
   name: string,
   tenantId: string | null,
@@ -99,6 +152,21 @@ function integration(provider: string): Doc<"integrations"> {
 }
 
 function credentials(provider: string) {
+  if (provider === "github") {
+    return {
+      installationId: "123",
+      token: "github-token",
+      expiresAt: Date.now() + 60_000,
+    }
+  }
+
+  if (provider === "slack") {
+    return {
+      bot: "bot-token",
+      user: "user-token",
+    }
+  }
+
   if (provider === "microsoftEmail" || provider === "microsoftCalendar") {
     return {
       accessToken: "access-token",
