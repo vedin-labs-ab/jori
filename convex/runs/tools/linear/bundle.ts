@@ -1,15 +1,16 @@
 import { type LinearCredentials } from "../../../providers/linear/credentials"
+import { createBrokerMcpScript } from "../adapter"
+import { getProviderToolDefinitions } from "../definitions"
 import {
   enabledToolsEnv,
   getPromptedTools,
   type ToolPermissionInput,
 } from "../policy"
-import { type ToolBundle } from "../types"
-
-import { createLinearProxyScript } from "./script"
+import { type BrokeredToolArgs, type ToolBundle } from "../types"
 
 export function createLinearToolBundle(
   args: {
+    broker: BrokeredToolArgs
     credentials: LinearCredentials
   } & ToolPermissionInput
 ): ToolBundle {
@@ -20,7 +21,8 @@ export function createLinearToolBundle(
         command: "node",
         args: ["/home/user/milo-workspace/milo-linear-mcp.mjs"],
         env: {
-          MILO_LINEAR_ACCESS_TOKEN: args.credentials.accessToken,
+          MILO_CONVEX_SITE_URL: args.broker.convexSiteUrl,
+          MILO_EXECUTION_TOKEN: args.broker.executionToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
         },
       },
@@ -28,7 +30,10 @@ export function createLinearToolBundle(
     sandboxFiles: [
       {
         path: "/home/user/milo-workspace/milo-linear-mcp.mjs",
-        content: createLinearProxyScript(),
+        content: createBrokerMcpScript({
+          provider: "linear",
+          tools: getProviderToolDefinitions("linear"),
+        }),
       },
     ],
     preflights: [

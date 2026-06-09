@@ -1,15 +1,16 @@
 import { type GitHubCredentials } from "../../../providers/github/credentials"
+import { createBrokerMcpScript } from "../adapter"
+import { getProviderToolDefinitions } from "../definitions"
 import {
   enabledToolsEnv,
   getPromptedTools,
   type ToolPermissionInput,
 } from "../policy"
-import { type ToolBundle } from "../types"
-
-import { createGitHubMcpScript } from "./script"
+import { type BrokeredToolArgs, type ToolBundle } from "../types"
 
 export function createGitHubToolBundle(
   args: {
+    broker: BrokeredToolArgs
     credentials: GitHubCredentials
   } & ToolPermissionInput
 ): ToolBundle {
@@ -24,7 +25,8 @@ export function createGitHubToolBundle(
         command: "node",
         args: ["/home/user/milo-workspace/milo-github-mcp.mjs"],
         env: {
-          MILO_GITHUB_TOKEN: args.credentials.token,
+          MILO_CONVEX_SITE_URL: args.broker.convexSiteUrl,
+          MILO_EXECUTION_TOKEN: args.broker.executionToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
         },
       },
@@ -32,7 +34,10 @@ export function createGitHubToolBundle(
     sandboxFiles: [
       {
         path: "/home/user/milo-workspace/milo-github-mcp.mjs",
-        content: createGitHubMcpScript(),
+        content: createBrokerMcpScript({
+          provider: "github",
+          tools: getProviderToolDefinitions("github"),
+        }),
       },
     ],
     preflights: [

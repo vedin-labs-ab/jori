@@ -34,6 +34,11 @@ export type McpServerConfig = {
   env: Record<string, string>
 }
 
+export type BrokeredToolArgs = {
+  convexSiteUrl: string
+  executionToken: string
+}
+
 export type SandboxFile = {
   path: string
   content: string

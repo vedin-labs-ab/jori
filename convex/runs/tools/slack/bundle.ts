@@ -1,14 +1,16 @@
 import { type SlackCredentials } from "../../../providers/slack/credentials"
+import { createBrokerMcpScript } from "../adapter"
+import { getProviderToolDefinitions } from "../definitions"
 import {
   enabledToolsEnv,
   getPromptedTools,
   type ToolPermissionInput,
 } from "../policy"
-import { createSlackProxyScript } from "../proxy"
-import { type ToolBundle } from "../types"
+import { type BrokeredToolArgs, type ToolBundle } from "../types"
 export function createSlackToolBundle(
   args: {
     accountId: string
+    broker: BrokeredToolArgs
     credentials: SlackCredentials
   } & ToolPermissionInput
 ): ToolBundle {
@@ -17,19 +19,21 @@ export function createSlackToolBundle(
       {
         name: "slack",
         command: "node",
-        args: ["/home/user/milo-workspace/milo-slack-mcp-proxy.mjs"],
+        args: ["/home/user/milo-workspace/milo-slack-mcp.mjs"],
         env: {
-          MILO_SLACK_CACHE_KEY: args.accountId,
-          MILO_SLACK_BOT_TOKEN: args.credentials.bot,
-          MILO_SLACK_USER_TOKEN: args.credentials.user,
+          MILO_CONVEX_SITE_URL: args.broker.convexSiteUrl,
+          MILO_EXECUTION_TOKEN: args.broker.executionToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
         },
       },
     ],
     sandboxFiles: [
       {
-        path: "/home/user/milo-workspace/milo-slack-mcp-proxy.mjs",
-        content: createSlackProxyScript(),
+        path: "/home/user/milo-workspace/milo-slack-mcp.mjs",
+        content: createBrokerMcpScript({
+          provider: "slack",
+          tools: getProviderToolDefinitions("slack"),
+        }),
       },
     ],
     preflights: [

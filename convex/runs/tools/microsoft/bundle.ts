@@ -1,16 +1,18 @@
 import { type MicrosoftCredentials } from "../../../providers/microsoft/credentials"
+import { createBrokerMcpScript } from "../adapter"
+import { getProviderToolDefinitions } from "../definitions"
 import {
   enabledToolsEnv,
   getPromptedTools,
   type ToolPermissionInput,
 } from "../policy"
-import { type ToolBundle } from "../types"
-import { createMicrosoftGraphMcpScript } from "./script"
+import { type BrokeredToolArgs, type ToolBundle } from "../types"
 
 type MicrosoftRuntimeSurface = "microsoftCalendar" | "microsoftEmail"
 
 export function createMicrosoftEmailToolBundle(
   args: {
+    broker: BrokeredToolArgs
     credentials: MicrosoftCredentials
   } & ToolPermissionInput
 ): ToolBundle {
@@ -24,6 +26,7 @@ export function createMicrosoftEmailToolBundle(
 
 export function createMicrosoftCalendarToolBundle(
   args: {
+    broker: BrokeredToolArgs
     credentials: MicrosoftCredentials
   } & ToolPermissionInput
 ): ToolBundle {
@@ -37,6 +40,7 @@ export function createMicrosoftCalendarToolBundle(
 
 function createMicrosoftToolBundle(
   args: {
+    broker: BrokeredToolArgs
     credentials: MicrosoftCredentials
     name: string
     scriptPath: string
@@ -50,8 +54,8 @@ function createMicrosoftToolBundle(
         command: "node",
         args: [args.scriptPath],
         env: {
-          MILO_MICROSOFT_ACCESS_TOKEN: args.credentials.accessToken,
-          MILO_MICROSOFT_SURFACE: args.surface,
+          MILO_CONVEX_SITE_URL: args.broker.convexSiteUrl,
+          MILO_EXECUTION_TOKEN: args.broker.executionToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
         },
       },
@@ -59,7 +63,10 @@ function createMicrosoftToolBundle(
     sandboxFiles: [
       {
         path: args.scriptPath,
-        content: createMicrosoftGraphMcpScript(),
+        content: createBrokerMcpScript({
+          provider: args.surface,
+          tools: getProviderToolDefinitions(args.surface),
+        }),
       },
     ],
     preflights: [

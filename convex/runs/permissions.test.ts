@@ -1,6 +1,7 @@
 import { expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
 import { resolveToolModes } from "../permissions/catalog"
+import { createCodexConfig } from "./codex"
 import { assembleToolsForRun } from "./tools"
 
 test("keeps delivery tools required and out of approval prompts", () => {
@@ -75,6 +76,45 @@ test("does not pass trigger issue defaults into Linear tools", () => {
   expect(linearServer?.env.MILO_LINEAR_DEFAULT_ISSUE_ID).toBeUndefined()
 })
 
+test("keeps provider credentials out of sandbox MCP config", () => {
+  const toolBundle = assembleToolsForRun({
+    milo: runtimeMilo(),
+    integrations: [
+      integration("slack"),
+      integration("github"),
+      integration("linear"),
+      integration("gmail"),
+      integration("googleCalendar"),
+      integration("notion"),
+      integration("microsoftEmail"),
+      integration("microsoftCalendar"),
+    ],
+    toolModes: resolveToolModes([]),
+  })
+  const config = createCodexConfig({
+    mcpServers: toolBundle.mcpServers,
+  })
+
+  for (const secret of [
+    "bot-token",
+    "user-token",
+    "github-token",
+    "access-token",
+  ]) {
+    expect(config).not.toContain(secret)
+  }
+
+  for (const server of toolBundle.mcpServers) {
+    expect(server.env).not.toHaveProperty("MILO_SLACK_BOT_TOKEN")
+    expect(server.env).not.toHaveProperty("MILO_SLACK_USER_TOKEN")
+    expect(server.env).not.toHaveProperty("MILO_GITHUB_TOKEN")
+    expect(server.env).not.toHaveProperty("MILO_LINEAR_ACCESS_TOKEN")
+    expect(server.env).not.toHaveProperty("MILO_GOOGLE_ACCESS_TOKEN")
+    expect(server.env).not.toHaveProperty("MILO_NOTION_ACCESS_TOKEN")
+    expect(server.env).not.toHaveProperty("MILO_MICROSOFT_ACCESS_TOKEN")
+  }
+})
+
 function runtimeMilo() {
   return {
     convexSiteUrl: "https://convex.example",
@@ -109,6 +149,15 @@ function credentials(provider: string) {
     return {
       bot: "bot-token",
       user: "user-token",
+    }
+  }
+
+  if (provider === "microsoftEmail" || provider === "microsoftCalendar") {
+    return {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      expiresAt: Date.now() + 60_000,
+      tenantId: "microsoft-tenant",
     }
   }
 

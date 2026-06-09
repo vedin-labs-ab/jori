@@ -1,17 +1,19 @@
 import { type GoogleCredentials } from "../../../providers/google/credentials"
+import { createBrokerMcpScript } from "../adapter"
+import { getProviderToolDefinitions } from "../definitions"
 import {
   enabledToolsEnv,
   getPromptedTools,
   type ToolPermissionInput,
 } from "../policy"
-import { type ToolBundle } from "../types"
-import { createGoogleProxyScript } from "./script"
+import { type BrokeredToolArgs, type ToolBundle } from "../types"
 
 type GoogleRuntimeSurface = "gmail" | "googleCalendar"
 
 export function createGmailToolBundle(
   args: {
     accountEmail: string
+    broker: BrokeredToolArgs
     credentials: GoogleCredentials
   } & ToolPermissionInput
 ): ToolBundle {
@@ -25,6 +27,7 @@ export function createGmailToolBundle(
 
 export function createGoogleCalendarToolBundle(
   args: {
+    broker: BrokeredToolArgs
     credentials: GoogleCredentials
   } & ToolPermissionInput
 ): ToolBundle {
@@ -40,6 +43,7 @@ export function createGoogleCalendarToolBundle(
 function createGoogleToolBundle(
   args: {
     accountEmail: string
+    broker: BrokeredToolArgs
     credentials: GoogleCredentials
     name: string
     scriptPath: string
@@ -53,9 +57,8 @@ function createGoogleToolBundle(
         command: "node",
         args: [args.scriptPath],
         env: {
-          MILO_GOOGLE_ACCESS_TOKEN: args.credentials.accessToken,
-          MILO_GOOGLE_ACCOUNT_EMAIL: args.accountEmail,
-          MILO_GOOGLE_SURFACE: args.surface,
+          MILO_CONVEX_SITE_URL: args.broker.convexSiteUrl,
+          MILO_EXECUTION_TOKEN: args.broker.executionToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
         },
       },
@@ -63,7 +66,10 @@ function createGoogleToolBundle(
     sandboxFiles: [
       {
         path: args.scriptPath,
-        content: createGoogleProxyScript(),
+        content: createBrokerMcpScript({
+          provider: args.surface,
+          tools: getProviderToolDefinitions(args.surface),
+        }),
       },
     ],
     preflights: [

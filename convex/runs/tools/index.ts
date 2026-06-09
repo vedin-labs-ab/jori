@@ -30,6 +30,10 @@ import {
 } from "./types"
 
 type IntegrationBundleArgs = {
+  broker: {
+    convexSiteUrl: string
+    executionToken: string
+  }
   integration: Doc<"integrations">
   toolModes: ReadonlyMap<string, PermissionMode>
 }
@@ -77,6 +81,7 @@ export function assembleToolsForRun(args: {
 
   for (const integration of args.integrations) {
     const integrationBundle = createIntegrationToolBundle({
+      broker: args.milo,
       integration,
       toolModes: args.toolModes,
     })
@@ -157,21 +162,25 @@ function createProviderToolBundle(
       return createGmailIntegrationToolBundle(args, permissionInput)
     case "googleCalendar":
       return createGoogleCalendarToolBundle({
+        broker: args.broker,
         credentials: requireGoogleCredentials(args.integration),
         ...permissionInput,
       })
     case "notion":
       return createNotionToolBundle({
+        broker: args.broker,
         credentials: requireNotionCredentials(args.integration),
         ...permissionInput,
       })
     case "microsoftEmail":
       return createMicrosoftEmailToolBundle({
+        broker: args.broker,
         credentials: requireMicrosoftCredentials(args.integration),
         ...permissionInput,
       })
     case "microsoftCalendar":
       return createMicrosoftCalendarToolBundle({
+        broker: args.broker,
         credentials: requireMicrosoftCredentials(args.integration),
         ...permissionInput,
       })
@@ -185,6 +194,7 @@ function createLinearIntegrationToolBundle(
   permissionInput: ToolPermissionInput
 ) {
   return createLinearToolBundle({
+    broker: args.broker,
     credentials: requireLinearCredentials(args.integration),
     ...permissionInput,
   })
@@ -195,6 +205,7 @@ function createGitHubIntegrationToolBundle(
   permissionInput: ToolPermissionInput
 ) {
   return createGitHubToolBundle({
+    broker: args.broker,
     credentials: requireGitHubCredentials(args.integration),
     ...permissionInput,
   })
@@ -206,6 +217,7 @@ function createSlackIntegrationToolBundle(
 ) {
   return createSlackToolBundle({
     accountId: args.integration.accountId,
+    broker: args.broker,
     credentials: requireSlackCredentials(args.integration),
     ...permissionInput,
   })
@@ -217,6 +229,7 @@ function createGmailIntegrationToolBundle(
 ) {
   return createGmailToolBundle({
     accountEmail: args.integration.accountId,
+    broker: args.broker,
     credentials: requireGoogleCredentials(args.integration),
     ...permissionInput,
   })

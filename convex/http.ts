@@ -27,7 +27,7 @@ import {
   handleSlackInstall,
   handleSlackOAuthCallback,
 } from "./providers/slack/http"
-import { handleMiloMcpRequest } from "./scheduling/mcp"
+import { handleGitHubTarballRequest, handleMiloMcpRequest } from "./tools/mcp"
 
 const http = httpRouter()
 
@@ -63,6 +63,14 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     return await handleMiloMcpRequest(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/milo/github/tarball",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    return await handleGitHubTarballRequest(ctx, request)
   }),
 })
 
