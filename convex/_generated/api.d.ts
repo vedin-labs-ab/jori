@@ -18,6 +18,7 @@ import type * as permissions_catalog from "../permissions/catalog.js";
 import type * as permissions_data from "../permissions/data.js";
 import type * as permissions_tools from "../permissions/tools.js";
 import type * as prompts_generated from "../prompts/generated.js";
+import type * as providers_data from "../providers/data.js";
 import type * as providers_github_app from "../providers/github/app.js";
 import type * as providers_github_config from "../providers/github/config.js";
 import type * as providers_github_credentials from "../providers/github/credentials.js";
@@ -120,6 +121,7 @@ declare const fullApi: ApiFromModules<{
   "permissions/data": typeof permissions_data;
   "permissions/tools": typeof permissions_tools;
   "prompts/generated": typeof prompts_generated;
+  "providers/data": typeof providers_data;
   "providers/github/app": typeof providers_github_app;
   "providers/github/config": typeof providers_github_config;
   "providers/github/credentials": typeof providers_github_credentials;

@@ -1,65 +1,41 @@
-export function getMicrosoftTenantName(data: unknown) {
-  const tenant = readMicrosoftDataObject(data, "tenant")
+import {
+  readProviderDataArray,
+  readProviderDataObject,
+  readProviderDataString,
+} from "../data"
 
-  return readMicrosoftDataString(tenant, "displayName")
+export function getMicrosoftTenantName(data: unknown) {
+  const tenant = readProviderDataObject(data, "tenant")
+
+  return readProviderDataString(tenant, "displayName")
 }
 
 export function getMicrosoftConnectedUser(data: unknown) {
-  const user = readMicrosoftDataObject(data, "user")
-  const displayName = readMicrosoftDataString(user, "displayName")
-  const userPrincipalName = readMicrosoftDataString(user, "userPrincipalName")
+  const user = readProviderDataObject(data, "user")
+  const displayName = readProviderDataString(user, "displayName")
+  const userPrincipalName = readProviderDataString(user, "userPrincipalName")
 
   return displayName ?? userPrincipalName
 }
 
 export function getMicrosoftEmail(data: unknown) {
-  const user = readMicrosoftDataObject(data, "user")
-  const mail = readMicrosoftDataString(user, "mail")
-  const userPrincipalName = readMicrosoftDataString(user, "userPrincipalName")
+  const user = readProviderDataObject(data, "user")
+  const mail = readProviderDataString(user, "mail")
+  const userPrincipalName = readProviderDataString(user, "userPrincipalName")
 
   return mail ?? userPrincipalName
 }
 
 export function getMicrosoftConnectedUserId(data: unknown) {
-  const user = readMicrosoftDataObject(data, "user")
+  const user = readProviderDataObject(data, "user")
 
-  return readMicrosoftDataString(user, "id")
+  return readProviderDataString(user, "id")
 }
 
 export function getMicrosoftMentions(data: unknown) {
-  const mentions = readMicrosoftDataArray(data, "mentions")
+  const mentions = readProviderDataArray(data, "mentions")
 
   return mentions
-    .map((mention) => readMicrosoftDataString(mention, "mentionText"))
+    .map((mention) => readProviderDataString(mention, "mentionText"))
     .filter((mentionText): mentionText is string => mentionText !== undefined)
-}
-
-function readMicrosoftDataObject(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  const value = (data as Record<string, unknown>)[key]
-
-  return typeof value === "object" && value !== null ? value : undefined
-}
-
-function readMicrosoftDataArray(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return []
-  }
-
-  const value = (data as Record<string, unknown>)[key]
-
-  return Array.isArray(value) ? value : []
-}
-
-function readMicrosoftDataString(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  const value = (data as Record<string, unknown>)[key]
-
-  return typeof value === "string" ? value : undefined
 }
