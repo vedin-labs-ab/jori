@@ -4,6 +4,7 @@ import { v } from "convex/values"
 export const executions = defineTable({
   tenantId: v.string(),
   triggerId: v.id("triggers"),
+  promptId: v.id("_storage"),
   sandboxId: v.optional(v.string()),
   hash: v.optional(v.string()),
   status: v.union(

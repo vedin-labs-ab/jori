@@ -198,15 +198,6 @@ function runtimeInput() {
   return {
     type: "message",
     provider: "slack",
-    execution: {
-      _id: "execution",
-      _creationTime: 0,
-      tenantId: "tenant",
-      triggerId: "trigger",
-      status: "pending",
-      startedAt: 0,
-      updatedAt: 0,
-    },
     trigger: {
       _id: "trigger",
       _creationTime: 0,

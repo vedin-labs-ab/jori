@@ -1,34 +1,28 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
 
-export const getInput = internalQuery({
+export const getInputByTrigger = internalQuery({
   args: {
-    executionId: v.id("executions"),
+    triggerId: v.id("triggers"),
   },
   handler: async (ctx, args) => {
-    const execution = await ctx.db.get(args.executionId)
+    const trigger = await ctx.db.get(args.triggerId)
 
-    if (execution === null) {
-      return null
-    }
-
-    const trigger = await ctx.db.get(execution.triggerId)
-
-    if (trigger === null || trigger.tenantId !== execution.tenantId) {
+    if (trigger === null) {
       return null
     }
 
     if (trigger.type === "message") {
-      return await getMessageInput(ctx, { execution, trigger })
+      return await getMessageInput(ctx, { trigger })
     }
 
     if (trigger.type === "scheduled") {
-      return await getScheduledInput(ctx, { execution, trigger })
+      return await getScheduledInput(ctx, { trigger })
     }
 
     return null
@@ -38,7 +32,6 @@ export const getInput = internalQuery({
 async function getMessageInput(
   ctx: QueryCtx,
   args: {
-    execution: Doc<"executions">
     trigger: Doc<"triggers">
   }
 ) {
@@ -48,7 +41,7 @@ async function getMessageInput(
 
   const message = await ctx.db.get(args.trigger.messageId)
 
-  if (message === null || message.tenantId !== args.execution.tenantId) {
+  if (message === null || message.tenantId !== args.trigger.tenantId) {
     return null
   }
 
@@ -56,7 +49,7 @@ async function getMessageInput(
 
   if (
     integration === null ||
-    integration.tenantId !== args.execution.tenantId ||
+    integration.tenantId !== args.trigger.tenantId ||
     !isMessageProvider(integration.provider)
   ) {
     return null
@@ -64,14 +57,13 @@ async function getMessageInput(
 
   const integrations = await listActiveIntegrations(
     ctx,
-    args.execution.tenantId,
-    args.execution.createdBy
+    args.trigger.tenantId,
+    args.trigger.createdBy
   )
 
   return {
     type: "message" as const,
     provider: integration.provider,
-    execution: args.execution,
     trigger: args.trigger,
     message,
     integration,
@@ -88,7 +80,6 @@ function isMessageProvider(
 async function getScheduledInput(
   ctx: QueryCtx,
   args: {
-    execution: Doc<"executions">
     trigger: Doc<"triggers">
   }
 ) {
@@ -98,7 +89,7 @@ async function getScheduledInput(
 
   const schedule = await ctx.db.get(args.trigger.scheduleId)
 
-  if (schedule === null || schedule.tenantId !== args.execution.tenantId) {
+  if (schedule === null || schedule.tenantId !== args.trigger.tenantId) {
     return null
   }
 
@@ -112,13 +103,35 @@ async function getScheduledInput(
 
   return {
     type: "scheduled" as const,
-    execution: args.execution,
     trigger: args.trigger,
     schedule,
     integration,
     integrations,
   }
 }
+
+export const create = internalMutation({
+  args: {
+    triggerId: v.id("triggers"),
+    promptId: v.id("_storage"),
+  },
+  handler: async (ctx, args): Promise<Id<"executions"> | null> => {
+    const trigger = await ctx.db.get(args.triggerId)
+
+    if (trigger === null) {
+      return null
+    }
+
+    return await ctx.db.insert("executions", {
+      tenantId: trigger.tenantId,
+      triggerId: trigger._id,
+      promptId: args.promptId,
+      status: "queued",
+      createdBy: trigger.createdBy,
+      createdAt: Date.now(),
+    })
+  },
+})
 
 async function listActiveIntegrations(
   ctx: QueryCtx,

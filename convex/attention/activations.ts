@@ -26,7 +26,7 @@ export async function findConversationActivation(
     .first()
 }
 
-export async function startMessageExecution(
+export async function startMessageTrigger(
   ctx: MutationCtx,
   args: {
     activation: Doc<"activations"> | null
@@ -53,14 +53,6 @@ export async function startMessageExecution(
     createdAt: args.now,
   })
 
-  const executionId = await ctx.db.insert("executions", {
-    tenantId: args.integration.tenantId,
-    triggerId,
-    status: "queued",
-    createdBy: args.createdBy,
-    createdAt: args.now,
-  })
-
   const activationId =
     args.activation === null
       ? await ctx.db.insert("activations", {
@@ -77,7 +69,6 @@ export async function startMessageExecution(
     status: "started" as const,
     messageId: args.messageId,
     triggerId,
-    executionId,
     activationId,
   }
 }

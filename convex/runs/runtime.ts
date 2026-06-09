@@ -3,23 +3,23 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { resolveToolModes } from "../permissions/catalog"
-import { filterRuntimeSkillsForBundle } from "./bundles"
+import { createPromptedExecution } from "./artifacts"
 import { type CodexRuntimeInput } from "./codex"
 import { prepareIntegrationForRuntime } from "./integrations"
-import { assemblePrompt, type RuntimeSkill } from "./prompt"
 import { runCodexInE2B } from "./sandbox/e2b"
 import { requireMessageTarget } from "./targets"
 import { createExecutionToken, hashExecutionToken } from "./tokens"
-import { assembleToolsForRun } from "./tools"
 import { CodexRunError, formatError } from "./trace"
 
 export const runMessageExecution = internalAction({
   args: {
-    executionId: v.id("executions"),
+    triggerId: v.id("triggers"),
   },
   handler: async (ctx, args) => {
-    const input = await ctx.runQuery(internal.runs.executions.getInput, args)
+    const input = await ctx.runQuery(
+      internal.runs.executions.getInputByTrigger,
+      args
+    )
 
     if (input === null || input.type !== "message") {
       return
@@ -30,7 +30,6 @@ export const runMessageExecution = internalAction({
     await runExecution(ctx, {
       type: "message",
       provider: input.provider,
-      execution: input.execution,
       trigger: input.trigger,
       integration: input.integration,
       integrations: await prepareIntegrationsForRuntime(
@@ -44,20 +43,22 @@ export const runMessageExecution = internalAction({
 
 export const runScheduledExecution = internalAction({
   args: {
-    executionId: v.id("executions"),
+    triggerId: v.id("triggers"),
   },
   handler: async (ctx, args) => {
-    const input = await ctx.runQuery(internal.runs.executions.getInput, args)
+    const input = await ctx.runQuery(
+      internal.runs.executions.getInputByTrigger,
+      args
+    )
 
     if (input === null || input.type !== "scheduled") {
       return
     }
 
     if (input.integration === null) {
-      await finishExecutionWithError(
+      await createFailedExecution(
         ctx,
-        input.execution.tenantId,
-        input.execution._id,
+        input,
         "Scheduled task output target requires a connected Slack integration."
       )
       return
@@ -65,7 +66,6 @@ export const runScheduledExecution = internalAction({
 
     await runExecution(ctx, {
       type: "scheduled",
-      execution: input.execution,
       trigger: input.trigger,
       integration: input.integration,
       integrations: await prepareIntegrationsForRuntime(
@@ -80,25 +80,16 @@ export const runScheduledExecution = internalAction({
 async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
   const executionToken = createExecutionToken()
   const hash = await hashExecutionToken(executionToken)
-  const skills = await ctx.runQuery(internal.skills.catalog.listForRuntime, {
-    tenantId: input.execution.tenantId,
+  const execution = await createPromptedExecution(ctx, {
+    convexSiteUrl: requireConvexSiteUrl(),
+    input,
+    executionToken,
   })
-  const permissionOverrides = await ctx.runQuery(
-    internal.permissions.tools.listForRuntime,
-    {
-      tenantId: input.execution.tenantId,
-    }
-  )
-  const toolModes = resolveToolModes(permissionOverrides)
-  const toolBundle = assembleToolsForRun({
-    milo: {
-      convexSiteUrl: requireConvexSiteUrl(),
-      executionToken,
-    },
-    integrations: input.integrations,
-    toolModes,
-  })
-  const promptBundle = assembleRuntimePrompt(input, skills, toolBundle)
+
+  if (execution === null) {
+    return
+  }
+
   let trace: string | undefined
   let executionError: string | undefined
   let status: "completed" | "failed" = "completed"
@@ -108,13 +99,13 @@ async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
       authJsonBase64: requireCodexAuthJsonBase64(),
       onSandboxCreated: async (sandboxId) => {
         await ctx.runMutation(internal.runs.executions.markRunning, {
-          executionId: input.execution._id,
+          executionId: execution.id,
           sandboxId,
           hash,
         })
       },
-      prompt: promptBundle.rendered,
-      toolBundle,
+      prompt: execution.prompt,
+      toolBundle: execution.toolBundle,
     })
 
     trace = runtimeResult.trace
@@ -134,25 +125,12 @@ async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
         )
 
   await ctx.runMutation(internal.runs.executions.finish, {
-    tenantId: input.execution.tenantId,
-    executionId: input.execution._id,
+    tenantId: input.trigger.tenantId,
+    executionId: execution.id,
     fileId,
     error: executionError,
     status,
   })
-}
-
-function assembleRuntimePrompt(
-  input: CodexRuntimeInput,
-  skills: RuntimeSkill[],
-  toolBundle: ReturnType<typeof assembleToolsForRun>
-) {
-  return assemblePrompt(
-    input,
-    filterRuntimeSkillsForBundle(skills, toolBundle.skillNames),
-    toolBundle.promptedTools,
-    toolBundle.capabilities
-  )
 }
 
 async function prepareIntegrationsForRuntime(
@@ -172,15 +150,24 @@ async function prepareIntegrationsForRuntime(
   return prepared
 }
 
-async function finishExecutionWithError(
+async function createFailedExecution(
   ctx: ActionCtx,
-  tenantId: string,
-  executionId: CodexRuntimeInput["execution"]["_id"],
+  input: CodexRuntimeInput,
   message: string
 ) {
+  const execution = await createPromptedExecution(ctx, {
+    convexSiteUrl: requireConvexSiteUrl(),
+    input,
+    executionToken: createExecutionToken(),
+  })
+
+  if (execution === null) {
+    return
+  }
+
   await ctx.runMutation(internal.runs.executions.finish, {
-    tenantId,
-    executionId,
+    tenantId: input.trigger.tenantId,
+    executionId: execution.id,
     error: message,
     status: "failed",
   })

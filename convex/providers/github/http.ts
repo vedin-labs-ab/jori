@@ -105,7 +105,7 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
 
   if (result.status === "started") {
     await ctx.scheduler.runAfter(0, internal.runs.runtime.runMessageExecution, {
-      executionId: result.executionId,
+      triggerId: result.triggerId,
     })
   }
 

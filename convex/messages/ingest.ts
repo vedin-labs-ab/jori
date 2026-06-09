@@ -3,7 +3,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import {
   findConversationActivation,
-  startMessageExecution,
+  startMessageTrigger,
 } from "../attention/activations"
 import { resolveUserIdByEmail } from "../identity/identities"
 import {
@@ -156,7 +156,7 @@ async function recordProviderMessage(
     return { status: "ignored" as const, messageId }
   }
 
-  return await startMessageExecution(ctx, {
+  return await startMessageTrigger(ctx, {
     activation,
     integration: input.integration,
     messageId,

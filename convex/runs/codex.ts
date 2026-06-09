@@ -2,23 +2,22 @@ import { type Doc } from "../_generated/dataModel"
 import { type McpServerConfig } from "./tools"
 
 export type MessageProvider = "github" | "linear" | "slack"
+export type RuntimeIntegration = Doc<"integrations">
 
 export type MessageRuntimeInput = {
   type: "message"
   provider: MessageProvider
-  execution: Doc<"executions">
   trigger: Doc<"triggers">
-  integration: Doc<"integrations">
-  integrations: Doc<"integrations">[]
+  integration: RuntimeIntegration
+  integrations: RuntimeIntegration[]
   message: Doc<"messages">
 }
 
 export type ScheduledRuntimeInput = {
   type: "scheduled"
-  execution: Doc<"executions">
   trigger: Doc<"triggers">
-  integration: Doc<"integrations">
-  integrations: Doc<"integrations">[]
+  integration: RuntimeIntegration | null
+  integrations: RuntimeIntegration[]
   schedule: Doc<"schedules">
 }
 

@@ -17,12 +17,12 @@ import {
   getMicrosoftTokenScope,
   refreshMicrosoftAccessToken,
 } from "../providers/microsoft/oauth"
-import { type CodexRuntimeInput } from "./codex"
+import { type RuntimeIntegration } from "./codex"
 
 export async function prepareIntegrationForRuntime(
   ctx: ActionCtx,
   args: {
-    integration: CodexRuntimeInput["integration"]
+    integration: RuntimeIntegration
   }
 ) {
   const integration = args.integration
@@ -53,7 +53,7 @@ export async function prepareIntegrationForRuntime(
 }
 
 async function prepareGitHubIntegrationForRuntime(
-  integration: CodexRuntimeInput["integration"]
+  integration: RuntimeIntegration
 ) {
   const credentials = requireGitHubCredentials(integration)
   const tokenResult = await createGitHubInstallationToken(
@@ -73,7 +73,7 @@ async function prepareGitHubIntegrationForRuntime(
 
 async function prepareLinearIntegrationForRuntime(
   ctx: ActionCtx,
-  integration: CodexRuntimeInput["integration"]
+  integration: RuntimeIntegration
 ) {
   const credentials = requireLinearCredentials(integration)
 
@@ -110,7 +110,7 @@ async function prepareLinearIntegrationForRuntime(
 
 async function prepareGoogleIntegrationForRuntime(
   ctx: ActionCtx,
-  integration: CodexRuntimeInput["integration"]
+  integration: RuntimeIntegration
 ) {
   const credentials = requireGoogleCredentials(integration)
 
@@ -147,7 +147,7 @@ async function prepareGoogleIntegrationForRuntime(
 
 async function prepareMicrosoftIntegrationForRuntime(
   ctx: ActionCtx,
-  integration: CodexRuntimeInput["integration"]
+  integration: RuntimeIntegration
 ) {
   const credentials = requireMicrosoftCredentials(integration)
 

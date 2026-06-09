@@ -217,19 +217,11 @@ export const fire = internalMutation({
       createdAt: now,
     })
 
-    const executionId = await ctx.db.insert("executions", {
-      tenantId: schedule.tenantId,
-      triggerId,
-      status: "queued",
-      createdBy: schedule.createdBy,
-      createdAt: now,
-    })
-
     await ctx.scheduler.runAfter(
       0,
       internal.runs.runtime.runScheduledExecution,
       {
-        executionId,
+        triggerId,
       }
     )
 
@@ -258,7 +250,7 @@ export const fire = internalMutation({
       })
     }
 
-    return { executionId, triggerId }
+    return { triggerId }
   },
 })
 
