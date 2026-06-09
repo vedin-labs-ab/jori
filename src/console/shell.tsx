@@ -5,7 +5,7 @@ import {
   UserButton,
 } from "@clerk/tanstack-react-start"
 import { Link, useRouterState } from "@tanstack/react-router"
-import { Boxes, Plug, Sparkles } from "lucide-react"
+import { Building2, Cable, GraduationCap } from "lucide-react"
 import { type ReactNode } from "react"
 import {
   Breadcrumb,
@@ -31,13 +31,13 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { BrandIcon, BrandMark } from "@/shared/brand"
+import { BrandMark } from "@/shared/brand"
 import { IntegrationCallbackAlerts } from "./alerts"
 
 const consoleNavigation = [
-  { icon: Boxes, label: "Console", to: "/console" },
-  { icon: Plug, label: "Integrations", to: "/integrations" },
-  { icon: Sparkles, label: "Skills", to: "/skills" },
+  { icon: Building2, label: "Console", to: "/console" },
+  { icon: Cable, label: "Integrations", to: "/integrations" },
+  { icon: GraduationCap, label: "Skills", to: "/skills" },
 ] as const
 
 export function PublicConsoleFrame({
@@ -132,19 +132,7 @@ function ConsoleSidebar({ pathname }: { pathname: string }) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg" tooltip="Milo">
-              <Link to="/console">
-                <BrandIcon className="size-8" />
-                <span className="font-medium">Milo</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <div className="px-2 group-data-[collapsible=icon]:hidden">
-          <OrganizationSwitcher />
-        </div>
+        <OrganizationSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
