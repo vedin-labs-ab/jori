@@ -7,12 +7,14 @@
 - If you've changed Convex code, run `pnpm run deploy` before handoff.
 - Do not weaken or bypass checks to make them pass unless explicitly instructed.
 
-### Worktree Workflow
+### Change Workflow
 
-- For codebase changes, prefer starting from a fresh Codex worktree based on latest `main`.
-- Keep each task isolated in its own worktree and branch; do not let parallel agents share a mutable branch.
-- When the task is complete, create a `codex/<task-name>` branch, run required checks, and commit the complete change atomically.
-- Do not merge or write directly to `main`; integrate finished work through a serialized PR/merge step after updating against latest `main`.
+- For code changes, use a fresh worktree from latest `main` on a dedicated `codex/<task-name>` branch.
+- Keep each task isolated; never share mutable branches across agents.
+- Commit completed work on the task branch after required checks pass.
+- Before updating `main`, rebase the task branch on latest `main`, resolve conflicts, and rerun checks.
+- Update `main` atomically with a serialized fast-forward merge from the checked task branch.
+- If `main` moves before the update lands, repeat the rebase/check/fast-forward sequence.
 
 ### Code Quality & Architecture
 
