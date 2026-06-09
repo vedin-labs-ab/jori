@@ -41,8 +41,8 @@ export function PermissionSection({
         <button
           type="button"
           className={cn(
-            buttonVariants({ variant: "ghost", size: "sm" }),
-            "group/permission-trigger h-auto w-full justify-between py-1 text-left whitespace-normal shadow-none active:not-aria-[haspopup]:translate-y-0 active:not-aria-[haspopup]:shadow-none"
+            buttonVariants({ variant: "ghost", size: "default" }),
+            "group/permission-trigger h-auto min-h-7 w-full justify-between px-0 py-1.5 text-left whitespace-normal shadow-none hover:px-2 active:not-aria-[haspopup]:translate-y-0 active:not-aria-[haspopup]:shadow-none"
           )}
           aria-label={`${isOpen ? "Hide" : "Show"} ${title.toLowerCase()}`}
         >
