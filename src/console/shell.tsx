@@ -5,7 +5,7 @@ import {
   UserButton,
 } from "@clerk/tanstack-react-start"
 import { Link, useRouterState } from "@tanstack/react-router"
-import { Building2, Cable, GraduationCap } from "lucide-react"
+import { Cable, LayoutDashboard, Library } from "lucide-react"
 import { type ReactNode } from "react"
 import {
   Breadcrumb,
@@ -35,9 +35,9 @@ import { BrandMark } from "@/shared/brand"
 import { IntegrationCallbackAlerts } from "./alerts"
 
 const consoleNavigation = [
-  { icon: Building2, label: "Console", to: "/console" },
+  { icon: LayoutDashboard, label: "Console", to: "/console" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
-  { icon: GraduationCap, label: "Skills", to: "/skills" },
+  { icon: Library, label: "Skills", to: "/skills" },
 ] as const
 
 export function PublicConsoleFrame({
