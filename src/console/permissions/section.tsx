@@ -29,7 +29,7 @@ export function PermissionSection({
   provider: ToolProvider
   title: string
 }) {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
   const permissions =
     controller.permissions === undefined || controller.permissions === null
       ? []
