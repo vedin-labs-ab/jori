@@ -38,7 +38,6 @@ type ToolPermission = {
   label: string
   description: string
   access: ToolAccess
-  defaultMode: PermissionMode
   mode: PermissionMode
   overrideMode: PermissionMode | null
 }
@@ -98,7 +97,7 @@ export function PermissionsCard({ tenantId }: { tenantId: string }) {
       <CardContent className="grid gap-4">
         <PermissionError error={error} />
         <PermissionContent
-          permissions={permissions ?? undefined}
+          permissions={permissions}
           pendingTool={pendingTool}
           onUpdate={updatePermission}
         />

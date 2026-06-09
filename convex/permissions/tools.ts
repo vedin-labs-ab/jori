@@ -35,18 +35,15 @@ export const list = query({
 
     const overrides = await listOverrides(ctx, args.tenantId)
     const modes = resolveToolModes(overrides)
+    const overridesByTool = new Map(
+      overrides.map((override) => [override.tool, override.mode])
+    )
 
-    return toolPermissions.map((permission) => {
-      const override = overrides.find(
-        (candidate) => candidate.tool === permission.tool
-      )
-
-      return {
-        ...permission,
-        mode: resolveToolMode(modes, permission.tool),
-        overrideMode: override?.mode ?? null,
-      }
-    })
+    return toolPermissions.map((permission) => ({
+      ...permission,
+      mode: resolveToolMode(modes, permission.tool),
+      overrideMode: overridesByTool.get(permission.tool) ?? null,
+    }))
   },
 })
 

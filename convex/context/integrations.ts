@@ -24,19 +24,10 @@ export const getSlackStatus = query({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    if (identity === null) {
-      return null
-    }
-
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_provider", (query) =>
-        query.eq("tenantId", args.tenantId).eq("provider", "slack")
-      )
-      .order("desc")
-      .first()
+    const integration = await getTenantIntegration(ctx, {
+      provider: "slack",
+      tenantId: args.tenantId,
+    })
 
     if (integration === null) {
       return null
@@ -56,19 +47,10 @@ export const getLinearStatus = query({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    if (identity === null) {
-      return null
-    }
-
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_provider", (query) =>
-        query.eq("tenantId", args.tenantId).eq("provider", "linear")
-      )
-      .order("desc")
-      .first()
+    const integration = await getTenantIntegration(ctx, {
+      provider: "linear",
+      tenantId: args.tenantId,
+    })
 
     if (integration === null) {
       return null
@@ -113,19 +95,10 @@ export const getGitHubStatus = query({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    if (identity === null) {
-      return null
-    }
-
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_provider", (query) =>
-        query.eq("tenantId", args.tenantId).eq("provider", "github")
-      )
-      .order("desc")
-      .first()
+    const integration = await getTenantIntegration(ctx, {
+      provider: "github",
+      tenantId: args.tenantId,
+    })
 
     if (integration === null) {
       return null
@@ -172,28 +145,7 @@ async function getGoogleUserStatus(
     tenantId: string
   }
 ) {
-  const identity = await ctx.auth.getUserIdentity()
-
-  if (identity === null) {
-    return null
-  }
-
-  const userId = getClerkUserId(identity)
-
-  if (userId === undefined) {
-    return null
-  }
-
-  const integration = await ctx.db
-    .query("integrations")
-    .withIndex("by_tenant_provider_owner", (query) =>
-      query
-        .eq("tenantId", args.tenantId)
-        .eq("provider", args.provider)
-        .eq("ownerId", userId)
-    )
-    .order("desc")
-    .first()
+  const integration = await getUserIntegration(ctx, args)
 
   if (integration === null) {
     return null
@@ -216,28 +168,7 @@ async function getMicrosoftUserStatus(
     tenantId: string
   }
 ) {
-  const identity = await ctx.auth.getUserIdentity()
-
-  if (identity === null) {
-    return null
-  }
-
-  const userId = getClerkUserId(identity)
-
-  if (userId === undefined) {
-    return null
-  }
-
-  const integration = await ctx.db
-    .query("integrations")
-    .withIndex("by_tenant_provider_owner", (query) =>
-      query
-        .eq("tenantId", args.tenantId)
-        .eq("provider", args.provider)
-        .eq("ownerId", userId)
-    )
-    .order("desc")
-    .first()
+  const integration = await getUserIntegration(ctx, args)
 
   if (integration === null) {
     return null
@@ -252,4 +183,57 @@ async function getMicrosoftUserStatus(
     tenantName: getMicrosoftTenantName(integration.data),
     scope: "user" as const,
   }
+}
+
+async function getTenantIntegration(
+  ctx: QueryCtx,
+  args: {
+    provider: string
+    tenantId: string
+  }
+) {
+  const identity = await ctx.auth.getUserIdentity()
+
+  if (identity === null) {
+    return null
+  }
+
+  return await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_provider", (query) =>
+      query.eq("tenantId", args.tenantId).eq("provider", args.provider)
+    )
+    .order("desc")
+    .first()
+}
+
+async function getUserIntegration(
+  ctx: QueryCtx,
+  args: {
+    provider: GoogleSurfaceProvider | MicrosoftSurfaceProvider
+    tenantId: string
+  }
+) {
+  const identity = await ctx.auth.getUserIdentity()
+
+  if (identity === null) {
+    return null
+  }
+
+  const userId = getClerkUserId(identity)
+
+  if (userId === undefined) {
+    return null
+  }
+
+  return await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_provider_owner", (query) =>
+      query
+        .eq("tenantId", args.tenantId)
+        .eq("provider", args.provider)
+        .eq("ownerId", userId)
+    )
+    .order("desc")
+    .first()
 }
