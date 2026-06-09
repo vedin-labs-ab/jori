@@ -12,6 +12,9 @@ Context:
   description, status, or comments materially change the response.
 - Use `linear_get_issue` for the target issue and `linear_list_comments` when
   the comment thread matters.
+- Use `linear_search_issues` when the target issue is described by title,
+  identifier, or other text and you do not already have the exact issue ID.
+  Then use `linear_get_issue` once the target issue is identified.
 - Treat Linear issue IDs, identifiers, URLs, and comment IDs as provider-native
   references. Do not invent issue keys or user mentions.
 

@@ -52,6 +52,19 @@ const linearGraphqlUrl = ${JSON.stringify(linearGraphqlUrl)};
 
 const tools = [
   {
+    name: "linear_search_issues",
+    description: "Search Linear issues by title or exact issue identifier, such as ENG-123.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["query"],
+      properties: {
+        query: { type: "string" },
+        first: { type: "number" },
+      },
+    },
+  },
+  {
     name: "linear_get_issue",
     description: "Read a Linear issue by ID, including recent comments. Defaults to the trigger issue when this run came from Linear.",
     inputSchema: {
@@ -120,17 +133,22 @@ const transport = new StdioServerTransport();
 await server.connect(transport);
 
 async function callTool(toolName, args) {
-  const issueId = getIssueId(args);
+  if (toolName === "linear_search_issues") {
+    return await searchIssues(args.query, args.first);
+  }
 
   if (toolName === "linear_get_issue") {
+    const issueId = getIssueId(args);
     return await getIssue(issueId);
   }
 
   if (toolName === "linear_list_comments") {
+    const issueId = getIssueId(args);
     return await listComments(issueId, args.first);
   }
 
   if (toolName === "linear_add_comment") {
+    const issueId = getIssueId(args);
     if (typeof args.body !== "string" || args.body.trim() === "") {
       throw new McpError(ErrorCode.InvalidParams, "Comment body is required");
     }
@@ -148,6 +166,91 @@ function getIssueId(args) {
   }
 
   return issueId;
+}
+
+async function searchIssues(query, first) {
+  const normalizedQuery = normalizeIssueSearchQuery(query);
+  const exactIssue = await getIssueSummaryByIdentifier(normalizedQuery);
+  const result = await linearGraphql({
+    query: \`
+      query MiloIssueSearch($query: String!, $first: Int!) {
+        issues(first: $first, filter: { title: { containsIgnoreCase: $query } }) {
+          nodes {
+            id
+            identifier
+            title
+            url
+            updatedAt
+            state {
+              name
+              type
+            }
+            assignee {
+              id
+              name
+            }
+            creator {
+              id
+              name
+            }
+          }
+        }
+      }
+    \`,
+    variables: {
+      query: normalizedQuery,
+      first: normalizeIssueSearchLimit(first),
+    },
+  });
+
+  const issuesById = new Map();
+  if (exactIssue !== null) {
+    issuesById.set(exactIssue.id, exactIssue);
+  }
+
+  for (const issue of result.data?.issues?.nodes ?? []) {
+    issuesById.set(issue.id, issue);
+  }
+
+  return {
+    query: normalizedQuery,
+    issues: Array.from(issuesById.values()),
+  };
+}
+
+async function getIssueSummaryByIdentifier(query) {
+  if (!/^[a-z]+-\\d+$/i.test(query)) {
+    return null;
+  }
+
+  const result = await linearGraphql({
+    query: \`
+      query MiloIssueSummary($id: String!) {
+        issue(id: $id) {
+          id
+          identifier
+          title
+          url
+          updatedAt
+          state {
+            name
+            type
+          }
+          assignee {
+            id
+            name
+          }
+          creator {
+            id
+            name
+          }
+        }
+      }
+    \`,
+    variables: { id: query.toUpperCase() },
+  });
+
+  return result.data?.issue ?? null;
 }
 
 async function getIssue(issueId) {
@@ -279,6 +382,22 @@ function normalizeCommentLimit(value) {
   }
 
   return Math.max(1, Math.min(50, Math.round(value)));
+}
+
+function normalizeIssueSearchQuery(value) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new McpError(ErrorCode.InvalidParams, "Search query is required");
+  }
+
+  return value.trim();
+}
+
+function normalizeIssueSearchLimit(value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return 10;
+  }
+
+  return Math.max(1, Math.min(25, Math.round(value)));
 }
 
 function requiredEnv(name) {

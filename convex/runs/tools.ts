@@ -170,6 +170,7 @@ function createIntegrationToolBundle(args: {
     const credentials = requireSlackCredentials(args.integration)
 
     return createSlackToolBundle({
+      accountId: args.integration.accountId,
       credentials,
     })
   }

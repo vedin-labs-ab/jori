@@ -21,17 +21,22 @@ const contextTools = [
   "conversations_search_messages",
   "users_search",
 ].join(",");
+const cacheKey = sanitizeCacheKey(requiredEnv("MILO_SLACK_CACHE_KEY"));
 
 const upstreams = [
-  await createUpstream("context", ["--transport", "stdio", "--no-cache", "--enabled-tools", contextTools], {
+  await createUpstream("context", ["--transport", "stdio", "--enabled-tools", contextTools], {
     SLACK_MCP_XOXP_TOKEN: requiredEnv("MILO_SLACK_USER_TOKEN"),
     SLACK_MCP_ENABLED_TOOLS: contextTools,
+    SLACK_MCP_CHANNELS_CACHE: "/tmp/milo-slack-" + cacheKey + "-context-channels-cache.json",
+    SLACK_MCP_USERS_CACHE: "/tmp/milo-slack-" + cacheKey + "-context-users-cache.json",
     SLACK_MCP_LOG_LEVEL: "error",
   }),
-  await createUpstream("reply", ["--transport", "stdio", "--no-cache", "--enabled-tools", "conversations_add_message"], {
+  await createUpstream("reply", ["--transport", "stdio", "--enabled-tools", "conversations_add_message"], {
     SLACK_MCP_XOXB_TOKEN: requiredEnv("MILO_SLACK_BOT_TOKEN"),
     SLACK_MCP_ADD_MESSAGE_TOOL: "true",
     SLACK_MCP_ENABLED_TOOLS: "conversations_add_message",
+    SLACK_MCP_CHANNELS_CACHE: "/tmp/milo-slack-" + cacheKey + "-reply-channels-cache.json",
+    SLACK_MCP_USERS_CACHE: "/tmp/milo-slack-" + cacheKey + "-reply-users-cache.json",
     SLACK_MCP_LOG_LEVEL: "error",
   }),
 ];
@@ -97,5 +102,9 @@ function requiredEnv(name) {
     throw new Error("Missing " + name);
   }
   return value;
+}
+
+function sanitizeCacheKey(value) {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "_");
 }
 `
