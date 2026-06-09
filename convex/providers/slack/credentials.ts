@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { requireCredentials } from "../credentials"
 
 export type SlackCredentials = {
   bot: string
@@ -8,21 +9,9 @@ export type SlackCredentials = {
 export function requireSlackCredentials(
   integration: Doc<"integrations">
 ): SlackCredentials {
-  const credentials = integration.credentials
-
-  if (
-    typeof credentials === "object" &&
-    credentials !== null &&
-    "bot" in credentials &&
-    typeof credentials.bot === "string" &&
-    "user" in credentials &&
-    typeof credentials.user === "string"
-  ) {
-    return {
-      bot: credentials.bot,
-      user: credentials.user,
-    }
-  }
-
-  throw new Error("Missing Slack integration credentials")
+  return requireCredentials(
+    integration,
+    { required: { bot: "string", user: "string" } },
+    "Missing Slack integration credentials"
+  )
 }

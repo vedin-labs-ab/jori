@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { requireCredentials } from "../credentials"
 
 export type GitHubCredentials = {
   installationId: string
@@ -9,26 +10,12 @@ export type GitHubCredentials = {
 export function requireGitHubCredentials(
   integration: Doc<"integrations">
 ): GitHubCredentials {
-  const credentials = integration.credentials
-
-  if (
-    typeof credentials === "object" &&
-    credentials !== null &&
-    "installationId" in credentials &&
-    typeof credentials.installationId === "string"
-  ) {
-    return {
-      installationId: credentials.installationId,
-      token:
-        "token" in credentials && typeof credentials.token === "string"
-          ? credentials.token
-          : undefined,
-      expiresAt:
-        "expiresAt" in credentials && typeof credentials.expiresAt === "number"
-          ? credentials.expiresAt
-          : undefined,
-    }
-  }
-
-  throw new Error("Missing GitHub integration credentials")
+  return requireCredentials(
+    integration,
+    {
+      required: { installationId: "string" },
+      optional: { token: "string", expiresAt: "number" },
+    },
+    "Missing GitHub integration credentials"
+  )
 }
