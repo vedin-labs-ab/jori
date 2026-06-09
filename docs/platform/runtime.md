@@ -6,7 +6,7 @@ Defines the minimum runtime model needed to trigger Milo from Slack, Linear, Git
 
 ## Runtime Loop
 
-A Slack, Linear, or GitHub message creates a message record. If the message asks Milo to work, Milo creates a trigger, starts an execution caused by that trigger, activates the conversation, runs Codex in an E2B sandbox, stores the raw Codex agent trace as a Convex file, and lets Codex reply through the provider MCP tools.
+A Slack, Linear, or GitHub message creates a message record. If the message asks Milo to work, Milo creates a trigger, starts one execution caused by that trigger, runs Codex in an E2B sandbox, stores the raw Codex agent trace as a Convex file, and lets Codex reply through the provider MCP tools.
 
 A schedule stores future work, an explicit output target, and either a one-shot UTC ISO timestamp or a recurring UTC cron expression. When the schedule fires, Milo creates a scheduled trigger, starts an execution caused by that trigger, and runs Codex in E2B with the scheduled task name, description, metadata, and output target.
 
@@ -62,7 +62,7 @@ The first console UI should only cover sign-up, organization creation, website e
 - Use `accountId` for the provider account connected to an integration.
 - Use `type` for compact message and trigger categories.
 - Use `externalId` for the provider-native message identifier.
-- Use `conversationId` for the durable discussion or work surface Milo is listening to.
+- Use `conversationId` for the durable external discussion or work surface.
 - Use `data` only for provider-specific details that do not deserve first-class columns yet.
 - Use `createdAt` for explicit creation timestamps.
 
@@ -81,7 +81,6 @@ Skills:
 Attention:
 
 - [Triggers](./attention/triggers.md)
-- [Activations](./attention/activations.md)
 
 Runs:
 

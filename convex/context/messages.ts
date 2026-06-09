@@ -1,10 +1,6 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import {
-  findConversationActivation,
-  startMessageExecution,
-} from "../attention/activations"
 import { resolveUserIdByEmail } from "../identity/identities"
 import {
   isGitHubAppMessage,
@@ -146,26 +142,59 @@ async function recordProviderMessage(
     message: input.message,
   })
 
-  const activation = await findConversationActivation(ctx, {
-    tenantId: input.integration.tenantId,
-    integrationId: input.integration._id,
-    conversationId: input.message.conversationId,
-  })
-
-  if (activation === null && !input.isRelevant) {
+  if (!input.isRelevant) {
     return { status: "ignored" as const, messageId }
   }
 
   return await startMessageExecution(ctx, {
-    activation,
     integration: input.integration,
     messageId,
     messageType: input.message.type,
     messageExternalId: input.message.externalId,
-    conversationId: input.message.conversationId ?? input.message.externalId,
     createdBy,
     now,
   })
+}
+
+async function startMessageExecution(
+  ctx: MutationCtx,
+  args: {
+    integration: Doc<"integrations">
+    messageId: Id<"messages">
+    messageType: string
+    messageExternalId: string
+    createdBy: string | undefined
+    now: number
+  }
+) {
+  const triggerId = await ctx.db.insert("triggers", {
+    tenantId: args.integration.tenantId,
+    messageId: args.messageId,
+    type: "message",
+    data: {
+      message: {
+        type: args.messageType,
+        externalId: args.messageExternalId,
+      },
+    },
+    createdBy: args.createdBy,
+    createdAt: args.now,
+  })
+
+  const executionId = await ctx.db.insert("executions", {
+    tenantId: args.integration.tenantId,
+    triggerId,
+    status: "queued",
+    createdBy: args.createdBy,
+    createdAt: args.now,
+  })
+
+  return {
+    status: "started" as const,
+    messageId: args.messageId,
+    triggerId,
+    executionId,
+  }
 }
 
 async function findActiveIntegration(

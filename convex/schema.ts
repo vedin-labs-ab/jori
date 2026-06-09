@@ -1,5 +1,4 @@
 import { defineSchema } from "convex/server"
-import { activations } from "./schemas/activations"
 import { executions } from "./schemas/executions"
 import { identities } from "./schemas/identities"
 import { integrations } from "./schemas/integrations"
@@ -17,7 +16,6 @@ export default defineSchema({
   messages,
   schedules,
   triggers,
-  activations,
   executions,
   traces,
   permissions,

@@ -16,7 +16,7 @@ Domain code lives under folders named for responsibility:
 - `identity`: Clerk-backed organization behavior.
 - `context`: integrations and observed source items.
 - `skills`: persisted runtime instructions and tenant skill management.
-- `attention`: triggers and active listening state.
+- `attention`: trigger model documentation.
 - `runs`: execution lifecycle and runtime orchestration.
   - `sandbox`: E2B setup, Codex bootstrap commands, and token preflights.
   - `tools`: runtime MCP server configuration, provider tool bundles, and bundled MCP scripts.

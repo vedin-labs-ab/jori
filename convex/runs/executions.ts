@@ -198,18 +198,5 @@ export const finish = internalMutation({
       finishedAt: Date.now(),
       hash: undefined,
     })
-
-    const activations = await ctx.db
-      .query("activations")
-      .withIndex("by_execution", (query) =>
-        query.eq("executionId", args.executionId)
-      )
-      .collect()
-
-    for (const activation of activations) {
-      if (activation.executionId === args.executionId) {
-        await ctx.db.patch(activation._id, { executionId: undefined })
-      }
-    }
   },
 })
