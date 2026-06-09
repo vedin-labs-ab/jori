@@ -62,6 +62,7 @@ import type * as providers_slack_gate from "../providers/slack/gate.js";
 import type * as providers_slack_http from "../providers/slack/http.js";
 import type * as providers_slack_install from "../providers/slack/install.js";
 import type * as providers_slack_signing from "../providers/slack/signing.js";
+import type * as runs_bundles from "../runs/bundles.js";
 import type * as runs_codex from "../runs/codex.js";
 import type * as runs_executions from "../runs/executions.js";
 import type * as runs_integrations from "../runs/integrations.js";
@@ -163,6 +164,7 @@ declare const fullApi: ApiFromModules<{
   "providers/slack/http": typeof providers_slack_http;
   "providers/slack/install": typeof providers_slack_install;
   "providers/slack/signing": typeof providers_slack_signing;
+  "runs/bundles": typeof runs_bundles;
   "runs/codex": typeof runs_codex;
   "runs/executions": typeof runs_executions;
   "runs/integrations": typeof runs_integrations;

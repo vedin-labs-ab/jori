@@ -10,6 +10,7 @@ import { requireGoogleCredentials } from "../../providers/google/credentials"
 import { requireLinearCredentials } from "../../providers/linear/credentials"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
+import { getProviderSkillNames } from "../bundles"
 import { createGitHubToolBundle } from "./github"
 import { createGmailToolBundle, createGoogleCalendarToolBundle } from "./google"
 import { createLinearToolBundle } from "./linear"
@@ -20,7 +21,11 @@ import {
 import { createMiloToolBundle } from "./milo"
 import { type ToolPermissionInput } from "./policy"
 import { createSlackToolBundle } from "./slack"
-import { type RuntimeTarget, type ToolBundle } from "./types"
+import {
+  type RuntimeTarget,
+  type RuntimeToolBundle,
+  type ToolBundle,
+} from "./types"
 
 type IntegrationBundleArgs = {
   integration: Doc<"integrations">
@@ -28,9 +33,15 @@ type IntegrationBundleArgs = {
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
+type IntegrationToolBundle = {
+  provider: ToolProvider
+  bundle: ToolBundle
+}
+
 export type {
   McpServerConfig,
   RuntimeTarget,
+  RuntimeToolBundle,
   SandboxFile,
   ToolBundle,
   ToolPreflight,
@@ -44,8 +55,9 @@ export function assembleToolsForRun(args: {
   integrations: Doc<"integrations">[]
   toolModes: ReadonlyMap<string, PermissionMode>
   target: RuntimeTarget
-}): ToolBundle {
+}): RuntimeToolBundle {
   const bundles: ToolBundle[] = []
+  const skillNames = new Set<string>()
   const miloPermissions = getEnabledToolPermissions("milo", args.toolModes)
 
   if (miloPermissions.length > 0) {
@@ -57,6 +69,7 @@ export function assembleToolsForRun(args: {
         toolModes: args.toolModes,
       })
     )
+    addProviderSkillNames(skillNames, "milo")
   }
 
   for (const integration of args.integrations) {
@@ -67,7 +80,8 @@ export function assembleToolsForRun(args: {
     })
 
     if (integrationBundle !== null) {
-      bundles.push(integrationBundle)
+      bundles.push(integrationBundle.bundle)
+      addProviderSkillNames(skillNames, integrationBundle.provider)
     }
   }
 
@@ -76,10 +90,13 @@ export function assembleToolsForRun(args: {
     sandboxFiles: bundles.flatMap((bundle) => bundle.sandboxFiles),
     preflights: bundles.flatMap((bundle) => bundle.preflights),
     promptedTools: bundles.flatMap((bundle) => bundle.promptedTools),
+    skillNames: [...skillNames],
   }
 }
 
-function createIntegrationToolBundle(args: IntegrationBundleArgs) {
+function createIntegrationToolBundle(
+  args: IntegrationBundleArgs
+): IntegrationToolBundle | null {
   const provider = getRuntimeToolProvider(args.integration.provider)
 
   if (provider === null) {
@@ -97,7 +114,18 @@ function createIntegrationToolBundle(args: IntegrationBundleArgs) {
     toolModes: args.toolModes,
   }
 
-  return createProviderToolBundle(args, permissionInput)
+  const bundle = createProviderToolBundle(args, permissionInput)
+
+  return bundle === null ? null : { provider, bundle }
+}
+
+function addProviderSkillNames(
+  skillNames: Set<string>,
+  provider: ToolProvider
+) {
+  for (const skillName of getProviderSkillNames(provider)) {
+    skillNames.add(skillName)
+  }
 }
 
 function createProviderToolBundle(

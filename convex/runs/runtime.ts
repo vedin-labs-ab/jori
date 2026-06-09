@@ -4,9 +4,10 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
 import { resolveToolModes } from "../permissions/catalog"
+import { filterRuntimeSkillsForBundle } from "./bundles"
 import { type CodexRuntimeInput } from "./codex"
 import { prepareIntegrationForRuntime } from "./integrations"
-import { assemblePrompt } from "./prompt"
+import { assemblePrompt, type RuntimeSkill } from "./prompt"
 import { runCodexInE2B } from "./sandbox/e2b"
 import { requireMessageTarget } from "./targets"
 import { createExecutionToken, hashExecutionToken } from "./tokens"
@@ -120,7 +121,7 @@ async function runExecution(
     toolModes,
     target,
   })
-  const promptBundle = assemblePrompt(input, skills, toolBundle.promptedTools)
+  const promptBundle = assembleRuntimePrompt(input, skills, toolBundle)
   let trace: string | undefined
   let executionError: string | undefined
   let status: "completed" | "failed" = "completed"
@@ -162,6 +163,18 @@ async function runExecution(
     error: executionError,
     status,
   })
+}
+
+function assembleRuntimePrompt(
+  input: CodexRuntimeInput,
+  skills: RuntimeSkill[],
+  toolBundle: ReturnType<typeof assembleToolsForRun>
+) {
+  return assemblePrompt(
+    input,
+    filterRuntimeSkillsForBundle(skills, toolBundle.skillNames),
+    toolBundle.promptedTools
+  )
 }
 
 async function prepareIntegrationsForRuntime(

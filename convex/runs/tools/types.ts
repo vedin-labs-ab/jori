@@ -12,6 +12,10 @@ export type ToolBundle = {
   promptedTools: ToolPermission[]
 }
 
+export type RuntimeToolBundle = ToolBundle & {
+  skillNames: string[]
+}
+
 export type McpServerConfig = {
   name: string
   command: string
