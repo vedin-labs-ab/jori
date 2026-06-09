@@ -129,20 +129,51 @@ function PermissionSummary({ permissions }: { permissions: ToolPermission[] }) {
     return null
   }
 
-  const allowedCount = permissions.filter(
-    (permission) => permission.mode === "allowed"
-  ).length
-  const requiredCount = permissions.filter(
-    (permission) => permission.mode === "required"
-  ).length
+  const items = getPermissionSummaryItems(permissions)
+
+  if (items.length === 0) {
+    return null
+  }
 
   return (
     <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-      <span>{allowedCount} allowed</span>
-      <span aria-hidden="true" className="size-1 rounded-full bg-current" />
-      {requiredCount} required
+      {items.map((item, index) => (
+        <span key={item} className="inline-flex items-center gap-2">
+          {index === 0 ? null : (
+            <span
+              aria-hidden="true"
+              className="size-1 rounded-full bg-current"
+            />
+          )}
+          {item}
+        </span>
+      ))}
     </div>
   )
+}
+
+function getPermissionSummaryItems(permissions: ToolPermission[]) {
+  const counts = {
+    allowed: 0,
+    prompted: 0,
+    required: 0,
+    blocked: 0,
+  }
+
+  for (const permission of permissions) {
+    counts[permission.mode] += 1
+  }
+
+  return [
+    formatPermissionSummaryItem(counts.allowed, "allowed"),
+    formatPermissionSummaryItem(counts.prompted, "prompted"),
+    formatPermissionSummaryItem(counts.required, "required"),
+    formatPermissionSummaryItem(counts.blocked, "blocked"),
+  ].filter((item) => item !== null)
+}
+
+function formatPermissionSummaryItem(count: number, label: string) {
+  return count > 0 ? `${count} ${label}` : null
 }
 
 function PermissionGroup({
