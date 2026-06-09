@@ -4,13 +4,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -23,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { BrandIcon } from "@/shared/brand"
+import { IntegrationSurface } from "../integrations/surface"
 import { LoadingMessage } from "../loading"
 import {
   type PermissionMode,
@@ -66,28 +60,18 @@ export function NativePermissionsCard({
   controller: ToolPermissionController
 }) {
   return (
-    <Card className="md:col-span-2">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span className="flex size-11 items-center justify-center rounded-md border bg-background">
-            <BrandIcon className="size-7" />
-          </span>
-          Milo tools
-        </CardTitle>
-        <CardDescription>
-          Control built-in scheduling permissions that are not tied to an
-          external integration.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <PermissionSection
-          controller={controller}
-          emptyLabel="No native tool permissions are defined yet."
-          provider="milo"
-          title="Permissions"
-        />
-      </CardContent>
-    </Card>
+    <IntegrationSurface
+      description="Control built-in scheduling permissions that are not tied to an external integration."
+      logo={{ mark: <BrandIcon className="size-7" /> }}
+      title="Milo tools"
+    >
+      <PermissionSection
+        controller={controller}
+        emptyLabel="No native tool permissions are defined yet."
+        provider="milo"
+        title="Permissions"
+      />
+    </IntegrationSurface>
   )
 }
 
