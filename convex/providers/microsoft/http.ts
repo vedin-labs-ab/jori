@@ -1,5 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { redirectWithStatus } from "../http"
 import {
   type MicrosoftSurfaceProvider,
   microsoftOAuthAuthorizeUrl,
@@ -75,7 +76,7 @@ export async function handleMicrosoftOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    return redirectWithProviderStatus(state.returnUrl, provider, "error")
+    return redirectWithMicrosoftStatus(state.returnUrl, provider, "error")
   }
 
   let profile: Awaited<ReturnType<typeof fetchMicrosoftInstallationProfile>>
@@ -85,7 +86,7 @@ export async function handleMicrosoftOAuthCallback(
       accessToken: tokenResult.access_token,
     })
   } catch {
-    return redirectWithProviderStatus(state.returnUrl, provider, "error")
+    return redirectWithMicrosoftStatus(state.returnUrl, provider, "error")
   }
 
   try {
@@ -104,19 +105,20 @@ export async function handleMicrosoftOAuthCallback(
       }
     )
   } catch {
-    return redirectWithProviderStatus(state.returnUrl, provider, "error")
+    return redirectWithMicrosoftStatus(state.returnUrl, provider, "error")
   }
 
-  return redirectWithProviderStatus(state.returnUrl, provider, "connected")
+  return redirectWithMicrosoftStatus(state.returnUrl, provider, "connected")
 }
 
-function redirectWithProviderStatus(
+function redirectWithMicrosoftStatus(
   returnUrl: string,
   provider: MicrosoftSurfaceProvider,
   status: "connected" | "error"
 ) {
-  const url = new URL(returnUrl)
-  url.searchParams.set(microsoftSurfaceConfigs[provider].callbackParam, status)
-
-  return Response.redirect(url.toString(), 302)
+  return redirectWithStatus(
+    returnUrl,
+    microsoftSurfaceConfigs[provider].callbackParam,
+    status
+  )
 }

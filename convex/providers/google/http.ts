@@ -1,5 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { redirectWithStatus } from "../http"
 import {
   type GoogleSurfaceProvider,
   googleOAuthAuthorizeUrl,
@@ -80,7 +81,7 @@ export async function handleGoogleOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    return redirectWithProviderStatus(state.returnUrl, provider, "error")
+    return redirectWithGoogleStatus(state.returnUrl, provider, "error")
   }
 
   let profile: Awaited<ReturnType<typeof fetchGoogleInstallationProfile>>
@@ -88,7 +89,7 @@ export async function handleGoogleOAuthCallback(
   try {
     profile = await fetchGoogleInstallationProfile(tokenResult.access_token)
   } catch {
-    return redirectWithProviderStatus(state.returnUrl, provider, "error")
+    return redirectWithGoogleStatus(state.returnUrl, provider, "error")
   }
 
   try {
@@ -106,19 +107,20 @@ export async function handleGoogleOAuthCallback(
       }
     )
   } catch {
-    return redirectWithProviderStatus(state.returnUrl, provider, "error")
+    return redirectWithGoogleStatus(state.returnUrl, provider, "error")
   }
 
-  return redirectWithProviderStatus(state.returnUrl, provider, "connected")
+  return redirectWithGoogleStatus(state.returnUrl, provider, "connected")
 }
 
-function redirectWithProviderStatus(
+function redirectWithGoogleStatus(
   returnUrl: string,
   provider: GoogleSurfaceProvider,
   status: "connected" | "error"
 ) {
-  const url = new URL(returnUrl)
-  url.searchParams.set(googleSurfaceConfigs[provider].callbackParam, status)
-
-  return Response.redirect(url.toString(), 302)
+  return redirectWithStatus(
+    returnUrl,
+    googleSurfaceConfigs[provider].callbackParam,
+    status
+  )
 }

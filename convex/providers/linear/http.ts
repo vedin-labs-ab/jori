@@ -1,5 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { redirectWithStatus, unauthorizedResponse } from "../http"
 import {
   linearOAuthAuthorizeUrl,
   linearOAuthCallbackPath,
@@ -66,7 +67,7 @@ export async function handleLinearOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    return redirectWithProviderStatus(state.returnUrl, "linear", "error")
+    return redirectWithStatus(state.returnUrl, "linear", "error")
   }
 
   let profile: Awaited<ReturnType<typeof fetchLinearInstallationProfile>>
@@ -74,7 +75,7 @@ export async function handleLinearOAuthCallback(
   try {
     profile = await fetchLinearInstallationProfile(tokenResult.access_token)
   } catch {
-    return redirectWithProviderStatus(state.returnUrl, "linear", "error")
+    return redirectWithStatus(state.returnUrl, "linear", "error")
   }
 
   await ctx.runMutation(
@@ -90,7 +91,7 @@ export async function handleLinearOAuthCallback(
     }
   )
 
-  return redirectWithProviderStatus(state.returnUrl, "linear", "connected")
+  return redirectWithStatus(state.returnUrl, "linear", "connected")
 }
 
 export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
@@ -133,19 +134,4 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
   }
 
   return Response.json({ ok: true })
-}
-
-function unauthorizedResponse() {
-  return new Response("Unauthorized", { status: 401 })
-}
-
-function redirectWithProviderStatus(
-  returnUrl: string,
-  provider: "linear" | "slack",
-  status: "connected" | "error"
-) {
-  const url = new URL(returnUrl)
-  url.searchParams.set(provider, status)
-
-  return Response.redirect(url.toString(), 302)
 }

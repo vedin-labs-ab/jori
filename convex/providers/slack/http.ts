@@ -1,5 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { redirectWithStatus, unauthorizedResponse } from "../http"
 import {
   slackBotScopes,
   slackInstallUserScopes,
@@ -92,7 +93,7 @@ export async function handleSlackOAuthCallback(
     botToken === undefined ||
     userToken === undefined
   ) {
-    return redirectWithProviderStatus(state.returnUrl, "slack", "error")
+    return redirectWithStatus(state.returnUrl, "slack", "error")
   }
 
   await ctx.runMutation(
@@ -110,7 +111,7 @@ export async function handleSlackOAuthCallback(
     }
   )
 
-  return redirectWithProviderStatus(state.returnUrl, "slack", "connected")
+  return redirectWithStatus(state.returnUrl, "slack", "connected")
 }
 
 export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
@@ -251,19 +252,4 @@ function getSlackUserToken(tokenResult: {
   const token = tokenResult.authed_user?.access_token
 
   return token === "" ? undefined : token
-}
-
-function unauthorizedResponse() {
-  return new Response("Unauthorized", { status: 401 })
-}
-
-function redirectWithProviderStatus(
-  returnUrl: string,
-  provider: "linear" | "slack",
-  status: "connected" | "error"
-) {
-  const url = new URL(returnUrl)
-  url.searchParams.set(provider, status)
-
-  return Response.redirect(url.toString(), 302)
 }

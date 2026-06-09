@@ -1,5 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { redirectWithStatus, unauthorizedResponse } from "../http"
 import {
   fetchGitHubInstallationProfile,
   type GitHubInstallationProfile,
@@ -56,7 +57,7 @@ export async function handleGitHubInstallCallback(
   try {
     profile = await fetchGitHubInstallationProfile(installationId)
   } catch {
-    return redirectWithProviderStatus(state.returnUrl, "github", "error")
+    return redirectWithStatus(state.returnUrl, "github", "error")
   }
 
   await ctx.runMutation(internal.providers.github.install.recordInstallation, {
@@ -66,7 +67,7 @@ export async function handleGitHubInstallCallback(
     profile: normalizeInstallationProfile(profile),
   })
 
-  return redirectWithProviderStatus(state.returnUrl, "github", "connected")
+  return redirectWithStatus(state.returnUrl, "github", "connected")
 }
 
 export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
@@ -111,10 +112,6 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
   return Response.json({ ok: true })
 }
 
-function unauthorizedResponse() {
-  return new Response("Unauthorized", { status: 401 })
-}
-
 function normalizeInstallationProfile(profile: GitHubInstallationProfile) {
   return {
     id: profile.id,
@@ -134,15 +131,4 @@ function normalizeInstallationProfile(profile: GitHubInstallationProfile) {
           },
     app_slug: profile.app_slug,
   }
-}
-
-function redirectWithProviderStatus(
-  returnUrl: string,
-  provider: "github" | "linear" | "slack",
-  status: "connected" | "error"
-) {
-  const url = new URL(returnUrl)
-  url.searchParams.set(provider, status)
-
-  return Response.redirect(url.toString(), 302)
 }
