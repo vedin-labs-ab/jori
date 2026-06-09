@@ -1,10 +1,17 @@
 import { v } from "convex/values"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import {
   internalMutation,
   type MutationCtx,
   mutation,
 } from "../../_generated/server"
+import { requireClerkUserId } from "../../identity/users"
 import { type MicrosoftSurfaceProvider } from "./config"
+import {
+  getMicrosoftAccountId,
+  getMicrosoftIdentityEmail,
+  upsertMicrosoftIdentity,
+} from "./identity"
 import { createSignedMicrosoftState } from "./signing"
 
 const microsoftProvider = v.union(
@@ -82,42 +89,83 @@ export const recordOAuthInstallation = internalMutation({
       tenantId: args.microsoftTenantId,
     }
     const accountId = getMicrosoftAccountId(args.profile)
+    const email = getMicrosoftIdentityEmail(args.profile)
     const data = {
       profile: args.profile,
       scopes: args.scope,
       tenant: args.profile.tenant,
       user: args.profile.user,
     }
-
-    if (existing !== null) {
-      await ctx.db.patch(existing._id, {
-        tenantId: args.tenantId,
-        scope: "user",
-        ownerId: args.createdBy,
-        accountId,
-        credentials,
-        status: "active",
-        createdBy: args.createdBy,
-        data,
-      })
-
-      return existing._id
-    }
-
-    return await ctx.db.insert("integrations", {
+    const integrationId = await upsertMicrosoftIntegration(ctx, {
+      existing,
+      now,
       tenantId: args.tenantId,
       provider: args.provider,
-      scope: "user",
       ownerId: args.createdBy,
       accountId,
       credentials,
-      status: "active",
-      createdBy: args.createdBy,
-      createdAt: now,
       data,
     })
+
+    await upsertMicrosoftIdentity(ctx, {
+      tenantId: args.tenantId,
+      userId: args.createdBy,
+      microsoftTenantId: args.microsoftTenantId,
+      email,
+      profile: args.profile,
+    })
+
+    return integrationId
   },
 })
+
+async function upsertMicrosoftIntegration(
+  ctx: MutationCtx,
+  args: {
+    existing: Doc<"integrations"> | null
+    now: number
+    tenantId: string
+    provider: MicrosoftSurfaceProvider
+    ownerId: string
+    accountId: string
+    credentials: {
+      accessToken: string
+      refreshToken: string
+      expiresAt: number
+      scope: string | undefined
+      tenantId: string
+    }
+    data: {
+      profile: unknown
+      scopes: string | undefined
+      tenant: unknown
+      user: unknown
+    }
+  }
+): Promise<Id<"integrations">> {
+  const values = {
+    tenantId: args.tenantId,
+    provider: args.provider,
+    scope: "user" as const,
+    ownerId: args.ownerId,
+    accountId: args.accountId,
+    credentials: args.credentials,
+    status: "active" as const,
+    createdBy: args.ownerId,
+    data: args.data,
+  }
+
+  if (args.existing !== null) {
+    await ctx.db.patch(args.existing._id, values)
+
+    return args.existing._id
+  }
+
+  return await ctx.db.insert("integrations", {
+    ...values,
+    createdAt: args.now,
+  })
+}
 
 export const updateOAuthCredentials = internalMutation({
   args: {
@@ -181,20 +229,10 @@ async function createInstallState(
   return await createSignedMicrosoftState({
     provider,
     tenantId: args.tenantId,
-    createdBy: identity.tokenIdentifier,
+    createdBy: requireClerkUserId(identity),
     returnUrl: args.returnUrl,
     createdAt: Date.now(),
   })
-}
-
-function getMicrosoftAccountId(profile: {
-  user: {
-    id: string
-    userPrincipalName?: string
-    mail?: string
-  }
-}) {
-  return profile.user.mail ?? profile.user.userPrincipalName ?? profile.user.id
 }
 
 function readRefreshToken(credentials: unknown) {

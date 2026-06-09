@@ -4,6 +4,7 @@ import {
   internalQuery,
   mutation,
 } from "../../_generated/server"
+import { requireClerkUserId } from "../../identity/users"
 import { createSignedSlackState } from "./signing"
 
 export const createInstallState = mutation({
@@ -20,7 +21,7 @@ export const createInstallState = mutation({
 
     return await createSignedSlackState({
       tenantId: args.tenantId,
-      createdBy: identity.tokenIdentifier,
+      createdBy: requireClerkUserId(identity),
       returnUrl: args.returnUrl,
       createdAt: Date.now(),
     })

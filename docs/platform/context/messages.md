@@ -15,6 +15,7 @@ Stores observed external messages that can start or continue Milo work.
 
 - Provider-native identifiers for dedupe and routing.
 - The external actor, conversation, text, and observed time.
+- The resolved actor email when a provider can expose it.
 - Provider-specific details only when needed.
 
 ## Boundary
@@ -30,6 +31,7 @@ messages: defineTable({
   type: v.string(),
   externalId: v.string(),
   actorId: v.optional(v.string()),
+  actorEmail: v.optional(v.string()),
   conversationId: v.optional(v.string()),
   text: v.optional(v.string()),
   data: v.optional(v.any()),

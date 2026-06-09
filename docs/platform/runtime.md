@@ -10,11 +10,11 @@ A Slack, Linear, or GitHub message creates a message record. If the message asks
 
 A schedule stores future work, an explicit output target, and either a one-shot UTC ISO timestamp or a recurring UTC cron expression. When the schedule fires, Milo creates a scheduled trigger, starts an execution caused by that trigger, and runs Codex in E2B with the scheduled task name, description, metadata, and output target.
 
-Identity and organizations come from Clerk. Milo stores Clerk organization IDs as `tenantId` and Clerk user IDs as `createdBy`. There are no local organization, user, membership, or identity-mapping tables.
+Identity and organizations come from Clerk. Milo stores Clerk organization IDs as `tenantId` and raw Clerk user IDs as `createdBy`, `ownerId`, and `userId`. Milo keeps a small `identities` table that maps Google and Microsoft provider users back to Clerk users for runtime resolution; it does not create Milo-owned users.
 
 E2B sandbox identity is stored directly on executions. There is no sandbox table. The Convex backend orchestrates the sandbox and execution lifecycle, but provider communication belongs to Codex through provider MCP servers.
 
-Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Provider MCP is configured per execution from the active integration and target. Slack exposes context and reply tools scoped to the triggering channel. Linear exposes issue read/comment tools scoped to the triggering issue. GitHub exposes repository context and comment replies scoped to the triggering issue or pull request. Google and Microsoft expose user-scoped mail and calendar tools when those integrations are active for the execution. Milo MCP is configured per execution with a one-time token whose hash is stored on the active execution; MCP requests derive `tenantId` from that token. Each sandbox only receives the MCP tokens for the tenant and workspace that triggered the execution.
+Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Provider MCP is configured per execution from the active integration and target. Slack exposes context and reply tools scoped to the triggering channel. Linear exposes issue read/comment tools scoped to the triggering issue. GitHub exposes repository context and comment replies scoped to the triggering issue or pull request. Google and Microsoft expose user-scoped mail and calendar tools when those integrations are active for the resolved execution user. Milo MCP is configured per execution with a one-time token whose hash is stored on the active execution; MCP requests derive `tenantId` from that token. Each sandbox only receives the MCP tokens for the tenant and workspace that triggered the execution.
 
 Required Convex environment variables:
 
@@ -42,9 +42,9 @@ Linear installs use OAuth with `actor=app` and targeted scopes for reading issue
 
 GitHub installs use a signed GitHub App install state and send issue and pull request comments to `/github/events`.
 
-Google installs use delegated OAuth for Gmail and Calendar account access.
+Google installs use delegated OAuth for Gmail and Calendar account access, and record a Google identity row for the connecting Clerk user.
 
-Microsoft installs use delegated OAuth for Outlook mail and calendar account access.
+Microsoft installs use delegated OAuth for Outlook mail and calendar account access, and record a Microsoft identity row for the connecting Clerk user.
 
 Use Clerk's out-of-the-box components wherever possible. Styling may be adjusted to match Milo's theme, but identity and organization behavior should remain Clerk-owned. Store organization setup details, such as website, in Clerk organization metadata unless Milo needs to query them frequently.
 
@@ -56,6 +56,8 @@ The first console UI should only cover sign-up, organization creation, website e
 
 - Use `tenantId` for the Clerk organization ID.
 - Use `createdBy` for the Clerk user ID when a person creates the record.
+- Use `ownerId` for the Clerk user ID that owns a user-scoped integration.
+- Use `userId` for the Clerk user ID in identity mapping rows.
 - Use `provider` for the integration type, such as Slack, Teams, Jira, or Linear.
 - Use `accountId` for the provider account connected to an integration.
 - Use `type` for compact message and trigger categories.
@@ -70,6 +72,7 @@ Context:
 
 - [Messages](./context/messages.md)
 - [Integrations](./context/integrations.md)
+- [Identities](./context/identities.md)
 
 Skills:
 
@@ -97,5 +100,5 @@ The implementation follows the domain map in [Structure](./structure.md). Framew
 
 These are intentionally not first-version models:
 
-- Local organizations, users, memberships, and identity mappings.
+- Local organizations, users, and memberships.
 - Conversation scopes, sandboxes, execution events, agents, reviews, permissions, memory, artifacts, tools, and dreaming.

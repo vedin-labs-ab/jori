@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { type QueryCtx, query } from "../_generated/server"
+import { getClerkUserId } from "../identity/users"
 import {
   getGitHubAccountLogin,
   getGitHubAccountType,
@@ -177,13 +178,19 @@ async function getGoogleUserStatus(
     return null
   }
 
+  const userId = getClerkUserId(identity)
+
+  if (userId === undefined) {
+    return null
+  }
+
   const integration = await ctx.db
     .query("integrations")
     .withIndex("by_tenant_provider_owner", (query) =>
       query
         .eq("tenantId", args.tenantId)
         .eq("provider", args.provider)
-        .eq("ownerId", identity.tokenIdentifier)
+        .eq("ownerId", userId)
     )
     .order("desc")
     .first()
@@ -215,13 +222,19 @@ async function getMicrosoftUserStatus(
     return null
   }
 
+  const userId = getClerkUserId(identity)
+
+  if (userId === undefined) {
+    return null
+  }
+
   const integration = await ctx.db
     .query("integrations")
     .withIndex("by_tenant_provider_owner", (query) =>
       query
         .eq("tenantId", args.tenantId)
         .eq("provider", args.provider)
-        .eq("ownerId", identity.tokenIdentifier)
+        .eq("ownerId", userId)
     )
     .order("desc")
     .first()

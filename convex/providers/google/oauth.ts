@@ -15,6 +15,7 @@ export type GoogleTokenResponse =
     }
 
 export type GoogleInstallationProfile = {
+  id: string
   email: string
   name?: string
   picture?: string
@@ -85,16 +86,22 @@ export async function fetchGoogleInstallationProfile(accessToken: string) {
     },
   })
   const profile = (await response.json()) as {
+    sub?: string
     email?: string
     name?: string
     picture?: string
   }
 
-  if (!response.ok || profile.email === undefined) {
+  if (
+    !response.ok ||
+    profile.sub === undefined ||
+    profile.email === undefined
+  ) {
     throw new Error("Could not read Google Workspace installation profile")
   }
 
   return {
+    id: profile.sub,
     email: profile.email,
     name: profile.name,
     picture: profile.picture,

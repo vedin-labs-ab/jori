@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
+import { requireClerkUserId } from "../../identity/users"
 import { createSignedLinearState } from "./signing"
 
 export const createInstallState = mutation({
@@ -16,7 +17,7 @@ export const createInstallState = mutation({
 
     return await createSignedLinearState({
       tenantId: args.tenantId,
-      createdBy: identity.subject,
+      createdBy: requireClerkUserId(identity),
       returnUrl: args.returnUrl,
       createdAt: Date.now(),
     })

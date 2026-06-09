@@ -5,6 +5,7 @@ import {
   mutation,
   query,
 } from "../_generated/server"
+import { requireClerkUserId } from "../identity/users"
 import { skills as globalSkillSeed } from "../prompts/generated"
 import { checkTenantAccess, requireTenantAccess } from "./access"
 import {
@@ -82,7 +83,7 @@ export const create = mutation({
       name: input.name,
       description: input.description,
       body: input.body,
-      createdBy: identity.subject,
+      createdBy: requireClerkUserId(identity),
       createdAt: now,
       updatedAt: now,
     })

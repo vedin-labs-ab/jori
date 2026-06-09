@@ -5,6 +5,7 @@ import {
   findConversationActivation,
   startMessageExecution,
 } from "../attention/activations"
+import { resolveUserIdByEmail } from "../identity/identities"
 import {
   isGitHubAppMessage,
   isMiloRelevantGitHubMessage,
@@ -214,50 +215,10 @@ async function resolveMessageOwner(
     message: ObservedMessage
   }
 ) {
-  const actorEmail = normalizeEmail(input.message.actorEmail)
-
-  if (actorEmail === undefined) {
-    return undefined
-  }
-
-  const integrations = await ctx.db
-    .query("integrations")
-    .withIndex("by_tenant_status", (query) =>
-      query.eq("tenantId", input.tenantId).eq("status", "active")
-    )
-    .collect()
-  const ownerIds = new Set(
-    integrations
-      .filter(
-        (integration) =>
-          integration.scope === "user" &&
-          integration.ownerId !== undefined &&
-          isUserContextProvider(integration.provider) &&
-          normalizeEmail(integration.accountId) === actorEmail
-      )
-      .map((integration) => integration.ownerId as string)
-  )
-
-  if (ownerIds.size !== 1) {
-    return undefined
-  }
-
-  return [...ownerIds][0]
-}
-
-function isUserContextProvider(provider: string) {
-  return (
-    provider === "gmail" ||
-    provider === "googleCalendar" ||
-    provider === "microsoftEmail" ||
-    provider === "microsoftCalendar"
-  )
-}
-
-function normalizeEmail(email: string | undefined) {
-  const normalized = email?.trim().toLowerCase()
-
-  return normalized === "" ? undefined : normalized
+  return await resolveUserIdByEmail(ctx, {
+    tenantId: input.tenantId,
+    email: input.message.actorEmail,
+  })
 }
 
 function isSlackBotMessage(actorId: string | undefined, data: unknown) {

@@ -4,6 +4,8 @@ import {
   type MutationCtx,
   mutation,
 } from "../../_generated/server"
+import { upsertIdentity } from "../../identity/identities"
+import { requireClerkUserId } from "../../identity/users"
 import { type GoogleSurfaceProvider } from "./config"
 import { createSignedGoogleState } from "./signing"
 
@@ -39,6 +41,7 @@ export const recordOAuthInstallation = internalMutation({
     expiresAt: v.number(),
     scope: v.optional(v.string()),
     profile: v.object({
+      id: v.string(),
       email: v.string(),
       name: v.optional(v.string()),
       picture: v.optional(v.string()),
@@ -85,10 +88,12 @@ export const recordOAuthInstallation = internalMutation({
         data,
       })
 
+      await upsertGoogleIdentity(ctx, args)
+
       return existing._id
     }
 
-    return await ctx.db.insert("integrations", {
+    const integrationId = await ctx.db.insert("integrations", {
       tenantId: args.tenantId,
       provider: args.provider,
       scope: "user",
@@ -100,6 +105,10 @@ export const recordOAuthInstallation = internalMutation({
       createdAt: now,
       data,
     })
+
+    await upsertGoogleIdentity(ctx, args)
+
+    return integrationId
   },
 })
 
@@ -159,9 +168,30 @@ async function createInstallState(
   return await createSignedGoogleState({
     provider,
     tenantId: args.tenantId,
-    createdBy: identity.tokenIdentifier,
+    createdBy: requireClerkUserId(identity),
     returnUrl: args.returnUrl,
     createdAt: Date.now(),
+  })
+}
+
+async function upsertGoogleIdentity(
+  ctx: MutationCtx,
+  args: {
+    tenantId: string
+    createdBy: string
+    profile: {
+      id: string
+      email: string
+    }
+  }
+) {
+  await upsertIdentity(ctx, {
+    tenantId: args.tenantId,
+    userId: args.createdBy,
+    provider: "google",
+    providerAccountId: args.profile.email,
+    externalUserId: args.profile.id,
+    email: args.profile.email,
   })
 }
 
