@@ -14,6 +14,7 @@ import {
 import { api } from "../../../convex/_generated/api"
 import { readErrorMessage } from "../error"
 import { LoadingMessage } from "../loading"
+import { ConsolePage } from "../page"
 import { SkillDialog } from "./dialog"
 import { SkillSection } from "./section"
 import { emptySkillForm, type Skill, type SkillFormValues } from "./types"
@@ -28,6 +29,14 @@ type SkillListResult =
       message: string
       skills: Skill[]
     }
+
+export function Skills() {
+  return (
+    <ConsolePage>
+      {(organization) => <SkillsCard tenantId={organization.id} />}
+    </ConsolePage>
+  )
+}
 
 export function SkillsCard({ tenantId }: { tenantId: string }) {
   const skillList = useQuery(api.skills.catalog.list, { tenantId })
