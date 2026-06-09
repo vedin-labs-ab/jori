@@ -43,9 +43,8 @@ export async function handleGoogleInstall(
 export async function handleGoogleOAuthCallback(
   ctx: ActionCtx,
   request: Request,
-  provider: GoogleSurfaceProvider
+  expectedProvider?: GoogleSurfaceProvider
 ) {
-  const surface = googleSurfaceConfigs[provider]
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
   const stateValue = requestUrl.searchParams.get("state")
@@ -66,11 +65,14 @@ export async function handleGoogleOAuthCallback(
     return new Response("Expired Google Workspace OAuth state", { status: 400 })
   }
 
-  if (state.provider !== provider) {
+  if (expectedProvider !== undefined && state.provider !== expectedProvider) {
     return new Response("Mismatched Google Workspace OAuth state", {
       status: 400,
     })
   }
+
+  const provider = state.provider
+  const surface = googleSurfaceConfigs[provider]
 
   const tokenResult = await exchangeGoogleAuthorizationCode({
     code,

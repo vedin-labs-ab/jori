@@ -97,10 +97,10 @@ http.route({
 })
 
 http.route({
-  path: "/gmail/oauth/callback",
+  path: "/google/oauth/callback",
   method: "GET",
   handler: httpAction(async (ctx, request) => {
-    return await handleGoogleOAuthCallback(ctx, request, "gmail")
+    return await handleGoogleOAuthCallback(ctx, request)
   }),
 })
 
@@ -109,14 +109,6 @@ http.route({
   method: "GET",
   handler: httpAction(async (_ctx, request) => {
     return await handleGoogleInstall(request, "googleCalendar")
-  }),
-})
-
-http.route({
-  path: "/google-calendar/oauth/callback",
-  method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    return await handleGoogleOAuthCallback(ctx, request, "googleCalendar")
   }),
 })
 

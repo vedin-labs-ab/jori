@@ -3,6 +3,7 @@ export const googleOAuthAuthorizeUrl =
 export const googleOAuthTokenUrl = "https://oauth2.googleapis.com/token"
 export const googleUserInfoUrl =
   "https://openidconnect.googleapis.com/v1/userinfo"
+export const googleOAuthCallbackPath = "/google/oauth/callback"
 
 const googleIdentityScopes = ["openid", "email", "profile"]
 
@@ -19,7 +20,7 @@ export type GoogleSurfaceConfig = {
 export const googleSurfaceConfigs = {
   gmail: {
     callbackParam: "gmail",
-    callbackPath: "/gmail/oauth/callback",
+    callbackPath: googleOAuthCallbackPath,
     installPath: "/gmail/install",
     provider: "gmail",
     scopes: [
@@ -30,7 +31,7 @@ export const googleSurfaceConfigs = {
   },
   googleCalendar: {
     callbackParam: "googleCalendar",
-    callbackPath: "/google-calendar/oauth/callback",
+    callbackPath: googleOAuthCallbackPath,
     installPath: "/google-calendar/install",
     provider: "googleCalendar",
     scopes: [
