@@ -69,8 +69,8 @@ export function NativePermissionsCard({
     <Card className="md:col-span-2">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <span className="flex size-5 items-center justify-center rounded-md border bg-background">
-            <BrandIcon className="size-3.5" />
+          <span className="flex size-11 items-center justify-center rounded-md border bg-background">
+            <BrandIcon className="size-7" />
           </span>
           Milo tools
         </CardTitle>
