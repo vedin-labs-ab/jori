@@ -1,7 +1,6 @@
 import { ChevronDown, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
 import {
   Collapsible,
   CollapsibleContent,
@@ -36,32 +35,29 @@ export function PermissionSection({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <div className="flex items-center gap-2 font-medium text-sm">
-            <ShieldCheck className="size-4 text-muted-foreground" />
-            {title}
+      <CollapsibleTrigger asChild>
+        <button
+          type="button"
+          className="group/permission-trigger flex w-full items-center justify-between rounded-md border border-transparent py-1 text-left transition-colors duration-200 outline-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 data-[state=open]:text-foreground dark:hover:bg-muted/50"
+          aria-label={`${isOpen ? "Hide" : "Show"} ${title.toLowerCase()}`}
+        >
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 transition-transform duration-200 ease-out group-hover/permission-trigger:translate-x-2 group-focus-visible/permission-trigger:translate-x-2">
+            <div className="flex items-center gap-2 font-medium text-sm">
+              <ShieldCheck className="size-4 text-muted-foreground" />
+              {title}
+            </div>
+            <PermissionSummary permissions={permissions} />
           </div>
-          <PermissionSummary permissions={permissions} />
-        </div>
-        <CollapsibleTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            aria-label={`${isOpen ? "Hide" : "Show"} ${title.toLowerCase()}`}
-          >
-            <ChevronDown
-              className={
-                isOpen
-                  ? "rotate-180 transition-transform"
-                  : "transition-transform"
-              }
-            />
-          </Button>
-        </CollapsibleTrigger>
-      </div>
-      <CollapsibleContent className="pt-3">
+          <ChevronDown
+            className={
+              isOpen
+                ? "rotate-180 transition-transform duration-200 ease-out group-hover/permission-trigger:-translate-x-2 group-focus-visible/permission-trigger:-translate-x-2"
+                : "transition-transform duration-200 ease-out group-hover/permission-trigger:-translate-x-2 group-focus-visible/permission-trigger:-translate-x-2"
+            }
+          />
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-4">
         <PermissionContent
           controller={controller}
           emptyLabel={emptyLabel}
@@ -103,7 +99,7 @@ function PermissionContent({
   }
 
   return (
-    <div className="grid gap-5">
+    <div className="grid gap-6">
       <ProviderPermissionError
         error={controller.error}
         permissions={permissions}
