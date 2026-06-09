@@ -1,27 +1,29 @@
 ---
 name: microsoft
-description: Built-in Microsoft Teams skill for reading Teams context and replying through Microsoft Graph.
+description: Built-in Microsoft skill for explicit Outlook mail and Microsoft Calendar reads, sends, creates, and updates.
 ---
 
-# Microsoft Teams
+# Microsoft
 
-Use Microsoft Teams for context and replies.
+Use Microsoft tools only when the user explicitly asks for Outlook mail or
+calendar work, or when that context is directly necessary for the task.
 
-Context:
-- Start with `teams_get_context` when the Teams thread or chat history matters.
-- Use `microsoft_graph_get` only when the request needs Microsoft 365 context
-  such as recent calendar, mail, file, user, or drive data.
-- Keep Microsoft 365 reads directly tied to the Teams request. Do not browse or
-  inventory mailboxes, drives, teams, or tenant data.
+Email:
+- Search with `microsoft_email_search_messages` only for focused lookup.
+- Read a message with `microsoft_email_get_message` before updating it or
+  using it as important context.
+- Send `microsoft_email_send_message` only when a send is explicitly requested
+  or clearly appropriate from the user's instruction.
+- Prefer `microsoft_email_create_draft` when the user asks to prepare email but
+  does not clearly ask to send it.
 
-Replies:
-- Send the final response with `teams_reply` when a Teams reply is useful.
-- Reply only to the Teams chat or channel thread from the trigger.
-- Send one message unless the task explicitly needs multiple.
-- After the reply succeeds, stop.
+Calendar:
+- Use `microsoft_calendar_list_events` or `microsoft_calendar_get_event` before
+  updating an existing event.
+- Ask before creating or updating an event if date, time, timezone, attendees,
+  or intent is ambiguous.
 
 Format:
-- Use concise Teams-friendly text.
-- Use simple HTML only when links, paragraphs, or light structure make the
-  message easier to scan.
+- Keep confirmations concise and include the relevant subject, event title, or
+  time when useful.
 - Do not mention internal Graph paths, tokens, scopes, or tool names.

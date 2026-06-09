@@ -22,7 +22,10 @@ import {
 import { createGitHubToolBundle } from "./github"
 import { createGmailToolBundle, createGoogleCalendarToolBundle } from "./google"
 import { createLinearProxyScript } from "./linear"
-import { createMicrosoftToolBundle } from "./microsoft"
+import {
+  createMicrosoftCalendarToolBundle,
+  createMicrosoftEmailToolBundle,
+} from "./microsoft"
 import { createMiloMcpScript } from "./milo"
 import { createSlackToolBundle } from "./slack"
 
@@ -68,7 +71,11 @@ export type ToolPreflight =
       credentials: GoogleCredentials
     }
   | {
-      type: "microsoft"
+      type: "microsoftEmail"
+      credentials: MicrosoftCredentials
+    }
+  | {
+      type: "microsoftCalendar"
       credentials: MicrosoftCredentials
     }
 
@@ -92,14 +99,6 @@ export type RuntimeTarget =
       provider: "slack"
       channelId: string
       threadId?: string
-    }
-  | {
-      provider: "microsoft"
-      chatId?: string
-      teamId?: string
-      channelId?: string
-      messageId?: string
-      replyId?: string
     }
 
 export function assembleToolsForRun(args: {
@@ -192,12 +191,19 @@ function createIntegrationToolBundle(args: {
     })
   }
 
-  if (args.integration.provider === "microsoft") {
+  if (args.integration.provider === "microsoftEmail") {
     const credentials = requireMicrosoftCredentials(args.integration)
 
-    return createMicrosoftToolBundle({
+    return createMicrosoftEmailToolBundle({
       credentials,
-      target: args.target.provider === "microsoft" ? args.target : {},
+    })
+  }
+
+  if (args.integration.provider === "microsoftCalendar") {
+    const credentials = requireMicrosoftCredentials(args.integration)
+
+    return createMicrosoftCalendarToolBundle({
+      credentials,
     })
   }
 

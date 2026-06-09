@@ -5,6 +5,7 @@ export type MicrosoftCredentials = {
   refreshToken: string
   expiresAt: number
   scope?: string
+  tenantId: string
 }
 
 export function requireMicrosoftCredentials(
@@ -20,12 +21,15 @@ export function requireMicrosoftCredentials(
     "refreshToken" in credentials &&
     typeof credentials.refreshToken === "string" &&
     "expiresAt" in credentials &&
-    typeof credentials.expiresAt === "number"
+    typeof credentials.expiresAt === "number" &&
+    "tenantId" in credentials &&
+    typeof credentials.tenantId === "string"
   ) {
     return {
       accessToken: credentials.accessToken,
       refreshToken: credentials.refreshToken,
       expiresAt: credentials.expiresAt,
+      tenantId: credentials.tenantId,
       scope:
         "scope" in credentials && typeof credentials.scope === "string"
           ? credentials.scope

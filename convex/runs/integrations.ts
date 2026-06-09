@@ -44,7 +44,10 @@ export async function prepareIntegrationForRuntime(
     return await prepareGoogleIntegrationForRuntime(ctx, integration)
   }
 
-  if (integration.provider === "microsoft") {
+  if (
+    integration.provider === "microsoftCalendar" ||
+    integration.provider === "microsoftEmail"
+  ) {
     return await prepareMicrosoftIntegrationForRuntime(ctx, integration)
   }
 
@@ -158,7 +161,7 @@ async function prepareMicrosoftIntegrationForRuntime(
 
   const tokenResult = await refreshMicrosoftAccessToken({
     refreshToken: credentials.refreshToken,
-    tenantId: integration.accountId,
+    tenantId: credentials.tenantId,
   })
 
   if ("error" in tokenResult || tokenResult.refresh_token === undefined) {

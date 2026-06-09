@@ -1,18 +1,115 @@
 import { useMutation, useQuery } from "convex/react"
-import { ExternalLink, Loader2, MessagesSquare } from "lucide-react"
-import { useState } from "react"
+import { CalendarDays, ExternalLink, Loader2, Mail } from "lucide-react"
+import { type ReactNode, useState } from "react"
 import { api } from "../../convex/_generated/api"
 import { IntegrationConnectionCard } from "./integration"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 
-export function MicrosoftConnection({ tenantId }: { tenantId: string }) {
+type MicrosoftStatus = {
+  accountId: string
+  email?: string
+  name?: string
+  status: "active" | "paused" | "revoked"
+  tenantName?: string
+} | null
+
+type MicrosoftSurfaceConfig = {
+  action: string
+  connectedDetail: string
+  connectError: string
+  description: string
+  emptyDetail: string
+  icon: ReactNode
+  installPath: string
+  label: string
+  loading: string
+}
+
+const emailConfig = {
+  action: "Connect Email",
+  connectedDetail:
+    "User-scoped. Milo can read, draft, edit, and send Outlook mail from this account when explicitly requested.",
+  connectError: "Could not start Microsoft Email install.",
+  description:
+    "Connect the Outlook account Milo can use for email context and replies.",
+  emptyDetail:
+    "Connect your Outlook account. This connection is scoped to you, not the whole tenant.",
+  icon: <Mail className="size-4" />,
+  installPath: "/microsoft-email/install",
+  label: "Microsoft Email",
+  loading: "Connecting Email",
+} satisfies MicrosoftSurfaceConfig
+
+const calendarConfig = {
+  action: "Connect Calendar",
+  connectedDetail:
+    "User-scoped. Milo can read, create, and update this account's Microsoft calendar events when explicitly requested.",
+  connectError: "Could not start Microsoft Calendar install.",
+  description:
+    "Connect the Microsoft Calendar account Milo can use for scheduling work.",
+  emptyDetail:
+    "Connect your Microsoft Calendar account. This connection is scoped to you, not the whole tenant.",
+  icon: <CalendarDays className="size-4" />,
+  installPath: "/microsoft-calendar/install",
+  label: "Microsoft Calendar",
+  loading: "Connecting Calendar",
+} satisfies MicrosoftSurfaceConfig
+
+export function MicrosoftEmailConnection({ tenantId }: { tenantId: string }) {
   const createInstallState = useMutation(
-    api.providers.microsoft.install.createInstallState
+    api.providers.microsoft.install.createMicrosoftEmailInstallState
   )
-  const status = useQuery(api.context.integrations.getMicrosoftStatus, {
+  const status = useQuery(api.context.integrations.getMicrosoftEmailStatus, {
     tenantId,
   })
+
+  return (
+    <MicrosoftSurfaceConnection
+      config={emailConfig}
+      createInstallState={createInstallState}
+      status={status}
+      tenantId={tenantId}
+    />
+  )
+}
+
+export function MicrosoftCalendarConnection({
+  tenantId,
+}: {
+  tenantId: string
+}) {
+  const createInstallState = useMutation(
+    api.providers.microsoft.install.createMicrosoftCalendarInstallState
+  )
+  const status = useQuery(api.context.integrations.getMicrosoftCalendarStatus, {
+    tenantId,
+  })
+
+  return (
+    <MicrosoftSurfaceConnection
+      config={calendarConfig}
+      createInstallState={createInstallState}
+      status={status}
+      tenantId={tenantId}
+    />
+  )
+}
+
+function MicrosoftSurfaceConnection({
+  config,
+  createInstallState,
+  status,
+  tenantId,
+}: {
+  config: MicrosoftSurfaceConfig
+  createInstallState: (args: {
+    tenantId: string
+    returnUrl: string
+  }) => Promise<string>
+  status: MicrosoftStatus | undefined
+  tenantId: string
+}) {
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState<string>()
 
@@ -30,7 +127,7 @@ export function MicrosoftConnection({ tenantId }: { tenantId: string }) {
         tenantId,
         returnUrl: window.location.origin,
       })
-      const installUrl = new URL("/microsoft/install", convexSiteUrl)
+      const installUrl = new URL(config.installPath, convexSiteUrl)
       installUrl.searchParams.set("state", state)
       window.location.assign(installUrl.toString())
     } catch (installError) {
@@ -38,21 +135,23 @@ export function MicrosoftConnection({ tenantId }: { tenantId: string }) {
       setError(
         installError instanceof Error
           ? installError.message
-          : "Could not start Microsoft install."
+          : config.connectError
       )
     }
   }
 
   return (
     <IntegrationConnectionCard
-      title="Microsoft Teams"
-      description="Connect Microsoft 365 for Teams message triggers."
+      title={config.label}
+      description={config.description}
       status={status?.status}
-      headline={getMicrosoftHeadline(status)}
-      detail={getMicrosoftDetail(status?.status)}
-      icon={<MessagesSquare className="size-4" />}
+      headline={getMicrosoftHeadline(status, config.label)}
+      detail={getMicrosoftDetail(status?.status, config)}
+      icon={config.icon}
       error={error}
-      actionLabel={<MicrosoftActionLabel isConnecting={isConnecting} />}
+      actionLabel={
+        <MicrosoftActionLabel config={config} isConnecting={isConnecting} />
+      }
       isConnecting={isConnecting}
       onConnect={connectMicrosoft}
     />
@@ -60,49 +159,51 @@ export function MicrosoftConnection({ tenantId }: { tenantId: string }) {
 }
 
 function getMicrosoftHeadline(
-  status:
-    | {
-        accountId: string
-        tenantName?: string
-        connectedUser?: string
-      }
-    | null
-    | undefined
+  status: MicrosoftStatus | undefined,
+  label: string
 ) {
   if (status === undefined) {
-    return "Checking Microsoft"
+    return `Checking ${label}`
   }
 
-  if (status?.tenantName !== undefined && status.connectedUser !== undefined) {
-    return `${status.tenantName} via ${status.connectedUser}`
-  }
-
-  return status?.tenantName ?? status?.accountId ?? "No tenant connected"
+  return (
+    status?.name ??
+    status?.email ??
+    status?.accountId ??
+    `No ${label} connected`
+  )
 }
 
 function getMicrosoftDetail(
-  status: "active" | "paused" | "revoked" | undefined
+  status: "active" | "paused" | "revoked" | undefined,
+  config: MicrosoftSurfaceConfig
 ) {
   if (status === "active") {
-    return "Milo can receive Teams message notifications, read the triggering conversation, and reply through the connected Microsoft account."
+    return config.connectedDetail
   }
 
-  return "Grant tenant consent and connect a Microsoft account for Teams message context and replies."
+  return config.emptyDetail
 }
 
-function MicrosoftActionLabel({ isConnecting }: { isConnecting: boolean }) {
+function MicrosoftActionLabel({
+  config,
+  isConnecting,
+}: {
+  config: MicrosoftSurfaceConfig
+  isConnecting: boolean
+}) {
   if (isConnecting) {
     return (
       <>
         <Loader2 className="size-4 animate-spin" />
-        Connecting Microsoft
+        {config.loading}
       </>
     )
   }
 
   return (
     <>
-      Connect Microsoft
+      {config.action}
       <ExternalLink />
     </>
   )

@@ -26,7 +26,7 @@ export function createToolPreflightCommand(preflight: ToolPreflight) {
     return createGoogleTokenPreflightCommand("googleCalendar")
   }
 
-  return createMicrosoftTokenPreflightCommand()
+  return createMicrosoftTokenPreflightCommand(preflight.type)
 }
 
 export function createToolPreflightEnv(

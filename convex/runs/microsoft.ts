@@ -1,61 +1,124 @@
 import { type MicrosoftCredentials } from "../providers/microsoft/credentials"
-import { type RuntimeTarget, type ToolBundle } from "./tools"
+import { type ToolBundle } from "./tools"
 
-export function createMicrosoftTokenPreflightCommand() {
-  return microsoftTokenPreflightCommand
-}
+type MicrosoftRuntimeSurface = "microsoftCalendar" | "microsoftEmail"
 
-export function createMicrosoftGraphMcpScript() {
-  return microsoftGraphMcpScript
-}
-
-export function createMicrosoftToolBundle(args: {
+export function createMicrosoftEmailToolBundle(args: {
   credentials: MicrosoftCredentials
-  target: Partial<Extract<RuntimeTarget, { provider: "microsoft" }>>
+}): ToolBundle {
+  return createMicrosoftToolBundle({
+    ...args,
+    name: "microsoftEmail",
+    scriptPath: "/tmp/milo-workspace/milo-microsoft-email-mcp.mjs",
+    surface: "microsoftEmail",
+  })
+}
+
+export function createMicrosoftCalendarToolBundle(args: {
+  credentials: MicrosoftCredentials
+}): ToolBundle {
+  return createMicrosoftToolBundle({
+    ...args,
+    name: "microsoftCalendar",
+    scriptPath: "/tmp/milo-workspace/milo-microsoft-calendar-mcp.mjs",
+    surface: "microsoftCalendar",
+  })
+}
+
+function createMicrosoftToolBundle(args: {
+  credentials: MicrosoftCredentials
+  name: string
+  scriptPath: string
+  surface: MicrosoftRuntimeSurface
 }): ToolBundle {
   return {
     mcpServers: [
       {
-        name: "microsoft",
+        name: args.name,
         command: "node",
-        args: ["/tmp/milo-workspace/milo-microsoft-mcp.mjs"],
+        args: [args.scriptPath],
         env: {
           MILO_MICROSOFT_ACCESS_TOKEN: args.credentials.accessToken,
-          MILO_MICROSOFT_TARGET_JSON: JSON.stringify(args.target),
+          MILO_MICROSOFT_SURFACE: args.surface,
         },
       },
     ],
     sandboxFiles: [
       {
-        path: "/tmp/milo-workspace/milo-microsoft-mcp.mjs",
+        path: args.scriptPath,
         content: createMicrosoftGraphMcpScript(),
       },
     ],
     preflights: [
       {
-        type: "microsoft",
+        type: args.surface,
         credentials: args.credentials,
       },
     ],
   }
 }
 
-const microsoftTokenPreflightCommand = [
+export function createMicrosoftTokenPreflightCommand(
+  surface: MicrosoftRuntimeSurface
+) {
+  return surface === "microsoftEmail"
+    ? microsoftEmailTokenPreflightCommand
+    : microsoftCalendarTokenPreflightCommand
+}
+
+export function createMicrosoftGraphMcpScript() {
+  return microsoftGraphMcpScript
+}
+
+const microsoftEmailTokenPreflightCommand = [
   "node <<'NODE'",
   "async function main() {",
   "  const token = process.env.MILO_MICROSOFT_ACCESS_TOKEN;",
   "  if (!token) {",
   "    throw new Error('Missing Microsoft access token');",
   "  }",
-  "  const response = await fetch('https://graph.microsoft.com/v1.0/me?$select=id', {",
-  "    headers: { authorization: 'Bearer ' + token },",
+  "  await verify('Microsoft Email messages', 'https://graph.microsoft.com/v1.0/me/messages?$top=1');",
+  "  console.log('Microsoft Email token preflight passed');",
+  "}",
+  "",
+  "async function verify(label, url) {",
+  "  const response = await fetch(url, {",
+  "    headers: { authorization: 'Bearer ' + process.env.MILO_MICROSOFT_ACCESS_TOKEN },",
   "  });",
   "  const body = await response.json();",
-  "  if (!response.ok || typeof body.id !== 'string') {",
-  "    throw new Error('Microsoft token preflight failed: ' + JSON.stringify(body));",
+  "  if (!response.ok) {",
+  "    throw new Error(label + ' preflight failed: ' + JSON.stringify(body));",
   "  }",
-  "  console.log('Microsoft token preflight passed');",
   "}",
+  "",
+  "main().catch((error) => {",
+  "  console.error(error);",
+  "  process.exit(1);",
+  "});",
+  "NODE",
+].join("\n")
+
+const microsoftCalendarTokenPreflightCommand = [
+  "node <<'NODE'",
+  "async function main() {",
+  "  const token = process.env.MILO_MICROSOFT_ACCESS_TOKEN;",
+  "  if (!token) {",
+  "    throw new Error('Missing Microsoft access token');",
+  "  }",
+  "  await verify('Microsoft Calendar events', 'https://graph.microsoft.com/v1.0/me/events?$top=1');",
+  "  console.log('Microsoft Calendar token preflight passed');",
+  "}",
+  "",
+  "async function verify(label, url) {",
+  "  const response = await fetch(url, {",
+  "    headers: { authorization: 'Bearer ' + process.env.MILO_MICROSOFT_ACCESS_TOKEN },",
+  "  });",
+  "  const body = await response.json();",
+  "  if (!response.ok) {",
+  "    throw new Error(label + ' preflight failed: ' + JSON.stringify(body));",
+  "  }",
+  "}",
+  "",
   "main().catch((error) => {",
   "  console.error(error);",
   "  process.exit(1);",
@@ -75,49 +138,138 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 const accessToken = requiredEnv("MILO_MICROSOFT_ACCESS_TOKEN");
-const target = JSON.parse(requiredEnv("MILO_MICROSOFT_TARGET_JSON"));
+const microsoftSurface = requiredEnv("MILO_MICROSOFT_SURFACE");
 
-const graph = Client.init({
+const client = Client.init({
   authProvider: (done) => done(null, accessToken),
 });
 
-const tools = [
+const emailTools = [
   {
-    name: "teams_get_context",
-    description: "Read recent Teams context for the conversation that triggered this run.",
+    name: "microsoft_email_search_messages",
+    description: "Search or list recent Outlook messages in the connected Microsoft account.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
       properties: {
-        limit: { type: "number" },
+        q: { type: "string" },
+        folderId: { type: "string" },
+        top: { type: "number" },
       },
     },
   },
   {
-    name: "teams_reply",
-    description: "Reply to the Teams conversation that triggered this run.",
+    name: "microsoft_email_get_message",
+    description: "Read one Outlook message from the connected Microsoft account.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
-      required: ["content"],
+      required: ["messageId"],
       properties: {
-        content: { type: "string" },
-        contentType: {
-          type: "string",
-          enum: ["html", "text"],
-        },
+        messageId: { type: "string" },
       },
     },
   },
   {
-    name: "microsoft_graph_get",
-    description: "Read narrowly-scoped Microsoft 365 context with Graph when it is needed for the Teams request.",
+    name: "microsoft_email_send_message",
+    description: "Send a new Outlook email from the connected Microsoft account.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
-      required: ["path"],
+      required: ["subject", "body", "to"],
       properties: {
-        path: { type: "string" },
+        subject: { type: "string" },
+        body: { type: "string" },
+        bodyType: { type: "string", enum: ["Text", "HTML"] },
+        to: { type: "array", items: { type: "string" } },
+        cc: { type: "array", items: { type: "string" } },
+        bcc: { type: "array", items: { type: "string" } },
+        saveToSentItems: { type: "boolean" },
+      },
+    },
+  },
+  {
+    name: "microsoft_email_create_draft",
+    description: "Create an Outlook draft message in the connected Microsoft account.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["subject", "body", "to"],
+      properties: {
+        subject: { type: "string" },
+        body: { type: "string" },
+        bodyType: { type: "string", enum: ["Text", "HTML"] },
+        to: { type: "array", items: { type: "string" } },
+        cc: { type: "array", items: { type: "string" } },
+        bcc: { type: "array", items: { type: "string" } },
+      },
+    },
+  },
+  {
+    name: "microsoft_email_update_message",
+    description: "Update an Outlook message or draft in the connected Microsoft account.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["messageId", "message"],
+      properties: {
+        messageId: { type: "string" },
+        message: { type: "object", additionalProperties: true },
+      },
+    },
+  },
+];
+
+const calendarTools = [
+  {
+    name: "microsoft_calendar_list_events",
+    description: "List Microsoft Calendar events for the connected account.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        timeMin: { type: "string" },
+        timeMax: { type: "string" },
+        top: { type: "number" },
+      },
+    },
+  },
+  {
+    name: "microsoft_calendar_get_event",
+    description: "Read one Microsoft Calendar event from the connected account.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["eventId"],
+      properties: {
+        eventId: { type: "string" },
+      },
+    },
+  },
+  {
+    name: "microsoft_calendar_create_event",
+    description: "Create a Microsoft Calendar event in the connected account.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["event"],
+      properties: {
+        event: { type: "object", additionalProperties: true },
+        sendUpdates: { type: "string", enum: ["all", "none"] },
+      },
+    },
+  },
+  {
+    name: "microsoft_calendar_update_event",
+    description: "Update a Microsoft Calendar event in the connected account.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["eventId", "event"],
+      properties: {
+        eventId: { type: "string" },
+        event: { type: "object", additionalProperties: true },
+        sendUpdates: { type: "string", enum: ["all", "none"] },
       },
     },
   },
@@ -125,185 +277,195 @@ const tools = [
 
 const server = new Server(
   { name: "milo-microsoft", version: "0.0.0" },
-  { capabilities: { tools: {} } },
+  { capabilities: { tools: {} } }
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools }));
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  return { tools: microsoftSurface === "microsoftEmail" ? emailTools : calendarTools };
+});
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const toolName = request.params.name;
   const args = request.params.arguments ?? {};
 
-  if (!tools.some((tool) => tool.name === toolName)) {
-    throw new McpError(ErrorCode.InvalidParams, "Unknown Microsoft tool: " + toolName);
+  if (microsoftSurface === "microsoftEmail") {
+    return await handleEmailTool(toolName, args);
   }
 
-  const result = await callTool(toolName, args);
+  if (microsoftSurface === "microsoftCalendar") {
+    return await handleCalendarTool(toolName, args);
+  }
 
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify(result, null, 2),
-      },
-    ],
-  };
+  throw new McpError(ErrorCode.InvalidParams, "Unknown Microsoft surface: " + microsoftSurface);
 });
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
+async function handleEmailTool(toolName, args) {
+  if (toolName === "microsoft_email_search_messages") {
+    const top = normalizeTop(args.top, 10, 25);
+    const folderPath = requiredOptionalString(args.folderId) === undefined
+      ? "/me/messages"
+      : "/me/mailFolders/" + encodeURIComponent(args.folderId) + "/messages";
+    const request = client.api(folderPath).top(top);
 
-async function callTool(toolName, args) {
-  if (toolName === "teams_get_context") {
-    return await getTeamsContext(args.limit);
-  }
-
-  if (toolName === "teams_reply") {
-    if (typeof args.content !== "string" || args.content.trim() === "") {
-      throw new McpError(ErrorCode.InvalidParams, "Reply content is required");
+    if (typeof args.q === "string" && args.q.trim() !== "") {
+      request.search('"' + args.q.replace(/"/g, '\\"') + '"');
+    } else {
+      request.orderby("receivedDateTime desc");
     }
 
-    return await replyToTeams(args.content, args.contentType);
+    return jsonContent(await request.get());
   }
 
-  if (toolName === "microsoft_graph_get") {
-    if (typeof args.path !== "string" || args.path.trim() === "") {
-      throw new McpError(ErrorCode.InvalidParams, "Graph path is required");
-    }
-
-    return await graphGet(args.path);
+  if (toolName === "microsoft_email_get_message") {
+    return jsonContent(await client.api("/me/messages/" + encodeURIComponent(requiredString(args.messageId, "messageId"))).get());
   }
 
-  throw new McpError(ErrorCode.InvalidParams, "Unknown Microsoft tool: " + toolName);
-}
-
-async function getTeamsContext(limit) {
-  const top = normalizeLimit(limit);
-
-  if (target.chatId !== undefined) {
-    return await graph
-      .api("/chats/" + encodePath(target.chatId) + "/messages")
-      .top(top)
-      .orderby("createdDateTime desc")
-      .get();
+  if (toolName === "microsoft_email_send_message") {
+    await client.api("/me/sendMail").post({
+      message: buildMessage(args),
+      saveToSentItems: args.saveToSentItems !== false,
+    });
+    return textContent("sent");
   }
 
-  if (
-    target.teamId !== undefined &&
-    target.channelId !== undefined &&
-    target.messageId !== undefined
-  ) {
-    const rootMessage = await graph
-      .api(
-        "/teams/" +
-          encodePath(target.teamId) +
-          "/channels/" +
-          encodePath(target.channelId) +
-          "/messages/" +
-          encodePath(target.messageId),
-      )
-      .get();
-    const replies = await graph
-      .api(
-        "/teams/" +
-          encodePath(target.teamId) +
-          "/channels/" +
-          encodePath(target.channelId) +
-          "/messages/" +
-          encodePath(target.messageId) +
-          "/replies",
-      )
-      .top(top)
-      .get();
-
-    return {
-      message: rootMessage,
-      replies: replies.value ?? [],
-    };
+  if (toolName === "microsoft_email_create_draft") {
+    return jsonContent(await client.api("/me/messages").post(buildMessage(args)));
   }
 
-  throw new McpError(ErrorCode.InvalidParams, "This run does not have a Teams conversation target");
-}
-
-async function replyToTeams(content, contentType) {
-  const body = {
-    body: {
-      contentType: contentType === "text" ? "text" : "html",
-      content,
-    },
-  };
-
-  if (target.chatId !== undefined) {
-    return await graph
-      .api("/chats/" + encodePath(target.chatId) + "/messages")
-      .post(body);
-  }
-
-  if (
-    target.teamId !== undefined &&
-    target.channelId !== undefined &&
-    target.messageId !== undefined
-  ) {
-    return await graph
-      .api(
-        "/teams/" +
-          encodePath(target.teamId) +
-          "/channels/" +
-          encodePath(target.channelId) +
-          "/messages/" +
-          encodePath(target.messageId) +
-          "/replies",
-      )
-      .post(body);
-  }
-
-  throw new McpError(ErrorCode.InvalidParams, "This run does not have a Teams reply target");
-}
-
-async function graphGet(path) {
-  const normalizedPath = path.startsWith("/") ? path : "/" + path;
-
-  if (!isAllowedGraphReadPath(normalizedPath)) {
-    throw new McpError(
-      ErrorCode.InvalidParams,
-      "This run may only read Teams context plus /me mail, calendar, and drive context",
+  if (toolName === "microsoft_email_update_message") {
+    return jsonContent(
+      await client
+        .api("/me/messages/" + encodeURIComponent(requiredString(args.messageId, "messageId")))
+        .patch(requiredObject(args.message, "message"))
     );
   }
 
-  return await graph.api(normalizedPath).get();
+  throw new McpError(ErrorCode.InvalidParams, "Unknown Microsoft Email tool: " + toolName);
 }
 
-function isAllowedGraphReadPath(path) {
-  return [
-    "/me",
-    "/me/",
-    "/me/messages",
-    "/me/mailFolders",
-    "/me/events",
-    "/me/calendar",
-    "/me/calendarView",
-    "/me/drive",
-    "/me/drive/",
-  ].some((prefix) => path === prefix || path.startsWith(prefix));
-}
+async function handleCalendarTool(toolName, args) {
+  if (toolName === "microsoft_calendar_list_events") {
+    const top = normalizeTop(args.top, 10, 50);
 
-function normalizeLimit(value) {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return 25;
+    if (typeof args.timeMin === "string" || typeof args.timeMax === "string") {
+      const timeMin = typeof args.timeMin === "string" ? args.timeMin : new Date().toISOString();
+      const timeMax = typeof args.timeMax === "string" ? args.timeMax : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      return jsonContent(
+        await client
+          .api("/me/calendarView")
+          .query({ startDateTime: timeMin, endDateTime: timeMax })
+          .top(top)
+          .orderby("start/dateTime")
+          .get()
+      );
+    }
+
+    return jsonContent(await client.api("/me/events").top(top).orderby("start/dateTime").get());
   }
 
-  return Math.max(1, Math.min(50, Math.round(value)));
+  if (toolName === "microsoft_calendar_get_event") {
+    return jsonContent(await client.api("/me/events/" + encodeURIComponent(requiredString(args.eventId, "eventId"))).get());
+  }
+
+  if (toolName === "microsoft_calendar_create_event") {
+    let request = client.api("/me/events");
+    if (args.sendUpdates === "all" || args.sendUpdates === "none") {
+      request = request.query({ sendUpdates: args.sendUpdates });
+    }
+    return jsonContent(await request.post(requiredObject(args.event, "event")));
+  }
+
+  if (toolName === "microsoft_calendar_update_event") {
+    let request = client.api("/me/events/" + encodeURIComponent(requiredString(args.eventId, "eventId")));
+    if (args.sendUpdates === "all" || args.sendUpdates === "none") {
+      request = request.query({ sendUpdates: args.sendUpdates });
+    }
+    return jsonContent(await request.patch(requiredObject(args.event, "event")));
+  }
+
+  throw new McpError(ErrorCode.InvalidParams, "Unknown Microsoft Calendar tool: " + toolName);
 }
 
-function encodePath(value) {
-  return encodeURIComponent(value);
+function buildMessage(args) {
+  return {
+    subject: requiredString(args.subject, "subject"),
+    body: {
+      contentType: args.bodyType === "HTML" ? "HTML" : "Text",
+      content: requiredString(args.body, "body"),
+    },
+    toRecipients: recipients(requiredStringArray(args.to, "to")),
+    ccRecipients: recipients(optionalStringArray(args.cc)),
+    bccRecipients: recipients(optionalStringArray(args.bcc)),
+  };
+}
+
+function recipients(addresses) {
+  return addresses.map((address) => ({ emailAddress: { address } }));
+}
+
+function normalizeTop(value, fallback, max) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return fallback;
+  }
+
+  return Math.max(1, Math.min(Math.floor(value), max));
 }
 
 function requiredEnv(name) {
   const value = process.env[name];
-  if (value === undefined || value === "") {
+  if (!value) {
     throw new Error("Missing " + name);
   }
   return value;
 }
+
+function requiredString(value, name) {
+  if (typeof value !== "string" || value === "") {
+    throw new McpError(ErrorCode.InvalidParams, "Missing " + name);
+  }
+
+  return value;
+}
+
+function requiredOptionalString(value) {
+  if (typeof value === "string" && value !== "") {
+    return value;
+  }
+
+  return undefined;
+}
+
+function requiredStringArray(value, name) {
+  if (!Array.isArray(value) || !value.every((item) => typeof item === "string" && item !== "")) {
+    throw new McpError(ErrorCode.InvalidParams, "Missing " + name);
+  }
+
+  return value;
+}
+
+function optionalStringArray(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item) => typeof item === "string" && item !== "");
+}
+
+function requiredObject(value, name) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new McpError(ErrorCode.InvalidParams, "Missing " + name);
+  }
+
+  return value;
+}
+
+function jsonContent(value) {
+  return { content: [{ type: "text", text: JSON.stringify(value, null, 2) }] };
+}
+
+function textContent(value) {
+  return { content: [{ type: "text", text: value }] };
+}
+
+await server.connect(new StdioServerTransport());
 `

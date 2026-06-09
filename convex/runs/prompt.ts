@@ -101,9 +101,7 @@ function createScheduledTriggerPart(
   }
 }
 
-function getProviderLabel(
-  provider: "github" | "linear" | "microsoft" | "slack"
-) {
+function getProviderLabel(provider: "github" | "linear" | "slack") {
   if (provider === "github") {
     return "GitHub"
   }
@@ -112,15 +110,11 @@ function getProviderLabel(
     return "Linear"
   }
 
-  if (provider === "microsoft") {
-    return "Microsoft Teams"
-  }
-
   return "Slack"
 }
 
 function getMessageTargetId(
-  provider: "github" | "linear" | "microsoft" | "slack",
+  provider: "github" | "linear" | "slack",
   data: unknown
 ) {
   if (provider === "github") {
@@ -129,15 +123,6 @@ function getMessageTargetId(
 
   if (provider === "linear") {
     return getDataString(data, "issueId") ?? ""
-  }
-
-  if (provider === "microsoft") {
-    return (
-      getDataString(data, "chatId") ??
-      getDataString(data, "channelId") ??
-      getDataString(data, "resource") ??
-      ""
-    )
   }
 
   return getDataString(data, "channelId") ?? ""

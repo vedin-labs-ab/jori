@@ -5,7 +5,8 @@ type IntegrationCallbackProvider =
   | "github"
   | "googleCalendar"
   | "linear"
-  | "microsoft"
+  | "microsoftCalendar"
+  | "microsoftEmail"
   | "slack"
 
 export function useIntegrationCallbackStatus(

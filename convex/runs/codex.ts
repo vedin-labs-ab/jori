@@ -21,16 +21,6 @@ export type LinearRuntimeInput = {
   message: Doc<"messages">
 }
 
-export type MicrosoftRuntimeInput = {
-  type: "message"
-  provider: "microsoft"
-  execution: Doc<"executions">
-  trigger: Doc<"triggers">
-  integration: Doc<"integrations">
-  integrations: Doc<"integrations">[]
-  message: Doc<"messages">
-}
-
 export type GitHubRuntimeInput = {
   type: "message"
   provider: "github"
@@ -53,7 +43,6 @@ export type ScheduledRuntimeInput = {
 export type CodexRuntimeInput =
   | SlackRuntimeInput
   | LinearRuntimeInput
-  | MicrosoftRuntimeInput
   | GitHubRuntimeInput
   | ScheduledRuntimeInput
 

@@ -81,13 +81,8 @@ async function getMessageInput(
 
 function isMessageProvider(
   provider: string
-): provider is "github" | "linear" | "microsoft" | "slack" {
-  return (
-    provider === "github" ||
-    provider === "linear" ||
-    provider === "microsoft" ||
-    provider === "slack"
-  )
+): provider is "github" | "linear" | "slack" {
+  return provider === "github" || provider === "linear" || provider === "slack"
 }
 
 async function getScheduledInput(

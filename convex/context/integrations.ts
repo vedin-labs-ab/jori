@@ -10,8 +10,10 @@ import {
   getLinearOrganizationName,
   getLinearOrganizationUrlKey,
 } from "../providers/linear/data"
+import { type MicrosoftSurfaceProvider } from "../providers/microsoft/config"
 import {
   getMicrosoftConnectedUser,
+  getMicrosoftEmail,
   getMicrosoftTenantName,
 } from "../providers/microsoft/data"
 import { getSlackTeamName } from "../providers/slack/data"
@@ -81,36 +83,27 @@ export const getLinearStatus = query({
   },
 })
 
-export const getMicrosoftStatus = query({
+export const getMicrosoftEmailStatus = query({
   args: {
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
+    return await getMicrosoftUserStatus(ctx, {
+      provider: "microsoftEmail",
+      tenantId: args.tenantId,
+    })
+  },
+})
 
-    if (identity === null) {
-      return null
-    }
-
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_provider", (query) =>
-        query.eq("tenantId", args.tenantId).eq("provider", "microsoft")
-      )
-      .order("desc")
-      .first()
-
-    if (integration === null) {
-      return null
-    }
-
-    return {
-      accountId: integration.accountId,
-      status: integration.status,
-      createdAt: integration.createdAt,
-      tenantName: getMicrosoftTenantName(integration.data),
-      connectedUser: getMicrosoftConnectedUser(integration.data),
-    }
+export const getMicrosoftCalendarStatus = query({
+  args: {
+    tenantId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await getMicrosoftUserStatus(ctx, {
+      provider: "microsoftCalendar",
+      tenantId: args.tenantId,
+    })
   },
 })
 
@@ -205,6 +198,45 @@ async function getGoogleUserStatus(
     createdAt: integration.createdAt,
     email: getGoogleEmail(integration.data),
     name: getGoogleName(integration.data),
+    scope: "user" as const,
+  }
+}
+
+async function getMicrosoftUserStatus(
+  ctx: QueryCtx,
+  args: {
+    provider: MicrosoftSurfaceProvider
+    tenantId: string
+  }
+) {
+  const identity = await ctx.auth.getUserIdentity()
+
+  if (identity === null) {
+    return null
+  }
+
+  const integration = await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_provider_owner", (query) =>
+      query
+        .eq("tenantId", args.tenantId)
+        .eq("provider", args.provider)
+        .eq("ownerId", identity.tokenIdentifier)
+    )
+    .order("desc")
+    .first()
+
+  if (integration === null) {
+    return null
+  }
+
+  return {
+    accountId: integration.accountId,
+    status: integration.status,
+    createdAt: integration.createdAt,
+    email: getMicrosoftEmail(integration.data),
+    name: getMicrosoftConnectedUser(integration.data),
+    tenantName: getMicrosoftTenantName(integration.data),
     scope: "user" as const,
   }
 }

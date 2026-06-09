@@ -1,7 +1,7 @@
 import { type RuntimeTarget } from "./tools"
 
 export function requireMessageTarget(
-  provider: "github" | "linear" | "microsoft" | "slack",
+  provider: "github" | "linear" | "slack",
   data: unknown
 ): RuntimeTarget {
   if (provider === "github") {
@@ -10,10 +10,6 @@ export function requireMessageTarget(
 
   if (provider === "linear") {
     return requireLinearTarget(data)
-  }
-
-  if (provider === "microsoft") {
-    return requireMicrosoftTarget(data)
   }
 
   return requireSlackTarget(data)
@@ -77,40 +73,6 @@ function requireSlackTarget(data: unknown): RuntimeTarget {
     provider: "slack",
     channelId,
   }
-}
-
-function requireMicrosoftTarget(data: unknown): RuntimeTarget {
-  const chatId = getDataString(data, "chatId")
-  const teamId = getDataString(data, "teamId")
-  const channelId = getDataString(data, "channelId")
-  const messageId = getDataString(data, "messageId")
-
-  if (chatId !== undefined && chatId !== "") {
-    return {
-      provider: "microsoft",
-      chatId,
-      messageId,
-    }
-  }
-
-  if (
-    teamId !== undefined &&
-    teamId !== "" &&
-    channelId !== undefined &&
-    channelId !== "" &&
-    messageId !== undefined &&
-    messageId !== ""
-  ) {
-    return {
-      provider: "microsoft",
-      teamId,
-      channelId,
-      messageId,
-      replyId: getDataString(data, "replyId"),
-    }
-  }
-
-  throw new Error("Missing Microsoft Teams target")
 }
 
 function getDataString(data: unknown, key: string) {

@@ -49,21 +49,24 @@ export function requireMicrosoftClientSecret() {
 export async function exchangeMicrosoftAuthorizationCode(args: {
   code: string
   redirectUri: string
-  tenantId: string
+  tenantId?: string
 }) {
-  const response = await fetch(microsoftOAuthTokenUrl(args.tenantId), {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: requireMicrosoftClientId(),
-      client_secret: requireMicrosoftClientSecret(),
-      code: args.code,
-      grant_type: "authorization_code",
-      redirect_uri: args.redirectUri,
-    }),
-  })
+  const response = await fetch(
+    microsoftOAuthTokenUrl(args.tenantId ?? "organizations"),
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: requireMicrosoftClientId(),
+        client_secret: requireMicrosoftClientSecret(),
+        code: args.code,
+        grant_type: "authorization_code",
+        redirect_uri: args.redirectUri,
+      }),
+    }
+  )
 
   return (await response.json()) as MicrosoftTokenResponse
 }
@@ -88,35 +91,9 @@ export async function refreshMicrosoftAccessToken(args: {
   return (await response.json()) as MicrosoftTokenResponse
 }
 
-export async function acquireMicrosoftApplicationToken(tenantId: string) {
-  const response = await fetch(microsoftOAuthTokenUrl(tenantId), {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: requireMicrosoftClientId(),
-      client_secret: requireMicrosoftClientSecret(),
-      grant_type: "client_credentials",
-      scope: "https://graph.microsoft.com/.default",
-    }),
-  })
-  const result = (await response.json()) as MicrosoftTokenResponse
-
-  if ("error" in result) {
-    throw new Error(
-      `Microsoft application token failed: ${
-        result.error_description ?? result.error
-      }`
-    )
-  }
-
-  return result.access_token
-}
-
 export async function fetchMicrosoftInstallationProfile(args: {
   accessToken: string
-  tenantId: string
+  tenantId?: string
 }) {
   const me = (await microsoftGraphGet(args.accessToken, "/me")) as {
     id?: string
@@ -124,22 +101,15 @@ export async function fetchMicrosoftInstallationProfile(args: {
     userPrincipalName?: string
     mail?: string
   }
-  const organization = (await microsoftGraphGet(
-    args.accessToken,
-    "/organization?$select=id,displayName"
-  )) as {
-    value?: Array<{
-      id?: string
-      displayName?: string
-    }>
-  }
-  const tenant =
-    organization.value?.find(
-      (organizationItem) => organizationItem.id === args.tenantId
-    ) ?? organization.value?.[0]
+  const tokenTenantId = readJwtStringClaim(args.accessToken, "tid")
+  const tenantId = args.tenantId ?? tokenTenantId
 
   if (me.id === undefined) {
     throw new Error("Could not read Microsoft installation user")
+  }
+
+  if (tenantId === undefined) {
+    throw new Error("Could not read Microsoft installation tenant")
   }
 
   return {
@@ -150,8 +120,7 @@ export async function fetchMicrosoftInstallationProfile(args: {
       mail: me.mail,
     },
     tenant: {
-      id: args.tenantId,
-      displayName: tenant?.displayName,
+      id: tenantId,
     },
   } satisfies MicrosoftInstallationProfile
 }
@@ -173,4 +142,26 @@ async function microsoftGraphGet(accessToken: string, path: string) {
   }
 
   return result
+}
+
+function readJwtStringClaim(token: string, claim: string) {
+  const [, payload] = token.split(".")
+
+  if (payload === undefined) {
+    return undefined
+  }
+
+  try {
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/")
+    const padded = normalized.padEnd(
+      normalized.length + ((4 - (normalized.length % 4)) % 4),
+      "="
+    )
+    const decoded = JSON.parse(atob(padded)) as Record<string, unknown>
+    const value = decoded[claim]
+
+    return typeof value === "string" ? value : undefined
+  } catch {
+    return undefined
+  }
 }

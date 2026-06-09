@@ -12,6 +12,14 @@ export function getMicrosoftConnectedUser(data: unknown) {
   return displayName ?? userPrincipalName
 }
 
+export function getMicrosoftEmail(data: unknown) {
+  const user = readMicrosoftDataObject(data, "user")
+  const mail = readMicrosoftDataString(user, "mail")
+  const userPrincipalName = readMicrosoftDataString(user, "userPrincipalName")
+
+  return mail ?? userPrincipalName
+}
+
 export function getMicrosoftConnectedUserId(data: unknown) {
   const user = readMicrosoftDataObject(data, "user")
 

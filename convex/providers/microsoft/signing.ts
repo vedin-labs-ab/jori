@@ -1,16 +1,13 @@
-import {
-  createSignedState,
-  parseSignedState,
-  timingSafeEqual,
-} from "../signing"
+import { createSignedState, parseSignedState } from "../signing"
+import { type MicrosoftSurfaceProvider } from "./config"
 import { requireMicrosoftClientSecret } from "./oauth"
 
 export type MicrosoftInstallState = {
+  provider: MicrosoftSurfaceProvider
   tenantId: string
   createdBy: string
   returnUrl: string
   createdAt: number
-  microsoftTenantId?: string
 }
 
 export async function createSignedMicrosoftState(state: MicrosoftInstallState) {
@@ -23,14 +20,4 @@ export async function parseSignedMicrosoftState(value: string) {
     value,
     errorLabel: "Microsoft",
   })
-}
-
-export function verifyMicrosoftClientState(clientState: string | undefined) {
-  const expected = process.env.MICROSOFT_GRAPH_CLIENT_STATE
-
-  if (expected === undefined || clientState === undefined) {
-    return false
-  }
-
-  return timingSafeEqual(clientState, expected)
 }

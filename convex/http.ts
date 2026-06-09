@@ -15,8 +15,6 @@ import {
   handleLinearOAuthCallback,
 } from "./providers/linear/http"
 import {
-  handleMicrosoftAdminConsentCallback,
-  handleMicrosoftEvents,
   handleMicrosoftInstall,
   handleMicrosoftOAuthCallback,
 } from "./providers/microsoft/http"
@@ -161,34 +159,34 @@ http.route({
 })
 
 http.route({
-  path: "/microsoft/install",
+  path: "/microsoft-email/install",
   method: "GET",
   handler: httpAction(async (_ctx, request) => {
-    return await handleMicrosoftInstall(request)
+    return await handleMicrosoftInstall(request, "microsoftEmail")
   }),
 })
 
 http.route({
-  path: "/microsoft/admin/callback",
+  path: "/microsoft-email/oauth/callback",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    return await handleMicrosoftOAuthCallback(ctx, request, "microsoftEmail")
+  }),
+})
+
+http.route({
+  path: "/microsoft-calendar/install",
   method: "GET",
   handler: httpAction(async (_ctx, request) => {
-    return await handleMicrosoftAdminConsentCallback(request)
+    return await handleMicrosoftInstall(request, "microsoftCalendar")
   }),
 })
 
 http.route({
-  path: "/microsoft/oauth/callback",
+  path: "/microsoft-calendar/oauth/callback",
   method: "GET",
   handler: httpAction(async (ctx, request) => {
-    return await handleMicrosoftOAuthCallback(ctx, request)
-  }),
-})
-
-http.route({
-  path: "/microsoft/events",
-  method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    return await handleMicrosoftEvents(ctx, request)
+    return await handleMicrosoftOAuthCallback(ctx, request, "microsoftCalendar")
   }),
 })
 

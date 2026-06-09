@@ -15,7 +15,10 @@ import { BrandMark } from "@/shared/brand"
 import { GitHubConnection } from "./github"
 import { GmailConnection, GoogleCalendarConnection } from "./google"
 import { LinearConnection } from "./linear"
-import { MicrosoftConnection } from "./microsoft"
+import {
+  MicrosoftCalendarConnection,
+  MicrosoftEmailConnection,
+} from "./microsoft"
 import { OrganizationCard } from "./organization"
 import { SkillsCard } from "./skill/card"
 import { SlackConnection } from "./slack"
@@ -28,14 +31,17 @@ export function Setup() {
   const githubStatus = useIntegrationCallbackStatus("github")
   const googleCalendarStatus = useIntegrationCallbackStatus("googleCalendar")
   const linearStatus = useIntegrationCallbackStatus("linear")
-  const microsoftStatus = useIntegrationCallbackStatus("microsoft")
+  const microsoftCalendarStatus =
+    useIntegrationCallbackStatus("microsoftCalendar")
+  const microsoftEmailStatus = useIntegrationCallbackStatus("microsoftEmail")
   const slackStatus = useIntegrationCallbackStatus("slack")
   const callbackStatuses = {
     gmail: gmailStatus,
     github: githubStatus,
     googleCalendar: googleCalendarStatus,
     linear: linearStatus,
-    microsoft: microsoftStatus,
+    microsoftCalendar: microsoftCalendarStatus,
+    microsoftEmail: microsoftEmailStatus,
     slack: slackStatus,
   }
 
@@ -105,11 +111,18 @@ const integrationCallbackAlerts = [
       "Linear can now send Milo issue and comment events for the active organization.",
   },
   {
-    provider: "microsoft",
+    provider: "microsoftEmail",
     status: "connected",
-    title: "Microsoft connected",
+    title: "Microsoft Email connected",
     description:
-      "Microsoft 365 can now send Milo Teams message events for the active organization.",
+      "Milo can now use Outlook mail tools for your account when explicitly requested.",
+  },
+  {
+    provider: "microsoftCalendar",
+    status: "connected",
+    title: "Microsoft Calendar connected",
+    description:
+      "Milo can now use Microsoft Calendar tools for your account when explicitly requested.",
   },
   {
     provider: "github",
@@ -147,11 +160,18 @@ const integrationCallbackAlerts = [
       "Linear did not return an installation token. Check the Linear OAuth app settings and try again.",
   },
   {
-    provider: "microsoft",
+    provider: "microsoftEmail",
     status: "error",
-    title: "Microsoft connection failed",
+    title: "Microsoft Email connection failed",
     description:
-      "Microsoft did not complete tenant consent and account OAuth. Check the Microsoft app permissions and try again.",
+      "Microsoft did not return a usable Outlook mail OAuth token. Check the Microsoft app permissions and try again.",
+  },
+  {
+    provider: "microsoftCalendar",
+    status: "error",
+    title: "Microsoft Calendar connection failed",
+    description:
+      "Microsoft did not return a usable Calendar OAuth token. Check the Microsoft app permissions and try again.",
   },
   {
     provider: "github",
@@ -299,10 +319,11 @@ function SignedInView() {
       <OrganizationCard organization={organization} />
       <SlackConnection tenantId={organization.id} />
       <LinearConnection tenantId={organization.id} />
-      <MicrosoftConnection tenantId={organization.id} />
       <GitHubConnection tenantId={organization.id} />
       <GmailConnection tenantId={organization.id} />
       <GoogleCalendarConnection tenantId={organization.id} />
+      <MicrosoftEmailConnection tenantId={organization.id} />
+      <MicrosoftCalendarConnection tenantId={organization.id} />
       <SkillsCard tenantId={organization.id} />
     </section>
   )
