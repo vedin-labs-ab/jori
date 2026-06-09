@@ -1,14 +1,13 @@
-# Message Trigger
+# Trigger
 
 A {{message.provider}} message triggered this run.
 
-Message target:
+Target:
 - Provider: {{message.provider}}
 - Channel ID: {{message.channelId}}
 - Conversation ID: {{message.conversationId}}
 
-Original message:
+Message:
 {{message.text}}
 
-Complete the requested work using the available tools. If a reply is warranted,
-send it to the message target above.
+Handle the request. If a reply is useful, send it to this target.

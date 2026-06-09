@@ -1,6 +1,6 @@
-# Schedule Trigger
+# Trigger
 
-A Milo schedule triggered this run.
+A schedule triggered this run.
 
 Schedule:
 - ID: {{schedule.id}}
@@ -8,9 +8,10 @@ Schedule:
 - Description: {{schedule.description}}
 - Metadata: {{schedule.metadata}}
 
-Output target:
-- Type: Slack
+Publish to:
+- Provider: Slack
 - Channel ID: {{output.channelId}}
 - Thread timestamp: {{output.threadId}}
 
-Complete the scheduled task and publish the result to the output target above. If the work cannot be completed, publish a concise status explaining what blocked it.
+Run the scheduled work and publish the result to this target. If you cannot
+complete it, publish a concise status with the blocker.
