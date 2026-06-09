@@ -1,11 +1,13 @@
 import { ChevronDown, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { cn } from "@/lib/utils"
 import { LoadingMessage } from "../loading"
 import {
   type ConfigurablePermissionMode,
@@ -38,10 +40,13 @@ export function PermissionSection({
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="group/permission-trigger flex w-full items-center justify-between rounded-md border border-transparent py-1 text-left transition-colors duration-200 outline-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 data-[state=open]:text-foreground dark:hover:bg-muted/50"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "sm" }),
+            "group/permission-trigger h-auto w-full justify-between py-1 text-left whitespace-normal shadow-none active:not-aria-[haspopup]:translate-y-0 active:not-aria-[haspopup]:shadow-none"
+          )}
           aria-label={`${isOpen ? "Hide" : "Show"} ${title.toLowerCase()}`}
         >
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 transform-gpu transition-transform duration-200 ease-out group-hover/permission-trigger:translate-x-2 group-focus-visible/permission-trigger:translate-x-2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 transition-transform duration-200 ease-out group-hover/permission-trigger:translate-x-2 group-focus-visible/permission-trigger:translate-x-2">
             <div className="flex items-center gap-2 font-medium text-sm">
               <ShieldCheck className="size-4 text-muted-foreground" />
               {title}
@@ -49,11 +54,10 @@ export function PermissionSection({
             <PermissionSummary permissions={permissions} />
           </div>
           <ChevronDown
-            className={
-              isOpen
-                ? "size-4 shrink-0 rotate-180 transform-gpu transition-transform duration-200 ease-out group-hover/permission-trigger:-translate-x-2 group-focus-visible/permission-trigger:-translate-x-2"
-                : "size-4 shrink-0 transform-gpu transition-transform duration-200 ease-out group-hover/permission-trigger:-translate-x-2 group-focus-visible/permission-trigger:-translate-x-2"
-            }
+            className={cn(
+              "size-4 shrink-0 transition-transform duration-200 ease-out group-hover/permission-trigger:-translate-x-2 group-focus-visible/permission-trigger:-translate-x-2",
+              isOpen && "rotate-180"
+            )}
           />
         </button>
       </CollapsibleTrigger>
