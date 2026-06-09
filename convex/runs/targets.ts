@@ -1,7 +1,9 @@
+import { type MessageProvider } from "./codex"
+import { readDataNumber, readDataObject, readDataString } from "./data"
 import { type RuntimeTarget } from "./tools"
 
 export function requireMessageTarget(
-  provider: "github" | "linear" | "slack",
+  provider: MessageProvider,
   data: unknown
 ): RuntimeTarget {
   if (provider === "github") {
@@ -16,12 +18,12 @@ export function requireMessageTarget(
 }
 
 function requireGitHubTarget(data: unknown): RuntimeTarget {
-  const repository = getDataObject(data, "repository")
-  const owner = getDataString(repository, "owner")
-  const repo = getDataString(repository, "name")
-  const comment = getDataObject(data, "comment")
-  const commentId = getDataString(comment, "id")
-  const commentKind = getDataString(comment, "kind")
+  const repository = readDataObject(data, "repository")
+  const owner = readDataString(repository, "owner")
+  const repo = readDataString(repository, "name")
+  const comment = readDataObject(data, "comment")
+  const commentId = readDataString(comment, "id")
+  const commentKind = readDataString(comment, "kind")
 
   if (
     owner === undefined ||
@@ -40,16 +42,16 @@ function requireGitHubTarget(data: unknown): RuntimeTarget {
     provider: "github",
     owner,
     repo,
-    repositoryId: getDataNumber(repository, "id"),
-    issueNumber: getDataNumber(data, "issueNumber"),
-    pullNumber: getDataNumber(data, "pullNumber"),
+    repositoryId: readDataNumber(repository, "id"),
+    issueNumber: readDataNumber(data, "issueNumber"),
+    pullNumber: readDataNumber(data, "pullNumber"),
     commentId,
     commentKind,
   }
 }
 
 function requireLinearTarget(data: unknown): RuntimeTarget {
-  const issueId = getDataString(data, "issueId")
+  const issueId = readDataString(data, "issueId")
 
   if (issueId === undefined || issueId === "") {
     throw new Error("Missing Linear issue target")
@@ -58,12 +60,12 @@ function requireLinearTarget(data: unknown): RuntimeTarget {
   return {
     provider: "linear",
     issueId,
-    commentId: getDataString(data, "commentId"),
+    commentId: readDataString(data, "commentId"),
   }
 }
 
 function requireSlackTarget(data: unknown): RuntimeTarget {
-  const channelId = getDataString(data, "channelId")
+  const channelId = readDataString(data, "channelId")
 
   if (channelId === undefined || channelId === "") {
     throw new Error("Missing Slack channel target")
@@ -73,34 +75,4 @@ function requireSlackTarget(data: unknown): RuntimeTarget {
     provider: "slack",
     channelId,
   }
-}
-
-function getDataString(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  const value = (data as Record<string, unknown>)[key]
-
-  return typeof value === "string" ? value : undefined
-}
-
-function getDataNumber(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  const value = (data as Record<string, unknown>)[key]
-
-  return typeof value === "number" ? value : undefined
-}
-
-function getDataObject(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  const value = (data as Record<string, unknown>)[key]
-
-  return typeof value === "object" && value !== null ? value : undefined
 }

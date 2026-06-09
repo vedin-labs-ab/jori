@@ -1,6 +1,7 @@
 import { type ToolPermission } from "../permissions/catalog"
 import { promptTemplates } from "../prompts/generated"
-import { type CodexRuntimeInput } from "./codex"
+import { type CodexRuntimeInput, type MessageProvider } from "./codex"
+import { readDataNumber, readDataObject, readDataString } from "./data"
 
 export type PromptBundle = {
   rendered: string
@@ -127,38 +128,33 @@ function createScheduledTriggerPart(
   }
 }
 
-function getProviderLabel(provider: "github" | "linear" | "slack") {
-  if (provider === "github") {
-    return "GitHub"
-  }
+const providerLabels = {
+  github: "GitHub",
+  linear: "Linear",
+  slack: "Slack",
+} satisfies Record<MessageProvider, string>
 
-  if (provider === "linear") {
-    return "Linear"
-  }
-
-  return "Slack"
+function getProviderLabel(provider: MessageProvider) {
+  return providerLabels[provider]
 }
 
-function getMessageTargetId(
-  provider: "github" | "linear" | "slack",
-  data: unknown
-) {
+function getMessageTargetId(provider: MessageProvider, data: unknown) {
   if (provider === "github") {
     return getGitHubTargetId(data)
   }
 
   if (provider === "linear") {
-    return getDataString(data, "issueId") ?? ""
+    return readDataString(data, "issueId") ?? ""
   }
 
-  return getDataString(data, "channelId") ?? ""
+  return readDataString(data, "channelId") ?? ""
 }
 
 function getGitHubTargetId(data: unknown) {
-  const repository = getDataObject(data, "repository")
-  const fullName = getDataString(repository, "fullName")
-  const issueNumber = getDataNumber(data, "issueNumber")
-  const pullNumber = getDataNumber(data, "pullNumber")
+  const repository = readDataObject(data, "repository")
+  const fullName = readDataString(repository, "fullName")
+  const issueNumber = readDataNumber(data, "issueNumber")
+  const pullNumber = readDataNumber(data, "pullNumber")
   const number = pullNumber ?? issueNumber
 
   if (fullName === undefined || number === undefined) {
@@ -166,36 +162,6 @@ function getGitHubTargetId(data: unknown) {
   }
 
   return `${fullName}#${number}`
-}
-
-function getDataString(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  const value = (data as Record<string, unknown>)[key]
-
-  return typeof value === "string" ? value : undefined
-}
-
-function getDataNumber(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  const value = (data as Record<string, unknown>)[key]
-
-  return typeof value === "number" ? value : undefined
-}
-
-function getDataObject(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  const value = (data as Record<string, unknown>)[key]
-
-  return typeof value === "object" && value !== null ? value : undefined
 }
 
 function renderTemplate(

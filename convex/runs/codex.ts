@@ -1,29 +1,11 @@
 import { type Doc } from "../_generated/dataModel"
 import { type McpServerConfig } from "./tools"
 
-export type SlackRuntimeInput = {
-  type: "message"
-  provider: "slack"
-  execution: Doc<"executions">
-  trigger: Doc<"triggers">
-  integration: Doc<"integrations">
-  integrations: Doc<"integrations">[]
-  message: Doc<"messages">
-}
+export type MessageProvider = "github" | "linear" | "slack"
 
-export type LinearRuntimeInput = {
+export type MessageRuntimeInput = {
   type: "message"
-  provider: "linear"
-  execution: Doc<"executions">
-  trigger: Doc<"triggers">
-  integration: Doc<"integrations">
-  integrations: Doc<"integrations">[]
-  message: Doc<"messages">
-}
-
-export type GitHubRuntimeInput = {
-  type: "message"
-  provider: "github"
+  provider: MessageProvider
   execution: Doc<"executions">
   trigger: Doc<"triggers">
   integration: Doc<"integrations">
@@ -40,11 +22,7 @@ export type ScheduledRuntimeInput = {
   schedule: Doc<"schedules">
 }
 
-export type CodexRuntimeInput =
-  | SlackRuntimeInput
-  | LinearRuntimeInput
-  | GitHubRuntimeInput
-  | ScheduledRuntimeInput
+export type CodexRuntimeInput = MessageRuntimeInput | ScheduledRuntimeInput
 
 export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {
   return [
