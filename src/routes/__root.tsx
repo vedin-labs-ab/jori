@@ -4,6 +4,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { ConvexProviderWithClerk } from "convex/react-clerk"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { convex } from "@/shared/convex"
 
 import appCss from "../styles.css?url"
@@ -96,7 +97,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <ClerkProvider appearance={{ theme: shadcn }}>
           <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-            {children}
+            <TooltipProvider>{children}</TooltipProvider>
           </ConvexProviderWithClerk>
         </ClerkProvider>
         <TanStackDevtools
