@@ -6,6 +6,10 @@ import {
   startMessageExecution,
 } from "../attention/activations"
 import {
+  isGitHubAppMessage,
+  isMiloRelevantGitHubMessage,
+} from "../providers/github/gate"
+import {
   isLinearAppMessage,
   isMiloRelevantLinearMessage,
 } from "../providers/linear/gate"
@@ -118,6 +122,30 @@ export const recordMicrosoftMessage = internalMutation({
   },
 })
 
+export const recordGitHubMessage = internalMutation({
+  args: observedMessageArgs,
+  handler: async (ctx, args) => {
+    const integration = await findActiveIntegration(ctx, {
+      provider: "github",
+      accountId: args.accountId,
+    })
+
+    if (integration === null) {
+      return { status: "missing_integration" as const }
+    }
+
+    if (isGitHubAppMessage(getGitHubSenderType(args.data))) {
+      return { status: "ignored_bot" as const }
+    }
+
+    return await recordProviderMessage(ctx, {
+      integration,
+      message: args,
+      isRelevant: isMiloRelevantGitHubMessage(args.text, args.type),
+    })
+  },
+})
+
 async function recordProviderMessage(
   ctx: MutationCtx,
   input: {
@@ -209,4 +237,20 @@ function isSlackBotMessage(actorId: string | undefined, data: unknown) {
   }
 
   return actorId === getSlackBotId(data)
+}
+
+function getGitHubSenderType(data: unknown) {
+  if (typeof data !== "object" || data === null) {
+    return undefined
+  }
+
+  const sender = (data as Record<string, unknown>).sender
+
+  if (typeof sender !== "object" || sender === null) {
+    return undefined
+  }
+
+  const type = (sender as Record<string, unknown>).type
+
+  return typeof type === "string" ? type : undefined
 }

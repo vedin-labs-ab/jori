@@ -1,6 +1,10 @@
 import { v } from "convex/values"
 import { query } from "../_generated/server"
 import {
+  getGitHubAccountLogin,
+  getGitHubAccountType,
+} from "../providers/github/data"
+import {
   getLinearOrganizationName,
   getLinearOrganizationUrlKey,
 } from "../providers/linear/data"
@@ -104,6 +108,39 @@ export const getMicrosoftStatus = query({
       createdAt: integration.createdAt,
       tenantName: getMicrosoftTenantName(integration.data),
       connectedUser: getMicrosoftConnectedUser(integration.data),
+    }
+  },
+})
+
+export const getGitHubStatus = query({
+  args: {
+    tenantId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+
+    if (identity === null) {
+      return null
+    }
+
+    const integration = await ctx.db
+      .query("integrations")
+      .withIndex("by_tenant_provider", (query) =>
+        query.eq("tenantId", args.tenantId).eq("provider", "github")
+      )
+      .order("desc")
+      .first()
+
+    if (integration === null) {
+      return null
+    }
+
+    return {
+      accountId: integration.accountId,
+      status: integration.status,
+      createdAt: integration.createdAt,
+      accountLogin: getGitHubAccountLogin(integration.data),
+      accountType: getGitHubAccountType(integration.data),
     }
   },
 })

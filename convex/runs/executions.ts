@@ -80,9 +80,12 @@ async function getMessageInput(
 
 function isMessageProvider(
   provider: string
-): provider is "linear" | "microsoft" | "slack" {
+): provider is "github" | "linear" | "microsoft" | "slack" {
   return (
-    provider === "linear" || provider === "microsoft" || provider === "slack"
+    provider === "github" ||
+    provider === "linear" ||
+    provider === "microsoft" ||
+    provider === "slack"
   )
 }
 

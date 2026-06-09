@@ -1,9 +1,13 @@
 import { type RuntimeTarget } from "./tools"
 
 export function requireMessageTarget(
-  provider: "linear" | "microsoft" | "slack",
+  provider: "github" | "linear" | "microsoft" | "slack",
   data: unknown
 ): RuntimeTarget {
+  if (provider === "github") {
+    return requireGitHubTarget(data)
+  }
+
   if (provider === "linear") {
     return requireLinearTarget(data)
   }
@@ -13,6 +17,39 @@ export function requireMessageTarget(
   }
 
   return requireSlackTarget(data)
+}
+
+function requireGitHubTarget(data: unknown): RuntimeTarget {
+  const repository = getDataObject(data, "repository")
+  const owner = getDataString(repository, "owner")
+  const repo = getDataString(repository, "name")
+  const comment = getDataObject(data, "comment")
+  const commentId = getDataString(comment, "id")
+  const commentKind = getDataString(comment, "kind")
+
+  if (
+    owner === undefined ||
+    owner === "" ||
+    repo === undefined ||
+    repo === "" ||
+    commentId === undefined ||
+    commentId === "" ||
+    commentKind === undefined ||
+    commentKind === ""
+  ) {
+    throw new Error("Missing GitHub comment target")
+  }
+
+  return {
+    provider: "github",
+    owner,
+    repo,
+    repositoryId: getDataNumber(repository, "id"),
+    issueNumber: getDataNumber(data, "issueNumber"),
+    pullNumber: getDataNumber(data, "pullNumber"),
+    commentId,
+    commentKind,
+  }
 }
 
 function requireLinearTarget(data: unknown): RuntimeTarget {
@@ -84,4 +121,24 @@ function getDataString(data: unknown, key: string) {
   const value = (data as Record<string, unknown>)[key]
 
   return typeof value === "string" ? value : undefined
+}
+
+function getDataNumber(data: unknown, key: string) {
+  if (typeof data !== "object" || data === null) {
+    return undefined
+  }
+
+  const value = (data as Record<string, unknown>)[key]
+
+  return typeof value === "number" ? value : undefined
+}
+
+function getDataObject(data: unknown, key: string) {
+  if (typeof data !== "object" || data === null) {
+    return undefined
+  }
+
+  const value = (data as Record<string, unknown>)[key]
+
+  return typeof value === "object" && value !== null ? value : undefined
 }

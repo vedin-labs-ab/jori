@@ -101,7 +101,13 @@ function createScheduledTriggerPart(
   }
 }
 
-function getProviderLabel(provider: "linear" | "microsoft" | "slack") {
+function getProviderLabel(
+  provider: "github" | "linear" | "microsoft" | "slack"
+) {
+  if (provider === "github") {
+    return "GitHub"
+  }
+
   if (provider === "linear") {
     return "Linear"
   }
@@ -114,9 +120,13 @@ function getProviderLabel(provider: "linear" | "microsoft" | "slack") {
 }
 
 function getMessageTargetId(
-  provider: "linear" | "microsoft" | "slack",
+  provider: "github" | "linear" | "microsoft" | "slack",
   data: unknown
 ) {
+  if (provider === "github") {
+    return getGitHubTargetId(data)
+  }
+
   if (provider === "linear") {
     return getDataString(data, "issueId") ?? ""
   }
@@ -133,6 +143,20 @@ function getMessageTargetId(
   return getDataString(data, "channelId") ?? ""
 }
 
+function getGitHubTargetId(data: unknown) {
+  const repository = getDataObject(data, "repository")
+  const fullName = getDataString(repository, "fullName")
+  const issueNumber = getDataNumber(data, "issueNumber")
+  const pullNumber = getDataNumber(data, "pullNumber")
+  const number = pullNumber ?? issueNumber
+
+  if (fullName === undefined || number === undefined) {
+    return ""
+  }
+
+  return `${fullName}#${number}`
+}
+
 function getDataString(data: unknown, key: string) {
   if (typeof data !== "object" || data === null) {
     return undefined
@@ -141,6 +165,26 @@ function getDataString(data: unknown, key: string) {
   const value = (data as Record<string, unknown>)[key]
 
   return typeof value === "string" ? value : undefined
+}
+
+function getDataNumber(data: unknown, key: string) {
+  if (typeof data !== "object" || data === null) {
+    return undefined
+  }
+
+  const value = (data as Record<string, unknown>)[key]
+
+  return typeof value === "number" ? value : undefined
+}
+
+function getDataObject(data: unknown, key: string) {
+  if (typeof data !== "object" || data === null) {
+    return undefined
+  }
+
+  const value = (data as Record<string, unknown>)[key]
+
+  return typeof value === "object" && value !== null ? value : undefined
 }
 
 function renderTemplate(

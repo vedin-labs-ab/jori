@@ -31,6 +31,16 @@ export type MicrosoftRuntimeInput = {
   message: Doc<"messages">
 }
 
+export type GitHubRuntimeInput = {
+  type: "message"
+  provider: "github"
+  execution: Doc<"executions">
+  trigger: Doc<"triggers">
+  integration: Doc<"integrations">
+  integrations: Doc<"integrations">[]
+  message: Doc<"messages">
+}
+
 export type ScheduledRuntimeInput = {
   type: "scheduled"
   execution: Doc<"executions">
@@ -44,6 +54,7 @@ export type CodexRuntimeInput =
   | SlackRuntimeInput
   | LinearRuntimeInput
   | MicrosoftRuntimeInput
+  | GitHubRuntimeInput
   | ScheduledRuntimeInput
 
 export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {

@@ -1,6 +1,11 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
 import {
+  handleGitHubEvents,
+  handleGitHubInstall,
+  handleGitHubInstallCallback,
+} from "./providers/github/http"
+import {
   handleLinearEvents,
   handleLinearInstall,
   handleLinearOAuthCallback,
@@ -52,6 +57,30 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     return await handleMiloMcpRequest(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/github/install",
+  method: "GET",
+  handler: httpAction(async (_ctx, request) => {
+    return await handleGitHubInstall(request)
+  }),
+})
+
+http.route({
+  path: "/github/install/callback",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    return await handleGitHubInstallCallback(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/github/events",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    return await handleGitHubEvents(ctx, request)
   }),
 })
 

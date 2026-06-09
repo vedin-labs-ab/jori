@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-type IntegrationCallbackProvider = "linear" | "microsoft" | "slack"
+type IntegrationCallbackProvider = "github" | "linear" | "microsoft" | "slack"
 
 export function useIntegrationCallbackStatus(
   provider: IntegrationCallbackProvider

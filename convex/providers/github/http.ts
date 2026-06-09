@@ -1,0 +1,148 @@
+import { internal } from "../../_generated/api"
+import { type ActionCtx } from "../../_generated/server"
+import {
+  fetchGitHubInstallationProfile,
+  type GitHubInstallationProfile,
+} from "./app"
+import { githubAppInstallBaseUrl, requireGitHubAppSlug } from "./config"
+import { getGitHubMessage } from "./events"
+import { parseSignedGitHubState, verifyGitHubRequest } from "./signing"
+import { type GitHubWebhookPayload } from "./types"
+
+export async function handleGitHubInstall(request: Request) {
+  const requestUrl = new URL(request.url)
+  const state = requestUrl.searchParams.get("state")
+
+  if (state === null) {
+    return new Response("Missing state", { status: 400 })
+  }
+
+  const githubUrl = new URL(
+    `${githubAppInstallBaseUrl}/${requireGitHubAppSlug()}/installations/new`
+  )
+  githubUrl.searchParams.set("state", state)
+
+  return Response.redirect(githubUrl.toString(), 302)
+}
+
+export async function handleGitHubInstallCallback(
+  ctx: ActionCtx,
+  request: Request
+) {
+  const requestUrl = new URL(request.url)
+  const installationId = requestUrl.searchParams.get("installation_id")
+  const stateValue = requestUrl.searchParams.get("state")
+
+  if (installationId === null || stateValue === null) {
+    return new Response("Missing GitHub installation parameters", {
+      status: 400,
+    })
+  }
+
+  let state: Awaited<ReturnType<typeof parseSignedGitHubState>>
+
+  try {
+    state = await parseSignedGitHubState(stateValue)
+  } catch {
+    return new Response("Invalid GitHub install state", { status: 400 })
+  }
+
+  if (Date.now() - state.createdAt > 10 * 60 * 1000) {
+    return new Response("Expired GitHub install state", { status: 400 })
+  }
+
+  let profile: Awaited<ReturnType<typeof fetchGitHubInstallationProfile>>
+
+  try {
+    profile = await fetchGitHubInstallationProfile(installationId)
+  } catch {
+    return redirectWithProviderStatus(state.returnUrl, "github", "error")
+  }
+
+  await ctx.runMutation(internal.providers.github.install.recordInstallation, {
+    tenantId: state.tenantId,
+    createdBy: state.createdBy,
+    installationId,
+    profile: normalizeInstallationProfile(profile),
+  })
+
+  return redirectWithProviderStatus(state.returnUrl, "github", "connected")
+}
+
+export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
+  const body = await request.text()
+  const verified = await verifyGitHubRequest(request, body)
+
+  if (!verified) {
+    return unauthorizedResponse()
+  }
+
+  const payload = JSON.parse(body) as GitHubWebhookPayload
+  const message = getGitHubMessage({
+    event: request.headers.get("x-github-event"),
+    payload,
+    deliveryId: request.headers.get("x-github-delivery"),
+  })
+
+  if (message === null) {
+    return Response.json({ ok: true })
+  }
+
+  const result = await ctx.runMutation(
+    internal.context.messages.recordGitHubMessage,
+    {
+      accountId: message.accountId,
+      type: message.type,
+      externalId: message.externalId,
+      actorId: message.actorId,
+      conversationId: message.conversationId,
+      text: message.text,
+      observedAt: message.observedAt,
+      data: message.data,
+    }
+  )
+
+  if (result.status === "started") {
+    await ctx.scheduler.runAfter(0, internal.runs.runtime.runMessageExecution, {
+      executionId: result.executionId,
+    })
+  }
+
+  return Response.json({ ok: true })
+}
+
+function unauthorizedResponse() {
+  return new Response("Unauthorized", { status: 401 })
+}
+
+function normalizeInstallationProfile(profile: GitHubInstallationProfile) {
+  return {
+    id: profile.id,
+    html_url: profile.html_url,
+    repository_selection: profile.repository_selection,
+    permissions: profile.permissions,
+    events: profile.events,
+    account:
+      profile.account === undefined
+        ? undefined
+        : {
+            id: profile.account.id,
+            login: profile.account.login,
+            type: profile.account.type,
+            avatar_url: profile.account.avatar_url,
+            html_url: profile.account.html_url,
+          },
+    app_slug: profile.app_slug,
+  }
+}
+
+function redirectWithProviderStatus(
+  returnUrl: string,
+  provider: "github" | "linear" | "slack",
+  status: "connected" | "error"
+) {
+  const url = new URL(returnUrl)
+  url.searchParams.set(provider, status)
+
+  return Response.redirect(url.toString(), 302)
+}

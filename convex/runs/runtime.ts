@@ -35,7 +35,8 @@ export const runMessageExecution = internalAction({
         integration: input.integration,
         integrations: await prepareIntegrationsForRuntime(
           ctx,
-          input.integrations
+          input.integrations,
+          target
         ),
         message: input.message,
       },
@@ -74,7 +75,12 @@ export const runScheduledExecution = internalAction({
         integration: input.integration,
         integrations: await prepareIntegrationsForRuntime(
           ctx,
-          input.integrations
+          input.integrations,
+          {
+            provider: "slack",
+            channelId: input.schedule.output.channelId,
+            threadId: input.schedule.output.threadId,
+          }
         ),
         schedule: input.schedule,
       },
@@ -151,12 +157,18 @@ async function runExecution(
 
 async function prepareIntegrationsForRuntime(
   ctx: ActionCtx,
-  integrations: CodexRuntimeInput["integrations"]
+  integrations: CodexRuntimeInput["integrations"],
+  target: RuntimeTarget
 ) {
   const prepared: CodexRuntimeInput["integrations"] = []
 
   for (const integration of integrations) {
-    prepared.push(await prepareIntegrationForRuntime(ctx, integration))
+    prepared.push(
+      await prepareIntegrationForRuntime(ctx, {
+        integration,
+        target,
+      })
+    )
   }
 
   return prepared

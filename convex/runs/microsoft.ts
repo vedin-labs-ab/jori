@@ -1,9 +1,43 @@
+import { type MicrosoftCredentials } from "../providers/microsoft/credentials"
+import { type RuntimeTarget, type ToolBundle } from "./tools"
+
 export function createMicrosoftTokenPreflightCommand() {
   return microsoftTokenPreflightCommand
 }
 
 export function createMicrosoftGraphMcpScript() {
   return microsoftGraphMcpScript
+}
+
+export function createMicrosoftToolBundle(args: {
+  credentials: MicrosoftCredentials
+  target: Partial<Extract<RuntimeTarget, { provider: "microsoft" }>>
+}): ToolBundle {
+  return {
+    mcpServers: [
+      {
+        name: "microsoft",
+        command: "node",
+        args: ["/tmp/milo-workspace/milo-microsoft-mcp.mjs"],
+        env: {
+          MILO_MICROSOFT_ACCESS_TOKEN: args.credentials.accessToken,
+          MILO_MICROSOFT_TARGET_JSON: JSON.stringify(args.target),
+        },
+      },
+    ],
+    sandboxFiles: [
+      {
+        path: "/tmp/milo-workspace/milo-microsoft-mcp.mjs",
+        content: createMicrosoftGraphMcpScript(),
+      },
+    ],
+    preflights: [
+      {
+        type: "microsoft",
+        credentials: args.credentials,
+      },
+    ],
+  }
 }
 
 const microsoftTokenPreflightCommand = [

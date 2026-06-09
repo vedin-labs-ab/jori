@@ -12,6 +12,7 @@ import { CheckCircle2, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { BrandMark } from "@/shared/brand"
+import { GitHubConnection } from "./github"
 import { LinearConnection } from "./linear"
 import { MicrosoftConnection } from "./microsoft"
 import { OrganizationCard } from "./organization"
@@ -22,6 +23,7 @@ import { useIntegrationCallbackStatus } from "./status"
 export function Setup() {
   const { isLoaded, isSignedIn } = useAuth()
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
+  const githubStatus = useIntegrationCallbackStatus("github")
   const linearStatus = useIntegrationCallbackStatus("linear")
   const microsoftStatus = useIntegrationCallbackStatus("microsoft")
   const slackStatus = useIntegrationCallbackStatus("slack")
@@ -90,6 +92,16 @@ export function Setup() {
         </Alert>
       ) : null}
 
+      {githubStatus === "connected" ? (
+        <Alert>
+          <CheckCircle2 />
+          <AlertTitle>GitHub connected</AlertTitle>
+          <AlertDescription>
+            GitHub can now send Milo comment events for the active organization.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       {slackStatus === "error" ? (
         <Alert variant="destructive">
           <AlertTitle>Slack connection failed</AlertTitle>
@@ -116,6 +128,16 @@ export function Setup() {
           <AlertDescription>
             Microsoft did not complete tenant consent and account OAuth. Check
             the Microsoft app permissions and try again.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {githubStatus === "error" ? (
+        <Alert variant="destructive">
+          <AlertTitle>GitHub connection failed</AlertTitle>
+          <AlertDescription>
+            GitHub did not return an installation. Check the GitHub App setup
+            URL and try again.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -186,7 +208,7 @@ function SignedOutView() {
         Bring Milo into your work.
       </h1>
       <p className="text-sm text-muted-foreground">
-        Sign up, create an organization, connect Slack or Linear, and Milo can
+        Sign up, create an organization, connect a provider, and Milo can
         respond where work is happening.
       </p>
       <div className="flex flex-wrap gap-2">
@@ -235,6 +257,7 @@ function SignedInView() {
       <SlackConnection tenantId={organization.id} />
       <LinearConnection tenantId={organization.id} />
       <MicrosoftConnection tenantId={organization.id} />
+      <GitHubConnection tenantId={organization.id} />
       <SkillsCard tenantId={organization.id} />
     </section>
   )

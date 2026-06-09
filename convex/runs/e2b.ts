@@ -7,6 +7,7 @@ import {
   type Username,
 } from "e2b"
 import { createCodexConfig } from "./codex"
+import { createGitHubTokenPreflightCommand } from "./github"
 import {
   codexHome,
   createBootstrapCommand,
@@ -161,6 +162,10 @@ async function verifyPreflights(
   const traces: CommandTrace[] = []
 
   for (const preflight of preflights) {
+    if (preflight.type === "github") {
+      traces.push(await verifyGitHubToken(sandbox, preflight))
+    }
+
     if (preflight.type === "linear") {
       traces.push(await verifyLinearToken(sandbox, preflight))
     }
@@ -175,6 +180,26 @@ async function verifyPreflights(
   }
 
   return traces
+}
+
+async function verifyGitHubToken(
+  sandbox: E2BSandbox,
+  preflight: Extract<ToolPreflight, { type: "github" }>
+) {
+  const result = await runCommand(
+    sandbox,
+    createGitHubTokenPreflightCommand(),
+    {
+      envs: {
+        MILO_GITHUB_TOKEN: preflight.credentials.token ?? "",
+        MILO_GITHUB_OWNER: preflight.owner,
+        MILO_GITHUB_REPO: preflight.repo,
+      },
+      timeoutMs: 30_000,
+    }
+  )
+
+  return createCommandTrace(result)
 }
 
 async function verifyLinearToken(

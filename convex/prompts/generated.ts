@@ -1,4 +1,10 @@
 export const skills = {
+  github: {
+    name: "github",
+    description:
+      "Built-in GitHub skill for reading trigger context, inspecting repositories, and replying to GitHub comment threads.",
+    body: "# GitHub\n\nUse GitHub for repository context and GitHub replies.\n\nContext:\n- Start with `github_get_trigger_context` when issue, pull request, comment, or\n  adjacent discussion context could change the answer.\n- Use `github_request` for target-repository GitHub REST API calls.\n- Use `github_clone_repository` when file contents, diffs, tests, or repository\n  structure matter. Inspect only what is needed.\n\nReplies:\n- Send the final response with `github_reply` when a reply is useful.\n- Reply only in the GitHub thread that triggered the run.\n- Send one comment unless the task explicitly needs multiple.\n- After the reply succeeds, stop.\n\nFormat:\n- Keep comments concise and practical.\n- Use GitHub-flavored Markdown.\n- Link to files, issues, pull requests, commits, or external context only when\n  it helps the user act.",
+  },
   linear: {
     name: "linear",
     description:

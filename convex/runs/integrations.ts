@@ -1,5 +1,7 @@
 import { internal } from "../_generated/api"
 import { type ActionCtx } from "../_generated/server"
+import { createGitHubInstallationToken } from "../providers/github/app"
+import { requireGitHubCredentials } from "../providers/github/credentials"
 import { requireLinearCredentials } from "../providers/linear/credentials"
 import {
   getLinearTokenScope,
@@ -11,11 +13,21 @@ import {
   refreshMicrosoftAccessToken,
 } from "../providers/microsoft/oauth"
 import { type CodexRuntimeInput } from "./codex"
+import { type RuntimeTarget } from "./tools"
 
 export async function prepareIntegrationForRuntime(
   ctx: ActionCtx,
-  integration: CodexRuntimeInput["integration"]
+  args: {
+    integration: CodexRuntimeInput["integration"]
+    target: RuntimeTarget
+  }
 ) {
+  const integration = args.integration
+
+  if (integration.provider === "github") {
+    return await prepareGitHubIntegrationForRuntime(integration, args.target)
+  }
+
   if (integration.provider === "linear") {
     return await prepareLinearIntegrationForRuntime(ctx, integration)
   }
@@ -25,6 +37,27 @@ export async function prepareIntegrationForRuntime(
   }
 
   return integration
+}
+
+async function prepareGitHubIntegrationForRuntime(
+  integration: CodexRuntimeInput["integration"],
+  target: RuntimeTarget
+) {
+  const credentials = requireGitHubCredentials(integration)
+  const tokenResult = await createGitHubInstallationToken(
+    credentials.installationId,
+    target.provider === "github" ? target.repositoryId : undefined
+  )
+  const expiresAt = Date.parse(tokenResult.expires_at)
+
+  return {
+    ...integration,
+    credentials: {
+      installationId: credentials.installationId,
+      token: tokenResult.token,
+      expiresAt: Number.isFinite(expiresAt) ? expiresAt : undefined,
+    },
+  }
 }
 
 async function prepareLinearIntegrationForRuntime(
