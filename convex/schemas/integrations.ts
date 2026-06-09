@@ -15,5 +15,6 @@ export const integrations = defineTable({
   createdAt: v.number(),
   data: v.optional(v.any()),
 })
+  .index("by_tenant_status", ["tenantId", "status"])
   .index("by_tenant_provider", ["tenantId", "provider"])
   .index("by_provider_account", ["provider", "accountId"])

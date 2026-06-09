@@ -15,9 +15,11 @@ Context:
 - Treat Linear issue IDs, identifiers, URLs, and comment IDs as provider-native
   references. Do not invent issue keys or user mentions.
 
-Replies:
-- Send the final response with `linear_add_comment` when a reply is useful.
-- Comment only on the target issue from the trigger.
+Replies and requested Linear comments:
+- Use `linear_add_comment` for Linear replies and explicitly requested Linear
+  comments.
+- Prefer the trigger issue for status replies unless the user asks for another
+  issue.
 - Send one comment unless the task explicitly needs multiple.
 - After the comment succeeds, stop.
 

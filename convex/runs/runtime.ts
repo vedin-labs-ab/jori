@@ -24,10 +24,6 @@ export const runMessageExecution = internalAction({
     }
 
     const target = requireMessageTarget(input.provider, input.message.data)
-    const integration = await prepareIntegrationForRuntime(
-      ctx,
-      input.integration
-    )
 
     await runExecution(
       ctx,
@@ -36,7 +32,11 @@ export const runMessageExecution = internalAction({
         provider: input.provider,
         execution: input.execution,
         trigger: input.trigger,
-        integration,
+        integration: input.integration,
+        integrations: await prepareIntegrationsForRuntime(
+          ctx,
+          input.integrations
+        ),
         message: input.message,
       },
       target
@@ -72,6 +72,10 @@ export const runScheduledExecution = internalAction({
         execution: input.execution,
         trigger: input.trigger,
         integration: input.integration,
+        integrations: await prepareIntegrationsForRuntime(
+          ctx,
+          input.integrations
+        ),
         schedule: input.schedule,
       },
       {
@@ -99,10 +103,8 @@ async function runExecution(
       convexSiteUrl: requireConvexSiteUrl(),
       executionToken,
     },
-    integration: {
-      integration: input.integration,
-      target,
-    },
+    integrations: input.integrations,
+    target,
   })
   let trace: string | undefined
   let executionError: string | undefined
@@ -145,6 +147,19 @@ async function runExecution(
     error: executionError,
     status,
   })
+}
+
+async function prepareIntegrationsForRuntime(
+  ctx: ActionCtx,
+  integrations: CodexRuntimeInput["integrations"]
+) {
+  const prepared: CodexRuntimeInput["integrations"] = []
+
+  for (const integration of integrations) {
+    prepared.push(await prepareIntegrationForRuntime(ctx, integration))
+  }
+
+  return prepared
 }
 
 async function finishExecutionWithError(

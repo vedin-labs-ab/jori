@@ -13,6 +13,10 @@ Message:
 Context:
 - Treat the triggering message as the starting point, not necessarily the whole
   request.
+- Use the target above as the default place to communicate with the caller. It
+  does not limit which available tools you may use to complete the request.
+- When work happens somewhere else, send a concise status back to this target
+  when it helps the caller.
 - For non-trivial work, first inspect adjacent conversation context when it may
   change what should be done.
 - Look for relevant details in the surrounding thread, nearby channel messages,

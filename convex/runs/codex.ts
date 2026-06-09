@@ -7,6 +7,7 @@ export type SlackRuntimeInput = {
   execution: Doc<"executions">
   trigger: Doc<"triggers">
   integration: Doc<"integrations">
+  integrations: Doc<"integrations">[]
   message: Doc<"messages">
 }
 
@@ -16,6 +17,7 @@ export type LinearRuntimeInput = {
   execution: Doc<"executions">
   trigger: Doc<"triggers">
   integration: Doc<"integrations">
+  integrations: Doc<"integrations">[]
   message: Doc<"messages">
 }
 
@@ -25,6 +27,7 @@ export type MicrosoftRuntimeInput = {
   execution: Doc<"executions">
   trigger: Doc<"triggers">
   integration: Doc<"integrations">
+  integrations: Doc<"integrations">[]
   message: Doc<"messages">
 }
 
@@ -33,6 +36,7 @@ export type ScheduledRuntimeInput = {
   execution: Doc<"executions">
   trigger: Doc<"triggers">
   integration: Doc<"integrations">
+  integrations: Doc<"integrations">[]
   schedule: Doc<"schedules">
 }
 

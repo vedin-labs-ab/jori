@@ -47,13 +47,13 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 const accessToken = requiredEnv("MILO_LINEAR_ACCESS_TOKEN");
-const allowedIssueId = requiredEnv("MILO_LINEAR_ALLOWED_ISSUE_ID");
+const defaultIssueId = process.env.MILO_LINEAR_DEFAULT_ISSUE_ID;
 const linearGraphqlUrl = ${JSON.stringify(linearGraphqlUrl)};
 
 const tools = [
   {
     name: "linear_get_issue",
-    description: "Read the Linear issue that triggered this run, including recent comments.",
+    description: "Read a Linear issue by ID, including recent comments. Defaults to the trigger issue when this run came from Linear.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -64,7 +64,7 @@ const tools = [
   },
   {
     name: "linear_list_comments",
-    description: "Read recent comments from the Linear issue that triggered this run.",
+    description: "Read recent comments from a Linear issue by ID. Defaults to the trigger issue when this run came from Linear.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -76,7 +76,7 @@ const tools = [
   },
   {
     name: "linear_add_comment",
-    description: "Add a comment to the Linear issue that triggered this run.",
+    description: "Add a comment to a Linear issue by ID. Defaults to the trigger issue when this run came from Linear.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -141,13 +141,10 @@ async function callTool(toolName, args) {
 }
 
 function getIssueId(args) {
-  const issueId = args.issueId ?? allowedIssueId;
+  const issueId = args.issueId ?? defaultIssueId;
 
-  if (issueId !== allowedIssueId) {
-    throw new McpError(
-      ErrorCode.InvalidParams,
-      "This run may only access the Linear issue that triggered it",
-    );
+  if (typeof issueId !== "string" || issueId === "") {
+    throw new McpError(ErrorCode.InvalidParams, "Issue ID is required");
   }
 
   return issueId;

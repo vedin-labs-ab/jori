@@ -73,10 +73,8 @@ export function assembleToolsForRun(args: {
     convexSiteUrl: string
     executionToken: string
   }
-  integration?: {
-    integration: Doc<"integrations">
-    target: RuntimeTarget
-  }
+  integrations: Doc<"integrations">[]
+  target: RuntimeTarget
 }): ToolBundle {
   const bundles = [
     createMiloToolBundle({
@@ -85,39 +83,39 @@ export function assembleToolsForRun(args: {
     }),
   ]
 
-  if (args.integration?.target.provider === "linear") {
-    const credentials = requireLinearCredentials(args.integration.integration)
+  for (const integration of args.integrations) {
+    if (integration.provider === "linear") {
+      const credentials = requireLinearCredentials(integration)
 
-    bundles.push(
-      createLinearToolBundle({
-        credentials,
-        issueId: args.integration.target.issueId,
-      })
-    )
-  }
+      bundles.push(
+        createLinearToolBundle({
+          credentials,
+          defaultIssueId:
+            args.target.provider === "linear" ? args.target.issueId : undefined,
+        })
+      )
+    }
 
-  if (args.integration?.target.provider === "slack") {
-    const credentials = requireSlackCredentials(args.integration.integration)
+    if (integration.provider === "slack") {
+      const credentials = requireSlackCredentials(integration)
 
-    bundles.push(
-      createSlackToolBundle({
-        credentials,
-        channelId: args.integration.target.channelId,
-      })
-    )
-  }
+      bundles.push(
+        createSlackToolBundle({
+          credentials,
+        })
+      )
+    }
 
-  if (args.integration?.target.provider === "microsoft") {
-    const credentials = requireMicrosoftCredentials(
-      args.integration.integration
-    )
+    if (integration.provider === "microsoft") {
+      const credentials = requireMicrosoftCredentials(integration)
 
-    bundles.push(
-      createMicrosoftToolBundle({
-        credentials,
-        target: args.integration.target,
-      })
-    )
+      bundles.push(
+        createMicrosoftToolBundle({
+          credentials,
+          target: args.target.provider === "microsoft" ? args.target : {},
+        })
+      )
+    }
   }
 
   return {
@@ -129,7 +127,7 @@ export function assembleToolsForRun(args: {
 
 function createMicrosoftToolBundle(args: {
   credentials: MicrosoftCredentials
-  target: Extract<RuntimeTarget, { provider: "microsoft" }>
+  target: Partial<Extract<RuntimeTarget, { provider: "microsoft" }>>
 }): ToolBundle {
   return {
     mcpServers: [
@@ -186,7 +184,7 @@ function createMiloToolBundle(args: {
 
 function createLinearToolBundle(args: {
   credentials: LinearCredentials
-  issueId: string
+  defaultIssueId?: string
 }): ToolBundle {
   return {
     mcpServers: [
@@ -196,7 +194,9 @@ function createLinearToolBundle(args: {
         args: ["/tmp/milo-workspace/milo-linear-mcp.mjs"],
         env: {
           MILO_LINEAR_ACCESS_TOKEN: args.credentials.accessToken,
-          MILO_LINEAR_ALLOWED_ISSUE_ID: args.issueId,
+          ...(args.defaultIssueId === undefined
+            ? {}
+            : { MILO_LINEAR_DEFAULT_ISSUE_ID: args.defaultIssueId }),
         },
       },
     ],
@@ -217,7 +217,6 @@ function createLinearToolBundle(args: {
 
 function createSlackToolBundle(args: {
   credentials: SlackCredentials
-  channelId: string
 }): ToolBundle {
   return {
     mcpServers: [
@@ -226,7 +225,6 @@ function createSlackToolBundle(args: {
         command: "node",
         args: ["/tmp/milo-workspace/milo-slack-mcp-proxy.mjs"],
         env: {
-          MILO_SLACK_ALLOWED_CHANNEL_ID: args.channelId,
           MILO_SLACK_BOT_TOKEN: args.credentials.bot,
           MILO_SLACK_USER_TOKEN: args.credentials.user,
         },

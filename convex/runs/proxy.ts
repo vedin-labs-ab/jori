@@ -22,8 +22,6 @@ const contextTools = [
   "users_search",
 ].join(",");
 
-const allowedChannelId = requiredEnv("MILO_SLACK_ALLOWED_CHANNEL_ID");
-
 const upstreams = [
   await createUpstream("context", ["--transport", "stdio", "--no-cache", "--enabled-tools", contextTools], {
     SLACK_MCP_XOXP_TOKEN: requiredEnv("MILO_SLACK_USER_TOKEN"),
@@ -32,7 +30,7 @@ const upstreams = [
   }),
   await createUpstream("reply", ["--transport", "stdio", "--no-cache", "--enabled-tools", "conversations_add_message"], {
     SLACK_MCP_XOXB_TOKEN: requiredEnv("MILO_SLACK_BOT_TOKEN"),
-    SLACK_MCP_ADD_MESSAGE_TOOL: allowedChannelId,
+    SLACK_MCP_ADD_MESSAGE_TOOL: "true",
     SLACK_MCP_ENABLED_TOOLS: "conversations_add_message",
     SLACK_MCP_LOG_LEVEL: "error",
   }),

@@ -13,9 +13,11 @@ Context:
 - Use ID-based user and channel mentions when available. Do not rely on raw
   `@name` or `#channel` parsing.
 
-Replies:
-- Send the final response with `conversations_add_message`.
-- Post only to the target from the trigger.
+Replies and requested Slack posts:
+- Use `conversations_add_message` for Slack replies and explicitly requested
+  Slack posts.
+- Prefer the trigger target for status replies unless the user asks for another
+  channel or thread.
 - Send one message unless the task explicitly needs multiple.
 - After the reply succeeds, stop.
 
