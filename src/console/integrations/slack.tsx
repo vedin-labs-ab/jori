@@ -1,9 +1,20 @@
 import { useMutation, useQuery } from "convex/react"
-import { MessageSquare } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
+import { type ToolPermissionController } from "../permissions/controller"
 import { IntegrationConnection } from "./card"
 
-export function SlackConnection({ tenantId }: { tenantId: string }) {
+const slackLogo = {
+  alt: "Slack logo",
+  src: "https://svgl.app/library/slack.svg",
+}
+
+export function SlackConnection({
+  permissions,
+  tenantId,
+}: {
+  permissions: ToolPermissionController
+  tenantId: string
+}) {
   const createInstallState = useMutation(
     api.providers.slack.install.createInstallState
   )
@@ -14,7 +25,6 @@ export function SlackConnection({ tenantId }: { tenantId: string }) {
       action="Connect Slack"
       connectError="Could not start Slack install."
       createInstallState={createInstallState}
-      description="Connect the Slack workspace that should trigger Milo."
       detail={
         status?.status === "active"
           ? "Milo can receive signed Slack events, search context, and post thread replies as Milo."
@@ -25,9 +35,11 @@ export function SlackConnection({ tenantId }: { tenantId: string }) {
           ? "Checking Slack"
           : (status?.teamName ?? status?.accountId ?? "No workspace connected")
       }
-      icon={<MessageSquare className="size-4" />}
       installPath="/slack/install"
       loading="Connecting Slack"
+      logo={slackLogo}
+      permissions={permissions}
+      provider="slack"
       status={status?.status}
       tenantId={tenantId}
       title="Slack"

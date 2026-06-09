@@ -22,7 +22,8 @@ import {
 } from "./integrations/microsoft"
 import { SlackConnection } from "./integrations/slack"
 import { LoadingMessage } from "./loading"
-import { PermissionsCard } from "./permissions"
+import { NativePermissionsCard } from "./permissions"
+import { useToolPermissions } from "./permissions/controller"
 import { ConsoleHeader } from "./shell"
 import { SkillsCard } from "./skills"
 
@@ -129,17 +130,40 @@ function SignedInView() {
     )
   }
 
+  return <OrganizationConsole organization={organization} />
+}
+
+type ActiveOrganization = NonNullable<
+  ReturnType<typeof useOrganization>["organization"]
+>
+
+function OrganizationConsole({
+  organization,
+}: {
+  organization: ActiveOrganization
+}) {
+  const permissions = useToolPermissions(organization.id)
+
   return (
     <section className="grid gap-4 md:grid-cols-2">
       <OrganizationCard organization={organization} />
-      <SlackConnection tenantId={organization.id} />
-      <LinearConnection tenantId={organization.id} />
-      <GitHubConnection tenantId={organization.id} />
-      <GmailConnection tenantId={organization.id} />
-      <GoogleCalendarConnection tenantId={organization.id} />
-      <MicrosoftEmailConnection tenantId={organization.id} />
-      <MicrosoftCalendarConnection tenantId={organization.id} />
-      <PermissionsCard tenantId={organization.id} />
+      <SlackConnection permissions={permissions} tenantId={organization.id} />
+      <LinearConnection permissions={permissions} tenantId={organization.id} />
+      <GitHubConnection permissions={permissions} tenantId={organization.id} />
+      <GmailConnection permissions={permissions} tenantId={organization.id} />
+      <GoogleCalendarConnection
+        permissions={permissions}
+        tenantId={organization.id}
+      />
+      <MicrosoftEmailConnection
+        permissions={permissions}
+        tenantId={organization.id}
+      />
+      <MicrosoftCalendarConnection
+        permissions={permissions}
+        tenantId={organization.id}
+      />
+      <NativePermissionsCard controller={permissions} />
       <SkillsCard tenantId={organization.id} />
     </section>
   )

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "convex/react"
-import { CalendarDays, Mail } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
+import { type ToolPermissionController } from "../permissions/controller"
 import { AccountConnection, type AccountConnectionConfig } from "./account"
 
 const emailConfig = {
@@ -8,14 +8,16 @@ const emailConfig = {
   connectedDetail:
     "User-scoped. Milo can read, draft, edit, and send Outlook mail from this account when explicitly requested.",
   connectError: "Could not start Microsoft Email install.",
-  description:
-    "Connect the Outlook account Milo can use for email context and replies.",
   emptyDetail:
     "Connect your Outlook account. This connection is scoped to you, not the whole tenant.",
-  icon: <Mail className="size-4" />,
   installPath: "/microsoft-email/install",
-  label: "Microsoft Email",
+  label: "Outlook Mail",
   loading: "Connecting Email",
+  logo: {
+    alt: "Microsoft Outlook logo",
+    src: "https://svgl.app/library/microsoft-outlook.svg",
+  },
+  provider: "microsoftEmail",
 } satisfies AccountConnectionConfig
 
 const calendarConfig = {
@@ -23,17 +25,25 @@ const calendarConfig = {
   connectedDetail:
     "User-scoped. Milo can read, create, and update this account's Microsoft calendar events when explicitly requested.",
   connectError: "Could not start Microsoft Calendar install.",
-  description:
-    "Connect the Microsoft Calendar account Milo can use for scheduling work.",
   emptyDetail:
     "Connect your Microsoft Calendar account. This connection is scoped to you, not the whole tenant.",
-  icon: <CalendarDays className="size-4" />,
   installPath: "/microsoft-calendar/install",
   label: "Microsoft Calendar",
   loading: "Connecting Calendar",
+  logo: {
+    alt: "Microsoft logo",
+    src: "https://svgl.app/library/microsoft.svg",
+  },
+  provider: "microsoftCalendar",
 } satisfies AccountConnectionConfig
 
-export function MicrosoftEmailConnection({ tenantId }: { tenantId: string }) {
+export function MicrosoftEmailConnection({
+  permissions,
+  tenantId,
+}: {
+  permissions: ToolPermissionController
+  tenantId: string
+}) {
   const createInstallState = useMutation(
     api.providers.microsoft.install.createMicrosoftEmailInstallState
   )
@@ -45,6 +55,7 @@ export function MicrosoftEmailConnection({ tenantId }: { tenantId: string }) {
     <AccountConnection
       config={emailConfig}
       createInstallState={createInstallState}
+      permissions={permissions}
       status={status}
       tenantId={tenantId}
     />
@@ -52,8 +63,10 @@ export function MicrosoftEmailConnection({ tenantId }: { tenantId: string }) {
 }
 
 export function MicrosoftCalendarConnection({
+  permissions,
   tenantId,
 }: {
+  permissions: ToolPermissionController
   tenantId: string
 }) {
   const createInstallState = useMutation(
@@ -67,6 +80,7 @@ export function MicrosoftCalendarConnection({
     <AccountConnection
       config={calendarConfig}
       createInstallState={createInstallState}
+      permissions={permissions}
       status={status}
       tenantId={tenantId}
     />

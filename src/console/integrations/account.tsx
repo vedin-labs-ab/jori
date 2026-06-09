@@ -1,17 +1,24 @@
-import { type ReactNode } from "react"
-import { type ConnectionStatus, IntegrationConnection } from "./card"
+import {
+  type ToolPermissionController,
+  type ToolProvider,
+} from "../permissions/controller"
+import {
+  type ConnectionStatus,
+  IntegrationConnection,
+  type IntegrationLogo,
+} from "./card"
 import { type CreateInstallState } from "./install"
 
 export type AccountConnectionConfig = {
   action: string
   connectedDetail: string
   connectError: string
-  description: string
   emptyDetail: string
-  icon: ReactNode
   installPath: string
   label: string
   loading: string
+  logo: IntegrationLogo
+  provider: Exclude<ToolProvider, "milo">
 }
 
 type AccountStatus = {
@@ -24,11 +31,13 @@ type AccountStatus = {
 export function AccountConnection({
   config,
   createInstallState,
+  permissions,
   status,
   tenantId,
 }: {
   config: AccountConnectionConfig
   createInstallState: CreateInstallState
+  permissions: ToolPermissionController
   status: AccountStatus | undefined
   tenantId: string
 }) {
@@ -37,16 +46,17 @@ export function AccountConnection({
       action={config.action}
       connectError={config.connectError}
       createInstallState={createInstallState}
-      description={config.description}
       detail={
         status?.status === "active"
           ? config.connectedDetail
           : config.emptyDetail
       }
       headline={getAccountHeadline(status, config.label)}
-      icon={config.icon}
       installPath={config.installPath}
       loading={config.loading}
+      logo={config.logo}
+      permissions={permissions}
+      provider={config.provider}
       status={status?.status}
       tenantId={tenantId}
       title={config.label}

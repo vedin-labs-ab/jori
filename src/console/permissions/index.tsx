@@ -1,6 +1,4 @@
-import { useMutation, useQuery } from "convex/react"
 import { ShieldCheck } from "lucide-react"
-import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -17,41 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { api } from "../../../convex/_generated/api"
-import { readErrorMessage } from "../error"
 import { LoadingMessage } from "../loading"
-
-type PermissionMode = "allowed" | "prompted" | "blocked"
-type ToolAccess = "read" | "write"
-
-type ToolPermission = {
-  tool: string
-  provider: string
-  label: string
-  description: string
-  access: ToolAccess
-  mode: PermissionMode
-  overrideMode: PermissionMode | null
-}
-
-const providerLabels: Record<string, string> = {
-  milo: "Milo",
-  slack: "Slack",
-  linear: "Linear",
-  github: "GitHub",
-  gmail: "Gmail",
-  googleCalendar: "Google Calendar",
-  microsoftEmail: "Outlook Mail",
-  microsoftCalendar: "Microsoft Calendar",
-}
+import {
+  type PermissionMode,
+  type ToolAccess,
+  type ToolPermission,
+  type ToolPermissionController,
+  type ToolProvider,
+} from "./controller"
 
 const modeLabels: Record<PermissionMode, string> = {
   allowed: "Allowed",
@@ -64,62 +35,68 @@ const modeOptions: Record<ToolAccess, PermissionMode[]> = {
   write: ["allowed", "prompted", "blocked"],
 }
 
-export function PermissionsCard({ tenantId }: { tenantId: string }) {
-  const permissions = useQuery(api.permissions.tools.list, { tenantId })
-  const setPermission = useMutation(api.permissions.tools.set)
-  const [pendingTool, setPendingTool] = useState<string>()
-  const [error, setError] = useState<string>()
+export function IntegrationPermissions({
+  controller,
+  provider,
+}: {
+  controller: ToolPermissionController
+  provider: Exclude<ToolProvider, "milo">
+}) {
+  return (
+    <PermissionSection
+      controller={controller}
+      emptyLabel="No provider permissions are defined yet."
+      provider={provider}
+      title="Permissions"
+    />
+  )
+}
 
-  async function updatePermission(tool: string, mode: PermissionMode) {
-    setPendingTool(tool)
-    setError(undefined)
-
-    try {
-      await setPermission({ tenantId, tool, mode })
-    } catch (updateError) {
-      setError(readErrorMessage(updateError, "Could not update permission."))
-    } finally {
-      setPendingTool(undefined)
-    }
-  }
-
+export function NativePermissionsCard({
+  controller,
+}: {
+  controller: ToolPermissionController
+}) {
   return (
     <Card className="md:col-span-2">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ShieldCheck className="size-4" />
-          Permissions
+          Milo tools
         </CardTitle>
         <CardDescription>
-          Control which tools Milo can use for this organization.
+          Control built-in scheduling permissions that are not tied to an
+          external integration.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        <PermissionError error={error} />
-        <PermissionContent
-          permissions={permissions}
-          pendingTool={pendingTool}
-          onUpdate={updatePermission}
+      <CardContent>
+        <PermissionSection
+          controller={controller}
+          emptyLabel="No native tool permissions are defined yet."
+          provider="milo"
+          title="Permissions"
         />
       </CardContent>
     </Card>
   )
 }
 
-function PermissionContent({
-  permissions,
-  pendingTool,
-  onUpdate,
+function PermissionSection({
+  controller,
+  emptyLabel,
+  provider,
+  title,
 }: {
-  permissions: ToolPermission[] | null | undefined
-  pendingTool: string | undefined
-  onUpdate: (tool: string, mode: PermissionMode) => void
+  controller: ToolPermissionController
+  emptyLabel: string
+  provider: ToolProvider
+  title: string
 }) {
-  if (permissions === undefined) {
+  if (controller.permissions === undefined) {
     return <LoadingMessage label="Loading permissions" />
   }
 
-  if (permissions === null) {
+  if (controller.permissions === null) {
     return (
       <Alert variant="destructive">
         <AlertTitle>Permission access unavailable</AlertTitle>
@@ -130,78 +107,116 @@ function PermissionContent({
     )
   }
 
+  const permissions = controller.getProviderPermissions(provider)
+
+  if (permissions.length === 0) {
+    return <p className="text-xs text-muted-foreground">{emptyLabel}</p>
+  }
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Provider</TableHead>
-          <TableHead>Tool</TableHead>
-          <TableHead>Access</TableHead>
-          <TableHead>Mode</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
+    <section className="grid gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 font-medium text-sm">
+          <ShieldCheck className="size-4 text-muted-foreground" />
+          {title}
+        </div>
+        <Badge variant="outline">{permissions.length} tools</Badge>
+      </div>
+      <ProviderPermissionError
+        error={controller.error}
+        permissions={permissions}
+      />
+      <div className="divide-y divide-border/80">
         {permissions.map((permission) => (
-          <TableRow key={permission.tool}>
-            <TableCell>{providerLabels[permission.provider]}</TableCell>
-            <TableCell className="whitespace-normal">
-              <div className="grid gap-1">
-                <span className="font-medium">{permission.label}</span>
-                <span className="text-muted-foreground">
-                  {permission.description}
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline">{permission.access}</Badge>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Select
-                  value={permission.mode}
-                  onValueChange={(mode) =>
-                    onUpdate(permission.tool, mode as PermissionMode)
-                  }
-                  disabled={pendingTool === permission.tool}
-                >
-                  <SelectTrigger aria-label={`${permission.label} permission`}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modeOptions[permission.access].map((mode) => (
-                      <SelectItem key={mode} value={mode}>
-                        {modeLabels[mode]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <DefaultBadge permission={permission} />
-              </div>
-            </TableCell>
-          </TableRow>
+          <PermissionRow
+            key={permission.tool}
+            onUpdate={controller.updatePermission}
+            pendingTool={controller.pendingTool}
+            permission={permission}
+          />
         ))}
-      </TableBody>
-    </Table>
+      </div>
+    </section>
   )
 }
 
-function DefaultBadge({ permission }: { permission: ToolPermission }) {
-  if (permission.overrideMode === null) {
-    return <Badge variant="secondary">Default</Badge>
-  }
-
-  return <Badge variant="outline">Override</Badge>
+function PermissionRow({
+  onUpdate,
+  pendingTool,
+  permission,
+}: {
+  onUpdate: (tool: string, mode: PermissionMode) => void
+  pendingTool: string | undefined
+  permission: ToolPermission
+}) {
+  return (
+    <div className="grid gap-3 py-3 first:pt-0 last:pb-0 sm:grid-cols-[minmax(8rem,1fr)_minmax(12rem,1.6fr)_auto_auto] sm:items-center">
+      <div className="grid gap-0.5">
+        <div className="font-medium text-sm">{permission.label}</div>
+        <DefaultLabel permission={permission} />
+      </div>
+      <div className="text-xs text-muted-foreground">
+        {permission.description}
+      </div>
+      <Badge
+        className="h-6 w-fit justify-self-start rounded-md px-2.5 text-xs"
+        variant="outline"
+      >
+        {permission.access}
+      </Badge>
+      <Select
+        value={permission.mode}
+        onValueChange={(mode) =>
+          onUpdate(permission.tool, mode as PermissionMode)
+        }
+        disabled={pendingTool === permission.tool}
+      >
+        <SelectTrigger
+          aria-label={`${permission.label} permission`}
+          className="w-28 justify-self-start sm:justify-self-end"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {modeOptions[permission.access].map((mode) => (
+            <SelectItem key={mode} value={mode}>
+              {modeLabels[mode]}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
 }
 
-function PermissionError({ error }: { error: string | undefined }) {
-  if (error === undefined) {
+function DefaultLabel({ permission }: { permission: ToolPermission }) {
+  if (permission.overrideMode !== null) {
+    return (
+      <span className="text-[0.6875rem] text-muted-foreground">Custom</span>
+    )
+  }
+
+  return <span className="text-[0.6875rem] text-muted-foreground">Default</span>
+}
+
+function ProviderPermissionError({
+  error,
+  permissions,
+}: {
+  error: ToolPermissionController["error"]
+  permissions: ToolPermission[]
+}) {
+  if (
+    error === undefined ||
+    !permissions.some((permission) => permission.tool === error.tool)
+  ) {
     return null
   }
 
   return (
     <Alert variant="destructive">
       <AlertTitle>Permission update failed</AlertTitle>
-      <AlertDescription>{error}</AlertDescription>
+      <AlertDescription>{error.message}</AlertDescription>
     </Alert>
   )
 }

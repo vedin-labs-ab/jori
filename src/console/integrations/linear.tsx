@@ -1,9 +1,20 @@
 import { useMutation, useQuery } from "convex/react"
-import { GitPullRequestArrow } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
+import { type ToolPermissionController } from "../permissions/controller"
 import { IntegrationConnection } from "./card"
 
-export function LinearConnection({ tenantId }: { tenantId: string }) {
+const linearLogo = {
+  alt: "Linear logo",
+  src: "https://svgl.app/library/linear.svg",
+}
+
+export function LinearConnection({
+  permissions,
+  tenantId,
+}: {
+  permissions: ToolPermissionController
+  tenantId: string
+}) {
   const createInstallState = useMutation(
     api.providers.linear.install.createInstallState
   )
@@ -16,12 +27,13 @@ export function LinearConnection({ tenantId }: { tenantId: string }) {
       action="Connect Linear"
       connectError="Could not start Linear install."
       createInstallState={createInstallState}
-      description="Connect the Linear workspace Milo should watch."
       detail={getLinearDetail(status?.status)}
       headline={getLinearHeadline(status)}
-      icon={<GitPullRequestArrow className="size-4" />}
       installPath="/linear/install"
       loading="Connecting Linear"
+      logo={linearLogo}
+      permissions={permissions}
+      provider="linear"
       status={status?.status}
       tenantId={tenantId}
       title="Linear"

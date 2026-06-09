@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "convex/react"
-import { CalendarDays, Mail } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
+import { type ToolPermissionController } from "../permissions/controller"
 import { AccountConnection, type AccountConnectionConfig } from "./account"
 
 const gmailConfig = {
@@ -8,14 +8,16 @@ const gmailConfig = {
   connectedDetail:
     "User-scoped. Milo can read Gmail context and reply from this account when explicitly requested.",
   connectError: "Could not start Email install.",
-  description:
-    "Connect the Gmail account Milo can use for email context and replies.",
   emptyDetail:
     "Connect your Gmail account. This connection is scoped to you, not the whole tenant.",
-  icon: <Mail className="size-4" />,
   installPath: "/gmail/install",
-  label: "Email",
+  label: "Gmail",
   loading: "Connecting Email",
+  logo: {
+    alt: "Gmail logo",
+    src: "https://svgl.app/library/gmail.svg",
+  },
+  provider: "gmail",
 } satisfies AccountConnectionConfig
 
 const calendarConfig = {
@@ -23,17 +25,25 @@ const calendarConfig = {
   connectedDetail:
     "User-scoped. Milo can read, create, and update this account's calendar events when explicitly requested.",
   connectError: "Could not start Calendar install.",
-  description:
-    "Connect the Google Calendar account Milo can use for scheduling work.",
   emptyDetail:
     "Connect your Google Calendar account. This connection is scoped to you, not the whole tenant.",
-  icon: <CalendarDays className="size-4" />,
   installPath: "/google-calendar/install",
-  label: "Calendar",
+  label: "Google Calendar",
   loading: "Connecting Calendar",
+  logo: {
+    alt: "Google Calendar logo",
+    src: "https://svgl.app/library/google-calendar.svg",
+  },
+  provider: "googleCalendar",
 } satisfies AccountConnectionConfig
 
-export function GmailConnection({ tenantId }: { tenantId: string }) {
+export function GmailConnection({
+  permissions,
+  tenantId,
+}: {
+  permissions: ToolPermissionController
+  tenantId: string
+}) {
   const createInstallState = useMutation(
     api.providers.google.install.createGmailInstallState
   )
@@ -45,13 +55,20 @@ export function GmailConnection({ tenantId }: { tenantId: string }) {
     <AccountConnection
       config={gmailConfig}
       createInstallState={createInstallState}
+      permissions={permissions}
       status={status}
       tenantId={tenantId}
     />
   )
 }
 
-export function GoogleCalendarConnection({ tenantId }: { tenantId: string }) {
+export function GoogleCalendarConnection({
+  permissions,
+  tenantId,
+}: {
+  permissions: ToolPermissionController
+  tenantId: string
+}) {
   const createInstallState = useMutation(
     api.providers.google.install.createGoogleCalendarInstallState
   )
@@ -63,6 +80,7 @@ export function GoogleCalendarConnection({ tenantId }: { tenantId: string }) {
     <AccountConnection
       config={calendarConfig}
       createInstallState={createInstallState}
+      permissions={permissions}
       status={status}
       tenantId={tenantId}
     />

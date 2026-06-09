@@ -1,9 +1,20 @@
 import { useMutation, useQuery } from "convex/react"
-import { GitBranch } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
+import { type ToolPermissionController } from "../permissions/controller"
 import { IntegrationConnection } from "./card"
 
-export function GitHubConnection({ tenantId }: { tenantId: string }) {
+const githubLogo = {
+  alt: "GitHub logo",
+  src: "https://svgl.app/library/github_light.svg",
+}
+
+export function GitHubConnection({
+  permissions,
+  tenantId,
+}: {
+  permissions: ToolPermissionController
+  tenantId: string
+}) {
   const createInstallState = useMutation(
     api.providers.github.install.createInstallState
   )
@@ -16,12 +27,13 @@ export function GitHubConnection({ tenantId }: { tenantId: string }) {
       action="Connect GitHub"
       connectError="Could not start GitHub install."
       createInstallState={createInstallState}
-      description="Connect the GitHub App installation Milo should watch."
       detail={getGitHubDetail(status?.status)}
       headline={getGitHubHeadline(status)}
-      icon={<GitBranch className="size-4" />}
       installPath="/github/install"
       loading="Connecting GitHub"
+      logo={githubLogo}
+      permissions={permissions}
+      provider="github"
       status={status?.status}
       tenantId={tenantId}
       title="GitHub"
