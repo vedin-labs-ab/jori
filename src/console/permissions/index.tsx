@@ -1,6 +1,8 @@
-import { ShieldCheck } from "lucide-react"
+import { ChevronDown, ShieldCheck } from "lucide-react"
+import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -9,12 +11,18 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { BrandIcon } from "@/shared/brand"
 import { LoadingMessage } from "../loading"
 import {
   type PermissionMode,
@@ -61,7 +69,9 @@ export function NativePermissionsCard({
     <Card className="md:col-span-2">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <ShieldCheck className="size-4" />
+          <span className="flex size-5 items-center justify-center rounded-md border bg-background">
+            <BrandIcon className="size-3.5" />
+          </span>
           Milo tools
         </CardTitle>
         <CardDescription>
@@ -92,6 +102,52 @@ function PermissionSection({
   provider: ToolProvider
   title: string
 }) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 font-medium text-sm">
+          <ShieldCheck className="size-4 text-muted-foreground" />
+          {title}
+        </div>
+        <CollapsibleTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-label={`${isOpen ? "Hide" : "Show"} ${title.toLowerCase()}`}
+          >
+            <ChevronDown
+              className={
+                isOpen
+                  ? "rotate-180 transition-transform"
+                  : "transition-transform"
+              }
+            />
+          </Button>
+        </CollapsibleTrigger>
+      </div>
+      <CollapsibleContent className="pt-3">
+        <PermissionContent
+          controller={controller}
+          emptyLabel={emptyLabel}
+          provider={provider}
+        />
+      </CollapsibleContent>
+    </Collapsible>
+  )
+}
+
+function PermissionContent({
+  controller,
+  emptyLabel,
+  provider,
+}: {
+  controller: ToolPermissionController
+  emptyLabel: string
+  provider: ToolProvider
+}) {
   if (controller.permissions === undefined) {
     return <LoadingMessage label="Loading permissions" />
   }
@@ -114,14 +170,7 @@ function PermissionSection({
   }
 
   return (
-    <section className="grid gap-3">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 font-medium text-sm">
-          <ShieldCheck className="size-4 text-muted-foreground" />
-          {title}
-        </div>
-        <Badge variant="outline">{permissions.length} tools</Badge>
-      </div>
+    <div className="grid gap-3">
       <ProviderPermissionError
         error={controller.error}
         permissions={permissions}
@@ -136,7 +185,7 @@ function PermissionSection({
           />
         ))}
       </div>
-    </section>
+    </div>
   )
 }
 
@@ -150,20 +199,19 @@ function PermissionRow({
   permission: ToolPermission
 }) {
   return (
-    <div className="grid gap-3 py-3 first:pt-0 last:pb-0 sm:grid-cols-[minmax(8rem,1fr)_minmax(12rem,1.6fr)_auto_auto] sm:items-center">
-      <div className="grid gap-0.5">
+    <div className="grid gap-3 py-3 first:pt-0 last:pb-0 sm:grid-cols-[minmax(9rem,1fr)_minmax(12rem,1.6fr)_auto] sm:items-center">
+      <div className="flex flex-wrap items-center gap-2">
         <div className="font-medium text-sm">{permission.label}</div>
-        <DefaultLabel permission={permission} />
+        <Badge
+          className="h-5 rounded-md px-2 text-[0.6875rem]"
+          variant="outline"
+        >
+          {permission.access}
+        </Badge>
       </div>
       <div className="text-xs text-muted-foreground">
         {permission.description}
       </div>
-      <Badge
-        className="h-6 w-fit justify-self-start rounded-md px-2.5 text-xs"
-        variant="outline"
-      >
-        {permission.access}
-      </Badge>
       <Select
         value={permission.mode}
         onValueChange={(mode) =>
@@ -187,16 +235,6 @@ function PermissionRow({
       </Select>
     </div>
   )
-}
-
-function DefaultLabel({ permission }: { permission: ToolPermission }) {
-  if (permission.overrideMode !== null) {
-    return (
-      <span className="text-[0.6875rem] text-muted-foreground">Custom</span>
-    )
-  }
-
-  return <span className="text-[0.6875rem] text-muted-foreground">Default</span>
 }
 
 function ProviderPermissionError({
