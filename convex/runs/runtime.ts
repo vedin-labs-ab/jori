@@ -3,6 +3,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
+import { resolveToolModes } from "../permissions/catalog"
 import { type CodexRuntimeInput } from "./codex"
 import { prepareIntegrationForRuntime } from "./integrations"
 import { assemblePrompt } from "./prompt"
@@ -103,15 +104,23 @@ async function runExecution(
   const skills = await ctx.runQuery(internal.skills.catalog.listForRuntime, {
     tenantId: input.execution.tenantId,
   })
-  const promptBundle = assemblePrompt(input, skills)
+  const permissionOverrides = await ctx.runQuery(
+    internal.permissions.tools.listForRuntime,
+    {
+      tenantId: input.execution.tenantId,
+    }
+  )
+  const toolModes = resolveToolModes(permissionOverrides)
   const toolBundle = assembleToolsForRun({
     milo: {
       convexSiteUrl: requireConvexSiteUrl(),
       executionToken,
     },
     integrations: input.integrations,
+    toolModes,
     target,
   })
+  const promptBundle = assemblePrompt(input, skills, toolBundle.promptedTools)
   let trace: string | undefined
   let executionError: string | undefined
   let status: "completed" | "failed" = "completed"

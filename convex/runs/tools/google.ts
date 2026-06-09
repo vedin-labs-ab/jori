@@ -1,12 +1,19 @@
 import { type GoogleCredentials } from "../../providers/google/credentials"
+import {
+  enabledToolsEnv,
+  getPromptedTools,
+  type ToolPermissionInput,
+} from "./policy"
 import { type ToolBundle } from "./types"
 
 type GoogleRuntimeSurface = "gmail" | "googleCalendar"
 
-export function createGmailToolBundle(args: {
-  accountEmail: string
-  credentials: GoogleCredentials
-}): ToolBundle {
+export function createGmailToolBundle(
+  args: {
+    accountEmail: string
+    credentials: GoogleCredentials
+  } & ToolPermissionInput
+): ToolBundle {
   return createGoogleToolBundle({
     ...args,
     name: "gmail",
@@ -15,9 +22,11 @@ export function createGmailToolBundle(args: {
   })
 }
 
-export function createGoogleCalendarToolBundle(args: {
-  credentials: GoogleCredentials
-}): ToolBundle {
+export function createGoogleCalendarToolBundle(
+  args: {
+    credentials: GoogleCredentials
+  } & ToolPermissionInput
+): ToolBundle {
   return createGoogleToolBundle({
     ...args,
     accountEmail: "",
@@ -27,13 +36,15 @@ export function createGoogleCalendarToolBundle(args: {
   })
 }
 
-function createGoogleToolBundle(args: {
-  accountEmail: string
-  credentials: GoogleCredentials
-  name: string
-  scriptPath: string
-  surface: GoogleRuntimeSurface
-}): ToolBundle {
+function createGoogleToolBundle(
+  args: {
+    accountEmail: string
+    credentials: GoogleCredentials
+    name: string
+    scriptPath: string
+    surface: GoogleRuntimeSurface
+  } & ToolPermissionInput
+): ToolBundle {
   return {
     mcpServers: [
       {
@@ -44,6 +55,7 @@ function createGoogleToolBundle(args: {
           MILO_GOOGLE_ACCESS_TOKEN: args.credentials.accessToken,
           MILO_GOOGLE_ACCOUNT_EMAIL: args.accountEmail,
           MILO_GOOGLE_SURFACE: args.surface,
+          MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
         },
       },
     ],
@@ -59,6 +71,7 @@ function createGoogleToolBundle(args: {
         credentials: args.credentials,
       },
     ],
+    promptedTools: getPromptedTools(args),
   }
 }
 
@@ -263,7 +276,7 @@ const calendarTools = [
   },
 ];
 
-const tools = googleSurface === "gmail" ? gmailTools : calendarTools;
+const tools = filterEnabledTools(googleSurface === "gmail" ? gmailTools : calendarTools);
 
 const server = new Server(
   { name: "milo-google-workspace", version: "0.0.0" },
@@ -608,5 +621,25 @@ function requiredEnv(name) {
     throw new Error("Missing " + name);
   }
   return value;
+}
+
+function filterEnabledTools(allTools) {
+  const enabledTools = readEnabledTools();
+
+  if (enabledTools === undefined) {
+    return allTools;
+  }
+
+  return allTools.filter((tool) => enabledTools.has(tool.name));
+}
+
+function readEnabledTools() {
+  const value = process.env.MILO_ENABLED_TOOLS;
+
+  if (value === undefined || value === "") {
+    return undefined;
+  }
+
+  return new Set(value.split(",").filter(Boolean));
 }
 `

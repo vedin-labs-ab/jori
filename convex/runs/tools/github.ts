@@ -1,4 +1,9 @@
 import { type GitHubCredentials } from "../../providers/github/credentials"
+import {
+  enabledToolsEnv,
+  getPromptedTools,
+  type ToolPermissionInput,
+} from "./policy"
 import { type ToolBundle } from "./types"
 
 export function createGitHubTokenPreflightCommand() {
@@ -9,15 +14,17 @@ export function createGitHubMcpScript() {
   return githubMcpScript
 }
 
-export function createGitHubToolBundle(args: {
-  credentials: GitHubCredentials
-  owner: string
-  repo: string
-  issueNumber?: number
-  pullNumber?: number
-  commentId: string
-  commentKind: string
-}): ToolBundle {
+export function createGitHubToolBundle(
+  args: {
+    credentials: GitHubCredentials
+    owner: string
+    repo: string
+    issueNumber?: number
+    pullNumber?: number
+    commentId: string
+    commentKind: string
+  } & ToolPermissionInput
+): ToolBundle {
   if (args.credentials.token === undefined) {
     throw new Error("Missing GitHub runtime token")
   }
@@ -36,6 +43,7 @@ export function createGitHubToolBundle(args: {
           MILO_GITHUB_PULL_NUMBER: String(args.pullNumber ?? ""),
           MILO_GITHUB_COMMENT_ID: args.commentId,
           MILO_GITHUB_COMMENT_KIND: args.commentKind,
+          MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
         },
       },
     ],
@@ -53,6 +61,7 @@ export function createGitHubToolBundle(args: {
         repo: args.repo,
       },
     ],
+    promptedTools: getPromptedTools(args),
   }
 }
 
@@ -119,7 +128,7 @@ const octokit = new Octokit({
   userAgent: "milo-github",
 });
 
-const tools = [
+const allTools = [
   {
     name: "github_get_trigger_context",
     description: "Read the GitHub issue, pull request, triggering comment, and adjacent comments for this run.",
@@ -168,6 +177,8 @@ const tools = [
     },
   },
 ];
+
+const tools = filterEnabledTools(allTools);
 
 const server = new Server(
   { name: "milo-github", version: "0.0.0" },
@@ -414,5 +425,25 @@ function requiredEnv(name) {
     throw new Error("Missing " + name);
   }
   return value;
+}
+
+function filterEnabledTools(allTools) {
+  const enabledTools = readEnabledTools();
+
+  if (enabledTools === undefined) {
+    return allTools;
+  }
+
+  return allTools.filter((tool) => enabledTools.has(tool.name));
+}
+
+function readEnabledTools() {
+  const value = process.env.MILO_ENABLED_TOOLS;
+
+  if (value === undefined || value === "") {
+    return undefined;
+  }
+
+  return new Set(value.split(",").filter(Boolean));
 }
 `

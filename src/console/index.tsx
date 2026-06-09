@@ -22,6 +22,7 @@ import {
   MicrosoftEmailConnection,
 } from "./integrations/microsoft"
 import { SlackConnection } from "./integrations/slack"
+import { PermissionsCard } from "./permissions"
 import { ConsoleHeader } from "./shell"
 import { SkillsCard } from "./skills"
 
@@ -153,6 +154,7 @@ function SignedInView() {
       <GoogleCalendarConnection tenantId={organization.id} />
       <MicrosoftEmailConnection tenantId={organization.id} />
       <MicrosoftCalendarConnection tenantId={organization.id} />
+      <PermissionsCard tenantId={organization.id} />
       <SkillsCard tenantId={organization.id} />
     </section>
   )

@@ -1,11 +1,18 @@
 import { type MicrosoftCredentials } from "../../providers/microsoft/credentials"
+import {
+  enabledToolsEnv,
+  getPromptedTools,
+  type ToolPermissionInput,
+} from "./policy"
 import { type ToolBundle } from "./types"
 
 type MicrosoftRuntimeSurface = "microsoftCalendar" | "microsoftEmail"
 
-export function createMicrosoftEmailToolBundle(args: {
-  credentials: MicrosoftCredentials
-}): ToolBundle {
+export function createMicrosoftEmailToolBundle(
+  args: {
+    credentials: MicrosoftCredentials
+  } & ToolPermissionInput
+): ToolBundle {
   return createMicrosoftToolBundle({
     ...args,
     name: "microsoftEmail",
@@ -14,9 +21,11 @@ export function createMicrosoftEmailToolBundle(args: {
   })
 }
 
-export function createMicrosoftCalendarToolBundle(args: {
-  credentials: MicrosoftCredentials
-}): ToolBundle {
+export function createMicrosoftCalendarToolBundle(
+  args: {
+    credentials: MicrosoftCredentials
+  } & ToolPermissionInput
+): ToolBundle {
   return createMicrosoftToolBundle({
     ...args,
     name: "microsoftCalendar",
@@ -25,12 +34,14 @@ export function createMicrosoftCalendarToolBundle(args: {
   })
 }
 
-function createMicrosoftToolBundle(args: {
-  credentials: MicrosoftCredentials
-  name: string
-  scriptPath: string
-  surface: MicrosoftRuntimeSurface
-}): ToolBundle {
+function createMicrosoftToolBundle(
+  args: {
+    credentials: MicrosoftCredentials
+    name: string
+    scriptPath: string
+    surface: MicrosoftRuntimeSurface
+  } & ToolPermissionInput
+): ToolBundle {
   return {
     mcpServers: [
       {
@@ -40,6 +51,7 @@ function createMicrosoftToolBundle(args: {
         env: {
           MILO_MICROSOFT_ACCESS_TOKEN: args.credentials.accessToken,
           MILO_MICROSOFT_SURFACE: args.surface,
+          MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
         },
       },
     ],
@@ -55,6 +67,7 @@ function createMicrosoftToolBundle(args: {
         credentials: args.credentials,
       },
     ],
+    promptedTools: getPromptedTools(args),
   }
 }
 
@@ -275,18 +288,22 @@ const calendarTools = [
   },
 ];
 
+const tools = filterEnabledTools(microsoftSurface === "microsoftEmail" ? emailTools : calendarTools);
+
 const server = new Server(
   { name: "milo-microsoft", version: "0.0.0" },
   { capabilities: { tools: {} } }
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return { tools: microsoftSurface === "microsoftEmail" ? emailTools : calendarTools };
-});
+server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools }));
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const toolName = request.params.name;
   const args = request.params.arguments ?? {};
+
+  if (!tools.some((tool) => tool.name === toolName)) {
+    throw new McpError(ErrorCode.InvalidParams, "Unknown Microsoft tool: " + toolName);
+  }
 
   if (microsoftSurface === "microsoftEmail") {
     return await handleEmailTool(toolName, args);
@@ -417,6 +434,26 @@ function requiredEnv(name) {
     throw new Error("Missing " + name);
   }
   return value;
+}
+
+function filterEnabledTools(allTools) {
+  const enabledTools = readEnabledTools();
+
+  if (enabledTools === undefined) {
+    return allTools;
+  }
+
+  return allTools.filter((tool) => enabledTools.has(tool.name));
+}
+
+function readEnabledTools() {
+  const value = process.env.MILO_ENABLED_TOOLS;
+
+  if (value === undefined || value === "") {
+    return undefined;
+  }
+
+  return new Set(value.split(",").filter(Boolean));
 }
 
 function requiredString(value, name) {

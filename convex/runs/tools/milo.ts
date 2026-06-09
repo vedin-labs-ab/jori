@@ -1,3 +1,40 @@
+import {
+  enabledToolsEnv,
+  getPromptedTools,
+  type ToolPermissionInput,
+} from "./policy"
+import { type ToolBundle } from "./types"
+
+export function createMiloToolBundle(
+  args: {
+    convexSiteUrl: string
+    executionToken: string
+  } & ToolPermissionInput
+): ToolBundle {
+  return {
+    mcpServers: [
+      {
+        name: "milo",
+        command: "node",
+        args: ["/tmp/milo-workspace/milo-mcp.mjs"],
+        env: {
+          MILO_CONVEX_SITE_URL: args.convexSiteUrl,
+          MILO_EXECUTION_TOKEN: args.executionToken,
+          MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
+        },
+      },
+    ],
+    sandboxFiles: [
+      {
+        path: "/tmp/milo-workspace/milo-mcp.mjs",
+        content: createMiloMcpScript(),
+      },
+    ],
+    preflights: [],
+    promptedTools: getPromptedTools(args),
+  }
+}
+
 export function createMiloMcpScript() {
   return miloMcpScript
 }
@@ -15,7 +52,7 @@ import {
 const convexSiteUrl = requiredEnv("MILO_CONVEX_SITE_URL");
 const executionToken = requiredEnv("MILO_EXECUTION_TOKEN");
 
-const tools = [
+const allTools = [
   {
     name: "add_schedule",
     description: "Create a Milo schedule. Use a one-shot UTC ISO timestamp or a recurring five-field UTC cron expression. The output target is required; ask the user for clarification before calling this tool if it is ambiguous.",
@@ -130,6 +167,8 @@ const tools = [
   },
 ];
 
+const tools = filterEnabledTools(allTools);
+
 const server = new Server(
   { name: "milo", version: "0.0.0" },
   { capabilities: { tools: {} } },
@@ -200,5 +239,25 @@ function requiredEnv(name) {
     throw new Error("Missing " + name);
   }
   return value;
+}
+
+function filterEnabledTools(allTools) {
+  const enabledTools = readEnabledTools();
+
+  if (enabledTools === undefined) {
+    return allTools;
+  }
+
+  return allTools.filter((tool) => enabledTools.has(tool.name));
+}
+
+function readEnabledTools() {
+  const value = process.env.MILO_ENABLED_TOOLS;
+
+  if (value === undefined || value === "") {
+    return undefined;
+  }
+
+  return new Set(value.split(",").filter(Boolean));
 }
 `

@@ -43,10 +43,15 @@ const upstreams = [
 
 const toolRoutes = new Map();
 const tools = [];
+const enabledTools = readEnabledTools();
 
 for (const upstream of upstreams) {
   const response = await upstream.client.listTools();
   for (const tool of response.tools) {
+    if (enabledTools !== undefined && !enabledTools.has(tool.name)) {
+      continue;
+    }
+
     if (toolRoutes.has(tool.name)) {
       throw new Error("Duplicate Slack MCP tool: " + tool.name);
     }
@@ -106,5 +111,15 @@ function requiredEnv(name) {
 
 function sanitizeCacheKey(value) {
   return value.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function readEnabledTools() {
+  const value = process.env.MILO_ENABLED_TOOLS;
+
+  if (value === undefined || value === "") {
+    return undefined;
+  }
+
+  return new Set(value.split(",").filter(Boolean));
 }
 `

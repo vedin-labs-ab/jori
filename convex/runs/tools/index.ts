@@ -1,22 +1,32 @@
 import { type Doc } from "../../_generated/dataModel"
+import {
+  getToolPermissionsByProvider,
+  type PermissionMode,
+  resolveToolMode,
+  type ToolProvider,
+} from "../../permissions/catalog"
 import { requireGitHubCredentials } from "../../providers/github/credentials"
 import { requireGoogleCredentials } from "../../providers/google/credentials"
-import {
-  type LinearCredentials,
-  requireLinearCredentials,
-} from "../../providers/linear/credentials"
+import { requireLinearCredentials } from "../../providers/linear/credentials"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
 import { createGitHubToolBundle } from "./github"
 import { createGmailToolBundle, createGoogleCalendarToolBundle } from "./google"
-import { createLinearProxyScript } from "./linear"
+import { createLinearToolBundle } from "./linear"
 import {
   createMicrosoftCalendarToolBundle,
   createMicrosoftEmailToolBundle,
 } from "./microsoft"
-import { createMiloMcpScript } from "./milo"
+import { createMiloToolBundle } from "./milo"
+import { type ToolPermissionInput } from "./policy"
 import { createSlackToolBundle } from "./slack"
 import { type RuntimeTarget, type ToolBundle } from "./types"
+
+type IntegrationBundleArgs = {
+  integration: Doc<"integrations">
+  target: RuntimeTarget
+  toolModes: ReadonlyMap<string, PermissionMode>
+}
 
 export type {
   McpServerConfig,
@@ -32,19 +42,28 @@ export function assembleToolsForRun(args: {
     executionToken: string
   }
   integrations: Doc<"integrations">[]
+  toolModes: ReadonlyMap<string, PermissionMode>
   target: RuntimeTarget
 }): ToolBundle {
-  const bundles = [
-    createMiloToolBundle({
-      convexSiteUrl: args.milo.convexSiteUrl,
-      executionToken: args.milo.executionToken,
-    }),
-  ]
+  const bundles: ToolBundle[] = []
+  const miloPermissions = getEnabledToolPermissions("milo", args.toolModes)
+
+  if (miloPermissions.length > 0) {
+    bundles.push(
+      createMiloToolBundle({
+        convexSiteUrl: args.milo.convexSiteUrl,
+        executionToken: args.milo.executionToken,
+        permissions: miloPermissions,
+        toolModes: args.toolModes,
+      })
+    )
+  }
 
   for (const integration of args.integrations) {
     const integrationBundle = createIntegrationToolBundle({
       integration,
       target: args.target,
+      toolModes: args.toolModes,
     })
 
     if (integrationBundle !== null) {
@@ -56,140 +75,139 @@ export function assembleToolsForRun(args: {
     mcpServers: bundles.flatMap((bundle) => bundle.mcpServers),
     sandboxFiles: bundles.flatMap((bundle) => bundle.sandboxFiles),
     preflights: bundles.flatMap((bundle) => bundle.preflights),
+    promptedTools: bundles.flatMap((bundle) => bundle.promptedTools),
   }
 }
 
-function createIntegrationToolBundle(args: {
-  integration: Doc<"integrations">
-  target: RuntimeTarget
-}) {
-  if (args.integration.provider === "linear") {
-    const credentials = requireLinearCredentials(args.integration)
+function createIntegrationToolBundle(args: IntegrationBundleArgs) {
+  const provider = getRuntimeToolProvider(args.integration.provider)
 
-    return createLinearToolBundle({
-      credentials,
-      defaultIssueId:
-        args.target.provider === "linear" ? args.target.issueId : undefined,
-    })
+  if (provider === null) {
+    return null
   }
 
+  const permissions = getEnabledToolPermissions(provider, args.toolModes)
+
+  if (permissions.length === 0) {
+    return null
+  }
+
+  const permissionInput: ToolPermissionInput = {
+    permissions,
+    toolModes: args.toolModes,
+  }
+
+  return createProviderToolBundle(args, permissionInput)
+}
+
+function createProviderToolBundle(
+  args: IntegrationBundleArgs,
+  permissionInput: ToolPermissionInput
+) {
+  switch (args.integration.provider) {
+    case "linear":
+      return createLinearIntegrationToolBundle(args, permissionInput)
+    case "github":
+      return createGitHubIntegrationToolBundle(args, permissionInput)
+    case "slack":
+      return createSlackIntegrationToolBundle(args, permissionInput)
+    case "gmail":
+      return createGmailIntegrationToolBundle(args, permissionInput)
+    case "googleCalendar":
+      return createGoogleCalendarToolBundle({
+        credentials: requireGoogleCredentials(args.integration),
+        ...permissionInput,
+      })
+    case "microsoftEmail":
+      return createMicrosoftEmailToolBundle({
+        credentials: requireMicrosoftCredentials(args.integration),
+        ...permissionInput,
+      })
+    case "microsoftCalendar":
+      return createMicrosoftCalendarToolBundle({
+        credentials: requireMicrosoftCredentials(args.integration),
+        ...permissionInput,
+      })
+    default:
+      return null
+  }
+}
+
+function createLinearIntegrationToolBundle(
+  args: IntegrationBundleArgs,
+  permissionInput: ToolPermissionInput
+) {
+  return createLinearToolBundle({
+    credentials: requireLinearCredentials(args.integration),
+    defaultIssueId:
+      args.target.provider === "linear" ? args.target.issueId : undefined,
+    ...permissionInput,
+  })
+}
+
+function createGitHubIntegrationToolBundle(
+  args: IntegrationBundleArgs,
+  permissionInput: ToolPermissionInput
+) {
+  if (args.target.provider !== "github") {
+    return null
+  }
+
+  return createGitHubToolBundle({
+    credentials: requireGitHubCredentials(args.integration),
+    owner: args.target.owner,
+    repo: args.target.repo,
+    issueNumber: args.target.issueNumber,
+    pullNumber: args.target.pullNumber,
+    commentId: args.target.commentId,
+    commentKind: args.target.commentKind,
+    ...permissionInput,
+  })
+}
+
+function createSlackIntegrationToolBundle(
+  args: IntegrationBundleArgs,
+  permissionInput: ToolPermissionInput
+) {
+  return createSlackToolBundle({
+    accountId: args.integration.accountId,
+    credentials: requireSlackCredentials(args.integration),
+    ...permissionInput,
+  })
+}
+
+function createGmailIntegrationToolBundle(
+  args: IntegrationBundleArgs,
+  permissionInput: ToolPermissionInput
+) {
+  return createGmailToolBundle({
+    accountEmail: args.integration.accountId,
+    credentials: requireGoogleCredentials(args.integration),
+    ...permissionInput,
+  })
+}
+
+function getEnabledToolPermissions(
+  provider: ToolProvider,
+  toolModes: ReadonlyMap<string, PermissionMode>
+) {
+  return getToolPermissionsByProvider(provider).filter(
+    (permission) => resolveToolMode(toolModes, permission.tool) !== "blocked"
+  )
+}
+
+function getRuntimeToolProvider(provider: string): ToolProvider | null {
   if (
-    args.integration.provider === "github" &&
-    args.target.provider === "github"
+    provider === "linear" ||
+    provider === "github" ||
+    provider === "slack" ||
+    provider === "gmail" ||
+    provider === "googleCalendar" ||
+    provider === "microsoftEmail" ||
+    provider === "microsoftCalendar"
   ) {
-    const credentials = requireGitHubCredentials(args.integration)
-
-    return createGitHubToolBundle({
-      credentials,
-      owner: args.target.owner,
-      repo: args.target.repo,
-      issueNumber: args.target.issueNumber,
-      pullNumber: args.target.pullNumber,
-      commentId: args.target.commentId,
-      commentKind: args.target.commentKind,
-    })
-  }
-
-  if (args.integration.provider === "slack") {
-    const credentials = requireSlackCredentials(args.integration)
-
-    return createSlackToolBundle({
-      accountId: args.integration.accountId,
-      credentials,
-    })
-  }
-
-  if (args.integration.provider === "gmail") {
-    const credentials = requireGoogleCredentials(args.integration)
-
-    return createGmailToolBundle({
-      accountEmail: args.integration.accountId,
-      credentials,
-    })
-  }
-
-  if (args.integration.provider === "googleCalendar") {
-    const credentials = requireGoogleCredentials(args.integration)
-
-    return createGoogleCalendarToolBundle({
-      credentials,
-    })
-  }
-
-  if (args.integration.provider === "microsoftEmail") {
-    const credentials = requireMicrosoftCredentials(args.integration)
-
-    return createMicrosoftEmailToolBundle({
-      credentials,
-    })
-  }
-
-  if (args.integration.provider === "microsoftCalendar") {
-    const credentials = requireMicrosoftCredentials(args.integration)
-
-    return createMicrosoftCalendarToolBundle({
-      credentials,
-    })
+    return provider
   }
 
   return null
-}
-
-function createMiloToolBundle(args: {
-  convexSiteUrl: string
-  executionToken: string
-}): ToolBundle {
-  return {
-    mcpServers: [
-      {
-        name: "milo",
-        command: "node",
-        args: ["/tmp/milo-workspace/milo-mcp.mjs"],
-        env: {
-          MILO_CONVEX_SITE_URL: args.convexSiteUrl,
-          MILO_EXECUTION_TOKEN: args.executionToken,
-        },
-      },
-    ],
-    sandboxFiles: [
-      {
-        path: "/tmp/milo-workspace/milo-mcp.mjs",
-        content: createMiloMcpScript(),
-      },
-    ],
-    preflights: [],
-  }
-}
-
-function createLinearToolBundle(args: {
-  credentials: LinearCredentials
-  defaultIssueId?: string
-}): ToolBundle {
-  return {
-    mcpServers: [
-      {
-        name: "linear",
-        command: "node",
-        args: ["/tmp/milo-workspace/milo-linear-mcp.mjs"],
-        env: {
-          MILO_LINEAR_ACCESS_TOKEN: args.credentials.accessToken,
-          ...(args.defaultIssueId === undefined
-            ? {}
-            : { MILO_LINEAR_DEFAULT_ISSUE_ID: args.defaultIssueId }),
-        },
-      },
-    ],
-    sandboxFiles: [
-      {
-        path: "/tmp/milo-workspace/milo-linear-mcp.mjs",
-        content: createLinearProxyScript(),
-      },
-    ],
-    preflights: [
-      {
-        type: "linear",
-        credentials: args.credentials,
-      },
-    ],
-  }
 }

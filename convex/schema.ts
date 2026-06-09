@@ -3,6 +3,7 @@ import { activations } from "./schemas/activations"
 import { executions } from "./schemas/executions"
 import { integrations } from "./schemas/integrations"
 import { messages } from "./schemas/messages"
+import { permissions } from "./schemas/permissions"
 import { schedules } from "./schemas/schedules"
 import { skills } from "./schemas/skills"
 import { traces } from "./schemas/traces"
@@ -17,4 +18,5 @@ export default defineSchema({
   activations,
   executions,
   traces,
+  permissions,
 })

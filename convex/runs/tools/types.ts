@@ -1,3 +1,4 @@
+import { type ToolPermission } from "../../permissions/catalog"
 import { type GitHubCredentials } from "../../providers/github/credentials"
 import { type GoogleCredentials } from "../../providers/google/credentials"
 import { type LinearCredentials } from "../../providers/linear/credentials"
@@ -8,6 +9,7 @@ export type ToolBundle = {
   mcpServers: McpServerConfig[]
   sandboxFiles: SandboxFile[]
   preflights: ToolPreflight[]
+  promptedTools: ToolPermission[]
 }
 
 export type McpServerConfig = {
