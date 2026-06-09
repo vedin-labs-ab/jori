@@ -16,3 +16,5 @@ export const slackUserScopes = [
   "search:read",
   "users:read",
 ]
+
+export const slackInstallUserScopes = [...slackUserScopes, "users:read.email"]

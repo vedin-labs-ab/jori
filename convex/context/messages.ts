@@ -21,6 +21,7 @@ const observedMessageArgs = {
   type: v.string(),
   externalId: v.string(),
   actorId: v.optional(v.string()),
+  actorEmail: v.optional(v.string()),
   conversationId: v.optional(v.string()),
   text: v.optional(v.string()),
   observedAt: v.optional(v.number()),
@@ -31,6 +32,7 @@ type ObservedMessage = {
   type: string
   externalId: string
   actorId?: string
+  actorEmail?: string
   conversationId?: string
   text?: string
   observedAt?: number
@@ -138,6 +140,10 @@ async function recordProviderMessage(
     integration: input.integration,
   })
   const now = Date.now()
+  const createdBy = await resolveMessageOwner(ctx, {
+    tenantId: input.integration.tenantId,
+    message: input.message,
+  })
 
   const activation = await findConversationActivation(ctx, {
     tenantId: input.integration.tenantId,
@@ -156,6 +162,7 @@ async function recordProviderMessage(
     messageType: input.message.type,
     messageExternalId: input.message.externalId,
     conversationId: input.message.conversationId ?? input.message.externalId,
+    createdBy,
     now,
   })
 }
@@ -191,12 +198,66 @@ async function insertMessage(
     type: input.message.type,
     externalId: input.message.externalId,
     actorId: input.message.actorId,
+    actorEmail: input.message.actorEmail,
     conversationId: input.message.conversationId,
     text: input.message.text,
     data: input.message.data,
     observedAt: input.message.observedAt,
     createdAt: Date.now(),
   })
+}
+
+async function resolveMessageOwner(
+  ctx: MutationCtx,
+  input: {
+    tenantId: string
+    message: ObservedMessage
+  }
+) {
+  const actorEmail = normalizeEmail(input.message.actorEmail)
+
+  if (actorEmail === undefined) {
+    return undefined
+  }
+
+  const integrations = await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_status", (query) =>
+      query.eq("tenantId", input.tenantId).eq("status", "active")
+    )
+    .collect()
+  const ownerIds = new Set(
+    integrations
+      .filter(
+        (integration) =>
+          integration.scope === "user" &&
+          integration.ownerId !== undefined &&
+          isUserContextProvider(integration.provider) &&
+          normalizeEmail(integration.accountId) === actorEmail
+      )
+      .map((integration) => integration.ownerId as string)
+  )
+
+  if (ownerIds.size !== 1) {
+    return undefined
+  }
+
+  return [...ownerIds][0]
+}
+
+function isUserContextProvider(provider: string) {
+  return (
+    provider === "gmail" ||
+    provider === "googleCalendar" ||
+    provider === "microsoftEmail" ||
+    provider === "microsoftCalendar"
+  )
+}
+
+function normalizeEmail(email: string | undefined) {
+  const normalized = email?.trim().toLowerCase()
+
+  return normalized === "" ? undefined : normalized
 }
 
 function isSlackBotMessage(actorId: string | undefined, data: unknown) {

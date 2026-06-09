@@ -70,7 +70,7 @@ export async function handleMiloMcpRequest(ctx: ActionCtx, request: Request) {
   }
 
   try {
-    const result = await callMiloTool(ctx, execution.tenantId, body)
+    const result = await callMiloTool(ctx, execution, body)
 
     return Response.json(result)
   } catch (error) {
@@ -80,43 +80,47 @@ export async function handleMiloMcpRequest(ctx: ActionCtx, request: Request) {
 
 async function callMiloTool(
   ctx: ActionCtx,
-  tenantId: string,
+  execution: {
+    tenantId: string
+    createdBy?: string
+  },
   request: MiloMcpRequest
 ) {
   const args = normalizeToolArgs(request.args)
 
   if (request.tool === "add_schedule") {
     return await ctx.runMutation(internal.scheduling.schedules.create, {
-      tenantId,
       ...(args as AddScheduleArgs),
+      tenantId: execution.tenantId,
+      createdBy: execution.createdBy,
     })
   }
 
   if (request.tool === "search_schedules") {
     return await ctx.runQuery(internal.scheduling.schedules.search, {
-      tenantId,
       ...(args as SearchSchedulesArgs),
+      tenantId: execution.tenantId,
     })
   }
 
   if (request.tool === "read_schedule") {
     return await ctx.runQuery(internal.scheduling.schedules.read, {
-      tenantId,
       ...(args as ReadScheduleArgs),
+      tenantId: execution.tenantId,
     })
   }
 
   if (request.tool === "update_schedule") {
     return await ctx.runMutation(internal.scheduling.schedules.update, {
-      tenantId,
       ...(args as UpdateScheduleArgs),
+      tenantId: execution.tenantId,
     })
   }
 
   if (request.tool === "delete_schedule") {
     return await ctx.runMutation(internal.scheduling.schedules.remove, {
-      tenantId,
       ...(args as ReadScheduleArgs),
+      tenantId: execution.tenantId,
     })
   }
 

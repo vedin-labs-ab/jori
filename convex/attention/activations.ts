@@ -35,6 +35,7 @@ export async function startMessageExecution(
     messageType: string
     messageExternalId: string
     conversationId: string
+    createdBy: string | undefined
     now: number
   }
 ) {
@@ -48,6 +49,7 @@ export async function startMessageExecution(
         externalId: args.messageExternalId,
       },
     },
+    createdBy: args.createdBy,
     createdAt: args.now,
   })
 
@@ -55,6 +57,7 @@ export async function startMessageExecution(
     tenantId: args.integration.tenantId,
     triggerId,
     status: "queued",
+    createdBy: args.createdBy,
     createdAt: args.now,
   })
 
@@ -66,6 +69,7 @@ export async function startMessageExecution(
           integrationId: args.integration._id,
           conversationId: args.conversationId,
           executionId,
+          createdBy: args.createdBy,
           createdAt: args.now,
         })
       : args.activation._id

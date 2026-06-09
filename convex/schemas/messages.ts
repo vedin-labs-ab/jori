@@ -7,6 +7,7 @@ export const messages = defineTable({
   type: v.string(),
   externalId: v.string(),
   actorId: v.optional(v.string()),
+  actorEmail: v.optional(v.string()),
   conversationId: v.optional(v.string()),
   text: v.optional(v.string()),
   data: v.optional(v.any()),

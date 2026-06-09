@@ -1,5 +1,9 @@
 import { v } from "convex/values"
-import { internalMutation, mutation } from "../../_generated/server"
+import {
+  internalMutation,
+  internalQuery,
+  mutation,
+} from "../../_generated/server"
 import { createSignedSlackState } from "./signing"
 
 export const createInstallState = mutation({
@@ -16,10 +20,41 @@ export const createInstallState = mutation({
 
     return await createSignedSlackState({
       tenantId: args.tenantId,
-      createdBy: identity.subject,
+      createdBy: identity.tokenIdentifier,
       returnUrl: args.returnUrl,
       createdAt: Date.now(),
     })
+  },
+})
+
+export const getUserToken = internalQuery({
+  args: {
+    accountId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const integration = await ctx.db
+      .query("integrations")
+      .withIndex("by_provider_account", (query) =>
+        query.eq("provider", "slack").eq("accountId", args.accountId)
+      )
+      .first()
+
+    if (integration === null || integration.status !== "active") {
+      return null
+    }
+
+    const credentials = integration.credentials
+
+    if (
+      typeof credentials === "object" &&
+      credentials !== null &&
+      "user" in credentials &&
+      typeof credentials.user === "string"
+    ) {
+      return credentials.user
+    }
+
+    return null
   },
 })
 

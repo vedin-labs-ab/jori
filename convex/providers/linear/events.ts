@@ -66,6 +66,7 @@ function getLinearCommentMessage(
     type: `comment.${payload.action ?? "create"}`,
     externalId: createLinearExternalId(accountId, deliveryId, data.id),
     actorId: payload.actor?.id,
+    actorEmail: payload.actor?.email,
     conversationId: data.issueId,
     text: data.body,
     observedAt: getObservedAt(payload, data.createdAt),

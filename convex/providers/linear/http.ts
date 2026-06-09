@@ -118,6 +118,7 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
       type: message.type,
       externalId: message.externalId,
       actorId: message.actorId,
+      actorEmail: message.actorEmail,
       conversationId: message.conversationId,
       text: message.text,
       observedAt: message.observedAt,

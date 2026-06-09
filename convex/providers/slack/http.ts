@@ -2,10 +2,10 @@ import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import {
   slackBotScopes,
+  slackInstallUserScopes,
   slackOAuthAccessUrl,
   slackOAuthAuthorizeUrl,
   slackOAuthCallbackPath,
-  slackUserScopes,
 } from "./config"
 import { getSlackMessage, type SlackEventPayload } from "./events"
 import { parseSignedSlackState, verifySlackRequest } from "./signing"
@@ -27,7 +27,7 @@ export async function handleSlackInstall(request: Request) {
   const slackUrl = new URL(slackOAuthAuthorizeUrl)
   slackUrl.searchParams.set("client_id", slackClientId)
   slackUrl.searchParams.set("scope", slackBotScopes.join(","))
-  slackUrl.searchParams.set("user_scope", slackUserScopes.join(","))
+  slackUrl.searchParams.set("user_scope", slackInstallUserScopes.join(","))
   slackUrl.searchParams.set("state", state)
   slackUrl.searchParams.set(
     "redirect_uri",
@@ -137,6 +137,11 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
+  const actorEmail = await getSlackActorEmail(ctx, {
+    accountId: message.accountId,
+    actorId: message.actorId,
+  })
+
   const result = await ctx.runMutation(
     internal.context.messages.recordSlackMessage,
     {
@@ -144,6 +149,7 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
       type: message.type,
       externalId: message.externalId,
       actorId: message.actorId,
+      actorEmail,
       conversationId: message.conversationId,
       text: message.text,
       observedAt: message.observedAt,
@@ -160,6 +166,45 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
   return Response.json({ ok: true })
 }
 
+async function getSlackActorEmail(
+  ctx: ActionCtx,
+  args: {
+    accountId: string
+    actorId: string | undefined
+  }
+) {
+  if (args.actorId === undefined) {
+    return undefined
+  }
+
+  const userToken = await ctx.runQuery(
+    internal.providers.slack.install.getUserToken,
+    {
+      accountId: args.accountId,
+    }
+  )
+
+  if (userToken === null) {
+    return undefined
+  }
+
+  const slackUrl = new URL("https://slack.com/api/users.info")
+  slackUrl.searchParams.set("user", args.actorId)
+
+  const response = await fetch(slackUrl, {
+    headers: { authorization: `Bearer ${userToken}` },
+  })
+  const body = (await response.json().catch(() => null)) as SlackUserInfo | null
+
+  if (!response.ok || body?.ok !== true) {
+    return undefined
+  }
+
+  const email = body.user?.profile?.email?.trim()
+
+  return email === "" ? undefined : email
+}
+
 type SlackOAuthResponse =
   | {
       ok: true
@@ -173,6 +218,20 @@ type SlackOAuthResponse =
       team: {
         id: string
         name?: string
+      }
+    }
+  | {
+      ok: false
+      error?: string
+    }
+
+type SlackUserInfo =
+  | {
+      ok: true
+      user?: {
+        profile?: {
+          email?: string
+        }
       }
     }
   | {
