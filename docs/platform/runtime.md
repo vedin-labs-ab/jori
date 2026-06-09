@@ -2,11 +2,11 @@
 
 ## Responsibility
 
-Defines the minimum runtime model needed to trigger Milo from Slack, Linear, Microsoft Teams, and user-managed schedules.
+Defines the minimum runtime model needed to trigger Milo from Slack, Linear, GitHub, and user-managed schedules.
 
 ## Runtime Loop
 
-A Slack, Linear, or Microsoft Teams message creates a message record. If the message asks Milo to work, Milo creates a trigger, starts an execution caused by that trigger, activates the conversation, runs Codex in an E2B sandbox, stores the raw Codex agent trace as a Convex file, and lets Codex reply through the provider MCP tools.
+A Slack, Linear, or GitHub message creates a message record. If the message asks Milo to work, Milo creates a trigger, starts an execution caused by that trigger, activates the conversation, runs Codex in an E2B sandbox, stores the raw Codex agent trace as a Convex file, and lets Codex reply through the provider MCP tools.
 
 A schedule stores future work, an explicit output target, and either a one-shot UTC ISO timestamp or a recurring UTC cron expression. When the schedule fires, Milo creates a scheduled trigger, starts an execution caused by that trigger, and runs Codex in E2B with the scheduled task name, description, metadata, and output target.
 
@@ -14,7 +14,7 @@ Identity and organizations come from Clerk. Milo stores Clerk organization IDs a
 
 E2B sandbox identity is stored directly on executions. There is no sandbox table. The Convex backend orchestrates the sandbox and execution lifecycle, but provider communication belongs to Codex through provider MCP servers.
 
-Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Provider MCP is configured per execution from the active integration and target. Slack exposes context and reply tools scoped to the triggering channel. Linear exposes issue read/comment tools scoped to the triggering issue. Microsoft exposes Graph-backed Teams context and reply tools scoped to the triggering chat or channel thread, plus constrained on-demand Graph reads for mail, calendar, and files. Milo MCP is configured per execution with a one-time token whose hash is stored on the active execution; MCP requests derive `tenantId` from that token. Each sandbox only receives the MCP tokens for the tenant and workspace that triggered the execution.
+Codex authentication is stored as a Convex environment variable and copied into the ephemeral E2B sandbox as `auth.json` at runtime. Provider MCP is configured per execution from the active integration and target. Slack exposes context and reply tools scoped to the triggering channel. Linear exposes issue read/comment tools scoped to the triggering issue. GitHub exposes repository context and comment replies scoped to the triggering issue or pull request. Google and Microsoft expose user-scoped mail and calendar tools when those integrations are active for the execution. Milo MCP is configured per execution with a one-time token whose hash is stored on the active execution; MCP requests derive `tenantId` from that token. Each sandbox only receives the MCP tokens for the tenant and workspace that triggered the execution.
 
 Required Convex environment variables:
 
@@ -22,7 +22,9 @@ Required Convex environment variables:
 - `CODEX_AUTH_JSON_BASE64`: base64-encoded Codex `auth.json`.
 - `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, and `SLACK_SIGNING_SECRET`: Slack app install and event verification secrets.
 - `LINEAR_CLIENT_ID`, `LINEAR_CLIENT_SECRET`, and `LINEAR_WEBHOOK_SECRET`: Linear OAuth install and webhook verification secrets.
-- `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, and `MICROSOFT_GRAPH_CLIENT_STATE`: Microsoft Entra OAuth, application token, install state, and Graph notification verification secrets.
+- `GITHUB_APP_SLUG`, `GITHUB_APP_ID`, `GITHUB_PRIVATE_KEY`, and `GITHUB_WEBHOOK_SECRET`: GitHub App install and webhook verification secrets.
+- `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`: Google OAuth install and refresh secrets.
+- `MICROSOFT_CLIENT_ID` and `MICROSOFT_CLIENT_SECRET`: Microsoft Entra OAuth install and refresh secrets.
 
 ## Onboarding
 
@@ -32,19 +34,23 @@ The first onboarding flow should be simple and mostly Clerk-native:
 2. User creates an organization.
 3. User enters the organization name.
 4. User optionally enters the organization website.
-5. User connects Slack, Linear, or Microsoft Teams as the first integration.
+5. User connects the first provider integration.
 
 Slack installs use one OAuth flow that requests both bot scopes and user scopes. The bot token needs `app_mentions:read` and `chat:write`; the user token needs Slack read/search scopes such as `channels:history`, `groups:history`, `im:history`, `mpim:history`, `search:read`, and `users:read`.
 
 Linear installs use OAuth with `actor=app` and targeted scopes for reading issue context, receiving app mentions, and creating comments. Linear webhooks should send `Comment` resource events to `/linear/events`.
 
-Microsoft installs use the Microsoft admin consent endpoint followed by delegated OAuth. The Entra app should be configured with the delegated Teams, mail, calendar, and file scopes requested by the install flow, plus application permissions needed for Teams message change notifications. Microsoft Graph subscriptions should use `/microsoft/events` as the notification URL and the configured `MICROSOFT_GRAPH_CLIENT_STATE`.
+GitHub installs use a signed GitHub App install state and send issue and pull request comments to `/github/events`.
+
+Google installs use delegated OAuth for Gmail and Calendar account access.
+
+Microsoft installs use delegated OAuth for Outlook mail and calendar account access.
 
 Use Clerk's out-of-the-box components wherever possible. Styling may be adjusted to match Milo's theme, but identity and organization behavior should remain Clerk-owned. Store organization setup details, such as website, in Clerk organization metadata unless Milo needs to query them frequently.
 
 ## UI Scope
 
-The first UI should only cover sign-up, organization creation, website entry, Slack, Linear, and Microsoft connection, plus basic connection status. There should be no dashboard, run console, memory UI, agent builder, settings area, or artifact browser in the first version.
+The first console UI should only cover sign-up, organization creation, website entry, provider connections, basic connection status, and tenant skill management. There should be no dashboard, run browser, memory UI, agent builder, settings area, or artifact browser in the first version.
 
 ## Schema Conventions
 
@@ -64,6 +70,10 @@ Context:
 
 - [Messages](./context/messages.md)
 - [Integrations](./context/integrations.md)
+
+Skills:
+
+- [Skills](./skills.md)
 
 Attention:
 
@@ -88,4 +98,4 @@ The implementation follows the domain map in [Structure](./structure.md). Framew
 These are intentionally not first-version models:
 
 - Local organizations, users, memberships, and identity mappings.
-- Conversation scopes, sandboxes, execution events, agents, reviews, permissions, memory, artifacts, skills, tools, and dreaming.
+- Conversation scopes, sandboxes, execution events, agents, reviews, permissions, memory, artifacts, tools, and dreaming.

@@ -1,5 +1,5 @@
-import { type GitHubCredentials } from "../providers/github/credentials"
-import { type ToolBundle } from "./tools"
+import { type GitHubCredentials } from "../../providers/github/credentials"
+import { type ToolBundle } from "./types"
 
 export function createGitHubTokenPreflightCommand() {
   return githubTokenPreflightCommand

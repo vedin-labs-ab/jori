@@ -1,7 +1,7 @@
-import { slackBotScopes, slackUserScopes } from "../providers/slack/config"
-import { type SlackCredentials } from "../providers/slack/credentials"
+import { slackBotScopes, slackUserScopes } from "../../providers/slack/config"
+import { type SlackCredentials } from "../../providers/slack/credentials"
 import { createSlackProxyScript } from "./proxy"
-import { type ToolBundle } from "./tools"
+import { type ToolBundle } from "./types"
 
 export function createSlackToolBundle(args: {
   accountId: string

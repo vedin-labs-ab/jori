@@ -6,7 +6,16 @@ import {
   Sandbox,
   type Username,
 } from "e2b"
-import { createCodexConfig } from "./codex"
+import { createCodexConfig } from "../codex"
+import { type ToolBundle, type ToolPreflight } from "../tools/types"
+import {
+  assertCommandSucceeded,
+  assertCommandsSucceeded,
+  CodexRunError,
+  type CommandTrace,
+  createCommandTrace,
+  formatError,
+} from "../trace"
 import {
   codexHome,
   createBootstrapCommand,
@@ -18,15 +27,6 @@ import {
   createToolPreflightCommand,
   createToolPreflightEnv,
 } from "./preflights"
-import { type ToolBundle, type ToolPreflight } from "./tools"
-import {
-  assertCommandSucceeded,
-  assertCommandsSucceeded,
-  CodexRunError,
-  type CommandTrace,
-  createCommandTrace,
-  formatError,
-} from "./trace"
 
 const sandboxTimeoutMs = 5 * 60 * 1_000
 

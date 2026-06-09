@@ -1,5 +1,5 @@
-import { type MicrosoftCredentials } from "../providers/microsoft/credentials"
-import { type ToolBundle } from "./tools"
+import { type MicrosoftCredentials } from "../../providers/microsoft/credentials"
+import { type ToolBundle } from "./types"
 
 type MicrosoftRuntimeSurface = "microsoftCalendar" | "microsoftEmail"
 

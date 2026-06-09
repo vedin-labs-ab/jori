@@ -1,24 +1,12 @@
-import { type Doc } from "../_generated/dataModel"
-import {
-  type GitHubCredentials,
-  requireGitHubCredentials,
-} from "../providers/github/credentials"
-import {
-  type GoogleCredentials,
-  requireGoogleCredentials,
-} from "../providers/google/credentials"
+import { type Doc } from "../../_generated/dataModel"
+import { requireGitHubCredentials } from "../../providers/github/credentials"
+import { requireGoogleCredentials } from "../../providers/google/credentials"
 import {
   type LinearCredentials,
   requireLinearCredentials,
-} from "../providers/linear/credentials"
-import {
-  type MicrosoftCredentials,
-  requireMicrosoftCredentials,
-} from "../providers/microsoft/credentials"
-import {
-  requireSlackCredentials,
-  type SlackCredentials,
-} from "../providers/slack/credentials"
+} from "../../providers/linear/credentials"
+import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
+import { requireSlackCredentials } from "../../providers/slack/credentials"
 import { createGitHubToolBundle } from "./github"
 import { createGmailToolBundle, createGoogleCalendarToolBundle } from "./google"
 import { createLinearProxyScript } from "./linear"
@@ -28,78 +16,15 @@ import {
 } from "./microsoft"
 import { createMiloMcpScript } from "./milo"
 import { createSlackToolBundle } from "./slack"
+import { type RuntimeTarget, type ToolBundle } from "./types"
 
-export type ToolBundle = {
-  mcpServers: McpServerConfig[]
-  sandboxFiles: SandboxFile[]
-  preflights: ToolPreflight[]
-}
-
-export type McpServerConfig = {
-  name: string
-  command: string
-  args: string[]
-  env: Record<string, string>
-}
-
-export type SandboxFile = {
-  path: string
-  content: string
-}
-
-export type ToolPreflight =
-  | {
-      type: "github"
-      credentials: GitHubCredentials
-      owner: string
-      repo: string
-    }
-  | {
-      type: "linear"
-      credentials: LinearCredentials
-    }
-  | {
-      type: "slack"
-      credentials: SlackCredentials
-    }
-  | {
-      type: "gmail"
-      credentials: GoogleCredentials
-    }
-  | {
-      type: "googleCalendar"
-      credentials: GoogleCredentials
-    }
-  | {
-      type: "microsoftEmail"
-      credentials: MicrosoftCredentials
-    }
-  | {
-      type: "microsoftCalendar"
-      credentials: MicrosoftCredentials
-    }
-
-export type RuntimeTarget =
-  | {
-      provider: "github"
-      owner: string
-      repo: string
-      repositoryId?: number
-      issueNumber?: number
-      pullNumber?: number
-      commentId: string
-      commentKind: string
-    }
-  | {
-      provider: "linear"
-      issueId: string
-      commentId?: string
-    }
-  | {
-      provider: "slack"
-      channelId: string
-      threadId?: string
-    }
+export type {
+  McpServerConfig,
+  RuntimeTarget,
+  SandboxFile,
+  ToolBundle,
+  ToolPreflight,
+} from "./types"
 
 export function assembleToolsForRun(args: {
   milo: {

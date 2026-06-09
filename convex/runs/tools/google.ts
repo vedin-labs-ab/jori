@@ -1,5 +1,5 @@
-import { type GoogleCredentials } from "../providers/google/credentials"
-import { type ToolBundle } from "./tools"
+import { type GoogleCredentials } from "../../providers/google/credentials"
+import { type ToolBundle } from "./types"
 
 type GoogleRuntimeSurface = "gmail" | "googleCalendar"
 

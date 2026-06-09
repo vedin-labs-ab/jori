@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from "convex/react"
 import { ExternalLink, GitBranch, Loader2 } from "lucide-react"
 import { useState } from "react"
-import { api } from "../../convex/_generated/api"
-import { IntegrationConnectionCard } from "./integration"
+import { api } from "../../../convex/_generated/api"
+import { IntegrationConnectionCard } from "./card"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 

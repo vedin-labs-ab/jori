@@ -18,9 +18,14 @@ Domain code lives under folders named for responsibility:
 - `skills`: persisted runtime instructions and tenant skill management.
 - `attention`: triggers and active listening state.
 - `runs`: execution lifecycle and runtime orchestration.
+  - `sandbox`: E2B setup, Codex bootstrap commands, and token preflights.
+  - `tools`: runtime MCP server configuration, provider tool bundles, and bundled MCP scripts.
 - `scheduling`: user-managed schedules and schedule MCP mutations.
-- `providers/slack`: Slack protocol code, including OAuth, signing, event parsing, and relevance checks.
+- `providers/github`: GitHub protocol code, including GitHub App auth, signing, event parsing, and relevance checks.
+- `providers/google`: Google protocol code, including OAuth, token refresh, signing, and account metadata.
 - `providers/linear`: Linear protocol code, including OAuth, signing, event parsing, and relevance checks.
+- `providers/microsoft`: Microsoft protocol code, including OAuth, token refresh, signing, and account metadata.
+- `providers/slack`: Slack protocol code, including OAuth, signing, event parsing, and relevance checks.
 - `schemas`: one table definition per file, imported by the root schema.
 
 ## Frontend
@@ -29,7 +34,11 @@ TanStack route files stay in `src/routes`, and generated router output stays in 
 
 Product code lives under folders named for responsibility:
 
-- `setup`: first-run sign-up, organization, website, and integration connection UI.
+- `landing`: public product entry.
+- `console`: signed-in organization, integration, and skill management UI.
+  - `identity`: Clerk organization setup and metadata.
+  - `integrations`: provider connection cards and callback status handling.
+  - `skills`: tenant skill management UI.
 - `shared`: cross-domain frontend helpers and components.
 - `design`: internal design review surfaces.
 - `components/ui`: shadcn/ui primitives.

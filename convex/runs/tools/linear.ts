@@ -1,4 +1,4 @@
-import { linearGraphqlUrl } from "../providers/linear/config"
+import { linearGraphqlUrl } from "../../providers/linear/config"
 
 export function createLinearTokenPreflightCommand() {
   return linearTokenPreflightCommand

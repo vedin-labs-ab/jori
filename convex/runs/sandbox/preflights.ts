@@ -1,9 +1,9 @@
-import { createGitHubTokenPreflightCommand } from "./github"
-import { createGoogleTokenPreflightCommand } from "./google"
-import { createLinearTokenPreflightCommand } from "./linear"
-import { createMicrosoftTokenPreflightCommand } from "./microsoft"
-import { createSlackTokenPreflightCommand } from "./slack"
-import { type ToolPreflight } from "./tools"
+import { createGitHubTokenPreflightCommand } from "../tools/github"
+import { createGoogleTokenPreflightCommand } from "../tools/google"
+import { createLinearTokenPreflightCommand } from "../tools/linear"
+import { createMicrosoftTokenPreflightCommand } from "../tools/microsoft"
+import { createSlackTokenPreflightCommand } from "../tools/slack"
+import { type ToolPreflight } from "../tools/types"
 
 export function createToolPreflightCommand(preflight: ToolPreflight) {
   if (preflight.type === "github") {
