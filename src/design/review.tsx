@@ -5,6 +5,7 @@ import {
 } from "@clerk/tanstack-react-start"
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
 import { Bold, Italic, Underline } from "lucide-react"
+import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Kbd, KbdGroup } from "@/components/ui/kbd"
@@ -23,8 +24,6 @@ import { Toggle } from "@/components/ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { BrandMark } from "@/shared/brand"
 
-const sectionClass = "flex flex-col gap-2"
-const titleClass = "text-xs font-medium text-muted-foreground"
 const rowClass = "flex flex-wrap items-center gap-3"
 
 export function Review() {
@@ -61,8 +60,7 @@ export function Review() {
           </p>
         </div>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Button — variants</h2>
+        <ReviewSection title="Button — variants">
           <div className={rowClass}>
             <Button variant="default">Default</Button>
             <Button variant="secondary">Secondary</Button>
@@ -71,20 +69,18 @@ export function Review() {
             <Button variant="destructive">Destructive</Button>
             <Button variant="link">Link</Button>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Button — sizes (filled)</h2>
+        <ReviewSection title="Button — sizes (filled)">
           <div className={rowClass}>
             <Button size="xs">Extra small</Button>
             <Button size="sm">Small</Button>
             <Button size="default">Default</Button>
             <Button size="lg">Large</Button>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Button — secondary sizes</h2>
+        <ReviewSection title="Button — secondary sizes">
           <div className={rowClass}>
             <Button variant="secondary" size="xs">
               Extra small
@@ -99,20 +95,18 @@ export function Review() {
               Large
             </Button>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Button — disabled</h2>
+        <ReviewSection title="Button — disabled">
           <div className={rowClass}>
             <Button disabled>Default</Button>
             <Button variant="secondary" disabled>
               Secondary
             </Button>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Toggle</h2>
+        <ReviewSection title="Toggle">
           <div className={rowClass}>
             <Toggle aria-label="Bold">
               <Bold />
@@ -124,10 +118,9 @@ export function Review() {
               <Underline />
             </Toggle>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Toggle group</h2>
+        <ReviewSection title="Toggle group">
           <div className={rowClass}>
             <ToggleGroup type="multiple" defaultValue={["bold"]}>
               <ToggleGroupItem value="bold" aria-label="Bold">
@@ -153,20 +146,18 @@ export function Review() {
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Switch</h2>
+        <ReviewSection title="Switch">
           <div className={rowClass}>
             <Switch defaultChecked aria-label="Default on" />
             <Switch aria-label="Default off" />
             <Switch size="sm" defaultChecked aria-label="Small on" />
             <Switch size="sm" aria-label="Small off" />
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Slider</h2>
+        <ReviewSection title="Slider">
           <div className={rowClass}>
             <Slider
               defaultValue={[40]}
@@ -176,10 +167,9 @@ export function Review() {
               aria-label="Value"
             />
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Kbd — rank 9</h2>
+        <ReviewSection title="Kbd — rank 9">
           <div className={rowClass}>
             <Kbd>⌘</Kbd>
             <Kbd>Shift</Kbd>
@@ -196,10 +186,9 @@ export function Review() {
               </KbdGroup>
             </Button>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Select — rank 7</h2>
+        <ReviewSection title="Select — rank 7">
           <div className={rowClass}>
             <Select defaultValue="apple">
               <SelectTrigger className="w-40">
@@ -213,10 +202,9 @@ export function Review() {
             </Select>
             <Button variant="outline">Adjacent button</Button>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Native select — rank 7</h2>
+        <ReviewSection title="Native select — rank 7">
           <div className={rowClass}>
             <NativeSelect defaultValue="apple">
               <NativeSelectOption value="apple">Apple</NativeSelectOption>
@@ -227,10 +215,9 @@ export function Review() {
             </NativeSelect>
             <Button variant="outline">Adjacent button</Button>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Tabs — rank 6</h2>
+        <ReviewSection title="Tabs — rank 6">
           <div className={rowClass}>
             <Tabs defaultValue="account" className="w-60">
               <TabsList>
@@ -246,10 +233,9 @@ export function Review() {
               </TabsList>
             </Tabs>
           </div>
-        </section>
+        </ReviewSection>
 
-        <section className={sectionClass}>
-          <h2 className={titleClass}>Button group — rank 5</h2>
+        <ReviewSection title="Button group — rank 5">
           <div className={rowClass}>
             <ButtonGroup>
               <Button variant="outline">Day</Button>
@@ -268,8 +254,23 @@ export function Review() {
               </Button>
             </ButtonGroup>
           </div>
-        </section>
+        </ReviewSection>
       </div>
     </div>
+  )
+}
+
+function ReviewSection({
+  children,
+  title,
+}: {
+  children: ReactNode
+  title: string
+}) {
+  return (
+    <section className="flex flex-col gap-2">
+      <h2 className="text-xs font-medium text-muted-foreground">{title}</h2>
+      {children}
+    </section>
   )
 }

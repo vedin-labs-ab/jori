@@ -2,7 +2,7 @@ import { SignInButton, UserButton, useAuth } from "@clerk/tanstack-react-start"
 import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { BrandMark } from "@/shared/brand"
+import { BrandIcon, BrandMark } from "@/shared/brand"
 
 export function Landing() {
   return (
@@ -32,16 +32,7 @@ export function Landing() {
         </div>
 
         <div className="grid gap-4 border-y py-8 md:border-y-0 md:border-l md:py-0 md:pl-10">
-          <img
-            src="/brand/mark/mark-black.svg"
-            alt=""
-            className="size-16 dark:hidden"
-          />
-          <img
-            src="/brand/mark/mark-white.svg"
-            alt=""
-            className="hidden size-16 dark:block"
-          />
+          <BrandIcon className="size-16" />
           <p className="max-w-sm text-2xl font-medium leading-snug">
             Set up an organization, connect Slack, and give Milo the skills it
             needs to help.
