@@ -103,7 +103,7 @@ function PermissionContent({
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-5">
       <ProviderPermissionError
         error={controller.error}
         permissions={permissions}
@@ -137,7 +137,7 @@ function PermissionSummary({ permissions }: { permissions: ToolPermission[] }) {
   ).length
 
   return (
-    <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+    <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
       <span>{allowedCount} allowed</span>
       <span aria-hidden="true" className="size-1 rounded-full bg-current" />
       {requiredCount} required

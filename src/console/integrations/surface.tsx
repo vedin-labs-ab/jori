@@ -68,7 +68,7 @@ function IntegrationLogoMark({ logo }: { logo: IntegrationLogo }) {
     return (
       <img
         alt={logo.alt}
-        className="size-11 shrink-0 object-contain"
+        className="size-8 shrink-0 object-contain"
         referrerPolicy="no-referrer"
         src={logo.src}
       />

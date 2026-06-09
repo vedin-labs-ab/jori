@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react"
+import { Loader2, Unplug } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +31,10 @@ export function DisconnectDialog({
               Disconnecting
             </>
           ) : (
-            "Disconnect"
+            <>
+              <Unplug />
+              Disconnect
+            </>
           )}
         </Button>
       </AlertDialogTrigger>
