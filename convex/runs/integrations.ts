@@ -18,19 +18,17 @@ import {
   refreshMicrosoftAccessToken,
 } from "../providers/microsoft/oauth"
 import { type CodexRuntimeInput } from "./codex"
-import { type RuntimeTarget } from "./tools"
 
 export async function prepareIntegrationForRuntime(
   ctx: ActionCtx,
   args: {
     integration: CodexRuntimeInput["integration"]
-    target: RuntimeTarget
   }
 ) {
   const integration = args.integration
 
   if (integration.provider === "github") {
-    return await prepareGitHubIntegrationForRuntime(integration, args.target)
+    return await prepareGitHubIntegrationForRuntime(integration)
   }
 
   if (integration.provider === "linear") {
@@ -55,13 +53,11 @@ export async function prepareIntegrationForRuntime(
 }
 
 async function prepareGitHubIntegrationForRuntime(
-  integration: CodexRuntimeInput["integration"],
-  target: RuntimeTarget
+  integration: CodexRuntimeInput["integration"]
 ) {
   const credentials = requireGitHubCredentials(integration)
   const tokenResult = await createGitHubInstallationToken(
-    credentials.installationId,
-    target.provider === "github" ? target.repositoryId : undefined
+    credentials.installationId
   )
   const expiresAt = Date.parse(tokenResult.expires_at)
 

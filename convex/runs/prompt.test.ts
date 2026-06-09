@@ -7,19 +7,54 @@ describe("runtime prompts", () => {
     [
       "github",
       {
-        repository: { fullName: "acme/app" },
+        repository: {
+          id: 123,
+          owner: "acme",
+          name: "app",
+          fullName: "acme/app",
+        },
         issueNumber: 12,
+        pullNumber: 12,
+        comment: { id: "comment-id", kind: "issue_comment" },
       },
       "GitHub",
       "acme/app#12",
     ],
-    ["linear", { issueId: "ISSUE-1" }, "Linear", "ISSUE-1"],
-    ["slack", { channelId: "C123" }, "Slack", "C123"],
+    [
+      "linear",
+      { issueId: "ISSUE-1", commentId: "comment-id" },
+      "Linear",
+      "ISSUE-1",
+    ],
+    ["slack", { channelId: "C123", ts: "123.456" }, "Slack", "C123"],
   ] as const)("renders %s message trigger target context", (provider, data, providerLabel, targetId) => {
     const prompt = assemblePrompt(runtimeInput(provider, data), [])
 
     expect(prompt.rendered).toContain(`Provider: ${providerLabel}`)
     expect(prompt.rendered).toContain(`Target ID: ${targetId}`)
+    expect(prompt.rendered).toContain("Target metadata:")
+  })
+
+  test("renders GitHub tool inputs in message target metadata", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("github", {
+        repository: {
+          id: 123,
+          owner: "acme",
+          name: "app",
+          fullName: "acme/app",
+        },
+        issueNumber: 12,
+        pullNumber: 12,
+        comment: { id: "comment-id", kind: "issue_comment" },
+      }),
+      []
+    )
+
+    expect(prompt.rendered).toContain("Repository owner: acme")
+    expect(prompt.rendered).toContain("Repository name: app")
+    expect(prompt.rendered).toContain("Issue number: 12")
+    expect(prompt.rendered).toContain("Pull request number: 12")
   })
 })
 

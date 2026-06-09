@@ -6,13 +6,6 @@ import {
 } from "./policy"
 import { type ToolBundle } from "./types"
 
-export const githubAccountToolNames = [
-  "github_list_repositories",
-  "github_get_repository",
-  "github_search_issues",
-  "github_get_file",
-] as const
-
 export function createGitHubTokenPreflightCommand() {
   return githubTokenPreflightCommand
 }
@@ -22,57 +15,6 @@ export function createGitHubMcpScript() {
 }
 
 export function createGitHubToolBundle(
-  args: {
-    credentials: GitHubCredentials
-    owner: string
-    repo: string
-    issueNumber?: number
-    pullNumber?: number
-    commentId: string
-    commentKind: string
-  } & ToolPermissionInput
-): ToolBundle {
-  if (args.credentials.token === undefined) {
-    throw new Error("Missing GitHub runtime token")
-  }
-
-  return {
-    mcpServers: [
-      {
-        name: "github",
-        command: "node",
-        args: ["/tmp/milo-workspace/milo-github-mcp.mjs"],
-        env: {
-          MILO_GITHUB_TOKEN: args.credentials.token,
-          MILO_GITHUB_OWNER: args.owner,
-          MILO_GITHUB_REPO: args.repo,
-          MILO_GITHUB_ISSUE_NUMBER: String(args.issueNumber ?? ""),
-          MILO_GITHUB_PULL_NUMBER: String(args.pullNumber ?? ""),
-          MILO_GITHUB_COMMENT_ID: args.commentId,
-          MILO_GITHUB_COMMENT_KIND: args.commentKind,
-          MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
-        },
-      },
-    ],
-    sandboxFiles: [
-      {
-        path: "/tmp/milo-workspace/milo-github-mcp.mjs",
-        content: createGitHubMcpScript(),
-      },
-    ],
-    preflights: [
-      {
-        type: "github",
-        credentials: args.credentials,
-        owner: args.owner,
-        repo: args.repo,
-      },
-    ],
-    promptedTools: getPromptedTools(args),
-  }
-}
-
-export function createGitHubAccountToolBundle(
   args: {
     credentials: GitHubCredentials
   } & ToolPermissionInput
@@ -113,13 +55,10 @@ const githubTokenPreflightCommand = [
   "node <<'NODE'",
   "async function main() {",
   "  const token = process.env.MILO_GITHUB_TOKEN;",
-  "  const owner = process.env.MILO_GITHUB_OWNER;",
-  "  const repo = process.env.MILO_GITHUB_REPO;",
   "  if (!token) {",
   "    throw new Error('Missing GitHub token');",
   "  }",
-  "  const path = owner && repo ? '/repos/' + owner + '/' + repo : '/installation/repositories?per_page=1';",
-  "  const response = await fetch('https://api.github.com' + path, {",
+  "  const response = await fetch('https://api.github.com/installation/repositories?per_page=1', {",
   "    headers: {",
   "      accept: 'application/vnd.github+json',",
   "      authorization: 'Bearer ' + token,",
@@ -156,21 +95,14 @@ import {
 
 const run = promisify(execFile);
 const token = requiredEnv("MILO_GITHUB_TOKEN");
-const owner = optionalEnv("MILO_GITHUB_OWNER");
-const repo = optionalEnv("MILO_GITHUB_REPO");
-const issueNumber = optionalNumberEnv("MILO_GITHUB_ISSUE_NUMBER");
-const pullNumber = optionalNumberEnv("MILO_GITHUB_PULL_NUMBER");
-const commentId = optionalEnv("MILO_GITHUB_COMMENT_ID");
-const commentKind = optionalEnv("MILO_GITHUB_COMMENT_KIND");
 const workspace = "/tmp/milo-workspace";
 const defaultCloneDirectory = path.join(workspace, "repository");
-const repoPathPrefix = owner && repo ? "/repos/" + owner + "/" + repo : undefined;
 const octokit = new Octokit({
   auth: token,
   userAgent: "milo-github",
 });
 
-const accountTools = [
+const allTools = [
   {
     name: "github_list_repositories",
     description: "List repositories available to this GitHub App installation.",
@@ -214,6 +146,35 @@ const accountTools = [
     },
   },
   {
+    name: "github_get_issue",
+    description: "Read a GitHub issue or pull request conversation by repository and issue number.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["owner", "repo", "issueNumber"],
+      properties: {
+        owner: { type: "string" },
+        repo: { type: "string" },
+        issueNumber: { type: "number" },
+        comments: { type: "number", minimum: 0, maximum: 100 },
+      },
+    },
+  },
+  {
+    name: "github_get_pull_request",
+    description: "Read a GitHub pull request by repository and pull request number.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["owner", "repo", "pullNumber"],
+      properties: {
+        owner: { type: "string" },
+        repo: { type: "string" },
+        pullNumber: { type: "number" },
+      },
+    },
+  },
+  {
     name: "github_get_file",
     description: "Read a file or directory from a GitHub repository.",
     inputSchema: {
@@ -228,59 +189,37 @@ const accountTools = [
       },
     },
   },
-];
-
-const triggerTools = hasTriggerTarget() ? [
-  {
-    name: "github_get_trigger_context",
-    description: "Read the GitHub issue, pull request, triggering comment, and adjacent comments for this run.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      properties: {},
-    },
-  },
-  {
-    name: "github_request",
-    description: "Call the GitHub REST API for the triggering repository using the installation token.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["method", "path"],
-      properties: {
-        method: { type: "string" },
-        path: { type: "string" },
-        parameters: { type: "object" },
-      },
-    },
-  },
   {
     name: "github_clone_repository",
-    description: "Clone the triggering repository into the sandbox using scoped GitHub App credentials.",
+    description: "Clone a GitHub repository into the sandbox using GitHub App credentials.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
+      required: ["owner", "repo"],
       properties: {
+        owner: { type: "string" },
+        repo: { type: "string" },
         directory: { type: "string" },
         ref: { type: "string" },
       },
     },
   },
   {
-    name: "github_reply",
-    description: "Reply in the GitHub comment thread that triggered this run.",
+    name: "github_add_issue_comment",
+    description: "Add a comment to a GitHub issue or pull request conversation.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
-      required: ["body"],
+      required: ["owner", "repo", "issueNumber", "body"],
       properties: {
+        owner: { type: "string" },
+        repo: { type: "string" },
+        issueNumber: { type: "number" },
         body: { type: "string" },
       },
     },
   },
-  ] : [];
-
-const allTools = [...accountTools, ...triggerTools];
+];
 
 const tools = filterEnabledTools(allTools);
 
@@ -327,24 +266,24 @@ async function callTool(toolName, args) {
     return await searchIssues(args);
   }
 
+  if (toolName === "github_get_issue") {
+    return await getIssue(args);
+  }
+
+  if (toolName === "github_get_pull_request") {
+    return await getPullRequest(args);
+  }
+
   if (toolName === "github_get_file") {
     return await getFile(args);
-  }
-
-  if (toolName === "github_get_trigger_context") {
-    return await getTriggerContext();
-  }
-
-  if (toolName === "github_request") {
-    return await githubRequest(args);
   }
 
   if (toolName === "github_clone_repository") {
     return await cloneRepository(args);
   }
 
-  if (toolName === "github_reply") {
-    return await reply(args);
+  if (toolName === "github_add_issue_comment") {
+    return await addIssueComment(args);
   }
 
   throw new McpError(ErrorCode.InvalidParams, "Unknown GitHub tool: " + toolName);
@@ -402,6 +341,33 @@ async function searchIssues(args) {
   };
 }
 
+async function getIssue(args) {
+  const issueNumber = requiredNumber(args.issueNumber, "issueNumber");
+  const commentsLimit = boundedNumber(args.comments, 30, 0, 100);
+  const issuePath = repositoryPath(args.owner, args.repo) + "/issues/" + issueNumber;
+  const issue = await readRequest(issuePath);
+  const comments =
+    commentsLimit === 0
+      ? []
+      : await readRequest(issuePath + "/comments", {
+          per_page: commentsLimit,
+        });
+
+  return {
+    issue: summarizeIssue(issue),
+    comments: comments.map(summarizeComment),
+  };
+}
+
+async function getPullRequest(args) {
+  const pullNumber = requiredNumber(args.pullNumber, "pullNumber");
+  const pullRequest = await readRequest(
+    repositoryPath(args.owner, args.repo) + "/pulls/" + pullNumber,
+  );
+
+  return summarizePullRequest(pullRequest);
+}
+
 async function getFile(args) {
   const path = requiredString(args.path, "path");
   const parameters = {};
@@ -449,50 +415,9 @@ async function getFile(args) {
   };
 }
 
-async function getTriggerContext() {
-  requireTriggerTarget();
-
-  if (commentKind === "pull_request_review") {
-    return {
-      repository: await request("GET", repoPathPrefix),
-      pullRequest: await request("GET", repoPathPrefix + "/pulls/" + requiredPullNumber()),
-      reviewComment: await request("GET", repoPathPrefix + "/pulls/comments/" + commentId),
-      reviewComments: await request("GET", repoPathPrefix + "/pulls/" + requiredPullNumber() + "/comments", {
-        per_page: 100,
-      }),
-    };
-  }
-
-  const issue = await request("GET", repoPathPrefix + "/issues/" + requiredIssueNumber());
-  const response = {
-    repository: await request("GET", repoPathPrefix),
-    issue,
-    comment: await request("GET", repoPathPrefix + "/issues/comments/" + commentId),
-    comments: await request("GET", repoPathPrefix + "/issues/" + requiredIssueNumber() + "/comments", {
-      per_page: 100,
-    }),
-  };
-
-  if (pullNumber !== undefined) {
-    response.pullRequest = await request("GET", repoPathPrefix + "/pulls/" + pullNumber);
-  }
-
-  return response;
-}
-
-async function githubRequest(args) {
-  requireTriggerTarget();
-
-  if (typeof args.method !== "string" || typeof args.path !== "string") {
-    throw new McpError(ErrorCode.InvalidParams, "method and path are required");
-  }
-
-  return await request(args.method, args.path, args.parameters);
-}
-
 async function cloneRepository(args) {
-  requireTriggerTarget();
-
+  const owner = requiredString(args.owner, "owner");
+  const repo = requiredString(args.repo, "repo");
   const directory = normalizeCloneDirectory(args.directory);
   await ensureDirectoryCanBeCreated(directory);
 
@@ -500,9 +425,9 @@ async function cloneRepository(args) {
     "https://x-access-token:" +
     encodeURIComponent(token) +
     "@github.com/" +
-    owner +
+    encodeURIComponent(owner) +
     "/" +
-    repo +
+    encodeURIComponent(repo) +
     ".git";
   const cloneArgs = ["clone", "--depth", "1"];
 
@@ -517,46 +442,20 @@ async function cloneRepository(args) {
   return { directory, repository: owner + "/" + repo };
 }
 
-async function reply(args) {
-  requireTriggerTarget();
+async function addIssueComment(args) {
+  const owner = requiredString(args.owner, "owner");
+  const repo = requiredString(args.repo, "repo");
+  const issueNumber = requiredNumber(args.issueNumber, "issueNumber");
+  const body = requiredString(args.body, "body");
 
-  if (typeof args.body !== "string" || args.body.trim() === "") {
-    throw new McpError(ErrorCode.InvalidParams, "Reply body is required");
-  }
-
-  if (commentKind === "pull_request_review") {
-    return await request(
-      "POST",
-      repoPathPrefix + "/pulls/comments/" + commentId + "/replies",
-      { body: args.body },
-    );
-  }
-
-  return await request("POST", repoPathPrefix + "/issues/" + requiredIssueNumber() + "/comments", {
-    body: args.body,
+  const response = await octokit.request("POST /repos/{owner}/{repo}/issues/{issue_number}/comments", {
+    owner,
+    repo,
+    issue_number: issueNumber,
+    body,
   });
-}
 
-async function request(method, requestPath, parameters = {}) {
-  const normalizedMethod = method.toUpperCase();
-
-  if (!isAllowedMethod(normalizedMethod)) {
-    throw new McpError(ErrorCode.InvalidParams, "Unsupported GitHub method: " + method);
-  }
-
-  assertRepoScopedPath(requestPath);
-
-  try {
-    const response = await octokit.request(
-      normalizedMethod + " " + requestPath,
-      parameters ?? {},
-    );
-
-    return response.data;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new McpError(ErrorCode.InternalError, "GitHub request failed: " + message);
-  }
+  return summarizeComment(response.data);
 }
 
 async function readRequest(requestPath, parameters = {}) {
@@ -567,35 +466,6 @@ async function readRequest(requestPath, parameters = {}) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new McpError(ErrorCode.InternalError, "GitHub request failed: " + message);
-  }
-}
-
-function assertRepoScopedPath(requestPath) {
-  requireTriggerTarget();
-
-  if (
-    requestPath !== repoPathPrefix &&
-    !requestPath.startsWith(repoPathPrefix + "/")
-  ) {
-    throw new McpError(
-      ErrorCode.InvalidParams,
-      "GitHub API access is limited to " + repoPathPrefix,
-    );
-  }
-}
-
-function hasTriggerTarget() {
-  return (
-    owner !== undefined &&
-    repo !== undefined &&
-    commentId !== undefined &&
-    commentKind !== undefined
-  );
-}
-
-function requireTriggerTarget() {
-  if (repoPathPrefix === undefined || commentId === undefined || commentKind === undefined) {
-    throw new McpError(ErrorCode.InvalidParams, "GitHub trigger context is not available for this run");
   }
 }
 
@@ -622,6 +492,66 @@ function summarizeRepository(repository) {
   };
 }
 
+function summarizeIssue(issue) {
+  return {
+    id: issue.id,
+    number: issue.number,
+    title: issue.title,
+    body: issue.body,
+    state: issue.state,
+    htmlUrl: issue.html_url,
+    pullRequest: issue.pull_request !== undefined,
+    author: issue.user?.login,
+    assignees: issue.assignees?.map((user) => user.login) ?? [],
+    labels: issue.labels?.map((label) =>
+      typeof label === "string" ? label : label.name,
+    ) ?? [],
+    createdAt: issue.created_at,
+    updatedAt: issue.updated_at,
+  };
+}
+
+function summarizePullRequest(pullRequest) {
+  return {
+    id: pullRequest.id,
+    number: pullRequest.number,
+    title: pullRequest.title,
+    body: pullRequest.body,
+    state: pullRequest.state,
+    draft: pullRequest.draft,
+    merged: pullRequest.merged,
+    mergeable: pullRequest.mergeable,
+    htmlUrl: pullRequest.html_url,
+    author: pullRequest.user?.login,
+    base: {
+      ref: pullRequest.base?.ref,
+      sha: pullRequest.base?.sha,
+      repository: pullRequest.base?.repo?.full_name,
+    },
+    head: {
+      ref: pullRequest.head?.ref,
+      sha: pullRequest.head?.sha,
+      repository: pullRequest.head?.repo?.full_name,
+    },
+    additions: pullRequest.additions,
+    deletions: pullRequest.deletions,
+    changedFiles: pullRequest.changed_files,
+    createdAt: pullRequest.created_at,
+    updatedAt: pullRequest.updated_at,
+  };
+}
+
+function summarizeComment(comment) {
+  return {
+    id: comment.id,
+    body: comment.body,
+    htmlUrl: comment.html_url,
+    author: comment.user?.login,
+    createdAt: comment.created_at,
+    updatedAt: comment.updated_at,
+  };
+}
+
 function requiredString(value, name) {
   if (typeof value !== "string" || value.trim() === "") {
     throw new McpError(ErrorCode.InvalidParams, name + " is required");
@@ -630,16 +560,20 @@ function requiredString(value, name) {
   return value.trim();
 }
 
+function requiredNumber(value, name) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new McpError(ErrorCode.InvalidParams, name + " is required");
+  }
+
+  return Math.trunc(value);
+}
+
 function boundedNumber(value, fallback, min, max) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return fallback;
   }
 
   return Math.max(min, Math.min(max, Math.trunc(value)));
-}
-
-function isAllowedMethod(method) {
-  return ["GET", "POST", "PATCH", "PUT", "DELETE"].includes(method);
 }
 
 function normalizeCloneDirectory(value) {
@@ -681,50 +615,12 @@ async function ensureDirectoryCanBeCreated(directory) {
   }
 }
 
-function requiredIssueNumber() {
-  if (issueNumber === undefined) {
-    throw new McpError(ErrorCode.InvalidParams, "This trigger has no issue target");
-  }
-
-  return issueNumber;
-}
-
-function requiredPullNumber() {
-  if (pullNumber === undefined) {
-    throw new McpError(ErrorCode.InvalidParams, "This trigger has no pull request target");
-  }
-
-  return pullNumber;
-}
-
-function optionalNumberEnv(name) {
-  const value = process.env[name];
-
-  if (value === undefined || value === "") {
-    return undefined;
-  }
-
-  const numberValue = Number(value);
-
-  if (!Number.isFinite(numberValue)) {
-    throw new Error("Invalid " + name);
-  }
-
-  return numberValue;
-}
-
 function requiredEnv(name) {
   const value = process.env[name];
   if (value === undefined || value === "") {
     throw new Error("Missing " + name);
   }
   return value;
-}
-
-function optionalEnv(name) {
-  const value = process.env[name];
-
-  return value === undefined || value === "" ? undefined : value;
 }
 
 function filterEnabledTools(allTools) {

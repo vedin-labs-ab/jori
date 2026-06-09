@@ -10,7 +10,6 @@ import { type ToolBundle } from "./types"
 export function createLinearToolBundle(
   args: {
     credentials: LinearCredentials
-    defaultIssueId?: string
   } & ToolPermissionInput
 ): ToolBundle {
   return {
@@ -22,9 +21,6 @@ export function createLinearToolBundle(
         env: {
           MILO_LINEAR_ACCESS_TOKEN: args.credentials.accessToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
-          ...(args.defaultIssueId === undefined
-            ? {}
-            : { MILO_LINEAR_DEFAULT_ISSUE_ID: args.defaultIssueId }),
         },
       },
     ],
@@ -91,7 +87,6 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 const accessToken = requiredEnv("MILO_LINEAR_ACCESS_TOKEN");
-const defaultIssueId = process.env.MILO_LINEAR_DEFAULT_ISSUE_ID;
 const linearGraphqlUrl = ${JSON.stringify(linearGraphqlUrl)};
 
 const allTools = [
@@ -110,10 +105,11 @@ const allTools = [
   },
   {
     name: "linear_get_issue",
-    description: "Read a Linear issue by ID, including recent comments. Defaults to the trigger issue when this run came from Linear.",
+    description: "Read a Linear issue by ID, including recent comments.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
+      required: ["issueId"],
       properties: {
         issueId: { type: "string" },
       },
@@ -121,10 +117,11 @@ const allTools = [
   },
   {
     name: "linear_list_comments",
-    description: "Read recent comments from a Linear issue by ID. Defaults to the trigger issue when this run came from Linear.",
+    description: "Read recent comments from a Linear issue by ID.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
+      required: ["issueId"],
       properties: {
         issueId: { type: "string" },
         first: { type: "number" },
@@ -133,11 +130,11 @@ const allTools = [
   },
   {
     name: "linear_add_comment",
-    description: "Add a comment to a Linear issue by ID. Defaults to the trigger issue when this run came from Linear.",
+    description: "Add a comment to a Linear issue by ID.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
-      required: ["body"],
+      required: ["issueId", "body"],
       properties: {
         issueId: { type: "string" },
         body: { type: "string" },
@@ -205,7 +202,7 @@ async function callTool(toolName, args) {
 }
 
 function getIssueId(args) {
-  const issueId = args.issueId ?? defaultIssueId;
+  const issueId = args.issueId;
 
   if (typeof issueId !== "string" || issueId === "") {
     throw new McpError(ErrorCode.InvalidParams, "Issue ID is required");

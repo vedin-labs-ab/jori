@@ -11,7 +11,7 @@ import { assemblePrompt, type RuntimeSkill } from "./prompt"
 import { runCodexInE2B } from "./sandbox/e2b"
 import { requireMessageTarget } from "./targets"
 import { createExecutionToken, hashExecutionToken } from "./tokens"
-import { assembleToolsForRun, type RuntimeTarget } from "./tools"
+import { assembleToolsForRun } from "./tools"
 import { CodexRunError, formatError } from "./trace"
 
 export const runMessageExecution = internalAction({
@@ -25,25 +25,20 @@ export const runMessageExecution = internalAction({
       return
     }
 
-    const target = requireMessageTarget(input.provider, input.message.data)
+    requireMessageTarget(input.provider, input.message.data)
 
-    await runExecution(
-      ctx,
-      {
-        type: "message",
-        provider: input.provider,
-        execution: input.execution,
-        trigger: input.trigger,
-        integration: input.integration,
-        integrations: await prepareIntegrationsForRuntime(
-          ctx,
-          input.integrations,
-          target
-        ),
-        message: input.message,
-      },
-      target
-    )
+    await runExecution(ctx, {
+      type: "message",
+      provider: input.provider,
+      execution: input.execution,
+      trigger: input.trigger,
+      integration: input.integration,
+      integrations: await prepareIntegrationsForRuntime(
+        ctx,
+        input.integrations
+      ),
+      message: input.message,
+    })
   },
 })
 
@@ -68,38 +63,21 @@ export const runScheduledExecution = internalAction({
       return
     }
 
-    await runExecution(
-      ctx,
-      {
-        type: "scheduled",
-        execution: input.execution,
-        trigger: input.trigger,
-        integration: input.integration,
-        integrations: await prepareIntegrationsForRuntime(
-          ctx,
-          input.integrations,
-          {
-            provider: "slack",
-            channelId: input.schedule.output.channelId,
-            threadId: input.schedule.output.threadId,
-          }
-        ),
-        schedule: input.schedule,
-      },
-      {
-        provider: "slack",
-        channelId: input.schedule.output.channelId,
-        threadId: input.schedule.output.threadId,
-      }
-    )
+    await runExecution(ctx, {
+      type: "scheduled",
+      execution: input.execution,
+      trigger: input.trigger,
+      integration: input.integration,
+      integrations: await prepareIntegrationsForRuntime(
+        ctx,
+        input.integrations
+      ),
+      schedule: input.schedule,
+    })
   },
 })
 
-async function runExecution(
-  ctx: ActionCtx,
-  input: CodexRuntimeInput,
-  target: RuntimeTarget
-) {
+async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
   const executionToken = createExecutionToken()
   const hash = await hashExecutionToken(executionToken)
   const skills = await ctx.runQuery(internal.skills.catalog.listForRuntime, {
@@ -119,7 +97,6 @@ async function runExecution(
     },
     integrations: input.integrations,
     toolModes,
-    target,
   })
   const promptBundle = assembleRuntimePrompt(input, skills, toolBundle)
   let trace: string | undefined
@@ -179,8 +156,7 @@ function assembleRuntimePrompt(
 
 async function prepareIntegrationsForRuntime(
   ctx: ActionCtx,
-  integrations: CodexRuntimeInput["integrations"],
-  target: RuntimeTarget
+  integrations: CodexRuntimeInput["integrations"]
 ) {
   const prepared: CodexRuntimeInput["integrations"] = []
 
@@ -188,7 +164,6 @@ async function prepareIntegrationsForRuntime(
     prepared.push(
       await prepareIntegrationForRuntime(ctx, {
         integration,
-        target,
       })
     )
   }

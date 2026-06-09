@@ -38,7 +38,7 @@ export async function fetchGitHubInstallationProfile(installationId: string) {
 
 export async function createGitHubInstallationToken(
   installationId: string,
-  repositoryId: number | undefined
+  repositoryId?: number
 ) {
   return await githubAppRequest<GitHubInstallationToken>(
     `/app/installations/${installationId}/access_tokens`,

@@ -7,6 +7,9 @@ Target:
 - Target ID: {{message.targetId}}
 - Conversation ID: {{message.conversationId}}
 
+Target metadata:
+{{message.targetMetadata}}
+
 Message:
 {{message.text}}
 

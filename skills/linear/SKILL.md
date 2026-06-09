@@ -8,10 +8,11 @@ description: Built-in Linear skill for reading issue context and sending concise
 Use Linear for issue context and issue comments.
 
 Context:
-- Read the triggering issue before answering when the issue title,
-  description, status, or comments materially change the response.
+- Read the relevant issue before answering when the issue title, description,
+  status, or comments materially change the response.
 - Use `linear_get_issue` for the target issue and `linear_list_comments` when
-  the comment thread matters.
+  the comment thread matters. Pass the issue ID explicitly, using trigger
+  context when it identifies the relevant Linear issue.
 - Use `linear_search_issues` when the target issue is described by title,
   identifier, or other text and you do not already have the exact issue ID.
   Then use `linear_get_issue` once the target issue is identified.
@@ -20,9 +21,9 @@ Context:
 
 Replies and requested Linear comments:
 - Use `linear_add_comment` for Linear replies and explicitly requested Linear
-  comments.
-- Prefer the trigger issue for status replies unless the user asks for another
-  issue.
+  comments. Pass the issue ID explicitly.
+- Prefer the issue from trigger context for status replies unless the user asks
+  for another issue.
 - Send one comment unless the task explicitly needs multiple.
 - After the comment succeeds, stop.
 

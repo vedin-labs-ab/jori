@@ -101,6 +101,10 @@ function createMessageTriggerPart(
         targetId: getMessageTargetId(input.provider, input.message.data),
         conversationId:
           input.message.conversationId ?? input.message.externalId,
+        targetMetadata: getMessageTargetMetadata(
+          input.provider,
+          input.message.data
+        ),
         text: input.message.text ?? "",
       },
     }),
@@ -162,6 +166,68 @@ function getGitHubTargetId(data: unknown) {
   }
 
   return `${fullName}#${number}`
+}
+
+function getMessageTargetMetadata(provider: MessageProvider, data: unknown) {
+  if (provider === "github") {
+    return formatTargetMetadata(getGitHubTargetMetadata(data))
+  }
+
+  if (provider === "linear") {
+    return formatTargetMetadata(getLinearTargetMetadata(data))
+  }
+
+  return formatTargetMetadata(getSlackTargetMetadata(data))
+}
+
+function getGitHubTargetMetadata(data: unknown) {
+  const repository = readDataObject(data, "repository")
+  const comment = readDataObject(data, "comment")
+
+  return [
+    metadataLine("Repository owner", readDataString(repository, "owner")),
+    metadataLine("Repository name", readDataString(repository, "name")),
+    metadataLine(
+      "Repository full name",
+      readDataString(repository, "fullName")
+    ),
+    metadataLine("Repository ID", readDataNumber(repository, "id")),
+    metadataLine("Issue number", readDataNumber(data, "issueNumber")),
+    metadataLine("Pull request number", readDataNumber(data, "pullNumber")),
+    metadataLine("Comment ID", readDataString(comment, "id")),
+    metadataLine("Comment kind", readDataString(comment, "kind")),
+  ].filter((line) => line !== null)
+}
+
+function getLinearTargetMetadata(data: unknown) {
+  return [
+    metadataLine("Issue ID", readDataString(data, "issueId")),
+    metadataLine("Comment ID", readDataString(data, "commentId")),
+  ].filter((line) => line !== null)
+}
+
+function getSlackTargetMetadata(data: unknown) {
+  return [
+    metadataLine("Channel ID", readDataString(data, "channelId")),
+    metadataLine("Message timestamp", readDataString(data, "ts")),
+    metadataLine("Thread timestamp", readDataString(data, "threadTs")),
+  ].filter((line) => line !== null)
+}
+
+function metadataLine(label: string, value: string | number | undefined) {
+  if (value === undefined || value === "") {
+    return null
+  }
+
+  return `- ${label}: ${value}`
+}
+
+function formatTargetMetadata(lines: string[]) {
+  if (lines.length === 0) {
+    return "- None"
+  }
+
+  return lines.join("\n")
 }
 
 function renderTemplate(

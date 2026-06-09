@@ -12,11 +12,7 @@ import { requireMicrosoftCredentials } from "../../providers/microsoft/credentia
 import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
 import { getProviderSkillNames } from "../bundles"
-import {
-  createGitHubAccountToolBundle,
-  createGitHubToolBundle,
-  githubAccountToolNames,
-} from "./github"
+import { createGitHubToolBundle } from "./github"
 import { createGmailToolBundle, createGoogleCalendarToolBundle } from "./google"
 import { createLinearToolBundle } from "./linear"
 import {
@@ -27,15 +23,10 @@ import { createMiloToolBundle } from "./milo"
 import { createNotionToolBundle } from "./notion"
 import { type ToolPermissionInput } from "./policy"
 import { createSlackToolBundle } from "./slack"
-import {
-  type RuntimeTarget,
-  type RuntimeToolBundle,
-  type ToolBundle,
-} from "./types"
+import { type RuntimeToolBundle, type ToolBundle } from "./types"
 
 type IntegrationBundleArgs = {
   integration: Doc<"integrations">
-  target: RuntimeTarget
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
@@ -60,7 +51,6 @@ export function assembleToolsForRun(args: {
   }
   integrations: Doc<"integrations">[]
   toolModes: ReadonlyMap<string, PermissionMode>
-  target: RuntimeTarget
 }): RuntimeToolBundle {
   const bundles: ToolBundle[] = []
   const skillNames = new Set<string>()
@@ -81,7 +71,6 @@ export function assembleToolsForRun(args: {
   for (const integration of args.integrations) {
     const integrationBundle = createIntegrationToolBundle({
       integration,
-      target: args.target,
       toolModes: args.toolModes,
     })
 
@@ -178,8 +167,6 @@ function createLinearIntegrationToolBundle(
 ) {
   return createLinearToolBundle({
     credentials: requireLinearCredentials(args.integration),
-    defaultIssueId:
-      args.target.provider === "linear" ? args.target.issueId : undefined,
     ...permissionInput,
   })
 }
@@ -188,38 +175,10 @@ function createGitHubIntegrationToolBundle(
   args: IntegrationBundleArgs,
   permissionInput: ToolPermissionInput
 ) {
-  if (args.target.provider !== "github") {
-    const permissions = permissionInput.permissions.filter((permission) =>
-      isGitHubAccountToolName(permission.tool)
-    )
-
-    if (permissions.length === 0) {
-      return null
-    }
-
-    return createGitHubAccountToolBundle({
-      credentials: requireGitHubCredentials(args.integration),
-      ...permissionInput,
-      permissions,
-    })
-  }
-
   return createGitHubToolBundle({
     credentials: requireGitHubCredentials(args.integration),
-    owner: args.target.owner,
-    repo: args.target.repo,
-    issueNumber: args.target.issueNumber,
-    pullNumber: args.target.pullNumber,
-    commentId: args.target.commentId,
-    commentKind: args.target.commentKind,
     ...permissionInput,
   })
-}
-
-function isGitHubAccountToolName(tool: string) {
-  return githubAccountToolNames.includes(
-    tool as (typeof githubAccountToolNames)[number]
-  )
 }
 
 function createSlackIntegrationToolBundle(
