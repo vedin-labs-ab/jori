@@ -9,9 +9,8 @@ import { useConvexAuth } from "convex/react"
 import { type ReactNode } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { IntegrationCallbackAlerts } from "./alerts"
 import { LoadingMessage } from "./loading"
-import { ConsoleHeader } from "./shell"
+import { ConsoleShell, PublicConsoleFrame } from "./shell"
 
 export type ActiveOrganization = NonNullable<
   ReturnType<typeof useOrganization>["organization"]
@@ -25,22 +24,23 @@ export function ConsolePage({
   const { isLoaded, isSignedIn } = useAuth()
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
 
+  if (!isLoaded) {
+    return (
+      <PublicConsoleFrame isLoaded={isLoaded} isSignedIn={isSignedIn}>
+        <LoadingMessage label="Loading" />
+      </PublicConsoleFrame>
+    )
+  }
+
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-5xl flex-col gap-8 px-6 py-8">
-      <ConsoleHeader isLoaded={isLoaded} isSignedIn={isSignedIn} />
-      <IntegrationCallbackAlerts />
-
-      {!isLoaded ? <LoadingMessage label="Loading" /> : null}
-
-      <ConsoleContent
-        isClerkLoaded={isLoaded}
-        isConvexAuthenticated={isAuthenticated}
-        isConvexAuthLoading={isConvexAuthLoading}
-        isSignedIn={isSignedIn}
-      >
-        {children}
-      </ConsoleContent>
-    </main>
+    <ConsoleContent
+      isClerkLoaded={isLoaded}
+      isConvexAuthenticated={isAuthenticated}
+      isConvexAuthLoading={isConvexAuthLoading}
+      isSignedIn={isSignedIn}
+    >
+      {children}
+    </ConsoleContent>
   )
 }
 
@@ -62,21 +62,31 @@ function ConsoleContent({
   }
 
   if (!isSignedIn) {
-    return <SignedOutView />
+    return (
+      <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
+        <SignedOutView />
+      </PublicConsoleFrame>
+    )
   }
 
   if (isConvexAuthLoading) {
-    return <LoadingMessage label="Loading authentication" />
+    return (
+      <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
+        <LoadingMessage label="Loading authentication" />
+      </PublicConsoleFrame>
+    )
   }
 
   if (!isConvexAuthenticated) {
     return (
-      <Alert variant="destructive">
-        <AlertTitle>Authentication unavailable</AlertTitle>
-        <AlertDescription>
-          Convex could not validate the active Clerk session.
-        </AlertDescription>
-      </Alert>
+      <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
+        <Alert variant="destructive">
+          <AlertTitle>Authentication unavailable</AlertTitle>
+          <AlertDescription>
+            Convex could not validate the active Clerk session.
+          </AlertDescription>
+        </Alert>
+      </PublicConsoleFrame>
     )
   }
 
@@ -113,24 +123,30 @@ function SignedInView({
   const { isLoaded, organization } = useOrganization()
 
   if (!isLoaded) {
-    return <LoadingMessage label="Loading organization" />
+    return (
+      <PublicConsoleFrame isLoaded={isLoaded} isSignedIn>
+        <LoadingMessage label="Loading organization" />
+      </PublicConsoleFrame>
+    )
   }
 
   if (organization === undefined || organization === null) {
     return (
-      <section className="grid max-w-xl gap-4">
-        <div className="grid gap-1">
-          <h1 className="text-2xl font-medium tracking-normal">
-            Create your organization.
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Milo uses Clerk organizations as tenants.
-          </p>
-        </div>
-        <CreateOrganization />
-      </section>
+      <PublicConsoleFrame isLoaded={isLoaded} isSignedIn>
+        <section className="grid max-w-xl gap-4">
+          <div className="grid gap-1">
+            <h1 className="text-2xl font-medium tracking-normal">
+              Create your organization.
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Milo uses Clerk organizations as tenants.
+            </p>
+          </div>
+          <CreateOrganization />
+        </section>
+      </PublicConsoleFrame>
     )
   }
 
-  return children(organization)
+  return <ConsoleShell>{children(organization)}</ConsoleShell>
 }
