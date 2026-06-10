@@ -2,10 +2,7 @@ import { type ToolPermission } from "../permissions/catalog"
 import { promptTemplates } from "../prompts/generated"
 import { type CodexRuntimeInput, type MessageProvider } from "./codex"
 import { readDataNumber, readDataObject, readDataString } from "./data"
-import {
-  createAvailableToolsInstructions,
-  createToolApprovalInstructions,
-} from "./instructions"
+import { createToolApprovalInstructions } from "./instructions"
 import { type RuntimeToolCapability } from "./tools/types"
 
 export type PromptBundle = {
@@ -32,12 +29,10 @@ export function assemblePrompt(
   input: CodexRuntimeInput,
   availableSkills: RuntimeSkill[],
   promptedTools: ToolPermission[] = [],
-  capabilities: RuntimeToolCapability[] = []
+  _capabilities: RuntimeToolCapability[] = []
 ): PromptBundle {
   const parts = [
     createSystemPart(),
-    createAvailableToolsPart(capabilities),
-    ...createSkillsParts(availableSkills),
     ...createApprovalParts(promptedTools),
     createTriggerPart(input),
   ]
@@ -46,16 +41,6 @@ export function assemblePrompt(
     rendered: parts.map((part) => part.content).join("\n\n"),
     parts,
     skillIds: availableSkills.map((skill) => skill.name),
-  }
-}
-
-function createAvailableToolsPart(
-  capabilities: RuntimeToolCapability[]
-): PromptPart {
-  return {
-    id: "system/available-tools",
-    type: "system",
-    content: createAvailableToolsInstructions(capabilities),
   }
 }
 
@@ -69,25 +54,6 @@ function createApprovalParts(promptedTools: ToolPermission[]): PromptPart[] {
       id: "system/tool-approval",
       type: "system",
       content: createToolApprovalInstructions(promptedTools),
-    },
-  ]
-}
-
-function createSkillsParts(availableSkills: RuntimeSkill[]): PromptPart[] {
-  if (availableSkills.length === 0) {
-    return []
-  }
-
-  return [
-    {
-      id: "system/skills",
-      type: "system",
-      content: [
-        "# Skills",
-        "",
-        "Agent Skills for this run are installed under `.agents/skills`.",
-        "Use matching skills through the harness' normal skill-loading flow, and do not read unrelated skill files.",
-      ].join("\n"),
     },
   ]
 }

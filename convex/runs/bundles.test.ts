@@ -44,7 +44,7 @@ describe("runtime integration bundles", () => {
     expect(prompt.skillIds).toEqual(["scheduling", "email-style"])
     expect(prompt.rendered).not.toContain("google_gmail_search_threads")
     expect(prompt.rendered).not.toContain("Keep email concise.")
-    expect(prompt.rendered).toContain(".agents/skills")
+    expect(prompt.rendered).not.toContain("# Skills")
   })
 })
 
@@ -80,14 +80,17 @@ describe("runtime active integration availability", () => {
     expect(toolBundle.skillNames).toContain("slack")
     expect(toolBundle.skillNames).not.toContain("notion")
     expect(prompt.skillIds).toEqual(["slack"])
-    expect(prompt.rendered).toContain("Slack: List channels")
+    expect(
+      toolBundle.capabilities.map((capability) => capability.label)
+    ).toEqual(["Schedules", "Slack"])
+    expect(prompt.rendered).not.toContain("Slack: List channels")
     expect(prompt.rendered).not.toContain("Notion:")
     expect(prompt.rendered).not.toContain("notion_search")
   })
 })
 
-describe("runtime available tool instructions", () => {
-  test("renders active connected capabilities for meta tool questions", () => {
+describe("runtime native tool availability metadata", () => {
+  test("keeps active connected capabilities out of the prompt", () => {
     const toolBundle = assembleToolsForRun({
       milo: {
         convexSiteUrl: "https://convex.example",
@@ -103,9 +106,12 @@ describe("runtime available tool instructions", () => {
       toolBundle.capabilities
     )
 
-    expect(prompt.rendered).toContain("# Available Tools")
-    expect(prompt.rendered).toContain("Schedules: Search schedules")
-    expect(prompt.rendered).toContain("Slack: List channels")
+    expect(
+      toolBundle.capabilities.map((capability) => capability.label)
+    ).toEqual(["Schedules", "Slack"])
+    expect(prompt.rendered).not.toContain("# Available Tools")
+    expect(prompt.rendered).not.toContain("Schedules: Search schedules")
+    expect(prompt.rendered).not.toContain("Slack: List channels")
     expect(prompt.rendered).not.toContain("Notion:")
     expect(prompt.rendered).not.toContain("Local workspace")
     expect(prompt.rendered).not.toContain("Web/current")
