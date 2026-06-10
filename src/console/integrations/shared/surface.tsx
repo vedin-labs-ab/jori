@@ -80,5 +80,7 @@ function IntegrationLogoMark({ logo }: { logo: IntegrationLogo }) {
     )
   }
 
-  return <div className={containerClassName}>{logo.mark}</div>
+  return (
+    <div className={`${containerClassName} [&>svg]:size-6`}>{logo.mark}</div>
+  )
 }
