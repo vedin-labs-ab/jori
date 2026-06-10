@@ -2,7 +2,7 @@ export const pageSize = 8
 
 export const filterOptions = [
   { label: "All", value: "all" },
-  { label: "Running", value: "running" },
+  { label: "Ongoing", value: "ongoing" },
   { label: "Needs approval", value: "approval" },
   { label: "Failed", value: "failed" },
   { label: "Completed", value: "completed" },

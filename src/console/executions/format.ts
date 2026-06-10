@@ -1,7 +1,6 @@
 import {
   type ApprovalState,
   type ExecutionItem,
-  type ExecutionStatus,
   type FilterValue,
 } from "./types"
 
@@ -14,26 +13,11 @@ export function matchesFilter(row: ExecutionItem, filter: FilterValue) {
     return row.approval?.state === "pending"
   }
 
-  return row.status === filter
-}
-
-export function statusCopy(
-  status: ExecutionStatus,
-  approvalState: ApprovalState | undefined
-) {
-  if (approvalState === "pending") {
-    return "Waiting for approval before continuing."
+  if (filter === "ongoing") {
+    return row.status === "queued" || row.status === "running"
   }
 
-  const copy = {
-    completed: "The execution completed successfully.",
-    failed: "The execution failed before completion.",
-    queued: "The execution is queued.",
-    running: "The execution is currently running.",
-    stopped: "The execution was stopped.",
-  } satisfies Record<ExecutionStatus, string>
-
-  return copy[status]
+  return row.status === filter
 }
 
 export function approvalLabel(state: ApprovalState) {

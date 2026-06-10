@@ -1,12 +1,13 @@
-import { AlertCircle, Clock3, Target, Timer, Zap } from "lucide-react"
+import { FileText, Timer } from "lucide-react"
 import { useState } from "react"
 import {
   ApprovalCallout,
   CodeDetail,
   DetailLine,
+  ErrorDetail,
   ExecutionDetails,
 } from "./details"
-import { formatDuration, relativeTime, statusCopy } from "./format"
+import { formatDuration, relativeTime } from "./format"
 import { SourceParts } from "./source"
 import { ApprovalBadge, MetaPill, StatusIcon } from "./status"
 import { type ExecutionItem } from "./types"
@@ -86,24 +87,15 @@ function ExpandedExecution({
   return (
     <div className="grid gap-0 border-t px-3 pb-3">
       <DetailLine
-        icon={Target}
+        icon={FileText}
         label="Prompt"
         value={execution.objective ?? execution.title}
       />
-      <DetailLine
-        icon={Zap}
-        label="Progress"
-        value={
-          execution.progress ??
-          statusCopy(execution.status, execution.approval?.state)
-        }
-      />
-      <DetailLine icon={Clock3} label="Trigger" value={execution.trigger} />
       {execution.approval !== null ? (
         <ApprovalCallout approval={execution.approval} now={now} />
       ) : null}
       {execution.error !== undefined ? (
-        <DetailLine icon={AlertCircle} label="Error" value={execution.error} />
+        <ErrorDetail value={execution.error} />
       ) : null}
       <ExecutionDetails createdAt={execution.createdAt}>
         <CodeDetail label="Sandbox" value={execution.sandboxId} />

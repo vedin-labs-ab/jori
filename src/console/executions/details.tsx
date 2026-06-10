@@ -1,4 +1,4 @@
-import { AlertCircle, Copy, Info, type LucideIcon } from "lucide-react"
+import { AlertTriangle, Copy, type LucideIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,7 +20,7 @@ export function ApprovalCallout({
     <div className="mt-3 rounded-md border border-amber-700/20 bg-amber-700/5 p-3">
       <div className="grid gap-2 sm:grid-cols-[10rem_1fr]">
         <div className="flex items-center gap-2 font-medium text-amber-900 text-xs">
-          <AlertCircle className="size-3.5" />
+          <AlertTriangle className="size-3.5" />
           {approvalLabel(approval.state)}
         </div>
         <div className="grid gap-1 text-xs">
@@ -77,6 +77,20 @@ export function DetailLine({
   )
 }
 
+export function ErrorDetail({ value }: { value: string }) {
+  return (
+    <div className="grid gap-2 border-b py-3 text-xs sm:grid-cols-[10rem_1fr]">
+      <div className="flex items-start gap-2 font-medium">
+        <AlertTriangle className="mt-0.5 size-3.5 text-destructive" />
+        Error
+      </div>
+      <pre className="min-w-0 overflow-x-auto rounded-md bg-muted p-2 font-mono text-foreground text-xs leading-relaxed">
+        <code>{value}</code>
+      </pre>
+    </div>
+  )
+}
+
 export function ExecutionDetails({
   children,
   createdAt,
@@ -86,10 +100,6 @@ export function ExecutionDetails({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-3 text-xs">
-      <span className="inline-flex items-center gap-2 font-medium">
-        <Info className="size-3.5 text-muted-foreground" />
-        Details
-      </span>
       {children}
       <span className="text-muted-foreground">
         Created {absoluteTime(createdAt)}

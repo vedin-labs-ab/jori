@@ -10,6 +10,7 @@ import {
   PaginationItem,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   Tooltip,
   TooltipContent,
@@ -35,7 +36,7 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
   return (
     <section className="grid gap-4">
       <ExecutionsHeader />
-      <div className="rounded-lg border bg-card">
+      <div className="grid gap-3">
         <ExecutionFilters
           filter={filter}
           query={query}
@@ -86,19 +87,24 @@ function ExecutionFilters({
   setQuery: (query: string) => void
 }) {
   return (
-    <div className="flex flex-col gap-3 border-b p-3 md:flex-row md:items-center md:justify-between">
-      <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <ToggleGroup
+        className="flex-wrap justify-start"
+        onValueChange={(value) => {
+          if (value !== "") {
+            setFilter(value as FilterValue)
+          }
+        }}
+        type="single"
+        value={filter}
+        variant="outline"
+      >
         {filterOptions.map((option) => (
-          <Button
-            key={option.value}
-            onClick={() => setFilter(option.value)}
-            type="button"
-            variant={filter === option.value ? "default" : "secondary"}
-          >
+          <ToggleGroupItem key={option.value} value={option.value}>
             {option.label}
-          </Button>
+          </ToggleGroupItem>
         ))}
-      </div>
+      </ToggleGroup>
       <div className="flex items-center gap-2">
         <div className="relative min-w-0 flex-1 md:w-72">
           <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
@@ -130,7 +136,7 @@ function ExecutionRows({
   pagination: ReturnType<typeof useExecutionPagination>
 }) {
   return (
-    <div className="grid gap-2 p-3">
+    <div className="grid gap-2">
       {pagination.isLoadingFirstPage ? <ExecutionSkeletonList /> : null}
       {!pagination.isLoadingFirstPage && pagination.visibleRows.length === 0 ? (
         <EmptyExecutions hasFilters={pagination.hasFilters} />
@@ -155,7 +161,7 @@ function ExecutionPager({
   pagination: ReturnType<typeof useExecutionPagination>
 }) {
   return (
-    <div className="flex flex-col gap-3 border-t p-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-muted-foreground text-xs">
         Showing {pagination.firstVisibleNumber}-{pagination.lastVisibleNumber}{" "}
         of {pagination.filteredRows.length} loaded

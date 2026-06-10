@@ -2,9 +2,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Circle,
-  Clock3,
+  Loader2,
   type LucideIcon,
-  Play,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -26,12 +25,20 @@ export function StatusIcon({ status }: { status: ExecutionStatus }) {
       : status === "failed"
         ? AlertCircle
         : status === "running"
-          ? Play
+          ? Loader2
           : status === "queued"
-            ? Clock3
+            ? Loader2
             : Circle
 
-  return <Icon className={cn("size-4", statusIconClasses[status])} />
+  return (
+    <Icon
+      className={cn(
+        "size-4",
+        statusIconClasses[status],
+        (status === "queued" || status === "running") && "animate-spin"
+      )}
+    />
+  )
 }
 
 export function ApprovalBadge({
