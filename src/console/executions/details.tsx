@@ -96,14 +96,14 @@ export function CodeBlockDetail({
         <code className="block whitespace-pre-wrap break-words" ref={codeRef}>
           {value}
         </code>
-        <CopyButton
+        <span
           className={cn(
             "absolute right-1.5",
             isSingleRenderedLine ? "top-1/2 -translate-y-1/2" : "top-1.5"
           )}
-          label={label}
-          value={value}
-        />
+        >
+          <CopyButton label={label} value={value} />
+        </span>
       </div>
     </div>
   )
@@ -210,10 +210,18 @@ function CopyButton({
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
+          aria-disabled={hasCopied}
           aria-label={`${hasCopied ? "Copied" : "Copy"} ${label}`}
-          className={cn("relative", className)}
+          className={cn(
+            "relative aria-disabled:pointer-events-none",
+            className
+          )}
           onClick={(event) => {
             event.stopPropagation()
+            if (hasCopied) {
+              return
+            }
+
             void navigator.clipboard?.writeText(value)
             setHasCopied(true)
           }}
