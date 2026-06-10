@@ -19,7 +19,6 @@ import {
   codexHome,
   createBootstrapCommand,
   createCodexCommand,
-  createImageCheckCommand,
   e2bSandboxTemplate,
   workspace,
 } from "./harness"
@@ -55,15 +54,6 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
   try {
     sandbox = await createE2BSandbox()
     await args.onSandboxCreated(sandbox.sandboxId)
-    assertSetupCommandSucceeded(
-      recordSetupTrace(
-        setupTraces,
-        "image_check",
-        await verifySandboxImage(sandbox)
-      ),
-      "The E2B sandbox image is missing a required runtime dependency.",
-      setupTraces
-    )
     assertSetupCommandSucceeded(
       recordSetupTrace(
         setupTraces,
@@ -135,14 +125,6 @@ function requireE2BApiKey() {
   }
 
   return apiKey
-}
-
-async function verifySandboxImage(sandbox: E2BSandbox) {
-  const result = await runCommand(sandbox, createImageCheckCommand(), {
-    timeoutMs: 30_000,
-  })
-
-  return createCommandTrace(result)
 }
 
 async function bootstrapCodex(

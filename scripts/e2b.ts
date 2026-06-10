@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { defaultBuildLogger, Template } from "e2b"
 import {
   codexVersion,
+  createImageCheckCommand,
   e2bSandboxTemplate,
   workspace,
 } from "../convex/runs/sandbox/harness.ts"
@@ -35,6 +36,7 @@ const template = Template()
       `chmod 777 ${workspace}`,
       "npm cache clean --force",
       "rm -rf /var/lib/apt/lists/*",
+      createImageCheckCommand(),
     ],
     { user: "root" }
   )
