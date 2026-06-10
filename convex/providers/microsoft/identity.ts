@@ -26,8 +26,8 @@ export async function upsertMicrosoftIdentity(
     tenantId: args.tenantId,
     userId: args.userId,
     provider: "microsoft",
-    providerAccountId: args.microsoftTenantId,
-    externalUserId: args.profile.user.id,
+    accountId: args.microsoftTenantId,
+    externalId: args.profile.user.id,
     email: args.email,
   })
 }

@@ -10,16 +10,16 @@ export const identities = defineTable({
   tenantId: v.string(),
   userId: v.string(),
   provider: identityProvider,
-  providerAccountId: v.string(),
-  externalUserId: v.string(),
+  accountId: v.string(),
+  externalId: v.string(),
   email: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
 })
   .index("by_tenant_email", ["tenantId", "email"])
-  .index("by_tenant_provider_external_user", [
+  .index("by_tenant_provider_external_id", [
     "tenantId",
     "provider",
-    "externalUserId",
+    "externalId",
   ])
   .index("by_tenant_provider_user", ["tenantId", "provider", "userId"])

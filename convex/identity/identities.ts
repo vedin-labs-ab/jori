@@ -8,8 +8,8 @@ export async function upsertIdentity(
     tenantId: string
     userId: string
     provider: IdentityProvider
-    providerAccountId: string
-    externalUserId: string
+    accountId: string
+    externalId: string
     email?: string
   }
 ) {
@@ -17,11 +17,11 @@ export async function upsertIdentity(
   const email = normalizeEmail(args.email)
   const existing = await ctx.db
     .query("identities")
-    .withIndex("by_tenant_provider_external_user", (query) =>
+    .withIndex("by_tenant_provider_external_id", (query) =>
       query
         .eq("tenantId", args.tenantId)
         .eq("provider", args.provider)
-        .eq("externalUserId", args.externalUserId)
+        .eq("externalId", args.externalId)
     )
     .first()
 
@@ -30,8 +30,8 @@ export async function upsertIdentity(
       tenantId: args.tenantId,
       userId: args.userId,
       provider: args.provider,
-      providerAccountId: args.providerAccountId,
-      externalUserId: args.externalUserId,
+      accountId: args.accountId,
+      externalId: args.externalId,
       email,
       createdAt: now,
       updatedAt: now,
@@ -40,7 +40,7 @@ export async function upsertIdentity(
 
   await ctx.db.patch(existing._id, {
     userId: args.userId,
-    providerAccountId: args.providerAccountId,
+    accountId: args.accountId,
     email,
     updatedAt: now,
   })
