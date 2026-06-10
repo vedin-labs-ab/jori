@@ -13,6 +13,7 @@ const tableRegistry: Record<TableName, true> = {
   schedules: true,
   triggers: true,
   activations: true,
+  approvals: true,
   executions: true,
   traces: true,
   permissions: true,
