@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import {
   getGitHubAccountLogin,
@@ -36,7 +37,7 @@ export const getSlackStatus = query({
       tenantId: args.tenantId,
     })
 
-    if (integration === null) {
+    if (!isVisibleIntegration(integration)) {
       return null
     }
 
@@ -59,7 +60,7 @@ export const getLinearStatus = query({
       tenantId: args.tenantId,
     })
 
-    if (integration === null) {
+    if (!isVisibleIntegration(integration)) {
       return null
     }
 
@@ -107,7 +108,7 @@ export const getGitHubStatus = query({
       tenantId: args.tenantId,
     })
 
-    if (integration === null) {
+    if (!isVisibleIntegration(integration)) {
       return null
     }
 
@@ -131,7 +132,7 @@ export const getNotionStatus = query({
       tenantId: args.tenantId,
     })
 
-    if (integration === null) {
+    if (!isVisibleIntegration(integration)) {
       return null
     }
 
@@ -181,7 +182,7 @@ async function getGoogleUserStatus(
 ) {
   const integration = await getUserIntegration(ctx, args)
 
-  if (integration === null) {
+  if (!isVisibleIntegration(integration)) {
     return null
   }
 
@@ -204,7 +205,7 @@ async function getMicrosoftUserStatus(
 ) {
   const integration = await getUserIntegration(ctx, args)
 
-  if (integration === null) {
+  if (!isVisibleIntegration(integration)) {
     return null
   }
 
@@ -217,4 +218,10 @@ async function getMicrosoftUserStatus(
     tenantName: getMicrosoftTenantName(integration.data),
     scope: "user" as const,
   }
+}
+
+function isVisibleIntegration(
+  integration: Doc<"integrations"> | null
+): integration is Doc<"integrations"> {
+  return integration !== null && integration.status !== "revoked"
 }

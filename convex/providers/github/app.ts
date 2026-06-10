@@ -52,9 +52,20 @@ export async function createGitHubInstallationToken(
   )
 }
 
+export async function deleteGitHubInstallation(installationId: string) {
+  await githubAppRequest<void>(`/app/installations/${installationId}`, {
+    method: "DELETE",
+    successStatuses: [202, 404],
+  })
+}
+
 async function githubAppRequest<Result>(
   path: string,
-  init: { method: "GET" | "POST"; body?: unknown }
+  init: {
+    method: "DELETE" | "GET" | "POST"
+    body?: unknown
+    successStatuses?: number[]
+  }
 ) {
   const response = await fetch(`${githubApiUrl}${path}`, {
     method: init.method,
@@ -68,13 +79,23 @@ async function githubAppRequest<Result>(
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   })
-  const result = await response.json()
+  const result = await readGitHubResponse(response)
 
-  if (!response.ok) {
+  if (!response.ok && !(init.successStatuses ?? []).includes(response.status)) {
     throw new Error(`GitHub App request failed: ${JSON.stringify(result)}`)
   }
 
   return result as Result
+}
+
+async function readGitHubResponse(response: Response) {
+  const body = await response.text()
+
+  if (body === "") {
+    return null
+  }
+
+  return JSON.parse(body) as unknown
 }
 
 async function createGitHubAppJwt() {

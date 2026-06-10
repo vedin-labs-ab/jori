@@ -1,4 +1,4 @@
-import { useMutation } from "convex/react"
+import { useAction } from "convex/react"
 import { useState } from "react"
 import { api } from "../../../convex/_generated/api"
 import { readErrorMessage } from "../error"
@@ -13,7 +13,7 @@ export function useIntegrationDisconnect({
   tenantId: string
   title: string
 }) {
-  const disconnectIntegration = useMutation(
+  const disconnectIntegration = useAction(
     api.integrations.disconnect.disconnect
   )
   const [isDisconnecting, setIsDisconnecting] = useState(false)
