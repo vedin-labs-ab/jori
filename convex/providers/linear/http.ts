@@ -1,5 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { createProviderActor } from "../../schemas/actors"
 import { redirectWithStatus, unauthorizedResponse } from "../http"
 import {
   linearOAuthAuthorizeUrl,
@@ -118,8 +119,11 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
       accountId: message.accountId,
       type: message.type,
       externalId: message.externalId,
-      actorId: message.actorId,
-      actorEmail: message.actorEmail,
+      actor: createProviderActor({
+        provider: "linear",
+        externalId: message.actorId,
+        email: message.actorEmail,
+      }),
       conversationId: message.conversationId,
       text: message.text,
       observedAt: message.observedAt,

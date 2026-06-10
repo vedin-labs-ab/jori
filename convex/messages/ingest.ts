@@ -17,13 +17,19 @@ import {
 } from "../providers/linear/gate"
 import { getSlackBotId } from "../providers/slack/data"
 import { isMiloRelevantMessage } from "../providers/slack/gate"
+import {
+  type Actor,
+  actorValidator,
+  createUserActor,
+  getActorEmail,
+  getActorExternalId,
+} from "../schemas/actors"
 
 const observedMessageArgs = {
   accountId: v.string(),
   type: v.string(),
   externalId: v.string(),
-  actorId: v.optional(v.string()),
-  actorEmail: v.optional(v.string()),
+  actor: v.optional(actorValidator),
   conversationId: v.optional(v.string()),
   text: v.optional(v.string()),
   observedAt: v.optional(v.number()),
@@ -33,8 +39,7 @@ const observedMessageArgs = {
 type ObservedMessage = {
   type: string
   externalId: string
-  actorId?: string
-  actorEmail?: string
+  actor?: Actor
   conversationId?: string
   text?: string
   observedAt?: number
@@ -53,7 +58,12 @@ export const recordSlackMessage = internalMutation({
       return { status: "missing_integration" as const }
     }
 
-    if (isSlackBotMessage(args.actorId, integration.data)) {
+    if (
+      isSlackBotMessage(
+        getActorExternalId(args.actor, "slack"),
+        integration.data
+      )
+    ) {
       return { status: "ignored_bot" as const }
     }
 
@@ -82,7 +92,12 @@ export const recordLinearMessage = internalMutation({
       return { status: "missing_integration" as const }
     }
 
-    if (isLinearAppMessage(args.actorId, integration.data)) {
+    if (
+      isLinearAppMessage(
+        getActorExternalId(args.actor, "linear"),
+        integration.data
+      )
+    ) {
       return { status: "ignored_bot" as const }
     }
 
@@ -199,8 +214,7 @@ async function insertMessage(
     integrationId: input.integration._id,
     type: input.message.type,
     externalId: input.message.externalId,
-    actorId: input.message.actorId,
-    actorEmail: input.message.actorEmail,
+    actor: input.message.actor,
     conversationId: input.message.conversationId,
     text: input.message.text,
     data: input.message.data,
@@ -216,10 +230,12 @@ async function resolveMessageOwner(
     message: ObservedMessage
   }
 ) {
-  return await resolveUserIdByEmail(ctx, {
+  const userId = await resolveUserIdByEmail(ctx, {
     tenantId: input.tenantId,
-    email: input.message.actorEmail,
+    email: getActorEmail(input.message.actor),
   })
+
+  return createUserActor(userId)
 }
 
 function isSlackBotMessage(actorId: string | undefined, data: unknown) {

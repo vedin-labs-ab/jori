@@ -5,6 +5,7 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
+import { getActorUserId } from "../schemas/actors"
 
 export const getInputByTrigger = internalQuery({
   args: {
@@ -58,7 +59,7 @@ async function getMessageInput(
   const integrations = await listActiveIntegrations(
     ctx,
     args.trigger.tenantId,
-    args.trigger.createdBy
+    getActorUserId(args.trigger.createdBy)
   )
 
   return {
@@ -96,7 +97,7 @@ async function getScheduledInput(
   const integrations = await listActiveIntegrations(
     ctx,
     schedule.tenantId,
-    schedule.createdBy
+    getActorUserId(schedule.createdBy)
   )
   const integration =
     integrations.find((candidate) => candidate.provider === "slack") ?? null

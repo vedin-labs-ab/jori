@@ -7,6 +7,7 @@ import {
   query,
 } from "../_generated/server"
 import { requireClerkUserId } from "../identity/users"
+import { createUserActor } from "../schemas/actors"
 import {
   type ConfigurablePermissionMode,
   getToolPermission,
@@ -73,6 +74,7 @@ export const set = mutation({
 
     const existing = await getOverride(ctx, args.tenantId, args.tool)
     const userId = requireClerkUserId(identity)
+    const updatedBy = createUserActor(userId)
 
     if (args.mode === permission.defaultMode) {
       if (existing !== null) {
@@ -87,13 +89,13 @@ export const set = mutation({
         tenantId: args.tenantId,
         tool: args.tool,
         mode: args.mode,
-        updatedBy: userId,
+        updatedBy,
         updatedAt: Date.now(),
       })
     } else {
       await ctx.db.patch(existing._id, {
         mode: args.mode,
-        updatedBy: userId,
+        updatedBy,
         updatedAt: Date.now(),
       })
     }

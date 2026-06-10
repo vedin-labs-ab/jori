@@ -6,6 +6,7 @@ import {
   mutation,
 } from "../../_generated/server"
 import { requireClerkUserId } from "../../identity/users"
+import { createUserActor } from "../../schemas/actors"
 import { type MicrosoftSurfaceProvider } from "./config"
 import {
   getMicrosoftAccountId,
@@ -151,7 +152,7 @@ async function upsertMicrosoftIntegration(
     accountId: args.accountId,
     credentials: args.credentials,
     status: "active" as const,
-    createdBy: args.ownerId,
+    createdBy: createUserActor(args.ownerId),
     data: args.data,
   }
 

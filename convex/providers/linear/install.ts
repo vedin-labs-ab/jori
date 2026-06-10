@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
 import { requireClerkUserId } from "../../identity/users"
+import { createUserActor } from "../../schemas/actors"
 import { createSignedLinearState } from "./signing"
 
 export const createInstallState = mutation({
@@ -44,6 +45,7 @@ export const recordOAuthInstallation = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
+    const createdBy = createUserActor(args.createdBy)
     const existing = await ctx.db
       .query("integrations")
       .withIndex("by_provider_account", (query) =>
@@ -70,7 +72,7 @@ export const recordOAuthInstallation = internalMutation({
         tenantId: args.tenantId,
         credentials,
         status: "active",
-        createdBy: args.createdBy,
+        createdBy,
         data,
       })
 
@@ -83,7 +85,7 @@ export const recordOAuthInstallation = internalMutation({
       accountId: args.profile.organization.id,
       credentials,
       status: "active",
-      createdBy: args.createdBy,
+      createdBy,
       createdAt: now,
       data,
     })

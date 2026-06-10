@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { actorValidator } from "./actors"
 
 export const scheduleOutput = v.object({
   type: v.literal("slack"),
@@ -29,7 +30,7 @@ export const schedules = defineTable({
   nextRunAt: v.optional(v.number()),
   scheduledFunctionId: v.optional(v.id("_scheduled_functions")),
   status: scheduleStatus,
-  createdBy: v.optional(v.string()),
+  createdBy: v.optional(actorValidator),
   createdAt: v.number(),
   updatedAt: v.number(),
   lastTriggeredAt: v.optional(v.number()),

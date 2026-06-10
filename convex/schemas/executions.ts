@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { actorValidator } from "./actors"
 
 export const executions = defineTable({
   tenantId: v.string(),
@@ -16,7 +17,7 @@ export const executions = defineTable({
     v.literal("stopped")
   ),
   error: v.optional(v.string()),
-  createdBy: v.optional(v.string()),
+  createdBy: v.optional(actorValidator),
   createdAt: v.number(),
   finishedAt: v.optional(v.number()),
 })

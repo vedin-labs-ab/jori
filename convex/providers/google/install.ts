@@ -6,6 +6,7 @@ import {
 } from "../../_generated/server"
 import { upsertIdentity } from "../../identity/identities"
 import { requireClerkUserId } from "../../identity/users"
+import { createUserActor } from "../../schemas/actors"
 import { type GoogleSurfaceProvider } from "./config"
 import { createSignedGoogleState } from "./signing"
 
@@ -49,6 +50,7 @@ export const recordOAuthInstallation = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
+    const createdBy = createUserActor(args.createdBy)
     const existing = await ctx.db
       .query("integrations")
       .withIndex("by_tenant_provider_owner", (query) =>
@@ -84,7 +86,7 @@ export const recordOAuthInstallation = internalMutation({
         accountId: args.profile.email,
         credentials,
         status: "active",
-        createdBy: args.createdBy,
+        createdBy,
         data,
       })
 
@@ -101,7 +103,7 @@ export const recordOAuthInstallation = internalMutation({
       accountId: args.profile.email,
       credentials,
       status: "active",
-      createdBy: args.createdBy,
+      createdBy,
       createdAt: now,
       data,
     })

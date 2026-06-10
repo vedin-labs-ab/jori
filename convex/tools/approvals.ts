@@ -156,27 +156,20 @@ async function deliverSlackApproval(
 
 function createRequestedBy(context: ApprovalBrokerContext): Actor {
   if (context.input.trigger.createdBy !== undefined) {
-    return { userId: context.input.trigger.createdBy }
+    return context.input.trigger.createdBy
   }
 
   if (context.input.type === "scheduled") {
     const createdBy = context.input.schedule.createdBy
 
     if (createdBy !== undefined) {
-      return { userId: createdBy }
+      return createdBy
     }
   }
 
   if (context.input.type === "message") {
-    if (context.input.message.actorEmail !== undefined) {
-      return { email: context.input.message.actorEmail }
-    }
-
-    if (context.input.message.actorId !== undefined) {
-      return {
-        provider: context.input.provider,
-        externalId: context.input.message.actorId,
-      }
+    if (context.input.message.actor !== undefined) {
+      return context.input.message.actor
     }
   }
 

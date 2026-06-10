@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { actorValidator } from "./actors"
 
 export const triggers = defineTable({
   tenantId: v.string(),
@@ -11,7 +12,7 @@ export const triggers = defineTable({
     v.literal("message")
   ),
   data: v.optional(v.any()),
-  createdBy: v.optional(v.string()),
+  createdBy: v.optional(actorValidator),
   createdAt: v.number(),
 })
   .index("by_message", ["messageId"])

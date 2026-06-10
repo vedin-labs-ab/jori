@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { type Actor } from "../schemas/actors"
 
 export async function findConversationActivation(
   ctx: MutationCtx,
@@ -35,7 +36,7 @@ export async function startMessageTrigger(
     messageType: string
     messageExternalId: string
     conversationId: string
-    createdBy: string | undefined
+    createdBy: Actor | undefined
     now: number
   }
 ) {

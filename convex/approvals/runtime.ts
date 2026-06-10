@@ -3,13 +3,12 @@ import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
 import { createSlackExpirationResponse } from "../providers/slack/approvalBlocks"
-import { type Actor } from "../schemas/actors"
+import { type Actor, actorValidator } from "../schemas/actors"
 import { postSlackMessage, updateSlackMessage } from "../tools/providers/slack"
 
 export type SlackApprovalDecisionArgs = {
   accountId: string
-  actorId?: string
-  actorEmail?: string
+  actor?: Actor
   channelId: string
   threadTs?: string
   code: string
@@ -26,8 +25,7 @@ export type SlackApprovalDecisionResult = {
 export const handleSlackDecision = internalAction({
   args: {
     accountId: v.string(),
-    actorId: v.optional(v.string()),
-    actorEmail: v.optional(v.string()),
+    actor: v.optional(actorValidator),
     channelId: v.string(),
     threadTs: v.optional(v.string()),
     code: v.string(),
@@ -104,9 +102,7 @@ export async function decideSlackApproval(
     }
   }
 
-  const decidedBy = createSlackActor(args)
-
-  if (decidedBy === null) {
+  if (args.actor === undefined) {
     return {
       status: "missing",
       integration: target.integration,
@@ -118,7 +114,7 @@ export async function decideSlackApproval(
   const result = await ctx.runMutation(internal.approvals.approvals.decide, {
     approvalId: target.approval._id,
     decision: args.decision,
-    decidedBy,
+    decidedBy: args.actor,
   })
 
   if (result.status === "approved") {
@@ -153,21 +149,6 @@ export async function decideSlackApproval(
     approval: result.approval,
     message: decisionStatusMessage(result.status, result.approval),
   }
-}
-
-function createSlackActor(args: {
-  actorId?: string
-  actorEmail?: string
-}): Actor | null {
-  if (args.actorEmail !== undefined && args.actorEmail !== "") {
-    return { email: args.actorEmail }
-  }
-
-  if (args.actorId !== undefined && args.actorId !== "") {
-    return { provider: "slack", externalId: args.actorId }
-  }
-
-  return null
 }
 
 async function postSlackDecisionMessage(

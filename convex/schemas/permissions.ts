@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { actorValidator } from "./actors"
 
 export const permissions = defineTable({
   tenantId: v.string(),
@@ -9,7 +10,7 @@ export const permissions = defineTable({
     v.literal("prompted"),
     v.literal("blocked")
   ),
-  updatedBy: v.string(),
+  updatedBy: actorValidator,
   updatedAt: v.number(),
 })
   .index("by_tenant", ["tenantId"])

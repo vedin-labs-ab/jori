@@ -1,5 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { createProviderActor } from "../../schemas/actors"
 import { redirectWithStatus, unauthorizedResponse } from "../http"
 import {
   fetchGitHubInstallationProfile,
@@ -95,7 +96,10 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
       accountId: message.accountId,
       type: message.type,
       externalId: message.externalId,
-      actorId: message.actorId,
+      actor: createProviderActor({
+        provider: "github",
+        externalId: message.actorId,
+      }),
       conversationId: message.conversationId,
       text: message.text,
       observedAt: message.observedAt,
