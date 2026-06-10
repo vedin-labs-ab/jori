@@ -60,6 +60,32 @@ test("revokes Linear refresh tokens with client authentication", async () => {
   )
 })
 
+test("revokes Notion access tokens with client authentication", async () => {
+  vi.stubEnv("NOTION_CLIENT_ID", "notion-client")
+  vi.stubEnv("NOTION_CLIENT_SECRET", "notion-secret")
+
+  const fetch = vi.fn().mockResolvedValue(Response.json({ request_id: "id" }))
+  vi.stubGlobal("fetch", fetch)
+
+  await revokeIntegrationAccess(
+    integration("notion", {
+      accessToken: "notion-access",
+      refreshToken: "notion-refresh",
+    })
+  )
+
+  expect(fetch).toHaveBeenCalledWith(
+    "https://api.notion.com/v1/oauth/revoke",
+    expect.objectContaining({
+      body: JSON.stringify({ token: "notion-access" }),
+      headers: expect.objectContaining({
+        authorization: "Basic bm90aW9uLWNsaWVudDpub3Rpb24tc2VjcmV0",
+      }),
+      method: "POST",
+    })
+  )
+})
+
 test("falls back to Slack token revocation when app uninstall is unavailable", async () => {
   vi.stubEnv("SLACK_CLIENT_ID", "slack-client")
   vi.stubEnv("SLACK_CLIENT_SECRET", "slack-secret")

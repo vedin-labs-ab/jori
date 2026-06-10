@@ -119,12 +119,14 @@ async function revokeNotionIntegration(integration: Doc<"integrations">) {
     method: "POST",
     headers: {
       accept: "application/json",
+      authorization: `Basic ${encodeBasicCredentials(
+        requireNotionClientId(),
+        requireNotionClientSecret()
+      )}`,
       "content-type": "application/json",
       "notion-version": notionApiVersion,
     },
     body: JSON.stringify({
-      client_id: requireNotionClientId(),
-      client_secret: requireNotionClientSecret(),
       token: credentials.accessToken,
     }),
   })
