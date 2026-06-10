@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
+import { type ToolPermission } from "../permissions/catalog"
 import { createApprovalContinuationPrompt } from "./continuation"
 import { assemblePrompt } from "./prompt"
 
@@ -59,6 +60,23 @@ describe("runtime prompts", () => {
   })
 })
 
+describe("approval request prompts", () => {
+  test("renders approval tool usage as the only approval request path", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", { channelId: "C123", ts: "123.456" }),
+      [],
+      [promptedTool()]
+    )
+
+    expect(prompt.rendered).toContain(
+      "`request_tool_approval` sends the user-facing approval request and code."
+    )
+    expect(prompt.rendered).toContain(
+      "Do not send a normal message asking for approval"
+    )
+  })
+})
+
 describe("approval continuation prompts", () => {
   test("renders continuation context", () => {
     const prompt = createApprovalContinuationPrompt(approvalContinuation())
@@ -114,6 +132,17 @@ function integration(provider: string): Doc<"integrations"> {
     status: "active",
     createdAt: 0,
   } as Doc<"integrations">
+}
+
+function promptedTool(): ToolPermission {
+  return {
+    provider: "notion",
+    tool: "notion_create_page",
+    label: "Create Notion page",
+    description: "Create a Notion page or database record.",
+    access: "write",
+    defaultMode: "prompted",
+  }
 }
 
 function approvalContinuation() {

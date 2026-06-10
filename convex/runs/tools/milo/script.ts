@@ -19,7 +19,7 @@ const instructions = "Use these Milo scheduling tools only when the user asks to
 const allTools = [
   {
     name: "request_tool_approval",
-    description: "Request user approval for one prompted tool call. Use this instead of directly calling a tool that requires approval, then stop after the request succeeds.",
+    description: "Request user approval for one prompted tool call. This sends the approval request and code to the user. Use this instead of sending a normal message asking for approval, then stop after the request succeeds.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
