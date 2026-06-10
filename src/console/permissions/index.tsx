@@ -29,7 +29,7 @@ export function NativePermissionsCard({
     <IntegrationSurface
       description="Control built-in scheduling permissions for this tenant."
       logo={{ mark: <MiloLogo aria-hidden="true" className="size-8" /> }}
-      title="Milo tools"
+      title="Milo"
     >
       <PermissionSection
         controller={controller}

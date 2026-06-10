@@ -2,6 +2,7 @@ import { useState } from "react"
 import { readErrorMessage } from "../error"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
+const integrationReturnPath = "/integrations"
 
 export type CreateInstallState = (args: {
   tenantId: string
@@ -34,7 +35,7 @@ export function useIntegrationInstall({
     try {
       const state = await createInstallState({
         tenantId,
-        returnUrl: window.location.origin,
+        returnUrl: `${window.location.origin}${integrationReturnPath}`,
       })
       const installUrl = new URL(installPath, convexSiteUrl)
       installUrl.searchParams.set("state", state)
