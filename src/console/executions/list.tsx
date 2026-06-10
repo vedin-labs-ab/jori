@@ -1,6 +1,5 @@
-import { usePaginatedQuery } from "convex/react"
 import { Loader2, Search, SlidersHorizontal } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,16 +16,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { api } from "../../../convex/_generated/api"
 import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
-import { matchesFilter } from "./format"
+import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { ExecutionRow } from "./row"
-import {
-  type ExecutionItem,
-  type FilterValue,
-  filterOptions,
-  pageSize,
-} from "./types"
+import { type FilterValue, filterOptions } from "./types"
 
 export function ExecutionsList({ tenantId }: { tenantId: string }) {
   const [filter, setFilter] = useState<FilterValue>("all")
@@ -123,18 +116,14 @@ function ExecutionFilters({
               <span className="sr-only">Filters are applied live</span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Filters apply to loaded executions</TooltipContent>
+          <TooltipContent>Filters apply to all executions</TooltipContent>
         </Tooltip>
       </div>
     </div>
   )
 }
 
-function ExecutionRows({
-  pagination,
-}: {
-  pagination: ReturnType<typeof useExecutionPagination>
-}) {
+function ExecutionRows({ pagination }: { pagination: ExecutionPagination }) {
   return (
     <div className="grid gap-2">
       {pagination.isLoadingFirstPage ? <ExecutionSkeletonList /> : null}
@@ -154,17 +143,10 @@ function ExecutionRows({
   )
 }
 
-function ExecutionPager({
-  pagination,
-}: {
-  pagination: ReturnType<typeof useExecutionPagination>
-}) {
+function ExecutionPager({ pagination }: { pagination: ExecutionPagination }) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-muted-foreground text-xs">
-        Showing {pagination.firstVisibleNumber}-{pagination.lastVisibleNumber}{" "}
-        of {pagination.filteredRows.length} loaded
-      </p>
+      <p className="text-muted-foreground text-xs">{pagination.footerLabel}</p>
       <Pagination className="mx-0 w-fit justify-start sm:justify-end">
         <PaginationContent>
           <PaginationItem>
@@ -198,124 +180,4 @@ function ExecutionPager({
       </Pagination>
     </div>
   )
-}
-
-function useExecutionPagination(
-  tenantId: string,
-  filter: FilterValue,
-  query: string
-) {
-  const [pageIndex, setPageIndex] = useState(0)
-  const advanceAfterLoad = useRef(false)
-  const now = useNow()
-  const executions = usePaginatedQuery(
-    api.executions.list.page,
-    { tenantId },
-    { initialNumItems: pageSize }
-  )
-  const rows = (executions.results ?? []) as ExecutionItem[]
-  const normalizedQuery = query.trim().toLowerCase()
-  const filteredRows = useMemo(
-    () => filterRows(rows, filter, normalizedQuery),
-    [filter, normalizedQuery, rows]
-  )
-  const pageCount = Math.max(1, Math.ceil(filteredRows.length / pageSize))
-  const visibleRows = filteredRows.slice(
-    pageIndex * pageSize,
-    pageIndex * pageSize + pageSize
-  )
-  const canUseNextLoadedPage = pageIndex + 1 < pageCount
-  const canLoadMore = executions.status === "CanLoadMore"
-  const isLoadingMore = executions.status === "LoadingMore"
-
-  usePageBounds(pageIndex, pageCount, setPageIndex)
-  useAdvanceAfterLoad(advanceAfterLoad, filteredRows.length, {
-    isLoadingMore,
-    pageIndex,
-    setPageIndex,
-  })
-
-  return {
-    canGoNext: canUseNextLoadedPage || canLoadMore,
-    filteredRows,
-    firstVisibleNumber: visibleRows.length === 0 ? 0 : pageIndex * pageSize + 1,
-    hasFilters: filter !== "all" || normalizedQuery !== "",
-    isLoadingFirstPage: executions.status === "LoadingFirstPage",
-    isLoadingMore,
-    lastVisibleNumber: pageIndex * pageSize + visibleRows.length,
-    next: () => {
-      if (canUseNextLoadedPage) {
-        setPageIndex((current) => current + 1)
-      } else if (canLoadMore) {
-        advanceAfterLoad.current = true
-        executions.loadMore(pageSize)
-      }
-    },
-    now,
-    pageIndex,
-    previous: () => setPageIndex((current) => Math.max(0, current - 1)),
-    reset: () => setPageIndex(0),
-    visibleRows,
-  }
-}
-
-function filterRows(
-  rows: ExecutionItem[],
-  filter: FilterValue,
-  normalizedQuery: string
-) {
-  return rows.filter((row) => {
-    if (!matchesFilter(row, filter)) {
-      return false
-    }
-
-    return (
-      normalizedQuery === "" || row.searchableText.includes(normalizedQuery)
-    )
-  })
-}
-
-function usePageBounds(
-  pageIndex: number,
-  pageCount: number,
-  setPageIndex: (updater: (current: number) => number) => void
-) {
-  useEffect(() => {
-    if (pageIndex >= pageCount) {
-      setPageIndex(() => Math.max(0, pageCount - 1))
-    }
-  }, [pageCount, pageIndex, setPageIndex])
-}
-
-function useAdvanceAfterLoad(
-  advanceAfterLoad: React.MutableRefObject<boolean>,
-  filteredRowCount: number,
-  input: {
-    isLoadingMore: boolean
-    pageIndex: number
-    setPageIndex: (updater: (current: number) => number) => void
-  }
-) {
-  useEffect(() => {
-    if (
-      advanceAfterLoad.current &&
-      !input.isLoadingMore &&
-      filteredRowCount > (input.pageIndex + 1) * pageSize
-    ) {
-      advanceAfterLoad.current = false
-      input.setPageIndex((current) => current + 1)
-    }
-  }, [advanceAfterLoad, filteredRowCount, input])
-}
-
-function useNow() {
-  const [now, setNow] = useState(() => Date.now())
-
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 1000)
-
-    return () => window.clearInterval(interval)
-  }, [])
-
-  return now
 }

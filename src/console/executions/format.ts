@@ -1,24 +1,4 @@
-import {
-  type ApprovalState,
-  type ExecutionItem,
-  type FilterValue,
-} from "./types"
-
-export function matchesFilter(row: ExecutionItem, filter: FilterValue) {
-  if (filter === "all") {
-    return true
-  }
-
-  if (filter === "approval") {
-    return row.approval?.state === "pending"
-  }
-
-  if (filter === "ongoing") {
-    return row.status === "queued" || row.status === "running"
-  }
-
-  return row.status === filter
-}
+import { type ApprovalState } from "./types"
 
 export function approvalLabel(state: ApprovalState) {
   const labels = {
