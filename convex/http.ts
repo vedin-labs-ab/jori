@@ -25,6 +25,7 @@ import {
 import {
   handleSlackEvents,
   handleSlackInstall,
+  handleSlackInteractions,
   handleSlackOAuthCallback,
 } from "./providers/slack/http"
 import { handleGitHubTarballRequest, handleMiloMcpRequest } from "./tools/mcp"
@@ -143,6 +144,14 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     return await handleSlackEvents(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/slack/interactions",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    return await handleSlackInteractions(ctx, request)
   }),
 })
 

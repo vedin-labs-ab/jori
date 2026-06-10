@@ -11,7 +11,7 @@ import { type Provider } from "../providers/catalog"
 import { type CodexRuntimeInput } from "../runs/codex"
 import { type Actor } from "../schemas/actors"
 import { parsePromptedToolApproval } from "./approvalArgs"
-import { callProviderTool } from "./providers"
+import { postSlackMessage, type SlackBlock } from "./providers/slack"
 
 export type ApprovalBrokerContext = {
   execution: Doc<"executions">
@@ -72,19 +72,20 @@ export async function createPromptedToolApproval(
   const delivery = getSlackApprovalDelivery(context)
 
   if (delivery !== null) {
-    await callProviderTool({
-      integration: delivery.integration,
-      tool: "conversations_add_message",
-      toolArgs: {
-        channel: delivery.channelId,
-        thread_ts: delivery.threadTs,
-        text: formatApprovalRequest({
-          code,
-          provider: request.provider,
-          tool: request.tool,
-          summary: request.summary,
-        }),
-      },
+    await postSlackMessage(delivery.integration, {
+      channel: delivery.channelId,
+      thread_ts: delivery.threadTs,
+      text: formatApprovalFallbackText({
+        provider: request.provider,
+        tool: request.tool,
+        summary: request.summary,
+      }),
+      blocks: createSlackApprovalBlocks({
+        code,
+        provider: request.provider,
+        tool: request.tool,
+        summary: request.summary,
+      }),
     })
   }
 
@@ -191,22 +192,85 @@ function readString(data: unknown, key: string) {
   return typeof value === "string" && value !== "" ? value : undefined
 }
 
-function formatApprovalRequest(args: {
-  code: string
+function formatApprovalFallbackText(args: {
   provider: Provider
   tool: string
   summary: string
 }) {
   return [
-    `Milo needs approval ${args.code}.`,
-    "",
+    "Milo needs approval before continuing.",
     args.summary,
-    "",
     `Tool: ${args.provider}.${args.tool}`,
-    "",
-    `Reply "approve ${args.code}" to approve or "deny ${args.code}" to deny.`,
-    "This approval expires in 30 minutes.",
   ].join("\n")
+}
+
+function createSlackApprovalBlocks(args: {
+  code: string
+  provider: Provider
+  tool: string
+  summary: string
+}): SlackBlock[] {
+  return [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*Approval requested*",
+      },
+    },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: truncateSlackText(args.summary, 2900),
+      },
+    },
+    {
+      type: "context",
+      elements: [
+        {
+          type: "mrkdwn",
+          text: `*Tool:* ${args.provider}.${args.tool}`,
+        },
+        {
+          type: "mrkdwn",
+          text: "Expires in 30 minutes",
+        },
+      ],
+    },
+    {
+      type: "actions",
+      block_id: `milo_approval_${args.code}`,
+      elements: [
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: "Approve",
+          },
+          style: "primary",
+          action_id: "milo_approval_approve",
+          value: JSON.stringify({ code: args.code }),
+        },
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: "Deny",
+          },
+          style: "danger",
+          action_id: "milo_approval_deny",
+          value: JSON.stringify({ code: args.code }),
+        },
+      ],
+    },
+  ]
+}
+
+function truncateSlackText(value: string, maximumLength: number) {
+  return value.length <= maximumLength
+    ? value
+    : `${value.slice(0, maximumLength - 3)}...`
 }
 
 function createApprovalCode() {

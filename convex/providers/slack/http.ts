@@ -1,7 +1,10 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { redirectWithStatus, unauthorizedResponse } from "../http"
-import { handleSlackApprovalDecision } from "./approvals"
+import {
+  handleSlackApprovalDecision,
+  handleSlackApprovalInteraction,
+} from "./approvals"
 import {
   slackBotScopes,
   slackInstallUserScopes,
@@ -178,6 +181,34 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
   }
 
   return Response.json({ ok: true })
+}
+
+export async function handleSlackInteractions(
+  ctx: ActionCtx,
+  request: Request
+) {
+  const body = await request.text()
+  const verified = await verifySlackRequest(request, body)
+
+  if (!verified) {
+    return unauthorizedResponse()
+  }
+
+  const payload = new URLSearchParams(body).get("payload")
+
+  if (payload === null) {
+    return new Response("Missing Slack interaction payload", { status: 400 })
+  }
+
+  let parsed: unknown
+
+  try {
+    parsed = JSON.parse(payload) as unknown
+  } catch {
+    return new Response("Invalid Slack interaction payload", { status: 400 })
+  }
+
+  return await handleSlackApprovalInteraction(ctx, parsed)
 }
 
 async function getSlackActorEmail(

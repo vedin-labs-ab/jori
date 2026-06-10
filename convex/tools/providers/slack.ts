@@ -7,6 +7,27 @@ import {
   requiredString,
 } from "./common"
 
+export type SlackBlock = Record<string, unknown>
+
+export async function postSlackMessage(
+  integration: Doc<"integrations">,
+  args: {
+    channel: string
+    text: string
+    thread_ts?: string
+    blocks?: SlackBlock[]
+  }
+) {
+  const credentials = requireSlackCredentials(integration)
+
+  return await slackApi(credentials.bot, "chat.postMessage", {
+    channel: args.channel,
+    text: args.text,
+    thread_ts: args.thread_ts,
+    blocks: args.blocks,
+  })
+}
+
 export async function callSlackTool(
   integration: Doc<"integrations">,
   tool: string,
@@ -70,7 +91,7 @@ export async function callSlackTool(
   }
 
   if (tool === "conversations_add_message") {
-    return await slackApi(credentials.bot, "chat.postMessage", {
+    return await postSlackMessage(integration, {
       channel: requiredString(args.channel, "channel"),
       text: requiredString(args.text, "text"),
       thread_ts: optionalString(args.thread_ts),
