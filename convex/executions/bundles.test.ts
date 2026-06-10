@@ -157,10 +157,13 @@ function integration(
     tenantId: "tenant",
     provider,
     scope: "tenant",
-    accountId: `${provider}-account`,
+    externalId: `${provider}-account`,
+    email: provider === "gmail" ? "user@example.com" : undefined,
     credentials: credentials(provider),
     status,
+    createdBy: "user",
     createdAt: 0,
+    updatedAt: 0,
   } as Doc<"integrations">
 }
 

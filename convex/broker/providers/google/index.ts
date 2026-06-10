@@ -178,7 +178,7 @@ async function replyToGmailThread(
     token,
     `https://gmail.googleapis.com/gmail/v1/users/me/threads/${encodeURIComponent(threadId)}?format=metadata`
   )
-  const accountEmail = integration.accountId
+  const accountEmail = requireIntegrationEmail(integration)
   const messages = [...(thread.messages ?? [])].sort(
     (left, right) =>
       Number(left.internalDate ?? 0) - Number(right.internalDate ?? 0)
@@ -222,6 +222,14 @@ async function replyToGmailThread(
       },
     }
   )
+}
+
+function requireIntegrationEmail(integration: Doc<"integrations">) {
+  if (integration.email !== undefined) {
+    return integration.email
+  }
+
+  throw new Error(`${integration.provider} integration is missing email`)
 }
 
 async function googleJson(

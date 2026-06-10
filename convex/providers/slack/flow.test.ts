@@ -201,7 +201,7 @@ function slackIntegration(accountId: string): Doc<"integrations"> {
     tenantId: "tenant",
     provider: "slack",
     scope: "tenant",
-    accountId,
+    externalId: accountId,
     credentials: {
       bot: "xoxb-test-bot",
       user: "xoxp-test-user",
@@ -214,6 +214,8 @@ function slackIntegration(accountId: string): Doc<"integrations"> {
       },
     },
     status: "active",
+    createdBy: "user",
     createdAt: 0,
+    updatedAt: 0,
   } as Doc<"integrations">
 }

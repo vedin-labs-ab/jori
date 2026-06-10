@@ -137,10 +137,12 @@ function integration(provider: string): Doc<"integrations"> {
     tenantId: "tenant",
     provider,
     scope: "tenant",
-    accountId: `${provider}-account`,
+    externalId: `${provider}-account`,
     credentials: {},
     status: "active",
+    createdBy: "user",
     createdAt: 0,
+    updatedAt: 0,
   } as Doc<"integrations">
 }
 

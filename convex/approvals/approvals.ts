@@ -127,8 +127,8 @@ export const getSlackDecisionTarget = internalQuery({
   handler: async (ctx, args) => {
     const integration = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_account", (query) =>
-        query.eq("provider", "slack").eq("accountId", args.accountId)
+      .withIndex("by_provider_and_external", (query) =>
+        query.eq("provider", "slack").eq("externalId", args.accountId)
       )
       .first()
 

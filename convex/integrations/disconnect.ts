@@ -54,15 +54,12 @@ export const disconnect = action({
       throw error
     }
 
-    const revokedAt = Date.now()
-
     await ctx.runMutation(internal.integrations.disconnect.finishDisconnect, {
-      accountId: target.integration.accountId,
       credentials: target.integration.credentials,
+      externalId: requireExternalId(target.integration),
       integrationId: target.integration._id,
       ownerId: target.integration.ownerId,
       provider: target.integration.provider,
-      revokedAt,
       tenantId: target.integration.tenantId,
     })
 
@@ -113,7 +110,10 @@ export const beginDisconnect = internalMutation({
       return false
     }
 
-    await ctx.db.patch(args.integrationId, { status: "paused" })
+    await ctx.db.patch(args.integrationId, {
+      status: "paused",
+      updatedAt: Date.now(),
+    })
 
     return true
   },
@@ -132,27 +132,26 @@ export const cancelDisconnect = internalMutation({
       integration.status === "paused" &&
       isSameSnapshot(integration.credentials, args.credentials)
     ) {
-      await ctx.db.patch(args.integrationId, { status: "active" })
+      await ctx.db.patch(args.integrationId, {
+        status: "active",
+        updatedAt: Date.now(),
+      })
     }
   },
 })
 
 export const finishDisconnect = internalMutation({
   args: {
-    accountId: v.string(),
     credentials: v.any(),
+    externalId: v.string(),
     integrationId: v.id("integrations"),
     ownerId: v.optional(v.string()),
     provider: integrationProviderValidator,
-    revokedAt: v.number(),
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    for (const integration of await getIntegrationsToRevoke(ctx, args)) {
-      await ctx.db.patch(integration._id, {
-        credentials: { revokedAt: args.revokedAt },
-        status: "revoked",
-      })
+    for (const integration of await getIntegrationsToDelete(ctx, args)) {
+      await ctx.db.delete(integration._id)
     }
   },
 })
@@ -170,11 +169,11 @@ function isUserScopedProvider(provider: IntegrationProvider) {
   )
 }
 
-async function getIntegrationsToRevoke(
+async function getIntegrationsToDelete(
   ctx: MutationCtx,
   args: {
-    accountId: string
     credentials: unknown
+    externalId: string
     integrationId: Id<"integrations">
     ownerId?: string | undefined
     provider: IntegrationProvider
@@ -196,13 +195,13 @@ async function getIntegrationsToRevoke(
 
   const integrations = await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_status", (query) =>
+    .withIndex("by_tenant_and_status", (query) =>
       query.eq("tenantId", args.tenantId).eq("status", "active")
     )
     .collect()
   const pausedIntegrations = await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_status", (query) =>
+    .withIndex("by_tenant_and_status", (query) =>
       query.eq("tenantId", args.tenantId).eq("status", "paused")
     )
     .collect()
@@ -210,13 +209,21 @@ async function getIntegrationsToRevoke(
   return [...integrations, ...pausedIntegrations].filter(
     (candidate) =>
       isGoogleProvider(candidate.provider) &&
-      candidate.accountId === args.accountId &&
+      candidate.externalId === args.externalId &&
       candidate.ownerId === args.ownerId
   )
 }
 
 function isGoogleProvider(provider: IntegrationProvider) {
   return provider === "gmail" || provider === "googleCalendar"
+}
+
+function requireExternalId(integration: Doc<"integrations">) {
+  if (integration.externalId !== undefined) {
+    return integration.externalId
+  }
+
+  throw new Error(`${integration.provider} integration is missing external ID`)
 }
 
 function isSameSnapshot(left: unknown, right: unknown) {

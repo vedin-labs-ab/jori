@@ -1,14 +1,16 @@
 import { type ConnectionStatus } from "./card"
 
 export type AccountStatus = {
-  accountId: string
+  externalId: string
   email?: string
+  fallbackEmail?: string
+  fallbackName?: string
   name?: string
   status: Exclude<ConnectionStatus, undefined>
 } | null
 
 export type WorkspaceStatus = {
-  accountId: string
+  externalId: string
   status: Exclude<ConnectionStatus, undefined>
 } | null
 
@@ -22,8 +24,10 @@ export function getAccountHeadline(
 
   return (
     status?.name ??
+    status?.fallbackName ??
     status?.email ??
-    status?.accountId ??
+    status?.fallbackEmail ??
+    status?.externalId ??
     `No ${label} connected`
   )
 }
@@ -40,7 +44,7 @@ export function getWorkspaceHeadline(
 
   return (
     connectedLabels.find((value) => value !== undefined) ??
-    status?.accountId ??
+    status?.externalId ??
     emptyHeadline
   )
 }

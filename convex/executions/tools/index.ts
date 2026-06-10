@@ -216,7 +216,7 @@ function createSlackIntegrationToolBundle(
   permissionInput: ToolPermissionInput
 ) {
   return createSlackToolBundle({
-    accountId: args.integration.accountId,
+    accountId: requireIntegrationExternalId(args.integration),
     broker: args.broker,
     credentials: requireSlackCredentials(args.integration),
     ...permissionInput,
@@ -228,11 +228,27 @@ function createGmailIntegrationToolBundle(
   permissionInput: ToolPermissionInput
 ) {
   return createGmailToolBundle({
-    accountEmail: args.integration.accountId,
+    accountEmail: requireIntegrationEmail(args.integration),
     broker: args.broker,
     credentials: requireGoogleCredentials(args.integration),
     ...permissionInput,
   })
+}
+
+function requireIntegrationExternalId(integration: Doc<"integrations">) {
+  if (integration.externalId !== undefined) {
+    return integration.externalId
+  }
+
+  throw new Error(`${integration.provider} integration is missing external ID`)
+}
+
+function requireIntegrationEmail(integration: Doc<"integrations">) {
+  if (integration.email !== undefined) {
+    return integration.email
+  }
+
+  throw new Error(`${integration.provider} integration is missing email`)
 }
 
 function getEnabledToolPermissions(

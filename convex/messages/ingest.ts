@@ -189,8 +189,8 @@ async function findActiveIntegration(
 ) {
   const integration = await ctx.db
     .query("integrations")
-    .withIndex("by_provider_account", (query) =>
-      query.eq("provider", args.provider).eq("accountId", args.accountId)
+    .withIndex("by_provider_and_external", (query) =>
+      query.eq("provider", args.provider).eq("externalId", args.accountId)
     )
     .first()
 

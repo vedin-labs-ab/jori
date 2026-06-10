@@ -2,10 +2,6 @@ import { type MutationCtx } from "../../_generated/server"
 import { upsertIdentity } from "../../identity/identities"
 import { type MicrosoftInstallationProfile } from "./oauth"
 
-export function getMicrosoftAccountId(profile: MicrosoftInstallationProfile) {
-  return profile.user.mail ?? profile.user.userPrincipalName ?? profile.user.id
-}
-
 export function getMicrosoftIdentityEmail(
   profile: MicrosoftInstallationProfile
 ) {

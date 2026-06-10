@@ -35,8 +35,8 @@ export const getUserToken = internalQuery({
   handler: async (ctx, args) => {
     const integration = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_account", (query) =>
-        query.eq("provider", "slack").eq("accountId", args.accountId)
+      .withIndex("by_provider_and_external", (query) =>
+        query.eq("provider", "slack").eq("externalId", args.accountId)
       )
       .first()
 
@@ -78,8 +78,8 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_account", (query) =>
-        query.eq("provider", "slack").eq("accountId", args.accountId)
+      .withIndex("by_provider_and_external", (query) =>
+        query.eq("provider", "slack").eq("externalId", args.accountId)
       )
       .first()
 
@@ -100,9 +100,13 @@ export const recordOAuthInstallation = internalMutation({
     if (existing !== null) {
       await ctx.db.patch(existing._id, {
         tenantId: args.tenantId,
+        scope: "tenant",
+        externalId: args.accountId,
+        name: args.team.name,
         credentials,
         status: "active",
         createdBy: args.createdBy,
+        updatedAt: now,
         data,
       })
 
@@ -112,11 +116,14 @@ export const recordOAuthInstallation = internalMutation({
     return await ctx.db.insert("integrations", {
       tenantId: args.tenantId,
       provider: "slack",
-      accountId: args.accountId,
+      scope: "tenant",
+      externalId: args.accountId,
+      name: args.team.name,
       credentials,
       status: "active",
       createdBy: args.createdBy,
       createdAt: now,
+      updatedAt: now,
       data,
     })
   },

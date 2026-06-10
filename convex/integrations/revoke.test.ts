@@ -137,11 +137,15 @@ function integration(
   return {
     _creationTime: Date.now(),
     _id: `${provider}-integration`,
-    accountId: `${provider}-account`,
+    externalId: `${provider}-account`,
     createdAt: Date.now(),
+    createdBy: "user",
     credentials,
     provider,
+    scope:
+      provider === "gmail" || provider === "microsoftEmail" ? "user" : "tenant",
     status: "active",
     tenantId: "tenant",
+    updatedAt: Date.now(),
   } as Doc<"integrations">
 }

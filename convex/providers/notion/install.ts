@@ -43,8 +43,10 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_account", (query) =>
-        query.eq("provider", "notion").eq("accountId", args.profile.workspaceId)
+      .withIndex("by_provider_and_external", (query) =>
+        query
+          .eq("provider", "notion")
+          .eq("externalId", args.profile.workspaceId)
       )
       .first()
 
@@ -58,9 +60,13 @@ export const recordOAuthInstallation = internalMutation({
       await ctx.db.patch(existing._id, {
         tenantId: args.tenantId,
         scope: "tenant",
+        externalId: args.profile.workspaceId,
+        name: args.profile.workspaceName,
+        avatar: args.profile.workspaceIcon,
         credentials,
         status: "active",
         createdBy: args.createdBy,
+        updatedAt: now,
         data,
       })
 
@@ -71,11 +77,14 @@ export const recordOAuthInstallation = internalMutation({
       tenantId: args.tenantId,
       provider: "notion",
       scope: "tenant",
-      accountId: args.profile.workspaceId,
+      externalId: args.profile.workspaceId,
+      name: args.profile.workspaceName,
+      avatar: args.profile.workspaceIcon,
       credentials,
       status: "active",
       createdBy: args.createdBy,
       createdAt: now,
+      updatedAt: now,
       data,
     })
   },
@@ -99,7 +108,10 @@ export const updateOAuthCredentials = internalMutation({
       refreshToken: args.refreshToken,
     }
 
-    await ctx.db.patch(args.integrationId, { credentials })
+    await ctx.db.patch(args.integrationId, {
+      credentials,
+      updatedAt: Date.now(),
+    })
 
     return credentials
   },

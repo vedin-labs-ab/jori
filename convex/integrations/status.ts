@@ -42,7 +42,8 @@ export const getSlackStatus = query({
     }
 
     return {
-      accountId: integration.accountId,
+      externalId: integration.externalId,
+      name: integration.name,
       status: integration.status,
       createdAt: integration.createdAt,
       teamName: getSlackTeamName(integration.data),
@@ -65,7 +66,8 @@ export const getLinearStatus = query({
     }
 
     return {
-      accountId: integration.accountId,
+      externalId: integration.externalId,
+      name: integration.name,
       status: integration.status,
       createdAt: integration.createdAt,
       organizationName: getLinearOrganizationName(integration.data),
@@ -113,7 +115,10 @@ export const getGitHubStatus = query({
     }
 
     return {
-      accountId: integration.accountId,
+      externalId: integration.externalId,
+      name: integration.name,
+      url: integration.url,
+      avatar: integration.avatar,
       status: integration.status,
       createdAt: integration.createdAt,
       accountLogin: getGitHubAccountLogin(integration.data),
@@ -137,7 +142,9 @@ export const getNotionStatus = query({
     }
 
     return {
-      accountId: integration.accountId,
+      externalId: integration.externalId,
+      name: integration.name,
+      avatar: integration.avatar,
       status: integration.status,
       createdAt: integration.createdAt,
       botId: getNotionBotId(integration.data),
@@ -187,11 +194,14 @@ async function getGoogleUserStatus(
   }
 
   return {
-    accountId: integration.accountId,
+    externalId: integration.externalId,
+    email: integration.email,
+    name: integration.name,
+    avatar: integration.avatar,
     status: integration.status,
     createdAt: integration.createdAt,
-    email: getGoogleEmail(integration.data),
-    name: getGoogleName(integration.data),
+    fallbackEmail: getGoogleEmail(integration.data),
+    fallbackName: getGoogleName(integration.data),
     scope: "user" as const,
   }
 }
@@ -210,11 +220,13 @@ async function getMicrosoftUserStatus(
   }
 
   return {
-    accountId: integration.accountId,
+    externalId: integration.externalId,
+    email: integration.email,
+    name: integration.name,
     status: integration.status,
     createdAt: integration.createdAt,
-    email: getMicrosoftEmail(integration.data),
-    name: getMicrosoftConnectedUser(integration.data),
+    fallbackEmail: getMicrosoftEmail(integration.data),
+    fallbackName: getMicrosoftConnectedUser(integration.data),
     tenantName: getMicrosoftTenantName(integration.data),
     scope: "user" as const,
   }
@@ -223,5 +235,5 @@ async function getMicrosoftUserStatus(
 function isVisibleIntegration(
   integration: Doc<"integrations"> | null
 ): integration is Doc<"integrations"> {
-  return integration !== null && integration.status !== "revoked"
+  return integration !== null
 }

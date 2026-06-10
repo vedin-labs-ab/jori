@@ -15,7 +15,7 @@ import {
 } from "../shared/install"
 import { type IntegrationLogo, IntegrationSurface } from "./surface"
 
-export type ConnectionStatus = "active" | "paused" | "revoked" | undefined
+export type ConnectionStatus = "active" | "paused" | undefined
 export type { IntegrationLogo } from "../shared/surface"
 
 export type IntegrationConnectionConfig = {

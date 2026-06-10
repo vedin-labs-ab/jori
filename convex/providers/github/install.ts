@@ -51,8 +51,8 @@ export const recordInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_account", (query) =>
-        query.eq("provider", "github").eq("accountId", args.installationId)
+      .withIndex("by_provider_and_external", (query) =>
+        query.eq("provider", "github").eq("externalId", args.installationId)
       )
       .first()
 
@@ -72,9 +72,15 @@ export const recordInstallation = internalMutation({
     if (existing !== null) {
       await ctx.db.patch(existing._id, {
         tenantId: args.tenantId,
+        scope: "tenant",
+        externalId: args.installationId,
+        name: args.profile.account?.login,
+        url: args.profile.account?.html_url ?? args.profile.html_url,
+        avatar: args.profile.account?.avatar_url,
         credentials,
         status: "active",
         createdBy: args.createdBy,
+        updatedAt: now,
         data,
       })
 
@@ -84,11 +90,16 @@ export const recordInstallation = internalMutation({
     return await ctx.db.insert("integrations", {
       tenantId: args.tenantId,
       provider: "github",
-      accountId: args.installationId,
+      scope: "tenant",
+      externalId: args.installationId,
+      name: args.profile.account?.login,
+      url: args.profile.account?.html_url ?? args.profile.html_url,
+      avatar: args.profile.account?.avatar_url,
       credentials,
       status: "active",
       createdBy: args.createdBy,
       createdAt: now,
+      updatedAt: now,
       data,
     })
   },

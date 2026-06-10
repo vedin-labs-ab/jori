@@ -151,7 +151,7 @@ async function listActiveIntegrations(
 ) {
   const integrations = await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_status", (query) =>
+    .withIndex("by_tenant_and_status", (query) =>
       query.eq("tenantId", tenantId).eq("status", "active")
     )
     .collect()

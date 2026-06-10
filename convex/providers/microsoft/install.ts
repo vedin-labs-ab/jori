@@ -7,11 +7,7 @@ import {
 } from "../../_generated/server"
 import { requireClerkUserId } from "../../identity/users"
 import { type MicrosoftSurfaceProvider } from "./config"
-import {
-  getMicrosoftAccountId,
-  getMicrosoftIdentityEmail,
-  upsertMicrosoftIdentity,
-} from "./identity"
+import { getMicrosoftIdentityEmail, upsertMicrosoftIdentity } from "./identity"
 import { createSignedMicrosoftState } from "./signing"
 
 const microsoftProvider = v.union(
@@ -66,7 +62,7 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_tenant_provider_owner", (query) =>
+      .withIndex("by_tenant_and_provider_and_owner", (query) =>
         query
           .eq("tenantId", args.tenantId)
           .eq("provider", args.provider)
@@ -88,7 +84,6 @@ export const recordOAuthInstallation = internalMutation({
       scope: args.scope,
       tenantId: args.microsoftTenantId,
     }
-    const accountId = getMicrosoftAccountId(args.profile)
     const email = getMicrosoftIdentityEmail(args.profile)
     const data = {
       profile: args.profile,
@@ -102,7 +97,9 @@ export const recordOAuthInstallation = internalMutation({
       tenantId: args.tenantId,
       provider: args.provider,
       ownerId: args.createdBy,
-      accountId,
+      externalId: args.profile.user.id,
+      name: args.profile.user.displayName,
+      email,
       credentials,
       data,
     })
@@ -127,7 +124,9 @@ async function upsertMicrosoftIntegration(
     tenantId: string
     provider: MicrosoftSurfaceProvider
     ownerId: string
-    accountId: string
+    externalId: string
+    name: string | undefined
+    email: string | undefined
     credentials: {
       accessToken: string
       refreshToken: string
@@ -148,10 +147,13 @@ async function upsertMicrosoftIntegration(
     provider: args.provider,
     scope: "user" as const,
     ownerId: args.ownerId,
-    accountId: args.accountId,
+    externalId: args.externalId,
+    name: args.name,
+    email: args.email,
     credentials: args.credentials,
     status: "active" as const,
     createdBy: args.ownerId,
+    updatedAt: args.now,
     data: args.data,
   }
 
@@ -206,7 +208,10 @@ export const updateOAuthCredentials = internalMutation({
       tenantId,
     }
 
-    await ctx.db.patch(args.integrationId, { credentials })
+    await ctx.db.patch(args.integrationId, {
+      credentials,
+      updatedAt: Date.now(),
+    })
 
     return credentials
   },

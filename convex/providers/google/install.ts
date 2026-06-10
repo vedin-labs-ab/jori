@@ -51,7 +51,7 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_tenant_provider_owner", (query) =>
+      .withIndex("by_tenant_and_provider_and_owner", (query) =>
         query
           .eq("tenantId", args.tenantId)
           .eq("provider", args.provider)
@@ -75,18 +75,10 @@ export const recordOAuthInstallation = internalMutation({
     const data = {
       profile: args.profile,
     }
+    const values = createGoogleIntegrationValues(args, credentials, data, now)
 
     if (existing !== null) {
-      await ctx.db.patch(existing._id, {
-        tenantId: args.tenantId,
-        scope: "user",
-        ownerId: args.createdBy,
-        accountId: args.profile.email,
-        credentials,
-        status: "active",
-        createdBy: args.createdBy,
-        data,
-      })
+      await ctx.db.patch(existing._id, values)
 
       await upsertGoogleIdentity(ctx, args)
 
@@ -94,16 +86,8 @@ export const recordOAuthInstallation = internalMutation({
     }
 
     const integrationId = await ctx.db.insert("integrations", {
-      tenantId: args.tenantId,
-      provider: args.provider,
-      scope: "user",
-      ownerId: args.createdBy,
-      accountId: args.profile.email,
-      credentials,
-      status: "active",
-      createdBy: args.createdBy,
+      ...values,
       createdAt: now,
-      data,
     })
 
     await upsertGoogleIdentity(ctx, args)
@@ -111,6 +95,51 @@ export const recordOAuthInstallation = internalMutation({
     return integrationId
   },
 })
+
+function createGoogleIntegrationValues(
+  args: {
+    provider: GoogleSurfaceProvider
+    tenantId: string
+    createdBy: string
+    profile: {
+      id: string
+      email: string
+      name?: string
+      picture?: string
+    }
+  },
+  credentials: {
+    accessToken: string
+    refreshToken: string
+    expiresAt: number
+    scope: string | undefined
+  },
+  data: {
+    profile: {
+      id: string
+      email: string
+      name?: string
+      picture?: string
+    }
+  },
+  now: number
+) {
+  return {
+    tenantId: args.tenantId,
+    provider: args.provider,
+    scope: "user" as const,
+    ownerId: args.createdBy,
+    externalId: args.profile.id,
+    name: args.profile.name,
+    email: args.profile.email,
+    avatar: args.profile.picture,
+    credentials,
+    status: "active" as const,
+    createdBy: args.createdBy,
+    updatedAt: now,
+    data,
+  }
+}
 
 export const updateOAuthCredentials = internalMutation({
   args: {
@@ -145,7 +174,10 @@ export const updateOAuthCredentials = internalMutation({
       scope: args.scope,
     }
 
-    await ctx.db.patch(args.integrationId, { credentials })
+    await ctx.db.patch(args.integrationId, {
+      credentials,
+      updatedAt: Date.now(),
+    })
 
     return credentials
   },

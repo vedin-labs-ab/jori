@@ -19,7 +19,7 @@ export async function getTenantIntegration(
 
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_provider", (query) =>
+    .withIndex("by_tenant_and_provider", (query) =>
       query.eq("tenantId", args.tenantId).eq("provider", args.provider)
     )
     .order("desc")
@@ -62,7 +62,7 @@ export async function getUserIntegrationForOwner(
 ) {
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_provider_owner", (query) =>
+    .withIndex("by_tenant_and_provider_and_owner", (query) =>
       query
         .eq("tenantId", args.tenantId)
         .eq("provider", args.provider)
