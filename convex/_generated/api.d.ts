@@ -45,6 +45,7 @@ import type * as executions_skills from "../executions/skills.js";
 import type * as executions_targets from "../executions/targets.js";
 import type * as executions_tokens from "../executions/tokens.js";
 import type * as executions_tools_adapter from "../executions/tools/adapter.js";
+import type * as executions_tools_assemble from "../executions/tools/assemble.js";
 import type * as executions_tools_definitions from "../executions/tools/definitions.js";
 import type * as executions_tools_github_bundle from "../executions/tools/github/bundle.js";
 import type * as executions_tools_github_index from "../executions/tools/github/index.js";
@@ -66,6 +67,7 @@ import type * as executions_tools_notion_bundle from "../executions/tools/notion
 import type * as executions_tools_notion_index from "../executions/tools/notion/index.js";
 import type * as executions_tools_notion_preflight from "../executions/tools/notion/preflight.js";
 import type * as executions_tools_policy from "../executions/tools/policy.js";
+import type * as executions_tools_resolve from "../executions/tools/resolve.js";
 import type * as executions_tools_schemas_common from "../executions/tools/schemas/common.js";
 import type * as executions_tools_schemas_github from "../executions/tools/schemas/github.js";
 import type * as executions_tools_schemas_google from "../executions/tools/schemas/google.js";
@@ -216,6 +218,7 @@ declare const fullApi: ApiFromModules<{
   "executions/targets": typeof executions_targets;
   "executions/tokens": typeof executions_tokens;
   "executions/tools/adapter": typeof executions_tools_adapter;
+  "executions/tools/assemble": typeof executions_tools_assemble;
   "executions/tools/definitions": typeof executions_tools_definitions;
   "executions/tools/github/bundle": typeof executions_tools_github_bundle;
   "executions/tools/github/index": typeof executions_tools_github_index;
@@ -237,6 +240,7 @@ declare const fullApi: ApiFromModules<{
   "executions/tools/notion/index": typeof executions_tools_notion_index;
   "executions/tools/notion/preflight": typeof executions_tools_notion_preflight;
   "executions/tools/policy": typeof executions_tools_policy;
+  "executions/tools/resolve": typeof executions_tools_resolve;
   "executions/tools/schemas/common": typeof executions_tools_schemas_common;
   "executions/tools/schemas/github": typeof executions_tools_schemas_github;
   "executions/tools/schemas/google": typeof executions_tools_schemas_google;
