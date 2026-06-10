@@ -7,7 +7,7 @@ import {
 
 export type GitHubInstallState = {
   tenantId: string
-  createdBy: string
+  createdByUserId: string
   returnUrl: string
   createdAt: number
 }

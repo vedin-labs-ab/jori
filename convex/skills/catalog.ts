@@ -7,7 +7,6 @@ import {
 } from "../_generated/server"
 import { requireClerkUserId } from "../identity/users"
 import { skills as globalSkillSeed } from "../prompts/generated"
-import { createUserActor } from "../schemas/actors"
 import { checkTenantAccess, requireTenantAccess } from "./access"
 import {
   normalizeSkillInput,
@@ -85,7 +84,7 @@ export const create = mutation({
       name: input.name,
       description: input.description,
       body: input.body,
-      createdBy: createUserActor(userId),
+      createdByUserId: userId,
       createdAt: now,
       updatedAt: now,
     })

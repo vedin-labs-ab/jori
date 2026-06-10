@@ -1,7 +1,6 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
 import { requireClerkUserId } from "../../identity/users"
-import { createUserActor } from "../../schemas/actors"
 import { createSignedNotionState } from "./signing"
 
 export const createInstallState = mutation({
@@ -18,7 +17,7 @@ export const createInstallState = mutation({
 
     return await createSignedNotionState({
       tenantId: args.tenantId,
-      createdBy: requireClerkUserId(identity),
+      createdByUserId: requireClerkUserId(identity),
       returnUrl: args.returnUrl,
       createdAt: Date.now(),
     })
@@ -28,7 +27,7 @@ export const createInstallState = mutation({
 export const recordOAuthInstallation = internalMutation({
   args: {
     tenantId: v.string(),
-    createdBy: v.string(),
+    createdByUserId: v.string(),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
     profile: v.object({
@@ -42,7 +41,6 @@ export const recordOAuthInstallation = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    const createdBy = createUserActor(args.createdBy)
     const existing = await ctx.db
       .query("integrations")
       .withIndex("by_provider_account", (query) =>
@@ -62,7 +60,7 @@ export const recordOAuthInstallation = internalMutation({
         scope: "tenant",
         credentials,
         status: "active",
-        createdBy,
+        createdByUserId: args.createdByUserId,
         data,
       })
 
@@ -76,7 +74,7 @@ export const recordOAuthInstallation = internalMutation({
       accountId: args.profile.workspaceId,
       credentials,
       status: "active",
-      createdBy,
+      createdByUserId: args.createdByUserId,
       createdAt: now,
       data,
     })

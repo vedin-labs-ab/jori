@@ -5,7 +5,6 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { getActorUserId } from "../schemas/actors"
 
 export const getInputByTrigger = internalQuery({
   args: {
@@ -59,7 +58,7 @@ async function getMessageInput(
   const integrations = await listActiveIntegrations(
     ctx,
     args.trigger.tenantId,
-    getActorUserId(args.trigger.createdBy)
+    args.trigger.createdByUserId
   )
 
   return {
@@ -97,7 +96,7 @@ async function getScheduledInput(
   const integrations = await listActiveIntegrations(
     ctx,
     schedule.tenantId,
-    getActorUserId(schedule.createdBy)
+    schedule.createdByUserId
   )
   const integration =
     integrations.find((candidate) => candidate.provider === "slack") ?? null
@@ -130,7 +129,7 @@ export const create = internalMutation({
       approvalId: args.approvalId,
       promptId: args.promptId,
       status: "queued",
-      createdBy: trigger.createdBy,
+      createdByUserId: trigger.createdByUserId,
       createdAt: Date.now(),
     })
   },

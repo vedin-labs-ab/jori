@@ -68,7 +68,7 @@ export async function handleNotionOAuthCallback(
     internal.providers.notion.install.recordOAuthInstallation,
     {
       tenantId: state.tenantId,
-      createdBy: state.createdBy,
+      createdByUserId: state.createdByUserId,
       accessToken: tokenResult.access_token,
       refreshToken: tokenResult.refresh_token ?? undefined,
       profile: {

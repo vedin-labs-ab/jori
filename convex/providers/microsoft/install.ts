@@ -6,7 +6,6 @@ import {
   mutation,
 } from "../../_generated/server"
 import { requireClerkUserId } from "../../identity/users"
-import { createUserActor } from "../../schemas/actors"
 import { type MicrosoftSurfaceProvider } from "./config"
 import {
   getMicrosoftAccountId,
@@ -44,7 +43,7 @@ export const recordOAuthInstallation = internalMutation({
   args: {
     provider: microsoftProvider,
     tenantId: v.string(),
-    createdBy: v.string(),
+    createdByUserId: v.string(),
     microsoftTenantId: v.string(),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
@@ -71,7 +70,7 @@ export const recordOAuthInstallation = internalMutation({
         query
           .eq("tenantId", args.tenantId)
           .eq("provider", args.provider)
-          .eq("ownerId", args.createdBy)
+          .eq("ownerId", args.createdByUserId)
       )
       .first()
 
@@ -102,7 +101,7 @@ export const recordOAuthInstallation = internalMutation({
       now,
       tenantId: args.tenantId,
       provider: args.provider,
-      ownerId: args.createdBy,
+      ownerId: args.createdByUserId,
       accountId,
       credentials,
       data,
@@ -110,7 +109,7 @@ export const recordOAuthInstallation = internalMutation({
 
     await upsertMicrosoftIdentity(ctx, {
       tenantId: args.tenantId,
-      userId: args.createdBy,
+      userId: args.createdByUserId,
       microsoftTenantId: args.microsoftTenantId,
       email,
       profile: args.profile,
@@ -152,7 +151,7 @@ async function upsertMicrosoftIntegration(
     accountId: args.accountId,
     credentials: args.credentials,
     status: "active" as const,
-    createdBy: createUserActor(args.ownerId),
+    createdByUserId: args.ownerId,
     data: args.data,
   }
 
@@ -230,7 +229,7 @@ async function createInstallState(
   return await createSignedMicrosoftState({
     provider,
     tenantId: args.tenantId,
-    createdBy: requireClerkUserId(identity),
+    createdByUserId: requireClerkUserId(identity),
     returnUrl: args.returnUrl,
     createdAt: Date.now(),
   })

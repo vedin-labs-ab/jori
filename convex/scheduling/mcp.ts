@@ -2,7 +2,6 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { hashExecutionToken } from "../runs/tokens"
-import { type Actor } from "../schemas/actors"
 
 type MiloMcpRequest = {
   tool: string
@@ -83,7 +82,7 @@ export async function callMiloScheduleTool(
   ctx: ActionCtx,
   execution: {
     tenantId: string
-    createdBy?: Actor
+    createdByUserId?: string
   },
   request: MiloMcpRequest
 ) {
@@ -93,7 +92,7 @@ export async function callMiloScheduleTool(
     return await ctx.runMutation(internal.scheduling.schedules.create, {
       ...(args as AddScheduleArgs),
       tenantId: execution.tenantId,
-      createdBy: execution.createdBy,
+      createdByUserId: execution.createdByUserId,
     })
   }
 

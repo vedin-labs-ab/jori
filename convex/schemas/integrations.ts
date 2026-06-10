@@ -1,7 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { integrationProviderValidator } from "../providers/catalog"
-import { actorValidator } from "./actors"
 
 export const integrations = defineTable({
   tenantId: v.string(),
@@ -15,7 +14,7 @@ export const integrations = defineTable({
     v.literal("paused"),
     v.literal("revoked")
   ),
-  createdBy: v.optional(actorValidator),
+  createdByUserId: v.optional(v.string()),
   createdAt: v.number(),
   data: v.optional(v.any()),
 })

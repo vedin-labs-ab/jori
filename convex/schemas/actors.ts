@@ -30,10 +30,6 @@ export function createUserActor(userId: string | undefined): Actor | undefined {
   return userId === undefined ? undefined : { userId }
 }
 
-export function getActorUserId(actor: Actor | undefined) {
-  return actor !== undefined && "userId" in actor ? actor.userId : undefined
-}
-
 export function getActorEmail(actor: Actor | undefined) {
   return actor !== undefined && "email" in actor ? actor.email : undefined
 }

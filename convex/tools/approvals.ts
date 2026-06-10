@@ -9,7 +9,7 @@ import {
 } from "../permissions/catalog"
 import { createSlackApprovalRequest } from "../providers/slack/approvalBlocks"
 import { type CodexRuntimeInput } from "../runs/codex"
-import { type Actor } from "../schemas/actors"
+import { type Actor, createUserActor } from "../schemas/actors"
 import { parsePromptedToolApproval } from "./approvalArgs"
 import { postSlackMessage } from "./providers/slack"
 
@@ -155,15 +155,15 @@ async function deliverSlackApproval(
 }
 
 function createRequestedBy(context: ApprovalBrokerContext): Actor {
-  if (context.input.trigger.createdBy !== undefined) {
-    return context.input.trigger.createdBy
+  if (context.input.trigger.createdByUserId !== undefined) {
+    return createUserActor(context.input.trigger.createdByUserId)
   }
 
   if (context.input.type === "scheduled") {
-    const createdBy = context.input.schedule.createdBy
+    const createdByUserId = context.input.schedule.createdByUserId
 
-    if (createdBy !== undefined) {
-      return createdBy
+    if (createdByUserId !== undefined) {
+      return createUserActor(createdByUserId)
     }
   }
 

@@ -120,7 +120,7 @@ async function executeApprovedTool(
         ctx,
         {
           tenantId: approval.tenantId,
-          createdBy: input.trigger.createdBy,
+          createdByUserId: input.trigger.createdByUserId,
         },
         {
           tool: approval.tool,

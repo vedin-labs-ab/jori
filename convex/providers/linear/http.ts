@@ -83,7 +83,7 @@ export async function handleLinearOAuthCallback(
     internal.providers.linear.install.recordOAuthInstallation,
     {
       tenantId: state.tenantId,
-      createdBy: state.createdBy,
+      createdByUserId: state.createdByUserId,
       accessToken: tokenResult.access_token,
       refreshToken: tokenResult.refresh_token,
       expiresAt: Date.now() + tokenResult.expires_in * 1000,

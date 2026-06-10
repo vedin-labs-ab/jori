@@ -1,6 +1,5 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { type Actor } from "../schemas/actors"
 
 export async function findConversationActivation(
   ctx: MutationCtx,
@@ -36,7 +35,7 @@ export async function startMessageTrigger(
     messageType: string
     messageExternalId: string
     conversationId: string
-    createdBy: Actor | undefined
+    createdByUserId: string | undefined
     now: number
   }
 ) {
@@ -50,7 +49,7 @@ export async function startMessageTrigger(
         externalId: args.messageExternalId,
       },
     },
-    createdBy: args.createdBy,
+    createdByUserId: args.createdByUserId,
     createdAt: args.now,
   })
 
@@ -61,7 +60,7 @@ export async function startMessageTrigger(
           triggerId,
           integrationId: args.integration._id,
           conversationId: args.conversationId,
-          createdBy: args.createdBy,
+          createdByUserId: args.createdByUserId,
           createdAt: args.now,
         })
       : args.activation._id

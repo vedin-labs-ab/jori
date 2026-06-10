@@ -9,7 +9,7 @@ const slackSigningSecret = process.env.SLACK_SIGNING_SECRET
 
 export type SlackInstallState = {
   tenantId: string
-  createdBy: string
+  createdByUserId: string
   returnUrl: string
   createdAt: number
 }

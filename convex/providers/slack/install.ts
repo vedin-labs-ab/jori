@@ -5,7 +5,6 @@ import {
   mutation,
 } from "../../_generated/server"
 import { requireClerkUserId } from "../../identity/users"
-import { createUserActor } from "../../schemas/actors"
 import { createSignedSlackState } from "./signing"
 
 export const createInstallState = mutation({
@@ -22,7 +21,7 @@ export const createInstallState = mutation({
 
     return await createSignedSlackState({
       tenantId: args.tenantId,
-      createdBy: requireClerkUserId(identity),
+      createdByUserId: requireClerkUserId(identity),
       returnUrl: args.returnUrl,
       createdAt: Date.now(),
     })
@@ -63,7 +62,7 @@ export const getUserToken = internalQuery({
 export const recordOAuthInstallation = internalMutation({
   args: {
     tenantId: v.string(),
-    createdBy: v.string(),
+    createdByUserId: v.string(),
     accountId: v.string(),
     botScopes: v.optional(v.string()),
     botToken: v.string(),
@@ -77,7 +76,6 @@ export const recordOAuthInstallation = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    const createdBy = createUserActor(args.createdBy)
     const existing = await ctx.db
       .query("integrations")
       .withIndex("by_provider_account", (query) =>
@@ -104,7 +102,7 @@ export const recordOAuthInstallation = internalMutation({
         tenantId: args.tenantId,
         credentials,
         status: "active",
-        createdBy,
+        createdByUserId: args.createdByUserId,
         data,
       })
 
@@ -117,7 +115,7 @@ export const recordOAuthInstallation = internalMutation({
       accountId: args.accountId,
       credentials,
       status: "active",
-      createdBy,
+      createdByUserId: args.createdByUserId,
       createdAt: now,
       data,
     })

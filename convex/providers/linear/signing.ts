@@ -8,7 +8,7 @@ import { requireLinearClientSecret } from "./oauth"
 
 export type LinearInstallState = {
   tenantId: string
-  createdBy: string
+  createdByUserId: string
   returnUrl: string
   createdAt: number
 }

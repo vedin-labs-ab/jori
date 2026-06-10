@@ -20,7 +20,6 @@ import { isMiloRelevantMessage } from "../providers/slack/gate"
 import {
   type Actor,
   actorValidator,
-  createUserActor,
   getActorEmail,
   getActorExternalId,
 } from "../schemas/actors"
@@ -157,7 +156,7 @@ async function recordProviderMessage(
     integration: input.integration,
   })
   const now = Date.now()
-  const createdBy = await resolveMessageOwner(ctx, {
+  const createdByUserId = await resolveMessageOwner(ctx, {
     tenantId: input.integration.tenantId,
     message: input.message,
   })
@@ -179,7 +178,7 @@ async function recordProviderMessage(
     messageType: input.message.type,
     messageExternalId: input.message.externalId,
     conversationId: input.message.conversationId ?? input.message.externalId,
-    createdBy,
+    createdByUserId,
     now,
   })
 }
@@ -230,12 +229,10 @@ async function resolveMessageOwner(
     message: ObservedMessage
   }
 ) {
-  const userId = await resolveUserIdByEmail(ctx, {
+  return await resolveUserIdByEmail(ctx, {
     tenantId: input.tenantId,
     email: getActorEmail(input.message.actor),
   })
-
-  return createUserActor(userId)
 }
 
 function isSlackBotMessage(actorId: string | undefined, data: unknown) {

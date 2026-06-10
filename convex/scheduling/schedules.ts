@@ -6,7 +6,6 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
-import { actorValidator } from "../schemas/actors"
 import { scheduleOutput } from "../schemas/schedules"
 import {
   compareSchedules,
@@ -31,7 +30,7 @@ export const create = internalMutation({
     metadata: v.optional(v.any()),
     output: scheduleOutput,
     schedule: scheduleInput,
-    createdBy: v.optional(actorValidator),
+    createdByUserId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -47,7 +46,7 @@ export const create = internalMutation({
       runAt: timing.runAt,
       nextRunAt: timing.nextRunAt,
       status: "active",
-      createdBy: args.createdBy,
+      createdByUserId: args.createdByUserId,
       createdAt: now,
       updatedAt: now,
     })
@@ -214,7 +213,7 @@ export const fire = internalMutation({
       data: {
         scheduleName: schedule.name,
       },
-      createdBy: schedule.createdBy,
+      createdByUserId: schedule.createdByUserId,
       createdAt: now,
     })
 

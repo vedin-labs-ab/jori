@@ -6,7 +6,6 @@ import {
 } from "../../_generated/server"
 import { upsertIdentity } from "../../identity/identities"
 import { requireClerkUserId } from "../../identity/users"
-import { createUserActor } from "../../schemas/actors"
 import { type GoogleSurfaceProvider } from "./config"
 import { createSignedGoogleState } from "./signing"
 
@@ -36,7 +35,7 @@ export const recordOAuthInstallation = internalMutation({
   args: {
     provider: googleProvider,
     tenantId: v.string(),
-    createdBy: v.string(),
+    createdByUserId: v.string(),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
     expiresAt: v.number(),
@@ -50,14 +49,13 @@ export const recordOAuthInstallation = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    const createdBy = createUserActor(args.createdBy)
     const existing = await ctx.db
       .query("integrations")
       .withIndex("by_tenant_provider_owner", (query) =>
         query
           .eq("tenantId", args.tenantId)
           .eq("provider", args.provider)
-          .eq("ownerId", args.createdBy)
+          .eq("ownerId", args.createdByUserId)
       )
       .first()
 
@@ -82,11 +80,11 @@ export const recordOAuthInstallation = internalMutation({
       await ctx.db.patch(existing._id, {
         tenantId: args.tenantId,
         scope: "user",
-        ownerId: args.createdBy,
+        ownerId: args.createdByUserId,
         accountId: args.profile.email,
         credentials,
         status: "active",
-        createdBy,
+        createdByUserId: args.createdByUserId,
         data,
       })
 
@@ -99,11 +97,11 @@ export const recordOAuthInstallation = internalMutation({
       tenantId: args.tenantId,
       provider: args.provider,
       scope: "user",
-      ownerId: args.createdBy,
+      ownerId: args.createdByUserId,
       accountId: args.profile.email,
       credentials,
       status: "active",
-      createdBy,
+      createdByUserId: args.createdByUserId,
       createdAt: now,
       data,
     })
@@ -170,7 +168,7 @@ async function createInstallState(
   return await createSignedGoogleState({
     provider,
     tenantId: args.tenantId,
-    createdBy: requireClerkUserId(identity),
+    createdByUserId: requireClerkUserId(identity),
     returnUrl: args.returnUrl,
     createdAt: Date.now(),
   })
@@ -180,7 +178,7 @@ async function upsertGoogleIdentity(
   ctx: MutationCtx,
   args: {
     tenantId: string
-    createdBy: string
+    createdByUserId: string
     profile: {
       id: string
       email: string
@@ -189,7 +187,7 @@ async function upsertGoogleIdentity(
 ) {
   await upsertIdentity(ctx, {
     tenantId: args.tenantId,
-    userId: args.createdBy,
+    userId: args.createdByUserId,
     provider: "google",
     accountId: args.profile.email,
     externalId: args.profile.id,

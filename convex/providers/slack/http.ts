@@ -106,7 +106,7 @@ export async function handleSlackOAuthCallback(
     internal.providers.slack.install.recordOAuthInstallation,
     {
       tenantId: state.tenantId,
-      createdBy: state.createdBy,
+      createdByUserId: state.createdByUserId,
       accountId: tokenResult.team.id,
       botScopes: tokenResult.scope,
       botToken,
