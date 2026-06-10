@@ -1,6 +1,9 @@
 import { expect, test } from "vitest"
 import { type SlackApprovalDecisionResult } from "../../approvals/runtime"
-import { createSlackDecisionResponse } from "./approvalBlocks"
+import {
+  createSlackApprovalRequest,
+  createSlackDecisionResponse,
+} from "./approvalBlocks"
 import { parseSlackApprovalInteraction } from "./approvals"
 
 test("parses Slack approval button payloads", () => {
@@ -28,6 +31,38 @@ test("parses Slack approval button payloads", () => {
     code: "ABC12345",
     decision: "approved",
   })
+})
+
+test("renders Slack approval requests as compact cards", () => {
+  const request = createSlackApprovalRequest({
+    code: "ABC12345",
+    provider: "notion",
+    tool: "notion_create_page",
+    summary: "Create a new Notion page under Customer Discovery.",
+  })
+  const card = request.blocks[0] as Record<string, unknown>
+  const actions = card.actions as Record<string, unknown>[]
+
+  expect(card.type).toBe("card")
+  expect(card.slack_icon).toEqual({ type: "icon", name: "edit" })
+  expect(card.title).toMatchObject({
+    type: "mrkdwn",
+    text: "Approval required",
+  })
+  expect(card.subtitle).toMatchObject({
+    type: "mrkdwn",
+    text: "Create Notion page",
+  })
+  expect(card.body).toMatchObject({
+    type: "mrkdwn",
+    text: "Create a new Notion page under Customer Discovery.\n\n_Expires in 30 minutes_",
+  })
+  expect(actions.map((action) => action.action_id)).toEqual([
+    "milo_approval_deny",
+    "milo_approval_approve",
+  ])
+  expect(actions[0]).not.toHaveProperty("style")
+  expect(actions[1]).toMatchObject({ style: "primary" })
 })
 
 test("replaces Slack approval buttons with a decision summary", () => {
@@ -60,9 +95,10 @@ test("replaces Slack approval buttons with a decision summary", () => {
   const rendered = JSON.stringify(response)
 
   expect(response.replace_original).toBe(true)
-  expect(rendered).toContain("*Denied* by <@U123> at <!date^")
+  expect(rendered).toContain("Denied by <@U123> at <!date^")
   expect(rendered).toContain("Post a follow-up message in Slack.")
-  expect(rendered).toContain("*Tool:* slack.conversations_add_message")
+  expect(rendered).toContain("Send Slack message")
   expect(rendered).not.toContain("ABC12345")
+  expect(rendered).not.toContain("Expires in")
   expect(rendered).not.toContain('"type":"actions"')
 })
