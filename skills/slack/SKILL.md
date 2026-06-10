@@ -6,7 +6,7 @@ description: Built-in Slack skill for native messages, with correct mrkdwn forma
 # Slack
 
 Format Slack messages so they feel native to Slack:
-- Use plain `text` for direct replies. When using plain `text`, write concise
+- Use plain `text` for direct replies. When using `text`, write concise
   Slack `mrkdwn`: *bold*, _italic_, `code`, and > quote render; **bold** and
   [label](url) do not.
 - Use Slack-native `blocks`
