@@ -33,8 +33,8 @@ export const recordOAuthInstallation = internalMutation({
     expiresAt: v.number(),
     scope: v.optional(v.string()),
     profile: v.object({
-      appUserId: v.string(),
-      appUserName: v.optional(v.string()),
+      botId: v.string(),
+      botName: v.optional(v.string()),
       organization: v.object({
         id: v.string(),
         name: v.optional(v.string()),
@@ -54,13 +54,15 @@ export const recordOAuthInstallation = internalMutation({
       .first()
 
     const credentials = {
-      accessToken: args.accessToken,
-      refreshToken: args.refreshToken,
+      tokens: {
+        access: args.accessToken,
+        refresh: args.refreshToken,
+      },
       expiresAt: args.expiresAt,
       scope: args.scope,
     }
     const data = {
-      appUserId: args.profile.appUserId,
+      botId: args.profile.botId,
     }
     const url = getLinearUrl(args.profile.organization.urlKey)
 
@@ -118,8 +120,10 @@ export const updateOAuthCredentials = internalMutation({
     }
 
     const credentials = {
-      accessToken: args.accessToken,
-      refreshToken: args.refreshToken,
+      tokens: {
+        access: args.accessToken,
+        refresh: args.refreshToken,
+      },
       expiresAt: args.expiresAt,
       scope: args.scope,
     }

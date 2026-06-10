@@ -3,19 +3,42 @@ import { requireCredentials } from "../credentials"
 
 export type GitHubCredentials = {
   installationId: string
-  token?: string
+  tokens?: {
+    access?: string
+  }
   expiresAt?: number
 }
 
 export function requireGitHubCredentials(
   integration: Doc<"integrations">
 ): GitHubCredentials {
-  return requireCredentials(
+  const credentials = requireCredentials(
     integration,
     {
       required: { installationId: "string" },
-      optional: { token: "string", expiresAt: "number" },
+      optional: { expiresAt: "number" },
     },
     "Missing GitHub integration credentials"
   )
+
+  return {
+    ...credentials,
+    tokens: readGitHubTokens(integration.credentials),
+  }
+}
+
+function readGitHubTokens(credentials: unknown) {
+  if (
+    typeof credentials !== "object" ||
+    credentials === null ||
+    !("tokens" in credentials) ||
+    typeof credentials.tokens !== "object" ||
+    credentials.tokens === null ||
+    !("access" in credentials.tokens) ||
+    typeof credentials.tokens.access !== "string"
+  ) {
+    return undefined
+  }
+
+  return { access: credentials.tokens.access }
 }

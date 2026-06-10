@@ -76,7 +76,6 @@ export async function handleNotionOAuthCallback(
         workspaceId: tokenResult.workspace_id,
         workspaceName: tokenResult.workspace_name ?? undefined,
         workspaceIcon: tokenResult.workspace_icon ?? undefined,
-        owner: tokenResult.owner,
         duplicatedTemplateId: tokenResult.duplicated_template_id ?? undefined,
       },
     }

@@ -1,4 +1,4 @@
-import { getLinearAppUserId } from "./data"
+import { getLinearBotId } from "./data"
 
 export function isMiloRelevantLinearMessage(
   text: string | undefined,
@@ -19,7 +19,7 @@ export function isLinearAppMessage(
     return false
   }
 
-  return actorId === getLinearAppUserId(integrationData)
+  return actorId === getLinearBotId(integrationData)
 }
 
 function mentionsMilo(text: string | undefined) {

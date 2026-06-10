@@ -15,8 +15,8 @@ export type LinearTokenResponse =
     }
 
 export type LinearInstallationProfile = {
-  appUserId: string
-  appUserName?: string
+  botId: string
+  botName?: string
   organization: {
     id: string
     name?: string
@@ -80,16 +80,16 @@ export async function fetchLinearInstallationProfile(accessToken: string) {
     errors?: unknown
   }
 
-  const appUserId = result.data?.viewer?.id
+  const botId = result.data?.viewer?.id
   const organizationId = result.data?.organization?.id
 
-  if (appUserId === undefined || organizationId === undefined) {
+  if (botId === undefined || organizationId === undefined) {
     throw new Error("Could not read Linear installation profile")
   }
 
   return {
-    appUserId,
-    appUserName: result.data?.viewer?.name,
+    botId,
+    botName: result.data?.viewer?.name,
     organization: {
       id: organizationId,
       name: result.data?.organization?.name,

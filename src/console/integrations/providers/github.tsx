@@ -46,27 +46,11 @@ export function GitHubConnection({
         status,
         githubConfig.label,
         "No installation connected",
-        getGitHubAccountLabel(status)
+        status?.name
       )}
       permissions={permissions}
       status={status}
       tenantId={tenantId}
     />
   )
-}
-
-function getGitHubAccountLabel(
-  status:
-    | {
-        name?: string
-        accountType?: string
-      }
-    | null
-    | undefined
-) {
-  if (status?.name !== undefined) {
-    return status.accountType === undefined
-      ? status.name
-      : `${status.name} (${status.accountType})`
-  }
 }

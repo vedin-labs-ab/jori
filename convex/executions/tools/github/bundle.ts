@@ -14,7 +14,7 @@ export function createGitHubToolBundle(
     credentials: GitHubCredentials
   } & ToolPermissionInput
 ): ToolBundle {
-  if (args.credentials.token === undefined) {
+  if (args.credentials.tokens?.access === undefined) {
     throw new Error("Missing GitHub runtime token")
   }
 

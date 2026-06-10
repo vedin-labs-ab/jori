@@ -39,13 +39,13 @@ export function createToolPreflightEnv(
 ): Record<string, string> {
   if (preflight.type === "github") {
     return {
-      MILO_GITHUB_TOKEN: preflight.credentials.token ?? "",
+      MILO_GITHUB_TOKEN: preflight.credentials.tokens?.access ?? "",
     }
   }
 
   if (preflight.type === "linear") {
     return {
-      MILO_LINEAR_ACCESS_TOKEN: preflight.credentials.accessToken,
+      MILO_LINEAR_ACCESS_TOKEN: preflight.credentials.tokens.access,
     }
   }
 
@@ -58,17 +58,17 @@ export function createToolPreflightEnv(
 
   if (preflight.type === "gmail" || preflight.type === "googleCalendar") {
     return {
-      MILO_GOOGLE_ACCESS_TOKEN: preflight.credentials.accessToken,
+      MILO_GOOGLE_ACCESS_TOKEN: preflight.credentials.tokens.access,
     }
   }
 
   if (preflight.type === "notion") {
     return {
-      MILO_NOTION_ACCESS_TOKEN: preflight.credentials.accessToken,
+      MILO_NOTION_ACCESS_TOKEN: preflight.credentials.tokens.access,
     }
   }
 
   return {
-    MILO_MICROSOFT_ACCESS_TOKEN: preflight.credentials.accessToken,
+    MILO_MICROSOFT_ACCESS_TOKEN: preflight.credentials.tokens.access,
   }
 }

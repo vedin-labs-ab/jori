@@ -1,11 +1,10 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
-import { getGitHubAccountType } from "../providers/github/data"
 import { type GoogleSurfaceProvider } from "../providers/google/config"
 import { type MicrosoftSurfaceProvider } from "../providers/microsoft/config"
 import { getMicrosoftTenantName } from "../providers/microsoft/data"
-import { getNotionBotId, getNotionOwnerEmail } from "../providers/notion/data"
+import { getNotionBotId } from "../providers/notion/data"
 import { getTenantIntegration, getUserIntegration } from "./data"
 
 export const getSlackStatus = query({
@@ -100,7 +99,6 @@ export const getGitHubStatus = query({
       avatar: integration.avatar,
       status: integration.status,
       createdAt: integration.createdAt,
-      accountType: getGitHubAccountType(integration.data),
     }
   },
 })
@@ -126,7 +124,6 @@ export const getNotionStatus = query({
       status: integration.status,
       createdAt: integration.createdAt,
       botId: getNotionBotId(integration.data),
-      ownerEmail: getNotionOwnerEmail(integration.data),
     }
   },
 })

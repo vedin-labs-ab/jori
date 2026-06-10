@@ -25,11 +25,16 @@ export async function callGoogleTool(
   const credentials = requireGoogleCredentials(integration)
 
   if (tool.startsWith("google_gmail_")) {
-    return await callGmailTool(integration, credentials.accessToken, tool, args)
+    return await callGmailTool(
+      integration,
+      credentials.tokens.access,
+      tool,
+      args
+    )
   }
 
   if (tool.startsWith("google_calendar_")) {
-    return await callGoogleCalendarTool(credentials.accessToken, tool, args)
+    return await callGoogleCalendarTool(credentials.tokens.access, tool, args)
   }
 
   throw new Error(`Unknown Google tool: ${tool}`)

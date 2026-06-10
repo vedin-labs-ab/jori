@@ -1,11 +1,16 @@
 import { expect, test } from "vitest"
-import { type Doc } from "../_generated/dataModel"
 import {
   resolveToolMode,
   resolveToolModes,
   toolPermissions,
 } from "../permissions/catalog"
 import { createCodexConfig } from "./codex"
+import {
+  integration,
+  readProperties,
+  readRequired,
+  runtimeMilo,
+} from "./permissions.fixtures"
 import { assembleToolsForRun } from "./tools"
 import { getProviderToolDefinitions } from "./tools/definitions"
 
@@ -196,85 +201,3 @@ test("keeps provider credentials out of sandbox MCP config", () => {
     expect(server.env).not.toHaveProperty("MILO_MICROSOFT_ACCESS_TOKEN")
   }
 })
-
-function runtimeMilo() {
-  return {
-    convexSiteUrl: "https://convex.example",
-    executionToken: "execution-token",
-  }
-}
-
-function integration(provider: string): Doc<"integrations"> {
-  return {
-    _id: `${provider}-integration`,
-    _creationTime: 0,
-    tenantId: "tenant",
-    provider,
-    scope: "tenant",
-    externalId: `${provider}-account`,
-    email: provider === "gmail" ? "user@example.com" : undefined,
-    credentials: credentials(provider),
-    status: "active",
-    createdBy: "user",
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
-}
-
-function credentials(provider: string) {
-  if (provider === "github") {
-    return {
-      installationId: "123",
-      token: "github-token",
-      expiresAt: Date.now() + 60_000,
-    }
-  }
-
-  if (provider === "slack") {
-    return {
-      bot: "bot-token",
-      user: "user-token",
-    }
-  }
-
-  if (provider === "microsoftEmail" || provider === "microsoftCalendar") {
-    return {
-      accessToken: "access-token",
-      refreshToken: "refresh-token",
-      expiresAt: Date.now() + 60_000,
-      tenantId: "microsoft-tenant",
-    }
-  }
-
-  return {
-    accessToken: "access-token",
-    refreshToken: "refresh-token",
-    expiresAt: Date.now() + 60_000,
-  }
-}
-
-function readProperties(schema: unknown) {
-  if (
-    typeof schema !== "object" ||
-    schema === null ||
-    !("properties" in schema)
-  ) {
-    return {}
-  }
-
-  const properties = schema.properties
-
-  return typeof properties === "object" && properties !== null ? properties : {}
-}
-
-function readRequired(schema: unknown) {
-  if (
-    typeof schema !== "object" ||
-    schema === null ||
-    !("required" in schema)
-  ) {
-    return []
-  }
-
-  return Array.isArray(schema.required) ? schema.required : []
-}

@@ -13,9 +13,8 @@ test("revokes Google refresh tokens", async () => {
 
   await revokeIntegrationAccess(
     integration("gmail", {
-      accessToken: "google-access",
+      tokens: { access: "google-access", refresh: "google-refresh" },
       expiresAt: Date.now() + 60_000,
-      refreshToken: "google-refresh",
     })
   )
 
@@ -38,9 +37,8 @@ test("revokes Linear refresh tokens with client authentication", async () => {
 
   await revokeIntegrationAccess(
     integration("linear", {
-      accessToken: "linear-access",
+      tokens: { access: "linear-access", refresh: "linear-refresh" },
       expiresAt: Date.now() + 60_000,
-      refreshToken: "linear-refresh",
     })
   )
 
@@ -69,8 +67,7 @@ test("revokes Notion access tokens with client authentication", async () => {
 
   await revokeIntegrationAccess(
     integration("notion", {
-      accessToken: "notion-access",
-      refreshToken: "notion-refresh",
+      tokens: { access: "notion-access", refresh: "notion-refresh" },
     })
   )
 
@@ -120,9 +117,8 @@ test("does not call Microsoft tenant-wide revocation APIs", async () => {
 
   await revokeIntegrationAccess(
     integration("microsoftEmail", {
-      accessToken: "microsoft-access",
+      tokens: { access: "microsoft-access", refresh: "microsoft-refresh" },
       expiresAt: Date.now() + 60_000,
-      refreshToken: "microsoft-refresh",
       tenantId: "microsoft-tenant",
     })
   )

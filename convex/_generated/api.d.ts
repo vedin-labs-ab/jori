@@ -108,7 +108,6 @@ import type * as providers_data from "../providers/data.js";
 import type * as providers_github_app from "../providers/github/app.js";
 import type * as providers_github_config from "../providers/github/config.js";
 import type * as providers_github_credentials from "../providers/github/credentials.js";
-import type * as providers_github_data from "../providers/github/data.js";
 import type * as providers_github_events from "../providers/github/events.js";
 import type * as providers_github_gate from "../providers/github/gate.js";
 import type * as providers_github_http from "../providers/github/http.js";
@@ -278,7 +277,6 @@ declare const fullApi: ApiFromModules<{
   "providers/github/app": typeof providers_github_app;
   "providers/github/config": typeof providers_github_config;
   "providers/github/credentials": typeof providers_github_credentials;
-  "providers/github/data": typeof providers_github_data;
   "providers/github/events": typeof providers_github_events;
   "providers/github/gate": typeof providers_github_gate;
   "providers/github/http": typeof providers_github_http;

@@ -13,10 +13,10 @@ export async function callLinearTool(
   if (tool === "linear_search_issues") {
     const query = requiredString(args.query, "query")
     const exactIssue = await getLinearIssueSummaryByIdentifier(
-      credentials.accessToken,
+      credentials.tokens.access,
       query
     )
-    const result = await linearGraphql(credentials.accessToken, {
+    const result = await linearGraphql(credentials.tokens.access, {
       query: `
         query MiloIssueSearch($query: String!, $first: Int!) {
           issues(first: $first, filter: { title: { containsIgnoreCase: $query } }) {
@@ -52,7 +52,7 @@ export async function callLinearTool(
   }
 
   if (tool === "linear_get_issue") {
-    const result = await linearGraphql(credentials.accessToken, {
+    const result = await linearGraphql(credentials.tokens.access, {
       query: `
         query MiloIssue($id: String!) {
           issue(id: $id) {
@@ -86,7 +86,7 @@ export async function callLinearTool(
   }
 
   if (tool === "linear_list_comments") {
-    const result = await linearGraphql(credentials.accessToken, {
+    const result = await linearGraphql(credentials.tokens.access, {
       query: `
         query MiloIssueComments($id: String!, $first: Int!) {
           issue(id: $id) {
@@ -114,7 +114,7 @@ export async function callLinearTool(
   }
 
   if (tool === "linear_add_comment") {
-    return await linearGraphql(credentials.accessToken, {
+    return await linearGraphql(credentials.tokens.access, {
       query: `
         mutation MiloAddComment($input: CommentCreateInput!) {
           commentCreate(input: $input) {

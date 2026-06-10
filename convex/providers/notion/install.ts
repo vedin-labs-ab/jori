@@ -35,7 +35,6 @@ export const recordOAuthInstallation = internalMutation({
       workspaceId: v.string(),
       workspaceName: v.optional(v.string()),
       workspaceIcon: v.optional(v.string()),
-      owner: v.optional(v.any()),
       duplicatedTemplateId: v.optional(v.string()),
     }),
   },
@@ -51,12 +50,13 @@ export const recordOAuthInstallation = internalMutation({
       .first()
 
     const credentials = {
-      accessToken: args.accessToken,
-      refreshToken: args.refreshToken,
+      tokens: {
+        access: args.accessToken,
+        refresh: args.refreshToken,
+      },
     }
     const data = {
       botId: args.profile.botId,
-      owner: args.profile.owner,
       duplicatedTemplateId: args.profile.duplicatedTemplateId,
     }
 
@@ -108,8 +108,10 @@ export const updateOAuthCredentials = internalMutation({
     }
 
     const credentials = {
-      accessToken: args.accessToken,
-      refreshToken: args.refreshToken,
+      tokens: {
+        access: args.accessToken,
+        refresh: args.refreshToken,
+      },
     }
 
     await ctx.db.patch(args.integrationId, {

@@ -32,19 +32,13 @@ export const recordInstallation = internalMutation({
     profile: v.object({
       id: v.number(),
       html_url: v.optional(v.string()),
-      repository_selection: v.optional(v.string()),
-      permissions: v.optional(v.record(v.string(), v.string())),
-      events: v.optional(v.array(v.string())),
       account: v.optional(
         v.object({
-          id: v.optional(v.number()),
           login: v.optional(v.string()),
-          type: v.optional(v.string()),
           avatar_url: v.optional(v.string()),
           html_url: v.optional(v.string()),
         })
       ),
-      app_slug: v.optional(v.string()),
     }),
   },
   handler: async (ctx, args) => {
@@ -59,14 +53,6 @@ export const recordInstallation = internalMutation({
     const credentials = {
       installationId: args.installationId,
     }
-    const data = {
-      installationUrl: args.profile.html_url,
-      repositorySelection: args.profile.repository_selection,
-      permissions: args.profile.permissions,
-      events: args.profile.events,
-      appSlug: args.profile.app_slug,
-      accountType: args.profile.account?.type,
-    }
 
     if (existing !== null) {
       await ctx.db.patch(existing._id, {
@@ -80,7 +66,7 @@ export const recordInstallation = internalMutation({
         status: "active",
         createdBy: args.createdBy,
         updatedAt: now,
-        data,
+        data: undefined,
       })
 
       return existing._id
@@ -99,7 +85,6 @@ export const recordInstallation = internalMutation({
       createdBy: args.createdBy,
       createdAt: now,
       updatedAt: now,
-      data,
     })
   },
 })

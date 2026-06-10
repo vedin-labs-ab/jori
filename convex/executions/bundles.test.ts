@@ -171,7 +171,7 @@ function credentials(provider: string) {
   if (provider === "github") {
     return {
       installationId: "123",
-      token: "github-token",
+      tokens: { access: "github-token" },
       expiresAt: Date.now() + 60_000,
     }
   }
@@ -185,16 +185,20 @@ function credentials(provider: string) {
 
   if (provider === "microsoftEmail" || provider === "microsoftCalendar") {
     return {
-      accessToken: "access-token",
-      refreshToken: "refresh-token",
+      tokens: {
+        access: "access-token",
+        refresh: "refresh-token",
+      },
       expiresAt: Date.now() + 60_000,
       tenantId: "microsoft-tenant",
     }
   }
 
   return {
-    accessToken: "access-token",
-    refreshToken: "refresh-token",
+    tokens: {
+      access: "access-token",
+      refresh: "refresh-token",
+    },
     expiresAt: Date.now() + 60_000,
   }
 }

@@ -84,7 +84,7 @@ export async function revokeIntegrationAccess(
 async function revokeGoogleIntegration(integration: Doc<"integrations">) {
   const credentials = requireGoogleCredentials(integration)
   const response = await postForm(googleOAuthRevokeUrl, {
-    token: credentials.refreshToken,
+    token: credentials.tokens.refresh,
   })
 
   await expectOAuthRevocationResponse(response, "Google")
@@ -95,7 +95,7 @@ async function revokeLinearIntegration(integration: Doc<"integrations">) {
   const response = await postForm(
     linearOAuthRevokeUrl,
     {
-      token: credentials.refreshToken,
+      token: credentials.tokens.refresh,
       token_type_hint: "refresh_token",
     },
     {
@@ -127,7 +127,7 @@ async function revokeNotionIntegration(integration: Doc<"integrations">) {
       "notion-version": notionApiVersion,
     },
     body: JSON.stringify({
-      token: credentials.accessToken,
+      token: credentials.tokens.access,
     }),
   })
 

@@ -67,8 +67,10 @@ export const recordOAuthInstallation = internalMutation({
     }
 
     const credentials = {
-      accessToken: args.accessToken,
-      refreshToken,
+      tokens: {
+        access: args.accessToken,
+        refresh: refreshToken,
+      },
       expiresAt: args.expiresAt,
       scope: args.scope,
     }
@@ -106,8 +108,10 @@ function createGoogleIntegrationValues(
     }
   },
   credentials: {
-    accessToken: string
-    refreshToken: string
+    tokens: {
+      access: string
+      refresh: string
+    }
     expiresAt: number
     scope: string | undefined
   },
@@ -156,8 +160,10 @@ export const updateOAuthCredentials = internalMutation({
     }
 
     const credentials = {
-      accessToken: args.accessToken,
-      refreshToken,
+      tokens: {
+        access: args.accessToken,
+        refresh: refreshToken,
+      },
       expiresAt: args.expiresAt,
       scope: args.scope,
     }
@@ -218,10 +224,13 @@ function readRefreshToken(credentials: unknown) {
   if (
     typeof credentials === "object" &&
     credentials !== null &&
-    "refreshToken" in credentials &&
-    typeof credentials.refreshToken === "string"
+    "tokens" in credentials &&
+    typeof credentials.tokens === "object" &&
+    credentials.tokens !== null &&
+    "refresh" in credentials.tokens &&
+    typeof credentials.tokens.refresh === "string"
   ) {
-    return credentials.refreshToken
+    return credentials.tokens.refresh
   }
 
   return undefined

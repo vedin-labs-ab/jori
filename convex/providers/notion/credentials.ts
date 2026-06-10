@@ -1,19 +1,23 @@
 import { type Doc } from "../../_generated/dataModel"
-import { requireCredentials } from "../credentials"
+import { requireTokenCredentials } from "../credentials"
 
 export type NotionCredentials = {
-  accessToken: string
-  refreshToken?: string
+  tokens: {
+    access: string
+    refresh?: string
+  }
 }
 
 export function requireNotionCredentials(
   integration: Doc<"integrations">
 ): NotionCredentials {
-  return requireCredentials(
+  return requireTokenCredentials(
     integration,
     {
-      required: { accessToken: "string" },
-      optional: { refreshToken: "string" },
+      tokens: {
+        required: { access: "string" },
+        optional: { refresh: "string" },
+      },
     },
     "Missing Notion integration credentials"
   )

@@ -124,19 +124,13 @@ function normalizeInstallationProfile(profile: GitHubInstallationProfile) {
   return {
     id: profile.id,
     html_url: profile.html_url,
-    repository_selection: profile.repository_selection,
-    permissions: profile.permissions,
-    events: profile.events,
     account:
       profile.account === undefined
         ? undefined
         : {
-            id: profile.account.id,
             login: profile.account.login,
-            type: profile.account.type,
             avatar_url: profile.account.avatar_url,
             html_url: profile.account.html_url,
           },
-    app_slug: profile.app_slug,
   }
 }

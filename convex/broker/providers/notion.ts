@@ -14,7 +14,10 @@ export async function callNotionTool(
     throw new Error(`Unknown Notion tool: ${tool}`)
   }
 
-  return await handler(requireNotionCredentials(integration).accessToken, args)
+  return await handler(
+    requireNotionCredentials(integration).tokens.access,
+    args
+  )
 }
 
 const notionToolHandlers: Record<

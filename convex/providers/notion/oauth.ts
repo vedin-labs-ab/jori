@@ -10,7 +10,6 @@ export type NotionTokenResponse =
       workspace_icon: string | null
       workspace_name: string | null
       workspace_id: string
-      owner: unknown
       duplicated_template_id: string | null
       request_id?: string
     }

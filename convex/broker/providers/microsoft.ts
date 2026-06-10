@@ -18,11 +18,15 @@ export async function callMicrosoftTool(
   const credentials = requireMicrosoftCredentials(integration)
 
   if (tool.startsWith("microsoft_email_")) {
-    return await callMicrosoftEmailTool(credentials.accessToken, tool, args)
+    return await callMicrosoftEmailTool(credentials.tokens.access, tool, args)
   }
 
   if (tool.startsWith("microsoft_calendar_")) {
-    return await callMicrosoftCalendarTool(credentials.accessToken, tool, args)
+    return await callMicrosoftCalendarTool(
+      credentials.tokens.access,
+      tool,
+      args
+    )
   }
 
   throw new Error(`Unknown Microsoft tool: ${tool}`)

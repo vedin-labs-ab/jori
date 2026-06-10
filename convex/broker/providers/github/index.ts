@@ -229,11 +229,11 @@ async function addIssueComment(token: string, args: Record<string, unknown>) {
 function requireGitHubRuntimeToken(integration: Doc<"integrations">) {
   const credentials = requireGitHubCredentials(integration)
 
-  if (credentials.token === undefined) {
+  if (credentials.tokens?.access === undefined) {
     throw new Error("Missing GitHub runtime token")
   }
 
-  return credentials.token
+  return credentials.tokens.access
 }
 
 async function githubJson(

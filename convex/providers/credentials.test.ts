@@ -8,15 +8,19 @@ describe("provider credentials", () => {
     expect(
       requireGoogleCredentials(
         integration({
-          accessToken: "access-token",
-          refreshToken: "refresh-token",
+          tokens: {
+            access: "access-token",
+            refresh: "refresh-token",
+          },
           expiresAt: 123,
           scope: "email profile",
         })
       )
     ).toEqual({
-      accessToken: "access-token",
-      refreshToken: "refresh-token",
+      tokens: {
+        access: "access-token",
+        refresh: "refresh-token",
+      },
       expiresAt: 123,
       scope: "email profile",
     })
@@ -27,13 +31,13 @@ describe("provider credentials", () => {
       requireGitHubCredentials(
         integration({
           installationId: "installation",
-          token: 123,
+          tokens: { access: 123 },
           expiresAt: "tomorrow",
         })
       )
     ).toEqual({
       installationId: "installation",
-      token: undefined,
+      tokens: undefined,
       expiresAt: undefined,
     })
   })

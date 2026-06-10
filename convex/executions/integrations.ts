@@ -67,7 +67,7 @@ async function prepareGitHubIntegrationForRuntime(
     ...integration,
     credentials: {
       installationId: credentials.installationId,
-      token: tokenResult.token,
+      tokens: { access: tokenResult.token },
       expiresAt: Number.isFinite(expiresAt) ? expiresAt : undefined,
     },
   }
@@ -83,7 +83,7 @@ async function prepareLinearIntegrationForRuntime(
     return integration
   }
 
-  const tokenResult = await refreshLinearAccessToken(credentials.refreshToken)
+  const tokenResult = await refreshLinearAccessToken(credentials.tokens.refresh)
 
   if ("error" in tokenResult) {
     throw tokenRefreshError("Linear", tokenResult)
@@ -113,7 +113,7 @@ async function prepareGoogleIntegrationForRuntime(
     return integration
   }
 
-  const tokenResult = await refreshGoogleAccessToken(credentials.refreshToken)
+  const tokenResult = await refreshGoogleAccessToken(credentials.tokens.refresh)
 
   if ("error" in tokenResult) {
     throw tokenRefreshError("Google Workspace", tokenResult)
@@ -144,7 +144,7 @@ async function prepareMicrosoftIntegrationForRuntime(
   }
 
   const tokenResult = await refreshMicrosoftAccessToken({
-    refreshToken: credentials.refreshToken,
+    refreshToken: credentials.tokens.refresh,
     tenantId: credentials.tenantId,
   })
 
