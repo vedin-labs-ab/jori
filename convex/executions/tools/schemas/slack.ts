@@ -44,7 +44,11 @@ export const slackToolInputSchemas = {
   users_search: objectSchema({
     properties: {
       cursor: stringProperty("Slack pagination cursor."),
-      limit: numberProperty("Maximum users to inspect.", 1, 200),
+      limit: numberProperty(
+        "Users fetched per page, before the query filter is applied.",
+        1,
+        200
+      ),
       query: stringProperty("Optional case-insensitive text to match."),
     },
   }),

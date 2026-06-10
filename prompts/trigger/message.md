@@ -1,6 +1,7 @@
 # Trigger
 
 A {{message.provider}} message triggered this run.
+Current UTC time: {{time.utc}}.
 
 Target:
 {{message.target}}

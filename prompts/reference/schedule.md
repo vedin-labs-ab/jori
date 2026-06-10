@@ -9,6 +9,4 @@ Schedule:
 - Metadata: {{schedule.metadata}}
 
 Publish to:
-- Provider: Slack
-- Channel ID: {{output.channelId}}
-- Thread timestamp: {{output.threadId}}
+{{output.target}}

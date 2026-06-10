@@ -43,6 +43,7 @@ describe("runtime prompts", () => {
     const prompt = assemblePrompt(runtimeInput(provider, data))
 
     expect(prompt).toContain(`A ${providerLabel} message triggered this run.`)
+    expect(prompt).toContain("Current UTC time:")
 
     for (const line of targetLines) {
       expect(prompt).toContain(line)
@@ -57,6 +58,25 @@ describe("runtime prompts", () => {
     )
 
     expect(prompt).not.toContain("Thread timestamp")
+  })
+})
+
+describe("schedule trigger prompts", () => {
+  test("renders the publish target and omits an absent thread", () => {
+    const prompt = assemblePrompt(scheduledRuntimeInput())
+
+    expect(prompt).toContain("A schedule triggered this run.")
+    expect(prompt).toContain("Current UTC time:")
+    expect(prompt).toContain("- Provider: Slack")
+    expect(prompt).toContain("- Channel ID: C123")
+    expect(prompt).not.toContain("Thread timestamp")
+    expect(prompt).toContain("Run the scheduled work")
+  })
+
+  test("renders the publish thread when present", () => {
+    const prompt = assemblePrompt(scheduledRuntimeInput("123.456"))
+
+    expect(prompt).toContain("- Thread timestamp: 123.456")
   })
 })
 
@@ -96,9 +116,44 @@ describe("approval continuation prompts", () => {
     expect(prompt).toContain("google_calendar_create_event")
     expect(prompt).toContain('"eventId":"event-123"')
     expect(prompt).toContain("Do not repeat the approved tool call")
+    expect(prompt).toContain("report what failed instead of retrying")
     expect(prompt).not.toContain("Handle the request")
   })
 })
+
+function scheduledRuntimeInput(threadId?: string) {
+  return {
+    type: "scheduled",
+    trigger: {
+      _id: "trigger",
+      _creationTime: 0,
+      tenantId: "tenant",
+      type: "scheduled",
+      status: "active",
+      createdAt: 0,
+    },
+    integration: integration("slack"),
+    integrations: [integration("slack")],
+    schedule: {
+      _id: "schedule",
+      _creationTime: 0,
+      tenantId: "tenant",
+      name: "Daily digest",
+      description: "Post the daily digest.",
+      metadata: { source: "daily" },
+      output: {
+        type: "slack",
+        channelId: "C123",
+        ...(threadId === undefined ? {} : { threadId }),
+      },
+      type: "recurring",
+      cron: "0 9 * * *",
+      status: "active",
+      createdAt: 0,
+      updatedAt: 0,
+    },
+  } as unknown as Parameters<typeof assemblePrompt>[0]
+}
 
 function runtimeInput(provider: "github" | "linear" | "slack", data: unknown) {
   return {

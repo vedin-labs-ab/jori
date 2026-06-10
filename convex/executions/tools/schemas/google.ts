@@ -55,7 +55,11 @@ function gmailMessageSchema() {
     properties: {
       bcc: stringArrayProperty("BCC recipient email addresses."),
       body: stringProperty("Message body."),
-      bodyType: { type: "string", enum: ["Text", "HTML"] },
+      bodyType: {
+        type: "string",
+        enum: ["Text", "HTML"],
+        description: "Defaults to Text.",
+      },
       cc: stringArrayProperty("CC recipient email addresses."),
       subject: stringProperty("Message subject."),
       to: stringArrayProperty("Recipient email addresses."),
@@ -70,7 +74,8 @@ function gmailReadSchema(idProperty: string) {
       [idProperty]: stringProperty("Gmail ID."),
       format: {
         type: "string",
-        enum: ["full", "metadata", "minimal", "raw"],
+        enum: ["full", "metadata", "minimal"],
+        description: "Defaults to full.",
       },
     },
   })
@@ -88,6 +93,8 @@ function calendarWriteSchema(
       sendUpdates: {
         type: "string",
         enum: ["all", "externalOnly", "none"],
+        description:
+          "Whether attendees are emailed about the change. Defaults to none.",
       },
       ...properties,
     },

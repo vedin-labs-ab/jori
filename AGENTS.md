@@ -58,5 +58,5 @@ Complexity compounds quickly. Be deliberate in preventing it.
 
 This project uses Convex as its backend.
 
-When working on Convex code, **always read `convex/_generated/ai/GUIDELINES.md` first**.  
+When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first**.  
 This file defines the correct usage patterns and overrides any prior assumptions.

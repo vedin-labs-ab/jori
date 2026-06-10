@@ -57,7 +57,9 @@ export const githubToolInputSchemas = {
   github_clone_repository: objectSchema({
     required: ["owner", "repo"],
     properties: {
-      directory: stringProperty("Workspace-relative destination directory."),
+      directory: stringProperty(
+        "Empty workspace-relative destination directory. Defaults to repository."
+      ),
       owner: stringProperty("Repository owner."),
       ref: stringProperty("Branch, tag, or commit SHA."),
       repo: stringProperty("Repository name."),

@@ -1,6 +1,7 @@
 import { type ToolPermission } from "../permissions/catalog"
 import { promptTemplates } from "../prompts/generated"
 import { renderPromptTemplate } from "../prompts/render"
+import { createPromptTime } from "../prompts/time"
 import { type CodexRuntimeInput, type MessageProvider } from "./codex"
 import {
   type ApprovalContinuation,
@@ -55,6 +56,7 @@ function createMessageValues(
       target: getMessageTarget(input.provider, input.message.data),
       text: input.message.text ?? "",
     },
+    time: { utc: createPromptTime() },
   }
 }
 
@@ -63,8 +65,11 @@ function createScheduleValues(
 ) {
   return {
     output: {
-      channelId: input.schedule.output.channelId,
-      threadId: input.schedule.output.threadId ?? "",
+      target: formatTargetLines([
+        targetLine("Provider", "Slack"),
+        targetLine("Channel ID", input.schedule.output.channelId),
+        targetLine("Thread timestamp", input.schedule.output.threadId),
+      ]),
     },
     schedule: {
       id: input.schedule._id,
@@ -72,6 +77,7 @@ function createScheduleValues(
       description: input.schedule.description,
       metadata: JSON.stringify(input.schedule.metadata ?? null),
     },
+    time: { utc: createPromptTime() },
   }
 }
 

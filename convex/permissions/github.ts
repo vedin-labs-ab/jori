@@ -47,7 +47,7 @@ export const githubToolPermissionRows = [
     "github",
     "github_clone_repository",
     "Clone repository",
-    "Clone a GitHub repository into the sandbox.",
+    "Clone a GitHub repository into the workspace.",
     "read",
   ],
   [

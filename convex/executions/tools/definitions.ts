@@ -50,7 +50,8 @@ function approvalInputSchema() {
     properties: {
       summary: {
         type: "string",
-        description: "Short user-facing description of the exact action.",
+        description:
+          "Short user-facing description of the exact action and the details needed to judge it.",
       },
       handoff: {
         type: "object",

@@ -58,7 +58,11 @@ function microsoftMessageSchema(properties: Record<string, unknown> = {}) {
     properties: {
       bcc: stringArrayProperty("BCC recipient email addresses."),
       body: stringProperty("Message body."),
-      bodyType: { type: "string", enum: ["Text", "HTML"] },
+      bodyType: {
+        type: "string",
+        enum: ["Text", "HTML"],
+        description: "Defaults to Text.",
+      },
       cc: stringArrayProperty("CC recipient email addresses."),
       subject: stringProperty("Message subject."),
       to: stringArrayProperty("Recipient email addresses."),
@@ -75,7 +79,11 @@ function microsoftCalendarWriteSchema(
     required,
     properties: {
       event: objectProperty("Microsoft Graph event payload."),
-      sendUpdates: { type: "string", enum: ["all", "none"] },
+      sendUpdates: {
+        type: "string",
+        enum: ["all", "none"],
+        description: "Whether attendees are emailed about the change.",
+      },
       ...properties,
     },
   })

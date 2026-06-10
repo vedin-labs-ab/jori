@@ -1,6 +1,7 @@
 # Trigger
 
 A schedule triggered this run.
+Current UTC time: {{time.utc}}.
 
 Schedule:
 - ID: {{schedule.id}}
@@ -9,9 +10,7 @@ Schedule:
 - Metadata: {{schedule.metadata}}
 
 Publish to:
-- Provider: Slack
-- Channel ID: {{output.channelId}}
-- Thread timestamp: {{output.threadId}}
+{{output.target}}
 
 Run the scheduled work and publish the result to this target. If you cannot
 complete it, publish a concise status with the blocker.

@@ -17,7 +17,13 @@ export const toolPermissionRows = [
     "Inspect a Milo schedule.",
     "read",
   ],
-  ["milo", "add_schedule", "Add schedule", "Create a Milo schedule.", "write"],
+  [
+    "milo",
+    "add_schedule",
+    "Add schedule",
+    "Schedule a task for Milo to run later, once or on a recurring cron.",
+    "write",
+  ],
   [
     "milo",
     "update_schedule",
@@ -112,14 +118,14 @@ export const toolPermissionRows = [
     "gmail",
     "google_gmail_reply_to_thread",
     "Reply to thread",
-    "Send a Gmail reply.",
+    "Reply to the latest message in a Gmail thread.",
     "write",
   ],
   [
     "gmail",
     "google_gmail_send_message",
     "Send email",
-    "Send a Gmail email.",
+    "Send a new Gmail email.",
     "write",
   ],
   [
