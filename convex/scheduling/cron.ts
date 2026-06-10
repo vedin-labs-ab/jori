@@ -7,8 +7,8 @@ const cronFieldRanges = [
 ] as const
 
 type CronSchedule = {
-  minutes: Set<number>
-  hours: Set<number>
+  minutes: number[]
+  hours: number[]
   daysOfMonth: Set<number>
   months: Set<number>
   daysOfWeek: Set<number>
@@ -22,18 +22,21 @@ export function validateCronExpression(expression: string) {
 
 export function getNextCronRunAt(expression: string, from: number) {
   const schedule = parseCronExpression(expression)
-  const cursor = new Date(from)
-  cursor.setUTCSeconds(0, 0)
-  cursor.setUTCMinutes(cursor.getUTCMinutes() + 1)
+  const start = getNextMinute(from)
+  const cursor = getStartOfUtcDay(start)
 
-  const maxAttempts = 5 * 366 * 24 * 60
+  const maxSearchDays = 5 * 366
 
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (matchesSchedule(schedule, cursor)) {
-      return cursor.getTime()
+  for (let day = 0; day < maxSearchDays; day += 1) {
+    if (matchesCalendar(schedule, cursor)) {
+      const runAt = getNextTimeOnDay(schedule, cursor, start)
+
+      if (runAt !== null) {
+        return runAt
+      }
     }
 
-    cursor.setUTCMinutes(cursor.getUTCMinutes() + 1)
+    cursor.setUTCDate(cursor.getUTCDate() + 1)
   }
 
   throw new Error("Cron expression has no matching run in the next five years")
@@ -52,15 +55,25 @@ function parseCronExpression(expression: string): CronSchedule {
     [...daysOfWeek].map((value) => (value === 7 ? 0 : value))
   )
 
-  return {
-    minutes: parseCronField(minute, 0),
-    hours: parseCronField(hour, 1),
+  const schedule = {
+    minutes: parseCronValues(minute, 0),
+    hours: parseCronValues(hour, 1),
     daysOfMonth: parseCronField(dayOfMonth, 2),
     months: parseCronField(month, 3),
     daysOfWeek: normalizedDaysOfWeek,
     unrestrictedDayOfMonth: dayOfMonth === "*",
     unrestrictedDayOfWeek: dayOfWeek === "*",
   }
+
+  validateCalendarSatisfiable(schedule)
+
+  return schedule
+}
+
+function parseCronValues(field: string, fieldIndex: number) {
+  return [...parseCronField(field, fieldIndex)].sort(
+    (left, right) => left - right
+  )
 }
 
 function parseCronField(field: string, fieldIndex: number) {
@@ -71,6 +84,10 @@ function parseCronField(field: string, fieldIndex: number) {
   const values = new Set<number>()
 
   for (const part of field.split(",")) {
+    if (part === "") {
+      throw new Error("Cron fields cannot contain empty parts")
+    }
+
     addCronPart(values, part, fieldIndex)
   }
 
@@ -116,16 +133,8 @@ function parseCronRange(range: string, fieldIndex: number) {
   return { start, end }
 }
 
-function matchesSchedule(schedule: CronSchedule, date: Date) {
+function matchesCalendar(schedule: CronSchedule, date: Date) {
   if (!schedule.months.has(date.getUTCMonth() + 1)) {
-    return false
-  }
-
-  if (!schedule.hours.has(date.getUTCHours())) {
-    return false
-  }
-
-  if (!schedule.minutes.has(date.getUTCMinutes())) {
     return false
   }
 
@@ -141,4 +150,78 @@ function matchesSchedule(schedule: CronSchedule, date: Date) {
   }
 
   return dayOfMonthMatches || dayOfWeekMatches
+}
+
+function validateCalendarSatisfiable(schedule: CronSchedule) {
+  if (!schedule.unrestrictedDayOfWeek) {
+    return
+  }
+
+  for (const month of schedule.months) {
+    const maxDay = getMaxPossibleDayOfMonth(month)
+
+    for (const dayOfMonth of schedule.daysOfMonth) {
+      if (dayOfMonth <= maxDay) {
+        return
+      }
+    }
+  }
+
+  throw new Error("Cron day-of-month never occurs in the selected month(s)")
+}
+
+function getMaxPossibleDayOfMonth(month: number) {
+  if (month === 2) {
+    return 29
+  }
+
+  if ([4, 6, 9, 11].includes(month)) {
+    return 30
+  }
+
+  return 31
+}
+
+function getNextMinute(from: number) {
+  const date = new Date(from)
+  date.setUTCSeconds(0, 0)
+  date.setUTCMinutes(date.getUTCMinutes() + 1)
+  return date
+}
+
+function getStartOfUtcDay(date: Date) {
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  )
+}
+
+function getNextTimeOnDay(schedule: CronSchedule, day: Date, start: Date) {
+  const isStartDay =
+    day.getUTCFullYear() === start.getUTCFullYear() &&
+    day.getUTCMonth() === start.getUTCMonth() &&
+    day.getUTCDate() === start.getUTCDate()
+  const startHour = start.getUTCHours()
+  const startMinute = start.getUTCMinutes()
+
+  for (const hour of schedule.hours) {
+    if (isStartDay && hour < startHour) {
+      continue
+    }
+
+    for (const minute of schedule.minutes) {
+      if (isStartDay && hour === startHour && minute < startMinute) {
+        continue
+      }
+
+      return Date.UTC(
+        day.getUTCFullYear(),
+        day.getUTCMonth(),
+        day.getUTCDate(),
+        hour,
+        minute
+      )
+    }
+  }
+
+  return null
 }

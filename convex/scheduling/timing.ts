@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
-import { getNextCronRunAt, validateCronExpression } from "./cron"
+import { getNextCronRunAt } from "./cron"
 
 export const scheduleInput = v.union(
   v.object({
@@ -31,8 +31,6 @@ export function getScheduleTiming(schedule: ScheduleInput, now: number) {
       nextRunAt: runAt,
     }
   }
-
-  validateCronExpression(schedule.cron)
 
   return {
     cron: schedule.cron.trim(),
