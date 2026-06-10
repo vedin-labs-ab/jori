@@ -27,9 +27,12 @@ export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {
   return [
     'cli_auth_credentials_store = "file"',
     'approval_policy = "never"',
-    'sandbox_mode = "read-only"',
+    'sandbox_mode = "danger-full-access"',
     'model = "gpt-5.5"',
     'model_reasoning_effort = "low"',
+    "",
+    "[tools]",
+    "web_search = true",
     "",
     ...args.mcpServers.flatMap(renderMcpServerConfig),
   ].join("\n")

@@ -2,8 +2,8 @@ export const skills = {
   slack: {
     name: "slack",
     description:
-      "Built-in Slack skill for native messages, with correct mrkdwn formatting, links, escaping, and threading.",
-    body: "# Slack\n\nFormat Slack messages so they feel native to Slack:\n- Write concise Slack `mrkdwn`. It is not standard Markdown: *bold*, _italic_,\n  `code`, and > quote render; **bold** and [label](url) do not.\n- Use Slack link syntax like `<https://example.com|label>` and mention people\n  with `<@USER_ID>`.\n- Escape literal `&`, `<`, and `>` in Slack text unless using them for Slack\n  link, mention, or date syntax.\n- When replying to a message, reply in its thread: set `thread_ts` to the\n  thread timestamp, or to the message timestamp to start one.",
+      "Built-in Slack skill for native messages, with correct mrkdwn formatting, Block Kit blocks, links, escaping, and threading.",
+    body: "# Slack\n\nFormat Slack messages so they feel native to Slack:\n- Write concise Slack `mrkdwn`. It is not standard Markdown: *bold*, _italic_,\n  `code`, and > quote render; **bold** and [label](url) do not.\n- Use Slack link syntax like `<https://example.com|label>` and mention people\n  with `<@USER_ID>`.\n- Escape literal `&`, `<`, and `>` in Slack text unless using them for Slack\n  link, mention, or date syntax.\n- When replying to a message, reply in its thread: set `thread_ts` to the\n  thread timestamp, or to the message timestamp to start one.\n- Keep simple replies plain `text`. Use Block Kit `blocks`\n  (https://docs.slack.dev/reference/block-kit/blocks) when structure makes a\n  message easier to scan — reports, comparisons, tables — not as decoration.\n- Skip interactive elements like buttons, inputs, and menus.\n- Never use `card` blocks.",
   },
 } as const
 

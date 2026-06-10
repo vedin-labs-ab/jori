@@ -114,10 +114,29 @@ export async function callSlackTool(
       channel: requiredString(args.channel, "channel"),
       text: requiredString(args.text, "text"),
       thread_ts: optionalString(args.thread_ts),
+      blocks: optionalBlocks(args.blocks),
     })
   }
 
   throw new Error(`Unknown Slack tool: ${tool}`)
+}
+
+function optionalBlocks(value: unknown) {
+  if (value === undefined || value === null) {
+    return undefined
+  }
+
+  if (
+    !Array.isArray(value) ||
+    !value.every(
+      (block) =>
+        typeof block === "object" && block !== null && !Array.isArray(block)
+    )
+  ) {
+    throw new Error("blocks must be an array of Block Kit block objects")
+  }
+
+  return value.length === 0 ? undefined : (value as SlackBlock[])
 }
 
 async function slackApi(

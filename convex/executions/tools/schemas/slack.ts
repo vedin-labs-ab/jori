@@ -55,6 +55,12 @@ export const slackToolInputSchemas = {
   conversations_add_message: objectSchema({
     required: ["channel", "text"],
     properties: {
+      blocks: {
+        type: "array",
+        description:
+          "Optional Block Kit blocks rendered in place of text, which then serves as the notification fallback.",
+        items: { type: "object", additionalProperties: true },
+      },
       channel: stringProperty("Slack channel ID."),
       text: stringProperty("Slack mrkdwn message text."),
       thread_ts: stringProperty("Thread timestamp for a threaded reply."),

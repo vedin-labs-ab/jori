@@ -1,6 +1,6 @@
 ---
 name: slack
-description: Built-in Slack skill for native messages, with correct mrkdwn formatting, links, escaping, and threading.
+description: Built-in Slack skill for native messages, with correct mrkdwn formatting, Block Kit blocks, links, escaping, and threading.
 ---
 
 # Slack
@@ -14,3 +14,8 @@ Format Slack messages so they feel native to Slack:
   link, mention, or date syntax.
 - When replying to a message, reply in its thread: set `thread_ts` to the
   thread timestamp, or to the message timestamp to start one.
+- Keep simple replies plain `text`. Use Block Kit `blocks`
+  (https://docs.slack.dev/reference/block-kit/blocks) when structure makes a
+  message easier to scan — reports, comparisons, tables — not as decoration.
+- Skip interactive elements like buttons, inputs, and menus.
+- Never use `card` blocks.
