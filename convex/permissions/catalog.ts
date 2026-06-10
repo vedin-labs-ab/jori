@@ -44,7 +44,7 @@ export const toolPermissions = toolPermissionRows.map(
     label,
     description,
     access,
-    defaultMode: defaultMode ?? (access === "read" ? "allowed" : "prompted"),
+    defaultMode: defaultMode ?? "allowed",
   })
 ) satisfies ToolPermission[]
 

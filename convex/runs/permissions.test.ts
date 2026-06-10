@@ -1,6 +1,10 @@
 import { expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import { resolveToolModes } from "../permissions/catalog"
+import {
+  resolveToolMode,
+  resolveToolModes,
+  toolPermissions,
+} from "../permissions/catalog"
 import { createCodexConfig } from "./codex"
 import { assembleToolsForRun } from "./tools"
 import { getProviderToolDefinitions } from "./tools/definitions"
@@ -77,9 +81,22 @@ test("does not pass trigger issue defaults into Linear tools", () => {
   expect(linearServer?.env.MILO_LINEAR_DEFAULT_ISSUE_ID).toBeUndefined()
 })
 
-test("wraps prompted tool schemas with approval metadata", () => {
+test("defaults all configurable tool permissions to allowed", () => {
+  const modes = resolveToolModes([])
+
+  for (const permission of toolPermissions) {
+    expect(resolveToolMode(modes, permission.tool)).toBe(
+      permission.defaultMode === "required" ? "required" : "allowed"
+    )
+  }
+})
+
+test("wraps prompted write tool schemas with approval metadata", () => {
+  const toolModes = resolveToolModes([
+    { tool: "notion_create_page", mode: "prompted" },
+  ])
   const tools = getProviderToolDefinitions("notion", {
-    toolModes: resolveToolModes([]),
+    toolModes,
   })
   const createPage = tools.find((tool) => tool.name === "notion_create_page")
   const search = tools.find((tool) => tool.name === "notion_search")
@@ -122,8 +139,11 @@ test("includes prompted read tools in runtime approval prompts", () => {
 })
 
 test("wraps prompted Milo schedule schemas with approval metadata", () => {
+  const toolModes = resolveToolModes([
+    { tool: "add_schedule", mode: "prompted" },
+  ])
   const tools = getProviderToolDefinitions("milo", {
-    toolModes: resolveToolModes([]),
+    toolModes,
   })
   const addSchedule = tools.find((tool) => tool.name === "add_schedule")
   const search = tools.find((tool) => tool.name === "search_schedules")
