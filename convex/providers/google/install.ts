@@ -189,7 +189,6 @@ async function upsertGoogleIdentity(
     tenantId: args.tenantId,
     userId: args.createdBy,
     provider: "google",
-    accountId: args.profile.email,
     externalId: args.profile.id,
     email: args.profile.email,
   })

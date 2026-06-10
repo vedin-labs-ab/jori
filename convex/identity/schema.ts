@@ -11,7 +11,6 @@ export const identities = defineTable({
   tenantId: v.string(),
   userId: v.string(),
   provider: identityProvider,
-  accountId: v.string(),
   externalId: v.string(),
   email: v.optional(v.string()),
   createdAt: v.number(),

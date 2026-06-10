@@ -38,7 +38,6 @@ export const syncVerifiedEmails = internalMutation({
         tenantId: args.tenantId,
         userId: args.userId,
         provider: "clerk",
-        accountId: args.userId,
         externalId: email.externalId,
         email: email.email,
       })

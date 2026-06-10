@@ -8,7 +8,6 @@ export async function upsertIdentity(
     tenantId: string
     userId: string
     provider: IdentityProvider
-    accountId: string
     externalId: string
     email?: string
   }
@@ -30,7 +29,6 @@ export async function upsertIdentity(
       tenantId: args.tenantId,
       userId: args.userId,
       provider: args.provider,
-      accountId: args.accountId,
       externalId: args.externalId,
       email,
       createdAt: now,
@@ -40,7 +38,6 @@ export async function upsertIdentity(
 
   await ctx.db.patch(existing._id, {
     userId: args.userId,
-    accountId: args.accountId,
     email,
     updatedAt: now,
   })
