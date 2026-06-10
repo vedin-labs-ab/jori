@@ -1,19 +1,13 @@
-import { readProviderDataObject, readProviderDataString } from "../data"
+import { readProviderDataString } from "../data"
 
 export function getGoogleEmail(data: unknown) {
-  const profile = readProviderDataObject(data, "profile")
-
-  return readProviderDataString(profile, "email")
+  return readProviderDataString(data, "profile", "email")
 }
 
 export function getGoogleName(data: unknown) {
-  const profile = readProviderDataObject(data, "profile")
-
-  return readProviderDataString(profile, "name")
+  return readProviderDataString(data, "profile", "name")
 }
 
 export function getGoogleGmailHistoryId(data: unknown) {
-  const gmail = readProviderDataObject(data, "gmail")
-
-  return readProviderDataString(gmail, "historyId")
+  return readProviderDataString(data, "gmail", "historyId")
 }

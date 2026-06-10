@@ -1,13 +1,11 @@
-import { readProviderDataObject, readProviderDataString } from "../data"
+import { readProviderDataString } from "../data"
 
 export function getSlackBotId(data: unknown) {
   return readProviderDataString(data, "botId")
 }
 
 export function getSlackTeamName(data: unknown) {
-  const team = readProviderDataObject(data, "team")
-
-  return readProviderDataString(team, "name")
+  return readProviderDataString(data, "team", "name")
 }
 
 export function getSlackChannelType(data: unknown) {

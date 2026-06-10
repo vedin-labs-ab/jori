@@ -1,25 +1,33 @@
-export function readProviderDataObject(data: unknown, key: string) {
-  const value = readProviderDataValue(data, key)
+type ProviderDataPath = [string, ...string[]]
 
-  return typeof value === "object" && value !== null ? value : undefined
-}
-
-export function readProviderDataArray(data: unknown, key: string) {
-  const value = readProviderDataValue(data, key)
+export function readProviderDataArray(
+  data: unknown,
+  ...path: ProviderDataPath
+) {
+  const value = readProviderDataValue(data, path)
 
   return Array.isArray(value) ? value : []
 }
 
-export function readProviderDataString(data: unknown, key: string) {
-  const value = readProviderDataValue(data, key)
+export function readProviderDataString(
+  data: unknown,
+  ...path: ProviderDataPath
+) {
+  const value = readProviderDataValue(data, path)
 
   return typeof value === "string" ? value : undefined
 }
 
-function readProviderDataValue(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
+function readProviderDataValue(data: unknown, path: ProviderDataPath) {
+  let value = data
+
+  for (const key of path) {
+    if (typeof value !== "object" || value === null) {
+      return undefined
+    }
+
+    value = (value as Record<string, unknown>)[key]
   }
 
-  return (data as Record<string, unknown>)[key]
+  return value
 }

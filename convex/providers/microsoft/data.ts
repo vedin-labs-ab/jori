@@ -1,35 +1,33 @@
-import {
-  readProviderDataArray,
-  readProviderDataObject,
-  readProviderDataString,
-} from "../data"
+import { readProviderDataArray, readProviderDataString } from "../data"
 
 export function getMicrosoftTenantName(data: unknown) {
-  const tenant = readProviderDataObject(data, "tenant")
-
-  return readProviderDataString(tenant, "displayName")
+  return readProviderDataString(data, "tenant", "displayName")
 }
 
 export function getMicrosoftConnectedUser(data: unknown) {
-  const user = readProviderDataObject(data, "user")
-  const displayName = readProviderDataString(user, "displayName")
-  const userPrincipalName = readProviderDataString(user, "userPrincipalName")
+  const displayName = readProviderDataString(data, "user", "displayName")
+  const userPrincipalName = readProviderDataString(
+    data,
+    "user",
+    "userPrincipalName"
+  )
 
   return displayName ?? userPrincipalName
 }
 
 export function getMicrosoftEmail(data: unknown) {
-  const user = readProviderDataObject(data, "user")
-  const mail = readProviderDataString(user, "mail")
-  const userPrincipalName = readProviderDataString(user, "userPrincipalName")
+  const mail = readProviderDataString(data, "user", "mail")
+  const userPrincipalName = readProviderDataString(
+    data,
+    "user",
+    "userPrincipalName"
+  )
 
   return mail ?? userPrincipalName
 }
 
 export function getMicrosoftConnectedUserId(data: unknown) {
-  const user = readProviderDataObject(data, "user")
-
-  return readProviderDataString(user, "id")
+  return readProviderDataString(data, "user", "id")
 }
 
 export function getMicrosoftMentions(data: unknown) {

@@ -1,15 +1,11 @@
-import { readProviderDataObject, readProviderDataString } from "../data"
+import { readProviderDataString } from "../data"
 
 export function getGitHubAccountLogin(data: unknown) {
-  const account = readProviderDataObject(data, "account")
-
-  return readProviderDataString(account, "login")
+  return readProviderDataString(data, "account", "login")
 }
 
 export function getGitHubAccountType(data: unknown) {
-  const account = readProviderDataObject(data, "account")
-
-  return readProviderDataString(account, "type")
+  return readProviderDataString(data, "account", "type")
 }
 
 export function getGitHubAppSlug(data: unknown) {
