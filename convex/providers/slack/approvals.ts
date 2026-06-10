@@ -1,7 +1,10 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { decideSlackApproval } from "../../approvals/runtime"
-import { type SlackBlock } from "../../tools/providers/slack"
+import {
+  createSlackDecisionResponse,
+  type SlackApprovalInteraction,
+} from "./approvalBlocks"
 
 type SlackApprovalDecisionInput = {
   accountId: string
@@ -63,8 +66,19 @@ export async function handleSlackApprovalInteraction(
     code: interaction.code,
     decision: interaction.decision,
   })
+  const response = createSlackDecisionResponse(interaction, result)
 
-  return Response.json(createSlackDecisionResponse(interaction, result))
+  if (interaction.responseUrl !== undefined) {
+    try {
+      await postSlackInteractionResponse(interaction.responseUrl, response)
+
+      return Response.json({ ok: true })
+    } catch {
+      return Response.json(response)
+    }
+  }
+
+  return Response.json(response)
 }
 
 function parseApprovalDecision(text: string | undefined) {
@@ -96,6 +110,7 @@ export function parseSlackApprovalInteraction(payload: unknown) {
   const accountId = readNestedString(payload.team, "id")
   const actorId = readNestedString(payload.user, "id")
   const channelId = readNestedString(payload.channel, "id")
+  const responseUrl = readString(payload, "response_url")
 
   if (code === null || accountId === null || channelId === null) {
     return null
@@ -109,9 +124,10 @@ export function parseSlackApprovalInteraction(payload: unknown) {
       readNestedString(payload.message, "thread_ts") ??
       readNestedString(payload.message, "ts") ??
       undefined,
+    responseUrl,
     code,
     decision,
-  }
+  } satisfies SlackApprovalInteraction
 }
 
 function readFirstAction(actions: unknown) {
@@ -154,92 +170,21 @@ function readApprovalCode(value: unknown) {
   }
 }
 
-export function createSlackDecisionResponse(
-  interaction: NonNullable<ReturnType<typeof parseSlackApprovalInteraction>>,
-  result: Awaited<ReturnType<typeof decideSlackApproval>>
+async function postSlackInteractionResponse(
+  responseUrl: string,
+  response: ReturnType<typeof createSlackDecisionResponse>
 ) {
-  return {
-    replace_original: true,
-    text: createDecisionFallbackText(result),
-    blocks: createDecisionBlocks(interaction, result),
-  }
-}
-
-function createDecisionFallbackText(
-  result: Awaited<ReturnType<typeof decideSlackApproval>>
-) {
-  if (result.status === "approved") {
-    return "Approved. Milo is continuing the run."
-  }
-
-  if (result.status === "denied") {
-    return "Denied. Milo will not run this action."
-  }
-
-  return result.message
-}
-
-function createDecisionBlocks(
-  interaction: NonNullable<ReturnType<typeof parseSlackApprovalInteraction>>,
-  result: Awaited<ReturnType<typeof decideSlackApproval>>
-): SlackBlock[] {
-  const title = getDecisionTitle(result.status, result.approval?.decision)
-  const actor =
-    interaction.actorId === undefined ? "" : ` by <@${interaction.actorId}>`
-  const summary = result.approval?.summary
-  const tool =
-    result.approval === undefined
-      ? undefined
-      : `${result.approval.provider}.${result.approval.tool}`
-
-  return [
-    {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text:
-          summary === undefined
-            ? `*${title}*${actor}\n${result.message}`
-            : `*${title}*${actor}\n${summary}`,
-      },
+  const update = await fetch(responseUrl, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
     },
-    ...(tool === undefined
-      ? []
-      : [
-          {
-            type: "context",
-            elements: [
-              {
-                type: "mrkdwn",
-                text: `*Tool:* ${tool}`,
-              },
-              {
-                type: "mrkdwn",
-                text: result.message,
-              },
-            ],
-          },
-        ]),
-  ]
-}
+    body: JSON.stringify(response),
+  })
 
-function getDecisionTitle(
-  status: Awaited<ReturnType<typeof decideSlackApproval>>["status"],
-  decision?: "approved" | "denied"
-) {
-  if (status === "approved" || decision === "approved") {
-    return "Approved"
+  if (!update.ok) {
+    throw new Error(`Slack interaction update failed: ${update.status}`)
   }
-
-  if (status === "denied" || decision === "denied") {
-    return "Denied"
-  }
-
-  if (status === "expired") {
-    return "Approval expired"
-  }
-
-  return "Approval unavailable"
 }
 
 function readString(data: unknown, key: string) {

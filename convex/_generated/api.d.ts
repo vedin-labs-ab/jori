@@ -74,6 +74,7 @@ import type * as providers_notion_install from "../providers/notion/install.js";
 import type * as providers_notion_oauth from "../providers/notion/oauth.js";
 import type * as providers_notion_signing from "../providers/notion/signing.js";
 import type * as providers_signing from "../providers/signing.js";
+import type * as providers_slack_approvalBlocks from "../providers/slack/approvalBlocks.js";
 import type * as providers_slack_approvals from "../providers/slack/approvals.js";
 import type * as providers_slack_config from "../providers/slack/config.js";
 import type * as providers_slack_credentials from "../providers/slack/credentials.js";
@@ -244,6 +245,7 @@ declare const fullApi: ApiFromModules<{
   "providers/notion/oauth": typeof providers_notion_oauth;
   "providers/notion/signing": typeof providers_notion_signing;
   "providers/signing": typeof providers_signing;
+  "providers/slack/approvalBlocks": typeof providers_slack_approvalBlocks;
   "providers/slack/approvals": typeof providers_slack_approvals;
   "providers/slack/config": typeof providers_slack_config;
   "providers/slack/credentials": typeof providers_slack_credentials;
