@@ -17,5 +17,5 @@ Format Slack messages so they feel native to Slack:
   (https://docs.slack.dev/reference/block-kit/blocks) when structure,
   hierarchy, or a requested presentation makes the answer clearer, easier to
   scan, or easier to act on. Include concise fallback `text` with `blocks`.
-- Skip interactive elements like buttons, inputs, and menus.
-- Never use `card` blocks.
+- Do not use interactive elements like buttons, inputs, or menus.
+- Do not use `card` blocks.
