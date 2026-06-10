@@ -45,7 +45,7 @@ test("includes general GitHub tools for non-GitHub triggers", () => {
   expect(enabledTools).toContain("github_add_issue_comment")
   expect(githubServer?.env.MILO_GITHUB_OWNER).toBeUndefined()
   expect(githubServer?.env.MILO_GITHUB_REPO).toBeUndefined()
-  expect(toolBundle.skillNames).toContain("github")
+  expect(toolBundle.skillNames).not.toContain("github")
 })
 
 test("keeps GitHub comments required and out of approval prompts", () => {
