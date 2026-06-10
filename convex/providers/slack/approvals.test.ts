@@ -55,8 +55,15 @@ test("renders Slack approval requests as compact cards", () => {
   })
   expect(card.body).toMatchObject({ type: "mrkdwn" })
   expect(JSON.stringify(card.body)).toContain(
-    "Create a new Notion page under Customer Discovery.\\n\\n_Expires at <!date^1710000000^{time}|"
+    "Create a new Notion page under Customer Discovery."
   )
+  expect(card.subtext).toMatchObject({
+    type: "mrkdwn",
+  })
+  expect(JSON.stringify(card.subtext)).toContain(
+    "Expires at <!date^1710000000^{time}|"
+  )
+  expect(JSON.stringify(card.body)).not.toContain("Expires at")
   expect(actions.map((action) => action.action_id)).toEqual([
     "milo_approval_deny",
     "milo_approval_approve",
@@ -94,8 +101,10 @@ test("replaces Slack approval buttons with a decision summary", () => {
     } as SlackApprovalDecisionResult["approval"],
   })
   const rendered = JSON.stringify(response)
+  const card = response.blocks[0] as Record<string, unknown>
 
   expect(response.replace_original).toBe(true)
+  expect(card.slack_icon).toEqual({ type: "icon", name: "thumbs-down" })
   expect(rendered).toContain("Denied by <@U123> at <!date^")
   expect(rendered).toContain("Post a follow-up message in Slack.")
   expect(rendered).toContain("Send Slack message")

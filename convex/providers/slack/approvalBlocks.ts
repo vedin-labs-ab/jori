@@ -52,9 +52,10 @@ function createSlackApprovalBlocks(args: {
       icon: "edit",
       title: "Approval required",
       subtitle: getToolLabel(args.tool),
-      body: `${truncateSlackText(args.summary, 2800)}\n\n_Expires at ${formatSlackTime(
+      body: truncateSlackText(args.summary, 2800),
+      subtext: `Expires at ${formatSlackTime(
         toSlackTimestamp(args.expiresAt)
-      )}_`,
+      )}`,
       actions: createApprovalActions(args.code),
     }),
   ]
@@ -88,7 +89,7 @@ function createDecisionBlocks(
 
   return [
     createApprovalCard({
-      icon: "check",
+      icon: getDecisionIcon(result.status, result.approval?.decision),
       title: `${title} by ${actor} at ${time}`,
       subtitle,
       body: summary ?? result.message,
@@ -101,6 +102,7 @@ function createApprovalCard(args: {
   title: string
   subtitle?: string
   body: string
+  subtext?: string
   actions?: Record<string, unknown>[]
 }): SlackBlock {
   return {
@@ -114,6 +116,9 @@ function createApprovalCard(args: {
       ? {}
       : { subtitle: markdownText(args.subtitle) }),
     body: markdownText(args.body),
+    ...(args.subtext === undefined
+      ? {}
+      : { subtext: markdownText(args.subtext) }),
     ...(args.actions === undefined ? {} : { actions: args.actions }),
   }
 }
@@ -169,6 +174,17 @@ function getDecisionTitle(
   }
 
   return "Approval unavailable"
+}
+
+function getDecisionIcon(
+  status: SlackApprovalDecisionResult["status"],
+  decision?: "approved" | "denied"
+) {
+  if (status === "denied" || decision === "denied") {
+    return "thumbs-down"
+  }
+
+  return "check"
 }
 
 function formatSlackActor(actorId: string | undefined) {
