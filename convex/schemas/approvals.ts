@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { providerValidator } from "../providers/catalog"
+import { actorValidator } from "./actors"
 
 const approvalDecision = v.union(v.literal("approved"), v.literal("denied"))
 
@@ -12,8 +13,8 @@ export const approvals = defineTable({
   args: v.any(),
   summary: v.string(),
   code: v.string(),
-  requestedBy: v.optional(v.string()),
-  decidedBy: v.optional(v.string()),
+  requestedBy: v.optional(actorValidator),
+  decidedBy: v.optional(actorValidator),
   decision: v.optional(approvalDecision),
   createdAt: v.number(),
   expiresAt: v.number(),

@@ -136,6 +136,7 @@ import type * as scheduling_mcp from "../scheduling/mcp.js";
 import type * as scheduling_schedules from "../scheduling/schedules.js";
 import type * as scheduling_timing from "../scheduling/timing.js";
 import type * as schemas_activations from "../schemas/activations.js";
+import type * as schemas_actors from "../schemas/actors.js";
 import type * as schemas_approvals from "../schemas/approvals.js";
 import type * as schemas_executions from "../schemas/executions.js";
 import type * as schemas_identities from "../schemas/identities.js";
@@ -296,6 +297,7 @@ declare const fullApi: ApiFromModules<{
   "scheduling/schedules": typeof scheduling_schedules;
   "scheduling/timing": typeof scheduling_timing;
   "schemas/activations": typeof schemas_activations;
+  "schemas/actors": typeof schemas_actors;
   "schemas/approvals": typeof schemas_approvals;
   "schemas/executions": typeof schemas_executions;
   "schemas/identities": typeof schemas_identities;
