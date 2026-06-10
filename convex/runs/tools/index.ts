@@ -4,7 +4,6 @@ import {
   type PermissionMode,
   resolveToolMode,
   type ToolProvider,
-  toolPermissions,
 } from "../../permissions/catalog"
 import { requireGitHubCredentials } from "../../providers/github/credentials"
 import { requireGoogleCredentials } from "../../providers/google/credentials"
@@ -66,9 +65,8 @@ export function assembleToolsForRun(args: {
   const skillNames = new Set<string>()
   const capabilities: RuntimeToolCapability[] = []
   const miloPermissions = getEnabledToolPermissions("milo", args.toolModes)
-  const promptedPermissions = getPromptedPermissions(args.toolModes)
 
-  if (miloPermissions.length > 0 || promptedPermissions.length > 0) {
+  if (miloPermissions.length > 0) {
     bundles.push(
       createMiloToolBundle({
         convexSiteUrl: args.milo.convexSiteUrl,
@@ -243,14 +241,6 @@ function getEnabledToolPermissions(
 ) {
   return getToolPermissionsByProvider(provider).filter(
     (permission) => resolveToolMode(toolModes, permission.tool) !== "blocked"
-  )
-}
-
-function getPromptedPermissions(
-  toolModes: ReadonlyMap<string, PermissionMode>
-) {
-  return toolPermissions.filter(
-    (permission) => resolveToolMode(toolModes, permission.tool) === "prompted"
   )
 }
 

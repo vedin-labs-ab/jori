@@ -32,7 +32,7 @@ export function createSlackToolBundle(
         path: "/home/user/milo-workspace/milo-slack-mcp.mjs",
         content: createBrokerMcpScript({
           provider: "slack",
-          tools: getProviderToolDefinitions("slack"),
+          tools: getProviderToolDefinitions("slack", args),
         }),
       },
     ],

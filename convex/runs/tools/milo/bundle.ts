@@ -1,3 +1,4 @@
+import { getProviderToolDefinitions } from "../definitions"
 import {
   enabledToolsEnv,
   getPromptedTools,
@@ -28,7 +29,9 @@ export function createMiloToolBundle(
     sandboxFiles: [
       {
         path: "/home/user/milo-workspace/milo-mcp.mjs",
-        content: createMiloMcpScript(),
+        content: createMiloMcpScript({
+          tools: getProviderToolDefinitions("milo", args),
+        }),
       },
     ],
     preflights: [],

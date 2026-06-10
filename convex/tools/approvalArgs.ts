@@ -1,6 +1,6 @@
 import { type Provider } from "../providers/catalog"
 
-export type ApprovalToolArgs = {
+export type PromptedToolApproval = {
   provider: Provider
   tool: string
   args: Record<string, unknown>
@@ -12,58 +12,53 @@ export type ApprovalToolArgs = {
   }
 }
 
-export function parseApprovalToolArgs(
+export function parsePromptedToolApproval(args: {
+  provider: Provider
+  tool: string
   args: Record<string, unknown>
-): ApprovalToolArgs {
-  const provider = args.provider
-  const tool = args.tool
-  const summary = args.summary
-  const handoff = args.handoff
+}): PromptedToolApproval {
+  const approval = args.args.approval
 
-  if (!isProvider(provider)) {
-    throw new Error("Approval request requires a valid provider")
-  }
-
-  if (typeof tool !== "string" || tool === "") {
-    throw new Error("Approval request requires a tool")
-  }
-
-  if (typeof summary !== "string" || summary === "") {
-    throw new Error("Approval request requires a summary")
-  }
-
-  if (!isApprovalHandoff(handoff)) {
+  if (!isApprovalObject(approval)) {
     throw new Error(
-      "Approval request requires handoff objective, progress, and next"
+      `Tool requires approval: ${args.tool}. Include approval summary and handoff.`
     )
   }
 
+  const { approval: _approval, ...toolArgs } = args.args
+
   return {
-    provider,
-    tool,
-    args: normalizeToolArgs(args.args),
-    summary,
-    handoff,
+    provider: args.provider,
+    tool: args.tool,
+    args: toolArgs,
+    summary: approval.summary,
+    handoff: approval.handoff,
   }
 }
 
-function isProvider(provider: unknown): provider is Provider {
+function isApprovalObject(
+  approval: unknown
+): approval is Pick<PromptedToolApproval, "summary" | "handoff"> {
+  if (
+    typeof approval !== "object" ||
+    approval === null ||
+    Array.isArray(approval)
+  ) {
+    return false
+  }
+
+  const candidate = approval as Record<string, unknown>
+
   return (
-    provider === "milo" ||
-    provider === "slack" ||
-    provider === "linear" ||
-    provider === "github" ||
-    provider === "gmail" ||
-    provider === "googleCalendar" ||
-    provider === "notion" ||
-    provider === "microsoftEmail" ||
-    provider === "microsoftCalendar"
+    typeof candidate.summary === "string" &&
+    candidate.summary !== "" &&
+    isApprovalHandoff(candidate.handoff)
   )
 }
 
 function isApprovalHandoff(
   handoff: unknown
-): handoff is ApprovalToolArgs["handoff"] {
+): handoff is PromptedToolApproval["handoff"] {
   return (
     typeof handoff === "object" &&
     handoff !== null &&
@@ -72,12 +67,4 @@ function isApprovalHandoff(
     typeof (handoff as Record<string, unknown>).progress === "string" &&
     typeof (handoff as Record<string, unknown>).next === "string"
   )
-}
-
-function normalizeToolArgs(args: unknown) {
-  if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    return {}
-  }
-
-  return args as Record<string, unknown>
 }

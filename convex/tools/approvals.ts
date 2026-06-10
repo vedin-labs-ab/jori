@@ -10,7 +10,7 @@ import {
 import { type Provider } from "../providers/catalog"
 import { type CodexRuntimeInput } from "../runs/codex"
 import { type Actor } from "../schemas/actors"
-import { parseApprovalToolArgs } from "./approvalArgs"
+import { parsePromptedToolApproval } from "./approvalArgs"
 import { callProviderTool } from "./providers"
 
 export type ApprovalBrokerContext = {
@@ -20,12 +20,16 @@ export type ApprovalBrokerContext = {
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
-export async function requestToolApproval(
+export async function createPromptedToolApproval(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
-  args: Record<string, unknown>
+  args: {
+    provider: ToolProvider
+    tool: string
+    args: Record<string, unknown>
+  }
 ) {
-  const request = parseApprovalToolArgs(args)
+  const request = parsePromptedToolApproval(args)
   const permission = getToolPermission(request.tool)
 
   if (permission === undefined || permission.provider !== request.provider) {

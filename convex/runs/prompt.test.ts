@@ -69,10 +69,10 @@ describe("approval request prompts", () => {
     )
 
     expect(prompt.rendered).toContain(
-      "`request_tool_approval` sends the user-facing approval request and code."
+      "Prompted tool schemas include a required `approval` object."
     )
     expect(prompt.rendered).toContain(
-      "Do not send a normal message asking for approval"
+      "call the actual tool with its normal args plus `approval`"
     )
   })
 })

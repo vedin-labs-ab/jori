@@ -1,8 +1,13 @@
-export function createMiloMcpScript() {
-  return miloMcpScript
+import { type McpToolDefinition } from "../definitions"
+
+export function createMiloMcpScript(args: { tools: McpToolDefinition[] }) {
+  return miloMcpScript({
+    toolsJson: JSON.stringify(args.tools),
+  })
 }
 
-const miloMcpScript = `
+function miloMcpScript(args: { toolsJson: string }) {
+  return `
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -15,149 +20,7 @@ import {
 const convexSiteUrl = requiredEnv("MILO_CONVEX_SITE_URL");
 const executionToken = requiredEnv("MILO_EXECUTION_TOKEN");
 const instructions = "Use these Milo scheduling tools only when the user asks to create, inspect, update, or delete scheduled work. Schedules use UTC timestamps or UTC cron expressions, and write calls need a clear output target.";
-
-const allTools = [
-  {
-    name: "request_tool_approval",
-    description: "Request user approval for one prompted tool call. This sends the approval request and code to the user. Use this instead of sending a normal message asking for approval, then stop after the request succeeds.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["provider", "tool", "args", "summary", "handoff"],
-      properties: {
-        provider: {
-          enum: ["milo", "slack", "linear", "github", "gmail", "googleCalendar", "notion", "microsoftEmail", "microsoftCalendar"],
-        },
-        tool: { type: "string" },
-        args: { type: "object" },
-        summary: { type: "string", description: "Short user-facing description of the exact action being approved." },
-        handoff: {
-          type: "object",
-          additionalProperties: false,
-          required: ["objective", "progress", "next"],
-          properties: {
-            objective: { type: "string", description: "The user's overall goal." },
-            progress: { type: "string", description: "Useful context gathered before approval." },
-            next: { type: "string", description: "What the continuation agent should do after the approved call result is available." },
-          },
-        },
-      },
-    },
-  },
-  {
-    name: "add_schedule",
-    description: "Create a Milo schedule. Use a one-shot UTC ISO timestamp or a recurring five-field UTC cron expression. The output target is required; ask the user for clarification before calling this tool if it is ambiguous.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["name", "description", "schedule", "output"],
-      properties: {
-        name: { type: "string" },
-        description: { type: "string" },
-        metadata: {},
-        schedule: {
-          oneOf: [
-            {
-              type: "object",
-              additionalProperties: false,
-              required: ["type", "runAt"],
-              properties: {
-                type: { const: "oneShot" },
-                runAt: { type: "string", description: "ISO timestamp in UTC, ending with Z." },
-              },
-            },
-            {
-              type: "object",
-              additionalProperties: false,
-              required: ["type", "cron"],
-              properties: {
-                type: { const: "recurring" },
-                cron: { type: "string", description: "Five-field cron expression interpreted in UTC." },
-              },
-            },
-          ],
-        },
-        output: slackOutputSchema(),
-      },
-    },
-  },
-  {
-    name: "search_schedules",
-    description: "Search Milo schedules by name or description. Omit query for list-like behavior.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        query: { type: "string" },
-        includeCompleted: { type: "boolean" },
-        limit: { type: "number" },
-      },
-    },
-  },
-  {
-    name: "read_schedule",
-    description: "Read one Milo schedule by id.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["scheduleId"],
-      properties: {
-        scheduleId: { type: "string" },
-      },
-    },
-  },
-  {
-    name: "update_schedule",
-    description: "Update a Milo schedule. Provide only fields that should change.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["scheduleId"],
-      properties: {
-        scheduleId: { type: "string" },
-        name: { type: "string" },
-        description: { type: "string" },
-        metadata: {},
-        schedule: {
-          oneOf: [
-            {
-              type: "object",
-              additionalProperties: false,
-              required: ["type", "runAt"],
-              properties: {
-                type: { const: "oneShot" },
-                runAt: { type: "string" },
-              },
-            },
-            {
-              type: "object",
-              additionalProperties: false,
-              required: ["type", "cron"],
-              properties: {
-                type: { const: "recurring" },
-                cron: { type: "string" },
-              },
-            },
-          ],
-        },
-        output: slackOutputSchema(),
-      },
-    },
-  },
-  {
-    name: "delete_schedule",
-    description: "Delete a Milo schedule and cancel its pending Convex scheduled function.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["scheduleId"],
-      properties: {
-        scheduleId: { type: "string" },
-      },
-    },
-  },
-];
-
+const allTools = ${args.toolsJson};
 const tools = filterEnabledTools(allTools);
 
 const server = new Server(
@@ -211,19 +74,6 @@ async function callMilo(tool, args) {
   return result;
 }
 
-function slackOutputSchema() {
-  return {
-    type: "object",
-    additionalProperties: false,
-    required: ["type", "channelId"],
-    properties: {
-      type: { const: "slack" },
-      channelId: { type: "string" },
-      threadId: { type: "string" },
-    },
-  };
-}
-
 function requiredEnv(name) {
   const value = process.env[name];
   if (value === undefined || value === "") {
@@ -239,7 +89,7 @@ function filterEnabledTools(allTools) {
     return allTools;
   }
 
-  return allTools.filter((tool) => tool.name === "request_tool_approval" || enabledTools.has(tool.name));
+  return allTools.filter((tool) => enabledTools.has(tool.name));
 }
 
 function readEnabledTools() {
@@ -252,3 +102,4 @@ function readEnabledTools() {
   return new Set(value.split(",").filter(Boolean));
 }
 `
+}

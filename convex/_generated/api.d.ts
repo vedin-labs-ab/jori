@@ -129,6 +129,7 @@ import type * as runs_tools_schemas_google from "../runs/tools/schemas/google.js
 import type * as runs_tools_schemas_index from "../runs/tools/schemas/index.js";
 import type * as runs_tools_schemas_linear from "../runs/tools/schemas/linear.js";
 import type * as runs_tools_schemas_microsoft from "../runs/tools/schemas/microsoft.js";
+import type * as runs_tools_schemas_milo from "../runs/tools/schemas/milo.js";
 import type * as runs_tools_schemas_notion from "../runs/tools/schemas/notion.js";
 import type * as runs_tools_schemas_slack from "../runs/tools/schemas/slack.js";
 import type * as runs_tools_slack_bundle from "../runs/tools/slack/bundle.js";
@@ -298,6 +299,7 @@ declare const fullApi: ApiFromModules<{
   "runs/tools/schemas/index": typeof runs_tools_schemas_index;
   "runs/tools/schemas/linear": typeof runs_tools_schemas_linear;
   "runs/tools/schemas/microsoft": typeof runs_tools_schemas_microsoft;
+  "runs/tools/schemas/milo": typeof runs_tools_schemas_milo;
   "runs/tools/schemas/notion": typeof runs_tools_schemas_notion;
   "runs/tools/schemas/slack": typeof runs_tools_schemas_slack;
   "runs/tools/slack/bundle": typeof runs_tools_slack_bundle;

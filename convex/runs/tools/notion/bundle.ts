@@ -32,7 +32,7 @@ export function createNotionToolBundle(
         path: "/home/user/milo-workspace/milo-notion-mcp.mjs",
         content: createBrokerMcpScript({
           provider: "notion",
-          tools: getProviderToolDefinitions("notion"),
+          tools: getProviderToolDefinitions("notion", args),
         }),
       },
     ],

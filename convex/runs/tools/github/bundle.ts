@@ -36,7 +36,7 @@ export function createGitHubToolBundle(
         path: "/home/user/milo-workspace/milo-github-mcp.mjs",
         content: createBrokerMcpScript({
           provider: "github",
-          tools: getProviderToolDefinitions("github"),
+          tools: getProviderToolDefinitions("github", args),
         }),
       },
     ],

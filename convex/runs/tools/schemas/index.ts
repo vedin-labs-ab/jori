@@ -2,6 +2,7 @@ import { githubToolInputSchemas } from "./github"
 import { googleToolInputSchemas } from "./google"
 import { linearToolInputSchemas } from "./linear"
 import { microsoftToolInputSchemas } from "./microsoft"
+import { miloToolInputSchemas } from "./milo"
 import { notionToolInputSchemas } from "./notion"
 import { slackToolInputSchemas } from "./slack"
 
@@ -12,6 +13,7 @@ const toolInputSchemas = {
   ...googleToolInputSchemas,
   ...linearToolInputSchemas,
   ...microsoftToolInputSchemas,
+  ...miloToolInputSchemas,
   ...notionToolInputSchemas,
   ...slackToolInputSchemas,
 }

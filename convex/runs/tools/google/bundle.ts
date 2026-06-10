@@ -68,7 +68,7 @@ function createGoogleToolBundle(
         path: args.scriptPath,
         content: createBrokerMcpScript({
           provider: args.surface,
-          tools: getProviderToolDefinitions(args.surface),
+          tools: getProviderToolDefinitions(args.surface, args),
         }),
       },
     ],

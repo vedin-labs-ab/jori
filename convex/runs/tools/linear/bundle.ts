@@ -32,7 +32,7 @@ export function createLinearToolBundle(
         path: "/home/user/milo-workspace/milo-linear-mcp.mjs",
         content: createBrokerMcpScript({
           provider: "linear",
-          tools: getProviderToolDefinitions("linear"),
+          tools: getProviderToolDefinitions("linear", args),
         }),
       },
     ],

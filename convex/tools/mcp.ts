@@ -3,6 +3,7 @@ import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import {
   getToolPermission,
+  type PermissionMode,
   resolveToolMode,
   resolveToolModes,
   type ToolProvider,
@@ -10,7 +11,10 @@ import {
 import { prepareIntegrationForRuntime } from "../runs/integrations"
 import { hashExecutionToken } from "../runs/tokens"
 import { callMiloScheduleTool } from "../scheduling/mcp"
-import { type ApprovalBrokerContext, requestToolApproval } from "./approvals"
+import {
+  type ApprovalBrokerContext,
+  createPromptedToolApproval,
+} from "./approvals"
 import { callProviderTool, fetchGitHubTarball } from "./providers"
 import {
   formatProviderError,
@@ -141,16 +145,18 @@ async function callBrokerTool(
     args: Record<string, unknown>
   }
 ) {
-  if (request.provider === "milo" && request.tool === "request_tool_approval") {
-    return await requestToolApproval(ctx, context, request.args)
-  }
-
   if (request.provider === "milo") {
-    authorizeTool(context, request)
+    const mode = authorizeTool(context, request)
+
+    if (mode === "prompted") {
+      return await createPromptedToolApproval(ctx, context, request)
+    }
+
     return await callMiloScheduleTool(ctx, context.execution, request)
   }
 
   const provider = request.provider
+  const mode = authorizeTool(context, request)
   const integration = await authorizeProviderTool(context, {
     provider,
     tool: request.tool,
@@ -158,6 +164,10 @@ async function callBrokerTool(
 
   if (integration === null) {
     throw new Error(`No active ${request.provider} integration is available`)
+  }
+
+  if (mode === "prompted") {
+    return await createPromptedToolApproval(ctx, context, request)
   }
 
   return await callProviderTool({
@@ -173,7 +183,7 @@ function authorizeTool(
     provider: ToolProvider
     tool: string
   }
-) {
+): PermissionMode {
   const permission = getToolPermission(request.tool)
 
   if (permission === undefined || permission.provider !== request.provider) {
@@ -186,11 +196,7 @@ function authorizeTool(
     throw new Error(`Tool is blocked: ${request.tool}`)
   }
 
-  if (mode === "prompted") {
-    throw new Error(
-      `Tool requires approval: ${request.tool}. Use request_tool_approval.`
-    )
-  }
+  return mode
 }
 
 async function authorizeProviderTool(

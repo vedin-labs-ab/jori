@@ -3,6 +3,7 @@ import { type Doc } from "../_generated/dataModel"
 import { resolveToolModes } from "../permissions/catalog"
 import { createCodexConfig } from "./codex"
 import { assembleToolsForRun } from "./tools"
+import { getProviderToolDefinitions } from "./tools/definitions"
 
 test("keeps delivery tools required and out of approval prompts", () => {
   const toolBundle = assembleToolsForRun({
@@ -74,6 +75,32 @@ test("does not pass trigger issue defaults into Linear tools", () => {
   )
 
   expect(linearServer?.env.MILO_LINEAR_DEFAULT_ISSUE_ID).toBeUndefined()
+})
+
+test("wraps prompted tool schemas with approval metadata", () => {
+  const tools = getProviderToolDefinitions("notion", {
+    toolModes: resolveToolModes([]),
+  })
+  const createPage = tools.find((tool) => tool.name === "notion_create_page")
+  const search = tools.find((tool) => tool.name === "notion_search")
+
+  expect(readRequired(createPage?.inputSchema)).toContain("approval")
+  expect(readProperties(createPage?.inputSchema)).toHaveProperty("approval")
+  expect(readRequired(search?.inputSchema)).not.toContain("approval")
+  expect(readProperties(search?.inputSchema)).not.toHaveProperty("approval")
+})
+
+test("wraps prompted Milo schedule schemas with approval metadata", () => {
+  const tools = getProviderToolDefinitions("milo", {
+    toolModes: resolveToolModes([]),
+  })
+  const addSchedule = tools.find((tool) => tool.name === "add_schedule")
+  const search = tools.find((tool) => tool.name === "search_schedules")
+
+  expect(readRequired(addSchedule?.inputSchema)).toContain("approval")
+  expect(readProperties(addSchedule?.inputSchema)).toHaveProperty("approval")
+  expect(readRequired(search?.inputSchema)).not.toContain("approval")
+  expect(readProperties(search?.inputSchema)).not.toHaveProperty("approval")
 })
 
 test("keeps provider credentials out of sandbox MCP config", () => {
@@ -170,4 +197,30 @@ function credentials(provider: string) {
     refreshToken: "refresh-token",
     expiresAt: Date.now() + 60_000,
   }
+}
+
+function readProperties(schema: unknown) {
+  if (
+    typeof schema !== "object" ||
+    schema === null ||
+    !("properties" in schema)
+  ) {
+    return {}
+  }
+
+  const properties = schema.properties
+
+  return typeof properties === "object" && properties !== null ? properties : {}
+}
+
+function readRequired(schema: unknown) {
+  if (
+    typeof schema !== "object" ||
+    schema === null ||
+    !("required" in schema)
+  ) {
+    return []
+  }
+
+  return Array.isArray(schema.required) ? schema.required : []
 }
