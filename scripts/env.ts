@@ -103,7 +103,9 @@ function readEnvFile(filePath: string) {
     }
 
     const name = withoutExport.slice(0, separator).trim()
-    const rawValue = withoutExport.slice(separator + 1).trim()
+    const rawValue = stripInlineComment(
+      withoutExport.slice(separator + 1)
+    ).trim()
 
     if (/^[A-Z_][A-Z0-9_]*$/.test(name)) {
       env[name] = parseEnvValue(rawValue)
@@ -111,6 +113,29 @@ function readEnvFile(filePath: string) {
   }
 
   return env
+}
+
+function stripInlineComment(value: string) {
+  let quote: string | null = null
+
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index]
+
+    if ((char === '"' || char === "'") && value[index - 1] !== "\\") {
+      quote = quote === char ? null : char
+      continue
+    }
+
+    if (
+      char === "#" &&
+      quote === null &&
+      (index === 0 || /\s/.test(value[index - 1]))
+    ) {
+      return value.slice(0, index)
+    }
+  }
+
+  return value
 }
 
 function parseEnvValue(value: string) {
