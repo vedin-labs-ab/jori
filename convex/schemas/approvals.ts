@@ -13,7 +13,7 @@ export const approvals = defineTable({
   args: v.any(),
   summary: v.string(),
   code: v.string(),
-  requestedBy: v.optional(actorValidator),
+  requestedBy: actorValidator,
   decidedBy: v.optional(actorValidator),
   decision: v.optional(approvalDecision),
   createdAt: v.number(),
