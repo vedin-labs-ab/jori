@@ -28,6 +28,25 @@ export async function postSlackMessage(
   })
 }
 
+export async function updateSlackMessage(
+  integration: Doc<"integrations">,
+  args: {
+    channel: string
+    ts: string
+    text: string
+    blocks?: SlackBlock[]
+  }
+) {
+  const credentials = requireSlackCredentials(integration)
+
+  return await slackApi(credentials.bot, "chat.update", {
+    channel: args.channel,
+    ts: args.ts,
+    text: args.text,
+    blocks: args.blocks,
+  })
+}
+
 export async function callSlackTool(
   integration: Doc<"integrations">,
   tool: string,

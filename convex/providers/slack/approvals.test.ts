@@ -14,7 +14,6 @@ test("parses Slack approval button payloads", () => {
       user: { id: "U123" },
       channel: { id: "C123" },
       message: { ts: "1710000000.000100" },
-      response_url: "https://hooks.slack.com/actions/T123/123/abc",
       actions: [
         {
           action_id: "milo_approval_approve",
@@ -26,8 +25,8 @@ test("parses Slack approval button payloads", () => {
     accountId: "T123",
     actorId: "U123",
     channelId: "C123",
+    messageTs: "1710000000.000100",
     threadTs: "1710000000.000100",
-    responseUrl: "https://hooks.slack.com/actions/T123/123/abc",
     code: "ABC12345",
     decision: "approved",
   })
@@ -72,6 +71,7 @@ test("replaces Slack approval buttons with a decision summary", () => {
     team: { id: "T123" },
     user: { id: "U123" },
     channel: { id: "C123" },
+    message: { ts: "1710000000.000100" },
     actions: [
       {
         action_id: "milo_approval_deny",

@@ -6,8 +6,8 @@ export type SlackApprovalInteraction = {
   accountId: string
   actorId?: string
   channelId: string
+  messageTs: string
   threadTs?: string
-  responseUrl?: string
   code: string
   decision: "approved" | "denied"
 }

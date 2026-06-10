@@ -1,6 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { decideSlackApproval } from "../../approvals/runtime"
+import { updateSlackMessage } from "../../tools/providers/slack"
 import {
   createSlackDecisionResponse,
   type SlackApprovalInteraction,
@@ -58,10 +59,6 @@ export async function handleSlackApprovalInteraction(
     return okResponse()
   }
 
-  if (interaction.responseUrl === undefined) {
-    return okResponse()
-  }
-
   const result = await decideSlackApproval(ctx, {
     accountId: interaction.accountId,
     actorId: interaction.actorId,
@@ -72,7 +69,14 @@ export async function handleSlackApprovalInteraction(
   })
   const response = createSlackDecisionResponse(interaction, result)
 
-  await postSlackInteractionResponse(interaction.responseUrl, response)
+  if (result.integration !== undefined) {
+    await updateSlackMessage(result.integration, {
+      channel: interaction.channelId,
+      ts: interaction.messageTs,
+      text: response.text,
+      blocks: response.blocks,
+    })
+  }
 
   return okResponse()
 }
@@ -106,9 +110,14 @@ export function parseSlackApprovalInteraction(payload: unknown) {
   const accountId = readNestedString(payload.team, "id")
   const actorId = readNestedString(payload.user, "id")
   const channelId = readNestedString(payload.channel, "id")
-  const responseUrl = readString(payload, "response_url")
+  const messageTs = readNestedString(payload.message, "ts")
 
-  if (code === null || accountId === null || channelId === null) {
+  if (
+    code === null ||
+    accountId === null ||
+    channelId === null ||
+    messageTs === null
+  ) {
     return null
   }
 
@@ -116,11 +125,8 @@ export function parseSlackApprovalInteraction(payload: unknown) {
     accountId,
     actorId: actorId ?? undefined,
     channelId,
-    threadTs:
-      readNestedString(payload.message, "thread_ts") ??
-      readNestedString(payload.message, "ts") ??
-      undefined,
-    responseUrl,
+    messageTs,
+    threadTs: readNestedString(payload.message, "thread_ts") ?? messageTs,
     code,
     decision,
   } satisfies SlackApprovalInteraction
@@ -163,23 +169,6 @@ function readApprovalCode(value: unknown) {
     return parsed.code.toUpperCase()
   } catch {
     return null
-  }
-}
-
-async function postSlackInteractionResponse(
-  responseUrl: string,
-  response: ReturnType<typeof createSlackDecisionResponse>
-) {
-  const update = await fetch(responseUrl, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(response),
-  })
-
-  if (!update.ok) {
-    throw new Error(`Slack interaction update failed: ${update.status}`)
   }
 }
 
