@@ -3,6 +3,7 @@ import {
   objectProperty,
   objectSchema,
   type SchemaMap,
+  stringArrayProperty,
   stringProperty,
 } from "./common"
 
@@ -22,6 +23,8 @@ export const googleToolInputSchemas = {
       threadId: stringProperty("Gmail thread ID."),
     },
   }),
+  google_gmail_send_message: gmailMessageSchema(),
+  google_gmail_create_draft: gmailMessageSchema(),
   google_calendar_list_events: objectSchema({
     properties: {
       calendarId: stringProperty("Calendar ID. Defaults to primary."),
@@ -45,6 +48,20 @@ export const googleToolInputSchemas = {
     eventId: stringProperty("Google Calendar event ID."),
   }),
 } satisfies SchemaMap
+
+function gmailMessageSchema() {
+  return objectSchema({
+    required: ["to", "subject", "body"],
+    properties: {
+      bcc: stringArrayProperty("BCC recipient email addresses."),
+      body: stringProperty("Message body."),
+      bodyType: { type: "string", enum: ["Text", "HTML"] },
+      cc: stringArrayProperty("CC recipient email addresses."),
+      subject: stringProperty("Message subject."),
+      to: stringArrayProperty("Recipient email addresses."),
+    },
+  })
+}
 
 function gmailReadSchema(idProperty: string) {
   return objectSchema({

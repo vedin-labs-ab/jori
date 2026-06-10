@@ -44,17 +44,25 @@ export function ensureReplySubject(subject: string) {
 }
 
 export function createMimeMessage(args: {
-  to: string
+  to: string[]
+  cc?: string[]
+  bcc?: string[]
   subject: string
   body: string
+  bodyType?: "HTML" | "Text"
   inReplyTo?: string
   references?: string
 }) {
   const headers = [
-    ["To", args.to],
+    ["To", args.to.join(", ")],
+    ...messageAddressHeaders("Cc", args.cc),
+    ...messageAddressHeaders("Bcc", args.bcc),
     ["Subject", args.subject],
     ["MIME-Version", "1.0"],
-    ["Content-Type", "text/plain; charset=UTF-8"],
+    [
+      "Content-Type",
+      `${args.bodyType === "HTML" ? "text/html" : "text/plain"}; charset=UTF-8`,
+    ],
   ]
 
   if (args.inReplyTo !== undefined) {
@@ -72,6 +80,12 @@ export function createMimeMessage(args: {
       args.body,
     ].join("\r\n")
   )
+}
+
+function messageAddressHeaders(name: string, addresses: string[] | undefined) {
+  return addresses === undefined || addresses.length === 0
+    ? []
+    : [[name, addresses.join(", ")]]
 }
 
 export function normalizeGmailFormat(value: unknown) {

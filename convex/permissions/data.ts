@@ -116,6 +116,20 @@ export const toolPermissionRows = [
     "write",
   ],
   [
+    "gmail",
+    "google_gmail_send_message",
+    "Send email",
+    "Send a Gmail email.",
+    "write",
+  ],
+  [
+    "gmail",
+    "google_gmail_create_draft",
+    "Create draft",
+    "Create a Gmail draft.",
+    "write",
+  ],
+  [
     "googleCalendar",
     "google_calendar_list_events",
     "List events",

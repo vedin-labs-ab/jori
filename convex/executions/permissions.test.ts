@@ -53,6 +53,40 @@ test("includes general GitHub tools for non-GitHub triggers", () => {
   expect(toolBundle.skillNames).not.toContain("github")
 })
 
+test("includes Gmail send and draft tools with message schemas", () => {
+  const toolBundle = assembleToolsForRun({
+    milo: runtimeMilo(),
+    integrations: [integration("gmail")],
+    toolModes: resolveToolModes([]),
+  })
+  const gmailServer = toolBundle.mcpServers.find(
+    (server) => server.name === "gmail"
+  )
+  const enabledTools = gmailServer?.env.MILO_ENABLED_TOOLS.split(",") ?? []
+  const tools = getProviderToolDefinitions("gmail", {
+    toolModes: resolveToolModes([]),
+  })
+  const sendMessage = tools.find(
+    (tool) => tool.name === "google_gmail_send_message"
+  )
+  const createDraft = tools.find(
+    (tool) => tool.name === "google_gmail_create_draft"
+  )
+
+  expect(enabledTools).toContain("google_gmail_reply_to_thread")
+  expect(enabledTools).toContain("google_gmail_send_message")
+  expect(enabledTools).toContain("google_gmail_create_draft")
+  expect(readRequired(sendMessage?.inputSchema)).toEqual([
+    "to",
+    "subject",
+    "body",
+  ])
+  expect(readProperties(sendMessage?.inputSchema)).toHaveProperty("to")
+  expect(readProperties(sendMessage?.inputSchema)).toHaveProperty("cc")
+  expect(readProperties(sendMessage?.inputSchema)).toHaveProperty("bcc")
+  expect(readProperties(createDraft?.inputSchema)).toHaveProperty("to")
+})
+
 test("keeps GitHub comments required and out of approval prompts", () => {
   const toolBundle = assembleToolsForRun({
     milo: runtimeMilo(),
