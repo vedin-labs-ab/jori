@@ -14,6 +14,7 @@ import {
   Component,
   LayoutDashboard,
   Library,
+  ListChecks,
   LogOut,
   ShieldUser,
 } from "lucide-react"
@@ -59,6 +60,7 @@ import { IntegrationCallbackAlerts } from "./alerts"
 
 const consoleNavigation = [
   { icon: LayoutDashboard, label: "Console", to: "/console" },
+  { icon: ListChecks, label: "Executions", to: "/executions" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
   { icon: Component, label: "Playground", to: "/playground" },
