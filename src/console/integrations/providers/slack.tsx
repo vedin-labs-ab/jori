@@ -1,11 +1,11 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import { getWorkspaceHeadline } from "../shared/headline"
 import {
-  WorkspaceConnection,
-  type WorkspaceConnectionConfig,
-} from "./workspace"
+  IntegrationConnection,
+  type IntegrationConnectionConfig,
+} from "../shared/card"
+import { getWorkspaceHeadline } from "../shared/headline"
 
 const slackConfig = {
   action: "Connect Slack",
@@ -22,7 +22,7 @@ const slackConfig = {
     src: "https://svgl.app/library/slack.svg",
   },
   provider: "slack",
-} satisfies WorkspaceConnectionConfig
+} satisfies IntegrationConnectionConfig
 
 export function SlackConnection({
   permissions,
@@ -37,7 +37,7 @@ export function SlackConnection({
   const status = useQuery(api.integrations.status.getSlackStatus, { tenantId })
 
   return (
-    <WorkspaceConnection
+    <IntegrationConnection
       config={slackConfig}
       createInstallState={createInstallState}
       headline={getWorkspaceHeadline(

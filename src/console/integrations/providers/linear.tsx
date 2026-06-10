@@ -1,11 +1,11 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import { getWorkspaceHeadline } from "../shared/headline"
 import {
-  WorkspaceConnection,
-  type WorkspaceConnectionConfig,
-} from "./workspace"
+  IntegrationConnection,
+  type IntegrationConnectionConfig,
+} from "../shared/card"
+import { getWorkspaceHeadline } from "../shared/headline"
 
 const linearConfig = {
   action: "Connect Linear",
@@ -22,7 +22,7 @@ const linearConfig = {
     src: "https://svgl.app/library/linear.svg",
   },
   provider: "linear",
-} satisfies WorkspaceConnectionConfig
+} satisfies IntegrationConnectionConfig
 
 export function LinearConnection({
   permissions,
@@ -39,7 +39,7 @@ export function LinearConnection({
   })
 
   return (
-    <WorkspaceConnection
+    <IntegrationConnection
       config={linearConfig}
       createInstallState={createInstallState}
       headline={getWorkspaceHeadline(

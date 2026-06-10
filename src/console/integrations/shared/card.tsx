@@ -13,52 +13,55 @@ import {
   type CreateInstallState,
   useIntegrationInstall,
 } from "../shared/install"
-import { type IntegrationLogo, IntegrationSurface } from "../shared/surface"
+import { type IntegrationLogo, IntegrationSurface } from "./surface"
 
 export type ConnectionStatus = "active" | "paused" | "revoked" | undefined
 export type { IntegrationLogo } from "../shared/surface"
 
-export function IntegrationConnection({
-  action,
-  connectError,
-  createInstallState,
-  detail,
-  headline,
-  installPath,
-  loading,
-  logo,
-  permissions,
-  provider,
-  status,
-  tenantId,
-  title,
-}: {
+export type IntegrationConnectionConfig = {
   action: string
+  connectedDetail: string
   connectError: string
-  createInstallState: CreateInstallState
-  detail: string
-  headline: string
+  emptyDetail: string
   installPath: string
+  label: string
   loading: string
   logo: IntegrationLogo
-  permissions: ToolPermissionController
   provider: Exclude<ToolProvider, "milo">
-  status: ConnectionStatus
+}
+
+type IntegrationStatus = {
+  status: Exclude<ConnectionStatus, undefined>
+} | null
+
+export function IntegrationConnection({
+  config,
+  createInstallState,
+  headline,
+  permissions,
+  status,
+  tenantId,
+}: {
+  config: IntegrationConnectionConfig
+  createInstallState: CreateInstallState
+  headline: string
+  permissions: ToolPermissionController
+  status: IntegrationStatus | undefined
   tenantId: string
-  title: string
 }) {
   const install = useIntegrationInstall({
-    connectError,
+    connectError: config.connectError,
     createInstallState,
-    installPath,
+    installPath: config.installPath,
     tenantId,
   })
   const disconnect = useIntegrationDisconnect({
-    provider,
+    provider: config.provider,
     tenantId,
-    title,
+    title: config.label,
   })
-  const isConnected = status === "active"
+  const connectionStatus = status?.status
+  const isConnected = connectionStatus === "active"
   const error = install.error ?? disconnect.error
 
   return (
@@ -68,7 +71,7 @@ export function IntegrationConnection({
           <DisconnectDialog
             isDisconnecting={disconnect.isDisconnecting}
             onDisconnect={disconnect.disconnect}
-            title={title}
+            title={config.label}
           />
         ) : (
           <Button
@@ -79,21 +82,21 @@ export function IntegrationConnection({
             {install.isConnecting ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                {loading}
+                {config.loading}
               </>
             ) : (
               <>
-                {action}
+                {config.action}
                 <ExternalLink />
               </>
             )}
           </Button>
         )
       }
-      description={detail}
-      logo={logo}
-      status={<ConnectionLine headline={headline} status={status} />}
-      title={title}
+      description={isConnected ? config.connectedDetail : config.emptyDetail}
+      logo={config.logo}
+      status={<ConnectionLine headline={headline} status={connectionStatus} />}
+      title={config.label}
     >
       {error === undefined && !isConnected ? undefined : (
         <>
@@ -101,7 +104,7 @@ export function IntegrationConnection({
           {isConnected ? (
             <IntegrationPermissions
               controller={permissions}
-              provider={provider}
+              provider={config.provider}
             />
           ) : null}
         </>

@@ -1,11 +1,11 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import { getWorkspaceHeadline } from "../shared/headline"
 import {
-  WorkspaceConnection,
-  type WorkspaceConnectionConfig,
-} from "./workspace"
+  IntegrationConnection,
+  type IntegrationConnectionConfig,
+} from "../shared/card"
+import { getWorkspaceHeadline } from "../shared/headline"
 
 const notionConfig = {
   action: "Connect Notion",
@@ -22,7 +22,7 @@ const notionConfig = {
     src: "https://svgl.app/library/notion.svg",
   },
   provider: "notion",
-} satisfies WorkspaceConnectionConfig
+} satisfies IntegrationConnectionConfig
 
 export function NotionConnection({
   permissions,
@@ -39,7 +39,7 @@ export function NotionConnection({
   })
 
   return (
-    <WorkspaceConnection
+    <IntegrationConnection
       config={notionConfig}
       createInstallState={createInstallState}
       headline={getWorkspaceHeadline(

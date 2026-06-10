@@ -2,9 +2,10 @@ import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
 import {
-  AccountConnection,
-  type AccountConnectionConfig,
-} from "../shared/account"
+  IntegrationConnection,
+  type IntegrationConnectionConfig,
+} from "../shared/card"
+import { getAccountHeadline } from "../shared/headline"
 
 const gmailConfig = {
   action: "Connect Email",
@@ -21,7 +22,7 @@ const gmailConfig = {
     src: "https://svgl.app/library/gmail.svg",
   },
   provider: "gmail",
-} satisfies AccountConnectionConfig
+} satisfies IntegrationConnectionConfig
 
 const calendarConfig = {
   action: "Connect Calendar",
@@ -38,7 +39,7 @@ const calendarConfig = {
     src: "https://svgl.app/library/google-calendar.svg",
   },
   provider: "googleCalendar",
-} satisfies AccountConnectionConfig
+} satisfies IntegrationConnectionConfig
 
 export function GmailConnection({
   permissions,
@@ -55,9 +56,10 @@ export function GmailConnection({
   })
 
   return (
-    <AccountConnection
+    <IntegrationConnection
       config={gmailConfig}
       createInstallState={createInstallState}
+      headline={getAccountHeadline(status, gmailConfig.label)}
       permissions={permissions}
       status={status}
       tenantId={tenantId}
@@ -80,9 +82,10 @@ export function GoogleCalendarConnection({
   })
 
   return (
-    <AccountConnection
+    <IntegrationConnection
       config={calendarConfig}
       createInstallState={createInstallState}
+      headline={getAccountHeadline(status, calendarConfig.label)}
       permissions={permissions}
       status={status}
       tenantId={tenantId}

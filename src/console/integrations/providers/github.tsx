@@ -1,11 +1,11 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import { getWorkspaceHeadline } from "../shared/headline"
 import {
-  WorkspaceConnection,
-  type WorkspaceConnectionConfig,
-} from "./workspace"
+  IntegrationConnection,
+  type IntegrationConnectionConfig,
+} from "../shared/card"
+import { getWorkspaceHeadline } from "../shared/headline"
 
 const githubConfig = {
   action: "Connect GitHub",
@@ -22,7 +22,7 @@ const githubConfig = {
     src: "https://svgl.app/library/github_light.svg",
   },
   provider: "github",
-} satisfies WorkspaceConnectionConfig
+} satisfies IntegrationConnectionConfig
 
 export function GitHubConnection({
   permissions,
@@ -39,7 +39,7 @@ export function GitHubConnection({
   })
 
   return (
-    <WorkspaceConnection
+    <IntegrationConnection
       config={githubConfig}
       createInstallState={createInstallState}
       headline={getWorkspaceHeadline(
