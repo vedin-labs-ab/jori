@@ -39,6 +39,7 @@ test("renders Slack approval requests as compact cards", () => {
     provider: "notion",
     tool: "notion_create_page",
     summary: "Create a new Notion page under Customer Discovery.",
+    expiresAt: 1_710_000_000_000,
   })
   const card = request.blocks[0] as Record<string, unknown>
   const actions = card.actions as Record<string, unknown>[]
@@ -53,10 +54,10 @@ test("renders Slack approval requests as compact cards", () => {
     type: "mrkdwn",
     text: "Create Notion page",
   })
-  expect(card.body).toMatchObject({
-    type: "mrkdwn",
-    text: "Create a new Notion page under Customer Discovery.\n\n_Expires in 30 minutes_",
-  })
+  expect(card.body).toMatchObject({ type: "mrkdwn" })
+  expect(JSON.stringify(card.body)).toContain(
+    "Create a new Notion page under Customer Discovery.\\n\\n_Expires at <!date^1710000000^{time}|"
+  )
   expect(actions.map((action) => action.action_id)).toEqual([
     "milo_approval_deny",
     "milo_approval_approve",

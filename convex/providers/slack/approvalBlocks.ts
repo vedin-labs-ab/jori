@@ -17,6 +17,7 @@ export function createSlackApprovalRequest(args: {
   provider: Provider
   tool: string
   summary: string
+  expiresAt: number
 }) {
   return {
     text: [
@@ -44,13 +45,16 @@ function createSlackApprovalBlocks(args: {
   provider: Provider
   tool: string
   summary: string
+  expiresAt: number
 }): SlackBlock[] {
   return [
     createApprovalCard({
       icon: "edit",
       title: "Approval required",
       subtitle: getToolLabel(args.tool),
-      body: `${truncateSlackText(args.summary, 2800)}\n\n_Expires in 30 minutes_`,
+      body: `${truncateSlackText(args.summary, 2800)}\n\n_Expires at ${formatSlackTime(
+        toSlackTimestamp(args.expiresAt)
+      )}_`,
       actions: createApprovalActions(args.code),
     }),
   ]
@@ -178,6 +182,10 @@ function formatSlackTime(timestamp: number) {
   })
 
   return `<!date^${timestamp}^{time}|${fallback}>`
+}
+
+function toSlackTimestamp(timestampMs: number) {
+  return Math.floor(timestampMs / 1000)
 }
 
 function getToolLabel(tool: string) {

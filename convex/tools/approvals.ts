@@ -55,20 +55,17 @@ export async function createPromptedToolApproval(
 
   const requestedBy = createRequestedBy(context)
   const code = createApprovalCode()
-  const approvalId = await ctx.runMutation(
-    internal.approvals.approvals.create,
-    {
-      tenantId: context.execution.tenantId,
-      executionId: context.execution._id,
-      provider: request.provider,
-      tool: request.tool,
-      args: request.args,
-      summary: request.summary,
-      handoff: request.handoff,
-      code,
-      requestedBy,
-    }
-  )
+  const approval = await ctx.runMutation(internal.approvals.approvals.create, {
+    tenantId: context.execution.tenantId,
+    executionId: context.execution._id,
+    provider: request.provider,
+    tool: request.tool,
+    args: request.args,
+    summary: request.summary,
+    handoff: request.handoff,
+    code,
+    requestedBy,
+  })
   const delivery = getSlackApprovalDelivery(context)
 
   if (delivery !== null) {
@@ -77,6 +74,7 @@ export async function createPromptedToolApproval(
       provider: request.provider,
       tool: request.tool,
       summary: request.summary,
+      expiresAt: approval.expiresAt,
     })
 
     await postSlackMessage(delivery.integration, {
@@ -89,7 +87,7 @@ export async function createPromptedToolApproval(
 
   return {
     status: "approval_requested",
-    approvalId,
+    approvalId: approval.approvalId,
     code,
     instruction: `Stop now. The user can approve with: approve ${code}`,
   }

@@ -33,11 +33,14 @@ export const create = internalMutation({
 
     const now = Date.now()
 
-    return await ctx.db.insert("approvals", {
+    const expiresAt = now + approvalTtlMs
+    const approvalId = await ctx.db.insert("approvals", {
       ...args,
       createdAt: now,
-      expiresAt: now + approvalTtlMs,
+      expiresAt,
     })
+
+    return { approvalId, expiresAt }
   },
 })
 
