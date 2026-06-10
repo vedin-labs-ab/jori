@@ -94,11 +94,7 @@ export function resolveToolMode(
 
 export function isModeAllowed(
   permission: ToolPermission,
-  mode: ConfigurablePermissionMode
+  _mode: ConfigurablePermissionMode
 ) {
-  if (permission.defaultMode === "required") {
-    return false
-  }
-
-  return permission.access === "write" || mode !== "prompted"
+  return permission.defaultMode !== "required"
 }

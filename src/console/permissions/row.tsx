@@ -8,7 +8,6 @@ import {
 import {
   type ConfigurablePermissionMode,
   type PermissionMode,
-  type ToolAccess,
   type ToolPermission,
 } from "./controller"
 
@@ -19,10 +18,7 @@ const modeLabels: Record<PermissionMode, string> = {
   blocked: "Blocked",
 }
 
-const modeOptions: Record<ToolAccess, ConfigurablePermissionMode[]> = {
-  read: ["allowed", "blocked"],
-  write: ["allowed", "prompted", "blocked"],
-}
+const configurableModes = ["allowed", "prompted", "blocked"] as const
 
 export function PermissionRow({
   onUpdate,
@@ -34,9 +30,7 @@ export function PermissionRow({
   permission: ToolPermission
 }) {
   const modes =
-    permission.mode === "required"
-      ? (["required"] as const)
-      : modeOptions[permission.access]
+    permission.mode === "required" ? (["required"] as const) : configurableModes
 
   return (
     <div className="grid gap-3 py-3 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">

@@ -90,6 +90,37 @@ test("wraps prompted tool schemas with approval metadata", () => {
   expect(readProperties(search?.inputSchema)).not.toHaveProperty("approval")
 })
 
+test("wraps prompted read tool schemas with approval metadata", () => {
+  const toolModes = resolveToolModes([
+    { tool: "notion_search", mode: "prompted" },
+  ])
+  const tools = getProviderToolDefinitions("notion", { toolModes })
+  const search = tools.find((tool) => tool.name === "notion_search")
+
+  expect(readRequired(search?.inputSchema)).toContain("approval")
+  expect(readProperties(search?.inputSchema)).toHaveProperty("approval")
+})
+
+test("includes prompted read tools in runtime approval prompts", () => {
+  const toolBundle = assembleToolsForRun({
+    milo: runtimeMilo(),
+    integrations: [integration("slack")],
+    toolModes: resolveToolModes([
+      { tool: "conversations_history", mode: "prompted" },
+    ]),
+  })
+  const slackServer = toolBundle.mcpServers.find(
+    (server) => server.name === "slack"
+  )
+
+  expect(slackServer?.env.MILO_ENABLED_TOOLS.split(",")).toContain(
+    "conversations_history"
+  )
+  expect(toolBundle.promptedTools.map((tool) => tool.tool)).toContain(
+    "conversations_history"
+  )
+})
+
 test("wraps prompted Milo schedule schemas with approval metadata", () => {
   const tools = getProviderToolDefinitions("milo", {
     toolModes: resolveToolModes([]),
