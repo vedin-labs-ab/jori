@@ -64,7 +64,8 @@ function approvalInputSchema() {
           },
           progress: {
             type: "string",
-            description: "Useful context gathered before approval.",
+            description:
+              "Useful context gathered before approval, including anything already sent to the user.",
           },
           next: {
             type: "string",

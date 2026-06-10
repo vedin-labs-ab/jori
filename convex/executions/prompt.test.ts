@@ -44,6 +44,7 @@ describe("runtime prompts", () => {
 
     expect(prompt).toContain(`A ${providerLabel} message triggered this run.`)
     expect(prompt).toContain("Current UTC time:")
+    expect(prompt).toContain("The requester cannot see you working.")
 
     for (const line of targetLines) {
       expect(prompt).toContain(line)
@@ -117,6 +118,7 @@ describe("approval continuation prompts", () => {
     expect(prompt).toContain('"eventId":"event-123"')
     expect(prompt).toContain("Do not repeat the approved tool call")
     expect(prompt).toContain("report what failed instead of retrying")
+    expect(prompt).toContain("do not announce that you are continuing")
     expect(prompt).not.toContain("Handle the request")
   })
 })
