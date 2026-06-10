@@ -2,6 +2,7 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
 export const identityProvider = v.union(
+  v.literal("clerk"),
   v.literal("google"),
   v.literal("microsoft")
 )

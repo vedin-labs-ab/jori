@@ -5,10 +5,11 @@ import {
   useAuth,
   useOrganization,
 } from "@clerk/tanstack-react-start"
-import { useConvexAuth } from "convex/react"
-import { type ReactNode } from "react"
+import { useAction, useConvexAuth } from "convex/react"
+import { type ReactNode, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { api } from "../../convex/_generated/api"
 import { LoadingMessage } from "./loading"
 import { ConsoleShell, PublicConsoleFrame } from "./shell"
 
@@ -148,5 +149,20 @@ function SignedInView({
     )
   }
 
-  return <ConsoleShell>{children(organization)}</ConsoleShell>
+  return (
+    <>
+      <ClerkIdentitySync tenantId={organization.id} />
+      <ConsoleShell>{children(organization)}</ConsoleShell>
+    </>
+  )
+}
+
+function ClerkIdentitySync({ tenantId }: { tenantId: string }) {
+  const syncCurrentUser = useAction(api.identity.clerk.syncCurrentUser)
+
+  useEffect(() => {
+    void syncCurrentUser({ tenantId }).catch(() => undefined)
+  }, [syncCurrentUser, tenantId])
+
+  return null
 }

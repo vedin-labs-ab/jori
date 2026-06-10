@@ -1,6 +1,6 @@
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 
-export type IdentityProvider = "google" | "microsoft"
+export type IdentityProvider = "clerk" | "google" | "microsoft"
 
 export async function upsertIdentity(
   ctx: MutationCtx,
