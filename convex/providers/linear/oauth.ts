@@ -1,3 +1,4 @@
+import { fetchFormToken, requireProviderEnv } from "../oauth"
 import { linearGraphqlUrl, linearOAuthTokenUrl } from "./config"
 
 export type LinearTokenResponse =
@@ -24,61 +25,29 @@ export type LinearInstallationProfile = {
 }
 
 export function requireLinearClientId() {
-  const clientId = process.env.LINEAR_CLIENT_ID
-
-  if (clientId === undefined) {
-    throw new Error("Missing LINEAR_CLIENT_ID")
-  }
-
-  return clientId
+  return requireProviderEnv("LINEAR_CLIENT_ID")
 }
 
 export function requireLinearClientSecret() {
-  const clientSecret = process.env.LINEAR_CLIENT_SECRET
-
-  if (clientSecret === undefined) {
-    throw new Error("Missing LINEAR_CLIENT_SECRET")
-  }
-
-  return clientSecret
+  return requireProviderEnv("LINEAR_CLIENT_SECRET")
 }
 
 export async function exchangeLinearAuthorizationCode(args: {
   code: string
   redirectUri: string
 }) {
-  const response = await fetch(linearOAuthTokenUrl, {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: requireLinearClientId(),
-      client_secret: requireLinearClientSecret(),
-      code: args.code,
-      grant_type: "authorization_code",
-      redirect_uri: args.redirectUri,
-    }),
+  return await requestLinearToken({
+    code: args.code,
+    grant_type: "authorization_code",
+    redirect_uri: args.redirectUri,
   })
-
-  return (await response.json()) as LinearTokenResponse
 }
 
 export async function refreshLinearAccessToken(refreshToken: string) {
-  const response = await fetch(linearOAuthTokenUrl, {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: requireLinearClientId(),
-      client_secret: requireLinearClientSecret(),
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-    }),
+  return await requestLinearToken({
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
   })
-
-  return (await response.json()) as LinearTokenResponse
 }
 
 export async function fetchLinearInstallationProfile(accessToken: string) {
@@ -135,6 +104,14 @@ export function getLinearTokenScope(value: string | string[] | undefined) {
   }
 
   return value
+}
+
+async function requestLinearToken(body: Record<string, string>) {
+  return await fetchFormToken<LinearTokenResponse>(linearOAuthTokenUrl, {
+    client_id: requireLinearClientId(),
+    client_secret: requireLinearClientSecret(),
+    ...body,
+  })
 }
 
 async function linearGraphql(

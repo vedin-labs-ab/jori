@@ -1,3 +1,4 @@
+import { requireProviderEnv } from "../oauth"
 import { notionApiVersion, notionOAuthTokenUrl } from "./config"
 
 export type NotionTokenResponse =
@@ -21,23 +22,11 @@ export type NotionTokenResponse =
     }
 
 export function requireNotionClientId() {
-  const clientId = process.env.NOTION_CLIENT_ID
-
-  if (clientId === undefined) {
-    throw new Error("Missing NOTION_CLIENT_ID")
-  }
-
-  return clientId
+  return requireProviderEnv("NOTION_CLIENT_ID")
 }
 
 export function requireNotionClientSecret() {
-  const clientSecret = process.env.NOTION_CLIENT_SECRET
-
-  if (clientSecret === undefined) {
-    throw new Error("Missing NOTION_CLIENT_SECRET")
-  }
-
-  return clientSecret
+  return requireProviderEnv("NOTION_CLIENT_SECRET")
 }
 
 export async function exchangeNotionAuthorizationCode(args: {

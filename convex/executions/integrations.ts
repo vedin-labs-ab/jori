@@ -19,6 +19,8 @@ import {
 } from "../providers/microsoft/oauth"
 import { type RuntimeIntegration } from "./codex"
 
+const OAUTH_REFRESH_BUFFER_MS = 5 * 60 * 1000
+
 export async function prepareIntegrationForRuntime(
   ctx: ActionCtx,
   args: {
@@ -77,18 +79,14 @@ async function prepareLinearIntegrationForRuntime(
 ) {
   const credentials = requireLinearCredentials(integration)
 
-  if (credentials.expiresAt > Date.now() + 5 * 60 * 1000) {
+  if (hasFreshOAuthToken(credentials)) {
     return integration
   }
 
   const tokenResult = await refreshLinearAccessToken(credentials.refreshToken)
 
   if ("error" in tokenResult) {
-    throw new Error(
-      `Linear token refresh failed: ${
-        tokenResult.error_description ?? tokenResult.error
-      }`
-    )
+    throw tokenRefreshError("Linear", tokenResult)
   }
 
   const refreshedCredentials = await ctx.runMutation(
@@ -102,10 +100,7 @@ async function prepareLinearIntegrationForRuntime(
     }
   )
 
-  return {
-    ...integration,
-    credentials: refreshedCredentials,
-  }
+  return withCredentials(integration, refreshedCredentials)
 }
 
 async function prepareGoogleIntegrationForRuntime(
@@ -114,18 +109,14 @@ async function prepareGoogleIntegrationForRuntime(
 ) {
   const credentials = requireGoogleCredentials(integration)
 
-  if (credentials.expiresAt > Date.now() + 5 * 60 * 1000) {
+  if (hasFreshOAuthToken(credentials)) {
     return integration
   }
 
   const tokenResult = await refreshGoogleAccessToken(credentials.refreshToken)
 
   if ("error" in tokenResult) {
-    throw new Error(
-      `Google Workspace token refresh failed: ${
-        tokenResult.error_description ?? tokenResult.error
-      }`
-    )
+    throw tokenRefreshError("Google Workspace", tokenResult)
   }
 
   const refreshedCredentials = await ctx.runMutation(
@@ -139,10 +130,7 @@ async function prepareGoogleIntegrationForRuntime(
     }
   )
 
-  return {
-    ...integration,
-    credentials: refreshedCredentials,
-  }
+  return withCredentials(integration, refreshedCredentials)
 }
 
 async function prepareMicrosoftIntegrationForRuntime(
@@ -151,7 +139,7 @@ async function prepareMicrosoftIntegrationForRuntime(
 ) {
   const credentials = requireMicrosoftCredentials(integration)
 
-  if (credentials.expiresAt > Date.now() + 5 * 60 * 1000) {
+  if (hasFreshOAuthToken(credentials)) {
     return integration
   }
 
@@ -160,14 +148,12 @@ async function prepareMicrosoftIntegrationForRuntime(
     tenantId: credentials.tenantId,
   })
 
-  if ("error" in tokenResult || tokenResult.refresh_token === undefined) {
-    throw new Error(
-      `Microsoft token refresh failed: ${
-        "error" in tokenResult
-          ? (tokenResult.error_description ?? tokenResult.error)
-          : "missing refresh token"
-      }`
-    )
+  if ("error" in tokenResult) {
+    throw tokenRefreshError("Microsoft", tokenResult)
+  }
+
+  if (tokenResult.refresh_token === undefined) {
+    throw new Error("Microsoft token refresh failed: missing refresh token")
   }
 
   const refreshedCredentials = await ctx.runMutation(
@@ -181,8 +167,28 @@ async function prepareMicrosoftIntegrationForRuntime(
     }
   )
 
+  return withCredentials(integration, refreshedCredentials)
+}
+
+function hasFreshOAuthToken(credentials: { expiresAt: number }) {
+  return credentials.expiresAt > Date.now() + OAUTH_REFRESH_BUFFER_MS
+}
+
+function tokenRefreshError(
+  provider: string,
+  result: { error: string; error_description?: string }
+) {
+  return new Error(
+    `${provider} token refresh failed: ${result.error_description ?? result.error}`
+  )
+}
+
+function withCredentials(
+  integration: RuntimeIntegration,
+  credentials: RuntimeIntegration["credentials"]
+): RuntimeIntegration {
   return {
     ...integration,
-    credentials: refreshedCredentials,
+    credentials,
   }
 }

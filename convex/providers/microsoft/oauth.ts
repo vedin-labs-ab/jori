@@ -1,3 +1,4 @@
+import { fetchFormToken, requireProviderEnv } from "../oauth"
 import { microsoftGraphUrl, microsoftOAuthTokenUrl } from "./config"
 
 export type MicrosoftTokenResponse =
@@ -27,23 +28,11 @@ export type MicrosoftInstallationProfile = {
 }
 
 export function requireMicrosoftClientId() {
-  const clientId = process.env.MICROSOFT_CLIENT_ID
-
-  if (clientId === undefined) {
-    throw new Error("Missing MICROSOFT_CLIENT_ID")
-  }
-
-  return clientId
+  return requireProviderEnv("MICROSOFT_CLIENT_ID")
 }
 
 export function requireMicrosoftClientSecret() {
-  const clientSecret = process.env.MICROSOFT_CLIENT_SECRET
-
-  if (clientSecret === undefined) {
-    throw new Error("Missing MICROSOFT_CLIENT_SECRET")
-  }
-
-  return clientSecret
+  return requireProviderEnv("MICROSOFT_CLIENT_SECRET")
 }
 
 export async function exchangeMicrosoftAuthorizationCode(args: {
@@ -51,44 +40,21 @@ export async function exchangeMicrosoftAuthorizationCode(args: {
   redirectUri: string
   tenantId?: string
 }) {
-  const response = await fetch(
-    microsoftOAuthTokenUrl(args.tenantId ?? "organizations"),
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        client_id: requireMicrosoftClientId(),
-        client_secret: requireMicrosoftClientSecret(),
-        code: args.code,
-        grant_type: "authorization_code",
-        redirect_uri: args.redirectUri,
-      }),
-    }
-  )
-
-  return (await response.json()) as MicrosoftTokenResponse
+  return await requestMicrosoftToken(args.tenantId ?? "organizations", {
+    code: args.code,
+    grant_type: "authorization_code",
+    redirect_uri: args.redirectUri,
+  })
 }
 
 export async function refreshMicrosoftAccessToken(args: {
   refreshToken: string
   tenantId: string
 }) {
-  const response = await fetch(microsoftOAuthTokenUrl(args.tenantId), {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: requireMicrosoftClientId(),
-      client_secret: requireMicrosoftClientSecret(),
-      grant_type: "refresh_token",
-      refresh_token: args.refreshToken,
-    }),
+  return await requestMicrosoftToken(args.tenantId, {
+    grant_type: "refresh_token",
+    refresh_token: args.refreshToken,
   })
-
-  return (await response.json()) as MicrosoftTokenResponse
 }
 
 export async function fetchMicrosoftInstallationProfile(args: {
@@ -127,6 +93,20 @@ export async function fetchMicrosoftInstallationProfile(args: {
 
 export function getMicrosoftTokenScope(value: string | undefined) {
   return value
+}
+
+async function requestMicrosoftToken(
+  tenantId: string,
+  body: Record<string, string>
+) {
+  return await fetchFormToken<MicrosoftTokenResponse>(
+    microsoftOAuthTokenUrl(tenantId),
+    {
+      client_id: requireMicrosoftClientId(),
+      client_secret: requireMicrosoftClientSecret(),
+      ...body,
+    }
+  )
 }
 
 async function microsoftGraphGet(accessToken: string, path: string) {

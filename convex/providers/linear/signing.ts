@@ -1,3 +1,4 @@
+import { requireProviderEnv } from "../oauth"
 import {
   createSignedState,
   hmacSha256Hex,
@@ -41,11 +42,5 @@ export async function verifyLinearRequest(_request: Request, body: string) {
 }
 
 function requireLinearWebhookSecret() {
-  const secret = process.env.LINEAR_WEBHOOK_SECRET
-
-  if (secret === undefined) {
-    throw new Error("Missing LINEAR_WEBHOOK_SECRET")
-  }
-
-  return secret
+  return requireProviderEnv("LINEAR_WEBHOOK_SECRET")
 }

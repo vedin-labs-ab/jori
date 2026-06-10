@@ -144,6 +144,7 @@ import type * as providers_notion_http from "../providers/notion/http.js";
 import type * as providers_notion_install from "../providers/notion/install.js";
 import type * as providers_notion_oauth from "../providers/notion/oauth.js";
 import type * as providers_notion_signing from "../providers/notion/signing.js";
+import type * as providers_oauth from "../providers/oauth.js";
 import type * as providers_signing from "../providers/signing.js";
 import type * as providers_slack_approval_blocks from "../providers/slack/approval/blocks.js";
 import type * as providers_slack_approval_labels from "../providers/slack/approval/labels.js";
@@ -310,6 +311,7 @@ declare const fullApi: ApiFromModules<{
   "providers/notion/install": typeof providers_notion_install;
   "providers/notion/oauth": typeof providers_notion_oauth;
   "providers/notion/signing": typeof providers_notion_signing;
+  "providers/oauth": typeof providers_oauth;
   "providers/signing": typeof providers_signing;
   "providers/slack/approval/blocks": typeof providers_slack_approval_blocks;
   "providers/slack/approval/labels": typeof providers_slack_approval_labels;
