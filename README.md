@@ -21,6 +21,10 @@ Microsoft Teams tenant-scoped ingestion is not active in this version.
 - `E2B_API_KEY`: E2B API key for ephemeral sandboxes.
 - `E2B_SANDBOX_TEMPLATE`: optional E2B sandbox template override. Defaults to `milo-codex`.
 - `CODEX_AUTH_JSON_BASE64`: base64-encoded Codex `auth.json`.
+- `OPENROUTER_API_KEY`: OpenRouter API key for server-side model calls.
+- `OPENROUTER_APP_TITLE`: optional OpenRouter attribution title. Defaults to `Milo`.
+- `OPENROUTER_HTTP_REFERER`: optional OpenRouter attribution URL. Defaults to `CONVEX_SITE_URL` when set.
+- `OPENROUTER_APP_CATEGORIES`: optional OpenRouter attribution categories. Defaults to `cloud-agent`.
 - `SLACK_CLIENT_ID`: Slack OAuth client ID.
 - `SLACK_CLIENT_SECRET`: Slack OAuth client secret.
 - `SLACK_SIGNING_SECRET`: Slack event and install state signing secret.

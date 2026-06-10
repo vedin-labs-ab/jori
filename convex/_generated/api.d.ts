@@ -18,6 +18,8 @@ import type * as integrations_disconnect from "../integrations/disconnect.js";
 import type * as integrations_status from "../integrations/status.js";
 import type * as maintenance_truncate from "../maintenance/truncate.js";
 import type * as messages_ingest from "../messages/ingest.js";
+import type * as openrouter_client from "../openrouter/client.js";
+import type * as openrouter_index from "../openrouter/index.js";
 import type * as permissions_catalog from "../permissions/catalog.js";
 import type * as permissions_data from "../permissions/data.js";
 import type * as permissions_github from "../permissions/github.js";
@@ -174,6 +176,8 @@ declare const fullApi: ApiFromModules<{
   "integrations/status": typeof integrations_status;
   "maintenance/truncate": typeof maintenance_truncate;
   "messages/ingest": typeof messages_ingest;
+  "openrouter/client": typeof openrouter_client;
+  "openrouter/index": typeof openrouter_index;
   "permissions/catalog": typeof permissions_catalog;
   "permissions/data": typeof permissions_data;
   "permissions/github": typeof permissions_github;
