@@ -1,119 +1,76 @@
 import { type ToolPermission } from "../permissions/catalog"
 import { promptTemplates } from "../prompts/generated"
 import { type CodexRuntimeInput, type MessageProvider } from "./codex"
+import {
+  type ApprovalContinuation,
+  createApprovalContinuationPrompt,
+} from "./continuation"
 import { readDataNumber, readDataObject, readDataString } from "./data"
 import { createToolApprovalInstructions } from "./instructions"
-import { type RuntimeToolCapability } from "./tools/types"
-
-export type PromptBundle = {
-  rendered: string
-  parts: PromptPart[]
-  skillIds: string[]
-}
-
-type PromptPart = {
-  id: string
-  type: "system" | "skill" | "trigger"
-  content: string
-}
-
-export type RuntimeSkill = {
-  id: string
-  tenantId: string | null
-  name: string
-  description: string
-  body: string
-}
 
 export function assemblePrompt(
   input: CodexRuntimeInput,
-  availableSkills: RuntimeSkill[],
   promptedTools: ToolPermission[] = [],
-  _capabilities: RuntimeToolCapability[] = []
-): PromptBundle {
+  continuation?: ApprovalContinuation
+): string {
   const parts = [
-    createSystemPart(),
-    ...createApprovalParts(promptedTools),
-    createTriggerPart(input),
+    promptTemplates["system/persona"],
+    ...(promptedTools.length === 0
+      ? []
+      : [createToolApprovalInstructions(promptedTools)]),
+    createTriggerPart(input, continuation === undefined),
+    ...(continuation === undefined
+      ? []
+      : [createApprovalContinuationPrompt(continuation)]),
   ]
 
-  return {
-    rendered: parts.map((part) => part.content).join("\n\n"),
-    parts,
-    skillIds: availableSkills.map((skill) => skill.name),
-  }
+  return parts.join("\n\n")
 }
 
-function createApprovalParts(promptedTools: ToolPermission[]): PromptPart[] {
-  if (promptedTools.length === 0) {
-    return []
-  }
-
-  return [
-    {
-      id: "system/tool-approval",
-      type: "system",
-      content: createToolApprovalInstructions(promptedTools),
-    },
-  ]
-}
-
-function createSystemPart(): PromptPart {
-  return {
-    id: "system/persona",
-    type: "system",
-    content: promptTemplates["system/persona"],
-  }
-}
-
-function createTriggerPart(input: CodexRuntimeInput): PromptPart {
+function createTriggerPart(input: CodexRuntimeInput, isInitialRun: boolean) {
   if (input.type === "scheduled") {
-    return createScheduledTriggerPart(input)
+    return renderTemplate(
+      isInitialRun
+        ? promptTemplates["trigger/schedule"]
+        : promptTemplates["reference/schedule"],
+      createScheduleValues(input)
+    )
   }
 
-  return createMessageTriggerPart(input)
+  return renderTemplate(
+    isInitialRun
+      ? promptTemplates["trigger/message"]
+      : promptTemplates["reference/message"],
+    createMessageValues(input)
+  )
 }
 
-function createMessageTriggerPart(
+function createMessageValues(
   input: Extract<CodexRuntimeInput, { type: "message" }>
-): PromptPart {
+) {
   return {
-    id: "trigger/message",
-    type: "trigger",
-    content: renderTemplate(promptTemplates["trigger/message"], {
-      message: {
-        provider: getProviderLabel(input.provider),
-        targetId: getMessageTargetId(input.provider, input.message.data),
-        conversationId:
-          input.message.conversationId ?? input.message.externalId,
-        targetMetadata: getMessageTargetMetadata(
-          input.provider,
-          input.message.data
-        ),
-        text: input.message.text ?? "",
-      },
-    }),
+    message: {
+      provider: getProviderLabel(input.provider),
+      target: getMessageTarget(input.provider, input.message.data),
+      text: input.message.text ?? "",
+    },
   }
 }
 
-function createScheduledTriggerPart(
+function createScheduleValues(
   input: Extract<CodexRuntimeInput, { type: "scheduled" }>
-): PromptPart {
+) {
   return {
-    id: "trigger/schedule",
-    type: "trigger",
-    content: renderTemplate(promptTemplates["trigger/schedule"], {
-      output: {
-        channelId: input.schedule.output.channelId,
-        threadId: input.schedule.output.threadId ?? "",
-      },
-      schedule: {
-        id: input.schedule._id,
-        name: input.schedule.name,
-        description: input.schedule.description,
-        metadata: JSON.stringify(input.schedule.metadata ?? null),
-      },
-    }),
+    output: {
+      channelId: input.schedule.output.channelId,
+      threadId: input.schedule.output.threadId ?? "",
+    },
+    schedule: {
+      id: input.schedule._id,
+      name: input.schedule.name,
+      description: input.schedule.description,
+      metadata: JSON.stringify(input.schedule.metadata ?? null),
+    },
   }
 }
 
@@ -127,79 +84,47 @@ function getProviderLabel(provider: MessageProvider) {
   return providerLabels[provider]
 }
 
-function getMessageTargetId(provider: MessageProvider, data: unknown) {
+function getMessageTarget(provider: MessageProvider, data: unknown) {
   if (provider === "github") {
-    return getGitHubTargetId(data)
+    return formatTargetLines(getGitHubTargetLines(data))
   }
 
   if (provider === "linear") {
-    return readDataString(data, "issueId") ?? ""
+    return formatTargetLines(getLinearTargetLines(data))
   }
 
-  return readDataString(data, "channelId") ?? ""
+  return formatTargetLines(getSlackTargetLines(data))
 }
 
-function getGitHubTargetId(data: unknown) {
-  const repository = readDataObject(data, "repository")
-  const fullName = readDataString(repository, "fullName")
-  const issueNumber = readDataNumber(data, "issueNumber")
-  const pullNumber = readDataNumber(data, "pullNumber")
-  const number = pullNumber ?? issueNumber
-
-  if (fullName === undefined || number === undefined) {
-    return ""
-  }
-
-  return `${fullName}#${number}`
-}
-
-function getMessageTargetMetadata(provider: MessageProvider, data: unknown) {
-  if (provider === "github") {
-    return formatTargetMetadata(getGitHubTargetMetadata(data))
-  }
-
-  if (provider === "linear") {
-    return formatTargetMetadata(getLinearTargetMetadata(data))
-  }
-
-  return formatTargetMetadata(getSlackTargetMetadata(data))
-}
-
-function getGitHubTargetMetadata(data: unknown) {
+function getGitHubTargetLines(data: unknown) {
   const repository = readDataObject(data, "repository")
   const comment = readDataObject(data, "comment")
 
   return [
-    metadataLine("Repository owner", readDataString(repository, "owner")),
-    metadataLine("Repository name", readDataString(repository, "name")),
-    metadataLine(
-      "Repository full name",
-      readDataString(repository, "fullName")
-    ),
-    metadataLine("Repository ID", readDataNumber(repository, "id")),
-    metadataLine("Issue number", readDataNumber(data, "issueNumber")),
-    metadataLine("Pull request number", readDataNumber(data, "pullNumber")),
-    metadataLine("Comment ID", readDataString(comment, "id")),
-    metadataLine("Comment kind", readDataString(comment, "kind")),
-  ].filter((line) => line !== null)
+    targetLine("Repository", readDataString(repository, "fullName")),
+    targetLine("Issue number", readDataNumber(data, "issueNumber")),
+    targetLine("Pull request number", readDataNumber(data, "pullNumber")),
+    targetLine("Comment ID", readDataString(comment, "id")),
+    targetLine("Comment kind", readDataString(comment, "kind")),
+  ]
 }
 
-function getLinearTargetMetadata(data: unknown) {
+function getLinearTargetLines(data: unknown) {
   return [
-    metadataLine("Issue ID", readDataString(data, "issueId")),
-    metadataLine("Comment ID", readDataString(data, "commentId")),
-  ].filter((line) => line !== null)
+    targetLine("Issue ID", readDataString(data, "issueId")),
+    targetLine("Comment ID", readDataString(data, "commentId")),
+  ]
 }
 
-function getSlackTargetMetadata(data: unknown) {
+function getSlackTargetLines(data: unknown) {
   return [
-    metadataLine("Channel ID", readDataString(data, "channelId")),
-    metadataLine("Message timestamp", readDataString(data, "ts")),
-    metadataLine("Thread timestamp", readDataString(data, "threadTs")),
-  ].filter((line) => line !== null)
+    targetLine("Channel ID", readDataString(data, "channelId")),
+    targetLine("Message timestamp", readDataString(data, "ts")),
+    targetLine("Thread timestamp", readDataString(data, "threadTs")),
+  ]
 }
 
-function metadataLine(label: string, value: string | number | undefined) {
+function targetLine(label: string, value: string | number | undefined) {
   if (value === undefined || value === "") {
     return null
   }
@@ -207,12 +132,10 @@ function metadataLine(label: string, value: string | number | undefined) {
   return `- ${label}: ${value}`
 }
 
-function formatTargetMetadata(lines: string[]) {
-  if (lines.length === 0) {
-    return "- None"
-  }
+function formatTargetLines(lines: Array<string | null>) {
+  const present = lines.filter((line) => line !== null)
 
-  return lines.join("\n")
+  return present.length === 0 ? "- None" : present.join("\n")
 }
 
 function renderTemplate(

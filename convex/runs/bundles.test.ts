@@ -5,7 +5,8 @@ import {
   resolveToolModes,
 } from "../permissions/catalog"
 import { filterRuntimeSkillsForBundle } from "./bundles"
-import { assemblePrompt, type RuntimeSkill } from "./prompt"
+import { assemblePrompt } from "./prompt"
+import { type RuntimeSkill } from "./skills"
 import { assembleToolsForRun } from "./tools"
 
 describe("runtime integration bundles", () => {
@@ -32,7 +33,7 @@ describe("runtime integration bundles", () => {
       ],
       toolBundle.skillNames
     )
-    const prompt = assemblePrompt(runtimeInput(), promptSkills)
+    const prompt = assemblePrompt(runtimeInput())
 
     expect(toolBundle.mcpServers.map((server) => server.name)).not.toContain(
       "gmail"
@@ -41,10 +42,13 @@ describe("runtime integration bundles", () => {
     expect(
       toolBundle.capabilities.map((capability) => capability.label)
     ).not.toContain("Gmail")
-    expect(prompt.skillIds).toEqual(["scheduling", "email-style"])
-    expect(prompt.rendered).not.toContain("google_gmail_search_threads")
-    expect(prompt.rendered).not.toContain("Keep email concise.")
-    expect(prompt.rendered).not.toContain("# Skills")
+    expect(promptSkills.map((skill) => skill.name)).toEqual([
+      "scheduling",
+      "email-style",
+    ])
+    expect(prompt).not.toContain("google_gmail_search_threads")
+    expect(prompt).not.toContain("Keep email concise.")
+    expect(prompt).not.toContain("# Skills")
   })
 })
 
@@ -58,18 +62,14 @@ describe("runtime active integration availability", () => {
       integrations: [integration("slack"), integration("notion", "paused")],
       toolModes: resolveToolModes([]),
     })
-    const prompt = assemblePrompt(
-      runtimeInput(),
-      filterRuntimeSkillsForBundle(
-        [
-          runtimeSkill("slack", null, "Use conversations_history."),
-          runtimeSkill("notion", null, "Use notion_search."),
-        ],
-        toolBundle.skillNames
-      ),
-      toolBundle.promptedTools,
-      toolBundle.capabilities
+    const promptSkills = filterRuntimeSkillsForBundle(
+      [
+        runtimeSkill("slack", null, "Use conversations_history."),
+        runtimeSkill("notion", null, "Use notion_search."),
+      ],
+      toolBundle.skillNames
     )
+    const prompt = assemblePrompt(runtimeInput(), toolBundle.promptedTools)
 
     expect(toolBundle.mcpServers.map((server) => server.name)).toContain(
       "slack"
@@ -79,13 +79,13 @@ describe("runtime active integration availability", () => {
     )
     expect(toolBundle.skillNames).toContain("slack")
     expect(toolBundle.skillNames).not.toContain("notion")
-    expect(prompt.skillIds).toEqual(["slack"])
+    expect(promptSkills.map((skill) => skill.name)).toEqual(["slack"])
     expect(
       toolBundle.capabilities.map((capability) => capability.label)
     ).toEqual(["Schedules", "Slack"])
-    expect(prompt.rendered).not.toContain("Slack: List channels")
-    expect(prompt.rendered).not.toContain("Notion:")
-    expect(prompt.rendered).not.toContain("notion_search")
+    expect(prompt).not.toContain("Slack: List channels")
+    expect(prompt).not.toContain("Notion:")
+    expect(prompt).not.toContain("notion_search")
   })
 })
 
@@ -99,22 +99,17 @@ describe("runtime native tool availability metadata", () => {
       integrations: [integration("slack")],
       toolModes: resolveToolModes([]),
     })
-    const prompt = assemblePrompt(
-      runtimeInput(),
-      [],
-      toolBundle.promptedTools,
-      toolBundle.capabilities
-    )
+    const prompt = assemblePrompt(runtimeInput(), toolBundle.promptedTools)
 
     expect(
       toolBundle.capabilities.map((capability) => capability.label)
     ).toEqual(["Schedules", "Slack"])
-    expect(prompt.rendered).not.toContain("# Available Tools")
-    expect(prompt.rendered).not.toContain("Schedules: Search schedules")
-    expect(prompt.rendered).not.toContain("Slack: List channels")
-    expect(prompt.rendered).not.toContain("Notion:")
-    expect(prompt.rendered).not.toContain("Local workspace")
-    expect(prompt.rendered).not.toContain("Web/current")
+    expect(prompt).not.toContain("# Available Tools")
+    expect(prompt).not.toContain("Schedules: Search schedules")
+    expect(prompt).not.toContain("Slack: List channels")
+    expect(prompt).not.toContain("Notion:")
+    expect(prompt).not.toContain("Local workspace")
+    expect(prompt).not.toContain("Web/current")
   })
 })
 

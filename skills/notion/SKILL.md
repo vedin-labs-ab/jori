@@ -38,4 +38,3 @@ Comments:
 Format:
 - Keep Notion comments concise and practical.
 - Use Markdown for comment text, with inline formatting only.
-- Do not mention internal tool names in user-facing replies.

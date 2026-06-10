@@ -19,31 +19,27 @@ export function createApprovalContinuationPrompt(
   return [
     "# Approval Continuation",
     "",
-    "A previous Milo run paused to request approval for one tool call. The user approved it, Milo executed the approved tool call, and this run should continue the original work from the handoff below.",
+    "A previous run paused to request user approval for one tool call. The user approved it and the call has been executed; its result is below and may be an error. Continue the task from the handoff. Do not repeat the approved tool call unless a new user request clearly requires it.",
     "",
-    "## Original Objective",
+    "## Objective",
     continuation.handoff.objective,
     "",
     "## Progress Before Approval",
     continuation.handoff.progress,
     "",
     "## Approved Action",
-    `- Provider: ${continuation.action.provider}`,
-    `- Tool: ${continuation.action.tool}`,
-    `- Summary: ${continuation.action.summary}`,
-    "- Arguments:",
+    `${continuation.action.provider}.${continuation.action.tool}: ${continuation.action.summary}`,
+    "",
     fencedJson(continuation.action.args),
     "",
-    "## Tool Result",
+    "## Result",
     fencedJson(continuation.result),
     "",
-    "## Continue From Here",
+    "## Next",
     continuation.handoff.next,
-    "",
-    "Use the tool result and the handoff context to continue the task. Do not repeat the approved tool call unless a new user request clearly requires it.",
   ].join("\n")
 }
 
 function fencedJson(value: unknown) {
-  return ["```json", JSON.stringify(value, null, 2), "```"].join("\n")
+  return ["```json", JSON.stringify(value), "```"].join("\n")
 }

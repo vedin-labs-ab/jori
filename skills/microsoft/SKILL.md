@@ -26,4 +26,3 @@ Calendar:
 Format:
 - Keep confirmations concise and include the relevant subject, event title, or
   time when useful.
-- Do not mention internal Graph paths, tokens, scopes, or tool names.

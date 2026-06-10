@@ -20,4 +20,3 @@ Replies:
 
 Format:
 - Keep replies concise and plain text.
-- Do not mention internal tool names in user-facing replies.

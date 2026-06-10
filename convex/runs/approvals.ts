@@ -8,7 +8,6 @@ import { callMiloScheduleTool } from "../scheduling/mcp"
 import { callProviderTool } from "../tools/providers"
 import { createPromptedExecution } from "./artifacts"
 import { type CodexRuntimeInput } from "./codex"
-import { createApprovalContinuationPrompt } from "./continuation"
 import { runPromptedExecution } from "./execute"
 import { prepareIntegrationForRuntime } from "./integrations"
 import { createExecutionToken } from "./tokens"
@@ -51,23 +50,22 @@ export const runApprovedExecution = internalAction({
 
     const preparedInput = await prepareRuntimeInput(ctx, input)
     const result = await executeApprovedTool(ctx, preparedInput, approval)
-    const continuationPrompt = createApprovalContinuationPrompt({
-      handoff: approval.handoff,
-      action: {
-        provider: approval.provider,
-        tool: approval.tool,
-        summary: approval.summary,
-        args: approval.args,
-      },
-      result,
-    })
     const executionToken = createExecutionToken()
     const promptedExecution = await createPromptedExecution(ctx, {
       convexSiteUrl: requireConvexSiteUrl(),
       input: preparedInput,
       executionToken,
       approvalId: approval._id,
-      continuationPrompt,
+      continuation: {
+        handoff: approval.handoff,
+        action: {
+          provider: approval.provider,
+          tool: approval.tool,
+          summary: approval.summary,
+          args: approval.args,
+        },
+        result,
+      },
     })
 
     if (promptedExecution === null) {

@@ -4,6 +4,7 @@ import { type ActionCtx } from "../_generated/server"
 import { resolveToolModes } from "../permissions/catalog"
 import { filterRuntimeSkillsForBundle } from "./bundles"
 import { type CodexRuntimeInput } from "./codex"
+import { type ApprovalContinuation } from "./continuation"
 import { assemblePrompt } from "./prompt"
 import { createSkillSandboxFiles } from "./skills"
 import { assembleToolsForRun } from "./tools"
@@ -15,7 +16,7 @@ export async function createPromptedExecution(
     executionToken: string
     convexSiteUrl: string
     approvalId?: Id<"approvals">
-    continuationPrompt?: string
+    continuation?: ApprovalContinuation
   }
 ) {
   const input = args.input
@@ -34,15 +35,10 @@ export async function createPromptedExecution(
       ...createSkillSandboxFiles(runtimeSkills),
     ],
   }
-  const promptBundle = assemblePrompt(
+  const prompt = assemblePrompt(
     input,
-    runtimeSkills,
     runtimeToolBundle.promptedTools,
-    runtimeToolBundle.capabilities
-  )
-  const prompt = appendContinuationPrompt(
-    promptBundle.rendered,
-    args.continuationPrompt
+    args.continuation
   )
   const executionId = await createExecution(ctx, {
     triggerId: input.trigger._id,
@@ -112,8 +108,4 @@ async function createExecution(
   }
 
   return executionId
-}
-
-function appendContinuationPrompt(prompt: string, continuation?: string) {
-  return continuation === undefined ? prompt : `${prompt}\n\n${continuation}`
 }

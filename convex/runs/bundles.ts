@@ -1,5 +1,5 @@
 import { type ToolPermission, type ToolProvider } from "../permissions/catalog"
-import { type RuntimeSkill } from "./prompt"
+import { type RuntimeSkill } from "./skills"
 import { type RuntimeToolCapability } from "./tools/types"
 
 const providerMetadata = {

@@ -1,7 +1,6 @@
 import { expect, test } from "vitest"
-import { type RuntimeSkill } from "./prompt"
 import { workspace } from "./sandbox/harness"
-import { createSkillSandboxFiles } from "./skills"
+import { createSkillSandboxFiles, type RuntimeSkill } from "./skills"
 
 test("renders runtime skills as standard Agent Skill files", () => {
   const [file] = createSkillSandboxFiles([

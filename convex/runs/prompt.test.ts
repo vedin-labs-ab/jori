@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
 import { type ToolPermission } from "../permissions/catalog"
-import { createApprovalContinuationPrompt } from "./continuation"
 import { assemblePrompt } from "./prompt"
 
 describe("runtime prompts", () => {
@@ -20,73 +19,84 @@ describe("runtime prompts", () => {
         comment: { id: "comment-id", kind: "issue_comment" },
       },
       "GitHub",
-      "acme/app#12",
+      [
+        "- Repository: acme/app",
+        "- Issue number: 12",
+        "- Pull request number: 12",
+        "- Comment ID: comment-id",
+        "- Comment kind: issue_comment",
+      ],
     ],
     [
       "linear",
       { issueId: "ISSUE-1", commentId: "comment-id" },
       "Linear",
-      "ISSUE-1",
+      ["- Issue ID: ISSUE-1", "- Comment ID: comment-id"],
     ],
-    ["slack", { channelId: "C123", ts: "123.456" }, "Slack", "C123"],
-  ] as const)("renders %s message trigger target context", (provider, data, providerLabel, targetId) => {
-    const prompt = assemblePrompt(runtimeInput(provider, data), [])
+    [
+      "slack",
+      { channelId: "C123", ts: "123.456" },
+      "Slack",
+      ["- Channel ID: C123", "- Message timestamp: 123.456"],
+    ],
+  ] as const)("renders %s message trigger target", (provider, data, providerLabel, targetLines) => {
+    const prompt = assemblePrompt(runtimeInput(provider, data))
 
-    expect(prompt.rendered).toContain(`Provider: ${providerLabel}`)
-    expect(prompt.rendered).toContain(`Target ID: ${targetId}`)
-    expect(prompt.rendered).toContain("Target metadata:")
+    expect(prompt).toContain(`A ${providerLabel} message triggered this run.`)
+
+    for (const line of targetLines) {
+      expect(prompt).toContain(line)
+    }
+
+    expect(prompt).toContain("Handle the request.")
   })
 
-  test("renders GitHub tool inputs in message target metadata", () => {
+  test("omits absent target fields", () => {
     const prompt = assemblePrompt(
-      runtimeInput("github", {
-        repository: {
-          id: 123,
-          owner: "acme",
-          name: "app",
-          fullName: "acme/app",
-        },
-        issueNumber: 12,
-        pullNumber: 12,
-        comment: { id: "comment-id", kind: "issue_comment" },
-      }),
-      []
+      runtimeInput("slack", { channelId: "C123", ts: "123.456" })
     )
 
-    expect(prompt.rendered).toContain("Repository owner: acme")
-    expect(prompt.rendered).toContain("Repository name: app")
-    expect(prompt.rendered).toContain("Issue number: 12")
-    expect(prompt.rendered).toContain("Pull request number: 12")
+    expect(prompt).not.toContain("Thread timestamp")
   })
 })
 
 describe("approval request prompts", () => {
-  test("renders approval tool usage as the only approval request path", () => {
+  test("lists prompted tools and the approval contract", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channelId: "C123", ts: "123.456" }),
-      [],
       [promptedTool()]
     )
 
-    expect(prompt.rendered).toContain(
-      "Prompted tool schemas include a required `approval` object."
+    expect(prompt).toContain("# Approvals")
+    expect(prompt).toContain("notion_create_page")
+    expect(prompt).toContain("never ask for approval in a chat message")
+  })
+
+  test("omits the approvals section without prompted tools", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", { channelId: "C123", ts: "123.456" })
     )
-    expect(prompt.rendered).toContain(
-      "call the actual tool with its normal args plus `approval`"
-    )
+
+    expect(prompt).not.toContain("# Approvals")
   })
 })
 
 describe("approval continuation prompts", () => {
-  test("renders continuation context", () => {
-    const prompt = createApprovalContinuationPrompt(approvalContinuation())
+  test("replaces the trigger directive with the continuation", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", { channelId: "C123", ts: "123.456" }),
+      [promptedTool()],
+      approvalContinuation()
+    )
 
+    expect(prompt).toContain("# Original Trigger")
     expect(prompt).toContain("# Approval Continuation")
     expect(prompt).toContain("Create the calendar event")
     expect(prompt).toContain("Found a time")
     expect(prompt).toContain("google_calendar_create_event")
-    expect(prompt).toContain('"eventId": "event-123"')
+    expect(prompt).toContain('"eventId":"event-123"')
     expect(prompt).toContain("Do not repeat the approved tool call")
+    expect(prompt).not.toContain("Handle the request")
   })
 })
 

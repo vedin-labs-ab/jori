@@ -18,4 +18,3 @@ Events:
 
 Format:
 - Keep confirmations concise and include the event title and time when useful.
-- Do not mention internal tool names in user-facing replies.

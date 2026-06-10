@@ -3,18 +3,15 @@ import { type ToolPermission } from "../permissions/catalog"
 export function createToolApprovalInstructions(
   promptedTools: ToolPermission[]
 ) {
+  const toolNames = promptedTools.map((tool) => tool.tool).join(", ")
+
   return [
-    "# Tool Approval",
+    "# Approvals",
     "",
-    "The following tools require explicit user approval before use:",
+    `These tools need explicit user approval: ${toolNames}.`,
     "",
-    ...promptedTools.map((tool) => `- ${tool.tool}: ${tool.description}`),
-    "",
-    "Prompted tool schemas include a required `approval` object.",
-    "When using a prompted tool, call the actual tool with its normal args plus `approval`.",
-    "`approval.summary` should describe the exact action. `approval.handoff` must include { objective, progress, next }.",
-    "The tool call sends the user-facing approval request and code. Do not send a normal message asking for approval.",
-    "If the tool returns `approval_requested`, stop.",
-    "If you are continuing after an approval, use the approved tool result in the prompt and continue from the handoff.",
+    "Their schemas require an `approval` object alongside the normal args. The call itself sends the user the approval request and code; never ask for approval in a chat message.",
+    "Write `approval.handoff` for a fresh agent that finishes the task after approval with no other memory of this run.",
+    "If the result is `approval_requested`, stop. Once the user approves, a new run continues from your handoff.",
   ].join("\n")
 }
