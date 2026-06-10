@@ -1,3 +1,6 @@
+import { promptTemplates } from "../prompts/generated"
+import { renderPromptTemplate } from "../prompts/render"
+
 export type ApprovalContinuation = {
   handoff: {
     objective: string
@@ -16,30 +19,16 @@ export type ApprovalContinuation = {
 export function createApprovalContinuationPrompt(
   continuation: ApprovalContinuation
 ) {
-  return [
-    "# Approval Continuation",
-    "",
-    "A previous run paused to request user approval for one tool call. The user approved it and the call has been executed; its result is below and may be an error. Continue the task from the handoff. Do not repeat the approved tool call unless a new user request clearly requires it.",
-    "",
-    "## Objective",
-    continuation.handoff.objective,
-    "",
-    "## Progress Before Approval",
-    continuation.handoff.progress,
-    "",
-    "## Approved Action",
-    `${continuation.action.provider}.${continuation.action.tool}: ${continuation.action.summary}`,
-    "",
-    fencedJson(continuation.action.args),
-    "",
-    "## Result",
-    fencedJson(continuation.result),
-    "",
-    "## Next",
-    continuation.handoff.next,
-  ].join("\n")
+  return renderPromptTemplate(promptTemplates["approval/continuation"], {
+    action: {
+      ...continuation.action,
+      args: stringifyPromptJson(continuation.action.args),
+    },
+    handoff: continuation.handoff,
+    result: stringifyPromptJson(continuation.result),
+  })
 }
 
-function fencedJson(value: unknown) {
-  return ["```json", JSON.stringify(value), "```"].join("\n")
+function stringifyPromptJson(value: unknown) {
+  return JSON.stringify(value) ?? "null"
 }

@@ -1,12 +1,14 @@
+import { promptTemplates } from "../../../prompts/generated"
 import { type McpToolDefinition } from "../definitions"
 
 export function createMiloMcpScript(args: { tools: McpToolDefinition[] }) {
   return miloMcpScript({
+    instructions: promptTemplates["tools/scheduling"],
     toolsJson: JSON.stringify(args.tools),
   })
 }
 
-function miloMcpScript(args: { toolsJson: string }) {
+function miloMcpScript(args: { instructions: string; toolsJson: string }) {
   return `
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -19,7 +21,7 @@ import {
 
 const convexSiteUrl = requiredEnv("MILO_CONVEX_SITE_URL");
 const executionToken = requiredEnv("MILO_EXECUTION_TOKEN");
-const instructions = "Use these Milo scheduling tools only when the user asks to create, inspect, update, or delete scheduled work. Schedules use UTC timestamps or UTC cron expressions, and write calls need a clear output target.";
+const instructions = ${JSON.stringify(args.instructions)};
 const allTools = ${args.toolsJson};
 const tools = filterEnabledTools(allTools);
 

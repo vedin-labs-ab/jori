@@ -1,5 +1,6 @@
 import { type ToolPermission } from "../permissions/catalog"
 import { promptTemplates } from "../prompts/generated"
+import { renderPromptTemplate } from "../prompts/render"
 import { type CodexRuntimeInput, type MessageProvider } from "./codex"
 import {
   type ApprovalContinuation,
@@ -29,7 +30,7 @@ export function assemblePrompt(
 
 function createTriggerPart(input: CodexRuntimeInput, isInitialRun: boolean) {
   if (input.type === "scheduled") {
-    return renderTemplate(
+    return renderPromptTemplate(
       isInitialRun
         ? promptTemplates["trigger/schedule"]
         : promptTemplates["reference/schedule"],
@@ -37,7 +38,7 @@ function createTriggerPart(input: CodexRuntimeInput, isInitialRun: boolean) {
     )
   }
 
-  return renderTemplate(
+  return renderPromptTemplate(
     isInitialRun
       ? promptTemplates["trigger/message"]
       : promptTemplates["reference/message"],
@@ -136,29 +137,4 @@ function formatTargetLines(lines: Array<string | null>) {
   const present = lines.filter((line) => line !== null)
 
   return present.length === 0 ? "- None" : present.join("\n")
-}
-
-function renderTemplate(
-  template: string,
-  values: Record<string, unknown>
-): string {
-  return template.replaceAll(/{{\s*([\w.]+)\s*}}/g, (_match, path) =>
-    String(resolveTemplateValue(values, path))
-  )
-}
-
-function resolveTemplateValue(values: Record<string, unknown>, path: string) {
-  const value = path.split(".").reduce<unknown>((current, part) => {
-    if (typeof current !== "object" || current === null || !(part in current)) {
-      throw new Error(`Missing prompt template value: ${path}`)
-    }
-
-    return current[part as keyof typeof current]
-  }, values)
-
-  if (value === undefined || value === null) {
-    throw new Error(`Missing prompt template value: ${path}`)
-  }
-
-  return value
 }
