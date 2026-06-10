@@ -1,22 +1,17 @@
 ---
 name: slack
-description: Built-in Slack skill for native messages, with correct mrkdwn formatting, Block Kit blocks, links, escaping, and threading.
+description: Format Slack replies with native `text`, `mrkdwn`, Block Kit blocks, links, mentions, escaping, and thread-aware responses.
 ---
 
 # Slack
 
-Format Slack messages so they feel native to Slack:
-- Use plain `text` for direct replies. When using `text`, write concise
-  Slack `mrkdwn`: *bold*, _italic_, `code`, and > quote render; **bold** and
-  [label](url) do not.
-- Use Slack-native `blocks`
-  (https://docs.slack.dev/reference/block-kit/blocks) when structure,
-  hierarchy, or a requested presentation makes the answer clearer, easier to
-  scan, or easier to act on.
-- Include concise fallback `text` with `blocks`.
-- Use Slack link syntax like `<https://example.com|label>` and mention people
-  with `<@USER_ID>`.
-- Escape literal `&`, `<`, and `>` in Slack text unless using them for Slack
-  link, mention, or date syntax.
-- Do not use interactive elements like buttons, inputs, or menus.
+Format Slack messages so they feel native: direct, compact, and easy to scan.
+
+- Use plain `text` for short replies, confirmations, simple answers, and quick follow-ups.
+- Use Slack-native `blocks` when the message has sections, lists, decisions, options, status updates, summaries, or requested presentation structure.
+- When using `blocks`, include concise fallback `text` that summarizes the message.
+- Write Slack `mrkdwn`, not GitHub Markdown: `*bold*`, `_italic_`, `` `code` ``, and `>` quotes render; `**bold**` and `[label](url)` do not.
+- Use Slack link syntax: `<https://example.com|label>`. Mention people as `<@USER_ID>`.
+- Escape literal `&`, `<`, and `>` unless they are part of Slack link, mention, or date syntax.
+- Do not use elements that require user input submission, such as buttons, inputs, and menus; passive display interactions like `data_table` search and `carousel` navigation are allowed.
 - Do not use `card` blocks.
