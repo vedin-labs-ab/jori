@@ -1,123 +1,47 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 
-const localEnvPath = path.join(process.cwd(), ".env.local")
-const sharedEnvFilename = "milo.env.local"
+const requiredEnv = ["CONVEX_DEPLOYMENT", "CLERK_JWT_ISSUER_DOMAIN"] as const
 
-const requiredLocalEnv = [
-  "CONVEX_DEPLOYMENT",
-  "VITE_CONVEX_URL",
-  "VITE_CONVEX_SITE_URL",
-  "VITE_CLERK_PUBLISHABLE_KEY",
-  "CLERK_JWT_ISSUER_DOMAIN",
-] as const
+const command = process.argv.slice(2)
 
-type Command = "check" | "run" | "setup"
-
-const command = process.argv[2] as Command | undefined
-
-if (command === "check") {
-  checkEnv()
-} else if (command === "setup") {
-  setupSharedEnv()
-} else if (command === "run") {
-  runWithEnv(process.argv.slice(3))
-} else {
-  printUsageAndExit()
+if (command.length === 0) {
+  throw new Error("Missing command.")
 }
 
-function checkEnv() {
-  const resolved = resolveEnv()
-  const missing = missingRequiredEnv(resolved.env)
+const resolved = resolveEnv()
+const missing = requiredEnv.filter((name) => isEmpty(resolved.env[name]))
 
-  if (missing.length > 0) {
-    printMissingEnv(missing, resolved.sources)
-    process.exit(1)
-  }
-
-  process.stdout.write(
+if (missing.length > 0) {
+  process.stderr.write(
     [
-      "Local environment is ready.",
+      `Missing required local environment: ${missing.join(", ")}`,
       `Loaded: ${formatSources(resolved.sources)}`,
+      "Add the missing values to .env.local in this checkout or the primary checkout.",
       "",
     ].join("\n")
   )
+  process.exit(1)
 }
 
-function setupSharedEnv() {
-  const sharedEnvPath = getSharedEnvPath()
+const result = spawnSync(command[0], command.slice(1), {
+  env: resolved.env,
+  stdio: "inherit",
+})
 
-  if (sharedEnvPath === null) {
-    throw new Error("Unable to find the git common directory.")
-  }
-
-  if (!existsSync(localEnvPath)) {
-    throw new Error(
-      "Missing .env.local. Copy .env.local.example to .env.local and fill it in first."
-    )
-  }
-
-  const localEnv = readEnvFile(localEnvPath)
-  const sharedEnv = { ...localEnv }
-
-  for (const name of requiredLocalEnv) {
-    const inheritedValue = process.env[name]
-
-    if (
-      isEmpty(sharedEnv[name]) &&
-      inheritedValue !== undefined &&
-      inheritedValue.trim() !== ""
-    ) {
-      sharedEnv[name] = inheritedValue
-    }
-  }
-
-  const missing = missingRequiredEnv(sharedEnv)
-
-  if (missing.length > 0) {
-    printMissingEnv(missing, [localEnvPath])
-    process.exit(1)
-  }
-
-  writeFileSync(sharedEnvPath, serializeEnv(sharedEnv), { mode: 0o600 })
-  process.stdout.write(
-    [
-      `Wrote shared local environment to ${sharedEnvPath}.`,
-      "All git worktrees for this repository can now use pnpm run deploy.",
-      "",
-    ].join("\n")
-  )
+if (result.error !== undefined) {
+  throw result.error
 }
 
-function runWithEnv(args: string[]) {
-  if (args.length === 0) {
-    throw new Error("Missing command to run.")
-  }
-
-  const resolved = resolveEnv()
-  const missing = missingRequiredEnv(resolved.env)
-
-  if (missing.length > 0) {
-    printMissingEnv(missing, resolved.sources)
-    process.exit(1)
-  }
-
-  const result = spawnSync(args[0], args.slice(1), {
-    env: resolved.env,
-    stdio: "inherit",
-  })
-
-  process.exit(result.status ?? 1)
-}
+process.exit(result.status ?? 1)
 
 function resolveEnv() {
-  const sharedEnvPath = getSharedEnvPath()
   const env = { ...process.env }
   const sources: string[] = []
 
-  for (const source of [sharedEnvPath, localEnvPath]) {
-    if (source === null || !existsSync(source)) {
+  for (const source of getEnvSources()) {
+    if (!existsSync(source)) {
       continue
     }
 
@@ -127,10 +51,23 @@ function resolveEnv() {
 
   Object.assign(env, process.env)
 
+  if (isEmpty(env.CLERK_JWT_ISSUER_DOMAIN)) {
+    env.CLERK_JWT_ISSUER_DOMAIN = inferClerkIssuerDomain(
+      env.VITE_CLERK_PUBLISHABLE_KEY
+    )
+  }
+
   return { env, sources }
 }
 
-function getSharedEnvPath() {
+function getEnvSources() {
+  return unique([
+    getPrimaryWorktreeEnvPath(),
+    path.join(process.cwd(), ".env.local"),
+  ]).filter((source): source is string => source !== null)
+}
+
+function getPrimaryWorktreeEnvPath() {
   const result = spawnSync("git", ["rev-parse", "--git-common-dir"], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "ignore"],
@@ -141,8 +78,8 @@ function getSharedEnvPath() {
   }
 
   return path.join(
-    path.resolve(process.cwd(), result.stdout.trim()),
-    sharedEnvFilename
+    path.dirname(path.resolve(process.cwd(), result.stdout.trim())),
+    ".env.local"
   )
 }
 
@@ -168,11 +105,9 @@ function readEnvFile(filePath: string) {
     const name = withoutExport.slice(0, separator).trim()
     const rawValue = withoutExport.slice(separator + 1).trim()
 
-    if (!/^[A-Z_][A-Z0-9_]*$/.test(name)) {
-      continue
+    if (/^[A-Z_][A-Z0-9_]*$/.test(name)) {
+      env[name] = parseEnvValue(rawValue)
     }
-
-    env[name] = parseEnvValue(rawValue)
   }
 
   return env
@@ -193,61 +128,39 @@ function parseEnvValue(value: string) {
   return value
 }
 
-function serializeEnv(env: Record<string, string>) {
-  return [
-    "# Generated by `pnpm env:setup`.",
-    "# Keep this file out of git; it is shared by local git worktrees.",
-    "",
-    ...Object.entries(env)
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([name, value]) => `${name}=${formatEnvValue(value)}`),
-    "",
-  ].join("\n")
-}
-
-function formatEnvValue(value: string) {
-  if (/^[^\s'"#]+$/.test(value)) {
-    return value
+function inferClerkIssuerDomain(publishableKey: string | undefined) {
+  if (publishableKey === undefined || publishableKey.trim() === "") {
+    return undefined
   }
 
-  return JSON.stringify(value)
+  const match = publishableKey.match(/^pk_(?:test|live)_(.+)$/)
+
+  if (match === null) {
+    return undefined
+  }
+
+  const encodedFrontendApi = match[1]
+  const decodedFrontendApi = Buffer.from(encodedFrontendApi, "base64")
+    .toString("utf8")
+    .replace(/\$$/, "")
+
+  if (decodedFrontendApi.trim() === "" || /\s/.test(decodedFrontendApi)) {
+    return undefined
+  }
+
+  return decodedFrontendApi.startsWith("https://")
+    ? decodedFrontendApi
+    : `https://${decodedFrontendApi}`
 }
 
-function missingRequiredEnv(env: Record<string, string | undefined>) {
-  return requiredLocalEnv.filter((name) => isEmpty(env[name]))
+function unique(values: Array<string | null>) {
+  return [...new Set(values)]
 }
 
 function isEmpty(value: string | undefined) {
   return value === undefined || value.trim() === ""
 }
 
-function printMissingEnv(
-  missing: readonly string[],
-  sources: readonly string[]
-) {
-  process.stderr.write(
-    [
-      `Missing required local environment: ${missing.join(", ")}`,
-      `Loaded: ${formatSources(sources)}`,
-      "Fix .env.local, then run `pnpm env:setup` once to share it with all local worktrees.",
-      "",
-    ].join("\n")
-  )
-}
-
 function formatSources(sources: readonly string[]) {
   return sources.length === 0 ? "no env files" : sources.join(", ")
-}
-
-function printUsageAndExit(): never {
-  process.stderr.write(
-    [
-      "Usage:",
-      "  pnpm env:check",
-      "  pnpm env:setup",
-      "  pnpm env:run <command> [...args]",
-      "",
-    ].join("\n")
-  )
-  process.exit(1)
 }
