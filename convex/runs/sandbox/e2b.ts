@@ -10,7 +10,6 @@ import { createCodexConfig } from "../codex"
 import { type ToolBundle, type ToolPreflight } from "../tools/types"
 import {
   assertCommandSucceeded,
-  assertCommandsSucceeded,
   CodexRunError,
   type CommandTrace,
   createCommandTrace,
@@ -43,34 +42,56 @@ export type E2BCodexRunResult = {
 }
 
 type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
+type SetupTrace = {
+  type: "milo.setup"
+  stage: string
+  trace: CommandTrace
+}
 
 export async function runCodexInE2B(args: E2BCodexRunArgs) {
   let sandbox: E2BSandbox | undefined
+  const setupTraces: SetupTrace[] = []
 
   try {
     sandbox = await createE2BSandbox()
     await args.onSandboxCreated(sandbox.sandboxId)
-    const imageTrace = await verifySandboxImage(sandbox)
-    assertCommandSucceeded(
-      imageTrace,
-      "The E2B sandbox image is missing a required runtime dependency."
+    assertSetupCommandSucceeded(
+      recordSetupTrace(
+        setupTraces,
+        "image_check",
+        await verifySandboxImage(sandbox)
+      ),
+      "The E2B sandbox image is missing a required runtime dependency.",
+      setupTraces
     )
-    const bootstrapTrace = await bootstrapCodex(sandbox, {
-      authJsonBase64: args.authJsonBase64,
-      toolBundle: args.toolBundle,
-    })
-    assertCommandSucceeded(
-      bootstrapTrace,
-      "Could not bootstrap Codex inside E2B."
+    assertSetupCommandSucceeded(
+      recordSetupTrace(
+        setupTraces,
+        "bootstrap",
+        await bootstrapCodex(sandbox, {
+          authJsonBase64: args.authJsonBase64,
+          toolBundle: args.toolBundle,
+        })
+      ),
+      "Could not bootstrap Codex inside E2B.",
+      setupTraces
     )
-    const preflightTraces = await verifyPreflights(
+
+    for (const preflightTrace of await verifyPreflights(
       sandbox,
       args.toolBundle.preflights
-    )
-    assertCommandsSucceeded(
-      preflightTraces,
-      "A preflight failed inside the E2B sandbox."
-    )
+    )) {
+      assertSetupCommandSucceeded(
+        recordSetupTrace(
+          setupTraces,
+          `preflight:${preflightTrace.type}`,
+          preflightTrace.trace
+        ),
+        "A preflight failed inside the E2B sandbox.",
+        setupTraces
+      )
+    }
+
     const agentTrace = await executeCodex(sandbox, args)
     const trace = agentTrace.stdout
     assertCommandSucceeded(
@@ -118,7 +139,7 @@ function requireE2BApiKey() {
 
 async function verifySandboxImage(sandbox: E2BSandbox) {
   const result = await runCommand(sandbox, createImageCheckCommand(), {
-    timeoutMs: 10_000,
+    timeoutMs: 30_000,
   })
 
   return createCommandTrace(result)
@@ -165,10 +186,13 @@ async function verifyPreflights(
   sandbox: E2BSandbox,
   preflights: ToolPreflight[]
 ) {
-  const traces: CommandTrace[] = []
+  const traces: Array<{ type: ToolPreflight["type"]; trace: CommandTrace }> = []
 
   for (const preflight of preflights) {
-    traces.push(await verifyToolPreflight(sandbox, preflight))
+    traces.push({
+      type: preflight.type,
+      trace: await verifyToolPreflight(sandbox, preflight),
+    })
   }
 
   return traces
@@ -212,8 +236,39 @@ async function runCommand(
       } satisfies CommandResult
     }
 
-    throw error
+    return {
+      exitCode: 124,
+      error: formatError(error),
+      stdout: "",
+      stderr: "",
+    } satisfies CommandResult
   }
+}
+
+function recordSetupTrace(
+  traces: SetupTrace[],
+  stage: string,
+  trace: CommandTrace
+) {
+  traces.push({ type: "milo.setup", stage, trace })
+
+  return trace
+}
+
+function assertSetupCommandSucceeded(
+  commandTrace: CommandTrace,
+  message: string,
+  setupTraces: SetupTrace[]
+) {
+  assertCommandSucceeded(
+    commandTrace,
+    message,
+    serializeSetupTrace(setupTraces)
+  )
+}
+
+function serializeSetupTrace(traces: SetupTrace[]) {
+  return traces.map((trace) => JSON.stringify(trace)).join("\n")
 }
 
 function encodeBase64(value: string) {
