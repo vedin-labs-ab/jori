@@ -2,10 +2,11 @@ import { FileText, Timer } from "lucide-react"
 import { useState } from "react"
 import {
   ApprovalCallout,
+  CodeBlockDetail,
   CodeDetail,
-  DetailLine,
   ErrorDetail,
   ExecutionDetails,
+  RelativeTime,
 } from "./details"
 import { formatDuration, relativeTime } from "./format"
 import { SourceParts } from "./source"
@@ -13,19 +14,17 @@ import { ApprovalBadge, MetaPill, StatusIcon } from "./status"
 import { type ExecutionItem } from "./types"
 
 export function ExecutionRow({
-  defaultOpen,
   execution,
   now,
 }: {
-  defaultOpen: boolean
   execution: ExecutionItem
   now: number
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen)
+  const [isOpen, setIsOpen] = useState(false)
   const durationMs = durationFor(execution, now)
 
   return (
-    <article className="rounded-md border bg-background">
+    <article className="overflow-hidden rounded-md border bg-background">
       <button
         className="grid w-full grid-cols-[auto_1fr] items-center gap-3 p-3 text-left md:grid-cols-[auto_1fr_auto]"
         onClick={() => setIsOpen((current) => !current)}
@@ -70,9 +69,10 @@ function ExecutionMeta({
       {durationMs !== undefined ? (
         <MetaPill icon={Timer} label={formatDuration(durationMs)} />
       ) : null}
-      <span className="text-muted-foreground text-xs">
-        {relativeTime(execution.createdAt, now)}
-      </span>
+      <RelativeTime
+        absolute={execution.createdAt}
+        value={relativeTime(execution.createdAt, now)}
+      />
     </div>
   )
 }
@@ -85,8 +85,8 @@ function ExpandedExecution({
   now: number
 }) {
   return (
-    <div className="grid gap-0 border-t px-3 pb-3">
-      <DetailLine
+    <div className="grid gap-0">
+      <CodeBlockDetail
         icon={FileText}
         label="Prompt"
         value={execution.objective ?? execution.title}
@@ -97,7 +97,7 @@ function ExpandedExecution({
       {execution.error !== undefined ? (
         <ErrorDetail value={execution.error} />
       ) : null}
-      <ExecutionDetails createdAt={execution.createdAt}>
+      <ExecutionDetails>
         <CodeDetail label="Sandbox" value={execution.sandboxId} />
         <CodeDetail label="Hash" value={execution.hash} />
         <CodeDetail label="Prompt" value={execution.promptId} />

@@ -4,7 +4,7 @@ const skeletonRows = ["first", "second", "third", "fourth"]
 
 export function EmptyExecutions({ hasFilters }: { hasFilters: boolean }) {
   return (
-    <div className="grid min-h-48 place-items-center rounded-md border border-dashed p-6 text-center">
+    <div className="grid min-h-48 place-items-center p-6 text-center">
       <div className="grid max-w-sm gap-2">
         <FileText className="mx-auto size-6 text-muted-foreground" />
         <h2 className="font-medium text-sm">

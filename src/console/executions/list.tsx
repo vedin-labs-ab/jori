@@ -142,9 +142,8 @@ function ExecutionRows({
         <EmptyExecutions hasFilters={pagination.hasFilters} />
       ) : null}
       {!pagination.isLoadingFirstPage && pagination.visibleRows.length > 0
-        ? pagination.visibleRows.map((execution, index) => (
+        ? pagination.visibleRows.map((execution) => (
             <ExecutionRow
-              defaultOpen={pagination.pageIndex === 0 && index === 0}
               execution={execution}
               key={execution.id}
               now={pagination.now}
