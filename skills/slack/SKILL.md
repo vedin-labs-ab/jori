@@ -12,8 +12,6 @@ Format Slack messages so they feel native to Slack:
   with `<@USER_ID>`.
 - Escape literal `&`, `<`, and `>` in Slack text unless using them for Slack
   link, mention, or date syntax.
-- When replying to a message, reply in its thread: set `thread_ts` to the
-  thread timestamp, or to the message timestamp to start one.
 - Match the format to the outcome the user needs. Use plain `text` for direct
   replies; use Slack-native `blocks`
   (https://docs.slack.dev/reference/block-kit/blocks) when structure,
