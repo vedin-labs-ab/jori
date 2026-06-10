@@ -16,7 +16,38 @@ Notion uses a public connection OAuth install. Milo stores workspace-level acces
 
 Microsoft Teams tenant-scoped ingestion is not active in this version.
 
+## Local Setup
+
+Create a local env file from the tracked template:
+
+```sh
+cp .env.local.example .env.local
+```
+
+Fill in every value, then run:
+
+```sh
+pnpm env:setup
+pnpm env:check
+```
+
+`pnpm env:setup` copies the local values into the repository's git common
+directory as `milo.env.local`. Git worktrees share that directory, so fresh
+agent worktrees can run `pnpm run deploy` without manually copying ignored env
+files into each worktree.
+
+Required local variables:
+
+- `CONVEX_DEPLOYMENT`: Convex deployment selected by `npx convex dev`.
+- `VITE_CONVEX_URL`: client Convex URL.
+- `VITE_CONVEX_SITE_URL`: client Convex site URL.
+- `VITE_CLERK_PUBLISHABLE_KEY`: client Clerk publishable key.
+- `CLERK_JWT_ISSUER_DOMAIN`: Clerk JWT issuer URL used by
+  `convex/auth.config.ts` while Convex prepares a deploy.
+
 ## Required Convex Environment Variables
+
+These are stored on the Convex deployment with `npx convex env set`.
 
 - `E2B_API_KEY`: E2B API key for ephemeral sandboxes.
 - `E2B_SANDBOX_TEMPLATE`: optional E2B sandbox template override. Defaults to `milo-codex`.
