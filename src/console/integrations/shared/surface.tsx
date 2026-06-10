@@ -64,16 +64,21 @@ export function IntegrationSurface({
 }
 
 function IntegrationLogoMark({ logo }: { logo: IntegrationLogo }) {
+  const containerClassName =
+    "flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted"
+
   if ("src" in logo) {
     return (
-      <img
-        alt={logo.alt}
-        className="size-8 shrink-0 object-contain"
-        referrerPolicy="no-referrer"
-        src={logo.src}
-      />
+      <div className={containerClassName}>
+        <img
+          alt={logo.alt}
+          className="size-6 object-contain"
+          referrerPolicy="no-referrer"
+          src={logo.src}
+        />
+      </div>
     )
   }
 
-  return logo.mark
+  return <div className={containerClassName}>{logo.mark}</div>
 }
