@@ -127,7 +127,7 @@ test("renders expired Slack approvals without actions", () => {
   expect(card.slack_icon).toEqual({ type: "icon", name: "archive" })
   expect(card.title).toMatchObject({
     type: "mrkdwn",
-    text: "Approval expired",
+    text: "Request expired",
   })
   expect(card.subtitle).toMatchObject({
     type: "mrkdwn",

@@ -52,7 +52,7 @@ export function createSlackExpirationResponse(args: {
 }) {
   return {
     replace_original: true,
-    text: "Approval expired. Milo will not run this action.",
+    text: "Request expired. Milo will not run this action.",
     blocks: createExpirationBlocks(args),
   }
 }
@@ -86,7 +86,7 @@ function createExpirationBlocks(args: {
   return [
     createApprovalCard({
       icon: "archive",
-      title: "Approval expired",
+      title: "Request expired",
       subtitle: getToolLabel(args.tool),
       body: truncateSlackText(args.summary, 2800),
       subtext: `Expired at ${formatSlackTime(
@@ -205,7 +205,7 @@ function getDecisionTitle(
   }
 
   if (status === "expired") {
-    return "Approval expired"
+    return "Request expired"
   }
 
   return "Approval unavailable"
