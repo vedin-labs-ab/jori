@@ -14,6 +14,7 @@ import {
 
 const convexSiteUrl = requiredEnv("MILO_CONVEX_SITE_URL");
 const executionToken = requiredEnv("MILO_EXECUTION_TOKEN");
+const instructions = "Use these Milo scheduling tools only when the user asks to create, inspect, update, or delete scheduled work. Schedules use UTC timestamps or UTC cron expressions, and write calls need a clear output target.";
 
 const allTools = [
   {
@@ -134,7 +135,7 @@ const tools = filterEnabledTools(allTools);
 
 const server = new Server(
   { name: "milo", version: "0.0.0" },
-  { capabilities: { tools: {} } },
+  { capabilities: { tools: {} }, instructions },
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools }));

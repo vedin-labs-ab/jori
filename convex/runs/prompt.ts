@@ -37,8 +37,8 @@ export function assemblePrompt(
   const parts = [
     createSystemPart(),
     createAvailableToolsPart(capabilities),
+    ...createSkillsParts(availableSkills),
     ...createApprovalParts(promptedTools),
-    ...availableSkills.map((skill) => createSkillPart(skill)),
     createTriggerPart(input),
   ]
 
@@ -73,19 +73,30 @@ function createApprovalParts(promptedTools: ToolPermission[]): PromptPart[] {
   ]
 }
 
+function createSkillsParts(availableSkills: RuntimeSkill[]): PromptPart[] {
+  if (availableSkills.length === 0) {
+    return []
+  }
+
+  return [
+    {
+      id: "system/skills",
+      type: "system",
+      content: [
+        "# Skills",
+        "",
+        "Agent Skills for this run are installed under `.agents/skills`.",
+        "Use matching skills through the harness' normal skill-loading flow, and do not read unrelated skill files.",
+      ].join("\n"),
+    },
+  ]
+}
+
 function createSystemPart(): PromptPart {
   return {
     id: "system/persona",
     type: "system",
     content: promptTemplates["system/persona"],
-  }
-}
-
-function createSkillPart(skill: RuntimeSkill): PromptPart {
-  return {
-    id: skill.id,
-    type: "skill",
-    content: [`# Skill: ${skill.name}`, "", skill.body].join("\n"),
   }
 }
 

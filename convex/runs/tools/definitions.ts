@@ -2,6 +2,7 @@ import {
   getToolPermissionsByProvider,
   type ToolProvider,
 } from "../../permissions/catalog"
+import { emptyObjectSchema, getToolInputSchema } from "./schemas"
 
 export type McpToolDefinition = {
   name: string
@@ -13,10 +14,6 @@ export function getProviderToolDefinitions(provider: ToolProvider) {
   return getToolPermissionsByProvider(provider).map((permission) => ({
     name: permission.tool,
     description: permission.description,
-    inputSchema: {
-      type: "object",
-      additionalProperties: true,
-      properties: {},
-    },
+    inputSchema: getToolInputSchema(permission.tool) ?? emptyObjectSchema(),
   })) satisfies McpToolDefinition[]
 }

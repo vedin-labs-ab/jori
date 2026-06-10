@@ -1,0 +1,82 @@
+import {
+  numberProperty,
+  objectProperty,
+  objectSchema,
+  type SchemaMap,
+  stringArrayProperty,
+  stringProperty,
+} from "./common"
+
+export const microsoftToolInputSchemas = {
+  microsoft_email_search_messages: objectSchema({
+    properties: {
+      folderId: stringProperty("Optional mail folder ID."),
+      q: stringProperty("Microsoft Graph message search string."),
+      top: numberProperty("Maximum messages to return.", 1, 25),
+    },
+  }),
+  microsoft_email_get_message: objectSchema({
+    required: ["messageId"],
+    properties: {
+      messageId: stringProperty("Outlook message ID."),
+    },
+  }),
+  microsoft_email_send_message: microsoftMessageSchema({
+    saveToSentItems: { type: "boolean" },
+  }),
+  microsoft_email_create_draft: microsoftMessageSchema(),
+  microsoft_email_update_message: objectSchema({
+    required: ["messageId", "message"],
+    properties: {
+      message: objectProperty("Partial Microsoft Graph message payload."),
+      messageId: stringProperty("Outlook message or draft ID."),
+    },
+  }),
+  microsoft_calendar_list_events: objectSchema({
+    properties: {
+      timeMax: stringProperty("Upper bound ISO timestamp."),
+      timeMin: stringProperty("Lower bound ISO timestamp."),
+      top: numberProperty("Maximum events to return.", 1, 50),
+    },
+  }),
+  microsoft_calendar_get_event: objectSchema({
+    required: ["eventId"],
+    properties: {
+      eventId: stringProperty("Microsoft Graph event ID."),
+    },
+  }),
+  microsoft_calendar_create_event: microsoftCalendarWriteSchema(["event"]),
+  microsoft_calendar_update_event: microsoftCalendarWriteSchema(
+    ["eventId", "event"],
+    { eventId: stringProperty("Microsoft Graph event ID.") }
+  ),
+} satisfies SchemaMap
+
+function microsoftMessageSchema(properties: Record<string, unknown> = {}) {
+  return objectSchema({
+    required: ["to", "subject", "body"],
+    properties: {
+      bcc: stringArrayProperty("BCC recipient email addresses."),
+      body: stringProperty("Message body."),
+      bodyType: { type: "string", enum: ["Text", "HTML"] },
+      cc: stringArrayProperty("CC recipient email addresses."),
+      subject: stringProperty("Message subject."),
+      to: stringArrayProperty("Recipient email addresses."),
+      ...properties,
+    },
+  })
+}
+
+function microsoftCalendarWriteSchema(
+  required: string[],
+  properties: Record<string, unknown> = {}
+) {
+  return objectSchema({
+    required,
+    properties: {
+      event: objectProperty("Microsoft Graph event payload."),
+      sendUpdates: { type: "string", enum: ["all", "none"] },
+      ...properties,
+    },
+  })
+}

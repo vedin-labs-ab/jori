@@ -104,6 +104,10 @@ test("keeps provider credentials out of sandbox MCP config", () => {
     expect(config).not.toContain(secret)
   }
 
+  expect(config).toContain(
+    'enabled_tools = ["search_schedules", "read_schedule", "add_schedule", "update_schedule", "delete_schedule"]'
+  )
+
   for (const server of toolBundle.mcpServers) {
     expect(server.env).not.toHaveProperty("MILO_SLACK_BOT_TOKEN")
     expect(server.env).not.toHaveProperty("MILO_SLACK_USER_TOKEN")

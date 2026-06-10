@@ -43,7 +43,8 @@ describe("runtime integration bundles", () => {
     ).not.toContain("Gmail")
     expect(prompt.skillIds).toEqual(["scheduling", "email-style"])
     expect(prompt.rendered).not.toContain("google_gmail_search_threads")
-    expect(prompt.rendered).toContain("Keep email concise.")
+    expect(prompt.rendered).not.toContain("Keep email concise.")
+    expect(prompt.rendered).toContain(".agents/skills")
   })
 })
 

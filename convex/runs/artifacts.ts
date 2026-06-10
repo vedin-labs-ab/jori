@@ -4,7 +4,8 @@ import { type ActionCtx } from "../_generated/server"
 import { resolveToolModes } from "../permissions/catalog"
 import { filterRuntimeSkillsForBundle } from "./bundles"
 import { type CodexRuntimeInput } from "./codex"
-import { assemblePrompt, type RuntimeSkill } from "./prompt"
+import { assemblePrompt } from "./prompt"
+import { createSkillSandboxFiles } from "./skills"
 import { assembleToolsForRun } from "./tools"
 
 export async function createPromptedExecution(
@@ -20,7 +21,23 @@ export async function createPromptedExecution(
     tenantId: input.trigger.tenantId,
   })
   const toolBundle = await assembleRuntimeTools(ctx, args)
-  const promptBundle = assembleRuntimePrompt(input, skills, toolBundle)
+  const runtimeSkills = filterRuntimeSkillsForBundle(
+    skills,
+    toolBundle.skillNames
+  )
+  const runtimeToolBundle = {
+    ...toolBundle,
+    sandboxFiles: [
+      ...toolBundle.sandboxFiles,
+      ...createSkillSandboxFiles(runtimeSkills),
+    ],
+  }
+  const promptBundle = assemblePrompt(
+    input,
+    runtimeSkills,
+    runtimeToolBundle.promptedTools,
+    runtimeToolBundle.capabilities
+  )
   const executionId = await createExecution(ctx, {
     triggerId: input.trigger._id,
     prompt: promptBundle.rendered,
@@ -33,7 +50,7 @@ export async function createPromptedExecution(
   return {
     id: executionId,
     prompt: promptBundle.rendered,
-    toolBundle,
+    toolBundle: runtimeToolBundle,
   }
 }
 
@@ -61,19 +78,6 @@ async function assembleRuntimeTools(
     integrations: args.input.integrations,
     toolModes,
   })
-}
-
-function assembleRuntimePrompt(
-  input: CodexRuntimeInput,
-  skills: RuntimeSkill[],
-  toolBundle: ReturnType<typeof assembleToolsForRun>
-) {
-  return assemblePrompt(
-    input,
-    filterRuntimeSkillsForBundle(skills, toolBundle.skillNames),
-    toolBundle.promptedTools,
-    toolBundle.capabilities
-  )
 }
 
 async function createExecution(

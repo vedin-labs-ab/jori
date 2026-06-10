@@ -36,11 +36,16 @@ export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {
 }
 
 function renderMcpServerConfig(server: McpServerConfig) {
+  const enabledTools = server.env.MILO_ENABLED_TOOLS?.split(",").filter(Boolean)
+
   return [
     `[mcp_servers.${server.name}]`,
     `command = ${tomlString(server.command)}`,
     `args = ${tomlArray(server.args)}`,
     "required = true",
+    ...(enabledTools === undefined || enabledTools.length === 0
+      ? []
+      : [`enabled_tools = ${tomlArray(enabledTools)}`]),
     'default_tools_approval_mode = "approve"',
     "startup_timeout_sec = 30",
     "tool_timeout_sec = 30",
