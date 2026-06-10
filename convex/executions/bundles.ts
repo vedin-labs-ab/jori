@@ -5,7 +5,7 @@ import { type RuntimeToolCapability } from "./tools/types"
 const providerMetadata = {
   milo: {
     label: "Schedules",
-    skillNames: ["scheduling"],
+    skillNames: [],
   },
   slack: {
     label: "Slack",
@@ -13,31 +13,31 @@ const providerMetadata = {
   },
   linear: {
     label: "Linear",
-    skillNames: ["linear"],
+    skillNames: [],
   },
   github: {
     label: "GitHub",
-    skillNames: ["github"],
+    skillNames: [],
   },
   gmail: {
     label: "Gmail",
-    skillNames: ["gmail"],
+    skillNames: [],
   },
   googleCalendar: {
     label: "Google Calendar",
-    skillNames: ["calendar"],
+    skillNames: [],
   },
   notion: {
     label: "Notion",
-    skillNames: ["notion"],
+    skillNames: [],
   },
   microsoftEmail: {
     label: "Outlook Mail",
-    skillNames: ["microsoft"],
+    skillNames: [],
   },
   microsoftCalendar: {
     label: "Microsoft Calendar",
-    skillNames: ["microsoft"],
+    skillNames: [],
   },
 } satisfies Record<
   ToolProvider,

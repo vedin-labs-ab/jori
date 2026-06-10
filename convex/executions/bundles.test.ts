@@ -10,7 +10,7 @@ import { type RuntimeSkill } from "./skills"
 import { assembleToolsForRun } from "./tools"
 
 describe("runtime integration bundles", () => {
-  test("omits built-in provider skills when every provider tool is blocked", () => {
+  test("omits Slack formatting skill when Slack tools are unavailable", () => {
     const toolModes = resolveToolModes(
       getToolPermissionsByProvider("gmail").map((permission) => ({
         tool: permission.tool,
@@ -27,8 +27,7 @@ describe("runtime integration bundles", () => {
     })
     const promptSkills = filterRuntimeSkillsForBundle(
       [
-        runtimeSkill("gmail", null, "Use google_gmail_search_threads."),
-        runtimeSkill("scheduling", null, "Use add_schedule."),
+        runtimeSkill("slack", null, "Use Slack mrkdwn formatting."),
         runtimeSkill("email-style", "tenant", "Keep email concise."),
       ],
       toolBundle.skillNames
@@ -38,15 +37,12 @@ describe("runtime integration bundles", () => {
     expect(toolBundle.mcpServers.map((server) => server.name)).not.toContain(
       "gmail"
     )
-    expect(toolBundle.skillNames).not.toContain("gmail")
+    expect(toolBundle.skillNames).not.toContain("slack")
     expect(
       toolBundle.capabilities.map((capability) => capability.label)
     ).not.toContain("Gmail")
-    expect(promptSkills.map((skill) => skill.name)).toEqual([
-      "scheduling",
-      "email-style",
-    ])
-    expect(prompt).not.toContain("google_gmail_search_threads")
+    expect(promptSkills.map((skill) => skill.name)).toEqual(["email-style"])
+    expect(prompt).not.toContain("Use Slack mrkdwn formatting.")
     expect(prompt).not.toContain("Keep email concise.")
     expect(prompt).not.toContain("# Skills")
   })
@@ -65,7 +61,7 @@ describe("runtime active integration availability", () => {
     const promptSkills = filterRuntimeSkillsForBundle(
       [
         runtimeSkill("slack", null, "Use conversations_history."),
-        runtimeSkill("notion", null, "Use notion_search."),
+        runtimeSkill("team-style", "tenant", "Prefer concise status updates."),
       ],
       toolBundle.skillNames
     )
@@ -79,7 +75,10 @@ describe("runtime active integration availability", () => {
     )
     expect(toolBundle.skillNames).toContain("slack")
     expect(toolBundle.skillNames).not.toContain("notion")
-    expect(promptSkills.map((skill) => skill.name)).toEqual(["slack"])
+    expect(promptSkills.map((skill) => skill.name)).toEqual([
+      "slack",
+      "team-style",
+    ])
     expect(
       toolBundle.capabilities.map((capability) => capability.label)
     ).toEqual(["Schedules", "Slack"])
@@ -114,7 +113,7 @@ describe("runtime native tool availability metadata", () => {
 })
 
 describe("runtime shared provider bundles", () => {
-  test("deduplicates shared provider skills when any bundled tool remains", () => {
+  test("does not attach built-in skills to non-Slack providers", () => {
     const toolBundle = assembleToolsForRun({
       milo: {
         convexSiteUrl: "https://convex.example",
@@ -127,9 +126,10 @@ describe("runtime shared provider bundles", () => {
       toolModes: resolveToolModes([]),
     })
 
+    expect(toolBundle.skillNames).toEqual([])
     expect(
-      toolBundle.skillNames.filter((skillName) => skillName === "microsoft")
-    ).toHaveLength(1)
+      toolBundle.capabilities.map((capability) => capability.label)
+    ).toEqual(["Schedules", "Outlook Mail", "Microsoft Calendar"])
   })
 })
 
