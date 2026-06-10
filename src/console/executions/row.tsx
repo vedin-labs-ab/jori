@@ -7,7 +7,8 @@ import {
   ExecutionDetails,
 } from "./details"
 import { formatDuration, relativeTime, statusCopy } from "./format"
-import { ApprovalBadge, MetaPill, StatusBadge, StatusIcon } from "./status"
+import { SourceParts } from "./source"
+import { ApprovalBadge, MetaPill, StatusIcon } from "./status"
 import { type ExecutionItem } from "./types"
 
 export function ExecutionRow({
@@ -46,11 +47,7 @@ function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
   return (
     <div className="min-w-0">
       <div className="truncate font-medium text-sm">{execution.title}</div>
-      <div className="flex flex-wrap gap-x-2 gap-y-1 text-muted-foreground text-xs">
-        {execution.sourceParts.map((part) => (
-          <span key={part}>{part}</span>
-        ))}
-      </div>
+      <SourceParts parts={execution.sourceParts} />
     </div>
   )
 }
@@ -66,7 +63,6 @@ function ExecutionMeta({
 }) {
   return (
     <div className="col-span-2 flex flex-wrap items-center gap-3 justify-self-start md:col-span-1 md:justify-self-end">
-      <StatusBadge status={execution.status} />
       {execution.approval?.state === "pending" ? (
         <ApprovalBadge expiresAt={execution.approval.expiresAt} now={now} />
       ) : null}
@@ -91,7 +87,7 @@ function ExpandedExecution({
     <div className="grid gap-0 border-t px-3 pb-3">
       <DetailLine
         icon={Target}
-        label="Objective"
+        label="Prompt"
         value={execution.objective ?? execution.title}
       />
       <DetailLine

@@ -1,6 +1,5 @@
-import { Link } from "@tanstack/react-router"
 import { usePaginatedQuery } from "convex/react"
-import { Loader2, Play, Search, SlidersHorizontal } from "lucide-react"
+import { Loader2, Search, SlidersHorizontal } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -58,27 +57,19 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
 
 function ExecutionsHeader() {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div className="grid gap-1">
-        <div className="flex items-center gap-2">
-          <h1 className="font-medium text-2xl tracking-normal">Executions</h1>
-          <Badge
-            variant="outline"
-            className="border-emerald-700/20 bg-emerald-700/10 text-emerald-800"
-          >
-            Live
-          </Badge>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Agent runs for this workspace.
-        </p>
+    <div className="grid gap-1">
+      <div className="flex items-center gap-2">
+        <h1 className="font-medium text-2xl tracking-normal">Executions</h1>
+        <Badge
+          variant="outline"
+          className="border-emerald-700/20 bg-emerald-700/10 text-emerald-800"
+        >
+          Live
+        </Badge>
       </div>
-      <Button asChild>
-        <Link to="/playground">
-          <Play data-icon="inline-start" />
-          Run execution
-        </Link>
-      </Button>
+      <p className="text-sm text-muted-foreground">
+        Agent runs for this workspace.
+      </p>
     </div>
   )
 }

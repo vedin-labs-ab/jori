@@ -17,18 +17,6 @@ export function matchesFilter(row: ExecutionItem, filter: FilterValue) {
   return row.status === filter
 }
 
-export function statusLabel(status: ExecutionStatus) {
-  const labels = {
-    completed: "Completed",
-    failed: "Failed",
-    queued: "Queued",
-    running: "Running",
-    stopped: "Stopped",
-  } satisfies Record<ExecutionStatus, string>
-
-  return labels[status]
-}
-
 export function statusCopy(
   status: ExecutionStatus,
   approvalState: ApprovalState | undefined

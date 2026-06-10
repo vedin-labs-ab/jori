@@ -8,23 +8,15 @@ import {
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { formatDuration, statusLabel } from "./format"
+import { formatDuration } from "./format"
 import { type ExecutionStatus } from "./types"
 
-const statusClasses = {
-  completed: "bg-emerald-700/10 text-emerald-800",
-  failed: "bg-red-700/10 text-red-800",
-  queued: "bg-muted text-muted-foreground",
-  running: "bg-emerald-700/10 text-emerald-800",
-  stopped: "bg-muted text-muted-foreground",
-} satisfies Record<ExecutionStatus, string>
-
-const statusIconBorders = {
-  completed: "border-emerald-700/20",
-  failed: "border-red-700/20",
-  queued: "border-muted",
-  running: "border-emerald-700/20",
-  stopped: "border-muted",
+const statusIconClasses = {
+  completed: "text-emerald-800",
+  failed: "text-red-800",
+  queued: "text-muted-foreground",
+  running: "text-emerald-800",
+  stopped: "text-muted-foreground",
 } satisfies Record<ExecutionStatus, string>
 
 export function StatusIcon({ status }: { status: ExecutionStatus }) {
@@ -39,25 +31,7 @@ export function StatusIcon({ status }: { status: ExecutionStatus }) {
             ? Clock3
             : Circle
 
-  return (
-    <span
-      className={cn(
-        "inline-flex size-8 items-center justify-center rounded-full border",
-        statusClasses[status],
-        statusIconBorders[status]
-      )}
-    >
-      <Icon className="size-4" />
-    </span>
-  )
-}
-
-export function StatusBadge({ status }: { status: ExecutionStatus }) {
-  return (
-    <Badge variant="secondary" className={statusClasses[status]}>
-      {statusLabel(status)}
-    </Badge>
-  )
+  return <Icon className={cn("size-4", statusIconClasses[status])} />
 }
 
 export function ApprovalBadge({
