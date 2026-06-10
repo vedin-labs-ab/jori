@@ -55,7 +55,11 @@ export async function handleSlackApprovalInteraction(
   const interaction = parseSlackApprovalInteraction(payload)
 
   if (interaction === null) {
-    return Response.json({ ok: true })
+    return okResponse()
+  }
+
+  if (interaction.responseUrl === undefined) {
+    return okResponse()
   }
 
   const result = await decideSlackApproval(ctx, {
@@ -68,17 +72,9 @@ export async function handleSlackApprovalInteraction(
   })
   const response = createSlackDecisionResponse(interaction, result)
 
-  if (interaction.responseUrl !== undefined) {
-    try {
-      await postSlackInteractionResponse(interaction.responseUrl, response)
+  await postSlackInteractionResponse(interaction.responseUrl, response)
 
-      return Response.json({ ok: true })
-    } catch {
-      return Response.json(response)
-    }
-  }
-
-  return Response.json(response)
+  return okResponse()
 }
 
 function parseApprovalDecision(text: string | undefined) {
@@ -195,6 +191,10 @@ function readString(data: unknown, key: string) {
   const value = data[key as keyof typeof data]
 
   return typeof value === "string" && value !== "" ? value : undefined
+}
+
+function okResponse() {
+  return new Response(null, { status: 200 })
 }
 
 function readNestedString(value: unknown, key: string) {
