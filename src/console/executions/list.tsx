@@ -54,10 +54,11 @@ function ExecutionsHeader() {
     <div className="grid gap-1">
       <div className="flex items-center gap-2">
         <h1 className="font-medium text-2xl tracking-normal">Executions</h1>
-        <Badge
-          variant="outline"
-          className="border-emerald-700/20 bg-emerald-700/10 text-emerald-800"
-        >
+        <Badge variant="outline">
+          <span className="relative flex size-1.5">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+            <span className="relative inline-flex size-1.5 rounded-full bg-emerald-600" />
+          </span>
           Live
         </Badge>
       </div>
