@@ -1,14 +1,12 @@
-import { promptTemplates } from "../../../prompts/generated"
 import { type McpToolDefinition } from "../definitions"
 
 export function createMiloMcpScript(args: { tools: McpToolDefinition[] }) {
   return miloMcpScript({
-    instructions: promptTemplates["tools/scheduling"],
     toolsJson: JSON.stringify(args.tools),
   })
 }
 
-function miloMcpScript(args: { instructions: string; toolsJson: string }) {
+function miloMcpScript(args: { toolsJson: string }) {
   return `
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -21,13 +19,12 @@ import {
 
 const convexSiteUrl = requiredEnv("MILO_CONVEX_SITE_URL");
 const executionToken = requiredEnv("MILO_EXECUTION_TOKEN");
-const instructions = ${JSON.stringify(args.instructions)};
 const allTools = ${args.toolsJson};
 const tools = filterEnabledTools(allTools);
 
 const server = new Server(
   { name: "milo", version: "0.0.0" },
-  { capabilities: { tools: {} }, instructions },
+  { capabilities: { tools: {} } },
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools }));
