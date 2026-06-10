@@ -3,6 +3,7 @@ import { type SlackApprovalDecisionResult } from "../../approvals/runtime"
 import {
   createSlackApprovalRequest,
   createSlackDecisionResponse,
+  createSlackExpirationResponse,
 } from "./approvalBlocks"
 import { parseSlackApprovalInteraction } from "./approvals"
 
@@ -111,4 +112,31 @@ test("replaces Slack approval buttons with a decision summary", () => {
   expect(rendered).not.toContain("ABC12345")
   expect(rendered).not.toContain("Expires in")
   expect(rendered).not.toContain('"type":"actions"')
+})
+
+test("renders expired Slack approvals without actions", () => {
+  const response = createSlackExpirationResponse({
+    tool: "notion_create_page",
+    summary: "Create a new Notion page under Customer Discovery.",
+    expiresAt: 1_710_000_000_000,
+  })
+  const rendered = JSON.stringify(response)
+  const card = response.blocks[0] as Record<string, unknown>
+
+  expect(response.replace_original).toBe(true)
+  expect(card.slack_icon).toEqual({ type: "icon", name: "archive" })
+  expect(card.title).toMatchObject({
+    type: "mrkdwn",
+    text: "Approval expired",
+  })
+  expect(card.subtitle).toMatchObject({
+    type: "mrkdwn",
+    text: "Create Notion page",
+  })
+  expect(rendered).toContain(
+    "Create a new Notion page under Customer Discovery."
+  )
+  expect(rendered).toContain("Expired at <!date^1710000000^{time}|")
+  expect(rendered).not.toContain("Expires at")
+  expect(rendered).not.toContain('"actions"')
 })

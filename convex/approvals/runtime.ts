@@ -2,8 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
+import { createSlackExpirationResponse } from "../providers/slack/approvalBlocks"
 import { type Actor } from "../schemas/actors"
-import { postSlackMessage } from "../tools/providers/slack"
+import { postSlackMessage, updateSlackMessage } from "../tools/providers/slack"
 
 export type SlackApprovalDecisionArgs = {
   accountId: string
@@ -40,6 +41,39 @@ export const handleSlackDecision = internalAction({
     }
 
     await postSlackDecisionMessage(result.integration, args, result.message)
+  },
+})
+
+export const expireApproval = internalAction({
+  args: {
+    approvalId: v.id("approvals"),
+  },
+  handler: async (ctx, args) => {
+    const target = await ctx.runQuery(
+      internal.approvals.approvals.getExpirationTarget,
+      {
+        approvalId: args.approvalId,
+      }
+    )
+
+    if (target === null || target.integration === null) {
+      return
+    }
+
+    const delivery = target.approval.delivery
+
+    if (delivery?.provider !== "slack") {
+      return
+    }
+
+    const response = createSlackExpirationResponse(target.approval)
+
+    await updateSlackMessage(target.integration, {
+      channel: delivery.data.channelId,
+      ts: delivery.data.messageTs,
+      text: response.text,
+      blocks: response.blocks,
+    })
   },
 })
 

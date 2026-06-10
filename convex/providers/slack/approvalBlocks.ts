@@ -1,6 +1,7 @@
 import { type SlackApprovalDecisionResult } from "../../approvals/runtime"
 import { type SlackBlock } from "../../tools/providers/slack"
 import { type Provider } from "../catalog"
+import { getToolLabel } from "./approvalLabels"
 
 export type SlackApprovalInteraction = {
   accountId: string
@@ -33,10 +34,26 @@ export function createSlackDecisionResponse(
   interaction: SlackApprovalInteraction,
   result: SlackApprovalDecisionResult
 ) {
+  if (result.status === "expired" && result.approval !== undefined) {
+    return createSlackExpirationResponse(result.approval)
+  }
+
   return {
     replace_original: true,
     text: createDecisionFallbackText(result),
     blocks: createDecisionBlocks(interaction, result),
+  }
+}
+
+export function createSlackExpirationResponse(args: {
+  tool: string
+  summary: string
+  expiresAt: number
+}) {
+  return {
+    replace_original: true,
+    text: "Approval expired. Milo will not run this action.",
+    blocks: createExpirationBlocks(args),
   }
 }
 
@@ -57,6 +74,24 @@ function createSlackApprovalBlocks(args: {
         toSlackTimestamp(args.expiresAt)
       )}`,
       actions: createApprovalActions(args.code),
+    }),
+  ]
+}
+
+function createExpirationBlocks(args: {
+  tool: string
+  summary: string
+  expiresAt: number
+}): SlackBlock[] {
+  return [
+    createApprovalCard({
+      icon: "archive",
+      title: "Approval expired",
+      subtitle: getToolLabel(args.tool),
+      body: truncateSlackText(args.summary, 2800),
+      subtext: `Expired at ${formatSlackTime(
+        toSlackTimestamp(args.expiresAt)
+      )}`,
     }),
   ]
 }
@@ -204,72 +239,8 @@ function toSlackTimestamp(timestampMs: number) {
   return Math.floor(timestampMs / 1000)
 }
 
-function getToolLabel(tool: string) {
-  return toolLabels[tool] ?? humanizeToolName(tool)
-}
-
-function humanizeToolName(tool: string) {
-  return tool
-    .split("_")
-    .filter((part) => part !== "")
-    .map((part) => `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`)
-    .join(" ")
-}
-
 function truncateSlackText(value: string, maximumLength: number) {
   return value.length <= maximumLength
     ? value
     : `${value.slice(0, maximumLength - 3)}...`
-}
-
-const toolLabels: Record<string, string> = {
-  add_schedule: "Add schedule",
-  channels_list: "List Slack channels",
-  conversations_add_message: "Send Slack message",
-  conversations_history: "Read Slack channel history",
-  conversations_replies: "Read Slack thread replies",
-  conversations_search_messages: "Search Slack messages",
-  delete_schedule: "Delete schedule",
-  google_calendar_create_event: "Create Google Calendar event",
-  google_calendar_get_event: "Read Google Calendar event",
-  google_calendar_list_events: "List Google Calendar events",
-  google_calendar_update_event: "Update Google Calendar event",
-  google_gmail_get_message: "Read Gmail message",
-  google_gmail_get_thread: "Read Gmail thread",
-  google_gmail_reply_to_thread: "Reply to Gmail thread",
-  google_gmail_search_threads: "Search Gmail threads",
-  github_add_issue_comment: "Add GitHub issue comment",
-  github_clone_repository: "Clone GitHub repository",
-  github_get_file: "Read GitHub file",
-  github_get_issue: "Read GitHub issue",
-  github_get_pull_request: "Read GitHub pull request",
-  github_get_repository: "Read GitHub repository",
-  github_list_repositories: "List GitHub repositories",
-  github_search_issues: "Search GitHub issues and pull requests",
-  linear_add_comment: "Add Linear comment",
-  linear_get_issue: "Read Linear issue",
-  linear_list_comments: "Read Linear comments",
-  linear_search_issues: "Search Linear issues",
-  microsoft_calendar_create_event: "Create Microsoft Calendar event",
-  microsoft_calendar_get_event: "Read Microsoft Calendar event",
-  microsoft_calendar_list_events: "List Microsoft Calendar events",
-  microsoft_calendar_update_event: "Update Microsoft Calendar event",
-  microsoft_email_create_draft: "Create Outlook draft",
-  microsoft_email_get_message: "Read Outlook message",
-  microsoft_email_search_messages: "Search Outlook messages",
-  microsoft_email_send_message: "Send Outlook email",
-  microsoft_email_update_message: "Update Outlook message",
-  notion_append_block_children: "Append Notion blocks",
-  notion_create_comment: "Add Notion comment",
-  notion_create_page: "Create Notion page",
-  notion_get_block_children: "Read Notion page content",
-  notion_get_page: "Read Notion page",
-  notion_list_comments: "Read Notion comments",
-  notion_query_data_source: "Query Notion data source",
-  notion_search: "Search Notion",
-  notion_update_page: "Update Notion page",
-  read_schedule: "Read schedule",
-  search_schedules: "Search schedules",
-  update_schedule: "Update schedule",
-  users_search: "Search Slack users",
 }
