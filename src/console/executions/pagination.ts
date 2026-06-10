@@ -41,17 +41,18 @@ export function useExecutionPagination(
     setPageIndex,
   })
 
-  const shownThrough = pageIndex * pageSize + visibleRows.length
   const hasFilters = filter !== "all" || normalizedQuery !== ""
+  const footerLabel = formatFooterLabel({
+    filteredTotal,
+    hasFilters,
+    pageIndex,
+    totalCount,
+    visibleCount: visibleRows.length,
+  })
 
   return {
     canGoNext: canUseNextLoadedPage || canLoadMore,
-    footerLabel: formatFooterLabel({
-      filteredTotal,
-      hasFilters,
-      shownThrough,
-      totalCount,
-    }),
+    footerLabel,
     hasFilters,
     isLoadingFirstPage: executions.status === "LoadingFirstPage",
     isLoadingMore,
@@ -76,19 +77,24 @@ export type ExecutionPagination = ReturnType<typeof useExecutionPagination>
 function formatFooterLabel({
   filteredTotal,
   hasFilters,
-  shownThrough,
+  pageIndex,
   totalCount,
+  visibleCount,
 }: {
   filteredTotal: number
   hasFilters: boolean
-  shownThrough: number
+  pageIndex: number
   totalCount: number
+  visibleCount: number
 }) {
+  const rangeStart = visibleCount === 0 ? 0 : pageIndex * pageSize + 1
+  const rangeEnd = pageIndex * pageSize + visibleCount
+
   if (hasFilters) {
-    return `Showing ${shownThrough}/${filteredTotal} of ${totalCount} total`
+    return `Showing items ${rangeStart}-${rangeEnd} of ${filteredTotal} matching (${totalCount} total)`
   }
 
-  return `Showing ${shownThrough}/${totalCount} total`
+  return `Showing items ${rangeStart}-${rangeEnd} of ${totalCount} total`
 }
 
 function usePageBounds(
