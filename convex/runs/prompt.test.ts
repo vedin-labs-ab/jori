@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
+import { createApprovalContinuationPrompt } from "./continuation"
 import { assemblePrompt } from "./prompt"
 
 describe("runtime prompts", () => {
@@ -58,6 +59,19 @@ describe("runtime prompts", () => {
   })
 })
 
+describe("approval continuation prompts", () => {
+  test("renders continuation context", () => {
+    const prompt = createApprovalContinuationPrompt(approvalContinuation())
+
+    expect(prompt).toContain("# Approval Continuation")
+    expect(prompt).toContain("Create the calendar event")
+    expect(prompt).toContain("Found a time")
+    expect(prompt).toContain("google_calendar_create_event")
+    expect(prompt).toContain('"eventId": "event-123"')
+    expect(prompt).toContain("Do not repeat the approved tool call")
+  })
+})
+
 function runtimeInput(provider: "github" | "linear" | "slack", data: unknown) {
   return {
     type: "message",
@@ -100,4 +114,21 @@ function integration(provider: string): Doc<"integrations"> {
     status: "active",
     createdAt: 0,
   } as Doc<"integrations">
+}
+
+function approvalContinuation() {
+  return {
+    handoff: {
+      objective: "Create the calendar event and confirm it in Slack.",
+      progress: "Found a time that works for the attendees.",
+      next: "Tell the Slack thread the event was created.",
+    },
+    action: {
+      provider: "googleCalendar",
+      tool: "google_calendar_create_event",
+      summary: "Create a 30 minute design review.",
+      args: { title: "Design review" },
+    },
+    result: { eventId: "event-123" },
+  }
 }

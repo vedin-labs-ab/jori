@@ -83,6 +83,7 @@ import type * as providers_slack_signing from "../providers/slack/signing.js";
 import type * as runs_artifacts from "../runs/artifacts.js";
 import type * as runs_bundles from "../runs/bundles.js";
 import type * as runs_codex from "../runs/codex.js";
+import type * as runs_continuation from "../runs/continuation.js";
 import type * as runs_data from "../runs/data.js";
 import type * as runs_executions from "../runs/executions.js";
 import type * as runs_instructions from "../runs/instructions.js";
@@ -244,6 +245,7 @@ declare const fullApi: ApiFromModules<{
   "runs/artifacts": typeof runs_artifacts;
   "runs/bundles": typeof runs_bundles;
   "runs/codex": typeof runs_codex;
+  "runs/continuation": typeof runs_continuation;
   "runs/data": typeof runs_data;
   "runs/executions": typeof runs_executions;
   "runs/instructions": typeof runs_instructions;

@@ -4,6 +4,11 @@ import { providerValidator } from "../providers/catalog"
 import { actorValidator } from "./actors"
 
 const approvalDecision = v.union(v.literal("approved"), v.literal("denied"))
+const approvalHandoff = v.object({
+  objective: v.string(),
+  progress: v.string(),
+  next: v.string(),
+})
 
 export const approvals = defineTable({
   tenantId: v.string(),
@@ -12,6 +17,7 @@ export const approvals = defineTable({
   tool: v.string(),
   args: v.any(),
   summary: v.string(),
+  handoff: approvalHandoff,
   code: v.string(),
   requestedBy: actorValidator,
   decidedBy: v.optional(actorValidator),
