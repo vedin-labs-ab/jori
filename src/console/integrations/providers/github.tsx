@@ -58,15 +58,15 @@ export function GitHubConnection({
 function getGitHubAccountLabel(
   status:
     | {
-        accountLogin?: string
+        name?: string
         accountType?: string
       }
     | null
     | undefined
 ) {
-  if (status?.accountLogin !== undefined) {
+  if (status?.name !== undefined) {
     return status.accountType === undefined
-      ? status.accountLogin
-      : `${status.accountLogin} (${status.accountType})`
+      ? status.name
+      : `${status.name} (${status.accountType})`
   }
 }

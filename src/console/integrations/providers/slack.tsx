@@ -44,7 +44,7 @@ export function SlackConnection({
         status,
         slackConfig.label,
         "No workspace connected",
-        status?.teamName
+        status?.name
       )}
       permissions={permissions}
       status={status}

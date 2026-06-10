@@ -1,30 +1,11 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
-import {
-  getGitHubAccountLogin,
-  getGitHubAccountType,
-} from "../providers/github/data"
+import { getGitHubAccountType } from "../providers/github/data"
 import { type GoogleSurfaceProvider } from "../providers/google/config"
-import { getGoogleEmail, getGoogleName } from "../providers/google/data"
-import {
-  getLinearOrganizationName,
-  getLinearOrganizationUrlKey,
-} from "../providers/linear/data"
 import { type MicrosoftSurfaceProvider } from "../providers/microsoft/config"
-import {
-  getMicrosoftConnectedUser,
-  getMicrosoftEmail,
-  getMicrosoftTenantName,
-} from "../providers/microsoft/data"
-import {
-  getNotionBotId,
-  getNotionOwnerEmail,
-  getNotionOwnerName,
-  getNotionWorkspaceIcon,
-  getNotionWorkspaceName,
-} from "../providers/notion/data"
-import { getSlackTeamName } from "../providers/slack/data"
+import { getMicrosoftTenantName } from "../providers/microsoft/data"
+import { getNotionBotId, getNotionOwnerEmail } from "../providers/notion/data"
 import { getTenantIntegration, getUserIntegration } from "./data"
 
 export const getSlackStatus = query({
@@ -46,7 +27,6 @@ export const getSlackStatus = query({
       name: integration.name,
       status: integration.status,
       createdAt: integration.createdAt,
-      teamName: getSlackTeamName(integration.data),
     }
   },
 })
@@ -68,10 +48,9 @@ export const getLinearStatus = query({
     return {
       externalId: integration.externalId,
       name: integration.name,
+      url: integration.url,
       status: integration.status,
       createdAt: integration.createdAt,
-      organizationName: getLinearOrganizationName(integration.data),
-      organizationUrlKey: getLinearOrganizationUrlKey(integration.data),
     }
   },
 })
@@ -121,7 +100,6 @@ export const getGitHubStatus = query({
       avatar: integration.avatar,
       status: integration.status,
       createdAt: integration.createdAt,
-      accountLogin: getGitHubAccountLogin(integration.data),
       accountType: getGitHubAccountType(integration.data),
     }
   },
@@ -149,9 +127,6 @@ export const getNotionStatus = query({
       createdAt: integration.createdAt,
       botId: getNotionBotId(integration.data),
       ownerEmail: getNotionOwnerEmail(integration.data),
-      ownerName: getNotionOwnerName(integration.data),
-      workspaceIcon: getNotionWorkspaceIcon(integration.data),
-      workspaceName: getNotionWorkspaceName(integration.data),
     }
   },
 })
@@ -200,8 +175,6 @@ async function getGoogleUserStatus(
     avatar: integration.avatar,
     status: integration.status,
     createdAt: integration.createdAt,
-    fallbackEmail: getGoogleEmail(integration.data),
-    fallbackName: getGoogleName(integration.data),
     scope: "user" as const,
   }
 }
@@ -225,8 +198,6 @@ async function getMicrosoftUserStatus(
     name: integration.name,
     status: integration.status,
     createdAt: integration.createdAt,
-    fallbackEmail: getMicrosoftEmail(integration.data),
-    fallbackName: getMicrosoftConnectedUser(integration.data),
     tenantName: getMicrosoftTenantName(integration.data),
     scope: "user" as const,
   }

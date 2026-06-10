@@ -4,10 +4,6 @@ export function getSlackBotId(data: unknown) {
   return readProviderDataString(data, "botId")
 }
 
-export function getSlackTeamName(data: unknown) {
-  return readProviderDataString(data, "team", "name")
-}
-
 export function getSlackChannelType(data: unknown) {
   return readProviderDataString(data, "channelType")
 }

@@ -86,10 +86,7 @@ export const recordOAuthInstallation = internalMutation({
     }
     const email = getMicrosoftIdentityEmail(args.profile)
     const data = {
-      profile: args.profile,
-      scopes: args.scope,
-      tenant: args.profile.tenant,
-      user: args.profile.user,
+      tenantName: args.profile.tenant.displayName,
     }
     const integrationId = await upsertMicrosoftIntegration(ctx, {
       existing,
@@ -135,10 +132,7 @@ async function upsertMicrosoftIntegration(
       tenantId: string
     }
     data: {
-      profile: unknown
-      scopes: string | undefined
-      tenant: unknown
-      user: unknown
+      tenantName: string | undefined
     }
   }
 ): Promise<Id<"integrations">> {

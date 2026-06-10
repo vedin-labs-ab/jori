@@ -93,7 +93,6 @@ export const recordOAuthInstallation = internalMutation({
         bot: args.botScopes,
         user: args.userScopes,
       },
-      team: args.team,
       botId: args.botId,
     }
 

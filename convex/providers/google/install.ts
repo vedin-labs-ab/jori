@@ -72,13 +72,10 @@ export const recordOAuthInstallation = internalMutation({
       expiresAt: args.expiresAt,
       scope: args.scope,
     }
-    const data = {
-      profile: args.profile,
-    }
-    const values = createGoogleIntegrationValues(args, credentials, data, now)
+    const values = createGoogleIntegrationValues(args, credentials, now)
 
     if (existing !== null) {
-      await ctx.db.patch(existing._id, values)
+      await ctx.db.patch(existing._id, { ...values, data: undefined })
 
       await upsertGoogleIdentity(ctx, args)
 
@@ -114,14 +111,6 @@ function createGoogleIntegrationValues(
     expiresAt: number
     scope: string | undefined
   },
-  data: {
-    profile: {
-      id: string
-      email: string
-      name?: string
-      picture?: string
-    }
-  },
   now: number
 ) {
   return {
@@ -137,7 +126,6 @@ function createGoogleIntegrationValues(
     status: "active" as const,
     createdBy: args.createdBy,
     updatedAt: now,
-    data,
   }
 }
 

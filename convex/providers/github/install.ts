@@ -60,13 +60,12 @@ export const recordInstallation = internalMutation({
       installationId: args.installationId,
     }
     const data = {
-      installationId: args.installationId,
       installationUrl: args.profile.html_url,
       repositorySelection: args.profile.repository_selection,
       permissions: args.profile.permissions,
       events: args.profile.events,
       appSlug: args.profile.app_slug,
-      account: args.profile.account,
+      accountType: args.profile.account?.type,
     }
 
     if (existing !== null) {

@@ -54,7 +54,11 @@ export const recordOAuthInstallation = internalMutation({
       accessToken: args.accessToken,
       refreshToken: args.refreshToken,
     }
-    const data = args.profile
+    const data = {
+      botId: args.profile.botId,
+      owner: args.profile.owner,
+      duplicatedTemplateId: args.profile.duplicatedTemplateId,
+    }
 
     if (existing !== null) {
       await ctx.db.patch(existing._id, {

@@ -46,8 +46,7 @@ export function NotionConnection({
         status,
         notionConfig.label,
         "No workspace connected",
-        status?.workspaceName,
-        status?.ownerName,
+        status?.name,
         status?.ownerEmail
       )}
       permissions={permissions}

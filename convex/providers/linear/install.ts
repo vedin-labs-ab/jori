@@ -61,9 +61,8 @@ export const recordOAuthInstallation = internalMutation({
     }
     const data = {
       appUserId: args.profile.appUserId,
-      appUserName: args.profile.appUserName,
-      organization: args.profile.organization,
     }
+    const url = getLinearUrl(args.profile.organization.urlKey)
 
     if (existing !== null) {
       await ctx.db.patch(existing._id, {
@@ -71,6 +70,7 @@ export const recordOAuthInstallation = internalMutation({
         scope: "tenant",
         externalId: args.profile.organization.id,
         name: args.profile.organization.name,
+        url,
         credentials,
         status: "active",
         createdBy: args.createdBy,
@@ -87,6 +87,7 @@ export const recordOAuthInstallation = internalMutation({
       scope: "tenant",
       externalId: args.profile.organization.id,
       name: args.profile.organization.name,
+      url,
       credentials,
       status: "active",
       createdBy: args.createdBy,
@@ -96,6 +97,10 @@ export const recordOAuthInstallation = internalMutation({
     })
   },
 })
+
+function getLinearUrl(urlKey: string | undefined) {
+  return urlKey === undefined ? undefined : `https://linear.app/${urlKey}`
+}
 
 export const updateOAuthCredentials = internalMutation({
   args: {

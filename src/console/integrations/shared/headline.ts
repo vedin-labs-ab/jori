@@ -3,8 +3,6 @@ import { type ConnectionStatus } from "./card"
 export type AccountStatus = {
   externalId: string
   email?: string
-  fallbackEmail?: string
-  fallbackName?: string
   name?: string
   status: Exclude<ConnectionStatus, undefined>
 } | null
@@ -24,9 +22,7 @@ export function getAccountHeadline(
 
   return (
     status?.name ??
-    status?.fallbackName ??
     status?.email ??
-    status?.fallbackEmail ??
     status?.externalId ??
     `No ${label} connected`
   )

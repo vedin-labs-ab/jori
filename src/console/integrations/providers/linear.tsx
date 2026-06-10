@@ -46,8 +46,8 @@ export function LinearConnection({
         status,
         linearConfig.label,
         "No workspace connected",
-        status?.organizationName,
-        status?.organizationUrlKey
+        status?.name,
+        status?.url
       )}
       permissions={permissions}
       status={status}
