@@ -27,12 +27,12 @@ export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {
   return [
     'cli_auth_credentials_store = "file"',
     'approval_policy = "never"',
-    'sandbox_mode = "danger-full-access"',
+    'sandbox_mode = "read-only"',
     'model = "gpt-5.5"',
     'model_reasoning_effort = "low"',
-    "",
-    "[tools]",
-    "web_search = true",
+    // Hosted Responses web search; runs server-side, so read-only does not
+    // gate it. Must be the top-level key — the [tools] boolean is ignored.
+    'web_search = "live"',
     "",
     ...args.mcpServers.flatMap(renderMcpServerConfig),
   ].join("\n")

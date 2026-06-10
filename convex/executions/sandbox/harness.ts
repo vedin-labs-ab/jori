@@ -45,6 +45,6 @@ export function createCodexCommand() {
   return [
     "set -eu",
     'printf "%s" "$MILO_CODEX_PROMPT_BASE64" | base64 -d > /tmp/milo-prompt.md',
-    "codex exec --json --ephemeral --disable apps --skip-git-repo-check --sandbox danger-full-access - < /tmp/milo-prompt.md",
+    "codex exec --json --ephemeral --disable apps --skip-git-repo-check --sandbox read-only - < /tmp/milo-prompt.md",
   ].join("\n")
 }

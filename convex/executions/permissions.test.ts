@@ -221,6 +221,11 @@ test("keeps provider credentials out of sandbox MCP config", () => {
     expect(config).not.toContain(secret)
   }
 
+  // Codex enables web search only via the top-level string key; the [tools]
+  // boolean form is silently ignored.
+  expect(config).toContain('web_search = "live"')
+  expect(config).toContain('sandbox_mode = "read-only"')
+
   expect(config).toContain(
     'enabled_tools = ["search_schedules", "read_schedule", "add_schedule", "update_schedule", "delete_schedule"]'
   )

@@ -5,6 +5,6 @@ test("disables Codex Apps for sandbox runs", () => {
   expect(createCodexCommand()).toContain("--disable apps")
 })
 
-test("relies on E2B isolation instead of the Codex sandbox", () => {
-  expect(createCodexCommand()).toContain("--sandbox danger-full-access")
+test("runs Codex read-only, leaving E2B as the network boundary", () => {
+  expect(createCodexCommand()).toContain("--sandbox read-only")
 })
