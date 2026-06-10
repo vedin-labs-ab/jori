@@ -136,7 +136,7 @@ function expectRuntimeAssembly({ prompt, skillFiles, toolBundle }: SlackFlow) {
     "Format Slack messages so they feel native to Slack"
   )
   expect(skillFiles[0]?.content).toContain(
-    "Choose the format around the user's goal"
+    "Match the format to the outcome the user needs"
   )
   expect(toolBundle.sandboxFiles.map((file) => file.path)).toContain(
     "/home/user/milo-workspace/milo-slack-mcp.mjs"

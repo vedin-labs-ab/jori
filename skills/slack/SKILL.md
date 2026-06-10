@@ -14,12 +14,10 @@ Format Slack messages so they feel native to Slack:
   link, mention, or date syntax.
 - When replying to a message, reply in its thread: set `thread_ts` to the
   thread timestamp, or to the message timestamp to start one.
-- Choose the format around the user's goal and the reader's next action. Use
-  plain `text` when that is enough; use Block Kit `blocks`
-  (https://docs.slack.dev/reference/block-kit/blocks) when native Slack
-  structure makes the answer easier to understand or act on.
-- When the user asks for a specific layout or presentation, use the closest
-  Slack-native representation instead of simulating it with Markdown or code
-  fences. Include concise fallback `text` whenever sending `blocks`.
+- Match the format to the outcome the user needs. Use plain `text` for direct
+  replies; use Slack-native `blocks`
+  (https://docs.slack.dev/reference/block-kit/blocks) when structure,
+  hierarchy, or a requested presentation makes the answer clearer, easier to
+  scan, or easier to act on. Include concise fallback `text` with `blocks`.
 - Skip interactive elements like buttons, inputs, and menus.
 - Never use `card` blocks.
