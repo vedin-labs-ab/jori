@@ -14,7 +14,7 @@ const statusIconClasses = {
   completed: "text-emerald-800",
   failed: "text-red-800",
   queued: "text-muted-foreground",
-  running: "text-emerald-800",
+  running: "text-muted-foreground",
   stopped: "text-muted-foreground",
 } satisfies Record<ExecutionStatus, string>
 
