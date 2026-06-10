@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { providerValidator } from "../providers/catalog"
 
 const approvalStatus = v.union(
   v.literal("pending"),
@@ -7,18 +8,6 @@ const approvalStatus = v.union(
   v.literal("denied"),
   v.literal("expired"),
   v.literal("consumed")
-)
-
-const approvalProvider = v.union(
-  v.literal("milo"),
-  v.literal("slack"),
-  v.literal("linear"),
-  v.literal("github"),
-  v.literal("gmail"),
-  v.literal("googleCalendar"),
-  v.literal("notion"),
-  v.literal("microsoftEmail"),
-  v.literal("microsoftCalendar")
 )
 
 const approvalDelivery = v.object({
@@ -33,7 +22,7 @@ export const approvals = defineTable({
   triggerId: v.id("triggers"),
   executionId: v.id("executions"),
   status: approvalStatus,
-  provider: approvalProvider,
+  provider: providerValidator,
   tool: v.string(),
   args: v.any(),
   argsHash: v.string(),

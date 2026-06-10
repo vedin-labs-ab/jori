@@ -1,9 +1,10 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { integrationProviderValidator } from "../providers/catalog"
 
 export const integrations = defineTable({
   tenantId: v.string(),
-  provider: v.string(),
+  provider: integrationProviderValidator,
   scope: v.optional(v.union(v.literal("tenant"), v.literal("user"))),
   ownerId: v.optional(v.string()),
   accountId: v.string(),

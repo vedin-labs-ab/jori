@@ -1,12 +1,13 @@
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { getClerkUserId } from "../identity/users"
+import { type IntegrationProvider } from "../providers/catalog"
 
 type QueryLikeCtx = QueryCtx | MutationCtx
 
 export async function getTenantIntegration(
   ctx: QueryLikeCtx,
   args: {
-    provider: string
+    provider: IntegrationProvider
     tenantId: string
   }
 ) {
@@ -28,7 +29,7 @@ export async function getTenantIntegration(
 export async function getUserIntegration(
   ctx: QueryLikeCtx,
   args: {
-    provider: string
+    provider: IntegrationProvider
     tenantId: string
   }
 ) {
@@ -55,7 +56,7 @@ export async function getUserIntegrationForOwner(
   ctx: QueryLikeCtx,
   args: {
     ownerId: string
-    provider: string
+    provider: IntegrationProvider
     tenantId: string
   }
 ) {

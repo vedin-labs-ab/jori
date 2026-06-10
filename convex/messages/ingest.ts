@@ -6,6 +6,7 @@ import {
   startMessageTrigger,
 } from "../attention/activations"
 import { resolveUserIdByEmail } from "../identity/identities"
+import { type IntegrationProvider } from "../providers/catalog"
 import {
   isGitHubAppMessage,
   isMiloRelevantGitHubMessage,
@@ -170,7 +171,7 @@ async function recordProviderMessage(
 
 async function findActiveIntegration(
   ctx: MutationCtx,
-  args: { provider: string; accountId: string }
+  args: { provider: IntegrationProvider; accountId: string }
 ) {
   const integration = await ctx.db
     .query("integrations")

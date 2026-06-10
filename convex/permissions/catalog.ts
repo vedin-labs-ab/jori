@@ -1,3 +1,4 @@
+import { type Provider } from "../providers/catalog"
 import { toolPermissionRows } from "./data"
 
 export const permissionModes = [
@@ -11,16 +12,7 @@ export const toolAccessLevels = ["read", "write"] as const
 export type PermissionMode = (typeof permissionModes)[number]
 export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
 export type ToolAccess = (typeof toolAccessLevels)[number]
-export type ToolProvider =
-  | "milo"
-  | "slack"
-  | "linear"
-  | "github"
-  | "gmail"
-  | "googleCalendar"
-  | "notion"
-  | "microsoftEmail"
-  | "microsoftCalendar"
+export type ToolProvider = Provider
 
 export type ToolPermission = {
   tool: string

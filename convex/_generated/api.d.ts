@@ -26,6 +26,7 @@ import type * as permissions_github from "../permissions/github.js";
 import type * as permissions_notion from "../permissions/notion.js";
 import type * as permissions_tools from "../permissions/tools.js";
 import type * as prompts_generated from "../prompts/generated.js";
+import type * as providers_catalog from "../providers/catalog.js";
 import type * as providers_credentials from "../providers/credentials.js";
 import type * as providers_data from "../providers/data.js";
 import type * as providers_github_app from "../providers/github/app.js";
@@ -185,6 +186,7 @@ declare const fullApi: ApiFromModules<{
   "permissions/notion": typeof permissions_notion;
   "permissions/tools": typeof permissions_tools;
   "prompts/generated": typeof prompts_generated;
+  "providers/catalog": typeof providers_catalog;
   "providers/credentials": typeof providers_credentials;
   "providers/data": typeof providers_data;
   "providers/github/app": typeof providers_github_app;
