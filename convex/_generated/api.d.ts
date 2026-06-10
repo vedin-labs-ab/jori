@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as approvals_approvals from "../approvals/approvals.js";
+import type * as approvals_runtime from "../approvals/runtime.js";
 import type * as attention_activations from "../attention/activations.js";
 import type * as http from "../http.js";
 import type * as identity_identities from "../identity/identities.js";
@@ -72,6 +74,7 @@ import type * as providers_notion_install from "../providers/notion/install.js";
 import type * as providers_notion_oauth from "../providers/notion/oauth.js";
 import type * as providers_notion_signing from "../providers/notion/signing.js";
 import type * as providers_signing from "../providers/signing.js";
+import type * as providers_slack_approvals from "../providers/slack/approvals.js";
 import type * as providers_slack_config from "../providers/slack/config.js";
 import type * as providers_slack_credentials from "../providers/slack/credentials.js";
 import type * as providers_slack_data from "../providers/slack/data.js";
@@ -80,11 +83,13 @@ import type * as providers_slack_gate from "../providers/slack/gate.js";
 import type * as providers_slack_http from "../providers/slack/http.js";
 import type * as providers_slack_install from "../providers/slack/install.js";
 import type * as providers_slack_signing from "../providers/slack/signing.js";
+import type * as runs_approvals from "../runs/approvals.js";
 import type * as runs_artifacts from "../runs/artifacts.js";
 import type * as runs_bundles from "../runs/bundles.js";
 import type * as runs_codex from "../runs/codex.js";
 import type * as runs_continuation from "../runs/continuation.js";
 import type * as runs_data from "../runs/data.js";
+import type * as runs_execute from "../runs/execute.js";
 import type * as runs_executions from "../runs/executions.js";
 import type * as runs_instructions from "../runs/instructions.js";
 import type * as runs_integrations from "../runs/integrations.js";
@@ -151,6 +156,8 @@ import type * as schemas_triggers from "../schemas/triggers.js";
 import type * as skills_access from "../skills/access.js";
 import type * as skills_catalog from "../skills/catalog.js";
 import type * as skills_data from "../skills/data.js";
+import type * as tools_approvalArgs from "../tools/approvalArgs.js";
+import type * as tools_approvals from "../tools/approvals.js";
 import type * as tools_mcp from "../tools/mcp.js";
 import type * as tools_providers from "../tools/providers.js";
 import type * as tools_providers_common from "../tools/providers/common.js";
@@ -170,6 +177,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "approvals/approvals": typeof approvals_approvals;
+  "approvals/runtime": typeof approvals_runtime;
   "attention/activations": typeof attention_activations;
   http: typeof http;
   "identity/identities": typeof identity_identities;
@@ -234,6 +243,7 @@ declare const fullApi: ApiFromModules<{
   "providers/notion/oauth": typeof providers_notion_oauth;
   "providers/notion/signing": typeof providers_notion_signing;
   "providers/signing": typeof providers_signing;
+  "providers/slack/approvals": typeof providers_slack_approvals;
   "providers/slack/config": typeof providers_slack_config;
   "providers/slack/credentials": typeof providers_slack_credentials;
   "providers/slack/data": typeof providers_slack_data;
@@ -242,11 +252,13 @@ declare const fullApi: ApiFromModules<{
   "providers/slack/http": typeof providers_slack_http;
   "providers/slack/install": typeof providers_slack_install;
   "providers/slack/signing": typeof providers_slack_signing;
+  "runs/approvals": typeof runs_approvals;
   "runs/artifacts": typeof runs_artifacts;
   "runs/bundles": typeof runs_bundles;
   "runs/codex": typeof runs_codex;
   "runs/continuation": typeof runs_continuation;
   "runs/data": typeof runs_data;
+  "runs/execute": typeof runs_execute;
   "runs/executions": typeof runs_executions;
   "runs/instructions": typeof runs_instructions;
   "runs/integrations": typeof runs_integrations;
@@ -313,6 +325,8 @@ declare const fullApi: ApiFromModules<{
   "skills/access": typeof skills_access;
   "skills/catalog": typeof skills_catalog;
   "skills/data": typeof skills_data;
+  "tools/approvalArgs": typeof tools_approvalArgs;
+  "tools/approvals": typeof tools_approvals;
   "tools/mcp": typeof tools_mcp;
   "tools/providers": typeof tools_providers;
   "tools/providers/common": typeof tools_providers_common;

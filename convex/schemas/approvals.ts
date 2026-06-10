@@ -3,8 +3,11 @@ import { v } from "convex/values"
 import { providerValidator } from "../providers/catalog"
 import { actorValidator } from "./actors"
 
-const approvalDecision = v.union(v.literal("approved"), v.literal("denied"))
-const approvalHandoff = v.object({
+export const approvalDecision = v.union(
+  v.literal("approved"),
+  v.literal("denied")
+)
+export const approvalHandoff = v.object({
   objective: v.string(),
   progress: v.string(),
   next: v.string(),

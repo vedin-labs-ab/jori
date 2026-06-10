@@ -70,7 +70,7 @@ export async function handleMiloMcpRequest(ctx: ActionCtx, request: Request) {
   }
 
   try {
-    const result = await callMiloTool(ctx, execution, body)
+    const result = await callMiloScheduleTool(ctx, execution, body)
 
     return Response.json(result)
   } catch (error) {
@@ -78,7 +78,7 @@ export async function handleMiloMcpRequest(ctx: ActionCtx, request: Request) {
   }
 }
 
-async function callMiloTool(
+export async function callMiloScheduleTool(
   ctx: ActionCtx,
   execution: {
     tenantId: string

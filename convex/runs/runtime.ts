@@ -5,11 +5,10 @@ import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
 import { createPromptedExecution } from "./artifacts"
 import { type CodexRuntimeInput } from "./codex"
+import { runPromptedExecution } from "./execute"
 import { prepareIntegrationForRuntime } from "./integrations"
-import { runCodexInE2B } from "./sandbox/e2b"
 import { requireMessageTarget } from "./targets"
-import { createExecutionToken, hashExecutionToken } from "./tokens"
-import { CodexRunError, formatError } from "./trace"
+import { createExecutionToken } from "./tokens"
 
 export const runMessageExecution = internalAction({
   args: {
@@ -79,7 +78,6 @@ export const runScheduledExecution = internalAction({
 
 async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
   const executionToken = createExecutionToken()
-  const hash = await hashExecutionToken(executionToken)
   const execution = await createPromptedExecution(ctx, {
     convexSiteUrl: requireConvexSiteUrl(),
     input,
@@ -90,46 +88,10 @@ async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
     return
   }
 
-  let trace: string | undefined
-  let executionError: string | undefined
-  let status: "completed" | "failed" = "completed"
-
-  try {
-    const runtimeResult = await runCodexInE2B({
-      authJsonBase64: requireCodexAuthJsonBase64(),
-      onSandboxCreated: async (sandboxId) => {
-        await ctx.runMutation(internal.runs.executions.markRunning, {
-          executionId: execution.id,
-          sandboxId,
-          hash,
-        })
-      },
-      prompt: execution.prompt,
-      toolBundle: execution.toolBundle,
-    })
-
-    trace = runtimeResult.trace
-  } catch (error) {
-    status = "failed"
-    executionError = formatError(error)
-    trace = error instanceof CodexRunError ? error.trace : undefined
-  }
-
-  const fileId =
-    trace === undefined
-      ? undefined
-      : await ctx.storage.store(
-          new Blob([trace], {
-            type: "application/x-ndjson",
-          })
-        )
-
-  await ctx.runMutation(internal.runs.executions.finish, {
+  await runPromptedExecution(ctx, {
     tenantId: input.trigger.tenantId,
-    executionId: execution.id,
-    fileId,
-    error: executionError,
-    status,
+    execution,
+    executionToken,
   })
 }
 
@@ -171,16 +133,6 @@ async function createFailedExecution(
     error: message,
     status: "failed",
   })
-}
-
-function requireCodexAuthJsonBase64() {
-  const authJson = process.env.CODEX_AUTH_JSON_BASE64
-
-  if (authJson === undefined) {
-    throw new Error("Missing CODEX_AUTH_JSON_BASE64")
-  }
-
-  return authJson
 }
 
 function requireConvexSiteUrl() {

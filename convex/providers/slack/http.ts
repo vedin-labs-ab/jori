@@ -1,6 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { redirectWithStatus, unauthorizedResponse } from "../http"
+import { handleSlackApprovalDecision } from "./approvals"
 import {
   slackBotScopes,
   slackInstallUserScopes,
@@ -142,6 +143,18 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     accountId: message.accountId,
     actorId: message.actorId,
   })
+
+  if (
+    await handleSlackApprovalDecision(ctx, {
+      accountId: message.accountId,
+      actorId: message.actorId,
+      actorEmail,
+      text: message.text,
+      data: message.data,
+    })
+  ) {
+    return Response.json({ ok: true })
+  }
 
   const result = await ctx.runMutation(
     internal.messages.ingest.recordSlackMessage,

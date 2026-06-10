@@ -1,5 +1,5 @@
 import { internal } from "../_generated/api"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import {
   getToolPermission,
@@ -9,6 +9,8 @@ import {
 } from "../permissions/catalog"
 import { prepareIntegrationForRuntime } from "../runs/integrations"
 import { hashExecutionToken } from "../runs/tokens"
+import { callMiloScheduleTool } from "../scheduling/mcp"
+import { type ApprovalBrokerContext, requestToolApproval } from "./approvals"
 import { callProviderTool, fetchGitHubTarball } from "./providers"
 import {
   formatProviderError,
@@ -24,48 +26,7 @@ type MiloMcpRequest = {
   args?: unknown
 }
 
-type BrokerContext = {
-  execution: Doc<"executions">
-  integrations: Doc<"integrations">[]
-  toolModes: ReadonlyMap<string, ReturnType<typeof resolveToolMode>>
-}
-
-type SlackOutput = {
-  type: "slack"
-  channelId: string
-  threadId?: string
-}
-
-type ScheduleSpec =
-  | { type: "oneShot"; runAt: string }
-  | { type: "recurring"; cron: string }
-
-type AddScheduleArgs = {
-  name: string
-  description: string
-  metadata?: unknown
-  output: SlackOutput
-  schedule: ScheduleSpec
-}
-
-type SearchSchedulesArgs = {
-  query?: string
-  includeCompleted?: boolean
-  limit?: number
-}
-
-type ReadScheduleArgs = {
-  scheduleId: Id<"schedules">
-}
-
-type UpdateScheduleArgs = {
-  scheduleId: Id<"schedules">
-  name?: string
-  description?: string
-  metadata?: unknown
-  output?: SlackOutput
-  schedule?: ScheduleSpec
-}
+type BrokerContext = ApprovalBrokerContext
 
 export async function handleMiloMcpRequest(ctx: ActionCtx, request: Request) {
   const context = await authenticateBrokerRequest(ctx, request)
@@ -165,6 +126,7 @@ async function authenticateBrokerRequest(ctx: ActionCtx, request: Request) {
 
   return {
     execution,
+    input,
     integrations,
     toolModes: resolveToolModes(permissions),
   } satisfies BrokerContext
@@ -179,12 +141,20 @@ async function callBrokerTool(
     args: Record<string, unknown>
   }
 ) {
-  if (request.provider === "milo") {
-    authorizeTool(context, request)
-    return await callScheduleTool(ctx, context, request.tool, request.args)
+  if (request.provider === "milo" && request.tool === "request_tool_approval") {
+    return await requestToolApproval(ctx, context, request.args)
   }
 
-  const integration = await authorizeProviderTool(context, request)
+  if (request.provider === "milo") {
+    authorizeTool(context, request)
+    return await callMiloScheduleTool(ctx, context.execution, request)
+  }
+
+  const provider = request.provider
+  const integration = await authorizeProviderTool(context, {
+    provider,
+    tool: request.tool,
+  })
 
   if (integration === null) {
     throw new Error(`No active ${request.provider} integration is available`)
@@ -210,72 +180,41 @@ function authorizeTool(
     throw new Error(`Unknown ${request.provider} tool: ${request.tool}`)
   }
 
-  if (resolveToolMode(context.toolModes, request.tool) === "blocked") {
+  const mode = resolveToolMode(context.toolModes, request.tool)
+
+  if (mode === "blocked") {
     throw new Error(`Tool is blocked: ${request.tool}`)
+  }
+
+  if (mode === "prompted") {
+    throw new Error(
+      `Tool requires approval: ${request.tool}. Use request_tool_approval.`
+    )
   }
 }
 
 async function authorizeProviderTool(
   context: BrokerContext,
   request: {
-    provider: ToolProvider
+    provider: Exclude<ToolProvider, "milo">
     tool: string
   }
 ) {
   authorizeTool(context, request)
 
+  return findProviderIntegration(context, request.provider)
+}
+
+function findProviderIntegration(
+  context: BrokerContext,
+  provider: Exclude<ToolProvider, "milo">
+) {
   return (
     context.integrations.find(
       (integration) =>
-        integration.status === "active" &&
-        integration.provider === request.provider
+        integration.status === "active" && integration.provider === provider
     ) ?? null
   )
-}
-
-async function callScheduleTool(
-  ctx: ActionCtx,
-  context: BrokerContext,
-  tool: string,
-  args: Record<string, unknown>
-) {
-  if (tool === "add_schedule") {
-    return await ctx.runMutation(internal.scheduling.schedules.create, {
-      ...(args as AddScheduleArgs),
-      tenantId: context.execution.tenantId,
-      createdBy: context.execution.createdBy,
-    })
-  }
-
-  if (tool === "search_schedules") {
-    return await ctx.runQuery(internal.scheduling.schedules.search, {
-      ...(args as SearchSchedulesArgs),
-      tenantId: context.execution.tenantId,
-    })
-  }
-
-  if (tool === "read_schedule") {
-    return await ctx.runQuery(internal.scheduling.schedules.read, {
-      ...(args as ReadScheduleArgs),
-      tenantId: context.execution.tenantId,
-    })
-  }
-
-  if (tool === "update_schedule") {
-    return await ctx.runMutation(internal.scheduling.schedules.update, {
-      ...(args as UpdateScheduleArgs),
-      tenantId: context.execution.tenantId,
-    })
-  }
-
-  if (tool === "delete_schedule") {
-    return await ctx.runMutation(internal.scheduling.schedules.remove, {
-      ...(args as ReadScheduleArgs),
-      tenantId: context.execution.tenantId,
-    })
-  }
-
-  throw new Error(`Unknown Milo tool: ${tool}`)
 }
 
 function getBearerToken(request: Request) {

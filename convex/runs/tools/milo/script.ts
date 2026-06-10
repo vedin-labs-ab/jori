@@ -18,6 +18,33 @@ const instructions = "Use these Milo scheduling tools only when the user asks to
 
 const allTools = [
   {
+    name: "request_tool_approval",
+    description: "Request user approval for one prompted tool call. Use this instead of directly calling a tool that requires approval, then stop after the request succeeds.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["provider", "tool", "args", "summary", "handoff"],
+      properties: {
+        provider: {
+          enum: ["milo", "slack", "linear", "github", "gmail", "googleCalendar", "notion", "microsoftEmail", "microsoftCalendar"],
+        },
+        tool: { type: "string" },
+        args: { type: "object" },
+        summary: { type: "string", description: "Short user-facing description of the exact action being approved." },
+        handoff: {
+          type: "object",
+          additionalProperties: false,
+          required: ["objective", "progress", "next"],
+          properties: {
+            objective: { type: "string", description: "The user's overall goal." },
+            progress: { type: "string", description: "Useful context gathered before approval." },
+            next: { type: "string", description: "What the continuation agent should do after the approved call result is available." },
+          },
+        },
+      },
+    },
+  },
+  {
     name: "add_schedule",
     description: "Create a Milo schedule. Use a one-shot UTC ISO timestamp or a recurring five-field UTC cron expression. The output target is required; ask the user for clarification before calling this tool if it is ambiguous.",
     inputSchema: {
@@ -212,7 +239,7 @@ function filterEnabledTools(allTools) {
     return allTools;
   }
 
-  return allTools.filter((tool) => enabledTools.has(tool.name));
+  return allTools.filter((tool) => tool.name === "request_tool_approval" || enabledTools.has(tool.name));
 }
 
 function readEnabledTools() {

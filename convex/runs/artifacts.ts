@@ -14,6 +14,8 @@ export async function createPromptedExecution(
     input: CodexRuntimeInput
     executionToken: string
     convexSiteUrl: string
+    approvalId?: Id<"approvals">
+    continuationPrompt?: string
   }
 ) {
   const input = args.input
@@ -38,9 +40,14 @@ export async function createPromptedExecution(
     runtimeToolBundle.promptedTools,
     runtimeToolBundle.capabilities
   )
+  const prompt = appendContinuationPrompt(
+    promptBundle.rendered,
+    args.continuationPrompt
+  )
   const executionId = await createExecution(ctx, {
     triggerId: input.trigger._id,
-    prompt: promptBundle.rendered,
+    approvalId: args.approvalId,
+    prompt,
   })
 
   if (executionId === null) {
@@ -49,7 +56,7 @@ export async function createPromptedExecution(
 
   return {
     id: executionId,
-    prompt: promptBundle.rendered,
+    prompt,
     toolBundle: runtimeToolBundle,
   }
 }
@@ -84,6 +91,7 @@ async function createExecution(
   ctx: ActionCtx,
   args: {
     triggerId: Id<"triggers">
+    approvalId?: Id<"approvals">
     prompt: string
   }
 ) {
@@ -95,6 +103,7 @@ async function createExecution(
 
   const executionId = await ctx.runMutation(internal.runs.executions.create, {
     triggerId: args.triggerId,
+    approvalId: args.approvalId,
     promptId,
   })
 
@@ -103,4 +112,8 @@ async function createExecution(
   }
 
   return executionId
+}
+
+function appendContinuationPrompt(prompt: string, continuation?: string) {
+  return continuation === undefined ? prompt : `${prompt}\n\n${continuation}`
 }

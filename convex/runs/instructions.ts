@@ -10,7 +10,8 @@ export function createToolApprovalInstructions(
     "",
     ...promptedTools.map((tool) => `- ${tool.tool}: ${tool.description}`),
     "",
-    "When you need one of these tools, describe the exact action you want to take, ask for approval, and stop. Do not call the tool in the same turn.",
-    "If the current user message clearly approves a previously requested action, call only the approved tool with the approved arguments.",
+    "When one is needed, call `request_tool_approval` with provider, tool, exact args, summary, and handoff { objective, progress, next }.",
+    "After `request_tool_approval` succeeds, stop. Do not call the prompted tool directly.",
+    "If you are continuing after an approval, use the approved tool result in the prompt and continue from the handoff.",
   ].join("\n")
 }

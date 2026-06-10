@@ -114,6 +114,7 @@ export const create = internalMutation({
   args: {
     triggerId: v.id("triggers"),
     promptId: v.id("_storage"),
+    approvalId: v.optional(v.id("approvals")),
   },
   handler: async (ctx, args): Promise<Id<"executions"> | null> => {
     const trigger = await ctx.db.get(args.triggerId)
@@ -125,11 +126,21 @@ export const create = internalMutation({
     return await ctx.db.insert("executions", {
       tenantId: trigger.tenantId,
       triggerId: trigger._id,
+      approvalId: args.approvalId,
       promptId: args.promptId,
       status: "queued",
       createdBy: trigger.createdBy,
       createdAt: Date.now(),
     })
+  },
+})
+
+export const get = internalQuery({
+  args: {
+    executionId: v.id("executions"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.executionId)
   },
 })
 
