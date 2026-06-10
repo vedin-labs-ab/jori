@@ -1,5 +1,5 @@
 import { AlertTriangle, Check, Copy, type LucideIcon } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -83,22 +83,56 @@ export function CodeBlockDetail({
   label: string
   value: string
 }) {
+  const codeRef = useRef<HTMLElement>(null)
+  const isSingleRenderedLine = useIsSingleRenderedLine(codeRef)
+
   return (
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
       <div className="flex items-start gap-2 font-medium">
         <Icon className={cn("mt-0.5 size-3.5", iconClassName)} />
         {label}
       </div>
-      <div className="relative min-w-0 rounded-md bg-muted px-2.5 py-2 pr-9 font-mono text-foreground text-xs leading-relaxed">
-        <code className="block whitespace-pre-wrap break-words">{value}</code>
+      <div className="relative min-w-0 rounded-md bg-muted px-2.5 py-2 pr-8.5 font-mono text-foreground text-xs leading-relaxed">
+        <code className="block whitespace-pre-wrap break-words" ref={codeRef}>
+          {value}
+        </code>
         <CopyButton
-          className="absolute top-1.5 right-1.5"
+          className={cn(
+            "absolute right-1.5",
+            isSingleRenderedLine ? "top-1/2 -translate-y-1/2" : "top-1.5"
+          )}
           label={label}
           value={value}
         />
       </div>
     </div>
   )
+}
+
+function useIsSingleRenderedLine(ref: React.RefObject<HTMLElement | null>) {
+  const [isSingleLine, setIsSingleLine] = useState(true)
+
+  useEffect(() => {
+    const element = ref.current
+
+    if (element === null) {
+      return
+    }
+
+    const measure = () => {
+      const lineHeight = Number.parseFloat(getComputedStyle(element).lineHeight)
+      setIsSingleLine(element.offsetHeight <= lineHeight * 1.5)
+    }
+
+    measure()
+
+    const resizeObserver = new ResizeObserver(measure)
+    resizeObserver.observe(element)
+
+    return () => resizeObserver.disconnect()
+  }, [ref])
+
+  return isSingleLine
 }
 
 export function ExecutionDetails({ children }: { children: React.ReactNode }) {
