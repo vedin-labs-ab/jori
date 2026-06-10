@@ -1,5 +1,6 @@
 import { ExternalLink, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { IntegrationPermissions } from "../../permissions"
@@ -60,8 +61,7 @@ export function IntegrationConnection({
     tenantId,
     title: config.label,
   })
-  const connectionStatus = status?.status
-  const isConnected = connectionStatus === "active"
+  const isConnected = status?.status === "active"
   const error = install.error ?? disconnect.error
 
   return (
@@ -95,7 +95,7 @@ export function IntegrationConnection({
       }
       description={isConnected ? config.connectedDetail : config.emptyDetail}
       logo={config.logo}
-      status={<ConnectionLine headline={headline} status={connectionStatus} />}
+      status={<ConnectionBadge headline={headline} status={status} />}
       title={config.label}
     >
       {error === undefined && !isConnected ? undefined : (
@@ -113,46 +113,45 @@ export function IntegrationConnection({
   )
 }
 
-function ConnectionLine({
+function ConnectionBadge({
   headline,
   status,
 }: {
   headline: string
-  status: ConnectionStatus
+  status: IntegrationStatus | undefined
 }) {
   return (
-    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+    <Badge className="gap-1.5 text-muted-foreground" variant="outline">
       <span
         aria-hidden="true"
-        className={cn("size-2 rounded-full", getStatusColorClassName(status))}
+        className={cn("size-1.5 rounded-full", getStatusDotClassName(status))}
       />
       <span>{getStatusLabel(status, headline)}</span>
-    </div>
+    </Badge>
   )
 }
 
-function getStatusLabel(status: ConnectionStatus, headline: string) {
-  if (status === "active") {
-    return `Connected to ${headline}`
-  }
-
+function getStatusLabel(
+  status: IntegrationStatus | undefined,
+  headline: string
+) {
   if (status === undefined) {
     return headline
   }
 
-  return `${headline} (${status})`
+  if (status === null) {
+    return "Not connected"
+  }
+
+  return headline
 }
 
-function getStatusColorClassName(status: ConnectionStatus) {
-  if (status === "active") {
+function getStatusDotClassName(status: IntegrationStatus | undefined) {
+  if (status?.status === "active") {
     return "bg-primary"
   }
 
-  if (status === undefined) {
-    return "bg-muted-foreground/40"
-  }
-
-  return "bg-warning"
+  return "bg-muted-foreground/40"
 }
 
 function ConnectionError({ error }: { error: string | undefined }) {
