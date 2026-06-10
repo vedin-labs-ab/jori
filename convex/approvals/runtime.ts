@@ -2,9 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { createSlackExpirationResponse } from "../providers/slack/approvalBlocks"
-import { type Actor, actorValidator } from "../schemas/actors"
-import { postSlackMessage, updateSlackMessage } from "../tools/providers/slack"
+import { postSlackMessage, updateSlackMessage } from "../broker/providers/slack"
+import { createSlackExpirationResponse } from "../providers/slack/approval/blocks"
+import { type Actor, actorValidator } from "../shared/actor"
 
 export type SlackApprovalDecisionArgs = {
   accountId: string
@@ -120,7 +120,7 @@ export async function decideSlackApproval(
   if (result.status === "approved") {
     await ctx.scheduler.runAfter(
       0,
-      internal.runs.approvals.runApprovedExecution,
+      internal.executions.approvals.runApprovedExecution,
       {
         approvalId: target.approval._id,
       }

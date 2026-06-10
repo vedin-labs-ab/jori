@@ -2,15 +2,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ConsolePage } from "../page"
 import { NativePermissionsCard } from "../permissions"
 import { useToolPermissions } from "../permissions/controller"
-import { GitHubConnection } from "./github"
-import { GmailConnection, GoogleCalendarConnection } from "./google"
-import { LinearConnection } from "./linear"
+import { GitHubConnection } from "./providers/github"
+import { GmailConnection, GoogleCalendarConnection } from "./providers/google"
+import { LinearConnection } from "./providers/linear"
 import {
   MicrosoftCalendarConnection,
   MicrosoftEmailConnection,
-} from "./microsoft"
-import { NotionConnection } from "./notion"
-import { SlackConnection } from "./slack"
+} from "./providers/microsoft"
+import { NotionConnection } from "./providers/notion"
+import { SlackConnection } from "./providers/slack"
 
 export function Integrations() {
   return (

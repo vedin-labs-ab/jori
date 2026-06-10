@@ -1,6 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { createProviderActor } from "../../schemas/actors"
+import { createProviderActor } from "../../shared/actor"
 import { redirectWithStatus, unauthorizedResponse } from "../http"
 import {
   linearOAuthAuthorizeUrl,
@@ -132,9 +132,13 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
   )
 
   if (result.status === "started") {
-    await ctx.scheduler.runAfter(0, internal.runs.runtime.runMessageExecution, {
-      triggerId: result.triggerId,
-    })
+    await ctx.scheduler.runAfter(
+      0,
+      internal.executions.runtime.runMessageExecution,
+      {
+        triggerId: result.triggerId,
+      }
+    )
   }
 
   return Response.json({ ok: true })

@@ -6,13 +6,13 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
-import { scheduleOutput } from "../schemas/schedules"
 import {
   compareSchedules,
   getRequiredSchedule,
   getTenantSchedule,
   matchesQuery,
 } from "./data"
+import { scheduleOutput } from "./schema"
 import {
   getScheduleTiming,
   normalizeRequiredText,
@@ -219,7 +219,7 @@ export const fire = internalMutation({
 
     await ctx.scheduler.runAfter(
       0,
-      internal.runs.runtime.runScheduledExecution,
+      internal.executions.runtime.runScheduledExecution,
       {
         triggerId,
       }

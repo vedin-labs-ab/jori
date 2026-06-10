@@ -1,5 +1,6 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
+import { handleGitHubTarballRequest, handleMiloMcpRequest } from "./broker/mcp"
 import {
   handleGitHubEvents,
   handleGitHubInstall,
@@ -28,7 +29,6 @@ import {
   handleSlackInteractions,
   handleSlackOAuthCallback,
 } from "./providers/slack/http"
-import { handleGitHubTarballRequest, handleMiloMcpRequest } from "./tools/mcp"
 
 const http = httpRouter()
 

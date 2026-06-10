@@ -7,12 +7,8 @@ import {
   type MutationCtx,
 } from "../_generated/server"
 import { providerValidator } from "../providers/catalog"
-import { actorValidator } from "../schemas/actors"
-import {
-  approvalDecision,
-  approvalDelivery,
-  approvalHandoff,
-} from "../schemas/approvals"
+import { actorValidator } from "../shared/actor"
+import { approvalDecision, approvalDelivery, approvalHandoff } from "./schema"
 
 const approvalTtlMs = 30 * 60 * 1000
 

@@ -4,7 +4,7 @@ import {
   createSlackApprovalRequest,
   createSlackDecisionResponse,
   createSlackExpirationResponse,
-} from "./approvalBlocks"
+} from "./approval/blocks"
 import { parseSlackApprovalInteraction } from "./approvals"
 
 test("parses Slack approval button payloads", () => {

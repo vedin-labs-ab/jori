@@ -22,7 +22,7 @@ import {
   actorValidator,
   getActorEmail,
   getActorExternalId,
-} from "../schemas/actors"
+} from "../shared/actor"
 
 const observedMessageArgs = {
   accountId: v.string(),

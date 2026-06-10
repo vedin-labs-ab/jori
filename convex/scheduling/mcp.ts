@@ -1,7 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { hashExecutionToken } from "../runs/tokens"
+import { hashExecutionToken } from "../executions/tokens"
 
 type MiloMcpRequest = {
   tool: string
@@ -53,7 +53,7 @@ export async function handleMiloMcpRequest(ctx: ActionCtx, request: Request) {
   }
 
   const execution = await ctx.runQuery(
-    internal.runs.executions.getActiveByHash,
+    internal.executions.records.getActiveByHash,
     {
       hash: await hashExecutionToken(token),
     }
