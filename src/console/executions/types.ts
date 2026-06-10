@@ -1,4 +1,4 @@
-export const pageSize = 8
+export const pageSize = 25
 
 export const filterOptions = [
   { label: "All", value: "all" },
