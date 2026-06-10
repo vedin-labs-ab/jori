@@ -95,7 +95,7 @@ export async function handleMicrosoftOAuthCallback(
       {
         provider,
         tenantId: state.tenantId,
-        createdByUserId: state.createdByUserId,
+        createdBy: state.createdBy,
         microsoftTenantId: profile.tenant.id,
         accessToken: tokenResult.access_token,
         refreshToken: tokenResult.refresh_token,

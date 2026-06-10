@@ -84,7 +84,7 @@ export const create = mutation({
       name: input.name,
       description: input.description,
       body: input.body,
-      createdByUserId: userId,
+      createdBy: userId,
       createdAt: now,
       updatedAt: now,
     })

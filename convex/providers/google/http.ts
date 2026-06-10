@@ -98,7 +98,7 @@ export async function handleGoogleOAuthCallback(
       {
         provider,
         tenantId: state.tenantId,
-        createdByUserId: state.createdByUserId,
+        createdBy: state.createdBy,
         accessToken: tokenResult.access_token,
         refreshToken: tokenResult.refresh_token,
         expiresAt: Date.now() + tokenResult.expires_in * 1000,

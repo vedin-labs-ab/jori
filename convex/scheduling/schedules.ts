@@ -30,7 +30,7 @@ export const create = internalMutation({
     metadata: v.optional(v.any()),
     output: scheduleOutput,
     schedule: scheduleInput,
-    createdByUserId: v.optional(v.string()),
+    createdBy: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -46,7 +46,7 @@ export const create = internalMutation({
       runAt: timing.runAt,
       nextRunAt: timing.nextRunAt,
       status: "active",
-      createdByUserId: args.createdByUserId,
+      createdBy: args.createdBy,
       createdAt: now,
       updatedAt: now,
     })
@@ -213,7 +213,7 @@ export const fire = internalMutation({
       data: {
         scheduleName: schedule.name,
       },
-      createdByUserId: schedule.createdByUserId,
+      createdBy: schedule.createdBy,
       createdAt: now,
     })
 

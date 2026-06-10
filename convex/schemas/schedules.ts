@@ -29,7 +29,7 @@ export const schedules = defineTable({
   nextRunAt: v.optional(v.number()),
   scheduledFunctionId: v.optional(v.id("_scheduled_functions")),
   status: scheduleStatus,
-  createdByUserId: v.optional(v.string()),
+  createdBy: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
   lastTriggeredAt: v.optional(v.number()),

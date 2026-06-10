@@ -14,7 +14,7 @@ export const integrations = defineTable({
     v.literal("paused"),
     v.literal("revoked")
   ),
-  createdByUserId: v.optional(v.string()),
+  createdBy: v.optional(v.string()),
   createdAt: v.number(),
   data: v.optional(v.any()),
 })

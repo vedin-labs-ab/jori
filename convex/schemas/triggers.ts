@@ -11,7 +11,7 @@ export const triggers = defineTable({
     v.literal("message")
   ),
   data: v.optional(v.any()),
-  createdByUserId: v.optional(v.string()),
+  createdBy: v.optional(v.string()),
   createdAt: v.number(),
 })
   .index("by_message", ["messageId"])

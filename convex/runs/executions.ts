@@ -58,7 +58,7 @@ async function getMessageInput(
   const integrations = await listActiveIntegrations(
     ctx,
     args.trigger.tenantId,
-    args.trigger.createdByUserId
+    args.trigger.createdBy
   )
 
   return {
@@ -96,7 +96,7 @@ async function getScheduledInput(
   const integrations = await listActiveIntegrations(
     ctx,
     schedule.tenantId,
-    schedule.createdByUserId
+    schedule.createdBy
   )
   const integration =
     integrations.find((candidate) => candidate.provider === "slack") ?? null
@@ -129,7 +129,7 @@ export const create = internalMutation({
       approvalId: args.approvalId,
       promptId: args.promptId,
       status: "queued",
-      createdByUserId: trigger.createdByUserId,
+      createdBy: trigger.createdBy,
       createdAt: Date.now(),
     })
   },

@@ -9,7 +9,7 @@ export const permissions = defineTable({
     v.literal("prompted"),
     v.literal("blocked")
   ),
-  updatedByUserId: v.string(),
+  updatedBy: v.string(),
   updatedAt: v.number(),
 })
   .index("by_tenant", ["tenantId"])

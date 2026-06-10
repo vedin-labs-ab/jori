@@ -63,7 +63,7 @@ export async function handleGitHubInstallCallback(
 
   await ctx.runMutation(internal.providers.github.install.recordInstallation, {
     tenantId: state.tenantId,
-    createdByUserId: state.createdByUserId,
+    createdBy: state.createdBy,
     installationId,
     profile: normalizeInstallationProfile(profile),
   })

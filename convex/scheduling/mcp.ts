@@ -82,7 +82,7 @@ export async function callMiloScheduleTool(
   ctx: ActionCtx,
   execution: {
     tenantId: string
-    createdByUserId?: string
+    createdBy?: string
   },
   request: MiloMcpRequest
 ) {
@@ -92,7 +92,7 @@ export async function callMiloScheduleTool(
     return await ctx.runMutation(internal.scheduling.schedules.create, {
       ...(args as AddScheduleArgs),
       tenantId: execution.tenantId,
-      createdByUserId: execution.createdByUserId,
+      createdBy: execution.createdBy,
     })
   }
 

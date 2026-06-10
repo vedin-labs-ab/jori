@@ -87,13 +87,13 @@ export const set = mutation({
         tenantId: args.tenantId,
         tool: args.tool,
         mode: args.mode,
-        updatedByUserId: userId,
+        updatedBy: userId,
         updatedAt: Date.now(),
       })
     } else {
       await ctx.db.patch(existing._id, {
         mode: args.mode,
-        updatedByUserId: userId,
+        updatedBy: userId,
         updatedAt: Date.now(),
       })
     }

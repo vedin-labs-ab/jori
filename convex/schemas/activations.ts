@@ -6,6 +6,6 @@ export const activations = defineTable({
   triggerId: v.id("triggers"),
   integrationId: v.id("integrations"),
   conversationId: v.string(),
-  createdByUserId: v.optional(v.string()),
+  createdBy: v.optional(v.string()),
   createdAt: v.number(),
 }).index("by_conversation", ["tenantId", "integrationId", "conversationId"])

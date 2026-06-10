@@ -43,7 +43,7 @@ export const recordOAuthInstallation = internalMutation({
   args: {
     provider: microsoftProvider,
     tenantId: v.string(),
-    createdByUserId: v.string(),
+    createdBy: v.string(),
     microsoftTenantId: v.string(),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
@@ -70,7 +70,7 @@ export const recordOAuthInstallation = internalMutation({
         query
           .eq("tenantId", args.tenantId)
           .eq("provider", args.provider)
-          .eq("ownerId", args.createdByUserId)
+          .eq("ownerId", args.createdBy)
       )
       .first()
 
@@ -101,7 +101,7 @@ export const recordOAuthInstallation = internalMutation({
       now,
       tenantId: args.tenantId,
       provider: args.provider,
-      ownerId: args.createdByUserId,
+      ownerId: args.createdBy,
       accountId,
       credentials,
       data,
@@ -109,7 +109,7 @@ export const recordOAuthInstallation = internalMutation({
 
     await upsertMicrosoftIdentity(ctx, {
       tenantId: args.tenantId,
-      userId: args.createdByUserId,
+      userId: args.createdBy,
       microsoftTenantId: args.microsoftTenantId,
       email,
       profile: args.profile,
@@ -151,7 +151,7 @@ async function upsertMicrosoftIntegration(
     accountId: args.accountId,
     credentials: args.credentials,
     status: "active" as const,
-    createdByUserId: args.ownerId,
+    createdBy: args.ownerId,
     data: args.data,
   }
 
@@ -229,7 +229,7 @@ async function createInstallState(
   return await createSignedMicrosoftState({
     provider,
     tenantId: args.tenantId,
-    createdByUserId: requireClerkUserId(identity),
+    createdBy: requireClerkUserId(identity),
     returnUrl: args.returnUrl,
     createdAt: Date.now(),
   })

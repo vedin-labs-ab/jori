@@ -155,15 +155,15 @@ async function deliverSlackApproval(
 }
 
 function createRequestedBy(context: ApprovalBrokerContext): Actor {
-  if (context.input.trigger.createdByUserId !== undefined) {
-    return createUserActor(context.input.trigger.createdByUserId)
+  if (context.input.trigger.createdBy !== undefined) {
+    return createUserActor(context.input.trigger.createdBy)
   }
 
   if (context.input.type === "scheduled") {
-    const createdByUserId = context.input.schedule.createdByUserId
+    const createdBy = context.input.schedule.createdBy
 
-    if (createdByUserId !== undefined) {
-      return createUserActor(createdByUserId)
+    if (createdBy !== undefined) {
+      return createUserActor(createdBy)
     }
   }
 

@@ -6,7 +6,7 @@ export const skills = defineTable({
   name: v.string(),
   description: v.string(),
   body: v.string(),
-  createdByUserId: v.optional(v.string()),
+  createdBy: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
 })

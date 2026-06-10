@@ -35,7 +35,7 @@ export const recordOAuthInstallation = internalMutation({
   args: {
     provider: googleProvider,
     tenantId: v.string(),
-    createdByUserId: v.string(),
+    createdBy: v.string(),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
     expiresAt: v.number(),
@@ -55,7 +55,7 @@ export const recordOAuthInstallation = internalMutation({
         query
           .eq("tenantId", args.tenantId)
           .eq("provider", args.provider)
-          .eq("ownerId", args.createdByUserId)
+          .eq("ownerId", args.createdBy)
       )
       .first()
 
@@ -80,11 +80,11 @@ export const recordOAuthInstallation = internalMutation({
       await ctx.db.patch(existing._id, {
         tenantId: args.tenantId,
         scope: "user",
-        ownerId: args.createdByUserId,
+        ownerId: args.createdBy,
         accountId: args.profile.email,
         credentials,
         status: "active",
-        createdByUserId: args.createdByUserId,
+        createdBy: args.createdBy,
         data,
       })
 
@@ -97,11 +97,11 @@ export const recordOAuthInstallation = internalMutation({
       tenantId: args.tenantId,
       provider: args.provider,
       scope: "user",
-      ownerId: args.createdByUserId,
+      ownerId: args.createdBy,
       accountId: args.profile.email,
       credentials,
       status: "active",
-      createdByUserId: args.createdByUserId,
+      createdBy: args.createdBy,
       createdAt: now,
       data,
     })
@@ -168,7 +168,7 @@ async function createInstallState(
   return await createSignedGoogleState({
     provider,
     tenantId: args.tenantId,
-    createdByUserId: requireClerkUserId(identity),
+    createdBy: requireClerkUserId(identity),
     returnUrl: args.returnUrl,
     createdAt: Date.now(),
   })
@@ -178,7 +178,7 @@ async function upsertGoogleIdentity(
   ctx: MutationCtx,
   args: {
     tenantId: string
-    createdByUserId: string
+    createdBy: string
     profile: {
       id: string
       email: string
@@ -187,7 +187,7 @@ async function upsertGoogleIdentity(
 ) {
   await upsertIdentity(ctx, {
     tenantId: args.tenantId,
-    userId: args.createdByUserId,
+    userId: args.createdBy,
     provider: "google",
     accountId: args.profile.email,
     externalId: args.profile.id,

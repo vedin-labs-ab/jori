@@ -17,7 +17,7 @@ export const createInstallState = mutation({
 
     return await createSignedGitHubState({
       tenantId: args.tenantId,
-      createdByUserId: requireClerkUserId(identity),
+      createdBy: requireClerkUserId(identity),
       returnUrl: args.returnUrl,
       createdAt: Date.now(),
     })
@@ -27,7 +27,7 @@ export const createInstallState = mutation({
 export const recordInstallation = internalMutation({
   args: {
     tenantId: v.string(),
-    createdByUserId: v.string(),
+    createdBy: v.string(),
     installationId: v.string(),
     profile: v.object({
       id: v.number(),
@@ -74,7 +74,7 @@ export const recordInstallation = internalMutation({
         tenantId: args.tenantId,
         credentials,
         status: "active",
-        createdByUserId: args.createdByUserId,
+        createdBy: args.createdBy,
         data,
       })
 
@@ -87,7 +87,7 @@ export const recordInstallation = internalMutation({
       accountId: args.installationId,
       credentials,
       status: "active",
-      createdByUserId: args.createdByUserId,
+      createdBy: args.createdBy,
       createdAt: now,
       data,
     })

@@ -35,7 +35,7 @@ export async function startMessageTrigger(
     messageType: string
     messageExternalId: string
     conversationId: string
-    createdByUserId: string | undefined
+    createdBy: string | undefined
     now: number
   }
 ) {
@@ -49,7 +49,7 @@ export async function startMessageTrigger(
         externalId: args.messageExternalId,
       },
     },
-    createdByUserId: args.createdByUserId,
+    createdBy: args.createdBy,
     createdAt: args.now,
   })
 
@@ -60,7 +60,7 @@ export async function startMessageTrigger(
           triggerId,
           integrationId: args.integration._id,
           conversationId: args.conversationId,
-          createdByUserId: args.createdByUserId,
+          createdBy: args.createdBy,
           createdAt: args.now,
         })
       : args.activation._id

@@ -156,7 +156,7 @@ async function recordProviderMessage(
     integration: input.integration,
   })
   const now = Date.now()
-  const createdByUserId = await resolveMessageOwner(ctx, {
+  const createdBy = await resolveMessageOwner(ctx, {
     tenantId: input.integration.tenantId,
     message: input.message,
   })
@@ -178,7 +178,7 @@ async function recordProviderMessage(
     messageType: input.message.type,
     messageExternalId: input.message.externalId,
     conversationId: input.message.conversationId ?? input.message.externalId,
-    createdByUserId,
+    createdBy,
     now,
   })
 }

@@ -21,7 +21,7 @@ export const createInstallState = mutation({
 
     return await createSignedSlackState({
       tenantId: args.tenantId,
-      createdByUserId: requireClerkUserId(identity),
+      createdBy: requireClerkUserId(identity),
       returnUrl: args.returnUrl,
       createdAt: Date.now(),
     })
@@ -62,7 +62,7 @@ export const getUserToken = internalQuery({
 export const recordOAuthInstallation = internalMutation({
   args: {
     tenantId: v.string(),
-    createdByUserId: v.string(),
+    createdBy: v.string(),
     accountId: v.string(),
     botScopes: v.optional(v.string()),
     botToken: v.string(),
@@ -102,7 +102,7 @@ export const recordOAuthInstallation = internalMutation({
         tenantId: args.tenantId,
         credentials,
         status: "active",
-        createdByUserId: args.createdByUserId,
+        createdBy: args.createdBy,
         data,
       })
 
@@ -115,7 +115,7 @@ export const recordOAuthInstallation = internalMutation({
       accountId: args.accountId,
       credentials,
       status: "active",
-      createdByUserId: args.createdByUserId,
+      createdBy: args.createdBy,
       createdAt: now,
       data,
     })

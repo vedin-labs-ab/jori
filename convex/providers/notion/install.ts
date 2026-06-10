@@ -17,7 +17,7 @@ export const createInstallState = mutation({
 
     return await createSignedNotionState({
       tenantId: args.tenantId,
-      createdByUserId: requireClerkUserId(identity),
+      createdBy: requireClerkUserId(identity),
       returnUrl: args.returnUrl,
       createdAt: Date.now(),
     })
@@ -27,7 +27,7 @@ export const createInstallState = mutation({
 export const recordOAuthInstallation = internalMutation({
   args: {
     tenantId: v.string(),
-    createdByUserId: v.string(),
+    createdBy: v.string(),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
     profile: v.object({
@@ -60,7 +60,7 @@ export const recordOAuthInstallation = internalMutation({
         scope: "tenant",
         credentials,
         status: "active",
-        createdByUserId: args.createdByUserId,
+        createdBy: args.createdBy,
         data,
       })
 
@@ -74,7 +74,7 @@ export const recordOAuthInstallation = internalMutation({
       accountId: args.profile.workspaceId,
       credentials,
       status: "active",
-      createdByUserId: args.createdByUserId,
+      createdBy: args.createdBy,
       createdAt: now,
       data,
     })

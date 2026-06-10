@@ -17,7 +17,7 @@ export const createInstallState = mutation({
 
     return await createSignedLinearState({
       tenantId: args.tenantId,
-      createdByUserId: requireClerkUserId(identity),
+      createdBy: requireClerkUserId(identity),
       returnUrl: args.returnUrl,
       createdAt: Date.now(),
     })
@@ -27,7 +27,7 @@ export const createInstallState = mutation({
 export const recordOAuthInstallation = internalMutation({
   args: {
     tenantId: v.string(),
-    createdByUserId: v.string(),
+    createdBy: v.string(),
     accessToken: v.string(),
     refreshToken: v.string(),
     expiresAt: v.number(),
@@ -70,7 +70,7 @@ export const recordOAuthInstallation = internalMutation({
         tenantId: args.tenantId,
         credentials,
         status: "active",
-        createdByUserId: args.createdByUserId,
+        createdBy: args.createdBy,
         data,
       })
 
@@ -83,7 +83,7 @@ export const recordOAuthInstallation = internalMutation({
       accountId: args.profile.organization.id,
       credentials,
       status: "active",
-      createdByUserId: args.createdByUserId,
+      createdBy: args.createdBy,
       createdAt: now,
       data,
     })
