@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   Circle,
   CircleAlert,
+  ClockAlert,
   Loader2,
   type LucideIcon,
 } from "lucide-react"
@@ -28,6 +29,10 @@ export function StatusIcon({
 }) {
   if (approvalState === "pending") {
     return <CircleAlert className="size-4 text-amber-900" />
+  }
+
+  if (approvalState === "expired") {
+    return <ClockAlert className="size-4 text-amber-900" />
   }
 
   const Icon =
