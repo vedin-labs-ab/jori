@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { ScheduleDateTimePicker } from "./picker"
 import { RecurringFields } from "./recurring"
 import { type Schedule, type ScheduleFormValues } from "./types"
 
@@ -142,14 +143,10 @@ function ScheduleTiming({
         <RecurringFields onValuesChange={onValuesChange} values={values} />
       </TabsContent>
       <TabsContent value="oneShot" className="grid gap-2">
-        <Label htmlFor="schedule-run-at">Run at</Label>
-        <Input
+        <ScheduleDateTimePicker
           id="schedule-run-at"
-          type="datetime-local"
+          onValueChange={(runAt) => onValuesChange({ ...values, runAt })}
           value={values.runAt}
-          onChange={(event) =>
-            onValuesChange({ ...values, runAt: event.target.value })
-          }
         />
         <p className="text-muted-foreground text-xs">
           Runs once at this time, in your local timezone.

@@ -15,6 +15,7 @@ import {
   weekdayOptions,
 } from "./cron"
 import { absoluteTime, relativeTime } from "./format"
+import { ScheduleTimePicker } from "./picker"
 import {
   type RepeatMode,
   repeatOptions,
@@ -98,18 +99,13 @@ function RepeatDetails({
           value={values.monthDay}
         />
       ) : null}
-      <div className="grid gap-2">
-        <Label htmlFor="schedule-time">Time (UTC)</Label>
-        <Input
-          className="w-32"
-          id="schedule-time"
-          onChange={(event) =>
-            onValuesChange({ ...values, time: event.target.value })
-          }
-          type="time"
-          value={values.time}
-        />
-      </div>
+      <ScheduleTimePicker
+        className="w-32"
+        id="schedule-time"
+        label="Time (UTC)"
+        onValueChange={(time) => onValuesChange({ ...values, time })}
+        value={values.time}
+      />
     </div>
   )
 }
