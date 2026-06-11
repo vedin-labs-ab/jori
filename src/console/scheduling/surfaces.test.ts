@@ -19,9 +19,23 @@ describe("schedule integration marker parsing", () => {
     ).toEqual(["github", "googleDrive", "microsoftEmail"])
   })
 
+  test("recognizes bare provider names as markers", () => {
+    expect(
+      findScheduleSurfaceMentions(
+        "Review github, write a doc in google drive, then email via outlook."
+      )
+    ).toEqual(["github", "googleDrive", "microsoftEmail"])
+  })
+
   test("normalizes recognized markers to canonical labels", () => {
     expect(
       normalizeScheduleSurfaceMentions("Post to @slack and create @notion page")
+    ).toBe("Post to @Slack and create @Notion page")
+  })
+
+  test("normalizes bare markers to canonical labels", () => {
+    expect(
+      normalizeScheduleSurfaceMentions("Post to slack and create notion page")
     ).toBe("Post to @Slack and create @Notion page")
   })
 
@@ -29,11 +43,18 @@ describe("schedule integration marker parsing", () => {
     expect(
       normalizeCompletedScheduleSurfaceMentions("Post to @github, then stop")
     ).toBe("Post to @GitHub, then stop")
+
+    expect(
+      normalizeCompletedScheduleSurfaceMentions("Post to github, then stop")
+    ).toBe("Post to @GitHub, then stop")
   })
 
   test("keeps active marker text untouched until a boundary is typed", () => {
     expect(normalizeCompletedScheduleSurfaceMentions("Post to @github")).toBe(
       "Post to @github"
+    )
+    expect(normalizeCompletedScheduleSurfaceMentions("Post to github")).toBe(
+      "Post to github"
     )
   })
 
@@ -44,6 +65,12 @@ describe("schedule integration marker parsing", () => {
     expect(normalizeCompletedScheduleSurfaceMentions("Use @go ")).toBe(
       "Use @go "
     )
+    expect(normalizeCompletedScheduleSurfaceMentions("Open githb ")).toBe(
+      "Open @GitHub "
+    )
+    expect(normalizeCompletedScheduleSurfaceMentions("Use git ")).toBe(
+      "Use git "
+    )
   })
 })
 
@@ -51,10 +78,21 @@ describe("schedule integration marker autocomplete", () => {
   test("finds active marker queries for autocomplete", () => {
     expect(findActiveScheduleSurfaceMention("Send to @li", 11)).toEqual({
       end: 11,
+      kind: "explicit",
       query: "li",
       start: 8,
     })
     expect(findActiveScheduleSurfaceMention("Send to @li now", 15)).toBeNull()
+  })
+
+  test("starts bare autocomplete after three characters", () => {
+    expect(findActiveScheduleSurfaceMention("Send gi", 7)).toBeNull()
+    expect(findActiveScheduleSurfaceMention("Send git", 8)).toEqual({
+      end: 8,
+      kind: "bare",
+      query: "git",
+      start: 5,
+    })
   })
 
   test("suggests providers from prefixes and aliases", () => {
@@ -73,19 +111,30 @@ describe("schedule integration marker autocomplete", () => {
     expect(
       replaceScheduleSurfaceMention(
         "Send to @li",
-        { end: 11, query: "li", start: 8 },
+        { end: 11, kind: "explicit", query: "li", start: 8 },
         "linear"
       )
     ).toEqual({
       cursor: 16,
       text: "Send to @Linear ",
     })
+
+    expect(
+      replaceScheduleSurfaceMention(
+        "Send git",
+        { end: 8, kind: "bare", query: "git", start: 5 },
+        "github"
+      )
+    ).toEqual({
+      cursor: 13,
+      text: "Send @GitHub ",
+    })
   })
 
   test("splits recognized markers for highlighted rendering", () => {
-    expect(getScheduleSurfaceMentionParts("Use @github and @Slack.")).toEqual([
+    expect(getScheduleSurfaceMentionParts("Use github and @Slack.")).toEqual([
       { text: "Use " },
-      { provider: "github", text: "@github" },
+      { provider: "github", text: "github" },
       { text: " and " },
       { provider: "slack", text: "@Slack" },
       { text: "." },
@@ -108,7 +157,7 @@ describe("schedule integration access sync", () => {
   })
 
   test("leaves new selected-read markers unclassified", () => {
-    expect(syncScheduleSurfaces("@GitHub", [], "selected")).toEqual([
+    expect(syncScheduleSurfaces("GitHub", [], "selected")).toEqual([
       { provider: "github", access: "" },
     ])
   })

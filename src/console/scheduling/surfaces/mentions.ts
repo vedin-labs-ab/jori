@@ -21,6 +21,7 @@ export type ScheduleSurfaceSuggestion = {
 
 export type ActiveScheduleSurfaceMention = {
   end: number
+  kind: "bare" | "explicit"
   query: string
   start: number
 }
@@ -45,6 +46,16 @@ export function findActiveScheduleSurfaceMention(
   text: string,
   cursor: number
 ): ActiveScheduleSurfaceMention | null {
+  return (
+    findActiveExplicitMention(text, cursor) ??
+    findActiveBareMention(text, cursor)
+  )
+}
+
+function findActiveExplicitMention(
+  text: string,
+  cursor: number
+): ActiveScheduleSurfaceMention | null {
   if (cursor < 0 || cursor > text.length) {
     return null
   }
@@ -61,7 +72,36 @@ export function findActiveScheduleSurfaceMention(
     return null
   }
 
-  return { end: cursor, query, start }
+  return { end: cursor, kind: "explicit", query, start }
+}
+
+function findActiveBareMention(
+  text: string,
+  cursor: number
+): ActiveScheduleSurfaceMention | null {
+  if (cursor < 0 || cursor > text.length) {
+    return null
+  }
+
+  let start = cursor
+
+  while (start > 0 && /[a-z0-9-]/i.test(text[start - 1])) {
+    start -= 1
+  }
+
+  const query = text.slice(start, cursor)
+  const previous = text[start - 1]
+
+  if (
+    query.length < 3 ||
+    previous === "@" ||
+    isMentionNameCharacter(previous) ||
+    getScheduleSurfaceSuggestions(query).length === 0
+  ) {
+    return null
+  }
+
+  return { end: cursor, kind: "bare", query, start }
 }
 
 export function getScheduleSurfaceSuggestions(

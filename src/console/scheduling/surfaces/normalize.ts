@@ -55,6 +55,12 @@ function readMentionReplacements(
     }
   }
 
+  for (const match of readFuzzyBareMatches(text, options)) {
+    if (!replacements.some((replacement) => overlaps(replacement, match))) {
+      replacements.push(toMentionReplacement(match))
+    }
+  }
+
   return replacements.sort((left, right) => left.start - right.start)
 }
 
@@ -70,6 +76,28 @@ function readFuzzyMentionMatches(
     }
 
     const match = matchFuzzyMention(text, index, options)
+
+    if (match !== null) {
+      matches.push(match)
+      index = match.end - 1
+    }
+  }
+
+  return matches
+}
+
+function readFuzzyBareMatches(
+  text: string,
+  options: NormalizationOptions
+): MentionMatch[] {
+  const matches: MentionMatch[] = []
+
+  for (let index = 0; index < text.length; index += 1) {
+    if (!canStartBareToken(text, index)) {
+      continue
+    }
+
+    const match = matchFuzzyBare(text, index, options)
 
     if (match !== null) {
       matches.push(match)
@@ -100,6 +128,24 @@ function matchFuzzyMention(
   return provider === null ? null : { end: token.end, provider, start }
 }
 
+function matchFuzzyBare(
+  text: string,
+  start: number,
+  options: NormalizationOptions
+): MentionMatch | null {
+  const token = readMentionToken(text, start)
+
+  if (token === null || !canNormalizeEnd(text, token.end, options)) {
+    return null
+  }
+
+  const provider = findFuzzyScheduleSurfaceProvider(token.value, {
+    allowPrefix: false,
+  })
+
+  return provider === null ? null : { end: token.end, provider, start }
+}
+
 function readMentionToken(text: string, start: number) {
   let end = start
 
@@ -115,6 +161,16 @@ function readMentionToken(text: string, start: number) {
     end,
     value: text.slice(start, end),
   }
+}
+
+function canStartBareToken(text: string, start: number) {
+  if (!/[a-z0-9]/i.test(text[start])) {
+    return false
+  }
+
+  const previous = text[start - 1]
+
+  return previous !== "@" && !isMentionNameCharacter(previous)
 }
 
 function canNormalizeEnd(

@@ -9,9 +9,11 @@ export function normalizeFuzzyAlias(value: string) {
 }
 
 export function findFuzzyScheduleSurfaceProvider(
-  value: string
+  value: string,
+  options: { allowPrefix?: boolean } = {}
 ): ScheduleSurfaceProvider | null {
   const normalizedValue = normalizeFuzzyAlias(value)
+  const allowPrefix = options.allowPrefix ?? true
 
   if (normalizedValue.length < 3) {
     return null
@@ -25,11 +27,13 @@ export function findFuzzyScheduleSurfaceProvider(
     return exactMatch
   }
 
-  const prefixMatch = findUniqueProviderMatch(normalizedValue, (alias) =>
-    alias.startsWith(normalizedValue)
-      ? normalizedValue.length / alias.length
-      : 0
-  )
+  const prefixMatch = allowPrefix
+    ? findUniqueProviderMatch(normalizedValue, (alias) =>
+        alias.startsWith(normalizedValue)
+          ? normalizedValue.length / alias.length
+          : 0
+      )
+    : null
 
   if (prefixMatch !== null) {
     return prefixMatch

@@ -15,6 +15,20 @@ describe("schedule instructions field autocomplete", () => {
     expect(screen.getByRole("option", { name: "@Linear" })).toBeDefined()
   })
 
+  test("suggests bare provider words after three characters", () => {
+    const field = renderInstructionsField()
+
+    changeInput(field.input, "Send gi", 7)
+    field.rerender("Send gi")
+
+    expect(screen.queryByRole("option")).toBeNull()
+
+    changeInput(field.input, "Send git", 8)
+    field.rerender("Send git")
+
+    expect(screen.getByRole("option", { name: "@GitHub" })).toBeDefined()
+  })
+
   test("accepts the active suggestion with enter", () => {
     const field = renderInstructionsField()
 
@@ -24,6 +38,16 @@ describe("schedule instructions field autocomplete", () => {
 
     expect(field.onValueChange).toHaveBeenLastCalledWith("Send @Linear ")
   })
+
+  test("accepts a bare provider suggestion with enter", () => {
+    const field = renderInstructionsField()
+
+    changeInput(field.input, "Send git", 8)
+    field.rerender("Send git")
+    fireEvent.keyDown(field.input, { key: "Enter" })
+
+    expect(field.onValueChange).toHaveBeenLastCalledWith("Send @GitHub ")
+  })
 })
 
 describe("schedule instructions field normalization", () => {
@@ -31,6 +55,14 @@ describe("schedule instructions field normalization", () => {
     const field = renderInstructionsField()
 
     changeInput(field.input, "Post to @github ", 16)
+
+    expect(field.onValueChange).toHaveBeenLastCalledWith("Post to @GitHub ")
+  })
+
+  test("canonicalizes a completed bare provider when a boundary is typed", () => {
+    const field = renderInstructionsField()
+
+    changeInput(field.input, "Post to github ", 15)
 
     expect(field.onValueChange).toHaveBeenLastCalledWith("Post to @GitHub ")
   })
