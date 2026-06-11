@@ -1,11 +1,7 @@
 import {
   applyScheduleReadScope,
-  insertScheduleSurfaceMention,
-  normalizeScheduleSurfaceMentions,
-  removeScheduleSurfaceMention,
   type ScheduleReadScope,
-  type ScheduleSurfaceAccess,
-  type ScheduleSurfaceProvider,
+  type ScheduleSurfaceFormValue,
   syncScheduleSurfaces,
 } from "./surfaces"
 import { type ScheduleFormValues } from "./types"
@@ -18,30 +14,18 @@ export function createScheduleDialogActions({
   values: ScheduleFormValues
 }) {
   return {
-    insertSurface: (provider: ScheduleSurfaceProvider) => {
-      const description = insertScheduleSurfaceMention(
-        normalizeScheduleSurfaceMentions(values.description),
-        provider
-      )
-
-      updateDescriptionState({ description, onValuesChange, values })
-    },
     normalizeDescription: () => {
       updateDescriptionState({
-        description: normalizeScheduleSurfaceMentions(values.description),
+        description: values.description,
         onValuesChange,
         values,
       })
     },
-    removeSurface: (provider: ScheduleSurfaceProvider) => {
-      updateDescriptionState({
-        description: removeScheduleSurfaceMention(values.description, provider),
-        onValuesChange,
-        values,
-      })
-    },
-    updateDescription: (description: string) => {
-      updateDescriptionState({ description, onValuesChange, values })
+    updateInstructions: (
+      description: string,
+      surfaces: ScheduleSurfaceFormValue[]
+    ) => {
+      onValuesChange({ ...values, description, surfaces })
     },
     updateName: (name: string) => {
       onValuesChange({ ...values, name })
@@ -51,17 +35,6 @@ export function createScheduleDialogActions({
         ...values,
         readScope,
         surfaces: applyScheduleReadScope(values.surfaces, readScope),
-      })
-    },
-    updateSurfaceAccess: (
-      provider: ScheduleSurfaceProvider,
-      access: ScheduleSurfaceAccess
-    ) => {
-      onValuesChange({
-        ...values,
-        surfaces: values.surfaces.map((surface) =>
-          surface.provider === provider ? { ...surface, access } : surface
-        ),
       })
     },
   }

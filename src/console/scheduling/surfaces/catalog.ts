@@ -46,6 +46,15 @@ export function getScheduleSurfaceProvider(provider: ScheduleSurfaceProvider) {
   return scheduleSurfaceProviders.find((item) => item.provider === provider)
 }
 
+export function isScheduleSurfaceProvider(
+  provider: unknown
+): provider is ScheduleSurfaceProvider {
+  return (
+    typeof provider === "string" &&
+    scheduleSurfaceProviders.some((item) => item.provider === provider)
+  )
+}
+
 export function getScheduleSurfaceLabel(provider: ScheduleSurfaceProvider) {
   return getScheduleSurfaceProvider(provider)?.label ?? provider
 }

@@ -1,167 +1,193 @@
+import { type Editor, useEditor } from "@tiptap/react"
+import StarterKit from "@tiptap/starter-kit"
 import {
-  type ChangeEvent,
-  type KeyboardEvent,
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
   useId,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react"
+import { type ScheduleSurfaceProvider } from "../surfaces"
 import {
-  type ActiveScheduleSurfaceMention,
-  findActiveScheduleSurfaceMention,
-  getScheduleSurfaceSuggestions,
-  normalizeCompletedScheduleSurfaceMentions,
-  replaceScheduleSurfaceMention,
-  type ScheduleSurfaceProvider,
-} from "../surfaces"
+  createScheduleInstructionDocument,
+  serializeScheduleInstructionDocument,
+} from "./document"
+import {
+  useExternalInstructionValue,
+  useInstructionAutocompleteA11y,
+  useLatestInstructionRefs,
+} from "./effects"
+import { ScheduleSurfaceExtension } from "./extension"
+import {
+  insertSurfaceSuggestion,
+  replaceCompletedSurfaceMention,
+} from "./input"
+import { handleSuggestionKey, updateSuggestionIndex } from "./keys"
+import {
+  getInstructionSuggestionState,
+  type InstructionSuggestionState,
+} from "./suggest"
+import {
+  type InstructionRefs,
+  type ScheduleInstructionsFieldProps,
+} from "./types"
 
-type SelectionRange = {
-  end: number
-  start: number
-}
-
-export type InstructionState = ReturnType<typeof useInstructionState>
-export type InstructionHandlers = ReturnType<typeof useInstructionHandlers>
-
-export function useInstructionState(value: string) {
+export function useScheduleInstructionsEditor(
+  props: ScheduleInstructionsFieldProps
+) {
+  const refs = useInstructionRefs(props)
   const listboxId = useId()
-  const pendingCursorRef = useRef<number | null>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [selection, setSelection] = useState<SelectionRange>({
-    end: 0,
-    start: 0,
-  })
-  const activeMention =
-    selection.start === selection.end
-      ? findActiveScheduleSurfaceMention(value, selection.start)
-      : null
-  const suggestions =
-    activeMention === null
-      ? []
-      : getScheduleSurfaceSuggestions(activeMention.query)
-  const isAutocompleteOpen = suggestions.length > 0
-  const activeSuggestion = suggestions[activeIndex] ?? suggestions[0]
+  const [isEmpty, setIsEmpty] = useState(props.value === "")
+  const [suggestion, setSuggestion] =
+    useState<InstructionSuggestionState | null>(null)
+  const updateSuggestion = useCallback(
+    (editor: Editor, activeIndex = refs.suggestion.current?.activeIndex ?? 0) =>
+      setSuggestion(getInstructionSuggestionState(editor, activeIndex)),
+    [refs.suggestion]
+  )
+  const editor = useEditor(
+    createEditorOptions({
+      props,
+      refs,
+      setIsEmpty,
+      setSuggestion,
+      updateSuggestion,
+    })
+  )
 
-  useLayoutEffect(() => {
-    if (pendingCursorRef.current === null) {
-      return
-    }
+  useLatestInstructionRefs({ editor, props, refs, suggestion })
+  useExternalInstructionValue({ editor, props, setIsEmpty, updateSuggestion })
+  useInstructionAutocompleteA11y({ editor, listboxId, suggestion })
 
-    const cursor = pendingCursorRef.current
-    pendingCursorRef.current = null
-    textareaRef.current?.setSelectionRange(cursor, cursor)
-  })
+  const selectSuggestion = useCallback(
+    (provider: ScheduleSurfaceProvider) =>
+      insertSurfaceSuggestion({
+        editor,
+        provider,
+        readScope: props.readScope,
+        setSuggestion,
+        state: suggestion,
+      }),
+    [editor, props.readScope, suggestion]
+  )
 
   return {
-    activeIndex,
-    activeMention,
-    activeSuggestion,
-    isAutocompleteOpen,
+    editor,
+    isEmpty,
     listboxId,
-    pendingCursorRef,
-    setActiveIndex,
-    setSelection,
-    suggestions,
-    textareaRef,
+    selectSuggestion,
+    setActiveSuggestionIndex: (activeIndex: number) =>
+      updateSuggestionIndex(activeIndex, setSuggestion),
+    suggestion,
   }
 }
 
-export function useInstructionHandlers({
-  onValueChange,
-  state,
-  value,
+export const editorContentClassName =
+  "whitespace-pre-wrap break-words text-foreground selection:bg-informational/20"
+
+function useInstructionRefs(props: ScheduleInstructionsFieldProps) {
+  return {
+    editor: useRef<Editor | null>(null),
+    onBlur: useRef(props.onBlur),
+    onValueChange: useRef(props.onValueChange),
+    readScope: useRef(props.readScope),
+    suggestion: useRef<InstructionSuggestionState | null>(null),
+  }
+}
+
+function createEditorOptions({
+  props,
+  refs,
+  setIsEmpty,
+  setSuggestion,
+  updateSuggestion,
 }: {
-  onValueChange: (value: string) => void
-  state: InstructionState
-  value: string
-}) {
-  function selectSuggestion(
-    mention: ActiveScheduleSurfaceMention,
-    provider: ScheduleSurfaceProvider
-  ) {
-    const next = replaceScheduleSurfaceMention(value, mention, provider)
+  props: ScheduleInstructionsFieldProps
+  refs: InstructionRefs
+  setIsEmpty: Dispatch<SetStateAction<boolean>>
+  setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
+  updateSuggestion: (editor: Editor, activeIndex?: number) => void
+}): Parameters<typeof useEditor>[0] {
+  return {
+    content: createScheduleInstructionDocument({
+      description: props.value,
+      readScope: props.readScope,
+      surfaces: props.surfaces,
+    }),
+    editorProps: createEditorProps({ id: props.id, refs, setSuggestion }),
+    extensions,
+    immediatelyRender: false,
+    onBlur: () => refs.onBlur.current(),
+    onSelectionUpdate: ({ editor }) => updateSuggestion(editor),
+    onUpdate: ({ editor }) => {
+      const nextValue = serializeScheduleInstructionDocument(editor.getJSON())
 
-    state.pendingCursorRef.current = next.cursor
-    state.setSelection({ end: next.cursor, start: next.cursor })
-    onValueChange(next.text)
+      setIsEmpty(nextValue.description === "")
+      refs.onValueChange.current(nextValue)
+      updateSuggestion(editor)
+    },
   }
-
-  function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
-    const rawValue = event.target.value
-    const cursor = getCursorAfterCompletedMentionNormalization(
-      rawValue,
-      event.target.selectionStart
-    )
-
-    state.pendingCursorRef.current = cursor
-    state.setSelection({ end: cursor, start: cursor })
-    onValueChange(normalizeCompletedScheduleSurfaceMentions(rawValue))
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    handleAutocompleteKey({ event, selectSuggestion, state })
-  }
-
-  function updateSelection(target: HTMLTextAreaElement) {
-    state.setSelection({
-      end: target.selectionEnd,
-      start: target.selectionStart,
-    })
-  }
-
-  return { handleChange, handleKeyDown, selectSuggestion, updateSelection }
 }
 
-function handleAutocompleteKey({
-  event,
-  selectSuggestion,
-  state,
+const extensions = [
+  StarterKit.configure({
+    blockquote: false,
+    bold: false,
+    bulletList: false,
+    code: false,
+    codeBlock: false,
+    dropcursor: false,
+    gapcursor: false,
+    heading: false,
+    horizontalRule: false,
+    italic: false,
+    listItem: false,
+    orderedList: false,
+    strike: false,
+  }),
+  ScheduleSurfaceExtension,
+]
+
+function createEditorProps({
+  id,
+  refs,
+  setSuggestion,
 }: {
-  event: KeyboardEvent<HTMLTextAreaElement>
-  selectSuggestion: (
-    mention: ActiveScheduleSurfaceMention,
-    provider: ScheduleSurfaceProvider
-  ) => void
-  state: InstructionState
+  id: string
+  refs: InstructionRefs
+  setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
 }) {
-  if (!state.isAutocompleteOpen || state.activeMention === null) {
-    return
+  return {
+    attributes: {
+      "aria-autocomplete": "list",
+      "aria-expanded": "false",
+      "aria-multiline": "true",
+      class: editorContentClassName,
+      id,
+      role: "textbox",
+      spellcheck: "true",
+    },
+    handleKeyDown: (_view: Editor["view"], event: KeyboardEvent) =>
+      handleSuggestionKey({
+        editor: refs.editor.current,
+        event,
+        readScope: refs.readScope.current,
+        setSuggestion,
+        state: refs.suggestion.current,
+      }),
+    handleTextInput: (
+      view: Editor["view"],
+      from: number,
+      to: number,
+      text: string
+    ) =>
+      replaceCompletedSurfaceMention({
+        from,
+        readScope: refs.readScope.current,
+        text,
+        to,
+        view,
+      }),
   }
-
-  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-    event.preventDefault()
-    state.setActiveIndex((index) =>
-      getNextActiveIndex(index, event.key, state.suggestions.length)
-    )
-    return
-  }
-
-  if (event.key === "Enter" || event.key === "Tab") {
-    event.preventDefault()
-
-    if (state.activeSuggestion !== undefined) {
-      selectSuggestion(state.activeMention, state.activeSuggestion.provider)
-    }
-    return
-  }
-
-  if (event.key === "Escape") {
-    event.preventDefault()
-    state.setSelection({ end: -1, start: -1 })
-  }
-}
-
-function getNextActiveIndex(index: number, key: string, length: number) {
-  return key === "ArrowDown"
-    ? (index + 1) % length
-    : (index - 1 + length) % length
-}
-
-function getCursorAfterCompletedMentionNormalization(
-  value: string,
-  cursor: number
-) {
-  return normalizeCompletedScheduleSurfaceMentions(value.slice(0, cursor))
-    .length
 }

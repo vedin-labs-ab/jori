@@ -129,7 +129,7 @@ export function replaceScheduleSurfaceMention(
   mention: ActiveScheduleSurfaceMention,
   provider: ScheduleSurfaceProvider
 ) {
-  const replacement = `@${getScheduleSurfaceLabel(provider)}`
+  const replacement = getScheduleSurfaceLabel(provider)
   const suffix = text.slice(mention.end)
   const separator =
     suffix === "" || isMentionNameCharacter(suffix[0]) ? " " : ""

@@ -30,23 +30,23 @@ describe("schedule integration marker parsing", () => {
   test("normalizes recognized markers to canonical labels", () => {
     expect(
       normalizeScheduleSurfaceMentions("Post to @slack and create @notion page")
-    ).toBe("Post to @Slack and create @Notion page")
+    ).toBe("Post to Slack and create Notion page")
   })
 
   test("normalizes bare markers to canonical labels", () => {
     expect(
       normalizeScheduleSurfaceMentions("Post to slack and create notion page")
-    ).toBe("Post to @Slack and create @Notion page")
+    ).toBe("Post to Slack and create Notion page")
   })
 
   test("normalizes completed markers as soon as the user types a boundary", () => {
     expect(
       normalizeCompletedScheduleSurfaceMentions("Post to @github, then stop")
-    ).toBe("Post to @GitHub, then stop")
+    ).toBe("Post to GitHub, then stop")
 
     expect(
       normalizeCompletedScheduleSurfaceMentions("Post to github, then stop")
-    ).toBe("Post to @GitHub, then stop")
+    ).toBe("Post to GitHub, then stop")
   })
 
   test("keeps active marker text untouched until a boundary is typed", () => {
@@ -60,13 +60,13 @@ describe("schedule integration marker parsing", () => {
 
   test("normalizes close marker typos only when the match is clear", () => {
     expect(normalizeCompletedScheduleSurfaceMentions("Open @githb ")).toBe(
-      "Open @GitHub "
+      "Open GitHub "
     )
     expect(normalizeCompletedScheduleSurfaceMentions("Use @go ")).toBe(
       "Use @go "
     )
     expect(normalizeCompletedScheduleSurfaceMentions("Open githb ")).toBe(
-      "Open @GitHub "
+      "Open GitHub "
     )
     expect(normalizeCompletedScheduleSurfaceMentions("Use git ")).toBe(
       "Use git "
@@ -115,8 +115,8 @@ describe("schedule integration marker autocomplete", () => {
         "linear"
       )
     ).toEqual({
-      cursor: 16,
-      text: "Send to @Linear ",
+      cursor: 15,
+      text: "Send to Linear ",
     })
 
     expect(
@@ -126,8 +126,8 @@ describe("schedule integration marker autocomplete", () => {
         "github"
       )
     ).toEqual({
-      cursor: 13,
-      text: "Send @GitHub ",
+      cursor: 12,
+      text: "Send GitHub ",
     })
   })
 

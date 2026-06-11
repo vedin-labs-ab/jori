@@ -22,6 +22,16 @@ export function normalizeCompletedScheduleSurfaceMentions(text: string) {
   return normalizeSurfaceMentions(text, { includeEnd: false })
 }
 
+export function findCompletedScheduleSurfaceMention(
+  text: string
+): MentionMatch | null {
+  return (
+    readMentionReplacements(text, { includeEnd: true }).find(
+      (replacement) => replacement.end === text.length
+    ) ?? null
+  )
+}
+
 function normalizeSurfaceMentions(text: string, options: NormalizationOptions) {
   const replacements = readMentionReplacements(text, options)
 
@@ -188,7 +198,7 @@ function canNormalizeEnd(
 function toMentionReplacement(match: MentionMatch): MentionReplacement {
   return {
     ...match,
-    text: `@${getScheduleSurfaceLabel(match.provider)}`,
+    text: getScheduleSurfaceLabel(match.provider),
   }
 }
 

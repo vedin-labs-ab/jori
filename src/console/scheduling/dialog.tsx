@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -12,11 +13,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { IntegrationAccessFields } from "./access"
 import { createScheduleDialogActions } from "./actions"
 import { ScheduleInstructionsField } from "./instructions"
 import { ScheduleDateTimePicker } from "./picker"
 import { RecurringFields } from "./recurring"
+import { type ScheduleReadScope } from "./surfaces"
 import { type Schedule, type ScheduleFormValues } from "./types"
 
 export function ScheduleDialog({
@@ -42,7 +43,7 @@ export function ScheduleDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>
             {schedule === undefined ? "New schedule" : "Edit schedule"}
@@ -69,17 +70,17 @@ export function ScheduleDialog({
               id="schedule-description"
               value={values.description}
               onBlur={actions.normalizeDescription}
-              onValueChange={actions.updateDescription}
-              placeholder="Summarize shipped @GitHub changes and post the result to @Slack."
-              rows={4}
+              onValueChange={(next) =>
+                actions.updateInstructions(next.description, next.surfaces)
+              }
+              placeholder="Summarize shipped GitHub changes and post the result to Slack."
+              readScope={values.readScope}
+              surfaces={values.surfaces}
             />
           </div>
-          <IntegrationAccessFields
-            onInsertSurface={actions.insertSurface}
+          <ReadScopeField
             onReadScopeChange={actions.updateReadScope}
-            onRemoveSurface={actions.removeSurface}
-            onSurfaceAccessChange={actions.updateSurfaceAccess}
-            values={values}
+            readScope={values.readScope}
           />
           <ScheduleTiming onValuesChange={onValuesChange} values={values} />
         </div>
@@ -99,6 +100,34 @@ export function ScheduleDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function ReadScopeField({
+  onReadScopeChange,
+  readScope,
+}: {
+  onReadScopeChange: (readScope: ScheduleReadScope) => void
+  readScope: ScheduleReadScope
+}) {
+  return (
+    <div className="flex items-start gap-2 rounded-md border bg-muted/20 p-2">
+      <Checkbox
+        checked={readScope === "allConnected"}
+        id="schedule-all-reads"
+        onCheckedChange={(checked) =>
+          onReadScopeChange(checked === true ? "allConnected" : "selected")
+        }
+      />
+      <div className="grid gap-0.5">
+        <Label htmlFor="schedule-all-reads" className="font-normal text-xs">
+          Allow reading from any connected integration
+        </Label>
+        <p className="text-muted-foreground text-xs">
+          Writes still require a badge set to Write or Both.
+        </p>
+      </div>
+    </div>
   )
 }
 

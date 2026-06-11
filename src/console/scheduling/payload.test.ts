@@ -8,7 +8,7 @@ describe("schedule payload", () => {
       createScheduleArgs({
         ...emptyScheduleForm,
         name: "Weekly release summary",
-        description: "Summarize @GitHub and post to @Slack.",
+        description: "Summarize GitHub and post to Slack.",
         surfaces: [
           { provider: "github", access: "read" },
           { provider: "slack", access: "write" },
@@ -17,7 +17,7 @@ describe("schedule payload", () => {
     ).toEqual({
       args: {
         name: "Weekly release summary",
-        description: "Summarize @GitHub and post to @Slack.",
+        description: "Summarize GitHub and post to Slack.",
         output: {
           readScope: "selected",
           surfaces: [
@@ -38,11 +38,11 @@ describe("schedule payload", () => {
       createScheduleArgs({
         ...emptyScheduleForm,
         name: "Weekly release summary",
-        description: "Summarize @GitHub.",
+        description: "Summarize GitHub.",
         surfaces: [{ provider: "github", access: "" }],
       })
     ).toEqual({
-      error: "Choose read, write, or both for each integration.",
+      error: "Choose read, write, or both for each integration badge.",
     })
   })
 
@@ -51,7 +51,7 @@ describe("schedule payload", () => {
       createScheduleArgs({
         ...emptyScheduleForm,
         name: "Weekly release summary",
-        description: "Summarize @GitHub.",
+        description: "Summarize GitHub.",
         surfaces: [{ provider: "github", access: "read" }],
       })
     ).toEqual({

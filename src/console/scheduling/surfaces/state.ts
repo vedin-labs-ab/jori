@@ -1,6 +1,7 @@
 import {
   getScheduleSurfaceLabel,
   type ScheduleReadScope,
+  type ScheduleSurfaceAccess,
   type ScheduleSurfaceFormValue,
   type ScheduleSurfaceProvider,
 } from "./catalog"
@@ -15,7 +16,7 @@ export function insertScheduleSurfaceMention(
     return text
   }
 
-  const marker = `@${getScheduleSurfaceLabel(provider)}`
+  const marker = getScheduleSurfaceLabel(provider)
   const separator = text === "" || /\s$/.test(text) ? "" : " "
 
   return `${text}${separator}${marker}`
@@ -61,7 +62,7 @@ export function syncScheduleSurfaces(
 
   return findScheduleSurfaceMentions(text).map((provider) => ({
     provider,
-    access: existing.get(provider) ?? defaultAccess(readScope),
+    access: existing.get(provider) ?? defaultScheduleSurfaceAccess(readScope),
   }))
 }
 
@@ -86,6 +87,34 @@ export function hasScheduleWriteSurface(surfaces: ScheduleSurfaceFormValue[]) {
   )
 }
 
-function defaultAccess(readScope: ScheduleReadScope) {
+export function defaultScheduleSurfaceAccess(readScope: ScheduleReadScope) {
   return readScope === "allConnected" ? "read" : ""
+}
+
+export function getNextScheduleSurfaceAccess(
+  access: ScheduleSurfaceFormValue["access"]
+): ScheduleSurfaceAccess {
+  if (access === "") {
+    return "read"
+  }
+
+  if (access === "read") {
+    return "write"
+  }
+
+  return access === "write" ? "both" : "read"
+}
+
+export function getScheduleSurfaceAccessLabel(
+  access: ScheduleSurfaceFormValue["access"]
+) {
+  if (access === "") {
+    return "Choose access"
+  }
+
+  if (access === "both") {
+    return "Read/write"
+  }
+
+  return access === "read" ? "Read" : "Write"
 }

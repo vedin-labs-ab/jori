@@ -110,11 +110,11 @@ function buildBaseArgs(values: ScheduleFormValues): ArgsResult<ScheduleArgs> {
   }
 
   if (surfaces.length === 0) {
-    return { error: "Mention at least one integration with @." }
+    return { error: "Add at least one integration badge." }
   }
 
   if (surfaces.some((surface) => surface.access === "")) {
-    return { error: "Choose read, write, or both for each integration." }
+    return { error: "Choose read, write, or both for each integration badge." }
   }
 
   if (!hasScheduleWriteSurface(surfaces)) {

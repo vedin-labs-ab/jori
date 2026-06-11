@@ -1,53 +1,42 @@
-import { Textarea } from "@/components/ui/textarea"
-import { InstructionAutocomplete } from "./autocomplete"
-import { InstructionHighlight } from "./highlight"
-import { useInstructionHandlers, useInstructionState } from "./state"
+import { EditorContent } from "@tiptap/react"
+import { cn } from "@/lib/utils"
+import { useScheduleInstructionsEditor } from "./state"
+import { InstructionSuggestions } from "./suggestions"
+import { type ScheduleInstructionsFieldProps } from "./types"
 
-export function ScheduleInstructionsField({
-  id,
-  onBlur,
-  onValueChange,
-  placeholder,
-  rows,
-  value,
-}: {
-  id: string
-  onBlur: () => void
-  onValueChange: (value: string) => void
-  placeholder: string
-  rows: number
-  value: string
-}) {
-  const state = useInstructionState(value)
-  const handlers = useInstructionHandlers({ onValueChange, state, value })
+export function ScheduleInstructionsField(
+  props: ScheduleInstructionsFieldProps
+) {
+  const {
+    editor,
+    isEmpty,
+    listboxId,
+    selectSuggestion,
+    setActiveSuggestionIndex,
+    suggestion,
+  } = useScheduleInstructionsEditor(props)
 
   return (
     <div className="relative">
-      <InstructionHighlight value={value} />
-      <Textarea
-        aria-activedescendant={
-          state.isAutocompleteOpen
-            ? `${state.listboxId}-${state.activeIndex}`
-            : undefined
-        }
-        aria-autocomplete="list"
-        aria-controls={state.isAutocompleteOpen ? state.listboxId : undefined}
-        aria-expanded={state.isAutocompleteOpen}
-        className="relative z-10 bg-transparent text-transparent caret-foreground selection:bg-informational/20"
-        id={id}
-        onBlur={onBlur}
-        onChange={handlers.handleChange}
-        onClick={(event) => handlers.updateSelection(event.currentTarget)}
-        onFocus={(event) => handlers.updateSelection(event.currentTarget)}
-        onKeyDown={handlers.handleKeyDown}
-        onKeyUp={(event) => handlers.updateSelection(event.currentTarget)}
-        placeholder={placeholder}
-        ref={state.textareaRef}
-        rows={rows}
-        spellCheck={true}
-        value={value}
+      <EditorContent
+        className={cn(
+          "rounded-md border border-input bg-transparent text-sm shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30 md:text-xs/relaxed",
+          "[&_.tiptap]:min-h-24 [&_.tiptap]:px-2 [&_.tiptap]:py-2 [&_.tiptap]:outline-none",
+          "[&_.tiptap>p]:my-0 [&_.tiptap>p]:min-h-[1.5em]"
+        )}
+        editor={editor}
       />
-      <InstructionAutocomplete handlers={handlers} state={state} />
+      {isEmpty ? (
+        <div className="pointer-events-none absolute top-2 left-2 text-muted-foreground text-sm md:text-xs/relaxed">
+          {props.placeholder}
+        </div>
+      ) : null}
+      <InstructionSuggestions
+        listboxId={listboxId}
+        onActiveIndexChange={setActiveSuggestionIndex}
+        onSelect={selectSuggestion}
+        state={suggestion}
+      />
     </div>
   )
 }
