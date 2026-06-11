@@ -55,7 +55,7 @@ function SourcePart({
   label: string
 }) {
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className="inline-flex items-center gap-1">
       <ProviderLogo provider={label} />
       <span className={isEmphasized ? "font-medium text-foreground" : ""}>
         {label}
