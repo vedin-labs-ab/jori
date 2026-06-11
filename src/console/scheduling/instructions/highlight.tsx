@@ -30,5 +30,5 @@ export function InstructionHighlight({ value }: { value: string }) {
 function getHighlightClassName(provider: ScheduleSurfaceProvider | undefined) {
   return provider === undefined
     ? "text-foreground"
-    : "rounded-[3px] bg-informational/10 px-0.5 font-semibold text-informational ring-1 ring-informational/20"
+    : "text-informational underline decoration-informational/40 underline-offset-2"
 }

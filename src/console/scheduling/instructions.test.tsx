@@ -68,11 +68,24 @@ describe("schedule instructions field normalization", () => {
   })
 })
 
-function renderInstructionsField() {
+describe("schedule instructions field highlighting", () => {
+  test("keeps marker highlights metric-safe for caret alignment", () => {
+    const field = renderInstructionsField("Post to @GitHub")
+    const marker = field.container.querySelector(
+      '[aria-hidden="true"] span[class*="text-informational"]'
+    )
+
+    expect(marker?.className).toContain("underline")
+    expect(marker?.className).not.toMatch(/\b(bg|font|px|ring)-/)
+  })
+})
+
+function renderInstructionsField(value = "") {
   const onValueChange = vi.fn()
-  const view = renderInstructionsFieldWithValue("", onValueChange)
+  const view = renderInstructionsFieldWithValue(value, onValueChange)
 
   return {
+    container: view.container,
     input: screen.getByRole("textbox") as HTMLTextAreaElement,
     onValueChange,
     rerender: (value: string) =>
