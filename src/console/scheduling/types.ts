@@ -13,10 +13,24 @@ export const scheduleFilterOptions = [
 
 export type ScheduleFilter = (typeof scheduleFilterOptions)[number]["value"]
 
+export const repeatOptions = [
+  { label: "Daily", value: "daily" },
+  { label: "Weekdays", value: "weekdays" },
+  { label: "Weekly", value: "weekly" },
+  { label: "Monthly", value: "monthly" },
+  { label: "Custom", value: "custom" },
+] as const
+
+export type RepeatMode = (typeof repeatOptions)[number]["value"]
+
 export type ScheduleFormValues = {
   name: string
   description: string
   type: Schedule["type"]
+  repeat: RepeatMode
+  time: string
+  weekday: string
+  monthDay: string
   cron: string
   runAt: string
   channelId: string
@@ -27,6 +41,10 @@ export const emptyScheduleForm: ScheduleFormValues = {
   name: "",
   description: "",
   type: "recurring",
+  repeat: "daily",
+  time: "09:00",
+  weekday: "1",
+  monthDay: "1",
   cron: "",
   runAt: "",
   channelId: "",

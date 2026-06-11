@@ -1,3 +1,4 @@
+import { buildRecurringCron, classifyCron } from "./cron"
 import { toDatetimeLocal } from "./format"
 import {
   emptyScheduleForm,
@@ -28,7 +29,7 @@ export function scheduleFormValues(
     name: schedule.name,
     description: schedule.description,
     type: schedule.type,
-    cron: schedule.cron ?? "",
+    ...classifyCron(schedule.cron),
     runAt: schedule.runAt === undefined ? "" : toDatetimeLocal(schedule.runAt),
     channelId: schedule.output.channelId,
     threadId: schedule.output.threadId ?? "",
@@ -113,20 +114,13 @@ function buildScheduleSpec(
   values: ScheduleFormValues
 ): { schedule: ScheduleSpec } | { error: string } {
   if (values.type === "recurring") {
-    const cron = values.cron.trim()
+    const built = buildRecurringCron(values)
 
-    if (cron === "") {
-      return { error: "Cron expression is required." }
+    if ("error" in built) {
+      return built
     }
 
-    if (cron.split(/\s+/).length !== 5) {
-      return {
-        error:
-          "Cron expressions need five fields: minute, hour, day of month, month, and day of week.",
-      }
-    }
-
-    return { schedule: { type: "recurring", cron } }
+    return { schedule: { type: "recurring", cron: built.cron } }
   }
 
   if (values.runAt === "") {
@@ -152,7 +146,9 @@ function hasTimingChanged(values: ScheduleFormValues, existing: Schedule) {
   }
 
   if (values.type === "recurring") {
-    return values.cron.trim() !== (existing.cron ?? "")
+    const built = buildRecurringCron(values)
+
+    return "error" in built || built.cron !== (existing.cron ?? "")
   }
 
   return values.runAt !== scheduleFormValues(existing).runAt

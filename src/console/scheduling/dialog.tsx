@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { RecurringFields } from "./recurring"
 import { type Schedule, type ScheduleFormValues } from "./types"
 
 export function ScheduleDialog({
@@ -137,20 +138,8 @@ function ScheduleTiming({
         <TabsTrigger value="recurring">Recurring</TabsTrigger>
         <TabsTrigger value="oneShot">One-time</TabsTrigger>
       </TabsList>
-      <TabsContent value="recurring" className="grid gap-2">
-        <Label htmlFor="schedule-cron">Cron expression</Label>
-        <Input
-          id="schedule-cron"
-          className="font-mono"
-          value={values.cron}
-          onChange={(event) =>
-            onValuesChange({ ...values, cron: event.target.value })
-          }
-          placeholder="0 9 * * 1-5"
-        />
-        <p className="text-muted-foreground text-xs">
-          Five fields in UTC: minute, hour, day of month, month, day of week.
-        </p>
+      <TabsContent value="recurring">
+        <RecurringFields onValuesChange={onValuesChange} values={values} />
       </TabsContent>
       <TabsContent value="oneShot" className="grid gap-2">
         <Label htmlFor="schedule-run-at">Run at</Label>

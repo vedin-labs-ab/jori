@@ -2,6 +2,7 @@ import { Clock, MessageSquare, Pencil, Repeat2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { SeparatorDot } from "../dot"
+import { describeCron } from "./cron"
 import { DeleteSchedule } from "./delete"
 import { absoluteTime, relativeTime } from "./format"
 import { type Schedule } from "./types"
@@ -78,7 +79,13 @@ export function ScheduleRow({
 
 function ScheduleTiming({ schedule }: { schedule: Schedule }) {
   if (schedule.type === "recurring") {
-    return <span className="font-mono">{schedule.cron} UTC</span>
+    const description = describeCron(schedule.cron)
+
+    if (description === null) {
+      return <span className="font-mono">{schedule.cron} UTC</span>
+    }
+
+    return <span>{description}</span>
   }
 
   return (
