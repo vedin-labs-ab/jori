@@ -114,6 +114,7 @@ function approvalSummary(
   return {
     delivery: deliveryLabel(approval.delivery),
     expiresAt: approval.expiresAt,
+    id: approval._id,
     provider: approval.provider,
     state,
     summary: approval.summary,

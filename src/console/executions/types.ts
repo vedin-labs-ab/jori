@@ -42,6 +42,7 @@ export type ExecutionItem = {
   traceFileId?: string
   error?: string
   approval: {
+    id: string
     state: ApprovalState
     tool: string
     summary: string

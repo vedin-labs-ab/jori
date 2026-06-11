@@ -1,8 +1,12 @@
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import {
+  type ActionCtx,
+  type MutationCtx,
+  type QueryCtx,
+} from "../_generated/server"
 import { readClerkOrganizationId } from "../identity/users"
 
 export async function requireTenantAccess(
-  ctx: QueryCtx | MutationCtx,
+  ctx: QueryCtx | MutationCtx | ActionCtx,
   tenantId: string
 ) {
   const access = await checkTenantAccess(ctx, tenantId)
@@ -15,7 +19,7 @@ export async function requireTenantAccess(
 }
 
 export async function checkTenantAccess(
-  ctx: QueryCtx | MutationCtx,
+  ctx: QueryCtx | MutationCtx | ActionCtx,
   tenantId: string
 ) {
   const identity = await ctx.auth.getUserIdentity()

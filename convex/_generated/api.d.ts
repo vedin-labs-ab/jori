@@ -9,6 +9,7 @@
  */
 
 import type * as approvals_approvals from "../approvals/approvals.js";
+import type * as approvals_console from "../approvals/console.js";
 import type * as approvals_runtime from "../approvals/runtime.js";
 import type * as attention_activations from "../attention/activations.js";
 import type * as broker_approval_args from "../broker/approval/args.js";
@@ -158,6 +159,7 @@ import type * as providers_notion_signing from "../providers/notion/signing.js";
 import type * as providers_oauth from "../providers/oauth.js";
 import type * as providers_signing from "../providers/signing.js";
 import type * as providers_slack_approval_blocks from "../providers/slack/approval/blocks.js";
+import type * as providers_slack_approval_cards from "../providers/slack/approval/cards.js";
 import type * as providers_slack_approval_labels from "../providers/slack/approval/labels.js";
 import type * as providers_slack_approvals from "../providers/slack/approvals.js";
 import type * as providers_slack_config from "../providers/slack/config.js";
@@ -187,6 +189,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "approvals/approvals": typeof approvals_approvals;
+  "approvals/console": typeof approvals_console;
   "approvals/runtime": typeof approvals_runtime;
   "attention/activations": typeof attention_activations;
   "broker/approval/args": typeof broker_approval_args;
@@ -336,6 +339,7 @@ declare const fullApi: ApiFromModules<{
   "providers/oauth": typeof providers_oauth;
   "providers/signing": typeof providers_signing;
   "providers/slack/approval/blocks": typeof providers_slack_approval_blocks;
+  "providers/slack/approval/cards": typeof providers_slack_approval_cards;
   "providers/slack/approval/labels": typeof providers_slack_approval_labels;
   "providers/slack/approvals": typeof providers_slack_approvals;
   "providers/slack/config": typeof providers_slack_config;

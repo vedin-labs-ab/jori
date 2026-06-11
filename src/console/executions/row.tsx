@@ -37,7 +37,10 @@ export function ExecutionRow({
           onClick={() => setIsOpen((current) => !current)}
           type="button"
         >
-          <StatusIcon status={execution.status} />
+          <StatusIcon
+            approvalState={execution.approval?.state}
+            status={execution.status}
+          />
           <ExecutionTitle execution={execution} />
           <ExecutionMeta
             durationMs={durationMs}
@@ -54,11 +57,7 @@ export function ExecutionRow({
         ) : null}
       </div>
       {isOpen ? (
-        <ExpandedExecution
-          execution={execution}
-          now={now}
-          tenantId={tenantId}
-        />
+        <ExpandedExecution execution={execution} tenantId={tenantId} />
       ) : null}
     </article>
   )
@@ -100,11 +99,9 @@ function ExecutionMeta({
 
 function ExpandedExecution({
   execution,
-  now,
   tenantId,
 }: {
   execution: ExecutionItem
-  now: number
   tenantId: string
 }) {
   return (
@@ -115,7 +112,7 @@ function ExpandedExecution({
         value={execution.objective ?? execution.title}
       />
       {execution.approval !== null ? (
-        <ApprovalCallout approval={execution.approval} now={now} />
+        <ApprovalCallout approval={execution.approval} tenantId={tenantId} />
       ) : null}
       {execution.error !== undefined ? (
         <ErrorDetail value={execution.error} />

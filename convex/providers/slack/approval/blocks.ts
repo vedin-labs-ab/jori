@@ -1,6 +1,12 @@
 import { type SlackApprovalDecisionResult } from "../../../approvals/runtime"
 import { type SlackBlock } from "../../../broker/providers/slack"
 import { type Provider } from "../../catalog"
+import {
+  createApprovalCard,
+  formatSlackTime,
+  toSlackTimestamp,
+  truncateSlackText,
+} from "./cards"
 import { getToolLabel } from "./labels"
 
 export type SlackApprovalInteraction = {
@@ -42,6 +48,20 @@ export function createSlackDecisionResponse(
     replace_original: true,
     text: createDecisionFallbackText(result),
     blocks: createDecisionBlocks(interaction, result),
+  }
+}
+
+export function createSlackConsoleDecisionResponse(
+  result: SlackApprovalDecisionResult
+) {
+  if (result.status === "expired" && result.approval !== undefined) {
+    return createSlackExpirationResponse(result.approval)
+  }
+
+  return {
+    replace_original: true,
+    text: createDecisionFallbackText(result),
+    blocks: createConsoleDecisionBlocks(result),
   }
 }
 
@@ -132,30 +152,25 @@ function createDecisionBlocks(
   ]
 }
 
-function createApprovalCard(args: {
-  icon: string
-  title: string
-  subtitle?: string
-  body: string
-  subtext?: string
-  actions?: Record<string, unknown>[]
-}): SlackBlock {
-  return {
-    type: "card",
-    slack_icon: {
-      type: "icon",
-      name: args.icon,
-    },
-    title: markdownText(args.title),
-    ...(args.subtitle === undefined
-      ? {}
-      : { subtitle: markdownText(args.subtitle) }),
-    body: markdownText(args.body),
-    ...(args.subtext === undefined
-      ? {}
-      : { subtext: markdownText(args.subtext) }),
-    ...(args.actions === undefined ? {} : { actions: args.actions }),
-  }
+function createConsoleDecisionBlocks(
+  result: SlackApprovalDecisionResult
+): SlackBlock[] {
+  const title = getDecisionTitle(result.status, result.approval?.decision)
+  const time = formatSlackTime(Math.floor(Date.now() / 1000))
+  const summary = result.approval?.summary
+  const subtitle =
+    result.approval === undefined
+      ? undefined
+      : getToolLabel(result.approval.tool)
+
+  return [
+    createApprovalCard({
+      icon: getDecisionIcon(result.status, result.approval?.decision),
+      title: `${title} in Milo at ${time}`,
+      subtitle,
+      body: summary ?? result.message,
+    }),
+  ]
 }
 
 function createApprovalActions(code: string) {
@@ -182,14 +197,6 @@ function createApprovalActions(code: string) {
       value: JSON.stringify({ code }),
     },
   ]
-}
-
-function markdownText(text: string) {
-  return {
-    type: "mrkdwn",
-    text,
-    verbatim: false,
-  }
 }
 
 function getDecisionTitle(
@@ -224,23 +231,4 @@ function getDecisionIcon(
 
 function formatSlackActor(actorId: string | undefined) {
   return actorId === undefined ? "unknown user" : `<@${actorId}>`
-}
-
-function formatSlackTime(timestamp: number) {
-  const fallback = new Date(timestamp * 1000).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  })
-
-  return `<!date^${timestamp}^{time}|${fallback}>`
-}
-
-function toSlackTimestamp(timestampMs: number) {
-  return Math.floor(timestampMs / 1000)
-}
-
-function truncateSlackText(value: string, maximumLength: number) {
-  return value.length <= maximumLength
-    ? value
-    : `${value.slice(0, maximumLength - 3)}...`
 }

@@ -111,10 +111,27 @@ export async function decideSlackApproval(
     }
   }
 
-  const result = await ctx.runMutation(internal.approvals.approvals.decide, {
-    approvalId: target.approval._id,
-    decision: args.decision,
+  return await decideApproval(ctx, {
+    approval: target.approval,
     decidedBy: args.actor,
+    decision: args.decision,
+    integration: target.integration,
+  })
+}
+
+export async function decideApproval(
+  ctx: ActionCtx,
+  args: {
+    approval: Doc<"approvals">
+    decidedBy: Actor
+    decision: "approved" | "denied"
+    integration?: Doc<"integrations">
+  }
+): Promise<SlackApprovalDecisionResult> {
+  const result = await ctx.runMutation(internal.approvals.approvals.decide, {
+    approvalId: args.approval._id,
+    decision: args.decision,
+    decidedBy: args.decidedBy,
   })
 
   if (result.status === "approved") {
@@ -122,13 +139,13 @@ export async function decideSlackApproval(
       0,
       internal.executions.approvals.runApprovedExecution,
       {
-        approvalId: target.approval._id,
+        approvalId: args.approval._id,
       }
     )
 
     return {
       status: "approved",
-      integration: target.integration,
+      integration: args.integration,
       approval: result.approval,
       message: "Approved. Continuing the run.",
     }
@@ -137,7 +154,7 @@ export async function decideSlackApproval(
   if (result.status === "denied") {
     return {
       status: "denied",
-      integration: target.integration,
+      integration: args.integration,
       approval: result.approval,
       message: "Denied.",
     }
@@ -145,7 +162,7 @@ export async function decideSlackApproval(
 
   return {
     status: result.status,
-    integration: target.integration,
+    integration: args.integration,
     approval: result.approval,
     message: decisionStatusMessage(result.status, result.approval),
   }

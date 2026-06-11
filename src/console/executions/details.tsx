@@ -8,17 +8,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { absoluteTime, approvalLabel, formatDuration } from "./format"
+import { ApprovalActions } from "./approval"
+import { absoluteTime, approvalLabel } from "./format"
 import { type ExecutionItem } from "./types"
 
 const copyResetDelayMs = 1200
 
 export function ApprovalCallout({
   approval,
-  now,
+  tenantId,
 }: {
   approval: NonNullable<ExecutionItem["approval"]>
-  now: number
+  tenantId: string
 }) {
   return (
     <div className="m-3 rounded-md border border-amber-700/20 bg-amber-700/5 p-3">
@@ -28,36 +29,17 @@ export function ApprovalCallout({
           {approvalLabel(approval.state)}
         </div>
         <div className="grid gap-1 text-xs">
-          <p className="font-medium">
-            Tool: {approval.tool}
-            <ApprovalExpiry approval={approval} now={now} />
-          </p>
+          <p className="font-medium">Tool: {approval.tool}</p>
           <p className="text-muted-foreground">{approval.summary}</p>
           {approval.delivery !== undefined ? (
             <p className="text-muted-foreground">{approval.delivery}</p>
           ) : null}
+          {approval.state === "pending" ? (
+            <ApprovalActions approval={approval} tenantId={tenantId} />
+          ) : null}
         </div>
       </div>
     </div>
-  )
-}
-
-function ApprovalExpiry({
-  approval,
-  now,
-}: {
-  approval: NonNullable<ExecutionItem["approval"]>
-  now: number
-}) {
-  if (approval.state !== "pending") {
-    return null
-  }
-
-  return (
-    <span className="font-normal text-muted-foreground">
-      {" "}
-      - expires in {formatDuration(Math.max(0, approval.expiresAt - now))}
-    </span>
   )
 }
 

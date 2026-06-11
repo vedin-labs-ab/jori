@@ -2,13 +2,14 @@ import {
   AlertCircle,
   CheckCircle2,
   Circle,
+  CircleAlert,
   Loader2,
   type LucideIcon,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "./format"
-import { type ExecutionStatus } from "./types"
+import { type ApprovalState, type ExecutionStatus } from "./types"
 
 const statusIconClasses = {
   completed: "text-emerald-800",
@@ -18,7 +19,17 @@ const statusIconClasses = {
   stopped: "text-muted-foreground",
 } satisfies Record<ExecutionStatus, string>
 
-export function StatusIcon({ status }: { status: ExecutionStatus }) {
+export function StatusIcon({
+  approvalState,
+  status,
+}: {
+  approvalState?: ApprovalState
+  status: ExecutionStatus
+}) {
+  if (approvalState === "pending") {
+    return <CircleAlert className="size-4 text-amber-900" />
+  }
+
   const Icon =
     status === "completed"
       ? CheckCircle2
