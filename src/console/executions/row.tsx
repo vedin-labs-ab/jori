@@ -1,5 +1,10 @@
 import { MessageCircleMore, Timer } from "lucide-react"
 import { useState } from "react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { ApprovalCallout } from "./approval"
 import {
   CodeBlockDetail,
@@ -69,9 +74,20 @@ export function ExecutionRow({
 }
 
 function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
+  const fullPrompt = execution.objective ?? execution.title
+
   return (
-    <div className="min-w-0 max-w-[72ch]">
-      <div className="truncate font-medium text-sm">{execution.title}</div>
+    <div className="min-w-0 max-w-[56ch]">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="block truncate font-medium text-sm">
+            {execution.title}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-[min(38rem,calc(100vw-2rem))] whitespace-pre-wrap break-words text-left leading-relaxed">
+          {fullPrompt}
+        </TooltipContent>
+      </Tooltip>
       <SourceParts parts={execution.sourceParts} />
     </div>
   )
