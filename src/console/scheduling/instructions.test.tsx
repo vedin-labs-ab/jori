@@ -64,6 +64,31 @@ describe("schedule instructions field", () => {
     expect(editorFrame?.className).toContain("[overflow-wrap:anywhere]")
   })
 
+  test("keeps text rows stable when badges are present", async () => {
+    const field = renderInstructionsField({
+      description: "Post GitHub results to Slack.",
+      surfaces: [
+        { provider: "github", access: "read" },
+        { provider: "slack", access: "write" },
+      ],
+    })
+
+    expect(await screen.findByRole("textbox")).toBeDefined()
+
+    const editorFrame = field.container.querySelector(".relative > div")
+    const badgeWrapper = field.container.querySelector(
+      "[data-schedule-surface-view]"
+    )
+    const badge = badgeWrapper?.querySelector('[data-slot="badge"]')
+
+    expect(editorFrame?.className).toContain("[&_.tiptap]:leading-6")
+    expect(editorFrame?.className).toContain("[&_.tiptap>p]:min-h-6")
+    expect(editorFrame?.className).toContain("[&_.tiptap>p]:leading-6")
+    expect(badgeWrapper?.className).toContain("align-middle")
+    expect(badge?.className).toContain("align-middle")
+    expect(badge?.className).toContain("leading-none")
+  })
+
   test("renders integration badges inside the editor", async () => {
     renderInstructionsField({
       description: "Post to @github.",

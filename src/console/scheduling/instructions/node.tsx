@@ -31,13 +31,13 @@ export function ScheduleSurfaceNodeView({
   return (
     <NodeViewWrapper
       as="span"
-      className="inline-flex align-baseline"
+      className="inline-flex align-middle"
       contentEditable={false}
       data-schedule-surface-view=""
     >
       <Badge
         className={cn(
-          "mx-0.5 h-5 gap-1.5 rounded-md px-1.5 align-baseline text-[0.6875rem]",
+          "mx-0.5 h-5 gap-1.5 rounded-md px-1.5 align-middle text-[0.6875rem] leading-none",
           getAccessClassName(access),
           selected && "ring-2 ring-ring/40"
         )}
