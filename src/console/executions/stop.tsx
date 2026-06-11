@@ -43,11 +43,11 @@ export function StopExecution({
             <Button
               aria-label="Stop execution"
               className={className}
-              size="icon-sm"
+              size="icon"
               type="button"
-              variant="ghost"
+              variant="destructive"
             >
-              <Square className="fill-current text-destructive" />
+              <Square className="fill-current" />
             </Button>
           </AlertDialogTrigger>
         </TooltipTrigger>

@@ -251,15 +251,15 @@ function StatusCaption({
   pulse?: boolean
 }) {
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className="inline-flex items-center gap-1">
       <span className="relative grid size-2.5 shrink-0 place-items-center">
         {pulse ? (
-          <span className="absolute size-1.5 animate-ping rounded-full bg-emerald-500 opacity-75" />
+          <span className="absolute size-1.5 animate-ping rounded-full bg-primary opacity-75" />
         ) : null}
         <span
           className={cn(
             "relative block size-1.5 rounded-full",
-            pulse ? "bg-emerald-500" : "bg-muted-foreground"
+            pulse ? "bg-primary" : "bg-muted-foreground"
           )}
         />
       </span>
