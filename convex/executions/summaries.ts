@@ -165,23 +165,27 @@ function sourceLabels({
 }) {
   if (schedule !== null) {
     return [
-      "Schedule",
-      schedule.type === "recurring" ? "Recurring" : "One shot",
+      `Triggered by ${schedule.type === "recurring" ? "recurring" : "scheduled"} task`,
+      schedule.name,
     ]
   }
 
   if (message !== null) {
+    const provider = providerLabel(integration?.provider)
+
     return [
-      providerLabel(integration?.provider),
-      message.type,
-      actorLabel(message.actor),
+      `Triggered by ${actorLabel(message.actor)} in`,
+      provider,
+      messageSurface(message.type),
     ].filter((part): part is string => part !== undefined && part !== "")
   }
 
   if (approval !== null) {
+    const provider = providerLabel(approval.provider)
+
     return [
-      providerLabel(approval.provider),
-      actorLabel(approval.requestedBy),
+      `Triggered by ${actorLabel(approval.requestedBy)} in`,
+      provider,
     ].filter((part): part is string => part !== undefined && part !== "")
   }
 
@@ -217,7 +221,7 @@ function triggerLabel(
 
 function actorLabel(actor: Actor | undefined) {
   if (actor === undefined) {
-    return undefined
+    return "someone"
   }
 
   if ("email" in actor && actor.email !== undefined) {
@@ -225,10 +229,16 @@ function actorLabel(actor: Actor | undefined) {
   }
 
   if ("userId" in actor) {
-    return actor.userId
+    return actor.name ?? actor.email ?? "a user"
   }
 
   return "provider" in actor ? actor.externalId : undefined
+}
+
+function messageSurface(type: string) {
+  const surface = type.replaceAll("_", " ").trim()
+
+  return surface === "" ? "message" : surface
 }
 
 function firstLine(text: string | undefined) {

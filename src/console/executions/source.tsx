@@ -34,41 +34,19 @@ export function ProviderLogo({
 }
 
 export function SourceParts({ parts }: { parts: string[] }) {
-  const visibleParts = visibleSourceParts(parts)
-
   return (
-    <div className="flex flex-wrap gap-x-2 gap-y-1 text-muted-foreground text-xs">
-      {visibleParts.map((part, index) => (
-        <SourcePart isProvider={index === 0} key={part} label={part} />
+    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-muted-foreground text-xs">
+      {parts.map((part) => (
+        <SourcePart key={part} label={part} />
       ))}
     </div>
   )
 }
 
-function visibleSourceParts(parts: string[]) {
-  if (providerLogos[parts[0] ?? ""] === undefined) {
-    return parts
-  }
-
-  if (parts.length <= 2) {
-    return [parts[0]].filter((part): part is string => Boolean(part))
-  }
-
-  return [parts[0], parts.at(-1)].filter((part): part is string =>
-    Boolean(part)
-  )
-}
-
-function SourcePart({
-  isProvider,
-  label,
-}: {
-  isProvider: boolean
-  label: string
-}) {
+function SourcePart({ label }: { label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <ProviderLogo provider={isProvider ? label : undefined} />
+      <ProviderLogo provider={label} />
       <span>{label}</span>
     </span>
   )
