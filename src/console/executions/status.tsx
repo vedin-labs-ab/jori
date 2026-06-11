@@ -6,7 +6,9 @@ import {
   ClockAlert,
   Loader2,
   type LucideIcon,
+  UserCheck,
 } from "lucide-react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "./format"
 import { type ApprovalState, type ExecutionStatus } from "./types"
@@ -58,14 +60,44 @@ export function StatusIcon({
 
 export function ApprovalBadge({
   expiresAt,
+  isVisible,
   now,
 }: {
   expiresAt: number
+  isVisible: boolean
   now: number
 }) {
+  const [shouldRender, setShouldRender] = useState(isVisible)
+
+  useEffect(() => {
+    if (isVisible) {
+      setShouldRender(true)
+      return
+    }
+
+    const timeout = window.setTimeout(() => setShouldRender(false), 200)
+
+    return () => window.clearTimeout(timeout)
+  }, [isVisible])
+
+  if (!shouldRender) {
+    return null
+  }
+
   return (
-    <span className="text-warning text-xs">
-      Needs approval · {formatDuration(Math.max(0, expiresAt - now))}
+    <span
+      aria-hidden={!isVisible}
+      className={cn(
+        "inline-flex origin-left items-center gap-1 text-warning text-xs transition-[opacity,transform] duration-200 ease-out",
+        isVisible
+          ? "scale-x-100 opacity-100"
+          : "pointer-events-none scale-x-95 opacity-0"
+      )}
+    >
+      <UserCheck className="size-3.5 shrink-0" />
+      <span>
+        Needs approval · {formatDuration(Math.max(0, expiresAt - now))}
+      </span>
     </span>
   )
 }

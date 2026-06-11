@@ -45,6 +45,7 @@ export function ExecutionRow({
           <ExecutionMeta
             durationMs={durationMs}
             execution={execution}
+            isOpen={isOpen}
             now={now}
           />
         </button>
@@ -79,16 +80,22 @@ function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
 function ExecutionMeta({
   durationMs,
   execution,
+  isOpen,
   now,
 }: {
   durationMs: number | undefined
   execution: ExecutionItem
+  isOpen: boolean
   now: number
 }) {
   return (
     <div className="col-span-2 flex flex-wrap items-center gap-3 justify-self-start md:col-span-1 md:justify-self-end">
       {execution.approval?.state === "pending" ? (
-        <ApprovalBadge expiresAt={execution.approval.expiresAt} now={now} />
+        <ApprovalBadge
+          expiresAt={execution.approval.expiresAt}
+          isVisible={!isOpen}
+          now={now}
+        />
       ) : null}
       {durationMs !== undefined ? (
         <MetaPill icon={Timer} label={formatDuration(durationMs)} />
