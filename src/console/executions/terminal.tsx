@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { type FunctionArgs, type FunctionReturnType } from "convex/server"
-import { FileX, SquareTerminal } from "lucide-react"
+import { SquareTerminal } from "lucide-react"
 import {
   type ReactElement,
   type ReactNode,
@@ -173,12 +173,12 @@ function EmptyStoredTraceNotice() {
         className="bg-background text-muted-foreground"
         variant="icon"
       >
-        <FileX />
+        <SquareTerminal />
       </EmptyMedia>
       <EmptyHeader>
-        <EmptyTitle>No trace recorded</EmptyTitle>
+        <EmptyTitle>No trace output</EmptyTitle>
         <EmptyDescription>
-          This execution stopped before any trace output was written.
+          The run stopped before any trace events were recorded.
         </EmptyDescription>
       </EmptyHeader>
     </Empty>
