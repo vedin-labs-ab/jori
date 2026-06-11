@@ -173,13 +173,9 @@ function sourceLabels({
   if (message !== null) {
     const provider = providerLabel(integration?.provider)
 
-    return [
-      "Triggered by",
-      actorLabel(message.actor),
-      "in",
-      provider,
-      messageSurface(message.type),
-    ].filter((part): part is string => part !== undefined && part !== "")
+    return ["Triggered by", actorLabel(message.actor), "in", provider].filter(
+      (part): part is string => part !== undefined && part !== ""
+    )
   }
 
   if (approval !== null) {
@@ -237,12 +233,6 @@ function actorLabel(actor: Actor | undefined) {
   }
 
   return "provider" in actor ? actor.externalId : undefined
-}
-
-function messageSurface(type: string) {
-  const surface = type.replaceAll("_", " ").trim()
-
-  return surface === "" ? "message" : surface
 }
 
 function firstLine(text: string | undefined) {
