@@ -123,7 +123,7 @@ const ExecutionFilters = memo(function ExecutionFilters({
             aria-label="Filter by approval state"
             className="h-8 w-full sm:w-fit"
           >
-            <span className="flex min-w-0 flex-1 items-center gap-2 text-left sm:flex-none">
+            <span className="flex min-w-0 flex-1 items-center gap-1.5 text-left sm:flex-none">
               <span className="shrink-0">Approval:</span>
               <SelectValue className="min-w-0 truncate" />
             </span>
