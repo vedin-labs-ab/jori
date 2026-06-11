@@ -16,8 +16,17 @@ export const executions = defineTable({
     v.literal("stopped")
   ),
   error: v.optional(v.string()),
-  traceHost: v.optional(v.string()),
-  traceToken: v.optional(v.string()),
+  trace: v.optional(
+    v.union(
+      v.object({
+        host: v.string(),
+        token: v.string(),
+      }),
+      v.object({
+        fileId: v.id("_storage"),
+      })
+    )
+  ),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
   finishedAt: v.optional(v.number()),

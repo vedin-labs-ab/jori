@@ -86,7 +86,6 @@ import type * as executions_tools_slack_index from "../executions/tools/slack/in
 import type * as executions_tools_slack_preflight from "../executions/tools/slack/preflight.js";
 import type * as executions_tools_types from "../executions/tools/types.js";
 import type * as executions_trace from "../executions/trace.js";
-import type * as executions_traces from "../executions/traces.js";
 import type * as executions_triggers from "../executions/triggers.js";
 import type * as http from "../http.js";
 import type * as identity_clerk from "../identity/clerk.js";
@@ -264,7 +263,6 @@ declare const fullApi: ApiFromModules<{
   "executions/tools/slack/preflight": typeof executions_tools_slack_preflight;
   "executions/tools/types": typeof executions_tools_types;
   "executions/trace": typeof executions_trace;
-  "executions/traces": typeof executions_traces;
   "executions/triggers": typeof executions_triggers;
   http: typeof http;
   "identity/clerk": typeof identity_clerk;

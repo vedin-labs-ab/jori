@@ -2,7 +2,6 @@ import { defineSchema } from "convex/server"
 import { approvals } from "./approvals/schema"
 import { activations } from "./attention/schema"
 import { executions } from "./executions/schema"
-import { traces } from "./executions/traces"
 import { triggers } from "./executions/triggers"
 import { identities } from "./identity/schema"
 import { integrations } from "./integrations/schema"
@@ -21,6 +20,5 @@ export default defineSchema({
   activations,
   approvals,
   executions,
-  traces,
   permissions,
 })

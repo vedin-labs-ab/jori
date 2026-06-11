@@ -73,7 +73,6 @@ export const runApprovedExecution = internalAction({
     }
 
     await runPromptedExecution(ctx, {
-      tenantId: preparedInput.trigger.tenantId,
       execution: promptedExecution,
       executionToken,
     })

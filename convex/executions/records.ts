@@ -187,8 +187,10 @@ export const markRunning = internalMutation({
   args: {
     executionId: v.id("executions"),
     sandboxId: v.string(),
-    traceHost: v.string(),
-    traceToken: v.string(),
+    trace: v.object({
+      host: v.string(),
+      token: v.string(),
+    }),
     hash: v.string(),
   },
   handler: async (ctx, args) => {
@@ -201,8 +203,7 @@ export const markRunning = internalMutation({
     await ctx.db.patch(args.executionId, {
       status: "running",
       sandboxId: args.sandboxId,
-      traceHost: args.traceHost,
-      traceToken: args.traceToken,
+      trace: args.trace,
       hash: args.hash,
     })
 
@@ -212,22 +213,12 @@ export const markRunning = internalMutation({
 
 export const finish = internalMutation({
   args: {
-    tenantId: v.string(),
     executionId: v.id("executions"),
     fileId: v.optional(v.id("_storage")),
     error: v.optional(v.string()),
     status: v.union(v.literal("completed"), v.literal("failed")),
   },
   handler: async (ctx, args) => {
-    if (args.fileId !== undefined) {
-      await ctx.db.insert("traces", {
-        tenantId: args.tenantId,
-        executionId: args.executionId,
-        fileId: args.fileId,
-        createdAt: Date.now(),
-      })
-    }
-
     // A user stop already settled the row; only the trace is still welcome.
     const execution = await ctx.db.get(args.executionId)
     const wasStopped = execution?.status === "stopped"
@@ -241,8 +232,12 @@ export const finish = internalMutation({
             finishedAt: Date.now(),
           }),
       hash: undefined,
-      traceHost: undefined,
-      traceToken: undefined,
+      trace:
+        args.fileId === undefined
+          ? undefined
+          : {
+              fileId: args.fileId,
+            },
     })
   },
 })

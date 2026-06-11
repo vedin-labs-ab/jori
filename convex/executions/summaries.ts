@@ -34,7 +34,7 @@ export async function summarizeExecution(
     sandboxId: execution.sandboxId,
     hash: execution.hash,
     promptId: execution.promptId,
-    traceFileId: context.trace?.fileId,
+    traceFileId: storedTraceFileId(execution),
     error: execution.error,
     approval:
       context.approval === null
@@ -58,13 +58,6 @@ async function getExecutionContext(
     execution.approvalId === undefined
       ? null
       : await ctx.db.get(execution.approvalId)
-  const trace = await ctx.db
-    .query("traces")
-    .withIndex("by_execution", (index) =>
-      index.eq("executionId", execution._id)
-    )
-    .order("desc")
-    .first()
   const message =
     trigger?.messageId === undefined
       ? null
@@ -78,7 +71,13 @@ async function getExecutionContext(
       ? null
       : await ctx.db.get(message.integrationId)
 
-  return { approval, integration, message, schedule, trace, trigger }
+  return { approval, integration, message, schedule, trigger }
+}
+
+function storedTraceFileId(execution: Doc<"executions">) {
+  const trace = execution.trace
+
+  return trace !== undefined && "fileId" in trace ? trace.fileId : undefined
 }
 
 function getDuration(execution: Doc<"executions">) {

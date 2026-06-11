@@ -16,15 +16,9 @@ export const trace = query({
       return { type: "missing" as const }
     }
 
-    const trace = await ctx.db
-      .query("traces")
-      .withIndex("by_execution", (index) =>
-        index.eq("executionId", execution._id)
-      )
-      .order("desc")
-      .first()
+    const trace = execution.trace
 
-    if (trace !== null) {
+    if (trace !== undefined && "fileId" in trace) {
       const url = await ctx.storage.getUrl(trace.fileId)
 
       return url === null
@@ -32,13 +26,10 @@ export const trace = query({
         : { type: "stored" as const, url }
     }
 
-    if (
-      execution.traceHost !== undefined &&
-      execution.traceToken !== undefined
-    ) {
+    if (trace !== undefined && "host" in trace) {
       return {
         type: "live" as const,
-        url: `https://${execution.traceHost}/trace?token=${execution.traceToken}`,
+        url: `https://${trace.host}/trace?token=${trace.token}`,
       }
     }
 

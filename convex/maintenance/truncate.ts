@@ -15,7 +15,6 @@ const tableRegistry: Record<TableName, true> = {
   activations: true,
   approvals: true,
   executions: true,
-  traces: true,
   permissions: true,
 }
 

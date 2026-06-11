@@ -101,7 +101,6 @@ async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
   }
 
   await runPromptedExecution(ctx, {
-    tenantId: input.trigger.tenantId,
     execution,
     executionToken,
   })
@@ -140,7 +139,6 @@ async function createFailedExecution(
   }
 
   await ctx.runMutation(internal.executions.records.finish, {
-    tenantId: input.trigger.tenantId,
     executionId: execution.id,
     error: message,
     status: "failed",

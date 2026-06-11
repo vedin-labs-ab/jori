@@ -31,8 +31,7 @@ export const stop = mutation({
       stoppedAt: now,
       finishedAt: now,
       hash: undefined,
-      traceHost: undefined,
-      traceToken: undefined,
+      trace: undefined,
     })
 
     if (execution.sandboxId !== undefined) {

@@ -17,7 +17,6 @@ type PromptedExecution = {
 export async function runPromptedExecution(
   ctx: ActionCtx,
   args: {
-    tenantId: string
     execution: PromptedExecution
     executionToken: string
   }
@@ -37,8 +36,10 @@ export async function runPromptedExecution(
           {
             executionId: args.execution.id,
             sandboxId: sandbox.sandboxId,
-            traceHost: sandbox.traceHost,
-            traceToken,
+            trace: {
+              host: sandbox.traceHost,
+              token: traceToken,
+            },
             hash,
           }
         )
@@ -69,7 +70,6 @@ export async function runPromptedExecution(
         )
 
   await ctx.runMutation(internal.executions.records.finish, {
-    tenantId: args.tenantId,
     executionId: args.execution.id,
     fileId,
     error: executionError,
