@@ -13,7 +13,11 @@ import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
 import { createRuntimeToolCapability } from "../bundles"
 import { createGitHubToolBundle } from "./github"
-import { createGmailToolBundle, createGoogleCalendarToolBundle } from "./google"
+import {
+  createGmailToolBundle,
+  createGoogleCalendarToolBundle,
+  createGoogleDriveToolBundle,
+} from "./google"
 import { createLinearToolBundle } from "./linear"
 import {
   createMicrosoftCalendarToolBundle,
@@ -98,6 +102,12 @@ function createProviderToolBundle(
       return createGmailIntegrationToolBundle(args, permissionInput)
     case "googleCalendar":
       return createGoogleCalendarToolBundle({
+        broker: args.broker,
+        credentials: requireGoogleCredentials(args.integration),
+        ...permissionInput,
+      })
+    case "googleDrive":
+      return createGoogleDriveToolBundle({
         broker: args.broker,
         credentials: requireGoogleCredentials(args.integration),
         ...permissionInput,
@@ -194,6 +204,7 @@ function getRuntimeToolProvider(provider: string): ToolProvider | null {
     provider === "slack" ||
     provider === "gmail" ||
     provider === "googleCalendar" ||
+    provider === "googleDrive" ||
     provider === "notion" ||
     provider === "microsoftEmail" ||
     provider === "microsoftCalendar"

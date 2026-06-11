@@ -52,6 +52,12 @@ const integrationCallbackAlerts = [
     "Milo can now use Google Calendar tools for your account when explicitly requested."
   ),
   callbackAlert(
+    "googleDrive",
+    "connected",
+    "Drive connected",
+    "Milo can now use Google Drive tools for your account when explicitly requested."
+  ),
+  callbackAlert(
     "slack",
     "error",
     "Slack connection failed",
@@ -92,6 +98,12 @@ const integrationCallbackAlerts = [
     "error",
     "Calendar connection failed",
     "Google did not return a usable Calendar OAuth token. Check the Google OAuth app settings and try again."
+  ),
+  callbackAlert(
+    "googleDrive",
+    "error",
+    "Drive connection failed",
+    "Google did not return a usable Drive OAuth token. Check the Google OAuth app settings and try again."
   ),
 ]
 

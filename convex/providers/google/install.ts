@@ -9,7 +9,11 @@ import { requireClerkUserId } from "../../identity/users"
 import { type GoogleSurfaceProvider } from "./config"
 import { createSignedGoogleState } from "./signing"
 
-const googleProvider = v.union(v.literal("gmail"), v.literal("googleCalendar"))
+const googleProvider = v.union(
+  v.literal("gmail"),
+  v.literal("googleCalendar"),
+  v.literal("googleDrive")
+)
 
 export const createGmailInstallState = mutation({
   args: {
@@ -28,6 +32,16 @@ export const createGoogleCalendarInstallState = mutation({
   },
   handler: async (ctx, args) => {
     return await createInstallState(ctx, "googleCalendar", args)
+  },
+})
+
+export const createGoogleDriveInstallState = mutation({
+  args: {
+    tenantId: v.string(),
+    returnUrl: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await createInstallState(ctx, "googleDrive", args)
   },
 })
 
@@ -147,7 +161,8 @@ export const updateOAuthCredentials = internalMutation({
     if (
       integration === null ||
       (integration.provider !== "gmail" &&
-        integration.provider !== "googleCalendar")
+        integration.provider !== "googleCalendar" &&
+        integration.provider !== "googleDrive")
     ) {
       throw new Error("Google Workspace integration not found")
     }

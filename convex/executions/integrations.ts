@@ -39,7 +39,8 @@ export async function prepareIntegrationForRuntime(
 
   if (
     integration.provider === "gmail" ||
-    integration.provider === "googleCalendar"
+    integration.provider === "googleCalendar" ||
+    integration.provider === "googleDrive"
   ) {
     return await prepareGoogleIntegrationForRuntime(ctx, integration)
   }

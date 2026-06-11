@@ -27,6 +27,10 @@ const providerMetadata = {
     label: "Google Calendar",
     skillNames: [],
   },
+  googleDrive: {
+    label: "Google Drive",
+    skillNames: [],
+  },
   notion: {
     label: "Notion",
     skillNames: [],

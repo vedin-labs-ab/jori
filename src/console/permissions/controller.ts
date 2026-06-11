@@ -14,6 +14,7 @@ export type ToolProvider =
   | "github"
   | "gmail"
   | "googleCalendar"
+  | "googleDrive"
   | "notion"
   | "microsoftEmail"
   | "microsoftCalendar"

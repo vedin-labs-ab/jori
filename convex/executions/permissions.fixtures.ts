@@ -13,15 +13,26 @@ export function integration(provider: string): Doc<"integrations"> {
     _creationTime: 0,
     tenantId: "tenant",
     provider,
-    scope: "tenant",
+    scope: isUserScopedProvider(provider) ? "user" : "tenant",
+    ownerId: isUserScopedProvider(provider) ? "user" : undefined,
     externalId: `${provider}-account`,
-    email: provider === "gmail" ? "user@example.com" : undefined,
+    email: isUserScopedProvider(provider) ? "user@example.com" : undefined,
     credentials: credentials(provider),
     status: "active",
     createdBy: "user",
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">
+}
+
+function isUserScopedProvider(provider: string) {
+  return (
+    provider === "gmail" ||
+    provider === "googleCalendar" ||
+    provider === "googleDrive" ||
+    provider === "microsoftEmail" ||
+    provider === "microsoftCalendar"
+  )
 }
 
 export function readProperties(schema: unknown) {

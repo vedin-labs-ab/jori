@@ -7,6 +7,7 @@ export const providers = [
   "github",
   "gmail",
   "googleCalendar",
+  "googleDrive",
   "notion",
   "microsoftEmail",
   "microsoftCalendar",
@@ -26,6 +27,7 @@ export const providerValidator = v.union(
   v.literal("github"),
   v.literal("gmail"),
   v.literal("googleCalendar"),
+  v.literal("googleDrive"),
   v.literal("notion"),
   v.literal("microsoftEmail"),
   v.literal("microsoftCalendar")
@@ -37,6 +39,7 @@ export const integrationProviderValidator = v.union(
   v.literal("github"),
   v.literal("gmail"),
   v.literal("googleCalendar"),
+  v.literal("googleDrive"),
   v.literal("notion"),
   v.literal("microsoftEmail"),
   v.literal("microsoftCalendar")

@@ -7,6 +7,7 @@ export function providerLabel(provider: string | undefined) {
     github: "GitHub",
     gmail: "Gmail",
     googleCalendar: "Google Calendar",
+    googleDrive: "Google Drive",
     linear: "Linear",
     microsoftCalendar: "Microsoft Calendar",
     microsoftEmail: "Microsoft Email",

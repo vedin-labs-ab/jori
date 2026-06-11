@@ -156,15 +156,26 @@ function integration(
     _creationTime: 0,
     tenantId: "tenant",
     provider,
-    scope: "tenant",
+    scope: isUserScopedProvider(provider) ? "user" : "tenant",
+    ownerId: isUserScopedProvider(provider) ? "user" : undefined,
     externalId: `${provider}-account`,
-    email: provider === "gmail" ? "user@example.com" : undefined,
+    email: isUserScopedProvider(provider) ? "user@example.com" : undefined,
     credentials: credentials(provider),
     status,
     createdBy: "user",
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">
+}
+
+function isUserScopedProvider(provider: string) {
+  return (
+    provider === "gmail" ||
+    provider === "googleCalendar" ||
+    provider === "googleDrive" ||
+    provider === "microsoftEmail" ||
+    provider === "microsoftCalendar"
+  )
 }
 
 function credentials(provider: string) {

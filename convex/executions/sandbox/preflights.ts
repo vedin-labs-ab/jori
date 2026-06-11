@@ -27,6 +27,10 @@ export function createToolPreflightCommand(preflight: ToolPreflight) {
     return createGoogleTokenPreflightCommand("googleCalendar")
   }
 
+  if (preflight.type === "googleDrive") {
+    return createGoogleTokenPreflightCommand("googleDrive")
+  }
+
   if (preflight.type === "notion") {
     return createNotionTokenPreflightCommand()
   }
@@ -56,7 +60,11 @@ export function createToolPreflightEnv(
     }
   }
 
-  if (preflight.type === "gmail" || preflight.type === "googleCalendar") {
+  if (
+    preflight.type === "gmail" ||
+    preflight.type === "googleCalendar" ||
+    preflight.type === "googleDrive"
+  ) {
     return {
       MILO_GOOGLE_ACCESS_TOKEN: preflight.credentials.tokens.access,
     }

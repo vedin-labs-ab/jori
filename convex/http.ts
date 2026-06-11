@@ -124,6 +124,14 @@ http.route({
 })
 
 http.route({
+  path: "/google-drive/install",
+  method: "GET",
+  handler: httpAction(async (_ctx, request) => {
+    return await handleGoogleInstall(request, "googleDrive")
+  }),
+})
+
+http.route({
   path: "/slack/install",
   method: "GET",
   handler: httpAction(async (_ctx, request) => {

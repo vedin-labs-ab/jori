@@ -164,6 +164,7 @@ function isUserScopedProvider(provider: IntegrationProvider) {
   return (
     provider === "gmail" ||
     provider === "googleCalendar" ||
+    provider === "googleDrive" ||
     provider === "microsoftCalendar" ||
     provider === "microsoftEmail"
   )
@@ -215,7 +216,11 @@ async function getIntegrationsToDelete(
 }
 
 function isGoogleProvider(provider: IntegrationProvider) {
-  return provider === "gmail" || provider === "googleCalendar"
+  return (
+    provider === "gmail" ||
+    provider === "googleCalendar" ||
+    provider === "googleDrive"
+  )
 }
 
 function requireExternalId(integration: Doc<"integrations">) {

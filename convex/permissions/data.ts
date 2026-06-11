@@ -1,5 +1,6 @@
 import { type ToolPermissionRow } from "./catalog"
 import { githubToolPermissionRows } from "./github"
+import { googleToolPermissionRows } from "./google"
 import { notionToolPermissionRows } from "./notion"
 
 export const toolPermissionRows = [
@@ -93,76 +94,7 @@ export const toolPermissionRows = [
     "required",
   ],
   ...githubToolPermissionRows,
-  [
-    "gmail",
-    "google_gmail_search_threads",
-    "Search threads",
-    "Search Gmail threads.",
-    "read",
-  ],
-  [
-    "gmail",
-    "google_gmail_get_thread",
-    "Read thread",
-    "Read a Gmail thread.",
-    "read",
-  ],
-  [
-    "gmail",
-    "google_gmail_get_message",
-    "Read message",
-    "Read a Gmail message.",
-    "read",
-  ],
-  [
-    "gmail",
-    "google_gmail_reply_to_thread",
-    "Reply to thread",
-    "Reply to the latest message in a Gmail thread.",
-    "write",
-  ],
-  [
-    "gmail",
-    "google_gmail_send_message",
-    "Send email",
-    "Send a new Gmail email.",
-    "write",
-  ],
-  [
-    "gmail",
-    "google_gmail_create_draft",
-    "Create draft",
-    "Create a Gmail draft.",
-    "write",
-  ],
-  [
-    "googleCalendar",
-    "google_calendar_list_events",
-    "List events",
-    "List Google Calendar events.",
-    "read",
-  ],
-  [
-    "googleCalendar",
-    "google_calendar_get_event",
-    "Read event",
-    "Read a Google Calendar event.",
-    "read",
-  ],
-  [
-    "googleCalendar",
-    "google_calendar_create_event",
-    "Create event",
-    "Create a Google Calendar event.",
-    "write",
-  ],
-  [
-    "googleCalendar",
-    "google_calendar_update_event",
-    "Update event",
-    "Update a Google Calendar event.",
-    "write",
-  ],
+  ...googleToolPermissionRows,
   ...notionToolPermissionRows,
   [
     "microsoftEmail",

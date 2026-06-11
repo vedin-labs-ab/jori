@@ -41,6 +41,23 @@ const calendarConfig = {
   provider: "googleCalendar",
 } satisfies IntegrationConnectionConfig
 
+const driveConfig = {
+  action: "Connect Drive",
+  connectedDetail:
+    "User-scoped. Milo can search, read, create, and update Drive files available to this app when explicitly requested.",
+  connectError: "Could not start Drive install.",
+  emptyDetail:
+    "Connect your Google Drive account. This connection is scoped to you, not the whole tenant.",
+  installPath: "/google-drive/install",
+  label: "Google Drive",
+  loading: "Connecting Drive",
+  logo: {
+    alt: "Google Drive logo",
+    src: "https://svgl.app/library/google-drive.svg",
+  },
+  provider: "googleDrive",
+} satisfies IntegrationConnectionConfig
+
 export function GmailConnection({
   permissions,
   tenantId,
@@ -60,6 +77,32 @@ export function GmailConnection({
       config={gmailConfig}
       createInstallState={createInstallState}
       headline={getAccountHeadline(status, gmailConfig.label)}
+      permissions={permissions}
+      status={status}
+      tenantId={tenantId}
+    />
+  )
+}
+
+export function GoogleDriveConnection({
+  permissions,
+  tenantId,
+}: {
+  permissions: ToolPermissionController
+  tenantId: string
+}) {
+  const createInstallState = useMutation(
+    api.providers.google.install.createGoogleDriveInstallState
+  )
+  const status = useQuery(api.integrations.status.getGoogleDriveStatus, {
+    tenantId,
+  })
+
+  return (
+    <IntegrationConnection
+      config={driveConfig}
+      createInstallState={createInstallState}
+      headline={getAccountHeadline(status, driveConfig.label)}
       permissions={permissions}
       status={status}
       tenantId={tenantId}

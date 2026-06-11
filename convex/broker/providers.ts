@@ -27,7 +27,11 @@ export async function callProviderTool(args: {
     return await callGitHubTool(args.integration, args.tool, args.toolArgs)
   }
 
-  if (provider === "gmail" || provider === "googleCalendar") {
+  if (
+    provider === "gmail" ||
+    provider === "googleCalendar" ||
+    provider === "googleDrive"
+  ) {
     return await callGoogleTool(args.integration, args.tool, args.toolArgs)
   }
 

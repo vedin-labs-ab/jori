@@ -87,6 +87,36 @@ test("includes Gmail send and draft tools with message schemas", () => {
   expect(readProperties(createDraft?.inputSchema)).toHaveProperty("to")
 })
 
+test("includes Google Drive tools with file content schemas", () => {
+  const toolBundle = assembleToolsForRun({
+    milo: runtimeMilo(),
+    integrations: [integration("googleDrive")],
+    toolModes: resolveToolModes([]),
+  })
+  const driveServer = toolBundle.mcpServers.find(
+    (server) => server.name === "googleDrive"
+  )
+  const enabledTools = driveServer?.env.MILO_ENABLED_TOOLS.split(",") ?? []
+  const tools = getProviderToolDefinitions("googleDrive", {
+    toolModes: resolveToolModes([]),
+  })
+  const createFile = tools.find(
+    (tool) => tool.name === "google_drive_create_file"
+  )
+  const readFile = tools.find((tool) => tool.name === "google_drive_read_file")
+
+  expect(enabledTools).toContain("google_drive_search_files")
+  expect(enabledTools).toContain("google_drive_read_file")
+  expect(enabledTools).toContain("google_drive_create_file")
+  expect(enabledTools).toContain("google_drive_update_file")
+  expect(readRequired(createFile?.inputSchema)).toEqual(["name", "content"])
+  expect(readProperties(createFile?.inputSchema)).toHaveProperty("parents")
+  expect(readProperties(readFile?.inputSchema)).toHaveProperty("exportMimeType")
+  expect(
+    toolBundle.capabilities.map((capability) => capability.label)
+  ).toContain("Google Drive")
+})
+
 test("keeps GitHub comments required and out of approval prompts", () => {
   const toolBundle = assembleToolsForRun({
     milo: runtimeMilo(),
@@ -202,6 +232,7 @@ test("keeps provider credentials out of sandbox MCP config", () => {
       integration("linear"),
       integration("gmail"),
       integration("googleCalendar"),
+      integration("googleDrive"),
       integration("notion"),
       integration("microsoftEmail"),
       integration("microsoftCalendar"),

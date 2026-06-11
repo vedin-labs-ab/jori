@@ -4,6 +4,7 @@ export const integrationCallbackProviders = [
   "gmail",
   "github",
   "googleCalendar",
+  "googleDrive",
   "linear",
   "microsoftCalendar",
   "microsoftEmail",

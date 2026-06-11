@@ -8,7 +8,7 @@ import {
 } from "../policy"
 import { type BrokeredToolArgs, type ToolBundle } from "../types"
 
-type GoogleRuntimeSurface = "gmail" | "googleCalendar"
+type GoogleRuntimeSurface = "gmail" | "googleCalendar" | "googleDrive"
 
 export function createGmailToolBundle(
   args: {
@@ -37,6 +37,21 @@ export function createGoogleCalendarToolBundle(
     name: "googleCalendar",
     scriptPath: "/home/user/milo-workspace/milo-google-calendar-mcp.mjs",
     surface: "googleCalendar",
+  })
+}
+
+export function createGoogleDriveToolBundle(
+  args: {
+    broker: BrokeredToolArgs
+    credentials: GoogleCredentials
+  } & ToolPermissionInput
+): ToolBundle {
+  return createGoogleToolBundle({
+    ...args,
+    accountEmail: "",
+    name: "googleDrive",
+    scriptPath: "/home/user/milo-workspace/milo-google-drive-mcp.mjs",
+    surface: "googleDrive",
   })
 }
 

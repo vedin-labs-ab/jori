@@ -66,6 +66,10 @@ export type ToolPreflight =
       credentials: GoogleCredentials
     }
   | {
+      type: "googleDrive"
+      credentials: GoogleCredentials
+    }
+  | {
       type: "notion"
       credentials: NotionCredentials
     }

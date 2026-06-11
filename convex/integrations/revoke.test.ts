@@ -12,7 +12,7 @@ test("revokes Google refresh tokens", async () => {
   vi.stubGlobal("fetch", fetch)
 
   await revokeIntegrationAccess(
-    integration("gmail", {
+    integration("googleDrive", {
       tokens: { access: "google-access", refresh: "google-refresh" },
       expiresAt: Date.now() + 60_000,
     })
@@ -139,7 +139,13 @@ function integration(
     credentials,
     provider,
     scope:
-      provider === "gmail" || provider === "microsoftEmail" ? "user" : "tenant",
+      provider === "gmail" ||
+      provider === "googleCalendar" ||
+      provider === "googleDrive" ||
+      provider === "microsoftEmail" ||
+      provider === "microsoftCalendar"
+        ? "user"
+        : "tenant",
     status: "active",
     tenantId: "tenant",
     updatedAt: Date.now(),

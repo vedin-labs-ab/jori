@@ -3,7 +3,11 @@ import { ConsolePage } from "../page"
 import { NativePermissionsCard } from "../permissions"
 import { useToolPermissions } from "../permissions/controller"
 import { GitHubConnection } from "./providers/github"
-import { GmailConnection, GoogleCalendarConnection } from "./providers/google"
+import {
+  GmailConnection,
+  GoogleCalendarConnection,
+  GoogleDriveConnection,
+} from "./providers/google"
 import { LinearConnection } from "./providers/linear"
 import {
   MicrosoftCalendarConnection,
@@ -42,6 +46,7 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
           permissions={permissions}
           tenantId={tenantId}
         />
+        <GoogleDriveConnection permissions={permissions} tenantId={tenantId} />
         <MicrosoftEmailConnection
           permissions={permissions}
           tenantId={tenantId}

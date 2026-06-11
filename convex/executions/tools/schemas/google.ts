@@ -47,6 +47,60 @@ export const googleToolInputSchemas = {
   google_calendar_update_event: calendarWriteSchema(["eventId", "event"], {
     eventId: stringProperty("Google Calendar event ID."),
   }),
+  google_drive_search_files: objectSchema({
+    properties: {
+      corpora: {
+        type: "string",
+        enum: ["user", "domain", "drive", "allDrives"],
+        description: "Drive corpus to search. Defaults to user.",
+      },
+      driveId: stringProperty("Shared drive ID when corpora is drive."),
+      includeItemsFromAllDrives: {
+        type: "boolean",
+        description: "Include My Drive and shared drive files.",
+      },
+      includeTrashed: {
+        type: "boolean",
+        description: "Include trashed files. Defaults to false.",
+      },
+      orderBy: stringProperty("Drive sort expression."),
+      pageSize: numberProperty("Maximum files to return.", 1, 100),
+      pageToken: stringProperty("Token from a previous list response."),
+      q: stringProperty("Drive files.list search query."),
+      spaces: stringProperty("Comma-separated spaces. Defaults to drive."),
+      supportsAllDrives: {
+        type: "boolean",
+        description: "Whether the app supports shared drives.",
+      },
+    },
+  }),
+  google_drive_get_file: driveFileSchema(),
+  google_drive_read_file: objectSchema({
+    required: ["fileId"],
+    properties: {
+      exportMimeType: stringProperty(
+        "MIME type for exporting Google Workspace files. Defaults to text/plain."
+      ),
+      fileId: stringProperty("Google Drive file ID."),
+      maxCharacters: numberProperty(
+        "Maximum returned characters. Defaults to 200000.",
+        1,
+        200000
+      ),
+      supportsAllDrives: {
+        type: "boolean",
+        description: "Whether the app supports shared drives.",
+      },
+    },
+  }),
+  google_drive_create_file: driveWriteSchema(["name", "content"], {
+    name: stringProperty("File name."),
+    parents: stringArrayProperty("Parent folder IDs."),
+  }),
+  google_drive_update_file: driveWriteSchema(["fileId"], {
+    fileId: stringProperty("Google Drive file ID."),
+    name: stringProperty("New file name."),
+  }),
 } satisfies SchemaMap
 
 function gmailMessageSchema() {
@@ -95,6 +149,37 @@ function calendarWriteSchema(
         enum: ["all", "externalOnly", "none"],
         description:
           "Whether attendees are emailed about the change. Defaults to none.",
+      },
+      ...properties,
+    },
+  })
+}
+
+function driveFileSchema() {
+  return objectSchema({
+    required: ["fileId"],
+    properties: {
+      fileId: stringProperty("Google Drive file ID."),
+      supportsAllDrives: {
+        type: "boolean",
+        description: "Whether the app supports shared drives.",
+      },
+    },
+  })
+}
+
+function driveWriteSchema(
+  required: string[],
+  properties: Record<string, unknown>
+) {
+  return objectSchema({
+    required,
+    properties: {
+      content: stringProperty("File content."),
+      mimeType: stringProperty("File MIME type. Defaults to text/plain."),
+      supportsAllDrives: {
+        type: "boolean",
+        description: "Whether the app supports shared drives.",
       },
       ...properties,
     },

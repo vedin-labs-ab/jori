@@ -152,6 +152,18 @@ export const getGoogleCalendarStatus = query({
   },
 })
 
+export const getGoogleDriveStatus = query({
+  args: {
+    tenantId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await getGoogleUserStatus(ctx, {
+      provider: "googleDrive",
+      tenantId: args.tenantId,
+    })
+  },
+})
+
 async function getGoogleUserStatus(
   ctx: QueryCtx,
   args: {
