@@ -15,7 +15,8 @@ export async function summarizeExecution(
     context.schedule?.name ??
     firstLine(context.message?.text) ??
     titleFromTrigger(context.trigger)
-  const sourceParts = executionSourceParts(execution, context)
+  const stoppedBy = await stoppedByLabel(ctx, execution)
+  const sourceParts = executionSourceParts(context, stoppedBy)
 
   return {
     id: execution._id,
@@ -148,16 +149,44 @@ function searchableText(
 }
 
 function executionSourceParts(
-  execution: Doc<"executions">,
-  context: Awaited<ReturnType<typeof getExecutionContext>>
+  context: Awaited<ReturnType<typeof getExecutionContext>>,
+  stoppedBy: string | undefined
 ) {
   const parts = sourceLabels(context)
 
-  if (execution.stoppedBy === undefined || execution.stoppedBy === "") {
+  if (stoppedBy === undefined) {
     return parts
   }
 
-  return [...parts, `Stopped by ${execution.stoppedBy}`]
+  return [...parts, `Stopped by ${stoppedBy}`]
+}
+
+async function stoppedByLabel(ctx: QueryCtx, execution: Doc<"executions">) {
+  const stoppedBy = execution.stoppedBy
+
+  if (stoppedBy === undefined || stoppedBy === "") {
+    return undefined
+  }
+
+  if (!isClerkUserId(stoppedBy)) {
+    return stoppedBy
+  }
+
+  const identity = await ctx.db
+    .query("identities")
+    .withIndex("by_tenant_provider_user", (query) =>
+      query
+        .eq("tenantId", execution.tenantId)
+        .eq("provider", "clerk")
+        .eq("userId", stoppedBy)
+    )
+    .first()
+
+  return identity?.email ?? stoppedBy
+}
+
+function isClerkUserId(value: string) {
+  return value.startsWith("user_")
 }
 
 function sourceLabels({

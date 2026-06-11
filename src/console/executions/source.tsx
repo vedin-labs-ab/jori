@@ -60,7 +60,9 @@ function SourcePart({
   return (
     <span className="inline-flex items-center gap-1">
       {isStoppedBy ? (
-        <span className="mx-0.5 size-1 rounded-full bg-muted-foreground/70" />
+        <span className="px-1 text-muted-foreground/60" aria-hidden="true">
+          ·
+        </span>
       ) : null}
       <ProviderLogo provider={label} />
       <span className={isEmphasized ? "font-medium text-foreground" : ""}>
