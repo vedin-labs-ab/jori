@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
@@ -159,6 +160,16 @@ function EmptyTraceNotice() {
   )
 }
 
+function EmptyStoredTraceNotice() {
+  return (
+    <Empty className="h-full">
+      <EmptyHeader>
+        <EmptyTitle>No trace recorded.</EmptyTitle>
+      </EmptyHeader>
+    </Empty>
+  )
+}
+
 function TerminalNotice({
   connection,
   isFinalizingTrace = false,
@@ -173,7 +184,7 @@ function TerminalNotice({
   }
 
   if (connection?.type === "stored" && storedTraceStatus === "loaded") {
-    return <EmptyTraceNotice />
+    return <EmptyStoredTraceNotice />
   }
 
   return (
