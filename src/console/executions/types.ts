@@ -45,12 +45,14 @@ export type ExecutionItem = {
     id: string
     state: ApprovalState
     tool: string
+    toolLabel: string
     summary: string
     provider: string
     expiresAt: number
     delivery?: string
     source?: {
       label: string
+      provider?: string
       url?: string
     }
   } | null

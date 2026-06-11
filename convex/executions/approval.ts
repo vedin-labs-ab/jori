@@ -1,4 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
+import { getToolLabel } from "../providers/slack/approval/labels"
 import { providerLabel } from "./labels"
 
 export function summarizeApproval(args: {
@@ -18,6 +19,7 @@ export function summarizeApproval(args: {
     state,
     summary: args.approval.summary,
     tool: args.approval.tool,
+    toolLabel: getToolLabel(args.approval.tool),
   }
 }
 
@@ -55,6 +57,7 @@ function approvalSource({
   if (messageUrl !== undefined) {
     return {
       label: "Source message",
+      provider: "slack",
       url: messageUrl,
     }
   }
@@ -71,13 +74,19 @@ function approvalSource({
   if (deliveryUrl !== undefined) {
     return {
       label: "Delivered to Slack",
+      provider: "slack",
       url: deliveryUrl,
     }
   }
 
   const label = deliveryLabel(approval.delivery)
 
-  return label === undefined ? undefined : { label }
+  return label === undefined
+    ? undefined
+    : {
+        label,
+        provider: approval.delivery?.provider,
+      }
 }
 
 function deliveryLabel(delivery: Doc<"approvals">["delivery"]) {

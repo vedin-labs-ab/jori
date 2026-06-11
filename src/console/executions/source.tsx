@@ -7,6 +7,30 @@ const providerLogos: Record<string, string> = {
   "Microsoft Email": "/logos/providers/microsoft-email.svg",
   Notion: "/logos/providers/notion.svg",
   Slack: "/logos/providers/slack.svg",
+  github: "/logos/providers/github.svg",
+  gmail: "/logos/providers/gmail.svg",
+  googleCalendar: "/logos/providers/google-calendar.svg",
+  linear: "/logos/providers/linear.svg",
+  microsoftCalendar: "/logos/providers/microsoft-calendar.svg",
+  microsoftEmail: "/logos/providers/microsoft-email.svg",
+  notion: "/logos/providers/notion.svg",
+  slack: "/logos/providers/slack.svg",
+}
+
+export function ProviderLogo({
+  className = "size-3",
+  provider,
+}: {
+  className?: string
+  provider: string | undefined
+}) {
+  const logo = provider === undefined ? undefined : providerLogos[provider]
+
+  if (logo === undefined) {
+    return null
+  }
+
+  return <img alt="" className={`${className} shrink-0`} src={logo} />
 }
 
 export function SourceParts({ parts }: { parts: string[] }) {
@@ -42,13 +66,9 @@ function SourcePart({
   isProvider: boolean
   label: string
 }) {
-  const logo = isProvider ? providerLogos[label] : undefined
-
   return (
     <span className="inline-flex items-center gap-1.5">
-      {logo !== undefined ? (
-        <img alt="" className="size-3 shrink-0" src={logo} />
-      ) : null}
+      <ProviderLogo provider={isProvider ? label : undefined} />
       <span>{label}</span>
     </span>
   )
