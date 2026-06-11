@@ -1,4 +1,4 @@
-import { Loader2, Search, SlidersHorizontal } from "lucide-react"
+import { Loader2, Search } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,11 +9,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
@@ -77,26 +72,15 @@ function ExecutionFilters({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <div className="flex items-center gap-2">
-        <div className="relative min-w-0 flex-1 md:w-72">
-          <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
-          <Input
-            aria-label="Search executions"
-            className="h-8 pr-2 pl-8"
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search executions..."
-            value={query}
-          />
-        </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button type="button" variant="outline" size="icon-lg">
-              <SlidersHorizontal />
-              <span className="sr-only">Filters are applied live</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Filters apply to all executions</TooltipContent>
-        </Tooltip>
+      <div className="relative min-w-0 flex-1 md:w-72 md:flex-none">
+        <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
+        <Input
+          aria-label="Search executions"
+          className="h-8 pr-2 pl-8"
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search executions..."
+          value={query}
+        />
       </div>
     </div>
   )
