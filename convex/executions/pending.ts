@@ -1,5 +1,6 @@
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
+import { type ExecutionFilter, executionMatchesFilter } from "./filters"
 import { summarizeExecution } from "./summaries"
 
 type ExecutionSummary = Awaited<ReturnType<typeof summarizeExecution>>
@@ -7,6 +8,7 @@ type ExecutionSummary = Awaited<ReturnType<typeof summarizeExecution>>
 export async function pagePendingApprovals(
   ctx: QueryCtx,
   args: {
+    executionFilter: ExecutionFilter
     query: string
     tenantId: string
     paginationOpts: {
@@ -40,6 +42,10 @@ export async function pagePendingApprovals(
 
     seenExecutionIds.add(execution._id)
 
+    if (!executionMatchesFilter(execution, args.executionFilter)) {
+      continue
+    }
+
     const summary = await summarizeExecution(ctx, execution, approval)
 
     if (!matchesSearch(summary, normalizedQuery)) {
@@ -70,6 +76,7 @@ export async function pagePendingApprovals(
 export async function countPendingApprovals(
   ctx: QueryCtx,
   args: {
+    executionFilter: ExecutionFilter
     normalizedQuery: string
     tenantId: string
   }
@@ -94,6 +101,10 @@ export async function countPendingApprovals(
     }
 
     seenExecutionIds.add(execution._id)
+
+    if (!executionMatchesFilter(execution, args.executionFilter)) {
+      continue
+    }
 
     if (args.normalizedQuery === "") {
       count += 1

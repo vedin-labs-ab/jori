@@ -36,6 +36,7 @@ import type * as executions_continuation from "../executions/continuation.js";
 import type * as executions_control from "../executions/control.js";
 import type * as executions_data from "../executions/data.js";
 import type * as executions_execute from "../executions/execute.js";
+import type * as executions_filters from "../executions/filters.js";
 import type * as executions_instructions from "../executions/instructions.js";
 import type * as executions_integrations from "../executions/integrations.js";
 import type * as executions_labels from "../executions/labels.js";
@@ -219,6 +220,7 @@ declare const fullApi: ApiFromModules<{
   "executions/control": typeof executions_control;
   "executions/data": typeof executions_data;
   "executions/execute": typeof executions_execute;
+  "executions/filters": typeof executions_filters;
   "executions/instructions": typeof executions_instructions;
   "executions/integrations": typeof executions_integrations;
   "executions/labels": typeof executions_labels;

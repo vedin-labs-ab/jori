@@ -1,35 +1,36 @@
-import { usePaginatedQuery, useQuery } from "convex/react"
+import {
+  type UsePaginatedQueryReturnType,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react"
 import { type MutableRefObject, useEffect, useRef, useState } from "react"
 import { api } from "../../../convex/_generated/api"
-import { type ExecutionItem, type FilterValue, pageSize } from "./types"
+import {
+  type ApprovalFilter,
+  type ExecutionFilter,
+  type ExecutionItem,
+  pageSize,
+} from "./types"
 
 export function useExecutionPagination(
   tenantId: string,
-  filter: FilterValue,
+  executionFilter: ExecutionFilter,
+  approvalFilter: ApprovalFilter,
   query: string
 ) {
   const [pageIndex, setPageIndex] = useState(0)
   const advanceAfterLoad = useRef(false)
   const now = useNow()
-  const normalizedQuery = query.trim().toLowerCase()
-  const executions = usePaginatedQuery(
-    api.executions.list.page,
-    { filter, query: normalizedQuery, tenantId },
-    { initialNumItems: pageSize }
-  )
-  const stats = useQuery(api.executions.list.stats, {
-    filter,
-    query: normalizedQuery,
+  const { executions, normalizedQuery, rows, stats } = useExecutionPageData({
+    approvalFilter,
+    executionFilter,
+    query,
     tenantId,
   })
-  const rows = (executions.results ?? []) as ExecutionItem[]
   const filteredTotal = stats?.filteredCount ?? rows.length
   const totalCount = stats?.totalCount ?? filteredTotal
   const pageCount = Math.max(1, Math.ceil(filteredTotal / pageSize))
-  const visibleRows = rows.slice(
-    pageIndex * pageSize,
-    pageIndex * pageSize + pageSize
-  )
+  const visibleRows = pageRows(rows, pageIndex)
   const canUseNextLoadedPage = rows.length > (pageIndex + 1) * pageSize
   const canLoadMore = executions.status === "CanLoadMore"
   const isLoadingMore = executions.status === "LoadingMore"
@@ -41,7 +42,11 @@ export function useExecutionPagination(
     setPageIndex,
   })
 
-  const hasFilters = filter !== "all" || normalizedQuery !== ""
+  const hasFilters = hasActiveFilters({
+    approvalFilter,
+    executionFilter,
+    normalizedQuery,
+  })
   const footerLabel = formatFooterLabel({
     filteredTotal,
     hasFilters,
@@ -56,14 +61,14 @@ export function useExecutionPagination(
     hasFilters,
     isLoadingFirstPage: executions.status === "LoadingFirstPage",
     isLoadingMore,
-    next: () => {
-      if (canUseNextLoadedPage) {
-        setPageIndex((current) => current + 1)
-      } else if (canLoadMore) {
-        advanceAfterLoad.current = true
-        executions.loadMore(pageSize)
-      }
-    },
+    next: () =>
+      nextPage({
+        advanceAfterLoad,
+        canLoadMore,
+        canUseNextLoadedPage,
+        executions,
+        setPageIndex,
+      }),
     now,
     pageIndex,
     previous: () => setPageIndex((current) => Math.max(0, current - 1)),
@@ -73,6 +78,81 @@ export function useExecutionPagination(
 }
 
 export type ExecutionPagination = ReturnType<typeof useExecutionPagination>
+
+function useExecutionPageData({
+  approvalFilter,
+  executionFilter,
+  query,
+  tenantId,
+}: {
+  approvalFilter: ApprovalFilter
+  executionFilter: ExecutionFilter
+  query: string
+  tenantId: string
+}) {
+  const normalizedQuery = query.trim().toLowerCase()
+  const queryArgs = {
+    approvalFilter,
+    executionFilter,
+    query: normalizedQuery,
+    tenantId,
+  }
+  const executions = usePaginatedQuery(api.executions.list.page, queryArgs, {
+    initialNumItems: pageSize,
+  })
+  const stats = useQuery(api.executions.list.stats, queryArgs)
+
+  return {
+    executions,
+    normalizedQuery,
+    rows: (executions.results ?? []) as ExecutionItem[],
+    stats,
+  }
+}
+
+function pageRows(rows: ExecutionItem[], pageIndex: number) {
+  return rows.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)
+}
+
+function hasActiveFilters({
+  approvalFilter,
+  executionFilter,
+  normalizedQuery,
+}: {
+  approvalFilter: ApprovalFilter
+  executionFilter: ExecutionFilter
+  normalizedQuery: string
+}) {
+  return (
+    executionFilter !== "all" ||
+    approvalFilter !== "any" ||
+    normalizedQuery !== ""
+  )
+}
+
+function nextPage({
+  advanceAfterLoad,
+  canLoadMore,
+  canUseNextLoadedPage,
+  executions,
+  setPageIndex,
+}: {
+  advanceAfterLoad: MutableRefObject<boolean>
+  canLoadMore: boolean
+  canUseNextLoadedPage: boolean
+  executions: Pick<
+    UsePaginatedQueryReturnType<typeof api.executions.list.page>,
+    "loadMore"
+  >
+  setPageIndex: (updater: (current: number) => number) => void
+}) {
+  if (canUseNextLoadedPage) {
+    setPageIndex((current) => current + 1)
+  } else if (canLoadMore) {
+    advanceAfterLoad.current = true
+    executions.loadMore(pageSize)
+  }
+}
 
 function formatFooterLabel({
   filteredTotal,

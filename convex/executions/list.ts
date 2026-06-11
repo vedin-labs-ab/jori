@@ -1,25 +1,23 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { requireTenantAccess } from "../skills/access"
+import {
+  type ApprovalFilter,
+  approvalFilterValidator,
+  approvalMatchesFilter,
+  executionFilterValidator,
+  executionMatchesFilter,
+} from "./filters"
 import { countPendingApprovals, pagePendingApprovals } from "./pending"
 import { summarizeExecution } from "./summaries"
 
-type Filter = "all" | "ongoing" | "approval" | "failed" | "completed"
 type ExecutionSummary = Awaited<ReturnType<typeof summarizeExecution>>
-
-const filterValidator = v.union(
-  v.literal("all"),
-  v.literal("ongoing"),
-  v.literal("approval"),
-  v.literal("failed"),
-  v.literal("completed")
-)
 
 export const page = query({
   args: {
-    filter: filterValidator,
+    approvalFilter: approvalFilterValidator,
+    executionFilter: executionFilterValidator,
     query: v.string(),
     tenantId: v.string(),
     paginationOpts: paginationOptsValidator,
@@ -27,7 +25,7 @@ export const page = query({
   handler: async (ctx, args) => {
     await requireTenantAccess(ctx, args.tenantId)
 
-    if (args.filter === "approval") {
+    if (args.approvalFilter === "pending") {
       return await pagePendingApprovals(ctx, args)
     }
 
@@ -41,10 +39,13 @@ export const page = query({
       .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
       .order("desc")
 
-    const shouldMatchSummary = needsSummary(args.filter, normalizedQuery)
+    const shouldMatchSummary = needsSummary(
+      args.approvalFilter,
+      normalizedQuery
+    )
 
     for await (const execution of executions) {
-      if (!canMatchRawFilter(execution, args.filter)) {
+      if (!executionMatchesFilter(execution, args.executionFilter)) {
         continue
       }
 
@@ -54,7 +55,7 @@ export const page = query({
 
       if (
         summary !== null &&
-        !matchesSummary(summary, args.filter, normalizedQuery)
+        !matchesSummary(summary, args.approvalFilter, normalizedQuery)
       ) {
         continue
       }
@@ -83,7 +84,8 @@ export const page = query({
 
 export const stats = query({
   args: {
-    filter: filterValidator,
+    approvalFilter: approvalFilterValidator,
+    executionFilter: executionFilterValidator,
     query: v.string(),
     tenantId: v.string(),
   },
@@ -92,9 +94,10 @@ export const stats = query({
 
     const normalizedQuery = normalizeQuery(args.query)
 
-    if (args.filter === "approval") {
+    if (args.approvalFilter === "pending") {
       return {
         filteredCount: await countPendingApprovals(ctx, {
+          executionFilter: args.executionFilter,
           normalizedQuery,
           tenantId: args.tenantId,
         }),
@@ -112,18 +115,18 @@ export const stats = query({
     for await (const execution of executions) {
       totalCount += 1
 
-      if (!canMatchRawFilter(execution, args.filter)) {
+      if (!executionMatchesFilter(execution, args.executionFilter)) {
         continue
       }
 
-      if (!needsSummary(args.filter, normalizedQuery)) {
+      if (!needsSummary(args.approvalFilter, normalizedQuery)) {
         filteredCount += 1
         continue
       }
 
       const summary = await summarizeExecution(ctx, execution)
 
-      if (matchesSummary(summary, args.filter, normalizedQuery)) {
+      if (matchesSummary(summary, args.approvalFilter, normalizedQuery)) {
         filteredCount += 1
       }
     }
@@ -159,32 +162,16 @@ function normalizeQuery(query: string) {
   return query.trim().toLowerCase()
 }
 
-function canMatchRawFilter(execution: Doc<"executions">, filter: Filter) {
-  if (filter === "all") {
-    return true
-  }
-
-  if (filter === "ongoing") {
-    return execution.status === "queued" || execution.status === "running"
-  }
-
-  if (filter === "approval") {
-    return true
-  }
-
-  return execution.status === filter
-}
-
-function needsSummary(filter: Filter, normalizedQuery: string) {
-  return filter === "approval" || normalizedQuery !== ""
+function needsSummary(filter: ApprovalFilter, normalizedQuery: string) {
+  return filter !== "any" || normalizedQuery !== ""
 }
 
 function matchesSummary(
   summary: ExecutionSummary,
-  filter: Filter,
+  filter: ApprovalFilter,
   normalizedQuery: string
 ) {
-  if (filter === "approval" && summary.approval?.state !== "pending") {
+  if (!approvalMatchesFilter(summary.approval?.state, filter)) {
     return false
   }
 

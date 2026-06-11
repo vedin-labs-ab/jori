@@ -10,6 +10,7 @@ import {
   UserPen,
   UserX,
 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
   TooltipContent,
@@ -35,14 +36,8 @@ const statusIcons = {
   stopped: Circle,
 } satisfies Record<ExecutionStatus, LucideIcon>
 
-export function StatusIcon({
-  approvalState,
-  status,
-}: {
-  approvalState?: ApprovalState
-  status: ExecutionStatus
-}) {
-  const label = statusLabel(approvalState, status)
+export function StatusIcon({ status }: { status: ExecutionStatus }) {
+  const label = executionStatusLabels[status]
 
   return (
     <Tooltip>
@@ -53,7 +48,7 @@ export function StatusIcon({
           role="img"
         >
           <span className="inline-flex transition-opacity duration-150 group-focus-visible/execution-row:opacity-0 group-hover/execution-row:opacity-0">
-            <StatusGlyph approvalState={approvalState} status={status} />
+            <StatusGlyph status={status} />
           </span>
           <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/execution-row:opacity-100 group-hover/execution-row:opacity-100" />
         </span>
@@ -63,29 +58,7 @@ export function StatusIcon({
   )
 }
 
-function StatusGlyph({
-  approvalState,
-  status,
-}: {
-  approvalState?: ApprovalState
-  status: ExecutionStatus
-}) {
-  if (approvalState === "pending") {
-    return <UserPen className="size-4 text-warning" />
-  }
-
-  if (approvalState === "approved" || approvalState === "consumed") {
-    return <UserCheck className="size-4 text-emerald-800" />
-  }
-
-  if (approvalState === "denied") {
-    return <UserX className="size-4 text-destructive" />
-  }
-
-  if (approvalState === "expired") {
-    return <ClockAlert className="size-4 text-warning" />
-  }
-
+function StatusGlyph({ status }: { status: ExecutionStatus }) {
   const Icon = statusIcons[status]
 
   return (
@@ -97,17 +70,6 @@ function StatusGlyph({
       )}
     />
   )
-}
-
-function statusLabel(
-  approvalState: ApprovalState | undefined,
-  status: ExecutionStatus
-) {
-  if (approvalState !== undefined) {
-    return approvalStatusLabels[approvalState]
-  }
-
-  return executionStatusLabels[status]
 }
 
 const approvalStatusLabels = {
@@ -126,28 +88,63 @@ const executionStatusLabels = {
   stopped: "Stopped",
 } satisfies Record<ExecutionStatus, string>
 
-export function ApprovalBadge({
+const approvalBadgeIcons = {
+  approved: UserCheck,
+  consumed: UserCheck,
+  denied: UserX,
+  expired: ClockAlert,
+  pending: UserPen,
+} satisfies Record<ApprovalState, LucideIcon>
+
+export function ApprovalStatusBadge({
   expiresAt,
   isVisible,
   now,
+  state,
 }: {
   expiresAt: number
   isVisible: boolean
   now: number
+  state: ApprovalState
 }) {
+  const Icon = approvalBadgeIcons[state]
+
   return (
-    <span
+    <Badge
       aria-hidden={!isVisible}
       className={cn(
-        "inline-block origin-left overflow-hidden whitespace-nowrap text-warning text-xs transition-[max-width,opacity,transform] duration-200 ease-out",
+        "origin-left overflow-hidden transition-[max-width,opacity,transform] duration-200 ease-out",
+        approvalBadgeClasses[state],
         isVisible
           ? "max-w-56 scale-x-100 opacity-100"
-          : "pointer-events-none max-w-0 scale-x-95 opacity-0"
+          : "pointer-events-none max-w-0 scale-x-95 border-transparent px-0 opacity-0"
       )}
+      variant="outline"
     >
-      Needs approval · {formatDuration(Math.max(0, expiresAt - now))}
-    </span>
+      <Icon data-icon="inline-start" />
+      {approvalBadgeLabel(state, expiresAt, now)}
+    </Badge>
   )
+}
+
+const approvalBadgeClasses = {
+  approved: "border-emerald-800/20 text-emerald-800",
+  consumed: "border-emerald-800/20 text-emerald-800",
+  denied: "border-destructive/20 text-destructive",
+  expired: "border-warning/20 text-warning",
+  pending: "border-warning/20 text-warning",
+} satisfies Record<ApprovalState, string>
+
+function approvalBadgeLabel(
+  state: ApprovalState,
+  expiresAt: number,
+  now: number
+) {
+  if (state === "pending") {
+    return `Needs approval · ${formatDuration(Math.max(0, expiresAt - now))}`
+  }
+
+  return approvalStatusLabels[state]
 }
 
 export function MetaPill({

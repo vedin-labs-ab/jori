@@ -8,26 +8,49 @@ import {
   PaginationItem,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { ExecutionRow } from "./row"
-import { type FilterValue, filterOptions } from "./types"
+import {
+  type ApprovalFilter,
+  approvalFilterLabels,
+  approvalFilterOptions,
+  type ExecutionFilter,
+  executionFilterOptions,
+} from "./types"
 
 export function ExecutionsList({ tenantId }: { tenantId: string }) {
-  const [filter, setFilter] = useState<FilterValue>("all")
+  const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
+  const [executionFilter, setExecutionFilter] = useState<ExecutionFilter>("all")
   const [query, setQuery] = useState("")
-  const pagination = useExecutionPagination(tenantId, filter, query)
+  const pagination = useExecutionPagination(
+    tenantId,
+    executionFilter,
+    approvalFilter,
+    query
+  )
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col gap-3">
         <ExecutionFilters
-          filter={filter}
+          approvalFilter={approvalFilter}
+          executionFilter={executionFilter}
           query={query}
-          setFilter={(value) => {
-            setFilter(value)
+          setApprovalFilter={(value) => {
+            setApprovalFilter(value)
+            pagination.reset()
+          }}
+          setExecutionFilter={(value) => {
+            setExecutionFilter(value)
             pagination.reset()
           }}
           setQuery={(value) => {
@@ -43,14 +66,18 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
 }
 
 function ExecutionFilters({
-  filter,
+  approvalFilter,
+  executionFilter,
   query,
-  setFilter,
+  setApprovalFilter,
+  setExecutionFilter,
   setQuery,
 }: {
-  filter: FilterValue
+  approvalFilter: ApprovalFilter
+  executionFilter: ExecutionFilter
   query: string
-  setFilter: (filter: FilterValue) => void
+  setApprovalFilter: (filter: ApprovalFilter) => void
+  setExecutionFilter: (filter: ExecutionFilter) => void
   setQuery: (query: string) => void
 }) {
   return (
@@ -59,28 +86,48 @@ function ExecutionFilters({
         className="flex-wrap justify-start"
         onValueChange={(value) => {
           if (value !== "") {
-            setFilter(value as FilterValue)
+            setExecutionFilter(value as ExecutionFilter)
           }
         }}
         type="single"
-        value={filter}
+        value={executionFilter}
         variant="outline"
       >
-        {filterOptions.map((option) => (
+        {executionFilterOptions.map((option) => (
           <ToggleGroupItem key={option.value} value={option.value}>
             {option.label}
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <div className="relative min-w-0 flex-1 md:w-72 md:flex-none">
-        <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
-        <Input
-          aria-label="Search executions"
-          className="h-8 pr-2 pl-8"
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search executions..."
-          value={query}
-        />
+      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row md:flex-none">
+        <Select
+          onValueChange={(value) => setApprovalFilter(value as ApprovalFilter)}
+          value={approvalFilter}
+        >
+          <SelectTrigger
+            aria-label="Filter by approval state"
+            className="h-8 w-full sm:w-fit"
+          >
+            Approval: {approvalFilterLabels[approvalFilter]}
+          </SelectTrigger>
+          <SelectContent>
+            {approvalFilterOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
+          <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
+          <Input
+            aria-label="Search executions"
+            className="h-8 pr-2 pl-8"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search executions..."
+            value={query}
+          />
+        </div>
       </div>
     </div>
   )

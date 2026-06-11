@@ -10,7 +10,7 @@ import {
 } from "./details"
 import { formatDuration, relativeTime } from "./format"
 import { SourceParts } from "./source"
-import { ApprovalBadge, MetaPill, StatusIcon } from "./status"
+import { ApprovalStatusBadge, MetaPill, StatusIcon } from "./status"
 import { StopExecution } from "./stop"
 import { TraceTerminal } from "./terminal"
 import { type ExecutionItem } from "./types"
@@ -37,10 +37,7 @@ export function ExecutionRow({
           onClick={() => setIsOpen((current) => !current)}
           type="button"
         >
-          <StatusIcon
-            approvalState={execution.approval?.state}
-            status={execution.status}
-          />
+          <StatusIcon status={execution.status} />
           <ExecutionTitle execution={execution} />
           <ExecutionMeta
             durationMs={durationMs}
@@ -90,11 +87,12 @@ function ExecutionMeta({
 }) {
   return (
     <div className="col-span-2 flex flex-wrap items-center gap-3 justify-self-start md:col-span-1 md:justify-self-end">
-      {execution.approval?.state === "pending" ? (
-        <ApprovalBadge
+      {execution.approval !== null ? (
+        <ApprovalStatusBadge
           expiresAt={execution.approval.expiresAt}
           isVisible={!isOpen}
           now={now}
+          state={execution.approval.state}
         />
       ) : null}
       {durationMs !== undefined ? (
