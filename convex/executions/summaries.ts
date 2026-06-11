@@ -40,10 +40,10 @@ export async function summarizeExecution(
     traceFileId: storedTraceFileId(execution),
     error: execution.error,
     approval:
-      context.approval === null
+      context.requestedApproval === null
         ? null
         : summarizeApproval({
-            approval: context.approval,
+            approval: context.requestedApproval,
             approvalDeliveryIntegration: context.approvalDeliveryIntegration,
             integration: context.integration,
             message: context.message,
@@ -67,10 +67,9 @@ async function getExecutionContext(
     execution.approvalId === undefined
       ? null
       : await ctx.db.get(execution.approvalId)
-  const approval =
-    requestedApproval ??
-    (await getLatestRequestedApproval(ctx, execution)) ??
-    continuationApproval
+  const executionRequestedApproval =
+    requestedApproval ?? (await getLatestRequestedApproval(ctx, execution))
+  const approval = executionRequestedApproval ?? continuationApproval
   const message =
     trigger?.messageId === undefined
       ? null
@@ -84,15 +83,16 @@ async function getExecutionContext(
       ? null
       : await ctx.db.get(message.integrationId)
   const approvalDeliveryIntegration =
-    approval?.delivery === undefined
+    executionRequestedApproval?.delivery === undefined
       ? null
-      : await ctx.db.get(approval.delivery.integrationId)
+      : await ctx.db.get(executionRequestedApproval.delivery.integrationId)
 
   return {
     approval,
     approvalDeliveryIntegration,
     integration,
     message,
+    requestedApproval: executionRequestedApproval,
     schedule,
     trigger,
   }
