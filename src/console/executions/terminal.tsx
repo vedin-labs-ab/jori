@@ -67,7 +67,7 @@ function ConnectedTerminal({
     tenantId,
   })
   const [hasConnectedTrace, setHasConnectedTrace] = useState(false)
-  const lines = useTraceLines(connection)
+  const { lines, storedTraceStatus } = useTraceLines(connection)
   const isFinalizingTrace =
     connection?.type === "missing" && hasConnectedTrace && lines.length === 0
 
@@ -85,6 +85,7 @@ function ConnectedTerminal({
         <TerminalNotice
           connection={connection}
           isFinalizingTrace={isFinalizingTrace}
+          storedTraceStatus={storedTraceStatus}
         />
       )}
     </TerminalFrame>
@@ -161,11 +162,17 @@ function EmptyTraceNotice() {
 function TerminalNotice({
   connection,
   isFinalizingTrace = false,
+  storedTraceStatus,
 }: {
   connection: TraceConnection | undefined
   isFinalizingTrace?: boolean
+  storedTraceStatus: StoredTraceStatus
 }) {
   if (connection?.type === "missing" && !isFinalizingTrace) {
+    return <EmptyTraceNotice />
+  }
+
+  if (connection?.type === "stored" && storedTraceStatus === "loaded") {
     return <EmptyTraceNotice />
   }
 
@@ -183,8 +190,12 @@ function TerminalNotice({
   )
 }
 
+type StoredTraceStatus = "idle" | "loading" | "loaded"
+
 function useTraceLines(connection: TraceConnection | undefined) {
   const [lines, setLines] = useState<string[]>([])
+  const [storedTraceStatus, setStoredTraceStatus] =
+    useState<StoredTraceStatus>("idle")
   const liveUrl = connection?.type === "live" ? connection.url : undefined
   const storedUrl = connection?.type === "stored" ? connection.url : undefined
 
@@ -207,22 +218,39 @@ function useTraceLines(connection: TraceConnection | undefined) {
 
   useEffect(() => {
     if (storedUrl === undefined) {
+      setStoredTraceStatus("idle")
       return
     }
 
     const controller = new AbortController()
+    let isActive = true
+
+    setLines([])
+    setStoredTraceStatus("loading")
 
     void fetch(storedUrl, { signal: controller.signal })
       .then((response) => response.text())
-      .then((trace) =>
-        setLines(trace.split("\n").filter((line) => line !== ""))
-      )
-      .catch(() => undefined)
+      .then((trace) => {
+        if (!isActive) {
+          return
+        }
 
-    return () => controller.abort()
+        setLines(trace.split("\n").filter((line) => line !== ""))
+        setStoredTraceStatus("loaded")
+      })
+      .catch(() => {
+        if (isActive) {
+          setStoredTraceStatus("loaded")
+        }
+      })
+
+    return () => {
+      isActive = false
+      controller.abort()
+    }
   }, [storedUrl])
 
-  return lines
+  return { lines, storedTraceStatus }
 }
 
 function captionFor(
