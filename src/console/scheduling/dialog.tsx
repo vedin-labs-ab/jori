@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { IntegrationAccessFields } from "./access"
+import { createScheduleDialogActions } from "./actions"
 import { ScheduleDateTimePicker } from "./picker"
 import { RecurringFields } from "./recurring"
 import { type Schedule, type ScheduleFormValues } from "./types"
@@ -36,12 +38,7 @@ export function ScheduleDialog({
   schedule: Schedule | undefined
   values: ScheduleFormValues
 }) {
-  function updateValue(
-    name: Exclude<keyof ScheduleFormValues, "type">,
-    value: string
-  ) {
-    onValuesChange({ ...values, [name]: value })
-  }
+  const actions = createScheduleDialogActions({ onValuesChange, values })
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -51,8 +48,8 @@ export function ScheduleDialog({
             {schedule === undefined ? "New schedule" : "Edit schedule"}
           </DialogTitle>
           <DialogDescription>
-            Milo runs the described work on schedule and posts the result to
-            Slack.
+            Milo runs the described work on schedule with the integration access
+            you choose.
           </DialogDescription>
         </DialogHeader>
 
@@ -62,44 +59,31 @@ export function ScheduleDialog({
             <Input
               id="schedule-name"
               value={values.name}
-              onChange={(event) => updateValue("name", event.target.value)}
+              onChange={(event) => actions.updateName(event.target.value)}
               placeholder="Weekly release summary"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="schedule-description">Description</Label>
+            <Label htmlFor="schedule-description">Instructions</Label>
             <Textarea
               id="schedule-description"
               value={values.description}
+              onBlur={actions.normalizeDescription}
               onChange={(event) =>
-                updateValue("description", event.target.value)
+                actions.updateDescription(event.target.value)
               }
-              placeholder="Summarize the changes shipped this week and call out anything risky."
-              rows={3}
+              placeholder="Summarize shipped @GitHub changes and post the result to @Slack."
+              rows={4}
             />
           </div>
+          <IntegrationAccessFields
+            onInsertSurface={actions.insertSurface}
+            onReadScopeChange={actions.updateReadScope}
+            onRemoveSurface={actions.removeSurface}
+            onSurfaceAccessChange={actions.updateSurfaceAccess}
+            values={values}
+          />
           <ScheduleTiming onValuesChange={onValuesChange} values={values} />
-          <div className="grid gap-2">
-            <Label htmlFor="schedule-channel">Slack channel ID</Label>
-            <Input
-              id="schedule-channel"
-              value={values.channelId}
-              onChange={(event) => updateValue("channelId", event.target.value)}
-              placeholder="C0123456789"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="schedule-thread">Slack thread ID</Label>
-            <Input
-              id="schedule-thread"
-              value={values.threadId}
-              onChange={(event) => updateValue("threadId", event.target.value)}
-              placeholder="1718000000.000100"
-            />
-            <p className="text-muted-foreground text-xs">
-              Optional. Leave empty to post directly to the channel.
-            </p>
-          </div>
         </div>
 
         {error === undefined ? null : (

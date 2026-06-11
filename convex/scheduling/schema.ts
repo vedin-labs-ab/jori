@@ -1,10 +1,26 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { integrationProviderValidator } from "../providers/catalog"
+
+export const scheduleReadScope = v.union(
+  v.literal("selected"),
+  v.literal("allConnected")
+)
+
+export const scheduleSurfaceAccess = v.union(
+  v.literal("read"),
+  v.literal("write"),
+  v.literal("both")
+)
+
+export const scheduleSurface = v.object({
+  provider: integrationProviderValidator,
+  access: scheduleSurfaceAccess,
+})
 
 export const scheduleOutput = v.object({
-  type: v.literal("slack"),
-  channelId: v.string(),
-  threadId: v.optional(v.string()),
+  readScope: scheduleReadScope,
+  surfaces: v.array(scheduleSurface),
 })
 
 export const scheduleType = v.union(

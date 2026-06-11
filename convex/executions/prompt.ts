@@ -2,6 +2,11 @@ import { type ToolPermission } from "../permissions/catalog"
 import { promptTemplates } from "../prompts/generated"
 import { renderPromptTemplate } from "../prompts/render"
 import { createPromptTime } from "../prompts/time"
+import {
+  type ScheduleReadScope,
+  scheduleAccessLabel,
+  scheduleProviderLabels,
+} from "../scheduling/output"
 import { type CodexRuntimeInput, type MessageProvider } from "./codex"
 import {
   type ApprovalContinuation,
@@ -65,11 +70,7 @@ function createScheduleValues(
 ) {
   return {
     output: {
-      target: formatTargetLines([
-        targetLine("Provider", "Slack"),
-        targetLine("Channel ID", input.schedule.output.channelId),
-        targetLine("Thread timestamp", input.schedule.output.threadId),
-      ]),
+      access: formatScheduleAccess(input.schedule.output),
     },
     schedule: {
       id: input.schedule._id,
@@ -79,6 +80,29 @@ function createScheduleValues(
     },
     time: { utc: createPromptTime() },
   }
+}
+
+function formatScheduleAccess(
+  output: Extract<
+    CodexRuntimeInput,
+    { type: "scheduled" }
+  >["schedule"]["output"]
+) {
+  return formatTargetLines([
+    targetLine("Read scope", scheduleReadScopeLabel(output.readScope)),
+    ...output.surfaces.map((surface) =>
+      targetLine(
+        scheduleProviderLabels[surface.provider],
+        scheduleAccessLabel(surface.access)
+      )
+    ),
+  ])
+}
+
+function scheduleReadScopeLabel(readScope: ScheduleReadScope) {
+  return readScope === "allConnected"
+    ? "Any connected integration"
+    : "Selected integrations only"
 }
 
 const providerLabels = {

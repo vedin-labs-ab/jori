@@ -9,8 +9,9 @@ Schedule:
 - Description: {{schedule.description}}
 - Metadata: {{schedule.metadata}}
 
-Publish to:
-{{output.target}}
+Integration access:
+{{output.access}}
 
-Run the scheduled work and publish the result to this target. If you cannot
-complete it, publish a concise status with the blocker.
+Run the scheduled work using this integration access. Use write actions only
+for integrations marked Write or Read/write. If you cannot complete the task
+with the available access, stop and report the blocker.

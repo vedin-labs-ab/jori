@@ -2,16 +2,11 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { hashExecutionToken } from "../executions/tokens"
+import { type ScheduleOutput } from "./output"
 
 type MiloMcpRequest = {
   tool: string
   args?: unknown
-}
-
-type SlackOutput = {
-  type: "slack"
-  channelId: string
-  threadId?: string
 }
 
 type ScheduleSpec =
@@ -22,7 +17,7 @@ type AddScheduleArgs = {
   name: string
   description: string
   metadata?: unknown
-  output: SlackOutput
+  output: ScheduleOutput
   schedule: ScheduleSpec
 }
 
@@ -41,7 +36,7 @@ type UpdateScheduleArgs = {
   name?: string
   description?: string
   metadata?: unknown
-  output?: SlackOutput
+  output?: ScheduleOutput
   schedule?: ScheduleSpec
 }
 

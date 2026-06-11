@@ -8,5 +8,5 @@ Schedule:
 - Description: {{schedule.description}}
 - Metadata: {{schedule.metadata}}
 
-Publish to:
-{{output.target}}
+Integration access:
+{{output.access}}

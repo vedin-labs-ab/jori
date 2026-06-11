@@ -183,6 +183,7 @@ import type * as scheduling_console from "../scheduling/console.js";
 import type * as scheduling_cron from "../scheduling/cron.js";
 import type * as scheduling_data from "../scheduling/data.js";
 import type * as scheduling_mcp from "../scheduling/mcp.js";
+import type * as scheduling_output from "../scheduling/output.js";
 import type * as scheduling_schedules from "../scheduling/schedules.js";
 import type * as scheduling_timing from "../scheduling/timing.js";
 import type * as shared_actor from "../shared/actor.js";
@@ -372,6 +373,7 @@ declare const fullApi: ApiFromModules<{
   "scheduling/cron": typeof scheduling_cron;
   "scheduling/data": typeof scheduling_data;
   "scheduling/mcp": typeof scheduling_mcp;
+  "scheduling/output": typeof scheduling_output;
   "scheduling/schedules": typeof scheduling_schedules;
   "scheduling/timing": typeof scheduling_timing;
   "shared/actor": typeof shared_actor;

@@ -3,6 +3,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
+import { getScheduleProviderAccess } from "../scheduling/output"
 import { createPromptedExecution } from "./artifacts"
 import { type CodexRuntimeInput } from "./codex"
 import { runPromptedExecution } from "./execute"
@@ -55,22 +56,13 @@ export const runScheduledExecution = internalAction({
       return
     }
 
-    if (input.integration === null) {
-      await createFailedExecution(
-        ctx,
-        input,
-        "Scheduled task output target requires a connected Slack integration."
-      )
-      return
-    }
-
     await runExecution(ctx, {
       type: "scheduled",
       trigger: input.trigger,
-      integration: input.integration,
+      integration: null,
       integrations: await prepareIntegrationsForRuntime(
         ctx,
-        input.integrations
+        filterScheduledIntegrations(input.integrations, input.schedule.output)
       ),
       schedule: input.schedule,
     })
@@ -106,6 +98,19 @@ async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
   })
 }
 
+function filterScheduledIntegrations(
+  integrations: CodexRuntimeInput["integrations"],
+  output: Extract<
+    CodexRuntimeInput,
+    { type: "scheduled" }
+  >["schedule"]["output"]
+) {
+  return integrations.filter(
+    (integration) =>
+      getScheduleProviderAccess(output, integration.provider) !== "none"
+  )
+}
+
 async function prepareIntegrationsForRuntime(
   ctx: ActionCtx,
   integrations: CodexRuntimeInput["integrations"]
@@ -121,28 +126,6 @@ async function prepareIntegrationsForRuntime(
   }
 
   return prepared
-}
-
-async function createFailedExecution(
-  ctx: ActionCtx,
-  input: CodexRuntimeInput,
-  message: string
-) {
-  const execution = await createPromptedExecution(ctx, {
-    convexSiteUrl: requireConvexSiteUrl(),
-    input,
-    executionToken: createExecutionToken(),
-  })
-
-  if (execution === null) {
-    return
-  }
-
-  await ctx.runMutation(internal.executions.records.finish, {
-    executionId: execution.id,
-    error: message,
-    status: "failed",
-  })
 }
 
 function requireConvexSiteUrl() {

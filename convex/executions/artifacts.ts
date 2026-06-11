@@ -79,6 +79,8 @@ async function assembleRuntimeTools(
       executionToken: args.executionToken,
     },
     integrations: args.input.integrations,
+    scheduleOutput:
+      args.input.type === "scheduled" ? args.input.schedule.output : undefined,
     toolModes,
   })
 }

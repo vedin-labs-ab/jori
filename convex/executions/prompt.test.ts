@@ -63,21 +63,23 @@ describe("runtime prompts", () => {
 })
 
 describe("schedule trigger prompts", () => {
-  test("renders the publish target and omits an absent thread", () => {
+  test("renders selected integration access", () => {
     const prompt = assemblePrompt(scheduledRuntimeInput())
 
     expect(prompt).toContain("A schedule triggered this run.")
     expect(prompt).toContain("Current UTC time:")
-    expect(prompt).toContain("- Provider: Slack")
-    expect(prompt).toContain("- Channel ID: C123")
-    expect(prompt).not.toContain("Thread timestamp")
+    expect(prompt).toContain("Integration access:")
+    expect(prompt).toContain("- Read scope: Selected integrations only")
+    expect(prompt).toContain("- GitHub: Read")
+    expect(prompt).toContain("- Slack: Write")
+    expect(prompt).toContain("Use write actions only")
     expect(prompt).toContain("Run the scheduled work")
   })
 
-  test("renders the publish thread when present", () => {
-    const prompt = assemblePrompt(scheduledRuntimeInput("123.456"))
+  test("renders all connected read scope", () => {
+    const prompt = assemblePrompt(scheduledRuntimeInput("allConnected"))
 
-    expect(prompt).toContain("- Thread timestamp: 123.456")
+    expect(prompt).toContain("- Read scope: Any connected integration")
   })
 })
 
@@ -140,7 +142,9 @@ describe("approval continuation prompts", () => {
   })
 })
 
-function scheduledRuntimeInput(threadId?: string) {
+function scheduledRuntimeInput(
+  readScope: "selected" | "allConnected" = "selected"
+) {
   return {
     type: "scheduled",
     trigger: {
@@ -151,8 +155,8 @@ function scheduledRuntimeInput(threadId?: string) {
       status: "active",
       createdAt: 0,
     },
-    integration: integration("slack"),
-    integrations: [integration("slack")],
+    integration: null,
+    integrations: [integration("github"), integration("slack")],
     schedule: {
       _id: "schedule",
       _creationTime: 0,
@@ -161,9 +165,11 @@ function scheduledRuntimeInput(threadId?: string) {
       description: "Post the daily digest.",
       metadata: { source: "daily" },
       output: {
-        type: "slack",
-        channelId: "C123",
-        ...(threadId === undefined ? {} : { threadId }),
+        readScope,
+        surfaces: [
+          { provider: "github", access: "read" },
+          { provider: "slack", access: "write" },
+        ],
       },
       type: "recurring",
       cron: "0 9 * * *",

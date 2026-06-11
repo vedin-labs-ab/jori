@@ -1,15 +1,49 @@
 import { numberProperty, objectSchema, stringProperty } from "./common"
 
-const slackOutputSchema = () => ({
+const scheduleOutputSchema = () => ({
   ...objectSchema({
-    required: ["type", "channelId"],
+    required: ["readScope", "surfaces"],
     properties: {
-      type: { const: "slack" },
-      channelId: stringProperty("Slack channel ID."),
-      threadId: stringProperty("Slack thread timestamp."),
+      readScope: {
+        type: "string",
+        enum: ["selected", "allConnected"],
+        description:
+          "Use selected to limit reads to listed read/both surfaces. Use allConnected to allow reads from every connected integration.",
+      },
+      surfaces: {
+        type: "array",
+        description:
+          "Integration access for this schedule. At least one surface must be write or both.",
+        items: objectSchema({
+          required: ["provider", "access"],
+          properties: {
+            provider: {
+              type: "string",
+              enum: [
+                "slack",
+                "linear",
+                "github",
+                "gmail",
+                "googleCalendar",
+                "googleDrive",
+                "notion",
+                "microsoftEmail",
+                "microsoftCalendar",
+              ],
+              description: "Connected integration provider.",
+            },
+            access: {
+              type: "string",
+              enum: ["read", "write", "both"],
+              description:
+                "Read exposes read tools, write exposes write tools, both exposes both.",
+            },
+          },
+        }),
+      },
     },
   }),
-  description: "Slack target where each run publishes its result.",
+  description: "Integration read/write access for each scheduled run.",
 })
 
 const scheduleSchema = () => ({
@@ -44,7 +78,7 @@ export const miloToolInputSchemas = {
         description: "Optional JSON context made available to every run.",
       },
       schedule: scheduleSchema(),
-      output: slackOutputSchema(),
+      output: scheduleOutputSchema(),
     },
   }),
   search_schedules: objectSchema({
@@ -75,7 +109,7 @@ export const miloToolInputSchemas = {
         description: "Optional JSON context made available to every run.",
       },
       schedule: scheduleSchema(),
-      output: slackOutputSchema(),
+      output: scheduleOutputSchema(),
     },
   }),
   delete_schedule: objectSchema({

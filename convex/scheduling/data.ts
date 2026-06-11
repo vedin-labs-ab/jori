@@ -1,8 +1,7 @@
-import { type Infer } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
-import { type scheduleOutput } from "./schema"
+import { normalizeScheduleOutput, type ScheduleOutput } from "./output"
 import {
   getScheduleTiming,
   normalizeRequiredText,
@@ -10,8 +9,6 @@ import {
 } from "./timing"
 
 export const maxSearchResults = 100
-
-type ScheduleOutput = Infer<typeof scheduleOutput>
 
 export async function createSchedule(
   ctx: MutationCtx,
@@ -32,7 +29,7 @@ export async function createSchedule(
     name: normalizeRequiredText(args.name, "name"),
     description: normalizeRequiredText(args.description, "description"),
     metadata: args.metadata,
-    output: args.output,
+    output: normalizeScheduleOutput(args.output),
     type: args.schedule.type,
     cron: timing.cron,
     runAt: timing.runAt,
@@ -113,7 +110,7 @@ export async function updateSchedule(
   }
 
   if (args.output !== undefined) {
-    patch.output = args.output
+    patch.output = normalizeScheduleOutput(args.output)
   }
 
   if (args.schedule !== undefined) {

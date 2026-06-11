@@ -198,10 +198,7 @@ function getSlackApprovalDelivery(
 
 function getSlackTarget(input: CodexRuntimeInput) {
   if (input.type === "scheduled") {
-    return {
-      channelId: input.schedule.output.channelId,
-      threadTs: input.schedule.output.threadId,
-    }
+    return null
   }
 
   if (input.provider !== "slack") {

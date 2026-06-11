@@ -1,6 +1,11 @@
 import { buildRecurringCron, classifyCron } from "./cron"
 import { toDatetimeLocal } from "./format"
 import {
+  hasScheduleWriteSurface,
+  normalizeScheduleSurfaceMentions,
+  syncScheduleSurfaces,
+} from "./surfaces"
+import {
   emptyScheduleForm,
   type Schedule,
   type ScheduleFormValues,
@@ -13,7 +18,13 @@ type ScheduleSpec =
 type ScheduleArgs = {
   name: string
   description: string
-  output: { type: "slack"; channelId: string; threadId?: string }
+  output: {
+    readScope: ScheduleFormValues["readScope"]
+    surfaces: Array<{
+      provider: ScheduleFormValues["surfaces"][number]["provider"]
+      access: Exclude<ScheduleFormValues["surfaces"][number]["access"], "">
+    }>
+  }
 }
 
 type ArgsResult<Args> = { args: Args } | { error: string }
@@ -27,12 +38,12 @@ export function scheduleFormValues(
 
   return {
     name: schedule.name,
-    description: schedule.description,
+    description: normalizeScheduleSurfaceMentions(schedule.description),
     type: schedule.type,
     ...classifyCron(schedule.cron),
     runAt: schedule.runAt === undefined ? "" : toDatetimeLocal(schedule.runAt),
-    channelId: schedule.output.channelId,
-    threadId: schedule.output.threadId ?? "",
+    readScope: schedule.output.readScope,
+    surfaces: schedule.output.surfaces,
   }
 }
 
@@ -81,20 +92,33 @@ export function updateScheduleArgs(
 
 function buildBaseArgs(values: ScheduleFormValues): ArgsResult<ScheduleArgs> {
   const name = values.name.trim()
-  const description = values.description.trim()
-  const channelId = values.channelId.trim()
-  const threadId = values.threadId.trim()
+  const description = normalizeScheduleSurfaceMentions(
+    values.description.trim()
+  )
+  const surfaces = syncScheduleSurfaces(
+    description,
+    values.surfaces,
+    values.readScope
+  )
 
   if (name === "") {
     return { error: "Name is required." }
   }
 
   if (description === "") {
-    return { error: "Description is required." }
+    return { error: "Instructions are required." }
   }
 
-  if (channelId === "") {
-    return { error: "Slack channel ID is required." }
+  if (surfaces.length === 0) {
+    return { error: "Mention at least one integration with @." }
+  }
+
+  if (surfaces.some((surface) => surface.access === "")) {
+    return { error: "Choose read, write, or both for each integration." }
+  }
+
+  if (!hasScheduleWriteSurface(surfaces)) {
+    return { error: "At least one integration must allow writes." }
   }
 
   return {
@@ -102,9 +126,11 @@ function buildBaseArgs(values: ScheduleFormValues): ArgsResult<ScheduleArgs> {
       name,
       description,
       output: {
-        type: "slack",
-        channelId,
-        ...(threadId === "" ? {} : { threadId }),
+        readScope: values.readScope,
+        surfaces: surfaces.map((surface) => ({
+          access: surface.access as Exclude<typeof surface.access, "">,
+          provider: surface.provider,
+        })),
       },
     },
   }

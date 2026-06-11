@@ -1,5 +1,9 @@
 import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
+import {
+  type ScheduleReadScope,
+  type ScheduleSurfaceFormValue,
+} from "./surfaces"
 
 export type ScheduleList = FunctionReturnType<
   typeof api.scheduling.console.list
@@ -33,8 +37,8 @@ export type ScheduleFormValues = {
   monthDay: string
   cron: string
   runAt: string
-  channelId: string
-  threadId: string
+  readScope: ScheduleReadScope
+  surfaces: ScheduleSurfaceFormValue[]
 }
 
 export const emptyScheduleForm: ScheduleFormValues = {
@@ -47,6 +51,6 @@ export const emptyScheduleForm: ScheduleFormValues = {
   monthDay: "1",
   cron: "",
   runAt: "",
-  channelId: "",
-  threadId: "",
+  readScope: "selected",
+  surfaces: [],
 }

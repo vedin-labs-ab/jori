@@ -3,6 +3,7 @@ import {
   type PermissionMode,
   type ToolProvider,
 } from "../../permissions/catalog"
+import { type ScheduleOutput } from "../../scheduling/output"
 import { createRuntimeToolCapability, getProviderSkillNames } from "../bundles"
 import { createMiloToolBundle } from "./milo"
 import {
@@ -21,6 +22,7 @@ export function assembleToolsForRun(args: {
     executionToken: string
   }
   integrations: Doc<"integrations">[]
+  scheduleOutput?: ScheduleOutput
   toolModes: ReadonlyMap<string, PermissionMode>
 }): RuntimeToolBundle {
   const bundles: ToolBundle[] = []
@@ -37,7 +39,7 @@ export function assembleToolsForRun(args: {
         toolModes: args.toolModes,
       })
     )
-    addProviderSkillNames(skillNames, "milo")
+    addProviderSkillNames(skillNames, "milo", miloPermissions)
     capabilities.push(createRuntimeToolCapability("milo", miloPermissions))
   }
 
@@ -45,12 +47,17 @@ export function assembleToolsForRun(args: {
     const integrationBundle = createIntegrationToolBundle({
       broker: args.milo,
       integration,
+      scheduleOutput: args.scheduleOutput,
       toolModes: args.toolModes,
     })
 
     if (integrationBundle !== null) {
       bundles.push(integrationBundle.bundle)
-      addProviderSkillNames(skillNames, integrationBundle.provider)
+      addProviderSkillNames(
+        skillNames,
+        integrationBundle.provider,
+        integrationBundle.permissions
+      )
       capabilities.push(integrationBundle.capability)
     }
   }
@@ -67,9 +74,10 @@ export function assembleToolsForRun(args: {
 
 function addProviderSkillNames(
   skillNames: Set<string>,
-  provider: ToolProvider
+  provider: ToolProvider,
+  permissions: Parameters<typeof getProviderSkillNames>[1]
 ) {
-  for (const skillName of getProviderSkillNames(provider)) {
+  for (const skillName of getProviderSkillNames(provider, permissions)) {
     skillNames.add(skillName)
   }
 }

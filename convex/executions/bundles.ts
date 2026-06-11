@@ -55,7 +55,14 @@ const bundledSkillNames = new Set(
   Object.values(providerMetadata).flatMap((metadata) => metadata.skillNames)
 )
 
-export function getProviderSkillNames(provider: ToolProvider) {
+export function getProviderSkillNames(
+  provider: ToolProvider,
+  permissions: readonly ToolPermission[]
+) {
+  if (!permissions.some((permission) => permission.access === "write")) {
+    return []
+  }
+
   return providerMetadata[provider].skillNames
 }
 

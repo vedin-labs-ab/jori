@@ -1,10 +1,11 @@
-import { Clock, MessageSquare, Pencil, Repeat2 } from "lucide-react"
+import { Clock, Pencil, Repeat2, Workflow } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { SeparatorDot } from "../dot"
 import { describeCron } from "./cron"
 import { DeleteSchedule } from "./delete"
 import { absoluteTime, relativeTime } from "./format"
+import { getScheduleSurfaceLabel } from "./surfaces"
 import { type Schedule } from "./types"
 
 export function ScheduleRow({
@@ -44,13 +45,10 @@ export function ScheduleRow({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs">
           <ScheduleTiming schedule={schedule} />
           <span className="inline-flex min-w-0 items-center gap-1.5">
-            <MessageSquare className="size-3.5" />
-            <span>Slack</span>
+            <Workflow className="size-3.5" />
+            <span>{readScopeLabel(schedule.output.readScope)}</span>
             <SeparatorDot />
-            <span className="truncate">
-              {schedule.output.channelId}
-              {schedule.output.threadId === undefined ? "" : " (thread)"}
-            </span>
+            <span className="truncate">{surfaceSummary(schedule)}</span>
           </span>
         </div>
       </div>
@@ -75,6 +73,21 @@ export function ScheduleRow({
       </div>
     </article>
   )
+}
+
+function readScopeLabel(readScope: Schedule["output"]["readScope"]) {
+  return readScope === "allConnected" ? "All reads" : "Selected reads"
+}
+
+function surfaceSummary(schedule: Schedule) {
+  const writers = schedule.output.surfaces.filter(
+    (surface) => surface.access === "write" || surface.access === "both"
+  )
+  const surfaces = writers.length === 0 ? schedule.output.surfaces : writers
+
+  return surfaces
+    .map((surface) => getScheduleSurfaceLabel(surface.provider))
+    .join(", ")
 }
 
 function ScheduleTiming({ schedule }: { schedule: Schedule }) {

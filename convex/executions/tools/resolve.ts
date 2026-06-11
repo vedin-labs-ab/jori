@@ -3,6 +3,7 @@ import {
   getToolPermissionsByProvider,
   type PermissionMode,
   resolveToolMode,
+  type ToolPermission,
   type ToolProvider,
 } from "../../permissions/catalog"
 import { requireGitHubCredentials } from "../../providers/github/credentials"
@@ -11,6 +12,13 @@ import { requireLinearCredentials } from "../../providers/linear/credentials"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
+import {
+  canRead,
+  canWrite,
+  getScheduleProviderAccess,
+  type ScheduleOutput,
+  type ScheduleSurfaceAccess,
+} from "../../scheduling/output"
 import { createRuntimeToolCapability } from "../bundles"
 import { createGitHubToolBundle } from "./github"
 import {
@@ -34,6 +42,7 @@ type IntegrationBundleArgs = {
     executionToken: string
   }
   integration: Doc<"integrations">
+  scheduleOutput?: ScheduleOutput
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
@@ -41,6 +50,7 @@ type IntegrationToolBundle = {
   provider: ToolProvider
   bundle: ToolBundle
   capability: RuntimeToolCapability
+  permissions: ToolPermission[]
 }
 
 export function createIntegrationToolBundle(
@@ -56,7 +66,18 @@ export function createIntegrationToolBundle(
     return null
   }
 
-  const permissions = getEnabledToolPermissions(provider, args.toolModes)
+  const providerAccess =
+    args.scheduleOutput === undefined
+      ? "both"
+      : getScheduleProviderAccess(
+          args.scheduleOutput,
+          args.integration.provider
+        )
+  const permissions = getEnabledToolPermissions(
+    provider,
+    args.toolModes,
+    providerAccess
+  )
 
   if (permissions.length === 0) {
     return null
@@ -75,16 +96,31 @@ export function createIntegrationToolBundle(
         provider,
         bundle,
         capability: createRuntimeToolCapability(provider, permissions),
+        permissions,
       }
 }
 
 export function getEnabledToolPermissions(
   provider: ToolProvider,
-  toolModes: ReadonlyMap<string, PermissionMode>
+  toolModes: ReadonlyMap<string, PermissionMode>,
+  access: ScheduleSurfaceAccess | "none" = "both"
 ) {
   return getToolPermissionsByProvider(provider).filter(
-    (permission) => resolveToolMode(toolModes, permission.tool) !== "blocked"
+    (permission) =>
+      resolveToolMode(toolModes, permission.tool) !== "blocked" &&
+      isPermissionAllowedByAccess(permission.access, access)
   )
+}
+
+function isPermissionAllowedByAccess(
+  permissionAccess: "read" | "write",
+  access: ScheduleSurfaceAccess | "none"
+) {
+  if (permissionAccess === "read") {
+    return canRead(access)
+  }
+
+  return canWrite(access)
 }
 
 function createProviderToolBundle(

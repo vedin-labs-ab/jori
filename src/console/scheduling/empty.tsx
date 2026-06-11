@@ -23,7 +23,7 @@ export function EmptySchedules({ hasFilters }: { hasFilters: boolean }) {
         <EmptyDescription>
           {hasFilters
             ? "Adjust the search or include completed schedules."
-            : "Create a schedule and Milo will run the work and post the result to Slack."}
+            : "Create a schedule and Milo will run the work with the integration access you choose."}
         </EmptyDescription>
       </EmptyHeader>
     </Empty>

@@ -98,14 +98,12 @@ async function getScheduledInput(
     schedule.tenantId,
     schedule.createdBy
   )
-  const integration =
-    integrations.find((candidate) => candidate.provider === "slack") ?? null
 
   return {
     type: "scheduled" as const,
     trigger: args.trigger,
     schedule,
-    integration,
+    integration: null,
     integrations,
   }
 }
