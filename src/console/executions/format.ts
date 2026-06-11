@@ -6,7 +6,7 @@ export function approvalLabel(state: ApprovalState) {
     consumed: "Approved",
     denied: "Denied",
     expired: "Expired",
-    pending: "Required",
+    pending: "Requested",
   } satisfies Record<ApprovalState, string>
 
   return labels[state]
