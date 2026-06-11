@@ -49,6 +49,21 @@ describe("schedule instructions document", () => {
 })
 
 describe("schedule instructions field", () => {
+  test("constrains long unbroken text inside the editor", async () => {
+    const field = renderInstructionsField({
+      description: "Post to GitHub then qweqweqweqweqweqweqweqweqweqweqweqwe.",
+      surfaces: [{ provider: "github", access: "read" }],
+    })
+
+    expect(await screen.findByRole("textbox")).toBeDefined()
+
+    const editorFrame = field.container.querySelector(".relative > div")
+
+    expect(field.container.firstElementChild?.className).toContain("min-w-0")
+    expect(editorFrame?.className).toContain("min-w-0")
+    expect(editorFrame?.className).toContain("[overflow-wrap:anywhere]")
+  })
+
   test("renders integration badges inside the editor", async () => {
     renderInstructionsField({
       description: "Post to @github.",
@@ -93,7 +108,7 @@ function renderInstructionsField({
 }) {
   const onValueChange = vi.fn()
 
-  render(
+  const view = render(
     <ScheduleInstructionsField
       id="instructions"
       onBlur={vi.fn()}
@@ -105,5 +120,5 @@ function renderInstructionsField({
     />
   )
 
-  return { onValueChange }
+  return { container: view.container, onValueChange }
 }

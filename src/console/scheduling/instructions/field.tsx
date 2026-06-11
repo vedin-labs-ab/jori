@@ -17,12 +17,12 @@ export function ScheduleInstructionsField(
   } = useScheduleInstructionsEditor(props)
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <EditorContent
         className={cn(
-          "rounded-md border border-input bg-transparent text-sm shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30 md:text-xs/relaxed",
-          "[&_.tiptap]:min-h-24 [&_.tiptap]:px-2 [&_.tiptap]:py-2 [&_.tiptap]:outline-none",
-          "[&_.tiptap>p]:my-0 [&_.tiptap>p]:min-h-[1.5em]"
+          "min-w-0 max-w-full rounded-md border border-input bg-transparent text-sm shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30 md:text-xs/relaxed",
+          "[&_.tiptap]:min-h-24 [&_.tiptap]:min-w-0 [&_.tiptap]:max-w-full [&_.tiptap]:overflow-x-hidden [&_.tiptap]:px-2 [&_.tiptap]:py-2 [&_.tiptap]:break-words [&_.tiptap]:whitespace-pre-wrap [&_.tiptap]:outline-none [&_.tiptap]:[overflow-wrap:anywhere]",
+          "[&_.tiptap>p]:my-0 [&_.tiptap>p]:min-h-[1.5em] [&_.tiptap>p]:max-w-full [&_.tiptap>p]:break-words [&_.tiptap>p]:[overflow-wrap:anywhere]"
         )}
         editor={editor}
       />
