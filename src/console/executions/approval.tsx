@@ -1,15 +1,6 @@
 import { useAction } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import {
-  ArrowUpRight,
-  Check,
-  Clock3,
-  Loader2,
-  UserCheck,
-  UserPen,
-  UserX,
-  X,
-} from "lucide-react"
+import { ArrowUpRight, Check, Clock3, Loader2, UserPen, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,17 +24,10 @@ export function ApprovalCallout({
   now: number
   tenantId: string
 }) {
-  const HeaderIcon =
-    approval.state === "expired"
-      ? UserX
-      : approval.state === "approved" || approval.state === "consumed"
-        ? UserCheck
-        : UserPen
-
   return (
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
       <div className="flex items-start gap-2 font-medium">
-        <HeaderIcon className="mt-0.5 size-3.5 text-muted-foreground" />
+        <UserPen className="mt-0.5 size-3.5 text-muted-foreground" />
         Approval
       </div>
       <div className="min-w-0">

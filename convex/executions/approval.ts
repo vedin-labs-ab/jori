@@ -56,7 +56,7 @@ function approvalSource({
 
   if (messageUrl !== undefined) {
     return {
-      label: "Source message",
+      label: "Request message",
       provider: "slack",
       url: messageUrl,
     }

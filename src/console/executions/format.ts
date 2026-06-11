@@ -2,11 +2,11 @@ import { type ApprovalState } from "./types"
 
 export function approvalLabel(state: ApprovalState) {
   const labels = {
-    approved: "Approval granted",
-    consumed: "Approval used",
-    denied: "Approval denied",
-    expired: "Approval expired",
-    pending: "Approval required",
+    approved: "Approved",
+    consumed: "Approved",
+    denied: "Denied",
+    expired: "Expired",
+    pending: "Required",
   } satisfies Record<ApprovalState, string>
 
   return labels[state]
