@@ -1,13 +1,7 @@
 import { MessageCircleMore, Timer } from "lucide-react"
 import { useState } from "react"
 import { ApprovalCallout } from "./approval"
-import {
-  CodeBlockDetail,
-  CodeDetail,
-  ErrorDetail,
-  ExecutionDetails,
-  RelativeTime,
-} from "./details"
+import { CodeBlockDetail, ErrorDetail, RelativeTime } from "./details"
 import { formatDuration, relativeTime } from "./format"
 import { SourceParts } from "./source"
 import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
@@ -136,13 +130,6 @@ function ExpandedExecution({
         <ErrorDetail value={execution.error} />
       ) : null}
       <TraceTerminal execution={execution} tenantId={tenantId} />
-      <ExecutionDetails>
-        <CodeDetail label="Sandbox" value={execution.sandboxId} />
-        <CodeDetail label="Hash" value={execution.hash} />
-        <CodeDetail label="Prompt" value={execution.promptId} />
-        <CodeDetail label="Trace" value={execution.traceFileId} />
-        <CodeDetail label="Stopped by" value={execution.stoppedBy} />
-      </ExecutionDetails>
     </div>
   )
 }

@@ -1,7 +1,11 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { mutation } from "../_generated/server"
-import { requireClerkUserId } from "../identity/users"
+import {
+  readClerkUserEmail,
+  readClerkUserName,
+  requireClerkUserId,
+} from "../identity/users"
 import { requireTenantAccess } from "../skills/access"
 
 export const stop = mutation({
@@ -27,7 +31,7 @@ export const stop = mutation({
     // auth and live trace access immediately, even before the kill lands.
     await ctx.db.patch(execution._id, {
       status: "stopped",
-      stoppedBy: requireClerkUserId(identity),
+      stoppedBy: stoppedByLabel(identity),
       stoppedAt: now,
       finishedAt: now,
       hash: undefined,
@@ -43,3 +47,15 @@ export const stop = mutation({
     return null
   },
 })
+
+function stoppedByLabel(identity: {
+  email?: string
+  name?: string
+  subject?: string
+}) {
+  return (
+    readClerkUserName(identity) ??
+    readClerkUserEmail(identity) ??
+    requireClerkUserId(identity)
+  )
+}

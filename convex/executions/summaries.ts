@@ -15,7 +15,7 @@ export async function summarizeExecution(
     context.schedule?.name ??
     firstLine(context.message?.text) ??
     titleFromTrigger(context.trigger)
-  const sourceParts = sourceLabels(context)
+  const sourceParts = executionSourceParts(execution, context)
 
   return {
     id: execution._id,
@@ -31,12 +31,7 @@ export async function summarizeExecution(
     trigger: triggerLabel(context.trigger, context.integration?.provider),
     createdAt: execution.createdAt,
     finishedAt: execution.finishedAt,
-    stoppedAt: execution.stoppedAt,
-    stoppedBy: execution.stoppedBy,
     durationMs: getDuration(execution),
-    sandboxId: execution.sandboxId,
-    hash: execution.hash,
-    promptId: execution.promptId,
     traceFileId: storedTraceFileId(execution),
     error: execution.error,
     approval:
@@ -150,6 +145,19 @@ function searchableText(
     .filter(Boolean)
     .join(" ")
     .toLowerCase()
+}
+
+function executionSourceParts(
+  execution: Doc<"executions">,
+  context: Awaited<ReturnType<typeof getExecutionContext>>
+) {
+  const parts = sourceLabels(context)
+
+  if (execution.stoppedBy === undefined || execution.stoppedBy === "") {
+    return parts
+  }
+
+  return [...parts, `Stopped by ${execution.stoppedBy}`]
 }
 
 function sourceLabels({

@@ -39,6 +39,7 @@ export function SourceParts({ parts }: { parts: string[] }) {
       {parts.map((part, index) => (
         <SourcePart
           isEmphasized={isEmphasizedSourcePart(parts, index)}
+          isStoppedBy={part.startsWith("Stopped by ")}
           key={part}
           label={part}
         />
@@ -49,13 +50,18 @@ export function SourceParts({ parts }: { parts: string[] }) {
 
 function SourcePart({
   isEmphasized,
+  isStoppedBy,
   label,
 }: {
   isEmphasized: boolean
+  isStoppedBy: boolean
   label: string
 }) {
   return (
     <span className="inline-flex items-center gap-1">
+      {isStoppedBy ? (
+        <span className="mx-0.5 size-1 rounded-full bg-muted-foreground/70" />
+      ) : null}
       <ProviderLogo provider={label} />
       <span className={isEmphasized ? "font-medium text-foreground" : ""}>
         {label}

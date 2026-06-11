@@ -1,6 +1,5 @@
 import { AlertTriangle, Check, Copy, type LucideIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -84,36 +83,6 @@ function useIsSingleRenderedLine(ref: React.RefObject<HTMLElement | null>) {
   }, [ref])
 
   return isSingleLine
-}
-
-export function ExecutionDetails({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t bg-muted/40 px-3 py-2 text-xs">
-      {children}
-    </div>
-  )
-}
-
-export function CodeDetail({
-  label,
-  value,
-}: {
-  label: string
-  value?: string
-}) {
-  if (value === undefined || value === "") {
-    return null
-  }
-
-  const shortValue = value.length > 12 ? `${value.slice(0, 8)}...` : value
-
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <Badge variant="secondary">{label}</Badge>
-      <code className="text-muted-foreground">{shortValue}</code>
-      <CopyButton label={label} value={value} />
-    </span>
-  )
 }
 
 export function RelativeTime({

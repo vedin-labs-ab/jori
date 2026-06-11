@@ -47,12 +47,7 @@ export type ExecutionItem = {
   trigger: string
   createdAt: number
   finishedAt?: number
-  stoppedAt?: number
-  stoppedBy?: string
   durationMs?: number
-  sandboxId?: string
-  hash?: string
-  promptId: string
   traceFileId?: string
   error?: string
   approval: {
