@@ -247,8 +247,11 @@ function approvalMeta(
   tooltip: string
 } | null {
   if (approval.state === "pending" || approval.state === "expired") {
+    const hasExpired = now >= approval.expiresAt
+
     return {
       Icon: Clock3,
+      iconClassName: hasExpired ? "text-warning" : undefined,
       label: expirationLabel(approval, now),
       tooltip: absoluteTime(approval.expiresAt),
     }
