@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { type FunctionArgs, type FunctionReturnType } from "convex/server"
-import { SquareTerminal } from "lucide-react"
+import { FileX, SquareTerminal } from "lucide-react"
 import {
   type ReactElement,
   type ReactNode,
@@ -9,7 +9,13 @@ import {
   useRef,
   useState,
 } from "react"
-import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
@@ -163,8 +169,17 @@ function EmptyTraceNotice() {
 function EmptyStoredTraceNotice() {
   return (
     <Empty className="h-full">
+      <EmptyMedia
+        className="bg-background text-muted-foreground"
+        variant="icon"
+      >
+        <FileX />
+      </EmptyMedia>
       <EmptyHeader>
-        <EmptyTitle>No trace recorded.</EmptyTitle>
+        <EmptyTitle>No trace recorded</EmptyTitle>
+        <EmptyDescription>
+          This execution stopped before any trace output was written.
+        </EmptyDescription>
       </EmptyHeader>
     </Empty>
   )
