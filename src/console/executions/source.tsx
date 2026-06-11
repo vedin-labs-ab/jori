@@ -36,18 +36,39 @@ export function ProviderLogo({
 export function SourceParts({ parts }: { parts: string[] }) {
   return (
     <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-muted-foreground text-xs">
-      {parts.map((part) => (
-        <SourcePart key={part} label={part} />
+      {parts.map((part, index) => (
+        <SourcePart
+          isEmphasized={isEmphasizedSourcePart(parts, index)}
+          key={part}
+          label={part}
+        />
       ))}
     </div>
   )
 }
 
-function SourcePart({ label }: { label: string }) {
+function SourcePart({
+  isEmphasized,
+  label,
+}: {
+  isEmphasized: boolean
+  label: string
+}) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <ProviderLogo provider={label} />
-      <span>{label}</span>
+      <span className={isEmphasized ? "font-medium text-foreground" : ""}>
+        {label}
+      </span>
     </span>
+  )
+}
+
+function isEmphasizedSourcePart(parts: string[], index: number) {
+  const label = parts[index]
+
+  return (
+    providerLogos[label] !== undefined ||
+    (parts[index - 1] === "Triggered by" && parts[index + 1] === "in")
   )
 }

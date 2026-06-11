@@ -174,7 +174,9 @@ function sourceLabels({
     const provider = providerLabel(integration?.provider)
 
     return [
-      `Triggered by ${actorLabel(message.actor)} in`,
+      "Triggered by",
+      actorLabel(message.actor),
+      "in",
       provider,
       messageSurface(message.type),
     ].filter((part): part is string => part !== undefined && part !== "")
@@ -184,7 +186,9 @@ function sourceLabels({
     const provider = providerLabel(approval.provider)
 
     return [
-      `Triggered by ${actorLabel(approval.requestedBy)} in`,
+      "Triggered by",
+      actorLabel(approval.requestedBy),
+      "in",
       provider,
     ].filter((part): part is string => part !== undefined && part !== "")
   }
