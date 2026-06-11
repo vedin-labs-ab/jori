@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { type FunctionArgs, type FunctionReturnType } from "convex/server"
-import { Cable, SquareTerminal } from "lucide-react"
+import { SquareTerminal } from "lucide-react"
 import {
   type ReactElement,
   type ReactNode,
@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
 } from "react"
-import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
@@ -27,12 +26,9 @@ export function TraceTerminal({
   execution: ExecutionItem
   tenantId: string
 }) {
-  const [isMonitoring, setIsMonitoring] = useState(false)
   const isOngoing =
     execution.status === "queued" || execution.status === "running"
-  const showConnectCta = isOngoing && !isMonitoring
-  const hasTrace =
-    isMonitoring || isOngoing || execution.traceFileId !== undefined
+  const hasTrace = isOngoing || execution.traceFileId !== undefined
 
   return (
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
@@ -40,24 +36,10 @@ export function TraceTerminal({
         <SquareTerminal className="mt-0.5 size-3.5 text-muted-foreground" />
         Trace
       </div>
-      {showConnectCta ? (
-        <TerminalFrame>
-          <div className="grid h-full place-items-center">
-            <Button
-              onClick={() => setIsMonitoring(true)}
-              type="button"
-              variant="outline"
-            >
-              <Cable data-icon="inline-start" />
-              Connect
-            </Button>
-          </div>
-        </TerminalFrame>
-      ) : null}
-      {!showConnectCta && hasTrace ? (
+      {hasTrace ? (
         <ConnectedTerminal executionId={execution.id} tenantId={tenantId} />
       ) : null}
-      {!(showConnectCta || hasTrace) ? (
+      {!hasTrace ? (
         <TerminalFrame>
           <EmptyTraceNotice />
         </TerminalFrame>

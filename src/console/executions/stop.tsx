@@ -70,6 +70,7 @@ export function StopExecution({
                 tenantId,
               })
             }}
+            variant="destructive"
           >
             Stop execution
           </AlertDialogAction>
