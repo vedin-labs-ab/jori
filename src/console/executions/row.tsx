@@ -38,12 +38,13 @@ export function ExecutionRow({
     <article className="overflow-hidden rounded-md border bg-background">
       <div className="flex items-center">
         <button
-          className="grid min-w-0 flex-1 grid-cols-[auto_1fr] items-center gap-3 p-3 text-left md:grid-cols-[auto_1fr_auto]"
+          className="group/execution-row grid min-w-0 flex-1 grid-cols-[auto_1fr] items-center gap-3 p-3 text-left md:grid-cols-[auto_1fr_auto]"
           onClick={() => setIsOpen((current) => !current)}
           type="button"
         >
           <StatusIcon
             approvalState={execution.approval?.state}
+            isOpen={isOpen}
             status={execution.status}
           />
           <ExecutionTitle execution={execution} />

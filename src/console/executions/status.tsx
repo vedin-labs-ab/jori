@@ -1,6 +1,7 @@
 import {
   AlertCircle,
   CheckCircle2,
+  ChevronsUpDown,
   Circle,
   ClockAlert,
   Loader2,
@@ -36,25 +37,31 @@ const statusIcons = {
 
 export function StatusIcon({
   approvalState,
+  isOpen,
   status,
 }: {
   approvalState?: ApprovalState
+  isOpen: boolean
   status: ExecutionStatus
 }) {
   const label = statusLabel(approvalState, status)
+  const actionLabel = isOpen ? "Click to collapse" : "Click to expand"
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <span
-          aria-label={label}
-          className="inline-flex shrink-0 items-center"
+          aria-label={`${label}. ${actionLabel}.`}
+          className="relative inline-flex size-4 shrink-0 items-center justify-center"
           role="img"
         >
-          <StatusGlyph approvalState={approvalState} status={status} />
+          <span className="inline-flex transition-opacity duration-150 group-focus-visible/execution-row:opacity-0 group-hover/execution-row:opacity-0">
+            <StatusGlyph approvalState={approvalState} status={status} />
+          </span>
+          <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/execution-row:opacity-100 group-hover/execution-row:opacity-100" />
         </span>
       </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent>{`${label}. ${actionLabel}.`}</TooltipContent>
     </Tooltip>
   )
 }
