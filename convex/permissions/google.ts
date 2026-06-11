@@ -75,7 +75,7 @@ export const googleToolPermissionRows = [
     "googleDrive",
     "google_drive_search_files",
     "Search files",
-    "Search Google Drive files available to Milo.",
+    "Search files in the connected Google Drive.",
     "read",
   ],
   [

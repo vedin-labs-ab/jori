@@ -46,9 +46,6 @@ export const googleSurfaceConfigs = {
     callbackPath: googleOAuthCallbackPath,
     installPath: "/google-drive/install",
     provider: "googleDrive",
-    scopes: [
-      ...googleIdentityScopes,
-      "https://www.googleapis.com/auth/drive.file",
-    ],
+    scopes: [...googleIdentityScopes, "https://www.googleapis.com/auth/drive"],
   },
 } satisfies Record<GoogleSurfaceProvider, GoogleSurfaceConfig>

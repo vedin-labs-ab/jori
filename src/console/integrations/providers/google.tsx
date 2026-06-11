@@ -44,10 +44,10 @@ const calendarConfig = {
 const driveConfig = {
   action: "Connect Drive",
   connectedDetail:
-    "Tenant-scoped. Milo can search, read, create, and update Drive files available to this app when explicitly requested.",
+    "Tenant-scoped. Milo can search, read, create, and update files in the connected Drive when explicitly requested.",
   connectError: "Could not start Drive install.",
   emptyDetail:
-    "Connect Google Drive for this tenant. Milo can use the connection across tenant runs.",
+    "Connect Google Drive for this tenant. Milo can use the connection across tenant runs when explicitly requested.",
   installPath: "/google-drive/install",
   label: "Google Drive",
   loading: "Connecting Drive",
