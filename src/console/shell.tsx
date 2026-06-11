@@ -110,7 +110,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             </Breadcrumb>
           </div>
         </header>
-        <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col gap-8 overflow-y-auto px-4 pb-6 md:px-6">
+        <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col gap-8 overflow-y-auto px-4 pt-1 pb-6 md:px-6">
           <IntegrationCallbackAlerts />
           {children}
         </div>
