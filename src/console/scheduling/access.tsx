@@ -17,9 +17,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { SurfaceLogo } from "./logo"
 import {
   getScheduleSurfaceLabel,
-  getScheduleSurfaceLogo,
   type ScheduleReadScope,
   type ScheduleSurfaceAccess,
   type ScheduleSurfaceFormValue,
@@ -121,7 +121,7 @@ function SurfacePicker({
                   }}
                   value={provider.label}
                 >
-                  <ProviderLogo provider={provider.provider} />
+                  <SurfaceLogo provider={provider.provider} />
                   {provider.label}
                 </CommandItem>
               ))}
@@ -148,7 +148,7 @@ function SurfaceAccessRow({
   return (
     <div className="grid gap-2 rounded-md border bg-background p-2 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
       <div className="flex min-w-0 items-center gap-2">
-        <ProviderLogo provider={surface.provider} />
+        <SurfaceLogo provider={surface.provider} />
         <span className="truncate font-medium text-sm">
           {getScheduleSurfaceLabel(surface.provider)}
         </span>
@@ -209,15 +209,5 @@ function AccessToggle({
         Both
       </ToggleGroupItem>
     </ToggleGroup>
-  )
-}
-
-function ProviderLogo({ provider }: { provider: ScheduleSurfaceProvider }) {
-  return (
-    <img
-      alt=""
-      className="size-3.5 shrink-0"
-      src={getScheduleSurfaceLogo(provider)}
-    />
   )
 }

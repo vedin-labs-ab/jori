@@ -1,11 +1,16 @@
 import { describe, expect, test } from "vitest"
 import {
+  findActiveScheduleSurfaceMention,
   findScheduleSurfaceMentions,
+  getScheduleSurfaceMentionParts,
+  getScheduleSurfaceSuggestions,
+  normalizeCompletedScheduleSurfaceMentions,
   normalizeScheduleSurfaceMentions,
+  replaceScheduleSurfaceMention,
   syncScheduleSurfaces,
 } from "./surfaces"
 
-describe("schedule integration markers", () => {
+describe("schedule integration marker parsing", () => {
   test("recognizes case-insensitive aliases in mention markers", () => {
     expect(
       findScheduleSurfaceMentions(
@@ -20,6 +25,75 @@ describe("schedule integration markers", () => {
     ).toBe("Post to @Slack and create @Notion page")
   })
 
+  test("normalizes completed markers as soon as the user types a boundary", () => {
+    expect(
+      normalizeCompletedScheduleSurfaceMentions("Post to @github, then stop")
+    ).toBe("Post to @GitHub, then stop")
+  })
+
+  test("keeps active marker text untouched until a boundary is typed", () => {
+    expect(normalizeCompletedScheduleSurfaceMentions("Post to @github")).toBe(
+      "Post to @github"
+    )
+  })
+
+  test("normalizes close marker typos only when the match is clear", () => {
+    expect(normalizeCompletedScheduleSurfaceMentions("Open @githb ")).toBe(
+      "Open @GitHub "
+    )
+    expect(normalizeCompletedScheduleSurfaceMentions("Use @go ")).toBe(
+      "Use @go "
+    )
+  })
+})
+
+describe("schedule integration marker autocomplete", () => {
+  test("finds active marker queries for autocomplete", () => {
+    expect(findActiveScheduleSurfaceMention("Send to @li", 11)).toEqual({
+      end: 11,
+      query: "li",
+      start: 8,
+    })
+    expect(findActiveScheduleSurfaceMention("Send to @li now", 15)).toBeNull()
+  })
+
+  test("suggests providers from prefixes and aliases", () => {
+    expect(
+      getScheduleSurfaceSuggestions("li").map((item) => item.provider)
+    ).toEqual(["linear"])
+
+    expect(
+      getScheduleSurfaceSuggestions("go").map((item) => item.provider)
+    ).toEqual(
+      expect.arrayContaining(["gmail", "googleCalendar", "googleDrive"])
+    )
+  })
+
+  test("replaces the active marker with a canonical mention", () => {
+    expect(
+      replaceScheduleSurfaceMention(
+        "Send to @li",
+        { end: 11, query: "li", start: 8 },
+        "linear"
+      )
+    ).toEqual({
+      cursor: 16,
+      text: "Send to @Linear ",
+    })
+  })
+
+  test("splits recognized markers for highlighted rendering", () => {
+    expect(getScheduleSurfaceMentionParts("Use @github and @Slack.")).toEqual([
+      { text: "Use " },
+      { provider: "github", text: "@github" },
+      { text: " and " },
+      { provider: "slack", text: "@Slack" },
+      { text: "." },
+    ])
+  })
+})
+
+describe("schedule integration access sync", () => {
   test("keeps existing access and defaults new all-read markers to read", () => {
     expect(
       syncScheduleSurfaces(

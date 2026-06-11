@@ -12,9 +12,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
 import { IntegrationAccessFields } from "./access"
 import { createScheduleDialogActions } from "./actions"
+import { ScheduleInstructionsField } from "./instructions"
 import { ScheduleDateTimePicker } from "./picker"
 import { RecurringFields } from "./recurring"
 import { type Schedule, type ScheduleFormValues } from "./types"
@@ -65,13 +65,11 @@ export function ScheduleDialog({
           </div>
           <div className="grid gap-2">
             <Label htmlFor="schedule-description">Instructions</Label>
-            <Textarea
+            <ScheduleInstructionsField
               id="schedule-description"
               value={values.description}
               onBlur={actions.normalizeDescription}
-              onChange={(event) =>
-                actions.updateDescription(event.target.value)
-              }
+              onValueChange={actions.updateDescription}
               placeholder="Summarize shipped @GitHub changes and post the result to @Slack."
               rows={4}
             />
