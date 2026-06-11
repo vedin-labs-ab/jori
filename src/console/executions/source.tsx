@@ -57,6 +57,9 @@ function SourcePart({
   isStoppedBy: boolean
   label: string
 }) {
+  const stoppedByLabel = "Stopped by "
+  const stoppedByActor = isStoppedBy ? label.slice(stoppedByLabel.length) : null
+
   return (
     <span className="inline-flex items-center gap-1">
       {isStoppedBy ? (
@@ -65,9 +68,16 @@ function SourcePart({
         </span>
       ) : null}
       <ProviderLogo provider={label} />
-      <span className={isEmphasized ? "font-medium text-foreground" : ""}>
-        {label}
-      </span>
+      {stoppedByActor === null ? (
+        <span className={isEmphasized ? "font-medium text-foreground" : ""}>
+          {label}
+        </span>
+      ) : (
+        <span>
+          {stoppedByLabel}
+          <span className="font-medium text-foreground">{stoppedByActor}</span>
+        </span>
+      )}
     </span>
   )
 }
