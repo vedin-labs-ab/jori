@@ -7,7 +7,6 @@ import {
   Loader2,
   type LucideIcon,
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "./format"
 import { type ApprovalState, type ExecutionStatus } from "./types"
@@ -65,9 +64,9 @@ export function ApprovalBadge({
   now: number
 }) {
   return (
-    <Badge variant="secondary" className="bg-amber-700/10 text-amber-900">
-      Approval - {formatDuration(Math.max(0, expiresAt - now))}
-    </Badge>
+    <span className="text-warning text-xs">
+      Needs approval · {formatDuration(Math.max(0, expiresAt - now))}
+    </span>
   )
 }
 
