@@ -9,6 +9,11 @@ import {
   UserPen,
   UserX,
 } from "lucide-react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "./format"
 import { type ApprovalState, type ExecutionStatus } from "./types"
@@ -30,6 +35,31 @@ const statusIcons = {
 } satisfies Record<ExecutionStatus, LucideIcon>
 
 export function StatusIcon({
+  approvalState,
+  status,
+}: {
+  approvalState?: ApprovalState
+  status: ExecutionStatus
+}) {
+  const label = statusLabel(approvalState, status)
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          aria-label={label}
+          className="inline-flex shrink-0 items-center"
+          role="img"
+        >
+          <StatusGlyph approvalState={approvalState} status={status} />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+function StatusGlyph({
   approvalState,
   status,
 }: {
@@ -64,6 +94,33 @@ export function StatusIcon({
     />
   )
 }
+
+function statusLabel(
+  approvalState: ApprovalState | undefined,
+  status: ExecutionStatus
+) {
+  if (approvalState !== undefined) {
+    return approvalStatusLabels[approvalState]
+  }
+
+  return executionStatusLabels[status]
+}
+
+const approvalStatusLabels = {
+  approved: "Approved",
+  consumed: "Approved",
+  denied: "Denied",
+  expired: "Approval expired",
+  pending: "Needs approval",
+} satisfies Record<ApprovalState, string>
+
+const executionStatusLabels = {
+  completed: "Completed",
+  failed: "Failed",
+  queued: "Queued",
+  running: "Running",
+  stopped: "Stopped",
+} satisfies Record<ExecutionStatus, string>
 
 export function ApprovalBadge({
   expiresAt,
