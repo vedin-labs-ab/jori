@@ -162,6 +162,7 @@ import type * as providers_oauth from "../providers/oauth.js";
 import type * as providers_signing from "../providers/signing.js";
 import type * as providers_slack_approval_blocks from "../providers/slack/approval/blocks.js";
 import type * as providers_slack_approval_cards from "../providers/slack/approval/cards.js";
+import type * as providers_slack_approval_decision from "../providers/slack/approval/decision.js";
 import type * as providers_slack_approval_labels from "../providers/slack/approval/labels.js";
 import type * as providers_slack_approvals from "../providers/slack/approvals.js";
 import type * as providers_slack_config from "../providers/slack/config.js";
@@ -344,6 +345,7 @@ declare const fullApi: ApiFromModules<{
   "providers/signing": typeof providers_signing;
   "providers/slack/approval/blocks": typeof providers_slack_approval_blocks;
   "providers/slack/approval/cards": typeof providers_slack_approval_cards;
+  "providers/slack/approval/decision": typeof providers_slack_approval_decision;
   "providers/slack/approval/labels": typeof providers_slack_approval_labels;
   "providers/slack/approvals": typeof providers_slack_approvals;
   "providers/slack/config": typeof providers_slack_config;

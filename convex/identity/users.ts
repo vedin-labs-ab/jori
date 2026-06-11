@@ -1,4 +1,6 @@
 type ClerkIdentity = {
+  email?: string
+  name?: string
   subject?: string
 }
 
@@ -14,6 +16,14 @@ export function requireClerkUserId(identity: ClerkIdentity) {
   }
 
   return userId
+}
+
+export function readClerkUserEmail(identity: ClerkIdentity) {
+  return normalizeIdentityString(identity.email)
+}
+
+export function readClerkUserName(identity: ClerkIdentity) {
+  return normalizeIdentityString(identity.name)
 }
 
 export function readClerkOrganizationId(identity: Record<string, unknown>) {
@@ -32,7 +42,11 @@ export function readClerkOrganizationId(identity: Record<string, unknown>) {
 }
 
 function normalizeClerkUserId(userId: string | undefined) {
-  const normalized = userId?.trim()
+  return normalizeIdentityString(userId)
+}
+
+function normalizeIdentityString(value: string | undefined) {
+  const normalized = value?.trim()
 
   return normalized === "" ? undefined : normalized
 }

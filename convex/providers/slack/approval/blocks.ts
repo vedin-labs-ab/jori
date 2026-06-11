@@ -7,6 +7,7 @@ import {
   toSlackTimestamp,
   truncateSlackText,
 } from "./cards"
+import { createDecisionTitle, getDecisionIcon } from "./decision"
 import { getToolLabel } from "./labels"
 
 export type SlackApprovalInteraction = {
@@ -132,10 +133,6 @@ function createDecisionBlocks(
   interaction: SlackApprovalInteraction,
   result: SlackApprovalDecisionResult
 ): SlackBlock[] {
-  const title = getDecisionTitle(result.status, result.approval?.decision)
-  const decidedAt = Math.floor(Date.now() / 1000)
-  const actor = formatSlackActor(interaction.actorId)
-  const time = formatSlackTime(decidedAt)
   const summary = result.approval?.summary
   const subtitle =
     result.approval === undefined
@@ -145,7 +142,9 @@ function createDecisionBlocks(
   return [
     createApprovalCard({
       icon: getDecisionIcon(result.status, result.approval?.decision),
-      title: `${title} by ${actor} at ${time}`,
+      title: createDecisionTitle(result, {
+        fallbackActor: formatSlackActor(interaction.actorId),
+      }),
       subtitle,
       body: summary ?? result.message,
     }),
@@ -155,8 +154,6 @@ function createDecisionBlocks(
 function createConsoleDecisionBlocks(
   result: SlackApprovalDecisionResult
 ): SlackBlock[] {
-  const title = getDecisionTitle(result.status, result.approval?.decision)
-  const time = formatSlackTime(Math.floor(Date.now() / 1000))
   const summary = result.approval?.summary
   const subtitle =
     result.approval === undefined
@@ -166,7 +163,7 @@ function createConsoleDecisionBlocks(
   return [
     createApprovalCard({
       icon: getDecisionIcon(result.status, result.approval?.decision),
-      title: `${title} in Milo at ${time}`,
+      title: createDecisionTitle(result, { surface: "milo" }),
       subtitle,
       body: summary ?? result.message,
     }),
@@ -197,36 +194,6 @@ function createApprovalActions(code: string) {
       value: JSON.stringify({ code }),
     },
   ]
-}
-
-function getDecisionTitle(
-  status: SlackApprovalDecisionResult["status"],
-  decision?: "approved" | "denied"
-) {
-  if (status === "approved" || decision === "approved") {
-    return "Approved"
-  }
-
-  if (status === "denied" || decision === "denied") {
-    return "Denied"
-  }
-
-  if (status === "expired") {
-    return "Request expired"
-  }
-
-  return "Approval unavailable"
-}
-
-function getDecisionIcon(
-  status: SlackApprovalDecisionResult["status"],
-  decision?: "approved" | "denied"
-) {
-  if (status === "denied" || decision === "denied") {
-    return "thumbs-down"
-  }
-
-  return "check"
 }
 
 function formatSlackActor(actorId: string | undefined) {

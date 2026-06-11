@@ -5,13 +5,15 @@ import {
 } from "../providers/catalog"
 
 export type Actor =
-  | { userId: string }
+  | { userId: string; name?: string; email?: string }
   | { email: string }
   | { provider: IntegrationProvider; externalId: string; email?: string }
 
 export const actorValidator = v.union(
   v.object({
     userId: v.string(),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
   }),
   v.object({
     email: v.string(),
@@ -23,15 +25,49 @@ export const actorValidator = v.union(
   })
 )
 
-export function createUserActor(userId: string): Actor
+export function createUserActor(
+  userId: string,
+  profile?: { name?: string; email?: string }
+): Actor
 export function createUserActor(userId: undefined): undefined
-export function createUserActor(userId: string | undefined): Actor | undefined
-export function createUserActor(userId: string | undefined): Actor | undefined {
-  return userId === undefined ? undefined : { userId }
+export function createUserActor(
+  userId: string | undefined,
+  profile?: { name?: string; email?: string }
+): Actor | undefined
+export function createUserActor(
+  userId: string | undefined,
+  profile: { name?: string; email?: string } = {}
+): Actor | undefined {
+  if (userId === undefined) {
+    return undefined
+  }
+
+  return {
+    userId,
+    ...nonEmptyActorFields(profile),
+  }
 }
 
 export function getActorEmail(actor: Actor | undefined) {
   return actor !== undefined && "email" in actor ? actor.email : undefined
+}
+
+export function getActorDisplayName(actor: Actor | undefined) {
+  if (actor === undefined) {
+    return undefined
+  }
+
+  if ("provider" in actor) {
+    return actor.provider === "slack"
+      ? `<@${actor.externalId}>`
+      : (actor.email ?? actor.externalId)
+  }
+
+  if ("userId" in actor) {
+    return actor.name ?? actor.email ?? actor.userId
+  }
+
+  return actor.email
 }
 
 export function getActorExternalId(
@@ -47,6 +83,17 @@ export function getActorExternalId(
   }
 
   return actor.externalId
+}
+
+function nonEmptyActorFields(fields: { name?: string; email?: string }) {
+  return {
+    ...(fields.name === undefined || fields.name === ""
+      ? {}
+      : { name: fields.name }),
+    ...(fields.email === undefined || fields.email === ""
+      ? {}
+      : { email: fields.email }),
+  }
 }
 
 export function createProviderActor(args: {

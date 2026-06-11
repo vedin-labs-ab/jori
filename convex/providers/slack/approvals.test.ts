@@ -2,6 +2,7 @@ import { expect, test } from "vitest"
 import { type SlackApprovalDecisionResult } from "../../approvals/runtime"
 import {
   createSlackApprovalRequest,
+  createSlackConsoleDecisionResponse,
   createSlackDecisionResponse,
   createSlackExpirationResponse,
 } from "./approval/blocks"
@@ -99,6 +100,10 @@ test("replaces Slack approval buttons with a decision summary", () => {
       provider: "slack",
       tool: "conversations_add_message",
       summary: "Post a follow-up message in Slack.",
+      decidedBy: {
+        provider: "slack",
+        externalId: "U123",
+      },
     } as SlackApprovalDecisionResult["approval"],
   })
   const rendered = JSON.stringify(response)
@@ -112,6 +117,30 @@ test("replaces Slack approval buttons with a decision summary", () => {
   expect(rendered).not.toContain("ABC12345")
   expect(rendered).not.toContain("Expires in")
   expect(rendered).not.toContain('"type":"actions"')
+})
+
+test("renders Milo approval decisions with the Clerk approver identity", () => {
+  const response = createSlackConsoleDecisionResponse({
+    status: "approved",
+    message: "Approved. Continuing the run.",
+    approval: {
+      provider: "notion",
+      tool: "notion_create_page",
+      summary: "Create a new Notion page.",
+      decidedBy: {
+        userId: "user_123",
+        name: "Albin Vedin",
+        email: "albin@example.com",
+      },
+    } as SlackApprovalDecisionResult["approval"],
+  })
+  const rendered = JSON.stringify(response)
+  const card = response.blocks[0] as Record<string, unknown>
+
+  expect(response.replace_original).toBe(true)
+  expect(card.slack_icon).toEqual({ type: "icon", name: "check" })
+  expect(rendered).toContain("Approved by Albin Vedin in Milo at <!date^")
+  expect(rendered).toContain("Create a new Notion page.")
 })
 
 test("renders expired Slack approvals without actions", () => {

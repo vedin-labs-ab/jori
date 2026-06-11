@@ -3,8 +3,13 @@ import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
 import { updateSlackMessage } from "../broker/providers/slack"
-import { requireClerkUserId } from "../identity/users"
+import {
+  readClerkUserEmail,
+  readClerkUserName,
+  requireClerkUserId,
+} from "../identity/users"
 import { createSlackConsoleDecisionResponse } from "../providers/slack/approval/blocks"
+import { createUserActor } from "../shared/actor"
 import { requireTenantAccess } from "../skills/access"
 import { decideApproval, type SlackApprovalDecisionResult } from "./runtime"
 
@@ -30,7 +35,10 @@ export const decide = action({
 
     const result = await decideApproval(ctx, {
       approval: target.approval,
-      decidedBy: { userId: requireClerkUserId(identity) },
+      decidedBy: createUserActor(requireClerkUserId(identity), {
+        email: readClerkUserEmail(identity),
+        name: readClerkUserName(identity),
+      }),
       decision: args.decision,
       integration: target.integration ?? undefined,
     })
