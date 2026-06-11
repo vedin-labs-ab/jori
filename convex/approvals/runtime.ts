@@ -152,11 +152,19 @@ export async function decideApproval(
   }
 
   if (result.status === "denied") {
+    await ctx.scheduler.runAfter(
+      0,
+      internal.executions.approvals.runDeniedExecution,
+      {
+        approvalId: args.approval._id,
+      }
+    )
+
     return {
       status: "denied",
       integration: args.integration,
       approval: result.approval,
-      message: "Denied.",
+      message: "Denied. Continuing without the action.",
     }
   }
 

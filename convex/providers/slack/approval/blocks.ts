@@ -123,7 +123,7 @@ function createDecisionFallbackText(result: SlackApprovalDecisionResult) {
   }
 
   if (result.status === "denied") {
-    return "Denied. Milo will not run this action."
+    return "Denied. Milo is continuing without this action."
   }
 
   return result.message

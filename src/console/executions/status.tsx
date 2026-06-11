@@ -107,7 +107,6 @@ function StatusGlyph({
 
 const approvalStatusLabels = {
   approved: "Approved",
-  consumed: "Approved",
   denied: "Denied",
   expired: "Approval expired",
   pending: "Needs approval",
@@ -123,7 +122,6 @@ const executionStatusLabels = {
 
 const approvalStatusIcons = {
   approved: UserCheck,
-  consumed: UserCheck,
   denied: UserX,
   expired: ClockAlert,
   pending: UserPen,
@@ -156,7 +154,6 @@ export function ApprovalStatusMeta({
 
 const approvalStatusClasses = {
   approved: "text-emerald-800",
-  consumed: "text-emerald-800",
   denied: "text-destructive",
   expired: "text-warning",
   pending: "text-warning",

@@ -164,12 +164,12 @@ export const decide = internalMutation({
       return { status: "missing" as const }
     }
 
-    if (approval.consumedAt !== undefined) {
-      return { status: "consumed" as const, approval }
-    }
-
     if (approval.decision !== undefined) {
       return { status: "decided" as const, approval }
+    }
+
+    if (approval.consumedAt !== undefined) {
+      return { status: "consumed" as const, approval }
     }
 
     if (Date.now() > approval.expiresAt) {
@@ -199,14 +199,15 @@ export const decide = internalMutation({
   },
 })
 
-export const claimApproved = internalMutation({
+export const claimDecisionContinuation = internalMutation({
   args: {
     approvalId: v.id("approvals"),
+    decision: approvalDecision,
   },
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)
 
-    if (!isReadyToConsume(approval)) {
+    if (!isReadyToContinue(approval, args.decision)) {
       return null
     }
 
@@ -218,14 +219,14 @@ export const claimApproved = internalMutation({
   },
 })
 
-function isReadyToConsume(
-  approval: Doc<"approvals"> | null
+function isReadyToContinue(
+  approval: Doc<"approvals"> | null,
+  decision: Doc<"approvals">["decision"]
 ): approval is Doc<"approvals"> {
   return (
     approval !== null &&
-    approval.decision === "approved" &&
-    approval.consumedAt === undefined &&
-    Date.now() <= approval.expiresAt
+    approval.decision === decision &&
+    approval.consumedAt === undefined
   )
 }
 

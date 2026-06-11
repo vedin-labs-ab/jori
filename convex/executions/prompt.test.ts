@@ -90,7 +90,8 @@ describe("approval request prompts", () => {
 
     expect(prompt).toContain("# Approvals")
     expect(prompt).toContain("notion_create_page")
-    expect(prompt).toContain("never ask for approval in a chat message")
+    expect(prompt).toContain("do not ask for approval in chat")
+    expect(prompt).toContain("approves or denies the action")
   })
 
   test("omits the approvals section without prompted tools", () => {
@@ -103,7 +104,7 @@ describe("approval request prompts", () => {
 })
 
 describe("approval continuation prompts", () => {
-  test("replaces the trigger directive with the continuation", () => {
+  test("renders approved action results", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channelId: "C123", ts: "123.456" }),
       [promptedTool()],
@@ -111,14 +112,30 @@ describe("approval continuation prompts", () => {
     )
 
     expect(prompt).toContain("# Original Trigger")
-    expect(prompt).toContain("# Approval Continuation")
+    expect(prompt).toContain("# Approval Decision")
+    expect(prompt).toContain("approved the action")
     expect(prompt).toContain("Create the calendar event")
     expect(prompt).toContain("Found a time")
     expect(prompt).toContain("google_calendar_create_event")
     expect(prompt).toContain('"eventId":"event-123"')
-    expect(prompt).toContain("Do not repeat the approved tool call")
+    expect(prompt).toContain("Do not repeat the approved action")
     expect(prompt).toContain("report what failed instead of retrying")
-    expect(prompt).toContain("do not announce that you are continuing")
+    expect(prompt).not.toContain("Handle the request")
+  })
+
+  test("renders denied action results", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", { channelId: "C123", ts: "123.456" }),
+      [promptedTool()],
+      approvalContinuation("denied")
+    )
+
+    expect(prompt).toContain("# Original Trigger")
+    expect(prompt).toContain("# Approval Decision")
+    expect(prompt).toContain("denied the action")
+    expect(prompt).toContain("Do not run the denied action")
+    expect(prompt).toContain("If a safe path remains, continue")
+    expect(prompt).toContain('"code":"approval_denied"')
     expect(prompt).not.toContain("Handle the request")
   })
 })
@@ -214,8 +231,9 @@ function promptedTool(): ToolPermission {
   }
 }
 
-function approvalContinuation() {
+function approvalContinuation(decision: "approved" | "denied" = "approved") {
   return {
+    decision,
     handoff: {
       objective: "Create the calendar event and confirm it in Slack.",
       progress: "Found a time that works for the attendees.",
@@ -227,6 +245,14 @@ function approvalContinuation() {
       summary: "Create a 30 minute design review.",
       args: { title: "Design review" },
     },
-    result: { eventId: "event-123" },
+    result:
+      decision === "approved"
+        ? { eventId: "event-123" }
+        : {
+            error: {
+              code: "approval_denied",
+              message: "The user denied approval for this action.",
+            },
+          },
   }
 }

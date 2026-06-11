@@ -16,12 +16,7 @@ export type ApprovalFilter =
   | "expired"
   | "none"
 
-export type ApprovalState =
-  | "pending"
-  | "approved"
-  | "denied"
-  | "expired"
-  | "consumed"
+export type ApprovalState = "pending" | "approved" | "denied" | "expired"
 
 export const executionFilterValidator = v.union(
   v.literal("all"),
@@ -65,10 +60,6 @@ export function approvalMatchesFilter(
 
   if (filter === "none") {
     return approvalState === undefined
-  }
-
-  if (filter === "approved") {
-    return approvalState === "approved" || approvalState === "consumed"
   }
 
   return approvalState === filter

@@ -18,66 +18,133 @@ export const runApprovedExecution = internalAction({
     approvalId: v.id("approvals"),
   },
   handler: async (ctx, args) => {
-    const approval = await ctx.runMutation(
-      internal.approvals.approvals.claimApproved,
-      {
-        approvalId: args.approvalId,
-      }
-    )
-
-    if (approval === null) {
-      return
-    }
-
-    const execution = await ctx.runQuery(internal.executions.records.get, {
-      executionId: approval.executionId,
+    const continuation = await loadDecisionContinuation(ctx, {
+      approvalId: args.approvalId,
+      decision: "approved",
     })
 
-    if (execution === null) {
+    if (continuation === null) {
       return
     }
 
-    const input = await ctx.runQuery(
-      internal.executions.records.getInputByTrigger,
-      {
-        triggerId: execution.triggerId,
-      }
-    )
-
-    if (input === null) {
-      return
-    }
-
-    const preparedInput = await prepareRuntimeInput(ctx, input)
-    const result = await executeApprovedTool(ctx, preparedInput, approval)
-    const executionToken = createExecutionToken()
-    const promptedExecution = await createPromptedExecution(ctx, {
-      convexSiteUrl: requireConvexSiteUrl(),
-      input: preparedInput,
-      executionToken,
-      approvalId: approval._id,
-      continuation: {
-        handoff: approval.handoff,
-        action: {
-          provider: approval.provider,
-          tool: approval.tool,
-          summary: approval.summary,
-          args: approval.args,
-        },
-        result,
-      },
-    })
-
-    if (promptedExecution === null) {
-      return
-    }
-
-    await runPromptedExecution(ctx, {
-      execution: promptedExecution,
-      executionToken,
+    await runApprovalContinuation(ctx, {
+      ...continuation,
+      decision: "approved",
+      result: await executeApprovedTool(
+        ctx,
+        continuation.input,
+        continuation.approval
+      ),
     })
   },
 })
+
+export const runDeniedExecution = internalAction({
+  args: {
+    approvalId: v.id("approvals"),
+  },
+  handler: async (ctx, args) => {
+    const continuation = await loadDecisionContinuation(ctx, {
+      approvalId: args.approvalId,
+      decision: "denied",
+    })
+
+    if (continuation === null) {
+      return
+    }
+
+    await runApprovalContinuation(ctx, {
+      ...continuation,
+      decision: "denied",
+      result: createDeniedResult(),
+    })
+  },
+})
+
+async function loadDecisionContinuation(
+  ctx: ActionCtx,
+  args: {
+    approvalId: Doc<"approvals">["_id"]
+    decision: "approved" | "denied"
+  }
+) {
+  const approval = await ctx.runMutation(
+    internal.approvals.approvals.claimDecisionContinuation,
+    args
+  )
+
+  if (approval === null) {
+    return null
+  }
+
+  const input = await loadContinuationInput(ctx, approval)
+
+  return input === null ? null : { approval, input }
+}
+
+async function runApprovalContinuation(
+  ctx: ActionCtx,
+  args: {
+    approval: Doc<"approvals">
+    decision: "approved" | "denied"
+    input: CodexRuntimeInput
+    result: unknown
+  }
+) {
+  const executionToken = createExecutionToken()
+  const promptedExecution = await createPromptedExecution(ctx, {
+    convexSiteUrl: requireConvexSiteUrl(),
+    input: args.input,
+    executionToken,
+    approvalId: args.approval._id,
+    continuation: {
+      decision: args.decision,
+      handoff: args.approval.handoff,
+      action: {
+        provider: args.approval.provider,
+        tool: args.approval.tool,
+        summary: args.approval.summary,
+        args: args.approval.args,
+      },
+      result: args.result,
+    },
+  })
+
+  if (promptedExecution === null) {
+    return
+  }
+
+  await runPromptedExecution(ctx, {
+    execution: promptedExecution,
+    executionToken,
+  })
+}
+
+async function loadContinuationInput(
+  ctx: ActionCtx,
+  approval: Doc<"approvals">
+) {
+  const execution = await ctx.runQuery(internal.executions.records.get, {
+    executionId: approval.executionId,
+  })
+
+  if (execution === null) {
+    return null
+  }
+
+  const input = await ctx.runQuery(
+    internal.executions.records.getInputByTrigger,
+    {
+      triggerId: execution.triggerId,
+    }
+  )
+
+  if (input === null) {
+    return null
+  }
+
+  return await prepareRuntimeInput(ctx, input)
+}
 
 async function prepareRuntimeInput(ctx: ActionCtx, input: CodexRuntimeInput) {
   const integrations = await prepareIntegrationsForRuntime(
@@ -145,6 +212,15 @@ async function executeApprovedTool(
     return {
       error: formatError(error),
     }
+  }
+}
+
+function createDeniedResult() {
+  return {
+    error: {
+      code: "approval_denied",
+      message: "The user denied approval for this action.",
+    },
   }
 }
 

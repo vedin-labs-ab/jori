@@ -29,12 +29,7 @@ export type ExecutionStatus =
   | "completed"
   | "failed"
   | "stopped"
-export type ApprovalState =
-  | "pending"
-  | "approved"
-  | "denied"
-  | "expired"
-  | "consumed"
+export type ApprovalState = "pending" | "approved" | "denied" | "expired"
 
 export type ExecutionItem = {
   id: string

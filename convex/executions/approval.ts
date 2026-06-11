@@ -25,10 +25,6 @@ export function summarizeApproval(args: {
 }
 
 function getApprovalState(approval: Doc<"approvals">) {
-  if (approval.consumedAt !== undefined) {
-    return "consumed" as const
-  }
-
   if (approval.decision !== undefined) {
     return approval.decision
   }

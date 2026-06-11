@@ -257,10 +257,7 @@ function approvalMeta(
     }
   }
 
-  if (
-    (approval.state === "approved" || approval.state === "consumed") &&
-    approval.decidedAt !== undefined
-  ) {
+  if (approval.state === "approved" && approval.decidedAt !== undefined) {
     return {
       Icon: Check,
       iconClassName: "text-primary",

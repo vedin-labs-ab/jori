@@ -70,7 +70,7 @@ function approvalInputSchema() {
           next: {
             type: "string",
             description:
-              "What the continuation agent should do after the approved tool result is available.",
+              "What the continuation agent should do after the user approves or denies the action.",
           },
         },
       },
