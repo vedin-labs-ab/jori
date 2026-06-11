@@ -37,21 +37,18 @@ const statusIcons = {
 
 export function StatusIcon({
   approvalState,
-  isOpen,
   status,
 }: {
   approvalState?: ApprovalState
-  isOpen: boolean
   status: ExecutionStatus
 }) {
   const label = statusLabel(approvalState, status)
-  const actionLabel = isOpen ? "Click to collapse" : "Click to expand"
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <span
-          aria-label={`${label}. ${actionLabel}.`}
+          aria-label={label}
           className="relative inline-flex size-4 shrink-0 items-center justify-center"
           role="img"
         >
@@ -61,7 +58,7 @@ export function StatusIcon({
           <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/execution-row:opacity-100 group-hover/execution-row:opacity-100" />
         </span>
       </TooltipTrigger>
-      <TooltipContent>{`${label}. ${actionLabel}.`}</TooltipContent>
+      <TooltipContent>{label}</TooltipContent>
     </Tooltip>
   )
 }

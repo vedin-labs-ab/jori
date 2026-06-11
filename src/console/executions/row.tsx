@@ -39,7 +39,6 @@ export function ExecutionRow({
         >
           <StatusIcon
             approvalState={execution.approval?.state}
-            isOpen={isOpen}
             status={execution.status}
           />
           <ExecutionTitle execution={execution} />
