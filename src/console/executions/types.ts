@@ -14,7 +14,7 @@ export const approvalFilterOptions = [
   { label: "Approved", value: "approved" },
   { label: "Denied", value: "denied" },
   { label: "Expired", value: "expired" },
-  { label: "No approval", value: "none" },
+  { label: "No approval needed", value: "none" },
 ] as const
 
 export const approvalFilterLabels = Object.fromEntries(
