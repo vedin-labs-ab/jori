@@ -1,4 +1,4 @@
-import { FileText, Timer } from "lucide-react"
+import { MessageCircleMore, Timer } from "lucide-react"
 import { useState } from "react"
 import { ApprovalCallout } from "./approval"
 import {
@@ -70,7 +70,7 @@ export function ExecutionRow({
 
 function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 max-w-[72ch]">
       <div className="truncate font-medium text-sm">{execution.title}</div>
       <SourceParts parts={execution.sourceParts} />
     </div>
@@ -120,7 +120,7 @@ function ExpandedExecution({
   return (
     <div className="grid gap-0">
       <CodeBlockDetail
-        icon={FileText}
+        icon={MessageCircleMore}
         label="Prompt"
         value={execution.objective ?? execution.title}
       />

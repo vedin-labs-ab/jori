@@ -2,13 +2,12 @@ import {
   AlertCircle,
   CheckCircle2,
   Circle,
-  CircleAlert,
   ClockAlert,
   Loader2,
   type LucideIcon,
   UserCheck,
+  UserPen,
 } from "lucide-react"
-import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "./format"
 import { type ApprovalState, type ExecutionStatus } from "./types"
@@ -21,6 +20,14 @@ const statusIconClasses = {
   stopped: "text-muted-foreground",
 } satisfies Record<ExecutionStatus, string>
 
+const statusIcons = {
+  completed: CheckCircle2,
+  failed: AlertCircle,
+  queued: Loader2,
+  running: Loader2,
+  stopped: Circle,
+} satisfies Record<ExecutionStatus, LucideIcon>
+
 export function StatusIcon({
   approvalState,
   status,
@@ -29,23 +36,18 @@ export function StatusIcon({
   status: ExecutionStatus
 }) {
   if (approvalState === "pending") {
-    return <CircleAlert className="size-4 text-amber-900" />
+    return <UserPen className="size-4 text-amber-900" />
+  }
+
+  if (approvalState === "approved" || approvalState === "consumed") {
+    return <UserCheck className="size-4 text-emerald-800" />
   }
 
   if (approvalState === "expired") {
     return <ClockAlert className="size-4 text-amber-900" />
   }
 
-  const Icon =
-    status === "completed"
-      ? CheckCircle2
-      : status === "failed"
-        ? AlertCircle
-        : status === "running"
-          ? Loader2
-          : status === "queued"
-            ? Loader2
-            : Circle
+  const Icon = statusIcons[status]
 
   return (
     <Icon
@@ -67,35 +69,18 @@ export function ApprovalBadge({
   isVisible: boolean
   now: number
 }) {
-  const [shouldRender, setShouldRender] = useState(isVisible)
-
-  useEffect(() => {
-    if (isVisible) {
-      setShouldRender(true)
-      return
-    }
-
-    const timeout = window.setTimeout(() => setShouldRender(false), 200)
-
-    return () => window.clearTimeout(timeout)
-  }, [isVisible])
-
-  if (!shouldRender) {
-    return null
-  }
-
   return (
-    <span
-      aria-hidden={!isVisible}
-      className={cn(
-        "inline-flex origin-left items-center gap-1 text-warning text-xs transition-[opacity,transform] duration-200 ease-out",
-        isVisible
-          ? "scale-x-100 opacity-100"
-          : "pointer-events-none scale-x-95 opacity-0"
-      )}
-    >
-      <UserCheck className="size-3.5 shrink-0" />
-      <span>
+    <span className="inline-flex items-center gap-1 text-warning text-xs">
+      <UserPen className="size-3.5 shrink-0" />
+      <span
+        aria-hidden={!isVisible}
+        className={cn(
+          "inline-block origin-left overflow-hidden whitespace-nowrap transition-[max-width,opacity,transform] duration-200 ease-out",
+          isVisible
+            ? "max-w-56 scale-x-100 opacity-100"
+            : "pointer-events-none max-w-0 scale-x-95 opacity-0"
+        )}
+      >
         Needs approval · {formatDuration(Math.max(0, expiresAt - now))}
       </span>
     </span>

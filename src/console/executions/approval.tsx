@@ -6,6 +6,7 @@ import {
   Clock3,
   Loader2,
   UserCheck,
+  UserPen,
   X,
 } from "lucide-react"
 import { useState } from "react"
@@ -31,10 +32,15 @@ export function ApprovalCallout({
   now: number
   tenantId: string
 }) {
+  const HeaderIcon =
+    approval.state === "approved" || approval.state === "consumed"
+      ? UserCheck
+      : UserPen
+
   return (
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
       <div className="flex items-start gap-2 font-medium">
-        <UserCheck className="mt-0.5 size-3.5 text-muted-foreground" />
+        <HeaderIcon className="mt-0.5 size-3.5 text-muted-foreground" />
         Approval
       </div>
       <div className="min-w-0">
@@ -156,6 +162,12 @@ function ApprovalMeta({
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+      {source === undefined ? null : (
+        <>
+          <ApprovalSource source={source} />
+          <span className="h-4 w-px bg-border" />
+        </>
+      )}
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="inline-flex items-center gap-1.5">
@@ -165,12 +177,6 @@ function ApprovalMeta({
         </TooltipTrigger>
         <TooltipContent>{absoluteTime(approval.expiresAt)}</TooltipContent>
       </Tooltip>
-      {source === undefined ? null : (
-        <>
-          <span className="h-4 w-px bg-border" />
-          <ApprovalSource source={source} />
-        </>
-      )}
     </div>
   )
 }
@@ -224,13 +230,9 @@ function expirationLabel(
   approval: NonNullable<ExecutionItem["approval"]>,
   now: number
 ) {
-  if (approval.state === "pending") {
-    return `Expires in ${formatDuration(Math.max(0, approval.expiresAt - now))}`
-  }
-
-  if (approval.state === "expired") {
+  if (now >= approval.expiresAt) {
     return `Expired ${formatDuration(Math.max(0, now - approval.expiresAt))} ago`
   }
 
-  return `Expires ${absoluteTime(approval.expiresAt)}`
+  return `Expires in ${formatDuration(Math.max(0, approval.expiresAt - now))}`
 }
