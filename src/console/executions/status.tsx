@@ -10,7 +10,6 @@ import {
   UserPen,
   UserX,
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
   TooltipContent,
@@ -88,7 +87,7 @@ const executionStatusLabels = {
   stopped: "Stopped",
 } satisfies Record<ExecutionStatus, string>
 
-const approvalBadgeIcons = {
+const approvalStatusIcons = {
   approved: UserCheck,
   consumed: UserCheck,
   denied: UserX,
@@ -96,7 +95,7 @@ const approvalBadgeIcons = {
   pending: UserPen,
 } satisfies Record<ApprovalState, LucideIcon>
 
-export function ApprovalStatusBadge({
+export function ApprovalStatusMeta({
   expiresAt,
   isVisible,
   now,
@@ -107,35 +106,34 @@ export function ApprovalStatusBadge({
   now: number
   state: ApprovalState
 }) {
-  const Icon = approvalBadgeIcons[state]
+  const Icon = approvalStatusIcons[state]
 
   return (
-    <Badge
+    <span
       aria-hidden={!isVisible}
       className={cn(
-        "origin-left overflow-hidden transition-[max-width,opacity,transform] duration-200 ease-out",
-        approvalBadgeClasses[state],
+        "inline-flex origin-left items-center gap-1 overflow-hidden whitespace-nowrap text-xs transition-[max-width,opacity,transform] duration-200 ease-out",
+        approvalStatusClasses[state],
         isVisible
           ? "max-w-56 scale-x-100 opacity-100"
-          : "pointer-events-none max-w-0 scale-x-95 border-transparent px-0 opacity-0"
+          : "pointer-events-none max-w-0 scale-x-95 opacity-0"
       )}
-      variant="outline"
     >
-      <Icon data-icon="inline-start" />
-      {approvalBadgeLabel(state, expiresAt, now)}
-    </Badge>
+      <Icon className="size-3.5" />
+      {approvalStatusLabel(state, expiresAt, now)}
+    </span>
   )
 }
 
-const approvalBadgeClasses = {
-  approved: "border-emerald-800/20 text-emerald-800",
-  consumed: "border-emerald-800/20 text-emerald-800",
-  denied: "border-destructive/20 text-destructive",
-  expired: "border-warning/20 text-warning",
-  pending: "border-warning/20 text-warning",
+const approvalStatusClasses = {
+  approved: "text-emerald-800",
+  consumed: "text-emerald-800",
+  denied: "text-destructive",
+  expired: "text-warning",
+  pending: "text-warning",
 } satisfies Record<ApprovalState, string>
 
-function approvalBadgeLabel(
+function approvalStatusLabel(
   state: ApprovalState,
   expiresAt: number,
   now: number

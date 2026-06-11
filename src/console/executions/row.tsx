@@ -10,7 +10,7 @@ import {
 } from "./details"
 import { formatDuration, relativeTime } from "./format"
 import { SourceParts } from "./source"
-import { ApprovalStatusBadge, MetaPill, StatusIcon } from "./status"
+import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
 import { StopExecution } from "./stop"
 import { TraceTerminal } from "./terminal"
 import { type ExecutionItem } from "./types"
@@ -88,7 +88,7 @@ function ExecutionMeta({
   return (
     <div className="col-span-2 flex flex-wrap items-center gap-3 justify-self-start md:col-span-1 md:justify-self-end">
       {execution.approval !== null ? (
-        <ApprovalStatusBadge
+        <ApprovalStatusMeta
           expiresAt={execution.approval.expiresAt}
           isVisible={!isOpen}
           now={now}
