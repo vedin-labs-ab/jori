@@ -7,6 +7,7 @@ import {
   type LucideIcon,
   UserCheck,
   UserPen,
+  UserX,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "./format"
@@ -41,6 +42,10 @@ export function StatusIcon({
 
   if (approvalState === "approved" || approvalState === "consumed") {
     return <UserCheck className="size-4 text-emerald-800" />
+  }
+
+  if (approvalState === "denied") {
+    return <UserX className="size-4 text-destructive" />
   }
 
   if (approvalState === "expired") {

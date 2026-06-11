@@ -162,26 +162,32 @@ function ApprovalMeta({
   now: number
 }) {
   const source = approval.source ?? fallbackApprovalSource(approval)
+  const showExpiration =
+    approval.state === "pending" || approval.state === "expired"
+
+  if (source === undefined && !showExpiration) {
+    return null
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
-      {source === undefined ? null : (
-        <>
-          <ApprovalSource source={source} />
-          <span className="px-1 text-muted-foreground/60" aria-hidden="true">
-            ·
-          </span>
-        </>
-      )}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex items-center gap-1.5">
-            <Clock3 className="size-3.5" />
-            {expirationLabel(approval, now)}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent>{absoluteTime(approval.expiresAt)}</TooltipContent>
-      </Tooltip>
+      {source === undefined ? null : <ApprovalSource source={source} />}
+      {source !== undefined && showExpiration ? (
+        <span className="px-1 text-muted-foreground/60" aria-hidden="true">
+          ·
+        </span>
+      ) : null}
+      {showExpiration ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock3 className="size-3.5" />
+              {expirationLabel(approval, now)}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{absoluteTime(approval.expiresAt)}</TooltipContent>
+        </Tooltip>
+      ) : null}
     </div>
   )
 }
