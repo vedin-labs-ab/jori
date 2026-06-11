@@ -28,7 +28,14 @@ export function TraceTerminal({
 }) {
   const isOngoing =
     execution.status === "queued" || execution.status === "running"
-  const hasTrace = isOngoing || execution.traceFileId !== undefined
+  const hasAvailableTrace = isOngoing || execution.traceFileId !== undefined
+  const [hasLoadedTrace, setHasLoadedTrace] = useState(hasAvailableTrace)
+
+  useEffect(() => {
+    if (hasAvailableTrace) {
+      setHasLoadedTrace(true)
+    }
+  }, [hasAvailableTrace])
 
   return (
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
@@ -36,10 +43,10 @@ export function TraceTerminal({
         <SquareTerminal className="mt-0.5 size-3.5 text-muted-foreground" />
         Trace
       </div>
-      {hasTrace ? (
+      {hasLoadedTrace ? (
         <ConnectedTerminal executionId={execution.id} tenantId={tenantId} />
       ) : null}
-      {!hasTrace ? (
+      {!hasLoadedTrace ? (
         <TerminalFrame>
           <EmptyTraceNotice />
         </TerminalFrame>
@@ -59,14 +66,26 @@ function ConnectedTerminal({
     executionId: executionId as ExecutionId,
     tenantId,
   })
+  const [hasConnectedTrace, setHasConnectedTrace] = useState(false)
   const lines = useTraceLines(connection)
+  const isFinalizingTrace =
+    connection?.type === "missing" && hasConnectedTrace && lines.length === 0
+
+  useEffect(() => {
+    if (connection?.type === "live" || connection?.type === "stored") {
+      setHasConnectedTrace(true)
+    }
+  }, [connection?.type])
 
   return (
     <TerminalFrame caption={captionFor(connection, lines.length > 0)}>
       {lines.length > 0 ? (
         <TraceLines lines={lines} />
       ) : (
-        <TerminalNotice connection={connection} />
+        <TerminalNotice
+          connection={connection}
+          isFinalizingTrace={isFinalizingTrace}
+        />
       )}
     </TerminalFrame>
   )
@@ -141,10 +160,12 @@ function EmptyTraceNotice() {
 
 function TerminalNotice({
   connection,
+  isFinalizingTrace = false,
 }: {
   connection: TraceConnection | undefined
+  isFinalizingTrace?: boolean
 }) {
-  if (connection?.type === "missing") {
+  if (connection?.type === "missing" && !isFinalizingTrace) {
     return <EmptyTraceNotice />
   }
 
@@ -152,9 +173,11 @@ function TerminalNotice({
     <div className="grid h-full place-items-center">
       <span className="inline-flex items-center gap-2 text-muted-foreground">
         <Spinner className="size-3.5" />
-        {connection?.type === "pending"
-          ? "Waiting for the sandbox to start..."
-          : "Waiting for trace output..."}
+        {isFinalizingTrace
+          ? "Finalizing trace..."
+          : connection?.type === "pending"
+            ? "Waiting for the sandbox to start..."
+            : "Waiting for trace output..."}
       </span>
     </div>
   )
