@@ -1,6 +1,7 @@
 import { Clock, MessageSquare, Pencil, Repeat2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { SeparatorDot } from "../dot"
 import { DeleteSchedule } from "./delete"
 import { absoluteTime, relativeTime } from "./format"
 import { type Schedule } from "./types"
@@ -41,10 +42,14 @@ export function ScheduleRow({
         </p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs">
           <ScheduleTiming schedule={schedule} />
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex min-w-0 items-center gap-1.5">
             <MessageSquare className="size-3.5" />
-            Slack · {schedule.output.channelId}
-            {schedule.output.threadId === undefined ? "" : " (thread)"}
+            <span>Slack</span>
+            <SeparatorDot />
+            <span className="truncate">
+              {schedule.output.channelId}
+              {schedule.output.threadId === undefined ? "" : " (thread)"}
+            </span>
           </span>
         </div>
       </div>
