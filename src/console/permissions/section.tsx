@@ -8,6 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
+import { SeparatorDot } from "../dot"
 import { LoadingMessage } from "../loading"
 import {
   type ConfigurablePermissionMode,
@@ -139,12 +140,7 @@ function PermissionSummary({ permissions }: { permissions: ToolPermission[] }) {
     <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
       {items.map((item, index) => (
         <span key={item} className="inline-flex items-center gap-2">
-          {index === 0 ? null : (
-            <span
-              aria-hidden="true"
-              className="size-1 rounded-full bg-current"
-            />
-          )}
+          {index === 0 ? null : <SeparatorDot />}
           {item}
         </span>
       ))}

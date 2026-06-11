@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
+import { SeparatorDot } from "../dot"
 import { absoluteTime, formatDuration } from "./format"
 import { ProviderLogo } from "./source"
 import { type ExecutionItem } from "./types"
@@ -162,9 +163,7 @@ function ApprovalMeta({
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
       {source === undefined ? null : <ApprovalSource source={source} />}
       {source !== undefined && meta !== null ? (
-        <span className="px-1 text-muted-foreground/60" aria-hidden="true">
-          ·
-        </span>
+        <SeparatorDot className="text-muted-foreground/60" />
       ) : null}
       {meta === null ? null : (
         <Tooltip>

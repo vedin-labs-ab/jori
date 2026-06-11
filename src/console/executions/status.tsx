@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { SeparatorDot } from "../dot"
 import { formatDuration } from "./format"
 import {
   type ApprovalState,
@@ -57,7 +58,7 @@ export function StatusIcon({
   const label =
     approvalState === null
       ? executionStatusLabels[status]
-      : `${executionStatusLabels[status]} · ${approvalStatusLabels[approvalState]}`
+      : `${executionStatusLabels[status]}, ${approvalStatusLabels[approvalState]}`
 
   return (
     <Tooltip>
@@ -147,7 +148,9 @@ export function ApprovalStatusMeta({
           : "pointer-events-none max-w-0 scale-x-95 opacity-0"
       )}
     >
-      {approvalStatusLabel("pending", expiresAt, now)}
+      <span>Needs approval</span>
+      <SeparatorDot />
+      <span>{formatDuration(Math.max(0, expiresAt - now))}</span>
     </span>
   )
 }
@@ -158,18 +161,6 @@ const approvalStatusClasses = {
   expired: "text-warning",
   pending: "text-warning",
 } satisfies Record<ApprovalState, string>
-
-function approvalStatusLabel(
-  state: ApprovalState,
-  expiresAt: number,
-  now: number
-) {
-  if (state === "pending") {
-    return `Needs approval · ${formatDuration(Math.max(0, expiresAt - now))}`
-  }
-
-  return approvalStatusLabels[state]
-}
 
 function effectiveApprovalState(
   approval: ApprovalIndicator,

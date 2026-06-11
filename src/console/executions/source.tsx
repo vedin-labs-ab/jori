@@ -1,3 +1,5 @@
+import { SeparatorDot } from "../dot"
+
 const providerLogos: Record<string, string> = {
   GitHub: "/logos/providers/github.svg",
   Gmail: "/logos/providers/gmail.svg",
@@ -87,10 +89,8 @@ function SourceSegment({ segment }: { segment: SourceSegment }) {
 
   if (segment.type === "stopped") {
     return (
-      <span className="inline-flex items-center gap-1">
-        <span className="px-1 text-muted-foreground/60" aria-hidden="true">
-          ·
-        </span>
+      <span className="inline-flex items-center gap-1.5">
+        <SeparatorDot className="text-muted-foreground/60" />
         <span>
           Stopped by{" "}
           <span className="font-medium text-foreground">{segment.actor}</span>
