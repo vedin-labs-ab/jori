@@ -38,6 +38,7 @@ import type * as executions_instructions from "../executions/instructions.js";
 import type * as executions_integrations from "../executions/integrations.js";
 import type * as executions_list from "../executions/list.js";
 import type * as executions_monitor from "../executions/monitor.js";
+import type * as executions_pending from "../executions/pending.js";
 import type * as executions_prompt from "../executions/prompt.js";
 import type * as executions_records from "../executions/records.js";
 import type * as executions_runtime from "../executions/runtime.js";
@@ -215,6 +216,7 @@ declare const fullApi: ApiFromModules<{
   "executions/integrations": typeof executions_integrations;
   "executions/list": typeof executions_list;
   "executions/monitor": typeof executions_monitor;
+  "executions/pending": typeof executions_pending;
   "executions/prompt": typeof executions_prompt;
   "executions/records": typeof executions_records;
   "executions/runtime": typeof executions_runtime;

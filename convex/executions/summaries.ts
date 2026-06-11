@@ -4,9 +4,10 @@ import { type Actor } from "../shared/actor"
 
 export async function summarizeExecution(
   ctx: QueryCtx,
-  execution: Doc<"executions">
+  execution: Doc<"executions">,
+  requestedApproval?: Doc<"approvals">
 ) {
-  const context = await getExecutionContext(ctx, execution)
+  const context = await getExecutionContext(ctx, execution, requestedApproval)
   const title =
     context.approval?.handoff.objective ??
     context.schedule?.name ??
@@ -51,13 +52,18 @@ export async function summarizeExecution(
 
 async function getExecutionContext(
   ctx: QueryCtx,
-  execution: Doc<"executions">
+  execution: Doc<"executions">,
+  requestedApproval: Doc<"approvals"> | undefined
 ) {
   const trigger = await ctx.db.get(execution.triggerId)
-  const approval =
+  const continuationApproval =
     execution.approvalId === undefined
       ? null
       : await ctx.db.get(execution.approvalId)
+  const approval =
+    requestedApproval ??
+    (await getLatestRequestedApproval(ctx, execution)) ??
+    continuationApproval
   const message =
     trigger?.messageId === undefined
       ? null
@@ -72,6 +78,19 @@ async function getExecutionContext(
       : await ctx.db.get(message.integrationId)
 
   return { approval, integration, message, schedule, trigger }
+}
+
+async function getLatestRequestedApproval(
+  ctx: QueryCtx,
+  execution: Doc<"executions">
+) {
+  return await ctx.db
+    .query("approvals")
+    .withIndex("by_execution", (index) =>
+      index.eq("executionId", execution._id)
+    )
+    .order("desc")
+    .first()
 }
 
 function storedTraceFileId(execution: Doc<"executions">) {

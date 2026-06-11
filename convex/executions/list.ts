@@ -1,9 +1,13 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
-import { query } from "../_generated/server"
+import { type QueryCtx, query } from "../_generated/server"
 import { requireTenantAccess } from "../skills/access"
+import { countPendingApprovals, pagePendingApprovals } from "./pending"
 import { summarizeExecution } from "./summaries"
+
+type Filter = "all" | "ongoing" | "approval" | "failed" | "completed"
+type ExecutionSummary = Awaited<ReturnType<typeof summarizeExecution>>
 
 const filterValidator = v.union(
   v.literal("all"),
@@ -23,9 +27,13 @@ export const page = query({
   handler: async (ctx, args) => {
     await requireTenantAccess(ctx, args.tenantId)
 
+    if (args.filter === "approval") {
+      return await pagePendingApprovals(ctx, args)
+    }
+
     const offset = parseCursor(args.paginationOpts.cursor)
     const normalizedQuery = normalizeQuery(args.query)
-    const rows = []
+    const rows: ExecutionSummary[] = []
     let matchingIndex = 0
     let hasMore = false
     const executions = ctx.db
@@ -83,6 +91,17 @@ export const stats = query({
     await requireTenantAccess(ctx, args.tenantId)
 
     const normalizedQuery = normalizeQuery(args.query)
+
+    if (args.filter === "approval") {
+      return {
+        filteredCount: await countPendingApprovals(ctx, {
+          normalizedQuery,
+          tenantId: args.tenantId,
+        }),
+        totalCount: await countExecutions(ctx, args.tenantId),
+      }
+    }
+
     let filteredCount = 0
     let totalCount = 0
     const executions = ctx.db
@@ -113,6 +132,19 @@ export const stats = query({
   },
 })
 
+async function countExecutions(ctx: QueryCtx, tenantId: string) {
+  let count = 0
+  const executions = ctx.db
+    .query("executions")
+    .withIndex("by_tenant", (index) => index.eq("tenantId", tenantId))
+
+  for await (const _execution of executions) {
+    count += 1
+  }
+
+  return count
+}
+
 function parseCursor(cursor: string | null) {
   if (cursor === null) {
     return 0
@@ -127,10 +159,7 @@ function normalizeQuery(query: string) {
   return query.trim().toLowerCase()
 }
 
-function canMatchRawFilter(
-  execution: Doc<"executions">,
-  filter: "all" | "ongoing" | "approval" | "failed" | "completed"
-) {
+function canMatchRawFilter(execution: Doc<"executions">, filter: Filter) {
   if (filter === "all") {
     return true
   }
@@ -140,22 +169,19 @@ function canMatchRawFilter(
   }
 
   if (filter === "approval") {
-    return execution.approvalId !== undefined
+    return true
   }
 
   return execution.status === filter
 }
 
-function needsSummary(
-  filter: "all" | "ongoing" | "approval" | "failed" | "completed",
-  normalizedQuery: string
-) {
+function needsSummary(filter: Filter, normalizedQuery: string) {
   return filter === "approval" || normalizedQuery !== ""
 }
 
 function matchesSummary(
-  summary: Awaited<ReturnType<typeof summarizeExecution>>,
-  filter: "all" | "ongoing" | "approval" | "failed" | "completed",
+  summary: ExecutionSummary,
+  filter: Filter,
   normalizedQuery: string
 ) {
   if (filter === "approval" && summary.approval?.state !== "pending") {
