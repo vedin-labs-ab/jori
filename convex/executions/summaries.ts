@@ -1,6 +1,8 @@
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
+import { summarizeApproval } from "./approval"
+import { providerLabel } from "./labels"
 
 export async function summarizeExecution(
   ctx: QueryCtx,
@@ -40,7 +42,12 @@ export async function summarizeExecution(
     approval:
       context.approval === null
         ? null
-        : approvalSummary(context.approval, getApprovalState(context.approval)),
+        : summarizeApproval({
+            approval: context.approval,
+            approvalDeliveryIntegration: context.approvalDeliveryIntegration,
+            integration: context.integration,
+            message: context.message,
+          }),
     searchableText: searchableText({
       execution,
       title,
@@ -76,8 +83,19 @@ async function getExecutionContext(
     message?.integrationId === undefined
       ? null
       : await ctx.db.get(message.integrationId)
+  const approvalDeliveryIntegration =
+    approval?.delivery === undefined
+      ? null
+      : await ctx.db.get(approval.delivery.integrationId)
 
-  return { approval, integration, message, schedule, trigger }
+  return {
+    approval,
+    approvalDeliveryIntegration,
+    integration,
+    message,
+    schedule,
+    trigger,
+  }
 }
 
 async function getLatestRequestedApproval(
@@ -105,21 +123,6 @@ function getDuration(execution: Doc<"executions">) {
   }
 
   return Math.max(0, execution.finishedAt - execution.createdAt)
-}
-
-function approvalSummary(
-  approval: Doc<"approvals">,
-  state: ReturnType<typeof getApprovalState>
-) {
-  return {
-    delivery: deliveryLabel(approval.delivery),
-    expiresAt: approval.expiresAt,
-    id: approval._id,
-    provider: approval.provider,
-    state,
-    summary: approval.summary,
-    tool: approval.tool,
-  }
 }
 
 function searchableText(
@@ -212,32 +215,6 @@ function triggerLabel(
   return "Manual run"
 }
 
-function getApprovalState(approval: Doc<"approvals">) {
-  if (approval.consumedAt !== undefined) {
-    return "consumed" as const
-  }
-
-  if (approval.decision !== undefined) {
-    return approval.decision
-  }
-
-  return Date.now() > approval.expiresAt
-    ? ("expired" as const)
-    : ("pending" as const)
-}
-
-function deliveryLabel(delivery: Doc<"approvals">["delivery"]) {
-  if (delivery === undefined) {
-    return undefined
-  }
-
-  if (delivery.provider === "slack") {
-    return "Delivered to Slack"
-  }
-
-  return `Delivered to ${providerLabel(delivery.provider)}`
-}
-
 function actorLabel(actor: Actor | undefined) {
   if (actor === undefined) {
     return undefined
@@ -252,26 +229,6 @@ function actorLabel(actor: Actor | undefined) {
   }
 
   return "provider" in actor ? actor.externalId : undefined
-}
-
-function providerLabel(provider: string | undefined) {
-  if (provider === undefined) {
-    return "Milo"
-  }
-
-  const labels: Record<string, string> = {
-    github: "GitHub",
-    gmail: "Gmail",
-    googleCalendar: "Google Calendar",
-    linear: "Linear",
-    microsoftCalendar: "Microsoft Calendar",
-    microsoftEmail: "Microsoft Email",
-    milo: "Milo",
-    notion: "Notion",
-    slack: "Slack",
-  }
-
-  return labels[provider] ?? provider
 }
 
 function firstLine(text: string | undefined) {

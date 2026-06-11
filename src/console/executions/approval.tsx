@@ -1,12 +1,60 @@
 import { useAction } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import { Check, Loader2, X } from "lucide-react"
+import {
+  ArrowUpRight,
+  Check,
+  Clock3,
+  Loader2,
+  UserCheck,
+  X,
+} from "lucide-react"
 import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { api } from "../../../convex/_generated/api"
+import { absoluteTime, approvalLabel, formatDuration } from "./format"
 import { type ExecutionItem } from "./types"
 
 type ApprovalDecisionArgs = FunctionArgs<typeof api.approvals.console.decide>
+
+export function ApprovalCallout({
+  approval,
+  now,
+  tenantId,
+}: {
+  approval: NonNullable<ExecutionItem["approval"]>
+  now: number
+  tenantId: string
+}) {
+  return (
+    <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
+      <div className="flex items-start gap-2 font-medium">
+        <UserCheck className="mt-0.5 size-3.5 text-muted-foreground" />
+        Approval
+      </div>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary">{approval.tool}</Badge>
+          <span className="text-muted-foreground">
+            {approvalLabel(approval.state)}
+          </span>
+        </div>
+        <p className="mt-3 text-foreground text-sm leading-relaxed">
+          {approval.summary}
+        </p>
+        <ApprovalMeta approval={approval} now={now} />
+        {approval.state === "pending" ? (
+          <ApprovalActions approval={approval} tenantId={tenantId} />
+        ) : null}
+      </div>
+    </div>
+  )
+}
 
 export function ApprovalActions({
   approval,
@@ -40,8 +88,23 @@ export function ApprovalActions({
   }
 
   return (
-    <div className="mt-2 grid gap-2">
-      <div className="flex flex-wrap gap-2">
+    <div className="mt-4 grid gap-2 border-t pt-3">
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          disabled={pendingDecision !== undefined}
+          onClick={() => void submit("denied")}
+          size="sm"
+          type="button"
+          variant="outline"
+          className="text-destructive hover:text-destructive"
+        >
+          {pendingDecision === "denied" ? (
+            <Loader2 className="animate-spin" data-icon="inline-start" />
+          ) : (
+            <X data-icon="inline-start" />
+          )}
+          Deny
+        </Button>
         <Button
           disabled={pendingDecision !== undefined}
           onClick={() => void submit("approved")}
@@ -55,24 +118,94 @@ export function ApprovalActions({
           )}
           Approve
         </Button>
-        <Button
-          disabled={pendingDecision !== undefined}
-          onClick={() => void submit("denied")}
-          size="sm"
-          type="button"
-          variant="destructive"
-        >
-          {pendingDecision === "denied" ? (
-            <Loader2 className="animate-spin" data-icon="inline-start" />
-          ) : (
-            <X data-icon="inline-start" />
-          )}
-          Deny
-        </Button>
       </div>
       {error !== undefined ? (
         <p className="text-destructive text-xs">{error}</p>
       ) : null}
     </div>
   )
+}
+
+function ApprovalMeta({
+  approval,
+  now,
+}: {
+  approval: NonNullable<ExecutionItem["approval"]>
+  now: number
+}) {
+  const source = approval.source ?? fallbackApprovalSource(approval)
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center gap-1.5">
+            <Clock3 className="size-3.5" />
+            {expirationLabel(approval, now)}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>{absoluteTime(approval.expiresAt)}</TooltipContent>
+      </Tooltip>
+      {source === undefined ? null : (
+        <>
+          <span className="h-4 w-px bg-border" />
+          <ApprovalSource source={source} />
+        </>
+      )}
+    </div>
+  )
+}
+
+function ApprovalSource({
+  source,
+}: {
+  source: NonNullable<ExecutionItem["approval"]>["source"]
+}) {
+  if (source === undefined) {
+    return null
+  }
+
+  if (source.url === undefined) {
+    return <span>{source.label}</span>
+  }
+
+  return (
+    <a
+      className="group/status-link inline-flex items-center gap-0.5 rounded-sm underline-offset-4 transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      href={source.url}
+      rel="noreferrer"
+      target="_blank"
+    >
+      <span>{source.label}</span>
+      <ArrowUpRight
+        aria-hidden="true"
+        className="size-3 -translate-x-1 opacity-0 transition-all duration-200 ease-out group-hover/status-link:translate-x-0 group-hover/status-link:opacity-100 group-focus-visible/status-link:translate-x-0 group-focus-visible/status-link:opacity-100"
+      />
+    </a>
+  )
+}
+
+function fallbackApprovalSource(
+  approval: NonNullable<ExecutionItem["approval"]>
+) {
+  return approval.delivery === undefined
+    ? undefined
+    : {
+        label: approval.delivery,
+      }
+}
+
+function expirationLabel(
+  approval: NonNullable<ExecutionItem["approval"]>,
+  now: number
+) {
+  if (approval.state === "pending") {
+    return `Expires in ${formatDuration(Math.max(0, approval.expiresAt - now))}`
+  }
+
+  if (approval.state === "expired") {
+    return `Expired ${formatDuration(Math.max(0, now - approval.expiresAt))} ago`
+  }
+
+  return `Expires ${absoluteTime(approval.expiresAt)}`
 }

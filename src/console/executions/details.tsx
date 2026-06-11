@@ -8,40 +8,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { ApprovalActions } from "./approval"
-import { absoluteTime, approvalLabel } from "./format"
-import { type ExecutionItem } from "./types"
+import { absoluteTime } from "./format"
 
 const copyResetDelayMs = 1200
-
-export function ApprovalCallout({
-  approval,
-  tenantId,
-}: {
-  approval: NonNullable<ExecutionItem["approval"]>
-  tenantId: string
-}) {
-  return (
-    <div className="m-3 rounded-md border border-amber-700/20 bg-amber-700/5 p-3">
-      <div className="grid gap-2 sm:grid-cols-[10rem_1fr]">
-        <div className="flex items-center gap-2 font-medium text-amber-900 text-xs">
-          <AlertTriangle className="size-3.5" />
-          {approvalLabel(approval.state)}
-        </div>
-        <div className="grid gap-1 text-xs">
-          <p className="font-medium">Tool: {approval.tool}</p>
-          <p className="text-muted-foreground">{approval.summary}</p>
-          {approval.delivery !== undefined ? (
-            <p className="text-muted-foreground">{approval.delivery}</p>
-          ) : null}
-          {approval.state === "pending" ? (
-            <ApprovalActions approval={approval} tenantId={tenantId} />
-          ) : null}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export function ErrorDetail({ value }: { value: string }) {
   return (

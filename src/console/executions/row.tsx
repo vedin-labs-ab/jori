@@ -1,7 +1,7 @@
 import { FileText, Timer } from "lucide-react"
 import { useState } from "react"
+import { ApprovalCallout } from "./approval"
 import {
-  ApprovalCallout,
   CodeBlockDetail,
   CodeDetail,
   ErrorDetail,
@@ -57,7 +57,11 @@ export function ExecutionRow({
         ) : null}
       </div>
       {isOpen ? (
-        <ExpandedExecution execution={execution} tenantId={tenantId} />
+        <ExpandedExecution
+          execution={execution}
+          now={now}
+          tenantId={tenantId}
+        />
       ) : null}
     </article>
   )
@@ -99,9 +103,11 @@ function ExecutionMeta({
 
 function ExpandedExecution({
   execution,
+  now,
   tenantId,
 }: {
   execution: ExecutionItem
+  now: number
   tenantId: string
 }) {
   return (
@@ -112,7 +118,11 @@ function ExpandedExecution({
         value={execution.objective ?? execution.title}
       />
       {execution.approval !== null ? (
-        <ApprovalCallout approval={execution.approval} tenantId={tenantId} />
+        <ApprovalCallout
+          approval={execution.approval}
+          now={now}
+          tenantId={tenantId}
+        />
       ) : null}
       {execution.error !== undefined ? (
         <ErrorDetail value={execution.error} />

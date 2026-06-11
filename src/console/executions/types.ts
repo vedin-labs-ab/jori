@@ -49,6 +49,10 @@ export type ExecutionItem = {
     provider: string
     expiresAt: number
     delivery?: string
+    source?: {
+      label: string
+      url?: string
+    }
   } | null
   searchableText: string
 }
