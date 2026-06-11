@@ -37,7 +37,11 @@ export function ExecutionRow({
           onClick={() => setIsOpen((current) => !current)}
           type="button"
         >
-          <StatusIcon status={execution.status} />
+          <StatusIcon
+            approval={execution.approval}
+            now={now}
+            status={execution.status}
+          />
           <ExecutionTitle execution={execution} />
           <ExecutionMeta
             durationMs={durationMs}
@@ -87,12 +91,11 @@ function ExecutionMeta({
 }) {
   return (
     <div className="col-span-2 flex flex-wrap items-center gap-3 justify-self-start md:col-span-1 md:justify-self-end">
-      {execution.approval !== null ? (
+      {hasLivePendingApproval(execution.approval, now) ? (
         <ApprovalStatusMeta
           expiresAt={execution.approval.expiresAt}
           isVisible={!isOpen}
           now={now}
-          state={execution.approval.state}
         />
       ) : null}
       {durationMs !== undefined ? (
@@ -150,4 +153,15 @@ function durationFor(execution: ExecutionItem, now: number) {
   }
 
   return execution.durationMs
+}
+
+function hasLivePendingApproval(
+  approval: ExecutionItem["approval"],
+  now: number
+): approval is NonNullable<ExecutionItem["approval"]> {
+  return (
+    approval !== null &&
+    approval.state === "pending" &&
+    approval.expiresAt > now
+  )
 }

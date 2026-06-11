@@ -17,7 +17,11 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "./format"
-import { type ApprovalState, type ExecutionStatus } from "./types"
+import {
+  type ApprovalState,
+  type ExecutionItem,
+  type ExecutionStatus,
+} from "./types"
 
 const statusIconClasses = {
   completed: "text-emerald-800",
@@ -35,8 +39,25 @@ const statusIcons = {
   stopped: Circle,
 } satisfies Record<ExecutionStatus, LucideIcon>
 
-export function StatusIcon({ status }: { status: ExecutionStatus }) {
-  const label = executionStatusLabels[status]
+type ApprovalIndicator = Pick<
+  NonNullable<ExecutionItem["approval"]>,
+  "expiresAt" | "state"
+> | null
+
+export function StatusIcon({
+  approval,
+  now,
+  status,
+}: {
+  approval: ApprovalIndicator
+  now: number
+  status: ExecutionStatus
+}) {
+  const approvalState = effectiveApprovalState(approval, now)
+  const label =
+    approvalState === null
+      ? executionStatusLabels[status]
+      : `${executionStatusLabels[status]} · ${approvalStatusLabels[approvalState]}`
 
   return (
     <Tooltip>
@@ -47,7 +68,7 @@ export function StatusIcon({ status }: { status: ExecutionStatus }) {
           role="img"
         >
           <span className="inline-flex transition-opacity duration-150 group-focus-visible/execution-row:opacity-0 group-hover/execution-row:opacity-0">
-            <StatusGlyph status={status} />
+            <StatusGlyph approvalState={approvalState} status={status} />
           </span>
           <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/execution-row:opacity-100 group-hover/execution-row:opacity-100" />
         </span>
@@ -57,15 +78,28 @@ export function StatusIcon({ status }: { status: ExecutionStatus }) {
   )
 }
 
-function StatusGlyph({ status }: { status: ExecutionStatus }) {
-  const Icon = statusIcons[status]
+function StatusGlyph({
+  approvalState,
+  status,
+}: {
+  approvalState: ApprovalState | null
+  status: ExecutionStatus
+}) {
+  const Icon =
+    approvalState === null
+      ? statusIcons[status]
+      : approvalStatusIcons[approvalState]
 
   return (
     <Icon
       className={cn(
         "size-4",
-        statusIconClasses[status],
-        (status === "queued" || status === "running") && "animate-spin"
+        approvalState === null
+          ? statusIconClasses[status]
+          : approvalStatusClasses[approvalState],
+        approvalState === null &&
+          (status === "queued" || status === "running") &&
+          "animate-spin"
       )}
     />
   )
@@ -99,28 +133,24 @@ export function ApprovalStatusMeta({
   expiresAt,
   isVisible,
   now,
-  state,
 }: {
   expiresAt: number
   isVisible: boolean
   now: number
-  state: ApprovalState
 }) {
-  const Icon = approvalStatusIcons[state]
-
   return (
     <span
       aria-hidden={!isVisible}
       className={cn(
         "inline-flex origin-left items-center gap-1 overflow-hidden whitespace-nowrap text-xs transition-[max-width,opacity,transform] duration-200 ease-out",
-        approvalStatusClasses[state],
+        approvalStatusClasses.pending,
         isVisible
           ? "max-w-56 scale-x-100 opacity-100"
           : "pointer-events-none max-w-0 scale-x-95 opacity-0"
       )}
     >
-      <Icon className="size-3.5" />
-      {approvalStatusLabel(state, expiresAt, now)}
+      <UserPen className="size-3.5" />
+      {approvalStatusLabel("pending", expiresAt, now)}
     </span>
   )
 }
@@ -143,6 +173,21 @@ function approvalStatusLabel(
   }
 
   return approvalStatusLabels[state]
+}
+
+function effectiveApprovalState(
+  approval: ApprovalIndicator,
+  now: number
+): ApprovalState | null {
+  if (approval === null) {
+    return null
+  }
+
+  if (approval.state === "pending" && approval.expiresAt <= now) {
+    return "expired"
+  }
+
+  return approval.state
 }
 
 export function MetaPill({
