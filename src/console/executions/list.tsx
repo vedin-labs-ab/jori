@@ -26,8 +26,7 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
   const pagination = useExecutionPagination(tenantId, filter, query)
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col gap-4">
-      <ExecutionsHeader />
+    <section className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col gap-3">
         <ExecutionFilters
           filter={filter}
@@ -45,17 +44,6 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
         <ExecutionPager pagination={pagination} />
       </div>
     </section>
-  )
-}
-
-function ExecutionsHeader() {
-  return (
-    <div className="grid gap-1">
-      <h1 className="font-medium text-2xl tracking-normal">Executions</h1>
-      <p className="text-sm text-muted-foreground">
-        Agent runs for this workspace.
-      </p>
-    </div>
   )
 }
 
