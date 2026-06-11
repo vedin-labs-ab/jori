@@ -1,6 +1,6 @@
 import { useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import { OctagonX } from "lucide-react"
+import { Square } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +13,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { api } from "../../../convex/_generated/api"
 
 type ExecutionId = FunctionArgs<
@@ -32,12 +37,22 @@ export function StopExecution({
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button className={className} type="button" variant="destructive">
-          <OctagonX data-icon="inline-start" />
-          Stop
-        </Button>
-      </AlertDialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <AlertDialogTrigger asChild>
+            <Button
+              aria-label="Stop execution"
+              className={className}
+              size="icon-sm"
+              type="button"
+              variant="ghost"
+            >
+              <Square className="fill-current text-destructive" />
+            </Button>
+          </AlertDialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Stop execution</TooltipContent>
+      </Tooltip>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Stop this execution?</AlertDialogTitle>

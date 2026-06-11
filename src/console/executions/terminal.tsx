@@ -1,9 +1,17 @@
 import { useQuery } from "convex/react"
 import { type FunctionArgs, type FunctionReturnType } from "convex/server"
 import { Cable, SquareTerminal } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import {
+  type ReactElement,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
 import { type ExecutionItem } from "./types"
 
@@ -22,6 +30,9 @@ export function TraceTerminal({
   const [isMonitoring, setIsMonitoring] = useState(false)
   const isOngoing =
     execution.status === "queued" || execution.status === "running"
+  const showConnectCta = isOngoing && !isMonitoring
+  const hasTrace =
+    isMonitoring || isOngoing || execution.traceFileId !== undefined
 
   return (
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
@@ -29,10 +40,8 @@ export function TraceTerminal({
         <SquareTerminal className="mt-0.5 size-3.5 text-muted-foreground" />
         Trace
       </div>
-      {isMonitoring ? (
-        <ConnectedTerminal executionId={execution.id} tenantId={tenantId} />
-      ) : (
-        <TerminalFrame caption={isOngoing ? "Live monitoring is opt-in" : ""}>
+      {showConnectCta ? (
+        <TerminalFrame>
           <div className="grid h-full place-items-center">
             <Button
               onClick={() => setIsMonitoring(true)}
@@ -40,11 +49,19 @@ export function TraceTerminal({
               variant="outline"
             >
               <Cable data-icon="inline-start" />
-              {isOngoing ? "Connect" : "Load trace"}
+              Connect
             </Button>
           </div>
         </TerminalFrame>
-      )}
+      ) : null}
+      {!showConnectCta && hasTrace ? (
+        <ConnectedTerminal executionId={execution.id} tenantId={tenantId} />
+      ) : null}
+      {!(showConnectCta || hasTrace) ? (
+        <TerminalFrame>
+          <EmptyTraceNotice />
+        </TerminalFrame>
+      ) : null}
     </div>
   )
 }
@@ -77,15 +94,16 @@ function TerminalFrame({
   caption,
   children,
 }: {
-  caption: string
-  children: React.ReactNode
+  caption?: ReactElement | string
+  children: ReactNode
 }) {
   return (
     <div className="grid h-64 min-w-0 grid-rows-[auto_1fr] overflow-hidden rounded-md bg-muted">
-      <div className="flex items-center justify-between gap-2 border-b px-2.5 py-1.5 text-muted-foreground">
-        <span className="font-medium">Agent trace</span>
-        <span>{caption}</span>
-      </div>
+      {caption !== undefined ? (
+        <div className="flex items-center justify-end border-b px-2.5 py-1.5 text-muted-foreground">
+          {caption}
+        </div>
+      ) : null}
       <div className="min-h-0">{children}</div>
     </div>
   )
@@ -94,6 +112,7 @@ function TerminalFrame({
 function TraceLines({ lines }: { lines: string[] }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const stickToBottom = useRef(true)
+  const trace = useMemo(() => lines.map(formatTraceLine).join("\n"), [lines])
 
   // Re-runs after every render, so each batch of appended lines keeps the
   // view pinned to the bottom unless the user scrolled up.
@@ -115,9 +134,25 @@ function TraceLines({ lines }: { lines: string[] }) {
       }}
       ref={scrollRef}
     >
-      <code className="block whitespace-pre-wrap break-all font-mono leading-relaxed">
-        {lines.join("\n")}
+      <code className="block whitespace-pre-wrap break-words font-mono leading-relaxed">
+        {trace}
       </code>
+    </div>
+  )
+}
+
+function formatTraceLine(line: string) {
+  try {
+    return JSON.stringify(JSON.parse(line), null, 2)
+  } catch {
+    return line
+  }
+}
+
+function EmptyTraceNotice() {
+  return (
+    <div className="grid h-full place-items-center text-muted-foreground">
+      No trace recorded.
     </div>
   )
 }
@@ -128,11 +163,7 @@ function TerminalNotice({
   connection: TraceConnection | undefined
 }) {
   if (connection?.type === "missing") {
-    return (
-      <div className="grid h-full place-items-center text-muted-foreground">
-        No trace recorded.
-      </div>
-    )
+    return <EmptyTraceNotice />
   }
 
   return (
@@ -202,12 +233,37 @@ function captionFor(
   }
 
   if (connection.type === "live") {
-    return "Live"
+    return <StatusCaption pulse>Live</StatusCaption>
   }
 
   if (connection.type === "stored") {
-    return "Stored trace"
+    return <StatusCaption>Stored</StatusCaption>
   }
 
-  return hasLines ? "Stream ended" : ""
+  return hasLines ? "Stream ended" : undefined
+}
+
+function StatusCaption({
+  children,
+  pulse = false,
+}: {
+  children: ReactNode
+  pulse?: boolean
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className="relative grid size-2.5 shrink-0 place-items-center">
+        {pulse ? (
+          <span className="absolute size-1.5 animate-ping rounded-full bg-emerald-500 opacity-75" />
+        ) : null}
+        <span
+          className={cn(
+            "relative block size-1.5 rounded-full",
+            pulse ? "bg-emerald-500" : "bg-muted-foreground"
+          )}
+        />
+      </span>
+      {children}
+    </span>
+  )
 }

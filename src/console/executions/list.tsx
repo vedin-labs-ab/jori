@@ -1,6 +1,5 @@
 import { Loader2, Search, SlidersHorizontal } from "lucide-react"
 import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -52,16 +51,7 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
 function ExecutionsHeader() {
   return (
     <div className="grid gap-1">
-      <div className="flex items-center gap-2">
-        <h1 className="font-medium text-2xl tracking-normal">Executions</h1>
-        <Badge variant="outline">
-          <span className="relative grid size-2.5 shrink-0 place-items-center">
-            <span className="absolute size-1.5 animate-ping rounded-full bg-primary opacity-75" />
-            <span className="relative block size-1.5 rounded-full bg-primary" />
-          </span>
-          Live
-        </Badge>
-      </div>
+      <h1 className="font-medium text-2xl tracking-normal">Executions</h1>
       <p className="text-sm text-muted-foreground">
         Agent runs for this workspace.
       </p>

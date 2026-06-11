@@ -26,22 +26,33 @@ export function ExecutionRow({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const durationMs = durationFor(execution, now)
+  const isOngoing =
+    execution.status === "queued" || execution.status === "running"
 
   return (
     <article className="overflow-hidden rounded-md border bg-background">
-      <button
-        className="grid w-full grid-cols-[auto_1fr] items-center gap-3 p-3 text-left md:grid-cols-[auto_1fr_auto]"
-        onClick={() => setIsOpen((current) => !current)}
-        type="button"
-      >
-        <StatusIcon status={execution.status} />
-        <ExecutionTitle execution={execution} />
-        <ExecutionMeta
-          durationMs={durationMs}
-          execution={execution}
-          now={now}
-        />
-      </button>
+      <div className="flex items-center">
+        <button
+          className="grid min-w-0 flex-1 grid-cols-[auto_1fr] items-center gap-3 p-3 text-left md:grid-cols-[auto_1fr_auto]"
+          onClick={() => setIsOpen((current) => !current)}
+          type="button"
+        >
+          <StatusIcon status={execution.status} />
+          <ExecutionTitle execution={execution} />
+          <ExecutionMeta
+            durationMs={durationMs}
+            execution={execution}
+            now={now}
+          />
+        </button>
+        {isOngoing ? (
+          <StopExecution
+            className="mr-3 shrink-0"
+            executionId={execution.id}
+            tenantId={tenantId}
+          />
+        ) : null}
+      </div>
       {isOpen ? (
         <ExpandedExecution
           execution={execution}
@@ -96,9 +107,6 @@ function ExpandedExecution({
   now: number
   tenantId: string
 }) {
-  const isOngoing =
-    execution.status === "queued" || execution.status === "running"
-
   return (
     <div className="grid gap-0">
       <CodeBlockDetail
@@ -119,13 +127,6 @@ function ExpandedExecution({
         <CodeDetail label="Prompt" value={execution.promptId} />
         <CodeDetail label="Trace" value={execution.traceFileId} />
         <CodeDetail label="Stopped by" value={execution.stoppedBy} />
-        {isOngoing ? (
-          <StopExecution
-            className="ms-auto"
-            executionId={execution.id}
-            tenantId={tenantId}
-          />
-        ) : null}
       </ExecutionDetails>
     </div>
   )
