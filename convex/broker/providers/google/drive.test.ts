@@ -167,8 +167,7 @@ function googleDriveIntegration(): Doc<"integrations"> {
     _creationTime: 0,
     tenantId: "tenant",
     provider: "googleDrive",
-    scope: "user",
-    ownerId: "user",
+    scope: "tenant",
     externalId: "google-account",
     email: "user@example.com",
     credentials: {

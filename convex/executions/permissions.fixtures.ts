@@ -29,7 +29,6 @@ function isUserScopedProvider(provider: string) {
   return (
     provider === "gmail" ||
     provider === "googleCalendar" ||
-    provider === "googleDrive" ||
     provider === "microsoftEmail" ||
     provider === "microsoftCalendar"
   )

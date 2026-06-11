@@ -7,6 +7,10 @@ import {
 import { upsertIdentity } from "../../identity/identities"
 import { requireClerkUserId } from "../../identity/users"
 import { type GoogleSurfaceProvider } from "./config"
+import {
+  findExistingGoogleIntegration,
+  getGoogleIntegrationScope,
+} from "./scope"
 import { createSignedGoogleState } from "./signing"
 
 const googleProvider = v.union(
@@ -63,15 +67,7 @@ export const recordOAuthInstallation = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    const existing = await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_and_provider_and_owner", (query) =>
-        query
-          .eq("tenantId", args.tenantId)
-          .eq("provider", args.provider)
-          .eq("ownerId", args.createdBy)
-      )
-      .first()
+    const existing = await findExistingGoogleIntegration(ctx, args)
 
     const existingRefreshToken = readRefreshToken(existing?.credentials)
     const refreshToken = args.refreshToken ?? existingRefreshToken
@@ -134,8 +130,11 @@ function createGoogleIntegrationValues(
   return {
     tenantId: args.tenantId,
     provider: args.provider,
-    scope: "user" as const,
-    ownerId: args.createdBy,
+    scope: getGoogleIntegrationScope(args.provider),
+    ownerId:
+      getGoogleIntegrationScope(args.provider) === "user"
+        ? args.createdBy
+        : undefined,
     externalId: args.profile.id,
     name: args.profile.name,
     email: args.profile.email,

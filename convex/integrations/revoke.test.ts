@@ -141,7 +141,6 @@ function integration(
     scope:
       provider === "gmail" ||
       provider === "googleCalendar" ||
-      provider === "googleDrive" ||
       provider === "microsoftEmail" ||
       provider === "microsoftCalendar"
         ? "user"

@@ -157,10 +157,24 @@ export const getGoogleDriveStatus = query({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    return await getGoogleUserStatus(ctx, {
+    const integration = await getTenantIntegration(ctx, {
       provider: "googleDrive",
       tenantId: args.tenantId,
     })
+
+    if (!isVisibleIntegration(integration)) {
+      return null
+    }
+
+    return {
+      externalId: integration.externalId,
+      email: integration.email,
+      name: integration.name,
+      avatar: integration.avatar,
+      status: integration.status,
+      createdAt: integration.createdAt,
+      scope: "tenant" as const,
+    }
   },
 })
 

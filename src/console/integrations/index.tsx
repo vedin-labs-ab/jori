@@ -38,6 +38,7 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
         <LinearConnection permissions={permissions} tenantId={tenantId} />
         <GitHubConnection permissions={permissions} tenantId={tenantId} />
         <NotionConnection permissions={permissions} tenantId={tenantId} />
+        <GoogleDriveConnection permissions={permissions} tenantId={tenantId} />
         <NativePermissionsCard controller={permissions} />
       </TabsContent>
       <TabsContent value="user" className="grid gap-4 md:grid-cols-2">
@@ -46,7 +47,6 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
           permissions={permissions}
           tenantId={tenantId}
         />
-        <GoogleDriveConnection permissions={permissions} tenantId={tenantId} />
         <MicrosoftEmailConnection
           permissions={permissions}
           tenantId={tenantId}

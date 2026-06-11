@@ -5,7 +5,7 @@ import {
   IntegrationConnection,
   type IntegrationConnectionConfig,
 } from "../shared/card"
-import { getAccountHeadline } from "../shared/headline"
+import { getAccountHeadline, getWorkspaceHeadline } from "../shared/headline"
 
 const gmailConfig = {
   action: "Connect Email",
@@ -44,16 +44,16 @@ const calendarConfig = {
 const driveConfig = {
   action: "Connect Drive",
   connectedDetail:
-    "User-scoped. Milo can search, read, create, and update Drive files available to this app when explicitly requested.",
+    "Tenant-scoped. Milo can search, read, create, and update Drive files available to this app when explicitly requested.",
   connectError: "Could not start Drive install.",
   emptyDetail:
-    "Connect your Google Drive account. This connection is scoped to you, not the whole tenant.",
+    "Connect Google Drive for this tenant. Milo can use the connection across tenant runs.",
   installPath: "/google-drive/install",
   label: "Google Drive",
   loading: "Connecting Drive",
   logo: {
     alt: "Google Drive logo",
-    src: "https://svgl.app/library/google-drive.svg",
+    src: "https://svgl.app/library/drive.svg",
   },
   provider: "googleDrive",
 } satisfies IntegrationConnectionConfig
@@ -102,7 +102,13 @@ export function GoogleDriveConnection({
     <IntegrationConnection
       config={driveConfig}
       createInstallState={createInstallState}
-      headline={getAccountHeadline(status, driveConfig.label)}
+      headline={getWorkspaceHeadline(
+        status,
+        driveConfig.label,
+        "No Drive connected",
+        status?.name,
+        status?.email
+      )}
       permissions={permissions}
       status={status}
       tenantId={tenantId}

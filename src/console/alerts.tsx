@@ -55,7 +55,7 @@ const integrationCallbackAlerts = [
     "googleDrive",
     "connected",
     "Drive connected",
-    "Milo can now use Google Drive tools for your account when explicitly requested."
+    "Milo can now use Google Drive tools for this tenant when explicitly requested."
   ),
   callbackAlert(
     "slack",
