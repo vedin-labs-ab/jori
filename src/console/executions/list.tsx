@@ -1,5 +1,5 @@
 import { Loader2, Search } from "lucide-react"
-import { useState } from "react"
+import { memo, useCallback, useDeferredValue, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -31,11 +31,35 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
   const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
   const [executionFilter, setExecutionFilter] = useState<ExecutionFilter>("all")
   const [query, setQuery] = useState("")
+  const deferredApprovalFilter = useDeferredValue(approvalFilter)
+  const deferredExecutionFilter = useDeferredValue(executionFilter)
+  const deferredQuery = useDeferredValue(query)
   const pagination = useExecutionPagination(
     tenantId,
-    executionFilter,
-    approvalFilter,
-    query
+    deferredExecutionFilter,
+    deferredApprovalFilter,
+    deferredQuery
+  )
+  const setApprovalFilterAndReset = useCallback(
+    (value: ApprovalFilter) => {
+      setApprovalFilter(value)
+      pagination.reset()
+    },
+    [pagination.reset]
+  )
+  const setExecutionFilterAndReset = useCallback(
+    (value: ExecutionFilter) => {
+      setExecutionFilter(value)
+      pagination.reset()
+    },
+    [pagination.reset]
+  )
+  const setQueryAndReset = useCallback(
+    (value: string) => {
+      setQuery(value)
+      pagination.reset()
+    },
+    [pagination.reset]
   )
 
   return (
@@ -45,18 +69,9 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
           approvalFilter={approvalFilter}
           executionFilter={executionFilter}
           query={query}
-          setApprovalFilter={(value) => {
-            setApprovalFilter(value)
-            pagination.reset()
-          }}
-          setExecutionFilter={(value) => {
-            setExecutionFilter(value)
-            pagination.reset()
-          }}
-          setQuery={(value) => {
-            setQuery(value)
-            pagination.reset()
-          }}
+          setApprovalFilter={setApprovalFilterAndReset}
+          setExecutionFilter={setExecutionFilterAndReset}
+          setQuery={setQueryAndReset}
         />
         <ExecutionRows pagination={pagination} tenantId={tenantId} />
         <ExecutionPager pagination={pagination} />
@@ -65,7 +80,7 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
   )
 }
 
-function ExecutionFilters({
+const ExecutionFilters = memo(function ExecutionFilters({
   approvalFilter,
   executionFilter,
   query,
@@ -106,12 +121,12 @@ function ExecutionFilters({
         >
           <SelectTrigger
             aria-label="Filter by approval state"
-            className="h-8 w-full sm:w-fit"
+            className="h-8 w-full min-w-36 sm:w-fit"
           >
             <span>Approval:</span>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent align="start" position="popper">
             {approvalFilterOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
@@ -132,7 +147,7 @@ function ExecutionFilters({
       </div>
     </div>
   )
-}
+})
 
 function ExecutionRows({
   pagination,
@@ -141,6 +156,8 @@ function ExecutionRows({
   pagination: ExecutionPagination
   tenantId: string
 }) {
+  const now = useNow()
+
   return (
     // auto-rows-max keeps row heights at their content size; without it the
     // overflow-hidden articles let the definite-height grid compress its
@@ -155,13 +172,25 @@ function ExecutionRows({
             <ExecutionRow
               execution={execution}
               key={execution.id}
-              now={pagination.now}
+              now={now}
               tenantId={tenantId}
             />
           ))
         : null}
     </div>
   )
+}
+
+function useNow() {
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 1000)
+
+    return () => window.clearInterval(interval)
+  }, [])
+
+  return now
 }
 
 function ExecutionPager({ pagination }: { pagination: ExecutionPagination }) {

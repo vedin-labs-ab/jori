@@ -3,7 +3,14 @@ import {
   usePaginatedQuery,
   useQuery,
 } from "convex/react"
-import { type MutableRefObject, useEffect, useRef, useState } from "react"
+import {
+  type MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { api } from "../../../convex/_generated/api"
 import {
   type ApprovalFilter,
@@ -20,7 +27,6 @@ export function useExecutionPagination(
 ) {
   const [pageIndex, setPageIndex] = useState(0)
   const advanceAfterLoad = useRef(false)
-  const now = useNow()
   const { executions, normalizedQuery, rows, stats } = useExecutionPageData({
     approvalFilter,
     executionFilter,
@@ -34,6 +40,13 @@ export function useExecutionPagination(
   const canUseNextLoadedPage = rows.length > (pageIndex + 1) * pageSize
   const canLoadMore = executions.status === "CanLoadMore"
   const isLoadingMore = executions.status === "LoadingMore"
+  const { next, previous, reset } = usePaginationActions({
+    advanceAfterLoad,
+    canLoadMore,
+    canUseNextLoadedPage,
+    executions,
+    setPageIndex,
+  })
 
   usePageBounds(pageIndex, pageCount, setPageIndex)
   useAdvanceAfterLoad(advanceAfterLoad, rows.length, {
@@ -61,7 +74,34 @@ export function useExecutionPagination(
     hasFilters,
     isLoadingFirstPage: executions.status === "LoadingFirstPage",
     isLoadingMore,
-    next: () =>
+    next,
+    pageIndex,
+    previous,
+    reset,
+    visibleRows,
+  }
+}
+
+export type ExecutionPagination = ReturnType<typeof useExecutionPagination>
+
+function usePaginationActions({
+  advanceAfterLoad,
+  canLoadMore,
+  canUseNextLoadedPage,
+  executions,
+  setPageIndex,
+}: {
+  advanceAfterLoad: MutableRefObject<boolean>
+  canLoadMore: boolean
+  canUseNextLoadedPage: boolean
+  executions: Pick<
+    UsePaginatedQueryReturnType<typeof api.executions.list.page>,
+    "loadMore"
+  >
+  setPageIndex: (updater: (current: number) => number) => void
+}) {
+  const next = useCallback(
+    () =>
       nextPage({
         advanceAfterLoad,
         canLoadMore,
@@ -69,15 +109,22 @@ export function useExecutionPagination(
         executions,
         setPageIndex,
       }),
-    now,
-    pageIndex,
-    previous: () => setPageIndex((current) => Math.max(0, current - 1)),
-    reset: () => setPageIndex(0),
-    visibleRows,
-  }
-}
+    [
+      advanceAfterLoad,
+      canLoadMore,
+      canUseNextLoadedPage,
+      executions,
+      setPageIndex,
+    ]
+  )
+  const previous = useCallback(
+    () => setPageIndex((current) => Math.max(0, current - 1)),
+    [setPageIndex]
+  )
+  const reset = useCallback(() => setPageIndex(() => 0), [setPageIndex])
 
-export type ExecutionPagination = ReturnType<typeof useExecutionPagination>
+  return { next, previous, reset }
+}
 
 function useExecutionPageData({
   approvalFilter,
@@ -91,12 +138,15 @@ function useExecutionPageData({
   tenantId: string
 }) {
   const normalizedQuery = query.trim().toLowerCase()
-  const queryArgs = {
-    approvalFilter,
-    executionFilter,
-    query: normalizedQuery,
-    tenantId,
-  }
+  const queryArgs = useMemo(
+    () => ({
+      approvalFilter,
+      executionFilter,
+      query: normalizedQuery,
+      tenantId,
+    }),
+    [approvalFilter, executionFilter, normalizedQuery, tenantId]
+  )
   const executions = usePaginatedQuery(api.executions.list.page, queryArgs, {
     initialNumItems: pageSize,
   })
@@ -208,16 +258,4 @@ function useAdvanceAfterLoad(
       input.setPageIndex((current) => current + 1)
     }
   }, [advanceAfterLoad, filteredRowCount, input])
-}
-
-function useNow() {
-  const [now, setNow] = useState(() => Date.now())
-
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 1000)
-
-    return () => window.clearInterval(interval)
-  }, [])
-
-  return now
 }
