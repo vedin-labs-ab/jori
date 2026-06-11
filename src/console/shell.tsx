@@ -91,9 +91,9 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
   const pageTitle = getPageTitle(pathname)
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-svh overflow-hidden">
       <ConsoleSidebar pathname={pathname} />
-      <SidebarInset>
+      <SidebarInset className="min-h-0">
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
@@ -110,7 +110,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             </Breadcrumb>
           </div>
         </header>
-        <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 pb-6 md:px-6">
+        <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col gap-8 overflow-y-auto px-4 pb-6 md:px-6">
           <IntegrationCallbackAlerts />
           {children}
         </div>

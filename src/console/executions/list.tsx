@@ -27,9 +27,9 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
   const pagination = useExecutionPagination(tenantId, filter, query)
 
   return (
-    <section className="grid gap-4">
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
       <ExecutionsHeader />
-      <div className="grid gap-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
         <ExecutionFilters
           filter={filter}
           query={query}
@@ -126,7 +126,7 @@ function ExecutionFilters({
 
 function ExecutionRows({ pagination }: { pagination: ExecutionPagination }) {
   return (
-    <div className="grid gap-2">
+    <div className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto">
       {pagination.isLoadingFirstPage ? <ExecutionSkeletonList /> : null}
       {!pagination.isLoadingFirstPage && pagination.visibleRows.length === 0 ? (
         <EmptyExecutions hasFilters={pagination.hasFilters} />
