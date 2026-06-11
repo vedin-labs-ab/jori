@@ -132,7 +132,10 @@ function ExecutionRows({
   tenantId: string
 }) {
   return (
-    <div className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto">
+    // auto-rows-max keeps row heights at their content size; without it the
+    // overflow-hidden articles let the definite-height grid compress its
+    // tracks to fit instead of overflowing into the scrollbar.
+    <div className="grid min-h-0 flex-1 auto-rows-max content-start gap-2 overflow-y-auto">
       {pagination.isLoadingFirstPage ? <ExecutionSkeletonList /> : null}
       {!pagination.isLoadingFirstPage && pagination.visibleRows.length === 0 ? (
         <EmptyExecutions hasFilters={pagination.hasFilters} />
