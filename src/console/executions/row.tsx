@@ -33,7 +33,7 @@ export function ExecutionRow({
     <article className="overflow-hidden rounded-md border bg-background">
       <div className="flex items-center">
         <button
-          className="group/execution-row grid min-w-0 flex-1 grid-cols-[auto_1fr] items-center gap-3 p-3 text-left md:grid-cols-[auto_1fr_auto]"
+          className="group/execution-row grid min-w-0 flex-1 grid-cols-[auto_1fr] items-center gap-3 p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset md:grid-cols-[auto_1fr_auto]"
           onClick={() => setIsOpen((current) => !current)}
           type="button"
         >
