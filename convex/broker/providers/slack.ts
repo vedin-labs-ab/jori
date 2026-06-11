@@ -8,6 +8,7 @@ import {
 } from "./common"
 
 export type SlackBlock = Record<string, unknown>
+type SlackApiResult = Record<string, unknown> | null
 
 export async function postSlackMessage(
   integration: Doc<"integrations">,
@@ -20,7 +21,7 @@ export async function postSlackMessage(
 ) {
   const credentials = requireSlackCredentials(integration)
 
-  return await slackApi(credentials.bot, "chat.postMessage", {
+  return await slackJsonApi(credentials.bot, "chat.postMessage", {
     channel: args.channel,
     text: args.text,
     thread_ts: args.thread_ts,
@@ -39,7 +40,7 @@ export async function updateSlackMessage(
 ) {
   const credentials = requireSlackCredentials(integration)
 
-  return await slackApi(credentials.bot, "chat.update", {
+  return await slackJsonApi(credentials.bot, "chat.update", {
     channel: args.channel,
     ts: args.ts,
     text: args.text,
@@ -55,7 +56,7 @@ export async function callSlackTool(
   const credentials = requireSlackCredentials(integration)
 
   if (tool === "channels_list") {
-    return await slackApi(credentials.user, "conversations.list", {
+    return await slackQueryApi(credentials.user, "conversations.list", {
       limit: boundedNumber(args.limit, 100, 1, 1000),
       cursor: optionalString(args.cursor),
       types:
@@ -64,7 +65,7 @@ export async function callSlackTool(
   }
 
   if (tool === "conversations_history") {
-    return await slackApi(credentials.user, "conversations.history", {
+    return await slackQueryApi(credentials.user, "conversations.history", {
       channel: requiredString(args.channel, "channel"),
       limit: boundedNumber(args.limit, 50, 1, 100),
       latest: optionalString(args.latest),
@@ -75,7 +76,7 @@ export async function callSlackTool(
   }
 
   if (tool === "conversations_replies") {
-    return await slackApi(credentials.user, "conversations.replies", {
+    return await slackQueryApi(credentials.user, "conversations.replies", {
       channel: requiredString(args.channel, "channel"),
       ts: requiredString(args.ts, "ts"),
       limit: boundedNumber(args.limit, 50, 1, 100),
@@ -83,7 +84,7 @@ export async function callSlackTool(
   }
 
   if (tool === "conversations_search_messages") {
-    return await slackApi(credentials.user, "search.messages", {
+    return await slackQueryApi(credentials.user, "search.messages", {
       query: requiredString(args.query, "query"),
       count: boundedNumber(args.count, 20, 1, 100),
       page: boundedNumber(args.page, 1, 1, 100),
@@ -91,13 +92,17 @@ export async function callSlackTool(
   }
 
   if (tool === "users_search") {
-    const result = await slackApi(credentials.user, "users.list", {
+    const result = await slackQueryApi(credentials.user, "users.list", {
       limit: boundedNumber(args.limit, 100, 1, 200),
       cursor: optionalString(args.cursor),
     })
     const query = optionalString(args.query)?.toLowerCase()
 
-    if (query === undefined || !Array.isArray(result.members)) {
+    if (
+      result === null ||
+      query === undefined ||
+      !Array.isArray(result.members)
+    ) {
       return result
     }
 
@@ -139,7 +144,7 @@ function optionalBlocks(value: unknown) {
   return value.length === 0 ? undefined : (value as SlackBlock[])
 }
 
-async function slackApi(
+async function slackJsonApi(
   token: string,
   method: string,
   body: Record<string, unknown>
@@ -148,14 +153,51 @@ async function slackApi(
     method: "POST",
     headers: {
       authorization: `Bearer ${token}`,
-      "content-type": "application/json",
+      "content-type": "application/json; charset=utf-8",
     },
     body,
   })
+
+  return assertSlackApiSucceeded(result)
+}
+
+async function slackQueryApi(
+  token: string,
+  method: string,
+  params: Record<string, unknown>
+) {
+  const url = new URL(`https://slack.com/api/${method}`)
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) {
+      url.searchParams.set(key, String(value))
+    }
+  }
+
+  const result = await fetchJson(url.toString(), {
+    method: "GET",
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  })
+
+  return assertSlackApiSucceeded(result)
+}
+
+function assertSlackApiSucceeded(result: unknown): SlackApiResult {
+  if (!isSlackApiResult(result)) {
+    throw new Error("Slack API request failed: invalid response")
+  }
 
   if (result !== null && result.ok === false) {
     throw new Error(`Slack API request failed: ${JSON.stringify(result)}`)
   }
 
   return result
+}
+
+function isSlackApiResult(result: unknown): result is SlackApiResult {
+  return (
+    result === null || (typeof result === "object" && !Array.isArray(result))
+  )
 }

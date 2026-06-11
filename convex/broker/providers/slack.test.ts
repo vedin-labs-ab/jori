@@ -30,6 +30,11 @@ describe("Slack message tool", () => {
     expect(result).toEqual({ ok: true, ts: "111.222" })
     expect(calls).toHaveLength(1)
     expect(calls[0]?.url).toBe("https://slack.com/api/chat.postMessage")
+    expect(calls[0]?.method).toBe("POST")
+    expect(calls[0]?.headers).toMatchObject({
+      authorization: "Bearer bot-token",
+      "content-type": "application/json; charset=utf-8",
+    })
     expect(calls[0]?.body).toMatchObject({
       channel: "C123",
       text: "Report summary",
@@ -63,13 +68,74 @@ describe("Slack message tool", () => {
   })
 })
 
+describe("Slack read tools", () => {
+  test("reads thread replies with query parameters", async () => {
+    const calls = mockSlackFetch({ ok: true, messages: [] })
+
+    const result = await callSlackTool(
+      slackIntegration(),
+      "conversations_replies",
+      {
+        channel: "C123",
+        ts: "123.456",
+        limit: 10,
+      }
+    )
+
+    expect(result).toEqual({ ok: true, messages: [] })
+    expect(calls).toHaveLength(1)
+    expect(calls[0]?.url).toBe("https://slack.com/api/conversations.replies")
+    expect(calls[0]?.method).toBe("GET")
+    expect(calls[0]?.headers).toMatchObject({
+      authorization: "Bearer user-token",
+    })
+    expect(calls[0]?.body).toBeUndefined()
+    expect(calls[0]?.params).toMatchObject({
+      channel: "C123",
+      limit: "10",
+      ts: "123.456",
+    })
+  })
+
+  test("searches messages with query parameters", async () => {
+    const calls = mockSlackFetch({ ok: true, messages: { matches: [] } })
+
+    await callSlackTool(slackIntegration(), "conversations_search_messages", {
+      query: "stilla",
+      count: 5,
+      page: 2,
+    })
+
+    expect(calls).toHaveLength(1)
+    expect(calls[0]?.url).toBe("https://slack.com/api/search.messages")
+    expect(calls[0]?.method).toBe("GET")
+    expect(calls[0]?.body).toBeUndefined()
+    expect(calls[0]?.params).toMatchObject({
+      count: "5",
+      page: "2",
+      query: "stilla",
+    })
+  })
+})
+
 function mockSlackFetch(responseBody: unknown) {
-  const calls: Array<{ body: unknown; url: string }> = []
+  const calls: Array<{
+    body: unknown
+    headers: Record<string, string>
+    method: string | undefined
+    params: Record<string, string>
+    url: string
+  }> = []
 
   globalThis.fetch = vi.fn(async (url, init) => {
+    const parsedUrl = new URL(String(url))
+
     calls.push({
       body: typeof init?.body === "string" ? JSON.parse(init.body) : init?.body,
-      url: String(url),
+      headers: (init?.headers ?? {}) as Record<string, string>,
+      method: init?.method,
+      params: Object.fromEntries(parsedUrl.searchParams.entries()),
+      url: `${parsedUrl.origin}${parsedUrl.pathname}`,
     })
 
     return Response.json(responseBody)

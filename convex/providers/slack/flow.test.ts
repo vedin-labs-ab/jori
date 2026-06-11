@@ -133,10 +133,10 @@ function expectRuntimeAssembly({ prompt, skillFiles, toolBundle }: SlackFlow) {
     path: "/home/user/milo-workspace/.agents/skills/slack/SKILL.md",
   })
   expect(skillFiles[0]?.content).toContain(
-    "Format Slack messages so they feel native to Slack"
+    "Format Slack messages so they feel native: direct, compact, and easy to scan."
   )
   expect(skillFiles[0]?.content).toContain(
-    "Match the format to the outcome the user needs"
+    "Use Slack-native `blocks` instead of one long `text` string"
   )
   expect(toolBundle.sandboxFiles.map((file) => file.path)).toContain(
     "/home/user/milo-workspace/milo-slack-mcp.mjs"
@@ -169,7 +169,7 @@ async function expectSlackOutput({ integration }: SlackFlow) {
       method: "POST",
       headers: {
         authorization: "Bearer xoxb-test-bot",
-        "content-type": "application/json",
+        "content-type": "application/json; charset=utf-8",
       },
       body: JSON.stringify({
         channel: "C123",
