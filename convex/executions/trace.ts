@@ -17,6 +17,38 @@ export class CodexRunError extends Error {
   }
 }
 
+export type SetupTrace = {
+  type: "milo.setup"
+  stage: string
+  trace: CommandTrace
+}
+
+export function recordSetupTrace(
+  traces: SetupTrace[],
+  stage: string,
+  trace: CommandTrace
+) {
+  traces.push({ type: "milo.setup", stage, trace })
+
+  return trace
+}
+
+export function assertSetupCommandSucceeded(
+  commandTrace: CommandTrace,
+  message: string,
+  setupTraces: SetupTrace[]
+) {
+  assertCommandSucceeded(
+    commandTrace,
+    message,
+    serializeSetupTrace(setupTraces)
+  )
+}
+
+function serializeSetupTrace(traces: SetupTrace[]) {
+  return traces.map((trace) => JSON.stringify(trace)).join("\n")
+}
+
 export function createCommandTrace(result: CommandResult): CommandTrace {
   return {
     exitCode: result.exitCode,

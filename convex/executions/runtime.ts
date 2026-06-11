@@ -7,6 +7,7 @@ import { createPromptedExecution } from "./artifacts"
 import { type CodexRuntimeInput } from "./codex"
 import { runPromptedExecution } from "./execute"
 import { prepareIntegrationForRuntime } from "./integrations"
+import { killE2BSandbox } from "./sandbox/e2b"
 import { requireMessageTarget } from "./targets"
 import { createExecutionToken } from "./tokens"
 
@@ -73,6 +74,17 @@ export const runScheduledExecution = internalAction({
       ),
       schedule: input.schedule,
     })
+  },
+})
+
+export const killSandbox = internalAction({
+  args: {
+    sandboxId: v.string(),
+  },
+  handler: async (_ctx, args) => {
+    await killE2BSandbox(args.sandboxId)
+
+    return null
   },
 })
 

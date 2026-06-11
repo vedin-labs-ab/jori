@@ -28,6 +28,8 @@ export async function summarizeExecution(
     trigger: triggerLabel(context.trigger, context.integration?.provider),
     createdAt: execution.createdAt,
     finishedAt: execution.finishedAt,
+    stoppedAt: execution.stoppedAt,
+    stoppedBy: execution.stoppedBy,
     durationMs: getDuration(execution),
     sandboxId: execution.sandboxId,
     hash: execution.hash,

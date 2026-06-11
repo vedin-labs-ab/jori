@@ -11,14 +11,18 @@ import {
 import { formatDuration, relativeTime } from "./format"
 import { SourceParts } from "./source"
 import { ApprovalBadge, MetaPill, StatusIcon } from "./status"
+import { StopExecution } from "./stop"
+import { TraceTerminal } from "./terminal"
 import { type ExecutionItem } from "./types"
 
 export function ExecutionRow({
   execution,
   now,
+  tenantId,
 }: {
   execution: ExecutionItem
   now: number
+  tenantId: string
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const durationMs = durationFor(execution, now)
@@ -38,7 +42,13 @@ export function ExecutionRow({
           now={now}
         />
       </button>
-      {isOpen ? <ExpandedExecution execution={execution} now={now} /> : null}
+      {isOpen ? (
+        <ExpandedExecution
+          execution={execution}
+          now={now}
+          tenantId={tenantId}
+        />
+      ) : null}
     </article>
   )
 }
@@ -80,10 +90,15 @@ function ExecutionMeta({
 function ExpandedExecution({
   execution,
   now,
+  tenantId,
 }: {
   execution: ExecutionItem
   now: number
+  tenantId: string
 }) {
+  const isOngoing =
+    execution.status === "queued" || execution.status === "running"
+
   return (
     <div className="grid gap-0">
       <CodeBlockDetail
@@ -97,11 +112,20 @@ function ExpandedExecution({
       {execution.error !== undefined ? (
         <ErrorDetail value={execution.error} />
       ) : null}
+      <TraceTerminal execution={execution} tenantId={tenantId} />
       <ExecutionDetails>
         <CodeDetail label="Sandbox" value={execution.sandboxId} />
         <CodeDetail label="Hash" value={execution.hash} />
         <CodeDetail label="Prompt" value={execution.promptId} />
         <CodeDetail label="Trace" value={execution.traceFileId} />
+        <CodeDetail label="Stopped by" value={execution.stoppedBy} />
+        {isOngoing ? (
+          <StopExecution
+            className="ms-auto"
+            executionId={execution.id}
+            tenantId={tenantId}
+          />
+        ) : null}
       </ExecutionDetails>
     </div>
   )

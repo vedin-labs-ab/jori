@@ -10,16 +10,21 @@ import { createCodexConfig } from "../codex"
 import { type ToolBundle, type ToolPreflight } from "../tools/types"
 import {
   assertCommandSucceeded,
+  assertSetupCommandSucceeded,
   CodexRunError,
   type CommandTrace,
   createCommandTrace,
   formatError,
+  recordSetupTrace,
+  type SetupTrace,
 } from "../trace"
 import {
   codexHome,
   createBootstrapCommand,
   createCodexCommand,
+  createTraceServerCommand,
   e2bSandboxTemplate,
+  tracePort,
   workspace,
 } from "./harness"
 import {
@@ -31,9 +36,13 @@ const sandboxTimeoutMs = 5 * 60 * 1_000
 
 export type E2BCodexRunArgs = {
   authJsonBase64: string
-  onSandboxCreated: (sandboxId: string) => Promise<void>
+  onSandboxCreated: (sandbox: {
+    sandboxId: string
+    traceHost: string
+  }) => Promise<void>
   prompt: string
   toolBundle: ToolBundle
+  traceToken: string
 }
 
 export type E2BCodexRunResult = {
@@ -41,11 +50,6 @@ export type E2BCodexRunResult = {
 }
 
 type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
-type SetupTrace = {
-  type: "milo.setup"
-  stage: string
-  trace: CommandTrace
-}
 
 export async function runCodexInE2B(args: E2BCodexRunArgs) {
   let sandbox: E2BSandbox | undefined
@@ -53,7 +57,11 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
 
   try {
     sandbox = await createE2BSandbox()
-    await args.onSandboxCreated(sandbox.sandboxId)
+    await startTraceServer(sandbox, args.traceToken)
+    await args.onSandboxCreated({
+      sandboxId: sandbox.sandboxId,
+      traceHost: sandbox.getHost(tracePort),
+    })
     assertSetupCommandSucceeded(
       recordSetupTrace(
         setupTraces,
@@ -100,6 +108,12 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
   } finally {
     await sandbox?.kill().catch(() => undefined)
   }
+}
+
+export async function killE2BSandbox(sandboxId: string) {
+  await Sandbox.kill(sandboxId, { apiKey: requireE2BApiKey() }).catch(
+    () => undefined
+  )
 }
 
 async function createE2BSandbox() {
@@ -151,17 +165,36 @@ async function bootstrapCodex(
   return createCommandTrace(result)
 }
 
+async function startTraceServer(sandbox: E2BSandbox, traceToken: string) {
+  await sandbox.commands.run(createTraceServerCommand(), {
+    background: true,
+    envs: {
+      MILO_TRACE_TOKEN: traceToken,
+    },
+    timeoutMs: 0,
+  })
+}
+
 async function executeCodex(sandbox: E2BSandbox, args: E2BCodexRunArgs) {
+  let streamedStdout = ""
   const result = await runCommand(sandbox, createCodexCommand(), {
     cwd: workspace,
     envs: {
       CODEX_HOME: codexHome,
       MILO_CODEX_PROMPT_BASE64: encodeBase64(args.prompt),
     },
+    onStdout: (data) => {
+      streamedStdout += data
+    },
     timeoutMs: 180_000,
   })
 
-  return createCommandTrace(result)
+  // When the sandbox is killed mid-run (user stop) the command error carries
+  // no output, so fall back to the streamed copy to keep the partial trace.
+  return createCommandTrace({
+    ...result,
+    stdout: result.stdout === "" ? streamedStdout : result.stdout,
+  })
 }
 
 async function verifyPreflights(
@@ -202,6 +235,7 @@ async function runCommand(
   options: {
     cwd?: string
     envs?: Record<string, string>
+    onStdout?: (data: string) => void
     timeoutMs: number
     user?: Username
   }
@@ -225,32 +259,6 @@ async function runCommand(
       stderr: "",
     } satisfies CommandResult
   }
-}
-
-function recordSetupTrace(
-  traces: SetupTrace[],
-  stage: string,
-  trace: CommandTrace
-) {
-  traces.push({ type: "milo.setup", stage, trace })
-
-  return trace
-}
-
-function assertSetupCommandSucceeded(
-  commandTrace: CommandTrace,
-  message: string,
-  setupTraces: SetupTrace[]
-) {
-  assertCommandSucceeded(
-    commandTrace,
-    message,
-    serializeSetupTrace(setupTraces)
-  )
-}
-
-function serializeSetupTrace(traces: SetupTrace[]) {
-  return traces.map((trace) => JSON.stringify(trace)).join("\n")
 }
 
 function encodeBase64(value: string) {

@@ -4,7 +4,7 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { runCodexInE2B } from "./sandbox/e2b"
-import { hashExecutionToken } from "./tokens"
+import { createExecutionToken, hashExecutionToken } from "./tokens"
 import { type RuntimeToolBundle } from "./tools"
 import { CodexRunError, formatError } from "./trace"
 
@@ -23,6 +23,7 @@ export async function runPromptedExecution(
   }
 ) {
   const hash = await hashExecutionToken(args.executionToken)
+  const traceToken = createExecutionToken()
   let trace: string | undefined
   let executionError: string | undefined
   let status: "completed" | "failed" = "completed"
@@ -30,15 +31,25 @@ export async function runPromptedExecution(
   try {
     const runtimeResult = await runCodexInE2B({
       authJsonBase64: requireCodexAuthJsonBase64(),
-      onSandboxCreated: async (sandboxId) => {
-        await ctx.runMutation(internal.executions.records.markRunning, {
-          executionId: args.execution.id,
-          sandboxId,
-          hash,
-        })
+      onSandboxCreated: async (sandbox) => {
+        const isRunning: boolean = await ctx.runMutation(
+          internal.executions.records.markRunning,
+          {
+            executionId: args.execution.id,
+            sandboxId: sandbox.sandboxId,
+            traceHost: sandbox.traceHost,
+            traceToken,
+            hash,
+          }
+        )
+
+        if (!isRunning) {
+          throw new Error("Execution was stopped before the sandbox started.")
+        }
       },
       prompt: args.execution.prompt,
       toolBundle: args.execution.toolBundle,
+      traceToken,
     })
 
     trace = runtimeResult.trace

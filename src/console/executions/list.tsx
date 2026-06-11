@@ -42,7 +42,7 @@ export function ExecutionsList({ tenantId }: { tenantId: string }) {
             pagination.reset()
           }}
         />
-        <ExecutionRows pagination={pagination} />
+        <ExecutionRows pagination={pagination} tenantId={tenantId} />
         <ExecutionPager pagination={pagination} />
       </div>
     </section>
@@ -124,7 +124,13 @@ function ExecutionFilters({
   )
 }
 
-function ExecutionRows({ pagination }: { pagination: ExecutionPagination }) {
+function ExecutionRows({
+  pagination,
+  tenantId,
+}: {
+  pagination: ExecutionPagination
+  tenantId: string
+}) {
   return (
     <div className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto">
       {pagination.isLoadingFirstPage ? <ExecutionSkeletonList /> : null}
@@ -137,6 +143,7 @@ function ExecutionRows({ pagination }: { pagination: ExecutionPagination }) {
               execution={execution}
               key={execution.id}
               now={pagination.now}
+              tenantId={tenantId}
             />
           ))
         : null}

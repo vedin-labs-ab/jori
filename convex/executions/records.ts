@@ -186,15 +186,27 @@ export const getActiveByHash = internalQuery({
 export const markRunning = internalMutation({
   args: {
     executionId: v.id("executions"),
-    sandboxId: v.optional(v.string()),
+    sandboxId: v.string(),
+    traceHost: v.string(),
+    traceToken: v.string(),
     hash: v.string(),
   },
   handler: async (ctx, args) => {
+    const execution = await ctx.db.get(args.executionId)
+
+    if (execution === null || execution.status === "stopped") {
+      return false
+    }
+
     await ctx.db.patch(args.executionId, {
       status: "running",
       sandboxId: args.sandboxId,
+      traceHost: args.traceHost,
+      traceToken: args.traceToken,
       hash: args.hash,
     })
+
+    return true
   },
 })
 
@@ -216,11 +228,21 @@ export const finish = internalMutation({
       })
     }
 
+    // A user stop already settled the row; only the trace is still welcome.
+    const execution = await ctx.db.get(args.executionId)
+    const wasStopped = execution?.status === "stopped"
+
     await ctx.db.patch(args.executionId, {
-      status: args.status,
-      error: args.status === "failed" ? args.error : undefined,
-      finishedAt: Date.now(),
+      ...(wasStopped
+        ? {}
+        : {
+            status: args.status,
+            error: args.status === "failed" ? args.error : undefined,
+            finishedAt: Date.now(),
+          }),
       hash: undefined,
+      traceHost: undefined,
+      traceToken: undefined,
     })
   },
 })

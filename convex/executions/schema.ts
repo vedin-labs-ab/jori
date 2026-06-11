@@ -16,9 +16,13 @@ export const executions = defineTable({
     v.literal("stopped")
   ),
   error: v.optional(v.string()),
+  traceHost: v.optional(v.string()),
+  traceToken: v.optional(v.string()),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
   finishedAt: v.optional(v.number()),
+  stoppedBy: v.optional(v.string()),
+  stoppedAt: v.optional(v.number()),
 })
   .index("by_tenant", ["tenantId"])
   .index("by_trigger", ["triggerId"])
