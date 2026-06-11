@@ -121,10 +121,12 @@ const ExecutionFilters = memo(function ExecutionFilters({
         >
           <SelectTrigger
             aria-label="Filter by approval state"
-            className="h-8 w-full min-w-36 sm:w-fit"
+            className="h-8 w-full sm:w-fit"
           >
-            <span>Approval:</span>
-            <SelectValue />
+            <span className="flex min-w-0 flex-1 items-center gap-2 text-left sm:flex-none">
+              <span className="shrink-0">Approval:</span>
+              <SelectValue className="min-w-0 truncate" />
+            </span>
           </SelectTrigger>
           <SelectContent align="start" position="popper">
             {approvalFilterOptions.map((option) => (
