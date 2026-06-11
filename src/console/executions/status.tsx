@@ -149,7 +149,6 @@ export function ApprovalStatusMeta({
           : "pointer-events-none max-w-0 scale-x-95 opacity-0"
       )}
     >
-      <UserPen className="size-3.5" />
       {approvalStatusLabel("pending", expiresAt, now)}
     </span>
   )
