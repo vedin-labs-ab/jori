@@ -13,6 +13,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
@@ -21,7 +22,6 @@ import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { ExecutionRow } from "./row"
 import {
   type ApprovalFilter,
-  approvalFilterLabels,
   approvalFilterOptions,
   type ExecutionFilter,
   executionFilterOptions,
@@ -108,7 +108,8 @@ function ExecutionFilters({
             aria-label="Filter by approval state"
             className="h-8 w-full sm:w-fit"
           >
-            Approval: {approvalFilterLabels[approvalFilter]}
+            <span>Approval:</span>
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {approvalFilterOptions.map((option) => (
