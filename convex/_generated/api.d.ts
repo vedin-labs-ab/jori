@@ -175,6 +175,7 @@ import type * as providers_slack_http from "../providers/slack/http.js";
 import type * as providers_slack_install from "../providers/slack/install.js";
 import type * as providers_slack_signing from "../providers/slack/signing.js";
 import type * as providers_slack_users from "../providers/slack/users.js";
+import type * as scheduling_console from "../scheduling/console.js";
 import type * as scheduling_cron from "../scheduling/cron.js";
 import type * as scheduling_data from "../scheduling/data.js";
 import type * as scheduling_mcp from "../scheduling/mcp.js";
@@ -359,6 +360,7 @@ declare const fullApi: ApiFromModules<{
   "providers/slack/install": typeof providers_slack_install;
   "providers/slack/signing": typeof providers_slack_signing;
   "providers/slack/users": typeof providers_slack_users;
+  "scheduling/console": typeof scheduling_console;
   "scheduling/cron": typeof scheduling_cron;
   "scheduling/data": typeof scheduling_data;
   "scheduling/mcp": typeof scheduling_mcp;

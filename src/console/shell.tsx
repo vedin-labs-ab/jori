@@ -10,6 +10,7 @@ import {
 import { Link, useRouterState } from "@tanstack/react-router"
 import {
   Cable,
+  CalendarClock,
   ChevronsUpDown,
   Component,
   LayoutDashboard,
@@ -61,6 +62,7 @@ import { IntegrationCallbackAlerts } from "./alerts"
 const consoleNavigation = [
   { icon: LayoutDashboard, label: "Console", to: "/console" },
   { icon: ListChecks, label: "Executions", to: "/executions" },
+  { icon: CalendarClock, label: "Scheduling", to: "/scheduling" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
   { icon: Component, label: "Playground", to: "/playground" },

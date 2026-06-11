@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SkillsRouteImport } from './routes/skills'
+import { Route as SchedulingRouteImport } from './routes/scheduling'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as ExecutionsRouteImport } from './routes/executions'
@@ -19,6 +20,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
   path: '/skills',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchedulingRoute = SchedulingRouteImport.update({
+  id: '/scheduling',
+  path: '/scheduling',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlaygroundRoute = PlaygroundRouteImport.update({
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playground': typeof PlaygroundRoute
+  '/scheduling': typeof SchedulingRoute
   '/skills': typeof SkillsRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playground': typeof PlaygroundRoute
+  '/scheduling': typeof SchedulingRoute
   '/skills': typeof SkillsRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playground': typeof PlaygroundRoute
+  '/scheduling': typeof SchedulingRoute
   '/skills': typeof SkillsRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/executions'
     | '/integrations'
     | '/playground'
+    | '/scheduling'
     | '/skills'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/executions'
     | '/integrations'
     | '/playground'
+    | '/scheduling'
     | '/skills'
   id:
     | '__root__'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/executions'
     | '/integrations'
     | '/playground'
+    | '/scheduling'
     | '/skills'
   fileRoutesById: FileRoutesById
 }
@@ -105,6 +117,7 @@ export interface RootRouteChildren {
   ExecutionsRoute: typeof ExecutionsRoute
   IntegrationsRoute: typeof IntegrationsRoute
   PlaygroundRoute: typeof PlaygroundRoute
+  SchedulingRoute: typeof SchedulingRoute
   SkillsRoute: typeof SkillsRoute
 }
 
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/skills'
       fullPath: '/skills'
       preLoaderRoute: typeof SkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scheduling': {
+      id: '/scheduling'
+      path: '/scheduling'
+      fullPath: '/scheduling'
+      preLoaderRoute: typeof SchedulingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/playground': {
@@ -161,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExecutionsRoute: ExecutionsRoute,
   IntegrationsRoute: IntegrationsRoute,
   PlaygroundRoute: PlaygroundRoute,
+  SchedulingRoute: SchedulingRoute,
   SkillsRoute: SkillsRoute,
 }
 export const routeTree = rootRouteImport
