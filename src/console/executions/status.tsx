@@ -36,7 +36,7 @@ export function StatusIcon({
   status: ExecutionStatus
 }) {
   if (approvalState === "pending") {
-    return <UserPen className="size-4 text-amber-900" />
+    return <UserPen className="size-4 text-warning" />
   }
 
   if (approvalState === "approved" || approvalState === "consumed") {
@@ -44,7 +44,7 @@ export function StatusIcon({
   }
 
   if (approvalState === "expired") {
-    return <ClockAlert className="size-4 text-amber-900" />
+    return <ClockAlert className="size-4 text-warning" />
   }
 
   const Icon = statusIcons[status]
@@ -70,19 +70,16 @@ export function ApprovalBadge({
   now: number
 }) {
   return (
-    <span className="inline-flex items-center gap-1 text-warning text-xs">
-      <UserPen className="size-3.5 shrink-0" />
-      <span
-        aria-hidden={!isVisible}
-        className={cn(
-          "inline-block origin-left overflow-hidden whitespace-nowrap transition-[max-width,opacity,transform] duration-200 ease-out",
-          isVisible
-            ? "max-w-56 scale-x-100 opacity-100"
-            : "pointer-events-none max-w-0 scale-x-95 opacity-0"
-        )}
-      >
-        Needs approval · {formatDuration(Math.max(0, expiresAt - now))}
-      </span>
+    <span
+      aria-hidden={!isVisible}
+      className={cn(
+        "inline-block origin-left overflow-hidden whitespace-nowrap text-warning text-xs transition-[max-width,opacity,transform] duration-200 ease-out",
+        isVisible
+          ? "max-w-56 scale-x-100 opacity-100"
+          : "pointer-events-none max-w-0 scale-x-95 opacity-0"
+      )}
+    >
+      Needs approval · {formatDuration(Math.max(0, expiresAt - now))}
     </span>
   )
 }

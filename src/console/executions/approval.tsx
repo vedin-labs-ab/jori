@@ -7,6 +7,7 @@ import {
   Loader2,
   UserCheck,
   UserPen,
+  UserX,
   X,
 } from "lucide-react"
 import { useState } from "react"
@@ -33,9 +34,11 @@ export function ApprovalCallout({
   tenantId: string
 }) {
   const HeaderIcon =
-    approval.state === "approved" || approval.state === "consumed"
-      ? UserCheck
-      : UserPen
+    approval.state === "expired"
+      ? UserX
+      : approval.state === "approved" || approval.state === "consumed"
+        ? UserCheck
+        : UserPen
 
   return (
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
@@ -165,7 +168,9 @@ function ApprovalMeta({
       {source === undefined ? null : (
         <>
           <ApprovalSource source={source} />
-          <span className="h-4 w-px bg-border" />
+          <span className="px-1 text-muted-foreground/60" aria-hidden="true">
+            ·
+          </span>
         </>
       )}
       <Tooltip>
@@ -201,7 +206,7 @@ function ApprovalSource({
 
   return (
     <a
-      className="group/status-link inline-flex items-center gap-1.5 rounded-sm underline-offset-4 transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="group/status-link relative inline-flex items-center gap-1.5 rounded-sm underline-offset-4 transition-[color,padding] duration-200 hover:pr-4 hover:text-foreground focus-visible:pr-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       href={source.url}
       rel="noreferrer"
       target="_blank"
@@ -210,7 +215,7 @@ function ApprovalSource({
       <span>{source.label}</span>
       <ArrowUpRight
         aria-hidden="true"
-        className="size-3 -translate-x-1 opacity-0 transition-all duration-200 ease-out group-hover/status-link:translate-x-0 group-hover/status-link:opacity-100 group-focus-visible/status-link:translate-x-0 group-focus-visible/status-link:opacity-100"
+        className="pointer-events-none absolute right-0 size-3 -translate-x-1 opacity-0 transition-all duration-200 ease-out group-hover/status-link:translate-x-0 group-hover/status-link:opacity-100 group-focus-visible/status-link:translate-x-0 group-focus-visible/status-link:opacity-100"
       />
     </a>
   )
@@ -231,7 +236,7 @@ function expirationLabel(
   now: number
 ) {
   if (now >= approval.expiresAt) {
-    return `Expired ${formatDuration(Math.max(0, now - approval.expiresAt))} ago`
+    return `Expired at ${absoluteTime(approval.expiresAt)}`
   }
 
   return `Expires in ${formatDuration(Math.max(0, approval.expiresAt - now))}`
