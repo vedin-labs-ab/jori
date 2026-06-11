@@ -1,6 +1,14 @@
 import { useAction } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import { ArrowUpRight, Check, Clock3, Loader2, UserPen, X } from "lucide-react"
+import {
+  ArrowUpRight,
+  Check,
+  Clock3,
+  Loader2,
+  type LucideIcon,
+  UserPen,
+  X,
+} from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -8,8 +16,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
-import { absoluteTime, approvalLabel, formatDuration } from "./format"
+import { absoluteTime, formatDuration } from "./format"
 import { ProviderLogo } from "./source"
 import { type ExecutionItem } from "./types"
 
@@ -35,9 +44,6 @@ export function ApprovalCallout({
           <span className="inline-flex min-w-0 items-center gap-2 font-medium text-sm">
             <ProviderLogo className="size-4" provider={approval.provider} />
             <span className="truncate">{approval.toolLabel}</span>
-          </span>
-          <span className="text-muted-foreground">
-            {approvalLabel(approval.state)}
           </span>
         </div>
         <p className="mt-3 text-foreground text-sm leading-relaxed">
@@ -146,32 +152,31 @@ function ApprovalMeta({
   now: number
 }) {
   const source = approval.source ?? fallbackApprovalSource(approval)
-  const showExpiration =
-    approval.state === "pending" || approval.state === "expired"
+  const meta = approvalMeta(approval, now)
 
-  if (source === undefined && !showExpiration) {
+  if (source === undefined && meta === null) {
     return null
   }
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
       {source === undefined ? null : <ApprovalSource source={source} />}
-      {source !== undefined && showExpiration ? (
+      {source !== undefined && meta !== null ? (
         <span className="px-1 text-muted-foreground/60" aria-hidden="true">
           ·
         </span>
       ) : null}
-      {showExpiration ? (
+      {meta === null ? null : (
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="inline-flex items-center gap-1.5">
-              <Clock3 className="size-3.5" />
-              {expirationLabel(approval, now)}
+              <meta.Icon className={cn("size-3.5", meta.iconClassName)} />
+              {meta.label}
             </span>
           </TooltipTrigger>
-          <TooltipContent>{absoluteTime(approval.expiresAt)}</TooltipContent>
+          <TooltipContent>{meta.tooltip}</TooltipContent>
         </Tooltip>
-      ) : null}
+      )}
     </div>
   )
 }
@@ -230,4 +235,45 @@ function expirationLabel(
   }
 
   return `Expires in ${formatDuration(Math.max(0, approval.expiresAt - now))}`
+}
+
+function approvalMeta(
+  approval: NonNullable<ExecutionItem["approval"]>,
+  now: number
+): {
+  Icon: LucideIcon
+  iconClassName?: string
+  label: string
+  tooltip: string
+} | null {
+  if (approval.state === "pending" || approval.state === "expired") {
+    return {
+      Icon: Clock3,
+      label: expirationLabel(approval, now),
+      tooltip: absoluteTime(approval.expiresAt),
+    }
+  }
+
+  if (
+    (approval.state === "approved" || approval.state === "consumed") &&
+    approval.decidedAt !== undefined
+  ) {
+    return {
+      Icon: Check,
+      iconClassName: "text-primary",
+      label: `Approved at ${absoluteTime(approval.decidedAt)}`,
+      tooltip: absoluteTime(approval.decidedAt),
+    }
+  }
+
+  if (approval.state === "denied" && approval.decidedAt !== undefined) {
+    return {
+      Icon: X,
+      iconClassName: "text-destructive",
+      label: `Denied at ${absoluteTime(approval.decidedAt)}`,
+      tooltip: absoluteTime(approval.decidedAt),
+    }
+  }
+
+  return null
 }

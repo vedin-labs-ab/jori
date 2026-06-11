@@ -11,6 +11,7 @@ export function summarizeApproval(args: {
   const state = getApprovalState(args.approval)
 
   return {
+    decidedAt: args.approval.decidedAt,
     delivery: deliveryLabel(args.approval.delivery),
     expiresAt: args.approval.expiresAt,
     id: args.approval._id,

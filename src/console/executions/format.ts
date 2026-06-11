@@ -1,17 +1,3 @@
-import { type ApprovalState } from "./types"
-
-export function approvalLabel(state: ApprovalState) {
-  const labels = {
-    approved: "Approved",
-    consumed: "Approved",
-    denied: "Denied",
-    expired: "Expired",
-    pending: "Requested",
-  } satisfies Record<ApprovalState, string>
-
-  return labels[state]
-}
-
 export function formatDuration(milliseconds: number) {
   const seconds = Math.max(0, Math.round(milliseconds / 1000))
 

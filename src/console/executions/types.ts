@@ -63,6 +63,7 @@ export type ExecutionItem = {
     summary: string
     provider: string
     expiresAt: number
+    decidedAt?: number
     delivery?: string
     source?: {
       label: string
