@@ -46,13 +46,13 @@ describe("automation event catalog criteria", () => {
     ).toThrow("From must be an email address.")
   })
 
-  test("keeps pending delivery explicit", () => {
+  test("keeps pending event-triggered automations explicit", () => {
     expect(() =>
       assertAutomationEventIsAvailable(
         requireEvent("googleDrive", "file.updated")
       )
     ).toThrow(
-      "Google Drive event delivery needs Drive change subscriptions before automations can run."
+      "Google Drive event-triggered automations need Drive change subscriptions before they can run."
     )
   })
 })

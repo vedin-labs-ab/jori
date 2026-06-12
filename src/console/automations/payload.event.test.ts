@@ -62,7 +62,7 @@ describe("automation event payload validation", () => {
     ).toEqual({ error: "Channel is required." })
   })
 
-  test("rejects unavailable event delivery", () => {
+  test("rejects unavailable event-triggered automations", () => {
     expect(
       createAutomationArgs(
         eventForm({
@@ -76,7 +76,7 @@ describe("automation event payload validation", () => {
       )
     ).toEqual({
       error:
-        "Gmail event delivery needs mailbox subscriptions before automations can run.",
+        "Gmail event-triggered automations need mailbox subscriptions before they can run.",
     })
   })
 

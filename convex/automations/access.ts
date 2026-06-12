@@ -32,7 +32,7 @@ export async function resolveAccessInput(
   const writeProviders = uniqueProviders(args.access.write)
 
   if (writeProviders.length === 0) {
-    throw new Error("At least one integration needs write access.")
+    throw new Error("Give at least one integration write access.")
   }
 
   const read =

@@ -90,14 +90,14 @@ function triggerLabel(automation: Automation) {
   }
 
   return automation.trigger.type === "event"
-    ? "Event automation"
+    ? "Event-triggered automation"
     : "One-time automation"
 }
 
 function readScopeLabel(readScope: Automation["access"]["readScope"]) {
   return readScope === "allConnected"
-    ? "Reads all connected"
-    : "Reads mentioned"
+    ? "Reads all connected integrations"
+    : "Reads mentioned integrations"
 }
 
 function surfaceSummary(automation: Automation) {
@@ -183,7 +183,7 @@ function AutomationRuns({
   return (
     <div className="grid gap-0.5 text-left text-xs md:text-right">
       {nextAt === undefined ? (
-        <span className="text-muted-foreground">Event based</span>
+        <span className="text-muted-foreground">Waiting for event</span>
       ) : (
         <span title={absoluteTime(nextAt)}>
           Next {relativeTime(nextAt, now)}

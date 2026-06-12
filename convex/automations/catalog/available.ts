@@ -3,8 +3,9 @@ import { event, optionParameter, provider, textParameter } from "./builders"
 export const availableAutomationEventCatalog = [
   provider("slack", [
     event("message.created", {
-      label: "Channel message created",
-      description: "Runs when a new message appears in a selected channel.",
+      label: "New channel message",
+      description:
+        "Runs when a new message appears in the selected Slack channel.",
       parameters: [
         optionParameter("channel", "Channel", "Search Slack channels", {
           required: true,
@@ -15,9 +16,9 @@ export const availableAutomationEventCatalog = [
   ]),
   provider("github", [
     event("issue.comment.changed", {
-      label: "Issue comment created/edited",
+      label: "Issue comment created or edited",
       description:
-        "Runs when a comment is created or edited on a selected GitHub issue.",
+        "Runs when someone creates or edits a comment on the selected GitHub issue.",
       parameters: [
         optionParameter("repo", "Repository", "Search repositories", {
           required: true,
@@ -30,9 +31,9 @@ export const availableAutomationEventCatalog = [
       ],
     }),
     event("pull_request.comment.changed", {
-      label: "PR comment created/edited",
+      label: "Pull request comment created or edited",
       description:
-        "Runs when a conversation comment is created or edited on a selected GitHub pull request.",
+        "Runs when someone creates or edits a conversation comment on the selected GitHub pull request.",
       parameters: [
         optionParameter("repo", "Repository", "Search repositories", {
           required: true,
@@ -45,9 +46,9 @@ export const availableAutomationEventCatalog = [
       ],
     }),
     event("pull_request.review_comment.changed", {
-      label: "PR review comment created/edited",
+      label: "Pull request review comment created or edited",
       description:
-        "Runs when an inline review comment is created or edited on a selected GitHub pull request.",
+        "Runs when someone creates or edits an inline review comment on the selected GitHub pull request.",
       parameters: [
         optionParameter("repo", "Repository", "Search repositories", {
           required: true,
@@ -63,9 +64,9 @@ export const availableAutomationEventCatalog = [
   ]),
   provider("linear", [
     event("issue.comment.changed", {
-      label: "Issue comment created/updated",
+      label: "Issue comment created or updated",
       description:
-        "Runs when a comment is created or updated on a matching Linear issue.",
+        "Runs when someone creates or updates a comment on a matching Linear issue.",
       parameters: [
         optionParameter("team", "Team", "Search Linear teams", {
           source: "linear.teams",

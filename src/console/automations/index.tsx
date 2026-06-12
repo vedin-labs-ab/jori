@@ -148,7 +148,7 @@ function AutomationFilters({
             aria-label="Search automations"
             className="h-8 pr-2 pl-8"
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search automations..."
+            placeholder="Search automations"
             value={query}
           />
         </div>

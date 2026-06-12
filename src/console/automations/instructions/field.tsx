@@ -10,8 +10,8 @@ export function AutomationInstructionsField(
 ) {
   const accessHint =
     props.readScope === "allConnected"
-      ? "Click its icon to switch between read and read/write."
-      : "Click its icon to switch between read, write, and read/write."
+      ? "Use each icon to set integration access: read or read/write."
+      : "Use each icon to set integration access: read, write, or read/write."
   const {
     editor,
     isEmpty,

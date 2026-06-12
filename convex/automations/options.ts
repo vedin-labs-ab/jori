@@ -32,7 +32,7 @@ export const search = action({
       !isAutomationEventOptionSource(args.source) ||
       !providerUsesAutomationEventOptionSource(args.provider, args.source)
     ) {
-      throw new Error("Choose a supported event resource.")
+      throw new Error("Choose a supported event option.")
     }
 
     const lookup: IntegrationLookup = await ctx.runQuery(

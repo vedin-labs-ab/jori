@@ -129,13 +129,11 @@ function buildBaseArgs(
   }
 
   if (surfaces.some((surface) => surface.access === "")) {
-    return {
-      error: "Choose read, write, or both for each mentioned integration.",
-    }
+    return { error: "Choose read, write, or read/write for each mention." }
   }
 
   if (!hasAutomationWriteSurface(surfaces)) {
-    return { error: "At least one integration needs write access." }
+    return { error: "Give at least one mentioned integration write access." }
   }
 
   return {

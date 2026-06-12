@@ -141,7 +141,7 @@ describe("automation instructions field footer", () => {
       "Type an integration name to mention it."
     )
     expect(field.container.textContent).toContain(
-      "Click its icon to switch between read, write, and read/write."
+      "Use each icon to set integration access: read, write, or read/write."
     )
 
     const footer = field.container.querySelector(
