@@ -96,17 +96,19 @@ describe("schedule instructions field layout", () => {
     const badgeWrapper = field.container.querySelector(
       "[data-schedule-surface-view]"
     )
-    const badge = badgeWrapper?.querySelector('[data-slot="badge"]')
+    const buttonGroup = badgeWrapper?.querySelector(
+      '[data-slot="button-group"]'
+    )
 
     expect(editorFrame?.className).toContain("[&_.tiptap]:leading-6")
     expect(editorFrame?.className).toContain("[&_.tiptap>p]:min-h-6")
     expect(editorFrame?.className).toContain("[&_.tiptap>p]:leading-6")
     expect(badgeWrapper?.className).toContain("align-middle")
-    expect(badge?.className).toContain("align-middle")
-    expect(badge?.className).toContain("leading-none")
+    expect(buttonGroup?.className).toContain("align-middle")
+    expect(buttonGroup?.className).toContain("h-6")
   })
 
-  test("uses icon color instead of background for badge access hover", async () => {
+  test("uses icon opacity instead of background for badge access hover", async () => {
     renderInstructionsField({
       description: "Post to GitHub.",
       surfaces: [{ provider: "github", access: "read" }],
@@ -116,8 +118,9 @@ describe("schedule instructions field layout", () => {
       name: "GitHub access: Read. Change access.",
     })
 
-    expect(button.className).toContain("text-muted-foreground")
-    expect(button.className).toContain("hover:text-foreground")
+    expect(button.className).toContain("text-informational")
+    expect(button.className).toContain("opacity-55")
+    expect(button.className).toContain("hover:opacity-100")
     expect(button.className).not.toContain("hover:bg-")
   })
 })
@@ -153,6 +156,26 @@ describe("schedule instructions field", () => {
       expect(field.onValueChange).toHaveBeenLastCalledWith({
         description: "Post to GitHub.",
         surfaces: [{ provider: "github", access: "write" }],
+      })
+    })
+  })
+
+  test("removes a marker from its provider pane", async () => {
+    const field = renderInstructionsField({
+      description: "Post to GitHub.",
+      surfaces: [{ provider: "github", access: "read" }],
+    })
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Remove GitHub marker",
+      })
+    )
+
+    await waitFor(() => {
+      expect(field.onValueChange).toHaveBeenLastCalledWith({
+        description: "Post to .",
+        surfaces: [],
       })
     })
   })
