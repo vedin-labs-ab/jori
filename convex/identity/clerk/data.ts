@@ -1,6 +1,6 @@
 import { v } from "convex/values"
-import { internalMutation } from "../_generated/server"
-import { upsertIdentity } from "./identities"
+import { internalMutation } from "../../_generated/server"
+import { upsertIdentity } from "../identities"
 
 const verifiedClerkEmailValidator = v.object({
   externalId: v.string(),
