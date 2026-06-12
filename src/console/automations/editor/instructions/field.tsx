@@ -39,7 +39,8 @@ export function AutomationInstructionsField(
           <div className="flex min-h-9 items-center gap-2 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
             <AtSign aria-hidden="true" className="size-3.5 shrink-0" />
             <span>
-              Type integration names. Milo suggests matches and adds badges.
+              Type integration names and Milo suggests matches, then turns them
+              into badges.
             </span>
           </div>
         </div>
