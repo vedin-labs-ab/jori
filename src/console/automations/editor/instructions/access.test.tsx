@@ -15,7 +15,7 @@ describe("automation instructions all-read access", () => {
 
     expect(await screen.findByRole("textbox")).toBeDefined()
     expect(field.container.textContent).toContain(
-      "Type integration names. Milo suggests matches and adds badges."
+      "Type integration names and Milo suggests matches, then turns them into badges."
     )
     expect(field.container.textContent).not.toContain("read/write")
   })
