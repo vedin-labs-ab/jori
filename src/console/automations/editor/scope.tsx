@@ -83,6 +83,7 @@ function AddConditionMenu({
           className="w-full justify-start text-muted-foreground hover:text-foreground"
           disabled={available.length === 0}
           type="button"
+          size="lg"
           variant="outline"
         >
           <Plus />
