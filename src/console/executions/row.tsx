@@ -1,5 +1,5 @@
 import { MessageCircleMore, Timer } from "lucide-react"
-import { useState } from "react"
+import { memo, useState } from "react"
 import { ApprovalCallout } from "./approval"
 import { CodeBlockDetail, ErrorDetail, RelativeTime } from "./details"
 import { formatDuration, relativeTime } from "./format"
@@ -9,7 +9,7 @@ import { StopExecution } from "./stop"
 import { TraceTerminal } from "./terminal"
 import { type ExecutionItem } from "./types"
 
-export function ExecutionRow({
+export const ExecutionRow = memo(function ExecutionRow({
   execution,
   now,
   tenantId,
@@ -61,7 +61,7 @@ export function ExecutionRow({
       ) : null}
     </article>
   )
-}
+})
 
 function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
   return (

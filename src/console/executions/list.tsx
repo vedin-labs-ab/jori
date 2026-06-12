@@ -19,11 +19,13 @@ import { cn } from "@/lib/utils"
 import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { ExecutionRow } from "./row"
+import { displayNowForExecution, executionClockInterval } from "./time"
 import {
   type ApprovalFilter,
   approvalFilterLabels,
   approvalFilterOptions,
   type ExecutionFilter,
+  type ExecutionItem,
   executionFilterOptions,
 } from "./types"
 
@@ -160,7 +162,7 @@ function ExecutionRows({
   pagination: ExecutionPagination
   tenantId: string
 }) {
-  const now = useNow()
+  const now = useExecutionClock(pagination.visibleRows)
 
   return (
     // auto-rows-max keeps row heights at their content size; without it the
@@ -176,7 +178,7 @@ function ExecutionRows({
             <ExecutionRow
               execution={execution}
               key={execution.id}
-              now={now}
+              now={displayNowForExecution(execution, now)}
               tenantId={tenantId}
             />
           ))
@@ -185,14 +187,15 @@ function ExecutionRows({
   )
 }
 
-function useNow() {
+function useExecutionClock(executions: ExecutionItem[]) {
   const [now, setNow] = useState(() => Date.now())
+  const intervalMs = executionClockInterval(executions, now)
 
   useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 1000)
+    const interval = window.setInterval(() => setNow(Date.now()), intervalMs)
 
     return () => window.clearInterval(interval)
-  }, [])
+  }, [intervalMs])
 
   return now
 }
