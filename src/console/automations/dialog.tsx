@@ -22,6 +22,10 @@ import {
 } from "@/components/ui/tooltip"
 import { createAutomationDialogActions } from "./actions"
 import { AutomationInstructionsField } from "./instructions"
+import {
+  automationInstructionMarkerErrors,
+  readAutomationInstructionMarkerError,
+} from "./payload/marker"
 import { RecurringFields } from "./recurring"
 import { type AutomationReadScope } from "./surfaces"
 import { type Automation, type AutomationFormValues } from "./types"
@@ -56,6 +60,7 @@ export function AutomationDialog({
   values: AutomationFormValues
 }) {
   const actions = createAutomationDialogActions({ onValuesChange, values })
+  const instructionsError = readAutomationInstructionMarkerError(error)
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -92,6 +97,7 @@ export function AutomationDialog({
               </p>
             </div>
             <AutomationInstructionsField
+              error={instructionsError}
               id="automation-description"
               value={values.instructions}
               onBlur={actions.normalizeDescription}
@@ -100,6 +106,10 @@ export function AutomationDialog({
               }
               placeholder="Summarize shipped GitHub changes and post the result to Slack."
               readScope={values.readScope}
+              showAccessError={
+                instructionsError ===
+                automationInstructionMarkerErrors.incompleteAccess
+              }
               surfaces={values.surfaces}
             />
           </div>
@@ -116,7 +126,7 @@ export function AutomationDialog({
           />
         </div>
 
-        {error === undefined ? null : (
+        {error === undefined || instructionsError !== undefined ? null : (
           <Alert variant="destructive">
             <AlertTitle>Could not save automation</AlertTitle>
             <AlertDescription>{error}</AlertDescription>

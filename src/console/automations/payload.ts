@@ -1,14 +1,11 @@
+import { automationInstructionMarkerErrors } from "./payload/marker"
 import {
-  type AutomationEventCriteria,
-  getAutomationEventDefinition,
-  getDefaultAutomationEvent,
-  isAutomationEventProvider,
-} from "../../../convex/automations/events"
-import { buildRecurringCron, classifyCron } from "./cron"
-import { toDatetimeLocal } from "./format"
-import { criteriaKey, eventCriteriaFormValues } from "./payload/criteria"
+  buildAutomationTriggerSpec,
+  hasAutomationTriggerChanged,
+  type TriggerSpec,
+  triggerFormValues,
+} from "./payload/trigger"
 import { readAutomationPreferences } from "./preferences"
-import { readAutomationEventCriteria } from "./rules"
 import {
   hasAutomationWriteSurface,
   normalizeAutomationSurfaceMentions,
@@ -19,16 +16,6 @@ import {
   type AutomationFormValues,
   emptyAutomationForm,
 } from "./types"
-
-type TriggerSpec =
-  | { type: "once"; at: string }
-  | { type: "cron"; cron: string }
-  | {
-      type: "event"
-      provider: AutomationFormValues["eventProvider"]
-      event: string
-      criteria?: AutomationEventCriteria
-    }
 
 type AutomationArgs = {
   name: string
@@ -71,7 +58,7 @@ export function createAutomationArgs(
     return base
   }
 
-  const trigger = buildTriggerSpec(values)
+  const trigger = buildAutomationTriggerSpec(values)
 
   if ("error" in trigger) {
     return trigger
@@ -90,11 +77,17 @@ export function updateAutomationArgs(
     return base
   }
 
-  if (!hasTriggerChanged(values, existing)) {
+  if (
+    !hasAutomationTriggerChanged(
+      values,
+      existing,
+      automationFormValues(existing)
+    )
+  ) {
     return base
   }
 
-  const trigger = buildTriggerSpec(values)
+  const trigger = buildAutomationTriggerSpec(values)
 
   if ("error" in trigger) {
     return trigger
@@ -125,15 +118,15 @@ function buildBaseArgs(
   }
 
   if (surfaces.length === 0) {
-    return { error: "Mention at least one integration in the instructions." }
+    return { error: automationInstructionMarkerErrors.noMarkers }
   }
 
   if (surfaces.some((surface) => surface.access === "")) {
-    return { error: "Choose read, write, or read/write for each mention." }
+    return { error: automationInstructionMarkerErrors.incompleteAccess }
   }
 
   if (!hasAutomationWriteSurface(surfaces)) {
-    return { error: "Give at least one mentioned integration write access." }
+    return { error: automationInstructionMarkerErrors.noWrite }
   }
 
   return {
@@ -158,138 +151,5 @@ function buildBaseArgs(
         web: values.webSearch,
       },
     },
-  }
-}
-
-function buildTriggerSpec(
-  values: AutomationFormValues
-): { trigger: TriggerSpec } | { error: string } {
-  if (values.type === "cron") {
-    const built = buildRecurringCron(values)
-
-    if ("error" in built) {
-      return built
-    }
-
-    return { trigger: { type: "cron", cron: built.cron } }
-  }
-
-  if (values.type === "event") {
-    const definition = getAutomationEventDefinition(
-      values.eventProvider,
-      values.event
-    )
-
-    if (definition === undefined) {
-      return { error: "Choose a supported automation event." }
-    }
-
-    const criteria = readAutomationEventCriteria(
-      definition,
-      values.eventCriteria
-    )
-
-    if ("error" in criteria) {
-      return criteria
-    }
-
-    return {
-      trigger: {
-        type: "event",
-        provider: values.eventProvider,
-        event: definition.value,
-        criteria: criteria.value,
-      },
-    }
-  }
-
-  if (values.runAt === "") {
-    return { error: "Run time is required." }
-  }
-
-  const runAt = new Date(values.runAt)
-
-  if (Number.isNaN(runAt.getTime())) {
-    return { error: "Run time is not a valid date." }
-  }
-
-  if (runAt.getTime() <= Date.now()) {
-    return { error: "Run time must be in the future." }
-  }
-
-  return { trigger: { type: "once", at: runAt.toISOString() } }
-}
-
-function hasTriggerChanged(values: AutomationFormValues, existing: Automation) {
-  const existingValues = automationFormValues(existing)
-
-  if (values.type !== existingValues.type) {
-    return true
-  }
-
-  if (values.type === "cron") {
-    const built = buildRecurringCron(values)
-
-    return (
-      existing.trigger.type !== "cron" ||
-      "error" in built ||
-      built.cron !== existing.trigger.cron
-    )
-  }
-
-  if (values.type === "event") {
-    return (
-      values.eventProvider !== existingValues.eventProvider ||
-      values.event.trim() !== existingValues.event ||
-      criteriaKey(values.eventCriteria) !==
-        criteriaKey(existingValues.eventCriteria)
-    )
-  }
-
-  return values.runAt !== existingValues.runAt
-}
-
-function triggerFormValues(automation: Automation) {
-  const trigger = automation.trigger
-
-  if (trigger.type === "cron") {
-    return {
-      type: "cron" as const,
-      ...classifyCron(trigger.cron),
-      runAt: "",
-      eventProvider: emptyAutomationForm.eventProvider,
-      event: emptyAutomationForm.event,
-      eventCriteria: {},
-    }
-  }
-
-  if (trigger.type === "event") {
-    const provider = isAutomationEventProvider(trigger.provider)
-      ? trigger.provider
-      : emptyAutomationForm.eventProvider
-    const definition =
-      getAutomationEventDefinition(provider, trigger.event) ??
-      getDefaultAutomationEvent(provider)
-
-    return {
-      type: "event" as const,
-      ...classifyCron(undefined),
-      runAt: "",
-      eventProvider: provider,
-      event: definition.value,
-      eventCriteria:
-        definition.value === trigger.event
-          ? eventCriteriaFormValues(definition, trigger)
-          : {},
-    }
-  }
-
-  return {
-    type: "once" as const,
-    ...classifyCron(undefined),
-    runAt: toDatetimeLocal(trigger.at),
-    eventProvider: emptyAutomationForm.eventProvider,
-    event: emptyAutomationForm.event,
-    eventCriteria: {},
   }
 }

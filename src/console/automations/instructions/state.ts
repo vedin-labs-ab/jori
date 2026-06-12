@@ -16,6 +16,7 @@ import {
 import {
   useExternalInstructionValue,
   useInstructionAutocompleteA11y,
+  useInstructionValidationA11y,
   useLatestInstructionRefs,
 } from "./effects"
 import { AutomationSurfaceExtension } from "./extension"
@@ -59,6 +60,11 @@ export function useAutomationInstructionsEditor(
   useLatestInstructionRefs({ editor, props, refs, suggestion })
   useExternalInstructionValue({ editor, props, setIsEmpty, updateSuggestion })
   useInstructionAutocompleteA11y({ editor, listboxId, suggestion })
+  useInstructionValidationA11y({
+    editor,
+    error: props.error,
+    errorId: `${props.id}-error`,
+  })
 
   const selectSuggestion = useCallback(
     (provider: AutomationSurfaceProvider) =>
@@ -115,7 +121,13 @@ function createEditorOptions({
       readScope: props.readScope,
       surfaces: props.surfaces,
     }),
-    editorProps: createEditorProps({ id: props.id, refs, setSuggestion }),
+    editorProps: createEditorProps({
+      error: props.error,
+      errorId: `${props.id}-error`,
+      id: props.id,
+      refs,
+      setSuggestion,
+    }),
     extensions: createExtensions(refs),
     immediatelyRender: false,
     onBlur: () => refs.onBlur.current(),
@@ -156,10 +168,14 @@ const starterKitExtension = StarterKit.configure({
 })
 
 function createEditorProps({
+  error,
+  errorId,
   id,
   refs,
   setSuggestion,
 }: {
+  error: string | undefined
+  errorId: string
   id: string
   refs: InstructionRefs
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
@@ -167,6 +183,9 @@ function createEditorProps({
   return {
     attributes: {
       "aria-autocomplete": "list",
+      ...(error === undefined
+        ? {}
+        : { "aria-describedby": errorId, "aria-invalid": "true" }),
       "aria-expanded": "false",
       "aria-multiline": "true",
       class: editorContentClassName,
