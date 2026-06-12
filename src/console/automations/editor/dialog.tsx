@@ -61,6 +61,11 @@ export function AutomationDialog({
 }) {
   const actions = createAutomationDialogActions({ onValuesChange, values })
   const instructionsError = readAutomationInstructionMarkerError(error)
+  const nameError = readAutomationNameError(error, values.name)
+  const shouldShowFormError =
+    error !== undefined &&
+    instructionsError === undefined &&
+    !isAutomationNameError(error)
 
   return (
     <Dialog
@@ -84,15 +89,11 @@ export function AutomationDialog({
         </DialogHeader>
 
         <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="automation-name">Name</Label>
-            <Input
-              id="automation-name"
-              value={values.name}
-              onChange={(event) => actions.updateName(event.target.value)}
-              placeholder="Weekly release summary"
-            />
-          </div>
+          <AutomationNameField
+            error={nameError}
+            onValueChange={actions.updateName}
+            value={values.name}
+          />
           <div className="grid gap-2">
             <div className="flex items-center gap-1.5">
               <Label htmlFor="automation-description">Instructions</Label>
@@ -128,12 +129,12 @@ export function AutomationDialog({
           />
         </div>
 
-        {error === undefined || instructionsError !== undefined ? null : (
+        {shouldShowFormError ? (
           <Alert variant="destructive">
             <AlertTitle>Could not save automation</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
-        )}
+        ) : null}
 
         <DialogFooter>
           <Button type="button" onClick={onSave} disabled={isSaving}>
@@ -144,6 +145,60 @@ export function AutomationDialog({
       </DialogContent>
     </Dialog>
   )
+}
+
+function AutomationNameField({
+  error,
+  onValueChange,
+  value,
+}: {
+  error: string | undefined
+  onValueChange: (value: string) => void
+  value: string
+}) {
+  return (
+    <div className="grid gap-2">
+      <Label htmlFor="automation-name">Name</Label>
+      <Input
+        aria-describedby={
+          error === undefined ? undefined : "automation-name-error"
+        }
+        aria-invalid={error === undefined ? undefined : true}
+        id="automation-name"
+        value={value}
+        onChange={(event) => onValueChange(event.target.value)}
+        placeholder="Weekly release summary"
+      />
+      {error === undefined ? null : (
+        <p
+          className="text-destructive text-xs/relaxed"
+          id="automation-name-error"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
+
+const automationNameErrors = {
+  required: "Name is required.",
+} as const
+
+function readAutomationNameError(
+  error: string | undefined,
+  name: string
+): string | undefined {
+  if (!isAutomationNameError(error) || name.trim() !== "") {
+    return undefined
+  }
+
+  return error
+}
+
+function isAutomationNameError(error: string | undefined) {
+  return error === automationNameErrors.required
 }
 
 function InstructionsHelp() {
