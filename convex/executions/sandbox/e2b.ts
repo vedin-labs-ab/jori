@@ -23,7 +23,6 @@ import {
   createBootstrapCommand,
   createCodexCommand,
   createTraceServerCommand,
-  e2bSandboxTemplate,
   tracePort,
   workspace,
 } from "./harness"
@@ -31,10 +30,10 @@ import {
   createToolPreflightCommand,
   createToolPreflightEnv,
 } from "./preflights"
-
-const sandboxTimeoutMs = 5 * 60 * 1_000
+import { type AgentRuntimeProfile, resolveAgentRuntimeProfile } from "./profile"
 
 export type E2BCodexRunArgs = {
+  agentId?: string
   authJsonBase64: string
   onSandboxCreated: (sandbox: {
     sandboxId: string
@@ -54,10 +53,11 @@ type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
 export async function runCodexInE2B(args: E2BCodexRunArgs) {
   let sandbox: E2BSandbox | undefined
   const setupTraces: SetupTrace[] = []
+  const profile = resolveAgentRuntimeProfile({ agentId: args.agentId })
 
   try {
-    sandbox = await createE2BSandbox()
-    await startTraceServer(sandbox, args.traceToken)
+    sandbox = await createE2BSandbox(profile)
+    await startTraceServer(sandbox, args.traceToken, profile)
     await args.onSandboxCreated({
       sandboxId: sandbox.sandboxId,
       traceHost: sandbox.getHost(tracePort),
@@ -68,6 +68,7 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
         "bootstrap",
         await bootstrapCodex(sandbox, {
           authJsonBase64: args.authJsonBase64,
+          profile,
           toolBundle: args.toolBundle,
         })
       ),
@@ -77,7 +78,8 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
 
     for (const preflightTrace of await verifyPreflights(
       sandbox,
-      args.toolBundle.preflights
+      args.toolBundle.preflights,
+      profile
     )) {
       assertSetupCommandSucceeded(
         recordSetupTrace(
@@ -90,7 +92,7 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
       )
     }
 
-    const agentTrace = await executeCodex(sandbox, args)
+    const agentTrace = await executeCodex(sandbox, args, profile)
     const trace = agentTrace.stdout
     assertCommandSucceeded(
       agentTrace,
@@ -116,19 +118,17 @@ export async function killE2BSandbox(sandboxId: string) {
   )
 }
 
-async function createE2BSandbox() {
-  return await Sandbox.create(
-    process.env.E2B_SANDBOX_TEMPLATE ?? e2bSandboxTemplate,
-    {
-      apiKey: requireE2BApiKey(),
-      allowInternetAccess: true,
-      metadata: {
-        app: "milo",
-        runtime: "codex",
-      },
-      timeoutMs: sandboxTimeoutMs,
-    }
-  )
+async function createE2BSandbox(profile: AgentRuntimeProfile) {
+  return await Sandbox.create(profile.sandbox.template, {
+    apiKey: requireE2BApiKey(),
+    allowInternetAccess: true,
+    metadata: {
+      agent: profile.agentId,
+      app: "milo",
+      runtime: "codex",
+    },
+    timeoutMs: profile.sandbox.timeoutMs,
+  })
 }
 
 function requireE2BApiKey() {
@@ -145,6 +145,7 @@ async function bootstrapCodex(
   sandbox: E2BSandbox,
   args: {
     authJsonBase64: string
+    profile: AgentRuntimeProfile
     toolBundle: ToolBundle
   }
 ) {
@@ -159,23 +160,31 @@ async function bootstrapCodex(
         JSON.stringify(args.toolBundle.sandboxFiles)
       ),
     },
-    timeoutMs: 30_000,
+    timeoutMs: args.profile.timeouts.bootstrapMs,
   })
 
   return createCommandTrace(result)
 }
 
-async function startTraceServer(sandbox: E2BSandbox, traceToken: string) {
+async function startTraceServer(
+  sandbox: E2BSandbox,
+  traceToken: string,
+  profile: AgentRuntimeProfile
+) {
   await sandbox.commands.run(createTraceServerCommand(), {
     background: true,
     envs: {
       MILO_TRACE_TOKEN: traceToken,
     },
-    timeoutMs: 0,
+    timeoutMs: profile.timeouts.traceServerMs,
   })
 }
 
-async function executeCodex(sandbox: E2BSandbox, args: E2BCodexRunArgs) {
+async function executeCodex(
+  sandbox: E2BSandbox,
+  args: E2BCodexRunArgs,
+  profile: AgentRuntimeProfile
+) {
   let streamedStdout = ""
   const result = await runCommand(sandbox, createCodexCommand(), {
     cwd: workspace,
@@ -186,7 +195,7 @@ async function executeCodex(sandbox: E2BSandbox, args: E2BCodexRunArgs) {
     onStdout: (data) => {
       streamedStdout += data
     },
-    timeoutMs: 180_000,
+    timeoutMs: profile.timeouts.codexMs,
   })
 
   // When the sandbox is killed mid-run (user stop) the command error carries
@@ -199,14 +208,15 @@ async function executeCodex(sandbox: E2BSandbox, args: E2BCodexRunArgs) {
 
 async function verifyPreflights(
   sandbox: E2BSandbox,
-  preflights: ToolPreflight[]
+  preflights: ToolPreflight[],
+  profile: AgentRuntimeProfile
 ) {
   const traces: Array<{ type: ToolPreflight["type"]; trace: CommandTrace }> = []
 
   for (const preflight of preflights) {
     traces.push({
       type: preflight.type,
-      trace: await verifyToolPreflight(sandbox, preflight),
+      trace: await verifyToolPreflight(sandbox, preflight, profile),
     })
   }
 
@@ -215,14 +225,15 @@ async function verifyPreflights(
 
 async function verifyToolPreflight(
   sandbox: E2BSandbox,
-  preflight: ToolPreflight
+  preflight: ToolPreflight,
+  profile: AgentRuntimeProfile
 ) {
   const result = await runCommand(
     sandbox,
     createToolPreflightCommand(preflight),
     {
       envs: createToolPreflightEnv(preflight),
-      timeoutMs: 30_000,
+      timeoutMs: profile.timeouts.preflightMs,
     }
   )
 

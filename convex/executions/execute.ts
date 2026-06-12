@@ -17,6 +17,7 @@ type PromptedExecution = {
 export async function runPromptedExecution(
   ctx: ActionCtx,
   args: {
+    agentId?: string
     execution: PromptedExecution
     executionToken: string
   }
@@ -29,6 +30,7 @@ export async function runPromptedExecution(
 
   try {
     const runtimeResult = await runCodexInE2B({
+      agentId: args.agentId,
       authJsonBase64: requireCodexAuthJsonBase64(),
       onSandboxCreated: async (sandbox) => {
         const isRunning: boolean = await ctx.runMutation(

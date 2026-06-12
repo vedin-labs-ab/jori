@@ -51,6 +51,7 @@ import type * as executions_runtime from "../executions/runtime.js";
 import type * as executions_sandbox_e2b from "../executions/sandbox/e2b.js";
 import type * as executions_sandbox_harness from "../executions/sandbox/harness.js";
 import type * as executions_sandbox_preflights from "../executions/sandbox/preflights.js";
+import type * as executions_sandbox_profile from "../executions/sandbox/profile.js";
 import type * as executions_skills from "../executions/skills.js";
 import type * as executions_summaries from "../executions/summaries.js";
 import type * as executions_targets from "../executions/targets.js";
@@ -241,6 +242,7 @@ declare const fullApi: ApiFromModules<{
   "executions/sandbox/e2b": typeof executions_sandbox_e2b;
   "executions/sandbox/harness": typeof executions_sandbox_harness;
   "executions/sandbox/preflights": typeof executions_sandbox_preflights;
+  "executions/sandbox/profile": typeof executions_sandbox_profile;
   "executions/skills": typeof executions_skills;
   "executions/summaries": typeof executions_summaries;
   "executions/targets": typeof executions_targets;

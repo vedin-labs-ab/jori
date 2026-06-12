@@ -93,6 +93,7 @@ async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
   }
 
   await runPromptedExecution(ctx, {
+    agentId: input.type,
     execution,
     executionToken,
   })

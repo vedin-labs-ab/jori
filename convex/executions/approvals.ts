@@ -115,6 +115,7 @@ async function runApprovalContinuation(
   }
 
   await runPromptedExecution(ctx, {
+    agentId: args.input.type,
     execution: promptedExecution,
     executionToken,
   })
