@@ -46,8 +46,14 @@ describe("recurring automation fields", () => {
       />
     )
 
-    const input = screen.getByLabelText("Cron expression")
+    const input = screen.getByLabelText("Expression")
     expect(input.getAttribute("value")).toBe("*/5 * * * *")
+    expect(
+      screen.getByRole("button", { name: "Expression help" })
+    ).toBeDefined()
+    expect(
+      screen.queryByText("UTC: minute, hour, day, month, weekday.")
+    ).toBeNull()
     expect(screen.getByText(/^Next run /)).toBeDefined()
   })
 
