@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest"
 import {
   assertAutomationEventIsAvailable,
+  automationEventParameterResetKeys,
   getAutomationEventDefinition,
   normalizeAutomationEventCriteria,
 } from "./events"
@@ -57,6 +58,37 @@ describe("automation event catalog criteria", () => {
   })
 })
 
+describe("automation event catalog dependencies", () => {
+  test("declares GitHub hard option dependencies as reset dependencies", () => {
+    const definition = requireEvent("github", "issue.comment.changed")
+    const issue = requireParameter(definition, "issue")
+
+    expect(automationEventParameterResetKeys(issue)).toEqual(["repo"])
+  })
+
+  test("declares Linear scope reset dependencies", () => {
+    const definition = requireEvent("linear", "issue.comment.changed")
+    const project = requireParameter(definition, "project")
+    const issue = requireParameter(definition, "issue")
+
+    expect(automationEventParameterResetKeys(project)).toEqual(["team"])
+    expect(automationEventParameterResetKeys(issue)).toEqual([
+      "team",
+      "project",
+    ])
+  })
+
+  test("declares GitHub review path reset dependencies", () => {
+    const definition = requireEvent(
+      "github",
+      "pull_request.review_comment.changed"
+    )
+    const path = requireParameter(definition, "path")
+
+    expect(automationEventParameterResetKeys(path)).toEqual(["repo", "pr"])
+  })
+})
+
 function requireEvent(
   provider: Parameters<typeof getAutomationEventDefinition>[0],
   event: string
@@ -68,4 +100,19 @@ function requireEvent(
   }
 
   return definition
+}
+
+function requireParameter(
+  definition: ReturnType<typeof requireEvent>,
+  key: string
+) {
+  const parameter = definition.parameters?.find(
+    (candidate) => candidate.key === key
+  )
+
+  if (parameter === undefined) {
+    throw new Error(`Missing test parameter ${definition.value}.${key}`)
+  }
+
+  return parameter
 }

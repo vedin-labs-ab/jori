@@ -58,7 +58,9 @@ export const availableAutomationEventCatalog = [
           source: "github.pullRequests",
           dependsOn: ["repo"],
         }),
-        textParameter("path", "Path", "src/example.ts"),
+        textParameter("path", "Path", "src/example.ts", {
+          resetsOn: ["repo", "pr"],
+        }),
       ],
     }),
   ]),
@@ -73,9 +75,11 @@ export const availableAutomationEventCatalog = [
         }),
         optionParameter("project", "Project", "Search Linear projects", {
           source: "linear.projects",
+          resetsOn: ["team"],
         }),
         optionParameter("issue", "Issue", "Search Linear issues", {
           source: "linear.issues",
+          resetsOn: ["team", "project"],
         }),
       ],
     }),

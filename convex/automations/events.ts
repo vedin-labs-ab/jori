@@ -85,6 +85,15 @@ export function providerUsesAutomationEventOptionSource(
   )
 }
 
+export function automationEventParameterResetKeys(
+  parameter: AutomationEventParameter
+) {
+  return [
+    ...(parameter.type === "option" ? (parameter.dependsOn ?? []) : []),
+    ...(parameter.resetsOn ?? []),
+  ]
+}
+
 export function normalizeAutomationEventCriteria(
   definition: AutomationEventDefinition,
   criteria: Record<string, unknown> | undefined

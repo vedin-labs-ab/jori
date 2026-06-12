@@ -6,6 +6,12 @@ import {
   type AutomationEventParameter,
 } from "./types"
 
+type ParameterOptions = {
+  required?: boolean
+  description?: string
+  resetsOn?: readonly string[]
+}
+
 export function provider<const Provider extends IntegrationProvider>(
   provider: Provider,
   events: readonly AutomationEventDefinition[]
@@ -44,11 +50,9 @@ export function optionParameter(
   key: string,
   label: string,
   placeholder: string,
-  options: {
+  options: ParameterOptions & {
     source: AutomationEventOptionSource
-    required?: boolean
     dependsOn?: readonly string[]
-    description?: string
   }
 ): AutomationEventParameter {
   return {
@@ -60,6 +64,7 @@ export function optionParameter(
     source: options.source,
     dependsOn: options.dependsOn,
     description: options.description,
+    resetsOn: options.resetsOn,
   }
 }
 
@@ -67,7 +72,7 @@ export function textParameter(
   key: string,
   label: string,
   placeholder: string,
-  options: { required?: boolean; description?: string } = {}
+  options: ParameterOptions = {}
 ): AutomationEventParameter {
   return {
     type: "text",
@@ -76,6 +81,7 @@ export function textParameter(
     placeholder,
     required: options.required ?? false,
     description: options.description,
+    resetsOn: options.resetsOn,
   }
 }
 
@@ -83,7 +89,7 @@ export function emailParameter(
   key: string,
   label: string,
   placeholder: string,
-  options: { required?: boolean; description?: string } = {}
+  options: ParameterOptions = {}
 ): AutomationEventParameter {
   return {
     type: "email",
@@ -92,6 +98,7 @@ export function emailParameter(
     placeholder,
     required: options.required ?? false,
     description: options.description,
+    resetsOn: options.resetsOn,
   }
 }
 
@@ -99,12 +106,10 @@ export function numberParameter(
   key: string,
   label: string,
   placeholder: string,
-  options: {
-    required?: boolean
+  options: ParameterOptions & {
     min?: number
     max?: number
     step?: number
-    description?: string
   } = {}
 ): AutomationEventParameter {
   return {
@@ -117,5 +122,6 @@ export function numberParameter(
     max: options.max,
     step: options.step,
     description: options.description,
+    resetsOn: options.resetsOn,
   }
 }

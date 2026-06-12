@@ -17,6 +17,7 @@ import {
   getAutomationEventDefinition,
   getDefaultAutomationEvent,
 } from "../../../convex/automations/events"
+import { applyEventCriteriaChange } from "./criteria"
 import { EventProviderField } from "./provider-field"
 import { EventOptionField } from "./resource"
 import { type AutomationFormValues } from "./types"
@@ -129,7 +130,14 @@ function EventParameterFields({
               parameters={parameters}
               values={values}
               onValueChange={(value) =>
-                onValuesChange({ ...values, [parameter.key]: value })
+                onValuesChange(
+                  applyEventCriteriaChange({
+                    key: parameter.key,
+                    parameters,
+                    value,
+                    values,
+                  })
+                )
               }
             />
           ))}

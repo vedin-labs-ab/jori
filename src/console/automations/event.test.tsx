@@ -183,4 +183,25 @@ describe("automation event parameter fields", () => {
       "Choose repository first"
     )
   })
+
+  test("keeps optional Linear scope pickers available without parent criteria", () => {
+    render(
+      <EventFields
+        tenantId="tenant"
+        onValuesChange={() => undefined}
+        values={{
+          ...emptyAutomationForm,
+          type: "event",
+          eventProvider: "linear",
+          event: "issue.comment.changed",
+          eventCriteria: {},
+        }}
+      />
+    )
+
+    expect(screen.getByLabelText("Project").hasAttribute("disabled")).toBe(
+      false
+    )
+    expect(screen.getByLabelText("Issue").hasAttribute("disabled")).toBe(false)
+  })
 })
