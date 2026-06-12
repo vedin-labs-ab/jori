@@ -1,6 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { redirectWithStatus } from "../http"
+import { readCallbackState, redirectWithStatus } from "../http"
 import { notionOAuthAuthorizeUrl, notionOAuthCallbackPath } from "./config"
 import { exchangeNotionAuthorizationCode, requireNotionClientId } from "./oauth"
 import { parseSignedNotionState } from "./signing"
@@ -43,18 +43,17 @@ export async function handleNotionOAuthCallback(
     return new Response("Missing OAuth callback parameters", { status: 400 })
   }
 
-  let state: Awaited<ReturnType<typeof parseSignedNotionState>>
+  const parsed = await readCallbackState({
+    value: stateValue,
+    parse: parseSignedNotionState,
+    label: "Notion OAuth",
+  })
 
-  try {
-    state = await parseSignedNotionState(stateValue)
-  } catch {
-    return new Response("Invalid Notion OAuth state", { status: 400 })
+  if (!parsed.ok) {
+    return parsed.response
   }
 
-  if (Date.now() - state.createdAt > 10 * 60 * 1000) {
-    return new Response("Expired Notion OAuth state", { status: 400 })
-  }
-
+  const state = parsed.state
   const tokenResult = await exchangeNotionAuthorizationCode({
     code,
     redirectUri: `${requestUrl.origin}${notionOAuthCallbackPath}`,

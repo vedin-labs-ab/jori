@@ -1,7 +1,12 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { createProviderActor } from "../../shared/actor"
-import { redirectWithStatus, unauthorizedResponse } from "../http"
+import {
+  ingestProviderMessage,
+  readCallbackState,
+  redirectWithStatus,
+  unauthorizedResponse,
+} from "../http"
 import {
   fetchGitHubInstallationProfile,
   type GitHubInstallationProfile,
@@ -41,17 +46,17 @@ export async function handleGitHubInstallCallback(
     })
   }
 
-  let state: Awaited<ReturnType<typeof parseSignedGitHubState>>
+  const parsed = await readCallbackState({
+    value: stateValue,
+    parse: parseSignedGitHubState,
+    label: "GitHub install",
+  })
 
-  try {
-    state = await parseSignedGitHubState(stateValue)
-  } catch {
-    return new Response("Invalid GitHub install state", { status: 400 })
+  if (!parsed.ok) {
+    return parsed.response
   }
 
-  if (Date.now() - state.createdAt > 10 * 60 * 1000) {
-    return new Response("Expired GitHub install state", { status: 400 })
-  }
+  const state = parsed.state
 
   let profile: Awaited<ReturnType<typeof fetchGitHubInstallationProfile>>
 
@@ -90,7 +95,8 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
-  const result = await ctx.runMutation(
+  return await ingestProviderMessage(
+    ctx,
     internal.messages.ingest.recordGitHubMessage,
     {
       accountId: message.accountId,
@@ -106,14 +112,6 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
       data: message.data,
     }
   )
-
-  if (result.status === "started") {
-    await ctx.scheduler.runAfter(0, internal.executions.runtime.runMessage, {
-      runId: result.runId,
-    })
-  }
-
-  return Response.json({ ok: true })
 }
 
 function normalizeInstallationProfile(profile: GitHubInstallationProfile) {

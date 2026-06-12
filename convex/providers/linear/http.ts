@@ -1,7 +1,12 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { createProviderActor } from "../../shared/actor"
-import { redirectWithStatus, unauthorizedResponse } from "../http"
+import {
+  ingestProviderMessage,
+  readCallbackState,
+  redirectWithStatus,
+  unauthorizedResponse,
+} from "../http"
 import {
   linearOAuthAuthorizeUrl,
   linearOAuthCallbackPath,
@@ -51,18 +56,17 @@ export async function handleLinearOAuthCallback(
     return new Response("Missing OAuth callback parameters", { status: 400 })
   }
 
-  let state: Awaited<ReturnType<typeof parseSignedLinearState>>
+  const parsed = await readCallbackState({
+    value: stateValue,
+    parse: parseSignedLinearState,
+    label: "Linear OAuth",
+  })
 
-  try {
-    state = await parseSignedLinearState(stateValue)
-  } catch {
-    return new Response("Invalid Linear OAuth state", { status: 400 })
+  if (!parsed.ok) {
+    return parsed.response
   }
 
-  if (Date.now() - state.createdAt > 10 * 60 * 1000) {
-    return new Response("Expired Linear OAuth state", { status: 400 })
-  }
-
+  const state = parsed.state
   const tokenResult = await exchangeLinearAuthorizationCode({
     code,
     redirectUri: `${requestUrl.origin}${linearOAuthCallbackPath}`,
@@ -115,7 +119,9 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
   }
 
   const hydratedMessage = await hydrateLinearMessage(ctx, message)
-  const result = await ctx.runMutation(
+
+  return await ingestProviderMessage(
+    ctx,
     internal.messages.ingest.recordLinearMessage,
     {
       accountId: hydratedMessage.accountId,
@@ -132,14 +138,6 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
       data: hydratedMessage.data,
     }
   )
-
-  if (result.status === "started") {
-    await ctx.scheduler.runAfter(0, internal.executions.runtime.runMessage, {
-      runId: result.runId,
-    })
-  }
-
-  return Response.json({ ok: true })
 }
 
 type LinearMessage = NonNullable<ReturnType<typeof getLinearMessage>>

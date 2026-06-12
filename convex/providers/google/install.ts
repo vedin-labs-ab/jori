@@ -5,7 +5,8 @@ import {
   mutation,
 } from "../../_generated/server"
 import { upsertIdentity } from "../../identity/identities"
-import { requireClerkUserId } from "../../identity/users"
+import { readRefreshToken } from "../credentials"
+import { buildInstallState } from "../install"
 import { type GoogleSurfaceProvider } from "./config"
 import {
   findExistingGoogleIntegration,
@@ -199,18 +200,9 @@ async function createInstallState(
     returnUrl: string
   }
 ) {
-  const identity = await ctx.auth.getUserIdentity()
-
-  if (identity === null) {
-    throw new Error("Unauthorized")
-  }
-
   return await createSignedGoogleState({
     provider,
-    tenantId: args.tenantId,
-    createdBy: requireClerkUserId(identity),
-    returnUrl: args.returnUrl,
-    createdAt: Date.now(),
+    ...(await buildInstallState(ctx, args)),
   })
 }
 
@@ -232,20 +224,4 @@ async function upsertGoogleIdentity(
     externalId: args.profile.id,
     email: args.profile.email,
   })
-}
-
-function readRefreshToken(credentials: unknown) {
-  if (
-    typeof credentials === "object" &&
-    credentials !== null &&
-    "tokens" in credentials &&
-    typeof credentials.tokens === "object" &&
-    credentials.tokens !== null &&
-    "refresh" in credentials.tokens &&
-    typeof credentials.tokens.refresh === "string"
-  ) {
-    return credentials.tokens.refresh
-  }
-
-  return undefined
 }

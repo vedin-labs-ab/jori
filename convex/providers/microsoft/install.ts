@@ -5,7 +5,8 @@ import {
   type MutationCtx,
   mutation,
 } from "../../_generated/server"
-import { requireClerkUserId } from "../../identity/users"
+import { readRefreshToken } from "../credentials"
+import { buildInstallState } from "../install"
 import { type MicrosoftSurfaceProvider } from "./config"
 import { getMicrosoftIdentityEmail, upsertMicrosoftIdentity } from "./identity"
 import { createSignedMicrosoftState } from "./signing"
@@ -225,35 +226,10 @@ async function createInstallState(
     returnUrl: string
   }
 ) {
-  const identity = await ctx.auth.getUserIdentity()
-
-  if (identity === null) {
-    throw new Error("Unauthorized")
-  }
-
   return await createSignedMicrosoftState({
     provider,
-    tenantId: args.tenantId,
-    createdBy: requireClerkUserId(identity),
-    returnUrl: args.returnUrl,
-    createdAt: Date.now(),
+    ...(await buildInstallState(ctx, args)),
   })
-}
-
-function readRefreshToken(credentials: unknown) {
-  if (
-    typeof credentials === "object" &&
-    credentials !== null &&
-    "tokens" in credentials &&
-    typeof credentials.tokens === "object" &&
-    credentials.tokens !== null &&
-    "refresh" in credentials.tokens &&
-    typeof credentials.tokens.refresh === "string"
-  ) {
-    return credentials.tokens.refresh
-  }
-
-  return undefined
 }
 
 function readTenantId(credentials: unknown) {
