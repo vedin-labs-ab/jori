@@ -1,3 +1,4 @@
+import { automationEventCatalog } from "../../../automations/events"
 import { numberProperty, objectSchema, stringProperty } from "./common"
 
 const providerEnum = [
@@ -10,6 +11,16 @@ const providerEnum = [
   "notion",
   "microsoftEmail",
   "microsoftCalendar",
+]
+const eventProviderEnum = automationEventCatalog.map(
+  (definition) => definition.provider
+)
+const eventEnum = [
+  ...new Set(
+    automationEventCatalog.flatMap((definition) =>
+      definition.events.map((event) => event.value)
+    )
+  ),
 ]
 
 const accessSchema = () => ({
@@ -73,14 +84,16 @@ const triggerSchema = () => ({
         type: { const: "event" },
         provider: {
           type: "string",
-          enum: providerEnum,
+          enum: eventProviderEnum,
           description: "Connected provider that emits the event.",
         },
-        event: stringProperty(
-          "Provider event name, for example page.updated or message.received."
-        ),
+        event: {
+          type: "string",
+          enum: eventEnum,
+          description: "Supported event name for the selected provider.",
+        },
         filter: stringProperty(
-          "Optional exact resource filter such as a Notion page ID."
+          "Exact resource value when the event requires one, such as a Slack channel ID or Notion page ID."
         ),
       },
     }),

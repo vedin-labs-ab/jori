@@ -1,9 +1,12 @@
 import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
 import {
+  type AutomationEventProvider,
+  getDefaultAutomationEvent,
+} from "../../../convex/automations/events"
+import {
   type AutomationReadScope,
   type AutomationSurfaceFormValue,
-  type AutomationSurfaceProvider,
 } from "./surfaces"
 
 export type AutomationList = FunctionReturnType<
@@ -39,13 +42,15 @@ export type AutomationFormValues = {
   monthDay: string
   cron: string
   runAt: string
-  eventProvider: AutomationSurfaceProvider
+  eventProvider: AutomationEventProvider
   event: string
-  eventFilter: string
+  eventResource: string
   readScope: AutomationReadScope
   webSearch: boolean
   surfaces: AutomationSurfaceFormValue[]
 }
+
+const defaultEvent = getDefaultAutomationEvent()
 
 export const emptyAutomationForm: AutomationFormValues = {
   name: "",
@@ -58,8 +63,8 @@ export const emptyAutomationForm: AutomationFormValues = {
   cron: "",
   runAt: "",
   eventProvider: "notion",
-  event: "page.updated",
-  eventFilter: "",
+  event: defaultEvent.value,
+  eventResource: "",
   readScope: "allConnected",
   webSearch: true,
   surfaces: [],

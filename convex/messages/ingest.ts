@@ -23,6 +23,7 @@ import {
   getActorEmail,
   getActorExternalId,
 } from "../shared/actor"
+import { recordAutomationEvent } from "./events"
 
 const observedMessageArgs = {
   accountId: v.string(),
@@ -156,6 +157,7 @@ async function recordProviderMessage(
     integration: input.integration,
   })
   const now = Date.now()
+  await recordAutomationEvent(ctx, { ...input, now })
   const createdBy = await resolveMessageOwner(ctx, {
     tenantId: input.integration.tenantId,
     message: input.message,

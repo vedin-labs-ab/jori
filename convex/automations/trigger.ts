@@ -2,12 +2,12 @@ import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveEventIntegration } from "./access"
-import { type AutomationTriggerInput } from "./schema"
 import {
-  getTimeTrigger,
-  getTimeTriggerAt,
-  normalizeRequiredText,
-} from "./timing"
+  getAutomationEventDefinition,
+  normalizeAutomationEventResource,
+} from "./events"
+import { type AutomationTriggerInput } from "./schema"
+import { getTimeTrigger, getTimeTriggerAt } from "./timing"
 
 export async function resolveTrigger(
   ctx: MutationCtx,
@@ -19,6 +19,15 @@ export async function resolveTrigger(
   }
 ): Promise<Doc<"automations">["trigger"]> {
   if (args.trigger.type === "event") {
+    const definition = getAutomationEventDefinition(
+      args.trigger.provider,
+      args.trigger.event
+    )
+
+    if (definition === undefined) {
+      throw new Error("Choose a supported automation event.")
+    }
+
     return {
       type: "event",
       integrationId: (
@@ -28,8 +37,8 @@ export async function resolveTrigger(
           tenantId: args.tenantId,
         })
       )._id,
-      event: normalizeRequiredText(args.trigger.event, "event"),
-      filter: normalizeOptionalText(args.trigger.filter),
+      event: definition.value,
+      filter: normalizeAutomationEventResource(definition, args.trigger.filter),
     }
   }
 
@@ -106,10 +115,4 @@ export async function scheduleTrigger(
   )
 
   return { ...args.trigger, functionId }
-}
-
-function normalizeOptionalText(value: string | undefined) {
-  const normalized = value?.trim()
-
-  return normalized === "" ? undefined : normalized
 }

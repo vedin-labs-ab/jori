@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { internalMutation } from "../_generated/server"
-import { startEventAutomations } from "../automations/data"
 import { actorValidator } from "../shared/actor"
+import { recordEvent } from "./data"
 
 export const record = internalMutation({
   args: {
@@ -21,21 +21,8 @@ export const record = internalMutation({
       return { status: "missing_integration" as const }
     }
 
-    const existing = await ctx.db
-      .query("events")
-      .withIndex("by_integration_and_key", (index) =>
-        index.eq("integrationId", integration._id).eq("key", args.key)
-      )
-      .first()
-
-    if (existing !== null) {
-      return { status: "duplicate" as const, eventId: existing._id }
-    }
-
-    const now = Date.now()
-    const eventId = await ctx.db.insert("events", {
-      tenantId: integration.tenantId,
-      integrationId: integration._id,
+    const result = await recordEvent(ctx, {
+      integration,
       key: args.key,
       type: args.type,
       resource: args.resource,
@@ -43,20 +30,12 @@ export const record = internalMutation({
       text: args.text,
       data: args.data,
       observedAt: args.observedAt,
-      createdAt: now,
     })
-    const event = await ctx.db.get(eventId)
-
-    if (event === null) {
-      throw new Error("Event insert failed.")
-    }
-
-    const runIds = await startEventAutomations(ctx, { event, now })
 
     return {
-      status: "recorded" as const,
-      eventId,
-      runIds,
+      status: result.status,
+      eventId: result.eventId,
+      runIds: result.status === "recorded" ? result.runIds : [],
     }
   },
 })

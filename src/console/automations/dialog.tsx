@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { NativeSelect } from "@/components/ui/native-select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Tooltip,
@@ -21,14 +20,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { createAutomationDialogActions } from "./actions"
+import { EventFields } from "./event"
 import { AutomationInstructionsField } from "./instructions"
 import { AutomationDateTimePicker } from "./picker"
 import { RecurringFields } from "./recurring"
-import {
-  type AutomationReadScope,
-  type AutomationSurfaceProvider,
-  automationSurfaceProviders,
-} from "./surfaces"
+import { type AutomationReadScope } from "./surfaces"
 import { type Automation, type AutomationFormValues } from "./types"
 
 export function AutomationDialog({
@@ -39,6 +35,7 @@ export function AutomationDialog({
   onSave,
   onValuesChange,
   automation,
+  tenantId,
   values,
 }: {
   error: string | undefined
@@ -48,6 +45,7 @@ export function AutomationDialog({
   onSave: () => void
   onValuesChange: (values: AutomationFormValues) => void
   automation: Automation | undefined
+  tenantId: string
   values: AutomationFormValues
 }) {
   const actions = createAutomationDialogActions({ onValuesChange, values })
@@ -104,7 +102,11 @@ export function AutomationDialog({
             readScope={values.readScope}
             webSearch={values.webSearch}
           />
-          <AutomationTiming onValuesChange={onValuesChange} values={values} />
+          <AutomationTiming
+            tenantId={tenantId}
+            onValuesChange={onValuesChange}
+            values={values}
+          />
         </div>
 
         {error === undefined ? null : (
@@ -230,9 +232,11 @@ function AccessCheckbox({
 }
 
 function AutomationTiming({
+  tenantId,
   onValuesChange,
   values,
 }: {
+  tenantId: string
   onValuesChange: (values: AutomationFormValues) => void
   values: AutomationFormValues
 }) {
@@ -266,64 +270,12 @@ function AutomationTiming({
         </p>
       </TabsContent>
       <TabsContent value="event">
-        <EventFields onValuesChange={onValuesChange} values={values} />
+        <EventFields
+          tenantId={tenantId}
+          onValuesChange={onValuesChange}
+          values={values}
+        />
       </TabsContent>
     </Tabs>
-  )
-}
-
-function EventFields({
-  onValuesChange,
-  values,
-}: {
-  onValuesChange: (values: AutomationFormValues) => void
-  values: AutomationFormValues
-}) {
-  return (
-    <div className="grid gap-3">
-      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div className="grid gap-2">
-          <Label htmlFor="automation-event-provider">Provider</Label>
-          <NativeSelect
-            id="automation-event-provider"
-            onChange={(event) =>
-              onValuesChange({
-                ...values,
-                eventProvider: event.target.value as AutomationSurfaceProvider,
-              })
-            }
-            value={values.eventProvider}
-          >
-            {automationSurfaceProviders.map((provider) => (
-              <option key={provider.provider} value={provider.provider}>
-                {provider.label}
-              </option>
-            ))}
-          </NativeSelect>
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="automation-event-name">Event</Label>
-          <Input
-            id="automation-event-name"
-            onChange={(event) =>
-              onValuesChange({ ...values, event: event.target.value })
-            }
-            placeholder="page.updated"
-            value={values.event}
-          />
-        </div>
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="automation-event-filter">Resource filter</Label>
-        <Input
-          id="automation-event-filter"
-          onChange={(event) =>
-            onValuesChange({ ...values, eventFilter: event.target.value })
-          }
-          placeholder="Optional page, thread, or message source ID"
-          value={values.eventFilter}
-        />
-      </div>
-    </div>
   )
 }

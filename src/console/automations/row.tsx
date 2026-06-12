@@ -1,6 +1,7 @@
 import { Clock, Pencil, Repeat2, Workflow, Zap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { getAutomationEventDefinition } from "../../../convex/automations/events"
 import { SeparatorDot } from "../dot"
 import { describeCron } from "./cron"
 import { DeleteAutomation } from "./delete"
@@ -124,12 +125,24 @@ function AutomationTrigger({ automation }: { automation: Automation }) {
   }
 
   if (trigger.type === "event") {
+    const eventLabel =
+      trigger.provider === undefined
+        ? trigger.event
+        : (getAutomationEventDefinition(trigger.provider, trigger.event)
+            ?.label ?? trigger.event)
+
     return (
       <span>
         {trigger.provider === undefined
           ? "Provider event"
           : getAutomationSurfaceLabel(trigger.provider)}{" "}
-        {trigger.event}
+        {eventLabel}
+        {trigger.filter === undefined ? null : (
+          <>
+            <SeparatorDot />
+            <span className="font-mono">{trigger.filter}</span>
+          </>
+        )}
       </span>
     )
   }

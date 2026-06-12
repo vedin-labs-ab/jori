@@ -1,6 +1,12 @@
+import {
+  getAutomationEventDefinition,
+  getDefaultAutomationEvent,
+  isAutomationEventProvider,
+} from "../../../convex/automations/events"
 import { buildRecurringCron, classifyCron } from "./cron"
 import { toDatetimeLocal } from "./format"
 import { readAutomationPreferences } from "./preferences"
+import { readAutomationEventResource } from "./rules"
 import {
   hasAutomationWriteSurface,
   normalizeAutomationSurfaceMentions,
@@ -169,18 +175,30 @@ function buildTriggerSpec(
   }
 
   if (values.type === "event") {
-    const event = values.event.trim()
+    const definition = getAutomationEventDefinition(
+      values.eventProvider,
+      values.event
+    )
 
-    if (event === "") {
-      return { error: "Event name is required." }
+    if (definition === undefined) {
+      return { error: "Choose a supported automation event." }
+    }
+
+    const resource = readAutomationEventResource(
+      definition,
+      values.eventResource
+    )
+
+    if ("error" in resource) {
+      return resource
     }
 
     return {
       trigger: {
         type: "event",
         provider: values.eventProvider,
-        event,
-        filter: emptyToUndefined(values.eventFilter),
+        event: definition.value,
+        filter: resource.value,
       },
     }
   }
@@ -223,7 +241,7 @@ function hasTriggerChanged(values: AutomationFormValues, existing: Automation) {
     return (
       values.eventProvider !== existingValues.eventProvider ||
       values.event.trim() !== existingValues.event ||
-      values.eventFilter.trim() !== existingValues.eventFilter
+      values.eventResource.trim() !== existingValues.eventResource
     )
   }
 
@@ -240,18 +258,26 @@ function triggerFormValues(automation: Automation) {
       runAt: "",
       eventProvider: emptyAutomationForm.eventProvider,
       event: emptyAutomationForm.event,
-      eventFilter: "",
+      eventResource: "",
     }
   }
 
   if (trigger.type === "event") {
+    const provider = isAutomationEventProvider(trigger.provider)
+      ? trigger.provider
+      : emptyAutomationForm.eventProvider
+    const definition =
+      getAutomationEventDefinition(provider, trigger.event) ??
+      getDefaultAutomationEvent(provider)
+
     return {
       type: "event" as const,
       ...classifyCron(undefined),
       runAt: "",
-      eventProvider: trigger.provider ?? emptyAutomationForm.eventProvider,
-      event: trigger.event,
-      eventFilter: trigger.filter ?? "",
+      eventProvider: provider,
+      event: definition.value,
+      eventResource:
+        definition.value === trigger.event ? (trigger.filter ?? "") : "",
     }
   }
 
@@ -261,12 +287,6 @@ function triggerFormValues(automation: Automation) {
     runAt: toDatetimeLocal(trigger.at),
     eventProvider: emptyAutomationForm.eventProvider,
     event: emptyAutomationForm.event,
-    eventFilter: "",
+    eventResource: "",
   }
-}
-
-function emptyToUndefined(value: string) {
-  const trimmed = value.trim()
-
-  return trimmed === "" ? undefined : trimmed
 }

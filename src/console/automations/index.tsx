@@ -66,6 +66,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
         onSave={editor.saveAutomation}
         onValuesChange={editor.setFormValues}
         automation={editor.formAutomation}
+        tenantId={tenantId}
         values={editor.formValues}
       />
     </section>
