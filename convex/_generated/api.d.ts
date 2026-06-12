@@ -167,6 +167,7 @@ import type * as providers_google_oauth from "../providers/google/oauth.js";
 import type * as providers_google_scope from "../providers/google/scope.js";
 import type * as providers_google_signing from "../providers/google/signing.js";
 import type * as providers_http from "../providers/http.js";
+import type * as providers_install from "../providers/install.js";
 import type * as providers_linear_config from "../providers/linear/config.js";
 import type * as providers_linear_credentials from "../providers/linear/credentials.js";
 import type * as providers_linear_data from "../providers/linear/data.js";
@@ -382,6 +383,7 @@ declare const fullApi: ApiFromModules<{
   "providers/google/scope": typeof providers_google_scope;
   "providers/google/signing": typeof providers_google_signing;
   "providers/http": typeof providers_http;
+  "providers/install": typeof providers_install;
   "providers/linear/config": typeof providers_linear_config;
   "providers/linear/credentials": typeof providers_linear_credentials;
   "providers/linear/data": typeof providers_linear_data;
