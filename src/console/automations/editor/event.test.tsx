@@ -198,14 +198,20 @@ describe("automation event conditions", () => {
     renderEventFields({
       eventProvider: "linear",
       event: "issue.comment.changed",
-      eventCriteria: { project: "project-a" },
+      eventCriteria: {
+        issue: "issue-a",
+        project: "project-a",
+        team: "team-a",
+      },
     })
 
+    expect(screen.getByLabelText("Team")).toBeDefined()
     expect(screen.getByLabelText("Project")).toBeDefined()
+    expect(screen.getByLabelText("Issue")).toBeDefined()
     expect(screen.getByLabelText("Project").hasAttribute("disabled")).toBe(
       false
     )
-    expect(screen.queryByLabelText("Team")).toBeNull()
+    expect(screen.queryByRole("button", { name: "Add condition" })).toBeNull()
   })
 })
 

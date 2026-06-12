@@ -56,7 +56,6 @@ export function EventScopeFields({
       availableConditions={conditions.filter(
         (condition) => !addedKeys.includes(condition.key)
       )}
-      hasConditions={conditions.length > 0}
       removableKeys={addedKeys}
       values={values}
       onAdd={(key) => setAddedKeys((keys) => [...keys, key])}
@@ -117,7 +116,6 @@ function ScopeFieldGrid({
   parameters,
   allParameters,
   availableConditions,
-  hasConditions,
   removableKeys,
   values,
   onAdd,
@@ -129,14 +127,13 @@ function ScopeFieldGrid({
   parameters: readonly AutomationEventParameter[]
   allParameters: readonly AutomationEventParameter[]
   availableConditions: readonly AutomationEventParameter[]
-  hasConditions: boolean
   removableKeys: readonly string[]
   values: Record<string, string>
   onAdd: (key: string) => void
   onValuesChange: (values: Record<string, string>) => void
   onRemove: (key: string) => void
 }) {
-  if (parameters.length === 0 && !hasConditions) {
+  if (parameters.length === 0 && availableConditions.length === 0) {
     return null
   }
 
@@ -164,7 +161,7 @@ function ScopeFieldGrid({
           onRemove={() => onRemove(parameter.key)}
         />
       ))}
-      {hasConditions ? (
+      {availableConditions.length > 0 ? (
         <div className="grid gap-2">
           <span
             aria-hidden="true"
