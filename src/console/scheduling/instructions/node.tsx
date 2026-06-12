@@ -1,6 +1,6 @@
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react"
 import { CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
-import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
+import { ButtonGroup } from "@/components/ui/button-group"
 import { cn } from "@/lib/utils"
 import {
   getNextScheduleSurfaceAccess,
@@ -54,8 +54,10 @@ export function ScheduleSurfaceNodeView({
           }
           providerLabel={providerLabel}
         />
-        <ButtonGroupSeparator
-          className={cn("w-px data-vertical:my-0", toneClassNames.separator)}
+        <span
+          aria-hidden="true"
+          className={cn("w-px shrink-0 self-stretch", toneClassNames.separator)}
+          data-slot="button-group-separator"
         />
         <ScheduleSurfaceRemoveButton
           onRemove={deleteNode}
