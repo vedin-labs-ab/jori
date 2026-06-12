@@ -110,7 +110,7 @@ describe("schedule instructions field layout", () => {
     expect(separator?.className).toContain("self-stretch")
     expect(separator?.className).toContain("w-px")
     expect(separator?.className).not.toContain("data-vertical")
-    expect(removePane?.className).toContain("px-1.5")
+    expect(removePane?.className).toContain("px-1")
   })
 })
 
@@ -149,7 +149,8 @@ describe("schedule instructions marker styling", () => {
     })
 
     expect(button.className).toContain("text-[#2563EB]")
-    expect(button.className).toContain("w-5")
+    expect(button.className).toContain("px-1")
+    expect(button.className).not.toContain("w-5")
     expect(button.className).toContain("opacity-55")
     expect(button.className).toContain("hover:opacity-100")
     expect(button.className).not.toContain("hover:bg-")

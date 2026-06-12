@@ -88,7 +88,7 @@ function ScheduleSurfaceAccessButton({
     <button
       aria-label={`${providerLabel} access: ${accessLabel}. Change access.`}
       className={cn(
-        "grid w-5 place-items-center opacity-55 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
+        "grid px-1 place-items-center opacity-55 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
         iconClassName
       )}
       onClick={(event) => {
