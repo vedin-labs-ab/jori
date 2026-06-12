@@ -193,7 +193,7 @@ function uniqueProviders(providers: IntegrationProvider[]) {
   return [...new Set(providers)]
 }
 
-function isUserScopedProvider(provider: IntegrationProvider) {
+export function isUserScopedProvider(provider: IntegrationProvider) {
   return (
     provider === "gmail" ||
     provider === "googleCalendar" ||

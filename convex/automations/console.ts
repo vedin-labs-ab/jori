@@ -7,8 +7,9 @@ import {
   query,
 } from "../_generated/server"
 import { requireClerkUserId } from "../identity/users"
+import { type IntegrationProvider } from "../providers/catalog"
 import { checkTenantAccess, requireTenantAccess } from "../skills/access"
-import { projectAccessForConsole } from "./access"
+import { isUserScopedProvider, projectAccessForConsole } from "./access"
 import {
   createAutomation,
   maxSearchResults,
@@ -16,6 +17,7 @@ import {
   searchAutomations,
   updateAutomation,
 } from "./data"
+import { automationEventCatalog } from "./events"
 import { accessInput, triggerInput } from "./schema"
 
 export const list = query({
@@ -46,6 +48,29 @@ export const list = query({
       status: "ready" as const,
       automations: await Promise.all(
         automations.map((automation) => toConsoleAutomation(ctx, automation))
+      ),
+    }
+  },
+})
+
+export const eventProviders = query({
+  args: {
+    tenantId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const ownerId = requireClerkUserId(identity)
+
+    return {
+      providers: await Promise.all(
+        automationEventCatalog.map(async (definition) => ({
+          provider: definition.provider,
+          connected: await hasActiveProviderIntegration(ctx, {
+            provider: definition.provider,
+            ownerId,
+            tenantId: args.tenantId,
+          }),
+        }))
       ),
     }
   },
@@ -133,4 +158,32 @@ async function projectTriggerForConsole(
     criteria: trigger.criteria,
     filter: trigger.filter,
   }
+}
+
+async function hasActiveProviderIntegration(
+  ctx: QueryCtx,
+  args: {
+    provider: IntegrationProvider
+    ownerId: string
+    tenantId: string
+  }
+) {
+  const integration = isUserScopedProvider(args.provider)
+    ? await ctx.db
+        .query("integrations")
+        .withIndex("by_tenant_and_provider_and_owner", (query) =>
+          query
+            .eq("tenantId", args.tenantId)
+            .eq("provider", args.provider)
+            .eq("ownerId", args.ownerId)
+        )
+        .first()
+    : await ctx.db
+        .query("integrations")
+        .withIndex("by_tenant_and_provider", (query) =>
+          query.eq("tenantId", args.tenantId).eq("provider", args.provider)
+        )
+        .first()
+
+  return integration?.status === "active"
 }
