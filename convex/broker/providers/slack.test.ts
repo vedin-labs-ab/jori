@@ -105,8 +105,9 @@ describe("Slack file uploads", () => {
       body: {
         alt_txt: "A small generated image.",
         filename: "kitten.png",
-        length: 5,
+        length: "5",
       },
+      headers: { "content-type": "application/x-www-form-urlencoded" },
       url: "https://slack.com/api/files.getUploadURLExternal",
     })
     expect(calls[1]).toMatchObject({
@@ -196,7 +197,7 @@ function mockSlackFetch(
     const parsedUrl = new URL(String(url))
 
     calls.push({
-      body: typeof init?.body === "string" ? JSON.parse(init.body) : init?.body,
+      body: parseSlackRequestBody(init?.body),
       headers: (init?.headers ?? {}) as Record<string, string>,
       method: init?.method,
       params: Object.fromEntries(parsedUrl.searchParams.entries()),
@@ -209,6 +210,14 @@ function mockSlackFetch(
   })
 
   return calls
+}
+
+function parseSlackRequestBody(body: BodyInit | null | undefined) {
+  if (body instanceof URLSearchParams) {
+    return Object.fromEntries(body.entries())
+  }
+
+  return typeof body === "string" ? JSON.parse(body) : body
 }
 
 function slackIntegration(): Doc<"integrations"> {

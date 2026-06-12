@@ -1,5 +1,3 @@
-import { fetchJson } from "../common"
-
 export type SlackApiResult = Record<string, unknown> | null
 
 export async function slackJsonApi(
@@ -7,13 +5,38 @@ export async function slackJsonApi(
   method: string,
   body: Record<string, unknown>
 ) {
-  const result = await fetchJson(`https://slack.com/api/${method}`, {
+  const result = await fetchSlackApi(`https://slack.com/api/${method}`, {
     method: "POST",
     headers: {
       authorization: `Bearer ${token}`,
       "content-type": "application/json; charset=utf-8",
     },
-    body,
+    body: JSON.stringify(body),
+  })
+
+  return assertSlackApiSucceeded(result)
+}
+
+export async function slackFormApi(
+  token: string,
+  method: string,
+  body: Record<string, boolean | number | string | undefined>
+) {
+  const form = new URLSearchParams()
+
+  for (const [key, value] of Object.entries(body)) {
+    if (value !== undefined) {
+      form.set(key, String(value))
+    }
+  }
+
+  const result = await fetchSlackApi(`https://slack.com/api/${method}`, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${token}`,
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: form,
   })
 
   return assertSlackApiSucceeded(result)
@@ -32,7 +55,7 @@ export async function slackQueryApi(
     }
   }
 
-  const result = await fetchJson(url.toString(), {
+  const result = await fetchSlackApi(url.toString(), {
     method: "GET",
     headers: {
       authorization: `Bearer ${token}`,
@@ -50,6 +73,18 @@ export function requiredSlackResultString(result: SlackApiResult, key: string) {
   }
 
   return value
+}
+
+async function fetchSlackApi(url: string, options: RequestInit) {
+  const response = await fetch(url, options)
+  const text = await response.text()
+  const result = text === "" ? null : JSON.parse(text)
+
+  if (!response.ok) {
+    throw new Error(`Slack API request failed: ${JSON.stringify(result)}`)
+  }
+
+  return result
 }
 
 function assertSlackApiSucceeded(result: unknown): SlackApiResult {
