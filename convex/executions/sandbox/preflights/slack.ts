@@ -3,11 +3,7 @@ import {
   slackUserScopes,
 } from "../../../providers/slack/config"
 
-export function createSlackTokenPreflightCommand() {
-  return slackTokenPreflightCommand
-}
-
-const slackTokenPreflightCommand = [
+export const slackTokenPreflightCommand = [
   "node <<'NODE'",
   `const requiredBotScopes = ${JSON.stringify(slackBotScopes)};`,
   `const requiredUserScopes = ${JSON.stringify(slackUserScopes)};`,
