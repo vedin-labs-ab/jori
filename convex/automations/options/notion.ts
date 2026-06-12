@@ -12,7 +12,7 @@ import {
 
 export async function searchNotionObjects(
   args: OptionLoaderArgs,
-  objectType: "database" | "page"
+  objectType: "data_source" | "page"
 ) {
   const result = await notionJson(args, "/search", {
     query: args.query,

@@ -1,9 +1,14 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { readCallbackState, redirectWithStatus } from "../http"
+import {
+  readCallbackState,
+  redirectWithStatus,
+  unauthorizedResponse,
+} from "../http"
 import { notionOAuthAuthorizeUrl, notionOAuthCallbackPath } from "./config"
+import { readNotionAutomationEvents } from "./events"
 import { exchangeNotionAuthorizationCode, requireNotionClientId } from "./oauth"
-import { parseSignedNotionState } from "./signing"
+import { parseSignedNotionState, verifyNotionWebhookRequest } from "./signing"
 
 export async function handleNotionInstall(request: Request) {
   const requestUrl = new URL(request.url)
@@ -83,6 +88,40 @@ export async function handleNotionOAuthCallback(
   return redirectWithStatus(state.returnUrl, "notion", "connected")
 }
 
+export async function handleNotionEvents(ctx: ActionCtx, request: Request) {
+  const body = await request.text()
+  const payload = parseJsonRecord(body)
+
+  if (payload === null) {
+    return new Response("Invalid Notion event payload", { status: 400 })
+  }
+
+  const verificationToken = readVerificationToken(payload)
+
+  if (verificationToken !== undefined) {
+    return Response.json({ ok: true, verification_token: verificationToken })
+  }
+
+  if (!(await verifyNotionWebhookRequest(request, body))) {
+    return unauthorizedResponse()
+  }
+
+  for (const event of readNotionAutomationEvents(payload)) {
+    await ctx.runMutation(internal.providers.notion.data.recordWebhookEvent, {
+      workspaceId: event.workspaceId,
+      key: event.key,
+      type: event.type,
+      resource: event.resource,
+      criteria: event.criteria,
+      actor: event.actor,
+      data: event.data,
+      observedAt: event.observedAt,
+    })
+  }
+
+  return Response.json({ ok: true })
+}
+
 async function redirectFromCallbackState(
   stateValue: string,
   status: "connected" | "error"
@@ -94,4 +133,22 @@ async function redirectFromCallbackState(
   } catch {
     return new Response("Invalid Notion OAuth state", { status: 400 })
   }
+}
+
+function parseJsonRecord(body: string) {
+  try {
+    const value: unknown = JSON.parse(body)
+
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : null
+  } catch {
+    return null
+  }
+}
+
+function readVerificationToken(payload: Record<string, unknown>) {
+  const token = payload.verification_token
+
+  return typeof token === "string" && token !== "" ? token : undefined
 }

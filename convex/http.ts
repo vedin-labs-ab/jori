@@ -22,6 +22,7 @@ import {
   handleMicrosoftOAuthCallback,
 } from "./providers/microsoft/http"
 import {
+  handleNotionEvents,
   handleNotionInstall,
   handleNotionOAuthCallback,
 } from "./providers/notion/http"
@@ -206,6 +207,14 @@ http.route({
   method: "GET",
   handler: httpAction(async (ctx, request) => {
     return await handleNotionOAuthCallback(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/notion/events",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    return await handleNotionEvents(ctx, request)
   }),
 })
 

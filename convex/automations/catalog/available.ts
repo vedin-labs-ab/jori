@@ -84,4 +84,39 @@ export const availableAutomationEventCatalog = [
       ],
     }),
   ]),
+  provider("notion", [
+    event("page.updated", {
+      label: "Page updated",
+      description:
+        "Runs when content or properties change on the selected Notion page.",
+      parameters: [
+        optionParameter("page", "Page", "Search Notion pages", {
+          required: true,
+          source: "notion.pages",
+        }),
+      ],
+    }),
+    event("data_source.item.changed", {
+      label: "Data source item created or updated",
+      description:
+        "Runs when a page is created or updated inside the selected Notion data source.",
+      parameters: [
+        optionParameter("dataSource", "Data source", "Search data sources", {
+          required: true,
+          source: "notion.dataSources",
+        }),
+      ],
+    }),
+    event("comment.created", {
+      label: "Comment created",
+      description:
+        "Runs when a comment is created on the selected Notion page.",
+      parameters: [
+        optionParameter("page", "Page", "Search Notion pages", {
+          required: true,
+          source: "notion.pages",
+        }),
+      ],
+    }),
+  ]),
 ]

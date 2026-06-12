@@ -56,6 +56,16 @@ describe("automation event catalog criteria", () => {
       "Google Drive event-triggered automations need Drive change subscriptions before they can run."
     )
   })
+
+  test("makes Notion webhook events available", () => {
+    const definition = requireEvent("notion", "data_source.item.changed")
+
+    expect(() => assertAutomationEventIsAvailable(definition)).not.toThrow()
+    expect(requireParameter(definition, "dataSource")).toMatchObject({
+      required: true,
+      source: "notion.dataSources",
+    })
+  })
 })
 
 describe("automation event catalog dependencies", () => {

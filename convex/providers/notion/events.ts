@@ -1,0 +1,291 @@
+import { type Actor } from "../../shared/actor"
+
+type NotionEntity = {
+  id: string
+  type: string
+}
+
+type NotionParent = {
+  id: string
+  type: string
+}
+
+export type NotionAutomationEvent = {
+  workspaceId: string
+  key: string
+  type: "comment.created" | "data_source.item.changed" | "page.updated"
+  resource?: string
+  criteria: Record<string, string>
+  actor?: Actor
+  data: Record<string, unknown>
+  observedAt?: number
+}
+
+const pageUpdateEvents = new Set([
+  "page.content_updated",
+  "page.properties_updated",
+])
+
+const dataSourceItemPageEvents = new Set(["page.created", ...pageUpdateEvents])
+
+export function readNotionAutomationEvents(
+  payload: unknown
+): NotionAutomationEvent[] {
+  const event = readNotionEvent(payload)
+
+  if (event === null) {
+    return []
+  }
+
+  return [
+    ...readPageUpdatedEvent(event),
+    ...readDataSourceItemEvents(event),
+    ...readCommentCreatedEvent(event),
+  ]
+}
+
+function readPageUpdatedEvent(event: NotionEvent) {
+  if (!pageUpdateEvents.has(event.type) || event.entity.type !== "page") {
+    return []
+  }
+
+  return [
+    createAutomationEvent(event, {
+      type: "page.updated",
+      resource: event.entity.id,
+      criteria: { page: event.entity.id },
+      data: { pageId: event.entity.id },
+    }),
+  ]
+}
+
+function readDataSourceItemEvents(event: NotionEvent) {
+  if (
+    event.type === "data_source.content_updated" &&
+    event.entity.type === "data_source"
+  ) {
+    return [
+      createAutomationEvent(event, {
+        type: "data_source.item.changed",
+        resource: event.entity.id,
+        criteria: { dataSource: event.entity.id },
+        data: { dataSourceId: event.entity.id },
+      }),
+    ]
+  }
+
+  const dataSourceId = getDataSourceParentId(event)
+
+  if (
+    !dataSourceItemPageEvents.has(event.type) ||
+    event.entity.type !== "page" ||
+    dataSourceId === undefined
+  ) {
+    return []
+  }
+
+  return [
+    createAutomationEvent(event, {
+      type: "data_source.item.changed",
+      resource: dataSourceId,
+      criteria: { dataSource: dataSourceId, page: event.entity.id },
+      data: {
+        dataSourceId,
+        pageId: event.entity.id,
+      },
+    }),
+  ]
+}
+
+function readCommentCreatedEvent(event: NotionEvent) {
+  const pageId = readString(event.rawData, "page_id")
+
+  if (
+    event.type !== "comment.created" ||
+    event.entity.type !== "comment" ||
+    pageId === undefined
+  ) {
+    return []
+  }
+
+  return [
+    createAutomationEvent(event, {
+      type: "comment.created",
+      resource: pageId,
+      criteria: { page: pageId },
+      data: {
+        commentId: event.entity.id,
+        pageId,
+      },
+    }),
+  ]
+}
+
+function createAutomationEvent(
+  event: NotionEvent,
+  automationEvent: {
+    type: NotionAutomationEvent["type"]
+    resource: string
+    criteria: Record<string, string>
+    data: Record<string, unknown>
+  }
+): NotionAutomationEvent {
+  return {
+    workspaceId: event.workspaceId,
+    key: `notion:${event.workspaceId}:${event.id}:${automationEvent.type}`,
+    type: automationEvent.type,
+    resource: automationEvent.resource,
+    criteria: automationEvent.criteria,
+    actor: event.actor,
+    data: {
+      notionEventId: event.id,
+      notionEventType: event.type,
+      workspaceId: event.workspaceId,
+      workspaceName: event.workspaceName,
+      subscriptionId: event.subscriptionId,
+      notionIntegrationId: event.integrationId,
+      attemptNumber: event.attemptNumber,
+      apiVersion: event.apiVersion,
+      entity: event.entity,
+      parent: event.parent,
+      updatedBlocks: readRecordArray(event.rawData, "updated_blocks"),
+      updatedProperties: readRecordArray(event.rawData, "updated_properties"),
+      ...automationEvent.data,
+    },
+    observedAt: event.observedAt,
+  }
+}
+
+function getDataSourceParentId(event: NotionEvent) {
+  return event.parent?.type === "data_source" ? event.parent.id : undefined
+}
+
+type NotionEvent = {
+  id: string
+  type: string
+  workspaceId: string
+  workspaceName?: string
+  subscriptionId?: string
+  integrationId?: string
+  attemptNumber?: number
+  apiVersion?: string
+  entity: NotionEntity
+  parent?: NotionParent
+  actor?: Actor
+  rawData: Record<string, unknown>
+  observedAt?: number
+}
+
+function readNotionEvent(payload: unknown): NotionEvent | null {
+  const record = readRecord(payload)
+  const id = readString(record, "id")
+  const type = readString(record, "type")
+  const workspaceId = readString(record, "workspace_id")
+  const entity = readEntity(record)
+
+  if (
+    id === undefined ||
+    type === undefined ||
+    workspaceId === undefined ||
+    entity === undefined
+  ) {
+    return null
+  }
+
+  const rawData = readRecord(readValue(record, "data"))
+
+  return {
+    id,
+    type,
+    workspaceId,
+    workspaceName: readString(record, "workspace_name"),
+    subscriptionId: readString(record, "subscription_id"),
+    integrationId: readString(record, "integration_id"),
+    attemptNumber: readNumber(record, "attempt_number"),
+    apiVersion: readString(record, "api_version"),
+    entity,
+    parent: readParent(rawData),
+    actor: readAuthor(record),
+    rawData,
+    observedAt: readTimestamp(record),
+  }
+}
+
+function readEntity(record: Record<string, unknown>) {
+  return readIdTypeObject(readValue(record, "entity"))
+}
+
+function readParent(record: Record<string, unknown>) {
+  return readIdTypeObject(readValue(record, "parent"))
+}
+
+function readIdTypeObject(value: unknown): NotionEntity | undefined {
+  const record = readRecord(value)
+  const id = readString(record, "id")
+  const type = readString(record, "type")
+
+  if (id === undefined || type === undefined) {
+    return undefined
+  }
+
+  return { id, type }
+}
+
+function readAuthor(record: Record<string, unknown>): Actor | undefined {
+  const author = readArray(readValue(record, "authors"))
+    .map(readIdTypeObject)
+    .find((candidate) => candidate !== undefined)
+
+  return author === undefined
+    ? undefined
+    : {
+        provider: "notion",
+        externalId: author.id,
+      }
+}
+
+function readTimestamp(record: Record<string, unknown>) {
+  const timestamp = readString(record, "timestamp")
+
+  if (timestamp === undefined) {
+    return undefined
+  }
+
+  const milliseconds = Date.parse(timestamp)
+
+  return Number.isFinite(milliseconds) ? milliseconds : undefined
+}
+
+function readRecordArray(record: Record<string, unknown>, key: string) {
+  const values = readArray(readValue(record, key)).filter(
+    (value) => typeof value === "object" && value !== null
+  )
+
+  return values.length === 0 ? undefined : values
+}
+
+function readRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {}
+}
+
+function readArray(value: unknown) {
+  return Array.isArray(value) ? value : []
+}
+
+function readValue(record: Record<string, unknown>, key: string) {
+  return record[key]
+}
+
+function readString(record: Record<string, unknown>, key: string) {
+  const value = readValue(record, key)
+
+  return typeof value === "string" && value !== "" ? value : undefined
+}
+
+function readNumber(record: Record<string, unknown>, key: string) {
+  const value = readValue(record, key)
+
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined
+}

@@ -191,6 +191,7 @@ import type * as providers_microsoft_signing from "../providers/microsoft/signin
 import type * as providers_notion_config from "../providers/notion/config.js";
 import type * as providers_notion_credentials from "../providers/notion/credentials.js";
 import type * as providers_notion_data from "../providers/notion/data.js";
+import type * as providers_notion_events from "../providers/notion/events.js";
 import type * as providers_notion_http from "../providers/notion/http.js";
 import type * as providers_notion_install from "../providers/notion/install.js";
 import type * as providers_notion_oauth from "../providers/notion/oauth.js";
@@ -407,6 +408,7 @@ declare const fullApi: ApiFromModules<{
   "providers/notion/config": typeof providers_notion_config;
   "providers/notion/credentials": typeof providers_notion_credentials;
   "providers/notion/data": typeof providers_notion_data;
+  "providers/notion/events": typeof providers_notion_events;
   "providers/notion/http": typeof providers_notion_http;
   "providers/notion/install": typeof providers_notion_install;
   "providers/notion/oauth": typeof providers_notion_oauth;

@@ -113,7 +113,7 @@ async function loadProviderOptions(args: {
     return await searchNotionObjects(loaderArgs, "page")
   }
   if (args.source === "notion.dataSources") {
-    return await searchNotionObjects(loaderArgs, "database")
+    return await searchNotionObjects(loaderArgs, "data_source")
   }
 
   return []
