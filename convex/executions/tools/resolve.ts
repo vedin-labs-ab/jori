@@ -20,21 +20,14 @@ import { requireMicrosoftCredentials } from "../../providers/microsoft/credentia
 import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
 import { createRuntimeToolCapability } from "../bundles"
-import { createGitHubToolBundle } from "./github"
+import { createBrokeredToolBundle } from "./brokered"
 import {
-  createGmailToolBundle,
-  createGoogleCalendarToolBundle,
-  createGoogleDriveToolBundle,
-} from "./google"
-import { createLinearToolBundle } from "./linear"
-import {
-  createMicrosoftCalendarToolBundle,
-  createMicrosoftEmailToolBundle,
-} from "./microsoft"
-import { createNotionToolBundle } from "./notion"
-import { type ToolPermissionInput } from "./policy"
-import { createSlackToolBundle } from "./slack"
-import { type RuntimeToolCapability, type ToolBundle } from "./types"
+  type RuntimeToolCapability,
+  type ToolBundle,
+  type ToolPreflight,
+} from "./types"
+
+type RuntimeToolProvider = ToolPreflight["type"]
 
 type IntegrationBundleArgs = {
   broker: {
@@ -80,21 +73,17 @@ export function createIntegrationToolBundle(
     return null
   }
 
-  const permissionInput: ToolPermissionInput = {
+  return {
+    provider,
+    bundle: createBrokeredToolBundle({
+      broker: args.broker,
+      preflight: createIntegrationPreflight(provider, args.integration),
+      permissions,
+      toolModes: args.toolModes,
+    }),
+    capability: createRuntimeToolCapability(provider, permissions),
     permissions,
-    toolModes: args.toolModes,
   }
-
-  const bundle = createProviderToolBundle(args, permissionInput)
-
-  return bundle === null
-    ? null
-    : {
-        provider,
-        bundle,
-        capability: createRuntimeToolCapability(provider, permissions),
-        permissions,
-      }
 }
 
 export function getEnabledToolPermissions(
@@ -120,130 +109,71 @@ function isPermissionAllowedByAccess(
   return canUseWrite(access)
 }
 
-function createProviderToolBundle(
-  args: IntegrationBundleArgs,
-  permissionInput: ToolPermissionInput
-) {
-  switch (args.integration.provider) {
+const runtimeToolProviders: readonly RuntimeToolProvider[] = [
+  "linear",
+  "github",
+  "slack",
+  "gmail",
+  "googleCalendar",
+  "googleDrive",
+  "notion",
+  "microsoftEmail",
+  "microsoftCalendar",
+]
+
+function getRuntimeToolProvider(provider: string): RuntimeToolProvider | null {
+  return (
+    runtimeToolProviders.find((candidate) => candidate === provider) ?? null
+  )
+}
+
+function createIntegrationPreflight(
+  provider: RuntimeToolProvider,
+  integration: Doc<"integrations">
+): ToolPreflight {
+  switch (provider) {
     case "linear":
-      return createLinearIntegrationToolBundle(args, permissionInput)
+      return {
+        type: "linear",
+        credentials: requireLinearCredentials(integration),
+      }
     case "github":
-      return createGitHubIntegrationToolBundle(args, permissionInput)
+      return {
+        type: "github",
+        credentials: requireGitHubRuntimeCredentials(integration),
+      }
     case "slack":
-      return createSlackIntegrationToolBundle(args, permissionInput)
+      return {
+        type: "slack",
+        credentials: requireSlackCredentials(integration),
+      }
     case "gmail":
-      return createGmailIntegrationToolBundle(args, permissionInput)
     case "googleCalendar":
-      return createGoogleCalendarToolBundle({
-        broker: args.broker,
-        credentials: requireGoogleCredentials(args.integration),
-        ...permissionInput,
-      })
     case "googleDrive":
-      return createGoogleDriveToolBundle({
-        broker: args.broker,
-        credentials: requireGoogleCredentials(args.integration),
-        ...permissionInput,
-      })
+      return {
+        type: provider,
+        credentials: requireGoogleCredentials(integration),
+      }
     case "notion":
-      return createNotionToolBundle({
-        broker: args.broker,
-        credentials: requireNotionCredentials(args.integration),
-        ...permissionInput,
-      })
+      return {
+        type: "notion",
+        credentials: requireNotionCredentials(integration),
+      }
     case "microsoftEmail":
-      return createMicrosoftEmailToolBundle({
-        broker: args.broker,
-        credentials: requireMicrosoftCredentials(args.integration),
-        ...permissionInput,
-      })
     case "microsoftCalendar":
-      return createMicrosoftCalendarToolBundle({
-        broker: args.broker,
-        credentials: requireMicrosoftCredentials(args.integration),
-        ...permissionInput,
-      })
-    default:
-      return null
+      return {
+        type: provider,
+        credentials: requireMicrosoftCredentials(integration),
+      }
   }
 }
 
-function createLinearIntegrationToolBundle(
-  args: IntegrationBundleArgs,
-  permissionInput: ToolPermissionInput
-) {
-  return createLinearToolBundle({
-    broker: args.broker,
-    credentials: requireLinearCredentials(args.integration),
-    ...permissionInput,
-  })
-}
+function requireGitHubRuntimeCredentials(integration: Doc<"integrations">) {
+  const credentials = requireGitHubCredentials(integration)
 
-function createGitHubIntegrationToolBundle(
-  args: IntegrationBundleArgs,
-  permissionInput: ToolPermissionInput
-) {
-  return createGitHubToolBundle({
-    broker: args.broker,
-    credentials: requireGitHubCredentials(args.integration),
-    ...permissionInput,
-  })
-}
-
-function createSlackIntegrationToolBundle(
-  args: IntegrationBundleArgs,
-  permissionInput: ToolPermissionInput
-) {
-  return createSlackToolBundle({
-    accountId: requireIntegrationExternalId(args.integration),
-    broker: args.broker,
-    credentials: requireSlackCredentials(args.integration),
-    ...permissionInput,
-  })
-}
-
-function createGmailIntegrationToolBundle(
-  args: IntegrationBundleArgs,
-  permissionInput: ToolPermissionInput
-) {
-  return createGmailToolBundle({
-    accountEmail: requireIntegrationEmail(args.integration),
-    broker: args.broker,
-    credentials: requireGoogleCredentials(args.integration),
-    ...permissionInput,
-  })
-}
-
-function requireIntegrationExternalId(integration: Doc<"integrations">) {
-  if (integration.externalId !== undefined) {
-    return integration.externalId
+  if (credentials.tokens?.access === undefined) {
+    throw new Error("Missing GitHub runtime token")
   }
 
-  throw new Error(`${integration.provider} integration is missing external ID`)
-}
-
-function requireIntegrationEmail(integration: Doc<"integrations">) {
-  if (integration.email !== undefined) {
-    return integration.email
-  }
-
-  throw new Error(`${integration.provider} integration is missing email`)
-}
-
-function getRuntimeToolProvider(provider: string): ToolProvider | null {
-  if (
-    provider === "linear" ||
-    provider === "github" ||
-    provider === "slack" ||
-    provider === "gmail" ||
-    provider === "googleCalendar" ||
-    provider === "googleDrive" ||
-    provider === "notion" ||
-    provider === "microsoftEmail" ||
-    provider === "microsoftCalendar"
-  ) {
-    return provider
-  }
-
-  return null
+  return credentials
 }
