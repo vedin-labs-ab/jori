@@ -3,7 +3,7 @@ import {
   optionalString,
   requiredString,
   setOptionalSearchParam,
-} from "../common"
+} from "../../common"
 import {
   createDriveFileMetadata,
   createDriveFileUpdateMetadata,
@@ -20,8 +20,8 @@ import {
   requiredText,
   setDriveQuery,
   setOptionalBooleanSearchParam,
-} from "./drive/format"
-import { googleJson, googleMultipartJson, googleText } from "./request"
+} from "./format"
+import { googleJson, googleMultipartJson, googleText } from "../request"
 
 export async function callGoogleDriveTool(
   token: string,

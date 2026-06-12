@@ -10,7 +10,7 @@ import {
 import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
-} from "./approvals"
+} from "./approval"
 import {
   slackBotScopes,
   slackInstallUserScopes,

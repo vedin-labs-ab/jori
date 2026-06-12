@@ -1,17 +1,17 @@
-import { internal } from "../_generated/api"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { type ActionCtx } from "../_generated/server"
-import { type CodexRuntimeInput } from "../executions/codex"
+import { internal } from "../../_generated/api"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { type ActionCtx } from "../../_generated/server"
+import { type CodexRuntimeInput } from "../../executions/codex"
 import {
   getToolPermission,
   type PermissionMode,
   resolveToolMode,
   type ToolProvider,
-} from "../permissions/catalog"
-import { createSlackApprovalRequest } from "../providers/slack/approval/blocks"
-import { type Actor, createUserActor } from "../shared/actor"
-import { parsePromptedToolApproval } from "./approval/args"
-import { postSlackMessage } from "./providers/slack"
+} from "../../permissions/catalog"
+import { createSlackApprovalRequest } from "../../providers/slack/approval/blocks"
+import { type Actor, createUserActor } from "../../shared/actor"
+import { parsePromptedToolApproval } from "./args"
+import { postSlackMessage } from "../providers/slack"
 
 export type ApprovalBrokerContext = {
   execution: Doc<"executions">

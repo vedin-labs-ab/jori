@@ -13,7 +13,7 @@ import {
 import {
   type ApprovalBrokerContext,
   createPromptedToolApproval,
-} from "./approvals"
+} from "./approval"
 import { callMiloTool } from "./milo"
 import { callProviderTool, fetchGitHubTarball } from "./providers"
 import {

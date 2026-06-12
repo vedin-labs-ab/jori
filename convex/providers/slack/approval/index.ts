@@ -1,12 +1,12 @@
-import { internal } from "../../_generated/api"
-import { type ActionCtx } from "../../_generated/server"
-import { decideSlackApproval } from "../../approvals/runtime"
-import { updateSlackMessage } from "../../broker/providers/slack"
-import { createProviderActor } from "../../shared/actor"
+import { internal } from "../../../_generated/api"
+import { type ActionCtx } from "../../../_generated/server"
+import { decideSlackApproval } from "../../../approvals/runtime"
+import { updateSlackMessage } from "../../../broker/providers/slack"
+import { createProviderActor } from "../../../shared/actor"
 import {
   createSlackDecisionResponse,
   type SlackApprovalInteraction,
-} from "./approval/blocks"
+} from "./blocks"
 
 type SlackApprovalDecisionInput = {
   accountId: string

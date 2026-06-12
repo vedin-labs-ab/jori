@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { type Doc } from "../../_generated/dataModel"
-import { artifactContext } from "./fixtures/artifacts"
-import { callSlackTool } from "./slack"
+import { type Doc } from "../../../_generated/dataModel"
+import { artifactContext } from "../fixtures/artifacts"
+import { callSlackTool } from "."
 
 const originalFetch = globalThis.fetch
 
