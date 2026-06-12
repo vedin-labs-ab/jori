@@ -1,5 +1,6 @@
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start"
 import { shadcn } from "@clerk/ui/themes"
+import geistLatinWoff2 from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
@@ -55,6 +56,13 @@ export const Route = createRootRoute({
       },
     ],
     links: [
+      {
+        rel: "preload",
+        href: geistLatinWoff2,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       {
         rel: "stylesheet",
         href: appCss,

@@ -1,13 +1,12 @@
 import { useQuery } from "convex/react"
 import { Plus, Search } from "lucide-react"
-import { useDeferredValue, useEffect, useState } from "react"
+import { lazy, Suspense, useDeferredValue, useEffect, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import { AutomationDialog } from "./dialog"
 import { type AutomationEditor, useAutomationEditor } from "./editor"
 import { AutomationSkeletonList, EmptyAutomations } from "./empty"
 import { AutomationRow } from "./row"
@@ -16,6 +15,12 @@ import {
   type AutomationList,
   automationFilterOptions,
 } from "./types"
+
+// The dialog pulls in the TipTap editor and calendar pickers, which dwarf the
+// list view. Loading it lazily keeps them out of the route chunk.
+const AutomationDialog = lazy(async () => ({
+  default: (await import("./dialog")).AutomationDialog,
+}))
 
 export function Automations() {
   return (
@@ -36,6 +41,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
   })
   const editor = useAutomationEditor(tenantId)
   const now = useNow()
+  const isDialogMounted = useAutomationDialogMount(editor.isFormOpen)
 
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-3">
@@ -58,19 +64,40 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
         now={now}
         automationList={automationList}
       />
-      <AutomationDialog
-        error={editor.formError}
-        isOpen={editor.isFormOpen}
-        isSaving={editor.isSaving}
-        onOpenChange={editor.setIsFormOpen}
-        onSave={editor.saveAutomation}
-        onValuesChange={editor.setFormValues}
-        automation={editor.formAutomation}
-        tenantId={tenantId}
-        values={editor.formValues}
-      />
+      {isDialogMounted ? (
+        <Suspense fallback={null}>
+          <AutomationDialog
+            error={editor.formError}
+            isOpen={editor.isFormOpen}
+            isSaving={editor.isSaving}
+            onOpenChange={editor.setIsFormOpen}
+            onSave={editor.saveAutomation}
+            onValuesChange={editor.setFormValues}
+            automation={editor.formAutomation}
+            tenantId={tenantId}
+            values={editor.formValues}
+          />
+        </Suspense>
+      ) : null}
     </section>
   )
+}
+
+// Warm the dialog chunk once the list is on screen so opening the form does
+// not wait on the network, and keep the dialog mounted after the first open
+// so the close animation can play.
+function useAutomationDialogMount(isFormOpen: boolean) {
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    void import("./dialog")
+  }, [])
+
+  if (isFormOpen && !isMounted) {
+    setIsMounted(true)
+  }
+
+  return isMounted
 }
 
 function AutomationFilters({
