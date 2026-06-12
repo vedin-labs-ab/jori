@@ -117,6 +117,10 @@ function AutomationSurfaceAccessButton({
         event.stopPropagation()
         onChange()
       }}
+      onMouseDown={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
       title={accessLabel}
       type="button"
     >
