@@ -184,7 +184,7 @@ function CronHelp({ cron }: { cron: string }) {
             className="inline-flex size-4 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
             type="button"
           >
-            <CircleHelp className="size-3.5" />
+            <CircleHelp className="size-3" />
           </button>
         </TooltipTrigger>
         <TooltipContent
