@@ -10,21 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SkillsRouteImport } from './routes/skills'
-import { Route as SchedulingRouteImport } from './routes/scheduling'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as ExecutionsRouteImport } from './routes/executions'
 import { Route as ConsoleRouteImport } from './routes/console'
+import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
   path: '/skills',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SchedulingRoute = SchedulingRouteImport.update({
-  id: '/scheduling',
-  path: '/scheduling',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlaygroundRoute = PlaygroundRouteImport.update({
@@ -47,6 +42,11 @@ const ConsoleRoute = ConsoleRouteImport.update({
   path: '/console',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AutomationsRoute = AutomationsRouteImport.update({
+  id: '/automations',
+  path: '/automations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,69 +55,69 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playground': typeof PlaygroundRoute
-  '/scheduling': typeof SchedulingRoute
   '/skills': typeof SkillsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playground': typeof PlaygroundRoute
-  '/scheduling': typeof SchedulingRoute
   '/skills': typeof SkillsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playground': typeof PlaygroundRoute
-  '/scheduling': typeof SchedulingRoute
   '/skills': typeof SkillsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/automations'
     | '/console'
     | '/executions'
     | '/integrations'
     | '/playground'
-    | '/scheduling'
     | '/skills'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/automations'
     | '/console'
     | '/executions'
     | '/integrations'
     | '/playground'
-    | '/scheduling'
     | '/skills'
   id:
     | '__root__'
     | '/'
+    | '/automations'
     | '/console'
     | '/executions'
     | '/integrations'
     | '/playground'
-    | '/scheduling'
     | '/skills'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AutomationsRoute: typeof AutomationsRoute
   ConsoleRoute: typeof ConsoleRoute
   ExecutionsRoute: typeof ExecutionsRoute
   IntegrationsRoute: typeof IntegrationsRoute
   PlaygroundRoute: typeof PlaygroundRoute
-  SchedulingRoute: typeof SchedulingRoute
   SkillsRoute: typeof SkillsRoute
 }
 
@@ -128,13 +128,6 @@ declare module '@tanstack/react-router' {
       path: '/skills'
       fullPath: '/skills'
       preLoaderRoute: typeof SkillsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/scheduling': {
-      id: '/scheduling'
-      path: '/scheduling'
-      fullPath: '/scheduling'
-      preLoaderRoute: typeof SchedulingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/playground': {
@@ -165,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/automations': {
+      id: '/automations'
+      path: '/automations'
+      fullPath: '/automations'
+      preLoaderRoute: typeof AutomationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -177,11 +177,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AutomationsRoute: AutomationsRoute,
   ConsoleRoute: ConsoleRoute,
   ExecutionsRoute: ExecutionsRoute,
   IntegrationsRoute: IntegrationsRoute,
   PlaygroundRoute: PlaygroundRoute,
-  SchedulingRoute: SchedulingRoute,
   SkillsRoute: SkillsRoute,
 }
 export const routeTree = rootRouteImport

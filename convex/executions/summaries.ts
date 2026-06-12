@@ -2,6 +2,7 @@ import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
 import { summarizeApproval } from "./approval"
+import { getExecutionContext } from "./context"
 import { providerLabel } from "./labels"
 
 export async function summarizeExecution(
@@ -12,9 +13,9 @@ export async function summarizeExecution(
   const context = await getExecutionContext(ctx, execution, requestedApproval)
   const title =
     context.approval?.handoff.objective ??
-    context.schedule?.name ??
+    context.automation?.name ??
     firstLine(context.message?.text) ??
-    titleFromTrigger(context.trigger)
+    titleFromRun(context.run)
   const stoppedBy = await stoppedByLabel(ctx, execution)
   const sourceParts = executionSourceParts(context, stoppedBy)
 
@@ -25,11 +26,11 @@ export async function summarizeExecution(
     sourceParts,
     objective:
       context.approval?.handoff.objective ??
-      context.schedule?.description ??
+      context.automation?.instructions ??
       context.message?.text,
     progress: context.approval?.handoff.progress ?? execution.error,
     next: context.approval?.handoff.next,
-    trigger: triggerLabel(context.trigger, context.integration?.provider),
+    trigger: triggerLabel(context),
     createdAt: execution.createdAt,
     finishedAt: execution.finishedAt,
     durationMs: getDuration(execution),
@@ -51,60 +52,6 @@ export async function summarizeExecution(
       ...context,
     }),
   }
-}
-
-async function getExecutionContext(
-  ctx: QueryCtx,
-  execution: Doc<"executions">,
-  requestedApproval: Doc<"approvals"> | undefined
-) {
-  const trigger = await ctx.db.get(execution.triggerId)
-  const continuationApproval =
-    execution.approvalId === undefined
-      ? null
-      : await ctx.db.get(execution.approvalId)
-  const executionRequestedApproval =
-    requestedApproval ?? (await getLatestRequestedApproval(ctx, execution))
-  const approval = executionRequestedApproval ?? continuationApproval
-  const message =
-    trigger?.messageId === undefined
-      ? null
-      : await ctx.db.get(trigger.messageId)
-  const schedule =
-    trigger?.scheduleId === undefined
-      ? null
-      : await ctx.db.get(trigger.scheduleId)
-  const integration =
-    message?.integrationId === undefined
-      ? null
-      : await ctx.db.get(message.integrationId)
-  const approvalDeliveryIntegration =
-    executionRequestedApproval?.delivery === undefined
-      ? null
-      : await ctx.db.get(executionRequestedApproval.delivery.integrationId)
-
-  return {
-    approval,
-    approvalDeliveryIntegration,
-    integration,
-    message,
-    requestedApproval: executionRequestedApproval,
-    schedule,
-    trigger,
-  }
-}
-
-async function getLatestRequestedApproval(
-  ctx: QueryCtx,
-  execution: Doc<"executions">
-) {
-  return await ctx.db
-    .query("approvals")
-    .withIndex("by_execution", (index) =>
-      index.eq("executionId", execution._id)
-    )
-    .order("desc")
-    .first()
 }
 
 function storedTraceFileId(execution: Doc<"executions">) {
@@ -136,10 +83,12 @@ function searchableText(
     input.approval?.handoff.objective,
     input.approval?.handoff.progress,
     input.approval?.tool,
-    input.trigger?.type,
+    input.run?.reason.type,
     input.message?.text,
-    input.schedule?.name,
-    input.schedule?.description,
+    input.automation?.name,
+    input.automation?.instructions,
+    input.event?.type,
+    input.event?.resource,
     input.integration?.provider,
     ...input.sourceParts,
   ]
@@ -191,20 +140,24 @@ function isClerkUserId(value: string) {
 
 function sourceLabels({
   approval,
+  automation,
+  event,
   integration,
   message,
-  schedule,
-}: {
-  approval: Doc<"approvals"> | null
-  integration: Doc<"integrations"> | null
-  message: Doc<"messages"> | null
-  schedule: Doc<"schedules"> | null
-}) {
-  if (schedule !== null) {
-    return [
-      `Triggered by ${schedule.type === "recurring" ? "a recurring" : "a one-time"} schedule:`,
-      schedule.name,
-    ]
+  run,
+}: Awaited<ReturnType<typeof getExecutionContext>>) {
+  if (automation !== null) {
+    if (run?.reason.type === "event") {
+      return [
+        "Triggered by",
+        providerLabel(integration?.provider),
+        event?.type ?? "event",
+        "for automation:",
+        automation.name,
+      ].filter((part): part is string => part !== undefined && part !== "")
+    }
+
+    return ["Triggered by automation:", automation.name]
   }
 
   if (message !== null) {
@@ -229,12 +182,16 @@ function sourceLabels({
   return ["Manual run"]
 }
 
-function titleFromTrigger(trigger: Doc<"triggers"> | null) {
-  if (trigger?.type === "scheduled") {
-    return "Scheduled run"
+function titleFromRun(run: Doc<"runs"> | null) {
+  if (run?.reason.type === "time") {
+    return "Timed automation"
   }
 
-  if (trigger?.type === "message") {
+  if (run?.reason.type === "event") {
+    return "Event automation"
+  }
+
+  if (run?.reason.type === "message") {
     return "Message run"
   }
 
@@ -242,15 +199,20 @@ function titleFromTrigger(trigger: Doc<"triggers"> | null) {
 }
 
 function triggerLabel(
-  trigger: Doc<"triggers"> | null,
-  provider: string | undefined
+  context: Awaited<ReturnType<typeof getExecutionContext>>
 ) {
-  if (trigger?.type === "scheduled") {
-    return "Schedule trigger"
+  const run = context.run
+
+  if (run?.reason.type === "time") {
+    return "Time automation"
   }
 
-  if (trigger?.type === "message") {
-    return `${providerLabel(provider)} message`
+  if (run?.reason.type === "event") {
+    return `${providerLabel(context.integration?.provider)} event`
+  }
+
+  if (run?.reason.type === "message") {
+    return `${providerLabel(context.integration?.provider)} message`
   }
 
   return "Manual run"

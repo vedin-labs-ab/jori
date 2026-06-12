@@ -1,9 +1,9 @@
 import { type Doc } from "../../_generated/dataModel"
+import { type AutomationAccess } from "../../automations/access"
 import {
   type PermissionMode,
   type ToolProvider,
 } from "../../permissions/catalog"
-import { type ScheduleOutput } from "../../scheduling/output"
 import { createRuntimeToolCapability, getProviderSkillNames } from "../bundles"
 import { createMiloToolBundle } from "./milo"
 import {
@@ -22,7 +22,7 @@ export function assembleToolsForRun(args: {
     executionToken: string
   }
   integrations: Doc<"integrations">[]
-  scheduleOutput?: ScheduleOutput
+  access?: AutomationAccess
   toolModes: ReadonlyMap<string, PermissionMode>
 }): RuntimeToolBundle {
   const bundles: ToolBundle[] = []
@@ -47,7 +47,7 @@ export function assembleToolsForRun(args: {
     const integrationBundle = createIntegrationToolBundle({
       broker: args.milo,
       integration,
-      scheduleOutput: args.scheduleOutput,
+      access: args.access,
       toolModes: args.toolModes,
     })
 

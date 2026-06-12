@@ -13,7 +13,7 @@ export function EmptyExecutions({ hasFilters }: { hasFilters: boolean }) {
         <p className="text-muted-foreground text-xs">
           {hasFilters
             ? "Adjust the filters or search to widen the results."
-            : "Runs appear here when Milo picks up work from messages or schedules."}
+            : "Runs appear here when Milo picks up work from messages or automations."}
         </p>
       </div>
     </div>

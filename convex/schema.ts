@@ -2,14 +2,16 @@ import { defineSchema } from "convex/server"
 import { approvals } from "./approvals/schema"
 import { artifacts } from "./artifacts/schema"
 import { activations } from "./attention/schema"
+import { automations } from "./automations/schema"
+import { events } from "./events/schema"
 import { executions } from "./executions/schema"
-import { triggers } from "./executions/triggers"
 import { identities } from "./identity/schema"
 import { integrations } from "./integrations/schema"
 import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
-import { schedules } from "./scheduling/schema"
+import { runs } from "./runs/schema"
 import { skills } from "./skills/schema"
+import { subscriptions } from "./subscriptions/schema"
 
 export default defineSchema({
   skills,
@@ -17,8 +19,10 @@ export default defineSchema({
   identities,
   integrations,
   messages,
-  schedules,
-  triggers,
+  automations,
+  subscriptions,
+  events,
+  runs,
   activations,
   approvals,
   executions,

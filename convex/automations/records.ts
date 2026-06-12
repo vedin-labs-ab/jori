@@ -1,0 +1,78 @@
+import { v } from "convex/values"
+import { internalMutation, internalQuery } from "../_generated/server"
+import {
+  createAutomation,
+  fireAutomation,
+  removeAutomation,
+  searchAutomations,
+  updateAutomation,
+} from "./data"
+import { accessInput, triggerInput } from "./schema"
+
+export const create = internalMutation({
+  args: {
+    tenantId: v.string(),
+    name: v.string(),
+    instructions: v.string(),
+    metadata: v.optional(v.any()),
+    access: accessInput,
+    trigger: triggerInput,
+    createdBy: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => await createAutomation(ctx, args),
+})
+
+export const search = internalQuery({
+  args: {
+    tenantId: v.string(),
+    query: v.optional(v.string()),
+    includeCompleted: v.optional(v.boolean()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => await searchAutomations(ctx, args),
+})
+
+export const read = internalQuery({
+  args: {
+    tenantId: v.string(),
+    automationId: v.id("automations"),
+  },
+  handler: async (ctx, args) => {
+    const automation = await ctx.db.get(args.automationId)
+
+    if (automation === null || automation.tenantId !== args.tenantId) {
+      return null
+    }
+
+    return automation
+  },
+})
+
+export const update = internalMutation({
+  args: {
+    tenantId: v.string(),
+    automationId: v.id("automations"),
+    name: v.optional(v.string()),
+    instructions: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    access: v.optional(accessInput),
+    trigger: v.optional(triggerInput),
+  },
+  handler: async (ctx, args) => await updateAutomation(ctx, args),
+})
+
+export const remove = internalMutation({
+  args: {
+    tenantId: v.string(),
+    automationId: v.id("automations"),
+  },
+  handler: async (ctx, args) => await removeAutomation(ctx, args),
+})
+
+export const fire = internalMutation({
+  args: {
+    automationId: v.id("automations"),
+    expectedAt: v.number(),
+  },
+  handler: async (ctx, args) => await fireAutomation(ctx, args),
+})

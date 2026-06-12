@@ -21,7 +21,7 @@ export async function createPromptedExecution(
 ) {
   const input = args.input
   const skills = await ctx.runQuery(internal.skills.catalog.listForRuntime, {
-    tenantId: input.trigger.tenantId,
+    tenantId: input.run.tenantId,
   })
   const toolBundle = await assembleRuntimeTools(ctx, args)
   const runtimeSkills = filterRuntimeSkillsForBundle(
@@ -41,7 +41,7 @@ export async function createPromptedExecution(
     args.continuation
   )
   const executionId = await createExecution(ctx, {
-    triggerId: input.trigger._id,
+    runId: input.run._id,
     approvalId: args.approvalId,
     prompt,
   })
@@ -59,7 +59,7 @@ export async function createPromptedExecution(
 }
 
 function shouldAllowWebSearch(input: CodexRuntimeInput) {
-  return input.type !== "scheduled" || input.schedule.output.webSearch
+  return input.type !== "automation" || input.automation.access.web
 }
 
 async function assembleRuntimeTools(
@@ -73,7 +73,7 @@ async function assembleRuntimeTools(
   const permissionOverrides = await ctx.runQuery(
     internal.permissions.tools.listForRuntime,
     {
-      tenantId: args.input.trigger.tenantId,
+      tenantId: args.input.run.tenantId,
     }
   )
   const toolModes = resolveToolModes(permissionOverrides)
@@ -84,8 +84,10 @@ async function assembleRuntimeTools(
       executionToken: args.executionToken,
     },
     integrations: args.input.integrations,
-    scheduleOutput:
-      args.input.type === "scheduled" ? args.input.schedule.output : undefined,
+    access:
+      args.input.type === "automation"
+        ? args.input.automation.access
+        : undefined,
     toolModes,
   })
 }
@@ -93,7 +95,7 @@ async function assembleRuntimeTools(
 async function createExecution(
   ctx: ActionCtx,
   args: {
-    triggerId: Id<"triggers">
+    runId: Id<"runs">
     approvalId?: Id<"approvals">
     prompt: string
   }
@@ -107,7 +109,7 @@ async function createExecution(
   const executionId = await ctx.runMutation(
     internal.executions.records.create,
     {
-      triggerId: args.triggerId,
+      runId: args.runId,
       approvalId: args.approvalId,
       promptId,
     }

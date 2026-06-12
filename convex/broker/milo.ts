@@ -1,6 +1,6 @@
 import { type ActionCtx } from "../_generated/server"
 import { callMiloArtifactTool, isMiloArtifactTool } from "../artifacts/mcp"
-import { callMiloScheduleTool } from "../scheduling/mcp"
+import { callMiloAutomationTool } from "../automations/mcp"
 
 type MiloToolRequest = {
   tool: string
@@ -19,5 +19,5 @@ export async function callMiloTool(
     return await callMiloArtifactTool(ctx, execution, request)
   }
 
-  return await callMiloScheduleTool(ctx, execution, request)
+  return await callMiloAutomationTool(ctx, execution, request)
 }

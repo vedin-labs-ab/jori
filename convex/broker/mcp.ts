@@ -111,12 +111,9 @@ export async function authenticateBrokerRequest(
     return null
   }
 
-  const input = await ctx.runQuery(
-    internal.executions.records.getInputByTrigger,
-    {
-      triggerId: execution.triggerId,
-    }
-  )
+  const input = await ctx.runQuery(internal.executions.records.getInputByRun, {
+    runId: execution.runId,
+  })
 
   if (input === null) {
     return null

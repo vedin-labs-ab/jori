@@ -180,13 +180,9 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
   )
 
   if (result.status === "started") {
-    await ctx.scheduler.runAfter(
-      0,
-      internal.executions.runtime.runMessageExecution,
-      {
-        triggerId: result.triggerId,
-      }
-    )
+    await ctx.scheduler.runAfter(0, internal.executions.runtime.runMessage, {
+      runId: result.runId,
+    })
   }
 
   return Response.json({ ok: true })

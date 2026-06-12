@@ -34,7 +34,7 @@ test("keeps delivery tools required and out of approval prompts", () => {
   )
 })
 
-test("includes general GitHub tools for non-GitHub triggers", () => {
+test("includes general GitHub tools without provider defaults", () => {
   const toolBundle = assembleToolsForRun({
     milo: runtimeMilo(),
     integrations: [integration("github")],
@@ -138,7 +138,7 @@ test("keeps GitHub comments required and out of approval prompts", () => {
   )
 })
 
-test("does not pass trigger issue defaults into Linear tools", () => {
+test("does not pass issue defaults into Linear tools", () => {
   const toolBundle = assembleToolsForRun({
     milo: runtimeMilo(),
     integrations: [integration("linear")],
@@ -208,18 +208,18 @@ test("includes prompted read tools in runtime approval prompts", () => {
   )
 })
 
-test("wraps prompted Milo schedule schemas with approval metadata", () => {
+test("wraps prompted Milo automation schemas with approval metadata", () => {
   const toolModes = resolveToolModes([
-    { tool: "add_schedule", mode: "prompted" },
+    { tool: "add_automation", mode: "prompted" },
   ])
   const tools = getProviderToolDefinitions("milo", {
     toolModes,
   })
-  const addSchedule = tools.find((tool) => tool.name === "add_schedule")
-  const search = tools.find((tool) => tool.name === "search_schedules")
+  const addAutomation = tools.find((tool) => tool.name === "add_automation")
+  const search = tools.find((tool) => tool.name === "search_automations")
 
-  expect(readRequired(addSchedule?.inputSchema)).toContain("approval")
-  expect(readProperties(addSchedule?.inputSchema)).toHaveProperty("approval")
+  expect(readRequired(addAutomation?.inputSchema)).toContain("approval")
+  expect(readProperties(addAutomation?.inputSchema)).toHaveProperty("approval")
   expect(readRequired(search?.inputSchema)).not.toContain("approval")
   expect(readProperties(search?.inputSchema)).not.toHaveProperty("approval")
 })
@@ -259,7 +259,7 @@ test("keeps provider credentials out of sandbox MCP config", () => {
   expect(config).toContain('sandbox_mode = "read-only"')
 
   expect(config).toContain(
-    'enabled_tools = ["save_artifact", "search_artifacts", "read_artifact", "search_schedules", "read_schedule", "add_schedule", "update_schedule", "delete_schedule"]'
+    'enabled_tools = ["save_artifact", "search_artifacts", "read_artifact", "search_automations", "read_automation", "add_automation", "update_automation", "delete_automation"]'
   )
 
   for (const server of toolBundle.mcpServers) {

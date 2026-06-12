@@ -1,71 +1,87 @@
 import { numberProperty, objectSchema, stringProperty } from "./common"
 
-const scheduleOutputSchema = () => ({
+const providerEnum = [
+  "slack",
+  "linear",
+  "github",
+  "gmail",
+  "googleCalendar",
+  "googleDrive",
+  "notion",
+  "microsoftEmail",
+  "microsoftCalendar",
+]
+
+const accessSchema = () => ({
   ...objectSchema({
-    required: ["readScope", "webSearch", "surfaces"],
+    required: ["read", "write", "web"],
     properties: {
-      readScope: {
-        type: "string",
-        enum: ["selected", "allConnected"],
-        description:
-          "Use selected to limit reads to listed read/both surfaces. Use allConnected to allow reads from every connected integration.",
-      },
-      webSearch: {
-        type: "boolean",
-        description:
-          "Whether this schedule may use hosted web search during runs.",
-      },
-      surfaces: {
-        type: "array",
-        description:
-          "Integration access for this schedule. At least one surface must be write or both.",
-        items: objectSchema({
-          required: ["provider", "access"],
-          properties: {
-            provider: {
+      read: {
+        oneOf: [
+          {
+            const: "all",
+            description: "Allow reads from every connected integration.",
+          },
+          {
+            type: "array",
+            description: "Providers this automation may read from.",
+            items: {
               type: "string",
-              enum: [
-                "slack",
-                "linear",
-                "github",
-                "gmail",
-                "googleCalendar",
-                "googleDrive",
-                "notion",
-                "microsoftEmail",
-                "microsoftCalendar",
-              ],
-              description: "Connected integration provider.",
-            },
-            access: {
-              type: "string",
-              enum: ["read", "write", "both"],
-              description:
-                "Read exposes read tools, write exposes write tools, both exposes both.",
+              enum: providerEnum,
             },
           },
-        }),
+        ],
+      },
+      write: {
+        type: "array",
+        description:
+          "Providers this automation may write to. At least one is required.",
+        items: {
+          type: "string",
+          enum: providerEnum,
+        },
+      },
+      web: {
+        type: "boolean",
+        description: "Whether this automation may use hosted web search.",
       },
     },
   }),
-  description: "Integration read/write access for each scheduled run.",
+  description: "Integration and web access for each automation run.",
 })
 
-const scheduleSchema = () => ({
-  description: "When to run.",
+const triggerSchema = () => ({
+  description: "What starts the automation.",
   oneOf: [
     objectSchema({
-      required: ["type", "runAt"],
+      required: ["type", "at"],
       properties: {
-        type: { const: "oneShot" },
-        runAt: stringProperty("Future ISO timestamp in UTC, ending with Z."),
+        type: { const: "once" },
+        at: stringProperty("Future ISO timestamp in UTC, ending with Z."),
       },
     }),
     objectSchema({
       required: ["type", "cron"],
       properties: {
-        type: { const: "recurring" },
+        type: { const: "cron" },
         cron: stringProperty("Five-field cron expression interpreted in UTC."),
+      },
+    }),
+    objectSchema({
+      required: ["type", "provider", "event"],
+      properties: {
+        type: { const: "event" },
+        provider: {
+          type: "string",
+          enum: providerEnum,
+          description: "Connected provider that emits the event.",
+        },
+        event: stringProperty(
+          "Provider event name, for example page.updated or message.received."
+        ),
+        filter: stringProperty(
+          "Optional exact resource filter such as a Notion page ID."
+        ),
       },
     }),
   ],
@@ -104,55 +120,55 @@ export const miloToolInputSchemas = {
       artifactId: stringProperty("Artifact ID."),
     },
   }),
-  add_schedule: objectSchema({
-    required: ["name", "description", "schedule", "output"],
+  add_automation: objectSchema({
+    required: ["name", "instructions", "trigger", "access"],
     properties: {
-      name: stringProperty("Short schedule name."),
-      description: stringProperty(
+      name: stringProperty("Short automation name."),
+      instructions: stringProperty(
         "What each run should do, written as instructions for the agent that executes it."
       ),
       metadata: {
         description: "Optional JSON context made available to every run.",
       },
-      schedule: scheduleSchema(),
-      output: scheduleOutputSchema(),
+      trigger: triggerSchema(),
+      access: accessSchema(),
     },
   }),
-  search_schedules: objectSchema({
+  search_automations: objectSchema({
     properties: {
       query: stringProperty(
-        "Substring matched against schedule names and descriptions."
+        "Substring matched against automation names and instructions."
       ),
       includeCompleted: {
         type: "boolean",
-        description: "Also return completed schedules.",
+        description: "Also return completed automations.",
       },
-      limit: numberProperty("Maximum number of schedules to return."),
+      limit: numberProperty("Maximum number of automations to return."),
     },
   }),
-  read_schedule: objectSchema({
-    required: ["scheduleId"],
+  read_automation: objectSchema({
+    required: ["automationId"],
     properties: {
-      scheduleId: stringProperty("Milo schedule ID."),
+      automationId: stringProperty("Milo automation ID."),
     },
   }),
-  update_schedule: objectSchema({
-    required: ["scheduleId"],
+  update_automation: objectSchema({
+    required: ["automationId"],
     properties: {
-      scheduleId: stringProperty("Milo schedule ID."),
-      name: stringProperty("Updated schedule name."),
-      description: stringProperty("Updated run instructions."),
+      automationId: stringProperty("Milo automation ID."),
+      name: stringProperty("Updated automation name."),
+      instructions: stringProperty("Updated run instructions."),
       metadata: {
         description: "Optional JSON context made available to every run.",
       },
-      schedule: scheduleSchema(),
-      output: scheduleOutputSchema(),
+      trigger: triggerSchema(),
+      access: accessSchema(),
     },
   }),
-  delete_schedule: objectSchema({
-    required: ["scheduleId"],
+  delete_automation: objectSchema({
+    required: ["automationId"],
     properties: {
-      scheduleId: stringProperty("Milo schedule ID."),
+      automationId: stringProperty("Milo automation ID."),
     },
   }),
 }

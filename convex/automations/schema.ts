@@ -1,0 +1,76 @@
+import { defineTable } from "convex/server"
+import { type Infer, v } from "convex/values"
+import { integrationProviderValidator } from "../providers/catalog"
+
+export const accessInput = v.object({
+  read: v.union(v.literal("all"), v.array(integrationProviderValidator)),
+  write: v.array(integrationProviderValidator),
+  web: v.boolean(),
+})
+
+export const access = v.object({
+  read: v.union(v.literal("all"), v.array(v.id("integrations"))),
+  write: v.array(v.id("integrations")),
+  web: v.boolean(),
+})
+
+export const triggerInput = v.union(
+  v.object({
+    type: v.literal("once"),
+    at: v.string(),
+  }),
+  v.object({
+    type: v.literal("cron"),
+    cron: v.string(),
+  }),
+  v.object({
+    type: v.literal("event"),
+    provider: integrationProviderValidator,
+    event: v.string(),
+    filter: v.optional(v.string()),
+  })
+)
+
+export const trigger = v.union(
+  v.object({
+    type: v.literal("once"),
+    at: v.number(),
+    functionId: v.optional(v.id("_scheduled_functions")),
+  }),
+  v.object({
+    type: v.literal("cron"),
+    cron: v.string(),
+    nextAt: v.number(),
+    functionId: v.optional(v.id("_scheduled_functions")),
+  }),
+  v.object({
+    type: v.literal("event"),
+    integrationId: v.id("integrations"),
+    event: v.string(),
+    filter: v.optional(v.string()),
+  })
+)
+
+export const status = v.union(
+  v.literal("active"),
+  v.literal("paused"),
+  v.literal("completed")
+)
+
+export const automations = defineTable({
+  tenantId: v.string(),
+  name: v.string(),
+  instructions: v.string(),
+  metadata: v.optional(v.any()),
+  access,
+  trigger,
+  status,
+  createdBy: v.optional(v.string()),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+  lastRunAt: v.optional(v.number()),
+})
+  .index("by_tenant", ["tenantId"])
+  .index("by_tenant_status", ["tenantId", "status"])
+
+export type AutomationTriggerInput = Infer<typeof triggerInput>

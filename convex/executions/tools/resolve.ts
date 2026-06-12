@@ -1,5 +1,12 @@
 import { type Doc } from "../../_generated/dataModel"
 import {
+  type AccessLevel,
+  type AutomationAccess,
+  canUseRead,
+  canUseWrite,
+  getIntegrationAccess,
+} from "../../automations/access"
+import {
   getToolPermissionsByProvider,
   type PermissionMode,
   resolveToolMode,
@@ -12,13 +19,6 @@ import { requireLinearCredentials } from "../../providers/linear/credentials"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
-import {
-  canRead,
-  canWrite,
-  getScheduleProviderAccess,
-  type ScheduleOutput,
-  type ScheduleSurfaceAccess,
-} from "../../scheduling/output"
 import { createRuntimeToolCapability } from "../bundles"
 import { createGitHubToolBundle } from "./github"
 import {
@@ -42,7 +42,7 @@ type IntegrationBundleArgs = {
     executionToken: string
   }
   integration: Doc<"integrations">
-  scheduleOutput?: ScheduleOutput
+  access?: AutomationAccess
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
@@ -66,17 +66,14 @@ export function createIntegrationToolBundle(
     return null
   }
 
-  const providerAccess =
-    args.scheduleOutput === undefined
+  const integrationAccess =
+    args.access === undefined
       ? "both"
-      : getScheduleProviderAccess(
-          args.scheduleOutput,
-          args.integration.provider
-        )
+      : getIntegrationAccess(args.access, args.integration._id)
   const permissions = getEnabledToolPermissions(
     provider,
     args.toolModes,
-    providerAccess
+    integrationAccess
   )
 
   if (permissions.length === 0) {
@@ -103,7 +100,7 @@ export function createIntegrationToolBundle(
 export function getEnabledToolPermissions(
   provider: ToolProvider,
   toolModes: ReadonlyMap<string, PermissionMode>,
-  access: ScheduleSurfaceAccess | "none" = "both"
+  access: AccessLevel = "both"
 ) {
   return getToolPermissionsByProvider(provider).filter(
     (permission) =>
@@ -114,13 +111,13 @@ export function getEnabledToolPermissions(
 
 function isPermissionAllowedByAccess(
   permissionAccess: "read" | "write",
-  access: ScheduleSurfaceAccess | "none"
+  access: AccessLevel
 ) {
   if (permissionAccess === "read") {
-    return canRead(access)
+    return canUseRead(access)
   }
 
-  return canWrite(access)
+  return canUseWrite(access)
 }
 
 function createProviderToolBundle(

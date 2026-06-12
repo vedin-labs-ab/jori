@@ -1,12 +1,13 @@
+import {
+  type AutomationAccess,
+  accessLabel,
+  getIntegrationAccess,
+  providerLabels,
+} from "../automations/access"
 import { type ToolPermission } from "../permissions/catalog"
 import { promptTemplates } from "../prompts/generated"
 import { renderPromptTemplate } from "../prompts/render"
 import { createPromptTime } from "../prompts/time"
-import {
-  type ScheduleReadScope,
-  scheduleAccessLabel,
-  scheduleProviderLabels,
-} from "../scheduling/output"
 import { type CodexRuntimeInput, type MessageProvider } from "./codex"
 import {
   type ApprovalContinuation,
@@ -35,12 +36,12 @@ export function assemblePrompt(
 }
 
 function createTriggerPart(input: CodexRuntimeInput, isInitialRun: boolean) {
-  if (input.type === "scheduled") {
+  if (input.type === "automation") {
     return renderPromptTemplate(
       isInitialRun
-        ? promptTemplates["trigger/schedule"]
-        : promptTemplates["reference/schedule"],
-      createScheduleValues(input)
+        ? promptTemplates["trigger/automation"]
+        : promptTemplates["reference/automation"],
+      createAutomationValues(input)
     )
   }
 
@@ -65,55 +66,96 @@ function createMessageValues(
   }
 }
 
-function createScheduleValues(
-  input: Extract<CodexRuntimeInput, { type: "scheduled" }>
+function createAutomationValues(
+  input: Extract<CodexRuntimeInput, { type: "automation" }>
 ) {
   return {
-    output: {
-      access: formatScheduleAccess(input.schedule.output),
+    access: {
+      summary: formatAutomationAccess(
+        input.automation.access,
+        input.integrations
+      ),
     },
-    schedule: {
-      id: input.schedule._id,
-      name: input.schedule.name,
-      description: input.schedule.description,
-      metadata: JSON.stringify(input.schedule.metadata ?? null),
+    automation: {
+      id: input.automation._id,
+      name: input.automation.name,
+      instructions: input.automation.instructions,
+      metadata: JSON.stringify(input.automation.metadata ?? null),
+      trigger: formatAutomationTrigger(input),
+    },
+    event: {
+      details: formatEvent(input.event),
     },
     time: { utc: createPromptTime() },
   }
 }
 
-function formatScheduleAccess(
-  output: Extract<
+function formatAutomationAccess(
+  access: AutomationAccess,
+  integrations: Extract<
     CodexRuntimeInput,
-    { type: "scheduled" }
-  >["schedule"]["output"]
+    { type: "automation" }
+  >["integrations"]
 ) {
   return formatTargetLines([
-    targetLine("Read scope", scheduleReadScopeLabel(output.readScope)),
-    targetLine("Web search", output.webSearch ? "Allowed" : "Disabled"),
-    ...output.surfaces.map((surface) =>
+    targetLine(
+      "Read scope",
+      access.read === "all"
+        ? "All connected integrations"
+        : "Selected integrations only"
+    ),
+    targetLine("Web search", access.web ? "Allowed" : "Disabled"),
+    ...integrations.map((integration) =>
       targetLine(
-        scheduleProviderLabels[surface.provider],
-        scheduleAccessLabel(surface.access)
+        providerLabels[integration.provider],
+        accessLabel(getIntegrationAccess(access, integration._id))
       )
     ),
   ])
 }
 
-function scheduleReadScopeLabel(readScope: ScheduleReadScope) {
-  return readScope === "allConnected"
-    ? "Any connected integration"
-    : "Selected integrations only"
+function formatAutomationTrigger(
+  input: Extract<CodexRuntimeInput, { type: "automation" }>
+) {
+  const reason = input.run.reason
+
+  if (reason.type === "time") {
+    return `Time at ${new Date(reason.scheduledAt).toISOString()}`
+  }
+
+  if (reason.type === "event") {
+    return "Provider event"
+  }
+
+  if (reason.type === "manual") {
+    return "Manual"
+  }
+
+  return "Unknown"
 }
 
-const providerLabels = {
+function formatEvent(
+  event: Extract<CodexRuntimeInput, { type: "automation" }>["event"]
+) {
+  if (event === null) {
+    return "- None"
+  }
+
+  return formatTargetLines([
+    targetLine("Type", event.type),
+    targetLine("Resource", event.resource),
+    targetLine("Text", event.text),
+  ])
+}
+
+const providerLabelsForMessages = {
   github: "GitHub",
   linear: "Linear",
   slack: "Slack",
 } satisfies Record<MessageProvider, string>
 
 function getProviderLabel(provider: MessageProvider) {
-  return providerLabels[provider]
+  return providerLabelsForMessages[provider]
 }
 
 function getMessageTarget(provider: MessageProvider, data: unknown) {

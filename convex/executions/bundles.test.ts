@@ -104,7 +104,7 @@ describe("runtime native tool availability metadata", () => {
       toolBundle.capabilities.map((capability) => capability.label)
     ).toEqual(["Milo", "Slack"])
     expect(prompt).not.toContain("# Available Tools")
-    expect(prompt).not.toContain("Schedules: Search schedules")
+    expect(prompt).not.toContain("Automations: Search automations")
     expect(prompt).not.toContain("Slack: List channels")
     expect(prompt).not.toContain("Notion:")
     expect(prompt).not.toContain("Local workspace")

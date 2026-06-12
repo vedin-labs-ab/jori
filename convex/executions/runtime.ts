@@ -3,7 +3,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { getScheduleProviderAccess } from "../scheduling/output"
+import { getIntegrationAccess } from "../automations/access"
 import { createPromptedExecution } from "./artifacts"
 import { type CodexRuntimeInput } from "./codex"
 import { runPromptedExecution } from "./execute"
@@ -12,13 +12,13 @@ import { killE2BSandbox } from "./sandbox/e2b"
 import { requireMessageTarget } from "./targets"
 import { createExecutionToken } from "./tokens"
 
-export const runMessageExecution = internalAction({
+export const runMessage = internalAction({
   args: {
-    triggerId: v.id("triggers"),
+    runId: v.id("runs"),
   },
   handler: async (ctx, args) => {
     const input = await ctx.runQuery(
-      internal.executions.records.getInputByTrigger,
+      internal.executions.records.getInputByRun,
       args
     )
 
@@ -31,7 +31,7 @@ export const runMessageExecution = internalAction({
     await runExecution(ctx, {
       type: "message",
       provider: input.provider,
-      trigger: input.trigger,
+      run: input.run,
       integration: input.integration,
       integrations: await prepareIntegrationsForRuntime(
         ctx,
@@ -42,29 +42,33 @@ export const runMessageExecution = internalAction({
   },
 })
 
-export const runScheduledExecution = internalAction({
+export const runAutomation = internalAction({
   args: {
-    triggerId: v.id("triggers"),
+    runId: v.id("runs"),
   },
   handler: async (ctx, args) => {
     const input = await ctx.runQuery(
-      internal.executions.records.getInputByTrigger,
+      internal.executions.records.getInputByRun,
       args
     )
 
-    if (input === null || input.type !== "scheduled") {
+    if (input === null || input.type !== "automation") {
       return
     }
 
     await runExecution(ctx, {
-      type: "scheduled",
-      trigger: input.trigger,
+      type: "automation",
+      run: input.run,
       integration: null,
       integrations: await prepareIntegrationsForRuntime(
         ctx,
-        filterScheduledIntegrations(input.integrations, input.schedule.output)
+        filterAutomationIntegrations(
+          input.integrations,
+          input.automation.access
+        )
       ),
-      schedule: input.schedule,
+      automation: input.automation,
+      event: input.event,
     })
   },
 })
@@ -99,16 +103,15 @@ async function runExecution(ctx: ActionCtx, input: CodexRuntimeInput) {
   })
 }
 
-function filterScheduledIntegrations(
+function filterAutomationIntegrations(
   integrations: CodexRuntimeInput["integrations"],
-  output: Extract<
+  access: Extract<
     CodexRuntimeInput,
-    { type: "scheduled" }
-  >["schedule"]["output"]
+    { type: "automation" }
+  >["automation"]["access"]
 ) {
   return integrations.filter(
-    (integration) =>
-      getScheduleProviderAccess(output, integration.provider) !== "none"
+    (integration) => getIntegrationAccess(access, integration._id) !== "none"
   )
 }
 

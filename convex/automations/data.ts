@@ -1,0 +1,4 @@
+export { fireAutomation, startEventAutomations } from "./fire"
+export { getRequiredAutomation, getTenantAutomation } from "./read"
+export { maxSearchResults, searchAutomations } from "./search"
+export { createAutomation, removeAutomation, updateAutomation } from "./write"

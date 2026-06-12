@@ -6,7 +6,7 @@ export function artifactContext() {
       _id: "execution-id",
       _creationTime: 0,
       tenantId: "tenant",
-      triggerId: "trigger-id",
+      runId: "run-id",
       promptId: "prompt-id",
       status: "running",
       createdAt: 0,

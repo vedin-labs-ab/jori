@@ -1,7 +1,12 @@
 import { describe, expect, test } from "vitest"
-import { type Doc } from "../_generated/dataModel"
-import { type ToolPermission } from "../permissions/catalog"
 import { assemblePrompt } from "./prompt"
+import {
+  approvalContinuation,
+  automationRuntimeInput,
+  githubId,
+  promptedTool,
+  runtimeInput,
+} from "./prompt.fixtures"
 
 describe("runtime prompts", () => {
   test.each([
@@ -62,11 +67,11 @@ describe("runtime prompts", () => {
   })
 })
 
-describe("schedule trigger prompts", () => {
+describe("automation trigger prompts", () => {
   test("renders selected integration access", () => {
-    const prompt = assemblePrompt(scheduledRuntimeInput())
+    const prompt = assemblePrompt(automationRuntimeInput())
 
-    expect(prompt).toContain("A schedule triggered this run.")
+    expect(prompt).toContain("An automation triggered this run.")
     expect(prompt).toContain("Current UTC time:")
     expect(prompt).toContain("Integration access:")
     expect(prompt).toContain("- Read scope: Selected integrations only")
@@ -74,17 +79,17 @@ describe("schedule trigger prompts", () => {
     expect(prompt).toContain("- GitHub: Read")
     expect(prompt).toContain("- Slack: Write")
     expect(prompt).toContain("Use write actions only")
-    expect(prompt).toContain("Run the scheduled work")
+    expect(prompt).toContain("Run the automation")
   })
 
   test("renders all connected read scope", () => {
-    const prompt = assemblePrompt(scheduledRuntimeInput("allConnected"))
+    const prompt = assemblePrompt(automationRuntimeInput("all"))
 
-    expect(prompt).toContain("- Read scope: Any connected integration")
+    expect(prompt).toContain("- Read scope: All connected integrations")
   })
 
   test("renders disabled web search", () => {
-    const prompt = assemblePrompt(scheduledRuntimeInput("selected", false))
+    const prompt = assemblePrompt(automationRuntimeInput([githubId()], false))
 
     expect(prompt).toContain("- Web search: Disabled")
   })
@@ -148,126 +153,3 @@ describe("approval continuation prompts", () => {
     expect(prompt).not.toContain("Handle the request")
   })
 })
-
-function scheduledRuntimeInput(
-  readScope: "selected" | "allConnected" = "selected",
-  webSearch = true
-) {
-  return {
-    type: "scheduled",
-    trigger: {
-      _id: "trigger",
-      _creationTime: 0,
-      tenantId: "tenant",
-      type: "scheduled",
-      status: "active",
-      createdAt: 0,
-    },
-    integration: null,
-    integrations: [integration("github"), integration("slack")],
-    schedule: {
-      _id: "schedule",
-      _creationTime: 0,
-      tenantId: "tenant",
-      name: "Daily digest",
-      description: "Post the daily digest.",
-      metadata: { source: "daily" },
-      output: {
-        readScope,
-        webSearch,
-        surfaces: [
-          { provider: "github", access: "read" },
-          { provider: "slack", access: "write" },
-        ],
-      },
-      type: "recurring",
-      cron: "0 9 * * *",
-      status: "active",
-      createdAt: 0,
-      updatedAt: 0,
-    },
-  } as unknown as Parameters<typeof assemblePrompt>[0]
-}
-
-function runtimeInput(provider: "github" | "linear" | "slack", data: unknown) {
-  return {
-    type: "message",
-    provider,
-    trigger: {
-      _id: "trigger",
-      _creationTime: 0,
-      tenantId: "tenant",
-      type: "message",
-      provider,
-      status: "active",
-      createdAt: 0,
-    },
-    integration: integration(provider),
-    integrations: [integration(provider)],
-    message: {
-      _id: "message",
-      _creationTime: 0,
-      tenantId: "tenant",
-      integrationId: `${provider}-integration`,
-      externalId: "external-message",
-      conversationId: "conversation",
-      actorId: "actor",
-      text: "Please help.",
-      data,
-      createdAt: 0,
-    },
-  } as unknown as Parameters<typeof assemblePrompt>[0]
-}
-
-function integration(provider: string): Doc<"integrations"> {
-  return {
-    _id: `${provider}-integration`,
-    _creationTime: 0,
-    tenantId: "tenant",
-    provider,
-    scope: "tenant",
-    externalId: `${provider}-account`,
-    credentials: {},
-    status: "active",
-    createdBy: "user",
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
-}
-
-function promptedTool(): ToolPermission {
-  return {
-    provider: "notion",
-    tool: "notion_create_page",
-    label: "Create Notion page",
-    description: "Create a Notion page or database record.",
-    access: "write",
-    defaultMode: "prompted",
-  }
-}
-
-function approvalContinuation(decision: "approved" | "denied" = "approved") {
-  return {
-    decision,
-    handoff: {
-      objective: "Create the calendar event and confirm it in Slack.",
-      progress: "Found a time that works for the attendees.",
-      next: "Tell the Slack thread the event was created.",
-    },
-    action: {
-      provider: "googleCalendar",
-      tool: "google_calendar_create_event",
-      summary: "Create a 30 minute design review.",
-      args: { title: "Design review" },
-    },
-    result:
-      decision === "approved"
-        ? { eventId: "event-123" }
-        : {
-            error: {
-              code: "approval_denied",
-              message: "The user denied approval for this action.",
-            },
-          },
-  }
-}

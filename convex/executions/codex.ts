@@ -7,21 +7,22 @@ export type RuntimeIntegration = Doc<"integrations">
 export type MessageRuntimeInput = {
   type: "message"
   provider: MessageProvider
-  trigger: Doc<"triggers">
+  run: Doc<"runs">
   integration: RuntimeIntegration
   integrations: RuntimeIntegration[]
   message: Doc<"messages">
 }
 
-export type ScheduledRuntimeInput = {
-  type: "scheduled"
-  trigger: Doc<"triggers">
+export type AutomationRuntimeInput = {
+  type: "automation"
+  run: Doc<"runs">
   integration: RuntimeIntegration | null
   integrations: RuntimeIntegration[]
-  schedule: Doc<"schedules">
+  automation: Doc<"automations">
+  event: Doc<"events"> | null
 }
 
-export type CodexRuntimeInput = MessageRuntimeInput | ScheduledRuntimeInput
+export type CodexRuntimeInput = MessageRuntimeInput | AutomationRuntimeInput
 
 export function createCodexConfig(args: {
   mcpServers: McpServerConfig[]

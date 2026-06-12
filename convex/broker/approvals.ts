@@ -155,12 +155,12 @@ async function deliverSlackApproval(
 }
 
 function createRequestedBy(context: ApprovalBrokerContext): Actor {
-  if (context.input.trigger.createdBy !== undefined) {
-    return createUserActor(context.input.trigger.createdBy)
+  if (context.input.run.createdBy !== undefined) {
+    return createUserActor(context.input.run.createdBy)
   }
 
-  if (context.input.type === "scheduled") {
-    const createdBy = context.input.schedule.createdBy
+  if (context.input.type === "automation") {
+    const createdBy = context.input.automation.createdBy
 
     if (createdBy !== undefined) {
       return createUserActor(createdBy)
@@ -197,7 +197,7 @@ function getSlackApprovalDelivery(
 }
 
 function getSlackTarget(input: CodexRuntimeInput) {
-  if (input.type === "scheduled") {
+  if (input.type === "automation") {
     return null
   }
 

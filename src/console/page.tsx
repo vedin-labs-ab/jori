@@ -140,8 +140,8 @@ function SignedInView({
               Create your organization.
             </h1>
             <p className="text-sm text-muted-foreground">
-              Integrations, schedules, and permissions are shared with your team
-              through an organization.
+              Integrations, automations, and permissions are shared with your
+              team through an organization.
             </p>
           </div>
           <CreateOrganization />

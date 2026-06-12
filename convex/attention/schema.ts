@@ -3,7 +3,7 @@ import { v } from "convex/values"
 
 export const activations = defineTable({
   tenantId: v.string(),
-  triggerId: v.id("triggers"),
+  runId: v.id("runs"),
   integrationId: v.id("integrations"),
   conversationId: v.string(),
   createdBy: v.optional(v.string()),

@@ -62,7 +62,7 @@ import { IntegrationCallbackAlerts } from "./alerts"
 const consoleNavigation = [
   { icon: LayoutDashboard, label: "Overview", to: "/console" },
   { icon: ListChecks, label: "Runs", to: "/executions" },
-  { icon: CalendarClock, label: "Schedules", to: "/scheduling" },
+  { icon: CalendarClock, label: "Automations", to: "/automations" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
   { icon: Component, label: "Playground", to: "/playground" },

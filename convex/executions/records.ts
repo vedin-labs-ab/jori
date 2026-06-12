@@ -5,24 +5,25 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
+import { getIntegrationAccess } from "../automations/access"
 
-export const getInputByTrigger = internalQuery({
+export const getInputByRun = internalQuery({
   args: {
-    triggerId: v.id("triggers"),
+    runId: v.id("runs"),
   },
   handler: async (ctx, args) => {
-    const trigger = await ctx.db.get(args.triggerId)
+    const run = await ctx.db.get(args.runId)
 
-    if (trigger === null) {
+    if (run === null) {
       return null
     }
 
-    if (trigger.type === "message") {
-      return await getMessageInput(ctx, { trigger })
+    if (run.reason.type === "message") {
+      return await getMessageInput(ctx, { run })
     }
 
-    if (trigger.type === "scheduled") {
-      return await getScheduledInput(ctx, { trigger })
+    if (run.automationId !== undefined) {
+      return await getAutomationInput(ctx, { run })
     }
 
     return null
@@ -32,16 +33,16 @@ export const getInputByTrigger = internalQuery({
 async function getMessageInput(
   ctx: QueryCtx,
   args: {
-    trigger: Doc<"triggers">
+    run: Doc<"runs">
   }
 ) {
-  if (args.trigger.messageId === undefined) {
+  if (args.run.reason.type !== "message") {
     return null
   }
 
-  const message = await ctx.db.get(args.trigger.messageId)
+  const message = await ctx.db.get(args.run.reason.messageId)
 
-  if (message === null || message.tenantId !== args.trigger.tenantId) {
+  if (message === null || message.tenantId !== args.run.tenantId) {
     return null
   }
 
@@ -49,7 +50,7 @@ async function getMessageInput(
 
   if (
     integration === null ||
-    integration.tenantId !== args.trigger.tenantId ||
+    integration.tenantId !== args.run.tenantId ||
     !isMessageProvider(integration.provider)
   ) {
     return null
@@ -57,14 +58,14 @@ async function getMessageInput(
 
   const integrations = await listActiveIntegrations(
     ctx,
-    args.trigger.tenantId,
-    args.trigger.createdBy
+    args.run.tenantId,
+    args.run.createdBy
   )
 
   return {
     type: "message" as const,
     provider: integration.provider,
-    trigger: args.trigger,
+    run: args.run,
     message,
     integration,
     integrations,
@@ -77,57 +78,66 @@ function isMessageProvider(
   return provider === "github" || provider === "linear" || provider === "slack"
 }
 
-async function getScheduledInput(
+async function getAutomationInput(
   ctx: QueryCtx,
   args: {
-    trigger: Doc<"triggers">
+    run: Doc<"runs">
   }
 ) {
-  if (args.trigger.scheduleId === undefined) {
+  if (args.run.automationId === undefined) {
     return null
   }
 
-  const schedule = await ctx.db.get(args.trigger.scheduleId)
+  const automation = await ctx.db.get(args.run.automationId)
 
-  if (schedule === null || schedule.tenantId !== args.trigger.tenantId) {
+  if (automation === null || automation.tenantId !== args.run.tenantId) {
     return null
   }
 
+  const event =
+    args.run.reason.type === "event"
+      ? await ctx.db.get(args.run.reason.eventId)
+      : null
   const integrations = await listActiveIntegrations(
     ctx,
-    schedule.tenantId,
-    schedule.createdBy
+    automation.tenantId,
+    automation.createdBy
   )
 
   return {
-    type: "scheduled" as const,
-    trigger: args.trigger,
-    schedule,
+    type: "automation" as const,
+    run: args.run,
+    automation,
+    event:
+      event !== null && event.tenantId === args.run.tenantId ? event : null,
     integration: null,
-    integrations,
+    integrations: integrations.filter(
+      (integration) =>
+        getIntegrationAccess(automation.access, integration._id) !== "none"
+    ),
   }
 }
 
 export const create = internalMutation({
   args: {
-    triggerId: v.id("triggers"),
+    runId: v.id("runs"),
     promptId: v.id("_storage"),
     approvalId: v.optional(v.id("approvals")),
   },
   handler: async (ctx, args): Promise<Id<"executions"> | null> => {
-    const trigger = await ctx.db.get(args.triggerId)
+    const run = await ctx.db.get(args.runId)
 
-    if (trigger === null) {
+    if (run === null) {
       return null
     }
 
     return await ctx.db.insert("executions", {
-      tenantId: trigger.tenantId,
-      triggerId: trigger._id,
+      tenantId: run.tenantId,
+      runId: run._id,
       approvalId: args.approvalId,
       promptId: args.promptId,
       status: "queued",
-      createdBy: trigger.createdBy,
+      createdBy: run.createdBy,
       createdAt: Date.now(),
     })
   },
@@ -217,7 +227,6 @@ export const finish = internalMutation({
     status: v.union(v.literal("completed"), v.literal("failed")),
   },
   handler: async (ctx, args) => {
-    // A user stop already settled the row; only the trace is still welcome.
     const execution = await ctx.db.get(args.executionId)
     const wasStopped = execution?.status === "stopped"
 

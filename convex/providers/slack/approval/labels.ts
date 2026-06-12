@@ -11,13 +11,13 @@ function humanizeToolName(tool: string) {
 }
 
 const toolLabels: Record<string, string> = {
-  add_schedule: "Add schedule",
+  add_automation: "Add automation",
   channels_list: "List Slack channels",
   conversations_add_message: "Send Slack message",
   conversations_history: "Read Slack channel history",
   conversations_replies: "Read Slack thread replies",
   conversations_search_messages: "Search Slack messages",
-  delete_schedule: "Delete schedule",
+  delete_automation: "Delete automation",
   google_calendar_create_event: "Create Google Calendar event",
   google_calendar_get_event: "Read Google Calendar event",
   google_calendar_list_events: "List Google Calendar events",
@@ -64,10 +64,10 @@ const toolLabels: Record<string, string> = {
   notion_search: "Search Notion",
   notion_update_page: "Update Notion page",
   read_artifact: "Read artifact",
-  read_schedule: "Read schedule",
+  read_automation: "Read automation",
   save_artifact: "Save artifact",
   search_artifacts: "Search artifacts",
-  search_schedules: "Search schedules",
-  update_schedule: "Update schedule",
+  search_automations: "Search automations",
+  update_automation: "Update automation",
   users_search: "Search Slack users",
 }

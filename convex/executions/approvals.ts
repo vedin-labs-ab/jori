@@ -133,12 +133,9 @@ async function loadContinuationInput(
     return null
   }
 
-  const input = await ctx.runQuery(
-    internal.executions.records.getInputByTrigger,
-    {
-      triggerId: execution.triggerId,
-    }
-  )
+  const input = await ctx.runQuery(internal.executions.records.getInputByRun, {
+    runId: execution.runId,
+  })
 
   if (input === null) {
     return null
@@ -187,7 +184,7 @@ async function executeApprovedTool(
         ctx,
         {
           tenantId: approval.tenantId,
-          createdBy: input.trigger.createdBy,
+          createdBy: input.run.createdBy,
         },
         {
           tool: approval.tool,

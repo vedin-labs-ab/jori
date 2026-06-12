@@ -3,7 +3,7 @@ import { v } from "convex/values"
 
 export const executions = defineTable({
   tenantId: v.string(),
-  triggerId: v.id("triggers"),
+  runId: v.id("runs"),
   approvalId: v.optional(v.id("approvals")),
   promptId: v.id("_storage"),
   sandboxId: v.optional(v.string()),
@@ -34,6 +34,6 @@ export const executions = defineTable({
   stoppedAt: v.optional(v.number()),
 })
   .index("by_tenant", ["tenantId"])
-  .index("by_trigger", ["triggerId"])
+  .index("by_run", ["runId"])
   .index("by_approval", ["approvalId"])
   .index("by_hash", ["hash"])
