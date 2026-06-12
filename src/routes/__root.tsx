@@ -5,15 +5,18 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { ConvexProviderWithClerk } from "convex/react-clerk"
+import { AlertTriangle, SearchX } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { convex } from "@/shared/convex"
-
+import { RootStateFrame } from "@/shared/root-state"
 import appCss from "../styles.css?url"
 
 const appTitle = "Milo"
 const appDescription = "AI teammates for company work."
 
 export const Route = createRootRoute({
+  errorComponent: RootError,
   head: () => ({
     meta: [
       {
@@ -87,14 +90,61 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  notFoundComponent: () => (
-    <main className="container mx-auto p-4 pt-16">
-      <h1>404</h1>
-      <p>The requested page could not be found.</p>
-    </main>
-  ),
+  notFoundComponent: NotFound,
   shellComponent: RootDocument,
 })
+
+function RootError({ error, reset }: { error: unknown; reset?: () => void }) {
+  const message = readErrorMessage(error)
+
+  return (
+    <RootStateFrame
+      action={
+        <Button
+          onClick={() => {
+            reset?.()
+            window.location.reload()
+          }}
+          type="button"
+        >
+          Reload
+        </Button>
+      }
+      description="The app hit an unexpected state. Reload to reconnect your session and try again."
+      icon={<AlertTriangle />}
+      title="Milo couldn't load this page"
+    >
+      {import.meta.env.DEV ? (
+        <code className="block max-w-full overflow-x-auto rounded-md bg-muted px-2.5 py-2 text-left font-mono text-muted-foreground text-xs">
+          {message}
+        </code>
+      ) : null}
+    </RootStateFrame>
+  )
+}
+
+function NotFound() {
+  return (
+    <RootStateFrame
+      action={
+        <Button asChild variant="outline">
+          <a href="/console">Go to console</a>
+        </Button>
+      }
+      description="The link may be outdated, or the page may have moved."
+      icon={<SearchX />}
+      title="Page not found"
+    />
+  )
+}
+
+function readErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message.trim() !== "") {
+    return error.message
+  }
+
+  return "Unknown application error."
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
