@@ -3,14 +3,13 @@ import { CalendarIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { AutomationTimePicker } from "./time"
 
 const defaultTime = "09:00"
 
@@ -99,32 +98,6 @@ export function AutomationDateTimePicker({
         label="Time"
         onValueChange={updateTime}
         value={timeValue}
-      />
-    </div>
-  )
-}
-
-export function AutomationTimePicker({
-  className,
-  id,
-  label,
-  onValueChange,
-  value,
-}: {
-  className?: string
-  id: string
-  label: string
-  onValueChange: (value: string) => void
-  value: string
-}) {
-  return (
-    <div className={cn("grid gap-2", className)}>
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        onChange={(event) => onValueChange(event.target.value)}
-        type="time"
-        value={value}
       />
     </div>
   )

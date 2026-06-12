@@ -15,7 +15,7 @@ import {
   weekdayOptions,
 } from "./cron"
 import { absoluteTime, relativeTime } from "./format"
-import { AutomationTimePicker } from "./picker"
+import { AutomationTimePicker } from "./time"
 import {
   type AutomationFormValues,
   type RepeatMode,
