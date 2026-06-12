@@ -1,13 +1,13 @@
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc } from "../../../_generated/dataModel"
 import {
   type ArtifactAttachment,
   type ArtifactContext,
   readArtifactAttachments,
-} from "../../artifacts/attachments"
-import { requireSlackCredentials } from "../../providers/slack/credentials"
-import { boundedNumber, optionalString, requiredString } from "./common"
-import { slackJsonApi, slackQueryApi } from "./slack/client"
-import { postSlackFiles } from "./slack/upload"
+} from "../../../artifacts/attachments"
+import { requireSlackCredentials } from "../../../providers/slack/credentials"
+import { boundedNumber, optionalString, requiredString } from "../common"
+import { slackJsonApi, slackQueryApi } from "./client"
+import { postSlackFiles } from "./upload"
 
 export type SlackBlock = Record<string, unknown>
 

@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { type Doc } from "../../../_generated/dataModel"
-import { callGoogleTool } from "."
+import { type Doc } from "../../../../_generated/dataModel"
+import { callGoogleTool } from ".."
 
 const originalFetch = globalThis.fetch
 
