@@ -105,6 +105,21 @@ describe("schedule instructions field layout", () => {
     expect(badge?.className).toContain("align-middle")
     expect(badge?.className).toContain("leading-none")
   })
+
+  test("uses icon color instead of background for badge access hover", async () => {
+    renderInstructionsField({
+      description: "Post to GitHub.",
+      surfaces: [{ provider: "github", access: "read" }],
+    })
+
+    const button = await screen.findByRole("button", {
+      name: "GitHub access: Read. Change access.",
+    })
+
+    expect(button.className).toContain("text-muted-foreground")
+    expect(button.className).toContain("hover:text-foreground")
+    expect(button.className).not.toContain("hover:bg-")
+  })
 })
 
 describe("schedule instructions field", () => {

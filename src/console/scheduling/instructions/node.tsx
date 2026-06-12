@@ -45,7 +45,7 @@ export function ScheduleSurfaceNodeView({
       >
         <button
           aria-label={`${getScheduleSurfaceLabel(provider)} access: ${accessLabel}. Change access.`}
-          className="grid size-4 place-items-center rounded-[4px] outline-none hover:bg-background/60 focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="grid size-4 place-items-center rounded-[4px] text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
