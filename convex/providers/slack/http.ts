@@ -9,21 +9,15 @@ import {
 import {
   slackBotScopes,
   slackInstallUserScopes,
-  slackOAuthAccessUrl,
   slackOAuthAuthorizeUrl,
   slackOAuthCallbackPath,
 } from "./config"
 import { getSlackMessage, type SlackEventPayload } from "./events"
+import { exchangeSlackAuthorizationCode, requireSlackClientId } from "./oauth"
 import { parseSignedSlackState, verifySlackRequest } from "./signing"
 import { getSlackActorEmail } from "./users"
 
 export async function handleSlackInstall(request: Request) {
-  const slackClientId = process.env.SLACK_CLIENT_ID
-
-  if (slackClientId === undefined) {
-    return new Response("Missing SLACK_CLIENT_ID", { status: 500 })
-  }
-
   const requestUrl = new URL(request.url)
   const state = requestUrl.searchParams.get("state")
 
@@ -32,7 +26,7 @@ export async function handleSlackInstall(request: Request) {
   }
 
   const slackUrl = new URL(slackOAuthAuthorizeUrl)
-  slackUrl.searchParams.set("client_id", slackClientId)
+  slackUrl.searchParams.set("client_id", requireSlackClientId())
   slackUrl.searchParams.set("scope", slackBotScopes.join(","))
   slackUrl.searchParams.set("user_scope", slackInstallUserScopes.join(","))
   slackUrl.searchParams.set("state", state)
@@ -68,26 +62,10 @@ export async function handleSlackOAuthCallback(
     return new Response("Expired Slack OAuth state", { status: 400 })
   }
 
-  const slackClientId = process.env.SLACK_CLIENT_ID
-  const slackClientSecret = process.env.SLACK_CLIENT_SECRET
-
-  if (slackClientId === undefined || slackClientSecret === undefined) {
-    return new Response("Missing Slack OAuth configuration", { status: 500 })
-  }
-
-  const tokenResponse = await fetch(slackOAuthAccessUrl, {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: slackClientId,
-      client_secret: slackClientSecret,
-      code,
-      redirect_uri: `${requestUrl.origin}${slackOAuthCallbackPath}`,
-    }),
+  const tokenResult = await exchangeSlackAuthorizationCode({
+    code,
+    redirectUri: `${requestUrl.origin}${slackOAuthCallbackPath}`,
   })
-  const tokenResult = (await tokenResponse.json()) as SlackOAuthResponse
 
   const botToken =
     tokenResult.ok === true ? getSlackBotToken(tokenResult) : undefined
@@ -215,26 +193,6 @@ export async function handleSlackInteractions(
 
   return await handleSlackApprovalInteraction(ctx, parsed)
 }
-
-type SlackOAuthResponse =
-  | {
-      ok: true
-      access_token: string
-      bot_user_id?: string
-      scope?: string
-      authed_user?: {
-        access_token?: string
-        scope?: string
-      }
-      team: {
-        id: string
-        name?: string
-      }
-    }
-  | {
-      ok: false
-      error?: string
-    }
 
 function getSlackBotToken(tokenResult: { access_token?: string }) {
   const token = tokenResult.access_token

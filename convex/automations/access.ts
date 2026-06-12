@@ -1,7 +1,10 @@
 import { type Infer } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
-import { type IntegrationProvider } from "../providers/catalog"
+import {
+  type IntegrationProvider,
+  isUserScopedProvider,
+} from "../providers/catalog"
 import { type access, type accessInput } from "./schema"
 
 export type AutomationAccess = Infer<typeof access>
@@ -191,15 +194,6 @@ async function resolveProvider(
 
 function uniqueProviders(providers: IntegrationProvider[]) {
   return [...new Set(providers)]
-}
-
-export function isUserScopedProvider(provider: IntegrationProvider) {
-  return (
-    provider === "gmail" ||
-    provider === "googleCalendar" ||
-    provider === "microsoftCalendar" ||
-    provider === "microsoftEmail"
-  )
 }
 
 function sortSurfaces<

@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { query } from "../_generated/server"
-import { requireTenantAccess } from "../skills/access"
+import { requireTenantAccess } from "../identity/access"
 
 export const trace = query({
   args: {

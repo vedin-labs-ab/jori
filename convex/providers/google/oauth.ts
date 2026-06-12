@@ -77,10 +77,6 @@ export async function fetchGoogleInstallationProfile(accessToken: string) {
   } satisfies GoogleInstallationProfile
 }
 
-export function getGoogleTokenScope(value: string | undefined) {
-  return value
-}
-
 async function requestGoogleToken(body: Record<string, string>) {
   return await fetchFormToken<GoogleTokenResponse>(googleOAuthTokenUrl, {
     client_id: requireGoogleClientId(),

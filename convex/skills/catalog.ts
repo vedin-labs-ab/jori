@@ -5,9 +5,9 @@ import {
   mutation,
   query,
 } from "../_generated/server"
+import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
 import { skills as globalSkillSeed } from "../prompts/generated"
-import { checkTenantAccess, requireTenantAccess } from "./access"
 import {
   normalizeSkillInput,
   requireUniqueTenantSkillName,

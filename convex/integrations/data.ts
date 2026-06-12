@@ -1,4 +1,5 @@
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { checkTenantAccess } from "../identity/access"
 import { getClerkUserId } from "../identity/users"
 import { type IntegrationProvider } from "../providers/catalog"
 
@@ -11,9 +12,9 @@ export async function getTenantIntegration(
     tenantId: string
   }
 ) {
-  const identity = await ctx.auth.getUserIdentity()
+  const access = await checkTenantAccess(ctx, args.tenantId)
 
-  if (identity === null) {
+  if (!access.ok) {
     return null
   }
 
@@ -33,13 +34,13 @@ export async function getUserIntegration(
     tenantId: string
   }
 ) {
-  const identity = await ctx.auth.getUserIdentity()
+  const access = await checkTenantAccess(ctx, args.tenantId)
 
-  if (identity === null) {
+  if (!access.ok) {
     return null
   }
 
-  const userId = getClerkUserId(identity)
+  const userId = getClerkUserId(access.identity)
 
   if (userId === undefined) {
     return null

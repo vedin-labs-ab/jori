@@ -9,7 +9,6 @@ import {
 import {
   exchangeGoogleAuthorizationCode,
   fetchGoogleInstallationProfile,
-  getGoogleTokenScope,
   requireGoogleClientId,
 } from "./oauth"
 import { parseSignedGoogleState } from "./signing"
@@ -102,7 +101,7 @@ export async function handleGoogleOAuthCallback(
         accessToken: tokenResult.access_token,
         refreshToken: tokenResult.refresh_token,
         expiresAt: Date.now() + tokenResult.expires_in * 1000,
-        scope: getGoogleTokenScope(tokenResult.scope),
+        scope: tokenResult.scope,
         profile,
       }
     )

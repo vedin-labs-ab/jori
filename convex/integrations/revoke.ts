@@ -24,6 +24,10 @@ import {
   slackAuthRevokeUrl,
 } from "../providers/slack/config"
 import { requireSlackCredentials } from "../providers/slack/credentials"
+import {
+  requireSlackClientId,
+  requireSlackClientSecret,
+} from "../providers/slack/oauth"
 
 const alreadyRevokedErrors = new Set([
   "invalid_auth",
@@ -240,26 +244,6 @@ async function readOAuthResponse(response: Response) {
   } catch {
     return { message: body }
   }
-}
-
-function requireSlackClientId() {
-  const clientId = process.env.SLACK_CLIENT_ID
-
-  if (clientId === undefined || clientId === "") {
-    throw new Error("Missing SLACK_CLIENT_ID")
-  }
-
-  return clientId
-}
-
-function requireSlackClientSecret() {
-  const clientSecret = process.env.SLACK_CLIENT_SECRET
-
-  if (clientSecret === undefined || clientSecret === "") {
-    throw new Error("Missing SLACK_CLIENT_SECRET")
-  }
-
-  return clientSecret
 }
 
 function encodeBasicCredentials(clientId: string, clientSecret: string) {
