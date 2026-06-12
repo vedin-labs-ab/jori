@@ -27,7 +27,7 @@ export function ScheduleInstructionsField(
         editor={editor}
       />
       {isEmpty ? (
-        <div className="pointer-events-none absolute top-2 left-2 text-muted-foreground text-sm md:text-xs/relaxed">
+        <div className="pointer-events-none absolute top-[9px] right-[9px] left-[9px] text-muted-foreground text-sm/6 md:text-xs/6">
           {props.placeholder}
         </div>
       ) : null}

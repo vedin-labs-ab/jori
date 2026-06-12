@@ -48,7 +48,24 @@ describe("schedule instructions document", () => {
   })
 })
 
-describe("schedule instructions field", () => {
+describe("schedule instructions field layout", () => {
+  test("aligns placeholder with the editable text", async () => {
+    const field = renderInstructionsField({
+      description: "",
+      surfaces: [],
+    })
+
+    expect(await screen.findByRole("textbox")).toBeDefined()
+
+    const placeholder = field.container.querySelector(".pointer-events-none")
+
+    expect(placeholder?.className).toContain("top-[9px]")
+    expect(placeholder?.className).toContain("left-[9px]")
+    expect(placeholder?.className).toContain("right-[9px]")
+    expect(placeholder?.className).toContain("text-sm/6")
+    expect(placeholder?.className).toContain("md:text-xs/6")
+  })
+
   test("constrains long unbroken text inside the editor", async () => {
     const field = renderInstructionsField({
       description: "Post to GitHub then qweqweqweqweqweqweqweqweqweqweqweqwe.",
@@ -88,7 +105,9 @@ describe("schedule instructions field", () => {
     expect(badge?.className).toContain("align-middle")
     expect(badge?.className).toContain("leading-none")
   })
+})
 
+describe("schedule instructions field", () => {
   test("renders integration badges inside the editor", async () => {
     renderInstructionsField({
       description: "Post to @github.",
