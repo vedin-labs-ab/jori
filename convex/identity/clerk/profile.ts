@@ -1,4 +1,4 @@
-import { normalizeEmail } from "./identities"
+import { normalizeEmail } from "../identities"
 
 export type VerifiedClerkEmail = {
   externalId: string

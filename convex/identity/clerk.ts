@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { action } from "../_generated/server"
-import { readVerifiedClerkEmails } from "./clerkProfile"
+import { readVerifiedClerkEmails } from "./clerk/profile"
 import { readClerkOrganizationId, requireClerkUserId } from "./users"
 
 export const syncCurrentUser = action({
@@ -30,7 +30,7 @@ export const syncCurrentUser = action({
     const emails = readVerifiedClerkEmails(profile)
 
     const result: { synced: number } = await ctx.runMutation(
-      internal.identity.clerkData.syncVerifiedEmails,
+      internal.identity.clerk.data.syncVerifiedEmails,
       {
         tenantId: args.tenantId,
         userId,
