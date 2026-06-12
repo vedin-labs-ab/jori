@@ -168,6 +168,14 @@ export function describeCron(cron: string | undefined) {
   return null
 }
 
+export function getCrontabGuruUrl(cron: string) {
+  const expression = cron.trim().split(/\s+/).filter(Boolean).join("_")
+
+  return expression === ""
+    ? "https://crontab.guru/"
+    : `https://crontab.guru/#${encodeURI(expression)}`
+}
+
 function readTime(minute: string, hour: string) {
   if (!(isInteger(minute) && isInteger(hour))) {
     return null

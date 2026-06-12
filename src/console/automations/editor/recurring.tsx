@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/tooltip"
 import {
   composeCron,
+  getCrontabGuruUrl,
   monthDayOptions,
   previewRecurringRun,
   weekdayOptions,
@@ -158,7 +159,7 @@ function CustomCronField({
     <div className="grid gap-2">
       <div className="flex items-center gap-1.5">
         <Label htmlFor="automation-cron">Expression</Label>
-        <CronHelp />
+        <CronHelp cron={values.cron} />
       </div>
       <Input
         className="font-mono"
@@ -173,7 +174,7 @@ function CustomCronField({
   )
 }
 
-function CronHelp() {
+function CronHelp({ cron }: { cron: string }) {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -195,7 +196,7 @@ function CronHelp() {
             <p>Uses five UTC fields: minute, hour, day, month, weekday.</p>
             <a
               className="underline underline-offset-2"
-              href="https://crontab.guru/"
+              href={getCrontabGuruUrl(cron)}
               rel="noreferrer"
               target="_blank"
             >
