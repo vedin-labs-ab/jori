@@ -49,6 +49,69 @@ export function automationRuntimeInput(
   } as unknown as Parameters<typeof assemblePrompt>[0]
 }
 
+export function linearAutomationRuntimeInput() {
+  const linear = integration("linear")
+
+  return {
+    type: "automation",
+    run: {
+      _id: "run",
+      _creationTime: 0,
+      tenantId: "tenant",
+      automationId: "automation",
+      reason: {
+        type: "event",
+        eventId: "event",
+      },
+      createdAt: 0,
+    },
+    integration: linear,
+    integrations: [linear],
+    automation: {
+      _id: "automation",
+      _creationTime: 0,
+      tenantId: "tenant",
+      name: "Linear quip",
+      instructions: "Reply with a short quip.",
+      access: {
+        read: "all",
+        write: [linear._id],
+        web: true,
+      },
+      trigger: {
+        type: "event",
+        integrationId: linear._id,
+        event: "issue.comment.changed",
+        criteria: { team: "team-id" },
+      },
+      status: "active",
+      createdAt: 0,
+      updatedAt: 0,
+    },
+    event: {
+      _id: "event",
+      _creationTime: 0,
+      tenantId: "tenant",
+      integrationId: linear._id,
+      key: "linear:delivery",
+      type: "issue.comment.changed",
+      criteria: { issue: "issue-id", team: "team-id" },
+      text: "i wonder if this is worth spending time on",
+      data: {
+        issueId: "issue-id",
+        issueIdentifier: "VED-1",
+        issue: {
+          title: "Get familiar with Linear",
+          url: "https://linear.app/acme/issue/VED-1/get-familiar",
+        },
+        commentId: "comment-id",
+        url: "https://linear.app/acme/issue/VED-1/get-familiar#comment-id",
+      },
+      createdAt: 0,
+    },
+  } as unknown as Parameters<typeof assemblePrompt>[0]
+}
+
 export function runtimeInput(
   provider: "github" | "linear" | "slack",
   data: unknown

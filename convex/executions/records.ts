@@ -98,6 +98,10 @@ async function getAutomationInput(
     args.run.reason.type === "event"
       ? await ctx.db.get(args.run.reason.eventId)
       : null
+  const integration =
+    event === null || event.tenantId !== args.run.tenantId
+      ? null
+      : await ctx.db.get(event.integrationId)
   const integrations = await listActiveIntegrations(
     ctx,
     automation.tenantId,
@@ -110,7 +114,10 @@ async function getAutomationInput(
     automation,
     event:
       event !== null && event.tenantId === args.run.tenantId ? event : null,
-    integration: null,
+    integration:
+      integration !== null && integration.tenantId === args.run.tenantId
+        ? integration
+        : null,
     integrations: integrations.filter(
       (integration) =>
         getIntegrationAccess(automation.access, integration._id) !== "none"

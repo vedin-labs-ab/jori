@@ -84,7 +84,7 @@ function createAutomationValues(
       trigger: formatAutomationTrigger(input),
     },
     event: {
-      details: formatEvent(input.event),
+      details: formatEvent(input.event, input.integration?.provider),
     },
     time: { utc: createPromptTime() },
   }
@@ -135,7 +135,8 @@ function formatAutomationTrigger(
 }
 
 function formatEvent(
-  event: Extract<CodexRuntimeInput, { type: "automation" }>["event"]
+  event: Extract<CodexRuntimeInput, { type: "automation" }>["event"],
+  provider: string | undefined
 ) {
   if (event === null) {
     return "- None"
@@ -143,31 +144,49 @@ function formatEvent(
 
   return formatTargetLines([
     targetLine("Type", event.type),
+    targetLine("Provider", formatProviderLabel(provider)),
     targetLine("Resource", event.resource),
+    ...getProviderTargetLines(provider, event.data),
     targetLine("Text", event.text),
   ])
 }
 
-const providerLabelsForMessages = {
-  github: "GitHub",
-  linear: "Linear",
-  slack: "Slack",
-} satisfies Record<MessageProvider, string>
-
 function getProviderLabel(provider: MessageProvider) {
-  return providerLabelsForMessages[provider]
+  return providerLabels[provider]
 }
 
 function getMessageTarget(provider: MessageProvider, data: unknown) {
+  return formatTargetLines(getProviderTargetLines(provider, data))
+}
+
+function formatProviderLabel(provider: string | undefined) {
+  if (provider === undefined) {
+    return undefined
+  }
+
+  return isKnownProvider(provider) ? providerLabels[provider] : provider
+}
+
+function getProviderTargetLines(provider: string | undefined, data: unknown) {
   if (provider === "github") {
-    return formatTargetLines(getGitHubTargetLines(data))
+    return getGitHubTargetLines(data)
   }
 
   if (provider === "linear") {
-    return formatTargetLines(getLinearTargetLines(data))
+    return getLinearTargetLines(data)
   }
 
-  return formatTargetLines(getSlackTargetLines(data))
+  if (provider === "slack") {
+    return getSlackTargetLines(data)
+  }
+
+  return []
+}
+
+function isKnownProvider(
+  provider: string
+): provider is keyof typeof providerLabels {
+  return provider in providerLabels
 }
 
 function getGitHubTargetLines(data: unknown) {
@@ -184,9 +203,15 @@ function getGitHubTargetLines(data: unknown) {
 }
 
 function getLinearTargetLines(data: unknown) {
+  const issue = readDataObject(data, "issue")
+
   return [
     targetLine("Issue ID", readDataString(data, "issueId")),
+    targetLine("Issue key", readDataString(data, "issueIdentifier")),
+    targetLine("Issue title", readDataString(issue, "title")),
+    targetLine("Issue URL", readDataString(issue, "url")),
     targetLine("Comment ID", readDataString(data, "commentId")),
+    targetLine("Comment URL", readDataString(data, "url")),
   ]
 }
 

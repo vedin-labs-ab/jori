@@ -11,7 +11,7 @@ export async function callLinearTool(
   const credentials = requireLinearCredentials(integration)
 
   if (tool === "linear_search_issues") {
-    const query = requiredString(args.query, "query")
+    const query = normalizeSearchQuery(requiredString(args.query, "query"))
     const exactIssue = await getLinearIssueSummaryByIdentifier(
       credentials.tokens.access,
       query
@@ -19,7 +19,16 @@ export async function callLinearTool(
     const result = await linearGraphql(credentials.tokens.access, {
       query: `
         query MiloIssueSearch($query: String!, $first: Int!) {
-          issues(first: $first, filter: { title: { containsIgnoreCase: $query } }) {
+          issues(
+            first: $first
+            filter: {
+              or: [
+                { title: { containsIgnoreCase: $query } }
+                { description: { containsIgnoreCase: $query } }
+                { comments: { body: { containsIgnoreCase: $query } } }
+              ]
+            }
+          ) {
             nodes {
               id
               identifier
@@ -133,6 +142,16 @@ export async function callLinearTool(
   }
 
   throw new Error(`Unknown Linear tool: ${tool}`)
+}
+
+function normalizeSearchQuery(query: string) {
+  const unquoted = query.replace(/^["'](.*)["']$/, "$1").trim()
+
+  if (unquoted === "") {
+    throw new Error("query is required")
+  }
+
+  return unquoted
 }
 
 async function getLinearIssueSummaryByIdentifier(token: string, query: string) {
