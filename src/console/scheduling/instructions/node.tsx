@@ -55,7 +55,7 @@ export function ScheduleSurfaceNodeView({
           providerLabel={providerLabel}
         />
         <ButtonGroupSeparator
-          className={cn("my-1 w-px", toneClassNames.separator)}
+          className={cn("w-px data-vertical:my-0", toneClassNames.separator)}
         />
         <ScheduleSurfaceRemoveButton
           onRemove={deleteNode}

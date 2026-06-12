@@ -93,6 +93,9 @@ describe("schedule instructions field layout", () => {
     const buttonGroup = badgeWrapper?.querySelector(
       '[data-slot="button-group"]'
     )
+    const separator = buttonGroup?.querySelector(
+      '[data-slot="button-group-separator"]'
+    )
 
     expect(editorFrame?.className).toContain("[&_.tiptap]:leading-6")
     expect(editorFrame?.className).toContain("[&_.tiptap>p]:min-h-6")
@@ -101,6 +104,8 @@ describe("schedule instructions field layout", () => {
     expect(buttonGroup?.className).toContain("align-middle")
     expect(buttonGroup?.className).toContain("h-5")
     expect(buttonGroup?.className).toContain("text-[0.625rem]/none")
+    expect(separator?.className).toContain("data-vertical:my-0")
+    expect(separator?.className).not.toContain("my-1")
   })
 })
 
