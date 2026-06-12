@@ -2,6 +2,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
 import { type AutomationAccessInput, resolveAccessInput } from "./access"
+import { automationEventCriteriaKey } from "./events"
 import { getRequiredAutomation, getTenantAutomation } from "./read"
 import { type AutomationTriggerInput } from "./schema"
 import { normalizeRequiredText } from "./timing"
@@ -167,6 +168,7 @@ function isSameEventTrigger(
     right?.type === "event" &&
     left.integrationId === right.integrationId &&
     left.event === right.event &&
-    left.filter === right.filter
+    automationEventCriteriaKey(left.criteria) ===
+      automationEventCriteriaKey(right.criteria)
   )
 }

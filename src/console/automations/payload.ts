@@ -1,12 +1,14 @@
 import {
+  type AutomationEventCriteria,
   getAutomationEventDefinition,
   getDefaultAutomationEvent,
   isAutomationEventProvider,
 } from "../../../convex/automations/events"
 import { buildRecurringCron, classifyCron } from "./cron"
 import { toDatetimeLocal } from "./format"
+import { criteriaKey, eventCriteriaFormValues } from "./payload/criteria"
 import { readAutomationPreferences } from "./preferences"
-import { readAutomationEventResource } from "./rules"
+import { readAutomationEventCriteria } from "./rules"
 import {
   hasAutomationWriteSurface,
   normalizeAutomationSurfaceMentions,
@@ -25,7 +27,7 @@ type TriggerSpec =
       type: "event"
       provider: AutomationFormValues["eventProvider"]
       event: string
-      filter?: string
+      criteria?: AutomationEventCriteria
     }
 
 type AutomationArgs = {
@@ -184,13 +186,13 @@ function buildTriggerSpec(
       return { error: "Choose a supported automation event." }
     }
 
-    const resource = readAutomationEventResource(
+    const criteria = readAutomationEventCriteria(
       definition,
-      values.eventResource
+      values.eventCriteria
     )
 
-    if ("error" in resource) {
-      return resource
+    if ("error" in criteria) {
+      return criteria
     }
 
     return {
@@ -198,7 +200,7 @@ function buildTriggerSpec(
         type: "event",
         provider: values.eventProvider,
         event: definition.value,
-        filter: resource.value,
+        criteria: criteria.value,
       },
     }
   }
@@ -241,7 +243,8 @@ function hasTriggerChanged(values: AutomationFormValues, existing: Automation) {
     return (
       values.eventProvider !== existingValues.eventProvider ||
       values.event.trim() !== existingValues.event ||
-      values.eventResource.trim() !== existingValues.eventResource
+      criteriaKey(values.eventCriteria) !==
+        criteriaKey(existingValues.eventCriteria)
     )
   }
 
@@ -258,7 +261,7 @@ function triggerFormValues(automation: Automation) {
       runAt: "",
       eventProvider: emptyAutomationForm.eventProvider,
       event: emptyAutomationForm.event,
-      eventResource: "",
+      eventCriteria: {},
     }
   }
 
@@ -276,8 +279,10 @@ function triggerFormValues(automation: Automation) {
       runAt: "",
       eventProvider: provider,
       event: definition.value,
-      eventResource:
-        definition.value === trigger.event ? (trigger.filter ?? "") : "",
+      eventCriteria:
+        definition.value === trigger.event
+          ? eventCriteriaFormValues(definition, trigger)
+          : {},
     }
   }
 
@@ -287,6 +292,6 @@ function triggerFormValues(automation: Automation) {
     runAt: toDatetimeLocal(trigger.at),
     eventProvider: emptyAutomationForm.eventProvider,
     event: emptyAutomationForm.event,
-    eventResource: "",
+    eventCriteria: {},
   }
 }

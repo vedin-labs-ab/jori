@@ -2,8 +2,8 @@ import { type ReactAction } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
 import {
+  type AutomationEventParameter,
   type AutomationEventProvider,
-  type AutomationEventResource,
 } from "../../../convex/automations/events"
 
 type AutomationEventOptionSearchResult = Awaited<
@@ -20,7 +20,8 @@ type SearchAction = ReactAction<typeof api.automations.options.search>
 export function searchEventOptions({
   provider,
   query,
-  resource,
+  parameter,
+  criteria,
   search,
   setIsLoading,
   setMessage,
@@ -29,7 +30,8 @@ export function searchEventOptions({
 }: {
   provider: AutomationEventProvider
   query: string
-  resource: Extract<AutomationEventResource, { type: "option" }>
+  parameter: Extract<AutomationEventParameter, { type: "option" }>
+  criteria: Record<string, string>
   search: SearchAction
   setIsLoading: (isLoading: boolean) => void
   setMessage: (message: string | undefined) => void
@@ -44,8 +46,9 @@ export function searchEventOptions({
     search({
       tenantId,
       provider,
-      source: resource.source,
+      source: parameter.source,
       query,
+      criteria,
     })
       .then((result) => {
         if (isCancelled) {

@@ -18,6 +18,21 @@ type LinearComment = {
   id?: string
   body?: string
   issueId?: string
+  issue?: {
+    id?: string
+    identifier?: string
+    title?: string
+    url?: string
+    team?: {
+      id?: string
+      key?: string
+      name?: string
+    }
+    project?: {
+      id?: string
+      name?: string
+    } | null
+  }
   url?: string
   createdAt?: string
   updatedAt?: string
@@ -52,12 +67,9 @@ function getLinearCommentMessage(
   deliveryId: string | null
 ) {
   const data = payload.data as LinearComment | undefined
+  const issueId = data?.issueId ?? data?.issue?.id
 
-  if (
-    data === undefined ||
-    data.id === undefined ||
-    data.issueId === undefined
-  ) {
+  if (data === undefined || data.id === undefined || issueId === undefined) {
     return null
   }
 
@@ -67,14 +79,18 @@ function getLinearCommentMessage(
     externalId: createLinearExternalId(accountId, deliveryId, data.id),
     actorId: payload.actor?.id,
     actorEmail: payload.actor?.email,
-    conversationId: data.issueId,
+    conversationId: issueId,
     text: data.body,
     observedAt: getObservedAt(payload, data.createdAt),
     data: {
       action: payload.action,
       eventType: payload.type,
       deliveryId,
-      issueId: data.issueId,
+      issueId,
+      issueIdentifier: data.issue?.identifier,
+      teamId: data.issue?.team?.id,
+      projectId: data.issue?.project?.id,
+      issue: data.issue,
       commentId: data.id,
       url: payload.url ?? data.url,
     },

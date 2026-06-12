@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { automationEventCriteriaKey } from "../automations/events"
 
 type EventTrigger = Extract<Doc<"automations">["trigger"], { type: "event" }>
 
@@ -11,6 +12,7 @@ export async function ensureSubscription(
   }
 ) {
   const now = Date.now()
+  const criteriaKey = automationEventCriteriaKey(args.trigger.criteria)
   const existing = await findSubscription(ctx, args.trigger)
 
   if (existing !== null) {
@@ -26,7 +28,8 @@ export async function ensureSubscription(
     tenantId: args.tenantId,
     integrationId: args.trigger.integrationId,
     event: args.trigger.event,
-    resource: args.trigger.filter,
+    criteria: args.trigger.criteria,
+    criteriaKey,
     status: "active",
     createdAt: now,
     updatedAt: now,
@@ -57,6 +60,21 @@ export async function releaseSubscription(
 }
 
 async function findSubscription(ctx: MutationCtx, trigger: EventTrigger) {
+  const criteriaKey = automationEventCriteriaKey(trigger.criteria)
+  const subscription = await ctx.db
+    .query("subscriptions")
+    .withIndex("by_integration_event_criteria", (index) =>
+      index
+        .eq("integrationId", trigger.integrationId)
+        .eq("event", trigger.event)
+        .eq("criteriaKey", criteriaKey)
+    )
+    .first()
+
+  if (subscription !== null || trigger.filter === undefined) {
+    return subscription
+  }
+
   return await ctx.db
     .query("subscriptions")
     .withIndex("by_integration_event_resource", (index) =>
@@ -94,7 +112,8 @@ async function hasMatchingAutomation(
       trigger.type === "event" &&
       trigger.integrationId === args.trigger.integrationId &&
       trigger.event === args.trigger.event &&
-      trigger.filter === args.trigger.filter
+      automationEventCriteriaKey(trigger.criteria) ===
+        automationEventCriteriaKey(args.trigger.criteria)
     )
   })
 }

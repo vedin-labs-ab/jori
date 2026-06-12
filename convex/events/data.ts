@@ -9,6 +9,7 @@ export async function recordEvent(
     key: string
     type: string
     resource?: string
+    criteria?: Doc<"events">["criteria"]
     actor?: Doc<"events">["actor"]
     text?: string
     data?: unknown
@@ -37,6 +38,7 @@ export async function recordEvent(
     key: args.key,
     type: args.type,
     resource: args.resource,
+    criteria: args.criteria,
     actor: args.actor,
     text: args.text,
     data: args.data,

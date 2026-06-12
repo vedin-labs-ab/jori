@@ -44,7 +44,7 @@ export type AutomationFormValues = {
   runAt: string
   eventProvider: AutomationEventProvider
   event: string
-  eventResource: string
+  eventCriteria: Record<string, string>
   readScope: AutomationReadScope
   webSearch: boolean
   surfaces: AutomationSurfaceFormValue[]
@@ -62,9 +62,9 @@ export const emptyAutomationForm: AutomationFormValues = {
   monthDay: "1",
   cron: "",
   runAt: "",
-  eventProvider: "notion",
+  eventProvider: "slack",
   event: defaultEvent.value,
-  eventResource: "",
+  eventCriteria: {},
   readScope: "allConnected",
   webSearch: true,
   surfaces: [],

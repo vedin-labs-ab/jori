@@ -137,10 +137,10 @@ function AutomationTrigger({ automation }: { automation: Automation }) {
           ? "Provider event"
           : getAutomationSurfaceLabel(trigger.provider)}{" "}
         {eventLabel}
-        {trigger.filter === undefined ? null : (
+        {eventCriteriaSummary(trigger) === undefined ? null : (
           <>
             <SeparatorDot />
-            <span className="font-mono">{trigger.filter}</span>
+            <span className="font-mono">{eventCriteriaSummary(trigger)}</span>
           </>
         )}
       </span>
@@ -148,6 +148,22 @@ function AutomationTrigger({ automation }: { automation: Automation }) {
   }
 
   return <span>Once at {absoluteTime(trigger.at)}</span>
+}
+
+function eventCriteriaSummary(
+  trigger: Extract<Automation["trigger"], { type: "event" }>
+) {
+  const criteria = trigger.criteria
+
+  if (criteria === undefined) {
+    return trigger.filter
+  }
+
+  const summary = Object.entries(criteria)
+    .map(([, value]) => String(value))
+    .join(", ")
+
+  return summary === "" ? undefined : summary
 }
 
 function AutomationRuns({

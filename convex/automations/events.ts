@@ -1,88 +1,24 @@
 import { type IntegrationProvider } from "../providers/catalog"
+import { automationEventCatalog, automationEventOptionSources } from "./catalog"
+import {
+  type AutomationEventCriteria,
+  type AutomationEventDefinition,
+  type AutomationEventOptionSource,
+  type AutomationEventParameter,
+} from "./catalog/types"
 
-export const automationEventOptionSources = ["slack.channels"] as const
+export { automationEventCatalog, automationEventOptionSources } from "./catalog"
+export type {
+  AutomationEventCriteria,
+  AutomationEventCriteriaValue,
+  AutomationEventDefinition,
+  AutomationEventOptionSource,
+  AutomationEventParameter,
+  AutomationEventProviderDefinition,
+} from "./catalog/types"
 
-export type AutomationEventOptionSource =
-  (typeof automationEventOptionSources)[number]
-
-export type AutomationEventResource =
-  | {
-      type: "text"
-      label: string
-      placeholder: string
-      required: boolean
-    }
-  | {
-      type: "option"
-      label: string
-      placeholder: string
-      required: boolean
-      source: AutomationEventOptionSource
-    }
-
-export type AutomationEventDefinition = {
-  value: string
-  label: string
-  description: string
-  resource?: AutomationEventResource
-}
-
-export type AutomationEventProviderDefinition = {
-  provider: IntegrationProvider
-  events: readonly AutomationEventDefinition[]
-}
-
-export const automationEventCatalog = [
-  provider("notion", [
-    event("page.updated", {
-      label: "Page updated",
-      description: "Runs when a selected Notion page changes.",
-      resource: {
-        type: "text",
-        label: "Page",
-        placeholder: "Paste a Notion page ID or URL",
-        required: true,
-      },
-    }),
-  ]),
-  provider("slack", [
-    event("message.created", {
-      label: "Channel message",
-      description: "Runs when a new message appears in a selected channel.",
-      resource: {
-        type: "option",
-        label: "Channel",
-        placeholder: "Search Slack channels",
-        required: true,
-        source: "slack.channels",
-      },
-    }),
-  ]),
-  provider("gmail", [
-    event("message.received", {
-      label: "Email received",
-      description: "Runs when a new Gmail message arrives.",
-    }),
-  ]),
-  provider("microsoftEmail", [
-    event("message.received", {
-      label: "Email received",
-      description: "Runs when a new Outlook message arrives.",
-    }),
-  ]),
-  provider("googleDrive", [
-    event("file.updated", {
-      label: "File updated",
-      description: "Runs when a selected Google Drive file changes.",
-      resource: {
-        type: "text",
-        label: "File",
-        placeholder: "Paste a Google Drive file ID or URL",
-        required: true,
-      },
-    }),
-  ]),
-] as const satisfies readonly AutomationEventProviderDefinition[]
+const pendingProviderDelivery =
+  "Event delivery for this provider is not available yet."
 
 export type AutomationEventProvider =
   (typeof automationEventCatalog)[number]["provider"]
@@ -142,50 +78,166 @@ export function providerUsesAutomationEventOptionSource(
   provider: IntegrationProvider,
   source: AutomationEventOptionSource
 ) {
-  return getAutomationEventDefinitions(provider).some((definition) => {
-    const resource = definition.resource
-
-    return resource?.type === "option" && resource.source === source
-  })
+  return getAutomationEventDefinitions(provider).some((definition) =>
+    (definition.parameters ?? []).some(
+      (parameter) => parameter.type === "option" && parameter.source === source
+    )
+  )
 }
 
-export function normalizeAutomationEventResource(
+export function normalizeAutomationEventCriteria(
   definition: AutomationEventDefinition,
-  value: string | undefined
+  criteria: Record<string, unknown> | undefined
 ) {
-  const normalized = normalizeOptionalText(value)
+  const parameters = definition.parameters ?? []
+  const input = criteria ?? {}
 
-  if (definition.resource === undefined) {
-    if (normalized !== undefined) {
-      throw new Error(`${definition.label} does not use a resource.`)
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    throw new Error("Event criteria must be a key-value object.")
+  }
+
+  assertKnownCriteriaKeys(parameters, input)
+
+  const normalized: AutomationEventCriteria = {}
+
+  for (const parameter of parameters) {
+    const value = normalizeAutomationEventParameter(
+      parameter,
+      input[parameter.key]
+    )
+
+    if (value === undefined) {
+      if (parameter.required) {
+        throw new Error(`${parameter.label} is required.`)
+      }
+      continue
     }
 
+    normalized[parameter.key] = value
+  }
+
+  return Object.keys(normalized).length === 0 ? undefined : normalized
+}
+
+export function assertAutomationEventIsAvailable(
+  definition: AutomationEventDefinition
+) {
+  if (definition.availability.status === "available") {
+    return
+  }
+
+  throw new Error(definition.availability.message ?? pendingProviderDelivery)
+}
+
+export function automationEventCriteriaKey(
+  criteria: AutomationEventCriteria | undefined
+) {
+  if (criteria === undefined || Object.keys(criteria).length === 0) {
     return undefined
   }
 
-  if (definition.resource.required && normalized === undefined) {
-    throw new Error(`${definition.resource.label} is required.`)
+  return JSON.stringify(
+    Object.entries(criteria).sort(([left], [right]) =>
+      left.localeCompare(right)
+    )
+  )
+}
+
+export function legacyAutomationEventCriteria(
+  definition: AutomationEventDefinition,
+  filter: string | undefined
+) {
+  const normalized = normalizeOptionalText(filter)
+
+  if (normalized === undefined) {
+    return undefined
+  }
+
+  const parameter = definition.parameters?.[0]
+
+  return parameter === undefined
+    ? undefined
+    : normalizeAutomationEventCriteria(definition, {
+        [parameter.key]: normalized,
+      })
+}
+
+function assertKnownCriteriaKeys(
+  parameters: readonly AutomationEventParameter[],
+  criteria: Record<string, unknown>
+) {
+  const knownKeys = new Set(parameters.map((parameter) => parameter.key))
+
+  for (const key of Object.keys(criteria)) {
+    if (
+      !knownKeys.has(key) &&
+      criteria[key] !== undefined &&
+      criteria[key] !== ""
+    ) {
+      throw new Error(`Unknown event criterion: ${key}.`)
+    }
+  }
+}
+
+function normalizeAutomationEventParameter(
+  parameter: AutomationEventParameter,
+  value: unknown
+) {
+  if (parameter.type === "number") {
+    return normalizeNumberParameter(parameter, value)
+  }
+
+  const normalized = normalizeOptionalText(
+    typeof value === "string" ? value : undefined
+  )
+
+  if (normalized === undefined) {
+    return undefined
+  }
+
+  if (parameter.type === "email" && !isEmailAddress(normalized)) {
+    throw new Error(`${parameter.label} must be an email address.`)
   }
 
   return normalized
 }
 
-function provider<const Provider extends IntegrationProvider>(
-  provider: Provider,
-  events: readonly AutomationEventDefinition[]
+function normalizeNumberParameter(
+  parameter: Extract<AutomationEventParameter, { type: "number" }>,
+  value: unknown
 ) {
-  return { provider, events }
-}
+  const numberValue =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && value.trim() !== ""
+        ? Number(value)
+        : undefined
 
-function event<const Value extends string>(
-  value: Value,
-  definition: Omit<AutomationEventDefinition, "value">
-) {
-  return { ...definition, value }
+  if (numberValue === undefined) {
+    return undefined
+  }
+
+  if (!Number.isFinite(numberValue) || !Number.isInteger(numberValue)) {
+    throw new Error(`${parameter.label} must be a whole number.`)
+  }
+
+  if (parameter.min !== undefined && numberValue < parameter.min) {
+    throw new Error(`${parameter.label} must be at least ${parameter.min}.`)
+  }
+
+  if (parameter.max !== undefined && numberValue > parameter.max) {
+    throw new Error(`${parameter.label} must be at most ${parameter.max}.`)
+  }
+
+  return numberValue
 }
 
 function normalizeOptionalText(value: string | undefined) {
   const normalized = value?.trim()
 
   return normalized === "" ? undefined : normalized
+}
+
+function isEmailAddress(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }

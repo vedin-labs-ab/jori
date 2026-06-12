@@ -1,5 +1,10 @@
 import { automationEventCatalog } from "../../../automations/events"
-import { numberProperty, objectSchema, stringProperty } from "./common"
+import {
+  numberProperty,
+  objectProperty,
+  objectSchema,
+  stringProperty,
+} from "./common"
 
 const providerEnum = [
   "slack",
@@ -92,8 +97,8 @@ const triggerSchema = () => ({
           enum: eventEnum,
           description: "Supported event name for the selected provider.",
         },
-        filter: stringProperty(
-          "Exact resource value when the event requires one, such as a Slack channel ID or Notion page ID."
+        criteria: objectProperty(
+          'Normalized event criteria keyed by catalog parameter name, such as {"channel":"C123"} or {"repo":"owner/repo","issue":"123"}.'
         ),
       },
     }),

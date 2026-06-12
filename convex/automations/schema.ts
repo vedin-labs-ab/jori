@@ -2,6 +2,9 @@ import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { integrationProviderValidator } from "../providers/catalog"
 
+const eventCriteriaValue = v.union(v.string(), v.number())
+const eventCriteria = v.record(v.string(), eventCriteriaValue)
+
 export const accessInput = v.object({
   read: v.union(v.literal("all"), v.array(integrationProviderValidator)),
   write: v.array(integrationProviderValidator),
@@ -27,6 +30,7 @@ export const triggerInput = v.union(
     type: v.literal("event"),
     provider: integrationProviderValidator,
     event: v.string(),
+    criteria: v.optional(eventCriteria),
     filter: v.optional(v.string()),
   })
 )
@@ -47,6 +51,7 @@ export const trigger = v.union(
     type: v.literal("event"),
     integrationId: v.id("integrations"),
     event: v.string(),
+    criteria: v.optional(eventCriteria),
     filter: v.optional(v.string()),
   })
 )

@@ -130,6 +130,7 @@ async function projectTriggerForConsole(
     type: "event" as const,
     provider: integration?.provider,
     event: trigger.event,
+    criteria: trigger.criteria,
     filter: trigger.filter,
   }
 }
