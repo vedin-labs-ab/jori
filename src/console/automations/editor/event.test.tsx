@@ -52,7 +52,7 @@ describe("automation event fields", () => {
 
     expect(
       screen
-        .getByLabelText("Provider")
+        .getByLabelText("Integration")
         .querySelector('img[src="/logos/providers/slack.svg"]')
     ).not.toBeNull()
   })
@@ -122,7 +122,7 @@ describe("automation event provider options", () => {
 })
 
 function openProviderPicker() {
-  fireEvent.pointerDown(screen.getByLabelText("Provider"), {
+  fireEvent.pointerDown(screen.getByLabelText("Integration"), {
     button: 0,
     ctrlKey: false,
     pointerType: "mouse",
@@ -175,15 +175,16 @@ describe("automation event conditions", () => {
     expect(screen.queryByLabelText("Team")).toBeNull()
     expect(screen.queryByLabelText("Project")).toBeNull()
     expect(screen.queryByLabelText("Issue")).toBeNull()
-    expect(
-      screen.getByText("Optionally narrow when this automation should run.")
-    ).toBeDefined()
+    expect(screen.getByText("Scope")).toBeDefined()
+    expect(screen.getByText("Set where this event applies.")).toBeDefined()
   })
 
-  test("hides the conditions section when every parameter is required", () => {
+  test("shows required scope fields without an add button when every parameter is required", () => {
     renderEventFields({ eventProvider: "slack", event: "message.created" })
 
     expect(screen.getByLabelText("Channel")).toBeDefined()
+    expect(screen.getByText("Scope")).toBeDefined()
+    expect(screen.queryByRole("button", { name: "Add condition" })).toBeNull()
     expect(screen.queryByText("Conditions")).toBeNull()
   })
 

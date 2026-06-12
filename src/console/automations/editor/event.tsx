@@ -10,17 +10,14 @@ import {
 } from "@/components/ui/select"
 import {
   type AutomationEventDefinition,
-  type AutomationEventParameter,
   type AutomationEventProvider,
   automationEventCatalog,
   getAutomationEventDefinition,
   getDefaultAutomationEvent,
 } from "../../../../convex/automations/events"
 import { type AutomationFormValues } from "../types"
-import { EventConditionFields } from "./conditions"
-import { applyEventCriteriaChange } from "./criteria"
-import { EventParameterControl } from "./parameter"
 import { EventProviderField } from "./provider/field"
+import { EventScopeFields } from "./scope"
 
 export function EventFields({
   tenantId,
@@ -39,7 +36,7 @@ export function EventFields({
     <div className="grid gap-3">
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="grid gap-2">
-          <Label htmlFor="automation-event-provider">Provider</Label>
+          <Label htmlFor="automation-event-provider">Integration</Label>
           <EventProviderField
             tenantId={tenantId}
             value={values.eventProvider}
@@ -104,11 +101,6 @@ function EventParameterFields({
   onValuesChange: (values: Record<string, string>) => void
   values: Record<string, string>
 }) {
-  const parameters = event.parameters ?? []
-  const requiredParameters = parameters.filter(
-    (parameter) => parameter.required
-  )
-
   return (
     <div className="grid gap-3">
       <div className="grid gap-1">
@@ -122,31 +114,7 @@ function EventParameterFields({
           </Alert>
         ) : null}
       </div>
-      {requiredParameters.length === 0 ? null : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {requiredParameters.map((parameter) => (
-            <EventParameterField
-              key={parameter.key}
-              tenantId={tenantId}
-              provider={provider}
-              parameter={parameter}
-              parameters={parameters}
-              values={values}
-              onValueChange={(value) =>
-                onValuesChange(
-                  applyEventCriteriaChange({
-                    key: parameter.key,
-                    parameters,
-                    value,
-                    values,
-                  })
-                )
-              }
-            />
-          ))}
-        </div>
-      )}
-      <EventConditionFields
+      <EventScopeFields
         key={`${provider}:${event.value}`}
         tenantId={tenantId}
         provider={provider}
@@ -154,42 +122,6 @@ function EventParameterFields({
         onValuesChange={onValuesChange}
         values={values}
       />
-    </div>
-  )
-}
-
-function EventParameterField({
-  tenantId,
-  provider,
-  parameter,
-  parameters,
-  values,
-  onValueChange,
-}: {
-  tenantId: string
-  provider: AutomationEventProvider
-  parameter: AutomationEventParameter
-  parameters: readonly AutomationEventParameter[]
-  values: Record<string, string>
-  onValueChange: (value: string) => void
-}) {
-  const id = `automation-event-${parameter.key}`
-
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor={id}>{parameter.label}</Label>
-      <EventParameterControl
-        tenantId={tenantId}
-        provider={provider}
-        parameter={parameter}
-        parameters={parameters}
-        values={values}
-        id={id}
-        onValueChange={onValueChange}
-      />
-      {parameter.description === undefined ? null : (
-        <p className="text-muted-foreground text-xs">{parameter.description}</p>
-      )}
     </div>
   )
 }
