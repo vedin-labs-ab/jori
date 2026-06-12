@@ -16,7 +16,7 @@ import { refreshMicrosoftAccessToken } from "../providers/microsoft/oauth"
 
 type RuntimeIntegration = Doc<"integrations">
 
-const OAUTH_REFRESH_BUFFER_MS = 5 * 60 * 1000
+const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000
 
 export async function prepareIntegrationForRuntime(
   ctx: ActionCtx,
@@ -27,7 +27,7 @@ export async function prepareIntegrationForRuntime(
   const integration = args.integration
 
   if (integration.provider === "github") {
-    return await prepareGitHubIntegrationForRuntime(integration)
+    return await prepareGitHubIntegrationForRuntime(ctx, integration)
   }
 
   if (integration.provider === "linear") {
@@ -46,22 +46,34 @@ export async function prepareIntegrationForRuntime(
 }
 
 async function prepareGitHubIntegrationForRuntime(
+  ctx: ActionCtx,
   integration: RuntimeIntegration
 ) {
   const credentials = requireGitHubCredentials(integration)
+
+  if (hasFreshGitHubToken(credentials)) {
+    return integration
+  }
+
   const tokenResult = await createGitHubInstallationToken(
     credentials.installationId
   )
   const expiresAt = Date.parse(tokenResult.expires_at)
 
-  return {
-    ...integration,
-    credentials: {
-      installationId: credentials.installationId,
-      tokens: { access: tokenResult.token },
-      expiresAt: Number.isFinite(expiresAt) ? expiresAt : undefined,
-    },
+  if (!Number.isFinite(expiresAt)) {
+    throw new Error("GitHub installation token is missing an expiration")
   }
+
+  const refreshedCredentials = await ctx.runMutation(
+    internal.providers.github.install.updateInstallationCredentials,
+    {
+      integrationId: integration._id,
+      accessToken: tokenResult.token,
+      expiresAt,
+    }
+  )
+
+  return withCredentials(integration, refreshedCredentials)
 }
 
 async function prepareLinearIntegrationForRuntime(
@@ -161,8 +173,28 @@ async function prepareMicrosoftIntegrationForRuntime(
   return withCredentials(integration, refreshedCredentials)
 }
 
+function hasFreshGitHubToken(credentials: {
+  tokens?: {
+    access?: string
+  }
+  expiresAt?: number
+}) {
+  const accessToken = credentials.tokens?.access
+
+  return (
+    accessToken !== undefined &&
+    accessToken !== "" &&
+    credentials.expiresAt !== undefined &&
+    hasFreshTokenExpiration(credentials.expiresAt)
+  )
+}
+
 function hasFreshOAuthToken(credentials: { expiresAt: number }) {
-  return credentials.expiresAt > Date.now() + OAUTH_REFRESH_BUFFER_MS
+  return hasFreshTokenExpiration(credentials.expiresAt)
+}
+
+function hasFreshTokenExpiration(expiresAt: number) {
+  return expiresAt > Date.now() + TOKEN_REFRESH_BUFFER_MS
 }
 
 function tokenRefreshError(
