@@ -4,7 +4,7 @@ import { internalMutation, type MutationCtx } from "../_generated/server"
 import {
   findConversationActivation,
   startMessageRun,
-} from "../attention/activations"
+} from "../activations/data"
 import { resolveUserIdByEmail } from "../identity/identities"
 import { type IntegrationProvider } from "../providers/catalog"
 import {
