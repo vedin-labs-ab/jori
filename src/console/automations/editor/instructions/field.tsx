@@ -9,10 +9,6 @@ export function AutomationInstructionsField(
   props: AutomationInstructionsFieldProps
 ) {
   const errorId = props.error === undefined ? undefined : `${props.id}-error`
-  const accessHint =
-    props.readScope === "allConnected"
-      ? "Set each badge to read or read/write."
-      : "Set each badge to read, write, or both."
   const {
     editor,
     isEmpty,
@@ -42,7 +38,9 @@ export function AutomationInstructionsField(
           <EditorContent className="min-w-0 max-w-full" editor={editor} />
           <div className="flex min-h-9 items-center gap-2 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
             <AtSign aria-hidden="true" className="size-3.5 shrink-0" />
-            <span>Mention integrations by name. {accessHint}</span>
+            <span>
+              Type integration names. Milo suggests matches and adds badges.
+            </span>
           </div>
         </div>
         {isEmpty ? (

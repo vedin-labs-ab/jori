@@ -6,7 +6,7 @@ import { renderInstructionsField } from "./fixtures"
 afterEach(cleanup)
 
 describe("automation instructions all-read access", () => {
-  test("shows all-read marker guidance", async () => {
+  test("keeps the footer focused on smart integration mentions", async () => {
     const field = renderInstructionsField({
       description: "",
       readScope: "allConnected",
@@ -15,8 +15,9 @@ describe("automation instructions all-read access", () => {
 
     expect(await screen.findByRole("textbox")).toBeDefined()
     expect(field.container.textContent).toContain(
-      "Set each badge to read or read/write."
+      "Type integration names. Milo suggests matches and adds badges."
     )
+    expect(field.container.textContent).not.toContain("read/write")
   })
 
   test("cycles marker access between read and read/write", async () => {
