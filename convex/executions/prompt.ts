@@ -196,13 +196,21 @@ function isKnownProvider(
 function getGitHubTargetLines(data: unknown) {
   const repository = readDataObject(data, "repository")
   const comment = readDataObject(data, "comment")
+  const commentKind = readDataString(comment, "kind")
 
   return [
     targetLine("Repository", readDataString(repository, "fullName")),
     targetLine("Issue number", readDataNumber(data, "issueNumber")),
     targetLine("Pull request number", readDataNumber(data, "pullNumber")),
     targetLine("Comment ID", readDataString(comment, "id")),
-    targetLine("Comment kind", readDataString(comment, "kind")),
+    targetLine("Comment kind", commentKind),
+    targetLine(
+      "Review thread comment ID",
+      commentKind === "pull_request_review"
+        ? (readDataString(comment, "inReplyToId") ??
+            readDataString(comment, "id"))
+        : undefined
+    ),
   ]
 }
 

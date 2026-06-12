@@ -1,16 +1,21 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { githubApiUrl } from "../../../providers/github/config"
-import { requireGitHubCredentials } from "../../../providers/github/credentials"
 import {
   base64Decode,
   boundedNumber,
-  fetchJson,
   jsonErrorResponse,
   optionalString,
   readNested,
   requiredNumber,
   requiredString,
 } from "../common"
+import {
+  githubHeaders,
+  githubJson,
+  repositoryPath,
+  requireGitHubRuntimeToken,
+} from "./client"
+import { addIssueComment, replyToPullRequestReviewComment } from "./comments"
 import {
   summarizeComment,
   summarizeIssue,
@@ -74,6 +79,7 @@ const githubToolHandlers: Record<
   github_get_pull_request: getPullRequest,
   github_get_repository: getRepository,
   github_list_repositories: listRepositories,
+  github_reply_to_pull_request_review_comment: replyToPullRequestReviewComment,
   github_search_issues: searchIssues,
 }
 
@@ -208,65 +214,6 @@ async function getFile(token: string, args: Record<string, unknown>) {
     truncated: content.length > 100_000,
     content: content.slice(0, 100_000),
   }
-}
-
-async function addIssueComment(token: string, args: Record<string, unknown>) {
-  const result = await githubJson(
-    token,
-    `${repositoryPath(args.owner, args.repo)}/issues/${requiredNumber(args.issueNumber, "issueNumber")}/comments`,
-    {},
-    {
-      method: "POST",
-      body: {
-        body: requiredString(args.body, "body"),
-      },
-    }
-  )
-
-  return summarizeComment(result)
-}
-
-function requireGitHubRuntimeToken(integration: Doc<"integrations">) {
-  const credentials = requireGitHubCredentials(integration)
-
-  if (credentials.tokens?.access === undefined) {
-    throw new Error("Missing GitHub runtime token")
-  }
-
-  return credentials.tokens.access
-}
-
-async function githubJson(
-  token: string,
-  path: string,
-  query: Record<string, unknown> = {},
-  options: { method?: string; body?: unknown } = {}
-) {
-  const url = new URL(githubApiUrl + path)
-
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) {
-      url.searchParams.set(key, String(value))
-    }
-  }
-
-  return await fetchJson(url.toString(), {
-    method: options.method ?? "GET",
-    headers: githubHeaders(token),
-    body: options.body,
-  })
-}
-
-function githubHeaders(token: string) {
-  return {
-    authorization: `Bearer ${token}`,
-    accept: "application/vnd.github+json",
-    "x-github-api-version": "2022-11-28",
-  }
-}
-
-function repositoryPath(ownerValue: unknown, repoValue: unknown) {
-  return `/repos/${encodeURIComponent(requiredString(ownerValue, "owner"))}/${encodeURIComponent(requiredString(repoValue, "repo"))}`
 }
 
 function encodeRepositoryPath(value: string) {

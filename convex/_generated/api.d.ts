@@ -51,6 +51,8 @@ import type * as broker_milo from "../broker/milo.js";
 import type * as broker_providers from "../broker/providers.js";
 import type * as broker_providers_common from "../broker/providers/common.js";
 import type * as broker_providers_fixtures_artifacts from "../broker/providers/fixtures/artifacts.js";
+import type * as broker_providers_github_client from "../broker/providers/github/client.js";
+import type * as broker_providers_github_comments from "../broker/providers/github/comments.js";
 import type * as broker_providers_github_format from "../broker/providers/github/format.js";
 import type * as broker_providers_github_index from "../broker/providers/github/index.js";
 import type * as broker_providers_google_drive from "../broker/providers/google/drive.js";
@@ -268,6 +270,8 @@ declare const fullApi: ApiFromModules<{
   "broker/providers": typeof broker_providers;
   "broker/providers/common": typeof broker_providers_common;
   "broker/providers/fixtures/artifacts": typeof broker_providers_fixtures_artifacts;
+  "broker/providers/github/client": typeof broker_providers_github_client;
+  "broker/providers/github/comments": typeof broker_providers_github_comments;
   "broker/providers/github/format": typeof broker_providers_github_format;
   "broker/providers/github/index": typeof broker_providers_github_index;
   "broker/providers/google/drive": typeof broker_providers_google_drive;
