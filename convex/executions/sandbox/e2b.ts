@@ -69,7 +69,7 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
         "bootstrap",
         await bootstrapCodex(sandbox, { ...args, profile })
       ),
-      "Could not bootstrap Codex inside E2B.",
+      "Could not start the run environment.",
       setupTraces
     )
 
@@ -84,7 +84,7 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
           `preflight:${preflightTrace.type}`,
           preflightTrace.trace
         ),
-        "A preflight failed inside the E2B sandbox.",
+        "An integration check failed while starting the run.",
         setupTraces
       )
     }

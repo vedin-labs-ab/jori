@@ -38,7 +38,7 @@ export function ScheduleSurfaceNodeView({
       data-schedule-surface-view=""
     >
       <ButtonGroup
-        aria-label={`${providerLabel} schedule surface`}
+        aria-label={`${providerLabel} integration access`}
         className={cn(
           "mx-0.5 inline-flex h-5 overflow-hidden rounded-sm border align-middle text-[0.625rem]/none shadow-none",
           toneClassNames.surface,

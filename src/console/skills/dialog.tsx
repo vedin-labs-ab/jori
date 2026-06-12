@@ -42,8 +42,8 @@ export function SkillDialog({
             {skill === undefined ? "Add skill" : "Edit skill"}
           </DialogTitle>
           <DialogDescription>
-            Use a lowercase hyphenated name, a clear trigger description, and
-            Markdown instructions.
+            Name the skill, describe when Milo should use it, and write the
+            instructions in Markdown.
           </DialogDescription>
         </DialogHeader>
 

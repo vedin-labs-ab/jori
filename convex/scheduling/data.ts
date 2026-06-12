@@ -178,7 +178,7 @@ export async function getTenantSchedule(
   const schedule = await ctx.db.get(scheduleId)
 
   if (schedule === null || schedule.tenantId !== tenantId) {
-    throw new Error("Schedule not found")
+    throw new Error("Schedule not found.")
   }
 
   return schedule
@@ -191,7 +191,7 @@ export async function getRequiredSchedule(
   const schedule = await ctx.db.get(scheduleId)
 
   if (schedule === null) {
-    throw new Error("Schedule not found")
+    throw new Error("Schedule not found.")
   }
 
   return schedule

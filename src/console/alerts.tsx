@@ -13,97 +13,97 @@ const integrationCallbackAlerts = [
     "slack",
     "connected",
     "Slack connected",
-    "Slack can now send Milo events for the active organization."
+    "Milo can now respond to mentions and search context in your Slack workspace."
   ),
   callbackAlert(
     "linear",
     "connected",
     "Linear connected",
-    "Linear can now send Milo issue and comment events for the active organization."
+    "Milo can now respond to mentions and comment on Linear issues."
   ),
   callbackAlert(
     "microsoftEmail",
     "connected",
-    "Microsoft Email connected",
-    "Milo can now use Outlook mail tools for your account when explicitly requested."
+    "Outlook Mail connected",
+    "Milo can now work with your Outlook mail when you ask."
   ),
   callbackAlert(
     "microsoftCalendar",
     "connected",
     "Microsoft Calendar connected",
-    "Milo can now use Microsoft Calendar tools for your account when explicitly requested."
+    "Milo can now work with your Microsoft calendar when you ask."
   ),
   callbackAlert(
     "github",
     "connected",
     "GitHub connected",
-    "GitHub can now send Milo comment events for the active organization."
+    "Milo can now respond to mentions in GitHub issues and pull requests."
   ),
   callbackAlert(
     "gmail",
     "connected",
-    "Email connected",
-    "Milo can now use Gmail tools for your account when explicitly requested."
+    "Gmail connected",
+    "Milo can now work with your Gmail when you ask."
   ),
   callbackAlert(
     "googleCalendar",
     "connected",
-    "Calendar connected",
-    "Milo can now use Google Calendar tools for your account when explicitly requested."
+    "Google Calendar connected",
+    "Milo can now work with your Google Calendar when you ask."
   ),
   callbackAlert(
     "googleDrive",
     "connected",
-    "Drive connected",
-    "Milo can now use Google Drive tools for this tenant when explicitly requested."
+    "Google Drive connected",
+    "Milo can now work with your organization's shared Drive when a run needs it."
   ),
   callbackAlert(
     "slack",
     "error",
     "Slack connection failed",
-    "Slack did not return an installation token. Check the Slack app OAuth settings and try again."
+    "Slack didn't finish connecting. Try again, and check the Slack app's OAuth settings if it keeps failing."
   ),
   callbackAlert(
     "linear",
     "error",
     "Linear connection failed",
-    "Linear did not return an installation token. Check the Linear OAuth app settings and try again."
+    "Linear didn't finish connecting. Try again, and check the Linear OAuth app settings if it keeps failing."
   ),
   callbackAlert(
     "microsoftEmail",
     "error",
-    "Microsoft Email connection failed",
-    "Microsoft did not return a usable Outlook mail OAuth token. Check the Microsoft app permissions and try again."
+    "Outlook Mail connection failed",
+    "Microsoft didn't finish connecting. Try again, and check the Microsoft app permissions if it keeps failing."
   ),
   callbackAlert(
     "microsoftCalendar",
     "error",
     "Microsoft Calendar connection failed",
-    "Microsoft did not return a usable Calendar OAuth token. Check the Microsoft app permissions and try again."
+    "Microsoft didn't finish connecting. Try again, and check the Microsoft app permissions if it keeps failing."
   ),
   callbackAlert(
     "github",
     "error",
     "GitHub connection failed",
-    "GitHub did not return an installation. Check the GitHub App setup URL and try again."
+    "GitHub didn't finish installing the app. Try again, and check the GitHub App settings if it keeps failing."
   ),
   callbackAlert(
     "gmail",
     "error",
-    "Email connection failed",
-    "Google did not return a usable Gmail OAuth token. Check the Google OAuth app settings and try again."
+    "Gmail connection failed",
+    "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
   ),
   callbackAlert(
     "googleCalendar",
     "error",
-    "Calendar connection failed",
-    "Google did not return a usable Calendar OAuth token. Check the Google OAuth app settings and try again."
+    "Google Calendar connection failed",
+    "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
   ),
   callbackAlert(
     "googleDrive",
     "error",
-    "Drive connection failed",
-    "Google did not return a usable Drive OAuth token. Check the Google OAuth app settings and try again."
+    "Google Drive connection failed",
+    "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
   ),
 ]
 

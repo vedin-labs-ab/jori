@@ -27,7 +27,7 @@ export async function checkTenantAccess(
   if (identity === null) {
     return {
       ok: false as const,
-      message: "Unauthorized: sign in before accessing tenant data.",
+      message: "Sign in to access this organization.",
     }
   }
 
@@ -45,7 +45,7 @@ export async function checkTenantAccess(
     return {
       ok: false as const,
       message:
-        "Unauthorized: active Clerk organization does not match the requested tenant. Switch organizations or refresh your session.",
+        "This data belongs to another organization. Switch organizations or refresh your session.",
     }
   }
 

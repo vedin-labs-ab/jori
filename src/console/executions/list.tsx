@@ -139,10 +139,10 @@ const ExecutionFilters = memo(function ExecutionFilters({
         <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
           <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
           <Input
-            aria-label="Search executions"
+            aria-label="Search runs"
             className="h-8 pr-2 pl-8"
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search executions..."
+            placeholder="Search runs..."
             value={query}
           />
         </div>

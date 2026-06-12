@@ -14,7 +14,7 @@ import {
 const modeLabels: Record<PermissionMode, string> = {
   required: "Required",
   allowed: "Allowed",
-  prompted: "Prompted",
+  prompted: "Ask first",
   blocked: "Blocked",
 }
 

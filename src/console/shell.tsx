@@ -60,9 +60,9 @@ import { BrandMark } from "@/shared/brand"
 import { IntegrationCallbackAlerts } from "./alerts"
 
 const consoleNavigation = [
-  { icon: LayoutDashboard, label: "Console", to: "/console" },
-  { icon: ListChecks, label: "Executions", to: "/executions" },
-  { icon: CalendarClock, label: "Scheduling", to: "/scheduling" },
+  { icon: LayoutDashboard, label: "Overview", to: "/console" },
+  { icon: ListChecks, label: "Runs", to: "/executions" },
+  { icon: CalendarClock, label: "Schedules", to: "/scheduling" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
   { icon: Component, label: "Playground", to: "/playground" },
@@ -285,7 +285,7 @@ function SidebarUserButton() {
                 }
               >
                 <ShieldUser />
-                Identity
+                Account
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

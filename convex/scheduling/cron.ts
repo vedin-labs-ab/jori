@@ -39,14 +39,18 @@ export function getNextCronRunAt(expression: string, from: number) {
     cursor.setUTCDate(cursor.getUTCDate() + 1)
   }
 
-  throw new Error("Cron expression has no matching run in the next five years")
+  throw new Error(
+    "This cron expression has no upcoming runs in the next five years."
+  )
 }
 
 function parseCronExpression(expression: string): CronSchedule {
   const fields = expression.trim().split(/\s+/)
 
   if (fields.length !== 5) {
-    throw new Error("Cron expressions must contain five UTC fields")
+    throw new Error(
+      "Cron expressions need five fields: minute, hour, day of month, month, day of week."
+    )
   }
 
   const [minute, hour, dayOfMonth, month, dayOfWeek] = fields
@@ -167,7 +171,7 @@ function validateCalendarSatisfiable(schedule: CronSchedule) {
     }
   }
 
-  throw new Error("Cron day-of-month never occurs in the selected month(s)")
+  throw new Error("This day of month never occurs in the selected months.")
 }
 
 function getMaxPossibleDayOfMonth(month: number) {

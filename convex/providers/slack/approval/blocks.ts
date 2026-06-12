@@ -30,8 +30,8 @@ export function createSlackApprovalRequest(args: {
   return {
     text: [
       "Milo needs approval before continuing.",
+      `Action: ${getToolLabel(args.tool)}`,
       args.summary,
-      `Tool: ${args.provider}.${args.tool}`,
     ].join("\n"),
     blocks: createSlackApprovalBlocks(args),
   }
@@ -73,7 +73,7 @@ export function createSlackExpirationResponse(args: {
 }) {
   return {
     replace_original: true,
-    text: "Request expired. Milo will not run this action.",
+    text: "Request expired. Milo skipped this action.",
     blocks: createExpirationBlocks(args),
   }
 }

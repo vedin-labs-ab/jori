@@ -76,7 +76,9 @@ export function ScheduleRow({
 }
 
 function readScopeLabel(readScope: Schedule["output"]["readScope"]) {
-  return readScope === "allConnected" ? "All reads" : "Selected reads"
+  return readScope === "allConnected"
+    ? "Reads all connected"
+    : "Reads mentioned"
 }
 
 function surfaceSummary(schedule: Schedule) {

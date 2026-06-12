@@ -7,7 +7,7 @@ const providerLogos: Record<string, string> = {
   "Google Drive": "/logos/providers/google-drive.svg",
   Linear: "/logos/providers/linear.svg",
   "Microsoft Calendar": "/logos/providers/microsoft-calendar.svg",
-  "Microsoft Email": "/logos/providers/microsoft-email.svg",
+  "Outlook Mail": "/logos/providers/microsoft-email.svg",
   Notion: "/logos/providers/notion.svg",
   Slack: "/logos/providers/slack.svg",
   github: "/logos/providers/github.svg",

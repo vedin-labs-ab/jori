@@ -47,9 +47,7 @@ export function OrganizationCard({
     <Card>
       <CardHeader>
         <CardTitle>Organization</CardTitle>
-        <CardDescription>
-          Clerk owns identity and organization setup.
-        </CardDescription>
+        <CardDescription>Your team's shared workspace in Milo.</CardDescription>
         <CardAction>
           <Badge variant="outline">Active</Badge>
         </CardAction>

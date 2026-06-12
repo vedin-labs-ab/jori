@@ -138,7 +138,7 @@ describe("schedule instructions field footer", () => {
 
     expect(await screen.findByRole("textbox")).toBeDefined()
     expect(field.container.textContent).toContain(
-      "Type an integration name to insert a marker."
+      "Type an integration name to mention it."
     )
 
     const footer = field.container.querySelector(
@@ -180,7 +180,7 @@ describe("schedule instructions marker hover", () => {
     })
 
     const button = await screen.findByRole("button", {
-      name: "Remove Google Drive marker",
+      name: "Remove Google Drive",
     })
     const content = button.closest("[data-schedule-remove-content]")
     const icon = button.querySelector("svg")
@@ -243,7 +243,7 @@ describe("schedule instructions field", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Remove GitHub marker",
+        name: "Remove GitHub",
       })
     )
 

@@ -36,7 +36,7 @@ export function normalizeScheduleOutput(
   }
 
   if (!hasScheduleWriter({ ...output, surfaces })) {
-    throw new Error("At least one write integration is required.")
+    throw new Error("At least one integration needs write access.")
   }
 
   return {

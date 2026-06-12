@@ -48,7 +48,7 @@ describe("schedule cron form parts", () => {
       buildRecurringCron({ ...classifyCron("0 9 * * *"), time: "" })
     ).toEqual({ error: "Time is required." })
     expect(buildRecurringCron(classifyCron("0 9 30 2 *"))).toEqual({
-      error: "Cron day-of-month never occurs in the selected month(s)",
+      error: "This day of month never occurs in the selected months.",
     })
   })
 

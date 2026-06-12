@@ -38,7 +38,7 @@ export function Landing() {
             needs to help.
           </p>
           <p className="text-sm leading-6 text-muted-foreground">
-            The current setup experience now lives in the console.
+            Setup takes a few minutes in the console.
           </p>
         </div>
       </section>

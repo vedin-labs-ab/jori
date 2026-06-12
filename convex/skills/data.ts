@@ -24,11 +24,11 @@ export function normalizeSkillInput(input: {
     description.length === 0 ||
     description.length > skillDescriptionMaxLength
   ) {
-    throw new Error("Skill description must be 1-320 characters.")
+    throw new Error("Skill description must be 1–320 characters.")
   }
 
   if (body.length === 0 || body.length > skillBodyMaxLength) {
-    throw new Error("Skill instructions must be 1-24000 characters.")
+    throw new Error("Skill instructions must be 1–24,000 characters.")
   }
 
   return { name, description, body }
@@ -47,7 +47,7 @@ export async function requireUniqueTenantSkillName(
     .first()
 
   if (existingSkill !== null) {
-    throw new Error("A tenant skill with this name already exists.")
+    throw new Error("A skill with this name already exists.")
   }
 }
 

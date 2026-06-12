@@ -105,7 +105,7 @@ export const update = mutation({
     const skill = await ctx.db.get(args.skillId)
 
     if (skill === null || skill.tenantId !== args.tenantId) {
-      throw new Error("Skill not found")
+      throw new Error("Skill not found.")
     }
 
     const input = normalizeSkillInput(args)
@@ -134,7 +134,7 @@ export const remove = mutation({
     const skill = await ctx.db.get(args.skillId)
 
     if (skill === null || skill.tenantId !== args.tenantId) {
-      throw new Error("Skill not found")
+      throw new Error("Skill not found.")
     }
 
     await ctx.db.delete(args.skillId)

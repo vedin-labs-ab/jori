@@ -22,7 +22,7 @@ export function getScheduleTiming(schedule: ScheduleInput, now: number) {
     const runAt = parseUtcIsoTimestamp(schedule.runAt)
 
     if (runAt <= now) {
-      throw new Error("One-shot schedules must be in the future")
+      throw new Error("One-time schedules must run in the future.")
     }
 
     return {
@@ -43,7 +43,7 @@ export function normalizeRequiredText(value: string, label: string) {
   const normalized = value.trim()
 
   if (normalized === "") {
-    throw new Error(`Schedule ${label} is required`)
+    throw new Error(`Schedule ${label} is required.`)
   }
 
   return normalized
@@ -51,7 +51,7 @@ export function normalizeRequiredText(value: string, label: string) {
 
 export function requiredCron(schedule: Doc<"schedules">) {
   if (schedule.cron === undefined) {
-    throw new Error("Recurring schedule is missing cron")
+    throw new Error("Recurring schedules need a cron expression.")
   }
 
   return schedule.cron
@@ -59,13 +59,13 @@ export function requiredCron(schedule: Doc<"schedules">) {
 
 function parseUtcIsoTimestamp(value: string) {
   if (!value.endsWith("Z")) {
-    throw new Error("One-shot schedules must use an ISO timestamp in UTC")
+    throw new Error("One-time schedules need an ISO timestamp in UTC.")
   }
 
   const timestamp = Date.parse(value)
 
   if (!Number.isFinite(timestamp)) {
-    throw new Error("Invalid ISO timestamp")
+    throw new Error("Run time is not a valid date.")
   }
 
   return timestamp

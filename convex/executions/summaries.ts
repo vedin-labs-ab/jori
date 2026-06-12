@@ -202,7 +202,7 @@ function sourceLabels({
 }) {
   if (schedule !== null) {
     return [
-      `Triggered by ${schedule.type === "recurring" ? "recurring" : "scheduled"} task`,
+      `Triggered by ${schedule.type === "recurring" ? "a recurring" : "a one-time"} schedule:`,
       schedule.name,
     ]
   }
@@ -231,14 +231,14 @@ function sourceLabels({
 
 function titleFromTrigger(trigger: Doc<"triggers"> | null) {
   if (trigger?.type === "scheduled") {
-    return "Scheduled execution"
+    return "Scheduled run"
   }
 
   if (trigger?.type === "message") {
-    return "Message execution"
+    return "Message run"
   }
 
-  return "Manual execution"
+  return "Manual run"
 }
 
 function triggerLabel(

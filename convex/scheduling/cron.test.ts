@@ -4,11 +4,11 @@ import { getNextCronRunAt, validateCronExpression } from "./cron"
 describe("cron scheduling", () => {
   test("rejects impossible day-of-month and month combinations", () => {
     expect(() => validateCronExpression("0 0 30 2 *")).toThrow(
-      "Cron day-of-month never occurs in the selected month(s)"
+      "This day of month never occurs in the selected months."
     )
     expect(() =>
       getNextCronRunAt("0 0 31 4,6,9,11 *", Date.UTC(2026, 0, 1))
-    ).toThrow("Cron day-of-month never occurs in the selected month(s)")
+    ).toThrow("This day of month never occurs in the selected months.")
   })
 
   test("preserves cron day-of-month and day-of-week OR semantics", () => {

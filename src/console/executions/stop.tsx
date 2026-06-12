@@ -41,7 +41,7 @@ export function StopExecution({
         <TooltipTrigger asChild>
           <AlertDialogTrigger asChild>
             <Button
-              aria-label="Stop execution"
+              aria-label="Stop run"
               className={className}
               size="icon"
               type="button"
@@ -51,14 +51,14 @@ export function StopExecution({
             </Button>
           </AlertDialogTrigger>
         </TooltipTrigger>
-        <TooltipContent>Stop execution</TooltipContent>
+        <TooltipContent>Stop run</TooltipContent>
       </Tooltip>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Stop this execution?</AlertDialogTitle>
+          <AlertDialogTitle>Stop this run?</AlertDialogTitle>
           <AlertDialogDescription>
-            The sandbox is terminated immediately and the run cannot resume. The
-            trace captured so far is kept.
+            Milo stops working immediately and the run can't resume. The trace
+            so far is kept.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -72,7 +72,7 @@ export function StopExecution({
             }}
             variant="destructive"
           >
-            Stop execution
+            Stop run
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -10,10 +10,10 @@ import { getWorkspaceHeadline } from "../shared/headline"
 const slackConfig = {
   action: "Connect Slack",
   connectedDetail:
-    "Milo can receive signed Slack events, search context, and post thread replies as Milo.",
-  connectError: "Could not start Slack install.",
+    "Milo responds to mentions, searches conversation context, and replies in threads.",
+  connectError: "Could not start the Slack connection.",
   emptyDetail:
-    "Install the Slack app once to enable context search and Milo replies.",
+    "Install the Slack app so Milo can respond to mentions where your team talks.",
   installPath: "/slack/install",
   label: "Slack",
   loading: "Connecting Slack",

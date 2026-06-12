@@ -90,7 +90,7 @@ export async function decideSlackApproval(
   if (target === null) {
     return {
       status: "missing",
-      message: "Approval could not be found.",
+      message: "That approval request no longer exists.",
     }
   }
 
@@ -98,7 +98,7 @@ export async function decideSlackApproval(
     return {
       status: "missing",
       integration: target.integration,
-      message: "No approval found for that request.",
+      message: "That approval request no longer exists.",
     }
   }
 
@@ -107,7 +107,8 @@ export async function decideSlackApproval(
       status: "missing",
       integration: target.integration,
       approval: target.approval,
-      message: "Approval decisions require a known Slack user.",
+      message:
+        "Couldn't identify the Slack user, so the decision wasn't recorded.",
     }
   }
 
@@ -147,7 +148,7 @@ export async function decideApproval(
       status: "approved",
       integration: args.integration,
       approval: result.approval,
-      message: "Approved. Continuing the run.",
+      message: "Approved. Milo is continuing the run.",
     }
   }
 
@@ -164,7 +165,7 @@ export async function decideApproval(
       status: "denied",
       integration: args.integration,
       approval: result.approval,
-      message: "Denied. Continuing without the action.",
+      message: "Denied. Milo is continuing without this action.",
     }
   }
 
@@ -196,24 +197,20 @@ function decisionStatusMessage(
   approval?: Doc<"approvals">
 ) {
   if (status === "expired") {
-    return "That approval has expired."
+    return "That approval request has expired."
   }
 
   if (approval?.decision === "approved") {
-    return "Already approved."
+    return "This request was already approved."
   }
 
   if (approval?.decision === "denied") {
-    return "Already denied."
+    return "This request was already denied."
   }
 
-  if (status === "decided") {
-    return "That approval was already decided."
+  if (status === "decided" || status === "consumed") {
+    return "This request was already decided."
   }
 
-  if (status === "consumed") {
-    return "That approval was already consumed."
-  }
-
-  return "Approval could not be found."
+  return "That approval request no longer exists."
 }

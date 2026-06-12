@@ -10,10 +10,10 @@ import { getWorkspaceHeadline } from "../shared/headline"
 const githubConfig = {
   action: "Connect GitHub",
   connectedDetail:
-    "Milo can receive signed GitHub comment webhooks, read the target repository, and reply in comment threads.",
-  connectError: "Could not start GitHub install.",
+    "Milo responds to mentions, reads the connected repositories, and replies in issue and pull request threads.",
+  connectError: "Could not start the GitHub connection.",
   emptyDetail:
-    "Install the GitHub App to enable mention-based issue and pull request comment triggers.",
+    "Install the GitHub App so Milo can respond to mentions in issues and pull requests.",
   installPath: "/github/install",
   label: "GitHub",
   loading: "Connecting GitHub",

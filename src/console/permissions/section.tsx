@@ -162,7 +162,7 @@ function getPermissionSummaryItems(permissions: ToolPermission[]) {
 
   return [
     formatPermissionSummaryItem(counts.allowed, "allowed"),
-    formatPermissionSummaryItem(counts.prompted, "prompted"),
+    formatPermissionSummaryItem(counts.prompted, "ask first"),
     formatPermissionSummaryItem(counts.required, "required"),
     formatPermissionSummaryItem(counts.blocked, "blocked"),
   ].filter((item) => item !== null)

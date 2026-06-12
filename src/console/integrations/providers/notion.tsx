@@ -10,10 +10,10 @@ import { getWorkspaceHeadline } from "../shared/headline"
 const notionConfig = {
   action: "Connect Notion",
   connectedDetail:
-    "Milo can search shared Notion content, read pages and records, update pages, append blocks, and add comments.",
-  connectError: "Could not start Notion install.",
+    "Milo can search shared content, read and update pages, and add comments.",
+  connectError: "Could not start the Notion connection.",
   emptyDetail:
-    "Connect Notion to let Milo use selected workspace pages and databases as context and action surfaces.",
+    "Connect Notion so Milo can work with the pages and databases you share.",
   installPath: "/notion/install",
   label: "Notion",
   loading: "Connecting Notion",

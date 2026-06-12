@@ -75,7 +75,7 @@ function SkillRow({
           </div>
         </div>
         <Badge variant={isEditable ? "secondary" : "outline"}>
-          {isEditable ? "Tenant" : "Global"}
+          {isEditable ? "Organization" : "Built-in"}
         </Badge>
       </div>
 

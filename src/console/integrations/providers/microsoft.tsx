@@ -8,15 +8,15 @@ import {
 import { getAccountHeadline } from "../shared/headline"
 
 const emailConfig = {
-  action: "Connect Email",
+  action: "Connect Outlook",
   connectedDetail:
-    "User-scoped. Milo can read, draft, edit, and send Outlook mail from this account when explicitly requested.",
-  connectError: "Could not start Microsoft Email install.",
+    "Connected for you only. Milo can read, draft, and send your mail when you ask.",
+  connectError: "Could not start the Outlook connection.",
   emptyDetail:
-    "Connect your Outlook account. This connection is scoped to you, not the whole tenant.",
+    "Connect your Outlook account. This connects only you, not the whole organization.",
   installPath: "/microsoft-email/install",
   label: "Outlook Mail",
-  loading: "Connecting Email",
+  loading: "Connecting Outlook",
   logo: {
     alt: "Microsoft Outlook logo",
     src: "https://svgl.app/library/microsoft-outlook.svg",
@@ -27,10 +27,10 @@ const emailConfig = {
 const calendarConfig = {
   action: "Connect Calendar",
   connectedDetail:
-    "User-scoped. Milo can read, create, and update this account's Microsoft calendar events when explicitly requested.",
-  connectError: "Could not start Microsoft Calendar install.",
+    "Connected for you only. Milo can read, create, and update your events when you ask.",
+  connectError: "Could not start the Microsoft Calendar connection.",
   emptyDetail:
-    "Connect your Microsoft Calendar account. This connection is scoped to you, not the whole tenant.",
+    "Connect your Microsoft Calendar. This connects only you, not the whole organization.",
   installPath: "/microsoft-calendar/install",
   label: "Microsoft Calendar",
   loading: "Connecting Calendar",

@@ -53,7 +53,8 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
       <CardHeader>
         <CardTitle>Skills</CardTitle>
         <CardDescription>
-          Teach Milo durable working habits for this organization.
+          Teach Milo how your team works. Skills apply whenever the work matches
+          their description.
         </CardDescription>
         <CardAction>
           <Button
@@ -212,20 +213,20 @@ function SkillContent({
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       <SkillSection
-        description="Built-in skills apply to every tenant and can only be changed by Milo administrators."
-        emptyLabel="No global skills have been synced yet."
+        description="Built-in skills ship with Milo and apply to every organization."
+        emptyLabel="No built-in skills yet."
         pendingSkillId={pendingSkillId}
         skills={groupedSkills.global}
-        title="Global"
+        title="Built-in"
       />
       <SkillSection
-        description="Tenant skills apply only to this organization."
-        emptyLabel="No tenant skills yet."
+        description="Skills your team adds. They apply only to this organization."
+        emptyLabel="No skills yet. Add one to teach Milo how your team works."
         onDelete={onDelete}
         onEdit={onEdit}
         pendingSkillId={pendingSkillId}
         skills={groupedSkills.tenant}
-        title="Tenant"
+        title="Organization"
       />
     </div>
   )

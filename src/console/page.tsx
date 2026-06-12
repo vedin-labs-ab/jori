@@ -73,7 +73,7 @@ function ConsoleContent({
   if (isConvexAuthLoading) {
     return (
       <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
-        <LoadingMessage label="Loading authentication" />
+        <LoadingMessage label="Signing you in" />
       </PublicConsoleFrame>
     )
   }
@@ -82,9 +82,9 @@ function ConsoleContent({
     return (
       <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
         <Alert variant="destructive">
-          <AlertTitle>Authentication unavailable</AlertTitle>
+          <AlertTitle>Couldn't verify your session</AlertTitle>
           <AlertDescription>
-            Convex could not validate the active Clerk session.
+            Sign out and back in, then try again.
           </AlertDescription>
         </Alert>
       </PublicConsoleFrame>
@@ -101,8 +101,8 @@ function SignedOutView() {
         Bring Milo into your work.
       </h1>
       <p className="text-sm text-muted-foreground">
-        Sign up, create an organization, connect a provider, and Milo can
-        respond where work is happening.
+        Create an organization, connect your tools, and Milo starts helping
+        where your team already works.
       </p>
       <div className="flex flex-wrap gap-2">
         <SignUpButton mode="modal">
@@ -126,7 +126,7 @@ function SignedInView({
   if (!isLoaded) {
     return (
       <PublicConsoleFrame isLoaded={isLoaded} isSignedIn>
-        <LoadingMessage label="Loading organization" />
+        <LoadingMessage label="Loading your organization" />
       </PublicConsoleFrame>
     )
   }
@@ -140,7 +140,8 @@ function SignedInView({
               Create your organization.
             </h1>
             <p className="text-sm text-muted-foreground">
-              Milo uses Clerk organizations as tenants.
+              Integrations, schedules, and permissions are shared with your team
+              through an organization.
             </p>
           </div>
           <CreateOrganization />

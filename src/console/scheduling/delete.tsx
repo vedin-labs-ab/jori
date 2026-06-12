@@ -39,8 +39,8 @@ export function DeleteSchedule({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete “{schedule.name}”?</AlertDialogTitle>
           <AlertDialogDescription>
-            The schedule is removed permanently and its upcoming runs are
-            cancelled. Past executions are kept.
+            This permanently deletes the schedule and cancels its upcoming runs.
+            Past runs are kept.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

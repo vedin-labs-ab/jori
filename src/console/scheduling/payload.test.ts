@@ -70,7 +70,7 @@ describe("schedule payload", () => {
         surfaces: [{ provider: "github", access: "" }],
       })
     ).toEqual({
-      error: "Choose read, write, or both for each integration badge.",
+      error: "Choose read, write, or both for each mentioned integration.",
     })
   })
 
@@ -83,7 +83,7 @@ describe("schedule payload", () => {
         surfaces: [{ provider: "github", access: "read" }],
       })
     ).toEqual({
-      error: "At least one integration must allow writes.",
+      error: "At least one integration needs write access.",
     })
   })
 })

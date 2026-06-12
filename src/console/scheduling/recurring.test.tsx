@@ -54,7 +54,9 @@ describe("recurring schedule fields", () => {
     )
 
     expect(
-      screen.getByText("Cron expressions must contain five UTC fields")
+      screen.getByText(
+        "Cron expressions need five fields: minute, hour, day of month, month, day of week."
+      )
     ).toBeDefined()
   })
 })

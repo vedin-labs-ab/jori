@@ -10,10 +10,10 @@ import { getWorkspaceHeadline } from "../shared/headline"
 const linearConfig = {
   action: "Connect Linear",
   connectedDetail:
-    "Milo can receive signed Linear issue and comment events, read issue context, and post issue comments.",
-  connectError: "Could not start Linear install.",
+    "Milo responds to mentions, reads issue context, and comments on issues.",
+  connectError: "Could not start the Linear connection.",
   emptyDetail:
-    "Install Milo as a Linear app user to enable issue comments and mention-based triggers.",
+    "Connect Linear so Milo can respond to mentions and comment on issues.",
   installPath: "/linear/install",
   label: "Linear",
   loading: "Connecting Linear",

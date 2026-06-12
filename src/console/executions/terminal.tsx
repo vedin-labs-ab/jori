@@ -209,7 +209,7 @@ function TerminalNotice({
         {isFinalizingTrace
           ? "Finalizing trace..."
           : connection?.type === "pending"
-            ? "Waiting for the sandbox to start..."
+            ? "Waiting for the run to start..."
             : "Waiting for trace output..."}
       </span>
     </div>
@@ -288,7 +288,7 @@ function captionFor(
   }
 
   if (connection.type === "pending") {
-    return "Waiting for sandbox"
+    return "Starting"
   }
 
   if (connection.type === "live") {

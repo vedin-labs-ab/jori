@@ -36,7 +36,7 @@ export const updateWebsite = action({
     )
 
     if (!response.ok) {
-      throw new Error("Could not update Clerk organization metadata")
+      throw new Error("Could not update the organization website.")
     }
   },
 })

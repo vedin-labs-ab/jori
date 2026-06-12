@@ -30,8 +30,8 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
   return (
     <Tabs defaultValue="tenant" className="gap-4">
       <TabsList className="w-fit">
-        <TabsTrigger value="tenant">Tenant</TabsTrigger>
-        <TabsTrigger value="user">User</TabsTrigger>
+        <TabsTrigger value="tenant">Organization</TabsTrigger>
+        <TabsTrigger value="user">Personal</TabsTrigger>
       </TabsList>
       <TabsContent value="tenant" className="grid gap-4 md:grid-cols-2">
         <SlackConnection permissions={permissions} tenantId={tenantId} />

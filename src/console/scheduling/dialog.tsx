@@ -55,8 +55,8 @@ export function ScheduleDialog({
             {schedule === undefined ? "New schedule" : "Edit schedule"}
           </DialogTitle>
           <DialogDescription>
-            Milo runs the described work on schedule with the integration access
-            you choose.
+            Describe the work, choose what Milo can access, and set when it
+            runs.
           </DialogDescription>
         </DialogHeader>
 
@@ -77,8 +77,8 @@ export function ScheduleDialog({
                 <InstructionsHelp />
               </div>
               <p className="text-muted-foreground text-xs">
-                Mention integrations to insert access markers. At least one
-                marker must allow writes.
+                Mention integrations to give Milo access. At least one needs
+                write access.
               </p>
             </div>
             <ScheduleInstructionsField
@@ -140,12 +140,12 @@ function InstructionsHelp() {
         >
           <div className="grid gap-1">
             <p>
-              Describe the scheduled work and mention integrations such as
-              GitHub, Slack, Linear, Gmail, or Google Drive to insert markers.
+              Describe the work and mention integrations such as GitHub, Slack,
+              Linear, Gmail, or Google Drive to give Milo access to them.
             </p>
             <p>
-              Each marker controls Read, Write, or Both access. Use Write or
-              Both for integrations where Milo should post, create, or update.
+              Each mention controls what Milo can do there — read, write, or
+              both. Give write access where Milo should post, create, or update.
             </p>
             <p>
               Example: "Summarize GitHub changes and post the result to Slack."
@@ -174,7 +174,7 @@ function AccessFields({
       <div className="grid gap-2">
         <AccessCheckbox
           checked={readScope === "allConnected"}
-          description="Mentioned integrations start as Read. Use Write or Both for output targets."
+          description="Milo can read from every connected integration, not just the ones you mention."
           id="schedule-all-reads"
           label="Allow reading from any connected integration"
           onCheckedChange={(checked) =>
@@ -183,7 +183,7 @@ function AccessFields({
         />
         <AccessCheckbox
           checked={webSearch}
-          description="Lets Milo search the public web when needed."
+          description="Milo can search the web when the work needs it."
           id="schedule-web-search"
           label="Allow web search"
           onCheckedChange={onWebSearchChange}

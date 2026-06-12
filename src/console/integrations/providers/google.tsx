@@ -8,15 +8,15 @@ import {
 import { getAccountHeadline, getWorkspaceHeadline } from "../shared/headline"
 
 const gmailConfig = {
-  action: "Connect Email",
+  action: "Connect Gmail",
   connectedDetail:
-    "User-scoped. Milo can read Gmail context and reply from this account when explicitly requested.",
-  connectError: "Could not start Email install.",
+    "Connected for you only. Milo can read and reply to your email when you ask.",
+  connectError: "Could not start the Gmail connection.",
   emptyDetail:
-    "Connect your Gmail account. This connection is scoped to you, not the whole tenant.",
+    "Connect your Gmail account. This connects only you, not the whole organization.",
   installPath: "/gmail/install",
   label: "Gmail",
-  loading: "Connecting Email",
+  loading: "Connecting Gmail",
   logo: {
     alt: "Gmail logo",
     src: "https://svgl.app/library/gmail.svg",
@@ -27,10 +27,10 @@ const gmailConfig = {
 const calendarConfig = {
   action: "Connect Calendar",
   connectedDetail:
-    "User-scoped. Milo can read, create, and update this account's calendar events when explicitly requested.",
-  connectError: "Could not start Calendar install.",
+    "Connected for you only. Milo can read, create, and update your events when you ask.",
+  connectError: "Could not start the Google Calendar connection.",
   emptyDetail:
-    "Connect your Google Calendar account. This connection is scoped to you, not the whole tenant.",
+    "Connect your Google Calendar. This connects only you, not the whole organization.",
   installPath: "/google-calendar/install",
   label: "Google Calendar",
   loading: "Connecting Calendar",
@@ -44,10 +44,10 @@ const calendarConfig = {
 const driveConfig = {
   action: "Connect Drive",
   connectedDetail:
-    "Tenant-scoped. Milo can search, read, create, and update files in the connected Drive when explicitly requested.",
-  connectError: "Could not start Drive install.",
+    "Shared with your organization. Milo can search, read, create, and update files when you ask.",
+  connectError: "Could not start the Google Drive connection.",
   emptyDetail:
-    "Connect Google Drive for this tenant. Milo can use the connection across tenant runs when explicitly requested.",
+    "Connect Google Drive for your organization. Any run can use it when you ask.",
   installPath: "/google-drive/install",
   label: "Google Drive",
   loading: "Connecting Drive",

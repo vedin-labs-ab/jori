@@ -8,12 +8,12 @@ export function EmptyExecutions({ hasFilters }: { hasFilters: boolean }) {
       <div className="grid max-w-sm gap-2">
         <FileText className="mx-auto size-6 text-muted-foreground" />
         <h2 className="font-medium text-sm">
-          {hasFilters ? "No matching executions" : "No executions yet"}
+          {hasFilters ? "No matching runs" : "No runs yet"}
         </h2>
         <p className="text-muted-foreground text-xs">
           {hasFilters
-            ? "Adjust the filters or load more rows to widen the search."
-            : "Executions will appear here when messages or schedules start runs."}
+            ? "Adjust the filters or search to widen the results."
+            : "Runs appear here when Milo picks up work from messages or schedules."}
         </p>
       </div>
     </div>

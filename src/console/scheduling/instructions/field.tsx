@@ -31,8 +31,8 @@ export function ScheduleInstructionsField(
         <div className="flex min-h-9 items-center gap-2 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
           <Sparkles aria-hidden="true" className="size-3.5 shrink-0" />
           <span>
-            Type an integration name to insert a marker. Use marker icons for
-            Read, Write, or Both.
+            Type an integration name to mention it. Click its icon to switch
+            between read, write, and both.
           </span>
         </div>
       </div>

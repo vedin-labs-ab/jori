@@ -116,15 +116,17 @@ function buildBaseArgs(values: ScheduleFormValues): ArgsResult<ScheduleArgs> {
   }
 
   if (surfaces.length === 0) {
-    return { error: "Add at least one integration badge." }
+    return { error: "Mention at least one integration in the instructions." }
   }
 
   if (surfaces.some((surface) => surface.access === "")) {
-    return { error: "Choose read, write, or both for each integration badge." }
+    return {
+      error: "Choose read, write, or both for each mentioned integration.",
+    }
   }
 
   if (!hasScheduleWriteSurface(surfaces)) {
-    return { error: "At least one integration must allow writes." }
+    return { error: "At least one integration needs write access." }
   }
 
   return {

@@ -13,7 +13,7 @@ export function IntegrationPermissions({
   return (
     <PermissionSection
       controller={controller}
-      emptyLabel="No provider permissions are defined yet."
+      emptyLabel="No permissions to configure yet."
       provider={provider}
       title="Permissions"
     />
@@ -27,13 +27,13 @@ export function NativePermissionsCard({
 }) {
   return (
     <IntegrationSurface
-      description="Control built-in scheduling permissions for this tenant."
+      description="Control what Milo's built-in tools can do for this organization."
       logo={{ mark: <MiloLogo aria-hidden="true" className="size-8" /> }}
       title="Milo"
     >
       <PermissionSection
         controller={controller}
-        emptyLabel="No tenant tool permissions are defined yet."
+        emptyLabel="No permissions to configure yet."
         provider="milo"
         title="Permissions"
       />
