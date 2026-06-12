@@ -4,6 +4,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select"
 import { api } from "../../../convex/_generated/api"
 import { type AutomationEventProvider } from "../../../convex/automations/events"
@@ -36,7 +37,9 @@ export function EventProviderField({
       value={value}
     >
       <SelectTrigger id="automation-event-provider" className="w-full">
-        <ProviderSelectValue provider={value} />
+        <SelectValue>
+          <ProviderSelectValue provider={value} />
+        </SelectValue>
       </SelectTrigger>
       <SelectContent className="z-[70]">
         {options.map((option) => (
@@ -59,7 +62,7 @@ function ProviderSelectValue({
   provider: AutomationEventProvider
 }) {
   return (
-    <span className="flex min-w-0 items-center gap-1.5">
+    <span className="pointer-events-none flex min-w-0 items-center gap-1.5">
       <SurfaceLogo provider={provider} />
       <span className="truncate">{getAutomationSurfaceLabel(provider)}</span>
     </span>
@@ -68,7 +71,7 @@ function ProviderSelectValue({
 
 function ProviderSelectItem({ option }: { option: EventProviderOption }) {
   return (
-    <span className="flex min-w-0 flex-1 items-center justify-between gap-3 pr-5">
+    <span className="pointer-events-none flex min-w-0 flex-1 items-center justify-between gap-3 pr-5">
       <span className="flex min-w-0 items-center gap-2">
         <SurfaceLogo provider={option.provider} />
         <span className="truncate">
