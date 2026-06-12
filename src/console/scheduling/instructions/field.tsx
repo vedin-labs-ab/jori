@@ -8,6 +8,10 @@ import { type ScheduleInstructionsFieldProps } from "./types"
 export function ScheduleInstructionsField(
   props: ScheduleInstructionsFieldProps
 ) {
+  const accessHint =
+    props.readScope === "allConnected"
+      ? "Click its icon to switch between read and read/write."
+      : "Click its icon to switch between read, write, and read/write."
   const {
     editor,
     isEmpty,
@@ -30,10 +34,7 @@ export function ScheduleInstructionsField(
         <EditorContent className="min-w-0 max-w-full" editor={editor} />
         <div className="flex min-h-9 items-center gap-2 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
           <Sparkles aria-hidden="true" className="size-3.5 shrink-0" />
-          <span>
-            Type an integration name to mention it. Click its icon to switch
-            between read, write, and both.
-          </span>
+          <span>Type an integration name to mention it. {accessHint}</span>
         </div>
       </div>
       {isEmpty ? (

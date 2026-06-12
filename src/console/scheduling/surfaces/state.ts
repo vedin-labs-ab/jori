@@ -62,7 +62,10 @@ export function syncScheduleSurfaces(
 
   return findScheduleSurfaceMentions(text).map((provider) => ({
     provider,
-    access: existing.get(provider) ?? defaultScheduleSurfaceAccess(readScope),
+    access: normalizeScheduleSurfaceAccess(
+      existing.get(provider) ?? defaultScheduleSurfaceAccess(readScope),
+      readScope
+    ),
   }))
 }
 
@@ -74,7 +77,7 @@ export function applyScheduleReadScope(
     ...surface,
     access:
       readScope === "allConnected"
-        ? surface.access || "read"
+        ? normalizeScheduleSurfaceAccess(surface.access, readScope)
         : surface.access === "read"
           ? ""
           : surface.access,
@@ -92,8 +95,13 @@ export function defaultScheduleSurfaceAccess(readScope: ScheduleReadScope) {
 }
 
 export function getNextScheduleSurfaceAccess(
-  access: ScheduleSurfaceFormValue["access"]
+  access: ScheduleSurfaceFormValue["access"],
+  readScope: ScheduleReadScope
 ): ScheduleSurfaceAccess {
+  if (readScope === "allConnected") {
+    return access === "both" ? "read" : "both"
+  }
+
   if (access === "") {
     return "read"
   }
@@ -103,6 +111,17 @@ export function getNextScheduleSurfaceAccess(
   }
 
   return access === "write" ? "both" : "read"
+}
+
+function normalizeScheduleSurfaceAccess(
+  access: ScheduleSurfaceFormValue["access"],
+  readScope: ScheduleReadScope
+) {
+  if (readScope !== "allConnected") {
+    return access
+  }
+
+  return access === "write" || access === "both" ? "both" : "read"
 }
 
 export function getScheduleSurfaceAccessLabel(

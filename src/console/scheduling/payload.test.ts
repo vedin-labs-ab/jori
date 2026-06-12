@@ -67,6 +67,7 @@ describe("schedule payload", () => {
         ...emptyScheduleForm,
         name: "Weekly release summary",
         description: "Summarize GitHub.",
+        readScope: "selected",
         surfaces: [{ provider: "github", access: "" }],
       })
     ).toEqual({

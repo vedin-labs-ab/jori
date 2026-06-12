@@ -144,8 +144,9 @@ function InstructionsHelp() {
               Linear, Gmail, or Google Drive to give Milo access to them.
             </p>
             <p>
-              Each mention controls what Milo can do there — read, write, or
-              both. Give write access where Milo should post, create, or update.
+              Each mention controls what Milo can do there: read, write, or
+              read/write. When all reads are allowed, mentions switch between
+              read and read/write.
             </p>
             <p>
               Example: "Summarize GitHub changes and post the result to Slack."

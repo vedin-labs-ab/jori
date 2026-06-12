@@ -4,9 +4,11 @@ import { ScheduleInstructionsField } from "."
 
 export function renderInstructionsField({
   description,
+  readScope = "selected",
   surfaces,
 }: {
   description: string
+  readScope?: Parameters<typeof ScheduleInstructionsField>[0]["readScope"]
   surfaces: Parameters<typeof ScheduleInstructionsField>[0]["surfaces"]
 }) {
   const onValueChange = vi.fn()
@@ -17,7 +19,7 @@ export function renderInstructionsField({
       onBlur={vi.fn()}
       onValueChange={onValueChange}
       placeholder="Instructions"
-      readScope="selected"
+      readScope={readScope}
       surfaces={surfaces}
       value={description}
     />

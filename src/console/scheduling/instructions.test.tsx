@@ -140,6 +140,9 @@ describe("schedule instructions field footer", () => {
     expect(field.container.textContent).toContain(
       "Type an integration name to mention it."
     )
+    expect(field.container.textContent).toContain(
+      "Click its icon to switch between read, write, and read/write."
+    )
 
     const footer = field.container.querySelector(
       "[data-schedule-instructions-frame] > div:last-child"

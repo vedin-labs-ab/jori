@@ -116,7 +116,7 @@ function createEditorOptions({
       surfaces: props.surfaces,
     }),
     editorProps: createEditorProps({ id: props.id, refs, setSuggestion }),
-    extensions,
+    extensions: createExtensions(refs),
     immediatelyRender: false,
     onBlur: () => refs.onBlur.current(),
     onSelectionUpdate: ({ editor }) => updateSuggestion(editor),
@@ -130,24 +130,30 @@ function createEditorOptions({
   }
 }
 
-const extensions = [
-  StarterKit.configure({
-    blockquote: false,
-    bold: false,
-    bulletList: false,
-    code: false,
-    codeBlock: false,
-    dropcursor: false,
-    gapcursor: false,
-    heading: false,
-    horizontalRule: false,
-    italic: false,
-    listItem: false,
-    orderedList: false,
-    strike: false,
-  }),
-  ScheduleSurfaceExtension,
-]
+function createExtensions(refs: InstructionRefs) {
+  return [
+    starterKitExtension,
+    ScheduleSurfaceExtension.configure({
+      getReadScope: () => refs.readScope.current,
+    }),
+  ]
+}
+
+const starterKitExtension = StarterKit.configure({
+  blockquote: false,
+  bold: false,
+  bulletList: false,
+  code: false,
+  codeBlock: false,
+  dropcursor: false,
+  gapcursor: false,
+  heading: false,
+  horizontalRule: false,
+  italic: false,
+  listItem: false,
+  orderedList: false,
+  strike: false,
+})
 
 function createEditorProps({
   id,

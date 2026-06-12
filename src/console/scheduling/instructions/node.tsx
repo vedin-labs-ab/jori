@@ -7,12 +7,15 @@ import {
   getScheduleSurfaceAccessLabel,
   getScheduleSurfaceLabel,
   isScheduleSurfaceProvider,
+  type ScheduleReadScope,
   type ScheduleSurfaceFormValue,
 } from "../surfaces"
+import { type ScheduleSurfaceExtensionOptions } from "./extension"
 import { ScheduleSurfaceRemoveButton } from "./remove"
 
 export function ScheduleSurfaceNodeView({
   deleteNode,
+  extension,
   node,
   selected,
   updateAttributes,
@@ -50,7 +53,12 @@ export function ScheduleSurfaceNodeView({
           accessLabel={accessLabel}
           iconClassName={toneClassNames.scopeIcon}
           onChange={() =>
-            updateAttributes({ access: getNextScheduleSurfaceAccess(access) })
+            updateAttributes({
+              access: getNextScheduleSurfaceAccess(
+                access,
+                getNodeViewReadScope(extension)
+              ),
+            })
           }
           providerLabel={providerLabel}
         />
@@ -70,6 +78,16 @@ export function ScheduleSurfaceNodeView({
       </ButtonGroup>
     </NodeViewWrapper>
   )
+}
+
+function getNodeViewReadScope(
+  extension: NodeViewProps["extension"]
+): ScheduleReadScope {
+  return (
+    extension.options as Partial<ScheduleSurfaceExtensionOptions>
+  ).getReadScope?.() === "allConnected"
+    ? "allConnected"
+    : "selected"
 }
 
 function ScheduleSurfaceAccessButton({

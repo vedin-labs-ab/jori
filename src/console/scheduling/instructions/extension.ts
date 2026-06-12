@@ -3,6 +3,7 @@ import { ReactNodeViewRenderer } from "@tiptap/react"
 import {
   getScheduleSurfaceLabel,
   isScheduleSurfaceProvider,
+  type ScheduleReadScope,
   type ScheduleSurfaceFormValue,
   type ScheduleSurfaceProvider,
 } from "../surfaces"
@@ -14,54 +15,65 @@ export type ScheduleSurfaceNodeAttrs = {
   provider: ScheduleSurfaceProvider
 }
 
-export const ScheduleSurfaceExtension = Node.create({
-  name: scheduleSurfaceNodeName,
-  group: "inline",
-  inline: true,
-  atom: true,
-  selectable: true,
+export type ScheduleSurfaceExtensionOptions = {
+  getReadScope: () => ScheduleReadScope
+}
 
-  addAttributes() {
-    return {
-      access: {
-        default: "",
-        parseHTML: (element) =>
-          parseScheduleSurfaceAccess(element.getAttribute("data-access")),
-        renderHTML: (attributes) => ({
-          "data-access": parseScheduleSurfaceAccess(attributes.access),
+export const ScheduleSurfaceExtension =
+  Node.create<ScheduleSurfaceExtensionOptions>({
+    name: scheduleSurfaceNodeName,
+    group: "inline",
+    inline: true,
+    atom: true,
+    selectable: true,
+
+    addOptions() {
+      return {
+        getReadScope: () => "selected",
+      }
+    },
+
+    addAttributes() {
+      return {
+        access: {
+          default: "",
+          parseHTML: (element) =>
+            parseScheduleSurfaceAccess(element.getAttribute("data-access")),
+          renderHTML: (attributes) => ({
+            "data-access": parseScheduleSurfaceAccess(attributes.access),
+          }),
+        },
+        provider: {
+          default: null,
+          parseHTML: (element) =>
+            parseScheduleSurfaceProvider(element.getAttribute("data-provider")),
+          renderHTML: (attributes) => ({
+            "data-provider": parseScheduleSurfaceProvider(attributes.provider),
+          }),
+        },
+      }
+    },
+
+    parseHTML() {
+      return [{ tag: "span[data-schedule-surface]" }]
+    },
+
+    renderHTML({ HTMLAttributes, node }) {
+      const provider = parseScheduleSurfaceProvider(node.attrs.provider)
+
+      return [
+        "span",
+        mergeAttributes(HTMLAttributes, {
+          "data-schedule-surface": "",
         }),
-      },
-      provider: {
-        default: null,
-        parseHTML: (element) =>
-          parseScheduleSurfaceProvider(element.getAttribute("data-provider")),
-        renderHTML: (attributes) => ({
-          "data-provider": parseScheduleSurfaceProvider(attributes.provider),
-        }),
-      },
-    }
-  },
+        provider === null ? "" : getScheduleSurfaceLabel(provider),
+      ]
+    },
 
-  parseHTML() {
-    return [{ tag: "span[data-schedule-surface]" }]
-  },
-
-  renderHTML({ HTMLAttributes, node }) {
-    const provider = parseScheduleSurfaceProvider(node.attrs.provider)
-
-    return [
-      "span",
-      mergeAttributes(HTMLAttributes, {
-        "data-schedule-surface": "",
-      }),
-      provider === null ? "" : getScheduleSurfaceLabel(provider),
-    ]
-  },
-
-  addNodeView() {
-    return ReactNodeViewRenderer(ScheduleSurfaceNodeView)
-  },
-})
+    addNodeView() {
+      return ReactNodeViewRenderer(ScheduleSurfaceNodeView)
+    },
+  })
 
 function parseScheduleSurfaceProvider(provider: unknown) {
   return isScheduleSurfaceProvider(provider) ? provider : null

@@ -1,7 +1,9 @@
 import { describe, expect, test } from "vitest"
 import {
+  applyScheduleReadScope,
   findActiveScheduleSurfaceMention,
   findScheduleSurfaceMentions,
+  getNextScheduleSurfaceAccess,
   getScheduleSurfaceMentionParts,
   getScheduleSurfaceSuggestions,
   normalizeCompletedScheduleSurfaceMentions,
@@ -143,7 +145,7 @@ describe("schedule integration marker autocomplete", () => {
 })
 
 describe("schedule integration access sync", () => {
-  test("keeps existing access and defaults new all-read markers to read", () => {
+  test("promotes write markers and defaults new all-read markers to read", () => {
     expect(
       syncScheduleSurfaces(
         "@GitHub to @Slack",
@@ -152,7 +154,7 @@ describe("schedule integration access sync", () => {
       )
     ).toEqual([
       { provider: "github", access: "read" },
-      { provider: "slack", access: "write" },
+      { provider: "slack", access: "both" },
     ])
   })
 
@@ -160,5 +162,28 @@ describe("schedule integration access sync", () => {
     expect(syncScheduleSurfaces("GitHub", [], "selected")).toEqual([
       { provider: "github", access: "" },
     ])
+  })
+
+  test("promotes write-only markers when all reads are enabled", () => {
+    expect(
+      applyScheduleReadScope(
+        [
+          { provider: "github", access: "write" },
+          { provider: "slack", access: "both" },
+          { provider: "linear", access: "" },
+        ],
+        "allConnected"
+      )
+    ).toEqual([
+      { provider: "github", access: "both" },
+      { provider: "slack", access: "both" },
+      { provider: "linear", access: "read" },
+    ])
+  })
+
+  test("limits all-read marker access cycling to read and read/write", () => {
+    expect(getNextScheduleSurfaceAccess("read", "allConnected")).toBe("both")
+    expect(getNextScheduleSurfaceAccess("both", "allConnected")).toBe("read")
+    expect(getNextScheduleSurfaceAccess("write", "allConnected")).toBe("both")
   })
 })
