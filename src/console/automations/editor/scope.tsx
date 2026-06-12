@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 import {
   type AutomationEventDefinition,
   type AutomationEventParameter,
@@ -50,29 +49,26 @@ export function EventScopeFields({
 
   return (
     <div className="grid gap-3">
-      <Separator />
-      <div className="grid gap-3">
-        <ScopeHeader
-          available={conditions.filter(
-            (condition) => !addedKeys.includes(condition.key)
-          )}
-          hasConditions={conditions.length > 0}
-          onAdd={(key) => setAddedKeys((keys) => [...keys, key])}
-        />
-        <ScopeFieldGrid
-          tenantId={tenantId}
-          provider={provider}
-          parameters={[...requiredParameters, ...visibleConditions]}
-          allParameters={parameters}
-          removableKeys={addedKeys}
-          values={values}
-          onValuesChange={onValuesChange}
-          onRemove={(key) => {
-            setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
-            onValuesChange(removeEventCriterion({ key, parameters, values }))
-          }}
-        />
-      </div>
+      <ScopeHeader
+        available={conditions.filter(
+          (condition) => !addedKeys.includes(condition.key)
+        )}
+        hasConditions={conditions.length > 0}
+        onAdd={(key) => setAddedKeys((keys) => [...keys, key])}
+      />
+      <ScopeFieldGrid
+        tenantId={tenantId}
+        provider={provider}
+        parameters={[...requiredParameters, ...visibleConditions]}
+        allParameters={parameters}
+        removableKeys={addedKeys}
+        values={values}
+        onValuesChange={onValuesChange}
+        onRemove={(key) => {
+          setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
+          onValuesChange(removeEventCriterion({ key, parameters, values }))
+        }}
+      />
     </div>
   )
 }

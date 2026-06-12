@@ -94,14 +94,9 @@ export function AutomationDialog({
             />
           </div>
           <div className="grid gap-2">
-            <div className="grid gap-1">
-              <div className="flex items-center gap-1.5">
-                <Label htmlFor="automation-description">Instructions</Label>
-                <InstructionsHelp />
-              </div>
-              <p className="text-muted-foreground text-xs">
-                Mention integrations, then set access.
-              </p>
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="automation-description">Instructions</Label>
+              <InstructionsHelp />
             </div>
             <AutomationInstructionsField
               error={instructionsError}
@@ -282,7 +277,6 @@ function AutomationTiming({
             value={values.runAt}
           />
         </Suspense>
-        <p className="text-muted-foreground text-xs">Uses your local time.</p>
       </TabsContent>
       <TabsContent value="event">
         <Suspense fallback={<TimingFallback />}>
