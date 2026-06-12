@@ -177,6 +177,7 @@ describe("automation event conditions", () => {
     expect(screen.queryByLabelText("Issue")).toBeNull()
     expect(screen.queryByText("Scope")).toBeNull()
     expect(screen.queryByText("Choose where this applies.")).toBeNull()
+    expect(screen.getByText("Conditions")).toBeDefined()
     expect(screen.getByRole("button", { name: "Add condition" })).toBeDefined()
     expect(
       screen.queryByText(
@@ -234,6 +235,7 @@ describe("automation event condition editing", () => {
     expect(screen.getByLabelText("Team").hasAttribute("disabled")).toBe(false)
     expect(screen.getByLabelText("Team").className).toContain("basis-0")
     expect(screen.getByRole("group", { name: "Team condition" })).toBeDefined()
+    expect(screen.queryByText("Conditions")).toBeNull()
     expect(
       screen.queryByText("Narrows runs to issues in the selected team.")
     ).toBeNull()
