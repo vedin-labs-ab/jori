@@ -13,7 +13,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
@@ -22,6 +21,7 @@ import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { ExecutionRow } from "./row"
 import {
   type ApprovalFilter,
+  approvalFilterLabels,
   approvalFilterOptions,
   type ExecutionFilter,
   executionFilterOptions,
@@ -123,9 +123,11 @@ const ExecutionFilters = memo(function ExecutionFilters({
             aria-label="Filter by approval state"
             className="h-8 w-full sm:w-fit"
           >
-            <span className="flex min-w-0 flex-1 items-center gap-1.5 text-left sm:flex-none">
-              <span className="shrink-0">Approval:</span>
-              <SelectValue className="min-w-0 truncate" />
+            <span className="min-w-0 flex-1 truncate text-left sm:flex-none">
+              Approval:{" "}
+              <span className="font-medium">
+                {approvalFilterLabels[approvalFilter]}
+              </span>
             </span>
           </SelectTrigger>
           <SelectContent align="start" position="popper">
