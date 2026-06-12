@@ -91,10 +91,6 @@ export async function fetchMicrosoftInstallationProfile(args: {
   } satisfies MicrosoftInstallationProfile
 }
 
-export function getMicrosoftTokenScope(value: string | undefined) {
-  return value
-}
-
 async function requestMicrosoftToken(
   tenantId: string,
   body: Record<string, string>

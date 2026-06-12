@@ -1,5 +1,4 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { type GoogleSurfaceProvider } from "../providers/google/config"
 import { type MicrosoftSurfaceProvider } from "../providers/microsoft/config"
@@ -17,7 +16,7 @@ export const getSlackStatus = query({
       tenantId: args.tenantId,
     })
 
-    if (!isVisibleIntegration(integration)) {
+    if (integration === null) {
       return null
     }
 
@@ -40,7 +39,7 @@ export const getLinearStatus = query({
       tenantId: args.tenantId,
     })
 
-    if (!isVisibleIntegration(integration)) {
+    if (integration === null) {
       return null
     }
 
@@ -88,7 +87,7 @@ export const getGitHubStatus = query({
       tenantId: args.tenantId,
     })
 
-    if (!isVisibleIntegration(integration)) {
+    if (integration === null) {
       return null
     }
 
@@ -113,7 +112,7 @@ export const getNotionStatus = query({
       tenantId: args.tenantId,
     })
 
-    if (!isVisibleIntegration(integration)) {
+    if (integration === null) {
       return null
     }
 
@@ -162,7 +161,7 @@ export const getGoogleDriveStatus = query({
       tenantId: args.tenantId,
     })
 
-    if (!isVisibleIntegration(integration)) {
+    if (integration === null) {
       return null
     }
 
@@ -187,7 +186,7 @@ async function getGoogleUserStatus(
 ) {
   const integration = await getUserIntegration(ctx, args)
 
-  if (!isVisibleIntegration(integration)) {
+  if (integration === null) {
     return null
   }
 
@@ -211,7 +210,7 @@ async function getMicrosoftUserStatus(
 ) {
   const integration = await getUserIntegration(ctx, args)
 
-  if (!isVisibleIntegration(integration)) {
+  if (integration === null) {
     return null
   }
 
@@ -224,10 +223,4 @@ async function getMicrosoftUserStatus(
     tenantName: getMicrosoftTenantName(integration.data),
     scope: "user" as const,
   }
-}
-
-function isVisibleIntegration(
-  integration: Doc<"integrations"> | null
-): integration is Doc<"integrations"> {
-  return integration !== null
 }

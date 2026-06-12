@@ -3,6 +3,7 @@ import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
 import { updateSlackMessage } from "../broker/providers/slack"
+import { requireTenantAccess } from "../identity/access"
 import {
   readClerkUserEmail,
   readClerkUserName,
@@ -10,7 +11,6 @@ import {
 } from "../identity/users"
 import { createSlackConsoleDecisionResponse } from "../providers/slack/approval/blocks"
 import { createUserActor } from "../shared/actor"
-import { requireTenantAccess } from "../skills/access"
 import { decideApproval, type SlackApprovalDecisionResult } from "./runtime"
 
 export const decide = action({

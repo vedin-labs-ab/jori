@@ -1,12 +1,12 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { mutation } from "../_generated/server"
+import { requireTenantAccess } from "../identity/access"
 import {
   readClerkUserEmail,
   readClerkUserName,
   requireClerkUserId,
 } from "../identity/users"
-import { requireTenantAccess } from "../skills/access"
 
 export const stop = mutation({
   args: {

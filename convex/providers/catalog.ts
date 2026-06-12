@@ -44,3 +44,24 @@ export const integrationProviderValidator = v.union(
   v.literal("microsoftEmail"),
   v.literal("microsoftCalendar")
 )
+
+export function isGoogleProvider(provider: IntegrationProvider) {
+  return (
+    provider === "gmail" ||
+    provider === "googleCalendar" ||
+    provider === "googleDrive"
+  )
+}
+
+export function isMicrosoftProvider(provider: IntegrationProvider) {
+  return provider === "microsoftCalendar" || provider === "microsoftEmail"
+}
+
+export function isUserScopedProvider(provider: IntegrationProvider) {
+  return (
+    provider === "gmail" ||
+    provider === "googleCalendar" ||
+    provider === "microsoftCalendar" ||
+    provider === "microsoftEmail"
+  )
+}

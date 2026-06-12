@@ -11,6 +11,7 @@ import {
   handleGoogleInstall,
   handleGoogleOAuthCallback,
 } from "./providers/google/http"
+import { unauthorizedResponse } from "./providers/http"
 import {
   handleLinearEvents,
   handleLinearInstall,
@@ -32,10 +33,6 @@ import {
 } from "./providers/slack/http"
 
 const http = httpRouter()
-
-function unauthorizedResponse() {
-  return new Response("Unauthorized", { status: 401 })
-}
 
 http.route({
   path: "/ping",

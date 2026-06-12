@@ -2,9 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
+import { requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
 import { integrationProviderValidator } from "../providers/catalog"
-import { requireTenantAccess } from "../skills/access"
 import { providerLabels, resolveEventIntegration } from "./access"
 import {
   isAutomationEventOptionSource,

@@ -7,12 +7,14 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
+import { requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
 import {
   type IntegrationProvider,
   integrationProviderValidator,
+  isGoogleProvider,
+  isUserScopedProvider,
 } from "../providers/catalog"
-import { requireTenantAccess } from "../skills/access"
 import { getTenantIntegration, getUserIntegrationForOwner } from "./data"
 import { revokeIntegrationAccess } from "./revoke"
 
@@ -160,15 +162,6 @@ type DisconnectTarget = {
   integration: Doc<"integrations">
 }
 
-function isUserScopedProvider(provider: IntegrationProvider) {
-  return (
-    provider === "gmail" ||
-    provider === "googleCalendar" ||
-    provider === "microsoftCalendar" ||
-    provider === "microsoftEmail"
-  )
-}
-
 async function getIntegrationsToDelete(
   ctx: MutationCtx,
   args: {
@@ -211,14 +204,6 @@ async function getIntegrationsToDelete(
       isGoogleProvider(candidate.provider) &&
       candidate.externalId === args.externalId &&
       candidate.ownerId === args.ownerId
-  )
-}
-
-function isGoogleProvider(provider: IntegrationProvider) {
-  return (
-    provider === "gmail" ||
-    provider === "googleCalendar" ||
-    provider === "googleDrive"
   )
 }
 

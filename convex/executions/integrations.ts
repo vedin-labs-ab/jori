@@ -1,22 +1,17 @@
 import { internal } from "../_generated/api"
 import { type ActionCtx } from "../_generated/server"
+import { isGoogleProvider, isMicrosoftProvider } from "../providers/catalog"
 import { createGitHubInstallationToken } from "../providers/github/app"
 import { requireGitHubCredentials } from "../providers/github/credentials"
 import { requireGoogleCredentials } from "../providers/google/credentials"
-import {
-  getGoogleTokenScope,
-  refreshGoogleAccessToken,
-} from "../providers/google/oauth"
+import { refreshGoogleAccessToken } from "../providers/google/oauth"
 import { requireLinearCredentials } from "../providers/linear/credentials"
 import {
   getLinearTokenScope,
   refreshLinearAccessToken,
 } from "../providers/linear/oauth"
 import { requireMicrosoftCredentials } from "../providers/microsoft/credentials"
-import {
-  getMicrosoftTokenScope,
-  refreshMicrosoftAccessToken,
-} from "../providers/microsoft/oauth"
+import { refreshMicrosoftAccessToken } from "../providers/microsoft/oauth"
 import { type RuntimeIntegration } from "./codex"
 
 const OAUTH_REFRESH_BUFFER_MS = 5 * 60 * 1000
@@ -37,18 +32,11 @@ export async function prepareIntegrationForRuntime(
     return await prepareLinearIntegrationForRuntime(ctx, integration)
   }
 
-  if (
-    integration.provider === "gmail" ||
-    integration.provider === "googleCalendar" ||
-    integration.provider === "googleDrive"
-  ) {
+  if (isGoogleProvider(integration.provider)) {
     return await prepareGoogleIntegrationForRuntime(ctx, integration)
   }
 
-  if (
-    integration.provider === "microsoftCalendar" ||
-    integration.provider === "microsoftEmail"
-  ) {
+  if (isMicrosoftProvider(integration.provider)) {
     return await prepareMicrosoftIntegrationForRuntime(ctx, integration)
   }
 
@@ -127,7 +115,7 @@ async function prepareGoogleIntegrationForRuntime(
       accessToken: tokenResult.access_token,
       refreshToken: tokenResult.refresh_token,
       expiresAt: Date.now() + tokenResult.expires_in * 1000,
-      scope: getGoogleTokenScope(tokenResult.scope),
+      scope: tokenResult.scope,
     }
   )
 
@@ -164,7 +152,7 @@ async function prepareMicrosoftIntegrationForRuntime(
       accessToken: tokenResult.access_token,
       refreshToken: tokenResult.refresh_token,
       expiresAt: Date.now() + tokenResult.expires_in * 1000,
-      scope: getMicrosoftTokenScope(tokenResult.scope),
+      scope: tokenResult.scope,
     }
   )
 

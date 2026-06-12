@@ -3,7 +3,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "../_generated/server"
-import { readClerkOrganizationId } from "../identity/users"
+import { readClerkOrganizationId } from "./users"
 
 export async function requireTenantAccess(
   ctx: QueryCtx | MutationCtx | ActionCtx,

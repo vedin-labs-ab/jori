@@ -6,10 +6,13 @@ import {
   type QueryCtx,
   query,
 } from "../_generated/server"
+import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
-import { type IntegrationProvider } from "../providers/catalog"
-import { checkTenantAccess, requireTenantAccess } from "../skills/access"
-import { isUserScopedProvider, projectAccessForConsole } from "./access"
+import {
+  type IntegrationProvider,
+  isUserScopedProvider,
+} from "../providers/catalog"
+import { projectAccessForConsole } from "./access"
 import {
   createAutomation,
   maxSearchResults,
