@@ -1,4 +1,5 @@
 import {
+  artifactAttachmentsProperty,
   numberProperty,
   objectProperty,
   objectSchema,
@@ -56,6 +57,7 @@ function microsoftMessageSchema(properties: Record<string, unknown> = {}) {
   return objectSchema({
     required: ["to", "subject", "body"],
     properties: {
+      attachments: artifactAttachmentsProperty(),
       bcc: stringArrayProperty("BCC recipient email addresses."),
       body: stringProperty("Message body."),
       bodyType: {

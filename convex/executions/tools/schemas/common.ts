@@ -49,3 +49,19 @@ export function objectProperty(description: string) {
     additionalProperties: true,
   }
 }
+
+export function artifactAttachmentsProperty() {
+  return {
+    type: "array",
+    description:
+      "Files to attach. Save local files with save_artifact first, then pass returned artifact IDs here.",
+    items: objectSchema({
+      required: ["artifactId"],
+      properties: {
+        artifactId: stringProperty("Artifact ID returned by save_artifact."),
+        name: stringProperty("Optional attachment filename override."),
+        mimeType: stringProperty("Optional attachment content type override."),
+      },
+    }),
+  }
+}

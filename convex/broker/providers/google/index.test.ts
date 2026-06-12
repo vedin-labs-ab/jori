@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc } from "../../../_generated/dataModel"
+import { artifactContext } from "../fixtures/artifacts"
 import { callGoogleTool } from "."
 
 const originalFetch = globalThis.fetch
@@ -65,6 +66,35 @@ describe("Gmail write tools", () => {
     expect(raw).toContain("Subject: Draft")
     expect(raw).toContain("Content-Type: text/html; charset=UTF-8")
     expect(raw).toContain("\r\n\r\n<p>Hello from Milo</p>")
+  })
+})
+
+describe("Gmail artifact attachments", () => {
+  test("sends attachments from artifacts", async () => {
+    const calls = mockGoogleFetch({ id: "sent-message" })
+
+    await callGoogleTool(
+      gmailIntegration(),
+      "google_gmail_send_message",
+      {
+        attachments: [{ artifactId: "artifact-id" }],
+        body: "See attached.",
+        subject: "Artifact",
+        to: ["recipient@example.com"],
+      },
+      artifactContext()
+    )
+
+    const raw = readRawMessage(calls[0]?.body)
+
+    expect(raw).toContain("Content-Type: multipart/mixed; boundary=")
+    expect(raw).toContain("Content-Type: text/plain; charset=UTF-8")
+    expect(raw).toContain("See attached.")
+    expect(raw).toContain('Content-Type: image/png; name="kitten.png"')
+    expect(raw).toContain(
+      'Content-Disposition: attachment; filename="kitten.png"'
+    )
+    expect(raw).toContain("aGVsbG8=")
   })
 })
 

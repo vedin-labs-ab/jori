@@ -1,3 +1,4 @@
+import { codexHome, workspace } from "../../sandbox/harness"
 import { getProviderToolDefinitions } from "../definitions"
 import {
   enabledToolsEnv,
@@ -21,8 +22,10 @@ export function createMiloToolBundle(
         args: ["/home/user/milo-workspace/milo-mcp.mjs"],
         env: {
           MILO_CONVEX_SITE_URL: args.convexSiteUrl,
+          MILO_CODEX_HOME: codexHome,
           MILO_EXECUTION_TOKEN: args.executionToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
+          MILO_WORKSPACE: workspace,
         },
       },
     ],

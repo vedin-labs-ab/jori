@@ -204,7 +204,17 @@ async function executeApprovedTool(
       throw new Error(`No active ${approval.provider} integration is available`)
     }
 
+    const execution = await ctx.runQuery(internal.executions.records.get, {
+      executionId: approval.executionId,
+    })
+
+    if (execution === null) {
+      throw new Error("Approval execution is missing")
+    }
+
     return await callProviderTool({
+      ctx,
+      execution,
       integration,
       tool: approval.tool,
       toolArgs: normalizeToolArgs(approval.args),

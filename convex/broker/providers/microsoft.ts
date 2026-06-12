@@ -1,6 +1,11 @@
 import { type Doc } from "../../_generated/dataModel"
+import {
+  type ArtifactContext,
+  readArtifactAttachments,
+} from "../../artifacts/attachments"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import {
+  base64EncodeBytes,
   boundedNumber,
   fetchJson,
   optionalString,
@@ -13,12 +18,18 @@ import {
 export async function callMicrosoftTool(
   integration: Doc<"integrations">,
   tool: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  context?: ArtifactContext
 ) {
   const credentials = requireMicrosoftCredentials(integration)
 
   if (tool.startsWith("microsoft_email_")) {
-    return await callMicrosoftEmailTool(credentials.tokens.access, tool, args)
+    return await callMicrosoftEmailTool(
+      credentials.tokens.access,
+      tool,
+      args,
+      context
+    )
   }
 
   if (tool.startsWith("microsoft_calendar_")) {
@@ -35,7 +46,8 @@ export async function callMicrosoftTool(
 async function callMicrosoftEmailTool(
   token: string,
   tool: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  context?: ArtifactContext
 ) {
   if (tool === "microsoft_email_search_messages") {
     return await searchMessages(token, args)
@@ -49,10 +61,18 @@ async function callMicrosoftEmailTool(
   }
 
   if (tool === "microsoft_email_send_message") {
+    const attachments = await readArtifactAttachments(
+      context,
+      args.attachments,
+      {
+        maxBytes: 3 * 1024 * 1024,
+      }
+    )
+
     await microsoftGraph(token, "/me/sendMail", {
       method: "POST",
       body: {
-        message: buildMicrosoftMessage(args),
+        message: buildMicrosoftMessage(args, attachments),
         saveToSentItems: args.saveToSentItems !== false,
       },
     })
@@ -60,9 +80,17 @@ async function callMicrosoftEmailTool(
   }
 
   if (tool === "microsoft_email_create_draft") {
+    const attachments = await readArtifactAttachments(
+      context,
+      args.attachments,
+      {
+        maxBytes: 3 * 1024 * 1024,
+      }
+    )
+
     return await microsoftGraph(token, "/me/messages", {
       method: "POST",
-      body: buildMicrosoftMessage(args),
+      body: buildMicrosoftMessage(args, attachments),
     })
   }
 
@@ -196,7 +224,10 @@ function microsoftSendUpdatesQuery(args: Record<string, unknown>) {
     : {}
 }
 
-function buildMicrosoftMessage(args: Record<string, unknown>) {
+function buildMicrosoftMessage(
+  args: Record<string, unknown>,
+  attachments: Awaited<ReturnType<typeof readArtifactAttachments>> = []
+) {
   return {
     subject: requiredString(args.subject, "subject"),
     body: {
@@ -206,6 +237,16 @@ function buildMicrosoftMessage(args: Record<string, unknown>) {
     toRecipients: recipients(requiredStringArray(args.to, "to")),
     ccRecipients: recipients(optionalStringArray(args.cc)),
     bccRecipients: recipients(optionalStringArray(args.bcc)),
+    ...(attachments.length === 0
+      ? {}
+      : {
+          attachments: attachments.map((attachment) => ({
+            "@odata.type": "#microsoft.graph.fileAttachment",
+            name: attachment.name,
+            contentType: attachment.mimeType,
+            contentBytes: base64EncodeBytes(attachment.bytes),
+          })),
+        }),
   }
 }
 

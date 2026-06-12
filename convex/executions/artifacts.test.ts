@@ -1,0 +1,30 @@
+import { expect, test } from "vitest"
+import { resolveToolModes } from "../permissions/catalog"
+import {
+  readProperties,
+  readRequired,
+  runtimeMilo,
+} from "./permissions.fixtures"
+import { assembleToolsForRun } from "./tools"
+import { getProviderToolDefinitions } from "./tools/definitions"
+
+test("includes artifact saving in Milo tools", () => {
+  const toolBundle = assembleToolsForRun({
+    milo: runtimeMilo(),
+    integrations: [],
+    toolModes: resolveToolModes([{ tool: "save_artifact", mode: "blocked" }]),
+  })
+  const miloServer = toolBundle.mcpServers.find(
+    (server) => server.name === "milo"
+  )
+  const tools = getProviderToolDefinitions("milo", {
+    toolModes: resolveToolModes([]),
+  })
+  const saveArtifact = tools.find((tool) => tool.name === "save_artifact")
+
+  expect(miloServer?.env.MILO_ENABLED_TOOLS.split(",")).toContain(
+    "save_artifact"
+  )
+  expect(readRequired(saveArtifact?.inputSchema)).toEqual(["path"])
+  expect(readProperties(saveArtifact?.inputSchema)).toHaveProperty("path")
+})

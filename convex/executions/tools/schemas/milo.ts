@@ -72,6 +72,21 @@ const scheduleSchema = () => ({
 })
 
 export const miloToolInputSchemas = {
+  save_artifact: objectSchema({
+    required: ["path"],
+    properties: {
+      path: stringProperty(
+        "Local file path to persist. Use this before sharing or attaching generated files."
+      ),
+      name: stringProperty("Optional filename to show to recipients."),
+      mimeType: stringProperty(
+        "Optional content type, for example image/png or application/pdf."
+      ),
+      description: stringProperty(
+        "Optional short description of the artifact."
+      ),
+    },
+  }),
   add_schedule: objectSchema({
     required: ["name", "description", "schedule", "output"],
     properties: {

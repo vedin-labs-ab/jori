@@ -64,6 +64,7 @@ const toolLabels: Record<string, string> = {
   notion_search: "Search Notion",
   notion_update_page: "Update Notion page",
   read_schedule: "Read schedule",
+  save_artifact: "Save artifact",
   search_schedules: "Search schedules",
   update_schedule: "Update schedule",
   users_search: "Search Slack users",

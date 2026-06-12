@@ -1,4 +1,4 @@
-import { base64UrlEncode, optionalString } from "../common"
+import { base64EncodeBytes, base64UrlEncode, optionalString } from "../common"
 
 export function getHeader(message: Record<string, unknown>, name: string) {
   const payload = readObject(message.payload)
@@ -52,6 +52,11 @@ export function createMimeMessage(args: {
   bodyType?: "HTML" | "Text"
   inReplyTo?: string
   references?: string
+  attachments?: Array<{
+    name: string
+    mimeType: string
+    bytes: Uint8Array
+  }>
 }) {
   const headers = [
     ["To", args.to.join(", ")],
@@ -59,10 +64,6 @@ export function createMimeMessage(args: {
     ...messageAddressHeaders("Bcc", args.bcc),
     ["Subject", args.subject],
     ["MIME-Version", "1.0"],
-    [
-      "Content-Type",
-      `${args.bodyType === "HTML" ? "text/html" : "text/plain"}; charset=UTF-8`,
-    ],
   ]
 
   if (args.inReplyTo !== undefined) {
@@ -73,6 +74,22 @@ export function createMimeMessage(args: {
     headers.push(["References", args.references])
   }
 
+  if (args.attachments !== undefined && args.attachments.length > 0) {
+    return base64UrlEncode(
+      createMultipartMimeMessage({
+        headers,
+        body: args.body,
+        bodyType: args.bodyType,
+        attachments: args.attachments,
+      })
+    )
+  }
+
+  headers.push([
+    "Content-Type",
+    `${args.bodyType === "HTML" ? "text/html" : "text/plain"}; charset=UTF-8`,
+  ])
+
   return base64UrlEncode(
     [
       ...headers.map(([name, value]) => `${name}: ${value}`),
@@ -80,6 +97,51 @@ export function createMimeMessage(args: {
       args.body,
     ].join("\r\n")
   )
+}
+
+function createMultipartMimeMessage(args: {
+  headers: string[][]
+  body: string
+  bodyType?: "HTML" | "Text"
+  attachments: Array<{
+    name: string
+    mimeType: string
+    bytes: Uint8Array
+  }>
+}) {
+  const boundary = `milo-${crypto.randomUUID()}`
+  const bodyContentType = args.bodyType === "HTML" ? "text/html" : "text/plain"
+  const parts = [
+    ...args.headers,
+    ["Content-Type", `multipart/mixed; boundary="${boundary}"`],
+    "",
+    `--${boundary}`,
+    `Content-Type: ${bodyContentType}; charset=UTF-8`,
+    "",
+    args.body,
+    ...args.attachments.flatMap((attachment) => [
+      `--${boundary}`,
+      `Content-Type: ${attachment.mimeType}; name="${escapeHeaderParameter(attachment.name)}"`,
+      "Content-Transfer-Encoding: base64",
+      `Content-Disposition: attachment; filename="${escapeHeaderParameter(attachment.name)}"`,
+      "",
+      wrapBase64(base64EncodeBytes(attachment.bytes)),
+    ]),
+    `--${boundary}--`,
+    "",
+  ]
+
+  return parts
+    .map((part) => (Array.isArray(part) ? `${part[0]}: ${part[1]}` : part))
+    .join("\r\n")
+}
+
+function wrapBase64(value: string) {
+  return value.match(/.{1,76}/g)?.join("\r\n") ?? ""
+}
+
+function escapeHeaderParameter(value: string) {
+  return value.replace(/[\r\n"]/g, "_")
 }
 
 function messageAddressHeaders(name: string, addresses: string[] | undefined) {

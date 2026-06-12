@@ -1,5 +1,9 @@
 import { type Doc } from "../../../_generated/dataModel"
 import {
+  type ArtifactContext,
+  readArtifactAttachments,
+} from "../../../artifacts/attachments"
+import {
   boundedNumber,
   optionalStringArray,
   requiredString,
@@ -20,7 +24,8 @@ export async function callGmailTool(
   integration: Doc<"integrations">,
   token: string,
   tool: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  context?: ArtifactContext
 ) {
   if (tool === "google_gmail_search_threads") {
     return await searchGmailThreads(token, args)
@@ -39,11 +44,11 @@ export async function callGmailTool(
   }
 
   if (tool === "google_gmail_send_message") {
-    return await sendGmailMessage(token, args)
+    return await sendGmailMessage(token, args, context)
   }
 
   if (tool === "google_gmail_create_draft") {
-    return await createGmailDraft(token, args)
+    return await createGmailDraft(token, args, context)
   }
 
   throw new Error(`Unknown Gmail tool: ${tool}`)
@@ -136,20 +141,31 @@ async function replyToGmailThread(
   )
 }
 
-async function sendGmailMessage(token: string, args: Record<string, unknown>) {
+async function sendGmailMessage(
+  token: string,
+  args: Record<string, unknown>,
+  context?: ArtifactContext
+) {
   return await googleJson(
     token,
     "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
     {
       method: "POST",
       body: {
-        raw: createMimeMessage(gmailMessageInput(args)),
+        raw: createMimeMessage({
+          ...gmailMessageInput(args),
+          attachments: await readArtifactAttachments(context, args.attachments),
+        }),
       },
     }
   )
 }
 
-async function createGmailDraft(token: string, args: Record<string, unknown>) {
+async function createGmailDraft(
+  token: string,
+  args: Record<string, unknown>,
+  context?: ArtifactContext
+) {
   return await googleJson(
     token,
     "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
@@ -157,7 +173,13 @@ async function createGmailDraft(token: string, args: Record<string, unknown>) {
       method: "POST",
       body: {
         message: {
-          raw: createMimeMessage(gmailMessageInput(args)),
+          raw: createMimeMessage({
+            ...gmailMessageInput(args),
+            attachments: await readArtifactAttachments(
+              context,
+              args.attachments
+            ),
+          }),
         },
       },
     }

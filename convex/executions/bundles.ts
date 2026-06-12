@@ -4,7 +4,7 @@ import { type RuntimeToolCapability } from "./tools/types"
 
 const providerMetadata = {
   milo: {
-    label: "Schedules",
+    label: "Milo",
     skillNames: [],
   },
   slack: {

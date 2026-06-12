@@ -90,7 +90,10 @@ export async function handleGitHubTarballRequest(
   }
 }
 
-async function authenticateBrokerRequest(ctx: ActionCtx, request: Request) {
+export async function authenticateBrokerRequest(
+  ctx: ActionCtx,
+  request: Request
+) {
   const token = getBearerToken(request)
 
   if (token === null) {
@@ -174,6 +177,8 @@ async function callBrokerTool(
   }
 
   return await callProviderTool({
+    ctx,
+    execution: context.execution,
     integration,
     tool: request.tool,
     toolArgs: request.args,

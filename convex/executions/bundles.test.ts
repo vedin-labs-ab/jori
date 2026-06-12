@@ -81,7 +81,7 @@ describe("runtime active integration availability", () => {
     ])
     expect(
       toolBundle.capabilities.map((capability) => capability.label)
-    ).toEqual(["Schedules", "Slack"])
+    ).toEqual(["Milo", "Slack"])
     expect(prompt).not.toContain("Slack: List channels")
     expect(prompt).not.toContain("Notion:")
     expect(prompt).not.toContain("notion_search")
@@ -102,7 +102,7 @@ describe("runtime native tool availability metadata", () => {
 
     expect(
       toolBundle.capabilities.map((capability) => capability.label)
-    ).toEqual(["Schedules", "Slack"])
+    ).toEqual(["Milo", "Slack"])
     expect(prompt).not.toContain("# Available Tools")
     expect(prompt).not.toContain("Schedules: Search schedules")
     expect(prompt).not.toContain("Slack: List channels")
@@ -129,7 +129,7 @@ describe("runtime shared provider bundles", () => {
     expect(toolBundle.skillNames).toEqual([])
     expect(
       toolBundle.capabilities.map((capability) => capability.label)
-    ).toEqual(["Schedules", "Outlook Mail", "Microsoft Calendar"])
+    ).toEqual(["Milo", "Outlook Mail", "Microsoft Calendar"])
   })
 })
 

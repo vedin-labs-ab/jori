@@ -84,6 +84,7 @@ test("includes Gmail send and draft tools with message schemas", () => {
   expect(readProperties(sendMessage?.inputSchema)).toHaveProperty("to")
   expect(readProperties(sendMessage?.inputSchema)).toHaveProperty("cc")
   expect(readProperties(sendMessage?.inputSchema)).toHaveProperty("bcc")
+  expect(readProperties(sendMessage?.inputSchema)).toHaveProperty("attachments")
   expect(readProperties(createDraft?.inputSchema)).toHaveProperty("to")
 })
 
@@ -258,7 +259,7 @@ test("keeps provider credentials out of sandbox MCP config", () => {
   expect(config).toContain('sandbox_mode = "read-only"')
 
   expect(config).toContain(
-    'enabled_tools = ["search_schedules", "read_schedule", "add_schedule", "update_schedule", "delete_schedule"]'
+    'enabled_tools = ["save_artifact", "search_schedules", "read_schedule", "add_schedule", "update_schedule", "delete_schedule"]'
   )
 
   for (const server of toolBundle.mcpServers) {

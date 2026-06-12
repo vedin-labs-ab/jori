@@ -1,5 +1,6 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
+import { handleArtifactUploadRequest } from "./broker/artifacts"
 import { handleGitHubTarballRequest, handleMiloMcpRequest } from "./broker/mcp"
 import {
   handleGitHubEvents,
@@ -72,6 +73,14 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     return await handleGitHubTarballRequest(ctx, request)
+  }),
+})
+
+http.route({
+  path: "/milo/artifacts",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    return await handleArtifactUploadRequest(ctx, request)
   }),
 })
 

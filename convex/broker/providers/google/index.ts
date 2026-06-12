@@ -2,6 +2,7 @@ import { type Doc } from "../../../_generated/dataModel"
 import { requireGoogleCredentials } from "../../../providers/google/credentials"
 import {
   boundedNumber,
+  type ProviderToolContext,
   requiredObject,
   requiredString,
   setOptionalSearchParam,
@@ -14,7 +15,8 @@ import { googleJson } from "./request"
 export async function callGoogleTool(
   integration: Doc<"integrations">,
   tool: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  context?: ProviderToolContext
 ) {
   const credentials = requireGoogleCredentials(integration)
 
@@ -23,7 +25,8 @@ export async function callGoogleTool(
       integration,
       credentials.tokens.access,
       tool,
-      args
+      args,
+      context
     )
   }
 

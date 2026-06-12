@@ -1,3 +1,11 @@
+import { type Doc } from "../../_generated/dataModel"
+import { type ActionCtx } from "../../_generated/server"
+
+export type ProviderToolContext = {
+  ctx: ActionCtx
+  execution: Doc<"executions">
+}
+
 export async function fetchJson(
   url: string,
   options: {
@@ -125,16 +133,20 @@ export function base64Decode(value: string) {
 
 export function base64UrlEncode(value: string) {
   const bytes = new TextEncoder().encode(value)
-  let binary = ""
+  const base64 = base64EncodeBytes(bytes)
 
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte)
+  return base64.replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "")
+}
+
+export function base64EncodeBytes(bytes: Uint8Array) {
+  let binary = ""
+  const chunkSize = 0x8000
+
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.slice(offset, offset + chunkSize))
   }
 
   return btoa(binary)
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replaceAll("=", "")
 }
 
 export function formatProviderError(error: unknown, fallback: string) {

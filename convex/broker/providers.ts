@@ -1,4 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
+import { type ActionCtx } from "../_generated/server"
 import { callGitHubTool, fetchGitHubTarball } from "./providers/github"
 import { callGoogleTool } from "./providers/google"
 import { callLinearTool } from "./providers/linear"
@@ -9,6 +10,8 @@ import { callSlackTool } from "./providers/slack"
 export { fetchGitHubTarball }
 
 export async function callProviderTool(args: {
+  ctx: ActionCtx
+  execution: Doc<"executions">
   integration: Doc<"integrations">
   tool: string
   toolArgs: Record<string, unknown>
@@ -32,7 +35,10 @@ export async function callProviderTool(args: {
     provider === "googleCalendar" ||
     provider === "googleDrive"
   ) {
-    return await callGoogleTool(args.integration, args.tool, args.toolArgs)
+    return await callGoogleTool(args.integration, args.tool, args.toolArgs, {
+      ctx: args.ctx,
+      execution: args.execution,
+    })
   }
 
   if (provider === "notion") {
@@ -40,7 +46,10 @@ export async function callProviderTool(args: {
   }
 
   if (provider === "microsoftEmail" || provider === "microsoftCalendar") {
-    return await callMicrosoftTool(args.integration, args.tool, args.toolArgs)
+    return await callMicrosoftTool(args.integration, args.tool, args.toolArgs, {
+      ctx: args.ctx,
+      execution: args.execution,
+    })
   }
 
   throw new Error(`Unsupported provider: ${provider}`)
