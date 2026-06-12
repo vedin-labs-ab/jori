@@ -33,7 +33,7 @@ test("projects Notion page content updates to page events", () => {
   ])
 })
 
-test("projects Notion data source child page updates to item events", () => {
+test("projects Notion data source child page updates to page events", () => {
   const events = readNotionAutomationEvents(
     notionPayload({
       type: "page.properties_updated",
@@ -45,42 +45,15 @@ test("projects Notion data source child page updates to item events", () => {
     })
   )
 
-  expect(events.map((event) => event.type)).toEqual([
-    "page.updated",
-    "data_source.item.changed",
-  ])
-  expect(events[1]).toEqual(
-    expect.objectContaining({
-      key: "notion:workspace-id:notion-event-id:data_source.item.changed",
-      resource: "data-source-id",
-      criteria: { dataSource: "data-source-id", page: "page-id" },
-      data: expect.objectContaining({
-        dataSourceId: "data-source-id",
-        pageId: "page-id",
-        updatedProperties: [{ id: "property-id", action: "updated" }],
-      }),
-    })
-  )
-})
-
-test("projects Notion data source content updates to item events", () => {
-  const events = readNotionAutomationEvents(
-    notionPayload({
-      type: "data_source.content_updated",
-      entity: { id: "data-source-id", type: "data_source" },
-      data: {
-        parent: { id: "page-id", type: "page" },
-      },
-    })
-  )
-
   expect(events).toEqual([
     expect.objectContaining({
-      type: "data_source.item.changed",
-      resource: "data-source-id",
-      criteria: { dataSource: "data-source-id" },
+      type: "page.updated",
+      resource: "page-id",
+      criteria: { page: "page-id" },
       data: expect.objectContaining({
-        dataSourceId: "data-source-id",
+        pageId: "page-id",
+        parent: { id: "data-source-id", type: "data_source" },
+        updatedProperties: [{ id: "property-id", action: "updated" }],
       }),
     }),
   ])
@@ -123,6 +96,25 @@ test("ignores unsupported Notion payloads", () => {
       notionPayload({
         type: "comment.updated",
         entity: { id: "comment-id", type: "comment" },
+      })
+    )
+  ).toEqual([])
+  expect(
+    readNotionAutomationEvents(
+      notionPayload({
+        type: "data_source.content_updated",
+        entity: { id: "data-source-id", type: "data_source" },
+      })
+    )
+  ).toEqual([])
+  expect(
+    readNotionAutomationEvents(
+      notionPayload({
+        type: "page.created",
+        entity: { id: "page-id", type: "page" },
+        data: {
+          parent: { id: "data-source-id", type: "data_source" },
+        },
       })
     )
   ).toEqual([])

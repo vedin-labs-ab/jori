@@ -110,10 +110,7 @@ async function loadProviderOptions(args: {
     return await searchGoogleDriveFiles(loaderArgs, "folder")
   }
   if (args.source === "notion.pages") {
-    return await searchNotionObjects(loaderArgs, "page")
-  }
-  if (args.source === "notion.dataSources") {
-    return await searchNotionObjects(loaderArgs, "data_source")
+    return await searchNotionObjects(loaderArgs)
   }
 
   return []
@@ -149,8 +146,6 @@ function optionUnavailableMessage(source: AutomationEventOptionSource) {
       "Could not load Google Drive folders. Check the Google Drive connection and try again.",
     "notion.pages":
       "Could not load Notion pages. Check the Notion connection and try again.",
-    "notion.dataSources":
-      "Could not load Notion data sources. Check the Notion connection and try again.",
   }
 
   return messages[source]

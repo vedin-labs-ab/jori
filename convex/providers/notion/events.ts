@@ -13,7 +13,7 @@ type NotionParent = {
 export type NotionAutomationEvent = {
   workspaceId: string
   key: string
-  type: "comment.created" | "data_source.item.changed" | "page.updated"
+  type: "comment.created" | "page.updated"
   resource?: string
   criteria: Record<string, string>
   actor?: Actor
@@ -26,8 +26,6 @@ const pageUpdateEvents = new Set([
   "page.properties_updated",
 ])
 
-const dataSourceItemPageEvents = new Set(["page.created", ...pageUpdateEvents])
-
 export function readNotionAutomationEvents(
   payload: unknown
 ): NotionAutomationEvent[] {
@@ -37,11 +35,7 @@ export function readNotionAutomationEvents(
     return []
   }
 
-  return [
-    ...readPageUpdatedEvent(event),
-    ...readDataSourceItemEvents(event),
-    ...readCommentCreatedEvent(event),
-  ]
+  return [...readPageUpdatedEvent(event), ...readCommentCreatedEvent(event)]
 }
 
 function readPageUpdatedEvent(event: NotionEvent) {
@@ -55,44 +49,6 @@ function readPageUpdatedEvent(event: NotionEvent) {
       resource: event.entity.id,
       criteria: { page: event.entity.id },
       data: { pageId: event.entity.id },
-    }),
-  ]
-}
-
-function readDataSourceItemEvents(event: NotionEvent) {
-  if (
-    event.type === "data_source.content_updated" &&
-    event.entity.type === "data_source"
-  ) {
-    return [
-      createAutomationEvent(event, {
-        type: "data_source.item.changed",
-        resource: event.entity.id,
-        criteria: { dataSource: event.entity.id },
-        data: { dataSourceId: event.entity.id },
-      }),
-    ]
-  }
-
-  const dataSourceId = getDataSourceParentId(event)
-
-  if (
-    !dataSourceItemPageEvents.has(event.type) ||
-    event.entity.type !== "page" ||
-    dataSourceId === undefined
-  ) {
-    return []
-  }
-
-  return [
-    createAutomationEvent(event, {
-      type: "data_source.item.changed",
-      resource: dataSourceId,
-      criteria: { dataSource: dataSourceId, page: event.entity.id },
-      data: {
-        dataSourceId,
-        pageId: event.entity.id,
-      },
     }),
   ]
 }
@@ -154,10 +110,6 @@ function createAutomationEvent(
     },
     observedAt: event.observedAt,
   }
-}
-
-function getDataSourceParentId(event: NotionEvent) {
-  return event.parent?.type === "data_source" ? event.parent.id : undefined
 }
 
 type NotionEvent = {

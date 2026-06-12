@@ -96,17 +96,6 @@ export const availableAutomationEventCatalog = [
         }),
       ],
     }),
-    event("data_source.item.changed", {
-      label: "Data source item created or updated",
-      description:
-        "Runs when a page is created or updated inside the selected Notion data source.",
-      parameters: [
-        optionParameter("dataSource", "Data source", "Search data sources", {
-          required: true,
-          source: "notion.dataSources",
-        }),
-      ],
-    }),
     event("comment.created", {
       label: "Comment created",
       description:
