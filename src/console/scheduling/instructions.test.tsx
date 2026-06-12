@@ -75,18 +75,6 @@ describe("schedule instructions field layout", () => {
     expect(editorFrame?.className).toContain("[overflow-wrap:anywhere]")
   })
 
-  test("shows marker guidance inside the editor frame", async () => {
-    const field = renderInstructionsField({
-      description: "",
-      surfaces: [],
-    })
-
-    expect(await screen.findByRole("textbox")).toBeDefined()
-    expect(field.container.textContent).toContain(
-      "Type an integration name to insert a marker."
-    )
-  })
-
   test("keeps text rows stable when badges are present", async () => {
     const field = renderInstructionsField({
       description: "Post GitHub results to Slack.",
@@ -116,6 +104,29 @@ describe("schedule instructions field layout", () => {
   })
 })
 
+describe("schedule instructions field footer", () => {
+  test("shows marker guidance inside the editor frame", async () => {
+    const field = renderInstructionsField({
+      description: "",
+      surfaces: [],
+    })
+
+    expect(await screen.findByRole("textbox")).toBeDefined()
+    expect(field.container.textContent).toContain(
+      "Type an integration name to insert a marker."
+    )
+
+    const footer = field.container.querySelector(
+      "[data-schedule-instructions-frame] > div:last-child"
+    )
+
+    expect(footer?.className).toContain("border-t")
+    expect(footer?.className).toContain("bg-muted/30")
+    expect(footer?.className).toContain("px-2")
+    expect(footer?.className).not.toContain("mx-2")
+  })
+})
+
 describe("schedule instructions marker styling", () => {
   test("uses icon opacity instead of background for badge access hover", async () => {
     renderInstructionsField({
@@ -136,7 +147,7 @@ describe("schedule instructions marker styling", () => {
 })
 
 describe("schedule instructions marker hover", () => {
-  test("switches remove pane content instantly while animating width", async () => {
+  test("keeps provider pane width stable and only swaps the icon affordance", async () => {
     renderInstructionsField({
       description: "Post to Google Drive.",
       surfaces: [{ provider: "googleDrive", access: "read" }],
@@ -145,15 +156,17 @@ describe("schedule instructions marker hover", () => {
     const button = await screen.findByRole("button", {
       name: "Remove Google Drive marker",
     })
-    const content = button.querySelector("[data-schedule-remove-content]")
+    const content = button.closest("[data-schedule-remove-content]")
+    const icon = button.querySelector("svg")
 
-    expect(button.className).toContain("overflow-hidden")
-    expect(button.className).toContain("transition-[width]")
+    expect(button.className).not.toContain("transition-[width]")
     expect(content?.textContent).toBe("Google Drive")
+    expect(icon?.className.baseVal).toContain("opacity-55")
+    expect(icon?.className.baseVal).toContain("group-hover/x:opacity-100")
 
     fireEvent.mouseEnter(button)
 
-    expect(content?.textContent).toBe("Remove")
+    expect(content?.textContent).toBe("Google Drive")
 
     fireEvent.mouseLeave(button)
 
@@ -196,7 +209,7 @@ describe("schedule instructions field", () => {
     })
   })
 
-  test("removes a marker from its provider pane", async () => {
+  test("removes a marker from its provider icon button", async () => {
     const field = renderInstructionsField({
       description: "Post to GitHub.",
       surfaces: [{ provider: "github", access: "read" }],
