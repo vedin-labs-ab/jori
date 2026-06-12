@@ -1,8 +1,8 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { prepareIntegrationForRuntime } from "../executions/integrations"
 import { hashExecutionToken } from "../executions/tokens"
+import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import {
   getToolPermission,
   type PermissionMode,

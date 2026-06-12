@@ -4,6 +4,7 @@ import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
+import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { integrationProviderValidator } from "../providers/catalog"
 import { providerLabels, resolveEventIntegration } from "./access"
 import {
@@ -48,8 +49,12 @@ export const search = action({
       return lookup
     }
 
-    return await searchProviderOptions({
+    const integration = await prepareIntegrationForRuntime(ctx, {
       integration: lookup.integration,
+    })
+
+    return await searchProviderOptions({
+      integration,
       source: args.source,
       query: args.query,
       criteria: args.criteria,
