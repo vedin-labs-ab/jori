@@ -23,11 +23,14 @@ import {
 import { type AutomationReadScope } from "../surfaces"
 import { type Automation, type AutomationFormValues } from "../types"
 import { createAutomationDialogActions } from "./actions"
-import { AutomationInstructionsField } from "./instructions"
 import {
-  automationInstructionMarkerErrors,
-  readAutomationInstructionMarkerError,
-} from "./payload/marker"
+  isAutomationInstructionsError,
+  isAutomationNameError,
+  readAutomationInstructionsError,
+  readAutomationNameError,
+} from "./errors"
+import { AutomationInstructionsField } from "./instructions"
+import { automationInstructionMarkerErrors } from "./payload/marker"
 import { RecurringFields } from "./recurring"
 
 const AutomationDateTimePicker = lazy(async () => ({
@@ -60,12 +63,16 @@ export function AutomationDialog({
   values: AutomationFormValues
 }) {
   const actions = createAutomationDialogActions({ onValuesChange, values })
-  const instructionsError = readAutomationInstructionMarkerError(error)
+  const instructionsError = readAutomationInstructionsError(
+    error,
+    values.instructions
+  )
   const nameError = readAutomationNameError(error, values.name)
   const shouldShowFormError =
     error !== undefined &&
     instructionsError === undefined &&
-    !isAutomationNameError(error)
+    !isAutomationNameError(error) &&
+    !isAutomationInstructionsError(error)
 
   return (
     <Dialog
@@ -182,25 +189,6 @@ function AutomationNameField({
       </div>
     </div>
   )
-}
-
-const automationNameErrors = {
-  required: "Name is required.",
-} as const
-
-function readAutomationNameError(
-  error: string | undefined,
-  name: string
-): string | undefined {
-  if (!isAutomationNameError(error) || name.trim() !== "") {
-    return undefined
-  }
-
-  return error
-}
-
-function isAutomationNameError(error: string | undefined) {
-  return error === automationNameErrors.required
 }
 
 function InstructionsHelp() {

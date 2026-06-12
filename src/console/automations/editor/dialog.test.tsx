@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
 import { emptyAutomationForm } from "../types"
 import { AutomationDialog } from "./dialog"
@@ -48,6 +48,53 @@ describe("automation dialog name validation", () => {
   })
 })
 
+describe("automation dialog instructions validation", () => {
+  test("shows required-instructions errors on the instructions field", async () => {
+    renderAutomationDialog({
+      error: "Instructions are required.",
+      values: {
+        ...emptyAutomationForm,
+        name: "Release summary",
+        instructions: "",
+      },
+    })
+
+    const textbox = await findInstructionsTextbox()
+    const editorFrame = document.body.querySelector(
+      "[data-automation-instructions-frame]"
+    )
+
+    expect(editorFrame?.className).toContain("border-destructive")
+    expect(editorFrame?.className).toContain("ring-destructive/20")
+    expect(textbox.getAttribute("aria-invalid")).toBe("true")
+    expect(textbox.getAttribute("aria-describedby")).toBe(
+      "automation-description-error"
+    )
+    expect(screen.getByRole("alert").textContent).toBe(
+      "Instructions are required."
+    )
+    expect(screen.queryByText("Could not save automation")).toBeNull()
+  })
+
+  test("hides stale required-instructions errors after instructions are present", async () => {
+    renderAutomationDialog({
+      error: "Instructions are required.",
+      values: {
+        ...emptyAutomationForm,
+        name: "Release summary",
+        instructions: "Summarize GitHub changes.",
+      },
+    })
+
+    const textbox = await findInstructionsTextbox()
+
+    expect(textbox.getAttribute("aria-invalid")).toBeNull()
+    expect(textbox.getAttribute("aria-describedby")).toBeNull()
+    expect(screen.queryByText("Instructions are required.")).toBeNull()
+    expect(screen.queryByText("Could not save automation")).toBeNull()
+  })
+})
+
 function renderAutomationDialog({
   error,
   values,
@@ -68,4 +115,18 @@ function renderAutomationDialog({
       values={values}
     />
   )
+}
+
+function findInstructionsTextbox() {
+  return waitFor(() => {
+    const textbox = document.body.querySelector<HTMLElement>(
+      "#automation-description"
+    )
+
+    if (textbox === null) {
+      throw new Error("Instructions textbox not found")
+    }
+
+    return textbox
+  })
 }
