@@ -54,7 +54,7 @@ export function artifactAttachmentsProperty() {
   return {
     type: "array",
     description:
-      "Files to attach. Save local files with save_artifact first, then pass returned artifact IDs here.",
+      "Files to attach. Save local files with save_artifact or find existing files with search_artifacts, then pass artifact IDs here.",
     items: objectSchema({
       required: ["artifactId"],
       properties: {

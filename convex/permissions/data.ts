@@ -14,6 +14,20 @@ export const toolPermissionRows = [
   ],
   [
     "milo",
+    "search_artifacts",
+    "Search artifacts",
+    "Find saved generated files that can be reused or attached.",
+    "read",
+  ],
+  [
+    "milo",
+    "read_artifact",
+    "Read artifact",
+    "Inspect a saved generated file by artifact ID.",
+    "read",
+  ],
+  [
+    "milo",
     "search_schedules",
     "Search schedules",
     "Find Milo schedules.",

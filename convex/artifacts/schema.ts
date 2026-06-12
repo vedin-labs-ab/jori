@@ -13,3 +13,4 @@ export const artifacts = defineTable({
 })
   .index("by_execution", ["executionId"])
   .index("by_tenant", ["tenantId"])
+  .index("by_tenant_and_created_at", ["tenantId", "createdAt"])

@@ -259,7 +259,7 @@ test("keeps provider credentials out of sandbox MCP config", () => {
   expect(config).toContain('sandbox_mode = "read-only"')
 
   expect(config).toContain(
-    'enabled_tools = ["save_artifact", "search_schedules", "read_schedule", "add_schedule", "update_schedule", "delete_schedule"]'
+    'enabled_tools = ["save_artifact", "search_artifacts", "read_artifact", "search_schedules", "read_schedule", "add_schedule", "update_schedule", "delete_schedule"]'
   )
 
   for (const server of toolBundle.mcpServers) {

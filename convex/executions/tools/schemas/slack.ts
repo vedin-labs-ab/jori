@@ -1,4 +1,5 @@
 import {
+  artifactAttachmentsProperty,
   numberProperty,
   objectSchema,
   type SchemaMap,
@@ -55,10 +56,11 @@ export const slackToolInputSchemas = {
   conversations_add_message: objectSchema({
     required: ["channel", "text"],
     properties: {
+      attachments: artifactAttachmentsProperty(),
       blocks: {
         type: "array",
         description:
-          "Optional Block Kit blocks rendered in place of text, which then serves as the notification fallback.",
+          "Optional Block Kit blocks for text-only messages. When attachments are provided, text is used as the file upload comment.",
         items: { type: "object", additionalProperties: true },
       },
       channel: stringProperty("Slack channel ID."),

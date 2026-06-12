@@ -7,6 +7,7 @@ export type ArtifactAttachment = {
   name: string
   mimeType: string
   size: number
+  description?: string
   bytes: Uint8Array
 }
 
@@ -34,9 +35,9 @@ export async function readArtifactAttachments(
 
   for (const input of inputs) {
     const artifact = await context.ctx.runQuery(
-      internal.artifacts.data.getForExecution,
+      internal.artifacts.data.getForTenant,
       {
-        executionId: context.execution._id,
+        tenantId: context.execution.tenantId,
         artifactId: input.artifactId as Id<"artifacts">,
       }
     )
@@ -62,6 +63,7 @@ export async function readArtifactAttachments(
       name: input.name ?? artifact.name,
       mimeType: input.mimeType ?? artifact.mimeType,
       size: artifact.size,
+      description: artifact.description,
       bytes: new Uint8Array(await blob.arrayBuffer()),
     })
   }

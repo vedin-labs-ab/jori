@@ -1,14 +1,15 @@
 import { type Doc } from "../../_generated/dataModel"
-import { requireSlackCredentials } from "../../providers/slack/credentials"
 import {
-  boundedNumber,
-  fetchJson,
-  optionalString,
-  requiredString,
-} from "./common"
+  type ArtifactAttachment,
+  type ArtifactContext,
+  readArtifactAttachments,
+} from "../../artifacts/attachments"
+import { requireSlackCredentials } from "../../providers/slack/credentials"
+import { boundedNumber, optionalString, requiredString } from "./common"
+import { slackJsonApi, slackQueryApi } from "./slack/client"
+import { postSlackFiles } from "./slack/upload"
 
 export type SlackBlock = Record<string, unknown>
-type SlackApiResult = Record<string, unknown> | null
 
 export async function postSlackMessage(
   integration: Doc<"integrations">,
@@ -17,9 +18,20 @@ export async function postSlackMessage(
     text: string
     thread_ts?: string
     blocks?: SlackBlock[]
+    attachments?: ArtifactAttachment[]
   }
 ) {
   const credentials = requireSlackCredentials(integration)
+  const attachments = args.attachments ?? []
+
+  if (attachments.length > 0) {
+    return await postSlackFiles(credentials.bot, {
+      attachments,
+      channel: args.channel,
+      text: args.text,
+      thread_ts: args.thread_ts,
+    })
+  }
 
   return await slackJsonApi(credentials.bot, "chat.postMessage", {
     channel: args.channel,
@@ -51,7 +63,8 @@ export async function updateSlackMessage(
 export async function callSlackTool(
   integration: Doc<"integrations">,
   tool: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  context?: ArtifactContext
 ) {
   const credentials = requireSlackCredentials(integration)
 
@@ -116,6 +129,9 @@ export async function callSlackTool(
 
   if (tool === "conversations_add_message") {
     return await postSlackMessage(integration, {
+      attachments: await readArtifactAttachments(context, args.attachments, {
+        maxBytes: 25 * 1024 * 1024,
+      }),
       channel: requiredString(args.channel, "channel"),
       text: requiredString(args.text, "text"),
       thread_ts: optionalString(args.thread_ts),
@@ -142,62 +158,4 @@ function optionalBlocks(value: unknown) {
   }
 
   return value.length === 0 ? undefined : (value as SlackBlock[])
-}
-
-async function slackJsonApi(
-  token: string,
-  method: string,
-  body: Record<string, unknown>
-) {
-  const result = await fetchJson(`https://slack.com/api/${method}`, {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${token}`,
-      "content-type": "application/json; charset=utf-8",
-    },
-    body,
-  })
-
-  return assertSlackApiSucceeded(result)
-}
-
-async function slackQueryApi(
-  token: string,
-  method: string,
-  params: Record<string, unknown>
-) {
-  const url = new URL(`https://slack.com/api/${method}`)
-
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined) {
-      url.searchParams.set(key, String(value))
-    }
-  }
-
-  const result = await fetchJson(url.toString(), {
-    method: "GET",
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-  })
-
-  return assertSlackApiSucceeded(result)
-}
-
-function assertSlackApiSucceeded(result: unknown): SlackApiResult {
-  if (!isSlackApiResult(result)) {
-    throw new Error("Slack API request failed: invalid response")
-  }
-
-  if (result !== null && result.ok === false) {
-    throw new Error(`Slack API request failed: ${JSON.stringify(result)}`)
-  }
-
-  return result
-}
-
-function isSlackApiResult(result: unknown): result is SlackApiResult {
-  return (
-    result === null || (typeof result === "object" && !Array.isArray(result))
-  )
 }

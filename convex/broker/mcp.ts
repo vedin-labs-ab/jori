@@ -10,11 +10,11 @@ import {
   resolveToolModes,
   type ToolProvider,
 } from "../permissions/catalog"
-import { callMiloScheduleTool } from "../scheduling/mcp"
 import {
   type ApprovalBrokerContext,
   createPromptedToolApproval,
 } from "./approvals"
+import { callMiloTool } from "./milo"
 import { callProviderTool, fetchGitHubTarball } from "./providers"
 import {
   formatProviderError,
@@ -158,7 +158,7 @@ async function callBrokerTool(
       return await createPromptedToolApproval(ctx, context, request)
     }
 
-    return await callMiloScheduleTool(ctx, context.execution, request)
+    return await callMiloTool(ctx, context.execution, request)
   }
 
   const provider = request.provider

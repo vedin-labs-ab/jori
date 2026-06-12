@@ -19,7 +19,10 @@ export async function callProviderTool(args: {
   const provider = args.integration.provider
 
   if (provider === "slack") {
-    return await callSlackTool(args.integration, args.tool, args.toolArgs)
+    return await callSlackTool(args.integration, args.tool, args.toolArgs, {
+      ctx: args.ctx,
+      execution: args.execution,
+    })
   }
 
   if (provider === "linear") {

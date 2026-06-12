@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc } from "../../_generated/dataModel"
+import { artifactContext } from "./fixtures/artifacts"
 import { callSlackTool } from "./slack"
 
 const originalFetch = globalThis.fetch
@@ -68,6 +69,67 @@ describe("Slack message tool", () => {
   })
 })
 
+describe("Slack file uploads", () => {
+  test("uploads artifact attachments as Slack files", async () => {
+    const calls = mockSlackFetch([
+      {
+        ok: true,
+        upload_url: "https://files.slack.com/upload/v1/TICKET",
+        file_id: "F123",
+      },
+      new Response(""),
+      {
+        ok: true,
+        files: [{ id: "F123", title: "kitten.png" }],
+      },
+    ])
+
+    const result = await callSlackTool(
+      slackIntegration(),
+      "conversations_add_message",
+      {
+        attachments: [{ artifactId: "artifact-id" }],
+        channel: "C123",
+        text: "Here is the image.",
+        thread_ts: "123.456",
+      },
+      artifactContext()
+    )
+
+    expect(result).toEqual({
+      ok: true,
+      files: [{ id: "F123", title: "kitten.png" }],
+    })
+    expect(calls).toHaveLength(3)
+    expect(calls[0]).toMatchObject({
+      body: {
+        alt_txt: "A small generated image.",
+        filename: "kitten.png",
+        length: 5,
+      },
+      url: "https://slack.com/api/files.getUploadURLExternal",
+    })
+    expect(calls[1]).toMatchObject({
+      headers: { "content-type": "image/png" },
+      method: "POST",
+      url: "https://files.slack.com/upload/v1/TICKET",
+    })
+    expect(calls[1]?.body).toBeInstanceOf(Blob)
+    expect(
+      new Uint8Array(await (calls[1]?.body as Blob).arrayBuffer())
+    ).toEqual(new Uint8Array([104, 101, 108, 108, 111]))
+    expect(calls[2]).toMatchObject({
+      body: {
+        channel_id: "C123",
+        files: [{ id: "F123", title: "kitten.png" }],
+        initial_comment: "Here is the image.",
+        thread_ts: "123.456",
+      },
+      url: "https://slack.com/api/files.completeUploadExternal",
+    })
+  })
+})
+
 describe("Slack read tools", () => {
   test("reads thread replies with query parameters", async () => {
     const calls = mockSlackFetch({ ok: true, messages: [] })
@@ -118,7 +180,9 @@ describe("Slack read tools", () => {
   })
 })
 
-function mockSlackFetch(responseBody: unknown) {
+function mockSlackFetch(
+  responseBody: unknown | Response | Array<unknown | Response>
+) {
   const calls: Array<{
     body: unknown
     headers: Record<string, string>
@@ -126,6 +190,7 @@ function mockSlackFetch(responseBody: unknown) {
     params: Record<string, string>
     url: string
   }> = []
+  const responses = Array.isArray(responseBody) ? [...responseBody] : undefined
 
   globalThis.fetch = vi.fn(async (url, init) => {
     const parsedUrl = new URL(String(url))
@@ -138,7 +203,9 @@ function mockSlackFetch(responseBody: unknown) {
       url: `${parsedUrl.origin}${parsedUrl.pathname}`,
     })
 
-    return Response.json(responseBody)
+    const response = responses?.shift() ?? responseBody
+
+    return response instanceof Response ? response : Response.json(response)
   })
 
   return calls

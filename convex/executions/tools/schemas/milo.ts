@@ -87,6 +87,23 @@ export const miloToolInputSchemas = {
       ),
     },
   }),
+  search_artifacts: objectSchema({
+    properties: {
+      query: stringProperty(
+        "Substring matched against artifact names, descriptions, and content types."
+      ),
+      mimeType: stringProperty(
+        "Optional content type filter, for example image/png or image/."
+      ),
+      limit: numberProperty("Maximum artifacts to return.", 1, 100),
+    },
+  }),
+  read_artifact: objectSchema({
+    required: ["artifactId"],
+    properties: {
+      artifactId: stringProperty("Artifact ID."),
+    },
+  }),
   add_schedule: objectSchema({
     required: ["name", "description", "schedule", "output"],
     properties: {

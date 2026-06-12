@@ -4,8 +4,8 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
+import { callMiloTool } from "../broker/milo"
 import { callProviderTool } from "../broker/providers"
-import { callMiloScheduleTool } from "../scheduling/mcp"
 import { createPromptedExecution } from "./artifacts"
 import { type CodexRuntimeInput } from "./codex"
 import { runPromptedExecution } from "./execute"
@@ -183,7 +183,7 @@ async function executeApprovedTool(
 ) {
   try {
     if (approval.provider === "milo") {
-      return await callMiloScheduleTool(
+      return await callMiloTool(
         ctx,
         {
           tenantId: approval.tenantId,

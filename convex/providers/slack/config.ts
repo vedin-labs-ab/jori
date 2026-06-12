@@ -4,7 +4,7 @@ export const slackAppsUninstallUrl = "https://slack.com/api/apps.uninstall"
 export const slackAuthRevokeUrl = "https://slack.com/api/auth.revoke"
 export const slackOAuthCallbackPath = "/slack/oauth/callback"
 
-export const slackBotScopes = ["app_mentions:read", "chat:write"]
+export const slackBotScopes = ["app_mentions:read", "chat:write", "files:write"]
 
 export const slackUserScopes = [
   "channels:history",
