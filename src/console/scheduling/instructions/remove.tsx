@@ -13,7 +13,7 @@ export function ScheduleSurfaceRemoveButton({
 }) {
   return (
     <span
-      className="group/remove flex items-center gap-1 px-2 font-medium"
+      className="group/remove flex items-center gap-1 px-1.5 font-medium"
       data-schedule-remove-content=""
     >
       <button

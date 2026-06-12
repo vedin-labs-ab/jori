@@ -96,6 +96,9 @@ describe("schedule instructions field layout", () => {
     const separator = buttonGroup?.querySelector(
       '[data-slot="button-group-separator"]'
     )
+    const removePane = buttonGroup?.querySelector(
+      "[data-schedule-remove-content]"
+    )
 
     expect(editorFrame?.className).toContain("[&_.tiptap]:leading-6")
     expect(editorFrame?.className).toContain("[&_.tiptap>p]:min-h-6")
@@ -106,6 +109,7 @@ describe("schedule instructions field layout", () => {
     expect(buttonGroup?.className).toContain("text-[0.625rem]/none")
     expect(separator?.className).toContain("data-vertical:my-0")
     expect(separator?.className).not.toContain("my-1")
+    expect(removePane?.className).toContain("px-1.5")
   })
 })
 
@@ -144,7 +148,7 @@ describe("schedule instructions marker styling", () => {
     })
 
     expect(button.className).toContain("text-[#2563EB]")
-    expect(button.className).toContain("w-6")
+    expect(button.className).toContain("w-5")
     expect(button.className).toContain("opacity-55")
     expect(button.className).toContain("hover:opacity-100")
     expect(button.className).not.toContain("hover:bg-")
