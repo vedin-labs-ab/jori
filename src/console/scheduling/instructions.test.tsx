@@ -99,9 +99,12 @@ describe("schedule instructions field layout", () => {
     expect(editorFrame?.className).toContain("[&_.tiptap>p]:leading-6")
     expect(badgeWrapper?.className).toContain("align-middle")
     expect(buttonGroup?.className).toContain("align-middle")
-    expect(buttonGroup?.className).toContain("h-6")
+    expect(buttonGroup?.className).toContain("h-5")
+    expect(buttonGroup?.className).toContain("text-[0.625rem]/none")
   })
+})
 
+describe("schedule instructions marker styling", () => {
   test("uses icon opacity instead of background for badge access hover", async () => {
     renderInstructionsField({
       description: "Post to GitHub.",
@@ -113,6 +116,7 @@ describe("schedule instructions field layout", () => {
     })
 
     expect(button.className).toContain("text-[#2563EB]")
+    expect(button.className).toContain("w-6")
     expect(button.className).toContain("opacity-55")
     expect(button.className).toContain("hover:opacity-100")
     expect(button.className).not.toContain("hover:bg-")

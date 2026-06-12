@@ -41,7 +41,7 @@ export function ScheduleSurfaceNodeView({
       <ButtonGroup
         aria-label={`${providerLabel} schedule surface`}
         className={cn(
-          "mx-0.5 inline-flex h-6 overflow-hidden rounded-md border align-middle text-xs/relaxed shadow-none",
+          "mx-0.5 inline-flex h-5 overflow-hidden rounded-sm border align-middle text-[0.625rem]/none shadow-none",
           toneClassNames.surface,
           selected && "ring-2 ring-ring/40"
         )}
@@ -87,7 +87,7 @@ function ScheduleSurfaceAccessButton({
     <button
       aria-label={`${providerLabel} access: ${accessLabel}. Change access.`}
       className={cn(
-        "grid w-7 place-items-center opacity-55 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
+        "grid w-6 place-items-center opacity-55 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
         iconClassName
       )}
       onClick={(event) => {
@@ -98,7 +98,7 @@ function ScheduleSurfaceAccessButton({
       title={accessLabel}
       type="button"
     >
-      <Icon className="size-3.5" />
+      <Icon className="size-3" />
     </button>
   )
 }
@@ -115,7 +115,7 @@ function ScheduleSurfaceRemoveButton({
   return (
     <button
       aria-label={`Remove ${providerLabel} marker`}
-      className="group/remove-surface-marker flex items-center gap-1.5 px-2 font-medium outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30"
+      className="group/remove-surface-marker flex items-center gap-1 px-2 font-medium outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30"
       onClick={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -136,13 +136,13 @@ function ScheduleSurfaceRemoveIcon({
   provider: ScheduleSurfaceProvider
 }) {
   return (
-    <span className="grid size-3.5 shrink-0 place-items-center">
-      <span className="col-start-1 row-start-1 flex size-3.5 items-center justify-center group-hover/remove-surface-marker:invisible">
-        <SurfaceLogo provider={provider} />
+    <span className="grid size-3 shrink-0 place-items-center">
+      <span className="col-start-1 row-start-1 flex size-3 items-center justify-center group-hover/remove-surface-marker:invisible">
+        <SurfaceLogo className="size-3" provider={provider} />
       </span>
       <X
         aria-hidden="true"
-        className="invisible col-start-1 row-start-1 size-3.5 group-hover/remove-surface-marker:visible"
+        className="invisible col-start-1 row-start-1 size-3 group-hover/remove-surface-marker:visible"
       />
     </span>
   )
