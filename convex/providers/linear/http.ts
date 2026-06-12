@@ -8,6 +8,7 @@ import {
   linearOAuthScopes,
 } from "./config"
 import { getLinearMessage, type LinearWebhookPayload } from "./events"
+import { fetchLinearIssueContext, type LinearIssueContext } from "./issues"
 import {
   exchangeLinearAuthorizationCode,
   fetchLinearInstallationProfile,
@@ -113,21 +114,22 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
+  const hydratedMessage = await hydrateLinearMessage(ctx, message)
   const result = await ctx.runMutation(
     internal.messages.ingest.recordLinearMessage,
     {
-      accountId: message.accountId,
-      type: message.type,
-      externalId: message.externalId,
+      accountId: hydratedMessage.accountId,
+      type: hydratedMessage.type,
+      externalId: hydratedMessage.externalId,
       actor: createProviderActor({
         provider: "linear",
-        externalId: message.actorId,
-        email: message.actorEmail,
+        externalId: hydratedMessage.actorId,
+        email: hydratedMessage.actorEmail,
       }),
-      conversationId: message.conversationId,
-      text: message.text,
-      observedAt: message.observedAt,
-      data: message.data,
+      conversationId: hydratedMessage.conversationId,
+      text: hydratedMessage.text,
+      observedAt: hydratedMessage.observedAt,
+      data: hydratedMessage.data,
     }
   )
 
@@ -138,4 +140,58 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
   }
 
   return Response.json({ ok: true })
+}
+
+type LinearMessage = NonNullable<ReturnType<typeof getLinearMessage>>
+
+async function hydrateLinearMessage(
+  ctx: ActionCtx,
+  message: LinearMessage
+): Promise<LinearMessage> {
+  if (message.data.projectId !== undefined) {
+    return message
+  }
+
+  const plan = await ctx.runQuery(
+    internal.providers.linear.hydration.issueProject,
+    {
+      accountId: message.accountId,
+      event: "issue.comment.changed",
+      criteria: linearIssueCriteria(message),
+    }
+  )
+
+  if (plan.status !== "ready" || !plan.required) {
+    return message
+  }
+
+  return withLinearIssueContext(
+    message,
+    await fetchLinearIssueContext(plan.integration, message.data.issueId)
+  )
+}
+
+function linearIssueCriteria(message: LinearMessage) {
+  return {
+    issue: message.data.issueId,
+    ...(message.data.teamId === undefined ? {} : { team: message.data.teamId }),
+  }
+}
+
+function withLinearIssueContext(
+  message: LinearMessage,
+  issue: LinearIssueContext | null
+): LinearMessage {
+  if (issue === null) {
+    return message
+  }
+
+  return {
+    ...message,
+    data: {
+      ...message.data,
+      teamId: message.data.teamId ?? issue.teamId,
+      projectId: message.data.projectId ?? issue.projectId,
+    },
+  }
 }

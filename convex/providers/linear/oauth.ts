@@ -1,5 +1,6 @@
 import { fetchFormToken, requireProviderEnv } from "../oauth"
-import { linearGraphqlUrl, linearOAuthTokenUrl } from "./config"
+import { linearOAuthTokenUrl } from "./config"
+import { linearGraphql } from "./graphql"
 
 export type LinearTokenResponse =
   | {
@@ -51,7 +52,19 @@ export async function refreshLinearAccessToken(refreshToken: string) {
 }
 
 export async function fetchLinearInstallationProfile(accessToken: string) {
-  const result = (await linearGraphql(accessToken, {
+  const result = await linearGraphql<{
+    data?: {
+      viewer?: {
+        id?: string
+        name?: string
+      }
+      organization?: {
+        id?: string
+        name?: string
+        urlKey?: string
+      }
+    }
+  }>(accessToken, {
     query: `
       query MiloLinearInstallation {
         viewer {
@@ -65,20 +78,7 @@ export async function fetchLinearInstallationProfile(accessToken: string) {
         }
       }
     `,
-  })) as {
-    data?: {
-      viewer?: {
-        id?: string
-        name?: string
-      }
-      organization?: {
-        id?: string
-        name?: string
-        urlKey?: string
-      }
-    }
-    errors?: unknown
-  }
+  })
 
   const botId = result.data?.viewer?.id
   const organizationId = result.data?.organization?.id
@@ -112,29 +112,4 @@ async function requestLinearToken(body: Record<string, string>) {
     client_secret: requireLinearClientSecret(),
     ...body,
   })
-}
-
-async function linearGraphql(
-  accessToken: string,
-  body: {
-    query: string
-    variables?: Record<string, unknown>
-  }
-) {
-  const response = await fetch(linearGraphqlUrl, {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(body),
-  })
-
-  const result = await response.json()
-
-  if (!response.ok) {
-    throw new Error(`Linear GraphQL request failed: ${JSON.stringify(result)}`)
-  }
-
-  return result
 }

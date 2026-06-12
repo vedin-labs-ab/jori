@@ -171,8 +171,11 @@ import type * as providers_linear_credentials from "../providers/linear/credenti
 import type * as providers_linear_data from "../providers/linear/data.js";
 import type * as providers_linear_events from "../providers/linear/events.js";
 import type * as providers_linear_gate from "../providers/linear/gate.js";
+import type * as providers_linear_graphql from "../providers/linear/graphql.js";
 import type * as providers_linear_http from "../providers/linear/http.js";
+import type * as providers_linear_hydration from "../providers/linear/hydration.js";
 import type * as providers_linear_install from "../providers/linear/install.js";
+import type * as providers_linear_issues from "../providers/linear/issues.js";
 import type * as providers_linear_oauth from "../providers/linear/oauth.js";
 import type * as providers_linear_signing from "../providers/linear/signing.js";
 import type * as providers_microsoft_config from "../providers/microsoft/config.js";
@@ -382,8 +385,11 @@ declare const fullApi: ApiFromModules<{
   "providers/linear/data": typeof providers_linear_data;
   "providers/linear/events": typeof providers_linear_events;
   "providers/linear/gate": typeof providers_linear_gate;
+  "providers/linear/graphql": typeof providers_linear_graphql;
   "providers/linear/http": typeof providers_linear_http;
+  "providers/linear/hydration": typeof providers_linear_hydration;
   "providers/linear/install": typeof providers_linear_install;
+  "providers/linear/issues": typeof providers_linear_issues;
   "providers/linear/oauth": typeof providers_linear_oauth;
   "providers/linear/signing": typeof providers_linear_signing;
   "providers/microsoft/config": typeof providers_microsoft_config;
