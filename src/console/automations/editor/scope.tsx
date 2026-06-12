@@ -137,8 +137,6 @@ function ScopeFieldGrid({
     return null
   }
 
-  const hasVisibleScopeFields = parameters.length > 0
-
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {parameters.map((parameter) => (
@@ -165,18 +163,9 @@ function ScopeFieldGrid({
       ))}
       {availableConditions.length > 0 ? (
         <div className="grid gap-2">
-          {hasVisibleScopeFields ? (
-            <span
-              aria-hidden="true"
-              className="invisible font-medium text-xs/relaxed leading-none"
-            >
-              Condition
-            </span>
-          ) : (
-            <span className="font-medium text-muted-foreground text-xs/relaxed leading-none">
-              Conditions
-            </span>
-          )}
+          <span className="font-medium text-muted-foreground text-xs/relaxed leading-none">
+            Condition
+          </span>
           <AddConditionMenu available={availableConditions} onAdd={onAdd} />
         </div>
       ) : null}
