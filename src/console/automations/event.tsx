@@ -17,8 +17,8 @@ import {
   getAutomationEventDefinition,
   getDefaultAutomationEvent,
 } from "../../../convex/automations/events"
+import { EventProviderField } from "./provider-field"
 import { EventOptionField } from "./resource"
-import { getAutomationSurfaceLabel } from "./surfaces"
 import { type AutomationFormValues } from "./types"
 
 export function EventFields({
@@ -39,30 +39,17 @@ export function EventFields({
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="grid gap-2">
           <Label htmlFor="automation-event-provider">Provider</Label>
-          <Select
+          <EventProviderField
+            tenantId={tenantId}
+            value={values.eventProvider}
             onValueChange={(provider) =>
               onProviderChange({
-                provider: provider as AutomationEventProvider,
+                provider,
                 onValuesChange,
                 values,
               })
             }
-            value={values.eventProvider}
-          >
-            <SelectTrigger id="automation-event-provider" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="z-[70]">
-              {automationEventCatalog.map((definition) => (
-                <SelectItem
-                  key={definition.provider}
-                  value={definition.provider}
-                >
-                  {getAutomationSurfaceLabel(definition.provider)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="automation-event-name">Event</Label>
