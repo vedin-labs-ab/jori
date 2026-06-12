@@ -57,13 +57,13 @@ describe("automation event catalog criteria", () => {
     )
   })
 
-  test("makes Notion webhook events available", () => {
-    const definition = requireEvent("notion", "data_source.item.changed")
+  test("makes supported Notion webhook events available", () => {
+    const definition = requireEvent("notion", "page.updated")
 
     expect(() => assertAutomationEventIsAvailable(definition)).not.toThrow()
-    expect(requireParameter(definition, "dataSource")).toMatchObject({
+    expect(requireParameter(definition, "page")).toMatchObject({
       required: true,
-      source: "notion.dataSources",
+      source: "notion.pages",
     })
   })
 })

@@ -15,7 +15,6 @@ export const automationEventOptionSources = [
   "googleDrive.files",
   "googleDrive.folders",
   "notion.pages",
-  "notion.dataSources",
 ] as const
 
 export type AutomationEventOptionSource =

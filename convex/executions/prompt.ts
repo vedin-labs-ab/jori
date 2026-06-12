@@ -241,7 +241,6 @@ function getNotionTargetLines(data: unknown) {
 
   return [
     targetLine("Page ID", readDataString(data, "pageId")),
-    targetLine("Data source ID", readDataString(data, "dataSourceId")),
     targetLine("Comment ID", readDataString(data, "commentId")),
     targetLine("Entity ID", readDataString(entity, "id")),
     targetLine("Entity type", readDataString(entity, "type")),

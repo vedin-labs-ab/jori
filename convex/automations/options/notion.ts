@@ -10,14 +10,11 @@ import {
   requiredOptionString,
 } from "./common"
 
-export async function searchNotionObjects(
-  args: OptionLoaderArgs,
-  objectType: "data_source" | "page"
-) {
+export async function searchNotionObjects(args: OptionLoaderArgs) {
   const result = await notionJson(args, "/search", {
     query: args.query,
     page_size: maxOptions,
-    filter: { property: "object", value: objectType },
+    filter: { property: "object", value: "page" },
   })
 
   return readArray(result.results).map((item) => {
