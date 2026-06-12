@@ -17,8 +17,11 @@ export const pendingAutomationEventCatalog = [
       parameters: [
         optionParameter("label", "Label", "Search Gmail labels", {
           source: "gmail.labels",
+          description: "Narrows runs to messages with the selected label.",
         }),
-        emailParameter("from", "From", "person@example.com"),
+        emailParameter("from", "From", "person@example.com", {
+          description: "Narrows runs to messages from this sender.",
+        }),
       ],
     }),
   ]),
@@ -31,8 +34,11 @@ export const pendingAutomationEventCatalog = [
       parameters: [
         optionParameter("folder", "Folder", "Search Outlook folders", {
           source: "microsoftEmail.folders",
+          description: "Narrows runs to messages in the selected folder.",
         }),
-        emailParameter("from", "From", "person@example.com"),
+        emailParameter("from", "From", "person@example.com", {
+          description: "Narrows runs to messages from this sender.",
+        }),
       ],
     }),
   ]),
@@ -127,7 +133,9 @@ export const pendingAutomationEventCatalog = [
           required: true,
           source: "googleDrive.folders",
         }),
-        textParameter("mimeType", "MIME type", "application/pdf"),
+        textParameter("mimeType", "MIME type", "application/pdf", {
+          description: "Narrows runs to files of this MIME type.",
+        }),
       ],
     }),
   ]),

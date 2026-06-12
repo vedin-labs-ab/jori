@@ -3,7 +3,7 @@ import {
   type AutomationEventDefinition,
   getAutomationEventDefinition,
 } from "../../../../convex/automations/events"
-import { applyEventCriteriaChange } from "./criteria"
+import { applyEventCriteriaChange, removeEventCriterion } from "./criteria"
 
 describe("automation event criteria hard dependencies", () => {
   test("clears hard dependent criteria when a parent changes", () => {
@@ -113,6 +113,39 @@ describe("automation event criteria text dependencies", () => {
         },
       })
     ).toEqual({ repo: "milo/app", pr: "43" })
+  })
+})
+
+describe("automation event criteria removal", () => {
+  test("keeps soft-dependent criteria when a scoping condition is removed", () => {
+    const event = requireEvent("linear", "issue.comment.changed")
+
+    expect(
+      removeEventCriterion({
+        key: "team",
+        parameters: event.parameters ?? [],
+        values: {
+          team: "team-a",
+          project: "project-a",
+          issue: "issue-a",
+        },
+      })
+    ).toEqual({ project: "project-a", issue: "issue-a" })
+  })
+
+  test("clears hard-dependent criteria when their parent is removed", () => {
+    const event = requireEvent("github", "issue.comment.changed")
+
+    expect(
+      removeEventCriterion({
+        key: "repo",
+        parameters: event.parameters ?? [],
+        values: {
+          repo: "milo/app",
+          issue: "42",
+        },
+      })
+    ).toEqual({})
   })
 })
 
