@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { workspace } from "./sandbox/harness"
+import { workspace } from "./harness"
 import { createSkillSandboxFiles, type RuntimeSkill } from "./skills"
 
 test("renders runtime skills as standard Agent Skill files", () => {

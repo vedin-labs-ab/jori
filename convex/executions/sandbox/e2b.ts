@@ -9,16 +9,6 @@ import {
 import { createCodexConfig } from "../codex"
 import { type ToolBundle, type ToolPreflight } from "../tools/types"
 import {
-  assertCommandSucceeded,
-  assertSetupCommandSucceeded,
-  CodexRunError,
-  type CommandTrace,
-  createCommandTrace,
-  formatError,
-  recordSetupTrace,
-  type SetupTrace,
-} from "../trace"
-import {
   codexHome,
   createBootstrapCommand,
   createCodexCommand,
@@ -31,6 +21,16 @@ import {
   createToolPreflightEnv,
 } from "./preflights"
 import { type AgentRuntimeProfile, resolveAgentRuntimeProfile } from "./profile"
+import {
+  assertCommandSucceeded,
+  assertSetupCommandSucceeded,
+  CodexRunError,
+  type CommandTrace,
+  createCommandTrace,
+  formatError,
+  recordSetupTrace,
+  type SetupTrace,
+} from "./trace"
 
 export type E2BCodexRunArgs = {
   agentId?: string

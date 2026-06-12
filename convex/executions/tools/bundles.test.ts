@@ -1,13 +1,13 @@
 import { describe, expect, test } from "vitest"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc } from "../../_generated/dataModel"
 import {
   getToolPermissionsByProvider,
   resolveToolModes,
-} from "../permissions/catalog"
+} from "../../permissions/catalog"
+import { assemblePrompt } from "../prompt"
+import { type RuntimeSkill } from "../sandbox/skills"
+import { assembleToolsForRun } from "."
 import { filterRuntimeSkillsForBundle } from "./bundles"
-import { assemblePrompt } from "./prompt"
-import { type RuntimeSkill } from "./skills"
-import { assembleToolsForRun } from "./tools"
 
 describe("runtime integration bundles", () => {
   test("omits Slack formatting skill when Slack tools are unavailable", () => {

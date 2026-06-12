@@ -1,7 +1,7 @@
 import { defineSchema } from "convex/server"
+import { activations } from "./activations/schema"
 import { approvals } from "./approvals/schema"
 import { artifacts } from "./artifacts/schema"
-import { activations } from "./activations/schema"
 import { automations } from "./automations/schema"
 import { events } from "./events/schema"
 import { executions } from "./executions/schema"

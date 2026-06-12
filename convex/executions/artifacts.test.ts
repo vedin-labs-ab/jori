@@ -1,12 +1,12 @@
 import { expect, test } from "vitest"
 import { resolveToolModes } from "../permissions/catalog"
+import { assembleToolsForRun } from "./tools"
+import { getProviderToolDefinitions } from "./tools/definitions"
 import {
   readProperties,
   readRequired,
   runtimeMilo,
-} from "./permissions.fixtures"
-import { assembleToolsForRun } from "./tools"
-import { getProviderToolDefinitions } from "./tools/definitions"
+} from "./tools/permissions.fixtures"
 
 test("includes artifact tools in Milo tools", () => {
   const toolBundle = assembleToolsForRun({

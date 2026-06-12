@@ -1,11 +1,11 @@
 "use node"
 
-import { internal } from "../_generated/api"
-import { type Id } from "../_generated/dataModel"
-import { type ActionCtx } from "../_generated/server"
-import { runCodexInE2B } from "./sandbox/e2b"
-import { createExecutionToken, hashExecutionToken } from "./tokens"
-import { type RuntimeToolBundle } from "./tools"
+import { internal } from "../../_generated/api"
+import { type Id } from "../../_generated/dataModel"
+import { type ActionCtx } from "../../_generated/server"
+import { createExecutionToken, hashExecutionToken } from "../tokens"
+import { type RuntimeToolBundle } from "../tools"
+import { runCodexInE2B } from "./e2b"
 import { CodexRunError, formatError } from "./trace"
 
 type PromptedExecution = {

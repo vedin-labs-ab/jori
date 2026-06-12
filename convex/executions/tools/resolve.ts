@@ -19,8 +19,8 @@ import { requireLinearCredentials } from "../../providers/linear/credentials"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
-import { createRuntimeToolCapability } from "../bundles"
 import { createBrokeredToolBundle } from "./brokered"
+import { createRuntimeToolCapability } from "./bundles"
 import {
   type RuntimeToolCapability,
   type ToolBundle,

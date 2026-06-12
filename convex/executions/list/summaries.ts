@@ -1,9 +1,9 @@
-import { type Doc } from "../_generated/dataModel"
-import { type QueryCtx } from "../_generated/server"
-import { type Actor } from "../shared/actor"
-import { summarizeApproval } from "./approval"
+import { type Doc } from "../../_generated/dataModel"
+import { type QueryCtx } from "../../_generated/server"
+import { summarizeApproval } from "../../approvals/summary"
+import { providerLabel } from "../../providers/catalog"
+import { type Actor } from "../../shared/actor"
 import { getExecutionContext } from "./context"
-import { providerLabel } from "./labels"
 
 export async function summarizeExecution(
   ctx: QueryCtx,

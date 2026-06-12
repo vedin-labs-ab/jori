@@ -1,6 +1,6 @@
-import { promptTemplates } from "../prompts/generated"
-import { renderPromptTemplate } from "../prompts/render"
-import { createPromptTime } from "../prompts/time"
+import { promptTemplates } from "../../prompts/generated"
+import { renderPromptTemplate } from "../../prompts/render"
+import { createPromptTime } from "../../prompts/time"
 
 export type ApprovalContinuation = {
   decision: "approved" | "denied"

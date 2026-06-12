@@ -9,9 +9,9 @@ import { callProviderTool } from "../broker/providers"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { createPromptedExecution } from "./artifacts"
 import { type CodexRuntimeInput } from "./codex"
-import { runPromptedExecution } from "./execute"
+import { runPromptedExecution } from "./sandbox/execute"
+import { formatError } from "./sandbox/trace"
 import { createExecutionToken } from "./tokens"
-import { formatError } from "./trace"
 
 export const runApprovedExecution = internalAction({
   args: {

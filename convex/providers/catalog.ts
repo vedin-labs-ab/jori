@@ -45,6 +45,27 @@ export const integrationProviderValidator = v.union(
   v.literal("microsoftCalendar")
 )
 
+const providerLabels: Record<Provider, string> = {
+  milo: "Milo",
+  slack: "Slack",
+  linear: "Linear",
+  github: "GitHub",
+  gmail: "Gmail",
+  googleCalendar: "Google Calendar",
+  googleDrive: "Google Drive",
+  notion: "Notion",
+  microsoftEmail: "Outlook Mail",
+  microsoftCalendar: "Microsoft Calendar",
+}
+
+export function providerLabel(provider: string | undefined) {
+  if (provider === undefined) {
+    return "Milo"
+  }
+
+  return providerLabels[provider as Provider] ?? provider
+}
+
 export function isGoogleProvider(provider: IntegrationProvider) {
   return (
     provider === "gmail" ||

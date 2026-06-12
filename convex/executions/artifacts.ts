@@ -2,12 +2,12 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { resolveToolModes } from "../permissions/catalog"
-import { filterRuntimeSkillsForBundle } from "./bundles"
 import { type CodexRuntimeInput } from "./codex"
-import { type ApprovalContinuation } from "./continuation"
 import { assemblePrompt } from "./prompt"
-import { createSkillSandboxFiles } from "./skills"
+import { type ApprovalContinuation } from "./prompt/continuation"
+import { createSkillSandboxFiles } from "./sandbox/skills"
 import { assembleToolsForRun } from "./tools"
+import { filterRuntimeSkillsForBundle } from "./tools/bundles"
 
 export async function createPromptedExecution(
   ctx: ActionCtx,

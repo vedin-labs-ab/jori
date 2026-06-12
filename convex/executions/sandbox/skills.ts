@@ -1,5 +1,5 @@
-import { workspace } from "./sandbox/harness"
-import { type SandboxFile } from "./tools/types"
+import { type SandboxFile } from "../tools/types"
+import { workspace } from "./harness"
 
 export type RuntimeSkill = {
   id: string

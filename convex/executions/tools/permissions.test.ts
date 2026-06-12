@@ -3,16 +3,16 @@ import {
   resolveToolMode,
   resolveToolModes,
   toolPermissions,
-} from "../permissions/catalog"
-import { createCodexConfig } from "./codex"
+} from "../../permissions/catalog"
+import { createCodexConfig } from "../codex"
+import { assembleToolsForRun } from "."
+import { getProviderToolDefinitions } from "./definitions"
 import {
   integration,
   readProperties,
   readRequired,
   runtimeMilo,
 } from "./permissions.fixtures"
-import { assembleToolsForRun } from "./tools"
-import { getProviderToolDefinitions } from "./tools/definitions"
 
 test("keeps delivery tools required and out of approval prompts", () => {
   const toolBundle = assembleToolsForRun({

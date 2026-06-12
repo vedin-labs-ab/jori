@@ -10,8 +10,8 @@ import {
 } from "../../permissions/catalog"
 import { createSlackApprovalRequest } from "../../providers/slack/approval/blocks"
 import { type Actor, createUserActor } from "../../shared/actor"
-import { parsePromptedToolApproval } from "./args"
 import { postSlackMessage } from "../providers/slack"
+import { parsePromptedToolApproval } from "./args"
 
 export type ApprovalBrokerContext = {
   execution: Doc<"executions">
