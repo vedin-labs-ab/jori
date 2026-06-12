@@ -20,6 +20,7 @@ export const scheduleSurface = v.object({
 
 export const scheduleOutput = v.object({
   readScope: scheduleReadScope,
+  webSearch: v.boolean(),
   surfaces: v.array(scheduleSurface),
 })
 

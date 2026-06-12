@@ -75,6 +75,18 @@ describe("schedule instructions field layout", () => {
     expect(editorFrame?.className).toContain("[overflow-wrap:anywhere]")
   })
 
+  test("shows marker guidance inside the editor frame", async () => {
+    const field = renderInstructionsField({
+      description: "",
+      surfaces: [],
+    })
+
+    expect(await screen.findByRole("textbox")).toBeDefined()
+    expect(field.container.textContent).toContain(
+      "Type an integration name to insert a marker."
+    )
+  })
+
   test("keeps text rows stable when badges are present", async () => {
     const field = renderInstructionsField({
       description: "Post GitHub results to Slack.",

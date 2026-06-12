@@ -42,6 +42,7 @@ export type E2BCodexRunArgs = {
   prompt: string
   toolBundle: ToolBundle
   traceToken: string
+  webSearch: boolean
 }
 
 export type E2BCodexRunResult = {
@@ -66,11 +67,7 @@ export async function runCodexInE2B(args: E2BCodexRunArgs) {
       recordSetupTrace(
         setupTraces,
         "bootstrap",
-        await bootstrapCodex(sandbox, {
-          authJsonBase64: args.authJsonBase64,
-          profile,
-          toolBundle: args.toolBundle,
-        })
+        await bootstrapCodex(sandbox, { ...args, profile })
       ),
       "Could not bootstrap Codex inside E2B.",
       setupTraces
@@ -147,6 +144,7 @@ async function bootstrapCodex(
     authJsonBase64: string
     profile: AgentRuntimeProfile
     toolBundle: ToolBundle
+    webSearch: boolean
   }
 ) {
   const result = await runCommand(sandbox, createBootstrapCommand(), {
@@ -154,6 +152,7 @@ async function bootstrapCodex(
       CODEX_AUTH_JSON_BASE64: args.authJsonBase64,
       CODEX_CONFIG_TOML: createCodexConfig({
         mcpServers: args.toolBundle.mcpServers,
+        webSearch: args.webSearch,
       }),
       CODEX_HOME: codexHome,
       MILO_SANDBOX_FILES_BASE64: encodeBase64(

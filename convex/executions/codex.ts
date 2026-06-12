@@ -23,7 +23,10 @@ export type ScheduledRuntimeInput = {
 
 export type CodexRuntimeInput = MessageRuntimeInput | ScheduledRuntimeInput
 
-export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {
+export function createCodexConfig(args: {
+  mcpServers: McpServerConfig[]
+  webSearch?: boolean
+}) {
   return [
     'cli_auth_credentials_store = "file"',
     'approval_policy = "never"',
@@ -32,7 +35,7 @@ export function createCodexConfig(args: { mcpServers: McpServerConfig[] }) {
     'model_reasoning_effort = "low"',
     // Hosted Responses web search; runs server-side, so read-only does not
     // gate it. Must be the top-level key — the [tools] boolean is ignored.
-    'web_search = "live"',
+    ...(args.webSearch === false ? [] : ['web_search = "live"']),
     "",
     ...args.mcpServers.flatMap(renderMcpServerConfig),
   ].join("\n")

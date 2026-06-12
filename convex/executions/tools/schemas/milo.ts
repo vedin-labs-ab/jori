@@ -2,13 +2,18 @@ import { numberProperty, objectSchema, stringProperty } from "./common"
 
 const scheduleOutputSchema = () => ({
   ...objectSchema({
-    required: ["readScope", "surfaces"],
+    required: ["readScope", "webSearch", "surfaces"],
     properties: {
       readScope: {
         type: "string",
         enum: ["selected", "allConnected"],
         description:
           "Use selected to limit reads to listed read/both surfaces. Use allConnected to allow reads from every connected integration.",
+      },
+      webSearch: {
+        type: "boolean",
+        description:
+          "Whether this schedule may use hosted web search during runs.",
       },
       surfaces: {
         type: "array",

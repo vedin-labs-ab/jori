@@ -1,4 +1,8 @@
 import {
+  writeScheduleReadScopePreference,
+  writeScheduleWebSearchPreference,
+} from "./preferences"
+import {
   applyScheduleReadScope,
   type ScheduleReadScope,
   type ScheduleSurfaceFormValue,
@@ -31,11 +35,16 @@ export function createScheduleDialogActions({
       onValuesChange({ ...values, name })
     },
     updateReadScope: (readScope: ScheduleReadScope) => {
+      writeScheduleReadScopePreference(readScope)
       onValuesChange({
         ...values,
         readScope,
         surfaces: applyScheduleReadScope(values.surfaces, readScope),
       })
+    },
+    updateWebSearch: (webSearch: boolean) => {
+      writeScheduleWebSearchPreference(webSearch)
+      onValuesChange({ ...values, webSearch })
     },
   }
 }

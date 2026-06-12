@@ -70,6 +70,7 @@ describe("schedule trigger prompts", () => {
     expect(prompt).toContain("Current UTC time:")
     expect(prompt).toContain("Integration access:")
     expect(prompt).toContain("- Read scope: Selected integrations only")
+    expect(prompt).toContain("- Web search: Allowed")
     expect(prompt).toContain("- GitHub: Read")
     expect(prompt).toContain("- Slack: Write")
     expect(prompt).toContain("Use write actions only")
@@ -80,6 +81,12 @@ describe("schedule trigger prompts", () => {
     const prompt = assemblePrompt(scheduledRuntimeInput("allConnected"))
 
     expect(prompt).toContain("- Read scope: Any connected integration")
+  })
+
+  test("renders disabled web search", () => {
+    const prompt = assemblePrompt(scheduledRuntimeInput("selected", false))
+
+    expect(prompt).toContain("- Web search: Disabled")
   })
 })
 
@@ -143,7 +150,8 @@ describe("approval continuation prompts", () => {
 })
 
 function scheduledRuntimeInput(
-  readScope: "selected" | "allConnected" = "selected"
+  readScope: "selected" | "allConnected" = "selected",
+  webSearch = true
 ) {
   return {
     type: "scheduled",
@@ -166,6 +174,7 @@ function scheduledRuntimeInput(
       metadata: { source: "daily" },
       output: {
         readScope,
+        webSearch,
         surfaces: [
           { provider: "github", access: "read" },
           { provider: "slack", access: "write" },

@@ -9,6 +9,7 @@ test("restricts scheduled selected integrations to declared access", () => {
     integrations: [integration("github"), integration("slack")],
     scheduleOutput: {
       readScope: "selected",
+      webSearch: true,
       surfaces: [
         { provider: "github", access: "read" },
         { provider: "slack", access: "write" },
@@ -31,6 +32,7 @@ test("allows all connected reads without broadening scheduled writes", () => {
     integrations: [integration("github"), integration("notion")],
     scheduleOutput: {
       readScope: "allConnected",
+      webSearch: true,
       surfaces: [{ provider: "notion", access: "write" }],
     },
     toolModes: resolveToolModes([]),

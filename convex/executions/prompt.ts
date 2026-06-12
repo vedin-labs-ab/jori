@@ -90,6 +90,7 @@ function formatScheduleAccess(
 ) {
   return formatTargetLines([
     targetLine("Read scope", scheduleReadScopeLabel(output.readScope)),
+    targetLine("Web search", output.webSearch ? "Allowed" : "Disabled"),
     ...output.surfaces.map((surface) =>
       targetLine(
         scheduleProviderLabels[surface.provider],

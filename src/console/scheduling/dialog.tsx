@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react"
+import { CircleHelp, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -13,6 +13,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { createScheduleDialogActions } from "./actions"
 import { ScheduleInstructionsField } from "./instructions"
 import { ScheduleDateTimePicker } from "./picker"
@@ -65,7 +71,16 @@ export function ScheduleDialog({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="schedule-description">Instructions</Label>
+            <div className="grid gap-1">
+              <div className="flex items-center gap-1.5">
+                <Label htmlFor="schedule-description">Instructions</Label>
+                <InstructionsHelp />
+              </div>
+              <p className="text-muted-foreground text-xs">
+                Mention integrations to insert access markers. At least one
+                marker must allow writes.
+              </p>
+            </div>
             <ScheduleInstructionsField
               id="schedule-description"
               value={values.description}
@@ -78,9 +93,11 @@ export function ScheduleDialog({
               surfaces={values.surfaces}
             />
           </div>
-          <ReadScopeField
+          <AccessFields
             onReadScopeChange={actions.updateReadScope}
+            onWebSearchChange={actions.updateWebSearch}
             readScope={values.readScope}
+            webSearch={values.webSearch}
           />
           <ScheduleTiming onValuesChange={onValuesChange} values={values} />
         </div>
@@ -103,29 +120,104 @@ export function ScheduleDialog({
   )
 }
 
-function ReadScopeField({
+function InstructionsHelp() {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            aria-label="Instructions help"
+            className="inline-flex size-4 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            type="button"
+          >
+            <CircleHelp className="size-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent
+          align="start"
+          className="max-w-80 items-start text-left leading-relaxed"
+          side="right"
+        >
+          <div className="grid gap-1">
+            <p>
+              Describe the scheduled work and mention integrations such as
+              GitHub, Slack, Linear, Gmail, or Google Drive to insert markers.
+            </p>
+            <p>
+              Each marker controls Read, Write, or Both access. Use Write or
+              Both for integrations where Milo should post, create, or update.
+            </p>
+            <p>
+              Example: "Summarize GitHub changes and post the result to Slack."
+            </p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+function AccessFields({
   onReadScopeChange,
+  onWebSearchChange,
   readScope,
+  webSearch,
 }: {
   onReadScopeChange: (readScope: ScheduleReadScope) => void
+  onWebSearchChange: (webSearch: boolean) => void
   readScope: ScheduleReadScope
+  webSearch: boolean
 }) {
   return (
-    <div className="flex items-start gap-2 rounded-md border bg-muted/20 p-2">
+    <div className="grid gap-2">
+      <h3 className="font-medium text-xs">Access</h3>
+      <div className="grid gap-2">
+        <AccessCheckbox
+          checked={readScope === "allConnected"}
+          description="Mentioned integrations start as Read. Use Write or Both for output targets."
+          id="schedule-all-reads"
+          label="Allow reading from any connected integration"
+          onCheckedChange={(checked) =>
+            onReadScopeChange(checked ? "allConnected" : "selected")
+          }
+        />
+        <AccessCheckbox
+          checked={webSearch}
+          description="Lets Milo search the public web when needed."
+          id="schedule-web-search"
+          label="Allow web search"
+          onCheckedChange={onWebSearchChange}
+        />
+      </div>
+    </div>
+  )
+}
+
+function AccessCheckbox({
+  checked,
+  description,
+  id,
+  label,
+  onCheckedChange,
+}: {
+  checked: boolean
+  description: string
+  id: string
+  label: string
+  onCheckedChange: (checked: boolean) => void
+}) {
+  return (
+    <div className="flex items-start gap-2">
       <Checkbox
-        checked={readScope === "allConnected"}
-        id="schedule-all-reads"
-        onCheckedChange={(checked) =>
-          onReadScopeChange(checked === true ? "allConnected" : "selected")
-        }
+        checked={checked}
+        id={id}
+        onCheckedChange={(next) => onCheckedChange(next === true)}
       />
       <div className="grid gap-0.5">
-        <Label htmlFor="schedule-all-reads" className="font-normal text-xs">
-          Allow reading from any connected integration
+        <Label htmlFor={id} className="font-normal text-xs">
+          {label}
         </Label>
-        <p className="text-muted-foreground text-xs">
-          Writes still require a badge set to Write or Both.
-        </p>
+        <p className="text-muted-foreground text-xs">{description}</p>
       </div>
     </div>
   )

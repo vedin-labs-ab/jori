@@ -41,6 +41,7 @@ export function normalizeScheduleOutput(
 
   return {
     readScope: output.readScope,
+    webSearch: output.webSearch,
     surfaces,
   }
 }

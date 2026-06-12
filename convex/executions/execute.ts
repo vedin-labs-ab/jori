@@ -12,6 +12,7 @@ type PromptedExecution = {
   id: Id<"executions">
   prompt: string
   toolBundle: RuntimeToolBundle
+  webSearch: boolean
 }
 
 export async function runPromptedExecution(
@@ -53,6 +54,7 @@ export async function runPromptedExecution(
       prompt: args.execution.prompt,
       toolBundle: args.execution.toolBundle,
       traceToken,
+      webSearch: args.execution.webSearch,
     })
 
     trace = runtimeResult.trace

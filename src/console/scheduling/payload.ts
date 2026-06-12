@@ -1,5 +1,6 @@
 import { buildRecurringCron, classifyCron } from "./cron"
 import { toDatetimeLocal } from "./format"
+import { readSchedulePreferences } from "./preferences"
 import {
   hasScheduleWriteSurface,
   normalizeScheduleSurfaceMentions,
@@ -20,6 +21,7 @@ type ScheduleArgs = {
   description: string
   output: {
     readScope: ScheduleFormValues["readScope"]
+    webSearch: boolean
     surfaces: Array<{
       provider: ScheduleFormValues["surfaces"][number]["provider"]
       access: Exclude<ScheduleFormValues["surfaces"][number]["access"], "">
@@ -33,7 +35,10 @@ export function scheduleFormValues(
   schedule: Schedule | undefined
 ): ScheduleFormValues {
   if (schedule === undefined) {
-    return emptyScheduleForm
+    return {
+      ...emptyScheduleForm,
+      ...readSchedulePreferences(),
+    }
   }
 
   return {
@@ -43,6 +48,7 @@ export function scheduleFormValues(
     ...classifyCron(schedule.cron),
     runAt: schedule.runAt === undefined ? "" : toDatetimeLocal(schedule.runAt),
     readScope: schedule.output.readScope,
+    webSearch: schedule.output.webSearch,
     surfaces: schedule.output.surfaces,
   }
 }
@@ -127,6 +133,7 @@ function buildBaseArgs(values: ScheduleFormValues): ArgsResult<ScheduleArgs> {
       description,
       output: {
         readScope: values.readScope,
+        webSearch: values.webSearch,
         surfaces: surfaces.map((surface) => ({
           access: surface.access as Exclude<typeof surface.access, "">,
           provider: surface.provider,

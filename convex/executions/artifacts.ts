@@ -54,7 +54,12 @@ export async function createPromptedExecution(
     id: executionId,
     prompt,
     toolBundle: runtimeToolBundle,
+    webSearch: shouldAllowWebSearch(input),
   }
+}
+
+function shouldAllowWebSearch(input: CodexRuntimeInput) {
+  return input.type !== "scheduled" || input.schedule.output.webSearch
 }
 
 async function assembleRuntimeTools(

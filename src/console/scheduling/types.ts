@@ -38,6 +38,7 @@ export type ScheduleFormValues = {
   cron: string
   runAt: string
   readScope: ScheduleReadScope
+  webSearch: boolean
   surfaces: ScheduleSurfaceFormValue[]
 }
 
@@ -51,6 +52,7 @@ export const emptyScheduleForm: ScheduleFormValues = {
   monthDay: "1",
   cron: "",
   runAt: "",
-  readScope: "selected",
+  readScope: "allConnected",
+  webSearch: true,
   surfaces: [],
 }
