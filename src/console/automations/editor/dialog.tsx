@@ -153,7 +153,7 @@ function InstructionsHelp() {
         <TooltipTrigger asChild>
           <button
             aria-label="Instructions help"
-            className="inline-flex size-4 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            className="inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
             type="button"
           >
             <CircleHelp className="size-3" />
