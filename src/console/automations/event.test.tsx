@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { EventFields } from "./event"
 import { getProviderOptions } from "./provider-options"
@@ -20,6 +20,11 @@ afterEach(() => {
 })
 
 beforeEach(() => {
+  Object.assign(HTMLElement.prototype, {
+    hasPointerCapture: () => false,
+    releasePointerCapture: () => undefined,
+    scrollIntoView: () => undefined,
+  })
   convexMocks.useQuery.mockReturnValue({
     providers: [
       { provider: "slack", connected: true },
@@ -37,41 +42,55 @@ beforeEach(() => {
 
 describe("automation event fields", () => {
   test("disables the event picker when the selected provider has one event", () => {
-    render(
-      <EventFields
-        tenantId="tenant"
-        onValuesChange={() => undefined}
-        values={{
-          ...emptyAutomationForm,
-          type: "event",
-          eventProvider: "slack",
-          event: "message.created",
-        }}
-      />
-    )
+    renderEventFields({ eventProvider: "slack", event: "message.created" })
 
     expect(screen.getByLabelText("Event").hasAttribute("disabled")).toBe(true)
   })
 
   test("renders the selected provider logo in the provider picker", () => {
-    render(
-      <EventFields
-        tenantId="tenant"
-        onValuesChange={() => undefined}
-        values={{
-          ...emptyAutomationForm,
-          type: "event",
-          eventProvider: "slack",
-          event: "message.created",
-        }}
-      />
-    )
+    renderEventFields({ eventProvider: "slack", event: "message.created" })
 
     expect(
       screen
         .getByLabelText("Provider")
         .querySelector('img[src="/logos/providers/slack.svg"]')
     ).not.toBeNull()
+  })
+})
+
+describe("automation event provider picker", () => {
+  test("opens the provider picker menu", () => {
+    renderEventFields({ eventProvider: "slack", event: "message.created" })
+
+    openProviderPicker()
+
+    expect(screen.getByRole("option", { name: /GitHub/ })).toBeDefined()
+  })
+
+  test("opens the provider picker when the selected provider is not connected", () => {
+    convexMocks.useQuery.mockReturnValue(providerConnections("github"))
+
+    renderEventFields({ eventProvider: "slack", event: "message.created" })
+
+    openProviderPicker()
+
+    expect(screen.getByRole("option", { name: /GitHub/ })).toBeDefined()
+    expect(
+      screen
+        .getByRole("option", { name: /Slack/ })
+        .getAttribute("data-disabled")
+    ).toBe("")
+  })
+
+  test("opens the provider picker when no providers are connected", () => {
+    convexMocks.useQuery.mockReturnValue(providerConnections())
+
+    renderEventFields({ eventProvider: "slack", event: "message.created" })
+
+    openProviderPicker()
+
+    expect(screen.getByRole("option", { name: /Slack/ })).toBeDefined()
+    expect(screen.getAllByText("Not connected").length).toBeGreaterThan(0)
   })
 })
 
@@ -101,6 +120,47 @@ describe("automation event provider options", () => {
     expect(options[1].provider).toBe("slack")
   })
 })
+
+function openProviderPicker() {
+  fireEvent.pointerDown(screen.getByLabelText("Provider"), {
+    button: 0,
+    ctrlKey: false,
+    pointerType: "mouse",
+  })
+}
+
+function renderEventFields(values: Partial<typeof emptyAutomationForm> = {}) {
+  render(
+    <EventFields
+      tenantId="tenant"
+      onValuesChange={() => undefined}
+      values={{
+        ...emptyAutomationForm,
+        type: "event",
+        ...values,
+      }}
+    />
+  )
+}
+
+function providerConnections(connectedProvider?: string) {
+  return {
+    providers: [
+      "slack",
+      "linear",
+      "github",
+      "gmail",
+      "googleCalendar",
+      "googleDrive",
+      "notion",
+      "microsoftEmail",
+      "microsoftCalendar",
+    ].map((provider) => ({
+      provider,
+      connected: provider === connectedProvider,
+    })),
+  }
+}
 
 describe("automation event parameter fields", () => {
   test("disables dependent option pickers until their parent is selected", () => {
