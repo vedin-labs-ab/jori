@@ -18,12 +18,14 @@ export function EmptyAutomations({ hasFilters }: { hasFilters: boolean }) {
           <CalendarClock />
         </EmptyMedia>
         <EmptyTitle>
-          {hasFilters ? "No matching automations" : "No automations yet"}
+          {hasFilters
+            ? "No automations match this search"
+            : "No automations yet"}
         </EmptyTitle>
         <EmptyDescription>
           {hasFilters
-            ? "Adjust the search or include completed automations."
-            : "Create an automation to give Milo recurring, one-time, or event-based work."}
+            ? "Adjust your search or switch to All."
+            : "Create an automation for recurring, one-time, or event-triggered work."}
         </EmptyDescription>
       </EmptyHeader>
     </Empty>

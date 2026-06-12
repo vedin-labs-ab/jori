@@ -68,7 +68,7 @@ describe("automation payload", () => {
         surfaces: [{ provider: "github", access: "" }],
       })
     ).toEqual({
-      error: "Choose read, write, or both for each mentioned integration.",
+      error: "Choose read, write, or read/write for each mention.",
     })
   })
 
@@ -81,7 +81,7 @@ describe("automation payload", () => {
         surfaces: [{ provider: "github", access: "read" }],
       })
     ).toEqual({
-      error: "At least one integration needs write access.",
+      error: "Give at least one mentioned integration write access.",
     })
   })
 })

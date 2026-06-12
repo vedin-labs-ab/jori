@@ -65,8 +65,8 @@ export function AutomationDialog({
             {automation === undefined ? "New automation" : "Edit automation"}
           </DialogTitle>
           <DialogDescription>
-            Describe the work, choose what Milo can access, and set when it
-            runs.
+            Describe the work, set integration access, and choose when Milo runs
+            it.
           </DialogDescription>
         </DialogHeader>
 
@@ -87,8 +87,8 @@ export function AutomationDialog({
                 <InstructionsHelp />
               </div>
               <p className="text-muted-foreground text-xs">
-                Mention integrations to give Milo access. At least one needs
-                write access.
+                Mention each integration Milo should use. Give at least one
+                integration write access.
               </p>
             </div>
             <AutomationInstructionsField
@@ -154,13 +154,13 @@ function InstructionsHelp() {
         >
           <div className="grid gap-1">
             <p>
-              Describe the work and mention integrations such as GitHub, Slack,
-              Linear, Gmail, or Google Drive to give Milo access to them.
+              Describe the work and mention each integration Milo should use,
+              such as GitHub, Slack, Linear, Gmail, or Google Drive.
             </p>
             <p>
-              Each mention controls what Milo can do there: read, write, or
-              read/write. When all reads are allowed, mentions switch between
-              read and read/write.
+              Each mention sets access for that integration: read, write, or
+              read/write. If Milo can read every connected integration, mentions
+              switch between read and read/write access.
             </p>
             <p>
               Example: "Summarize GitHub changes and post the result to Slack."
@@ -189,18 +189,18 @@ function AccessFields({
       <div className="grid gap-2">
         <AccessCheckbox
           checked={readScope === "allConnected"}
-          description="Milo can read from every connected integration, not just the ones you mention."
+          description="Use this when the automation may need context from tools you do not mention."
           id="automation-all-reads"
-          label="Allow reading from any connected integration"
+          label="Let Milo read any connected integration"
           onCheckedChange={(checked) =>
             onReadScopeChange(checked ? "allConnected" : "selected")
           }
         />
         <AccessCheckbox
           checked={webSearch}
-          description="Milo can search the web when the work needs it."
+          description="Use web search when the automation may need current public information."
           id="automation-web-search"
-          label="Allow web search"
+          label="Let Milo search the web"
           onCheckedChange={onWebSearchChange}
         />
       </div>
@@ -275,7 +275,7 @@ function AutomationTiming({
           />
         </Suspense>
         <p className="text-muted-foreground text-xs">
-          Runs once at this time, in your local timezone.
+          Runs once at this time in your local timezone.
         </p>
       </TabsContent>
       <TabsContent value="event">

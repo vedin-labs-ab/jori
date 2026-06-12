@@ -10,10 +10,10 @@ import {
 export const pendingAutomationEventCatalog = [
   provider("gmail", [
     pendingEvent("message.received", {
-      label: "Email received",
+      label: "New email",
       description: "Runs when a new Gmail message arrives.",
       message:
-        "Gmail event delivery needs mailbox subscriptions before automations can run.",
+        "Gmail event-triggered automations need mailbox subscriptions before they can run.",
       parameters: [
         optionParameter("label", "Label", "Search Gmail labels", {
           source: "gmail.labels",
@@ -24,10 +24,10 @@ export const pendingAutomationEventCatalog = [
   ]),
   provider("microsoftEmail", [
     pendingEvent("message.received", {
-      label: "Email received",
+      label: "New email",
       description: "Runs when a new Outlook message arrives.",
       message:
-        "Outlook Mail event delivery needs Microsoft Graph subscriptions before automations can run.",
+        "Outlook Mail event-triggered automations need Microsoft Graph subscriptions before they can run.",
       parameters: [
         optionParameter("folder", "Folder", "Search Outlook folders", {
           source: "microsoftEmail.folders",
@@ -38,10 +38,11 @@ export const pendingAutomationEventCatalog = [
   ]),
   provider("googleCalendar", [
     pendingEvent("event.changed", {
-      label: "Event created/updated",
-      description: "Runs when an event is created or updated on a calendar.",
+      label: "Calendar event created or updated",
+      description:
+        "Runs when an event is created or updated on the selected calendar.",
       message:
-        "Google Calendar event delivery needs calendar subscriptions before automations can run.",
+        "Google Calendar event-triggered automations need calendar subscriptions before they can run.",
       parameters: [
         optionParameter("calendar", "Calendar", "Search calendars", {
           required: true,
@@ -51,9 +52,9 @@ export const pendingAutomationEventCatalog = [
     }),
     pendingEvent("event.starting_soon", {
       label: "Event starting soon",
-      description: "Runs before a calendar event starts.",
+      description: "Runs before an event starts on the selected calendar.",
       message:
-        "Google Calendar starting-soon delivery needs scheduled calendar watchers before automations can run.",
+        "Google Calendar starting-soon automations need scheduled calendar checks before they can run.",
       parameters: [
         optionParameter("calendar", "Calendar", "Search calendars", {
           required: true,
@@ -71,10 +72,11 @@ export const pendingAutomationEventCatalog = [
   ]),
   provider("microsoftCalendar", [
     pendingEvent("event.changed", {
-      label: "Event created/updated",
-      description: "Runs when an event is created or updated on a calendar.",
+      label: "Calendar event created or updated",
+      description:
+        "Runs when an event is created or updated on the selected calendar.",
       message:
-        "Microsoft Calendar event delivery needs Microsoft Graph subscriptions before automations can run.",
+        "Microsoft Calendar event-triggered automations need Microsoft Graph subscriptions before they can run.",
       parameters: [
         optionParameter("calendar", "Calendar", "Search calendars", {
           required: true,
@@ -84,9 +86,9 @@ export const pendingAutomationEventCatalog = [
     }),
     pendingEvent("event.starting_soon", {
       label: "Event starting soon",
-      description: "Runs before a calendar event starts.",
+      description: "Runs before an event starts on the selected calendar.",
       message:
-        "Microsoft Calendar starting-soon delivery needs scheduled calendar watchers before automations can run.",
+        "Microsoft Calendar starting-soon automations need scheduled calendar checks before they can run.",
       parameters: [
         optionParameter("calendar", "Calendar", "Search calendars", {
           required: true,
@@ -105,9 +107,9 @@ export const pendingAutomationEventCatalog = [
   provider("googleDrive", [
     pendingEvent("file.updated", {
       label: "File updated",
-      description: "Runs when a selected Google Drive file changes.",
+      description: "Runs when the selected Google Drive file changes.",
       message:
-        "Google Drive event delivery needs Drive change subscriptions before automations can run.",
+        "Google Drive event-triggered automations need Drive change subscriptions before they can run.",
       parameters: [
         optionParameter("file", "File", "Search Drive files", {
           required: true,
@@ -116,10 +118,10 @@ export const pendingAutomationEventCatalog = [
       ],
     }),
     pendingEvent("folder.file.created", {
-      label: "File created in folder",
-      description: "Runs when a file is created in a selected Drive folder.",
+      label: "File added to folder",
+      description: "Runs when a file is created in the selected Drive folder.",
       message:
-        "Google Drive folder event delivery needs Drive change subscriptions before automations can run.",
+        "Google Drive folder automations need Drive change subscriptions before they can run.",
       parameters: [
         optionParameter("folder", "Folder", "Search Drive folders", {
           required: true,
@@ -132,9 +134,9 @@ export const pendingAutomationEventCatalog = [
   provider("notion", [
     pendingEvent("page.updated", {
       label: "Page updated",
-      description: "Runs when a selected Notion page changes.",
+      description: "Runs when the selected Notion page changes.",
       message:
-        "Notion page event delivery needs Notion webhook support before automations can run.",
+        "Notion page automations need Notion webhook support before they can run.",
       parameters: [
         optionParameter("page", "Page", "Search Notion pages", {
           required: true,
@@ -143,11 +145,11 @@ export const pendingAutomationEventCatalog = [
       ],
     }),
     pendingEvent("data_source.item.changed", {
-      label: "Database item created/updated",
+      label: "Database item created or updated",
       description:
-        "Runs when an item is created or updated in a selected Notion data source.",
+        "Runs when an item is created or updated in the selected Notion data source.",
       message:
-        "Notion data source event delivery needs Notion webhook support before automations can run.",
+        "Notion data source automations need Notion webhook support before they can run.",
       parameters: [
         optionParameter("dataSource", "Data source", "Search data sources", {
           required: true,
@@ -157,9 +159,10 @@ export const pendingAutomationEventCatalog = [
     }),
     pendingEvent("comment.created", {
       label: "Comment created",
-      description: "Runs when a comment is created on a selected Notion page.",
+      description:
+        "Runs when a comment is created on the selected Notion page.",
       message:
-        "Notion comment event delivery needs Notion webhook support before automations can run.",
+        "Notion comment automations need Notion webhook support before they can run.",
       parameters: [
         optionParameter("page", "Page", "Search Notion pages", {
           required: true,

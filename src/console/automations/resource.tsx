@@ -235,7 +235,7 @@ function EventOptionState({
     return (
       <div className="flex items-center gap-2 px-3 py-2 text-muted-foreground text-xs">
         <Loader2 className="size-3.5 animate-spin" />
-        Loading
+        Loading options
       </div>
     )
   }
@@ -245,6 +245,6 @@ function EventOptionState({
   }
 
   return options.length === 0 ? (
-    <CommandEmpty>No results found.</CommandEmpty>
+    <CommandEmpty>No options found.</CommandEmpty>
   ) : null
 }
