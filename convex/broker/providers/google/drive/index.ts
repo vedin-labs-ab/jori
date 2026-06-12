@@ -4,6 +4,7 @@ import {
   requiredString,
   setOptionalSearchParam,
 } from "../../common"
+import { googleJson, googleMultipartJson, googleText } from "../request"
 import {
   createDriveFileMetadata,
   createDriveFileUpdateMetadata,
@@ -21,7 +22,6 @@ import {
   setDriveQuery,
   setOptionalBooleanSearchParam,
 } from "./format"
-import { googleJson, googleMultipartJson, googleText } from "../request"
 
 export async function callGoogleDriveTool(
   token: string,

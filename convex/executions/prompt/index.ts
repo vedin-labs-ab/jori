@@ -3,17 +3,17 @@ import {
   accessLabel,
   getIntegrationAccess,
   providerLabels,
-} from "../automations/access"
-import { type ToolPermission } from "../permissions/catalog"
-import { promptTemplates } from "../prompts/generated"
-import { renderPromptTemplate } from "../prompts/render"
-import { createPromptTime } from "../prompts/time"
-import { type CodexRuntimeInput, type MessageProvider } from "./codex"
+} from "../../automations/access"
+import { type ToolPermission } from "../../permissions/catalog"
+import { promptTemplates } from "../../prompts/generated"
+import { renderPromptTemplate } from "../../prompts/render"
+import { createPromptTime } from "../../prompts/time"
+import { type CodexRuntimeInput, type MessageProvider } from "../codex"
+import { readDataNumber, readDataObject, readDataString } from "../data"
 import {
   type ApprovalContinuation,
   createApprovalContinuationPrompt,
 } from "./continuation"
-import { readDataNumber, readDataObject, readDataString } from "./data"
 import { createToolApprovalInstructions } from "./instructions"
 
 export function assemblePrompt(

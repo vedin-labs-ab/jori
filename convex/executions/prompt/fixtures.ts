@@ -1,6 +1,6 @@
-import { type Doc } from "../_generated/dataModel"
-import { type ToolPermission } from "../permissions/catalog"
-import { type assemblePrompt } from "./prompt"
+import { type Doc } from "../../_generated/dataModel"
+import { type ToolPermission } from "../../permissions/catalog"
+import { type assemblePrompt } from "."
 
 export function automationRuntimeInput(
   readScope: "all" | string[] = [githubId()],

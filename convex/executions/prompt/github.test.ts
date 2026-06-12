@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { type Doc } from "../_generated/dataModel"
-import { assemblePrompt } from "./prompt"
+import { type Doc } from "../../_generated/dataModel"
+import { assemblePrompt } from "."
 
 describe("GitHub automation prompts", () => {
   test("renders review comment target context", () => {

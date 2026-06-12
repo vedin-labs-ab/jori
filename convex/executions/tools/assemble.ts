@@ -4,7 +4,7 @@ import {
   type PermissionMode,
   type ToolProvider,
 } from "../../permissions/catalog"
-import { createRuntimeToolCapability, getProviderSkillNames } from "../bundles"
+import { createRuntimeToolCapability, getProviderSkillNames } from "./bundles"
 import { createMiloToolBundle } from "./milo"
 import {
   createIntegrationToolBundle,

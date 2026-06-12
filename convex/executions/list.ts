@@ -8,9 +8,9 @@ import {
   approvalMatchesFilter,
   executionFilterValidator,
   executionMatchesFilter,
-} from "./filters"
-import { countPendingApprovals, pagePendingApprovals } from "./pending"
-import { summarizeExecution } from "./summaries"
+} from "./list/filters"
+import { countPendingApprovals, pagePendingApprovals } from "./list/pending"
+import { summarizeExecution } from "./list/summaries"
 
 type ExecutionSummary = Awaited<ReturnType<typeof summarizeExecution>>
 

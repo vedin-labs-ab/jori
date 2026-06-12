@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { assemblePrompt } from "./prompt"
+import { assemblePrompt } from "."
 import {
   approvalContinuation,
   automationRuntimeInput,
@@ -8,7 +8,7 @@ import {
   notionAutomationRuntimeInput,
   promptedTool,
   runtimeInput,
-} from "./prompt.fixtures"
+} from "./fixtures"
 
 const messageTriggerCases = [
   [

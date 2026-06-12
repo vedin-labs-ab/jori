@@ -1,12 +1,12 @@
 import { expect, test } from "vitest"
 import { type SlackApprovalDecisionResult } from "../../../approvals/runtime"
+import { parseSlackApprovalInteraction } from "."
 import {
   createSlackApprovalRequest,
   createSlackConsoleDecisionResponse,
   createSlackDecisionResponse,
   createSlackExpirationResponse,
 } from "./blocks"
-import { parseSlackApprovalInteraction } from "."
 
 test("parses Slack approval button payloads", () => {
   expect(
