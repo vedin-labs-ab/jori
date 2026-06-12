@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
 import {
   type AutomationEventDefinition,
   type AutomationEventParameter,
@@ -16,7 +17,7 @@ import {
 import { applyEventCriteriaChange, removeEventCriterion } from "./criteria"
 import { EventParameterControl } from "./parameter"
 
-export function EventConditionFields({
+export function EventScopeFields({
   tenantId,
   provider,
   event,
@@ -30,57 +31,71 @@ export function EventConditionFields({
   values: Record<string, string>
 }) {
   const parameters = event.parameters ?? []
+  const requiredParameters = parameters.filter(
+    (parameter) => parameter.required
+  )
   const conditions = parameters.filter((parameter) => !parameter.required)
   const [addedKeys, setAddedKeys] = useState(() =>
     conditionKeysWithValues(conditions, values)
   )
 
-  if (conditions.length === 0) {
+  if (parameters.length === 0) {
     return null
   }
 
+  const visibleConditions = conditions.filter((condition) =>
+    addedKeys.includes(condition.key)
+  )
+
   return (
-    <div className="grid gap-3 border-t pt-3">
-      <ConditionsHeader
-        available={conditions.filter(
-          (condition) => !addedKeys.includes(condition.key)
-        )}
-        onAdd={(key) => setAddedKeys((keys) => [...keys, key])}
-      />
-      <ConditionFieldGrid
-        tenantId={tenantId}
-        provider={provider}
-        conditions={conditions.filter((condition) =>
-          addedKeys.includes(condition.key)
-        )}
-        parameters={parameters}
-        values={values}
-        onValuesChange={onValuesChange}
-        onRemove={(key) => {
-          setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
-          onValuesChange(removeEventCriterion({ key, parameters, values }))
-        }}
-      />
+    <div className="grid gap-3">
+      <Separator />
+      <div className="grid gap-3">
+        <ScopeHeader
+          available={conditions.filter(
+            (condition) => !addedKeys.includes(condition.key)
+          )}
+          hasConditions={conditions.length > 0}
+          onAdd={(key) => setAddedKeys((keys) => [...keys, key])}
+        />
+        <ScopeFieldGrid
+          tenantId={tenantId}
+          provider={provider}
+          parameters={[...requiredParameters, ...visibleConditions]}
+          allParameters={parameters}
+          removableKeys={addedKeys}
+          values={values}
+          onValuesChange={onValuesChange}
+          onRemove={(key) => {
+            setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
+            onValuesChange(removeEventCriterion({ key, parameters, values }))
+          }}
+        />
+      </div>
     </div>
   )
 }
 
-function ConditionsHeader({
+function ScopeHeader({
   available,
+  hasConditions,
   onAdd,
 }: {
   available: readonly AutomationEventParameter[]
+  hasConditions: boolean
   onAdd: (key: string) => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex items-start justify-between gap-3">
       <div className="grid gap-0.5">
-        <h3 className="font-medium text-xs">Conditions</h3>
+        <h3 className="font-medium text-xs">Scope</h3>
         <p className="text-muted-foreground text-xs">
-          Optionally narrow when this automation should run.
+          Set where this event applies.
         </p>
       </div>
-      <AddConditionMenu available={available} onAdd={onAdd} />
+      {hasConditions ? (
+        <AddConditionMenu available={available} onAdd={onAdd} />
+      ) : null}
     </div>
   )
 }
@@ -99,7 +114,7 @@ function AddConditionMenu({
           className="shrink-0"
           disabled={available.length === 0}
           type="button"
-          variant="outline"
+          variant="secondary"
         >
           <Plus />
           Add condition
@@ -126,42 +141,45 @@ function AddConditionMenu({
   )
 }
 
-function ConditionFieldGrid({
+function ScopeFieldGrid({
   tenantId,
   provider,
-  conditions,
   parameters,
+  allParameters,
+  removableKeys,
   values,
   onValuesChange,
   onRemove,
 }: {
   tenantId: string
   provider: AutomationEventProvider
-  conditions: readonly AutomationEventParameter[]
   parameters: readonly AutomationEventParameter[]
+  allParameters: readonly AutomationEventParameter[]
+  removableKeys: readonly string[]
   values: Record<string, string>
   onValuesChange: (values: Record<string, string>) => void
   onRemove: (key: string) => void
 }) {
-  if (conditions.length === 0) {
+  if (parameters.length === 0) {
     return null
   }
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {conditions.map((parameter) => (
-        <ConditionField
+      {parameters.map((parameter) => (
+        <ScopeField
           key={parameter.key}
           tenantId={tenantId}
           provider={provider}
           parameter={parameter}
-          parameters={parameters}
+          parameters={allParameters}
+          removable={removableKeys.includes(parameter.key)}
           values={values}
           onValueChange={(value) =>
             onValuesChange(
               applyEventCriteriaChange({
                 key: parameter.key,
-                parameters,
+                parameters: allParameters,
                 value,
                 values,
               })
@@ -174,11 +192,12 @@ function ConditionFieldGrid({
   )
 }
 
-function ConditionField({
+function ScopeField({
   tenantId,
   provider,
   parameter,
   parameters,
+  removable,
   values,
   onValueChange,
   onRemove,
@@ -187,6 +206,7 @@ function ConditionField({
   provider: AutomationEventProvider
   parameter: AutomationEventParameter
   parameters: readonly AutomationEventParameter[]
+  removable: boolean
   values: Record<string, string>
   onValueChange: (value: string) => void
   onRemove: () => void
@@ -208,17 +228,22 @@ function ConditionField({
             onValueChange={onValueChange}
           />
         </div>
-        <Button
-          aria-label={`Remove ${parameter.label} condition`}
-          className="shrink-0 text-muted-foreground hover:text-foreground"
-          onClick={onRemove}
-          size="icon"
-          type="button"
-          variant="ghost"
-        >
-          <X />
-        </Button>
+        {removable ? (
+          <Button
+            aria-label={`Remove ${parameter.label} condition`}
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+            onClick={onRemove}
+            size="icon"
+            type="button"
+            variant="ghost"
+          >
+            <X />
+          </Button>
+        ) : null}
       </div>
+      {parameter.description === undefined ? null : (
+        <p className="text-muted-foreground text-xs">{parameter.description}</p>
+      )}
     </div>
   )
 }
