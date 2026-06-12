@@ -1,6 +1,7 @@
 import { Plus, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -212,35 +213,41 @@ function ScopeField({
   onRemove: () => void
 }) {
   const id = `automation-event-${parameter.key}`
+  const control = (
+    <EventParameterControl
+      tenantId={tenantId}
+      provider={provider}
+      parameter={parameter}
+      parameters={parameters}
+      values={values}
+      id={id}
+      onValueChange={onValueChange}
+    />
+  )
 
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>{parameter.label}</Label>
-      <div className="flex items-center gap-1">
-        <div className="min-w-0 flex-1">
-          <EventParameterControl
-            tenantId={tenantId}
-            provider={provider}
-            parameter={parameter}
-            parameters={parameters}
-            values={values}
-            id={id}
-            onValueChange={onValueChange}
-          />
-        </div>
-        {removable ? (
+      {removable ? (
+        <ButtonGroup
+          aria-label={`${parameter.label} condition`}
+          className="w-full [&>[data-slot=button]:first-child]:min-w-0 [&>[data-slot=button]:first-child]:flex-1 [&>[data-slot=button]:first-child]:shrink"
+        >
+          {control}
           <Button
             aria-label={`Remove ${parameter.label} condition`}
-            className="shrink-0 text-muted-foreground hover:text-foreground"
+            className="h-auto w-8 self-stretch text-muted-foreground hover:text-foreground"
             onClick={onRemove}
             size="icon"
             type="button"
-            variant="ghost"
+            variant="outline"
           >
             <X />
           </Button>
-        ) : null}
-      </div>
+        </ButtonGroup>
+      ) : (
+        control
+      )}
       {removable || parameter.description === undefined ? null : (
         <p className="text-muted-foreground text-xs">{parameter.description}</p>
       )}
