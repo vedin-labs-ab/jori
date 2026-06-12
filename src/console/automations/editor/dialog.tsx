@@ -63,7 +63,16 @@ export function AutomationDialog({
   const instructionsError = readAutomationInstructionMarkerError(error)
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (isSaving) {
+          return
+        }
+
+        onOpenChange(open)
+      }}
+    >
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>

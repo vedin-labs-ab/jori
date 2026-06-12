@@ -1,6 +1,5 @@
 import { Info } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -18,9 +17,10 @@ import {
   getDefaultAutomationEvent,
 } from "../../../../convex/automations/events"
 import { type AutomationFormValues } from "../types"
+import { EventConditionFields } from "./conditions"
 import { applyEventCriteriaChange } from "./criteria"
+import { EventParameterControl } from "./parameter"
 import { EventProviderField } from "./provider/field"
-import { EventOptionField } from "./resource"
 
 export function EventFields({
   tenantId,
@@ -105,6 +105,9 @@ function EventParameterFields({
   values: Record<string, string>
 }) {
   const parameters = event.parameters ?? []
+  const requiredParameters = parameters.filter(
+    (parameter) => parameter.required
+  )
 
   return (
     <div className="grid gap-3">
@@ -119,9 +122,9 @@ function EventParameterFields({
           </Alert>
         ) : null}
       </div>
-      {parameters.length === 0 ? null : (
+      {requiredParameters.length === 0 ? null : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {parameters.map((parameter) => (
+          {requiredParameters.map((parameter) => (
             <EventParameterField
               key={parameter.key}
               tenantId={tenantId}
@@ -143,6 +146,14 @@ function EventParameterFields({
           ))}
         </div>
       )}
+      <EventConditionFields
+        key={`${provider}:${event.value}`}
+        tenantId={tenantId}
+        provider={provider}
+        event={event}
+        onValuesChange={onValuesChange}
+        values={values}
+      />
     </div>
   )
 }
@@ -163,43 +174,18 @@ function EventParameterField({
   onValueChange: (value: string) => void
 }) {
   const id = `automation-event-${parameter.key}`
-  const dependencyLabel = missingDependencyLabel(parameter, parameters, values)
-
-  if (parameter.type === "option") {
-    return (
-      <div className="grid gap-2">
-        <Label htmlFor={id}>{parameter.label}</Label>
-        <EventOptionField
-          tenantId={tenantId}
-          provider={provider}
-          parameter={parameter}
-          criteria={values}
-          disabled={dependencyLabel !== undefined}
-          disabledMessage={
-            dependencyLabel === undefined
-              ? undefined
-              : `Choose ${dependencyLabel} first`
-          }
-          id={id}
-          value={values[parameter.key] ?? ""}
-          onValueChange={onValueChange}
-        />
-      </div>
-    )
-  }
 
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>{parameter.label}</Label>
-      <Input
+      <EventParameterControl
+        tenantId={tenantId}
+        provider={provider}
+        parameter={parameter}
+        parameters={parameters}
+        values={values}
         id={id}
-        min={parameter.type === "number" ? parameter.min : undefined}
-        max={parameter.type === "number" ? parameter.max : undefined}
-        onChange={(event) => onValueChange(event.target.value)}
-        placeholder={parameter.placeholder}
-        step={parameter.type === "number" ? parameter.step : undefined}
-        type={parameter.type}
-        value={values[parameter.key] ?? ""}
+        onValueChange={onValueChange}
       />
       {parameter.description === undefined ? null : (
         <p className="text-muted-foreground text-xs">{parameter.description}</p>
@@ -240,27 +226,4 @@ function getSelectedEvent(provider: AutomationEventProvider, event: string) {
     getAutomationEventDefinition(provider, event) ??
     getDefaultAutomationEvent(provider)
   )
-}
-
-function missingDependencyLabel(
-  parameter: AutomationEventParameter,
-  parameters: readonly AutomationEventParameter[],
-  values: Record<string, string>
-) {
-  if (parameter.type !== "option") {
-    return undefined
-  }
-
-  const missingKey = parameter.dependsOn?.find(
-    (key) => values[key]?.trim() === "" || values[key] === undefined
-  )
-
-  if (missingKey === undefined) {
-    return undefined
-  }
-
-  return (
-    parameters.find((candidate) => candidate.key === missingKey)?.label ??
-    missingKey
-  ).toLowerCase()
 }

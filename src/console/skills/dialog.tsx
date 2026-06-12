@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { type Skill, type SkillFormValues } from "./types"
 
 export function SkillDialog({
+  error,
   isOpen,
   isSaving,
   onOpenChange,
@@ -22,6 +24,7 @@ export function SkillDialog({
   skill,
   values,
 }: {
+  error: string | undefined
   isOpen: boolean
   isSaving: boolean
   onOpenChange: (isOpen: boolean) => void
@@ -35,7 +38,16 @@ export function SkillDialog({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (isSaving) {
+          return
+        }
+
+        onOpenChange(open)
+      }}
+    >
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
@@ -85,6 +97,13 @@ export function SkillDialog({
             />
           </div>
         </div>
+
+        {error === undefined ? null : (
+          <Alert variant="destructive">
+            <AlertTitle>Could not save skill</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <DialogFooter>
           <Button type="button" onClick={onSave} disabled={isSaving}>

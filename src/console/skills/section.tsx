@@ -1,7 +1,8 @@
-import { Loader2, Pencil, Trash2 } from "lucide-react"
+import { Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { DeleteSkill } from "./delete"
 import { type Skill } from "./types"
 
 export function SkillSection({
@@ -116,16 +117,11 @@ function SkillActions({
           <Pencil />
           Edit
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onDelete?.(skill)}
-          disabled={isPending}
-        >
-          {isPending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 />}
-          Delete
-        </Button>
+        <DeleteSkill
+          isPending={isPending}
+          onDelete={() => onDelete?.(skill)}
+          skill={skill}
+        />
       </div>
     </>
   )

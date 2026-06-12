@@ -1,6 +1,6 @@
-import { useMutation, useQuery } from "convex/react"
+import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,12 +12,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { api } from "../../../convex/_generated/api"
-import { readErrorMessage } from "../error"
 import { LoadingMessage } from "../loading"
 import { ConsolePage } from "../page"
 import { SkillDialog } from "./dialog"
+import { useSkillEditor } from "./editor"
 import { SkillSection } from "./section"
-import { emptySkillForm, type Skill, type SkillFormValues } from "./types"
+import { type Skill } from "./types"
 
 type SkillListResult =
   | {
@@ -69,7 +69,7 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
         </CardAction>
       </CardHeader>
       <CardContent className="grid gap-5">
-        <SkillError error={editor.error} />
+        <SkillDeleteError error={editor.deleteError} />
         <SkillAccessError result={skillList} />
         {skillList?.status !== "unauthorized" ? (
           <SkillContent
@@ -82,6 +82,7 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
         ) : null}
       </CardContent>
       <SkillDialog
+        error={editor.formError}
         isOpen={editor.isFormOpen}
         isSaving={editor.pendingSkillId === (editor.formSkill?._id ?? "new")}
         onOpenChange={editor.setIsFormOpen}
@@ -94,87 +95,14 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
   )
 }
 
-function useSkillEditor(tenantId: string) {
-  const createSkill = useMutation(api.skills.catalog.create)
-  const updateSkill = useMutation(api.skills.catalog.update)
-  const removeSkill = useMutation(api.skills.catalog.remove)
-  const [formSkill, setFormSkill] = useState<Skill>()
-  const [formValues, setFormValues] = useState<SkillFormValues>(emptySkillForm)
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [pendingSkillId, setPendingSkillId] = useState<string>()
-  const [error, setError] = useState<string>()
-
-  function openCreateForm() {
-    setError(undefined)
-    setFormSkill(undefined)
-    setFormValues(emptySkillForm)
-    setIsFormOpen(true)
-  }
-
-  function openEditForm(skill: Skill) {
-    setError(undefined)
-    setFormSkill(skill)
-    setFormValues(skill)
-    setIsFormOpen(true)
-  }
-
-  async function saveSkill() {
-    setPendingSkillId(formSkill?._id ?? "new")
-    setError(undefined)
-    try {
-      await saveSkillForm()
-      setIsFormOpen(false)
-    } catch (saveError) {
-      setError(readErrorMessage(saveError, "Could not save skill."))
-    } finally {
-      setPendingSkillId(undefined)
-    }
-  }
-
-  async function saveSkillForm() {
-    if (formSkill === undefined) {
-      await createSkill({ tenantId, ...formValues })
-      return
-    }
-
-    await updateSkill({ tenantId, skillId: formSkill._id, ...formValues })
-  }
-
-  async function deleteSkill(skill: Skill) {
-    setPendingSkillId(skill._id)
-    setError(undefined)
-    try {
-      await removeSkill({ tenantId, skillId: skill._id })
-    } catch (deleteError) {
-      setError(readErrorMessage(deleteError, "Could not delete skill."))
-    } finally {
-      setPendingSkillId(undefined)
-    }
-  }
-
-  return {
-    deleteSkill,
-    error,
-    formSkill,
-    formValues,
-    isFormOpen,
-    openCreateForm,
-    openEditForm,
-    pendingSkillId,
-    saveSkill,
-    setFormValues,
-    setIsFormOpen,
-  }
-}
-
-function SkillError({ error }: { error: string | undefined }) {
+function SkillDeleteError({ error }: { error: string | undefined }) {
   if (error === undefined) {
     return null
   }
 
   return (
     <Alert variant="destructive">
-      <AlertTitle>Skill update failed</AlertTitle>
+      <AlertTitle>Could not delete skill</AlertTitle>
       <AlertDescription>{error}</AlertDescription>
     </Alert>
   )

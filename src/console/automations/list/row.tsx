@@ -23,6 +23,7 @@ export function AutomationRow({
   automation: Automation
 }) {
   const TypeIcon = triggerIcon(automation)
+  const surfaces = surfaceSummary(automation)
 
   return (
     <article className="grid grid-cols-[auto_1fr] items-start gap-3 rounded-md border bg-background p-3 md:grid-cols-[auto_1fr_auto] md:items-center">
@@ -48,8 +49,12 @@ export function AutomationRow({
           <span className="inline-flex min-w-0 items-center gap-1.5">
             <Workflow className="size-3.5" />
             <span>{readScopeLabel(automation.access.readScope)}</span>
-            <SeparatorDot />
-            <span className="truncate">{surfaceSummary(automation)}</span>
+            {surfaces === "" ? null : (
+              <>
+                <SeparatorDot />
+                <span className="truncate">{surfaces}</span>
+              </>
+            )}
           </span>
         </div>
       </div>

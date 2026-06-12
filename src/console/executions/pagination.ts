@@ -221,10 +221,14 @@ function formatFooterLabel({
   const rangeEnd = pageIndex * pageSize + visibleCount
 
   if (hasFilters) {
-    return `Showing ${rangeStart}–${rangeEnd} of ${filteredTotal} matching runs (${totalCount} total)`
+    return `Showing ${rangeStart}–${rangeEnd} of ${filteredTotal} matching ${pluralRuns(filteredTotal)} (${totalCount} total)`
   }
 
-  return `Showing ${rangeStart}–${rangeEnd} of ${totalCount} runs`
+  return `Showing ${rangeStart}–${rangeEnd} of ${totalCount} ${pluralRuns(totalCount)}`
+}
+
+function pluralRuns(count: number) {
+  return count === 1 ? "run" : "runs"
 }
 
 function usePageBounds(

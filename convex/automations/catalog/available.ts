@@ -27,6 +27,7 @@ export const availableAutomationEventCatalog = [
         optionParameter("issue", "Issue", "Search issues", {
           source: "github.issues",
           dependsOn: ["repo"],
+          description: "Narrows runs to comments on the selected issue.",
         }),
       ],
     }),
@@ -42,6 +43,7 @@ export const availableAutomationEventCatalog = [
         optionParameter("pr", "Pull request", "Search pull requests", {
           source: "github.pullRequests",
           dependsOn: ["repo"],
+          description: "Narrows runs to comments on the selected pull request.",
         }),
       ],
     }),
@@ -57,9 +59,11 @@ export const availableAutomationEventCatalog = [
         optionParameter("pr", "Pull request", "Search pull requests", {
           source: "github.pullRequests",
           dependsOn: ["repo"],
+          description: "Narrows runs to comments on the selected pull request.",
         }),
         textParameter("path", "Path", "src/example.ts", {
           resetsOn: ["repo", "pr"],
+          description: "Narrows runs to comments on one file path.",
         }),
       ],
     }),
@@ -72,14 +76,17 @@ export const availableAutomationEventCatalog = [
       parameters: [
         optionParameter("team", "Team", "Search Linear teams", {
           source: "linear.teams",
+          description: "Narrows runs to issues in the selected team.",
         }),
         optionParameter("project", "Project", "Search Linear projects", {
           source: "linear.projects",
           resetsOn: ["team"],
+          description: "Narrows runs to issues in the selected project.",
         }),
         optionParameter("issue", "Issue", "Search Linear issues", {
           source: "linear.issues",
           resetsOn: ["team", "project"],
+          description: "Narrows runs to comments on the selected issue.",
         }),
       ],
     }),

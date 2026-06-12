@@ -142,8 +142,10 @@ function CopyButton({
               return
             }
 
-            void navigator.clipboard?.writeText(value)
-            setHasCopied(true)
+            void navigator.clipboard
+              ?.writeText(value)
+              .then(() => setHasCopied(true))
+              .catch(() => undefined)
           }}
           size="icon-xs"
           type="button"

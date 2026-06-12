@@ -129,11 +129,14 @@ function openProviderPicker() {
   })
 }
 
-function renderEventFields(values: Partial<typeof emptyAutomationForm> = {}) {
+function renderEventFields(
+  values: Partial<typeof emptyAutomationForm> = {},
+  onValuesChange: (values: typeof emptyAutomationForm) => void = () => undefined
+) {
   render(
     <EventFields
       tenantId="tenant"
-      onValuesChange={() => undefined}
+      onValuesChange={onValuesChange}
       values={{
         ...emptyAutomationForm,
         type: "event",
@@ -162,46 +165,104 @@ function providerConnections(connectedProvider?: string) {
   }
 }
 
-describe("automation event parameter fields", () => {
-  test("disables dependent option pickers until their parent is selected", () => {
-    render(
-      <EventFields
-        tenantId="tenant"
-        onValuesChange={() => undefined}
-        values={{
-          ...emptyAutomationForm,
-          type: "event",
-          eventProvider: "github",
-          event: "issue.comment.changed",
-          eventCriteria: {},
-        }}
-      />
+describe("automation event conditions", () => {
+  test("hides optional parameters until they are added as conditions", () => {
+    renderEventFields({
+      eventProvider: "linear",
+      event: "issue.comment.changed",
+    })
+
+    expect(screen.queryByLabelText("Team")).toBeNull()
+    expect(screen.queryByLabelText("Project")).toBeNull()
+    expect(screen.queryByLabelText("Issue")).toBeNull()
+    expect(
+      screen.getByText("Optionally narrow when this automation should run.")
+    ).toBeDefined()
+  })
+
+  test("hides the conditions section when every parameter is required", () => {
+    renderEventFields({ eventProvider: "slack", event: "message.created" })
+
+    expect(screen.getByLabelText("Channel")).toBeDefined()
+    expect(screen.queryByText("Conditions")).toBeNull()
+  })
+
+  test("shows conditions that already have values", () => {
+    renderEventFields({
+      eventProvider: "linear",
+      event: "issue.comment.changed",
+      eventCriteria: { project: "project-a" },
+    })
+
+    expect(screen.getByLabelText("Project")).toBeDefined()
+    expect(screen.getByLabelText("Project").hasAttribute("disabled")).toBe(
+      false
     )
+    expect(screen.queryByLabelText("Team")).toBeNull()
+  })
+})
+
+describe("automation event condition editing", () => {
+  test("adds a condition from the add-condition menu", () => {
+    renderEventFields({
+      eventProvider: "linear",
+      event: "issue.comment.changed",
+    })
+
+    openAddConditionMenu()
+
+    expect(
+      screen.getByText("Narrows runs to issues in the selected team.")
+    ).toBeDefined()
+
+    fireEvent.click(screen.getByRole("menuitem", { name: /Team/ }))
+
+    expect(screen.getByLabelText("Team")).toBeDefined()
+    expect(screen.getByLabelText("Team").hasAttribute("disabled")).toBe(false)
+  })
+
+  test("removes a condition and clears its criteria value", () => {
+    const onValuesChange = vi.fn()
+
+    renderEventFields(
+      {
+        eventProvider: "linear",
+        event: "issue.comment.changed",
+        eventCriteria: { team: "team-a" },
+      },
+      onValuesChange
+    )
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remove Team condition" })
+    )
+
+    expect(screen.queryByLabelText("Team")).toBeNull()
+    expect(onValuesChange).toHaveBeenCalledWith(
+      expect.objectContaining({ eventCriteria: {} })
+    )
+  })
+
+  test("disables dependent condition pickers until their parent is selected", () => {
+    renderEventFields({
+      eventProvider: "github",
+      event: "issue.comment.changed",
+    })
+
+    openAddConditionMenu()
+    fireEvent.click(screen.getByRole("menuitem", { name: /Issue/ }))
 
     expect(screen.getByLabelText("Issue").hasAttribute("disabled")).toBe(true)
     expect(screen.getByLabelText("Issue").textContent).toContain(
       "Choose repository first"
     )
   })
-
-  test("keeps optional Linear scope pickers available without parent criteria", () => {
-    render(
-      <EventFields
-        tenantId="tenant"
-        onValuesChange={() => undefined}
-        values={{
-          ...emptyAutomationForm,
-          type: "event",
-          eventProvider: "linear",
-          event: "issue.comment.changed",
-          eventCriteria: {},
-        }}
-      />
-    )
-
-    expect(screen.getByLabelText("Project").hasAttribute("disabled")).toBe(
-      false
-    )
-    expect(screen.getByLabelText("Issue").hasAttribute("disabled")).toBe(false)
-  })
 })
+
+function openAddConditionMenu() {
+  fireEvent.pointerDown(screen.getByRole("button", { name: "Add condition" }), {
+    button: 0,
+    ctrlKey: false,
+    pointerType: "mouse",
+  })
+}
