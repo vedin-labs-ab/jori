@@ -79,8 +79,7 @@ export function AutomationDialog({
             {automation === undefined ? "New automation" : "Edit automation"}
           </DialogTitle>
           <DialogDescription>
-            Describe the work, set integration access, and choose when Milo runs
-            it.
+            Tell Milo what to do, what it can access, and when to run.
           </DialogDescription>
         </DialogHeader>
 
@@ -101,8 +100,7 @@ export function AutomationDialog({
                 <InstructionsHelp />
               </div>
               <p className="text-muted-foreground text-xs">
-                Mention each integration Milo should use. Give at least one
-                integration write access.
+                Mention integrations, then set access.
               </p>
             </div>
             <AutomationInstructionsField
@@ -113,7 +111,7 @@ export function AutomationDialog({
               onValueChange={(next) =>
                 actions.updateInstructions(next.description, next.surfaces)
               }
-              placeholder="Summarize shipped GitHub changes and post the result to Slack."
+              placeholder="Summarize GitHub changes and post them to Slack."
               readScope={values.readScope}
               showAccessError={
                 instructionsError ===
@@ -172,18 +170,9 @@ function InstructionsHelp() {
           side="right"
         >
           <div className="grid gap-1">
-            <p>
-              Describe the work and mention each integration Milo should use,
-              such as GitHub, Slack, Linear, Gmail, or Google Drive.
-            </p>
-            <p>
-              Each mention sets access for that integration: read, write, or
-              read/write. If Milo can read every connected integration, mentions
-              switch between read and read/write access.
-            </p>
-            <p>
-              Example: "Summarize GitHub changes and post the result to Slack."
-            </p>
+            <p>Write the work Milo should do.</p>
+            <p>Mention integrations like GitHub, Slack, Linear, or Gmail.</p>
+            <p>Set access from each badge.</p>
           </div>
         </TooltipContent>
       </Tooltip>
@@ -208,7 +197,7 @@ function AccessFields({
       <div className="grid gap-2">
         <AccessCheckbox
           checked={readScope === "allConnected"}
-          description="Use this when the automation may need context from tools you do not mention."
+          description="For context from integrations you do not mention."
           id="automation-all-reads"
           label="Let Milo read any connected integration"
           onCheckedChange={(checked) =>
@@ -217,7 +206,7 @@ function AccessFields({
         />
         <AccessCheckbox
           checked={webSearch}
-          description="Use web search when the automation may need current public information."
+          description="For current public information."
           id="automation-web-search"
           label="Let Milo search the web"
           onCheckedChange={onWebSearchChange}
@@ -293,9 +282,7 @@ function AutomationTiming({
             value={values.runAt}
           />
         </Suspense>
-        <p className="text-muted-foreground text-xs">
-          Runs once at this time in your local timezone.
-        </p>
+        <p className="text-muted-foreground text-xs">Uses your local time.</p>
       </TabsContent>
       <TabsContent value="event">
         <Suspense fallback={<TimingFallback />}>

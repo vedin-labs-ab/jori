@@ -103,17 +103,14 @@ function EventParameterFields({
 }) {
   return (
     <div className="grid gap-3">
-      <div className="grid gap-1">
-        <p className="text-muted-foreground text-xs">{event.description}</p>
-        {event.availability.status === "pending" ? (
-          <Alert className="py-2">
-            <Info className="size-4" />
-            <AlertDescription className="text-xs">
-              {event.availability.message}
-            </AlertDescription>
-          </Alert>
-        ) : null}
-      </div>
+      {event.availability.status === "pending" ? (
+        <Alert className="py-2">
+          <Info className="size-4" />
+          <AlertDescription className="text-xs">
+            {event.availability.message}
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <EventScopeFields
         key={`${provider}:${event.value}`}
         tenantId={tenantId}

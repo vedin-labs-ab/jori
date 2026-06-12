@@ -138,10 +138,10 @@ describe("automation instructions field footer", () => {
 
     expect(await screen.findByRole("textbox")).toBeDefined()
     expect(field.container.textContent).toContain(
-      "Type an integration name to mention it."
+      "Mention integrations by name."
     )
     expect(field.container.textContent).toContain(
-      "Use each icon to set integration access: read, write, or read/write."
+      "Set each badge to read, write, or both."
     )
 
     const footer = field.container.querySelector(

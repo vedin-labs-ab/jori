@@ -91,7 +91,7 @@ function ScopeHeader({
       <div className="grid gap-0.5">
         <h3 className="font-medium text-xs">Scope</h3>
         <p className="text-muted-foreground text-xs">
-          Set where this event applies.
+          Choose where this applies.
         </p>
       </div>
       {hasConditions ? (
