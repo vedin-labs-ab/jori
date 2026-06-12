@@ -58,4 +58,12 @@ export const githubToolPermissionRows = [
     "write",
     "required",
   ],
+  [
+    "github",
+    "github_reply_to_pull_request_review_comment",
+    "Reply to review comment",
+    "Post a reply to an inline GitHub pull request review comment.",
+    "write",
+    "required",
+  ],
 ] satisfies ToolPermissionRow[]

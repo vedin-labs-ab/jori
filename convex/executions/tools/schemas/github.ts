@@ -77,6 +77,16 @@ export const githubToolInputSchemas = {
       repo: stringProperty("Repository name."),
     },
   }),
+  github_reply_to_pull_request_review_comment: objectSchema({
+    required: ["owner", "repo", "pullNumber", "commentId", "body"],
+    properties: {
+      body: stringProperty("GitHub-flavored Markdown reply body."),
+      commentId: numberProperty("Top-level pull request review comment ID.", 1),
+      owner: stringProperty("Repository owner."),
+      pullNumber: numberProperty("Pull request number.", 1),
+      repo: stringProperty("Repository name."),
+    },
+  }),
 } satisfies SchemaMap
 
 function repositorySchema() {

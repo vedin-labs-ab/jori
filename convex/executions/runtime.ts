@@ -59,7 +59,7 @@ export const runAutomation = internalAction({
     await runExecution(ctx, {
       type: "automation",
       run: input.run,
-      integration: null,
+      integration: input.integration,
       integrations: await prepareIntegrationsForRuntime(
         ctx,
         filterAutomationIntegrations(
