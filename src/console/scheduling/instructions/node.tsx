@@ -56,8 +56,11 @@ export function ScheduleSurfaceNodeView({
         />
         <span
           aria-hidden="true"
-          className={cn("w-px shrink-0 self-stretch", toneClassNames.separator)}
-          data-slot="button-group-separator"
+          className={cn(
+            "w-px shrink-0 self-stretch rounded-none",
+            toneClassNames.separator
+          )}
+          data-schedule-surface-separator=""
         />
         <ScheduleSurfaceRemoveButton
           onRemove={deleteNode}

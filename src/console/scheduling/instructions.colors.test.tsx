@@ -56,7 +56,7 @@ describe("schedule instructions marker colors", () => {
       '[data-slot="button-group"]'
     )
     const markerSeparator = buttonGroup?.querySelector(
-      '[data-slot="button-group-separator"]'
+      "[data-schedule-surface-separator]"
     )
 
     expectClasses(buttonGroup, surface)

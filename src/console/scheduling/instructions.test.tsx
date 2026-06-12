@@ -93,9 +93,6 @@ describe("schedule instructions field layout", () => {
     const buttonGroup = badgeWrapper?.querySelector(
       '[data-slot="button-group"]'
     )
-    const separator = buttonGroup?.querySelector(
-      '[data-slot="button-group-separator"]'
-    )
     const removePane = buttonGroup?.querySelector(
       "[data-schedule-remove-content]"
     )
@@ -107,10 +104,28 @@ describe("schedule instructions field layout", () => {
     expect(buttonGroup?.className).toContain("align-middle")
     expect(buttonGroup?.className).toContain("h-5")
     expect(buttonGroup?.className).toContain("text-[0.625rem]/none")
+    expect(removePane?.className).toContain("px-1")
+  })
+})
+
+describe("schedule instructions marker divider", () => {
+  test("uses a plain unrounded divider outside shadcn slot styling", async () => {
+    const field = renderInstructionsField({
+      description: "Post GitHub results to Slack.",
+      surfaces: [{ provider: "github", access: "read" }],
+    })
+
+    expect(await screen.findByRole("textbox")).toBeDefined()
+
+    const separator = field.container.querySelector(
+      "[data-schedule-surface-separator]"
+    )
+
     expect(separator?.className).toContain("self-stretch")
     expect(separator?.className).toContain("w-px")
+    expect(separator?.className).toContain("rounded-none")
     expect(separator?.className).not.toContain("data-vertical")
-    expect(removePane?.className).toContain("px-1")
+    expect(separator?.getAttribute("data-slot")).toBeNull()
   })
 })
 
