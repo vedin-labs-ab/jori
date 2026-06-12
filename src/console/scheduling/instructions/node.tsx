@@ -27,6 +27,7 @@ export function ScheduleSurfaceNodeView({
     return null
   }
 
+  const toneClassNames = getSurfaceToneClassNames(access)
   const accessLabel = getScheduleSurfaceAccessLabel(access)
   const providerLabel = getScheduleSurfaceLabel(provider)
 
@@ -40,20 +41,23 @@ export function ScheduleSurfaceNodeView({
       <ButtonGroup
         aria-label={`${providerLabel} schedule surface`}
         className={cn(
-          "mx-0.5 inline-flex h-6 overflow-hidden rounded-md border align-middle text-foreground text-xs/relaxed shadow-none",
-          getSurfaceClassName(access),
+          "mx-0.5 inline-flex h-6 overflow-hidden rounded-md border align-middle text-xs/relaxed shadow-none",
+          toneClassNames.surface,
           selected && "ring-2 ring-ring/40"
         )}
       >
         <ScheduleSurfaceAccessButton
           access={access}
           accessLabel={accessLabel}
+          iconClassName={toneClassNames.scopeIcon}
           onChange={() =>
             updateAttributes({ access: getNextScheduleSurfaceAccess(access) })
           }
           providerLabel={providerLabel}
         />
-        <ButtonGroupSeparator className="my-1 w-px bg-border" />
+        <ButtonGroupSeparator
+          className={cn("my-1 w-px", toneClassNames.separator)}
+        />
         <ScheduleSurfaceRemoveButton
           onRemove={deleteNode}
           provider={provider}
@@ -67,11 +71,13 @@ export function ScheduleSurfaceNodeView({
 function ScheduleSurfaceAccessButton({
   access,
   accessLabel,
+  iconClassName,
   onChange,
   providerLabel,
 }: {
   access: ScheduleSurfaceFormValue["access"]
   accessLabel: string
+  iconClassName: string
   onChange: () => void
   providerLabel: string
 }) {
@@ -82,7 +88,7 @@ function ScheduleSurfaceAccessButton({
       aria-label={`${providerLabel} access: ${accessLabel}. Change access.`}
       className={cn(
         "grid w-7 place-items-center opacity-55 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
-        getAccessIconClassName(access)
+        iconClassName
       )}
       onClick={(event) => {
         event.preventDefault()
@@ -136,7 +142,7 @@ function ScheduleSurfaceRemoveIcon({
       </span>
       <X
         aria-hidden="true"
-        className="invisible col-start-1 row-start-1 size-3.5 text-muted-foreground group-hover/remove-surface-marker:visible"
+        className="invisible col-start-1 row-start-1 size-3.5 group-hover/remove-surface-marker:visible"
       />
     </span>
   )
@@ -174,37 +180,39 @@ function getAccessIcon(access: ScheduleSurfaceFormValue["access"]) {
   return access === "both" ? FilePenLine : CircleDashed
 }
 
-function getSurfaceClassName(access: ScheduleSurfaceFormValue["access"]) {
-  if (access === "read") {
-    return "border-informational/30 bg-informational/10"
-  }
-
-  if (access === "write") {
-    return "border-primary/30 bg-primary/10"
-  }
-
-  if (access === "both") {
-    return "border-foreground/20 bg-muted"
-  }
-
-  return "border-dashed bg-background"
+function getSurfaceToneClassNames(access: ScheduleSurfaceFormValue["access"]) {
+  return scheduleSurfaceToneClassNames[access]
 }
 
-function getAccessIconClassName(access: ScheduleSurfaceFormValue["access"]) {
-  if (access === "read") {
-    return "text-informational"
+const scheduleSurfaceToneClassNames = {
+  "": {
+    scopeIcon: "text-[#78716C]",
+    separator: "bg-[#D6D3D1]",
+    surface: "border-[#D6D3D1] bg-[#FAFAF9] text-[#57534E]",
+  },
+  both: {
+    scopeIcon: "text-[#6256C7]",
+    separator: "bg-[#DDD6F5]",
+    surface: "border-[#D4C8F3] bg-[#FAF8FF] text-[#1F2937]",
+  },
+  read: {
+    scopeIcon: "text-[#2563EB]",
+    separator: "bg-[#C9D7ED]",
+    surface: "border-[#BFD3F2] bg-[#F7FAFF] text-[#1F2937]",
+  },
+  write: {
+    scopeIcon: "text-[#2F7D4F]",
+    separator: "bg-[#C9DED1]",
+    surface: "border-[#BDD8C7] bg-[#F6FBF7] text-[#1F2937]",
+  },
+} satisfies Record<
+  ScheduleSurfaceFormValue["access"],
+  {
+    scopeIcon: string
+    separator: string
+    surface: string
   }
-
-  if (access === "write") {
-    return "text-primary"
-  }
-
-  if (access === "both") {
-    return "text-foreground"
-  }
-
-  return "text-muted-foreground"
-}
+>
 
 function parseScheduleSurfaceAccess(
   access: unknown

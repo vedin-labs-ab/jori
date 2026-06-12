@@ -1,17 +1,11 @@
 // @vitest-environment jsdom
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react"
-import { afterEach, describe, expect, test, vi } from "vitest"
-import { ScheduleInstructionsField } from "./instructions"
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react"
+import { afterEach, describe, expect, test } from "vitest"
 import {
   createScheduleInstructionDocument,
   serializeScheduleInstructionDocument,
 } from "./instructions/document"
+import { renderInstructionsField } from "./instructions/test-utils"
 
 afterEach(cleanup)
 
@@ -118,7 +112,7 @@ describe("schedule instructions field layout", () => {
       name: "GitHub access: Read. Change access.",
     })
 
-    expect(button.className).toContain("text-informational")
+    expect(button.className).toContain("text-[#2563EB]")
     expect(button.className).toContain("opacity-55")
     expect(button.className).toContain("hover:opacity-100")
     expect(button.className).not.toContain("hover:bg-")
@@ -215,27 +209,3 @@ describe("schedule instructions field", () => {
     })
   })
 })
-
-function renderInstructionsField({
-  description,
-  surfaces,
-}: {
-  description: string
-  surfaces: Parameters<typeof ScheduleInstructionsField>[0]["surfaces"]
-}) {
-  const onValueChange = vi.fn()
-
-  const view = render(
-    <ScheduleInstructionsField
-      id="instructions"
-      onBlur={vi.fn()}
-      onValueChange={onValueChange}
-      placeholder="Instructions"
-      readScope="selected"
-      surfaces={surfaces}
-      value={description}
-    />
-  )
-
-  return { container: view.container, onValueChange }
-}
