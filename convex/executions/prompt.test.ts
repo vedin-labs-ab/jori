@@ -5,6 +5,7 @@ import {
   automationRuntimeInput,
   githubId,
   linearAutomationRuntimeInput,
+  notionAutomationRuntimeInput,
   promptedTool,
   runtimeInput,
 } from "./prompt.fixtures"
@@ -133,6 +134,21 @@ describe("automation trigger prompts", () => {
     expect(prompt).toContain(
       "- Text: i wonder if this is worth spending time on"
     )
+  })
+
+  test("renders provider target context for Notion events", () => {
+    const prompt = assemblePrompt(notionAutomationRuntimeInput())
+
+    expect(prompt).toContain("- Type: comment.created")
+    expect(prompt).toContain("- Provider: Notion")
+    expect(prompt).toContain("- Page ID: page-id")
+    expect(prompt).toContain("- Comment ID: comment-id")
+    expect(prompt).toContain("- Entity ID: comment-id")
+    expect(prompt).toContain("- Entity type: comment")
+    expect(prompt).toContain("- Parent ID: block-id")
+    expect(prompt).toContain("- Parent type: block")
+    expect(prompt).toContain("- Notion event ID: notion-event-id")
+    expect(prompt).toContain("- Notion event type: comment.created")
   })
 })
 

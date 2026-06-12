@@ -59,10 +59,7 @@ export function linearAutomationRuntimeInput() {
       _creationTime: 0,
       tenantId: "tenant",
       automationId: "automation",
-      reason: {
-        type: "event",
-        eventId: "event",
-      },
+      reason: { type: "event", eventId: "event" },
       createdAt: 0,
     },
     integration: linear,
@@ -106,6 +103,62 @@ export function linearAutomationRuntimeInput() {
         },
         commentId: "comment-id",
         url: "https://linear.app/acme/issue/VED-1/get-familiar#comment-id",
+      },
+      createdAt: 0,
+    },
+  } as unknown as Parameters<typeof assemblePrompt>[0]
+}
+
+export function notionAutomationRuntimeInput() {
+  const notion = integration("notion")
+
+  return {
+    type: "automation",
+    run: {
+      _id: "run",
+      _creationTime: 0,
+      tenantId: "tenant",
+      automationId: "automation",
+      reason: {
+        type: "event",
+        eventId: "event",
+      },
+      createdAt: 0,
+    },
+    integration: notion,
+    integrations: [notion],
+    automation: {
+      _id: "automation",
+      _creationTime: 0,
+      tenantId: "tenant",
+      name: "Notion follow-up",
+      instructions: "Summarize the changed Notion page.",
+      access: { read: "all", write: [], web: false },
+      trigger: {
+        type: "event",
+        integrationId: notion._id,
+        event: "comment.created",
+        criteria: { page: "page-id" },
+      },
+      status: "active",
+      createdAt: 0,
+      updatedAt: 0,
+    },
+    event: {
+      _id: "event",
+      _creationTime: 0,
+      tenantId: "tenant",
+      integrationId: notion._id,
+      key: "notion:workspace:event",
+      type: "comment.created",
+      criteria: { page: "page-id" },
+      data: {
+        pageId: "page-id",
+        commentId: "comment-id",
+        notionEventId: "notion-event-id",
+        notionEventType: "comment.created",
+        entity: { id: "comment-id", type: "comment" },
+        parent: { id: "block-id", type: "block" },
       },
       createdAt: 0,
     },

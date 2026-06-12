@@ -131,44 +131,4 @@ export const pendingAutomationEventCatalog = [
       ],
     }),
   ]),
-  provider("notion", [
-    pendingEvent("page.updated", {
-      label: "Page updated",
-      description: "Runs when the selected Notion page changes.",
-      message:
-        "Notion page automations need Notion webhook support before they can run.",
-      parameters: [
-        optionParameter("page", "Page", "Search Notion pages", {
-          required: true,
-          source: "notion.pages",
-        }),
-      ],
-    }),
-    pendingEvent("data_source.item.changed", {
-      label: "Database item created or updated",
-      description:
-        "Runs when an item is created or updated in the selected Notion data source.",
-      message:
-        "Notion data source automations need Notion webhook support before they can run.",
-      parameters: [
-        optionParameter("dataSource", "Data source", "Search data sources", {
-          required: true,
-          source: "notion.dataSources",
-        }),
-      ],
-    }),
-    pendingEvent("comment.created", {
-      label: "Comment created",
-      description:
-        "Runs when a comment is created on the selected Notion page.",
-      message:
-        "Notion comment automations need Notion webhook support before they can run.",
-      parameters: [
-        optionParameter("page", "Page", "Search Notion pages", {
-          required: true,
-          source: "notion.pages",
-        }),
-      ],
-    }),
-  ]),
 ]

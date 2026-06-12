@@ -1,4 +1,9 @@
-import { createSignedState, parseSignedState } from "../signing"
+import {
+  createSignedState,
+  hmacSha256Hex,
+  parseSignedState,
+  timingSafeEqual,
+} from "../signing"
 import { requireNotionClientSecret } from "./oauth"
 
 export type NotionInstallState = {
@@ -18,4 +23,30 @@ export async function parseSignedNotionState(value: string) {
     value,
     errorLabel: "Notion",
   })
+}
+
+export async function verifyNotionWebhookRequest(
+  request: Request,
+  body: string
+) {
+  const signature = request.headers.get("x-notion-signature")
+  const verificationToken = readNotionWebhookVerificationToken()
+
+  if (
+    signature === null ||
+    verificationToken === undefined ||
+    !signature.startsWith("sha256=")
+  ) {
+    return false
+  }
+
+  const expected = `sha256=${await hmacSha256Hex(verificationToken, body)}`
+
+  return timingSafeEqual(signature, expected)
+}
+
+function readNotionWebhookVerificationToken() {
+  const token = process.env.NOTION_WEBHOOK_VERIFICATION_TOKEN?.trim()
+
+  return token === "" ? undefined : token
 }

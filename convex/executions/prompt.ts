@@ -176,6 +176,10 @@ function getProviderTargetLines(provider: string | undefined, data: unknown) {
     return getLinearTargetLines(data)
   }
 
+  if (provider === "notion") {
+    return getNotionTargetLines(data)
+  }
+
   if (provider === "slack") {
     return getSlackTargetLines(data)
   }
@@ -220,6 +224,23 @@ function getSlackTargetLines(data: unknown) {
     targetLine("Channel ID", readDataString(data, "channelId")),
     targetLine("Message timestamp", readDataString(data, "ts")),
     targetLine("Thread timestamp", readDataString(data, "threadTs")),
+  ]
+}
+
+function getNotionTargetLines(data: unknown) {
+  const entity = readDataObject(data, "entity")
+  const parent = readDataObject(data, "parent")
+
+  return [
+    targetLine("Page ID", readDataString(data, "pageId")),
+    targetLine("Data source ID", readDataString(data, "dataSourceId")),
+    targetLine("Comment ID", readDataString(data, "commentId")),
+    targetLine("Entity ID", readDataString(entity, "id")),
+    targetLine("Entity type", readDataString(entity, "type")),
+    targetLine("Parent ID", readDataString(parent, "id")),
+    targetLine("Parent type", readDataString(parent, "type")),
+    targetLine("Notion event ID", readDataString(data, "notionEventId")),
+    targetLine("Notion event type", readDataString(data, "notionEventType")),
   ]
 }
 
