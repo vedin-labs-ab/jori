@@ -160,7 +160,7 @@ function InstructionsHelp() {
           </button>
         </TooltipTrigger>
         <TooltipContent
-          align="start"
+          align="center"
           className="max-w-80 items-start text-left leading-relaxed"
           side="right"
         >

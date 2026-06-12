@@ -188,7 +188,7 @@ function CronHelp({ cron }: { cron: string }) {
           </button>
         </TooltipTrigger>
         <TooltipContent
-          align="start"
+          align="center"
           className="max-w-72 items-start text-left leading-relaxed"
           side="right"
         >
