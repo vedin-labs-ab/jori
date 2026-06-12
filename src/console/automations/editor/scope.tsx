@@ -213,6 +213,9 @@ function ScopeField({
   onRemove: () => void
 }) {
   const id = `automation-event-${parameter.key}`
+  const controlClassName = removable
+    ? "min-w-0 flex-1 basis-0 shrink"
+    : undefined
   const control = (
     <EventParameterControl
       tenantId={tenantId}
@@ -221,6 +224,7 @@ function ScopeField({
       parameters={parameters}
       values={values}
       id={id}
+      className={controlClassName}
       onValueChange={onValueChange}
     />
   )
@@ -231,12 +235,12 @@ function ScopeField({
       {removable ? (
         <ButtonGroup
           aria-label={`${parameter.label} condition`}
-          className="w-full [&>[data-slot=button]:first-child]:min-w-0 [&>[data-slot=button]:first-child]:flex-1 [&>[data-slot=button]:first-child]:shrink"
+          className="w-full"
         >
           {control}
           <Button
             aria-label={`Remove ${parameter.label} condition`}
-            className="h-auto w-8 self-stretch text-muted-foreground hover:text-foreground"
+            className="h-auto w-8 shrink-0 self-stretch text-muted-foreground hover:text-foreground"
             onClick={onRemove}
             size="icon"
             type="button"

@@ -12,6 +12,7 @@ export function EventParameterControl({
   parameters,
   values,
   id,
+  className,
   onValueChange,
 }: {
   tenantId: string
@@ -20,6 +21,7 @@ export function EventParameterControl({
   parameters: readonly AutomationEventParameter[]
   values: Record<string, string>
   id: string
+  className?: string
   onValueChange: (value: string) => void
 }) {
   const dependencyLabel = missingDependencyLabel(parameter, parameters, values)
@@ -38,6 +40,7 @@ export function EventParameterControl({
             : `Choose ${dependencyLabel} first`
         }
         id={id}
+        className={className}
         value={values[parameter.key] ?? ""}
         onValueChange={onValueChange}
       />
@@ -47,6 +50,7 @@ export function EventParameterControl({
   return (
     <Input
       id={id}
+      className={className}
       min={parameter.type === "number" ? parameter.min : undefined}
       max={parameter.type === "number" ? parameter.max : undefined}
       onChange={(event) => onValueChange(event.target.value)}
