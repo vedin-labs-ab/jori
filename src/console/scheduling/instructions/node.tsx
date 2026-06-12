@@ -1,16 +1,15 @@
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react"
-import { CircleDashed, FilePenLine, FileText, PenLine, X } from "lucide-react"
+import { CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
 import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
 import { cn } from "@/lib/utils"
-import { SurfaceLogo } from "../logo"
 import {
   getNextScheduleSurfaceAccess,
   getScheduleSurfaceAccessLabel,
   getScheduleSurfaceLabel,
   isScheduleSurfaceProvider,
   type ScheduleSurfaceFormValue,
-  type ScheduleSurfaceProvider,
 } from "../surfaces"
+import { ScheduleSurfaceRemoveButton } from "./remove"
 
 export function ScheduleSurfaceNodeView({
   deleteNode,
@@ -100,71 +99,6 @@ function ScheduleSurfaceAccessButton({
     >
       <Icon className="size-3" />
     </button>
-  )
-}
-
-function ScheduleSurfaceRemoveButton({
-  onRemove,
-  provider,
-  providerLabel,
-}: {
-  onRemove: () => void
-  provider: ScheduleSurfaceProvider
-  providerLabel: string
-}) {
-  return (
-    <button
-      aria-label={`Remove ${providerLabel} marker`}
-      className="group/remove-surface-marker flex items-center gap-1 px-2 font-medium outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30"
-      onClick={(event) => {
-        event.preventDefault()
-        event.stopPropagation()
-        onRemove()
-      }}
-      title={`Remove ${providerLabel}`}
-      type="button"
-    >
-      <ScheduleSurfaceRemoveIcon provider={provider} />
-      <ScheduleSurfaceRemoveLabel providerLabel={providerLabel} />
-    </button>
-  )
-}
-
-function ScheduleSurfaceRemoveIcon({
-  provider,
-}: {
-  provider: ScheduleSurfaceProvider
-}) {
-  return (
-    <span className="grid size-3 shrink-0 place-items-center">
-      <span className="col-start-1 row-start-1 flex size-3 items-center justify-center group-hover/remove-surface-marker:invisible">
-        <SurfaceLogo className="size-3" provider={provider} />
-      </span>
-      <X
-        aria-hidden="true"
-        className="invisible col-start-1 row-start-1 size-3 group-hover/remove-surface-marker:visible"
-      />
-    </span>
-  )
-}
-
-function ScheduleSurfaceRemoveLabel({
-  providerLabel,
-}: {
-  providerLabel: string
-}) {
-  return (
-    <span className="relative inline-grid overflow-hidden">
-      <span className="col-start-1 row-start-1 group-hover/remove-surface-marker:invisible">
-        {providerLabel}
-      </span>
-      <span
-        aria-hidden="true"
-        className="invisible col-start-1 row-start-1 group-hover/remove-surface-marker:visible"
-      >
-        Remove
-      </span>
-    </span>
   )
 }
 

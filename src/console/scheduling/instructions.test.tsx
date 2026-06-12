@@ -124,37 +124,28 @@ describe("schedule instructions marker styling", () => {
 })
 
 describe("schedule instructions marker hover", () => {
-  test("switches remove pane content instantly on hover", async () => {
+  test("switches remove pane content instantly while animating width", async () => {
     renderInstructionsField({
-      description: "Post to GitHub.",
-      surfaces: [{ provider: "github", access: "read" }],
+      description: "Post to Google Drive.",
+      surfaces: [{ provider: "googleDrive", access: "read" }],
     })
 
     const button = await screen.findByRole("button", {
-      name: "Remove GitHub marker",
+      name: "Remove Google Drive marker",
     })
-    const logoWrapper = button.querySelector("img")?.parentElement
-    const removeIcon = button.querySelector("svg")
-    const labelWrapper = button.querySelector(".relative.inline-grid")
-    const [providerLabel, removeLabel] = Array.from(
-      labelWrapper?.querySelectorAll("span") ?? []
-    )
+    const content = button.querySelector("[data-schedule-remove-content]")
 
-    expect(logoWrapper?.className).toContain(
-      "group-hover/remove-surface-marker:invisible"
-    )
-    expect(removeIcon?.className.baseVal).toContain("invisible")
-    expect(removeIcon?.className.baseVal).toContain(
-      "group-hover/remove-surface-marker:visible"
-    )
-    expect(providerLabel?.className).toContain(
-      "group-hover/remove-surface-marker:invisible"
-    )
-    expect(removeLabel?.className).toContain("invisible")
-    expect(removeLabel?.className).toContain(
-      "group-hover/remove-surface-marker:visible"
-    )
-    expect(button.innerHTML).not.toContain("transition-")
+    expect(button.className).toContain("overflow-hidden")
+    expect(button.className).toContain("transition-[width]")
+    expect(content?.textContent).toBe("Google Drive")
+
+    fireEvent.mouseEnter(button)
+
+    expect(content?.textContent).toBe("Remove")
+
+    fireEvent.mouseLeave(button)
+
+    expect(content?.textContent).toBe("Google Drive")
   })
 })
 
