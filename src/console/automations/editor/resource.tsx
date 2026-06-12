@@ -31,6 +31,7 @@ export function EventOptionField({
   disabled,
   disabledMessage,
   id,
+  className,
   value,
   onValueChange,
 }: {
@@ -41,6 +42,7 @@ export function EventOptionField({
   disabled: boolean
   disabledMessage: string | undefined
   id: string
+  className?: string
   value: string
   onValueChange: (value: string) => void
 }) {
@@ -78,6 +80,7 @@ export function EventOptionField({
         disabledMessage={disabledMessage}
         id={id}
         isOpen={isOpen}
+        className={className}
         placeholder={parameter.placeholder}
         value={value}
         valueLabel={valueLabel}
@@ -105,6 +108,7 @@ function EventOptionTrigger({
   disabledMessage,
   id,
   isOpen,
+  className,
   placeholder,
   value,
   valueLabel,
@@ -113,6 +117,7 @@ function EventOptionTrigger({
   disabledMessage: string | undefined
   id: string
   isOpen: boolean
+  className?: string
   placeholder: string
   value: string
   valueLabel: string
@@ -126,7 +131,8 @@ function EventOptionTrigger({
         aria-haspopup="listbox"
         className={cn(
           "h-8 w-full justify-between font-normal",
-          (value === "" || disabled) && "text-muted-foreground"
+          (value === "" || disabled) && "text-muted-foreground",
+          className
         )}
         disabled={disabled}
         id={id}

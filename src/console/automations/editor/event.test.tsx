@@ -220,6 +220,7 @@ describe("automation event condition editing", () => {
 
     expect(screen.getByLabelText("Team")).toBeDefined()
     expect(screen.getByLabelText("Team").hasAttribute("disabled")).toBe(false)
+    expect(screen.getByLabelText("Team").className).toContain("basis-0")
     expect(screen.getByRole("group", { name: "Team condition" })).toBeDefined()
     expect(
       screen.queryByText("Narrows runs to issues in the selected team.")
