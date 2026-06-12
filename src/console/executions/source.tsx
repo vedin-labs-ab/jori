@@ -51,6 +51,11 @@ export function SourceParts({ parts }: { parts: string[] }) {
 
 type SourceSegment =
   | {
+      automation: string
+      key: string
+      type: "automation"
+    }
+  | {
       actor: string
       key: string
       provider: string | undefined
@@ -69,6 +74,18 @@ type SourceSegment =
     }
 
 function SourceSegment({ segment }: { segment: SourceSegment }) {
+  if (segment.type === "automation") {
+    return (
+      <span>
+        Triggered by the{" "}
+        <span className="font-medium text-foreground">
+          {segment.automation}
+        </span>{" "}
+        automation
+      </span>
+    )
+  }
+
   if (segment.type === "triggered") {
     return (
       <span>
@@ -118,45 +135,121 @@ function sourceSegments(parts: string[]) {
   const keys = new Map<string, number>()
 
   for (let index = 0; index < parts.length; index += 1) {
-    const part = parts[index]
+    const matchedSegment = matchedSourceSegment(parts, index, keys)
 
-    if (part === "Triggered by" && parts[index + 2] === "in") {
-      const actor = parts[index + 1] ?? "someone"
-      const providerCandidate = parts[index + 3]
-      const provider = providerCandidate?.startsWith("Stopped by ")
-        ? undefined
-        : providerCandidate
-
-      segments.push({
-        actor,
-        key: sourceSegmentKey(keys, `triggered-${actor}-${provider ?? ""}`),
-        provider,
-        type: "triggered",
-      })
-      index += provider === undefined ? 2 : 3
+    if (matchedSegment !== undefined) {
+      segments.push(matchedSegment.segment)
+      index += matchedSegment.skip
       continue
     }
 
-    if (part.startsWith("Stopped by ")) {
-      const actor = part.slice("Stopped by ".length)
-
-      segments.push({
-        actor,
-        key: sourceSegmentKey(keys, `stopped-${actor}`),
-        type: "stopped",
-      })
-      continue
-    }
-
-    segments.push({
-      isEmphasized: isEmphasizedSourcePart(parts, index),
-      key: sourceSegmentKey(keys, `part-${part}`),
-      label: part,
-      type: "part",
-    })
+    segments.push(partSourceSegment(parts, index, keys))
   }
 
   return segments
+}
+
+type SourceSegmentMatch = {
+  segment: SourceSegment
+  skip: number
+}
+
+function matchedSourceSegment(
+  parts: string[],
+  index: number,
+  keys: Map<string, number>
+): SourceSegmentMatch | undefined {
+  return (
+    automationSourceSegment(parts, index, keys) ??
+    triggeredSourceSegment(parts, index, keys) ??
+    stoppedSourceSegment(parts[index], keys)
+  )
+}
+
+function automationSourceSegment(
+  parts: string[],
+  index: number,
+  keys: Map<string, number>
+): SourceSegmentMatch | undefined {
+  if (parts[index] !== "Triggered by automation:") {
+    return undefined
+  }
+
+  const automation = parts[index + 1]
+
+  if (automation === undefined || automation === "") {
+    return undefined
+  }
+
+  return {
+    segment: {
+      automation,
+      key: sourceSegmentKey(keys, `automation-${automation}`),
+      type: "automation",
+    },
+    skip: 1,
+  }
+}
+
+function triggeredSourceSegment(
+  parts: string[],
+  index: number,
+  keys: Map<string, number>
+): SourceSegmentMatch | undefined {
+  if (parts[index] !== "Triggered by" || parts[index + 2] !== "in") {
+    return undefined
+  }
+
+  const actor = parts[index + 1] ?? "someone"
+  const providerCandidate = parts[index + 3]
+  const provider = providerCandidate?.startsWith("Stopped by ")
+    ? undefined
+    : providerCandidate
+
+  return {
+    segment: {
+      actor,
+      key: sourceSegmentKey(keys, `triggered-${actor}-${provider ?? ""}`),
+      provider,
+      type: "triggered",
+    },
+    skip: provider === undefined ? 2 : 3,
+  }
+}
+
+function stoppedSourceSegment(
+  part: string,
+  keys: Map<string, number>
+): SourceSegmentMatch | undefined {
+  if (!part.startsWith("Stopped by ")) {
+    return undefined
+  }
+
+  const actor = part.slice("Stopped by ".length)
+
+  return {
+    segment: {
+      actor,
+      key: sourceSegmentKey(keys, `stopped-${actor}`),
+      type: "stopped",
+    },
+    skip: 0,
+  }
+}
+
+function partSourceSegment(
+  parts: string[],
+  index: number,
+  keys: Map<string, number>
+): SourceSegment {
+  const part = parts[index]
+
+  return {
+    isEmphasized: isEmphasizedSourcePart(parts, index),
+    key: sourceSegmentKey(keys, `part-${part}`),
+    label: part,
+    type: "part",
+  }
 }
 
 function sourceSegmentKey(keys: Map<string, number>, key: string) {
