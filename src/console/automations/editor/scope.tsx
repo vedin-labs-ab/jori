@@ -241,7 +241,7 @@ function ScopeField({
           </Button>
         ) : null}
       </div>
-      {parameter.description === undefined ? null : (
+      {removable || parameter.description === undefined ? null : (
         <p className="text-muted-foreground text-xs">{parameter.description}</p>
       )}
     </div>

@@ -220,6 +220,9 @@ describe("automation event condition editing", () => {
 
     expect(screen.getByLabelText("Team")).toBeDefined()
     expect(screen.getByLabelText("Team").hasAttribute("disabled")).toBe(false)
+    expect(
+      screen.queryByText("Narrows runs to issues in the selected team.")
+    ).toBeNull()
   })
 
   test("removes a condition and clears its criteria value", () => {
