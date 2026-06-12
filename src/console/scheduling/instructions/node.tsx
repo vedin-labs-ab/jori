@@ -57,7 +57,7 @@ export function ScheduleSurfaceNodeView({
         <span
           aria-hidden="true"
           className={cn(
-            "w-px shrink-0 self-stretch rounded-none",
+            "w-[0.5px] shrink-0 self-stretch rounded-none",
             toneClassNames.separator
           )}
           data-schedule-surface-separator=""

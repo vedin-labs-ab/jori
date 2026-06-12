@@ -122,7 +122,7 @@ describe("schedule instructions marker divider", () => {
     )
 
     expect(separator?.className).toContain("self-stretch")
-    expect(separator?.className).toContain("w-px")
+    expect(separator?.className).toContain("w-[0.5px]")
     expect(separator?.className).toContain("rounded-none")
     expect(separator?.className).not.toContain("data-vertical")
     expect(separator?.getAttribute("data-slot")).toBeNull()
