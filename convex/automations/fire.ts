@@ -92,7 +92,10 @@ export async function startEventAutomations(
   return runIds
 }
 
-function matchesEvent(automation: Doc<"automations">, event: Doc<"events">) {
+export function matchesEvent(
+  automation: Doc<"automations">,
+  event: Doc<"events">
+) {
   const trigger = automation.trigger
 
   if (
@@ -103,9 +106,35 @@ function matchesEvent(automation: Doc<"automations">, event: Doc<"events">) {
     return false
   }
 
-  if (trigger.filter === undefined || trigger.filter === "") {
+  const triggerCriteria = trigger.criteria ?? legacyTriggerCriteria(trigger)
+
+  if (triggerCriteria === undefined) {
     return true
   }
 
-  return event.resource === trigger.filter
+  const eventCriteria = event.criteria ?? legacyEventCriteria(event)
+
+  if (eventCriteria === undefined) {
+    return false
+  }
+
+  return Object.entries(triggerCriteria).every(
+    ([key, value]) => eventCriteria[key] === value
+  )
+}
+
+function legacyTriggerCriteria(
+  trigger: Extract<Doc<"automations">["trigger"], { type: "event" }>
+): Record<string, string> | undefined {
+  return trigger.filter === undefined || trigger.filter === ""
+    ? undefined
+    : { resource: trigger.filter }
+}
+
+function legacyEventCriteria(
+  event: Doc<"events">
+): Record<string, string> | undefined {
+  return event.resource === undefined || event.resource === ""
+    ? undefined
+    : { resource: event.resource }
 }

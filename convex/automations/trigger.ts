@@ -3,8 +3,10 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveEventIntegration } from "./access"
 import {
+  assertAutomationEventIsAvailable,
   getAutomationEventDefinition,
-  normalizeAutomationEventResource,
+  legacyAutomationEventCriteria,
+  normalizeAutomationEventCriteria,
 } from "./events"
 import { type AutomationTriggerInput } from "./schema"
 import { getTimeTrigger, getTimeTriggerAt } from "./timing"
@@ -28,6 +30,14 @@ export async function resolveTrigger(
       throw new Error("Choose a supported automation event.")
     }
 
+    assertAutomationEventIsAvailable(definition)
+
+    const criteria = normalizeAutomationEventCriteria(
+      definition,
+      args.trigger.criteria ??
+        legacyAutomationEventCriteria(definition, args.trigger.filter)
+    )
+
     return {
       type: "event",
       integrationId: (
@@ -38,7 +48,7 @@ export async function resolveTrigger(
         })
       )._id,
       event: definition.value,
-      filter: normalizeAutomationEventResource(definition, args.trigger.filter),
+      criteria,
     }
   }
 

@@ -12,6 +12,17 @@ type AutomationEventMessage = {
   observedAt?: number
 }
 
+type AutomationEventRecord = {
+  key: string
+  type: string
+  resource?: string
+  criteria?: Doc<"events">["criteria"]
+  actor?: Actor
+  text?: string
+  data?: unknown
+  observedAt?: number
+}
+
 export async function recordAutomationEvent(
   ctx: MutationCtx,
   input: {
@@ -20,25 +31,202 @@ export async function recordAutomationEvent(
     now: number
   }
 ) {
-  if (input.integration.provider !== "slack") {
-    return
+  for (const event of readAutomationEventsForMessage(input)) {
+    await recordEvent(ctx, {
+      integration: input.integration,
+      key: event.key,
+      type: event.type,
+      resource: event.resource,
+      criteria: event.criteria,
+      actor: event.actor,
+      text: event.text,
+      data: event.data,
+      observedAt: event.observedAt,
+      now: input.now,
+    })
+  }
+}
+
+export function readAutomationEventsForMessage(input: {
+  integration: Pick<Doc<"integrations">, "provider">
+  message: AutomationEventMessage
+}): AutomationEventRecord[] {
+  if (input.integration.provider === "slack") {
+    return readSlackAutomationEvents(input.message)
   }
 
-  const channelId = getSlackChannelId(input.message.data)
+  if (input.integration.provider === "github") {
+    return readGitHubAutomationEvents(input.message)
+  }
+
+  if (input.integration.provider === "linear") {
+    return readLinearAutomationEvents(input.message)
+  }
+
+  return []
+}
+
+function readSlackAutomationEvents(message: AutomationEventMessage) {
+  const channelId = getSlackChannelId(message.data)
 
   if (channelId === undefined) {
-    return
+    return []
   }
 
-  await recordEvent(ctx, {
-    integration: input.integration,
-    key: input.message.externalId,
-    type: "message.created",
-    resource: channelId,
-    actor: input.message.actor,
-    text: input.message.text,
-    data: input.message.data,
-    observedAt: input.message.observedAt,
-    now: input.now,
-  })
+  return [
+    baseEvent(message, {
+      type: "message.created",
+      resource: channelId,
+      criteria: { channel: channelId },
+    }),
+  ]
+}
+
+function readGitHubAutomationEvents(message: AutomationEventMessage) {
+  const data = readRecord(message.data)
+  const eventType = readString(data, "eventType")
+
+  if (eventType === "issue_comment") {
+    return readGitHubIssueCommentEvent(message, data)
+  }
+
+  if (eventType === "pull_request_review_comment") {
+    return readGitHubPullRequestReviewCommentEvent(message, data)
+  }
+
+  return []
+}
+
+function readGitHubIssueCommentEvent(
+  message: AutomationEventMessage,
+  data: Record<string, unknown>
+) {
+  const repo = readNestedString(data, "repository", "fullName")
+  const issueNumber = readNumber(data, "issueNumber")
+  const pullNumber = readNumber(data, "pullNumber")
+
+  if (repo === undefined || issueNumber === undefined) {
+    return []
+  }
+
+  if (readBoolean(data, "isPullRequest")) {
+    return [
+      baseEvent(message, {
+        type: "pull_request.comment.changed",
+        criteria: {
+          repo,
+          pr: String(pullNumber ?? issueNumber),
+        },
+      }),
+    ]
+  }
+
+  return [
+    baseEvent(message, {
+      type: "issue.comment.changed",
+      criteria: {
+        repo,
+        issue: String(issueNumber),
+      },
+    }),
+  ]
+}
+
+function readGitHubPullRequestReviewCommentEvent(
+  message: AutomationEventMessage,
+  data: Record<string, unknown>
+) {
+  const repo = readNestedString(data, "repository", "fullName")
+  const pullNumber = readNumber(data, "pullNumber")
+
+  if (repo === undefined || pullNumber === undefined) {
+    return []
+  }
+
+  return [
+    baseEvent(message, {
+      type: "pull_request.review_comment.changed",
+      criteria: {
+        repo,
+        pr: String(pullNumber),
+        ...optionalCriterion("path", readNestedString(data, "comment", "path")),
+      },
+    }),
+  ]
+}
+
+function readLinearAutomationEvents(message: AutomationEventMessage) {
+  const data = readRecord(message.data)
+  const issueId = readString(data, "issueId")
+
+  if (issueId === undefined) {
+    return []
+  }
+
+  return [
+    baseEvent(message, {
+      type: "issue.comment.changed",
+      criteria: {
+        issue: issueId,
+        ...optionalCriterion("team", readString(data, "teamId")),
+        ...optionalCriterion("project", readString(data, "projectId")),
+      },
+    }),
+  ]
+}
+
+function baseEvent(
+  message: AutomationEventMessage,
+  event: Pick<AutomationEventRecord, "criteria" | "resource" | "type">
+): AutomationEventRecord {
+  return {
+    key: message.externalId,
+    type: event.type,
+    resource: event.resource,
+    criteria: event.criteria,
+    actor: message.actor,
+    text: message.text,
+    data: message.data,
+    observedAt: message.observedAt,
+  }
+}
+
+function optionalCriterion(key: string, value: string | undefined) {
+  return value === undefined ? {} : { [key]: value }
+}
+
+function readRecord(value: unknown) {
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : {}
+}
+
+function readString(data: Record<string, unknown>, key: string) {
+  const value = data[key]
+
+  return typeof value === "string" && value !== "" ? value : undefined
+}
+
+function readNumber(data: Record<string, unknown>, key: string) {
+  const value = data[key]
+
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined
+}
+
+function readBoolean(data: Record<string, unknown>, key: string) {
+  return data[key] === true
+}
+
+function readNestedString(
+  data: Record<string, unknown>,
+  key: string,
+  nestedKey: string
+) {
+  const nested = data[key]
+
+  if (typeof nested !== "object" || nested === null) {
+    return undefined
+  }
+
+  return readString(nested as Record<string, unknown>, nestedKey)
 }

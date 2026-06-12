@@ -1,3 +1,5 @@
+import { Info } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -9,6 +11,7 @@ import {
 } from "@/components/ui/select"
 import {
   type AutomationEventDefinition,
+  type AutomationEventParameter,
   type AutomationEventProvider,
   automationEventCatalog,
   getAutomationEventDefinition,
@@ -69,7 +72,7 @@ export function EventFields({
               onValuesChange({
                 ...values,
                 event,
-                eventResource: "",
+                eventCriteria: {},
               })
             }
             value={selectedEvent.value}
@@ -87,47 +90,103 @@ export function EventFields({
           </Select>
         </div>
       </div>
-      <EventResourceField
+      <EventParameterFields
         tenantId={tenantId}
         provider={values.eventProvider}
         event={selectedEvent}
-        onValueChange={(eventResource) =>
-          onValuesChange({ ...values, eventResource })
+        onValuesChange={(eventCriteria) =>
+          onValuesChange({ ...values, eventCriteria })
         }
-        value={values.eventResource}
+        values={values.eventCriteria}
       />
     </div>
   )
 }
 
-function EventResourceField({
+function EventParameterFields({
   tenantId,
   provider,
   event,
-  onValueChange,
-  value,
+  onValuesChange,
+  values,
 }: {
   tenantId: string
   provider: AutomationEventProvider
   event: AutomationEventDefinition
-  onValueChange: (value: string) => void
-  value: string
+  onValuesChange: (values: Record<string, string>) => void
+  values: Record<string, string>
 }) {
-  const resource = event.resource
+  const parameters = event.parameters ?? []
 
-  if (resource === undefined) {
-    return <p className="text-muted-foreground text-xs">{event.description}</p>
-  }
+  return (
+    <div className="grid gap-3">
+      <div className="grid gap-1">
+        <p className="text-muted-foreground text-xs">{event.description}</p>
+        {event.availability.status === "pending" ? (
+          <Alert className="py-2">
+            <Info className="size-4" />
+            <AlertDescription className="text-xs">
+              {event.availability.message}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+      </div>
+      {parameters.length === 0 ? null : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {parameters.map((parameter) => (
+            <EventParameterField
+              key={parameter.key}
+              tenantId={tenantId}
+              provider={provider}
+              parameter={parameter}
+              parameters={parameters}
+              values={values}
+              onValueChange={(value) =>
+                onValuesChange({ ...values, [parameter.key]: value })
+              }
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
-  if (resource.type === "option") {
+function EventParameterField({
+  tenantId,
+  provider,
+  parameter,
+  parameters,
+  values,
+  onValueChange,
+}: {
+  tenantId: string
+  provider: AutomationEventProvider
+  parameter: AutomationEventParameter
+  parameters: readonly AutomationEventParameter[]
+  values: Record<string, string>
+  onValueChange: (value: string) => void
+}) {
+  const id = `automation-event-${parameter.key}`
+  const dependencyLabel = missingDependencyLabel(parameter, parameters, values)
+
+  if (parameter.type === "option") {
     return (
       <div className="grid gap-2">
-        <Label htmlFor="automation-event-resource">{resource.label}</Label>
+        <Label htmlFor={id}>{parameter.label}</Label>
         <EventOptionField
           tenantId={tenantId}
           provider={provider}
-          resource={resource}
-          value={value}
+          parameter={parameter}
+          criteria={values}
+          disabled={dependencyLabel !== undefined}
+          disabledMessage={
+            dependencyLabel === undefined
+              ? undefined
+              : `Choose ${dependencyLabel} first`
+          }
+          id={id}
+          value={values[parameter.key] ?? ""}
           onValueChange={onValueChange}
         />
       </div>
@@ -136,13 +195,20 @@ function EventResourceField({
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor="automation-event-resource">{resource.label}</Label>
+      <Label htmlFor={id}>{parameter.label}</Label>
       <Input
-        id="automation-event-resource"
+        id={id}
+        min={parameter.type === "number" ? parameter.min : undefined}
+        max={parameter.type === "number" ? parameter.max : undefined}
         onChange={(event) => onValueChange(event.target.value)}
-        placeholder={resource.placeholder}
-        value={value}
+        placeholder={parameter.placeholder}
+        step={parameter.type === "number" ? parameter.step : undefined}
+        type={parameter.type}
+        value={values[parameter.key] ?? ""}
       />
+      {parameter.description === undefined ? null : (
+        <p className="text-muted-foreground text-xs">{parameter.description}</p>
+      )}
     </div>
   )
 }
@@ -162,7 +228,7 @@ function onProviderChange({
     ...values,
     eventProvider: provider,
     event: event.value,
-    eventResource: "",
+    eventCriteria: {},
   })
 }
 
@@ -179,4 +245,27 @@ function getSelectedEvent(provider: AutomationEventProvider, event: string) {
     getAutomationEventDefinition(provider, event) ??
     getDefaultAutomationEvent(provider)
   )
+}
+
+function missingDependencyLabel(
+  parameter: AutomationEventParameter,
+  parameters: readonly AutomationEventParameter[],
+  values: Record<string, string>
+) {
+  if (parameter.type !== "option") {
+    return undefined
+  }
+
+  const missingKey = parameter.dependsOn?.find(
+    (key) => values[key]?.trim() === "" || values[key] === undefined
+  )
+
+  if (missingKey === undefined) {
+    return undefined
+  }
+
+  return (
+    parameters.find((candidate) => candidate.key === missingKey)?.label ??
+    missingKey
+  ).toLowerCase()
 }

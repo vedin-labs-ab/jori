@@ -1,17 +1,20 @@
 import {
+  type AutomationEventCriteria,
   type AutomationEventDefinition,
-  normalizeAutomationEventResource,
+  assertAutomationEventIsAvailable,
+  normalizeAutomationEventCriteria,
 } from "../../../convex/automations/events"
 
-export function readAutomationEventResource(
+export function readAutomationEventCriteria(
   definition: AutomationEventDefinition,
-  value: string
-): { value: string | undefined } | { error: string } {
+  value: Record<string, string>
+): { value: AutomationEventCriteria | undefined } | { error: string } {
   try {
-    return { value: normalizeAutomationEventResource(definition, value) }
+    assertAutomationEventIsAvailable(definition)
+    return { value: normalizeAutomationEventCriteria(definition, value) }
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "Invalid event resource.",
+      error: error instanceof Error ? error.message : "Invalid event criteria.",
     }
   }
 }

@@ -18,21 +18,29 @@ import {
 import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
 import {
+  type AutomationEventParameter,
   type AutomationEventProvider,
-  type AutomationEventResource,
 } from "../../../convex/automations/events"
 import { type AutomationEventOption, searchEventOptions } from "./search"
 
 export function EventOptionField({
   tenantId,
   provider,
-  resource,
+  parameter,
+  criteria,
+  disabled,
+  disabledMessage,
+  id,
   value,
   onValueChange,
 }: {
   tenantId: string
   provider: AutomationEventProvider
-  resource: Extract<AutomationEventResource, { type: "option" }>
+  parameter: Extract<AutomationEventParameter, { type: "option" }>
+  criteria: Record<string, string>
+  disabled: boolean
+  disabledMessage: string | undefined
+  id: string
   value: string
   onValueChange: (value: string) => void
 }) {
@@ -46,27 +54,31 @@ export function EventOptionField({
   const valueLabel = selectedOption?.label ?? value
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || disabled) {
       return
     }
 
     return searchEventOptions({
       provider,
       query,
-      resource,
+      parameter,
+      criteria,
       search,
       setIsLoading,
       setMessage,
       setOptions,
       tenantId,
     })
-  }, [isOpen, provider, query, resource, search, tenantId])
+  }, [isOpen, disabled, provider, query, parameter, criteria, search, tenantId])
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen && !disabled} onOpenChange={setIsOpen}>
       <EventOptionTrigger
+        disabled={disabled}
+        disabledMessage={disabledMessage}
+        id={id}
         isOpen={isOpen}
-        placeholder={resource.placeholder}
+        placeholder={parameter.placeholder}
         value={value}
         valueLabel={valueLabel}
       />
@@ -80,7 +92,7 @@ export function EventOptionField({
           setQuery("")
         }}
         options={options}
-        placeholder={resource.placeholder}
+        placeholder={parameter.placeholder}
         query={query}
         value={value}
       />
@@ -89,16 +101,24 @@ export function EventOptionField({
 }
 
 function EventOptionTrigger({
+  disabled,
+  disabledMessage,
+  id,
   isOpen,
   placeholder,
   value,
   valueLabel,
 }: {
+  disabled: boolean
+  disabledMessage: string | undefined
+  id: string
   isOpen: boolean
   placeholder: string
   value: string
   valueLabel: string
 }) {
+  const label = disabled ? (disabledMessage ?? placeholder) : placeholder
+
   return (
     <PopoverTrigger asChild>
       <Button
@@ -106,15 +126,16 @@ function EventOptionTrigger({
         aria-haspopup="listbox"
         className={cn(
           "h-8 w-full justify-between font-normal",
-          value === "" && "text-muted-foreground"
+          (value === "" || disabled) && "text-muted-foreground"
         )}
-        id="automation-event-resource"
+        disabled={disabled}
+        id={id}
         role="combobox"
         type="button"
         variant="outline"
       >
         <span className="min-w-0 truncate">
-          {value === "" ? placeholder : valueLabel}
+          {value === "" || disabled ? label : valueLabel}
         </span>
         <ChevronsUpDown className="size-3.5 opacity-50" />
       </Button>
