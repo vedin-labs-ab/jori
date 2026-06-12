@@ -4,6 +4,7 @@ import {
   classifyCron,
   composeCron,
   describeCron,
+  getCrontabGuruUrl,
 } from "./cron"
 
 describe("automation cron form parts", () => {
@@ -58,5 +59,15 @@ describe("automation cron form parts", () => {
     expect(describeCron("0 9 * * 1")).toBe("Mondays at 09:00 UTC")
     expect(describeCron("15 6 3 * *")).toBe("Monthly on the 3rd at 06:15 UTC")
     expect(describeCron("*/5 * * * *")).toBe(null)
+  })
+
+  test("builds Crontab.guru links from the current expression", () => {
+    expect(getCrontabGuruUrl("5 4 * * 3")).toBe(
+      "https://crontab.guru/#5_4_*_*_3"
+    )
+    expect(getCrontabGuruUrl("  */5   * * * *  ")).toBe(
+      "https://crontab.guru/#*/5_*_*_*_*"
+    )
+    expect(getCrontabGuruUrl("")).toBe("https://crontab.guru/")
   })
 })
