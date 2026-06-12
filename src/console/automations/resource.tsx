@@ -1,5 +1,4 @@
-import { type ReactAction, useAction } from "convex/react"
-import { type FunctionReturnType } from "convex/server"
+import { useAction } from "convex/react"
 import { ChevronsUpDown, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -22,6 +21,7 @@ import {
   type AutomationEventProvider,
   type AutomationEventResource,
 } from "../../../convex/automations/events"
+import { type AutomationEventOption, searchEventOptions } from "./search"
 
 export function EventOptionField({
   tenantId,
@@ -41,7 +41,7 @@ export function EventOptionField({
   const [query, setQuery] = useState("")
   const [options, setOptions] = useState<AutomationEventOption[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string>()
+  const [message, setMessage] = useState<string>()
   const selectedOption = options.find((option) => option.value === value)
   const valueLabel = selectedOption?.label ?? value
 
@@ -55,8 +55,8 @@ export function EventOptionField({
       query,
       resource,
       search,
-      setError,
       setIsLoading,
+      setMessage,
       setOptions,
       tenantId,
     })
@@ -71,8 +71,8 @@ export function EventOptionField({
         valueLabel={valueLabel}
       />
       <EventOptionContent
-        error={error}
         isLoading={isLoading}
+        message={message}
         onQueryChange={setQuery}
         onValueChange={(nextValue) => {
           onValueChange(nextValue)
@@ -87,12 +87,6 @@ export function EventOptionField({
     </Popover>
   )
 }
-
-type AutomationEventOption = FunctionReturnType<
-  typeof api.automations.options.search
->[number]
-
-type SearchAction = ReactAction<typeof api.automations.options.search>
 
 function EventOptionTrigger({
   isOpen,
@@ -129,8 +123,8 @@ function EventOptionTrigger({
 }
 
 function EventOptionContent({
-  error,
   isLoading,
+  message,
   onQueryChange,
   onValueChange,
   options,
@@ -138,8 +132,8 @@ function EventOptionContent({
   query,
   value,
 }: {
-  error: string | undefined
   isLoading: boolean
+  message: string | undefined
   onQueryChange: (query: string) => void
   onValueChange: (value: string) => void
   options: AutomationEventOption[]
@@ -160,8 +154,8 @@ function EventOptionContent({
         />
         <CommandList>
           <EventOptionState
-            error={error}
             isLoading={isLoading}
+            message={message}
             options={options}
           />
           <CommandGroup>
@@ -207,71 +201,13 @@ function EventOptionItem({
   )
 }
 
-function searchEventOptions({
-  provider,
-  query,
-  resource,
-  search,
-  setError,
-  setIsLoading,
-  setOptions,
-  tenantId,
-}: {
-  provider: AutomationEventProvider
-  query: string
-  resource: Extract<AutomationEventResource, { type: "option" }>
-  search: SearchAction
-  setError: (error: string | undefined) => void
-  setIsLoading: (isLoading: boolean) => void
-  setOptions: (options: AutomationEventOption[]) => void
-  tenantId: string
-}) {
-  let isCancelled = false
-  const timeout = window.setTimeout(() => {
-    setIsLoading(true)
-    setError(undefined)
-
-    search({
-      tenantId,
-      provider,
-      source: resource.source,
-      query,
-    })
-      .then((result) => {
-        if (!isCancelled) {
-          setOptions(result)
-        }
-      })
-      .catch((searchError: unknown) => {
-        if (!isCancelled) {
-          setOptions([])
-          setError(
-            searchError instanceof Error
-              ? searchError.message
-              : "Could not load options."
-          )
-        }
-      })
-      .finally(() => {
-        if (!isCancelled) {
-          setIsLoading(false)
-        }
-      })
-  }, 150)
-
-  return () => {
-    isCancelled = true
-    window.clearTimeout(timeout)
-  }
-}
-
 function EventOptionState({
-  error,
   isLoading,
+  message,
   options,
 }: {
-  error: string | undefined
   isLoading: boolean
+  message: string | undefined
   options: AutomationEventOption[]
 }) {
   if (isLoading) {
@@ -283,8 +219,8 @@ function EventOptionState({
     )
   }
 
-  if (error !== undefined) {
-    return <p className="px-3 py-2 text-destructive text-xs">{error}</p>
+  if (message !== undefined) {
+    return <p className="px-3 py-2 text-muted-foreground text-xs">{message}</p>
   }
 
   return options.length === 0 ? (

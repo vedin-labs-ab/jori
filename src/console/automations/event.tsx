@@ -29,6 +29,7 @@ export function EventFields({
 }) {
   const events = getEventDefinitions(values.eventProvider)
   const selectedEvent = getSelectedEvent(values.eventProvider, values.event)
+  const hasMultipleEvents = events.length > 1
 
   return (
     <div className="grid gap-3">
@@ -48,7 +49,7 @@ export function EventFields({
             <SelectTrigger id="automation-event-provider" className="w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-[70]">
               {automationEventCatalog.map((definition) => (
                 <SelectItem
                   key={definition.provider}
@@ -63,6 +64,7 @@ export function EventFields({
         <div className="grid gap-2">
           <Label htmlFor="automation-event-name">Event</Label>
           <Select
+            disabled={!hasMultipleEvents}
             onValueChange={(event) =>
               onValuesChange({
                 ...values,
@@ -75,7 +77,7 @@ export function EventFields({
             <SelectTrigger id="automation-event-name" className="w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-[70]">
               {events.map((definition) => (
                 <SelectItem key={definition.value} value={definition.value}>
                   {definition.label}

@@ -23,6 +23,16 @@ export type AutomationEventOption = {
   description?: string
 }
 
+export type AutomationEventOptionSearchResult =
+  | {
+      status: "ready"
+      options: AutomationEventOption[]
+    }
+  | {
+      status: "unavailable"
+      message: string
+    }
+
 export const search = action({
   args: {
     tenantId: v.string(),
@@ -30,7 +40,7 @@ export const search = action({
     source: v.string(),
     query: v.string(),
   },
-  handler: async (ctx, args): Promise<AutomationEventOption[]> => {
+  handler: async (ctx, args): Promise<AutomationEventOptionSearchResult> => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
 
     if (
@@ -40,7 +50,7 @@ export const search = action({
       throw new Error("Choose a supported event resource.")
     }
 
-    const integration: Doc<"integrations"> = await ctx.runQuery(
+    const lookup: IntegrationLookup = await ctx.runQuery(
       internal.automations.options.integration,
       {
         tenantId: args.tenantId,
@@ -49,13 +59,27 @@ export const search = action({
       }
     )
 
-    if (args.source === "slack.channels") {
-      return await searchSlackChannels(integration, args.query)
+    if (lookup.status === "unavailable") {
+      return lookup
     }
 
-    return []
+    if (args.source === "slack.channels") {
+      return await searchSlackChannelOptions(lookup.integration, args.query)
+    }
+
+    return { status: "ready", options: [] }
   },
 })
+
+type IntegrationLookup =
+  | {
+      status: "ready"
+      integration: Doc<"integrations">
+    }
+  | {
+      status: "unavailable"
+      message: string
+    }
 
 export const integration = internalQuery({
   args: {
@@ -63,13 +87,42 @@ export const integration = internalQuery({
     provider: integrationProviderValidator,
     createdBy: v.string(),
   },
-  handler: async (ctx, args) =>
-    await resolveEventIntegration(ctx, {
-      tenantId: args.tenantId,
-      provider: args.provider,
-      createdBy: args.createdBy,
-    }),
+  handler: async (ctx, args): Promise<IntegrationLookup> => {
+    try {
+      return {
+        status: "ready",
+        integration: await resolveEventIntegration(ctx, {
+          tenantId: args.tenantId,
+          provider: args.provider,
+          createdBy: args.createdBy,
+        }),
+      }
+    } catch {
+      return {
+        status: "unavailable",
+        message: "Connect Slack before choosing a channel.",
+      }
+    }
+  },
 })
+
+async function searchSlackChannelOptions(
+  integration: Doc<"integrations">,
+  query: string
+): Promise<AutomationEventOptionSearchResult> {
+  try {
+    return {
+      status: "ready",
+      options: await searchSlackChannels(integration, query),
+    }
+  } catch {
+    return {
+      status: "unavailable",
+      message:
+        "Could not load Slack channels. Check the Slack connection and try again.",
+    }
+  }
+}
 
 async function searchSlackChannels(
   integration: Doc<"integrations">,
