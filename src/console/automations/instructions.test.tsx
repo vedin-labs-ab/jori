@@ -246,11 +246,13 @@ describe("automation instructions field", () => {
       surfaces: [{ provider: "github", access: "read" }],
     })
 
-    fireEvent.click(
-      await screen.findByRole("button", {
-        name: "Remove GitHub",
-      })
-    )
+    const button = await screen.findByRole("button", {
+      name: "Remove GitHub",
+    })
+
+    expect(fireEvent.mouseDown(button)).toBe(false)
+
+    fireEvent.click(button)
 
     await waitFor(() => {
       expect(field.onValueChange).toHaveBeenLastCalledWith({

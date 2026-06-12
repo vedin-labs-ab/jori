@@ -24,6 +24,10 @@ export function AutomationSurfaceRemoveButton({
           event.stopPropagation()
           onRemove()
         }}
+        onMouseDown={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+        }}
         title={`Remove ${providerLabel}`}
         type="button"
       >
