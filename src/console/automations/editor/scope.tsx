@@ -48,52 +48,24 @@ export function EventScopeFields({
   )
 
   return (
-    <div className="grid gap-3">
-      <ScopeHeader
-        available={conditions.filter(
-          (condition) => !addedKeys.includes(condition.key)
-        )}
-        hasConditions={conditions.length > 0}
-        onAdd={(key) => setAddedKeys((keys) => [...keys, key])}
-      />
-      <ScopeFieldGrid
-        tenantId={tenantId}
-        provider={provider}
-        parameters={[...requiredParameters, ...visibleConditions]}
-        allParameters={parameters}
-        removableKeys={addedKeys}
-        values={values}
-        onValuesChange={onValuesChange}
-        onRemove={(key) => {
-          setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
-          onValuesChange(removeEventCriterion({ key, parameters, values }))
-        }}
-      />
-    </div>
-  )
-}
-
-function ScopeHeader({
-  available,
-  hasConditions,
-  onAdd,
-}: {
-  available: readonly AutomationEventParameter[]
-  hasConditions: boolean
-  onAdd: (key: string) => void
-}) {
-  return (
-    <div className="flex items-start justify-between gap-3">
-      <div className="grid gap-0.5">
-        <h3 className="font-medium text-xs">Scope</h3>
-        <p className="text-muted-foreground text-xs">
-          Choose where this applies.
-        </p>
-      </div>
-      {hasConditions ? (
-        <AddConditionMenu available={available} onAdd={onAdd} />
-      ) : null}
-    </div>
+    <ScopeFieldGrid
+      tenantId={tenantId}
+      provider={provider}
+      parameters={[...requiredParameters, ...visibleConditions]}
+      allParameters={parameters}
+      availableConditions={conditions.filter(
+        (condition) => !addedKeys.includes(condition.key)
+      )}
+      hasConditions={conditions.length > 0}
+      removableKeys={addedKeys}
+      values={values}
+      onAdd={(key) => setAddedKeys((keys) => [...keys, key])}
+      onValuesChange={onValuesChange}
+      onRemove={(key) => {
+        setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
+        onValuesChange(removeEventCriterion({ key, parameters, values }))
+      }}
+    />
   )
 }
 
@@ -108,10 +80,10 @@ function AddConditionMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          className="shrink-0"
+          className="w-full justify-start text-muted-foreground hover:text-foreground"
           disabled={available.length === 0}
           type="button"
-          variant="secondary"
+          variant="outline"
         >
           <Plus />
           Add condition
@@ -143,8 +115,11 @@ function ScopeFieldGrid({
   provider,
   parameters,
   allParameters,
+  availableConditions,
+  hasConditions,
   removableKeys,
   values,
+  onAdd,
   onValuesChange,
   onRemove,
 }: {
@@ -152,12 +127,15 @@ function ScopeFieldGrid({
   provider: AutomationEventProvider
   parameters: readonly AutomationEventParameter[]
   allParameters: readonly AutomationEventParameter[]
+  availableConditions: readonly AutomationEventParameter[]
+  hasConditions: boolean
   removableKeys: readonly string[]
   values: Record<string, string>
+  onAdd: (key: string) => void
   onValuesChange: (values: Record<string, string>) => void
   onRemove: (key: string) => void
 }) {
-  if (parameters.length === 0) {
+  if (parameters.length === 0 && !hasConditions) {
     return null
   }
 
@@ -185,6 +163,17 @@ function ScopeFieldGrid({
           onRemove={() => onRemove(parameter.key)}
         />
       ))}
+      {hasConditions ? (
+        <div className="grid gap-2">
+          <span
+            aria-hidden="true"
+            className="invisible font-medium text-xs/relaxed leading-none"
+          >
+            Condition
+          </span>
+          <AddConditionMenu available={availableConditions} onAdd={onAdd} />
+        </div>
+      ) : null}
     </div>
   )
 }

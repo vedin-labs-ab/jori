@@ -175,8 +175,9 @@ describe("automation event conditions", () => {
     expect(screen.queryByLabelText("Team")).toBeNull()
     expect(screen.queryByLabelText("Project")).toBeNull()
     expect(screen.queryByLabelText("Issue")).toBeNull()
-    expect(screen.getByText("Scope")).toBeDefined()
-    expect(screen.getByText("Choose where this applies.")).toBeDefined()
+    expect(screen.queryByText("Scope")).toBeNull()
+    expect(screen.queryByText("Choose where this applies.")).toBeNull()
+    expect(screen.getByRole("button", { name: "Add condition" })).toBeDefined()
     expect(
       screen.queryByText(
         "Runs when someone creates or updates a comment on a matching Linear issue."
@@ -188,7 +189,7 @@ describe("automation event conditions", () => {
     renderEventFields({ eventProvider: "slack", event: "message.created" })
 
     expect(screen.getByLabelText("Channel")).toBeDefined()
-    expect(screen.getByText("Scope")).toBeDefined()
+    expect(screen.queryByText("Scope")).toBeNull()
     expect(screen.queryByRole("button", { name: "Add condition" })).toBeNull()
     expect(screen.queryByText("Conditions")).toBeNull()
   })
