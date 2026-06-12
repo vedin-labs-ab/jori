@@ -125,6 +125,41 @@ describe("schedule instructions field layout", () => {
   })
 })
 
+describe("schedule instructions marker hover", () => {
+  test("switches remove pane content instantly on hover", async () => {
+    renderInstructionsField({
+      description: "Post to GitHub.",
+      surfaces: [{ provider: "github", access: "read" }],
+    })
+
+    const button = await screen.findByRole("button", {
+      name: "Remove GitHub marker",
+    })
+    const logoWrapper = button.querySelector("img")?.parentElement
+    const removeIcon = button.querySelector("svg")
+    const labelWrapper = button.querySelector(".relative.inline-grid")
+    const [providerLabel, removeLabel] = Array.from(
+      labelWrapper?.querySelectorAll("span") ?? []
+    )
+
+    expect(logoWrapper?.className).toContain(
+      "group-hover/remove-surface-marker:invisible"
+    )
+    expect(removeIcon?.className.baseVal).toContain("invisible")
+    expect(removeIcon?.className.baseVal).toContain(
+      "group-hover/remove-surface-marker:visible"
+    )
+    expect(providerLabel?.className).toContain(
+      "group-hover/remove-surface-marker:invisible"
+    )
+    expect(removeLabel?.className).toContain("invisible")
+    expect(removeLabel?.className).toContain(
+      "group-hover/remove-surface-marker:visible"
+    )
+    expect(button.innerHTML).not.toContain("transition-")
+  })
+})
+
 describe("schedule instructions field", () => {
   test("renders integration badges inside the editor", async () => {
     renderInstructionsField({

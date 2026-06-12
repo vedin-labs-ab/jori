@@ -1,5 +1,5 @@
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react"
-import { CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
+import { CircleDashed, FilePenLine, FileText, PenLine, X } from "lucide-react"
 import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
 import { cn } from "@/lib/utils"
 import { SurfaceLogo } from "../logo"
@@ -9,6 +9,7 @@ import {
   getScheduleSurfaceLabel,
   isScheduleSurfaceProvider,
   type ScheduleSurfaceFormValue,
+  type ScheduleSurfaceProvider,
 } from "../surfaces"
 
 export function ScheduleSurfaceNodeView({
@@ -28,7 +29,6 @@ export function ScheduleSurfaceNodeView({
 
   const accessLabel = getScheduleSurfaceAccessLabel(access)
   const providerLabel = getScheduleSurfaceLabel(provider)
-  const Icon = getAccessIcon(access)
 
   return (
     <NodeViewWrapper
@@ -45,49 +45,120 @@ export function ScheduleSurfaceNodeView({
           selected && "ring-2 ring-ring/40"
         )}
       >
-        <button
-          aria-label={`${providerLabel} access: ${accessLabel}. Change access.`}
-          className={cn(
-            "grid w-7 place-items-center opacity-55 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
-            getAccessIconClassName(access)
-          )}
-          onClick={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
+        <ScheduleSurfaceAccessButton
+          access={access}
+          accessLabel={accessLabel}
+          onChange={() =>
             updateAttributes({ access: getNextScheduleSurfaceAccess(access) })
-          }}
-          title={accessLabel}
-          type="button"
-        >
-          <Icon className="size-3.5" />
-        </button>
+          }
+          providerLabel={providerLabel}
+        />
         <ButtonGroupSeparator className="my-1 w-px bg-border" />
-        <button
-          aria-label={`Remove ${providerLabel} marker`}
-          className="group/remove-surface-marker flex items-center gap-1.5 px-2 font-medium outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30"
-          onClick={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            deleteNode()
-          }}
-          title={`Remove ${providerLabel}`}
-          type="button"
-        >
-          <SurfaceLogo provider={provider} />
-          <span className="relative inline-grid overflow-hidden">
-            <span className="col-start-1 row-start-1 transition-[opacity,transform] duration-150 ease-out group-hover/remove-surface-marker:-translate-y-1 group-hover/remove-surface-marker:opacity-0">
-              {providerLabel}
-            </span>
-            <span
-              aria-hidden="true"
-              className="col-start-1 row-start-1 translate-y-1 opacity-0 transition-[opacity,transform] duration-150 ease-out group-hover/remove-surface-marker:translate-y-0 group-hover/remove-surface-marker:opacity-100"
-            >
-              Remove
-            </span>
-          </span>
-        </button>
+        <ScheduleSurfaceRemoveButton
+          onRemove={deleteNode}
+          provider={provider}
+          providerLabel={providerLabel}
+        />
       </ButtonGroup>
     </NodeViewWrapper>
+  )
+}
+
+function ScheduleSurfaceAccessButton({
+  access,
+  accessLabel,
+  onChange,
+  providerLabel,
+}: {
+  access: ScheduleSurfaceFormValue["access"]
+  accessLabel: string
+  onChange: () => void
+  providerLabel: string
+}) {
+  const Icon = getAccessIcon(access)
+
+  return (
+    <button
+      aria-label={`${providerLabel} access: ${accessLabel}. Change access.`}
+      className={cn(
+        "grid w-7 place-items-center opacity-55 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
+        getAccessIconClassName(access)
+      )}
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onChange()
+      }}
+      title={accessLabel}
+      type="button"
+    >
+      <Icon className="size-3.5" />
+    </button>
+  )
+}
+
+function ScheduleSurfaceRemoveButton({
+  onRemove,
+  provider,
+  providerLabel,
+}: {
+  onRemove: () => void
+  provider: ScheduleSurfaceProvider
+  providerLabel: string
+}) {
+  return (
+    <button
+      aria-label={`Remove ${providerLabel} marker`}
+      className="group/remove-surface-marker flex items-center gap-1.5 px-2 font-medium outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30"
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onRemove()
+      }}
+      title={`Remove ${providerLabel}`}
+      type="button"
+    >
+      <ScheduleSurfaceRemoveIcon provider={provider} />
+      <ScheduleSurfaceRemoveLabel providerLabel={providerLabel} />
+    </button>
+  )
+}
+
+function ScheduleSurfaceRemoveIcon({
+  provider,
+}: {
+  provider: ScheduleSurfaceProvider
+}) {
+  return (
+    <span className="grid size-3.5 shrink-0 place-items-center">
+      <span className="col-start-1 row-start-1 flex size-3.5 items-center justify-center group-hover/remove-surface-marker:invisible">
+        <SurfaceLogo provider={provider} />
+      </span>
+      <X
+        aria-hidden="true"
+        className="invisible col-start-1 row-start-1 size-3.5 text-muted-foreground group-hover/remove-surface-marker:visible"
+      />
+    </span>
+  )
+}
+
+function ScheduleSurfaceRemoveLabel({
+  providerLabel,
+}: {
+  providerLabel: string
+}) {
+  return (
+    <span className="relative inline-grid overflow-hidden">
+      <span className="col-start-1 row-start-1 group-hover/remove-surface-marker:invisible">
+        {providerLabel}
+      </span>
+      <span
+        aria-hidden="true"
+        className="invisible col-start-1 row-start-1 group-hover/remove-surface-marker:visible"
+      >
+        Remove
+      </span>
+    </span>
   )
 }
 
