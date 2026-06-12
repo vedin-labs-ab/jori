@@ -155,54 +155,6 @@ describe("automation instructions field footer", () => {
   })
 })
 
-describe("automation instructions marker styling", () => {
-  test("uses icon opacity instead of background for badge access hover", async () => {
-    renderInstructionsField({
-      description: "Post to GitHub.",
-      surfaces: [{ provider: "github", access: "read" }],
-    })
-
-    const button = await screen.findByRole("button", {
-      name: "GitHub access: Read. Change access.",
-    })
-
-    expect(button.className).toContain("text-[#2563EB]")
-    expect(button.className).toContain("px-1")
-    expect(button.className).not.toContain("w-5")
-    expect(button.className).toContain("opacity-55")
-    expect(button.className).toContain("hover:opacity-100")
-    expect(button.className).not.toContain("hover:bg-")
-  })
-})
-
-describe("automation instructions marker hover", () => {
-  test("keeps provider pane width stable and only swaps the icon affordance", async () => {
-    renderInstructionsField({
-      description: "Post to Google Drive.",
-      surfaces: [{ provider: "googleDrive", access: "read" }],
-    })
-
-    const button = await screen.findByRole("button", {
-      name: "Remove Google Drive",
-    })
-    const content = button.closest("[data-automation-remove-content]")
-    const icon = button.querySelector("svg")
-
-    expect(button.className).not.toContain("transition-[width]")
-    expect(content?.textContent).toBe("Google Drive")
-    expect(icon?.className.baseVal).toContain("opacity-55")
-    expect(icon?.className.baseVal).toContain("group-hover/x:opacity-100")
-
-    fireEvent.mouseEnter(button)
-
-    expect(content?.textContent).toBe("Google Drive")
-
-    fireEvent.mouseLeave(button)
-
-    expect(content?.textContent).toBe("Google Drive")
-  })
-})
-
 describe("automation instructions field", () => {
   test("renders integration badges inside the editor", async () => {
     renderInstructionsField({

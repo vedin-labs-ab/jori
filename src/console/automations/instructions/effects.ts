@@ -101,3 +101,30 @@ export function useInstructionAutocompleteA11y({
     element.setAttribute("aria-expanded", "true")
   }, [editor, listboxId, suggestion])
 }
+
+export function useInstructionValidationA11y({
+  editor,
+  error,
+  errorId,
+}: {
+  editor: Editor | null
+  error: string | undefined
+  errorId: string
+}) {
+  useEffect(() => {
+    const element = editor?.view.dom
+
+    if (element === undefined) {
+      return
+    }
+
+    if (error === undefined) {
+      element.removeAttribute("aria-describedby")
+      element.removeAttribute("aria-invalid")
+      return
+    }
+
+    element.setAttribute("aria-describedby", errorId)
+    element.setAttribute("aria-invalid", "true")
+  }, [editor, error, errorId])
+}

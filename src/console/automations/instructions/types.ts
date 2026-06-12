@@ -8,11 +8,13 @@ import { type AutomationInstructionsValue } from "./document"
 import { type InstructionSuggestionState } from "./suggest"
 
 export type AutomationInstructionsFieldProps = {
+  error?: string
   id: string
   onBlur: () => void
   onValueChange: (value: AutomationInstructionsValue) => void
   placeholder: string
   readScope: AutomationReadScope
+  showAccessError?: boolean
   surfaces: AutomationSurfaceFormValue[]
   value: string
 }

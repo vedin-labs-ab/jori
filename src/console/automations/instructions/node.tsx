@@ -47,6 +47,7 @@ export function AutomationSurfaceNodeView({
           toneClassNames.surface,
           selected && "ring-2 ring-ring/40"
         )}
+        data-automation-surface-access={access === "" ? "unset" : access}
       >
         <AutomationSurfaceAccessButton
           access={access}
