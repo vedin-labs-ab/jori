@@ -16,10 +16,17 @@ import {
   automationFilterOptions,
 } from "./types"
 
-// The dialog pulls in the TipTap editor and calendar pickers, which dwarf the
-// list view. Loading it lazily keeps them out of the route chunk.
+let automationDialogModule: Promise<typeof import("./dialog")> | undefined
+
+function loadAutomationDialog() {
+  automationDialogModule ??= import("./dialog")
+  return automationDialogModule
+}
+
+// The dialog pulls in the TipTap editor, which dwarfs the list view. Loading it
+// lazily keeps the editor out of the route chunk.
 const AutomationDialog = lazy(async () => ({
-  default: (await import("./dialog")).AutomationDialog,
+  default: (await loadAutomationDialog()).AutomationDialog,
 }))
 
 export function Automations() {
@@ -48,6 +55,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
       <AutomationFilters
         filter={filter}
         onCreate={editor.openCreateForm}
+        onCreateIntent={loadAutomationDialog}
         query={query}
         setFilter={setFilter}
         setQuery={setQuery}
@@ -83,36 +91,37 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
   )
 }
 
-// Warm the dialog chunk once the list is on screen so opening the form does
-// not wait on the network, and keep the dialog mounted after the first open
-// so the close animation can play.
 function useAutomationDialogMount(isFormOpen: boolean) {
-  const [isMounted, setIsMounted] = useState(false)
+  const [hasOpened, setHasOpened] = useState(false)
 
   useEffect(() => {
-    void import("./dialog")
-  }, [])
+    if (isFormOpen) {
+      setHasOpened(true)
+    }
+  }, [isFormOpen])
 
-  if (isFormOpen && !isMounted) {
-    setIsMounted(true)
-  }
-
-  return isMounted
+  return isFormOpen || hasOpened
 }
 
 function AutomationFilters({
   filter,
   onCreate,
+  onCreateIntent,
   query,
   setFilter,
   setQuery,
 }: {
   filter: AutomationFilter
   onCreate: () => void
+  onCreateIntent: () => Promise<unknown>
   query: string
   setFilter: (filter: AutomationFilter) => void
   setQuery: (query: string) => void
 }) {
+  function preloadDialog() {
+    void onCreateIntent()
+  }
+
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <ToggleGroup
@@ -143,7 +152,16 @@ function AutomationFilters({
             value={query}
           />
         </div>
-        <Button onClick={onCreate} size="lg" type="button">
+        <Button
+          onClick={() => {
+            preloadDialog()
+            onCreate()
+          }}
+          onFocus={preloadDialog}
+          onPointerEnter={preloadDialog}
+          size="lg"
+          type="button"
+        >
           <Plus />
           New automation
         </Button>

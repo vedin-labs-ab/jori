@@ -1,4 +1,5 @@
 import { CircleHelp, Loader2 } from "lucide-react"
+import { lazy, Suspense } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -20,12 +21,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { createAutomationDialogActions } from "./actions"
-import { EventFields } from "./event"
 import { AutomationInstructionsField } from "./instructions"
-import { AutomationDateTimePicker } from "./picker"
 import { RecurringFields } from "./recurring"
 import { type AutomationReadScope } from "./surfaces"
 import { type Automation, type AutomationFormValues } from "./types"
+
+const AutomationDateTimePicker = lazy(async () => ({
+  default: (await import("./picker")).AutomationDateTimePicker,
+}))
+
+const EventFields = lazy(async () => ({
+  default: (await import("./event")).EventFields,
+}))
 
 export function AutomationDialog({
   error,
@@ -260,22 +267,32 @@ function AutomationTiming({
         <RecurringFields onValuesChange={onValuesChange} values={values} />
       </TabsContent>
       <TabsContent value="once" className="grid gap-2">
-        <AutomationDateTimePicker
-          id="automation-run-at"
-          onValueChange={(runAt) => onValuesChange({ ...values, runAt })}
-          value={values.runAt}
-        />
+        <Suspense fallback={<TimingFallback />}>
+          <AutomationDateTimePicker
+            id="automation-run-at"
+            onValueChange={(runAt) => onValuesChange({ ...values, runAt })}
+            value={values.runAt}
+          />
+        </Suspense>
         <p className="text-muted-foreground text-xs">
           Runs once at this time, in your local timezone.
         </p>
       </TabsContent>
       <TabsContent value="event">
-        <EventFields
-          tenantId={tenantId}
-          onValuesChange={onValuesChange}
-          values={values}
-        />
+        <Suspense fallback={<TimingFallback />}>
+          <EventFields
+            tenantId={tenantId}
+            onValuesChange={onValuesChange}
+            values={values}
+          />
+        </Suspense>
       </TabsContent>
     </Tabs>
+  )
+}
+
+function TimingFallback() {
+  return (
+    <div aria-hidden="true" className="h-16 rounded-md border bg-muted/30" />
   )
 }
