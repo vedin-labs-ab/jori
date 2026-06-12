@@ -4,47 +4,68 @@ import {
   approvalContinuation,
   automationRuntimeInput,
   githubId,
+  linearAutomationRuntimeInput,
   promptedTool,
   runtimeInput,
 } from "./prompt.fixtures"
 
-describe("runtime prompts", () => {
-  test.each([
-    [
-      "github",
-      {
-        repository: {
-          id: 123,
-          owner: "acme",
-          name: "app",
-          fullName: "acme/app",
-        },
-        issueNumber: 12,
-        pullNumber: 12,
-        comment: { id: "comment-id", kind: "issue_comment" },
+const messageTriggerCases = [
+  [
+    "github",
+    {
+      repository: {
+        id: 123,
+        owner: "acme",
+        name: "app",
+        fullName: "acme/app",
       },
-      "GitHub",
-      [
-        "- Repository: acme/app",
-        "- Issue number: 12",
-        "- Pull request number: 12",
-        "- Comment ID: comment-id",
-        "- Comment kind: issue_comment",
-      ],
-    ],
+      issueNumber: 12,
+      pullNumber: 12,
+      comment: { id: "comment-id", kind: "issue_comment" },
+    },
+    "GitHub",
     [
-      "linear",
-      { issueId: "ISSUE-1", commentId: "comment-id" },
-      "Linear",
-      ["- Issue ID: ISSUE-1", "- Comment ID: comment-id"],
+      "- Repository: acme/app",
+      "- Issue number: 12",
+      "- Pull request number: 12",
+      "- Comment ID: comment-id",
+      "- Comment kind: issue_comment",
     ],
+  ],
+  [
+    "linear",
+    {
+      issueId: "issue-id",
+      issueIdentifier: "ISSUE-1",
+      issue: {
+        title: "Ship target context",
+        url: "https://linear.app/acme/issue/ISSUE-1/ship-target-context",
+      },
+      commentId: "comment-id",
+      url: "https://linear.app/acme/issue/ISSUE-1/ship-target-context#comment-id",
+    },
+    "Linear",
     [
-      "slack",
-      { channelId: "C123", ts: "123.456" },
-      "Slack",
-      ["- Channel ID: C123", "- Message timestamp: 123.456"],
+      "- Issue ID: issue-id",
+      "- Issue key: ISSUE-1",
+      "- Issue title: Ship target context",
+      "- Issue URL: https://linear.app/acme/issue/ISSUE-1/ship-target-context",
+      "- Comment ID: comment-id",
+      "- Comment URL: https://linear.app/acme/issue/ISSUE-1/ship-target-context#comment-id",
     ],
-  ] as const)("renders %s message trigger target", (provider, data, providerLabel, targetLines) => {
+  ],
+  [
+    "slack",
+    { channelId: "C123", ts: "123.456" },
+    "Slack",
+    ["- Channel ID: C123", "- Message timestamp: 123.456"],
+  ],
+] as const
+
+describe("runtime prompts", () => {
+  test.each(
+    messageTriggerCases
+  )("renders %s message trigger target", (provider, data, providerLabel, targetLines) => {
     const prompt = assemblePrompt(runtimeInput(provider, data))
 
     expect(prompt).toContain(`A ${providerLabel} message triggered this run.`)
@@ -92,6 +113,26 @@ describe("automation trigger prompts", () => {
     const prompt = assemblePrompt(automationRuntimeInput([githubId()], false))
 
     expect(prompt).toContain("- Web search: Disabled")
+  })
+
+  test("renders provider target context for Linear events", () => {
+    const prompt = assemblePrompt(linearAutomationRuntimeInput())
+
+    expect(prompt).toContain("- Type: issue.comment.changed")
+    expect(prompt).toContain("- Provider: Linear")
+    expect(prompt).toContain("- Issue ID: issue-id")
+    expect(prompt).toContain("- Issue key: VED-1")
+    expect(prompt).toContain("- Issue title: Get familiar with Linear")
+    expect(prompt).toContain(
+      "- Issue URL: https://linear.app/acme/issue/VED-1/get-familiar"
+    )
+    expect(prompt).toContain("- Comment ID: comment-id")
+    expect(prompt).toContain(
+      "- Comment URL: https://linear.app/acme/issue/VED-1/get-familiar#comment-id"
+    )
+    expect(prompt).toContain(
+      "- Text: i wonder if this is worth spending time on"
+    )
   })
 })
 
