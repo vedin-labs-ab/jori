@@ -160,7 +160,7 @@ function CustomCronField({
         value={values.cron}
       />
       <p className="text-muted-foreground text-xs">
-        Five fields in UTC: minute, hour, day of month, month, day of week.
+        UTC: minute, hour, day, month, weekday.
       </p>
     </div>
   )

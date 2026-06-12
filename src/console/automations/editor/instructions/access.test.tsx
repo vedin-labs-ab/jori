@@ -15,7 +15,7 @@ describe("automation instructions all-read access", () => {
 
     expect(await screen.findByRole("textbox")).toBeDefined()
     expect(field.container.textContent).toContain(
-      "Use each icon to set integration access: read or read/write."
+      "Set each badge to read or read/write."
     )
   })
 

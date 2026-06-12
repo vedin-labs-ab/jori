@@ -1,5 +1,5 @@
 import { EditorContent } from "@tiptap/react"
-import { Sparkles } from "lucide-react"
+import { AtSign } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAutomationInstructionsEditor } from "./state"
 import { InstructionSuggestions } from "./suggestions"
@@ -11,8 +11,8 @@ export function AutomationInstructionsField(
   const errorId = props.error === undefined ? undefined : `${props.id}-error`
   const accessHint =
     props.readScope === "allConnected"
-      ? "Use each icon to set integration access: read or read/write."
-      : "Use each icon to set integration access: read, write, or read/write."
+      ? "Set each badge to read or read/write."
+      : "Set each badge to read, write, or both."
   const {
     editor,
     isEmpty,
@@ -41,8 +41,8 @@ export function AutomationInstructionsField(
         >
           <EditorContent className="min-w-0 max-w-full" editor={editor} />
           <div className="flex min-h-9 items-center gap-2 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
-            <Sparkles aria-hidden="true" className="size-3.5 shrink-0" />
-            <span>Type an integration name to mention it. {accessHint}</span>
+            <AtSign aria-hidden="true" className="size-3.5 shrink-0" />
+            <span>Mention integrations by name. {accessHint}</span>
           </div>
         </div>
         {isEmpty ? (

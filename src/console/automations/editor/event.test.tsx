@@ -176,7 +176,12 @@ describe("automation event conditions", () => {
     expect(screen.queryByLabelText("Project")).toBeNull()
     expect(screen.queryByLabelText("Issue")).toBeNull()
     expect(screen.getByText("Scope")).toBeDefined()
-    expect(screen.getByText("Set where this event applies.")).toBeDefined()
+    expect(screen.getByText("Choose where this applies.")).toBeDefined()
+    expect(
+      screen.queryByText(
+        "Runs when someone creates or updates a comment on a matching Linear issue."
+      )
+    ).toBeNull()
   })
 
   test("shows required scope fields without an add button when every parameter is required", () => {
