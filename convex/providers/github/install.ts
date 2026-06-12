@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
 import { buildInstallState } from "../install"
+import { requireGitHubCredentials } from "./credentials"
 import { createSignedGitHubState } from "./signing"
 
 export const createInstallState = mutation({
@@ -75,5 +76,36 @@ export const recordInstallation = internalMutation({
       createdAt: now,
       updatedAt: now,
     })
+  },
+})
+
+export const updateInstallationCredentials = internalMutation({
+  args: {
+    integrationId: v.id("integrations"),
+    accessToken: v.string(),
+    expiresAt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const integration = await ctx.db.get(args.integrationId)
+
+    if (integration === null || integration.provider !== "github") {
+      throw new Error("GitHub integration not found")
+    }
+
+    const existingCredentials = requireGitHubCredentials(integration)
+    const credentials = {
+      installationId: existingCredentials.installationId,
+      tokens: {
+        access: args.accessToken,
+      },
+      expiresAt: args.expiresAt,
+    }
+
+    await ctx.db.patch(args.integrationId, {
+      credentials,
+      updatedAt: Date.now(),
+    })
+
+    return credentials
   },
 })
