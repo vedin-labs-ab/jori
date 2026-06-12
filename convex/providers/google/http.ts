@@ -1,6 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { redirectWithStatus } from "../http"
+import { readCallbackState, redirectWithStatus } from "../http"
 import {
   type GoogleSurfaceProvider,
   googleOAuthAuthorizeUrl,
@@ -53,17 +53,17 @@ export async function handleGoogleOAuthCallback(
     return new Response("Missing OAuth callback parameters", { status: 400 })
   }
 
-  let state: Awaited<ReturnType<typeof parseSignedGoogleState>>
+  const parsed = await readCallbackState({
+    value: stateValue,
+    parse: parseSignedGoogleState,
+    label: "Google Workspace OAuth",
+  })
 
-  try {
-    state = await parseSignedGoogleState(stateValue)
-  } catch {
-    return new Response("Invalid Google Workspace OAuth state", { status: 400 })
+  if (!parsed.ok) {
+    return parsed.response
   }
 
-  if (Date.now() - state.createdAt > 10 * 60 * 1000) {
-    return new Response("Expired Google Workspace OAuth state", { status: 400 })
-  }
+  const state = parsed.state
 
   if (expectedProvider !== undefined && state.provider !== expectedProvider) {
     return new Response("Mismatched Google Workspace OAuth state", {

@@ -1,7 +1,12 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { createProviderActor } from "../../shared/actor"
-import { redirectWithStatus, unauthorizedResponse } from "../http"
+import {
+  ingestProviderMessage,
+  readCallbackState,
+  redirectWithStatus,
+  unauthorizedResponse,
+} from "../http"
 import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
@@ -50,18 +55,17 @@ export async function handleSlackOAuthCallback(
     return new Response("Missing OAuth callback parameters", { status: 400 })
   }
 
-  let state: Awaited<ReturnType<typeof parseSignedSlackState>>
+  const parsed = await readCallbackState({
+    value: stateValue,
+    parse: parseSignedSlackState,
+    label: "Slack OAuth",
+  })
 
-  try {
-    state = await parseSignedSlackState(stateValue)
-  } catch {
-    return new Response("Invalid Slack OAuth state", { status: 400 })
+  if (!parsed.ok) {
+    return parsed.response
   }
 
-  if (Date.now() - state.createdAt > 10 * 60 * 1000) {
-    return new Response("Expired Slack OAuth state", { status: 400 })
-  }
-
+  const state = parsed.state
   const tokenResult = await exchangeSlackAuthorizationCode({
     code,
     redirectUri: `${requestUrl.origin}${slackOAuthCallbackPath}`,
@@ -139,7 +143,8 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
-  const result = await ctx.runMutation(
+  return await ingestProviderMessage(
+    ctx,
     internal.messages.ingest.recordSlackMessage,
     {
       accountId: message.accountId,
@@ -156,14 +161,6 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
       data: message.data,
     }
   )
-
-  if (result.status === "started") {
-    await ctx.scheduler.runAfter(0, internal.executions.runtime.runMessage, {
-      runId: result.runId,
-    })
-  }
-
-  return Response.json({ ok: true })
 }
 
 export async function handleSlackInteractions(

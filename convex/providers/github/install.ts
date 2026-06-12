@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
-import { requireClerkUserId } from "../../identity/users"
+import { buildInstallState } from "../install"
 import { createSignedGitHubState } from "./signing"
 
 export const createInstallState = mutation({
@@ -9,18 +9,7 @@ export const createInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    if (identity === null) {
-      throw new Error("Unauthorized")
-    }
-
-    return await createSignedGitHubState({
-      tenantId: args.tenantId,
-      createdBy: requireClerkUserId(identity),
-      returnUrl: args.returnUrl,
-      createdAt: Date.now(),
-    })
+    return await createSignedGitHubState(await buildInstallState(ctx, args))
   },
 })
 

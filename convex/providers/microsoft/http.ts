@@ -1,6 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { redirectWithStatus } from "../http"
+import { readCallbackState, redirectWithStatus } from "../http"
 import {
   type MicrosoftSurfaceProvider,
   microsoftOAuthAuthorizeUrl,
@@ -53,17 +53,17 @@ export async function handleMicrosoftOAuthCallback(
     return new Response("Missing OAuth callback parameters", { status: 400 })
   }
 
-  let state: Awaited<ReturnType<typeof parseSignedMicrosoftState>>
+  const parsed = await readCallbackState({
+    value: stateValue,
+    parse: parseSignedMicrosoftState,
+    label: "Microsoft OAuth",
+  })
 
-  try {
-    state = await parseSignedMicrosoftState(stateValue)
-  } catch {
-    return new Response("Invalid Microsoft OAuth state", { status: 400 })
+  if (!parsed.ok) {
+    return parsed.response
   }
 
-  if (Date.now() - state.createdAt > 10 * 60 * 1000) {
-    return new Response("Expired Microsoft OAuth state", { status: 400 })
-  }
+  const state = parsed.state
 
   if (state.provider !== provider) {
     return new Response("Mismatched Microsoft OAuth state", { status: 400 })

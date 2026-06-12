@@ -129,3 +129,19 @@ function isCredentialObject(
 ): credentials is Record<string, unknown> {
   return typeof credentials === "object" && credentials !== null
 }
+
+export function readRefreshToken(credentials: unknown) {
+  if (
+    typeof credentials === "object" &&
+    credentials !== null &&
+    "tokens" in credentials &&
+    typeof credentials.tokens === "object" &&
+    credentials.tokens !== null &&
+    "refresh" in credentials.tokens &&
+    typeof credentials.tokens.refresh === "string"
+  ) {
+    return credentials.tokens.refresh
+  }
+
+  return undefined
+}
