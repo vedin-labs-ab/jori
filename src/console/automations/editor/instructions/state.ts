@@ -118,6 +118,7 @@ function createEditorOptions({
   return {
     content: createAutomationInstructionDocument({
       description: props.value,
+      permissions: props.permissions,
       readScope: props.readScope,
       surfaces: props.surfaces,
     }),

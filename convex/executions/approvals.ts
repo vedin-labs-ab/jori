@@ -8,6 +8,7 @@ import { callMiloTool } from "../broker/milo"
 import { callProviderTool } from "../broker/providers"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { createPromptedExecution } from "./artifacts"
+import { authorizeApprovedTool } from "./authorization"
 import { type CodexRuntimeInput } from "./codex"
 import { runPromptedExecution } from "./sandbox/execute"
 import { formatError } from "./sandbox/trace"
@@ -179,6 +180,8 @@ async function executeApprovedTool(
   approval: Doc<"approvals">
 ) {
   try {
+    const permission = await authorizeApprovedTool(ctx, input, approval)
+
     if (approval.provider === "milo") {
       return await callMiloTool(
         ctx,
@@ -201,26 +204,42 @@ async function executeApprovedTool(
       throw new Error(`No active ${approval.provider} integration is available`)
     }
 
-    const execution = await ctx.runQuery(internal.executions.records.get, {
-      executionId: approval.executionId,
-    })
-
-    if (execution === null) {
-      throw new Error("Approval execution is missing")
-    }
-
-    return await callProviderTool({
-      ctx,
-      execution,
+    return await callApprovedProviderTool(ctx, approval, {
       integration,
-      tool: approval.tool,
-      toolArgs: normalizeToolArgs(approval.args),
+      tool: permission.tool,
+      toolArgs: approval.args,
     })
   } catch (error) {
     return {
       error: formatError(error),
     }
   }
+}
+
+async function callApprovedProviderTool(
+  ctx: ActionCtx,
+  approval: Doc<"approvals">,
+  args: {
+    integration: CodexRuntimeInput["integrations"][number]
+    tool: string
+    toolArgs: unknown
+  }
+) {
+  const execution = await ctx.runQuery(internal.executions.records.get, {
+    executionId: approval.executionId,
+  })
+
+  if (execution === null) {
+    throw new Error("Approval execution is missing")
+  }
+
+  return await callProviderTool({
+    ctx,
+    execution,
+    integration: args.integration,
+    tool: args.tool,
+    toolArgs: normalizeToolArgs(args.toolArgs),
+  })
 }
 
 function createDeniedResult() {

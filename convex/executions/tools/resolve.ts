@@ -2,14 +2,11 @@ import { type Doc } from "../../_generated/dataModel"
 import {
   type AccessLevel,
   type AutomationAccess,
-  canUseRead,
-  canUseWrite,
   getIntegrationAccess,
 } from "../../automations/access"
 import {
   getToolPermissionsByProvider,
   type PermissionMode,
-  resolveToolMode,
   type ToolPermission,
   type ToolProvider,
 } from "../../permissions/catalog"
@@ -21,6 +18,7 @@ import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
 import { createBrokeredToolBundle } from "./brokered"
 import { createRuntimeToolCapability } from "./bundles"
+import { canUseToolPermission, type ToolExecutionType } from "./policy"
 import {
   type RuntimeToolCapability,
   type ToolBundle,
@@ -34,6 +32,7 @@ type IntegrationBundleArgs = {
     convexSiteUrl: string
     executionToken: string
   }
+  executionType: ToolExecutionType
   integration: Doc<"integrations">
   access?: AutomationAccess
   toolModes: ReadonlyMap<string, PermissionMode>
@@ -66,6 +65,7 @@ export function createIntegrationToolBundle(
   const permissions = getEnabledToolPermissions(
     provider,
     args.toolModes,
+    args.executionType,
     integrationAccess
   )
 
@@ -77,6 +77,7 @@ export function createIntegrationToolBundle(
     provider,
     bundle: createBrokeredToolBundle({
       broker: args.broker,
+      executionType: args.executionType,
       preflight: createIntegrationPreflight(provider, args.integration),
       permissions,
       toolModes: args.toolModes,
@@ -89,24 +90,12 @@ export function createIntegrationToolBundle(
 export function getEnabledToolPermissions(
   provider: ToolProvider,
   toolModes: ReadonlyMap<string, PermissionMode>,
+  executionType: ToolExecutionType = "message",
   access: AccessLevel = "both"
 ) {
-  return getToolPermissionsByProvider(provider).filter(
-    (permission) =>
-      resolveToolMode(toolModes, permission.tool) !== "blocked" &&
-      isPermissionAllowedByAccess(permission.access, access)
+  return getToolPermissionsByProvider(provider).filter((permission) =>
+    canUseToolPermission({ access, executionType, permission, toolModes })
   )
-}
-
-function isPermissionAllowedByAccess(
-  permissionAccess: "read" | "write",
-  access: AccessLevel
-) {
-  if (permissionAccess === "read") {
-    return canUseRead(access)
-  }
-
-  return canUseWrite(access)
 }
 
 const runtimeToolProviders: readonly RuntimeToolProvider[] = [

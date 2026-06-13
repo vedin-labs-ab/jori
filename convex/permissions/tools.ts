@@ -3,7 +3,6 @@ import {
   internalQuery,
   type MutationCtx,
   mutation,
-  type QueryCtx,
   query,
 } from "../_generated/server"
 import { requireClerkUserId } from "../identity/users"
@@ -16,6 +15,7 @@ import {
   resolveToolModes,
   toolPermissions,
 } from "./catalog"
+import { listPermissionOverrides } from "./read"
 
 const permissionModeValidator = v.union(
   v.literal("allowed"),
@@ -34,7 +34,7 @@ export const list = query({
       return null
     }
 
-    const overrides = await listOverrides(ctx, args.tenantId)
+    const overrides = await listPermissionOverrides(ctx, args.tenantId)
     const modes = resolveToolModes(overrides)
     const overridesByTool = new Map(
       overrides.map((override) => [override.tool, override.mode])
@@ -107,16 +107,9 @@ export const listForRuntime = internalQuery({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    return await listOverrides(ctx, args.tenantId)
+    return await listPermissionOverrides(ctx, args.tenantId)
   },
 })
-
-async function listOverrides(ctx: QueryLikeCtx, tenantId: string) {
-  return await ctx.db
-    .query("permissions")
-    .withIndex("by_tenant", (query) => query.eq("tenantId", tenantId))
-    .collect()
-}
 
 async function getOverride(ctx: MutationCtx, tenantId: string, tool: string) {
   return await ctx.db
@@ -126,7 +119,5 @@ async function getOverride(ctx: MutationCtx, tenantId: string, tool: string) {
     )
     .unique()
 }
-
-type QueryLikeCtx = QueryCtx | MutationCtx
 
 export type { ConfigurablePermissionMode, PermissionMode }

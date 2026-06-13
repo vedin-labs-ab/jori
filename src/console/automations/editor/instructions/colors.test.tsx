@@ -65,6 +65,48 @@ describe("automation instructions marker colors", () => {
   })
 })
 
+describe("automation instructions blocked marker colors", () => {
+  test("uses a blocked palette when policy denies automation access", async () => {
+    const field = renderInstructionsField({
+      description: "Post to GitHub.",
+      permissions: [
+        {
+          access: "read",
+          description: "Read issue",
+          label: "Read issue",
+          mode: "blocked",
+          overrideMode: "blocked",
+          provider: "github",
+          tool: "github_get_issue",
+        },
+      ],
+      policyKey: "github-read-blocked",
+      surfaces: [{ provider: "github", access: "read" }],
+    })
+
+    const accessButton = await screen.findByRole("button", {
+      name: "GitHub access: Read, unavailable for automations. Change access.",
+    })
+    const buttonGroup = field.container.querySelector(
+      '[data-slot="button-group"]'
+    )
+    const markerSeparator = buttonGroup?.querySelector(
+      "[data-automation-surface-separator]"
+    )
+
+    expect(buttonGroup?.getAttribute("data-automation-surface-policy")).toBe(
+      "blocked"
+    )
+    expectClasses(buttonGroup, [
+      "border-destructive/50",
+      "bg-destructive/5",
+      "text-destructive",
+    ])
+    expect(accessButton.className).toContain("text-destructive")
+    expect(markerSeparator?.className).toContain("bg-destructive/20")
+  })
+})
+
 function expectClasses(
   element: Element | null | undefined,
   classNames: readonly string[]

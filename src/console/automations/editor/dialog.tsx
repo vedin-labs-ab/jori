@@ -1,8 +1,6 @@
-import { CircleHelp, Loader2 } from "lucide-react"
-import { lazy, Suspense } from "react"
+import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -11,35 +9,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { type AutomationReadScope } from "../surfaces"
+import { type AutomationPolicyPermissions } from "../policy"
 import { type Automation, type AutomationFormValues } from "../types"
 import { createAutomationDialogActions } from "./actions"
+import { AccessFields } from "./dialog/access"
+import { AutomationInstructionsSection } from "./dialog/instructions"
+import { AutomationNameField } from "./dialog/name"
+import { AutomationTiming } from "./dialog/timing"
 import {
   isAutomationInstructionsError,
   isAutomationNameError,
   readAutomationInstructionsError,
   readAutomationNameError,
 } from "./errors"
-import { AutomationInstructionsField } from "./instructions"
-import { automationInstructionMarkerErrors } from "./payload/marker"
-import { RecurringFields } from "./recurring"
-
-const AutomationDateTimePicker = lazy(async () => ({
-  default: (await import("./picker")).AutomationDateTimePicker,
-}))
-
-const EventFields = lazy(async () => ({
-  default: (await import("./event")).EventFields,
-}))
 
 export function AutomationDialog({
   error,
@@ -48,6 +30,8 @@ export function AutomationDialog({
   onOpenChange,
   onSave,
   onValuesChange,
+  permissions,
+  policyKey,
   automation,
   tenantId,
   values,
@@ -58,6 +42,8 @@ export function AutomationDialog({
   onOpenChange: (isOpen: boolean) => void
   onSave: () => void
   onValuesChange: (values: AutomationFormValues) => void
+  permissions?: AutomationPolicyPermissions
+  policyKey: string
   automation: Automation | undefined
   tenantId: string
   values: AutomationFormValues
@@ -101,28 +87,14 @@ export function AutomationDialog({
             onValueChange={actions.updateName}
             value={values.name}
           />
-          <div className="grid gap-2">
-            <div className="flex items-center gap-1.5">
-              <Label htmlFor="automation-description">Instructions</Label>
-              <InstructionsHelp />
-            </div>
-            <AutomationInstructionsField
-              error={instructionsError}
-              id="automation-description"
-              value={values.instructions}
-              onBlur={actions.normalizeDescription}
-              onValueChange={(next) =>
-                actions.updateInstructions(next.description, next.surfaces)
-              }
-              placeholder="Summarize GitHub changes and post them to Slack."
-              readScope={values.readScope}
-              showAccessError={
-                instructionsError ===
-                automationInstructionMarkerErrors.incompleteAccess
-              }
-              surfaces={values.surfaces}
-            />
-          </div>
+          <AutomationInstructionsSection
+            error={instructionsError}
+            onBlur={actions.normalizeDescription}
+            onValueChange={actions.updateInstructions}
+            permissions={permissions}
+            policyKey={policyKey}
+            values={values}
+          />
           <AccessFields
             onReadScopeChange={actions.updateReadScope}
             onWebSearchChange={actions.updateWebSearch}
@@ -151,193 +123,5 @@ export function AutomationDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function AutomationNameField({
-  error,
-  onValueChange,
-  value,
-}: {
-  error: string | undefined
-  onValueChange: (value: string) => void
-  value: string
-}) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor="automation-name">Name</Label>
-      <div className="grid gap-1">
-        <Input
-          aria-describedby={
-            error === undefined ? undefined : "automation-name-error"
-          }
-          aria-invalid={error === undefined ? undefined : true}
-          id="automation-name"
-          value={value}
-          onChange={(event) => onValueChange(event.target.value)}
-          placeholder="Weekly release summary"
-        />
-        {error === undefined ? null : (
-          <p
-            className="text-destructive text-xs/relaxed"
-            id="automation-name-error"
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function InstructionsHelp() {
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            aria-label="Instructions help"
-            className="inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-            type="button"
-          >
-            <CircleHelp className="size-3" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent
-          align="center"
-          className="max-w-80 items-start text-left leading-relaxed"
-          side="right"
-        >
-          <div className="grid gap-1">
-            <p>Write the work Milo should do.</p>
-            <p>Mention integrations like GitHub, Slack, Linear, or Gmail.</p>
-            <p>Set access from each badge.</p>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
-}
-
-function AccessFields({
-  onReadScopeChange,
-  onWebSearchChange,
-  readScope,
-  webSearch,
-}: {
-  onReadScopeChange: (readScope: AutomationReadScope) => void
-  onWebSearchChange: (webSearch: boolean) => void
-  readScope: AutomationReadScope
-  webSearch: boolean
-}) {
-  return (
-    <div className="grid gap-2">
-      <h3 className="font-medium text-xs">Access</h3>
-      <div className="grid gap-2">
-        <AccessCheckbox
-          checked={readScope === "allConnected"}
-          description="For context from integrations you do not mention."
-          id="automation-all-reads"
-          label="Let Milo read any connected integration"
-          onCheckedChange={(checked) =>
-            onReadScopeChange(checked ? "allConnected" : "selected")
-          }
-        />
-        <AccessCheckbox
-          checked={webSearch}
-          description="For current public information."
-          id="automation-web-search"
-          label="Let Milo search the web"
-          onCheckedChange={onWebSearchChange}
-        />
-      </div>
-    </div>
-  )
-}
-
-function AccessCheckbox({
-  checked,
-  description,
-  id,
-  label,
-  onCheckedChange,
-}: {
-  checked: boolean
-  description: string
-  id: string
-  label: string
-  onCheckedChange: (checked: boolean) => void
-}) {
-  return (
-    <div className="flex items-start gap-2">
-      <Checkbox
-        checked={checked}
-        id={id}
-        onCheckedChange={(next) => onCheckedChange(next === true)}
-      />
-      <div className="grid gap-0.5">
-        <Label htmlFor={id} className="font-normal text-xs">
-          {label}
-        </Label>
-        <p className="text-muted-foreground text-xs">{description}</p>
-      </div>
-    </div>
-  )
-}
-
-function AutomationTiming({
-  tenantId,
-  onValuesChange,
-  values,
-}: {
-  tenantId: string
-  onValuesChange: (values: AutomationFormValues) => void
-  values: AutomationFormValues
-}) {
-  return (
-    <Tabs
-      value={values.type}
-      onValueChange={(type) =>
-        onValuesChange({
-          ...values,
-          type: type as AutomationFormValues["type"],
-        })
-      }
-      className="gap-3"
-    >
-      <TabsList className="w-full">
-        <TabsTrigger value="cron">Recurring</TabsTrigger>
-        <TabsTrigger value="once">One-time</TabsTrigger>
-        <TabsTrigger value="event">Event</TabsTrigger>
-      </TabsList>
-      <TabsContent value="cron">
-        <RecurringFields onValuesChange={onValuesChange} values={values} />
-      </TabsContent>
-      <TabsContent value="once" className="grid gap-2">
-        <Suspense fallback={<TimingFallback />}>
-          <AutomationDateTimePicker
-            id="automation-run-at"
-            onValueChange={(runAt) => onValuesChange({ ...values, runAt })}
-            value={values.runAt}
-          />
-        </Suspense>
-      </TabsContent>
-      <TabsContent value="event">
-        <Suspense fallback={<TimingFallback />}>
-          <EventFields
-            tenantId={tenantId}
-            onValuesChange={onValuesChange}
-            values={values}
-          />
-        </Suspense>
-      </TabsContent>
-    </Tabs>
-  )
-}
-
-function TimingFallback() {
-  return (
-    <div aria-hidden="true" className="h-16 rounded-md border bg-muted/30" />
   )
 }

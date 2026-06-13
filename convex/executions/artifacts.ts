@@ -88,6 +88,7 @@ async function assembleRuntimeTools(
       args.input.type === "automation"
         ? args.input.automation.access
         : undefined,
+    executionType: args.input.type,
     toolModes,
   })
 }

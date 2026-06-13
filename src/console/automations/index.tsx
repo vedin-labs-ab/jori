@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
+import { useToolPermissions } from "../permissions/controller"
 import { type AutomationEditor, useAutomationEditor } from "./editor"
 import { AutomationSkeletonList, EmptyAutomations } from "./list/empty"
 import { AutomationRow } from "./list/row"
+import { automationPolicyKey } from "./policy"
 import {
   type AutomationFilter,
   type AutomationList,
@@ -48,7 +50,8 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
     query: deferredQuery,
     includeCompleted: filter === "all",
   })
-  const editor = useAutomationEditor(tenantId)
+  const permissions = useToolPermissions(tenantId)
+  const editor = useAutomationEditor(tenantId, permissions.permissions)
   const now = useNow()
   const isDialogMounted = useAutomationDialogMount(editor.isFormOpen)
 
@@ -83,6 +86,8 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
             onOpenChange={editor.setIsFormOpen}
             onSave={editor.saveAutomation}
             onValuesChange={editor.setFormValues}
+            permissions={permissions.permissions}
+            policyKey={automationPolicyKey(permissions.permissions)}
             automation={editor.formAutomation}
             tenantId={tenantId}
             values={editor.formValues}

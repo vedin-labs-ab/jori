@@ -1,4 +1,8 @@
 import {
+  type AutomationPolicyPermissions,
+  validateAutomationPolicy,
+} from "../../policy"
+import {
   hasAutomationWriteSurface,
   normalizeAutomationSurfaceMentions,
   syncAutomationSurfaces,
@@ -28,6 +32,9 @@ type AutomationArgs = {
 }
 
 type ArgsResult<Args> = { args: Args } | { error: string }
+type AutomationArgsOptions = {
+  permissions?: AutomationPolicyPermissions
+}
 
 export function automationFormValues(
   automation: Automation | undefined
@@ -50,9 +57,10 @@ export function automationFormValues(
 }
 
 export function createAutomationArgs(
-  values: AutomationFormValues
+  values: AutomationFormValues,
+  options: AutomationArgsOptions = {}
 ): ArgsResult<AutomationArgs & { trigger: TriggerSpec }> {
-  const base = buildBaseArgs(values)
+  const base = buildBaseArgs(values, options)
 
   if ("error" in base) {
     return base
@@ -69,9 +77,10 @@ export function createAutomationArgs(
 
 export function updateAutomationArgs(
   values: AutomationFormValues,
-  existing: Automation
+  existing: Automation,
+  options: AutomationArgsOptions = {}
 ): ArgsResult<AutomationArgs & { trigger?: TriggerSpec }> {
-  const base = buildBaseArgs(values)
+  const base = buildBaseArgs(values, options)
 
   if ("error" in base) {
     return base
@@ -97,7 +106,8 @@ export function updateAutomationArgs(
 }
 
 function buildBaseArgs(
-  values: AutomationFormValues
+  values: AutomationFormValues,
+  options: AutomationArgsOptions
 ): ArgsResult<AutomationArgs> {
   const name = values.name.trim()
   const instructions = normalizeAutomationSurfaceMentions(
@@ -127,6 +137,22 @@ function buildBaseArgs(
 
   if (!hasAutomationWriteSurface(surfaces)) {
     return { error: automationInstructionMarkerErrors.noWrite }
+  }
+
+  if (Object.hasOwn(options, "permissions")) {
+    const policyError = validateAutomationPolicy({
+      permissions: options.permissions,
+      readScope: values.readScope,
+      surfaces,
+    })
+
+    if (policyError !== undefined) {
+      return {
+        error: policyError.includes("not available for automations")
+          ? automationInstructionMarkerErrors.unavailableAccess
+          : policyError,
+      }
+    }
   }
 
   return {

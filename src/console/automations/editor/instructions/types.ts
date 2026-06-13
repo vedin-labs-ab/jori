@@ -1,5 +1,6 @@
 import { type Editor } from "@tiptap/react"
 import { type MutableRefObject } from "react"
+import { type AutomationPolicyPermissions } from "../../policy"
 import {
   type AutomationReadScope,
   type AutomationSurfaceFormValue,
@@ -13,6 +14,8 @@ export type AutomationInstructionsFieldProps = {
   onBlur: () => void
   onValueChange: (value: AutomationInstructionsValue) => void
   placeholder: string
+  permissions?: AutomationPolicyPermissions
+  policyKey: string
   readScope: AutomationReadScope
   showAccessError?: boolean
   surfaces: AutomationSurfaceFormValue[]

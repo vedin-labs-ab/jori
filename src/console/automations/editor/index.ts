@@ -2,6 +2,7 @@ import { type ReactMutation, useMutation } from "convex/react"
 import { useState } from "react"
 import { api } from "../../../../convex/_generated/api"
 import { readErrorMessage } from "../../error"
+import { type AutomationPolicyPermissions } from "../policy"
 import { type Automation, type AutomationFormValues } from "../types"
 import {
   automationFormValues,
@@ -11,14 +12,20 @@ import {
 
 export type AutomationEditor = ReturnType<typeof useAutomationEditor>
 
-export function useAutomationEditor(tenantId: string) {
+export function useAutomationEditor(
+  tenantId: string,
+  permissions?: AutomationPolicyPermissions
+) {
   return {
-    ...useAutomationForm(tenantId),
+    ...useAutomationForm(tenantId, permissions),
     ...useAutomationDeletion(tenantId),
   }
 }
 
-function useAutomationForm(tenantId: string) {
+function useAutomationForm(
+  tenantId: string,
+  permissions?: AutomationPolicyPermissions
+) {
   const create = useMutation(api.automations.console.create)
   const update = useMutation(api.automations.console.update)
   const [formAutomation, setFormAutomation] = useState<Automation>()
@@ -44,6 +51,7 @@ function useAutomationForm(tenantId: string) {
         create,
         formAutomation,
         formValues,
+        permissions,
         tenantId,
         update,
       })
@@ -73,17 +81,19 @@ async function persistAutomation({
   create,
   formAutomation,
   formValues,
+  permissions,
   tenantId,
   update,
 }: {
   create: ReactMutation<typeof api.automations.console.create>
   formAutomation: Automation | undefined
   formValues: AutomationFormValues
+  permissions?: AutomationPolicyPermissions
   tenantId: string
   update: ReactMutation<typeof api.automations.console.update>
 }) {
   if (formAutomation === undefined) {
-    const result = createAutomationArgs(formValues)
+    const result = createAutomationArgs(formValues, { permissions })
 
     if ("error" in result) {
       throw new Error(result.error)
@@ -93,7 +103,9 @@ async function persistAutomation({
     return
   }
 
-  const result = updateAutomationArgs(formValues, formAutomation)
+  const result = updateAutomationArgs(formValues, formAutomation, {
+    permissions,
+  })
 
   if ("error" in result) {
     throw new Error(result.error)

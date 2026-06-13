@@ -7,11 +7,16 @@ import {
   getAutomationSurfaceLabel,
   isAutomationSurfaceProvider,
 } from "../../surfaces"
-import { automationSurfaceNodeName } from "./document"
+import {
+  type AutomationSurfacePolicyState,
+  automationSurfaceNodeName,
+  automationSurfacePolicyStates,
+} from "./document"
 import { AutomationSurfaceNodeView } from "./node"
 
 export type AutomationSurfaceNodeAttrs = {
   access: AutomationSurfaceFormValue["access"]
+  policy: AutomationSurfacePolicyState
   provider: AutomationSurfaceProvider
 }
 
@@ -55,6 +60,14 @@ export const AutomationSurfaceExtension =
             ),
           }),
         },
+        policy: {
+          default: "allowed",
+          parseHTML: (element) =>
+            parseAutomationSurfacePolicy(element.getAttribute("data-policy")),
+          renderHTML: (attributes) => ({
+            "data-policy": parseAutomationSurfacePolicy(attributes.policy),
+          }),
+        },
       }
     },
 
@@ -89,4 +102,12 @@ function parseAutomationSurfaceAccess(
   return access === "read" || access === "write" || access === "both"
     ? access
     : ""
+}
+
+function parseAutomationSurfacePolicy(
+  policy: unknown
+): AutomationSurfacePolicyState {
+  return automationSurfacePolicyStates.some((state) => state === policy)
+    ? (policy as AutomationSurfacePolicyState)
+    : "allowed"
 }
