@@ -112,13 +112,17 @@ function ExpandedExecution({
   now: number
   tenantId: string
 }) {
+  const objective = executionObjective(execution)
+
   return (
     <div className="grid gap-0">
-      <CodeBlockDetail
-        icon={MessageCircleMore}
-        label="Prompt"
-        value={execution.objective ?? execution.title}
-      />
+      {objective === undefined ? null : (
+        <CodeBlockDetail
+          icon={MessageCircleMore}
+          label={objective.label}
+          value={objective.value}
+        />
+      )}
       {execution.approval !== null ? (
         <ApprovalCallout
           approval={execution.approval}
@@ -132,6 +136,17 @@ function ExpandedExecution({
       <TraceTerminal execution={execution} tenantId={tenantId} />
     </div>
   )
+}
+
+function executionObjective(execution: ExecutionItem) {
+  if (execution.objective === undefined) {
+    return undefined
+  }
+
+  return {
+    label: execution.objectiveLabel ?? "Prompt",
+    value: execution.objective,
+  }
 }
 
 function durationFor(execution: ExecutionItem, now: number) {

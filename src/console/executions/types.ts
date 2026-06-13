@@ -37,6 +37,7 @@ export type ExecutionItem = {
   title: string
   sourceParts: string[]
   objective?: string
+  objectiveLabel?: string
   progress?: string
   next?: string
   trigger: string

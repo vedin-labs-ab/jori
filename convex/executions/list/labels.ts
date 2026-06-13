@@ -30,6 +30,30 @@ export function executionSourceParts(
   return [...parts, `Stopped by ${stoppedBy}`]
 }
 
+export function executionObjective(context: ExecutionContext) {
+  return (
+    context.approval?.handoff.objective ??
+    context.automation?.instructions ??
+    automationInstructionsSnapshot(context.run) ??
+    context.message?.text
+  )
+}
+
+export function executionObjectiveLabel(context: ExecutionContext) {
+  if (context.approval?.handoff.objective !== undefined) {
+    return "Prompt"
+  }
+
+  if (
+    context.automation !== null ||
+    automationInstructionsSnapshot(context.run) !== undefined
+  ) {
+    return "Instructions"
+  }
+
+  return context.message === null ? undefined : "Prompt"
+}
+
 export function triggerLabel(context: ExecutionContext) {
   const run = context.run
 
@@ -147,15 +171,23 @@ function eventLabel(
 }
 
 function automationNameSnapshot(run: Doc<"runs"> | null) {
+  return runDataString(run, "automationName")
+}
+
+function automationInstructionsSnapshot(run: Doc<"runs"> | null) {
+  return runDataString(run, "automationInstructions")
+}
+
+function runDataString(run: Doc<"runs"> | null, key: string) {
   const data = run?.data
 
   if (typeof data !== "object" || data === null || Array.isArray(data)) {
     return undefined
   }
 
-  const name = data.automationName
+  const value = data[key]
 
-  return typeof name === "string" && name.trim() !== "" ? name : undefined
+  return typeof value === "string" && value.trim() !== "" ? value : undefined
 }
 
 function titleFromRun(run: Doc<"runs"> | null) {
