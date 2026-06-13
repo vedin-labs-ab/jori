@@ -17,8 +17,8 @@ describe("automation event conditions", () => {
     expect(screen.queryByText("Choose where this applies.")).toBeNull()
     expect(screen.getByText("Condition")).toBeDefined()
     expect(
-      screen.getByRole("combobox", { name: "Add condition" })
-    ).toBeDefined()
+      screen.getByRole("button", { name: "Add condition" }).dataset.size
+    ).toBe("default")
     expect(
       screen.queryByText(
         "Runs when someone creates a comment on a matching Linear issue."
@@ -31,7 +31,7 @@ describe("automation event conditions", () => {
 
     expect(screen.getByLabelText("Channel")).toBeDefined()
     expect(screen.queryByText("Scope")).toBeNull()
-    expect(screen.queryByRole("combobox", { name: "Add condition" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Add condition" })).toBeNull()
     expect(screen.queryByText("Condition")).toBeNull()
   })
 
@@ -52,7 +52,7 @@ describe("automation event conditions", () => {
     expect(screen.getByLabelText("Project").hasAttribute("disabled")).toBe(
       false
     )
-    expect(screen.queryByRole("combobox", { name: "Add condition" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Add condition" })).toBeNull()
   })
 })
 
@@ -69,7 +69,7 @@ describe("automation event condition editing", () => {
       screen.getByText("Narrows runs to issues in the selected team.")
     ).toBeDefined()
 
-    fireEvent.click(screen.getByRole("option", { name: /Team/ }))
+    fireEvent.click(screen.getByRole("menuitem", { name: /Team/ }))
 
     expect(screen.getByLabelText("Team")).toBeDefined()
     expect(screen.getByLabelText("Team").hasAttribute("disabled")).toBe(false)
@@ -113,7 +113,7 @@ describe("automation event condition editing", () => {
     })
 
     openAddConditionPicker()
-    fireEvent.click(screen.getByRole("option", { name: /Issue/ }))
+    fireEvent.click(screen.getByRole("menuitem", { name: /Issue/ }))
 
     expect(screen.getByLabelText("Issue").hasAttribute("disabled")).toBe(true)
     expect(screen.getByLabelText("Issue").getAttribute("placeholder")).toBe(
@@ -123,12 +123,9 @@ describe("automation event condition editing", () => {
 })
 
 function openAddConditionPicker() {
-  fireEvent.pointerDown(
-    screen.getByRole("combobox", { name: "Add condition" }),
-    {
-      button: 0,
-      ctrlKey: false,
-      pointerType: "mouse",
-    }
-  )
+  fireEvent.pointerDown(screen.getByRole("button", { name: "Add condition" }), {
+    button: 0,
+    ctrlKey: false,
+    pointerType: "mouse",
+  })
 }
