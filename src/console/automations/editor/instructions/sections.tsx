@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { type ToolPermission } from "../../../permissions/controller"
 import {
@@ -124,7 +125,7 @@ function AutomationToolGroup({
           </Button>
         ) : null}
       </div>
-      <div className="overflow-hidden rounded-md border">
+      <ScrollArea className="max-h-[250px] rounded-md border [&>[data-slot=scroll-area-viewport]]:max-h-[250px]">
         {permissions.map((permission) => (
           <AutomationToolRow
             key={permission.tool}
@@ -135,7 +136,7 @@ function AutomationToolGroup({
             selected={selectedTools.has(permission.tool)}
           />
         ))}
-      </div>
+      </ScrollArea>
     </section>
   )
 }
