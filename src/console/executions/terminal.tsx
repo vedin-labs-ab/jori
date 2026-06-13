@@ -36,7 +36,7 @@ export function TraceTerminal({
   }, [hasAvailableTrace])
 
   return (
-    <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
+    <div className="grid min-w-0 gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_minmax(0,1fr)]">
       <div className="flex items-start gap-2 font-medium">
         <SquareTerminal className="mt-0.5 size-3.5 text-muted-foreground" />
         Trace
@@ -123,7 +123,7 @@ function TraceLines({ lines }: { lines: string[] }) {
 
   return (
     <div
-      className="h-full overflow-y-auto px-2.5 py-2"
+      className="h-full min-w-0 overflow-x-hidden overflow-y-auto px-2.5 py-2"
       onScroll={(event) => {
         const element = event.currentTarget
         stickToBottom.current =
@@ -131,7 +131,7 @@ function TraceLines({ lines }: { lines: string[] }) {
       }}
       ref={scrollRef}
     >
-      <code className="block whitespace-pre-wrap break-words font-mono leading-relaxed">
+      <code className="block min-w-0 whitespace-pre-wrap font-mono leading-relaxed [overflow-wrap:anywhere]">
         {trace}
       </code>
     </div>
@@ -172,9 +172,12 @@ function captionFor(
 
   if (connection.type === "stored") {
     if (input.trimmedLineCount > 0) {
-      return `Stored, last ${new Intl.NumberFormat().format(
-        maxVisibleTraceLines
-      )} lines`
+      return (
+        <StatusCaption>
+          Stored, last {new Intl.NumberFormat().format(maxVisibleTraceLines)}{" "}
+          lines
+        </StatusCaption>
+      )
     }
 
     return <StatusCaption>Stored</StatusCaption>
