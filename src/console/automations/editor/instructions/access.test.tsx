@@ -19,16 +19,16 @@ describe("automation instructions tool access", () => {
     expect(field.container.textContent).not.toContain("read/write")
   })
 
-  test("renders a zero count for markers without enabled tools", async () => {
+  test("hides the visible count for markers without enabled tools", async () => {
     renderInstructionsField({
       description: "Post to GitHub.",
       surfaces: [{ provider: "github", tools: [] }],
     })
 
-    expect(
-      await screen.findByRole("button", {
-        name: "GitHub tools: 0 enabled. Configure tools.",
-      })
-    ).toBeDefined()
+    const button = await screen.findByRole("button", {
+      name: "GitHub tools: No tools enabled. Configure tools.",
+    })
+
+    expect(button.textContent?.trim()).toBe("")
   })
 })
