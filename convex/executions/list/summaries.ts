@@ -1,9 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
-import { providerLabel } from "../../providers/catalog"
-import { type Actor } from "../../shared/actor"
 import { getExecutionContext } from "./context"
+import { executionSourceParts, executionTitle, triggerLabel } from "./labels"
 
 export async function summarizeExecution(
   ctx: QueryCtx,
@@ -11,11 +10,7 @@ export async function summarizeExecution(
   requestedApproval?: Doc<"approvals">
 ) {
   const context = await getExecutionContext(ctx, execution, requestedApproval)
-  const title =
-    context.approval?.handoff.objective ??
-    context.automation?.name ??
-    firstLine(context.message?.text) ??
-    titleFromRun(context.run)
+  const title = executionTitle(context)
   const stoppedBy = await stoppedByLabel(ctx, execution)
   const sourceParts = executionSourceParts(context, stoppedBy)
 
@@ -97,19 +92,6 @@ function searchableText(
     .toLowerCase()
 }
 
-function executionSourceParts(
-  context: Awaited<ReturnType<typeof getExecutionContext>>,
-  stoppedBy: string | undefined
-) {
-  const parts = sourceLabels(context)
-
-  if (stoppedBy === undefined) {
-    return parts
-  }
-
-  return [...parts, `Stopped by ${stoppedBy}`]
-}
-
 async function stoppedByLabel(ctx: QueryCtx, execution: Doc<"executions">) {
   const stoppedBy = execution.stoppedBy
 
@@ -136,110 +118,4 @@ async function stoppedByLabel(ctx: QueryCtx, execution: Doc<"executions">) {
 
 function isClerkUserId(value: string) {
   return value.startsWith("user_")
-}
-
-function sourceLabels({
-  approval,
-  automation,
-  event,
-  integration,
-  message,
-  run,
-}: Awaited<ReturnType<typeof getExecutionContext>>) {
-  if (automation !== null) {
-    if (run?.reason.type === "event") {
-      return [
-        "Triggered by",
-        providerLabel(integration?.provider),
-        event?.type ?? "event",
-        "for automation:",
-        automation.name,
-      ].filter((part): part is string => part !== undefined && part !== "")
-    }
-
-    return ["Triggered by automation:", automation.name]
-  }
-
-  if (message !== null) {
-    const provider = providerLabel(integration?.provider)
-
-    return ["Triggered by", actorLabel(message.actor), "in", provider].filter(
-      (part): part is string => part !== undefined && part !== ""
-    )
-  }
-
-  if (approval !== null) {
-    const provider = providerLabel(approval.provider)
-
-    return [
-      "Triggered by",
-      actorLabel(approval.requestedBy),
-      "in",
-      provider,
-    ].filter((part): part is string => part !== undefined && part !== "")
-  }
-
-  return ["Manual run"]
-}
-
-function titleFromRun(run: Doc<"runs"> | null) {
-  if (run?.reason.type === "time") {
-    return "Timed automation"
-  }
-
-  if (run?.reason.type === "event") {
-    return "Event automation"
-  }
-
-  if (run?.reason.type === "message") {
-    return "Message run"
-  }
-
-  return "Manual run"
-}
-
-function triggerLabel(
-  context: Awaited<ReturnType<typeof getExecutionContext>>
-) {
-  const run = context.run
-
-  if (run?.reason.type === "time") {
-    return "Time automation"
-  }
-
-  if (run?.reason.type === "event") {
-    return `${providerLabel(context.integration?.provider)} event`
-  }
-
-  if (run?.reason.type === "message") {
-    return `${providerLabel(context.integration?.provider)} message`
-  }
-
-  return "Manual run"
-}
-
-function actorLabel(actor: Actor | undefined) {
-  if (actor === undefined) {
-    return "someone"
-  }
-
-  if ("email" in actor && actor.email !== undefined) {
-    return actor.email
-  }
-
-  if ("userId" in actor) {
-    return actor.name ?? actor.email ?? "a user"
-  }
-
-  return "provider" in actor ? actor.externalId : undefined
-}
-
-function firstLine(text: string | undefined) {
-  const line = text?.trim().split("\n").find(Boolean)
-
-  if (line === undefined) {
-    return undefined
-  }
-
-  return line.length > 90 ? `${line.slice(0, 87)}...` : line
 }

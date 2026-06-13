@@ -19,4 +19,30 @@ describe("execution source parts", () => {
     expect(automationName.className).toContain("font-medium")
     expect(automationName.className).toContain("text-foreground")
   })
+
+  test("renders event automation sources with trigger context", () => {
+    render(
+      <SourceParts
+        parts={[
+          "Triggered by event:",
+          "vedin.labs@gmail.com",
+          "in",
+          "Slack",
+          "event:",
+          "New channel message",
+          "for automation:",
+          "Deep analysis",
+        ]}
+      />
+    )
+
+    expect(screen.getByText("vedin.labs@gmail.com").className).toContain(
+      "font-medium"
+    )
+    expect(screen.getByText("Slack").className).toContain("font-medium")
+    expect(screen.getByText("New channel message").className).toContain(
+      "font-medium"
+    )
+    expect(screen.getByText("Deep analysis").className).toContain("font-medium")
+  })
 })
