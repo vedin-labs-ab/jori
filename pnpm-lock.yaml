@@ -23,6 +23,9 @@ importers:
       '@openrouter/sdk':
         specifier: ^0.12.79
         version: 0.12.79
+      '@radix-ui/react-dismissable-layer':
+        specifier: ^1.1.12
+        version: 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@tailwindcss/vite':
         specifier: ^4
         version: 4.3.0(vite@8.0.16(@types/node@22.19.20)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
