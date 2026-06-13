@@ -36,8 +36,7 @@ export type ExecutionItem = {
   status: ExecutionStatus
   title: string
   sourceParts: string[]
-  objective?: string
-  objectiveLabel?: string
+  promptUrl?: string
   progress?: string
   next?: string
   trigger: string

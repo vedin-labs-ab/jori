@@ -8,7 +8,6 @@ const baseExecution: ExecutionItem = {
   durationMs: 1200,
   finishedAt: 1700000001323,
   id: "run-1",
-  objective: undefined,
   searchableText: "completed run",
   sourceParts: [],
   status: "completed",
