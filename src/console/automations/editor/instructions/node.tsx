@@ -13,6 +13,7 @@ import {
   getAutomationSurfaceLabel,
   isAutomationSurfaceProvider,
 } from "../../surfaces"
+import { parseAutomationSurfaceTools } from "./document"
 import { type AutomationSurfaceExtensionOptions } from "./extension"
 import { AutomationSurfaceRemoveButton } from "./remove"
 import {
@@ -191,10 +192,4 @@ function AutomationSurfaceToolsButton({
       {count > 0 ? <span className="tabular-nums">{count}</span> : null}
     </button>
   )
-}
-
-function parseAutomationSurfaceTools(tools: unknown) {
-  return Array.isArray(tools)
-    ? tools.filter((tool): tool is string => typeof tool === "string")
-    : []
 }
