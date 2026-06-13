@@ -1,23 +1,30 @@
-import { useId } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
+import { AlertCircleIcon, ShieldCheckIcon } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
-import { type ToolPermission } from "../../../permissions/controller"
-import {
-  type AutomationPolicyPermissions,
-  automationToolModeDescription,
-  isAutomationToolSelectable,
-} from "../../policy"
+import { SurfaceLogo } from "@/console/automations/surfaces/logo"
+
+import { type AutomationPolicyPermissions } from "../../policy"
 import { type AutomationSurfaceFormValue } from "../../surfaces"
+import { AutomationSurfaceToolGroups } from "./sections"
+
+type AutomationSurfaceToolsDialogProps = {
+  onOpenChange: (open: boolean) => void
+  onToolsChange: (tools: string[]) => void
+  open: boolean
+  permissions: AutomationPolicyPermissions
+  provider: AutomationSurfaceFormValue["provider"]
+  providerLabel: string
+  tools: string[]
+}
 
 export function AutomationSurfaceToolsDialog({
   onOpenChange,
@@ -27,23 +34,20 @@ export function AutomationSurfaceToolsDialog({
   provider,
   providerLabel,
   tools,
-}: {
-  onOpenChange: (open: boolean) => void
-  onToolsChange: (tools: string[]) => void
-  open: boolean
-  permissions: AutomationPolicyPermissions
-  provider: AutomationSurfaceFormValue["provider"]
-  providerLabel: string
-  tools: string[]
-}) {
+}: AutomationSurfaceToolsDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{providerLabel} tools</DialogTitle>
-          <DialogDescription>
-            Choose the exact tools this automation can use.
-          </DialogDescription>
+    <Dialog onOpenChange={onOpenChange} open={open}>
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-2xl">
+        <DialogHeader className="grid grid-cols-[auto_1fr] gap-3 p-5 pb-4 pr-12 text-left">
+          <SurfaceLogo className="mt-0.5 size-10" provider={provider} />
+          <div className="grid gap-1">
+            <DialogTitle className="font-semibold text-xl">
+              {providerLabel} tools
+            </DialogTitle>
+            <DialogDescription>
+              Choose the exact tools this automation can use.
+            </DialogDescription>
+          </div>
         </DialogHeader>
         <AutomationSurfaceToolsContent
           onToolsChange={onToolsChange}
@@ -56,33 +60,32 @@ export function AutomationSurfaceToolsDialog({
   )
 }
 
+type AutomationSurfaceToolsContentProps = {
+  onToolsChange: (tools: string[]) => void
+  permissions: AutomationPolicyPermissions
+  provider: AutomationSurfaceFormValue["provider"]
+  tools: string[]
+}
+
 function AutomationSurfaceToolsContent({
   onToolsChange,
   permissions,
   provider,
   tools,
-}: {
-  onToolsChange: (tools: string[]) => void
-  permissions: AutomationPolicyPermissions
-  provider: AutomationSurfaceFormValue["provider"]
-  tools: string[]
-}) {
+}: AutomationSurfaceToolsContentProps) {
   if (permissions === undefined) {
     return (
-      <p className="text-muted-foreground text-sm">
-        Loading integration permissions...
-      </p>
+      <div className="px-5 pb-5 text-muted-foreground text-sm">
+        Loading tool permissions...
+      </div>
     )
   }
 
   if (permissions === null) {
     return (
-      <Alert variant="destructive">
-        <AlertTitle>Permissions unavailable</AlertTitle>
-        <AlertDescription>
-          Sign in again to manage automation tools.
-        </AlertDescription>
-      </Alert>
+      <div className="px-5 pb-5 text-muted-foreground text-sm">
+        Tool permissions are unavailable right now.
+      </div>
     )
   }
 
@@ -92,146 +95,56 @@ function AutomationSurfaceToolsContent({
 
   if (providerPermissions.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
-        No tools are registered for this integration.
-      </p>
+      <div className="px-5 pb-5 text-muted-foreground text-sm">
+        This integration does not expose configurable tools yet.
+      </div>
     )
   }
 
   return (
-    <AutomationSurfaceToolGroups
-      onToolsChange={onToolsChange}
-      permissions={providerPermissions}
-      tools={tools}
-    />
+    <>
+      <AutomationSurfaceToolGroups
+        onToolsChange={onToolsChange}
+        permissions={providerPermissions}
+        tools={tools}
+      />
+      <AutomationSurfaceToolsFooter />
+    </>
   )
 }
 
-function AutomationSurfaceToolGroups({
-  onToolsChange,
-  permissions,
-  tools,
-}: {
-  onToolsChange: (tools: string[]) => void
-  permissions: ToolPermission[]
+function AutomationSurfaceToolsFooter() {
+  return (
+    <DialogFooter className="border-t px-5 py-4 sm:items-center sm:justify-between">
+      <div className="flex items-center gap-2 text-muted-foreground text-sm">
+        <ShieldCheckIcon className="size-4 text-primary" />
+        <span>You can change these anytime.</span>
+      </div>
+      <DialogClose asChild>
+        <Button type="button" variant="outline">
+          Close
+        </Button>
+      </DialogClose>
+    </DialogFooter>
+  )
+}
+
+export type AutomationSurfaceWithTools = AutomationSurfaceFormValue & {
   tools: string[]
-}) {
-  const selectedTools = new Set(tools)
-
-  function setTool(tool: string, enabled: boolean) {
-    const nextTools = new Set(selectedTools)
-
-    if (enabled) {
-      nextTools.add(tool)
-    } else {
-      nextTools.delete(tool)
-    }
-
-    onToolsChange([...nextTools])
-  }
-
-  return (
-    <div className="grid gap-5">
-      <AutomationToolGroup
-        access="read"
-        onToolChange={setTool}
-        permissions={permissions}
-        selectedTools={selectedTools}
-      />
-      <AutomationToolGroup
-        access="write"
-        onToolChange={setTool}
-        permissions={permissions}
-        selectedTools={selectedTools}
-      />
-    </div>
-  )
 }
 
-function AutomationToolGroup({
-  access,
-  onToolChange,
-  permissions,
-  selectedTools,
+export function MissingToolPermissionsMessage({
+  providerLabel,
 }: {
-  access: "read" | "write"
-  onToolChange: (tool: string, enabled: boolean) => void
-  permissions: ToolPermission[]
-  selectedTools: Set<string>
+  providerLabel: string
 }) {
-  const groupPermissions = permissions.filter(
-    (permission) => permission.access === access
-  )
-
-  if (groupPermissions.length === 0) {
-    return null
-  }
-
   return (
-    <div className="grid gap-2">
-      <div className="font-medium text-muted-foreground text-xs capitalize">
-        {access}
-      </div>
-      <div className="divide-y divide-border rounded-md border">
-        {groupPermissions.map((permission) => (
-          <AutomationToolRow
-            key={permission.tool}
-            onToolChange={onToolChange}
-            permission={permission}
-            selected={selectedTools.has(permission.tool)}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function AutomationToolRow({
-  onToolChange,
-  permission,
-  selected,
-}: {
-  onToolChange: (tool: string, enabled: boolean) => void
-  permission: ToolPermission
-  selected: boolean
-}) {
-  const id = `${useId()}-${permission.tool}`
-  const selectable = isAutomationToolSelectable(permission)
-  const disabled = !selectable && !selected
-
-  return (
-    <div className="grid grid-cols-[auto_1fr_auto] items-start gap-3 p-3">
-      <Checkbox
-        aria-describedby={`${id}-description`}
-        checked={selected}
-        className="mt-0.5"
-        disabled={disabled}
-        id={id}
-        onCheckedChange={(checked) => {
-          if (checked === true && !selectable) {
-            return
-          }
-
-          onToolChange(permission.tool, checked === true)
-        }}
-      />
-      <div className="grid gap-1">
-        <Label htmlFor={id} className="font-medium text-sm">
-          {permission.label}
-        </Label>
-        <p
-          className={cn(
-            "text-xs leading-relaxed",
-            selectable ? "text-muted-foreground" : "text-destructive"
-          )}
-          id={`${id}-description`}
-        >
-          {permission.description} {automationToolModeDescription(permission)}
-        </p>
-      </div>
-      <Badge className="mt-0.5 capitalize" variant="outline">
-        {permission.access}
-      </Badge>
+    <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-destructive text-xs">
+      <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0" />
+      <p>
+        Some {providerLabel} tools are no longer allowed for this integration.
+        Update this automation before saving.
+      </p>
     </div>
   )
 }
