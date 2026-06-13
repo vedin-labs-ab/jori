@@ -249,3 +249,33 @@ describe("automation instructions field", () => {
     })
   })
 })
+
+describe("automation instructions tool dialog", () => {
+  test("selects all selectable tools in a tool group", async () => {
+    const field = renderInstructionsField({
+      description: "Post to GitHub.",
+      surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
+    })
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "GitHub tools: 1 enabled. Configure tools.",
+      })
+    )
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Select all write tools" })
+    )
+
+    await waitFor(() => {
+      expect(field.onValueChange).toHaveBeenLastCalledWith({
+        description: "Post to GitHub.",
+        surfaces: [
+          {
+            provider: "github",
+            tools: ["github_get_issue", "github_add_issue_comment"],
+          },
+        ],
+      })
+    })
+  })
+})
