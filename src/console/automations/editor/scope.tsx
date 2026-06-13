@@ -3,11 +3,14 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Combobox,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox"
 import { Label } from "@/components/ui/label"
 import {
   type AutomationEventDefinition,
@@ -58,7 +61,9 @@ export function EventScopeFields({
       )}
       removableKeys={addedKeys}
       values={values}
-      onAdd={(key) => setAddedKeys((keys) => [...keys, key])}
+      onAdd={(key) =>
+        setAddedKeys((keys) => (keys.includes(key) ? keys : [...keys, key]))
+      }
       onValuesChange={onValuesChange}
       onRemove={(key) => {
         setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
@@ -68,46 +73,68 @@ export function EventScopeFields({
   )
 }
 
-function AddConditionMenu({
+function AddConditionCombobox({
   available,
   onAdd,
 }: {
   available: readonly AutomationEventParameter[]
   onAdd: (key: string) => void
 }) {
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          className="w-full justify-start text-muted-foreground hover:text-foreground"
-          disabled={available.length === 0}
-          type="button"
-          size="lg"
-          variant="outline"
-        >
-          <Plus />
-          Add condition
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="z-[70] w-72">
-        {available.map((parameter) => (
-          <DropdownMenuItem
-            key={parameter.key}
-            onSelect={() => onAdd(parameter.key)}
-          >
-            <div className="grid gap-0.5">
-              <span>{parameter.label}</span>
-              {parameter.description === undefined ? null : (
-                <span className="text-muted-foreground text-xs">
-                  {parameter.description}
-                </span>
-              )}
-            </div>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Combobox
+      isItemEqualToValue={(item, selected) => item.key === selected.key}
+      itemToStringValue={conditionToSearchValue}
+      items={available}
+      multiple
+      open={isOpen}
+      openOnInputClick
+      onOpenChange={setIsOpen}
+      onValueChange={(selected) => {
+        for (const parameter of selected) {
+          onAdd(parameter.key)
+        }
+        setIsOpen(false)
+      }}
+      value={[]}
+    >
+      <ComboboxChips>
+        <Plus className="size-3.5 text-muted-foreground" />
+        <ComboboxChipsInput
+          aria-label="Add condition"
+          onFocus={() => setIsOpen(true)}
+          onPointerDown={() => setIsOpen(true)}
+          placeholder="Add condition"
+        />
+      </ComboboxChips>
+      <ComboboxContent className="min-w-72">
+        <ComboboxEmpty>No conditions found.</ComboboxEmpty>
+        <ComboboxList>
+          {(parameter: AutomationEventParameter) => (
+            <ComboboxItem
+              className="items-start pr-7"
+              key={parameter.key}
+              value={parameter}
+            >
+              <div className="grid min-w-0 gap-0.5">
+                <span className="truncate">{parameter.label}</span>
+                {parameter.description === undefined ? null : (
+                  <span className="truncate text-muted-foreground">
+                    {parameter.description}
+                  </span>
+                )}
+              </div>
+            </ComboboxItem>
+          )}
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
   )
+}
+
+function conditionToSearchValue(parameter: AutomationEventParameter) {
+  return [parameter.label, parameter.description].filter(Boolean).join(" ")
 }
 
 function ScopeFieldGrid({
@@ -166,7 +193,7 @@ function ScopeFieldGrid({
           <span className="font-medium text-muted-foreground text-xs/relaxed leading-none">
             Condition
           </span>
-          <AddConditionMenu available={availableConditions} onAdd={onAdd} />
+          <AddConditionCombobox available={availableConditions} onAdd={onAdd} />
         </div>
       ) : null}
     </div>

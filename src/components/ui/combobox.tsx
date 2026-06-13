@@ -52,11 +52,13 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
 function ComboboxInput({
   className,
   children,
+  clearLabel = "Clear",
   disabled = false,
   showTrigger = true,
   showClear = false,
   ...props
 }: ComboboxPrimitive.Input.Props & {
+  clearLabel?: string
   showTrigger?: boolean
   showClear?: boolean
 }) {
@@ -79,7 +81,9 @@ function ComboboxInput({
             <ComboboxTrigger />
           </InputGroupButton>
         )}
-        {showClear && <ComboboxClear disabled={disabled} />}
+        {showClear && (
+          <ComboboxClear aria-label={clearLabel} disabled={disabled} />
+        )}
       </InputGroupAddon>
       {children}
     </InputGroup>
