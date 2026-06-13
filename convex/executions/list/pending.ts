@@ -21,31 +21,14 @@ export async function pagePendingApprovals(
   const normalizedQuery = normalizeQuery(args.query)
   const rows: ExecutionSummary[] = []
   const now = Date.now()
-  const seenExecutionIds = new Set<string>()
   let matchingIndex = 0
   let hasMore = false
-  const approvals = pendingApprovalQuery(ctx, args.tenantId, now)
 
-  for await (const approval of approvals) {
-    if (
-      !isPendingApproval(approval, now) ||
-      seenExecutionIds.has(approval.executionId)
-    ) {
-      continue
-    }
-
-    const execution = await ctx.db.get(approval.executionId)
-
-    if (execution === null || execution.tenantId !== args.tenantId) {
-      continue
-    }
-
-    seenExecutionIds.add(execution._id)
-
-    if (!executionMatchesFilter(execution, args.executionFilter)) {
-      continue
-    }
-
+  for await (const { approval, execution } of pendingApprovalExecutions(ctx, {
+    executionFilter: args.executionFilter,
+    now,
+    tenantId: args.tenantId,
+  })) {
     const summary = await summarizeExecution(ctx, execution, approval)
 
     if (!matchesSearch(summary, normalizedQuery)) {
@@ -82,30 +65,13 @@ export async function countPendingApprovals(
   }
 ) {
   const now = Date.now()
-  const seenExecutionIds = new Set<string>()
   let count = 0
-  const approvals = pendingApprovalQuery(ctx, args.tenantId, now)
 
-  for await (const approval of approvals) {
-    if (
-      !isPendingApproval(approval, now) ||
-      seenExecutionIds.has(approval.executionId)
-    ) {
-      continue
-    }
-
-    const execution = await ctx.db.get(approval.executionId)
-
-    if (execution === null || execution.tenantId !== args.tenantId) {
-      continue
-    }
-
-    seenExecutionIds.add(execution._id)
-
-    if (!executionMatchesFilter(execution, args.executionFilter)) {
-      continue
-    }
-
+  for await (const { approval, execution } of pendingApprovalExecutions(ctx, {
+    executionFilter: args.executionFilter,
+    now,
+    tenantId: args.tenantId,
+  })) {
     if (args.normalizedQuery === "") {
       count += 1
       continue
@@ -119,6 +85,39 @@ export async function countPendingApprovals(
   }
 
   return count
+}
+
+async function* pendingApprovalExecutions(
+  ctx: QueryCtx,
+  args: {
+    executionFilter: ExecutionFilter
+    now: number
+    tenantId: string
+  }
+) {
+  const seenExecutionIds = new Set<string>()
+  const approvals = pendingApprovalQuery(ctx, args.tenantId, args.now)
+
+  for await (const approval of approvals) {
+    if (
+      !isPendingApproval(approval, args.now) ||
+      seenExecutionIds.has(approval.executionId)
+    ) {
+      continue
+    }
+
+    const execution = await ctx.db.get(approval.executionId)
+
+    if (execution === null || execution.tenantId !== args.tenantId) {
+      continue
+    }
+
+    seenExecutionIds.add(execution._id)
+
+    if (executionMatchesFilter(execution, args.executionFilter)) {
+      yield { approval, execution }
+    }
+  }
 }
 
 function pendingApprovalQuery(ctx: QueryCtx, tenantId: string, now: number) {

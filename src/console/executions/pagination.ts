@@ -1,8 +1,4 @@
-import {
-  type UsePaginatedQueryReturnType,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react"
+import { usePaginatedQuery, useQuery } from "convex/react"
 import {
   type MutableRefObject,
   useCallback,
@@ -40,16 +36,18 @@ export function useExecutionPagination(
   const canUseNextLoadedPage = rows.length > (pageIndex + 1) * pageSize
   const canLoadMore = executions.status === "CanLoadMore"
   const isLoadingMore = executions.status === "LoadingMore"
-  const { next, previous, reset } = usePaginationActions({
+  const { next, previous, reset } = usePageNavigation({
     advanceAfterLoad,
     canLoadMore,
     canUseNextLoadedPage,
-    executions,
+    pageLoader: executions,
     setPageIndex,
   })
 
   usePageBounds(pageIndex, pageCount, setPageIndex)
-  useAdvanceAfterLoad(advanceAfterLoad, rows.length, {
+  useAdvanceAfterLoad({
+    advanceAfterLoad,
+    filteredRowCount: rows.length,
     isLoadingMore,
     pageIndex,
     setPageIndex,
@@ -84,39 +82,36 @@ export function useExecutionPagination(
 
 export type ExecutionPagination = ReturnType<typeof useExecutionPagination>
 
-function usePaginationActions({
+function usePageNavigation({
   advanceAfterLoad,
   canLoadMore,
   canUseNextLoadedPage,
-  executions,
+  pageLoader,
   setPageIndex,
 }: {
   advanceAfterLoad: MutableRefObject<boolean>
   canLoadMore: boolean
   canUseNextLoadedPage: boolean
-  executions: Pick<
-    UsePaginatedQueryReturnType<typeof api.executions.list.page>,
-    "loadMore"
-  >
+  pageLoader: { loadMore: (numItems: number) => void }
   setPageIndex: (updater: (current: number) => number) => void
 }) {
-  const next = useCallback(
-    () =>
-      nextPage({
-        advanceAfterLoad,
-        canLoadMore,
-        canUseNextLoadedPage,
-        executions,
-        setPageIndex,
-      }),
-    [
-      advanceAfterLoad,
-      canLoadMore,
-      canUseNextLoadedPage,
-      executions,
-      setPageIndex,
-    ]
-  )
+  const next = useCallback(() => {
+    if (canUseNextLoadedPage) {
+      setPageIndex((current) => current + 1)
+      return
+    }
+
+    if (canLoadMore) {
+      advanceAfterLoad.current = true
+      pageLoader.loadMore(pageSize)
+    }
+  }, [
+    advanceAfterLoad,
+    canLoadMore,
+    canUseNextLoadedPage,
+    pageLoader,
+    setPageIndex,
+  ])
   const previous = useCallback(
     () => setPageIndex((current) => Math.max(0, current - 1)),
     [setPageIndex]
@@ -180,30 +175,6 @@ function hasActiveFilters({
   )
 }
 
-function nextPage({
-  advanceAfterLoad,
-  canLoadMore,
-  canUseNextLoadedPage,
-  executions,
-  setPageIndex,
-}: {
-  advanceAfterLoad: MutableRefObject<boolean>
-  canLoadMore: boolean
-  canUseNextLoadedPage: boolean
-  executions: Pick<
-    UsePaginatedQueryReturnType<typeof api.executions.list.page>,
-    "loadMore"
-  >
-  setPageIndex: (updater: (current: number) => number) => void
-}) {
-  if (canUseNextLoadedPage) {
-    setPageIndex((current) => current + 1)
-  } else if (canLoadMore) {
-    advanceAfterLoad.current = true
-    executions.loadMore(pageSize)
-  }
-}
-
 function formatFooterLabel({
   filteredTotal,
   hasFilters,
@@ -243,23 +214,33 @@ function usePageBounds(
   }, [pageCount, pageIndex, setPageIndex])
 }
 
-function useAdvanceAfterLoad(
-  advanceAfterLoad: MutableRefObject<boolean>,
-  filteredRowCount: number,
-  input: {
-    isLoadingMore: boolean
-    pageIndex: number
-    setPageIndex: (updater: (current: number) => number) => void
-  }
-) {
+function useAdvanceAfterLoad({
+  advanceAfterLoad,
+  filteredRowCount,
+  isLoadingMore,
+  pageIndex,
+  setPageIndex,
+}: {
+  advanceAfterLoad: MutableRefObject<boolean>
+  filteredRowCount: number
+  isLoadingMore: boolean
+  pageIndex: number
+  setPageIndex: (updater: (current: number) => number) => void
+}) {
   useEffect(() => {
     if (
       advanceAfterLoad.current &&
-      !input.isLoadingMore &&
-      filteredRowCount > (input.pageIndex + 1) * pageSize
+      !isLoadingMore &&
+      filteredRowCount > (pageIndex + 1) * pageSize
     ) {
       advanceAfterLoad.current = false
-      input.setPageIndex((current) => current + 1)
+      setPageIndex((current) => current + 1)
     }
-  }, [advanceAfterLoad, filteredRowCount, input])
+  }, [
+    advanceAfterLoad,
+    filteredRowCount,
+    isLoadingMore,
+    pageIndex,
+    setPageIndex,
+  ])
 }
