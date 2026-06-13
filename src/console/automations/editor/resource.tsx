@@ -73,7 +73,8 @@ export function EventOptionField({
       autoHighlight
       filter={null}
       isItemEqualToValue={(item, selected) => item.value === selected.value}
-      itemToStringValue={(option) => option.label}
+      itemToStringLabel={(option) => option.label}
+      itemToStringValue={(option) => option.value}
       items={options}
       onInputValueChange={setQuery}
       onOpenChange={(open) => {
