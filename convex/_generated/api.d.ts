@@ -79,6 +79,7 @@ import type * as executions_data from "../executions/data.js";
 import type * as executions_list from "../executions/list.js";
 import type * as executions_list_context from "../executions/list/context.js";
 import type * as executions_list_filters from "../executions/list/filters.js";
+import type * as executions_list_labels from "../executions/list/labels.js";
 import type * as executions_list_pending from "../executions/list/pending.js";
 import type * as executions_list_summaries from "../executions/list/summaries.js";
 import type * as executions_monitor from "../executions/monitor.js";
@@ -298,6 +299,7 @@ declare const fullApi: ApiFromModules<{
   "executions/list": typeof executions_list;
   "executions/list/context": typeof executions_list_context;
   "executions/list/filters": typeof executions_list_filters;
+  "executions/list/labels": typeof executions_list_labels;
   "executions/list/pending": typeof executions_list_pending;
   "executions/list/summaries": typeof executions_list_summaries;
   "executions/monitor": typeof executions_monitor;
