@@ -1,8 +1,9 @@
-import { MessageCircleMore, Timer } from "lucide-react"
+import { Timer } from "lucide-react"
 import { memo, useState } from "react"
 import { ApprovalCallout } from "./approval"
-import { CodeBlockDetail, ErrorDetail, RelativeTime } from "./details"
+import { ErrorDetail, RelativeTime } from "./details"
 import { formatDuration, relativeTime } from "./format"
+import { PromptDetail } from "./prompt"
 import { SourceParts } from "./source"
 import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
 import { StopExecution } from "./stop"
@@ -112,17 +113,9 @@ function ExpandedExecution({
   now: number
   tenantId: string
 }) {
-  const objective = executionObjective(execution)
-
   return (
     <div className="grid gap-0">
-      {objective === undefined ? null : (
-        <CodeBlockDetail
-          icon={MessageCircleMore}
-          label={objective.label}
-          value={objective.value}
-        />
-      )}
+      <PromptDetail promptUrl={execution.promptUrl} />
       {execution.approval !== null ? (
         <ApprovalCallout
           approval={execution.approval}
@@ -136,17 +129,6 @@ function ExpandedExecution({
       <TraceTerminal execution={execution} tenantId={tenantId} />
     </div>
   )
-}
-
-function executionObjective(execution: ExecutionItem) {
-  if (execution.objective === undefined) {
-    return undefined
-  }
-
-  return {
-    label: execution.objectiveLabel ?? "Prompt",
-    value: execution.objective,
-  }
 }
 
 function durationFor(execution: ExecutionItem, now: number) {

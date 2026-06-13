@@ -23,11 +23,13 @@ export function ErrorDetail({ value }: { value: string }) {
 }
 
 export function CodeBlockDetail({
+  contentClassName,
   icon: Icon,
   iconClassName = "text-muted-foreground",
   label,
   value,
 }: {
+  contentClassName?: string
   icon: LucideIcon
   iconClassName?: string
   label: string
@@ -37,13 +39,15 @@ export function CodeBlockDetail({
   const isSingleRenderedLine = useIsSingleRenderedLine(codeRef)
 
   return (
-    <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
-      <div className="flex items-start gap-2 font-medium">
-        <Icon className={cn("mt-0.5 size-3.5", iconClassName)} />
-        {label}
-      </div>
+    <DetailRow icon={Icon} iconClassName={iconClassName} label={label}>
       <div className="relative min-w-0 rounded-md bg-muted px-2.5 py-2 pr-8.5 font-mono text-foreground text-xs leading-relaxed">
-        <code className="block whitespace-pre-wrap break-words" ref={codeRef}>
+        <code
+          className={cn(
+            "block whitespace-pre-wrap break-words",
+            contentClassName
+          )}
+          ref={codeRef}
+        >
           {value}
         </code>
         <span
@@ -55,6 +59,48 @@ export function CodeBlockDetail({
           <CopyButton label={label} value={value} />
         </span>
       </div>
+    </DetailRow>
+  )
+}
+
+export function StatusDetail({
+  icon: Icon,
+  iconClassName = "text-muted-foreground",
+  label,
+  value,
+}: {
+  icon: LucideIcon
+  iconClassName?: string
+  label: string
+  value: string
+}) {
+  return (
+    <DetailRow icon={Icon} iconClassName={iconClassName} label={label}>
+      <div className="min-w-0 rounded-md bg-muted px-2.5 py-2 text-muted-foreground text-xs">
+        {value}
+      </div>
+    </DetailRow>
+  )
+}
+
+function DetailRow({
+  children,
+  icon: Icon,
+  iconClassName,
+  label,
+}: {
+  children: React.ReactNode
+  icon: LucideIcon
+  iconClassName: string
+  label: string
+}) {
+  return (
+    <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
+      <div className="flex items-start gap-2 font-medium">
+        <Icon className={cn("mt-0.5 size-3.5", iconClassName)} />
+        {label}
+      </div>
+      {children}
     </div>
   )
 }

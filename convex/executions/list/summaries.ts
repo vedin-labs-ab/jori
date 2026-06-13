@@ -2,13 +2,7 @@ import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
 import { getExecutionContext } from "./context"
-import {
-  executionObjective,
-  executionObjectiveLabel,
-  executionSourceParts,
-  executionTitle,
-  triggerLabel,
-} from "./labels"
+import { executionSourceParts, executionTitle, triggerLabel } from "./labels"
 
 export async function summarizeExecution(
   ctx: QueryCtx,
@@ -17,7 +11,6 @@ export async function summarizeExecution(
 ) {
   const context = await getExecutionContext(ctx, execution, requestedApproval)
   const title = executionTitle(context)
-  const objective = executionObjective(context)
   const stoppedBy = await stoppedByLabel(ctx, execution)
   const sourceParts = executionSourceParts(context, stoppedBy)
 
@@ -26,8 +19,7 @@ export async function summarizeExecution(
     status: execution.status,
     title,
     sourceParts,
-    objective,
-    objectiveLabel: executionObjectiveLabel(context),
+    promptUrl: await storedPromptUrl(ctx, execution),
     progress: context.approval?.handoff.progress ?? execution.error,
     next: context.approval?.handoff.next,
     trigger: triggerLabel(context),
@@ -48,11 +40,14 @@ export async function summarizeExecution(
     searchableText: searchableText({
       execution,
       title,
-      objective,
       sourceParts,
       ...context,
     }),
   }
+}
+
+async function storedPromptUrl(ctx: QueryCtx, execution: Doc<"executions">) {
+  return (await ctx.storage.getUrl(execution.promptId)) ?? undefined
 }
 
 function storedTraceFileId(execution: Doc<"executions">) {
@@ -72,7 +67,6 @@ function getDuration(execution: Doc<"executions">) {
 function searchableText(
   input: Awaited<ReturnType<typeof getExecutionContext>> & {
     execution: Doc<"executions">
-    objective: string | undefined
     sourceParts: string[]
     title: string
   }
@@ -85,11 +79,11 @@ function searchableText(
     input.approval?.handoff.objective,
     input.approval?.handoff.progress,
     input.approval?.tool,
-    input.objective,
     input.run?.reason.type,
     input.message?.text,
     input.automation?.name,
     input.automation?.instructions,
+    automationInstructionsSnapshot(input.run),
     input.event?.type,
     input.event?.resource,
     input.integration?.provider,
@@ -126,4 +120,20 @@ async function stoppedByLabel(ctx: QueryCtx, execution: Doc<"executions">) {
 
 function isClerkUserId(value: string) {
   return value.startsWith("user_")
+}
+
+function automationInstructionsSnapshot(run: Doc<"runs"> | null) {
+  return runDataString(run, "automationInstructions")
+}
+
+function runDataString(run: Doc<"runs"> | null, key: string) {
+  const data = run?.data
+
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return undefined
+  }
+
+  const value = data[key]
+
+  return typeof value === "string" && value.trim() !== "" ? value : undefined
 }

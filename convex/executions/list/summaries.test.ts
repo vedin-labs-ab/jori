@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeExecution } from "./summaries"
 
-test("uses event automation run snapshots when the automation document is unavailable", async () => {
+test("uses event automation run snapshots for labels when the automation document is unavailable", async () => {
   const summary = await summarizeExecution(
     fakeQueryCtx({
       event: {
@@ -34,8 +34,8 @@ test("uses event automation run snapshots when the automation document is unavai
   )
 
   expect(summary.title).toBe("Deep analysis")
-  expect(summary.objective).toBe("Perform the deep analysis.")
-  expect(summary.objectiveLabel).toBe("Instructions")
+  expect(summary.promptUrl).toBe("https://storage/prompt")
+  expect(summary.searchableText).toContain("perform the deep analysis")
   expect(summary.sourceParts).toEqual([
     "Triggered by event:",
     "vedin.labs@gmail.com",
@@ -75,8 +75,8 @@ test("does not use automation names as instructions", async () => {
   )
 
   expect(summary.title).toBe("Notion test")
-  expect(summary.objective).toBeUndefined()
-  expect(summary.objectiveLabel).toBeUndefined()
+  expect(summary.promptUrl).toBe("https://storage/prompt")
+  expect("objective" in summary).toBe(false)
 })
 
 test("uses event text instead of manual copy for orphaned event runs", async () => {
@@ -105,7 +105,7 @@ test("uses event text instead of manual copy for orphaned event runs", async () 
   )
 
   expect(summary.title).toBe("can you schedule a launch review?")
-  expect(summary.objective).toBeUndefined()
+  expect(summary.promptUrl).toBe("https://storage/prompt")
   expect(summary.sourceParts).toEqual([
     "Triggered by event:",
     "Slack",
@@ -155,6 +155,9 @@ function fakeQueryCtx(docs: Record<string, unknown>) {
           }),
         }),
       }),
+    },
+    storage: {
+      getUrl: async (id: string) => `https://storage/${id}`,
     },
   } as unknown as QueryCtx
 }
