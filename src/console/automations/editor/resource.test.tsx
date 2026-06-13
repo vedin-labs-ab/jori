@@ -121,6 +121,9 @@ describe("automation event option field in dialogs", () => {
     fireEvent.click(screen.getByRole("button"))
 
     const option = await screen.findByRole("option", { name: /General/ })
+    const portal = document.querySelector('[data-slot="combobox-portal"]')
+
+    expect(portal?.className).toContain("pointer-events-auto")
 
     fireEvent.pointerMove(option, { pointerType: "mouse" })
     fireEvent.mouseMove(option)

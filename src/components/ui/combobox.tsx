@@ -106,15 +106,18 @@ function ComboboxContent({
   >) {
   return (
     <ComboboxPrimitive.Portal>
-      {/* Keep portaled popups interactive inside Radix modal layers. */}
-      <DismissableLayerBranch className="contents">
+      {/* Keep portaled popups targetable inside Radix modal layers. */}
+      <DismissableLayerBranch
+        data-slot="combobox-portal"
+        className="pointer-events-auto"
+      >
         <ComboboxPrimitive.Positioner
           side={side}
           sideOffset={sideOffset}
           align={align}
           alignOffset={alignOffset}
           anchor={anchor}
-          className="isolate z-50"
+          className="isolate z-50 pointer-events-auto"
         >
           <ComboboxPrimitive.Popup
             data-slot="combobox-content"
