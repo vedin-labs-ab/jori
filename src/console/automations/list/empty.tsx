@@ -12,7 +12,7 @@ const skeletonRows = ["first", "second", "third"]
 
 export function EmptyAutomations({ hasFilters }: { hasFilters: boolean }) {
   return (
-    <Empty className="min-h-48 border">
+    <Empty className="min-h-48">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <CalendarClock />
