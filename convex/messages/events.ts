@@ -1,5 +1,12 @@
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import {
+  githubCommentEventAction,
+  issueCommentEvent,
+  linearCommentEventAction,
+  pullRequestCommentEvent,
+  pullRequestReviewCommentEvent,
+} from "../automations/names"
 import { recordEvent } from "../events/data"
 import { getSlackChannelId } from "../providers/slack/data"
 import { type Actor } from "../shared/actor"
@@ -104,15 +111,16 @@ function readGitHubIssueCommentEvent(
   const repo = readNestedString(data, "repository", "fullName")
   const issueNumber = readNumber(data, "issueNumber")
   const pullNumber = readNumber(data, "pullNumber")
+  const action = githubCommentEventAction(readString(data, "action"))
 
-  if (repo === undefined || issueNumber === undefined) {
+  if (repo === undefined || issueNumber === undefined || action === undefined) {
     return []
   }
 
   if (readBoolean(data, "isPullRequest")) {
     return [
       baseEvent(message, {
-        type: "pull_request.comment.changed",
+        type: pullRequestCommentEvent[action],
         criteria: {
           repo,
           pr: String(pullNumber ?? issueNumber),
@@ -123,7 +131,7 @@ function readGitHubIssueCommentEvent(
 
   return [
     baseEvent(message, {
-      type: "issue.comment.changed",
+      type: issueCommentEvent[action],
       criteria: {
         repo,
         issue: String(issueNumber),
@@ -138,14 +146,15 @@ function readGitHubPullRequestReviewCommentEvent(
 ) {
   const repo = readNestedString(data, "repository", "fullName")
   const pullNumber = readNumber(data, "pullNumber")
+  const action = githubCommentEventAction(readString(data, "action"))
 
-  if (repo === undefined || pullNumber === undefined) {
+  if (repo === undefined || pullNumber === undefined || action === undefined) {
     return []
   }
 
   return [
     baseEvent(message, {
-      type: "pull_request.review_comment.changed",
+      type: pullRequestReviewCommentEvent[action],
       criteria: {
         repo,
         pr: String(pullNumber),
@@ -158,14 +167,15 @@ function readGitHubPullRequestReviewCommentEvent(
 function readLinearAutomationEvents(message: AutomationEventMessage) {
   const data = readRecord(message.data)
   const issueId = readString(data, "issueId")
+  const action = linearCommentEventAction(readString(data, "action"))
 
-  if (issueId === undefined) {
+  if (issueId === undefined || action === undefined) {
     return []
   }
 
   return [
     baseEvent(message, {
-      type: "issue.comment.changed",
+      type: issueCommentEvent[action],
       criteria: {
         issue: issueId,
         ...optionalCriterion("team", readString(data, "teamId")),

@@ -1,5 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { linearIssueCommentEvent } from "../../automations/names"
 import { createProviderActor } from "../../shared/actor"
 import {
   ingestProviderMessage,
@@ -146,6 +147,12 @@ async function hydrateLinearMessage(
   ctx: ActionCtx,
   message: LinearMessage
 ): Promise<LinearMessage> {
+  const event = linearIssueCommentEvent(message.data.action)
+
+  if (event === undefined) {
+    return message
+  }
+
   if (message.data.projectId !== undefined) {
     return message
   }
@@ -154,7 +161,7 @@ async function hydrateLinearMessage(
     internal.providers.linear.hydration.issueProject,
     {
       accountId: message.accountId,
-      event: "issue.comment.changed",
+      event,
       criteria: linearIssueCriteria(message),
     }
   )

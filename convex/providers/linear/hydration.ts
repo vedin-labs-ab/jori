@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalQuery } from "../../_generated/server"
+import { isLinearIssueCommentEvent } from "../../automations/names"
 
 const issueCriteria = v.object({
   issue: v.string(),
@@ -35,7 +36,7 @@ export const issueProject = internalQuery({
       return { status: "missing_integration" }
     }
 
-    if (args.event !== "issue.comment.changed") {
+    if (!isLinearIssueCommentEvent(args.event)) {
       return { status: "ready", integration, required: false }
     }
 

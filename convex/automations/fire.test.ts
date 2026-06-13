@@ -37,7 +37,7 @@ function automation(
     trigger: {
       type: "event",
       integrationId: "integration",
-      event: "issue.comment.changed",
+      event: "issue.comment.created",
       criteria,
     },
     status: "active",
@@ -55,7 +55,7 @@ function event(
     tenantId: "tenant",
     integrationId: "integration",
     key: "event-key",
-    type: "issue.comment.changed",
+    type: "issue.comment.created",
     criteria,
     createdAt: 0,
   } as unknown as Doc<"events">
