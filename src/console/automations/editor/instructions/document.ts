@@ -94,6 +94,32 @@ export function automationInstructionKey(value: AutomationInstructionsValue) {
   })
 }
 
+export function parseAutomationSurfaceProvider(provider: unknown) {
+  return isAutomationSurfaceProvider(provider) ? provider : null
+}
+
+export function parseAutomationSurfacePolicy(
+  policy: unknown
+): AutomationSurfacePolicyState {
+  return automationSurfacePolicyStates.some((state) => state === policy)
+    ? (policy as AutomationSurfacePolicyState)
+    : "allowed"
+}
+
+export function parseAutomationSurfaceTools(tools: unknown) {
+  return Array.isArray(tools)
+    ? tools.filter((tool): tool is string => typeof tool === "string")
+    : []
+}
+
+export function parseAutomationSurfaceToolsAttribute(tools: unknown) {
+  if (typeof tools === "string") {
+    return tools.split(",").filter((tool) => tool !== "")
+  }
+
+  return parseAutomationSurfaceTools(tools)
+}
+
 function appendText(paragraphs: JSONContent[], text: string) {
   const lines = text.split("\n")
 
@@ -167,10 +193,4 @@ function serializeSurfaceNode(
   }
 
   return getAutomationSurfaceLabel(provider)
-}
-
-function parseAutomationSurfaceTools(tools: unknown) {
-  return Array.isArray(tools)
-    ? tools.filter((tool): tool is string => typeof tool === "string")
-    : []
 }

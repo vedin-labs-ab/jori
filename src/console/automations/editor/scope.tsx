@@ -46,27 +46,56 @@ export function EventScopeFields({
   const visibleConditions = conditions.filter((condition) =>
     addedKeys.includes(condition.key)
   )
+  const availableConditions = conditions.filter(
+    (condition) => !addedKeys.includes(condition.key)
+  )
+  const visibleParameters = [...requiredParameters, ...visibleConditions]
+
+  function addCondition(key: string) {
+    setAddedKeys((keys) => (keys.includes(key) ? keys : [...keys, key]))
+  }
+
+  function removeCondition(key: string) {
+    setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
+    onValuesChange(removeEventCriterion({ key, parameters, values }))
+  }
 
   return (
-    <ScopeFieldGrid
-      tenantId={tenantId}
-      provider={provider}
-      parameters={[...requiredParameters, ...visibleConditions]}
-      allParameters={parameters}
-      availableConditions={conditions.filter(
-        (condition) => !addedKeys.includes(condition.key)
-      )}
-      removableKeys={addedKeys}
-      values={values}
-      onAdd={(key) =>
-        setAddedKeys((keys) => (keys.includes(key) ? keys : [...keys, key]))
-      }
-      onValuesChange={onValuesChange}
-      onRemove={(key) => {
-        setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
-        onValuesChange(removeEventCriterion({ key, parameters, values }))
-      }}
-    />
+    <div className="grid gap-3 sm:grid-cols-2">
+      {visibleParameters.map((parameter) => (
+        <ScopeField
+          key={parameter.key}
+          tenantId={tenantId}
+          provider={provider}
+          parameter={parameter}
+          parameters={parameters}
+          removable={addedKeys.includes(parameter.key)}
+          values={values}
+          onValueChange={(value) =>
+            onValuesChange(
+              applyEventCriteriaChange({
+                key: parameter.key,
+                parameters,
+                value,
+                values,
+              })
+            )
+          }
+          onRemove={() => removeCondition(parameter.key)}
+        />
+      ))}
+      {availableConditions.length > 0 ? (
+        <div className="grid gap-2">
+          <span className="font-medium text-muted-foreground text-xs/relaxed leading-none">
+            Condition
+          </span>
+          <AddConditionMenu
+            available={availableConditions}
+            onAdd={addCondition}
+          />
+        </div>
+      ) : null}
+    </div>
   )
 }
 
@@ -107,69 +136,6 @@ function AddConditionMenu({
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
-
-function ScopeFieldGrid({
-  tenantId,
-  provider,
-  parameters,
-  allParameters,
-  availableConditions,
-  removableKeys,
-  values,
-  onAdd,
-  onValuesChange,
-  onRemove,
-}: {
-  tenantId: string
-  provider: AutomationEventProvider
-  parameters: readonly AutomationEventParameter[]
-  allParameters: readonly AutomationEventParameter[]
-  availableConditions: readonly AutomationEventParameter[]
-  removableKeys: readonly string[]
-  values: Record<string, string>
-  onAdd: (key: string) => void
-  onValuesChange: (values: Record<string, string>) => void
-  onRemove: (key: string) => void
-}) {
-  if (parameters.length === 0 && availableConditions.length === 0) {
-    return null
-  }
-
-  return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      {parameters.map((parameter) => (
-        <ScopeField
-          key={parameter.key}
-          tenantId={tenantId}
-          provider={provider}
-          parameter={parameter}
-          parameters={allParameters}
-          removable={removableKeys.includes(parameter.key)}
-          values={values}
-          onValueChange={(value) =>
-            onValuesChange(
-              applyEventCriteriaChange({
-                key: parameter.key,
-                parameters: allParameters,
-                value,
-                values,
-              })
-            )
-          }
-          onRemove={() => onRemove(parameter.key)}
-        />
-      ))}
-      {availableConditions.length > 0 ? (
-        <div className="grid gap-2">
-          <span className="font-medium text-muted-foreground text-xs/relaxed leading-none">
-            Condition
-          </span>
-          <AddConditionMenu available={availableConditions} onAdd={onAdd} />
-        </div>
-      ) : null}
-    </div>
   )
 }
 

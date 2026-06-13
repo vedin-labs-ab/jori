@@ -4,12 +4,13 @@ import { type AutomationPolicyPermissions } from "../../policy"
 import {
   type AutomationSurfaceProvider,
   getAutomationSurfaceLabel,
-  isAutomationSurfaceProvider,
 } from "../../surfaces"
 import {
   type AutomationSurfacePolicyState,
   automationSurfaceNodeName,
-  automationSurfacePolicyStates,
+  parseAutomationSurfacePolicy,
+  parseAutomationSurfaceProvider,
+  parseAutomationSurfaceToolsAttribute,
 } from "./document"
 import { AutomationSurfaceNodeView } from "./node"
 
@@ -54,11 +55,13 @@ export const AutomationSurfaceExtension =
         tools: {
           default: [],
           parseHTML: (element) =>
-            parseAutomationSurfaceTools(element.getAttribute("data-tools")),
-          renderHTML: (attributes) => ({
-            "data-tools": parseAutomationSurfaceTools(attributes.tools).join(
-              ","
+            parseAutomationSurfaceToolsAttribute(
+              element.getAttribute("data-tools")
             ),
+          renderHTML: (attributes) => ({
+            "data-tools": parseAutomationSurfaceToolsAttribute(
+              attributes.tools
+            ).join(","),
           }),
         },
         policy: {
@@ -92,27 +95,3 @@ export const AutomationSurfaceExtension =
       return ReactNodeViewRenderer(AutomationSurfaceNodeView)
     },
   })
-
-function parseAutomationSurfaceProvider(provider: unknown) {
-  return isAutomationSurfaceProvider(provider) ? provider : null
-}
-
-function parseAutomationSurfacePolicy(
-  policy: unknown
-): AutomationSurfacePolicyState {
-  return automationSurfacePolicyStates.some((state) => state === policy)
-    ? (policy as AutomationSurfacePolicyState)
-    : "allowed"
-}
-
-function parseAutomationSurfaceTools(tools: unknown) {
-  if (Array.isArray(tools)) {
-    return tools.filter((tool): tool is string => typeof tool === "string")
-  }
-
-  if (typeof tools === "string") {
-    return tools.split(",").filter((tool) => tool !== "")
-  }
-
-  return []
-}
