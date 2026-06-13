@@ -2,6 +2,15 @@ import { type Infer } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import {
+  getToolPermissionsByProvider,
+  isUnattendedToolMode,
+  type PermissionMode,
+  resolveToolMode,
+  resolveToolModes,
+  type ToolAccess,
+} from "../permissions/catalog"
+import { listPermissionOverrides } from "../permissions/read"
+import {
   type IntegrationProvider,
   isUserScopedProvider,
 } from "../providers/catalog"
@@ -38,6 +47,13 @@ export async function resolveAccessInput(
     throw new Error("Give at least one integration write access.")
   }
 
+  await requireAutomationAccessPolicy(ctx, {
+    readProviders:
+      args.access.read === "all" ? [] : uniqueProviders(args.access.read),
+    tenantId: args.tenantId,
+    writeProviders,
+  })
+
   const read =
     args.access.read === "all"
       ? "all"
@@ -56,6 +72,53 @@ export async function resolveAccessInput(
     }),
     web: args.access.web,
   }
+}
+
+export async function requireAutomationAccessPolicy(
+  ctx: QueryLikeCtx,
+  args: {
+    readProviders: IntegrationProvider[]
+    tenantId: string
+    writeProviders: IntegrationProvider[]
+  }
+) {
+  const toolModes = resolveToolModes(
+    await listPermissionOverrides(ctx, args.tenantId)
+  )
+
+  for (const provider of args.readProviders) {
+    requireAutomationProviderAccess(toolModes, provider, "read")
+  }
+
+  for (const provider of args.writeProviders) {
+    requireAutomationProviderAccess(toolModes, provider, "write")
+  }
+}
+
+function requireAutomationProviderAccess(
+  toolModes: ReadonlyMap<string, PermissionMode>,
+  provider: IntegrationProvider,
+  access: ToolAccess
+) {
+  if (canUseAutomationProviderAccess(toolModes, provider, access)) {
+    return
+  }
+
+  throw new Error(
+    `${providerLabels[provider]} ${access} access is not available for automations. Check integration permissions.`
+  )
+}
+
+export function canUseAutomationProviderAccess(
+  toolModes: ReadonlyMap<string, PermissionMode>,
+  provider: IntegrationProvider,
+  access: ToolAccess
+) {
+  return getToolPermissionsByProvider(provider).some(
+    (permission) =>
+      permission.access === access &&
+      isUnattendedToolMode(resolveToolMode(toolModes, permission.tool))
+  )
 }
 
 export async function resolveEventIntegration(

@@ -35,6 +35,10 @@ export async function createPromptedToolApproval(
     args: Record<string, unknown>
   }
 ) {
+  if (context.input.type === "automation") {
+    throw new Error("Automations cannot request approval during a run")
+  }
+
   const request = parsePromptedToolApproval(args)
   const permission = getToolPermission(request.tool)
 

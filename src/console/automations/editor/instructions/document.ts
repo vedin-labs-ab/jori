@@ -1,4 +1,5 @@
 import { type JSONContent } from "@tiptap/core"
+import { isAutomationSurfacePolicyBlocked } from "../../policy"
 import {
   type AutomationReadScope,
   type AutomationSurfaceFormValue,
@@ -9,8 +10,12 @@ import {
   isAutomationSurfaceProvider,
   syncAutomationSurfaces,
 } from "../../surfaces"
+import { type AutomationInstructionsFieldProps } from "./types"
 
 export const automationSurfaceNodeName = "automationSurface"
+export const automationSurfacePolicyStates = ["allowed", "blocked"] as const
+export type AutomationSurfacePolicyState =
+  (typeof automationSurfacePolicyStates)[number]
 
 export type AutomationInstructionsValue = {
   description: string
@@ -19,9 +24,11 @@ export type AutomationInstructionsValue = {
 
 export function createAutomationInstructionDocument({
   description,
+  permissions,
   readScope,
   surfaces,
 }: AutomationInstructionsValue & {
+  permissions?: AutomationInstructionsFieldProps["permissions"]
   readScope: AutomationReadScope
 }): JSONContent {
   const accessByProvider = new Map(
@@ -44,6 +51,14 @@ export function createAutomationInstructionDocument({
         access:
           accessByProvider.get(part.provider) ??
           defaultAutomationSurfaceAccess(readScope),
+        policy: readSurfacePolicy({
+          access:
+            accessByProvider.get(part.provider) ??
+            defaultAutomationSurfaceAccess(readScope),
+          permissions,
+          provider: part.provider,
+          readScope,
+        }),
         provider: part.provider,
       },
     })
@@ -53,6 +68,24 @@ export function createAutomationInstructionDocument({
     type: "doc",
     content: normalizeParagraphs(paragraphs),
   }
+}
+
+function readSurfacePolicy({
+  access,
+  permissions,
+  provider,
+  readScope,
+}: AutomationSurfaceFormValue & {
+  permissions: AutomationInstructionsFieldProps["permissions"]
+  readScope: AutomationReadScope
+}): AutomationSurfacePolicyState {
+  return isAutomationSurfacePolicyBlocked({
+    permissions,
+    readScope,
+    surface: { access, provider },
+  })
+    ? "blocked"
+    : "allowed"
 }
 
 export function serializeAutomationInstructionDocument(

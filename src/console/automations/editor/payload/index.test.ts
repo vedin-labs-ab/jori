@@ -6,6 +6,7 @@ import {
   writeAutomationWebSearchPreference,
 } from "../preferences"
 import { automationFormValues, createAutomationArgs } from "."
+import { automationInstructionMarkerErrors } from "./marker"
 
 afterEach(() => {
   localStorage.clear()
@@ -85,3 +86,59 @@ describe("automation payload", () => {
     })
   })
 })
+
+describe("automation payload permissions", () => {
+  test("rejects automation access blocked by tool permissions", () => {
+    expect(
+      createAutomationArgs(
+        {
+          ...emptyAutomationForm,
+          name: "Weekly release summary",
+          instructions: "Summarize GitHub and post to Slack.",
+          readScope: "selected",
+          surfaces: [
+            { provider: "github", access: "read" },
+            { provider: "slack", access: "write" },
+          ],
+        },
+        {
+          permissions: [
+            toolPermission({
+              access: "read",
+              mode: "prompted",
+              provider: "github",
+              tool: "github_get_issue",
+            }),
+            toolPermission({
+              access: "write",
+              mode: "allowed",
+              provider: "slack",
+              tool: "conversations_add_message",
+            }),
+          ],
+        }
+      )
+    ).toEqual({
+      error: automationInstructionMarkerErrors.unavailableAccess,
+    })
+  })
+})
+
+function toolPermission(
+  overrides: Partial<{
+    access: "read" | "write"
+    mode: "required" | "allowed" | "prompted" | "blocked"
+    provider: "github" | "slack"
+    tool: string
+  }>
+) {
+  return {
+    access: overrides.access ?? "read",
+    description: "Tool",
+    label: "Tool",
+    mode: overrides.mode ?? "allowed",
+    overrideMode: null,
+    provider: overrides.provider ?? "github",
+    tool: overrides.tool ?? "github_get_issue",
+  }
+}

@@ -30,7 +30,7 @@ export function AutomationInstructionsField(
             props.error !== undefined &&
               "border-destructive ring-2 ring-destructive/20 focus-within:border-destructive focus-within:ring-destructive/20 dark:border-destructive/50 dark:ring-destructive/40 dark:focus-within:border-destructive/50 dark:focus-within:ring-destructive/40",
             props.showAccessError &&
-              "data-[access-error=true]:[&_[data-automation-surface-access=unset]]:border-destructive/60 data-[access-error=true]:[&_[data-automation-surface-access=unset]]:ring-2 data-[access-error=true]:[&_[data-automation-surface-access=unset]]:ring-destructive/30 dark:data-[access-error=true]:[&_[data-automation-surface-access=unset]]:ring-destructive/40"
+              "data-[access-error=true]:[&_[data-automation-surface-access=unset]]:border-destructive/60 data-[access-error=true]:[&_[data-automation-surface-policy=blocked]]:border-destructive/60 data-[access-error=true]:[&_[data-automation-surface-access=unset]]:ring-2 data-[access-error=true]:[&_[data-automation-surface-policy=blocked]]:ring-2 data-[access-error=true]:[&_[data-automation-surface-access=unset]]:ring-destructive/30 data-[access-error=true]:[&_[data-automation-surface-policy=blocked]]:ring-destructive/30 dark:data-[access-error=true]:[&_[data-automation-surface-access=unset]]:ring-destructive/40 dark:data-[access-error=true]:[&_[data-automation-surface-policy=blocked]]:ring-destructive/40"
           )}
           data-access-error={props.showAccessError ? "true" : undefined}
           data-automation-instructions-frame=""

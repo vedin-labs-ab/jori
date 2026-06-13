@@ -111,6 +111,7 @@ function renderAutomationDialog({
       onOpenChange={() => undefined}
       onSave={() => undefined}
       onValuesChange={() => undefined}
+      policyKey="test"
       tenantId="tenant"
       values={values}
     />

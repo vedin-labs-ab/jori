@@ -1,5 +1,5 @@
 import { type Editor } from "@tiptap/react"
-import { type Dispatch, type SetStateAction, useEffect } from "react"
+import { type Dispatch, type SetStateAction, useEffect, useRef } from "react"
 import {
   automationInstructionKey,
   createAutomationInstructionDocument,
@@ -42,6 +42,8 @@ export function useExternalInstructionValue({
   setIsEmpty: Dispatch<SetStateAction<boolean>>
   updateSuggestion: (editor: Editor, activeIndex?: number) => void
 }) {
+  const renderedPolicyKey = useRef(props.policyKey)
+
   useEffect(() => {
     if (editor === null) {
       return
@@ -51,14 +53,17 @@ export function useExternalInstructionValue({
     const currentValue = serializeAutomationInstructionDocument(
       editor.getJSON()
     )
+    const policyChanged = renderedPolicyKey.current !== props.policyKey
 
     if (
       automationInstructionKey(nextValue) !==
-      automationInstructionKey(currentValue)
+        automationInstructionKey(currentValue) ||
+      policyChanged
     ) {
       editor.commands.setContent(
         createAutomationInstructionDocument({
           description: props.value,
+          permissions: props.permissions,
           readScope: props.readScope,
           surfaces: props.surfaces,
         }),
@@ -66,6 +71,7 @@ export function useExternalInstructionValue({
       )
       setIsEmpty(props.value === "")
       updateSuggestion(editor)
+      renderedPolicyKey.current = props.policyKey
     }
   }, [editor, props, setIsEmpty, updateSuggestion])
 }

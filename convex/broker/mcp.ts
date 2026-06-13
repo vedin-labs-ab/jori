@@ -1,13 +1,17 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
+import { getIntegrationAccess } from "../automations/access"
 import { hashExecutionToken } from "../executions/tokens"
+import { isPermissionAllowedByAccess } from "../executions/tools/policy"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import {
+  canUseToolMode,
   getToolPermission,
   type PermissionMode,
   resolveToolMode,
   resolveToolModes,
+  type ToolPermission,
   type ToolProvider,
 } from "../permissions/catalog"
 import {
@@ -69,7 +73,12 @@ export async function handleGitHubTarballRequest(
   }
 
   const args = normalizeToolArgs(await request.json().catch(() => null))
+  const { permission } = authorizeTool(context, {
+    provider: "github",
+    tool: "github_clone_repository",
+  })
   const integration = await authorizeProviderTool(context, {
+    permission,
     provider: "github",
     tool: "github_clone_repository",
   })
@@ -149,7 +158,7 @@ async function callBrokerTool(
   }
 ) {
   if (request.provider === "milo") {
-    const mode = authorizeTool(context, request)
+    const { mode } = authorizeTool(context, request)
 
     if (mode === "prompted") {
       return await createPromptedToolApproval(ctx, context, request)
@@ -159,8 +168,9 @@ async function callBrokerTool(
   }
 
   const provider = request.provider
-  const mode = authorizeTool(context, request)
+  const { mode, permission } = authorizeTool(context, request)
   const integration = await authorizeProviderTool(context, {
+    permission,
     provider,
     tool: request.tool,
   })
@@ -188,7 +198,10 @@ function authorizeTool(
     provider: ToolProvider
     tool: string
   }
-): PermissionMode {
+): {
+  mode: PermissionMode
+  permission: ToolPermission
+} {
   const permission = getToolPermission(request.tool)
 
   if (permission === undefined || permission.provider !== request.provider) {
@@ -197,23 +210,43 @@ function authorizeTool(
 
   const mode = resolveToolMode(context.toolModes, request.tool)
 
-  if (mode === "blocked") {
+  if (!canUseToolMode(mode, context.input.type)) {
+    if (mode === "prompted" && context.input.type === "automation") {
+      throw new Error(
+        `Tool requires approval and cannot run in automations: ${request.tool}`
+      )
+    }
+
     throw new Error(`Tool is blocked: ${request.tool}`)
   }
 
-  return mode
+  return { mode, permission }
 }
 
 async function authorizeProviderTool(
   context: BrokerContext,
   request: {
+    permission: ToolPermission
     provider: Exclude<ToolProvider, "milo">
     tool: string
   }
 ) {
-  authorizeTool(context, request)
+  const integration = findProviderIntegration(context, request.provider)
 
-  return findProviderIntegration(context, request.provider)
+  if (integration !== null && context.input.type === "automation") {
+    const access = getIntegrationAccess(
+      context.input.automation.access,
+      integration._id
+    )
+
+    if (!isPermissionAllowedByAccess(request.permission.access, access)) {
+      throw new Error(
+        `Tool is not allowed by automation access: ${request.tool}`
+      )
+    }
+  }
+
+  return integration
 }
 
 function findProviderIntegration(

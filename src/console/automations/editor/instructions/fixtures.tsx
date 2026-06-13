@@ -5,12 +5,16 @@ import { AutomationInstructionsField } from "."
 export function renderInstructionsField({
   description,
   error,
+  permissions,
+  policyKey = "test",
   readScope = "selected",
   showAccessError,
   surfaces,
 }: {
   description: string
   error?: Parameters<typeof AutomationInstructionsField>[0]["error"]
+  permissions?: Parameters<typeof AutomationInstructionsField>[0]["permissions"]
+  policyKey?: Parameters<typeof AutomationInstructionsField>[0]["policyKey"]
   readScope?: Parameters<typeof AutomationInstructionsField>[0]["readScope"]
   showAccessError?: Parameters<
     typeof AutomationInstructionsField
@@ -26,6 +30,8 @@ export function renderInstructionsField({
       onBlur={vi.fn()}
       onValueChange={onValueChange}
       placeholder="Instructions"
+      permissions={permissions}
+      policyKey={policyKey}
       readScope={readScope}
       showAccessError={showAccessError}
       surfaces={surfaces}

@@ -47,6 +47,29 @@ test("allows all connected reads without broadening automation writes", () => {
   expect(notionTools).toContain("notion_search")
 })
 
+test("omits prompted tools from automation runs", () => {
+  const notion = integration("notion")
+  const toolBundle = assembleToolsForRun({
+    milo: runtimeMilo(),
+    integrations: [notion],
+    access: {
+      read: [notion._id],
+      write: [notion._id],
+      web: true,
+    },
+    executionType: "automation",
+    toolModes: resolveToolModes([
+      { tool: "notion_search", mode: "prompted" },
+      { tool: "notion_create_page", mode: "prompted" },
+    ]),
+  })
+  const notionTools = enabledTools(toolBundle, "notion")
+
+  expect(notionTools).not.toContain("notion_search")
+  expect(notionTools).not.toContain("notion_create_page")
+  expect(toolBundle.promptedTools).toEqual([])
+})
+
 function enabledTools(
   toolBundle: ReturnType<typeof assembleToolsForRun>,
   serverName: string

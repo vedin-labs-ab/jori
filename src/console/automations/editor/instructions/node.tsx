@@ -1,5 +1,5 @@
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react"
-import { CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
+import { Ban, CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { cn } from "@/lib/utils"
 import {
@@ -24,12 +24,13 @@ export function AutomationSurfaceNodeView({
     ? node.attrs.provider
     : null
   const access = parseAutomationSurfaceAccess(node.attrs.access)
+  const blocked = node.attrs.policy === "blocked"
 
   if (provider === null) {
     return null
   }
 
-  const toneClassNames = getSurfaceToneClassNames(access)
+  const toneClassNames = getSurfaceToneClassNames(access, blocked)
   const accessLabel = getAutomationSurfaceAccessLabel(access)
   const providerLabel = getAutomationSurfaceLabel(provider)
 
@@ -48,10 +49,12 @@ export function AutomationSurfaceNodeView({
           selected && "ring-2 ring-ring/40"
         )}
         data-automation-surface-access={access === "" ? "unset" : access}
+        data-automation-surface-policy={blocked ? "blocked" : "allowed"}
       >
         <AutomationSurfaceAccessButton
           access={access}
           accessLabel={accessLabel}
+          blocked={blocked}
           iconClassName={toneClassNames.scopeIcon}
           onChange={() =>
             updateAttributes({
@@ -94,21 +97,26 @@ function getNodeViewReadScope(
 function AutomationSurfaceAccessButton({
   access,
   accessLabel,
+  blocked,
   iconClassName,
   onChange,
   providerLabel,
 }: {
   access: AutomationSurfaceFormValue["access"]
   accessLabel: string
+  blocked: boolean
   iconClassName: string
   onChange: () => void
   providerLabel: string
 }) {
-  const Icon = getAccessIcon(access)
+  const Icon = getAccessIcon(access, blocked)
+  const label = blocked
+    ? `${providerLabel} access: ${accessLabel}, unavailable for automations. Change access.`
+    : `${providerLabel} access: ${accessLabel}. Change access.`
 
   return (
     <button
-      aria-label={`${providerLabel} access: ${accessLabel}. Change access.`}
+      aria-label={label}
       className={cn(
         "grid px-1 place-items-center opacity-55 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
         iconClassName
@@ -122,7 +130,7 @@ function AutomationSurfaceAccessButton({
         event.preventDefault()
         event.stopPropagation()
       }}
-      title={accessLabel}
+      title={blocked ? "Unavailable for automations" : accessLabel}
       type="button"
     >
       <Icon className="size-3" />
@@ -130,7 +138,14 @@ function AutomationSurfaceAccessButton({
   )
 }
 
-function getAccessIcon(access: AutomationSurfaceFormValue["access"]) {
+function getAccessIcon(
+  access: AutomationSurfaceFormValue["access"],
+  blocked: boolean
+) {
+  if (blocked) {
+    return Ban
+  }
+
   if (access === "read") {
     return FileText
   }
@@ -143,9 +158,12 @@ function getAccessIcon(access: AutomationSurfaceFormValue["access"]) {
 }
 
 function getSurfaceToneClassNames(
-  access: AutomationSurfaceFormValue["access"]
+  access: AutomationSurfaceFormValue["access"],
+  blocked: boolean
 ) {
-  return automationSurfaceToneClassNames[access]
+  return blocked
+    ? automationSurfaceToneClassNames.blocked
+    : automationSurfaceToneClassNames[access]
 }
 
 const automationSurfaceToneClassNames = {
@@ -169,8 +187,13 @@ const automationSurfaceToneClassNames = {
     separator: "bg-[#C9DED1]",
     surface: "border-[#BDD8C7] bg-[#F6FBF7] text-[#1F2937]",
   },
+  blocked: {
+    scopeIcon: "text-destructive",
+    separator: "bg-destructive/20",
+    surface: "border-destructive/50 bg-destructive/5 text-destructive",
+  },
 } satisfies Record<
-  AutomationSurfaceFormValue["access"],
+  AutomationSurfaceFormValue["access"] | "blocked",
   {
     scopeIcon: string
     separator: string

@@ -6,6 +6,7 @@ import {
 } from "../../permissions/catalog"
 import { createRuntimeToolCapability, getProviderSkillNames } from "./bundles"
 import { createMiloToolBundle } from "./milo"
+import { type ToolExecutionType } from "./policy"
 import {
   createIntegrationToolBundle,
   getEnabledToolPermissions,
@@ -23,17 +24,24 @@ export function assembleToolsForRun(args: {
   }
   integrations: Doc<"integrations">[]
   access?: AutomationAccess
+  executionType?: ToolExecutionType
   toolModes: ReadonlyMap<string, PermissionMode>
 }): RuntimeToolBundle {
   const bundles: ToolBundle[] = []
   const skillNames = new Set<string>()
   const capabilities: RuntimeToolCapability[] = []
-  const miloPermissions = getEnabledToolPermissions("milo", args.toolModes)
+  const executionType = args.executionType ?? "message"
+  const miloPermissions = getEnabledToolPermissions(
+    "milo",
+    args.toolModes,
+    executionType
+  )
 
   if (miloPermissions.length > 0) {
     bundles.push(
       createMiloToolBundle({
         convexSiteUrl: args.milo.convexSiteUrl,
+        executionType,
         executionToken: args.milo.executionToken,
         permissions: miloPermissions,
         toolModes: args.toolModes,
@@ -46,6 +54,7 @@ export function assembleToolsForRun(args: {
   for (const integration of args.integrations) {
     const integrationBundle = createIntegrationToolBundle({
       broker: args.milo,
+      executionType,
       integration,
       access: args.access,
       toolModes: args.toolModes,

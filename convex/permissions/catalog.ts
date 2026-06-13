@@ -92,6 +92,21 @@ export function resolveToolMode(
   return modes.get(tool) ?? getToolPermission(tool)?.defaultMode ?? "blocked"
 }
 
+export function canUseToolMode(
+  mode: PermissionMode,
+  executionType: "automation" | "message"
+) {
+  if (mode === "blocked") {
+    return false
+  }
+
+  return executionType === "message" || mode !== "prompted"
+}
+
+export function isUnattendedToolMode(mode: PermissionMode) {
+  return mode === "allowed" || mode === "required"
+}
+
 export function isModeAllowed(
   permission: ToolPermission,
   _mode: ConfigurablePermissionMode
