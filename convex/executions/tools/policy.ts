@@ -1,9 +1,4 @@
 import {
-  type AccessLevel,
-  canUseRead,
-  canUseWrite,
-} from "../../automations/access"
-import {
   canUseToolMode,
   type PermissionMode,
   resolveToolMode,
@@ -34,28 +29,12 @@ export function getPromptedTools(input: ToolPermissionInput) {
 }
 
 export function canUseToolPermission(input: {
-  access?: AccessLevel
   executionType: ToolExecutionType
   permission: ToolPermission
   toolModes: ReadonlyMap<string, PermissionMode>
 }) {
-  return (
-    canUseToolMode(
-      resolveToolMode(input.toolModes, input.permission.tool),
-      input.executionType
-    ) &&
-    (input.access === undefined ||
-      isPermissionAllowedByAccess(input.permission.access, input.access))
+  return canUseToolMode(
+    resolveToolMode(input.toolModes, input.permission.tool),
+    input.executionType
   )
-}
-
-export function isPermissionAllowedByAccess(
-  permissionAccess: "read" | "write",
-  access: AccessLevel
-) {
-  if (permissionAccess === "read") {
-    return canUseRead(access)
-  }
-
-  return canUseWrite(access)
 }

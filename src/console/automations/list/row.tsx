@@ -48,7 +48,7 @@ export function AutomationRow({
           <AutomationTrigger automation={automation} />
           <span className="inline-flex min-w-0 items-center gap-1.5">
             <Workflow className="size-3.5" />
-            <span>{readScopeLabel(automation.access.readScope)}</span>
+            <span>{toolSummary(automation)}</span>
             {surfaces === "" ? null : (
               <>
                 <SeparatorDot />
@@ -99,21 +99,19 @@ function triggerLabel(automation: Automation) {
     : "One-time automation"
 }
 
-function readScopeLabel(readScope: Automation["access"]["readScope"]) {
-  return readScope === "allConnected"
-    ? "Reads all connected integrations"
-    : "Reads mentioned integrations"
-}
-
 function surfaceSummary(automation: Automation) {
-  const writers = automation.access.surfaces.filter(
-    (surface) => surface.access === "write" || surface.access === "both"
-  )
-  const surfaces = writers.length === 0 ? automation.access.surfaces : writers
-
-  return surfaces
+  return automation.access.surfaces
     .map((surface) => getAutomationSurfaceLabel(surface.provider))
     .join(", ")
+}
+
+function toolSummary(automation: Automation) {
+  const count = automation.access.surfaces.reduce(
+    (sum, surface) => sum + surface.tools.length,
+    0
+  )
+
+  return count === 1 ? "1 integration tool" : `${count} integration tools`
 }
 
 function AutomationTrigger({ automation }: { automation: Automation }) {

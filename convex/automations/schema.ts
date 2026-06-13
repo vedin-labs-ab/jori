@@ -6,14 +6,22 @@ const eventCriteriaValue = v.union(v.string(), v.number())
 const eventCriteria = v.record(v.string(), eventCriteriaValue)
 
 export const accessInput = v.object({
-  read: v.union(v.literal("all"), v.array(integrationProviderValidator)),
-  write: v.array(integrationProviderValidator),
+  integrations: v.array(
+    v.object({
+      provider: integrationProviderValidator,
+      tools: v.array(v.string()),
+    })
+  ),
   web: v.boolean(),
 })
 
 export const access = v.object({
-  read: v.union(v.literal("all"), v.array(v.id("integrations"))),
-  write: v.array(v.id("integrations")),
+  integrations: v.array(
+    v.object({
+      integrationId: v.id("integrations"),
+      tools: v.array(v.string()),
+    })
+  ),
   web: v.boolean(),
 })
 

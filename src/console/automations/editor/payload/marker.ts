@@ -1,9 +1,9 @@
 export const automationInstructionMarkerErrors = {
-  incompleteAccess: "Choose read, write, or read/write for each mention.",
+  incompleteAccess: "Choose at least one tool for each mentioned integration.",
   noMarkers: "Mention at least one integration in the instructions.",
-  noWrite: "Give at least one mentioned integration write access.",
+  noWrite: "Give at least one mentioned integration a write tool.",
   unavailableAccess:
-    "Some mentioned integration access is not available for automations.",
+    "Some selected integration tools are not available for automations.",
 } as const
 
 export type AutomationInstructionMarkerError =

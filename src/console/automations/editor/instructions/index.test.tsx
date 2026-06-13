@@ -13,31 +13,29 @@ describe("automation instructions document", () => {
   test("converts parsed integration mentions into inline badge nodes", () => {
     const document = createAutomationInstructionDocument({
       description: "Review @github and post to slack.",
-      readScope: "selected",
       surfaces: [
-        { provider: "github", access: "read" },
-        { provider: "slack", access: "write" },
+        { provider: "github", tools: ["github_get_issue"] },
+        { provider: "slack", tools: ["conversations_add_message"] },
       ],
     })
 
     expect(serializeAutomationInstructionDocument(document)).toEqual({
       description: "Review GitHub and post to Slack.",
       surfaces: [
-        { provider: "github", access: "read" },
-        { provider: "slack", access: "write" },
+        { provider: "github", tools: ["github_get_issue"] },
+        { provider: "slack", tools: ["conversations_add_message"] },
       ],
     })
   })
 
-  test("defaults new all-read integrations to read access", () => {
+  test("defaults new integrations to no selected tools", () => {
     const document = createAutomationInstructionDocument({
       description: "Send to Slack.",
-      readScope: "allConnected",
       surfaces: [],
     })
 
     expect(serializeAutomationInstructionDocument(document).surfaces).toEqual([
-      { provider: "slack", access: "read" },
+      { provider: "slack", tools: [] },
     ])
   })
 })
@@ -63,7 +61,7 @@ describe("automation instructions field layout", () => {
   test("constrains long unbroken text inside the editor", async () => {
     const field = renderInstructionsField({
       description: "Post to GitHub then qweqweqweqweqweqweqweqweqweqweqweqwe.",
-      surfaces: [{ provider: "github", access: "read" }],
+      surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
     })
 
     expect(await screen.findByRole("textbox")).toBeDefined()
@@ -79,8 +77,8 @@ describe("automation instructions field layout", () => {
     const field = renderInstructionsField({
       description: "Post GitHub results to Slack.",
       surfaces: [
-        { provider: "github", access: "read" },
-        { provider: "slack", access: "write" },
+        { provider: "github", tools: ["github_get_issue"] },
+        { provider: "slack", tools: ["conversations_add_message"] },
       ],
     })
 
@@ -112,7 +110,7 @@ describe("automation instructions marker divider", () => {
   test("uses a plain unrounded divider outside shadcn slot styling", async () => {
     const field = renderInstructionsField({
       description: "Post GitHub results to Slack.",
-      surfaces: [{ provider: "github", access: "read" }],
+      surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
     })
 
     expect(await screen.findByRole("textbox")).toBeDefined()
@@ -156,35 +154,43 @@ describe("automation instructions field", () => {
   test("renders integration badges inside the editor", async () => {
     renderInstructionsField({
       description: "Post to @github.",
-      surfaces: [{ provider: "github", access: "write" }],
+      surfaces: [{ provider: "github", tools: ["github_add_issue_comment"] }],
     })
 
     expect(await screen.findByRole("textbox")).toBeDefined()
     expect(
       await screen.findByRole("button", {
-        name: "GitHub access: Write. Change access.",
+        name: "GitHub tools: 1 enabled. Configure tools.",
       })
     ).toBeDefined()
   })
 
-  test("cycles badge access from its inline icon", async () => {
+  test("opens tool selection from the inline tool count", async () => {
     const field = renderInstructionsField({
       description: "Post to GitHub.",
-      surfaces: [{ provider: "github", access: "read" }],
+      surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
     })
 
     const button = await screen.findByRole("button", {
-      name: "GitHub access: Read. Change access.",
+      name: "GitHub tools: 1 enabled. Configure tools.",
     })
 
     expect(fireEvent.mouseDown(button)).toBe(false)
 
     fireEvent.click(button)
+    fireEvent.click(
+      await screen.findByRole("checkbox", { name: "Add issue comment" })
+    )
 
     await waitFor(() => {
       expect(field.onValueChange).toHaveBeenLastCalledWith({
         description: "Post to GitHub.",
-        surfaces: [{ provider: "github", access: "write" }],
+        surfaces: [
+          {
+            provider: "github",
+            tools: ["github_get_issue", "github_add_issue_comment"],
+          },
+        ],
       })
     })
   })
@@ -192,7 +198,7 @@ describe("automation instructions field", () => {
   test("removes a marker from its provider icon button", async () => {
     const field = renderInstructionsField({
       description: "Post to GitHub.",
-      surfaces: [{ provider: "github", access: "read" }],
+      surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
     })
 
     const button = await screen.findByRole("button", {

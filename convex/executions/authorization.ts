@@ -1,7 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { getIntegrationAccess } from "../automations/access"
+import { canUseAutomationTool } from "../automations/access"
 import {
   canUseToolMode,
   getToolPermission,
@@ -9,7 +9,6 @@ import {
   resolveToolModes,
 } from "../permissions/catalog"
 import { type CodexRuntimeInput } from "./codex"
-import { isPermissionAllowedByAccess } from "./tools/policy"
 
 export async function authorizeApprovedTool(
   ctx: ActionCtx,
@@ -42,12 +41,13 @@ export async function authorizeApprovedTool(
       throw new Error(`No active ${approval.provider} integration is available`)
     }
 
-    const access = getIntegrationAccess(
+    const isSelected = canUseAutomationTool(
       input.automation.access,
-      integration._id
+      integration._id,
+      approval.tool
     )
 
-    if (!isPermissionAllowedByAccess(permission.access, access)) {
+    if (!isSelected) {
       throw new Error(
         `Tool is not allowed by automation access: ${approval.tool}`
       )

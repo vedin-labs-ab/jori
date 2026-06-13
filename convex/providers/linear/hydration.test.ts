@@ -99,7 +99,7 @@ function automation(
   return {
     _creationTime: 0,
     _id: "automation-id" as Id<"automations">,
-    access: { read: [], web: false, write: [] },
+    access: { integrations: [], web: false },
     createdAt: 0,
     instructions: "Test",
     name: "Test automation",

@@ -3,7 +3,6 @@ import { assemblePrompt } from "."
 import {
   approvalContinuation,
   automationRuntimeInput,
-  githubId,
   linearAutomationRuntimeInput,
   notionAutomationRuntimeInput,
   promptedTool,
@@ -96,22 +95,15 @@ describe("automation trigger prompts", () => {
     expect(prompt).toContain("An automation triggered this run.")
     expect(prompt).toContain("Current UTC time:")
     expect(prompt).toContain("Integration access:")
-    expect(prompt).toContain("- Read scope: Selected integrations only")
     expect(prompt).toContain("- Web search: Allowed")
-    expect(prompt).toContain("- GitHub: Read")
-    expect(prompt).toContain("- Slack: Write")
+    expect(prompt).toContain("- GitHub: Read issue")
+    expect(prompt).toContain("- Slack: Send message")
     expect(prompt).toContain("Use write actions only")
     expect(prompt).toContain("Run the automation")
   })
 
-  test("renders all connected read scope", () => {
-    const prompt = assemblePrompt(automationRuntimeInput("all"))
-
-    expect(prompt).toContain("- Read scope: All connected integrations")
-  })
-
   test("renders disabled web search", () => {
-    const prompt = assemblePrompt(automationRuntimeInput([githubId()], false))
+    const prompt = assemblePrompt(automationRuntimeInput(false))
 
     expect(prompt).toContain("- Web search: Disabled")
   })

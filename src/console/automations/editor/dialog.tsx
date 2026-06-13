@@ -96,9 +96,7 @@ export function AutomationDialog({
             values={values}
           />
           <AccessFields
-            onReadScopeChange={actions.updateReadScope}
             onWebSearchChange={actions.updateWebSearch}
-            readScope={values.readScope}
             webSearch={values.webSearch}
           />
           <AutomationTiming

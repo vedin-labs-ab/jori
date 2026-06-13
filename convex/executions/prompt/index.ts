@@ -1,10 +1,12 @@
 import {
   type AutomationAccess,
-  accessLabel,
-  getIntegrationAccess,
-  providerLabels,
+  getIntegrationTools,
 } from "../../automations/access"
-import { type ToolPermission } from "../../permissions/catalog"
+import { providerLabels } from "../../automations/providers"
+import {
+  getToolPermission,
+  type ToolPermission,
+} from "../../permissions/catalog"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { createPromptTime } from "../../prompts/time"
@@ -98,20 +100,22 @@ function formatAutomationAccess(
   >["integrations"]
 ) {
   return formatTargetLines([
-    targetLine(
-      "Read scope",
-      access.read === "all"
-        ? "All connected integrations"
-        : "Selected integrations only"
-    ),
     targetLine("Web search", access.web ? "Allowed" : "Disabled"),
     ...integrations.map((integration) =>
       targetLine(
         providerLabels[integration.provider],
-        accessLabel(getIntegrationAccess(access, integration._id))
+        formatSelectedTools(getIntegrationTools(access, integration._id))
       )
     ),
   ])
+}
+
+function formatSelectedTools(tools: readonly string[]) {
+  if (tools.length === 0) {
+    return "No tools"
+  }
+
+  return tools.map((tool) => getToolPermission(tool)?.label ?? tool).join(", ")
 }
 
 function formatAutomationTrigger(

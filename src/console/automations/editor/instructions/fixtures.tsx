@@ -1,13 +1,32 @@
 import { render } from "@testing-library/react"
 import { vi } from "vitest"
+import { type ToolPermission } from "../../../permissions/controller"
 import { AutomationInstructionsField } from "."
+
+export const instructionToolPermissions = [
+  toolPermission("github", "github_get_issue", "Read issue", "read"),
+  toolPermission(
+    "github",
+    "github_add_issue_comment",
+    "Add issue comment",
+    "write"
+  ),
+  toolPermission("slack", "conversations_history", "Read history", "read"),
+  toolPermission("slack", "conversations_add_message", "Send message", "write"),
+  toolPermission("googleDrive", "google_drive_read_file", "Read file", "read"),
+  toolPermission(
+    "googleDrive",
+    "google_drive_create_file",
+    "Create file",
+    "write"
+  ),
+] satisfies ToolPermission[]
 
 export function renderInstructionsField({
   description,
   error,
-  permissions,
+  permissions = instructionToolPermissions,
   policyKey = "test",
-  readScope = "selected",
   showAccessError,
   surfaces,
 }: {
@@ -15,7 +34,6 @@ export function renderInstructionsField({
   error?: Parameters<typeof AutomationInstructionsField>[0]["error"]
   permissions?: Parameters<typeof AutomationInstructionsField>[0]["permissions"]
   policyKey?: Parameters<typeof AutomationInstructionsField>[0]["policyKey"]
-  readScope?: Parameters<typeof AutomationInstructionsField>[0]["readScope"]
   showAccessError?: Parameters<
     typeof AutomationInstructionsField
   >[0]["showAccessError"]
@@ -32,7 +50,6 @@ export function renderInstructionsField({
       placeholder="Instructions"
       permissions={permissions}
       policyKey={policyKey}
-      readScope={readScope}
       showAccessError={showAccessError}
       surfaces={surfaces}
       value={description}
@@ -40,4 +57,21 @@ export function renderInstructionsField({
   )
 
   return { container: view.container, onValueChange }
+}
+
+function toolPermission(
+  provider: ToolPermission["provider"],
+  tool: string,
+  label: string,
+  access: ToolPermission["access"]
+): ToolPermission {
+  return {
+    access,
+    description: label,
+    label,
+    mode: "allowed",
+    overrideMode: null,
+    provider,
+    tool,
+  }
 }

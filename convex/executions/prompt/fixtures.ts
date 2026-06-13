@@ -1,13 +1,10 @@
-import { type Doc } from "../../_generated/dataModel"
 import { type ToolPermission } from "../../permissions/catalog"
 import { type assemblePrompt } from "."
+import { promptIntegration } from "./integration"
 
-export function automationRuntimeInput(
-  readScope: "all" | string[] = [githubId()],
-  webSearch = true
-) {
-  const github = integration("github")
-  const slack = integration("slack")
+export function automationRuntimeInput(webSearch = true) {
+  const github = promptIntegration("github")
+  const slack = promptIntegration("slack")
 
   return {
     type: "automation",
@@ -32,8 +29,10 @@ export function automationRuntimeInput(
       instructions: "Post the daily digest.",
       metadata: { source: "daily" },
       access: {
-        read: readScope,
-        write: [slack._id],
+        integrations: [
+          { integrationId: github._id, tools: ["github_get_issue"] },
+          { integrationId: slack._id, tools: ["conversations_add_message"] },
+        ],
         web: webSearch,
       },
       trigger: {
@@ -50,7 +49,7 @@ export function automationRuntimeInput(
 }
 
 export function linearAutomationRuntimeInput() {
-  const linear = integration("linear")
+  const linear = promptIntegration("linear")
 
   return {
     type: "automation",
@@ -71,8 +70,9 @@ export function linearAutomationRuntimeInput() {
       name: "Linear quip",
       instructions: "Reply with a short quip.",
       access: {
-        read: "all",
-        write: [linear._id],
+        integrations: [
+          { integrationId: linear._id, tools: ["linear_add_comment"] },
+        ],
         web: true,
       },
       trigger: {
@@ -110,7 +110,7 @@ export function linearAutomationRuntimeInput() {
 }
 
 export function notionAutomationRuntimeInput() {
-  const notion = integration("notion")
+  const notion = promptIntegration("notion")
 
   return {
     type: "automation",
@@ -133,7 +133,15 @@ export function notionAutomationRuntimeInput() {
       tenantId: "tenant",
       name: "Notion follow-up",
       instructions: "Summarize the changed Notion page.",
-      access: { read: "all", write: [], web: false },
+      access: {
+        integrations: [
+          {
+            integrationId: notion._id,
+            tools: ["notion_search", "notion_create_page"],
+          },
+        ],
+        web: false,
+      },
       trigger: {
         type: "event",
         integrationId: notion._id,
@@ -182,8 +190,8 @@ export function runtimeInput(
       },
       createdAt: 0,
     },
-    integration: integration(provider),
-    integrations: [integration(provider)],
+    integration: promptIntegration(provider),
+    integrations: [promptIntegration(provider)],
     message: {
       _id: "message",
       _creationTime: 0,
@@ -197,10 +205,6 @@ export function runtimeInput(
       createdAt: 0,
     },
   } as unknown as Parameters<typeof assemblePrompt>[0]
-}
-
-export function githubId() {
-  return "github-integration"
 }
 
 export function promptedTool(): ToolPermission {
@@ -240,20 +244,4 @@ export function approvalContinuation(
             },
           },
   }
-}
-
-function integration(provider: string): Doc<"integrations"> {
-  return {
-    _id: `${provider}-integration`,
-    _creationTime: 0,
-    tenantId: "tenant",
-    provider,
-    scope: "tenant",
-    externalId: `${provider}-account`,
-    credentials: {},
-    status: "active",
-    createdBy: "user",
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
 }

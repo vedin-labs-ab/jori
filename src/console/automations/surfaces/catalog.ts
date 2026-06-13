@@ -1,4 +1,3 @@
-export const automationReadScopes = ["selected", "allConnected"] as const
 export const automationSurfaceAccesses = ["read", "write", "both"] as const
 
 export const automationSurfaceProviders = [
@@ -30,7 +29,6 @@ export const automationSurfaceProviders = [
   ]),
 ] as const
 
-export type AutomationReadScope = (typeof automationReadScopes)[number]
 export type AutomationSurfaceAccess = (typeof automationSurfaceAccesses)[number]
 export type AutomationSurfaceProvider =
   (typeof automationSurfaceProviders)[number]["provider"]
@@ -39,7 +37,7 @@ export type AutomationSurfaceProviderMeta =
 
 export type AutomationSurfaceFormValue = {
   provider: AutomationSurfaceProvider
-  access: AutomationSurfaceAccess | ""
+  tools: string[]
 }
 
 export function getAutomationSurfaceProvider(

@@ -1,12 +1,10 @@
-import { type AutomationReadScope } from "../surfaces"
 import { type AutomationFormValues, emptyAutomationForm } from "../types"
 
-const readScopeKey = "milo.automation.readScope"
 const webSearchKey = "milo.automation.webSearch"
 
 export function readAutomationPreferences(): Pick<
   AutomationFormValues,
-  "readScope" | "webSearch"
+  "webSearch"
 > {
   const storage = getStorage()
 
@@ -15,15 +13,8 @@ export function readAutomationPreferences(): Pick<
   }
 
   return {
-    readScope: readAutomationReadScopePreference(storage),
     webSearch: readAutomationWebSearchPreference(storage),
   }
-}
-
-export function writeAutomationReadScopePreference(
-  readScope: AutomationReadScope
-) {
-  writeAutomationPreference(readScopeKey, readScope)
 }
 
 export function writeAutomationWebSearchPreference(webSearch: boolean) {
@@ -32,19 +23,8 @@ export function writeAutomationWebSearchPreference(webSearch: boolean) {
 
 function defaultAutomationPreferences() {
   return {
-    readScope: emptyAutomationForm.readScope,
     webSearch: emptyAutomationForm.webSearch,
   }
-}
-
-function readAutomationReadScopePreference(
-  storage: Storage
-): AutomationReadScope {
-  const value = storage.getItem(readScopeKey)
-
-  return value === "selected" || value === "allConnected"
-    ? value
-    : emptyAutomationForm.readScope
 }
 
 function readAutomationWebSearchPreference(storage: Storage) {

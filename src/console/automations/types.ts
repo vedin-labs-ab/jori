@@ -4,10 +4,7 @@ import {
   type AutomationEventProvider,
   getDefaultAutomationEvent,
 } from "../../../convex/automations/events"
-import {
-  type AutomationReadScope,
-  type AutomationSurfaceFormValue,
-} from "./surfaces"
+import { type AutomationSurfaceFormValue } from "./surfaces"
 
 export type AutomationList = FunctionReturnType<
   typeof api.automations.console.list
@@ -45,7 +42,6 @@ export type AutomationFormValues = {
   eventProvider: AutomationEventProvider
   event: string
   eventCriteria: Record<string, string>
-  readScope: AutomationReadScope
   webSearch: boolean
   surfaces: AutomationSurfaceFormValue[]
 }
@@ -65,7 +61,6 @@ export const emptyAutomationForm: AutomationFormValues = {
   eventProvider: "slack",
   event: defaultEvent.value,
   eventCriteria: {},
-  readScope: "allConnected",
   webSearch: true,
   surfaces: [],
 }

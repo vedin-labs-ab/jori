@@ -1,11 +1,9 @@
 import { describe, expect, test } from "vitest"
 import {
-  applyAutomationReadScope,
   findActiveAutomationSurfaceMention,
   findAutomationSurfaceMentions,
   getAutomationSurfaceMentionParts,
   getAutomationSurfaceSuggestions,
-  getNextAutomationSurfaceAccess,
   normalizeAutomationSurfaceMentions,
   normalizeCompletedAutomationSurfaceMentions,
   replaceAutomationSurfaceMention,
@@ -157,46 +155,21 @@ describe("automation integration marker autocomplete", () => {
   })
 })
 
-describe("automation integration access sync", () => {
-  test("promotes write markers and defaults new all-read markers to read", () => {
+describe("automation integration tool sync", () => {
+  test("preserves selected tools for existing markers", () => {
     expect(
-      syncAutomationSurfaces(
-        "@GitHub to @Slack",
-        [{ provider: "slack", access: "write" }],
-        "allConnected"
-      )
+      syncAutomationSurfaces("@GitHub to @Slack", [
+        { provider: "slack", tools: ["conversations_add_message"] },
+      ])
     ).toEqual([
-      { provider: "github", access: "read" },
-      { provider: "slack", access: "both" },
+      { provider: "github", tools: [] },
+      { provider: "slack", tools: ["conversations_add_message"] },
     ])
   })
 
-  test("leaves new selected-read markers unclassified", () => {
-    expect(syncAutomationSurfaces("GitHub", [], "selected")).toEqual([
-      { provider: "github", access: "" },
+  test("adds new markers without selected tools", () => {
+    expect(syncAutomationSurfaces("GitHub", [])).toEqual([
+      { provider: "github", tools: [] },
     ])
-  })
-
-  test("promotes write-only markers when all reads are enabled", () => {
-    expect(
-      applyAutomationReadScope(
-        [
-          { provider: "github", access: "write" },
-          { provider: "slack", access: "both" },
-          { provider: "linear", access: "" },
-        ],
-        "allConnected"
-      )
-    ).toEqual([
-      { provider: "github", access: "both" },
-      { provider: "slack", access: "both" },
-      { provider: "linear", access: "read" },
-    ])
-  })
-
-  test("limits all-read marker access cycling to read and read/write", () => {
-    expect(getNextAutomationSurfaceAccess("read", "allConnected")).toBe("both")
-    expect(getNextAutomationSurfaceAccess("both", "allConnected")).toBe("read")
-    expect(getNextAutomationSurfaceAccess("write", "allConnected")).toBe("both")
   })
 })

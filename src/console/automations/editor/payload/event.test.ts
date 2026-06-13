@@ -13,7 +13,7 @@ describe("automation event payload criteria", () => {
           eventProvider: "slack",
           event: "message.created",
           eventCriteria: { channel: "C123" },
-          surfaces: [{ provider: "slack", access: "both" }],
+          surfaces: [{ provider: "slack", tools: slackTools() }],
         })
       )
     ).toMatchObject({
@@ -56,7 +56,7 @@ describe("automation event payload validation", () => {
           eventProvider: "slack",
           event: "message.created",
           eventCriteria: {},
-          surfaces: [{ provider: "slack", access: "both" }],
+          surfaces: [{ provider: "slack", tools: slackTools() }],
         })
       )
     ).toEqual({ error: "Channel is required." })
@@ -71,7 +71,12 @@ describe("automation event payload validation", () => {
           eventProvider: "gmail",
           event: "message.received",
           eventCriteria: { from: "person@example.com" },
-          surfaces: [{ provider: "gmail", access: "both" }],
+          surfaces: [
+            {
+              provider: "gmail",
+              tools: ["google_gmail_get_message", "google_gmail_send_message"],
+            },
+          ],
         })
       )
     ).toEqual({
@@ -89,7 +94,7 @@ describe("automation event payload validation", () => {
           eventProvider: "slack",
           event: "page.updated",
           eventCriteria: { channel: "C123" },
-          surfaces: [{ provider: "slack", access: "both" }],
+          surfaces: [{ provider: "slack", tools: slackTools() }],
         })
       )
     ).toEqual({ error: "Choose a supported automation event." })
@@ -108,10 +113,14 @@ function githubReviewForm() {
       path: "src/app.ts",
     },
     surfaces: [
-      { provider: "github", access: "read" },
-      { provider: "slack", access: "write" },
+      { provider: "github", tools: ["github_get_issue"] },
+      { provider: "slack", tools: ["conversations_add_message"] },
     ],
   })
+}
+
+function slackTools() {
+  return ["conversations_history", "conversations_add_message"]
 }
 
 function eventForm(
