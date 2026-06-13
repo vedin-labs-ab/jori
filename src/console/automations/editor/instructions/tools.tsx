@@ -37,14 +37,12 @@ export function AutomationSurfaceToolsDialog({
 }: AutomationSurfaceToolsDialogProps) {
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-3xl">
-        <DialogHeader className="grid grid-cols-[auto_1fr] gap-4 p-6 pb-5 pr-14 text-left">
-          <SurfaceLogo className="mt-0.5 size-12" provider={provider} />
-          <div className="grid gap-1.5">
-            <DialogTitle className="font-semibold text-2xl">
-              {providerLabel} tools
-            </DialogTitle>
-            <DialogDescription className="text-sm/6">
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader className="grid grid-cols-[auto_1fr] gap-3 pr-8 text-left">
+          <SurfaceLogo className="mt-0.5 size-6" provider={provider} />
+          <div className="grid gap-1">
+            <DialogTitle>{providerLabel} tools</DialogTitle>
+            <DialogDescription>
               Choose the exact tools this automation can use.
             </DialogDescription>
           </div>
@@ -75,7 +73,7 @@ function AutomationSurfaceToolsContent({
 }: AutomationSurfaceToolsContentProps) {
   if (permissions === undefined) {
     return (
-      <div className="px-6 pb-6 text-muted-foreground text-sm">
+      <div className="text-muted-foreground text-sm">
         Loading tool permissions...
       </div>
     )
@@ -83,7 +81,7 @@ function AutomationSurfaceToolsContent({
 
   if (permissions === null) {
     return (
-      <div className="px-6 pb-6 text-muted-foreground text-sm">
+      <div className="text-muted-foreground text-sm">
         Tool permissions are unavailable right now.
       </div>
     )
@@ -95,7 +93,7 @@ function AutomationSurfaceToolsContent({
 
   if (providerPermissions.length === 0) {
     return (
-      <div className="px-6 pb-6 text-muted-foreground text-sm">
+      <div className="text-muted-foreground text-sm">
         This integration does not expose configurable tools yet.
       </div>
     )
@@ -115,9 +113,9 @@ function AutomationSurfaceToolsContent({
 
 function AutomationSurfaceToolsFooter() {
   return (
-    <DialogFooter className="mx-6 border-t px-0 py-5 sm:items-center sm:justify-between">
-      <div className="flex items-center gap-3 text-muted-foreground text-sm">
-        <ShieldCheckIcon className="size-5 text-primary" />
+    <DialogFooter className="sm:items-center sm:justify-between">
+      <div className="flex items-center gap-2 text-muted-foreground text-xs">
+        <ShieldCheckIcon className="size-4 text-primary" />
         <span>You can change these anytime.</span>
       </div>
       <DialogClose asChild>
