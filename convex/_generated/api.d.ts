@@ -28,6 +28,7 @@ import type * as automations_data from "../automations/data.js";
 import type * as automations_events from "../automations/events.js";
 import type * as automations_fire from "../automations/fire.js";
 import type * as automations_mcp from "../automations/mcp.js";
+import type * as automations_names from "../automations/names.js";
 import type * as automations_options from "../automations/options.js";
 import type * as automations_options_common from "../automations/options/common.js";
 import type * as automations_options_github from "../automations/options/github.js";
@@ -246,6 +247,7 @@ declare const fullApi: ApiFromModules<{
   "automations/events": typeof automations_events;
   "automations/fire": typeof automations_fire;
   "automations/mcp": typeof automations_mcp;
+  "automations/names": typeof automations_names;
   "automations/options": typeof automations_options;
   "automations/options/common": typeof automations_options_common;
   "automations/options/github": typeof automations_options_github;

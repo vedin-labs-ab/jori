@@ -7,7 +7,7 @@ import { applyEventCriteriaChange, removeEventCriterion } from "./criteria"
 
 describe("automation event criteria hard dependencies", () => {
   test("clears hard dependent criteria when a parent changes", () => {
-    const event = requireEvent("github", "issue.comment.changed")
+    const event = requireEvent("github", "issue.comment.created")
 
     expect(
       applyEventCriteriaChange({
@@ -23,7 +23,7 @@ describe("automation event criteria hard dependencies", () => {
   })
 
   test("preserves dependent criteria when a parent value is unchanged", () => {
-    const event = requireEvent("github", "issue.comment.changed")
+    const event = requireEvent("github", "issue.comment.created")
     const values = {
       repo: "milo/app",
       issue: "42",
@@ -42,7 +42,7 @@ describe("automation event criteria hard dependencies", () => {
 
 describe("automation event criteria Linear dependencies", () => {
   test("clears transitive Linear scope criteria when the team changes", () => {
-    const event = requireEvent("linear", "issue.comment.changed")
+    const event = requireEvent("linear", "issue.comment.created")
 
     expect(
       applyEventCriteriaChange({
@@ -59,7 +59,7 @@ describe("automation event criteria Linear dependencies", () => {
   })
 
   test("clears Linear issue criteria when the project changes", () => {
-    const event = requireEvent("linear", "issue.comment.changed")
+    const event = requireEvent("linear", "issue.comment.created")
 
     expect(
       applyEventCriteriaChange({
@@ -76,7 +76,7 @@ describe("automation event criteria Linear dependencies", () => {
   })
 
   test("preserves Linear scope criteria when only the issue changes", () => {
-    const event = requireEvent("linear", "issue.comment.changed")
+    const event = requireEvent("linear", "issue.comment.created")
 
     expect(
       applyEventCriteriaChange({
@@ -99,7 +99,7 @@ describe("automation event criteria Linear dependencies", () => {
 
 describe("automation event criteria text dependencies", () => {
   test("clears review comment path when its pull request changes", () => {
-    const event = requireEvent("github", "pull_request.review_comment.changed")
+    const event = requireEvent("github", "pull_request.review_comment.edited")
 
     expect(
       applyEventCriteriaChange({
@@ -118,7 +118,7 @@ describe("automation event criteria text dependencies", () => {
 
 describe("automation event criteria removal", () => {
   test("keeps soft-dependent criteria when a scoping condition is removed", () => {
-    const event = requireEvent("linear", "issue.comment.changed")
+    const event = requireEvent("linear", "issue.comment.edited")
 
     expect(
       removeEventCriterion({
@@ -134,7 +134,7 @@ describe("automation event criteria removal", () => {
   })
 
   test("clears hard-dependent criteria when their parent is removed", () => {
-    const event = requireEvent("github", "issue.comment.changed")
+    const event = requireEvent("github", "issue.comment.created")
 
     expect(
       removeEventCriterion({

@@ -10,7 +10,21 @@ describe("Linear issue project hydration pruning", () => {
       shouldHydrateLinearIssueProject({
         automation: automation({ issue: "issue-id", team: "team-id" }),
         integrationId,
-        event: "issue.comment.changed",
+        event: "issue.comment.created",
+        criteria: { issue: "issue-id", team: "team-id" },
+      })
+    ).toBe(true)
+  })
+
+  test("hydrates edited project-gated automations", () => {
+    expect(
+      shouldHydrateLinearIssueProject({
+        automation: automation({
+          event: "issue.comment.edited",
+          issue: "issue-id",
+        }),
+        integrationId,
+        event: "issue.comment.edited",
         criteria: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(true)
@@ -21,18 +35,20 @@ describe("Linear issue project hydration pruning", () => {
       shouldHydrateLinearIssueProject({
         automation: automation({ issue: "issue-id", team: "team-id" }),
         integrationId,
-        event: "issue.comment.changed",
+        event: "issue.comment.created",
         criteria: { issue: "issue-id" },
       })
     ).toBe(true)
   })
+})
 
+describe("Linear issue project hydration rejection", () => {
   test("skips hydration when known criteria rule out the automation", () => {
     expect(
       shouldHydrateLinearIssueProject({
         automation: automation({ issue: "other-issue", team: "team-id" }),
         integrationId,
-        event: "issue.comment.changed",
+        event: "issue.comment.created",
         criteria: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(false)
@@ -41,7 +57,7 @@ describe("Linear issue project hydration pruning", () => {
       shouldHydrateLinearIssueProject({
         automation: automation({ issue: "issue-id", team: "other-team" }),
         integrationId,
-        event: "issue.comment.changed",
+        event: "issue.comment.created",
         criteria: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(false)
@@ -52,7 +68,7 @@ describe("Linear issue project hydration pruning", () => {
       shouldHydrateLinearIssueProject({
         automation: automation({ project: null }),
         integrationId,
-        event: "issue.comment.changed",
+        event: "issue.comment.created",
         criteria: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(false)
@@ -61,7 +77,7 @@ describe("Linear issue project hydration pruning", () => {
       shouldHydrateLinearIssueProject({
         automation: automation({ event: "other.event" }),
         integrationId,
-        event: "issue.comment.changed",
+        event: "issue.comment.created",
         criteria: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(false)
@@ -92,7 +108,7 @@ function automation(
     trigger: {
       type: "event",
       integrationId,
-      event: event ?? "issue.comment.changed",
+      event: event ?? "issue.comment.created",
       criteria: eventCriteria({ issue, project, team }),
     },
     updatedAt: 0,

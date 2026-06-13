@@ -34,7 +34,7 @@ describe("automation event payload criteria", () => {
         trigger: {
           type: "event",
           provider: "github",
-          event: "pull_request.review_comment.changed",
+          event: "pull_request.review_comment.edited",
           criteria: {
             repo: "milo/app",
             pr: "42",
@@ -101,7 +101,7 @@ function githubReviewForm() {
     name: "Watch PR reviews",
     instructions: "Read GitHub and post to Slack.",
     eventProvider: "github",
-    event: "pull_request.review_comment.changed",
+    event: "pull_request.review_comment.edited",
     eventCriteria: {
       repo: "milo/app",
       pr: "42",

@@ -78,7 +78,7 @@ export function linearAutomationRuntimeInput() {
       trigger: {
         type: "event",
         integrationId: linear._id,
-        event: "issue.comment.changed",
+        event: "issue.comment.edited",
         criteria: { team: "team-id" },
       },
       status: "active",
@@ -91,7 +91,7 @@ export function linearAutomationRuntimeInput() {
       tenantId: "tenant",
       integrationId: linear._id,
       key: "linear:delivery",
-      type: "issue.comment.changed",
+      type: "issue.comment.edited",
       criteria: { issue: "issue-id", team: "team-id" },
       text: "i wonder if this is worth spending time on",
       data: {

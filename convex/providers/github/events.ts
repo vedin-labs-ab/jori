@@ -53,13 +53,18 @@ function getIssueCommentMessage(
   }
 
   const isPullRequest = issue.pull_request !== undefined
+  const action = payload.action ?? "created"
 
   return {
     accountId: String(installationId),
     type: isPullRequest
-      ? `comment.pull_request.${payload.action ?? "created"}`
-      : `comment.issue.${payload.action ?? "created"}`,
-    externalId: createGitHubExternalId(installationId, deliveryId, comment.id),
+      ? `comment.pull_request.${action}`
+      : `comment.issue.${action}`,
+    externalId: createGitHubExternalId(
+      installationId,
+      deliveryId,
+      `${action}:${comment.id}:${comment.updated_at ?? comment.created_at ?? ""}`
+    ),
     actorId: getSenderId(payload),
     conversationId: `${repository.fullName}#${issue.number}`,
     text: comment.body,
@@ -111,10 +116,16 @@ function getPullRequestReviewCommentMessage(
     return null
   }
 
+  const action = payload.action ?? "created"
+
   return {
     accountId: String(installationId),
-    type: `comment.pull_request_review.${payload.action ?? "created"}`,
-    externalId: createGitHubExternalId(installationId, deliveryId, comment.id),
+    type: `comment.pull_request_review.${action}`,
+    externalId: createGitHubExternalId(
+      installationId,
+      deliveryId,
+      `${action}:${comment.id}:${comment.updated_at ?? comment.created_at ?? ""}`
+    ),
     actorId: getSenderId(payload),
     conversationId: `${repository.fullName}#${pullRequest.number}`,
     text: comment.body,
@@ -193,9 +204,9 @@ function isRelevantCommentAction(action: string | undefined) {
 function createGitHubExternalId(
   installationId: number,
   deliveryId: string | null,
-  commentId: number
+  fallbackKey: string
 ) {
-  return `github:${installationId}:${deliveryId ?? commentId}`
+  return `github:${installationId}:${deliveryId ?? fallbackKey}`
 }
 
 function getSenderId(payload: GitHubWebhookPayload) {

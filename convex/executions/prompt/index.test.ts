@@ -119,7 +119,7 @@ describe("automation trigger prompts", () => {
   test("renders provider target context for Linear events", () => {
     const prompt = assemblePrompt(linearAutomationRuntimeInput())
 
-    expect(prompt).toContain("- Type: issue.comment.changed")
+    expect(prompt).toContain("- Type: issue.comment.edited")
     expect(prompt).toContain("- Provider: Linear")
     expect(prompt).toContain("- Issue ID: issue-id")
     expect(prompt).toContain("- Issue key: VED-1")

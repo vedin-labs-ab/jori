@@ -6,6 +6,41 @@ import {
   provider,
   textParameter,
 } from "./builders"
+import { type AutomationEventParameter } from "./types"
+
+function pendingCalendarChangeEvents(args: {
+  message: string
+  parameters: readonly AutomationEventParameter[]
+}) {
+  return [
+    pendingEvent("event.created", {
+      label: "Calendar event created",
+      description: "Runs when an event is created on the selected calendar.",
+      message: args.message,
+      parameters: args.parameters,
+    }),
+    pendingEvent("event.edited", {
+      label: "Calendar event edited",
+      description: "Runs when an event is edited on the selected calendar.",
+      message: args.message,
+      parameters: args.parameters,
+    }),
+  ]
+}
+
+const googleCalendarParameters = [
+  optionParameter("calendar", "Calendar", "Search calendars", {
+    required: true,
+    source: "googleCalendar.calendars",
+  }),
+]
+
+const microsoftCalendarParameters = [
+  optionParameter("calendar", "Calendar", "Search calendars", {
+    required: true,
+    source: "microsoftCalendar.calendars",
+  }),
+]
 
 export const pendingAutomationEventCatalog = [
   provider("gmail", [
@@ -43,18 +78,10 @@ export const pendingAutomationEventCatalog = [
     }),
   ]),
   provider("googleCalendar", [
-    pendingEvent("event.changed", {
-      label: "Calendar event created or updated",
-      description:
-        "Runs when an event is created or updated on the selected calendar.",
+    ...pendingCalendarChangeEvents({
       message:
         "Google Calendar event-triggered automations need calendar subscriptions before they can run.",
-      parameters: [
-        optionParameter("calendar", "Calendar", "Search calendars", {
-          required: true,
-          source: "googleCalendar.calendars",
-        }),
-      ],
+      parameters: googleCalendarParameters,
     }),
     pendingEvent("event.starting_soon", {
       label: "Event starting soon",
@@ -77,18 +104,10 @@ export const pendingAutomationEventCatalog = [
     }),
   ]),
   provider("microsoftCalendar", [
-    pendingEvent("event.changed", {
-      label: "Calendar event created or updated",
-      description:
-        "Runs when an event is created or updated on the selected calendar.",
+    ...pendingCalendarChangeEvents({
       message:
         "Microsoft Calendar event-triggered automations need Microsoft Graph subscriptions before they can run.",
-      parameters: [
-        optionParameter("calendar", "Calendar", "Search calendars", {
-          required: true,
-          source: "microsoftCalendar.calendars",
-        }),
-      ],
+      parameters: microsoftCalendarParameters,
     }),
     pendingEvent("event.starting_soon", {
       label: "Event starting soon",

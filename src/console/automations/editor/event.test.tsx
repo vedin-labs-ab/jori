@@ -169,7 +169,7 @@ describe("automation event conditions", () => {
   test("hides optional parameters until they are added as conditions", () => {
     renderEventFields({
       eventProvider: "linear",
-      event: "issue.comment.changed",
+      event: "issue.comment.created",
     })
 
     expect(screen.queryByLabelText("Team")).toBeNull()
@@ -181,7 +181,7 @@ describe("automation event conditions", () => {
     expect(screen.getByRole("button", { name: "Add condition" })).toBeDefined()
     expect(
       screen.queryByText(
-        "Runs when someone creates or updates a comment on a matching Linear issue."
+        "Runs when someone creates a comment on a matching Linear issue."
       )
     ).toBeNull()
   })
@@ -198,7 +198,7 @@ describe("automation event conditions", () => {
   test("shows conditions that already have values", () => {
     renderEventFields({
       eventProvider: "linear",
-      event: "issue.comment.changed",
+      event: "issue.comment.created",
       eventCriteria: {
         issue: "issue-a",
         project: "project-a",
@@ -220,7 +220,7 @@ describe("automation event condition editing", () => {
   test("adds a condition from the add-condition menu", () => {
     renderEventFields({
       eventProvider: "linear",
-      event: "issue.comment.changed",
+      event: "issue.comment.created",
     })
 
     openAddConditionMenu()
@@ -247,7 +247,7 @@ describe("automation event condition editing", () => {
     renderEventFields(
       {
         eventProvider: "linear",
-        event: "issue.comment.changed",
+        event: "issue.comment.created",
         eventCriteria: { team: "team-a" },
       },
       onValuesChange
@@ -266,7 +266,7 @@ describe("automation event condition editing", () => {
   test("disables dependent condition pickers until their parent is selected", () => {
     renderEventFields({
       eventProvider: "github",
-      event: "issue.comment.changed",
+      event: "issue.comment.created",
     })
 
     openAddConditionMenu()

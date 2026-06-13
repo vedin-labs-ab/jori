@@ -21,13 +21,14 @@ describe("Slack and GitHub message automation event projection", () => {
     ])
   })
 
-  test("projects GitHub issue comments to issue criteria", () => {
+  test("projects GitHub issue comments to created issue criteria", () => {
     expect(
       readAutomationEventsForMessage({
         integration: integration("github"),
         message: {
           externalId: "github:1:delivery",
           data: {
+            action: "created",
             eventType: "issue_comment",
             repository: { fullName: "milo/app" },
             issueNumber: 42,
@@ -37,8 +38,31 @@ describe("Slack and GitHub message automation event projection", () => {
       })
     ).toMatchObject([
       {
-        type: "issue.comment.changed",
+        type: "issue.comment.created",
         criteria: { repo: "milo/app", issue: "42" },
+      },
+    ])
+  })
+
+  test("projects GitHub pull request comments to edited pull request criteria", () => {
+    expect(
+      readAutomationEventsForMessage({
+        integration: integration("github"),
+        message: {
+          externalId: "github:1:delivery",
+          data: {
+            action: "edited",
+            eventType: "issue_comment",
+            repository: { fullName: "milo/app" },
+            issueNumber: 42,
+            isPullRequest: true,
+          },
+        },
+      })
+    ).toMatchObject([
+      {
+        type: "pull_request.comment.edited",
+        criteria: { repo: "milo/app", pr: "42" },
       },
     ])
   })
@@ -52,6 +76,7 @@ describe("review and Linear message automation event projection", () => {
         message: {
           externalId: "github:1:review",
           data: {
+            action: "edited",
             eventType: "pull_request_review_comment",
             repository: { fullName: "milo/app" },
             pullNumber: 12,
@@ -61,19 +86,20 @@ describe("review and Linear message automation event projection", () => {
       })
     ).toMatchObject([
       {
-        type: "pull_request.review_comment.changed",
+        type: "pull_request.review_comment.edited",
         criteria: { repo: "milo/app", pr: "12", path: "src/app.ts" },
       },
     ])
   })
 
-  test("projects Linear comments with team and project criteria", () => {
+  test("projects Linear created comments with team and project criteria", () => {
     expect(
       readAutomationEventsForMessage({
         integration: integration("linear"),
         message: {
           externalId: "linear:org:comment",
           data: {
+            action: "create",
             issueId: "issue-id",
             teamId: "team-id",
             projectId: "project-id",
@@ -82,11 +108,33 @@ describe("review and Linear message automation event projection", () => {
       })
     ).toMatchObject([
       {
-        type: "issue.comment.changed",
+        type: "issue.comment.created",
         criteria: {
           issue: "issue-id",
           team: "team-id",
           project: "project-id",
+        },
+      },
+    ])
+  })
+
+  test("projects Linear updated comments as edited events", () => {
+    expect(
+      readAutomationEventsForMessage({
+        integration: integration("linear"),
+        message: {
+          externalId: "linear:org:comment",
+          data: {
+            action: "update",
+            issueId: "issue-id",
+          },
+        },
+      })
+    ).toMatchObject([
+      {
+        type: "issue.comment.edited",
+        criteria: {
+          issue: "issue-id",
         },
       },
     ])

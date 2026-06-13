@@ -73,10 +73,16 @@ function getLinearCommentMessage(
     return null
   }
 
+  const action = payload.action ?? "create"
+
   return {
     accountId,
-    type: `comment.${payload.action ?? "create"}`,
-    externalId: createLinearExternalId(accountId, deliveryId, data.id),
+    type: `comment.${action}`,
+    externalId: createLinearExternalId(
+      accountId,
+      deliveryId,
+      `${action}:${data.id}:${data.updatedAt ?? data.createdAt ?? ""}`
+    ),
     actorId: payload.actor?.id,
     actorEmail: payload.actor?.email,
     conversationId: issueId,
@@ -108,9 +114,9 @@ function isRelevantLinearEvent(type: string, action: string | undefined) {
 function createLinearExternalId(
   accountId: string,
   deliveryId: string | null,
-  entityId: string
+  fallbackKey: string
 ) {
-  return `linear:${accountId}:${deliveryId ?? entityId}`
+  return `linear:${accountId}:${deliveryId ?? fallbackKey}`
 }
 
 function getObservedAt(

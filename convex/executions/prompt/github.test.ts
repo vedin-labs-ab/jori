@@ -6,7 +6,7 @@ describe("GitHub automation prompts", () => {
   test("renders review comment target context", () => {
     const prompt = assemblePrompt(githubAutomationRuntimeInput())
 
-    expect(prompt).toContain("- Type: pull_request.review_comment.changed")
+    expect(prompt).toContain("- Type: pull_request.review_comment.edited")
     expect(prompt).toContain("- Provider: GitHub")
     expect(prompt).toContain("- Repository: acme/app")
     expect(prompt).toContain("- Pull request number: 12")
@@ -46,7 +46,7 @@ function githubAutomationRuntimeInput() {
       trigger: {
         type: "event",
         integrationId: github._id,
-        event: "pull_request.review_comment.changed",
+        event: "pull_request.review_comment.edited",
         criteria: { repo: "acme/app" },
       },
       status: "active",
@@ -59,7 +59,7 @@ function githubAutomationRuntimeInput() {
       tenantId: "tenant",
       integrationId: github._id,
       key: "github:delivery",
-      type: "pull_request.review_comment.changed",
+      type: "pull_request.review_comment.edited",
       criteria: { path: "README.md", pr: "12", repo: "acme/app" },
       text: "This is a great change.",
       data: {
