@@ -1,37 +1,52 @@
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react"
-import { Ban, CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
+import { useState } from "react"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { cn } from "@/lib/utils"
 import {
-  type AutomationReadScope,
+  type AutomationPolicyPermissions,
+  isAutomationSurfacePolicyBlocked,
+} from "../../policy"
+import {
   type AutomationSurfaceFormValue,
+  getAutomationSurfaceAccess,
   getAutomationSurfaceAccessLabel,
   getAutomationSurfaceLabel,
-  getNextAutomationSurfaceAccess,
   isAutomationSurfaceProvider,
 } from "../../surfaces"
 import { type AutomationSurfaceExtensionOptions } from "./extension"
 import { AutomationSurfaceRemoveButton } from "./remove"
+import {
+  getAutomationSurfaceAccessIcon,
+  getAutomationSurfaceToneClassNames,
+} from "./tone"
+import { AutomationSurfaceToolsDialog } from "./tools"
 
-export function AutomationSurfaceNodeView({
-  deleteNode,
-  extension,
-  node,
-  selected,
-  updateAttributes,
-}: NodeViewProps) {
-  const provider = isAutomationSurfaceProvider(node.attrs.provider)
-    ? node.attrs.provider
+export function AutomationSurfaceNodeView(props: NodeViewProps) {
+  const provider = isAutomationSurfaceProvider(props.node.attrs.provider)
+    ? props.node.attrs.provider
     : null
-  const access = parseAutomationSurfaceAccess(node.attrs.access)
-  const blocked = node.attrs.policy === "blocked"
 
   if (provider === null) {
     return null
   }
 
-  const toneClassNames = getSurfaceToneClassNames(access, blocked)
-  const accessLabel = getAutomationSurfaceAccessLabel(access)
+  return <AutomationSurfaceNodeContent {...props} provider={provider} />
+}
+
+function AutomationSurfaceNodeContent({
+  deleteNode,
+  extension,
+  node,
+  provider,
+  selected,
+  updateAttributes,
+}: NodeViewProps & { provider: AutomationSurfaceFormValue["provider"] }) {
+  const [isToolDialogOpen, setIsToolDialogOpen] = useState(false)
+  const tools = parseAutomationSurfaceTools(node.attrs.tools)
+  const permissions = getNodeViewPermissions(extension)
+  const surface = { provider, tools }
+  const blocked = isAutomationSurfacePolicyBlocked({ permissions, surface })
+  const access = getAutomationSurfaceAccess(surface, permissions)
   const providerLabel = getAutomationSurfaceLabel(provider)
 
   return (
@@ -41,170 +56,144 @@ export function AutomationSurfaceNodeView({
       contentEditable={false}
       data-automation-surface-view=""
     >
-      <ButtonGroup
-        aria-label={`${providerLabel} integration access`}
-        className={cn(
-          "mx-0.5 inline-flex h-5 overflow-hidden rounded-sm border align-middle text-[0.625rem]/none shadow-none",
-          toneClassNames.surface,
-          selected && "ring-2 ring-ring/40"
-        )}
-        data-automation-surface-access={access === "" ? "unset" : access}
-        data-automation-surface-policy={blocked ? "blocked" : "allowed"}
-      >
-        <AutomationSurfaceAccessButton
-          access={access}
-          accessLabel={accessLabel}
-          blocked={blocked}
-          iconClassName={toneClassNames.scopeIcon}
-          onChange={() =>
-            updateAttributes({
-              access: getNextAutomationSurfaceAccess(
-                access,
-                getNodeViewReadScope(extension)
-              ),
-            })
-          }
-          providerLabel={providerLabel}
-        />
-        <span
-          aria-hidden="true"
-          className={cn(
-            "w-[0.5px] shrink-0 self-stretch rounded-none",
-            toneClassNames.separator
-          )}
-          data-automation-surface-separator=""
-        />
-        <AutomationSurfaceRemoveButton
-          onRemove={deleteNode}
-          provider={provider}
-          providerLabel={providerLabel}
-        />
-      </ButtonGroup>
+      <AutomationSurfaceMarker
+        access={access}
+        blocked={blocked}
+        count={tools.length}
+        onOpenTools={() => setIsToolDialogOpen(true)}
+        onRemove={deleteNode}
+        provider={provider}
+        providerLabel={providerLabel}
+        selected={selected}
+      />
+      <AutomationSurfaceToolsDialog
+        onOpenChange={setIsToolDialogOpen}
+        onToolsChange={(nextTools) => updateAttributes({ tools: nextTools })}
+        open={isToolDialogOpen}
+        permissions={permissions}
+        provider={provider}
+        providerLabel={providerLabel}
+        tools={tools}
+      />
     </NodeViewWrapper>
   )
 }
 
-function getNodeViewReadScope(
-  extension: NodeViewProps["extension"]
-): AutomationReadScope {
+function AutomationSurfaceMarker({
+  access,
+  blocked,
+  count,
+  onOpenTools,
+  onRemove,
+  provider,
+  providerLabel,
+  selected,
+}: {
+  access: ReturnType<typeof getAutomationSurfaceAccess>
+  blocked: boolean
+  count: number
+  onOpenTools: () => void
+  onRemove: () => void
+  provider: AutomationSurfaceFormValue["provider"]
+  providerLabel: string
+  selected: boolean
+}) {
+  const toneClassNames = getAutomationSurfaceToneClassNames(access, blocked)
+
   return (
-    extension.options as Partial<AutomationSurfaceExtensionOptions>
-  ).getReadScope?.() === "allConnected"
-    ? "allConnected"
-    : "selected"
+    <ButtonGroup
+      aria-label={`${providerLabel} integration tools`}
+      className={cn(
+        "mx-0.5 inline-flex h-5 overflow-hidden rounded-sm border align-middle text-[0.625rem]/none shadow-none",
+        toneClassNames.surface,
+        selected && "ring-2 ring-ring/40"
+      )}
+      data-automation-surface-access={access === "" ? "unset" : access}
+      data-automation-surface-policy={blocked ? "blocked" : "allowed"}
+    >
+      <AutomationSurfaceRemoveButton
+        onRemove={onRemove}
+        provider={provider}
+        providerLabel={providerLabel}
+      />
+      <span
+        aria-hidden="true"
+        className={cn(
+          "w-[0.5px] shrink-0 self-stretch rounded-none",
+          toneClassNames.separator
+        )}
+        data-automation-surface-separator=""
+      />
+      <AutomationSurfaceToolsButton
+        access={access}
+        accessLabel={getAutomationSurfaceAccessLabel(access)}
+        blocked={blocked}
+        count={count}
+        iconClassName={toneClassNames.scopeIcon}
+        onOpen={onOpenTools}
+        providerLabel={providerLabel}
+      />
+    </ButtonGroup>
+  )
 }
 
-function AutomationSurfaceAccessButton({
+function getNodeViewPermissions(
+  extension: NodeViewProps["extension"]
+): AutomationPolicyPermissions {
+  return (
+    extension.options as Partial<AutomationSurfaceExtensionOptions>
+  ).getPermissions?.()
+}
+
+function AutomationSurfaceToolsButton({
   access,
   accessLabel,
   blocked,
+  count,
   iconClassName,
-  onChange,
+  onOpen,
   providerLabel,
 }: {
-  access: AutomationSurfaceFormValue["access"]
+  access: ReturnType<typeof getAutomationSurfaceAccess>
   accessLabel: string
   blocked: boolean
+  count: number
   iconClassName: string
-  onChange: () => void
+  onOpen: () => void
   providerLabel: string
 }) {
-  const Icon = getAccessIcon(access, blocked)
+  const Icon = getAutomationSurfaceAccessIcon(access, blocked)
   const label = blocked
-    ? `${providerLabel} access: ${accessLabel}, unavailable for automations. Change access.`
-    : `${providerLabel} access: ${accessLabel}. Change access.`
+    ? `${providerLabel} tools: ${count} enabled, some unavailable. Configure tools.`
+    : `${providerLabel} tools: ${count} enabled. Configure tools.`
 
   return (
     <button
       aria-label={label}
       className={cn(
-        "grid px-1 place-items-center opacity-55 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
+        "inline-flex h-5 items-center gap-1 px-1 font-medium opacity-70 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
         iconClassName
       )}
       onClick={(event) => {
         event.preventDefault()
         event.stopPropagation()
-        onChange()
+        onOpen()
       }}
       onMouseDown={(event) => {
         event.preventDefault()
         event.stopPropagation()
       }}
-      title={blocked ? "Unavailable for automations" : accessLabel}
+      title={`${accessLabel}: ${count} enabled`}
       type="button"
     >
       <Icon className="size-3" />
+      <span className="tabular-nums">{count}</span>
     </button>
   )
 }
 
-function getAccessIcon(
-  access: AutomationSurfaceFormValue["access"],
-  blocked: boolean
-) {
-  if (blocked) {
-    return Ban
-  }
-
-  if (access === "read") {
-    return FileText
-  }
-
-  if (access === "write") {
-    return PenLine
-  }
-
-  return access === "both" ? FilePenLine : CircleDashed
-}
-
-function getSurfaceToneClassNames(
-  access: AutomationSurfaceFormValue["access"],
-  blocked: boolean
-) {
-  return blocked
-    ? automationSurfaceToneClassNames.blocked
-    : automationSurfaceToneClassNames[access]
-}
-
-const automationSurfaceToneClassNames = {
-  "": {
-    scopeIcon: "text-[#78716C]",
-    separator: "bg-[#D6D3D1]",
-    surface: "border-[#D6D3D1] bg-[#FAFAF9] text-[#57534E]",
-  },
-  both: {
-    scopeIcon: "text-[#6256C7]",
-    separator: "bg-[#DDD6F5]",
-    surface: "border-[#D4C8F3] bg-[#FAF8FF] text-[#1F2937]",
-  },
-  read: {
-    scopeIcon: "text-[#2563EB]",
-    separator: "bg-[#C9D7ED]",
-    surface: "border-[#BFD3F2] bg-[#F7FAFF] text-[#1F2937]",
-  },
-  write: {
-    scopeIcon: "text-[#2F7D4F]",
-    separator: "bg-[#C9DED1]",
-    surface: "border-[#BDD8C7] bg-[#F6FBF7] text-[#1F2937]",
-  },
-  blocked: {
-    scopeIcon: "text-destructive",
-    separator: "bg-destructive/20",
-    surface: "border-destructive/50 bg-destructive/5 text-destructive",
-  },
-} satisfies Record<
-  AutomationSurfaceFormValue["access"] | "blocked",
-  {
-    scopeIcon: string
-    separator: string
-    surface: string
-  }
->
-
-function parseAutomationSurfaceAccess(
-  access: unknown
-): AutomationSurfaceFormValue["access"] {
-  return access === "read" || access === "write" || access === "both"
-    ? access
-    : ""
+function parseAutomationSurfaceTools(tools: unknown) {
+  return Array.isArray(tools)
+    ? tools.filter((tool): tool is string => typeof tool === "string")
+    : []
 }

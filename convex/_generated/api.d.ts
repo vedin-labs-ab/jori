@@ -38,6 +38,7 @@ import type * as automations_options_microsoft from "../automations/options/micr
 import type * as automations_options_notion from "../automations/options/notion.js";
 import type * as automations_options_providers from "../automations/options/providers.js";
 import type * as automations_options_slack from "../automations/options/slack.js";
+import type * as automations_providers from "../automations/providers.js";
 import type * as automations_read from "../automations/read.js";
 import type * as automations_records from "../automations/records.js";
 import type * as automations_run from "../automations/run.js";
@@ -88,6 +89,7 @@ import type * as executions_prompt_continuation from "../executions/prompt/conti
 import type * as executions_prompt_fixtures from "../executions/prompt/fixtures.js";
 import type * as executions_prompt_index from "../executions/prompt/index.js";
 import type * as executions_prompt_instructions from "../executions/prompt/instructions.js";
+import type * as executions_prompt_integration from "../executions/prompt/integration.js";
 import type * as executions_records from "../executions/records.js";
 import type * as executions_runtime from "../executions/runtime.js";
 import type * as executions_sandbox_e2b from "../executions/sandbox/e2b.js";
@@ -260,6 +262,7 @@ declare const fullApi: ApiFromModules<{
   "automations/options/notion": typeof automations_options_notion;
   "automations/options/providers": typeof automations_options_providers;
   "automations/options/slack": typeof automations_options_slack;
+  "automations/providers": typeof automations_providers;
   "automations/read": typeof automations_read;
   "automations/records": typeof automations_records;
   "automations/run": typeof automations_run;
@@ -310,6 +313,7 @@ declare const fullApi: ApiFromModules<{
   "executions/prompt/fixtures": typeof executions_prompt_fixtures;
   "executions/prompt/index": typeof executions_prompt_index;
   "executions/prompt/instructions": typeof executions_prompt_instructions;
+  "executions/prompt/integration": typeof executions_prompt_integration;
   "executions/records": typeof executions_records;
   "executions/runtime": typeof executions_runtime;
   "executions/sandbox/e2b": typeof executions_sandbox_e2b;

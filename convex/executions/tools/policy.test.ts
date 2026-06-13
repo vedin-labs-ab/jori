@@ -10,8 +10,10 @@ test("restricts automation selected integrations to declared access", () => {
     milo: runtimeMilo(),
     integrations: [github, slack],
     access: {
-      read: [github._id],
-      write: [slack._id],
+      integrations: [
+        { integrationId: github._id, tools: ["github_get_issue"] },
+        { integrationId: slack._id, tools: ["conversations_add_message"] },
+      ],
       web: true,
     },
     toolModes: resolveToolModes([]),
@@ -25,15 +27,20 @@ test("restricts automation selected integrations to declared access", () => {
   expect(toolBundle.skillNames).toContain("slack")
 })
 
-test("allows all connected reads without broadening automation writes", () => {
+test("uses selected read and write tools without broadening access", () => {
   const github = integration("github")
   const notion = integration("notion")
   const toolBundle = assembleToolsForRun({
     milo: runtimeMilo(),
     integrations: [github, notion],
     access: {
-      read: "all",
-      write: [notion._id],
+      integrations: [
+        { integrationId: github._id, tools: ["github_get_issue"] },
+        {
+          integrationId: notion._id,
+          tools: ["notion_search", "notion_create_page"],
+        },
+      ],
       web: true,
     },
     toolModes: resolveToolModes([]),
@@ -53,8 +60,12 @@ test("omits prompted tools from automation runs", () => {
     milo: runtimeMilo(),
     integrations: [notion],
     access: {
-      read: [notion._id],
-      write: [notion._id],
+      integrations: [
+        {
+          integrationId: notion._id,
+          tools: ["notion_search", "notion_create_page"],
+        },
+      ],
       web: true,
     },
     executionType: "automation",

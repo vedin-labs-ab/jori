@@ -26,7 +26,7 @@ export function useLatestInstructionRefs({
     refs.editor.current = editor
     refs.onBlur.current = props.onBlur
     refs.onValueChange.current = props.onValueChange
-    refs.readScope.current = props.readScope
+    refs.permissions.current = props.permissions
     refs.suggestion.current = suggestion
   }, [editor, props, refs, suggestion])
 }
@@ -64,7 +64,6 @@ export function useExternalInstructionValue({
         createAutomationInstructionDocument({
           description: props.value,
           permissions: props.permissions,
-          readScope: props.readScope,
           surfaces: props.surfaces,
         }),
         { emitUpdate: false }

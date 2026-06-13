@@ -1,8 +1,7 @@
 import { mergeAttributes, Node } from "@tiptap/core"
 import { ReactNodeViewRenderer } from "@tiptap/react"
+import { type AutomationPolicyPermissions } from "../../policy"
 import {
-  type AutomationReadScope,
-  type AutomationSurfaceFormValue,
   type AutomationSurfaceProvider,
   getAutomationSurfaceLabel,
   isAutomationSurfaceProvider,
@@ -15,13 +14,13 @@ import {
 import { AutomationSurfaceNodeView } from "./node"
 
 export type AutomationSurfaceNodeAttrs = {
-  access: AutomationSurfaceFormValue["access"]
   policy: AutomationSurfacePolicyState
   provider: AutomationSurfaceProvider
+  tools: string[]
 }
 
 export type AutomationSurfaceExtensionOptions = {
-  getReadScope: () => AutomationReadScope
+  getPermissions: () => AutomationPolicyPermissions
 }
 
 export const AutomationSurfaceExtension =
@@ -34,20 +33,12 @@ export const AutomationSurfaceExtension =
 
     addOptions() {
       return {
-        getReadScope: () => "selected",
+        getPermissions: () => undefined,
       }
     },
 
     addAttributes() {
       return {
-        access: {
-          default: "",
-          parseHTML: (element) =>
-            parseAutomationSurfaceAccess(element.getAttribute("data-access")),
-          renderHTML: (attributes) => ({
-            "data-access": parseAutomationSurfaceAccess(attributes.access),
-          }),
-        },
         provider: {
           default: null,
           parseHTML: (element) =>
@@ -57,6 +48,16 @@ export const AutomationSurfaceExtension =
           renderHTML: (attributes) => ({
             "data-provider": parseAutomationSurfaceProvider(
               attributes.provider
+            ),
+          }),
+        },
+        tools: {
+          default: [],
+          parseHTML: (element) =>
+            parseAutomationSurfaceTools(element.getAttribute("data-tools")),
+          renderHTML: (attributes) => ({
+            "data-tools": parseAutomationSurfaceTools(attributes.tools).join(
+              ","
             ),
           }),
         },
@@ -96,18 +97,22 @@ function parseAutomationSurfaceProvider(provider: unknown) {
   return isAutomationSurfaceProvider(provider) ? provider : null
 }
 
-function parseAutomationSurfaceAccess(
-  access: unknown
-): AutomationSurfaceFormValue["access"] {
-  return access === "read" || access === "write" || access === "both"
-    ? access
-    : ""
-}
-
 function parseAutomationSurfacePolicy(
   policy: unknown
 ): AutomationSurfacePolicyState {
   return automationSurfacePolicyStates.some((state) => state === policy)
     ? (policy as AutomationSurfacePolicyState)
     : "allowed"
+}
+
+function parseAutomationSurfaceTools(tools: unknown) {
+  if (Array.isArray(tools)) {
+    return tools.filter((tool): tool is string => typeof tool === "string")
+  }
+
+  if (typeof tools === "string") {
+    return tools.split(",").filter((tool) => tool !== "")
+  }
+
+  return []
 }

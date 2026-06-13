@@ -44,7 +44,6 @@ export function AutomationInstructionsSection({
         permissions={permissions}
         placeholder="Summarize GitHub changes and post them to Slack."
         policyKey={policyKey}
-        readScope={values.readScope}
         showAccessError={isAccessMarkerError(error)}
         surfaces={values.surfaces}
       />
@@ -73,7 +72,7 @@ function InstructionsHelp() {
           <div className="grid gap-1">
             <p>Write the work Milo should do.</p>
             <p>Mention integrations like GitHub, Slack, Linear, or Gmail.</p>
-            <p>Set access from each badge.</p>
+            <p>Choose tools from each badge.</p>
           </div>
         </TooltipContent>
       </Tooltip>

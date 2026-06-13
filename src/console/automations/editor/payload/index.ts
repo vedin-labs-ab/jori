@@ -25,8 +25,10 @@ type AutomationArgs = {
   name: string
   instructions: string
   access: {
-    read: "all" | AutomationFormValues["surfaces"][number]["provider"][]
-    write: AutomationFormValues["surfaces"][number]["provider"][]
+    integrations: Array<{
+      provider: AutomationFormValues["surfaces"][number]["provider"]
+      tools: string[]
+    }>
     web: boolean
   }
 }
@@ -50,7 +52,6 @@ export function automationFormValues(
     name: automation.name,
     instructions: normalizeAutomationSurfaceMentions(automation.instructions),
     ...triggerFormValues(automation),
-    readScope: automation.access.readScope,
     webSearch: automation.access.webSearch,
     surfaces: automation.access.surfaces,
   }
@@ -113,11 +114,7 @@ function buildBaseArgs(
   const instructions = normalizeAutomationSurfaceMentions(
     values.instructions.trim()
   )
-  const surfaces = syncAutomationSurfaces(
-    instructions,
-    values.surfaces,
-    values.readScope
-  )
+  const surfaces = syncAutomationSurfaces(instructions, values.surfaces)
 
   if (name === "") {
     return { error: "Name is required." }
@@ -131,18 +128,13 @@ function buildBaseArgs(
     return { error: automationInstructionMarkerErrors.noMarkers }
   }
 
-  if (surfaces.some((surface) => surface.access === "")) {
+  if (surfaces.some((surface) => surface.tools.length === 0)) {
     return { error: automationInstructionMarkerErrors.incompleteAccess }
-  }
-
-  if (!hasAutomationWriteSurface(surfaces)) {
-    return { error: automationInstructionMarkerErrors.noWrite }
   }
 
   if (Object.hasOwn(options, "permissions")) {
     const policyError = validateAutomationPolicy({
       permissions: options.permissions,
-      readScope: values.readScope,
       surfaces,
     })
 
@@ -155,25 +147,21 @@ function buildBaseArgs(
     }
   }
 
+  if (Array.isArray(options.permissions)) {
+    if (!hasAutomationWriteSurface(surfaces, options.permissions)) {
+      return { error: automationInstructionMarkerErrors.noWrite }
+    }
+  }
+
   return {
     args: {
       name,
       instructions,
       access: {
-        read:
-          values.readScope === "allConnected"
-            ? "all"
-            : surfaces
-                .filter(
-                  (surface) =>
-                    surface.access === "read" || surface.access === "both"
-                )
-                .map((surface) => surface.provider),
-        write: surfaces
-          .filter(
-            (surface) => surface.access === "write" || surface.access === "both"
-          )
-          .map((surface) => surface.provider),
+        integrations: surfaces.map((surface) => ({
+          provider: surface.provider,
+          tools: surface.tools,
+        })),
         web: values.webSearch,
       },
     },

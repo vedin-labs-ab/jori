@@ -6,7 +6,6 @@ import { requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { integrationProviderValidator } from "../providers/catalog"
-import { providerLabels, resolveEventIntegration } from "./access"
 import {
   isAutomationEventOptionSource,
   providerUsesAutomationEventOptionSource,
@@ -15,6 +14,7 @@ import {
   type AutomationEventOptionSearchResult,
   searchProviderOptions,
 } from "./options/providers"
+import { providerLabels, resolveEventIntegration } from "./providers"
 
 const criteriaValidator = v.record(v.string(), v.union(v.string(), v.number()))
 

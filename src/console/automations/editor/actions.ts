@@ -1,14 +1,9 @@
 import {
-  type AutomationReadScope,
   type AutomationSurfaceFormValue,
-  applyAutomationReadScope,
   syncAutomationSurfaces,
 } from "../surfaces"
 import { type AutomationFormValues } from "../types"
-import {
-  writeAutomationReadScopePreference,
-  writeAutomationWebSearchPreference,
-} from "./preferences"
+import { writeAutomationWebSearchPreference } from "./preferences"
 
 export function createAutomationDialogActions({
   onValuesChange,
@@ -34,14 +29,6 @@ export function createAutomationDialogActions({
     updateName: (name: string) => {
       onValuesChange({ ...values, name })
     },
-    updateReadScope: (readScope: AutomationReadScope) => {
-      writeAutomationReadScopePreference(readScope)
-      onValuesChange({
-        ...values,
-        readScope,
-        surfaces: applyAutomationReadScope(values.surfaces, readScope),
-      })
-    },
     updateWebSearch: (webSearch: boolean) => {
       writeAutomationWebSearchPreference(webSearch)
       onValuesChange({ ...values, webSearch })
@@ -61,10 +48,6 @@ function updateDescriptionState({
   onValuesChange({
     ...values,
     instructions,
-    surfaces: syncAutomationSurfaces(
-      instructions,
-      values.surfaces,
-      values.readScope
-    ),
+    surfaces: syncAutomationSurfaces(instructions, values.surfaces),
   })
 }

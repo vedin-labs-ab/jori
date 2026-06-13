@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, test } from "vitest"
 import { emptyAutomationForm } from "../../types"
-import {
-  writeAutomationReadScopePreference,
-  writeAutomationWebSearchPreference,
-} from "../preferences"
+import { writeAutomationWebSearchPreference } from "../preferences"
 import { automationFormValues, createAutomationArgs } from "."
 import { automationInstructionMarkerErrors } from "./marker"
 
@@ -13,42 +10,43 @@ afterEach(() => {
 })
 
 describe("automation payload", () => {
-  test("defaults new automations to all reads and web search", () => {
+  test("defaults new automations to web search", () => {
     expect(automationFormValues(undefined)).toMatchObject({
-      readScope: "allConnected",
       webSearch: true,
     })
   })
 
   test("uses stored automation access preferences for new automations", () => {
-    writeAutomationReadScopePreference("selected")
     writeAutomationWebSearchPreference(false)
 
     expect(automationFormValues(undefined)).toMatchObject({
-      readScope: "selected",
       webSearch: false,
     })
   })
 
   test("creates automation args with integration access policy", () => {
     expect(
-      createAutomationArgs({
-        ...emptyAutomationForm,
-        name: "Weekly release summary",
-        instructions: "Summarize GitHub and post to Slack.",
-        readScope: "selected",
-        surfaces: [
-          { provider: "github", access: "read" },
-          { provider: "slack", access: "write" },
-        ],
-      })
+      createAutomationArgs(
+        {
+          ...emptyAutomationForm,
+          name: "Weekly release summary",
+          instructions: "Summarize GitHub and post to Slack.",
+          surfaces: [
+            { provider: "github", tools: ["github_get_issue"] },
+            { provider: "slack", tools: ["conversations_add_message"] },
+          ],
+        },
+        { permissions: automationPermissions() }
+      )
     ).toEqual({
       args: {
         name: "Weekly release summary",
         instructions: "Summarize GitHub and post to Slack.",
         access: {
-          read: ["github"],
-          write: ["slack"],
+          integrations: [
+            { provider: "github", tools: ["github_get_issue"] },
+            { provider: "slack", tools: ["conversations_add_message"] },
+          ],
           web: true,
         },
         trigger: {
@@ -59,30 +57,32 @@ describe("automation payload", () => {
     })
   })
 
-  test("requires every selected-read marker to have an access role", () => {
+  test("requires every marker to have at least one selected tool", () => {
     expect(
       createAutomationArgs({
         ...emptyAutomationForm,
         name: "Weekly release summary",
         instructions: "Summarize GitHub.",
-        readScope: "selected",
-        surfaces: [{ provider: "github", access: "" }],
+        surfaces: [{ provider: "github", tools: [] }],
       })
     ).toEqual({
-      error: "Choose read, write, or read/write for each mention.",
+      error: "Choose at least one tool for each mentioned integration.",
     })
   })
 
-  test("requires at least one write integration", () => {
+  test("requires at least one write tool", () => {
     expect(
-      createAutomationArgs({
-        ...emptyAutomationForm,
-        name: "Weekly release summary",
-        instructions: "Summarize GitHub.",
-        surfaces: [{ provider: "github", access: "read" }],
-      })
+      createAutomationArgs(
+        {
+          ...emptyAutomationForm,
+          name: "Weekly release summary",
+          instructions: "Summarize GitHub.",
+          surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
+        },
+        { permissions: automationPermissions() }
+      )
     ).toEqual({
-      error: "Give at least one mentioned integration write access.",
+      error: "Give at least one mentioned integration a write tool.",
     })
   })
 })
@@ -95,10 +95,9 @@ describe("automation payload permissions", () => {
           ...emptyAutomationForm,
           name: "Weekly release summary",
           instructions: "Summarize GitHub and post to Slack.",
-          readScope: "selected",
           surfaces: [
-            { provider: "github", access: "read" },
-            { provider: "slack", access: "write" },
+            { provider: "github", tools: ["github_get_issue"] },
+            { provider: "slack", tools: ["conversations_add_message"] },
           ],
         },
         {
@@ -123,6 +122,21 @@ describe("automation payload permissions", () => {
     })
   })
 })
+
+function automationPermissions() {
+  return [
+    toolPermission({
+      access: "read",
+      provider: "github",
+      tool: "github_get_issue",
+    }),
+    toolPermission({
+      access: "write",
+      provider: "slack",
+      tool: "conversations_add_message",
+    }),
+  ]
+}
 
 function toolPermission(
   overrides: Partial<{

@@ -32,9 +32,9 @@ describe("automation instructions marker validation", () => {
   test("targets unselected markers with destructive validation", async () => {
     const field = renderInstructionsField({
       description: "Post to GitHub.",
-      error: "Choose read, write, or read/write for each mention.",
+      error: "Choose at least one tool for each mentioned integration.",
       showAccessError: true,
-      surfaces: [{ provider: "github", access: "" }],
+      surfaces: [{ provider: "github", tools: [] }],
     })
 
     expect(await screen.findByRole("textbox")).toBeDefined()
@@ -60,17 +60,17 @@ describe("automation instructions marker styling", () => {
   test("uses icon opacity instead of background for badge access hover", async () => {
     renderInstructionsField({
       description: "Post to GitHub.",
-      surfaces: [{ provider: "github", access: "read" }],
+      surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
     })
 
     const button = await screen.findByRole("button", {
-      name: "GitHub access: Read. Change access.",
+      name: "GitHub tools: 1 enabled. Configure tools.",
     })
 
     expect(button.className).toContain("text-[#2563EB]")
     expect(button.className).toContain("px-1")
     expect(button.className).not.toContain("w-5")
-    expect(button.className).toContain("opacity-55")
+    expect(button.className).toContain("opacity-70")
     expect(button.className).toContain("hover:opacity-100")
     expect(button.className).not.toContain("hover:bg-")
   })
@@ -80,7 +80,9 @@ describe("automation instructions marker hover", () => {
   test("keeps provider pane width stable and only swaps the icon affordance", async () => {
     renderInstructionsField({
       description: "Post to Google Drive.",
-      surfaces: [{ provider: "googleDrive", access: "read" }],
+      surfaces: [
+        { provider: "googleDrive", tools: ["google_drive_read_file"] },
+      ],
     })
 
     const button = await screen.findByRole("button", {

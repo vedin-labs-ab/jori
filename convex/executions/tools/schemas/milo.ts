@@ -30,32 +30,28 @@ const eventEnum = [
 
 const accessSchema = () => ({
   ...objectSchema({
-    required: ["read", "write", "web"],
+    required: ["integrations", "web"],
     properties: {
-      read: {
-        oneOf: [
-          {
-            const: "all",
-            description: "Allow reads from every connected integration.",
-          },
-          {
-            type: "array",
-            description: "Providers this automation may read from.",
-            items: {
-              type: "string",
-              enum: providerEnum,
-            },
-          },
-        ],
-      },
-      write: {
+      integrations: {
         type: "array",
         description:
-          "Providers this automation may write to. At least one is required.",
-        items: {
-          type: "string",
-          enum: providerEnum,
-        },
+          "Integration tools this automation may use. Select exact tool names from the provider permission catalog.",
+        items: objectSchema({
+          required: ["provider", "tools"],
+          properties: {
+            provider: {
+              type: "string",
+              enum: providerEnum,
+              description: "Connected integration provider.",
+            },
+            tools: {
+              type: "array",
+              description:
+                "Exact tool names this automation may use for this provider.",
+              items: { type: "string" },
+            },
+          },
+        }),
       },
       web: {
         type: "boolean",

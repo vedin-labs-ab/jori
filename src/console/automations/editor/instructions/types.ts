@@ -1,10 +1,7 @@
 import { type Editor } from "@tiptap/react"
 import { type MutableRefObject } from "react"
 import { type AutomationPolicyPermissions } from "../../policy"
-import {
-  type AutomationReadScope,
-  type AutomationSurfaceFormValue,
-} from "../../surfaces"
+import { type AutomationSurfaceFormValue } from "../../surfaces"
 import { type AutomationInstructionsValue } from "./document"
 import { type InstructionSuggestionState } from "./suggest"
 
@@ -16,7 +13,6 @@ export type AutomationInstructionsFieldProps = {
   placeholder: string
   permissions?: AutomationPolicyPermissions
   policyKey: string
-  readScope: AutomationReadScope
   showAccessError?: boolean
   surfaces: AutomationSurfaceFormValue[]
   value: string
@@ -28,6 +24,6 @@ export type InstructionRefs = {
   onValueChange: MutableRefObject<
     AutomationInstructionsFieldProps["onValueChange"]
   >
-  readScope: MutableRefObject<AutomationReadScope>
+  permissions: MutableRefObject<AutomationPolicyPermissions>
   suggestion: MutableRefObject<InstructionSuggestionState | null>
 }

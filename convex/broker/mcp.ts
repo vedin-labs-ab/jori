@@ -1,9 +1,8 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { getIntegrationAccess } from "../automations/access"
+import { canUseAutomationTool } from "../automations/access"
 import { hashExecutionToken } from "../executions/tokens"
-import { isPermissionAllowedByAccess } from "../executions/tools/policy"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import {
   canUseToolMode,
@@ -234,12 +233,13 @@ async function authorizeProviderTool(
   const integration = findProviderIntegration(context, request.provider)
 
   if (integration !== null && context.input.type === "automation") {
-    const access = getIntegrationAccess(
+    const isSelected = canUseAutomationTool(
       context.input.automation.access,
-      integration._id
+      integration._id,
+      request.tool
     )
 
-    if (!isPermissionAllowedByAccess(request.permission.access, access)) {
+    if (!isSelected) {
       throw new Error(
         `Tool is not allowed by automation access: ${request.tool}`
       )

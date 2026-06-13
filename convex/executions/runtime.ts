@@ -3,7 +3,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { getIntegrationAccess } from "../automations/access"
+import { hasIntegrationTools } from "../automations/access"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { createPromptedExecution } from "./artifacts"
 import { type CodexRuntimeInput } from "./codex"
@@ -110,8 +110,8 @@ function filterAutomationIntegrations(
     { type: "automation" }
   >["automation"]["access"]
 ) {
-  return integrations.filter(
-    (integration) => getIntegrationAccess(access, integration._id) !== "none"
+  return integrations.filter((integration) =>
+    hasIntegrationTools(access, integration._id)
   )
 }
 

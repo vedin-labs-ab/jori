@@ -1,15 +1,14 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react"
+import { cleanup, screen } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
 import { renderInstructionsField } from "./fixtures"
 
 afterEach(cleanup)
 
-describe("automation instructions all-read access", () => {
+describe("automation instructions tool access", () => {
   test("keeps the footer focused on smart integration mentions", async () => {
     const field = renderInstructionsField({
       description: "",
-      readScope: "allConnected",
       surfaces: [],
     })
 
@@ -20,37 +19,16 @@ describe("automation instructions all-read access", () => {
     expect(field.container.textContent).not.toContain("read/write")
   })
 
-  test("cycles marker access between read and read/write", async () => {
-    const field = renderInstructionsField({
+  test("renders a zero count for markers without enabled tools", async () => {
+    renderInstructionsField({
       description: "Post to GitHub.",
-      readScope: "allConnected",
-      surfaces: [{ provider: "github", access: "read" }],
+      surfaces: [{ provider: "github", tools: [] }],
     })
 
-    fireEvent.click(
+    expect(
       await screen.findByRole("button", {
-        name: "GitHub access: Read. Change access.",
+        name: "GitHub tools: 0 enabled. Configure tools.",
       })
-    )
-
-    await waitFor(() => {
-      expect(field.onValueChange).toHaveBeenLastCalledWith({
-        description: "Post to GitHub.",
-        surfaces: [{ provider: "github", access: "both" }],
-      })
-    })
-
-    fireEvent.click(
-      await screen.findByRole("button", {
-        name: "GitHub access: Read/write. Change access.",
-      })
-    )
-
-    await waitFor(() => {
-      expect(field.onValueChange).toHaveBeenLastCalledWith({
-        description: "Post to GitHub.",
-        surfaces: [{ provider: "github", access: "read" }],
-      })
-    })
+    ).toBeDefined()
   })
 })

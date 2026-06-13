@@ -1,9 +1,6 @@
-import { type ToolAccess, type ToolPermission } from "../permissions/controller"
+import { type ToolPermission } from "../permissions/controller"
 import {
-  type AutomationReadScope,
   type AutomationSurfaceFormValue,
-  type AutomationSurfaceProvider,
-  getAutomationSurfaceAccessLabel,
   getAutomationSurfaceLabel,
 } from "./surfaces"
 
@@ -26,11 +23,9 @@ export function automationPolicyKey(permissions: AutomationPolicyPermissions) {
 
 export function validateAutomationPolicy({
   permissions,
-  readScope,
   surfaces,
 }: {
   permissions: AutomationPolicyPermissions
-  readScope: AutomationReadScope
   surfaces: AutomationSurfaceFormValue[]
 }) {
   if (permissions === undefined) {
@@ -42,83 +37,56 @@ export function validateAutomationPolicy({
   }
 
   const blockedSurface = surfaces.find((surface) =>
-    isAutomationSurfacePolicyBlocked({ permissions, readScope, surface })
+    isAutomationSurfacePolicyBlocked({ permissions, surface })
   )
 
   if (blockedSurface === undefined) {
     return undefined
   }
 
-  return `${getAutomationSurfaceLabel(blockedSurface.provider)} ${blockedAccessLabel(
-    blockedSurface,
-    readScope,
-    permissions
-  )} access is not available for automations.`
+  return `${getAutomationSurfaceLabel(blockedSurface.provider)} has tools that are not available for automations.`
 }
 
 export function isAutomationSurfacePolicyBlocked({
   permissions,
-  readScope,
   surface,
 }: {
   permissions: AutomationPolicyPermissions
-  readScope: AutomationReadScope
   surface: AutomationSurfaceFormValue
 }) {
-  if (!Array.isArray(permissions) || surface.access === "") {
+  if (!Array.isArray(permissions) || surface.tools.length === 0) {
     return false
   }
 
-  return requiredToolAccesses(surface.access, readScope).some(
-    (access) =>
-      !canUseAutomationProviderAccess(permissions, surface.provider, access)
+  const permissionsByTool = new Map(
+    permissions.map((permission) => [permission.tool, permission])
   )
+
+  return surface.tools.some((tool) => {
+    const permission = permissionsByTool.get(tool)
+
+    return (
+      permission === undefined ||
+      permission.provider !== surface.provider ||
+      !isAutomationToolSelectable(permission)
+    )
+  })
 }
 
-function blockedAccessLabel(
-  surface: AutomationSurfaceFormValue,
-  readScope: AutomationReadScope,
-  permissions: ToolPermission[]
-) {
-  const blockedAccesses = requiredToolAccesses(
-    surface.access,
-    readScope
-  ).filter(
-    (access) =>
-      !canUseAutomationProviderAccess(permissions, surface.provider, access)
-  )
+export function isAutomationToolSelectable(permission: ToolPermission) {
+  return permission.mode === "allowed" || permission.mode === "required"
+}
 
-  if (blockedAccesses.length === 1) {
-    return blockedAccesses[0]
+export function automationToolModeDescription(permission: ToolPermission) {
+  if (permission.mode === "prompted") {
+    return "Requires approval in Integrations and cannot run in automations."
   }
 
-  return getAutomationSurfaceAccessLabel(surface.access).toLowerCase()
-}
-
-function canUseAutomationProviderAccess(
-  permissions: ToolPermission[],
-  provider: AutomationSurfaceProvider,
-  access: ToolAccess
-) {
-  return permissions.some(
-    (permission) =>
-      permission.provider === provider &&
-      permission.access === access &&
-      isUnattendedMode(permission.mode)
-  )
-}
-
-function isUnattendedMode(mode: ToolPermission["mode"]) {
-  return mode === "allowed" || mode === "required"
-}
-
-function requiredToolAccesses(
-  access: AutomationSurfaceFormValue["access"],
-  readScope: AutomationReadScope
-): ToolAccess[] {
-  if (access === "both") {
-    return readScope === "allConnected" ? ["write"] : ["read", "write"]
+  if (permission.mode === "blocked") {
+    return "Blocked in Integrations."
   }
 
-  return access === "" ? [] : [access]
+  return permission.mode === "required"
+    ? "Allowed for automations."
+    : "Allowed in Integrations."
 }

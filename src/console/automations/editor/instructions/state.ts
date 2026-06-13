@@ -71,11 +71,10 @@ export function useAutomationInstructionsEditor(
       insertSurfaceSuggestion({
         editor,
         provider,
-        readScope: props.readScope,
         setSuggestion,
         state: suggestion,
       }),
-    [editor, props.readScope, suggestion]
+    [editor, suggestion]
   )
 
   return {
@@ -97,7 +96,7 @@ function useInstructionRefs(props: AutomationInstructionsFieldProps) {
     editor: useRef<Editor | null>(null),
     onBlur: useRef(props.onBlur),
     onValueChange: useRef(props.onValueChange),
-    readScope: useRef(props.readScope),
+    permissions: useRef(props.permissions),
     suggestion: useRef<InstructionSuggestionState | null>(null),
   }
 }
@@ -119,7 +118,6 @@ function createEditorOptions({
     content: createAutomationInstructionDocument({
       description: props.value,
       permissions: props.permissions,
-      readScope: props.readScope,
       surfaces: props.surfaces,
     }),
     editorProps: createEditorProps({
@@ -147,7 +145,7 @@ function createExtensions(refs: InstructionRefs) {
   return [
     starterKitExtension,
     AutomationSurfaceExtension.configure({
-      getReadScope: () => refs.readScope.current,
+      getPermissions: () => refs.permissions.current,
     }),
   ]
 }
@@ -198,7 +196,6 @@ function createEditorProps({
       handleSuggestionKey({
         editor: refs.editor.current,
         event,
-        readScope: refs.readScope.current,
         setSuggestion,
         state: refs.suggestion.current,
       }),
@@ -210,7 +207,6 @@ function createEditorProps({
     ) =>
       replaceCompletedSurfaceMention({
         from,
-        readScope: refs.readScope.current,
         text,
         to,
         view,

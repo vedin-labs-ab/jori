@@ -1,10 +1,8 @@
 import { type JSONContent } from "@tiptap/core"
 import { isAutomationSurfacePolicyBlocked } from "../../policy"
 import {
-  type AutomationReadScope,
   type AutomationSurfaceFormValue,
   type AutomationSurfaceProvider,
-  defaultAutomationSurfaceAccess,
   getAutomationSurfaceLabel,
   getAutomationSurfaceMentionParts,
   isAutomationSurfaceProvider,
@@ -25,16 +23,14 @@ export type AutomationInstructionsValue = {
 export function createAutomationInstructionDocument({
   description,
   permissions,
-  readScope,
   surfaces,
 }: AutomationInstructionsValue & {
   permissions?: AutomationInstructionsFieldProps["permissions"]
-  readScope: AutomationReadScope
 }): JSONContent {
-  const accessByProvider = new Map(
-    syncAutomationSurfaces(description, surfaces, readScope).map((surface) => [
+  const toolsByProvider = new Map(
+    syncAutomationSurfaces(description, surfaces).map((surface) => [
       surface.provider,
-      surface.access,
+      surface.tools,
     ])
   )
   const paragraphs: JSONContent[] = [{ type: "paragraph", content: [] }]
@@ -48,18 +44,13 @@ export function createAutomationInstructionDocument({
     appendNode(paragraphs, {
       type: automationSurfaceNodeName,
       attrs: {
-        access:
-          accessByProvider.get(part.provider) ??
-          defaultAutomationSurfaceAccess(readScope),
         policy: readSurfacePolicy({
-          access:
-            accessByProvider.get(part.provider) ??
-            defaultAutomationSurfaceAccess(readScope),
           permissions,
           provider: part.provider,
-          readScope,
+          tools: toolsByProvider.get(part.provider) ?? [],
         }),
         provider: part.provider,
+        tools: toolsByProvider.get(part.provider) ?? [],
       },
     })
   }
@@ -71,18 +62,15 @@ export function createAutomationInstructionDocument({
 }
 
 function readSurfacePolicy({
-  access,
   permissions,
   provider,
-  readScope,
+  tools,
 }: AutomationSurfaceFormValue & {
   permissions: AutomationInstructionsFieldProps["permissions"]
-  readScope: AutomationReadScope
 }): AutomationSurfacePolicyState {
   return isAutomationSurfacePolicyBlocked({
     permissions,
-    readScope,
-    surface: { access, provider },
+    surface: { provider, tools },
   })
     ? "blocked"
     : "allowed"
@@ -174,23 +162,16 @@ function serializeSurfaceNode(
   if (!seen.has(provider)) {
     seen.add(provider)
     surfaces.push({
-      access: isAutomationSurfaceAccess(node.attrs?.access)
-        ? node.attrs.access
-        : "",
       provider,
+      tools: parseAutomationSurfaceTools(node.attrs?.tools),
     })
   }
 
   return getAutomationSurfaceLabel(provider)
 }
 
-function isAutomationSurfaceAccess(
-  access: unknown
-): access is AutomationSurfaceFormValue["access"] {
-  return (
-    access === "" ||
-    access === "read" ||
-    access === "write" ||
-    access === "both"
-  )
+function parseAutomationSurfaceTools(tools: unknown) {
+  return Array.isArray(tools)
+    ? tools.filter((tool): tool is string => typeof tool === "string")
+    : []
 }

@@ -1,8 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import {
-  type AccessLevel,
   type AutomationAccess,
-  getIntegrationAccess,
+  getIntegrationTools,
 } from "../../automations/access"
 import {
   getToolPermissionsByProvider,
@@ -60,8 +59,8 @@ export function createIntegrationToolBundle(
 
   const integrationAccess =
     args.access === undefined
-      ? "both"
-      : getIntegrationAccess(args.access, args.integration._id)
+      ? undefined
+      : getIntegrationTools(args.access, args.integration._id)
   const permissions = getEnabledToolPermissions(
     provider,
     args.toolModes,
@@ -91,10 +90,15 @@ export function getEnabledToolPermissions(
   provider: ToolProvider,
   toolModes: ReadonlyMap<string, PermissionMode>,
   executionType: ToolExecutionType = "message",
-  access: AccessLevel = "both"
+  selectedTools?: readonly string[]
 ) {
-  return getToolPermissionsByProvider(provider).filter((permission) =>
-    canUseToolPermission({ access, executionType, permission, toolModes })
+  const selectedToolSet =
+    selectedTools === undefined ? null : new Set(selectedTools)
+
+  return getToolPermissionsByProvider(provider).filter(
+    (permission) =>
+      (selectedToolSet === null || selectedToolSet.has(permission.tool)) &&
+      canUseToolPermission({ executionType, permission, toolModes })
   )
 }
 

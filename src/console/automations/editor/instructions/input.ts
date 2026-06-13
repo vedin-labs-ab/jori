@@ -2,9 +2,7 @@ import { type JSONContent } from "@tiptap/core"
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
 import {
-  type AutomationReadScope,
   type AutomationSurfaceProvider,
-  defaultAutomationSurfaceAccess,
   findCompletedAutomationSurfaceMention,
   isMentionNameCharacter,
 } from "../../surfaces"
@@ -14,13 +12,11 @@ import { type InstructionSuggestionState } from "./suggest"
 export function insertSurfaceSuggestion({
   editor,
   provider,
-  readScope,
   setSuggestion,
   state,
 }: {
   editor: Editor | null
   provider: AutomationSurfaceProvider
-  readScope: AutomationReadScope
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState | null
 }) {
@@ -35,7 +31,6 @@ export function insertSurfaceSuggestion({
       state.range,
       getSurfaceInsertionContent(
         provider,
-        readScope,
         shouldInsertTrailingSpace(editor, state.range.to)
       )
     )
@@ -45,13 +40,11 @@ export function insertSurfaceSuggestion({
 
 export function replaceCompletedSurfaceMention({
   from,
-  readScope,
   text,
   to,
   view,
 }: {
   from: number
-  readScope: AutomationReadScope
   text: string
   to: number
   view: Editor["view"]
@@ -83,8 +76,8 @@ export function replaceCompletedSurfaceMention({
     start,
     from,
     surfaceNode.create({
-      access: defaultAutomationSurfaceAccess(readScope),
       provider: match.provider,
+      tools: [],
     })
   )
 
@@ -96,14 +89,13 @@ export function replaceCompletedSurfaceMention({
 
 function getSurfaceInsertionContent(
   provider: AutomationSurfaceProvider,
-  readScope: AutomationReadScope,
   includeTrailingSpace: boolean
 ) {
   const content: JSONContent[] = [
     {
       attrs: {
-        access: defaultAutomationSurfaceAccess(readScope),
         provider,
+        tools: [],
       },
       type: automationSurfaceNodeName,
     },

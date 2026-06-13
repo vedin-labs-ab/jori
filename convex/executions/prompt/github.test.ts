@@ -39,8 +39,9 @@ function githubAutomationRuntimeInput() {
       name: "GitHub quip",
       instructions: "Reply with a short quip.",
       access: {
-        read: "all",
-        write: [github._id],
+        integrations: [
+          { integrationId: github._id, tools: ["github_add_issue_comment"] },
+        ],
         web: true,
       },
       trigger: {

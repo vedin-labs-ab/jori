@@ -33,7 +33,7 @@ function automation(
     tenantId: "tenant",
     name: "Automation",
     instructions: "Do work.",
-    access: { read: "all", write: [], web: true },
+    access: { integrations: [], web: true },
     trigger: {
       type: "event",
       integrationId: "integration",

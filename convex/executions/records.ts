@@ -5,7 +5,7 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { getIntegrationAccess } from "../automations/access"
+import { hasIntegrationTools } from "../automations/access"
 
 export const getInputByRun = internalQuery({
   args: {
@@ -118,9 +118,8 @@ async function getAutomationInput(
       integration !== null && integration.tenantId === args.run.tenantId
         ? integration
         : null,
-    integrations: integrations.filter(
-      (integration) =>
-        getIntegrationAccess(automation.access, integration._id) !== "none"
+    integrations: integrations.filter((integration) =>
+      hasIntegrationTools(automation.access, integration._id)
     ),
   }
 }

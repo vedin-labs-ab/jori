@@ -1,19 +1,16 @@
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
-import { type AutomationReadScope } from "../../surfaces"
 import { insertSurfaceSuggestion } from "./input"
 import { type InstructionSuggestionState } from "./suggest"
 
 export function handleSuggestionKey({
   editor,
   event,
-  readScope,
   setSuggestion,
   state,
 }: {
   editor: Editor | null
   event: KeyboardEvent
-  readScope: AutomationReadScope
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState | null
 }) {
@@ -36,7 +33,7 @@ export function handleSuggestionKey({
 
   if (event.key === "Enter" || event.key === "Tab") {
     event.preventDefault()
-    insertActiveSuggestion({ editor, readScope, setSuggestion, state })
+    insertActiveSuggestion({ editor, setSuggestion, state })
     return true
   }
 
@@ -58,12 +55,10 @@ export function updateSuggestionIndex(
 
 function insertActiveSuggestion({
   editor,
-  readScope,
   setSuggestion,
   state,
 }: {
   editor: Editor | null
-  readScope: AutomationReadScope
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState
 }) {
@@ -73,7 +68,6 @@ function insertActiveSuggestion({
     insertSurfaceSuggestion({
       editor,
       provider: activeSuggestion.provider,
-      readScope,
       setSuggestion,
       state,
     })
