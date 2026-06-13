@@ -117,8 +117,12 @@ function EventOptionContent({
         <>
           {isLoading ? null : <ComboboxEmpty>No options found.</ComboboxEmpty>}
           <ComboboxList>
-            {(option: AutomationEventOption) => (
-              <EventOptionItem key={option.value} option={option} />
+            {(option: AutomationEventOption, index: number) => (
+              <EventOptionItem
+                key={option.value}
+                index={index}
+                option={option}
+              />
             )}
           </ComboboxList>
         </>
@@ -169,9 +173,15 @@ function optionPlaceholder({
     : parameter.placeholder
 }
 
-function EventOptionItem({ option }: { option: AutomationEventOption }) {
+function EventOptionItem({
+  index,
+  option,
+}: {
+  index: number
+  option: AutomationEventOption
+}) {
   return (
-    <ComboboxItem className="items-start pr-7" value={option}>
+    <ComboboxItem className="items-start pr-7" index={index} value={option}>
       <div className="grid min-w-0 gap-0.5">
         <span className="truncate">{option.label}</span>
         {option.description === undefined ? null : (

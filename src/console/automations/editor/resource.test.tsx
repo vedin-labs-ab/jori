@@ -76,6 +76,19 @@ describe("automation event option field", () => {
 
     expect(option.className).toContain("hover:bg-accent")
 
+    fireEvent.pointerMove(option, { pointerType: "mouse" })
+    fireEvent.mouseMove(option)
+    await waitFor(() => {
+      expect(option.hasAttribute("data-highlighted")).toBe(true)
+    })
+
+    fireEvent.pointerDown(option, {
+      button: 0,
+      ctrlKey: false,
+      pointerType: "mouse",
+    })
+    fireEvent.mouseDown(option, { button: 0 })
+    fireEvent.mouseUp(option, { button: 0 })
     fireEvent.click(option)
 
     await waitFor(() => {
