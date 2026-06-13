@@ -62,7 +62,7 @@ export function AutomationSurfaceToolGroups({
   }
 
   return (
-    <div className="grid gap-6 px-5 pb-5">
+    <div className="grid gap-7 px-6 pb-6">
       {permissionGroups.map((group) => (
         <AutomationToolGroup
           access={group.access}
@@ -101,12 +101,12 @@ function AutomationToolGroup({
     hasSelectableTools && selectedCount === selectablePermissions.length
 
   return (
-    <section className="grid gap-3">
+    <section className="grid gap-3.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          <h3 className="font-medium text-base capitalize">{access}</h3>
+          <h3 className="font-semibold text-lg capitalize">{access}</h3>
           <Badge
-            className="shrink-0 rounded-md px-2 py-0.5 font-normal text-muted-foreground"
+            className="h-6 shrink-0 rounded-md px-2.5 font-normal text-muted-foreground text-xs"
             variant="secondary"
           >
             {selectedCount} of {selectablePermissions.length} selected
@@ -115,7 +115,7 @@ function AutomationToolGroup({
         {hasSelectableTools ? (
           <Button
             aria-label={`${allSelectableSelected ? "Clear" : "Select all"} ${access} tools`}
-            className="h-auto px-1 font-medium text-primary"
+            className="h-auto px-1 font-medium text-primary hover:bg-transparent hover:text-primary/80"
             onClick={() => onGroupChange(permissions, !allSelectableSelected)}
             type="button"
             variant="ghost"
@@ -124,7 +124,7 @@ function AutomationToolGroup({
           </Button>
         ) : null}
       </div>
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-hidden rounded-lg border">
         {permissions.map((permission) => (
           <AutomationToolRow
             key={permission.tool}
@@ -152,25 +152,27 @@ function AutomationToolRow({
   selected,
 }: AutomationToolRowProps) {
   const checkboxId = useId()
+  const descriptionId = `${checkboxId}-description`
   const selectable = isAutomationToolSelectable(permission)
   const disabled = !selectable && !selected
 
   return (
     <div
       className={cn(
-        "grid grid-cols-[auto_1fr] gap-3 border-b p-4 last:border-b-0",
+        "grid grid-cols-[auto_1fr] gap-4 border-b p-5 last:border-b-0",
         disabled && "bg-muted/30"
       )}
     >
       <Checkbox
+        aria-describedby={descriptionId}
         checked={selected}
-        className="mt-0.5"
+        className="mt-0.5 size-5 rounded-md"
         disabled={disabled}
         id={checkboxId}
         onCheckedChange={(value) => onCheckedChange(value === true)}
       />
-      <div className="grid min-w-0 gap-1">
-        <div className="flex items-center gap-2">
+      <div className="grid min-w-0 gap-1.5">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <Label
             className={cn(
               "font-medium text-base",
@@ -192,7 +194,10 @@ function AutomationToolRow({
             </span>
           ) : null}
         </div>
-        <p className="text-muted-foreground text-sm leading-relaxed">
+        <p
+          className="text-muted-foreground text-sm leading-relaxed"
+          id={descriptionId}
+        >
           {getToolDescription(permission)}
         </p>
       </div>
