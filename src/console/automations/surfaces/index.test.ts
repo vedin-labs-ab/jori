@@ -61,9 +61,14 @@ describe("automation integration marker parsing", () => {
       "Post to github"
     )
   })
+})
 
+describe("automation integration marker fuzzy normalization", () => {
   test("normalizes close marker typos only when the match is clear", () => {
     expect(normalizeCompletedAutomationSurfaceMentions("Open @githb ")).toBe(
+      "Open GitHub "
+    )
+    expect(normalizeCompletedAutomationSurfaceMentions("Open @githbu ")).toBe(
       "Open GitHub "
     )
     expect(normalizeCompletedAutomationSurfaceMentions("Use @go ")).toBe(
@@ -72,8 +77,14 @@ describe("automation integration marker parsing", () => {
     expect(normalizeCompletedAutomationSurfaceMentions("Open githb ")).toBe(
       "Open GitHub "
     )
+    expect(normalizeCompletedAutomationSurfaceMentions("Open githbu ")).toBe(
+      "Open GitHub "
+    )
     expect(normalizeCompletedAutomationSurfaceMentions("Use git ")).toBe(
       "Use git "
+    )
+    expect(normalizeCompletedAutomationSurfaceMentions("Open githxx ")).toBe(
+      "Open githxx "
     )
   })
 })
