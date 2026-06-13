@@ -62,7 +62,7 @@ export function AutomationSurfaceToolGroups({
   }
 
   return (
-    <div className="grid gap-7 px-6 pb-6">
+    <div className="grid gap-5">
       {permissionGroups.map((group) => (
         <AutomationToolGroup
           access={group.access}
@@ -101,12 +101,12 @@ function AutomationToolGroup({
     hasSelectableTools && selectedCount === selectablePermissions.length
 
   return (
-    <section className="grid gap-3.5">
+    <section className="grid gap-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          <h3 className="font-semibold text-lg capitalize">{access}</h3>
+          <h3 className="font-medium text-sm capitalize">{access}</h3>
           <Badge
-            className="h-6 shrink-0 rounded-md px-2.5 font-normal text-muted-foreground text-xs"
+            className="shrink-0 font-normal text-muted-foreground"
             variant="secondary"
           >
             {selectedCount} of {selectablePermissions.length} selected
@@ -115,16 +115,16 @@ function AutomationToolGroup({
         {hasSelectableTools ? (
           <Button
             aria-label={`${allSelectableSelected ? "Clear" : "Select all"} ${access} tools`}
-            className="h-auto px-1 font-medium text-primary hover:bg-transparent hover:text-primary/80"
             onClick={() => onGroupChange(permissions, !allSelectableSelected)}
+            size="sm"
             type="button"
-            variant="ghost"
+            variant="link"
           >
             {allSelectableSelected ? "Clear" : "Select all"}
           </Button>
         ) : null}
       </div>
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden rounded-md border">
         {permissions.map((permission) => (
           <AutomationToolRow
             key={permission.tool}
@@ -159,23 +159,23 @@ function AutomationToolRow({
   return (
     <div
       className={cn(
-        "grid grid-cols-[auto_1fr] gap-4 border-b p-5 last:border-b-0",
+        "grid grid-cols-[auto_1fr] gap-3 border-b p-3 last:border-b-0",
         disabled && "bg-muted/30"
       )}
     >
       <Checkbox
         aria-describedby={descriptionId}
         checked={selected}
-        className="mt-0.5 size-5 rounded-md"
+        className="mt-0.5"
         disabled={disabled}
         id={checkboxId}
         onCheckedChange={(value) => onCheckedChange(value === true)}
       />
-      <div className="grid min-w-0 gap-1.5">
+      <div className="grid min-w-0 gap-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <Label
             className={cn(
-              "font-medium text-base",
+              "font-medium text-sm",
               disabled && "text-muted-foreground"
             )}
             htmlFor={checkboxId}
@@ -183,19 +183,17 @@ function AutomationToolRow({
             {permission.label}
           </Label>
           {permission.mode === "blocked" || permission.mode === "prompted" ? (
-            <span
-              className={cn(
-                "rounded bg-muted px-1.5 py-0.5 text-muted-foreground text-xs",
-                permission.mode === "blocked" &&
-                  "bg-destructive/10 text-destructive"
-              )}
+            <Badge
+              variant={
+                permission.mode === "blocked" ? "destructive" : "secondary"
+              }
             >
               {getToolModeLabel(permission)}
-            </span>
+            </Badge>
           ) : null}
         </div>
         <p
-          className="text-muted-foreground text-sm leading-relaxed"
+          className="text-muted-foreground text-xs leading-relaxed"
           id={descriptionId}
         >
           {getToolDescription(permission)}
