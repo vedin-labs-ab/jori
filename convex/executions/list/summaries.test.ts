@@ -23,7 +23,10 @@ test("uses event automation run snapshots when the automation document is unavai
         tenantId: "tenant",
         automationId: "missing-automation",
         reason: { type: "event", eventId: "event" },
-        data: { automationName: "Deep analysis" },
+        data: {
+          automationInstructions: "Perform the deep analysis.",
+          automationName: "Deep analysis",
+        },
         createdAt: 0,
       },
     }),
@@ -31,6 +34,8 @@ test("uses event automation run snapshots when the automation document is unavai
   )
 
   expect(summary.title).toBe("Deep analysis")
+  expect(summary.objective).toBe("Perform the deep analysis.")
+  expect(summary.objectiveLabel).toBe("Instructions")
   expect(summary.sourceParts).toEqual([
     "Triggered by event:",
     "vedin.labs@gmail.com",
@@ -41,6 +46,37 @@ test("uses event automation run snapshots when the automation document is unavai
     "for automation:",
     "Deep analysis",
   ])
+})
+
+test("does not use automation names as instructions", async () => {
+  const summary = await summarizeExecution(
+    fakeQueryCtx({
+      event: {
+        _id: "event",
+        _creationTime: 0,
+        tenantId: "tenant",
+        integrationId: "integration",
+        key: "slack:event",
+        type: "message.created",
+        createdAt: 0,
+      },
+      integration: slackIntegration(),
+      run: {
+        _id: "run",
+        _creationTime: 0,
+        tenantId: "tenant",
+        automationId: "missing-automation",
+        reason: { type: "event", eventId: "event" },
+        data: { automationName: "Notion test" },
+        createdAt: 0,
+      },
+    }),
+    execution()
+  )
+
+  expect(summary.title).toBe("Notion test")
+  expect(summary.objective).toBeUndefined()
+  expect(summary.objectiveLabel).toBeUndefined()
 })
 
 test("uses event text instead of manual copy for orphaned event runs", async () => {
@@ -69,6 +105,7 @@ test("uses event text instead of manual copy for orphaned event runs", async () 
   )
 
   expect(summary.title).toBe("can you schedule a launch review?")
+  expect(summary.objective).toBeUndefined()
   expect(summary.sourceParts).toEqual([
     "Triggered by event:",
     "Slack",

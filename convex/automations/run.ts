@@ -15,6 +15,7 @@ export async function createAutomationRun(
     automationId: args.automation._id,
     reason: args.reason,
     data: {
+      automationInstructions: args.automation.instructions,
       automationName: args.automation.name,
     },
     createdBy: args.automation.createdBy,
