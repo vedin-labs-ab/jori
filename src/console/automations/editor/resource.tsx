@@ -1,20 +1,14 @@
 import { useAction } from "convex/react"
-import { ChevronsUpDown, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
 import {
@@ -52,8 +46,9 @@ export function EventOptionField({
   const [options, setOptions] = useState<AutomationEventOption[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<string>()
-  const selectedOption = options.find((option) => option.value === value)
-  const valueLabel = selectedOption?.label ?? value
+  const selectedOption =
+    options.find((option) => option.value === value) ??
+    (value === "" ? null : { label: value, value })
 
   useEffect(() => {
     if (!isOpen || disabled) {
@@ -74,148 +69,108 @@ export function EventOptionField({
   }, [isOpen, disabled, provider, query, parameter, criteria, search, tenantId])
 
   return (
-    <Popover open={isOpen && !disabled} onOpenChange={setIsOpen}>
-      <EventOptionTrigger
+    <Combobox
+      autoHighlight
+      filter={null}
+      isItemEqualToValue={(item, selected) => item.value === selected.value}
+      itemToStringValue={(option) => option.label}
+      items={options}
+      onInputValueChange={setQuery}
+      onOpenChange={(open) => {
+        setIsOpen(open)
+        if (!open) {
+          setQuery("")
+        }
+      }}
+      onValueChange={(option) => {
+        onValueChange(option?.value ?? "")
+        setQuery("")
+      }}
+      open={isOpen && !disabled}
+      value={selectedOption}
+    >
+      <EventOptionInput
+        className={cn("w-full", className)}
         disabled={disabled}
         disabledMessage={disabledMessage}
         id={id}
-        isOpen={isOpen}
-        className={className}
-        placeholder={parameter.placeholder}
-        value={value}
-        valueLabel={valueLabel}
-      />
-      <EventOptionContent
-        isLoading={isLoading}
-        message={message}
-        onQueryChange={setQuery}
-        onValueChange={(nextValue) => {
-          onValueChange(nextValue)
-          setIsOpen(false)
-          setQuery("")
-        }}
-        options={options}
-        placeholder={parameter.placeholder}
-        query={query}
+        parameter={parameter}
         value={value}
       />
-    </Popover>
-  )
-}
-
-function EventOptionTrigger({
-  disabled,
-  disabledMessage,
-  id,
-  isOpen,
-  className,
-  placeholder,
-  value,
-  valueLabel,
-}: {
-  disabled: boolean
-  disabledMessage: string | undefined
-  id: string
-  isOpen: boolean
-  className?: string
-  placeholder: string
-  value: string
-  valueLabel: string
-}) {
-  const label = disabled ? (disabledMessage ?? placeholder) : placeholder
-
-  return (
-    <PopoverTrigger asChild>
-      <Button
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-        className={cn(
-          "h-8 w-full justify-between font-normal",
-          (value === "" || disabled) && "text-muted-foreground",
-          className
-        )}
-        disabled={disabled}
-        id={id}
-        role="combobox"
-        type="button"
-        variant="outline"
-      >
-        <span className="min-w-0 truncate">
-          {value === "" || disabled ? label : valueLabel}
-        </span>
-        <ChevronsUpDown className="size-3.5 opacity-50" />
-      </Button>
-    </PopoverTrigger>
+      <EventOptionContent isLoading={isLoading} message={message} />
+    </Combobox>
   )
 }
 
 function EventOptionContent({
   isLoading,
   message,
-  onQueryChange,
-  onValueChange,
-  options,
-  placeholder,
-  query,
-  value,
 }: {
   isLoading: boolean
   message: string | undefined
-  onQueryChange: (query: string) => void
-  onValueChange: (value: string) => void
-  options: AutomationEventOption[]
-  placeholder: string
-  query: string
-  value: string
 }) {
   return (
-    <PopoverContent
-      align="start"
-      className="w-(--radix-popover-trigger-width) p-0"
-    >
-      <Command shouldFilter={false}>
-        <CommandInput
-          onValueChange={onQueryChange}
-          placeholder={placeholder}
-          value={query}
-        />
-        <CommandList>
-          <EventOptionState
-            isLoading={isLoading}
-            message={message}
-            options={options}
-          />
-          <CommandGroup>
-            {options.map((option) => (
-              <EventOptionItem
-                key={option.value}
-                onValueChange={onValueChange}
-                option={option}
-                value={value}
-              />
-            ))}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </PopoverContent>
+    <ComboboxContent>
+      <EventOptionState isLoading={isLoading} message={message} />
+      {message === undefined ? (
+        <>
+          {isLoading ? null : <ComboboxEmpty>No options found.</ComboboxEmpty>}
+          <ComboboxList>
+            {(option: AutomationEventOption) => (
+              <EventOptionItem key={option.value} option={option} />
+            )}
+          </ComboboxList>
+        </>
+      ) : null}
+    </ComboboxContent>
   )
 }
 
-function EventOptionItem({
-  onValueChange,
-  option,
+function EventOptionInput({
+  className,
+  disabled,
+  disabledMessage,
+  id,
+  parameter,
   value,
 }: {
-  onValueChange: (value: string) => void
-  option: AutomationEventOption
+  className?: string
+  disabled: boolean
+  disabledMessage: string | undefined
+  id: string
+  parameter: Extract<AutomationEventParameter, { type: "option" }>
   value: string
 }) {
   return (
-    <CommandItem
-      data-checked={option.value === value}
-      onSelect={() => onValueChange(option.value)}
-      value={option.value}
-    >
+    <ComboboxInput
+      aria-label={parameter.label}
+      className={className}
+      clearLabel={`Clear ${parameter.label}`}
+      disabled={disabled}
+      id={id}
+      placeholder={optionPlaceholder({ disabled, disabledMessage, parameter })}
+      showClear={!disabled && value !== ""}
+    />
+  )
+}
+
+function optionPlaceholder({
+  disabled,
+  disabledMessage,
+  parameter,
+}: {
+  disabled: boolean
+  disabledMessage: string | undefined
+  parameter: Extract<AutomationEventParameter, { type: "option" }>
+}) {
+  return disabled
+    ? (disabledMessage ?? parameter.placeholder)
+    : parameter.placeholder
+}
+
+function EventOptionItem({ option }: { option: AutomationEventOption }) {
+  return (
+    <ComboboxItem className="items-start pr-7" value={option}>
       <div className="grid min-w-0 gap-0.5">
         <span className="truncate">{option.label}</span>
         {option.description === undefined ? null : (
@@ -224,18 +179,16 @@ function EventOptionItem({
           </span>
         )}
       </div>
-    </CommandItem>
+    </ComboboxItem>
   )
 }
 
 function EventOptionState({
   isLoading,
   message,
-  options,
 }: {
   isLoading: boolean
   message: string | undefined
-  options: AutomationEventOption[]
 }) {
   if (isLoading) {
     return (
@@ -246,11 +199,7 @@ function EventOptionState({
     )
   }
 
-  if (message !== undefined) {
-    return <p className="px-3 py-2 text-muted-foreground text-xs">{message}</p>
-  }
-
-  return options.length === 0 ? (
-    <CommandEmpty>No options found.</CommandEmpty>
-  ) : null
+  return message === undefined ? null : (
+    <p className="px-3 py-2 text-muted-foreground text-xs">{message}</p>
+  )
 }
