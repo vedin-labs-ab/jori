@@ -48,7 +48,11 @@ export function AutomationDialog({
   tenantId: string
   values: AutomationFormValues
 }) {
-  const actions = createAutomationDialogActions({ onValuesChange, values })
+  const actions = createAutomationDialogActions({
+    onValuesChange,
+    permissions,
+    values,
+  })
   const instructionsError = readAutomationInstructionsError(
     error,
     values.instructions

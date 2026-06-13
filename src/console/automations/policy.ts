@@ -3,6 +3,12 @@ import {
   type AutomationSurfaceFormValue,
   getAutomationSurfaceLabel,
 } from "./surfaces"
+import { isAutomationToolSelectable } from "./tools"
+
+export {
+  automationToolModeDescription,
+  isAutomationToolSelectable,
+} from "./tools"
 
 export type AutomationPolicyPermissions = ToolPermission[] | null | undefined
 
@@ -71,22 +77,4 @@ export function isAutomationSurfacePolicyBlocked({
       !isAutomationToolSelectable(permission)
     )
   })
-}
-
-export function isAutomationToolSelectable(permission: ToolPermission) {
-  return permission.mode === "allowed" || permission.mode === "required"
-}
-
-export function automationToolModeDescription(permission: ToolPermission) {
-  if (permission.mode === "prompted") {
-    return "Requires approval in Integrations and cannot run in automations."
-  }
-
-  if (permission.mode === "blocked") {
-    return "Blocked in Integrations."
-  }
-
-  return permission.mode === "required"
-    ? "Allowed for automations."
-    : "Allowed in Integrations."
 }

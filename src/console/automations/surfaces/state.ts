@@ -1,5 +1,9 @@
 import { type ToolPermission } from "../../permissions/controller"
 import {
+  type AutomationToolPermissions,
+  getDefaultAutomationSurfaceTools,
+} from "../tools"
+import {
   type AutomationSurfaceAccess,
   type AutomationSurfaceFormValue,
   type AutomationSurfaceProvider,
@@ -53,7 +57,8 @@ export function removeAutomationSurfaceMention(
 
 export function syncAutomationSurfaces(
   text: string,
-  surfaces: AutomationSurfaceFormValue[]
+  surfaces: AutomationSurfaceFormValue[],
+  permissions?: AutomationToolPermissions
 ): AutomationSurfaceFormValue[] {
   const existing = new Map(
     surfaces.map((surface) => [surface.provider, uniqueTools(surface.tools)])
@@ -61,7 +66,9 @@ export function syncAutomationSurfaces(
 
   return findAutomationSurfaceMentions(text).map((provider) => ({
     provider,
-    tools: existing.get(provider) ?? [],
+    tools:
+      existing.get(provider) ??
+      getDefaultAutomationSurfaceTools(provider, permissions),
   }))
 }
 

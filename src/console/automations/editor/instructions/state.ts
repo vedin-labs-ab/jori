@@ -70,11 +70,12 @@ export function useAutomationInstructionsEditor(
     (provider: AutomationSurfaceProvider) =>
       insertSurfaceSuggestion({
         editor,
+        permissions: refs.permissions.current,
         provider,
         setSuggestion,
         state: suggestion,
       }),
-    [editor, suggestion]
+    [editor, refs.permissions, suggestion]
   )
 
   return {
@@ -196,6 +197,7 @@ function createEditorProps({
       handleSuggestionKey({
         editor: refs.editor.current,
         event,
+        permissions: refs.permissions.current,
         setSuggestion,
         state: refs.suggestion.current,
       }),
@@ -207,6 +209,7 @@ function createEditorProps({
     ) =>
       replaceCompletedSurfaceMention({
         from,
+        permissions: refs.permissions.current,
         text,
         to,
         view,

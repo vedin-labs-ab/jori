@@ -5,7 +5,7 @@ import {
   createAutomationInstructionDocument,
   serializeAutomationInstructionDocument,
 } from "./document"
-import { renderInstructionsField } from "./fixtures"
+import { renderInstructionsField, toolPermission } from "./fixtures"
 
 afterEach(cleanup)
 
@@ -28,14 +28,46 @@ describe("automation instructions document", () => {
     })
   })
 
-  test("defaults new integrations to no selected tools", () => {
+  test("defaults new integrations to selectable tools", () => {
     const document = createAutomationInstructionDocument({
       description: "Send to Slack.",
+      permissions: [
+        toolPermission(
+          "slack",
+          "conversations_history",
+          "Read history",
+          "read"
+        ),
+        toolPermission(
+          "slack",
+          "conversations_add_message",
+          "Send message",
+          "write",
+          "required"
+        ),
+        toolPermission(
+          "slack",
+          "conversations_request_approval",
+          "Request approval",
+          "write",
+          "prompted"
+        ),
+        toolPermission(
+          "slack",
+          "conversations_delete_message",
+          "Delete message",
+          "write",
+          "blocked"
+        ),
+      ],
       surfaces: [],
     })
 
     expect(serializeAutomationInstructionDocument(document).surfaces).toEqual([
-      { provider: "slack", tools: [] },
+      {
+        provider: "slack",
+        tools: ["conversations_history", "conversations_add_message"],
+      },
     ])
   })
 })

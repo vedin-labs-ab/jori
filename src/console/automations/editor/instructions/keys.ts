@@ -1,16 +1,19 @@
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
+import { type AutomationPolicyPermissions } from "../../policy"
 import { insertSurfaceSuggestion } from "./input"
 import { type InstructionSuggestionState } from "./suggest"
 
 export function handleSuggestionKey({
   editor,
   event,
+  permissions,
   setSuggestion,
   state,
 }: {
   editor: Editor | null
   event: KeyboardEvent
+  permissions: AutomationPolicyPermissions
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState | null
 }) {
@@ -33,7 +36,7 @@ export function handleSuggestionKey({
 
   if (event.key === "Enter" || event.key === "Tab") {
     event.preventDefault()
-    insertActiveSuggestion({ editor, setSuggestion, state })
+    insertActiveSuggestion({ editor, permissions, setSuggestion, state })
     return true
   }
 
@@ -55,10 +58,12 @@ export function updateSuggestionIndex(
 
 function insertActiveSuggestion({
   editor,
+  permissions,
   setSuggestion,
   state,
 }: {
   editor: Editor | null
+  permissions: AutomationPolicyPermissions
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState
 }) {
@@ -67,6 +72,7 @@ function insertActiveSuggestion({
   if (activeSuggestion !== undefined) {
     insertSurfaceSuggestion({
       editor,
+      permissions,
       provider: activeSuggestion.provider,
       setSuggestion,
       state,
