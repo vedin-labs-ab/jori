@@ -25,6 +25,7 @@
     "@clerk/ui": "^1.15.0",
     "@fontsource-variable/geist": "^5.2.9",
     "@openrouter/sdk": "^0.12.79",
+    "@radix-ui/react-dismissable-layer": "^1.1.12",
     "@tailwindcss/vite": "^4",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-router": "latest",
