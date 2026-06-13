@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+import { type ToolPermission } from "../../permissions/controller"
 import {
   findActiveAutomationSurfaceMention,
   findAutomationSurfaceMentions,
@@ -156,6 +157,13 @@ describe("automation integration marker autocomplete", () => {
 })
 
 describe("automation integration tool sync", () => {
+  const permissions = [
+    toolPermission("github", "github_get_issue", "read", "allowed"),
+    toolPermission("github", "github_add_issue_comment", "write", "required"),
+    toolPermission("github", "github_close_issue", "write", "prompted"),
+    toolPermission("github", "github_delete_issue", "write", "blocked"),
+  ] satisfies ToolPermission[]
+
   test("preserves selected tools for existing markers", () => {
     expect(
       syncAutomationSurfaces("@GitHub to @Slack", [
@@ -167,9 +175,35 @@ describe("automation integration tool sync", () => {
     ])
   })
 
-  test("adds new markers without selected tools", () => {
+  test("adds new markers with selectable tools", () => {
+    expect(syncAutomationSurfaces("GitHub", [], permissions)).toEqual([
+      {
+        provider: "github",
+        tools: ["github_get_issue", "github_add_issue_comment"],
+      },
+    ])
+  })
+
+  test("adds new markers without selected tools while permissions load", () => {
     expect(syncAutomationSurfaces("GitHub", [])).toEqual([
       { provider: "github", tools: [] },
     ])
   })
 })
+
+function toolPermission(
+  provider: ToolPermission["provider"],
+  tool: string,
+  access: ToolPermission["access"],
+  mode: ToolPermission["mode"]
+): ToolPermission {
+  return {
+    access,
+    description: tool,
+    label: tool,
+    mode,
+    overrideMode: null,
+    provider,
+    tool,
+  }
+}

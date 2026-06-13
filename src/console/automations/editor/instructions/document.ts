@@ -28,10 +28,9 @@ export function createAutomationInstructionDocument({
   permissions?: AutomationInstructionsFieldProps["permissions"]
 }): JSONContent {
   const toolsByProvider = new Map(
-    syncAutomationSurfaces(description, surfaces).map((surface) => [
-      surface.provider,
-      surface.tools,
-    ])
+    syncAutomationSurfaces(description, surfaces, permissions).map(
+      (surface) => [surface.provider, surface.tools]
+    )
   )
   const paragraphs: JSONContent[] = [{ type: "paragraph", content: [] }]
 

@@ -59,17 +59,18 @@ export function renderInstructionsField({
   return { container: view.container, onValueChange }
 }
 
-function toolPermission(
+export function toolPermission(
   provider: ToolPermission["provider"],
   tool: string,
   label: string,
-  access: ToolPermission["access"]
+  access: ToolPermission["access"],
+  mode: ToolPermission["mode"] = "allowed"
 ): ToolPermission {
   return {
     access,
     description: label,
     label,
-    mode: "allowed",
+    mode,
     overrideMode: null,
     provider,
     tool,

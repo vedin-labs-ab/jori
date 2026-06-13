@@ -1,21 +1,25 @@
 import { type JSONContent } from "@tiptap/core"
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
+import { type AutomationPolicyPermissions } from "../../policy"
 import {
   type AutomationSurfaceProvider,
   findCompletedAutomationSurfaceMention,
   isMentionNameCharacter,
 } from "../../surfaces"
+import { getDefaultAutomationSurfaceTools } from "../../tools"
 import { automationSurfaceNodeName } from "./document"
 import { type InstructionSuggestionState } from "./suggest"
 
 export function insertSurfaceSuggestion({
   editor,
+  permissions,
   provider,
   setSuggestion,
   state,
 }: {
   editor: Editor | null
+  permissions: AutomationPolicyPermissions
   provider: AutomationSurfaceProvider
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState | null
@@ -31,7 +35,8 @@ export function insertSurfaceSuggestion({
       state.range,
       getSurfaceInsertionContent(
         provider,
-        shouldInsertTrailingSpace(editor, state.range.to)
+        shouldInsertTrailingSpace(editor, state.range.to),
+        permissions
       )
     )
     .run()
@@ -40,11 +45,13 @@ export function insertSurfaceSuggestion({
 
 export function replaceCompletedSurfaceMention({
   from,
+  permissions,
   text,
   to,
   view,
 }: {
   from: number
+  permissions: AutomationPolicyPermissions
   text: string
   to: number
   view: Editor["view"]
@@ -75,10 +82,7 @@ export function replaceCompletedSurfaceMention({
   const transaction = view.state.tr.replaceWith(
     start,
     from,
-    surfaceNode.create({
-      provider: match.provider,
-      tools: [],
-    })
+    surfaceNode.create(createSurfaceNodeAttrs(match.provider, permissions))
   )
 
   transaction.insertText(text, start + 1)
@@ -89,14 +93,12 @@ export function replaceCompletedSurfaceMention({
 
 function getSurfaceInsertionContent(
   provider: AutomationSurfaceProvider,
-  includeTrailingSpace: boolean
+  includeTrailingSpace: boolean,
+  permissions: AutomationPolicyPermissions
 ) {
   const content: JSONContent[] = [
     {
-      attrs: {
-        provider,
-        tools: [],
-      },
+      attrs: createSurfaceNodeAttrs(provider, permissions),
       type: automationSurfaceNodeName,
     },
   ]
@@ -106,6 +108,16 @@ function getSurfaceInsertionContent(
   }
 
   return content
+}
+
+function createSurfaceNodeAttrs(
+  provider: AutomationSurfaceProvider,
+  permissions: AutomationPolicyPermissions
+) {
+  return {
+    provider,
+    tools: getDefaultAutomationSurfaceTools(provider, permissions),
+  }
 }
 
 function shouldInsertTrailingSpace(editor: Editor, position: number) {

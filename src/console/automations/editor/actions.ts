@@ -1,3 +1,4 @@
+import { type AutomationPolicyPermissions } from "../policy"
 import {
   type AutomationSurfaceFormValue,
   syncAutomationSurfaces,
@@ -7,9 +8,11 @@ import { writeAutomationWebSearchPreference } from "./preferences"
 
 export function createAutomationDialogActions({
   onValuesChange,
+  permissions,
   values,
 }: {
   onValuesChange: (values: AutomationFormValues) => void
+  permissions?: AutomationPolicyPermissions
   values: AutomationFormValues
 }) {
   return {
@@ -17,6 +20,7 @@ export function createAutomationDialogActions({
       updateDescriptionState({
         instructions: values.instructions,
         onValuesChange,
+        permissions,
         values,
       })
     },
@@ -39,15 +43,21 @@ export function createAutomationDialogActions({
 function updateDescriptionState({
   instructions,
   onValuesChange,
+  permissions,
   values,
 }: {
   instructions: string
   onValuesChange: (values: AutomationFormValues) => void
+  permissions?: AutomationPolicyPermissions
   values: AutomationFormValues
 }) {
   onValuesChange({
     ...values,
     instructions,
-    surfaces: syncAutomationSurfaces(instructions, values.surfaces),
+    surfaces: syncAutomationSurfaces(
+      instructions,
+      values.surfaces,
+      permissions
+    ),
   })
 }
