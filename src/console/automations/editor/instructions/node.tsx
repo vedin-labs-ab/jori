@@ -163,9 +163,10 @@ function AutomationSurfaceToolsButton({
   providerLabel: string
 }) {
   const Icon = getAutomationSurfaceAccessIcon(access, blocked)
+  const toolCountLabel = count === 0 ? "No tools enabled" : `${count} enabled`
   const label = blocked
-    ? `${providerLabel} tools: ${count} enabled, some unavailable. Configure tools.`
-    : `${providerLabel} tools: ${count} enabled. Configure tools.`
+    ? `${providerLabel} tools: ${toolCountLabel}, some unavailable. Configure tools.`
+    : `${providerLabel} tools: ${toolCountLabel}. Configure tools.`
 
   return (
     <button
@@ -183,11 +184,11 @@ function AutomationSurfaceToolsButton({
         event.preventDefault()
         event.stopPropagation()
       }}
-      title={`${accessLabel}: ${count} enabled`}
+      title={count === 0 ? accessLabel : `${accessLabel}: ${count} enabled`}
       type="button"
     >
       <Icon className="size-3" />
-      <span className="tabular-nums">{count}</span>
+      {count > 0 ? <span className="tabular-nums">{count}</span> : null}
     </button>
   )
 }
