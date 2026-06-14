@@ -98,10 +98,9 @@ describe("execution row one-shot details", () => {
           metadata: [],
         },
         details: [
-          { type: "scheduled", label: "Scheduled", at: 1700000000000 },
           {
             type: "tools",
-            label: "Slack: Send message, Read channel history",
+            label: "Slack · Send message, Read channel history",
             groups: [
               {
                 type: "slack",
@@ -110,7 +109,7 @@ describe("execution row one-shot details", () => {
               },
             ],
           },
-          { type: "web_search", label: "Yes" },
+          { type: "web_search", label: "Allowed" },
         ],
       })
     )
@@ -119,13 +118,16 @@ describe("execution row one-shot details", () => {
 
     expect(screen.getByText("Milo")).toBeDefined()
     expect(screen.getByText("one-shot")).toBeDefined()
-    expect(screen.getByText("Scheduled")).toBeDefined()
+    expect(screen.queryByText("Scheduled")).toBeNull()
     expect(screen.queryByText("One-shot")).toBeNull()
     expect(screen.getByText("Tools")).toBeDefined()
     expect(screen.getByText("Slack")).toBeDefined()
     expect(screen.getByText("Send message, Read channel history")).toBeDefined()
+    expect(
+      screen.queryByText("Slack: Send message, Read channel history")
+    ).toBeNull()
     expect(screen.getByText("Web search")).toBeDefined()
-    expect(screen.getByText("Yes")).toBeDefined()
+    expect(screen.getByText("Allowed")).toBeDefined()
   })
 })
 
