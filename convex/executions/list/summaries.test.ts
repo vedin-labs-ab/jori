@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeExecution } from "./summaries"
 
-test("uses event automation run snapshots for labels when the automation document is unavailable", async () => {
+test("uses event automation run snapshots when the automation document is unavailable", async () => {
   const summary = await summarizeExecution(
     fakeQueryCtx({
       event: {
@@ -23,10 +23,8 @@ test("uses event automation run snapshots for labels when the automation documen
         tenantId: "tenant",
         automationId: "missing-automation",
         reason: { type: "event", eventId: "event" },
-        data: {
-          automationInstructions: "Perform the deep analysis.",
-          automationName: "Deep analysis",
-        },
+        title: "Deep analysis",
+        instructions: "Perform the deep analysis.",
         createdAt: 0,
       },
     }),
@@ -47,6 +45,29 @@ test("uses event automation run snapshots for labels when the automation documen
     "for automation:",
     "Deep analysis",
   ])
+})
+
+test("uses message run snapshots when the message document is unavailable", async () => {
+  const summary = await summarizeExecution(
+    fakeQueryCtx({
+      run: {
+        _id: "run",
+        _creationTime: 0,
+        tenantId: "tenant",
+        reason: { type: "message", messageId: "missing-message" },
+        title: "Please summarize this thread.",
+        instructions: "Please summarize this thread.\n\nKeep it concise.",
+        createdAt: 0,
+      },
+    }),
+    execution()
+  )
+
+  expect(summary.title).toBe("Please summarize this thread.")
+  expect(summary.instructions).toBe(
+    "Please summarize this thread.\n\nKeep it concise."
+  )
+  expect(summary.searchableText).toContain("keep it concise")
 })
 
 test("does not use automation names as instructions", async () => {
@@ -114,7 +135,7 @@ test("uses event text instead of manual copy for orphaned event runs", async () 
   ])
 })
 
-test("uses message text as message run instructions", async () => {
+test("uses message text as legacy message run instructions", async () => {
   const summary = await summarizeExecution(
     fakeQueryCtx({
       integration: slackIntegration(),

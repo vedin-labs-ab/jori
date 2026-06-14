@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { createMessageRunSnapshot } from "../runs/snapshot"
 
 export async function findConversationActivation(
   ctx: MutationCtx,
@@ -32,8 +33,7 @@ export async function startMessageRun(
     activation: Doc<"activations"> | null
     integration: Doc<"integrations">
     messageId: Id<"messages">
-    messageType: string
-    messageExternalId: string
+    messageText: string | undefined
     conversationId: string
     createdBy: string | undefined
     now: number
@@ -45,12 +45,7 @@ export async function startMessageRun(
       type: "message",
       messageId: args.messageId,
     },
-    data: {
-      message: {
-        type: args.messageType,
-        externalId: args.messageExternalId,
-      },
-    },
+    ...createMessageRunSnapshot({ text: args.messageText }),
     createdBy: args.createdBy,
     createdAt: args.now,
   })
