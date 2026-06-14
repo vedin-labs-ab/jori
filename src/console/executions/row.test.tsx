@@ -81,7 +81,7 @@ describe("execution row linked details", () => {
       name: /vedin-labs\/frontier/i,
     })
     const commentSourceLink = screen.getByRole("link", {
-      name: /open comment/i,
+      name: /source/i,
     })
     const commentBody = screen.getByText("Can you check this failure?")
 
@@ -93,6 +93,32 @@ describe("execution row linked details", () => {
       "https://github.com/vedin-labs/frontier/issues/12#comment"
     )
     expect(commentBody.closest(".bg-muted")).not.toBeNull()
+  })
+
+  test("renders pull request details as a plain linked fact", () => {
+    renderExecutionRow(
+      execution({
+        task: "Review the pull request comment.",
+        title: "GitHub PR test",
+        details: [
+          {
+            type: "pull_request",
+            label: "#42",
+            url: "https://github.com/vedin-labs/frontier/pull/42",
+          },
+        ],
+      })
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: /github pr test/i }))
+
+    expect(screen.getByText("Pull request")).toBeDefined()
+    const pullRequestLink = screen.getByRole("link", { name: /#42/i })
+
+    expect(pullRequestLink.getAttribute("href")).toBe(
+      "https://github.com/vedin-labs/frontier/pull/42"
+    )
+    expect(pullRequestLink.closest(".bg-muted")).toBeNull()
   })
 })
 

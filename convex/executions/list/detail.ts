@@ -5,6 +5,7 @@ export type ExecutionDetailType =
   | "issue"
   | "message"
   | "page"
+  | "pull_request"
   | "repository"
   | "stopped"
 

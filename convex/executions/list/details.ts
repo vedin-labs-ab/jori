@@ -71,13 +71,14 @@ function isRequestedMetadata(
 ): item is ExecutionSource["metadata"][number] & {
   type: Extract<
     ExecutionDetailType,
-    "channel" | "issue" | "page" | "repository"
+    "channel" | "issue" | "page" | "pull_request" | "repository"
   >
 } {
   return (
     item.type === "channel" ||
     item.type === "issue" ||
     item.type === "page" ||
+    item.type === "pull_request" ||
     item.type === "repository"
   )
 }

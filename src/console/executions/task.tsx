@@ -1,10 +1,10 @@
 import { MessageCircleMore } from "lucide-react"
-import { CodeBlockDetail } from "./details"
+import { CodeBlockDetail, codeBlockContentClassName } from "./details"
 
 export function TaskDetail({ task }: { task: string }) {
   return (
     <CodeBlockDetail
-      framed
+      contentClassName={codeBlockContentClassName}
       icon={MessageCircleMore}
       label="Task"
       value={task}
