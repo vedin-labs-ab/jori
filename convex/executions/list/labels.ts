@@ -17,6 +17,21 @@ export function executionTitle(context: ExecutionContext) {
   )
 }
 
+export function executionInstructions(context: ExecutionContext) {
+  if (context.run?.reason.type === "message") {
+    return normalizedText(context.message?.text)
+  }
+
+  if (context.run?.automationId !== undefined) {
+    return (
+      runDataString(context.run, "automationInstructions") ??
+      normalizedText(context.automation?.instructions)
+    )
+  }
+
+  return undefined
+}
+
 export function executionSourceParts(
   context: ExecutionContext,
   stoppedBy: string | undefined
@@ -160,6 +175,12 @@ function runDataString(run: Doc<"runs"> | null, key: string) {
   const value = data[key]
 
   return typeof value === "string" && value.trim() !== "" ? value : undefined
+}
+
+function normalizedText(text: string | undefined) {
+  const value = text?.trim()
+
+  return value === "" ? undefined : value
 }
 
 function titleFromRun(run: Doc<"runs"> | null) {

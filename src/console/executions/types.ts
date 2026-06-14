@@ -36,9 +36,7 @@ export type ExecutionItem = {
   status: ExecutionStatus
   title: string
   sourceParts: string[]
-  promptUrl?: string
-  progress?: string
-  next?: string
+  instructions?: string
   trigger: string
   createdAt: number
   finishedAt?: number
