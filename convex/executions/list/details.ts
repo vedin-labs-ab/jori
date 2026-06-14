@@ -6,6 +6,7 @@ import {
   compactDetails,
   detail,
   type ExecutionDetail,
+  type ExecutionDetailGroup,
   type ExecutionDetailType,
   uniqueDetails,
 } from "./detail"
@@ -71,9 +72,13 @@ function oneShotDetails(input: {
     return []
   }
 
+  const tools = toolsDetail(input.automationAccess?.surfaces)
+
   return compactDetails([
-    detail("scheduled", "One-shot", { at: input.run.reason.scheduledAt }),
-    detail("tools", toolsLabel(input.automationAccess?.surfaces)),
+    detail("scheduled", "Scheduled", { at: input.run.reason.scheduledAt }),
+    tools === undefined
+      ? undefined
+      : detail("tools", tools.label, { groups: tools.groups }),
     detail(
       "web_search",
       input.automationAccess?.webSearch === true ? "Yes" : "No"
@@ -81,25 +86,51 @@ function oneShotDetails(input: {
   ])
 }
 
-function toolsLabel(surfaces: AutomationAccessSummary["surfaces"] | undefined) {
+function toolsDetail(
+  surfaces: AutomationAccessSummary["surfaces"] | undefined
+) {
+  const groups = toolGroups(surfaces)
+
+  if (groups === undefined) {
+    return undefined
+  }
+
+  return {
+    groups,
+    label: groups
+      .map((group) => `${group.label}: ${group.values.join(", ")}`)
+      .join(" · "),
+  }
+}
+
+function toolGroups(surfaces: AutomationAccessSummary["surfaces"] | undefined) {
   if (surfaces === undefined || surfaces.length === 0) {
     return undefined
   }
 
-  return surfaces
+  const groups = surfaces
     .map((surface) => {
-      const tools = surface.tools.map(toolLabel).join(", ")
+      const values = surface.tools.map(toolLabel).filter(isPresent)
 
-      return tools === ""
+      return values.length === 0
         ? undefined
-        : `${providerLabel(surface.provider)}: ${tools}`
+        : ({
+            type: surface.provider,
+            label: providerLabel(surface.provider),
+            values,
+          } satisfies ExecutionDetailGroup)
     })
-    .filter((label) => label !== undefined)
-    .join(" · ")
+    .filter(isPresent)
+
+  return groups.length === 0 ? undefined : groups
 }
 
 function toolLabel(tool: string) {
   return getToolPermission(tool)?.label ?? tool
+}
+
+function isPresent<T>(value: T | undefined): value is T {
+  return value !== undefined
 }
 
 function stoppedDetail(

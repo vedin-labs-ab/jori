@@ -12,11 +12,18 @@ export type ExecutionDetailType =
   | "tools"
   | "web_search"
 
+export type ExecutionDetailGroup = {
+  type: string
+  label: string
+  values: string[]
+}
+
 export type ExecutionDetail = {
   type: ExecutionDetailType
   label: string
   url?: string
   at?: number
+  groups?: ExecutionDetailGroup[]
 }
 
 export function detail(
@@ -24,6 +31,7 @@ export function detail(
   label: string | undefined,
   options: {
     at?: number
+    groups?: ExecutionDetailGroup[]
     url?: string
   } = {}
 ): ExecutionDetail | undefined {
@@ -40,6 +48,9 @@ export function detail(
       ? {}
       : { url: options.url }),
     ...(options.at === undefined ? {} : { at: options.at }),
+    ...(options.groups === undefined || options.groups.length === 0
+      ? {}
+      : { groups: options.groups }),
   }
 }
 
