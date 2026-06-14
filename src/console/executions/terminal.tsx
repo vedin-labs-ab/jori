@@ -4,6 +4,7 @@ import { SquareTerminal } from "lucide-react"
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
+import { CopyButton } from "./details"
 import { EmptyTraceNotice, TerminalFrame, TerminalNotice } from "./notice"
 import {
   type LiveStreamStatus,
@@ -75,6 +76,7 @@ function ConnectedTerminal({
   } = useTraceLines(connection)
   const isFinalizingTrace =
     connection?.type === "missing" && hasConnectedTrace && lines.length === 0
+  const trace = useMemo(() => formatTrace(lines), [lines])
 
   useEffect(() => {
     if (connection?.type === "live" || connection?.type === "stored") {
@@ -84,6 +86,9 @@ function ConnectedTerminal({
 
   return (
     <TerminalFrame
+      action={
+        trace === "" ? undefined : <CopyButton label="Trace" value={trace} />
+      }
       caption={captionFor(connection, {
         hasLines: lines.length > 0,
         streamStatus,
@@ -91,7 +96,7 @@ function ConnectedTerminal({
       })}
     >
       {lines.length > 0 ? (
-        <TraceLines lines={lines} />
+        <TraceLines trace={trace} />
       ) : (
         <TerminalNotice
           connection={connection}
@@ -106,10 +111,9 @@ function ConnectedTerminal({
   )
 }
 
-function TraceLines({ lines }: { lines: string[] }) {
+function TraceLines({ trace }: { trace: string }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const stickToBottom = useRef(true)
-  const trace = useMemo(() => lines.map(formatTraceLine).join("\n"), [lines])
 
   // Re-runs after every render, so each batch of appended lines keeps the
   // view pinned to the bottom unless the user scrolled up.
@@ -136,6 +140,10 @@ function TraceLines({ lines }: { lines: string[] }) {
       </code>
     </div>
   )
+}
+
+function formatTrace(lines: string[]) {
+  return lines.map(formatTraceLine).join("\n")
 }
 
 function formatTraceLine(line: string) {

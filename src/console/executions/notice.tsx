@@ -9,6 +9,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Spinner } from "@/components/ui/spinner"
+import { DetailFrame } from "./details"
 import {
   type LiveStreamStatus,
   type StoredTraceStatus,
@@ -16,21 +17,18 @@ import {
 } from "./trace"
 
 export function TerminalFrame({
+  action,
   caption,
   children,
 }: {
+  action?: ReactNode
   caption?: ReactElement | string
   children: ReactNode
 }) {
   return (
-    <div className="grid h-64 min-w-0 max-w-full grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-md bg-muted">
-      {caption !== undefined ? (
-        <div className="flex min-w-0 items-center justify-end border-b px-2.5 py-1.5 text-muted-foreground">
-          {caption}
-        </div>
-      ) : null}
-      <div className="min-h-0 min-w-0 overflow-hidden">{children}</div>
-    </div>
+    <DetailFrame action={action} className="h-64" header={caption}>
+      {children}
+    </DetailFrame>
   )
 }
 
