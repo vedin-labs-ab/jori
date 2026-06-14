@@ -1,4 +1,9 @@
-import { CircleDotDashed, File, type LucideIcon } from "lucide-react"
+import {
+  CircleDotDashed,
+  File,
+  GitPullRequestArrow,
+  type LucideIcon,
+} from "lucide-react"
 import { type ReactNode } from "react"
 import { Kbd } from "@/components/ui/kbd"
 import { cn } from "@/lib/utils"
@@ -152,6 +157,7 @@ function RepositoryDatum({ datum }: MetadataRendererProps) {
 function PullRequestDatum({ datum }: MetadataRendererProps) {
   return (
     <Kbd className="font-mono" title={datum.label}>
+      <GitPullRequestArrow className="size-3" />
       {pullRequestLabel(datum.label)}
     </Kbd>
   )
@@ -169,7 +175,16 @@ function ChannelDatum({ datum }: MetadataRendererProps) {
 }
 
 function IssueDatum({ datum, provider }: MetadataRendererProps) {
-  if (provider !== "github" && provider !== "linear") {
+  if (provider === "github") {
+    return (
+      <Kbd className="font-mono" title={datum.label}>
+        <CircleDotDashed className="size-3" />
+        {issueNumberLabel(datum.label)}
+      </Kbd>
+    )
+  }
+
+  if (provider !== "linear") {
     return <PlainMetadataDatum datum={datum} />
   }
 
@@ -225,6 +240,10 @@ function repositoryLabel(label: string) {
 }
 
 function pullRequestLabel(label: string) {
+  return label.match(/^#\d+/)?.[0] ?? label
+}
+
+function issueNumberLabel(label: string) {
   return label.match(/^#\d+/)?.[0] ?? label
 }
 
