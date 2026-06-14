@@ -105,6 +105,7 @@ export function AutomationDialog({
           />
           <AutomationTiming
             tenantId={tenantId}
+            showRunPreview={automation !== undefined}
             onValuesChange={onValuesChange}
             values={values}
           />

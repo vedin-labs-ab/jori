@@ -31,9 +31,11 @@ import {
 import { AutomationTimePicker } from "./time"
 
 export function RecurringFields({
+  showRunPreview = true,
   onValuesChange,
   values,
 }: {
+  showRunPreview?: boolean
   onValuesChange: (values: AutomationFormValues) => void
   values: AutomationFormValues
 }) {
@@ -77,7 +79,7 @@ export function RecurringFields({
       ) : (
         <RepeatDetails onValuesChange={onValuesChange} values={values} />
       )}
-      <RunPreview values={values} />
+      {showRunPreview ? <RunPreview values={values} /> : null}
     </div>
   )
 }

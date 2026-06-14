@@ -13,10 +13,12 @@ const EventFields = lazy(async () => ({
 
 export function AutomationTiming({
   tenantId,
+  showRunPreview,
   onValuesChange,
   values,
 }: {
   tenantId: string
+  showRunPreview: boolean
   onValuesChange: (values: AutomationFormValues) => void
   values: AutomationFormValues
 }) {
@@ -37,7 +39,11 @@ export function AutomationTiming({
         <TabsTrigger value="event">Event</TabsTrigger>
       </TabsList>
       <TabsContent value="cron">
-        <RecurringFields onValuesChange={onValuesChange} values={values} />
+        <RecurringFields
+          showRunPreview={showRunPreview}
+          onValuesChange={onValuesChange}
+          values={values}
+        />
       </TabsContent>
       <TabsContent value="once" className="grid gap-2">
         <Suspense fallback={<TimingFallback />}>
