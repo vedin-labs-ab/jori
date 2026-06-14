@@ -73,7 +73,7 @@ function execution(
       type: "automation",
       provider: { type: "slack", label: "Slack" },
       event: { type: "message.created", label: "New channel message" },
-      facts: [],
+      metadata: [],
     },
     status: "completed",
     task: overrides.task,

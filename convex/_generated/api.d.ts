@@ -82,7 +82,6 @@ import type * as executions_list from "../executions/list.js";
 import type * as executions_list_context from "../executions/list/context.js";
 import type * as executions_list_filters from "../executions/list/filters.js";
 import type * as executions_list_labels from "../executions/list/labels.js";
-import type * as executions_list_metadata from "../executions/list/metadata.js";
 import type * as executions_list_pending from "../executions/list/pending.js";
 import type * as executions_list_source from "../executions/list/source.js";
 import type * as executions_list_summaries from "../executions/list/summaries.js";
@@ -137,6 +136,7 @@ import type * as identity_organization from "../identity/organization.js";
 import type * as identity_users from "../identity/users.js";
 import type * as integrations_data from "../integrations/data.js";
 import type * as integrations_disconnect from "../integrations/disconnect.js";
+import type * as integrations_lookup from "../integrations/lookup.js";
 import type * as integrations_revoke from "../integrations/revoke.js";
 import type * as integrations_runtime from "../integrations/runtime.js";
 import type * as integrations_status from "../integrations/status.js";
@@ -204,6 +204,7 @@ import type * as providers_notion_events from "../providers/notion/events.js";
 import type * as providers_notion_http from "../providers/notion/http.js";
 import type * as providers_notion_install from "../providers/notion/install.js";
 import type * as providers_notion_oauth from "../providers/notion/oauth.js";
+import type * as providers_notion_pages from "../providers/notion/pages.js";
 import type * as providers_notion_signing from "../providers/notion/signing.js";
 import type * as providers_oauth from "../providers/oauth.js";
 import type * as providers_signing from "../providers/signing.js";
@@ -212,6 +213,7 @@ import type * as providers_slack_approval_cards from "../providers/slack/approva
 import type * as providers_slack_approval_decision from "../providers/slack/approval/decision.js";
 import type * as providers_slack_approval_index from "../providers/slack/approval/index.js";
 import type * as providers_slack_approval_labels from "../providers/slack/approval/labels.js";
+import type * as providers_slack_channels from "../providers/slack/channels.js";
 import type * as providers_slack_config from "../providers/slack/config.js";
 import type * as providers_slack_credentials from "../providers/slack/credentials.js";
 import type * as providers_slack_data from "../providers/slack/data.js";
@@ -226,6 +228,7 @@ import type * as runs_snapshot from "../runs/snapshot.js";
 import type * as shared_actor from "../shared/actor.js";
 import type * as skills_catalog from "../skills/catalog.js";
 import type * as skills_data from "../skills/data.js";
+import type * as sources_metadata from "../sources/metadata.js";
 import type * as subscriptions_data from "../subscriptions/data.js";
 
 import type {
@@ -309,7 +312,6 @@ declare const fullApi: ApiFromModules<{
   "executions/list/context": typeof executions_list_context;
   "executions/list/filters": typeof executions_list_filters;
   "executions/list/labels": typeof executions_list_labels;
-  "executions/list/metadata": typeof executions_list_metadata;
   "executions/list/pending": typeof executions_list_pending;
   "executions/list/source": typeof executions_list_source;
   "executions/list/summaries": typeof executions_list_summaries;
@@ -364,6 +366,7 @@ declare const fullApi: ApiFromModules<{
   "identity/users": typeof identity_users;
   "integrations/data": typeof integrations_data;
   "integrations/disconnect": typeof integrations_disconnect;
+  "integrations/lookup": typeof integrations_lookup;
   "integrations/revoke": typeof integrations_revoke;
   "integrations/runtime": typeof integrations_runtime;
   "integrations/status": typeof integrations_status;
@@ -431,6 +434,7 @@ declare const fullApi: ApiFromModules<{
   "providers/notion/http": typeof providers_notion_http;
   "providers/notion/install": typeof providers_notion_install;
   "providers/notion/oauth": typeof providers_notion_oauth;
+  "providers/notion/pages": typeof providers_notion_pages;
   "providers/notion/signing": typeof providers_notion_signing;
   "providers/oauth": typeof providers_oauth;
   "providers/signing": typeof providers_signing;
@@ -439,6 +443,7 @@ declare const fullApi: ApiFromModules<{
   "providers/slack/approval/decision": typeof providers_slack_approval_decision;
   "providers/slack/approval/index": typeof providers_slack_approval_index;
   "providers/slack/approval/labels": typeof providers_slack_approval_labels;
+  "providers/slack/channels": typeof providers_slack_channels;
   "providers/slack/config": typeof providers_slack_config;
   "providers/slack/credentials": typeof providers_slack_credentials;
   "providers/slack/data": typeof providers_slack_data;
@@ -453,6 +458,7 @@ declare const fullApi: ApiFromModules<{
   "shared/actor": typeof shared_actor;
   "skills/catalog": typeof skills_catalog;
   "skills/data": typeof skills_data;
+  "sources/metadata": typeof sources_metadata;
   "subscriptions/data": typeof subscriptions_data;
 }>;
 

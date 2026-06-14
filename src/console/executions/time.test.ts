@@ -9,7 +9,7 @@ const baseExecution: ExecutionItem = {
   finishedAt: 1700000001323,
   id: "run-1",
   searchableText: "completed run",
-  source: { type: "manual", facts: [] },
+  source: { type: "manual", metadata: [] },
   status: "completed",
   task: "Completed run",
   title: "Completed run",

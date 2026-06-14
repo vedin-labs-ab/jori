@@ -11,6 +11,7 @@ import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
 } from "./approval"
+import { enrichSlackMessageData } from "./channels"
 import {
   slackBotScopes,
   slackInstallUserScopes,
@@ -143,6 +144,11 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
+  const data = await enrichSlackMessageData(ctx, {
+    accountId: message.accountId,
+    data: message.data,
+  })
+
   return await ingestProviderMessage(
     ctx,
     internal.messages.ingest.recordSlackMessage,
@@ -158,7 +164,7 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
       conversationId: message.conversationId,
       text: message.text,
       observedAt: message.observedAt,
-      data: message.data,
+      data,
     }
   )
 }
