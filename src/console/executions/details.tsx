@@ -16,10 +16,11 @@ import { cn } from "@/lib/utils"
 import { absoluteTime } from "./format"
 
 const copyResetDelayMs = 1200
+export const codeBlockContentClassName = "max-h-[250px] overflow-y-auto"
 const codeBlockBodyClassName =
-  "max-h-80 overflow-y-auto px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed"
+  "max-h-[250px] overflow-y-auto px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed"
 
-export const codeBlockFrameClassName = "h-80"
+export const codeBlockFrameClassName = "h-[250px]"
 export type DetailIcon = ElementType<{ className?: string }>
 
 export function ErrorDetail({ value }: { value: string }) {

@@ -71,10 +71,17 @@ function githubDetails({
 }) {
   const repository = readDataObject(data, "repository")
   const issue = readDataObject(data, "issue")
+  const pullRequest = readDataObject(data, "pullRequest")
   const comment = readDataObject(data, "comment")
+  const explicitPullNumber =
+    readDataNumber(data, "pullNumber") ?? readDataNumber(pullRequest, "number")
   const isPullRequest =
     readDataBoolean(data, "isPullRequest") ||
-    readDataNumber(data, "pullNumber") !== undefined
+    pullRequest !== undefined ||
+    explicitPullNumber !== undefined
+  const pullNumber =
+    explicitPullNumber ??
+    (isPullRequest ? readDataNumber(issue, "number") : undefined)
 
   return compactDetails([
     detail(
@@ -84,7 +91,10 @@ function githubDetails({
       { url: readDataString(repository, "url") }
     ),
     isPullRequest
-      ? undefined
+      ? detail("pull_request", pullRequestLabel(pullNumber), {
+          url:
+            readDataString(pullRequest, "url") ?? readDataString(issue, "url"),
+        })
       : detail(
           "issue",
           issueLabel(
@@ -114,11 +124,11 @@ function linearDetails({
   return compactDetails([
     detail(
       "issue",
-      compactText([
+      linearIssueLabel(
         readDataString(data, "issueIdentifier") ??
           readDataString(issue, "identifier"),
-        readDataString(issue, "title"),
-      ]),
+        readDataString(issue, "title")
+      ),
       { url: readDataString(issue, "url") }
     ),
     detail(
@@ -156,6 +166,21 @@ function notionDetails({
 
 function issueLabel(number: number | undefined, title: string | undefined) {
   return compactText([number === undefined ? undefined : `#${number}`, title])
+}
+
+function pullRequestLabel(number: number | undefined) {
+  return number === undefined ? undefined : `#${number}`
+}
+
+function linearIssueLabel(
+  identifier: string | undefined,
+  title: string | undefined
+) {
+  if (identifier === undefined || title === undefined) {
+    return identifier ?? title
+  }
+
+  return `${identifier}: ${title}`
 }
 
 function channelLabel(label: string | undefined) {

@@ -2,6 +2,7 @@ import {
   ArrowUpRight,
   CircleDotDashed,
   File,
+  GitPullRequestArrow,
   Hash,
   MessageCircleMore,
   MessageSquareText,
@@ -29,6 +30,7 @@ const detailMeta = {
   issue: { icon: CircleDotDashed, label: "Issue" },
   message: { icon: MessageSquareText, label: "Message" },
   page: { icon: File, label: "Page" },
+  pull_request: { icon: GitPullRequestArrow, label: "Pull request" },
   repository: { icon: RepositoryIcon, label: "Repository" },
   stopped: { icon: Square, label: "Stopped" },
 } satisfies Record<
@@ -93,7 +95,7 @@ function PayloadFact({
     >
       <DetailFrame
         action={<CopyButton label={label} value={detail.label} />}
-        header={<PayloadHeader detail={detail} label={label} time={time} />}
+        header={<PayloadHeader detail={detail} time={time} />}
       >
         <CodeBlockBody value={detail.label} />
       </DetailFrame>
@@ -103,11 +105,9 @@ function PayloadFact({
 
 function PayloadHeader({
   detail,
-  label,
   time,
 }: {
   detail: ExecutionDetail
-  label: string
   time: string | undefined
 }) {
   if (detail.url === undefined && time === undefined) {
@@ -117,7 +117,7 @@ function PayloadHeader({
   return (
     <div className="flex min-w-0 items-center gap-2">
       {detail.url === undefined ? null : (
-        <FactLink href={detail.url}>Open {label.toLowerCase()}</FactLink>
+        <FactLink href={detail.url}>Source</FactLink>
       )}
       {detail.url !== undefined && time !== undefined ? (
         <SeparatorDot className="shrink-0 text-muted-foreground/60" />

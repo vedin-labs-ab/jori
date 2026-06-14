@@ -98,13 +98,13 @@ test("renders Linear issues with a dashed circle icon", () => {
         event: { type: "issue.comment.created", label: "Issue comment" },
         metadata: [
           { type: "project", label: "Engineering" },
-          { type: "issue", label: "ENG-214 Checkout error" },
+          { type: "issue", label: "ENG-214: Checkout error" },
         ],
       }}
     />
   )
 
-  expect(screen.getByText("ENG-214 Checkout error")).toBeDefined()
+  expect(screen.getByText("ENG-214: Checkout error")).toBeDefined()
   expect(
     container.querySelector("svg[aria-hidden='true']")?.getAttribute("class")
   ).toContain("lucide-circle-dot-dashed")
