@@ -9,7 +9,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Spinner } from "@/components/ui/spinner"
-import { DetailFrame } from "./details"
+import { codeBlockFrameClassName, DetailFrame } from "./details"
 import {
   type LiveStreamStatus,
   type StoredTraceStatus,
@@ -26,7 +26,11 @@ export function TerminalFrame({
   children: ReactNode
 }) {
   return (
-    <DetailFrame action={action} className="h-64" header={caption}>
+    <DetailFrame
+      action={action}
+      className={codeBlockFrameClassName}
+      header={caption}
+    >
       {children}
     </DetailFrame>
   )

@@ -4,8 +4,7 @@ import { CodeBlockDetail } from "./details"
 export function TaskDetail({ task }: { task: string }) {
   return (
     <CodeBlockDetail
-      contentClassName="max-h-96 overflow-y-auto"
-      header="Task"
+      framed
       icon={MessageCircleMore}
       label="Task"
       value={task}

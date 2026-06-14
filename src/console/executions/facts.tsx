@@ -2,18 +2,24 @@ import {
   ArrowUpRight,
   CircleDotDashed,
   File,
-  GitBranch,
   Hash,
-  type LucideIcon,
   MessageCircleMore,
   MessageSquareText,
   Square,
   UserCheck,
 } from "lucide-react"
+import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../dot"
-import { DetailRow } from "./details"
+import {
+  CodeBlockBody,
+  CopyButton,
+  DetailFrame,
+  type DetailIcon,
+  DetailRow,
+} from "./details"
 import { absoluteTime } from "./format"
+import { RepositoryIcon } from "./source"
 import { type ExecutionDetail, type ExecutionDetailType } from "./types"
 
 const detailMeta = {
@@ -23,12 +29,12 @@ const detailMeta = {
   issue: { icon: CircleDotDashed, label: "Issue" },
   message: { icon: MessageSquareText, label: "Message" },
   page: { icon: File, label: "Page" },
-  repository: { icon: GitBranch, label: "Repository" },
+  repository: { icon: RepositoryIcon, label: "Repository" },
   stopped: { icon: Square, label: "Stopped" },
 } satisfies Record<
   ExecutionDetailType,
   {
-    icon: LucideIcon
+    icon: DetailIcon
     label: string
   }
 >
@@ -46,7 +52,10 @@ export function ExecutionFacts({ details }: { details: ExecutionDetail[] }) {
 function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
   const meta = detailMeta[detail.type]
   const time = detail.at === undefined ? undefined : absoluteTime(detail.at)
-  const isPayload = isPayloadDetail(detail)
+
+  if (isPayloadDetail(detail)) {
+    return <PayloadFact detail={detail} label={meta.label} time={time} />
+  }
 
   return (
     <DetailRow
@@ -54,15 +63,8 @@ function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
       iconClassName="text-muted-foreground"
       label={meta.label}
     >
-      <div
-        className={cn(
-          "min-w-0 text-xs",
-          isPayload
-            ? "rounded-md bg-muted px-2.5 py-2"
-            : "flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5"
-        )}
-      >
-        <FactValue detail={detail} isPayload={isPayload} />
+      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 py-1.5 text-xs">
+        <FactValue detail={detail} />
         {time === undefined ? null : (
           <>
             <SeparatorDot className="text-muted-foreground/60" />
@@ -74,28 +76,72 @@ function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
   )
 }
 
-function FactValue({
+function PayloadFact({
   detail,
-  isPayload,
+  label,
+  time,
 }: {
   detail: ExecutionDetail
-  isPayload: boolean
+  label: string
+  time: string | undefined
 }) {
+  return (
+    <DetailRow
+      icon={detailMeta[detail.type].icon}
+      iconClassName="text-muted-foreground"
+      label={label}
+    >
+      <DetailFrame
+        action={<CopyButton label={label} value={detail.label} />}
+        header={<PayloadHeader detail={detail} label={label} time={time} />}
+      >
+        <CodeBlockBody value={detail.label} />
+      </DetailFrame>
+    </DetailRow>
+  )
+}
+
+function PayloadHeader({
+  detail,
+  label,
+  time,
+}: {
+  detail: ExecutionDetail
+  label: string
+  time: string | undefined
+}) {
+  if (detail.url === undefined && time === undefined) {
+    return undefined
+  }
+
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      {detail.url === undefined ? null : (
+        <FactLink href={detail.url}>Open {label.toLowerCase()}</FactLink>
+      )}
+      {detail.url !== undefined && time !== undefined ? (
+        <SeparatorDot className="shrink-0 text-muted-foreground/60" />
+      ) : null}
+      {time === undefined ? null : (
+        <span className="shrink-0 text-muted-foreground">{time}</span>
+      )}
+    </div>
+  )
+}
+
+function FactValue({ detail }: { detail: ExecutionDetail }) {
   if (detail.url === undefined) {
     return (
-      <span
-        className={cn(
-          "min-w-0 max-w-full font-medium text-foreground",
-          isPayload
-            ? "block whitespace-pre-wrap break-words leading-relaxed"
-            : "truncate"
-        )}
-      >
+      <span className="min-w-0 max-w-full truncate font-medium text-foreground">
         {detail.label}
       </span>
     )
   }
 
+  return <FactLink href={detail.url}>{detail.label}</FactLink>
+}
+
+function FactLink({ children, href }: { children: ReactNode; href: string }) {
   return (
     <a
       className={cn(
@@ -103,28 +149,14 @@ function FactValue({
         "rounded-sm font-medium text-foreground underline-offset-4",
         "transition-colors hover:underline focus-visible:outline-none",
         "focus-visible:ring-2 focus-visible:ring-ring/50",
-        isPayload ? "items-start" : "items-center"
+        "items-center"
       )}
-      href={detail.url}
+      href={href}
       rel="noreferrer"
       target="_blank"
     >
-      <span
-        className={cn(
-          "min-w-0",
-          isPayload
-            ? "whitespace-pre-wrap break-words leading-relaxed"
-            : "truncate"
-        )}
-      >
-        {detail.label}
-      </span>
-      <ArrowUpRight
-        className={cn(
-          "size-3 shrink-0 text-muted-foreground transition-colors group-hover/fact-link:text-foreground",
-          isPayload && "mt-0.5"
-        )}
-      />
+      <span className="min-w-0 truncate">{children}</span>
+      <ArrowUpRight className="size-3 shrink-0 text-muted-foreground transition-colors group-hover/fact-link:text-foreground" />
     </a>
   )
 }
