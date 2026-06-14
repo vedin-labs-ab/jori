@@ -1,48 +1,53 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
-import { SourceParts } from "./source"
+import { SourceLine } from "./source"
 
 afterEach(cleanup)
 
-describe("execution source parts", () => {
-  test("renders automation sources as a sentence with the automation emphasized", () => {
+describe("execution source line", () => {
+  test("renders automation-only sources without repeating the title", () => {
     const { container } = render(
-      <SourceParts parts={["Triggered by automation:", "Send goose image"]} />
-    )
-
-    expect(container.textContent).toBe(
-      "Triggered by the Send goose image automation"
-    )
-
-    const automationName = screen.getByText("Send goose image")
-    expect(automationName.className).toContain("font-medium")
-    expect(automationName.className).toContain("text-foreground")
-  })
-
-  test("renders event automation sources with trigger context", () => {
-    render(
-      <SourceParts
-        parts={[
-          "Triggered by event:",
-          "vedin.labs@gmail.com",
-          "in",
-          "Slack",
-          "event:",
-          "New channel message",
-          "for automation:",
-          "Deep analysis",
-        ]}
+      <SourceLine
+        source={{
+          type: "automation",
+          automation: { type: "automation", label: "Daily digest" },
+          facts: [],
+        }}
       />
     )
 
-    expect(screen.getByText("vedin.labs@gmail.com").className).toContain(
+    expect(container.textContent).toBe("Automation run")
+  })
+
+  test("renders rich event source metadata", () => {
+    render(
+      <SourceLine
+        source={{
+          type: "automation",
+          automation: { type: "automation", label: "Deep analysis" },
+          provider: { type: "github", label: "GitHub" },
+          event: {
+            type: "pull_request.review_comment.created",
+            label: "Pull request review comment created",
+          },
+          target: {
+            type: "pull_request",
+            label: "#42 in vedin-labs/frontier",
+          },
+          facts: [{ type: "path", label: "src/app.ts" }],
+        }}
+      />
+    )
+
+    expect(screen.getByText("GitHub").className).toContain("font-medium")
+    expect(
+      screen.getByText("pull_request.review_comment.created").className
+    ).toContain("font-mono")
+    expect(screen.getByText("#42 in vedin-labs/frontier").className).toContain(
       "font-medium"
     )
-    expect(screen.getByText("Slack").className).toContain("font-medium")
-    expect(screen.getByText("New channel message").className).toContain(
-      "font-medium"
-    )
-    expect(screen.getByText("Deep analysis").className).toContain("font-medium")
+    expect(screen.getByText("path")).toBeDefined()
+    expect(screen.getByText("src/app.ts")).toBeDefined()
   })
 })

@@ -212,6 +212,7 @@ async function insertMessage(
   return await ctx.db.insert("messages", {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
+    provider: input.integration.provider,
     type: input.message.type,
     externalId: input.message.externalId,
     actor: input.message.actor,

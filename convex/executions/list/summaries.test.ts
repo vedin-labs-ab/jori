@@ -10,10 +10,13 @@ test("uses stored automation snapshots when the automation document is unavailab
         _creationTime: 0,
         tenantId: "tenant",
         integrationId: "integration",
+        provider: "slack",
         key: "slack:event",
         type: "message.created",
+        resource: "C123",
         actor: { email: "vedin.labs@gmail.com" },
         text: "perform a deep analysis",
+        data: { channelId: "C123", ts: "1700000000.000000" },
         createdAt: 0,
       },
       integration: slackIntegration(),
@@ -24,7 +27,7 @@ test("uses stored automation snapshots when the automation document is unavailab
         automationId: "missing-automation",
         reason: { type: "event", eventId: "event" },
         title: "Deep analysis",
-        instructions: "Perform the deep analysis.",
+        task: "Perform the deep analysis.",
         createdAt: 0,
       },
     }),
@@ -32,19 +35,18 @@ test("uses stored automation snapshots when the automation document is unavailab
   )
 
   expect(summary.title).toBe("Deep analysis")
-  expect(summary.instructions).toBe("Perform the deep analysis.")
+  expect(summary.task).toBe("Perform the deep analysis.")
   expect(summary.searchableText).toContain("perform the deep analysis")
   expect("promptUrl" in summary).toBe(false)
-  expect(summary.sourceParts).toEqual([
-    "Triggered by event:",
-    "vedin.labs@gmail.com",
-    "in",
-    "Slack",
-    "event:",
-    "New channel message",
-    "for automation:",
-    "Deep analysis",
-  ])
+  expect(summary.source).toEqual({
+    type: "automation",
+    automation: { type: "automation", label: "Deep analysis" },
+    provider: { type: "slack", label: "Slack" },
+    event: { type: "message.created", label: "New channel message" },
+    actor: { type: "email", label: "vedin.labs@gmail.com" },
+    target: { type: "channel", label: "C123" },
+    facts: [{ type: "message", label: "1700000000.000000" }],
+  })
 })
 
 test("uses stored message snapshots when the message document is unavailable", async () => {
@@ -56,7 +58,7 @@ test("uses stored message snapshots when the message document is unavailable", a
         tenantId: "tenant",
         reason: { type: "message", messageId: "missing-message" },
         title: "Please summarize this thread.",
-        instructions: "Please summarize this thread.\n\nKeep it concise.",
+        task: "Please summarize this thread.\n\nKeep it concise.",
         createdAt: 0,
       },
     }),
@@ -64,9 +66,8 @@ test("uses stored message snapshots when the message document is unavailable", a
   )
 
   expect(summary.title).toBe("Please summarize this thread.")
-  expect(summary.instructions).toBe(
-    "Please summarize this thread.\n\nKeep it concise."
-  )
+  expect(summary.task).toBe("Please summarize this thread.\n\nKeep it concise.")
+  expect(summary.source).toEqual({ type: "message", facts: [] })
   expect(summary.searchableText).toContain("keep it concise")
 })
 
@@ -92,7 +93,7 @@ test("keeps stored automation snapshots when the automation changes", async () =
         automationId: "automation",
         reason: { type: "time", scheduledAt: 0 },
         title: "Original automation name",
-        instructions: "Original automation instructions.",
+        task: "Original automation instructions.",
         createdAt: 0,
       },
     }),
@@ -100,14 +101,15 @@ test("keeps stored automation snapshots when the automation changes", async () =
   )
 
   expect(summary.title).toBe("Original automation name")
-  expect(summary.instructions).toBe("Original automation instructions.")
-  expect(summary.sourceParts).toEqual([
-    "Triggered by automation:",
-    "Original automation name",
-  ])
+  expect(summary.task).toBe("Original automation instructions.")
+  expect(summary.source).toEqual({
+    type: "automation",
+    automation: { type: "automation", label: "Original automation name" },
+    facts: [],
+  })
 })
 
-test("does not read message text as an instructions fallback", async () => {
+test("does not read message text as a task fallback", async () => {
   const summary = await summarizeExecution(
     fakeQueryCtx({
       integration: slackIntegration(),
@@ -116,6 +118,7 @@ test("does not read message text as an instructions fallback", async () => {
         _creationTime: 0,
         tenantId: "tenant",
         integrationId: "integration",
+        provider: "slack",
         type: "message.channels",
         externalId: "slack:message",
         text: "Please summarize this thread.\n\nKeep it concise.",
@@ -127,6 +130,7 @@ test("does not read message text as an instructions fallback", async () => {
         tenantId: "tenant",
         reason: { type: "message", messageId: "message" },
         title: "Stored message title",
+        task: "Stored message task",
         createdAt: 0,
       },
     }),
@@ -134,7 +138,7 @@ test("does not read message text as an instructions fallback", async () => {
   )
 
   expect(summary.title).toBe("Stored message title")
-  expect(summary.instructions).toBeUndefined()
+  expect(summary.task).toBe("Stored message task")
   expect(summary.searchableText).not.toContain("keep it concise")
 })
 
