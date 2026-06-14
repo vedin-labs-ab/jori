@@ -1,3 +1,4 @@
+import { File, type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { Kbd } from "@/components/ui/kbd"
 import { cn } from "@/lib/utils"
@@ -125,6 +126,7 @@ type MetadataRenderer = (props: { datum: SourceDatum }) => ReactNode
 
 const metadataRenderers: Record<string, MetadataRenderer> = {
   channel: ChannelDatum,
+  page: PageDatum,
   pull_request: PullRequestDatum,
   repository: RepositoryDatum,
 }
@@ -152,19 +154,40 @@ function PullRequestDatum({ datum }: { datum: SourceDatum }) {
 function ChannelDatum({ datum }: { datum: SourceDatum }) {
   return (
     <span
-      className="inline-flex h-5 min-w-0 items-center gap-0.5 rounded-sm bg-muted px-1.5 font-medium text-foreground"
+      className="inline-flex h-5 max-w-64 min-w-0 items-center rounded-md bg-[#173241] px-1.5 font-medium text-[#31B9E5]"
       title={datum.label}
     >
-      <span className="shrink-0 text-muted-foreground">#</span>
-      <span className="truncate">{channelLabel(datum.label)}</span>
+      <span className="truncate">#{channelLabel(datum.label)}</span>
     </span>
   )
+}
+
+function PageDatum({ datum }: { datum: SourceDatum }) {
+  return <IconMetadataDatum datum={datum} icon={File} />
 }
 
 function PlainMetadataDatum({ datum }: { datum: SourceDatum }) {
   return (
     <span className="truncate font-medium text-foreground" title={datum.label}>
       {datum.label}
+    </span>
+  )
+}
+
+function IconMetadataDatum({
+  datum,
+  icon: Icon,
+}: {
+  datum: SourceDatum
+  icon: LucideIcon
+}) {
+  return (
+    <span
+      className="inline-flex min-w-0 items-center gap-1 font-medium text-foreground"
+      title={datum.label}
+    >
+      <Icon className="size-3 shrink-0 text-muted-foreground/70" />
+      <span className="truncate">{datum.label}</span>
     </span>
   )
 }
@@ -177,7 +200,8 @@ function RepositoryIcon({ className }: { className?: string }) {
       fill="currentColor"
       viewBox="0 0 24 24"
     >
-      <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h15A2.5 2.5 0 0 1 22 2.5v19.75a.75.75 0 0 1-1.2.6l-1.45-1.087a.25.25 0 0 0-.3 0L17.6 22.85a.75.75 0 0 1-1.2-.6V2.5a1 1 0 0 0-1-1H4.5a1 1 0 0 0-1 1v16.75c0 .966.784 1.75 1.75 1.75h8.5a.75.75 0 0 1 0 1.5h-8.5A3.25 3.25 0 0 1 2 19.25V2.5Zm15.9-1c.066.323.1.658.1 1v17.25l.65-.487a1.75 1.75 0 0 1 2.1 0l.65.487V2.5a1 1 0 0 0-1-1h-2.5Z" />
+      <path d="M3 2.75A2.75 2.75 0 0 1 5.75 0h14.5a.75.75 0 0 1 .75.75v20.5a.75.75 0 0 1-.75.75h-6a.75.75 0 0 1 0-1.5h5.25v-4H6A1.5 1.5 0 0 0 4.5 18v.75c0 .716.43 1.334 1.05 1.605a.75.75 0 0 1-.6 1.374A3.251 3.251 0 0 1 3 18.75ZM19.5 1.5H5.75c-.69 0-1.25.56-1.25 1.25v12.651A2.989 2.989 0 0 1 6 15h13.5Z" />
+      <path d="M7 18.25a.25.25 0 0 1 .25-.25h5a.25.25 0 0 1 .25.25v5.01a.25.25 0 0 1-.397.201l-2.206-1.604a.25.25 0 0 0-.294 0L7.397 23.46a.25.25 0 0 1-.397-.2v-5.01Z" />
     </svg>
   )
 }
