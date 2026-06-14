@@ -55,7 +55,8 @@ function githubMetadata(data: unknown) {
   return compactItems([
     item(
       "repository",
-      readString(repository, "fullName"),
+      readString(repository, "name") ??
+        repositoryName(readString(repository, "fullName")),
       readString(repository, "url")
     ),
     githubTarget(data),
@@ -78,12 +79,20 @@ function githubTarget(data: unknown) {
 
   return item(
     isPullRequest ? "pull_request" : "issue",
-    compactText([
-      number === undefined ? undefined : `#${number}`,
-      readString(target, "title"),
-    ]),
+    isPullRequest
+      ? number === undefined
+        ? undefined
+        : `#${number}`
+      : compactText([
+          number === undefined ? undefined : `#${number}`,
+          readString(target, "title"),
+        ]),
     readString(target, "url")
   )
+}
+
+function repositoryName(fullName: string | undefined) {
+  return fullName?.split("/").filter(Boolean).at(-1)
 }
 
 function linearMetadata(data: unknown) {
