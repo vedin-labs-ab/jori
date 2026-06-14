@@ -75,11 +75,18 @@ describe("execution row details", () => {
 
     expect(screen.getByText("Repository")).toBeDefined()
     expect(screen.getByText("Comment")).toBeDefined()
-    expect(
-      screen
-        .getByRole("link", { name: /vedin-labs\/frontier/i })
-        .getAttribute("href")
-    ).toBe("https://github.com/vedin-labs/frontier")
+    const repositoryLink = screen.getByRole("link", {
+      name: /vedin-labs\/frontier/i,
+    })
+    const commentLink = screen.getByRole("link", {
+      name: /can you check this failure/i,
+    })
+
+    expect(repositoryLink.getAttribute("href")).toBe(
+      "https://github.com/vedin-labs/frontier"
+    )
+    expect(repositoryLink.closest(".bg-muted")).toBeNull()
+    expect(commentLink.closest(".bg-muted")).not.toBeNull()
   })
 })
 
