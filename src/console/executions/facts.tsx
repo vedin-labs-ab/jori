@@ -5,7 +5,6 @@ import {
   GitPullRequestArrow,
   Hash,
   MessageCircleMore,
-  MessageSquareText,
   Square,
   UserCheck,
 } from "lucide-react"
@@ -28,7 +27,7 @@ const detailMeta = {
   comment: { icon: MessageCircleMore, label: "Comment" },
   decision: { icon: UserCheck, label: "Decision" },
   issue: { icon: CircleDotDashed, label: "Issue" },
-  message: { icon: MessageSquareText, label: "Message" },
+  message: { icon: MessageCircleMore, label: "Message" },
   page: { icon: File, label: "Page" },
   pull_request: { icon: GitPullRequestArrow, label: "Pull request" },
   repository: { icon: RepositoryIcon, label: "Repository" },
