@@ -89,12 +89,15 @@ describe("execution row linked details", () => {
       "https://github.com/vedin-labs/frontier"
     )
     expect(repositoryLink.closest(".bg-muted")).toBeNull()
+    expect(repositoryLink.parentElement?.className).not.toContain("py-1.5")
     expect(commentSourceLink.getAttribute("href")).toBe(
       "https://github.com/vedin-labs/frontier/issues/12#comment"
     )
     expect(commentBody.closest(".bg-muted")).not.toBeNull()
   })
+})
 
+describe("execution row pull request details", () => {
   test("renders pull request details as a plain linked fact", () => {
     renderExecutionRow(
       execution({
@@ -103,7 +106,7 @@ describe("execution row linked details", () => {
         details: [
           {
             type: "pull_request",
-            label: "#42",
+            label: "#42 Add execution metadata",
             url: "https://github.com/vedin-labs/frontier/pull/42",
           },
         ],
@@ -113,12 +116,15 @@ describe("execution row linked details", () => {
     fireEvent.click(screen.getByRole("button", { name: /github pr test/i }))
 
     expect(screen.getByText("Pull request")).toBeDefined()
-    const pullRequestLink = screen.getByRole("link", { name: /#42/i })
+    const pullRequestLink = screen.getByRole("link", {
+      name: /#42 add execution metadata/i,
+    })
 
     expect(pullRequestLink.getAttribute("href")).toBe(
       "https://github.com/vedin-labs/frontier/pull/42"
     )
     expect(pullRequestLink.closest(".bg-muted")).toBeNull()
+    expect(pullRequestLink.parentElement?.className).not.toContain("py-1.5")
   })
 })
 
