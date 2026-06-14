@@ -34,8 +34,9 @@ test("uses event automation run snapshots for labels when the automation documen
   )
 
   expect(summary.title).toBe("Deep analysis")
-  expect(summary.promptUrl).toBe("https://storage/prompt")
+  expect(summary.instructions).toBe("Perform the deep analysis.")
   expect(summary.searchableText).toContain("perform the deep analysis")
+  expect("promptUrl" in summary).toBe(false)
   expect(summary.sourceParts).toEqual([
     "Triggered by event:",
     "vedin.labs@gmail.com",
@@ -75,8 +76,7 @@ test("does not use automation names as instructions", async () => {
   )
 
   expect(summary.title).toBe("Notion test")
-  expect(summary.promptUrl).toBe("https://storage/prompt")
-  expect("objective" in summary).toBe(false)
+  expect(summary.instructions).toBeUndefined()
 })
 
 test("uses event text instead of manual copy for orphaned event runs", async () => {
@@ -105,13 +105,45 @@ test("uses event text instead of manual copy for orphaned event runs", async () 
   )
 
   expect(summary.title).toBe("can you schedule a launch review?")
-  expect(summary.promptUrl).toBe("https://storage/prompt")
+  expect(summary.instructions).toBeUndefined()
   expect(summary.sourceParts).toEqual([
     "Triggered by event:",
     "Slack",
     "event:",
     "New channel message",
   ])
+})
+
+test("uses message text as message run instructions", async () => {
+  const summary = await summarizeExecution(
+    fakeQueryCtx({
+      integration: slackIntegration(),
+      message: {
+        _id: "message",
+        _creationTime: 0,
+        tenantId: "tenant",
+        integrationId: "integration",
+        type: "message.channels",
+        externalId: "slack:message",
+        text: "Please summarize this thread.\n\nKeep it concise.",
+        createdAt: 0,
+      },
+      run: {
+        _id: "run",
+        _creationTime: 0,
+        tenantId: "tenant",
+        reason: { type: "message", messageId: "message" },
+        createdAt: 0,
+      },
+    }),
+    execution()
+  )
+
+  expect(summary.title).toBe("Please summarize this thread.")
+  expect(summary.instructions).toBe(
+    "Please summarize this thread.\n\nKeep it concise."
+  )
+  expect(summary.searchableText).toContain("keep it concise")
 })
 
 function slackIntegration() {
@@ -155,9 +187,6 @@ function fakeQueryCtx(docs: Record<string, unknown>) {
           }),
         }),
       }),
-    },
-    storage: {
-      getUrl: async (id: string) => `https://storage/${id}`,
     },
   } as unknown as QueryCtx
 }

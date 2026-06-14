@@ -3,7 +3,7 @@ import { memo, useState } from "react"
 import { ApprovalCallout } from "./approval"
 import { ErrorDetail, RelativeTime } from "./details"
 import { formatDuration, relativeTime } from "./format"
-import { PromptDetail } from "./prompt"
+import { InstructionsDetail } from "./instructions"
 import { SourceParts } from "./source"
 import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
 import { StopExecution } from "./stop"
@@ -115,7 +115,7 @@ function ExpandedExecution({
 }) {
   return (
     <div className="grid gap-0">
-      <PromptDetail promptUrl={execution.promptUrl} />
+      <InstructionsDetail instructions={execution.instructions} />
       {execution.approval !== null ? (
         <ApprovalCallout
           approval={execution.approval}
