@@ -60,9 +60,11 @@ test("renders Slack channels as channel tokens", () => {
     />
   )
 
-  expect(screen.getByText("#product").parentElement?.className).toContain(
-    "bg-[#173241]"
-  )
+  const token = screen.getByText("#product").parentElement
+
+  expect(token?.className).toContain("bg-current/10")
+  expect(token?.className).toContain("text-[#1264A3]")
+  expect(token?.className).toContain("dark:text-[#31B9E5]")
 })
 
 test("renders Notion pages with a file icon", () => {
