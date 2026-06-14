@@ -187,6 +187,7 @@ export function runtimeInput(
       reason: {
         type: "message",
         messageId: "message",
+        kind: "mention",
       },
       createdAt: 0,
     },

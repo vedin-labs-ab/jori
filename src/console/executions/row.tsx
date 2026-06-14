@@ -116,7 +116,7 @@ function ExpandedExecution({
 }) {
   return (
     <div className="grid gap-0">
-      <TaskDetail task={execution.task} />
+      <TaskDetail source={execution.taskSource} task={execution.task} />
       <ExecutionFacts details={execution.details} />
       {execution.approval !== null ? (
         <ApprovalCallout

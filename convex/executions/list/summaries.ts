@@ -2,7 +2,7 @@ import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
 import { getExecutionContext } from "./context"
-import { executionDetails } from "./details"
+import { executionDetailSummary } from "./details"
 import { executionTask, executionTitle, triggerLabel } from "./labels"
 import { executionSource, sourceSearchText } from "./source"
 
@@ -16,6 +16,15 @@ export async function summarizeExecution(
   const task = executionTask(context)
   const stoppedBy = await stoppedByLabel(ctx, execution)
   const source = executionSource(context, stoppedBy)
+  const detailSummary = executionDetailSummary({
+    approval: context.requestedApproval,
+    event: context.event,
+    execution,
+    integration: context.integration,
+    message: context.message,
+    source,
+    stoppedBy,
+  })
 
   return {
     id: execution._id,
@@ -23,17 +32,10 @@ export async function summarizeExecution(
     title,
     source,
     task,
+    taskSource: detailSummary.taskSource,
     trigger: triggerLabel(context),
     createdAt: execution.createdAt,
-    details: executionDetails({
-      approval: context.requestedApproval,
-      event: context.event,
-      execution,
-      integration: context.integration,
-      message: context.message,
-      source,
-      stoppedBy,
-    }),
+    details: detailSummary.details,
     finishedAt: execution.finishedAt,
     durationMs: getDuration(execution),
     traceFileId: storedTraceFileId(execution),

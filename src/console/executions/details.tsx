@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, Copy } from "lucide-react"
+import { AlertTriangle, ArrowUpRight, Check, Copy } from "lucide-react"
 import {
   type ElementType,
   type ReactNode,
@@ -142,6 +142,31 @@ export function DetailFrame({
         {children}
       </div>
     </div>
+  )
+}
+
+export function DetailLink({
+  children,
+  href,
+}: {
+  children: ReactNode
+  href: string
+}) {
+  return (
+    <a
+      className={cn(
+        "group/detail-link inline-flex min-w-0 max-w-full items-center gap-1.5",
+        "rounded-sm font-medium text-foreground underline-offset-4",
+        "transition-colors hover:underline focus-visible:outline-none",
+        "focus-visible:ring-2 focus-visible:ring-ring/50"
+      )}
+      href={href}
+      rel="noreferrer"
+      target="_blank"
+    >
+      <span className="min-w-0 truncate">{children}</span>
+      <ArrowUpRight className="size-3 shrink-0 text-muted-foreground transition-colors group-hover/detail-link:text-foreground" />
+    </a>
   )
 }
 

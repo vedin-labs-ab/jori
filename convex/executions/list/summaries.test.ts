@@ -55,7 +55,11 @@ test("requires message documents for message runs", async () => {
           _id: "run",
           _creationTime: 0,
           tenantId: "tenant",
-          reason: { type: "message", messageId: "missing-message" },
+          reason: {
+            type: "message",
+            messageId: "missing-message",
+            kind: "mention",
+          },
           title: "Please summarize this thread.",
           task: "Please summarize this thread.\n\nKeep it concise.",
           createdAt: 0,
@@ -86,7 +90,7 @@ test("uses stored message snapshots instead of message text", async () => {
         _id: "run",
         _creationTime: 0,
         tenantId: "tenant",
-        reason: { type: "message", messageId: "message" },
+        reason: { type: "message", messageId: "message", kind: "reply" },
         title: "Please summarize this thread.",
         task: "Stored task.",
         createdAt: 0,
@@ -99,10 +103,64 @@ test("uses stored message snapshots instead of message text", async () => {
   expect(summary.task).toBe("Stored task.")
   expect(summary.source).toEqual({
     type: "message",
+    kind: { type: "reply", label: "reply" },
     provider: { type: "slack", label: "Slack" },
     metadata: [{ type: "channel", label: "C123" }],
   })
   expect(summary.searchableText).not.toContain("keep it concise")
+})
+
+test("summarizes mention runs with source task links", async () => {
+  const summary = await summarizeExecution(
+    fakeQueryCtx({
+      integration: slackIntegration(),
+      message: {
+        _id: "message",
+        _creationTime: 0,
+        tenantId: "tenant",
+        integrationId: "integration",
+        provider: "slack",
+        type: "message.channels",
+        externalId: "slack:message",
+        conversationId: "C123",
+        text: "Please summarize this thread.",
+        data: {
+          channel: { id: "C123", name: "product" },
+          ts: "1700000000.000000",
+        },
+        metadata: [{ type: "channel", label: "#product" }],
+        createdAt: 0,
+      },
+      run: {
+        _id: "run",
+        _creationTime: 0,
+        tenantId: "tenant",
+        reason: { type: "message", messageId: "message", kind: "mention" },
+        title: "Please summarize this thread.",
+        task: "Please summarize this thread.",
+        createdAt: 0,
+      },
+    }),
+    execution()
+  )
+
+  expect(summary.source).toEqual({
+    type: "message",
+    kind: { type: "mention", label: "mention" },
+    provider: { type: "slack", label: "Slack" },
+    metadata: [{ type: "channel", label: "#product" }],
+  })
+  expect(summary.taskSource).toEqual({
+    label: "Source",
+    url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=slack-team",
+  })
+  expect(summary.details).toEqual([
+    {
+      type: "channel",
+      label: "#product",
+      url: "https://slack.com/app_redirect?channel=C123&team=slack-team",
+    },
+  ])
 })
 
 test("keeps stored automation snapshots when the automation changes", async () => {
