@@ -13,6 +13,7 @@ export const runReason = v.union(
   v.object({
     type: v.literal("message"),
     messageId: v.id("messages"),
+    kind: v.union(v.literal("mention"), v.literal("reply")),
   }),
   v.object({
     type: v.literal("manual"),

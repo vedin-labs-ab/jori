@@ -37,9 +37,15 @@ export type SourceDatum = {
   url?: string
 }
 
+export type ExecutionTaskSource = {
+  label: string
+  url: string
+}
+
 export type ExecutionSource = {
   type: "automation" | "event" | "manual" | "message"
   event?: SourceDatum
+  kind?: SourceDatum
   metadata: SourceDatum[]
   provider?: SourceDatum
   stop?: {
@@ -71,6 +77,7 @@ export type ExecutionItem = {
   title: string
   source: ExecutionSource
   task: string
+  taskSource?: ExecutionTaskSource
   trigger: string
   createdAt: number
   details: ExecutionDetail[]

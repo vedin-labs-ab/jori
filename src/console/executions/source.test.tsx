@@ -60,12 +60,14 @@ test("renders Slack channels as channel tokens", () => {
     <SourceLine
       source={{
         type: "message",
+        kind: { type: "reply", label: "reply" },
         provider: { type: "slack", label: "Slack" },
         metadata: [{ type: "channel", label: "#product" }],
       }}
     />
   )
 
+  expect(screen.getByText("reply").className).toContain("font-mono")
   const token = screen.getByText("#product").parentElement
 
   expect(token?.className).toContain("bg-current/10")

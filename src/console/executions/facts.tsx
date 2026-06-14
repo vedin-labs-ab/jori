@@ -1,5 +1,4 @@
 import {
-  ArrowUpRight,
   CircleDotDashed,
   File,
   GitPullRequestArrow,
@@ -16,6 +15,7 @@ import {
   CopyButton,
   DetailFrame,
   type DetailIcon,
+  DetailLink,
   DetailRow,
 } from "./details"
 import { absoluteTime } from "./format"
@@ -168,7 +168,7 @@ function PayloadHeader({
   return (
     <div className="flex min-w-0 items-center gap-2">
       {detail.url === undefined ? null : (
-        <FactLink href={detail.url}>Source</FactLink>
+        <DetailLink href={detail.url}>Source</DetailLink>
       )}
       {detail.url !== undefined && time !== undefined ? (
         <SeparatorDot className="shrink-0 text-muted-foreground/60" />
@@ -189,27 +189,7 @@ function FactValue({ detail }: { detail: ExecutionDetail }) {
     )
   }
 
-  return <FactLink href={detail.url}>{detail.label}</FactLink>
-}
-
-function FactLink({ children, href }: { children: ReactNode; href: string }) {
-  return (
-    <a
-      className={cn(
-        "group/fact-link inline-flex min-w-0 max-w-full gap-1.5",
-        "rounded-sm font-medium text-foreground underline-offset-4",
-        "transition-colors hover:underline focus-visible:outline-none",
-        "focus-visible:ring-2 focus-visible:ring-ring/50",
-        "items-center"
-      )}
-      href={href}
-      rel="noreferrer"
-      target="_blank"
-    >
-      <span className="min-w-0 truncate">{children}</span>
-      <ArrowUpRight className="size-3 shrink-0 text-muted-foreground transition-colors group-hover/fact-link:text-foreground" />
-    </a>
-  )
+  return <DetailLink href={detail.url}>{detail.label}</DetailLink>
 }
 
 function isPayloadDetail(detail: ExecutionDetail) {

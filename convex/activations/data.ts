@@ -39,11 +39,13 @@ export async function startMessageRun(
     now: number
   }
 ) {
+  const kind = args.activation === null ? "mention" : "reply"
   const runId = await ctx.db.insert("runs", {
     tenantId: args.integration.tenantId,
     reason: {
       type: "message",
       messageId: args.messageId,
+      kind,
     },
     ...createMessageRunSnapshot({ text: args.messageText }),
     createdBy: args.createdBy,

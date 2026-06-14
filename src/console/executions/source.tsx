@@ -58,9 +58,15 @@ function sourceItems(source: ExecutionSource): SourceItem[] {
       )
     ),
     ...optionalItem(
+      "kind",
+      source.kind === undefined ? undefined : (
+        <SourceTypeDatum datum={source.kind} />
+      )
+    ),
+    ...optionalItem(
       "event",
       source.event === undefined ? undefined : (
-        <EventDatum datum={source.event} />
+        <SourceTypeDatum datum={source.event} />
       )
     ),
     ...source.metadata.map((item) => ({
@@ -109,7 +115,7 @@ function ProviderDatum({ datum }: { datum: SourceDatum }) {
   )
 }
 
-function EventDatum({ datum }: { datum: SourceDatum }) {
+function SourceTypeDatum({ datum }: { datum: SourceDatum }) {
   return (
     <span
       className="truncate font-medium font-mono text-foreground"

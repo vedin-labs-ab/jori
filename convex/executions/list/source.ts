@@ -14,6 +14,7 @@ export type SourceDatum = {
 export type ExecutionSource = {
   type: "automation" | "event" | "manual" | "message"
   event?: SourceDatum
+  kind?: SourceDatum
   metadata: SourceMetadataItem[]
   provider?: SourceDatum
   stop?: {
@@ -25,11 +26,16 @@ export function executionSource(
   context: ExecutionContext,
   stoppedBy: string | undefined
 ): ExecutionSource {
+  const kind = sourceKind(context)
   const provider = sourceProvider(context)
   const event = sourceEvent(context)
   const source: ExecutionSource = {
     type: sourceType(context),
     metadata: context.event?.metadata ?? context.message?.metadata ?? [],
+  }
+
+  if (kind !== undefined) {
+    source.kind = kind
   }
 
   if (provider !== undefined) {
@@ -50,6 +56,8 @@ export function executionSource(
 export function sourceSearchText(source: ExecutionSource) {
   return [
     source.type,
+    source.kind?.type,
+    source.kind?.label,
     source.event?.type,
     source.event?.label,
     source.provider?.type,
@@ -59,6 +67,17 @@ export function sourceSearchText(source: ExecutionSource) {
   ]
     .filter(Boolean)
     .join(" ")
+}
+
+function sourceKind({ run }: ExecutionContext): SourceDatum | undefined {
+  if (run.reason.type !== "message") {
+    return undefined
+  }
+
+  return {
+    type: run.reason.kind,
+    label: run.reason.kind,
+  }
 }
 
 function sourceType({ run }: ExecutionContext): ExecutionSource["type"] {
