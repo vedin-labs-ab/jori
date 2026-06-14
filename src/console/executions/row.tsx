@@ -2,6 +2,7 @@ import { Timer } from "lucide-react"
 import { memo, useState } from "react"
 import { ApprovalCallout } from "./approval"
 import { ErrorDetail, RelativeTime } from "./details"
+import { ExecutionFacts } from "./facts"
 import { formatDuration, relativeTime } from "./format"
 import { SourceLine } from "./source"
 import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
@@ -116,6 +117,7 @@ function ExpandedExecution({
   return (
     <div className="grid gap-0">
       <TaskDetail task={execution.task} />
+      <ExecutionFacts details={execution.details} />
       {execution.approval !== null ? (
         <ApprovalCallout
           approval={execution.approval}

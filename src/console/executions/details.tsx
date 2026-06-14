@@ -83,7 +83,7 @@ export function StatusDetail({
   )
 }
 
-function DetailRow({
+export function DetailRow({
   children,
   icon: Icon,
   iconClassName,

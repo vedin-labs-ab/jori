@@ -47,6 +47,23 @@ export type ExecutionSource = {
   }
 }
 
+export type ExecutionDetailType =
+  | "channel"
+  | "comment"
+  | "decision"
+  | "issue"
+  | "message"
+  | "page"
+  | "repository"
+  | "stopped"
+
+export type ExecutionDetail = {
+  type: ExecutionDetailType
+  label: string
+  url?: string
+  at?: number
+}
+
 export type ExecutionItem = {
   id: string
   status: ExecutionStatus
@@ -55,6 +72,7 @@ export type ExecutionItem = {
   task: string
   trigger: string
   createdAt: number
+  details: ExecutionDetail[]
   finishedAt?: number
   durationMs?: number
   traceFileId?: string

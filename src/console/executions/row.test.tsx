@@ -49,6 +49,37 @@ describe("execution row details", () => {
     ).toBeDefined()
     expect(screen.getAllByText("Notion test")).toHaveLength(titleCount)
   })
+
+  test("renders execution details with links", () => {
+    renderExecutionRow(
+      execution({
+        task: "Review the issue comment.",
+        title: "GitHub test",
+        details: [
+          {
+            type: "repository",
+            label: "vedin-labs/frontier",
+            url: "https://github.com/vedin-labs/frontier",
+          },
+          {
+            type: "comment",
+            label: "Can you check this failure?",
+            url: "https://github.com/vedin-labs/frontier/issues/12#comment",
+          },
+        ],
+      })
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: /github test/i }))
+
+    expect(screen.getByText("Repository")).toBeDefined()
+    expect(screen.getByText("Comment")).toBeDefined()
+    expect(
+      screen
+        .getByRole("link", { name: /vedin-labs\/frontier/i })
+        .getAttribute("href")
+    ).toBe("https://github.com/vedin-labs/frontier")
+  })
 })
 
 function renderExecutionRow(item: ExecutionItem) {
@@ -60,11 +91,13 @@ function renderExecutionRow(item: ExecutionItem) {
 }
 
 function execution(
-  overrides: Pick<ExecutionItem, "task" | "title">
+  overrides: Pick<ExecutionItem, "task" | "title"> &
+    Partial<Pick<ExecutionItem, "details">>
 ): ExecutionItem {
   return {
     approval: null,
     createdAt: 1700000000000,
+    details: overrides.details ?? [],
     durationMs: 1000,
     finishedAt: 1700000001000,
     id: "execution",
