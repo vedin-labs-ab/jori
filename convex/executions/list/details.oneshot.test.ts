@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeExecution } from "./summaries"
 
-test("includes one-shot scheduled automation details", async () => {
+test("includes one-shot automation access details", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
   const summary = await summarizeExecution(
     fakeQueryCtx({
@@ -20,10 +20,9 @@ test("includes one-shot scheduled automation details", async () => {
     metadata: [],
   })
   expect(summary.details).toEqual([
-    { type: "scheduled", label: "Scheduled", at: scheduledAt },
     {
       type: "tools",
-      label: "Slack: Send message, Read channel history",
+      label: "Slack · Send message, Read channel history",
       groups: [
         {
           type: "slack",
@@ -32,8 +31,25 @@ test("includes one-shot scheduled automation details", async () => {
         },
       ],
     },
-    { type: "web_search", label: "Yes" },
+    { type: "web_search", label: "Allowed" },
   ])
+})
+
+test("marks one-shot automation web search as blocked when disabled", async () => {
+  const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
+  const summary = await summarizeExecution(
+    fakeQueryCtx({
+      automation: oneShotAutomation(scheduledAt, false),
+      integration: slackIntegration(),
+      run: oneShotRun(scheduledAt),
+    }),
+    execution({ createdAt: scheduledAt + 1000, finishedAt: scheduledAt + 2000 })
+  )
+
+  expect(summary.details).toContainEqual({
+    type: "web_search",
+    label: "Blocked",
+  })
 })
 
 function oneShotRun(scheduledAt: number) {
@@ -49,7 +65,7 @@ function oneShotRun(scheduledAt: number) {
   }
 }
 
-function oneShotAutomation(scheduledAt: number) {
+function oneShotAutomation(scheduledAt: number, webSearch = true) {
   return {
     _id: "automation",
     _creationTime: 0,
@@ -64,7 +80,7 @@ function oneShotAutomation(scheduledAt: number) {
           tools: ["conversations_add_message", "conversations_history"],
         },
       ],
-      web: true,
+      web: webSearch,
     },
     status: "completed",
     createdBy: "user",

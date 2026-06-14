@@ -75,13 +75,12 @@ function oneShotDetails(input: {
   const tools = toolsDetail(input.automationAccess?.surfaces)
 
   return compactDetails([
-    detail("scheduled", "Scheduled", { at: input.run.reason.scheduledAt }),
     tools === undefined
       ? undefined
       : detail("tools", tools.label, { groups: tools.groups }),
     detail(
       "web_search",
-      input.automationAccess?.webSearch === true ? "Yes" : "No"
+      input.automationAccess?.webSearch === true ? "Allowed" : "Blocked"
     ),
   ])
 }
@@ -98,7 +97,7 @@ function toolsDetail(
   return {
     groups,
     label: groups
-      .map((group) => `${group.label}: ${group.values.join(", ")}`)
+      .map((group) => `${group.label} · ${group.values.join(", ")}`)
       .join(" · "),
   }
 }

@@ -1,5 +1,4 @@
 import {
-  CalendarClock,
   CircleDotDashed,
   File,
   GitPullRequestArrow,
@@ -38,7 +37,6 @@ const detailMeta = {
   page: { icon: File, label: "Page" },
   pull_request: { icon: GitPullRequestArrow, label: "Pull request" },
   repository: { icon: RepositoryIcon, label: "Repository" },
-  scheduled: { icon: CalendarClock, label: "Scheduled" },
   stopped: { icon: Square, label: "Stopped" },
   tools: { icon: Wrench, label: "Tools" },
   web_search: { icon: Globe, label: "Web search" },
@@ -56,7 +54,6 @@ const compactFieldTypes = new Set<ExecutionDetailType>([
   "page",
   "pull_request",
   "repository",
-  "scheduled",
   "tools",
   "web_search",
 ])
@@ -100,13 +97,11 @@ function InlineFact({
   label: string
   time: string | undefined
 }) {
-  const hasValue = hasInlineFactValue(detail)
-
   return (
     <DetailRow icon={icon} iconClassName="text-muted-foreground" label={label}>
       <InlineFactContent compact={compactFieldTypes.has(detail.type)}>
-        {hasValue ? <FactValue detail={detail} /> : null}
-        <InlineFactTime separated={hasValue} time={time} />
+        <FactValue detail={detail} />
+        <InlineFactTime time={time} />
       </InlineFactContent>
     </DetailRow>
   )
@@ -131,20 +126,14 @@ function InlineFactContent({
   )
 }
 
-function InlineFactTime({
-  separated,
-  time,
-}: {
-  separated: boolean
-  time: string | undefined
-}) {
+function InlineFactTime({ time }: { time: string | undefined }) {
   if (time === undefined) {
     return null
   }
 
   return (
     <>
-      {separated ? <SeparatorDot className="text-muted-foreground/60" /> : null}
+      <SeparatorDot className="text-muted-foreground/60" />
       <span className="text-muted-foreground">{time}</span>
     </>
   )
@@ -247,16 +236,12 @@ function ToolGroup({
       <span className="shrink-0 font-medium text-foreground">
         {group.label}
       </span>
-      <span className="text-muted-foreground">:</span>
+      <SeparatorDot className="shrink-0 text-muted-foreground/60" />
       <span className="min-w-0 truncate text-foreground">
         {group.values.join(", ")}
       </span>
     </span>
   )
-}
-
-function hasInlineFactValue(detail: ExecutionDetail) {
-  return detail.type !== "scheduled"
 }
 
 function isPayloadDetail(detail: ExecutionDetail) {
