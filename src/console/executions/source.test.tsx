@@ -103,3 +103,27 @@ test("renders Linear issues with a dashed circle icon", () => {
     container.querySelector("svg[aria-hidden='true']")?.getAttribute("class")
   ).toContain("lucide-circle-dot-dashed")
 })
+
+test("renders GitHub issues with a dashed circle icon", () => {
+  const { container } = render(
+    <SourceLine
+      source={{
+        type: "automation",
+        provider: { type: "github", label: "GitHub" },
+        event: { type: "issue.comment.created", label: "Issue comment" },
+        metadata: [
+          { type: "repository", label: "frontier" },
+          { type: "issue", label: "#214 Checkout error" },
+        ],
+      }}
+    />
+  )
+
+  expect(screen.getByText("#214 Checkout error")).toBeDefined()
+  expect(
+    Array.from(container.querySelectorAll("svg[aria-hidden='true']")).some(
+      (element) =>
+        element.getAttribute("class")?.includes("lucide-circle-dot-dashed")
+    )
+  ).toBe(true)
+})
