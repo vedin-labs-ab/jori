@@ -6,18 +6,17 @@ import { SourceLine } from "./source"
 afterEach(cleanup)
 
 describe("execution source line", () => {
-  test("renders automation-only sources without repeating the title", () => {
+  test("renders nothing for automation-only sources", () => {
     const { container } = render(
       <SourceLine
         source={{
           type: "automation",
-          automation: { type: "automation", label: "Daily digest" },
           facts: [],
         }}
       />
     )
 
-    expect(container.textContent).toBe("Automation run")
+    expect(container.textContent).toBe("")
   })
 
   test("renders rich event source metadata", () => {
@@ -25,7 +24,6 @@ describe("execution source line", () => {
       <SourceLine
         source={{
           type: "automation",
-          automation: { type: "automation", label: "Deep analysis" },
           provider: { type: "github", label: "GitHub" },
           event: {
             type: "pull_request.review_comment.created",

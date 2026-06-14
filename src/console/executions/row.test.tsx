@@ -71,7 +71,6 @@ function execution(
     searchableText: "",
     source: {
       type: "automation",
-      automation: { type: "automation", label: overrides.title },
       provider: { type: "slack", label: "Slack" },
       event: { type: "message.created", label: "New channel message" },
       facts: [],

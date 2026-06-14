@@ -33,7 +33,7 @@ export async function startMessageRun(
     activation: Doc<"activations"> | null
     integration: Doc<"integrations">
     messageId: Id<"messages">
-    messageText: string | undefined
+    messageText: string
     conversationId: string
     createdBy: string | undefined
     now: number

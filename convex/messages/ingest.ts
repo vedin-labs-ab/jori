@@ -173,11 +173,17 @@ async function recordProviderMessage(
     return { status: "ignored" as const, messageId }
   }
 
+  const messageText = normalizeMessageText(input.message.text)
+
+  if (messageText === undefined) {
+    return { status: "ignored_empty" as const, messageId }
+  }
+
   return await startMessageRun(ctx, {
     activation,
     integration: input.integration,
     messageId,
-    messageText: input.message.text,
+    messageText,
     conversationId: input.message.conversationId ?? input.message.externalId,
     createdBy,
     now,
@@ -259,4 +265,10 @@ function getGitHubSenderType(data: unknown) {
   const type = (sender as Record<string, unknown>).type
 
   return typeof type === "string" ? type : undefined
+}
+
+function normalizeMessageText(text: string | undefined) {
+  const value = text?.trim()
+
+  return value === "" ? undefined : value
 }

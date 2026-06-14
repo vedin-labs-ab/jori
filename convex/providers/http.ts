@@ -65,7 +65,7 @@ type ObservedMessage = {
 type IngestMessageResult =
   | { status: "started"; runId: Id<"runs"> }
   | { status: "missing_integration" | "ignored_bot" | "duplicate" }
-  | { status: "ignored"; messageId: Id<"messages"> }
+  | { status: "ignored" | "ignored_empty"; messageId: Id<"messages"> }
 
 export async function ingestProviderMessage(
   ctx: ActionCtx,

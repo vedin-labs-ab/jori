@@ -22,17 +22,17 @@ export function ProviderLogo({
 export function SourceLine({ source }: { source: ExecutionSource }) {
   const items = sourceItems(source)
 
+  if (items.length === 0) {
+    return null
+  }
+
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-muted-foreground text-xs">
-      {items.length === 0 ? (
-        <span>{fallbackLabel(source.type)}</span>
-      ) : (
-        items.map((item, index) => (
-          <SourceItem key={item.key} showSeparator={index > 0}>
-            {item.content}
-          </SourceItem>
-        ))
-      )}
+      {items.map((item, index) => (
+        <SourceItem key={item.key} showSeparator={index > 0}>
+          {item.content}
+        </SourceItem>
+      ))}
     </div>
   )
 }
@@ -150,20 +150,4 @@ function optionalItem(key: string, content: ReactNode | undefined) {
 
 function shouldShowActor(source: ExecutionSource) {
   return source.type === "message" || source.target === undefined
-}
-
-function fallbackLabel(type: ExecutionSource["type"]) {
-  if (type === "automation") {
-    return "Automation run"
-  }
-
-  if (type === "event") {
-    return "Provider event"
-  }
-
-  if (type === "message") {
-    return "Message run"
-  }
-
-  return "Manual run"
 }

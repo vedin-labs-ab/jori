@@ -28,10 +28,9 @@ describe("run snapshots", () => {
     })
   })
 
-  test("stores a required task when provider message text is missing", () => {
-    expect(createMessageRunSnapshot({ text: undefined })).toEqual({
-      title: "Message run",
-      task: "Message run",
-    })
+  test("rejects empty run tasks", () => {
+    expect(() => createMessageRunSnapshot({ text: "   " })).toThrow(
+      "Run task cannot be empty."
+    )
   })
 })
