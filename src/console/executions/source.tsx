@@ -169,7 +169,7 @@ function ChannelDatum({ datum }: MetadataRendererProps) {
 }
 
 function IssueDatum({ datum, provider }: MetadataRendererProps) {
-  if (provider !== "linear") {
+  if (provider !== "github" && provider !== "linear") {
     return <PlainMetadataDatum datum={datum} />
   }
 
