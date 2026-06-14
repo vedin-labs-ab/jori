@@ -160,7 +160,7 @@ function PullRequestDatum({ datum }: MetadataRendererProps) {
 function ChannelDatum({ datum }: MetadataRendererProps) {
   return (
     <span
-      className="inline-flex h-5 max-w-64 min-w-0 items-center rounded-md bg-[#173241] px-1.5 font-medium text-[#31B9E5]"
+      className="inline-flex h-5 max-w-64 min-w-0 items-center rounded-md bg-current/10 px-1.5 font-medium text-[#1264A3] dark:text-[#31B9E5]"
       title={datum.label}
     >
       <span className="truncate">#{channelLabel(datum.label)}</span>
