@@ -13,7 +13,10 @@ import {
   getAutomationSurfaceLabel,
   isAutomationSurfaceProvider,
 } from "../../surfaces"
-import { parseAutomationSurfaceTools } from "./document"
+import {
+  automationSurfaceNodeName,
+  parseAutomationSurfaceTools,
+} from "./document"
 import { type AutomationSurfaceExtensionOptions } from "./extension"
 import { AutomationSurfaceRemoveButton } from "./remove"
 import {
@@ -36,11 +39,11 @@ export function AutomationSurfaceNodeView(props: NodeViewProps) {
 
 function AutomationSurfaceNodeContent({
   deleteNode,
+  editor,
   extension,
   node,
   provider,
   selected,
-  updateAttributes,
 }: NodeViewProps & { provider: AutomationSurfaceFormValue["provider"] }) {
   const [isToolDialogOpen, setIsToolDialogOpen] = useState(false)
   const tools = parseAutomationSurfaceTools(node.attrs.tools)
@@ -69,7 +72,9 @@ function AutomationSurfaceNodeContent({
       />
       <AutomationSurfaceToolsDialog
         onOpenChange={setIsToolDialogOpen}
-        onToolsChange={(nextTools) => updateAttributes({ tools: nextTools })}
+        onToolsChange={(nextTools) =>
+          updateProviderSurfaceTools({ editor, provider, tools: nextTools })
+        }
         open={isToolDialogOpen}
         permissions={permissions}
         provider={provider}
@@ -77,6 +82,49 @@ function AutomationSurfaceNodeContent({
         tools={tools}
       />
     </NodeViewWrapper>
+  )
+}
+
+function updateProviderSurfaceTools({
+  editor,
+  provider,
+  tools,
+}: {
+  editor: NodeViewProps["editor"]
+  provider: AutomationSurfaceFormValue["provider"]
+  tools: string[]
+}) {
+  const transaction = editor.state.tr
+  let changed = false
+
+  editor.state.doc.descendants((node, position) => {
+    if (
+      node.type.name !== automationSurfaceNodeName ||
+      node.attrs.provider !== provider ||
+      haveSameTools(parseAutomationSurfaceTools(node.attrs.tools), tools)
+    ) {
+      return
+    }
+
+    transaction.setNodeMarkup(position, undefined, {
+      ...node.attrs,
+      tools,
+    })
+    changed = true
+  })
+
+  if (changed) {
+    editor.view.dispatch(transaction.scrollIntoView())
+  }
+}
+
+function haveSameTools(left: string[], right: string[]) {
+  const leftTools = new Set(left)
+  const rightTools = new Set(right)
+
+  return (
+    leftTools.size === rightTools.size &&
+    [...leftTools].every((tool) => rightTools.has(tool))
   )
 }
 

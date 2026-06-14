@@ -120,6 +120,28 @@ export function parseAutomationSurfaceToolsAttribute(tools: unknown) {
   return parseAutomationSurfaceTools(tools)
 }
 
+export function readAutomationSurfaceToolsForProvider(
+  document: JSONContent,
+  provider: AutomationSurfaceProvider
+): string[] | undefined {
+  if (
+    document.type === automationSurfaceNodeName &&
+    document.attrs?.provider === provider
+  ) {
+    return parseAutomationSurfaceTools(document.attrs.tools)
+  }
+
+  for (const child of document.content ?? []) {
+    const tools = readAutomationSurfaceToolsForProvider(child, provider)
+
+    if (tools !== undefined) {
+      return tools
+    }
+  }
+
+  return undefined
+}
+
 function appendText(paragraphs: JSONContent[], text: string) {
   const lines = text.split("\n")
 
