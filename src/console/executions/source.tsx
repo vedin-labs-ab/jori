@@ -223,7 +223,7 @@ function IconMetadataDatum({
   )
 }
 
-function RepositoryIcon({ className }: { className?: string }) {
+export function RepositoryIcon({ className }: { className?: string }) {
   return (
     <svg
       aria-hidden="true"

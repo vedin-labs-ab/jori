@@ -1,5 +1,11 @@
-import { AlertTriangle, Check, Copy, type LucideIcon } from "lucide-react"
-import { type ReactNode, useEffect, useRef, useState } from "react"
+import { AlertTriangle, Check, Copy } from "lucide-react"
+import {
+  type ElementType,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -10,6 +16,11 @@ import { cn } from "@/lib/utils"
 import { absoluteTime } from "./format"
 
 const copyResetDelayMs = 1200
+const codeBlockBodyClassName =
+  "max-h-80 overflow-y-auto px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed"
+
+export const codeBlockFrameClassName = "h-80"
+export type DetailIcon = ElementType<{ className?: string }>
 
 export function ErrorDetail({ value }: { value: string }) {
   return (
@@ -24,6 +35,7 @@ export function ErrorDetail({ value }: { value: string }) {
 
 export function CodeBlockDetail({
   contentClassName,
+  framed = false,
   header,
   icon: Icon,
   iconClassName = "text-muted-foreground",
@@ -31,8 +43,9 @@ export function CodeBlockDetail({
   value,
 }: {
   contentClassName?: string
+  framed?: boolean
   header?: ReactNode
-  icon: LucideIcon
+  icon: DetailIcon
   iconClassName?: string
   label: string
   value: string
@@ -40,23 +53,14 @@ export function CodeBlockDetail({
   const codeRef = useRef<HTMLElement>(null)
   const isSingleRenderedLine = useIsSingleRenderedLine(codeRef)
 
-  if (header !== undefined) {
+  if (framed || header !== undefined) {
     return (
       <DetailRow icon={Icon} iconClassName={iconClassName} label={label}>
         <DetailFrame
           action={<CopyButton label={label} value={value} />}
           header={header}
         >
-          <div className="px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed">
-            <code
-              className={cn(
-                "block whitespace-pre-wrap break-words",
-                contentClassName
-              )}
-            >
-              {value}
-            </code>
-          </div>
+          <CodeBlockBody className={contentClassName} value={value} />
         </DetailFrame>
       </DetailRow>
     )
@@ -84,6 +88,22 @@ export function CodeBlockDetail({
         </span>
       </div>
     </DetailRow>
+  )
+}
+
+export function CodeBlockBody({
+  className,
+  value,
+}: {
+  className?: string
+  value: string
+}) {
+  return (
+    <div className={codeBlockBodyClassName}>
+      <code className={cn("block whitespace-pre-wrap break-words", className)}>
+        {value}
+      </code>
+    </div>
   )
 }
 
@@ -130,7 +150,7 @@ export function StatusDetail({
   label,
   value,
 }: {
-  icon: LucideIcon
+  icon: DetailIcon
   iconClassName?: string
   label: string
   value: string
@@ -151,7 +171,7 @@ export function DetailRow({
   label,
 }: {
   children: React.ReactNode
-  icon: LucideIcon
+  icon: DetailIcon
   iconClassName: string
   label: string
 }) {

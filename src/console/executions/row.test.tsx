@@ -17,7 +17,7 @@ afterEach(() => {
   cleanup()
 })
 
-describe("execution row details", () => {
+describe("execution row task details", () => {
   test("renders the execution task", () => {
     renderExecutionRow(
       execution({
@@ -28,7 +28,7 @@ describe("execution row details", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /notion test/i }))
 
-    expect(screen.getAllByText("Task")).toHaveLength(2)
+    expect(screen.getAllByText("Task")).toHaveLength(1)
     expect(screen.getByRole("button", { name: "Copy Task" })).toBeDefined()
     expect(screen.getByText("Summarize the Notion launch plan.")).toBeDefined()
   })
@@ -50,7 +50,9 @@ describe("execution row details", () => {
     ).toBeDefined()
     expect(screen.getAllByText("Notion test")).toHaveLength(titleCount)
   })
+})
 
+describe("execution row linked details", () => {
   test("renders execution details with links", () => {
     renderExecutionRow(
       execution({
@@ -78,15 +80,19 @@ describe("execution row details", () => {
     const repositoryLink = screen.getByRole("link", {
       name: /vedin-labs\/frontier/i,
     })
-    const commentLink = screen.getByRole("link", {
-      name: /can you check this failure/i,
+    const commentSourceLink = screen.getByRole("link", {
+      name: /open comment/i,
     })
+    const commentBody = screen.getByText("Can you check this failure?")
 
     expect(repositoryLink.getAttribute("href")).toBe(
       "https://github.com/vedin-labs/frontier"
     )
     expect(repositoryLink.closest(".bg-muted")).toBeNull()
-    expect(commentLink.closest(".bg-muted")).not.toBeNull()
+    expect(commentSourceLink.getAttribute("href")).toBe(
+      "https://github.com/vedin-labs/frontier/issues/12#comment"
+    )
+    expect(commentBody.closest(".bg-muted")).not.toBeNull()
   })
 })
 
