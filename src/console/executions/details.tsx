@@ -286,7 +286,7 @@ export function CopyButton({
           aria-disabled={hasCopied}
           aria-label={`${hasCopied ? "Copied" : "Copy"} ${label}`}
           className={cn(
-            "relative aria-disabled:pointer-events-none",
+            "relative text-muted-foreground hover:text-foreground aria-disabled:pointer-events-none",
             className
           )}
           onClick={(event) => {
