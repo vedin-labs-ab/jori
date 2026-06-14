@@ -80,3 +80,24 @@ test("renders Notion pages with a file icon", () => {
   expect(screen.getByText("Product roadmap")).toBeDefined()
   expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
 })
+
+test("renders Linear issues with a dashed circle icon", () => {
+  const { container } = render(
+    <SourceLine
+      source={{
+        type: "automation",
+        provider: { type: "linear", label: "Linear" },
+        event: { type: "issue.comment.created", label: "Issue comment" },
+        metadata: [
+          { type: "project", label: "Engineering" },
+          { type: "issue", label: "ENG-214 Checkout error" },
+        ],
+      }}
+    />
+  )
+
+  expect(screen.getByText("ENG-214 Checkout error")).toBeDefined()
+  expect(
+    container.querySelector("svg[aria-hidden='true']")?.getAttribute("class")
+  ).toContain("lucide-circle-dot-dashed")
+})

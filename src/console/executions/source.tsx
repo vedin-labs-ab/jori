@@ -1,4 +1,4 @@
-import { File, type LucideIcon } from "lucide-react"
+import { CircleDotDashed, File, type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { Kbd } from "@/components/ui/kbd"
 import { cn } from "@/lib/utils"
@@ -61,7 +61,7 @@ function sourceItems(source: ExecutionSource): SourceItem[] {
     ),
     ...source.metadata.map((item) => ({
       key: `metadata-${item.type}-${item.label}`,
-      content: <MetadataDatum datum={item} />,
+      content: <MetadataDatum datum={item} provider={source.provider?.type} />,
     })),
     ...optionalItem(
       "stop",
@@ -116,22 +116,28 @@ function EventDatum({ datum }: { datum: SourceDatum }) {
   )
 }
 
-function MetadataDatum({ datum }: { datum: SourceDatum }) {
+function MetadataDatum({ datum, provider }: MetadataRendererProps) {
   const Renderer = metadataRenderers[datum.type] ?? PlainMetadataDatum
 
-  return <Renderer datum={datum} />
+  return <Renderer datum={datum} provider={provider} />
 }
 
-type MetadataRenderer = (props: { datum: SourceDatum }) => ReactNode
+type MetadataRendererProps = {
+  datum: SourceDatum
+  provider?: string
+}
+
+type MetadataRenderer = (props: MetadataRendererProps) => ReactNode
 
 const metadataRenderers: Record<string, MetadataRenderer> = {
   channel: ChannelDatum,
+  issue: IssueDatum,
   page: PageDatum,
   pull_request: PullRequestDatum,
   repository: RepositoryDatum,
 }
 
-function RepositoryDatum({ datum }: { datum: SourceDatum }) {
+function RepositoryDatum({ datum }: MetadataRendererProps) {
   return (
     <span
       className="inline-flex min-w-0 items-center gap-1 font-medium text-foreground"
@@ -143,7 +149,7 @@ function RepositoryDatum({ datum }: { datum: SourceDatum }) {
   )
 }
 
-function PullRequestDatum({ datum }: { datum: SourceDatum }) {
+function PullRequestDatum({ datum }: MetadataRendererProps) {
   return (
     <Kbd className="font-mono" title={datum.label}>
       {pullRequestLabel(datum.label)}
@@ -151,7 +157,7 @@ function PullRequestDatum({ datum }: { datum: SourceDatum }) {
   )
 }
 
-function ChannelDatum({ datum }: { datum: SourceDatum }) {
+function ChannelDatum({ datum }: MetadataRendererProps) {
   return (
     <span
       className="inline-flex h-5 max-w-64 min-w-0 items-center rounded-md bg-[#173241] px-1.5 font-medium text-[#31B9E5]"
@@ -162,11 +168,19 @@ function ChannelDatum({ datum }: { datum: SourceDatum }) {
   )
 }
 
-function PageDatum({ datum }: { datum: SourceDatum }) {
+function IssueDatum({ datum, provider }: MetadataRendererProps) {
+  if (provider !== "linear") {
+    return <PlainMetadataDatum datum={datum} />
+  }
+
+  return <IconMetadataDatum datum={datum} icon={CircleDotDashed} />
+}
+
+function PageDatum({ datum }: MetadataRendererProps) {
   return <IconMetadataDatum datum={datum} icon={File} />
 }
 
-function PlainMetadataDatum({ datum }: { datum: SourceDatum }) {
+function PlainMetadataDatum({ datum }: MetadataRendererProps) {
   return (
     <span className="truncate font-medium text-foreground" title={datum.label}>
       {datum.label}
