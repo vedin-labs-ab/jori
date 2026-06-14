@@ -1,4 +1,5 @@
 import { internal } from "../../_generated/api"
+import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { fetchJson } from "../../broker/providers/common"
 import { notionApiUrl, notionApiVersion } from "./config"
@@ -18,7 +19,20 @@ export async function enrichNotionEventData(
     workspaceId: string
   }
 ) {
-  const page = await fetchNotionPageContext(ctx, args)
+  if (args.pageId === undefined) {
+    return args.data
+  }
+
+  const integration = await ctx.runQuery(
+    internal.integrations.lookup.activeByProviderExternal,
+    { provider: "notion", externalId: args.workspaceId }
+  )
+
+  if (integration === null) {
+    return args.data
+  }
+
+  const page = await fetchNotionPageContext(integration, args.pageId)
 
   if (page === undefined) {
     return args.data
@@ -60,44 +74,25 @@ export function notionPageTitle(object: Record<string, unknown>) {
   return undefined
 }
 
-async function fetchNotionPageContext(
-  ctx: ActionCtx,
-  args: {
-    pageId: string | undefined
-    workspaceId: string
-  }
+export async function fetchNotionPageContext(
+  integration: Doc<"integrations">,
+  pageId: string
 ): Promise<NotionPageContext | undefined> {
-  if (args.pageId === undefined) {
-    return undefined
-  }
-
-  const integration = await ctx.runQuery(
-    internal.integrations.lookup.activeByProviderExternal,
-    { provider: "notion", externalId: args.workspaceId }
-  )
-
-  if (integration === null) {
-    return undefined
-  }
-
   try {
     const page = readRecord(
-      await fetchJson(
-        `${notionApiUrl}/pages/${encodeURIComponent(args.pageId)}`,
-        {
-          method: "GET",
-          headers: {
-            authorization: `Bearer ${
-              requireNotionCredentials(integration).tokens.access
-            }`,
-            "notion-version": notionApiVersion,
-          },
-        }
-      )
+      await fetchJson(`${notionApiUrl}/pages/${encodeURIComponent(pageId)}`, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${
+            requireNotionCredentials(integration).tokens.access
+          }`,
+          "notion-version": notionApiVersion,
+        },
+      })
     )
 
     return {
-      id: args.pageId,
+      id: pageId,
       title: notionPageTitle(page),
       url: readString(page, "url"),
     }
