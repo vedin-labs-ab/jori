@@ -107,7 +107,7 @@ test("uses project and issue for Linear issue comments", () => {
     { type: "project", label: "Payments" },
     {
       type: "issue",
-      label: "ENG-214 Checkout error",
+      label: "ENG-214: Checkout error",
       url: "https://linear.app/acme/issue/ENG-214/checkout-error",
     },
   ])

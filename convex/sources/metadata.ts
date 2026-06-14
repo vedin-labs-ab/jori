@@ -103,15 +103,23 @@ function linearMetadata(data: unknown) {
     item("project", readString(project, "name")),
     item(
       "issue",
-      compactText([
+      issueLabel(
         readString(data, "issueIdentifier") ??
           readString(issue, "identifier") ??
           readString(data, "issueId"),
-        readString(issue, "title"),
-      ]),
+        readString(issue, "title")
+      ),
       readString(issue, "url")
     ),
   ])
+}
+
+function issueLabel(identifier: string | undefined, title: string | undefined) {
+  if (identifier === undefined || title === undefined) {
+    return identifier ?? title
+  }
+
+  return `${identifier}: ${title}`
 }
 
 function notionMetadata(data: unknown) {
