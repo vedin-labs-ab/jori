@@ -1,43 +1,39 @@
 type RunSnapshot = {
+  task: string
   title: string
-  instructions?: string
 }
 
 export function createAutomationRunSnapshot(input: {
   instructions: string
   name: string
 }): RunSnapshot {
+  const title = normalizeRunText(input.name) ?? "Automation run"
+
   return {
-    title: normalizeRunText(input.name) ?? "Automation run",
-    ...optionalInstructions(input.instructions),
+    title,
+    task: normalizeRunText(input.instructions) ?? title,
   }
 }
 
 export function createMessageRunSnapshot(input: {
   text: string | undefined
 }): RunSnapshot {
-  const instructions = normalizeRunText(input.text)
+  const task = normalizeRunText(input.text) ?? "Message run"
 
   return {
-    title: firstLine(instructions) ?? "Message run",
-    ...optionalInstructions(instructions),
+    title: firstLine(task) ?? "Message run",
+    task,
   }
 }
 
-function firstLine(text: string | undefined) {
-  const line = text?.trim().split("\n").find(Boolean)
+function firstLine(text: string) {
+  const line = text.trim().split("\n").find(Boolean)
 
   if (line === undefined) {
     return undefined
   }
 
   return line.length > 90 ? `${line.slice(0, 87)}...` : line
-}
-
-function optionalInstructions(text: string | undefined) {
-  const instructions = normalizeRunText(text)
-
-  return instructions === undefined ? {} : { instructions }
 }
 
 function normalizeRunText(text: string | undefined) {

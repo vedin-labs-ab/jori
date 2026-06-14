@@ -1,10 +1,12 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { integrationProviderValidator } from "../providers/catalog"
 import { actorValidator } from "../shared/actor"
 
 export const messages = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
+  provider: integrationProviderValidator,
   type: v.string(),
   externalId: v.string(),
   actor: v.optional(actorValidator),

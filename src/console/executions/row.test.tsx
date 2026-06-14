@@ -18,30 +18,35 @@ afterEach(() => {
 })
 
 describe("execution row details", () => {
-  test("renders execution instructions", () => {
+  test("renders the execution task", () => {
     renderExecutionRow(
       execution({
-        instructions: "Summarize the Notion launch plan.",
+        task: "Summarize the Notion launch plan.",
         title: "Notion test",
       })
     )
 
     fireEvent.click(screen.getByRole("button", { name: /notion test/i }))
 
-    expect(screen.getByText("Instructions")).toBeDefined()
+    expect(screen.getByText("Task")).toBeDefined()
     expect(screen.getByText("Summarize the Notion launch plan.")).toBeDefined()
   })
 
-  test("does not render the title as an instructions fallback", () => {
+  test("does not render the title as the task", () => {
     renderExecutionRow(
-      execution({ instructions: undefined, title: "Notion test" })
+      execution({
+        task: "Use the Notion page context to update the team.",
+        title: "Notion test",
+      })
     )
 
     const titleCount = screen.getAllByText("Notion test").length
 
     fireEvent.click(screen.getByRole("button", { name: /notion test/i }))
 
-    expect(screen.getByText("No instructions recorded.")).toBeDefined()
+    expect(
+      screen.getByText("Use the Notion page context to update the team.")
+    ).toBeDefined()
     expect(screen.getAllByText("Notion test")).toHaveLength(titleCount)
   })
 })
@@ -55,7 +60,7 @@ function renderExecutionRow(item: ExecutionItem) {
 }
 
 function execution(
-  overrides: Pick<ExecutionItem, "instructions" | "title">
+  overrides: Pick<ExecutionItem, "task" | "title">
 ): ExecutionItem {
   return {
     approval: null,
@@ -63,17 +68,16 @@ function execution(
     durationMs: 1000,
     finishedAt: 1700000001000,
     id: "execution",
-    instructions: overrides.instructions,
     searchableText: "",
-    sourceParts: [
-      "Triggered by event:",
-      "Slack",
-      "event:",
-      "New channel message",
-      "for automation:",
-      overrides.title,
-    ],
+    source: {
+      type: "automation",
+      automation: { type: "automation", label: overrides.title },
+      provider: { type: "slack", label: "Slack" },
+      event: { type: "message.created", label: "New channel message" },
+      facts: [],
+    },
     status: "completed",
+    task: overrides.task,
     title: overrides.title,
     trigger: "Slack event",
   }

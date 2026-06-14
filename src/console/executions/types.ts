@@ -31,12 +31,31 @@ export type ExecutionStatus =
   | "stopped"
 export type ApprovalState = "pending" | "approved" | "denied" | "expired"
 
+export type SourceDatum = {
+  type: string
+  label: string
+  url?: string
+}
+
+export type ExecutionSource = {
+  type: "automation" | "event" | "manual" | "message"
+  actor?: SourceDatum
+  automation?: SourceDatum
+  event?: SourceDatum
+  facts: SourceDatum[]
+  provider?: SourceDatum
+  stop?: {
+    actor: SourceDatum
+  }
+  target?: SourceDatum
+}
+
 export type ExecutionItem = {
   id: string
   status: ExecutionStatus
   title: string
-  sourceParts: string[]
-  instructions?: string
+  source: ExecutionSource
+  task: string
   trigger: string
   createdAt: number
   finishedAt?: number

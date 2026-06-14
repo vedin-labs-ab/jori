@@ -25,7 +25,7 @@ export const runs = defineTable({
   automationId: v.optional(v.id("automations")),
   reason: runReason,
   title: v.string(),
-  instructions: v.optional(v.string()),
+  task: v.string(),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
 })

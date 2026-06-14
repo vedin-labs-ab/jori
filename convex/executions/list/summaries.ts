@@ -2,12 +2,8 @@ import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
 import { getExecutionContext } from "./context"
-import {
-  executionInstructions,
-  executionSourceParts,
-  executionTitle,
-  triggerLabel,
-} from "./labels"
+import { executionTask, executionTitle, triggerLabel } from "./labels"
+import { executionSource, sourceSearchText } from "./source"
 
 export async function summarizeExecution(
   ctx: QueryCtx,
@@ -16,16 +12,16 @@ export async function summarizeExecution(
 ) {
   const context = await getExecutionContext(ctx, execution, requestedApproval)
   const title = executionTitle(context)
-  const instructions = executionInstructions(context)
+  const task = executionTask(context, title)
   const stoppedBy = await stoppedByLabel(ctx, execution)
-  const sourceParts = executionSourceParts(context, stoppedBy)
+  const source = executionSource(context, stoppedBy)
 
   return {
     id: execution._id,
     status: execution.status,
     title,
-    sourceParts,
-    instructions,
+    source,
+    task,
     trigger: triggerLabel(context),
     createdAt: execution.createdAt,
     finishedAt: execution.finishedAt,
@@ -44,8 +40,8 @@ export async function summarizeExecution(
     searchableText: searchableText({
       execution,
       title,
-      instructions,
-      sourceParts,
+      source,
+      task,
       ...context,
     }),
   }
@@ -68,8 +64,8 @@ function getDuration(execution: Doc<"executions">) {
 function searchableText(
   input: Awaited<ReturnType<typeof getExecutionContext>> & {
     execution: Doc<"executions">
-    instructions: string | undefined
-    sourceParts: string[]
+    source: ReturnType<typeof executionSource>
+    task: string
     title: string
   }
 ) {
@@ -82,12 +78,13 @@ function searchableText(
     input.approval?.handoff.progress,
     input.approval?.tool,
     input.run?.reason.type,
-    input.instructions,
+    input.task,
     input.automation?.name,
     input.event?.type,
     input.event?.resource,
+    input.event?.provider,
     input.integration?.provider,
-    ...input.sourceParts,
+    sourceSearchText(input.source),
   ]
     .filter(Boolean)
     .join(" ")

@@ -5,7 +5,7 @@ import {
 } from "./snapshot"
 
 describe("run snapshots", () => {
-  test("stores automation names and instructions directly", () => {
+  test("stores automation names and tasks directly", () => {
     expect(
       createAutomationRunSnapshot({
         name: "Daily digest",
@@ -13,7 +13,7 @@ describe("run snapshots", () => {
       })
     ).toEqual({
       title: "Daily digest",
-      instructions: "Summarize Slack and send the digest.",
+      task: "Summarize Slack and send the digest.",
     })
   })
 
@@ -24,7 +24,14 @@ describe("run snapshots", () => {
       })
     ).toEqual({
       title: "Please summarize this thread.",
-      instructions: "Please summarize this thread.\n\nFocus on open decisions.",
+      task: "Please summarize this thread.\n\nFocus on open decisions.",
+    })
+  })
+
+  test("stores a required task when provider message text is missing", () => {
+    expect(createMessageRunSnapshot({ text: undefined })).toEqual({
+      title: "Message run",
+      task: "Message run",
     })
   })
 })

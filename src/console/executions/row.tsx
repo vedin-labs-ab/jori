@@ -3,10 +3,10 @@ import { memo, useState } from "react"
 import { ApprovalCallout } from "./approval"
 import { ErrorDetail, RelativeTime } from "./details"
 import { formatDuration, relativeTime } from "./format"
-import { InstructionsDetail } from "./instructions"
-import { SourceParts } from "./source"
+import { SourceLine } from "./source"
 import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
 import { StopExecution } from "./stop"
+import { TaskDetail } from "./task"
 import { TraceTerminal } from "./terminal"
 import { type ExecutionItem } from "./types"
 
@@ -68,7 +68,7 @@ function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
   return (
     <div className="min-w-0 max-w-[56ch]">
       <div className="truncate font-medium text-sm">{execution.title}</div>
-      <SourceParts parts={execution.sourceParts} />
+      <SourceLine source={execution.source} />
     </div>
   )
 }
@@ -115,7 +115,7 @@ function ExpandedExecution({
 }) {
   return (
     <div className="grid gap-0">
-      <InstructionsDetail instructions={execution.instructions} />
+      <TaskDetail task={execution.task} />
       {execution.approval !== null ? (
         <ApprovalCallout
           approval={execution.approval}
