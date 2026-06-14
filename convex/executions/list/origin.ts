@@ -1,13 +1,11 @@
 import { type Doc } from "../../_generated/dataModel"
 import { slackChannelUrl, slackMessageUrl } from "../../providers/slack/links"
-import { readDataNumber, readDataObject, readDataString } from "../data"
 import {
-  commentLabel,
-  compactDetails,
-  compactText,
-  detail,
-  snippet,
-} from "./detail"
+  githubIssueLikeLabel,
+  issueIdentifierLabel,
+} from "../../sources/metadata"
+import { readDataNumber, readDataObject, readDataString } from "../data"
+import { commentLabel, compactDetails, detail, snippet } from "./detail"
 
 export function originDetails(input: {
   data: unknown
@@ -93,7 +91,7 @@ function githubDetails({
     isPullRequest
       ? detail(
           "pull_request",
-          pullRequestLabel(
+          githubIssueLikeLabel(
             pullNumber,
             readDataString(pullRequest, "title") ??
               readDataString(issue, "title")
@@ -106,7 +104,7 @@ function githubDetails({
         )
       : detail(
           "issue",
-          issueLabel(
+          githubIssueLikeLabel(
             readDataNumber(data, "issueNumber") ??
               readDataNumber(issue, "number"),
             readDataString(issue, "title")
@@ -133,7 +131,7 @@ function linearDetails({
   return compactDetails([
     detail(
       "issue",
-      linearIssueLabel(
+      issueIdentifierLabel(
         readDataString(data, "issueIdentifier") ??
           readDataString(issue, "identifier"),
         readDataString(issue, "title")
@@ -171,28 +169,6 @@ function notionDetails({
       { url: readDataString(data, "commentUrl") }
     ),
   ])
-}
-
-function issueLabel(number: number | undefined, title: string | undefined) {
-  return compactText([number === undefined ? undefined : `#${number}`, title])
-}
-
-function pullRequestLabel(
-  number: number | undefined,
-  title: string | undefined
-) {
-  return compactText([number === undefined ? undefined : `#${number}`, title])
-}
-
-function linearIssueLabel(
-  identifier: string | undefined,
-  title: string | undefined
-) {
-  if (identifier === undefined || title === undefined) {
-    return identifier ?? title
-  }
-
-  return `${identifier}: ${title}`
 }
 
 function channelLabel(label: string | undefined) {
