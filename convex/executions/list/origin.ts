@@ -91,10 +91,19 @@ function githubDetails({
       { url: readDataString(repository, "url") }
     ),
     isPullRequest
-      ? detail("pull_request", pullRequestLabel(pullNumber), {
-          url:
-            readDataString(pullRequest, "url") ?? readDataString(issue, "url"),
-        })
+      ? detail(
+          "pull_request",
+          pullRequestLabel(
+            pullNumber,
+            readDataString(pullRequest, "title") ??
+              readDataString(issue, "title")
+          ),
+          {
+            url:
+              readDataString(pullRequest, "url") ??
+              readDataString(issue, "url"),
+          }
+        )
       : detail(
           "issue",
           issueLabel(
@@ -168,8 +177,11 @@ function issueLabel(number: number | undefined, title: string | undefined) {
   return compactText([number === undefined ? undefined : `#${number}`, title])
 }
 
-function pullRequestLabel(number: number | undefined) {
-  return number === undefined ? undefined : `#${number}`
+function pullRequestLabel(
+  number: number | undefined,
+  title: string | undefined
+) {
+  return compactText([number === undefined ? undefined : `#${number}`, title])
 }
 
 function linearIssueLabel(

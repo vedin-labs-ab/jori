@@ -79,14 +79,10 @@ function githubTarget(data: unknown) {
 
   return item(
     isPullRequest ? "pull_request" : "issue",
-    isPullRequest
-      ? number === undefined
-        ? undefined
-        : `#${number}`
-      : compactText([
-          number === undefined ? undefined : `#${number}`,
-          readString(target, "title"),
-        ]),
+    compactText([
+      number === undefined ? undefined : `#${number}`,
+      readString(target, "title"),
+    ]),
     readString(target, "url")
   )
 }

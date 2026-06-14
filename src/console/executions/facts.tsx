@@ -40,6 +40,14 @@ const detailMeta = {
   }
 >
 
+const sourceFieldTypes = new Set<ExecutionDetailType>([
+  "channel",
+  "issue",
+  "page",
+  "pull_request",
+  "repository",
+])
+
 export function ExecutionFacts({ details }: { details: ExecutionDetail[] }) {
   if (details.length === 0) {
     return null
@@ -59,21 +67,65 @@ function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
   }
 
   return (
-    <DetailRow
+    <InlineFact
+      detail={detail}
       icon={meta.icon}
-      iconClassName="text-muted-foreground"
       label={meta.label}
-    >
-      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 py-1.5 text-xs">
+      time={time}
+    />
+  )
+}
+
+function InlineFact({
+  detail,
+  icon,
+  label,
+  time,
+}: {
+  detail: ExecutionDetail
+  icon: DetailIcon
+  label: string
+  time: string | undefined
+}) {
+  return (
+    <DetailRow icon={icon} iconClassName="text-muted-foreground" label={label}>
+      <InlineFactContent compact={sourceFieldTypes.has(detail.type)}>
         <FactValue detail={detail} />
-        {time === undefined ? null : (
-          <>
-            <SeparatorDot className="text-muted-foreground/60" />
-            <span className="text-muted-foreground">{time}</span>
-          </>
-        )}
-      </div>
+        <InlineFactTime time={time} />
+      </InlineFactContent>
     </DetailRow>
+  )
+}
+
+function InlineFactContent({
+  children,
+  compact,
+}: {
+  children: ReactNode
+  compact: boolean
+}) {
+  return (
+    <div
+      className={cn(
+        "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs",
+        !compact && "py-1.5"
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+
+function InlineFactTime({ time }: { time: string | undefined }) {
+  if (time === undefined) {
+    return null
+  }
+
+  return (
+    <>
+      <SeparatorDot className="text-muted-foreground/60" />
+      <span className="text-muted-foreground">{time}</span>
+    </>
   )
 }
 
