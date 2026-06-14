@@ -72,3 +72,17 @@ describe("recurring automation fields", () => {
     ).toBeDefined()
   })
 })
+
+describe("recurring automation preview", () => {
+  test("can hide the next-run preview", () => {
+    render(
+      <RecurringFields
+        showRunPreview={false}
+        onValuesChange={noop}
+        values={emptyAutomationForm}
+      />
+    )
+
+    expect(screen.queryByText(/^Next run /)).toBeNull()
+  })
+})
