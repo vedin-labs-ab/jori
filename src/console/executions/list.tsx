@@ -123,7 +123,7 @@ const ExecutionFilters = memo(function ExecutionFilters({
         >
           <SelectTrigger
             aria-label="Filter by approval state"
-            className="h-8 w-full sm:w-fit"
+            className="w-full sm:w-fit"
           >
             <span className="min-w-0 flex-1 truncate text-left sm:flex-none">
               Approval:{" "}
@@ -144,7 +144,7 @@ const ExecutionFilters = memo(function ExecutionFilters({
           <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
           <Input
             aria-label="Search runs"
-            className="h-8 pr-2 pl-8"
+            className="pr-2 pl-8"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search runs..."
             value={query}

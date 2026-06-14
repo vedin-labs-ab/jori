@@ -153,7 +153,7 @@ function AutomationFilters({
           <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
           <Input
             aria-label="Search automations"
-            className="h-8 pr-2 pl-8"
+            className="pr-2 pl-8"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search automations"
             value={query}
@@ -166,7 +166,6 @@ function AutomationFilters({
           }}
           onFocus={preloadDialog}
           onPointerEnter={preloadDialog}
-          size="lg"
           type="button"
         >
           <Plus />
