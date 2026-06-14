@@ -45,10 +45,7 @@ function slackMetadata(data: unknown) {
   const name = readString(channel, "name")
 
   return compactItems([
-    item(
-      "channel",
-      name === undefined ? readString(data, "channelId") : `#${name}`
-    ),
+    item("channel", name === undefined ? undefined : `#${name}`),
   ])
 }
 
@@ -110,15 +107,11 @@ function linearMetadata(data: unknown) {
 
 function notionMetadata(data: unknown) {
   const page = readObject(data, "page")
-  const entity = readObject(data, "entity")
 
   return compactItems([
     item(
       "page",
-      readString(page, "title") ??
-        readString(data, "pageTitle") ??
-        readString(data, "pageId") ??
-        readString(entity, "id"),
+      readString(page, "title") ?? readString(data, "pageTitle"),
       readString(page, "url")
     ),
   ])

@@ -1,4 +1,5 @@
 import { internal } from "../../_generated/api"
+import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { slackQueryApi } from "../../broker/providers/slack/client"
 import { requireSlackCredentials } from "./credentials"
@@ -16,7 +17,22 @@ export async function enrichSlackMessageData(
     data: unknown
   }
 ) {
-  const channel = await fetchSlackChannelContext(ctx, args)
+  const channelId = getSlackChannelId(args.data)
+
+  if (channelId === undefined) {
+    return args.data
+  }
+
+  const integration = await ctx.runQuery(
+    internal.integrations.lookup.activeByProviderExternal,
+    { provider: "slack", externalId: args.accountId }
+  )
+
+  if (integration === null) {
+    return args.data
+  }
+
+  const channel = await fetchSlackChannelContext(integration, channelId)
 
   if (channel === undefined) {
     return args.data
@@ -28,28 +44,10 @@ export async function enrichSlackMessageData(
   }
 }
 
-async function fetchSlackChannelContext(
-  ctx: ActionCtx,
-  args: {
-    accountId: string
-    data: unknown
-  }
+export async function fetchSlackChannelContext(
+  integration: Doc<"integrations">,
+  channelId: string
 ): Promise<SlackChannelContext | undefined> {
-  const channelId = getSlackChannelId(args.data)
-
-  if (channelId === undefined) {
-    return undefined
-  }
-
-  const integration = await ctx.runQuery(
-    internal.integrations.lookup.activeByProviderExternal,
-    { provider: "slack", externalId: args.accountId }
-  )
-
-  if (integration === null) {
-    return undefined
-  }
-
   try {
     const result = await slackQueryApi(
       requireSlackCredentials(integration).user,

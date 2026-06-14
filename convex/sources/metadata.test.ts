@@ -15,6 +15,19 @@ test("uses only the Slack channel", () => {
   ).toEqual([{ type: "channel", label: "#support" }])
 })
 
+test("does not use Slack channel IDs as display metadata", () => {
+  expect(
+    createSourceMetadata({
+      provider: "slack",
+      event: "message.created",
+      data: {
+        channelId: "C123",
+        ts: "1710000000.000200",
+      },
+    })
+  ).toEqual([])
+})
+
 test("uses repository and issue for GitHub issue comments", () => {
   expect(
     createSourceMetadata({
@@ -122,6 +135,19 @@ test("uses page for Notion events", () => {
       url: "https://notion.so/page-id",
     },
   ])
+})
+
+test("does not use Notion page IDs as display metadata", () => {
+  expect(
+    createSourceMetadata({
+      provider: "notion",
+      event: "page.updated",
+      data: {
+        pageId: "page-id",
+        workspaceName: "Workspace",
+      },
+    })
+  ).toEqual([])
 })
 
 test("uses subject and sender for incoming emails", () => {
