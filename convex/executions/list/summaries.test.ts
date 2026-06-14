@@ -17,6 +17,7 @@ test("uses stored automation snapshots when the automation document is unavailab
         actor: { email: "vedin.labs@gmail.com" },
         text: "perform a deep analysis",
         data: { channelId: "C123", ts: "1700000000.000000" },
+        metadata: [{ type: "channel", label: "C123" }],
         createdAt: 0,
       },
       integration: slackIntegration(),
@@ -42,9 +43,7 @@ test("uses stored automation snapshots when the automation document is unavailab
     type: "automation",
     provider: { type: "slack", label: "Slack" },
     event: { type: "message.created", label: "New channel message" },
-    actor: { type: "email", label: "vedin.labs@gmail.com" },
-    target: { type: "channel", label: "C123" },
-    facts: [{ type: "message", label: "1700000000.000000" }],
+    metadata: [{ type: "channel", label: "C123" }],
   })
 })
 
@@ -80,6 +79,7 @@ test("uses stored message snapshots instead of message text", async () => {
         type: "message.channels",
         externalId: "slack:message",
         text: "Please summarize this thread.\n\nKeep it concise.",
+        metadata: [{ type: "channel", label: "C123" }],
         createdAt: 0,
       },
       run: {
@@ -100,7 +100,7 @@ test("uses stored message snapshots instead of message text", async () => {
   expect(summary.source).toEqual({
     type: "message",
     provider: { type: "slack", label: "Slack" },
-    facts: [],
+    metadata: [{ type: "channel", label: "C123" }],
   })
   expect(summary.searchableText).not.toContain("keep it concise")
 })
@@ -138,7 +138,7 @@ test("keeps stored automation snapshots when the automation changes", async () =
   expect(summary.task).toBe("Original automation instructions.")
   expect(summary.source).toEqual({
     type: "automation",
-    facts: [],
+    metadata: [],
   })
 })
 

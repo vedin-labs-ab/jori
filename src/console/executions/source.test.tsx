@@ -11,7 +11,7 @@ describe("execution source line", () => {
       <SourceLine
         source={{
           type: "automation",
-          facts: [],
+          metadata: [],
         }}
       />
     )
@@ -29,11 +29,10 @@ describe("execution source line", () => {
             type: "pull_request.review_comment.created",
             label: "Pull request review comment created",
           },
-          target: {
-            type: "pull_request",
-            label: "#42 in vedin-labs/frontier",
-          },
-          facts: [{ type: "path", label: "src/app.ts" }],
+          metadata: [
+            { type: "repository", label: "vedin-labs/frontier" },
+            { type: "pull_request", label: "#42 Add execution metadata" },
+          ],
         }}
       />
     )
@@ -42,10 +41,9 @@ describe("execution source line", () => {
     expect(
       screen.getByText("pull_request.review_comment.created").className
     ).toContain("font-mono")
-    expect(screen.getByText("#42 in vedin-labs/frontier").className).toContain(
+    expect(screen.getByText("vedin-labs/frontier").className).toContain(
       "font-medium"
     )
-    expect(screen.getByText("path")).toBeDefined()
-    expect(screen.getByText("src/app.ts")).toBeDefined()
+    expect(screen.getByText("#42 Add execution metadata")).toBeDefined()
   })
 })

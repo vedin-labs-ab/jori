@@ -23,6 +23,7 @@ import {
   getActorEmail,
   getActorExternalId,
 } from "../shared/actor"
+import { createSourceMetadata } from "../sources/metadata"
 import { recordAutomationEvent } from "./events"
 
 const observedMessageArgs = {
@@ -225,6 +226,11 @@ async function insertMessage(
     conversationId: input.message.conversationId,
     text: input.message.text,
     data: input.message.data,
+    metadata: createSourceMetadata({
+      provider: input.integration.provider,
+      event: input.message.type,
+      data: input.message.data,
+    }),
     observedAt: input.message.observedAt,
     createdAt: Date.now(),
   })

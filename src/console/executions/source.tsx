@@ -56,21 +56,9 @@ function sourceItems(source: ExecutionSource): SourceItem[] {
         <EventDatum datum={source.event} />
       )
     ),
-    ...optionalItem(
-      "actor",
-      shouldShowActor(source) && source.actor !== undefined ? (
-        <EmphasizedDatum datum={source.actor} />
-      ) : undefined
-    ),
-    ...optionalItem(
-      "target",
-      source.target === undefined ? undefined : (
-        <EmphasizedDatum datum={source.target} />
-      )
-    ),
-    ...source.facts.slice(0, 2).map((fact) => ({
-      key: `fact-${fact.type}-${fact.label}`,
-      content: <FactDatum datum={fact} />,
+    ...source.metadata.map((item) => ({
+      key: `metadata-${item.type}-${item.label}`,
+      content: <MetadataDatum datum={item} />,
     })),
     ...optionalItem(
       "stop",
@@ -125,7 +113,7 @@ function EventDatum({ datum }: { datum: SourceDatum }) {
   )
 }
 
-function EmphasizedDatum({ datum }: { datum: SourceDatum }) {
+function MetadataDatum({ datum }: { datum: SourceDatum }) {
   return (
     <span className="truncate font-medium text-foreground" title={datum.label}>
       {datum.label}
@@ -133,21 +121,6 @@ function EmphasizedDatum({ datum }: { datum: SourceDatum }) {
   )
 }
 
-function FactDatum({ datum }: { datum: SourceDatum }) {
-  return (
-    <span className="inline-flex min-w-0 items-baseline gap-1">
-      <span className="text-muted-foreground">{datum.type}</span>
-      <span className="truncate text-foreground" title={datum.label}>
-        {datum.label}
-      </span>
-    </span>
-  )
-}
-
 function optionalItem(key: string, content: ReactNode | undefined) {
   return content === undefined ? [] : [{ key, content }]
-}
-
-function shouldShowActor(source: ExecutionSource) {
-  return source.type === "message" || source.target === undefined
 }

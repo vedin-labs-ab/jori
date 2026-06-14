@@ -39,14 +39,12 @@ export type SourceDatum = {
 
 export type ExecutionSource = {
   type: "automation" | "event" | "manual" | "message"
-  actor?: SourceDatum
   event?: SourceDatum
-  facts: SourceDatum[]
+  metadata: SourceDatum[]
   provider?: SourceDatum
   stop?: {
     actor: SourceDatum
   }
-  target?: SourceDatum
 }
 
 export type ExecutionItem = {

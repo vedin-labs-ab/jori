@@ -8,6 +8,7 @@ import {
 import { notionOAuthAuthorizeUrl, notionOAuthCallbackPath } from "./config"
 import { readNotionAutomationEvents } from "./events"
 import { exchangeNotionAuthorizationCode, requireNotionClientId } from "./oauth"
+import { enrichNotionEventData } from "./pages"
 import { parseSignedNotionState, verifyNotionWebhookRequest } from "./signing"
 
 export async function handleNotionInstall(request: Request) {
@@ -107,6 +108,12 @@ export async function handleNotionEvents(ctx: ActionCtx, request: Request) {
   }
 
   for (const event of readNotionAutomationEvents(payload)) {
+    const data = await enrichNotionEventData(ctx, {
+      data: event.data,
+      pageId: event.resource,
+      workspaceId: event.workspaceId,
+    })
+
     await ctx.runMutation(internal.providers.notion.data.recordWebhookEvent, {
       workspaceId: event.workspaceId,
       key: event.key,
@@ -114,7 +121,7 @@ export async function handleNotionEvents(ctx: ActionCtx, request: Request) {
       resource: event.resource,
       criteria: event.criteria,
       actor: event.actor,
-      data: event.data,
+      data,
       observedAt: event.observedAt,
     })
   }

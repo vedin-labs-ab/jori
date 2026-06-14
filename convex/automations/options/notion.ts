@@ -1,6 +1,7 @@
 import { fetchJson } from "../../broker/providers/common"
 import { notionApiUrl, notionApiVersion } from "../../providers/notion/config"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
+import { notionPageTitle } from "../../providers/notion/pages"
 import {
   maxOptions,
   type OptionLoaderArgs,
@@ -22,7 +23,7 @@ export async function searchNotionObjects(args: OptionLoaderArgs) {
 
     return {
       value: requiredOptionString(object.id),
-      label: notionTitle(object) ?? requiredOptionString(object.id),
+      label: notionPageTitle(object) ?? requiredOptionString(object.id),
       description: optionalOptionString(object.url),
     }
   })
@@ -44,40 +45,4 @@ async function notionJson(
     },
     body,
   })
-}
-
-function notionTitle(object: Record<string, unknown>) {
-  const title = readArray(object.title)
-    .map(notionRichTextPlainText)
-    .join("")
-    .trim()
-
-  if (title !== "") {
-    return title
-  }
-
-  const properties = readRecord(object.properties)
-
-  for (const property of Object.values(properties).map(readRecord)) {
-    if (property.type !== "title") {
-      continue
-    }
-
-    const propertyTitle = readArray(property.title)
-      .map(notionRichTextPlainText)
-      .join("")
-      .trim()
-
-    if (propertyTitle !== "") {
-      return propertyTitle
-    }
-  }
-
-  return undefined
-}
-
-function notionRichTextPlainText(value: unknown) {
-  const text = readRecord(value).plain_text
-
-  return typeof text === "string" ? text : ""
 }

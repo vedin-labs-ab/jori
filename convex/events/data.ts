@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { startEventAutomations } from "../automations/data"
+import { createSourceMetadata } from "../sources/metadata"
 
 export async function recordEvent(
   ctx: MutationCtx,
@@ -43,6 +44,11 @@ export async function recordEvent(
     actor: args.actor,
     text: args.text,
     data: args.data,
+    metadata: createSourceMetadata({
+      provider: args.integration.provider,
+      event: args.type,
+      data: args.data,
+    }),
     observedAt: args.observedAt,
     createdAt: now,
   })

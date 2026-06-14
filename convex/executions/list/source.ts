@@ -1,8 +1,7 @@
 import { getAutomationEventDefinition } from "../../automations/events"
 import { providerLabel } from "../../providers/catalog"
-import { type Actor } from "../../shared/actor"
+import { type SourceMetadataItem } from "../../sources/schema"
 import { type getExecutionContext } from "./context"
-import { sourceFacts, sourceTarget } from "./metadata"
 
 type ExecutionContext = Awaited<ReturnType<typeof getExecutionContext>>
 
@@ -14,14 +13,12 @@ export type SourceDatum = {
 
 export type ExecutionSource = {
   type: "automation" | "event" | "manual" | "message"
-  actor?: SourceDatum
   event?: SourceDatum
-  facts: SourceDatum[]
+  metadata: SourceMetadataItem[]
   provider?: SourceDatum
   stop?: {
     actor: SourceDatum
   }
-  target?: SourceDatum
 }
 
 export function executionSource(
@@ -30,22 +27,10 @@ export function executionSource(
 ): ExecutionSource {
   const provider = sourceProvider(context)
   const event = sourceEvent(context)
-  const data = context.event?.data ?? context.message?.data
-  const target = sourceTarget({
-    data,
-    event: context.event,
-    message: context.message,
-    provider: provider?.type,
-  })
   const source: ExecutionSource = {
     type: sourceType(context),
-    facts: sourceFacts(provider?.type, data),
+    metadata: context.event?.metadata ?? context.message?.metadata ?? [],
   }
-  const actor = actorDatum(
-    context.event?.actor ??
-      context.message?.actor ??
-      context.approval?.requestedBy
-  )
 
   if (provider !== undefined) {
     source.provider = provider
@@ -53,14 +38,6 @@ export function executionSource(
 
   if (event !== undefined) {
     source.event = event
-  }
-
-  if (actor !== undefined) {
-    source.actor = actor
-  }
-
-  if (target !== undefined) {
-    source.target = target
   }
 
   if (stoppedBy !== undefined) {
@@ -73,16 +50,12 @@ export function executionSource(
 export function sourceSearchText(source: ExecutionSource) {
   return [
     source.type,
-    source.actor?.type,
-    source.actor?.label,
     source.event?.type,
     source.event?.label,
     source.provider?.type,
     source.provider?.label,
-    source.target?.type,
-    source.target?.label,
     source.stop?.actor.label,
-    ...source.facts.flatMap((fact) => [fact.type, fact.label]),
+    ...source.metadata.flatMap((item) => [item.type, item.label]),
   ]
     .filter(Boolean)
     .join(" ")
@@ -137,28 +110,4 @@ function eventLabel(event: NonNullable<ExecutionContext["event"]>) {
     getAutomationEventDefinition(event.provider, event.type)?.label ??
     event.type
   )
-}
-
-function actorDatum(actor: Actor | undefined): SourceDatum | undefined {
-  if (actor === undefined) {
-    return undefined
-  }
-
-  if ("email" in actor && actor.email !== undefined) {
-    return { type: "email", label: actor.email }
-  }
-
-  if ("userId" in actor) {
-    return {
-      type: "user",
-      label: actor.name ?? actor.email ?? "User",
-    }
-  }
-
-  if ("provider" in actor) {
-    return {
-      type: actor.provider,
-      label: actor.email ?? actor.externalId,
-    }
-  }
 }
