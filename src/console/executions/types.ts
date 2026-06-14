@@ -67,11 +67,18 @@ export type ExecutionDetailType =
   | "tools"
   | "web_search"
 
+export type ExecutionDetailGroup = {
+  type: string
+  label: string
+  values: string[]
+}
+
 export type ExecutionDetail = {
   type: ExecutionDetailType
   label: string
   url?: string
   at?: number
+  groups?: ExecutionDetailGroup[]
 }
 
 export type ExecutionItem = {
