@@ -220,6 +220,7 @@ import type * as providers_slack_install from "../providers/slack/install.js";
 import type * as providers_slack_oauth from "../providers/slack/oauth.js";
 import type * as providers_slack_signing from "../providers/slack/signing.js";
 import type * as providers_slack_users from "../providers/slack/users.js";
+import type * as runs_snapshot from "../runs/snapshot.js";
 import type * as shared_actor from "../shared/actor.js";
 import type * as skills_catalog from "../skills/catalog.js";
 import type * as skills_data from "../skills/data.js";
@@ -444,6 +445,7 @@ declare const fullApi: ApiFromModules<{
   "providers/slack/oauth": typeof providers_slack_oauth;
   "providers/slack/signing": typeof providers_slack_signing;
   "providers/slack/users": typeof providers_slack_users;
+  "runs/snapshot": typeof runs_snapshot;
   "shared/actor": typeof shared_actor;
   "skills/catalog": typeof skills_catalog;
   "skills/data": typeof skills_data;

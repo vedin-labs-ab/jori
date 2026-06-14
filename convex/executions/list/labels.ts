@@ -1,6 +1,12 @@
 import { type Doc } from "../../_generated/dataModel"
 import { getAutomationEventDefinition } from "../../automations/events"
 import { providerLabel } from "../../providers/catalog"
+import {
+  firstLine,
+  normalizeRunText,
+  runSnapshotInstructions,
+  runSnapshotTitle,
+} from "../../runs/snapshot"
 import { type Actor } from "../../shared/actor"
 import { type getExecutionContext } from "./context"
 
@@ -9,6 +15,7 @@ type ExecutionContext = Awaited<ReturnType<typeof getExecutionContext>>
 export function executionTitle(context: ExecutionContext) {
   return (
     context.approval?.handoff.objective ??
+    runSnapshotTitle(context.run) ??
     context.automation?.name ??
     automationNameSnapshot(context.run) ??
     eventTitle(context) ??
@@ -18,14 +25,20 @@ export function executionTitle(context: ExecutionContext) {
 }
 
 export function executionInstructions(context: ExecutionContext) {
+  const instructions = runSnapshotInstructions(context.run)
+
+  if (instructions !== undefined) {
+    return instructions
+  }
+
   if (context.run?.reason.type === "message") {
-    return normalizedText(context.message?.text)
+    return normalizeRunText(context.message?.text)
   }
 
   if (context.run?.automationId !== undefined) {
     return (
       runDataString(context.run, "automationInstructions") ??
-      normalizedText(context.automation?.instructions)
+      normalizeRunText(context.automation?.instructions)
     )
   }
 
@@ -162,7 +175,9 @@ function eventLabel(
 }
 
 function automationNameSnapshot(run: Doc<"runs"> | null) {
-  return runDataString(run, "automationName")
+  return run?.automationId === undefined
+    ? undefined
+    : (runSnapshotTitle(run) ?? runDataString(run, "automationName"))
 }
 
 function runDataString(run: Doc<"runs"> | null, key: string) {
@@ -175,12 +190,6 @@ function runDataString(run: Doc<"runs"> | null, key: string) {
   const value = data[key]
 
   return typeof value === "string" && value.trim() !== "" ? value : undefined
-}
-
-function normalizedText(text: string | undefined) {
-  const value = text?.trim()
-
-  return value === "" ? undefined : value
 }
 
 function titleFromRun(run: Doc<"runs"> | null) {
@@ -213,14 +222,4 @@ function actorLabel(actor: Actor | undefined) {
   }
 
   return "provider" in actor ? actor.externalId : undefined
-}
-
-function firstLine(text: string | undefined) {
-  const line = text?.trim().split("\n").find(Boolean)
-
-  if (line === undefined) {
-    return undefined
-  }
-
-  return line.length > 90 ? `${line.slice(0, 87)}...` : line
 }

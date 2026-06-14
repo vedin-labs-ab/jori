@@ -1,6 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { createAutomationRunSnapshot } from "../runs/snapshot"
 
 export async function createAutomationRun(
   ctx: MutationCtx,
@@ -14,10 +15,10 @@ export async function createAutomationRun(
     tenantId: args.automation.tenantId,
     automationId: args.automation._id,
     reason: args.reason,
-    data: {
-      automationInstructions: args.automation.instructions,
-      automationName: args.automation.name,
-    },
+    ...createAutomationRunSnapshot({
+      instructions: args.automation.instructions,
+      name: args.automation.name,
+    }),
     createdBy: args.automation.createdBy,
     createdAt: args.now,
   })
