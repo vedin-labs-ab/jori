@@ -18,6 +18,23 @@ test("renders nothing for automation-only sources", () => {
   expect(container.textContent).toBe("")
 })
 
+test("renders one-shot Milo automation sources", () => {
+  const { container } = render(
+    <SourceLine
+      source={{
+        type: "automation",
+        provider: { type: "milo", label: "Milo" },
+        kind: { type: "one-shot", label: "one-shot" },
+        metadata: [],
+      }}
+    />
+  )
+
+  expect(screen.getByText("Milo").className).toContain("font-medium")
+  expect(screen.getByText("one-shot").className).toContain("font-mono")
+  expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
+})
+
 test("renders rich event source metadata", () => {
   const { container } = render(
     <SourceLine

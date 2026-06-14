@@ -7,7 +7,10 @@ export type ExecutionDetailType =
   | "page"
   | "pull_request"
   | "repository"
+  | "scheduled"
   | "stopped"
+  | "tools"
+  | "web_search"
 
 export type ExecutionDetail = {
   type: ExecutionDetailType

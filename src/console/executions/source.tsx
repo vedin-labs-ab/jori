@@ -6,6 +6,7 @@ import {
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import { MiloLogo } from "@/shared/brand"
 import { SeparatorDot } from "../dot"
 import { providerLogoPath } from "./logos"
 import { type ExecutionSource, type SourceDatum } from "./types"
@@ -17,6 +18,17 @@ export function ProviderLogo({
   className?: string
   provider: string | undefined
 }) {
+  if (provider === "milo") {
+    return (
+      <MiloLogo
+        aria-hidden="true"
+        className={className}
+        focusable="false"
+        title=""
+      />
+    )
+  }
+
   const logo = providerLogoPath(provider)
 
   if (logo === undefined) {

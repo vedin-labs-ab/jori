@@ -85,6 +85,44 @@ describe("execution row task details", () => {
   })
 })
 
+describe("execution row one-shot details", () => {
+  test("renders one-shot automation details", () => {
+    renderExecutionRow(
+      execution({
+        task: "Generate a team image.",
+        title: "Daily image",
+        source: {
+          type: "automation",
+          provider: { type: "milo", label: "Milo" },
+          kind: { type: "one-shot", label: "one-shot" },
+          metadata: [],
+        },
+        details: [
+          { type: "scheduled", label: "One-shot", at: 1700000000000 },
+          {
+            type: "tools",
+            label: "Slack: Send message, Read channel history",
+          },
+          { type: "web_search", label: "Yes" },
+        ],
+      })
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
+
+    expect(screen.getByText("Milo")).toBeDefined()
+    expect(screen.getByText("one-shot")).toBeDefined()
+    expect(screen.getByText("Scheduled")).toBeDefined()
+    expect(screen.getByText("One-shot")).toBeDefined()
+    expect(screen.getByText("Tools")).toBeDefined()
+    expect(
+      screen.getByText("Slack: Send message, Read channel history")
+    ).toBeDefined()
+    expect(screen.getByText("Web search")).toBeDefined()
+    expect(screen.getByText("Yes")).toBeDefined()
+  })
+})
+
 describe("execution row linked details", () => {
   test("renders execution details with links", () => {
     renderExecutionRow(
