@@ -51,7 +51,7 @@ test("uses repository and issue for GitHub issue comments", () => {
   ).toEqual([
     {
       type: "repository",
-      label: "vedin-labs/frontier",
+      label: "frontier",
       url: "https://github.com/vedin-labs/frontier",
     },
     {
@@ -79,10 +79,10 @@ test("uses repository and pull request for GitHub pull request comments", () => 
       },
     })
   ).toEqual([
-    { type: "repository", label: "vedin-labs/frontier" },
+    { type: "repository", label: "frontier" },
     {
       type: "pull_request",
-      label: "#2 Add description to README",
+      label: "#2",
       url: "https://github.com/vedin-labs/frontier/pull/2",
     },
   ])

@@ -20,7 +20,7 @@ describe("execution source line", () => {
   })
 
   test("renders rich event source metadata", () => {
-    render(
+    const { container } = render(
       <SourceLine
         source={{
           type: "automation",
@@ -41,9 +41,23 @@ describe("execution source line", () => {
     expect(
       screen.getByText("pull_request.review_comment.created").className
     ).toContain("font-mono")
-    expect(screen.getByText("vedin-labs/frontier").className).toContain(
-      "font-medium"
+    expect(screen.getByText("frontier")).toBeDefined()
+    expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
+    expect(container.querySelector("kbd")?.textContent).toBe("#42")
+  })
+
+  test("renders Slack channels as channel tokens", () => {
+    render(
+      <SourceLine
+        source={{
+          type: "message",
+          provider: { type: "slack", label: "Slack" },
+          metadata: [{ type: "channel", label: "#product" }],
+        }}
+      />
     )
-    expect(screen.getByText("#42 Add execution metadata")).toBeDefined()
+
+    expect(screen.getByText("#")).toBeDefined()
+    expect(screen.getByText("product").className).toContain("truncate")
   })
 })
