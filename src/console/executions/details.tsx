@@ -1,5 +1,5 @@
 import { AlertTriangle, Check, Copy, type LucideIcon } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -24,12 +24,14 @@ export function ErrorDetail({ value }: { value: string }) {
 
 export function CodeBlockDetail({
   contentClassName,
+  header,
   icon: Icon,
   iconClassName = "text-muted-foreground",
   label,
   value,
 }: {
   contentClassName?: string
+  header?: ReactNode
   icon: LucideIcon
   iconClassName?: string
   label: string
@@ -37,6 +39,28 @@ export function CodeBlockDetail({
 }) {
   const codeRef = useRef<HTMLElement>(null)
   const isSingleRenderedLine = useIsSingleRenderedLine(codeRef)
+
+  if (header !== undefined) {
+    return (
+      <DetailRow icon={Icon} iconClassName={iconClassName} label={label}>
+        <DetailFrame
+          action={<CopyButton label={label} value={value} />}
+          header={header}
+        >
+          <div className="px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed">
+            <code
+              className={cn(
+                "block whitespace-pre-wrap break-words",
+                contentClassName
+              )}
+            >
+              {value}
+            </code>
+          </div>
+        </DetailFrame>
+      </DetailRow>
+    )
+  }
 
   return (
     <DetailRow icon={Icon} iconClassName={iconClassName} label={label}>
@@ -60,6 +84,43 @@ export function CodeBlockDetail({
         </span>
       </div>
     </DetailRow>
+  )
+}
+
+export function DetailFrame({
+  action,
+  children,
+  className,
+  contentClassName,
+  header,
+}: {
+  action?: ReactNode
+  children: ReactNode
+  className?: string
+  contentClassName?: string
+  header?: ReactNode
+}) {
+  const hasHeader = header !== undefined || action !== undefined
+
+  return (
+    <div
+      className={cn(
+        "grid min-w-0 max-w-full grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-md bg-muted",
+        className
+      )}
+    >
+      {hasHeader ? (
+        <div className="flex min-w-0 items-center justify-between gap-2 border-b px-2.5 py-1.5 text-muted-foreground">
+          <div className="min-w-0 truncate">{header}</div>
+          {action === undefined ? null : (
+            <div className="shrink-0">{action}</div>
+          )}
+        </div>
+      ) : null}
+      <div className={cn("min-h-0 min-w-0 overflow-hidden", contentClassName)}>
+        {children}
+      </div>
+    </div>
   )
 }
 
@@ -148,7 +209,7 @@ export function RelativeTime({
   )
 }
 
-function CopyButton({
+export function CopyButton({
   className,
   label,
   value,

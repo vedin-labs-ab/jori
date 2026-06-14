@@ -28,7 +28,8 @@ describe("execution row details", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /notion test/i }))
 
-    expect(screen.getByText("Task")).toBeDefined()
+    expect(screen.getAllByText("Task")).toHaveLength(2)
+    expect(screen.getByRole("button", { name: "Copy Task" })).toBeDefined()
     expect(screen.getByText("Summarize the Notion launch plan.")).toBeDefined()
   })
 
