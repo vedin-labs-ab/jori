@@ -46,6 +46,7 @@ export function ExecutionFacts({ details }: { details: ExecutionDetail[] }) {
 function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
   const meta = detailMeta[detail.type]
   const time = detail.at === undefined ? undefined : absoluteTime(detail.at)
+  const isPayload = isPayloadDetail(detail)
 
   return (
     <DetailRow
@@ -53,8 +54,15 @@ function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
       iconClassName="text-muted-foreground"
       label={meta.label}
     >
-      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-muted px-2.5 py-2 text-xs">
-        <FactValue detail={detail} />
+      <div
+        className={cn(
+          "min-w-0 text-xs",
+          isPayload
+            ? "rounded-md bg-muted px-2.5 py-2"
+            : "flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5"
+        )}
+      >
+        <FactValue detail={detail} isPayload={isPayload} />
         {time === undefined ? null : (
           <>
             <SeparatorDot className="text-muted-foreground/60" />
@@ -66,10 +74,23 @@ function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
   )
 }
 
-function FactValue({ detail }: { detail: ExecutionDetail }) {
+function FactValue({
+  detail,
+  isPayload,
+}: {
+  detail: ExecutionDetail
+  isPayload: boolean
+}) {
   if (detail.url === undefined) {
     return (
-      <span className="min-w-0 max-w-full truncate font-medium text-foreground">
+      <span
+        className={cn(
+          "min-w-0 max-w-full font-medium text-foreground",
+          isPayload
+            ? "block whitespace-pre-wrap break-words leading-relaxed"
+            : "truncate"
+        )}
+      >
         {detail.label}
       </span>
     )
@@ -78,19 +99,38 @@ function FactValue({ detail }: { detail: ExecutionDetail }) {
   return (
     <a
       className={cn(
-        "group/fact-link inline-flex min-w-0 max-w-full items-center gap-1.5",
+        "group/fact-link inline-flex min-w-0 max-w-full gap-1.5",
         "rounded-sm font-medium text-foreground underline-offset-4",
         "transition-colors hover:underline focus-visible:outline-none",
-        "focus-visible:ring-2 focus-visible:ring-ring/50"
+        "focus-visible:ring-2 focus-visible:ring-ring/50",
+        isPayload ? "items-start" : "items-center"
       )}
       href={detail.url}
       rel="noreferrer"
       target="_blank"
     >
-      <span className="min-w-0 truncate">{detail.label}</span>
-      <ArrowUpRight className="size-3 shrink-0 text-muted-foreground transition-colors group-hover/fact-link:text-foreground" />
+      <span
+        className={cn(
+          "min-w-0",
+          isPayload
+            ? "whitespace-pre-wrap break-words leading-relaxed"
+            : "truncate"
+        )}
+      >
+        {detail.label}
+      </span>
+      <ArrowUpRight
+        className={cn(
+          "size-3 shrink-0 text-muted-foreground transition-colors group-hover/fact-link:text-foreground",
+          isPayload && "mt-0.5"
+        )}
+      />
     </a>
   )
+}
+
+function isPayloadDetail(detail: ExecutionDetail) {
+  return detail.type === "comment" || detail.type === "message"
 }
 
 function detailKey(detail: ExecutionDetail) {
