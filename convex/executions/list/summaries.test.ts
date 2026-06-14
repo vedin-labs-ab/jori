@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeExecution } from "./summaries"
 
-test("uses event automation run snapshots when the automation document is unavailable", async () => {
+test("uses stored automation snapshots when the automation document is unavailable", async () => {
   const summary = await summarizeExecution(
     fakeQueryCtx({
       event: {
@@ -47,7 +47,7 @@ test("uses event automation run snapshots when the automation document is unavai
   ])
 })
 
-test("uses message run snapshots when the message document is unavailable", async () => {
+test("uses stored message snapshots when the message document is unavailable", async () => {
   const summary = await summarizeExecution(
     fakeQueryCtx({
       run: {
@@ -70,72 +70,44 @@ test("uses message run snapshots when the message document is unavailable", asyn
   expect(summary.searchableText).toContain("keep it concise")
 })
 
-test("does not use automation names as instructions", async () => {
+test("keeps stored automation snapshots when the automation changes", async () => {
   const summary = await summarizeExecution(
     fakeQueryCtx({
-      event: {
-        _id: "event",
+      automation: {
+        _id: "automation",
         _creationTime: 0,
         tenantId: "tenant",
-        integrationId: "integration",
-        key: "slack:event",
-        type: "message.created",
+        name: "Updated automation name",
+        instructions: "Updated automation instructions.",
+        trigger: { type: "time" },
+        access: { integrations: [] },
+        createdBy: "user",
         createdAt: 0,
+        updatedAt: 0,
       },
-      integration: slackIntegration(),
       run: {
         _id: "run",
         _creationTime: 0,
         tenantId: "tenant",
-        automationId: "missing-automation",
-        reason: { type: "event", eventId: "event" },
-        data: { automationName: "Notion test" },
+        automationId: "automation",
+        reason: { type: "time", scheduledAt: 0 },
+        title: "Original automation name",
+        instructions: "Original automation instructions.",
         createdAt: 0,
       },
     }),
     execution()
   )
 
-  expect(summary.title).toBe("Notion test")
-  expect(summary.instructions).toBeUndefined()
-})
-
-test("uses event text instead of manual copy for orphaned event runs", async () => {
-  const summary = await summarizeExecution(
-    fakeQueryCtx({
-      event: {
-        _id: "event",
-        _creationTime: 0,
-        tenantId: "tenant",
-        integrationId: "integration",
-        key: "slack:event",
-        type: "message.created",
-        text: "can you schedule a launch review?",
-        createdAt: 0,
-      },
-      integration: slackIntegration(),
-      run: {
-        _id: "run",
-        _creationTime: 0,
-        tenantId: "tenant",
-        reason: { type: "event", eventId: "event" },
-        createdAt: 0,
-      },
-    }),
-    execution()
-  )
-
-  expect(summary.title).toBe("can you schedule a launch review?")
-  expect(summary.instructions).toBeUndefined()
+  expect(summary.title).toBe("Original automation name")
+  expect(summary.instructions).toBe("Original automation instructions.")
   expect(summary.sourceParts).toEqual([
-    "Triggered by event:",
-    "Slack",
-    "event:",
-    "New channel message",
+    "Triggered by automation:",
+    "Original automation name",
   ])
 })
 
-test("uses message text as legacy message run instructions", async () => {
+test("does not read message text as an instructions fallback", async () => {
   const summary = await summarizeExecution(
     fakeQueryCtx({
       integration: slackIntegration(),
@@ -154,17 +126,16 @@ test("uses message text as legacy message run instructions", async () => {
         _creationTime: 0,
         tenantId: "tenant",
         reason: { type: "message", messageId: "message" },
+        title: "Stored message title",
         createdAt: 0,
       },
     }),
     execution()
   )
 
-  expect(summary.title).toBe("Please summarize this thread.")
-  expect(summary.instructions).toBe(
-    "Please summarize this thread.\n\nKeep it concise."
-  )
-  expect(summary.searchableText).toContain("keep it concise")
+  expect(summary.title).toBe("Stored message title")
+  expect(summary.instructions).toBeUndefined()
+  expect(summary.searchableText).not.toContain("keep it concise")
 })
 
 function slackIntegration() {
