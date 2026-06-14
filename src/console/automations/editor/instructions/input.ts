@@ -8,7 +8,10 @@ import {
   isMentionNameCharacter,
 } from "../../surfaces"
 import { getDefaultAutomationSurfaceTools } from "../../tools"
-import { automationSurfaceNodeName } from "./document"
+import {
+  automationSurfaceNodeName,
+  readAutomationSurfaceToolsForProvider,
+} from "./document"
 import { type InstructionSuggestionState } from "./suggest"
 
 export function insertSurfaceSuggestion({
@@ -36,7 +39,8 @@ export function insertSurfaceSuggestion({
       getSurfaceInsertionContent(
         provider,
         shouldInsertTrailingSpace(editor, state.range.to),
-        permissions
+        permissions,
+        readAutomationSurfaceToolsForProvider(editor.getJSON(), provider)
       )
     )
     .run()
@@ -82,7 +86,16 @@ export function replaceCompletedSurfaceMention({
   const transaction = view.state.tr.replaceWith(
     start,
     from,
-    surfaceNode.create(createSurfaceNodeAttrs(match.provider, permissions))
+    surfaceNode.create(
+      createSurfaceNodeAttrs(
+        match.provider,
+        permissions,
+        readAutomationSurfaceToolsForProvider(
+          view.state.doc.toJSON(),
+          match.provider
+        )
+      )
+    )
   )
 
   transaction.insertText(text, start + 1)
@@ -94,11 +107,12 @@ export function replaceCompletedSurfaceMention({
 function getSurfaceInsertionContent(
   provider: AutomationSurfaceProvider,
   includeTrailingSpace: boolean,
-  permissions: AutomationPolicyPermissions
+  permissions: AutomationPolicyPermissions,
+  existingTools: string[] | undefined
 ) {
   const content: JSONContent[] = [
     {
-      attrs: createSurfaceNodeAttrs(provider, permissions),
+      attrs: createSurfaceNodeAttrs(provider, permissions, existingTools),
       type: automationSurfaceNodeName,
     },
   ]
@@ -112,11 +126,13 @@ function getSurfaceInsertionContent(
 
 function createSurfaceNodeAttrs(
   provider: AutomationSurfaceProvider,
-  permissions: AutomationPolicyPermissions
+  permissions: AutomationPolicyPermissions,
+  existingTools: string[] | undefined
 ) {
   return {
     provider,
-    tools: getDefaultAutomationSurfaceTools(provider, permissions),
+    tools:
+      existingTools ?? getDefaultAutomationSurfaceTools(provider, permissions),
   }
 }
 
