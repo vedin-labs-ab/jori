@@ -87,6 +87,42 @@ test("includes linked provider source details", async () => {
   ])
 })
 
+test("includes one-shot scheduled automation details", async () => {
+  const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
+  const summary = await summarizeExecution(
+    fakeQueryCtx({
+      automation: oneShotAutomation(scheduledAt),
+      integration: slackIntegration(),
+      run: {
+        _id: "run",
+        _creationTime: 0,
+        tenantId: "tenant",
+        automationId: "automation",
+        reason: { type: "time", scheduledAt },
+        title: "Daily image",
+        task: "Generate a team image.",
+        createdAt: scheduledAt + 1000,
+      },
+    }),
+    execution({ createdAt: scheduledAt + 1000, finishedAt: scheduledAt + 2000 })
+  )
+
+  expect(summary.source).toEqual({
+    type: "automation",
+    provider: { type: "milo", label: "Milo" },
+    kind: { type: "one-shot", label: "one-shot" },
+    metadata: [],
+  })
+  expect(summary.details).toEqual([
+    { type: "scheduled", label: "One-shot", at: scheduledAt },
+    {
+      type: "tools",
+      label: "Slack: Send message, Read channel history",
+    },
+    { type: "web_search", label: "Yes" },
+  ])
+})
+
 function manualRun(title: string, task: string) {
   return {
     _id: "run",
@@ -108,6 +144,31 @@ function eventRun(title: string, task: string) {
     title,
     task,
     createdAt: 0,
+  }
+}
+
+function oneShotAutomation(scheduledAt: number) {
+  return {
+    _id: "automation",
+    _creationTime: 0,
+    tenantId: "tenant",
+    name: "Daily image",
+    instructions: "Generate a team image.",
+    trigger: { type: "once", at: scheduledAt },
+    access: {
+      integrations: [
+        {
+          integrationId: "integration",
+          tools: ["conversations_add_message", "conversations_history"],
+        },
+      ],
+      web: true,
+    },
+    status: "completed",
+    createdBy: "user",
+    createdAt: 0,
+    updatedAt: 0,
+    lastRunAt: scheduledAt,
   }
 }
 
@@ -139,6 +200,22 @@ function githubIssueCommentEvent() {
     },
     metadata: [],
     createdAt: 0,
+  }
+}
+
+function slackIntegration() {
+  return {
+    _id: "integration",
+    _creationTime: 0,
+    tenantId: "tenant",
+    provider: "slack",
+    scope: "tenant",
+    externalId: "slack-team",
+    credentials: {},
+    status: "active",
+    createdBy: "user",
+    createdAt: 0,
+    updatedAt: 0,
   }
 }
 

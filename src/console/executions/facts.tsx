@@ -1,11 +1,14 @@
 import {
+  CalendarClock,
   CircleDotDashed,
   File,
   GitPullRequestArrow,
+  Globe,
   Hash,
   MessageCircleMore,
   Square,
   UserCheck,
+  Wrench,
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
@@ -31,7 +34,10 @@ const detailMeta = {
   page: { icon: File, label: "Page" },
   pull_request: { icon: GitPullRequestArrow, label: "Pull request" },
   repository: { icon: RepositoryIcon, label: "Repository" },
+  scheduled: { icon: CalendarClock, label: "Scheduled" },
   stopped: { icon: Square, label: "Stopped" },
+  tools: { icon: Wrench, label: "Tools" },
+  web_search: { icon: Globe, label: "Web search" },
 } satisfies Record<
   ExecutionDetailType,
   {

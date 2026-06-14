@@ -69,7 +69,16 @@ export function sourceSearchText(source: ExecutionSource) {
     .join(" ")
 }
 
-function sourceKind({ run }: ExecutionContext): SourceDatum | undefined {
+function sourceKind(context: ExecutionContext): SourceDatum | undefined {
+  const { run } = context
+
+  if (isOneShotTimeAutomation(context)) {
+    return {
+      type: "one-shot",
+      label: "one-shot",
+    }
+  }
+
   if (run.reason.type !== "message") {
     return undefined
   }
@@ -98,9 +107,18 @@ function sourceType({ run }: ExecutionContext): ExecutionSource["type"] {
 
 function sourceProvider({
   approval,
+  automation,
+  run,
   event,
   message,
 }: ExecutionContext): SourceDatum | undefined {
+  if (isOneShotTimeAutomation({ automation, run })) {
+    return {
+      type: "milo",
+      label: "Milo",
+    }
+  }
+
   const provider = message?.provider ?? event?.provider ?? approval?.provider
 
   if (provider === undefined) {
@@ -129,4 +147,11 @@ function eventLabel(event: NonNullable<ExecutionContext["event"]>) {
     getAutomationEventDefinition(event.provider, event.type)?.label ??
     event.type
   )
+}
+
+function isOneShotTimeAutomation({
+  automation,
+  run,
+}: Pick<ExecutionContext, "automation" | "run">) {
+  return run.reason.type === "time" && automation?.trigger.type === "once"
 }
