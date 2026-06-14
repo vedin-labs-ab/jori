@@ -1,9 +1,5 @@
-import { type Doc } from "../../_generated/dataModel"
 import { getAutomationEventDefinition } from "../../automations/events"
-import {
-  type IntegrationProvider,
-  providerLabel,
-} from "../../providers/catalog"
+import { providerLabel } from "../../providers/catalog"
 import { type Actor } from "../../shared/actor"
 import { type getExecutionContext } from "./context"
 import { sourceFacts, sourceTarget } from "./metadata"
@@ -19,7 +15,6 @@ export type SourceDatum = {
 export type ExecutionSource = {
   type: "automation" | "event" | "manual" | "message"
   actor?: SourceDatum
-  automation?: SourceDatum
   event?: SourceDatum
   facts: SourceDatum[]
   provider?: SourceDatum
@@ -46,16 +41,11 @@ export function executionSource(
     type: sourceType(context),
     facts: sourceFacts(provider?.type, data),
   }
-  const automation = sourceAutomation(context.run)
   const actor = actorDatum(
     context.event?.actor ??
       context.message?.actor ??
       context.approval?.requestedBy
   )
-
-  if (automation !== undefined) {
-    source.automation = automation
-  }
 
   if (provider !== undefined) {
     source.provider = provider
@@ -85,7 +75,6 @@ export function sourceSearchText(source: ExecutionSource) {
     source.type,
     source.actor?.type,
     source.actor?.label,
-    source.automation?.label,
     source.event?.type,
     source.event?.label,
     source.provider?.type,
@@ -100,45 +89,27 @@ export function sourceSearchText(source: ExecutionSource) {
 }
 
 function sourceType({ run }: ExecutionContext): ExecutionSource["type"] {
-  if (run?.automationId !== undefined) {
+  if (run.automationId !== undefined) {
     return "automation"
   }
 
-  if (run?.reason.type === "event") {
+  if (run.reason.type === "event") {
     return "event"
   }
 
-  if (run?.reason.type === "message") {
+  if (run.reason.type === "message") {
     return "message"
   }
 
   return "manual"
 }
 
-function sourceAutomation(
-  run: ExecutionContext["run"]
-): SourceDatum | undefined {
-  if (run?.automationId === undefined) {
-    return undefined
-  }
-
-  return {
-    type: "automation",
-    label: run.title,
-  }
-}
-
 function sourceProvider({
   approval,
   event,
-  integration,
   message,
 }: ExecutionContext): SourceDatum | undefined {
-  const provider =
-    message?.provider ??
-    event?.provider ??
-    integration?.provider ??
-    approval?.provider
+  const provider = message?.provider ?? event?.provider ?? approval?.provider
 
   if (provider === undefined) {
     return undefined
@@ -150,28 +121,22 @@ function sourceProvider({
   }
 }
 
-function sourceEvent({ event, integration }: ExecutionContext) {
+function sourceEvent({ event }: ExecutionContext) {
   if (event === null) {
     return undefined
   }
 
-  const provider = event.provider ?? integration?.provider
-
   return {
     type: event.type,
-    label: eventLabel(event, provider),
+    label: eventLabel(event),
   }
 }
 
-function eventLabel(
-  event: Doc<"events">,
-  provider: IntegrationProvider | undefined
-) {
-  if (provider === undefined) {
-    return event.type
-  }
-
-  return getAutomationEventDefinition(provider, event.type)?.label ?? event.type
+function eventLabel(event: NonNullable<ExecutionContext["event"]>) {
+  return (
+    getAutomationEventDefinition(event.provider, event.type)?.label ??
+    event.type
+  )
 }
 
 function actorDatum(actor: Actor | undefined): SourceDatum | undefined {

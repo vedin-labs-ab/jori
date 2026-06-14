@@ -12,7 +12,7 @@ export async function summarizeExecution(
 ) {
   const context = await getExecutionContext(ctx, execution, requestedApproval)
   const title = executionTitle(context)
-  const task = executionTask(context, title)
+  const task = executionTask(context)
   const stoppedBy = await stoppedByLabel(ctx, execution)
   const source = executionSource(context, stoppedBy)
 

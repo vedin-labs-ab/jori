@@ -40,7 +40,6 @@ test("uses stored automation snapshots when the automation document is unavailab
   expect("promptUrl" in summary).toBe(false)
   expect(summary.source).toEqual({
     type: "automation",
-    automation: { type: "automation", label: "Deep analysis" },
     provider: { type: "slack", label: "Slack" },
     event: { type: "message.created", label: "New channel message" },
     actor: { type: "email", label: "vedin.labs@gmail.com" },
@@ -49,16 +48,47 @@ test("uses stored automation snapshots when the automation document is unavailab
   })
 })
 
-test("uses stored message snapshots when the message document is unavailable", async () => {
+test("requires message documents for message runs", async () => {
+  await expect(
+    summarizeExecution(
+      fakeQueryCtx({
+        run: {
+          _id: "run",
+          _creationTime: 0,
+          tenantId: "tenant",
+          reason: { type: "message", messageId: "missing-message" },
+          title: "Please summarize this thread.",
+          task: "Please summarize this thread.\n\nKeep it concise.",
+          createdAt: 0,
+        },
+      }),
+      execution()
+    )
+  ).rejects.toThrow("Run message is missing.")
+})
+
+test("uses stored message snapshots instead of message text", async () => {
   const summary = await summarizeExecution(
     fakeQueryCtx({
+      integration: slackIntegration(),
+      message: {
+        _id: "message",
+        _creationTime: 0,
+        tenantId: "tenant",
+        integrationId: "integration",
+        provider: "slack",
+        type: "message.channels",
+        externalId: "slack:message",
+        text: "Please summarize this thread.\n\nKeep it concise.",
+        createdAt: 0,
+      },
       run: {
         _id: "run",
         _creationTime: 0,
         tenantId: "tenant",
-        reason: { type: "message", messageId: "missing-message" },
+        reason: { type: "message", messageId: "message" },
         title: "Please summarize this thread.",
-        task: "Please summarize this thread.\n\nKeep it concise.",
+        task: "Stored task.",
         createdAt: 0,
       },
     }),
@@ -66,9 +96,13 @@ test("uses stored message snapshots when the message document is unavailable", a
   )
 
   expect(summary.title).toBe("Please summarize this thread.")
-  expect(summary.task).toBe("Please summarize this thread.\n\nKeep it concise.")
-  expect(summary.source).toEqual({ type: "message", facts: [] })
-  expect(summary.searchableText).toContain("keep it concise")
+  expect(summary.task).toBe("Stored task.")
+  expect(summary.source).toEqual({
+    type: "message",
+    provider: { type: "slack", label: "Slack" },
+    facts: [],
+  })
+  expect(summary.searchableText).not.toContain("keep it concise")
 })
 
 test("keeps stored automation snapshots when the automation changes", async () => {
@@ -104,42 +138,8 @@ test("keeps stored automation snapshots when the automation changes", async () =
   expect(summary.task).toBe("Original automation instructions.")
   expect(summary.source).toEqual({
     type: "automation",
-    automation: { type: "automation", label: "Original automation name" },
     facts: [],
   })
-})
-
-test("does not read message text as a task fallback", async () => {
-  const summary = await summarizeExecution(
-    fakeQueryCtx({
-      integration: slackIntegration(),
-      message: {
-        _id: "message",
-        _creationTime: 0,
-        tenantId: "tenant",
-        integrationId: "integration",
-        provider: "slack",
-        type: "message.channels",
-        externalId: "slack:message",
-        text: "Please summarize this thread.\n\nKeep it concise.",
-        createdAt: 0,
-      },
-      run: {
-        _id: "run",
-        _creationTime: 0,
-        tenantId: "tenant",
-        reason: { type: "message", messageId: "message" },
-        title: "Stored message title",
-        task: "Stored message task",
-        createdAt: 0,
-      },
-    }),
-    execution()
-  )
-
-  expect(summary.title).toBe("Stored message title")
-  expect(summary.task).toBe("Stored message task")
-  expect(summary.searchableText).not.toContain("keep it concise")
 })
 
 function slackIntegration() {

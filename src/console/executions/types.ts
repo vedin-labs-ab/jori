@@ -40,7 +40,6 @@ export type SourceDatum = {
 export type ExecutionSource = {
   type: "automation" | "event" | "manual" | "message"
   actor?: SourceDatum
-  automation?: SourceDatum
   event?: SourceDatum
   facts: SourceDatum[]
   provider?: SourceDatum

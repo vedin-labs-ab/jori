@@ -1,4 +1,4 @@
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 
 export async function getExecutionContext(
@@ -7,6 +7,11 @@ export async function getExecutionContext(
   requestedApproval: Doc<"approvals"> | undefined
 ) {
   const run = await ctx.db.get(execution.runId)
+
+  if (run === null) {
+    throw new Error("Execution run is missing.")
+  }
+
   const continuationApproval =
     execution.approvalId === undefined
       ? null
@@ -15,13 +20,15 @@ export async function getExecutionContext(
     requestedApproval ?? (await getLatestRequestedApproval(ctx, execution))
   const approval = executionRequestedApproval ?? continuationApproval
   const message =
-    run?.reason.type === "message"
-      ? await ctx.db.get(run.reason.messageId)
+    run.reason.type === "message"
+      ? await getRequiredMessage(ctx, run.reason.messageId)
       : null
   const automation =
-    run?.automationId === undefined ? null : await ctx.db.get(run.automationId)
+    run.automationId === undefined ? null : await ctx.db.get(run.automationId)
   const event =
-    run?.reason.type === "event" ? await ctx.db.get(run.reason.eventId) : null
+    run.reason.type === "event"
+      ? await getRequiredEvent(ctx, run.reason.eventId)
+      : null
   const integration =
     message?.integrationId === undefined
       ? event?.integrationId === undefined
@@ -43,6 +50,26 @@ export async function getExecutionContext(
     requestedApproval: executionRequestedApproval,
     run,
   }
+}
+
+async function getRequiredMessage(ctx: QueryCtx, messageId: Id<"messages">) {
+  const message = await ctx.db.get(messageId)
+
+  if (message === null) {
+    throw new Error("Run message is missing.")
+  }
+
+  return message
+}
+
+async function getRequiredEvent(ctx: QueryCtx, eventId: Id<"events">) {
+  const event = await ctx.db.get(eventId)
+
+  if (event === null) {
+    throw new Error("Run event is missing.")
+  }
+
+  return event
 }
 
 async function getLatestRequestedApproval(
