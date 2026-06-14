@@ -5,7 +5,6 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { type ReactNode } from "react"
-import { Kbd } from "@/components/ui/kbd"
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../dot"
 import { providerLogoPath } from "./logos"
@@ -156,10 +155,10 @@ function RepositoryDatum({ datum }: MetadataRendererProps) {
 
 function PullRequestDatum({ datum }: MetadataRendererProps) {
   return (
-    <Kbd className="font-mono" title={datum.label}>
-      <GitPullRequestArrow className="size-3" />
-      {pullRequestLabel(datum.label)}
-    </Kbd>
+    <IconMetadataDatum
+      datum={{ ...datum, label: pullRequestLabel(datum.label) }}
+      icon={GitPullRequestArrow}
+    />
   )
 }
 
@@ -177,10 +176,11 @@ function ChannelDatum({ datum }: MetadataRendererProps) {
 function IssueDatum({ datum, provider }: MetadataRendererProps) {
   if (provider === "github") {
     return (
-      <Kbd className="font-mono" title={datum.label}>
-        <CircleDotDashed className="size-3" />
-        {issueNumberLabel(datum.label)}
-      </Kbd>
+      <IconMetadataDatum
+        datum={{ ...datum, label: issueNumberLabel(datum.label) }}
+        icon={CircleDotDashed}
+        title={datum.label}
+      />
     )
   }
 
@@ -206,14 +206,16 @@ function PlainMetadataDatum({ datum }: MetadataRendererProps) {
 function IconMetadataDatum({
   datum,
   icon: Icon,
+  title = datum.label,
 }: {
   datum: SourceDatum
   icon: LucideIcon
+  title?: string
 }) {
   return (
     <span
       className="inline-flex min-w-0 items-center gap-1 font-medium text-foreground"
-      title={datum.label}
+      title={title}
     >
       <Icon className="size-3 shrink-0 text-muted-foreground/70" />
       <span className="truncate">{datum.label}</span>
