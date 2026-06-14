@@ -1,6 +1,7 @@
 import { type Doc } from "../_generated/dataModel"
 import { providerLabel } from "../providers/catalog"
 import { getToolLabel } from "../providers/slack/approval/labels"
+import { slackMessageUrl } from "../providers/slack/links"
 
 export function summarizeApproval(args: {
   approval: Doc<"approvals">
@@ -96,28 +97,6 @@ function deliveryLabel(delivery: Doc<"approvals">["delivery"]) {
   }
 
   return `Delivered to ${providerLabel(delivery.provider)}`
-}
-
-function slackMessageUrl({
-  channelId,
-  messageTs,
-  teamId,
-}: {
-  channelId: string | undefined
-  messageTs: string | undefined
-  teamId: string | null | undefined
-}) {
-  if (teamId == null || channelId === undefined || messageTs === undefined) {
-    return undefined
-  }
-
-  const params = new URLSearchParams({
-    channel: channelId,
-    message_ts: messageTs,
-    team: teamId,
-  })
-
-  return `https://slack.com/app_redirect?${params.toString()}`
 }
 
 function readString(data: unknown, key: string) {

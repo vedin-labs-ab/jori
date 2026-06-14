@@ -5,6 +5,7 @@ import { type ExecutionItem } from "./types"
 const baseExecution: ExecutionItem = {
   approval: null,
   createdAt: 1700000000123,
+  details: [],
   durationMs: 1200,
   finishedAt: 1700000001323,
   id: "run-1",
