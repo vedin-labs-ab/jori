@@ -1,48 +1,17 @@
 import { type Doc } from "../../_generated/dataModel"
 import { getAutomationEventDefinition } from "../../automations/events"
 import { providerLabel } from "../../providers/catalog"
-import {
-  firstLine,
-  normalizeRunText,
-  runSnapshotInstructions,
-  runSnapshotTitle,
-} from "../../runs/snapshot"
 import { type Actor } from "../../shared/actor"
 import { type getExecutionContext } from "./context"
 
 type ExecutionContext = Awaited<ReturnType<typeof getExecutionContext>>
 
 export function executionTitle(context: ExecutionContext) {
-  return (
-    context.approval?.handoff.objective ??
-    runSnapshotTitle(context.run) ??
-    context.automation?.name ??
-    automationNameSnapshot(context.run) ??
-    eventTitle(context) ??
-    firstLine(context.message?.text) ??
-    titleFromRun(context.run)
-  )
+  return context.approval?.handoff.objective ?? context.run?.title ?? "Run"
 }
 
 export function executionInstructions(context: ExecutionContext) {
-  const instructions = runSnapshotInstructions(context.run)
-
-  if (instructions !== undefined) {
-    return instructions
-  }
-
-  if (context.run?.reason.type === "message") {
-    return normalizeRunText(context.message?.text)
-  }
-
-  if (context.run?.automationId !== undefined) {
-    return (
-      runDataString(context.run, "automationInstructions") ??
-      normalizeRunText(context.automation?.instructions)
-    )
-  }
-
-  return undefined
+  return context.run?.instructions
 }
 
 export function executionSourceParts(
@@ -78,13 +47,12 @@ export function triggerLabel(context: ExecutionContext) {
 
 function sourceLabels({
   approval,
-  automation,
   event,
   integration,
   message,
   run,
 }: ExecutionContext) {
-  const automationName = automation?.name ?? automationNameSnapshot(run)
+  const automationName = run?.automationId === undefined ? undefined : run.title
 
   if (automationName !== undefined) {
     if (run?.reason.type === "event") {
@@ -96,6 +64,10 @@ function sourceLabels({
 
   if (run?.reason.type === "event") {
     return eventSourceLabels({ event, integration })
+  }
+
+  if (run?.reason.type === "message" && message === null) {
+    return ["Triggered by message"]
   }
 
   if (message !== null) {
@@ -148,14 +120,6 @@ function eventSourceLabels({
   ].filter((part): part is string => part !== undefined && part !== "")
 }
 
-function eventTitle({ event, integration, run }: ExecutionContext) {
-  if (run?.reason.type !== "event" || event === null) {
-    return undefined
-  }
-
-  return firstLine(event.text) ?? eventLabel(event, integration)
-}
-
 function eventLabel(
   event: Doc<"events"> | null,
   integration: Doc<"integrations"> | null
@@ -172,40 +136,6 @@ function eventLabel(
     getAutomationEventDefinition(integration.provider, event.type)?.label ??
     event.type
   )
-}
-
-function automationNameSnapshot(run: Doc<"runs"> | null) {
-  return run?.automationId === undefined
-    ? undefined
-    : (runSnapshotTitle(run) ?? runDataString(run, "automationName"))
-}
-
-function runDataString(run: Doc<"runs"> | null, key: string) {
-  const data = run?.data
-
-  if (typeof data !== "object" || data === null || Array.isArray(data)) {
-    return undefined
-  }
-
-  const value = data[key]
-
-  return typeof value === "string" && value.trim() !== "" ? value : undefined
-}
-
-function titleFromRun(run: Doc<"runs"> | null) {
-  if (run?.reason.type === "time") {
-    return "Timed automation"
-  }
-
-  if (run?.reason.type === "event") {
-    return "Event automation"
-  }
-
-  if (run?.reason.type === "message") {
-    return "Message run"
-  }
-
-  return "Manual run"
 }
 
 function actorLabel(actor: Actor | undefined) {

@@ -24,9 +24,8 @@ export const runs = defineTable({
   tenantId: v.string(),
   automationId: v.optional(v.id("automations")),
   reason: runReason,
-  title: v.optional(v.string()),
+  title: v.string(),
   instructions: v.optional(v.string()),
-  data: v.optional(v.any()),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
 })

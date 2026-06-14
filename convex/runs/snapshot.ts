@@ -1,6 +1,4 @@
-import { type Doc } from "../_generated/dataModel"
-
-export type RunSnapshot = {
+type RunSnapshot = {
   title: string
   instructions?: string
 }
@@ -26,15 +24,7 @@ export function createMessageRunSnapshot(input: {
   }
 }
 
-export function runSnapshotInstructions(run: Doc<"runs"> | null) {
-  return normalizeRunText(run?.instructions)
-}
-
-export function runSnapshotTitle(run: Doc<"runs"> | null) {
-  return normalizeRunText(run?.title)
-}
-
-export function firstLine(text: string | undefined) {
+function firstLine(text: string | undefined) {
   const line = text?.trim().split("\n").find(Boolean)
 
   if (line === undefined) {
@@ -50,7 +40,7 @@ function optionalInstructions(text: string | undefined) {
   return instructions === undefined ? {} : { instructions }
 }
 
-export function normalizeRunText(text: string | undefined) {
+function normalizeRunText(text: string | undefined) {
   const value = text?.trim()
 
   return value === "" ? undefined : value
