@@ -76,7 +76,7 @@ test("includes linked provider source details", async () => {
     },
     {
       type: "issue",
-      label: "#42 Callback fails",
+      label: "#42: Callback fails",
       url: "https://github.com/vedin-labs/frontier/issues/42",
     },
     {

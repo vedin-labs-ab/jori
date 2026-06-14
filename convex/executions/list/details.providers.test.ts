@@ -20,7 +20,7 @@ test("includes linked GitHub pull request details", async () => {
     },
     {
       type: "pull_request",
-      label: "#42 Add execution metadata",
+      label: "#42: Add execution metadata",
       url: "https://github.com/vedin-labs/frontier/pull/42",
     },
     {

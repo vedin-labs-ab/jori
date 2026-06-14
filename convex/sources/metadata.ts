@@ -79,10 +79,7 @@ function githubTarget(data: unknown) {
 
   return item(
     isPullRequest ? "pull_request" : "issue",
-    compactText([
-      number === undefined ? undefined : `#${number}`,
-      readString(target, "title"),
-    ]),
+    githubIssueLikeLabel(number, readString(target, "title")),
     readString(target, "url")
   )
 }
@@ -99,7 +96,7 @@ function linearMetadata(data: unknown) {
     item("project", readString(project, "name")),
     item(
       "issue",
-      issueLabel(
+      issueIdentifierLabel(
         readString(data, "issueIdentifier") ??
           readString(issue, "identifier") ??
           readString(data, "issueId"),
@@ -110,7 +107,20 @@ function linearMetadata(data: unknown) {
   ])
 }
 
-function issueLabel(identifier: string | undefined, title: string | undefined) {
+export function githubIssueLikeLabel(
+  number: number | undefined,
+  title: string | undefined
+) {
+  return issueIdentifierLabel(
+    number === undefined ? undefined : `#${number}`,
+    title
+  )
+}
+
+export function issueIdentifierLabel(
+  identifier: string | undefined,
+  title: string | undefined
+) {
   if (identifier === undefined || title === undefined) {
     return identifier ?? title
   }
@@ -194,10 +204,6 @@ function item(
 
 function compactItems(items: Array<SourceMetadataItem | undefined>) {
   return items.filter((item): item is SourceMetadataItem => item !== undefined)
-}
-
-function compactText(parts: Array<string | undefined>) {
-  return parts.filter((part) => part !== undefined && part !== "").join(" ")
 }
 
 function readObject(data: unknown, key: string) {

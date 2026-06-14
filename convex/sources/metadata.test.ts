@@ -56,7 +56,7 @@ test("uses repository and issue for GitHub issue comments", () => {
     },
     {
       type: "issue",
-      label: "#42 Checkout error",
+      label: "#42: Checkout error",
       url: "https://github.com/vedin-labs/frontier/issues/42",
     },
   ])
@@ -82,7 +82,7 @@ test("uses repository and pull request for GitHub pull request comments", () => 
     { type: "repository", label: "frontier" },
     {
       type: "pull_request",
-      label: "#2 Add description to README",
+      label: "#2: Add description to README",
       url: "https://github.com/vedin-labs/frontier/pull/2",
     },
   ])
