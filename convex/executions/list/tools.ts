@@ -3,26 +3,18 @@ import { compactDetails, detail, type ExecutionDetailGroup } from "./detail"
 
 type ToolSnapshot = Doc<"executions">["toolSnapshot"]
 
-export function toolDetails(input: {
-  includeWebSearch: boolean
-  snapshot: ToolSnapshot
-}) {
-  if (input.snapshot === undefined) {
+export function toolDetails(snapshot: ToolSnapshot) {
+  if (snapshot === undefined) {
     return []
   }
 
-  const tools = toolsDetail(input.snapshot.groups)
+  const tools = toolsDetail(snapshot.groups)
 
   return compactDetails([
     tools === undefined
       ? undefined
       : detail("tools", tools.label, { groups: tools.groups }),
-    input.includeWebSearch
-      ? detail(
-          "web_search",
-          input.snapshot.webSearch === true ? "Allowed" : "Blocked"
-        )
-      : undefined,
+    detail("web_search", snapshot.webSearch === true ? "Allowed" : "Blocked"),
   ])
 }
 

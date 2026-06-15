@@ -28,6 +28,34 @@ test("shows stored tools for event automation runs", async () => {
   )
 
   expect(summary.details).toContainEqual(slackToolsDetail())
+  expect(summary.details).toContainEqual(webSearchDetail("Allowed"))
+})
+
+test("shows stored blocked web search for event automation runs", async () => {
+  const summary = await summarizeExecution(
+    fakeQueryCtx({
+      event: event(),
+      integration: slackIntegration(),
+      run: {
+        _id: "run",
+        _creationTime: 0,
+        tenantId: "tenant",
+        automationId: "missing-automation",
+        reason: { type: "event", eventId: "event" },
+        title: "Deep analysis",
+        task: "Perform the deep analysis.",
+        display: eventAutomationDisplay({
+          provider: { type: "slack", label: "Slack" },
+          event: { type: "message.created", label: "New channel message" },
+          metadata: [{ type: "channel", label: "C123" }],
+        }),
+        createdAt: 0,
+      },
+    }),
+    execution({ toolSnapshot: slackToolSnapshot(false) })
+  )
+
+  expect(summary.details).toContainEqual(webSearchDetail("Blocked"))
 })
 
 test("shows stored tools for mention and reply runs", async () => {
@@ -54,6 +82,7 @@ test("shows stored tools for mention and reply runs", async () => {
     )
 
     expect(summary.details).toContainEqual(slackToolsDetail())
+    expect(summary.details).toContainEqual(webSearchDetail("Allowed"))
   }
 })
 
@@ -117,7 +146,7 @@ function execution(overrides: Record<string, unknown>) {
   } as Parameters<typeof summarizeExecution>[1]
 }
 
-function slackToolSnapshot() {
+function slackToolSnapshot(webSearch = true) {
   return {
     groups: [
       {
@@ -126,7 +155,7 @@ function slackToolSnapshot() {
         tools: slackTools(),
       },
     ],
-    webSearch: true,
+    webSearch,
   }
 }
 
@@ -141,6 +170,13 @@ function slackToolsDetail() {
         tools: slackTools(),
       },
     ],
+  }
+}
+
+function webSearchDetail(label: "Allowed" | "Blocked") {
+  return {
+    type: "web_search",
+    label,
   }
 }
 
