@@ -16,6 +16,12 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
+import {
+  ConsolePageLayout,
+  ConsoleScrollableGrid,
+  ConsoleToolbar,
+  ConsoleToolbarActions,
+} from "../../layout"
 import { ExecutionRow } from "../row"
 import { displayNowForExecution, executionClockInterval } from "../time"
 import {
@@ -65,20 +71,18 @@ export function RunsList({ tenantId }: { tenantId: string }) {
   )
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col gap-3">
-        <ExecutionFilters
-          approvalFilter={approvalFilter}
-          executionFilter={executionFilter}
-          query={query}
-          setApprovalFilter={setApprovalFilterAndReset}
-          setExecutionFilter={setExecutionFilterAndReset}
-          setQuery={setQueryAndReset}
-        />
-        <ExecutionRows pagination={pagination} tenantId={tenantId} />
-        <ExecutionPager pagination={pagination} />
-      </div>
-    </section>
+    <ConsolePageLayout>
+      <ExecutionFilters
+        approvalFilter={approvalFilter}
+        executionFilter={executionFilter}
+        query={query}
+        setApprovalFilter={setApprovalFilterAndReset}
+        setExecutionFilter={setExecutionFilterAndReset}
+        setQuery={setQueryAndReset}
+      />
+      <ExecutionRows pagination={pagination} tenantId={tenantId} />
+      <ExecutionPager pagination={pagination} />
+    </ConsolePageLayout>
   )
 }
 
@@ -98,7 +102,7 @@ const ExecutionFilters = memo(function ExecutionFilters({
   setQuery: (query: string) => void
 }) {
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <ConsoleToolbar>
       <ToggleGroup
         className="flex-wrap justify-start"
         onValueChange={(value) => {
@@ -116,7 +120,7 @@ const ExecutionFilters = memo(function ExecutionFilters({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row md:flex-none">
+      <ConsoleToolbarActions>
         <Select
           onValueChange={(value) => setApprovalFilter(value as ApprovalFilter)}
           value={approvalFilter}
@@ -150,8 +154,8 @@ const ExecutionFilters = memo(function ExecutionFilters({
             value={query}
           />
         </div>
-      </div>
-    </div>
+      </ConsoleToolbarActions>
+    </ConsoleToolbar>
   )
 })
 
@@ -168,7 +172,7 @@ function ExecutionRows({
     // auto-rows-max keeps row heights at their content size; without it the
     // overflow-hidden articles let the definite-height grid compress its
     // tracks to fit instead of overflowing into the scrollbar.
-    <div className="grid min-h-0 flex-1 auto-rows-max content-start gap-2 overflow-y-auto">
+    <ConsoleScrollableGrid>
       {pagination.isLoadingFirstPage ? <ExecutionSkeletonList /> : null}
       {!pagination.isLoadingFirstPage && pagination.visibleRows.length === 0 ? (
         <EmptyExecutions hasFilters={pagination.hasFilters} />
@@ -183,7 +187,7 @@ function ExecutionRows({
             />
           ))
         : null}
-    </div>
+    </ConsoleScrollableGrid>
   )
 }
 
