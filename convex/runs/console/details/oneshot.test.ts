@@ -20,7 +20,7 @@ test("includes one-shot automation access details", async () => {
 
   expect(summary.source).toEqual({
     type: "automation",
-    provider: { type: "milo", label: "Milo" },
+    surface: { type: "milo", label: "Milo" },
     kind: { type: "one-shot", label: "one-shot" },
     metadata: [],
   })
@@ -105,7 +105,7 @@ function slackIntegration() {
     _id: "integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "slack",
+    integration: "slack",
     scope: "tenant",
     externalId: "slack-team",
     credentials: {},
@@ -134,7 +134,7 @@ function slackToolSnapshot(webSearch: boolean) {
   return {
     groups: [
       {
-        provider: "slack",
+        surface: "slack",
         label: "Slack",
         tools: slackTools(),
       },

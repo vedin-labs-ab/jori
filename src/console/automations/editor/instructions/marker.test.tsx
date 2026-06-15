@@ -34,7 +34,7 @@ describe("automation instructions marker validation", () => {
       description: "Post to GitHub.",
       error: "Choose at least one tool for each mentioned integration.",
       showAccessError: true,
-      surfaces: [{ provider: "github", tools: [] }],
+      surfaces: [{ integration: "github", tools: [] }],
     })
 
     expect(await screen.findByRole("textbox")).toBeDefined()
@@ -60,7 +60,7 @@ describe("automation instructions marker styling", () => {
   test("uses icon opacity instead of background for badge access hover", async () => {
     renderInstructionsField({
       description: "Post to GitHub.",
-      surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
+      surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
     const button = await screen.findByRole("button", {
@@ -77,11 +77,11 @@ describe("automation instructions marker styling", () => {
 })
 
 describe("automation instructions marker hover", () => {
-  test("keeps provider pane width stable and only swaps the icon affordance", async () => {
+  test("keeps integration pane width stable and only swaps the icon affordance", async () => {
     renderInstructionsField({
       description: "Post to Google Drive.",
       surfaces: [
-        { provider: "googleDrive", tools: ["google_drive_read_file"] },
+        { integration: "googleDrive", tools: ["google_drive_read_file"] },
       ],
     })
 

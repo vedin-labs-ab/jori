@@ -17,49 +17,52 @@ export type {
   AutomationEventParameter,
 } from "./catalog/types"
 
-const pendingProviderDelivery =
-  "Event delivery for this provider is not available yet."
+const pendingIntegrationDelivery =
+  "Event delivery for this integration is not available yet."
 
 export type AutomationEventIntegration =
-  (typeof automationEventCatalog)[number]["provider"]
+  (typeof automationEventCatalog)[number]["integration"]
 
 export const automationEventIntegrations = automationEventCatalog.map(
-  (definition) => definition.provider
+  (definition) => definition.integration
 )
 
-export function getAutomationEventIntegrationDefinition(provider: Integration) {
+export function getAutomationEventIntegrationDefinition(
+  integration: Integration
+) {
   return automationEventCatalog.find(
-    (definition) => definition.provider === provider
+    (definition) => definition.integration === integration
   )
 }
 
-export function getAutomationEventDefinitions(provider: Integration) {
-  return getAutomationEventIntegrationDefinition(provider)?.events ?? []
+export function getAutomationEventDefinitions(integration: Integration) {
+  return getAutomationEventIntegrationDefinition(integration)?.events ?? []
 }
 
 export function getAutomationEventDefinition(
-  provider: Integration,
+  integration: Integration,
   value: string
 ) {
-  return getAutomationEventDefinitions(provider).find(
+  return getAutomationEventDefinitions(integration).find(
     (definition) => definition.value === value
   )
 }
 
 export function getDefaultAutomationEvent(
-  provider: Integration = automationEventCatalog[0].provider
+  integration: Integration = automationEventCatalog[0].integration
 ) {
-  const providerDefinition = getAutomationEventIntegrationDefinition(provider)
+  const integrationDefinition =
+    getAutomationEventIntegrationDefinition(integration)
 
-  return providerDefinition?.events[0] ?? automationEventCatalog[0].events[0]
+  return integrationDefinition?.events[0] ?? automationEventCatalog[0].events[0]
 }
 
 export function isAutomationEventIntegration(
-  provider: unknown
-): provider is AutomationEventIntegration {
+  integration: unknown
+): integration is AutomationEventIntegration {
   return (
-    typeof provider === "string" &&
-    automationEventIntegrations.some((candidate) => candidate === provider)
+    typeof integration === "string" &&
+    automationEventIntegrations.some((candidate) => candidate === integration)
   )
 }
 
@@ -73,10 +76,10 @@ export function isAutomationEventOptionSource(
 }
 
 export function integrationUsesAutomationEventOptionSource(
-  provider: Integration,
+  integration: Integration,
   source: AutomationEventOptionSource
 ) {
-  return getAutomationEventDefinitions(provider).some((definition) =>
+  return getAutomationEventDefinitions(integration).some((definition) =>
     (definition.parameters ?? []).some(
       (parameter) => parameter.type === "option" && parameter.source === source
     )
@@ -133,7 +136,7 @@ export function assertAutomationEventIsAvailable(
     return
   }
 
-  throw new Error(definition.availability.message ?? pendingProviderDelivery)
+  throw new Error(definition.availability.message ?? pendingIntegrationDelivery)
 }
 
 export function automationEventCriteriaKey(

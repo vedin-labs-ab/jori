@@ -11,7 +11,7 @@ export function InstructionSuggestions({
 }: {
   listboxId: string
   onActiveIndexChange: (activeIndex: number) => void
-  onSelect: (provider: AutomationSurfaceIntegration) => void
+  onSelect: (integration: AutomationSurfaceIntegration) => void
   state: InstructionSuggestionState | null
 }) {
   if (state === null) {
@@ -35,14 +35,14 @@ export function InstructionSuggestions({
               : "hover:bg-muted/70"
           )}
           id={`${listboxId}-${index}`}
-          key={suggestion.provider}
-          onClick={() => onSelect(suggestion.provider)}
+          key={suggestion.integration}
+          onClick={() => onSelect(suggestion.integration)}
           onMouseDown={(event) => event.preventDefault()}
           onMouseEnter={() => onActiveIndexChange(index)}
           role="option"
           type="button"
         >
-          <SurfaceLogo provider={suggestion.provider} />
+          <SurfaceLogo integration={suggestion.integration} />
           <span className="font-medium">{suggestion.label}</span>
         </button>
       ))}

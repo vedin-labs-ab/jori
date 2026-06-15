@@ -21,7 +21,7 @@ const emailConfig = {
     alt: "Microsoft Outlook logo",
     src: "https://svgl.app/library/microsoft-outlook.svg",
   },
-  provider: "microsoftEmail",
+  integration: "microsoftEmail",
 } satisfies IntegrationConnectionConfig
 
 const calendarConfig = {
@@ -38,7 +38,7 @@ const calendarConfig = {
     alt: "Microsoft logo",
     src: "https://svgl.app/library/microsoft.svg",
   },
-  provider: "microsoftCalendar",
+  integration: "microsoftCalendar",
 } satisfies IntegrationConnectionConfig
 
 export function MicrosoftEmailConnection({

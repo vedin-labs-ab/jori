@@ -1,28 +1,28 @@
 export const automationSurfaceAccesses = ["read", "write", "both"] as const
 
 export const automationSurfaceIntegrations = [
-  provider("slack", "Slack", ["slack"]),
-  provider("linear", "Linear", ["linear"]),
-  provider("github", "GitHub", ["github", "git hub"]),
-  provider("gmail", "Gmail", ["gmail", "google mail"]),
-  provider("googleCalendar", "Google Calendar", [
+  integration("slack", "Slack", ["slack"]),
+  integration("linear", "Linear", ["linear"]),
+  integration("github", "GitHub", ["github", "git hub"]),
+  integration("gmail", "Gmail", ["gmail", "google mail"]),
+  integration("googleCalendar", "Google Calendar", [
     "google calendar",
     "googlecalendar",
     "gcal",
   ]),
-  provider("googleDrive", "Google Drive", [
+  integration("googleDrive", "Google Drive", [
     "google drive",
     "googledrive",
     "drive",
   ]),
-  provider("notion", "Notion", ["notion"]),
-  provider("microsoftEmail", "Outlook Mail", [
+  integration("notion", "Notion", ["notion"]),
+  integration("microsoftEmail", "Outlook Mail", [
     "outlook",
     "outlook mail",
     "microsoft email",
     "microsoft mail",
   ]),
-  provider("microsoftCalendar", "Microsoft Calendar", [
+  integration("microsoftCalendar", "Microsoft Calendar", [
     "microsoft calendar",
     "microsoftcalendar",
     "outlook calendar",
@@ -31,68 +31,70 @@ export const automationSurfaceIntegrations = [
 
 export type AutomationSurfaceAccess = (typeof automationSurfaceAccesses)[number]
 export type AutomationSurfaceIntegration =
-  (typeof automationSurfaceIntegrations)[number]["provider"]
+  (typeof automationSurfaceIntegrations)[number]["integration"]
 export type AutomationSurfaceIntegrationMeta =
   (typeof automationSurfaceIntegrations)[number]
 
 export type AutomationSurfaceFormValue = {
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
   tools: string[]
 }
 
 export function getAutomationSurfaceIntegration(
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
 ) {
   return automationSurfaceIntegrations.find(
-    (item) => item.provider === provider
+    (item) => item.integration === integration
   )
 }
 
 export function isAutomationSurfaceIntegration(
-  provider: unknown
-): provider is AutomationSurfaceIntegration {
+  integration: unknown
+): integration is AutomationSurfaceIntegration {
   return (
-    typeof provider === "string" &&
-    automationSurfaceIntegrations.some((item) => item.provider === provider)
+    typeof integration === "string" &&
+    automationSurfaceIntegrations.some(
+      (item) => item.integration === integration
+    )
   )
 }
 
 export function getAutomationSurfaceLabel(
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
 ) {
-  return getAutomationSurfaceIntegration(provider)?.label ?? provider
+  return getAutomationSurfaceIntegration(integration)?.label ?? integration
 }
 
 export function getAutomationSurfaceLogo(
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
 ) {
-  return `/logos/providers/${providerLogoName(provider)}.svg`
+  return `/logos/integrations/${integrationLogoName(integration)}.svg`
 }
 
-function provider<const Provider extends string>(
-  provider: Provider,
+function integration<const Integration extends string>(
+  integration: Integration,
   label: string,
   aliases: readonly string[]
 ) {
-  return { aliases, label, provider }
+  return { aliases, integration, label }
 }
 
-function providerLogoName(provider: AutomationSurfaceIntegration) {
-  if (provider === "googleCalendar") {
+function integrationLogoName(integration: AutomationSurfaceIntegration) {
+  if (integration === "googleCalendar") {
     return "google-calendar"
   }
 
-  if (provider === "googleDrive") {
+  if (integration === "googleDrive") {
     return "google-drive"
   }
 
-  if (provider === "microsoftCalendar") {
+  if (integration === "microsoftCalendar") {
     return "microsoft-calendar"
   }
 
-  if (provider === "microsoftEmail") {
+  if (integration === "microsoftEmail") {
     return "microsoft-email"
   }
 
-  return provider
+  return integration
 }

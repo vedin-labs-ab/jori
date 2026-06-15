@@ -16,7 +16,7 @@ export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
 export type ToolAccess = (typeof toolAccessLevels)[number]
 export type ToolPermission = {
   tool: string
-  provider: ToolSurface
+  surface: ToolSurface
   label: string
   description: string
   access: ToolAccess
@@ -35,7 +35,7 @@ export type PermissionOverride = {
 }
 
 export type ToolPermissionRow = readonly [
-  provider: ToolSurface,
+  surface: ToolSurface,
   tool: string,
   label: string,
   description: string,
@@ -44,8 +44,8 @@ export type ToolPermissionRow = readonly [
 ]
 
 export const toolPermissions = toolPermissionRows.map(
-  ([provider, tool, label, description, access, defaultMode]) => ({
-    provider,
+  ([surface, tool, label, description, access, defaultMode]) => ({
+    surface,
     tool,
     label,
     description,
@@ -62,10 +62,8 @@ export function getToolPermission(tool: string) {
   return toolPermissionsByName.get(tool)
 }
 
-export function getToolPermissionsBySurface(provider: ToolSurface) {
-  return toolPermissions.filter(
-    (permission) => permission.provider === provider
-  )
+export function getToolPermissionsBySurface(surface: ToolSurface) {
+  return toolPermissions.filter((permission) => permission.surface === surface)
 }
 
 export function resolveToolModes(overrides: PermissionOverride[]) {

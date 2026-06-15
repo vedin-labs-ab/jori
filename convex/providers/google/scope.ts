@@ -5,16 +5,16 @@ import { type GoogleIntegration } from "./config"
 export async function findExistingGoogleIntegration(
   ctx: MutationCtx,
   args: {
-    provider: GoogleIntegration
+    integration: GoogleIntegration
     tenantId: string
     createdBy: string
   }
 ): Promise<Doc<"integrations"> | null> {
-  if (getGoogleIntegrationScope(args.provider) === "tenant") {
+  if (getGoogleIntegrationScope(args.integration) === "tenant") {
     return await ctx.db
       .query("integrations")
-      .withIndex("by_tenant_and_provider", (query) =>
-        query.eq("tenantId", args.tenantId).eq("provider", args.provider)
+      .withIndex("by_tenant_and_integration", (query) =>
+        query.eq("tenantId", args.tenantId).eq("integration", args.integration)
       )
       .order("desc")
       .first()
@@ -22,17 +22,17 @@ export async function findExistingGoogleIntegration(
 
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_provider_and_owner", (query) =>
+    .withIndex("by_tenant_and_integration_and_owner", (query) =>
       query
         .eq("tenantId", args.tenantId)
-        .eq("provider", args.provider)
+        .eq("integration", args.integration)
         .eq("ownerId", args.createdBy)
     )
     .first()
 }
 
 export function getGoogleIntegrationScope(
-  provider: GoogleIntegration
+  integration: GoogleIntegration
 ): Doc<"integrations">["scope"] {
-  return provider === "googleDrive" ? "tenant" : "user"
+  return integration === "googleDrive" ? "tenant" : "user"
 }

@@ -13,10 +13,10 @@ type ParameterOptions = {
 }
 
 export function integration<const IntegrationKey extends Integration>(
-  provider: IntegrationKey,
+  integration: IntegrationKey,
   events: readonly AutomationEventDefinition[]
 ) {
-  return { provider, events }
+  return { integration, events }
 }
 
 export function event<const Value extends string>(

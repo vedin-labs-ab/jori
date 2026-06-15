@@ -13,7 +13,7 @@ vi.mock("convex/react", () => ({
   useQuery: convexMocks.useQuery,
 }))
 
-const providers = [
+const integrations = [
   "slack",
   "linear",
   "github",
@@ -56,18 +56,18 @@ export function renderEventFields(
 }
 
 export function integrationConnections(
-  connectedIntegration?: (typeof providers)[number]
+  connectedIntegration?: (typeof integrations)[number]
 ) {
   return {
-    integrations: providers.map((provider) => ({
-      provider,
-      connected: provider === connectedIntegration,
+    integrations: integrations.map((integration) => ({
+      integration,
+      connected: integration === connectedIntegration,
     })),
   }
 }
 
 export function mockIntegrationConnections(
-  connectedIntegration?: (typeof providers)[number]
+  connectedIntegration?: (typeof integrations)[number]
 ) {
   convexMocks.useQuery.mockReturnValue(
     integrationConnections(connectedIntegration)
@@ -76,6 +76,9 @@ export function mockIntegrationConnections(
 
 function allIntegrationConnections() {
   return {
-    integrations: providers.map((provider) => ({ provider, connected: true })),
+    integrations: integrations.map((integration) => ({
+      integration,
+      connected: true,
+    })),
   }
 }

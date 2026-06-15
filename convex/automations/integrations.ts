@@ -13,7 +13,7 @@ type QueryLikeCtx = MutationCtx | QueryCtx
 export async function resolveEventIntegration(
   ctx: QueryLikeCtx,
   args: {
-    provider: Integration
+    integration: Integration
     createdBy: string | undefined
     tenantId: string
   }
@@ -24,31 +24,33 @@ export async function resolveEventIntegration(
 async function resolveIntegration(
   ctx: QueryLikeCtx,
   args: {
-    provider: Integration
+    integration: Integration
     createdBy: string | undefined
     tenantId: string
   }
 ): Promise<Doc<"integrations">> {
   const integration =
-    isUserScopedIntegration(args.provider) && args.createdBy !== undefined
+    isUserScopedIntegration(args.integration) && args.createdBy !== undefined
       ? await ctx.db
           .query("integrations")
-          .withIndex("by_tenant_and_provider_and_owner", (query) =>
+          .withIndex("by_tenant_and_integration_and_owner", (query) =>
             query
               .eq("tenantId", args.tenantId)
-              .eq("provider", args.provider)
+              .eq("integration", args.integration)
               .eq("ownerId", args.createdBy)
           )
           .first()
       : await ctx.db
           .query("integrations")
-          .withIndex("by_tenant_and_provider", (query) =>
-            query.eq("tenantId", args.tenantId).eq("provider", args.provider)
+          .withIndex("by_tenant_and_integration", (query) =>
+            query
+              .eq("tenantId", args.tenantId)
+              .eq("integration", args.integration)
           )
           .first()
 
   if (integration === null || integration.status !== "active") {
-    throw new Error(`${integrationLabels[args.provider]} is not connected.`)
+    throw new Error(`${integrationLabels[args.integration]} is not connected.`)
   }
 
   return integration

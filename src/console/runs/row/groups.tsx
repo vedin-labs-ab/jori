@@ -67,7 +67,7 @@ function ToolGroupButton({
       onClick={onClick}
       type="button"
     >
-      <ProviderLogo className="size-3.5" provider={group.type} />
+      <ProviderLogo className="size-3.5" surface={group.type} />
       <span className="shrink-0 font-medium text-foreground">
         {group.label}
       </span>
@@ -139,7 +139,7 @@ function ToolGroupDialog({ group }: { group: ExecutionDetailGroup }) {
   return (
     <DialogContent className="sm:max-w-xl">
       <DialogHeader className="grid grid-cols-[auto_1fr] gap-3 pr-8 text-left">
-        <ProviderLogo className="mt-0.5 size-6" provider={group.type} />
+        <ProviderLogo className="mt-0.5 size-6" surface={group.type} />
         <div className="grid gap-1">
           <DialogTitle>{group.label} tools</DialogTitle>
           <DialogDescription>

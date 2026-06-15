@@ -10,9 +10,9 @@ export function createExecutionToolSnapshot(input: {
 }): ExecutionToolSnapshot {
   return {
     groups: input.capabilities
-      .filter((capability) => capability.provider !== "milo")
+      .filter((capability) => capability.surface !== "milo")
       .map((capability) => ({
-        provider: capability.provider,
+        surface: capability.surface,
         label: capability.label,
         tools: capability.tools,
       })),

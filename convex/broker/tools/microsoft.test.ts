@@ -66,7 +66,7 @@ function microsoftEmailIntegration(): Doc<"integrations"> {
     _id: "microsoft-email-integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "microsoftEmail",
+    integration: "microsoftEmail",
     scope: "user",
     ownerId: "user",
     externalId: "microsoft-account",

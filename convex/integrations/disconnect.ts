@@ -20,7 +20,7 @@ import { revokeIntegrationAccess } from "./revoke"
 
 export const disconnect = action({
   args: {
-    provider: integrationValidator,
+    integration: integrationValidator,
     tenantId: v.string(),
   },
   handler: async (ctx, args): Promise<Id<"integrations"> | null> => {
@@ -61,7 +61,7 @@ export const disconnect = action({
       externalId: requireExternalId(target.integration),
       integrationId: target.integration._id,
       ownerId: target.integration.ownerId,
-      provider: target.integration.provider,
+      integration: target.integration.integration,
       tenantId: target.integration.tenantId,
     })
 
@@ -71,20 +71,20 @@ export const disconnect = action({
 
 export const getDisconnectTarget = internalQuery({
   args: {
-    provider: integrationValidator,
+    integration: integrationValidator,
     tenantId: v.string(),
   },
   handler: async (ctx, args): Promise<DisconnectTarget | null> => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
     const userId = requireClerkUserId(identity)
-    const integration = isUserScopedIntegration(args.provider)
+    const integration = isUserScopedIntegration(args.integration)
       ? await getUserIntegrationForOwner(ctx, {
           ownerId: userId,
-          provider: args.provider,
+          integration: args.integration,
           tenantId: args.tenantId,
         })
       : await getTenantIntegration(ctx, {
-          provider: args.provider,
+          integration: args.integration,
           tenantId: args.tenantId,
         })
 
@@ -148,7 +148,7 @@ export const finishDisconnect = internalMutation({
     externalId: v.string(),
     integrationId: v.id("integrations"),
     ownerId: v.optional(v.string()),
-    provider: integrationValidator,
+    integration: integrationValidator,
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
@@ -169,7 +169,7 @@ async function getIntegrationsToDelete(
     externalId: string
     integrationId: Id<"integrations">
     ownerId?: string | undefined
-    provider: Integration
+    integration: Integration
     tenantId: string
   }
 ) {
@@ -179,7 +179,7 @@ async function getIntegrationsToDelete(
     return []
   }
 
-  if (!isGoogleIntegration(args.provider)) {
+  if (!isGoogleIntegration(args.integration)) {
     return integration.status === "paused" &&
       isSameSnapshot(integration.credentials, args.credentials)
       ? [integration]
@@ -201,7 +201,7 @@ async function getIntegrationsToDelete(
 
   return [...integrations, ...pausedIntegrations].filter(
     (candidate) =>
-      isGoogleIntegration(candidate.provider) &&
+      isGoogleIntegration(candidate.integration) &&
       candidate.externalId === args.externalId &&
       candidate.ownerId === args.ownerId
   )
@@ -212,7 +212,9 @@ function requireExternalId(integration: Doc<"integrations">) {
     return integration.externalId
   }
 
-  throw new Error(`${integration.provider} integration is missing external ID`)
+  throw new Error(
+    `${integration.integration} integration is missing external ID`
+  )
 }
 
 function isSameSnapshot(left: unknown, right: unknown) {

@@ -118,13 +118,13 @@ describe("automation event catalog dependencies", () => {
 })
 
 function requireEvent(
-  provider: Parameters<typeof getAutomationEventDefinition>[0],
+  integration: Parameters<typeof getAutomationEventDefinition>[0],
   event: string
 ) {
-  const definition = getAutomationEventDefinition(provider, event)
+  const definition = getAutomationEventDefinition(integration, event)
 
   if (definition === undefined) {
-    throw new Error(`Missing test event ${provider}.${event}`)
+    throw new Error(`Missing test event ${integration}.${event}`)
   }
 
   return definition

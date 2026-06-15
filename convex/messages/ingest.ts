@@ -51,7 +51,7 @@ export const recordSlackMessage = internalMutation({
   args: observedMessageArgs,
   handler: async (ctx, args) => {
     const integration = await findActiveIntegration(ctx, {
-      provider: "slack",
+      integration: "slack",
       accountId: args.accountId,
     })
 
@@ -85,7 +85,7 @@ export const recordLinearMessage = internalMutation({
   args: observedMessageArgs,
   handler: async (ctx, args) => {
     const integration = await findActiveIntegration(ctx, {
-      provider: "linear",
+      integration: "linear",
       accountId: args.accountId,
     })
 
@@ -114,7 +114,7 @@ export const recordGitHubMessage = internalMutation({
   args: observedMessageArgs,
   handler: async (ctx, args) => {
     const integration = await findActiveIntegration(ctx, {
-      provider: "github",
+      integration: "github",
       accountId: args.accountId,
     })
 
@@ -193,12 +193,12 @@ async function recordProviderMessage(
 
 async function findActiveIntegration(
   ctx: MutationCtx,
-  args: { provider: Integration; accountId: string }
+  args: { integration: Integration; accountId: string }
 ) {
   const integration = await ctx.db
     .query("integrations")
-    .withIndex("by_provider_and_external", (query) =>
-      query.eq("provider", args.provider).eq("externalId", args.accountId)
+    .withIndex("by_integration_and_external", (query) =>
+      query.eq("integration", args.integration).eq("externalId", args.accountId)
     )
     .first()
 
@@ -219,7 +219,7 @@ async function insertMessage(
   const messageId = await ctx.db.insert("messages", {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
-    provider: input.integration.provider,
+    integration: input.integration.integration,
     type: input.message.type,
     externalId: input.message.externalId,
     actor: input.message.actor,
@@ -227,7 +227,7 @@ async function insertMessage(
     text: input.message.text,
     data: input.message.data,
     metadata: createSourceMetadata({
-      provider: input.integration.provider,
+      integration: input.integration.integration,
       event: input.message.type,
       data: input.message.data,
     }),

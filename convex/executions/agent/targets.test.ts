@@ -10,7 +10,7 @@ describe("runtime targets", () => {
         comment: { id: "comment", kind: "issue_comment" },
       })
     ).toEqual({
-      provider: "github",
+      integration: "github",
       owner: "acme",
       repo: "app",
       repositoryId: 123,
@@ -28,7 +28,7 @@ describe("runtime targets", () => {
         commentId: "comment-id",
       })
     ).toEqual({
-      provider: "linear",
+      integration: "linear",
       issueId: "issue-id",
       commentId: "comment-id",
     })
@@ -36,7 +36,7 @@ describe("runtime targets", () => {
 
   test("extracts Slack channel targets", () => {
     expect(requireMessageTarget("slack", { channelId: "C123" })).toEqual({
-      provider: "slack",
+      integration: "slack",
       channelId: "C123",
     })
   })

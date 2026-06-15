@@ -12,7 +12,7 @@ export const getSlackStatus = query({
   },
   handler: async (ctx, args) => {
     const integration = await getTenantIntegration(ctx, {
-      provider: "slack",
+      integration: "slack",
       tenantId: args.tenantId,
     })
 
@@ -35,7 +35,7 @@ export const getLinearStatus = query({
   },
   handler: async (ctx, args) => {
     const integration = await getTenantIntegration(ctx, {
-      provider: "linear",
+      integration: "linear",
       tenantId: args.tenantId,
     })
 
@@ -59,7 +59,7 @@ export const getMicrosoftEmailStatus = query({
   },
   handler: async (ctx, args) => {
     return await getMicrosoftUserStatus(ctx, {
-      provider: "microsoftEmail",
+      integration: "microsoftEmail",
       tenantId: args.tenantId,
     })
   },
@@ -71,7 +71,7 @@ export const getMicrosoftCalendarStatus = query({
   },
   handler: async (ctx, args) => {
     return await getMicrosoftUserStatus(ctx, {
-      provider: "microsoftCalendar",
+      integration: "microsoftCalendar",
       tenantId: args.tenantId,
     })
   },
@@ -83,7 +83,7 @@ export const getGitHubStatus = query({
   },
   handler: async (ctx, args) => {
     const integration = await getTenantIntegration(ctx, {
-      provider: "github",
+      integration: "github",
       tenantId: args.tenantId,
     })
 
@@ -108,7 +108,7 @@ export const getNotionStatus = query({
   },
   handler: async (ctx, args) => {
     const integration = await getTenantIntegration(ctx, {
-      provider: "notion",
+      integration: "notion",
       tenantId: args.tenantId,
     })
 
@@ -133,7 +133,7 @@ export const getGmailStatus = query({
   },
   handler: async (ctx, args) => {
     return await getGoogleUserStatus(ctx, {
-      provider: "gmail",
+      integration: "gmail",
       tenantId: args.tenantId,
     })
   },
@@ -145,7 +145,7 @@ export const getGoogleCalendarStatus = query({
   },
   handler: async (ctx, args) => {
     return await getGoogleUserStatus(ctx, {
-      provider: "googleCalendar",
+      integration: "googleCalendar",
       tenantId: args.tenantId,
     })
   },
@@ -157,7 +157,7 @@ export const getGoogleDriveStatus = query({
   },
   handler: async (ctx, args) => {
     const integration = await getTenantIntegration(ctx, {
-      provider: "googleDrive",
+      integration: "googleDrive",
       tenantId: args.tenantId,
     })
 
@@ -180,7 +180,7 @@ export const getGoogleDriveStatus = query({
 async function getGoogleUserStatus(
   ctx: QueryCtx,
   args: {
-    provider: GoogleIntegration
+    integration: GoogleIntegration
     tenantId: string
   }
 ) {
@@ -204,7 +204,7 @@ async function getGoogleUserStatus(
 async function getMicrosoftUserStatus(
   ctx: QueryCtx,
   args: {
-    provider: MicrosoftIntegration
+    integration: MicrosoftIntegration
     tenantId: string
   }
 ) {

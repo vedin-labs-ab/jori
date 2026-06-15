@@ -1,7 +1,7 @@
 import { type ToolSurface } from "../../integrations/catalog"
 
 export type PromptedToolApproval = {
-  provider: ToolSurface
+  surface: ToolSurface
   tool: string
   args: Record<string, unknown>
   summary: string
@@ -13,7 +13,7 @@ export type PromptedToolApproval = {
 }
 
 export function parsePromptedToolApproval(args: {
-  provider: ToolSurface
+  surface: ToolSurface
   tool: string
   args: Record<string, unknown>
 }): PromptedToolApproval {
@@ -28,7 +28,7 @@ export function parsePromptedToolApproval(args: {
   const { approval: _approval, ...toolArgs } = args.args
 
   return {
-    provider: args.provider,
+    surface: args.surface,
     tool: args.tool,
     args: toolArgs,
     summary: approval.summary,

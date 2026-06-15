@@ -7,7 +7,7 @@ import { sourceMetadataValidator } from "../shared/sources/schema"
 export const messages = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
-  provider: integrationValidator,
+  integration: integrationValidator,
   type: v.string(),
   externalId: v.string(),
   actor: v.optional(actorValidator),

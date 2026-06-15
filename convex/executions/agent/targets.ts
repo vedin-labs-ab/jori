@@ -3,18 +3,18 @@ import {
   readDataObject,
   readDataString,
 } from "../../shared/data"
-import { type MessageProvider } from "./codex"
+import { type MessageIntegration } from "./codex"
 import { type RuntimeTarget } from "./tools"
 
 export function requireMessageTarget(
-  provider: MessageProvider,
+  integration: MessageIntegration,
   data: unknown
 ): RuntimeTarget {
-  if (provider === "github") {
+  if (integration === "github") {
     return requireGitHubTarget(data)
   }
 
-  if (provider === "linear") {
+  if (integration === "linear") {
     return requireLinearTarget(data)
   }
 
@@ -43,7 +43,7 @@ function requireGitHubTarget(data: unknown): RuntimeTarget {
   }
 
   return {
-    provider: "github",
+    integration: "github",
     owner,
     repo,
     repositoryId: readDataNumber(repository, "id"),
@@ -62,7 +62,7 @@ function requireLinearTarget(data: unknown): RuntimeTarget {
   }
 
   return {
-    provider: "linear",
+    integration: "linear",
     issueId,
     commentId: readDataString(data, "commentId"),
   }
@@ -76,7 +76,7 @@ function requireSlackTarget(data: unknown): RuntimeTarget {
   }
 
   return {
-    provider: "slack",
+    integration: "slack",
     channelId,
   }
 }

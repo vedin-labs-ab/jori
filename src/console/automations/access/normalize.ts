@@ -133,9 +133,9 @@ function matchFuzzyMention(
     return null
   }
 
-  const provider = findFuzzyAutomationSurfaceIntegration(token.value)
+  const integration = findFuzzyAutomationSurfaceIntegration(token.value)
 
-  return provider === null ? null : { end: token.end, provider, start }
+  return integration === null ? null : { end: token.end, integration, start }
 }
 
 function matchFuzzyBare(
@@ -149,11 +149,11 @@ function matchFuzzyBare(
     return null
   }
 
-  const provider = findFuzzyAutomationSurfaceIntegration(token.value, {
+  const integration = findFuzzyAutomationSurfaceIntegration(token.value, {
     allowPrefix: false,
   })
 
-  return provider === null ? null : { end: token.end, provider, start }
+  return integration === null ? null : { end: token.end, integration, start }
 }
 
 function readMentionToken(text: string, start: number) {
@@ -198,7 +198,7 @@ function canNormalizeEnd(
 function toMentionReplacement(match: MentionMatch): MentionReplacement {
   return {
     ...match,
-    text: getAutomationSurfaceLabel(match.provider),
+    text: getAutomationSurfaceLabel(match.integration),
   }
 }
 

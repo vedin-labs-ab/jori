@@ -19,13 +19,13 @@ import { EventParameterControl } from "./parameter"
 
 export function EventScopeFields({
   tenantId,
-  provider,
+  integration,
   event,
   onValuesChange,
   values,
 }: {
   tenantId: string
-  provider: AutomationEventIntegration
+  integration: AutomationEventIntegration
   event: AutomationEventDefinition
   onValuesChange: (values: Record<string, string>) => void
   values: Record<string, string>
@@ -66,7 +66,7 @@ export function EventScopeFields({
         <ScopeField
           key={parameter.key}
           tenantId={tenantId}
-          provider={provider}
+          integration={integration}
           parameter={parameter}
           parameters={parameters}
           removable={addedKeys.includes(parameter.key)}
@@ -141,7 +141,7 @@ function AddConditionMenu({
 
 function ScopeField({
   tenantId,
-  provider,
+  integration,
   parameter,
   parameters,
   removable,
@@ -150,7 +150,7 @@ function ScopeField({
   onRemove,
 }: {
   tenantId: string
-  provider: AutomationEventIntegration
+  integration: AutomationEventIntegration
   parameter: AutomationEventParameter
   parameters: readonly AutomationEventParameter[]
   removable: boolean
@@ -165,7 +165,7 @@ function ScopeField({
   const control = (
     <EventParameterControl
       tenantId={tenantId}
-      provider={provider}
+      integration={integration}
       parameter={parameter}
       parameters={parameters}
       values={values}

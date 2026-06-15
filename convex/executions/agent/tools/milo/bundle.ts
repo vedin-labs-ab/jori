@@ -1,5 +1,5 @@
 import { codexHome, workspace } from "../../sandbox/harness"
-import { getProviderToolDefinitions } from "../definitions"
+import { getSurfaceToolDefinitions } from "../definitions"
 import {
   enabledToolsEnv,
   getPromptedTools,
@@ -33,7 +33,7 @@ export function createMiloToolBundle(
       {
         path: "/home/user/milo-workspace/milo-mcp.mjs",
         content: createMiloMcpScript({
-          tools: getProviderToolDefinitions("milo", args),
+          tools: getSurfaceToolDefinitions("milo", args),
         }),
       },
     ],

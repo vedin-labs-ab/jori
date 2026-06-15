@@ -1,13 +1,13 @@
 import { type Doc } from "../../../_generated/dataModel"
 
-export function promptIntegration(provider: string): Doc<"integrations"> {
+export function promptIntegration(integration: string): Doc<"integrations"> {
   return {
-    _id: `${provider}-integration`,
+    _id: `${integration}-integration`,
     _creationTime: 0,
     tenantId: "tenant",
-    provider,
+    integration,
     scope: "tenant",
-    externalId: `${provider}-account`,
+    externalId: `${integration}-account`,
     credentials: {},
     status: "active",
     createdBy: "user",

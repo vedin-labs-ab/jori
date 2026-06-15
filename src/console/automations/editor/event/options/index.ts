@@ -6,14 +6,14 @@ import {
 export type EventIntegrationConnectionState = {
   integrations: Array<{
     connected: boolean
-    provider: AutomationEventIntegration
+    integration: AutomationEventIntegration
   }>
 }
 
 export type EventIntegrationOption = {
   connected: boolean | undefined
   index: number
-  provider: AutomationEventIntegration
+  integration: AutomationEventIntegration
 }
 
 export function getIntegrationOptions(
@@ -21,16 +21,16 @@ export function getIntegrationOptions(
 ): EventIntegrationOption[] {
   const connectedIntegrations = new Map(
     connections?.integrations.map((option) => [
-      option.provider,
+      option.integration,
       option.connected,
     ])
   )
 
   return automationEventCatalog
     .map((definition, index) => ({
-      connected: connectedIntegrations.get(definition.provider),
+      connected: connectedIntegrations.get(definition.integration),
       index,
-      provider: definition.provider,
+      integration: definition.integration,
     }))
     .sort(
       (left, right) =>

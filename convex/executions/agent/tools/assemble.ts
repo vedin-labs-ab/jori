@@ -4,7 +4,7 @@ import {
   type PermissionMode,
   type ToolSurface,
 } from "../../../permissions/catalog"
-import { createRuntimeToolCapability, getProviderSkillNames } from "./bundles"
+import { createRuntimeToolCapability, getSurfaceSkillNames } from "./bundles"
 import { createMiloToolBundle } from "./milo"
 import { type ToolExecutionType } from "./policy"
 import {
@@ -47,7 +47,7 @@ export function assembleToolsForRun(args: {
         toolModes: args.toolModes,
       })
     )
-    addProviderSkillNames(skillNames, "milo", miloPermissions)
+    addSurfaceSkillNames(skillNames, "milo", miloPermissions)
     capabilities.push(
       createRuntimeToolCapability("milo", miloPermissions, args.toolModes)
     )
@@ -64,9 +64,9 @@ export function assembleToolsForRun(args: {
 
     if (integrationBundle !== null) {
       bundles.push(integrationBundle.bundle)
-      addProviderSkillNames(
+      addSurfaceSkillNames(
         skillNames,
-        integrationBundle.provider,
+        integrationBundle.surface,
         integrationBundle.permissions
       )
       capabilities.push(integrationBundle.capability)
@@ -83,12 +83,12 @@ export function assembleToolsForRun(args: {
   }
 }
 
-function addProviderSkillNames(
+function addSurfaceSkillNames(
   skillNames: Set<string>,
-  provider: ToolSurface,
-  permissions: Parameters<typeof getProviderSkillNames>[1]
+  surface: ToolSurface,
+  permissions: Parameters<typeof getSurfaceSkillNames>[1]
 ) {
-  for (const skillName of getProviderSkillNames(provider, permissions)) {
+  for (const skillName of getSurfaceSkillNames(surface, permissions)) {
     skillNames.add(skillName)
   }
 }

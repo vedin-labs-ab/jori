@@ -174,12 +174,12 @@ export function notionAutomationRuntimeInput() {
 }
 
 export function runtimeInput(
-  provider: "github" | "linear" | "slack",
+  integration: "github" | "linear" | "slack",
   data: unknown
 ) {
   return {
     type: "message",
-    provider,
+    messageIntegration: integration,
     run: {
       _id: "run",
       _creationTime: 0,
@@ -191,13 +191,13 @@ export function runtimeInput(
       },
       createdAt: 0,
     },
-    integration: promptIntegration(provider),
-    integrations: [promptIntegration(provider)],
+    integration: promptIntegration(integration),
+    integrations: [promptIntegration(integration)],
     message: {
       _id: "message",
       _creationTime: 0,
       tenantId: "tenant",
-      integrationId: `${provider}-integration`,
+      integrationId: `${integration}-integration`,
       externalId: "external-message",
       conversationId: "conversation",
       actorId: "actor",
@@ -210,7 +210,7 @@ export function runtimeInput(
 
 export function promptedTool(): ToolPermission {
   return {
-    provider: "notion",
+    surface: "notion",
     tool: "notion_create_page",
     label: "Create Notion page",
     description: "Create a Notion page or database record.",
@@ -230,7 +230,7 @@ export function approvalContinuation(
       next: "Tell the Slack thread the event was created.",
     },
     action: {
-      provider: "googleCalendar",
+      surface: "googleCalendar",
       tool: "google_calendar_create_event",
       summary: "Create a 30 minute design review.",
       args: { title: "Design review" },

@@ -39,7 +39,7 @@ export async function resolveAccessInput(
         integrationId: (
           await resolveEventIntegration(ctx, {
             createdBy: args.createdBy,
-            provider: integration.provider,
+            integration: integration.integration,
             tenantId: args.tenantId,
           })
         )._id,
@@ -54,7 +54,7 @@ export async function requireAutomationAccessPolicy(
   ctx: QueryLikeCtx,
   args: {
     integrations: Array<{
-      provider: Integration
+      integration: Integration
       tools: string[]
     }>
     tenantId: string
@@ -75,10 +75,10 @@ export async function requireAutomationAccessPolicy(
 
       if (
         permission === undefined ||
-        permission.provider !== integration.provider
+        permission.surface !== integration.integration
       ) {
         throw new Error(
-          `Unknown ${integrationLabels[integration.provider]} tool: ${tool}`
+          `Unknown ${integrationLabels[integration.integration]} tool: ${tool}`
         )
       }
 
@@ -139,7 +139,7 @@ export async function projectAccessForConsole(
   access: AutomationAccess
 ) {
   const surfaces: Array<{
-    provider: Integration
+    integration: Integration
     access: Exclude<AccessLevel, "none">
     tools: string[]
   }> = []
@@ -155,7 +155,7 @@ export async function projectAccessForConsole(
 
     if (level !== "none") {
       surfaces.push({
-        provider: integration.provider,
+        integration: integration.integration,
         access: level,
         tools: entry.tools,
       })
@@ -171,7 +171,7 @@ export async function projectAccessForConsole(
 function normalizeAccessIntegrations(
   integrations: AutomationAccessInput["integrations"]
 ) {
-  const toolsByProvider = new Map<Integration, Set<string>>()
+  const toolsByIntegration = new Map<Integration, Set<string>>()
 
   for (const integration of integrations) {
     const tools = uniqueTools(integration.tools)
@@ -182,17 +182,18 @@ function normalizeAccessIntegrations(
       )
     }
 
-    const providerTools = toolsByProvider.get(integration.provider) ?? new Set()
+    const integrationTools =
+      toolsByIntegration.get(integration.integration) ?? new Set()
 
     for (const tool of tools) {
-      providerTools.add(tool)
+      integrationTools.add(tool)
     }
 
-    toolsByProvider.set(integration.provider, providerTools)
+    toolsByIntegration.set(integration.integration, integrationTools)
   }
 
-  return [...toolsByProvider].map(([provider, tools]) => ({
-    provider,
+  return [...toolsByIntegration].map(([integration, tools]) => ({
+    integration,
     tools: [...tools],
   }))
 }
@@ -238,12 +239,12 @@ function permissionModeLabel(mode: PermissionMode) {
 
 function sortSurfaces<
   Surface extends {
-    provider: Integration
+    integration: Integration
   },
 >(surfaces: Surface[]) {
   return [...surfaces].sort((left, right) =>
-    integrationLabels[left.provider].localeCompare(
-      integrationLabels[right.provider]
+    integrationLabels[left.integration].localeCompare(
+      integrationLabels[right.integration]
     )
   )
 }

@@ -31,9 +31,9 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_and_external", (query) =>
+      .withIndex("by_integration_and_external", (query) =>
         query
-          .eq("provider", "notion")
+          .eq("integration", "notion")
           .eq("externalId", args.profile.workspaceId)
       )
       .first()
@@ -68,7 +68,7 @@ export const recordOAuthInstallation = internalMutation({
 
     return await ctx.db.insert("integrations", {
       tenantId: args.tenantId,
-      provider: "notion",
+      integration: "notion",
       scope: "tenant",
       externalId: args.profile.workspaceId,
       name: args.profile.workspaceName,
@@ -92,7 +92,7 @@ export const updateOAuthCredentials = internalMutation({
   handler: async (ctx, args) => {
     const integration = await ctx.db.get(args.integrationId)
 
-    if (integration === null || integration.provider !== "notion") {
+    if (integration === null || integration.integration !== "notion") {
       throw new Error("Notion integration not found")
     }
 

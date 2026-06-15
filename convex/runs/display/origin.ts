@@ -14,22 +14,22 @@ import { commentLabel, compactDetails, detail, snippet } from "./detail"
 export function originDetails(input: {
   data: unknown
   integration: Doc<"integrations"> | null
-  provider: string | undefined
+  integrationKey: string | undefined
   text: string | undefined
 }) {
-  if (input.provider === "slack") {
+  if (input.integrationKey === "slack") {
     return slackDetails(input)
   }
 
-  if (input.provider === "github") {
+  if (input.integrationKey === "github") {
     return githubDetails(input)
   }
 
-  if (input.provider === "linear") {
+  if (input.integrationKey === "linear") {
     return linearDetails(input)
   }
 
-  if (input.provider === "notion") {
+  if (input.integrationKey === "notion") {
     return notionDetails(input)
   }
 
@@ -49,7 +49,7 @@ function slackDetails({
   const channelId =
     readDataString(data, "channelId") ?? readDataString(channel, "id")
   const teamId =
-    integration?.provider === "slack" ? integration.externalId : null
+    integration?.integration === "slack" ? integration.externalId : null
   const messageTs = readDataString(data, "ts")
 
   return compactDetails([

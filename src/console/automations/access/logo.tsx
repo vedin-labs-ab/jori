@@ -3,16 +3,16 @@ import { type AutomationSurfaceIntegration, getAutomationSurfaceLogo } from "."
 
 export function SurfaceLogo({
   className,
-  provider,
+  integration,
 }: {
   className?: string
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
 }) {
   return (
     <img
       alt=""
       className={cn("size-3.5 shrink-0", className)}
-      src={getAutomationSurfaceLogo(provider)}
+      src={getAutomationSurfaceLogo(integration)}
     />
   )
 }

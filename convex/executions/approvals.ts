@@ -102,7 +102,7 @@ async function runApprovalContinuation(
       decision: args.decision,
       handoff: args.approval.handoff,
       action: {
-        provider: args.approval.provider,
+        surface: args.approval.surface,
         tool: args.approval.tool,
         summary: args.approval.summary,
         args: args.approval.args,
@@ -182,7 +182,7 @@ async function executeApprovedTool(
   try {
     const permission = await authorizeApprovedTool(ctx, input, approval)
 
-    if (approval.provider === "milo") {
+    if (approval.surface === "milo") {
       return await callMiloTool(
         ctx,
         {
@@ -197,11 +197,11 @@ async function executeApprovedTool(
     }
 
     const integration = input.integrations.find(
-      (candidate) => candidate.provider === approval.provider
+      (candidate) => candidate.integration === approval.surface
     )
 
     if (integration === undefined) {
-      throw new Error(`No active ${approval.provider} integration is available`)
+      throw new Error(`No active ${approval.surface} integration is available`)
     }
 
     return await callApprovedProviderTool(ctx, approval, {

@@ -28,7 +28,7 @@ function toolsDetail(groups: NonNullable<ToolSnapshot>["groups"]) {
       group.tools.length === 0
         ? undefined
         : ({
-            type: group.provider,
+            type: group.surface,
             label: group.label,
             tools: group.tools,
           } satisfies ExecutionDetailGroup)

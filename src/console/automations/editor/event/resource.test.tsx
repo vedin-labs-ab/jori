@@ -156,7 +156,7 @@ function renderEventOptionField(
   return (
     <EventOptionField
       tenantId="tenant"
-      provider="slack"
+      integration="slack"
       parameter={channelParameter}
       criteria={{}}
       disabled={false}

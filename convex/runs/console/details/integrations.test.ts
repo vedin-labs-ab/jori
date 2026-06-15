@@ -75,7 +75,7 @@ function eventRun(input: {
 
 function githubDisplay() {
   return eventAutomationDisplay({
-    provider: { type: "github", label: "GitHub" },
+    surface: { type: "github", label: "GitHub" },
     event: {
       type: "pull_request.review_comment.created",
       label: "New pull request review comment",
@@ -102,7 +102,7 @@ function githubDisplay() {
 
 function linearDisplay() {
   return eventAutomationDisplay({
-    provider: { type: "linear", label: "Linear" },
+    surface: { type: "linear", label: "Linear" },
     event: { type: "issue.comment.created", label: "New issue comment" },
     details: [
       {
@@ -124,7 +124,7 @@ function githubPullRequestCommentEvent() {
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: "integration",
-    provider: "github",
+    integration: "github",
     key: "github:event",
     type: "pull_request.review_comment.created",
     text: "Can you check this pull request?",
@@ -156,7 +156,7 @@ function linearIssueCommentEvent() {
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: "integration",
-    provider: "linear",
+    integration: "linear",
     key: "linear:event",
     type: "issue.comment.created",
     text: "Please take a look.",
@@ -179,7 +179,7 @@ function githubIntegration() {
     _id: "integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "github",
+    integration: "github",
     scope: "tenant",
     externalId: "github-installation",
     credentials: {},

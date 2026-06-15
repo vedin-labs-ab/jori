@@ -14,7 +14,7 @@ export type ExecutionSource = {
   event?: SourceDatum
   kind?: SourceDatum
   metadata: SourceMetadataItem[]
-  provider?: SourceDatum
+  surface?: SourceDatum
   stop?: {
     actor: SourceDatum
   }
@@ -43,8 +43,8 @@ export function sourceSearchText(source: ExecutionSource) {
     source.kind?.label,
     source.event?.type,
     source.event?.label,
-    source.provider?.type,
-    source.provider?.label,
+    source.surface?.type,
+    source.surface?.label,
     source.stop?.actor.label,
     ...source.metadata.flatMap((item) => [item.type, item.label]),
   ]

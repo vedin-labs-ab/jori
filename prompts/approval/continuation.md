@@ -15,7 +15,7 @@ Current UTC time: {{time.utc}}.
 {{handoff.progress}}
 
 ## Requested Action
-{{action.provider}}.{{action.tool}}: {{action.summary}}
+{{action.surface}}.{{action.tool}}: {{action.summary}}
 
 ```json
 {{action.args}}

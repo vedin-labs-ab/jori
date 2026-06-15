@@ -35,9 +35,9 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_and_external", (query) =>
+      .withIndex("by_integration_and_external", (query) =>
         query
-          .eq("provider", "linear")
+          .eq("integration", "linear")
           .eq("externalId", args.profile.organization.id)
       )
       .first()
@@ -74,7 +74,7 @@ export const recordOAuthInstallation = internalMutation({
 
     return await ctx.db.insert("integrations", {
       tenantId: args.tenantId,
-      provider: "linear",
+      integration: "linear",
       scope: "tenant",
       externalId: args.profile.organization.id,
       name: args.profile.organization.name,
@@ -104,7 +104,7 @@ export const updateOAuthCredentials = internalMutation({
   handler: async (ctx, args) => {
     const integration = await ctx.db.get(args.integrationId)
 
-    if (integration === null || integration.provider !== "linear") {
+    if (integration === null || integration.integration !== "linear") {
       throw new Error("Linear integration not found")
     }
 

@@ -2,16 +2,16 @@ import { type ToolSurface } from "../../../permissions/catalog"
 import { type McpToolDefinition } from "./definitions"
 
 export function createBrokerMcpScript(args: {
-  provider: ToolSurface
+  surface: ToolSurface
   tools: McpToolDefinition[]
 }) {
   return brokerMcpScript({
-    provider: args.provider,
+    surface: args.surface,
     toolsJson: JSON.stringify(args.tools),
   })
 }
 
-function brokerMcpScript(args: { provider: ToolSurface; toolsJson: string }) {
+function brokerMcpScript(args: { surface: ToolSurface; toolsJson: string }) {
   return `
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
@@ -28,7 +28,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 const run = promisify(execFile);
-const provider = ${JSON.stringify(args.provider)};
+const surface = ${JSON.stringify(args.surface)};
 const convexSiteUrl = requiredEnv("MILO_CONVEX_SITE_URL");
 const executionToken = requiredEnv("MILO_EXECUTION_TOKEN");
 const workspace = "/home/user/milo-workspace";
@@ -36,7 +36,7 @@ const allTools = ${args.toolsJson};
 const tools = filterEnabledTools(allTools);
 
 const server = new Server(
-  { name: "milo-" + provider, version: "0.0.0" },
+  { name: "milo-" + surface, version: "0.0.0" },
   { capabilities: { tools: {} } },
 );
 
@@ -46,7 +46,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const toolName = request.params.name;
 
   if (!tools.some((tool) => tool.name === toolName)) {
-    throw new McpError(ErrorCode.InvalidParams, "Unknown " + provider + " tool: " + toolName);
+    throw new McpError(ErrorCode.InvalidParams, "Unknown " + surface + " tool: " + toolName);
   }
 
   const args = request.params.arguments ?? {};
@@ -69,7 +69,7 @@ async function callMilo(tool, args) {
       authorization: "Bearer " + executionToken,
       "content-type": "application/json",
     },
-    body: JSON.stringify({ provider, tool, args }),
+    body: JSON.stringify({ surface, tool, args }),
   });
   const result = await response.json().catch(() => null);
 

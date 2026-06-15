@@ -23,7 +23,7 @@ test("includes recurring automation details", async () => {
 
   expect(summary.source).toEqual({
     type: "automation",
-    provider: { type: "milo", label: "Milo" },
+    surface: { type: "milo", label: "Milo" },
     kind: { type: "recurring", label: "recurring" },
     metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
   })
@@ -123,7 +123,7 @@ function slackIntegration() {
     _id: "integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "slack",
+    integration: "slack",
     scope: "tenant",
     externalId: "slack-team",
     credentials: {},
@@ -152,7 +152,7 @@ function slackToolSnapshot() {
   return {
     groups: [
       {
-        provider: "slack",
+        surface: "slack",
         label: "Slack",
         tools: slackTools(),
       },

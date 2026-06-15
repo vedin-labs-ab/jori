@@ -18,7 +18,7 @@ export type AutomationEventOption = Extract<
 type SearchAction = ReactAction<typeof api.automations.options.search>
 
 export function searchEventOptions({
-  provider,
+  integration,
   query,
   parameter,
   criteria,
@@ -28,7 +28,7 @@ export function searchEventOptions({
   setOptions,
   tenantId,
 }: {
-  provider: AutomationEventIntegration
+  integration: AutomationEventIntegration
   query: string
   parameter: Extract<AutomationEventParameter, { type: "option" }>
   criteria: Record<string, string>
@@ -45,7 +45,7 @@ export function searchEventOptions({
 
     search({
       tenantId,
-      provider,
+      integration,
       source: parameter.source,
       query,
       criteria,

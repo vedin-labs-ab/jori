@@ -12,15 +12,15 @@ export type McpToolDefinition = {
   inputSchema: Record<string, unknown>
 }
 
-export function getProviderToolDefinitions(
-  provider: ToolSurface,
+export function getSurfaceToolDefinitions(
+  surface: ToolSurface,
   input: Pick<ToolPermissionInput, "toolModes"> & {
     executionType?: ToolExecutionType
   }
 ) {
   const executionType = input.executionType ?? "message"
 
-  return getToolPermissionsBySurface(provider).map((permission) => ({
+  return getToolPermissionsBySurface(surface).map((permission) => ({
     name: permission.tool,
     description: permission.description,
     inputSchema:

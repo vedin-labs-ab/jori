@@ -148,19 +148,21 @@ function runtimeSkill(
 }
 
 function integration(
-  provider: string,
+  integration: string,
   status: Doc<"integrations">["status"] = "active"
 ): Doc<"integrations"> {
   return {
-    _id: `${provider}-integration`,
+    _id: `${integration}-integration`,
     _creationTime: 0,
     tenantId: "tenant",
-    provider,
-    scope: isUserScopedIntegration(provider) ? "user" : "tenant",
-    ownerId: isUserScopedIntegration(provider) ? "user" : undefined,
-    externalId: `${provider}-account`,
-    email: isUserScopedIntegration(provider) ? "user@example.com" : undefined,
-    credentials: credentials(provider),
+    integration,
+    scope: isUserScopedIntegration(integration) ? "user" : "tenant",
+    ownerId: isUserScopedIntegration(integration) ? "user" : undefined,
+    externalId: `${integration}-account`,
+    email: isUserScopedIntegration(integration)
+      ? "user@example.com"
+      : undefined,
+    credentials: credentials(integration),
     status,
     createdBy: "user",
     createdAt: 0,
@@ -168,17 +170,17 @@ function integration(
   } as Doc<"integrations">
 }
 
-function isUserScopedIntegration(provider: string) {
+function isUserScopedIntegration(integration: string) {
   return (
-    provider === "gmail" ||
-    provider === "googleCalendar" ||
-    provider === "microsoftEmail" ||
-    provider === "microsoftCalendar"
+    integration === "gmail" ||
+    integration === "googleCalendar" ||
+    integration === "microsoftEmail" ||
+    integration === "microsoftCalendar"
   )
 }
 
-function credentials(provider: string) {
-  if (provider === "github") {
+function credentials(integration: string) {
+  if (integration === "github") {
     return {
       installationId: "123",
       tokens: { access: "github-token" },
@@ -186,14 +188,14 @@ function credentials(provider: string) {
     }
   }
 
-  if (provider === "slack") {
+  if (integration === "slack") {
     return {
       bot: "bot-token",
       user: "user-token",
     }
   }
 
-  if (provider === "microsoftEmail" || provider === "microsoftCalendar") {
+  if (integration === "microsoftEmail" || integration === "microsoftCalendar") {
     return {
       tokens: {
         access: "access-token",
@@ -216,16 +218,7 @@ function credentials(provider: string) {
 function runtimeInput() {
   return {
     type: "message",
-    provider: "slack",
-    trigger: {
-      _id: "trigger",
-      _creationTime: 0,
-      tenantId: "tenant",
-      type: "message",
-      provider: "slack",
-      status: "active",
-      createdAt: 0,
-    },
+    messageIntegration: "slack",
     integration: integration("slack"),
     integrations: [integration("slack")],
     message: {

@@ -33,7 +33,7 @@ test("includes approved decision actor details", async () => {
       _creationTime: 0,
       tenantId: "tenant",
       executionId: "execution",
-      provider: "slack",
+      surface: "slack",
       tool: "chat_postMessage",
       args: {},
       summary: "Send a message.",
@@ -113,7 +113,7 @@ function eventRun(title: string, task: string) {
     title,
     task,
     display: eventAutomationDisplay({
-      provider: { type: "github", label: "GitHub" },
+      surface: { type: "github", label: "GitHub" },
       event: { type: "issue.comment.created", label: "New issue comment" },
       details: [
         {
@@ -143,7 +143,7 @@ function githubIssueCommentEvent() {
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: "integration",
-    provider: "github",
+    integration: "github",
     key: "github:event",
     type: "issue.comment.created",
     text: "Can you investigate this failing callback?",
@@ -173,7 +173,7 @@ function githubIntegration() {
     _id: "integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "github",
+    integration: "github",
     scope: "tenant",
     externalId: "github-installation",
     credentials: {},

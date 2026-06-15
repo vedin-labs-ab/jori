@@ -1,12 +1,12 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type McpServerConfig } from "./tools"
 
-export type MessageProvider = "github" | "linear" | "slack"
+export type MessageIntegration = "github" | "linear" | "slack"
 export type RuntimeIntegration = Doc<"integrations">
 
 export type MessageRuntimeInput = {
   type: "message"
-  provider: MessageProvider
+  messageIntegration: MessageIntegration
   run: Doc<"runs">
   integration: RuntimeIntegration
   integrations: RuntimeIntegration[]

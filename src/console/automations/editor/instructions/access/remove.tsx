@@ -4,11 +4,11 @@ import { SurfaceLogo } from "../../../access/logo"
 
 export function AutomationSurfaceRemoveButton({
   onRemove,
-  provider,
+  integration,
   toolSurfaceLabel,
 }: {
   onRemove: () => void
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
   toolSurfaceLabel: string
 }) {
   return (
@@ -33,7 +33,7 @@ export function AutomationSurfaceRemoveButton({
       >
         <SurfaceLogo
           className="size-3 group-hover/remove:hidden group-focus-within/remove:hidden"
-          provider={provider}
+          integration={integration}
         />
         <X className="hidden size-3 opacity-55 transition-opacity duration-150 ease-out group-hover/remove:block group-focus-within/remove:block group-hover/x:opacity-100 group-focus-visible/x:opacity-100" />
       </button>

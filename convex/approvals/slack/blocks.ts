@@ -22,7 +22,7 @@ export type SlackApprovalInteraction = {
 
 export function createSlackApprovalRequest(args: {
   code: string
-  provider: ToolSurface
+  surface: ToolSurface
   tool: string
   summary: string
   expiresAt: number
@@ -80,7 +80,7 @@ export function createSlackExpirationResponse(args: {
 
 function createSlackApprovalBlocks(args: {
   code: string
-  provider: ToolSurface
+  surface: ToolSurface
   tool: string
   summary: string
   expiresAt: number

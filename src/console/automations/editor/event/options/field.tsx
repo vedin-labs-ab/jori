@@ -17,7 +17,7 @@ export function EventIntegrationField({
   tenantId,
   value,
 }: {
-  onValueChange: (provider: AutomationEventIntegration) => void
+  onValueChange: (integration: AutomationEventIntegration) => void
   tenantId: string
   value: AutomationEventIntegration
 }) {
@@ -28,22 +28,22 @@ export function EventIntegrationField({
 
   return (
     <Select
-      onValueChange={(provider) =>
-        onValueChange(provider as AutomationEventIntegration)
+      onValueChange={(integration) =>
+        onValueChange(integration as AutomationEventIntegration)
       }
       value={value}
     >
-      <SelectTrigger id="automation-event-provider" className="w-full">
+      <SelectTrigger id="automation-event-integration" className="w-full">
         <SelectValue>
-          <IntegrationSelectValue provider={value} />
+          <IntegrationSelectValue integration={value} />
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="z-[70]">
         {options.map((option) => (
           <SelectItem
             disabled={option.connected === false}
-            key={option.provider}
-            value={option.provider}
+            key={option.integration}
+            value={option.integration}
           >
             <IntegrationSelectItem option={option} />
           </SelectItem>
@@ -54,14 +54,14 @@ export function EventIntegrationField({
 }
 
 function IntegrationSelectValue({
-  provider,
+  integration,
 }: {
-  provider: AutomationEventIntegration
+  integration: AutomationEventIntegration
 }) {
   return (
     <span className="pointer-events-none flex min-w-0 items-center gap-1.5">
-      <SurfaceLogo provider={provider} />
-      <span className="truncate">{getAutomationSurfaceLabel(provider)}</span>
+      <SurfaceLogo integration={integration} />
+      <span className="truncate">{getAutomationSurfaceLabel(integration)}</span>
     </span>
   )
 }
@@ -70,9 +70,9 @@ function IntegrationSelectItem({ option }: { option: EventIntegrationOption }) {
   return (
     <span className="pointer-events-none flex min-w-0 flex-1 items-center justify-between gap-3 pr-5">
       <span className="flex min-w-0 items-center gap-2">
-        <SurfaceLogo provider={option.provider} />
+        <SurfaceLogo integration={option.integration} />
         <span className="truncate">
-          {getAutomationSurfaceLabel(option.provider)}
+          {getAutomationSurfaceLabel(option.integration)}
         </span>
       </span>
       {option.connected === false ? (

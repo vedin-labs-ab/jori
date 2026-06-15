@@ -20,7 +20,7 @@ test("stores automation display data directly", () => {
     display: {
       source: {
         type: "automation",
-        provider: { type: "milo", label: "Milo" },
+        surface: { type: "milo", label: "Milo" },
         kind: { type: "one-shot", label: "one-shot" },
         metadata: [],
       },
@@ -47,7 +47,7 @@ test("snapshots message source details and source link", () => {
       source: {
         type: "message",
         kind: { type: "mention", label: "mention" },
-        provider: { type: "slack", label: "Slack" },
+        surface: { type: "slack", label: "Slack" },
         metadata: [{ type: "channel", label: "#product" }],
       },
       trigger: "Slack message",
@@ -102,7 +102,7 @@ function integration(): Parameters<
     _id: id<"integrations">("integration"),
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "slack",
+    integration: "slack",
     scope: "tenant",
     externalId: "team",
     credentials: {},
@@ -122,7 +122,7 @@ function message(
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
-    provider: "slack",
+    integration: "slack",
     type: "message.channels",
     externalId: "slack:message",
     text,

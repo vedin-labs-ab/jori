@@ -38,8 +38,8 @@ export function messageDisplay(input: {
   const details = sourceDetails({
     data: input.message.data,
     integration: input.integration,
+    integrationKey: input.message.integration,
     metadata: input.message.metadata,
-    provider: input.message.provider,
     text: input.message.text,
   })
   const taskSource = taskSourceFrom(details)
@@ -48,13 +48,13 @@ export function messageDisplay(input: {
     source: {
       type: "message",
       kind: { type: input.kind, label: input.kind },
-      provider: {
-        type: input.message.provider,
-        label: toolSurfaceLabel(input.message.provider),
+      surface: {
+        type: input.message.integration,
+        label: toolSurfaceLabel(input.message.integration),
       },
       metadata: input.message.metadata,
     },
-    trigger: `${toolSurfaceLabel(input.message.provider)} message`,
+    trigger: `${toolSurfaceLabel(input.message.integration)} message`,
     details: details.filter((item) => !isPayloadDetail(item)),
     ...(taskSource === undefined ? {} : { taskSource }),
   }
@@ -65,31 +65,36 @@ function eventAutomationDisplay(input: {
   integration: Doc<"integrations"> | null
 }): RunDisplay {
   const event = input.event
-  const provider = event?.provider
+  const integration = event?.integration
 
   return {
     source: {
       type: "automation",
       metadata: event?.metadata ?? [],
-      ...(provider === undefined
+      ...(integration === undefined
         ? {}
-        : { provider: { type: provider, label: toolSurfaceLabel(provider) } }),
+        : {
+            surface: {
+              type: integration,
+              label: toolSurfaceLabel(integration),
+            },
+          }),
       ...(event === null
         ? {}
         : { event: { type: event.type, label: eventLabel(event) } }),
     },
     trigger:
-      provider === undefined
+      integration === undefined
         ? "Event automation"
-        : `${toolSurfaceLabel(provider)} event`,
+        : `${toolSurfaceLabel(integration)} event`,
     details:
       event === null
         ? []
         : sourceDetails({
             data: event.data,
             integration: input.integration,
+            integrationKey: integration,
             metadata: event.metadata,
-            provider,
             text: event.text,
           }),
   }
@@ -102,7 +107,7 @@ function timeAutomationDisplay(automation: Doc<"automations">): RunDisplay {
   return {
     source: {
       type: "automation",
-      provider: { type: "milo", label: "Milo" },
+      surface: { type: "milo", label: "Milo" },
       kind: {
         type: isRecurring ? "recurring" : "one-shot",
         label: isRecurring ? "recurring" : "one-shot",
@@ -124,8 +129,8 @@ function timeAutomationDisplay(automation: Doc<"automations">): RunDisplay {
 function sourceDetails(input: {
   data: unknown
   integration: Doc<"integrations"> | null
+  integrationKey: string | undefined
   metadata: SourceMetadataItem[]
-  provider: string | undefined
   text: string | undefined
 }) {
   return uniqueDetails([
@@ -158,7 +163,7 @@ function metadataDetails(metadata: SourceMetadataItem[]) {
 
 function eventLabel(event: Doc<"events">) {
   return (
-    getAutomationEventDefinition(event.provider, event.type)?.label ??
+    getAutomationEventDefinition(event.integration, event.type)?.label ??
     event.type
   )
 }

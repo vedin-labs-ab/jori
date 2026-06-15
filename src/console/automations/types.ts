@@ -39,7 +39,7 @@ export type AutomationFormValues = {
   monthDay: string
   cron: string
   runAt: string
-  eventProvider: AutomationEventIntegration
+  eventIntegration: AutomationEventIntegration
   event: string
   eventCriteria: Record<string, string>
   webSearch: boolean
@@ -58,7 +58,7 @@ export const emptyAutomationForm: AutomationFormValues = {
   monthDay: "1",
   cron: "",
   runAt: "",
-  eventProvider: "slack",
+  eventIntegration: "slack",
   event: defaultEvent.value,
   eventCriteria: {},
   webSearch: true,

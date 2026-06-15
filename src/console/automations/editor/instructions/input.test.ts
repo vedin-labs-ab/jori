@@ -8,7 +8,7 @@ import { insertSurfaceSuggestion } from "./suggestion/input"
 import { type InstructionSuggestionState } from "./suggestion/suggest"
 
 describe("automation instructions input", () => {
-  test("inserts duplicate suggestions with existing provider tools", () => {
+  test("inserts duplicate suggestions with existing integration tools", () => {
     let insertedContent: unknown
     const chain: EditorChain = {
       focus: () => chain,
@@ -24,7 +24,7 @@ describe("automation instructions input", () => {
         createAutomationInstructionDocument({
           description: "Read GitHub.",
           surfaces: [
-            { provider: "github", tools: ["github_add_issue_comment"] },
+            { integration: "github", tools: ["github_add_issue_comment"] },
           ],
         }),
       state: {
@@ -39,20 +39,20 @@ describe("automation instructions input", () => {
     insertSurfaceSuggestion({
       editor,
       permissions: [],
-      provider: "github",
+      integration: "github",
       setSuggestion,
       state: {
         activeIndex: 0,
         range: { from: 0, to: 0 },
         style: {},
-        suggestions: [{ label: "GitHub", provider: "github" }],
+        suggestions: [{ label: "GitHub", integration: "github" }],
       } satisfies InstructionSuggestionState,
     })
 
     expect(insertedContent).toEqual([
       {
         attrs: {
-          provider: "github",
+          integration: "github",
           tools: ["github_add_issue_comment"],
         },
         type: automationSurfaceNodeName,

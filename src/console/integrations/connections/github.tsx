@@ -21,7 +21,7 @@ const githubConfig = {
     alt: "GitHub logo",
     src: "https://svgl.app/library/github_light.svg",
   },
-  provider: "github",
+  integration: "github",
 } satisfies IntegrationConnectionConfig
 
 export function GitHubConnection({

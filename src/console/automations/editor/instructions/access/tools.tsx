@@ -20,7 +20,7 @@ type AutomationSurfaceToolsDialogProps = {
   onToolsChange: (tools: string[]) => void
   open: boolean
   permissions: AutomationPolicyPermissions
-  provider: AutomationSurfaceFormValue["provider"]
+  integration: AutomationSurfaceFormValue["integration"]
   toolSurfaceLabel: string
   tools: string[]
 }
@@ -30,7 +30,7 @@ export function AutomationSurfaceToolsDialog({
   onToolsChange,
   open,
   permissions,
-  provider,
+  integration,
   toolSurfaceLabel,
   tools,
 }: AutomationSurfaceToolsDialogProps) {
@@ -38,7 +38,7 @@ export function AutomationSurfaceToolsDialog({
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader className="grid grid-cols-[auto_1fr] gap-3 pr-8 text-left">
-          <SurfaceLogo className="mt-0.5 size-6" provider={provider} />
+          <SurfaceLogo className="mt-0.5 size-6" integration={integration} />
           <div className="grid gap-1">
             <DialogTitle>{toolSurfaceLabel} tools</DialogTitle>
             <DialogDescription>
@@ -49,7 +49,7 @@ export function AutomationSurfaceToolsDialog({
         <AutomationSurfaceToolsContent
           onToolsChange={onToolsChange}
           permissions={permissions}
-          provider={provider}
+          integration={integration}
           tools={tools}
         />
       </DialogContent>
@@ -60,14 +60,14 @@ export function AutomationSurfaceToolsDialog({
 type AutomationSurfaceToolsContentProps = {
   onToolsChange: (tools: string[]) => void
   permissions: AutomationPolicyPermissions
-  provider: AutomationSurfaceFormValue["provider"]
+  integration: AutomationSurfaceFormValue["integration"]
   tools: string[]
 }
 
 function AutomationSurfaceToolsContent({
   onToolsChange,
   permissions,
-  provider,
+  integration,
   tools,
 }: AutomationSurfaceToolsContentProps) {
   if (permissions === undefined) {
@@ -87,7 +87,7 @@ function AutomationSurfaceToolsContent({
   }
 
   const providerPermissions = permissions.filter(
-    (permission) => permission.provider === provider
+    (permission) => permission.surface === integration
   )
 
   if (providerPermissions.length === 0) {

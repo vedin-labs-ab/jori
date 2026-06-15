@@ -101,7 +101,7 @@ function triggerLabel(automation: Automation) {
 
 function surfaceSummary(automation: Automation) {
   return automation.access.surfaces
-    .map((surface) => getAutomationSurfaceLabel(surface.provider))
+    .map((surface) => getAutomationSurfaceLabel(surface.integration))
     .join(", ")
 }
 
@@ -129,16 +129,16 @@ function AutomationTrigger({ automation }: { automation: Automation }) {
 
   if (trigger.type === "event") {
     const eventLabel =
-      trigger.provider === undefined
+      trigger.integration === undefined
         ? trigger.event
-        : (getAutomationEventDefinition(trigger.provider, trigger.event)
+        : (getAutomationEventDefinition(trigger.integration, trigger.event)
             ?.label ?? trigger.event)
 
     return (
       <span>
-        {trigger.provider === undefined
-          ? "Provider event"
-          : getAutomationSurfaceLabel(trigger.provider)}{" "}
+        {trigger.integration === undefined
+          ? "Integration event"
+          : getAutomationSurfaceLabel(trigger.integration)}{" "}
         {eventLabel}
         {eventCriteriaSummary(trigger) === undefined ? null : (
           <>

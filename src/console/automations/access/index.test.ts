@@ -20,7 +20,7 @@ describe("automation integration marker parsing", () => {
     ).toEqual(["github", "googleDrive", "microsoftEmail"])
   })
 
-  test("recognizes bare provider names as markers", () => {
+  test("recognizes bare integration names as markers", () => {
     expect(
       findAutomationSurfaceMentions(
         "Review github, write a doc in google drive, then email via outlook."
@@ -109,13 +109,13 @@ describe("automation integration marker autocomplete", () => {
     })
   })
 
-  test("suggests providers from prefixes and aliases", () => {
+  test("suggests integrations from prefixes and aliases", () => {
     expect(
-      getAutomationSurfaceSuggestions("li").map((item) => item.provider)
+      getAutomationSurfaceSuggestions("li").map((item) => item.integration)
     ).toEqual(["linear"])
 
     expect(
-      getAutomationSurfaceSuggestions("go").map((item) => item.provider)
+      getAutomationSurfaceSuggestions("go").map((item) => item.integration)
     ).toEqual(
       expect.arrayContaining(["gmail", "googleCalendar", "googleDrive"])
     )
@@ -148,9 +148,9 @@ describe("automation integration marker autocomplete", () => {
   test("splits recognized markers for highlighted rendering", () => {
     expect(getAutomationSurfaceMentionParts("Use github and @Slack.")).toEqual([
       { text: "Use " },
-      { provider: "github", text: "github" },
+      { integration: "github", text: "github" },
       { text: " and " },
-      { provider: "slack", text: "@Slack" },
+      { integration: "slack", text: "@Slack" },
       { text: "." },
     ])
   })
@@ -167,18 +167,18 @@ describe("automation integration tool sync", () => {
   test("preserves selected tools for existing markers", () => {
     expect(
       syncAutomationSurfaces("@GitHub to @Slack", [
-        { provider: "slack", tools: ["conversations_add_message"] },
+        { integration: "slack", tools: ["conversations_add_message"] },
       ])
     ).toEqual([
-      { provider: "github", tools: [] },
-      { provider: "slack", tools: ["conversations_add_message"] },
+      { integration: "github", tools: [] },
+      { integration: "slack", tools: ["conversations_add_message"] },
     ])
   })
 
   test("adds new markers with selectable tools", () => {
     expect(syncAutomationSurfaces("GitHub", [], permissions)).toEqual([
       {
-        provider: "github",
+        integration: "github",
         tools: ["github_get_issue", "github_add_issue_comment"],
       },
     ])
@@ -186,13 +186,13 @@ describe("automation integration tool sync", () => {
 
   test("adds new markers without selected tools while permissions load", () => {
     expect(syncAutomationSurfaces("GitHub", [])).toEqual([
-      { provider: "github", tools: [] },
+      { integration: "github", tools: [] },
     ])
   })
 })
 
 function toolPermission(
-  provider: ToolPermission["provider"],
+  surface: ToolPermission["surface"],
   tool: string,
   access: ToolPermission["access"],
   mode: ToolPermission["mode"]
@@ -203,7 +203,7 @@ function toolPermission(
     label: tool,
     mode,
     overrideMode: null,
-    provider,
+    surface,
     tool,
   }
 }

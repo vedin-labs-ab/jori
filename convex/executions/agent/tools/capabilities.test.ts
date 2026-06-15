@@ -13,7 +13,7 @@ test("marks prompted runtime capabilities as approval-required", () => {
     ]),
   })
   const notion = toolBundle.capabilities.find(
-    (capability) => capability.provider === "notion"
+    (capability) => capability.surface === "notion"
   )
 
   expect(

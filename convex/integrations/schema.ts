@@ -7,7 +7,7 @@ const integrationStatus = v.union(v.literal("active"), v.literal("paused"))
 
 export const integrations = defineTable({
   tenantId: v.string(),
-  provider: integrationValidator,
+  integration: integrationValidator,
   scope: integrationScope,
   ownerId: v.optional(v.string()),
   externalId: v.string(),
@@ -23,15 +23,15 @@ export const integrations = defineTable({
   data: v.optional(v.any()),
 })
   .index("by_tenant_and_status", ["tenantId", "status"])
-  .index("by_tenant_and_provider", ["tenantId", "provider"])
-  .index("by_tenant_and_provider_and_owner", [
+  .index("by_tenant_and_integration", ["tenantId", "integration"])
+  .index("by_tenant_and_integration_and_owner", [
     "tenantId",
-    "provider",
+    "integration",
     "ownerId",
   ])
-  .index("by_provider_and_external", ["provider", "externalId"])
-  .index("by_tenant_and_provider_and_external", [
+  .index("by_integration_and_external", ["integration", "externalId"])
+  .index("by_tenant_and_integration_and_external", [
     "tenantId",
-    "provider",
+    "integration",
     "externalId",
   ])

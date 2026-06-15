@@ -21,7 +21,7 @@ const notionConfig = {
     alt: "Notion logo",
     src: "https://svgl.app/library/notion.svg",
   },
-  provider: "notion",
+  integration: "notion",
 } satisfies IntegrationConnectionConfig
 
 export function NotionConnection({

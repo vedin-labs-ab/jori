@@ -10,20 +10,20 @@ import { type AutomationPolicyPermissions } from "../../../access/policy"
 import { getDefaultAutomationSurfaceTools } from "../../../access/tools"
 import {
   automationSurfaceNodeName,
-  readAutomationSurfaceToolsForProvider,
+  readAutomationSurfaceToolsForIntegration,
 } from "../document"
 import { type InstructionSuggestionState } from "./suggest"
 
 export function insertSurfaceSuggestion({
   editor,
   permissions,
-  provider,
+  integration,
   setSuggestion,
   state,
 }: {
   editor: Editor | null
   permissions: AutomationPolicyPermissions
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState | null
 }) {
@@ -37,10 +37,10 @@ export function insertSurfaceSuggestion({
     .insertContentAt(
       state.range,
       getSurfaceInsertionContent(
-        provider,
+        integration,
         shouldInsertTrailingSpace(editor, state.range.to),
         permissions,
-        readAutomationSurfaceToolsForProvider(editor.getJSON(), provider)
+        readAutomationSurfaceToolsForIntegration(editor.getJSON(), integration)
       )
     )
     .run()
@@ -88,11 +88,11 @@ export function replaceCompletedSurfaceMention({
     from,
     surfaceNode.create(
       createSurfaceNodeAttrs(
-        match.provider,
+        match.integration,
         permissions,
-        readAutomationSurfaceToolsForProvider(
+        readAutomationSurfaceToolsForIntegration(
           view.state.doc.toJSON(),
-          match.provider
+          match.integration
         )
       )
     )
@@ -105,14 +105,14 @@ export function replaceCompletedSurfaceMention({
 }
 
 function getSurfaceInsertionContent(
-  provider: AutomationSurfaceIntegration,
+  integration: AutomationSurfaceIntegration,
   includeTrailingSpace: boolean,
   permissions: AutomationPolicyPermissions,
   existingTools: string[] | undefined
 ) {
   const content: JSONContent[] = [
     {
-      attrs: createSurfaceNodeAttrs(provider, permissions, existingTools),
+      attrs: createSurfaceNodeAttrs(integration, permissions, existingTools),
       type: automationSurfaceNodeName,
     },
   ]
@@ -125,14 +125,15 @@ function getSurfaceInsertionContent(
 }
 
 function createSurfaceNodeAttrs(
-  provider: AutomationSurfaceIntegration,
+  integration: AutomationSurfaceIntegration,
   permissions: AutomationPolicyPermissions,
   existingTools: string[] | undefined
 ) {
   return {
-    provider,
+    integration,
     tools:
-      existingTools ?? getDefaultAutomationSurfaceTools(provider, permissions),
+      existingTools ??
+      getDefaultAutomationSurfaceTools(integration, permissions),
   }
 }
 

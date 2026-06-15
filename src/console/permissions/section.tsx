@@ -22,19 +22,19 @@ import { PermissionRow } from "./row"
 export function PermissionSection({
   controller,
   emptyLabel,
-  provider,
+  surface,
   title,
 }: {
   controller: ToolPermissionController
   emptyLabel: string
-  provider: ToolSurface
+  surface: ToolSurface
   title: string
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const permissions =
     controller.permissions === undefined || controller.permissions === null
       ? []
-      : controller.getSurfacePermissions(provider)
+      : controller.getSurfacePermissions(surface)
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -66,7 +66,7 @@ export function PermissionSection({
         <PermissionContent
           controller={controller}
           emptyLabel={emptyLabel}
-          provider={provider}
+          surface={surface}
         />
       </CollapsibleContent>
     </Collapsible>
@@ -76,11 +76,11 @@ export function PermissionSection({
 function PermissionContent({
   controller,
   emptyLabel,
-  provider,
+  surface,
 }: {
   controller: ToolPermissionController
   emptyLabel: string
-  provider: ToolSurface
+  surface: ToolSurface
 }) {
   if (controller.permissions === undefined) {
     return <LoadingMessage label="Loading permissions" />
@@ -97,7 +97,7 @@ function PermissionContent({
     )
   }
 
-  const permissions = controller.getSurfacePermissions(provider)
+  const permissions = controller.getSurfacePermissions(surface)
 
   if (permissions.length === 0) {
     return <p className="text-xs text-muted-foreground">{emptyLabel}</p>
@@ -105,7 +105,7 @@ function PermissionContent({
 
   return (
     <div className="grid gap-6">
-      <ProviderPermissionError
+      <SurfacePermissionError
         error={controller.error}
         permissions={permissions}
       />
@@ -210,7 +210,7 @@ function PermissionGroup({
   )
 }
 
-function ProviderPermissionError({
+function SurfacePermissionError({
   error,
   permissions,
 }: {

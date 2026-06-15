@@ -26,7 +26,7 @@ type AutomationArgs = {
   instructions: string
   access: {
     integrations: Array<{
-      provider: AutomationFormValues["surfaces"][number]["provider"]
+      integration: AutomationFormValues["surfaces"][number]["integration"]
       tools: string[]
     }>
     web: boolean
@@ -159,7 +159,7 @@ function buildBaseArgs(
       instructions,
       access: {
         integrations: surfaces.map((surface) => ({
-          provider: surface.provider,
+          integration: surface.integration,
           tools: surface.tools,
         })),
         web: values.webSearch,

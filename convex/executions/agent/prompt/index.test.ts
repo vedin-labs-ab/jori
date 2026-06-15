@@ -110,11 +110,11 @@ describe("automation trigger prompts", () => {
     expect(prompt).toContain("- Web search: Disabled")
   })
 
-  test("renders provider target context for Linear events", () => {
+  test("renders integration target context for Linear events", () => {
     const prompt = assemblePrompt(linearAutomationRuntimeInput())
 
     expect(prompt).toContain("- Type: issue.comment.edited")
-    expect(prompt).toContain("- Provider: Linear")
+    expect(prompt).toContain("- Integration: Linear")
     expect(prompt).toContain("- Issue ID: issue-id")
     expect(prompt).toContain("- Issue key: VED-1")
     expect(prompt).toContain("- Issue title: Get familiar with Linear")
@@ -130,11 +130,11 @@ describe("automation trigger prompts", () => {
     )
   })
 
-  test("renders provider target context for Notion events", () => {
+  test("renders integration target context for Notion events", () => {
     const prompt = assemblePrompt(notionAutomationRuntimeInput())
 
     expect(prompt).toContain("- Type: comment.created")
-    expect(prompt).toContain("- Provider: Notion")
+    expect(prompt).toContain("- Integration: Notion")
     expect(prompt).toContain("- Page ID: page-id")
     expect(prompt).toContain("- Comment ID: comment-id")
     expect(prompt).toContain("- Entity ID: comment-id")

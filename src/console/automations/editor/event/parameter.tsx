@@ -7,7 +7,7 @@ import { EventOptionField } from "./resource"
 
 export function EventParameterControl({
   tenantId,
-  provider,
+  integration,
   parameter,
   parameters,
   values,
@@ -16,7 +16,7 @@ export function EventParameterControl({
   onValueChange,
 }: {
   tenantId: string
-  provider: AutomationEventIntegration
+  integration: AutomationEventIntegration
   parameter: AutomationEventParameter
   parameters: readonly AutomationEventParameter[]
   values: Record<string, string>
@@ -30,7 +30,7 @@ export function EventParameterControl({
     return (
       <EventOptionField
         tenantId={tenantId}
-        provider={provider}
+        integration={integration}
         parameter={parameter}
         criteria={values}
         disabled={dependencyLabel !== undefined}

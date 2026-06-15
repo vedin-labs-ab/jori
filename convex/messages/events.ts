@@ -55,18 +55,18 @@ export async function recordAutomationEvent(
 }
 
 export function readAutomationEventsForMessage(input: {
-  integration: Pick<Doc<"integrations">, "provider">
+  integration: Pick<Doc<"integrations">, "integration">
   message: AutomationEventMessage
 }): AutomationEventRecord[] {
-  if (input.integration.provider === "slack") {
+  if (input.integration.integration === "slack") {
     return readSlackAutomationEvents(input.message)
   }
 
-  if (input.integration.provider === "github") {
+  if (input.integration.integration === "github") {
     return readGitHubAutomationEvents(input.message)
   }
 
-  if (input.integration.provider === "linear") {
+  if (input.integration.integration === "linear") {
     return readLinearAutomationEvents(input.message)
   }
 

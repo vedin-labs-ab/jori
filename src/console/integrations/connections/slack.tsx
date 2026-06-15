@@ -21,7 +21,7 @@ const slackConfig = {
     alt: "Slack logo",
     src: "https://svgl.app/library/slack.svg",
   },
-  provider: "slack",
+  integration: "slack",
 } satisfies IntegrationConnectionConfig
 
 export function SlackConnection({

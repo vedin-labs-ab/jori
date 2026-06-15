@@ -17,7 +17,7 @@ test("shows stored tools for event automation runs", async () => {
         title: "Deep analysis",
         task: "Perform the deep analysis.",
         display: eventAutomationDisplay({
-          provider: { type: "slack", label: "Slack" },
+          surface: { type: "slack", label: "Slack" },
           event: { type: "message.created", label: "New channel message" },
           metadata: [{ type: "channel", label: "C123" }],
         }),
@@ -45,7 +45,7 @@ test("shows stored blocked web search for event automation runs", async () => {
         title: "Deep analysis",
         task: "Perform the deep analysis.",
         display: eventAutomationDisplay({
-          provider: { type: "slack", label: "Slack" },
+          surface: { type: "slack", label: "Slack" },
           event: { type: "message.created", label: "New channel message" },
           metadata: [{ type: "channel", label: "C123" }],
         }),
@@ -118,7 +118,7 @@ function slackIntegration() {
     _id: "integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "slack",
+    integration: "slack",
     scope: "tenant",
     externalId: "slack-team",
     credentials: {},
@@ -135,7 +135,7 @@ function event() {
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: "integration",
-    provider: "slack",
+    integration: "slack",
     key: "slack:event",
     type: "message.created",
     data: { channelId: "C123", ts: "1700000000.000000" },
@@ -150,7 +150,7 @@ function message(kind: "mention" | "reply") {
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: "integration",
-    provider: "slack",
+    integration: "slack",
     type: "message.channels",
     externalId: `slack:${kind}`,
     text: "Please summarize this thread.",
@@ -180,7 +180,7 @@ function slackToolSnapshot(
   return {
     groups: [
       {
-        provider: "slack",
+        surface: "slack",
         label: "Slack",
         tools: slackTools(approvalAccess),
       },

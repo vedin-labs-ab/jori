@@ -11,7 +11,7 @@ import { type MicrosoftIntegration } from "./config"
 import { getMicrosoftIdentityEmail, upsertMicrosoftIdentity } from "./identity"
 import { createSignedMicrosoftState } from "./signing"
 
-const microsoftProvider = v.union(
+const microsoftIntegration = v.union(
   v.literal("microsoftCalendar"),
   v.literal("microsoftEmail")
 )
@@ -38,7 +38,7 @@ export const createMicrosoftCalendarInstallState = mutation({
 
 export const recordOAuthInstallation = internalMutation({
   args: {
-    provider: microsoftProvider,
+    integration: microsoftIntegration,
     tenantId: v.string(),
     createdBy: v.string(),
     microsoftTenantId: v.string(),
@@ -63,10 +63,10 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_tenant_and_provider_and_owner", (query) =>
+      .withIndex("by_tenant_and_integration_and_owner", (query) =>
         query
           .eq("tenantId", args.tenantId)
-          .eq("provider", args.provider)
+          .eq("integration", args.integration)
           .eq("ownerId", args.createdBy)
       )
       .first()
@@ -95,7 +95,7 @@ export const recordOAuthInstallation = internalMutation({
       existing,
       now,
       tenantId: args.tenantId,
-      provider: args.provider,
+      integration: args.integration,
       ownerId: args.createdBy,
       externalId: args.profile.user.id,
       name: args.profile.user.displayName,
@@ -122,7 +122,7 @@ async function upsertMicrosoftIntegration(
     existing: Doc<"integrations"> | null
     now: number
     tenantId: string
-    provider: MicrosoftIntegration
+    integration: MicrosoftIntegration
     ownerId: string
     externalId: string
     name: string | undefined
@@ -143,7 +143,7 @@ async function upsertMicrosoftIntegration(
 ): Promise<Id<"integrations">> {
   const values = {
     tenantId: args.tenantId,
-    provider: args.provider,
+    integration: args.integration,
     scope: "user" as const,
     ownerId: args.ownerId,
     externalId: args.externalId,
@@ -181,8 +181,8 @@ export const updateOAuthCredentials = internalMutation({
 
     if (
       integration === null ||
-      (integration.provider !== "microsoftCalendar" &&
-        integration.provider !== "microsoftEmail")
+      (integration.integration !== "microsoftCalendar" &&
+        integration.integration !== "microsoftEmail")
     ) {
       throw new Error("Microsoft integration not found")
     }
@@ -220,14 +220,14 @@ export const updateOAuthCredentials = internalMutation({
 
 async function createInstallState(
   ctx: MutationCtx,
-  provider: MicrosoftIntegration,
+  integration: MicrosoftIntegration,
   args: {
     tenantId: string
     returnUrl: string
   }
 ) {
   return await createSignedMicrosoftState({
-    provider,
+    integration,
     ...(await buildInstallState(ctx, args)),
   })
 }

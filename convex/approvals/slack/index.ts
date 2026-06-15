@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { updateSlackMessage } from "../../broker/tools/slack"
-import { createProviderActor } from "../../shared/actor"
+import { createIntegrationActor } from "../../shared/actor"
 import { decideSlackApproval } from "../runtime"
 import {
   createSlackDecisionResponse,
@@ -37,8 +37,8 @@ export async function handleSlackApprovalDecision(
     internal.approvals.runtime.handleSlackDecision,
     {
       accountId: input.accountId,
-      actor: createProviderActor({
-        provider: "slack",
+      actor: createIntegrationActor({
+        integration: "slack",
         externalId: input.actorId,
         email: input.actorEmail,
       }),
@@ -65,8 +65,8 @@ export async function handleSlackApprovalInteraction(
 
   const result = await decideSlackApproval(ctx, {
     accountId: interaction.accountId,
-    actor: createProviderActor({
-      provider: "slack",
+    actor: createIntegrationActor({
+      integration: "slack",
       externalId: interaction.actorId,
     }),
     channelId: interaction.channelId,

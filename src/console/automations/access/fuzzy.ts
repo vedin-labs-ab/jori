@@ -53,18 +53,18 @@ export function findFuzzyAutomationSurfaceIntegration(
     return null
   }
 
-  return best.provider
+  return best.integration
 }
 
 export function getIntegrationSuggestionScore(
   normalizedQuery: string,
-  provider: AutomationSurfaceIntegrationMeta
+  integration: AutomationSurfaceIntegrationMeta
 ) {
   if (normalizedQuery === "") {
     return 1
   }
 
-  const aliasScores = readIntegrationAliases(provider).map((alias) => {
+  const aliasScores = readIntegrationAliases(integration).map((alias) => {
     if (alias.startsWith(normalizedQuery)) {
       return 2 - normalizedQuery.length / alias.length
     }
@@ -90,7 +90,7 @@ function findUniqueIntegrationMatch(
     return null
   }
 
-  return matches[0].provider
+  return matches[0].integration
 }
 
 function readIntegrationMatchScores(
@@ -100,7 +100,7 @@ function readIntegrationMatchScores(
 ) {
   return automationSurfaceIntegrations
     .map((item) => ({
-      provider: item.provider,
+      integration: item.integration,
       score: Math.max(
         ...readIntegrationAliases(item).map((alias) => scoreAlias(alias))
       ),
@@ -109,8 +109,8 @@ function readIntegrationMatchScores(
     .sort((left, right) => right.score - left.score)
 }
 
-function readIntegrationAliases(provider: AutomationSurfaceIntegrationMeta) {
-  return [provider.label, ...provider.aliases].map(normalizeFuzzyAlias)
+function readIntegrationAliases(integration: AutomationSurfaceIntegrationMeta) {
+  return [integration.label, ...integration.aliases].map(normalizeFuzzyAlias)
 }
 
 function getFuzzySimilarity(left: string, right: string) {

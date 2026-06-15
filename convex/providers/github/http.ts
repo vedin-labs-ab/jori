@@ -1,6 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { createProviderActor } from "../../shared/actor"
+import { createIntegrationActor } from "../../shared/actor"
 import {
   ingestProviderMessage,
   readCallbackState,
@@ -102,8 +102,8 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
       accountId: message.accountId,
       type: message.type,
       externalId: message.externalId,
-      actor: createProviderActor({
-        provider: "github",
+      actor: createIntegrationActor({
+        integration: "github",
         externalId: message.actorId,
       }),
       conversationId: message.conversationId,

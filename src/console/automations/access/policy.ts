@@ -50,7 +50,7 @@ export function validateAutomationPolicy({
     return undefined
   }
 
-  return `${getAutomationSurfaceLabel(blockedSurface.provider)} has tools that are not available for automations.`
+  return `${getAutomationSurfaceLabel(blockedSurface.integration)} has tools that are not available for automations.`
 }
 
 export function isAutomationSurfacePolicyBlocked({
@@ -73,7 +73,7 @@ export function isAutomationSurfacePolicyBlocked({
 
     return (
       permission === undefined ||
-      permission.provider !== surface.provider ||
+      permission.surface !== surface.integration ||
       !isAutomationToolSelectable(permission)
     )
   })

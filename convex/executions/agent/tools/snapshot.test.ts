@@ -2,13 +2,13 @@ import { expect, test } from "vitest"
 import { createExecutionToolSnapshot } from "./snapshot"
 import { type RuntimeToolCapabilityTool } from "./types"
 
-test("stores connected-provider tool capabilities for execution details", () => {
+test("stores connected surface tool capabilities for execution details", () => {
   expect(
     createExecutionToolSnapshot({
       webSearch: true,
       capabilities: [
         {
-          provider: "milo",
+          surface: "milo",
           label: "Milo",
           tools: [
             {
@@ -20,7 +20,7 @@ test("stores connected-provider tool capabilities for execution details", () => 
           ],
         },
         {
-          provider: "slack",
+          surface: "slack",
           label: "Slack",
           tools: slackTools(),
         },
@@ -29,7 +29,7 @@ test("stores connected-provider tool capabilities for execution details", () => 
   ).toEqual({
     groups: [
       {
-        provider: "slack",
+        surface: "slack",
         label: "Slack",
         tools: slackTools(),
       },

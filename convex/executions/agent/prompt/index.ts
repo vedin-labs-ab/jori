@@ -15,7 +15,7 @@ import {
   readDataObject,
   readDataString,
 } from "../../../shared/data"
-import { type CodexRuntimeInput, type MessageProvider } from "../codex"
+import { type CodexRuntimeInput, type MessageIntegration } from "../codex"
 import {
   type ApprovalContinuation,
   createApprovalContinuationPrompt,
@@ -64,8 +64,8 @@ function createMessageValues(
 ) {
   return {
     message: {
-      provider: getProviderLabel(input.provider),
-      target: getMessageTarget(input.provider, input.message.data),
+      integration: getIntegrationLabel(input.messageIntegration),
+      target: getMessageTarget(input.messageIntegration, input.message.data),
       text: input.message.text ?? "",
     },
     time: { utc: createPromptTime() },
@@ -90,7 +90,7 @@ function createAutomationValues(
       trigger: formatAutomationTrigger(input),
     },
     event: {
-      details: formatEvent(input.event, input.integration?.provider),
+      details: formatEvent(input.event, input.integration?.integration),
     },
     time: { utc: createPromptTime() },
   }
@@ -107,7 +107,7 @@ function formatAutomationAccess(
     targetLine("Web search", access.web ? "Allowed" : "Disabled"),
     ...integrations.map((integration) =>
       targetLine(
-        integrationLabels[integration.provider],
+        integrationLabels[integration.integration],
         formatSelectedTools(getIntegrationTools(access, integration._id))
       )
     ),
@@ -132,7 +132,7 @@ function formatAutomationTrigger(
   }
 
   if (reason.type === "event") {
-    return "Provider event"
+    return "Integration event"
   }
 
   if (reason.type === "manual") {
@@ -144,7 +144,7 @@ function formatAutomationTrigger(
 
 function formatEvent(
   event: Extract<CodexRuntimeInput, { type: "automation" }>["event"],
-  provider: string | undefined
+  integration: string | undefined
 ) {
   if (event === null) {
     return "- None"
@@ -152,53 +152,58 @@ function formatEvent(
 
   return formatTargetLines([
     targetLine("Type", event.type),
-    targetLine("Provider", formatProviderLabel(provider)),
+    targetLine("Integration", formatIntegrationLabel(integration)),
     targetLine("Resource", event.resource),
-    ...getProviderTargetLines(provider, event.data),
+    ...getIntegrationTargetLines(integration, event.data),
     targetLine("Text", event.text),
   ])
 }
 
-function getProviderLabel(provider: MessageProvider) {
-  return integrationLabels[provider]
+function getIntegrationLabel(integration: MessageIntegration) {
+  return integrationLabels[integration]
 }
 
-function getMessageTarget(provider: MessageProvider, data: unknown) {
-  return formatTargetLines(getProviderTargetLines(provider, data))
+function getMessageTarget(integration: MessageIntegration, data: unknown) {
+  return formatTargetLines(getIntegrationTargetLines(integration, data))
 }
 
-function formatProviderLabel(provider: string | undefined) {
-  if (provider === undefined) {
+function formatIntegrationLabel(integration: string | undefined) {
+  if (integration === undefined) {
     return undefined
   }
 
-  return isKnownProvider(provider) ? integrationLabels[provider] : provider
+  return isKnownIntegration(integration)
+    ? integrationLabels[integration]
+    : integration
 }
 
-function getProviderTargetLines(provider: string | undefined, data: unknown) {
-  if (provider === "github") {
+function getIntegrationTargetLines(
+  integration: string | undefined,
+  data: unknown
+) {
+  if (integration === "github") {
     return getGitHubTargetLines(data)
   }
 
-  if (provider === "linear") {
+  if (integration === "linear") {
     return getLinearTargetLines(data)
   }
 
-  if (provider === "notion") {
+  if (integration === "notion") {
     return getNotionTargetLines(data)
   }
 
-  if (provider === "slack") {
+  if (integration === "slack") {
     return getSlackTargetLines(data)
   }
 
   return []
 }
 
-function isKnownProvider(
-  provider: string
-): provider is keyof typeof integrationLabels {
-  return provider in integrationLabels
+function isKnownIntegration(
+  integration: string
+): integration is keyof typeof integrationLabels {
+  return integration in integrationLabels
 }
 
 function getGitHubTargetLines(data: unknown) {

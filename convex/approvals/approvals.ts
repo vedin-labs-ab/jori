@@ -16,7 +16,7 @@ export const create = internalMutation({
   args: {
     tenantId: v.string(),
     executionId: v.id("executions"),
-    provider: toolSurfaceValidator,
+    surface: toolSurfaceValidator,
     tool: v.string(),
     args: v.any(),
     summary: v.string(),
@@ -90,7 +90,7 @@ export const getExpirationTarget = internalQuery({
       integration === null ||
       integration.status !== "active" ||
       integration.tenantId !== approval.tenantId ||
-      integration.provider !== delivery.provider
+      integration.integration !== delivery.integration
     ) {
       return { approval, integration: null }
     }
@@ -127,8 +127,8 @@ export const getSlackDecisionTarget = internalQuery({
   handler: async (ctx, args) => {
     const integration = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_and_external", (query) =>
-        query.eq("provider", "slack").eq("externalId", args.accountId)
+      .withIndex("by_integration_and_external", (query) =>
+        query.eq("integration", "slack").eq("externalId", args.accountId)
       )
       .first()
 

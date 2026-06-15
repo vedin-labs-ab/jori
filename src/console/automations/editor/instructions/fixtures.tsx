@@ -60,7 +60,7 @@ export function renderInstructionsField({
 }
 
 export function toolPermission(
-  provider: ToolPermission["provider"],
+  surface: ToolPermission["surface"],
   tool: string,
   label: string,
   access: ToolPermission["access"],
@@ -72,7 +72,7 @@ export function toolPermission(
     label,
     mode,
     overrideMode: null,
-    provider,
+    surface,
     tool,
   }
 }

@@ -38,7 +38,7 @@ type IntegrationBundleArgs = {
 }
 
 type IntegrationToolBundle = {
-  provider: ToolSurface
+  surface: ToolSurface
   bundle: ToolBundle
   capability: RuntimeToolCapability
   permissions: ToolPermission[]
@@ -51,9 +51,9 @@ export function createIntegrationToolBundle(
     return null
   }
 
-  const provider = getRuntimeToolSurface(args.integration.provider)
+  const surface = getRuntimeToolSurface(args.integration.integration)
 
-  if (provider === null) {
+  if (surface === null) {
     return null
   }
 
@@ -62,7 +62,7 @@ export function createIntegrationToolBundle(
       ? undefined
       : getIntegrationTools(args.access, args.integration._id)
   const permissions = getEnabledToolPermissions(
-    provider,
+    surface,
     args.toolModes,
     args.executionType,
     integrationAccess
@@ -73,16 +73,16 @@ export function createIntegrationToolBundle(
   }
 
   return {
-    provider,
+    surface,
     bundle: createBrokeredToolBundle({
       broker: args.broker,
       executionType: args.executionType,
-      preflight: createIntegrationPreflight(provider, args.integration),
+      preflight: createIntegrationPreflight(surface, args.integration),
       permissions,
       toolModes: args.toolModes,
     }),
     capability: createRuntimeToolCapability(
-      provider,
+      surface,
       permissions,
       args.toolModes
     ),
@@ -91,7 +91,7 @@ export function createIntegrationToolBundle(
 }
 
 export function getEnabledToolPermissions(
-  provider: ToolSurface,
+  surface: ToolSurface,
   toolModes: ReadonlyMap<string, PermissionMode>,
   executionType: ToolExecutionType = "message",
   selectedTools?: readonly string[]
@@ -99,7 +99,7 @@ export function getEnabledToolPermissions(
   const selectedToolSet =
     selectedTools === undefined ? null : new Set(selectedTools)
 
-  return getToolPermissionsBySurface(provider).filter(
+  return getToolPermissionsBySurface(surface).filter(
     (permission) =>
       (selectedToolSet === null || selectedToolSet.has(permission.tool)) &&
       canUseToolPermission({ executionType, permission, toolModes })
@@ -118,15 +118,15 @@ const runtimeToolSurfaces: readonly RuntimeToolSurface[] = [
   "microsoftCalendar",
 ]
 
-function getRuntimeToolSurface(provider: string): RuntimeToolSurface | null {
-  return runtimeToolSurfaces.find((candidate) => candidate === provider) ?? null
+function getRuntimeToolSurface(surface: string): RuntimeToolSurface | null {
+  return runtimeToolSurfaces.find((candidate) => candidate === surface) ?? null
 }
 
 function createIntegrationPreflight(
-  provider: RuntimeToolSurface,
+  surface: RuntimeToolSurface,
   integration: Doc<"integrations">
 ): ToolPreflight {
-  switch (provider) {
+  switch (surface) {
     case "linear":
       return {
         type: "linear",
@@ -146,7 +146,7 @@ function createIntegrationPreflight(
     case "googleCalendar":
     case "googleDrive":
       return {
-        type: provider,
+        type: surface,
         credentials: requireGoogleCredentials(integration),
       }
     case "notion":
@@ -157,7 +157,7 @@ function createIntegrationPreflight(
     case "microsoftEmail":
     case "microsoftCalendar":
       return {
-        type: provider,
+        type: surface,
         credentials: requireMicrosoftCredentials(integration),
       }
   }

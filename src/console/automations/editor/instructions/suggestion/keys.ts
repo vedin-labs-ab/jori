@@ -73,7 +73,7 @@ function insertActiveSuggestion({
     insertSurfaceSuggestion({
       editor,
       permissions,
-      provider: activeSuggestion.provider,
+      integration: activeSuggestion.integration,
       setSuggestion,
       state,
     })

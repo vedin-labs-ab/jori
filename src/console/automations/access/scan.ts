@@ -5,7 +5,7 @@ import {
 
 export type MentionMatch = {
   end: number
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
   start: number
 }
 
@@ -13,7 +13,7 @@ const mentionAliases = automationSurfaceIntegrations
   .flatMap((item) =>
     [...item.aliases, item.label].map((alias) => ({
       alias: alias.toLowerCase(),
-      provider: item.provider,
+      integration: item.integration,
     }))
   )
   .sort((left, right) => right.alias.length - left.alias.length)
@@ -91,7 +91,7 @@ function matchMention(text: string, start: number): MentionMatch | null {
       return {
         start,
         end: start + 1 + candidate.alias.length,
-        provider: candidate.provider,
+        integration: candidate.integration,
       }
     }
   }
@@ -110,7 +110,7 @@ function matchBareMention(text: string, start: number): MentionMatch | null {
       return {
         start,
         end: start + candidate.alias.length,
-        provider: candidate.provider,
+        integration: candidate.integration,
       }
     }
   }

@@ -14,7 +14,7 @@ export const approvalHandoff = v.object({
 })
 export const approvalDelivery = v.union(
   v.object({
-    provider: v.literal("slack"),
+    integration: v.literal("slack"),
     integrationId: v.id("integrations"),
     data: v.object({
       channelId: v.string(),
@@ -27,7 +27,7 @@ export const approvalDelivery = v.union(
 export const approvals = defineTable({
   tenantId: v.string(),
   executionId: v.id("executions"),
-  provider: toolSurfaceValidator,
+  surface: toolSurfaceValidator,
   tool: v.string(),
   args: v.any(),
   summary: v.string(),

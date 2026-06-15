@@ -37,7 +37,7 @@ test("parses Slack approval button payloads", () => {
 test("renders Slack approval requests as compact cards", () => {
   const request = createSlackApprovalRequest({
     code: "ABC12345",
-    provider: "notion",
+    surface: "notion",
     tool: "notion_create_page",
     summary: "Create a new Notion page under Customer Discovery.",
     expiresAt: 1_710_000_000_000,
@@ -97,11 +97,11 @@ test("replaces Slack approval buttons with a decision summary", () => {
     status: "denied",
     message: "Denied.",
     approval: {
-      provider: "slack",
+      surface: "slack",
       tool: "conversations_add_message",
       summary: "Post a follow-up message in Slack.",
       decidedBy: {
-        provider: "slack",
+        integration: "slack",
         externalId: "U123",
       },
     } as SlackApprovalDecisionResult["approval"],
@@ -124,7 +124,7 @@ test("renders Milo approval decisions with the Clerk approver identity", () => {
     status: "approved",
     message: "Approved. Continuing the run.",
     approval: {
-      provider: "notion",
+      surface: "notion",
       tool: "notion_create_page",
       summary: "Create a new Notion page.",
       decidedBy: {
