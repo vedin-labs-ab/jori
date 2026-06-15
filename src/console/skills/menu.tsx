@@ -41,7 +41,7 @@ export function SkillManagementMenu({
             disabled={isPending}
             size="icon-sm"
             type="button"
-            variant="outline"
+            variant="ghost"
           >
             <MoreHorizontal />
           </Button>
