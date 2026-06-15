@@ -9,7 +9,6 @@ import {
 } from "@clerk/tanstack-react-start"
 import { Link, useRouterState } from "@tanstack/react-router"
 import {
-  BookOpenCheck,
   Cable,
   CalendarClock,
   ChevronsUpDown,
@@ -17,6 +16,7 @@ import {
   Library,
   ListChecks,
   LogOut,
+  NotebookTabs,
   ShieldUser,
 } from "lucide-react"
 import { type ReactNode } from "react"
@@ -62,7 +62,7 @@ import { IntegrationCallbackAlerts } from "./alerts"
 const consoleNavigation = [
   { icon: LayoutDashboard, label: "Overview", to: "/console" },
   { icon: ListChecks, label: "Runs", to: "/executions" },
-  { icon: BookOpenCheck, label: "Playbooks", to: "/playbooks" },
+  { icon: NotebookTabs, label: "Playbooks", to: "/playbooks" },
   { icon: CalendarClock, label: "Automations", to: "/automations" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },

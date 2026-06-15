@@ -1,4 +1,4 @@
-import { BookOpenCheck } from "lucide-react"
+import { NotebookTabs } from "lucide-react"
 import {
   Empty,
   EmptyDescription,
@@ -15,7 +15,7 @@ export function Playbooks() {
         <Empty className="min-h-64">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <BookOpenCheck />
+              <NotebookTabs />
             </EmptyMedia>
             <EmptyTitle>No playbooks yet</EmptyTitle>
             <EmptyDescription>
