@@ -33,7 +33,7 @@ export function SkillCard({
       <div className="grid flex-1 grid-cols-[2.5rem_minmax(0,1fr)] gap-3 p-4">
         <SkillIcon icon={Icon} skill={skill} />
         <div className="grid min-w-0 content-start gap-2">
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+          <div className="grid min-h-6 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
             <h3 className="truncate font-heading text-sm font-medium">
               {skill.name}
             </h3>
@@ -109,7 +109,7 @@ function GlobalSkillToggle({
   skill: Skill
 }) {
   return (
-    <div className="flex shrink-0 items-center gap-2 text-muted-foreground text-xs">
+    <div className="flex h-6 shrink-0 items-center gap-2 text-muted-foreground text-xs">
       <span>{skill.enabled ? "Enabled" : "Disabled"}</span>
       <Switch
         aria-label={`${skill.name} enabled`}
