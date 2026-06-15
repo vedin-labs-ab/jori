@@ -1,12 +1,6 @@
 import { Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { type Automation } from "../types"
 import { AutomationActions } from "./actions"
@@ -41,9 +35,9 @@ export function AutomationRow({
                 </Badge>
               ) : null}
             </div>
-            <CardDescription className="line-clamp-2 max-w-[72ch]">
+            <p className="line-clamp-2 max-w-[72ch] text-muted-foreground text-xs/relaxed">
               {automation.instructions}
-            </CardDescription>
+            </p>
           </div>
           <div className="col-start-3 row-start-1 self-start justify-self-end">
             <AutomationActions
