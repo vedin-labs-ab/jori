@@ -6,6 +6,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { ConsoleContentGrid } from "../layout"
 import { LoadingMessage } from "../loading"
 import { SkillCard } from "./card"
 import { type Skill, type SkillFilterView } from "./types"
@@ -41,7 +42,7 @@ export function SkillContent({
   const now = Date.now()
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <ConsoleContentGrid className="md:grid-cols-2 xl:grid-cols-3">
       {skills.length === 0 ? (
         <SkillEmptyState
           description={emptyDescription(view, isFiltering)}
@@ -65,7 +66,7 @@ export function SkillContent({
           skill={skill}
         />
       ))}
-    </div>
+    </ConsoleContentGrid>
   )
 }
 

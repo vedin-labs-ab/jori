@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "../../../convex/_generated/api"
+import {
+  ConsolePageLayout,
+  ConsoleScrollableList,
+  ConsoleToolbar,
+  ConsoleToolbarActions,
+} from "../layout"
 import { ConsolePage } from "../page"
 import { useToolPermissions } from "../permissions/controller"
 import { automationPolicyKey } from "./access/policy"
@@ -56,7 +62,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
   const isDialogMounted = useAutomationDialogMount(editor.isFormOpen)
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col gap-3">
+    <ConsolePageLayout>
       <AutomationFilters
         filter={filter}
         onCreate={editor.openCreateForm}
@@ -94,7 +100,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
           />
         </Suspense>
       ) : null}
-    </section>
+    </ConsolePageLayout>
   )
 }
 
@@ -130,7 +136,7 @@ function AutomationFilters({
   }
 
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <ConsoleToolbar>
       <ToggleGroup
         className="flex-wrap justify-start"
         onValueChange={(value) => {
@@ -148,7 +154,7 @@ function AutomationFilters({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row md:flex-none">
+      <ConsoleToolbarActions>
         <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
           <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
           <Input
@@ -171,8 +177,8 @@ function AutomationFilters({
           <Plus />
           New automation
         </Button>
-      </div>
-    </div>
+      </ConsoleToolbarActions>
+    </ConsoleToolbar>
   )
 }
 
@@ -205,7 +211,7 @@ function AutomationRows({
   }
 
   return (
-    <ul className="grid min-h-0 flex-1 auto-rows-max content-start gap-3 overflow-y-auto pb-2 lg:grid-cols-2">
+    <ConsoleScrollableList className="pb-2 lg:grid-cols-2">
       {automationList.automations.map((automation) => (
         <AutomationRow
           isDeleting={editor.deletingAutomationId === automation.id}
@@ -216,7 +222,7 @@ function AutomationRows({
           automation={automation}
         />
       ))}
-    </ul>
+    </ConsoleScrollableList>
   )
 }
 

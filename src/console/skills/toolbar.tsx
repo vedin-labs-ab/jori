@@ -2,6 +2,7 @@ import { Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { ConsoleToolbar, ConsoleToolbarActions } from "../layout"
 import { type SkillFilterView, skillFilterOptions } from "./types"
 
 export function SkillsToolbar({
@@ -20,9 +21,9 @@ export function SkillsToolbar({
   view: SkillFilterView
 }) {
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <ConsoleToolbar>
       <SkillViewFilter onViewChange={onViewChange} view={view} />
-      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row md:flex-none">
+      <ConsoleToolbarActions>
         <SkillSearch onSearchChange={onSearchChange} searchTerm={searchTerm} />
         <Button
           type="button"
@@ -33,8 +34,8 @@ export function SkillsToolbar({
           <Plus />
           New skill
         </Button>
-      </div>
-    </div>
+      </ConsoleToolbarActions>
+    </ConsoleToolbar>
   )
 }
 

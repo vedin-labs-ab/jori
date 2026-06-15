@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
 import { useMemo, useState } from "react"
 import { api } from "../../../convex/_generated/api"
+import { ConsoleContentGrid, ConsolePageLayout } from "../layout"
 import { ConsolePage } from "../page"
 import { SkillStatusAlerts } from "./alerts"
 import { SkillContent } from "./content"
@@ -38,7 +39,7 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
   const isAccessReady = skillList?.status === "ready"
 
   return (
-    <div className="grid gap-7">
+    <ConsolePageLayout>
       <SkillsToolbar
         isCreateDisabled={!isAccessReady}
         onCreate={editor.openCreateForm}
@@ -48,7 +49,7 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
         view={view}
       />
 
-      <div className="grid gap-4">
+      <ConsoleContentGrid>
         <SkillStatusAlerts
           deleteError={editor.deleteError}
           globalError={globalSettings.error?.message}
@@ -68,14 +69,14 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
             view={view}
           />
         ) : null}
-      </div>
+      </ConsoleContentGrid>
 
       <SkillDialogs
         editor={editor}
         onViewSkillChange={setViewSkill}
         viewSkill={viewSkill}
       />
-    </div>
+    </ConsolePageLayout>
   )
 }
 
