@@ -27,8 +27,9 @@ test("shows event integration with event name in help tooltip", async () => {
   expect(screen.getByText("Event")).toBeDefined()
   expect(screen.getByText("GitHub")).toBeDefined()
   expect(
-    container.querySelector('img[src="/logos/integrations/github.svg"]')
-  ).not.toBeNull()
+    container.querySelectorAll('img[src="/logos/integrations/github.svg"]')
+  ).toHaveLength(1)
+  expect(screen.getByText("Monitoring")).toBeDefined()
   expect(screen.queryByText("Issue comment created")).toBeNull()
 
   fireEvent.focus(
