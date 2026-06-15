@@ -30,7 +30,8 @@ test("marks approval-required tools in message run details", () => {
 
   fireEvent.click(screen.getByRole("button", { name: /create a notion page/i }))
 
-  expect(screen.getByText("Approval 1")).toBeDefined()
+  expect(screen.getByText(hasTextContent("Write 1*"))).toBeDefined()
+  expect(screen.getByText("*").className).toContain("text-warning")
 
   fireEvent.click(screen.getByRole("button", { name: "Open Notion tools" }))
 
@@ -44,7 +45,7 @@ function executionWithApprovalTool(): ExecutionItem {
     details: [
       {
         type: "tools",
-        label: "Notion · Read 1 · Write 1 · Approval 1",
+        label: "Notion · Read 1 · Write 1*",
         groups: [
           {
             type: "notion",
@@ -69,6 +70,11 @@ function executionWithApprovalTool(): ExecutionItem {
     title: "Create a Notion page.",
     trigger: "Slack message",
   }
+}
+
+function hasTextContent(text: string) {
+  return (_content: string, element: Element | null) =>
+    element?.textContent === text
 }
 
 function notionTools() {

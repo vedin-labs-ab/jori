@@ -86,7 +86,7 @@ test("shows stored tools for mention and reply runs", async () => {
   }
 })
 
-test("counts approval-required tools in mention and reply runs", async () => {
+test("marks approval-required access counts in mention and reply runs", async () => {
   for (const kind of ["mention", "reply"] as const) {
     const summary = await summarizeExecution(
       fakeQueryCtx({
@@ -106,10 +106,10 @@ test("counts approval-required tools in mention and reply runs", async () => {
           createdAt: 0,
         },
       }),
-      execution({ toolSnapshot: slackToolSnapshot(true, true) })
+      execution({ toolSnapshot: slackToolSnapshot(true, "read") })
     )
 
-    expect(summary.details).toContainEqual(slackToolsDetail(true))
+    expect(summary.details).toContainEqual(slackToolsDetail("read"))
   }
 })
 
@@ -173,28 +173,31 @@ function execution(overrides: Record<string, unknown>) {
   } as Parameters<typeof summarizeExecution>[1]
 }
 
-function slackToolSnapshot(webSearch = true, requiresApproval = false) {
+function slackToolSnapshot(
+  webSearch = true,
+  approvalAccess?: "read" | "write"
+) {
   return {
     groups: [
       {
         provider: "slack",
         label: "Slack",
-        tools: slackTools(requiresApproval),
+        tools: slackTools(approvalAccess),
       },
     ],
     webSearch,
   }
 }
 
-function slackToolsDetail(requiresApproval = false) {
+function slackToolsDetail(approvalAccess?: "read" | "write") {
   return {
     type: "tools",
-    label: `Slack · Read 1 · Write 1${requiresApproval ? " · Approval 1" : ""}`,
+    label: `Slack · Read 1${approvalAccess === "read" ? "*" : ""} · Write 1${approvalAccess === "write" ? "*" : ""}`,
     groups: [
       {
         type: "slack",
         label: "Slack",
-        tools: slackTools(requiresApproval),
+        tools: slackTools(approvalAccess),
       },
     ],
   }
@@ -207,19 +210,20 @@ function webSearchDetail(label: "Allowed" | "Blocked") {
   }
 }
 
-function slackTools(requiresApproval = false) {
+function slackTools(approvalAccess?: "read" | "write") {
   return [
     {
       access: "write" as const,
       description: "Post a Slack message.",
       label: "Send message",
+      ...(approvalAccess === "write" ? { requiresApproval: true } : {}),
       tool: "conversations_add_message",
     },
     {
       access: "read" as const,
       description: "Read Slack channel messages.",
       label: "Read channel history",
-      ...(requiresApproval ? { requiresApproval: true } : {}),
+      ...(approvalAccess === "read" ? { requiresApproval: true } : {}),
       tool: "conversations_history",
     },
   ]

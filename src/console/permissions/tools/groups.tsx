@@ -3,6 +3,7 @@ import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { SeparatorDot } from "../../dot"
 import {
   accessLabel,
   groupToolsByAccess,
@@ -112,9 +113,12 @@ function ReadonlyToolRow({ tool }: { tool: ToolCapability }) {
       <ToolRowContent
         accessories={
           tool.requiresApproval === true ? (
-            <Badge className="font-normal" variant="secondary">
-              Requires approval
-            </Badge>
+            <>
+              <SeparatorDot className="text-muted-foreground/60" />
+              <span className="font-normal text-muted-foreground text-xs">
+                Requires approval
+              </span>
+            </>
           ) : undefined
         }
         description={tool.description}
