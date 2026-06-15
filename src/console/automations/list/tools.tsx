@@ -28,9 +28,9 @@ function WebSearchStatus({ allowed }: { allowed: boolean }) {
   const stateClassName = allowed ? "text-primary" : "text-destructive"
 
   return (
-    <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
-      <Icon className={cn("size-4 shrink-0", stateClassName)} />
-      <span className="min-w-0 truncate">
+    <span className="flex min-w-0 items-center gap-2">
+      <Icon className="size-4 shrink-0 text-muted-foreground" />
+      <span className="min-w-0 truncate text-foreground">
         Web{" "}
         <span className={cn("font-medium", stateClassName)}>
           {allowed ? "allowed" : "blocked"}
