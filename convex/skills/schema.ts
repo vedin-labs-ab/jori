@@ -12,3 +12,13 @@ export const skills = defineTable({
 })
   .index("by_tenant", ["tenantId"])
   .index("by_tenant_name", ["tenantId", "name"])
+
+export const skillSettings = defineTable({
+  tenantId: v.string(),
+  skillName: v.string(),
+  enabled: v.boolean(),
+  updatedBy: v.string(),
+  updatedAt: v.number(),
+})
+  .index("by_tenant", ["tenantId"])
+  .index("by_tenant_and_skill", ["tenantId", "skillName"])

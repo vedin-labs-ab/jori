@@ -1,4 +1,4 @@
-import { type MutationCtx } from "../_generated/server"
+import { type MutationCtx, type QueryCtx } from "../_generated/server"
 
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const skillNameMaxLength = 64
@@ -65,4 +65,30 @@ export function sortSkills<T extends { tenantId: string | null; name: string }>(
 
     return left.name.localeCompare(right.name)
   })
+}
+
+export function listSkillSettings(ctx: QueryCtx, tenantId: string) {
+  return ctx.db
+    .query("skillSettings")
+    .withIndex("by_tenant", (index) => index.eq("tenantId", tenantId))
+    .collect()
+}
+
+export async function getSkillSetting(
+  ctx: MutationCtx,
+  tenantId: string,
+  skillName: string
+) {
+  return await ctx.db
+    .query("skillSettings")
+    .withIndex("by_tenant_and_skill", (index) =>
+      index.eq("tenantId", tenantId).eq("skillName", skillName)
+    )
+    .unique()
+}
+
+export function mapSkillSettingsByName<
+  Setting extends { skillName: string; enabled: boolean },
+>(settings: Setting[]) {
+  return new Map(settings.map((setting) => [setting.skillName, setting]))
 }

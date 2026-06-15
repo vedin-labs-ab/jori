@@ -19,6 +19,7 @@ const tableRegistry: Record<TableName, true> = {
   approvals: true,
   executions: true,
   permissions: true,
+  skillSettings: true,
 }
 
 const tables = Object.keys(tableRegistry) as TableName[]

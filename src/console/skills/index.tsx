@@ -1,34 +1,16 @@
 import { useQuery } from "convex/react"
-import { Plus } from "lucide-react"
-import { useMemo } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { useMemo, useState } from "react"
 import { api } from "../../../convex/_generated/api"
-import { LoadingMessage } from "../loading"
 import { ConsolePage } from "../page"
+import { SkillStatusAlerts } from "./alerts"
+import { SkillContent } from "./content"
 import { SkillDialog } from "./dialog"
-import { useSkillEditor } from "./editor"
-import { SkillSection } from "./section"
-import { type Skill } from "./types"
-
-type SkillListResult =
-  | {
-      status: "ready"
-      skills: Skill[]
-    }
-  | {
-      status: "unauthorized"
-      message: string
-      skills: Skill[]
-    }
+import { type SkillEditor, useSkillEditor } from "./editor"
+import { emptyGroupedSkills, filterSkills, groupSkills } from "./helpers"
+import { useGlobalSkillSettings } from "./settings"
+import { SkillsToolbar } from "./toolbar"
+import { type Skill, type SkillFilterView } from "./types"
+import { SkillViewDialog } from "./view"
 
 export function Skills() {
   return (
@@ -41,46 +23,77 @@ export function Skills() {
 export function SkillsCard({ tenantId }: { tenantId: string }) {
   const skillList = useQuery(api.skills.catalog.list, { tenantId })
   const editor = useSkillEditor(tenantId)
+  const globalSettings = useGlobalSkillSettings(tenantId)
+  const [view, setView] = useState<SkillFilterView>("all")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [viewSkill, setViewSkill] = useState<Skill>()
   const skills = skillList?.status === "ready" ? skillList.skills : undefined
+  const filteredSkills = useMemo(
+    () => (skills === undefined ? undefined : filterSkills(skills, searchTerm)),
+    [skills, searchTerm]
+  )
   const groupedSkills = useMemo(
-    () => (skills === undefined ? emptyGroupedSkills : groupSkills(skills)),
-    [skills]
+    () =>
+      filteredSkills === undefined
+        ? emptyGroupedSkills
+        : groupSkills(filteredSkills),
+    [filteredSkills]
   )
   const isAccessReady = skillList?.status === "ready"
 
   return (
-    <Card className="md:col-span-2">
-      <CardHeader>
-        <CardTitle>Skills</CardTitle>
-        <CardDescription>
-          Teach Milo how your team works. Skills apply whenever the work matches
-          their description.
-        </CardDescription>
-        <CardAction>
-          <Button
-            type="button"
-            size="sm"
-            onClick={editor.openCreateForm}
-            disabled={!isAccessReady}
-          >
-            <Plus />
-            Add skill
-          </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="grid gap-5">
-        <SkillDeleteError error={editor.deleteError} />
-        <SkillAccessError result={skillList} />
+    <div className="grid gap-7">
+      <SkillsToolbar
+        isCreateDisabled={!isAccessReady}
+        onCreate={editor.openCreateForm}
+        onSearchChange={setSearchTerm}
+        onViewChange={setView}
+        searchTerm={searchTerm}
+        view={view}
+      />
+
+      <div className="grid gap-4">
+        <SkillStatusAlerts
+          deleteError={editor.deleteError}
+          globalError={globalSettings.error?.message}
+          result={skillList}
+        />
         {skillList?.status !== "unauthorized" ? (
           <SkillContent
             groupedSkills={groupedSkills}
             isLoading={skillList === undefined}
             onDelete={editor.deleteSkill}
             onEdit={editor.openEditForm}
+            onToggleGlobalSkill={globalSettings.updateGlobalSkillEnabled}
+            onView={setViewSkill}
             pendingSkillId={editor.pendingSkillId}
+            pendingGlobalSkillId={globalSettings.pendingSkillId}
+            searchTerm={searchTerm}
+            view={view}
           />
         ) : null}
-      </CardContent>
+      </div>
+
+      <SkillDialogs
+        editor={editor}
+        onViewSkillChange={setViewSkill}
+        viewSkill={viewSkill}
+      />
+    </div>
+  )
+}
+
+function SkillDialogs({
+  editor,
+  onViewSkillChange,
+  viewSkill,
+}: {
+  editor: SkillEditor
+  onViewSkillChange: (skill: Skill | undefined) => void
+  viewSkill: Skill | undefined
+}) {
+  return (
+    <>
       <SkillDialog
         error={editor.formError}
         isOpen={editor.isFormOpen}
@@ -91,86 +104,14 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
         skill={editor.formSkill}
         values={editor.formValues}
       />
-    </Card>
-  )
-}
-
-function SkillDeleteError({ error }: { error: string | undefined }) {
-  if (error === undefined) {
-    return null
-  }
-
-  return (
-    <Alert variant="destructive">
-      <AlertTitle>Could not delete skill</AlertTitle>
-      <AlertDescription>{error}</AlertDescription>
-    </Alert>
-  )
-}
-
-function SkillAccessError({ result }: { result: SkillListResult | undefined }) {
-  if (result?.status !== "unauthorized") {
-    return null
-  }
-
-  return (
-    <Alert variant="destructive">
-      <AlertTitle>Skill access unavailable</AlertTitle>
-      <AlertDescription>{result.message}</AlertDescription>
-    </Alert>
-  )
-}
-
-function SkillContent({
-  groupedSkills,
-  isLoading,
-  onDelete,
-  onEdit,
-  pendingSkillId,
-}: {
-  groupedSkills: ReturnType<typeof groupSkills>
-  isLoading: boolean
-  onDelete: (skill: Skill) => void
-  onEdit: (skill: Skill) => void
-  pendingSkillId: string | undefined
-}) {
-  if (isLoading) {
-    return <LoadingMessage label="Loading skills" />
-  }
-
-  return (
-    <div className="grid gap-5 lg:grid-cols-2">
-      <SkillSection
-        description="Built-in skills ship with Milo and apply to every organization."
-        emptyLabel="No built-in skills yet."
-        pendingSkillId={pendingSkillId}
-        skills={groupedSkills.global}
-        title="Built-in"
+      <SkillViewDialog
+        skill={viewSkill}
+        onOpenChange={(open) => {
+          if (!open) {
+            onViewSkillChange(undefined)
+          }
+        }}
       />
-      <SkillSection
-        description="Skills your team adds. They apply only to this organization."
-        emptyLabel="No skills yet. Add one to teach Milo how your team works."
-        onDelete={onDelete}
-        onEdit={onEdit}
-        pendingSkillId={pendingSkillId}
-        skills={groupedSkills.tenant}
-        title="Organization"
-      />
-    </div>
-  )
-}
-
-const emptyGroupedSkills = {
-  global: [],
-  tenant: [],
-} satisfies Record<Skill["scope"], Skill[]>
-
-function groupSkills(skills: Skill[]) {
-  return skills.reduce<Record<Skill["scope"], Skill[]>>(
-    (groups, skill) => {
-      groups[skill.scope].push(skill)
-      return groups
-    },
-    { global: [], tenant: [] }
+    </>
   )
 }

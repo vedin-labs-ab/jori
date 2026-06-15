@@ -6,6 +6,9 @@ export type Skill = {
   name: string
   description: string
   body: string
+  createdAt: number
+  updatedAt: number
+  enabled: boolean
   scope: "global" | "tenant"
 }
 
@@ -14,6 +17,8 @@ export type SkillFormValues = {
   description: string
   body: string
 }
+
+export type SkillFilterView = "all" | "tenant" | "global"
 
 export const emptySkillForm: SkillFormValues = {
   name: "",
