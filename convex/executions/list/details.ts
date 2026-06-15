@@ -11,6 +11,7 @@ import {
   uniqueDetails,
 } from "./detail"
 import { originDetails } from "./origin"
+import { cronScheduleLabel } from "./schedule"
 import { type ExecutionSource } from "./source"
 
 type AutomationAccessSummary = {
@@ -52,7 +53,7 @@ export function executionDetailSummary(input: {
     details: uniqueDetails([
       stoppedDetail(input.execution, input.stoppedBy),
       decisionDetail(input.approval),
-      ...oneShotDetails(input),
+      ...timeAutomationDetails(input),
       ...visibleOriginDetails,
       ...metadataDetails(input.source.metadata),
     ]),
@@ -60,19 +61,54 @@ export function executionDetailSummary(input: {
   }
 }
 
-function oneShotDetails(input: {
+function timeAutomationDetails(input: {
   automation: Doc<"automations"> | null
   automationAccess?: AutomationAccessSummary
   run: Doc<"runs">
 }) {
-  if (
-    input.run.reason.type !== "time" ||
-    input.automation?.trigger.type !== "once"
-  ) {
+  if (input.run.reason.type !== "time" || input.automation === null) {
     return []
   }
 
-  const tools = toolsDetail(input.automationAccess?.surfaces)
+  if (input.automation.trigger.type === "cron") {
+    return recurringAutomationDetails({
+      automationAccess: input.automationAccess,
+      scheduledAt: input.run.reason.scheduledAt,
+      status: input.automation.status,
+      trigger: input.automation.trigger,
+    })
+  }
+
+  if (input.automation.trigger.type !== "once") {
+    return []
+  }
+
+  return accessDetails(input.automationAccess)
+}
+
+function recurringAutomationDetails(input: {
+  automationAccess?: AutomationAccessSummary
+  scheduledAt: number
+  status: Doc<"automations">["status"]
+  trigger: Extract<Doc<"automations">["trigger"], { type: "cron" }>
+}) {
+  const trigger = input.trigger
+
+  return compactDetails([
+    detail("schedule", cronScheduleLabel(trigger.cron)),
+    detail("occurrence", "Occurrence", { at: input.scheduledAt }),
+    input.status === "active"
+      ? detail("next", "Next", { at: trigger.nextAt })
+      : undefined,
+    input.status === "active"
+      ? undefined
+      : detail("status", automationStatusLabel(input.status)),
+    ...accessDetails(input.automationAccess),
+  ])
+}
+
+function accessDetails(automationAccess: AutomationAccessSummary | undefined) {
+  const tools = toolsDetail(automationAccess?.surfaces)
 
   return compactDetails([
     tools === undefined
@@ -80,9 +116,17 @@ function oneShotDetails(input: {
       : detail("tools", tools.label, { groups: tools.groups }),
     detail(
       "web_search",
-      input.automationAccess?.webSearch === true ? "Allowed" : "Blocked"
+      automationAccess?.webSearch === true ? "Allowed" : "Blocked"
     ),
   ])
+}
+
+function automationStatusLabel(status: Doc<"automations">["status"]) {
+  if (status === "paused") {
+    return "Paused"
+  }
+
+  return status === "completed" ? "Completed" : undefined
 }
 
 function toolsDetail(

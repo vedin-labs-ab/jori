@@ -5,6 +5,8 @@ import {
 import { readErrorMessage } from "../error"
 import { type AutomationFormValues, emptyAutomationForm } from "./types"
 
+export { describeCron } from "../../../convex/automations/labels"
+
 export type CronParts = Pick<
   AutomationFormValues,
   "cron" | "monthDay" | "repeat" | "time" | "weekday"
@@ -139,33 +141,6 @@ export function previewRecurringRun(
   } catch (error) {
     return { error: readErrorMessage(error, "No upcoming runs.") }
   }
-}
-
-export function describeCron(cron: string | undefined) {
-  const parts = classifyCron(cron)
-  const time = `${parts.time} UTC`
-
-  if (parts.repeat === "daily") {
-    return `Daily at ${time}`
-  }
-
-  if (parts.repeat === "weekdays") {
-    return `Weekdays at ${time}`
-  }
-
-  if (parts.repeat === "weekly") {
-    const weekday = weekdayOptions.find(
-      (option) => option.value === parts.weekday
-    )
-
-    return weekday === undefined ? null : `${weekday.label}s at ${time}`
-  }
-
-  if (parts.repeat === "monthly") {
-    return `Monthly on the ${ordinal(Number(parts.monthDay))} at ${time}`
-  }
-
-  return null
 }
 
 export function getCrontabGuruUrl(cron: string) {
