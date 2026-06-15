@@ -1,5 +1,9 @@
+import {
+  readDataNumber,
+  readDataObject,
+  readDataString,
+} from "../../shared/data"
 import { type MessageProvider } from "./codex"
-import { readDataNumber, readDataObject, readDataString } from "./data"
 import { type RuntimeTarget } from "./tools"
 
 export function requireMessageTarget(

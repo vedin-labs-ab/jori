@@ -6,8 +6,8 @@ import {
   getAutomationSurfaceMentionParts,
   isAutomationSurfaceProvider,
   syncAutomationSurfaces,
-} from "../../access"
-import { isAutomationSurfacePolicyBlocked } from "../../access/policy"
+} from "../../surface"
+import { isAutomationSurfacePolicyBlocked } from "../../surface/policy"
 import { type AutomationInstructionsFieldProps } from "./types"
 
 export const automationSurfaceNodeName = "automationSurface"

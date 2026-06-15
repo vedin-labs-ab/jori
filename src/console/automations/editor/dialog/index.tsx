@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { type AutomationPolicyPermissions } from "../../access/policy"
+import { type AutomationPolicyPermissions } from "../../surface/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
 import { createAutomationDialogActions } from "../actions"
 import {

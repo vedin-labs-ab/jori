@@ -1,6 +1,6 @@
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
-import { type AutomationPolicyPermissions } from "../../../access/policy"
+import { type AutomationPolicyPermissions } from "../../../surface/policy"
 import { insertSurfaceSuggestion } from "./input"
 import { type InstructionSuggestionState } from "./suggest"
 

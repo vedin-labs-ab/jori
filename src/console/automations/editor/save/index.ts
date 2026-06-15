@@ -2,11 +2,11 @@ import {
   hasAutomationWriteSurface,
   normalizeAutomationSurfaceMentions,
   syncAutomationSurfaces,
-} from "../../access"
+} from "../../surface"
 import {
   type AutomationPolicyPermissions,
   validateAutomationPolicy,
-} from "../../access/policy"
+} from "../../surface/policy"
 import {
   type Automation,
   type AutomationFormValues,
