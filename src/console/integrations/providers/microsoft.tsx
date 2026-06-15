@@ -4,8 +4,8 @@ import { type ToolPermissionController } from "../../permissions/controller"
 import {
   IntegrationConnection,
   type IntegrationConnectionConfig,
-} from "../shared/card"
-import { getAccountHeadline } from "../shared/headline"
+} from "../connection/card"
+import { getAccountHeadline } from "../connection/headline"
 
 const emailConfig = {
   action: "Connect Outlook",

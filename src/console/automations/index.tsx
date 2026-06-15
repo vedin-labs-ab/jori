@@ -8,20 +8,22 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useToolPermissions } from "../permissions/controller"
-import { type AutomationEditor, useAutomationEditor } from "./form"
+import { automationPolicyKey } from "./access/policy"
+import { type AutomationEditor, useAutomationEditor } from "./editor"
 import { AutomationSkeletonList, EmptyAutomations } from "./list/empty"
 import { AutomationRow } from "./list/row"
-import { automationPolicyKey } from "./policy"
 import {
   type AutomationFilter,
   type AutomationList,
   automationFilterOptions,
 } from "./types"
 
-let automationDialogModule: Promise<typeof import("./form/dialog")> | undefined
+let automationDialogModule:
+  | Promise<typeof import("./editor/dialog")>
+  | undefined
 
 function loadAutomationDialog() {
-  automationDialogModule ??= import("./form/dialog")
+  automationDialogModule ??= import("./editor/dialog")
   return automationDialogModule
 }
 

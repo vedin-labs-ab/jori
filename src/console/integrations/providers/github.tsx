@@ -4,8 +4,8 @@ import { type ToolPermissionController } from "../../permissions/controller"
 import {
   IntegrationConnection,
   type IntegrationConnectionConfig,
-} from "../shared/card"
-import { getWorkspaceHeadline } from "../shared/headline"
+} from "../connection/card"
+import { getWorkspaceHeadline } from "../connection/headline"
 
 const githubConfig = {
   action: "Connect GitHub",

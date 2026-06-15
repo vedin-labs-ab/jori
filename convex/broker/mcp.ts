@@ -2,7 +2,7 @@ import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { canUseAutomationTool } from "../automations/access"
-import { hashExecutionToken } from "../executions/tokens"
+import { hashExecutionToken } from "../executions/agent/tokens"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import {
   canUseToolMode,

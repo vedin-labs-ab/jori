@@ -4,8 +4,11 @@ import { type ToolPermissionController } from "../../permissions/controller"
 import {
   IntegrationConnection,
   type IntegrationConnectionConfig,
-} from "../shared/card"
-import { getAccountHeadline, getWorkspaceHeadline } from "../shared/headline"
+} from "../connection/card"
+import {
+  getAccountHeadline,
+  getWorkspaceHeadline,
+} from "../connection/headline"
 
 const gmailConfig = {
   action: "Connect Gmail",

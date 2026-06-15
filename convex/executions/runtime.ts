@@ -5,12 +5,12 @@ import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
-import { createPromptedExecution } from "./artifacts"
-import { type CodexRuntimeInput } from "./codex"
-import { killE2BSandbox } from "./sandbox/e2b"
-import { runPromptedExecution } from "./sandbox/execute"
-import { requireMessageTarget } from "./targets"
-import { createExecutionToken } from "./tokens"
+import { createPromptedExecution } from "./agent/artifacts"
+import { type CodexRuntimeInput } from "./agent/codex"
+import { killE2BSandbox } from "./agent/sandbox/e2b"
+import { runPromptedExecution } from "./agent/sandbox/execute"
+import { requireMessageTarget } from "./agent/targets"
+import { createExecutionToken } from "./agent/tokens"
 
 export const runMessage = internalAction({
   args: {

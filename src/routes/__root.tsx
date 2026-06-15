@@ -9,7 +9,7 @@ import { AlertTriangle, SearchX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { convex } from "@/shared/convex"
-import { RootStateFrame } from "@/shared/root-state"
+import { RootStateFrame } from "@/shared/state"
 import appCss from "../styles.css?url"
 
 const appTitle = "Milo"
