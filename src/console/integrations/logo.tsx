@@ -12,10 +12,12 @@ type IntegrationLogoSize = "sm" | "md"
 
 export function IntegrationLogo({
   className,
+  decorative = false,
   integration,
   size = "sm",
 }: {
   className?: string
+  decorative?: boolean
   integration: Integration
   size?: IntegrationLogoSize
 }) {
@@ -27,7 +29,8 @@ export function IntegrationLogo({
 
   return (
     <img
-      alt={integrationLabel(integration)}
+      alt={decorative ? "" : integrationLabel(integration)}
+      aria-hidden={decorative}
       className={cn(logoSizeClassName(size), "shrink-0", className)}
       src={logo}
     />

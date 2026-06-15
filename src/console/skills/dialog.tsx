@@ -29,6 +29,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { IntegrationLogo } from "../integrations/logo"
+import { getSkillIcon } from "./metadata"
 import { type Skill, type SkillFormValues } from "./types"
 
 type SkillTextFieldName = Exclude<
@@ -166,13 +168,24 @@ function SkillCategoryField({
           <ComboboxList>
             {(category: string) => (
               <ComboboxItem key={category} value={category}>
-                {category}
+                <SkillCategoryOption category={category} />
               </ComboboxItem>
             )}
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
     </div>
+  )
+}
+
+function SkillCategoryOption({ category }: { category: string }) {
+  const Icon = getSkillIcon(category)
+
+  return (
+    <>
+      <Icon aria-hidden="true" className="size-3.5 text-muted-foreground" />
+      <span>{category}</span>
+    </>
   )
 }
 
@@ -228,6 +241,11 @@ function AssociatedIntegrationsField({
           <ComboboxValue>
             {selectedIntegrations.map((integration) => (
               <ComboboxChip key={integration}>
+                <IntegrationLogo
+                  className="size-3.5"
+                  decorative
+                  integration={integration}
+                />
                 {integrationLabel(integration)}
               </ComboboxChip>
             ))}
@@ -242,7 +260,7 @@ function AssociatedIntegrationsField({
           <ComboboxList>
             {(integration: Integration) => (
               <ComboboxItem key={integration} value={integration}>
-                {integrationLabel(integration)}
+                <IntegrationOption integration={integration} />
               </ComboboxItem>
             )}
           </ComboboxList>
@@ -253,6 +271,19 @@ function AssociatedIntegrationsField({
         the skill runs.
       </p>
     </div>
+  )
+}
+
+function IntegrationOption({ integration }: { integration: Integration }) {
+  return (
+    <>
+      <IntegrationLogo
+        className="size-3.5"
+        decorative
+        integration={integration}
+      />
+      <span>{integrationLabel(integration)}</span>
+    </>
   )
 }
 
