@@ -1,4 +1,4 @@
-import { requiredNumber, requiredString } from "../common"
+import { requiredNumber, requiredString } from "../../../shared/input"
 import { githubJson, repositoryPath } from "./client"
 import { summarizeComment } from "./format"
 

@@ -1,5 +1,5 @@
-import { fetchJson } from "../../broker/tools/common"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
+import { fetchJson } from "../../shared/http"
 import {
   maxOptions,
   normalizeQuery,

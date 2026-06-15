@@ -5,7 +5,11 @@ import {
   readArtifactAttachments,
 } from "../../../artifacts/attachments"
 import { requireSlackCredentials } from "../../../providers/slack/credentials"
-import { boundedNumber, optionalString, requiredString } from "../common"
+import {
+  boundedNumber,
+  optionalString,
+  requiredString,
+} from "../../../shared/input"
 import { slackJsonApi, slackQueryApi } from "./client"
 import { postSlackFiles } from "./upload"
 

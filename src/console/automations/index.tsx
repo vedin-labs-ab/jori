@@ -8,10 +8,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useToolPermissions } from "../permissions/controller"
+import { automationPolicyKey } from "./access/policy"
 import { type AutomationEditor, useAutomationEditor } from "./editor"
 import { AutomationSkeletonList, EmptyAutomations } from "./list/empty"
 import { AutomationRow } from "./list/row"
-import { automationPolicyKey } from "./surface/policy"
 import {
   type AutomationFilter,
   type AutomationList,

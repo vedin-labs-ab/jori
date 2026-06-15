@@ -1,4 +1,4 @@
-import { readArray, readNested } from "../common"
+import { readArray, readNested } from "../../../shared/input"
 
 export function summarizeRepository(repository: Record<string, unknown>) {
   return {

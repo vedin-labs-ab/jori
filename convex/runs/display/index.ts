@@ -2,7 +2,7 @@ import { type Infer } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
 import { getAutomationEventDefinition } from "../../automations/events"
 import { providerLabel } from "../../providers/catalog"
-import { type SourceMetadataItem } from "../../sources/schema"
+import { type SourceMetadataItem } from "../../shared/sources/schema"
 import { type runDisplay } from "../schema"
 import {
   compactDetails,

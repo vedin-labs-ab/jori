@@ -1,8 +1,8 @@
 import {
   type AutomationSurfaceFormValue,
   syncAutomationSurfaces,
-} from "../surface"
-import { type AutomationPolicyPermissions } from "../surface/policy"
+} from "../access"
+import { type AutomationPolicyPermissions } from "../access/policy"
 import { type AutomationFormValues } from "../types"
 import { writeAutomationWebSearchPreference } from "./preferences"
 

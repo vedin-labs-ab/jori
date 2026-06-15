@@ -1,6 +1,6 @@
 import { X } from "lucide-react"
-import { type AutomationSurfaceProvider } from "../../../surface"
-import { SurfaceLogo } from "../../../surface/logo"
+import { type AutomationSurfaceProvider } from "../../../access"
+import { SurfaceLogo } from "../../../access/logo"
 
 export function AutomationSurfaceRemoveButton({
   onRemove,

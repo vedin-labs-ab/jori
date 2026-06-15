@@ -14,18 +14,17 @@ import {
   type ToolProvider,
 } from "../permissions/catalog"
 import {
+  formatProviderError,
+  jsonError,
+  unauthorizedResponse,
+} from "../shared/http"
+import { optionalString, requiredString } from "../shared/input"
+import {
   type ApprovalBrokerContext,
   createPromptedToolApproval,
 } from "./approval"
 import { callMiloTool } from "./milo"
 import { callProviderTool, fetchGitHubTarball } from "./tools"
-import {
-  formatProviderError,
-  jsonError,
-  optionalString,
-  requiredString,
-  unauthorizedResponse,
-} from "./tools/common"
 
 type MiloMcpRequest = {
   provider?: ToolProvider

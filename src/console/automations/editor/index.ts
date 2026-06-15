@@ -2,7 +2,7 @@ import { type ReactMutation, useMutation } from "convex/react"
 import { useState } from "react"
 import { api } from "../../../../convex/_generated/api"
 import { readErrorMessage } from "../../error"
-import { type AutomationPolicyPermissions } from "../surface/policy"
+import { type AutomationPolicyPermissions } from "../access/policy"
 import { type Automation, type AutomationFormValues } from "../types"
 import {
   automationFormValues,

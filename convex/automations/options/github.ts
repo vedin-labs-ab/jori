@@ -1,6 +1,6 @@
-import { fetchJson } from "../../broker/tools/common"
 import { githubApiUrl } from "../../providers/github/config"
 import { requireGitHubCredentials } from "../../providers/github/credentials"
+import { fetchJson } from "../../shared/http"
 import {
   compactDescription,
   maxOptions,

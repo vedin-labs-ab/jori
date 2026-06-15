@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { startEventAutomations } from "../automations/data"
-import { createSourceMetadata } from "../sources/metadata"
+import { createSourceMetadata } from "../shared/sources/metadata"
 
 export async function recordEvent(
   ctx: MutationCtx,

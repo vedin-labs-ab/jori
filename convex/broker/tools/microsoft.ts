@@ -4,16 +4,16 @@ import {
   readArtifactAttachments,
 } from "../../artifacts/attachments"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
+import { base64EncodeBytes } from "../../shared/encoding"
+import { fetchJson } from "../../shared/http"
 import {
-  base64EncodeBytes,
   boundedNumber,
-  fetchJson,
   optionalString,
   optionalStringArray,
   requiredObject,
   requiredString,
   requiredStringArray,
-} from "./common"
+} from "../../shared/input"
 
 export async function callMicrosoftTool(
   integration: Doc<"integrations">,

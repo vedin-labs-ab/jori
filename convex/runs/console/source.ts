@@ -1,4 +1,4 @@
-import { type SourceMetadataItem } from "../../sources/schema"
+import { type SourceMetadataItem } from "../../shared/sources/schema"
 import { type getExecutionContext } from "./context"
 
 type ExecutionContext = Awaited<ReturnType<typeof getExecutionContext>>

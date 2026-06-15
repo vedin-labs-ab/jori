@@ -1,7 +1,8 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { githubApiUrl } from "../../../providers/github/config"
 import { requireGitHubCredentials } from "../../../providers/github/credentials"
-import { fetchJson, requiredString } from "../common"
+import { fetchJson } from "../../../shared/http"
+import { requiredString } from "../../../shared/input"
 
 export function requireGitHubRuntimeToken(integration: Doc<"integrations">) {
   const credentials = requireGitHubCredentials(integration)

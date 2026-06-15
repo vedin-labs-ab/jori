@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { integrationProviderValidator } from "../providers/catalog"
 import { actorValidator } from "../shared/actor"
-import { sourceMetadataValidator } from "../sources/schema"
+import { sourceMetadataValidator } from "../shared/sources/schema"
 
 export const messages = defineTable({
   tenantId: v.string(),

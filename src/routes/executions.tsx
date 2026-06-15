@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Executions } from "@/console/executions"
+import { Runs } from "@/console/runs"
 
 export const Route = createFileRoute("/executions")({
-  component: Executions,
+  component: Runs,
 })

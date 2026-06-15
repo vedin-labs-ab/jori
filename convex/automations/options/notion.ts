@@ -1,7 +1,7 @@
-import { fetchJson } from "../../broker/tools/common"
 import { notionApiUrl, notionApiVersion } from "../../providers/notion/config"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { notionPageTitle } from "../../providers/notion/pages"
+import { fetchJson } from "../../shared/http"
 import {
   maxOptions,
   type OptionLoaderArgs,

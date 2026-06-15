@@ -1,13 +1,13 @@
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { authenticateBrokerRequest } from "./mcp"
 import {
   formatProviderError,
   jsonError,
-  optionalString,
   unauthorizedResponse,
-} from "./tools/common"
+} from "../shared/http"
+import { optionalString } from "../shared/input"
+import { authenticateBrokerRequest } from "./mcp"
 
 export async function handleArtifactUploadRequest(
   ctx: ActionCtx,

@@ -3,8 +3,9 @@ import { ReactNodeViewRenderer } from "@tiptap/react"
 import {
   type AutomationSurfaceProvider,
   getAutomationSurfaceLabel,
-} from "../../../surface"
-import { type AutomationPolicyPermissions } from "../../../surface/policy"
+} from "../../../access"
+import { type AutomationPolicyPermissions } from "../../../access/policy"
+import { AutomationSurfaceNodeView } from "../access/node"
 import {
   type AutomationSurfacePolicyState,
   automationSurfaceNodeName,
@@ -12,7 +13,6 @@ import {
   parseAutomationSurfaceProvider,
   parseAutomationSurfaceToolsAttribute,
 } from "../document"
-import { AutomationSurfaceNodeView } from "../surface/node"
 
 export type AutomationSurfaceNodeAttrs = {
   policy: AutomationSurfacePolicyState

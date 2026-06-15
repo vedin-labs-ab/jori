@@ -4,7 +4,7 @@ import {
 } from "@contracts/automations/events"
 import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
-import { type AutomationSurfaceFormValue } from "./surface"
+import { type AutomationSurfaceFormValue } from "./access"
 
 export type AutomationList = FunctionReturnType<
   typeof api.automations.console.list

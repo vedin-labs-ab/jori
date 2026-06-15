@@ -1,6 +1,6 @@
-import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
-import { automationEventCriteriaKey } from "../automations/events"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { type MutationCtx } from "../../_generated/server"
+import { automationEventCriteriaKey } from "../events"
 
 type EventTrigger = Extract<Doc<"automations">["trigger"], { type: "event" }>
 

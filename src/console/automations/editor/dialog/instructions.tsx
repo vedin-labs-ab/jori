@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { type AutomationPolicyPermissions } from "../../surface/policy"
+import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type AutomationFormValues } from "../../types"
 import { AutomationInstructionsField } from "../instructions"
 import { automationInstructionMarkerErrors } from "../save/marker"

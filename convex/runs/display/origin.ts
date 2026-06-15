@@ -8,7 +8,7 @@ import {
 import {
   githubIssueLikeLabel,
   issueIdentifierLabel,
-} from "../../sources/metadata"
+} from "../../shared/sources/metadata"
 import { commentLabel, compactDetails, detail, snippet } from "./detail"
 
 export function originDetails(input: {

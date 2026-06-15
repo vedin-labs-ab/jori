@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { sourceMetadataValidator } from "../sources/schema"
+import { sourceMetadataValidator } from "../shared/sources/schema"
 
 const sourceDatum = v.object({
   type: v.string(),

@@ -1,11 +1,11 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
 import { type AutomationAccessInput, resolveAccessInput } from "./access"
 import { automationEventCriteriaKey } from "./events"
 import { getRequiredAutomation, getTenantAutomation } from "./read"
+import { normalizeRequiredText } from "./schedule/timing"
 import { type AutomationTriggerInput } from "./schema"
-import { normalizeRequiredText } from "./timing"
+import { ensureSubscription, releaseSubscription } from "./subscriptions/data"
 import {
   cancelTrigger,
   resolveTrigger,

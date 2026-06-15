@@ -1,7 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
 import { linearGraphqlUrl } from "../../providers/linear/config"
 import { requireLinearCredentials } from "../../providers/linear/credentials"
-import { boundedNumber, fetchJson, requiredString } from "./common"
+import { fetchJson } from "../../shared/http"
+import { boundedNumber, requiredString } from "../../shared/input"
 
 export async function callLinearTool(
   integration: Doc<"integrations">,

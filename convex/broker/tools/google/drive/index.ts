@@ -3,7 +3,7 @@ import {
   optionalString,
   requiredString,
   setOptionalSearchParam,
-} from "../../common"
+} from "../../../../shared/input"
 import { googleJson, googleMultipartJson, googleText } from "../request"
 import {
   createDriveFileMetadata,

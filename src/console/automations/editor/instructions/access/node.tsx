@@ -8,11 +8,11 @@ import {
   getAutomationSurfaceAccessLabel,
   getAutomationSurfaceLabel,
   isAutomationSurfaceProvider,
-} from "../../../surface"
+} from "../../../access"
 import {
   type AutomationPolicyPermissions,
   isAutomationSurfacePolicyBlocked,
-} from "../../../surface/policy"
+} from "../../../access/policy"
 import {
   automationSurfaceNodeName,
   parseAutomationSurfaceTools,
