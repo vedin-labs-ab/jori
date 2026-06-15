@@ -26,6 +26,7 @@ test("shows three integration logos when exactly three surfaces are connected", 
     null
   )
   expect(screen.getByText("3 tools")).toBeDefined()
+  expect(screen.getByText("allowed").className).toContain("text-primary")
 })
 
 test("collapses additional integrations into a tooltip count", async () => {
@@ -52,23 +53,42 @@ test("collapses additional integrations into a tooltip count", async () => {
   ).not.toHaveLength(0)
 })
 
-function renderToolSummary(surfaces: AutomationSurfaceIntegration[]) {
+test("shows blocked web search state", () => {
+  renderToolSummary(["slack"], false)
+
+  expect(screen.getAllByText(hasTextContent("Web blocked"))).not.toHaveLength(0)
+  expect(screen.getByText("blocked").className).toContain("text-destructive")
+})
+
+function renderToolSummary(
+  surfaces: AutomationSurfaceIntegration[],
+  webSearch = true
+) {
   return render(
     <TooltipProvider>
-      <AutomationToolSummary automation={automationWithSurfaces(surfaces)} />
+      <AutomationToolSummary
+        automation={automationWithSurfaces(surfaces, webSearch)}
+      />
     </TooltipProvider>
   )
 }
 
 function automationWithSurfaces(
-  surfaces: AutomationSurfaceIntegration[]
+  surfaces: AutomationSurfaceIntegration[],
+  webSearch: boolean
 ): Automation {
   return {
     access: {
+      webSearch,
       surfaces: surfaces.map((integration) => ({
         integration,
         tools: [`${integration}_tool`],
       })),
     },
   } as Automation
+}
+
+function hasTextContent(text: string) {
+  return (_content: string, element: Element | null) =>
+    element?.textContent === text
 }
