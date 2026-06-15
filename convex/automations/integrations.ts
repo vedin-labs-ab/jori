@@ -1,45 +1,36 @@
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import {
-  type IntegrationProvider,
-  isUserScopedProvider,
-} from "../providers/catalog"
+  type Integration,
+  integrationLabels,
+  isUserScopedIntegration,
+} from "../integrations/catalog"
+
+export { integrationLabels } from "../integrations/catalog"
 
 type QueryLikeCtx = MutationCtx | QueryCtx
-
-export const providerLabels = {
-  github: "GitHub",
-  gmail: "Gmail",
-  googleCalendar: "Google Calendar",
-  googleDrive: "Google Drive",
-  linear: "Linear",
-  microsoftCalendar: "Microsoft Calendar",
-  microsoftEmail: "Outlook Mail",
-  notion: "Notion",
-  slack: "Slack",
-} satisfies Record<IntegrationProvider, string>
 
 export async function resolveEventIntegration(
   ctx: QueryLikeCtx,
   args: {
-    provider: IntegrationProvider
+    provider: Integration
     createdBy: string | undefined
     tenantId: string
   }
 ) {
-  return await resolveProvider(ctx, args)
+  return await resolveIntegration(ctx, args)
 }
 
-async function resolveProvider(
+async function resolveIntegration(
   ctx: QueryLikeCtx,
   args: {
-    provider: IntegrationProvider
+    provider: Integration
     createdBy: string | undefined
     tenantId: string
   }
 ): Promise<Doc<"integrations">> {
   const integration =
-    isUserScopedProvider(args.provider) && args.createdBy !== undefined
+    isUserScopedIntegration(args.provider) && args.createdBy !== undefined
       ? await ctx.db
           .query("integrations")
           .withIndex("by_tenant_and_provider_and_owner", (query) =>
@@ -57,7 +48,7 @@ async function resolveProvider(
           .first()
 
   if (integration === null || integration.status !== "active") {
-    throw new Error(`${providerLabels[args.provider]} is not connected.`)
+    throw new Error(`${integrationLabels[args.provider]} is not connected.`)
   }
 
   return integration

@@ -1,13 +1,10 @@
 import { v } from "convex/values"
-import {
-  type IntegrationProvider,
-  integrationProviderValidator,
-} from "../providers/catalog"
+import { type Integration, integrationValidator } from "../integrations/catalog"
 
 export type Actor =
   | { userId: string; name?: string; email?: string }
   | { email: string }
-  | { provider: IntegrationProvider; externalId: string; email?: string }
+  | { provider: Integration; externalId: string; email?: string }
 
 export const actorValidator = v.union(
   v.object({
@@ -19,7 +16,7 @@ export const actorValidator = v.union(
     email: v.string(),
   }),
   v.object({
-    provider: integrationProviderValidator,
+    provider: integrationValidator,
     externalId: v.string(),
     email: v.optional(v.string()),
   })
@@ -72,7 +69,7 @@ export function getActorDisplayName(actor: Actor | undefined) {
 
 export function getActorExternalId(
   actor: Actor | undefined,
-  provider: IntegrationProvider
+  provider: Integration
 ) {
   if (
     actor === undefined ||
@@ -97,7 +94,7 @@ function nonEmptyActorFields(fields: { name?: string; email?: string }) {
 }
 
 export function createProviderActor(args: {
-  provider: IntegrationProvider
+  provider: Integration
   externalId?: string
   email?: string
 }): Actor | undefined {

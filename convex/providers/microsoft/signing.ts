@@ -1,9 +1,9 @@
 import { createSignedState, parseSignedState } from "../signing"
-import { type MicrosoftSurfaceProvider } from "./config"
+import { type MicrosoftIntegration } from "./config"
 import { requireMicrosoftClientSecret } from "./oauth"
 
 export type MicrosoftInstallState = {
-  provider: MicrosoftSurfaceProvider
+  provider: MicrosoftIntegration
   tenantId: string
   createdBy: string
   returnUrl: string

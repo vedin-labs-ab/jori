@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { type AutomationSurfaceProvider } from "../../../access"
+import { type AutomationSurfaceIntegration } from "../../../access"
 import {
   createAutomationInstructionDocument,
   serializeAutomationInstructionDocument,
@@ -67,7 +67,7 @@ export function useAutomationInstructionsEditor(
   })
 
   const selectSuggestion = useCallback(
-    (provider: AutomationSurfaceProvider) =>
+    (provider: AutomationSurfaceIntegration) =>
       insertSurfaceSuggestion({
         editor,
         permissions: refs.permissions.current,

@@ -1,10 +1,10 @@
-import { type IntegrationProvider } from "../../providers/catalog"
+import { type Integration } from "../../integrations/catalog"
 import { type SourceMetadataItem } from "./schema"
 
 export function createSourceMetadata(args: {
   data: unknown
   event?: string
-  provider: IntegrationProvider
+  provider: Integration
 }): SourceMetadataItem[] {
   if (args.provider === "slack") {
     return slackMetadata(args.data)

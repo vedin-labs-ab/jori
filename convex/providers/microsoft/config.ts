@@ -2,17 +2,17 @@ export const microsoftGraphUrl = "https://graph.microsoft.com/v1.0"
 
 const microsoftIdentityScopes = ["offline_access", "User.Read"]
 
-export type MicrosoftSurfaceProvider = "microsoftCalendar" | "microsoftEmail"
+export type MicrosoftIntegration = "microsoftCalendar" | "microsoftEmail"
 
-export type MicrosoftSurfaceConfig = {
-  callbackParam: MicrosoftSurfaceProvider
+export type MicrosoftIntegrationConfig = {
+  callbackParam: MicrosoftIntegration
   callbackPath: string
   installPath: string
-  provider: MicrosoftSurfaceProvider
+  provider: MicrosoftIntegration
   scopes: string[]
 }
 
-export const microsoftSurfaceConfigs = {
+export const microsoftIntegrationConfigs = {
   microsoftEmail: {
     callbackParam: "microsoftEmail",
     callbackPath: "/microsoft-email/oauth/callback",
@@ -27,7 +27,7 @@ export const microsoftSurfaceConfigs = {
     provider: "microsoftCalendar",
     scopes: [...microsoftIdentityScopes, "Calendars.ReadWrite"],
   },
-} satisfies Record<MicrosoftSurfaceProvider, MicrosoftSurfaceConfig>
+} satisfies Record<MicrosoftIntegration, MicrosoftIntegrationConfig>
 
 export function microsoftOAuthAuthorizeUrl(tenantId: string) {
   return `https://login.microsoftonline.com/${encodeURIComponent(

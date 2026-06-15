@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils"
-import { type AutomationSurfaceProvider, getAutomationSurfaceLogo } from "."
+import { type AutomationSurfaceIntegration, getAutomationSurfaceLogo } from "."
 
 export function SurfaceLogo({
   className,
   provider,
 }: {
   className?: string
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
 }) {
   return (
     <img

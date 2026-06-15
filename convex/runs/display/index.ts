@@ -1,7 +1,7 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
 import { getAutomationEventDefinition } from "../../automations/events"
-import { providerLabel } from "../../providers/catalog"
+import { toolSurfaceLabel } from "../../integrations/catalog"
 import { type SourceMetadataItem } from "../../shared/sources/schema"
 import { type runDisplay } from "../schema"
 import {
@@ -50,11 +50,11 @@ export function messageDisplay(input: {
       kind: { type: input.kind, label: input.kind },
       provider: {
         type: input.message.provider,
-        label: providerLabel(input.message.provider),
+        label: toolSurfaceLabel(input.message.provider),
       },
       metadata: input.message.metadata,
     },
-    trigger: `${providerLabel(input.message.provider)} message`,
+    trigger: `${toolSurfaceLabel(input.message.provider)} message`,
     details: details.filter((item) => !isPayloadDetail(item)),
     ...(taskSource === undefined ? {} : { taskSource }),
   }
@@ -73,7 +73,7 @@ function eventAutomationDisplay(input: {
       metadata: event?.metadata ?? [],
       ...(provider === undefined
         ? {}
-        : { provider: { type: provider, label: providerLabel(provider) } }),
+        : { provider: { type: provider, label: toolSurfaceLabel(provider) } }),
       ...(event === null
         ? {}
         : { event: { type: event.type, label: eventLabel(event) } }),
@@ -81,7 +81,7 @@ function eventAutomationDisplay(input: {
     trigger:
       provider === undefined
         ? "Event automation"
-        : `${providerLabel(provider)} event`,
+        : `${toolSurfaceLabel(provider)} event`,
     details:
       event === null
         ? []

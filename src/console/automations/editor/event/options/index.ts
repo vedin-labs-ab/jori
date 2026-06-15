@@ -1,42 +1,45 @@
 import {
-  type AutomationEventProvider,
+  type AutomationEventIntegration,
   automationEventCatalog,
 } from "@contracts/automations/events"
 
-export type EventProviderConnectionState = {
-  providers: Array<{
+export type EventIntegrationConnectionState = {
+  integrations: Array<{
     connected: boolean
-    provider: AutomationEventProvider
+    provider: AutomationEventIntegration
   }>
 }
 
-export type EventProviderOption = {
+export type EventIntegrationOption = {
   connected: boolean | undefined
   index: number
-  provider: AutomationEventProvider
+  provider: AutomationEventIntegration
 }
 
-export function getProviderOptions(
-  connections: EventProviderConnectionState | undefined
-): EventProviderOption[] {
-  const connectedProviders = new Map(
-    connections?.providers.map((option) => [option.provider, option.connected])
+export function getIntegrationOptions(
+  connections: EventIntegrationConnectionState | undefined
+): EventIntegrationOption[] {
+  const connectedIntegrations = new Map(
+    connections?.integrations.map((option) => [
+      option.provider,
+      option.connected,
+    ])
   )
 
   return automationEventCatalog
     .map((definition, index) => ({
-      connected: connectedProviders.get(definition.provider),
+      connected: connectedIntegrations.get(definition.provider),
       index,
       provider: definition.provider,
     }))
     .sort(
       (left, right) =>
-        providerSortRank(left) - providerSortRank(right) ||
+        integrationSortRank(left) - integrationSortRank(right) ||
         left.index - right.index
     )
 }
 
-function providerSortRank(option: EventProviderOption) {
+function integrationSortRank(option: EventIntegrationOption) {
   if (option.connected === true) {
     return 0
   }

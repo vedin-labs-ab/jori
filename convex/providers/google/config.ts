@@ -8,17 +8,17 @@ export const googleOAuthCallbackPath = "/google/oauth/callback"
 
 const googleIdentityScopes = ["openid", "email", "profile"]
 
-export type GoogleSurfaceProvider = "gmail" | "googleCalendar" | "googleDrive"
+export type GoogleIntegration = "gmail" | "googleCalendar" | "googleDrive"
 
-export type GoogleSurfaceConfig = {
-  callbackParam: GoogleSurfaceProvider
+export type GoogleIntegrationConfig = {
+  callbackParam: GoogleIntegration
   callbackPath: string
   installPath: string
-  provider: GoogleSurfaceProvider
+  provider: GoogleIntegration
   scopes: string[]
 }
 
-export const googleSurfaceConfigs = {
+export const googleIntegrationConfigs = {
   gmail: {
     callbackParam: "gmail",
     callbackPath: googleOAuthCallbackPath,
@@ -48,4 +48,4 @@ export const googleSurfaceConfigs = {
     provider: "googleDrive",
     scopes: [...googleIdentityScopes, "https://www.googleapis.com/auth/drive"],
   },
-} satisfies Record<GoogleSurfaceProvider, GoogleSurfaceConfig>
+} satisfies Record<GoogleIntegration, GoogleIntegrationConfig>

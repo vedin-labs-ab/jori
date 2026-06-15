@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { IntegrationPermissions } from "../../permissions"
 import {
   type ToolPermissionController,
-  type ToolProvider,
+  type ToolSurface,
 } from "../../permissions/controller"
 import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"
@@ -24,7 +24,7 @@ export type IntegrationConnectionConfig = {
   label: string
   loading: string
   logo: IntegrationLogo
-  provider: Exclude<ToolProvider, "milo">
+  provider: Exclude<ToolSurface, "milo">
 }
 
 type IntegrationStatus = {

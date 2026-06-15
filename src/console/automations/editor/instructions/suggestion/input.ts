@@ -2,7 +2,7 @@ import { type JSONContent } from "@tiptap/core"
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
 import {
-  type AutomationSurfaceProvider,
+  type AutomationSurfaceIntegration,
   findCompletedAutomationSurfaceMention,
   isMentionNameCharacter,
 } from "../../../access"
@@ -23,7 +23,7 @@ export function insertSurfaceSuggestion({
 }: {
   editor: Editor | null
   permissions: AutomationPolicyPermissions
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState | null
 }) {
@@ -105,7 +105,7 @@ export function replaceCompletedSurfaceMention({
 }
 
 function getSurfaceInsertionContent(
-  provider: AutomationSurfaceProvider,
+  provider: AutomationSurfaceIntegration,
   includeTrailingSpace: boolean,
   permissions: AutomationPolicyPermissions,
   existingTools: string[] | undefined
@@ -125,7 +125,7 @@ function getSurfaceInsertionContent(
 }
 
 function createSurfaceNodeAttrs(
-  provider: AutomationSurfaceProvider,
+  provider: AutomationSurfaceIntegration,
   permissions: AutomationPolicyPermissions,
   existingTools: string[] | undefined
 ) {

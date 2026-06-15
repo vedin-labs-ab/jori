@@ -1,11 +1,11 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { type GoogleSurfaceProvider } from "./config"
+import { type GoogleIntegration } from "./config"
 
 export async function findExistingGoogleIntegration(
   ctx: MutationCtx,
   args: {
-    provider: GoogleSurfaceProvider
+    provider: GoogleIntegration
     tenantId: string
     createdBy: string
   }
@@ -32,7 +32,7 @@ export async function findExistingGoogleIntegration(
 }
 
 export function getGoogleIntegrationScope(
-  provider: GoogleSurfaceProvider
+  provider: GoogleIntegration
 ): Doc<"integrations">["scope"] {
   return provider === "googleDrive" ? "tenant" : "user"
 }

@@ -29,14 +29,14 @@ import { searchSlackChannels } from "./slack"
 export type AutomationEventOptionSearchResult =
   | {
       status: "ready"
-      options: Awaited<ReturnType<typeof loadProviderOptions>>
+      options: Awaited<ReturnType<typeof loadIntegrationOptions>>
     }
   | {
       status: "unavailable"
       message: string
     }
 
-export async function searchProviderOptions(args: {
+export async function searchIntegrationOptions(args: {
   integration: Doc<"integrations">
   source: AutomationEventOptionSource
   query: string
@@ -45,7 +45,7 @@ export async function searchProviderOptions(args: {
   try {
     return {
       status: "ready",
-      options: await loadProviderOptions(args),
+      options: await loadIntegrationOptions(args),
     }
   } catch (error) {
     return {
@@ -58,7 +58,7 @@ export async function searchProviderOptions(args: {
   }
 }
 
-async function loadProviderOptions(args: {
+async function loadIntegrationOptions(args: {
   integration: Doc<"integrations">
   source: AutomationEventOptionSource
   query: string

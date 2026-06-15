@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../../../_generated/dataModel"
 import {
-  getToolPermissionsByProvider,
+  getToolPermissionsBySurface,
   resolveToolModes,
 } from "../../../permissions/catalog"
 import { assemblePrompt } from "../prompt"
@@ -12,7 +12,7 @@ import { filterRuntimeSkillsForBundle } from "./bundles"
 describe("runtime integration bundles", () => {
   test("omits Slack formatting skill when Slack tools are unavailable", () => {
     const toolModes = resolveToolModes(
-      getToolPermissionsByProvider("gmail").map((permission) => ({
+      getToolPermissionsBySurface("gmail").map((permission) => ({
         tool: permission.tool,
         mode: "blocked" as const,
       }))
@@ -156,10 +156,10 @@ function integration(
     _creationTime: 0,
     tenantId: "tenant",
     provider,
-    scope: isUserScopedProvider(provider) ? "user" : "tenant",
-    ownerId: isUserScopedProvider(provider) ? "user" : undefined,
+    scope: isUserScopedIntegration(provider) ? "user" : "tenant",
+    ownerId: isUserScopedIntegration(provider) ? "user" : undefined,
     externalId: `${provider}-account`,
-    email: isUserScopedProvider(provider) ? "user@example.com" : undefined,
+    email: isUserScopedIntegration(provider) ? "user@example.com" : undefined,
     credentials: credentials(provider),
     status,
     createdBy: "user",
@@ -168,7 +168,7 @@ function integration(
   } as Doc<"integrations">
 }
 
-function isUserScopedProvider(provider: string) {
+function isUserScopedIntegration(provider: string) {
   return (
     provider === "gmail" ||
     provider === "googleCalendar" ||

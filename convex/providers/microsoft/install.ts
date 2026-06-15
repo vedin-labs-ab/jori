@@ -7,7 +7,7 @@ import {
 } from "../../_generated/server"
 import { readRefreshToken } from "../credentials"
 import { buildInstallState } from "../install"
-import { type MicrosoftSurfaceProvider } from "./config"
+import { type MicrosoftIntegration } from "./config"
 import { getMicrosoftIdentityEmail, upsertMicrosoftIdentity } from "./identity"
 import { createSignedMicrosoftState } from "./signing"
 
@@ -122,7 +122,7 @@ async function upsertMicrosoftIntegration(
     existing: Doc<"integrations"> | null
     now: number
     tenantId: string
-    provider: MicrosoftSurfaceProvider
+    provider: MicrosoftIntegration
     ownerId: string
     externalId: string
     name: string | undefined
@@ -220,7 +220,7 @@ export const updateOAuthCredentials = internalMutation({
 
 async function createInstallState(
   ctx: MutationCtx,
-  provider: MicrosoftSurfaceProvider,
+  provider: MicrosoftIntegration,
   args: {
     tenantId: string
     returnUrl: string

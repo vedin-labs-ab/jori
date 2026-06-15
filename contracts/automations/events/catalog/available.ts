@@ -3,7 +3,7 @@ import {
   pullRequestCommentEvent,
   pullRequestReviewCommentEvent,
 } from "../names"
-import { event, optionParameter, provider, textParameter } from "./builders"
+import { event, integration, optionParameter, textParameter } from "./builders"
 import { type AutomationEventParameter } from "./types"
 
 const githubIssueCommentParameters = [
@@ -79,7 +79,7 @@ function commentEvents(args: {
 }
 
 export const availableAutomationEventCatalog = [
-  provider("slack", [
+  integration("slack", [
     event("message.created", {
       label: "New channel message",
       description:
@@ -92,7 +92,7 @@ export const availableAutomationEventCatalog = [
       ],
     }),
   ]),
-  provider("github", [
+  integration("github", [
     ...commentEvents({
       values: issueCommentEvent,
       label: "Issue comment",
@@ -112,7 +112,7 @@ export const availableAutomationEventCatalog = [
       parameters: githubPullRequestReviewCommentParameters,
     }),
   ]),
-  provider("linear", [
+  integration("linear", [
     ...commentEvents({
       values: issueCommentEvent,
       label: "Issue comment",
@@ -120,7 +120,7 @@ export const availableAutomationEventCatalog = [
       parameters: linearIssueCommentParameters,
     }),
   ]),
-  provider("notion", [
+  integration("notion", [
     event("page.updated", {
       label: "Page updated",
       description:

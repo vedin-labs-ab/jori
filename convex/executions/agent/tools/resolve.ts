@@ -4,10 +4,10 @@ import {
   getIntegrationTools,
 } from "../../../automations/access"
 import {
-  getToolPermissionsByProvider,
+  getToolPermissionsBySurface,
   type PermissionMode,
   type ToolPermission,
-  type ToolProvider,
+  type ToolSurface,
 } from "../../../permissions/catalog"
 import { requireGitHubCredentials } from "../../../providers/github/credentials"
 import { requireGoogleCredentials } from "../../../providers/google/credentials"
@@ -24,7 +24,7 @@ import {
   type ToolPreflight,
 } from "./types"
 
-type RuntimeToolProvider = ToolPreflight["type"]
+type RuntimeToolSurface = ToolPreflight["type"]
 
 type IntegrationBundleArgs = {
   broker: {
@@ -38,7 +38,7 @@ type IntegrationBundleArgs = {
 }
 
 type IntegrationToolBundle = {
-  provider: ToolProvider
+  provider: ToolSurface
   bundle: ToolBundle
   capability: RuntimeToolCapability
   permissions: ToolPermission[]
@@ -51,7 +51,7 @@ export function createIntegrationToolBundle(
     return null
   }
 
-  const provider = getRuntimeToolProvider(args.integration.provider)
+  const provider = getRuntimeToolSurface(args.integration.provider)
 
   if (provider === null) {
     return null
@@ -87,7 +87,7 @@ export function createIntegrationToolBundle(
 }
 
 export function getEnabledToolPermissions(
-  provider: ToolProvider,
+  provider: ToolSurface,
   toolModes: ReadonlyMap<string, PermissionMode>,
   executionType: ToolExecutionType = "message",
   selectedTools?: readonly string[]
@@ -95,14 +95,14 @@ export function getEnabledToolPermissions(
   const selectedToolSet =
     selectedTools === undefined ? null : new Set(selectedTools)
 
-  return getToolPermissionsByProvider(provider).filter(
+  return getToolPermissionsBySurface(provider).filter(
     (permission) =>
       (selectedToolSet === null || selectedToolSet.has(permission.tool)) &&
       canUseToolPermission({ executionType, permission, toolModes })
   )
 }
 
-const runtimeToolProviders: readonly RuntimeToolProvider[] = [
+const runtimeToolSurfaces: readonly RuntimeToolSurface[] = [
   "linear",
   "github",
   "slack",
@@ -114,14 +114,12 @@ const runtimeToolProviders: readonly RuntimeToolProvider[] = [
   "microsoftCalendar",
 ]
 
-function getRuntimeToolProvider(provider: string): RuntimeToolProvider | null {
-  return (
-    runtimeToolProviders.find((candidate) => candidate === provider) ?? null
-  )
+function getRuntimeToolSurface(provider: string): RuntimeToolSurface | null {
+  return runtimeToolSurfaces.find((candidate) => candidate === provider) ?? null
 }
 
 function createIntegrationPreflight(
-  provider: RuntimeToolProvider,
+  provider: RuntimeToolSurface,
   integration: Doc<"integrations">
 ): ToolPreflight {
   switch (provider) {

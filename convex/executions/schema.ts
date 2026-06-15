@@ -1,11 +1,11 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { providerValidator } from "../providers/catalog"
+import { toolSurfaceValidator } from "../integrations/catalog"
 
 export const toolSnapshot = v.object({
   groups: v.array(
     v.object({
-      provider: providerValidator,
+      provider: toolSurfaceValidator,
       label: v.string(),
       tools: v.array(
         v.object({

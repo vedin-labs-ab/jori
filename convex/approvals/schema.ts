@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { providerValidator } from "../providers/catalog"
+import { toolSurfaceValidator } from "../integrations/catalog"
 import { actorValidator } from "../shared/actor"
 
 export const approvalDecision = v.union(
@@ -27,7 +27,7 @@ export const approvalDelivery = v.union(
 export const approvals = defineTable({
   tenantId: v.string(),
   executionId: v.id("executions"),
-  provider: providerValidator,
+  provider: toolSurfaceValidator,
   tool: v.string(),
   args: v.any(),
   summary: v.string(),

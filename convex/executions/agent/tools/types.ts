@@ -1,6 +1,6 @@
 import {
   type ToolPermission,
-  type ToolProvider,
+  type ToolSurface,
 } from "../../../permissions/catalog"
 import { type GitHubCredentials } from "../../../providers/github/credentials"
 import { type GoogleCredentials } from "../../../providers/google/credentials"
@@ -22,7 +22,7 @@ export type RuntimeToolBundle = ToolBundle & {
 }
 
 export type RuntimeToolCapability = {
-  provider: ToolProvider
+  provider: ToolSurface
   label: string
   tools: RuntimeToolCapabilityTool[]
 }

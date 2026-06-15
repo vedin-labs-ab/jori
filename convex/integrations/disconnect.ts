@@ -10,17 +10,17 @@ import {
 import { requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
 import {
-  type IntegrationProvider,
-  integrationProviderValidator,
-  isGoogleProvider,
-  isUserScopedProvider,
-} from "../providers/catalog"
+  type Integration,
+  integrationValidator,
+  isGoogleIntegration,
+  isUserScopedIntegration,
+} from "../integrations/catalog"
 import { getTenantIntegration, getUserIntegrationForOwner } from "./data"
 import { revokeIntegrationAccess } from "./revoke"
 
 export const disconnect = action({
   args: {
-    provider: integrationProviderValidator,
+    provider: integrationValidator,
     tenantId: v.string(),
   },
   handler: async (ctx, args): Promise<Id<"integrations"> | null> => {
@@ -71,13 +71,13 @@ export const disconnect = action({
 
 export const getDisconnectTarget = internalQuery({
   args: {
-    provider: integrationProviderValidator,
+    provider: integrationValidator,
     tenantId: v.string(),
   },
   handler: async (ctx, args): Promise<DisconnectTarget | null> => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
     const userId = requireClerkUserId(identity)
-    const integration = isUserScopedProvider(args.provider)
+    const integration = isUserScopedIntegration(args.provider)
       ? await getUserIntegrationForOwner(ctx, {
           ownerId: userId,
           provider: args.provider,
@@ -148,7 +148,7 @@ export const finishDisconnect = internalMutation({
     externalId: v.string(),
     integrationId: v.id("integrations"),
     ownerId: v.optional(v.string()),
-    provider: integrationProviderValidator,
+    provider: integrationValidator,
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
@@ -169,7 +169,7 @@ async function getIntegrationsToDelete(
     externalId: string
     integrationId: Id<"integrations">
     ownerId?: string | undefined
-    provider: IntegrationProvider
+    provider: Integration
     tenantId: string
   }
 ) {
@@ -179,7 +179,7 @@ async function getIntegrationsToDelete(
     return []
   }
 
-  if (!isGoogleProvider(args.provider)) {
+  if (!isGoogleIntegration(args.provider)) {
     return integration.status === "paused" &&
       isSameSnapshot(integration.credentials, args.credentials)
       ? [integration]
@@ -201,7 +201,7 @@ async function getIntegrationsToDelete(
 
   return [...integrations, ...pausedIntegrations].filter(
     (candidate) =>
-      isGoogleProvider(candidate.provider) &&
+      isGoogleIntegration(candidate.provider) &&
       candidate.externalId === args.externalId &&
       candidate.ownerId === args.ownerId
   )

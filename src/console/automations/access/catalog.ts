@@ -1,6 +1,6 @@
 export const automationSurfaceAccesses = ["read", "write", "both"] as const
 
-export const automationSurfaceProviders = [
+export const automationSurfaceIntegrations = [
   provider("slack", "Slack", ["slack"]),
   provider("linear", "Linear", ["linear"]),
   provider("github", "GitHub", ["github", "git hub"]),
@@ -30,36 +30,42 @@ export const automationSurfaceProviders = [
 ] as const
 
 export type AutomationSurfaceAccess = (typeof automationSurfaceAccesses)[number]
-export type AutomationSurfaceProvider =
-  (typeof automationSurfaceProviders)[number]["provider"]
-export type AutomationSurfaceProviderMeta =
-  (typeof automationSurfaceProviders)[number]
+export type AutomationSurfaceIntegration =
+  (typeof automationSurfaceIntegrations)[number]["provider"]
+export type AutomationSurfaceIntegrationMeta =
+  (typeof automationSurfaceIntegrations)[number]
 
 export type AutomationSurfaceFormValue = {
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
   tools: string[]
 }
 
-export function getAutomationSurfaceProvider(
-  provider: AutomationSurfaceProvider
+export function getAutomationSurfaceIntegration(
+  provider: AutomationSurfaceIntegration
 ) {
-  return automationSurfaceProviders.find((item) => item.provider === provider)
-}
-
-export function isAutomationSurfaceProvider(
-  provider: unknown
-): provider is AutomationSurfaceProvider {
-  return (
-    typeof provider === "string" &&
-    automationSurfaceProviders.some((item) => item.provider === provider)
+  return automationSurfaceIntegrations.find(
+    (item) => item.provider === provider
   )
 }
 
-export function getAutomationSurfaceLabel(provider: AutomationSurfaceProvider) {
-  return getAutomationSurfaceProvider(provider)?.label ?? provider
+export function isAutomationSurfaceIntegration(
+  provider: unknown
+): provider is AutomationSurfaceIntegration {
+  return (
+    typeof provider === "string" &&
+    automationSurfaceIntegrations.some((item) => item.provider === provider)
+  )
 }
 
-export function getAutomationSurfaceLogo(provider: AutomationSurfaceProvider) {
+export function getAutomationSurfaceLabel(
+  provider: AutomationSurfaceIntegration
+) {
+  return getAutomationSurfaceIntegration(provider)?.label ?? provider
+}
+
+export function getAutomationSurfaceLogo(
+  provider: AutomationSurfaceIntegration
+) {
   return `/logos/providers/${providerLogoName(provider)}.svg`
 }
 
@@ -71,7 +77,7 @@ function provider<const Provider extends string>(
   return { aliases, label, provider }
 }
 
-function providerLogoName(provider: AutomationSurfaceProvider) {
+function providerLogoName(provider: AutomationSurfaceIntegration) {
   if (provider === "googleCalendar") {
     return "google-calendar"
   }

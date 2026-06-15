@@ -1,7 +1,7 @@
 import {
-  getToolPermissionsByProvider,
+  getToolPermissionsBySurface,
   resolveToolMode,
-  type ToolProvider,
+  type ToolSurface,
 } from "../../../permissions/catalog"
 import { type ToolExecutionType, type ToolPermissionInput } from "./policy"
 import { emptyObjectSchema, getToolInputSchema } from "./schemas"
@@ -13,14 +13,14 @@ export type McpToolDefinition = {
 }
 
 export function getProviderToolDefinitions(
-  provider: ToolProvider,
+  provider: ToolSurface,
   input: Pick<ToolPermissionInput, "toolModes"> & {
     executionType?: ToolExecutionType
   }
 ) {
   const executionType = input.executionType ?? "message"
 
-  return getToolPermissionsByProvider(provider).map((permission) => ({
+  return getToolPermissionsBySurface(provider).map((permission) => ({
     name: permission.tool,
     description: permission.description,
     inputSchema:

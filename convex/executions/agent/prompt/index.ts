@@ -2,7 +2,7 @@ import {
   type AutomationAccess,
   getIntegrationTools,
 } from "../../../automations/access"
-import { providerLabels } from "../../../automations/providers"
+import { integrationLabels } from "../../../automations/integrations"
 import {
   getToolPermission,
   type ToolPermission,
@@ -107,7 +107,7 @@ function formatAutomationAccess(
     targetLine("Web search", access.web ? "Allowed" : "Disabled"),
     ...integrations.map((integration) =>
       targetLine(
-        providerLabels[integration.provider],
+        integrationLabels[integration.provider],
         formatSelectedTools(getIntegrationTools(access, integration._id))
       )
     ),
@@ -160,7 +160,7 @@ function formatEvent(
 }
 
 function getProviderLabel(provider: MessageProvider) {
-  return providerLabels[provider]
+  return integrationLabels[provider]
 }
 
 function getMessageTarget(provider: MessageProvider, data: unknown) {
@@ -172,7 +172,7 @@ function formatProviderLabel(provider: string | undefined) {
     return undefined
   }
 
-  return isKnownProvider(provider) ? providerLabels[provider] : provider
+  return isKnownProvider(provider) ? integrationLabels[provider] : provider
 }
 
 function getProviderTargetLines(provider: string | undefined, data: unknown) {
@@ -197,8 +197,8 @@ function getProviderTargetLines(provider: string | undefined, data: unknown) {
 
 function isKnownProvider(
   provider: string
-): provider is keyof typeof providerLabels {
-  return provider in providerLabels
+): provider is keyof typeof integrationLabels {
+  return provider in integrationLabels
 }
 
 function getGitHubTargetLines(data: unknown) {

@@ -1,7 +1,7 @@
-import { type Provider } from "../../providers/catalog"
+import { type ToolSurface } from "../../integrations/catalog"
 
 export type PromptedToolApproval = {
-  provider: Provider
+  provider: ToolSurface
   tool: string
   args: Record<string, unknown>
   summary: string
@@ -13,7 +13,7 @@ export type PromptedToolApproval = {
 }
 
 export function parsePromptedToolApproval(args: {
-  provider: Provider
+  provider: ToolSurface
   tool: string
   args: Record<string, unknown>
 }): PromptedToolApproval {

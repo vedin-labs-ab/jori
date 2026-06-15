@@ -1,7 +1,7 @@
 import { mergeAttributes, Node } from "@tiptap/core"
 import { ReactNodeViewRenderer } from "@tiptap/react"
 import {
-  type AutomationSurfaceProvider,
+  type AutomationSurfaceIntegration,
   getAutomationSurfaceLabel,
 } from "../../../access"
 import { type AutomationPolicyPermissions } from "../../../access/policy"
@@ -9,14 +9,14 @@ import { AutomationSurfaceNodeView } from "../access/node"
 import {
   type AutomationSurfacePolicyState,
   automationSurfaceNodeName,
+  parseAutomationSurfaceIntegration,
   parseAutomationSurfacePolicy,
-  parseAutomationSurfaceProvider,
   parseAutomationSurfaceToolsAttribute,
 } from "../document"
 
 export type AutomationSurfaceNodeAttrs = {
   policy: AutomationSurfacePolicyState
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
   tools: string[]
 }
 
@@ -43,11 +43,11 @@ export const AutomationSurfaceExtension =
         provider: {
           default: null,
           parseHTML: (element) =>
-            parseAutomationSurfaceProvider(
+            parseAutomationSurfaceIntegration(
               element.getAttribute("data-provider")
             ),
           renderHTML: (attributes) => ({
-            "data-provider": parseAutomationSurfaceProvider(
+            "data-provider": parseAutomationSurfaceIntegration(
               attributes.provider
             ),
           }),
@@ -80,7 +80,7 @@ export const AutomationSurfaceExtension =
     },
 
     renderHTML({ HTMLAttributes, node }) {
-      const provider = parseAutomationSurfaceProvider(node.attrs.provider)
+      const provider = parseAutomationSurfaceIntegration(node.attrs.provider)
 
       return [
         "span",

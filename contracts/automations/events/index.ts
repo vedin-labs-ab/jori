@@ -1,4 +1,4 @@
-import { type IntegrationProvider } from "../../providers"
+import { type Integration } from "../../integrations"
 import { automationEventCatalog, automationEventOptionSources } from "./catalog"
 import {
   type AutomationEventCriteria,
@@ -12,35 +12,33 @@ export type {
   AutomationEventCriteria,
   AutomationEventCriteriaValue,
   AutomationEventDefinition,
+  AutomationEventIntegrationDefinition,
   AutomationEventOptionSource,
   AutomationEventParameter,
-  AutomationEventProviderDefinition,
 } from "./catalog/types"
 
 const pendingProviderDelivery =
   "Event delivery for this provider is not available yet."
 
-export type AutomationEventProvider =
+export type AutomationEventIntegration =
   (typeof automationEventCatalog)[number]["provider"]
 
-export const automationEventProviders = automationEventCatalog.map(
+export const automationEventIntegrations = automationEventCatalog.map(
   (definition) => definition.provider
 )
 
-export function getAutomationEventProviderDefinition(
-  provider: IntegrationProvider
-) {
+export function getAutomationEventIntegrationDefinition(provider: Integration) {
   return automationEventCatalog.find(
     (definition) => definition.provider === provider
   )
 }
 
-export function getAutomationEventDefinitions(provider: IntegrationProvider) {
-  return getAutomationEventProviderDefinition(provider)?.events ?? []
+export function getAutomationEventDefinitions(provider: Integration) {
+  return getAutomationEventIntegrationDefinition(provider)?.events ?? []
 }
 
 export function getAutomationEventDefinition(
-  provider: IntegrationProvider,
+  provider: Integration,
   value: string
 ) {
   return getAutomationEventDefinitions(provider).find(
@@ -49,19 +47,19 @@ export function getAutomationEventDefinition(
 }
 
 export function getDefaultAutomationEvent(
-  provider: IntegrationProvider = automationEventCatalog[0].provider
+  provider: Integration = automationEventCatalog[0].provider
 ) {
-  const providerDefinition = getAutomationEventProviderDefinition(provider)
+  const providerDefinition = getAutomationEventIntegrationDefinition(provider)
 
   return providerDefinition?.events[0] ?? automationEventCatalog[0].events[0]
 }
 
-export function isAutomationEventProvider(
+export function isAutomationEventIntegration(
   provider: unknown
-): provider is AutomationEventProvider {
+): provider is AutomationEventIntegration {
   return (
     typeof provider === "string" &&
-    automationEventProviders.some((candidate) => candidate === provider)
+    automationEventIntegrations.some((candidate) => candidate === provider)
   )
 }
 
@@ -74,8 +72,8 @@ export function isAutomationEventOptionSource(
   )
 }
 
-export function providerUsesAutomationEventOptionSource(
-  provider: IntegrationProvider,
+export function integrationUsesAutomationEventOptionSource(
+  provider: Integration,
   source: AutomationEventOptionSource
 ) {
   return getAutomationEventDefinitions(provider).some((definition) =>

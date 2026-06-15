@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { type AutomationSurfaceProvider } from "../../../access"
+import { type AutomationSurfaceIntegration } from "../../../access"
 import { SurfaceLogo } from "../../../access/logo"
 import { type InstructionSuggestionState } from "./suggest"
 
@@ -11,7 +11,7 @@ export function InstructionSuggestions({
 }: {
   listboxId: string
   onActiveIndexChange: (activeIndex: number) => void
-  onSelect: (provider: AutomationSurfaceProvider) => void
+  onSelect: (provider: AutomationSurfaceIntegration) => void
   state: InstructionSuggestionState | null
 }) {
   if (state === null) {

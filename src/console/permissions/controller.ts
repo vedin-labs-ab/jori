@@ -3,7 +3,7 @@ import {
   type PermissionMode,
   type ResolvedToolPermission,
   type ToolAccess,
-  type ToolProvider,
+  type ToolSurface,
 } from "@contracts/permissions"
 import { useMutation, useQuery } from "convex/react"
 import { useState } from "react"
@@ -14,7 +14,7 @@ export type {
   ConfigurablePermissionMode,
   PermissionMode,
   ToolAccess,
-  ToolProvider,
+  ToolSurface,
 }
 export type ToolPermission = ResolvedToolPermission
 
@@ -27,7 +27,7 @@ export type ToolPermissionController = {
   permissions: ToolPermission[] | null | undefined
   pendingTool: string | undefined
   error: PermissionUpdateError | undefined
-  getProviderPermissions: (provider: ToolProvider) => ToolPermission[]
+  getSurfacePermissions: (provider: ToolSurface) => ToolPermission[]
   updatePermission: (tool: string, mode: ConfigurablePermissionMode) => void
 }
 
@@ -59,7 +59,7 @@ export function useToolPermissions(tenantId: string): ToolPermissionController {
     }
   }
 
-  function getProviderPermissions(provider: ToolProvider) {
+  function getSurfacePermissions(provider: ToolSurface) {
     if (!Array.isArray(permissions)) {
       return []
     }
@@ -71,7 +71,7 @@ export function useToolPermissions(tenantId: string): ToolPermissionController {
     permissions,
     pendingTool,
     error,
-    getProviderPermissions,
+    getSurfacePermissions,
     updatePermission,
   }
 }

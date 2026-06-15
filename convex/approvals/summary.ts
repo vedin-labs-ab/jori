@@ -1,5 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
-import { providerLabel } from "../providers/catalog"
+import { toolSurfaceLabel } from "../integrations/catalog"
 import { slackMessageUrl } from "../providers/slack/links"
 import { getToolLabel } from "./slack/labels"
 
@@ -96,7 +96,7 @@ function deliveryLabel(delivery: Doc<"approvals">["delivery"]) {
     return "Delivered to Slack"
   }
 
-  return `Delivered to ${providerLabel(delivery.provider)}`
+  return `Delivered to ${toolSurfaceLabel(delivery.provider)}`
 }
 
 function readString(data: unknown, key: string) {

@@ -1,13 +1,13 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { integrationProviderValidator } from "../providers/catalog"
+import { integrationValidator } from "../integrations/catalog"
 
 const integrationScope = v.union(v.literal("tenant"), v.literal("user"))
 const integrationStatus = v.union(v.literal("active"), v.literal("paused"))
 
 export const integrations = defineTable({
   tenantId: v.string(),
-  provider: integrationProviderValidator,
+  provider: integrationValidator,
   scope: integrationScope,
   ownerId: v.optional(v.string()),
   externalId: v.string(),

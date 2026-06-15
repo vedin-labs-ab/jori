@@ -2,11 +2,11 @@
 import { fireEvent, screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 import {
-  mockProviderConnections,
-  providerConnections,
+  integrationConnections,
+  mockIntegrationConnections,
   renderEventFields,
 } from "./fixtures"
-import { getProviderOptions } from "./options"
+import { getIntegrationOptions } from "./options"
 
 describe("automation event fields", () => {
   test("disables the event picker when the selected provider has one event", () => {
@@ -36,7 +36,7 @@ describe("automation event provider picker", () => {
   })
 
   test("opens the provider picker when the selected provider is not connected", () => {
-    mockProviderConnections("github")
+    mockIntegrationConnections("github")
 
     renderEventFields({ eventProvider: "slack", event: "message.created" })
 
@@ -51,7 +51,7 @@ describe("automation event provider picker", () => {
   })
 
   test("opens the provider picker when no providers are connected", () => {
-    mockProviderConnections()
+    mockIntegrationConnections()
 
     renderEventFields({ eventProvider: "slack", event: "message.created" })
 
@@ -62,9 +62,9 @@ describe("automation event provider picker", () => {
   })
 })
 
-describe("automation event provider options", () => {
-  test("places connected providers first and marks unconnected providers", () => {
-    const options = getProviderOptions(providerConnections("github"))
+describe("automation event integration options", () => {
+  test("places connected integrations first and marks unconnected integrations", () => {
+    const options = getIntegrationOptions(integrationConnections("github"))
 
     expect(options[0]).toMatchObject({
       connected: true,

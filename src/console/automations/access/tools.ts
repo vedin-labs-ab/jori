@@ -1,10 +1,10 @@
 import { type ToolPermission } from "../../permissions/controller"
-import { type AutomationSurfaceProvider } from "./catalog"
+import { type AutomationSurfaceIntegration } from "./catalog"
 
 export type AutomationToolPermissions = ToolPermission[] | null | undefined
 
 export function getDefaultAutomationSurfaceTools(
-  provider: AutomationSurfaceProvider,
+  provider: AutomationSurfaceIntegration,
   permissions: AutomationToolPermissions
 ) {
   if (!Array.isArray(permissions)) {

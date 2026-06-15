@@ -2,14 +2,14 @@ import { useAction } from "convex/react"
 import { useState } from "react"
 import { api } from "../../../../convex/_generated/api"
 import { readErrorMessage } from "../../error"
-import { type ToolProvider } from "../../permissions/controller"
+import { type ToolSurface } from "../../permissions/controller"
 
 export function useIntegrationDisconnect({
   provider,
   tenantId,
   title,
 }: {
-  provider: Exclude<ToolProvider, "milo">
+  provider: Exclude<ToolSurface, "milo">
   tenantId: string
   title: string
 }) {
