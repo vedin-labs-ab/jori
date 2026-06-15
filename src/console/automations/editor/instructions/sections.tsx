@@ -4,13 +4,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { type ToolPermission } from "../../../permissions/controller"
 import {
   automationToolModeDescription,
   isAutomationToolSelectable,
 } from "../../policy"
+import { ToolGroupSection, ToolGroupsFrame, ToolRowContent } from "./list"
+import { groupToolsByAccess, type ToolAccessGroup } from "./model"
 
 type AutomationSurfaceToolGroupsProps = {
   onToolsChange: (tools: string[]) => void
@@ -24,14 +25,6 @@ export function AutomationSurfaceToolGroups({
   tools,
 }: AutomationSurfaceToolGroupsProps) {
   const selectedTools = new Set(tools)
-  const permissionGroups = (["read", "write"] as const)
-    .map((access) => ({
-      access,
-      permissions: permissions.filter(
-        (permission) => permission.access === access
-      ),
-    }))
-    .filter((group) => group.permissions.length > 0)
 
   function setTool(tool: string, enabled: boolean) {
     const nextTools = new Set(selectedTools)
@@ -45,10 +38,10 @@ export function AutomationSurfaceToolGroups({
     onToolsChange([...nextTools])
   }
 
-  function setGroupTools(groupPermissions: ToolPermission[], enabled: boolean) {
+  function setGroupTools(groupTools: ToolPermission[], enabled: boolean) {
     const nextTools = new Set(selectedTools)
 
-    for (const permission of groupPermissions) {
+    for (const permission of groupTools) {
       if (enabled && isAutomationToolSelectable(permission)) {
         nextTools.add(permission.tool)
         continue
@@ -63,95 +56,78 @@ export function AutomationSurfaceToolGroups({
   }
 
   return (
-    <div className="grid gap-5">
-      {permissionGroups.map((group) => (
-        <AutomationToolGroup
-          access={group.access}
+    <ToolGroupsFrame>
+      {groupToolsByAccess(permissions).map((group) => (
+        <EditableToolGroup
+          group={group}
           key={group.access}
           onGroupChange={setGroupTools}
           onToolChange={setTool}
-          permissions={group.permissions}
           selectedTools={selectedTools}
         />
       ))}
-    </div>
+    </ToolGroupsFrame>
   )
 }
 
-type AutomationToolGroupProps = {
-  access: ToolPermission["access"]
-  onGroupChange: (permissions: ToolPermission[], enabled: boolean) => void
-  onToolChange: (tool: string, enabled: boolean) => void
-  permissions: ToolPermission[]
-  selectedTools: Set<string>
-}
-
-function AutomationToolGroup({
-  access,
+function EditableToolGroup({
+  group,
   onGroupChange,
   onToolChange,
-  permissions,
   selectedTools,
-}: AutomationToolGroupProps) {
-  const selectablePermissions = permissions.filter(isAutomationToolSelectable)
-  const selectedCount = selectablePermissions.filter((permission) =>
+}: {
+  group: ToolAccessGroup<ToolPermission>
+  onGroupChange: (tools: ToolPermission[], enabled: boolean) => void
+  onToolChange: (tool: string, enabled: boolean) => void
+  selectedTools: Set<string>
+}) {
+  const selectableTools = group.tools.filter(isAutomationToolSelectable)
+  const selectedCount = selectableTools.filter((permission) =>
     selectedTools.has(permission.tool)
   ).length
-  const hasSelectableTools = selectablePermissions.length > 0
+  const hasSelectableTools = selectableTools.length > 0
   const allSelectableSelected =
-    hasSelectableTools && selectedCount === selectablePermissions.length
+    hasSelectableTools && selectedCount === selectableTools.length
 
   return (
-    <section className="grid gap-2">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <h3 className="font-medium text-sm capitalize">{access}</h3>
-          <Badge
-            className="shrink-0 font-normal text-muted-foreground"
-            variant="secondary"
-          >
-            {selectedCount} of {selectablePermissions.length} selected
-          </Badge>
-        </div>
-        {hasSelectableTools ? (
+    <ToolGroupSection
+      access={group.access}
+      action={
+        hasSelectableTools ? (
           <Button
-            aria-label={`${allSelectableSelected ? "Clear" : "Select all"} ${access} tools`}
-            onClick={() => onGroupChange(permissions, !allSelectableSelected)}
+            aria-label={`${allSelectableSelected ? "Clear" : "Select all"} ${group.access} tools`}
+            onClick={() => onGroupChange(group.tools, !allSelectableSelected)}
             size="sm"
             type="button"
             variant="link"
           >
             {allSelectableSelected ? "Clear" : "Select all"}
           </Button>
-        ) : null}
-      </div>
-      <ScrollArea className="max-h-[250px] rounded-md border [&>[data-slot=scroll-area-viewport]]:max-h-[250px]">
-        {permissions.map((permission) => (
-          <AutomationToolRow
-            key={permission.tool}
-            onCheckedChange={(enabled) =>
-              onToolChange(permission.tool, enabled)
-            }
-            permission={permission}
-            selected={selectedTools.has(permission.tool)}
-          />
-        ))}
-      </ScrollArea>
-    </section>
+        ) : null
+      }
+      badge={`${selectedCount} of ${selectableTools.length} selected`}
+    >
+      {group.tools.map((permission) => (
+        <EditableToolRow
+          key={permission.tool}
+          onCheckedChange={(enabled) => onToolChange(permission.tool, enabled)}
+          permission={permission}
+          selected={selectedTools.has(permission.tool)}
+        />
+      ))}
+    </ToolGroupSection>
   )
 }
 
-type AutomationToolRowProps = {
-  onCheckedChange: (enabled: boolean) => void
-  permission: ToolPermission
-  selected: boolean
-}
-
-function AutomationToolRow({
+function EditableToolRow({
   onCheckedChange,
   permission,
   selected,
-}: AutomationToolRowProps) {
+}: {
+  onCheckedChange: (enabled: boolean) => void
+  permission: ToolPermission
+  selected: boolean
+}) {
   const checkboxId = useId()
   const descriptionId = `${checkboxId}-description`
   const selectable = isAutomationToolSelectable(permission)
@@ -172,8 +148,12 @@ function AutomationToolRow({
         id={checkboxId}
         onCheckedChange={(value) => onCheckedChange(value === true)}
       />
-      <div className="grid min-w-0 gap-1">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <ToolRowContent
+        accessories={<ToolModeBadge permission={permission} />}
+        description={getToolDescription(permission)}
+        descriptionId={descriptionId}
+        muted={disabled}
+        title={
           <Label
             className={cn(
               "font-medium text-sm",
@@ -183,29 +163,24 @@ function AutomationToolRow({
           >
             {permission.label}
           </Label>
-          {permission.mode === "blocked" || permission.mode === "prompted" ? (
-            <Badge
-              variant={
-                permission.mode === "blocked" ? "destructive" : "secondary"
-              }
-            >
-              {getToolModeLabel(permission)}
-            </Badge>
-          ) : null}
-        </div>
-        <p
-          className="text-muted-foreground text-xs leading-relaxed"
-          id={descriptionId}
-        >
-          {getToolDescription(permission)}
-        </p>
-      </div>
+        }
+      />
     </div>
   )
 }
 
-function getToolModeLabel(permission: ToolPermission) {
-  return permission.mode === "prompted" ? "Approval required" : "Blocked"
+function ToolModeBadge({ permission }: { permission: ToolPermission }) {
+  if (permission.mode !== "blocked" && permission.mode !== "prompted") {
+    return null
+  }
+
+  return (
+    <Badge
+      variant={permission.mode === "blocked" ? "destructive" : "secondary"}
+    >
+      {permission.mode === "prompted" ? "Approval required" : "Blocked"}
+    </Badge>
+  )
 }
 
 function getToolDescription(permission: ToolPermission) {
@@ -215,3 +190,5 @@ function getToolDescription(permission: ToolPermission) {
 
   return `${permission.description} ${automationToolModeDescription(permission)}`
 }
+
+export { ReadonlyAutomationSurfaceToolGroups } from "./list"

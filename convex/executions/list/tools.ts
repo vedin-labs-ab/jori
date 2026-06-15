@@ -34,7 +34,7 @@ function toolsDetail(groups: NonNullable<ToolSnapshot>["groups"]) {
         : ({
             type: group.provider,
             label: group.label,
-            values: group.tools,
+            tools: group.tools,
           } satisfies ExecutionDetailGroup)
     )
     .filter(isPresent)
@@ -45,10 +45,24 @@ function toolsDetail(groups: NonNullable<ToolSnapshot>["groups"]) {
 
   return {
     groups: detailGroups,
-    label: detailGroups
-      .map((group) => `${group.label} · ${group.values.join(", ")}`)
-      .join(" · "),
+    label: detailGroups.map(toolGroupLabel).join(" · "),
   }
+}
+
+function toolGroupLabel(group: ExecutionDetailGroup) {
+  const counts = countToolsByAccess(group.tools)
+
+  return `${group.label} · Read ${counts.read} · Write ${counts.write}`
+}
+
+function countToolsByAccess(tools: ExecutionDetailGroup["tools"]) {
+  const counts = { read: 0, write: 0 }
+
+  for (const tool of tools) {
+    counts[tool.access] += 1
+  }
+
+  return counts
 }
 
 function isPresent<T>(value: T | undefined): value is T {

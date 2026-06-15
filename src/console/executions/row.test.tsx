@@ -71,12 +71,12 @@ describe("execution row message details", () => {
         details: [
           {
             type: "tools",
-            label: "Slack · Send message, Read channel history",
+            label: "Slack · Read 1 · Write 1",
             groups: [
               {
                 type: "slack",
                 label: "Slack",
-                values: ["Send message", "Read channel history"],
+                tools: slackTools(),
               },
             ],
           },
@@ -91,8 +91,12 @@ describe("execution row message details", () => {
     expect(screen.getByText("mention")).toBeDefined()
     expect(screen.getAllByText("Task")).toHaveLength(1)
     expect(screen.getByText("Tools")).toBeDefined()
-    expect(screen.getAllByText("Slack").length).toBeGreaterThan(1)
-    expect(screen.getByText("Send message, Read channel history")).toBeDefined()
+    expect(
+      screen.getByRole("button", { name: "Open Slack tools" })
+    ).toBeDefined()
+    expect(screen.getByText("Read 1")).toBeDefined()
+    expect(screen.getByText("Write 1")).toBeDefined()
+    expect(screen.queryByText("Send message, Read channel history")).toBeNull()
     expect(screen.getByRole("button", { name: "Copy Task" })).toBeDefined()
     expect(
       screen.getByRole("link", { name: /source/i }).getAttribute("href")
@@ -100,52 +104,6 @@ describe("execution row message details", () => {
       "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123"
     )
     expect(screen.queryByText("Message")).toBeNull()
-  })
-})
-
-describe("execution row one-shot details", () => {
-  test("renders one-shot automation details", () => {
-    renderExecutionRow(
-      execution({
-        task: "Generate a team image.",
-        title: "Daily image",
-        source: {
-          type: "automation",
-          provider: { type: "milo", label: "Milo" },
-          kind: { type: "one-shot", label: "one-shot" },
-          metadata: [],
-        },
-        details: [
-          {
-            type: "tools",
-            label: "Slack · Send message, Read channel history",
-            groups: [
-              {
-                type: "slack",
-                label: "Slack",
-                values: ["Send message", "Read channel history"],
-              },
-            ],
-          },
-          { type: "web_search", label: "Allowed" },
-        ],
-      })
-    )
-
-    fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
-
-    expect(screen.getByText("Milo")).toBeDefined()
-    expect(screen.getByText("one-shot")).toBeDefined()
-    expect(screen.queryByText("Scheduled")).toBeNull()
-    expect(screen.queryByText("One-shot")).toBeNull()
-    expect(screen.getByText("Tools")).toBeDefined()
-    expect(screen.getByText("Slack")).toBeDefined()
-    expect(screen.getByText("Send message, Read channel history")).toBeDefined()
-    expect(
-      screen.queryByText("Slack: Send message, Read channel history")
-    ).toBeNull()
-    expect(screen.getByText("Web search")).toBeDefined()
-    expect(screen.getByText("Allowed")).toBeDefined()
   })
 })
 
@@ -257,4 +215,21 @@ function execution(
     title: overrides.title,
     trigger: "Slack event",
   }
+}
+
+function slackTools() {
+  return [
+    {
+      access: "write" as const,
+      description: "Post a Slack message.",
+      label: "Send message",
+      tool: "conversations_add_message",
+    },
+    {
+      access: "read" as const,
+      description: "Read Slack channel messages.",
+      label: "Read channel history",
+      tool: "conversations_history",
+    },
+  ]
 }

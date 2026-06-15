@@ -23,7 +23,7 @@ import {
   DetailRow,
 } from "./details"
 import { absoluteTime, absoluteUtcTime } from "./format"
-import { GroupedFactValue } from "./groups"
+import { ExecutionToolsValue } from "./groups"
 import { RepositoryIcon } from "./source"
 import { type ExecutionDetail, type ExecutionDetailType } from "./types"
 
@@ -210,7 +210,7 @@ function PayloadHeader({
 
 function FactValue({ detail }: { detail: ExecutionDetail }) {
   if (detail.type === "tools" && detail.groups !== undefined) {
-    return <GroupedFactValue groups={detail.groups} />
+    return <ExecutionToolsValue groups={detail.groups} />
   }
 
   if (detail.url === undefined) {

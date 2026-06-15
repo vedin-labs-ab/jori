@@ -39,7 +39,12 @@ export function createRuntimeToolCapability(
   return {
     provider,
     label: providerLabel(provider),
-    tools: permissions.map((permission) => permission.label),
+    tools: permissions.map((permission) => ({
+      access: permission.access,
+      description: permission.description,
+      label: permission.label,
+      tool: permission.tool,
+    })),
   }
 }
 

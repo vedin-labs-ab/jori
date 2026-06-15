@@ -71,7 +71,14 @@ export type ExecutionDetailType =
 export type ExecutionDetailGroup = {
   type: string
   label: string
-  values: string[]
+  tools: ExecutionDetailTool[]
+}
+
+export type ExecutionDetailTool = {
+  access: "read" | "write"
+  description: string
+  label: string
+  tool: string
 }
 
 export type ExecutionDetail = {
