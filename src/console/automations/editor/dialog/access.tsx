@@ -9,18 +9,13 @@ export function AccessFields({
   webSearch: boolean
 }) {
   return (
-    <div className="grid gap-2">
-      <h3 className="font-medium text-xs">Access</h3>
-      <div className="grid gap-2">
-        <AccessCheckbox
-          checked={webSearch}
-          description="For current public information."
-          id="automation-web-search"
-          label="Let Milo search the web"
-          onCheckedChange={onWebSearchChange}
-        />
-      </div>
-    </div>
+    <AccessCheckbox
+      checked={webSearch}
+      description="For current public information."
+      id="automation-web-search"
+      label="Let Milo search the web"
+      onCheckedChange={onWebSearchChange}
+    />
   )
 }
 
