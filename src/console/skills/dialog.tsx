@@ -268,8 +268,8 @@ function AssociatedIntegrationsField({
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
-      <p className="flex items-start gap-1.5 text-muted-foreground text-xs">
-        <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+      <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
+        <Info aria-hidden="true" className="size-3.5 shrink-0" />
         <span>
           Used for internal categorization and filtering. It does not change how
           the skill runs.
