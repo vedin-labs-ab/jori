@@ -32,12 +32,9 @@ export function AutomationMeta({
         <span className="truncate font-medium text-foreground">
           {trigger.title}
         </span>
-        <span
-          className="truncate text-muted-foreground"
-          title={trigger.detailTitle}
-        >
+        <AutomationMetaDetail tooltip={trigger.detailTitle}>
           {trigger.detail}
-        </span>
+        </AutomationMetaDetail>
       </AutomationMetaCell>
       <AutomationToolMetaCell className="border-b sm:border-r sm:border-b-0">
         <AutomationToolSummary automation={automation} />
@@ -72,6 +69,32 @@ function AutomationMetaCell({
 }
 
 const metaIconClassName = "mt-0.5 size-3.5 shrink-0 text-muted-foreground"
+
+function AutomationMetaDetail({
+  children,
+  tooltip,
+}: {
+  children: ReactNode
+  tooltip: string | undefined
+}) {
+  if (tooltip === undefined) {
+    return <span className="truncate text-muted-foreground">{children}</span>
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          className="min-w-0 truncate rounded-sm border-0 bg-transparent p-0 text-left text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+          type="button"
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  )
+}
 
 function AutomationToolMetaCell({
   children,
