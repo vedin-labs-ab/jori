@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../_generated/server"
+import { eventAutomationDisplay, messageDisplay } from "./display.test.helpers"
 import { summarizeExecution } from "./summaries"
 
 test("shows stored tools for event automation runs", async () => {
@@ -15,6 +16,11 @@ test("shows stored tools for event automation runs", async () => {
         reason: { type: "event", eventId: "event" },
         title: "Deep analysis",
         task: "Perform the deep analysis.",
+        display: eventAutomationDisplay({
+          provider: { type: "slack", label: "Slack" },
+          event: { type: "message.created", label: "New channel message" },
+          metadata: [{ type: "channel", label: "C123" }],
+        }),
         createdAt: 0,
       },
     }),
@@ -37,6 +43,10 @@ test("shows stored tools for mention and reply runs", async () => {
           reason: { type: "message", messageId: "message", kind },
           title: "Please summarize this thread.",
           task: "Please summarize this thread.",
+          display: messageDisplay({
+            kind,
+            metadata: [{ type: "channel", label: "C123" }],
+          }),
           createdAt: 0,
         },
       }),

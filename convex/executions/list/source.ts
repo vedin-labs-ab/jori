@@ -1,8 +1,5 @@
-import { getAutomationEventDefinition } from "../../automations/events"
-import { providerLabel } from "../../providers/catalog"
 import { type SourceMetadataItem } from "../../sources/schema"
 import { type getExecutionContext } from "./context"
-import { cronScheduleLabel } from "./schedule"
 
 type ExecutionContext = Awaited<ReturnType<typeof getExecutionContext>>
 
@@ -27,27 +24,9 @@ export function executionSource(
   context: ExecutionContext,
   stoppedBy: string | undefined
 ): ExecutionSource {
-  const kind = sourceKind(context)
-  const provider = sourceProvider(context)
-  const event = sourceEvent(context)
   const source: ExecutionSource = {
-    type: sourceType(context),
-    metadata: [
-      ...timeAutomationMetadata(context),
-      ...(context.event?.metadata ?? context.message?.metadata ?? []),
-    ],
-  }
-
-  if (kind !== undefined) {
-    source.kind = kind
-  }
-
-  if (provider !== undefined) {
-    source.provider = provider
-  }
-
-  if (event !== undefined) {
-    source.event = event
+    ...context.run.display.source,
+    metadata: [...context.run.display.source.metadata],
   }
 
   if (stoppedBy !== undefined) {
@@ -71,127 +50,4 @@ export function sourceSearchText(source: ExecutionSource) {
   ]
     .filter(Boolean)
     .join(" ")
-}
-
-function sourceKind(context: ExecutionContext): SourceDatum | undefined {
-  const { run } = context
-
-  if (isOneShotTimeAutomation(context)) {
-    return {
-      type: "one-shot",
-      label: "one-shot",
-    }
-  }
-
-  if (isRecurringTimeAutomation(context)) {
-    return {
-      type: "recurring",
-      label: "recurring",
-    }
-  }
-
-  if (run.reason.type !== "message") {
-    return undefined
-  }
-
-  return {
-    type: run.reason.kind,
-    label: run.reason.kind,
-  }
-}
-
-function sourceType({ run }: ExecutionContext): ExecutionSource["type"] {
-  if (run.automationId !== undefined) {
-    return "automation"
-  }
-
-  if (run.reason.type === "event") {
-    return "event"
-  }
-
-  if (run.reason.type === "message") {
-    return "message"
-  }
-
-  return "manual"
-}
-
-function sourceProvider({
-  approval,
-  automation,
-  run,
-  event,
-  message,
-}: ExecutionContext): SourceDatum | undefined {
-  if (isMiloTimeAutomation({ automation, run })) {
-    return {
-      type: "milo",
-      label: "Milo",
-    }
-  }
-
-  const provider = message?.provider ?? event?.provider ?? approval?.provider
-
-  if (provider === undefined) {
-    return undefined
-  }
-
-  return {
-    type: provider,
-    label: providerLabel(provider),
-  }
-}
-
-function sourceEvent({ event }: ExecutionContext) {
-  if (event === null) {
-    return undefined
-  }
-
-  return {
-    type: event.type,
-    label: eventLabel(event),
-  }
-}
-
-function eventLabel(event: NonNullable<ExecutionContext["event"]>) {
-  return (
-    getAutomationEventDefinition(event.provider, event.type)?.label ??
-    event.type
-  )
-}
-
-function isOneShotTimeAutomation({
-  automation,
-  run,
-}: Pick<ExecutionContext, "automation" | "run">) {
-  return run.reason.type === "time" && automation?.trigger.type === "once"
-}
-
-function isRecurringTimeAutomation({
-  automation,
-  run,
-}: Pick<ExecutionContext, "automation" | "run">) {
-  return run.reason.type === "time" && automation?.trigger.type === "cron"
-}
-
-function isMiloTimeAutomation(
-  context: Pick<ExecutionContext, "automation" | "run">
-) {
-  return isOneShotTimeAutomation(context) || isRecurringTimeAutomation(context)
-}
-
-function timeAutomationMetadata({
-  automation,
-  run,
-}: Pick<ExecutionContext, "automation" | "run">): SourceMetadataItem[] {
-  if (run.reason.type !== "time" || automation?.trigger.type !== "cron") {
-    return []
-  }
-
-  return [
-    {
-      type: "schedule",
-      label: cronScheduleLabel(automation.trigger.cron),
-    },
-  ]
 }

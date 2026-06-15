@@ -8,8 +8,7 @@ test("marks new conversation message runs as mentions", async () => {
   const result = await startMessageRun(ctx, {
     activation: null,
     integration: integration(),
-    messageId: id<"messages">("message"),
-    messageText: "Please help.",
+    message: message("Please help."),
     conversationId: "conversation",
     createdBy: "user",
     now: 1000,
@@ -41,8 +40,7 @@ test("marks activated conversation message runs as replies", async () => {
       createdAt: 0,
     },
     integration: integration(),
-    messageId: id<"messages">("message"),
-    messageText: "Following up.",
+    message: message("Following up."),
     conversationId: "conversation",
     createdBy: "user",
     now: 1000,
@@ -73,6 +71,21 @@ function integration() {
     createdAt: 0,
     updatedAt: 0,
   } as Parameters<typeof startMessageRun>[1]["integration"]
+}
+
+function message(text: string) {
+  return {
+    _id: id<"messages">("message"),
+    _creationTime: 0,
+    tenantId: "tenant",
+    integrationId: id<"integrations">("integration"),
+    provider: "slack",
+    type: "message.channels",
+    externalId: "slack:message",
+    text,
+    metadata: [],
+    createdAt: 0,
+  } as Parameters<typeof startMessageRun>[1]["message"]
 }
 
 function id<TableName extends keyof DataModel>(value: string) {

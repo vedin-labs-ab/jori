@@ -23,16 +23,16 @@ export async function fireAutomation(
     return null
   }
 
-  const runId = await createAutomationRun(ctx, {
-    automation,
-    reason: {
-      type: "time",
-      scheduledAt: args.expectedAt,
-    },
-    now,
-  })
-
   if (automation.trigger.type === "once") {
+    const runId = await createAutomationRun(ctx, {
+      automation,
+      reason: {
+        type: "time",
+        scheduledAt: args.expectedAt,
+      },
+      now,
+    })
+
     await ctx.db.patch(automation._id, {
       status: "completed",
       trigger: {
@@ -42,15 +42,27 @@ export async function fireAutomation(
       lastRunAt: now,
       updatedAt: now,
     })
+
+    return { runId }
   } else {
+    const trigger = await scheduleNextCronAutomation(ctx, automation, now)
+    const runId = await createAutomationRun(ctx, {
+      automation: { ...automation, trigger },
+      reason: {
+        type: "time",
+        scheduledAt: args.expectedAt,
+      },
+      now,
+    })
+
     await ctx.db.patch(automation._id, {
-      trigger: await scheduleNextCronAutomation(ctx, automation, now),
+      trigger,
       lastRunAt: now,
       updatedAt: now,
     })
-  }
 
-  return { runId }
+    return { runId }
+  }
 }
 
 export async function startEventAutomations(
@@ -60,6 +72,7 @@ export async function startEventAutomations(
     now: number
   }
 ) {
+  const integration = await ctx.db.get(args.event.integrationId)
   const automations = await ctx.db
     .query("automations")
     .withIndex("by_tenant_status", (index) =>
@@ -76,6 +89,8 @@ export async function startEventAutomations(
     runIds.push(
       await createAutomationRun(ctx, {
         automation,
+        event: args.event,
+        integration,
         reason: {
           type: "event",
           eventId: args.event._id,
