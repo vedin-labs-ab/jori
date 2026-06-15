@@ -6,9 +6,9 @@ import {
   detail,
   type ExecutionDetail,
   uniqueDetails,
-} from "../executions/list/detail"
-import { originDetails } from "../executions/list/origin"
-import { cronScheduleLabel } from "../executions/list/schedule"
+} from "../executions/console/detail"
+import { originDetails } from "../executions/console/origin"
+import { cronScheduleLabel } from "../executions/console/schedule"
 import { providerLabel } from "../providers/catalog"
 import { type SourceMetadataItem } from "../sources/schema"
 import { type runDisplay } from "./schema"

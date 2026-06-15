@@ -2,7 +2,7 @@ import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { createSlackApprovalRequest } from "../../approvals/slack/blocks"
-import { type CodexRuntimeInput } from "../../executions/codex"
+import { type CodexRuntimeInput } from "../../executions/agent/codex"
 import {
   getToolPermission,
   type PermissionMode,

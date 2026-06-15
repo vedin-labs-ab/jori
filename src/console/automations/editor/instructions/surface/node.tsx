@@ -1,0 +1,243 @@
+import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react"
+import { useState } from "react"
+import { ButtonGroup } from "@/components/ui/button-group"
+import { cn } from "@/lib/utils"
+import {
+  type AutomationSurfaceFormValue,
+  getAutomationSurfaceAccess,
+  getAutomationSurfaceAccessLabel,
+  getAutomationSurfaceLabel,
+  isAutomationSurfaceProvider,
+} from "../../../access"
+import {
+  type AutomationPolicyPermissions,
+  isAutomationSurfacePolicyBlocked,
+} from "../../../access/policy"
+import {
+  automationSurfaceNodeName,
+  parseAutomationSurfaceTools,
+} from "../document"
+import { type AutomationSurfaceExtensionOptions } from "../editor/extension"
+import { AutomationSurfaceRemoveButton } from "./remove"
+import {
+  getAutomationSurfaceAccessIcon,
+  getAutomationSurfaceToneClassNames,
+} from "./tone"
+import { AutomationSurfaceToolsDialog } from "./tools"
+
+export function AutomationSurfaceNodeView(props: NodeViewProps) {
+  const provider = isAutomationSurfaceProvider(props.node.attrs.provider)
+    ? props.node.attrs.provider
+    : null
+
+  if (provider === null) {
+    return null
+  }
+
+  return <AutomationSurfaceNodeContent {...props} provider={provider} />
+}
+
+function AutomationSurfaceNodeContent({
+  deleteNode,
+  editor,
+  extension,
+  node,
+  provider,
+  selected,
+}: NodeViewProps & { provider: AutomationSurfaceFormValue["provider"] }) {
+  const [isToolDialogOpen, setIsToolDialogOpen] = useState(false)
+  const tools = parseAutomationSurfaceTools(node.attrs.tools)
+  const permissions = getNodeViewPermissions(extension)
+  const surface = { provider, tools }
+  const blocked = isAutomationSurfacePolicyBlocked({ permissions, surface })
+  const access = getAutomationSurfaceAccess(surface, permissions)
+  const providerLabel = getAutomationSurfaceLabel(provider)
+
+  return (
+    <NodeViewWrapper
+      as="span"
+      className="inline-flex align-middle"
+      contentEditable={false}
+      data-automation-surface-view=""
+    >
+      <AutomationSurfaceMarker
+        access={access}
+        blocked={blocked}
+        count={tools.length}
+        onOpenTools={() => setIsToolDialogOpen(true)}
+        onRemove={deleteNode}
+        provider={provider}
+        providerLabel={providerLabel}
+        selected={selected}
+      />
+      <AutomationSurfaceToolsDialog
+        onOpenChange={setIsToolDialogOpen}
+        onToolsChange={(nextTools) =>
+          updateProviderSurfaceTools({ editor, provider, tools: nextTools })
+        }
+        open={isToolDialogOpen}
+        permissions={permissions}
+        provider={provider}
+        providerLabel={providerLabel}
+        tools={tools}
+      />
+    </NodeViewWrapper>
+  )
+}
+
+function updateProviderSurfaceTools({
+  editor,
+  provider,
+  tools,
+}: {
+  editor: NodeViewProps["editor"]
+  provider: AutomationSurfaceFormValue["provider"]
+  tools: string[]
+}) {
+  const transaction = editor.state.tr
+  let changed = false
+
+  editor.state.doc.descendants((node, position) => {
+    if (
+      node.type.name !== automationSurfaceNodeName ||
+      node.attrs.provider !== provider ||
+      haveSameTools(parseAutomationSurfaceTools(node.attrs.tools), tools)
+    ) {
+      return
+    }
+
+    transaction.setNodeMarkup(position, undefined, {
+      ...node.attrs,
+      tools,
+    })
+    changed = true
+  })
+
+  if (changed) {
+    editor.view.dispatch(transaction.scrollIntoView())
+  }
+}
+
+function haveSameTools(left: string[], right: string[]) {
+  const leftTools = new Set(left)
+  const rightTools = new Set(right)
+
+  return (
+    leftTools.size === rightTools.size &&
+    [...leftTools].every((tool) => rightTools.has(tool))
+  )
+}
+
+function AutomationSurfaceMarker({
+  access,
+  blocked,
+  count,
+  onOpenTools,
+  onRemove,
+  provider,
+  providerLabel,
+  selected,
+}: {
+  access: ReturnType<typeof getAutomationSurfaceAccess>
+  blocked: boolean
+  count: number
+  onOpenTools: () => void
+  onRemove: () => void
+  provider: AutomationSurfaceFormValue["provider"]
+  providerLabel: string
+  selected: boolean
+}) {
+  const toneClassNames = getAutomationSurfaceToneClassNames(access, blocked)
+
+  return (
+    <ButtonGroup
+      aria-label={`${providerLabel} integration tools`}
+      className={cn(
+        "mx-0.5 inline-flex h-5 overflow-hidden rounded-sm border align-middle text-[0.625rem]/none shadow-none",
+        toneClassNames.surface,
+        selected && "ring-2 ring-ring/40"
+      )}
+      data-automation-surface-access={access === "" ? "unset" : access}
+      data-automation-surface-policy={blocked ? "blocked" : "allowed"}
+    >
+      <AutomationSurfaceRemoveButton
+        onRemove={onRemove}
+        provider={provider}
+        providerLabel={providerLabel}
+      />
+      <span
+        aria-hidden="true"
+        className={cn(
+          "w-[0.5px] shrink-0 self-stretch rounded-none",
+          toneClassNames.separator
+        )}
+        data-automation-surface-separator=""
+      />
+      <AutomationSurfaceToolsButton
+        access={access}
+        accessLabel={getAutomationSurfaceAccessLabel(access)}
+        blocked={blocked}
+        count={count}
+        iconClassName={toneClassNames.scopeIcon}
+        onOpen={onOpenTools}
+        providerLabel={providerLabel}
+      />
+    </ButtonGroup>
+  )
+}
+
+function getNodeViewPermissions(
+  extension: NodeViewProps["extension"]
+): AutomationPolicyPermissions {
+  return (
+    extension.options as Partial<AutomationSurfaceExtensionOptions>
+  ).getPermissions?.()
+}
+
+function AutomationSurfaceToolsButton({
+  access,
+  accessLabel,
+  blocked,
+  count,
+  iconClassName,
+  onOpen,
+  providerLabel,
+}: {
+  access: ReturnType<typeof getAutomationSurfaceAccess>
+  accessLabel: string
+  blocked: boolean
+  count: number
+  iconClassName: string
+  onOpen: () => void
+  providerLabel: string
+}) {
+  const Icon = getAutomationSurfaceAccessIcon(access, blocked)
+  const toolCountLabel = count === 0 ? "No tools enabled" : `${count} enabled`
+  const label = blocked
+    ? `${providerLabel} tools: ${toolCountLabel}, some unavailable. Configure tools.`
+    : `${providerLabel} tools: ${toolCountLabel}. Configure tools.`
+
+  return (
+    <button
+      aria-label={label}
+      className={cn(
+        "inline-flex h-5 items-center gap-1 px-1 font-medium opacity-70 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
+        iconClassName
+      )}
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onOpen()
+      }}
+      onMouseDown={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+      title={count === 0 ? accessLabel : `${accessLabel}: ${count} enabled`}
+      type="button"
+    >
+      <Icon className="size-3" />
+      {count > 0 ? <span className="tabular-nums">{count}</span> : null}
+    </button>
+  )
+}

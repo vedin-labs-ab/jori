@@ -7,7 +7,7 @@ import {
   createImageCheckCommand,
   e2bSandboxTemplate,
   workspace,
-} from "../convex/executions/sandbox/harness.ts"
+} from "../convex/executions/agent/sandbox/harness.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")
 

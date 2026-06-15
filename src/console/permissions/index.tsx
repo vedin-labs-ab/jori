@@ -1,5 +1,5 @@
 import { MiloLogo } from "@/shared/brand"
-import { IntegrationSurface } from "../integrations/shared/surface"
+import { IntegrationSurface } from "../integrations/connection/surface"
 import { type ToolPermissionController, type ToolProvider } from "./controller"
 import { PermissionSection } from "./section"
 

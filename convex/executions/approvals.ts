@@ -7,12 +7,12 @@ import { type ActionCtx, internalAction } from "../_generated/server"
 import { callMiloTool } from "../broker/milo"
 import { callProviderTool } from "../broker/tools"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
-import { createPromptedExecution } from "./artifacts"
-import { authorizeApprovedTool } from "./authorization"
-import { type CodexRuntimeInput } from "./codex"
-import { runPromptedExecution } from "./sandbox/execute"
-import { formatError } from "./sandbox/trace"
-import { createExecutionToken } from "./tokens"
+import { createPromptedExecution } from "./agent/artifacts"
+import { authorizeApprovedTool } from "./agent/authorization"
+import { type CodexRuntimeInput } from "./agent/codex"
+import { runPromptedExecution } from "./agent/sandbox/execute"
+import { formatError } from "./agent/sandbox/trace"
+import { createExecutionToken } from "./agent/tokens"
 
 export const runApprovedExecution = internalAction({
   args: {

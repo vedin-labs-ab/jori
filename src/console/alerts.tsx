@@ -4,7 +4,7 @@ import {
   type IntegrationCallbackProvider,
   type IntegrationCallbackStatus,
   useIntegrationCallbackStatuses,
-} from "./integrations/shared/status"
+} from "./integrations/connection/status"
 
 type VisibleCallbackStatus = Exclude<IntegrationCallbackStatus, null>
 
