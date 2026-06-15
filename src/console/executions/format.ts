@@ -50,3 +50,15 @@ export function absoluteTime(timestamp: number) {
     timeStyle: "short",
   }).format(timestamp)
 }
+
+export function absoluteUtcTime(timestamp: number) {
+  return new Intl.DateTimeFormat(undefined, {
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    month: "short",
+    timeZone: "UTC",
+    timeZoneName: "short",
+    year: "numeric",
+  }).format(timestamp)
+}

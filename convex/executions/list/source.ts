@@ -2,6 +2,7 @@ import { getAutomationEventDefinition } from "../../automations/events"
 import { providerLabel } from "../../providers/catalog"
 import { type SourceMetadataItem } from "../../sources/schema"
 import { type getExecutionContext } from "./context"
+import { cronScheduleLabel } from "./schedule"
 
 type ExecutionContext = Awaited<ReturnType<typeof getExecutionContext>>
 
@@ -31,7 +32,10 @@ export function executionSource(
   const event = sourceEvent(context)
   const source: ExecutionSource = {
     type: sourceType(context),
-    metadata: context.event?.metadata ?? context.message?.metadata ?? [],
+    metadata: [
+      ...timeAutomationMetadata(context),
+      ...(context.event?.metadata ?? context.message?.metadata ?? []),
+    ],
   }
 
   if (kind !== undefined) {
@@ -79,6 +83,13 @@ function sourceKind(context: ExecutionContext): SourceDatum | undefined {
     }
   }
 
+  if (isRecurringTimeAutomation(context)) {
+    return {
+      type: "recurring",
+      label: "recurring",
+    }
+  }
+
   if (run.reason.type !== "message") {
     return undefined
   }
@@ -112,7 +123,7 @@ function sourceProvider({
   event,
   message,
 }: ExecutionContext): SourceDatum | undefined {
-  if (isOneShotTimeAutomation({ automation, run })) {
+  if (isMiloTimeAutomation({ automation, run })) {
     return {
       type: "milo",
       label: "Milo",
@@ -154,4 +165,33 @@ function isOneShotTimeAutomation({
   run,
 }: Pick<ExecutionContext, "automation" | "run">) {
   return run.reason.type === "time" && automation?.trigger.type === "once"
+}
+
+function isRecurringTimeAutomation({
+  automation,
+  run,
+}: Pick<ExecutionContext, "automation" | "run">) {
+  return run.reason.type === "time" && automation?.trigger.type === "cron"
+}
+
+function isMiloTimeAutomation(
+  context: Pick<ExecutionContext, "automation" | "run">
+) {
+  return isOneShotTimeAutomation(context) || isRecurringTimeAutomation(context)
+}
+
+function timeAutomationMetadata({
+  automation,
+  run,
+}: Pick<ExecutionContext, "automation" | "run">): SourceMetadataItem[] {
+  if (run.reason.type !== "time" || automation?.trigger.type !== "cron") {
+    return []
+  }
+
+  return [
+    {
+      type: "schedule",
+      label: cronScheduleLabel(automation.trigger.cron),
+    },
+  ]
 }

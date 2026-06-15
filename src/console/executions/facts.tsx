@@ -1,10 +1,14 @@
 import {
+  CalendarClock,
   CircleDotDashed,
+  Clock,
   File,
   GitPullRequestArrow,
   Globe,
   Hash,
+  Info,
   MessageCircleMore,
+  Repeat2,
   Square,
   UserCheck,
   Wrench,
@@ -20,13 +24,10 @@ import {
   DetailLink,
   DetailRow,
 } from "./details"
-import { absoluteTime } from "./format"
-import { ProviderLogo, RepositoryIcon } from "./source"
-import {
-  type ExecutionDetail,
-  type ExecutionDetailGroup,
-  type ExecutionDetailType,
-} from "./types"
+import { absoluteTime, absoluteUtcTime } from "./format"
+import { GroupedFactValue } from "./groups"
+import { RepositoryIcon } from "./source"
+import { type ExecutionDetail, type ExecutionDetailType } from "./types"
 
 const detailMeta = {
   channel: { icon: Hash, label: "Channel" },
@@ -34,9 +35,13 @@ const detailMeta = {
   decision: { icon: UserCheck, label: "Decision" },
   issue: { icon: CircleDotDashed, label: "Issue" },
   message: { icon: MessageCircleMore, label: "Message" },
+  next: { icon: CalendarClock, label: "Next" },
+  occurrence: { icon: Clock, label: "Occurrence" },
   page: { icon: File, label: "Page" },
   pull_request: { icon: GitPullRequestArrow, label: "Pull request" },
   repository: { icon: RepositoryIcon, label: "Repository" },
+  schedule: { icon: Repeat2, label: "Schedule" },
+  status: { icon: Info, label: "Status" },
   stopped: { icon: Square, label: "Stopped" },
   tools: { icon: Wrench, label: "Tools" },
   web_search: { icon: Globe, label: "Web search" },
@@ -51,12 +56,18 @@ const detailMeta = {
 const compactFieldTypes = new Set<ExecutionDetailType>([
   "channel",
   "issue",
+  "next",
+  "occurrence",
   "page",
   "pull_request",
   "repository",
+  "schedule",
+  "status",
   "tools",
   "web_search",
 ])
+
+const timeOnlyFieldTypes = new Set<ExecutionDetailType>(["next", "occurrence"])
 
 export function ExecutionFacts({ details }: { details: ExecutionDetail[] }) {
   if (details.length === 0) {
@@ -70,7 +81,12 @@ export function ExecutionFacts({ details }: { details: ExecutionDetail[] }) {
 
 function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
   const meta = detailMeta[detail.type]
-  const time = detail.at === undefined ? undefined : absoluteTime(detail.at)
+  const time =
+    detail.at === undefined
+      ? undefined
+      : usesUtcTime(detail.type)
+        ? absoluteUtcTime(detail.at)
+        : absoluteTime(detail.at)
 
   if (isPayloadDetail(detail)) {
     return <PayloadFact detail={detail} label={meta.label} time={time} />
@@ -97,11 +113,13 @@ function InlineFact({
   label: string
   time: string | undefined
 }) {
+  const hasValue = !timeOnlyFieldTypes.has(detail.type)
+
   return (
     <DetailRow icon={icon} iconClassName="text-muted-foreground" label={label}>
       <InlineFactContent compact={compactFieldTypes.has(detail.type)}>
-        <FactValue detail={detail} />
-        <InlineFactTime time={time} />
+        {hasValue ? <FactValue detail={detail} /> : null}
+        <InlineFactTime separated={hasValue} time={time} />
       </InlineFactContent>
     </DetailRow>
   )
@@ -126,14 +144,20 @@ function InlineFactContent({
   )
 }
 
-function InlineFactTime({ time }: { time: string | undefined }) {
+function InlineFactTime({
+  separated,
+  time,
+}: {
+  separated: boolean
+  time: string | undefined
+}) {
   if (time === undefined) {
     return null
   }
 
   return (
     <>
-      <SeparatorDot className="text-muted-foreground/60" />
+      {separated ? <SeparatorDot className="text-muted-foreground/60" /> : null}
       <span className="text-muted-foreground">{time}</span>
     </>
   )
@@ -206,46 +230,12 @@ function FactValue({ detail }: { detail: ExecutionDetail }) {
   return <DetailLink href={detail.url}>{detail.label}</DetailLink>
 }
 
-function GroupedFactValue({ groups }: { groups: ExecutionDetailGroup[] }) {
-  return (
-    <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-      {groups.map((group, index) => (
-        <ToolGroup
-          group={group}
-          key={`${group.type}:${group.label}`}
-          showSeparator={index > 0}
-        />
-      ))}
-    </span>
-  )
-}
-
-function ToolGroup({
-  group,
-  showSeparator,
-}: {
-  group: ExecutionDetailGroup
-  showSeparator: boolean
-}) {
-  return (
-    <span className="inline-flex min-w-0 items-center gap-1.5">
-      {showSeparator ? (
-        <SeparatorDot className="shrink-0 text-muted-foreground/60" />
-      ) : null}
-      <ProviderLogo className="size-3.5" provider={group.type} />
-      <span className="shrink-0 font-medium text-foreground">
-        {group.label}
-      </span>
-      <SeparatorDot className="shrink-0 text-muted-foreground/60" />
-      <span className="min-w-0 truncate text-foreground">
-        {group.values.join(", ")}
-      </span>
-    </span>
-  )
-}
-
 function isPayloadDetail(detail: ExecutionDetail) {
   return detail.type === "comment" || detail.type === "message"
+}
+
+function usesUtcTime(type: ExecutionDetailType) {
+  return type === "next" || type === "occurrence"
 }
 
 function detailKey(detail: ExecutionDetail) {

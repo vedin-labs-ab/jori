@@ -17,7 +17,7 @@ export async function summarizeExecution(
   const task = executionTask(context)
   const stoppedBy = await stoppedByLabel(ctx, execution)
   const source = executionSource(context, stoppedBy)
-  const automationAccess = await oneShotAutomationAccess(ctx, context)
+  const automationAccess = await timeAutomationAccess(ctx, context)
   const detailSummary = executionDetailSummary({
     automation: context.automation,
     automationAccess,
@@ -64,13 +64,14 @@ export async function summarizeExecution(
   }
 }
 
-async function oneShotAutomationAccess(
+async function timeAutomationAccess(
   ctx: QueryCtx,
   context: Awaited<ReturnType<typeof getExecutionContext>>
 ) {
   if (
     context.run.reason.type !== "time" ||
-    context.automation?.trigger.type !== "once"
+    context.automation === null ||
+    context.automation.trigger.type === "event"
   ) {
     return undefined
   }

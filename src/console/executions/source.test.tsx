@@ -35,6 +35,24 @@ test("renders one-shot Milo automation sources", () => {
   expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
 })
 
+test("renders recurring Milo automation sources", () => {
+  const { container } = render(
+    <SourceLine
+      source={{
+        type: "automation",
+        provider: { type: "milo", label: "Milo" },
+        kind: { type: "recurring", label: "recurring" },
+        metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
+      }}
+    />
+  )
+
+  expect(screen.getByText("Milo").className).toContain("font-medium")
+  expect(screen.getByText("recurring").className).toContain("font-mono")
+  expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
+  expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
+})
+
 test("renders rich event source metadata", () => {
   const { container } = render(
     <SourceLine

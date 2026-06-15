@@ -1,0 +1,5 @@
+import { describeCron } from "../../automations/labels"
+
+export function cronScheduleLabel(cron: string) {
+  return describeCron(cron) ?? `${cron} UTC`
+}
