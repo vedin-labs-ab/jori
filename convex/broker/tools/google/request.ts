@@ -1,4 +1,4 @@
-import { fetchJson } from "../common"
+import { fetchJson } from "../../../shared/http"
 
 export async function googleJson(
   token: string,

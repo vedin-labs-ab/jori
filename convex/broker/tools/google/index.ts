@@ -2,11 +2,11 @@ import { type Doc } from "../../../_generated/dataModel"
 import { requireGoogleCredentials } from "../../../providers/google/credentials"
 import {
   boundedNumber,
-  type ProviderToolContext,
   requiredObject,
   requiredString,
   setOptionalSearchParam,
-} from "../common"
+} from "../../../shared/input"
+import { type ProviderToolContext } from "../context"
 import { callGoogleDriveTool } from "./drive"
 import { getCalendarId } from "./format"
 import { callGmailTool } from "./gmail"

@@ -16,7 +16,7 @@ import { type ToolPermission } from "../../../../permissions/controller"
 import {
   automationToolModeDescription,
   isAutomationToolSelectable,
-} from "../../../surface/policy"
+} from "../../../access/policy"
 
 type AutomationSurfaceToolGroupsProps = {
   onToolsChange: (tools: string[]) => void

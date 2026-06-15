@@ -23,7 +23,7 @@ import {
   getActorEmail,
   getActorExternalId,
 } from "../shared/actor"
-import { createSourceMetadata } from "../sources/metadata"
+import { createSourceMetadata } from "../shared/sources/metadata"
 import { recordAutomationEvent } from "./events"
 
 const observedMessageArgs = {

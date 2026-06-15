@@ -29,7 +29,7 @@ import {
 import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 
-export function ExecutionsList({ tenantId }: { tenantId: string }) {
+export function RunsList({ tenantId }: { tenantId: string }) {
   const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
   const [executionFilter, setExecutionFilter] = useState<ExecutionFilter>("all")
   const [query, setQuery] = useState("")

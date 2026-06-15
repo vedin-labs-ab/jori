@@ -142,10 +142,10 @@ function useExecutionPageData({
     }),
     [approvalFilter, executionFilter, normalizedQuery, tenantId]
   )
-  const executions = usePaginatedQuery(api.executions.console.page, queryArgs, {
+  const executions = usePaginatedQuery(api.runs.console.page, queryArgs, {
     initialNumItems: pageSize,
   })
-  const stats = useQuery(api.executions.console.stats, queryArgs)
+  const stats = useQuery(api.runs.console.stats, queryArgs)
 
   return {
     executions,

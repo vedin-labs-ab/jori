@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
-import { type AutomationSurfaceProvider } from "../../../surface"
-import { SurfaceLogo } from "../../../surface/logo"
+import { type AutomationSurfaceProvider } from "../../../access"
+import { SurfaceLogo } from "../../../access/logo"
 import { type InstructionSuggestionState } from "./suggest"
 
 export function InstructionSuggestions({

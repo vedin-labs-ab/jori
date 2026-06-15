@@ -4,7 +4,7 @@ import {
   type AutomationSurfaceSuggestion,
   findActiveAutomationSurfaceMention,
   getAutomationSurfaceSuggestions,
-} from "../../../surface"
+} from "../../../access"
 
 export type InstructionSuggestionState = {
   activeIndex: number

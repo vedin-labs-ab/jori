@@ -1,6 +1,6 @@
 import { type Doc } from "../../../_generated/dataModel"
-import { detail, uniqueDetails } from "../../../runs/display/detail"
 import { getActorDisplayName } from "../../../shared/actor"
+import { detail, uniqueDetails } from "../../display/detail"
 import { toolDetails } from "../tools"
 
 export function executionDetailSummary(input: {

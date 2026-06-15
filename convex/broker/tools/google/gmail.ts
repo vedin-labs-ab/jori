@@ -9,7 +9,7 @@ import {
   requiredString,
   requiredStringArray,
   setOptionalSearchParam,
-} from "../common"
+} from "../../../shared/input"
 import {
   createMimeMessage,
   ensureReplySubject,

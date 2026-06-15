@@ -3,7 +3,7 @@ import {
   compactDetails,
   detail,
   type ExecutionDetailGroup,
-} from "../../runs/display/detail"
+} from "../display/detail"
 
 type ToolSnapshot = Doc<"executions">["toolSnapshot"]
 

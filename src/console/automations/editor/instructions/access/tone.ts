@@ -1,5 +1,5 @@
 import { Ban, CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
-import { type getAutomationSurfaceAccess } from "../../../surface"
+import { type getAutomationSurfaceAccess } from "../../../access"
 
 export function getAutomationSurfaceAccessIcon(
   access: ReturnType<typeof getAutomationSurfaceAccess>,

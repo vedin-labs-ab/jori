@@ -1,14 +1,14 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { githubApiUrl } from "../../../providers/github/config"
+import { base64Decode } from "../../../shared/encoding"
+import { jsonErrorResponse } from "../../../shared/http"
 import {
-  base64Decode,
   boundedNumber,
-  jsonErrorResponse,
   optionalString,
   readNested,
   requiredNumber,
   requiredString,
-} from "../common"
+} from "../../../shared/input"
 import {
   githubHeaders,
   githubJson,

@@ -1,4 +1,5 @@
-import { base64EncodeBytes, base64UrlEncode, optionalString } from "../common"
+import { base64EncodeBytes, base64UrlEncode } from "../../../shared/encoding"
+import { optionalString } from "../../../shared/input"
 
 export function getHeader(message: Record<string, unknown>, name: string) {
   const payload = readObject(message.payload)

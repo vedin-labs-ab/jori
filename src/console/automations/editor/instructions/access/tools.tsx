@@ -10,9 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { type AutomationSurfaceFormValue } from "../../../surface"
-import { SurfaceLogo } from "../../../surface/logo"
-import { type AutomationPolicyPermissions } from "../../../surface/policy"
+import { type AutomationSurfaceFormValue } from "../../../access"
+import { SurfaceLogo } from "../../../access/logo"
+import { type AutomationPolicyPermissions } from "../../../access/policy"
 import { AutomationSurfaceToolGroups } from "./sections"
 
 type AutomationSurfaceToolsDialogProps = {

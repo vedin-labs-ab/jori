@@ -1,7 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
 import { notionApiUrl, notionApiVersion } from "../../providers/notion/config"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
-import { fetchJson, optionalString, requiredString } from "./common"
+import { fetchJson } from "../../shared/http"
+import { optionalString, requiredString } from "../../shared/input"
 
 export async function callNotionTool(
   integration: Doc<"integrations">,
