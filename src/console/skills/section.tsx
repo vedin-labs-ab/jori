@@ -1,10 +1,19 @@
+import { BookOpenText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { SkillCard } from "./card"
 import { type Skill } from "./types"
 
 export function SkillSection({
   description,
-  emptyLabel,
+  emptyDescription,
+  emptyTitle,
   onDelete,
   onEdit,
   onToggleGlobalSkill,
@@ -14,7 +23,8 @@ export function SkillSection({
   title,
 }: {
   description: string
-  emptyLabel: string
+  emptyDescription: string
+  emptyTitle: string
   onDelete?: (skill: Skill) => void
   onEdit?: (skill: Skill) => void
   onToggleGlobalSkill?: (skill: Skill, enabled: boolean) => void
@@ -37,9 +47,7 @@ export function SkillSection({
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {skills.length === 0 ? (
-          <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground md:col-span-2 xl:col-span-3">
-            {emptyLabel}
-          </div>
+          <SkillEmptyState description={emptyDescription} title={emptyTitle} />
         ) : null}
 
         {skills.map((skill) => (
@@ -56,5 +64,25 @@ export function SkillSection({
         ))}
       </div>
     </section>
+  )
+}
+
+function SkillEmptyState({
+  description,
+  title,
+}: {
+  description: string
+  title: string
+}) {
+  return (
+    <Empty className="min-h-40 rounded-md border md:col-span-2 xl:col-span-3">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <BookOpenText />
+        </EmptyMedia>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   )
 }
