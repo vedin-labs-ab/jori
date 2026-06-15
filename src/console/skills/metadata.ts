@@ -2,7 +2,7 @@ import {
   Code2,
   FileText,
   type LucideIcon,
-  MessageSquareText,
+  MessagesSquare,
   PencilLine,
   Search,
   Sparkles,
@@ -16,7 +16,7 @@ export function getSkillIcon(category: string): LucideIcon {
       normalizedCategory
     )
   ) {
-    return MessageSquareText
+    return MessagesSquare
   }
 
   if (/(code|engineering|developer|review)/.test(normalizedCategory)) {
