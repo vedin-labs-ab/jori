@@ -30,31 +30,31 @@ export function SkillCard({
 
   return (
     <Card className="min-h-56 gap-0 py-0 transition-shadow duration-200 hover:shadow-sm">
-      <div className="flex flex-1 flex-col gap-4 p-4">
-        <div className="flex items-start gap-3">
-          <SkillIcon icon={Icon} skill={skill} />
-          <div className="min-w-0 flex-1 pt-1">
+      <div className="grid flex-1 grid-cols-[2.5rem_minmax(0,1fr)] gap-3 p-4">
+        <SkillIcon icon={Icon} skill={skill} />
+        <div className="grid min-w-0 content-start gap-2 pt-1">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
             <h3 className="truncate font-heading text-sm font-medium">
               {skill.name}
             </h3>
-            <p className="mt-1 line-clamp-3 text-muted-foreground text-xs/relaxed">
-              {skill.description}
-            </p>
+            {isGlobal ? (
+              <GlobalSkillToggle
+                isPending={isPending}
+                onToggle={onToggleGlobalSkill}
+                skill={skill}
+              />
+            ) : (
+              <SkillManagementMenu
+                isPending={isPending}
+                onDelete={onDelete}
+                onEdit={onEdit}
+                skill={skill}
+              />
+            )}
           </div>
-          {isGlobal ? (
-            <GlobalSkillToggle
-              isPending={isPending}
-              onToggle={onToggleGlobalSkill}
-              skill={skill}
-            />
-          ) : (
-            <SkillManagementMenu
-              isPending={isPending}
-              onDelete={onDelete}
-              onEdit={onEdit}
-              skill={skill}
-            />
-          )}
+          <p className="line-clamp-4 text-muted-foreground text-xs/relaxed">
+            {skill.description}
+          </p>
         </div>
       </div>
 

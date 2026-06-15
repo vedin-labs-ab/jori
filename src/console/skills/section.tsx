@@ -75,7 +75,7 @@ function SkillEmptyState({
   title: string
 }) {
   return (
-    <Empty className="min-h-40 rounded-md border md:col-span-2 xl:col-span-3">
+    <Empty className="min-h-40 rounded-md md:col-span-2 xl:col-span-3">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <BookOpenText />
