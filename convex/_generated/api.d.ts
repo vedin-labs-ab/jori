@@ -90,6 +90,7 @@ import type * as executions_list_pending from "../executions/list/pending.js";
 import type * as executions_list_schedule from "../executions/list/schedule.js";
 import type * as executions_list_source from "../executions/list/source.js";
 import type * as executions_list_summaries from "../executions/list/summaries.js";
+import type * as executions_list_tools from "../executions/list/tools.js";
 import type * as executions_monitor from "../executions/monitor.js";
 import type * as executions_prompt_continuation from "../executions/prompt/continuation.js";
 import type * as executions_prompt_fixtures from "../executions/prompt/fixtures.js";
@@ -130,6 +131,7 @@ import type * as executions_tools_schemas_microsoft from "../executions/tools/sc
 import type * as executions_tools_schemas_milo from "../executions/tools/schemas/milo.js";
 import type * as executions_tools_schemas_notion from "../executions/tools/schemas/notion.js";
 import type * as executions_tools_schemas_slack from "../executions/tools/schemas/slack.js";
+import type * as executions_tools_snapshot from "../executions/tools/snapshot.js";
 import type * as executions_tools_types from "../executions/tools/types.js";
 import type * as http from "../http.js";
 import type * as identity_access from "../identity/access.js";
@@ -326,6 +328,7 @@ declare const fullApi: ApiFromModules<{
   "executions/list/schedule": typeof executions_list_schedule;
   "executions/list/source": typeof executions_list_source;
   "executions/list/summaries": typeof executions_list_summaries;
+  "executions/list/tools": typeof executions_list_tools;
   "executions/monitor": typeof executions_monitor;
   "executions/prompt/continuation": typeof executions_prompt_continuation;
   "executions/prompt/fixtures": typeof executions_prompt_fixtures;
@@ -366,6 +369,7 @@ declare const fullApi: ApiFromModules<{
   "executions/tools/schemas/milo": typeof executions_tools_schemas_milo;
   "executions/tools/schemas/notion": typeof executions_tools_schemas_notion;
   "executions/tools/schemas/slack": typeof executions_tools_schemas_slack;
+  "executions/tools/snapshot": typeof executions_tools_snapshot;
   "executions/tools/types": typeof executions_tools_types;
   http: typeof http;
   "identity/access": typeof identity_access;

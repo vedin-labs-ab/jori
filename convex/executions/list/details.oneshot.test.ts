@@ -10,7 +10,11 @@ test("includes one-shot automation access details", async () => {
       integration: slackIntegration(),
       run: oneShotRun(scheduledAt),
     }),
-    execution({ createdAt: scheduledAt + 1000, finishedAt: scheduledAt + 2000 })
+    execution({
+      createdAt: scheduledAt + 1000,
+      finishedAt: scheduledAt + 2000,
+      toolSnapshot: slackToolSnapshot(true),
+    })
   )
 
   expect(summary.source).toEqual({
@@ -43,7 +47,11 @@ test("marks one-shot automation web search as blocked when disabled", async () =
       integration: slackIntegration(),
       run: oneShotRun(scheduledAt),
     }),
-    execution({ createdAt: scheduledAt + 1000, finishedAt: scheduledAt + 2000 })
+    execution({
+      createdAt: scheduledAt + 1000,
+      finishedAt: scheduledAt + 2000,
+      toolSnapshot: slackToolSnapshot(false),
+    })
   )
 
   expect(summary.details).toContainEqual({
@@ -118,6 +126,19 @@ function execution(overrides: Record<string, unknown> = {}) {
     finishedAt: 1000,
     ...overrides,
   } as Parameters<typeof summarizeExecution>[1]
+}
+
+function slackToolSnapshot(webSearch: boolean) {
+  return {
+    groups: [
+      {
+        provider: "slack",
+        label: "Slack",
+        tools: ["Send message", "Read channel history"],
+      },
+    ],
+    webSearch,
+  }
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {

@@ -1,7 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
-import { projectAccessForConsole } from "../../automations/access"
 import { getExecutionContext } from "./context"
 import { executionDetailSummary } from "./details"
 import { executionTask, executionTitle, triggerLabel } from "./labels"
@@ -17,10 +16,8 @@ export async function summarizeExecution(
   const task = executionTask(context)
   const stoppedBy = await stoppedByLabel(ctx, execution)
   const source = executionSource(context, stoppedBy)
-  const automationAccess = await timeAutomationAccess(ctx, context)
   const detailSummary = executionDetailSummary({
     automation: context.automation,
-    automationAccess,
     approval: context.requestedApproval,
     event: context.event,
     execution,
@@ -62,21 +59,6 @@ export async function summarizeExecution(
       ...context,
     }),
   }
-}
-
-async function timeAutomationAccess(
-  ctx: QueryCtx,
-  context: Awaited<ReturnType<typeof getExecutionContext>>
-) {
-  if (
-    context.run.reason.type !== "time" ||
-    context.automation === null ||
-    context.automation.trigger.type === "event"
-  ) {
-    return undefined
-  }
-
-  return await projectAccessForConsole(ctx, context.automation.access)
 }
 
 function storedTraceFileId(execution: Doc<"executions">) {

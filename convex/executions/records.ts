@@ -6,6 +6,7 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
+import { toolSnapshot } from "./schema"
 
 export const getInputByRun = internalQuery({
   args: {
@@ -128,6 +129,7 @@ export const create = internalMutation({
   args: {
     runId: v.id("runs"),
     promptId: v.id("_storage"),
+    toolSnapshot,
     approvalId: v.optional(v.id("approvals")),
   },
   handler: async (ctx, args): Promise<Id<"executions"> | null> => {
@@ -142,6 +144,7 @@ export const create = internalMutation({
       runId: run._id,
       approvalId: args.approvalId,
       promptId: args.promptId,
+      toolSnapshot: args.toolSnapshot,
       status: "queued",
       createdBy: run.createdBy,
       createdAt: Date.now(),
