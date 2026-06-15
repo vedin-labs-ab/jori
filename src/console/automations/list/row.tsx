@@ -21,7 +21,7 @@ export function AutomationRow({
   return (
     <li className="min-w-0">
       <Card className="h-full gap-0 py-0 ring-inset transition-colors hover:bg-muted/20">
-        <CardHeader className="grid-cols-[auto_minmax(0,1fr)_auto] gap-3 px-4 py-4 sm:px-5">
+        <CardHeader className="grid-cols-[auto_minmax(0,1fr)_auto] gap-3 p-4 sm:p-5">
           <AutomationStatusMark automation={automation} />
           <div className="grid min-w-0 gap-1.5">
             <div className="flex min-w-0 items-center gap-2">

@@ -33,8 +33,8 @@ export function IntegrationSurface({
 }) {
   return (
     <Card className="gap-0 py-0 md:col-span-2">
-      <CardHeader className="gap-4 px-5 py-5 sm:grid-cols-[1fr_auto] sm:px-6">
-        <div className="flex min-w-0 items-start gap-4 sm:gap-5">
+      <CardHeader className="gap-3 p-4 sm:grid-cols-[1fr_auto] sm:p-5">
+        <div className="flex min-w-0 items-start gap-3">
           <IntegrationLogoMark logo={logo} />
           <div className="grid min-w-0 gap-2">
             <div className="grid gap-1">
@@ -54,7 +54,7 @@ export function IntegrationSurface({
       </CardHeader>
       {children === undefined ? null : (
         <div className="border-t">
-          <CardContent className="grid gap-4 px-5 py-5 sm:px-6">
+          <CardContent className="grid gap-4 p-4 sm:p-5">
             {children}
           </CardContent>
         </div>
