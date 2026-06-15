@@ -47,18 +47,28 @@ function toolsDetail(groups: NonNullable<ToolSnapshot>["groups"]) {
 
 function toolGroupLabel(group: ExecutionDetailGroup) {
   const counts = countTools(group.tools)
-  const approval = counts.approval === 0 ? "" : ` · Approval ${counts.approval}`
+  const read = `Read ${counts.read}${counts.readRequiresApproval ? "*" : ""}`
+  const write = `Write ${counts.write}${counts.writeRequiresApproval ? "*" : ""}`
 
-  return `${group.label} · Read ${counts.read} · Write ${counts.write}${approval}`
+  return `${group.label} · ${read} · ${write}`
 }
 
 function countTools(tools: ExecutionDetailGroup["tools"]) {
-  const counts = { read: 0, write: 0, approval: 0 }
+  const counts = {
+    read: 0,
+    readRequiresApproval: false,
+    write: 0,
+    writeRequiresApproval: false,
+  }
 
   for (const tool of tools) {
     counts[tool.access] += 1
     if (tool.requiresApproval === true) {
-      counts.approval += 1
+      if (tool.access === "read") {
+        counts.readRequiresApproval = true
+      } else {
+        counts.writeRequiresApproval = true
+      }
     }
   }
 

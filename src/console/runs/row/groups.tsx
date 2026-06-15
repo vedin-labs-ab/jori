@@ -76,9 +76,10 @@ function ToolGroupButton({
         className="w-[0.5px] shrink-0 self-stretch bg-border"
       />
       <ToolCounts
-        approval={counts.approval}
         read={counts.read}
+        readRequiresApproval={counts.readRequiresApproval}
         write={counts.write}
+        writeRequiresApproval={counts.writeRequiresApproval}
       />
       <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/70 transition-colors group-hover/tool-row:text-foreground" />
     </button>
@@ -86,24 +87,49 @@ function ToolGroupButton({
 }
 
 function ToolCounts({
-  approval,
   read,
+  readRequiresApproval,
   write,
+  writeRequiresApproval,
 }: {
-  approval: number
   read: number
+  readRequiresApproval: boolean
   write: number
+  writeRequiresApproval: boolean
 }) {
   return (
     <span className="inline-flex shrink-0 items-center gap-1.5">
-      <span>Read {read}</span>
+      <ToolCount
+        label="Read"
+        requiresApproval={readRequiresApproval}
+        value={read}
+      />
       <SeparatorDot className="shrink-0 text-muted-foreground/60" />
-      <span>Write {write}</span>
-      {approval > 0 ? (
-        <>
-          <SeparatorDot className="shrink-0 text-muted-foreground/60" />
-          <span>Approval {approval}</span>
-        </>
+      <ToolCount
+        label="Write"
+        requiresApproval={writeRequiresApproval}
+        value={write}
+      />
+    </span>
+  )
+}
+
+function ToolCount({
+  label,
+  requiresApproval,
+  value,
+}: {
+  label: string
+  requiresApproval: boolean
+  value: number
+}) {
+  return (
+    <span>
+      {label} {value}
+      {requiresApproval ? (
+        <span aria-hidden="true" className="text-warning">
+          *
+        </span>
       ) : null}
     </span>
   )
@@ -134,12 +160,21 @@ function ToolGroupDialog({ group }: { group: ExecutionDetailGroup }) {
 }
 
 function countTools(tools: ExecutionDetailGroup["tools"]) {
-  const counts = { read: 0, write: 0, approval: 0 }
+  const counts = {
+    read: 0,
+    readRequiresApproval: false,
+    write: 0,
+    writeRequiresApproval: false,
+  }
 
   for (const tool of tools) {
     counts[tool.access] += 1
     if (tool.requiresApproval === true) {
-      counts.approval += 1
+      if (tool.access === "read") {
+        counts.readRequiresApproval = true
+      } else {
+        counts.writeRequiresApproval = true
+      }
     }
   }
 
