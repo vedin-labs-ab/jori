@@ -25,6 +25,12 @@ export type SkillFormValues = {
 
 export type SkillFilterView = "all" | "tenant" | "global"
 
+export const skillFilterOptions = [
+  { label: "All", value: "all" },
+  { label: "Organization", value: "tenant" },
+  { label: "Global", value: "global" },
+] satisfies Array<{ label: string; value: SkillFilterView }>
+
 export const emptySkillForm: SkillFormValues = {
   name: "",
   category: "",

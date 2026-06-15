@@ -1,8 +1,8 @@
 import { Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { type SkillFilterView } from "./types"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { type SkillFilterView, skillFilterOptions } from "./types"
 
 export function SkillsToolbar({
   isCreateDisabled,
@@ -21,8 +21,8 @@ export function SkillsToolbar({
 }) {
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      <SkillViewTabs onViewChange={onViewChange} view={view} />
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <SkillViewFilter onViewChange={onViewChange} view={view} />
+      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row md:flex-none">
         <SkillSearch onSearchChange={onSearchChange} searchTerm={searchTerm} />
         <Button
           type="button"
@@ -38,7 +38,7 @@ export function SkillsToolbar({
   )
 }
 
-function SkillViewTabs({
+function SkillViewFilter({
   onViewChange,
   view,
 }: {
@@ -46,16 +46,23 @@ function SkillViewTabs({
   view: SkillFilterView
 }) {
   return (
-    <Tabs
+    <ToggleGroup
+      className="flex-wrap justify-start"
       value={view}
-      onValueChange={(value) => onViewChange(value as SkillFilterView)}
+      onValueChange={(value) => {
+        if (value !== "") {
+          onViewChange(value as SkillFilterView)
+        }
+      }}
+      type="single"
+      variant="outline"
     >
-      <TabsList>
-        <TabsTrigger value="all">All</TabsTrigger>
-        <TabsTrigger value="tenant">Organization</TabsTrigger>
-        <TabsTrigger value="global">Global</TabsTrigger>
-      </TabsList>
-    </Tabs>
+      {skillFilterOptions.map((option) => (
+        <ToggleGroupItem key={option.value} value={option.value}>
+          {option.label}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
   )
 }
 
@@ -67,14 +74,14 @@ function SkillSearch({
   searchTerm: string
 }) {
   return (
-    <div className="relative sm:w-80">
+    <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
       <Search
         aria-hidden="true"
-        className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2.5 size-4 text-muted-foreground"
+        className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground"
       />
       <Input
         aria-label="Search skills"
-        className="pl-8"
+        className="pr-2 pl-8"
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder="Search skills"
         value={searchTerm}
