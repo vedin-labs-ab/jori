@@ -115,11 +115,8 @@ function ReadonlyToolRow({ tool }: { tool: ToolCapability }) {
           tool.requiresApproval === true ? (
             <>
               <SeparatorDot className="text-muted-foreground/60" />
-              <span className="font-normal text-muted-foreground text-xs">
+              <span className="font-normal text-warning text-xs">
                 Requires approval
-                <span aria-hidden="true" className="text-warning">
-                  *
-                </span>
               </span>
             </>
           ) : undefined
