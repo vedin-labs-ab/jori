@@ -25,7 +25,7 @@ export function ExecutionSkeletonList() {
     <div className="grid gap-2">
       {skeletonRows.map((row) => (
         <div
-          className="h-16 rounded-md bg-muted/30 ring-1 ring-foreground/10"
+          className="h-16 rounded-md bg-muted/30 ring-1 ring-foreground/10 ring-inset"
           key={row}
         />
       ))}
