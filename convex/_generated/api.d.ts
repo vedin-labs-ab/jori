@@ -236,6 +236,7 @@ import type * as shared_input from "../shared/input.js";
 import type * as shared_sources_metadata from "../shared/sources/metadata.js";
 import type * as skills_catalog from "../skills/catalog.js";
 import type * as skills_data from "../skills/data.js";
+import type * as skills_settings from "../skills/settings.js";
 
 import type {
   ApiFromModules,
@@ -472,6 +473,7 @@ declare const fullApi: ApiFromModules<{
   "shared/sources/metadata": typeof shared_sources_metadata;
   "skills/catalog": typeof skills_catalog;
   "skills/data": typeof skills_data;
+  "skills/settings": typeof skills_settings;
 }>;
 
 /**

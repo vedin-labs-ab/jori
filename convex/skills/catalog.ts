@@ -9,6 +9,8 @@ import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
 import { skills as globalSkillSeed } from "../prompts/generated"
 import {
+  listSkillSettings,
+  mapSkillSettingsByName,
   normalizeSkillInput,
   requireUniqueTenantSkillName,
   sortSkills,
@@ -35,7 +37,7 @@ export const list = query({
       }
     }
 
-    const [globalSkills, tenantSkills] = await Promise.all([
+    const [globalSkills, tenantSkills, globalSettings] = await Promise.all([
       ctx.db
         .query("skills")
         .withIndex("by_tenant", (index) => index.eq("tenantId", null))
@@ -44,7 +46,9 @@ export const list = query({
         .query("skills")
         .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
         .collect(),
+      listSkillSettings(ctx, args.tenantId),
     ])
+    const settingsBySkillName = mapSkillSettingsByName(globalSettings)
 
     return {
       status: "ready" as const,
@@ -56,6 +60,9 @@ export const list = query({
         body: skill.body,
         createdAt: skill.createdAt,
         updatedAt: skill.updatedAt,
+        enabled:
+          skill.tenantId !== null ||
+          (settingsBySkillName.get(skill.name)?.enabled ?? true),
         scope:
           skill.tenantId === null ? ("global" as const) : ("tenant" as const),
       })),
@@ -146,7 +153,7 @@ export const listForRuntime = internalQuery({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    const [globalSkills, tenantSkills] = await Promise.all([
+    const [globalSkills, tenantSkills, globalSettings] = await Promise.all([
       ctx.db
         .query("skills")
         .withIndex("by_tenant", (index) => index.eq("tenantId", null))
@@ -155,15 +162,23 @@ export const listForRuntime = internalQuery({
         .query("skills")
         .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
         .collect(),
+      listSkillSettings(ctx, args.tenantId),
     ])
+    const settingsBySkillName = mapSkillSettingsByName(globalSettings)
 
-    return sortSkills([...globalSkills, ...tenantSkills]).map((skill) => ({
-      id: skill._id,
-      tenantId: skill.tenantId,
-      name: skill.name,
-      description: skill.description,
-      body: skill.body,
-    }))
+    return sortSkills([...globalSkills, ...tenantSkills])
+      .filter(
+        (skill) =>
+          skill.tenantId !== null ||
+          (settingsBySkillName.get(skill.name)?.enabled ?? true)
+      )
+      .map((skill) => ({
+        id: skill._id,
+        tenantId: skill.tenantId,
+        name: skill.name,
+        description: skill.description,
+        body: skill.body,
+      }))
   },
 })
 

@@ -11,7 +11,7 @@ import { integrations } from "./integrations/schema"
 import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
 import { runs } from "./runs/schema"
-import { skills } from "./skills/schema"
+import { skillSettings, skills } from "./skills/schema"
 
 export default defineSchema({
   skills,
@@ -27,4 +27,5 @@ export default defineSchema({
   approvals,
   executions,
   permissions,
+  skillSettings,
 })
