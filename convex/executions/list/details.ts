@@ -11,7 +11,6 @@ import {
   uniqueDetails,
 } from "./detail"
 import { originDetails } from "./origin"
-import { cronScheduleLabel } from "./schedule"
 import { type ExecutionSource } from "./source"
 
 type AutomationAccessSummary = {
@@ -73,7 +72,6 @@ function timeAutomationDetails(input: {
   if (input.automation.trigger.type === "cron") {
     return recurringAutomationDetails({
       automationAccess: input.automationAccess,
-      scheduledAt: input.run.reason.scheduledAt,
       status: input.automation.status,
       trigger: input.automation.trigger,
     })
@@ -88,15 +86,12 @@ function timeAutomationDetails(input: {
 
 function recurringAutomationDetails(input: {
   automationAccess?: AutomationAccessSummary
-  scheduledAt: number
   status: Doc<"automations">["status"]
   trigger: Extract<Doc<"automations">["trigger"], { type: "cron" }>
 }) {
   const trigger = input.trigger
 
   return compactDetails([
-    detail("schedule", cronScheduleLabel(trigger.cron)),
-    detail("occurrence", "Occurrence", { at: input.scheduledAt }),
     input.status === "active"
       ? detail("next", "Next", { at: trigger.nextAt })
       : undefined,

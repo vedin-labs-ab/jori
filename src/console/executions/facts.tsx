@@ -1,14 +1,12 @@
 import {
   CalendarClock,
   CircleDotDashed,
-  Clock,
   File,
   GitPullRequestArrow,
   Globe,
   Hash,
   Info,
   MessageCircleMore,
-  Repeat2,
   Square,
   UserCheck,
   Wrench,
@@ -36,11 +34,9 @@ const detailMeta = {
   issue: { icon: CircleDotDashed, label: "Issue" },
   message: { icon: MessageCircleMore, label: "Message" },
   next: { icon: CalendarClock, label: "Next" },
-  occurrence: { icon: Clock, label: "Occurrence" },
   page: { icon: File, label: "Page" },
   pull_request: { icon: GitPullRequestArrow, label: "Pull request" },
   repository: { icon: RepositoryIcon, label: "Repository" },
-  schedule: { icon: Repeat2, label: "Schedule" },
   status: { icon: Info, label: "Status" },
   stopped: { icon: Square, label: "Stopped" },
   tools: { icon: Wrench, label: "Tools" },
@@ -57,17 +53,15 @@ const compactFieldTypes = new Set<ExecutionDetailType>([
   "channel",
   "issue",
   "next",
-  "occurrence",
   "page",
   "pull_request",
   "repository",
-  "schedule",
   "status",
   "tools",
   "web_search",
 ])
 
-const timeOnlyFieldTypes = new Set<ExecutionDetailType>(["next", "occurrence"])
+const timeOnlyFieldTypes = new Set<ExecutionDetailType>(["next"])
 
 export function ExecutionFacts({ details }: { details: ExecutionDetail[] }) {
   if (details.length === 0) {
@@ -235,7 +229,7 @@ function isPayloadDetail(detail: ExecutionDetail) {
 }
 
 function usesUtcTime(type: ExecutionDetailType) {
-  return type === "next" || type === "occurrence"
+  return type === "next"
 }
 
 function detailKey(detail: ExecutionDetail) {

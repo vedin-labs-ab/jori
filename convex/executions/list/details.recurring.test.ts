@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeExecution } from "./summaries"
 
-test("includes recurring automation schedule details", async () => {
+test("includes recurring automation details", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 9)
   const nextAt = Date.UTC(2026, 5, 15, 9)
   const summary = await summarizeExecution(
@@ -21,8 +21,6 @@ test("includes recurring automation schedule details", async () => {
     metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
   })
   expect(summary.details).toEqual([
-    { type: "schedule", label: "Daily at 09:00 UTC" },
-    { type: "occurrence", label: "Occurrence", at: scheduledAt },
     { type: "next", label: "Next", at: nextAt },
     {
       type: "tools",
