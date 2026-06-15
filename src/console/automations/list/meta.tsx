@@ -1,12 +1,12 @@
 import { getAutomationEventDefinition } from "@contracts/automations/events"
-import { Clock, Repeat2, Workflow, Zap } from "lucide-react"
+import { Clock, Repeat2, Zap } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { getAutomationSurfaceLabel } from "../access"
-import { SurfaceLogo } from "../access/logo"
 import { describeCron } from "../cron"
 import { absoluteTime, relativeTime } from "../format"
 import { type Automation } from "../types"
+import { AutomationToolSummary } from "./tools"
 
 export function AutomationMeta({
   now,
@@ -30,12 +30,9 @@ export function AutomationMeta({
           {trigger.detail}
         </span>
       </AutomationMetaCell>
-      <AutomationMetaCell
-        className="border-b sm:border-r sm:border-b-0"
-        icon={Workflow}
-      >
-        <AutomationAccessSummary automation={automation} />
-      </AutomationMetaCell>
+      <AutomationToolMetaCell className="border-b sm:border-r sm:border-b-0">
+        <AutomationToolSummary automation={automation} />
+      </AutomationToolMetaCell>
       <AutomationMetaCell icon={Clock}>
         <AutomationRuns now={now} automation={automation} />
       </AutomationMetaCell>
@@ -61,6 +58,25 @@ function AutomationMetaCell({
     >
       <Icon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
       <div className="grid min-w-0 gap-0.5">{children}</div>
+    </div>
+  )
+}
+
+function AutomationToolMetaCell({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <div
+      className={cn(
+        "flex min-w-0 items-center px-4 py-3 sm:justify-center sm:px-5",
+        className
+      )}
+    >
+      {children}
     </div>
   )
 }
@@ -124,69 +140,6 @@ function eventCriteriaSummary(
     .join(", ")
 
   return summary === "" ? undefined : summary
-}
-
-function AutomationAccessSummary({ automation }: { automation: Automation }) {
-  const toolCount = countTools(automation)
-  const surfaces = surfaceSummary(automation)
-
-  return (
-    <>
-      <span className="flex min-w-0 items-center gap-2 font-medium text-foreground">
-        <SurfaceLogoStack automation={automation} />
-        <span className="truncate">{toolSummary(toolCount)}</span>
-      </span>
-      <span className="truncate text-muted-foreground" title={surfaces}>
-        {surfaces === "" ? "No connected tools" : surfaces}
-      </span>
-    </>
-  )
-}
-
-function SurfaceLogoStack({ automation }: { automation: Automation }) {
-  const visibleSurfaces = automation.access.surfaces.slice(0, 3)
-  const hiddenSurfaceCount =
-    automation.access.surfaces.length - visibleSurfaces.length
-
-  if (visibleSurfaces.length === 0) {
-    return null
-  }
-
-  return (
-    <span className="inline-flex shrink-0 items-center">
-      <span className="-space-x-1 inline-flex">
-        {visibleSurfaces.map((surface) => (
-          <SurfaceLogo
-            className="size-4 rounded-sm bg-background ring-2 ring-card"
-            integration={surface.integration}
-            key={surface.integration}
-          />
-        ))}
-      </span>
-      {hiddenSurfaceCount > 0 ? (
-        <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-sm border px-1 text-[0.625rem] text-muted-foreground leading-none">
-          +{hiddenSurfaceCount}
-        </span>
-      ) : null}
-    </span>
-  )
-}
-
-function surfaceSummary(automation: Automation) {
-  return automation.access.surfaces
-    .map((surface) => getAutomationSurfaceLabel(surface.integration))
-    .join(", ")
-}
-
-function countTools(automation: Automation) {
-  return automation.access.surfaces.reduce(
-    (sum, surface) => sum + surface.tools.length,
-    0
-  )
-}
-
-function toolSummary(count: number) {
-  return count === 1 ? "1 tool" : `${count} tools`
 }
 
 function AutomationRuns({
