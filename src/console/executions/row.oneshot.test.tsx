@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react"
 import { afterEach, beforeAll, describe, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ExecutionRow } from "./row"
@@ -48,12 +54,16 @@ describe("execution row one-shot details", () => {
     fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
     fireEvent.click(screen.getByRole("button", { name: "Open Slack tools" }))
 
-    expect(screen.getByRole("dialog")).toBeDefined()
+    const dialog = screen.getByRole("dialog")
+
+    expect(dialog).toBeDefined()
     expect(screen.getByText("Slack tools")).toBeDefined()
     expect(screen.getByText("Read channel history")).toBeDefined()
     expect(screen.getByText("Read Slack channel messages.")).toBeDefined()
     expect(screen.getByText("Send message")).toBeDefined()
     expect(screen.getByText("Post a Slack message.")).toBeDefined()
+    expect(within(dialog).getAllByText("Read")).toHaveLength(1)
+    expect(within(dialog).getAllByText("Write")).toHaveLength(1)
     expect(screen.queryByRole("checkbox")).toBeNull()
     expect(screen.queryByRole("button", { name: /select all/i })).toBeNull()
   })

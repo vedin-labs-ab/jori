@@ -71,21 +71,20 @@ function ToolGroupButton({
       <span className="shrink-0 font-medium text-foreground">
         {group.label}
       </span>
-      <ToolCount label="Read" value={counts.read} />
-      <ToolCount label="Write" value={counts.write} />
+      <span aria-hidden="true" className="h-3 w-px shrink-0 bg-border" />
+      <ToolCounts read={counts.read} write={counts.write} />
       <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/70 transition-colors group-hover/tool-row:text-foreground" />
     </button>
   )
 }
 
-function ToolCount({ label, value }: { label: string; value: number }) {
+function ToolCounts({ read, write }: { read: number; write: number }) {
   return (
-    <>
+    <span className="inline-flex shrink-0 items-center gap-1.5">
+      <span>Read {read}</span>
       <SeparatorDot className="shrink-0 text-muted-foreground/60" />
-      <span className="shrink-0">
-        {label} {value}
-      </span>
-    </>
+      <span>Write {write}</span>
+    </span>
   )
 }
 

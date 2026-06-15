@@ -93,10 +93,6 @@ export function ToolRowContent({
   )
 }
 
-export function ToolAccessBadge({ access }: { access: ToolAccess }) {
-  return <Badge variant="secondary">{accessLabel(access)}</Badge>
-}
-
 function ReadonlyToolGroup({
   group,
 }: {
@@ -118,7 +114,6 @@ function ReadonlyToolRow({ tool }: { tool: AutomationToolCapability }) {
   return (
     <div className="border-b p-3 last:border-b-0">
       <ToolRowContent
-        accessories={<ToolAccessBadge access={tool.access} />}
         description={tool.description}
         title={<span className="font-medium text-sm">{tool.label}</span>}
       />
