@@ -30,7 +30,7 @@ export function SkillCard({
 
   return (
     <Card className="min-h-56 gap-0 py-0 transition-shadow duration-200 hover:shadow-sm">
-      <div className="grid flex-1 grid-cols-[2.5rem_minmax(0,1fr)] gap-3 p-4">
+      <div className="grid flex-1 grid-cols-[2.5rem_minmax(0,1fr)] gap-3 p-4 sm:p-5">
         <SkillIcon icon={Icon} skill={skill} />
         <div className="grid min-w-0 content-start gap-2">
           <div className="grid min-h-6 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
@@ -58,7 +58,7 @@ export function SkillCard({
         </div>
       </div>
 
-      <div className="mt-auto flex min-h-14 flex-wrap items-center justify-between gap-3 border-t bg-muted/25 px-4 py-3">
+      <div className="mt-auto flex min-h-14 flex-wrap items-center justify-between gap-3 border-t bg-muted/25 px-4 py-3 sm:px-5">
         <IntegrationLogoStack
           emptyFallback={
             <span className="text-muted-foreground text-sm">-</span>
