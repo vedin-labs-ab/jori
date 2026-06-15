@@ -31,11 +31,14 @@ test("marks approval-required tools in message run details", () => {
   fireEvent.click(screen.getByRole("button", { name: /create a notion page/i }))
 
   expect(screen.getByText(hasTextContent("Write 1*"))).toBeDefined()
-  expect(screen.getByText("*").className).toContain("text-warning")
 
   fireEvent.click(screen.getByRole("button", { name: "Open Notion tools" }))
 
-  expect(screen.getByText("Requires approval")).toBeDefined()
+  expect(screen.getByText(hasTextContent("Requires approval*"))).toBeDefined()
+  expect(screen.getAllByText("*")).toHaveLength(2)
+  for (const star of screen.getAllByText("*")) {
+    expect(star.className).toContain("text-warning")
+  }
 })
 
 function executionWithApprovalTool(): ExecutionItem {
