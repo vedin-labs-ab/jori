@@ -32,8 +32,7 @@ export async function startMessageRun(
   args: {
     activation: Doc<"activations"> | null
     integration: Doc<"integrations">
-    messageId: Id<"messages">
-    messageText: string
+    message: Doc<"messages">
     conversationId: string
     createdBy: string | undefined
     now: number
@@ -44,10 +43,14 @@ export async function startMessageRun(
     tenantId: args.integration.tenantId,
     reason: {
       type: "message",
-      messageId: args.messageId,
+      messageId: args.message._id,
       kind,
     },
-    ...createMessageRunSnapshot({ text: args.messageText }),
+    ...createMessageRunSnapshot({
+      integration: args.integration,
+      kind,
+      message: args.message,
+    }),
     createdBy: args.createdBy,
     createdAt: args.now,
   })
@@ -66,7 +69,7 @@ export async function startMessageRun(
 
   return {
     status: "started" as const,
-    messageId: args.messageId,
+    messageId: args.message._id,
     runId,
     activationId,
   }

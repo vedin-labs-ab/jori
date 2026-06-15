@@ -17,14 +17,9 @@ export async function summarizeExecution(
   const stoppedBy = await stoppedByLabel(ctx, execution)
   const source = executionSource(context, stoppedBy)
   const detailSummary = executionDetailSummary({
-    automation: context.automation,
     approval: context.requestedApproval,
-    event: context.event,
     execution,
-    integration: context.integration,
-    message: context.message,
     run: context.run,
-    source,
     stoppedBy,
   })
 
@@ -91,14 +86,15 @@ function searchableText(
     input.approval?.handoff.objective,
     input.approval?.handoff.progress,
     input.approval?.tool,
+    input.run.display.trigger,
     input.run?.reason.type,
     input.task,
-    input.automation?.name,
-    input.event?.type,
-    input.event?.resource,
-    input.event?.provider,
-    input.integration?.provider,
     sourceSearchText(input.source),
+    ...input.run.display.details.flatMap((detail) => [
+      detail.type,
+      detail.label,
+    ]),
+    input.run.display.taskSource?.label,
   ]
     .filter(Boolean)
     .join(" ")

@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../_generated/server"
+import { oneShotDisplay } from "./display.test.helpers"
 import { summarizeExecution } from "./summaries"
 
 test("includes one-shot automation access details", async () => {
@@ -69,6 +70,7 @@ function oneShotRun(scheduledAt: number) {
     reason: { type: "time", scheduledAt },
     title: "Daily image",
     task: "Generate a team image.",
+    display: oneShotDisplay(),
     createdAt: scheduledAt + 1000,
   }
 }

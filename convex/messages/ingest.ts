@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import {
   findConversationActivation,
@@ -153,10 +153,11 @@ async function recordProviderMessage(
     return { status: "duplicate" as const }
   }
 
-  const messageId = await insertMessage(ctx, {
+  const message = await insertMessage(ctx, {
     message: input.message,
     integration: input.integration,
   })
+  const messageId = message._id
   const now = Date.now()
   await recordAutomationEvent(ctx, { ...input, now })
   const createdBy = await resolveMessageOwner(ctx, {
@@ -183,8 +184,7 @@ async function recordProviderMessage(
   return await startMessageRun(ctx, {
     activation,
     integration: input.integration,
-    messageId,
-    messageText,
+    message,
     conversationId: input.message.conversationId ?? input.message.externalId,
     createdBy,
     now,
@@ -215,8 +215,8 @@ async function insertMessage(
     message: ObservedMessage
     integration: Doc<"integrations">
   }
-): Promise<Id<"messages">> {
-  return await ctx.db.insert("messages", {
+): Promise<Doc<"messages">> {
+  const messageId = await ctx.db.insert("messages", {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
     provider: input.integration.provider,
@@ -234,6 +234,13 @@ async function insertMessage(
     observedAt: input.message.observedAt,
     createdAt: Date.now(),
   })
+  const message = await ctx.db.get(messageId)
+
+  if (message === null) {
+    throw new Error("Message insert failed.")
+  }
+
+  return message
 }
 
 async function resolveMessageOwner(

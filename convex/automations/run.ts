@@ -7,6 +7,8 @@ export async function createAutomationRun(
   ctx: MutationCtx,
   args: {
     automation: Doc<"automations">
+    event?: Doc<"events"> | null
+    integration?: Doc<"integrations"> | null
     reason: Doc<"runs">["reason"]
     now: number
   }
@@ -15,10 +17,7 @@ export async function createAutomationRun(
     tenantId: args.automation.tenantId,
     automationId: args.automation._id,
     reason: args.reason,
-    ...createAutomationRunSnapshot({
-      instructions: args.automation.instructions,
-      name: args.automation.name,
-    }),
+    ...createAutomationRunSnapshot(args),
     createdBy: args.automation.createdBy,
     createdAt: args.now,
   })

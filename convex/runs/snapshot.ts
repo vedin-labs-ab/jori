@@ -1,24 +1,39 @@
+import { type Infer } from "convex/values"
+import { type Doc } from "../_generated/dataModel"
+import { automationDisplay, messageDisplay } from "./display"
+import { type runDisplay } from "./schema"
+
+type RunDisplay = Infer<typeof runDisplay>
+
 type RunSnapshot = {
+  display: RunDisplay
   task: string
   title: string
 }
 
 export function createAutomationRunSnapshot(input: {
-  instructions: string
-  name: string
+  automation: Doc<"automations">
+  event?: Doc<"events"> | null
+  integration?: Doc<"integrations"> | null
 }): RunSnapshot {
   return {
-    title: normalizeRequiredRunText(input.name, "Run title"),
-    task: normalizeRequiredRunText(input.instructions, "Run task"),
+    title: normalizeRequiredRunText(input.automation.name, "Run title"),
+    task: normalizeRequiredRunText(input.automation.instructions, "Run task"),
+    display: automationDisplay(input),
   }
 }
 
-export function createMessageRunSnapshot(input: { text: string }): RunSnapshot {
-  const task = normalizeRequiredRunText(input.text, "Run task")
+export function createMessageRunSnapshot(input: {
+  integration: Doc<"integrations">
+  kind: "mention" | "reply"
+  message: Doc<"messages">
+}): RunSnapshot {
+  const task = normalizeRequiredRunText(input.message.text ?? "", "Run task")
 
   return {
     title: firstLine(task),
     task,
+    display: messageDisplay(input),
   }
 }
 

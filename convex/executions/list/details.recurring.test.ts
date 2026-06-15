@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../_generated/server"
+import { recurringDisplay } from "./display.test.helpers"
 import { summarizeExecution } from "./summaries"
 
 test("includes recurring automation details", async () => {
@@ -9,7 +10,9 @@ test("includes recurring automation details", async () => {
     fakeQueryCtx({
       automation: recurringAutomation({ nextAt }),
       integration: slackIntegration(),
-      run: recurringRun(scheduledAt),
+      run: recurringRun(scheduledAt, {
+        details: [{ type: "next", label: "Next", at: nextAt }],
+      }),
     }),
     execution({
       createdAt: scheduledAt + 1000,
@@ -48,7 +51,9 @@ test("includes paused recurring automation status without next run details", asy
     fakeQueryCtx({
       automation: recurringAutomation({ nextAt, status: "paused" }),
       integration: slackIntegration(),
-      run: recurringRun(scheduledAt),
+      run: recurringRun(scheduledAt, {
+        details: [{ type: "status", label: "Paused" }],
+      }),
     }),
     execution({ createdAt: scheduledAt + 1000, finishedAt: scheduledAt + 2000 })
   )
@@ -60,7 +65,10 @@ test("includes paused recurring automation status without next run details", asy
   expect(summary.details.some((detail) => detail.type === "next")).toBe(false)
 })
 
-function recurringRun(scheduledAt: number) {
+function recurringRun(
+  scheduledAt: number,
+  display: Parameters<typeof recurringDisplay>[0]
+) {
   return {
     _id: "run",
     _creationTime: 0,
@@ -69,6 +77,7 @@ function recurringRun(scheduledAt: number) {
     reason: { type: "time", scheduledAt },
     title: "Daily image",
     task: "Generate a team image.",
+    display: recurringDisplay(display),
     createdAt: scheduledAt + 1000,
   }
 }

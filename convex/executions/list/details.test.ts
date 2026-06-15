@@ -1,5 +1,9 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../_generated/server"
+import {
+  automationDisplay,
+  eventAutomationDisplay,
+} from "./display.test.helpers"
 import { summarizeExecution } from "./summaries"
 
 test("includes stopped details for stopped executions", async () => {
@@ -95,6 +99,10 @@ function manualRun(title: string, task: string) {
     reason: { type: "manual" },
     title,
     task,
+    display: automationDisplay({
+      source: { type: "manual", metadata: [] },
+      trigger: "Manual run",
+    }),
     createdAt: 0,
   }
 }
@@ -107,6 +115,27 @@ function eventRun(title: string, task: string) {
     reason: { type: "event", eventId: "event" },
     title,
     task,
+    display: eventAutomationDisplay({
+      provider: { type: "github", label: "GitHub" },
+      event: { type: "issue.comment.created", label: "New issue comment" },
+      details: [
+        {
+          type: "repository",
+          label: "vedin-labs/frontier",
+          url: "https://github.com/vedin-labs/frontier",
+        },
+        {
+          type: "issue",
+          label: "#42: Callback fails",
+          url: "https://github.com/vedin-labs/frontier/issues/42",
+        },
+        {
+          type: "comment",
+          label: "Can you investigate this failing callback?",
+          url: "https://github.com/vedin-labs/frontier/issues/42#comment-123",
+        },
+      ],
+    }),
     createdAt: 0,
   }
 }
