@@ -29,19 +29,19 @@ export async function prepareIntegrationForRuntime(
 ) {
   const integration = args.integration
 
-  if (integration.provider === "github") {
+  if (integration.integration === "github") {
     return await prepareGitHubIntegrationForRuntime(ctx, integration)
   }
 
-  if (integration.provider === "linear") {
+  if (integration.integration === "linear") {
     return await prepareLinearIntegrationForRuntime(ctx, integration)
   }
 
-  if (isGoogleIntegration(integration.provider)) {
+  if (isGoogleIntegration(integration.integration)) {
     return await prepareGoogleIntegrationForRuntime(ctx, integration)
   }
 
-  if (isMicrosoftIntegration(integration.provider)) {
+  if (isMicrosoftIntegration(integration.integration)) {
     return await prepareMicrosoftIntegrationForRuntime(ctx, integration)
   }
 
@@ -201,11 +201,11 @@ function hasFreshTokenExpiration(expiresAt: number) {
 }
 
 function tokenRefreshError(
-  provider: string,
+  platform: string,
   result: { error: string; error_description?: string }
 ) {
   return new Error(
-    `${provider} token refresh failed: ${result.error_description ?? result.error}`
+    `${platform} token refresh failed: ${result.error_description ?? result.error}`
   )
 }
 

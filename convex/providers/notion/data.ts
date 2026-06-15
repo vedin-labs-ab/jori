@@ -62,8 +62,8 @@ async function findActiveNotionIntegration(
 ) {
   const integration = await ctx.db
     .query("integrations")
-    .withIndex("by_provider_and_external", (query) =>
-      query.eq("provider", "notion").eq("externalId", workspaceId)
+    .withIndex("by_integration_and_external", (query) =>
+      query.eq("integration", "notion").eq("externalId", workspaceId)
     )
     .first()
 

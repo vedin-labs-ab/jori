@@ -8,7 +8,7 @@ type QueryLikeCtx = QueryCtx | MutationCtx
 export async function getTenantIntegration(
   ctx: QueryLikeCtx,
   args: {
-    provider: Integration
+    integration: Integration
     tenantId: string
   }
 ) {
@@ -20,8 +20,8 @@ export async function getTenantIntegration(
 
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_provider", (query) =>
-      query.eq("tenantId", args.tenantId).eq("provider", args.provider)
+    .withIndex("by_tenant_and_integration", (query) =>
+      query.eq("tenantId", args.tenantId).eq("integration", args.integration)
     )
     .order("desc")
     .first()
@@ -30,7 +30,7 @@ export async function getTenantIntegration(
 export async function getUserIntegration(
   ctx: QueryLikeCtx,
   args: {
-    provider: Integration
+    integration: Integration
     tenantId: string
   }
 ) {
@@ -48,7 +48,7 @@ export async function getUserIntegration(
 
   return await getUserIntegrationForOwner(ctx, {
     ownerId: userId,
-    provider: args.provider,
+    integration: args.integration,
     tenantId: args.tenantId,
   })
 }
@@ -57,16 +57,16 @@ export async function getUserIntegrationForOwner(
   ctx: QueryLikeCtx,
   args: {
     ownerId: string
-    provider: Integration
+    integration: Integration
     tenantId: string
   }
 ) {
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_provider_and_owner", (query) =>
+    .withIndex("by_tenant_and_integration_and_owner", (query) =>
       query
         .eq("tenantId", args.tenantId)
-        .eq("provider", args.provider)
+        .eq("integration", args.integration)
         .eq("ownerId", args.ownerId)
     )
     .order("desc")

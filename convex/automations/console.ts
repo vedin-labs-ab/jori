@@ -67,9 +67,9 @@ export const eventIntegrations = query({
     return {
       integrations: await Promise.all(
         automationEventCatalog.map(async (definition) => ({
-          provider: definition.provider,
+          integration: definition.integration,
           connected: await hasActiveIntegration(ctx, {
-            provider: definition.provider,
+            integration: definition.integration,
             ownerId,
             tenantId: args.tenantId,
           }),
@@ -156,7 +156,7 @@ async function projectTriggerForConsole(
 
   return {
     type: "event" as const,
-    provider: integration?.provider,
+    integration: integration?.integration,
     event: trigger.event,
     criteria: trigger.criteria,
     filter: trigger.filter,
@@ -166,25 +166,27 @@ async function projectTriggerForConsole(
 async function hasActiveIntegration(
   ctx: QueryCtx,
   args: {
-    provider: Integration
+    integration: Integration
     ownerId: string
     tenantId: string
   }
 ) {
-  const integration = isUserScopedIntegration(args.provider)
+  const integration = isUserScopedIntegration(args.integration)
     ? await ctx.db
         .query("integrations")
-        .withIndex("by_tenant_and_provider_and_owner", (query) =>
+        .withIndex("by_tenant_and_integration_and_owner", (query) =>
           query
             .eq("tenantId", args.tenantId)
-            .eq("provider", args.provider)
+            .eq("integration", args.integration)
             .eq("ownerId", args.ownerId)
         )
         .first()
     : await ctx.db
         .query("integrations")
-        .withIndex("by_tenant_and_provider", (query) =>
-          query.eq("tenantId", args.tenantId).eq("provider", args.provider)
+        .withIndex("by_tenant_and_integration", (query) =>
+          query
+            .eq("tenantId", args.tenantId)
+            .eq("integration", args.integration)
         )
         .first()
 

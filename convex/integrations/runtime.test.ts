@@ -115,7 +115,7 @@ function githubIntegration(credentials: unknown): Doc<"integrations"> {
     _id: "integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "github",
+    integration: "github",
     scope: "tenant",
     externalId: "98765",
     credentials,

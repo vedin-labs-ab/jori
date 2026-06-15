@@ -24,7 +24,7 @@ export type IntegrationConnectionConfig = {
   label: string
   loading: string
   logo: IntegrationLogo
-  provider: Exclude<ToolSurface, "milo">
+  integration: Exclude<ToolSurface, "milo">
 }
 
 type IntegrationStatus = {
@@ -54,7 +54,7 @@ export function IntegrationConnection({
     tenantId,
   })
   const disconnect = useIntegrationDisconnect({
-    provider: config.provider,
+    integration: config.integration,
     tenantId,
     title: config.label,
   })
@@ -101,7 +101,7 @@ export function IntegrationConnection({
           {isConnected ? (
             <IntegrationPermissions
               controller={permissions}
-              provider={config.provider}
+              surface={config.integration}
             />
           ) : null}
         </>

@@ -1,7 +1,7 @@
 import { CheckCircle2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
-  type IntegrationCallbackProvider,
+  type IntegrationCallbackIntegration,
   type IntegrationCallbackStatus,
   useIntegrationCallbackStatuses,
 } from "./integrations/connection/status"
@@ -108,12 +108,12 @@ const integrationCallbackAlerts = [
 ]
 
 function callbackAlert(
-  provider: IntegrationCallbackProvider,
+  integration: IntegrationCallbackIntegration,
   status: VisibleCallbackStatus,
   title: string,
   description: string
 ) {
-  return { description, provider, status, title }
+  return { description, integration, status, title }
 }
 
 export function IntegrationCallbackAlerts() {
@@ -121,9 +121,9 @@ export function IntegrationCallbackAlerts() {
 
   return integrationCallbackAlerts.map((alert) => (
     <CallbackAlert
-      key={`${alert.provider}-${alert.status}`}
+      key={`${alert.integration}-${alert.status}`}
       alert={alert}
-      visibleStatus={statuses[alert.provider]}
+      visibleStatus={statuses[alert.integration]}
     />
   ))
 }

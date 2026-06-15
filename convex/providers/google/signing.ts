@@ -3,7 +3,7 @@ import { type GoogleIntegration } from "./config"
 import { requireGoogleClientSecret } from "./oauth"
 
 export type GoogleInstallState = {
-  provider: GoogleIntegration
+  integration: GoogleIntegration
   tenantId: string
   createdBy: string
   returnUrl: string

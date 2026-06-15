@@ -14,7 +14,7 @@ export type GoogleIntegrationConfig = {
   callbackParam: GoogleIntegration
   callbackPath: string
   installPath: string
-  provider: GoogleIntegration
+  integration: GoogleIntegration
   scopes: string[]
 }
 
@@ -23,7 +23,7 @@ export const googleIntegrationConfigs = {
     callbackParam: "gmail",
     callbackPath: googleOAuthCallbackPath,
     installPath: "/gmail/install",
-    provider: "gmail",
+    integration: "gmail",
     scopes: [
       ...googleIdentityScopes,
       "https://www.googleapis.com/auth/gmail.readonly",
@@ -35,7 +35,7 @@ export const googleIntegrationConfigs = {
     callbackParam: "googleCalendar",
     callbackPath: googleOAuthCallbackPath,
     installPath: "/google-calendar/install",
-    provider: "googleCalendar",
+    integration: "googleCalendar",
     scopes: [
       ...googleIdentityScopes,
       "https://www.googleapis.com/auth/calendar.events",
@@ -45,7 +45,7 @@ export const googleIntegrationConfigs = {
     callbackParam: "googleDrive",
     callbackPath: googleOAuthCallbackPath,
     installPath: "/google-drive/install",
-    provider: "googleDrive",
+    integration: "googleDrive",
     scopes: [...googleIdentityScopes, "https://www.googleapis.com/auth/drive"],
   },
 } satisfies Record<GoogleIntegration, GoogleIntegrationConfig>

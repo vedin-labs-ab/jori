@@ -41,7 +41,7 @@ export function ApprovalCallout({
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="inline-flex min-w-0 items-center gap-2 font-medium text-sm">
-            <ProviderLogo className="size-4" provider={approval.provider} />
+            <ProviderLogo className="size-4" surface={approval.surface} />
             <span className="truncate">{approval.toolLabel}</span>
           </span>
         </div>

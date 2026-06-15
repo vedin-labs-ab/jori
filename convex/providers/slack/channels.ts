@@ -24,8 +24,8 @@ export async function enrichSlackMessageData(
   }
 
   const integration = await ctx.runQuery(
-    internal.integrations.lookup.activeByProviderExternal,
-    { provider: "slack", externalId: args.accountId }
+    internal.integrations.lookup.activeByIntegrationExternal,
+    { integration: "slack", externalId: args.accountId }
   )
 
   if (integration === null) {

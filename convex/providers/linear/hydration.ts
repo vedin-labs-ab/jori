@@ -27,8 +27,8 @@ export const issueProject = internalQuery({
   handler: async (ctx, args): Promise<IssueProjectHydrationPlan> => {
     const integration = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_and_external", (query) =>
-        query.eq("provider", "linear").eq("externalId", args.accountId)
+      .withIndex("by_integration_and_external", (query) =>
+        query.eq("integration", "linear").eq("externalId", args.accountId)
       )
       .first()
 

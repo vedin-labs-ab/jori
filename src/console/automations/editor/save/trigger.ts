@@ -19,7 +19,7 @@ export type TriggerSpec =
   | { type: "cron"; cron: string }
   | {
       type: "event"
-      provider: AutomationFormValues["eventProvider"]
+      integration: AutomationFormValues["eventIntegration"]
       event: string
       criteria?: AutomationEventCriteria
     }
@@ -39,7 +39,7 @@ export function buildAutomationTriggerSpec(
 
   if (values.type === "event") {
     const definition = getAutomationEventDefinition(
-      values.eventProvider,
+      values.eventIntegration,
       values.event
     )
 
@@ -59,7 +59,7 @@ export function buildAutomationTriggerSpec(
     return {
       trigger: {
         type: "event",
-        provider: values.eventProvider,
+        integration: values.eventIntegration,
         event: definition.value,
         criteria: criteria.value,
       },
@@ -104,7 +104,7 @@ export function hasAutomationTriggerChanged(
 
   if (values.type === "event") {
     return (
-      values.eventProvider !== existingValues.eventProvider ||
+      values.eventIntegration !== existingValues.eventIntegration ||
       values.event.trim() !== existingValues.event ||
       criteriaKey(values.eventCriteria) !==
         criteriaKey(existingValues.eventCriteria)
@@ -122,25 +122,25 @@ export function triggerFormValues(automation: Automation) {
       type: "cron" as const,
       ...classifyCron(trigger.cron),
       runAt: "",
-      eventProvider: emptyAutomationForm.eventProvider,
+      eventIntegration: emptyAutomationForm.eventIntegration,
       event: emptyAutomationForm.event,
       eventCriteria: {},
     }
   }
 
   if (trigger.type === "event") {
-    const provider = isAutomationEventIntegration(trigger.provider)
-      ? trigger.provider
-      : emptyAutomationForm.eventProvider
+    const integration = isAutomationEventIntegration(trigger.integration)
+      ? trigger.integration
+      : emptyAutomationForm.eventIntegration
     const definition =
-      getAutomationEventDefinition(provider, trigger.event) ??
-      getDefaultAutomationEvent(provider)
+      getAutomationEventDefinition(integration, trigger.event) ??
+      getDefaultAutomationEvent(integration)
 
     return {
       type: "event" as const,
       ...classifyCron(undefined),
       runAt: "",
-      eventProvider: provider,
+      eventIntegration: integration,
       event: definition.value,
       eventCriteria:
         definition.value === trigger.event
@@ -153,7 +153,7 @@ export function triggerFormValues(automation: Automation) {
     type: "once" as const,
     ...classifyCron(undefined),
     runAt: toDatetimeLocal(trigger.at),
-    eventProvider: emptyAutomationForm.eventProvider,
+    eventIntegration: emptyAutomationForm.eventIntegration,
     event: emptyAutomationForm.event,
     eventCriteria: {},
   }

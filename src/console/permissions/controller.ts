@@ -27,7 +27,7 @@ export type ToolPermissionController = {
   permissions: ToolPermission[] | null | undefined
   pendingTool: string | undefined
   error: PermissionUpdateError | undefined
-  getSurfacePermissions: (provider: ToolSurface) => ToolPermission[]
+  getSurfacePermissions: (surface: ToolSurface) => ToolPermission[]
   updatePermission: (tool: string, mode: ConfigurablePermissionMode) => void
 }
 
@@ -59,12 +59,12 @@ export function useToolPermissions(tenantId: string): ToolPermissionController {
     }
   }
 
-  function getSurfacePermissions(provider: ToolSurface) {
+  function getSurfacePermissions(surface: ToolSurface) {
     if (!Array.isArray(permissions)) {
       return []
     }
 
-    return permissions.filter((permission) => permission.provider === provider)
+    return permissions.filter((permission) => permission.surface === surface)
   }
 
   return {

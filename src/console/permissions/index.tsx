@@ -5,16 +5,16 @@ import { PermissionSection } from "./section"
 
 export function IntegrationPermissions({
   controller,
-  provider,
+  surface,
 }: {
   controller: ToolPermissionController
-  provider: Exclude<ToolSurface, "milo">
+  surface: Exclude<ToolSurface, "milo">
 }) {
   return (
     <PermissionSection
       controller={controller}
       emptyLabel="No permissions to configure yet."
-      provider={provider}
+      surface={surface}
       title="Permissions"
     />
   )
@@ -34,7 +34,7 @@ export function NativePermissionsCard({
       <PermissionSection
         controller={controller}
         emptyLabel="No permissions to configure yet."
-        provider="milo"
+        surface="milo"
         title="Permissions"
       />
     </IntegrationSurface>

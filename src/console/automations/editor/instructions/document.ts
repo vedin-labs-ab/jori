@@ -29,13 +29,13 @@ export function createAutomationInstructionDocument({
 }): JSONContent {
   const toolsByProvider = new Map(
     syncAutomationSurfaces(description, surfaces, permissions).map(
-      (surface) => [surface.provider, surface.tools]
+      (surface) => [surface.integration, surface.tools]
     )
   )
   const paragraphs: JSONContent[] = [{ type: "paragraph", content: [] }]
 
   for (const part of getAutomationSurfaceMentionParts(description)) {
-    if (part.provider === undefined) {
+    if (part.integration === undefined) {
       appendText(paragraphs, part.text)
       continue
     }
@@ -45,11 +45,11 @@ export function createAutomationInstructionDocument({
       attrs: {
         policy: readSurfacePolicy({
           permissions,
-          provider: part.provider,
-          tools: toolsByProvider.get(part.provider) ?? [],
+          integration: part.integration,
+          tools: toolsByProvider.get(part.integration) ?? [],
         }),
-        provider: part.provider,
-        tools: toolsByProvider.get(part.provider) ?? [],
+        integration: part.integration,
+        tools: toolsByProvider.get(part.integration) ?? [],
       },
     })
   }
@@ -62,14 +62,14 @@ export function createAutomationInstructionDocument({
 
 function readSurfacePolicy({
   permissions,
-  provider,
+  integration,
   tools,
 }: AutomationSurfaceFormValue & {
   permissions: AutomationInstructionsFieldProps["permissions"]
 }): AutomationSurfacePolicyState {
   return isAutomationSurfacePolicyBlocked({
     permissions,
-    surface: { provider, tools },
+    surface: { integration, tools },
   })
     ? "blocked"
     : "allowed"
@@ -94,8 +94,8 @@ export function automationInstructionKey(value: AutomationInstructionsValue) {
   })
 }
 
-export function parseAutomationSurfaceIntegration(provider: unknown) {
-  return isAutomationSurfaceIntegration(provider) ? provider : null
+export function parseAutomationSurfaceIntegration(integration: unknown) {
+  return isAutomationSurfaceIntegration(integration) ? integration : null
 }
 
 export function parseAutomationSurfacePolicy(
@@ -120,19 +120,19 @@ export function parseAutomationSurfaceToolsAttribute(tools: unknown) {
   return parseAutomationSurfaceTools(tools)
 }
 
-export function readAutomationSurfaceToolsForProvider(
+export function readAutomationSurfaceToolsForIntegration(
   document: JSONContent,
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
 ): string[] | undefined {
   if (
     document.type === automationSurfaceNodeName &&
-    document.attrs?.provider === provider
+    document.attrs?.integration === integration
   ) {
     return parseAutomationSurfaceTools(document.attrs.tools)
   }
 
   for (const child of document.content ?? []) {
-    const tools = readAutomationSurfaceToolsForProvider(child, provider)
+    const tools = readAutomationSurfaceToolsForIntegration(child, integration)
 
     if (tools !== undefined) {
       return tools
@@ -200,19 +200,19 @@ function serializeSurfaceNode(
   surfaces: AutomationSurfaceFormValue[],
   seen: Set<AutomationSurfaceIntegration>
 ) {
-  const provider = node.attrs?.provider
+  const integration = node.attrs?.integration
 
-  if (!isAutomationSurfaceIntegration(provider)) {
+  if (!isAutomationSurfaceIntegration(integration)) {
     return ""
   }
 
-  if (!seen.has(provider)) {
-    seen.add(provider)
+  if (!seen.has(integration)) {
+    seen.add(integration)
     surfaces.push({
-      provider,
+      integration,
       tools: parseAutomationSurfaceTools(node.attrs?.tools),
     })
   }
 
-  return getAutomationSurfaceLabel(provider)
+  return getAutomationSurfaceLabel(integration)
 }

@@ -8,7 +8,7 @@ export type MicrosoftIntegrationConfig = {
   callbackParam: MicrosoftIntegration
   callbackPath: string
   installPath: string
-  provider: MicrosoftIntegration
+  integration: MicrosoftIntegration
   scopes: string[]
 }
 
@@ -17,14 +17,14 @@ export const microsoftIntegrationConfigs = {
     callbackParam: "microsoftEmail",
     callbackPath: "/microsoft-email/oauth/callback",
     installPath: "/microsoft-email/install",
-    provider: "microsoftEmail",
+    integration: "microsoftEmail",
     scopes: [...microsoftIdentityScopes, "Mail.ReadWrite", "Mail.Send"],
   },
   microsoftCalendar: {
     callbackParam: "microsoftCalendar",
     callbackPath: "/microsoft-calendar/oauth/callback",
     installPath: "/microsoft-calendar/install",
-    provider: "microsoftCalendar",
+    integration: "microsoftCalendar",
     scopes: [...microsoftIdentityScopes, "Calendars.ReadWrite"],
   },
 } satisfies Record<MicrosoftIntegration, MicrosoftIntegrationConfig>

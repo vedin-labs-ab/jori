@@ -4,7 +4,7 @@ import { createSourceMetadata } from "./metadata"
 test("uses only the Slack channel", () => {
   expect(
     createSourceMetadata({
-      provider: "slack",
+      integration: "slack",
       event: "message.created",
       data: {
         channel: { id: "C123", name: "support" },
@@ -18,7 +18,7 @@ test("uses only the Slack channel", () => {
 test("does not use Slack channel IDs as display metadata", () => {
   expect(
     createSourceMetadata({
-      provider: "slack",
+      integration: "slack",
       event: "message.created",
       data: {
         channelId: "C123",
@@ -31,7 +31,7 @@ test("does not use Slack channel IDs as display metadata", () => {
 test("uses repository and issue for GitHub issue comments", () => {
   expect(
     createSourceMetadata({
-      provider: "github",
+      integration: "github",
       event: "issue.comment.created",
       data: {
         repository: {
@@ -65,7 +65,7 @@ test("uses repository and issue for GitHub issue comments", () => {
 test("uses repository and pull request for GitHub pull request comments", () => {
   expect(
     createSourceMetadata({
-      provider: "github",
+      integration: "github",
       event: "pull_request.review_comment.edited",
       data: {
         repository: { fullName: "vedin-labs/frontier" },
@@ -91,7 +91,7 @@ test("uses repository and pull request for GitHub pull request comments", () => 
 test("uses project and issue for Linear issue comments", () => {
   expect(
     createSourceMetadata({
-      provider: "linear",
+      integration: "linear",
       event: "issue.comment.created",
       data: {
         issueIdentifier: "ENG-214",
@@ -116,7 +116,7 @@ test("uses project and issue for Linear issue comments", () => {
 test("uses page for Notion events", () => {
   expect(
     createSourceMetadata({
-      provider: "notion",
+      integration: "notion",
       event: "page.updated",
       data: {
         pageId: "page-id",
@@ -140,7 +140,7 @@ test("uses page for Notion events", () => {
 test("does not use Notion page IDs as display metadata", () => {
   expect(
     createSourceMetadata({
-      provider: "notion",
+      integration: "notion",
       event: "page.updated",
       data: {
         pageId: "page-id",
@@ -153,7 +153,7 @@ test("does not use Notion page IDs as display metadata", () => {
 test("uses subject and sender for incoming emails", () => {
   expect(
     createSourceMetadata({
-      provider: "gmail",
+      integration: "gmail",
       event: "message.received",
       data: {
         subject: "Enterprise trial question",
@@ -169,7 +169,7 @@ test("uses subject and sender for incoming emails", () => {
 test("uses event name for calendar events", () => {
   expect(
     createSourceMetadata({
-      provider: "googleCalendar",
+      integration: "googleCalendar",
       event: "event.starting_soon",
       data: { event: { summary: "Design review" } },
     })
@@ -179,7 +179,7 @@ test("uses event name for calendar events", () => {
 test("uses folder and file for Google Drive events", () => {
   expect(
     createSourceMetadata({
-      provider: "googleDrive",
+      integration: "googleDrive",
       event: "folder.file.created",
       data: {
         folder: { name: "Finance" },

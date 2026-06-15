@@ -10,13 +10,13 @@ import {
 } from "./scan"
 
 export type AutomationSurfaceMentionPart = {
-  provider?: AutomationSurfaceIntegration
+  integration?: AutomationSurfaceIntegration
   text: string
 }
 
 export type AutomationSurfaceSuggestion = {
   label: string
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
 }
 
 export type ActiveAutomationSurfaceMention = {
@@ -33,9 +33,9 @@ export function findAutomationSurfaceMentions(
   const seen = new Set<AutomationSurfaceIntegration>()
 
   for (const match of readAutomationSurfaceMentionMatches(text)) {
-    if (!seen.has(match.provider)) {
-      seen.add(match.provider)
-      integrations.push(match.provider)
+    if (!seen.has(match.integration)) {
+      seen.add(match.integration)
+      integrations.push(match.integration)
     }
   }
 
@@ -112,7 +112,7 @@ export function getAutomationSurfaceSuggestions(
   return automationSurfaceIntegrations
     .map((item) => ({
       label: item.label,
-      provider: item.provider,
+      integration: item.integration,
       score: getIntegrationSuggestionScore(normalizedQuery, item),
     }))
     .filter((item) => item.score > 0)
@@ -121,15 +121,15 @@ export function getAutomationSurfaceSuggestions(
         right.score - left.score || left.label.localeCompare(right.label)
     )
     .slice(0, 6)
-    .map(({ label, provider }) => ({ label, provider }))
+    .map(({ label, integration }) => ({ label, integration }))
 }
 
 export function replaceAutomationSurfaceMention(
   text: string,
   mention: ActiveAutomationSurfaceMention,
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
 ) {
-  const replacement = getAutomationSurfaceLabel(provider)
+  const replacement = getAutomationSurfaceLabel(integration)
   const suffix = text.slice(mention.end)
   const separator =
     suffix === "" || isMentionNameCharacter(suffix[0]) ? " " : ""
@@ -159,7 +159,7 @@ export function getAutomationSurfaceMentionParts(
     }
 
     parts.push({
-      provider: match.provider,
+      integration: match.integration,
       text: text.slice(match.start, match.end),
     })
     cursor = match.end

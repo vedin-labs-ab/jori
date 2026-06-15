@@ -7,7 +7,7 @@ describe("GitHub automation prompts", () => {
     const prompt = assemblePrompt(githubAutomationRuntimeInput())
 
     expect(prompt).toContain("- Type: pull_request.review_comment.edited")
-    expect(prompt).toContain("- Provider: GitHub")
+    expect(prompt).toContain("- Integration: GitHub")
     expect(prompt).toContain("- Repository: acme/app")
     expect(prompt).toContain("- Pull request number: 12")
     expect(prompt).toContain("- Comment ID: 456")
@@ -82,7 +82,7 @@ function githubIntegration(): Doc<"integrations"> {
     _id: "github-integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "github",
+    integration: "github",
     scope: "tenant",
     externalId: "github-account",
     credentials: {},

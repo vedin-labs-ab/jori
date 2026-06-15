@@ -15,9 +15,9 @@ import { parseSignedMicrosoftState } from "./signing"
 
 export async function handleMicrosoftInstall(
   request: Request,
-  provider: MicrosoftIntegration
+  integration: MicrosoftIntegration
 ) {
-  const surface = microsoftIntegrationConfigs[provider]
+  const surface = microsoftIntegrationConfigs[integration]
   const requestUrl = new URL(request.url)
   const state = requestUrl.searchParams.get("state")
 
@@ -42,9 +42,9 @@ export async function handleMicrosoftInstall(
 export async function handleMicrosoftOAuthCallback(
   ctx: ActionCtx,
   request: Request,
-  provider: MicrosoftIntegration
+  integration: MicrosoftIntegration
 ) {
-  const surface = microsoftIntegrationConfigs[provider]
+  const surface = microsoftIntegrationConfigs[integration]
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
   const stateValue = requestUrl.searchParams.get("state")
@@ -65,7 +65,7 @@ export async function handleMicrosoftOAuthCallback(
 
   const state = parsed.state
 
-  if (state.provider !== provider) {
+  if (state.integration !== integration) {
     return new Response("Mismatched Microsoft OAuth state", { status: 400 })
   }
 
@@ -75,7 +75,7 @@ export async function handleMicrosoftOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    return redirectWithMicrosoftStatus(state.returnUrl, provider, "error")
+    return redirectWithMicrosoftStatus(state.returnUrl, integration, "error")
   }
 
   let profile: Awaited<ReturnType<typeof fetchMicrosoftInstallationProfile>>
@@ -85,14 +85,14 @@ export async function handleMicrosoftOAuthCallback(
       accessToken: tokenResult.access_token,
     })
   } catch {
-    return redirectWithMicrosoftStatus(state.returnUrl, provider, "error")
+    return redirectWithMicrosoftStatus(state.returnUrl, integration, "error")
   }
 
   try {
     await ctx.runMutation(
       internal.providers.microsoft.install.recordOAuthInstallation,
       {
-        provider,
+        integration,
         tenantId: state.tenantId,
         createdBy: state.createdBy,
         microsoftTenantId: profile.tenant.id,
@@ -104,20 +104,20 @@ export async function handleMicrosoftOAuthCallback(
       }
     )
   } catch {
-    return redirectWithMicrosoftStatus(state.returnUrl, provider, "error")
+    return redirectWithMicrosoftStatus(state.returnUrl, integration, "error")
   }
 
-  return redirectWithMicrosoftStatus(state.returnUrl, provider, "connected")
+  return redirectWithMicrosoftStatus(state.returnUrl, integration, "connected")
 }
 
 function redirectWithMicrosoftStatus(
   returnUrl: string,
-  provider: MicrosoftIntegration,
+  integration: MicrosoftIntegration,
   status: "connected" | "error"
 ) {
   return redirectWithStatus(
     returnUrl,
-    microsoftIntegrationConfigs[provider].callbackParam,
+    microsoftIntegrationConfigs[integration].callbackParam,
     status
   )
 }

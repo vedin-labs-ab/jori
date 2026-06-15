@@ -10,7 +10,7 @@ const eventCriteria = v.record(v.string(), eventCriteriaValue)
 export const events = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
-  provider: integrationValidator,
+  integration: integrationValidator,
   key: v.string(),
   type: v.string(),
   resource: v.optional(v.string()),

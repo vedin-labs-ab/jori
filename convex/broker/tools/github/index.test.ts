@@ -66,7 +66,7 @@ function githubIntegration(): Doc<"integrations"> {
     _id: "github-integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "github",
+    integration: "github",
     scope: "tenant",
     externalId: "github-account",
     credentials: {

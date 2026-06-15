@@ -4,7 +4,7 @@ import { type AutomationSurfaceIntegration } from "./catalog"
 export type AutomationToolPermissions = ToolPermission[] | null | undefined
 
 export function getDefaultAutomationSurfaceTools(
-  provider: AutomationSurfaceIntegration,
+  integration: AutomationSurfaceIntegration,
   permissions: AutomationToolPermissions
 ) {
   if (!Array.isArray(permissions)) {
@@ -14,7 +14,7 @@ export function getDefaultAutomationSurfaceTools(
   return permissions
     .filter(
       (permission) =>
-        permission.provider === provider &&
+        permission.surface === integration &&
         isAutomationToolSelectable(permission)
     )
     .map((permission) => permission.tool)

@@ -7,17 +7,19 @@ export function runtimeMilo() {
   }
 }
 
-export function integration(provider: string): Doc<"integrations"> {
+export function integration(integration: string): Doc<"integrations"> {
   return {
-    _id: `${provider}-integration`,
+    _id: `${integration}-integration`,
     _creationTime: 0,
     tenantId: "tenant",
-    provider,
-    scope: isUserScopedIntegration(provider) ? "user" : "tenant",
-    ownerId: isUserScopedIntegration(provider) ? "user" : undefined,
-    externalId: `${provider}-account`,
-    email: isUserScopedIntegration(provider) ? "user@example.com" : undefined,
-    credentials: credentials(provider),
+    integration,
+    scope: isUserScopedIntegration(integration) ? "user" : "tenant",
+    ownerId: isUserScopedIntegration(integration) ? "user" : undefined,
+    externalId: `${integration}-account`,
+    email: isUserScopedIntegration(integration)
+      ? "user@example.com"
+      : undefined,
+    credentials: credentials(integration),
     status: "active",
     createdBy: "user",
     createdAt: 0,
@@ -25,12 +27,12 @@ export function integration(provider: string): Doc<"integrations"> {
   } as Doc<"integrations">
 }
 
-function isUserScopedIntegration(provider: string) {
+function isUserScopedIntegration(integration: string) {
   return (
-    provider === "gmail" ||
-    provider === "googleCalendar" ||
-    provider === "microsoftEmail" ||
-    provider === "microsoftCalendar"
+    integration === "gmail" ||
+    integration === "googleCalendar" ||
+    integration === "microsoftEmail" ||
+    integration === "microsoftCalendar"
   )
 }
 
@@ -60,8 +62,8 @@ export function readRequired(schema: unknown) {
   return Array.isArray(schema.required) ? schema.required : []
 }
 
-function credentials(provider: string) {
-  if (provider === "github") {
+function credentials(integration: string) {
+  if (integration === "github") {
     return {
       installationId: "123",
       tokens: { access: "github-token" },
@@ -69,11 +71,11 @@ function credentials(provider: string) {
     }
   }
 
-  if (provider === "slack") {
+  if (integration === "slack") {
     return { bot: "bot-token", user: "user-token" }
   }
 
-  if (provider === "microsoftEmail" || provider === "microsoftCalendar") {
+  if (integration === "microsoftEmail" || integration === "microsoftCalendar") {
     return {
       tokens: { access: "access-token", refresh: "refresh-token" },
       expiresAt: Date.now() + 60_000,

@@ -127,22 +127,22 @@ test("does not call Microsoft tenant-wide revocation APIs", async () => {
 })
 
 function integration(
-  provider: Doc<"integrations">["provider"],
+  integration: Doc<"integrations">["integration"],
   credentials: Doc<"integrations">["credentials"]
 ): Doc<"integrations"> {
   return {
     _creationTime: Date.now(),
-    _id: `${provider}-integration`,
-    externalId: `${provider}-account`,
+    _id: `${integration}-integration`,
+    externalId: `${integration}-account`,
     createdAt: Date.now(),
     createdBy: "user",
     credentials,
-    provider,
+    integration,
     scope:
-      provider === "gmail" ||
-      provider === "googleCalendar" ||
-      provider === "microsoftEmail" ||
-      provider === "microsoftCalendar"
+      integration === "gmail" ||
+      integration === "googleCalendar" ||
+      integration === "microsoftEmail" ||
+      integration === "microsoftCalendar"
         ? "user"
         : "tenant",
     status: "active",

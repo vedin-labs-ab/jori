@@ -66,7 +66,7 @@ export const getDecisionTarget = internalQuery({
 
     const delivery = approval.delivery
 
-    if (delivery?.provider !== "slack") {
+    if (delivery?.integration !== "slack") {
       return { approval, integration: null }
     }
 
@@ -76,7 +76,7 @@ export const getDecisionTarget = internalQuery({
       integration === null ||
       integration.status !== "active" ||
       integration.tenantId !== approval.tenantId ||
-      integration.provider !== delivery.provider
+      integration.integration !== delivery.integration
     ) {
       return { approval, integration: null }
     }
@@ -94,7 +94,7 @@ async function updateDeliveredApproval(
 ) {
   const delivery = target.approval.delivery
 
-  if (target.integration === null || delivery?.provider !== "slack") {
+  if (target.integration === null || delivery?.integration !== "slack") {
     return
   }
 

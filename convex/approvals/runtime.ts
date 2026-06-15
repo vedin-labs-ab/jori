@@ -60,7 +60,7 @@ export const expireApproval = internalAction({
 
     const delivery = target.approval.delivery
 
-    if (delivery?.provider !== "slack") {
+    if (delivery?.integration !== "slack") {
       return
     }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-export const integrationCallbackProviders = [
+export const integrationCallbackIntegrations = [
   "gmail",
   "github",
   "googleCalendar",
@@ -12,8 +12,8 @@ export const integrationCallbackProviders = [
   "slack",
 ] as const
 
-export type IntegrationCallbackProvider =
-  (typeof integrationCallbackProviders)[number]
+export type IntegrationCallbackIntegration =
+  (typeof integrationCallbackIntegrations)[number]
 
 export type IntegrationCallbackStatus = "connected" | "error" | null
 
@@ -33,20 +33,20 @@ export function useIntegrationCallbackStatuses() {
 
 function readIntegrationCallbackStatuses(
   params = new URLSearchParams()
-): Record<IntegrationCallbackProvider, IntegrationCallbackStatus> {
+): Record<IntegrationCallbackIntegration, IntegrationCallbackStatus> {
   return Object.fromEntries(
-    integrationCallbackProviders.map((provider) => [
-      provider,
-      getIntegrationCallbackStatus(params, provider),
+    integrationCallbackIntegrations.map((integration) => [
+      integration,
+      getIntegrationCallbackStatus(params, integration),
     ])
-  ) as Record<IntegrationCallbackProvider, IntegrationCallbackStatus>
+  ) as Record<IntegrationCallbackIntegration, IntegrationCallbackStatus>
 }
 
 function getIntegrationCallbackStatus(
   params: URLSearchParams,
-  provider: IntegrationCallbackProvider
+  integration: IntegrationCallbackIntegration
 ) {
-  const value = params.get(provider)
+  const value = params.get(integration)
 
   if (value === "connected" || value === "error") {
     return value

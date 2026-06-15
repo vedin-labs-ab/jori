@@ -16,7 +16,7 @@ export function summarizeApproval(args: {
     delivery: deliveryLabel(args.approval.delivery),
     expiresAt: args.approval.expiresAt,
     id: args.approval._id,
-    provider: args.approval.provider,
+    surface: args.approval.surface,
     source: approvalSource(args),
     state,
     summary: args.approval.summary,
@@ -49,19 +49,20 @@ function approvalSource({
   const messageUrl = slackMessageUrl({
     channelId: readString(message?.data, "channelId"),
     messageTs: readString(message?.data, "ts"),
-    teamId: integration?.provider === "slack" ? integration.externalId : null,
+    teamId:
+      integration?.integration === "slack" ? integration.externalId : null,
   })
 
   if (messageUrl !== undefined) {
     return {
       label: "Request message",
-      provider: "slack",
+      integration: "slack",
       url: messageUrl,
     }
   }
 
   const deliveryUrl =
-    approval.delivery?.provider === "slack"
+    approval.delivery?.integration === "slack"
       ? slackMessageUrl({
           channelId: approval.delivery.data.channelId,
           messageTs: approval.delivery.data.messageTs,
@@ -72,7 +73,7 @@ function approvalSource({
   if (deliveryUrl !== undefined) {
     return {
       label: "Delivered to Slack",
-      provider: "slack",
+      integration: "slack",
       url: deliveryUrl,
     }
   }
@@ -83,7 +84,7 @@ function approvalSource({
     ? undefined
     : {
         label,
-        provider: approval.delivery?.provider,
+        integration: approval.delivery?.integration,
       }
 }
 
@@ -92,11 +93,11 @@ function deliveryLabel(delivery: Doc<"approvals">["delivery"]) {
     return undefined
   }
 
-  if (delivery.provider === "slack") {
+  if (delivery.integration === "slack") {
     return "Delivered to Slack"
   }
 
-  return `Delivered to ${toolSurfaceLabel(delivery.provider)}`
+  return `Delivered to ${toolSurfaceLabel(delivery.integration)}`
 }
 
 function readString(data: unknown, key: string) {

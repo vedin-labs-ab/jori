@@ -225,7 +225,7 @@ function slackIntegration(): Doc<"integrations"> {
     _id: "slack-integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "slack",
+    integration: "slack",
     scope: "tenant",
     externalId: "slack-account",
     credentials: {

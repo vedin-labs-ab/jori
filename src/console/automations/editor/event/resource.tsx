@@ -19,7 +19,7 @@ import { type AutomationEventOption, searchEventOptions } from "./search"
 
 export function EventOptionField({
   tenantId,
-  provider,
+  integration,
   parameter,
   criteria,
   disabled,
@@ -28,45 +28,19 @@ export function EventOptionField({
   className,
   value,
   onValueChange,
-}: {
-  tenantId: string
-  provider: AutomationEventIntegration
-  parameter: Extract<AutomationEventParameter, { type: "option" }>
-  criteria: Record<string, string>
-  disabled: boolean
-  disabledMessage: string | undefined
-  id: string
-  className?: string
-  value: string
-  onValueChange: (value: string) => void
-}) {
-  const search = useAction(api.automations.options.search)
+}: EventOptionFieldProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [query, setQuery] = useState("")
-  const [options, setOptions] = useState<AutomationEventOption[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState<string>()
+  const { isLoading, message, options, setQuery } = useEventOptions({
+    criteria,
+    disabled,
+    integration,
+    isOpen,
+    parameter,
+    tenantId,
+  })
   const selectedOption =
     options.find((option) => option.value === value) ??
     (value === "" ? null : { label: value, value })
-
-  useEffect(() => {
-    if (!isOpen || disabled) {
-      return
-    }
-
-    return searchEventOptions({
-      provider,
-      query,
-      parameter,
-      criteria,
-      search,
-      setIsLoading,
-      setMessage,
-      setOptions,
-      tenantId,
-    })
-  }, [isOpen, disabled, provider, query, parameter, criteria, search, tenantId])
 
   return (
     <Combobox
@@ -101,6 +75,68 @@ export function EventOptionField({
       <EventOptionContent isLoading={isLoading} message={message} />
     </Combobox>
   )
+}
+
+type EventOptionFieldProps = {
+  tenantId: string
+  integration: AutomationEventIntegration
+  parameter: Extract<AutomationEventParameter, { type: "option" }>
+  criteria: Record<string, string>
+  disabled: boolean
+  disabledMessage: string | undefined
+  id: string
+  className?: string
+  value: string
+  onValueChange: (value: string) => void
+}
+
+function useEventOptions({
+  criteria,
+  disabled,
+  integration,
+  isOpen,
+  parameter,
+  tenantId,
+}: Pick<
+  EventOptionFieldProps,
+  "criteria" | "disabled" | "integration" | "parameter" | "tenantId"
+> & {
+  isOpen: boolean
+}) {
+  const search = useAction(api.automations.options.search)
+  const [query, setQuery] = useState("")
+  const [options, setOptions] = useState<AutomationEventOption[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState<string>()
+
+  useEffect(() => {
+    if (!isOpen || disabled) {
+      return
+    }
+
+    return searchEventOptions({
+      integration,
+      query,
+      parameter,
+      criteria,
+      search,
+      setIsLoading,
+      setMessage,
+      setOptions,
+      tenantId,
+    })
+  }, [
+    isOpen,
+    disabled,
+    integration,
+    query,
+    parameter,
+    criteria,
+    search,
+    tenantId,
+  ])
+
+  return { isLoading, message, options, setQuery }
 }
 
 function EventOptionContent({

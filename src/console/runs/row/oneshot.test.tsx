@@ -92,7 +92,7 @@ function oneShotExecution({
     searchableText: "",
     source: {
       type: "automation",
-      provider: { type: "milo", label: "Milo" },
+      surface: { type: "milo", label: "Milo" },
       kind: { type: "one-shot", label: "one-shot" },
       metadata: [],
     },

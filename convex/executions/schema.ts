@@ -5,7 +5,7 @@ import { toolSurfaceValidator } from "../integrations/catalog"
 export const toolSnapshot = v.object({
   groups: v.array(
     v.object({
-      provider: toolSurfaceValidator,
+      surface: toolSurfaceValidator,
       label: v.string(),
       tools: v.array(
         v.object({

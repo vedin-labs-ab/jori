@@ -8,7 +8,7 @@ const eventCriteria = v.record(v.string(), eventCriteriaValue)
 export const accessInput = v.object({
   integrations: v.array(
     v.object({
-      provider: integrationValidator,
+      integration: integrationValidator,
       tools: v.array(v.string()),
     })
   ),
@@ -36,7 +36,7 @@ export const triggerInput = v.union(
   }),
   v.object({
     type: v.literal("event"),
-    provider: integrationValidator,
+    integration: integrationValidator,
     event: v.string(),
     criteria: v.optional(eventCriteria),
     filter: v.optional(v.string()),

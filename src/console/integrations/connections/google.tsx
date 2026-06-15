@@ -24,7 +24,7 @@ const gmailConfig = {
     alt: "Gmail logo",
     src: "https://svgl.app/library/gmail.svg",
   },
-  provider: "gmail",
+  integration: "gmail",
 } satisfies IntegrationConnectionConfig
 
 const calendarConfig = {
@@ -41,7 +41,7 @@ const calendarConfig = {
     alt: "Google Calendar logo",
     src: "https://svgl.app/library/google-calendar.svg",
   },
-  provider: "googleCalendar",
+  integration: "googleCalendar",
 } satisfies IntegrationConnectionConfig
 
 const driveConfig = {
@@ -58,7 +58,7 @@ const driveConfig = {
     alt: "Google Drive logo",
     src: "https://svgl.app/library/drive.svg",
   },
-  provider: "googleDrive",
+  integration: "googleDrive",
 } satisfies IntegrationConnectionConfig
 
 export function GmailConnection({

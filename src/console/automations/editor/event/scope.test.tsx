@@ -6,7 +6,7 @@ import { renderEventFields } from "./fixtures"
 describe("automation event conditions", () => {
   test("hides optional parameters until they are added as conditions", () => {
     renderEventFields({
-      eventProvider: "linear",
+      eventIntegration: "linear",
       event: "issue.comment.created",
     })
 
@@ -27,7 +27,7 @@ describe("automation event conditions", () => {
   })
 
   test("shows required scope fields without an add button when every parameter is required", () => {
-    renderEventFields({ eventProvider: "slack", event: "message.created" })
+    renderEventFields({ eventIntegration: "slack", event: "message.created" })
 
     expect(screen.getByLabelText("Channel")).toBeDefined()
     expect(screen.queryByText("Scope")).toBeNull()
@@ -37,7 +37,7 @@ describe("automation event conditions", () => {
 
   test("shows conditions that already have values", () => {
     renderEventFields({
-      eventProvider: "linear",
+      eventIntegration: "linear",
       event: "issue.comment.created",
       eventCriteria: {
         issue: "issue-a",
@@ -59,7 +59,7 @@ describe("automation event conditions", () => {
 describe("automation event condition editing", () => {
   test("adds a condition from the add-condition picker", () => {
     renderEventFields({
-      eventProvider: "linear",
+      eventIntegration: "linear",
       event: "issue.comment.created",
     })
 
@@ -89,7 +89,7 @@ describe("automation event condition editing", () => {
 
     renderEventFields(
       {
-        eventProvider: "linear",
+        eventIntegration: "linear",
         event: "issue.comment.created",
         eventCriteria: { team: "team-a" },
       },
@@ -108,7 +108,7 @@ describe("automation event condition editing", () => {
 
   test("disables dependent condition pickers until their parent is selected", () => {
     renderEventFields({
-      eventProvider: "github",
+      eventIntegration: "github",
       event: "issue.comment.created",
     })
 

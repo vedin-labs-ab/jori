@@ -54,7 +54,7 @@ function integration(credentials: unknown): Doc<"integrations"> {
     _id: "integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "gmail",
+    integration: "gmail",
     scope: "user",
     ownerId: "user",
     externalId: "account",

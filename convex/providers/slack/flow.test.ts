@@ -7,7 +7,7 @@ import { assembleToolsForRun } from "../../executions/agent/tools"
 import { filterRuntimeSkillsForBundle } from "../../executions/agent/tools/bundles"
 import { resolveToolModes } from "../../permissions/catalog"
 import { skills as globalSkills } from "../../prompts/generated"
-import { createProviderActor } from "../../shared/actor"
+import { createIntegrationActor } from "../../shared/actor"
 import { getSlackMessage, type SlackEventPayload } from "./events"
 
 type SlackFlow = ReturnType<typeof createSlackFlow>
@@ -69,17 +69,7 @@ function slackRuntimeInput(
 ) {
   return {
     type: "message",
-    provider: "slack",
-    trigger: {
-      _id: "trigger",
-      _creationTime: 0,
-      tenantId: integration.tenantId,
-      type: "message",
-      provider: "slack",
-      status: "active",
-      messageId: "message",
-      createdAt: 0,
-    },
+    messageIntegration: "slack",
     integration,
     integrations: [integration],
     message: {
@@ -89,8 +79,8 @@ function slackRuntimeInput(
       integrationId: integration._id,
       externalId: slackInput.externalId,
       conversationId: slackInput.conversationId,
-      actor: createProviderActor({
-        provider: "slack",
+      actor: createIntegrationActor({
+        integration: "slack",
         externalId: slackInput.actorId,
         email: "requester@example.com",
       }),
@@ -202,7 +192,7 @@ function slackIntegration(accountId: string): Doc<"integrations"> {
     _id: "slack-integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "slack",
+    integration: "slack",
     scope: "tenant",
     externalId: accountId,
     credentials: {

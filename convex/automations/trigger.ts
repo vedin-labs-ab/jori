@@ -22,7 +22,7 @@ export async function resolveTrigger(
 ): Promise<Doc<"automations">["trigger"]> {
   if (args.trigger.type === "event") {
     const definition = getAutomationEventDefinition(
-      args.trigger.provider,
+      args.trigger.integration,
       args.trigger.event
     )
 
@@ -43,7 +43,7 @@ export async function resolveTrigger(
       integrationId: (
         await resolveEventIntegration(ctx, {
           createdBy: args.createdBy,
-          provider: args.trigger.provider,
+          integration: args.trigger.integration,
           tenantId: args.tenantId,
         })
       )._id,

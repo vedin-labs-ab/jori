@@ -52,7 +52,7 @@ async function getMessageInput(
   if (
     integration === null ||
     integration.tenantId !== args.run.tenantId ||
-    !isMessageProvider(integration.provider)
+    !isMessageIntegration(integration.integration)
   ) {
     return null
   }
@@ -65,7 +65,7 @@ async function getMessageInput(
 
   return {
     type: "message" as const,
-    provider: integration.provider,
+    messageIntegration: integration.integration,
     run: args.run,
     message,
     integration,
@@ -73,10 +73,14 @@ async function getMessageInput(
   }
 }
 
-function isMessageProvider(
-  provider: string
-): provider is "github" | "linear" | "slack" {
-  return provider === "github" || provider === "linear" || provider === "slack"
+function isMessageIntegration(
+  integration: string
+): integration is "github" | "linear" | "slack" {
+  return (
+    integration === "github" ||
+    integration === "linear" ||
+    integration === "slack"
+  )
 }
 
 async function getAutomationInput(

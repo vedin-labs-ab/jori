@@ -32,8 +32,8 @@ describe("automation payload", () => {
           name: "Weekly release summary",
           instructions: "Summarize GitHub and post to Slack.",
           surfaces: [
-            { provider: "github", tools: ["github_get_issue"] },
-            { provider: "slack", tools: ["conversations_add_message"] },
+            { integration: "github", tools: ["github_get_issue"] },
+            { integration: "slack", tools: ["conversations_add_message"] },
           ],
         },
         { permissions: automationPermissions() }
@@ -44,8 +44,8 @@ describe("automation payload", () => {
         instructions: "Summarize GitHub and post to Slack.",
         access: {
           integrations: [
-            { provider: "github", tools: ["github_get_issue"] },
-            { provider: "slack", tools: ["conversations_add_message"] },
+            { integration: "github", tools: ["github_get_issue"] },
+            { integration: "slack", tools: ["conversations_add_message"] },
           ],
           web: true,
         },
@@ -63,7 +63,7 @@ describe("automation payload", () => {
         ...emptyAutomationForm,
         name: "Weekly release summary",
         instructions: "Summarize GitHub.",
-        surfaces: [{ provider: "github", tools: [] }],
+        surfaces: [{ integration: "github", tools: [] }],
       })
     ).toEqual({
       error: "Choose at least one tool for each mentioned integration.",
@@ -77,7 +77,7 @@ describe("automation payload", () => {
           ...emptyAutomationForm,
           name: "Weekly release summary",
           instructions: "Summarize GitHub.",
-          surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
+          surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
         },
         { permissions: automationPermissions() }
       )
@@ -96,8 +96,8 @@ describe("automation payload permissions", () => {
           name: "Weekly release summary",
           instructions: "Summarize GitHub and post to Slack.",
           surfaces: [
-            { provider: "github", tools: ["github_get_issue"] },
-            { provider: "slack", tools: ["conversations_add_message"] },
+            { integration: "github", tools: ["github_get_issue"] },
+            { integration: "slack", tools: ["conversations_add_message"] },
           ],
         },
         {
@@ -105,13 +105,13 @@ describe("automation payload permissions", () => {
             toolPermission({
               access: "read",
               mode: "prompted",
-              provider: "github",
+              surface: "github",
               tool: "github_get_issue",
             }),
             toolPermission({
               access: "write",
               mode: "allowed",
-              provider: "slack",
+              surface: "slack",
               tool: "conversations_add_message",
             }),
           ],
@@ -127,12 +127,12 @@ function automationPermissions() {
   return [
     toolPermission({
       access: "read",
-      provider: "github",
+      surface: "github",
       tool: "github_get_issue",
     }),
     toolPermission({
       access: "write",
-      provider: "slack",
+      surface: "slack",
       tool: "conversations_add_message",
     }),
   ]
@@ -142,7 +142,7 @@ function toolPermission(
   overrides: Partial<{
     access: "read" | "write"
     mode: "required" | "allowed" | "prompted" | "blocked"
-    provider: "github" | "slack"
+    surface: "github" | "slack"
     tool: string
   }>
 ) {
@@ -152,7 +152,7 @@ function toolPermission(
     label: "Tool",
     mode: overrides.mode ?? "allowed",
     overrideMode: null,
-    provider: overrides.provider ?? "github",
+    surface: overrides.surface ?? "github",
     tool: overrides.tool ?? "github_get_issue",
   }
 }

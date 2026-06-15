@@ -55,7 +55,7 @@ describe("automation instructions marker colors", () => {
   }) => {
     const field = renderInstructionsField({
       description: "Post to GitHub.",
-      surfaces: [{ provider: "github", tools: [...tools] }],
+      surfaces: [{ integration: "github", tools: [...tools] }],
     })
 
     const accessButton = await screen.findByRole("button", {
@@ -86,12 +86,12 @@ describe("automation instructions blocked marker colors", () => {
           label: "Read issue",
           mode: "blocked",
           overrideMode: "blocked",
-          provider: "github",
+          surface: "github",
           tool: "github_get_issue",
         },
       ],
       policyKey: "github-read-blocked",
-      surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
+      surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
     const accessButton = await screen.findByRole("button", {

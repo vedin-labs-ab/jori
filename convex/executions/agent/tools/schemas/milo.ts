@@ -6,7 +6,7 @@ import {
   stringProperty,
 } from "./common"
 
-const providerEnum = [
+const integrationEnum = [
   "slack",
   "linear",
   "github",
@@ -17,8 +17,8 @@ const providerEnum = [
   "microsoftEmail",
   "microsoftCalendar",
 ]
-const eventProviderEnum = automationEventCatalog.map(
-  (definition) => definition.provider
+const eventIntegrationEnum = automationEventCatalog.map(
+  (definition) => definition.integration
 )
 const eventEnum = [
   ...new Set(
@@ -35,19 +35,19 @@ const accessSchema = () => ({
       integrations: {
         type: "array",
         description:
-          "Integration tools this automation may use. Select exact tool names from the provider permission catalog.",
+          "Integration tools this automation may use. Select exact tool names from the permission catalog.",
         items: objectSchema({
-          required: ["provider", "tools"],
+          required: ["integration", "tools"],
           properties: {
-            provider: {
+            integration: {
               type: "string",
-              enum: providerEnum,
-              description: "Connected integration provider.",
+              enum: integrationEnum,
+              description: "Connected integration.",
             },
             tools: {
               type: "array",
               description:
-                "Exact tool names this automation may use for this provider.",
+                "Exact tool names this automation may use for this integration.",
               items: { type: "string" },
             },
           },
@@ -80,18 +80,18 @@ const triggerSchema = () => ({
       },
     }),
     objectSchema({
-      required: ["type", "provider", "event"],
+      required: ["type", "integration", "event"],
       properties: {
         type: { const: "event" },
-        provider: {
+        integration: {
           type: "string",
-          enum: eventProviderEnum,
-          description: "Connected provider that emits the event.",
+          enum: eventIntegrationEnum,
+          description: "Connected integration that emits the event.",
         },
         event: {
           type: "string",
+          description: "Supported event name for the selected integration.",
           enum: eventEnum,
-          description: "Supported event name for the selected provider.",
         },
         criteria: objectProperty(
           'Normalized event criteria keyed by catalog parameter name, such as {"channel":"C123"} or {"repo":"owner/repo","issue":"123"}.'

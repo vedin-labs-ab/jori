@@ -26,11 +26,11 @@ export const runMessage = internalAction({
       return
     }
 
-    requireMessageTarget(input.provider, input.message.data)
+    requireMessageTarget(input.messageIntegration, input.message.data)
 
     await runExecution(ctx, {
       type: "message",
-      provider: input.provider,
+      messageIntegration: input.messageIntegration,
       run: input.run,
       integration: input.integration,
       integrations: await prepareIntegrationsForRuntime(

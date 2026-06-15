@@ -21,7 +21,7 @@ const criteriaValidator = v.record(v.string(), v.union(v.string(), v.number()))
 export const search = action({
   args: {
     tenantId: v.string(),
-    provider: integrationValidator,
+    integration: integrationValidator,
     source: v.string(),
     query: v.string(),
     criteria: v.optional(criteriaValidator),
@@ -31,7 +31,7 @@ export const search = action({
 
     if (
       !isAutomationEventOptionSource(args.source) ||
-      !integrationUsesAutomationEventOptionSource(args.provider, args.source)
+      !integrationUsesAutomationEventOptionSource(args.integration, args.source)
     ) {
       throw new Error("Choose a supported event option.")
     }
@@ -40,7 +40,7 @@ export const search = action({
       internal.automations.options.integration,
       {
         tenantId: args.tenantId,
-        provider: args.provider,
+        integration: args.integration,
         createdBy: requireClerkUserId(identity),
       }
     )
@@ -75,7 +75,7 @@ type IntegrationLookup =
 export const integration = internalQuery({
   args: {
     tenantId: v.string(),
-    provider: integrationValidator,
+    integration: integrationValidator,
     createdBy: v.string(),
   },
   handler: async (ctx, args): Promise<IntegrationLookup> => {
@@ -84,14 +84,14 @@ export const integration = internalQuery({
         status: "ready",
         integration: await resolveEventIntegration(ctx, {
           tenantId: args.tenantId,
-          provider: args.provider,
+          integration: args.integration,
           createdBy: args.createdBy,
         }),
       }
     } catch {
       return {
         status: "unavailable",
-        message: `Connect ${integrationLabels[args.provider]} before choosing event options.`,
+        message: `Connect ${integrationLabels[args.integration]} before choosing event options.`,
       }
     }
   },

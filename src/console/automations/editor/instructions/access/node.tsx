@@ -26,15 +26,17 @@ import {
 import { AutomationSurfaceToolsDialog } from "./tools"
 
 export function AutomationSurfaceNodeView(props: NodeViewProps) {
-  const provider = isAutomationSurfaceIntegration(props.node.attrs.provider)
-    ? props.node.attrs.provider
+  const integration = isAutomationSurfaceIntegration(
+    props.node.attrs.integration
+  )
+    ? props.node.attrs.integration
     : null
 
-  if (provider === null) {
+  if (integration === null) {
     return null
   }
 
-  return <AutomationSurfaceNodeContent {...props} provider={provider} />
+  return <AutomationSurfaceNodeContent {...props} integration={integration} />
 }
 
 function AutomationSurfaceNodeContent({
@@ -42,16 +44,16 @@ function AutomationSurfaceNodeContent({
   editor,
   extension,
   node,
-  provider,
+  integration,
   selected,
-}: NodeViewProps & { provider: AutomationSurfaceFormValue["provider"] }) {
+}: NodeViewProps & { integration: AutomationSurfaceFormValue["integration"] }) {
   const [isToolDialogOpen, setIsToolDialogOpen] = useState(false)
   const tools = parseAutomationSurfaceTools(node.attrs.tools)
   const permissions = getNodeViewPermissions(extension)
-  const surface = { provider, tools }
+  const surface = { integration, tools }
   const blocked = isAutomationSurfacePolicyBlocked({ permissions, surface })
   const access = getAutomationSurfaceAccess(surface, permissions)
-  const toolSurfaceLabel = getAutomationSurfaceLabel(provider)
+  const toolSurfaceLabel = getAutomationSurfaceLabel(integration)
 
   return (
     <NodeViewWrapper
@@ -66,18 +68,22 @@ function AutomationSurfaceNodeContent({
         count={tools.length}
         onOpenTools={() => setIsToolDialogOpen(true)}
         onRemove={deleteNode}
-        provider={provider}
+        integration={integration}
         toolSurfaceLabel={toolSurfaceLabel}
         selected={selected}
       />
       <AutomationSurfaceToolsDialog
         onOpenChange={setIsToolDialogOpen}
         onToolsChange={(nextTools) =>
-          updateProviderSurfaceTools({ editor, provider, tools: nextTools })
+          updateIntegrationSurfaceTools({
+            editor,
+            integration,
+            tools: nextTools,
+          })
         }
         open={isToolDialogOpen}
         permissions={permissions}
-        provider={provider}
+        integration={integration}
         toolSurfaceLabel={toolSurfaceLabel}
         tools={tools}
       />
@@ -85,13 +91,13 @@ function AutomationSurfaceNodeContent({
   )
 }
 
-function updateProviderSurfaceTools({
+function updateIntegrationSurfaceTools({
   editor,
-  provider,
+  integration,
   tools,
 }: {
   editor: NodeViewProps["editor"]
-  provider: AutomationSurfaceFormValue["provider"]
+  integration: AutomationSurfaceFormValue["integration"]
   tools: string[]
 }) {
   const transaction = editor.state.tr
@@ -100,7 +106,7 @@ function updateProviderSurfaceTools({
   editor.state.doc.descendants((node, position) => {
     if (
       node.type.name !== automationSurfaceNodeName ||
-      node.attrs.provider !== provider ||
+      node.attrs.integration !== integration ||
       haveSameTools(parseAutomationSurfaceTools(node.attrs.tools), tools)
     ) {
       return
@@ -134,7 +140,7 @@ function AutomationSurfaceMarker({
   count,
   onOpenTools,
   onRemove,
-  provider,
+  integration,
   toolSurfaceLabel,
   selected,
 }: {
@@ -143,7 +149,7 @@ function AutomationSurfaceMarker({
   count: number
   onOpenTools: () => void
   onRemove: () => void
-  provider: AutomationSurfaceFormValue["provider"]
+  integration: AutomationSurfaceFormValue["integration"]
   toolSurfaceLabel: string
   selected: boolean
 }) {
@@ -162,7 +168,7 @@ function AutomationSurfaceMarker({
     >
       <AutomationSurfaceRemoveButton
         onRemove={onRemove}
-        provider={provider}
+        integration={integration}
         toolSurfaceLabel={toolSurfaceLabel}
       />
       <span

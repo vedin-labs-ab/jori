@@ -42,7 +42,7 @@ describe("execution clock timing", () => {
               delivery: undefined,
               expiresAt: 1700000066000,
               id: "approval-1",
-              provider: "slack",
+              surface: "slack",
               source: undefined,
               state: "pending",
               summary: "Approve this run",

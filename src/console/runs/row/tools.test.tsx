@@ -65,7 +65,7 @@ function executionWithApprovalTool(): ExecutionItem {
     source: {
       type: "message",
       kind: { type: "reply", label: "reply" },
-      provider: { type: "slack", label: "Slack" },
+      surface: { type: "slack", label: "Slack" },
       metadata: [{ type: "channel", label: "#product" }],
     },
     status: "completed",

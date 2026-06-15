@@ -28,21 +28,21 @@ export function EventFields({
   onValuesChange: (values: AutomationFormValues) => void
   values: AutomationFormValues
 }) {
-  const events = getEventDefinitions(values.eventProvider)
-  const selectedEvent = getSelectedEvent(values.eventProvider, values.event)
+  const events = getEventDefinitions(values.eventIntegration)
+  const selectedEvent = getSelectedEvent(values.eventIntegration, values.event)
   const hasMultipleEvents = events.length > 1
 
   return (
     <div className="grid gap-3">
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="grid gap-2">
-          <Label htmlFor="automation-event-provider">Integration</Label>
+          <Label htmlFor="automation-event-integration">Integration</Label>
           <EventIntegrationField
             tenantId={tenantId}
-            value={values.eventProvider}
-            onValueChange={(provider) =>
-              onProviderChange({
-                provider,
+            value={values.eventIntegration}
+            onValueChange={(integration) =>
+              onIntegrationChange({
+                integration,
                 onValuesChange,
                 values,
               })
@@ -77,7 +77,7 @@ export function EventFields({
       </div>
       <EventParameterFields
         tenantId={tenantId}
-        provider={values.eventProvider}
+        integration={values.eventIntegration}
         event={selectedEvent}
         onValuesChange={(eventCriteria) =>
           onValuesChange({ ...values, eventCriteria })
@@ -90,13 +90,13 @@ export function EventFields({
 
 function EventParameterFields({
   tenantId,
-  provider,
+  integration,
   event,
   onValuesChange,
   values,
 }: {
   tenantId: string
-  provider: AutomationEventIntegration
+  integration: AutomationEventIntegration
   event: AutomationEventDefinition
   onValuesChange: (values: Record<string, string>) => void
   values: Record<string, string>
@@ -112,9 +112,9 @@ function EventParameterFields({
         </Alert>
       ) : null}
       <EventScopeFields
-        key={`${provider}:${event.value}`}
+        key={`${integration}:${event.value}`}
         tenantId={tenantId}
-        provider={provider}
+        integration={integration}
         event={event}
         onValuesChange={onValuesChange}
         values={values}
@@ -123,36 +123,39 @@ function EventParameterFields({
   )
 }
 
-function onProviderChange({
-  provider,
+function onIntegrationChange({
+  integration,
   onValuesChange,
   values,
 }: {
-  provider: AutomationEventIntegration
+  integration: AutomationEventIntegration
   onValuesChange: (values: AutomationFormValues) => void
   values: AutomationFormValues
 }) {
-  const event = getDefaultAutomationEvent(provider)
+  const event = getDefaultAutomationEvent(integration)
 
   onValuesChange({
     ...values,
-    eventProvider: provider,
+    eventIntegration: integration,
     event: event.value,
     eventCriteria: {},
   })
 }
 
-function getEventDefinitions(provider: AutomationEventIntegration) {
+function getEventDefinitions(integration: AutomationEventIntegration) {
   return (
     automationEventCatalog.find(
-      (definition) => definition.provider === provider
-    )?.events ?? [getDefaultAutomationEvent(provider)]
+      (definition) => definition.integration === integration
+    )?.events ?? [getDefaultAutomationEvent(integration)]
   )
 }
 
-function getSelectedEvent(provider: AutomationEventIntegration, event: string) {
+function getSelectedEvent(
+  integration: AutomationEventIntegration,
+  event: string
+) {
   return (
-    getAutomationEventDefinition(provider, event) ??
-    getDefaultAutomationEvent(provider)
+    getAutomationEventDefinition(integration, event) ??
+    getDefaultAutomationEvent(integration)
   )
 }

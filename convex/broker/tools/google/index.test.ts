@@ -140,7 +140,7 @@ function gmailIntegration(): Doc<"integrations"> {
     _id: "gmail-integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "gmail",
+    integration: "gmail",
     scope: "user",
     ownerId: "user",
     externalId: "google-account",

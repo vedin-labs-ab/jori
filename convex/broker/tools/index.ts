@@ -16,27 +16,27 @@ export async function callProviderTool(args: {
   tool: string
   toolArgs: Record<string, unknown>
 }) {
-  const provider = args.integration.provider
+  const integration = args.integration.integration
 
-  if (provider === "slack") {
+  if (integration === "slack") {
     return await callSlackTool(args.integration, args.tool, args.toolArgs, {
       ctx: args.ctx,
       execution: args.execution,
     })
   }
 
-  if (provider === "linear") {
+  if (integration === "linear") {
     return await callLinearTool(args.integration, args.tool, args.toolArgs)
   }
 
-  if (provider === "github") {
+  if (integration === "github") {
     return await callGitHubTool(args.integration, args.tool, args.toolArgs)
   }
 
   if (
-    provider === "gmail" ||
-    provider === "googleCalendar" ||
-    provider === "googleDrive"
+    integration === "gmail" ||
+    integration === "googleCalendar" ||
+    integration === "googleDrive"
   ) {
     return await callGoogleTool(args.integration, args.tool, args.toolArgs, {
       ctx: args.ctx,
@@ -44,16 +44,16 @@ export async function callProviderTool(args: {
     })
   }
 
-  if (provider === "notion") {
+  if (integration === "notion") {
     return await callNotionTool(args.integration, args.tool, args.toolArgs)
   }
 
-  if (provider === "microsoftEmail" || provider === "microsoftCalendar") {
+  if (integration === "microsoftEmail" || integration === "microsoftCalendar") {
     return await callMicrosoftTool(args.integration, args.tool, args.toolArgs, {
       ctx: args.ctx,
       execution: args.execution,
     })
   }
 
-  throw new Error(`Unsupported provider: ${provider}`)
+  throw new Error(`Unsupported integration: ${integration}`)
 }

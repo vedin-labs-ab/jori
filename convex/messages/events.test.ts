@@ -141,6 +141,6 @@ describe("review and Linear message automation event projection", () => {
   })
 })
 
-function integration(provider: Doc<"integrations">["provider"]) {
-  return { provider } as Pick<Doc<"integrations">, "provider">
+function integration(integration: Doc<"integrations">["integration"]) {
+  return { integration } as Pick<Doc<"integrations">, "integration">
 }

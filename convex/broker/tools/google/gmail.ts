@@ -220,5 +220,5 @@ function requireIntegrationEmail(integration: Doc<"integrations">) {
     return integration.email
   }
 
-  throw new Error(`${integration.provider} integration is missing email`)
+  throw new Error(`${integration.integration} integration is missing email`)
 }

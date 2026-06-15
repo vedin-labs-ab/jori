@@ -10,7 +10,7 @@ export type ApprovalContinuation = {
     next: string
   }
   action: {
-    provider: string
+    surface: string
     tool: string
     summary: string
     args: unknown

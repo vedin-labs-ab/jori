@@ -30,7 +30,7 @@ export async function createPromptedToolApproval(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
   args: {
-    provider: ToolSurface
+    surface: ToolSurface
     tool: string
     args: Record<string, unknown>
   }
@@ -42,8 +42,8 @@ export async function createPromptedToolApproval(
   const request = parsePromptedToolApproval(args)
   const permission = getToolPermission(request.tool)
 
-  if (permission === undefined || permission.provider !== request.provider) {
-    throw new Error(`Unknown ${request.provider} tool: ${request.tool}`)
+  if (permission === undefined || permission.surface !== request.surface) {
+    throw new Error(`Unknown ${request.surface} tool: ${request.tool}`)
   }
 
   const mode = resolveToolMode(context.toolModes, request.tool)
@@ -57,10 +57,10 @@ export async function createPromptedToolApproval(
   }
 
   if (
-    request.provider !== "milo" &&
-    findProviderIntegration(context, request.provider) === null
+    request.surface !== "milo" &&
+    findSurfaceIntegration(context, request.surface) === null
   ) {
-    throw new Error(`No active ${request.provider} integration is available`)
+    throw new Error(`No active ${request.surface} integration is available`)
   }
 
   const requestedBy = createRequestedBy(context)
@@ -68,7 +68,7 @@ export async function createPromptedToolApproval(
   const approval = await ctx.runMutation(internal.approvals.approvals.create, {
     tenantId: context.execution.tenantId,
     executionId: context.execution._id,
-    provider: request.provider,
+    surface: request.surface,
     tool: request.tool,
     args: request.args,
     summary: request.summary,
@@ -82,7 +82,7 @@ export async function createPromptedToolApproval(
     await deliverSlackApproval(ctx, {
       approvalId: approval.approvalId,
       code,
-      provider: request.provider,
+      surface: request.surface,
       tool: request.tool,
       summary: request.summary,
       expiresAt: approval.expiresAt,
@@ -98,14 +98,14 @@ export async function createPromptedToolApproval(
   }
 }
 
-function findProviderIntegration(
+function findSurfaceIntegration(
   context: ApprovalBrokerContext,
-  provider: Exclude<ToolSurface, "milo">
+  surface: Exclude<ToolSurface, "milo">
 ) {
   return (
     context.integrations.find(
       (integration) =>
-        integration.status === "active" && integration.provider === provider
+        integration.status === "active" && integration.integration === surface
     ) ?? null
   )
 }
@@ -115,7 +115,7 @@ async function deliverSlackApproval(
   args: {
     approvalId: Id<"approvals">
     code: string
-    provider: ToolSurface
+    surface: ToolSurface
     tool: string
     summary: string
     expiresAt: number
@@ -124,7 +124,7 @@ async function deliverSlackApproval(
 ) {
   const message = createSlackApprovalRequest({
     code: args.code,
-    provider: args.provider,
+    surface: args.surface,
     tool: args.tool,
     summary: args.summary,
     expiresAt: args.expiresAt,
@@ -145,7 +145,7 @@ async function deliverSlackApproval(
   await ctx.runMutation(internal.approvals.approvals.recordDelivery, {
     approvalId: args.approvalId,
     delivery: {
-      provider: "slack",
+      integration: "slack",
       integrationId: args.delivery.integration._id,
       data: {
         channelId: readString(response, "channel") ?? args.delivery.channelId,
@@ -190,7 +190,7 @@ function getSlackApprovalDelivery(
   }
 
   const integration = context.integrations.find(
-    (candidate) => candidate.provider === "slack"
+    (candidate) => candidate.integration === "slack"
   )
 
   if (integration === undefined) {
@@ -205,7 +205,7 @@ function getSlackTarget(input: CodexRuntimeInput) {
     return null
   }
 
-  if (input.provider !== "slack") {
+  if (input.messageIntegration !== "slack") {
     return null
   }
 

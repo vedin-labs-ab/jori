@@ -220,7 +220,7 @@ function linearIntegration(): Doc<"integrations"> {
     _id: "linear-integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "linear",
+    integration: "linear",
     scope: "tenant",
     externalId: "linear-account",
     credentials: {

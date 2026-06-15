@@ -47,7 +47,7 @@ export type ExecutionSource = {
   event?: SourceDatum
   kind?: SourceDatum
   metadata: SourceDatum[]
-  provider?: SourceDatum
+  surface?: SourceDatum
   stop?: {
     actor: SourceDatum
   }
@@ -110,13 +110,13 @@ export type ExecutionItem = {
     tool: string
     toolLabel: string
     summary: string
-    provider: string
+    surface: string
     expiresAt: number
     decidedAt?: number
     delivery?: string
     source?: {
       label: string
-      provider?: string
+      surface?: string
       url?: string
     }
   } | null

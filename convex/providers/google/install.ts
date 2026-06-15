@@ -14,7 +14,7 @@ import {
 } from "./scope"
 import { createSignedGoogleState } from "./signing"
 
-const googleProvider = v.union(
+const googleIntegration = v.union(
   v.literal("gmail"),
   v.literal("googleCalendar"),
   v.literal("googleDrive")
@@ -52,7 +52,7 @@ export const createGoogleDriveInstallState = mutation({
 
 export const recordOAuthInstallation = internalMutation({
   args: {
-    provider: googleProvider,
+    integration: googleIntegration,
     tenantId: v.string(),
     createdBy: v.string(),
     accessToken: v.string(),
@@ -108,7 +108,7 @@ export const recordOAuthInstallation = internalMutation({
 
 function createGoogleIntegrationValues(
   args: {
-    provider: GoogleIntegration
+    integration: GoogleIntegration
     tenantId: string
     createdBy: string
     profile: {
@@ -130,10 +130,10 @@ function createGoogleIntegrationValues(
 ) {
   return {
     tenantId: args.tenantId,
-    provider: args.provider,
-    scope: getGoogleIntegrationScope(args.provider),
+    integration: args.integration,
+    scope: getGoogleIntegrationScope(args.integration),
     ownerId:
-      getGoogleIntegrationScope(args.provider) === "user"
+      getGoogleIntegrationScope(args.integration) === "user"
         ? args.createdBy
         : undefined,
     externalId: args.profile.id,
@@ -160,9 +160,9 @@ export const updateOAuthCredentials = internalMutation({
 
     if (
       integration === null ||
-      (integration.provider !== "gmail" &&
-        integration.provider !== "googleCalendar" &&
-        integration.provider !== "googleDrive")
+      (integration.integration !== "gmail" &&
+        integration.integration !== "googleCalendar" &&
+        integration.integration !== "googleDrive")
     ) {
       throw new Error("Google Workspace integration not found")
     }
@@ -194,14 +194,14 @@ export const updateOAuthCredentials = internalMutation({
 
 async function createInstallState(
   ctx: MutationCtx,
-  provider: GoogleIntegration,
+  integration: GoogleIntegration,
   args: {
     tenantId: string
     returnUrl: string
   }
 ) {
   return await createSignedGoogleState({
-    provider,
+    integration,
     ...(await buildInstallState(ctx, args)),
   })
 }

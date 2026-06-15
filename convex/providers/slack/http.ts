@@ -4,7 +4,7 @@ import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
 } from "../../approvals/slack"
-import { createProviderActor } from "../../shared/actor"
+import { createIntegrationActor } from "../../shared/actor"
 import {
   ingestProviderMessage,
   readCallbackState,
@@ -156,8 +156,8 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
       accountId: message.accountId,
       type: message.type,
       externalId: message.externalId,
-      actor: createProviderActor({
-        provider: "slack",
+      actor: createIntegrationActor({
+        integration: "slack",
         externalId: message.actorId,
         email: actorEmail,
       }),

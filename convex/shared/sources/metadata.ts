@@ -4,36 +4,36 @@ import { type SourceMetadataItem } from "./schema"
 export function createSourceMetadata(args: {
   data: unknown
   event?: string
-  provider: Integration
+  integration: Integration
 }): SourceMetadataItem[] {
-  if (args.provider === "slack") {
+  if (args.integration === "slack") {
     return slackMetadata(args.data)
   }
 
-  if (args.provider === "github") {
+  if (args.integration === "github") {
     return githubMetadata(args.data)
   }
 
-  if (args.provider === "linear") {
+  if (args.integration === "linear") {
     return linearMetadata(args.data)
   }
 
-  if (args.provider === "notion") {
+  if (args.integration === "notion") {
     return notionMetadata(args.data)
   }
 
-  if (args.provider === "gmail" || args.provider === "microsoftEmail") {
+  if (args.integration === "gmail" || args.integration === "microsoftEmail") {
     return emailMetadata(args.data)
   }
 
   if (
-    args.provider === "googleCalendar" ||
-    args.provider === "microsoftCalendar"
+    args.integration === "googleCalendar" ||
+    args.integration === "microsoftCalendar"
   ) {
     return calendarMetadata(args.data)
   }
 
-  if (args.provider === "googleDrive") {
+  if (args.integration === "googleDrive") {
     return driveMetadata(args.data)
   }
 

@@ -20,19 +20,19 @@ export function eventAutomationDisplay(input: {
   details?: RunDisplay["details"]
   event?: NonNullable<RunDisplay["source"]["event"]>
   metadata?: RunDisplay["source"]["metadata"]
-  provider?: NonNullable<RunDisplay["source"]["provider"]>
+  surface?: NonNullable<RunDisplay["source"]["surface"]>
 }): RunDisplay {
   return automationDisplay({
     source: {
       type: "automation",
-      provider: input.provider,
+      surface: input.surface,
       event: input.event,
       metadata: input.metadata ?? [],
     },
     trigger:
-      input.provider === undefined
+      input.surface === undefined
         ? "Event automation"
-        : `${input.provider.label} event`,
+        : `${input.surface.label} event`,
     details: input.details ?? [],
   })
 }
@@ -41,19 +41,19 @@ export function messageDisplay(input: {
   details?: RunDisplay["details"]
   kind: "mention" | "reply"
   metadata?: RunDisplay["source"]["metadata"]
-  provider?: NonNullable<RunDisplay["source"]["provider"]>
+  surface?: NonNullable<RunDisplay["source"]["surface"]>
   taskSource?: RunDisplay["taskSource"]
 }): RunDisplay {
-  const provider = input.provider ?? { type: "slack", label: "Slack" }
+  const surface = input.surface ?? { type: "slack", label: "Slack" }
 
   return {
     source: {
       type: "message",
       kind: { type: input.kind, label: input.kind },
-      provider,
+      surface,
       metadata: input.metadata ?? [],
     },
-    trigger: `${provider.label} message`,
+    trigger: `${surface.label} message`,
     details: input.details ?? [],
     ...(input.taskSource === undefined ? {} : { taskSource: input.taskSource }),
   }
@@ -63,7 +63,7 @@ export function oneShotDisplay(): RunDisplay {
   return automationDisplay({
     source: {
       type: "automation",
-      provider: { type: "milo", label: "Milo" },
+      surface: { type: "milo", label: "Milo" },
       kind: { type: "one-shot", label: "one-shot" },
       metadata: [],
     },
@@ -77,7 +77,7 @@ export function recurringDisplay(input: {
   return automationDisplay({
     source: {
       type: "automation",
-      provider: { type: "milo", label: "Milo" },
+      surface: { type: "milo", label: "Milo" },
       kind: { type: "recurring", label: "recurring" },
       metadata: [
         { type: "schedule", label: input.schedule ?? "Daily at 09:00 UTC" },

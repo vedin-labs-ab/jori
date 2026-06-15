@@ -15,9 +15,9 @@ import { parseSignedGoogleState } from "./signing"
 
 export async function handleGoogleInstall(
   request: Request,
-  provider: GoogleIntegration
+  integration: GoogleIntegration
 ) {
-  const surface = googleIntegrationConfigs[provider]
+  const surface = googleIntegrationConfigs[integration]
   const requestUrl = new URL(request.url)
   const state = requestUrl.searchParams.get("state")
 
@@ -43,7 +43,7 @@ export async function handleGoogleInstall(
 export async function handleGoogleOAuthCallback(
   ctx: ActionCtx,
   request: Request,
-  expectedProvider?: GoogleIntegration
+  expectedIntegration?: GoogleIntegration
 ) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
@@ -65,14 +65,17 @@ export async function handleGoogleOAuthCallback(
 
   const state = parsed.state
 
-  if (expectedProvider !== undefined && state.provider !== expectedProvider) {
+  if (
+    expectedIntegration !== undefined &&
+    state.integration !== expectedIntegration
+  ) {
     return new Response("Mismatched Google Workspace OAuth state", {
       status: 400,
     })
   }
 
-  const provider = state.provider
-  const surface = googleIntegrationConfigs[provider]
+  const integration = state.integration
+  const surface = googleIntegrationConfigs[integration]
 
   const tokenResult = await exchangeGoogleAuthorizationCode({
     code,
@@ -80,7 +83,7 @@ export async function handleGoogleOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    return redirectWithGoogleStatus(state.returnUrl, provider, "error")
+    return redirectWithGoogleStatus(state.returnUrl, integration, "error")
   }
 
   let profile: Awaited<ReturnType<typeof fetchGoogleInstallationProfile>>
@@ -88,14 +91,14 @@ export async function handleGoogleOAuthCallback(
   try {
     profile = await fetchGoogleInstallationProfile(tokenResult.access_token)
   } catch {
-    return redirectWithGoogleStatus(state.returnUrl, provider, "error")
+    return redirectWithGoogleStatus(state.returnUrl, integration, "error")
   }
 
   try {
     await ctx.runMutation(
       internal.providers.google.install.recordOAuthInstallation,
       {
-        provider,
+        integration,
         tenantId: state.tenantId,
         createdBy: state.createdBy,
         accessToken: tokenResult.access_token,
@@ -106,20 +109,20 @@ export async function handleGoogleOAuthCallback(
       }
     )
   } catch {
-    return redirectWithGoogleStatus(state.returnUrl, provider, "error")
+    return redirectWithGoogleStatus(state.returnUrl, integration, "error")
   }
 
-  return redirectWithGoogleStatus(state.returnUrl, provider, "connected")
+  return redirectWithGoogleStatus(state.returnUrl, integration, "connected")
 }
 
 function redirectWithGoogleStatus(
   returnUrl: string,
-  provider: GoogleIntegration,
+  integration: GoogleIntegration,
   status: "connected" | "error"
 ) {
   return redirectWithStatus(
     returnUrl,
-    googleIntegrationConfigs[provider].callbackParam,
+    googleIntegrationConfigs[integration].callbackParam,
     status
   )
 }

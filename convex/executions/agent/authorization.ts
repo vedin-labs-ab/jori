@@ -17,8 +17,8 @@ export async function authorizeApprovedTool(
 ) {
   const permission = getToolPermission(approval.tool)
 
-  if (permission === undefined || permission.provider !== approval.provider) {
-    throw new Error(`Unknown ${approval.provider} tool: ${approval.tool}`)
+  if (permission === undefined || permission.surface !== approval.surface) {
+    throw new Error(`Unknown ${approval.surface} tool: ${approval.tool}`)
   }
 
   const toolModes = resolveToolModes(
@@ -32,13 +32,13 @@ export async function authorizeApprovedTool(
     throw new Error(`Tool is no longer available: ${approval.tool}`)
   }
 
-  if (approval.provider !== "milo" && input.type === "automation") {
+  if (approval.surface !== "milo" && input.type === "automation") {
     const integration = input.integrations.find(
-      (candidate) => candidate.provider === approval.provider
+      (candidate) => candidate.integration === approval.surface
     )
 
     if (integration === undefined) {
-      throw new Error(`No active ${approval.provider} integration is available`)
+      throw new Error(`No active ${approval.surface} integration is available`)
     }
 
     const isSelected = canUseAutomationTool(

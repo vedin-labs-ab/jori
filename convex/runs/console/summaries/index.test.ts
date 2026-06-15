@@ -19,7 +19,7 @@ test("uses stored automation snapshots when the automation document is unavailab
         title: "Deep analysis",
         task: "Perform the deep analysis.",
         display: eventAutomationDisplay({
-          provider: { type: "slack", label: "Slack" },
+          surface: { type: "slack", label: "Slack" },
           event: { type: "message.created", label: "New channel message" },
           metadata: [{ type: "channel", label: "C123" }],
         }),
@@ -35,7 +35,7 @@ test("uses stored automation snapshots when the automation document is unavailab
   expect("promptUrl" in summary).toBe(false)
   expect(summary.source).toEqual({
     type: "automation",
-    provider: { type: "slack", label: "Slack" },
+    surface: { type: "slack", label: "Slack" },
     event: { type: "message.created", label: "New channel message" },
     metadata: [{ type: "channel", label: "C123" }],
   })
@@ -68,7 +68,7 @@ test("uses stored message snapshots when the message document is unavailable", a
   expect(summary.source).toEqual({
     type: "message",
     kind: { type: "mention", label: "mention" },
-    provider: { type: "slack", label: "Slack" },
+    surface: { type: "slack", label: "Slack" },
     metadata: [{ type: "channel", label: "C123" }],
   })
 })
@@ -82,7 +82,7 @@ test("uses stored message snapshots instead of message text", async () => {
         _creationTime: 0,
         tenantId: "tenant",
         integrationId: "integration",
-        provider: "slack",
+        integration: "slack",
         type: "message.channels",
         externalId: "slack:message",
         text: "Please summarize this thread.\n\nKeep it concise.",
@@ -111,7 +111,7 @@ test("uses stored message snapshots instead of message text", async () => {
   expect(summary.source).toEqual({
     type: "message",
     kind: { type: "reply", label: "reply" },
-    provider: { type: "slack", label: "Slack" },
+    surface: { type: "slack", label: "Slack" },
     metadata: [{ type: "channel", label: "C123" }],
   })
   expect(summary.searchableText).not.toContain("keep it concise")
@@ -151,7 +151,7 @@ test("summarizes mention runs with source task links", async () => {
   expect(summary.source).toEqual({
     type: "message",
     kind: { type: "mention", label: "mention" },
-    provider: { type: "slack", label: "Slack" },
+    surface: { type: "slack", label: "Slack" },
     metadata: [{ type: "channel", label: "#product" }],
   })
   expect(summary.taskSource).toEqual({
@@ -210,7 +210,7 @@ function slackIntegration() {
     _id: "integration",
     _creationTime: 0,
     tenantId: "tenant",
-    provider: "slack",
+    integration: "slack",
     scope: "tenant",
     externalId: "slack-team",
     credentials: {},

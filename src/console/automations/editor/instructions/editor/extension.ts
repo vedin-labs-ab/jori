@@ -16,7 +16,7 @@ import {
 
 export type AutomationSurfaceNodeAttrs = {
   policy: AutomationSurfacePolicyState
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
   tools: string[]
 }
 
@@ -40,15 +40,15 @@ export const AutomationSurfaceExtension =
 
     addAttributes() {
       return {
-        provider: {
+        integration: {
           default: null,
           parseHTML: (element) =>
             parseAutomationSurfaceIntegration(
-              element.getAttribute("data-provider")
+              element.getAttribute("data-integration")
             ),
           renderHTML: (attributes) => ({
-            "data-provider": parseAutomationSurfaceIntegration(
-              attributes.provider
+            "data-integration": parseAutomationSurfaceIntegration(
+              attributes.integration
             ),
           }),
         },
@@ -80,14 +80,16 @@ export const AutomationSurfaceExtension =
     },
 
     renderHTML({ HTMLAttributes, node }) {
-      const provider = parseAutomationSurfaceIntegration(node.attrs.provider)
+      const integration = parseAutomationSurfaceIntegration(
+        node.attrs.integration
+      )
 
       return [
         "span",
         mergeAttributes(HTMLAttributes, {
           "data-automation-surface": "",
         }),
-        provider === null ? "" : getAutomationSurfaceLabel(provider),
+        integration === null ? "" : getAutomationSurfaceLabel(integration),
       ]
     },
 

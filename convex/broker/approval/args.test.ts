@@ -3,7 +3,7 @@ import { parsePromptedToolApproval } from "./args"
 
 test("extracts approval metadata and strips it from tool args", () => {
   const approval = parsePromptedToolApproval({
-    provider: "notion",
+    surface: "notion",
     tool: "notion_create_page",
     args: {
       parent: { type: "workspace" },
@@ -29,7 +29,7 @@ test("extracts approval metadata and strips it from tool args", () => {
 test("requires approval metadata", () => {
   expect(() =>
     parsePromptedToolApproval({
-      provider: "notion",
+      surface: "notion",
       tool: "notion_create_page",
       args: {},
     })

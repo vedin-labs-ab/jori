@@ -35,8 +35,8 @@ export const recordInstallation = internalMutation({
     const now = Date.now()
     const existing = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_and_external", (query) =>
-        query.eq("provider", "github").eq("externalId", args.installationId)
+      .withIndex("by_integration_and_external", (query) =>
+        query.eq("integration", "github").eq("externalId", args.installationId)
       )
       .first()
 
@@ -64,7 +64,7 @@ export const recordInstallation = internalMutation({
 
     return await ctx.db.insert("integrations", {
       tenantId: args.tenantId,
-      provider: "github",
+      integration: "github",
       scope: "tenant",
       externalId: args.installationId,
       name: args.profile.account?.login,
@@ -88,7 +88,7 @@ export const updateInstallationCredentials = internalMutation({
   handler: async (ctx, args) => {
     const integration = await ctx.db.get(args.integrationId)
 
-    if (integration === null || integration.provider !== "github") {
+    if (integration === null || integration.integration !== "github") {
       throw new Error("GitHub integration not found")
     }
 

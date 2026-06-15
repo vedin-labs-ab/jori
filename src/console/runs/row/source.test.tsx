@@ -23,7 +23,7 @@ test("renders one-shot Milo automation sources", () => {
     <SourceLine
       source={{
         type: "automation",
-        provider: { type: "milo", label: "Milo" },
+        surface: { type: "milo", label: "Milo" },
         kind: { type: "one-shot", label: "one-shot" },
         metadata: [],
       }}
@@ -40,7 +40,7 @@ test("renders recurring Milo automation sources", () => {
     <SourceLine
       source={{
         type: "automation",
-        provider: { type: "milo", label: "Milo" },
+        surface: { type: "milo", label: "Milo" },
         kind: { type: "recurring", label: "recurring" },
         metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
       }}
@@ -63,7 +63,7 @@ test("renders rich event source metadata", () => {
     <SourceLine
       source={{
         type: "automation",
-        provider: { type: "github", label: "GitHub" },
+        surface: { type: "github", label: "GitHub" },
         event: {
           type: "pull_request.review_comment.created",
           label: "Pull request review comment created",
@@ -101,7 +101,7 @@ test("renders Slack channels as channel tokens", () => {
       source={{
         type: "message",
         kind: { type: "reply", label: "reply" },
-        provider: { type: "slack", label: "Slack" },
+        surface: { type: "slack", label: "Slack" },
         metadata: [{ type: "channel", label: "#product" }],
       }}
     />
@@ -120,7 +120,7 @@ test("renders Notion pages with a file icon", () => {
     <SourceLine
       source={{
         type: "automation",
-        provider: { type: "notion", label: "Notion" },
+        surface: { type: "notion", label: "Notion" },
         event: { type: "page.updated", label: "Page updated" },
         metadata: [{ type: "page", label: "Product roadmap" }],
       }}
@@ -136,7 +136,7 @@ test("renders Linear issues with a dashed circle icon", () => {
     <SourceLine
       source={{
         type: "automation",
-        provider: { type: "linear", label: "Linear" },
+        surface: { type: "linear", label: "Linear" },
         event: { type: "issue.comment.created", label: "Issue comment" },
         metadata: [
           { type: "project", label: "Engineering" },
@@ -157,7 +157,7 @@ test("renders GitHub issues with a dashed circle icon", () => {
     <SourceLine
       source={{
         type: "automation",
-        provider: { type: "github", label: "GitHub" },
+        surface: { type: "github", label: "GitHub" },
         event: { type: "issue.comment.created", label: "Issue comment" },
         metadata: [
           { type: "repository", label: "frontier" },

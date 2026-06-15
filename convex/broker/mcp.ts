@@ -27,7 +27,7 @@ import { callMiloTool } from "./milo"
 import { callProviderTool, fetchGitHubTarball } from "./tools"
 
 type MiloMcpRequest = {
-  provider?: ToolSurface
+  surface?: ToolSurface
   tool: string
   args?: unknown
 }
@@ -49,7 +49,7 @@ export async function handleMiloMcpRequest(ctx: ActionCtx, request: Request) {
 
   try {
     const result = await callBrokerTool(ctx, context, {
-      provider: body.provider ?? "milo",
+      surface: body.surface ?? "milo",
       tool: body.tool,
       args: normalizeToolArgs(body.args),
     })
@@ -72,12 +72,12 @@ export async function handleGitHubTarballRequest(
 
   const args = normalizeToolArgs(await request.json().catch(() => null))
   const { permission } = authorizeTool(context, {
-    provider: "github",
+    surface: "github",
     tool: "github_clone_repository",
   })
-  const integration = await authorizeProviderTool(context, {
+  const integration = await authorizeSurfaceTool(context, {
     permission,
-    provider: "github",
+    surface: "github",
     tool: "github_clone_repository",
   })
 
@@ -150,12 +150,12 @@ async function callBrokerTool(
   ctx: ActionCtx,
   context: BrokerContext,
   request: {
-    provider: ToolSurface
+    surface: ToolSurface
     tool: string
     args: Record<string, unknown>
   }
 ) {
-  if (request.provider === "milo") {
+  if (request.surface === "milo") {
     const { mode } = authorizeTool(context, request)
 
     if (mode === "prompted") {
@@ -165,16 +165,16 @@ async function callBrokerTool(
     return await callMiloTool(ctx, context.execution, request)
   }
 
-  const provider = request.provider
+  const surface = request.surface
   const { mode, permission } = authorizeTool(context, request)
-  const integration = await authorizeProviderTool(context, {
+  const integration = await authorizeSurfaceTool(context, {
     permission,
-    provider,
+    surface,
     tool: request.tool,
   })
 
   if (integration === null) {
-    throw new Error(`No active ${request.provider} integration is available`)
+    throw new Error(`No active ${request.surface} integration is available`)
   }
 
   if (mode === "prompted") {
@@ -193,7 +193,7 @@ async function callBrokerTool(
 function authorizeTool(
   context: BrokerContext,
   request: {
-    provider: ToolSurface
+    surface: ToolSurface
     tool: string
   }
 ): {
@@ -202,8 +202,8 @@ function authorizeTool(
 } {
   const permission = getToolPermission(request.tool)
 
-  if (permission === undefined || permission.provider !== request.provider) {
-    throw new Error(`Unknown ${request.provider} tool: ${request.tool}`)
+  if (permission === undefined || permission.surface !== request.surface) {
+    throw new Error(`Unknown ${request.surface} tool: ${request.tool}`)
   }
 
   const mode = resolveToolMode(context.toolModes, request.tool)
@@ -221,15 +221,15 @@ function authorizeTool(
   return { mode, permission }
 }
 
-async function authorizeProviderTool(
+async function authorizeSurfaceTool(
   context: BrokerContext,
   request: {
     permission: ToolPermission
-    provider: Exclude<ToolSurface, "milo">
+    surface: Exclude<ToolSurface, "milo">
     tool: string
   }
 ) {
-  const integration = findProviderIntegration(context, request.provider)
+  const integration = findSurfaceIntegration(context, request.surface)
 
   if (integration !== null && context.input.type === "automation") {
     const isSelected = canUseAutomationTool(
@@ -248,14 +248,14 @@ async function authorizeProviderTool(
   return integration
 }
 
-function findProviderIntegration(
+function findSurfaceIntegration(
   context: BrokerContext,
-  provider: Exclude<ToolSurface, "milo">
+  surface: Exclude<ToolSurface, "milo">
 ) {
   return (
     context.integrations.find(
       (integration) =>
-        integration.status === "active" && integration.provider === provider
+        integration.status === "active" && integration.integration === surface
     ) ?? null
   )
 }

@@ -61,7 +61,7 @@ describe("execution row message details", () => {
         source: {
           type: "message",
           kind: { type: "mention", label: "mention" },
-          provider: { type: "slack", label: "Slack" },
+          surface: { type: "slack", label: "Slack" },
           metadata: [{ type: "channel", label: "#product" }],
         },
         taskSource: {
@@ -115,10 +115,10 @@ describe("execution row approval details", () => {
           decidedAt: 1700000001000,
           expiresAt: 1700001800000,
           id: "approval",
-          provider: "slack",
+          surface: "slack",
           source: {
             label: "Request message",
-            provider: "slack",
+            surface: "slack",
             url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123",
           },
           state: "approved",
@@ -239,7 +239,7 @@ function execution(
     searchableText: "",
     source: overrides.source ?? {
       type: "automation",
-      provider: { type: "slack", label: "Slack" },
+      surface: { type: "slack", label: "Slack" },
       event: { type: "message.created", label: "New channel message" },
       metadata: [],
     },

@@ -14,12 +14,12 @@ import { providerLogoPath } from "./logos"
 
 export function ProviderLogo({
   className = "size-3",
-  provider,
+  surface,
 }: {
   className?: string
-  provider: string | undefined
+  surface: string | undefined
 }) {
-  if (provider === "milo") {
+  if (surface === "milo") {
     return (
       <MiloLogo
         aria-hidden="true"
@@ -30,7 +30,7 @@ export function ProviderLogo({
     )
   }
 
-  const logo = providerLogoPath(provider)
+  const logo = providerLogoPath(surface)
 
   if (logo === undefined) {
     return null
@@ -65,9 +65,9 @@ type SourceItem = {
 function sourceItems(source: ExecutionSource): SourceItem[] {
   return [
     ...optionalItem(
-      "provider",
-      source.provider === undefined ? undefined : (
-        <ProviderDatum datum={source.provider} />
+      "surface",
+      source.surface === undefined ? undefined : (
+        <ProviderDatum datum={source.surface} />
       )
     ),
     ...optionalItem(
@@ -84,7 +84,7 @@ function sourceItems(source: ExecutionSource): SourceItem[] {
     ),
     ...source.metadata.map((item) => ({
       key: `metadata-${item.type}-${item.label}`,
-      content: <MetadataDatum datum={item} provider={source.provider?.type} />,
+      content: <MetadataDatum datum={item} surface={source.surface?.type} />,
     })),
     ...optionalItem(
       "stop",
@@ -120,7 +120,7 @@ function SourceItem({
 function ProviderDatum({ datum }: { datum: SourceDatum }) {
   return (
     <span className="inline-flex min-w-0 items-center gap-1">
-      <ProviderLogo provider={datum.type} />
+      <ProviderLogo surface={datum.type} />
       <span className="truncate font-medium text-foreground">
         {datum.label}
       </span>
@@ -139,15 +139,15 @@ function SourceTypeDatum({ datum }: { datum: SourceDatum }) {
   )
 }
 
-function MetadataDatum({ datum, provider }: MetadataRendererProps) {
+function MetadataDatum({ datum, surface }: MetadataRendererProps) {
   const Renderer = metadataRenderers[datum.type] ?? PlainMetadataDatum
 
-  return <Renderer datum={datum} provider={provider} />
+  return <Renderer datum={datum} surface={surface} />
 }
 
 type MetadataRendererProps = {
   datum: SourceDatum
-  provider?: string
+  surface?: string
 }
 
 type MetadataRenderer = (props: MetadataRendererProps) => ReactNode
@@ -193,8 +193,8 @@ function ChannelDatum({ datum }: MetadataRendererProps) {
   )
 }
 
-function IssueDatum({ datum, provider }: MetadataRendererProps) {
-  if (provider === "github") {
+function IssueDatum({ datum, surface }: MetadataRendererProps) {
+  if (surface === "github") {
     return (
       <IconMetadataDatum
         datum={{ ...datum, label: issueNumberLabel(datum.label) }}
@@ -204,7 +204,7 @@ function IssueDatum({ datum, provider }: MetadataRendererProps) {
     )
   }
 
-  if (provider !== "linear") {
+  if (surface !== "linear") {
     return <PlainMetadataDatum datum={datum} />
   }
 

@@ -22,7 +22,7 @@ export type RuntimeToolBundle = ToolBundle & {
 }
 
 export type RuntimeToolCapability = {
-  provider: ToolSurface
+  surface: ToolSurface
   label: string
   tools: RuntimeToolCapabilityTool[]
 }
@@ -91,7 +91,7 @@ export type ToolPreflight =
 
 export type RuntimeTarget =
   | {
-      provider: "github"
+      integration: "github"
       owner: string
       repo: string
       repositoryId?: number
@@ -101,12 +101,12 @@ export type RuntimeTarget =
       commentKind: string
     }
   | {
-      provider: "linear"
+      integration: "linear"
       issueId: string
       commentId?: string
     }
   | {
-      provider: "slack"
+      integration: "slack"
       channelId: string
       threadId?: string
     }

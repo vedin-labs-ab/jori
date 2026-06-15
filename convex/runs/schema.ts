@@ -42,7 +42,7 @@ export const runDisplay = v.object({
     event: v.optional(sourceDatum),
     kind: v.optional(sourceDatum),
     metadata: sourceMetadataValidator,
-    provider: v.optional(sourceDatum),
+    surface: v.optional(sourceDatum),
   }),
   trigger: v.string(),
   details: v.array(runDisplayDetail),

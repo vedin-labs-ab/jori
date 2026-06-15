@@ -15,7 +15,7 @@ describe("automation instructions shared tool access document", () => {
       description: "Read GitHub and update GitHub.",
       surfaces: [
         {
-          provider: "github",
+          integration: "github",
           tools: ["github_get_issue", "github_add_issue_comment"],
         },
       ],
@@ -25,7 +25,7 @@ describe("automation instructions shared tool access document", () => {
       description: "Read GitHub and update GitHub.",
       surfaces: [
         {
-          provider: "github",
+          integration: "github",
           tools: ["github_get_issue", "github_add_issue_comment"],
         },
       ],
@@ -50,7 +50,7 @@ describe("automation instructions tool access", () => {
   test("hides the visible count for markers without enabled tools", async () => {
     renderInstructionsField({
       description: "Post to GitHub.",
-      surfaces: [{ provider: "github", tools: [] }],
+      surfaces: [{ integration: "github", tools: [] }],
     })
 
     const button = await screen.findByRole("button", {
@@ -63,7 +63,7 @@ describe("automation instructions tool access", () => {
   test("keeps duplicate integration badges in sync", async () => {
     const field = renderInstructionsField({
       description: "Read GitHub and post to GitHub.",
-      surfaces: [{ provider: "github", tools: ["github_get_issue"] }],
+      surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
     const accessButtons = await screen.findAllByRole("button", {
@@ -88,7 +88,7 @@ describe("automation instructions tool access", () => {
         description: "Read GitHub and post to GitHub.",
         surfaces: [
           {
-            provider: "github",
+            integration: "github",
             tools: ["github_get_issue", "github_add_issue_comment"],
           },
         ],

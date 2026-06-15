@@ -6,7 +6,7 @@ import {
 } from "../../../../permissions/catalog"
 import { createCodexConfig } from "../../codex"
 import { assembleToolsForRun } from ".."
-import { getProviderToolDefinitions } from "../definitions"
+import { getSurfaceToolDefinitions } from "../definitions"
 import {
   integration,
   readProperties,
@@ -63,7 +63,7 @@ test("includes Gmail send and draft tools with message schemas", () => {
     (server) => server.name === "gmail"
   )
   const enabledTools = gmailServer?.env.MILO_ENABLED_TOOLS.split(",") ?? []
-  const tools = getProviderToolDefinitions("gmail", {
+  const tools = getSurfaceToolDefinitions("gmail", {
     toolModes: resolveToolModes([]),
   })
   const sendMessage = tools.find(
@@ -98,7 +98,7 @@ test("includes Google Drive tools with file content schemas", () => {
     (server) => server.name === "googleDrive"
   )
   const enabledTools = driveServer?.env.MILO_ENABLED_TOOLS.split(",") ?? []
-  const tools = getProviderToolDefinitions("googleDrive", {
+  const tools = getSurfaceToolDefinitions("googleDrive", {
     toolModes: resolveToolModes([]),
   })
   const createFile = tools.find(
@@ -165,7 +165,7 @@ test("wraps prompted write tool schemas with approval metadata", () => {
   const toolModes = resolveToolModes([
     { tool: "notion_create_page", mode: "prompted" },
   ])
-  const tools = getProviderToolDefinitions("notion", {
+  const tools = getSurfaceToolDefinitions("notion", {
     toolModes,
   })
   const createPage = tools.find((tool) => tool.name === "notion_create_page")
@@ -181,7 +181,7 @@ test("wraps prompted read tool schemas with approval metadata", () => {
   const toolModes = resolveToolModes([
     { tool: "notion_search", mode: "prompted" },
   ])
-  const tools = getProviderToolDefinitions("notion", { toolModes })
+  const tools = getSurfaceToolDefinitions("notion", { toolModes })
   const search = tools.find((tool) => tool.name === "notion_search")
 
   expect(readRequired(search?.inputSchema)).toContain("approval")
@@ -212,7 +212,7 @@ test("wraps prompted Milo automation schemas with approval metadata", () => {
   const toolModes = resolveToolModes([
     { tool: "add_automation", mode: "prompted" },
   ])
-  const tools = getProviderToolDefinitions("milo", {
+  const tools = getSurfaceToolDefinitions("milo", {
     toolModes,
   })
   const addAutomation = tools.find((tool) => tool.name === "add_automation")

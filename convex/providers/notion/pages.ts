@@ -24,8 +24,8 @@ export async function enrichNotionEventData(
   }
 
   const integration = await ctx.runQuery(
-    internal.integrations.lookup.activeByProviderExternal,
-    { provider: "notion", externalId: args.workspaceId }
+    internal.integrations.lookup.activeByIntegrationExternal,
+    { integration: "notion", externalId: args.workspaceId }
   )
 
   if (integration === null) {

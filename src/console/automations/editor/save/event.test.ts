@@ -10,17 +10,17 @@ describe("automation event payload criteria", () => {
         eventForm({
           name: "Watch support",
           instructions: "Read Slack and post to Slack.",
-          eventProvider: "slack",
+          eventIntegration: "slack",
           event: "message.created",
           eventCriteria: { channel: "C123" },
-          surfaces: [{ provider: "slack", tools: slackTools() }],
+          surfaces: [{ integration: "slack", tools: slackTools() }],
         })
       )
     ).toMatchObject({
       args: {
         trigger: {
           type: "event",
-          provider: "slack",
+          integration: "slack",
           event: "message.created",
           criteria: { channel: "C123" },
         },
@@ -33,7 +33,7 @@ describe("automation event payload criteria", () => {
       args: {
         trigger: {
           type: "event",
-          provider: "github",
+          integration: "github",
           event: "pull_request.review_comment.edited",
           criteria: {
             repo: "milo/app",
@@ -53,10 +53,10 @@ describe("automation event payload validation", () => {
         eventForm({
           name: "Watch support",
           instructions: "Read Slack and post to Slack.",
-          eventProvider: "slack",
+          eventIntegration: "slack",
           event: "message.created",
           eventCriteria: {},
-          surfaces: [{ provider: "slack", tools: slackTools() }],
+          surfaces: [{ integration: "slack", tools: slackTools() }],
         })
       )
     ).toEqual({ error: "Channel is required." })
@@ -68,12 +68,12 @@ describe("automation event payload validation", () => {
         eventForm({
           name: "Watch inbox",
           instructions: "Read Gmail and draft with Gmail.",
-          eventProvider: "gmail",
+          eventIntegration: "gmail",
           event: "message.received",
           eventCriteria: { from: "person@example.com" },
           surfaces: [
             {
-              provider: "gmail",
+              integration: "gmail",
               tools: ["google_gmail_get_message", "google_gmail_send_message"],
             },
           ],
@@ -85,16 +85,16 @@ describe("automation event payload validation", () => {
     })
   })
 
-  test("rejects unsupported provider events", () => {
+  test("rejects unsupported integration events", () => {
     expect(
       createAutomationArgs(
         eventForm({
           name: "Watch support",
           instructions: "Read Slack and post to Slack.",
-          eventProvider: "slack",
+          eventIntegration: "slack",
           event: "page.updated",
           eventCriteria: { channel: "C123" },
-          surfaces: [{ provider: "slack", tools: slackTools() }],
+          surfaces: [{ integration: "slack", tools: slackTools() }],
         })
       )
     ).toEqual({ error: "Choose a supported automation event." })
@@ -105,7 +105,7 @@ function githubReviewForm() {
   return eventForm({
     name: "Watch PR reviews",
     instructions: "Read GitHub and post to Slack.",
-    eventProvider: "github",
+    eventIntegration: "github",
     event: "pull_request.review_comment.edited",
     eventCriteria: {
       repo: "milo/app",
@@ -113,8 +113,8 @@ function githubReviewForm() {
       path: "src/app.ts",
     },
     surfaces: [
-      { provider: "github", tools: ["github_get_issue"] },
-      { provider: "slack", tools: ["conversations_add_message"] },
+      { integration: "github", tools: ["github_get_issue"] },
+      { integration: "slack", tools: ["conversations_add_message"] },
     ],
   })
 }

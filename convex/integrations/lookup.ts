@@ -2,16 +2,18 @@ import { v } from "convex/values"
 import { internalQuery } from "../_generated/server"
 import { integrationValidator } from "../integrations/catalog"
 
-export const activeByProviderExternal = internalQuery({
+export const activeByIntegrationExternal = internalQuery({
   args: {
-    provider: integrationValidator,
+    integration: integrationValidator,
     externalId: v.string(),
   },
   handler: async (ctx, args) => {
     const integration = await ctx.db
       .query("integrations")
-      .withIndex("by_provider_and_external", (query) =>
-        query.eq("provider", args.provider).eq("externalId", args.externalId)
+      .withIndex("by_integration_and_external", (query) =>
+        query
+          .eq("integration", args.integration)
+          .eq("externalId", args.externalId)
       )
       .first()
 

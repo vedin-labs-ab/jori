@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { resolveToolModes } from "../../permissions/catalog"
 import { assembleToolsForRun } from "./tools"
-import { getProviderToolDefinitions } from "./tools/definitions"
+import { getSurfaceToolDefinitions } from "./tools/definitions"
 import {
   readProperties,
   readRequired,
@@ -17,7 +17,7 @@ test("includes artifact tools in Milo tools", () => {
   const miloServer = toolBundle.mcpServers.find(
     (server) => server.name === "milo"
   )
-  const tools = getProviderToolDefinitions("milo", {
+  const tools = getSurfaceToolDefinitions("milo", {
     toolModes: resolveToolModes([]),
   })
   const saveArtifact = tools.find((tool) => tool.name === "save_artifact")

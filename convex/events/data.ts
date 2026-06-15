@@ -36,7 +36,7 @@ export async function recordEvent(
   const eventId = await ctx.db.insert("events", {
     tenantId: args.integration.tenantId,
     integrationId: args.integration._id,
-    provider: args.integration.provider,
+    integration: args.integration.integration,
     key: args.key,
     type: args.type,
     resource: args.resource,
@@ -45,7 +45,7 @@ export async function recordEvent(
     text: args.text,
     data: args.data,
     metadata: createSourceMetadata({
-      provider: args.integration.provider,
+      integration: args.integration.integration,
       event: args.type,
       data: args.data,
     }),

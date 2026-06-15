@@ -24,7 +24,7 @@ test("renders recurring automation details", () => {
       title: "Daily image",
       source: {
         type: "automation",
-        provider: { type: "milo", label: "Milo" },
+        surface: { type: "milo", label: "Milo" },
         kind: { type: "recurring", label: "recurring" },
         metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
       },

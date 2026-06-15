@@ -191,7 +191,7 @@ function readAuthor(record: Record<string, unknown>): Actor | undefined {
   return author === undefined
     ? undefined
     : {
-        provider: "notion",
+        integration: "notion",
         externalId: author.id,
       }
 }

@@ -61,7 +61,7 @@ export type AutomationEventDefinition = {
 }
 
 export type AutomationEventIntegrationDefinition = {
-  provider: Integration
+  integration: Integration
   events: readonly AutomationEventDefinition[]
 }
 

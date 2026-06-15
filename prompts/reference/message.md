@@ -1,6 +1,6 @@
 # Original Trigger
 
-A {{message.provider}} message started this task. For reference:
+A {{message.integration}} message started this task. For reference:
 
 Target:
 {{message.target}}

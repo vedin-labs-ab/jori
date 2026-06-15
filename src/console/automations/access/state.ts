@@ -14,13 +14,13 @@ import {
 
 export function insertAutomationSurfaceMention(
   text: string,
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
 ) {
-  if (findAutomationSurfaceMentions(text).includes(provider)) {
+  if (findAutomationSurfaceMentions(text).includes(integration)) {
     return text
   }
 
-  const marker = getAutomationSurfaceLabel(provider)
+  const marker = getAutomationSurfaceLabel(integration)
   const separator = text === "" || /\s$/.test(text) ? "" : " "
 
   return `${text}${separator}${marker}`
@@ -28,11 +28,11 @@ export function insertAutomationSurfaceMention(
 
 export function removeAutomationSurfaceMention(
   text: string,
-  provider: AutomationSurfaceIntegration
+  integration: AutomationSurfaceIntegration
 ) {
   const matches = readAutomationSurfaceMentionMatches(text)
 
-  if (!matches.some((match) => match.provider === provider)) {
+  if (!matches.some((match) => match.integration === integration)) {
     return text
   }
 
@@ -42,7 +42,7 @@ export function removeAutomationSurfaceMention(
   for (const match of matches) {
     next += text.slice(cursor, match.start)
 
-    if (match.provider !== provider) {
+    if (match.integration !== integration) {
       next += text.slice(match.start, match.end)
     }
 
@@ -61,14 +61,14 @@ export function syncAutomationSurfaces(
   permissions?: AutomationToolPermissions
 ): AutomationSurfaceFormValue[] {
   const existing = new Map(
-    surfaces.map((surface) => [surface.provider, uniqueTools(surface.tools)])
+    surfaces.map((surface) => [surface.integration, uniqueTools(surface.tools)])
   )
 
-  return findAutomationSurfaceMentions(text).map((provider) => ({
-    provider,
+  return findAutomationSurfaceMentions(text).map((integration) => ({
+    integration,
     tools:
-      existing.get(provider) ??
-      getDefaultAutomationSurfaceTools(provider, permissions),
+      existing.get(integration) ??
+      getDefaultAutomationSurfaceTools(integration, permissions),
   }))
 }
 
@@ -140,7 +140,7 @@ export function getSelectedAutomationSurfacePermissions(
 
   return permissions.filter(
     (permission) =>
-      permission.provider === surface.provider &&
+      permission.surface === surface.integration &&
       selectedTools.has(permission.tool)
   )
 }

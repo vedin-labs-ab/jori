@@ -5,11 +5,11 @@ import { readErrorMessage } from "../../error"
 import { type ToolSurface } from "../../permissions/controller"
 
 export function useIntegrationDisconnect({
-  provider,
+  integration,
   tenantId,
   title,
 }: {
-  provider: Exclude<ToolSurface, "milo">
+  integration: Exclude<ToolSurface, "milo">
   tenantId: string
   title: string
 }) {
@@ -24,7 +24,7 @@ export function useIntegrationDisconnect({
     setIsDisconnecting(true)
 
     try {
-      await disconnectIntegration({ provider, tenantId })
+      await disconnectIntegration({ integration, tenantId })
     } catch (disconnectError) {
       setError(
         readErrorMessage(disconnectError, `Could not disconnect ${title}.`)

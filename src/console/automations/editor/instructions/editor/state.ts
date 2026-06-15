@@ -67,11 +67,11 @@ export function useAutomationInstructionsEditor(
   })
 
   const selectSuggestion = useCallback(
-    (provider: AutomationSurfaceIntegration) =>
+    (integration: AutomationSurfaceIntegration) =>
       insertSurfaceSuggestion({
         editor,
         permissions: refs.permissions.current,
-        provider,
+        integration,
         setSuggestion,
         state: suggestion,
       }),

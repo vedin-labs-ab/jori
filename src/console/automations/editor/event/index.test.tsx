@@ -9,36 +9,36 @@ import {
 import { getIntegrationOptions } from "./options"
 
 describe("automation event fields", () => {
-  test("disables the event picker when the selected provider has one event", () => {
-    renderEventFields({ eventProvider: "slack", event: "message.created" })
+  test("disables the event picker when the selected integration has one event", () => {
+    renderEventFields({ eventIntegration: "slack", event: "message.created" })
 
     expect(screen.getByLabelText("Event").hasAttribute("disabled")).toBe(true)
   })
 
-  test("renders the selected provider logo in the provider picker", () => {
-    renderEventFields({ eventProvider: "slack", event: "message.created" })
+  test("renders the selected integration logo in the integration picker", () => {
+    renderEventFields({ eventIntegration: "slack", event: "message.created" })
 
     expect(
       screen
         .getByLabelText("Integration")
-        .querySelector('img[src="/logos/providers/slack.svg"]')
+        .querySelector('img[src="/logos/integrations/slack.svg"]')
     ).not.toBeNull()
   })
 })
 
-describe("automation event provider picker", () => {
-  test("opens the provider picker menu", () => {
-    renderEventFields({ eventProvider: "slack", event: "message.created" })
+describe("automation event integration picker", () => {
+  test("opens the integration picker menu", () => {
+    renderEventFields({ eventIntegration: "slack", event: "message.created" })
 
     openProviderPicker()
 
     expect(screen.getByRole("option", { name: /GitHub/ })).toBeDefined()
   })
 
-  test("opens the provider picker when the selected provider is not connected", () => {
+  test("opens the integration picker when the selected integration is not connected", () => {
     mockIntegrationConnections("github")
 
-    renderEventFields({ eventProvider: "slack", event: "message.created" })
+    renderEventFields({ eventIntegration: "slack", event: "message.created" })
 
     openProviderPicker()
 
@@ -50,10 +50,10 @@ describe("automation event provider picker", () => {
     ).toBe("")
   })
 
-  test("opens the provider picker when no providers are connected", () => {
+  test("opens the integration picker when no integrations are connected", () => {
     mockIntegrationConnections()
 
-    renderEventFields({ eventProvider: "slack", event: "message.created" })
+    renderEventFields({ eventIntegration: "slack", event: "message.created" })
 
     openProviderPicker()
 
@@ -68,12 +68,12 @@ describe("automation event integration options", () => {
 
     expect(options[0]).toMatchObject({
       connected: true,
-      provider: "github",
+      integration: "github",
     })
     expect(options.slice(1).every((option) => option.connected === false)).toBe(
       true
     )
-    expect(options[1].provider).toBe("slack")
+    expect(options[1].integration).toBe("slack")
   })
 })
 

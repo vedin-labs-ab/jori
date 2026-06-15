@@ -3,7 +3,7 @@ import { type MicrosoftIntegration } from "./config"
 import { requireMicrosoftClientSecret } from "./oauth"
 
 export type MicrosoftInstallState = {
-  provider: MicrosoftIntegration
+  integration: MicrosoftIntegration
   tenantId: string
   createdBy: string
   returnUrl: string

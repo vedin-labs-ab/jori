@@ -21,7 +21,7 @@ const linearConfig = {
     alt: "Linear logo",
     src: "https://svgl.app/library/linear.svg",
   },
-  provider: "linear",
+  integration: "linear",
 } satisfies IntegrationConnectionConfig
 
 export function LinearConnection({

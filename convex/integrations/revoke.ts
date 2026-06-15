@@ -59,7 +59,7 @@ type SlackResponse = {
 export async function revokeIntegrationAccess(
   integration: Doc<"integrations">
 ) {
-  switch (integration.provider) {
+  switch (integration.integration) {
     case "github":
       await deleteGitHubInstallation(
         requireGitHubCredentials(integration).installationId
@@ -173,7 +173,7 @@ async function revokeSlackToken(token: string) {
 
 async function expectOAuthRevocationResponse(
   response: Response,
-  provider: string
+  platform: string
 ) {
   const result = await readOAuthResponse(response)
 
@@ -182,7 +182,7 @@ async function expectOAuthRevocationResponse(
   }
 
   throw new Error(
-    `${provider} disconnect failed: ${
+    `${platform} disconnect failed: ${
       result.error_description ??
       result.message ??
       result.error ??

@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { linearIssueCommentEvent } from "../../automations/names"
-import { createProviderActor } from "../../shared/actor"
+import { createIntegrationActor } from "../../shared/actor"
 import {
   ingestProviderMessage,
   readCallbackState,
@@ -128,8 +128,8 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
       accountId: hydratedMessage.accountId,
       type: hydratedMessage.type,
       externalId: hydratedMessage.externalId,
-      actor: createProviderActor({
-        provider: "linear",
+      actor: createIntegrationActor({
+        integration: "linear",
         externalId: hydratedMessage.actorId,
         email: hydratedMessage.actorEmail,
       }),
