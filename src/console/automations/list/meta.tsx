@@ -27,7 +27,7 @@ export function AutomationMeta({
     <div className="grid text-xs sm:grid-cols-[1.1fr_0.9fr_0.95fr]">
       <AutomationMetaCell
         className="border-b sm:border-r sm:border-b-0"
-        icon={trigger.Icon}
+        icon={trigger.icon}
       >
         <span className="truncate font-medium text-foreground">
           {trigger.title}
@@ -42,7 +42,7 @@ export function AutomationMeta({
       <AutomationToolMetaCell className="border-b sm:border-r sm:border-b-0">
         <AutomationToolSummary automation={automation} />
       </AutomationToolMetaCell>
-      <AutomationMetaCell icon={Clock}>
+      <AutomationMetaCell icon={<Clock className={metaIconClassName} />}>
         <AutomationRuns now={now} automation={automation} />
       </AutomationMetaCell>
     </div>
@@ -52,11 +52,11 @@ export function AutomationMeta({
 function AutomationMetaCell({
   children,
   className,
-  icon: Icon,
+  icon,
 }: {
   children: ReactNode
   className?: string
-  icon: typeof Clock
+  icon: ReactNode
 }) {
   return (
     <div
@@ -65,11 +65,13 @@ function AutomationMetaCell({
         className
       )}
     >
-      <Icon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+      {icon}
       <div className="grid min-w-0 gap-0.5">{children}</div>
     </div>
   )
 }
+
+const metaIconClassName = "mt-0.5 size-3.5 shrink-0 text-muted-foreground"
 
 function AutomationToolMetaCell({
   children,
@@ -99,7 +101,7 @@ function triggerSummary(automation: Automation) {
     return {
       detail,
       detailTitle: detail,
-      Icon: Repeat2,
+      icon: <Repeat2 className={metaIconClassName} />,
       title: "Recurring",
     }
   }
@@ -108,7 +110,7 @@ function triggerSummary(automation: Automation) {
     return {
       detail: eventTriggerDetail(trigger),
       detailTitle: undefined,
-      Icon: Zap,
+      icon: eventTriggerIcon(trigger),
       title: "Event",
     }
   }
@@ -116,9 +118,24 @@ function triggerSummary(automation: Automation) {
   return {
     detail: absoluteTime(trigger.at),
     detailTitle: absoluteTime(trigger.at),
-    Icon: Clock,
+    icon: <Clock className={metaIconClassName} />,
     title: "One time",
   }
+}
+
+function eventTriggerIcon(
+  trigger: Extract<Automation["trigger"], { type: "event" }>
+) {
+  if (trigger.integration === undefined) {
+    return <Zap className={metaIconClassName} />
+  }
+
+  return (
+    <SurfaceLogo
+      className="mt-0.5 size-3.5 rounded-sm"
+      integration={trigger.integration}
+    />
+  )
 }
 
 function eventTriggerDetail(
@@ -136,12 +153,6 @@ function eventTriggerDetail(
 
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5">
-      {trigger.integration === undefined ? null : (
-        <SurfaceLogo
-          className="size-3.5 rounded-sm"
-          integration={trigger.integration}
-        />
-      )}
       <span className="truncate">{source}</span>
       <EventTriggerHelp eventLabel={eventLabel} />
     </span>
@@ -218,7 +229,7 @@ function runPrimaryLabel(
   }
 
   if (nextAt === undefined) {
-    return { label: "Waiting for event", title: undefined }
+    return { label: "Monitoring", title: undefined }
   }
 
   const prefix = nextAt > now ? "Next" : "Scheduled"
