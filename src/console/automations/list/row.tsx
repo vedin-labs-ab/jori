@@ -1,13 +1,16 @@
-import { getAutomationEventDefinition } from "@contracts/automations/events"
-import { Clock, Pencil, Repeat2, Workflow, Zap } from "lucide-react"
+import { Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { SeparatorDot } from "../../dot"
-import { getAutomationSurfaceLabel } from "../access"
-import { describeCron } from "../cron"
-import { absoluteTime, relativeTime } from "../format"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 import { type Automation } from "../types"
-import { DeleteAutomation } from "./delete"
+import { AutomationActions } from "./actions"
+import { AutomationMeta } from "./meta"
 
 export function AutomationRow({
   isDeleting,
@@ -22,186 +25,58 @@ export function AutomationRow({
   onEdit: (automation: Automation) => void
   automation: Automation
 }) {
-  const TypeIcon = triggerIcon(automation)
-  const surfaces = surfaceSummary(automation)
-
   return (
-    <article className="grid grid-cols-[auto_1fr] items-start gap-3 rounded-md border bg-background p-3 md:grid-cols-[auto_1fr_auto] md:items-center">
-      <TypeIcon
-        aria-label={triggerLabel(automation)}
-        className="mt-0.5 size-4 shrink-0 text-muted-foreground md:mt-0"
-        role="img"
-      />
-      <div className="grid min-w-0 gap-1">
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="truncate font-medium text-sm">
-            {automation.name}
-          </span>
-          {automation.status === "completed" ? (
-            <Badge variant="outline">Completed</Badge>
-          ) : null}
-        </div>
-        <p className="truncate text-muted-foreground text-xs">
-          {automation.instructions}
-        </p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs">
-          <AutomationTrigger automation={automation} />
-          <span className="inline-flex min-w-0 items-center gap-1.5">
-            <Workflow className="size-3.5" />
-            <span>{toolSummary(automation)}</span>
-            {surfaces === "" ? null : (
-              <>
-                <SeparatorDot />
-                <span className="truncate">{surfaces}</span>
-              </>
-            )}
-          </span>
-        </div>
-      </div>
-      <div className="col-span-2 flex items-center gap-3 justify-self-start md:col-span-1 md:justify-self-end">
-        <AutomationRuns now={now} automation={automation} />
-        <div className="flex items-center">
-          <Button
-            aria-label={`Edit ${automation.name}`}
-            onClick={() => onEdit(automation)}
-            size="icon"
-            type="button"
-            variant="ghost"
-          >
-            <Pencil />
-          </Button>
-          <DeleteAutomation
-            isDeleting={isDeleting}
-            onDelete={() => onDelete(automation)}
-            automation={automation}
-          />
-        </div>
-      </div>
-    </article>
+    <li className="min-w-0">
+      <Card className="h-full gap-0 py-0 transition-colors hover:bg-muted/20">
+        <CardHeader className="grid-cols-[auto_minmax(0,1fr)_auto] gap-3 px-4 py-4 sm:px-5">
+          <AutomationStatusMark automation={automation} />
+          <div className="grid min-w-0 gap-1.5">
+            <div className="flex min-w-0 items-center gap-2">
+              <CardTitle className="truncate text-sm">
+                {automation.name}
+              </CardTitle>
+              {automation.status === "completed" ? (
+                <Badge className="shrink-0" variant="outline">
+                  Completed
+                </Badge>
+              ) : null}
+            </div>
+            <CardDescription className="line-clamp-2 max-w-[72ch]">
+              {automation.instructions}
+            </CardDescription>
+          </div>
+          <div className="col-start-3 row-start-1 self-start justify-self-end">
+            <AutomationActions
+              isDeleting={isDeleting}
+              onDelete={onDelete}
+              onEdit={onEdit}
+              automation={automation}
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="mt-auto border-t p-0">
+          <AutomationMeta now={now} automation={automation} />
+        </CardContent>
+      </Card>
+    </li>
   )
 }
 
-function triggerIcon(automation: Automation) {
-  if (automation.trigger.type === "cron") {
-    return Repeat2
-  }
-
-  return automation.trigger.type === "event" ? Zap : Clock
-}
-
-function triggerLabel(automation: Automation) {
-  if (automation.trigger.type === "cron") {
-    return "Recurring automation"
-  }
-
-  return automation.trigger.type === "event"
-    ? "Event-triggered automation"
-    : "One-time automation"
-}
-
-function surfaceSummary(automation: Automation) {
-  return automation.access.surfaces
-    .map((surface) => getAutomationSurfaceLabel(surface.integration))
-    .join(", ")
-}
-
-function toolSummary(automation: Automation) {
-  const count = automation.access.surfaces.reduce(
-    (sum, surface) => sum + surface.tools.length,
-    0
-  )
-
-  return count === 1 ? "1 integration tool" : `${count} integration tools`
-}
-
-function AutomationTrigger({ automation }: { automation: Automation }) {
-  const trigger = automation.trigger
-
-  if (trigger.type === "cron") {
-    const description = describeCron(trigger.cron)
-
-    if (description === null) {
-      return <span className="font-mono">{trigger.cron} UTC</span>
-    }
-
-    return <span>{description}</span>
-  }
-
-  if (trigger.type === "event") {
-    const eventLabel =
-      trigger.integration === undefined
-        ? trigger.event
-        : (getAutomationEventDefinition(trigger.integration, trigger.event)
-            ?.label ?? trigger.event)
-
-    return (
-      <span>
-        {trigger.integration === undefined
-          ? "Integration event"
-          : getAutomationSurfaceLabel(trigger.integration)}{" "}
-        {eventLabel}
-        {eventCriteriaSummary(trigger) === undefined ? null : (
-          <>
-            <SeparatorDot />
-            <span className="font-mono">{eventCriteriaSummary(trigger)}</span>
-          </>
-        )}
-      </span>
-    )
-  }
-
-  return <span>Once at {absoluteTime(trigger.at)}</span>
-}
-
-function eventCriteriaSummary(
-  trigger: Extract<Automation["trigger"], { type: "event" }>
-) {
-  const criteria = trigger.criteria
-
-  if (criteria === undefined) {
-    return trigger.filter
-  }
-
-  const summary = Object.entries(criteria)
-    .map(([, value]) => String(value))
-    .join(", ")
-
-  return summary === "" ? undefined : summary
-}
-
-function AutomationRuns({
-  now,
-  automation,
-}: {
-  now: number
-  automation: Automation
-}) {
-  const nextAt =
-    automation.trigger.type === "cron"
-      ? automation.trigger.nextAt
-      : automation.trigger.type === "once"
-        ? automation.trigger.at
-        : undefined
+function AutomationStatusMark({ automation }: { automation: Automation }) {
+  const isCompleted = automation.status === "completed"
 
   return (
-    <div className="grid gap-0.5 text-left text-xs md:text-right">
-      {nextAt === undefined ? (
-        <span className="text-muted-foreground">Waiting for event</span>
-      ) : (
-        <span title={absoluteTime(nextAt)}>
-          Next {relativeTime(nextAt, now)}
-        </span>
+    <span
+      aria-label={isCompleted ? "Completed automation" : "Active automation"}
+      className={cn(
+        "flex size-8 shrink-0 items-center justify-center rounded-md ring-1",
+        isCompleted
+          ? "bg-muted text-muted-foreground ring-foreground/10"
+          : "bg-primary/10 text-primary ring-primary/20"
       )}
-      {automation.lastRunAt === undefined ? (
-        <span className="text-muted-foreground">Never run</span>
-      ) : (
-        <span
-          className="text-muted-foreground"
-          title={absoluteTime(automation.lastRunAt)}
-        >
-          Ran {relativeTime(automation.lastRunAt, now)}
-        </span>
-      )}
-    </div>
+      role="img"
+    >
+      <Check className="size-4" />
+    </span>
   )
 }

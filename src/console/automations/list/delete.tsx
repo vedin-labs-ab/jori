@@ -1,4 +1,3 @@
-import { Loader2, Trash2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,36 +7,27 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import { type Automation } from "../types"
 
-export function DeleteAutomation({
+export function DeleteAutomationDialog({
   isDeleting,
   onDelete,
+  onOpenChange,
+  open,
   automation,
 }: {
   isDeleting: boolean
   onDelete: () => void
+  onOpenChange?: (open: boolean) => void
+  open?: boolean
   automation: Automation
 }) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          aria-label={`Delete ${automation.name}`}
-          disabled={isDeleting}
-          size="icon"
-          type="button"
-          variant="ghost"
-        >
-          {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete “{automation.name}”?</AlertDialogTitle>
+          <AlertDialogTitle>Delete "{automation.name}"?</AlertDialogTitle>
           <AlertDialogDescription>
             This permanently deletes the automation and cancels its upcoming
             runs. Past runs are kept.
@@ -45,7 +35,11 @@ export function DeleteAutomation({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={onDelete}>
+          <AlertDialogAction
+            disabled={isDeleting}
+            onClick={onDelete}
+            variant="destructive"
+          >
             Delete automation
           </AlertDialogAction>
         </AlertDialogFooter>

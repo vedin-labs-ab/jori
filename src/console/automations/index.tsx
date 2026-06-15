@@ -205,7 +205,7 @@ function AutomationRows({
   }
 
   return (
-    <div className="grid min-h-0 flex-1 auto-rows-max content-start gap-2 overflow-y-auto">
+    <ul className="grid min-h-0 flex-1 auto-rows-fr content-start gap-3 overflow-y-auto pb-2 lg:grid-cols-2">
       {automationList.automations.map((automation) => (
         <AutomationRow
           isDeleting={editor.deletingAutomationId === automation.id}
@@ -216,7 +216,7 @@ function AutomationRows({
           automation={automation}
         />
       ))}
-    </div>
+    </ul>
   )
 }
 

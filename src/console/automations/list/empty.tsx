@@ -34,9 +34,9 @@ export function EmptyAutomations({ hasFilters }: { hasFilters: boolean }) {
 
 export function AutomationSkeletonList() {
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-3 lg:grid-cols-2">
       {skeletonRows.map((row) => (
-        <Skeleton className="h-20 w-full rounded-md" key={row} />
+        <Skeleton className="h-40 w-full rounded-lg" key={row} />
       ))}
     </div>
   )
