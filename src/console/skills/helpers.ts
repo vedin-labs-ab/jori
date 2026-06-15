@@ -1,20 +1,5 @@
 import { integrationLabel } from "@contracts/integrations"
-import { type Skill } from "./types"
-
-export const emptyGroupedSkills = {
-  global: [],
-  tenant: [],
-} satisfies Record<Skill["scope"], Skill[]>
-
-export function groupSkills(skills: Skill[]) {
-  return skills.reduce<Record<Skill["scope"], Skill[]>>(
-    (groups, skill) => {
-      groups[skill.scope].push(skill)
-      return groups
-    },
-    { global: [], tenant: [] }
-  )
-}
+import { type Skill, type SkillFilterView } from "./types"
 
 export function filterSkills(skills: Skill[], searchTerm: string) {
   const query = searchTerm.trim().toLowerCase()
@@ -24,6 +9,14 @@ export function filterSkills(skills: Skill[], searchTerm: string) {
   }
 
   return skills.filter((skill) => skillSearchText(skill).includes(query))
+}
+
+export function filterSkillsByView(skills: Skill[], view: SkillFilterView) {
+  if (view === "all") {
+    return skills
+  }
+
+  return skills.filter((skill) => skill.scope === view)
 }
 
 function skillSearchText(skill: Skill) {

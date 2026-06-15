@@ -6,7 +6,7 @@ import { SkillStatusAlerts } from "./alerts"
 import { SkillContent } from "./content"
 import { SkillDialog } from "./dialog"
 import { type SkillEditor, useSkillEditor } from "./editor"
-import { emptyGroupedSkills, filterSkills, groupSkills } from "./helpers"
+import { filterSkills, filterSkillsByView } from "./helpers"
 import { useGlobalSkillSettings } from "./settings"
 import { SkillsToolbar } from "./toolbar"
 import { type Skill, type SkillFilterView } from "./types"
@@ -28,16 +28,12 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [viewSkill, setViewSkill] = useState<Skill>()
   const skills = skillList?.status === "ready" ? skillList.skills : undefined
-  const filteredSkills = useMemo(
-    () => (skills === undefined ? undefined : filterSkills(skills, searchTerm)),
-    [skills, searchTerm]
-  )
-  const groupedSkills = useMemo(
+  const visibleSkills = useMemo(
     () =>
-      filteredSkills === undefined
-        ? emptyGroupedSkills
-        : groupSkills(filteredSkills),
-    [filteredSkills]
+      skills === undefined
+        ? undefined
+        : filterSkillsByView(filterSkills(skills, searchTerm), view),
+    [skills, searchTerm, view]
   )
   const isAccessReady = skillList?.status === "ready"
 
@@ -60,7 +56,7 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
         />
         {skillList?.status !== "unauthorized" ? (
           <SkillContent
-            groupedSkills={groupedSkills}
+            skills={visibleSkills ?? []}
             isLoading={skillList === undefined}
             onDelete={editor.deleteSkill}
             onEdit={editor.openEditForm}

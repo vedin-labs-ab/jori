@@ -1,11 +1,16 @@
+import { BookOpenText } from "lucide-react"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { LoadingMessage } from "../loading"
-import { SkillSection } from "./section"
+import { SkillCard } from "./card"
 import { type Skill, type SkillFilterView } from "./types"
 
-type GroupedSkills = Record<Skill["scope"], Skill[]>
-
 export function SkillContent({
-  groupedSkills,
   isLoading,
   onDelete,
   onEdit,
@@ -14,9 +19,9 @@ export function SkillContent({
   pendingGlobalSkillId,
   pendingSkillId,
   searchTerm,
+  skills,
   view,
 }: {
-  groupedSkills: GroupedSkills
   isLoading: boolean
   onDelete: (skill: Skill) => void
   onEdit: (skill: Skill) => void
@@ -25,6 +30,7 @@ export function SkillContent({
   pendingGlobalSkillId: string | undefined
   pendingSkillId: string | undefined
   searchTerm: string
+  skills: Skill[]
   view: SkillFilterView
 }) {
   if (isLoading) {
@@ -32,54 +38,93 @@ export function SkillContent({
   }
 
   const isFiltering = searchTerm.trim().length > 0
+  const now = Date.now()
 
   return (
-    <div className="grid gap-9">
-      {view !== "global" ? (
-        <SkillSection
-          description="Editable skills created and managed by your organization."
-          emptyDescription={organizationEmptyDescription(isFiltering)}
-          emptyTitle={organizationEmptyTitle(isFiltering)}
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {skills.length === 0 ? (
+        <SkillEmptyState
+          description={emptyDescription(view, isFiltering)}
+          title={emptyTitle(view, isFiltering)}
+        />
+      ) : null}
+
+      {skills.map((skill) => (
+        <SkillCard
+          key={skill._id}
+          isPending={
+            skill.scope === "global"
+              ? pendingGlobalSkillId === skill._id
+              : pendingSkillId === skill._id
+          }
+          now={now}
           onDelete={onDelete}
           onEdit={onEdit}
-          onView={onView}
-          pendingSkillId={pendingSkillId}
-          skills={groupedSkills.tenant}
-          title="Organization skills"
-        />
-      ) : null}
-      {view !== "tenant" ? (
-        <SkillSection
-          description="System-defined skills enabled by default for your organization."
-          emptyDescription={globalEmptyDescription(isFiltering)}
-          emptyTitle={globalEmptyTitle(isFiltering)}
           onToggleGlobalSkill={onToggleGlobalSkill}
           onView={onView}
-          pendingSkillId={pendingGlobalSkillId}
-          skills={groupedSkills.global}
-          title="Global skills"
+          skill={skill}
         />
-      ) : null}
+      ))}
     </div>
   )
 }
 
-function organizationEmptyTitle(isFiltering: boolean) {
-  return isFiltering ? "No matching organization skills" : "No skills yet"
+function emptyTitle(view: SkillFilterView, isFiltering: boolean) {
+  if (isFiltering) {
+    if (view === "all") {
+      return "No matching skills"
+    }
+
+    return `No matching ${viewLabel(view)} skills`
+  }
+
+  if (view === "all") {
+    return "No skills yet"
+  }
+
+  return `No ${viewLabel(view)} skills`
 }
 
-function organizationEmptyDescription(isFiltering: boolean) {
-  return isFiltering
-    ? "Try a different search term."
-    : "Add one to teach Milo how your team works."
+function emptyDescription(view: SkillFilterView, isFiltering: boolean) {
+  if (isFiltering) {
+    return "Try a different search term."
+  }
+
+  if (view === "global") {
+    return "Global skills will appear here when they are available."
+  }
+
+  return "Add one to teach Milo how your team works."
 }
 
-function globalEmptyTitle(isFiltering: boolean) {
-  return isFiltering ? "No matching global skills" : "No global skills"
+function viewLabel(view: SkillFilterView) {
+  if (view === "tenant") {
+    return "organization"
+  }
+
+  if (view === "global") {
+    return "global"
+  }
+
+  return ""
 }
 
-function globalEmptyDescription(isFiltering: boolean) {
-  return isFiltering
-    ? "Try a different search term."
-    : "Global skills will appear here when they are available."
+function SkillEmptyState({
+  description,
+  title,
+}: {
+  description: string
+  title: string
+}) {
+  return (
+    <Empty className="min-h-40 rounded-md md:col-span-2 xl:col-span-3">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <BookOpenText />
+        </EmptyMedia>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  )
 }
