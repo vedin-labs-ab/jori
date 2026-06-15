@@ -71,7 +71,10 @@ function ToolGroupButton({
       <span className="shrink-0 font-medium text-foreground">
         {group.label}
       </span>
-      <span aria-hidden="true" className="h-3 w-px shrink-0 bg-border" />
+      <span
+        aria-hidden="true"
+        className="w-px shrink-0 self-stretch bg-border"
+      />
       <ToolCounts read={counts.read} write={counts.write} />
       <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/70 transition-colors group-hover/tool-row:text-foreground" />
     </button>
