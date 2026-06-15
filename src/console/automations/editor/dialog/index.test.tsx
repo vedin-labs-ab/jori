@@ -95,6 +95,31 @@ describe("automation dialog instructions validation", () => {
   })
 })
 
+describe("automation dialog access controls", () => {
+  test("shows web search directly after instructions without an access heading", () => {
+    renderAutomationDialog({
+      error: undefined,
+      values: {
+        ...emptyAutomationForm,
+        name: "Release summary",
+        instructions: "Summarize GitHub changes.",
+      },
+    })
+
+    const instructionsFrame = document.body.querySelector(
+      "[data-automation-instructions-frame]"
+    )
+    const webSearchLabel = screen.getByText("Let Milo search the web")
+
+    expect(screen.queryByText("Access")).toBeNull()
+    expect(instructionsFrame).not.toBeNull()
+    expect(
+      instructionsFrame?.compareDocumentPosition(webSearchLabel) ??
+        Node.DOCUMENT_POSITION_PRECEDING
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+})
+
 function renderAutomationDialog({
   error,
   values,
