@@ -16,10 +16,7 @@ export function executionDetailSummary(input: {
       stoppedDetail(input.execution, input.stoppedBy),
       decisionDetail(input.approval),
       ...(input.run.reason.type === "time" ? displayDetails : []),
-      ...toolDetails({
-        includeWebSearch: input.run.reason.type === "time",
-        snapshot: input.execution.toolSnapshot,
-      }),
+      ...toolDetails(input.execution.toolSnapshot),
       ...(input.run.reason.type === "time" ? [] : displayDetails),
     ]),
     taskSource: input.run.display.taskSource,
