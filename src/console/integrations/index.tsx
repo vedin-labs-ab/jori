@@ -29,7 +29,7 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
   const permissions = useToolPermissions(tenantId)
 
   return (
-    <Tabs defaultValue="tenant" className="min-h-0 flex-1 gap-4">
+    <Tabs defaultValue="tenant" className="gap-4">
       <TabsList className="w-fit">
         <TabsTrigger value="tenant">Organization</TabsTrigger>
         <TabsTrigger value="user">Personal</TabsTrigger>
