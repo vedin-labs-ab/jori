@@ -1,7 +1,14 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react"
 import { afterEach, beforeAll, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { absoluteTime } from "../format"
 import { type Automation } from "../types"
 import { AutomationMeta } from "./meta"
 
@@ -41,6 +48,38 @@ test("shows event integration with event name in help tooltip", async () => {
   )
 })
 
+test("shows recurring trigger detail in a tooltip", async () => {
+  render(
+    <TooltipProvider>
+      <AutomationMeta now={1700000000000} automation={recurringAutomation()} />
+    </TooltipProvider>
+  )
+
+  const detail = "Daily at 09:00 UTC"
+
+  fireEvent.focus(screen.getByRole("button", { name: detail }))
+
+  await expectTooltipContent(detail)
+})
+
+test("shows one-time trigger timestamp in a tooltip", async () => {
+  const runAt = 1700003600000
+  const detail = absoluteTime(runAt)
+
+  render(
+    <TooltipProvider>
+      <AutomationMeta
+        now={1700000000000}
+        automation={oneTimeAutomation(runAt)}
+      />
+    </TooltipProvider>
+  )
+
+  fireEvent.focus(screen.getByRole("button", { name: detail }))
+
+  await expectTooltipContent(detail)
+})
+
 function eventAutomation(): Automation {
   return {
     access: {
@@ -56,4 +95,41 @@ function eventAutomation(): Automation {
       type: "event",
     },
   } as unknown as Automation
+}
+
+function recurringAutomation(): Automation {
+  return {
+    access: {
+      surfaces: [],
+    },
+    lastRunAt: undefined,
+    status: "active",
+    trigger: {
+      cron: "0 9 * * *",
+      nextAt: 1700038800000,
+      type: "cron",
+    },
+  } as unknown as Automation
+}
+
+function oneTimeAutomation(runAt: number): Automation {
+  return {
+    access: {
+      surfaces: [],
+    },
+    lastRunAt: undefined,
+    status: "active",
+    trigger: {
+      at: runAt,
+      type: "once",
+    },
+  } as unknown as Automation
+}
+
+async function expectTooltipContent(text: string) {
+  await waitFor(() => {
+    expect(
+      document.body.querySelector('[data-slot="tooltip-content"]')?.textContent
+    ).toContain(text)
+  })
 }
