@@ -35,7 +35,7 @@ export function AutomationRow({
                 </Badge>
               ) : null}
             </div>
-            <p className="line-clamp-2 max-w-[72ch] text-muted-foreground text-xs/relaxed">
+            <p className="line-clamp-3 max-w-[72ch] text-muted-foreground text-xs/relaxed">
               {automation.instructions}
             </p>
           </div>
@@ -48,7 +48,7 @@ export function AutomationRow({
             />
           </div>
         </CardHeader>
-        <CardContent className="mt-auto border-t p-0">
+        <CardContent className="mt-auto border-t bg-muted/20 p-0">
           <AutomationMeta now={now} automation={automation} />
         </CardContent>
       </Card>
@@ -63,14 +63,14 @@ function AutomationStatusMark({ automation }: { automation: Automation }) {
     <span
       aria-label={isCompleted ? "Completed automation" : "Active automation"}
       className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-md ring-1",
+        "flex size-7 shrink-0 items-center justify-center rounded-md ring-1",
         isCompleted
-          ? "bg-muted text-muted-foreground ring-foreground/10"
-          : "bg-primary/10 text-primary ring-primary/20"
+          ? "bg-muted/60 text-muted-foreground/75 ring-border"
+          : "bg-primary/5 text-primary/80 ring-primary/10"
       )}
       role="img"
     >
-      <Check className="size-4" />
+      <Check className="size-3.5" />
     </span>
   )
 }
