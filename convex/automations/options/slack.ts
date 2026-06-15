@@ -1,4 +1,4 @@
-import { slackQueryApi } from "../../broker/providers/slack/client"
+import { slackQueryApi } from "../../broker/tools/slack/client"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
 import {
   type AutomationEventOption,

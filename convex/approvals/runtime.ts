@@ -2,9 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { postSlackMessage, updateSlackMessage } from "../broker/providers/slack"
-import { createSlackExpirationResponse } from "../providers/slack/approval/blocks"
+import { postSlackMessage, updateSlackMessage } from "../broker/tools/slack"
 import { type Actor, actorValidator } from "../shared/actor"
+import { createSlackExpirationResponse } from "./slack/blocks"
 
 export type SlackApprovalDecisionArgs = {
   accountId: string

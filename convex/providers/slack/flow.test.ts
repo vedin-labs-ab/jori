@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest"
 import { type Doc } from "../../_generated/dataModel"
-import { callSlackTool } from "../../broker/providers/slack"
+import { callSlackTool } from "../../broker/tools/slack"
 import { assemblePrompt } from "../../executions/prompt"
 import { createSkillSandboxFiles } from "../../executions/sandbox/skills"
 import { assembleToolsForRun } from "../../executions/tools"

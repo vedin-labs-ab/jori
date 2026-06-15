@@ -7,7 +7,7 @@ import {
   jsonError,
   optionalString,
   unauthorizedResponse,
-} from "./providers/common"
+} from "./tools/common"
 
 export async function handleArtifactUploadRequest(
   ctx: ActionCtx,

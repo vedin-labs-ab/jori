@@ -1,7 +1,7 @@
 import { type Doc } from "../_generated/dataModel"
 import { providerLabel } from "../providers/catalog"
-import { getToolLabel } from "../providers/slack/approval/labels"
 import { slackMessageUrl } from "../providers/slack/links"
+import { getToolLabel } from "./slack/labels"
 
 export function summarizeApproval(args: {
   approval: Doc<"approvals">

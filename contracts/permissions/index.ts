@@ -1,0 +1,121 @@
+import { type Provider } from "../providers"
+import { toolPermissionRows } from "./data"
+
+export const permissionModes = [
+  "required",
+  "allowed",
+  "prompted",
+  "blocked",
+] as const
+export const toolAccessLevels = ["read", "write"] as const
+
+export type PermissionMode = (typeof permissionModes)[number]
+export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
+export type ToolAccess = (typeof toolAccessLevels)[number]
+export type ToolProvider = Provider
+
+export type ToolPermission = {
+  tool: string
+  provider: ToolProvider
+  label: string
+  description: string
+  access: ToolAccess
+  defaultMode: PermissionMode
+}
+
+export type ResolvedToolPermission = Omit<ToolPermission, "defaultMode"> & {
+  defaultMode?: PermissionMode
+  mode: PermissionMode
+  overrideMode: ConfigurablePermissionMode | null
+}
+
+export type PermissionOverride = {
+  tool: string
+  mode: ConfigurablePermissionMode
+}
+
+export type ToolPermissionRow = readonly [
+  provider: ToolProvider,
+  tool: string,
+  label: string,
+  description: string,
+  access: ToolAccess,
+  defaultMode?: PermissionMode,
+]
+
+export const toolPermissions = toolPermissionRows.map(
+  ([provider, tool, label, description, access, defaultMode]) => ({
+    provider,
+    tool,
+    label,
+    description,
+    access,
+    defaultMode: defaultMode ?? "allowed",
+  })
+) satisfies ToolPermission[]
+
+const toolPermissionsByName = new Map(
+  toolPermissions.map((permission) => [permission.tool, permission])
+)
+
+export function getToolPermission(tool: string) {
+  return toolPermissionsByName.get(tool)
+}
+
+export function getToolPermissionsByProvider(provider: ToolProvider) {
+  return toolPermissions.filter(
+    (permission) => permission.provider === provider
+  )
+}
+
+export function resolveToolModes(overrides: PermissionOverride[]) {
+  const modes = new Map<string, PermissionMode>(
+    toolPermissions.map((permission) => [
+      permission.tool,
+      permission.defaultMode,
+    ])
+  )
+
+  for (const override of overrides) {
+    const permission = getToolPermission(override.tool)
+
+    if (
+      permission !== undefined &&
+      permission.defaultMode !== "required" &&
+      isModeAllowed(permission, override.mode)
+    ) {
+      modes.set(override.tool, override.mode)
+    }
+  }
+
+  return modes
+}
+
+export function resolveToolMode(
+  modes: ReadonlyMap<string, PermissionMode>,
+  tool: string
+) {
+  return modes.get(tool) ?? getToolPermission(tool)?.defaultMode ?? "blocked"
+}
+
+export function canUseToolMode(
+  mode: PermissionMode,
+  executionType: "automation" | "message"
+) {
+  if (mode === "blocked") {
+    return false
+  }
+
+  return executionType === "message" || mode !== "prompted"
+}
+
+export function isUnattendedToolMode(mode: PermissionMode) {
+  return mode === "allowed" || mode === "required"
+}
+
+export function isModeAllowed(
+  permission: ToolPermission,
+  _mode: ConfigurablePermissionMode
+) {
+  return permission.defaultMode !== "required"
+}

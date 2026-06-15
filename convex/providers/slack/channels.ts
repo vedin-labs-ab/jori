@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { slackQueryApi } from "../../broker/providers/slack/client"
+import { slackQueryApi } from "../../broker/tools/slack/client"
 import { requireSlackCredentials } from "./credentials"
 import { getSlackChannelId } from "./data"
 
