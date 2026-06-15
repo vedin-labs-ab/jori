@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import { createExecutionToolSnapshot } from "./snapshot"
+import { type RuntimeToolCapabilityTool } from "./types"
 
 test("stores connected-provider tool capabilities for execution details", () => {
   expect(
@@ -9,12 +10,19 @@ test("stores connected-provider tool capabilities for execution details", () => 
         {
           provider: "milo",
           label: "Milo",
-          tools: ["Save artifact"],
+          tools: [
+            {
+              access: "write",
+              description: "Persist a generated file.",
+              label: "Save artifact",
+              tool: "save_artifact",
+            },
+          ],
         },
         {
           provider: "slack",
           label: "Slack",
-          tools: ["Send message", "Read channel history"],
+          tools: slackTools(),
         },
       ],
     })
@@ -23,9 +31,26 @@ test("stores connected-provider tool capabilities for execution details", () => 
       {
         provider: "slack",
         label: "Slack",
-        tools: ["Send message", "Read channel history"],
+        tools: slackTools(),
       },
     ],
     webSearch: true,
   })
 })
+
+function slackTools(): RuntimeToolCapabilityTool[] {
+  return [
+    {
+      access: "write",
+      description: "Post a Slack message.",
+      label: "Send message",
+      tool: "conversations_add_message",
+    },
+    {
+      access: "read",
+      description: "Read Slack channel messages.",
+      label: "Read channel history",
+      tool: "conversations_history",
+    },
+  ]
+}

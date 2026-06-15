@@ -113,7 +113,7 @@ function slackToolSnapshot() {
       {
         provider: "slack",
         label: "Slack",
-        tools: ["Send message", "Read channel history"],
+        tools: slackTools(),
       },
     ],
     webSearch: true,
@@ -123,15 +123,32 @@ function slackToolSnapshot() {
 function slackToolsDetail() {
   return {
     type: "tools",
-    label: "Slack · Send message, Read channel history",
+    label: "Slack · Read 1 · Write 1",
     groups: [
       {
         type: "slack",
         label: "Slack",
-        values: ["Send message", "Read channel history"],
+        tools: slackTools(),
       },
     ],
   }
+}
+
+function slackTools() {
+  return [
+    {
+      access: "write" as const,
+      description: "Post a Slack message.",
+      label: "Send message",
+      tool: "conversations_add_message",
+    },
+    {
+      access: "read" as const,
+      description: "Read Slack channel messages.",
+      label: "Read channel history",
+      tool: "conversations_history",
+    },
+  ]
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {

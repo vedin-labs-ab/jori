@@ -24,8 +24,13 @@ export type RuntimeToolBundle = ToolBundle & {
 export type RuntimeToolCapability = {
   provider: ToolProvider
   label: string
-  tools: string[]
+  tools: RuntimeToolCapabilityTool[]
 }
+
+export type RuntimeToolCapabilityTool = Pick<
+  ToolPermission,
+  "access" | "description" | "label" | "tool"
+>
 
 export type McpServerConfig = {
   name: string

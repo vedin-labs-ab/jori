@@ -7,7 +7,14 @@ export const toolSnapshot = v.object({
     v.object({
       provider: providerValidator,
       label: v.string(),
-      tools: v.array(v.string()),
+      tools: v.array(
+        v.object({
+          access: v.union(v.literal("read"), v.literal("write")),
+          description: v.string(),
+          label: v.string(),
+          tool: v.string(),
+        })
+      ),
     })
   ),
   webSearch: v.boolean(),

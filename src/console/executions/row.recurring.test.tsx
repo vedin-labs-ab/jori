@@ -32,12 +32,12 @@ test("renders recurring automation details", () => {
         { type: "next", label: "Next", at: 1700125200000 },
         {
           type: "tools",
-          label: "Slack · Send message, Read channel history",
+          label: "Slack · Read 1 · Write 1",
           groups: [
             {
               type: "slack",
               label: "Slack",
-              values: ["Send message", "Read channel history"],
+              tools: slackTools(),
             },
           ],
         },
@@ -55,6 +55,9 @@ test("renders recurring automation details", () => {
   expect(screen.queryByText("Occurrence")).toBeNull()
   expect(screen.getByText("Next")).toBeDefined()
   expect(screen.getByText("Tools")).toBeDefined()
+  expect(screen.getByRole("button", { name: "Open Slack tools" })).toBeDefined()
+  expect(screen.getByText("Read 1")).toBeDefined()
+  expect(screen.getByText("Write 1")).toBeDefined()
   expect(screen.getByText("Web search")).toBeDefined()
   expect(screen.getByText("Allowed")).toBeDefined()
 })
@@ -88,4 +91,21 @@ function execution(
     title: overrides.title,
     trigger: "Time automation",
   }
+}
+
+function slackTools() {
+  return [
+    {
+      access: "write" as const,
+      description: "Post a Slack message.",
+      label: "Send message",
+      tool: "conversations_add_message",
+    },
+    {
+      access: "read" as const,
+      description: "Read Slack channel messages.",
+      label: "Read channel history",
+      tool: "conversations_history",
+    },
+  ]
 }
