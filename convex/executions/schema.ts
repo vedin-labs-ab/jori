@@ -1,11 +1,24 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { providerValidator } from "../providers/catalog"
+
+export const toolSnapshot = v.object({
+  groups: v.array(
+    v.object({
+      provider: providerValidator,
+      label: v.string(),
+      tools: v.array(v.string()),
+    })
+  ),
+  webSearch: v.boolean(),
+})
 
 export const executions = defineTable({
   tenantId: v.string(),
   runId: v.id("runs"),
   approvalId: v.optional(v.id("approvals")),
   promptId: v.id("_storage"),
+  toolSnapshot: v.optional(toolSnapshot),
   sandboxId: v.optional(v.string()),
   hash: v.optional(v.string()),
   status: v.union(

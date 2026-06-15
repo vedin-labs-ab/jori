@@ -216,7 +216,7 @@ function slackIntegration() {
   }
 }
 
-function execution() {
+function execution(overrides: Record<string, unknown> = {}) {
   return {
     _id: "execution",
     _creationTime: 0,
@@ -226,6 +226,7 @@ function execution() {
     status: "completed",
     createdAt: 0,
     finishedAt: 1000,
+    ...overrides,
   } as Parameters<typeof summarizeExecution>[1]
 }
 

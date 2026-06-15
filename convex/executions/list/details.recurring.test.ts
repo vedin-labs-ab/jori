@@ -11,7 +11,11 @@ test("includes recurring automation details", async () => {
       integration: slackIntegration(),
       run: recurringRun(scheduledAt),
     }),
-    execution({ createdAt: scheduledAt + 1000, finishedAt: scheduledAt + 2000 })
+    execution({
+      createdAt: scheduledAt + 1000,
+      finishedAt: scheduledAt + 2000,
+      toolSnapshot: slackToolSnapshot(),
+    })
   )
 
   expect(summary.source).toEqual({
@@ -133,6 +137,19 @@ function execution(overrides: Record<string, unknown> = {}) {
     finishedAt: 1000,
     ...overrides,
   } as Parameters<typeof summarizeExecution>[1]
+}
+
+function slackToolSnapshot() {
+  return {
+    groups: [
+      {
+        provider: "slack",
+        label: "Slack",
+        tools: ["Send message", "Read channel history"],
+      },
+    ],
+    webSearch: true,
+  }
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {

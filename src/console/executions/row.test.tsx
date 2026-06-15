@@ -33,39 +33,6 @@ describe("execution row task details", () => {
     expect(screen.getByText("Summarize the Notion launch plan.")).toBeDefined()
   })
 
-  test("renders message run task source without duplicate message detail", () => {
-    renderExecutionRow(
-      execution({
-        task: "Please summarize this thread.",
-        title: "Please summarize this thread.",
-        source: {
-          type: "message",
-          kind: { type: "mention", label: "mention" },
-          provider: { type: "slack", label: "Slack" },
-          metadata: [{ type: "channel", label: "#product" }],
-        },
-        taskSource: {
-          label: "Source",
-          url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123",
-        },
-      })
-    )
-
-    fireEvent.click(
-      screen.getByRole("button", { name: /please summarize this thread/i })
-    )
-
-    expect(screen.getByText("mention")).toBeDefined()
-    expect(screen.getAllByText("Task")).toHaveLength(1)
-    expect(screen.getByRole("button", { name: "Copy Task" })).toBeDefined()
-    expect(
-      screen.getByRole("link", { name: /source/i }).getAttribute("href")
-    ).toBe(
-      "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123"
-    )
-    expect(screen.queryByText("Message")).toBeNull()
-  })
-
   test("does not render the title as the task", () => {
     renderExecutionRow(
       execution({
@@ -82,6 +49,57 @@ describe("execution row task details", () => {
       screen.getByText("Use the Notion page context to update the team.")
     ).toBeDefined()
     expect(screen.getAllByText("Notion test")).toHaveLength(titleCount)
+  })
+})
+
+describe("execution row message details", () => {
+  test("renders message run task source without duplicate message detail", () => {
+    renderExecutionRow(
+      execution({
+        task: "Please summarize this thread.",
+        title: "Please summarize this thread.",
+        source: {
+          type: "message",
+          kind: { type: "mention", label: "mention" },
+          provider: { type: "slack", label: "Slack" },
+          metadata: [{ type: "channel", label: "#product" }],
+        },
+        taskSource: {
+          label: "Source",
+          url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123",
+        },
+        details: [
+          {
+            type: "tools",
+            label: "Slack · Send message, Read channel history",
+            groups: [
+              {
+                type: "slack",
+                label: "Slack",
+                values: ["Send message", "Read channel history"],
+              },
+            ],
+          },
+        ],
+      })
+    )
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /please summarize this thread/i })
+    )
+
+    expect(screen.getByText("mention")).toBeDefined()
+    expect(screen.getAllByText("Task")).toHaveLength(1)
+    expect(screen.getByText("Tools")).toBeDefined()
+    expect(screen.getAllByText("Slack").length).toBeGreaterThan(1)
+    expect(screen.getByText("Send message, Read channel history")).toBeDefined()
+    expect(screen.getByRole("button", { name: "Copy Task" })).toBeDefined()
+    expect(
+      screen.getByRole("link", { name: /source/i }).getAttribute("href")
+    ).toBe(
+      "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123"
+    )
+    expect(screen.queryByText("Message")).toBeNull()
   })
 })
 

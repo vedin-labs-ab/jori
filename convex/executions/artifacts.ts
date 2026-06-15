@@ -8,6 +8,7 @@ import { type ApprovalContinuation } from "./prompt/continuation"
 import { createSkillSandboxFiles } from "./sandbox/skills"
 import { assembleToolsForRun } from "./tools"
 import { filterRuntimeSkillsForBundle } from "./tools/bundles"
+import { createExecutionToolSnapshot } from "./tools/snapshot"
 
 export async function createPromptedExecution(
   ctx: ActionCtx,
@@ -20,6 +21,7 @@ export async function createPromptedExecution(
   }
 ) {
   const input = args.input
+  const webSearch = shouldAllowWebSearch(input)
   const skills = await ctx.runQuery(internal.skills.catalog.listForRuntime, {
     tenantId: input.run.tenantId,
   })
@@ -44,6 +46,10 @@ export async function createPromptedExecution(
     runId: input.run._id,
     approvalId: args.approvalId,
     prompt,
+    toolSnapshot: createExecutionToolSnapshot({
+      capabilities: toolBundle.capabilities,
+      webSearch,
+    }),
   })
 
   if (executionId === null) {
@@ -54,7 +60,7 @@ export async function createPromptedExecution(
     id: executionId,
     prompt,
     toolBundle: runtimeToolBundle,
-    webSearch: shouldAllowWebSearch(input),
+    webSearch,
   }
 }
 
@@ -99,6 +105,7 @@ async function createExecution(
     runId: Id<"runs">
     approvalId?: Id<"approvals">
     prompt: string
+    toolSnapshot: ReturnType<typeof createExecutionToolSnapshot>
   }
 ) {
   const promptId = await ctx.storage.store(
@@ -113,6 +120,7 @@ async function createExecution(
       runId: args.runId,
       approvalId: args.approvalId,
       promptId,
+      toolSnapshot: args.toolSnapshot,
     }
   )
 
