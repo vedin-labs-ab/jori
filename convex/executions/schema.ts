@@ -12,6 +12,7 @@ export const toolSnapshot = v.object({
           access: v.union(v.literal("read"), v.literal("write")),
           description: v.string(),
           label: v.string(),
+          requiresApproval: v.optional(v.boolean()),
           tool: v.string(),
         })
       ),

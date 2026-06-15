@@ -1,5 +1,7 @@
 import { toolSurfaceLabel } from "../../../integrations/catalog"
 import {
+  type PermissionMode,
+  resolveToolMode,
   type ToolPermission,
   type ToolSurface,
 } from "../../../permissions/catalog"
@@ -34,7 +36,8 @@ export function getProviderSkillNames(
 
 export function createRuntimeToolCapability(
   provider: ToolSurface,
-  permissions: ToolPermission[]
+  permissions: ToolPermission[],
+  toolModes: ReadonlyMap<string, PermissionMode>
 ): RuntimeToolCapability {
   return {
     provider,
@@ -43,6 +46,9 @@ export function createRuntimeToolCapability(
       access: permission.access,
       description: permission.description,
       label: permission.label,
+      ...(resolveToolMode(toolModes, permission.tool) === "prompted"
+        ? { requiresApproval: true }
+        : {}),
       tool: permission.tool,
     })),
   }

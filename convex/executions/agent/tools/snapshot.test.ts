@@ -44,6 +44,7 @@ function slackTools(): RuntimeToolCapabilityTool[] {
       access: "write",
       description: "Post a Slack message.",
       label: "Send message",
+      requiresApproval: true,
       tool: "conversations_add_message",
     },
     {

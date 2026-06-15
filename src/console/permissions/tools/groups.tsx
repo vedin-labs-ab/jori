@@ -110,6 +110,13 @@ function ReadonlyToolRow({ tool }: { tool: ToolCapability }) {
   return (
     <div className="border-b p-3 last:border-b-0">
       <ToolRowContent
+        accessories={
+          tool.requiresApproval === true ? (
+            <Badge className="font-normal" variant="secondary">
+              Requires approval
+            </Badge>
+          ) : undefined
+        }
         description={tool.description}
         title={<span className="font-medium text-sm">{tool.label}</span>}
       />

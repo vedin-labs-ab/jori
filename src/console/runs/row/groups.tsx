@@ -58,7 +58,7 @@ function ToolGroupButton({
   group: ExecutionDetailGroup
   onClick: () => void
 }) {
-  const counts = countToolsByAccess(group.tools)
+  const counts = countTools(group.tools)
 
   return (
     <button
@@ -75,18 +75,36 @@ function ToolGroupButton({
         aria-hidden="true"
         className="w-[0.5px] shrink-0 self-stretch bg-border"
       />
-      <ToolCounts read={counts.read} write={counts.write} />
+      <ToolCounts
+        approval={counts.approval}
+        read={counts.read}
+        write={counts.write}
+      />
       <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/70 transition-colors group-hover/tool-row:text-foreground" />
     </button>
   )
 }
 
-function ToolCounts({ read, write }: { read: number; write: number }) {
+function ToolCounts({
+  approval,
+  read,
+  write,
+}: {
+  approval: number
+  read: number
+  write: number
+}) {
   return (
     <span className="inline-flex shrink-0 items-center gap-1.5">
       <span>Read {read}</span>
       <SeparatorDot className="shrink-0 text-muted-foreground/60" />
       <span>Write {write}</span>
+      {approval > 0 ? (
+        <>
+          <SeparatorDot className="shrink-0 text-muted-foreground/60" />
+          <span>Approval {approval}</span>
+        </>
+      ) : null}
     </span>
   )
 }
@@ -115,11 +133,14 @@ function ToolGroupDialog({ group }: { group: ExecutionDetailGroup }) {
   )
 }
 
-function countToolsByAccess(tools: ExecutionDetailGroup["tools"]) {
-  const counts = { read: 0, write: 0 }
+function countTools(tools: ExecutionDetailGroup["tools"]) {
+  const counts = { read: 0, write: 0, approval: 0 }
 
   for (const tool of tools) {
     counts[tool.access] += 1
+    if (tool.requiresApproval === true) {
+      counts.approval += 1
+    }
   }
 
   return counts

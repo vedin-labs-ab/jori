@@ -3,7 +3,9 @@ import { type ToolPermission } from "../controller"
 export type ToolCapability = Pick<
   ToolPermission,
   "access" | "description" | "label" | "tool"
->
+> & {
+  requiresApproval?: boolean
+}
 
 export type ToolAccess = ToolCapability["access"]
 

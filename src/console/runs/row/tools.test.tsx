@@ -1,0 +1,90 @@
+// @vitest-environment jsdom
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { afterEach, beforeAll, expect, test } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { type ExecutionItem } from "../types"
+import { ExecutionRow } from "./index"
+
+beforeAll(() => {
+  globalThis.ResizeObserver = class {
+    disconnect() {}
+    observe() {}
+    unobserve() {}
+  }
+})
+
+afterEach(() => {
+  cleanup()
+})
+
+test("marks approval-required tools in message run details", () => {
+  render(
+    <TooltipProvider>
+      <ExecutionRow
+        execution={executionWithApprovalTool()}
+        now={1700000001000}
+        tenantId="tenant"
+      />
+    </TooltipProvider>
+  )
+
+  fireEvent.click(screen.getByRole("button", { name: /create a notion page/i }))
+
+  expect(screen.getByText("Approval 1")).toBeDefined()
+
+  fireEvent.click(screen.getByRole("button", { name: "Open Notion tools" }))
+
+  expect(screen.getByText("Requires approval")).toBeDefined()
+})
+
+function executionWithApprovalTool(): ExecutionItem {
+  return {
+    approval: null,
+    createdAt: 1700000000000,
+    details: [
+      {
+        type: "tools",
+        label: "Notion · Read 1 · Write 1 · Approval 1",
+        groups: [
+          {
+            type: "notion",
+            label: "Notion",
+            tools: notionTools(),
+          },
+        ],
+      },
+    ],
+    durationMs: 1000,
+    finishedAt: 1700000001000,
+    id: "execution",
+    searchableText: "",
+    source: {
+      type: "message",
+      kind: { type: "reply", label: "reply" },
+      provider: { type: "slack", label: "Slack" },
+      metadata: [{ type: "channel", label: "#product" }],
+    },
+    status: "completed",
+    task: "Create a Notion page.",
+    title: "Create a Notion page.",
+    trigger: "Slack message",
+  }
+}
+
+function notionTools() {
+  return [
+    {
+      access: "write" as const,
+      description: "Create a Notion page or database record.",
+      label: "Create page",
+      requiresApproval: true,
+      tool: "notion_create_page",
+    },
+    {
+      access: "read" as const,
+      description: "Search shared Notion pages and databases.",
+      label: "Search Notion",
+      tool: "notion_search",
+    },
+  ]
+}

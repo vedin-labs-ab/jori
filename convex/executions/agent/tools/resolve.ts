@@ -81,7 +81,11 @@ export function createIntegrationToolBundle(
       permissions,
       toolModes: args.toolModes,
     }),
-    capability: createRuntimeToolCapability(provider, permissions),
+    capability: createRuntimeToolCapability(
+      provider,
+      permissions,
+      args.toolModes
+    ),
     permissions,
   }
 }

@@ -48,7 +48,9 @@ export function assembleToolsForRun(args: {
       })
     )
     addProviderSkillNames(skillNames, "milo", miloPermissions)
-    capabilities.push(createRuntimeToolCapability("milo", miloPermissions))
+    capabilities.push(
+      createRuntimeToolCapability("milo", miloPermissions, args.toolModes)
+    )
   }
 
   for (const integration of args.integrations) {
