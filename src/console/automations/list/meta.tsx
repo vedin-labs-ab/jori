@@ -1,8 +1,14 @@
 import { getAutomationEventDefinition } from "@contracts/automations/events"
-import { Clock, Repeat2, Zap } from "lucide-react"
+import { CircleHelp, Clock, Repeat2, Zap } from "lucide-react"
 import { type ReactNode } from "react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { getAutomationSurfaceLabel } from "../access"
+import { SurfaceLogo } from "../access/logo"
 import { describeCron } from "../cron"
 import { absoluteTime, relativeTime } from "../format"
 import { type Automation } from "../types"
@@ -26,7 +32,10 @@ export function AutomationMeta({
         <span className="truncate font-medium text-foreground">
           {trigger.title}
         </span>
-        <span className="truncate text-muted-foreground" title={trigger.detail}>
+        <span
+          className="truncate text-muted-foreground"
+          title={trigger.detailTitle}
+        >
           {trigger.detail}
         </span>
       </AutomationMetaCell>
@@ -85,8 +94,11 @@ function triggerSummary(automation: Automation) {
   const trigger = automation.trigger
 
   if (trigger.type === "cron") {
+    const detail = describeCron(trigger.cron) ?? `${trigger.cron} UTC`
+
     return {
-      detail: describeCron(trigger.cron) ?? `${trigger.cron} UTC`,
+      detail,
+      detailTitle: detail,
       Icon: Repeat2,
       title: "Recurring",
     }
@@ -95,6 +107,7 @@ function triggerSummary(automation: Automation) {
   if (trigger.type === "event") {
     return {
       detail: eventTriggerDetail(trigger),
+      detailTitle: undefined,
       Icon: Zap,
       title: "Event",
     }
@@ -102,6 +115,7 @@ function triggerSummary(automation: Automation) {
 
   return {
     detail: absoluteTime(trigger.at),
+    detailTitle: absoluteTime(trigger.at),
     Icon: Clock,
     title: "One time",
   }
@@ -119,27 +133,42 @@ function eventTriggerDetail(
     trigger.integration === undefined
       ? "Integration"
       : getAutomationSurfaceLabel(trigger.integration)
-  const criteria = eventCriteriaSummary(trigger)
 
-  return criteria === undefined
-    ? `${source}: ${eventLabel}`
-    : `${source}: ${eventLabel}, ${criteria}`
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      {trigger.integration === undefined ? null : (
+        <SurfaceLogo
+          className="size-3.5 rounded-sm"
+          integration={trigger.integration}
+        />
+      )}
+      <span className="truncate">{source}</span>
+      <EventTriggerHelp eventLabel={eventLabel} />
+    </span>
+  )
 }
 
-function eventCriteriaSummary(
-  trigger: Extract<Automation["trigger"], { type: "event" }>
-) {
-  const criteria = trigger.criteria
-
-  if (criteria === undefined) {
-    return trigger.filter
-  }
-
-  const summary = Object.entries(criteria)
-    .map(([, value]) => String(value))
-    .join(", ")
-
-  return summary === "" ? undefined : summary
+function EventTriggerHelp({ eventLabel }: { eventLabel: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          aria-label={`Event: ${eventLabel}`}
+          className="inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          type="button"
+        >
+          <CircleHelp className="size-3" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        align="center"
+        className="max-w-72 items-start text-left leading-relaxed"
+        side="top"
+      >
+        {eventLabel}
+      </TooltipContent>
+    </Tooltip>
+  )
 }
 
 function AutomationRuns({

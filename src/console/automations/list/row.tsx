@@ -1,7 +1,6 @@
 import { Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
 import { type Automation } from "../types"
 import { AutomationActions } from "./actions"
 import { AutomationMeta } from "./meta"
@@ -62,15 +61,10 @@ function AutomationStatusMark({ automation }: { automation: Automation }) {
   return (
     <span
       aria-label={isCompleted ? "Completed automation" : "Active automation"}
-      className={cn(
-        "flex size-7 shrink-0 items-center justify-center rounded-md ring-1",
-        isCompleted
-          ? "bg-muted/60 text-muted-foreground/75 ring-border"
-          : "bg-primary/5 text-primary/80 ring-primary/10"
-      )}
+      className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted"
       role="img"
     >
-      <Check className="size-3.5" />
+      <Check className="size-6" />
     </span>
   )
 }
