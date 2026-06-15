@@ -41,6 +41,29 @@ test("marks approval-required tools in message run details", () => {
   expect(screen.getAllByText("*")).toHaveLength(1)
 })
 
+test("omits empty access counts in message run details", () => {
+  render(
+    <TooltipProvider>
+      <ExecutionRow
+        execution={executionWithSingleAccessToolGroups()}
+        now={1700000001000}
+        tenantId="tenant"
+      />
+    </TooltipProvider>
+  )
+
+  fireEvent.click(screen.getByRole("button", { name: /review tool access/i }))
+
+  expect(
+    screen.getByRole("button", { name: "Open GitHub tools" })
+  ).toBeDefined()
+  expect(screen.getByRole("button", { name: "Open Slack tools" })).toBeDefined()
+  expect(screen.getByText("Read 1")).toBeDefined()
+  expect(screen.getByText("Write 1")).toBeDefined()
+  expect(screen.queryByText("Read 0")).toBeNull()
+  expect(screen.queryByText("Write 0")).toBeNull()
+})
+
 function executionWithApprovalTool(): ExecutionItem {
   return {
     approval: null,
@@ -71,6 +94,59 @@ function executionWithApprovalTool(): ExecutionItem {
     status: "completed",
     task: "Create a Notion page.",
     title: "Create a Notion page.",
+    trigger: "Slack message",
+  }
+}
+
+function executionWithSingleAccessToolGroups(): ExecutionItem {
+  return {
+    approval: null,
+    createdAt: 1700000000000,
+    details: [
+      {
+        type: "tools",
+        label: "GitHub · Read 1 · Slack · Write 1",
+        groups: [
+          {
+            type: "github",
+            label: "GitHub",
+            tools: [
+              {
+                access: "read" as const,
+                description: "Read GitHub issues.",
+                label: "Read issue",
+                tool: "github_get_issue",
+              },
+            ],
+          },
+          {
+            type: "slack",
+            label: "Slack",
+            tools: [
+              {
+                access: "write" as const,
+                description: "Post a Slack message.",
+                label: "Send message",
+                tool: "conversations_add_message",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    durationMs: 1000,
+    finishedAt: 1700000001000,
+    id: "execution",
+    searchableText: "",
+    source: {
+      type: "message",
+      kind: { type: "reply", label: "reply" },
+      surface: { type: "slack", label: "Slack" },
+      metadata: [{ type: "channel", label: "#product" }],
+    },
+    status: "completed",
+    task: "Review tool access.",
+    title: "Review tool access.",
     trigger: "Slack message",
   }
 }

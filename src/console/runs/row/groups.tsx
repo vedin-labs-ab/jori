@@ -59,6 +59,7 @@ function ToolGroupButton({
   onClick: () => void
 }) {
   const counts = countTools(group.tools)
+  const hasToolCounts = counts.read > 0 || counts.write > 0
 
   return (
     <button
@@ -71,16 +72,20 @@ function ToolGroupButton({
       <span className="shrink-0 font-medium text-foreground">
         {group.label}
       </span>
-      <span
-        aria-hidden="true"
-        className="w-[0.5px] shrink-0 self-stretch bg-border"
-      />
-      <ToolCounts
-        read={counts.read}
-        readRequiresApproval={counts.readRequiresApproval}
-        write={counts.write}
-        writeRequiresApproval={counts.writeRequiresApproval}
-      />
+      {hasToolCounts ? (
+        <>
+          <span
+            aria-hidden="true"
+            className="w-[0.5px] shrink-0 self-stretch bg-border"
+          />
+          <ToolCounts
+            read={counts.read}
+            readRequiresApproval={counts.readRequiresApproval}
+            write={counts.write}
+            writeRequiresApproval={counts.writeRequiresApproval}
+          />
+        </>
+      ) : null}
       <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/70 transition-colors group-hover/tool-row:text-foreground" />
     </button>
   )
@@ -97,19 +102,28 @@ function ToolCounts({
   write: number
   writeRequiresApproval: boolean
 }) {
+  const hasReadTools = read > 0
+  const hasWriteTools = write > 0
+
   return (
     <span className="inline-flex shrink-0 items-center gap-1.5">
-      <ToolCount
-        label="Read"
-        requiresApproval={readRequiresApproval}
-        value={read}
-      />
-      <SeparatorDot className="shrink-0 text-muted-foreground/60" />
-      <ToolCount
-        label="Write"
-        requiresApproval={writeRequiresApproval}
-        value={write}
-      />
+      {hasReadTools ? (
+        <ToolCount
+          label="Read"
+          requiresApproval={readRequiresApproval}
+          value={read}
+        />
+      ) : null}
+      {hasReadTools && hasWriteTools ? (
+        <SeparatorDot className="shrink-0 text-muted-foreground/60" />
+      ) : null}
+      {hasWriteTools ? (
+        <ToolCount
+          label="Write"
+          requiresApproval={writeRequiresApproval}
+          value={write}
+        />
+      ) : null}
     </span>
   )
 }
