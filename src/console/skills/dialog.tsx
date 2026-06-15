@@ -3,7 +3,7 @@ import {
   integrationLabel,
   integrations,
 } from "@contracts/integrations"
-import { Loader2 } from "lucide-react"
+import { Info, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -93,17 +93,19 @@ export function SkillDialog({
         </DialogHeader>
 
         <div className="grid gap-4">
-          <SkillTextField
-            id="skill-name"
-            label="Name"
-            onChange={(value) => updateValue("name", value)}
-            placeholder="customer-support"
-            value={values.name}
-          />
-          <SkillCategoryField
-            onChange={(value) => updateValue("category", value)}
-            value={values.category}
-          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SkillTextField
+              id="skill-name"
+              label="Name"
+              onChange={(value) => updateValue("name", value)}
+              placeholder="customer-support"
+              value={values.name}
+            />
+            <SkillCategoryField
+              onChange={(value) => updateValue("category", value)}
+              value={values.category}
+            />
+          </div>
           <AssociatedIntegrationsField
             onChange={(associatedIntegrations) =>
               onValuesChange({ ...values, associatedIntegrations })
@@ -229,7 +231,7 @@ function AssociatedIntegrationsField({
     <div className="grid gap-2">
       <div className="flex items-center gap-1.5">
         <Label htmlFor="skill-integrations">Associated integrations</Label>
-        <span className="text-muted-foreground text-xs">Optional</span>
+        <span className="text-muted-foreground text-xs">(optional)</span>
       </div>
       <Combobox
         items={integrations}
@@ -266,9 +268,12 @@ function AssociatedIntegrationsField({
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
-      <p className="text-muted-foreground text-xs">
-        Used for internal categorization and filtering. It does not change how
-        the skill runs.
+      <p className="flex items-start gap-1.5 text-muted-foreground text-xs">
+        <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+        <span>
+          Used for internal categorization and filtering. It does not change how
+          the skill runs.
+        </span>
       </p>
     </div>
   )
@@ -296,7 +301,7 @@ function SkillDescriptionField({
 }) {
   return (
     <div className="grid gap-2">
-      <Label htmlFor="skill-description">Description</Label>
+      <Label htmlFor="skill-description">When to use</Label>
       <Textarea
         id="skill-description"
         value={value}
