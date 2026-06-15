@@ -1,5 +1,7 @@
-import { type Provider } from "../providers"
+import { type ToolSurface } from "../integrations"
 import { toolPermissionRows } from "./data"
+
+export type { ToolSurface } from "../integrations"
 
 export const permissionModes = [
   "required",
@@ -12,11 +14,9 @@ export const toolAccessLevels = ["read", "write"] as const
 export type PermissionMode = (typeof permissionModes)[number]
 export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
 export type ToolAccess = (typeof toolAccessLevels)[number]
-export type ToolProvider = Provider
-
 export type ToolPermission = {
   tool: string
-  provider: ToolProvider
+  provider: ToolSurface
   label: string
   description: string
   access: ToolAccess
@@ -35,7 +35,7 @@ export type PermissionOverride = {
 }
 
 export type ToolPermissionRow = readonly [
-  provider: ToolProvider,
+  provider: ToolSurface,
   tool: string,
   label: string,
   description: string,
@@ -62,7 +62,7 @@ export function getToolPermission(tool: string) {
   return toolPermissionsByName.get(tool)
 }
 
-export function getToolPermissionsByProvider(provider: ToolProvider) {
+export function getToolPermissionsBySurface(provider: ToolSurface) {
   return toolPermissions.filter(
     (permission) => permission.provider === provider
   )

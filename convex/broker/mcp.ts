@@ -11,7 +11,7 @@ import {
   resolveToolMode,
   resolveToolModes,
   type ToolPermission,
-  type ToolProvider,
+  type ToolSurface,
 } from "../permissions/catalog"
 import {
   formatProviderError,
@@ -27,7 +27,7 @@ import { callMiloTool } from "./milo"
 import { callProviderTool, fetchGitHubTarball } from "./tools"
 
 type MiloMcpRequest = {
-  provider?: ToolProvider
+  provider?: ToolSurface
   tool: string
   args?: unknown
 }
@@ -150,7 +150,7 @@ async function callBrokerTool(
   ctx: ActionCtx,
   context: BrokerContext,
   request: {
-    provider: ToolProvider
+    provider: ToolSurface
     tool: string
     args: Record<string, unknown>
   }
@@ -193,7 +193,7 @@ async function callBrokerTool(
 function authorizeTool(
   context: BrokerContext,
   request: {
-    provider: ToolProvider
+    provider: ToolSurface
     tool: string
   }
 ): {
@@ -225,7 +225,7 @@ async function authorizeProviderTool(
   context: BrokerContext,
   request: {
     permission: ToolPermission
-    provider: Exclude<ToolProvider, "milo">
+    provider: Exclude<ToolSurface, "milo">
     tool: string
   }
 ) {
@@ -250,7 +250,7 @@ async function authorizeProviderTool(
 
 function findProviderIntegration(
   context: BrokerContext,
-  provider: Exclude<ToolProvider, "milo">
+  provider: Exclude<ToolSurface, "milo">
 ) {
   return (
     context.integrations.find(

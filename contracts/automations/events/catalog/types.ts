@@ -1,4 +1,4 @@
-import { type IntegrationProvider } from "../../../providers"
+import { type Integration } from "../../../integrations"
 
 export const automationEventOptionSources = [
   "slack.channels",
@@ -60,8 +60,8 @@ export type AutomationEventDefinition = {
   parameters?: readonly AutomationEventParameter[]
 }
 
-export type AutomationEventProviderDefinition = {
-  provider: IntegrationProvider
+export type AutomationEventIntegrationDefinition = {
+  provider: Integration
   events: readonly AutomationEventDefinition[]
 }
 

@@ -1,9 +1,9 @@
 import {
   emailParameter,
+  integration,
   numberParameter,
   optionParameter,
   pendingEvent,
-  provider,
   textParameter,
 } from "./builders"
 import { type AutomationEventParameter } from "./types"
@@ -43,7 +43,7 @@ const microsoftCalendarParameters = [
 ]
 
 export const pendingAutomationEventCatalog = [
-  provider("gmail", [
+  integration("gmail", [
     pendingEvent("message.received", {
       label: "New email",
       description: "Runs when a new Gmail message arrives.",
@@ -60,7 +60,7 @@ export const pendingAutomationEventCatalog = [
       ],
     }),
   ]),
-  provider("microsoftEmail", [
+  integration("microsoftEmail", [
     pendingEvent("message.received", {
       label: "New email",
       description: "Runs when a new Outlook message arrives.",
@@ -77,7 +77,7 @@ export const pendingAutomationEventCatalog = [
       ],
     }),
   ]),
-  provider("googleCalendar", [
+  integration("googleCalendar", [
     ...pendingCalendarChangeEvents({
       message:
         "Google Calendar event-triggered automations need calendar subscriptions before they can run.",
@@ -103,7 +103,7 @@ export const pendingAutomationEventCatalog = [
       ],
     }),
   ]),
-  provider("microsoftCalendar", [
+  integration("microsoftCalendar", [
     ...pendingCalendarChangeEvents({
       message:
         "Microsoft Calendar event-triggered automations need Microsoft Graph subscriptions before they can run.",
@@ -129,7 +129,7 @@ export const pendingAutomationEventCatalog = [
       ],
     }),
   ]),
-  provider("googleDrive", [
+  integration("googleDrive", [
     pendingEvent("file.updated", {
       label: "File updated",
       description: "Runs when the selected Google Drive file changes.",

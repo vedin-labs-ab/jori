@@ -4,24 +4,24 @@ import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
+import { integrationValidator } from "../integrations/catalog"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
-import { integrationProviderValidator } from "../providers/catalog"
 import {
+  integrationUsesAutomationEventOptionSource,
   isAutomationEventOptionSource,
-  providerUsesAutomationEventOptionSource,
 } from "./events"
+import { integrationLabels, resolveEventIntegration } from "./integrations"
 import {
   type AutomationEventOptionSearchResult,
-  searchProviderOptions,
-} from "./options/providers"
-import { providerLabels, resolveEventIntegration } from "./providers"
+  searchIntegrationOptions,
+} from "./options/integrations"
 
 const criteriaValidator = v.record(v.string(), v.union(v.string(), v.number()))
 
 export const search = action({
   args: {
     tenantId: v.string(),
-    provider: integrationProviderValidator,
+    provider: integrationValidator,
     source: v.string(),
     query: v.string(),
     criteria: v.optional(criteriaValidator),
@@ -31,7 +31,7 @@ export const search = action({
 
     if (
       !isAutomationEventOptionSource(args.source) ||
-      !providerUsesAutomationEventOptionSource(args.provider, args.source)
+      !integrationUsesAutomationEventOptionSource(args.provider, args.source)
     ) {
       throw new Error("Choose a supported event option.")
     }
@@ -53,7 +53,7 @@ export const search = action({
       integration: lookup.integration,
     })
 
-    return await searchProviderOptions({
+    return await searchIntegrationOptions({
       integration,
       source: args.source,
       query: args.query,
@@ -75,7 +75,7 @@ type IntegrationLookup =
 export const integration = internalQuery({
   args: {
     tenantId: v.string(),
-    provider: integrationProviderValidator,
+    provider: integrationValidator,
     createdBy: v.string(),
   },
   handler: async (ctx, args): Promise<IntegrationLookup> => {
@@ -91,7 +91,7 @@ export const integration = internalQuery({
     } catch {
       return {
         status: "unavailable",
-        message: `Connect ${providerLabels[args.provider]} before choosing event options.`,
+        message: `Connect ${integrationLabels[args.provider]} before choosing event options.`,
       }
     }
   },

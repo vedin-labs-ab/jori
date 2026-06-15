@@ -1,4 +1,4 @@
-import { type IntegrationProvider } from "../../../providers"
+import { type Integration } from "../../../integrations"
 import {
   type AutomationEventAvailability,
   type AutomationEventDefinition,
@@ -12,8 +12,8 @@ type ParameterOptions = {
   resetsOn?: readonly string[]
 }
 
-export function provider<const Provider extends IntegrationProvider>(
-  provider: Provider,
+export function integration<const IntegrationKey extends Integration>(
+  provider: IntegrationKey,
   events: readonly AutomationEventDefinition[]
 ) {
   return { provider, events }

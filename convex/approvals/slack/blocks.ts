@@ -1,5 +1,5 @@
 import { type SlackBlock } from "../../broker/tools/slack"
-import { type Provider } from "../../providers/catalog"
+import { type ToolSurface } from "../../integrations/catalog"
 import { type SlackApprovalDecisionResult } from "../runtime"
 import {
   createApprovalCard,
@@ -22,7 +22,7 @@ export type SlackApprovalInteraction = {
 
 export function createSlackApprovalRequest(args: {
   code: string
-  provider: Provider
+  provider: ToolSurface
   tool: string
   summary: string
   expiresAt: number
@@ -80,7 +80,7 @@ export function createSlackExpirationResponse(args: {
 
 function createSlackApprovalBlocks(args: {
   code: string
-  provider: Provider
+  provider: ToolSurface
   tool: string
   summary: string
   expiresAt: number

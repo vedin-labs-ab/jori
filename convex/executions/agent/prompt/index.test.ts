@@ -65,10 +65,12 @@ const messageTriggerCases = [
 describe("runtime prompts", () => {
   test.each(
     messageTriggerCases
-  )("renders %s message trigger target", (provider, data, providerLabel, targetLines) => {
+  )("renders %s message trigger target", (provider, data, toolSurfaceLabel, targetLines) => {
     const prompt = assemblePrompt(runtimeInput(provider, data))
 
-    expect(prompt).toContain(`A ${providerLabel} message triggered this run.`)
+    expect(prompt).toContain(
+      `A ${toolSurfaceLabel} message triggered this run.`
+    )
     expect(prompt).toContain("Current UTC time:")
     expect(prompt).toContain("The requester cannot see you working.")
 

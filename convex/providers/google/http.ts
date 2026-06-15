@@ -2,9 +2,9 @@ import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { readCallbackState, redirectWithStatus } from "../http"
 import {
-  type GoogleSurfaceProvider,
+  type GoogleIntegration,
+  googleIntegrationConfigs,
   googleOAuthAuthorizeUrl,
-  googleSurfaceConfigs,
 } from "./config"
 import {
   exchangeGoogleAuthorizationCode,
@@ -15,9 +15,9 @@ import { parseSignedGoogleState } from "./signing"
 
 export async function handleGoogleInstall(
   request: Request,
-  provider: GoogleSurfaceProvider
+  provider: GoogleIntegration
 ) {
-  const surface = googleSurfaceConfigs[provider]
+  const surface = googleIntegrationConfigs[provider]
   const requestUrl = new URL(request.url)
   const state = requestUrl.searchParams.get("state")
 
@@ -43,7 +43,7 @@ export async function handleGoogleInstall(
 export async function handleGoogleOAuthCallback(
   ctx: ActionCtx,
   request: Request,
-  expectedProvider?: GoogleSurfaceProvider
+  expectedProvider?: GoogleIntegration
 ) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
@@ -72,7 +72,7 @@ export async function handleGoogleOAuthCallback(
   }
 
   const provider = state.provider
-  const surface = googleSurfaceConfigs[provider]
+  const surface = googleIntegrationConfigs[provider]
 
   const tokenResult = await exchangeGoogleAuthorizationCode({
     code,
@@ -114,12 +114,12 @@ export async function handleGoogleOAuthCallback(
 
 function redirectWithGoogleStatus(
   returnUrl: string,
-  provider: GoogleSurfaceProvider,
+  provider: GoogleIntegration,
   status: "connected" | "error"
 ) {
   return redirectWithStatus(
     returnUrl,
-    googleSurfaceConfigs[provider].callbackParam,
+    googleIntegrationConfigs[provider].callbackParam,
     status
   )
 }

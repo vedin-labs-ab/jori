@@ -1,15 +1,15 @@
 import { X } from "lucide-react"
-import { type AutomationSurfaceProvider } from "../../../access"
+import { type AutomationSurfaceIntegration } from "../../../access"
 import { SurfaceLogo } from "../../../access/logo"
 
 export function AutomationSurfaceRemoveButton({
   onRemove,
   provider,
-  providerLabel,
+  toolSurfaceLabel,
 }: {
   onRemove: () => void
-  provider: AutomationSurfaceProvider
-  providerLabel: string
+  provider: AutomationSurfaceIntegration
+  toolSurfaceLabel: string
 }) {
   return (
     <span
@@ -17,7 +17,7 @@ export function AutomationSurfaceRemoveButton({
       data-automation-remove-content=""
     >
       <button
-        aria-label={`Remove ${providerLabel}`}
+        aria-label={`Remove ${toolSurfaceLabel}`}
         className="group/x grid h-5 w-4 place-items-center outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30"
         onClick={(event) => {
           event.preventDefault()
@@ -28,7 +28,7 @@ export function AutomationSurfaceRemoveButton({
           event.preventDefault()
           event.stopPropagation()
         }}
-        title={`Remove ${providerLabel}`}
+        title={`Remove ${toolSurfaceLabel}`}
         type="button"
       >
         <SurfaceLogo
@@ -37,7 +37,7 @@ export function AutomationSurfaceRemoveButton({
         />
         <X className="hidden size-3 opacity-55 transition-opacity duration-150 ease-out group-hover/remove:block group-focus-within/remove:block group-hover/x:opacity-100 group-focus-visible/x:opacity-100" />
       </button>
-      <span className="whitespace-nowrap">{providerLabel}</span>
+      <span className="whitespace-nowrap">{toolSurfaceLabel}</span>
     </span>
   )
 }

@@ -1,6 +1,6 @@
 import {
+  type AutomationEventIntegration,
   type AutomationEventParameter,
-  type AutomationEventProvider,
 } from "@contracts/automations/events"
 import { type ReactAction } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
@@ -28,7 +28,7 @@ export function searchEventOptions({
   setOptions,
   tenantId,
 }: {
-  provider: AutomationEventProvider
+  provider: AutomationEventIntegration
   query: string
   parameter: Extract<AutomationEventParameter, { type: "option" }>
   criteria: Record<string, string>

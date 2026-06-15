@@ -1,17 +1,17 @@
 import {
-  type AutomationSurfaceProvider,
-  type AutomationSurfaceProviderMeta,
-  automationSurfaceProviders,
+  type AutomationSurfaceIntegration,
+  type AutomationSurfaceIntegrationMeta,
+  automationSurfaceIntegrations,
 } from "./catalog"
 
 export function normalizeFuzzyAlias(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "")
 }
 
-export function findFuzzyAutomationSurfaceProvider(
+export function findFuzzyAutomationSurfaceIntegration(
   value: string,
   options: { allowPrefix?: boolean } = {}
-): AutomationSurfaceProvider | null {
+): AutomationSurfaceIntegration | null {
   const normalizedValue = normalizeFuzzyAlias(value)
   const allowPrefix = options.allowPrefix ?? true
 
@@ -19,7 +19,7 @@ export function findFuzzyAutomationSurfaceProvider(
     return null
   }
 
-  const exactMatch = findUniqueProviderMatch(normalizedValue, (alias) =>
+  const exactMatch = findUniqueIntegrationMatch(normalizedValue, (alias) =>
     alias === normalizedValue ? 1 : 0
   )
 
@@ -28,7 +28,7 @@ export function findFuzzyAutomationSurfaceProvider(
   }
 
   const prefixMatch = allowPrefix
-    ? findUniqueProviderMatch(normalizedValue, (alias) =>
+    ? findUniqueIntegrationMatch(normalizedValue, (alias) =>
         alias.startsWith(normalizedValue)
           ? normalizedValue.length / alias.length
           : 0
@@ -43,7 +43,7 @@ export function findFuzzyAutomationSurfaceProvider(
     return null
   }
 
-  const [best, secondBest] = readProviderMatchScores(normalizedValue)
+  const [best, secondBest] = readIntegrationMatchScores(normalizedValue)
 
   if (best === undefined || best.score < 0.8) {
     return null
@@ -56,15 +56,15 @@ export function findFuzzyAutomationSurfaceProvider(
   return best.provider
 }
 
-export function getProviderSuggestionScore(
+export function getIntegrationSuggestionScore(
   normalizedQuery: string,
-  provider: AutomationSurfaceProviderMeta
+  provider: AutomationSurfaceIntegrationMeta
 ) {
   if (normalizedQuery === "") {
     return 1
   }
 
-  const aliasScores = readProviderAliases(provider).map((alias) => {
+  const aliasScores = readIntegrationAliases(provider).map((alias) => {
     if (alias.startsWith(normalizedQuery)) {
       return 2 - normalizedQuery.length / alias.length
     }
@@ -77,13 +77,14 @@ export function getProviderSuggestionScore(
   return Math.max(...aliasScores)
 }
 
-function findUniqueProviderMatch(
+function findUniqueIntegrationMatch(
   normalizedValue: string,
   scoreAlias: (alias: string) => number
 ) {
-  const matches = readProviderMatchScores(normalizedValue, scoreAlias).filter(
-    (match) => match.score > 0
-  )
+  const matches = readIntegrationMatchScores(
+    normalizedValue,
+    scoreAlias
+  ).filter((match) => match.score > 0)
 
   if (matches.length !== 1) {
     return null
@@ -92,23 +93,23 @@ function findUniqueProviderMatch(
   return matches[0].provider
 }
 
-function readProviderMatchScores(
+function readIntegrationMatchScores(
   normalizedValue: string,
   scoreAlias: (alias: string) => number = (alias) =>
     getFuzzySimilarity(normalizedValue, alias)
 ) {
-  return automationSurfaceProviders
+  return automationSurfaceIntegrations
     .map((item) => ({
       provider: item.provider,
       score: Math.max(
-        ...readProviderAliases(item).map((alias) => scoreAlias(alias))
+        ...readIntegrationAliases(item).map((alias) => scoreAlias(alias))
       ),
     }))
     .filter((item) => item.score > 0)
     .sort((left, right) => right.score - left.score)
 }
 
-function readProviderAliases(provider: AutomationSurfaceProviderMeta) {
+function readIntegrationAliases(provider: AutomationSurfaceIntegrationMeta) {
   return [provider.label, ...provider.aliases].map(normalizeFuzzyAlias)
 }
 

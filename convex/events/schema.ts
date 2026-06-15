@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { integrationProviderValidator } from "../providers/catalog"
+import { integrationValidator } from "../integrations/catalog"
 import { actorValidator } from "../shared/actor"
 import { sourceMetadataValidator } from "../shared/sources/schema"
 
@@ -10,7 +10,7 @@ const eventCriteria = v.record(v.string(), eventCriteriaValue)
 export const events = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
-  provider: integrationProviderValidator,
+  provider: integrationValidator,
   key: v.string(),
   type: v.string(),
   resource: v.optional(v.string()),

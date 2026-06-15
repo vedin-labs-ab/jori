@@ -1,6 +1,6 @@
 import {
+  type AutomationEventIntegration,
   type AutomationEventParameter,
-  type AutomationEventProvider,
 } from "@contracts/automations/events"
 import { useAction } from "convex/react"
 import { Loader2 } from "lucide-react"
@@ -30,7 +30,7 @@ export function EventOptionField({
   onValueChange,
 }: {
   tenantId: string
-  provider: AutomationEventProvider
+  provider: AutomationEventIntegration
   parameter: Extract<AutomationEventParameter, { type: "option" }>
   criteria: Record<string, string>
   disabled: boolean

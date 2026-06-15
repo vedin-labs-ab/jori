@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type QueryCtx, query } from "../_generated/server"
-import { type GoogleSurfaceProvider } from "../providers/google/config"
-import { type MicrosoftSurfaceProvider } from "../providers/microsoft/config"
+import { type GoogleIntegration } from "../providers/google/config"
+import { type MicrosoftIntegration } from "../providers/microsoft/config"
 import { getMicrosoftTenantName } from "../providers/microsoft/data"
 import { getNotionBotId } from "../providers/notion/data"
 import { getTenantIntegration, getUserIntegration } from "./data"
@@ -180,7 +180,7 @@ export const getGoogleDriveStatus = query({
 async function getGoogleUserStatus(
   ctx: QueryCtx,
   args: {
-    provider: GoogleSurfaceProvider
+    provider: GoogleIntegration
     tenantId: string
   }
 ) {
@@ -204,7 +204,7 @@ async function getGoogleUserStatus(
 async function getMicrosoftUserStatus(
   ctx: QueryCtx,
   args: {
-    provider: MicrosoftSurfaceProvider
+    provider: MicrosoftIntegration
     tenantId: string
   }
 ) {

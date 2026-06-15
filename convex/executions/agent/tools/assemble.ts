@@ -2,7 +2,7 @@ import { type Doc } from "../../../_generated/dataModel"
 import { type AutomationAccess } from "../../../automations/access"
 import {
   type PermissionMode,
-  type ToolProvider,
+  type ToolSurface,
 } from "../../../permissions/catalog"
 import { createRuntimeToolCapability, getProviderSkillNames } from "./bundles"
 import { createMiloToolBundle } from "./milo"
@@ -83,7 +83,7 @@ export function assembleToolsForRun(args: {
 
 function addProviderSkillNames(
   skillNames: Set<string>,
-  provider: ToolProvider,
+  provider: ToolSurface,
   permissions: Parameters<typeof getProviderSkillNames>[1]
 ) {
   for (const skillName of getProviderSkillNames(provider, permissions)) {

@@ -1,8 +1,8 @@
-import { type ToolProvider } from "../../../permissions/catalog"
+import { type ToolSurface } from "../../../permissions/catalog"
 import { type McpToolDefinition } from "./definitions"
 
 export function createBrokerMcpScript(args: {
-  provider: ToolProvider
+  provider: ToolSurface
   tools: McpToolDefinition[]
 }) {
   return brokerMcpScript({
@@ -11,7 +11,7 @@ export function createBrokerMcpScript(args: {
   })
 }
 
-function brokerMcpScript(args: { provider: ToolProvider; toolsJson: string }) {
+function brokerMcpScript(args: { provider: ToolSurface; toolsJson: string }) {
   return `
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";

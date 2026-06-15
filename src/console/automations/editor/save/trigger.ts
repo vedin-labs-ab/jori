@@ -2,7 +2,7 @@ import {
   type AutomationEventCriteria,
   getAutomationEventDefinition,
   getDefaultAutomationEvent,
-  isAutomationEventProvider,
+  isAutomationEventIntegration,
 } from "@contracts/automations/events"
 import { buildRecurringCron, classifyCron } from "../../cron"
 import { toDatetimeLocal } from "../../format"
@@ -129,7 +129,7 @@ export function triggerFormValues(automation: Automation) {
   }
 
   if (trigger.type === "event") {
-    const provider = isAutomationEventProvider(trigger.provider)
+    const provider = isAutomationEventIntegration(trigger.provider)
       ? trigger.provider
       : emptyAutomationForm.eventProvider
     const definition =

@@ -1,22 +1,22 @@
 import {
-  type AutomationSurfaceProvider,
-  automationSurfaceProviders,
+  type AutomationSurfaceIntegration,
+  automationSurfaceIntegrations,
   getAutomationSurfaceLabel,
 } from "./catalog"
-import { getProviderSuggestionScore, normalizeFuzzyAlias } from "./fuzzy"
+import { getIntegrationSuggestionScore, normalizeFuzzyAlias } from "./fuzzy"
 import {
   isMentionNameCharacter,
   readAutomationSurfaceMentionMatches,
 } from "./scan"
 
 export type AutomationSurfaceMentionPart = {
-  provider?: AutomationSurfaceProvider
+  provider?: AutomationSurfaceIntegration
   text: string
 }
 
 export type AutomationSurfaceSuggestion = {
   label: string
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
 }
 
 export type ActiveAutomationSurfaceMention = {
@@ -28,18 +28,18 @@ export type ActiveAutomationSurfaceMention = {
 
 export function findAutomationSurfaceMentions(
   text: string
-): AutomationSurfaceProvider[] {
-  const providers: AutomationSurfaceProvider[] = []
-  const seen = new Set<AutomationSurfaceProvider>()
+): AutomationSurfaceIntegration[] {
+  const integrations: AutomationSurfaceIntegration[] = []
+  const seen = new Set<AutomationSurfaceIntegration>()
 
   for (const match of readAutomationSurfaceMentionMatches(text)) {
     if (!seen.has(match.provider)) {
       seen.add(match.provider)
-      providers.push(match.provider)
+      integrations.push(match.provider)
     }
   }
 
-  return providers
+  return integrations
 }
 
 export function findActiveAutomationSurfaceMention(
@@ -109,11 +109,11 @@ export function getAutomationSurfaceSuggestions(
 ): AutomationSurfaceSuggestion[] {
   const normalizedQuery = normalizeFuzzyAlias(query)
 
-  return automationSurfaceProviders
+  return automationSurfaceIntegrations
     .map((item) => ({
       label: item.label,
       provider: item.provider,
-      score: getProviderSuggestionScore(normalizedQuery, item),
+      score: getIntegrationSuggestionScore(normalizedQuery, item),
     }))
     .filter((item) => item.score > 0)
     .sort(
@@ -127,7 +127,7 @@ export function getAutomationSurfaceSuggestions(
 export function replaceAutomationSurfaceMention(
   text: string,
   mention: ActiveAutomationSurfaceMention,
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
 ) {
   const replacement = getAutomationSurfaceLabel(provider)
   const suffix = text.slice(mention.end)

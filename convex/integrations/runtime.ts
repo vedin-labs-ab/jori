@@ -1,7 +1,10 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { isGoogleProvider, isMicrosoftProvider } from "../providers/catalog"
+import {
+  isGoogleIntegration,
+  isMicrosoftIntegration,
+} from "../integrations/catalog"
 import { createGitHubInstallationToken } from "../providers/github/app"
 import { requireGitHubCredentials } from "../providers/github/credentials"
 import { requireGoogleCredentials } from "../providers/google/credentials"
@@ -34,11 +37,11 @@ export async function prepareIntegrationForRuntime(
     return await prepareLinearIntegrationForRuntime(ctx, integration)
   }
 
-  if (isGoogleProvider(integration.provider)) {
+  if (isGoogleIntegration(integration.provider)) {
     return await prepareGoogleIntegrationForRuntime(ctx, integration)
   }
 
-  if (isMicrosoftProvider(integration.provider)) {
+  if (isMicrosoftIntegration(integration.provider)) {
     return await prepareMicrosoftIntegrationForRuntime(ctx, integration)
   }
 

@@ -1,10 +1,10 @@
 import { type JSONContent } from "@tiptap/core"
 import {
   type AutomationSurfaceFormValue,
-  type AutomationSurfaceProvider,
+  type AutomationSurfaceIntegration,
   getAutomationSurfaceLabel,
   getAutomationSurfaceMentionParts,
-  isAutomationSurfaceProvider,
+  isAutomationSurfaceIntegration,
   syncAutomationSurfaces,
 } from "../../access"
 import { isAutomationSurfacePolicyBlocked } from "../../access/policy"
@@ -79,7 +79,7 @@ export function serializeAutomationInstructionDocument(
   document: JSONContent
 ): AutomationInstructionsValue {
   const surfaces: AutomationSurfaceFormValue[] = []
-  const seen = new Set<AutomationSurfaceProvider>()
+  const seen = new Set<AutomationSurfaceIntegration>()
   const description = (document.content ?? [])
     .map((node) => serializeBlock(node, surfaces, seen))
     .join("\n")
@@ -94,8 +94,8 @@ export function automationInstructionKey(value: AutomationInstructionsValue) {
   })
 }
 
-export function parseAutomationSurfaceProvider(provider: unknown) {
-  return isAutomationSurfaceProvider(provider) ? provider : null
+export function parseAutomationSurfaceIntegration(provider: unknown) {
+  return isAutomationSurfaceIntegration(provider) ? provider : null
 }
 
 export function parseAutomationSurfacePolicy(
@@ -122,7 +122,7 @@ export function parseAutomationSurfaceToolsAttribute(tools: unknown) {
 
 export function readAutomationSurfaceToolsForProvider(
   document: JSONContent,
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
 ): string[] | undefined {
   if (
     document.type === automationSurfaceNodeName &&
@@ -176,7 +176,7 @@ function normalizeParagraphs(paragraphs: JSONContent[]) {
 function serializeBlock(
   node: JSONContent,
   surfaces: AutomationSurfaceFormValue[],
-  seen: Set<AutomationSurfaceProvider>
+  seen: Set<AutomationSurfaceIntegration>
 ): string {
   if (node.type === "text") {
     return node.text ?? ""
@@ -198,11 +198,11 @@ function serializeBlock(
 function serializeSurfaceNode(
   node: JSONContent,
   surfaces: AutomationSurfaceFormValue[],
-  seen: Set<AutomationSurfaceProvider>
+  seen: Set<AutomationSurfaceIntegration>
 ) {
   const provider = node.attrs?.provider
 
-  if (!isAutomationSurfaceProvider(provider)) {
+  if (!isAutomationSurfaceIntegration(provider)) {
     return ""
   }
 

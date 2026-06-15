@@ -7,7 +7,7 @@ import {
   getAutomationSurfaceAccess,
   getAutomationSurfaceAccessLabel,
   getAutomationSurfaceLabel,
-  isAutomationSurfaceProvider,
+  isAutomationSurfaceIntegration,
 } from "../../../access"
 import {
   type AutomationPolicyPermissions,
@@ -26,7 +26,7 @@ import {
 import { AutomationSurfaceToolsDialog } from "./tools"
 
 export function AutomationSurfaceNodeView(props: NodeViewProps) {
-  const provider = isAutomationSurfaceProvider(props.node.attrs.provider)
+  const provider = isAutomationSurfaceIntegration(props.node.attrs.provider)
     ? props.node.attrs.provider
     : null
 
@@ -51,7 +51,7 @@ function AutomationSurfaceNodeContent({
   const surface = { provider, tools }
   const blocked = isAutomationSurfacePolicyBlocked({ permissions, surface })
   const access = getAutomationSurfaceAccess(surface, permissions)
-  const providerLabel = getAutomationSurfaceLabel(provider)
+  const toolSurfaceLabel = getAutomationSurfaceLabel(provider)
 
   return (
     <NodeViewWrapper
@@ -67,7 +67,7 @@ function AutomationSurfaceNodeContent({
         onOpenTools={() => setIsToolDialogOpen(true)}
         onRemove={deleteNode}
         provider={provider}
-        providerLabel={providerLabel}
+        toolSurfaceLabel={toolSurfaceLabel}
         selected={selected}
       />
       <AutomationSurfaceToolsDialog
@@ -78,7 +78,7 @@ function AutomationSurfaceNodeContent({
         open={isToolDialogOpen}
         permissions={permissions}
         provider={provider}
-        providerLabel={providerLabel}
+        toolSurfaceLabel={toolSurfaceLabel}
         tools={tools}
       />
     </NodeViewWrapper>
@@ -135,7 +135,7 @@ function AutomationSurfaceMarker({
   onOpenTools,
   onRemove,
   provider,
-  providerLabel,
+  toolSurfaceLabel,
   selected,
 }: {
   access: ReturnType<typeof getAutomationSurfaceAccess>
@@ -144,14 +144,14 @@ function AutomationSurfaceMarker({
   onOpenTools: () => void
   onRemove: () => void
   provider: AutomationSurfaceFormValue["provider"]
-  providerLabel: string
+  toolSurfaceLabel: string
   selected: boolean
 }) {
   const toneClassNames = getAutomationSurfaceToneClassNames(access, blocked)
 
   return (
     <ButtonGroup
-      aria-label={`${providerLabel} integration tools`}
+      aria-label={`${toolSurfaceLabel} integration tools`}
       className={cn(
         "mx-0.5 inline-flex h-5 overflow-hidden rounded-sm border align-middle text-[0.625rem]/none shadow-none",
         toneClassNames.surface,
@@ -163,7 +163,7 @@ function AutomationSurfaceMarker({
       <AutomationSurfaceRemoveButton
         onRemove={onRemove}
         provider={provider}
-        providerLabel={providerLabel}
+        toolSurfaceLabel={toolSurfaceLabel}
       />
       <span
         aria-hidden="true"
@@ -180,7 +180,7 @@ function AutomationSurfaceMarker({
         count={count}
         iconClassName={toneClassNames.scopeIcon}
         onOpen={onOpenTools}
-        providerLabel={providerLabel}
+        toolSurfaceLabel={toolSurfaceLabel}
       />
     </ButtonGroup>
   )
@@ -201,7 +201,7 @@ function AutomationSurfaceToolsButton({
   count,
   iconClassName,
   onOpen,
-  providerLabel,
+  toolSurfaceLabel,
 }: {
   access: ReturnType<typeof getAutomationSurfaceAccess>
   accessLabel: string
@@ -209,13 +209,13 @@ function AutomationSurfaceToolsButton({
   count: number
   iconClassName: string
   onOpen: () => void
-  providerLabel: string
+  toolSurfaceLabel: string
 }) {
   const Icon = getAutomationSurfaceAccessIcon(access, blocked)
   const toolCountLabel = count === 0 ? "No tools enabled" : `${count} enabled`
   const label = blocked
-    ? `${providerLabel} tools: ${toolCountLabel}, some unavailable. Configure tools.`
-    : `${providerLabel} tools: ${toolCountLabel}. Configure tools.`
+    ? `${toolSurfaceLabel} tools: ${toolCountLabel}, some unavailable. Configure tools.`
+    : `${toolSurfaceLabel} tools: ${toolCountLabel}. Configure tools.`
 
   return (
     <button

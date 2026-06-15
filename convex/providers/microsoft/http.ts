@@ -2,9 +2,9 @@ import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { readCallbackState, redirectWithStatus } from "../http"
 import {
-  type MicrosoftSurfaceProvider,
+  type MicrosoftIntegration,
+  microsoftIntegrationConfigs,
   microsoftOAuthAuthorizeUrl,
-  microsoftSurfaceConfigs,
 } from "./config"
 import {
   exchangeMicrosoftAuthorizationCode,
@@ -15,9 +15,9 @@ import { parseSignedMicrosoftState } from "./signing"
 
 export async function handleMicrosoftInstall(
   request: Request,
-  provider: MicrosoftSurfaceProvider
+  provider: MicrosoftIntegration
 ) {
-  const surface = microsoftSurfaceConfigs[provider]
+  const surface = microsoftIntegrationConfigs[provider]
   const requestUrl = new URL(request.url)
   const state = requestUrl.searchParams.get("state")
 
@@ -42,9 +42,9 @@ export async function handleMicrosoftInstall(
 export async function handleMicrosoftOAuthCallback(
   ctx: ActionCtx,
   request: Request,
-  provider: MicrosoftSurfaceProvider
+  provider: MicrosoftIntegration
 ) {
-  const surface = microsoftSurfaceConfigs[provider]
+  const surface = microsoftIntegrationConfigs[provider]
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
   const stateValue = requestUrl.searchParams.get("state")
@@ -112,12 +112,12 @@ export async function handleMicrosoftOAuthCallback(
 
 function redirectWithMicrosoftStatus(
   returnUrl: string,
-  provider: MicrosoftSurfaceProvider,
+  provider: MicrosoftIntegration,
   status: "connected" | "error"
 ) {
   return redirectWithStatus(
     returnUrl,
-    microsoftSurfaceConfigs[provider].callbackParam,
+    microsoftIntegrationConfigs[provider].callbackParam,
     status
   )
 }

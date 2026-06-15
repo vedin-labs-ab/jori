@@ -1,6 +1,6 @@
 import {
   type AutomationEventDefinition,
-  type AutomationEventProvider,
+  type AutomationEventIntegration,
   automationEventCatalog,
   getAutomationEventDefinition,
   getDefaultAutomationEvent,
@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { type AutomationFormValues } from "../../types"
-import { EventProviderField } from "./options/field"
+import { EventIntegrationField } from "./options/field"
 import { EventScopeFields } from "./scope"
 
 export function EventFields({
@@ -37,7 +37,7 @@ export function EventFields({
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="grid gap-2">
           <Label htmlFor="automation-event-provider">Integration</Label>
-          <EventProviderField
+          <EventIntegrationField
             tenantId={tenantId}
             value={values.eventProvider}
             onValueChange={(provider) =>
@@ -96,7 +96,7 @@ function EventParameterFields({
   values,
 }: {
   tenantId: string
-  provider: AutomationEventProvider
+  provider: AutomationEventIntegration
   event: AutomationEventDefinition
   onValuesChange: (values: Record<string, string>) => void
   values: Record<string, string>
@@ -128,7 +128,7 @@ function onProviderChange({
   onValuesChange,
   values,
 }: {
-  provider: AutomationEventProvider
+  provider: AutomationEventIntegration
   onValuesChange: (values: AutomationFormValues) => void
   values: AutomationFormValues
 }) {
@@ -142,7 +142,7 @@ function onProviderChange({
   })
 }
 
-function getEventDefinitions(provider: AutomationEventProvider) {
+function getEventDefinitions(provider: AutomationEventIntegration) {
   return (
     automationEventCatalog.find(
       (definition) => definition.provider === provider
@@ -150,7 +150,7 @@ function getEventDefinitions(provider: AutomationEventProvider) {
   )
 }
 
-function getSelectedEvent(provider: AutomationEventProvider, event: string) {
+function getSelectedEvent(provider: AutomationEventIntegration, event: string) {
   return (
     getAutomationEventDefinition(provider, event) ??
     getDefaultAutomationEvent(provider)

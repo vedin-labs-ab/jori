@@ -1,8 +1,8 @@
+import { toolSurfaceLabel } from "../../../integrations/catalog"
 import {
   type ToolPermission,
-  type ToolProvider,
+  type ToolSurface,
 } from "../../../permissions/catalog"
-import { providerLabel } from "../../../providers/catalog"
 import { type RuntimeSkill } from "../sandbox/skills"
 import { type RuntimeToolCapability } from "./types"
 
@@ -17,12 +17,12 @@ const providerSkillNames = {
   notion: [],
   microsoftEmail: [],
   microsoftCalendar: [],
-} satisfies Record<ToolProvider, readonly string[]>
+} satisfies Record<ToolSurface, readonly string[]>
 
 const bundledSkillNames = new Set(Object.values(providerSkillNames).flat())
 
 export function getProviderSkillNames(
-  provider: ToolProvider,
+  provider: ToolSurface,
   permissions: readonly ToolPermission[]
 ) {
   if (!permissions.some((permission) => permission.access === "write")) {
@@ -33,12 +33,12 @@ export function getProviderSkillNames(
 }
 
 export function createRuntimeToolCapability(
-  provider: ToolProvider,
+  provider: ToolSurface,
   permissions: ToolPermission[]
 ): RuntimeToolCapability {
   return {
     provider,
-    label: providerLabel(provider),
+    label: toolSurfaceLabel(provider),
     tools: permissions.map((permission) => ({
       access: permission.access,
       description: permission.description,

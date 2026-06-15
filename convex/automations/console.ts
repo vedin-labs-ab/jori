@@ -9,9 +9,9 @@ import {
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
 import {
-  type IntegrationProvider,
-  isUserScopedProvider,
-} from "../providers/catalog"
+  type Integration,
+  isUserScopedIntegration,
+} from "../integrations/catalog"
 import { projectAccessForConsole } from "./access"
 import {
   createAutomation,
@@ -56,7 +56,7 @@ export const list = query({
   },
 })
 
-export const eventProviders = query({
+export const eventIntegrations = query({
   args: {
     tenantId: v.string(),
   },
@@ -65,10 +65,10 @@ export const eventProviders = query({
     const ownerId = requireClerkUserId(identity)
 
     return {
-      providers: await Promise.all(
+      integrations: await Promise.all(
         automationEventCatalog.map(async (definition) => ({
           provider: definition.provider,
-          connected: await hasActiveProviderIntegration(ctx, {
+          connected: await hasActiveIntegration(ctx, {
             provider: definition.provider,
             ownerId,
             tenantId: args.tenantId,
@@ -163,15 +163,15 @@ async function projectTriggerForConsole(
   }
 }
 
-async function hasActiveProviderIntegration(
+async function hasActiveIntegration(
   ctx: QueryCtx,
   args: {
-    provider: IntegrationProvider
+    provider: Integration
     ownerId: string
     tenantId: string
   }
 ) {
-  const integration = isUserScopedProvider(args.provider)
+  const integration = isUserScopedIntegration(args.provider)
     ? await ctx.db
         .query("integrations")
         .withIndex("by_tenant_and_provider_and_owner", (query) =>

@@ -7,7 +7,7 @@ import {
   legacyAutomationEventCriteria,
   normalizeAutomationEventCriteria,
 } from "./events"
-import { resolveEventIntegration } from "./providers"
+import { resolveEventIntegration } from "./integrations"
 import { getTimeTrigger, getTimeTriggerAt } from "./schedule/timing"
 import { type AutomationTriggerInput } from "./schema"
 

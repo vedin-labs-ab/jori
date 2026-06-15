@@ -1,6 +1,6 @@
 import { MiloLogo } from "@/shared/brand"
 import { IntegrationSurface } from "../integrations/connection/surface"
-import { type ToolPermissionController, type ToolProvider } from "./controller"
+import { type ToolPermissionController, type ToolSurface } from "./controller"
 import { PermissionSection } from "./section"
 
 export function IntegrationPermissions({
@@ -8,7 +8,7 @@ export function IntegrationPermissions({
   provider,
 }: {
   controller: ToolPermissionController
-  provider: Exclude<ToolProvider, "milo">
+  provider: Exclude<ToolSurface, "milo">
 }) {
   return (
     <PermissionSection

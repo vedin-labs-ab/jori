@@ -7,7 +7,7 @@ import {
   getToolPermission,
   type PermissionMode,
   resolveToolMode,
-  type ToolProvider,
+  type ToolSurface,
 } from "../../permissions/catalog"
 import { type Actor, createUserActor } from "../../shared/actor"
 import { postSlackMessage } from "../tools/slack"
@@ -30,7 +30,7 @@ export async function createPromptedToolApproval(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
   args: {
-    provider: ToolProvider
+    provider: ToolSurface
     tool: string
     args: Record<string, unknown>
   }
@@ -100,7 +100,7 @@ export async function createPromptedToolApproval(
 
 function findProviderIntegration(
   context: ApprovalBrokerContext,
-  provider: Exclude<ToolProvider, "milo">
+  provider: Exclude<ToolSurface, "milo">
 ) {
   return (
     context.integrations.find(
@@ -115,7 +115,7 @@ async function deliverSlackApproval(
   args: {
     approvalId: Id<"approvals">
     code: string
-    provider: ToolProvider
+    provider: ToolSurface
     tool: string
     summary: string
     expiresAt: number

@@ -1,5 +1,5 @@
 import { getAutomationSurfaceLabel } from "./catalog"
-import { findFuzzyAutomationSurfaceProvider } from "./fuzzy"
+import { findFuzzyAutomationSurfaceIntegration } from "./fuzzy"
 import {
   isMentionNameCharacter,
   type MentionMatch,
@@ -133,7 +133,7 @@ function matchFuzzyMention(
     return null
   }
 
-  const provider = findFuzzyAutomationSurfaceProvider(token.value)
+  const provider = findFuzzyAutomationSurfaceIntegration(token.value)
 
   return provider === null ? null : { end: token.end, provider, start }
 }
@@ -149,7 +149,7 @@ function matchFuzzyBare(
     return null
   }
 
-  const provider = findFuzzyAutomationSurfaceProvider(token.value, {
+  const provider = findFuzzyAutomationSurfaceIntegration(token.value, {
     allowPrefix: false,
   })
 

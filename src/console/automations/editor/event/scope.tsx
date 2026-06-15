@@ -1,7 +1,7 @@
 import {
   type AutomationEventDefinition,
+  type AutomationEventIntegration,
   type AutomationEventParameter,
-  type AutomationEventProvider,
 } from "@contracts/automations/events"
 import { Plus, X } from "lucide-react"
 import { useState } from "react"
@@ -25,7 +25,7 @@ export function EventScopeFields({
   values,
 }: {
   tenantId: string
-  provider: AutomationEventProvider
+  provider: AutomationEventIntegration
   event: AutomationEventDefinition
   onValuesChange: (values: Record<string, string>) => void
   values: Record<string, string>
@@ -150,7 +150,7 @@ function ScopeField({
   onRemove,
 }: {
   tenantId: string
-  provider: AutomationEventProvider
+  provider: AutomationEventIntegration
   parameter: AutomationEventParameter
   parameters: readonly AutomationEventParameter[]
   removable: boolean

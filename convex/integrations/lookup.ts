@@ -1,10 +1,10 @@
 import { v } from "convex/values"
 import { internalQuery } from "../_generated/server"
-import { integrationProviderValidator } from "../providers/catalog"
+import { integrationValidator } from "../integrations/catalog"
 
 export const activeByProviderExternal = internalQuery({
   args: {
-    provider: integrationProviderValidator,
+    provider: integrationValidator,
     externalId: v.string(),
   },
   handler: async (ctx, args) => {

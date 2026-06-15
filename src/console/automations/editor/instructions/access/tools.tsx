@@ -21,7 +21,7 @@ type AutomationSurfaceToolsDialogProps = {
   open: boolean
   permissions: AutomationPolicyPermissions
   provider: AutomationSurfaceFormValue["provider"]
-  providerLabel: string
+  toolSurfaceLabel: string
   tools: string[]
 }
 
@@ -31,7 +31,7 @@ export function AutomationSurfaceToolsDialog({
   open,
   permissions,
   provider,
-  providerLabel,
+  toolSurfaceLabel,
   tools,
 }: AutomationSurfaceToolsDialogProps) {
   return (
@@ -40,7 +40,7 @@ export function AutomationSurfaceToolsDialog({
         <DialogHeader className="grid grid-cols-[auto_1fr] gap-3 pr-8 text-left">
           <SurfaceLogo className="mt-0.5 size-6" provider={provider} />
           <div className="grid gap-1">
-            <DialogTitle>{providerLabel} tools</DialogTitle>
+            <DialogTitle>{toolSurfaceLabel} tools</DialogTitle>
             <DialogDescription>
               Choose the exact tools this automation can use.
             </DialogDescription>
@@ -131,16 +131,16 @@ export type AutomationSurfaceWithTools = AutomationSurfaceFormValue & {
 }
 
 export function MissingToolPermissionsMessage({
-  providerLabel,
+  toolSurfaceLabel,
 }: {
-  providerLabel: string
+  toolSurfaceLabel: string
 }) {
   return (
     <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-destructive text-xs">
       <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0" />
       <p>
-        Some {providerLabel} tools are no longer allowed for this integration.
-        Update this automation before saving.
+        Some {toolSurfaceLabel} tools are no longer allowed for this
+        integration. Update this automation before saving.
       </p>
     </div>
   )

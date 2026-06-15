@@ -13,10 +13,10 @@ export function integration(provider: string): Doc<"integrations"> {
     _creationTime: 0,
     tenantId: "tenant",
     provider,
-    scope: isUserScopedProvider(provider) ? "user" : "tenant",
-    ownerId: isUserScopedProvider(provider) ? "user" : undefined,
+    scope: isUserScopedIntegration(provider) ? "user" : "tenant",
+    ownerId: isUserScopedIntegration(provider) ? "user" : undefined,
     externalId: `${provider}-account`,
-    email: isUserScopedProvider(provider) ? "user@example.com" : undefined,
+    email: isUserScopedIntegration(provider) ? "user@example.com" : undefined,
     credentials: credentials(provider),
     status: "active",
     createdBy: "user",
@@ -25,7 +25,7 @@ export function integration(provider: string): Doc<"integrations"> {
   } as Doc<"integrations">
 }
 
-function isUserScopedProvider(provider: string) {
+function isUserScopedIntegration(provider: string) {
   return (
     provider === "gmail" ||
     provider === "googleCalendar" ||

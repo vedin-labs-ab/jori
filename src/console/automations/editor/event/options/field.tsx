@@ -1,4 +1,4 @@
-import { type AutomationEventProvider } from "@contracts/automations/events"
+import { type AutomationEventIntegration } from "@contracts/automations/events"
 import { useQuery } from "convex/react"
 import {
   Select,
@@ -10,32 +10,32 @@ import {
 import { api } from "../../../../../../convex/_generated/api"
 import { getAutomationSurfaceLabel } from "../../../access"
 import { SurfaceLogo } from "../../../access/logo"
-import { type EventProviderOption, getProviderOptions } from "."
+import { type EventIntegrationOption, getIntegrationOptions } from "."
 
-export function EventProviderField({
+export function EventIntegrationField({
   onValueChange,
   tenantId,
   value,
 }: {
-  onValueChange: (provider: AutomationEventProvider) => void
+  onValueChange: (provider: AutomationEventIntegration) => void
   tenantId: string
-  value: AutomationEventProvider
+  value: AutomationEventIntegration
 }) {
-  const connections = useQuery(api.automations.console.eventProviders, {
+  const connections = useQuery(api.automations.console.eventIntegrations, {
     tenantId,
   })
-  const options = getProviderOptions(connections)
+  const options = getIntegrationOptions(connections)
 
   return (
     <Select
       onValueChange={(provider) =>
-        onValueChange(provider as AutomationEventProvider)
+        onValueChange(provider as AutomationEventIntegration)
       }
       value={value}
     >
       <SelectTrigger id="automation-event-provider" className="w-full">
         <SelectValue>
-          <ProviderSelectValue provider={value} />
+          <IntegrationSelectValue provider={value} />
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="z-[70]">
@@ -45,7 +45,7 @@ export function EventProviderField({
             key={option.provider}
             value={option.provider}
           >
-            <ProviderSelectItem option={option} />
+            <IntegrationSelectItem option={option} />
           </SelectItem>
         ))}
       </SelectContent>
@@ -53,10 +53,10 @@ export function EventProviderField({
   )
 }
 
-function ProviderSelectValue({
+function IntegrationSelectValue({
   provider,
 }: {
-  provider: AutomationEventProvider
+  provider: AutomationEventIntegration
 }) {
   return (
     <span className="pointer-events-none flex min-w-0 items-center gap-1.5">
@@ -66,7 +66,7 @@ function ProviderSelectValue({
   )
 }
 
-function ProviderSelectItem({ option }: { option: EventProviderOption }) {
+function IntegrationSelectItem({ option }: { option: EventIntegrationOption }) {
   return (
     <span className="pointer-events-none flex min-w-0 flex-1 items-center justify-between gap-3 pr-5">
       <span className="flex min-w-0 items-center gap-2">

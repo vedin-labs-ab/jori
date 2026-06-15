@@ -35,7 +35,7 @@ beforeEach(() => {
     releasePointerCapture: () => undefined,
     scrollIntoView: () => undefined,
   })
-  convexMocks.useQuery.mockReturnValue(allProviderConnections())
+  convexMocks.useQuery.mockReturnValue(allIntegrationConnections())
 })
 
 export function renderEventFields(
@@ -55,25 +55,27 @@ export function renderEventFields(
   )
 }
 
-export function providerConnections(
-  connectedProvider?: (typeof providers)[number]
+export function integrationConnections(
+  connectedIntegration?: (typeof providers)[number]
 ) {
   return {
-    providers: providers.map((provider) => ({
+    integrations: providers.map((provider) => ({
       provider,
-      connected: provider === connectedProvider,
+      connected: provider === connectedIntegration,
     })),
   }
 }
 
-export function mockProviderConnections(
-  connectedProvider?: (typeof providers)[number]
+export function mockIntegrationConnections(
+  connectedIntegration?: (typeof providers)[number]
 ) {
-  convexMocks.useQuery.mockReturnValue(providerConnections(connectedProvider))
+  convexMocks.useQuery.mockReturnValue(
+    integrationConnections(connectedIntegration)
+  )
 }
 
-function allProviderConnections() {
+function allIntegrationConnections() {
   return {
-    providers: providers.map((provider) => ({ provider, connected: true })),
+    integrations: providers.map((provider) => ({ provider, connected: true })),
   }
 }

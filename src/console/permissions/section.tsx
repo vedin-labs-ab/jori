@@ -15,7 +15,7 @@ import {
   type ToolAccess,
   type ToolPermission,
   type ToolPermissionController,
-  type ToolProvider,
+  type ToolSurface,
 } from "./controller"
 import { PermissionRow } from "./row"
 
@@ -27,14 +27,14 @@ export function PermissionSection({
 }: {
   controller: ToolPermissionController
   emptyLabel: string
-  provider: ToolProvider
+  provider: ToolSurface
   title: string
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const permissions =
     controller.permissions === undefined || controller.permissions === null
       ? []
-      : controller.getProviderPermissions(provider)
+      : controller.getSurfacePermissions(provider)
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -80,7 +80,7 @@ function PermissionContent({
 }: {
   controller: ToolPermissionController
   emptyLabel: string
-  provider: ToolProvider
+  provider: ToolSurface
 }) {
   if (controller.permissions === undefined) {
     return <LoadingMessage label="Loading permissions" />
@@ -97,7 +97,7 @@ function PermissionContent({
     )
   }
 
-  const permissions = controller.getProviderPermissions(provider)
+  const permissions = controller.getSurfacePermissions(provider)
 
   if (permissions.length === 0) {
     return <p className="text-xs text-muted-foreground">{emptyLabel}</p>

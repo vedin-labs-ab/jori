@@ -6,7 +6,7 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
-import { providerValidator } from "../providers/catalog"
+import { toolSurfaceValidator } from "../integrations/catalog"
 import { actorValidator } from "../shared/actor"
 import { approvalDecision, approvalDelivery, approvalHandoff } from "./schema"
 
@@ -16,7 +16,7 @@ export const create = internalMutation({
   args: {
     tenantId: v.string(),
     executionId: v.id("executions"),
-    provider: providerValidator,
+    provider: toolSurfaceValidator,
     tool: v.string(),
     args: v.any(),
     summary: v.string(),

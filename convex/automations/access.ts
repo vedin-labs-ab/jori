@@ -1,6 +1,7 @@
 import { type Infer } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { type Integration } from "../integrations/catalog"
 import {
   getToolPermission,
   isUnattendedToolMode,
@@ -9,8 +10,7 @@ import {
   resolveToolModes,
 } from "../permissions/catalog"
 import { listPermissionOverrides } from "../permissions/read"
-import { type IntegrationProvider } from "../providers/catalog"
-import { providerLabels, resolveEventIntegration } from "./providers"
+import { integrationLabels, resolveEventIntegration } from "./integrations"
 import { type access, type accessInput } from "./schema"
 
 export type AutomationAccess = Infer<typeof access>
@@ -54,7 +54,7 @@ export async function requireAutomationAccessPolicy(
   ctx: QueryLikeCtx,
   args: {
     integrations: Array<{
-      provider: IntegrationProvider
+      provider: Integration
       tools: string[]
     }>
     tenantId: string
@@ -78,7 +78,7 @@ export async function requireAutomationAccessPolicy(
         permission.provider !== integration.provider
       ) {
         throw new Error(
-          `Unknown ${providerLabels[integration.provider]} tool: ${tool}`
+          `Unknown ${integrationLabels[integration.provider]} tool: ${tool}`
         )
       }
 
@@ -139,7 +139,7 @@ export async function projectAccessForConsole(
   access: AutomationAccess
 ) {
   const surfaces: Array<{
-    provider: IntegrationProvider
+    provider: Integration
     access: Exclude<AccessLevel, "none">
     tools: string[]
   }> = []
@@ -171,7 +171,7 @@ export async function projectAccessForConsole(
 function normalizeAccessIntegrations(
   integrations: AutomationAccessInput["integrations"]
 ) {
-  const toolsByProvider = new Map<IntegrationProvider, Set<string>>()
+  const toolsByProvider = new Map<Integration, Set<string>>()
 
   for (const integration of integrations) {
     const tools = uniqueTools(integration.tools)
@@ -238,10 +238,12 @@ function permissionModeLabel(mode: PermissionMode) {
 
 function sortSurfaces<
   Surface extends {
-    provider: IntegrationProvider
+    provider: Integration
   },
 >(surfaces: Surface[]) {
   return [...surfaces].sort((left, right) =>
-    providerLabels[left.provider].localeCompare(providerLabels[right.provider])
+    integrationLabels[left.provider].localeCompare(
+      integrationLabels[right.provider]
+    )
   )
 }

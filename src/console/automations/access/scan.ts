@@ -1,15 +1,15 @@
 import {
-  type AutomationSurfaceProvider,
-  automationSurfaceProviders,
+  type AutomationSurfaceIntegration,
+  automationSurfaceIntegrations,
 } from "./catalog"
 
 export type MentionMatch = {
   end: number
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
   start: number
 }
 
-const mentionAliases = automationSurfaceProviders
+const mentionAliases = automationSurfaceIntegrations
   .flatMap((item) =>
     [...item.aliases, item.label].map((alias) => ({
       alias: alias.toLowerCase(),

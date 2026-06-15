@@ -1,5 +1,5 @@
 import {
-  type AutomationEventProvider,
+  type AutomationEventIntegration,
   getDefaultAutomationEvent,
 } from "@contracts/automations/events"
 import { type FunctionReturnType } from "convex/server"
@@ -39,7 +39,7 @@ export type AutomationFormValues = {
   monthDay: string
   cron: string
   runAt: string
-  eventProvider: AutomationEventProvider
+  eventProvider: AutomationEventIntegration
   event: string
   eventCriteria: Record<string, string>
   webSearch: boolean

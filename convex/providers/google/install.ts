@@ -7,7 +7,7 @@ import {
 import { upsertIdentity } from "../../identity/identities"
 import { readRefreshToken } from "../credentials"
 import { buildInstallState } from "../install"
-import { type GoogleSurfaceProvider } from "./config"
+import { type GoogleIntegration } from "./config"
 import {
   findExistingGoogleIntegration,
   getGoogleIntegrationScope,
@@ -108,7 +108,7 @@ export const recordOAuthInstallation = internalMutation({
 
 function createGoogleIntegrationValues(
   args: {
-    provider: GoogleSurfaceProvider
+    provider: GoogleIntegration
     tenantId: string
     createdBy: string
     profile: {
@@ -194,7 +194,7 @@ export const updateOAuthCredentials = internalMutation({
 
 async function createInstallState(
   ctx: MutationCtx,
-  provider: GoogleSurfaceProvider,
+  provider: GoogleIntegration,
   args: {
     tenantId: string
     returnUrl: string

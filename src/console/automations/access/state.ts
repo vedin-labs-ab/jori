@@ -2,7 +2,7 @@ import { type ToolPermission } from "../../permissions/controller"
 import {
   type AutomationSurfaceAccess,
   type AutomationSurfaceFormValue,
-  type AutomationSurfaceProvider,
+  type AutomationSurfaceIntegration,
   getAutomationSurfaceLabel,
 } from "./catalog"
 import { findAutomationSurfaceMentions } from "./mentions"
@@ -14,7 +14,7 @@ import {
 
 export function insertAutomationSurfaceMention(
   text: string,
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
 ) {
   if (findAutomationSurfaceMentions(text).includes(provider)) {
     return text
@@ -28,7 +28,7 @@ export function insertAutomationSurfaceMention(
 
 export function removeAutomationSurfaceMention(
   text: string,
-  provider: AutomationSurfaceProvider
+  provider: AutomationSurfaceIntegration
 ) {
   const matches = readAutomationSurfaceMentionMatches(text)
 
