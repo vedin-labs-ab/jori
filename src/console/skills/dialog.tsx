@@ -6,7 +6,18 @@ import {
 import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+} from "@/components/ui/combobox"
 import {
   Dialog,
   DialogContent,
@@ -24,6 +35,15 @@ type SkillTextFieldName = Exclude<
   keyof SkillFormValues,
   "associatedIntegrations"
 >
+
+const skillCategoryOptions = [
+  "Communication",
+  "Engineering",
+  "Writing",
+  "Research",
+  "Documents",
+  "General",
+]
 
 export function SkillDialog({
   error,
@@ -46,18 +66,6 @@ export function SkillDialog({
 }) {
   function updateValue(name: SkillTextFieldName, value: string) {
     onValuesChange({ ...values, [name]: value })
-  }
-
-  function updateAssociatedIntegration(
-    integration: Integration,
-    isSelected: boolean
-  ) {
-    onValuesChange({
-      ...values,
-      associatedIntegrations: isSelected
-        ? [...values.associatedIntegrations, integration]
-        : values.associatedIntegrations.filter((item) => item !== integration),
-    })
   }
 
   return (
@@ -90,17 +98,15 @@ export function SkillDialog({
             placeholder="customer-support"
             value={values.name}
           />
-          <SkillTextField
-            id="skill-category"
-            label="Category"
+          <SkillCategoryField
             onChange={(value) => updateValue("category", value)}
-            placeholder="Support"
-            required
             value={values.category}
           />
           <AssociatedIntegrationsField
+            onChange={(associatedIntegrations) =>
+              onValuesChange({ ...values, associatedIntegrations })
+            }
             selectedIntegrations={values.associatedIntegrations}
-            onSelectionChange={updateAssociatedIntegration}
           />
           <SkillDescriptionField
             onChange={(value) => updateValue("description", value)}
@@ -127,6 +133,46 @@ export function SkillDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function SkillCategoryField({
+  onChange,
+  value,
+}: {
+  onChange: (value: string) => void
+  value: string
+}) {
+  return (
+    <div className="grid gap-2">
+      <Label htmlFor="skill-category">Category</Label>
+      <Combobox
+        autoHighlight
+        inputValue={value}
+        items={skillCategoryOptions}
+        onInputValueChange={onChange}
+        onValueChange={(category) => onChange(category ?? "")}
+        value={skillCategoryOptions.includes(value) ? value : null}
+      >
+        <ComboboxInput
+          className="w-full"
+          id="skill-category"
+          placeholder="Select or type a category"
+          required
+          showClear={value !== ""}
+        />
+        <ComboboxContent>
+          <ComboboxEmpty>No categories found.</ComboboxEmpty>
+          <ComboboxList>
+            {(category: string) => (
+              <ComboboxItem key={category} value={category}>
+                {category}
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+    </div>
   )
 }
 
@@ -160,35 +206,52 @@ function SkillTextField({
 }
 
 function AssociatedIntegrationsField({
-  onSelectionChange,
+  onChange,
   selectedIntegrations,
 }: {
-  onSelectionChange: (integration: Integration, isSelected: boolean) => void
+  onChange: (integrations: Integration[]) => void
   selectedIntegrations: Integration[]
 }) {
   return (
     <div className="grid gap-2">
-      <Label>Associated integrations</Label>
-      <div className="grid gap-2 rounded-md border p-3 sm:grid-cols-2">
-        {integrations.map((integration) => {
-          const checkboxId = `skill-integration-${integration}`
-
-          return (
-            <div className="flex items-center gap-2" key={integration}>
-              <Checkbox
-                id={checkboxId}
-                checked={selectedIntegrations.includes(integration)}
-                onCheckedChange={(checked) =>
-                  onSelectionChange(integration, checked === true)
-                }
-              />
-              <Label className="font-normal text-xs" htmlFor={checkboxId}>
-                {integrationLabel(integration)}
-              </Label>
-            </div>
-          )
-        })}
+      <div className="flex items-center gap-1.5">
+        <Label htmlFor="skill-integrations">Associated integrations</Label>
+        <span className="text-muted-foreground text-xs">Optional</span>
       </div>
+      <Combobox
+        items={integrations}
+        multiple
+        onValueChange={onChange}
+        value={selectedIntegrations}
+      >
+        <ComboboxChips className="w-full">
+          <ComboboxValue>
+            {selectedIntegrations.map((integration) => (
+              <ComboboxChip key={integration}>
+                {integrationLabel(integration)}
+              </ComboboxChip>
+            ))}
+          </ComboboxValue>
+          <ComboboxChipsInput
+            id="skill-integrations"
+            placeholder="Add integrations"
+          />
+        </ComboboxChips>
+        <ComboboxContent>
+          <ComboboxEmpty>No integrations found.</ComboboxEmpty>
+          <ComboboxList>
+            {(integration: Integration) => (
+              <ComboboxItem key={integration} value={integration}>
+                {integrationLabel(integration)}
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+      <p className="text-muted-foreground text-xs">
+        Used for internal categorization and filtering. It does not change how
+        the skill runs.
+      </p>
     </div>
   )
 }
