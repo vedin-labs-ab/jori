@@ -1,3 +1,4 @@
+import { integrationLabel } from "@contracts/integrations"
 import { type Skill } from "./types"
 
 export const emptyGroupedSkills = {
@@ -26,5 +27,13 @@ export function filterSkills(skills: Skill[], searchTerm: string) {
 }
 
 function skillSearchText(skill: Skill) {
-  return [skill.name, skill.description, skill.body].join(" ").toLowerCase()
+  return [
+    skill.name,
+    skill.category,
+    skill.description,
+    skill.body,
+    ...skill.associatedIntegrations.map(integrationLabel),
+  ]
+    .join(" ")
+    .toLowerCase()
 }

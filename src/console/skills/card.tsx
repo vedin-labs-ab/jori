@@ -2,16 +2,10 @@ import { BookOpenText, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
-import { cn } from "@/lib/utils"
+import { IntegrationLogoStack } from "../integrations/logo"
 import { relativeTime } from "../runs/format"
-import { ProviderLogo } from "../runs/row/source"
 import { SkillManagementMenu } from "./menu"
-import {
-  type AssociatedProvider,
-  getAssociatedProviders,
-  getSkillIcon,
-  getSkillIconClassName,
-} from "./metadata"
+import { getSkillIcon } from "./metadata"
 import { type Skill } from "./types"
 
 export function SkillCard({
@@ -32,8 +26,7 @@ export function SkillCard({
   skill: Skill
 }) {
   const isGlobal = skill.scope === "global"
-  const providers = getAssociatedProviders(skill)
-  const Icon = getSkillIcon(skill)
+  const Icon = getSkillIcon(skill.category)
 
   return (
     <Card className="min-h-56 gap-0 py-0 transition-shadow duration-200 hover:shadow-sm">
@@ -66,7 +59,13 @@ export function SkillCard({
       </div>
 
       <div className="mt-auto flex min-h-14 flex-wrap items-center justify-between gap-3 border-t bg-muted/25 px-4 py-3">
-        <ProviderLogos providers={providers} />
+        <IntegrationLogoStack
+          emptyFallback={
+            <span className="text-muted-foreground text-sm">-</span>
+          }
+          integrations={skill.associatedIntegrations}
+          size="md"
+        />
         <div className="ml-auto flex items-center gap-3">
           {skill.scope === "tenant" ? (
             <span className="whitespace-nowrap text-muted-foreground text-xs">
@@ -91,11 +90,10 @@ export function SkillCard({
 function SkillIcon({ icon: Icon, skill }: { icon: LucideIcon; skill: Skill }) {
   return (
     <div
-      className={cn(
-        "flex size-10 shrink-0 items-center justify-center rounded-lg",
-        getSkillIconClassName(skill)
-      )}
+      className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted text-foreground"
+      title={skill.category}
     >
+      <span className="sr-only">{skill.category}</span>
       <Icon className="size-5" />
     </div>
   )
@@ -119,27 +117,6 @@ function GlobalSkillToggle({
         disabled={isPending || onToggle === undefined}
         onCheckedChange={(enabled) => onToggle?.(skill, enabled)}
       />
-    </div>
-  )
-}
-
-function ProviderLogos({ providers }: { providers: AssociatedProvider[] }) {
-  if (providers.length === 0) {
-    return <span className="text-muted-foreground text-sm">-</span>
-  }
-
-  return (
-    <div className="flex min-w-0 items-center gap-2">
-      {providers.map((provider) => (
-        <span
-          className="inline-flex size-5 items-center justify-center"
-          key={provider.surface}
-          title={provider.label}
-        >
-          <ProviderLogo className="size-4" surface={provider.surface} />
-          <span className="sr-only">{provider.label}</span>
-        </span>
-      ))}
     </div>
   )
 }

@@ -38,7 +38,8 @@ export function SkillContent({
       {view !== "global" ? (
         <SkillSection
           description="Editable skills created and managed by your organization."
-          emptyLabel={organizationEmptyLabel(isFiltering)}
+          emptyDescription={organizationEmptyDescription(isFiltering)}
+          emptyTitle={organizationEmptyTitle(isFiltering)}
           onDelete={onDelete}
           onEdit={onEdit}
           onView={onView}
@@ -50,7 +51,8 @@ export function SkillContent({
       {view !== "tenant" ? (
         <SkillSection
           description="System-defined skills enabled by default for your organization."
-          emptyLabel={globalEmptyLabel(isFiltering)}
+          emptyDescription={globalEmptyDescription(isFiltering)}
+          emptyTitle={globalEmptyTitle(isFiltering)}
           onToggleGlobalSkill={onToggleGlobalSkill}
           onView={onView}
           pendingSkillId={pendingGlobalSkillId}
@@ -62,12 +64,22 @@ export function SkillContent({
   )
 }
 
-function organizationEmptyLabel(isFiltering: boolean) {
-  return isFiltering
-    ? "No matching organization skills."
-    : "No organization skills yet. Add one to teach Milo how your team works."
+function organizationEmptyTitle(isFiltering: boolean) {
+  return isFiltering ? "No matching organization skills" : "No skills yet"
 }
 
-function globalEmptyLabel(isFiltering: boolean) {
-  return isFiltering ? "No matching global skills." : "No global skills yet."
+function organizationEmptyDescription(isFiltering: boolean) {
+  return isFiltering
+    ? "Try a different search term."
+    : "Add one to teach Milo how your team works."
+}
+
+function globalEmptyTitle(isFiltering: boolean) {
+  return isFiltering ? "No matching global skills" : "No global skills"
+}
+
+function globalEmptyDescription(isFiltering: boolean) {
+  return isFiltering
+    ? "Try a different search term."
+    : "Global skills will appear here when they are available."
 }

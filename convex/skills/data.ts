@@ -1,23 +1,36 @@
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { type Integration, integrations } from "../integrations/catalog"
 
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const skillNameMaxLength = 64
+const skillCategoryMaxLength = 64
 const skillDescriptionMaxLength = 320
 const skillBodyMaxLength = 24_000
+const integrationNames = new Set<string>(integrations)
 
 export function normalizeSkillInput(input: {
+  associatedIntegrations: readonly string[]
+  category: string
   name: string
   description: string
   body: string
 }) {
   const name = input.name.trim().toLowerCase()
+  const category = input.category.trim()
   const description = input.description.trim()
   const body = input.body.trim()
+  const associatedIntegrations = normalizeAssociatedIntegrations(
+    input.associatedIntegrations
+  )
 
   if (!skillNamePattern.test(name) || name.length > skillNameMaxLength) {
     throw new Error(
       "Skill name must use lowercase letters, numbers, and hyphens."
     )
+  }
+
+  if (category.length === 0 || category.length > skillCategoryMaxLength) {
+    throw new Error("Skill category must be 1–64 characters.")
   }
 
   if (
@@ -31,7 +44,7 @@ export function normalizeSkillInput(input: {
     throw new Error("Skill instructions must be 1–24,000 characters.")
   }
 
-  return { name, description, body }
+  return { name, category, description, associatedIntegrations, body }
 }
 
 export async function requireUniqueTenantSkillName(
@@ -91,4 +104,22 @@ export function mapSkillSettingsByName<
   Setting extends { skillName: string; enabled: boolean },
 >(settings: Setting[]) {
   return new Map(settings.map((setting) => [setting.skillName, setting]))
+}
+
+function normalizeAssociatedIntegrations(
+  values: readonly string[]
+): Integration[] {
+  const result: Integration[] = []
+
+  for (const value of values) {
+    if (!integrationNames.has(value)) {
+      throw new Error("Skill integration is not supported.")
+    }
+
+    if (!result.includes(value as Integration)) {
+      result.push(value as Integration)
+    }
+  }
+
+  return result
 }

@@ -2,12 +2,16 @@ import { readdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 
 type Skill = {
+  associatedIntegrations: string[]
+  category: string
   name: string
   description: string
   body: string
 }
 
-type Frontmatter = Partial<Pick<Skill, "name" | "description">>
+type Frontmatter = Partial<
+  Pick<Skill, "associatedIntegrations" | "category" | "name" | "description">
+>
 
 const root = process.cwd()
 const skillsDir = path.join(root, "skills")
@@ -86,13 +90,19 @@ function parseSkill(content: string, filePath: string): Skill {
   const metadata = parseFrontmatter(match[1], filePath)
   const body = match[2].trim()
 
-  if (metadata.name === undefined || metadata.description === undefined) {
-    throw new Error(`${filePath} must define name and description`)
+  if (
+    metadata.name === undefined ||
+    metadata.description === undefined ||
+    metadata.category === undefined
+  ) {
+    throw new Error(`${filePath} must define name, description, and category`)
   }
 
   return {
     name: metadata.name,
     description: metadata.description,
+    category: metadata.category,
+    associatedIntegrations: metadata.associatedIntegrations ?? [],
     body,
   }
 }
@@ -110,12 +120,25 @@ function parseFrontmatter(value: string, filePath: string): Frontmatter {
     const key = line.slice(0, index).trim()
     const rawValue = line.slice(index + 1).trim()
 
-    if (key === "name" || key === "description") {
+    if (key === "associatedIntegrations") {
+      result.associatedIntegrations = parseList(rawValue)
+      continue
+    }
+
+    if (key === "name" || key === "description" || key === "category") {
       result[key] = rawValue.replace(/^["']|["']$/g, "")
     }
   }
 
   return result
+}
+
+function parseList(value: string) {
+  return value
+    .replace(/^\[|\]$/g, "")
+    .split(",")
+    .map((item) => item.trim().replace(/^["']|["']$/g, ""))
+    .filter((item) => item.length > 0)
 }
 
 function sortObject<Value>(

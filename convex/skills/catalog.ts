@@ -7,6 +7,7 @@ import {
 } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
+import { integrationValidator } from "../integrations/catalog"
 import { skills as globalSkillSeed } from "../prompts/generated"
 import {
   listSkillSettings,
@@ -17,6 +18,8 @@ import {
 } from "./data"
 
 type SeedSkill = {
+  associatedIntegrations: readonly string[]
+  category: string
   name: string
   description: string
   body: string
@@ -57,6 +60,8 @@ export const list = query({
         tenantId: skill.tenantId,
         name: skill.name,
         description: skill.description,
+        category: skill.category ?? "General",
+        associatedIntegrations: skill.associatedIntegrations ?? [],
         body: skill.body,
         createdAt: skill.createdAt,
         updatedAt: skill.updatedAt,
@@ -74,6 +79,8 @@ export const create = mutation({
   args: {
     tenantId: v.string(),
     name: v.string(),
+    category: v.string(),
+    associatedIntegrations: v.array(integrationValidator),
     description: v.string(),
     body: v.string(),
   },
@@ -89,6 +96,8 @@ export const create = mutation({
     return await ctx.db.insert("skills", {
       tenantId: args.tenantId,
       name: input.name,
+      category: input.category,
+      associatedIntegrations: input.associatedIntegrations,
       description: input.description,
       body: input.body,
       createdBy: userId,
@@ -103,6 +112,8 @@ export const update = mutation({
     tenantId: v.string(),
     skillId: v.id("skills"),
     name: v.string(),
+    category: v.string(),
+    associatedIntegrations: v.array(integrationValidator),
     description: v.string(),
     body: v.string(),
   },
@@ -123,6 +134,8 @@ export const update = mutation({
 
     await ctx.db.patch(args.skillId, {
       name: input.name,
+      category: input.category,
+      associatedIntegrations: input.associatedIntegrations,
       description: input.description,
       body: input.body,
       updatedAt: Date.now(),
@@ -203,6 +216,8 @@ export const syncGlobalSkills = internalMutation({
         await ctx.db.insert("skills", {
           tenantId: null,
           name: input.name,
+          category: input.category,
+          associatedIntegrations: input.associatedIntegrations,
           description: input.description,
           body: input.body,
           createdAt: now,
@@ -212,6 +227,8 @@ export const syncGlobalSkills = internalMutation({
       }
 
       await ctx.db.patch(existingSkill._id, {
+        category: input.category,
+        associatedIntegrations: input.associatedIntegrations,
         description: input.description,
         body: input.body,
         updatedAt: now,
