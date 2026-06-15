@@ -10,8 +10,12 @@ import {
 import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
 import { createPromptTime } from "../../../prompts/time"
+import {
+  readDataNumber,
+  readDataObject,
+  readDataString,
+} from "../../../shared/data"
 import { type CodexRuntimeInput, type MessageProvider } from "../codex"
-import { readDataNumber, readDataObject, readDataString } from "../data"
 import {
   type ApprovalContinuation,
   createApprovalContinuationPrompt,

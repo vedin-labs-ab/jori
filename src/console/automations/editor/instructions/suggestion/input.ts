@@ -5,9 +5,9 @@ import {
   type AutomationSurfaceProvider,
   findCompletedAutomationSurfaceMention,
   isMentionNameCharacter,
-} from "../../../access"
-import { type AutomationPolicyPermissions } from "../../../access/policy"
-import { getDefaultAutomationSurfaceTools } from "../../../access/tools"
+} from "../../../surface"
+import { type AutomationPolicyPermissions } from "../../../surface/policy"
+import { getDefaultAutomationSurfaceTools } from "../../../surface/tools"
 import {
   automationSurfaceNodeName,
   readAutomationSurfaceToolsForProvider,

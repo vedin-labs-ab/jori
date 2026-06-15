@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { type AutomationSurfaceProvider } from "../../../access"
+import { type AutomationSurfaceProvider } from "../../../surface"
 import {
   createAutomationInstructionDocument,
   serializeAutomationInstructionDocument,

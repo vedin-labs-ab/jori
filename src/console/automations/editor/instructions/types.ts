@@ -1,7 +1,7 @@
 import { type Editor } from "@tiptap/react"
 import { type MutableRefObject } from "react"
-import { type AutomationSurfaceFormValue } from "../../access"
-import { type AutomationPolicyPermissions } from "../../access/policy"
+import { type AutomationSurfaceFormValue } from "../../surface"
+import { type AutomationPolicyPermissions } from "../../surface/policy"
 import { type AutomationInstructionsValue } from "./document"
 import { type InstructionSuggestionState } from "./suggestion/suggest"
 

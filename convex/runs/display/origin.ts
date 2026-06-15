@@ -1,10 +1,14 @@
 import { type Doc } from "../../_generated/dataModel"
 import { slackChannelUrl, slackMessageUrl } from "../../providers/slack/links"
 import {
+  readDataNumber,
+  readDataObject,
+  readDataString,
+} from "../../shared/data"
+import {
   githubIssueLikeLabel,
   issueIdentifierLabel,
 } from "../../sources/metadata"
-import { readDataNumber, readDataObject, readDataString } from "../agent/data"
 import { commentLabel, compactDetails, detail, snippet } from "./detail"
 
 export function originDetails(input: {

@@ -1,17 +1,17 @@
 import { type Infer } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
-import { getAutomationEventDefinition } from "../automations/events"
+import { type Doc } from "../../_generated/dataModel"
+import { getAutomationEventDefinition } from "../../automations/events"
+import { providerLabel } from "../../providers/catalog"
+import { type SourceMetadataItem } from "../../sources/schema"
+import { type runDisplay } from "../schema"
 import {
   compactDetails,
   detail,
   type ExecutionDetail,
   uniqueDetails,
-} from "../executions/console/detail"
-import { originDetails } from "../executions/console/origin"
-import { cronScheduleLabel } from "../executions/console/schedule"
-import { providerLabel } from "../providers/catalog"
-import { type SourceMetadataItem } from "../sources/schema"
-import { type runDisplay } from "./schema"
+} from "./detail"
+import { originDetails } from "./origin"
+import { cronScheduleLabel } from "./schedule"
 
 type RunDisplay = Infer<typeof runDisplay>
 

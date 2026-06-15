@@ -1,5 +1,9 @@
 import { type Doc } from "../../_generated/dataModel"
-import { compactDetails, detail, type ExecutionDetailGroup } from "./detail"
+import {
+  compactDetails,
+  detail,
+  type ExecutionDetailGroup,
+} from "../../runs/display/detail"
 
 type ToolSnapshot = Doc<"executions">["toolSnapshot"]
 

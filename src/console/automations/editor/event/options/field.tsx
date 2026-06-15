@@ -8,8 +8,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { api } from "../../../../../../convex/_generated/api"
-import { getAutomationSurfaceLabel } from "../../../access"
-import { SurfaceLogo } from "../../../access/logo"
+import { getAutomationSurfaceLabel } from "../../../surface"
+import { SurfaceLogo } from "../../../surface/logo"
 import { type EventProviderOption, getProviderOptions } from "."
 
 export function EventProviderField({
