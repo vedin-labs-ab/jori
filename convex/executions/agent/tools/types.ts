@@ -30,7 +30,9 @@ export type RuntimeToolCapability = {
 export type RuntimeToolCapabilityTool = Pick<
   ToolPermission,
   "access" | "description" | "label" | "tool"
->
+> & {
+  requiresApproval?: boolean
+}
 
 export type McpServerConfig = {
   name: string

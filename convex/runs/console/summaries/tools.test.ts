@@ -86,6 +86,33 @@ test("shows stored tools for mention and reply runs", async () => {
   }
 })
 
+test("counts approval-required tools in mention and reply runs", async () => {
+  for (const kind of ["mention", "reply"] as const) {
+    const summary = await summarizeExecution(
+      fakeQueryCtx({
+        integration: slackIntegration(),
+        message: message(kind),
+        run: {
+          _id: "run",
+          _creationTime: 0,
+          tenantId: "tenant",
+          reason: { type: "message", messageId: "message", kind },
+          title: "Please summarize this thread.",
+          task: "Please summarize this thread.",
+          display: messageDisplay({
+            kind,
+            metadata: [{ type: "channel", label: "C123" }],
+          }),
+          createdAt: 0,
+        },
+      }),
+      execution({ toolSnapshot: slackToolSnapshot(true, true) })
+    )
+
+    expect(summary.details).toContainEqual(slackToolsDetail(true))
+  }
+})
+
 function slackIntegration() {
   return {
     _id: "integration",
@@ -146,28 +173,28 @@ function execution(overrides: Record<string, unknown>) {
   } as Parameters<typeof summarizeExecution>[1]
 }
 
-function slackToolSnapshot(webSearch = true) {
+function slackToolSnapshot(webSearch = true, requiresApproval = false) {
   return {
     groups: [
       {
         provider: "slack",
         label: "Slack",
-        tools: slackTools(),
+        tools: slackTools(requiresApproval),
       },
     ],
     webSearch,
   }
 }
 
-function slackToolsDetail() {
+function slackToolsDetail(requiresApproval = false) {
   return {
     type: "tools",
-    label: "Slack · Read 1 · Write 1",
+    label: `Slack · Read 1 · Write 1${requiresApproval ? " · Approval 1" : ""}`,
     groups: [
       {
         type: "slack",
         label: "Slack",
-        tools: slackTools(),
+        tools: slackTools(requiresApproval),
       },
     ],
   }
@@ -180,7 +207,7 @@ function webSearchDetail(label: "Allowed" | "Blocked") {
   }
 }
 
-function slackTools() {
+function slackTools(requiresApproval = false) {
   return [
     {
       access: "write" as const,
@@ -192,6 +219,7 @@ function slackTools() {
       access: "read" as const,
       description: "Read Slack channel messages.",
       label: "Read channel history",
+      ...(requiresApproval ? { requiresApproval: true } : {}),
       tool: "conversations_history",
     },
   ]

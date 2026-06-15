@@ -78,6 +78,7 @@ export type ExecutionDetailTool = {
   access: "read" | "write"
   description: string
   label: string
+  requiresApproval?: boolean
   tool: string
 }
 
