@@ -30,7 +30,7 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
 
   return (
     <Tabs defaultValue="tenant" className="gap-4">
-      <TabsList className="w-fit">
+      <TabsList className="w-fit !h-7">
         <TabsTrigger value="tenant">Organization</TabsTrigger>
         <TabsTrigger value="user">Personal</TabsTrigger>
       </TabsList>
