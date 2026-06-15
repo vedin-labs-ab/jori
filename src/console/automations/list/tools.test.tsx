@@ -26,7 +26,7 @@ test("shows three integration logos when exactly three surfaces are connected", 
     null
   )
   expect(screen.getByText("3 tools")).toBeDefined()
-  expect(screen.getByText("allowed").className).toContain("text-primary")
+  expectWebStatus(container, "allowed", "text-primary")
 })
 
 test("collapses additional integrations into a tooltip count", async () => {
@@ -54,10 +54,9 @@ test("collapses additional integrations into a tooltip count", async () => {
 })
 
 test("shows blocked web search state", () => {
-  renderToolSummary(["slack"], false)
+  const { container } = renderToolSummary(["slack"], false)
 
-  expect(screen.getAllByText(hasTextContent("Web blocked"))).not.toHaveLength(0)
-  expect(screen.getByText("blocked").className).toContain("text-destructive")
+  expectWebStatus(container, "blocked", "text-destructive")
 })
 
 function renderToolSummary(
@@ -91,4 +90,24 @@ function automationWithSurfaces(
 function hasTextContent(text: string) {
   return (_content: string, element: Element | null) =>
     element?.textContent === text
+}
+
+function expectWebStatus(
+  container: HTMLElement,
+  state: "allowed" | "blocked",
+  stateClassName: string
+) {
+  const label = screen
+    .getAllByText(hasTextContent(`Web ${state}`))
+    .find(
+      (element) =>
+        typeof element.className === "string" &&
+        element.className.includes("text-foreground")
+    )
+  const iconClassName = container.querySelector("svg")?.getAttribute("class")
+
+  expect(label).toBeDefined()
+  expect(screen.getByText(state).className).toContain(stateClassName)
+  expect(iconClassName).toContain("text-muted-foreground")
+  expect(iconClassName).not.toContain(stateClassName)
 }
