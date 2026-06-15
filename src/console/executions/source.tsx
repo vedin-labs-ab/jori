@@ -3,6 +3,7 @@ import {
   File,
   GitPullRequestArrow,
   type LucideIcon,
+  Repeat2,
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
@@ -157,6 +158,7 @@ const metadataRenderers: Record<string, MetadataRenderer> = {
   page: PageDatum,
   pull_request: PullRequestDatum,
   repository: RepositoryDatum,
+  schedule: ScheduleDatum,
 }
 
 function RepositoryDatum({ datum }: MetadataRendererProps) {
@@ -211,6 +213,10 @@ function IssueDatum({ datum, provider }: MetadataRendererProps) {
 
 function PageDatum({ datum }: MetadataRendererProps) {
   return <IconMetadataDatum datum={datum} icon={File} />
+}
+
+function ScheduleDatum({ datum }: MetadataRendererProps) {
+  return <IconMetadataDatum datum={datum} icon={Repeat2} />
 }
 
 function PlainMetadataDatum({ datum }: MetadataRendererProps) {

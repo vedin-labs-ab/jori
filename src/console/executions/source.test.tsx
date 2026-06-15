@@ -51,6 +51,11 @@ test("renders recurring Milo automation sources", () => {
   expect(screen.getByText("recurring").className).toContain("font-mono")
   expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
   expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
+  expect(
+    Array.from(container.querySelectorAll("svg[aria-hidden='true']")).some(
+      (element) => element.classList.contains("lucide-repeat-2")
+    )
+  ).toBe(true)
 })
 
 test("renders rich event source metadata", () => {

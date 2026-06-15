@@ -29,8 +29,6 @@ test("renders recurring automation details", () => {
         metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
       },
       details: [
-        { type: "schedule", label: "Daily at 09:00 UTC" },
-        { type: "occurrence", label: "Occurrence", at: 1700038800000 },
         { type: "next", label: "Next", at: 1700125200000 },
         {
           type: "tools",
@@ -52,9 +50,9 @@ test("renders recurring automation details", () => {
 
   expect(screen.getByText("Milo")).toBeDefined()
   expect(screen.getByText("recurring")).toBeDefined()
-  expect(screen.getAllByText("Daily at 09:00 UTC")).toHaveLength(2)
-  expect(screen.getByText("Schedule")).toBeDefined()
-  expect(screen.getByText("Occurrence")).toBeDefined()
+  expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
+  expect(screen.queryByText("Schedule")).toBeNull()
+  expect(screen.queryByText("Occurrence")).toBeNull()
   expect(screen.getByText("Next")).toBeDefined()
   expect(screen.getByText("Tools")).toBeDefined()
   expect(screen.getByText("Web search")).toBeDefined()
