@@ -1,7 +1,6 @@
 import { useAction } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import {
-  ArrowUpRight,
   Check,
   Clock3,
   Loader2,
@@ -18,7 +17,6 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
-import { SeparatorDot } from "../../dot"
 import { absoluteTime, formatDuration } from "../format"
 import { type ExecutionItem } from "../types"
 import { ProviderLogo } from "./source"
@@ -152,77 +150,25 @@ function ApprovalMeta({
   approval: NonNullable<ExecutionItem["approval"]>
   now: number
 }) {
-  const source = approval.source ?? fallbackApprovalSource(approval)
   const meta = approvalMeta(approval, now)
 
-  if (source === undefined && meta === null) {
+  if (meta === null) {
     return null
   }
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
-      {source === undefined ? null : <ApprovalSource source={source} />}
-      {source !== undefined && meta !== null ? (
-        <SeparatorDot className="text-muted-foreground/60" />
-      ) : null}
-      {meta === null ? null : (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex items-center gap-1.5">
-              <meta.Icon className={cn("size-3.5", meta.iconClassName)} />
-              {meta.label}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{meta.tooltip}</TooltipContent>
-        </Tooltip>
-      )}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center gap-1.5">
+            <meta.Icon className={cn("size-3.5", meta.iconClassName)} />
+            {meta.label}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>{meta.tooltip}</TooltipContent>
+      </Tooltip>
     </div>
   )
-}
-
-function ApprovalSource({
-  source,
-}: {
-  source: NonNullable<ExecutionItem["approval"]>["source"]
-}) {
-  if (source === undefined) {
-    return null
-  }
-
-  if (source.url === undefined) {
-    return (
-      <span className="inline-flex items-center gap-1.5">
-        <ProviderLogo provider={source.provider} />
-        {source.label}
-      </span>
-    )
-  }
-
-  return (
-    <a
-      className="group/status-link relative inline-flex items-center gap-1.5 rounded-sm underline-offset-4 transition-[color,padding] duration-200 hover:pr-4 hover:text-foreground focus-visible:pr-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-      href={source.url}
-      rel="noreferrer"
-      target="_blank"
-    >
-      <ProviderLogo provider={source.provider} />
-      <span>{source.label}</span>
-      <ArrowUpRight
-        aria-hidden="true"
-        className="pointer-events-none absolute right-0 size-3 -translate-x-1 opacity-0 transition-all duration-200 ease-out group-hover/status-link:translate-x-0 group-hover/status-link:opacity-100 group-focus-visible/status-link:translate-x-0 group-focus-visible/status-link:opacity-100"
-      />
-    </a>
-  )
-}
-
-function fallbackApprovalSource(
-  approval: NonNullable<ExecutionItem["approval"]>
-) {
-  return approval.delivery === undefined
-    ? undefined
-    : {
-        label: approval.delivery,
-      }
 }
 
 function expirationLabel(

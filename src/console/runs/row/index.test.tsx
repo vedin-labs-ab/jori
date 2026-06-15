@@ -107,6 +107,38 @@ describe("execution row message details", () => {
   })
 })
 
+describe("execution row approval details", () => {
+  test("does not render the approval request source link", () => {
+    renderExecutionRow(
+      execution({
+        approval: {
+          decidedAt: 1700000001000,
+          expiresAt: 1700001800000,
+          id: "approval",
+          provider: "slack",
+          source: {
+            label: "Request message",
+            provider: "slack",
+            url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123",
+          },
+          state: "approved",
+          summary: "Send the requested Slack update.",
+          tool: "conversations_add_message",
+          toolLabel: "Send Slack message",
+        },
+        task: "Send a Slack update.",
+        title: "Approval test",
+      })
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: /approval test/i }))
+
+    expect(screen.getByText("Approval")).toBeDefined()
+    expect(screen.getByText("Send the requested Slack update.")).toBeDefined()
+    expect(screen.queryByText("Request message")).toBeNull()
+  })
+})
+
 describe("execution row linked details", () => {
   test("renders execution details with links", () => {
     renderExecutionRow(
@@ -193,10 +225,12 @@ function renderExecutionRow(item: ExecutionItem) {
 
 function execution(
   overrides: Pick<ExecutionItem, "task" | "title"> &
-    Partial<Pick<ExecutionItem, "details" | "source" | "taskSource">>
+    Partial<
+      Pick<ExecutionItem, "approval" | "details" | "source" | "taskSource">
+    >
 ): ExecutionItem {
   return {
-    approval: null,
+    approval: overrides.approval ?? null,
     createdAt: 1700000000000,
     details: overrides.details ?? [],
     durationMs: 1000,
