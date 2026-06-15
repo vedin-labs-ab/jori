@@ -10,7 +10,7 @@ export function AutomationToolSummary({
 }) {
   return (
     <span className="grid min-w-0 gap-1.5">
-      <span className="flex min-w-0 items-center gap-2 font-medium text-foreground">
+      <span className="flex min-w-0 items-center gap-2 text-foreground">
         <IntegrationLogoStack
           integrations={automation.access.surfaces.map(
             (surface) => surface.integration
