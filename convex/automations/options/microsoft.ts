@@ -1,4 +1,4 @@
-import { fetchJson } from "../../broker/providers/common"
+import { fetchJson } from "../../broker/tools/common"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import {
   maxOptions,

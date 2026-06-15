@@ -1,9 +1,9 @@
-import { type FunctionReturnType } from "convex/server"
-import { type api } from "../../../convex/_generated/api"
 import {
   type AutomationEventProvider,
   getDefaultAutomationEvent,
-} from "../../../convex/automations/events"
+} from "@contracts/automations/events"
+import { type FunctionReturnType } from "convex/server"
+import { type api } from "../../../convex/_generated/api"
 import { type AutomationSurfaceFormValue } from "./surfaces"
 
 export type AutomationList = FunctionReturnType<

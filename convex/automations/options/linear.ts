@@ -1,4 +1,4 @@
-import { fetchJson } from "../../broker/providers/common"
+import { fetchJson } from "../../broker/tools/common"
 import { linearGraphqlUrl } from "../../providers/linear/config"
 import { requireLinearCredentials } from "../../providers/linear/credentials"
 import {

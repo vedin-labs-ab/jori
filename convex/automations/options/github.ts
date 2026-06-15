@@ -1,4 +1,4 @@
-import { fetchJson } from "../../broker/providers/common"
+import { fetchJson } from "../../broker/tools/common"
 import { githubApiUrl } from "../../providers/github/config"
 import { requireGitHubCredentials } from "../../providers/github/credentials"
 import {

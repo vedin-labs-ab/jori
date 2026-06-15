@@ -1,33 +1,22 @@
+import {
+  type ConfigurablePermissionMode,
+  type PermissionMode,
+  type ResolvedToolPermission,
+  type ToolAccess,
+  type ToolProvider,
+} from "@contracts/permissions"
 import { useMutation, useQuery } from "convex/react"
 import { useState } from "react"
 import { api } from "../../../convex/_generated/api"
 import { readErrorMessage } from "../error"
 
-export type PermissionMode = "required" | "allowed" | "prompted" | "blocked"
-export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
-export type ToolAccess = "read" | "write"
-
-export type ToolProvider =
-  | "milo"
-  | "slack"
-  | "linear"
-  | "github"
-  | "gmail"
-  | "googleCalendar"
-  | "googleDrive"
-  | "notion"
-  | "microsoftEmail"
-  | "microsoftCalendar"
-
-export type ToolPermission = {
-  tool: string
-  provider: ToolProvider
-  label: string
-  description: string
-  access: ToolAccess
-  mode: PermissionMode
-  overrideMode: PermissionMode | null
+export type {
+  ConfigurablePermissionMode,
+  PermissionMode,
+  ToolAccess,
+  ToolProvider,
 }
+export type ToolPermission = ResolvedToolPermission
 
 type PermissionUpdateError = {
   tool: string

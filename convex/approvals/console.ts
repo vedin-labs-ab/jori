@@ -2,16 +2,16 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
-import { updateSlackMessage } from "../broker/providers/slack"
+import { updateSlackMessage } from "../broker/tools/slack"
 import { requireTenantAccess } from "../identity/access"
 import {
   readClerkUserEmail,
   readClerkUserName,
   requireClerkUserId,
 } from "../identity/users"
-import { createSlackConsoleDecisionResponse } from "../providers/slack/approval/blocks"
 import { createUserActor } from "../shared/actor"
 import { decideApproval, type SlackApprovalDecisionResult } from "./runtime"
+import { createSlackConsoleDecisionResponse } from "./slack/blocks"
 
 export const decide = action({
   args: {

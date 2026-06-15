@@ -1,4 +1,4 @@
-import { fetchJson } from "../../broker/providers/common"
+import { fetchJson } from "../../broker/tools/common"
 import { notionApiUrl, notionApiVersion } from "../../providers/notion/config"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { notionPageTitle } from "../../providers/notion/pages"

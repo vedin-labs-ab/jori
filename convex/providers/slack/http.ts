@@ -1,5 +1,9 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import {
+  handleSlackApprovalDecision,
+  handleSlackApprovalInteraction,
+} from "../../approvals/slack"
 import { createProviderActor } from "../../shared/actor"
 import {
   ingestProviderMessage,
@@ -7,10 +11,6 @@ import {
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
-import {
-  handleSlackApprovalDecision,
-  handleSlackApprovalInteraction,
-} from "./approval"
 import { enrichSlackMessageData } from "./channels"
 import {
   slackBotScopes,

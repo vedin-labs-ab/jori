@@ -1,7 +1,7 @@
+import { getAutomationEventDefinition } from "@contracts/automations/events"
 import { Clock, Pencil, Repeat2, Workflow, Zap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { getAutomationEventDefinition } from "../../../../convex/automations/events"
 import { SeparatorDot } from "../../dot"
 import { describeCron } from "../cron"
 import { absoluteTime, relativeTime } from "../format"

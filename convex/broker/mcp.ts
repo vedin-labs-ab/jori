@@ -18,14 +18,14 @@ import {
   createPromptedToolApproval,
 } from "./approval"
 import { callMiloTool } from "./milo"
-import { callProviderTool, fetchGitHubTarball } from "./providers"
+import { callProviderTool, fetchGitHubTarball } from "./tools"
 import {
   formatProviderError,
   jsonError,
   optionalString,
   requiredString,
   unauthorizedResponse,
-} from "./providers/common"
+} from "./tools/common"
 
 type MiloMcpRequest = {
   provider?: ToolProvider

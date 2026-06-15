@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { fetchJson } from "../../broker/providers/common"
+import { fetchJson } from "../../broker/tools/common"
 import { notionApiUrl, notionApiVersion } from "./config"
 import { requireNotionCredentials } from "./credentials"
 
