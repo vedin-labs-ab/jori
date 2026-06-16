@@ -1,13 +1,6 @@
-import { Loader2, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { memo, useCallback, useDeferredValue, useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
 import {
   Select,
   SelectContent,
@@ -15,13 +8,13 @@ import {
   SelectTrigger,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { cn } from "@/lib/utils"
 import {
   ConsolePageLayout,
   ConsoleScrollableGrid,
   ConsoleToolbar,
   ConsoleToolbarActions,
 } from "../../layout"
+import { ConsoleListPager } from "../../list/pager"
 import { ExecutionRow } from "../row"
 import { displayNowForExecution, executionClockInterval } from "../time"
 import {
@@ -81,7 +74,7 @@ export function RunsList({ tenantId }: { tenantId: string }) {
         setQuery={setQueryAndReset}
       />
       <ExecutionRows pagination={pagination} tenantId={tenantId} />
-      <ExecutionPager pagination={pagination} />
+      <ConsoleListPager pagination={pagination} />
     </ConsolePageLayout>
   )
 }
@@ -202,43 +195,4 @@ function useExecutionClock(executions: ExecutionItem[]) {
   }, [intervalMs])
 
   return now
-}
-
-function ExecutionPager({ pagination }: { pagination: ExecutionPagination }) {
-  return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-muted-foreground text-xs">{pagination.footerLabel}</p>
-      <Pagination className="mx-0 w-fit justify-start sm:justify-end">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              aria-disabled={pagination.pageIndex === 0}
-              className={cn(
-                pagination.pageIndex === 0 &&
-                  "pointer-events-none opacity-50 shadow-none"
-              )}
-              href="#"
-              onClick={(event) => {
-                event.preventDefault()
-                pagination.previous()
-              }}
-            />
-          </PaginationItem>
-          <PaginationItem>
-            <Button
-              disabled={!pagination.canGoNext || pagination.isLoadingMore}
-              onClick={pagination.next}
-              type="button"
-              variant="outline"
-            >
-              {pagination.isLoadingMore ? (
-                <Loader2 className="animate-spin" data-icon="inline-start" />
-              ) : null}
-              Next
-            </Button>
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    </div>
-  )
 }

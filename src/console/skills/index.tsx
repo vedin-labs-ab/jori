@@ -1,7 +1,9 @@
 import { useQuery } from "convex/react"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { api } from "../../../convex/_generated/api"
-import { ConsoleContentGrid, ConsolePageLayout } from "../layout"
+import { ConsolePageLayout } from "../layout"
+import { ConsoleListPager } from "../list/pager"
+import { useClientPagination } from "../list/pagination"
 import { ConsolePage } from "../page"
 import { SkillStatusAlerts } from "./alerts"
 import { SkillContent } from "./content"
@@ -25,51 +27,49 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
   const skillList = useQuery(api.skills.catalog.list, { tenantId })
   const editor = useSkillEditor(tenantId)
   const globalSettings = useGlobalSkillSettings(tenantId)
-  const [view, setView] = useState<SkillFilterView>("all")
-  const [searchTerm, setSearchTerm] = useState("")
+  const filters = useSkillFilters()
   const [viewSkill, setViewSkill] = useState<Skill>()
   const skills = skillList?.status === "ready" ? skillList.skills : undefined
   const visibleSkills = useMemo(
     () =>
       skills === undefined
         ? undefined
-        : filterSkillsByView(filterSkills(skills, searchTerm), view),
-    [skills, searchTerm, view]
+        : filterSkillsByView(
+            filterSkills(skills, filters.searchTerm),
+            filters.view
+          ),
+    [skills, filters.searchTerm, filters.view]
   )
   const isAccessReady = skillList?.status === "ready"
+  const { pagination } = useSkillPagination({
+    skills,
+    visibleSkills,
+    view: filters.view,
+    searchTerm: filters.searchTerm,
+  })
+  const toolbar = useResettingSkillFilters(filters, pagination.reset)
 
   return (
     <ConsolePageLayout>
       <SkillsToolbar
         isCreateDisabled={!isAccessReady}
         onCreate={editor.openCreateForm}
-        onSearchChange={setSearchTerm}
-        onViewChange={setView}
-        searchTerm={searchTerm}
-        view={view}
+        onSearchChange={toolbar.setSearchTerm}
+        onViewChange={toolbar.setView}
+        searchTerm={filters.searchTerm}
+        view={filters.view}
       />
 
-      <ConsoleContentGrid>
-        <SkillStatusAlerts
-          deleteError={editor.deleteError}
-          globalError={globalSettings.error?.message}
-          result={skillList}
-        />
-        {skillList?.status !== "unauthorized" ? (
-          <SkillContent
-            skills={visibleSkills ?? []}
-            isLoading={skillList === undefined}
-            onDelete={editor.deleteSkill}
-            onEdit={editor.openEditForm}
-            onToggleGlobalSkill={globalSettings.updateGlobalSkillEnabled}
-            onView={setViewSkill}
-            pendingSkillId={editor.pendingSkillId}
-            pendingGlobalSkillId={globalSettings.pendingSkillId}
-            searchTerm={searchTerm}
-            view={view}
-          />
-        ) : null}
-      </ConsoleContentGrid>
+      <SkillListBody
+        editor={editor}
+        globalSettings={globalSettings}
+        onViewSkillChange={setViewSkill}
+        pagination={pagination}
+        searchTerm={filters.searchTerm}
+        skillList={skillList}
+        visibleCount={visibleSkills?.length ?? 0}
+        view={filters.view}
+      />
 
       <SkillDialogs
         editor={editor}
@@ -78,6 +78,105 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
       />
     </ConsolePageLayout>
   )
+}
+
+function useSkillFilters() {
+  const [view, setView] = useState<SkillFilterView>("all")
+  const [searchTerm, setSearchTerm] = useState("")
+
+  return { searchTerm, setSearchTerm, setView, view }
+}
+
+function useResettingSkillFilters(
+  filters: ReturnType<typeof useSkillFilters>,
+  reset: () => void
+) {
+  const setView = useCallback(
+    (value: SkillFilterView) => {
+      filters.setView(value)
+      reset()
+    },
+    [filters.setView, reset]
+  )
+  const setSearchTerm = useCallback(
+    (value: string) => {
+      filters.setSearchTerm(value)
+      reset()
+    },
+    [filters.setSearchTerm, reset]
+  )
+
+  return { setSearchTerm, setView }
+}
+
+function SkillListBody({
+  editor,
+  globalSettings,
+  onViewSkillChange,
+  pagination,
+  searchTerm,
+  skillList,
+  visibleCount,
+  view,
+}: {
+  editor: SkillEditor
+  globalSettings: ReturnType<typeof useGlobalSkillSettings>
+  onViewSkillChange: (skill: Skill) => void
+  pagination: ReturnType<typeof useSkillPagination>["pagination"]
+  searchTerm: string
+  skillList: ReturnType<typeof useQuery<typeof api.skills.catalog.list>>
+  visibleCount: number
+  view: SkillFilterView
+}) {
+  return (
+    <>
+      <SkillStatusAlerts
+        deleteError={editor.deleteError}
+        globalError={globalSettings.error?.message}
+        result={skillList}
+      />
+      {skillList?.status !== "unauthorized" ? (
+        <>
+          <SkillContent
+            filteredCount={visibleCount}
+            skills={pagination.visibleRows}
+            isLoading={skillList === undefined}
+            onDelete={editor.deleteSkill}
+            onEdit={editor.openEditForm}
+            onToggleGlobalSkill={globalSettings.updateGlobalSkillEnabled}
+            onView={onViewSkillChange}
+            pendingSkillId={editor.pendingSkillId}
+            pendingGlobalSkillId={globalSettings.pendingSkillId}
+            searchTerm={searchTerm}
+            view={view}
+          />
+          <ConsoleListPager pagination={pagination} />
+        </>
+      ) : null}
+    </>
+  )
+}
+
+function useSkillPagination({
+  skills,
+  visibleSkills,
+  view,
+  searchTerm,
+}: {
+  skills: Skill[] | undefined
+  visibleSkills: Skill[] | undefined
+  view: SkillFilterView
+  searchTerm: string
+}) {
+  const hasFilters = searchTerm.trim() !== "" || view !== "all"
+  const pagination = useClientPagination({
+    hasFilters,
+    itemLabel: { singular: "skill", plural: "skills" },
+    items: visibleSkills ?? [],
+    totalCount: skills?.length ?? 0,
+  })
+
+  return { pagination }
 }
 
 function SkillDialogs({

@@ -1,6 +1,13 @@
 import { useQuery } from "convex/react"
 import { Plus, Search } from "lucide-react"
-import { lazy, Suspense, useDeferredValue, useEffect, useState } from "react"
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useState,
+} from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,16 +15,16 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "../../../convex/_generated/api"
 import {
   ConsolePageLayout,
-  ConsoleScrollableList,
   ConsoleToolbar,
   ConsoleToolbarActions,
 } from "../layout"
+import { ConsoleListPager } from "../list/pager"
+import { useClientPagination } from "../list/pagination"
 import { ConsolePage } from "../page"
 import { useToolPermissions } from "../permissions/controller"
 import { automationPolicyKey } from "./access/policy"
 import { type AutomationEditor, useAutomationEditor } from "./editor"
-import { AutomationSkeletonList, EmptyAutomations } from "./list/empty"
-import { AutomationRow } from "./list/row"
+import { AutomationContent } from "./list/content"
 import {
   type AutomationFilter,
   type AutomationList,
@@ -48,28 +55,32 @@ export function Automations() {
 }
 
 function AutomationListView({ tenantId }: { tenantId: string }) {
-  const [filter, setFilter] = useState<AutomationFilter>("active")
-  const [query, setQuery] = useState("")
-  const deferredQuery = useDeferredValue(query)
+  const filters = useAutomationFilters()
+  const deferredQuery = useDeferredValue(filters.query)
   const automationList = useQuery(api.automations.console.list, {
     tenantId,
     query: deferredQuery,
-    includeCompleted: filter === "all",
+    includeCompleted: filters.filter === "all",
   })
   const permissions = useToolPermissions(tenantId)
   const editor = useAutomationEditor(tenantId, permissions.permissions)
   const now = useNow()
   const isDialogMounted = useAutomationDialogMount(editor.isFormOpen)
+  const { hasFilters, pagination } = useAutomationPagination({
+    automationList,
+    query: deferredQuery,
+  })
+  const toolbar = useResettingAutomationFilters(filters, pagination.reset)
 
   return (
     <ConsolePageLayout>
       <AutomationFilters
-        filter={filter}
+        filter={filters.filter}
         onCreate={editor.openCreateForm}
         onCreateIntent={loadAutomationDialog}
-        query={query}
-        setFilter={setFilter}
-        setQuery={setQuery}
+        query={filters.query}
+        setFilter={toolbar.setFilter}
+        setQuery={toolbar.setQuery}
       />
       {editor.deleteError === undefined ? null : (
         <Alert variant="destructive">
@@ -77,31 +88,72 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
           <AlertDescription>{editor.deleteError}</AlertDescription>
         </Alert>
       )}
-      <AutomationRows
+      <AutomationContent
         editor={editor}
-        hasFilters={deferredQuery.trim() !== ""}
+        hasFilters={hasFilters}
         now={now}
         automationList={automationList}
+        visibleAutomations={pagination.visibleRows}
       />
-      {isDialogMounted ? (
-        <Suspense fallback={null}>
-          <AutomationDialog
-            error={editor.formError}
-            isOpen={editor.isFormOpen}
-            isSaving={editor.isSaving}
-            onOpenChange={editor.setIsFormOpen}
-            onSave={editor.saveAutomation}
-            onValuesChange={editor.setFormValues}
-            permissions={permissions.permissions}
-            policyKey={automationPolicyKey(permissions.permissions)}
-            automation={editor.formAutomation}
-            tenantId={tenantId}
-            values={editor.formValues}
-          />
-        </Suspense>
+      {automationList?.status !== "unauthorized" ? (
+        <ConsoleListPager pagination={pagination} />
       ) : null}
+      <AutomationEditorDialog
+        editor={editor}
+        isMounted={isDialogMounted}
+        permissions={permissions.permissions}
+        tenantId={tenantId}
+      />
     </ConsolePageLayout>
   )
+}
+
+function useAutomationFilters() {
+  const [filter, setFilter] = useState<AutomationFilter>("active")
+  const [query, setQuery] = useState("")
+
+  return { filter, query, setFilter, setQuery }
+}
+
+function useResettingAutomationFilters(
+  filters: ReturnType<typeof useAutomationFilters>,
+  reset: () => void
+) {
+  const setFilter = useCallback(
+    (value: AutomationFilter) => {
+      filters.setFilter(value)
+      reset()
+    },
+    [filters.setFilter, reset]
+  )
+  const setQuery = useCallback(
+    (value: string) => {
+      filters.setQuery(value)
+      reset()
+    },
+    [filters.setQuery, reset]
+  )
+
+  return { setFilter, setQuery }
+}
+
+function useAutomationPagination({
+  automationList,
+  query,
+}: {
+  automationList: AutomationList | undefined
+  query: string
+}) {
+  const hasFilters = query.trim() !== ""
+  const automations =
+    automationList?.status === "ready" ? automationList.automations : []
+  const pagination = useClientPagination({
+    hasFilters,
+    itemLabel: { singular: "automation", plural: "automations" },
+    items: automations,
+  })
+
+  return { hasFilters, pagination }
 }
 
 function useAutomationDialogMount(isFormOpen: boolean) {
@@ -114,6 +166,40 @@ function useAutomationDialogMount(isFormOpen: boolean) {
   }, [isFormOpen])
 
   return isFormOpen || hasOpened
+}
+
+function AutomationEditorDialog({
+  editor,
+  isMounted,
+  permissions,
+  tenantId,
+}: {
+  editor: AutomationEditor
+  isMounted: boolean
+  permissions: ReturnType<typeof useToolPermissions>["permissions"]
+  tenantId: string
+}) {
+  if (!isMounted) {
+    return null
+  }
+
+  return (
+    <Suspense fallback={null}>
+      <AutomationDialog
+        error={editor.formError}
+        isOpen={editor.isFormOpen}
+        isSaving={editor.isSaving}
+        onOpenChange={editor.setIsFormOpen}
+        onSave={editor.saveAutomation}
+        onValuesChange={editor.setFormValues}
+        permissions={permissions}
+        policyKey={automationPolicyKey(permissions)}
+        automation={editor.formAutomation}
+        tenantId={tenantId}
+        values={editor.formValues}
+      />
+    </Suspense>
+  )
 }
 
 function AutomationFilters({
@@ -179,50 +265,6 @@ function AutomationFilters({
         </Button>
       </ConsoleToolbarActions>
     </ConsoleToolbar>
-  )
-}
-
-function AutomationRows({
-  editor,
-  hasFilters,
-  now,
-  automationList,
-}: {
-  editor: AutomationEditor
-  hasFilters: boolean
-  now: number
-  automationList: AutomationList | undefined
-}) {
-  if (automationList === undefined) {
-    return <AutomationSkeletonList />
-  }
-
-  if (automationList.status === "unauthorized") {
-    return (
-      <Alert variant="destructive">
-        <AlertTitle>Automation access unavailable</AlertTitle>
-        <AlertDescription>{automationList.message}</AlertDescription>
-      </Alert>
-    )
-  }
-
-  if (automationList.automations.length === 0) {
-    return <EmptyAutomations hasFilters={hasFilters} />
-  }
-
-  return (
-    <ConsoleScrollableList className="pb-2 lg:grid-cols-2">
-      {automationList.automations.map((automation) => (
-        <AutomationRow
-          isDeleting={editor.deletingAutomationId === automation.id}
-          key={automation.id}
-          now={now}
-          onDelete={editor.deleteAutomation}
-          onEdit={editor.openEditForm}
-          automation={automation}
-        />
-      ))}
-    </ConsoleScrollableList>
   )
 }
 
