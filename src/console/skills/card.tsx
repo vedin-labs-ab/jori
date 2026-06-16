@@ -29,7 +29,7 @@ export function SkillCard({
   const Icon = getSkillIcon(skill.category)
 
   return (
-    <Card className="min-h-56 gap-0 py-0 ring-inset transition-shadow duration-200 hover:shadow-sm">
+    <Card className="min-h-56 gap-0 py-0 ring-inset">
       <div className="grid flex-1 grid-cols-[2.5rem_minmax(0,1fr)] gap-3 p-4 sm:p-5">
         <SkillIcon icon={Icon} skill={skill} />
         <div className="grid min-w-0 content-start gap-2">
