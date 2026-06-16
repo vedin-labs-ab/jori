@@ -1,17 +1,14 @@
 import { BookOpenText } from "lucide-react"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import { ConsoleContentGrid } from "../layout"
-import { LoadingMessage } from "../loading"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ConsoleScrollableGrid } from "../layout"
+import { ConsoleEmptyState } from "../list/empty"
 import { SkillCard } from "./card"
 import { type Skill, type SkillFilterView } from "./types"
 
+const skeletonCards = ["first", "second", "third", "fourth", "fifth", "sixth"]
+
 export function SkillContent({
+  filteredCount,
   isLoading,
   onDelete,
   onEdit,
@@ -23,6 +20,7 @@ export function SkillContent({
   skills,
   view,
 }: {
+  filteredCount: number
   isLoading: boolean
   onDelete: (skill: Skill) => void
   onEdit: (skill: Skill) => void
@@ -35,15 +33,19 @@ export function SkillContent({
   view: SkillFilterView
 }) {
   if (isLoading) {
-    return <LoadingMessage label="Loading skills" />
+    return (
+      <ConsoleScrollableGrid className="md:grid-cols-2 xl:grid-cols-3">
+        <SkillSkeletonList />
+      </ConsoleScrollableGrid>
+    )
   }
 
   const isFiltering = searchTerm.trim().length > 0
   const now = Date.now()
 
   return (
-    <ConsoleContentGrid className="md:grid-cols-2 xl:grid-cols-3">
-      {skills.length === 0 ? (
+    <ConsoleScrollableGrid className="md:grid-cols-2 xl:grid-cols-3">
+      {filteredCount === 0 ? (
         <SkillEmptyState
           description={emptyDescription(view, isFiltering)}
           title={emptyTitle(view, isFiltering)}
@@ -66,7 +68,7 @@ export function SkillContent({
           skill={skill}
         />
       ))}
-    </ConsoleContentGrid>
+    </ConsoleScrollableGrid>
   )
 }
 
@@ -118,14 +120,21 @@ function SkillEmptyState({
   title: string
 }) {
   return (
-    <Empty className="min-h-40 rounded-md md:col-span-2 xl:col-span-3">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <BookOpenText />
-        </EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
-        <EmptyDescription>{description}</EmptyDescription>
-      </EmptyHeader>
-    </Empty>
+    <ConsoleEmptyState
+      className="md:col-span-2 xl:col-span-3"
+      description={description}
+      icon={BookOpenText}
+      title={title}
+    />
+  )
+}
+
+function SkillSkeletonList() {
+  return (
+    <>
+      {skeletonCards.map((card) => (
+        <Skeleton className="h-56 w-full rounded-lg" key={card} />
+      ))}
+    </>
   )
 }
