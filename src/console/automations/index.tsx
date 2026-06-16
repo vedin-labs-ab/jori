@@ -149,6 +149,7 @@ function useAutomationPagination({
     automationList?.status === "ready" ? automationList.automations : []
   const pagination = useClientPagination({
     hasFilters,
+    isReady: automationList?.status === "ready",
     itemLabel: { singular: "automation", plural: "automations" },
     items: automations,
   })

@@ -12,6 +12,7 @@ export type ConsolePagerState = {
   canGoNext: boolean
   footerLabel: string
   isLoadingMore?: boolean
+  isReady: boolean
   next: () => void
   pageIndex: number
   previous: () => void
@@ -22,6 +23,10 @@ export function ConsoleListPager({
 }: {
   pagination: ConsolePagerState
 }) {
+  if (!pagination.isReady) {
+    return null
+  }
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-muted-foreground text-xs">{pagination.footerLabel}</p>
