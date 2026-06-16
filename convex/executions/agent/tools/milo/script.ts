@@ -26,7 +26,7 @@ const workspace = requiredEnv("MILO_WORKSPACE");
 const allTools = ${args.toolsJson};
 const tools = filterEnabledTools(allTools);
 const generatedImagesDirectory = path.join(codexHome, "generated_images");
-const maxArtifactBytes = 25 * 1024 * 1024;
+const maxFileBytes = 25 * 1024 * 1024;
 
 const server = new Server(
   { name: "milo", version: "0.0.0" },
@@ -43,8 +43,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   const result =
-    toolName === "save_artifact"
-      ? await saveArtifact(request.params.arguments ?? {})
+    toolName === "save_file"
+      ? await saveFile(request.params.arguments ?? {})
       : await callMilo(toolName, request.params.arguments ?? {});
 
   return {
@@ -82,32 +82,32 @@ async function callMilo(tool, args) {
   return result;
 }
 
-async function saveArtifact(args) {
+async function saveFile(args) {
   if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    throw new McpError(ErrorCode.InvalidParams, "save_artifact arguments must be an object");
+    throw new McpError(ErrorCode.InvalidParams, "save_file arguments must be an object");
   }
 
   const filePath = requiredString(args.path, "path");
-  const resolvedPath = await resolveArtifactPath(filePath);
+  const resolvedPath = await resolveFilePath(filePath);
   const stat = await fs.stat(resolvedPath);
 
   if (!stat.isFile()) {
-    throw new McpError(ErrorCode.InvalidParams, "Artifact path must be a file");
+    throw new McpError(ErrorCode.InvalidParams, "Path must be a file");
   }
 
   if (stat.size <= 0) {
-    throw new McpError(ErrorCode.InvalidParams, "Artifact file is empty");
+    throw new McpError(ErrorCode.InvalidParams, "File is empty");
   }
 
-  if (stat.size > maxArtifactBytes) {
-    throw new McpError(ErrorCode.InvalidParams, "Artifact file exceeds the 25 MB limit");
+  if (stat.size > maxFileBytes) {
+    throw new McpError(ErrorCode.InvalidParams, "File exceeds the 25 MB limit");
   }
 
   const bytes = await fs.readFile(resolvedPath);
   const name = optionalString(args.name) ?? path.basename(resolvedPath);
   const mimeType = optionalString(args.mimeType) ?? inferMimeType(resolvedPath);
   const description = optionalString(args.description);
-  const url = new URL("/milo/artifacts", convexSiteUrl);
+  const url = new URL("/milo/files", convexSiteUrl);
 
   url.searchParams.set("name", name);
 
@@ -128,14 +128,14 @@ async function saveArtifact(args) {
   if (!response.ok) {
     throw new McpError(
       ErrorCode.InternalError,
-      result?.error ?? "Artifact upload failed",
+      result?.error ?? "File upload failed",
     );
   }
 
   return result;
 }
 
-async function resolveArtifactPath(value) {
+async function resolveFilePath(value) {
   const candidate = path.isAbsolute(value)
     ? path.resolve(value)
     : path.resolve(workspace, value);
@@ -144,7 +144,7 @@ async function resolveArtifactPath(value) {
   try {
     resolvedPath = await fs.realpath(candidate);
   } catch {
-    throw new McpError(ErrorCode.InvalidParams, "Artifact path does not exist");
+    throw new McpError(ErrorCode.InvalidParams, "File path does not exist");
   }
 
   const roots = await Promise.all(
@@ -160,7 +160,7 @@ async function resolveArtifactPath(value) {
   if (!roots.some((root) => isInsideDirectory(resolvedPath, root))) {
     throw new McpError(
       ErrorCode.InvalidParams,
-      "Artifact path must be inside the workspace or generated image directory",
+      "File path must be inside the workspace or generated image directory",
     );
   }
 

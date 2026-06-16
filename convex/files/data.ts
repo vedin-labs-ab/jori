@@ -6,8 +6,8 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 
-const maxArtifactSearchResults = 100
-const maxArtifactsScanned = 500
+const maxFileSearchResults = 100
+const maxFilesScanned = 500
 
 export const record = internalMutation({
   args: {
@@ -20,7 +20,7 @@ export const record = internalMutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("artifacts", {
+    return await ctx.db.insert("files", {
       ...args,
       createdAt: Date.now(),
     })
@@ -38,22 +38,21 @@ export const search = internalQuery({
     const limit = normalizeLimit(args.limit)
     const query = normalizeSearchText(args.query)
     const mimeType = normalizeSearchText(args.mimeType)
-    const artifacts = await ctx.db
-      .query("artifacts")
+    const files = await ctx.db
+      .query("files")
       .withIndex("by_tenant_and_created_at", (index) =>
         index.eq("tenantId", args.tenantId)
       )
       .order("desc")
-      .take(maxArtifactsScanned)
-    const matches = artifacts
+      .take(maxFilesScanned)
+    const matches = files
       .filter(
-        (artifact) =>
-          matchesQuery(artifact, query) && matchesMimeType(artifact, mimeType)
+        (file) => matchesQuery(file, query) && matchesMimeType(file, mimeType)
       )
       .slice(0, limit)
 
     return await Promise.all(
-      matches.map(async (artifact) => await summarizeArtifact(ctx, artifact))
+      matches.map(async (file) => await summarizeFile(ctx, file))
     )
   },
 })
@@ -61,48 +60,48 @@ export const search = internalQuery({
 export const read = internalQuery({
   args: {
     tenantId: v.string(),
-    artifactId: v.id("artifacts"),
+    fileId: v.id("files"),
   },
   handler: async (ctx, args) => {
-    const artifact = await ctx.db.get(args.artifactId)
+    const file = await ctx.db.get(args.fileId)
 
-    if (artifact === null || artifact.tenantId !== args.tenantId) {
+    if (file === null || file.tenantId !== args.tenantId) {
       return null
     }
 
-    return await summarizeArtifact(ctx, artifact)
+    return await summarizeFile(ctx, file)
   },
 })
 
 export const getForTenant = internalQuery({
   args: {
     tenantId: v.string(),
-    artifactId: v.id("artifacts"),
+    fileId: v.id("files"),
   },
   handler: async (ctx, args) => {
-    const artifact = await ctx.db.get(args.artifactId)
+    const file = await ctx.db.get(args.fileId)
 
-    if (artifact === null || artifact.tenantId !== args.tenantId) {
+    if (file === null || file.tenantId !== args.tenantId) {
       return null
     }
 
-    return artifact
+    return file
   },
 })
 
 export const getForExecution = internalQuery({
   args: {
     executionId: v.id("executions"),
-    artifactId: v.id("artifacts"),
+    fileId: v.id("files"),
   },
   handler: async (ctx, args) => {
-    const artifact = await ctx.db.get(args.artifactId)
+    const file = await ctx.db.get(args.fileId)
 
-    if (artifact === null || artifact.executionId !== args.executionId) {
+    if (file === null || file.executionId !== args.executionId) {
       return null
     }
 
-    return artifact
+    return file
   },
 })
 
@@ -111,7 +110,7 @@ function normalizeLimit(value: number | undefined) {
     return 25
   }
 
-  return Math.max(1, Math.min(maxArtifactSearchResults, Math.trunc(value)))
+  return Math.max(1, Math.min(maxFileSearchResults, Math.trunc(value)))
 }
 
 function normalizeSearchText(value: string | undefined) {
@@ -120,41 +119,38 @@ function normalizeSearchText(value: string | undefined) {
   return normalized === "" ? undefined : normalized
 }
 
-function matchesQuery(artifact: Doc<"artifacts">, query: string | undefined) {
+function matchesQuery(file: Doc<"files">, query: string | undefined) {
   if (query === undefined) {
     return true
   }
 
-  return [artifact.name, artifact.description, artifact.mimeType].some(
+  return [file.name, file.description, file.mimeType].some(
     (value) => value?.toLowerCase().includes(query) === true
   )
 }
 
-function matchesMimeType(
-  artifact: Doc<"artifacts">,
-  mimeType: string | undefined
-) {
+function matchesMimeType(file: Doc<"files">, mimeType: string | undefined) {
   if (mimeType === undefined) {
     return true
   }
 
-  const artifactMimeType = artifact.mimeType.toLowerCase()
+  const fileMimeType = file.mimeType.toLowerCase()
 
   return mimeType.endsWith("/")
-    ? artifactMimeType.startsWith(mimeType)
-    : artifactMimeType === mimeType
+    ? fileMimeType.startsWith(mimeType)
+    : fileMimeType === mimeType
 }
 
-async function summarizeArtifact(ctx: QueryCtx, artifact: Doc<"artifacts">) {
+async function summarizeFile(ctx: QueryCtx, file: Doc<"files">) {
   return {
-    artifactId: artifact._id,
-    name: artifact.name,
-    mimeType: artifact.mimeType,
-    size: artifact.size,
-    createdAt: artifact.createdAt,
-    url: await ctx.storage.getUrl(artifact.storageId),
-    ...(artifact.description === undefined
+    fileId: file._id,
+    name: file.name,
+    mimeType: file.mimeType,
+    size: file.size,
+    createdAt: file.createdAt,
+    url: await ctx.storage.getUrl(file.storageId),
+    ...(file.description === undefined
       ? {}
-      : { description: artifact.description }),
+      : { description: file.description }),
   }
 }

@@ -6,24 +6,24 @@ import { notionToolPermissionRows } from "./notion"
 export const toolPermissionRows = [
   [
     "milo",
-    "save_artifact",
-    "Save artifact",
+    "save_file",
+    "Save file",
     "Persist a generated file so it can be shared or attached by other tools.",
     "write",
     "required",
   ],
   [
     "milo",
-    "search_artifacts",
-    "Search artifacts",
+    "search_files",
+    "Search files",
     "Find saved generated files that can be reused or attached.",
     "read",
   ],
   [
     "milo",
-    "read_artifact",
-    "Read artifact",
-    "Inspect a saved generated file by artifact ID.",
+    "read_file",
+    "Read file",
+    "Inspect a saved generated file by file ID.",
     "read",
   ],
   [

@@ -9,7 +9,7 @@ import {
 import { optionalString } from "../shared/input"
 import { authenticateBrokerRequest } from "./mcp"
 
-export async function handleArtifactUploadRequest(
+export async function handleFileUploadRequest(
   ctx: ActionCtx,
   request: Request
 ) {
@@ -21,18 +21,18 @@ export async function handleArtifactUploadRequest(
 
   const requestUrl = new URL(request.url)
   const bytes = new Uint8Array(await request.arrayBuffer())
-  const maxArtifactBytes = 25 * 1024 * 1024
+  const maxFileBytes = 25 * 1024 * 1024
 
   if (bytes.byteLength === 0) {
-    return jsonError("Artifact file is empty", 400)
+    return jsonError("File is empty", 400)
   }
 
-  if (bytes.byteLength > maxArtifactBytes) {
-    return jsonError("Artifact file exceeds the 25 MB limit", 400)
+  if (bytes.byteLength > maxFileBytes) {
+    return jsonError("File exceeds the 25 MB limit", 400)
   }
 
   const mimeType = normalizeMimeType(request.headers.get("content-type"))
-  const name = normalizeArtifactName(requestUrl.searchParams.get("name"))
+  const name = normalizeFileName(requestUrl.searchParams.get("name"))
   const description = optionalString(requestUrl.searchParams.get("description"))
   let storageId: Id<"_storage"> | undefined
 
@@ -43,8 +43,8 @@ export async function handleArtifactUploadRequest(
       })
     )
 
-    const artifactId: Id<"artifacts"> = await ctx.runMutation(
-      internal.artifacts.data.record,
+    const fileId: Id<"files"> = await ctx.runMutation(
+      internal.files.data.record,
       {
         tenantId: context.execution.tenantId,
         executionId: context.execution._id,
@@ -58,7 +58,7 @@ export async function handleArtifactUploadRequest(
     const url = await ctx.storage.getUrl(storageId)
 
     return Response.json({
-      artifactId,
+      fileId,
       name,
       mimeType,
       size: bytes.byteLength,
@@ -69,11 +69,11 @@ export async function handleArtifactUploadRequest(
       await ctx.storage.delete(storageId)
     }
 
-    return jsonError(formatProviderError(error, "Artifact upload failed"), 400)
+    return jsonError(formatProviderError(error, "File upload failed"), 400)
   }
 }
 
-function normalizeArtifactName(value: string | null) {
+function normalizeFileName(value: string | null) {
   const name = value
     ?.trim()
     .split(/[\\/]/)
@@ -81,7 +81,7 @@ function normalizeArtifactName(value: string | null) {
     ?.replace(/[\r\n]/g, " ")
     .slice(0, 160)
 
-  return name === undefined || name === "" ? "artifact" : name
+  return name === undefined || name === "" ? "file" : name
 }
 
 function normalizeMimeType(value: string | null) {

@@ -1,6 +1,6 @@
 import { vi } from "vitest"
 
-export function artifactContext() {
+export function fileContext() {
   return {
     execution: {
       _id: "execution-id",
@@ -13,7 +13,7 @@ export function artifactContext() {
     },
     ctx: {
       runQuery: vi.fn(async () => ({
-        _id: "artifact-id",
+        _id: "file-id",
         _creationTime: 0,
         tenantId: "tenant",
         executionId: "execution-id",

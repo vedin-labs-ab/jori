@@ -1,9 +1,9 @@
 import { type Doc } from "../../../_generated/dataModel"
 import {
-  type ArtifactAttachment,
-  type ArtifactContext,
-  readArtifactAttachments,
-} from "../../../artifacts/attachments"
+  type FileAttachment,
+  type FileContext,
+  readFileAttachments,
+} from "../../../files/attachments"
 import { requireSlackCredentials } from "../../../providers/slack/credentials"
 import {
   boundedNumber,
@@ -22,7 +22,7 @@ export async function postSlackMessage(
     text: string
     thread_ts?: string
     blocks?: SlackBlock[]
-    attachments?: ArtifactAttachment[]
+    attachments?: FileAttachment[]
   }
 ) {
   const credentials = requireSlackCredentials(integration)
@@ -68,7 +68,7 @@ export async function callSlackTool(
   integration: Doc<"integrations">,
   tool: string,
   args: Record<string, unknown>,
-  context?: ArtifactContext
+  context?: FileContext
 ) {
   const credentials = requireSlackCredentials(integration)
 
@@ -133,7 +133,7 @@ export async function callSlackTool(
 
   if (tool === "conversations_add_message") {
     return await postSlackMessage(integration, {
-      attachments: await readArtifactAttachments(context, args.attachments, {
+      attachments: await readFileAttachments(context, args.attachments, {
         maxBytes: 25 * 1024 * 1024,
       }),
       channel: requiredString(args.channel, "channel"),

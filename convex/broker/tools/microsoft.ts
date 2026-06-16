@@ -1,8 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
-import {
-  type ArtifactContext,
-  readArtifactAttachments,
-} from "../../artifacts/attachments"
+import { type FileContext, readFileAttachments } from "../../files/attachments"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import { base64EncodeBytes } from "../../shared/encoding"
 import { fetchJson } from "../../shared/http"
@@ -19,7 +16,7 @@ export async function callMicrosoftTool(
   integration: Doc<"integrations">,
   tool: string,
   args: Record<string, unknown>,
-  context?: ArtifactContext
+  context?: FileContext
 ) {
   const credentials = requireMicrosoftCredentials(integration)
 
@@ -47,7 +44,7 @@ async function callMicrosoftEmailTool(
   token: string,
   tool: string,
   args: Record<string, unknown>,
-  context?: ArtifactContext
+  context?: FileContext
 ) {
   if (tool === "microsoft_email_search_messages") {
     return await searchMessages(token, args)
@@ -61,13 +58,9 @@ async function callMicrosoftEmailTool(
   }
 
   if (tool === "microsoft_email_send_message") {
-    const attachments = await readArtifactAttachments(
-      context,
-      args.attachments,
-      {
-        maxBytes: 3 * 1024 * 1024,
-      }
-    )
+    const attachments = await readFileAttachments(context, args.attachments, {
+      maxBytes: 3 * 1024 * 1024,
+    })
 
     await microsoftGraph(token, "/me/sendMail", {
       method: "POST",
@@ -80,13 +73,9 @@ async function callMicrosoftEmailTool(
   }
 
   if (tool === "microsoft_email_create_draft") {
-    const attachments = await readArtifactAttachments(
-      context,
-      args.attachments,
-      {
-        maxBytes: 3 * 1024 * 1024,
-      }
-    )
+    const attachments = await readFileAttachments(context, args.attachments, {
+      maxBytes: 3 * 1024 * 1024,
+    })
 
     return await microsoftGraph(token, "/me/messages", {
       method: "POST",
@@ -226,7 +215,7 @@ function microsoftSendUpdatesQuery(args: Record<string, unknown>) {
 
 function buildMicrosoftMessage(
   args: Record<string, unknown>,
-  attachments: Awaited<ReturnType<typeof readArtifactAttachments>> = []
+  attachments: Awaited<ReturnType<typeof readFileAttachments>> = []
 ) {
   return {
     subject: requiredString(args.subject, "subject"),

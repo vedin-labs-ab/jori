@@ -1,10 +1,10 @@
-import { type ArtifactAttachment } from "../../../artifacts/attachments"
+import { type FileAttachment } from "../../../files/attachments"
 import { requiredSlackResultString, slackFormApi, slackJsonApi } from "./client"
 
 export async function postSlackFiles(
   token: string,
   args: {
-    attachments: ArtifactAttachment[]
+    attachments: FileAttachment[]
     channel: string
     text: string
     thread_ts?: string
@@ -24,7 +24,7 @@ export async function postSlackFiles(
   })
 }
 
-async function uploadSlackFile(token: string, attachment: ArtifactAttachment) {
+async function uploadSlackFile(token: string, attachment: FileAttachment) {
   const ticket = await slackFormApi(token, "files.getUploadURLExternal", {
     filename: attachment.name,
     length: attachment.bytes.byteLength,

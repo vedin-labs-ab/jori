@@ -14,8 +14,8 @@ test("stores connected surface tool capabilities for execution details", () => {
             {
               access: "write",
               description: "Persist a generated file.",
-              label: "Save artifact",
-              tool: "save_artifact",
+              label: "Save file",
+              tool: "save_file",
             },
           ],
         },

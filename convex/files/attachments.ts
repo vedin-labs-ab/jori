@@ -2,8 +2,8 @@ import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 
-export type ArtifactAttachment = {
-  artifactId: Id<"artifacts">
+export type FileAttachment = {
+  fileId: Id<"files">
   name: string
   mimeType: string
   size: number
@@ -11,59 +11,56 @@ export type ArtifactAttachment = {
   bytes: Uint8Array
 }
 
-export type ArtifactContext = {
+export type FileContext = {
   ctx: ActionCtx
   execution: Doc<"executions">
 }
 
-export async function readArtifactAttachments(
-  context: ArtifactContext | undefined,
+export async function readFileAttachments(
+  context: FileContext | undefined,
   value: unknown,
   options: { maxBytes?: number } = {}
-): Promise<ArtifactAttachment[]> {
-  const inputs = readArtifactAttachmentInputs(value)
+): Promise<FileAttachment[]> {
+  const inputs = readFileAttachmentInputs(value)
 
   if (inputs.length === 0) {
     return []
   }
 
   if (context === undefined) {
-    throw new Error("Artifact attachments are not available in this context")
+    throw new Error("File attachments are not available in this context")
   }
 
-  const attachments: ArtifactAttachment[] = []
+  const attachments: FileAttachment[] = []
 
   for (const input of inputs) {
-    const artifact = await context.ctx.runQuery(
-      internal.artifacts.data.getForTenant,
-      {
-        tenantId: context.execution.tenantId,
-        artifactId: input.artifactId as Id<"artifacts">,
-      }
-    )
+    const file = await context.ctx.runQuery(internal.files.data.getForTenant, {
+      tenantId: context.execution.tenantId,
+      fileId: input.fileId as Id<"files">,
+    })
 
-    if (artifact === null) {
-      throw new Error(`Unknown artifact: ${input.artifactId}`)
+    if (file === null) {
+      throw new Error(`Unknown file: ${input.fileId}`)
     }
 
-    if (options.maxBytes !== undefined && artifact.size > options.maxBytes) {
+    if (options.maxBytes !== undefined && file.size > options.maxBytes) {
       throw new Error(
-        `${artifact.name} exceeds the ${formatBytes(options.maxBytes)} attachment limit`
+        `${file.name} exceeds the ${formatBytes(options.maxBytes)} attachment limit`
       )
     }
 
-    const blob = await context.ctx.storage.get(artifact.storageId)
+    const blob = await context.ctx.storage.get(file.storageId)
 
     if (blob === null) {
-      throw new Error(`Artifact file is missing: ${artifact.name}`)
+      throw new Error(`File is missing: ${file.name}`)
     }
 
     attachments.push({
-      artifactId: artifact._id,
-      name: input.name ?? artifact.name,
-      mimeType: input.mimeType ?? artifact.mimeType,
-      size: artifact.size,
-      description: artifact.description,
+      fileId: file._id,
+      name: input.name ?? file.name,
+      mimeType: input.mimeType ?? file.mimeType,
+      size: file.size,
+      description: file.description,
       bytes: new Uint8Array(await blob.arrayBuffer()),
     })
   }
@@ -71,7 +68,7 @@ export async function readArtifactAttachments(
   return attachments
 }
 
-function readArtifactAttachmentInputs(value: unknown) {
+function readFileAttachmentInputs(value: unknown) {
   if (value === undefined || value === null) {
     return []
   }
@@ -86,13 +83,10 @@ function readArtifactAttachmentInputs(value: unknown) {
     }
 
     const input = item as Record<string, unknown>
-    const artifactId = requiredString(
-      input.artifactId,
-      `attachments[${index}].artifactId`
-    )
+    const fileId = requiredString(input.fileId, `attachments[${index}].fileId`)
 
     return {
-      artifactId,
+      fileId,
       name: optionalString(input.name),
       mimeType: optionalString(input.mimeType),
     }
