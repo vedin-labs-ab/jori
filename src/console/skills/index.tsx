@@ -171,6 +171,7 @@ function useSkillPagination({
   const hasFilters = searchTerm.trim() !== "" || view !== "all"
   const pagination = useClientPagination({
     hasFilters,
+    isReady: skills !== undefined,
     itemLabel: { singular: "skill", plural: "skills" },
     items: visibleSkills ?? [],
     totalCount: skills?.length ?? 0,

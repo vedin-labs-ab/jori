@@ -4,12 +4,14 @@ export const consoleGridPageSize = 12
 
 export function useClientPagination<T>({
   hasFilters,
+  isReady,
   itemLabel,
   items,
   pageSize = consoleGridPageSize,
   totalCount = items.length,
 }: {
   hasFilters: boolean
+  isReady: boolean
   itemLabel: { singular: string; plural: string }
   items: T[]
   pageSize?: number
@@ -48,6 +50,7 @@ export function useClientPagination<T>({
       totalCount,
       visibleCount: visibleRows.length,
     }),
+    isReady,
     next,
     pageIndex,
     previous,

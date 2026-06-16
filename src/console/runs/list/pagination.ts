@@ -72,6 +72,7 @@ export function useExecutionPagination(
     hasFilters,
     isLoadingFirstPage: executions.status === "LoadingFirstPage",
     isLoadingMore,
+    isReady: executions.status !== "LoadingFirstPage" && stats !== undefined,
     next,
     pageIndex,
     previous,
