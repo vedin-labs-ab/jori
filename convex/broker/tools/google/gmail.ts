@@ -1,8 +1,8 @@
 import { type Doc } from "../../../_generated/dataModel"
 import {
-  type ArtifactContext,
-  readArtifactAttachments,
-} from "../../../artifacts/attachments"
+  type FileContext,
+  readFileAttachments,
+} from "../../../files/attachments"
 import {
   boundedNumber,
   optionalStringArray,
@@ -25,7 +25,7 @@ export async function callGmailTool(
   token: string,
   tool: string,
   args: Record<string, unknown>,
-  context?: ArtifactContext
+  context?: FileContext
 ) {
   if (tool === "google_gmail_search_threads") {
     return await searchGmailThreads(token, args)
@@ -144,7 +144,7 @@ async function replyToGmailThread(
 async function sendGmailMessage(
   token: string,
   args: Record<string, unknown>,
-  context?: ArtifactContext
+  context?: FileContext
 ) {
   return await googleJson(
     token,
@@ -154,7 +154,7 @@ async function sendGmailMessage(
       body: {
         raw: createMimeMessage({
           ...gmailMessageInput(args),
-          attachments: await readArtifactAttachments(context, args.attachments),
+          attachments: await readFileAttachments(context, args.attachments),
         }),
       },
     }
@@ -164,7 +164,7 @@ async function sendGmailMessage(
 async function createGmailDraft(
   token: string,
   args: Record<string, unknown>,
-  context?: ArtifactContext
+  context?: FileContext
 ) {
   return await googleJson(
     token,
@@ -175,10 +175,7 @@ async function createGmailDraft(
         message: {
           raw: createMimeMessage({
             ...gmailMessageInput(args),
-            attachments: await readArtifactAttachments(
-              context,
-              args.attachments
-            ),
+            attachments: await readFileAttachments(context, args.attachments),
           }),
         },
       },

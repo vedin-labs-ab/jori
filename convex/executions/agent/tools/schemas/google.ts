@@ -1,5 +1,5 @@
 import {
-  artifactAttachmentsProperty,
+  fileAttachmentsProperty,
   numberProperty,
   objectProperty,
   objectSchema,
@@ -108,7 +108,7 @@ function gmailMessageSchema() {
   return objectSchema({
     required: ["to", "subject", "body"],
     properties: {
-      attachments: artifactAttachmentsProperty(),
+      attachments: fileAttachmentsProperty(),
       bcc: stringArrayProperty("BCC recipient email addresses."),
       body: stringProperty("Message body."),
       bodyType: {

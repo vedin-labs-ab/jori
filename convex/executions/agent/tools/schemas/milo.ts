@@ -102,7 +102,7 @@ const triggerSchema = () => ({
 })
 
 export const miloToolInputSchemas = {
-  save_artifact: objectSchema({
+  save_file: objectSchema({
     required: ["path"],
     properties: {
       path: stringProperty(
@@ -112,26 +112,24 @@ export const miloToolInputSchemas = {
       mimeType: stringProperty(
         "Optional content type, for example image/png or application/pdf."
       ),
-      description: stringProperty(
-        "Optional short description of the artifact."
-      ),
+      description: stringProperty("Optional short description of the file."),
     },
   }),
-  search_artifacts: objectSchema({
+  search_files: objectSchema({
     properties: {
       query: stringProperty(
-        "Substring matched against artifact names, descriptions, and content types."
+        "Substring matched against file names, descriptions, and content types."
       ),
       mimeType: stringProperty(
         "Optional content type filter, for example image/png or image/."
       ),
-      limit: numberProperty("Maximum artifacts to return.", 1, 100),
+      limit: numberProperty("Maximum files to return.", 1, 100),
     },
   }),
-  read_artifact: objectSchema({
-    required: ["artifactId"],
+  read_file: objectSchema({
+    required: ["fileId"],
     properties: {
-      artifactId: stringProperty("Artifact ID."),
+      fileId: stringProperty("File ID."),
     },
   }),
   add_automation: objectSchema({

@@ -50,15 +50,15 @@ export function objectProperty(description: string) {
   }
 }
 
-export function artifactAttachmentsProperty() {
+export function fileAttachmentsProperty() {
   return {
     type: "array",
     description:
-      "Files to attach. Prefer this over sending file links when the destination supports attachments. Save local files with save_artifact or find existing files with search_artifacts, then pass artifact IDs here.",
+      "Files to attach. Prefer this over sending file links when the destination supports attachments. Save local files with save_file or find existing files with search_files, then pass file IDs here.",
     items: objectSchema({
-      required: ["artifactId"],
+      required: ["fileId"],
       properties: {
-        artifactId: stringProperty("Artifact ID returned by save_artifact."),
+        fileId: stringProperty("File ID returned by save_file."),
         name: stringProperty("Optional attachment filename override."),
         mimeType: stringProperty("Optional attachment content type override."),
       },
