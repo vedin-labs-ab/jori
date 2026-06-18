@@ -1,4 +1,4 @@
-import { type ToolPermission } from "../../permissions/controller"
+import { type ToolPermission } from "../../permissions/types"
 import {
   type AutomationSurfaceAccess,
   type AutomationSurfaceFormValue,

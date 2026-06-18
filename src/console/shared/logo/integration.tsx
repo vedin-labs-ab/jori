@@ -50,7 +50,7 @@ export function IntegrationLogoStack({
   maxVisible?: number
   size?: IntegrationLogoSize
 }) {
-  const uniqueIntegrations = uniqueIntegrationList(integrations)
+  const uniqueIntegrations = [...new Set(integrations)]
   const visibleLimit = Math.max(1, maxVisible)
   const hasOverflow = uniqueIntegrations.length > visibleLimit
   const visibleCount = hasOverflow
@@ -108,10 +108,6 @@ function HiddenIntegrationCount({
       <TooltipContent>{hiddenTitle}</TooltipContent>
     </Tooltip>
   )
-}
-
-function uniqueIntegrationList(integrations: readonly Integration[]) {
-  return [...new Set(integrations)]
 }
 
 function logoSizeClassName(size: IntegrationLogoSize) {

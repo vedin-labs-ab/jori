@@ -11,7 +11,7 @@ import { requireClerkUserId } from "../identity/users"
 import {
   type Integration,
   isUserScopedIntegration,
-} from "../integrations/catalog"
+} from "../shared/integrations"
 import { projectAccessForConsole } from "./access"
 import {
   createAutomation,

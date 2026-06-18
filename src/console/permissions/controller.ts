@@ -1,14 +1,14 @@
-import {
-  type ConfigurablePermissionMode,
-  type PermissionMode,
-  type ResolvedToolPermission,
-  type ToolAccess,
-  type ToolSurface,
-} from "@contracts/permissions"
 import { useMutation, useQuery } from "convex/react"
 import { useState } from "react"
 import { api } from "../../../convex/_generated/api"
 import { readErrorMessage } from "../shared/error"
+import {
+  type ConfigurablePermissionMode,
+  type PermissionMode,
+  type ToolAccess,
+  type ToolPermission,
+  type ToolSurface,
+} from "./types"
 
 export type {
   ConfigurablePermissionMode,
@@ -16,7 +16,6 @@ export type {
   ToolAccess,
   ToolSurface,
 }
-export type ToolPermission = ResolvedToolPermission
 
 type PermissionUpdateError = {
   tool: string

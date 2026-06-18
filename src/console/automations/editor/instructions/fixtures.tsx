@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react"
 import { vi } from "vitest"
-import { type ToolPermission } from "../../../permissions/controller"
+import { type ToolPermission } from "../../../permissions/types"
 import { AutomationInstructionsField } from "."
 
 export const instructionToolPermissions = [

@@ -4,8 +4,8 @@ import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
-import { integrationValidator } from "../integrations/catalog"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
+import { integrationValidator } from "../shared/integrations"
 import {
   integrationUsesAutomationEventOptionSource,
   isAutomationEventOptionSource,

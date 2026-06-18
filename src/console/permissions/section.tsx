@@ -10,14 +10,14 @@ import {
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../shared/dot"
 import { LoadingMessage } from "../shared/loading"
+import { type ToolPermissionController } from "./controller"
+import { PermissionRow } from "./row"
 import {
   type ConfigurablePermissionMode,
   type ToolAccess,
   type ToolPermission,
-  type ToolPermissionController,
   type ToolSurface,
-} from "./controller"
-import { PermissionRow } from "./row"
+} from "./types"
 
 export function PermissionSection({
   controller,

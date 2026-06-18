@@ -1,4 +1,4 @@
-import { type ToolSurface } from "../../integrations/catalog"
+import { type ToolSurface } from "../../shared/integrations"
 
 export type PromptedToolApproval = {
   surface: ToolSurface

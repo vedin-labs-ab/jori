@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { internalQuery } from "../_generated/server"
-import { integrationValidator } from "../integrations/catalog"
+import { integrationValidator } from "../shared/integrations"
 
 export const activeByIntegrationExternal = internalQuery({
   args: {

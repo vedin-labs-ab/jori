@@ -274,6 +274,7 @@ import type * as shared_data from "../shared/data.js";
 import type * as shared_encoding from "../shared/encoding.js";
 import type * as shared_http from "../shared/http.js";
 import type * as shared_input from "../shared/input.js";
+import type * as shared_integrations from "../shared/integrations.js";
 import type * as shared_sources_metadata from "../shared/sources/metadata.js";
 import type * as skills_catalog from "../skills/catalog.js";
 import type * as skills_data from "../skills/data.js";
@@ -551,6 +552,7 @@ declare const fullApi: ApiFromModules<{
   "shared/encoding": typeof shared_encoding;
   "shared/http": typeof shared_http;
   "shared/input": typeof shared_input;
+  "shared/integrations": typeof shared_integrations;
   "shared/sources/metadata": typeof shared_sources_metadata;
   "skills/catalog": typeof skills_catalog;
   "skills/data": typeof skills_data;

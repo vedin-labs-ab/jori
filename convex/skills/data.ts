@@ -1,5 +1,5 @@
 import { type MutationCtx } from "../_generated/server"
-import { type Integration, integrations } from "../integrations/catalog"
+import { type Integration, integrations } from "../shared/integrations"
 
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const skillNameMaxLength = 64

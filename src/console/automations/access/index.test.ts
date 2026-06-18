@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { type ToolPermission } from "../../permissions/controller"
+import { type ToolPermission } from "../../permissions/types"
 import {
   findActiveAutomationSurfaceMention,
   findAutomationSurfaceMentions,

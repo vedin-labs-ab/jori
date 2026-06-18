@@ -23,8 +23,8 @@ import {
 } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, absoluteUtcTime } from "../../shared/time"
+import { ToolGroupsValue } from "../../tools"
 import { type ExecutionDetail, type ExecutionDetailType } from "../types"
-import { ExecutionToolsValue } from "./groups"
 import { RepositoryIcon } from "./source"
 
 const detailMeta = {
@@ -210,7 +210,7 @@ function PayloadHeader({
 
 function FactValue({ detail }: { detail: ExecutionDetail }) {
   if (detail.type === "tools" && detail.groups !== undefined) {
-    return <ExecutionToolsValue groups={detail.groups} />
+    return <ToolGroupsValue groups={detail.groups} />
   }
 
   if (detail.url === undefined) {

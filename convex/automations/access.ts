@@ -1,7 +1,6 @@
 import { type Infer } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
-import { type Integration } from "../integrations/catalog"
 import {
   getToolPermission,
   isUnattendedToolMode,
@@ -10,6 +9,7 @@ import {
   resolveToolModes,
 } from "../permissions/catalog"
 import { listPermissionOverrides } from "../permissions/read"
+import { type Integration } from "../shared/integrations"
 import { integrationLabels, resolveEventIntegration } from "./integrations"
 import { type access, type accessInput } from "./schema"
 

@@ -1,6 +1,5 @@
 import { ChevronRight } from "lucide-react"
 import { useState } from "react"
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,19 +10,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { ReadonlyToolGroups } from "@/console/permissions/tools"
-import { SeparatorDot } from "../../shared/dot"
-import { type ExecutionDetailGroup } from "../types"
-import { ProviderLogo } from "./source"
+import { SeparatorDot } from "../shared/dot"
+import { ProviderLogo } from "../shared/logo/provider"
+import { type ToolCapability } from "./model"
+import { ReadonlyToolGroups } from "./readonly"
 
-export function ExecutionToolsValue({
+export type ToolGroup = {
+  type: string
+  label: string
+  tools: ToolCapability[]
+}
+
+export function ToolGroupsValue({
   description = "Tools available to this execution.",
   groups,
 }: {
   description?: string
-  groups: ExecutionDetailGroup[]
+  groups: ToolGroup[]
 }) {
-  const [activeGroup, setActiveGroup] = useState<ExecutionDetailGroup>()
+  const [activeGroup, setActiveGroup] = useState<ToolGroup>()
 
   return (
     <>
@@ -57,7 +62,7 @@ function ToolGroupButton({
   group,
   onClick,
 }: {
-  group: ExecutionDetailGroup
+  group: ToolGroup
   onClick: () => void
 }) {
   const counts = countTools(group.tools)
@@ -156,7 +161,7 @@ function ToolGroupDialog({
   group,
 }: {
   description: string
-  group: ExecutionDetailGroup
+  group: ToolGroup
 }) {
   return (
     <DialogContent className="sm:max-w-xl">
@@ -179,7 +184,7 @@ function ToolGroupDialog({
   )
 }
 
-function countTools(tools: ExecutionDetailGroup["tools"]) {
+function countTools(tools: ToolGroup["tools"]) {
   const counts = {
     read: 0,
     readRequiresApproval: false,

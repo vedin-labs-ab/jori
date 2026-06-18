@@ -41,7 +41,7 @@ export function IntegrationSurface({
               <CardTitle className="text-xl">{title}</CardTitle>
               {status}
             </div>
-            <p className="max-w-3xl text-sm text-muted-foreground">
+            <p className="max-w-3xl text-muted-foreground text-sm">
               {description}
             </p>
           </div>

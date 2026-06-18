@@ -14,7 +14,7 @@ import {
   integrationValidator,
   isGoogleIntegration,
   isUserScopedIntegration,
-} from "../integrations/catalog"
+} from "../shared/integrations"
 import { getTenantIntegration, getUserIntegrationForOwner } from "./data"
 import { revokeIntegrationAccess } from "./revoke"
 

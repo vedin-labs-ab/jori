@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { toolSurfaceValidator } from "../integrations/catalog"
+import { toolSurfaceValidator } from "../shared/integrations"
 
 export const toolSnapshot = v.object({
   groups: v.array(

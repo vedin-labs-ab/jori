@@ -58,7 +58,6 @@ import {
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BrandMark } from "@/shared/brand"
-import { IntegrationCallbackAlerts } from "../integrations/callback/alerts"
 
 const consoleNavigation = [
   { icon: LayoutDashboard, label: "Overview", to: "/console" },
@@ -71,10 +70,12 @@ const consoleNavigation = [
 ] as const
 
 export function PublicConsoleFrame({
+  chromeContent,
   children,
   isLoaded,
   isSignedIn,
 }: {
+  chromeContent?: ReactNode
   children: ReactNode
   isLoaded: boolean
   isSignedIn: boolean | undefined
@@ -82,13 +83,19 @@ export function PublicConsoleFrame({
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-5xl flex-col gap-8 px-6 py-8">
       <PublicConsoleHeader isLoaded={isLoaded} isSignedIn={isSignedIn} />
-      <IntegrationCallbackAlerts />
+      {chromeContent}
       {children}
     </main>
   )
 }
 
-export function ConsoleShell({ children }: { children: ReactNode }) {
+export function ConsoleShell({
+  chromeContent,
+  children,
+}: {
+  chromeContent?: ReactNode
+  children: ReactNode
+}) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
@@ -115,7 +122,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col gap-4 overflow-y-auto px-4 pt-1 pb-6 md:px-6">
-          <IntegrationCallbackAlerts />
+          {chromeContent}
           {children}
         </div>
       </SidebarInset>

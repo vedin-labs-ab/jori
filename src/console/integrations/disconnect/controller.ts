@@ -1,7 +1,7 @@
 import { useAction } from "convex/react"
 import { useState } from "react"
 import { api } from "../../../../convex/_generated/api"
-import { type ToolSurface } from "../../permissions/controller"
+import { type ToolSurface } from "../../permissions/types"
 import { readErrorMessage } from "../../shared/error"
 
 export function useIntegrationDisconnect({

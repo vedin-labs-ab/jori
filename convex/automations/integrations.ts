@@ -4,9 +4,9 @@ import {
   type Integration,
   integrationLabels,
   isUserScopedIntegration,
-} from "../integrations/catalog"
+} from "../shared/integrations"
 
-export { integrationLabels } from "../integrations/catalog"
+export { integrationLabels } from "../shared/integrations"
 
 type QueryLikeCtx = MutationCtx | QueryCtx
 

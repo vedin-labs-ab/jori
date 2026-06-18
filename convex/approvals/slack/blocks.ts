@@ -1,5 +1,5 @@
 import { type SlackBlock } from "../../broker/tools/slack"
-import { type ToolSurface } from "../../integrations/catalog"
+import { type ToolSurface } from "../../shared/integrations"
 import { type SlackApprovalDecisionResult } from "../runtime"
 import {
   createApprovalCard,

@@ -17,9 +17,9 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
+import { ProviderLogo } from "../../shared/logo/provider"
 import { absoluteTime, formatDuration } from "../../shared/time"
 import { type ExecutionItem } from "../types"
-import { ProviderLogo } from "./source"
 
 type ApprovalDecisionArgs = FunctionArgs<typeof api.approvals.console.decide>
 
