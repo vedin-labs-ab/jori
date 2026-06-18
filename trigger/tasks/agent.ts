@@ -1,7 +1,7 @@
 import { task } from "@trigger.dev/sdk/v3"
 import { MiloConvexClient } from "../convex"
 import { errorDetails, runtimeEvent } from "../events"
-import { OpenAIModelRuntime } from "../model/openai"
+import { OpenRouterModelRuntime } from "../model/openrouter"
 import {
   type ModelMessage,
   type ModelRuntime,
@@ -56,7 +56,7 @@ export const miloAgentRun = task({
     try {
       const output = await runAgentLoop({
         attempt,
-        model: new OpenAIModelRuntime(),
+        model: new OpenRouterModelRuntime(),
         runtime: { convex, context, sandbox },
       })
       await sandbox.cleanup()
@@ -132,6 +132,7 @@ async function runToolCalls(
       content,
       role: "tool",
       toolCallId: call.id,
+      toolName: call.name,
     })
     index += 1
   }

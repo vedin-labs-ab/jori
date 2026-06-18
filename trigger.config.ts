@@ -8,7 +8,7 @@ if (project === undefined || project === "") {
 
 export default defineConfig({
   project,
-  dirs: [".trigger/tasks"],
+  dirs: ["trigger/tasks"],
   runtime: "node-22",
   maxDuration: 7200,
   retries: {

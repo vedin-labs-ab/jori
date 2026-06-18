@@ -1,12 +1,11 @@
 import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../contracts/integrations"
 import { api } from "../convex/_generated/api"
-import { type Id } from "../convex/_generated/dataModel"
 import {
   type AgentRunPayload,
+  type ConvexId,
   type JsonObject,
   type RuntimeContext,
-  type SandboxCleanupPayload,
 } from "./types"
 
 export class MiloConvexClient {
@@ -24,9 +23,9 @@ export class MiloConvexClient {
   async recordEvent(args: {
     attempt?: number
     eventKey: string
-    executionId: Id<"executions">
+    executionId: ConvexId<"executions">
     payload?: JsonObject
-    runId: Id<"runs">
+    runId: ConvexId<"runs">
     sequence: number
     source: string
     toolCallId?: string
@@ -40,7 +39,7 @@ export class MiloConvexClient {
 
   async callTool(args: {
     approved?: boolean
-    executionId: Id<"executions">
+    executionId: ConvexId<"executions">
     input: JsonObject
     surface: ToolSurface
     tool: string
@@ -56,7 +55,7 @@ export class MiloConvexClient {
   }
 
   async requestApproval(args: {
-    executionId: Id<"executions">
+    executionId: ConvexId<"executions">
     input: JsonObject
     surface: ToolSurface
     tool: string
@@ -73,7 +72,7 @@ export class MiloConvexClient {
   }
 
   async createChildRun(args: {
-    parentRunId: Id<"runs">
+    parentRunId: ConvexId<"runs">
     task: string
     title?: string
   }) {
@@ -88,7 +87,7 @@ export class MiloConvexClient {
   async uploadFile(args: {
     bytes: Uint8Array
     description?: string
-    executionId: Id<"executions">
+    executionId: ConvexId<"executions">
     mimeType: string
     name: string
   }) {
@@ -100,7 +99,7 @@ export class MiloConvexClient {
     }
 
     const response = await fetch(url, {
-      body: args.bytes,
+      body: toArrayBuffer(args.bytes),
       headers: {
         "content-type": args.mimeType,
         "x-milo-execution-id": args.executionId,
@@ -118,7 +117,7 @@ export class MiloConvexClient {
   }
 
   async fetchGitHubTarball(args: {
-    executionId: Id<"executions">
+    executionId: ConvexId<"executions">
     owner: string
     ref?: string
     repo: string
@@ -150,8 +149,8 @@ export class MiloConvexClient {
   }
 
   async upsertSandbox(args: {
-    executionId: Id<"executions">
-    runId: Id<"runs">
+    executionId: ConvexId<"executions">
+    runId: ConvexId<"runs">
     sandboxId: string
     status: "created" | "reconnected" | "running"
     traceHost?: string
@@ -162,9 +161,13 @@ export class MiloConvexClient {
     })
   }
 
-  async markSandboxCleaned(args: SandboxCleanupPayload) {
+  async markSandboxCleaned(args: {
+    executionId: ConvexId<"executions">
+    sandboxId: string
+  }) {
     await this.client.mutation(api.runtime.sandboxes.markCleaned, {
-      ...args,
+      executionId: args.executionId,
+      sandboxId: args.sandboxId,
       secret: this.secret,
     })
   }
@@ -214,4 +217,11 @@ function fileUploadError(value: unknown) {
   }
 
   return "File upload failed"
+}
+
+function toArrayBuffer(bytes: Uint8Array) {
+  const copy = new Uint8Array(bytes.byteLength)
+  copy.set(bytes)
+
+  return copy.buffer
 }

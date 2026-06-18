@@ -1,21 +1,21 @@
+import { type GenericId } from "convex/values"
 import { type ToolSurface } from "../contracts/integrations"
 
 export { agentTaskId, cleanupTaskId } from "../contracts/runtime"
 
-import { type Id } from "../convex/_generated/dataModel"
-
 export type JsonObject = Record<string, unknown>
+export type ConvexId<TableName extends string> = GenericId<TableName>
 
 export type AgentRunPayload = {
-  executionId: Id<"executions">
-  parentRunId?: Id<"runs">
-  rootRunId?: Id<"runs">
-  runId: Id<"runs">
+  executionId: ConvexId<"executions">
+  parentRunId?: ConvexId<"runs">
+  rootRunId?: ConvexId<"runs">
+  runId: ConvexId<"runs">
 }
 
 export type SandboxCleanupPayload = {
-  executionId: Id<"executions">
-  runId: Id<"runs">
+  executionId: ConvexId<"executions">
+  runId: ConvexId<"runs">
   sandboxId: string
 }
 
@@ -33,16 +33,16 @@ export type RuntimeTool = {
 
 export type RuntimeContext = {
   execution: {
-    id: Id<"executions">
+    id: ConvexId<"executions">
     sandboxId: string | null
     status: "completed" | "failed" | "queued" | "running" | "stopped"
   }
   prompt: string
   run: {
-    id: Id<"runs">
-    rootRunId: Id<"runs"> | null
+    id: ConvexId<"runs">
+    rootRunId: ConvexId<"runs"> | null
     task: string
-    tenantId: Id<"tenants">
+    tenantId: string
     title: string
   }
   tools: RuntimeTool[]
@@ -60,9 +60,9 @@ export type RuntimeEventType =
 
 export type RuntimeEventInput = {
   attempt?: number
-  executionId: Id<"executions">
+  executionId: ConvexId<"executions">
   payload?: JsonObject
-  runId: Id<"runs">
+  runId: ConvexId<"runs">
   sequence: number
   source: string
   toolCallId?: string
@@ -70,6 +70,6 @@ export type RuntimeEventInput = {
 }
 
 export type ApprovalDecision = {
-  approvalId?: Id<"approvals">
+  approvalId?: ConvexId<"approvals">
   decision: "approved" | "denied"
 }
