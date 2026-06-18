@@ -7,12 +7,12 @@ import {
   internalMutation,
   type MutationCtx,
 } from "../_generated/server"
-import { postSlackMessage, updateSlackMessage } from "../broker/tools/slack"
+import { setSlackThreadStatus } from "../broker/tools/slack"
 import { readProviderDataString } from "../providers/data"
-import { requiredSlackResultString } from "../providers/slack/api"
 import { formatRuntimeError } from "./shared"
 
 const claimLeaseMs = 2 * 60 * 1000
+const statusRefreshMs = 90 * 1000
 
 const slackRunState = v.union(
   v.literal("working"),
@@ -25,7 +25,7 @@ type SlackRunState = Doc<"runtimeSlackStatuses">["state"]
 type SlackPublishTarget = {
   integration: Doc<"integrations">
   status: Doc<"runtimeSlackStatuses">
-  text: string
+  statusText: string
 }
 
 export async function createSlackRunStatus(
@@ -103,12 +103,9 @@ export const publish = internalAction({
     }
 
     try {
-      const response = await deliverSlackStatus(target)
-      const messageTs =
-        target.status.messageTs ?? requiredSlackResultString(response, "ts")
+      await deliverSlackStatus(target)
 
       await ctx.runMutation(internal.runtime.slack.recordDelivery, {
-        messageTs,
         runId: args.runId,
         state: target.status.state,
         now: Date.now(),
@@ -153,13 +150,12 @@ export const claim = internalMutation({
       updatedAt: args.now,
     })
 
-    return { integration, status, text: statusText(status) }
+    return { integration, status, statusText: assistantStatusText(status) }
   },
 })
 
 export const recordDelivery = internalMutation({
   args: {
-    messageTs: v.string(),
     now: v.number(),
     runId: v.id("runs"),
     state: slackRunState,
@@ -176,13 +172,15 @@ export const recordDelivery = internalMutation({
       deliveredAt: args.now,
       lastDeliveredState: args.state,
       lastError: undefined,
-      messageTs: args.messageTs,
+      messageTs: undefined,
       publishClaimUntil: undefined,
       updatedAt: args.now,
     })
 
     if (status.state !== args.state) {
       await schedulePublish(ctx, args.runId)
+    } else if (args.state === "working") {
+      await schedulePublish(ctx, args.runId, statusRefreshMs)
     }
 
     return null
@@ -221,18 +219,10 @@ async function claimPublish(ctx: ActionCtx, runId: Id<"runs">) {
 }
 
 async function deliverSlackStatus(target: SlackPublishTarget) {
-  if (target.status.messageTs === undefined) {
-    return await postSlackMessage(target.integration, {
-      channel: target.status.channelId,
-      text: target.text,
-      thread_ts: target.status.threadTs,
-    })
-  }
-
-  return await updateSlackMessage(target.integration, {
-    channel: target.status.channelId,
-    ts: target.status.messageTs,
-    text: target.text,
+  return await setSlackThreadStatus(target.integration, {
+    channelId: target.status.channelId,
+    status: target.statusText,
+    threadTs: target.status.threadTs,
   })
 }
 
@@ -252,9 +242,17 @@ function needsPublish(status: Doc<"runtimeSlackStatuses">, now: number) {
   }
 
   return (
-    status.messageTs === undefined ||
     status.lastDeliveredState !== status.state ||
-    status.lastError !== undefined
+    status.lastError !== undefined ||
+    needsWorkingRefresh(status, now)
+  )
+}
+
+function needsWorkingRefresh(status: Doc<"runtimeSlackStatuses">, now: number) {
+  return (
+    status.state === "working" &&
+    (status.deliveredAt === undefined ||
+      status.deliveredAt <= now - statusRefreshMs)
   )
 }
 
@@ -279,20 +277,16 @@ function readSlackTarget(
   }
 }
 
-function schedulePublish(ctx: MutationCtx, runId: Id<"runs">) {
-  return ctx.scheduler.runAfter(0, internal.runtime.slack.publish, { runId })
+function schedulePublish(ctx: MutationCtx, runId: Id<"runs">, delayMs = 0) {
+  return ctx.scheduler.runAfter(delayMs, internal.runtime.slack.publish, {
+    runId,
+  })
 }
 
-function statusText(status: Doc<"runtimeSlackStatuses">) {
-  if (status.state === "completed") {
-    return "Milo finished this run."
+function assistantStatusText(status: Doc<"runtimeSlackStatuses">) {
+  if (status.state === "working") {
+    return "is working..."
   }
 
-  if (status.state === "failed") {
-    return status.lastError === undefined
-      ? "Milo hit an error while working on this."
-      : `Milo hit an error while working on this: ${status.lastError}`
-  }
-
-  return "Milo is working on this."
+  return ""
 }
