@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc } from "../../../_generated/dataModel"
-import { callSlackTool, setSlackThreadStatus } from "."
+import { setSlackThreadStatus } from "."
 
 const originalFetch = globalThis.fetch
 
@@ -50,60 +50,6 @@ describe("Slack assistant thread status", () => {
       status: "",
       thread_ts: "123.456",
     })
-  })
-})
-
-describe("Slack final replies", () => {
-  test("clears assistant status before posting a threaded reply", async () => {
-    const calls = mockSlackFetch({ ok: true, ts: "111.222" })
-    const runAction = vi.fn(async () => {
-      expect(calls).toHaveLength(0)
-      return null
-    })
-
-    await callSlackTool(
-      slackIntegration(),
-      "conversations_add_message",
-      {
-        channel: "C123",
-        text: "Hello",
-        thread_ts: "123.456",
-      },
-      {
-        ctx: { runAction },
-        execution: { runId: "run-id" },
-      } as never
-    )
-
-    expect(runAction).toHaveBeenCalledWith(expect.anything(), {
-      channelId: "C123",
-      runId: "run-id",
-      threadTs: "123.456",
-    })
-    expect(calls[0]?.url).toBe("https://slack.com/api/chat.postMessage")
-  })
-
-  test("posts the reply when status clearing fails", async () => {
-    const calls = mockSlackFetch({ ok: true, ts: "111.222" })
-    const runAction = vi.fn(async () => {
-      throw new Error("status clear failed")
-    })
-
-    await callSlackTool(
-      slackIntegration(),
-      "conversations_add_message",
-      {
-        channel: "C123",
-        text: "Hello",
-        thread_ts: "123.456",
-      },
-      {
-        ctx: { runAction },
-        execution: { runId: "run-id" },
-      } as never
-    )
-
-    expect(calls[0]?.url).toBe("https://slack.com/api/chat.postMessage")
   })
 })
 

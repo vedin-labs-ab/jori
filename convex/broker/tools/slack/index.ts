@@ -1,4 +1,3 @@
-import { internal } from "../../../_generated/api"
 import { type Doc } from "../../../_generated/dataModel"
 import {
   type FileAttachment,
@@ -173,11 +172,6 @@ async function postSlackMessageTool(
   const text = requiredString(args.text, "text")
   const blocks = optionalBlocks(args.blocks)
 
-  await clearSlackStatusBeforeReply(context, {
-    channel,
-    threadTs,
-  })
-
   return await postSlackMessage(integration, {
     attachments,
     blocks,
@@ -185,28 +179,6 @@ async function postSlackMessageTool(
     text,
     thread_ts: threadTs,
   })
-}
-
-async function clearSlackStatusBeforeReply(
-  context: FileContext | undefined,
-  args: {
-    channel: string
-    threadTs: string | undefined
-  }
-) {
-  if (context === undefined || args.threadTs === undefined) {
-    return
-  }
-
-  try {
-    await context.ctx.runAction(internal.runtime.reply.clearForReply, {
-      channelId: args.channel,
-      runId: context.execution.runId,
-      threadTs: args.threadTs,
-    })
-  } catch {
-    return
-  }
 }
 
 function optionalBlocks(value: unknown) {

@@ -58,7 +58,11 @@ const messageTriggerCases = [
     "slack",
     { channelId: "C123", ts: "123.456" },
     "Slack",
-    ["- Channel ID: C123", "- Message timestamp: 123.456"],
+    [
+      "- Channel ID: C123",
+      "- Message timestamp: 123.456",
+      "- Reply thread timestamp: 123.456",
+    ],
   ],
 ] as const
 
@@ -81,12 +85,48 @@ describe("runtime prompts", () => {
     expect(prompt).toContain("Handle the request.")
   })
 
-  test("omits absent target fields", () => {
+  test("uses Slack message timestamp as the default reply thread", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channelId: "C123", ts: "123.456" })
     )
 
-    expect(prompt).not.toContain("Thread timestamp")
+    expect(prompt).toContain("- Reply thread timestamp: 123.456")
+    expect(prompt).not.toContain("- Reply thread timestamp: undefined")
+  })
+
+  test("uses Slack thread timestamp when the trigger is already threaded", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", {
+        channelId: "C123",
+        threadTs: "123.000",
+        ts: "123.456",
+      })
+    )
+
+    expect(prompt).toContain("- Message timestamp: 123.456")
+    expect(prompt).toContain("- Reply thread timestamp: 123.000")
+  })
+
+  test("tells Slack runs that final delivery is automatic", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", { channelId: "C123", ts: "123.456" })
+    )
+
+    expect(prompt).toContain("Milo will post it as a reply")
+    expect(prompt).toContain("Use Slack write tools only")
+    expect(prompt).not.toContain("If a reply is useful, send it to this target")
+  })
+
+  test("keeps manual target delivery for non-Slack messages", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("github", {
+        repository: { owner: "acme", name: "app" },
+        comment: { id: "comment-id", kind: "issue_comment" },
+      })
+    )
+
+    expect(prompt).toContain("If a reply is useful, send it to this target")
+    expect(prompt).not.toContain("Milo will post it as a reply")
   })
 })
 
