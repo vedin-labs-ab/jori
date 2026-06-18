@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { providerLogoPath } from "../runs/row/logos"
+import { providerLogoPath } from "../path"
 
 type IntegrationLogoSize = "sm" | "md"
 

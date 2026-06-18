@@ -9,8 +9,8 @@ import { useAction, useConvexAuth } from "convex/react"
 import { type ReactNode, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { api } from "../../../../convex/_generated/api"
-import { FullscreenSkeletonLoader } from "../loading"
+import { api } from "../../../convex/_generated/api"
+import { FullscreenSkeletonLoader } from "../shared/loading"
 import { ConsoleShell, PublicConsoleFrame } from "../shell"
 
 export type ActiveOrganization = NonNullable<

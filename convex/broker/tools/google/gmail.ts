@@ -3,6 +3,7 @@ import {
   type FileContext,
   readFileAttachments,
 } from "../../../files/attachments"
+import { googleJson } from "../../../providers/google/api"
 import {
   optionalString,
   optionalStringArray,
@@ -23,7 +24,6 @@ import {
   getGmailThreads,
   searchGmailThreads,
 } from "./gmail/read"
-import { googleJson } from "./request"
 
 export async function callGmailTool(
   integration: Doc<"integrations">,

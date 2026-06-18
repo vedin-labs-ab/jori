@@ -3,8 +3,8 @@ import {
   toolSurfaceLabel,
   toolSurfaces,
 } from "@contracts/integrations"
-import { relativeTime } from "../runs/format"
 import { type ExecutionDetailTool } from "../runs/types"
+import { relativeTime } from "../shared/time"
 import { type ArtifactSummary } from "./types"
 
 export type CapabilityGroup = {

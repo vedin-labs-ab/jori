@@ -1,3 +1,4 @@
+import { googleJson } from "../../../../providers/google/api"
 import {
   boundedNumber,
   requiredString,
@@ -5,7 +6,6 @@ import {
   setOptionalSearchParam,
 } from "../../../../shared/input"
 import { normalizeGmailFormat } from "../format"
-import { googleJson } from "../request"
 
 const maxBatchReadIds = 50
 

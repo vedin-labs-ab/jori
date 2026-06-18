@@ -1,6 +1,6 @@
-import { driveFilesUrl } from "../../broker/tools/google/drive/format"
-import { googleJson } from "../../broker/tools/google/request"
+import { googleJson } from "../../providers/google/api"
 import { requireGoogleCredentials } from "../../providers/google/credentials"
+import { driveFilesUrl } from "../../providers/google/drive"
 import {
   compactDescription,
   maxOptions,

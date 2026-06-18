@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../shared/dot"
-import { formatDuration } from "../format"
+import { formatDuration } from "../../shared/time"
 import {
   type ApprovalState,
   type ExecutionItem,

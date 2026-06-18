@@ -1,9 +1,4 @@
-export function absoluteTime(timestamp: number) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(timestamp)
-}
+export { absoluteTime } from "../shared/time"
 
 export function relativeTime(timestamp: number, now: number) {
   const isFuture = timestamp > now

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
-import { absoluteTime, formatDuration } from "../format"
+import { absoluteTime, formatDuration } from "../../shared/time"
 import { type ExecutionItem } from "../types"
 import { ProviderLogo } from "./source"
 
