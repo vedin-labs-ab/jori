@@ -1,3 +1,4 @@
+import { internal } from "../../../_generated/api"
 import { type Doc } from "../../../_generated/dataModel"
 import {
   type FileAttachment,
@@ -126,41 +127,86 @@ export async function callSlackTool(
   }
 
   if (tool === "users_search") {
-    const result = await slackQueryApi(credentials.user, "users.list", {
-      limit: boundedNumber(args.limit, 100, 1, 200),
-      cursor: optionalString(args.cursor),
-    })
-    const query = optionalString(args.query)?.toLowerCase()
-
-    if (
-      result === null ||
-      query === undefined ||
-      !Array.isArray(result.members)
-    ) {
-      return result
-    }
-
-    return {
-      ...result,
-      members: result.members.filter((member: Record<string, unknown>) =>
-        JSON.stringify(member).toLowerCase().includes(query)
-      ),
-    }
+    return await searchSlackUsers(credentials.user, args)
   }
 
   if (tool === "conversations_add_message") {
-    return await postSlackMessage(integration, {
-      attachments: await readFileAttachments(context, args.attachments, {
-        maxBytes: 25 * 1024 * 1024,
-      }),
-      channel: requiredString(args.channel, "channel"),
-      text: requiredString(args.text, "text"),
-      thread_ts: optionalString(args.thread_ts),
-      blocks: optionalBlocks(args.blocks),
-    })
+    return await postSlackMessageTool(integration, args, context)
   }
 
   throw new Error(`Unknown Slack tool: ${tool}`)
+}
+
+async function searchSlackUsers(token: string, args: Record<string, unknown>) {
+  const result = await slackQueryApi(token, "users.list", {
+    limit: boundedNumber(args.limit, 100, 1, 200),
+    cursor: optionalString(args.cursor),
+  })
+  const query = optionalString(args.query)?.toLowerCase()
+
+  if (
+    result === null ||
+    query === undefined ||
+    !Array.isArray(result.members)
+  ) {
+    return result
+  }
+
+  return {
+    ...result,
+    members: result.members.filter((member: Record<string, unknown>) =>
+      JSON.stringify(member).toLowerCase().includes(query)
+    ),
+  }
+}
+
+async function postSlackMessageTool(
+  integration: Doc<"integrations">,
+  args: Record<string, unknown>,
+  context?: FileContext
+) {
+  const attachments = await readFileAttachments(context, args.attachments, {
+    maxBytes: 25 * 1024 * 1024,
+  })
+  const channel = requiredString(args.channel, "channel")
+  const threadTs = optionalString(args.thread_ts)
+  const text = requiredString(args.text, "text")
+  const blocks = optionalBlocks(args.blocks)
+
+  await clearSlackStatusBeforeReply(context, {
+    channel,
+    threadTs,
+  })
+
+  return await postSlackMessage(integration, {
+    attachments,
+    blocks,
+    channel,
+    text,
+    thread_ts: threadTs,
+  })
+}
+
+async function clearSlackStatusBeforeReply(
+  context: FileContext | undefined,
+  args: {
+    channel: string
+    threadTs: string | undefined
+  }
+) {
+  if (context === undefined || args.threadTs === undefined) {
+    return
+  }
+
+  try {
+    await context.ctx.runAction(internal.runtime.reply.clearForReply, {
+      channelId: args.channel,
+      runId: context.execution.runId,
+      threadTs: args.threadTs,
+    })
+  } catch {
+    return
+  }
 }
 
 function optionalBlocks(value: unknown) {

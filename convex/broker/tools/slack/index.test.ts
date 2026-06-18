@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc } from "../../../_generated/dataModel"
 import { fileContext } from "../fixtures"
-import { callSlackTool, setSlackThreadStatus } from "."
+import { callSlackTool } from "."
 
 const originalFetch = globalThis.fetch
 
@@ -177,50 +177,6 @@ describe("Slack read tools", () => {
       count: "5",
       page: "2",
       query: "stilla",
-    })
-  })
-})
-
-describe("Slack assistant thread status", () => {
-  test("sets the assistant thread status with the bot token", async () => {
-    const calls = mockSlackFetch({ ok: true })
-
-    const result = await setSlackThreadStatus(slackIntegration(), {
-      channelId: "C123",
-      status: "is working...",
-      threadTs: "123.456",
-    })
-
-    expect(result).toEqual({ ok: true })
-    expect(calls).toHaveLength(1)
-    expect(calls[0]?.url).toBe(
-      "https://slack.com/api/assistant.threads.setStatus"
-    )
-    expect(calls[0]?.method).toBe("POST")
-    expect(calls[0]?.headers).toMatchObject({
-      authorization: "Bearer bot-token",
-      "content-type": "application/json; charset=utf-8",
-    })
-    expect(calls[0]?.body).toMatchObject({
-      channel_id: "C123",
-      status: "is working...",
-      thread_ts: "123.456",
-    })
-  })
-
-  test("clears the assistant thread status with an empty status", async () => {
-    const calls = mockSlackFetch({ ok: true })
-
-    await setSlackThreadStatus(slackIntegration(), {
-      channelId: "C123",
-      status: "",
-      threadTs: "123.456",
-    })
-
-    expect(calls[0]?.body).toMatchObject({
-      channel_id: "C123",
-      status: "",
-      thread_ts: "123.456",
     })
   })
 })
