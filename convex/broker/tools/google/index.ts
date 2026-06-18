@@ -1,4 +1,5 @@
 import { type Doc } from "../../../_generated/dataModel"
+import { googleJson } from "../../../providers/google/api"
 import { requireGoogleCredentials } from "../../../providers/google/credentials"
 import {
   boundedNumber,
@@ -10,7 +11,6 @@ import { type ProviderToolContext } from "../context"
 import { callGoogleDriveTool } from "./drive"
 import { getCalendarId } from "./format"
 import { callGmailTool } from "./gmail"
-import { googleJson } from "./request"
 
 export async function callGoogleTool(
   integration: Doc<"integrations">,

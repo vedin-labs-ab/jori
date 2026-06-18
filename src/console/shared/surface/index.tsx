@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-export type IntegrationLogo =
+export type SurfaceLogo =
   | {
       alt: string
       src: string
@@ -27,7 +27,7 @@ export function IntegrationSurface({
   action?: ReactNode
   children?: ReactNode
   description: string
-  logo: IntegrationLogo
+  logo: SurfaceLogo
   status?: ReactNode
   title: string
 }) {
@@ -63,7 +63,7 @@ export function IntegrationSurface({
   )
 }
 
-function IntegrationLogoMark({ logo }: { logo: IntegrationLogo }) {
+function IntegrationLogoMark({ logo }: { logo: SurfaceLogo }) {
   const containerClassName =
     "flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted"
 

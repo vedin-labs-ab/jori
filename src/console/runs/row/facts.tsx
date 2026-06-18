@@ -22,7 +22,7 @@ import {
   DetailRow,
 } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
-import { absoluteTime, absoluteUtcTime } from "../format"
+import { absoluteTime, absoluteUtcTime } from "../../shared/time"
 import { type ExecutionDetail, type ExecutionDetailType } from "../types"
 import { ExecutionToolsValue } from "./groups"
 import { RepositoryIcon } from "./source"

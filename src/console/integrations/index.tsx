@@ -1,8 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ConsolePage } from "../page"
 import { NativePermissionsCard } from "../permissions"
 import { useToolPermissions } from "../permissions/controller"
 import { ConsoleContentGrid } from "../shared/layout"
-import { ConsolePage } from "../shared/page"
 import { GitHubConnection } from "./connections/github"
 import {
   GmailConnection,

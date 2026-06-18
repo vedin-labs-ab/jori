@@ -29,7 +29,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { IntegrationLogo } from "../integrations/logo"
+import { IntegrationLogo } from "../shared/logo/integration"
 import { getSkillIcon } from "./metadata"
 import { type Skill, type SkillFormValues } from "./types"
 

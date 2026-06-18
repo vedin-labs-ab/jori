@@ -1,8 +1,8 @@
 import { useQuery } from "convex/react"
 import { useCallback, useDeferredValue, useEffect, useState } from "react"
 import { api } from "../../../convex/_generated/api"
+import { ConsolePage } from "../page"
 import { useClientPagination } from "../shared/list/pagination"
-import { ConsolePage } from "../shared/page"
 import { useArtifactDeletion } from "./deletion"
 import {
   type ArtifactFilter,

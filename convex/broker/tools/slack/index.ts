@@ -4,13 +4,13 @@ import {
   type FileContext,
   readFileAttachments,
 } from "../../../files/attachments"
+import { slackJsonApi, slackQueryApi } from "../../../providers/slack/api"
 import { requireSlackCredentials } from "../../../providers/slack/credentials"
 import {
   boundedNumber,
   optionalString,
   requiredString,
 } from "../../../shared/input"
-import { slackJsonApi, slackQueryApi } from "./client"
 import { postSlackFiles } from "./upload"
 
 export type SlackBlock = Record<string, unknown>

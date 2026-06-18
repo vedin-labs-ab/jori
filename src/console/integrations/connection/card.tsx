@@ -7,13 +7,13 @@ import {
   type ToolPermissionController,
   type ToolSurface,
 } from "../../permissions/controller"
+import { IntegrationSurface, type SurfaceLogo } from "../../shared/surface"
 import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"
 import { type CreateInstallState, useIntegrationInstall } from "./install"
-import { type IntegrationLogo, IntegrationSurface } from "./surface"
 
 export type ConnectionStatus = "active" | "paused" | undefined
-export type { IntegrationLogo } from "./surface"
+export type { SurfaceLogo } from "../../shared/surface"
 
 export type IntegrationConnectionConfig = {
   action: string
@@ -23,7 +23,7 @@ export type IntegrationConnectionConfig = {
   installPath: string
   label: string
   loading: string
-  logo: IntegrationLogo
+  logo: SurfaceLogo
   integration: Exclude<ToolSurface, "milo">
 }
 

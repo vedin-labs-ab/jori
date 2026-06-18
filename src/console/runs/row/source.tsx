@@ -9,8 +9,8 @@ import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { MiloLogo } from "@/shared/brand"
 import { SeparatorDot } from "../../shared/dot"
+import { providerLogoPath } from "../../shared/logo/path"
 import { type ExecutionSource, type SourceDatum } from "../types"
-import { providerLogoPath } from "./logos"
 
 export function ProviderLogo({
   className = "size-3",

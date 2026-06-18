@@ -3,7 +3,7 @@ import { Globe, GlobeOff } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { MiloLogo } from "@/shared/brand"
-import { providerLogoPath } from "../runs/row/logos"
+import { providerLogoPath } from "../shared/logo/path"
 
 type ToolSurfaceLogoSize = "sm" | "md"
 

@@ -6,8 +6,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { ConsolePage } from "./page"
 import { ConsolePageLayout } from "./shared/layout"
-import { ConsolePage } from "./shared/page"
 
 export function Console() {
   return (

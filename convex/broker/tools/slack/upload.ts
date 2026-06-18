@@ -1,5 +1,9 @@
 import { type FileAttachment } from "../../../files/attachments"
-import { requiredSlackResultString, slackFormApi, slackJsonApi } from "./client"
+import {
+  requiredSlackResultString,
+  slackFormApi,
+  slackJsonApi,
+} from "../../../providers/slack/api"
 
 export async function postSlackFiles(
   token: string,

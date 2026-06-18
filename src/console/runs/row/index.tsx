@@ -1,7 +1,7 @@
 import { Timer } from "lucide-react"
 import { memo, useState } from "react"
 import { ErrorDetail, RelativeTime } from "../../shared/details"
-import { formatDuration, relativeTime } from "../format"
+import { formatDuration, relativeTime } from "../../shared/time"
 import { type ExecutionItem } from "../types"
 import { ApprovalCallout } from "./approval"
 import { ExecutionFacts } from "./facts"
