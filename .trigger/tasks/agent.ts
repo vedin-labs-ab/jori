@@ -34,19 +34,21 @@ export const miloAgentRun = task({
   run: async (payload: AgentRunPayload, { ctx }) => {
     const convex = new MiloConvexClient()
     const context = await convex.loadRun(payload)
-
-    if (isTerminalStatus(context.execution.status)) {
-      return {
-        status: "skipped",
-      }
-    }
-
     const sandbox = new E2BSandboxRuntime(
       convex,
       context.run.id,
       context.execution.id,
       context.execution.sandboxId
     )
+
+    if (isTerminalStatus(context.execution.status)) {
+      await sandbox.cleanup()
+
+      return {
+        status: "skipped",
+      }
+    }
+
     const attempt = ctx.attempt.number
 
     await recordRunEvent(convex, context, "run.started", 0, attempt)
