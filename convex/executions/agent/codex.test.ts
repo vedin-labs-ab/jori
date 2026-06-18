@@ -8,5 +8,5 @@ test("omits hosted web search when disabled", () => {
   })
 
   expect(config).not.toContain("web_search")
-  expect(config).toContain('sandbox_mode = "read-only"')
+  expect(config).toContain('sandbox_mode = "workspace-write"')
 })

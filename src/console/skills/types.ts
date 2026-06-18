@@ -11,7 +11,6 @@ export type Skill = {
   body: string
   createdAt: number
   updatedAt: number
-  enabled: boolean
   scope: "global" | "tenant"
 }
 

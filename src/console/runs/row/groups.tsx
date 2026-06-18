@@ -17,8 +17,10 @@ import { type ExecutionDetailGroup } from "../types"
 import { ProviderLogo } from "./source"
 
 export function ExecutionToolsValue({
+  description = "Tools available to this execution.",
   groups,
 }: {
+  description?: string
   groups: ExecutionDetailGroup[]
 }) {
   const [activeGroup, setActiveGroup] = useState<ExecutionDetailGroup>()
@@ -44,7 +46,7 @@ export function ExecutionToolsValue({
         open={activeGroup !== undefined}
       >
         {activeGroup === undefined ? null : (
-          <ToolGroupDialog group={activeGroup} />
+          <ToolGroupDialog description={description} group={activeGroup} />
         )}
       </Dialog>
     </>
@@ -149,16 +151,20 @@ function ToolCount({
   )
 }
 
-function ToolGroupDialog({ group }: { group: ExecutionDetailGroup }) {
+function ToolGroupDialog({
+  description,
+  group,
+}: {
+  description: string
+  group: ExecutionDetailGroup
+}) {
   return (
     <DialogContent className="sm:max-w-xl">
       <DialogHeader className="grid grid-cols-[auto_1fr] gap-3 pr-8 text-left">
         <ProviderLogo className="mt-0.5 size-6" surface={group.type} />
         <div className="grid gap-1">
           <DialogTitle>{group.label} tools</DialogTitle>
-          <DialogDescription>
-            Tools available to this execution.
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </div>
       </DialogHeader>
       <ReadonlyToolGroups tools={group.tools} />

@@ -1,4 +1,5 @@
 import { automationEventCatalog } from "../../../../automations/events"
+import { artifactToolInputSchemas } from "./artifacts"
 import {
   numberProperty,
   objectProperty,
@@ -132,9 +133,13 @@ export const miloToolInputSchemas = {
       fileId: stringProperty("File ID."),
     },
   }),
+  ...artifactToolInputSchemas,
   add_automation: objectSchema({
     required: ["name", "instructions", "trigger", "access"],
     properties: {
+      artifactId: stringProperty(
+        "Optional artifact ID. Use this for artifact-owned automations that write artifact state."
+      ),
       name: stringProperty("Short automation name."),
       instructions: stringProperty(
         "What each run should do, written as instructions for the agent that executes it."
@@ -168,6 +173,9 @@ export const miloToolInputSchemas = {
     required: ["automationId"],
     properties: {
       automationId: stringProperty("Milo automation ID."),
+      artifactId: stringProperty(
+        "Optional artifact ID. Set this when binding the automation to an artifact."
+      ),
       name: stringProperty("Updated automation name."),
       instructions: stringProperty("Updated run instructions."),
       metadata: {

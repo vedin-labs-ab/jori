@@ -67,7 +67,7 @@ export const ExecutionRow = memo(function ExecutionRow({
 
 function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
   return (
-    <div className="min-w-0 max-w-[56ch]">
+    <div className="grid min-w-0 max-w-[56ch] gap-1">
       <div className="truncate font-medium text-sm">{execution.title}</div>
       <SourceLine source={execution.source} />
     </div>

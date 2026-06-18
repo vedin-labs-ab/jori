@@ -1,4 +1,4 @@
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { type MutationCtx } from "../_generated/server"
 import { type Integration, integrations } from "../integrations/catalog"
 
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -9,7 +9,7 @@ const skillBodyMaxLength = 24_000
 const integrationNames = new Set<string>(integrations)
 
 export function normalizeSkillInput(input: {
-  associatedIntegrations: readonly string[]
+  associatedIntegrations?: readonly string[]
   category: string
   name: string
   description: string
@@ -20,7 +20,7 @@ export function normalizeSkillInput(input: {
   const description = input.description.trim()
   const body = input.body.trim()
   const associatedIntegrations = normalizeAssociatedIntegrations(
-    input.associatedIntegrations
+    input.associatedIntegrations ?? []
   )
 
   if (!skillNamePattern.test(name) || name.length > skillNameMaxLength) {
@@ -78,32 +78,6 @@ export function sortSkills<T extends { tenantId: string | null; name: string }>(
 
     return left.name.localeCompare(right.name)
   })
-}
-
-export function listSkillSettings(ctx: QueryCtx, tenantId: string) {
-  return ctx.db
-    .query("skillSettings")
-    .withIndex("by_tenant", (index) => index.eq("tenantId", tenantId))
-    .collect()
-}
-
-export async function getSkillSetting(
-  ctx: MutationCtx,
-  tenantId: string,
-  skillName: string
-) {
-  return await ctx.db
-    .query("skillSettings")
-    .withIndex("by_tenant_and_skill", (index) =>
-      index.eq("tenantId", tenantId).eq("skillName", skillName)
-    )
-    .unique()
-}
-
-export function mapSkillSettingsByName<
-  Setting extends { skillName: string; enabled: boolean },
->(settings: Setting[]) {
-  return new Map(settings.map((setting) => [setting.skillName, setting]))
 }
 
 function normalizeAssociatedIntegrations(

@@ -12,9 +12,7 @@ export function SkillContent({
   isLoading,
   onDelete,
   onEdit,
-  onToggleGlobalSkill,
   onView,
-  pendingGlobalSkillId,
   pendingSkillId,
   searchTerm,
   skills,
@@ -24,9 +22,7 @@ export function SkillContent({
   isLoading: boolean
   onDelete: (skill: Skill) => void
   onEdit: (skill: Skill) => void
-  onToggleGlobalSkill: (skill: Skill, enabled: boolean) => void
   onView: (skill: Skill) => void
-  pendingGlobalSkillId: string | undefined
   pendingSkillId: string | undefined
   searchTerm: string
   skills: Skill[]
@@ -55,15 +51,10 @@ export function SkillContent({
       {skills.map((skill) => (
         <SkillCard
           key={skill._id}
-          isPending={
-            skill.scope === "global"
-              ? pendingGlobalSkillId === skill._id
-              : pendingSkillId === skill._id
-          }
+          isPending={pendingSkillId === skill._id}
           now={now}
           onDelete={onDelete}
           onEdit={onEdit}
-          onToggleGlobalSkill={onToggleGlobalSkill}
           onView={onView}
           skill={skill}
         />

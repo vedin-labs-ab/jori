@@ -1,3 +1,6 @@
+import { runtimeAssets } from "../../../../runtime/_generated/assets"
+import { base64Encode } from "../../../../shared/encoding"
+
 export type TokenPreflightSpec = {
   /** Environment variable the sandbox exposes the access token through. */
   tokenEnv: string
@@ -8,50 +11,46 @@ export type TokenPreflightSpec = {
   headers?: Record<string, string>
   /** JSON payload; when present the request is sent as a POST. */
   body?: unknown
-  /** Extra JavaScript failure condition evaluated against the response body. */
-  failureCondition?: string
+  /** Response body properties that fail the preflight when truthy. */
+  failureBodyProperties?: string[]
   failureLabel: string
   successMessage: string
 }
 
 export function createTokenPreflightCommand(spec: TokenPreflightSpec) {
-  const url = typeof spec.url === "function" ? spec.url() : spec.url
-  const headers = Object.entries(spec.headers ?? {})
-  const failure = [
-    "!response.ok",
-    ...(spec.failureCondition === undefined ? [] : [spec.failureCondition]),
-  ].join(" || ")
+  return createNodeScriptCommand({
+    configEnv: "MILO_PREFLIGHT_CONFIG_BASE64",
+    config: normalizeTokenPreflightSpec(spec),
+    script: runtimeAssets.sandbox.tokenPreflight,
+    target: "/tmp/milo-token-preflight.ts",
+  })
+}
 
+export function createNodeScriptCommand(args: {
+  config: unknown
+  configEnv: string
+  script: string
+  target: string
+}) {
   return [
-    "node <<'NODE'",
-    "async function main() {",
-    `  const token = process.env.${spec.tokenEnv};`,
-    "  if (!token) {",
-    `    throw new Error(${JSON.stringify(spec.missingTokenError)});`,
-    "  }",
-    `  const response = await fetch(${JSON.stringify(url)}, {`,
-    ...(spec.body === undefined ? [] : ["    method: 'POST',"]),
-    "    headers: {",
-    "      authorization: 'Bearer ' + token,",
-    ...headers.map(
-      ([name, value]) =>
-        `      ${JSON.stringify(name)}: ${JSON.stringify(value)},`
-    ),
-    "    },",
-    ...(spec.body === undefined
-      ? []
-      : [`    body: ${JSON.stringify(JSON.stringify(spec.body))},`]),
-    "  });",
-    "  const body = await response.json();",
-    `  if (${failure}) {`,
-    `    throw new Error(${JSON.stringify(spec.failureLabel)} + ' preflight failed: ' + JSON.stringify(body));`,
-    "  }",
-    `  console.log(${JSON.stringify(spec.successMessage)});`,
-    "}",
-    "main().catch((error) => {",
-    "  console.error(error);",
-    "  process.exit(1);",
-    "});",
-    "NODE",
+    "set -eu",
+    `export ${args.configEnv}="${encodeBase64Json(args.config)}"`,
+    `printf "%s" "${encodeBase64(args.script)}" | base64 -d > "${args.target}"`,
+    `node --experimental-strip-types "${args.target}"`,
   ].join("\n")
+}
+
+function normalizeTokenPreflightSpec(spec: TokenPreflightSpec) {
+  return {
+    ...spec,
+    url: typeof spec.url === "function" ? spec.url() : spec.url,
+  }
+}
+
+function encodeBase64Json(value: unknown) {
+  return encodeBase64(JSON.stringify(value))
+}
+
+function encodeBase64(value: string) {
+  return base64Encode(value)
 }

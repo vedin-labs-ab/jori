@@ -1,7 +1,6 @@
 import { BookOpenText, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Switch } from "@/components/ui/switch"
 import { IntegrationLogoStack } from "../integrations/logo"
 import { relativeTime } from "../runs/format"
 import { SkillManagementMenu } from "./menu"
@@ -13,7 +12,6 @@ export function SkillCard({
   now,
   onDelete,
   onEdit,
-  onToggleGlobalSkill,
   onView,
   skill,
 }: {
@@ -21,7 +19,6 @@ export function SkillCard({
   now: number
   onDelete?: (skill: Skill) => void
   onEdit?: (skill: Skill) => void
-  onToggleGlobalSkill?: (skill: Skill, enabled: boolean) => void
   onView: (skill: Skill) => void
   skill: Skill
 }) {
@@ -38,11 +35,9 @@ export function SkillCard({
               {skill.name}
             </h3>
             {isGlobal ? (
-              <GlobalSkillToggle
-                isPending={isPending}
-                onToggle={onToggleGlobalSkill}
-                skill={skill}
-              />
+              <span className="h-6 whitespace-nowrap text-muted-foreground text-xs">
+                Global
+              </span>
             ) : (
               <SkillManagementMenu
                 isPending={isPending}
@@ -95,28 +90,6 @@ function SkillIcon({ icon: Icon, skill }: { icon: LucideIcon; skill: Skill }) {
     >
       <span className="sr-only">{skill.category}</span>
       <Icon className="size-5" />
-    </div>
-  )
-}
-
-function GlobalSkillToggle({
-  isPending,
-  onToggle,
-  skill,
-}: {
-  isPending: boolean
-  onToggle?: (skill: Skill, enabled: boolean) => void
-  skill: Skill
-}) {
-  return (
-    <div className="flex h-6 shrink-0 items-center gap-2 text-muted-foreground text-xs">
-      <span>{skill.enabled ? "Enabled" : "Disabled"}</span>
-      <Switch
-        aria-label={`${skill.name} enabled`}
-        checked={skill.enabled}
-        disabled={isPending || onToggle === undefined}
-        onCheckedChange={(enabled) => onToggle?.(skill, enabled)}
-      />
     </div>
   )
 }

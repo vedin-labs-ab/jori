@@ -12,6 +12,7 @@ import {
   Cable,
   CalendarClock,
   ChevronsUpDown,
+  Component,
   LayoutDashboard,
   Library,
   ListChecks,
@@ -64,6 +65,7 @@ const consoleNavigation = [
   { icon: ListChecks, label: "Runs", to: "/executions" },
   { icon: NotebookTabs, label: "Playbooks", to: "/playbooks" },
   { icon: CalendarClock, label: "Automations", to: "/automations" },
+  { icon: Component, label: "Artifacts", to: "/artifacts" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
 ] as const

@@ -19,7 +19,16 @@ const tableRegistry: Record<TableName, true> = {
   approvals: true,
   executions: true,
   permissions: true,
-  skillSettings: true,
+  artifacts: true,
+  artifactVersions: true,
+  artifactTrees: true,
+  artifactEntries: true,
+  artifactBlobs: true,
+  artifactTools: true,
+  artifactSessions: true,
+  artifactAssets: true,
+  artifactState: true,
+  artifactCaches: true,
 }
 
 const tables = Object.keys(tableRegistry) as TableName[]

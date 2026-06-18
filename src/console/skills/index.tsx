@@ -10,7 +10,6 @@ import { SkillContent } from "./content"
 import { SkillDialog } from "./dialog"
 import { type SkillEditor, useSkillEditor } from "./editor"
 import { filterSkills, filterSkillsByView } from "./helpers"
-import { useGlobalSkillSettings } from "./settings"
 import { SkillsToolbar } from "./toolbar"
 import { type Skill, type SkillFilterView } from "./types"
 import { SkillViewDialog } from "./view"
@@ -26,7 +25,6 @@ export function Skills() {
 export function SkillsCard({ tenantId }: { tenantId: string }) {
   const skillList = useQuery(api.skills.catalog.list, { tenantId })
   const editor = useSkillEditor(tenantId)
-  const globalSettings = useGlobalSkillSettings(tenantId)
   const filters = useSkillFilters()
   const [viewSkill, setViewSkill] = useState<Skill>()
   const skills = skillList?.status === "ready" ? skillList.skills : undefined
@@ -62,7 +60,6 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
 
       <SkillListBody
         editor={editor}
-        globalSettings={globalSettings}
         onViewSkillChange={setViewSkill}
         pagination={pagination}
         searchTerm={filters.searchTerm}
@@ -111,7 +108,6 @@ function useResettingSkillFilters(
 
 function SkillListBody({
   editor,
-  globalSettings,
   onViewSkillChange,
   pagination,
   searchTerm,
@@ -120,7 +116,6 @@ function SkillListBody({
   view,
 }: {
   editor: SkillEditor
-  globalSettings: ReturnType<typeof useGlobalSkillSettings>
   onViewSkillChange: (skill: Skill) => void
   pagination: ReturnType<typeof useSkillPagination>["pagination"]
   searchTerm: string
@@ -130,11 +125,7 @@ function SkillListBody({
 }) {
   return (
     <>
-      <SkillStatusAlerts
-        deleteError={editor.deleteError}
-        globalError={globalSettings.error?.message}
-        result={skillList}
-      />
+      <SkillStatusAlerts deleteError={editor.deleteError} result={skillList} />
       {skillList?.status !== "unauthorized" ? (
         <>
           <SkillContent
@@ -143,10 +134,8 @@ function SkillListBody({
             isLoading={skillList === undefined}
             onDelete={editor.deleteSkill}
             onEdit={editor.openEditForm}
-            onToggleGlobalSkill={globalSettings.updateGlobalSkillEnabled}
             onView={onViewSkillChange}
             pendingSkillId={editor.pendingSkillId}
-            pendingGlobalSkillId={globalSettings.pendingSkillId}
             searchTerm={searchTerm}
             view={view}
           />

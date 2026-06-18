@@ -24,6 +24,7 @@ import { ConsolePage } from "../page"
 import { useToolPermissions } from "../permissions/controller"
 import { automationPolicyKey } from "./access/policy"
 import { type AutomationEditor, useAutomationEditor } from "./editor"
+import { filterAutomationsByView, hasAutomationFilters } from "./filter"
 import { AutomationContent } from "./list/content"
 import {
   type AutomationFilter,
@@ -60,7 +61,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
   const automationList = useQuery(api.automations.console.list, {
     tenantId,
     query: deferredQuery,
-    includeCompleted: filters.filter === "all",
+    statusFilter: filters.filter,
   })
   const permissions = useToolPermissions(tenantId)
   const editor = useAutomationEditor(tenantId, permissions.permissions)
@@ -68,6 +69,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
   const isDialogMounted = useAutomationDialogMount(editor.isFormOpen)
   const { hasFilters, pagination } = useAutomationPagination({
     automationList,
+    filter: filters.filter,
     query: deferredQuery,
   })
   const toolbar = useResettingAutomationFilters(filters, pagination.reset)
@@ -139,14 +141,18 @@ function useResettingAutomationFilters(
 
 function useAutomationPagination({
   automationList,
+  filter,
   query,
 }: {
   automationList: AutomationList | undefined
+  filter: AutomationFilter
   query: string
 }) {
-  const hasFilters = query.trim() !== ""
+  const hasFilters = hasAutomationFilters(query, filter)
   const automations =
-    automationList?.status === "ready" ? automationList.automations : []
+    automationList?.status === "ready"
+      ? filterAutomationsByView(automationList.automations, filter)
+      : []
   const pagination = useClientPagination({
     hasFilters,
     isReady: automationList?.status === "ready",

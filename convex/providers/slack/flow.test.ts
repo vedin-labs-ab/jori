@@ -117,25 +117,41 @@ function expectRuntimeAssembly({ prompt, skillFiles, toolBundle }: SlackFlow) {
     "milo",
     "slack",
   ])
-  expect(toolBundle.skillNames).toEqual(["slack"])
-  expect(skillFiles).toHaveLength(1)
-  expect(skillFiles[0]).toMatchObject({
+  expect(toolBundle.skillNames).toEqual(["artifact-creator", "slack"])
+  expect(skillFiles).toHaveLength(2)
+  const slackSkill = skillFiles.find((file) => file.path.includes("/slack/"))
+  expect(slackSkill).toMatchObject({
     path: "/home/user/milo-workspace/.agents/skills/slack/SKILL.md",
   })
-  expect(skillFiles[0]?.content).toContain(
+  expect(slackSkill?.content).toContain(
     "Format Slack messages so they feel native: direct, compact, and easy to scan."
   )
-  expect(skillFiles[0]?.content).toContain(
+  expect(slackSkill?.content).toContain(
     "Use Slack-native `blocks` instead of one long `text` string"
   )
   expect(toolBundle.sandboxFiles.map((file) => file.path)).toContain(
-    "/home/user/milo-workspace/milo-slack-mcp.mjs"
+    "/home/user/milo-workspace/milo-slack-mcp.ts"
   )
   expect(
     toolBundle.sandboxFiles.find((file) =>
-      file.path.endsWith("milo-slack-mcp.mjs")
+      file.path.endsWith("milo-slack-mcp.ts")
     )?.content
-  ).toContain("conversations_add_message")
+  ).not.toContain("conversations_add_message")
+  expect(slackToolNames(toolBundle)).toContain("conversations_add_message")
+}
+
+function slackToolNames(toolBundle: SlackFlow["toolBundle"]) {
+  const server = toolBundle.mcpServers.find(
+    (candidate) => candidate.name === "slack"
+  )
+  const tools = JSON.parse(
+    Buffer.from(
+      server?.env.MILO_TOOL_DEFINITIONS_BASE64 ?? "",
+      "base64"
+    ).toString("utf8")
+  ) as { name: string }[]
+
+  return tools.map((tool) => tool.name)
 }
 
 async function expectSlackOutput({ integration }: SlackFlow) {

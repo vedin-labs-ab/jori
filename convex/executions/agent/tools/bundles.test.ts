@@ -110,6 +110,33 @@ describe("runtime native tool availability metadata", () => {
     expect(prompt).not.toContain("Local workspace")
     expect(prompt).not.toContain("Web/current")
   })
+
+  test("attaches artifact creator skill when artifact write tools are available", () => {
+    const toolBundle = assembleToolsForRun({
+      milo: {
+        convexSiteUrl: "https://convex.example",
+        executionToken: "execution-token",
+      },
+      integrations: [],
+      toolModes: resolveToolModes([]),
+    })
+    const promptSkills = filterRuntimeSkillsForBundle(
+      [
+        runtimeSkill(
+          "artifact-creator",
+          null,
+          "Validate artifacts before publishing."
+        ),
+        runtimeSkill("slack", null, "Use Slack mrkdwn formatting."),
+      ],
+      toolBundle.skillNames
+    )
+
+    expect(toolBundle.skillNames).toContain("artifact-creator")
+    expect(promptSkills.map((skill) => skill.name)).toEqual([
+      "artifact-creator",
+    ])
+  })
 })
 
 describe("runtime shared provider bundles", () => {
@@ -126,7 +153,7 @@ describe("runtime shared provider bundles", () => {
       toolModes: resolveToolModes([]),
     })
 
-    expect(toolBundle.skillNames).toEqual([])
+    expect(toolBundle.skillNames).toEqual(["artifact-creator"])
     expect(
       toolBundle.capabilities.map((capability) => capability.label)
     ).toEqual(["Milo", "Outlook Mail", "Microsoft Calendar"])

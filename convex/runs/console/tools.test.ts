@@ -2,6 +2,13 @@ import { expect, test } from "vitest"
 import { toolDetails } from "./tools"
 
 test("omits empty access counts from tool labels", () => {
+  const miloTool = {
+    access: "write" as const,
+    description:
+      "Create a task that starts on a time or provider event trigger.",
+    label: "Add automation",
+    tool: "add_automation",
+  }
   const readTool = {
     access: "read" as const,
     description: "Read GitHub issues.",
@@ -19,6 +26,11 @@ test("omits empty access counts from tool labels", () => {
     toolDetails({
       groups: [
         {
+          surface: "milo",
+          label: "Milo",
+          tools: [miloTool],
+        },
+        {
           surface: "github",
           label: "GitHub",
           tools: [readTool],
@@ -33,8 +45,13 @@ test("omits empty access counts from tool labels", () => {
     })
   ).toContainEqual({
     type: "tools",
-    label: "GitHub · Read 1 · Slack · Write 1",
+    label: "Milo · Write 1 · GitHub · Read 1 · Slack · Write 1",
     groups: [
+      {
+        type: "milo",
+        label: "Milo",
+        tools: [miloTool],
+      },
       {
         type: "github",
         label: "GitHub",

@@ -1,4 +1,5 @@
 import { codexHome, workspace } from "../../sandbox/harness"
+import { createToolDefinitionsEnv } from "../adapter"
 import { getSurfaceToolDefinitions } from "../definitions"
 import {
   enabledToolsEnv,
@@ -6,7 +7,12 @@ import {
   type ToolPermissionInput,
 } from "../policy"
 import { type ToolBundle } from "../types"
-import { createMiloMcpScript } from "./script"
+import {
+  createArtifactBuilderConfigFile,
+  createArtifactBuilderFiles,
+  createArtifactTemplateFiles,
+} from "./artifacts"
+import { createMiloMcpFiles, createMiloMcpScript } from "./script"
 
 export function createMiloToolBundle(
   args: {
@@ -14,28 +20,38 @@ export function createMiloToolBundle(
     executionToken: string
   } & ToolPermissionInput
 ): ToolBundle {
+  const tools = getSurfaceToolDefinitions("milo", args)
+
   return {
     mcpServers: [
       {
         name: "milo",
         command: "node",
-        args: ["/home/user/milo-workspace/milo-mcp.mjs"],
+        args: [
+          "--experimental-strip-types",
+          "/home/user/milo-workspace/milo-mcp.ts",
+        ],
         env: {
           MILO_CONVEX_SITE_URL: args.convexSiteUrl,
           MILO_CODEX_HOME: codexHome,
           MILO_EXECUTION_TOKEN: args.executionToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
+          MILO_TOOL_DEFINITIONS_BASE64: createToolDefinitionsEnv(tools),
           MILO_WORKSPACE: workspace,
         },
       },
     ],
     sandboxFiles: [
       {
-        path: "/home/user/milo-workspace/milo-mcp.mjs",
+        path: "/home/user/milo-workspace/milo-mcp.ts",
         content: createMiloMcpScript({
-          tools: getSurfaceToolDefinitions("milo", args),
+          tools,
         }),
       },
+      ...createMiloMcpFiles(),
+      ...createArtifactBuilderFiles(),
+      createArtifactBuilderConfigFile(),
+      ...createArtifactTemplateFiles(),
     ],
     preflights: [],
     promptedTools: getPromptedTools(args),

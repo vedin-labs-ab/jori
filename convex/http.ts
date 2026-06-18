@@ -1,5 +1,11 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
+import {
+  handleArtifactAssetRequest,
+  handleArtifactRenderRequest,
+  handleArtifactStaticAssetRequest,
+  handleArtifactToolRequest,
+} from "./artifacts/http"
 import { handleFileUploadRequest } from "./broker/files"
 import { handleGitHubTarballRequest, handleMiloMcpRequest } from "./broker/mcp"
 import {
@@ -61,81 +67,103 @@ http.route({
 http.route({
   path: "/milo/mcp",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    return await handleMiloMcpRequest(ctx, request)
-  }),
+  handler: httpAction((ctx, request) => handleMiloMcpRequest(ctx, request)),
 })
 
 http.route({
   path: "/milo/github/tarball",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    return await handleGitHubTarballRequest(ctx, request)
-  }),
+  handler: httpAction((ctx, request) =>
+    handleGitHubTarballRequest(ctx, request)
+  ),
 })
 
 http.route({
   path: "/milo/files",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    return await handleFileUploadRequest(ctx, request)
-  }),
+  handler: httpAction((ctx, request) => handleFileUploadRequest(ctx, request)),
+})
+
+http.route({
+  pathPrefix: "/assets/",
+  method: "GET",
+  handler: httpAction((_ctx, request) =>
+    handleArtifactStaticAssetRequest(request)
+  ),
+})
+
+http.route({
+  pathPrefix: "/artifacts/render/",
+  method: "GET",
+  handler: httpAction((ctx, request) =>
+    handleArtifactRenderRequest(ctx, request)
+  ),
+})
+
+http.route({
+  pathPrefix: "/artifacts/assets/",
+  method: "GET",
+  handler: httpAction((ctx, request) =>
+    handleArtifactAssetRequest(ctx, request)
+  ),
+})
+
+http.route({
+  path: "/artifacts/tools",
+  method: "POST",
+  handler: httpAction((ctx, request) =>
+    handleArtifactToolRequest(ctx, request)
+  ),
 })
 
 http.route({
   path: "/github/install",
   method: "GET",
-  handler: httpAction(async (_ctx, request) => {
-    return await handleGitHubInstall(request)
-  }),
+  handler: httpAction((_ctx, request) => handleGitHubInstall(request)),
 })
 
 http.route({
   path: "/github/install/callback",
   method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    return await handleGitHubInstallCallback(ctx, request)
-  }),
+  handler: httpAction((ctx, request) =>
+    handleGitHubInstallCallback(ctx, request)
+  ),
 })
 
 http.route({
   path: "/github/events",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    return await handleGitHubEvents(ctx, request)
-  }),
+  handler: httpAction((ctx, request) => handleGitHubEvents(ctx, request)),
 })
 
 http.route({
   path: "/gmail/install",
   method: "GET",
-  handler: httpAction(async (_ctx, request) => {
-    return await handleGoogleInstall(request, "gmail")
-  }),
+  handler: httpAction((_ctx, request) => handleGoogleInstall(request, "gmail")),
 })
 
 http.route({
   path: "/google/oauth/callback",
   method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    return await handleGoogleOAuthCallback(ctx, request)
-  }),
+  handler: httpAction((ctx, request) =>
+    handleGoogleOAuthCallback(ctx, request)
+  ),
 })
 
 http.route({
   path: "/google-calendar/install",
   method: "GET",
-  handler: httpAction(async (_ctx, request) => {
-    return await handleGoogleInstall(request, "googleCalendar")
-  }),
+  handler: httpAction((_ctx, request) =>
+    handleGoogleInstall(request, "googleCalendar")
+  ),
 })
 
 http.route({
   path: "/google-drive/install",
   method: "GET",
-  handler: httpAction(async (_ctx, request) => {
-    return await handleGoogleInstall(request, "googleDrive")
-  }),
+  handler: httpAction((_ctx, request) =>
+    handleGoogleInstall(request, "googleDrive")
+  ),
 })
 
 http.route({

@@ -2,7 +2,7 @@ import { readdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 
 type Skill = {
-  associatedIntegrations: string[]
+  associatedIntegrations?: string[]
   category: string
   name: string
   description: string
@@ -98,11 +98,23 @@ function parseSkill(content: string, filePath: string): Skill {
     throw new Error(`${filePath} must define name, description, and category`)
   }
 
+  if (
+    metadata.associatedIntegrations === undefined ||
+    metadata.associatedIntegrations.length === 0
+  ) {
+    return {
+      name: metadata.name,
+      description: metadata.description,
+      category: metadata.category,
+      body,
+    }
+  }
+
   return {
     name: metadata.name,
     description: metadata.description,
     category: metadata.category,
-    associatedIntegrations: metadata.associatedIntegrations ?? [],
+    associatedIntegrations: metadata.associatedIntegrations,
     body,
   }
 }

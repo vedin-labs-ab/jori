@@ -21,13 +21,13 @@ import {
   updateAutomation,
 } from "./data"
 import { automationEventCatalog } from "./events"
-import { accessInput, triggerInput } from "./schema"
+import { accessInput, status, triggerInput } from "./schema"
 
 export const list = query({
   args: {
     tenantId: v.string(),
     query: v.string(),
-    includeCompleted: v.boolean(),
+    statusFilter: v.union(v.literal("all"), status),
   },
   handler: async (ctx, args) => {
     const access = await checkTenantAccess(ctx, args.tenantId)
@@ -43,7 +43,8 @@ export const list = query({
     const automations = await searchAutomations(ctx, {
       tenantId: args.tenantId,
       query: args.query,
-      includeCompleted: args.includeCompleted,
+      status: args.statusFilter === "all" ? undefined : args.statusFilter,
+      includeCompleted: args.statusFilter === "all",
       limit: maxSearchResults,
     })
 

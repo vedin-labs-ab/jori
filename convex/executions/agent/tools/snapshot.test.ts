@@ -2,7 +2,16 @@ import { expect, test } from "vitest"
 import { createExecutionToolSnapshot } from "./snapshot"
 import { type RuntimeToolCapabilityTool } from "./types"
 
-test("stores connected surface tool capabilities for execution details", () => {
+test("stores all surface tool capabilities for execution details", () => {
+  const miloTools = [
+    {
+      access: "write" as const,
+      description: "Persist a generated file.",
+      label: "Save file",
+      tool: "save_file",
+    },
+  ]
+
   expect(
     createExecutionToolSnapshot({
       webSearch: true,
@@ -10,14 +19,7 @@ test("stores connected surface tool capabilities for execution details", () => {
         {
           surface: "milo",
           label: "Milo",
-          tools: [
-            {
-              access: "write",
-              description: "Persist a generated file.",
-              label: "Save file",
-              tool: "save_file",
-            },
-          ],
+          tools: miloTools,
         },
         {
           surface: "slack",
@@ -28,6 +30,11 @@ test("stores connected surface tool capabilities for execution details", () => {
     })
   ).toEqual({
     groups: [
+      {
+        surface: "milo",
+        label: "Milo",
+        tools: miloTools,
+      },
       {
         surface: "slack",
         label: "Slack",

@@ -11,18 +11,27 @@ export { fetchGitHubTarball }
 
 export async function callProviderTool(args: {
   ctx: ActionCtx
-  execution: Doc<"executions">
+  execution?: Doc<"executions">
   integration: Doc<"integrations">
   tool: string
   toolArgs: Record<string, unknown>
 }) {
   const integration = args.integration.integration
+  const context =
+    args.execution === undefined
+      ? undefined
+      : {
+          ctx: args.ctx,
+          execution: args.execution,
+        }
 
   if (integration === "slack") {
-    return await callSlackTool(args.integration, args.tool, args.toolArgs, {
-      ctx: args.ctx,
-      execution: args.execution,
-    })
+    return await callSlackTool(
+      args.integration,
+      args.tool,
+      args.toolArgs,
+      context
+    )
   }
 
   if (integration === "linear") {
@@ -38,10 +47,12 @@ export async function callProviderTool(args: {
     integration === "googleCalendar" ||
     integration === "googleDrive"
   ) {
-    return await callGoogleTool(args.integration, args.tool, args.toolArgs, {
-      ctx: args.ctx,
-      execution: args.execution,
-    })
+    return await callGoogleTool(
+      args.integration,
+      args.tool,
+      args.toolArgs,
+      context
+    )
   }
 
   if (integration === "notion") {
@@ -49,10 +60,12 @@ export async function callProviderTool(args: {
   }
 
   if (integration === "microsoftEmail" || integration === "microsoftCalendar") {
-    return await callMicrosoftTool(args.integration, args.tool, args.toolArgs, {
-      ctx: args.ctx,
-      execution: args.execution,
-    })
+    return await callMicrosoftTool(
+      args.integration,
+      args.tool,
+      args.toolArgs,
+      context
+    )
   }
 
   throw new Error(`Unsupported integration: ${integration}`)
