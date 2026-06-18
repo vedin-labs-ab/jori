@@ -11,8 +11,8 @@ test("restricts automation selected integrations to declared access", () => {
     integrations: [github, slack],
     access: {
       integrations: [
-        { integrationId: github._id, tools: ["github_get_issue"] },
-        { integrationId: slack._id, tools: ["conversations_add_message"] },
+        { id: github._id, tools: ["github_get_issue"] },
+        { id: slack._id, tools: ["conversations_add_message"] },
       ],
       web: true,
     },
@@ -35,9 +35,9 @@ test("uses selected read and write tools without broadening access", () => {
     integrations: [github, notion],
     access: {
       integrations: [
-        { integrationId: github._id, tools: ["github_get_issue"] },
+        { id: github._id, tools: ["github_get_issue"] },
         {
-          integrationId: notion._id,
+          id: notion._id,
           tools: ["notion_search", "notion_create_page"],
         },
       ],
@@ -62,7 +62,7 @@ test("omits prompted tools from automation runs", () => {
     access: {
       integrations: [
         {
-          integrationId: notion._id,
+          id: notion._id,
           tools: ["notion_search", "notion_create_page"],
         },
       ],

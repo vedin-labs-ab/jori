@@ -30,8 +30,8 @@ export function automationRuntimeInput(webSearch = true) {
       type: "cron",
       access: {
         integrations: [
-          { integrationId: github._id, tools: ["github_get_issue"] },
-          { integrationId: slack._id, tools: ["conversations_add_message"] },
+          { id: github._id, tools: ["github_get_issue"] },
+          { id: slack._id, tools: ["conversations_add_message"] },
         ],
         web: webSearch,
       },
@@ -70,9 +70,7 @@ export function linearAutomationRuntimeInput() {
       instructions: "Reply with a short quip.",
       type: "event",
       access: {
-        integrations: [
-          { integrationId: linear._id, tools: ["linear_add_comment"] },
-        ],
+        integrations: [{ id: linear._id, tools: ["linear_add_comment"] }],
         web: true,
       },
       trigger: {
@@ -136,7 +134,7 @@ export function notionAutomationRuntimeInput() {
       access: {
         integrations: [
           {
-            integrationId: notion._id,
+            id: notion._id,
             tools: ["notion_search", "notion_create_page"],
           },
         ],

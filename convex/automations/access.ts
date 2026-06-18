@@ -38,7 +38,7 @@ export async function resolveAccessInput(
   return {
     integrations: await Promise.all(
       integrations.map(async (integration) => ({
-        integrationId: (
+        id: (
           await resolveEventIntegration(ctx, {
             createdBy: args.createdBy,
             integration: integration.integration,
@@ -131,9 +131,8 @@ export function getIntegrationTools(
   integrationId: Id<"integrations">
 ) {
   return (
-    access.integrations.find(
-      (integration) => integration.integrationId === integrationId
-    )?.tools ?? []
+    access.integrations.find((integration) => integration.id === integrationId)
+      ?.tools ?? []
   )
 }
 
@@ -163,7 +162,7 @@ export async function projectAccessForConsole(
   }> = []
 
   for (const entry of access.integrations) {
-    const integration = await ctx.db.get(entry.integrationId)
+    const integration = await ctx.db.get(entry.id)
 
     if (integration === null) {
       continue
