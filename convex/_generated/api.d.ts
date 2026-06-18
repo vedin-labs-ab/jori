@@ -253,6 +253,7 @@ import type * as runtime_outbox from "../runtime/outbox.js";
 import type * as runtime_sandboxes from "../runtime/sandboxes.js";
 import type * as runtime_schemas from "../runtime/schemas.js";
 import type * as runtime_shared from "../runtime/shared.js";
+import type * as runtime_slack from "../runtime/slack.js";
 import type * as runtime_tools from "../runtime/tools.js";
 import type * as shared_actor from "../shared/actor.js";
 import type * as shared_data from "../shared/data.js";
@@ -516,6 +517,7 @@ declare const fullApi: ApiFromModules<{
   "runtime/sandboxes": typeof runtime_sandboxes;
   "runtime/schemas": typeof runtime_schemas;
   "runtime/shared": typeof runtime_shared;
+  "runtime/slack": typeof runtime_slack;
   "runtime/tools": typeof runtime_tools;
   "shared/actor": typeof shared_actor;
   "shared/data": typeof shared_data;

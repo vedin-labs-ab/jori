@@ -27,6 +27,7 @@ import {
   runtimeEvents,
   runtimeOutbox,
   runtimeSandboxes,
+  runtimeSlackStatuses,
 } from "./runtime/schema"
 import { skills } from "./skills/schema"
 
@@ -46,6 +47,7 @@ export default defineSchema({
   runtimeEvents,
   runtimeOutbox,
   runtimeSandboxes,
+  runtimeSlackStatuses,
   permissions,
   artifacts,
   artifactVersions,

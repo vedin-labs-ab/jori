@@ -77,7 +77,7 @@ async function executeConvexTool(
   const toolName = tool.tool ?? tool.name
 
   if (tool.mode !== "prompted") {
-    return await callApprovedConvexTool(runtime, surface, toolName, call.args)
+    return await callConvexTool(runtime, surface, toolName, call.args)
   }
 
   const token = await wait.createToken({
@@ -118,26 +118,28 @@ async function executeConvexTool(
     }
   }
 
-  return await callApprovedConvexTool(
+  return await callConvexTool(
     runtime,
     surface,
     toolName,
-    stripApproval(call.args)
+    stripApproval(call.args),
+    true
   )
 }
 
-async function callApprovedConvexTool(
+async function callConvexTool(
   runtime: ToolRuntime,
   surface: ToolSurface,
   tool: string,
-  input: JsonObject
+  input: JsonObject,
+  approved?: boolean
 ) {
   if (surface === "milo" && tool === "save_file") {
     return await saveSandboxFile(runtime, input)
   }
 
   const result = await runtime.convex.callTool({
-    approved: true,
+    approved,
     executionId: runtime.context.execution.id,
     input:
       surface === "milo"

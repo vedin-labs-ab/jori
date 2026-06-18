@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { createMessageRunSnapshot } from "../runs/snapshot"
+import { createSlackRunStatus } from "../runtime/slack"
 
 export async function findConversationActivation(
   ctx: MutationCtx,
@@ -53,6 +54,13 @@ export async function startMessageRun(
     }),
     createdBy: args.createdBy,
     createdAt: args.now,
+  })
+
+  await createSlackRunStatus(ctx, {
+    integration: args.integration,
+    message: args.message,
+    runId,
+    now: args.now,
   })
 
   const activationId =
