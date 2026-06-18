@@ -1,10 +1,18 @@
-import { type CommandResult, Sandbox } from "e2b"
+import path from "node:path"
+import { CommandExitError, type CommandResult, Sandbox } from "e2b"
 import { type Id } from "../../convex/_generated/dataModel"
 import { type MiloConvexClient } from "../convex"
 import {
+  artifactBuildCommand,
+  artifactRunnerFile,
+  artifactRuntimeFiles,
+} from "./artifacts"
+import {
   type SandboxCommandInput,
   type SandboxCommandResult,
+  type SandboxExtractTarballInput,
   type SandboxRuntime,
+  type SandboxWriteFile,
 } from "./types"
 
 type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
@@ -13,6 +21,7 @@ const defaultCommandTimeoutMs = 20 * 60 * 1000
 const defaultSandboxTimeoutMs = 60 * 60 * 1000
 
 export class E2BSandboxRuntime implements SandboxRuntime {
+  private artifactRuntimeReady = false
   private sandbox: E2BSandbox | undefined
   private sandboxId: string | null
 
@@ -27,12 +36,70 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
   async runCommand(input: SandboxCommandInput): Promise<SandboxCommandResult> {
     const sandbox = await this.ensureSandbox()
-    const result = await sandbox.commands.run(input.command, {
-      cwd: input.cwd,
-      timeoutMs: input.timeoutMs ?? defaultCommandTimeoutMs,
-    })
+    const result = await runSandboxCommand(sandbox, input)
 
     return normalizeCommandResult(result)
+  }
+
+  async readFile(path: string) {
+    const sandbox = await this.ensureSandbox()
+
+    return await sandbox.files.read(path, { format: "bytes" })
+  }
+
+  async writeFiles(files: SandboxWriteFile[]) {
+    const sandbox = await this.ensureSandbox()
+
+    await sandbox.files.write(
+      files.map((file) => ({
+        data: file.content,
+        path: file.path,
+      }))
+    )
+  }
+
+  async extractTarball(input: SandboxExtractTarballInput) {
+    const archivePath = `/tmp/milo-github-${Date.now()}-${Math.random().toString(36).slice(2)}.tar.gz`
+    const directory = sandboxPath(input.directory ?? "repository")
+
+    await this.writeFiles([{ content: input.bytes, path: archivePath }])
+
+    const result = await this.runCommand({
+      command: [
+        "set -eu",
+        `directory=${shellQuote(directory)}`,
+        'if [ -d "$directory" ] && [ -n "$(ls -A "$directory")" ]; then',
+        '  echo "Clone directory is not empty" >&2',
+        "  exit 1",
+        "fi",
+        'mkdir -p "$directory"',
+        `tar -xzf ${shellQuote(archivePath)} --strip-components 1 -C "$directory"`,
+        `rm -f ${shellQuote(archivePath)}`,
+      ].join("\n"),
+    })
+
+    if (result.exitCode !== 0) {
+      throw new Error(compactCommandFailure(result))
+    }
+
+    return {
+      directory,
+      repository: input.repository,
+    }
+  }
+
+  async buildArtifact(workspacePath: string): Promise<Record<string, unknown>> {
+    await this.prepareArtifactRuntime()
+    const result = await this.runCommand({
+      command: artifactBuildCommand(workspacePath),
+      timeoutMs: defaultCommandTimeoutMs,
+    })
+
+    if (result.exitCode !== 0) {
+      throw new Error(compactCommandFailure(result))
+    }
+
+    return parseArtifactBuild(result.stdout)
   }
 
   async cleanup() {
@@ -82,6 +149,15 @@ export class E2BSandboxRuntime implements SandboxRuntime {
       traceHost: this.sandbox.sandboxDomain,
     })
   }
+
+  private async prepareArtifactRuntime() {
+    if (this.artifactRuntimeReady) {
+      return
+    }
+
+    await this.writeFiles([...artifactRuntimeFiles(), artifactRunnerFile()])
+    this.artifactRuntimeReady = true
+  }
 }
 
 export async function killE2BSandbox(args: {
@@ -127,6 +203,72 @@ function normalizeCommandResult(result: CommandResult): SandboxCommandResult {
     stderr: result.stderr,
     stdout: result.stdout,
   }
+}
+
+async function runSandboxCommand(
+  sandbox: E2BSandbox,
+  input: SandboxCommandInput
+): Promise<CommandResult> {
+  try {
+    return await sandbox.commands.run(input.command, {
+      cwd: input.cwd,
+      timeoutMs: input.timeoutMs ?? defaultCommandTimeoutMs,
+    })
+  } catch (error) {
+    if (error instanceof CommandExitError) {
+      return {
+        error: error.error,
+        exitCode: error.exitCode,
+        stderr: error.stderr,
+        stdout: error.stdout,
+      }
+    }
+
+    throw error
+  }
+}
+
+function compactCommandFailure(result: SandboxCommandResult) {
+  const output = [result.stdout, result.stderr]
+    .filter((value) => value.trim() !== "")
+    .join("\n")
+    .slice(0, 12_000)
+
+  return output === ""
+    ? `Command failed with exit code ${result.exitCode}.`
+    : output
+}
+
+function parseArtifactBuild(stdout: string) {
+  const parsed = JSON.parse(stdout) as unknown
+
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    throw new Error("Artifact builder returned an invalid payload.")
+  }
+
+  return parsed as Record<string, unknown>
+}
+
+function sandboxPath(value: string) {
+  const normalized = value.trim() === "" ? "repository" : value.trim()
+  const filePath = normalized.startsWith("/")
+    ? path.posix.normalize(normalized)
+    : path.posix.resolve(sandboxWorkspace, normalized)
+  const relative = path.posix.relative(sandboxWorkspace, filePath)
+
+  if (
+    relative === "" ||
+    relative.startsWith("..") ||
+    path.posix.isAbsolute(relative)
+  ) {
+    throw new Error("Sandbox path must be inside the Milo workspace.")
+  }
+
+  return filePath
+}
+
+function shellQuote(value: string) {
+  return `'${value.replaceAll("'", "'\\''")}'`
 }
 
 function requireSandboxTemplate() {

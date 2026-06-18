@@ -8,11 +8,11 @@ import {
   resolveToolMode,
   resolveToolModes,
 } from "../../permissions/catalog"
-import { type CodexRuntimeInput } from "./codex"
+import { type AgentRuntimeInput } from "./input"
 
 export async function authorizeApprovedTool(
   ctx: ActionCtx,
-  input: CodexRuntimeInput,
+  input: AgentRuntimeInput,
   approval: Doc<"approvals">
 ) {
   const permission = getToolPermission(approval.tool)

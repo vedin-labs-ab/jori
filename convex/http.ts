@@ -7,7 +7,7 @@ import {
   handleArtifactToolRequest,
 } from "./artifacts/serve/http"
 import { handleFileUploadRequest } from "./broker/files"
-import { handleGitHubTarballRequest, handleMiloMcpRequest } from "./broker/mcp"
+import { handleGitHubTarballRequest } from "./broker/mcp"
 import {
   handleGitHubEvents,
   handleGitHubInstall,
@@ -62,12 +62,6 @@ http.route({
       },
     })
   }),
-})
-
-http.route({
-  path: "/milo/mcp",
-  method: "POST",
-  handler: httpAction((ctx, request) => handleMiloMcpRequest(ctx, request)),
 })
 
 http.route({

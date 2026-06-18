@@ -69,13 +69,25 @@ async function patchExecutionStatus(
     return
   }
 
+  const execution = await ctx.db.get(args.executionId)
+
+  if (execution === null || execution.status === "stopped") {
+    return
+  }
+
   if (args.type === "run.started") {
-    await ctx.db.patch(args.executionId, { status: "running" })
+    if (execution.status === "queued" || execution.status === "running") {
+      await ctx.db.patch(args.executionId, { status: "running" })
+    }
 
     return
   }
 
   if (args.type === "run.completed") {
+    if (execution.status !== "queued" && execution.status !== "running") {
+      return
+    }
+
     await ctx.db.patch(args.executionId, {
       status: "completed",
       error: undefined,
@@ -86,6 +98,10 @@ async function patchExecutionStatus(
   }
 
   if (args.type === "run.failed") {
+    if (execution.status !== "queued" && execution.status !== "running") {
+      return
+    }
+
     await ctx.db.patch(args.executionId, {
       status: "failed",
       error: readPayloadString(args.payload, "error"),

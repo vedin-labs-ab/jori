@@ -2,16 +2,12 @@ import { existsSync, readFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 import { defaultBuildLogger, Template } from "e2b"
-import {
-  codexVersion,
-  e2bSandboxTemplate,
-  sandboxNodeVersion,
-  workspace,
-} from "../convex/executions/agent/sandbox/config.ts"
-import { createImageCheckCommand } from "../convex/executions/agent/sandbox/image.ts"
 import { runtimeAssets } from "../convex/runtime/_generated/assets.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")
+const e2bSandboxTemplate = process.env.MILO_E2B_TEMPLATE?.trim() || "milo-codex"
+const sandboxNodeVersion = "26.3.0"
+const workspace = "/home/user/milo-workspace"
 
 const apiKey = process.env.E2B_API_KEY ?? readCliApiKey()
 
@@ -31,22 +27,16 @@ const template = Template()
       "npm install -g n@10.2.0",
       `n ${sandboxNodeVersion}`,
       "hash -r",
-      `npm install -g @openai/codex@${codexVersion} slack-mcp-server@1.3.0`,
       [
         `npm install --prefix ${workspace}`,
         "@microsoft/microsoft-graph-client@3.0.7",
-        "@modelcontextprotocol/sdk@1.29.0",
         "@octokit/rest@22.0.1",
         ...runtimeAssets.artifact.dependencies,
       ].join(" "),
       `chmod 777 ${workspace}`,
       "npm cache clean --force",
       "rm -rf /var/lib/apt/lists/*",
-      createImageCheckCommand({
-        codexVersion,
-        imageCheck: runtimeAssets.sandbox.imageCheck,
-        workspace,
-      }),
+      createImageCheckCommand(),
     ],
     { user: "root" }
   )
@@ -66,4 +56,30 @@ function readCliApiKey() {
   }
 
   return config.teamApiKey
+}
+
+function createImageCheckCommand() {
+  return [
+    "set -eu",
+    "command -v node >/dev/null",
+    "command -v npm >/dev/null",
+    "command -v git >/dev/null",
+    `mkdir -p "${workspace}"`,
+    `test -x "${workspace}/node_modules/.bin/tsc"`,
+    `test -x "${workspace}/node_modules/.bin/biome"`,
+    `test -x "${workspace}/node_modules/.bin/vite"`,
+    `node -e ${JSON.stringify(imageCheckScript())}`,
+  ].join("\n")
+}
+
+function imageCheckScript() {
+  return [
+    "await import('react')",
+    "await import('vite')",
+    "await import('zod')",
+    "await import('lucide-react')",
+    "await import('@tailwindcss/vite')",
+    "await import('tailwindcss')",
+    "await import('shadcn')",
+  ].join(";")
 }

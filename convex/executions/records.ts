@@ -186,52 +186,6 @@ async function listActiveIntegrations(
   })
 }
 
-export const getActiveByHash = internalQuery({
-  args: {
-    hash: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const execution = await ctx.db
-      .query("executions")
-      .withIndex("by_hash", (query) => query.eq("hash", args.hash))
-      .first()
-
-    if (execution === null || execution.status !== "running") {
-      return null
-    }
-
-    return execution
-  },
-})
-
-export const markRunning = internalMutation({
-  args: {
-    executionId: v.id("executions"),
-    sandboxId: v.string(),
-    trace: v.object({
-      host: v.string(),
-      token: v.string(),
-    }),
-    hash: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const execution = await ctx.db.get(args.executionId)
-
-    if (execution === null || execution.status === "stopped") {
-      return false
-    }
-
-    await ctx.db.patch(args.executionId, {
-      status: "running",
-      sandboxId: args.sandboxId,
-      trace: args.trace,
-      hash: args.hash,
-    })
-
-    return true
-  },
-})
-
 export const finish = internalMutation({
   args: {
     executionId: v.id("executions"),
@@ -251,7 +205,6 @@ export const finish = internalMutation({
             error: args.status === "failed" ? args.error : undefined,
             finishedAt: Date.now(),
           }),
-      hash: undefined,
       trace:
         args.fileId === undefined
           ? undefined

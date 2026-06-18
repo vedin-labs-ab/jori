@@ -85,6 +85,70 @@ export class MiloConvexClient {
     })
   }
 
+  async uploadFile(args: {
+    bytes: Uint8Array
+    description?: string
+    executionId: Id<"executions">
+    mimeType: string
+    name: string
+  }) {
+    const url = new URL("/milo/files", requireConvexSiteUrl())
+    url.searchParams.set("name", args.name)
+
+    if (args.description !== undefined) {
+      url.searchParams.set("description", args.description)
+    }
+
+    const response = await fetch(url, {
+      body: args.bytes,
+      headers: {
+        "content-type": args.mimeType,
+        "x-milo-execution-id": args.executionId,
+        "x-milo-worker-secret": this.secret,
+      },
+      method: "POST",
+    })
+    const result = (await response.json().catch(() => null)) as unknown
+
+    if (!response.ok) {
+      throw new Error(fileUploadError(result))
+    }
+
+    return result
+  }
+
+  async fetchGitHubTarball(args: {
+    executionId: Id<"executions">
+    owner: string
+    ref?: string
+    repo: string
+  }) {
+    const response = await fetch(
+      new URL("/milo/github/tarball", requireConvexSiteUrl()),
+      {
+        body: JSON.stringify({
+          owner: args.owner,
+          ref: args.ref,
+          repo: args.repo,
+        }),
+        headers: {
+          "content-type": "application/json",
+          "x-milo-execution-id": args.executionId,
+          "x-milo-worker-secret": this.secret,
+        },
+        method: "POST",
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(
+        await response.text().catch(() => "GitHub tarball failed")
+      )
+    }
+
+    return new Uint8Array(await response.arrayBuffer())
+  }
+
   async upsertSandbox(args: {
     executionId: Id<"executions">
     runId: Id<"runs">
@@ -117,6 +181,18 @@ function requireConvexUrl() {
   return url
 }
 
+function requireConvexSiteUrl() {
+  const url =
+    process.env.CONVEX_SITE_URL?.trim() ||
+    process.env.VITE_CONVEX_SITE_URL?.trim()
+
+  if (url === undefined || url === "") {
+    throw new Error("Missing CONVEX_SITE_URL")
+  }
+
+  return url
+}
+
 function requireWorkerSecret() {
   const secret = process.env.MILO_WORKER_SECRET?.trim()
 
@@ -125,4 +201,17 @@ function requireWorkerSecret() {
   }
 
   return secret
+}
+
+function fileUploadError(value: unknown) {
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "error" in value &&
+    typeof value.error === "string"
+  ) {
+    return value.error
+  }
+
+  return "File upload failed"
 }

@@ -29,7 +29,6 @@ export const executions = defineTable({
   toolSnapshot: v.optional(toolSnapshot),
   sandboxId: v.optional(v.string()),
   triggerRunId: v.optional(v.string()),
-  hash: v.optional(v.string()),
   status: v.union(
     v.literal("queued"),
     v.literal("running"),
@@ -58,5 +57,4 @@ export const executions = defineTable({
   .index("by_tenant", ["tenantId"])
   .index("by_run", ["runId"])
   .index("by_approval", ["approvalId"])
-  .index("by_hash", ["hash"])
   .index("by_trigger_run", ["triggerRunId"])

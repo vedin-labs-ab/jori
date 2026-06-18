@@ -27,14 +27,12 @@ export const stop = mutation({
 
     const now = Date.now()
 
-    // Clearing hash and trace credentials revokes the sandbox's callback
-    // auth and live trace access immediately, even before the kill lands.
+    // Clearing trace credentials revokes live trace access immediately.
     await ctx.db.patch(execution._id, {
       status: "stopped",
       stoppedBy: stoppedByLabel(identity),
       stoppedAt: now,
       finishedAt: now,
-      hash: undefined,
       trace: undefined,
     })
 
