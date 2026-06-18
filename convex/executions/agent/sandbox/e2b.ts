@@ -1,13 +1,14 @@
 "use node"
 
-import {
-  CommandExitError,
-  type CommandResult,
-  Sandbox,
-  type Username,
-} from "e2b"
+import { Sandbox } from "e2b"
 import { createCodexConfig } from "../codex"
 import { type ToolBundle, type ToolPreflight } from "../tools/types"
+import { runCommand, writeSandboxFiles } from "./commands"
+import {
+  createBootstrapFiles,
+  createPromptFile,
+  createTraceServerFiles,
+} from "./files"
 import {
   codexHome,
   createBootstrapCommand,
@@ -147,17 +148,23 @@ async function bootstrapCodex(
     webSearch: boolean
   }
 ) {
-  const result = await runCommand(sandbox, createBootstrapCommand(), {
-    envs: {
-      CODEX_AUTH_JSON_BASE64: args.authJsonBase64,
-      CODEX_CONFIG_TOML: createCodexConfig({
+  await writeSandboxFiles(
+    sandbox,
+    createBootstrapFiles({
+      authJsonBase64: args.authJsonBase64,
+      codexConfig: createCodexConfig({
         mcpServers: args.toolBundle.mcpServers,
         webSearch: args.webSearch,
       }),
+      sandboxFiles: args.toolBundle.sandboxFiles,
+    }),
+    args.profile.timeouts.bootstrapMs
+  )
+
+  const result = await runCommand(sandbox, createBootstrapCommand(), {
+    envs: {
       CODEX_HOME: codexHome,
-      MILO_SANDBOX_FILES_BASE64: encodeBase64(
-        JSON.stringify(args.toolBundle.sandboxFiles)
-      ),
+      MILO_WORKSPACE: workspace,
     },
     timeoutMs: args.profile.timeouts.bootstrapMs,
   })
@@ -170,6 +177,12 @@ async function startTraceServer(
   traceToken: string,
   profile: AgentRuntimeProfile
 ) {
+  await writeSandboxFiles(
+    sandbox,
+    createTraceServerFiles(),
+    profile.timeouts.traceServerMs
+  )
+
   await sandbox.commands.run(createTraceServerCommand(), {
     background: true,
     envs: {
@@ -185,12 +198,15 @@ async function executeCodex(
   profile: AgentRuntimeProfile
 ) {
   let streamedStdout = ""
+  await writeSandboxFiles(
+    sandbox,
+    [createPromptFile(args.prompt)],
+    profile.timeouts.bootstrapMs
+  )
+
   const result = await runCommand(sandbox, createCodexCommand(), {
     cwd: workspace,
-    envs: {
-      CODEX_HOME: codexHome,
-      MILO_CODEX_PROMPT_BASE64: encodeBase64(args.prompt),
-    },
+    envs: { CODEX_HOME: codexHome },
     onStdout: (data) => {
       streamedStdout += data
     },
@@ -237,40 +253,4 @@ async function verifyToolPreflight(
   )
 
   return createCommandTrace(result)
-}
-
-async function runCommand(
-  sandbox: E2BSandbox,
-  command: string,
-  options: {
-    cwd?: string
-    envs?: Record<string, string>
-    onStdout?: (data: string) => void
-    timeoutMs: number
-    user?: Username
-  }
-) {
-  try {
-    return await sandbox.commands.run(command, options)
-  } catch (error) {
-    if (error instanceof CommandExitError) {
-      return {
-        exitCode: error.exitCode,
-        error: error.error,
-        stdout: error.stdout,
-        stderr: error.stderr,
-      } satisfies CommandResult
-    }
-
-    return {
-      exitCode: 124,
-      error: formatError(error),
-      stdout: "",
-      stderr: "",
-    } satisfies CommandResult
-  }
-}
-
-function encodeBase64(value: string) {
-  return Buffer.from(value, "utf8").toString("base64")
 }

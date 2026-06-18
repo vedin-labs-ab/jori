@@ -4,20 +4,25 @@ import {
   readFileAttachments,
 } from "../../../files/attachments"
 import {
-  boundedNumber,
+  optionalString,
   optionalStringArray,
   requiredString,
   requiredStringArray,
-  setOptionalSearchParam,
 } from "../../../shared/input"
 import {
   createMimeMessage,
   ensureReplySubject,
   getHeader,
   getReplyRecipient,
-  normalizeGmailFormat,
   parseOptionalEmailAddress,
 } from "./format"
+import {
+  getGmailMessage,
+  getGmailMessages,
+  getGmailThread,
+  getGmailThreads,
+  searchGmailThreads,
+} from "./gmail/read"
 import { googleJson } from "./request"
 
 export async function callGmailTool(
@@ -35,8 +40,16 @@ export async function callGmailTool(
     return await getGmailThread(token, args)
   }
 
+  if (tool === "google_gmail_get_threads") {
+    return await getGmailThreads(token, args)
+  }
+
   if (tool === "google_gmail_get_message") {
     return await getGmailMessage(token, args)
+  }
+
+  if (tool === "google_gmail_get_messages") {
+    return await getGmailMessages(token, args)
   }
 
   if (tool === "google_gmail_reply_to_thread") {
@@ -48,39 +61,10 @@ export async function callGmailTool(
   }
 
   if (tool === "google_gmail_create_draft") {
-    return await createGmailDraft(token, args, context)
+    return await createGmailDraft(integration, token, args, context)
   }
 
   throw new Error(`Unknown Gmail tool: ${tool}`)
-}
-
-async function searchGmailThreads(
-  token: string,
-  args: Record<string, unknown>
-) {
-  const url = new URL("https://gmail.googleapis.com/gmail/v1/users/me/threads")
-  url.searchParams.set(
-    "maxResults",
-    String(boundedNumber(args.maxResults, 10, 1, 50))
-  )
-  setOptionalSearchParam(url, "q", args.q)
-  return await googleJson(token, url.toString())
-}
-
-async function getGmailThread(token: string, args: Record<string, unknown>) {
-  const url = new URL(
-    `https://gmail.googleapis.com/gmail/v1/users/me/threads/${encodeURIComponent(requiredString(args.threadId, "threadId"))}`
-  )
-  url.searchParams.set("format", normalizeGmailFormat(args.format))
-  return await googleJson(token, url.toString())
-}
-
-async function getGmailMessage(token: string, args: Record<string, unknown>) {
-  const url = new URL(
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${encodeURIComponent(requiredString(args.messageId, "messageId"))}`
-  )
-  url.searchParams.set("format", normalizeGmailFormat(args.format))
-  return await googleJson(token, url.toString())
 }
 
 async function replyToGmailThread(
@@ -89,31 +73,7 @@ async function replyToGmailThread(
   args: Record<string, unknown>
 ) {
   const threadId = requiredString(args.threadId, "threadId")
-  const thread = await googleJson(
-    token,
-    `https://gmail.googleapis.com/gmail/v1/users/me/threads/${encodeURIComponent(threadId)}?format=metadata`
-  )
-  const accountEmail = requireIntegrationEmail(integration)
-  const messages = [...(thread.messages ?? [])].sort(
-    (left, right) =>
-      Number(left.internalDate ?? 0) - Number(right.internalDate ?? 0)
-  )
-  const latestExternalMessage = [...messages].reverse().find((message) => {
-    const from = parseOptionalEmailAddress(getHeader(message, "from"))
-    return (
-      from !== undefined && from.toLowerCase() !== accountEmail.toLowerCase()
-    )
-  })
-  const latestMessage = latestExternalMessage ?? messages.at(-1)
-
-  if (latestMessage === undefined) {
-    throw new Error("Cannot reply to an empty Gmail thread")
-  }
-
-  const messageId = getHeader(latestMessage, "message-id")
-  const references = [getHeader(latestMessage, "references"), messageId]
-    .filter(Boolean)
-    .join(" ")
+  const reply = await readGmailReplyContext(integration, token, threadId)
 
   return await googleJson(
     token,
@@ -122,18 +82,11 @@ async function replyToGmailThread(
       method: "POST",
       body: {
         raw: createMimeMessage({
-          to: [
-            getReplyRecipient(
-              latestMessage,
-              latestExternalMessage !== undefined
-            ),
-          ],
-          subject: ensureReplySubject(
-            getHeader(latestMessage, "subject") ?? ""
-          ),
+          to: reply.to,
+          subject: reply.subject,
           body: requiredString(args.body, "body"),
-          inReplyTo: messageId,
-          references,
+          inReplyTo: reply.inReplyTo,
+          references: reply.references,
         }),
         threadId,
       },
@@ -162,10 +115,23 @@ async function sendGmailMessage(
 }
 
 async function createGmailDraft(
+  integration: Doc<"integrations">,
   token: string,
   args: Record<string, unknown>,
   context?: FileContext
 ) {
+  const threadId = optionalString(args.threadId)
+
+  if (threadId !== undefined) {
+    return await createGmailThreadDraft(
+      integration,
+      token,
+      threadId,
+      args,
+      context
+    )
+  }
+
   return await googleJson(
     token,
     "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
@@ -181,6 +147,78 @@ async function createGmailDraft(
       },
     }
   )
+}
+
+async function createGmailThreadDraft(
+  integration: Doc<"integrations">,
+  token: string,
+  threadId: string,
+  args: Record<string, unknown>,
+  context?: FileContext
+) {
+  const reply = await readGmailReplyContext(integration, token, threadId)
+
+  return await googleJson(
+    token,
+    "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
+    {
+      method: "POST",
+      body: {
+        message: {
+          raw: createMimeMessage({
+            to: reply.to,
+            subject: reply.subject,
+            body: requiredString(args.body, "body"),
+            bodyType: args.bodyType === "HTML" ? "HTML" : "Text",
+            inReplyTo: reply.inReplyTo,
+            references: reply.references,
+            attachments: await readFileAttachments(context, args.attachments),
+          }),
+          threadId,
+        },
+      },
+    }
+  )
+}
+
+async function readGmailReplyContext(
+  integration: Doc<"integrations">,
+  token: string,
+  threadId: string
+) {
+  const thread = await googleJson(
+    token,
+    `https://gmail.googleapis.com/gmail/v1/users/me/threads/${encodeURIComponent(threadId)}?format=metadata`
+  )
+  const accountEmail = requireIntegrationEmail(integration)
+  const messages = [...(thread.messages ?? [])].sort(
+    (left, right) =>
+      Number(left.internalDate ?? 0) - Number(right.internalDate ?? 0)
+  )
+  const latestExternalMessage = [...messages].reverse().find((message) => {
+    const from = parseOptionalEmailAddress(getHeader(message, "from"))
+
+    return (
+      from !== undefined && from.toLowerCase() !== accountEmail.toLowerCase()
+    )
+  })
+  const latestMessage = latestExternalMessage ?? messages.at(-1)
+
+  if (latestMessage === undefined) {
+    throw new Error("Cannot reply to an empty Gmail thread")
+  }
+
+  const messageId = getHeader(latestMessage, "message-id")
+  const references = [getHeader(latestMessage, "references"), messageId]
+    .filter(Boolean)
+    .join(" ")
+
+  return {
+    to: [getReplyRecipient(latestMessage, latestExternalMessage !== undefined)],
+    subject: ensureReplySubject(getHeader(latestMessage, "subject") ?? ""),
+    inReplyTo: messageId,
+    references,
+  }
 }
 
 function gmailMessageInput(args: Record<string, unknown>) {

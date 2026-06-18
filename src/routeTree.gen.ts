@@ -15,7 +15,10 @@ import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as ExecutionsRouteImport } from './routes/executions'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as AutomationsRouteImport } from './routes/automations'
+import { Route as ArtifactsRouteImport } from './routes/artifacts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArtifactsIndexRouteImport } from './routes/artifacts/index'
+import { Route as ArtifactsArtifactIdIndexRouteImport } from './routes/artifacts/$artifactId/index'
 
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
@@ -47,20 +50,39 @@ const AutomationsRoute = AutomationsRouteImport.update({
   path: '/automations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArtifactsRoute = ArtifactsRouteImport.update({
+  id: '/artifacts',
+  path: '/artifacts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArtifactsIndexRoute = ArtifactsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ArtifactsRoute,
+} as any)
+const ArtifactsArtifactIdIndexRoute =
+  ArtifactsArtifactIdIndexRouteImport.update({
+    id: '/$artifactId/',
+    path: '/$artifactId/',
+    getParentRoute: () => ArtifactsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/artifacts': typeof ArtifactsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playbooks': typeof PlaybooksRoute
   '/skills': typeof SkillsRoute
+  '/artifacts/': typeof ArtifactsIndexRoute
+  '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,27 +92,35 @@ export interface FileRoutesByTo {
   '/integrations': typeof IntegrationsRoute
   '/playbooks': typeof PlaybooksRoute
   '/skills': typeof SkillsRoute
+  '/artifacts': typeof ArtifactsIndexRoute
+  '/artifacts/$artifactId': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/artifacts': typeof ArtifactsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playbooks': typeof PlaybooksRoute
   '/skills': typeof SkillsRoute
+  '/artifacts/': typeof ArtifactsIndexRoute
+  '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/artifacts'
     | '/automations'
     | '/console'
     | '/executions'
     | '/integrations'
     | '/playbooks'
     | '/skills'
+    | '/artifacts/'
+    | '/artifacts/$artifactId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,19 +130,25 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/playbooks'
     | '/skills'
+    | '/artifacts'
+    | '/artifacts/$artifactId'
   id:
     | '__root__'
     | '/'
+    | '/artifacts'
     | '/automations'
     | '/console'
     | '/executions'
     | '/integrations'
     | '/playbooks'
     | '/skills'
+    | '/artifacts/'
+    | '/artifacts/$artifactId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArtifactsRoute: typeof ArtifactsRouteWithChildren
   AutomationsRoute: typeof AutomationsRoute
   ConsoleRoute: typeof ConsoleRoute
   ExecutionsRoute: typeof ExecutionsRoute
@@ -165,6 +201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutomationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/artifacts': {
+      id: '/artifacts'
+      path: '/artifacts'
+      fullPath: '/artifacts'
+      preLoaderRoute: typeof ArtifactsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -172,11 +215,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/artifacts/': {
+      id: '/artifacts/'
+      path: '/'
+      fullPath: '/artifacts/'
+      preLoaderRoute: typeof ArtifactsIndexRouteImport
+      parentRoute: typeof ArtifactsRoute
+    }
+    '/artifacts/$artifactId/': {
+      id: '/artifacts/$artifactId/'
+      path: '/$artifactId'
+      fullPath: '/artifacts/$artifactId/'
+      preLoaderRoute: typeof ArtifactsArtifactIdIndexRouteImport
+      parentRoute: typeof ArtifactsRoute
+    }
   }
 }
 
+interface ArtifactsRouteChildren {
+  ArtifactsIndexRoute: typeof ArtifactsIndexRoute
+  ArtifactsArtifactIdIndexRoute: typeof ArtifactsArtifactIdIndexRoute
+}
+
+const ArtifactsRouteChildren: ArtifactsRouteChildren = {
+  ArtifactsIndexRoute: ArtifactsIndexRoute,
+  ArtifactsArtifactIdIndexRoute: ArtifactsArtifactIdIndexRoute,
+}
+
+const ArtifactsRouteWithChildren = ArtifactsRoute._addFileChildren(
+  ArtifactsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArtifactsRoute: ArtifactsRouteWithChildren,
   AutomationsRoute: AutomationsRoute,
   ConsoleRoute: ConsoleRoute,
   ExecutionsRoute: ExecutionsRoute,

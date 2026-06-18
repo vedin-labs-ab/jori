@@ -58,6 +58,7 @@ export async function createPromptedExecution(
 
   return {
     id: executionId,
+    runId: input.run._id,
     prompt,
     toolBundle: runtimeToolBundle,
     webSearch,

@@ -21,7 +21,12 @@ const surfaceSkillNames = {
   microsoftCalendar: [],
 } satisfies Record<ToolSurface, readonly string[]>
 
-const bundledSkillNames = new Set(Object.values(surfaceSkillNames).flat())
+const artifactSkillName = "artifact-creator"
+const artifactWriteTools = new Set(["create_artifact", "update_artifact"])
+const bundledSkillNames = new Set([
+  ...Object.values(surfaceSkillNames).flat(),
+  artifactSkillName,
+])
 
 export function getSurfaceSkillNames(
   surface: ToolSurface,
@@ -29,6 +34,14 @@ export function getSurfaceSkillNames(
 ) {
   if (!permissions.some((permission) => permission.access === "write")) {
     return []
+  }
+
+  if (surface === "milo") {
+    return permissions.some((permission) =>
+      artifactWriteTools.has(permission.tool)
+    )
+      ? [artifactSkillName]
+      : []
   }
 
   return surfaceSkillNames[surface]

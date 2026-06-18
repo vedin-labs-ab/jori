@@ -1,5 +1,5 @@
 import { workspace } from "../sandbox/harness"
-import { createBrokerMcpScript } from "./adapter"
+import { createBrokerMcpScript, createToolDefinitionsEnv } from "./adapter"
 import { getSurfaceToolDefinitions } from "./definitions"
 import {
   enabledToolsEnv,
@@ -19,18 +19,22 @@ export function createBrokeredToolBundle(
   } & ToolPermissionInput
 ): ToolBundle {
   const surface = args.preflight.type
-  const scriptPath = `${workspace}/milo-${toKebabCase(surface)}-mcp.mjs`
+  const scriptPath = `${workspace}/milo-${toKebabCase(surface)}-mcp.ts`
+  const tools = getSurfaceToolDefinitions(surface, args)
 
   return {
     mcpServers: [
       {
         name: surface,
         command: "node",
-        args: [scriptPath],
+        args: ["--experimental-strip-types", scriptPath],
         env: {
           MILO_CONVEX_SITE_URL: args.broker.convexSiteUrl,
           MILO_EXECUTION_TOKEN: args.broker.executionToken,
           MILO_ENABLED_TOOLS: enabledToolsEnv(args.permissions),
+          MILO_TOOL_DEFINITIONS_BASE64: createToolDefinitionsEnv(tools),
+          MILO_TOOL_SURFACE: surface,
+          MILO_WORKSPACE: workspace,
         },
       },
     ],
@@ -39,7 +43,7 @@ export function createBrokeredToolBundle(
         path: scriptPath,
         content: createBrokerMcpScript({
           surface,
-          tools: getSurfaceToolDefinitions(surface, args),
+          tools,
         }),
       },
     ],

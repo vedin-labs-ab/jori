@@ -13,6 +13,10 @@ export function base64UrlEncode(value: string) {
   return base64.replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "")
 }
 
+export function base64Encode(value: string) {
+  return base64EncodeBytes(new TextEncoder().encode(value))
+}
+
 export function base64EncodeBytes(bytes: Uint8Array) {
   let binary = ""
   const chunkSize = 0x8000

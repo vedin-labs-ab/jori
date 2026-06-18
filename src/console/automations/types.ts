@@ -12,8 +12,9 @@ export type AutomationList = FunctionReturnType<
 export type Automation = AutomationList["automations"][number]
 
 export const automationFilterOptions = [
-  { label: "Active", value: "active" },
   { label: "All", value: "all" },
+  { label: "Active", value: "active" },
+  { label: "Paused", value: "paused" },
 ] as const
 
 export type AutomationFilter = (typeof automationFilterOptions)[number]["value"]

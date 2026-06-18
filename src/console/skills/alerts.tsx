@@ -14,17 +14,14 @@ type SkillListResult =
 
 export function SkillStatusAlerts({
   deleteError,
-  globalError,
   result,
 }: {
   deleteError: string | undefined
-  globalError: string | undefined
   result: SkillListResult | undefined
 }) {
   return (
     <>
       <SkillDeleteError error={deleteError} />
-      <SkillGlobalSettingError error={globalError} />
       <SkillAccessError result={result} />
     </>
   )
@@ -38,19 +35,6 @@ function SkillDeleteError({ error }: { error: string | undefined }) {
   return (
     <Alert variant="destructive">
       <AlertTitle>Could not delete skill</AlertTitle>
-      <AlertDescription>{error}</AlertDescription>
-    </Alert>
-  )
-}
-
-function SkillGlobalSettingError({ error }: { error: string | undefined }) {
-  if (error === undefined) {
-    return null
-  }
-
-  return (
-    <Alert variant="destructive">
-      <AlertTitle>Could not update skill</AlertTitle>
       <AlertDescription>{error}</AlertDescription>
     </Alert>
   )

@@ -72,6 +72,7 @@ export const status = v.union(
 
 export const automations = defineTable({
   tenantId: v.string(),
+  artifactId: v.optional(v.id("artifacts")),
   name: v.string(),
   instructions: v.string(),
   metadata: v.optional(v.any()),
@@ -84,6 +85,7 @@ export const automations = defineTable({
   lastRunAt: v.optional(v.number()),
 })
   .index("by_tenant", ["tenantId"])
+  .index("by_artifact", ["artifactId"])
   .index("by_tenant_status", ["tenantId", "status"])
 
 export type AutomationTriggerInput = Infer<typeof triggerInput>

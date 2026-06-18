@@ -17,9 +17,23 @@ export const googleToolPermissionRows = [
   ],
   [
     "gmail",
+    "google_gmail_get_threads",
+    "Read threads",
+    "Read multiple Gmail threads.",
+    "read",
+  ],
+  [
+    "gmail",
     "google_gmail_get_message",
     "Read message",
     "Read a Gmail message.",
+    "read",
+  ],
+  [
+    "gmail",
+    "google_gmail_get_messages",
+    "Read messages",
+    "Read multiple Gmail messages.",
     "read",
   ],
   [

@@ -1,60 +1,61 @@
-import { expect, test } from "vitest"
+import { describe, expect, test } from "vitest"
+import { runtimeAssets } from "../../../../runtime/_generated/assets"
 import { createTokenPreflightCommand } from "./script"
 
-test("generates a bearer GET preflight script", () => {
-  const command = createTokenPreflightCommand({
-    tokenEnv: "MILO_EXAMPLE_TOKEN",
-    missingTokenError: "Missing Example token",
-    url: "https://api.example.com/me",
-    headers: { "x-example-version": "2026-01-01" },
-    failureLabel: "Example token",
-    successMessage: "Example token preflight passed",
+describe("token preflight command", () => {
+  test("wraps the checked preflight script with typed config", () => {
+    const command = createTokenPreflightCommand({
+      tokenEnv: "MILO_EXAMPLE_TOKEN",
+      missingTokenError: "Missing Example token",
+      url: "https://api.example.com/me",
+      headers: { "x-example-version": "2026-01-01" },
+      failureLabel: "Example token",
+      successMessage: "Example token preflight passed",
+    })
+
+    expect(command).not.toContain("node <<")
+    expect(command).toContain("MILO_PREFLIGHT_CONFIG_BASE64")
+    expect(command).toContain("/tmp/milo-token-preflight.ts")
+    expect(command).toContain("node --experimental-strip-types")
+    expect(command).toContain(
+      Buffer.from(runtimeAssets.sandbox.tokenPreflight).toString("base64")
+    )
+    expect(readExportedConfig(command)).toMatchObject({
+      tokenEnv: "MILO_EXAMPLE_TOKEN",
+      missingTokenError: "Missing Example token",
+      url: "https://api.example.com/me",
+      headers: { "x-example-version": "2026-01-01" },
+      failureLabel: "Example token",
+      successMessage: "Example token preflight passed",
+    })
   })
 
-  expect(command).toBe(
-    [
-      "node <<'NODE'",
-      "async function main() {",
-      "  const token = process.env.MILO_EXAMPLE_TOKEN;",
-      "  if (!token) {",
-      '    throw new Error("Missing Example token");',
-      "  }",
-      '  const response = await fetch("https://api.example.com/me", {',
-      "    headers: {",
-      "      authorization: 'Bearer ' + token,",
-      '      "x-example-version": "2026-01-01",',
-      "    },",
-      "  });",
-      "  const body = await response.json();",
-      "  if (!response.ok) {",
-      "    throw new Error(\"Example token\" + ' preflight failed: ' + JSON.stringify(body));",
-      "  }",
-      '  console.log("Example token preflight passed");',
-      "}",
-      "main().catch((error) => {",
-      "  console.error(error);",
-      "  process.exit(1);",
-      "});",
-      "NODE",
-    ].join("\n")
-  )
-})
+  test("passes POST body and typed failure properties as data", () => {
+    const command = createTokenPreflightCommand({
+      tokenEnv: "MILO_EXAMPLE_TOKEN",
+      missingTokenError: "Missing Example token",
+      url: () => "https://api.example.com/graphql",
+      body: { query: "{ viewer { id } }" },
+      failureBodyProperties: ["errors"],
+      failureLabel: "Example token",
+      successMessage: "Example token preflight passed",
+    })
 
-test("generates a POST preflight script with an extra failure condition", () => {
-  const command = createTokenPreflightCommand({
-    tokenEnv: "MILO_EXAMPLE_TOKEN",
-    missingTokenError: "Missing Example token",
-    url: () => "https://api.example.com/graphql",
-    body: { query: "{ viewer { id } }" },
-    failureCondition: "body.errors",
-    failureLabel: "Example token",
-    successMessage: "Example token preflight passed",
+    expect(readExportedConfig(command)).toMatchObject({
+      url: "https://api.example.com/graphql",
+      body: { query: "{ viewer { id } }" },
+      failureBodyProperties: ["errors"],
+    })
+    expect(command).not.toContain("body.errors")
   })
-
-  expect(command).toContain("    method: 'POST',")
-  expect(command).toContain(
-    `    body: "{\\"query\\":\\"{ viewer { id } }\\"}",`
-  )
-  expect(command).toContain("  if (!response.ok || body.errors) {")
-  expect(command).toContain('await fetch("https://api.example.com/graphql", {')
 })
+
+function readExportedConfig(command: string) {
+  const match = /MILO_PREFLIGHT_CONFIG_BASE64="([^"]+)"/.exec(command)
+
+  if (match === null) {
+    throw new Error("Missing preflight config export.")
+  }
+
+  return JSON.parse(Buffer.from(match[1], "base64").toString("utf8"))
+}

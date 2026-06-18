@@ -25,7 +25,7 @@ export const tokenPreflightSpecs: Record<
     url: "https://api.linear.app/graphql",
     headers: { "content-type": "application/json" },
     body: { query: "query MiloLinearPreflight { viewer { id } }" },
-    failureCondition: "body.errors",
+    failureBodyProperties: ["errors"],
     failureLabel: "Linear token",
     successMessage: "Linear token preflight passed",
   },

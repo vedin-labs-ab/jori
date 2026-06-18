@@ -16,7 +16,9 @@ export const googleToolInputSchemas = {
     },
   }),
   google_gmail_get_thread: gmailReadSchema("threadId"),
+  google_gmail_get_threads: gmailBatchReadSchema("threadIds"),
   google_gmail_get_message: gmailReadSchema("messageId"),
+  google_gmail_get_messages: gmailBatchReadSchema("messageIds"),
   google_gmail_reply_to_thread: objectSchema({
     required: ["threadId", "body"],
     properties: {
@@ -25,7 +27,7 @@ export const googleToolInputSchemas = {
     },
   }),
   google_gmail_send_message: gmailMessageSchema(),
-  google_gmail_create_draft: gmailMessageSchema(),
+  google_gmail_create_draft: gmailDraftSchema(),
   google_calendar_list_events: objectSchema({
     properties: {
       calendarId: stringProperty("Calendar ID. Defaults to primary."),
@@ -123,11 +125,55 @@ function gmailMessageSchema() {
   })
 }
 
+function gmailDraftSchema() {
+  return objectSchema({
+    required: ["body"],
+    properties: {
+      attachments: fileAttachmentsProperty(),
+      bcc: stringArrayProperty(
+        "BCC recipient email addresses. Standalone drafts only."
+      ),
+      body: stringProperty("Message body."),
+      bodyType: {
+        type: "string",
+        enum: ["Text", "HTML"],
+        description: "Defaults to Text.",
+      },
+      cc: stringArrayProperty(
+        "CC recipient email addresses. Standalone drafts only."
+      ),
+      subject: stringProperty(
+        "Message subject. Required unless threadId is provided."
+      ),
+      threadId: stringProperty(
+        "Optional Gmail thread ID. When provided, Milo creates a reply draft and infers recipient and subject."
+      ),
+      to: stringArrayProperty(
+        "Recipient email addresses. Required unless threadId is provided."
+      ),
+    },
+  })
+}
+
 function gmailReadSchema(idProperty: string) {
   return objectSchema({
     required: [idProperty],
     properties: {
       [idProperty]: stringProperty("Gmail ID."),
+      format: {
+        type: "string",
+        enum: ["full", "metadata", "minimal"],
+        description: "Defaults to full.",
+      },
+    },
+  })
+}
+
+function gmailBatchReadSchema(idsProperty: string) {
+  return objectSchema({
+    required: [idsProperty],
+    properties: {
+      [idsProperty]: stringArrayProperty("Gmail IDs. Maximum 50."),
       format: {
         type: "string",
         enum: ["full", "metadata", "minimal"],

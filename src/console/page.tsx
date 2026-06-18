@@ -10,7 +10,7 @@ import { type ReactNode, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { api } from "../../convex/_generated/api"
-import { LoadingMessage } from "./loading"
+import { FullscreenSkeletonLoader } from "./loading"
 import { ConsoleShell, PublicConsoleFrame } from "./shell"
 
 export type ActiveOrganization = NonNullable<
@@ -19,26 +19,28 @@ export type ActiveOrganization = NonNullable<
 
 export function ConsolePage({
   children,
+  chrome = "shell",
+  loadingFallback,
 }: {
   children: (organization: ActiveOrganization) => ReactNode
+  chrome?: "shell" | "none"
+  loadingFallback?: ReactNode
 }) {
   const { isLoaded, isSignedIn } = useAuth()
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
 
   if (!isLoaded) {
-    return (
-      <PublicConsoleFrame isLoaded={isLoaded} isSignedIn={isSignedIn}>
-        <LoadingMessage label="Loading" />
-      </PublicConsoleFrame>
-    )
+    return loadingFallback ?? <FullscreenSkeletonLoader />
   }
 
   return (
     <ConsoleContent
+      chrome={chrome}
       isClerkLoaded={isLoaded}
       isConvexAuthenticated={isAuthenticated}
       isConvexAuthLoading={isConvexAuthLoading}
       isSignedIn={isSignedIn}
+      loadingFallback={loadingFallback}
     >
       {children}
     </ConsoleContent>
@@ -47,16 +49,20 @@ export function ConsolePage({
 
 function ConsoleContent({
   children,
+  chrome,
   isClerkLoaded,
   isConvexAuthenticated,
   isConvexAuthLoading,
   isSignedIn,
+  loadingFallback,
 }: {
   children: (organization: ActiveOrganization) => ReactNode
+  chrome: "shell" | "none"
   isClerkLoaded: boolean
   isConvexAuthenticated: boolean
   isConvexAuthLoading: boolean
   isSignedIn: boolean | undefined
+  loadingFallback: ReactNode | undefined
 }) {
   if (!isClerkLoaded) {
     return null
@@ -71,11 +77,7 @@ function ConsoleContent({
   }
 
   if (isConvexAuthLoading) {
-    return (
-      <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
-        <LoadingMessage label="Signing you in" />
-      </PublicConsoleFrame>
-    )
+    return loadingFallback ?? <FullscreenSkeletonLoader />
   }
 
   if (!isConvexAuthenticated) {
@@ -91,7 +93,11 @@ function ConsoleContent({
     )
   }
 
-  return <SignedInView>{children}</SignedInView>
+  return (
+    <SignedInView chrome={chrome} loadingFallback={loadingFallback}>
+      {children}
+    </SignedInView>
+  )
 }
 
 function SignedOutView() {
@@ -118,17 +124,17 @@ function SignedOutView() {
 
 function SignedInView({
   children,
+  chrome,
+  loadingFallback,
 }: {
   children: (organization: ActiveOrganization) => ReactNode
+  chrome: "shell" | "none"
+  loadingFallback: ReactNode | undefined
 }) {
   const { isLoaded, organization } = useOrganization()
 
   if (!isLoaded) {
-    return (
-      <PublicConsoleFrame isLoaded={isLoaded} isSignedIn>
-        <LoadingMessage label="Loading your organization" />
-      </PublicConsoleFrame>
-    )
+    return loadingFallback ?? <FullscreenSkeletonLoader />
   }
 
   if (organization === undefined || organization === null) {
@@ -150,12 +156,14 @@ function SignedInView({
     )
   }
 
-  return (
+  const content = (
     <>
       <ClerkIdentitySync tenantId={organization.id} />
-      <ConsoleShell>{children(organization)}</ConsoleShell>
+      {children(organization)}
     </>
   )
+
+  return chrome === "shell" ? <ConsoleShell>{content}</ConsoleShell> : content
 }
 
 function ClerkIdentitySync({ tenantId }: { tenantId: string }) {

@@ -31,7 +31,7 @@ export function createCodexConfig(args: {
   return [
     'cli_auth_credentials_store = "file"',
     'approval_policy = "never"',
-    'sandbox_mode = "read-only"',
+    'sandbox_mode = "workspace-write"',
     'model = "gpt-5.5"',
     'model_reasoning_effort = "low"',
     // Hosted Responses web search; runs server-side, so read-only does not

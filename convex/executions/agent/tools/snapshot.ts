@@ -9,13 +9,11 @@ export function createExecutionToolSnapshot(input: {
   webSearch: boolean
 }): ExecutionToolSnapshot {
   return {
-    groups: input.capabilities
-      .filter((capability) => capability.surface !== "milo")
-      .map((capability) => ({
-        surface: capability.surface,
-        label: capability.label,
-        tools: capability.tools,
-      })),
+    groups: input.capabilities.map((capability) => ({
+      surface: capability.surface,
+      label: capability.label,
+      tools: capability.tools,
+    })),
     webSearch: input.webSearch,
   }
 }

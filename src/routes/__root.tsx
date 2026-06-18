@@ -8,6 +8,7 @@ import { ConvexProviderWithClerk } from "convex/react-clerk"
 import { AlertTriangle, SearchX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { FullscreenLoadingProvider } from "@/console/loading"
 import { convex } from "@/shared/convex"
 import { RootStateFrame } from "@/shared/state"
 import appCss from "../styles.css?url"
@@ -155,7 +156,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <ClerkProvider appearance={{ theme: shadcn }}>
           <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-            <TooltipProvider>{children}</TooltipProvider>
+            <FullscreenLoadingProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+            </FullscreenLoadingProvider>
           </ConvexProviderWithClerk>
         </ClerkProvider>
         <TanStackDevtools

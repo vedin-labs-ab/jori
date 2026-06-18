@@ -4,10 +4,12 @@ import { join } from "node:path"
 import { defaultBuildLogger, Template } from "e2b"
 import {
   codexVersion,
-  createImageCheckCommand,
   e2bSandboxTemplate,
+  sandboxNodeVersion,
   workspace,
-} from "../convex/executions/agent/sandbox/harness.ts"
+} from "../convex/executions/agent/sandbox/config.ts"
+import { createImageCheckCommand } from "../convex/executions/agent/sandbox/image.ts"
+import { runtimeAssets } from "../convex/runtime/_generated/assets.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")
 
@@ -26,17 +28,25 @@ const template = Template()
   .runCmd(
     [
       `mkdir -p ${workspace}`,
+      "npm install -g n@10.2.0",
+      `n ${sandboxNodeVersion}`,
+      "hash -r",
       `npm install -g @openai/codex@${codexVersion} slack-mcp-server@1.3.0`,
       [
         `npm install --prefix ${workspace}`,
         "@microsoft/microsoft-graph-client@3.0.7",
         "@modelcontextprotocol/sdk@1.29.0",
         "@octokit/rest@22.0.1",
+        ...runtimeAssets.artifact.dependencies,
       ].join(" "),
       `chmod 777 ${workspace}`,
       "npm cache clean --force",
       "rm -rf /var/lib/apt/lists/*",
-      createImageCheckCommand(),
+      createImageCheckCommand({
+        codexVersion,
+        imageCheck: runtimeAssets.sandbox.imageCheck,
+        workspace,
+      }),
     ],
     { user: "root" }
   )

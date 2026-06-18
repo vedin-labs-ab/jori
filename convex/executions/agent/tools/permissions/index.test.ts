@@ -256,10 +256,10 @@ test("keeps provider credentials out of sandbox MCP config", () => {
   // Codex enables web search only via the top-level string key; the [tools]
   // boolean form is silently ignored.
   expect(config).toContain('web_search = "live"')
-  expect(config).toContain('sandbox_mode = "read-only"')
+  expect(config).toContain('sandbox_mode = "workspace-write"')
 
   expect(config).toContain(
-    'enabled_tools = ["save_file", "search_files", "read_file", "search_automations", "read_automation", "add_automation", "update_automation", "delete_automation"]'
+    'enabled_tools = ["save_file", "search_files", "read_file", "search_artifacts", "read_artifact", "read_artifact_state", "create_artifact", "update_artifact", "delete_artifact", "update_artifact_state", "search_automations", "read_automation", "add_automation", "update_automation", "delete_automation"]'
   )
 
   for (const server of toolBundle.mcpServers) {

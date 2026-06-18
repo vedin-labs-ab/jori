@@ -10,6 +10,7 @@ import { CodexRunError, formatError } from "./trace"
 
 type PromptedExecution = {
   id: Id<"executions">
+  runId: Id<"runs">
   prompt: string
   toolBundle: RuntimeToolBundle
   webSearch: boolean
@@ -64,21 +65,74 @@ export async function runPromptedExecution(
     trace = error instanceof CodexRunError ? error.trace : undefined
   }
 
-  const fileId =
-    trace === undefined
-      ? undefined
-      : await ctx.storage.store(
-          new Blob([trace], {
-            type: "application/x-ndjson",
-          })
-        )
+  const traceResult = await storeTrace(ctx, trace)
 
-  await ctx.runMutation(internal.executions.records.finish, {
+  if (traceResult.error !== undefined) {
+    status = "failed"
+    executionError = joinExecutionErrors(executionError, traceResult.error)
+  }
+
+  await finishExecution(ctx, {
     executionId: args.execution.id,
-    fileId,
+    fileId: traceResult.fileId,
     error: executionError,
     status,
   })
+}
+
+async function storeTrace(ctx: ActionCtx, trace: string | undefined) {
+  if (trace === undefined) {
+    return {}
+  }
+
+  try {
+    return {
+      fileId: await ctx.storage.store(
+        new Blob([trace], {
+          type: "application/x-ndjson",
+        })
+      ),
+    }
+  } catch (error) {
+    return { error: `Failed to store execution trace: ${formatError(error)}` }
+  }
+}
+
+async function finishExecution(
+  ctx: ActionCtx,
+  args: {
+    executionId: Id<"executions">
+    fileId?: Id<"_storage">
+    error?: string
+    status: "completed" | "failed"
+  }
+) {
+  let lastError: unknown
+
+  for (const delayMs of [0, 250, 1000]) {
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+
+    try {
+      await ctx.runMutation(internal.executions.records.finish, args)
+
+      return
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Failed to finish execution.")
+}
+
+function joinExecutionErrors(
+  current: string | undefined,
+  next: string | undefined
+) {
+  return [current, next].filter(Boolean).join("\n\n") || undefined
 }
 
 function requireCodexAuthJsonBase64() {

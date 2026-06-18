@@ -10,6 +10,7 @@ type MiloMcpRequest = {
 }
 
 type AddAutomationArgs = {
+  artifactId?: Id<"artifacts">
   name: string
   instructions: string
   metadata?: unknown
@@ -29,6 +30,7 @@ type ReadAutomationArgs = {
 
 type UpdateAutomationArgs = {
   automationId: Id<"automations">
+  artifactId?: Id<"artifacts">
   name?: string
   instructions?: string
   metadata?: unknown

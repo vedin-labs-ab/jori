@@ -17,6 +17,7 @@ export async function createAutomation(
   ctx: MutationCtx,
   args: {
     tenantId: string
+    artifactId?: Id<"artifacts">
     name: string
     instructions: string
     metadata?: unknown
@@ -32,13 +33,17 @@ export async function createAutomation(
     trigger: args.trigger,
     now,
   })
+  await requireArtifact(ctx, args.tenantId, args.artifactId)
+
   const automationId = await ctx.db.insert("automations", {
     tenantId: args.tenantId,
+    artifactId: args.artifactId,
     name: normalizeRequiredText(args.name, "name"),
     instructions: normalizeRequiredText(args.instructions, "instructions"),
     metadata: args.metadata,
     access: await resolveAccessInput(ctx, {
       access: args.access,
+      artifactId: args.artifactId,
       createdBy: args.createdBy,
       tenantId: args.tenantId,
     }),
@@ -62,6 +67,7 @@ export async function updateAutomation(
   args: {
     tenantId: string
     automationId: Id<"automations">
+    artifactId?: Id<"artifacts">
     name?: string
     instructions?: string
     metadata?: unknown
@@ -92,9 +98,15 @@ export async function updateAutomation(
     patch.metadata = args.metadata ?? undefined
   }
 
+  if (args.artifactId !== undefined) {
+    await requireArtifact(ctx, args.tenantId, args.artifactId)
+    patch.artifactId = args.artifactId
+  }
+
   if (args.access !== undefined) {
     patch.access = await resolveAccessInput(ctx, {
       access: args.access,
+      artifactId: args.artifactId ?? existing.artifactId,
       createdBy: existing.createdBy,
       tenantId: existing.tenantId,
     })
@@ -132,6 +144,22 @@ export async function updateAutomation(
   }
 
   return await getRequiredAutomation(ctx, args.automationId)
+}
+
+async function requireArtifact(
+  ctx: MutationCtx,
+  tenantId: string,
+  artifactId: Id<"artifacts"> | undefined
+) {
+  if (artifactId === undefined) {
+    return
+  }
+
+  const artifact = await ctx.db.get(artifactId)
+
+  if (artifact === null || artifact.tenantId !== tenantId) {
+    throw new Error("Artifact automation owner is invalid.")
+  }
 }
 
 export async function removeAutomation(

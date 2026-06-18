@@ -22,6 +22,7 @@ export async function resolveAccessInput(
   ctx: QueryLikeCtx,
   args: {
     access: AutomationAccessInput
+    artifactId?: Id<"artifacts">
     createdBy: string | undefined
     tenantId: string
   }
@@ -29,6 +30,7 @@ export async function resolveAccessInput(
   const integrations = normalizeAccessIntegrations(args.access.integrations)
 
   await requireAutomationAccessPolicy(ctx, {
+    allowArtifactStateWrite: args.artifactId !== undefined,
     integrations,
     tenantId: args.tenantId,
   })
@@ -57,10 +59,15 @@ export async function requireAutomationAccessPolicy(
       integration: Integration
       tools: string[]
     }>
+    allowArtifactStateWrite?: boolean
     tenantId: string
   }
 ) {
   if (args.integrations.length === 0) {
+    if (args.allowArtifactStateWrite === true) {
+      return
+    }
+
     throw new Error("Select at least one integration tool.")
   }
 
@@ -71,34 +78,45 @@ export async function requireAutomationAccessPolicy(
 
   for (const integration of args.integrations) {
     for (const tool of integration.tools) {
-      const permission = getToolPermission(tool)
-
-      if (
-        permission === undefined ||
-        permission.surface !== integration.integration
-      ) {
-        throw new Error(
-          `Unknown ${integrationLabels[integration.integration]} tool: ${tool}`
-        )
-      }
-
-      const mode = resolveToolMode(toolModes, tool)
-
-      if (!isUnattendedToolMode(mode)) {
-        throw new Error(
-          `${permission.label} is ${permissionModeLabel(mode)} and cannot run in automations.`
-        )
-      }
-
-      if (permission.access === "write") {
+      if (requireAutomationTool(toolModes, integration, tool)) {
         hasWriteTool = true
       }
     }
   }
 
-  if (!hasWriteTool) {
+  if (!hasWriteTool && args.allowArtifactStateWrite !== true) {
     throw new Error("Give at least one integration write tool.")
   }
+}
+
+function requireAutomationTool(
+  toolModes: ReadonlyMap<string, PermissionMode>,
+  integration: {
+    integration: Integration
+    tools: string[]
+  },
+  tool: string
+) {
+  const permission = getToolPermission(tool)
+
+  if (
+    permission === undefined ||
+    permission.surface !== integration.integration
+  ) {
+    throw new Error(
+      `Unknown ${integrationLabels[integration.integration]} tool: ${tool}`
+    )
+  }
+
+  const mode = resolveToolMode(toolModes, tool)
+
+  if (!isUnattendedToolMode(mode)) {
+    throw new Error(
+      `${permission.label} is ${permissionModeLabel(mode)} and cannot run in automations.`
+    )
+  }
+
+  return permission.access === "write"
 }
 
 export function getIntegrationAccess(

@@ -12,6 +12,7 @@ import { accessInput, triggerInput } from "./schema"
 export const create = internalMutation({
   args: {
     tenantId: v.string(),
+    artifactId: v.optional(v.id("artifacts")),
     name: v.string(),
     instructions: v.string(),
     metadata: v.optional(v.any()),
@@ -52,6 +53,7 @@ export const update = internalMutation({
   args: {
     tenantId: v.string(),
     automationId: v.id("automations"),
+    artifactId: v.optional(v.id("artifacts")),
     name: v.optional(v.string()),
     instructions: v.optional(v.string()),
     metadata: v.optional(v.any()),
