@@ -20,7 +20,7 @@ export const drain = internalAction({
     for (let index = 0; index < batchSize; index += 1) {
       const item = (await ctx.runMutation(internal.runtime.outbox.claimNext, {
         now: Date.now(),
-      })) as Doc<"runtimeOutbox"> | null
+      })) as Doc<"outbox"> | null
 
       if (item === null) {
         return null
@@ -48,7 +48,7 @@ export const drain = internalAction({
 
 type DispatchCtx = ActionCtx
 
-async function performOperation(ctx: DispatchCtx, item: Doc<"runtimeOutbox">) {
+async function performOperation(ctx: DispatchCtx, item: Doc<"outbox">) {
   const operation = item.operation
 
   switch (operation.type) {
@@ -74,7 +74,7 @@ async function performOperation(ctx: DispatchCtx, item: Doc<"runtimeOutbox">) {
   }
 }
 
-async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"runtimeOutbox">) {
+async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
   const operation = item.operation
 
   if (operation.type !== "enqueueRun") {
@@ -120,7 +120,7 @@ function isTerminalExecution(execution: Doc<"executions">) {
   )
 }
 
-async function triggerSandboxCleanup(item: Doc<"runtimeOutbox">) {
+async function triggerSandboxCleanup(item: Doc<"outbox">) {
   const operation = item.operation
 
   if (operation.type !== "cancelRun" || operation.sandboxId === undefined) {
@@ -143,7 +143,7 @@ async function triggerSandboxCleanup(item: Doc<"runtimeOutbox">) {
   )
 }
 
-function runtimeTags(item: Doc<"runtimeOutbox">) {
+function runtimeTags(item: Doc<"outbox">) {
   return [`tenant:${shortTag(item.tenantId)}`, `outbox:${shortTag(item._id)}`]
 }
 

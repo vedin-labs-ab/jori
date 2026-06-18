@@ -1,10 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import {
-  findConversationActivation,
-  startMessageRun,
-} from "../activations/data"
+import { findConversation, startMessageRun } from "../conversations/data"
 import { resolveUserIdByEmail } from "../identity/identities"
 import {
   isGitHubAppMessage,
@@ -165,13 +162,13 @@ async function recordProviderMessage(
     message: input.message,
   })
 
-  const activation = await findConversationActivation(ctx, {
+  const conversation = await findConversation(ctx, {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
     conversationId: input.message.conversationId,
   })
 
-  if (activation === null && !input.isRelevant) {
+  if (conversation === null && !input.isRelevant) {
     return { status: "ignored" as const, messageId }
   }
 
@@ -182,10 +179,10 @@ async function recordProviderMessage(
   }
 
   return await startMessageRun(ctx, {
-    activation,
+    conversation,
     integration: input.integration,
     message,
-    conversationId: input.message.conversationId ?? input.message.externalId,
+    conversationKey: input.message.conversationId ?? input.message.externalId,
     createdBy,
     now,
   })

@@ -24,7 +24,7 @@ const runtimeOperation = v.union(
   })
 )
 
-export const runtimeOutbox = defineTable({
+export const outbox = defineTable({
   tenantId: v.string(),
   operation: runtimeOperation,
   idempotencyKey: v.string(),

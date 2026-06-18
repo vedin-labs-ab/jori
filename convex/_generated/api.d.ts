@@ -8,7 +8,6 @@
  * @module
  */
 
-import type * as activations_data from "../activations/data.js";
 import type * as approvals_approvals from "../approvals/approvals.js";
 import type * as approvals_console from "../approvals/console.js";
 import type * as approvals_runtime from "../approvals/runtime.js";
@@ -103,6 +102,7 @@ import type * as broker_tools_slack_delivery from "../broker/tools/slack/deliver
 import type * as broker_tools_slack_index from "../broker/tools/slack/index.js";
 import type * as broker_tools_slack_status from "../broker/tools/slack/status.js";
 import type * as broker_tools_slack_upload from "../broker/tools/slack/upload.js";
+import type * as conversations_data from "../conversations/data.js";
 import type * as events_data from "../events/data.js";
 import type * as events_ingest from "../events/ingest.js";
 import type * as executions_agent_authorization from "../executions/agent/authorization.js";
@@ -256,11 +256,14 @@ import type * as runtime_outbox from "../runtime/outbox.js";
 import type * as runtime_reply from "../runtime/reply.js";
 import type * as runtime_sandboxes from "../runtime/sandboxes.js";
 import type * as runtime_schemas from "../runtime/schemas.js";
+import type * as runtime_sessions from "../runtime/sessions.js";
 import type * as runtime_shared from "../runtime/shared.js";
 import type * as runtime_slack_lifecycle from "../runtime/slack/lifecycle.js";
 import type * as runtime_slack_source from "../runtime/slack/source.js";
 import type * as runtime_slack_status from "../runtime/slack/status.js";
 import type * as runtime_tools from "../runtime/tools.js";
+import type * as sessions_cursor from "../sessions/cursor.js";
+import type * as sessions_data from "../sessions/data.js";
 import type * as shared_actor from "../shared/actor.js";
 import type * as shared_data from "../shared/data.js";
 import type * as shared_encoding from "../shared/encoding.js";
@@ -278,7 +281,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "activations/data": typeof activations_data;
   "approvals/approvals": typeof approvals_approvals;
   "approvals/console": typeof approvals_console;
   "approvals/runtime": typeof approvals_runtime;
@@ -373,6 +375,7 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/slack/index": typeof broker_tools_slack_index;
   "broker/tools/slack/status": typeof broker_tools_slack_status;
   "broker/tools/slack/upload": typeof broker_tools_slack_upload;
+  "conversations/data": typeof conversations_data;
   "events/data": typeof events_data;
   "events/ingest": typeof events_ingest;
   "executions/agent/authorization": typeof executions_agent_authorization;
@@ -526,11 +529,14 @@ declare const fullApi: ApiFromModules<{
   "runtime/reply": typeof runtime_reply;
   "runtime/sandboxes": typeof runtime_sandboxes;
   "runtime/schemas": typeof runtime_schemas;
+  "runtime/sessions": typeof runtime_sessions;
   "runtime/shared": typeof runtime_shared;
   "runtime/slack/lifecycle": typeof runtime_slack_lifecycle;
   "runtime/slack/source": typeof runtime_slack_source;
   "runtime/slack/status": typeof runtime_slack_status;
   "runtime/tools": typeof runtime_tools;
+  "sessions/cursor": typeof sessions_cursor;
+  "sessions/data": typeof sessions_data;
   "shared/actor": typeof shared_actor;
   "shared/data": typeof shared_data;
   "shared/encoding": typeof shared_encoding;
