@@ -29,7 +29,7 @@ export function SkillCard({
     <Card className="min-h-56 gap-0 py-0 ring-inset">
       <div className="grid flex-1 grid-cols-[2.5rem_minmax(0,1fr)] gap-3 p-4 sm:p-5">
         <SkillIcon icon={Icon} skill={skill} />
-        <div className="grid min-w-0 content-start gap-2">
+        <div className="grid min-w-0 content-start gap-1.5">
           <div className="grid min-h-6 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
             <h3 className="truncate font-heading text-sm font-medium">
               {skill.name}
