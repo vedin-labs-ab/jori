@@ -34,11 +34,7 @@ export function SkillCard({
             <h3 className="truncate font-heading text-sm font-medium">
               {skill.name}
             </h3>
-            {isGlobal ? (
-              <span className="h-6 whitespace-nowrap text-muted-foreground text-xs">
-                Global
-              </span>
-            ) : (
+            {isGlobal ? null : (
               <SkillManagementMenu
                 isPending={isPending}
                 onDelete={onDelete}
@@ -55,9 +51,6 @@ export function SkillCard({
 
       <div className="mt-auto flex min-h-14 flex-wrap items-center justify-between gap-3 border-t bg-muted/25 px-4 py-3 sm:px-5">
         <IntegrationLogoStack
-          emptyFallback={
-            <span className="text-muted-foreground text-sm">-</span>
-          }
           integrations={skill.associatedIntegrations}
           size="md"
         />
