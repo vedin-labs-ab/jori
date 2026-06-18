@@ -9,7 +9,7 @@ import {
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
-import { accessInput, triggerInput } from "./schema"
+import { accessInput, automationType, triggerInput } from "./schema"
 
 export const create = internalMutation({
   args: {
@@ -18,6 +18,7 @@ export const create = internalMutation({
     name: v.string(),
     instructions: v.string(),
     access: accessInput,
+    type: automationType,
     trigger: triggerInput,
     createdBy: v.optional(v.string()),
   },
@@ -58,6 +59,7 @@ export const update = internalMutation({
     name: v.optional(v.string()),
     instructions: v.optional(v.string()),
     access: v.optional(accessInput),
+    type: v.optional(automationType),
     trigger: v.optional(triggerInput),
   },
   handler: async (ctx, args) => await updateAutomation(ctx, args),

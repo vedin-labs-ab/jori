@@ -2,7 +2,7 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type AutomationAccessInput } from "./access"
-import { type AutomationTriggerInput } from "./schema"
+import { type AutomationTriggerInput, type AutomationType } from "./schema"
 
 type MiloMcpRequest = {
   tool: string
@@ -14,6 +14,7 @@ type AddAutomationArgs = {
   name: string
   instructions: string
   access: AutomationAccessInput
+  type: AutomationType
   trigger: AutomationTriggerInput
 }
 
@@ -33,6 +34,7 @@ type UpdateAutomationArgs = {
   name?: string
   instructions?: string
   access?: AutomationAccessInput
+  type?: AutomationType
   trigger?: AutomationTriggerInput
 }
 

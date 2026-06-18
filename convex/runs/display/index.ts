@@ -20,7 +20,7 @@ export function automationDisplay(input: {
   event?: Doc<"events"> | null
   integration?: Doc<"integrations"> | null
 }): RunDisplay {
-  if (input.automation.trigger.type === "event") {
+  if (input.automation.type === "event") {
     return eventAutomationDisplay({
       event: input.event ?? null,
       integration: input.integration ?? null,
@@ -102,7 +102,7 @@ function eventAutomationDisplay(input: {
 
 function timeAutomationDisplay(automation: Doc<"automations">): RunDisplay {
   const trigger = automation.trigger
-  const isRecurring = trigger.type === "cron"
+  const isRecurring = automation.type === "cron" && "expression" in trigger
 
   return {
     source: {
@@ -113,7 +113,7 @@ function timeAutomationDisplay(automation: Doc<"automations">): RunDisplay {
         label: isRecurring ? "recurring" : "one-shot",
       },
       metadata: isRecurring
-        ? [{ type: "schedule", label: cronScheduleLabel(trigger.cron) }]
+        ? [{ type: "schedule", label: cronScheduleLabel(trigger.expression) }]
         : [],
     },
     trigger: "Time automation",
@@ -141,7 +141,7 @@ function sourceDetails(input: {
 
 function recurringAutomationDetails(input: {
   status: Doc<"automations">["status"]
-  trigger: Extract<Doc<"automations">["trigger"], { type: "cron" }>
+  trigger: Extract<Doc<"automations">["trigger"], { nextAt: number }>
 }) {
   return compactDetails([
     input.status === "active"

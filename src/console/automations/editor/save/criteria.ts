@@ -6,7 +6,7 @@ import { type Automation } from "../../types"
 
 export function eventCriteriaFormValues(
   definition: AutomationEventDefinition,
-  trigger: Extract<Automation["trigger"], { type: "event" }>
+  trigger: Extract<Automation["trigger"], { event: string }>
 ) {
   const criteria =
     trigger.criteria ??

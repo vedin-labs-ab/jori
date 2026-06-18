@@ -27,15 +27,12 @@ export const access = v.object({
 
 export const triggerInput = v.union(
   v.object({
-    type: v.literal("once"),
     at: v.string(),
   }),
   v.object({
-    type: v.literal("cron"),
-    cron: v.string(),
+    expression: v.string(),
   }),
   v.object({
-    type: v.literal("event"),
     integration: integrationValidator,
     event: v.string(),
     criteria: v.optional(eventCriteria),
@@ -45,18 +42,15 @@ export const triggerInput = v.union(
 
 export const trigger = v.union(
   v.object({
-    type: v.literal("once"),
     at: v.number(),
     functionId: v.optional(v.id("_scheduled_functions")),
   }),
   v.object({
-    type: v.literal("cron"),
-    cron: v.string(),
+    expression: v.string(),
     nextAt: v.number(),
     functionId: v.optional(v.id("_scheduled_functions")),
   }),
   v.object({
-    type: v.literal("event"),
     integrationId: v.id("integrations"),
     event: v.string(),
     criteria: v.optional(eventCriteria),
@@ -95,3 +89,4 @@ export const automations = defineTable({
   .index("by_tenant_status", ["tenantId", "status"])
 
 export type AutomationTriggerInput = Infer<typeof triggerInput>
+export type AutomationType = Infer<typeof automationType>

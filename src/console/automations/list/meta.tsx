@@ -118,8 +118,9 @@ function AutomationToolMetaCell({
 function triggerSummary(automation: Automation) {
   const trigger = automation.trigger
 
-  if (trigger.type === "cron") {
-    const detail = describeCron(trigger.cron) ?? `${trigger.cron} UTC`
+  if (automation.type === "cron" && "expression" in trigger) {
+    const detail =
+      describeCron(trigger.expression) ?? `${trigger.expression} UTC`
 
     return {
       detail,
@@ -129,7 +130,7 @@ function triggerSummary(automation: Automation) {
     }
   }
 
-  if (trigger.type === "event") {
+  if (automation.type === "event" && "event" in trigger) {
     return {
       detail: eventTriggerDetail(trigger),
       detailTitle: undefined,
@@ -139,40 +140,43 @@ function triggerSummary(automation: Automation) {
   }
 
   return {
-    detail: absoluteTime(trigger.at),
-    detailTitle: absoluteTime(trigger.at),
+    detail: "at" in trigger ? absoluteTime(trigger.at) : "One time",
+    detailTitle: "at" in trigger ? absoluteTime(trigger.at) : undefined,
     icon: <Clock className={metaIconClassName} />,
     title: "One time",
   }
 }
 
 function eventTriggerIcon(
-  trigger: Extract<Automation["trigger"], { type: "event" }>
+  trigger: Extract<Automation["trigger"], { event: string }>
 ) {
-  if (trigger.integration === undefined) {
+  const integration = "integration" in trigger ? trigger.integration : undefined
+
+  if (integration === undefined) {
     return <Zap className={metaIconClassName} />
   }
 
   return (
     <SurfaceLogo
       className="mt-0.5 size-3.5 rounded-sm"
-      integration={trigger.integration}
+      integration={integration}
     />
   )
 }
 
 function eventTriggerDetail(
-  trigger: Extract<Automation["trigger"], { type: "event" }>
+  trigger: Extract<Automation["trigger"], { event: string }>
 ) {
+  const integration = "integration" in trigger ? trigger.integration : undefined
   const eventLabel =
-    trigger.integration === undefined
+    integration === undefined
       ? trigger.event
-      : (getAutomationEventDefinition(trigger.integration, trigger.event)
-          ?.label ?? trigger.event)
+      : (getAutomationEventDefinition(integration, trigger.event)?.label ??
+        trigger.event)
   const source =
-    trigger.integration === undefined
+    integration === undefined
       ? "Integration"
-      : getAutomationSurfaceLabel(trigger.integration)
+      : getAutomationSurfaceLabel(integration)
 
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5">
@@ -213,9 +217,9 @@ function AutomationRuns({
   automation: Automation
 }) {
   const nextAt =
-    automation.trigger.type === "cron"
+    automation.type === "cron" && "nextAt" in automation.trigger
       ? automation.trigger.nextAt
-      : automation.trigger.type === "once"
+      : automation.type === "once" && "at" in automation.trigger
         ? automation.trigger.at
         : undefined
   const primary = runPrimaryLabel(automation, nextAt, now)

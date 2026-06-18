@@ -2,7 +2,7 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { automationEventCriteriaKey } from "../events"
 
-type EventTrigger = Extract<Doc<"automations">["trigger"], { type: "event" }>
+type EventTrigger = Extract<Doc<"automations">["trigger"], { event: string }>
 
 export async function ensureSubscription(
   ctx: MutationCtx,
@@ -109,7 +109,8 @@ async function hasMatchingAutomation(
     const trigger = automation.trigger
 
     return (
-      trigger.type === "event" &&
+      automation.type === "event" &&
+      "integrationId" in trigger &&
       trigger.integrationId === args.trigger.integrationId &&
       trigger.event === args.trigger.event &&
       automationEventCriteriaKey(trigger.criteria) ===

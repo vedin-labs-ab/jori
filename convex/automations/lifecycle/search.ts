@@ -78,11 +78,11 @@ function compareAutomations(
 }
 
 function nextRunAt(automation: Doc<"automations">) {
-  if (automation.type === "once" && automation.trigger.type === "once") {
+  if (automation.type === "once" && "at" in automation.trigger) {
     return automation.trigger.at
   }
 
-  if (automation.type === "cron" && automation.trigger.type === "cron") {
+  if (automation.type === "cron" && "nextAt" in automation.trigger) {
     return automation.trigger.nextAt
   }
 

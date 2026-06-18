@@ -107,7 +107,6 @@ function automation(
     tenantId: "tenant-id",
     type: "event",
     trigger: {
-      type: "event",
       integrationId,
       event: event ?? "issue.comment.created",
       criteria: eventCriteria({ issue, project, team }),

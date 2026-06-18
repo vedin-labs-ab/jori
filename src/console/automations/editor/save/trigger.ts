@@ -15,10 +15,9 @@ import { readAutomationEventCriteria } from "../event/rules"
 import { criteriaKey, eventCriteriaFormValues } from "./criteria"
 
 export type TriggerSpec =
-  | { type: "once"; at: string }
-  | { type: "cron"; cron: string }
+  | { at: string }
+  | { expression: string }
   | {
-      type: "event"
       integration: AutomationFormValues["eventIntegration"]
       event: string
       criteria?: AutomationEventCriteria
@@ -26,7 +25,9 @@ export type TriggerSpec =
 
 export function buildAutomationTriggerSpec(
   values: AutomationFormValues
-): { trigger: TriggerSpec } | { error: string } {
+):
+  | { type: AutomationFormValues["type"]; trigger: TriggerSpec }
+  | { error: string } {
   if (values.type === "cron") {
     const built = buildRecurringCron(values)
 
@@ -34,7 +35,7 @@ export function buildAutomationTriggerSpec(
       return built
     }
 
-    return { trigger: { type: "cron", cron: built.cron } }
+    return { type: "cron", trigger: { expression: built.cron } }
   }
 
   if (values.type === "event") {
@@ -57,8 +58,8 @@ export function buildAutomationTriggerSpec(
     }
 
     return {
+      type: "event",
       trigger: {
-        type: "event",
         integration: values.eventIntegration,
         event: definition.value,
         criteria: criteria.value,
@@ -80,7 +81,7 @@ export function buildAutomationTriggerSpec(
     return { error: "Run time must be in the future." }
   }
 
-  return { trigger: { type: "once", at: runAt.toISOString() } }
+  return { type: "once", trigger: { at: runAt.toISOString() } }
 }
 
 export function hasAutomationTriggerChanged(
@@ -96,9 +97,10 @@ export function hasAutomationTriggerChanged(
     const built = buildRecurringCron(values)
 
     return (
-      existing.trigger.type !== "cron" ||
+      existing.type !== "cron" ||
+      !("expression" in existing.trigger) ||
       "error" in built ||
-      built.cron !== existing.trigger.cron
+      built.cron !== existing.trigger.expression
     )
   }
 
@@ -117,10 +119,10 @@ export function hasAutomationTriggerChanged(
 export function triggerFormValues(automation: Automation) {
   const trigger = automation.trigger
 
-  if (trigger.type === "cron") {
+  if (automation.type === "cron" && "expression" in trigger) {
     return {
       type: "cron" as const,
-      ...classifyCron(trigger.cron),
+      ...classifyCron(trigger.expression),
       runAt: "",
       eventIntegration: emptyAutomationForm.eventIntegration,
       event: emptyAutomationForm.event,
@@ -128,9 +130,11 @@ export function triggerFormValues(automation: Automation) {
     }
   }
 
-  if (trigger.type === "event") {
-    const integration = isAutomationEventIntegration(trigger.integration)
-      ? trigger.integration
+  if (automation.type === "event" && "event" in trigger) {
+    const triggerIntegration =
+      "integration" in trigger ? trigger.integration : undefined
+    const integration = isAutomationEventIntegration(triggerIntegration)
+      ? triggerIntegration
       : emptyAutomationForm.eventIntegration
     const definition =
       getAutomationEventDefinition(integration, trigger.event) ??
@@ -152,7 +156,7 @@ export function triggerFormValues(automation: Automation) {
   return {
     type: "once" as const,
     ...classifyCron(undefined),
-    runAt: toDatetimeLocal(trigger.at),
+    runAt: "at" in trigger ? toDatetimeLocal(trigger.at) : "",
     eventIntegration: emptyAutomationForm.eventIntegration,
     event: emptyAutomationForm.event,
     eventCriteria: {},

@@ -18,8 +18,8 @@ describe("automation event payload criteria", () => {
       )
     ).toMatchObject({
       args: {
+        type: "event",
         trigger: {
-          type: "event",
           integration: "slack",
           event: "message.created",
           criteria: { channel: "C123" },
@@ -31,8 +31,8 @@ describe("automation event payload criteria", () => {
   test("creates event automation args with multiple criteria", () => {
     expect(createAutomationArgs(githubReviewForm())).toMatchObject({
       args: {
+        type: "event",
         trigger: {
-          type: "event",
           integration: "github",
           event: "pull_request.review_comment.edited",
           criteria: {

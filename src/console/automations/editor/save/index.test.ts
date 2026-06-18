@@ -49,9 +49,9 @@ describe("automation payload", () => {
           ],
           web: true,
         },
+        type: "cron",
         trigger: {
-          cron: "0 9 * * *",
-          type: "cron",
+          expression: "0 9 * * *",
         },
       },
     })

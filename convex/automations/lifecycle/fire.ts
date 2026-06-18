@@ -17,13 +17,14 @@ export async function fireAutomation(
   if (
     automation === null ||
     automation.status !== "active" ||
-    automation.trigger.type === "event" ||
+    automation.type === "event" ||
+    !("nextAt" in automation.trigger || "at" in automation.trigger) ||
     getTimeTriggerAt(automation.trigger) !== args.expectedAt
   ) {
     return null
   }
 
-  if (automation.trigger.type === "once") {
+  if (automation.type === "once") {
     const runId = await createAutomationRun(ctx, {
       automation,
       reason: {
@@ -44,25 +45,25 @@ export async function fireAutomation(
     })
 
     return { runId }
-  } else {
-    const trigger = await scheduleNextCronAutomation(ctx, automation, now)
-    const runId = await createAutomationRun(ctx, {
-      automation: { ...automation, trigger },
-      reason: {
-        type: "time",
-        scheduledAt: args.expectedAt,
-      },
-      now,
-    })
-
-    await ctx.db.patch(automation._id, {
-      trigger,
-      firedAt: now,
-      updatedAt: now,
-    })
-
-    return { runId }
   }
+
+  const trigger = await scheduleNextCronAutomation(ctx, automation, now)
+  const runId = await createAutomationRun(ctx, {
+    automation: { ...automation, trigger },
+    reason: {
+      type: "time",
+      scheduledAt: args.expectedAt,
+    },
+    now,
+  })
+
+  await ctx.db.patch(automation._id, {
+    trigger,
+    firedAt: now,
+    updatedAt: now,
+  })
+
+  return { runId }
 }
 
 export async function startEventAutomations(
@@ -115,7 +116,7 @@ export function matchesEvent(
 
   if (
     automation.type !== "event" ||
-    trigger.type !== "event" ||
+    !("integrationId" in trigger) ||
     trigger.integrationId !== event.integrationId ||
     trigger.event !== event.type
   ) {
@@ -140,7 +141,7 @@ export function matchesEvent(
 }
 
 function legacyTriggerCriteria(
-  trigger: Extract<Doc<"automations">["trigger"], { type: "event" }>
+  trigger: Extract<Doc<"automations">["trigger"], { integrationId: string }>
 ): Record<string, string> | undefined {
   return trigger.filter === undefined || trigger.filter === ""
     ? undefined
