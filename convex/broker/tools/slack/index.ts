@@ -64,6 +64,23 @@ export async function updateSlackMessage(
   })
 }
 
+export async function setSlackThreadStatus(
+  integration: Doc<"integrations">,
+  args: {
+    channelId: string
+    status: string
+    threadTs: string
+  }
+) {
+  const credentials = requireSlackCredentials(integration)
+
+  return await slackJsonApi(credentials.bot, "assistant.threads.setStatus", {
+    channel_id: args.channelId,
+    status: args.status,
+    thread_ts: args.threadTs,
+  })
+}
+
 export async function callSlackTool(
   integration: Doc<"integrations">,
   tool: string,
