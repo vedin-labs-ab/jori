@@ -4,7 +4,6 @@ const roots = ["src", "convex", "contracts", "runtime/source", "scripts"]
 const excludedPaths = [
   "(^|/)node_modules(/|$)",
   "(^|/)dist(/|$)",
-  "(^|/)_generated(/|$)",
   "[.]test[.](?:ts|tsx|js|jsx)$",
   "^runtime/source/artifact/template(/|$)",
 ].join("|")
@@ -32,15 +31,40 @@ const ruleSet = {
       },
     },
     {
-      name: "runtime-does-not-import-app",
+      name: "src-does-not-import-backend-runtime-or-scripts",
       severity: "error",
       comment:
-        "Runtime source may depend on contracts, not app or Convex code.",
+        "App code may use generated Convex API refs, not backend, runtime, or script internals.",
+      from: {
+        path: "^src/",
+      },
+      to: {
+        path: "^(?:convex|runtime|scripts)(?:/|$)",
+        pathNot: "^convex/_generated/",
+      },
+    },
+    {
+      name: "convex-does-not-import-app-runtime-or-scripts",
+      severity: "error",
+      comment:
+        "Convex code must stay independent from app, runtime, and tooling code.",
+      from: {
+        path: "^convex/",
+      },
+      to: {
+        path: "^(?:src|runtime|scripts)(?:/|$)",
+      },
+    },
+    {
+      name: "runtime-does-not-import-app-backend-or-scripts",
+      severity: "error",
+      comment:
+        "Runtime source may depend on contracts, not app, Convex, or script code.",
       from: {
         path: "^runtime/source/",
       },
       to: {
-        path: "^(?:src|convex)(?:/|$)",
+        path: "^(?:src|convex|scripts)(?:/|$)",
       },
     },
     {
@@ -63,6 +87,30 @@ const ruleSet = {
       },
       to: {
         path: "^src/console/(?:artifacts|automations|integrations|page|permissions|playbooks|runs|shell|skills|tools)(?:/|$)",
+      },
+    },
+    {
+      name: "ui-primitives-stay-generic",
+      severity: "error",
+      comment:
+        "Generic UI primitives must not depend on product, route, or shared app layers.",
+      from: {
+        path: "^src/components/ui/",
+      },
+      to: {
+        path: "^src/(?:console|routes|landing|shared)(?:/|$)",
+      },
+    },
+    {
+      name: "lib-stays-leaf",
+      severity: "error",
+      comment:
+        "Generic utilities must not depend on UI, product, route, or shared app layers.",
+      from: {
+        path: "^src/lib/",
+      },
+      to: {
+        path: "^src/(?:console|components|routes|landing|shared)(?:/|$)",
       },
     },
     {
