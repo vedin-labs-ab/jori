@@ -21,6 +21,7 @@ const tableRegistry: Record<TableName, true> = {
   runtimeEvents: true,
   runtimeOutbox: true,
   runtimeSandboxes: true,
+  runtimeSlackStatuses: true,
   permissions: true,
   artifacts: true,
   artifactVersions: true,

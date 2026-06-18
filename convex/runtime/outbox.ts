@@ -5,6 +5,7 @@ import { internalMutation, type MutationCtx } from "../_generated/server"
 import { formatRuntimeError } from "./shared"
 
 const maxAttempts = 8
+const processingLeaseMs = 5 * 60 * 1000
 
 export async function createQueuedExecution(
   ctx: MutationCtx,
@@ -108,12 +109,9 @@ export const claimNext = internalMutation({
   },
   returns: v.any(),
   handler: async (ctx, args) => {
-    const item = await ctx.db
-      .query("runtimeOutbox")
-      .withIndex("by_state_and_next_attempt", (query) =>
-        query.eq("state", "pending").lte("nextAttemptAt", args.now)
-      )
-      .first()
+    const item =
+      (await claimableItem(ctx, "pending", args.now)) ??
+      (await claimableItem(ctx, "processing", args.now))
 
     if (item === null) {
       return null
@@ -121,6 +119,7 @@ export const claimNext = internalMutation({
 
     await ctx.db.patch(item._id, {
       attempts: item.attempts + 1,
+      nextAttemptAt: args.now + processingLeaseMs,
       state: "processing",
       updatedAt: args.now,
     })
@@ -128,6 +127,19 @@ export const claimNext = internalMutation({
     return { ...item, attempts: item.attempts + 1, state: "processing" }
   },
 })
+
+async function claimableItem(
+  ctx: MutationCtx,
+  state: Doc<"runtimeOutbox">["state"],
+  now: number
+) {
+  return await ctx.db
+    .query("runtimeOutbox")
+    .withIndex("by_state_and_next_attempt", (query) =>
+      query.eq("state", state).lte("nextAttemptAt", now)
+    )
+    .first()
+}
 
 export const markSent = internalMutation({
   args: {

@@ -83,3 +83,27 @@ export const runtimeSandboxes = defineTable({
   .index("by_execution", ["executionId"])
   .index("by_run", ["runId"])
   .index("by_sandbox", ["sandboxId"])
+
+export const runtimeSlackStatuses = defineTable({
+  tenantId: v.string(),
+  runId: v.id("runs"),
+  integrationId: v.id("integrations"),
+  channelId: v.string(),
+  threadTs: v.string(),
+  messageTs: v.optional(v.string()),
+  state: v.union(
+    v.literal("working"),
+    v.literal("completed"),
+    v.literal("failed")
+  ),
+  lastDeliveredState: v.optional(
+    v.union(v.literal("working"), v.literal("completed"), v.literal("failed"))
+  ),
+  publishClaimUntil: v.optional(v.number()),
+  lastError: v.optional(v.string()),
+  deliveredAt: v.optional(v.number()),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+})
+  .index("by_run", ["runId"])
+  .index("by_integration_and_channel", ["integrationId", "channelId"])
