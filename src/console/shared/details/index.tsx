@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { absoluteTime } from "../format"
+import { absoluteTime } from "../../runs/format"
 
 const copyResetDelayMs = 1200
 export const codeBlockContentClassName = "max-h-[250px] overflow-y-auto"

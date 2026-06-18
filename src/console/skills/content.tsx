@@ -1,7 +1,7 @@
 import { BookOpenText } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ConsoleScrollableGrid } from "../layout"
-import { ConsoleEmptyState } from "../list/empty"
+import { ConsoleScrollableGrid } from "../shared/layout"
+import { ConsoleEmptyState } from "../shared/list/empty"
 import { SkillCard } from "./card"
 import { type Skill, type SkillFilterView } from "./types"
 

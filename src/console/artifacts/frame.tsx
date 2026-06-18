@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { api } from "../../../convex/_generated/api"
-import { FullscreenSkeletonLoader } from "../loading"
+import { FullscreenSkeletonLoader } from "../shared/loading"
 import { type ArtifactDetail } from "./types"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL

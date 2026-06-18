@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { ReadonlyToolGroups } from "@/console/permissions/tools"
-import { SeparatorDot } from "../../dot"
+import { SeparatorDot } from "../../shared/dot"
 import { type ExecutionDetailGroup } from "../types"
 import { ProviderLogo } from "./source"
 

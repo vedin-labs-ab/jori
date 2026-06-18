@@ -1,6 +1,6 @@
 import { CalendarClock } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ConsoleEmptyState } from "../../list/empty"
+import { ConsoleEmptyState } from "../../shared/list/empty"
 
 const skeletonRows = ["first", "second", "third"]
 

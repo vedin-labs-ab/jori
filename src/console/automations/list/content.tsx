@@ -1,5 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ConsoleScrollableList } from "../../layout"
+import { ConsoleScrollableList } from "../../shared/layout"
 import { type AutomationEditor } from "../editor"
 import { type AutomationList } from "../types"
 import { AutomationSkeletonList, EmptyAutomations } from "./empty"

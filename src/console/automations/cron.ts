@@ -2,7 +2,7 @@ import {
   getNextCronRunAt,
   validateCronExpression,
 } from "@contracts/automations/schedule/cron"
-import { readErrorMessage } from "../error"
+import { readErrorMessage } from "../shared/error"
 import { type AutomationFormValues, emptyAutomationForm } from "./types"
 
 export { describeCron } from "@contracts/automations/schedule/labels"

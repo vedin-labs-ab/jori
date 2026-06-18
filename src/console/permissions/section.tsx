@@ -8,8 +8,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
-import { SeparatorDot } from "../dot"
-import { LoadingMessage } from "../loading"
+import { SeparatorDot } from "../shared/dot"
+import { LoadingMessage } from "../shared/loading"
 import {
   type ConfigurablePermissionMode,
   type ToolAccess,

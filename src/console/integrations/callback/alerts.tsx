@@ -4,7 +4,7 @@ import {
   type IntegrationCallbackIntegration,
   type IntegrationCallbackStatus,
   useIntegrationCallbackStatuses,
-} from "./integrations/connection/status"
+} from "../connection/status"
 
 type VisibleCallbackStatus = Exclude<IntegrationCallbackStatus, null>
 

@@ -8,7 +8,7 @@ import {
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { MiloLogo } from "@/shared/brand"
-import { SeparatorDot } from "../../dot"
+import { SeparatorDot } from "../../shared/dot"
 import { type ExecutionSource, type SourceDatum } from "../types"
 import { providerLogoPath } from "./logos"
 

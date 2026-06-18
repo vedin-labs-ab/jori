@@ -13,15 +13,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "../../../convex/_generated/api"
+import { useToolPermissions } from "../permissions/controller"
 import {
   ConsolePageLayout,
   ConsoleToolbar,
   ConsoleToolbarActions,
-} from "../layout"
-import { ConsoleListPager } from "../list/pager"
-import { useClientPagination } from "../list/pagination"
-import { ConsolePage } from "../page"
-import { useToolPermissions } from "../permissions/controller"
+} from "../shared/layout"
+import { ConsoleListPager } from "../shared/list/pager"
+import { useClientPagination } from "../shared/list/pagination"
+import { ConsolePage } from "../shared/page"
 import { automationPolicyKey } from "./access/policy"
 import { type AutomationEditor, useAutomationEditor } from "./editor"
 import { filterAutomationsByView, hasAutomationFilters } from "./filter"

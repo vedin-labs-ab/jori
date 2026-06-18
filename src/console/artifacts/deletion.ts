@@ -1,7 +1,7 @@
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { api } from "../../../convex/_generated/api"
-import { readErrorMessage } from "../error"
+import { readErrorMessage } from "../shared/error"
 import { type ArtifactSummary } from "./types"
 
 export function useArtifactDeletion(tenantId: string) {
