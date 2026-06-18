@@ -66,5 +66,5 @@ This file defines the correct usage patterns and overrides any prior assumptions
 
 This project uses Trigger.dev for long-running agent execution and background task orchestration.
 
-When working on Trigger.dev code, **always read `.trigger/ai/guidelines.md` first**.  
+When working on Trigger.dev code, **always read `trigger/ai/guidelines.md` first**.  
 This file defines the correct usage patterns and overrides any prior assumptions.
