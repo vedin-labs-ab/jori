@@ -21,6 +21,7 @@ test("keeps one-time automation status icon passive", () => {
   renderRow({ automation: automation({ type: "once", trigger: { at: now } }) })
 
   expect(screen.getByLabelText("One-time automation")).toBeDefined()
+  expect(screen.getByTestId("automation-once-icon")).toBeDefined()
   expect(screen.queryByRole("button", { name: /pause/i })).toBeNull()
   expect(screen.queryByRole("button", { name: /resume/i })).toBeNull()
 })
@@ -57,7 +58,7 @@ test("pauses active recurring automation from status icon", () => {
   expect(onPause).toHaveBeenCalledTimes(1)
 })
 
-test("shows pause action while active recurring icon is hovered", () => {
+test("shows pause action while active cron icon is hovered", () => {
   renderRow({
     automation: automation({
       type: "cron",
@@ -67,16 +68,16 @@ test("shows pause action while active recurring icon is hovered", () => {
 
   const control = screen.getByRole("button", { name: "Pause Automation" })
 
-  expect(screen.getByTestId("automation-active-icon")).toBeDefined()
+  expect(screen.getByTestId("automation-cron-icon")).toBeDefined()
 
   fireEvent.pointerEnter(control)
 
   expect(screen.getByTestId("automation-pause-icon")).toBeDefined()
-  expect(screen.queryByTestId("automation-active-icon")).toBeNull()
+  expect(screen.queryByTestId("automation-cron-icon")).toBeNull()
 
   fireEvent.pointerLeave(control)
 
-  expect(screen.getByTestId("automation-active-icon")).toBeDefined()
+  expect(screen.getByTestId("automation-cron-icon")).toBeDefined()
 })
 
 test("resumes paused event automation from status icon", () => {
@@ -117,16 +118,16 @@ test("shows resume action while paused event icon is focused", () => {
 
   const control = screen.getByRole("button", { name: "Resume Automation" })
 
-  expect(screen.getByTestId("automation-paused-icon")).toBeDefined()
+  expect(screen.getByTestId("automation-event-icon")).toBeDefined()
 
   fireEvent.focus(control)
 
   expect(screen.getByTestId("automation-resume-icon")).toBeDefined()
-  expect(screen.queryByTestId("automation-paused-icon")).toBeNull()
+  expect(screen.queryByTestId("automation-event-icon")).toBeNull()
 
   fireEvent.blur(control)
 
-  expect(screen.getByTestId("automation-paused-icon")).toBeDefined()
+  expect(screen.getByTestId("automation-event-icon")).toBeDefined()
 })
 
 const now = 1_700_000_000_000

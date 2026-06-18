@@ -1,4 +1,12 @@
-import { CalendarClock, Check, Loader2, Pause, Play } from "lucide-react"
+import {
+  CalendarClock,
+  CalendarSync,
+  Check,
+  Loader2,
+  Pause,
+  Play,
+  Plug,
+} from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -187,21 +195,21 @@ function StaticStatusIcon({ automation }: { automation: Automation }) {
 }
 
 function StatusIcon({ automation }: { automation: Automation }) {
-  if (automation.status === "paused") {
+  if (automation.type === "event") {
     return (
-      <Pause
+      <Plug
         aria-hidden="true"
-        data-testid="automation-paused-icon"
         className="size-5"
+        data-testid="automation-event-icon"
       />
     )
   }
 
   return (
-    <Check
+    <CalendarSync
       aria-hidden="true"
-      data-testid="automation-active-icon"
       className="size-5"
+      data-testid="automation-cron-icon"
     />
   )
 }
