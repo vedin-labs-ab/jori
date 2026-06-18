@@ -110,6 +110,7 @@ import type * as executions_agent_prompt_fixtures from "../executions/agent/prom
 import type * as executions_agent_prompt_index from "../executions/agent/prompt/index.js";
 import type * as executions_agent_prompt_instructions from "../executions/agent/prompt/instructions.js";
 import type * as executions_agent_prompt_integration from "../executions/agent/prompt/integration.js";
+import type * as executions_agent_prompt_target from "../executions/agent/prompt/target.js";
 import type * as executions_agent_targets from "../executions/agent/targets.js";
 import type * as executions_agent_tools_bundles from "../executions/agent/tools/bundles.js";
 import type * as executions_agent_tools_definitions from "../executions/agent/tools/definitions.js";
@@ -375,6 +376,7 @@ declare const fullApi: ApiFromModules<{
   "executions/agent/prompt/index": typeof executions_agent_prompt_index;
   "executions/agent/prompt/instructions": typeof executions_agent_prompt_instructions;
   "executions/agent/prompt/integration": typeof executions_agent_prompt_integration;
+  "executions/agent/prompt/target": typeof executions_agent_prompt_target;
   "executions/agent/targets": typeof executions_agent_targets;
   "executions/agent/tools/bundles": typeof executions_agent_tools_bundles;
   "executions/agent/tools/definitions": typeof executions_agent_tools_definitions;
