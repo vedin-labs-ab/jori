@@ -25,6 +25,22 @@ test("keeps one-time automation status icon passive", () => {
   expect(screen.queryByRole("button", { name: /resume/i })).toBeNull()
 })
 
+test("uses the main icon instead of a badge for completed one-time automation", () => {
+  const { container } = renderRow({
+    automation: automation({
+      status: "completed",
+      type: "once",
+      trigger: { at: now },
+    }),
+  })
+
+  expect(screen.getByLabelText("Completed automation")).toBeDefined()
+  expect(screen.getByTestId("automation-completed-icon")).toBeDefined()
+  expect(container.querySelector('[data-slot="badge"]')).toBeNull()
+  expect(screen.queryByRole("button", { name: /pause/i })).toBeNull()
+  expect(screen.queryByRole("button", { name: /resume/i })).toBeNull()
+})
+
 test("pauses active recurring automation from status icon", () => {
   const onPause = vi.fn()
 

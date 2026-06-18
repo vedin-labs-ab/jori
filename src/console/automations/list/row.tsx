@@ -45,7 +45,7 @@ export function AutomationRow({
               <CardTitle className="truncate text-sm">
                 {automation.name}
               </CardTitle>
-              {automation.status === "completed" ? (
+              {shouldShowCompletedBadge(automation) ? (
                 <Badge className="shrink-0" variant="outline">
                   Completed
                 </Badge>
@@ -154,6 +154,10 @@ function automationStatusLabel(automation: Automation) {
   return automation.status === "paused" ? "Paused" : "Active"
 }
 
+function shouldShowCompletedBadge(automation: Automation) {
+  return automation.status === "completed" && automation.type !== "once"
+}
+
 function automationControlAction(automation: Automation) {
   if (automation.type === "once" || automation.status === "completed") {
     return undefined
@@ -163,11 +167,23 @@ function automationControlAction(automation: Automation) {
 }
 
 function StaticStatusIcon({ automation }: { automation: Automation }) {
-  if (automation.type === "once") {
-    return <CalendarClock className="size-5" />
+  if (automation.type === "once" && automation.status !== "completed") {
+    return (
+      <CalendarClock
+        aria-hidden="true"
+        className="size-5"
+        data-testid="automation-once-icon"
+      />
+    )
   }
 
-  return <Check className="size-5" />
+  return (
+    <Check
+      aria-hidden="true"
+      className="size-5"
+      data-testid="automation-completed-icon"
+    />
+  )
 }
 
 function StatusIcon({ automation }: { automation: Automation }) {
