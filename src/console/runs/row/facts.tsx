@@ -13,9 +13,6 @@ import {
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { SeparatorDot } from "../../dot"
-import { absoluteTime, absoluteUtcTime } from "../format"
-import { type ExecutionDetail, type ExecutionDetailType } from "../types"
 import {
   CodeBlockBody,
   CopyButton,
@@ -23,7 +20,10 @@ import {
   type DetailIcon,
   DetailLink,
   DetailRow,
-} from "./details"
+} from "../../shared/details"
+import { SeparatorDot } from "../../shared/dot"
+import { absoluteTime, absoluteUtcTime } from "../format"
+import { type ExecutionDetail, type ExecutionDetailType } from "../types"
 import { ExecutionToolsValue } from "./groups"
 import { RepositoryIcon } from "./source"
 

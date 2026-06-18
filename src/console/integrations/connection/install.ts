@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { readErrorMessage } from "../../error"
+import { readErrorMessage } from "../../shared/error"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 const integrationReturnPath = "/integrations"

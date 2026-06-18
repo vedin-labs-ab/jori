@@ -1,4 +1,4 @@
-import { ConsolePage } from "../page"
+import { ConsolePage } from "../shared/page"
 import { RunsList } from "./list"
 
 export function Runs() {

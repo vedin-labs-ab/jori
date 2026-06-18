@@ -9,7 +9,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Spinner } from "@/components/ui/spinner"
-import { codeBlockFrameClassName, DetailFrame } from "./details"
+import { codeBlockFrameClassName, DetailFrame } from "../../shared/details"
 import {
   type LiveStreamStatus,
   type StoredTraceStatus,

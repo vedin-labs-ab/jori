@@ -7,9 +7,9 @@ import {
   ConsoleScrollableList,
   ConsoleToolbar,
   ConsoleToolbarActions,
-} from "../layout"
-import { ConsoleListPager } from "../list/pager"
-import { type useClientPagination } from "../list/pagination"
+} from "../shared/layout"
+import { ConsoleListPager } from "../shared/list/pager"
+import { type useClientPagination } from "../shared/list/pagination"
 import { ArtifactSkeletonList, EmptyArtifacts } from "./empty"
 import { type ArtifactFilter, artifactFilterOptions } from "./filter"
 import { ArtifactRow } from "./row"

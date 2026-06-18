@@ -2,7 +2,7 @@ import { Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { ConsoleToolbar, ConsoleToolbarActions } from "../layout"
+import { ConsoleToolbar, ConsoleToolbarActions } from "../shared/layout"
 import { type SkillFilterView, skillFilterOptions } from "./types"
 
 export function SkillsToolbar({

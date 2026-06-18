@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { SeparatorDot } from "../../dot"
+import { SeparatorDot } from "../../shared/dot"
 import { formatDuration } from "../format"
 import {
   type ApprovalState,

@@ -1,5 +1,5 @@
 import { Box } from "lucide-react"
-import { ConsoleEmptyState } from "../list/empty"
+import { ConsoleEmptyState } from "../shared/list/empty"
 
 const skeletonRows = ["first", "second", "third", "fourth"]
 

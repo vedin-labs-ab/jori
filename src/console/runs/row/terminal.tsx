@@ -4,8 +4,8 @@ import { SquareTerminal } from "lucide-react"
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
+import { CopyButton } from "../../shared/details"
 import { type ExecutionItem } from "../types"
-import { CopyButton } from "./details"
 import { EmptyTraceNotice, TerminalFrame, TerminalNotice } from "./notice"
 import {
   type LiveStreamStatus,

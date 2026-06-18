@@ -1,10 +1,10 @@
 import { ClipboardList } from "lucide-react"
-import { type ExecutionTaskSource } from "../types"
 import {
   CodeBlockDetail,
   codeBlockContentClassName,
   DetailLink,
-} from "./details"
+} from "../../shared/details"
+import { type ExecutionTaskSource } from "../types"
 
 export function TaskDetail({
   source,

@@ -25,8 +25,8 @@ describe("runtime MCP payloads", () => {
       content: runtimeAssets.mcp.milo,
     })
     expect(bundle.sandboxFiles).toContainEqual({
-      path: "/home/user/milo-workspace/milo-files.ts",
-      content: runtimeAssets.mcp.miloFiles["milo-files.ts"],
+      path: "/home/user/milo-workspace/milo/files.ts",
+      content: runtimeAssets.mcp.miloFiles["milo/files.ts"],
     })
     expect(server?.args).toEqual([
       "--experimental-strip-types",

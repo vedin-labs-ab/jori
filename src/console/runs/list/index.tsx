@@ -13,8 +13,8 @@ import {
   ConsoleScrollableGrid,
   ConsoleToolbar,
   ConsoleToolbarActions,
-} from "../../layout"
-import { ConsoleListPager } from "../../list/pager"
+} from "../../shared/layout"
+import { ConsoleListPager } from "../../shared/list/pager"
 import { ExecutionRow } from "../row"
 import { displayNowForExecution, executionClockInterval } from "../time"
 import {

@@ -58,7 +58,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BrandMark } from "@/shared/brand"
-import { IntegrationCallbackAlerts } from "./alerts"
+import { IntegrationCallbackAlerts } from "../../integrations/callback/alerts"
 
 const consoleNavigation = [
   { icon: LayoutDashboard, label: "Overview", to: "/console" },
