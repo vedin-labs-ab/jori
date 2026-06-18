@@ -4,7 +4,7 @@
 
 - Ensure `pnpm run check` passes before handoff.
 - Use Biome only for linting and formatting.
-- Before making code changes, read `biome.jsonc` and shape the implementation to satisfy its configured rules from the start.
+- Before making code changes, read `biome.jsonc`, `scripts/dependencies.ts`, and `scripts/structure.ts`; shape the implementation to satisfy formatting, dependency boundary, and folder structure constraints from the start.
 - If you've changed Convex code, run `pnpm run deploy` before handoff.
 - Do not weaken or bypass checks to make them pass unless explicitly instructed.
 
