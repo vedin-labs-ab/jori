@@ -10,14 +10,13 @@
 
 ### Change Workflow
 
-- For code changes, inspect the current branch first.
-- If on `main`, create a fresh worktree from latest `origin/main` on a dedicated `agent/<task-name>` branch.
-- If already on a non-`main` task branch/worktree, continue there instead of creating another branch for the same task.
-- Keep unrelated tasks on separate branches.
-- Commit completed work only after required checks pass.
-- Before handoff, fetch latest `origin/main`, rebase the task branch, resolve conflicts, and rerun checks.
-- Push the task branch to GitHub and open a pull request into `main`.
-- Do not update local or remote `main` directly unless explicitly instructed.
+- For code changes, use a fresh worktree from latest `main` on a dedicated `codex/<task-name>` branch.
+- Keep each task isolated; never share mutable branches across agents.
+- Commit completed work on the task branch after required checks pass.
+- Before updating `main`, rebase the task branch on latest `main`, resolve conflicts, and rerun checks.
+- Update `main` atomically with a serialized fast-forward merge from the checked task branch.
+- If no git remote is configured, updating local `main` is sufficient.
+- If `main` moves before the update lands, repeat the rebase/check/fast-forward sequence.
 
 ### Code Quality & Architecture
 
