@@ -2,4 +2,4 @@ export {
   assertJsonSchemaValue,
   assertSupportedJsonSchema,
   normalizeJsonSchema,
-} from "../../../contracts/artifacts/json-schema"
+} from "../../../contracts/artifacts/schema"

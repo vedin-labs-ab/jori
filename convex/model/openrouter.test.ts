@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "vitest"
-import { requireOpenRouterConfig } from "./client"
+import { requireOpenRouterConfig } from "./openrouter"
 
 const environmentNames = [
   "CONVEX_SITE_URL",

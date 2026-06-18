@@ -3,7 +3,7 @@ import {
   assertJsonSchemaValue,
   assertSupportedJsonSchema,
   normalizeJsonSchema,
-} from "./json-schema"
+} from "./schema"
 
 export type ArtifactContract = {
   version: number
