@@ -6,6 +6,7 @@ import {
   Pause,
   Play,
   Plug,
+  Trash2,
 } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/tooltip"
 import { type Automation } from "../types"
 import { AutomationActions } from "./actions"
+import { DeleteAutomationDialog } from "./delete"
 import { AutomationMeta } from "./meta"
 
 export function AutomationRow({
@@ -38,12 +40,17 @@ export function AutomationRow({
   onResume: (automation: Automation) => void
   automation: Automation
 }) {
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const requestDelete = () => setIsDeleteOpen(true)
+
   return (
     <li className="min-w-0">
       <Card className="h-full gap-0 py-0 ring-inset transition-colors hover:bg-muted/20">
         <div className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-3 p-4 sm:p-5">
           <AutomationStatusMark
             isControlling={isControlling}
+            isDeleting={isDeleting}
+            onDeleteRequest={requestDelete}
             onPause={onPause}
             onResume={onResume}
             automation={automation}
@@ -67,7 +74,7 @@ export function AutomationRow({
               <AutomationActions
                 isControlling={isControlling}
                 isDeleting={isDeleting}
-                onDelete={onDelete}
+                onDeleteRequest={requestDelete}
                 onEdit={onEdit}
                 onPause={onPause}
                 onResume={onResume}
@@ -83,25 +90,36 @@ export function AutomationRow({
           <AutomationMeta now={now} automation={automation} />
         </CardContent>
       </Card>
+      <DeleteAutomationDialog
+        isDeleting={isDeleting}
+        onDelete={() => onDelete(automation)}
+        onOpenChange={setIsDeleteOpen}
+        open={isDeleteOpen}
+        automation={automation}
+      />
     </li>
   )
 }
 
 function AutomationStatusMark({
   isControlling,
+  isDeleting,
+  onDeleteRequest,
   onPause,
   onResume,
   automation,
 }: {
   isControlling: boolean
+  isDeleting: boolean
+  onDeleteRequest: () => void
   onPause: (automation: Automation) => void
   onResume: (automation: Automation) => void
   automation: Automation
 }) {
   const [isActionVisible, setIsActionVisible] = useState(false)
-  const controlAction = automationControlAction(automation)
+  const action = automationStatusAction(automation)
 
-  if (controlAction === undefined) {
+  if (action === undefined) {
     return (
       <span
         aria-label={`${automationStatusLabel(automation)} automation`}
@@ -113,11 +131,15 @@ function AutomationStatusMark({
     )
   }
 
-  const label =
-    controlAction === "pause"
-      ? `Pause ${automation.name}`
-      : `Resume ${automation.name}`
-  const onClick = controlAction === "pause" ? onPause : onResume
+  const label = statusActionLabel(action, automation.name)
+  const isBusy = action === "delete" ? isDeleting : isControlling
+  const onClick = statusActionClick({
+    action,
+    automation,
+    onDeleteRequest,
+    onPause,
+    onResume,
+  })
 
   return (
     <Tooltip>
@@ -125,18 +147,20 @@ function AutomationStatusMark({
         <button
           aria-label={label}
           className={`${statusMarkClassName} transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-60`}
-          disabled={isControlling}
+          disabled={isBusy}
           onBlur={() => setIsActionVisible(false)}
-          onClick={() => onClick(automation)}
+          onClick={onClick}
           onFocus={() => setIsActionVisible(true)}
           onPointerEnter={() => setIsActionVisible(true)}
           onPointerLeave={() => setIsActionVisible(false)}
           type="button"
         >
-          {isControlling ? (
+          {isBusy ? (
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
           ) : isActionVisible ? (
-            <ActionIcon action={controlAction} />
+            <ActionIcon action={action} />
+          ) : action === "delete" ? (
+            <StaticStatusIcon automation={automation} />
           ) : (
             <StatusIcon automation={automation} />
           )}
@@ -150,6 +174,8 @@ function AutomationStatusMark({
 const statusMarkClassName =
   "flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted text-foreground"
 
+type StatusAction = "delete" | "pause" | "resume"
+
 function automationStatusLabel(automation: Automation) {
   if (automation.status === "completed") {
     return "Completed"
@@ -162,16 +188,22 @@ function automationStatusLabel(automation: Automation) {
   return automation.status === "paused" ? "Paused" : "Active"
 }
 
-function shouldShowCompletedBadge(automation: Automation) {
-  return automation.status === "completed" && automation.type !== "once"
-}
+function automationStatusAction(
+  automation: Automation
+): StatusAction | undefined {
+  if (automation.type === "once") {
+    return "delete"
+  }
 
-function automationControlAction(automation: Automation) {
-  if (automation.type === "once" || automation.status === "completed") {
+  if (automation.status === "completed") {
     return undefined
   }
 
   return automation.status === "paused" ? "resume" : "pause"
+}
+
+function shouldShowCompletedBadge(automation: Automation) {
+  return automation.status === "completed" && automation.type !== "once"
 }
 
 function StaticStatusIcon({ automation }: { automation: Automation }) {
@@ -214,7 +246,17 @@ function StatusIcon({ automation }: { automation: Automation }) {
   )
 }
 
-function ActionIcon({ action }: { action: "pause" | "resume" }) {
+function ActionIcon({ action }: { action: StatusAction }) {
+  if (action === "delete") {
+    return (
+      <Trash2
+        aria-hidden="true"
+        data-testid="automation-delete-icon"
+        className="size-5"
+      />
+    )
+  }
+
   if (action === "pause") {
     return (
       <Pause
@@ -232,4 +274,38 @@ function ActionIcon({ action }: { action: "pause" | "resume" }) {
       className="size-5"
     />
   )
+}
+
+function statusActionLabel(action: StatusAction, name: string) {
+  if (action === "delete") {
+    return `Delete ${name}`
+  }
+
+  return action === "pause" ? `Pause ${name}` : `Resume ${name}`
+}
+
+function statusActionClick({
+  action,
+  automation,
+  onDeleteRequest,
+  onPause,
+  onResume,
+}: {
+  action: StatusAction
+  automation: Automation
+  onDeleteRequest: () => void
+  onPause: (automation: Automation) => void
+  onResume: (automation: Automation) => void
+}) {
+  if (action === "delete") {
+    return onDeleteRequest
+  }
+
+  return () => {
+    if (action === "pause") {
+      onPause(automation)
+    } else {
+      onResume(automation)
+    }
+  }
 }

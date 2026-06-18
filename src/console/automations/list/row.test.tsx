@@ -17,13 +17,28 @@ afterEach(() => {
   cleanup()
 })
 
-test("keeps one-time automation status icon passive", () => {
-  renderRow({ automation: automation({ type: "once", trigger: { at: now } }) })
+test("deletes one-time automation from status icon", () => {
+  const onDelete = vi.fn()
 
-  expect(screen.getByLabelText("One-time automation")).toBeDefined()
+  renderRow({
+    onDelete,
+    automation: automation({ type: "once", trigger: { at: now } }),
+  })
+
+  const control = screen.getByRole("button", { name: "Delete Automation" })
+
   expect(screen.getByTestId("automation-once-icon")).toBeDefined()
   expect(screen.queryByRole("button", { name: /pause/i })).toBeNull()
   expect(screen.queryByRole("button", { name: /resume/i })).toBeNull()
+
+  fireEvent.pointerEnter(control)
+
+  expect(screen.getByTestId("automation-delete-icon")).toBeDefined()
+
+  fireEvent.click(control)
+
+  expect(screen.getByText('Delete "Automation"?')).toBeDefined()
+  expect(onDelete).not.toHaveBeenCalled()
 })
 
 test("uses the main icon instead of a badge for completed one-time automation", () => {
@@ -35,7 +50,9 @@ test("uses the main icon instead of a badge for completed one-time automation", 
     }),
   })
 
-  expect(screen.getByLabelText("Completed automation")).toBeDefined()
+  expect(
+    screen.getByRole("button", { name: "Delete Automation" })
+  ).toBeDefined()
   expect(screen.getByTestId("automation-completed-icon")).toBeDefined()
   expect(container.querySelector('[data-slot="badge"]')).toBeNull()
   expect(screen.queryByRole("button", { name: /pause/i })).toBeNull()
@@ -102,6 +119,20 @@ test("resumes paused event automation from status icon", () => {
   expect(onResume).toHaveBeenCalledTimes(1)
 })
 
+test("opens the shared delete dialog from the action menu", () => {
+  renderRow({
+    automation: automation({
+      type: "cron",
+      trigger: { expression: "0 9 * * *", nextAt: now + day },
+    }),
+  })
+
+  openActions()
+  fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }))
+
+  expect(screen.getAllByText('Delete "Automation"?')).toHaveLength(1)
+})
+
 test("shows resume action while paused event icon is focused", () => {
   renderRow({
     automation: automation({
@@ -162,6 +193,13 @@ function renderRow({
       />
     </TooltipProvider>
   )
+}
+
+function openActions() {
+  fireEvent.pointerDown(screen.getByRole("button", { name: /open actions/i }), {
+    button: 0,
+    ctrlKey: false,
+  })
 }
 
 function automation(
