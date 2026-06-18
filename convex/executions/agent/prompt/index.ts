@@ -20,6 +20,7 @@ import {
   formatEvent,
   formatTargetLines,
   getMessageDelivery,
+  getMessageProgress,
   getMessageTarget,
   targetLine,
 } from "./target"
@@ -68,6 +69,7 @@ function createMessageValues(
     message: {
       delivery: getMessageDelivery(input.messageIntegration),
       integration: getIntegrationLabel(input.messageIntegration),
+      progress: getMessageProgress(input.messageIntegration),
       target: getMessageTarget(input.messageIntegration, input.message.data),
       text: input.message.text ?? "",
     },

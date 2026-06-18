@@ -76,7 +76,12 @@ describe("runtime prompts", () => {
       `A ${toolSurfaceLabel} message triggered this run.`
     )
     expect(prompt).toContain("Current UTC time:")
-    expect(prompt).toContain("The requester cannot see you working.")
+
+    if (provider === "slack") {
+      expect(prompt).toContain("Slack already shows Milo is working")
+    } else {
+      expect(prompt).toContain("The requester cannot see you working.")
+    }
 
     for (const line of targetLines) {
       expect(prompt).toContain(line)
@@ -114,6 +119,8 @@ describe("runtime prompts", () => {
 
     expect(prompt).toContain("Milo will post it as a reply")
     expect(prompt).toContain("Use Slack write tools only")
+    expect(prompt).toContain("not for routine replies")
+    expect(prompt).not.toContain("The requester cannot see you working")
     expect(prompt).not.toContain("If a reply is useful, send it to this target")
   })
 

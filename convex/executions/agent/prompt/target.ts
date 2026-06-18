@@ -17,11 +17,23 @@ export function getMessageDelivery(integration: MessageIntegration) {
   if (integration === "slack") {
     return [
       "- Return the final answer normally; Milo will post it as a reply in this Slack thread.",
-      "- Use Slack write tools only for interim updates or intentional extra Slack messages. When posting an interim update in the original conversation, use the reply thread timestamp above.",
+      "- Use Slack write tools only for intentional extra Slack messages or file delivery, not for routine replies to this source thread.",
     ].join("\n")
   }
 
   return "- If a reply is useful, send it to this target."
+}
+
+export function getMessageProgress(integration: MessageIntegration) {
+  if (integration === "slack") {
+    return "- Slack already shows Milo is working. Do not send routine acknowledgements or progress updates to the source thread."
+  }
+
+  return [
+    "- The requester cannot see you working. If answering will take more than a",
+    "  quick look, first send one short line here saying what you are about to do.",
+    "  When the answer is quick, skip the acknowledgement and just reply.",
+  ].join("\n")
 }
 
 export function formatEvent(

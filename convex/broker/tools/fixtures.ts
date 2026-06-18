@@ -12,6 +12,12 @@ export function fileContext() {
       createdAt: 0,
     },
     ctx: {
+      runMutation: vi.fn(async () => ({
+        channelId: "C123",
+        recordFinal: false,
+        source: false,
+        threadTs: "123.456",
+      })),
       runQuery: vi.fn(async () => ({
         _id: "file-id",
         _creationTime: 0,

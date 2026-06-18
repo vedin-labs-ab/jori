@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc } from "../../../_generated/dataModel"
-import { setSlackThreadStatus } from "."
+import { callSlackTool, setSlackThreadStatus } from "."
 
 const originalFetch = globalThis.fetch
 
@@ -50,6 +50,112 @@ describe("Slack assistant thread status", () => {
       status: "",
       thread_ts: "123.456",
     })
+  })
+})
+
+describe("Slack source replies", () => {
+  test("normalizes source channel posts into the stored thread", async () => {
+    const calls = mockSlackFetch([{ ok: true }, { ok: true, ts: "111.222" }])
+    const runMutation = vi
+      .fn()
+      .mockResolvedValueOnce({
+        channelId: "C123",
+        recordFinal: true,
+        source: true,
+        threadTs: "123.456",
+      })
+      .mockResolvedValueOnce(null)
+
+    await callSlackTool(
+      slackIntegration(),
+      "conversations_add_message",
+      {
+        channel: "C123",
+        text: "Hello",
+      },
+      {
+        ctx: { runMutation },
+        execution: { runId: "run-id" },
+      } as never
+    )
+
+    expect(calls[0]?.body).toMatchObject({
+      channel_id: "C123",
+      status: "",
+      thread_ts: "123.456",
+    })
+    expect(calls[1]?.body).toMatchObject({
+      channel: "C123",
+      text: "Hello",
+      thread_ts: "123.456",
+    })
+    expect(runMutation).toHaveBeenLastCalledWith(expect.anything(), {
+      messageTs: "111.222",
+      runId: "run-id",
+      statusCleared: true,
+      now: expect.any(Number),
+    })
+  })
+})
+
+describe("Slack source reply claim release", () => {
+  test("releases the source reply claim when Slack omits the message ts", async () => {
+    const calls = mockSlackFetch([{ ok: true }, { ok: true }])
+    const runMutation = vi
+      .fn()
+      .mockResolvedValueOnce({
+        channelId: "C123",
+        recordFinal: true,
+        source: true,
+        threadTs: "123.456",
+      })
+      .mockResolvedValueOnce(null)
+
+    await callSlackTool(
+      slackIntegration(),
+      "conversations_add_message",
+      {
+        channel: "C123",
+        text: "Hello",
+      },
+      {
+        ctx: { runMutation },
+        execution: { runId: "run-id" },
+      } as never
+    )
+
+    expect(calls).toHaveLength(2)
+    expect(runMutation).toHaveBeenLastCalledWith(expect.anything(), {
+      error: "Slack source reply response is missing ts",
+      runId: "run-id",
+      now: expect.any(Number),
+    })
+  })
+})
+
+describe("Slack source reply claim collisions", () => {
+  test("surfaces source reply claim collisions before calling Slack", async () => {
+    const calls = mockSlackFetch({ ok: true })
+    const runMutation = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("Slack source reply is already claimed"))
+
+    await expect(
+      callSlackTool(
+        slackIntegration(),
+        "conversations_add_message",
+        {
+          channel: "C123",
+          text: "Hello",
+        },
+        {
+          ctx: { runMutation },
+          execution: { runId: "run-id" },
+        } as never
+      )
+    ).rejects.toThrow("Slack source reply is already claimed")
+
+    expect(calls).toHaveLength(0)
   })
 })
 

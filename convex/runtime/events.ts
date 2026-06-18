@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, mutation } from "../_generated/server"
 import { requireWorkerSecret } from "./shared"
-import { recordSlackRunState } from "./slack"
+import { recordSlackRunState } from "./slack/lifecycle"
 
 export const record = mutation({
   args: {
