@@ -1,5 +1,4 @@
 import { type FunctionReference } from "convex/server"
-import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
@@ -64,6 +63,7 @@ type ObservedMessage = {
 
 type IngestMessageResult =
   | { status: "started"; runId: Id<"runs"> }
+  | { status: "continued"; sessionId: Id<"sessions"> }
   | { status: "missing_integration" | "ignored_bot" | "duplicate" }
   | { status: "ignored" | "ignored_empty"; messageId: Id<"messages"> }
 
@@ -77,13 +77,7 @@ export async function ingestProviderMessage(
   >,
   message: ObservedMessage
 ) {
-  const result = await ctx.runMutation(record, message)
-
-  if (result.status === "started") {
-    await ctx.runMutation(internal.runtime.outbox.ensureRunQueued, {
-      runId: result.runId,
-    })
-  }
+  await ctx.runMutation(record, message)
 
   return Response.json({ ok: true })
 }

@@ -15,6 +15,7 @@ import {
   type JsonObject,
   type RuntimeContext,
   type RuntimeEventType,
+  type RuntimeMessage,
 } from "../types"
 
 const maxAttempts = 3
@@ -87,9 +88,14 @@ async function runAgentLoop(args: {
   const tools = modelTools(args.runtime.context.tools)
 
   for (let step = 1; step <= maxModelSteps; step += 1) {
+    await appendSessionMessages(args.runtime, messages)
     const response = await args.model.complete({ messages, tools })
 
     if (response.type === "message") {
+      if (await appendSessionMessages(args.runtime, messages)) {
+        continue
+      }
+
       await completeRun(args.runtime, step, args.attempt, response.content)
 
       return {
@@ -110,6 +116,53 @@ async function runAgentLoop(args: {
   }
 
   throw new Error("Model loop exceeded the maximum step count.")
+}
+
+async function appendSessionMessages(
+  runtime: ToolRuntime,
+  messages: ModelMessage[]
+) {
+  const session = runtime.context.session
+
+  if (session === null) {
+    return false
+  }
+
+  let appended = false
+  let hasMore = true
+
+  while (hasMore) {
+    const drained = await runtime.convex.drainSessionMessages({
+      sessionId: session.id,
+    })
+
+    hasMore = drained.hasMore
+
+    for (const message of drained.messages) {
+      messages.push({
+        content: formatSessionMessage(message),
+        role: "user",
+      })
+      appended = true
+    }
+  }
+
+  return appended
+}
+
+function formatSessionMessage(message: RuntimeMessage) {
+  const observed = message.observedAt ?? message.createdAt
+
+  return [
+    `New ${message.integration} message in the active conversation.`,
+    `Type: ${message.type}`,
+    `Observed at: ${new Date(observed).toISOString()}`,
+    "",
+    "Message:",
+    "```text",
+    message.text,
+    "```",
+  ].join("\n")
 }
 
 async function runToolCalls(

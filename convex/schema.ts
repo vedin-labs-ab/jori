@@ -1,5 +1,4 @@
 import { defineSchema } from "convex/server"
-import { activations } from "./activations/schema"
 import { approvals } from "./approvals/schema"
 import {
   artifactAssets,
@@ -15,6 +14,7 @@ import {
 } from "./artifacts/schema"
 import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
+import { conversations } from "./conversations/schema"
 import { events } from "./events/schema"
 import { executions } from "./executions/schema"
 import { files } from "./files/schema"
@@ -24,11 +24,12 @@ import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
 import { runs } from "./runs/schema"
 import {
+  outbox,
   runtimeEvents,
-  runtimeOutbox,
   runtimeSandboxes,
   runtimeSlackStatuses,
 } from "./runtime/schema"
+import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
 
 export default defineSchema({
@@ -41,11 +42,12 @@ export default defineSchema({
   subscriptions,
   events,
   runs,
-  activations,
+  conversations,
+  sessions,
   approvals,
   executions,
   runtimeEvents,
-  runtimeOutbox,
+  outbox,
   runtimeSandboxes,
   runtimeSlackStatuses,
   permissions,

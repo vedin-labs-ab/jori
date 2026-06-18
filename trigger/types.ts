@@ -45,7 +45,19 @@ export type RuntimeContext = {
     tenantId: string
     title: string
   }
+  session: {
+    id: ConvexId<"sessions">
+  } | null
   tools: RuntimeTool[]
+}
+
+export type RuntimeMessage = {
+  createdAt: number
+  id: ConvexId<"messages">
+  integration: string
+  observedAt: number | null
+  text: string
+  type: string
 }
 
 export type RuntimeEventType =

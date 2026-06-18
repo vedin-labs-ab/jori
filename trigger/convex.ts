@@ -6,6 +6,7 @@ import {
   type ConvexId,
   type JsonObject,
   type RuntimeContext,
+  type RuntimeMessage,
 } from "./types"
 
 export class MiloConvexClient {
@@ -63,6 +64,20 @@ export class MiloConvexClient {
       surface: args.surface,
       tool: args.tool,
     })
+  }
+
+  async drainSessionMessages(args: {
+    limit?: number
+    sessionId: ConvexId<"sessions">
+  }) {
+    return (await this.client.mutation(api.runtime.sessions.drain, {
+      limit: args.limit,
+      secret: this.secret,
+      sessionId: args.sessionId,
+    })) as {
+      hasMore: boolean
+      messages: RuntimeMessage[]
+    }
   }
 
   async requestApproval(args: {

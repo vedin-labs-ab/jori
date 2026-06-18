@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, mutation } from "../_generated/server"
+import { continuePendingConversationRun } from "../conversations/data"
 import { requireWorkerSecret } from "./shared"
 import { recordSlackRunState } from "./slack/lifecycle"
 
@@ -54,10 +55,28 @@ export const record = mutation({
 
     await patchExecutionStatus(ctx, args)
     await patchSlackStatus(ctx, args)
+    await patchSessionStatus(ctx, args)
 
     return { created: true }
   },
 })
+
+async function patchSessionStatus(
+  ctx: MutationCtx,
+  args: {
+    runId: Id<"runs">
+    type: string
+  }
+) {
+  if (args.type !== "run.completed" && args.type !== "run.failed") {
+    return
+  }
+
+  await continuePendingConversationRun(ctx, {
+    runId: args.runId,
+    now: Date.now(),
+  })
+}
 
 async function patchSlackStatus(
   ctx: MutationCtx,

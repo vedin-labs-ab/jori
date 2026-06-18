@@ -19,7 +19,7 @@ Actions for raw webhook-style endpoints such as brokered MCP or file uploads.
 ## Run Flow
 
 1. Convex creates a `runs` record, creates the initial `executions` record, and
-   writes a `runtimeOutbox` item for the Trigger operation.
+   writes an `outbox` item for the Trigger operation.
 2. A Convex action drains the outbox with `TRIGGER_DEV_API_KEY`, triggering the
    `milo-agent-run` task with an idempotency key derived from the outbox item.
 3. Trigger loads the run from Convex, records lifecycle events with stable
@@ -55,7 +55,7 @@ Trigger-to-Convex callbacks use stable event keys:
 - `runId:source:sequence:type:toolCallId:attempt` for tool events.
 - E2B sandbox lifecycle is keyed by sandbox ID in `runtimeSandboxes`.
 
-Convex-to-Trigger operations use `runtimeOutbox` records. Mutations create or
+Convex-to-Trigger operations use `outbox` records. Mutations create or
 update durable intent, and a separate action performs external Trigger calls
 with retries. External calls are never assumed to be atomic with Convex
 transactions.

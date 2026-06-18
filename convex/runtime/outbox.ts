@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { recordSessionExecution } from "../sessions/data"
 import { formatRuntimeError } from "./shared"
 
 const maxAttempts = 8
@@ -23,6 +24,10 @@ export async function createQueuedExecution(
     .first()
 
   if (existing !== null) {
+    await recordSessionExecution(ctx, {
+      executionId: existing._id,
+      runId,
+    })
     await enqueueRun(ctx, run, existing._id)
 
     return existing._id
@@ -36,6 +41,7 @@ export async function createQueuedExecution(
     createdAt: Date.now(),
   })
 
+  await recordSessionExecution(ctx, { executionId, runId })
   await enqueueRun(ctx, run, executionId)
 
   return executionId
@@ -130,11 +136,11 @@ export const claimNext = internalMutation({
 
 async function claimableItem(
   ctx: MutationCtx,
-  state: Doc<"runtimeOutbox">["state"],
+  state: Doc<"outbox">["state"],
   now: number
 ) {
   return await ctx.db
-    .query("runtimeOutbox")
+    .query("outbox")
     .withIndex("by_state_and_next_attempt", (query) =>
       query.eq("state", state).lte("nextAttemptAt", now)
     )
@@ -144,7 +150,7 @@ async function claimableItem(
 export const markSent = internalMutation({
   args: {
     externalId: v.optional(v.string()),
-    outboxId: v.id("runtimeOutbox"),
+    outboxId: v.id("outbox"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -169,7 +175,7 @@ export const markSent = internalMutation({
 export const markFailed = internalMutation({
   args: {
     error: v.string(),
-    outboxId: v.id("runtimeOutbox"),
+    outboxId: v.id("outbox"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -213,10 +219,10 @@ async function enqueueRun(
 
 async function enqueueOperation(
   ctx: MutationCtx,
-  args: Pick<Doc<"runtimeOutbox">, "idempotencyKey" | "operation" | "tenantId">
+  args: Pick<Doc<"outbox">, "idempotencyKey" | "operation" | "tenantId">
 ) {
   const existing = await ctx.db
-    .query("runtimeOutbox")
+    .query("outbox")
     .withIndex("by_idempotency", (query) =>
       query.eq("idempotencyKey", args.idempotencyKey)
     )
@@ -227,7 +233,7 @@ async function enqueueOperation(
   }
 
   const now = Date.now()
-  const outboxId = await ctx.db.insert("runtimeOutbox", {
+  const outboxId = await ctx.db.insert("outbox", {
     ...args,
     attempts: 0,
     createdAt: now,
@@ -243,7 +249,7 @@ async function enqueueOperation(
 
 async function applyExternalId(
   ctx: MutationCtx,
-  item: Doc<"runtimeOutbox">,
+  item: Doc<"outbox">,
   externalId: string | undefined
 ) {
   if (item.operation.type !== "enqueueRun" || externalId === undefined) {

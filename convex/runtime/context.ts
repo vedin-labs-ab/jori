@@ -78,6 +78,9 @@ export const load = action({
       sandboxId?: string
       status: "completed" | "failed" | "queued" | "running" | "stopped"
     } | null
+    const session = await ctx.runQuery(internal.sessions.data.getByRun, {
+      runId: args.runId,
+    })
 
     if (input === null || execution === null) {
       throw new Error("Runtime context not found.")
@@ -117,6 +120,12 @@ export const load = action({
         tenantId: input.run.tenantId,
         title: input.run.title,
       },
+      session:
+        session === null
+          ? null
+          : {
+              id: session._id,
+            },
       tools: [...permissions.tools, ...sandboxTools],
     }
   },
