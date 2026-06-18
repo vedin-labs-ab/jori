@@ -21,6 +21,7 @@
     "prompts:compile": "node scripts/prompts.ts && biome format --write convex/prompts/generated.ts",
     "runtime:check": "node --experimental-strip-types scripts/runtime.ts --check",
     "runtime:generate": "node --experimental-strip-types scripts/runtime.ts",
+    "trigger:dev": "node --experimental-strip-types scripts/env.ts trigger dev --env-file .env.local",
     "test": "vitest run"
   },
   "dependencies": {
@@ -78,6 +79,7 @@
     "@vitejs/plugin-react": "^6",
     "dependency-cruiser": "^17.4.3",
     "jsdom": "^28",
+    "trigger.dev": "^4.4.6",
     "typescript": "^6",
     "vite": "^8",
     "vitest": "^4"
