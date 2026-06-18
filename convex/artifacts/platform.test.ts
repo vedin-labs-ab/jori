@@ -5,7 +5,7 @@ import {
   type ArtifactPlatformContext,
   callArtifactPlatformTool,
   createArtifactPlatformToolCacheArgs,
-} from "./platform"
+} from "./tools/platform"
 
 type CapturedCall = {
   kind: "query" | "mutation"

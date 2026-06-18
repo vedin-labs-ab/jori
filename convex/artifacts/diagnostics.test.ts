@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { createArtifactPromptDiagnostics } from "./diagnostics"
+import { createArtifactPromptDiagnostics } from "./tools/diagnostics"
 
 const response = {
   id: "gen-123",

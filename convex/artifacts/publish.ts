@@ -4,19 +4,19 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { getToolPermission } from "../permissions/catalog"
-import {
-  type ArtifactBuildInput,
-  type BuildAsset,
-  validateArtifactBuild,
-} from "./build"
 import { normalizeArtifactContract } from "./contract"
+import { type ArtifactConsoleLink, artifactConsoleLink } from "./serve/urls"
 import {
   type ArtifactSourceFile,
   createArtifactSourceSnapshot,
   type StoredArtifactBlob,
 } from "./source"
-import { artifactEntrypoint } from "./template"
-import { type ArtifactConsoleLink, artifactConsoleLink } from "./urls"
+import {
+  type ArtifactBuildInput,
+  type BuildAsset,
+  validateArtifactBuild,
+} from "./source/build"
+import { artifactEntrypoint } from "./source/template"
 
 type PublishedVersion = {
   artifactId: Id<"artifacts">

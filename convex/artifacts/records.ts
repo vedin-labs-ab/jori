@@ -1,20 +1,20 @@
 import { v } from "convex/values"
 import { internalMutation } from "../_generated/server"
+import { artifactAccess, artifactContract } from "./schema"
 import {
   getTenantArtifact,
   insertCapabilities,
   normalizeTitle,
   revokeCapabilities,
-} from "./links"
-import { insertVersion } from "./objects"
-import { purgeArchivedArtifact } from "./purge"
-import { artifactAccess, artifactContract } from "./schema"
+} from "./storage/links"
+import { insertVersion } from "./storage/objects"
+import { purgeArchivedArtifact } from "./storage/purge"
 import {
   assetValidator,
   capabilityInputValidator,
   storedBlobValidator,
   treeValidator,
-} from "./validators"
+} from "./storage/validators"
 
 export const publishCreated = internalMutation({
   args: {

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
-import { validateArtifactBuild } from "./build"
 import { callMiloArtifactTool } from "./mcp"
 import { createArtifactSourceSnapshot, hashArtifactSource } from "./source"
+import { validateArtifactBuild } from "./source/build"
 
 describe("artifact MCP publishing", () => {
   test("preserves source bytes validated by the sandbox builder", async () => {

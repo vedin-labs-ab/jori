@@ -5,7 +5,7 @@ import {
   handleArtifactRenderRequest,
   handleArtifactStaticAssetRequest,
   handleArtifactToolRequest,
-} from "./artifacts/http"
+} from "./artifacts/serve/http"
 import { handleFileUploadRequest } from "./broker/files"
 import { handleGitHubTarballRequest, handleMiloMcpRequest } from "./broker/mcp"
 import {

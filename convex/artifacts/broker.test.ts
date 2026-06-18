@@ -3,8 +3,8 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { callProviderTool } from "../broker/tools"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
-import { callArtifactTool } from "./broker"
-import { type ArtifactPlatformContext } from "./platform"
+import { callArtifactTool } from "./tools/broker"
+import { type ArtifactPlatformContext } from "./tools/platform"
 
 vi.mock("../broker/tools", () => ({
   callProviderTool: vi.fn(),

@@ -1,14 +1,17 @@
 import { describe, expect, test } from "vitest"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { canAccessArtifact } from "./access"
-import { validateArtifactBuild } from "./build"
-import { gitObjectId } from "./git"
-import { createSessionTokenPayload, readSessionTokenPayload } from "./session"
+import {
+  createSessionTokenPayload,
+  readSessionTokenPayload,
+} from "./serve/session"
 import {
   createArtifactSourceSnapshot,
   hashArtifactSource,
   normalizeArtifactPath,
 } from "./source"
+import { validateArtifactBuild } from "./source/build"
+import { gitObjectId } from "./source/git"
 
 describe("artifact source snapshots", () => {
   test("creates deterministic Git-compatible blob and tree IDs", () => {

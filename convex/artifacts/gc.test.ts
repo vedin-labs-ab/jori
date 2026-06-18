@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { canDeleteBlob } from "./gc"
+import { canDeleteBlob } from "./storage/gc"
 
 test("allows blob deletion when all parent trees are deleted", () => {
   expect(

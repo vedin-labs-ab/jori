@@ -2,7 +2,6 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { boundedNumber, optionalString, requiredString } from "../shared/input"
-import { normalizeExpectedVersion, normalizeStateWrite } from "./input"
 import {
   normalizeAccess,
   normalizeBuild,
@@ -10,7 +9,8 @@ import {
   normalizeSource,
   normalizeToolArgs,
   requiredArtifactId,
-} from "./mcp_input"
+} from "./tools/args"
+import { normalizeExpectedVersion, normalizeStateWrite } from "./tools/input"
 
 type MiloArtifactRequest = {
   tool: string
