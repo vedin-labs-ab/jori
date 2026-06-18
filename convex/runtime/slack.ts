@@ -168,6 +168,16 @@ export const recordDelivery = internalMutation({
       return null
     }
 
+    if (args.state === "working" && status.state !== "working") {
+      await ctx.db.patch(status._id, {
+        publishClaimUntil: undefined,
+        updatedAt: args.now,
+      })
+      await schedulePublish(ctx, args.runId)
+
+      return null
+    }
+
     await ctx.db.patch(status._id, {
       deliveredAt: args.now,
       lastDeliveredState: args.state,
@@ -284,9 +294,5 @@ function schedulePublish(ctx: MutationCtx, runId: Id<"runs">, delayMs = 0) {
 }
 
 function assistantStatusText(status: Doc<"runtimeSlackStatuses">) {
-  if (status.state === "working") {
-    return "is working..."
-  }
-
-  return ""
+  return status.state === "working" ? "is working..." : ""
 }
