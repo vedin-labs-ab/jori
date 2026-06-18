@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
-import { recurringDisplay } from "../display/helpers"
+import { recurringDisplay } from "../display"
 import { summarizeExecution } from "../summaries"
 
 test("includes recurring automation details", async () => {

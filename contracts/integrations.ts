@@ -1,4 +1,4 @@
-import { type Provider } from "../providers"
+import { type Provider } from "./providers"
 
 export const integrations = [
   "slack",

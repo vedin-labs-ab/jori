@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
-import { oneShotDisplay } from "../display/helpers"
+import { oneShotDisplay } from "../display"
 import { summarizeExecution } from "../summaries"
 
 test("includes one-shot automation access details", async () => {

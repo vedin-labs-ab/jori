@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { resolveToolModes } from "../../../permissions/catalog"
 import { assembleToolsForRun } from "."
-import { integration, runtimeMilo } from "./permissions/fixtures"
+import { integration, runtimeMilo } from "./fixtures"
 
 test("restricts automation selected integrations to declared access", () => {
   const github = integration("github")

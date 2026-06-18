@@ -2,7 +2,7 @@ import {
   googleJson,
   googleMultipartJson,
   googleText,
-} from "../../../../providers/google/api"
+} from "../../../providers/google/api"
 import {
   createDriveFileMetadata,
   createDriveFileUpdateMetadata,
@@ -19,13 +19,13 @@ import {
   requiredText,
   setDriveQuery,
   setOptionalBooleanSearchParam,
-} from "../../../../providers/google/drive"
+} from "../../../providers/google/drive"
 import {
   boundedNumber,
   optionalString,
   requiredString,
   setOptionalSearchParam,
-} from "../../../../shared/input"
+} from "../../../shared/input"
 
 export async function callGoogleDriveTool(
   token: string,

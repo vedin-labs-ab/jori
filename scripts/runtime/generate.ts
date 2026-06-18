@@ -52,10 +52,10 @@ function readRuntimeAssets(): RuntimeAssets {
     },
     sandbox: {
       bootstrap: readExecutableSource("sandbox/bootstrap.ts"),
-      imageCheck: readExecutableSource("sandbox/image/check.ts"),
+      imageCheck: readExecutableSource("sandbox/image.ts"),
       slackPreflight: readExecutableSource("sandbox/preflight/slack.ts"),
       tokenPreflight: readExecutableSource("sandbox/preflight/token.ts"),
-      traceServer: readExecutableSource("sandbox/trace/server.ts"),
+      traceServer: readExecutableSource("sandbox/trace.ts"),
     },
   }
 }

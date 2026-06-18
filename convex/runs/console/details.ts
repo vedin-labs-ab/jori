@@ -1,7 +1,7 @@
-import { type Doc } from "../../../_generated/dataModel"
-import { getActorDisplayName } from "../../../shared/actor"
-import { detail, uniqueDetails } from "../../display/detail"
-import { toolDetails } from "../tools"
+import { type Doc } from "../../_generated/dataModel"
+import { getActorDisplayName } from "../../shared/actor"
+import { detail, uniqueDetails } from "../display/detail"
+import { toolDetails } from "./tools"
 
 export function executionDetailSummary(input: {
   approval: Doc<"approvals"> | null

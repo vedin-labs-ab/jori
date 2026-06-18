@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
-import { automationDisplay, eventAutomationDisplay } from "../display/helpers"
+import { automationDisplay, eventAutomationDisplay } from "../display"
 import { summarizeExecution } from "../summaries"
 
 test("includes stopped details for stopped executions", async () => {

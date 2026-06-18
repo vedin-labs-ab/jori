@@ -1,10 +1,10 @@
-import { type Doc } from "../../../_generated/dataModel"
-import { type QueryCtx } from "../../../_generated/server"
-import { summarizeApproval } from "../../../approvals/summary"
-import { getExecutionContext } from "../context"
-import { executionDetailSummary } from "../details"
-import { executionTask, executionTitle, triggerLabel } from "../labels"
-import { executionSource, sourceSearchText } from "../source"
+import { type Doc } from "../../_generated/dataModel"
+import { type QueryCtx } from "../../_generated/server"
+import { summarizeApproval } from "../../approvals/summary"
+import { getExecutionContext } from "./context"
+import { executionDetailSummary } from "./details"
+import { executionTask, executionTitle, triggerLabel } from "./labels"
+import { executionSource, sourceSearchText } from "./source"
 
 export async function summarizeExecution(
   ctx: QueryCtx,

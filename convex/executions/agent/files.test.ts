@@ -2,11 +2,7 @@ import { expect, test } from "vitest"
 import { resolveToolModes } from "../../permissions/catalog"
 import { assembleToolsForRun } from "./tools"
 import { getSurfaceToolDefinitions } from "./tools/definitions"
-import {
-  readProperties,
-  readRequired,
-  runtimeMilo,
-} from "./tools/permissions/fixtures"
+import { readProperties, readRequired, runtimeMilo } from "./tools/fixtures"
 
 test("includes file tools in Milo tools", () => {
   const toolBundle = assembleToolsForRun({

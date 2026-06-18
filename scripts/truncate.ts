@@ -93,7 +93,7 @@ function runTruncateBatch(args: { deployment: string | null; limit: number }) {
       "--typecheck=disable",
       "--codegen=disable",
       ...deploymentArgs,
-      "maintenance/truncate:databaseBatch",
+      "maintenance:databaseBatch",
       JSON.stringify({ limit: args.limit }),
     ],
     {

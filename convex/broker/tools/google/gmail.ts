@@ -23,7 +23,7 @@ import {
   getGmailThread,
   getGmailThreads,
   searchGmailThreads,
-} from "./gmail/read"
+} from "./read"
 
 export async function callGmailTool(
   integration: Doc<"integrations">,

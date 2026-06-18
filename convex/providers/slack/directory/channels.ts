@@ -1,9 +1,9 @@
-import { internal } from "../../_generated/api"
-import { type Doc } from "../../_generated/dataModel"
-import { type ActionCtx } from "../../_generated/server"
-import { slackQueryApi } from "./api"
-import { requireSlackCredentials } from "./credentials"
-import { getSlackChannelId } from "./data"
+import { internal } from "../../../_generated/api"
+import { type Doc } from "../../../_generated/dataModel"
+import { type ActionCtx } from "../../../_generated/server"
+import { slackQueryApi } from "../api"
+import { requireSlackCredentials } from "../credentials"
+import { getSlackChannelId } from "../data"
 
 type SlackChannelContext = {
   id: string

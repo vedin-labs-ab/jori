@@ -12,7 +12,7 @@ import {
   readProperties,
   readRequired,
   runtimeMilo,
-} from "./fixtures"
+} from "../fixtures"
 
 test("keeps delivery tools required and out of approval prompts", () => {
   const toolBundle = assembleToolsForRun({

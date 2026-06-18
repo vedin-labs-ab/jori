@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
-import { eventAutomationDisplay } from "../display/helpers"
+import { eventAutomationDisplay } from "../display"
 import { summarizeExecution } from "../summaries"
 
 test("includes linked GitHub pull request details", async () => {

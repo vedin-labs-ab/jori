@@ -1,5 +1,5 @@
 import { MiloLogo } from "@/shared/brand"
-import { providerLogoPath } from "../path"
+import { providerLogoPath } from "./path"
 
 export function ProviderLogo({
   className = "size-3",
