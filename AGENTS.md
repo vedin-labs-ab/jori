@@ -61,3 +61,10 @@ This project uses Convex as its backend.
 
 When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first**.  
 This file defines the correct usage patterns and overrides any prior assumptions.
+
+## Trigger.dev
+
+This project uses Trigger.dev for long-running agent execution and background task orchestration.
+
+When working on Trigger.dev code, **always read `.trigger/ai/guidelines.md` first**.  
+This file defines the correct usage patterns and overrides any prior assumptions.
