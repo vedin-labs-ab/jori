@@ -38,11 +38,9 @@ export const stop = mutation({
       trace: undefined,
     })
 
-    if (execution.sandboxId !== undefined) {
-      await ctx.scheduler.runAfter(0, internal.executions.runtime.killSandbox, {
-        sandboxId: execution.sandboxId,
-      })
-    }
+    await ctx.runMutation(internal.runtime.outbox.enqueueCancellation, {
+      executionId: execution._id,
+    })
 
     return null
   },

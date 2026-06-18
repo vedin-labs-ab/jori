@@ -146,19 +146,21 @@ export async function authenticateBrokerRequest(
   } satisfies BrokerContext
 }
 
-async function callBrokerTool(
+export async function callBrokerTool(
   ctx: ActionCtx,
   context: BrokerContext,
   request: {
+    approved?: boolean
     surface: ToolSurface
     tool: string
     args: Record<string, unknown>
+    waitpointTokenId?: string
   }
-) {
+): Promise<unknown> {
   if (request.surface === "milo") {
     const { mode } = authorizeTool(context, request)
 
-    if (mode === "prompted") {
+    if (mode === "prompted" && request.approved !== true) {
       return await createPromptedToolApproval(ctx, context, request)
     }
 
@@ -177,7 +179,7 @@ async function callBrokerTool(
     throw new Error(`No active ${request.surface} integration is available`)
   }
 
-  if (mode === "prompted") {
+  if (mode === "prompted" && request.approved !== true) {
     return await createPromptedToolApproval(ctx, context, request)
   }
 

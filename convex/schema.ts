@@ -23,6 +23,11 @@ import { integrations } from "./integrations/schema"
 import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
 import { runs } from "./runs/schema"
+import {
+  runtimeEvents,
+  runtimeOutbox,
+  runtimeSandboxes,
+} from "./runtime/schema"
 import { skills } from "./skills/schema"
 
 export default defineSchema({
@@ -38,6 +43,9 @@ export default defineSchema({
   activations,
   approvals,
   executions,
+  runtimeEvents,
+  runtimeOutbox,
+  runtimeSandboxes,
   permissions,
   artifacts,
   artifactVersions,

@@ -29,7 +29,7 @@ export async function callMiloFileTool(
     tenantId: string
   },
   request: MiloFileRequest
-) {
+): Promise<unknown> {
   const args = normalizeToolArgs(request.args)
 
   if (request.tool === "search_files") {

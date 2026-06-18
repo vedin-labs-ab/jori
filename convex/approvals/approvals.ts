@@ -22,6 +22,7 @@ export const create = internalMutation({
     summary: v.string(),
     handoff: approvalHandoff,
     code: v.string(),
+    waitpointTokenId: v.optional(v.string()),
     requestedBy: actorValidator,
   },
   handler: async (ctx, args) => {

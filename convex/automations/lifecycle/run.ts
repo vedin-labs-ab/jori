@@ -1,7 +1,7 @@
-import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { createAutomationRunSnapshot } from "../../runs/snapshot"
+import { createQueuedExecution } from "../../runtime/outbox"
 
 export async function createAutomationRun(
   ctx: MutationCtx,
@@ -22,9 +22,7 @@ export async function createAutomationRun(
     createdAt: args.now,
   })
 
-  await ctx.scheduler.runAfter(0, internal.executions.runtime.runAutomation, {
-    runId,
-  })
+  await createQueuedExecution(ctx, runId)
 
   return runId
 }
