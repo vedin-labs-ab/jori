@@ -6,8 +6,8 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
-import { toolSurfaceValidator } from "../integrations/catalog"
 import { actorValidator } from "../shared/actor"
+import { toolSurfaceValidator } from "../shared/integrations"
 import { approvalDecision, approvalDelivery, approvalHandoff } from "./schema"
 
 const approvalTtlMs = 30 * 60 * 1000

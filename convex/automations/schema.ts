@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
-import { integrationValidator } from "../integrations/catalog"
+import { integrationValidator } from "../shared/integrations"
 
 const eventCriteriaValue = v.union(v.string(), v.number())
 const eventCriteria = v.record(v.string(), eventCriteriaValue)

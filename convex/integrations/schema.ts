@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { integrationValidator } from "../integrations/catalog"
+import { integrationValidator } from "../shared/integrations"
 
 const integrationScope = v.union(v.literal("tenant"), v.literal("user"))
 const integrationStatus = v.union(v.literal("active"), v.literal("paused"))

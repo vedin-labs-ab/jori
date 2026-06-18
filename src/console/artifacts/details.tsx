@@ -1,7 +1,7 @@
 import { Workflow, Wrench } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { ExecutionToolsValue } from "../runs/row/groups"
 import { DetailRow } from "../shared/details"
+import { ToolGroupsValue } from "../tools"
 import { automationSummary, type CapabilityGroup } from "./format"
 import { type ArtifactSummary } from "./types"
 
@@ -40,7 +40,7 @@ function ArtifactToolsValue({ groups }: { groups: CapabilityGroup[] }) {
   }
 
   return (
-    <ExecutionToolsValue
+    <ToolGroupsValue
       description="Tools granted to this artifact."
       groups={groups}
     />

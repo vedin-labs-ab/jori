@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { integrationValidator } from "../integrations/catalog"
+import { integrationValidator } from "../shared/integrations"
 
 export const skills = defineTable({
   tenantId: v.union(v.string(), v.null()),

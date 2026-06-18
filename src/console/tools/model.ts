@@ -1,13 +1,12 @@
-import { type ToolPermission } from "../controller"
+export type ToolAccess = "read" | "write"
 
-export type ToolCapability = Pick<
-  ToolPermission,
-  "access" | "description" | "label" | "tool"
-> & {
+export type ToolCapability = {
+  access: ToolAccess
+  description: string
+  label: string
   requiresApproval?: boolean
+  tool: string
 }
-
-export type ToolAccess = ToolCapability["access"]
 
 export type ToolAccessGroup<T extends ToolCapability> = {
   access: ToolAccess

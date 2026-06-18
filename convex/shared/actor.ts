@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Integration, integrationValidator } from "../integrations/catalog"
+import { type Integration, integrationValidator } from "./integrations"
 
 export type Actor =
   | { userId: string; name?: string; email?: string }

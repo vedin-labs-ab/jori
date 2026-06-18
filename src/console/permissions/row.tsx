@@ -9,7 +9,7 @@ import {
   type ConfigurablePermissionMode,
   type PermissionMode,
   type ToolPermission,
-} from "./controller"
+} from "./types"
 
 const modeLabels: Record<PermissionMode, string> = {
   required: "Required",

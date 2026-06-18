@@ -1,4 +1,4 @@
-import { type ToolPermission } from "../../permissions/controller"
+import { type ToolPermission } from "../../permissions/types"
 import { type AutomationSurfaceIntegration } from "./catalog"
 
 export type AutomationToolPermissions = ToolPermission[] | null | undefined

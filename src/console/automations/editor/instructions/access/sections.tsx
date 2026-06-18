@@ -10,9 +10,9 @@ import {
   ToolGroupSection,
   ToolGroupsFrame,
   ToolRowContent,
-} from "@/console/permissions/tools"
+} from "@/console/tools"
 import { cn } from "@/lib/utils"
-import { type ToolPermission } from "../../../../permissions/controller"
+import { type ToolPermission } from "../../../../permissions/types"
 import {
   automationToolModeDescription,
   isAutomationToolSelectable,

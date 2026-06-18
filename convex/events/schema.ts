@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { integrationValidator } from "../integrations/catalog"
 import { actorValidator } from "../shared/actor"
+import { integrationValidator } from "../shared/integrations"
 import { sourceMetadataValidator } from "../shared/sources/schema"
 
 const eventCriteriaValue = v.union(v.string(), v.number())

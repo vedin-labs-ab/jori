@@ -1,6 +1,6 @@
 import { type Doc } from "../_generated/dataModel"
-import { toolSurfaceLabel } from "../integrations/catalog"
 import { slackMessageUrl } from "../providers/slack/links"
+import { toolSurfaceLabel } from "../shared/integrations"
 import { getToolLabel } from "./slack/labels"
 
 export function summarizeApproval(args: {

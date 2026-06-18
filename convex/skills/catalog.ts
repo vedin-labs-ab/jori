@@ -7,8 +7,8 @@ import {
 } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
-import { integrationValidator } from "../integrations/catalog"
 import { skills as globalSkillSeed } from "../prompts/generated"
+import { integrationValidator } from "../shared/integrations"
 import {
   normalizeSkillInput,
   requireUniqueTenantSkillName,

@@ -1,4 +1,4 @@
-import { type Integration } from "../../integrations/catalog"
+import { type Integration } from "../integrations"
 import { type SourceMetadataItem } from "./schema"
 
 export function createSourceMetadata(args: {

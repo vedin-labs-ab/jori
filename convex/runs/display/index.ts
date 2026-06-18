@@ -1,7 +1,7 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
 import { getAutomationEventDefinition } from "../../automations/events"
-import { toolSurfaceLabel } from "../../integrations/catalog"
+import { toolSurfaceLabel } from "../../shared/integrations"
 import { type SourceMetadataItem } from "../../shared/sources/schema"
 import { type runDisplay } from "../schema"
 import {

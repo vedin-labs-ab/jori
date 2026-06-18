@@ -1,7 +1,7 @@
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { checkTenantAccess } from "../identity/access"
 import { getClerkUserId } from "../identity/users"
-import { type Integration } from "../integrations/catalog"
+import { type Integration } from "../shared/integrations"
 
 type QueryLikeCtx = QueryCtx | MutationCtx
 

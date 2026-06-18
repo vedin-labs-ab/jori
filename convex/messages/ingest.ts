@@ -6,7 +6,6 @@ import {
   startMessageRun,
 } from "../activations/data"
 import { resolveUserIdByEmail } from "../identity/identities"
-import { type Integration } from "../integrations/catalog"
 import {
   isGitHubAppMessage,
   isMiloRelevantGitHubMessage,
@@ -23,6 +22,7 @@ import {
   getActorEmail,
   getActorExternalId,
 } from "../shared/actor"
+import { type Integration } from "../shared/integrations"
 import { createSourceMetadata } from "../shared/sources/metadata"
 import { recordAutomationEvent } from "./events"
 

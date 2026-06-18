@@ -1,10 +1,6 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import {
-  isGoogleIntegration,
-  isMicrosoftIntegration,
-} from "../integrations/catalog"
 import { createGitHubInstallationToken } from "../providers/github/app"
 import { requireGitHubCredentials } from "../providers/github/credentials"
 import { requireGoogleCredentials } from "../providers/google/credentials"
@@ -16,6 +12,10 @@ import {
 } from "../providers/linear/oauth"
 import { requireMicrosoftCredentials } from "../providers/microsoft/credentials"
 import { refreshMicrosoftAccessToken } from "../providers/microsoft/oauth"
+import {
+  isGoogleIntegration,
+  isMicrosoftIntegration,
+} from "../shared/integrations"
 
 type RuntimeIntegration = Doc<"integrations">
 

@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { toolSurfaceValidator } from "../integrations/catalog"
 import { actorValidator } from "../shared/actor"
+import { toolSurfaceValidator } from "../shared/integrations"
 
 export const approvalDecision = v.union(
   v.literal("approved"),

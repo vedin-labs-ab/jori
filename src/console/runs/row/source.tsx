@@ -7,37 +7,9 @@ import {
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { MiloLogo } from "@/shared/brand"
 import { SeparatorDot } from "../../shared/dot"
-import { providerLogoPath } from "../../shared/logo/path"
+import { ProviderLogo } from "../../shared/logo/provider"
 import { type ExecutionSource, type SourceDatum } from "../types"
-
-export function ProviderLogo({
-  className = "size-3",
-  surface,
-}: {
-  className?: string
-  surface: string | undefined
-}) {
-  if (surface === "milo") {
-    return (
-      <MiloLogo
-        aria-hidden="true"
-        className={className}
-        focusable="false"
-        title=""
-      />
-    )
-  }
-
-  const logo = providerLogoPath(surface)
-
-  if (logo === undefined) {
-    return null
-  }
-
-  return <img alt="" className={`${className} shrink-0`} src={logo} />
-}
 
 export function SourceLine({ source }: { source: ExecutionSource }) {
   const items = sourceItems(source)

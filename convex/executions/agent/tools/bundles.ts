@@ -1,10 +1,10 @@
-import { toolSurfaceLabel } from "../../../integrations/catalog"
 import {
   type PermissionMode,
   resolveToolMode,
   type ToolPermission,
   type ToolSurface,
 } from "../../../permissions/catalog"
+import { toolSurfaceLabel } from "../../../shared/integrations"
 import { type RuntimeSkill } from "../sandbox/skills"
 import { type RuntimeToolCapability } from "./types"
 

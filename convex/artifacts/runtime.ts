@@ -1,13 +1,13 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
-import { isUserScopedIntegration } from "../integrations/catalog"
 import {
   getToolPermission,
   resolveToolMode,
   resolveToolModes,
 } from "../permissions/catalog"
 import { listPermissionOverrides } from "../permissions/read"
+import { isUserScopedIntegration } from "../shared/integrations"
 import { canAccessArtifact } from "./access"
 
 export const authorizeTool = internalQuery({
