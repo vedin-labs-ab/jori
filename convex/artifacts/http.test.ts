@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
-import { createArtifactRenderCsp, readArtifactFramePolicy } from "./frame"
-import { handleArtifactStaticAssetRequest } from "./http"
-import { createSessionAuthorizationArgs } from "./session"
+import { createArtifactRenderCsp, readArtifactFramePolicy } from "./serve/frame"
+import { handleArtifactStaticAssetRequest } from "./serve/http"
+import { createSessionAuthorizationArgs } from "./serve/session"
 
 describe("artifact render CSP", () => {
   test("allows only self when no Milo app origins are configured", () => {

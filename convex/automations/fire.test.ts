@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import { matchesEvent } from "./fire"
+import { matchesEvent } from "./lifecycle/fire"
 
 describe("automation event matching", () => {
   test("matches when trigger criteria are a subset of event criteria", () => {

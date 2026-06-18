@@ -6,7 +6,7 @@ import {
   removeAutomation,
   searchAutomations,
   updateAutomation,
-} from "./data"
+} from "./lifecycle"
 import { accessInput, triggerInput } from "./schema"
 
 export const create = internalMutation({

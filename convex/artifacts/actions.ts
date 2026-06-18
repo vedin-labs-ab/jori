@@ -15,7 +15,7 @@ import {
   type SourceReadResult,
 } from "./publish"
 import { artifactAccess } from "./schema"
-import { createSessionTokenPayload } from "./session"
+import { createSessionTokenPayload } from "./serve/session"
 
 const artifactSourceFileValidator = v.object({
   path: v.string(),
@@ -118,7 +118,7 @@ export const createSession = action({
     const now = Date.now()
     const expiresAt = now + 60 * 60 * 1000
     const record: Omit<SessionResult, "token"> = await ctx.runMutation(
-      internal.artifacts.sessions.createSessionRecord,
+      internal.artifacts.serve.sessions.createSessionRecord,
       {
         tenantId: args.tenantId,
         artifactId: args.artifactId,

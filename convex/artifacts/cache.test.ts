@@ -4,7 +4,7 @@ import {
   canStoreArtifactToolCacheValue,
   createArtifactToolCacheKey,
   normalizeArtifactToolCacheOptions,
-} from "./cache"
+} from "./tools/cache"
 
 describe("artifact tool cache", () => {
   test("clamps requested cache TTLs to the supported window", () => {

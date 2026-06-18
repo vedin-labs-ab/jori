@@ -13,14 +13,14 @@ import {
   isUserScopedIntegration,
 } from "../shared/integrations"
 import { projectAccessForConsole } from "./access"
+import { automationEventCatalog } from "./events"
 import {
   createAutomation,
   maxSearchResults,
   removeAutomation,
   searchAutomations,
   updateAutomation,
-} from "./data"
-import { automationEventCatalog } from "./events"
+} from "./lifecycle"
 import { accessInput, status, triggerInput } from "./schema"
 
 export const list = query({

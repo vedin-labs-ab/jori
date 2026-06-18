@@ -3,7 +3,7 @@ import {
   platformArtifactSourcePathPrefixes,
   platformArtifactSourcePaths,
   requiredArtifactSourcePaths,
-} from "../../../../artifacts/template"
+} from "../../../../artifacts/source/template"
 import { runtimeAssets } from "../../../../runtime/_generated/assets"
 import { workspace } from "../../sandbox/harness"
 import { type SandboxFile } from "../types"

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
-import { artifactConsoleLink } from "./urls"
+import { artifactConsoleLink } from "./serve/urls"
 
 describe("artifact console links", () => {
   test("returns a console path without an app origin", () => {

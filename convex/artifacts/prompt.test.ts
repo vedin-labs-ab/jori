@@ -1,13 +1,13 @@
 import { describe, expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
-import { type ArtifactPlatformContext } from "./platform"
+import { type ArtifactPlatformContext } from "./tools/platform"
 import {
   createArtifactPromptRequest,
   createArtifactPromptRequestDiagnostics,
   normalizeArtifactPromptInput,
   parsePromptOutput,
   readArtifactModel,
-} from "./prompt"
+} from "./tools/prompt"
 
 function restoreArtifactModel(value: string | undefined) {
   if (value === undefined) {

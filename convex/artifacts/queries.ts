@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
 import { canAccessArtifact, searchArtifacts, summarizeArtifact } from "./access"
-import { getTenantArtifact } from "./links"
+import { getTenantArtifact } from "./storage/links"
 
 export const getExistingBlobIds = internalQuery({
   args: {
