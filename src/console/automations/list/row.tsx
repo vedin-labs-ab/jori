@@ -1,12 +1,4 @@
-import {
-  CalendarClock,
-  Check,
-  CirclePause,
-  CirclePlay,
-  Loader2,
-  Pause,
-  Play,
-} from "lucide-react"
+import { CalendarClock, Check, Loader2, Pause, Play } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -148,7 +140,7 @@ function AutomationStatusMark({
 }
 
 const statusMarkClassName =
-  "flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted"
+  "flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted text-foreground"
 
 function automationStatusLabel(automation: Automation) {
   if (automation.status === "completed") {
@@ -172,30 +164,28 @@ function automationControlAction(automation: Automation) {
 
 function StaticStatusIcon({ automation }: { automation: Automation }) {
   if (automation.type === "once") {
-    return <CalendarClock className="size-5 text-muted-foreground" />
+    return <CalendarClock className="size-5" />
   }
 
-  return <Check className="size-6" />
+  return <Check className="size-5" />
 }
 
 function StatusIcon({ automation }: { automation: Automation }) {
   if (automation.status === "paused") {
     return (
-      <CirclePause
+      <Pause
         aria-hidden="true"
         data-testid="automation-paused-icon"
-        size={22}
-        strokeWidth={2.25}
+        className="size-5"
       />
     )
   }
 
   return (
-    <CirclePlay
+    <Check
       aria-hidden="true"
       data-testid="automation-active-icon"
-      size={22}
-      strokeWidth={2.25}
+      className="size-5"
     />
   )
 }
@@ -206,8 +196,7 @@ function ActionIcon({ action }: { action: "pause" | "resume" }) {
       <Pause
         aria-hidden="true"
         data-testid="automation-pause-icon"
-        size={20}
-        strokeWidth={2.25}
+        className="size-5"
       />
     )
   }
@@ -216,8 +205,7 @@ function ActionIcon({ action }: { action: "pause" | "resume" }) {
     <Play
       aria-hidden="true"
       data-testid="automation-resume-icon"
-      size={20}
-      strokeWidth={2.25}
+      className="size-5"
     />
   )
 }
