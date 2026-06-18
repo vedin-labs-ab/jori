@@ -12,7 +12,6 @@ export function fileContext() {
       createdAt: 0,
     },
     ctx: {
-      runAction: vi.fn(async () => null),
       runQuery: vi.fn(async () => ({
         _id: "file-id",
         _creationTime: 0,

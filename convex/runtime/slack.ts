@@ -182,7 +182,6 @@ export const recordDelivery = internalMutation({
       deliveredAt: args.now,
       lastDeliveredState: args.state,
       lastError: undefined,
-      messageTs: undefined,
       publishClaimUntil: undefined,
       updatedAt: args.now,
     })

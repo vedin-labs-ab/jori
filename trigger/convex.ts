@@ -37,6 +37,17 @@ export class MiloConvexClient {
     })
   }
 
+  async deliverFinalMessage(args: {
+    content: string
+    runId: ConvexId<"runs">
+  }) {
+    return await this.client.action(api.runtime.reply.deliverFinal, {
+      content: args.content,
+      runId: args.runId,
+      secret: this.secret,
+    })
+  }
+
   async callTool(args: {
     approved?: boolean
     executionId: ConvexId<"executions">
