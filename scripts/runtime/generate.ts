@@ -62,7 +62,7 @@ function readRuntimeAssets(): RuntimeAssets {
 
 function readMiloMcpFiles() {
   return {
-    "milo/files.ts": readExecutableSource("mcp/files/index.ts"),
+    "milo/files.ts": readExecutableSource("mcp/files.ts"),
   }
 }
 
@@ -87,7 +87,7 @@ function readExecutableSource(relativePath: string) {
           'from "../artifact/builder/index.ts"',
           'from "./milo-artifact-builder.ts"'
         )
-        .replaceAll('from "./files/index.ts"', 'from "./milo/files.ts"')
+        .replaceAll('from "./files.ts"', 'from "./milo/files.ts"')
     : source
 }
 

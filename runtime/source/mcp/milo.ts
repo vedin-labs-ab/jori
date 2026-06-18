@@ -7,7 +7,7 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js"
 import { checkArtifactWorkspace } from "../artifact/builder/index.ts"
-import { resolveWorkspacePath, saveFile } from "./files/index.ts"
+import { resolveWorkspacePath, saveFile } from "./files.ts"
 
 type ToolDefinition = {
   name: string
