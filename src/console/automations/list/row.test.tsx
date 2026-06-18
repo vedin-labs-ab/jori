@@ -41,6 +41,28 @@ test("pauses active recurring automation from status icon", () => {
   expect(onPause).toHaveBeenCalledTimes(1)
 })
 
+test("shows pause action while active recurring icon is hovered", () => {
+  renderRow({
+    automation: automation({
+      type: "cron",
+      trigger: { expression: "0 9 * * *", nextAt: now + day },
+    }),
+  })
+
+  const control = screen.getByRole("button", { name: "Pause Automation" })
+
+  expect(screen.getByTestId("automation-active-icon")).toBeDefined()
+
+  fireEvent.pointerEnter(control)
+
+  expect(screen.getByTestId("automation-pause-icon")).toBeDefined()
+  expect(screen.queryByTestId("automation-active-icon")).toBeNull()
+
+  fireEvent.pointerLeave(control)
+
+  expect(screen.getByTestId("automation-active-icon")).toBeDefined()
+})
+
 test("resumes paused event automation from status icon", () => {
   const onResume = vi.fn()
 
@@ -61,6 +83,34 @@ test("resumes paused event automation from status icon", () => {
   fireEvent.click(screen.getByRole("button", { name: "Resume Automation" }))
 
   expect(onResume).toHaveBeenCalledTimes(1)
+})
+
+test("shows resume action while paused event icon is focused", () => {
+  renderRow({
+    automation: automation({
+      status: "paused",
+      type: "event",
+      trigger: {
+        criteria: undefined,
+        event: "issue.comment.created",
+        filter: undefined,
+        integration: "github",
+      },
+    }),
+  })
+
+  const control = screen.getByRole("button", { name: "Resume Automation" })
+
+  expect(screen.getByTestId("automation-paused-icon")).toBeDefined()
+
+  fireEvent.focus(control)
+
+  expect(screen.getByTestId("automation-resume-icon")).toBeDefined()
+  expect(screen.queryByTestId("automation-paused-icon")).toBeNull()
+
+  fireEvent.blur(control)
+
+  expect(screen.getByTestId("automation-paused-icon")).toBeDefined()
 })
 
 const now = 1_700_000_000_000

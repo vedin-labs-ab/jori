@@ -7,6 +7,7 @@ import {
   Pause,
   Play,
 } from "lucide-react"
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -97,6 +98,7 @@ function AutomationStatusMark({
   onResume: (automation: Automation) => void
   automation: Automation
 }) {
+  const [isActionVisible, setIsActionVisible] = useState(false)
   const controlAction = automationControlAction(automation)
 
   if (controlAction === undefined) {
@@ -122,24 +124,21 @@ function AutomationStatusMark({
       <TooltipTrigger asChild>
         <button
           aria-label={label}
-          className={`${statusMarkClassName} group/status relative transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-60`}
+          className={`${statusMarkClassName} transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-60`}
           disabled={isControlling}
+          onBlur={() => setIsActionVisible(false)}
           onClick={() => onClick(automation)}
+          onFocus={() => setIsActionVisible(true)}
+          onPointerEnter={() => setIsActionVisible(true)}
+          onPointerLeave={() => setIsActionVisible(false)}
           type="button"
         >
           {isControlling ? (
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          ) : isActionVisible ? (
+            <ActionIcon action={controlAction} />
           ) : (
-            <>
-              <StatusIcon
-                className="transition-opacity group-hover/status:opacity-0 group-focus-visible/status:opacity-0"
-                automation={automation}
-              />
-              <ActionIcon
-                action={controlAction}
-                className="absolute opacity-0 transition-opacity group-hover/status:opacity-100 group-focus-visible/status:opacity-100"
-              />
-            </>
+            <StatusIcon automation={automation} />
           )}
         </button>
       </TooltipTrigger>
@@ -179,30 +178,46 @@ function StaticStatusIcon({ automation }: { automation: Automation }) {
   return <Check className="size-6" />
 }
 
-function StatusIcon({
-  className,
-  automation,
-}: {
-  className?: string
-  automation: Automation
-}) {
+function StatusIcon({ automation }: { automation: Automation }) {
   if (automation.status === "paused") {
-    return <CirclePause className={className} size={22} strokeWidth={2.25} />
+    return (
+      <CirclePause
+        aria-hidden="true"
+        data-testid="automation-paused-icon"
+        size={22}
+        strokeWidth={2.25}
+      />
+    )
   }
 
-  return <CirclePlay className={className} size={22} strokeWidth={2.25} />
+  return (
+    <CirclePlay
+      aria-hidden="true"
+      data-testid="automation-active-icon"
+      size={22}
+      strokeWidth={2.25}
+    />
+  )
 }
 
-function ActionIcon({
-  action,
-  className,
-}: {
-  action: "pause" | "resume"
-  className?: string
-}) {
+function ActionIcon({ action }: { action: "pause" | "resume" }) {
   if (action === "pause") {
-    return <Pause className={className} size={20} strokeWidth={2.25} />
+    return (
+      <Pause
+        aria-hidden="true"
+        data-testid="automation-pause-icon"
+        size={20}
+        strokeWidth={2.25}
+      />
+    )
   }
 
-  return <Play className={className} size={20} strokeWidth={2.25} />
+  return (
+    <Play
+      aria-hidden="true"
+      data-testid="automation-resume-icon"
+      size={20}
+      strokeWidth={2.25}
+    />
+  )
 }
