@@ -4,12 +4,12 @@ import { assertJsonSerializable } from "../../../contracts/artifacts/json"
 import {
   assertSupportedJsonSchema,
   normalizeJsonSchema,
-} from "../../../contracts/artifacts/json-schema"
+} from "../../../contracts/artifacts/schema"
 import {
   type OpenRouterChatInput,
   type OpenRouterChatMessage,
   sendOpenRouterChat,
-} from "../../openrouter"
+} from "../../model"
 import { requiredString } from "../../shared/input"
 import {
   type ArtifactPromptRequestDiagnostics,

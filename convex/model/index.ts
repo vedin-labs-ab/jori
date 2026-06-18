@@ -2,10 +2,10 @@ export type {
   OpenRouterChatInput,
   OpenRouterChatMessage,
   OpenRouterConfig,
-} from "./client"
+} from "./openrouter"
 export {
   createOpenRouterClient,
   getOpenRouterClient,
   requireOpenRouterConfig,
   sendOpenRouterChat,
-} from "./client"
+} from "./openrouter"
