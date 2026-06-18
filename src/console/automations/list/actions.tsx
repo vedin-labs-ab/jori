@@ -43,7 +43,7 @@ export function AutomationActions({
         <DropdownMenuTrigger asChild>
           <Button
             aria-label={`Open actions for ${automation.name}`}
-            size="icon"
+            size="icon-sm"
             type="button"
             variant="ghost"
           >
