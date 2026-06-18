@@ -17,7 +17,6 @@ export const miloSandboxCleanup = task({
     await killE2BSandbox({
       convex: new MiloConvexClient(),
       executionId: payload.executionId,
-      runId: payload.runId,
       sandboxId: payload.sandboxId,
     })
 

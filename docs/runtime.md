@@ -62,11 +62,12 @@ transactions.
 
 ## Runtime Interfaces
 
-The model runtime is adapter based. The first implementation uses OpenAI behind
-a small interface that accepts messages and tool definitions and returns final
-messages or tool calls. The interface is intentionally narrow so a Vercel AI SDK
-adapter can replace it later without changing Convex state or Trigger task
-ownership.
+The model runtime is adapter based. The first implementation uses Vercel AI SDK
+with the OpenRouter provider behind a small interface that accepts messages and
+tool definitions and returns final messages or tool calls. The default target is
+`z-ai/glm-5.2` with `MILO_OPENROUTER_REASONING_EFFORT=xhigh`, which maps GLM 5.2
+to max reasoning. The interface is intentionally narrow so the provider can
+change later without changing Convex state or Trigger task ownership.
 
 The sandbox runtime is adapter based. The first implementation uses E2B behind a
 small interface for lazy sandbox creation/reconnect, command execution, and

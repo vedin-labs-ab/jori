@@ -1,5 +1,5 @@
-import { type Id } from "../convex/_generated/dataModel"
 import {
+  type ConvexId,
   type JsonObject,
   type RuntimeEventInput,
   type RuntimeEventType,
@@ -14,7 +14,7 @@ export function runtimeEvent(args: RuntimeEventInput) {
 
 export function eventKey(args: {
   attempt?: number
-  runId: Id<"runs">
+  runId: ConvexId<"runs">
   sequence: number
   source: string
   toolCallId?: string

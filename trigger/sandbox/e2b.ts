@@ -1,12 +1,13 @@
-import path from "node:path"
 import { CommandExitError, type CommandResult, Sandbox } from "e2b"
-import { type Id } from "../../convex/_generated/dataModel"
 import { type MiloConvexClient } from "../convex"
+import { type ConvexId } from "../types"
 import {
   artifactBuildCommand,
   artifactRunnerFile,
   artifactRuntimeFiles,
 } from "./artifacts"
+import { toArrayBuffer } from "./buffer"
+import { sandboxPath, shellQuote } from "./path"
 import {
   type SandboxCommandInput,
   type SandboxCommandResult,
@@ -27,8 +28,8 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
   constructor(
     private readonly convex: MiloConvexClient,
-    private readonly runId: Id<"runs">,
-    private readonly executionId: Id<"executions">,
+    private readonly runId: ConvexId<"runs">,
+    private readonly executionId: ConvexId<"executions">,
     sandboxId: string | null
   ) {
     this.sandboxId = sandboxId
@@ -52,7 +53,10 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
     await sandbox.files.write(
       files.map((file) => ({
-        data: file.content,
+        data:
+          file.content instanceof Uint8Array
+            ? toArrayBuffer(file.content)
+            : file.content,
         path: file.path,
       }))
     )
@@ -110,7 +114,6 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     await killE2BSandbox({
       convex: this.convex,
       executionId: this.executionId,
-      runId: this.runId,
       sandboxId: this.sandboxId,
     })
     this.sandbox = undefined
@@ -162,14 +165,16 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
 export async function killE2BSandbox(args: {
   convex: MiloConvexClient
-  executionId: Id<"executions">
-  runId: Id<"runs">
+  executionId: ConvexId<"executions">
   sandboxId: string
 }) {
   await Sandbox.kill(args.sandboxId, { apiKey: requireE2BApiKey() }).catch(
     () => false
   )
-  await args.convex.markSandboxCleaned(args)
+  await args.convex.markSandboxCleaned({
+    executionId: args.executionId,
+    sandboxId: args.sandboxId,
+  })
 }
 
 async function connectSandbox(sandboxId: string) {
@@ -179,7 +184,10 @@ async function connectSandbox(sandboxId: string) {
   })
 }
 
-async function createSandbox(runId: Id<"runs">, executionId: Id<"executions">) {
+async function createSandbox(
+  runId: ConvexId<"runs">,
+  executionId: ConvexId<"executions">
+) {
   return await Sandbox.create(requireSandboxTemplate(), {
     apiKey: requireE2BApiKey(),
     allowInternetAccess: true,
@@ -247,28 +255,6 @@ function parseArtifactBuild(stdout: string) {
   }
 
   return parsed as Record<string, unknown>
-}
-
-function sandboxPath(value: string) {
-  const normalized = value.trim() === "" ? "repository" : value.trim()
-  const filePath = normalized.startsWith("/")
-    ? path.posix.normalize(normalized)
-    : path.posix.resolve(sandboxWorkspace, normalized)
-  const relative = path.posix.relative(sandboxWorkspace, filePath)
-
-  if (
-    relative === "" ||
-    relative.startsWith("..") ||
-    path.posix.isAbsolute(relative)
-  ) {
-    throw new Error("Sandbox path must be inside the Milo workspace.")
-  }
-
-  return filePath
-}
-
-function shellQuote(value: string) {
-  return `'${value.replaceAll("'", "'\\''")}'`
 }
 
 function requireSandboxTemplate() {

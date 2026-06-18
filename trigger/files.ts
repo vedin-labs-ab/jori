@@ -1,8 +1,7 @@
 import path from "node:path"
-import { type Id } from "../convex/_generated/dataModel"
 import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
-import { type JsonObject } from "./types"
+import { type ConvexId, type JsonObject } from "./types"
 
 const maxFileBytes = 25 * 1024 * 1024
 const mimeTypesByExtension: Record<string, string> = {
@@ -126,7 +125,7 @@ function inferMimeType(filePath: string) {
 }
 
 export type UploadedFile = {
-  fileId: Id<"files">
+  fileId: ConvexId<"files">
   mimeType: string
   name: string
   size: number

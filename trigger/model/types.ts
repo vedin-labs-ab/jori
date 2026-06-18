@@ -14,6 +14,7 @@ export type ModelMessage =
       content: string
       role: "tool"
       toolCallId: string
+      toolName: string
     }
 
 export type ModelTool = {
