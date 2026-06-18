@@ -17,6 +17,7 @@ import {
   ComboboxItem,
   ComboboxList,
   ComboboxValue,
+  useComboboxAnchor,
 } from "@/components/ui/combobox"
 import {
   Dialog,
@@ -227,6 +228,8 @@ function AssociatedIntegrationsField({
   onChange: (integrations: Integration[]) => void
   selectedIntegrations: Integration[]
 }) {
+  const anchor = useComboboxAnchor()
+
   return (
     <div className="grid gap-2">
       <div className="flex items-center gap-1.5">
@@ -239,7 +242,7 @@ function AssociatedIntegrationsField({
         onValueChange={onChange}
         value={selectedIntegrations}
       >
-        <ComboboxChips className="w-full">
+        <ComboboxChips className="w-full" ref={anchor}>
           <ComboboxValue>
             {selectedIntegrations.map((integration) => (
               <ComboboxChip key={integration}>
@@ -257,7 +260,7 @@ function AssociatedIntegrationsField({
             placeholder="Add integrations"
           />
         </ComboboxChips>
-        <ComboboxContent>
+        <ComboboxContent anchor={anchor}>
           <ComboboxEmpty>No integrations found.</ComboboxEmpty>
           <ComboboxList>
             {(integration: Integration) => (
