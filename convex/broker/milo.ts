@@ -17,7 +17,7 @@ export async function callMiloTool(
     runId?: Id<"runs">
   },
   request: MiloToolRequest
-) {
+): Promise<unknown> {
   if (isMiloFileTool(request.tool)) {
     return await callMiloFileTool(ctx, execution, request)
   }

@@ -33,8 +33,14 @@ export async function createPromptedToolApproval(
     surface: ToolSurface
     tool: string
     args: Record<string, unknown>
+    waitpointTokenId?: string
   }
-) {
+): Promise<{
+  approvalId: Id<"approvals">
+  code: string
+  instruction: string
+  status: "approval_requested"
+}> {
   if (context.input.type === "automation") {
     throw new Error("Automations cannot request approval during a run")
   }
@@ -65,17 +71,19 @@ export async function createPromptedToolApproval(
 
   const requestedBy = createRequestedBy(context)
   const code = createApprovalCode()
-  const approval = await ctx.runMutation(internal.approvals.approvals.create, {
-    tenantId: context.execution.tenantId,
-    executionId: context.execution._id,
-    surface: request.surface,
-    tool: request.tool,
-    args: request.args,
-    summary: request.summary,
-    handoff: request.handoff,
-    code,
-    requestedBy,
-  })
+  const approval: { approvalId: Id<"approvals">; expiresAt: number } =
+    await ctx.runMutation(internal.approvals.approvals.create, {
+      tenantId: context.execution.tenantId,
+      executionId: context.execution._id,
+      surface: request.surface,
+      tool: request.tool,
+      args: request.args,
+      summary: request.summary,
+      handoff: request.handoff,
+      code,
+      waitpointTokenId: args.waitpointTokenId,
+      requestedBy,
+    })
   const delivery = getSlackApprovalDelivery(context)
 
   if (delivery !== null) {

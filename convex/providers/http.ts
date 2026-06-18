@@ -80,7 +80,7 @@ export async function ingestProviderMessage(
   const result = await ctx.runMutation(record, message)
 
   if (result.status === "started") {
-    await ctx.scheduler.runAfter(0, internal.executions.runtime.runMessage, {
+    await ctx.runMutation(internal.runtime.outbox.ensureRunQueued, {
       runId: result.runId,
     })
   }

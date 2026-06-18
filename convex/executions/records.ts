@@ -132,8 +132,8 @@ async function getAutomationInput(
 export const create = internalMutation({
   args: {
     runId: v.id("runs"),
-    promptId: v.id("_storage"),
-    toolSnapshot,
+    promptId: v.optional(v.id("_storage")),
+    toolSnapshot: v.optional(toolSnapshot),
     approvalId: v.optional(v.id("approvals")),
   },
   handler: async (ctx, args): Promise<Id<"executions"> | null> => {

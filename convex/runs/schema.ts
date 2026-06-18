@@ -77,6 +77,8 @@ export const runReason = v.union(
 export const runs = defineTable({
   tenantId: v.string(),
   automationId: v.optional(v.id("automations")),
+  parentRunId: v.optional(v.id("runs")),
+  rootRunId: v.optional(v.id("runs")),
   reason: runReason,
   title: v.string(),
   task: v.string(),
@@ -86,3 +88,5 @@ export const runs = defineTable({
 })
   .index("by_tenant", ["tenantId"])
   .index("by_automation", ["automationId"])
+  .index("by_parent", ["parentRunId"])
+  .index("by_root", ["rootRunId"])

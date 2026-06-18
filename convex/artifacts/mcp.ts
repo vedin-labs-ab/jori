@@ -39,7 +39,7 @@ export async function callMiloArtifactTool(
     runId?: Id<"runs">
   },
   request: MiloArtifactRequest
-) {
+): Promise<unknown> {
   const args = normalizeToolArgs(request.args)
   const userId = execution.createdBy
 
@@ -72,7 +72,7 @@ async function createArtifact(
   tenantId: string,
   userId: string,
   args: Record<string, unknown>
-) {
+): Promise<unknown> {
   return await ctx.runAction(internal.artifacts.actions.createFromAgent, {
     tenantId,
     userId,
@@ -91,7 +91,7 @@ async function updateArtifact(
   tenantId: string,
   userId: string,
   args: Record<string, unknown>
-) {
+): Promise<unknown> {
   return await ctx.runAction(internal.artifacts.actions.updateFromAgent, {
     tenantId,
     userId,
@@ -111,7 +111,7 @@ async function searchArtifacts(
   tenantId: string,
   userId: string,
   args: Record<string, unknown>
-) {
+): Promise<unknown> {
   return await ctx.runQuery(internal.artifacts.queries.searchForAgent, {
     tenantId,
     userId,
@@ -126,25 +126,28 @@ async function readArtifact(
   tenantId: string,
   userId: string,
   args: Record<string, unknown>
-) {
+): Promise<unknown> {
   const artifactId = requiredArtifactId(args.artifactId)
-  const metadata = await ctx.runQuery(internal.artifacts.queries.readForAgent, {
-    tenantId,
-    userId,
-    artifactId,
-  })
+  const metadata = (await ctx.runQuery(
+    internal.artifacts.queries.readForAgent,
+    {
+      tenantId,
+      userId,
+      artifactId,
+    }
+  )) as Record<string, unknown> | null
 
   if (metadata === null) {
     return null
   }
 
-  const source = await ctx.runAction(internal.artifacts.actions.readForAgent, {
+  const source = (await ctx.runAction(internal.artifacts.actions.readForAgent, {
     tenantId,
     artifactId,
     versionId: optionalString(args.versionId) as
       | Id<"artifactVersions">
       | undefined,
-  })
+  })) as { files?: unknown[] } | null
 
   return { ...metadata, source: source?.files ?? [] }
 }

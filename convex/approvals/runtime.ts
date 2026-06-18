@@ -136,13 +136,10 @@ export async function decideApproval(
   })
 
   if (result.status === "approved") {
-    await ctx.scheduler.runAfter(
-      0,
-      internal.executions.approvals.runApprovedExecution,
-      {
-        approvalId: args.approval._id,
-      }
-    )
+    await ctx.runMutation(internal.runtime.outbox.enqueueApprovalResume, {
+      approvalId: args.approval._id,
+      decision: "approved",
+    })
 
     return {
       status: "approved",
@@ -153,13 +150,10 @@ export async function decideApproval(
   }
 
   if (result.status === "denied") {
-    await ctx.scheduler.runAfter(
-      0,
-      internal.executions.approvals.runDeniedExecution,
-      {
-        approvalId: args.approval._id,
-      }
-    )
+    await ctx.runMutation(internal.runtime.outbox.enqueueApprovalResume, {
+      approvalId: args.approval._id,
+      decision: "denied",
+    })
 
     return {
       status: "denied",
