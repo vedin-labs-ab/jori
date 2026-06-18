@@ -85,8 +85,9 @@ function eventAutomation(): Automation {
     access: {
       surfaces: [],
     },
-    lastRunAt: undefined,
+    firedAt: undefined,
     status: "active",
+    type: "event",
     trigger: {
       criteria: undefined,
       event: "issue.comment.created",
@@ -102,8 +103,9 @@ function recurringAutomation(): Automation {
     access: {
       surfaces: [],
     },
-    lastRunAt: undefined,
+    firedAt: undefined,
     status: "active",
+    type: "cron",
     trigger: {
       cron: "0 9 * * *",
       nextAt: 1700038800000,
@@ -117,8 +119,9 @@ function oneTimeAutomation(runAt: number): Automation {
     access: {
       surfaces: [],
     },
-    lastRunAt: undefined,
+    firedAt: undefined,
     status: "active",
+    type: "once",
     trigger: {
       at: runAt,
       type: "once",

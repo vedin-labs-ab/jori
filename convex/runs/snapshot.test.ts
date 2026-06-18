@@ -87,6 +87,7 @@ function automation(
     _creationTime: 0,
     tenantId: "tenant",
     access: { integrations: [], web: false },
+    type: overrides.trigger.type,
     status: "active",
     createdBy: "user",
     createdAt: 0,

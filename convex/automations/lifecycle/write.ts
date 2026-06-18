@@ -13,6 +13,16 @@ import {
   scheduleTrigger,
 } from "./trigger"
 
+type UpdateAutomationArgs = {
+  tenantId: string
+  automationId: Id<"automations">
+  artifactId?: Id<"artifacts">
+  name?: string
+  instructions?: string
+  access?: AutomationAccessInput
+  trigger?: AutomationTriggerInput
+}
+
 export async function createAutomation(
   ctx: MutationCtx,
   args: {
@@ -20,7 +30,6 @@ export async function createAutomation(
     artifactId?: Id<"artifacts">
     name: string
     instructions: string
-    metadata?: unknown
     access: AutomationAccessInput
     trigger: AutomationTriggerInput
     createdBy?: string
@@ -40,7 +49,7 @@ export async function createAutomation(
     artifactId: args.artifactId,
     name: normalizeRequiredText(args.name, "name"),
     instructions: normalizeRequiredText(args.instructions, "instructions"),
-    metadata: args.metadata,
+    type: trigger.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,
       artifactId: args.artifactId,
@@ -64,16 +73,7 @@ export async function createAutomation(
 
 export async function updateAutomation(
   ctx: MutationCtx,
-  args: {
-    tenantId: string
-    automationId: Id<"automations">
-    artifactId?: Id<"artifacts">
-    name?: string
-    instructions?: string
-    metadata?: unknown
-    access?: AutomationAccessInput
-    trigger?: AutomationTriggerInput
-  }
+  args: UpdateAutomationArgs
 ) {
   const existing = await getTenantAutomation(
     ctx,
@@ -81,54 +81,7 @@ export async function updateAutomation(
     args.automationId
   )
   const now = Date.now()
-  const patch: Partial<Doc<"automations">> = { updatedAt: now }
-
-  if (args.name !== undefined) {
-    patch.name = normalizeRequiredText(args.name, "name")
-  }
-
-  if (args.instructions !== undefined) {
-    patch.instructions = normalizeRequiredText(
-      args.instructions,
-      "instructions"
-    )
-  }
-
-  if (Object.hasOwn(args, "metadata")) {
-    patch.metadata = args.metadata ?? undefined
-  }
-
-  if (args.artifactId !== undefined) {
-    await requireArtifact(ctx, args.tenantId, args.artifactId)
-    patch.artifactId = args.artifactId
-  }
-
-  if (args.access !== undefined) {
-    patch.access = await resolveAccessInput(ctx, {
-      access: args.access,
-      artifactId: args.artifactId ?? existing.artifactId,
-      createdBy: existing.createdBy,
-      tenantId: existing.tenantId,
-    })
-  }
-
-  if (args.trigger !== undefined) {
-    await cancelTrigger(ctx, existing.trigger)
-    const trigger = await scheduleTrigger(ctx, {
-      automationId: args.automationId,
-      trigger: await resolveTrigger(ctx, {
-        createdBy: existing.createdBy,
-        tenantId: existing.tenantId,
-        trigger: args.trigger,
-        now,
-      }),
-    })
-    patch.trigger = trigger
-    patch.status = "active"
-    if (trigger.type === "event") {
-      await ensureSubscription(ctx, { tenantId: existing.tenantId, trigger })
-    }
-  }
+  const patch = await buildAutomationPatch(ctx, args, existing, now)
 
   await ctx.db.patch(args.automationId, patch)
   if (
@@ -146,20 +99,83 @@ export async function updateAutomation(
   return await getRequiredAutomation(ctx, args.automationId)
 }
 
-async function requireArtifact(
+async function buildAutomationPatch(
   ctx: MutationCtx,
-  tenantId: string,
-  artifactId: Id<"artifacts"> | undefined
+  args: UpdateAutomationArgs,
+  existing: Doc<"automations">,
+  now: number
 ) {
-  if (artifactId === undefined) {
-    return
+  const patch: Partial<Doc<"automations">> = { updatedAt: now }
+
+  if (args.name !== undefined) {
+    patch.name = normalizeRequiredText(args.name, "name")
   }
 
-  const artifact = await ctx.db.get(artifactId)
-
-  if (artifact === null || artifact.tenantId !== tenantId) {
-    throw new Error("Artifact automation owner is invalid.")
+  if (args.instructions !== undefined) {
+    patch.instructions = normalizeRequiredText(
+      args.instructions,
+      "instructions"
+    )
   }
+
+  if (args.artifactId !== undefined) {
+    await requireArtifact(ctx, args.tenantId, args.artifactId)
+    patch.artifactId = args.artifactId
+  }
+
+  if (args.access !== undefined) {
+    patch.access = await resolveAccessInput(ctx, {
+      access: args.access,
+      artifactId: args.artifactId ?? existing.artifactId,
+      createdBy: existing.createdBy,
+      tenantId: existing.tenantId,
+    })
+  }
+
+  if (args.trigger !== undefined) {
+    Object.assign(
+      patch,
+      await buildTriggerPatch(
+        ctx,
+        args.automationId,
+        existing,
+        args.trigger,
+        now
+      )
+    )
+  }
+
+  return patch
+}
+
+async function buildTriggerPatch(
+  ctx: MutationCtx,
+  automationId: Id<"automations">,
+  existing: Doc<"automations">,
+  input: AutomationTriggerInput,
+  now: number
+) {
+  await cancelTrigger(ctx, existing.trigger)
+  const trigger = await resolveTrigger(ctx, {
+    createdBy: existing.createdBy,
+    tenantId: existing.tenantId,
+    trigger: input,
+    now,
+  })
+  const status = existing.status === "paused" ? "paused" : "active"
+  const storedTrigger =
+    status === "active"
+      ? await scheduleTrigger(ctx, { automationId, trigger })
+      : trigger
+
+  if (status === "active" && storedTrigger.type === "event") {
+    await ensureSubscription(ctx, {
+      tenantId: existing.tenantId,
+      trigger: storedTrigger,
+    })
+  }
+
+  return { status, trigger: storedTrigger, type: storedTrigger.type }
 }
 
 export async function removeAutomation(
@@ -199,4 +215,20 @@ function isSameEventTrigger(
     automationEventCriteriaKey(left.criteria) ===
       automationEventCriteriaKey(right.criteria)
   )
+}
+
+async function requireArtifact(
+  ctx: MutationCtx,
+  tenantId: string,
+  artifactId: Id<"artifacts"> | undefined
+) {
+  if (artifactId === undefined) {
+    return
+  }
+
+  const artifact = await ctx.db.get(artifactId)
+
+  if (artifact === null || artifact.tenantId !== tenantId) {
+    throw new Error("Artifact automation owner is invalid.")
+  }
 }

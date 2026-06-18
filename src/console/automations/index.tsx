@@ -90,6 +90,12 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
           <AlertDescription>{editor.deleteError}</AlertDescription>
         </Alert>
       )}
+      {editor.controlError === undefined ? null : (
+        <Alert variant="destructive">
+          <AlertTitle>Could not update automation</AlertTitle>
+          <AlertDescription>{editor.controlError}</AlertDescription>
+        </Alert>
+      )}
       <AutomationContent
         editor={editor}
         hasFilters={hasFilters}

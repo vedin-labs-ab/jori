@@ -49,11 +49,14 @@ export function AutomationContent({
     <ConsoleScrollableList className="pb-2 lg:grid-cols-2">
       {visibleAutomations.map((automation) => (
         <AutomationRow
+          isControlling={editor.controllingAutomationId === automation.id}
           isDeleting={editor.deletingAutomationId === automation.id}
           key={automation.id}
           now={now}
           onDelete={editor.deleteAutomation}
           onEdit={editor.openEditForm}
+          onPause={editor.pauseAutomation}
+          onResume={editor.resumeAutomation}
           automation={automation}
         />
       ))}

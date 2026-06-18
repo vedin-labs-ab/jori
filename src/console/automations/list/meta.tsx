@@ -228,14 +228,14 @@ function AutomationRuns({
       >
         {primary.label}
       </span>
-      {automation.lastRunAt === undefined ? (
+      {automation.firedAt === undefined ? (
         <span className="truncate text-muted-foreground">Never run</span>
       ) : (
         <span
           className="truncate text-muted-foreground"
-          title={absoluteTime(automation.lastRunAt)}
+          title={absoluteTime(automation.firedAt)}
         >
-          Ran {relativeTime(automation.lastRunAt, now)}
+          Ran {relativeTime(automation.firedAt, now)}
         </span>
       )}
     </>
@@ -249,6 +249,10 @@ function runPrimaryLabel(
 ) {
   if (automation.status === "completed") {
     return { label: "Completed", title: undefined }
+  }
+
+  if (automation.status === "paused") {
+    return { label: "Paused", title: undefined }
   }
 
   if (nextAt === undefined) {

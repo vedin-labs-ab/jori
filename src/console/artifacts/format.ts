@@ -61,8 +61,8 @@ export function automationSummary(
   automation: ArtifactSummary["automations"][number],
   now: number
 ) {
-  if (automation.lastRunAt !== undefined) {
-    return `Ran ${relativeTime(automation.lastRunAt, now)}`
+  if (automation.firedAt !== undefined) {
+    return `Ran ${relativeTime(automation.firedAt, now)}`
   }
 
   if (automation.status === "active") {

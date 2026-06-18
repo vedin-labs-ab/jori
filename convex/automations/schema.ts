@@ -70,19 +70,25 @@ export const status = v.union(
   v.literal("completed")
 )
 
+export const automationType = v.union(
+  v.literal("once"),
+  v.literal("cron"),
+  v.literal("event")
+)
+
 export const automations = defineTable({
   tenantId: v.string(),
   artifactId: v.optional(v.id("artifacts")),
   name: v.string(),
   instructions: v.string(),
-  metadata: v.optional(v.any()),
+  type: automationType,
   access,
   trigger,
   status,
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
-  lastRunAt: v.optional(v.number()),
+  firedAt: v.optional(v.number()),
 })
   .index("by_tenant", ["tenantId"])
   .index("by_artifact", ["artifactId"])

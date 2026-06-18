@@ -18,6 +18,7 @@ export function useAutomationEditor(
 ) {
   return {
     ...useAutomationForm(tenantId, permissions),
+    ...useAutomationControl(tenantId),
     ...useAutomationDeletion(tenantId),
   }
 }
@@ -132,4 +133,58 @@ function useAutomationDeletion(tenantId: string) {
   }
 
   return { deleteError, deleteAutomation, deletingAutomationId }
+}
+
+function useAutomationControl(tenantId: string) {
+  const pause = useMutation(api.automations.console.pause)
+  const resume = useMutation(api.automations.console.resume)
+  const [controllingAutomationId, setControllingAutomationId] =
+    useState<string>()
+  const [controlError, setControlError] = useState<string>()
+
+  async function pauseAutomation(automation: Automation) {
+    await controlAutomation({
+      automation,
+      fallback: "Could not pause automation.",
+      mutation: pause,
+    })
+  }
+
+  async function resumeAutomation(automation: Automation) {
+    await controlAutomation({
+      automation,
+      fallback: "Could not resume automation.",
+      mutation: resume,
+    })
+  }
+
+  async function controlAutomation({
+    automation,
+    fallback,
+    mutation,
+  }: {
+    automation: Automation
+    fallback: string
+    mutation: (args: {
+      automationId: Automation["id"]
+      tenantId: string
+    }) => Promise<unknown>
+  }) {
+    setControllingAutomationId(automation.id)
+    setControlError(undefined)
+    try {
+      await mutation({ tenantId, automationId: automation.id })
+    } catch (error) {
+      setControlError(readErrorMessage(error, fallback))
+    } finally {
+      setControllingAutomationId(undefined)
+    }
+  }
+
+  return {
+    controlError,
+    controllingAutomationId,
+    pauseAutomation,
+    resumeAutomation,
+  }
 }

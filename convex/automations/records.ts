@@ -3,7 +3,9 @@ import { internalMutation, internalQuery } from "../_generated/server"
 import {
   createAutomation,
   fireAutomation,
+  pauseAutomation,
   removeAutomation,
+  resumeAutomation,
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
@@ -15,7 +17,6 @@ export const create = internalMutation({
     artifactId: v.optional(v.id("artifacts")),
     name: v.string(),
     instructions: v.string(),
-    metadata: v.optional(v.any()),
     access: accessInput,
     trigger: triggerInput,
     createdBy: v.optional(v.string()),
@@ -56,11 +57,26 @@ export const update = internalMutation({
     artifactId: v.optional(v.id("artifacts")),
     name: v.optional(v.string()),
     instructions: v.optional(v.string()),
-    metadata: v.optional(v.any()),
     access: v.optional(accessInput),
     trigger: v.optional(triggerInput),
   },
   handler: async (ctx, args) => await updateAutomation(ctx, args),
+})
+
+export const pause = internalMutation({
+  args: {
+    tenantId: v.string(),
+    automationId: v.id("automations"),
+  },
+  handler: async (ctx, args) => await pauseAutomation(ctx, args),
+})
+
+export const resume = internalMutation({
+  args: {
+    tenantId: v.string(),
+    automationId: v.id("automations"),
+  },
+  handler: async (ctx, args) => await resumeAutomation(ctx, args),
 })
 
 export const remove = internalMutation({

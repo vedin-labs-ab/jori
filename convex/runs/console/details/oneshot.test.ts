@@ -82,6 +82,7 @@ function oneShotAutomation(scheduledAt: number, webSearch = true) {
     tenantId: "tenant",
     name: "Daily image",
     instructions: "Generate a team image.",
+    type: "once",
     trigger: { type: "once", at: scheduledAt },
     access: {
       integrations: [
@@ -96,7 +97,7 @@ function oneShotAutomation(scheduledAt: number, webSearch = true) {
     createdBy: "user",
     createdAt: 0,
     updatedAt: 0,
-    lastRunAt: scheduledAt,
+    firedAt: scheduledAt,
   }
 }
 

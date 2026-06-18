@@ -6,16 +6,22 @@ import { AutomationActions } from "./actions"
 import { AutomationMeta } from "./meta"
 
 export function AutomationRow({
+  isControlling,
   isDeleting,
   now,
   onDelete,
   onEdit,
+  onPause,
+  onResume,
   automation,
 }: {
+  isControlling: boolean
   isDeleting: boolean
   now: number
   onDelete: (automation: Automation) => void
   onEdit: (automation: Automation) => void
+  onPause: (automation: Automation) => void
+  onResume: (automation: Automation) => void
   automation: Automation
 }) {
   return (
@@ -32,6 +38,10 @@ export function AutomationRow({
                 <Badge className="shrink-0" variant="outline">
                   Completed
                 </Badge>
+              ) : automation.status === "paused" ? (
+                <Badge className="shrink-0" variant="secondary">
+                  Paused
+                </Badge>
               ) : null}
             </div>
             <p className="line-clamp-3 max-w-[72ch] text-muted-foreground text-xs/relaxed">
@@ -40,9 +50,12 @@ export function AutomationRow({
           </div>
           <div className="col-start-3 row-start-1 self-start justify-self-end">
             <AutomationActions
+              isControlling={isControlling}
               isDeleting={isDeleting}
               onDelete={onDelete}
               onEdit={onEdit}
+              onPause={onPause}
+              onResume={onResume}
               automation={automation}
             />
           </div>
@@ -56,15 +69,21 @@ export function AutomationRow({
 }
 
 function AutomationStatusMark({ automation }: { automation: Automation }) {
-  const isCompleted = automation.status === "completed"
-
   return (
     <span
-      aria-label={isCompleted ? "Completed automation" : "Active automation"}
+      aria-label={`${automationStatusLabel(automation)} automation`}
       className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted"
       role="img"
     >
       <Check className="size-6" />
     </span>
   )
+}
+
+function automationStatusLabel(automation: Automation) {
+  if (automation.status === "completed") {
+    return "Completed"
+  }
+
+  return automation.status === "paused" ? "Paused" : "Active"
 }
