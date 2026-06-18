@@ -12,16 +12,4 @@ export type RuntimeAssets = {
     }
     template: Record<string, string>
   }
-  mcp: {
-    broker: string
-    milo: string
-    miloFiles: Record<string, string>
-  }
-  sandbox: {
-    bootstrap: string
-    imageCheck: string
-    slackPreflight: string
-    tokenPreflight: string
-    traceServer: string
-  }
 }

@@ -2,7 +2,7 @@ import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { createSlackApprovalRequest } from "../../approvals/slack/blocks"
-import { type CodexRuntimeInput } from "../../executions/agent/codex"
+import { type AgentRuntimeInput } from "../../executions/agent/input"
 import {
   getToolPermission,
   type PermissionMode,
@@ -15,7 +15,7 @@ import { parsePromptedToolApproval } from "./args"
 
 export type ApprovalBrokerContext = {
   execution: Doc<"executions">
-  input: CodexRuntimeInput
+  input: AgentRuntimeInput
   integrations: Doc<"integrations">[]
   toolModes: ReadonlyMap<string, PermissionMode>
 }
@@ -208,7 +208,7 @@ function getSlackApprovalDelivery(
   return { ...target, integration }
 }
 
-function getSlackTarget(input: CodexRuntimeInput) {
+function getSlackTarget(input: AgentRuntimeInput) {
   if (input.type === "automation") {
     return null
   }

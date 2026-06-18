@@ -1,15 +1,10 @@
-import { internal } from "../_generated/api"
-import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { canUseAutomationTool } from "../automations/access"
-import { hashExecutionToken } from "../executions/agent/tokens"
-import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import {
   canUseToolMode,
   getToolPermission,
   type PermissionMode,
   resolveToolMode,
-  resolveToolModes,
   type ToolPermission,
   type ToolSurface,
 } from "../permissions/catalog"
@@ -23,42 +18,11 @@ import {
   type ApprovalBrokerContext,
   createPromptedToolApproval,
 } from "./approval"
+import { authenticateBrokerRequest } from "./auth"
 import { callMiloTool } from "./milo"
 import { callProviderTool, fetchGitHubTarball } from "./tools"
 
-type MiloMcpRequest = {
-  surface?: ToolSurface
-  tool: string
-  args?: unknown
-}
-
 type BrokerContext = ApprovalBrokerContext
-
-export async function handleMiloMcpRequest(ctx: ActionCtx, request: Request) {
-  const context = await authenticateBrokerRequest(ctx, request)
-
-  if (context === null) {
-    return unauthorizedResponse()
-  }
-
-  const body = (await request.json().catch(() => null)) as MiloMcpRequest | null
-
-  if (body === null || typeof body.tool !== "string") {
-    return jsonError("Invalid Milo MCP request", 400)
-  }
-
-  try {
-    const result = await callBrokerTool(ctx, context, {
-      surface: body.surface ?? "milo",
-      tool: body.tool,
-      args: normalizeToolArgs(body.args),
-    })
-
-    return Response.json(result)
-  } catch (error) {
-    return jsonError(formatProviderError(error, "Milo MCP request failed"), 400)
-  }
-}
 
 export async function handleGitHubTarballRequest(
   ctx: ActionCtx,
@@ -93,57 +57,11 @@ export async function handleGitHubTarballRequest(
       ref: optionalString(args.ref),
     })
   } catch (error) {
-    return jsonError(formatProviderError(error, "Milo MCP request failed"), 400)
+    return jsonError(
+      formatProviderError(error, "GitHub tarball request failed"),
+      400
+    )
   }
-}
-
-export async function authenticateBrokerRequest(
-  ctx: ActionCtx,
-  request: Request
-) {
-  const token = getBearerToken(request)
-
-  if (token === null) {
-    return null
-  }
-
-  const execution = await ctx.runQuery(
-    internal.executions.records.getActiveByHash,
-    {
-      hash: await hashExecutionToken(token),
-    }
-  )
-
-  if (execution === null) {
-    return null
-  }
-
-  const input = await ctx.runQuery(internal.executions.records.getInputByRun, {
-    runId: execution.runId,
-  })
-
-  if (input === null) {
-    return null
-  }
-
-  const permissions = await ctx.runQuery(
-    internal.permissions.tools.listForRuntime,
-    {
-      tenantId: execution.tenantId,
-    }
-  )
-  const integrations: Doc<"integrations">[] = []
-
-  for (const integration of input.integrations) {
-    integrations.push(await prepareIntegrationForRuntime(ctx, { integration }))
-  }
-
-  return {
-    execution,
-    input,
-    integrations,
-    toolModes: resolveToolModes(permissions),
-  } satisfies BrokerContext
 }
 
 export async function callBrokerTool(
@@ -260,18 +178,6 @@ function findSurfaceIntegration(
         integration.status === "active" && integration.integration === surface
     ) ?? null
   )
-}
-
-function getBearerToken(request: Request) {
-  const authorization = request.headers.get("authorization")
-
-  if (authorization === null || !authorization.startsWith("Bearer ")) {
-    return null
-  }
-
-  const token = authorization.slice("Bearer ".length).trim()
-
-  return token === "" ? null : token
 }
 
 function normalizeToolArgs(args: unknown) {

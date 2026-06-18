@@ -45,24 +45,6 @@ function readRuntimeAssets(): RuntimeAssets {
       },
       template,
     },
-    mcp: {
-      broker: readExecutableSource("mcp/broker.ts"),
-      milo: readExecutableSource("mcp/milo.ts"),
-      miloFiles: readMiloMcpFiles(),
-    },
-    sandbox: {
-      bootstrap: readExecutableSource("sandbox/bootstrap.ts"),
-      imageCheck: readExecutableSource("sandbox/image.ts"),
-      slackPreflight: readExecutableSource("sandbox/preflight/slack.ts"),
-      tokenPreflight: readExecutableSource("sandbox/preflight/token.ts"),
-      traceServer: readExecutableSource("sandbox/trace.ts"),
-    },
-  }
-}
-
-function readMiloMcpFiles() {
-  return {
-    "milo/files.ts": readExecutableSource("mcp/files.ts"),
   }
 }
 
@@ -79,16 +61,7 @@ function readDependencyBase64(specifier: string) {
 }
 
 function readExecutableSource(relativePath: string) {
-  const source = transpileTypeScript(readSource(relativePath), relativePath)
-
-  return relativePath === "mcp/milo.ts"
-    ? source
-        .replaceAll(
-          'from "../artifact/builder/index.ts"',
-          'from "./milo-artifact-builder.ts"'
-        )
-        .replaceAll('from "./files.ts"', 'from "./milo/files.ts"')
-    : source
+  return transpileTypeScript(readSource(relativePath), relativePath)
 }
 
 function readTemplateFiles() {

@@ -7,7 +7,7 @@ import {
   unauthorizedResponse,
 } from "../shared/http"
 import { optionalString } from "../shared/input"
-import { authenticateBrokerRequest } from "./mcp"
+import { authenticateBrokerRequest } from "./auth"
 
 export async function handleFileUploadRequest(
   ctx: ActionCtx,

@@ -5,7 +5,7 @@ import { v } from "convex/values"
 import { agentTaskId, cleanupTaskId } from "../../contracts/runtime"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
-import { internalAction } from "../_generated/server"
+import { type ActionCtx, internalAction } from "../_generated/server"
 import { formatRuntimeError } from "./shared"
 
 const batchSize = 5
@@ -27,7 +27,7 @@ export const drain = internalAction({
       }
 
       try {
-        const externalId = await performOperation(item)
+        const externalId = await performOperation(ctx, item)
         await ctx.runMutation(internal.runtime.outbox.markSent, {
           outboxId: item._id,
           externalId,
@@ -46,12 +46,14 @@ export const drain = internalAction({
   },
 })
 
-async function performOperation(item: Doc<"runtimeOutbox">) {
+type DispatchCtx = ActionCtx
+
+async function performOperation(ctx: DispatchCtx, item: Doc<"runtimeOutbox">) {
   const operation = item.operation
 
   switch (operation.type) {
     case "enqueueRun":
-      return await triggerAgentRun(item)
+      return await triggerAgentRun(ctx, item)
     case "resumeApproval":
       await wait.completeToken(operation.waitpointTokenId, {
         approvalId: operation.approvalId,
@@ -72,10 +74,18 @@ async function performOperation(item: Doc<"runtimeOutbox">) {
   }
 }
 
-async function triggerAgentRun(item: Doc<"runtimeOutbox">) {
+async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"runtimeOutbox">) {
   const operation = item.operation
 
   if (operation.type !== "enqueueRun") {
+    return undefined
+  }
+
+  const execution = (await ctx.runQuery(internal.executions.records.get, {
+    executionId: operation.executionId,
+  })) as Doc<"executions"> | null
+
+  if (execution === null || isTerminalExecution(execution)) {
     return undefined
   }
 
@@ -100,6 +110,14 @@ async function triggerAgentRun(item: Doc<"runtimeOutbox">) {
   )
 
   return handle.id
+}
+
+function isTerminalExecution(execution: Doc<"executions">) {
+  return (
+    execution.status === "completed" ||
+    execution.status === "failed" ||
+    execution.status === "stopped"
+  )
 }
 
 async function triggerSandboxCleanup(item: Doc<"runtimeOutbox">) {

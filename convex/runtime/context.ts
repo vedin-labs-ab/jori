@@ -3,7 +3,7 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
 import { getIntegrationTools } from "../automations/access"
-import { type CodexRuntimeInput } from "../executions/agent/codex"
+import { type AgentRuntimeInput } from "../executions/agent/input"
 import { assemblePrompt } from "../executions/agent/prompt"
 import { createRuntimeToolCapability } from "../executions/agent/tools/bundles"
 import { getPromptedTools } from "../executions/agent/tools/policy"
@@ -70,10 +70,14 @@ export const load = action({
       {
         runId: args.runId,
       }
-    )) as CodexRuntimeInput | null
+    )) as AgentRuntimeInput | null
     const execution = (await ctx.runQuery(internal.executions.records.get, {
       executionId: args.executionId,
-    })) as { _id: Id<"executions">; sandboxId?: string } | null
+    })) as {
+      _id: Id<"executions">
+      sandboxId?: string
+      status: "completed" | "failed" | "queued" | "running" | "stopped"
+    } | null
 
     if (input === null || execution === null) {
       throw new Error("Runtime context not found.")
@@ -103,6 +107,7 @@ export const load = action({
       execution: {
         id: execution._id,
         sandboxId: execution.sandboxId ?? null,
+        status: execution.status,
       },
       prompt,
       run: {
@@ -134,7 +139,7 @@ export const prepareExecution = internalMutation({
   },
 })
 
-async function runtimePermissions(ctx: ActionCtx, input: CodexRuntimeInput) {
+async function runtimePermissions(ctx: ActionCtx, input: AgentRuntimeInput) {
   const overrides = await ctx.runQuery(
     internal.permissions.tools.listForRuntime,
     {
@@ -161,7 +166,7 @@ async function runtimePermissions(ctx: ActionCtx, input: CodexRuntimeInput) {
 }
 
 function permissionGroups(
-  input: CodexRuntimeInput,
+  input: AgentRuntimeInput,
   toolModes: ReadonlyMap<string, PermissionMode>
 ) {
   const executionType = input.type
@@ -199,7 +204,7 @@ function permissionGroups(
 }
 
 function selectedTools(
-  input: CodexRuntimeInput,
+  input: AgentRuntimeInput,
   integrationId: Id<"integrations">
 ) {
   return input.type === "automation"

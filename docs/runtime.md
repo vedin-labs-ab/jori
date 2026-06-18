@@ -27,14 +27,19 @@ Actions for raw webhook-style endpoints such as brokered MCP or file uploads.
 4. Product and integration tools call Convex broker functions. Sandbox tools
    lazily create or reconnect an E2B sandbox, persist its ID in Convex, then run
    commands from Trigger.
-5. Approval tools create approval state in Convex, store the Trigger waitpoint
+5. Milo artifact publish tools validate and build source from the E2B
+   workspace inside Trigger before calling Convex with the publish payload.
+   `save_file` reads bytes from E2B and uses the raw `/milo/files` upload
+   endpoint with the Milo worker secret; Convex stores only file metadata and
+   object storage references.
+6. Approval tools create approval state in Convex, store the Trigger waitpoint
    token on the approval, and suspend the task with `wait.forToken`.
-6. Approval decisions update Convex first, then write a resume outbox item that
+7. Approval decisions update Convex first, then write a resume outbox item that
    completes the Trigger waitpoint token. Convex polling is only a fallback for
    environments where waitpoints are unavailable.
-7. Subagent tools create child runs in Convex with `parentRunId` and
+8. Subagent tools create child runs in Convex with `parentRunId` and
    `rootRunId`, then enqueue child Trigger tasks through the same outbox.
-8. Trigger records final messages, errors, sandbox cleanup, and completion
+9. Trigger records final messages, errors, sandbox cleanup, and completion
    state back to Convex. Convex realtime queries and Slack status updates read
    only Convex state.
 

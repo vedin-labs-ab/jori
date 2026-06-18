@@ -19,9 +19,6 @@ test("generated runtime output is fresh", () => {
 }, 45_000)
 
 test("derives executable payloads from checked TypeScript source files", () => {
-  expect(runtimeAssets.mcp.milo).toContain("./milo-artifact-builder.ts")
-  expect(runtimeAssets.mcp.milo).not.toContain("type ToolDefinition")
-  expect(runtimeAssets.mcp.broker).toContain("milo-github-")
   expect(runtimeAssets.artifact.builder["milo-artifact-builder.ts"]).toContain(
     "./.milo/builder/config.ts"
   )
@@ -29,13 +26,6 @@ test("derives executable payloads from checked TypeScript source files", () => {
     "artifact-builder.json"
   )
   expect(runtimeAssets.artifact.fonts.geistLatinWoff2).not.toBe("")
-  expect(runtimeAssets.sandbox.bootstrap).toContain("CODEX_HOME")
-  expect(runtimeAssets.sandbox.bootstrap).not.toContain(
-    "CODEX_AUTH_JSON_BASE64"
-  )
-  expect(runtimeAssets.sandbox.bootstrap).not.toContain(
-    "MILO_SANDBOX_FILES_BASE64"
-  )
 })
 
 test("keeps artifact shell code and markup in native source assets", () => {

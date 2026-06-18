@@ -34,6 +34,13 @@ export const miloAgentRun = task({
   run: async (payload: AgentRunPayload, { ctx }) => {
     const convex = new MiloConvexClient()
     const context = await convex.loadRun(payload)
+
+    if (isTerminalStatus(context.execution.status)) {
+      return {
+        status: "skipped",
+      }
+    }
+
     const sandbox = new E2BSandboxRuntime(
       convex,
       context.run.id,
@@ -59,6 +66,10 @@ export const miloAgentRun = task({
     }
   },
 })
+
+function isTerminalStatus(status: RuntimeContext["execution"]["status"]) {
+  return status === "completed" || status === "failed" || status === "stopped"
+}
 
 async function runAgentLoop(args: {
   attempt: number

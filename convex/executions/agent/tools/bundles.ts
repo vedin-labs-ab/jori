@@ -5,47 +5,7 @@ import {
   type ToolSurface,
 } from "../../../permissions/catalog"
 import { toolSurfaceLabel } from "../../../shared/integrations"
-import { type RuntimeSkill } from "../sandbox/skills"
 import { type RuntimeToolCapability } from "./types"
-
-const surfaceSkillNames = {
-  milo: [],
-  slack: ["slack"],
-  linear: [],
-  github: [],
-  gmail: [],
-  googleCalendar: [],
-  googleDrive: [],
-  notion: [],
-  microsoftEmail: [],
-  microsoftCalendar: [],
-} satisfies Record<ToolSurface, readonly string[]>
-
-const artifactSkillName = "artifact-creator"
-const artifactWriteTools = new Set(["create_artifact", "update_artifact"])
-const bundledSkillNames = new Set([
-  ...Object.values(surfaceSkillNames).flat(),
-  artifactSkillName,
-])
-
-export function getSurfaceSkillNames(
-  surface: ToolSurface,
-  permissions: readonly ToolPermission[]
-) {
-  if (!permissions.some((permission) => permission.access === "write")) {
-    return []
-  }
-
-  if (surface === "milo") {
-    return permissions.some((permission) =>
-      artifactWriteTools.has(permission.tool)
-    )
-      ? [artifactSkillName]
-      : []
-  }
-
-  return surfaceSkillNames[surface]
-}
 
 export function createRuntimeToolCapability(
   surface: ToolSurface,
@@ -65,18 +25,4 @@ export function createRuntimeToolCapability(
       tool: permission.tool,
     })),
   }
-}
-
-export function filterRuntimeSkillsForBundle(
-  skills: RuntimeSkill[],
-  enabledSkillNames: readonly string[]
-) {
-  const enabledSkills = new Set(enabledSkillNames)
-
-  return skills.filter(
-    (skill) =>
-      skill.tenantId !== null ||
-      !bundledSkillNames.has(skill.name) ||
-      enabledSkills.has(skill.name)
-  )
 }

@@ -2,6 +2,11 @@ import { wait } from "@trigger.dev/sdk/v3"
 import { type ToolSurface } from "../contracts/integrations"
 import { type MiloConvexClient } from "./convex"
 import { errorDetails, runtimeEvent } from "./events"
+import {
+  materializeSandboxResult,
+  prepareMiloToolInput,
+  saveSandboxFile,
+} from "./files"
 import { type ModelToolCall } from "./model/types"
 import { type SandboxRuntime } from "./sandbox/types"
 import {
@@ -72,12 +77,7 @@ async function executeConvexTool(
   const toolName = tool.tool ?? tool.name
 
   if (tool.mode !== "prompted") {
-    return await runtime.convex.callTool({
-      executionId: runtime.context.execution.id,
-      input: call.args,
-      surface,
-      tool: toolName,
-    })
+    return await callApprovedConvexTool(runtime, surface, toolName, call.args)
   }
 
   const token = await wait.createToken({
@@ -118,13 +118,36 @@ async function executeConvexTool(
     }
   }
 
-  return await runtime.convex.callTool({
+  return await callApprovedConvexTool(
+    runtime,
+    surface,
+    toolName,
+    stripApproval(call.args)
+  )
+}
+
+async function callApprovedConvexTool(
+  runtime: ToolRuntime,
+  surface: ToolSurface,
+  tool: string,
+  input: JsonObject
+) {
+  if (surface === "milo" && tool === "save_file") {
+    return await saveSandboxFile(runtime, input)
+  }
+
+  const result = await runtime.convex.callTool({
     approved: true,
     executionId: runtime.context.execution.id,
-    input: stripApproval(call.args),
+    input:
+      surface === "milo"
+        ? await prepareMiloToolInput(runtime, tool, input)
+        : input,
     surface,
-    tool: toolName,
+    tool,
   })
+
+  return await materializeSandboxResult(runtime, result)
 }
 
 async function executeSandboxTool(runtime: ToolRuntime, input: JsonObject) {

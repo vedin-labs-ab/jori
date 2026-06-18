@@ -15,7 +15,7 @@ import {
   readDataObject,
   readDataString,
 } from "../../../shared/data"
-import { type CodexRuntimeInput, type MessageIntegration } from "../codex"
+import { type AgentRuntimeInput, type MessageIntegration } from "../input"
 import {
   type ApprovalContinuation,
   createApprovalContinuationPrompt,
@@ -23,7 +23,7 @@ import {
 import { createToolApprovalInstructions } from "./instructions"
 
 export function assemblePrompt(
-  input: CodexRuntimeInput,
+  input: AgentRuntimeInput,
   promptedTools: ToolPermission[] = [],
   continuation?: ApprovalContinuation
 ): string {
@@ -41,7 +41,7 @@ export function assemblePrompt(
   return parts.join("\n\n")
 }
 
-function createTriggerPart(input: CodexRuntimeInput, isInitialRun: boolean) {
+function createTriggerPart(input: AgentRuntimeInput, isInitialRun: boolean) {
   if (input.type === "automation") {
     return renderPromptTemplate(
       isInitialRun
@@ -60,7 +60,7 @@ function createTriggerPart(input: CodexRuntimeInput, isInitialRun: boolean) {
 }
 
 function createMessageValues(
-  input: Extract<CodexRuntimeInput, { type: "message" }>
+  input: Extract<AgentRuntimeInput, { type: "message" }>
 ) {
   return {
     message: {
@@ -73,7 +73,7 @@ function createMessageValues(
 }
 
 function createAutomationValues(
-  input: Extract<CodexRuntimeInput, { type: "automation" }>
+  input: Extract<AgentRuntimeInput, { type: "automation" }>
 ) {
   return {
     access: {
@@ -98,7 +98,7 @@ function createAutomationValues(
 function formatAutomationAccess(
   access: AutomationAccess,
   integrations: Extract<
-    CodexRuntimeInput,
+    AgentRuntimeInput,
     { type: "automation" }
   >["integrations"]
 ) {
@@ -122,7 +122,7 @@ function formatSelectedTools(tools: readonly string[]) {
 }
 
 function formatAutomationTrigger(
-  input: Extract<CodexRuntimeInput, { type: "automation" }>
+  input: Extract<AgentRuntimeInput, { type: "automation" }>
 ) {
   const reason = input.run.reason
 
@@ -142,7 +142,7 @@ function formatAutomationTrigger(
 }
 
 function formatEvent(
-  event: Extract<CodexRuntimeInput, { type: "automation" }>["event"],
+  event: Extract<AgentRuntimeInput, { type: "automation" }>["event"],
   integration: string | undefined
 ) {
   if (event === null) {

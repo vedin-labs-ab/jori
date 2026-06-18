@@ -35,6 +35,7 @@ export type RuntimeContext = {
   execution: {
     id: Id<"executions">
     sandboxId: string | null
+    status: "completed" | "failed" | "queued" | "running" | "stopped"
   }
   prompt: string
   run: {
