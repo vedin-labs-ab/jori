@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { createMessageRunSnapshot } from "../runs/snapshot"
-import { createSlackRunStatus } from "../runtime/slack"
+import { createSlackRunStatus } from "../runtime/slack/lifecycle"
 
 export async function findConversationActivation(
   ctx: MutationCtx,

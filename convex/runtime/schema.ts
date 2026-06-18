@@ -100,6 +100,7 @@ export const runtimeSlackStatuses = defineTable({
     v.union(v.literal("working"), v.literal("completed"), v.literal("failed"))
   ),
   publishClaimUntil: v.optional(v.number()),
+  replyClaimUntil: v.optional(v.number()),
   lastError: v.optional(v.string()),
   deliveredAt: v.optional(v.number()),
   createdAt: v.number(),

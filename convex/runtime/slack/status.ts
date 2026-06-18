@@ -1,15 +1,14 @@
 import { v } from "convex/values"
-import { internal } from "../_generated/api"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { internal } from "../../_generated/api"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import {
   type ActionCtx,
   internalAction,
   internalMutation,
   type MutationCtx,
-} from "../_generated/server"
-import { setSlackThreadStatus } from "../broker/tools/slack"
-import { readProviderDataString } from "../providers/data"
-import { formatRuntimeError } from "./shared"
+} from "../../_generated/server"
+import { setSlackThreadStatus } from "../../broker/tools/slack"
+import { formatRuntimeError } from "../shared"
 
 const claimLeaseMs = 2 * 60 * 1000
 const statusRefreshMs = 90 * 1000
@@ -20,74 +19,10 @@ const slackRunState = v.union(
   v.literal("failed")
 )
 
-type SlackRunState = Doc<"runtimeSlackStatuses">["state"]
-
 type SlackPublishTarget = {
   integration: Doc<"integrations">
   status: Doc<"runtimeSlackStatuses">
   statusText: string
-}
-
-export async function createSlackRunStatus(
-  ctx: MutationCtx,
-  args: {
-    integration: Doc<"integrations">
-    message: Doc<"messages">
-    runId: Id<"runs">
-    now: number
-  }
-) {
-  const target = readSlackTarget(args.integration, args.message)
-
-  if (target === null) {
-    return
-  }
-
-  const existing = await findSlackStatus(ctx, args.runId)
-
-  if (existing !== null) {
-    return
-  }
-
-  await ctx.db.insert("runtimeSlackStatuses", {
-    tenantId: args.integration.tenantId,
-    runId: args.runId,
-    integrationId: args.integration._id,
-    channelId: target.channelId,
-    threadTs: target.threadTs,
-    state: "working",
-    createdAt: args.now,
-    updatedAt: args.now,
-  })
-  await schedulePublish(ctx, args.runId)
-}
-
-export async function recordSlackRunState(
-  ctx: MutationCtx,
-  args: {
-    error?: string
-    runId: Id<"runs">
-    state: SlackRunState
-  }
-) {
-  const status = await findSlackStatus(ctx, args.runId)
-
-  if (status === null) {
-    return
-  }
-
-  const shouldPublish =
-    status.state !== args.state || status.lastDeliveredState !== args.state
-
-  await ctx.db.patch(status._id, {
-    lastError: args.error,
-    state: args.state,
-    updatedAt: Date.now(),
-  })
-
-  if (shouldPublish) {
-    await schedulePublish(ctx, args.runId)
-  }
 }
 
 export const publish = internalAction({
@@ -105,13 +40,13 @@ export const publish = internalAction({
     try {
       await deliverSlackStatus(target)
 
-      await ctx.runMutation(internal.runtime.slack.recordDelivery, {
+      await ctx.runMutation(internal.runtime.slack.status.recordDelivery, {
         runId: args.runId,
         state: target.status.state,
         now: Date.now(),
       })
     } catch (error) {
-      await ctx.runMutation(internal.runtime.slack.recordFailure, {
+      await ctx.runMutation(internal.runtime.slack.status.recordFailure, {
         error: formatRuntimeError(error),
         runId: args.runId,
         now: Date.now(),
@@ -221,7 +156,7 @@ export const recordFailure = internalMutation({
 })
 
 async function claimPublish(ctx: ActionCtx, runId: Id<"runs">) {
-  return (await ctx.runMutation(internal.runtime.slack.claim, {
+  return (await ctx.runMutation(internal.runtime.slack.status.claim, {
     runId,
     now: Date.now(),
   })) as SlackPublishTarget | null
@@ -265,31 +200,14 @@ function needsWorkingRefresh(status: Doc<"runtimeSlackStatuses">, now: number) {
   )
 }
 
-function readSlackTarget(
-  integration: Doc<"integrations">,
-  message: Doc<"messages">
-) {
-  if (integration.integration !== "slack") {
-    return null
-  }
-
-  const channelId = readProviderDataString(message.data, "channelId")
-  const messageTs = readProviderDataString(message.data, "ts")
-
-  if (channelId === undefined || messageTs === undefined) {
-    return null
-  }
-
-  return {
-    channelId,
-    threadTs: readProviderDataString(message.data, "threadTs") ?? messageTs,
-  }
-}
-
 function schedulePublish(ctx: MutationCtx, runId: Id<"runs">, delayMs = 0) {
-  return ctx.scheduler.runAfter(delayMs, internal.runtime.slack.publish, {
-    runId,
-  })
+  return ctx.scheduler.runAfter(
+    delayMs,
+    internal.runtime.slack.status.publish,
+    {
+      runId,
+    }
+  )
 }
 
 function assistantStatusText(status: Doc<"runtimeSlackStatuses">) {
