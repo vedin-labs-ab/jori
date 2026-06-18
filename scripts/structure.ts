@@ -1,15 +1,8 @@
 import { readdir } from "node:fs/promises"
 import path from "node:path"
 
-type FolderLimit = {
-  limit: number
-  reason?: string
-}
-
 type FolderCount = {
   count: number
-  limit: number
-  reason?: string
   relativePath: string
 }
 
@@ -26,7 +19,7 @@ const sourceExtensions = new Set([
   ".tsx",
 ])
 
-const ignoredDirectories = [
+const skippedDirectories = [
   ".git",
   "dist",
   "node_modules",
@@ -36,40 +29,9 @@ const ignoredDirectories = [
   "src/routes",
 ]
 
-const folderLimits = new Map<string, FolderLimit>([
-  [
-    "convex/artifacts",
-    {
-      limit: 34,
-      reason: "known artifact domain hotspot; split before adding more files",
-    },
-  ],
-  [
-    "convex/automations",
-    {
-      limit: 16,
-      reason: "known automation domain hotspot; split before adding more files",
-    },
-  ],
-  [
-    "src/console/artifacts",
-    {
-      limit: 14,
-      reason: "known artifact console hotspot; split before adding more files",
-    },
-  ],
-  [
-    "src/console/skills",
-    {
-      limit: 13,
-      reason: "known skills console hotspot; split before adding more files",
-    },
-  ],
-])
-
 const counts = await countFolders(root)
 const violations = counts
-  .filter((folder) => folder.count > folder.limit)
+  .filter((folder) => folder.count > defaultLimit)
   .sort((left, right) =>
     right.count === left.count
       ? left.relativePath.localeCompare(right.relativePath)
@@ -92,7 +54,7 @@ async function countFolders(directory: string): Promise<FolderCount[]> {
     entries
       .filter((entry) => entry.isDirectory())
       .map((entry) => path.join(directory, entry.name))
-      .filter((childPath) => !isIgnored(toRelativePath(childPath)))
+      .filter((childPath) => !isSkipped(toRelativePath(childPath)))
       .map((childPath) => countFolders(childPath))
   )
   const directSourceFileCount = entries.filter(
@@ -100,11 +62,9 @@ async function countFolders(directory: string): Promise<FolderCount[]> {
   ).length
   const result = childCounts.flat()
 
-  if (directSourceFileCount > 0 && !isIgnored(relativePath)) {
+  if (directSourceFileCount > 0 && !isSkipped(relativePath)) {
     result.push({
       count: directSourceFileCount,
-      limit: limitFor(relativePath).limit,
-      reason: limitFor(relativePath).reason,
       relativePath,
     })
   }
@@ -124,19 +84,10 @@ function isCountedSourceFile(fileName: string) {
   return sourceExtensions.has(path.extname(fileName))
 }
 
-function limitFor(relativePath: string): FolderLimit {
-  return (
-    folderLimits.get(relativePath) ?? {
-      limit: defaultLimit,
-      reason: undefined,
-    }
-  )
-}
-
-function isIgnored(relativePath: string) {
-  return ignoredDirectories.some(
-    (ignored) =>
-      relativePath === ignored || relativePath.startsWith(`${ignored}/`)
+function isSkipped(relativePath: string) {
+  return skippedDirectories.some(
+    (skipped) =>
+      relativePath === skipped || relativePath.startsWith(`${skipped}/`)
   )
 }
 
@@ -155,7 +106,7 @@ function formatViolations(violations: FolderCount[]) {
     "",
     ...violations.map(formatViolation),
     "",
-    "Split crowded folders by domain, workflow, or responsibility, or add a documented exception when the folder is intentionally flat.",
+    "Split crowded folders by domain, workflow, or responsibility.",
     "",
   ]
 
@@ -163,7 +114,5 @@ function formatViolations(violations: FolderCount[]) {
 }
 
 function formatViolation(folder: FolderCount) {
-  const reason = folder.reason === undefined ? "" : ` (${folder.reason})`
-
-  return `- ${folder.relativePath}: ${folder.count}/${folder.limit}${reason}`
+  return `- ${folder.relativePath}: ${folder.count}/${defaultLimit}`
 }
