@@ -3,7 +3,7 @@ import { type MutationCtx } from "../../_generated/server"
 import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import { automationEventCriteriaKey } from "../events"
 import { normalizeRequiredText } from "../schedule/timing"
-import { type AutomationTriggerInput } from "../schema"
+import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
 import { getRequiredAutomation, getTenantAutomation } from "./read"
 import {
@@ -20,6 +20,7 @@ type UpdateAutomationArgs = {
   name?: string
   instructions?: string
   access?: AutomationAccessInput
+  type?: AutomationType
   trigger?: AutomationTriggerInput
 }
 
@@ -31,6 +32,7 @@ export async function createAutomation(
     name: string
     instructions: string
     access: AutomationAccessInput
+    type: AutomationType
     trigger: AutomationTriggerInput
     createdBy?: string
   }
@@ -39,6 +41,7 @@ export async function createAutomation(
   const trigger = await resolveTrigger(ctx, {
     createdBy: args.createdBy,
     tenantId: args.tenantId,
+    type: args.type,
     trigger: args.trigger,
     now,
   })
@@ -49,7 +52,7 @@ export async function createAutomation(
     artifactId: args.artifactId,
     name: normalizeRequiredText(args.name, "name"),
     instructions: normalizeRequiredText(args.instructions, "instructions"),
-    type: trigger.type,
+    type: args.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,
       artifactId: args.artifactId,
@@ -64,7 +67,7 @@ export async function createAutomation(
   })
 
   await scheduleAutomationIfNeeded(ctx, automationId, trigger)
-  if (trigger.type === "event") {
+  if (args.type === "event" && "integrationId" in trigger) {
     await ensureSubscription(ctx, { tenantId: args.tenantId, trigger })
   }
 
@@ -86,7 +89,8 @@ export async function updateAutomation(
   await ctx.db.patch(args.automationId, patch)
   if (
     args.trigger !== undefined &&
-    existing.trigger.type === "event" &&
+    existing.type === "event" &&
+    "integrationId" in existing.trigger &&
     !isSameEventTrigger(existing.trigger, patch.trigger)
   ) {
     await releaseSubscription(ctx, {
@@ -132,6 +136,14 @@ async function buildAutomationPatch(
     })
   }
 
+  if (
+    args.trigger === undefined &&
+    args.type !== undefined &&
+    args.type !== existing.type
+  ) {
+    throw new Error("Changing automation type requires a trigger.")
+  }
+
   if (args.trigger !== undefined) {
     Object.assign(
       patch,
@@ -139,6 +151,7 @@ async function buildAutomationPatch(
         ctx,
         args.automationId,
         existing,
+        args.type ?? existing.type,
         args.trigger,
         now
       )
@@ -152,6 +165,7 @@ async function buildTriggerPatch(
   ctx: MutationCtx,
   automationId: Id<"automations">,
   existing: Doc<"automations">,
+  type: AutomationType,
   input: AutomationTriggerInput,
   now: number
 ) {
@@ -159,6 +173,7 @@ async function buildTriggerPatch(
   const trigger = await resolveTrigger(ctx, {
     createdBy: existing.createdBy,
     tenantId: existing.tenantId,
+    type,
     trigger: input,
     now,
   })
@@ -168,14 +183,18 @@ async function buildTriggerPatch(
       ? await scheduleTrigger(ctx, { automationId, trigger })
       : trigger
 
-  if (status === "active" && storedTrigger.type === "event") {
+  if (
+    status === "active" &&
+    type === "event" &&
+    "integrationId" in storedTrigger
+  ) {
     await ensureSubscription(ctx, {
       tenantId: existing.tenantId,
       trigger: storedTrigger,
     })
   }
 
-  return { status, trigger: storedTrigger, type: storedTrigger.type }
+  return { status, trigger: storedTrigger, type }
 }
 
 export async function removeAutomation(
@@ -193,7 +212,7 @@ export async function removeAutomation(
 
   await cancelTrigger(ctx, automation.trigger)
   await ctx.db.delete(args.automationId)
-  if (automation.trigger.type === "event") {
+  if (automation.type === "event" && "integrationId" in automation.trigger) {
     await releaseSubscription(ctx, {
       tenantId: automation.tenantId,
       trigger: automation.trigger,
@@ -208,8 +227,9 @@ function isSameEventTrigger(
   right: Doc<"automations">["trigger"] | undefined
 ) {
   return (
-    left.type === "event" &&
-    right?.type === "event" &&
+    "integrationId" in left &&
+    right !== undefined &&
+    "integrationId" in right &&
     left.integrationId === right.integrationId &&
     left.event === right.event &&
     automationEventCriteriaKey(left.criteria) ===

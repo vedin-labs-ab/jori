@@ -60,7 +60,12 @@ export function automationFormValues(
 export function createAutomationArgs(
   values: AutomationFormValues,
   options: AutomationArgsOptions = {}
-): ArgsResult<AutomationArgs & { trigger: TriggerSpec }> {
+): ArgsResult<
+  AutomationArgs & {
+    type: AutomationFormValues["type"]
+    trigger: TriggerSpec
+  }
+> {
   const base = buildBaseArgs(values, options)
 
   if ("error" in base) {
@@ -73,14 +78,19 @@ export function createAutomationArgs(
     return trigger
   }
 
-  return { args: { ...base.args, trigger: trigger.trigger } }
+  return { args: { ...base.args, ...trigger } }
 }
 
 export function updateAutomationArgs(
   values: AutomationFormValues,
   existing: Automation,
   options: AutomationArgsOptions = {}
-): ArgsResult<AutomationArgs & { trigger?: TriggerSpec }> {
+): ArgsResult<
+  AutomationArgs & {
+    type?: AutomationFormValues["type"]
+    trigger?: TriggerSpec
+  }
+> {
   const base = buildBaseArgs(values, options)
 
   if ("error" in base) {
@@ -103,7 +113,7 @@ export function updateAutomationArgs(
     return trigger
   }
 
-  return { args: { ...base.args, trigger: trigger.trigger } }
+  return { args: { ...base.args, ...trigger } }
 }
 
 function buildBaseArgs(

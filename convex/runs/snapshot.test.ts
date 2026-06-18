@@ -11,7 +11,8 @@ test("stores automation display data directly", () => {
       automation: automation({
         name: "Daily digest",
         instructions: "Summarize Slack and send the digest.",
-        trigger: { type: "once", at: 1000 },
+        type: "once",
+        trigger: { at: 1000 },
       }),
     })
   ).toEqual({
@@ -79,7 +80,7 @@ test("rejects empty run tasks", () => {
 function automation(
   overrides: Pick<
     Parameters<typeof createAutomationRunSnapshot>[0]["automation"],
-    "instructions" | "name" | "trigger"
+    "instructions" | "name" | "trigger" | "type"
   >
 ): Parameters<typeof createAutomationRunSnapshot>[0]["automation"] {
   return {
@@ -87,7 +88,6 @@ function automation(
     _creationTime: 0,
     tenantId: "tenant",
     access: { integrations: [], web: false },
-    type: overrides.trigger.type,
     status: "active",
     createdBy: "user",
     createdAt: 0,

@@ -28,7 +28,7 @@ export async function pauseAutomation(
   }
 
   await cancelTrigger(ctx, automation.trigger)
-  if (automation.trigger.type === "event") {
+  if (automation.type === "event" && "integrationId" in automation.trigger) {
     await releaseSubscription(ctx, {
       tenantId: automation.tenantId,
       trigger: automation.trigger,
@@ -71,11 +71,11 @@ export async function resumeAutomation(
 
   const now = Date.now()
   const trigger =
-    automation.trigger.type === "cron"
+    automation.type === "cron"
       ? await scheduleNextCronAutomation(ctx, automation, now)
       : automation.trigger
 
-  if (trigger.type === "event") {
+  if (automation.type === "event" && "integrationId" in trigger) {
     await ensureSubscription(ctx, {
       tenantId: automation.tenantId,
       trigger,
@@ -92,19 +92,18 @@ export async function resumeAutomation(
 }
 
 function requirePausableAutomation(automation: Doc<"automations">) {
-  if (automation.type === "once" || automation.trigger.type === "once") {
+  if (automation.type === "once") {
     throw new Error("One-time automations cannot be paused.")
   }
 }
 
 function clearTriggerFunction(trigger: Doc<"automations">["trigger"]) {
-  if (trigger.type !== "cron") {
+  if (!("nextAt" in trigger)) {
     return trigger
   }
 
   return {
-    type: trigger.type,
-    cron: trigger.cron,
+    expression: trigger.expression,
     nextAt: trigger.nextAt,
   }
 }

@@ -74,7 +74,8 @@ export function shouldHydrateLinearIssueProject(args: {
   const trigger = args.automation.trigger
 
   if (
-    trigger.type !== "event" ||
+    args.automation.type !== "event" ||
+    !("integrationId" in trigger) ||
     trigger.integrationId !== args.integrationId ||
     trigger.event !== args.event ||
     trigger.criteria?.project === undefined
@@ -90,7 +91,7 @@ export function shouldHydrateLinearIssueProject(args: {
 
 function knownCriterionMatches(
   criteria: NonNullable<
-    Extract<Doc<"automations">["trigger"], { type: "event" }>["criteria"]
+    Extract<Doc<"automations">["trigger"], { event: string }>["criteria"]
   >,
   key: string,
   value: string | undefined

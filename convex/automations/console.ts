@@ -23,7 +23,7 @@ import {
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
-import { accessInput, status, triggerInput } from "./schema"
+import { accessInput, automationType, status, triggerInput } from "./schema"
 
 export const list = query({
   args: {
@@ -88,6 +88,7 @@ export const create = mutation({
     name: v.string(),
     instructions: v.string(),
     access: accessInput,
+    type: automationType,
     trigger: triggerInput,
   },
   handler: async (ctx, args) => {
@@ -108,6 +109,7 @@ export const update = mutation({
     name: v.string(),
     instructions: v.string(),
     access: accessInput,
+    type: v.optional(automationType),
     trigger: v.optional(triggerInput),
   },
   handler: async (ctx, args) => {
@@ -164,7 +166,7 @@ async function toConsoleAutomation(
     instructions: automation.instructions,
     type: automation.type,
     status: automation.status,
-    trigger: await projectTriggerForConsole(ctx, automation.trigger),
+    trigger: await projectTriggerForConsole(ctx, automation),
     access: await projectAccessForConsole(ctx, automation.access),
     createdAt: automation.createdAt,
     updatedAt: automation.updatedAt,
@@ -174,16 +176,17 @@ async function toConsoleAutomation(
 
 async function projectTriggerForConsole(
   ctx: MutationCtx | QueryCtx,
-  trigger: Doc<"automations">["trigger"]
+  automation: Doc<"automations">
 ) {
-  if (trigger.type !== "event") {
+  const trigger = automation.trigger
+
+  if (automation.type !== "event" || !("integrationId" in trigger)) {
     return trigger
   }
 
   const integration = await ctx.db.get(trigger.integrationId)
 
   return {
-    type: "event" as const,
     integration: integration?.integration,
     event: trigger.event,
     criteria: trigger.criteria,

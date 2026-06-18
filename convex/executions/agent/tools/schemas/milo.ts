@@ -64,26 +64,26 @@ const accessSchema = () => ({
 })
 
 const triggerSchema = () => ({
-  description: "What starts the automation.",
+  description:
+    "Type-specific trigger payload. Pair with the top-level automation type.",
   oneOf: [
     objectSchema({
-      required: ["type", "at"],
+      required: ["at"],
       properties: {
-        type: { const: "once" },
         at: stringProperty("Future ISO timestamp in UTC, ending with Z."),
       },
     }),
     objectSchema({
-      required: ["type", "cron"],
+      required: ["expression"],
       properties: {
-        type: { const: "cron" },
-        cron: stringProperty("Five-field cron expression interpreted in UTC."),
+        expression: stringProperty(
+          "Five-field cron expression interpreted in UTC."
+        ),
       },
     }),
     objectSchema({
-      required: ["type", "integration", "event"],
+      required: ["integration", "event"],
       properties: {
-        type: { const: "event" },
         integration: {
           type: "string",
           enum: eventIntegrationEnum,
@@ -135,7 +135,7 @@ export const miloToolInputSchemas = {
   }),
   ...artifactToolInputSchemas,
   add_automation: objectSchema({
-    required: ["name", "instructions", "trigger", "access"],
+    required: ["name", "instructions", "type", "trigger", "access"],
     properties: {
       artifactId: stringProperty(
         "Optional artifact ID. Use this for artifact-owned automations that write artifact state."
@@ -144,6 +144,11 @@ export const miloToolInputSchemas = {
       instructions: stringProperty(
         "What each run should do, written as instructions for the agent that executes it."
       ),
+      type: {
+        type: "string",
+        enum: ["once", "cron", "event"],
+        description: "Automation trigger kind.",
+      },
       trigger: triggerSchema(),
       access: accessSchema(),
     },
@@ -175,6 +180,12 @@ export const miloToolInputSchemas = {
       ),
       name: stringProperty("Updated automation name."),
       instructions: stringProperty("Updated run instructions."),
+      type: {
+        type: "string",
+        enum: ["once", "cron", "event"],
+        description:
+          "New automation trigger kind. Include a matching trigger when changing type.",
+      },
       trigger: triggerSchema(),
       access: accessSchema(),
     },

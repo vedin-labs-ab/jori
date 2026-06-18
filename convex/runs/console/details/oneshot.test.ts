@@ -83,7 +83,7 @@ function oneShotAutomation(scheduledAt: number, webSearch = true) {
     name: "Daily image",
     instructions: "Generate a team image.",
     type: "once",
-    trigger: { type: "once", at: scheduledAt },
+    trigger: { at: scheduledAt },
     access: {
       integrations: [
         {

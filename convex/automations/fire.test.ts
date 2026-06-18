@@ -24,7 +24,7 @@ describe("automation event matching", () => {
 
 function automation(
   criteria: NonNullable<
-    Extract<Doc<"automations">["trigger"], { type: "event" }>["criteria"]
+    Extract<Doc<"automations">["trigger"], { event: string }>["criteria"]
   >
 ): Doc<"automations"> {
   return {
@@ -36,7 +36,6 @@ function automation(
     access: { integrations: [], web: true },
     type: "event",
     trigger: {
-      type: "event",
       integrationId: "integration",
       event: "issue.comment.created",
       criteria,

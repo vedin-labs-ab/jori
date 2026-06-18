@@ -36,8 +36,7 @@ export function automationRuntimeInput(webSearch = true) {
         web: webSearch,
       },
       trigger: {
-        type: "cron",
-        cron: "0 9 * * *",
+        expression: "0 9 * * *",
         nextAt: Date.UTC(2026, 5, 13, 9),
       },
       status: "active",
@@ -77,7 +76,6 @@ export function linearAutomationRuntimeInput() {
         web: true,
       },
       trigger: {
-        type: "event",
         integrationId: linear._id,
         event: "issue.comment.edited",
         criteria: { team: "team-id" },
@@ -145,7 +143,6 @@ export function notionAutomationRuntimeInput() {
         web: false,
       },
       trigger: {
-        type: "event",
         integrationId: notion._id,
         event: "comment.created",
         criteria: { page: "page-id" },

@@ -93,7 +93,6 @@ function eventAutomation(): Automation {
       event: "issue.comment.created",
       filter: undefined,
       integration: "github",
-      type: "event",
     },
   } as unknown as Automation
 }
@@ -107,9 +106,8 @@ function recurringAutomation(): Automation {
     status: "active",
     type: "cron",
     trigger: {
-      cron: "0 9 * * *",
+      expression: "0 9 * * *",
       nextAt: 1700038800000,
-      type: "cron",
     },
   } as unknown as Automation
 }
@@ -124,7 +122,6 @@ function oneTimeAutomation(runAt: number): Automation {
     type: "once",
     trigger: {
       at: runAt,
-      type: "once",
     },
   } as unknown as Automation
 }

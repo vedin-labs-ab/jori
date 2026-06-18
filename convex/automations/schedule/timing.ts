@@ -3,12 +3,11 @@ import { getNextCronRunAt } from "./cron"
 
 export type TimeTriggerInput =
   | { type: "once"; at: string }
-  | { type: "cron"; cron: string }
+  | { type: "cron"; expression: string }
 
-export type TimeTrigger = Extract<
-  Doc<"automations">["trigger"],
-  { type: "once" | "cron" }
->
+export type TimeTrigger =
+  | Extract<Doc<"automations">["trigger"], { at: number }>
+  | Extract<Doc<"automations">["trigger"], { nextAt: number }>
 
 export function getTimeTrigger(input: TimeTriggerInput, now: number) {
   if (input.type === "once") {
@@ -19,22 +18,20 @@ export function getTimeTrigger(input: TimeTriggerInput, now: number) {
     }
 
     return {
-      type: "once" as const,
       at,
     }
   }
 
-  const cron = input.cron.trim()
+  const expression = input.expression.trim()
 
   return {
-    type: "cron" as const,
-    cron,
-    nextAt: getNextCronRunAt(cron, now),
+    expression,
+    nextAt: getNextCronRunAt(expression, now),
   }
 }
 
 export function getTimeTriggerAt(trigger: TimeTrigger) {
-  return trigger.type === "once" ? trigger.at : trigger.nextAt
+  return "at" in trigger ? trigger.at : trigger.nextAt
 }
 
 export function normalizeRequiredText(value: string, label: string) {

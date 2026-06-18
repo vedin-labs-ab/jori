@@ -97,8 +97,7 @@ function recurringAutomation({
     instructions: "Generate a team image.",
     type: "cron",
     trigger: {
-      type: "cron",
-      cron: "0 9 * * *",
+      expression: "0 9 * * *",
       nextAt,
       functionId: "scheduled",
     },

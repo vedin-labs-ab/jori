@@ -46,7 +46,6 @@ function githubAutomationRuntimeInput() {
         web: true,
       },
       trigger: {
-        type: "event",
         integrationId: github._id,
         event: "pull_request.review_comment.edited",
         criteria: { repo: "acme/app" },
