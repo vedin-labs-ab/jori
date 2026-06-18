@@ -2,7 +2,7 @@ import {
   optionalString,
   optionalStringArray,
   requiredString,
-} from "../../../shared/input"
+} from "../../shared/input"
 
 export const driveFilesUrl = "https://www.googleapis.com/drive/v3/files"
 export const driveUploadFilesUrl =

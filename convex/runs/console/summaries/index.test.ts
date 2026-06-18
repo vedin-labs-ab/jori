@@ -4,8 +4,8 @@ import {
   automationDisplay,
   eventAutomationDisplay,
   messageDisplay,
-} from "../display/helpers"
-import { summarizeExecution } from "."
+} from "../display"
+import { summarizeExecution } from "../summaries"
 
 test("uses stored automation snapshots when the automation document is unavailable", async () => {
   const summary = await summarizeExecution(

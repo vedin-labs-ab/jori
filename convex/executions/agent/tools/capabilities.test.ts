@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { resolveToolModes } from "../../../permissions/catalog"
 import { assembleToolsForRun } from "."
-import { integration, runtimeMilo } from "./permissions/fixtures"
+import { integration, runtimeMilo } from "./fixtures"
 
 test("marks prompted runtime capabilities as approval-required", () => {
   const toolBundle = assembleToolsForRun({

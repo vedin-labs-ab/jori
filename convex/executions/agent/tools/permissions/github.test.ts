@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { resolveToolModes } from "../../../../permissions/catalog"
 import { assembleToolsForRun } from ".."
-import { integration, runtimeMilo } from "./fixtures"
+import { integration, runtimeMilo } from "../fixtures"
 
 const reviewReplyTool = "github_reply_to_pull_request_review_comment"
 

@@ -1,11 +1,11 @@
-import { googleJson } from "../../../../providers/google/api"
+import { googleJson } from "../../../providers/google/api"
 import {
   boundedNumber,
   requiredString,
   requiredStringArray,
   setOptionalSearchParam,
-} from "../../../../shared/input"
-import { normalizeGmailFormat } from "../format"
+} from "../../../shared/input"
+import { normalizeGmailFormat } from "./format"
 
 const maxBatchReadIds = 50
 

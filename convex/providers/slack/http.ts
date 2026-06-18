@@ -11,17 +11,17 @@ import {
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
-import { enrichSlackMessageData } from "./channels"
 import {
   slackBotScopes,
   slackInstallUserScopes,
   slackOAuthAuthorizeUrl,
   slackOAuthCallbackPath,
 } from "./config"
+import { enrichSlackMessageData } from "./directory/channels"
+import { getSlackActorEmail } from "./directory/users"
 import { getSlackMessage, type SlackEventPayload } from "./events"
 import { exchangeSlackAuthorizationCode, requireSlackClientId } from "./oauth"
 import { parseSignedSlackState, verifySlackRequest } from "./signing"
-import { getSlackActorEmail } from "./users"
 
 export async function handleSlackInstall(request: Request) {
   const requestUrl = new URL(request.url)

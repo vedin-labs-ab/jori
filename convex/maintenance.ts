@@ -1,7 +1,7 @@
 import { ConvexError, type GenericId, v } from "convex/values"
 
-import { type DataModel } from "../_generated/dataModel"
-import { internalMutation, type MutationCtx } from "../_generated/server"
+import { type DataModel } from "./_generated/dataModel"
+import { internalMutation, type MutationCtx } from "./_generated/server"
 
 type TableName = keyof DataModel
 

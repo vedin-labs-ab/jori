@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { resolveToolModes } from "../../../../permissions/catalog"
 import { assembleToolsForRun } from ".."
 import { getSurfaceToolDefinitions } from "../definitions"
-import { integration, readRequired, runtimeMilo } from "./fixtures"
+import { integration, readRequired, runtimeMilo } from "../fixtures"
 
 test("includes Gmail batch read tools with ID array schemas", () => {
   const toolBundle = assembleToolsForRun({

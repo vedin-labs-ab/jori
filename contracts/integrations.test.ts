@@ -8,7 +8,7 @@ import {
   providerForIntegration,
   toolSurfaceLabel,
   toolSurfaces,
-} from "."
+} from "./integrations"
 
 describe("integration catalog", () => {
   test("keeps provider boundaries separate from granular integrations", () => {

@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
-import { eventAutomationDisplay, messageDisplay } from "../display/helpers"
-import { summarizeExecution } from "."
+import { eventAutomationDisplay, messageDisplay } from "../display"
+import { summarizeExecution } from "../summaries"
 
 test("shows stored tools for event automation runs", async () => {
   const summary = await summarizeExecution(
