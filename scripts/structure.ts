@@ -32,6 +32,7 @@ const sourceExtensions = new Set([
 
 const skippedDirectories = [
   ".git",
+  ".trigger",
   ".tanstack",
   "dist",
   "node_modules",
