@@ -18,7 +18,7 @@ export const accessInput = v.object({
 export const access = v.object({
   integrations: v.array(
     v.object({
-      integrationId: v.id("integrations"),
+      id: v.id("integrations"),
       tools: v.array(v.string()),
     })
   ),

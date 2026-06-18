@@ -40,9 +40,7 @@ function githubAutomationRuntimeInput() {
       instructions: "Reply with a short quip.",
       type: "event",
       access: {
-        integrations: [
-          { integrationId: github._id, tools: ["github_add_issue_comment"] },
-        ],
+        integrations: [{ id: github._id, tools: ["github_add_issue_comment"] }],
         web: true,
       },
       trigger: {

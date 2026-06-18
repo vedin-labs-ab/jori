@@ -38,7 +38,7 @@ function automationAccess(
   tools: string[]
 ): AutomationAccess {
   return {
-    integrations: tools.length === 0 ? [] : [{ integrationId, tools }],
+    integrations: tools.length === 0 ? [] : [{ id: integrationId, tools }],
     web: true,
   }
 }

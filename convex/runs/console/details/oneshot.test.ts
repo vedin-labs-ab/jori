@@ -87,7 +87,7 @@ function oneShotAutomation(scheduledAt: number, webSearch = true) {
     access: {
       integrations: [
         {
-          integrationId: "integration",
+          id: "integration",
           tools: ["conversations_add_message", "conversations_history"],
         },
       ],
