@@ -1,4 +1,11 @@
-import { Loader2, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import {
+  Loader2,
+  MoreHorizontal,
+  Pause,
+  Pencil,
+  Play,
+  Trash2,
+} from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,17 +18,24 @@ import { type Automation } from "../types"
 import { DeleteAutomationDialog } from "./delete"
 
 export function AutomationActions({
+  isControlling,
   isDeleting,
   onDelete,
   onEdit,
+  onPause,
+  onResume,
   automation,
 }: {
+  isControlling: boolean
   isDeleting: boolean
   onDelete: (automation: Automation) => void
   onEdit: (automation: Automation) => void
+  onPause: (automation: Automation) => void
+  onResume: (automation: Automation) => void
   automation: Automation
 }) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const controlAction = automationControlAction(automation)
 
   return (
     <>
@@ -41,6 +55,24 @@ export function AutomationActions({
             <Pencil />
             Edit
           </DropdownMenuItem>
+          {controlAction === "pause" ? (
+            <DropdownMenuItem
+              disabled={isControlling}
+              onSelect={() => onPause(automation)}
+            >
+              {isControlling ? <Loader2 className="animate-spin" /> : <Pause />}
+              {isControlling ? "Pausing" : "Pause"}
+            </DropdownMenuItem>
+          ) : null}
+          {controlAction === "resume" ? (
+            <DropdownMenuItem
+              disabled={isControlling}
+              onSelect={() => onResume(automation)}
+            >
+              {isControlling ? <Loader2 className="animate-spin" /> : <Play />}
+              {isControlling ? "Resuming" : "Resume"}
+            </DropdownMenuItem>
+          ) : null}
           <DropdownMenuItem
             disabled={isDeleting}
             onSelect={() => setIsDeleteOpen(true)}
@@ -60,4 +92,12 @@ export function AutomationActions({
       />
     </>
   )
+}
+
+function automationControlAction(automation: Automation) {
+  if (automation.type === "once" || automation.status === "completed") {
+    return undefined
+  }
+
+  return automation.status === "paused" ? "resume" : "pause"
 }

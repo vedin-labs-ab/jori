@@ -170,7 +170,7 @@ function summarizeAutomations(automations: Doc<"automations">[]) {
     automationId: automation._id,
     name: automation.name,
     status: automation.status,
-    lastRunAt: automation.lastRunAt,
+    firedAt: automation.firedAt,
     updatedAt: automation.updatedAt,
   }))
 }

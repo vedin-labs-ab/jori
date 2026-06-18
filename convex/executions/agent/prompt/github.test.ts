@@ -38,6 +38,7 @@ function githubAutomationRuntimeInput() {
       tenantId: "tenant",
       name: "GitHub quip",
       instructions: "Reply with a short quip.",
+      type: "event",
       access: {
         integrations: [
           { integrationId: github._id, tools: ["github_add_issue_comment"] },

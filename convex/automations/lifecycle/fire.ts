@@ -39,7 +39,7 @@ export async function fireAutomation(
         ...automation.trigger,
         functionId: undefined,
       },
-      lastRunAt: now,
+      firedAt: now,
       updatedAt: now,
     })
 
@@ -57,7 +57,7 @@ export async function fireAutomation(
 
     await ctx.db.patch(automation._id, {
       trigger,
-      lastRunAt: now,
+      firedAt: now,
       updatedAt: now,
     })
 
@@ -99,7 +99,7 @@ export async function startEventAutomations(
       })
     )
     await ctx.db.patch(automation._id, {
-      lastRunAt: args.now,
+      firedAt: args.now,
       updatedAt: args.now,
     })
   }
@@ -114,6 +114,7 @@ export function matchesEvent(
   const trigger = automation.trigger
 
   if (
+    automation.type !== "event" ||
     trigger.type !== "event" ||
     trigger.integrationId !== event.integrationId ||
     trigger.event !== event.type

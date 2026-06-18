@@ -13,7 +13,6 @@ type AddAutomationArgs = {
   artifactId?: Id<"artifacts">
   name: string
   instructions: string
-  metadata?: unknown
   access: AutomationAccessInput
   trigger: AutomationTriggerInput
 }
@@ -33,7 +32,6 @@ type UpdateAutomationArgs = {
   artifactId?: Id<"artifacts">
   name?: string
   instructions?: string
-  metadata?: unknown
   access?: AutomationAccessInput
   trigger?: AutomationTriggerInput
 }

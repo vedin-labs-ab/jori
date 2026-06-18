@@ -1,6 +1,11 @@
-import { type ToolSurface } from "@contracts/integrations"
+import { type ToolSurface, toolSurfaceLabel } from "@contracts/integrations"
 import { Globe, GlobeOff } from "lucide-react"
 import { type ReactNode } from "react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { MiloLogo } from "@/shared/brand"
 import { providerLogoPath } from "../shared/logo/path"
@@ -77,11 +82,28 @@ function ToolSurfaceLogoStack({
         ))}
       </span>
       {hiddenSurfaces.length > 0 ? (
-        <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-sm border bg-background px-1 text-[0.625rem] text-muted-foreground leading-none">
-          +{hiddenSurfaces.length}
-        </span>
+        <HiddenSurfaceCount surfaces={hiddenSurfaces} />
       ) : null}
     </span>
+  )
+}
+
+function HiddenSurfaceCount({ surfaces }: { surfaces: ToolSurface[] }) {
+  const label = surfaces.map(toolSurfaceLabel).join(", ")
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          aria-label={`Show ${surfaces.length} more integrations: ${label}`}
+          className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-sm border bg-background px-1 text-[0.625rem] text-muted-foreground leading-none outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+          type="button"
+        >
+          +{surfaces.length}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   )
 }
 

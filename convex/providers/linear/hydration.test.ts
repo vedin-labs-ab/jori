@@ -105,6 +105,7 @@ function automation(
     name: "Test automation",
     status: "active",
     tenantId: "tenant-id",
+    type: "event",
     trigger: {
       type: "event",
       integrationId,

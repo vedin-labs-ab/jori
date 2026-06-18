@@ -27,7 +27,7 @@ export function automationRuntimeInput(webSearch = true) {
       tenantId: "tenant",
       name: "Daily digest",
       instructions: "Post the daily digest.",
-      metadata: { source: "daily" },
+      type: "cron",
       access: {
         integrations: [
           { integrationId: github._id, tools: ["github_get_issue"] },
@@ -69,6 +69,7 @@ export function linearAutomationRuntimeInput() {
       tenantId: "tenant",
       name: "Linear quip",
       instructions: "Reply with a short quip.",
+      type: "event",
       access: {
         integrations: [
           { integrationId: linear._id, tools: ["linear_add_comment"] },
@@ -133,6 +134,7 @@ export function notionAutomationRuntimeInput() {
       tenantId: "tenant",
       name: "Notion follow-up",
       instructions: "Summarize the changed Notion page.",
+      type: "event",
       access: {
         integrations: [
           {
@@ -152,25 +154,29 @@ export function notionAutomationRuntimeInput() {
       createdAt: 0,
       updatedAt: 0,
     },
-    event: {
-      _id: "event",
-      _creationTime: 0,
-      tenantId: "tenant",
-      integrationId: notion._id,
-      key: "notion:workspace:event",
-      type: "comment.created",
-      criteria: { page: "page-id" },
-      data: {
-        pageId: "page-id",
-        commentId: "comment-id",
-        notionEventId: "notion-event-id",
-        notionEventType: "comment.created",
-        entity: { id: "comment-id", type: "comment" },
-        parent: { id: "block-id", type: "block" },
-      },
-      createdAt: 0,
-    },
+    event: notionCommentEvent(notion._id),
   } as unknown as Parameters<typeof assemblePrompt>[0]
+}
+
+function notionCommentEvent(integrationId: string) {
+  return {
+    _id: "event",
+    _creationTime: 0,
+    tenantId: "tenant",
+    integrationId,
+    key: "notion:workspace:event",
+    type: "comment.created",
+    criteria: { page: "page-id" },
+    data: {
+      pageId: "page-id",
+      commentId: "comment-id",
+      notionEventId: "notion-event-id",
+      notionEventType: "comment.created",
+      entity: { id: "comment-id", type: "comment" },
+      parent: { id: "block-id", type: "block" },
+    },
+    createdAt: 0,
+  }
 }
 
 export function runtimeInput(

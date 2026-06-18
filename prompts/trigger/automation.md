@@ -8,7 +8,6 @@ Automation:
 - Name: {{automation.name}}
 - Trigger: {{automation.trigger}}
 - Instructions: {{automation.instructions}}
-- Metadata: {{automation.metadata}}
 
 Integration access:
 {{access.summary}}

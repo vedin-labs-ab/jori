@@ -34,6 +34,7 @@ function automation(
     name: "Automation",
     instructions: "Do work.",
     access: { integrations: [], web: true },
+    type: "event",
     trigger: {
       type: "event",
       integrationId: "integration",

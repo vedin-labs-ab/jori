@@ -54,6 +54,7 @@ import type * as automations_access from "../automations/access.js";
 import type * as automations_console from "../automations/console.js";
 import type * as automations_events from "../automations/events.js";
 import type * as automations_integrations from "../automations/integrations.js";
+import type * as automations_lifecycle_control from "../automations/lifecycle/control.js";
 import type * as automations_lifecycle_fire from "../automations/lifecycle/fire.js";
 import type * as automations_lifecycle_index from "../automations/lifecycle/index.js";
 import type * as automations_lifecycle_read from "../automations/lifecycle/read.js";
@@ -331,6 +332,7 @@ declare const fullApi: ApiFromModules<{
   "automations/console": typeof automations_console;
   "automations/events": typeof automations_events;
   "automations/integrations": typeof automations_integrations;
+  "automations/lifecycle/control": typeof automations_lifecycle_control;
   "automations/lifecycle/fire": typeof automations_lifecycle_fire;
   "automations/lifecycle/index": typeof automations_lifecycle_index;
   "automations/lifecycle/read": typeof automations_lifecycle_read;

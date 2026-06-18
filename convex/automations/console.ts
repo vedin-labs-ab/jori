@@ -17,7 +17,9 @@ import { automationEventCatalog } from "./events"
 import {
   createAutomation,
   maxSearchResults,
+  pauseAutomation,
   removeAutomation,
+  resumeAutomation,
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
@@ -115,6 +117,30 @@ export const update = mutation({
   },
 })
 
+export const pause = mutation({
+  args: {
+    tenantId: v.string(),
+    automationId: v.id("automations"),
+  },
+  handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+
+    return await toConsoleAutomation(ctx, await pauseAutomation(ctx, args))
+  },
+})
+
+export const resume = mutation({
+  args: {
+    tenantId: v.string(),
+    automationId: v.id("automations"),
+  },
+  handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+
+    return await toConsoleAutomation(ctx, await resumeAutomation(ctx, args))
+  },
+})
+
 export const remove = mutation({
   args: {
     tenantId: v.string(),
@@ -136,12 +162,13 @@ async function toConsoleAutomation(
     id: automation._id,
     name: automation.name,
     instructions: automation.instructions,
+    type: automation.type,
     status: automation.status,
     trigger: await projectTriggerForConsole(ctx, automation.trigger),
     access: await projectAccessForConsole(ctx, automation.access),
     createdAt: automation.createdAt,
     updatedAt: automation.updatedAt,
-    lastRunAt: automation.lastRunAt,
+    firedAt: automation.firedAt,
   }
 }
 

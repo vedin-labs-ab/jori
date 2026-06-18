@@ -144,9 +144,6 @@ export const miloToolInputSchemas = {
       instructions: stringProperty(
         "What each run should do, written as instructions for the agent that executes it."
       ),
-      metadata: {
-        description: "Optional JSON context made available to every run.",
-      },
       trigger: triggerSchema(),
       access: accessSchema(),
     },
@@ -178,9 +175,6 @@ export const miloToolInputSchemas = {
       ),
       name: stringProperty("Updated automation name."),
       instructions: stringProperty("Updated run instructions."),
-      metadata: {
-        description: "Optional JSON context made available to every run.",
-      },
       trigger: triggerSchema(),
       access: accessSchema(),
     },

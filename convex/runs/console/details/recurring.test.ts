@@ -95,6 +95,7 @@ function recurringAutomation({
     tenantId: "tenant",
     name: "Daily image",
     instructions: "Generate a team image.",
+    type: "cron",
     trigger: {
       type: "cron",
       cron: "0 9 * * *",
@@ -114,7 +115,7 @@ function recurringAutomation({
     createdBy: "user",
     createdAt: 0,
     updatedAt: 0,
-    lastRunAt: nextAt,
+    firedAt: nextAt,
   }
 }
 

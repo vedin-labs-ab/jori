@@ -86,7 +86,6 @@ function createAutomationValues(
       id: input.automation._id,
       name: input.automation.name,
       instructions: input.automation.instructions,
-      metadata: JSON.stringify(input.automation.metadata ?? null),
       trigger: formatAutomationTrigger(input),
     },
     event: {
