@@ -14,7 +14,8 @@ import {
   type ModelToolCall,
 } from "./types"
 
-const defaultModel = "minimax/minimax-m3"
+const defaultModel = "z-ai/glm-5.2"
+const defaultReasoningEffort = "xhigh"
 const reasoningEfforts = new Set([
   "high",
   "low",
@@ -197,11 +198,9 @@ function requireModelConfig() {
 }
 
 function readReasoningEffort() {
-  const effort = readEnvironmentVariable("MILO_OPENROUTER_REASONING_EFFORT")
-
-  if (effort === undefined) {
-    return undefined
-  }
+  const effort =
+    readEnvironmentVariable("MILO_OPENROUTER_REASONING_EFFORT") ??
+    defaultReasoningEffort
 
   if (!reasoningEfforts.has(effort)) {
     throw new Error(
