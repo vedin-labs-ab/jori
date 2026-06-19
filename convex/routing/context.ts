@@ -2,9 +2,7 @@ import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
 import { getSlackBotId, getSlackChannelType } from "../providers/slack/data"
-import { getActorDisplayName } from "../shared/actor"
-
-const recentMessageLimit = 8
+import { recentConversation, slackMessageEntry } from "./history"
 
 export const getSlackContext = internalQuery({
   args: {
@@ -35,10 +33,10 @@ export const getSlackContext = internalQuery({
 
     return {
       activeExecution: active,
-      currentMessage: runtimeMessage(message),
+      currentMessage: slackMessageEntry(message),
       isDirectMessage: isDirectSlackMessage(message),
       isMention: isSlackMention(message, integration),
-      recentMessages: await recentMessages(ctx, message),
+      recentMessages: await recentConversation(ctx, message),
     }
   },
 })
@@ -101,36 +99,6 @@ async function getActiveExecution(
     latestStatus: event?.type ?? null,
     runId: execution.runId,
     status: execution.status,
-  }
-}
-
-async function recentMessages(ctx: QueryCtx, message: Doc<"messages">) {
-  if (message.conversationId === undefined) {
-    return [runtimeMessage(message)]
-  }
-
-  const messages = await ctx.db
-    .query("messages")
-    .withIndex("by_conversation", (query) =>
-      query
-        .eq("tenantId", message.tenantId)
-        .eq("integrationId", message.integrationId)
-        .eq("conversationId", message.conversationId)
-    )
-    .order("desc")
-    .take(recentMessageLimit)
-
-  return messages.reverse().map(runtimeMessage)
-}
-
-function runtimeMessage(message: Doc<"messages">) {
-  return {
-    actor: getActorDisplayName(message.actor) ?? null,
-    createdAt: message.createdAt,
-    id: message._id,
-    observedAt: message.observedAt ?? null,
-    text: message.text ?? "",
-    type: message.type,
   }
 }
 
