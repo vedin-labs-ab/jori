@@ -3,18 +3,26 @@ import { createArtifactPromptDiagnostics } from "./tools/diagnostics"
 
 const response = {
   id: "gen-123",
-  model: "z-ai/glm-5.2",
+  model: "minimax/minimax-m3",
   openrouterMetadata: {
     attempt: 2,
     endpoints: {
       available: [
-        { model: "z-ai/glm-5.2", provider: "slow-provider", selected: false },
-        { model: "z-ai/glm-5.2", provider: "fast-provider", selected: true },
+        {
+          model: "minimax/minimax-m3",
+          provider: "slow-provider",
+          selected: false,
+        },
+        {
+          model: "minimax/minimax-m3",
+          provider: "fast-provider",
+          selected: true,
+        },
       ],
       total: 5,
     },
     region: "eu",
-    requested: "z-ai/glm-5.2",
+    requested: "minimax/minimax-m3",
     strategy: "direct",
     summary: "selected fast-provider",
   },
@@ -38,13 +46,13 @@ const request = {
 const diagnostics = {
   durationMs: 1234,
   generationId: "gen-123",
-  model: "z-ai/glm-5.2",
+  model: "minimax/minimax-m3",
   provider: {
     attempt: 2,
     availableEndpoints: 5,
     region: "eu",
-    requested: "z-ai/glm-5.2",
-    selectedModel: "z-ai/glm-5.2",
+    requested: "minimax/minimax-m3",
+    selectedModel: "minimax/minimax-m3",
     selectedProvider: "fast-provider",
     strategy: "direct",
     summary: "selected fast-provider",
