@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { type Id } from "../_generated/dataModel"
 import { sendOpenRouterChat } from "../model"
 import { decideRoute, type SlackRoutingContext } from "./decision"
@@ -7,11 +7,35 @@ vi.mock("../model", () => ({
   sendOpenRouterChat: vi.fn(),
 }))
 
+const originalIntakeModel = process.env.OPENROUTER_INTAKE_MODEL
+
 beforeEach(() => {
   vi.clearAllMocks()
 })
 
+afterEach(() => {
+  restoreIntakeModel(originalIntakeModel)
+})
+
 describe("Slack intake routing", () => {
+  test("uses GLM 5.2 with latency-prioritized provider routing", async () => {
+    process.env.OPENROUTER_INTAKE_MODEL = ""
+    vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
+      modelResponse({ route: "agent" })
+    )
+
+    await decideRoute(context({ isMention: true }))
+
+    expect(lastRoutingRequest()).toMatchObject({
+      maxTokens: 256,
+      model: "z-ai/glm-5.2",
+      provider: {
+        requireParameters: true,
+        sort: "latency",
+      },
+    })
+  })
+
   test("does not silently ignore mentioned small talk", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ route: "ignore" })
@@ -57,6 +81,25 @@ describe("Slack intake routing", () => {
     })
   })
 })
+
+function restoreIntakeModel(value: string | undefined) {
+  if (value === undefined) {
+    delete process.env.OPENROUTER_INTAKE_MODEL
+    return
+  }
+
+  process.env.OPENROUTER_INTAKE_MODEL = value
+}
+
+function lastRoutingRequest() {
+  const [request] = vi.mocked(sendOpenRouterChat).mock.calls.at(-1) ?? []
+
+  if (request === undefined) {
+    throw new Error("Expected Slack intake to call OpenRouter.")
+  }
+
+  return request
+}
 
 function context(
   overrides: Partial<SlackRoutingContext> = {}

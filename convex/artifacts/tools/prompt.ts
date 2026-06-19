@@ -31,7 +31,7 @@ const maxSchemaBytes = 64 * 1024
 const defaultPromptOutputTokens = 1000
 const minPromptOutputTokens = 64
 const maxPromptOutputTokens = 16_000
-const defaultArtifactPromptModel = "minimax/minimax-m3"
+const defaultArtifactPromptModel = "z-ai/glm-5.2"
 
 export async function promptModel(
   context: ArtifactPlatformContext,

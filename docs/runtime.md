@@ -65,10 +65,12 @@ transactions.
 The model runtime is adapter based. The first implementation uses Vercel AI SDK
 with the OpenRouter provider behind a small interface that accepts messages and
 tool definitions and returns final messages or tool calls. The default target is
-`minimax/minimax-m3`. `MILO_OPENROUTER_REASONING_EFFORT` is optional and omitted
-by default, because effort levels are model-specific in OpenRouter. The
-interface is intentionally narrow so the provider can change later without
-changing Convex state or Trigger task ownership.
+`z-ai/glm-5.2` with `MILO_OPENROUTER_REASONING_EFFORT` defaulting to `xhigh`.
+Agent calls ask OpenRouter for providers that support the requested parameters
+and sort by price. Slack intake routing uses the same model with latency sorting
+because it sits on the user-facing response path. The interface is intentionally
+narrow so the provider can change later without changing Convex state or
+Trigger task ownership.
 
 The sandbox runtime is adapter based. The first implementation uses E2B behind a
 small interface for lazy sandbox creation/reconnect, command execution, and
