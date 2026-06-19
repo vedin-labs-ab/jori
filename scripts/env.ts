@@ -2,7 +2,8 @@ import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 
-const requiredEnv = ["CONVEX_DEPLOYMENT", "CLERK_JWT_ISSUER_DOMAIN"] as const
+const baseRequiredEnv = ["CLERK_JWT_ISSUER_DOMAIN"] as const
+const convexDeploymentEnv = "CONVEX_DEPLOYMENT"
 
 const command = process.argv.slice(2)
 
@@ -11,7 +12,9 @@ if (command.length === 0) {
 }
 
 const resolved = resolveEnv()
-const missing = requiredEnv.filter((name) => isEmpty(resolved.env[name]))
+const missing = requiredEnvironmentVariables(command).filter((name) =>
+  isEmpty(resolved.env[name])
+)
 
 if (missing.length > 0) {
   process.stderr.write(
@@ -58,6 +61,22 @@ function resolveEnv() {
   }
 
   return { env, sources }
+}
+
+function requiredEnvironmentVariables(command: readonly string[]) {
+  return isConvexConfigureCommand(command)
+    ? [...baseRequiredEnv]
+    : [convexDeploymentEnv, ...baseRequiredEnv]
+}
+
+function isConvexConfigureCommand(command: readonly string[]) {
+  const convexIndex = command.indexOf("convex")
+
+  return (
+    convexIndex !== -1 &&
+    command[convexIndex + 1] === "dev" &&
+    command.includes("--configure")
+  )
 }
 
 function getEnvSources() {
