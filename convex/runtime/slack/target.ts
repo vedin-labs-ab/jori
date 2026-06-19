@@ -136,6 +136,7 @@ async function findSlackStatus(
     threadTs: string
   }
 ) {
+  // A thread accumulates one status row per run; re-assert against the newest.
   return await ctx.db
     .query("runtimeSlackStatuses")
     .withIndex("by_integration_and_channel_and_thread", (query) =>
@@ -144,5 +145,6 @@ async function findSlackStatus(
         .eq("channelId", args.channelId)
         .eq("threadTs", args.threadTs)
     )
+    .order("desc")
     .first()
 }
