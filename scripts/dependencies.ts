@@ -2,6 +2,10 @@ import { cruise, type IFlattenedRuleSet } from "dependency-cruiser"
 
 const roots = ["src", "convex", "contracts", "runtime/source", "scripts"]
 const excludedPaths = [
+  "(^|/)[.]agents(/|$)",
+  "(^|/)[.]claude(/|$)",
+  "(^|/)[.]trigger(/|$)",
+  "(^|/)[.]tanstack(/|$)",
   "(^|/)node_modules(/|$)",
   "(^|/)dist(/|$)",
   "[.]test[.](?:ts|tsx|js|jsx)$",

@@ -11,6 +11,7 @@
       "**",
       "!.agents",
       "!.claude",
+      "!.trigger",
       "!.tanstack",
       "!dist",
       "!node_modules",

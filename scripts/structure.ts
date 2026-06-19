@@ -31,6 +31,7 @@ const sourceExtensions = new Set([
 ])
 
 const skippedDirectories = [
+  ".agents",
   ".claude",
   ".git",
   ".trigger",
