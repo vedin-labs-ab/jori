@@ -18,7 +18,7 @@ import {
   slackOAuthCallbackPath,
 } from "./config"
 import { enrichSlackMessageData } from "./directory/channels"
-import { getSlackActorEmail } from "./directory/users"
+import { getSlackActorProfile } from "./directory/users"
 import { getSlackMessage, type SlackEventPayload } from "./events"
 import { exchangeSlackAuthorizationCode, requireSlackClientId } from "./oauth"
 import { parseSignedSlackState, verifySlackRequest } from "./signing"
@@ -127,7 +127,7 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
-  const actorEmail = await getSlackActorEmail(ctx, {
+  const actorProfile = await getSlackActorProfile(ctx, {
     accountId: message.accountId,
     actorId: message.actorId,
   })
@@ -136,7 +136,8 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     await handleSlackApprovalDecision(ctx, {
       accountId: message.accountId,
       actorId: message.actorId,
-      actorEmail,
+      actorEmail: actorProfile?.email,
+      actorName: actorProfile?.name,
       text: message.text,
       data: message.data,
     })
@@ -156,7 +157,8 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     actor: createIntegrationActor({
       integration: "slack",
       externalId: message.actorId,
-      email: actorEmail,
+      email: actorProfile?.email,
+      name: actorProfile?.name,
     }),
     conversationId: message.conversationId,
     text: message.text,

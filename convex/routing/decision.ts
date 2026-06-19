@@ -82,13 +82,34 @@ function routeMessages(
 
 function intakeDecisionSchema() {
   return {
-    type: "object",
-    additionalProperties: false,
-    required: ["route"],
-    properties: {
-      route: { type: "string", enum: ["ignore", "reply", "agent"] },
-      reply: { type: "string" },
-    },
+    oneOf: [
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["route"],
+        properties: {
+          route: { type: "string", enum: ["ignore"] },
+        },
+      },
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["route", "reply"],
+        properties: {
+          route: { type: "string", enum: ["reply"] },
+          reply: { type: "string", minLength: 1 },
+        },
+      },
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["route"],
+        properties: {
+          route: { type: "string", enum: ["agent"] },
+          reply: { type: "string", minLength: 1 },
+        },
+      },
+    ],
   }
 }
 

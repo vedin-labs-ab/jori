@@ -4,7 +4,12 @@ import { type Integration, integrationValidator } from "./integrations"
 export type Actor =
   | { userId: string; name?: string; email?: string }
   | { email: string }
-  | { integration: Integration; externalId: string; email?: string }
+  | {
+      integration: Integration
+      externalId: string
+      name?: string
+      email?: string
+    }
 
 export const actorValidator = v.union(
   v.object({
@@ -18,6 +23,7 @@ export const actorValidator = v.union(
   v.object({
     integration: integrationValidator,
     externalId: v.string(),
+    name: v.optional(v.string()),
     email: v.optional(v.string()),
   })
 )
@@ -55,9 +61,13 @@ export function getActorDisplayName(actor: Actor | undefined) {
   }
 
   if ("integration" in actor) {
-    return actor.integration === "slack"
-      ? `<@${actor.externalId}>`
-      : (actor.email ?? actor.externalId)
+    return (
+      actor.name ??
+      actor.email ??
+      (actor.integration === "slack"
+        ? `<@${actor.externalId}>`
+        : actor.externalId)
+    )
   }
 
   if ("userId" in actor) {
@@ -96,17 +106,18 @@ function nonEmptyActorFields(fields: { name?: string; email?: string }) {
 export function createIntegrationActor(args: {
   integration: Integration
   externalId?: string
+  name?: string
   email?: string
 }): Actor | undefined {
   if (args.externalId !== undefined && args.externalId !== "") {
-    const actor: Actor = {
+    return {
       integration: args.integration,
       externalId: args.externalId,
+      ...nonEmptyActorFields({
+        email: args.email,
+        name: args.name,
+      }),
     }
-
-    return args.email === undefined || args.email === ""
-      ? actor
-      : { ...actor, email: args.email }
   }
 
   if (args.email !== undefined && args.email !== "") {

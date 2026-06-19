@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { getActorDisplayName } from "../shared/actor"
+import { routingMessageText } from "./surface"
 
 const recentConversationLimit = 16
 const finalEventLimit = 5
@@ -16,27 +17,32 @@ export type RoutingConversationEntry = {
 
 export async function recentConversation(
   ctx: QueryCtx,
-  message: Doc<"messages">
+  message: Doc<"messages">,
+  integration: Doc<"integrations">
 ) {
   if (message.conversationId === undefined) {
-    return [messageEntry(message)]
+    return [messageEntry(message, integration)]
   }
 
   const messages = await recentMessages(ctx, message)
   const replies = await recentMiloReplies(ctx, message)
 
-  return mergeRecentConversation([...messages.map(messageEntry), ...replies])
+  return mergeRecentConversation([
+    ...messages.map((entry) => messageEntry(entry, integration)),
+    ...replies,
+  ])
 }
 
 export function messageEntry(
-  message: Doc<"messages">
+  message: Doc<"messages">,
+  integration: Doc<"integrations">
 ): RoutingConversationEntry {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
     createdAt: message.createdAt,
     id: message._id,
     observedAt: message.observedAt ?? null,
-    text: message.text ?? "",
+    text: routingMessageText(message, integration),
     type: message.type,
   }
 }
