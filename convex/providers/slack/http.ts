@@ -163,7 +163,7 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     observedAt: message.observedAt,
     data,
   })
-  const messageId = readRecordedMessageId(result)
+  const messageId = readNewlyRecordedMessageId(result)
 
   if (messageId !== undefined) {
     await ctx.scheduler.runAfter(0, internal.routing.slack.route, {
@@ -174,18 +174,20 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
   return Response.json({ ok: true })
 }
 
-function readRecordedMessageId(result: unknown) {
+export function readNewlyRecordedMessageId(result: unknown) {
   if (
     typeof result !== "object" ||
     result === null ||
-    !("messageId" in result)
+    !("messageId" in result) ||
+    !("status" in result)
   ) {
     return undefined
   }
 
-  const messageId = (result as { messageId?: unknown }).messageId
+  const record = result as { messageId?: unknown; status?: unknown }
+  const messageId = record.messageId
 
-  return typeof messageId === "string"
+  return record.status === "recorded" && typeof messageId === "string"
     ? (messageId as Id<"messages">)
     : undefined
 }
