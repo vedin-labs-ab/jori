@@ -28,7 +28,7 @@ describe("message intake routing request", () => {
     await decideRoute(context({ isAddressed: true }))
 
     expect(lastRoutingRequest()).toMatchObject({
-      maxTokens: 256,
+      maxTokens: 128,
       model: "z-ai/glm-5.2",
       provider: {
         requireParameters: true,
@@ -70,6 +70,32 @@ describe("message intake routing request", () => {
           },
         },
       ],
+    })
+  })
+})
+
+describe("message intake quick replies", () => {
+  test("replies to addressed greetings without OpenRouter", async () => {
+    await expect(
+      decideRoute(context({ isAddressed: true, text: "@Milo hello my man" }))
+    ).resolves.toEqual({
+      reply: "Hey, what can I help with?",
+      route: "reply",
+    })
+
+    expect(sendOpenRouterChat).not.toHaveBeenCalled()
+  })
+
+  test("keeps greetings with work on the model path", async () => {
+    vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
+      modelResponse({ route: "agent" })
+    )
+
+    await expect(
+      decideRoute(context({ isAddressed: true, text: "@Milo hello check CI" }))
+    ).resolves.toEqual({
+      model: "test-model",
+      route: "agent",
     })
   })
 })
@@ -160,17 +186,18 @@ function lastRoutingSchema() {
   return responseFormat?.jsonSchema?.schema
 }
 
-function context(
-  overrides: Partial<MessageRoutingContext> = {}
-): MessageRoutingContext {
+type ContextOverrides = Partial<MessageRoutingContext> & { text?: string }
+
+function context(overrides: ContextOverrides = {}): MessageRoutingContext {
   const currentMessage = {
     actor: "<@U123>",
     createdAt: 1,
     id: "message" as Id<"messages">,
     observedAt: 1,
-    text: "<@MILO> hello my man",
+    text: overrides.text ?? "@Milo please check this",
     type: "message.channels",
   }
+  const { text: _text, ...contextOverrides } = overrides
 
   return {
     activeExecution: null,
@@ -179,7 +206,7 @@ function context(
     isAddressed: false,
     isDirect: false,
     recentMessages: [currentMessage],
-    ...overrides,
+    ...contextOverrides,
   }
 }
 

@@ -23,12 +23,14 @@ export const getMessageContext = internalQuery({
       return null
     }
 
-    const active = await getActiveExecution(ctx, {
-      integration,
-      message,
-    })
-
     const audience = messageAudience(message, integration)
+    const [active, recentMessages] = await Promise.all([
+      getActiveExecution(ctx, {
+        integration,
+        message,
+      }),
+      recentConversation(ctx, message, integration),
+    ])
 
     return {
       activeExecution: active,
@@ -36,7 +38,7 @@ export const getMessageContext = internalQuery({
       integration: message.integration,
       isAddressed: audience.isAddressed,
       isDirect: audience.isDirect,
-      recentMessages: await recentConversation(ctx, message, integration),
+      recentMessages,
     }
   },
 })

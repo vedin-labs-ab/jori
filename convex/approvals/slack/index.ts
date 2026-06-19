@@ -17,6 +17,10 @@ type SlackApprovalDecisionInput = {
   data: unknown
 }
 
+export function isSlackApprovalDecisionText(text: string | undefined) {
+  return parseApprovalDecision(text) !== null
+}
+
 export async function handleSlackApprovalDecision(
   ctx: ActionCtx,
   input: SlackApprovalDecisionInput

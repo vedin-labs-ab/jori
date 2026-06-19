@@ -239,6 +239,7 @@ import type * as routing_decision from "../routing/decision.js";
 import type * as routing_delivery from "../routing/delivery.js";
 import type * as routing_history from "../routing/history.js";
 import type * as routing_message from "../routing/message.js";
+import type * as routing_quick from "../routing/quick.js";
 import type * as routing_records from "../routing/records.js";
 import type * as routing_replies from "../routing/replies.js";
 import type * as routing_surface from "../routing/surface.js";
@@ -519,6 +520,7 @@ declare const fullApi: ApiFromModules<{
   "routing/delivery": typeof routing_delivery;
   "routing/history": typeof routing_history;
   "routing/message": typeof routing_message;
+  "routing/quick": typeof routing_quick;
   "routing/records": typeof routing_records;
   "routing/replies": typeof routing_replies;
   "routing/surface": typeof routing_surface;

@@ -90,12 +90,14 @@ export const claimFinalReply = internalMutation({
 
 export const recordFinalReplyDelivery = internalMutation({
   args: {
+    content: v.string(),
     deliveryId: v.string(),
     routingId: v.id("routing"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     await ctx.db.patch(args.routingId, {
+      finalReply: args.content,
       finalReplyClaimUntil: undefined,
       finalReplyError: undefined,
       finalReplyMessageTs: args.deliveryId,
