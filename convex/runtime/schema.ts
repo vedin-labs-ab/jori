@@ -108,3 +108,8 @@ export const runtimeSlackStatuses = defineTable({
 })
   .index("by_run", ["runId"])
   .index("by_integration_and_channel", ["integrationId", "channelId"])
+  .index("by_integration_and_channel_and_thread", [
+    "integrationId",
+    "channelId",
+    "threadTs",
+  ])

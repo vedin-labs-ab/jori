@@ -262,6 +262,7 @@ import type * as runtime_shared from "../runtime/shared.js";
 import type * as runtime_slack_lifecycle from "../runtime/slack/lifecycle.js";
 import type * as runtime_slack_source from "../runtime/slack/source.js";
 import type * as runtime_slack_status from "../runtime/slack/status.js";
+import type * as runtime_slack_target from "../runtime/slack/target.js";
 import type * as runtime_tools from "../runtime/tools.js";
 import type * as sessions_cursor from "../sessions/cursor.js";
 import type * as sessions_data from "../sessions/data.js";
@@ -536,6 +537,7 @@ declare const fullApi: ApiFromModules<{
   "runtime/slack/lifecycle": typeof runtime_slack_lifecycle;
   "runtime/slack/source": typeof runtime_slack_source;
   "runtime/slack/status": typeof runtime_slack_status;
+  "runtime/slack/target": typeof runtime_slack_target;
   "runtime/tools": typeof runtime_tools;
   "sessions/cursor": typeof sessions_cursor;
   "sessions/data": typeof sessions_data;
