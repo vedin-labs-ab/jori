@@ -3,7 +3,6 @@ import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, mutation } from "../_generated/server"
 import { continuePendingConversationRun } from "../conversations/data"
 import { requireWorkerSecret } from "./shared"
-import { recordSlackRunState } from "./slack/lifecycle"
 
 export const record = mutation({
   args: {
@@ -54,7 +53,6 @@ export const record = mutation({
     })
 
     await patchExecutionStatus(ctx, args)
-    await patchSlackStatus(ctx, args)
     await patchSessionStatus(ctx, args)
 
     return { created: true }
@@ -76,35 +74,6 @@ async function patchSessionStatus(
     runId: args.runId,
     now: Date.now(),
   })
-}
-
-async function patchSlackStatus(
-  ctx: MutationCtx,
-  args: {
-    payload?: unknown
-    runId: Id<"runs">
-    type: string
-  }
-) {
-  if (args.type === "run.started") {
-    await recordSlackRunState(ctx, { runId: args.runId, state: "working" })
-
-    return
-  }
-
-  if (args.type === "run.completed") {
-    await recordSlackRunState(ctx, { runId: args.runId, state: "completed" })
-
-    return
-  }
-
-  if (args.type === "run.failed") {
-    await recordSlackRunState(ctx, {
-      runId: args.runId,
-      state: "failed",
-      error: readPayloadString(args.payload, "error"),
-    })
-  }
 }
 
 async function patchExecutionStatus(

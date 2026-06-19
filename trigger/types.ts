@@ -56,6 +56,10 @@ export type RuntimeMessage = {
   id: ConvexId<"messages">
   integration: string
   observedAt: number | null
+  routing: {
+    reply: string | null
+    route: "agent" | "ignore" | "reply"
+  } | null
   text: string
   type: string
 }

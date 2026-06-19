@@ -50,12 +50,22 @@ export function collectPendingBatch(
   return { cursor, hasMore, messages: pending }
 }
 
-export function formatRuntimeMessage(message: Doc<"messages">) {
+export function formatRuntimeMessage(
+  message: Doc<"messages">,
+  routing: Pick<Doc<"routing">, "reply" | "route"> | null = null
+) {
   return {
     id: message._id,
     createdAt: message.createdAt,
     integration: message.integration,
     observedAt: message.observedAt ?? null,
+    routing:
+      routing === null
+        ? null
+        : {
+            reply: routing.reply ?? null,
+            route: routing.route,
+          },
     text: message.text ?? "",
     type: message.type,
   }
