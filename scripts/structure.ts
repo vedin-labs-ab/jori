@@ -31,6 +31,7 @@ const sourceExtensions = new Set([
 ])
 
 const skippedDirectories = [
+  ".claude",
   ".git",
   ".trigger",
   ".tanstack",
