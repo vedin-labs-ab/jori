@@ -32,6 +32,7 @@ export async function deliverFinalReply(
     const deliveryId = await sendReply(target, content)
 
     await ctx.runMutation(internal.routing.replies.recordFinalReplyDelivery, {
+      content,
       deliveryId,
       routingId: target.routingId,
     })

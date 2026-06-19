@@ -5,9 +5,10 @@ import {
 } from "../model"
 import { promptTemplates } from "../prompts/generated"
 import { type MessageRoutingContext } from "./context"
+import { quickReplyDecision } from "./quick"
 
 const defaultIntakeModel = "z-ai/glm-5.2"
-const maxOutputTokens = 256
+const maxOutputTokens = 128
 const defaultAddressedReply = "What can I help with?"
 const intakeProviderRouting = {
   requireParameters: true,
@@ -26,6 +27,12 @@ export async function decideRoute(
 ): Promise<IntakeDecision> {
   if (!hasText(context.currentMessage.text)) {
     return { route: "ignore" }
+  }
+
+  const quickDecision = quickReplyDecision(context)
+
+  if (quickDecision !== null) {
+    return quickDecision
   }
 
   try {

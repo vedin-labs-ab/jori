@@ -3,6 +3,7 @@ import { type ActionCtx } from "../../_generated/server"
 import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
+  isSlackApprovalDecisionText,
 } from "../../approvals/slack"
 import { newlyRecordedMessageId } from "../../messages/data"
 import { createIntegrationActor } from "../../shared/actor"
@@ -127,28 +128,40 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
-  const actorProfile = await getSlackActorProfile(ctx, {
-    accountId: message.accountId,
-    actorId: message.actorId,
-  })
+  return await handleSlackMessageEvent(ctx, message)
+}
 
-  if (
-    await handleSlackApprovalDecision(ctx, {
+async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
+  if (isSlackApprovalDecisionText(message.text)) {
+    const actorProfile = await getSlackActorProfile(ctx, {
       accountId: message.accountId,
       actorId: message.actorId,
-      actorEmail: actorProfile?.email,
-      actorName: actorProfile?.name,
-      text: message.text,
-      data: message.data,
     })
-  ) {
-    return Response.json({ ok: true })
+
+    if (
+      await handleSlackApprovalDecision(ctx, {
+        accountId: message.accountId,
+        actorId: message.actorId,
+        actorEmail: actorProfile?.email,
+        actorName: actorProfile?.name,
+        text: message.text,
+        data: message.data,
+      })
+    ) {
+      return Response.json({ ok: true })
+    }
   }
 
-  const data = await enrichSlackMessageData(ctx, {
-    accountId: message.accountId,
-    data: message.data,
-  })
+  const [actorProfile, data] = await Promise.all([
+    getSlackActorProfile(ctx, {
+      accountId: message.accountId,
+      actorId: message.actorId,
+    }),
+    enrichSlackMessageData(ctx, {
+      accountId: message.accountId,
+      data: message.data,
+    }),
+  ])
 
   const result = await ctx.runMutation(internal.messages.slack.record, {
     accountId: message.accountId,
@@ -175,6 +188,8 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
 
   return Response.json({ ok: true })
 }
+
+type SlackMessage = NonNullable<ReturnType<typeof getSlackMessage>>
 
 export async function handleSlackInteractions(
   ctx: ActionCtx,

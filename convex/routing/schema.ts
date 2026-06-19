@@ -21,6 +21,7 @@ export const routing = defineTable({
   replyMessageTs: v.optional(v.string()),
   replyClaimUntil: v.optional(v.number()),
   replyError: v.optional(v.string()),
+  finalReply: v.optional(v.string()),
   finalReplyMessageTs: v.optional(v.string()),
   finalReplyClaimUntil: v.optional(v.number()),
   finalReplyError: v.optional(v.string()),

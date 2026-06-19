@@ -1,10 +1,9 @@
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { getActorDisplayName } from "../shared/actor"
 import { routingMessageText } from "./surface"
 
 const recentConversationLimit = 16
-const finalEventLimit = 5
 
 export type RoutingConversationEntry = {
   actor: string | null
@@ -24,8 +23,10 @@ export async function recentConversation(
     return [messageEntry(message, integration)]
   }
 
-  const messages = await recentMessages(ctx, message)
-  const replies = await recentMiloReplies(ctx, message)
+  const [messages, replies] = await Promise.all([
+    recentMessages(ctx, message),
+    recentMiloReplies(ctx, message),
+  ])
 
   return mergeRecentConversation([
     ...messages.map((entry) => messageEntry(entry, integration)),
@@ -93,21 +94,21 @@ async function recentMiloReplies(ctx: QueryCtx, message: Doc<"messages">) {
     .order("desc")
     .take(recentConversationLimit)
 
-  return await routingReplyEntries(ctx, routings)
+  return routingReplyEntries(routings)
 }
 
-async function routingReplyEntries(ctx: QueryCtx, routings: Doc<"routing">[]) {
+function routingReplyEntries(routings: Doc<"routing">[]) {
   const entries: RoutingConversationEntry[] = []
 
   for (const routing of routings) {
-    entries.push(...(await routingEntries(ctx, routing)))
+    entries.push(...routingEntries(routing))
   }
 
   return entries
 }
 
-async function routingEntries(ctx: QueryCtx, routing: Doc<"routing">) {
-  return [quickReplyEntry(routing), await finalReplyEntry(ctx, routing)].filter(
+function routingEntries(routing: Doc<"routing">) {
+  return [quickReplyEntry(routing), finalReplyEntry(routing)].filter(
     isConversationEntry
   )
 }
@@ -125,25 +126,21 @@ function quickReplyEntry(routing: Doc<"routing">) {
   })
 }
 
-async function finalReplyEntry(ctx: QueryCtx, routing: Doc<"routing">) {
+function finalReplyEntry(routing: Doc<"routing">) {
   if (
     routing.finalReplyMessageTs === undefined ||
-    routing.runId === undefined
+    routing.finalReply === undefined
   ) {
     return null
   }
 
-  const text = await readFinalReplyText(ctx, routing.runId)
-
-  return text === undefined
-    ? null
-    : miloReplyEntry({
-        createdAt:
-          deliveryTimestampMs(routing.finalReplyMessageTs) ?? routing.updatedAt,
-        id: `${routing._id}:final`,
-        text,
-        type: "milo.final_reply",
-      })
+  return miloReplyEntry({
+    createdAt:
+      deliveryTimestampMs(routing.finalReplyMessageTs) ?? routing.updatedAt,
+    id: `${routing._id}:final`,
+    text: routing.finalReply,
+    type: "milo.final_reply",
+  })
 }
 
 function miloReplyEntry(args: {
@@ -160,31 +157,6 @@ function miloReplyEntry(args: {
     text: args.text,
     type: args.type,
   }
-}
-
-async function readFinalReplyText(ctx: QueryCtx, runId: Id<"runs">) {
-  const events = await ctx.db
-    .query("runtimeEvents")
-    .withIndex("by_run", (query) => query.eq("runId", runId))
-    .order("desc")
-    .take(finalEventLimit)
-
-  return events
-    .filter((event) => event.type === "message.final")
-    .map((event) => readPayloadString(event.payload, "content"))
-    .find((content) => content !== undefined)
-}
-
-function readPayloadString(payload: unknown, key: string) {
-  if (typeof payload !== "object" || payload === null || !(key in payload)) {
-    return undefined
-  }
-
-  const value = (payload as Record<string, unknown>)[key]
-
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
 }
 
 function deliveryTimestampMs(value: string) {
