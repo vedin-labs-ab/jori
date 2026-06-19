@@ -3,7 +3,6 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import {
   type ActionCtx,
-  internalAction,
   internalMutation,
   type MutationCtx,
 } from "../../_generated/server"
@@ -17,48 +16,48 @@ type SlackTarget = {
   status: Doc<"runtimeSlackStatuses">
 }
 
-export const publishWorking = internalAction({
+// Called directly from the Slack events HTTP action (not via ctx.runAction) so
+// the working status is re-asserted in the fewest hops after a user message
+// clears it: one claim mutation, then the setStatus call.
+export async function publishWorkingStatus(
+  ctx: ActionCtx,
   args: {
-    accountId: v.string(),
-    channelId: v.string(),
-    threadTs: v.string(),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    let target: SlackTarget | null = null
+    accountId: string
+    channelId: string
+    threadTs: string
+  }
+) {
+  let target: SlackTarget | null = null
 
-    try {
-      target = await claimWorkingTarget(ctx, args)
+  try {
+    target = await claimWorkingTarget(ctx, args)
 
-      if (target === null) {
-        return null
-      }
-
-      await setSlackThreadStatus(target.integration, {
-        channelId: target.status.channelId,
-        status: "is working...",
-        threadTs: target.status.threadTs,
-      })
-      await ctx.runMutation(internal.runtime.slack.status.recordDelivery, {
-        runId: target.status.runId,
-        state: "working",
-        now: Date.now(),
-      })
-    } catch (error) {
-      if (target === null) {
-        return null
-      }
-
-      await ctx.runMutation(internal.runtime.slack.status.recordFailure, {
-        error: formatRuntimeError(error),
-        runId: target.status.runId,
-        now: Date.now(),
-      })
+    if (target === null) {
+      return
     }
 
-    return null
-  },
-})
+    await setSlackThreadStatus(target.integration, {
+      channelId: target.status.channelId,
+      status: "is working...",
+      threadTs: target.status.threadTs,
+    })
+    await ctx.runMutation(internal.runtime.slack.status.recordDelivery, {
+      runId: target.status.runId,
+      state: "working",
+      now: Date.now(),
+    })
+  } catch (error) {
+    if (target === null) {
+      return
+    }
+
+    await ctx.runMutation(internal.runtime.slack.status.recordFailure, {
+      error: formatRuntimeError(error),
+      runId: target.status.runId,
+      now: Date.now(),
+    })
+  }
+}
 
 export const claimWorking = internalMutation({
   args: {

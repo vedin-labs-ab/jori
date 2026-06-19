@@ -4,6 +4,7 @@ import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
 } from "../../approvals/slack"
+import { publishWorkingStatus } from "../../runtime/slack/target"
 import { createIntegrationActor } from "../../shared/actor"
 import {
   readCallbackState,
@@ -127,7 +128,7 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
   }
 
   if (message.data.channelId !== undefined) {
-    await ctx.runAction(internal.runtime.slack.target.publishWorking, {
+    await publishWorkingStatus(ctx, {
       accountId: message.accountId,
       channelId: message.data.channelId,
       threadTs: message.conversationId,
