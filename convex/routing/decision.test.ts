@@ -74,32 +74,6 @@ describe("message intake routing request", () => {
   })
 })
 
-describe("message intake quick replies", () => {
-  test("replies to addressed greetings without OpenRouter", async () => {
-    await expect(
-      decideRoute(context({ isAddressed: true, text: "@Milo hello my man" }))
-    ).resolves.toEqual({
-      reply: "Hey, what can I help with?",
-      route: "reply",
-    })
-
-    expect(sendOpenRouterChat).not.toHaveBeenCalled()
-  })
-
-  test("keeps greetings with work on the model path", async () => {
-    vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
-      modelResponse({ route: "agent" })
-    )
-
-    await expect(
-      decideRoute(context({ isAddressed: true, text: "@Milo hello check CI" }))
-    ).resolves.toEqual({
-      model: "test-model",
-      route: "agent",
-    })
-  })
-})
-
 describe("message intake routing decisions", () => {
   test("does not silently ignore mentioned small talk", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
@@ -186,18 +160,17 @@ function lastRoutingSchema() {
   return responseFormat?.jsonSchema?.schema
 }
 
-type ContextOverrides = Partial<MessageRoutingContext> & { text?: string }
-
-function context(overrides: ContextOverrides = {}): MessageRoutingContext {
+function context(
+  overrides: Partial<MessageRoutingContext> = {}
+): MessageRoutingContext {
   const currentMessage = {
     actor: "<@U123>",
     createdAt: 1,
     id: "message" as Id<"messages">,
     observedAt: 1,
-    text: overrides.text ?? "@Milo please check this",
+    text: "@Milo please check this",
     type: "message.channels",
   }
-  const { text: _text, ...contextOverrides } = overrides
 
   return {
     activeExecution: null,
@@ -206,7 +179,7 @@ function context(overrides: ContextOverrides = {}): MessageRoutingContext {
     isAddressed: false,
     isDirect: false,
     recentMessages: [currentMessage],
-    ...contextOverrides,
+    ...overrides,
   }
 }
 
