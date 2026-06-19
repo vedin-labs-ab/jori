@@ -127,6 +127,14 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
+  if (message.data.channelId !== undefined) {
+    await ctx.runAction(internal.runtime.slack.target.publishWorking, {
+      accountId: message.accountId,
+      channelId: message.data.channelId,
+      threadTs: message.conversationId,
+    })
+  }
+
   const actorEmail = await getSlackActorEmail(ctx, {
     accountId: message.accountId,
     actorId: message.actorId,
