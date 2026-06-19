@@ -7,6 +7,7 @@ import {
 
 const defaultIntakeModel = "minimax/minimax-m3"
 const maxOutputTokens = 256
+const defaultAddressedReply = "What can I help with?"
 
 export type IntakeDecision = {
   error?: string
@@ -52,7 +53,7 @@ export async function decideRoute(
   try {
     const response = await sendOpenRouterChat(createRequest(context))
     const text = readAssistantText(response)
-    const decision = normalizeDecision(JSON.parse(text))
+    const decision = normalizeDecision(JSON.parse(text), context)
 
     return { ...decision, model: response.model }
   } catch (error) {
@@ -89,14 +90,12 @@ function routeMessages(context: SlackRoutingContext): OpenRouterChatMessage[] {
     {
       role: "system",
       content: [
-        "Route this Slack message for Milo.",
-        "You are only a traffic light. Do not call tools, inspect systems, or rewrite the user's task.",
-        "Return ignore when Milo should not start new work.",
-        "Return reply only for a short answer that needs no tools, inspection, verification, or agent lifecycle.",
-        "Return agent when the message requests work, changes active work, answers a question Milo needs, asks to stop, or may need tools.",
-        "If route is ignore, do not include reply.",
-        "If route is agent, reply may be a short non-completion acknowledgement. Do not claim work has been done.",
-        "Return only JSON matching the schema.",
+        "Route this Slack message for Milo. Return one JSON object. No prose.",
+        "ignore: not for Milo; only unaddressed channel chatter outside active work.",
+        "reply: for Milo; greeting, thanks, or simple no-tool question.",
+        "agent: work, tools, verification, state/status, stop/change request, or active-run input.",
+        "Uncertain addressed messages -> agent. Never ignore addressed small talk.",
+        "reply field: omit for ignore; one sentence for reply; optional ack for agent, never completion.",
       ].join("\n"),
     },
     {
@@ -118,7 +117,10 @@ function intakeDecisionSchema() {
   }
 }
 
-function normalizeDecision(value: unknown): IntakeDecision {
+function normalizeDecision(
+  value: unknown,
+  context: SlackRoutingContext
+): IntakeDecision {
   if (typeof value !== "object" || value === null) {
     throw new Error("Intake decision must be an object.")
   }
@@ -132,14 +134,46 @@ function normalizeDecision(value: unknown): IntakeDecision {
   }
 
   if (route === "reply" && reply === undefined) {
-    throw new Error("Intake reply route requires reply.")
+    return missingReplyDecision(context)
   }
 
   if (route === "ignore") {
-    return { route }
+    return ignoredDecision(context)
   }
 
   return { route, ...(reply === undefined ? {} : { reply }) }
+}
+
+function ignoredDecision(context: SlackRoutingContext): IntakeDecision {
+  return addressedFallbackDecision(context) ?? { route: "ignore" }
+}
+
+function missingReplyDecision(context: SlackRoutingContext): IntakeDecision {
+  const decision = addressedFallbackDecision(context)
+
+  if (decision !== null) {
+    return decision
+  }
+
+  throw new Error("Intake reply route requires reply.")
+}
+
+function addressedFallbackDecision(
+  context: SlackRoutingContext
+): IntakeDecision | null {
+  if (context.activeExecution !== null) {
+    return { route: "agent" }
+  }
+
+  if (isAddressedToMilo(context)) {
+    return { reply: defaultAddressedReply, route: "reply" }
+  }
+
+  return null
+}
+
+function isAddressedToMilo(context: SlackRoutingContext) {
+  return context.isDirectMessage || context.isMention
 }
 
 function fallbackDecision(context: SlackRoutingContext): IntakeDecision {
