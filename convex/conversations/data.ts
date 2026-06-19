@@ -2,7 +2,10 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { createQueuedExecution } from "../runtime/outbox"
-import { createSlackRunStatus } from "../runtime/slack/lifecycle"
+import {
+  createSlackRunStatus,
+  reassertSlackRunStatus,
+} from "../runtime/slack/lifecycle"
 import {
   findReusableSession,
   readPendingMessages,
@@ -54,6 +57,13 @@ export async function startMessageRun(
       : await findReusableSession(ctx, conversation._id)
 
   if (conversation !== null && activeSession !== null) {
+    if (activeSession.runId !== undefined) {
+      await reassertSlackRunStatus(ctx, {
+        runId: activeSession.runId,
+        now: args.now,
+      })
+    }
+
     return {
       status: "continued" as const,
       conversationId: conversation._id,
