@@ -7,9 +7,13 @@ import {
 import { promptTemplates } from "../prompts/generated"
 import { type SlackConversationEntry } from "./history"
 
-const defaultIntakeModel = "minimax/minimax-m3"
+const defaultIntakeModel = "z-ai/glm-5.2"
 const maxOutputTokens = 256
 const defaultAddressedReply = "What can I help with?"
+const intakeProviderRouting = {
+  requireParameters: true,
+  sort: "latency",
+} as const
 
 export type IntakeDecision = {
   error?: string
@@ -68,7 +72,7 @@ function createRequest(context: SlackRoutingContext): OpenRouterChatInput {
     maxTokens: maxOutputTokens,
     messages: routeMessages(context),
     model: readIntakeModel(),
-    provider: { requireParameters: true, sort: "latency" },
+    provider: intakeProviderRouting,
     responseFormat: {
       type: "json_schema",
       jsonSchema: {

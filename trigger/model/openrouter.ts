@@ -1,4 +1,7 @@
-import { createOpenRouter } from "@openrouter/ai-sdk-provider"
+import {
+  createOpenRouter,
+  type OpenRouterChatSettings,
+} from "@openrouter/ai-sdk-provider"
 import {
   type ModelMessage as AiModelMessage,
   generateText,
@@ -16,6 +19,10 @@ import {
 
 const defaultModel = "z-ai/glm-5.2"
 const defaultReasoningEffort = "xhigh"
+const agentProviderRouting = {
+  require_parameters: true,
+  sort: "price",
+} satisfies NonNullable<OpenRouterChatSettings["provider"]>
 const reasoningEfforts = new Set([
   "high",
   "low",
@@ -24,7 +31,13 @@ const reasoningEfforts = new Set([
   "none",
   "xhigh",
 ])
-type ReasoningEffort = "high" | "low" | "medium" | "minimal" | "none" | "xhigh"
+export type ReasoningEffort =
+  | "high"
+  | "low"
+  | "medium"
+  | "minimal"
+  | "none"
+  | "xhigh"
 
 export class OpenRouterModelRuntime implements ModelRuntime {
   private readonly config = requireModelConfig()
@@ -47,9 +60,7 @@ export class OpenRouterModelRuntime implements ModelRuntime {
       ...prompt,
       model: this.provider.chat(
         this.config.model,
-        reasoningEffort === undefined
-          ? {}
-          : { reasoning: { effort: reasoningEffort } }
+        createOpenRouterModelSettings(reasoningEffort)
       ),
       toolChoice: args.tools.length === 0 ? "none" : "auto",
       tools: toAiTools(args.tools),
@@ -68,6 +79,17 @@ export class OpenRouterModelRuntime implements ModelRuntime {
       toolCalls,
       type: "tool_calls",
     }
+  }
+}
+
+export function createOpenRouterModelSettings(
+  reasoningEffort: ReasoningEffort | undefined
+): OpenRouterChatSettings {
+  return {
+    provider: agentProviderRouting,
+    ...(reasoningEffort === undefined
+      ? {}
+      : { reasoning: { effort: reasoningEffort } }),
   }
 }
 
