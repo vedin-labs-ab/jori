@@ -60,14 +60,14 @@ test("includes artifact prompt model in prompt cache identity", () => {
   const originalModel = process.env.OPENROUTER_ARTIFACT_MODEL
 
   try {
-    process.env.OPENROUTER_ARTIFACT_MODEL = "z-ai/glm-5.2"
+    process.env.OPENROUTER_ARTIFACT_MODEL = "minimax/minimax-m3"
 
     expect(
       createArtifactPlatformToolCacheArgs("promptModel", {
         input: { message: "hello" },
       })
     ).toEqual({
-      _miloCache: { model: "z-ai/glm-5.2" },
+      _miloCache: { model: "minimax/minimax-m3" },
       input: { message: "hello" },
     })
 

@@ -14,8 +14,7 @@ import {
   type ModelToolCall,
 } from "./types"
 
-const defaultModel = "z-ai/glm-5.2"
-const defaultReasoningEffort = "xhigh"
+const defaultModel = "minimax/minimax-m3"
 const reasoningEfforts = new Set([
   "high",
   "low",
@@ -24,6 +23,7 @@ const reasoningEfforts = new Set([
   "none",
   "xhigh",
 ])
+type ReasoningEffort = "high" | "low" | "medium" | "minimal" | "none" | "xhigh"
 
 export class OpenRouterModelRuntime implements ModelRuntime {
   private readonly config = requireModelConfig()
@@ -41,13 +41,15 @@ export class OpenRouterModelRuntime implements ModelRuntime {
     tools: ModelTool[]
   }): Promise<ModelResponse> {
     const prompt = toAiPrompt(args.messages)
+    const reasoningEffort = readReasoningEffort()
     const response = await generateText({
       ...prompt,
-      model: this.provider.chat(this.config.model, {
-        reasoning: {
-          effort: readReasoningEffort(),
-        },
-      }),
+      model: this.provider.chat(
+        this.config.model,
+        reasoningEffort === undefined
+          ? {}
+          : { reasoning: { effort: reasoningEffort } }
+      ),
       toolChoice: args.tools.length === 0 ? "none" : "auto",
       tools: toAiTools(args.tools),
     })
@@ -195,9 +197,11 @@ function requireModelConfig() {
 }
 
 function readReasoningEffort() {
-  const effort =
-    readEnvironmentVariable("MILO_OPENROUTER_REASONING_EFFORT") ??
-    defaultReasoningEffort
+  const effort = readEnvironmentVariable("MILO_OPENROUTER_REASONING_EFFORT")
+
+  if (effort === undefined) {
+    return undefined
+  }
 
   if (!reasoningEfforts.has(effort)) {
     throw new Error(
@@ -205,7 +209,7 @@ function readReasoningEffort() {
     )
   }
 
-  return effort as "high" | "low" | "medium" | "minimal" | "none" | "xhigh"
+  return effort as ReasoningEffort
 }
 
 function readEnvironmentVariable(name: string) {
