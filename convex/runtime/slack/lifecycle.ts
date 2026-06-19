@@ -67,6 +67,29 @@ export async function recordSlackRunState(
   }
 }
 
+export async function reassertSlackRunStatus(
+  ctx: MutationCtx,
+  args: {
+    now: number
+    runId: Id<"runs">
+  }
+) {
+  const status = await findSlackStatus(ctx, args.runId)
+
+  if (status === null || status.state !== "working") {
+    return
+  }
+
+  await ctx.db.patch(status._id, {
+    lastDeliveredState: undefined,
+    lastError: undefined,
+    publishClaimUntil: undefined,
+    state: "working",
+    updatedAt: args.now,
+  })
+  await schedulePublish(ctx, args.runId)
+}
+
 async function findSlackStatus(ctx: MutationCtx, runId: Id<"runs">) {
   return await ctx.db
     .query("runtimeSlackStatuses")
