@@ -6,6 +6,14 @@ import { notionToolPermissionRows } from "./notion"
 export const toolPermissionRows = [
   [
     "milo",
+    "list_capabilities",
+    "List capabilities",
+    "List current run tools, connected integration capabilities, and integrations available to connect.",
+    "read",
+    "required",
+  ],
+  [
+    "milo",
     "save_file",
     "Save file",
     "Persist a generated file so it can be shared or attached by other tools.",

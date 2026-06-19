@@ -19,6 +19,7 @@ import {
   createPromptedToolApproval,
 } from "./approval"
 import { authenticateBrokerRequest } from "./auth"
+import { listCapabilities } from "./capabilities"
 import { callMiloTool } from "./milo"
 import { callProviderTool, fetchGitHubTarball } from "./tools"
 
@@ -77,6 +78,10 @@ export async function callBrokerTool(
 ): Promise<unknown> {
   if (request.surface === "milo") {
     const { mode } = authorizeTool(context, request)
+
+    if (request.tool === "list_capabilities") {
+      return listCapabilities(context)
+    }
 
     if (mode === "prompted" && request.approved !== true) {
       return await createPromptedToolApproval(ctx, context, request)

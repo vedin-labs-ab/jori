@@ -103,6 +103,9 @@ const triggerSchema = () => ({
 })
 
 export const miloToolInputSchemas = {
+  list_capabilities: objectSchema({
+    properties: {},
+  }),
   save_file: objectSchema({
     required: ["path"],
     properties: {

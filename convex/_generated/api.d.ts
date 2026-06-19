@@ -80,6 +80,7 @@ import type * as automations_subscriptions_data from "../automations/subscriptio
 import type * as broker_approval_args from "../broker/approval/args.js";
 import type * as broker_approval_index from "../broker/approval/index.js";
 import type * as broker_auth from "../broker/auth.js";
+import type * as broker_capabilities from "../broker/capabilities.js";
 import type * as broker_files from "../broker/files.js";
 import type * as broker_mcp from "../broker/mcp.js";
 import type * as broker_milo from "../broker/milo.js";
@@ -353,6 +354,7 @@ declare const fullApi: ApiFromModules<{
   "broker/approval/args": typeof broker_approval_args;
   "broker/approval/index": typeof broker_approval_index;
   "broker/auth": typeof broker_auth;
+  "broker/capabilities": typeof broker_capabilities;
   "broker/files": typeof broker_files;
   "broker/mcp": typeof broker_mcp;
   "broker/milo": typeof broker_milo;

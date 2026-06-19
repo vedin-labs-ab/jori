@@ -14,6 +14,7 @@ import { postSlackMessage } from "../tools/slack"
 import { parsePromptedToolApproval } from "./args"
 
 export type ApprovalBrokerContext = {
+  connectedIntegrations: Doc<"integrations">[]
   execution: Doc<"executions">
   input: AgentRuntimeInput
   integrations: Doc<"integrations">[]
