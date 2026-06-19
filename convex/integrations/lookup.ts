@@ -24,3 +24,26 @@ export const activeByIntegrationExternal = internalQuery({
     return integration
   },
 })
+
+export const listActiveForRuntime = internalQuery({
+  args: {
+    tenantId: v.string(),
+    ownerId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const integrations = await ctx.db
+      .query("integrations")
+      .withIndex("by_tenant_and_status", (query) =>
+        query.eq("tenantId", args.tenantId).eq("status", "active")
+      )
+      .collect()
+
+    return integrations.filter((integration) => {
+      if (integration.scope !== "user") {
+        return true
+      }
+
+      return args.ownerId !== undefined && integration.ownerId === args.ownerId
+    })
+  },
+})

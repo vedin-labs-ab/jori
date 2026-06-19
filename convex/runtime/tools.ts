@@ -90,6 +90,13 @@ async function loadBrokerContext(
       tenantId: execution.tenantId,
     }
   )
+  const connectedIntegrations = await ctx.runQuery(
+    internal.integrations.lookup.listActiveForRuntime,
+    {
+      tenantId: execution.tenantId,
+      ownerId: execution.createdBy,
+    }
+  )
   const integrations: Doc<"integrations">[] = []
 
   for (const integration of input.integrations) {
@@ -97,6 +104,7 @@ async function loadBrokerContext(
   }
 
   return {
+    connectedIntegrations,
     execution,
     input,
     integrations,
