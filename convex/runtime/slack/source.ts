@@ -28,13 +28,12 @@ export const claimSlackFinal = internalMutation({
     await ctx.db.patch(status._id, {
       lastError: undefined,
       replyClaimUntil: args.now + claimLeaseMs,
-      state: "completed",
       updatedAt: args.now,
     })
 
     return {
       integration,
-      status: { ...status, state: "completed" },
+      status,
     }
   },
 })
@@ -73,7 +72,6 @@ export const prepareSlackToolMessage = internalMutation({
     await ctx.db.patch(status._id, {
       lastError: undefined,
       ...(recordFinal ? { replyClaimUntil: args.now + claimLeaseMs } : {}),
-      state: "completed",
       updatedAt: args.now,
     })
 

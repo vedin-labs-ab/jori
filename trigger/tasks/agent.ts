@@ -199,7 +199,7 @@ async function completeRun(
 ) {
   const sequence = step * toolSequenceOffset
 
-  await runtime.convex.deliverFinalMessage({
+  const delivery = await runtime.convex.deliverFinalMessage({
     content,
     runId: runtime.context.run.id,
   })
@@ -211,6 +211,7 @@ async function completeRun(
     attempt,
     {
       content,
+      delivered: delivery.delivered,
     }
   )
   await recordRunEvent(
