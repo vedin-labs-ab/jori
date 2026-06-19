@@ -63,7 +63,7 @@ type ObservedMessage = {
 
 type IngestMessageResult =
   | { status: "started"; runId: Id<"runs"> }
-  | { status: "continued"; sessionId: Id<"sessions"> }
+  | { status: "continued"; runId?: Id<"runs">; sessionId: Id<"sessions"> }
   | { status: "missing_integration" | "ignored_bot" | "duplicate" }
   | { status: "ignored" | "ignored_empty"; messageId: Id<"messages"> }
 

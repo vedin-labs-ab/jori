@@ -57,19 +57,23 @@ export async function startMessageRun(
       : await findReusableSession(ctx, conversation._id)
 
   if (conversation !== null && activeSession !== null) {
-    if (activeSession.runId !== undefined) {
-      await reassertSlackRunStatus(ctx, {
-        runId: activeSession.runId,
-        now: args.now,
-      })
-    }
-
-    return {
+    const result = {
       status: "continued" as const,
       conversationId: conversation._id,
       messageId: args.message._id,
       sessionId: activeSession._id,
     }
+
+    if (activeSession.runId !== undefined) {
+      await reassertSlackRunStatus(ctx, {
+        runId: activeSession.runId,
+        now: args.now,
+      })
+
+      return { ...result, runId: activeSession.runId }
+    }
+
+    return result
   }
 
   const kind = conversation === null ? "mention" : "reply"
