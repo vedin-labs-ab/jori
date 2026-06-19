@@ -1,4 +1,5 @@
 import { internal } from "../../_generated/api"
+import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import {
   handleSlackApprovalDecision,
@@ -6,7 +7,6 @@ import {
 } from "../../approvals/slack"
 import { createIntegrationActor } from "../../shared/actor"
 import {
-  ingestProviderMessage,
   readCallbackState,
   redirectWithStatus,
   unauthorizedResponse,
@@ -149,8 +149,7 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     data: message.data,
   })
 
-  return await ingestProviderMessage(
-    ctx,
+  const result = await ctx.runMutation(
     internal.messages.ingest.recordSlackMessage,
     {
       accountId: message.accountId,
@@ -167,6 +166,14 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
       data,
     }
   )
+
+  if (hasContinuedRunId(result)) {
+    await ctx.runAction(internal.runtime.slack.status.publish, {
+      runId: result.runId,
+    })
+  }
+
+  return Response.json({ ok: true })
 }
 
 export async function handleSlackInteractions(
@@ -209,4 +216,17 @@ function getSlackUserToken(tokenResult: {
   const token = tokenResult.authed_user?.access_token
 
   return token === "" ? undefined : token
+}
+
+function hasContinuedRunId(
+  result: unknown
+): result is { status: "continued"; runId: Id<"runs"> } {
+  return (
+    typeof result === "object" &&
+    result !== null &&
+    "status" in result &&
+    result.status === "continued" &&
+    "runId" in result &&
+    typeof result.runId === "string"
+  )
 }

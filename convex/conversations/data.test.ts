@@ -60,6 +60,7 @@ test("continues active conversation sessions without starting another run", asyn
   })
 
   expect(result).toMatchObject({
+    runId: "active-run",
     status: "continued",
     sessionId: "session",
   })
