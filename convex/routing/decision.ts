@@ -5,6 +5,7 @@ import {
   sendOpenRouterChat,
 } from "../model"
 import { promptTemplates } from "../prompts/generated"
+import { type SlackConversationEntry } from "./history"
 
 const defaultIntakeModel = "minimax/minimax-m3"
 const maxOutputTokens = 256
@@ -34,14 +35,7 @@ export type SlackRoutingContext = {
   }
   isDirectMessage: boolean
   isMention: boolean
-  recentMessages: Array<{
-    actor: string | null
-    createdAt: number
-    id: Id<"messages">
-    observedAt: number | null
-    text: string
-    type: string
-  }>
+  recentMessages: SlackConversationEntry[]
 }
 
 export async function decideRoute(

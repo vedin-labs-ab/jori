@@ -236,6 +236,7 @@ import type * as routing_context from "../routing/context.js";
 import type * as routing_continuation from "../routing/continuation.js";
 import type * as routing_data from "../routing/data.js";
 import type * as routing_decision from "../routing/decision.js";
+import type * as routing_history from "../routing/history.js";
 import type * as routing_records from "../routing/records.js";
 import type * as routing_replies from "../routing/replies.js";
 import type * as routing_slack from "../routing/slack.js";
@@ -513,6 +514,7 @@ declare const fullApi: ApiFromModules<{
   "routing/continuation": typeof routing_continuation;
   "routing/data": typeof routing_data;
   "routing/decision": typeof routing_decision;
+  "routing/history": typeof routing_history;
   "routing/records": typeof routing_records;
   "routing/replies": typeof routing_replies;
   "routing/slack": typeof routing_slack;
