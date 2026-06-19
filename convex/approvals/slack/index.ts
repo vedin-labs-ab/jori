@@ -12,6 +12,7 @@ type SlackApprovalDecisionInput = {
   accountId: string
   actorId?: string
   actorEmail?: string
+  actorName?: string
   text?: string
   data: unknown
 }
@@ -41,6 +42,7 @@ export async function handleSlackApprovalDecision(
         integration: "slack",
         externalId: input.actorId,
         email: input.actorEmail,
+        name: input.actorName,
       }),
       channelId,
       threadTs:

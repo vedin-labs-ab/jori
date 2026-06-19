@@ -32,11 +32,11 @@ export const getMessageContext = internalQuery({
 
     return {
       activeExecution: active,
-      currentMessage: messageEntry(message),
+      currentMessage: messageEntry(message, integration),
       integration: message.integration,
       isAddressed: audience.isAddressed,
       isDirect: audience.isDirect,
-      recentMessages: await recentConversation(ctx, message),
+      recentMessages: await recentConversation(ctx, message, integration),
     }
   },
 })

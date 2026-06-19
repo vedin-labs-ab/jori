@@ -18,7 +18,7 @@ afterEach(() => {
   restoreIntakeModel(originalIntakeModel)
 })
 
-describe("message intake routing", () => {
+describe("message intake routing request", () => {
   test("uses GLM 5.2 with latency-prioritized provider routing", async () => {
     process.env.OPENROUTER_INTAKE_MODEL = ""
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
@@ -37,9 +37,59 @@ describe("message intake routing", () => {
     })
   })
 
+  test("sends route-specific structured output schema", async () => {
+    vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
+      modelResponse({ route: "agent" })
+    )
+
+    await decideRoute(context({ isAddressed: true }))
+
+    expect(lastRoutingSchema()).toMatchObject({
+      oneOf: [
+        {
+          additionalProperties: false,
+          required: ["route"],
+          properties: {
+            route: { enum: ["ignore"] },
+          },
+        },
+        {
+          additionalProperties: false,
+          required: ["route", "reply"],
+          properties: {
+            route: { enum: ["reply"] },
+            reply: { minLength: 1 },
+          },
+        },
+        {
+          additionalProperties: false,
+          required: ["route"],
+          properties: {
+            route: { enum: ["agent"] },
+            reply: { minLength: 1 },
+          },
+        },
+      ],
+    })
+  })
+})
+
+describe("message intake routing decisions", () => {
   test("does not silently ignore mentioned small talk", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ route: "ignore" })
+    )
+
+    await expect(decideRoute(context({ isAddressed: true }))).resolves.toEqual({
+      model: "test-model",
+      reply: "What can I help with?",
+      route: "reply",
+    })
+  })
+
+  test("recovers when a reply route omits reply text", async () => {
+    vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
+      modelResponse({ route: "reply" })
     )
 
     await expect(decideRoute(context({ isAddressed: true }))).resolves.toEqual({
@@ -102,6 +152,14 @@ function lastRoutingRequest() {
   return request
 }
 
+function lastRoutingSchema() {
+  const responseFormat = lastRoutingRequest().responseFormat as
+    | { jsonSchema?: { schema?: unknown } }
+    | undefined
+
+  return responseFormat?.jsonSchema?.schema
+}
+
 function context(
   overrides: Partial<MessageRoutingContext> = {}
 ): MessageRoutingContext {
@@ -125,7 +183,10 @@ function context(
   }
 }
 
-function modelResponse(content: { route: "agent" | "ignore" | "reply" }) {
+function modelResponse(content: {
+  reply?: string
+  route: "agent" | "ignore" | "reply"
+}) {
   return {
     choices: [
       {

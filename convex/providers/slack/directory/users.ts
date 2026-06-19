@@ -1,13 +1,18 @@
 import { internal } from "../../../_generated/api"
 import { type ActionCtx } from "../../../_generated/server"
 
-export async function getSlackActorEmail(
+export type SlackActorProfile = {
+  email?: string
+  name?: string
+}
+
+export async function getSlackActorProfile(
   ctx: ActionCtx,
   args: {
     accountId: string
     actorId: string | undefined
   }
-) {
+): Promise<SlackActorProfile | undefined> {
   if (args.actorId === undefined) {
     return undefined
   }
@@ -35,17 +40,25 @@ export async function getSlackActorEmail(
     return undefined
   }
 
-  const email = body.user?.profile?.email?.trim()
+  const profile = readSlackProfile(body.user)
 
-  return email === "" ? undefined : email
+  return profile.email === undefined && profile.name === undefined
+    ? undefined
+    : profile
 }
 
 type SlackUserInfo =
   | {
       ok: true
       user?: {
+        name?: string
+        real_name?: string
         profile?: {
+          display_name?: string
+          display_name_normalized?: string
           email?: string
+          real_name?: string
+          real_name_normalized?: string
         }
       }
     }
@@ -53,3 +66,24 @@ type SlackUserInfo =
       ok: false
       error?: string
     }
+
+function readSlackProfile(
+  user: Extract<SlackUserInfo, { ok: true }>["user"]
+): SlackActorProfile {
+  return {
+    email: normalizeSlackProfileString(user?.profile?.email),
+    name:
+      normalizeSlackProfileString(user?.profile?.display_name_normalized) ??
+      normalizeSlackProfileString(user?.profile?.display_name) ??
+      normalizeSlackProfileString(user?.profile?.real_name_normalized) ??
+      normalizeSlackProfileString(user?.profile?.real_name) ??
+      normalizeSlackProfileString(user?.real_name) ??
+      normalizeSlackProfileString(user?.name),
+  }
+}
+
+function normalizeSlackProfileString(value: string | undefined) {
+  const trimmed = value?.trim()
+
+  return trimmed === undefined || trimmed === "" ? undefined : trimmed
+}

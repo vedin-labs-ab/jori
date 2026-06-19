@@ -23,6 +23,19 @@ export type TextReplyTarget = ReplyTarget & {
   text: string
 }
 
+export function routingMessageText(
+  message: Doc<"messages">,
+  integration: Doc<"integrations">
+) {
+  const text = message.text ?? ""
+
+  if (message.integration === "slack") {
+    return slackRoutingMessageText(text, integration)
+  }
+
+  return text
+}
+
 export function messageAudience(
   message: Doc<"messages">,
   integration: Doc<"integrations">
@@ -66,6 +79,25 @@ function isSlackMention(
   const botId = getSlackBotId(integration.data)
 
   return botId !== undefined && (message.text ?? "").includes(`<@${botId}>`)
+}
+
+function slackRoutingMessageText(
+  text: string,
+  integration: Doc<"integrations">
+) {
+  const botId = getSlackBotId(integration.data)
+
+  return botId === undefined
+    ? text
+    : text.replace(slackUserMentionPattern(botId), "@Milo")
+}
+
+function slackUserMentionPattern(userId: string) {
+  return new RegExp(`<@${escapeRegExp(userId)}(?:\\|[^>]+)?>`, "g")
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
 function slackReplyAddress(message: Doc<"messages">): ReplyAddress | null {
