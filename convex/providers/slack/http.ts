@@ -1,10 +1,10 @@
 import { internal } from "../../_generated/api"
+import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
 } from "../../approvals/slack"
-import { publishWorkingStatus } from "../../runtime/slack/target"
 import { createIntegrationActor } from "../../shared/actor"
 import {
   readCallbackState,
@@ -127,14 +127,6 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
-  if (message.data.channelId !== undefined) {
-    await publishWorkingStatus(ctx, {
-      accountId: message.accountId,
-      channelId: message.data.channelId,
-      threadTs: message.conversationId,
-    })
-  }
-
   const actorEmail = await getSlackActorEmail(ctx, {
     accountId: message.accountId,
     actorId: message.actorId,
@@ -157,7 +149,7 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     data: message.data,
   })
 
-  await ctx.runMutation(internal.messages.ingest.recordSlackMessage, {
+  const result = await ctx.runMutation(internal.messages.slack.record, {
     accountId: message.accountId,
     type: message.type,
     externalId: message.externalId,
@@ -171,8 +163,31 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     observedAt: message.observedAt,
     data,
   })
+  const messageId = readRecordedMessageId(result)
+
+  if (messageId !== undefined) {
+    await ctx.scheduler.runAfter(0, internal.routing.slack.route, {
+      messageId,
+    })
+  }
 
   return Response.json({ ok: true })
+}
+
+function readRecordedMessageId(result: unknown) {
+  if (
+    typeof result !== "object" ||
+    result === null ||
+    !("messageId" in result)
+  ) {
+    return undefined
+  }
+
+  const messageId = (result as { messageId?: unknown }).messageId
+
+  return typeof messageId === "string"
+    ? (messageId as Id<"messages">)
+    : undefined
 }
 
 export async function handleSlackInteractions(

@@ -11,15 +11,7 @@ import {
   optionalString,
   requiredString,
 } from "../../../shared/input"
-import {
-  clearSourceSlackStatus,
-  prepareSlackMessageRoute,
-  recordSourceSlackReply,
-  recordSourceSlackReplyFailure,
-} from "./delivery"
 import { postSlackFiles } from "./upload"
-
-export { setSlackThreadStatus } from "./status"
 
 export type SlackBlock = Record<string, unknown>
 
@@ -162,34 +154,14 @@ async function postSlackMessageTool(
   const threadTs = optionalString(args.thread_ts)
   const text = requiredString(args.text, "text")
   const blocks = optionalBlocks(args.blocks)
-  const route = await prepareSlackMessageRoute(context, {
+
+  return await postSlackMessage(integration, {
+    attachments,
+    blocks,
     channel,
-    threadTs,
+    text,
+    thread_ts: threadTs,
   })
-  const statusCleared =
-    route.source && (await clearSourceSlackStatus(context, integration, route))
-
-  let response: unknown
-
-  try {
-    response = await postSlackMessage(integration, {
-      attachments,
-      blocks,
-      channel: route.channelId,
-      text,
-      thread_ts: route.threadTs,
-    })
-  } catch (error) {
-    await recordSourceSlackReplyFailure(context, route, error)
-    throw error
-  }
-
-  await recordSourceSlackReply(context, response, route, {
-    hasAttachments: attachments.length > 0,
-    statusCleared,
-  })
-
-  return response
 }
 
 function optionalBlocks(value: unknown) {

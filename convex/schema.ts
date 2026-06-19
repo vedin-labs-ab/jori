@@ -22,13 +22,9 @@ import { identities } from "./identity/schema"
 import { integrations } from "./integrations/schema"
 import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
+import { routing } from "./routing/schema"
 import { runs } from "./runs/schema"
-import {
-  outbox,
-  runtimeEvents,
-  runtimeSandboxes,
-  runtimeSlackStatuses,
-} from "./runtime/schema"
+import { outbox, runtimeEvents, runtimeSandboxes } from "./runtime/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
 
@@ -46,10 +42,10 @@ export default defineSchema({
   sessions,
   approvals,
   executions,
+  routing,
   runtimeEvents,
   outbox,
   runtimeSandboxes,
-  runtimeSlackStatuses,
   permissions,
   artifacts,
   artifactVersions,

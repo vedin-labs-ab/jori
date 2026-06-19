@@ -152,11 +152,20 @@ async function appendSessionMessages(
 
 function formatSessionMessage(message: RuntimeMessage) {
   const observed = message.observedAt ?? message.createdAt
+  const routing = message.routing
 
   return [
     `New ${message.integration} message in the active conversation.`,
     `Type: ${message.type}`,
     `Observed at: ${new Date(observed).toISOString()}`,
+    ...(routing === null
+      ? []
+      : [
+          `Intake route: ${routing.route}`,
+          ...(routing.reply === null
+            ? []
+            : [`Milo already replied: ${routing.reply}`]),
+        ]),
     "",
     "Message:",
     "```text",

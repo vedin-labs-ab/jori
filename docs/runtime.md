@@ -39,13 +39,13 @@ Actions for raw webhook-style endpoints such as brokered MCP or file uploads.
    environments where waitpoints are unavailable.
 8. Subagent tools create child runs in Convex with `parentRunId` and
    `rootRunId`, then enqueue child Trigger tasks through the same outbox.
-9. Slack ingress acknowledges immediately after Convex records the message and
-   run intent. Convex stores one `runtimeSlackStatuses` record per Slack run and
-   scheduled actions post or update the visible Slack working/completed/failed
-   status from that Convex-backed state.
+9. Slack ingress acknowledges after Convex records the source message. A
+   lightweight Convex-side routing action stores the intake decision, optionally
+   posts a fast direct reply, and starts a Trigger run only when no active
+   thread execution can pick up the message.
 10. Trigger records final messages, errors, sandbox cleanup, and completion
-    state back to Convex. Convex realtime queries and Slack status updates read
-    only Convex state.
+    state back to Convex. Active Slack thread executions drain new source
+    messages and routing metadata at safe points.
 
 ## Idempotency
 

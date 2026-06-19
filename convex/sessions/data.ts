@@ -178,10 +178,30 @@ export const drainMessages = internalMutation({
 
     return {
       hasMore: batch.hasMore,
-      messages: batch.messages.map(formatRuntimeMessage),
+      messages: await formatRuntimeMessages(ctx, batch.messages),
     }
   },
 })
+
+async function formatRuntimeMessages(
+  ctx: MutationCtx,
+  messages: Doc<"messages">[]
+) {
+  const result: ReturnType<typeof formatRuntimeMessage>[] = []
+
+  for (const message of messages) {
+    result.push(formatRuntimeMessage(message, await findRouting(ctx, message)))
+  }
+
+  return result
+}
+
+async function findRouting(ctx: MutationCtx, message: Doc<"messages">) {
+  return await ctx.db
+    .query("routing")
+    .withIndex("by_message", (query) => query.eq("messageId", message._id))
+    .first()
+}
 
 async function findSession(
   ctx: QueryLikeCtx,
