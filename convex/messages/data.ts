@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveUserIdByEmail } from "../identity/identities"
 import { type Actor, actorValidator, getActorEmail } from "../shared/actor"
@@ -25,6 +25,24 @@ export type ObservedMessage = {
   text?: string
   observedAt?: number
   data?: unknown
+}
+
+export function newlyRecordedMessageId(result: unknown) {
+  if (
+    typeof result !== "object" ||
+    result === null ||
+    !("messageId" in result) ||
+    !("status" in result)
+  ) {
+    return undefined
+  }
+
+  const record = result as { messageId?: unknown; status?: unknown }
+  const messageId = record.messageId
+
+  return record.status === "recorded" && typeof messageId === "string"
+    ? (messageId as Id<"messages">)
+    : undefined
 }
 
 export async function findActiveIntegration(

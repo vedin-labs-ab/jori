@@ -1,11 +1,10 @@
-import { type Id } from "../_generated/dataModel"
 import {
   type OpenRouterChatInput,
   type OpenRouterChatMessage,
   sendOpenRouterChat,
 } from "../model"
 import { promptTemplates } from "../prompts/generated"
-import { type SlackConversationEntry } from "./history"
+import { type MessageRoutingContext } from "./context"
 
 const defaultIntakeModel = "z-ai/glm-5.2"
 const maxOutputTokens = 256
@@ -22,28 +21,8 @@ export type IntakeDecision = {
   route: "agent" | "ignore" | "reply"
 }
 
-export type SlackRoutingContext = {
-  activeExecution: {
-    executionId: Id<"executions">
-    latestStatus: string | null
-    runId: Id<"runs">
-    status: string
-  } | null
-  currentMessage: {
-    actor: string | null
-    createdAt: number
-    id: Id<"messages">
-    observedAt: number | null
-    text: string
-    type: string
-  }
-  isDirectMessage: boolean
-  isMention: boolean
-  recentMessages: SlackConversationEntry[]
-}
-
 export async function decideRoute(
-  context: SlackRoutingContext
+  context: MessageRoutingContext
 ): Promise<IntakeDecision> {
   if (!hasText(context.currentMessage.text)) {
     return { route: "ignore" }
@@ -64,10 +43,12 @@ export async function decideRoute(
 }
 
 export function formatRoutingError(error: unknown) {
-  return error instanceof Error ? error.message : "Slack intake routing failed"
+  return error instanceof Error
+    ? error.message
+    : "Message intake routing failed"
 }
 
-function createRequest(context: SlackRoutingContext): OpenRouterChatInput {
+function createRequest(context: MessageRoutingContext): OpenRouterChatInput {
   return {
     maxTokens: maxOutputTokens,
     messages: routeMessages(context),
@@ -76,7 +57,7 @@ function createRequest(context: SlackRoutingContext): OpenRouterChatInput {
     responseFormat: {
       type: "json_schema",
       jsonSchema: {
-        name: "slack_intake_decision",
+        name: "message_intake_decision",
         strict: true,
         schema: intakeDecisionSchema(),
       },
@@ -84,11 +65,13 @@ function createRequest(context: SlackRoutingContext): OpenRouterChatInput {
   }
 }
 
-function routeMessages(context: SlackRoutingContext): OpenRouterChatMessage[] {
+function routeMessages(
+  context: MessageRoutingContext
+): OpenRouterChatMessage[] {
   return [
     {
       role: "system",
-      content: promptTemplates["routing/slack"],
+      content: promptTemplates["routing/message"],
     },
     {
       role: "user",
@@ -111,7 +94,7 @@ function intakeDecisionSchema() {
 
 function normalizeDecision(
   value: unknown,
-  context: SlackRoutingContext
+  context: MessageRoutingContext
 ): IntakeDecision {
   if (typeof value !== "object" || value === null) {
     throw new Error("Intake decision must be an object.")
@@ -136,11 +119,11 @@ function normalizeDecision(
   return { route, ...(reply === undefined ? {} : { reply }) }
 }
 
-function ignoredDecision(context: SlackRoutingContext): IntakeDecision {
+function ignoredDecision(context: MessageRoutingContext): IntakeDecision {
   return addressedFallbackDecision(context) ?? { route: "ignore" }
 }
 
-function missingReplyDecision(context: SlackRoutingContext): IntakeDecision {
+function missingReplyDecision(context: MessageRoutingContext): IntakeDecision {
   const decision = addressedFallbackDecision(context)
 
   if (decision !== null) {
@@ -151,7 +134,7 @@ function missingReplyDecision(context: SlackRoutingContext): IntakeDecision {
 }
 
 function addressedFallbackDecision(
-  context: SlackRoutingContext
+  context: MessageRoutingContext
 ): IntakeDecision | null {
   if (context.activeExecution !== null) {
     return { route: "agent" }
@@ -164,16 +147,16 @@ function addressedFallbackDecision(
   return null
 }
 
-function isAddressedToMilo(context: SlackRoutingContext) {
-  return context.isDirectMessage || context.isMention
+function isAddressedToMilo(context: MessageRoutingContext) {
+  return context.isDirect || context.isAddressed
 }
 
-function fallbackDecision(context: SlackRoutingContext): IntakeDecision {
-  if (context.activeExecution !== null || context.isDirectMessage) {
+function fallbackDecision(context: MessageRoutingContext): IntakeDecision {
+  if (context.activeExecution !== null || context.isDirect) {
     return { route: "agent" }
   }
 
-  return context.isMention ? { route: "agent" } : { route: "ignore" }
+  return context.isAddressed ? { route: "agent" } : { route: "ignore" }
 }
 
 function readAssistantText(

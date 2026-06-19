@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { type Id } from "../_generated/dataModel"
 import { sendOpenRouterChat } from "../model"
-import { decideRoute, type SlackRoutingContext } from "./decision"
+import { type MessageRoutingContext } from "./context"
+import { decideRoute } from "./decision"
 
 vi.mock("../model", () => ({
   sendOpenRouterChat: vi.fn(),
@@ -17,14 +18,14 @@ afterEach(() => {
   restoreIntakeModel(originalIntakeModel)
 })
 
-describe("Slack intake routing", () => {
+describe("message intake routing", () => {
   test("uses GLM 5.2 with latency-prioritized provider routing", async () => {
     process.env.OPENROUTER_INTAKE_MODEL = ""
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ route: "agent" })
     )
 
-    await decideRoute(context({ isMention: true }))
+    await decideRoute(context({ isAddressed: true }))
 
     expect(lastRoutingRequest()).toMatchObject({
       maxTokens: 256,
@@ -41,7 +42,7 @@ describe("Slack intake routing", () => {
       modelResponse({ route: "ignore" })
     )
 
-    await expect(decideRoute(context({ isMention: true }))).resolves.toEqual({
+    await expect(decideRoute(context({ isAddressed: true }))).resolves.toEqual({
       model: "test-model",
       reply: "What can I help with?",
       route: "reply",
@@ -95,15 +96,15 @@ function lastRoutingRequest() {
   const [request] = vi.mocked(sendOpenRouterChat).mock.calls.at(-1) ?? []
 
   if (request === undefined) {
-    throw new Error("Expected Slack intake to call OpenRouter.")
+    throw new Error("Expected message intake to call OpenRouter.")
   }
 
   return request
 }
 
 function context(
-  overrides: Partial<SlackRoutingContext> = {}
-): SlackRoutingContext {
+  overrides: Partial<MessageRoutingContext> = {}
+): MessageRoutingContext {
   const currentMessage = {
     actor: "<@U123>",
     createdAt: 1,
@@ -116,8 +117,9 @@ function context(
   return {
     activeExecution: null,
     currentMessage,
-    isDirectMessage: false,
-    isMention: false,
+    integration: "slack",
+    isAddressed: false,
+    isDirect: false,
     recentMessages: [currentMessage],
     ...overrides,
   }

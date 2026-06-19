@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest"
-import { mergeRecentConversation, type SlackConversationEntry } from "./history"
+import {
+  mergeRecentConversation,
+  type RoutingConversationEntry,
+} from "./history"
 
-describe("Slack routing conversation history", () => {
+describe("message routing conversation history", () => {
   test("keeps Milo replies in chronological conversation context", () => {
     expect(
       mergeRecentConversation([
@@ -23,7 +26,7 @@ function entry(
   text: string,
   createdAt: number,
   type: string
-): SlackConversationEntry {
+): RoutingConversationEntry {
   return {
     actor,
     createdAt,

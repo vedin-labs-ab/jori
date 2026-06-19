@@ -8,15 +8,15 @@ import {
 import { findConversation, startMessageRun } from "../conversations/data"
 import { resolveUserIdByEmail } from "../identity/identities"
 import { getActorEmail } from "../shared/actor"
-import { continueTerminalSlackSession } from "./continuation"
+import { continueTerminalSession } from "./continuation"
 import {
-  activeSlackIntegration,
+  activeMessageIntegration,
   findRoutingByMessage,
   hasActiveClaim,
   routingReplyClaimMs,
-  slackReplyTarget,
 } from "./data"
 import { routingRoute } from "./schema"
+import { replyAddress } from "./surface"
 
 const routingDecision = v.object({
   error: v.optional(v.string()),
@@ -25,7 +25,7 @@ const routingDecision = v.object({
   route: routingRoute,
 })
 
-export const applySlackDecision = internalMutation({
+export const applyDecision = internalMutation({
   args: {
     decision: routingDecision,
     messageId: v.id("messages"),
@@ -35,11 +35,11 @@ export const applySlackDecision = internalMutation({
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId)
 
-    if (message === null || message.integration !== "slack") {
+    if (message === null) {
       return { status: "missing" as const }
     }
 
-    const integration = await activeSlackIntegration(ctx, message.integrationId)
+    const integration = await activeMessageIntegration(ctx, message)
 
     if (integration === null) {
       return { status: "missing" as const }
@@ -75,8 +75,8 @@ async function createRouting(
   }
 ) {
   const run = await maybeStartAgentRun(ctx, input)
-  const replyTarget = slackReplyTarget(input.message)
-  const shouldReply = input.decision.reply !== undefined && replyTarget !== null
+  const address = replyAddress(input.message)
+  const shouldReply = input.decision.reply !== undefined && address !== null
   const routingId = await ctx.db.insert("routing", {
     tenantId: input.message.tenantId,
     integrationId: input.message.integrationId,
@@ -93,7 +93,7 @@ async function createRouting(
     updatedAt: input.now,
   })
 
-  await continueTerminalSlackSession(ctx, {
+  await continueTerminalSession(ctx, {
     integration: input.integration,
     message: input.message,
     now: input.now,
@@ -104,7 +104,7 @@ async function createRouting(
     status: "routed" as const,
     reply: shouldReply
       ? {
-          ...replyTarget,
+          address,
           integration: input.integration,
           routingId,
           text: input.decision.reply,
@@ -159,12 +159,12 @@ async function claimPendingReply(
     routing: Doc<"routing">
   }
 ) {
-  const target = slackReplyTarget(input.message)
+  const address = replyAddress(input.message)
 
   if (
     input.routing.reply === undefined ||
     input.routing.replyMessageTs !== undefined ||
-    target === null ||
+    address === null ||
     hasActiveClaim(input.routing.replyClaimUntil, input.now)
   ) {
     return { status: "routed" as const, reply: null }
@@ -179,7 +179,7 @@ async function claimPendingReply(
   return {
     status: "routed" as const,
     reply: {
-      ...target,
+      address,
       integration: input.integration,
       routingId: input.routing._id,
       text: input.routing.reply,

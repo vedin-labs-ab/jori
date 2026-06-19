@@ -1,10 +1,10 @@
 import { internal } from "../../_generated/api"
-import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
 } from "../../approvals/slack"
+import { newlyRecordedMessageId } from "../../messages/data"
 import { createIntegrationActor } from "../../shared/actor"
 import {
   readCallbackState,
@@ -163,33 +163,15 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     observedAt: message.observedAt,
     data,
   })
-  const messageId = readNewlyRecordedMessageId(result)
+  const messageId = newlyRecordedMessageId(result)
 
   if (messageId !== undefined) {
-    await ctx.scheduler.runAfter(0, internal.routing.slack.route, {
+    await ctx.scheduler.runAfter(0, internal.routing.message.route, {
       messageId,
     })
   }
 
   return Response.json({ ok: true })
-}
-
-export function readNewlyRecordedMessageId(result: unknown) {
-  if (
-    typeof result !== "object" ||
-    result === null ||
-    !("messageId" in result) ||
-    !("status" in result)
-  ) {
-    return undefined
-  }
-
-  const record = result as { messageId?: unknown; status?: unknown }
-  const messageId = record.messageId
-
-  return record.status === "recorded" && typeof messageId === "string"
-    ? (messageId as Id<"messages">)
-    : undefined
 }
 
 export async function handleSlackInteractions(

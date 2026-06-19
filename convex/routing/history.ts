@@ -5,7 +5,7 @@ import { getActorDisplayName } from "../shared/actor"
 const recentConversationLimit = 16
 const finalEventLimit = 5
 
-export type SlackConversationEntry = {
+export type RoutingConversationEntry = {
   actor: string | null
   createdAt: number
   id: string
@@ -19,21 +19,18 @@ export async function recentConversation(
   message: Doc<"messages">
 ) {
   if (message.conversationId === undefined) {
-    return [slackMessageEntry(message)]
+    return [messageEntry(message)]
   }
 
-  const messages = await recentSlackMessages(ctx, message)
+  const messages = await recentMessages(ctx, message)
   const replies = await recentMiloReplies(ctx, message)
 
-  return mergeRecentConversation([
-    ...messages.map(slackMessageEntry),
-    ...replies,
-  ])
+  return mergeRecentConversation([...messages.map(messageEntry), ...replies])
 }
 
-export function slackMessageEntry(
+export function messageEntry(
   message: Doc<"messages">
-): SlackConversationEntry {
+): RoutingConversationEntry {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
     createdAt: message.createdAt,
@@ -44,7 +41,7 @@ export function slackMessageEntry(
   }
 }
 
-export function mergeRecentConversation(entries: SlackConversationEntry[]) {
+export function mergeRecentConversation(entries: RoutingConversationEntry[]) {
   return [...entries]
     .sort(
       (left, right) =>
@@ -53,7 +50,7 @@ export function mergeRecentConversation(entries: SlackConversationEntry[]) {
     .slice(-recentConversationLimit)
 }
 
-async function recentSlackMessages(ctx: QueryCtx, message: Doc<"messages">) {
+async function recentMessages(ctx: QueryCtx, message: Doc<"messages">) {
   const conversationId = message.conversationId
 
   if (conversationId === undefined) {
@@ -94,7 +91,7 @@ async function recentMiloReplies(ctx: QueryCtx, message: Doc<"messages">) {
 }
 
 async function routingReplyEntries(ctx: QueryCtx, routings: Doc<"routing">[]) {
-  const entries: SlackConversationEntry[] = []
+  const entries: RoutingConversationEntry[] = []
 
   for (const routing of routings) {
     entries.push(...(await routingEntries(ctx, routing)))
@@ -115,7 +112,7 @@ function quickReplyEntry(routing: Doc<"routing">) {
   }
 
   return miloReplyEntry({
-    createdAt: slackTimestampMs(routing.replyMessageTs) ?? routing.updatedAt,
+    createdAt: deliveryTimestampMs(routing.replyMessageTs) ?? routing.updatedAt,
     id: `${routing._id}:reply`,
     text: routing.reply,
     type: "milo.reply",
@@ -136,7 +133,7 @@ async function finalReplyEntry(ctx: QueryCtx, routing: Doc<"routing">) {
     ? null
     : miloReplyEntry({
         createdAt:
-          slackTimestampMs(routing.finalReplyMessageTs) ?? routing.updatedAt,
+          deliveryTimestampMs(routing.finalReplyMessageTs) ?? routing.updatedAt,
         id: `${routing._id}:final`,
         text,
         type: "milo.final_reply",
@@ -148,7 +145,7 @@ function miloReplyEntry(args: {
   id: string
   text: string
   type: string
-}): SlackConversationEntry {
+}): RoutingConversationEntry {
   return {
     actor: "Milo",
     createdAt: args.createdAt,
@@ -184,14 +181,14 @@ function readPayloadString(payload: unknown, key: string) {
     : undefined
 }
 
-function slackTimestampMs(value: string) {
+function deliveryTimestampMs(value: string) {
   const timestamp = Number(value)
 
   return Number.isFinite(timestamp) ? Math.round(timestamp * 1000) : undefined
 }
 
 function isConversationEntry(
-  entry: SlackConversationEntry | null
-): entry is SlackConversationEntry {
+  entry: RoutingConversationEntry | null
+): entry is RoutingConversationEntry {
   return entry !== null
 }
