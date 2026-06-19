@@ -1,5 +1,4 @@
 import { internal } from "../../_generated/api"
-import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import {
   handleSlackApprovalDecision,
@@ -157,29 +156,20 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     data: message.data,
   })
 
-  const result = await ctx.runMutation(
-    internal.messages.ingest.recordSlackMessage,
-    {
-      accountId: message.accountId,
-      type: message.type,
-      externalId: message.externalId,
-      actor: createIntegrationActor({
-        integration: "slack",
-        externalId: message.actorId,
-        email: actorEmail,
-      }),
-      conversationId: message.conversationId,
-      text: message.text,
-      observedAt: message.observedAt,
-      data,
-    }
-  )
-
-  if (hasContinuedRunId(result)) {
-    await ctx.runAction(internal.runtime.slack.status.publish, {
-      runId: result.runId,
-    })
-  }
+  await ctx.runMutation(internal.messages.ingest.recordSlackMessage, {
+    accountId: message.accountId,
+    type: message.type,
+    externalId: message.externalId,
+    actor: createIntegrationActor({
+      integration: "slack",
+      externalId: message.actorId,
+      email: actorEmail,
+    }),
+    conversationId: message.conversationId,
+    text: message.text,
+    observedAt: message.observedAt,
+    data,
+  })
 
   return Response.json({ ok: true })
 }
@@ -224,17 +214,4 @@ function getSlackUserToken(tokenResult: {
   const token = tokenResult.authed_user?.access_token
 
   return token === "" ? undefined : token
-}
-
-function hasContinuedRunId(
-  result: unknown
-): result is { status: "continued"; runId: Id<"runs"> } {
-  return (
-    typeof result === "object" &&
-    result !== null &&
-    "status" in result &&
-    result.status === "continued" &&
-    "runId" in result &&
-    typeof result.runId === "string"
-  )
 }
