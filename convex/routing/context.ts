@@ -1,10 +1,11 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
-import { getSlackBotId, getSlackChannelType } from "../providers/slack/data"
-import { recentConversation, slackMessageEntry } from "./history"
+import { activeMessageIntegration } from "./data"
+import { messageEntry, recentConversation } from "./history"
+import { type MessageAudience, messageAudience } from "./surface"
 
-export const getSlackContext = internalQuery({
+export const getMessageContext = internalQuery({
   args: {
     messageId: v.id("messages"),
   },
@@ -12,17 +13,13 @@ export const getSlackContext = internalQuery({
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId)
 
-    if (message === null || message.integration !== "slack") {
+    if (message === null) {
       return null
     }
 
-    const integration = await ctx.db.get(message.integrationId)
+    const integration = await activeMessageIntegration(ctx, message)
 
-    if (
-      integration === null ||
-      integration.status !== "active" ||
-      integration.integration !== "slack"
-    ) {
+    if (integration === null) {
       return null
     }
 
@@ -31,11 +28,14 @@ export const getSlackContext = internalQuery({
       message,
     })
 
+    const audience = messageAudience(message, integration)
+
     return {
       activeExecution: active,
-      currentMessage: slackMessageEntry(message),
-      isDirectMessage: isDirectSlackMessage(message),
-      isMention: isSlackMention(message, integration),
+      currentMessage: messageEntry(message),
+      integration: message.integration,
+      isAddressed: audience.isAddressed,
+      isDirect: audience.isDirect,
       recentMessages: await recentConversation(ctx, message),
     }
   },
@@ -102,29 +102,24 @@ async function getActiveExecution(
   }
 }
 
-function isDirectSlackMessage(message: Doc<"messages">) {
-  return (
-    message.type === "message.im" || getSlackChannelType(message.data) === "im"
-  )
-}
-
-function isSlackMention(
-  message: Doc<"messages">,
-  integration: Doc<"integrations">
-) {
-  if (message.type === "app_mention") {
-    return true
-  }
-
-  const botId = getSlackBotId(integration.data)
-
-  return botId !== undefined && (message.text ?? "").includes(`<@${botId}>`)
-}
-
 function isTerminalExecution(execution: Doc<"executions">) {
   return (
     execution.status === "completed" ||
     execution.status === "failed" ||
     execution.status === "stopped"
   )
+}
+
+export type MessageRoutingContext = {
+  activeExecution: {
+    executionId: Doc<"executions">["_id"]
+    latestStatus: string | null
+    runId: Doc<"runs">["_id"]
+    status: string
+  } | null
+  currentMessage: ReturnType<typeof messageEntry>
+  integration: Doc<"messages">["integration"]
+  isAddressed: MessageAudience["isAddressed"]
+  isDirect: MessageAudience["isDirect"]
+  recentMessages: Awaited<ReturnType<typeof recentConversation>>
 }

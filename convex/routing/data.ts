@@ -1,16 +1,16 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
-import { readProviderDataString } from "../providers/data"
 
 export const routingReplyClaimMs = 2 * 60 * 1000
 
-export async function activeSlackIntegration(
+export async function activeMessageIntegration(
   ctx: QueryCtx,
-  integrationId: Id<"integrations">
+  message: Doc<"messages">
 ) {
-  const integration = await ctx.db.get(integrationId)
+  const integration = await ctx.db.get(message.integrationId)
 
-  return integration?.integration === "slack" && integration.status === "active"
+  return integration?.integration === message.integration &&
+    integration.status === "active"
     ? integration
     : null
 }
@@ -23,20 +23,6 @@ export async function findRoutingByMessage(
     .query("routing")
     .withIndex("by_message", (query) => query.eq("messageId", messageId))
     .first()
-}
-
-export function slackReplyTarget(message: Doc<"messages">) {
-  const channelId = readProviderDataString(message.data, "channelId")
-  const messageTs = readProviderDataString(message.data, "ts")
-
-  if (channelId === undefined || messageTs === undefined) {
-    return null
-  }
-
-  return {
-    channelId,
-    threadTs: readProviderDataString(message.data, "threadTs") ?? messageTs,
-  }
 }
 
 export function hasActiveClaim(claimUntil: number | undefined, now: number) {

@@ -1,17 +1,9 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { type ActionCtx, action } from "../_generated/server"
-import { postSlackMessage } from "../broker/tools/slack"
-import { readProviderDataString } from "../providers/data"
-import { formatRuntimeError, requireWorkerSecret } from "./shared"
-
-type SlackFinalTarget = {
-  channelId: string
-  integration: Doc<"integrations">
-  routingId: Id<"routing">
-  threadTs: string
-}
+import { action } from "../_generated/server"
+import { deliverFinalReply } from "../routing/delivery"
+import { type ReplyTarget } from "../routing/surface"
+import { requireWorkerSecret } from "./shared"
 
 export const deliverFinal = action({
   args: {
@@ -30,54 +22,14 @@ export const deliverFinal = action({
     }
 
     const target = (await ctx.runMutation(
-      internal.routing.replies.claimFinalSlackReply,
+      internal.routing.replies.claimFinalReply,
       { runId: args.runId, now: Date.now() }
-    )) as SlackFinalTarget | null
+    )) as ReplyTarget | null
 
     if (target === null) {
       return { delivered: false }
     }
 
-    return await deliverSlackFinal(ctx, args.content, target)
+    return await deliverFinalReply(ctx, args.content, target)
   },
 })
-
-async function deliverSlackFinal(
-  ctx: ActionCtx,
-  content: string,
-  target: SlackFinalTarget
-) {
-  try {
-    const response = await postSlackMessage(target.integration, {
-      channel: target.channelId,
-      text: content,
-      thread_ts: target.threadTs,
-    })
-    const messageTs = readProviderDataString(response, "ts")
-
-    if (messageTs === undefined) {
-      throw new Error("Slack final reply response is missing ts")
-    }
-
-    await ctx.runMutation(internal.routing.replies.recordFinalSlackReply, {
-      messageTs,
-      routingId: target.routingId,
-    })
-
-    return { delivered: true }
-  } catch (error) {
-    await recordSlackFinalFailure(ctx, target.routingId, error)
-    throw error
-  }
-}
-
-async function recordSlackFinalFailure(
-  ctx: ActionCtx,
-  routingId: Id<"routing">,
-  error: unknown
-) {
-  await ctx.runMutation(internal.routing.replies.releaseFinalSlackReply, {
-    error: formatRuntimeError(error),
-    routingId,
-  })
-}

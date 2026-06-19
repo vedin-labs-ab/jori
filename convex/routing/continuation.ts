@@ -5,7 +5,7 @@ import {
   findConversation,
 } from "../conversations/data"
 
-export async function continueTerminalSlackSession(
+export async function continueTerminalSession(
   ctx: MutationCtx,
   input: {
     integration: Doc<"integrations">

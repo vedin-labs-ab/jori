@@ -2,16 +2,16 @@ import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type QueryCtx } from "../_generated/server"
 import {
-  activeSlackIntegration,
+  activeMessageIntegration,
   findRoutingByMessage,
   hasActiveClaim,
   routingReplyClaimMs,
-  slackReplyTarget,
 } from "./data"
+import { replyAddress } from "./surface"
 
-export const recordSlackReply = internalMutation({
+export const recordReplyDelivery = internalMutation({
   args: {
-    messageTs: v.string(),
+    deliveryId: v.string(),
     routingId: v.id("routing"),
   },
   returns: v.null(),
@@ -19,7 +19,7 @@ export const recordSlackReply = internalMutation({
     await ctx.db.patch(args.routingId, {
       replyClaimUntil: undefined,
       replyError: undefined,
-      replyMessageTs: args.messageTs,
+      replyMessageTs: args.deliveryId,
       updatedAt: Date.now(),
     })
 
@@ -27,7 +27,7 @@ export const recordSlackReply = internalMutation({
   },
 })
 
-export const recordSlackReplyFailure = internalMutation({
+export const recordReplyFailure = internalMutation({
   args: {
     error: v.string(),
     routingId: v.id("routing"),
@@ -44,14 +44,14 @@ export const recordSlackReplyFailure = internalMutation({
   },
 })
 
-export const claimFinalSlackReply = internalMutation({
+export const claimFinalReply = internalMutation({
   args: {
     now: v.number(),
     runId: v.id("runs"),
   },
   returns: v.any(),
   handler: async (ctx, args) => {
-    const source = await findSlackRunSource(ctx, args.runId)
+    const source = await findRunSource(ctx, args.runId)
 
     if (source === null) {
       return null
@@ -68,9 +68,9 @@ export const claimFinalSlackReply = internalMutation({
       return null
     }
 
-    const target = slackReplyTarget(source.message)
+    const address = replyAddress(source.message)
 
-    if (target === null) {
+    if (address === null) {
       return null
     }
 
@@ -81,16 +81,16 @@ export const claimFinalSlackReply = internalMutation({
     })
 
     return {
-      ...target,
+      address,
       integration: source.integration,
       routingId: routing._id,
     }
   },
 })
 
-export const recordFinalSlackReply = internalMutation({
+export const recordFinalReplyDelivery = internalMutation({
   args: {
-    messageTs: v.string(),
+    deliveryId: v.string(),
     routingId: v.id("routing"),
   },
   returns: v.null(),
@@ -98,7 +98,7 @@ export const recordFinalSlackReply = internalMutation({
     await ctx.db.patch(args.routingId, {
       finalReplyClaimUntil: undefined,
       finalReplyError: undefined,
-      finalReplyMessageTs: args.messageTs,
+      finalReplyMessageTs: args.deliveryId,
       updatedAt: Date.now(),
     })
 
@@ -106,7 +106,7 @@ export const recordFinalSlackReply = internalMutation({
   },
 })
 
-export const releaseFinalSlackReply = internalMutation({
+export const releaseFinalReply = internalMutation({
   args: {
     error: v.string(),
     routingId: v.id("routing"),
@@ -123,7 +123,7 @@ export const releaseFinalSlackReply = internalMutation({
   },
 })
 
-async function findSlackRunSource(ctx: QueryCtx, runId: Id<"runs">) {
+async function findRunSource(ctx: QueryCtx, runId: Id<"runs">) {
   const run = await ctx.db.get(runId)
 
   if (run === null || run.reason.type !== "message") {
@@ -132,11 +132,11 @@ async function findSlackRunSource(ctx: QueryCtx, runId: Id<"runs">) {
 
   const message = await ctx.db.get(run.reason.messageId)
 
-  if (message === null || message.integration !== "slack") {
+  if (message === null) {
     return null
   }
 
-  const integration = await activeSlackIntegration(ctx, message.integrationId)
+  const integration = await activeMessageIntegration(ctx, message)
 
   return integration === null ? null : { integration, message }
 }

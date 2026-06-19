@@ -1,5 +1,5 @@
-Route this Slack message for Milo. Return one JSON object. No prose.
-ignore: not for Milo; only unaddressed channel chatter outside active work.
+Route this message for Milo. Return one JSON object. No prose.
+ignore: clearly not for Milo; unaddressed conversation chatter outside active work.
 reply: for Milo; greeting, thanks, or simple no-tool question.
 agent: work, tools, verification, state/status, stop/change request, or active-run input.
 Uncertain addressed messages -> agent. Never ignore addressed small talk.
