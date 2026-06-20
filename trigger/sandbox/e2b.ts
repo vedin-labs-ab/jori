@@ -125,28 +125,26 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
     if (this.sandboxId !== null) {
       this.sandbox = await connectSandbox(this.sandboxId)
-      await this.persistSandbox("reconnected")
+      await this.persistSandbox()
 
       return this.sandbox
     }
 
     this.sandbox = await createSandbox(this.runId)
     this.sandboxId = this.sandbox.sandboxId
-    await this.persistSandbox("created")
+    await this.persistSandbox()
 
     return this.sandbox
   }
 
-  private async persistSandbox(status: "created" | "reconnected") {
+  private async persistSandbox() {
     if (this.sandbox === undefined) {
       return
     }
 
     await this.convex.upsertSandbox({
+      externalId: this.sandbox.sandboxId,
       runId: this.runId,
-      sandboxId: this.sandbox.sandboxId,
-      status,
-      traceHost: this.sandbox.sandboxDomain,
     })
   }
 
@@ -168,7 +166,7 @@ export async function killE2BSandbox(args: {
     () => false
   )
   await args.convex.markSandboxCleaned({
-    sandboxId: args.sandboxId,
+    externalId: args.sandboxId,
   })
 }
 

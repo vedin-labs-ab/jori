@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalQuery,
   type MutationCtx,
@@ -8,19 +8,11 @@ import {
 } from "../_generated/server"
 import { requireWorkerSecret } from "./shared"
 
-const activeSandboxStatuses = new Set(["created", "running", "reconnected"])
-
 export const upsert = mutation({
   args: {
+    externalId: v.string(),
     runId: v.id("runs"),
-    sandboxId: v.string(),
     secret: v.string(),
-    status: v.union(
-      v.literal("created"),
-      v.literal("running"),
-      v.literal("reconnected")
-    ),
-    traceHost: v.optional(v.string()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -34,7 +26,9 @@ export const upsert = mutation({
 
     const existing = await ctx.db
       .query("sandboxes")
-      .withIndex("by_sandbox", (query) => query.eq("sandboxId", args.sandboxId))
+      .withIndex("by_external_id", (query) =>
+        query.eq("externalId", args.externalId)
+      )
       .first()
     const now = Date.now()
 
@@ -42,17 +36,17 @@ export const upsert = mutation({
       await ctx.db.insert("sandboxes", {
         tenantId: run.tenantId,
         runId: args.runId,
-        provider: "e2b",
-        sandboxId: args.sandboxId,
-        status: args.status,
-        traceHost: args.traceHost,
+        externalId: args.externalId,
+        status: "active",
         createdAt: now,
         updatedAt: now,
       })
     } else {
       await ctx.db.patch(existing._id, {
-        status: args.status,
-        traceHost: args.traceHost,
+        error: undefined,
+        runId: args.runId,
+        status: "active",
+        tenantId: run.tenantId,
         updatedAt: now,
       })
     }
@@ -64,7 +58,7 @@ export const upsert = mutation({
 export const markCleaned = mutation({
   args: {
     error: v.optional(v.string()),
-    sandboxId: v.string(),
+    externalId: v.string(),
     secret: v.string(),
   },
   returns: v.null(),
@@ -73,13 +67,14 @@ export const markCleaned = mutation({
 
     const existing = await ctx.db
       .query("sandboxes")
-      .withIndex("by_sandbox", (query) => query.eq("sandboxId", args.sandboxId))
+      .withIndex("by_external_id", (query) =>
+        query.eq("externalId", args.externalId)
+      )
       .first()
 
     if (existing !== null) {
       await ctx.db.patch(existing._id, {
-        cleanedAt: Date.now(),
-        lastError: args.error,
+        error: args.error,
         status: args.error === undefined ? "cleaned" : "failed",
         updatedAt: Date.now(),
       })
@@ -102,17 +97,12 @@ export const activeByRun = internalQuery({
 export async function findActiveSandbox(
   ctx: MutationCtx | QueryCtx,
   runId: Id<"runs">
-) {
-  const sandboxes = ctx.db
+): Promise<Doc<"sandboxes"> | null> {
+  return await ctx.db
     .query("sandboxes")
-    .withIndex("by_run", (query) => query.eq("runId", runId))
+    .withIndex("by_run_and_status", (query) =>
+      query.eq("runId", runId).eq("status", "active")
+    )
     .order("desc")
-
-  for await (const sandbox of sandboxes) {
-    if (activeSandboxStatuses.has(sandbox.status)) {
-      return sandbox
-    }
-  }
-
-  return null
+    .first()
 }
