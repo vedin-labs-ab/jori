@@ -5,16 +5,16 @@ import {
 } from "./history"
 
 describe("message routing conversation history", () => {
-  test("keeps Milo replies in chronological conversation context", () => {
+  test("keeps messages in chronological conversation context", () => {
     expect(
       mergeRecentConversation([
         entry("message-2", "User", "thanks", 3000, "message.channels"),
-        entry("milo-1", "Milo", "On it.", 2000, "milo.reply"),
+        entry("milo-1", "Milo", "On it.", 2000, "message.channels"),
         entry("message-1", "User", "hello", 1000, "message.channels"),
       ])
     ).toEqual([
       entry("message-1", "User", "hello", 1000, "message.channels"),
-      entry("milo-1", "Milo", "On it.", 2000, "milo.reply"),
+      entry("milo-1", "Milo", "On it.", 2000, "message.channels"),
       entry("message-2", "User", "thanks", 3000, "message.channels"),
     ])
   })

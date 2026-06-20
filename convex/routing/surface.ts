@@ -1,4 +1,4 @@
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import {
   getSlackBotUserId,
   getSlackChannelId,
@@ -31,16 +31,6 @@ export type ReplyAddress =
       threadTs: string
       type: "slack"
     }
-
-export type ReplyTarget = {
-  address: ReplyAddress
-  integration: Doc<"integrations">
-  routingId: Id<"routing">
-}
-
-export type TextReplyTarget = ReplyTarget & {
-  text: string
-}
 
 export function routingMessageText(
   message: Doc<"messages">,

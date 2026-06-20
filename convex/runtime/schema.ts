@@ -3,22 +3,29 @@ import { v } from "convex/values"
 
 const runtimeOperation = v.union(
   v.object({
-    type: v.literal("enqueueRun"),
+    type: v.literal("run.start"),
     runId: v.id("runs"),
     parentRunId: v.optional(v.id("runs")),
     rootRunId: v.optional(v.id("runs")),
   }),
   v.object({
-    type: v.literal("resumeApproval"),
+    type: v.literal("approval.resume"),
     approvalId: v.id("approvals"),
     decision: v.union(v.literal("approved"), v.literal("denied")),
     waitpointTokenId: v.string(),
   }),
   v.object({
-    type: v.literal("cancelRun"),
+    type: v.literal("run.cancel"),
     runId: v.id("runs"),
     sandboxId: v.optional(v.string()),
     triggerRunId: v.optional(v.string()),
+  }),
+  v.object({
+    type: v.literal("reply.send"),
+    kind: v.union(v.literal("quick"), v.literal("final")),
+    messageId: v.id("messages"),
+    routingId: v.id("routing"),
+    text: v.string(),
   })
 )
 

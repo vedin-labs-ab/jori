@@ -44,7 +44,7 @@ export const enqueueApprovalResume = internalMutation({
       tenantId: approval.tenantId,
       idempotencyKey: `approval:${approval._id}:${args.decision}`,
       operation: {
-        type: "resumeApproval",
+        type: "approval.resume",
         approvalId: approval._id,
         decision: args.decision,
         waitpointTokenId: approval.waitpointTokenId,
@@ -69,7 +69,7 @@ export const enqueueCancellation = internalMutation({
       tenantId: run.tenantId,
       idempotencyKey: `cancel:${run._id}`,
       operation: {
-        type: "cancelRun",
+        type: "run.cancel",
         runId: run._id,
         sandboxId: run.sandboxId,
         triggerRunId: run.triggerRunId,
@@ -173,7 +173,7 @@ async function enqueueRun(ctx: MutationCtx, run: Doc<"runs">) {
     tenantId: run.tenantId,
     idempotencyKey: `run:${run._id}`,
     operation: {
-      type: "enqueueRun",
+      type: "run.start",
       runId: run._id,
       parentRunId: run.parentRunId,
       rootRunId: run.rootRunId,
@@ -181,7 +181,7 @@ async function enqueueRun(ctx: MutationCtx, run: Doc<"runs">) {
   })
 }
 
-async function enqueueOperation(
+export async function enqueueOperation(
   ctx: MutationCtx,
   args: Pick<Doc<"outbox">, "idempotencyKey" | "operation" | "tenantId">
 ) {
@@ -193,6 +193,7 @@ async function enqueueOperation(
     .first()
 
   if (existing !== null) {
+    await ctx.scheduler.runAfter(0, internal.runtime.dispatch.drain, {})
     return existing._id
   }
 
@@ -216,7 +217,7 @@ async function applyExternalId(
   item: Doc<"outbox">,
   externalId: string | undefined
 ) {
-  if (item.operation.type !== "enqueueRun" || externalId === undefined) {
+  if (item.operation.type !== "run.start" || externalId === undefined) {
     return
   }
 

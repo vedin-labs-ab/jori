@@ -1,8 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 
-export const routingReplyClaimMs = 2 * 60 * 1000
-
 export async function activeMessageIntegration(
   ctx: QueryCtx,
   message: Doc<"messages">
@@ -23,8 +21,4 @@ export async function findRoutingByMessage(
     .query("routing")
     .withIndex("by_message", (query) => query.eq("messageId", messageId))
     .first()
-}
-
-export function hasActiveClaim(claimUntil: number | undefined, now: number) {
-  return claimUntil !== undefined && claimUntil > now
 }
