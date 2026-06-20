@@ -14,7 +14,7 @@ export type MessageRuntimeInput = {
   conversation: RoutingConversationEntry[]
   routing: {
     reply: string | null
-    route: "agent" | "ignore" | "reply"
+    route: "agent" | "ignore" | "respond"
   } | null
 }
 

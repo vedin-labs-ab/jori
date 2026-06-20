@@ -8,7 +8,6 @@ import { type MessageRoutingContext } from "./context"
 
 const defaultIntakeModel = "z-ai/glm-5.2"
 const maxOutputTokens = 128
-const defaultAddressedReply = "What can I help with?"
 const intakeProviderRouting = {
   requireParameters: true,
   sort: "latency",
@@ -18,7 +17,7 @@ export type IntakeDecision = {
   error?: string
   model?: string
   reply?: string
-  route: "agent" | "ignore" | "reply"
+  route: "agent" | "ignore" | "respond"
 }
 
 export async function decideRoute(
@@ -31,7 +30,7 @@ export async function decideRoute(
   try {
     const response = await sendOpenRouterChat(createRequest(context))
     const text = readAssistantText(response)
-    const decision = normalizeDecision(parseDecisionJson(text), context)
+    const decision = normalizeDecision(parseDecisionJson(text))
 
     return { ...decision, model: response.model }
   } catch (error) {
@@ -113,10 +112,7 @@ function intakeDecisionSchema() {
   }
 }
 
-function normalizeDecision(
-  value: unknown,
-  context: MessageRoutingContext
-): IntakeDecision {
+function normalizeDecision(value: unknown): IntakeDecision {
   if (typeof value !== "object" || value === null) {
     throw new Error("Intake decision must be an object.")
   }
@@ -125,59 +121,22 @@ function normalizeDecision(
   const route = record.route
   const reply = normalizeReply(record.message) ?? normalizeReply(record.reply)
 
-  if (
-    route !== "ignore" &&
-    route !== "respond" &&
-    route !== "reply" &&
-    route !== "agent"
-  ) {
+  if (route !== "ignore" && route !== "respond" && route !== "agent") {
     throw new Error("Intake decision route is invalid.")
   }
 
-  if ((route === "respond" || route === "reply") && reply === undefined) {
-    return missingReplyDecision(context)
+  if (route === "ignore") {
+    return { route }
   }
 
-  if (route === "ignore") {
-    return ignoredDecision(context)
+  if (route === "respond" && reply === undefined) {
+    return { route: "ignore" }
   }
 
   return {
-    route: route === "respond" ? "reply" : route,
+    route,
     ...(reply === undefined ? {} : { reply }),
   }
-}
-
-function ignoredDecision(context: MessageRoutingContext): IntakeDecision {
-  return addressedFallbackDecision(context) ?? { route: "ignore" }
-}
-
-function missingReplyDecision(context: MessageRoutingContext): IntakeDecision {
-  const decision = addressedFallbackDecision(context)
-
-  if (decision !== null) {
-    return decision
-  }
-
-  throw new Error("Intake reply route requires reply.")
-}
-
-function addressedFallbackDecision(
-  context: MessageRoutingContext
-): IntakeDecision | null {
-  if (context.activeExecution !== null) {
-    return { route: "agent" }
-  }
-
-  if (isAddressedToMilo(context)) {
-    return { reply: defaultAddressedReply, route: "reply" }
-  }
-
-  return null
-}
-
-function isAddressedToMilo(context: MessageRoutingContext) {
-  return context.isDirect || context.isAddressed
 }
 
 function fallbackDecision(context: MessageRoutingContext): IntakeDecision {

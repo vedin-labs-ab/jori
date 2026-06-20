@@ -60,7 +60,7 @@ export type RuntimeMessage = {
   observedAt: number | null
   routing: {
     reply: string | null
-    route: "agent" | "ignore" | "reply"
+    route: "agent" | "ignore" | "respond"
   } | null
   source: "bot" | "self" | "unknown" | "user"
   text: string

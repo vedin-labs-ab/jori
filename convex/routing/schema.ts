@@ -3,7 +3,7 @@ import { v } from "convex/values"
 
 export const routingRoute = v.union(
   v.literal("ignore"),
-  v.literal("reply"),
+  v.literal("respond"),
   v.literal("agent")
 )
 

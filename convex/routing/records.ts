@@ -191,13 +191,13 @@ type RoutingDecision = {
   error?: string
   model?: string
   reply?: string
-  route: "agent" | "ignore" | "reply"
+  route: "agent" | "ignore" | "respond"
 }
 
 function normalizeDecision(decision: RoutingDecision): RoutingDecision {
   const reply = normalizeReply(decision.reply)
 
-  if (decision.route === "reply" && reply === undefined) {
+  if (decision.route === "respond" && reply === undefined) {
     return { ...decision, reply: undefined, route: "ignore" }
   }
 
