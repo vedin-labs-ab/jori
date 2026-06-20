@@ -1,14 +1,18 @@
 import {
   CalendarClock,
+  CalendarDays,
   CircleDotDashed,
   File,
+  Folder,
   GitPullRequestArrow,
   Globe,
   Hash,
   Info,
+  Mail,
   MessageCircleMore,
   Square,
   UserCheck,
+  UserRound,
   Wrench,
 } from "lucide-react"
 import { type ReactNode } from "react"
@@ -28,17 +32,25 @@ import { type ExecutionDetail, type ExecutionDetailType } from "../types"
 import { RepositoryIcon } from "./source"
 
 const detailMeta = {
+  calendar_event: { icon: CalendarDays, label: "Event" },
   channel: { icon: Hash, label: "Channel" },
   comment: { icon: MessageCircleMore, label: "Comment" },
   decision: { icon: UserCheck, label: "Decision" },
+  email: { icon: Mail, label: "Email" },
+  file: { icon: File, label: "File" },
+  folder: { icon: Folder, label: "Folder" },
   issue: { icon: CircleDotDashed, label: "Issue" },
   message: { icon: MessageCircleMore, label: "Message" },
   next: { icon: CalendarClock, label: "Next" },
   page: { icon: File, label: "Page" },
+  project: { icon: Square, label: "Project" },
   pull_request: { icon: GitPullRequestArrow, label: "Pull request" },
   repository: { icon: RepositoryIcon, label: "Repository" },
+  schedule: { icon: CalendarClock, label: "Schedule" },
+  sender: { icon: UserRound, label: "Sender" },
   status: { icon: Info, label: "Status" },
   stopped: { icon: Square, label: "Stopped" },
+  subject: { icon: Mail, label: "Subject" },
   tools: { icon: Wrench, label: "Tools" },
   web_search: { icon: Globe, label: "Web search" },
 } satisfies Record<
@@ -50,13 +62,21 @@ const detailMeta = {
 >
 
 const compactFieldTypes = new Set<ExecutionDetailType>([
+  "calendar_event",
   "channel",
+  "email",
+  "file",
+  "folder",
   "issue",
   "next",
   "page",
+  "project",
   "pull_request",
   "repository",
+  "schedule",
+  "sender",
   "status",
+  "subject",
   "tools",
   "web_search",
 ])

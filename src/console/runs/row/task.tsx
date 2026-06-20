@@ -4,19 +4,18 @@ import {
   codeBlockContentClassName,
   DetailLink,
 } from "../../shared/details"
-import { type ExecutionTaskSource } from "../types"
 
 export function TaskDetail({
-  source,
+  sourceUrl,
   task,
 }: {
-  source?: ExecutionTaskSource
+  sourceUrl?: string
   task: string
 }) {
-  if (source?.url !== undefined) {
+  if (sourceUrl !== undefined) {
     return (
       <CodeBlockDetail
-        header={<DetailLink href={source.url}>{source.label}</DetailLink>}
+        header={<DetailLink href={sourceUrl}>Source</DetailLink>}
         icon={ClipboardList}
         label="Task"
         value={task}

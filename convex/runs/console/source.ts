@@ -1,4 +1,4 @@
-import { type SourceMetadataItem } from "../../shared/sources/schema"
+import { type ToolSurface } from "../../shared/integrations"
 import { type getRunContext } from "./context"
 
 type RunContext = Awaited<ReturnType<typeof getRunContext>>
@@ -11,13 +11,11 @@ export type SourceDatum = {
 
 export type RunSource = {
   type: "automation" | "event" | "manual" | "message"
-  event?: SourceDatum
-  kind?: SourceDatum
-  metadata: SourceMetadataItem[]
-  surface?: SourceDatum
+  surface?: ToolSurface
   stop?: {
     actor: SourceDatum
   }
+  url?: string
 }
 
 export function runSource(
@@ -26,7 +24,6 @@ export function runSource(
 ): RunSource {
   const source: RunSource = {
     ...context.run.snapshot.source,
-    metadata: [...context.run.snapshot.source.metadata],
   }
 
   if (stoppedBy !== undefined) {
@@ -37,17 +34,7 @@ export function runSource(
 }
 
 export function sourceSearchText(source: RunSource) {
-  return [
-    source.type,
-    source.kind?.type,
-    source.kind?.label,
-    source.event?.type,
-    source.event?.label,
-    source.surface?.type,
-    source.surface?.label,
-    source.stop?.actor.label,
-    ...source.metadata.flatMap((item) => [item.type, item.label]),
-  ]
+  return [source.type, source.surface, source.url, source.stop?.actor.label]
     .filter(Boolean)
     .join(" ")
 }

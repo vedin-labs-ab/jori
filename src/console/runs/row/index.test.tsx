@@ -60,12 +60,7 @@ describe("execution row message details", () => {
         title: "Please summarize this thread.",
         source: {
           type: "message",
-          kind: { type: "mention", label: "mention" },
-          surface: { type: "slack", label: "Slack" },
-          metadata: [{ type: "channel", label: "#product" }],
-        },
-        taskSource: {
-          label: "Source",
+          surface: "slack",
           url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123",
         },
         details: [
@@ -88,7 +83,7 @@ describe("execution row message details", () => {
       screen.getByRole("button", { name: /please summarize this thread/i })
     )
 
-    expect(screen.getByText("mention")).toBeDefined()
+    expect(screen.getAllByText("Slack").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Task")).toHaveLength(1)
     expect(screen.getByText("Tools")).toBeDefined()
     expect(
@@ -225,9 +220,7 @@ function renderExecutionRow(item: ExecutionItem) {
 
 function execution(
   overrides: Pick<ExecutionItem, "task" | "title"> &
-    Partial<
-      Pick<ExecutionItem, "approval" | "details" | "source" | "taskSource">
-    >
+    Partial<Pick<ExecutionItem, "approval" | "details" | "source">>
 ): ExecutionItem {
   return {
     approval: overrides.approval ?? null,
@@ -239,13 +232,10 @@ function execution(
     searchableText: "",
     source: overrides.source ?? {
       type: "automation",
-      surface: { type: "slack", label: "Slack" },
-      event: { type: "message.created", label: "New channel message" },
-      metadata: [],
+      surface: "slack",
     },
     status: "completed",
     task: overrides.task,
-    taskSource: overrides.taskSource,
     title: overrides.title,
     trigger: "Slack event",
   }

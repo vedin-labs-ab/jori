@@ -1,32 +1,29 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { toolSurfaceValidator } from "../shared/integrations"
-import { sourceMetadataValidator } from "../shared/sources/schema"
 
-const snapshotDatum = v.object({
-  type: v.string(),
-  label: v.string(),
-  url: v.optional(v.string()),
-})
-
-const runSnapshotDetailType = v.union(
+const runSnapshotContextType = v.union(
+  v.literal("calendar_event"),
   v.literal("channel"),
   v.literal("comment"),
-  v.literal("decision"),
+  v.literal("email"),
+  v.literal("file"),
+  v.literal("folder"),
   v.literal("issue"),
   v.literal("message"),
   v.literal("next"),
   v.literal("page"),
+  v.literal("project"),
   v.literal("pull_request"),
   v.literal("repository"),
+  v.literal("schedule"),
+  v.literal("sender"),
   v.literal("status"),
-  v.literal("stopped"),
-  v.literal("tools"),
-  v.literal("web_search")
+  v.literal("subject")
 )
 
-export const runSnapshotDetail = v.object({
-  type: runSnapshotDetailType,
+export const runSnapshotContext = v.object({
+  type: runSnapshotContextType,
   label: v.string(),
   url: v.optional(v.string()),
   timestamp: v.optional(v.number()),
@@ -41,19 +38,10 @@ export const runSnapshot = v.object({
       v.literal("manual"),
       v.literal("message")
     ),
-    event: v.optional(snapshotDatum),
-    kind: v.optional(snapshotDatum),
-    metadata: sourceMetadataValidator,
-    surface: v.optional(snapshotDatum),
+    surface: v.optional(toolSurfaceValidator),
+    url: v.optional(v.string()),
   }),
-  trigger: v.string(),
-  details: v.array(runSnapshotDetail),
-  taskSource: v.optional(
-    v.object({
-      label: v.string(),
-      url: v.string(),
-    })
-  ),
+  context: v.array(runSnapshotContext),
 })
 
 export const runCause = v.union(

@@ -34,7 +34,6 @@ describe("execution row one-shot details", () => {
     fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
 
     expect(screen.getByText("Milo")).toBeDefined()
-    expect(screen.getByText("one-shot")).toBeDefined()
     expect(screen.queryByText("Scheduled")).toBeNull()
     expect(screen.queryByText("One-shot")).toBeNull()
     expect(screen.getByText("Tools")).toBeDefined()
@@ -92,9 +91,7 @@ function oneShotExecution({
     searchableText: "",
     source: {
       type: "automation",
-      surface: { type: "milo", label: "Milo" },
-      kind: { type: "one-shot", label: "one-shot" },
-      metadata: [],
+      surface: "milo",
     },
     status: "completed",
     task: "Generate a team image.",

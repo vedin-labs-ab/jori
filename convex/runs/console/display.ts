@@ -9,54 +9,42 @@ export function automationDisplay(
   return {
     source: {
       type: "automation",
-      metadata: [],
     },
-    trigger: "Time automation",
-    details: [],
+    context: [],
     ...overrides,
   }
 }
 
 export function eventAutomationDisplay(input: {
-  details?: RunSnapshot["details"]
-  event?: NonNullable<RunSnapshot["source"]["event"]>
-  metadata?: RunSnapshot["source"]["metadata"]
+  context?: RunSnapshot["context"]
   surface?: NonNullable<RunSnapshot["source"]["surface"]>
+  url?: string
 }): RunSnapshotInput {
   return automationDisplay({
     source: {
       type: "automation",
       surface: input.surface,
-      event: input.event,
-      metadata: input.metadata ?? [],
+      ...(input.url === undefined ? {} : { url: input.url }),
     },
-    trigger:
-      input.surface === undefined
-        ? "Event automation"
-        : `${input.surface.label} event`,
-    details: input.details ?? [],
+    context: input.context ?? [],
   })
 }
 
 export function messageDisplay(input: {
-  details?: RunSnapshot["details"]
+  context?: RunSnapshot["context"]
   kind: "mention" | "reply"
-  metadata?: RunSnapshot["source"]["metadata"]
   surface?: NonNullable<RunSnapshot["source"]["surface"]>
-  taskSource?: RunSnapshot["taskSource"]
+  url?: string
 }): RunSnapshotInput {
-  const surface = input.surface ?? { type: "slack", label: "Slack" }
+  const surface = input.surface ?? "slack"
 
   return {
     source: {
       type: "message",
-      kind: { type: input.kind, label: input.kind },
       surface,
-      metadata: input.metadata ?? [],
+      ...(input.url === undefined ? {} : { url: input.url }),
     },
-    trigger: `${surface.label} message`,
-    details: input.details ?? [],
-    ...(input.taskSource === undefined ? {} : { taskSource: input.taskSource }),
+    context: input.context ?? [],
   }
 }
 
@@ -64,26 +52,23 @@ export function oneShotDisplay(): RunSnapshotInput {
   return automationDisplay({
     source: {
       type: "automation",
-      surface: { type: "milo", label: "Milo" },
-      kind: { type: "one-shot", label: "one-shot" },
-      metadata: [],
+      surface: "milo",
     },
   })
 }
 
 export function recurringDisplay(input: {
-  details?: RunSnapshot["details"]
+  context?: RunSnapshot["context"]
   schedule?: string
 }): RunSnapshotInput {
   return automationDisplay({
     source: {
       type: "automation",
-      surface: { type: "milo", label: "Milo" },
-      kind: { type: "recurring", label: "recurring" },
-      metadata: [
-        { type: "schedule", label: input.schedule ?? "Daily at 09:00 UTC" },
-      ],
+      surface: "milo",
     },
-    details: input.details ?? [],
+    context: [
+      { type: "schedule", label: input.schedule ?? "Daily at 09:00 UTC" },
+      ...(input.context ?? []),
+    ],
   })
 }

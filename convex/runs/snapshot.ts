@@ -57,10 +57,8 @@ export function createInstructionRunSnapshot(input: {
     snapshot: {
       ...(input.parent?.snapshot ?? manualSnapshot()),
       title: normalizeTitle(input.title, instructions),
-      trigger: input.parent === undefined ? "Manual" : "Subagent",
       source: input.parent?.snapshot.source ?? {
         type: "manual",
-        metadata: [],
       },
     },
   }
@@ -87,10 +85,8 @@ function manualSnapshot(): RunSnapshot {
     title: "Manual run",
     source: {
       type: "manual",
-      metadata: [],
     },
-    trigger: "Manual",
-    details: [],
+    context: [],
   }
 }
 

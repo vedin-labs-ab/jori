@@ -83,12 +83,8 @@ function eventRun(input: {
 
 function githubDisplay() {
   return eventAutomationDisplay({
-    surface: { type: "github", label: "GitHub" },
-    event: {
-      type: "pull_request.review_comment.created",
-      label: "New pull request review comment",
-    },
-    details: [
+    surface: "github",
+    context: [
       {
         type: "repository",
         label: "vedin-labs/frontier",
@@ -110,9 +106,8 @@ function githubDisplay() {
 
 function linearDisplay() {
   return eventAutomationDisplay({
-    surface: { type: "linear", label: "Linear" },
-    event: { type: "issue.comment.created", label: "New issue comment" },
-    details: [
+    surface: "linear",
+    context: [
       {
         type: "issue",
         label: "VED-5: Test issue",

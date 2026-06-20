@@ -24,11 +24,10 @@ test("renders recurring automation details", () => {
       title: "Daily image",
       source: {
         type: "automation",
-        surface: { type: "milo", label: "Milo" },
-        kind: { type: "recurring", label: "recurring" },
-        metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
+        surface: "milo",
       },
       details: [
+        { type: "schedule", label: "Daily at 09:00 UTC" },
         { type: "next", label: "Next", timestamp: 1700125200000 },
         {
           type: "tools",
@@ -49,9 +48,8 @@ test("renders recurring automation details", () => {
   fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
 
   expect(screen.getByText("Milo")).toBeDefined()
-  expect(screen.getByText("recurring")).toBeDefined()
   expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
-  expect(screen.queryByText("Schedule")).toBeNull()
+  expect(screen.getByText("Schedule")).toBeDefined()
   expect(screen.queryByText("Occurrence")).toBeNull()
   expect(screen.getByText("Next")).toBeDefined()
   expect(screen.getByText("Tools")).toBeDefined()
@@ -84,7 +82,6 @@ function execution(
     searchableText: "",
     source: overrides.source ?? {
       type: "automation",
-      metadata: [],
     },
     status: "completed",
     task: overrides.task,

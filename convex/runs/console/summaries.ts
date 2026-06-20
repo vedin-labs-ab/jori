@@ -29,7 +29,6 @@ export async function summarizeRun(
     title,
     source,
     task,
-    taskSource: detailSummary.taskSource,
     trigger: triggerLabel(context),
     createdAt: run.createdAt,
     details: detailSummary.details,
@@ -78,15 +77,13 @@ function searchableText(
     input.approval?.handoff.objective,
     input.approval?.handoff.progress,
     input.approval?.tool,
-    input.run.snapshot.trigger,
     input.run.cause.type,
     input.task,
     sourceSearchText(input.source),
-    ...input.run.snapshot.details.flatMap((detail) => [
+    ...input.run.snapshot.context.flatMap((detail) => [
       detail.type,
       detail.label,
     ]),
-    input.run.snapshot.taskSource?.label,
   ]
     .filter(Boolean)
     .join(" ")

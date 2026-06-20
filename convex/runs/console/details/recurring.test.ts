@@ -8,7 +8,7 @@ test("includes recurring automation details", async () => {
   const nextAt = Date.UTC(2026, 5, 15, 9)
   const run = testRun(
     recurringRun(scheduledAt, {
-      details: [{ type: "next", label: "Next", timestamp: nextAt }],
+      context: [{ type: "next", label: "Next", timestamp: nextAt }],
     }),
     {
       createdAt: scheduledAt + 1000,
@@ -27,11 +27,10 @@ test("includes recurring automation details", async () => {
 
   expect(summary.source).toEqual({
     type: "automation",
-    surface: { type: "milo", label: "Milo" },
-    kind: { type: "recurring", label: "recurring" },
-    metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
+    surface: "milo",
   })
   expect(summary.details).toEqual([
+    { type: "schedule", label: "Daily at 09:00 UTC" },
     { type: "next", label: "Next", timestamp: nextAt },
     {
       type: "tools",
@@ -53,7 +52,7 @@ test("includes paused recurring automation status without next run details", asy
   const nextAt = Date.UTC(2026, 5, 15, 9)
   const run = testRun(
     recurringRun(scheduledAt, {
-      details: [{ type: "status", label: "Paused" }],
+      context: [{ type: "status", label: "Paused" }],
     }),
     { createdAt: scheduledAt + 1000, endedAt: scheduledAt + 2000 }
   )

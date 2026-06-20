@@ -125,10 +125,8 @@ function run(): Doc<"runs"> {
       title: "Task",
       source: {
         type: "manual",
-        metadata: [],
       },
-      trigger: "Manual",
-      details: [],
+      context: [],
     },
   } as unknown as Doc<"runs">
 }

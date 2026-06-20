@@ -16,9 +16,8 @@ test("uses stored automation snapshots when the automation document is unavailab
     snapshot: {
       title: "Deep analysis",
       ...eventAutomationDisplay({
-        surface: { type: "slack", label: "Slack" },
-        event: { type: "message.created", label: "New channel message" },
-        metadata: [{ type: "channel", label: "C123" }],
+        context: [{ type: "channel", label: "C123" }],
+        surface: "slack",
       }),
     },
   })
@@ -30,10 +29,9 @@ test("uses stored automation snapshots when the automation document is unavailab
   expect("promptUrl" in summary).toBe(false)
   expect(summary.source).toEqual({
     type: "automation",
-    surface: { type: "slack", label: "Slack" },
-    event: { type: "message.created", label: "New channel message" },
-    metadata: [{ type: "channel", label: "C123" }],
+    surface: "slack",
   })
+  expect(summary.details).toContainEqual({ type: "channel", label: "C123" })
 })
 
 test("uses stored message snapshots when the message document is unavailable", async () => {
@@ -46,8 +44,8 @@ test("uses stored message snapshots when the message document is unavailable", a
     snapshot: {
       title: "Please summarize this thread.",
       ...messageDisplay({
+        context: [{ type: "channel", label: "C123" }],
         kind: "mention",
-        metadata: [{ type: "channel", label: "C123" }],
       }),
     },
   })
@@ -55,9 +53,7 @@ test("uses stored message snapshots when the message document is unavailable", a
 
   expect(summary.source).toEqual({
     type: "message",
-    kind: { type: "mention", label: "mention" },
-    surface: { type: "slack", label: "Slack" },
-    metadata: [{ type: "channel", label: "C123" }],
+    surface: "slack",
   })
 })
 
@@ -67,8 +63,8 @@ test("uses source message text for message tasks", async () => {
     snapshot: {
       title: "Please summarize this thread.",
       ...messageDisplay({
+        context: [{ type: "channel", label: "C123" }],
         kind: "reply",
-        metadata: [{ type: "channel", label: "C123" }],
       }),
     },
   })
@@ -100,9 +96,7 @@ test("uses source message text for message tasks", async () => {
   expect(summary.task).toBe("Please summarize this thread.\n\nKeep it concise.")
   expect(summary.source).toEqual({
     type: "message",
-    kind: { type: "reply", label: "reply" },
-    surface: { type: "slack", label: "Slack" },
-    metadata: [{ type: "channel", label: "C123" }],
+    surface: "slack",
   })
   expect(summary.searchableText).toContain("keep it concise")
 })
@@ -113,19 +107,15 @@ test("summarizes mention runs with source task links", async () => {
     snapshot: {
       title: "Please summarize this thread.",
       ...messageDisplay({
-        kind: "mention",
-        metadata: [{ type: "channel", label: "#product" }],
-        details: [
+        context: [
           {
             type: "channel",
             label: "#product",
             url: "https://slack.com/app_redirect?channel=C123&team=slack-team",
           },
         ],
-        taskSource: {
-          label: "Source",
-          url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=slack-team",
-        },
+        kind: "mention",
+        url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=slack-team",
       }),
     },
   })
@@ -133,12 +123,7 @@ test("summarizes mention runs with source task links", async () => {
 
   expect(summary.source).toEqual({
     type: "message",
-    kind: { type: "mention", label: "mention" },
-    surface: { type: "slack", label: "Slack" },
-    metadata: [{ type: "channel", label: "#product" }],
-  })
-  expect(summary.taskSource).toEqual({
-    label: "Source",
+    surface: "slack",
     url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=slack-team",
   })
   expect(summary.details).toEqual([
@@ -183,7 +168,6 @@ test("keeps stored automation snapshots when the automation changes", async () =
   expect(summary.task).toBe("Original automation instructions.")
   expect(summary.source).toEqual({
     type: "automation",
-    metadata: [],
   })
 })
 
