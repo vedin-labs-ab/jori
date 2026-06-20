@@ -156,6 +156,7 @@ function message(kind: "mention" | "reply") {
     integration: "slack",
     type: "message.channels",
     externalId: `slack:${kind}`,
+    mentioned: kind === "mention",
     text: "Please summarize this thread.",
     data: {
       channel: { id: "C123", name: "social" },

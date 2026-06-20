@@ -52,6 +52,7 @@ export type RuntimeMessage = {
   createdAt: number
   id: ConvexId<"messages">
   integration: string
+  mentioned: boolean
   observedAt: number | null
   routing: {
     reply: string | null

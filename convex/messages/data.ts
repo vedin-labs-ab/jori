@@ -17,6 +17,7 @@ export const observedMessageArgs = {
   accountId: v.string(),
   type: v.string(),
   externalId: v.string(),
+  mentioned: v.optional(v.boolean()),
   actor: v.optional(actorValidator),
   conversationId: v.optional(v.string()),
   text: v.optional(v.string()),
@@ -27,6 +28,7 @@ export const observedMessageArgs = {
 export type ObservedMessage = {
   type: string
   externalId: string
+  mentioned?: boolean
   actor?: Actor
   conversationId?: string
   text?: string
@@ -75,6 +77,7 @@ export async function insertMessage(
     integration: input.integration.integration,
     type: input.message.type,
     externalId: input.message.externalId,
+    mentioned: input.message.mentioned ?? false,
     actor: input.message.actor,
     conversationId: input.message.conversationId,
     text: input.message.text,

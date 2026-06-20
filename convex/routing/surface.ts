@@ -2,7 +2,6 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import {
   getSlackBotId,
   getSlackChannelId,
-  getSlackChannelType,
   getSlackMessageTs,
   getSlackThreadTs,
 } from "../providers/slack/data"
@@ -66,7 +65,7 @@ export function messageAudience(
 
   if (message.integration === "github" || message.integration === "linear") {
     return {
-      isAddressed: mentionsMilo(message.text),
+      isAddressed: message.mentioned,
       isDirect: false,
     }
   }
@@ -92,28 +91,18 @@ export function replyAddress(message: Doc<"messages">): ReplyAddress | null {
 
 function slackMessageAudience(
   message: Doc<"messages">,
-  integration: Doc<"integrations">
+  _integration: Doc<"integrations">
 ): MessageAudience {
-  const isDirect =
-    message.type === "message.im" || getSlackChannelType(message.data) === "im"
+  const isDirect = isSlackDirectMessage(message.type)
 
   return {
-    isAddressed: isDirect || isSlackMention(message, integration),
+    isAddressed: isDirect || message.mentioned,
     isDirect,
   }
 }
 
-function isSlackMention(
-  message: Doc<"messages">,
-  integration: Doc<"integrations">
-) {
-  if (message.type === "app_mention") {
-    return true
-  }
-
-  const botId = getSlackBotId(integration.data)
-
-  return botId !== undefined && (message.text ?? "").includes(`<@${botId}>`)
+function isSlackDirectMessage(type: string) {
+  return type === "message.im" || type === "message.mpim"
 }
 
 function slackRoutingMessageText(
@@ -129,10 +118,6 @@ function slackRoutingMessageText(
 
 function slackUserMentionPattern(userId: string) {
   return new RegExp(`<@${escapeRegExp(userId)}(?:\\|[^>]+)?>`, "g")
-}
-
-function mentionsMilo(text: string | undefined) {
-  return text !== undefined && /(?:^|\W)@milo(?:$|\W)/i.test(text)
 }
 
 function escapeRegExp(value: string) {

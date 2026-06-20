@@ -62,6 +62,7 @@ function message(
     integration: "slack",
     type: "message",
     externalId: messageId,
+    mentioned: false,
     text,
     createdAt: creationTime,
   }

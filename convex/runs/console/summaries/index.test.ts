@@ -78,6 +78,7 @@ test("uses stored message snapshots instead of message text", async () => {
         integration: "slack",
         type: "message.channels",
         externalId: "slack:message",
+        mentioned: false,
         text: "Please summarize this thread.\n\nKeep it concise.",
         data: {
           channel: { id: "C123", name: "product" },

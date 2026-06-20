@@ -159,6 +159,7 @@ function formatSessionMessage(message: RuntimeMessage) {
     `Authority: ${message.authority}`,
     ...(message.actor === null ? [] : [`Actor: ${message.actor}`]),
     `Type: ${message.type}`,
+    `Mentioned Milo: ${message.mentioned ? "yes" : "no"}`,
     `Observed at: ${new Date(observed).toISOString()}`,
     ...(routing === null
       ? []

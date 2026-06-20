@@ -9,6 +9,7 @@ export const messages = defineTable({
   integration: integrationValidator,
   type: v.string(),
   externalId: v.string(),
+  mentioned: v.boolean(),
   actor: v.optional(actorValidator),
   conversationId: v.optional(v.string()),
   text: v.optional(v.string()),

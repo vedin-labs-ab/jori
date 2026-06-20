@@ -136,6 +136,7 @@ function message(text: string, data?: unknown) {
     integration: "slack",
     type: "message.channels",
     externalId: "slack:message",
+    mentioned: false,
     text,
     data,
     createdAt: 900,
