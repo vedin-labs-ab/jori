@@ -23,17 +23,13 @@ export async function findReusableSession(
 ) {
   const session = await findSession(ctx, conversationId)
 
-  if (session === null || session.state !== "active") {
+  if (session?.runId === undefined) {
     return null
-  }
-
-  if (session.runId === undefined) {
-    return session
   }
 
   const run = await ctx.db.get(session.runId)
 
-  return run !== null && isTerminalStatus(run.status) ? null : session
+  return run === null || isTerminalStatus(run.status) ? null : session
 }
 
 export async function startSession(
@@ -43,15 +39,12 @@ export async function startSession(
     message: Doc<"messages">
     now: number
     runId: Id<"runs">
-    tenantId: string
   }
 ) {
   const existing = await findSession(ctx, args.conversationId)
   const patch = {
-    lastConsumedAt: args.message._creationTime,
-    lastConsumedMessageId: args.message._id,
+    cursor: messageCursor(args.message),
     runId: args.runId,
-    state: "active" as const,
     updatedAt: args.now,
   }
 
@@ -61,9 +54,7 @@ export async function startSession(
   }
 
   return await ctx.db.insert("sessions", {
-    tenantId: args.tenantId,
     conversationId: args.conversationId,
-    createdAt: args.now,
     ...patch,
   })
 }
@@ -73,22 +64,10 @@ export async function stopSession(
   session: Doc<"sessions">,
   now: number
 ) {
-  const conversation = await ctx.db.get(session.conversationId)
-
   await ctx.db.patch(session._id, {
-    state: "idle",
+    runId: undefined,
     updatedAt: now,
   })
-
-  if (
-    conversation !== null &&
-    session.runId !== undefined &&
-    conversation.runId === session.runId
-  ) {
-    await ctx.db.patch(conversation._id, {
-      runId: undefined,
-    })
-  }
 }
 
 export async function readPendingMessages(
@@ -150,7 +129,7 @@ export const drainMessages = internalMutation({
   handler: async (ctx, args) => {
     const session = await ctx.db.get(args.sessionId)
 
-    if (session === null || session.state !== "active") {
+    if (session?.runId === undefined) {
       return { hasMore: false, messages: [] }
     }
 
@@ -159,8 +138,7 @@ export const drainMessages = internalMutation({
 
     if (batch.cursor !== undefined) {
       await ctx.db.patch(session._id, {
-        lastConsumedAt: batch.cursor._creationTime,
-        lastConsumedMessageId: batch.cursor._id,
+        cursor: messageCursor(batch.cursor),
         updatedAt: Date.now(),
       })
     }
@@ -220,9 +198,9 @@ async function queryConversationMessages(
         .eq("integrationId", args.conversation.integrationId)
         .eq("conversationId", args.conversation.conversationId)
 
-      return args.session.lastConsumedAt === undefined
+      return args.session.cursor === undefined
         ? scoped
-        : scoped.gte("_creationTime", args.session.lastConsumedAt)
+        : scoped.gte("_creationTime", args.session.cursor.timestamp)
     })
     .order("asc")
     .take(args.limit)
@@ -230,4 +208,11 @@ async function queryConversationMessages(
 
 function isTerminalStatus(status: Doc<"runs">["status"]) {
   return status === "completed" || status === "failed" || status === "stopped"
+}
+
+function messageCursor(message: Doc<"messages">) {
+  return {
+    messageId: message._id,
+    timestamp: message._creationTime,
+  }
 }

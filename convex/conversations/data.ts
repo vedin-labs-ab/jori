@@ -99,16 +99,14 @@ export async function startMessageRun(
           integrationId: args.integration._id,
           conversationId: args.conversationKey,
           rootRunId: runId,
-          runId,
           createdBy: args.createdBy,
           createdAt: args.now,
         })
       : conversation._id
 
-  if (conversation !== null) {
+  if (conversation !== null && conversation.rootRunId === undefined) {
     await ctx.db.patch(conversation._id, {
-      ...(conversation.rootRunId === undefined ? { rootRunId: runId } : {}),
-      runId,
+      rootRunId: runId,
     })
   }
 
@@ -116,7 +114,6 @@ export async function startMessageRun(
     conversationId,
     message: args.message,
     runId,
-    tenantId: args.integration.tenantId,
     now: args.now,
   })
 

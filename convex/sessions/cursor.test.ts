@@ -32,19 +32,15 @@ test("does not advance past the returned message limit", () => {
   expect(batch.hasMore).toBe(true)
 })
 
-function session(
-  lastConsumedMessageId: string,
-  lastConsumedAt: number
-): Doc<"sessions"> {
+function session(messageId: string, timestamp: number): Doc<"sessions"> {
   return {
     _id: id<"sessions">("session"),
     _creationTime: 0,
-    tenantId: "tenant",
     conversationId: id<"conversations">("conversation"),
-    state: "active",
-    lastConsumedAt,
-    lastConsumedMessageId: id<"messages">(lastConsumedMessageId),
-    createdAt: 0,
+    cursor: {
+      messageId: id<"messages">(messageId),
+      timestamp,
+    },
     updatedAt: 0,
   }
 }

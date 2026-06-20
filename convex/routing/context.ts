@@ -77,12 +77,11 @@ async function getActiveRun(
     )
     .first()
 
-  if (session === null || session.state !== "active") {
+  if (session?.runId === undefined) {
     return null
   }
 
-  const run =
-    session.runId === undefined ? null : await ctx.db.get(session.runId)
+  const run = await ctx.db.get(session.runId)
 
   if (run === null || isTerminalRun(run)) {
     return null
