@@ -17,7 +17,7 @@ const root = process.cwd()
 const skillsDir = path.join(root, "skills")
 const promptsDir = path.join(root, "prompts")
 const outputFile = path.join(root, "convex", "prompts", "generated.ts")
-const promptPartsPrefix = "parts/"
+const promptAssemblyPrefix = "assembly/"
 const promptIncludePattern = /\{\{\s*include\s+"([^"]+)"\s*\}\}/g
 
 const skills = await readSkills(skillsDir)
@@ -59,11 +59,14 @@ async function readPromptTemplates(
   directory: string
 ): Promise<Record<string, string>> {
   const sources = await readPromptSources(directory)
-  const entries = Object.entries(sources).filter(([id]) => !isPromptPart(id))
+  const entries = Object.entries(sources).filter(([id]) => isPromptAssembly(id))
 
   return sortObject(
     Object.fromEntries(
-      entries.map(([id]) => [id, resolvePromptTemplate(id, sources)])
+      entries.map(([id]) => [
+        promptAssemblyId(id),
+        resolvePromptTemplate(id, sources),
+      ])
     )
   )
 }
@@ -88,7 +91,10 @@ async function readPromptSources(
     }
 
     if (entry.isFile() && entry.name.endsWith(".md")) {
-      result[id.replace(/\.md$/, "")] = await readFile(entryPath, "utf8")
+      const promptId = id.replace(/\.md$/, "")
+
+      validatePromptId(promptId)
+      result[promptId] = await readFile(entryPath, "utf8")
     }
   }
 
@@ -134,8 +140,30 @@ function normalizeIncludeId(id: string) {
   return normalized
 }
 
-function isPromptPart(id: string) {
-  return id.startsWith(promptPartsPrefix)
+function isPromptAssembly(id: string) {
+  return id.startsWith(promptAssemblyPrefix)
+}
+
+function promptAssemblyId(id: string) {
+  const assemblyId = id.slice(promptAssemblyPrefix.length)
+
+  if (assemblyId === "") {
+    throw new Error(`Invalid prompt assembly file: ${id}`)
+  }
+
+  return assemblyId
+}
+
+function validatePromptId(id: string) {
+  const invalidSegment = id
+    .split("/")
+    .find((segment) => !/^[a-z]+$/.test(segment))
+
+  if (invalidSegment !== undefined) {
+    throw new Error(
+      `Prompt path segment must be a single lowercase word: ${invalidSegment}`
+    )
+  }
 }
 
 function formatPromptTemplate(source: string) {
