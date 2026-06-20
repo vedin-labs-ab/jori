@@ -38,12 +38,12 @@ test("starts new conversation message runs as mentions", async () => {
   ])
   expect(inserted(ctx, "outbox")).toEqual([
     expect.objectContaining({
-      idempotencyKey: "run:runs-1",
+      key: "run:runs-1",
       operation: expect.objectContaining({
         runId: "runs-1",
         type: "run.start",
       }),
-      state: "pending",
+      status: "pending",
     }),
   ])
 })

@@ -2,7 +2,6 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { findActiveSandbox } from "./sandboxes"
 import { formatRuntimeError } from "./shared"
 
 const maxAttempts = 8
@@ -43,12 +42,11 @@ export const enqueueApprovalResume = internalMutation({
 
     return await enqueueOperation(ctx, {
       tenantId: approval.tenantId,
-      idempotencyKey: `approval:${approval._id}:${args.decision}`,
+      key: `approval:${approval._id}:${args.decision}`,
       operation: {
         type: "approval.resume",
         approvalId: approval._id,
         decision: args.decision,
-        waitpointTokenId: approval.waitpointTokenId,
       },
     })
   },
@@ -66,16 +64,12 @@ export const enqueueCancellation = internalMutation({
       return null
     }
 
-    const sandbox = await findActiveSandbox(ctx, run._id)
-
     return await enqueueOperation(ctx, {
       tenantId: run.tenantId,
-      idempotencyKey: `cancel:${run._id}`,
+      key: `cancel:${run._id}`,
       operation: {
         type: "run.cancel",
         runId: run._id,
-        sandboxId: sandbox?.sandboxId,
-        workerId: run.workerId,
       },
     })
   },
@@ -97,32 +91,38 @@ export const claimNext = internalMutation({
 
     await ctx.db.patch(item._id, {
       attempts: item.attempts + 1,
-      nextAttemptAt: args.now + processingLeaseMs,
-      state: "processing",
+      dueAt: args.now + processingLeaseMs,
+      status: "processing",
       updatedAt: args.now,
     })
 
-    return { ...item, attempts: item.attempts + 1, state: "processing" }
+    return {
+      ...item,
+      attempts: item.attempts + 1,
+      dueAt: args.now + processingLeaseMs,
+      status: "processing",
+      updatedAt: args.now,
+    }
   },
 })
 
 async function claimableItem(
   ctx: MutationCtx,
-  state: Doc<"outbox">["state"],
+  status: Doc<"outbox">["status"],
   now: number
 ) {
   return await ctx.db
     .query("outbox")
-    .withIndex("by_state_and_next_attempt", (query) =>
-      query.eq("state", state).lte("nextAttemptAt", now)
+    .withIndex("by_status_and_due_at", (query) =>
+      query.eq("status", status).lte("dueAt", now)
     )
     .first()
 }
 
 export const markSent = internalMutation({
   args: {
-    externalId: v.optional(v.string()),
     outboxId: v.id("outbox"),
+    receiptId: v.optional(v.string()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -132,11 +132,11 @@ export const markSent = internalMutation({
       return null
     }
 
-    await applyExternalId(ctx, item, args.externalId)
+    await applyReceipt(ctx, item, args.receiptId)
     await ctx.db.patch(args.outboxId, {
-      externalId: args.externalId,
-      lastError: undefined,
-      state: "sent",
+      error: undefined,
+      receiptId: args.receiptId,
+      status: "sent",
       updatedAt: Date.now(),
     })
 
@@ -161,9 +161,9 @@ export const markFailed = internalMutation({
     const delayMs = retry ? retryDelayMs(item.attempts) : 0
 
     await ctx.db.patch(args.outboxId, {
-      lastError: formatRuntimeError(args.error),
-      nextAttemptAt: Date.now() + delayMs,
-      state: retry ? "pending" : "failed",
+      dueAt: Date.now() + delayMs,
+      error: formatRuntimeError(args.error),
+      status: retry ? "pending" : "failed",
       updatedAt: Date.now(),
     })
 
@@ -174,7 +174,7 @@ export const markFailed = internalMutation({
 async function enqueueRun(ctx: MutationCtx, run: Doc<"runs">) {
   return await enqueueOperation(ctx, {
     tenantId: run.tenantId,
-    idempotencyKey: `run:${run._id}`,
+    key: `run:${run._id}`,
     operation: {
       type: "run.start",
       runId: run._id,
@@ -184,13 +184,11 @@ async function enqueueRun(ctx: MutationCtx, run: Doc<"runs">) {
 
 export async function enqueueOperation(
   ctx: MutationCtx,
-  args: Pick<Doc<"outbox">, "idempotencyKey" | "operation" | "tenantId">
+  args: Pick<Doc<"outbox">, "key" | "operation" | "tenantId">
 ) {
   const existing = await ctx.db
     .query("outbox")
-    .withIndex("by_idempotency", (query) =>
-      query.eq("idempotencyKey", args.idempotencyKey)
-    )
+    .withIndex("by_key", (query) => query.eq("key", args.key))
     .first()
 
   if (existing !== null) {
@@ -203,8 +201,8 @@ export async function enqueueOperation(
     ...args,
     attempts: 0,
     createdAt: now,
-    nextAttemptAt: now,
-    state: "pending",
+    dueAt: now,
+    status: "pending",
     updatedAt: now,
   })
 
@@ -213,17 +211,17 @@ export async function enqueueOperation(
   return outboxId
 }
 
-async function applyExternalId(
+async function applyReceipt(
   ctx: MutationCtx,
   item: Doc<"outbox">,
-  externalId: string | undefined
+  receiptId: string | undefined
 ) {
-  if (item.operation.type !== "run.start" || externalId === undefined) {
+  if (item.operation.type !== "run.start" || receiptId === undefined) {
     return
   }
 
   await ctx.db.patch(item.operation.runId, {
-    workerId: externalId,
+    workerId: receiptId,
   })
 }
 

@@ -19,7 +19,7 @@ test("queues reply delivery as an idempotent outbox operation", async () => {
     {
       table: "outbox",
       doc: expect.objectContaining({
-        idempotencyKey: "reply:routing:quick",
+        key: "reply:routing:quick",
         operation: {
           type: "reply.send",
           kind: "quick",
@@ -27,7 +27,7 @@ test("queues reply delivery as an idempotent outbox operation", async () => {
           routingId: "routing",
           text: "On it.",
         },
-        state: "pending",
+        status: "pending",
         tenantId: "tenant",
       }),
     },
