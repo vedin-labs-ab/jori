@@ -17,6 +17,8 @@ const root = process.cwd()
 const skillsDir = path.join(root, "skills")
 const promptsDir = path.join(root, "prompts")
 const outputFile = path.join(root, "convex", "prompts", "generated.ts")
+const promptPartsPrefix = "parts/"
+const promptIncludePattern = /\{\{\s*include\s+"([^"]+)"\s*\}\}/g
 
 const skills = await readSkills(skillsDir)
 const promptTemplates = await readPromptTemplates(promptsDir)
@@ -54,6 +56,19 @@ async function readSkills(directory: string): Promise<Record<string, Skill>> {
 }
 
 async function readPromptTemplates(
+  directory: string
+): Promise<Record<string, string>> {
+  const sources = await readPromptSources(directory)
+  const entries = Object.entries(sources).filter(([id]) => !isPromptPart(id))
+
+  return sortObject(
+    Object.fromEntries(
+      entries.map(([id]) => [id, resolvePromptTemplate(id, sources)])
+    )
+  )
+}
+
+async function readPromptSources(
   directory: string,
   prefix = ""
 ): Promise<Record<string, string>> {
@@ -67,7 +82,7 @@ async function readPromptTemplates(
     if (entry.isDirectory()) {
       result = {
         ...result,
-        ...(await readPromptTemplates(entryPath, id)),
+        ...(await readPromptSources(entryPath, id)),
       }
       continue
     }
@@ -78,6 +93,53 @@ async function readPromptTemplates(
   }
 
   return sortObject(result)
+}
+
+function resolvePromptTemplate(
+  id: string,
+  sources: Record<string, string>,
+  stack: string[] = []
+): string {
+  const source = sources[id]
+
+  if (source === undefined) {
+    throw new Error(`Prompt template ${id} does not exist.`)
+  }
+
+  if (stack.includes(id)) {
+    throw new Error(`Circular prompt include: ${[...stack, id].join(" -> ")}`)
+  }
+
+  return formatPromptTemplate(
+    source.replace(promptIncludePattern, (_match, rawIncludeId: string) =>
+      resolvePromptTemplate(normalizeIncludeId(rawIncludeId), sources, [
+        ...stack,
+        id,
+      ]).trim()
+    )
+  )
+}
+
+function normalizeIncludeId(id: string) {
+  const normalized = id.trim().replace(/\.md$/, "")
+
+  if (
+    normalized === "" ||
+    normalized.startsWith("/") ||
+    normalized.includes("..")
+  ) {
+    throw new Error(`Invalid prompt include: ${id}`)
+  }
+
+  return normalized
+}
+
+function isPromptPart(id: string) {
+  return id.startsWith(promptPartsPrefix)
+}
+
+function formatPromptTemplate(source: string) {
+  return `${source.trim()}\n`
 }
 
 function parseSkill(content: string, filePath: string): Skill {
