@@ -100,7 +100,6 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
     type: message.type,
     externalId: message.externalId,
     actor: createIntegrationActor({
-      integration: "github",
       externalId: message.actorId,
       kind: message.actorKind,
       name: message.actorName,

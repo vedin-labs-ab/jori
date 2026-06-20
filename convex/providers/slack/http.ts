@@ -173,7 +173,6 @@ async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
     type: message.type,
     externalId: message.externalId,
     actor: createIntegrationActor({
-      integration: "slack",
       externalId: message.actorId,
       kind: message.actorKind,
       email: actorProfile?.email,

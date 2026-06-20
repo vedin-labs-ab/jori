@@ -2,7 +2,6 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { actorValidator } from "../shared/actor"
 import { integrationValidator } from "../shared/integrations"
-import { sourceMetadataValidator } from "../shared/sources/schema"
 
 export const messages = defineTable({
   tenantId: v.string(),
@@ -14,7 +13,6 @@ export const messages = defineTable({
   conversationId: v.optional(v.string()),
   text: v.optional(v.string()),
   data: v.optional(v.any()),
-  metadata: sourceMetadataValidator,
   observedAt: v.optional(v.number()),
   createdAt: v.number(),
 })

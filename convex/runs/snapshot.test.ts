@@ -128,8 +128,6 @@ function message(
     externalId: "slack:message",
     text,
     data,
-    metadata:
-      data === undefined ? [] : [{ type: "channel", label: "#product" }],
     createdAt: 0,
   }
 }

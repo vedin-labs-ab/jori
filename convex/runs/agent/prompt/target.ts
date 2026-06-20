@@ -129,14 +129,16 @@ function getLinearTargetLines(data: unknown) {
 }
 
 function getSlackTargetLines(data: unknown) {
+  const channel = readDataObject(data, "channel")
+  const thread = readDataObject(data, "thread")
   const messageTs = readDataString(data, "ts")
 
   return [
-    targetLine("Channel ID", readDataString(data, "channelId")),
+    targetLine("Channel ID", readDataString(channel, "id")),
     targetLine("Message timestamp", messageTs),
     targetLine(
       "Reply thread timestamp",
-      readDataString(data, "threadTs") ?? messageTs
+      readDataString(thread, "ts") ?? messageTs
     ),
   ]
 }

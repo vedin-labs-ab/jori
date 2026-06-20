@@ -8,7 +8,7 @@ test("uses only the Slack channel", () => {
       event: "message.created",
       data: {
         channel: { id: "C123", name: "support" },
-        threadTs: "1710000000.000100",
+        thread: { ts: "1710000000.000100" },
         ts: "1710000000.000200",
       },
     })
@@ -21,7 +21,7 @@ test("does not use Slack channel IDs as display metadata", () => {
       integration: "slack",
       event: "message.created",
       data: {
-        channelId: "C123",
+        channel: { id: "C123" },
         ts: "1710000000.000200",
       },
     })

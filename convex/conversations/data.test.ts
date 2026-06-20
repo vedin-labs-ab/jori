@@ -138,7 +138,6 @@ function message(text: string, data?: unknown) {
     externalId: "slack:message",
     text,
     data,
-    metadata: [],
     createdAt: 900,
   } as Parameters<typeof startMessageRun>[1]["message"]
 }

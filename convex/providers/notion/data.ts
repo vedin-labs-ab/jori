@@ -75,7 +75,7 @@ async function findActiveNotionIntegration(
 }
 
 function isNotionBotEvent(actor: Actor | undefined, data: unknown) {
-  const actorId = getActorExternalId(actor, "notion")
+  const actorId = getActorExternalId(actor)
   const botId = getNotionBotId(data)
 
   return actorId !== undefined && botId !== undefined && actorId === botId

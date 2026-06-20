@@ -56,7 +56,7 @@ const messageTriggerCases = [
   ],
   [
     "slack",
-    { channelId: "C123", ts: "123.456" },
+    { channel: { id: "C123" }, ts: "123.456" },
     "Slack",
     [
       "- Channel ID: C123",
@@ -90,7 +90,7 @@ describe("runtime prompts", () => {
 
   test("uses Slack message timestamp as the default reply thread", () => {
     const prompt = assemblePrompt(
-      runtimeInput("slack", { channelId: "C123", ts: "123.456" })
+      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
     expect(prompt).toContain("- Reply thread timestamp: 123.456")
@@ -100,8 +100,8 @@ describe("runtime prompts", () => {
   test("uses Slack thread timestamp when the trigger is already threaded", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", {
-        channelId: "C123",
-        threadTs: "123.000",
+        channel: { id: "C123" },
+        thread: { ts: "123.000" },
         ts: "123.456",
       })
     )
@@ -186,7 +186,7 @@ describe("automation trigger prompts", () => {
 describe("approval request prompts", () => {
   test("lists prompted tools and the approval contract", () => {
     const prompt = assemblePrompt(
-      runtimeInput("slack", { channelId: "C123", ts: "123.456" }),
+      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
       [promptedTool()]
     )
 
@@ -198,7 +198,7 @@ describe("approval request prompts", () => {
 
   test("omits the approvals section without prompted tools", () => {
     const prompt = assemblePrompt(
-      runtimeInput("slack", { channelId: "C123", ts: "123.456" })
+      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
     expect(prompt).not.toContain("# Approvals")
@@ -208,7 +208,7 @@ describe("approval request prompts", () => {
 describe("approval continuation prompts", () => {
   test("renders approved action results", () => {
     const prompt = assemblePrompt(
-      runtimeInput("slack", { channelId: "C123", ts: "123.456" }),
+      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
       [promptedTool()],
       approvalContinuation()
     )
@@ -227,7 +227,7 @@ describe("approval continuation prompts", () => {
 
   test("renders denied action results", () => {
     const prompt = assemblePrompt(
-      runtimeInput("slack", { channelId: "C123", ts: "123.456" }),
+      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
       [promptedTool()],
       approvalContinuation("denied")
     )

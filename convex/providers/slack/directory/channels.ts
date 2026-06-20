@@ -40,7 +40,10 @@ export async function enrichSlackMessageData(
 
   return {
     ...readRecord(args.data),
-    channel,
+    channel: {
+      ...readRecord(readRecord(args.data).channel),
+      ...channel,
+    },
   }
 }
 
