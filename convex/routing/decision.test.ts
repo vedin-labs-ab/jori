@@ -81,10 +81,12 @@ describe("message intake routing request", () => {
     await decideRoute(context({ isAddressed: true }))
 
     const prompt = lastSystemPrompt()
+    expect(prompt).toContain("## Task")
     expect(prompt).toContain("Choose the first matching route:")
-    expect(prompt).toContain("addressed/direct message")
+    expect(prompt).toContain("assistant-directed message")
+    expect(prompt).toContain("execution-related")
     expect(prompt).toContain("still uncertain")
-    expect(prompt.indexOf("addressed/direct message")).toBeLessThan(
+    expect(prompt.indexOf("assistant-directed message")).toBeLessThan(
       prompt.indexOf("still uncertain")
     )
   })
