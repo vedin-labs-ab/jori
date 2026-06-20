@@ -1,17 +1,32 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { readProviderDataString } from "../providers/data"
 import { getSlackBotId, getSlackChannelType } from "../providers/slack/data"
+import { readDataNumber, readDataObject, readDataString } from "../shared/data"
 
 export type MessageAudience = {
   isAddressed: boolean
   isDirect: boolean
 }
 
-export type ReplyAddress = {
-  channelId: string
-  threadTs: string
-  type: "slack"
-}
+export type ReplyAddress =
+  | {
+      type: "github"
+      kind: "issue" | "review"
+      owner: string
+      repo: string
+      issueNumber?: number
+      pullNumber?: number
+      commentId?: string
+    }
+  | {
+      type: "linear"
+      issueId: string
+    }
+  | {
+      channelId: string
+      threadTs: string
+      type: "slack"
+    }
 
 export type ReplyTarget = {
   address: ReplyAddress
@@ -44,10 +59,25 @@ export function messageAudience(
     return slackMessageAudience(message, integration)
   }
 
+  if (message.integration === "github" || message.integration === "linear") {
+    return {
+      isAddressed: mentionsMilo(message.text),
+      isDirect: false,
+    }
+  }
+
   return { isAddressed: false, isDirect: false }
 }
 
 export function replyAddress(message: Doc<"messages">): ReplyAddress | null {
+  if (message.integration === "github") {
+    return githubReplyAddress(message)
+  }
+
+  if (message.integration === "linear") {
+    return linearReplyAddress(message)
+  }
+
   if (message.integration === "slack") {
     return slackReplyAddress(message)
   }
@@ -96,8 +126,48 @@ function slackUserMentionPattern(userId: string) {
   return new RegExp(`<@${escapeRegExp(userId)}(?:\\|[^>]+)?>`, "g")
 }
 
+function mentionsMilo(text: string | undefined) {
+  return text !== undefined && /(?:^|\W)@milo(?:$|\W)/i.test(text)
+}
+
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+function githubReplyAddress(message: Doc<"messages">): ReplyAddress | null {
+  const repository = readDataObject(message.data, "repository")
+  const fullName = readDataString(repository, "fullName")
+  const parts = fullName?.split("/")
+
+  if (parts?.length !== 2) {
+    return null
+  }
+
+  const [owner, repo] = parts
+  const comment = readDataObject(message.data, "comment")
+  const commentKind = readDataString(comment, "kind")
+
+  if (commentKind === "pull_request_review") {
+    const pullNumber = readDataNumber(message.data, "pullNumber")
+    const commentId =
+      readDataString(comment, "inReplyToId") ?? readDataString(comment, "id")
+
+    return pullNumber === undefined || commentId === undefined
+      ? null
+      : { type: "github", kind: "review", owner, repo, pullNumber, commentId }
+  }
+
+  const issueNumber = readDataNumber(message.data, "issueNumber")
+
+  return issueNumber === undefined
+    ? null
+    : { type: "github", kind: "issue", owner, repo, issueNumber }
+}
+
+function linearReplyAddress(message: Doc<"messages">): ReplyAddress | null {
+  const issueId = readDataString(message.data, "issueId")
+
+  return issueId === undefined ? null : { type: "linear", issueId }
 }
 
 function slackReplyAddress(message: Doc<"messages">): ReplyAddress | null {

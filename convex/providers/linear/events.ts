@@ -85,6 +85,11 @@ function getLinearCommentMessage(
     ),
     actorId: payload.actor?.id,
     actorEmail: payload.actor?.email,
+    actorKind:
+      payload.actor?.type === "application"
+        ? ("bot" as const)
+        : ("user" as const),
+    actorName: payload.actor?.name,
     conversationId: issueId,
     text: data.body,
     observedAt: getObservedAt(payload, data.createdAt),

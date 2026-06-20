@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { type RoutingConversationEntry } from "../../routing/history"
 
 export type MessageIntegration = "github" | "linear" | "slack"
 export type RuntimeIntegration = Doc<"integrations">
@@ -10,6 +11,11 @@ export type MessageRuntimeInput = {
   integration: RuntimeIntegration
   integrations: RuntimeIntegration[]
   message: Doc<"messages">
+  conversation: RoutingConversationEntry[]
+  routing: {
+    reply: string | null
+    route: "agent" | "ignore" | "reply"
+  } | null
 }
 
 export type AutomationRuntimeInput = {

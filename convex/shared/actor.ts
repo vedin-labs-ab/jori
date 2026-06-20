@@ -1,26 +1,38 @@
 import { v } from "convex/values"
 import { type Integration, integrationValidator } from "./integrations"
 
+export type ActorKind = "bot" | "self" | "user"
+
 export type Actor =
-  | { userId: string; name?: string; email?: string }
-  | { email: string }
+  | { kind: "user"; userId: string; name?: string; email?: string }
+  | { kind: "user"; email: string }
   | {
+      kind: ActorKind
       integration: Integration
       externalId: string
       name?: string
       email?: string
     }
 
+export const actorKindValidator = v.union(
+  v.literal("bot"),
+  v.literal("self"),
+  v.literal("user")
+)
+
 export const actorValidator = v.union(
   v.object({
+    kind: v.literal("user"),
     userId: v.string(),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
   }),
   v.object({
+    kind: v.literal("user"),
     email: v.string(),
   }),
   v.object({
+    kind: actorKindValidator,
     integration: integrationValidator,
     externalId: v.string(),
     name: v.optional(v.string()),
@@ -46,6 +58,7 @@ export function createUserActor(
   }
 
   return {
+    kind: "user",
     userId,
     ...nonEmptyActorFields(profile),
   }
@@ -61,6 +74,10 @@ export function getActorDisplayName(actor: Actor | undefined) {
   }
 
   if ("integration" in actor) {
+    if (actor.kind === "self") {
+      return "Milo"
+    }
+
     return (
       actor.name ??
       actor.email ??
@@ -75,6 +92,10 @@ export function getActorDisplayName(actor: Actor | undefined) {
   }
 
   return actor.email
+}
+
+export function isUserActor(actor: Actor | undefined) {
+  return actor?.kind === "user"
 }
 
 export function getActorExternalId(
@@ -106,11 +127,13 @@ function nonEmptyActorFields(fields: { name?: string; email?: string }) {
 export function createIntegrationActor(args: {
   integration: Integration
   externalId?: string
+  kind?: ActorKind
   name?: string
   email?: string
 }): Actor | undefined {
   if (args.externalId !== undefined && args.externalId !== "") {
     return {
+      kind: args.kind ?? "user",
       integration: args.integration,
       externalId: args.externalId,
       ...nonEmptyActorFields({
@@ -121,8 +144,19 @@ export function createIntegrationActor(args: {
   }
 
   if (args.email !== undefined && args.email !== "") {
-    return { email: args.email }
+    return { kind: "user", email: args.email }
   }
 
   return undefined
+}
+
+export function withActorKind(
+  actor: Actor | undefined,
+  kind: ActorKind
+): Actor | undefined {
+  if (actor === undefined || !("integration" in actor)) {
+    return actor
+  }
+
+  return { ...actor, kind }
 }

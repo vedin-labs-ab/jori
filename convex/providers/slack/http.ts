@@ -5,7 +5,6 @@ import {
   handleSlackApprovalInteraction,
   isSlackApprovalDecisionText,
 } from "../../approvals/slack"
-import { newlyRecordedMessageId } from "../../messages/data"
 import { createIntegrationActor } from "../../shared/actor"
 import {
   readCallbackState,
@@ -132,7 +131,10 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
 }
 
 async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
-  if (isSlackApprovalDecisionText(message.text)) {
+  if (
+    message.actorKind === "user" &&
+    isSlackApprovalDecisionText(message.text)
+  ) {
     const actorProfile = await getSlackActorProfile(ctx, {
       accountId: message.accountId,
       actorId: message.actorId,
@@ -153,23 +155,27 @@ async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
   }
 
   const [actorProfile, data] = await Promise.all([
-    getSlackActorProfile(ctx, {
-      accountId: message.accountId,
-      actorId: message.actorId,
-    }),
+    message.actorKind === "user"
+      ? getSlackActorProfile(ctx, {
+          accountId: message.accountId,
+          actorId: message.actorId,
+        })
+      : undefined,
     enrichSlackMessageData(ctx, {
       accountId: message.accountId,
       data: message.data,
     }),
   ])
 
-  const result = await ctx.runMutation(internal.messages.slack.record, {
+  await ctx.runMutation(internal.messages.intake.record, {
     accountId: message.accountId,
+    integration: "slack",
     type: message.type,
     externalId: message.externalId,
     actor: createIntegrationActor({
       integration: "slack",
       externalId: message.actorId,
+      kind: message.actorKind,
       email: actorProfile?.email,
       name: actorProfile?.name,
     }),
@@ -178,13 +184,6 @@ async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
     observedAt: message.observedAt,
     data,
   })
-  const messageId = newlyRecordedMessageId(result)
-
-  if (messageId !== undefined) {
-    await ctx.scheduler.runAfter(0, internal.routing.message.route, {
-      messageId,
-    })
-  }
 
   return Response.json({ ok: true })
 }

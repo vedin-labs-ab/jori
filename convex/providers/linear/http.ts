@@ -3,7 +3,6 @@ import { type ActionCtx } from "../../_generated/server"
 import { linearIssueCommentEvent } from "../../automations/names"
 import { createIntegrationActor } from "../../shared/actor"
 import {
-  ingestProviderMessage,
   readCallbackState,
   redirectWithStatus,
   unauthorizedResponse,
@@ -121,24 +120,25 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
 
   const hydratedMessage = await hydrateLinearMessage(ctx, message)
 
-  return await ingestProviderMessage(
-    ctx,
-    internal.messages.ingest.recordLinearMessage,
-    {
-      accountId: hydratedMessage.accountId,
-      type: hydratedMessage.type,
-      externalId: hydratedMessage.externalId,
-      actor: createIntegrationActor({
-        integration: "linear",
-        externalId: hydratedMessage.actorId,
-        email: hydratedMessage.actorEmail,
-      }),
-      conversationId: hydratedMessage.conversationId,
-      text: hydratedMessage.text,
-      observedAt: hydratedMessage.observedAt,
-      data: hydratedMessage.data,
-    }
-  )
+  await ctx.runMutation(internal.messages.intake.record, {
+    accountId: hydratedMessage.accountId,
+    integration: "linear",
+    type: hydratedMessage.type,
+    externalId: hydratedMessage.externalId,
+    actor: createIntegrationActor({
+      integration: "linear",
+      externalId: hydratedMessage.actorId,
+      kind: hydratedMessage.actorKind,
+      email: hydratedMessage.actorEmail,
+      name: hydratedMessage.actorName,
+    }),
+    conversationId: hydratedMessage.conversationId,
+    text: hydratedMessage.text,
+    observedAt: hydratedMessage.observedAt,
+    data: hydratedMessage.data,
+  })
+
+  return Response.json({ ok: true })
 }
 
 type LinearMessage = NonNullable<ReturnType<typeof getLinearMessage>>

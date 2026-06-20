@@ -32,6 +32,7 @@ function entry(
     createdAt,
     id,
     observedAt: null,
+    source: actor === "Milo" ? "self" : "user",
     text,
     type,
   }

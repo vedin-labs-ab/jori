@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, mutation } from "../_generated/server"
-import { continuePendingConversationRun } from "../conversations/data"
+import { continuePendingConversationRun } from "../conversations/continuation"
 import { requireWorkerSecret } from "./shared"
 
 export const record = mutation({

@@ -208,6 +208,7 @@ function context(
     createdAt: 1,
     id: "message" as Id<"messages">,
     observedAt: 1,
+    source: "user" as const,
     text: "@Milo please check this",
     type: "message.channels",
   }

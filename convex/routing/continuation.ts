@@ -1,9 +1,7 @@
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import {
-  continueTerminalConversationSession,
-  findConversation,
-} from "../conversations/data"
+import { continueTerminalConversationSession } from "../conversations/continuation"
+import { findConversation } from "../conversations/data"
 
 export async function continueTerminalSession(
   ctx: MutationCtx,

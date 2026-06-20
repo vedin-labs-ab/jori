@@ -156,6 +156,9 @@ function formatSessionMessage(message: RuntimeMessage) {
 
   return [
     `New ${message.integration} message in the active conversation.`,
+    `Source: ${message.source}`,
+    `Authority: ${message.authority}`,
+    ...(message.actor === null ? [] : [`Actor: ${message.actor}`]),
     `Type: ${message.type}`,
     `Observed at: ${new Date(observed).toISOString()}`,
     ...(routing === null

@@ -29,14 +29,11 @@ export function getSlackMessage(payload: SlackEventPayload) {
     return null
   }
 
-  if (
-    event.type !== "app_mention" &&
-    !(event.type === "message" && event.subtype === undefined)
-  ) {
+  if (event.type !== "app_mention" && event.type !== "message") {
     return null
   }
 
-  if (event.bot_id !== undefined || event.ts === undefined) {
+  if (event.ts === undefined) {
     return null
   }
 
@@ -55,7 +52,9 @@ export function getSlackMessage(payload: SlackEventPayload) {
     accountId,
     type: getSlackMessageType(event),
     externalId,
-    actorId: event.user,
+    actorId: event.user ?? event.bot_id,
+    actorKind:
+      event.bot_id === undefined ? ("user" as const) : ("bot" as const),
     conversationId: event.thread_ts ?? event.ts,
     text: event.text,
     observedAt: Number.isFinite(Number(event.ts))
@@ -67,6 +66,8 @@ export function getSlackMessage(payload: SlackEventPayload) {
       ts: event.ts,
       threadTs: event.thread_ts,
       channelType: event.channel_type,
+      subtype: event.subtype,
+      botId: event.bot_id,
     },
   }
 }
