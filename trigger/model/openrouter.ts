@@ -17,7 +17,7 @@ import {
   type ModelToolCall,
 } from "./types"
 
-const defaultModel = "z-ai/glm-5.2"
+const defaultAgentModel = "z-ai/glm-5.2"
 const defaultReasoningEffort = "xhigh"
 const agentProviderRouting = {
   require_parameters: true,
@@ -215,7 +215,8 @@ function requireModelConfig() {
 
   return {
     apiKey,
-    model: readEnvironmentVariable("MILO_OPENROUTER_MODEL") ?? defaultModel,
+    model:
+      readEnvironmentVariable("MILO_OPENROUTER_MODEL") ?? defaultAgentModel,
   }
 }
 

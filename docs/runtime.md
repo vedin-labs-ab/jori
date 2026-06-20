@@ -64,13 +64,14 @@ transactions.
 
 The model runtime is adapter based. The first implementation uses Vercel AI SDK
 with the OpenRouter provider behind a small interface that accepts messages and
-tool definitions and returns final messages or tool calls. The default target is
-`z-ai/glm-5.2` with `MILO_OPENROUTER_REASONING_EFFORT` defaulting to `xhigh`.
-Agent calls ask OpenRouter for providers that support the requested parameters
-and sort by price. Message intake routing uses the same model with latency
-sorting because it sits on the user-facing response path. The interface is
-intentionally narrow so the provider can change later without changing Convex
-state or Trigger task ownership.
+tool definitions and returns final messages or tool calls. Agent calls default
+to `z-ai/glm-5.2` with `MILO_OPENROUTER_REASONING_EFFORT` defaulting to
+`xhigh`, ask OpenRouter for providers that support the requested parameters, and
+sort by price. Message intake routing defaults to
+`deepseek/deepseek-v4-flash` and sorts providers by latency because it sits on
+the user-facing response path. The interface is intentionally narrow so the
+provider can change later without changing Convex state or Trigger task
+ownership.
 
 The sandbox runtime is adapter based. The first implementation uses E2B behind a
 small interface for lazy sandbox creation/reconnect, command execution, and

@@ -6,7 +6,7 @@ import {
 import { promptTemplates } from "../prompts/generated"
 import { type MessageRoutingContext } from "./context"
 
-const defaultIntakeModel = "z-ai/glm-5.2"
+const defaultIntakeModel = "deepseek/deepseek-v4-flash"
 const maxOutputTokens = 128
 const defaultAddressedReply = "What can I help with?"
 const intakeProviderRouting = {

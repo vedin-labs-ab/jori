@@ -19,7 +19,7 @@ afterEach(() => {
 })
 
 describe("message intake routing request", () => {
-  test("uses GLM 5.2 with latency-prioritized provider routing", async () => {
+  test("uses DeepSeek V4 Flash with latency-prioritized provider routing", async () => {
     process.env.OPENROUTER_INTAKE_MODEL = ""
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ route: "agent" })
@@ -29,7 +29,7 @@ describe("message intake routing request", () => {
 
     expect(lastRoutingRequest()).toMatchObject({
       maxTokens: 128,
-      model: "z-ai/glm-5.2",
+      model: "deepseek/deepseek-v4-flash",
       provider: {
         requireParameters: true,
         sort: "latency",
