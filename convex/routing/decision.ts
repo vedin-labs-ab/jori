@@ -71,7 +71,7 @@ function routeMessages(
   return [
     {
       role: "system",
-      content: promptTemplates["routing/message"],
+      content: promptTemplates.routing,
     },
     {
       role: "user",

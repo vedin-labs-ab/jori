@@ -31,7 +31,7 @@ export function assemblePrompt(
   continuation?: ApprovalContinuation
 ): string {
   const parts = [
-    promptTemplates["system/persona"],
+    promptTemplates.persona,
     ...(promptedTools.length === 0
       ? []
       : [createToolApprovalInstructions(promptedTools)]),
