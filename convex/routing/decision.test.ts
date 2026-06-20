@@ -19,7 +19,7 @@ afterEach(() => {
 })
 
 describe("message intake routing request", () => {
-  test("uses DeepSeek V4 Flash with latency-prioritized provider routing", async () => {
+  test("uses GLM 5.2 with latency-prioritized provider routing", async () => {
     process.env.OPENROUTER_INTAKE_MODEL = ""
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ route: "agent" })
@@ -29,7 +29,7 @@ describe("message intake routing request", () => {
 
     expect(lastRoutingRequest()).toMatchObject({
       maxTokens: 128,
-      model: "deepseek/deepseek-v4-flash",
+      model: "z-ai/glm-5.2",
       provider: {
         requireParameters: true,
         sort: "latency",
@@ -55,10 +55,10 @@ describe("message intake routing request", () => {
         },
         {
           additionalProperties: false,
-          required: ["route", "reply"],
+          required: ["route", "message"],
           properties: {
-            route: { enum: ["reply"] },
-            reply: { minLength: 1 },
+            route: { enum: ["respond"] },
+            message: { minLength: 1 },
           },
         },
         {
@@ -66,7 +66,7 @@ describe("message intake routing request", () => {
           required: ["route"],
           properties: {
             route: { enum: ["agent"] },
-            reply: { minLength: 1 },
+            message: { minLength: 1 },
           },
         },
       ],
@@ -75,17 +75,17 @@ describe("message intake routing request", () => {
 
   test("sends first-match routing precedence", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
-      modelResponse({ route: "reply", reply: "Hey." })
+      modelResponse({ message: "Hey.", route: "respond" })
     )
 
     await decideRoute(context({ isAddressed: true }))
 
     const prompt = lastSystemPrompt()
-    expect(prompt).toContain("Choose by first match:")
-    expect(prompt).toContain("addressed/direct greeting")
-    expect(prompt).toContain("uncertain addressed/direct")
-    expect(prompt.indexOf("addressed/direct greeting")).toBeLessThan(
-      prompt.indexOf("uncertain addressed/direct")
+    expect(prompt).toContain("Choose the first matching route:")
+    expect(prompt).toContain("addressed/direct message")
+    expect(prompt).toContain("still uncertain")
+    expect(prompt.indexOf("addressed/direct message")).toBeLessThan(
+      prompt.indexOf("still uncertain")
     )
   })
 })
@@ -103,9 +103,9 @@ describe("message intake routing decisions", () => {
     })
   })
 
-  test("recovers when a reply route omits reply text", async () => {
+  test("recovers when a respond route omits message text", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
-      modelResponse({ route: "reply" })
+      modelResponse({ route: "respond" })
     )
 
     await expect(decideRoute(context({ isAddressed: true }))).resolves.toEqual({
@@ -151,7 +151,7 @@ describe("message intake routing decisions", () => {
   test("accepts a JSON decision wrapped in stray prose", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelTextResponse(
-        'This is a greeting.\n\n{"route":"reply","reply":"Hey Albin."}'
+        'This is a greeting.\n\n{"route":"respond","message":"Hey Albin."}'
       )
     )
 
@@ -224,8 +224,9 @@ function context(
 }
 
 function modelResponse(content: {
+  message?: string
   reply?: string
-  route: "agent" | "ignore" | "reply"
+  route: "agent" | "ignore" | "reply" | "respond"
 }) {
   return modelTextResponse(JSON.stringify(content))
 }
