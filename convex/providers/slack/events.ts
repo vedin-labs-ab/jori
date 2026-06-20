@@ -54,6 +54,7 @@ export function getSlackMessage(payload: SlackEventPayload) {
     externalId,
     mentioned: event.type === "app_mention",
     actorId: event.user ?? event.bot_id,
+    actorAliases: slackActorAliases(event),
     actorKind:
       event.bot_id === undefined ? ("user" as const) : ("bot" as const),
     conversationId: event.thread_ts ?? event.ts,
@@ -71,8 +72,15 @@ function slackMessageData(payload: SlackEventPayload, event: SlackEvent) {
     ...optionalObject("channel", slackChannel(event)),
     ...optionalObject("thread", slackThread(event)),
     ...optionalObject("event", slackEvent(payload, event)),
-    ...optionalString("botId", event.bot_id),
   }
+}
+
+function slackActorAliases(event: SlackEvent) {
+  if (event.bot_id === undefined || event.bot_id === event.user) {
+    return []
+  }
+
+  return [{ type: "slack.bot", id: event.bot_id }]
 }
 
 function slackChannel(event: SlackEvent) {

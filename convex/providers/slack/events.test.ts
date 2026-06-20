@@ -48,6 +48,33 @@ describe("Slack event messages", () => {
       })
     ).toMatchObject({ mentioned: true, type: "message.channels" })
   })
+})
+
+describe("Slack event actor aliases", () => {
+  test("stores Slack bot event ids as actor aliases", () => {
+    const message = getSlackMessage({
+      type: "event_callback",
+      team_id: "T123",
+      event: {
+        type: "message",
+        user: "U123",
+        bot_id: "B123",
+        channel: "C123",
+        channel_type: "channel",
+        text: "hello from the bot",
+        ts: "1710000000.000200",
+      },
+    })
+
+    expect(message).toMatchObject({
+      actorAliases: [{ type: "slack.bot", id: "B123" }],
+      actorId: "U123",
+    })
+    expect(message?.data).toEqual({
+      channel: { id: "C123" },
+      ts: "1710000000.000200",
+    })
+  })
 
   test("uses an unknown message type when Slack omits the channel kind", () => {
     expect(

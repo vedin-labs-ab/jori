@@ -1,7 +1,7 @@
 import { readProviderDataString } from "../data"
 
-export function getSlackBotId(data: unknown) {
-  return readProviderDataString(data, "botId")
+export function getSlackBotUserId(data: unknown) {
+  return readProviderDataString(data, "botUserId")
 }
 
 export function getSlackChannelId(data: unknown) {

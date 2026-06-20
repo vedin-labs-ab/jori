@@ -59,7 +59,7 @@ export const recordOAuthInstallation = internalMutation({
       id: v.string(),
       name: v.optional(v.string()),
     }),
-    botId: v.optional(v.string()),
+    botUserId: v.optional(v.string()),
     userScopes: v.optional(v.string()),
     userToken: v.string(),
   },
@@ -82,7 +82,7 @@ export const recordOAuthInstallation = internalMutation({
         bot: args.botScopes,
         user: args.userScopes,
       },
-      botId: args.botId,
+      botUserId: args.botUserId,
     }
 
     if (existing !== null) {
