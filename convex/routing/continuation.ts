@@ -19,7 +19,7 @@ export async function continueTerminalSession(
   const conversation = await findConversation(ctx, {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
-    conversationId: input.message.conversationId,
+    externalId: input.message.conversationId,
   })
 
   if (conversation === null) {

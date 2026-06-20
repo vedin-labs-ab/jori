@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { resolveMessageOwner } from "../messages/data"
 import { findRoutingByMessage } from "../routing/data"
 import { maxPendingReadLimit } from "../sessions/cursor"
 import { readPendingMessages, stopSession } from "../sessions/data"
@@ -80,8 +81,11 @@ async function continueSession(
     conversation,
     integration,
     message: pending.message,
-    conversationKey: conversation.conversationId,
-    createdBy: conversation.createdBy,
+    createdBy: await resolveMessageOwner(ctx, {
+      tenantId: integration.tenantId,
+      message: pending.message,
+    }),
+    externalId: conversation.externalId,
     now,
     replaceActiveSession: true,
   })

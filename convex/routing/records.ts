@@ -117,7 +117,7 @@ async function maybeStartAgentRun(
   const conversation = await findConversation(ctx, {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
-    conversationId: input.message.conversationId,
+    externalId: input.message.conversationId,
   })
   const createdBy = await resolveUserIdByEmail(ctx, {
     tenantId: input.integration.tenantId,
@@ -127,8 +127,8 @@ async function maybeStartAgentRun(
     conversation,
     integration: input.integration,
     message: input.message,
-    conversationKey: input.message.conversationId ?? input.message.externalId,
     createdBy,
+    externalId: input.message.conversationId ?? input.message.externalId,
     now: input.now,
   })
   return { runId: run.runId }

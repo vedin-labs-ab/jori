@@ -23,7 +23,14 @@ export async function findReusableSession(
 ) {
   const session = await findSession(ctx, conversationId)
 
-  if (session?.runId === undefined) {
+  return session === null ? null : await isReusableSession(ctx, session)
+}
+
+export async function isReusableSession(
+  ctx: MutationCtx,
+  session: Doc<"sessions">
+) {
+  if (session.runId === undefined) {
     return null
   }
 
@@ -170,7 +177,7 @@ async function findRouting(ctx: MutationCtx, message: Doc<"messages">) {
     .first()
 }
 
-async function findSession(
+export async function findSession(
   ctx: QueryLikeCtx,
   conversationId: Id<"conversations">
 ) {
@@ -196,7 +203,7 @@ async function queryConversationMessages(
       const scoped = query
         .eq("tenantId", args.conversation.tenantId)
         .eq("integrationId", args.conversation.integrationId)
-        .eq("conversationId", args.conversation.conversationId)
+        .eq("conversationId", args.conversation.externalId)
 
       return args.session.cursor === undefined
         ? scoped
