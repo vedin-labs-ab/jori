@@ -13,7 +13,7 @@ export type FileAttachment = {
 
 export type FileContext = {
   ctx: ActionCtx
-  execution: Doc<"executions">
+  run: Doc<"runs">
 }
 
 export async function readFileAttachments(
@@ -35,7 +35,7 @@ export async function readFileAttachments(
 
   for (const input of inputs) {
     const file = await context.ctx.runQuery(internal.files.data.getForTenant, {
-      tenantId: context.execution.tenantId,
+      tenantId: context.run.tenantId,
       fileId: input.fileId as Id<"files">,
     })
 

@@ -27,15 +27,13 @@ export async function findReusableSession(
     return null
   }
 
-  if (session.executionId === undefined) {
+  if (session.runId === undefined) {
     return session
   }
 
-  const execution = await ctx.db.get(session.executionId)
+  const run = await ctx.db.get(session.runId)
 
-  return execution !== null && isTerminalStatus(execution.status)
-    ? null
-    : session
+  return run !== null && isTerminalStatus(run.status) ? null : session
 }
 
 export async function startSession(
@@ -50,7 +48,6 @@ export async function startSession(
 ) {
   const existing = await findSession(ctx, args.conversationId)
   const patch = {
-    executionId: undefined,
     lastConsumedAt: args.message._creationTime,
     lastConsumedMessageId: args.message._id,
     runId: args.runId,
@@ -76,28 +73,20 @@ export async function stopSession(
   session: Doc<"sessions">,
   now: number
 ) {
+  const conversation = await ctx.db.get(session.conversationId)
+
   await ctx.db.patch(session._id, {
     state: "idle",
     updatedAt: now,
   })
-}
 
-export async function recordSessionExecution(
-  ctx: MutationCtx,
-  args: {
-    executionId: Id<"executions">
-    runId: Id<"runs">
-  }
-) {
-  const session = await ctx.db
-    .query("sessions")
-    .withIndex("by_run", (query) => query.eq("runId", args.runId))
-    .first()
-
-  if (session !== null && session.runId === args.runId) {
-    await ctx.db.patch(session._id, {
-      executionId: args.executionId,
-      updatedAt: Date.now(),
+  if (
+    conversation !== null &&
+    session.runId !== undefined &&
+    conversation.runId === session.runId
+  ) {
+    await ctx.db.patch(conversation._id, {
+      runId: undefined,
     })
   }
 }
@@ -239,6 +228,6 @@ async function queryConversationMessages(
     .take(args.limit)
 }
 
-function isTerminalStatus(status: Doc<"executions">["status"]) {
+function isTerminalStatus(status: Doc<"runs">["status"]) {
   return status === "completed" || status === "failed" || status === "stopped"
 }

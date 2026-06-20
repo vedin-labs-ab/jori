@@ -10,25 +10,25 @@ import {
 
 export const stop = mutation({
   args: {
-    executionId: v.id("executions"),
+    runId: v.id("runs"),
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
-    const execution = await ctx.db.get(args.executionId)
+    const run = await ctx.db.get(args.runId)
 
-    if (execution === null || execution.tenantId !== args.tenantId) {
-      throw new Error("Execution not found.")
+    if (run === null || run.tenantId !== args.tenantId) {
+      throw new Error("Run not found.")
     }
 
-    if (execution.status !== "queued" && execution.status !== "running") {
+    if (run.status !== "queued" && run.status !== "running") {
       return null
     }
 
     const now = Date.now()
 
     // Clearing trace credentials revokes live trace access immediately.
-    await ctx.db.patch(execution._id, {
+    await ctx.db.patch(run._id, {
       status: "stopped",
       stoppedBy: stoppedByLabel(identity),
       stoppedAt: now,
@@ -37,7 +37,7 @@ export const stop = mutation({
     })
 
     await ctx.runMutation(internal.runtime.outbox.enqueueCancellation, {
-      executionId: execution._id,
+      runId: run._id,
     })
 
     return null

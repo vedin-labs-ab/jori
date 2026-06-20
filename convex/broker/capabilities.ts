@@ -1,6 +1,4 @@
 import { getIntegrationTools } from "../automations/access"
-import { type AgentRuntimeInput } from "../executions/agent/input"
-import { canUseToolPermission } from "../executions/agent/tools/policy"
 import {
   getToolPermissionsBySurface,
   type PermissionMode,
@@ -9,6 +7,8 @@ import {
   type ToolPermission,
   type ToolSurface,
 } from "../permissions/catalog"
+import { type AgentRuntimeInput } from "../runs/agent/input"
+import { canUseToolPermission } from "../runs/agent/tools/policy"
 import {
   integrations as integrationCatalog,
   toolSurfaceLabel,

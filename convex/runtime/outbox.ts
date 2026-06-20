@@ -2,58 +2,28 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { recordSessionExecution } from "../sessions/data"
 import { formatRuntimeError } from "./shared"
 
 const maxAttempts = 8
 const processingLeaseMs = 5 * 60 * 1000
 
-export async function createQueuedExecution(
-  ctx: MutationCtx,
-  runId: Id<"runs">
-) {
+export async function queueRun(ctx: MutationCtx, runId: Id<"runs">) {
   const run = await ctx.db.get(runId)
 
   if (run === null) {
     return null
   }
 
-  const existing = await ctx.db
-    .query("executions")
-    .withIndex("by_run", (query) => query.eq("runId", runId))
-    .first()
-
-  if (existing !== null) {
-    await recordSessionExecution(ctx, {
-      executionId: existing._id,
-      runId,
-    })
-    await enqueueRun(ctx, run, existing._id)
-
-    return existing._id
-  }
-
-  const executionId = await ctx.db.insert("executions", {
-    tenantId: run.tenantId,
-    runId,
-    status: "queued",
-    createdBy: run.createdBy,
-    createdAt: Date.now(),
-  })
-
-  await recordSessionExecution(ctx, { executionId, runId })
-  await enqueueRun(ctx, run, executionId)
-
-  return executionId
+  return await enqueueRun(ctx, run)
 }
 
-export const ensureRunQueued = internalMutation({
+export const ensureQueued = internalMutation({
   args: {
     runId: v.id("runs"),
   },
   returns: v.any(),
   handler: async (ctx, args) => {
-    return await createQueuedExecution(ctx, args.runId)
+    return await queueRun(ctx, args.runId)
   },
 })
 
@@ -85,25 +55,24 @@ export const enqueueApprovalResume = internalMutation({
 
 export const enqueueCancellation = internalMutation({
   args: {
-    executionId: v.id("executions"),
+    runId: v.id("runs"),
   },
   returns: v.any(),
   handler: async (ctx, args) => {
-    const execution = await ctx.db.get(args.executionId)
+    const run = await ctx.db.get(args.runId)
 
-    if (execution === null) {
+    if (run === null) {
       return null
     }
 
     return await enqueueOperation(ctx, {
-      tenantId: execution.tenantId,
-      idempotencyKey: `cancel:${execution._id}`,
+      tenantId: run.tenantId,
+      idempotencyKey: `cancel:${run._id}`,
       operation: {
         type: "cancelRun",
-        executionId: execution._id,
-        runId: execution.runId,
-        sandboxId: execution.sandboxId,
-        triggerRunId: execution.triggerRunId,
+        runId: run._id,
+        sandboxId: run.sandboxId,
+        triggerRunId: run.triggerRunId,
       },
     })
   },
@@ -199,18 +168,13 @@ export const markFailed = internalMutation({
   },
 })
 
-async function enqueueRun(
-  ctx: MutationCtx,
-  run: Doc<"runs">,
-  executionId: Id<"executions">
-) {
+async function enqueueRun(ctx: MutationCtx, run: Doc<"runs">) {
   return await enqueueOperation(ctx, {
     tenantId: run.tenantId,
-    idempotencyKey: `run:${run._id}:execution:${executionId}`,
+    idempotencyKey: `run:${run._id}`,
     operation: {
       type: "enqueueRun",
       runId: run._id,
-      executionId,
       parentRunId: run.parentRunId,
       rootRunId: run.rootRunId,
     },
@@ -256,7 +220,7 @@ async function applyExternalId(
     return
   }
 
-  await ctx.db.patch(item.operation.executionId, {
+  await ctx.db.patch(item.operation.runId, {
     triggerRunId: externalId,
   })
 }

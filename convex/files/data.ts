@@ -12,7 +12,7 @@ const maxFilesScanned = 500
 export const record = internalMutation({
   args: {
     tenantId: v.string(),
-    executionId: v.id("executions"),
+    runId: v.id("runs"),
     storageId: v.id("_storage"),
     name: v.string(),
     mimeType: v.string(),
@@ -89,15 +89,15 @@ export const getForTenant = internalQuery({
   },
 })
 
-export const getForExecution = internalQuery({
+export const getForRun = internalQuery({
   args: {
-    executionId: v.id("executions"),
     fileId: v.id("files"),
+    runId: v.id("runs"),
   },
   handler: async (ctx, args) => {
     const file = await ctx.db.get(args.fileId)
 
-    if (file === null || file.executionId !== args.executionId) {
+    if (file === null || file.runId !== args.runId) {
       return null
     }
 

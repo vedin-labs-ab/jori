@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import { type AgentRuntimeInput } from "../executions/agent/input"
-import { integration } from "../executions/agent/tools/fixtures"
+import { type AgentRuntimeInput } from "../runs/agent/input"
+import { integration } from "../runs/agent/tools/fixtures"
 import { type ApprovalBrokerContext } from "./approval"
 import { listCapabilities } from "./capabilities"
 
@@ -70,9 +70,9 @@ function context(args: {
 }): ApprovalBrokerContext {
   return {
     connectedIntegrations: args.connectedIntegrations,
-    execution: execution(),
     input: args.input,
     integrations: args.input.integrations,
+    run: run(),
     toolModes: args.toolModes,
   }
 }
@@ -116,6 +116,7 @@ function run(): Doc<"runs"> {
     _id: "run",
     _creationTime: 0,
     tenantId: "tenant",
+    status: "running",
     task: "Task",
     title: "Task",
     createdBy: "user",
@@ -125,22 +126,10 @@ function run(): Doc<"runs"> {
     display: {
       source: {
         type: "manual",
-        metadata: {},
+        metadata: [],
       },
       trigger: "Manual",
       details: [],
     },
   } as unknown as Doc<"runs">
-}
-
-function execution(): Doc<"executions"> {
-  return {
-    _id: "execution",
-    _creationTime: 0,
-    tenantId: "tenant",
-    runId: "run",
-    status: "running",
-    createdBy: "user",
-    createdAt: 0,
-  } as Doc<"executions">
 }

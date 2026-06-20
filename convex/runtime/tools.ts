@@ -16,7 +16,7 @@ export const call = action({
   args: {
     approved: v.optional(v.boolean()),
     args: v.any(),
-    executionId: v.id("executions"),
+    runId: v.id("runs"),
     secret: v.string(),
     surface: toolSurfaceValidator,
     tool: v.string(),
@@ -25,23 +25,19 @@ export const call = action({
   handler: async (ctx, args) => {
     requireWorkerSecret(args.secret)
 
-    return await callBrokerTool(
-      ctx,
-      await loadBrokerContext(ctx, args.executionId),
-      {
-        approved: args.approved,
-        args: normalizeToolArgs(args.args),
-        surface: args.surface,
-        tool: args.tool,
-      }
-    )
+    return await callBrokerTool(ctx, await loadBrokerContext(ctx, args.runId), {
+      approved: args.approved,
+      args: normalizeToolArgs(args.args),
+      surface: args.surface,
+      tool: args.tool,
+    })
   },
 })
 
 export const requestApproval = action({
   args: {
     args: v.any(),
-    executionId: v.id("executions"),
+    runId: v.id("runs"),
     secret: v.string(),
     surface: toolSurfaceValidator,
     tool: v.string(),
@@ -53,7 +49,7 @@ export const requestApproval = action({
 
     return await createPromptedToolApproval(
       ctx,
-      await loadBrokerContext(ctx, args.executionId),
+      await loadBrokerContext(ctx, args.runId),
       {
         args: normalizeToolArgs(args.args),
         surface: args.surface,
@@ -66,18 +62,18 @@ export const requestApproval = action({
 
 async function loadBrokerContext(
   ctx: ActionCtx,
-  executionId: Doc<"executions">["_id"]
+  runId: Doc<"runs">["_id"]
 ): Promise<ApprovalBrokerContext> {
-  const execution = await ctx.runQuery(internal.executions.records.get, {
-    executionId,
+  const run = await ctx.runQuery(internal.runs.records.get, {
+    runId,
   })
 
-  if (execution === null) {
-    throw new Error("Execution not found.")
+  if (run === null) {
+    throw new Error("Run not found.")
   }
 
-  const input = await ctx.runQuery(internal.executions.records.getInputByRun, {
-    runId: execution.runId,
+  const input = await ctx.runQuery(internal.runs.records.getInputByRun, {
+    runId: run._id,
   })
 
   if (input === null) {
@@ -87,14 +83,14 @@ async function loadBrokerContext(
   const overrides = await ctx.runQuery(
     internal.permissions.tools.listForRuntime,
     {
-      tenantId: execution.tenantId,
+      tenantId: run.tenantId,
     }
   )
   const connectedIntegrations = await ctx.runQuery(
     internal.integrations.lookup.listActiveForRuntime,
     {
-      tenantId: execution.tenantId,
-      ownerId: execution.createdBy,
+      tenantId: run.tenantId,
+      ownerId: run.createdBy,
     }
   )
   const integrations: Doc<"integrations">[] = []
@@ -105,9 +101,9 @@ async function loadBrokerContext(
 
   return {
     connectedIntegrations,
-    execution,
     input,
     integrations,
+    run,
     toolModes: resolveToolModes(overrides),
   }
 }

@@ -87,8 +87,8 @@ async function executeConvexTool(
   })
 
   await runtime.convex.requestApproval({
-    executionId: runtime.context.execution.id,
     input: call.args,
+    runId: runtime.context.run.id,
     surface,
     tool: toolName,
     waitpointTokenId: token.id,
@@ -100,7 +100,6 @@ async function executeConvexTool(
         route: tool.route,
         waitpointTokenId: token.id,
       },
-      executionId: runtime.context.execution.id,
       runId: runtime.context.run.id,
       sequence: 0,
       source: "trigger.approval",
@@ -140,11 +139,11 @@ async function callConvexTool(
 
   const result = await runtime.convex.callTool({
     approved,
-    executionId: runtime.context.execution.id,
     input:
       surface === "milo"
         ? await prepareMiloToolInput(runtime, tool, input)
         : input,
+    runId: runtime.context.run.id,
     surface,
     tool,
   })
@@ -187,7 +186,6 @@ async function recordToolEvent(
         route: tool.route,
         ...payload,
       },
-      executionId: args.runtime.context.execution.id,
       runId: args.runtime.context.run.id,
       sequence: args.sequence,
       source: "trigger.tool",

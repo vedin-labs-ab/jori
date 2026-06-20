@@ -1,6 +1,6 @@
 export const pageSize = 25
 
-export const executionFilterOptions = [
+export const runFilterOptions = [
   { label: "All", value: "all" },
   { label: "Ongoing", value: "ongoing" },
   { label: "Failed", value: "failed" },
@@ -21,7 +21,7 @@ export const approvalFilterLabels = Object.fromEntries(
   approvalFilterOptions.map((option) => [option.value, option.label])
 ) as Record<ApprovalFilter, string>
 
-export type ExecutionFilter = (typeof executionFilterOptions)[number]["value"]
+export type RunFilter = (typeof runFilterOptions)[number]["value"]
 export type ApprovalFilter = (typeof approvalFilterOptions)[number]["value"]
 export type ExecutionStatus =
   | "queued"

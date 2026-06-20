@@ -1,12 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
 
-export type ExecutionFilter =
-  | "all"
-  | "ongoing"
-  | "failed"
-  | "stopped"
-  | "completed"
+export type RunFilter = "all" | "ongoing" | "failed" | "stopped" | "completed"
 
 export type ApprovalFilter =
   | "any"
@@ -18,7 +13,7 @@ export type ApprovalFilter =
 
 export type ApprovalState = "pending" | "approved" | "denied" | "expired"
 
-export const executionFilterValidator = v.union(
+export const runFilterValidator = v.union(
   v.literal("all"),
   v.literal("ongoing"),
   v.literal("failed"),
@@ -35,19 +30,16 @@ export const approvalFilterValidator = v.union(
   v.literal("none")
 )
 
-export function executionMatchesFilter(
-  execution: Doc<"executions">,
-  filter: ExecutionFilter
-) {
+export function runMatchesFilter(run: Doc<"runs">, filter: RunFilter) {
   if (filter === "all") {
     return true
   }
 
   if (filter === "ongoing") {
-    return execution.status === "queued" || execution.status === "running"
+    return run.status === "queued" || run.status === "running"
   }
 
-  return execution.status === filter
+  return run.status === filter
 }
 
 export function approvalMatchesFilter(

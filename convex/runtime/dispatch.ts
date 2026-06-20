@@ -81,18 +81,17 @@ async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
     return undefined
   }
 
-  const execution = (await ctx.runQuery(internal.executions.records.get, {
-    executionId: operation.executionId,
-  })) as Doc<"executions"> | null
+  const run = (await ctx.runQuery(internal.runs.records.get, {
+    runId: operation.runId,
+  })) as Doc<"runs"> | null
 
-  if (execution === null || isTerminalExecution(execution)) {
+  if (run === null || isTerminalRun(run)) {
     return undefined
   }
 
   const handle = await tasks.trigger(
     agentTaskId,
     {
-      executionId: operation.executionId,
       runId: operation.runId,
       ...(operation.parentRunId === undefined
         ? {}
@@ -112,11 +111,11 @@ async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
   return handle.id
 }
 
-function isTerminalExecution(execution: Doc<"executions">) {
+function isTerminalRun(run: Doc<"runs">) {
   return (
-    execution.status === "completed" ||
-    execution.status === "failed" ||
-    execution.status === "stopped"
+    run.status === "completed" ||
+    run.status === "failed" ||
+    run.status === "stopped"
   )
 }
 
@@ -130,7 +129,6 @@ async function triggerSandboxCleanup(item: Doc<"outbox">) {
   await tasks.trigger(
     cleanupTaskId,
     {
-      executionId: operation.executionId,
       runId: operation.runId,
       sandboxId: operation.sandboxId,
     },

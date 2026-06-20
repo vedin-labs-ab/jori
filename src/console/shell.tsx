@@ -61,7 +61,7 @@ import { BrandMark } from "@/shared/brand"
 
 const consoleNavigation = [
   { icon: LayoutDashboard, label: "Overview", to: "/console" },
-  { icon: ListChecks, label: "Runs", to: "/executions" },
+  { icon: ListChecks, label: "Runs", to: "/runs" },
   { icon: NotebookTabs, label: "Playbooks", to: "/playbooks" },
   { icon: CalendarClock, label: "Automations", to: "/automations" },
   { icon: Component, label: "Artifacts", to: "/artifacts" },

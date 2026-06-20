@@ -17,7 +17,6 @@ export const routing = defineTable({
   model: v.optional(v.string()),
   error: v.optional(v.string()),
   runId: v.optional(v.id("runs")),
-  executionId: v.optional(v.id("executions")),
   replyMessageTs: v.optional(v.string()),
   replyClaimUntil: v.optional(v.number()),
   replyError: v.optional(v.string()),

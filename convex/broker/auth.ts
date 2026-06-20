@@ -11,39 +11,37 @@ export async function authenticateBrokerRequest(
   ctx: ActionCtx,
   request: Request
 ): Promise<BrokerContext | null> {
-  const executionId = request.headers.get("x-milo-execution-id")
+  const runId = request.headers.get("x-milo-run-id")
   const secret = request.headers.get("x-milo-worker-secret")?.trim()
 
   if (
-    executionId === null ||
-    executionId.trim() === "" ||
+    runId === null ||
+    runId.trim() === "" ||
     secret === undefined ||
     !isWorkerSecret(secret)
   ) {
     return null
   }
 
-  const execution = await ctx
-    .runQuery(internal.executions.records.get, {
-      executionId: executionId as Doc<"executions">["_id"],
+  const run = await ctx
+    .runQuery(internal.runs.records.get, {
+      runId: runId as Doc<"runs">["_id"],
     })
     .catch(() => null)
 
-  return execution?.status === "running"
-    ? await loadBrokerContext(ctx, execution)
-    : null
+  return run?.status === "running" ? await loadBrokerContext(ctx, run) : null
 }
 
 async function loadBrokerContext(
   ctx: ActionCtx,
-  execution: Doc<"executions"> | null
+  run: Doc<"runs"> | null
 ): Promise<BrokerContext | null> {
-  if (execution === null) {
+  if (run === null) {
     return null
   }
 
-  const input = await ctx.runQuery(internal.executions.records.getInputByRun, {
-    runId: execution.runId,
+  const input = await ctx.runQuery(internal.runs.records.getInputByRun, {
+    runId: run._id,
   })
 
   if (input === null) {
@@ -53,14 +51,14 @@ async function loadBrokerContext(
   const permissions = await ctx.runQuery(
     internal.permissions.tools.listForRuntime,
     {
-      tenantId: execution.tenantId,
+      tenantId: run.tenantId,
     }
   )
   const connectedIntegrations = await ctx.runQuery(
     internal.integrations.lookup.listActiveForRuntime,
     {
-      tenantId: execution.tenantId,
-      ownerId: execution.createdBy,
+      tenantId: run.tenantId,
+      ownerId: run.createdBy,
     }
   )
   const integrations: Doc<"integrations">[] = []
@@ -71,9 +69,9 @@ async function loadBrokerContext(
 
   return {
     connectedIntegrations,
-    execution,
     input,
     integrations,
+    run,
     toolModes: resolveToolModes(permissions),
   }
 }

@@ -15,7 +15,6 @@ export class MiloConvexClient {
 
   async loadRun(payload: AgentRunPayload) {
     return (await this.client.action(api.runtime.context.load, {
-      executionId: payload.executionId,
       runId: payload.runId,
       secret: this.secret,
     })) as RuntimeContext
@@ -24,7 +23,6 @@ export class MiloConvexClient {
   async recordEvent(args: {
     attempt?: number
     eventKey: string
-    executionId: ConvexId<"executions">
     payload?: JsonObject
     runId: ConvexId<"runs">
     sequence: number
@@ -32,7 +30,7 @@ export class MiloConvexClient {
     toolCallId?: string
     type: string
   }) {
-    await this.client.mutation(api.runtime.events.record, {
+    await this.client.mutation(api.runtime.logs.record, {
       ...args,
       secret: this.secret,
     })
@@ -51,15 +49,15 @@ export class MiloConvexClient {
 
   async callTool(args: {
     approved?: boolean
-    executionId: ConvexId<"executions">
     input: JsonObject
+    runId: ConvexId<"runs">
     surface: ToolSurface
     tool: string
   }) {
     return await this.client.action(api.runtime.tools.call, {
       approved: args.approved,
       args: args.input,
-      executionId: args.executionId,
+      runId: args.runId,
       secret: this.secret,
       surface: args.surface,
       tool: args.tool,
@@ -81,15 +79,15 @@ export class MiloConvexClient {
   }
 
   async requestApproval(args: {
-    executionId: ConvexId<"executions">
     input: JsonObject
+    runId: ConvexId<"runs">
     surface: ToolSurface
     tool: string
     waitpointTokenId: string
   }) {
     return await this.client.action(api.runtime.tools.requestApproval, {
       args: args.input,
-      executionId: args.executionId,
+      runId: args.runId,
       secret: this.secret,
       surface: args.surface,
       tool: args.tool,
@@ -113,9 +111,9 @@ export class MiloConvexClient {
   async uploadFile(args: {
     bytes: Uint8Array
     description?: string
-    executionId: ConvexId<"executions">
     mimeType: string
     name: string
+    runId: ConvexId<"runs">
   }) {
     const url = new URL("/milo/files", requireConvexSiteUrl())
     url.searchParams.set("name", args.name)
@@ -128,7 +126,7 @@ export class MiloConvexClient {
       body: toArrayBuffer(args.bytes),
       headers: {
         "content-type": args.mimeType,
-        "x-milo-execution-id": args.executionId,
+        "x-milo-run-id": args.runId,
         "x-milo-worker-secret": this.secret,
       },
       method: "POST",
@@ -143,10 +141,10 @@ export class MiloConvexClient {
   }
 
   async fetchGitHubTarball(args: {
-    executionId: ConvexId<"executions">
     owner: string
     ref?: string
     repo: string
+    runId: ConvexId<"runs">
   }) {
     const response = await fetch(
       new URL("/milo/github/tarball", requireConvexSiteUrl()),
@@ -158,7 +156,7 @@ export class MiloConvexClient {
         }),
         headers: {
           "content-type": "application/json",
-          "x-milo-execution-id": args.executionId,
+          "x-milo-run-id": args.runId,
           "x-milo-worker-secret": this.secret,
         },
         method: "POST",
@@ -175,7 +173,6 @@ export class MiloConvexClient {
   }
 
   async upsertSandbox(args: {
-    executionId: ConvexId<"executions">
     runId: ConvexId<"runs">
     sandboxId: string
     status: "created" | "reconnected" | "running"
@@ -187,12 +184,8 @@ export class MiloConvexClient {
     })
   }
 
-  async markSandboxCleaned(args: {
-    executionId: ConvexId<"executions">
-    sandboxId: string
-  }) {
+  async markSandboxCleaned(args: { sandboxId: string }) {
     await this.client.mutation(api.runtime.sandboxes.markCleaned, {
-      executionId: args.executionId,
       sandboxId: args.sandboxId,
       secret: this.secret,
     })

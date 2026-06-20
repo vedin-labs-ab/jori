@@ -2,11 +2,10 @@ import { vi } from "vitest"
 
 export function fileContext() {
   return {
-    execution: {
-      _id: "execution-id",
+    run: {
+      _id: "run-id",
       _creationTime: 0,
       tenantId: "tenant",
-      runId: "run-id",
       promptId: "prompt-id",
       status: "running",
       createdAt: 0,
@@ -22,7 +21,7 @@ export function fileContext() {
         _id: "file-id",
         _creationTime: 0,
         tenantId: "tenant",
-        executionId: "execution-id",
+        runId: "run-id",
         storageId: "storage-id",
         name: "kitten.png",
         mimeType: "image/png",

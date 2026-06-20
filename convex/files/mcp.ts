@@ -25,7 +25,7 @@ export function isMiloFileTool(tool: string) {
 
 export async function callMiloFileTool(
   ctx: ActionCtx,
-  execution: {
+  run: {
     tenantId: string
   },
   request: MiloFileRequest
@@ -35,14 +35,14 @@ export async function callMiloFileTool(
   if (request.tool === "search_files") {
     return await ctx.runQuery(internal.files.data.search, {
       ...(args as SearchFilesArgs),
-      tenantId: execution.tenantId,
+      tenantId: run.tenantId,
     })
   }
 
   if (request.tool === "read_file") {
     return await ctx.runQuery(internal.files.data.read, {
       ...(args as ReadFileArgs),
-      tenantId: execution.tenantId,
+      tenantId: run.tenantId,
     })
   }
 

@@ -29,7 +29,6 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   constructor(
     private readonly convex: MiloConvexClient,
     private readonly runId: ConvexId<"runs">,
-    private readonly executionId: ConvexId<"executions">,
     sandboxId: string | null
   ) {
     this.sandboxId = sandboxId
@@ -113,7 +112,6 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
     await killE2BSandbox({
       convex: this.convex,
-      executionId: this.executionId,
       sandboxId: this.sandboxId,
     })
     this.sandbox = undefined
@@ -132,7 +130,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
       return this.sandbox
     }
 
-    this.sandbox = await createSandbox(this.runId, this.executionId)
+    this.sandbox = await createSandbox(this.runId)
     this.sandboxId = this.sandbox.sandboxId
     await this.persistSandbox("created")
 
@@ -145,7 +143,6 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     }
 
     await this.convex.upsertSandbox({
-      executionId: this.executionId,
       runId: this.runId,
       sandboxId: this.sandbox.sandboxId,
       status,
@@ -165,14 +162,12 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
 export async function killE2BSandbox(args: {
   convex: MiloConvexClient
-  executionId: ConvexId<"executions">
   sandboxId: string
 }) {
   await Sandbox.kill(args.sandboxId, { apiKey: requireE2BApiKey() }).catch(
     () => false
   )
   await args.convex.markSandboxCleaned({
-    executionId: args.executionId,
     sandboxId: args.sandboxId,
   })
 }
@@ -184,10 +179,7 @@ async function connectSandbox(sandboxId: string) {
   })
 }
 
-async function createSandbox(
-  runId: ConvexId<"runs">,
-  executionId: ConvexId<"executions">
-) {
+async function createSandbox(runId: ConvexId<"runs">) {
   return await Sandbox.create(requireSandboxTemplate(), {
     apiKey: requireE2BApiKey(),
     allowInternetAccess: true,
@@ -197,7 +189,6 @@ async function createSandbox(
     },
     metadata: {
       app: "milo",
-      executionId,
       runId,
       runtime: "trigger",
     },

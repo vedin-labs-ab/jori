@@ -1,7 +1,7 @@
 import { type SourceMetadataItem } from "../../shared/sources/schema"
-import { type getExecutionContext } from "./context"
+import { type getRunContext } from "./context"
 
-type ExecutionContext = Awaited<ReturnType<typeof getExecutionContext>>
+type RunContext = Awaited<ReturnType<typeof getRunContext>>
 
 export type SourceDatum = {
   type: string
@@ -9,7 +9,7 @@ export type SourceDatum = {
   url?: string
 }
 
-export type ExecutionSource = {
+export type RunSource = {
   type: "automation" | "event" | "manual" | "message"
   event?: SourceDatum
   kind?: SourceDatum
@@ -20,11 +20,11 @@ export type ExecutionSource = {
   }
 }
 
-export function executionSource(
-  context: ExecutionContext,
+export function runSource(
+  context: RunContext,
   stoppedBy: string | undefined
-): ExecutionSource {
-  const source: ExecutionSource = {
+): RunSource {
+  const source: RunSource = {
     ...context.run.display.source,
     metadata: [...context.run.display.source.metadata],
   }
@@ -36,7 +36,7 @@ export function executionSource(
   return source
 }
 
-export function sourceSearchText(source: ExecutionSource) {
+export function sourceSearchText(source: RunSource) {
   return [
     source.type,
     source.kind?.type,

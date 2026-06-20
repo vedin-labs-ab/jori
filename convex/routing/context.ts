@@ -25,7 +25,7 @@ export const getMessageContext = internalQuery({
 
     const audience = messageAudience(message, integration)
     const [active, recentMessages] = await Promise.all([
-      getActiveExecution(ctx, {
+      getActiveRun(ctx, {
         integration,
         message,
       }),
@@ -33,7 +33,7 @@ export const getMessageContext = internalQuery({
     ])
 
     return {
-      activeExecution: active,
+      activeRun: active,
       currentMessage: messageEntry(message, integration),
       integration: message.integration,
       isAddressed: audience.isAddressed,
@@ -43,7 +43,7 @@ export const getMessageContext = internalQuery({
   },
 })
 
-async function getActiveExecution(
+async function getActiveRun(
   ctx: QueryCtx,
   input: {
     integration: Doc<"integrations">
@@ -81,40 +81,36 @@ async function getActiveExecution(
     return null
   }
 
-  const execution =
-    session.executionId === undefined
-      ? null
-      : await ctx.db.get(session.executionId)
+  const run =
+    session.runId === undefined ? null : await ctx.db.get(session.runId)
 
-  if (execution === null || isTerminalExecution(execution)) {
+  if (run === null || isTerminalRun(run)) {
     return null
   }
 
-  const event = await ctx.db
-    .query("runtimeEvents")
-    .withIndex("by_run", (query) => query.eq("runId", execution.runId))
+  const log = await ctx.db
+    .query("logs")
+    .withIndex("by_run", (query) => query.eq("runId", run._id))
     .order("desc")
     .first()
 
   return {
-    executionId: execution._id,
-    latestStatus: event?.type ?? null,
-    runId: execution.runId,
-    status: execution.status,
+    latestStatus: log?.type ?? null,
+    runId: run._id,
+    status: run.status,
   }
 }
 
-function isTerminalExecution(execution: Doc<"executions">) {
+function isTerminalRun(run: Doc<"runs">) {
   return (
-    execution.status === "completed" ||
-    execution.status === "failed" ||
-    execution.status === "stopped"
+    run.status === "completed" ||
+    run.status === "failed" ||
+    run.status === "stopped"
   )
 }
 
 export type MessageRoutingContext = {
-  activeExecution: {
-    executionId: Doc<"executions">["_id"]
+  activeRun: {
     latestStatus: string | null
     runId: Doc<"runs">["_id"]
     status: string

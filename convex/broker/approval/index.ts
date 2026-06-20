@@ -2,22 +2,22 @@ import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { createSlackApprovalRequest } from "../../approvals/slack/blocks"
-import { type AgentRuntimeInput } from "../../executions/agent/input"
 import {
   getToolPermission,
   type PermissionMode,
   resolveToolMode,
   type ToolSurface,
 } from "../../permissions/catalog"
+import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { type Actor, createUserActor } from "../../shared/actor"
 import { postSlackMessage } from "../tools/slack"
 import { parsePromptedToolApproval } from "./args"
 
 export type ApprovalBrokerContext = {
   connectedIntegrations: Doc<"integrations">[]
-  execution: Doc<"executions">
   input: AgentRuntimeInput
   integrations: Doc<"integrations">[]
+  run: Doc<"runs">
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
@@ -74,8 +74,8 @@ export async function createPromptedToolApproval(
   const code = createApprovalCode()
   const approval: { approvalId: Id<"approvals">; expiresAt: number } =
     await ctx.runMutation(internal.approvals.approvals.create, {
-      tenantId: context.execution.tenantId,
-      executionId: context.execution._id,
+      tenantId: context.run.tenantId,
+      runId: context.run._id,
       surface: request.surface,
       tool: request.tool,
       args: request.args,

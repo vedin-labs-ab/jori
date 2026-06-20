@@ -16,28 +16,28 @@ import {
 } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { ExecutionRow } from "../row"
-import { displayNowForExecution, executionClockInterval } from "../time"
+import { displayNowForRun, runClockInterval } from "../time"
 import {
   type ApprovalFilter,
   approvalFilterLabels,
   approvalFilterOptions,
-  type ExecutionFilter,
   type ExecutionItem,
-  executionFilterOptions,
+  type RunFilter,
+  runFilterOptions,
 } from "../types"
 import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 
 export function RunsList({ tenantId }: { tenantId: string }) {
   const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
-  const [executionFilter, setExecutionFilter] = useState<ExecutionFilter>("all")
+  const [runFilter, setRunFilter] = useState<RunFilter>("all")
   const [query, setQuery] = useState("")
   const deferredApprovalFilter = useDeferredValue(approvalFilter)
-  const deferredExecutionFilter = useDeferredValue(executionFilter)
+  const deferredRunFilter = useDeferredValue(runFilter)
   const deferredQuery = useDeferredValue(query)
   const pagination = useExecutionPagination(
     tenantId,
-    deferredExecutionFilter,
+    deferredRunFilter,
     deferredApprovalFilter,
     deferredQuery
   )
@@ -48,9 +48,9 @@ export function RunsList({ tenantId }: { tenantId: string }) {
     },
     [pagination.reset]
   )
-  const setExecutionFilterAndReset = useCallback(
-    (value: ExecutionFilter) => {
-      setExecutionFilter(value)
+  const setRunFilterAndReset = useCallback(
+    (value: RunFilter) => {
+      setRunFilter(value)
       pagination.reset()
     },
     [pagination.reset]
@@ -67,11 +67,11 @@ export function RunsList({ tenantId }: { tenantId: string }) {
     <ConsolePageLayout>
       <ExecutionFilters
         approvalFilter={approvalFilter}
-        executionFilter={executionFilter}
         query={query}
+        runFilter={runFilter}
         setApprovalFilter={setApprovalFilterAndReset}
-        setExecutionFilter={setExecutionFilterAndReset}
         setQuery={setQueryAndReset}
+        setRunFilter={setRunFilterAndReset}
       />
       <ExecutionRows pagination={pagination} tenantId={tenantId} />
       <ConsoleListPager pagination={pagination} />
@@ -81,18 +81,18 @@ export function RunsList({ tenantId }: { tenantId: string }) {
 
 const ExecutionFilters = memo(function ExecutionFilters({
   approvalFilter,
-  executionFilter,
   query,
+  runFilter,
   setApprovalFilter,
-  setExecutionFilter,
   setQuery,
+  setRunFilter,
 }: {
   approvalFilter: ApprovalFilter
-  executionFilter: ExecutionFilter
   query: string
+  runFilter: RunFilter
   setApprovalFilter: (filter: ApprovalFilter) => void
-  setExecutionFilter: (filter: ExecutionFilter) => void
   setQuery: (query: string) => void
+  setRunFilter: (filter: RunFilter) => void
 }) {
   return (
     <ConsoleToolbar>
@@ -100,14 +100,14 @@ const ExecutionFilters = memo(function ExecutionFilters({
         className="flex-wrap justify-start"
         onValueChange={(value) => {
           if (value !== "") {
-            setExecutionFilter(value as ExecutionFilter)
+            setRunFilter(value as RunFilter)
           }
         }}
         type="single"
-        value={executionFilter}
+        value={runFilter}
         variant="outline"
       >
-        {executionFilterOptions.map((option) => (
+        {runFilterOptions.map((option) => (
           <ToggleGroupItem key={option.value} value={option.value}>
             {option.label}
           </ToggleGroupItem>
@@ -175,7 +175,7 @@ function ExecutionRows({
             <ExecutionRow
               execution={execution}
               key={execution.id}
-              now={displayNowForExecution(execution, now)}
+              now={displayNowForRun(execution, now)}
               tenantId={tenantId}
             />
           ))
@@ -184,9 +184,9 @@ function ExecutionRows({
   )
 }
 
-function useExecutionClock(executions: ExecutionItem[]) {
+function useExecutionClock(runs: ExecutionItem[]) {
   const [now, setNow] = useState(() => Date.now())
-  const intervalMs = executionClockInterval(executions, now)
+  const intervalMs = runClockInterval(runs, now)
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), intervalMs)

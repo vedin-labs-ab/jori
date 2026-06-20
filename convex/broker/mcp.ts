@@ -87,7 +87,7 @@ export async function callBrokerTool(
       return await createPromptedToolApproval(ctx, context, request)
     }
 
-    return await callMiloTool(ctx, context.execution, request)
+    return await callMiloTool(ctx, context.run, request)
   }
 
   const surface = request.surface
@@ -108,8 +108,8 @@ export async function callBrokerTool(
 
   return await callProviderTool({
     ctx,
-    execution: context.execution,
     integration,
+    run: context.run,
     tool: request.tool,
     toolArgs: request.args,
   })

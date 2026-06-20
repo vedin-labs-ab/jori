@@ -56,9 +56,9 @@ export async function saveSandboxFile(runtime: ToolRuntime, input: JsonObject) {
   return await runtime.convex.uploadFile({
     bytes,
     description: optionalString(input.description),
-    executionId: runtime.context.execution.id,
     mimeType: optionalString(input.mimeType) ?? inferMimeType(filePath),
     name: optionalString(input.name) ?? path.posix.basename(filePath),
+    runId: runtime.context.run.id,
   })
 }
 
@@ -73,10 +73,10 @@ export async function materializeSandboxResult(
   }
 
   const bytes = await runtime.convex.fetchGitHubTarball({
-    executionId: runtime.context.execution.id,
     owner: download.owner,
     ref: download.ref,
     repo: download.repo,
+    runId: runtime.context.run.id,
   })
 
   return await runtime.sandbox.extractTarball({

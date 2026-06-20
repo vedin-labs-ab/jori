@@ -3,5 +3,5 @@ import { type ActionCtx } from "../../_generated/server"
 
 export type ProviderToolContext = {
   ctx: ActionCtx
-  execution: Doc<"executions">
+  run: Doc<"runs">
 }

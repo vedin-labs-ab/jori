@@ -10,23 +10,23 @@ import {
 import { api } from "../../../../convex/_generated/api"
 import {
   type ApprovalFilter,
-  type ExecutionFilter,
   type ExecutionItem,
   pageSize,
+  type RunFilter,
 } from "../types"
 
 export function useExecutionPagination(
   tenantId: string,
-  executionFilter: ExecutionFilter,
+  runFilter: RunFilter,
   approvalFilter: ApprovalFilter,
   query: string
 ) {
   const [pageIndex, setPageIndex] = useState(0)
   const advanceAfterLoad = useRef(false)
-  const { executions, normalizedQuery, rows, stats } = useExecutionPageData({
+  const { normalizedQuery, rows, runs, stats } = useExecutionPageData({
     approvalFilter,
-    executionFilter,
     query,
+    runFilter,
     tenantId,
   })
   const filteredTotal = stats?.filteredCount ?? rows.length
@@ -34,13 +34,13 @@ export function useExecutionPagination(
   const pageCount = Math.max(1, Math.ceil(filteredTotal / pageSize))
   const visibleRows = pageRows(rows, pageIndex)
   const canUseNextLoadedPage = rows.length > (pageIndex + 1) * pageSize
-  const canLoadMore = executions.status === "CanLoadMore"
-  const isLoadingMore = executions.status === "LoadingMore"
+  const canLoadMore = runs.status === "CanLoadMore"
+  const isLoadingMore = runs.status === "LoadingMore"
   const { next, previous, reset } = usePageNavigation({
     advanceAfterLoad,
     canLoadMore,
     canUseNextLoadedPage,
-    pageLoader: executions,
+    pageLoader: runs,
     setPageIndex,
   })
 
@@ -55,8 +55,8 @@ export function useExecutionPagination(
 
   const hasFilters = hasActiveFilters({
     approvalFilter,
-    executionFilter,
     normalizedQuery,
+    runFilter,
   })
   const footerLabel = formatFooterLabel({
     filteredTotal,
@@ -70,9 +70,9 @@ export function useExecutionPagination(
     canGoNext: canUseNextLoadedPage || canLoadMore,
     footerLabel,
     hasFilters,
-    isLoadingFirstPage: executions.status === "LoadingFirstPage",
+    isLoadingFirstPage: runs.status === "LoadingFirstPage",
     isLoadingMore,
-    isReady: executions.status !== "LoadingFirstPage" && stats !== undefined,
+    isReady: runs.status !== "LoadingFirstPage" && stats !== undefined,
     next,
     pageIndex,
     previous,
@@ -124,34 +124,34 @@ function usePageNavigation({
 
 function useExecutionPageData({
   approvalFilter,
-  executionFilter,
   query,
+  runFilter,
   tenantId,
 }: {
   approvalFilter: ApprovalFilter
-  executionFilter: ExecutionFilter
   query: string
+  runFilter: RunFilter
   tenantId: string
 }) {
   const normalizedQuery = query.trim().toLowerCase()
   const queryArgs = useMemo(
     () => ({
       approvalFilter,
-      executionFilter,
       query: normalizedQuery,
+      runFilter,
       tenantId,
     }),
-    [approvalFilter, executionFilter, normalizedQuery, tenantId]
+    [approvalFilter, normalizedQuery, runFilter, tenantId]
   )
-  const executions = usePaginatedQuery(api.runs.console.page, queryArgs, {
+  const runs = usePaginatedQuery(api.runs.console.page, queryArgs, {
     initialNumItems: pageSize,
   })
   const stats = useQuery(api.runs.console.stats, queryArgs)
 
   return {
-    executions,
     normalizedQuery,
-    rows: (executions.results ?? []) as ExecutionItem[],
+    rows: (runs.results ?? []) as ExecutionItem[],
+    runs,
     stats,
   }
 }
@@ -162,17 +162,15 @@ function pageRows(rows: ExecutionItem[], pageIndex: number) {
 
 function hasActiveFilters({
   approvalFilter,
-  executionFilter,
   normalizedQuery,
+  runFilter,
 }: {
   approvalFilter: ApprovalFilter
-  executionFilter: ExecutionFilter
   normalizedQuery: string
+  runFilter: RunFilter
 }) {
   return (
-    executionFilter !== "all" ||
-    approvalFilter !== "any" ||
-    normalizedQuery !== ""
+    runFilter !== "all" || approvalFilter !== "any" || normalizedQuery !== ""
   )
 }
 

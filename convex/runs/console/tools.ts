@@ -5,7 +5,7 @@ import {
   type ExecutionDetailGroup,
 } from "../display/detail"
 
-type ToolSnapshot = Doc<"executions">["toolSnapshot"]
+type ToolSnapshot = Doc<"runs">["toolSnapshot"]
 
 export function toolDetails(snapshot: ToolSnapshot) {
   if (snapshot === undefined) {

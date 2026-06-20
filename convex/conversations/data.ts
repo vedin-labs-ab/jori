@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { createMessageRunSnapshot } from "../runs/snapshot"
-import { createQueuedExecution } from "../runtime/outbox"
+import { queueRun } from "../runtime/outbox"
 import { findReusableSession, startSession } from "../sessions/data"
 
 export async function findConversation(
@@ -99,13 +99,17 @@ export async function startMessageRun(
           integrationId: args.integration._id,
           conversationId: args.conversationKey,
           rootRunId: runId,
+          runId,
           createdBy: args.createdBy,
           createdAt: args.now,
         })
       : conversation._id
 
-  if (conversation !== null && conversation.rootRunId === undefined) {
-    await ctx.db.patch(conversation._id, { rootRunId: runId })
+  if (conversation !== null) {
+    await ctx.db.patch(conversation._id, {
+      ...(conversation.rootRunId === undefined ? { rootRunId: runId } : {}),
+      runId,
+    })
   }
 
   const sessionId = await startSession(ctx, {
@@ -116,7 +120,7 @@ export async function startMessageRun(
     now: args.now,
   })
 
-  await createQueuedExecution(ctx, runId)
+  await queueRun(ctx, runId)
 
   return {
     status: "started" as const,
@@ -149,6 +153,7 @@ async function insertRun(
       kind: args.kind,
       message: args.message,
     }),
+    status: "queued",
     createdBy: args.createdBy,
     createdAt: args.now,
   })

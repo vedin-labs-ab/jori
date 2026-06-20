@@ -6,7 +6,6 @@ export const sessions = defineTable({
   conversationId: v.id("conversations"),
   state: v.union(v.literal("active"), v.literal("idle")),
   runId: v.optional(v.id("runs")),
-  executionId: v.optional(v.id("executions")),
   lastConsumedMessageId: v.optional(v.id("messages")),
   lastConsumedAt: v.optional(v.number()),
   createdAt: v.number(),

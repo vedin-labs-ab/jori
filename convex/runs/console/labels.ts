@@ -1,15 +1,15 @@
-import { type getExecutionContext } from "./context"
+import { type getRunContext } from "./context"
 
-type ExecutionContext = Awaited<ReturnType<typeof getExecutionContext>>
+type RunContext = Awaited<ReturnType<typeof getRunContext>>
 
-export function executionTitle(context: ExecutionContext) {
+export function runTitle(context: RunContext) {
   return context.run.title
 }
 
-export function executionTask(context: ExecutionContext) {
+export function runTask(context: RunContext) {
   return context.run.task
 }
 
-export function triggerLabel(context: ExecutionContext) {
+export function triggerLabel(context: RunContext) {
   return context.run.display.trigger
 }

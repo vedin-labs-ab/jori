@@ -1,24 +1,13 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 
-export async function getExecutionContext(
+export async function getRunContext(
   ctx: QueryCtx,
-  execution: Doc<"executions">,
+  run: Doc<"runs">,
   requestedApproval: Doc<"approvals"> | undefined
 ) {
-  const run = await ctx.db.get(execution.runId)
-
-  if (run === null) {
-    throw new Error("Execution run is missing.")
-  }
-
-  const continuationApproval =
-    execution.approvalId === undefined
-      ? null
-      : await ctx.db.get(execution.approvalId)
-  const executionRequestedApproval =
-    requestedApproval ?? (await getLatestRequestedApproval(ctx, execution))
-  const approval = executionRequestedApproval ?? continuationApproval
+  const runApproval =
+    requestedApproval ?? (await getLatestRequestedApproval(ctx, run))
   const message =
     run.reason.type === "message"
       ? await ctx.db.get(run.reason.messageId)
@@ -34,31 +23,26 @@ export async function getExecutionContext(
         : await ctx.db.get(event.integrationId)
       : await ctx.db.get(message.integrationId)
   const approvalDeliveryIntegration =
-    executionRequestedApproval?.delivery === undefined
+    runApproval?.delivery === undefined
       ? null
-      : await ctx.db.get(executionRequestedApproval.delivery.integrationId)
+      : await ctx.db.get(runApproval.delivery.integrationId)
 
   return {
-    approval,
+    approval: runApproval,
     approvalDeliveryIntegration,
     automation,
     event,
     integration,
     message,
-    requestedApproval: executionRequestedApproval,
+    requestedApproval: runApproval,
     run,
   }
 }
 
-async function getLatestRequestedApproval(
-  ctx: QueryCtx,
-  execution: Doc<"executions">
-) {
+async function getLatestRequestedApproval(ctx: QueryCtx, run: Doc<"runs">) {
   return await ctx.db
     .query("approvals")
-    .withIndex("by_execution", (index) =>
-      index.eq("executionId", execution._id)
-    )
+    .withIndex("by_run", (index) => index.eq("runId", run._id))
     .order("desc")
     .first()
 }

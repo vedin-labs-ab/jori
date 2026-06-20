@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { toolSurfaceValidator } from "../shared/integrations"
 import { sourceMetadataValidator } from "../shared/sources/schema"
 
 const sourceDatum = v.object({
@@ -74,6 +75,33 @@ export const runReason = v.union(
   })
 )
 
+export const runStatus = v.union(
+  v.literal("queued"),
+  v.literal("running"),
+  v.literal("completed"),
+  v.literal("failed"),
+  v.literal("stopped")
+)
+
+export const toolSnapshot = v.object({
+  groups: v.array(
+    v.object({
+      surface: toolSurfaceValidator,
+      label: v.string(),
+      tools: v.array(
+        v.object({
+          access: v.union(v.literal("read"), v.literal("write")),
+          description: v.string(),
+          label: v.string(),
+          requiresApproval: v.optional(v.boolean()),
+          tool: v.string(),
+        })
+      ),
+    })
+  ),
+  webSearch: v.boolean(),
+})
+
 export const runs = defineTable({
   tenantId: v.string(),
   automationId: v.optional(v.id("automations")),
@@ -83,10 +111,31 @@ export const runs = defineTable({
   title: v.string(),
   task: v.string(),
   display: runDisplay,
+  status: runStatus,
+  promptId: v.optional(v.id("_storage")),
+  toolSnapshot: v.optional(toolSnapshot),
+  sandboxId: v.optional(v.string()),
+  triggerRunId: v.optional(v.string()),
+  error: v.optional(v.string()),
+  trace: v.optional(
+    v.union(
+      v.object({
+        host: v.string(),
+        token: v.string(),
+      }),
+      v.object({
+        fileId: v.id("_storage"),
+      })
+    )
+  ),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
+  finishedAt: v.optional(v.number()),
+  stoppedBy: v.optional(v.string()),
+  stoppedAt: v.optional(v.number()),
 })
   .index("by_tenant", ["tenantId"])
   .index("by_automation", ["automationId"])
   .index("by_parent", ["parentRunId"])
   .index("by_root", ["rootRunId"])
+  .index("by_trigger", ["triggerRunId"])

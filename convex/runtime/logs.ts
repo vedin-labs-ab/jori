@@ -8,7 +8,6 @@ export const record = mutation({
   args: {
     attempt: v.optional(v.number()),
     eventKey: v.string(),
-    executionId: v.optional(v.id("executions")),
     payload: v.optional(v.any()),
     runId: v.id("runs"),
     secret: v.string(),
@@ -24,7 +23,7 @@ export const record = mutation({
     requireWorkerSecret(args.secret)
 
     const existing = await ctx.db
-      .query("runtimeEvents")
+      .query("logs")
       .withIndex("by_key", (query) => query.eq("eventKey", args.eventKey))
       .first()
 
@@ -38,10 +37,9 @@ export const record = mutation({
       throw new Error("Run not found.")
     }
 
-    await ctx.db.insert("runtimeEvents", {
+    await ctx.db.insert("logs", {
       tenantId: run.tenantId,
       runId: args.runId,
-      executionId: args.executionId,
       eventKey: args.eventKey,
       source: args.source,
       type: args.type,
@@ -52,7 +50,7 @@ export const record = mutation({
       createdAt: Date.now(),
     })
 
-    await patchExecutionStatus(ctx, args)
+    await patchRunStatus(ctx, args)
     await patchSessionStatus(ctx, args)
 
     return { created: true }
@@ -76,38 +74,34 @@ async function patchSessionStatus(
   })
 }
 
-async function patchExecutionStatus(
+async function patchRunStatus(
   ctx: MutationCtx,
   args: {
-    executionId?: Id<"executions">
+    runId: Id<"runs">
     payload?: unknown
     type: string
   }
 ) {
-  if (args.executionId === undefined) {
-    return
-  }
+  const run = await ctx.db.get(args.runId)
 
-  const execution = await ctx.db.get(args.executionId)
-
-  if (execution === null || execution.status === "stopped") {
+  if (run === null || run.status === "stopped") {
     return
   }
 
   if (args.type === "run.started") {
-    if (execution.status === "queued" || execution.status === "running") {
-      await ctx.db.patch(args.executionId, { status: "running" })
+    if (run.status === "queued" || run.status === "running") {
+      await ctx.db.patch(args.runId, { status: "running" })
     }
 
     return
   }
 
   if (args.type === "run.completed") {
-    if (execution.status !== "queued" && execution.status !== "running") {
+    if (run.status !== "queued" && run.status !== "running") {
       return
     }
 
-    await ctx.db.patch(args.executionId, {
+    await ctx.db.patch(args.runId, {
       status: "completed",
       error: undefined,
       finishedAt: Date.now(),
@@ -117,11 +111,11 @@ async function patchExecutionStatus(
   }
 
   if (args.type === "run.failed") {
-    if (execution.status !== "queued" && execution.status !== "running") {
+    if (run.status !== "queued" && run.status !== "running") {
       return
     }
 
-    await ctx.db.patch(args.executionId, {
+    await ctx.db.patch(args.runId, {
       status: "failed",
       error: readPayloadString(args.payload, "error"),
       finishedAt: Date.now(),

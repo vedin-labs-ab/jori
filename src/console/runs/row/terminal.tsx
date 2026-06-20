@@ -14,9 +14,7 @@ import {
   useTraceLines,
 } from "./trace"
 
-type ExecutionId = FunctionArgs<
-  typeof api.executions.monitor.trace
->["executionId"]
+type RunId = FunctionArgs<typeof api.runs.monitor.trace>["runId"]
 
 export function TraceTerminal({
   execution,
@@ -43,7 +41,7 @@ export function TraceTerminal({
         Trace
       </div>
       {hasLoadedTrace ? (
-        <ConnectedTerminal executionId={execution.id} tenantId={tenantId} />
+        <ConnectedTerminal runId={execution.id} tenantId={tenantId} />
       ) : null}
       {!hasLoadedTrace ? (
         <TerminalFrame>
@@ -55,14 +53,14 @@ export function TraceTerminal({
 }
 
 function ConnectedTerminal({
-  executionId,
+  runId,
   tenantId,
 }: {
-  executionId: string
+  runId: string
   tenantId: string
 }) {
-  const connection = useQuery(api.executions.monitor.trace, {
-    executionId: executionId as ExecutionId,
+  const connection = useQuery(api.runs.monitor.trace, {
+    runId: runId as RunId,
     tenantId,
   })
   const [hasConnectedTrace, setHasConnectedTrace] = useState(false)
