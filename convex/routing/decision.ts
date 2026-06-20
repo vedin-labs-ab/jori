@@ -6,7 +6,7 @@ import {
 import { promptTemplates } from "../prompts/generated"
 import { type MessageRoutingContext } from "./context"
 
-const defaultIntakeModel = "deepseek/deepseek-v4-flash"
+const defaultIntakeModel = "z-ai/glm-5.2"
 const maxOutputTokens = 128
 const defaultAddressedReply = "What can I help with?"
 const intakeProviderRouting = {
@@ -94,10 +94,10 @@ function intakeDecisionSchema() {
       {
         type: "object",
         additionalProperties: false,
-        required: ["route", "reply"],
+        required: ["route", "message"],
         properties: {
-          route: { type: "string", enum: ["reply"] },
-          reply: { type: "string", minLength: 1 },
+          route: { type: "string", enum: ["respond"] },
+          message: { type: "string", minLength: 1 },
         },
       },
       {
@@ -106,7 +106,7 @@ function intakeDecisionSchema() {
         required: ["route"],
         properties: {
           route: { type: "string", enum: ["agent"] },
-          reply: { type: "string", minLength: 1 },
+          message: { type: "string", minLength: 1 },
         },
       },
     ],
@@ -123,13 +123,18 @@ function normalizeDecision(
 
   const record = value as Record<string, unknown>
   const route = record.route
-  const reply = normalizeReply(record.reply)
+  const reply = normalizeReply(record.message) ?? normalizeReply(record.reply)
 
-  if (route !== "ignore" && route !== "reply" && route !== "agent") {
+  if (
+    route !== "ignore" &&
+    route !== "respond" &&
+    route !== "reply" &&
+    route !== "agent"
+  ) {
     throw new Error("Intake decision route is invalid.")
   }
 
-  if (route === "reply" && reply === undefined) {
+  if ((route === "respond" || route === "reply") && reply === undefined) {
     return missingReplyDecision(context)
   }
 
@@ -137,7 +142,10 @@ function normalizeDecision(
     return ignoredDecision(context)
   }
 
-  return { route, ...(reply === undefined ? {} : { reply }) }
+  return {
+    route: route === "respond" ? "reply" : route,
+    ...(reply === undefined ? {} : { reply }),
+  }
 }
 
 function ignoredDecision(context: MessageRoutingContext): IntakeDecision {
