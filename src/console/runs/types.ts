@@ -37,34 +37,35 @@ export type SourceDatum = {
   url?: string
 }
 
-export type ExecutionTaskSource = {
-  label: string
-  url: string
-}
-
 export type ExecutionSource = {
   type: "automation" | "event" | "manual" | "message"
-  event?: SourceDatum
-  kind?: SourceDatum
-  metadata: SourceDatum[]
-  surface?: SourceDatum
+  surface?: string
   stop?: {
     actor: SourceDatum
   }
+  url?: string
 }
 
 export type ExecutionDetailType =
+  | "calendar_event"
   | "channel"
   | "comment"
   | "decision"
+  | "email"
+  | "file"
+  | "folder"
   | "issue"
   | "message"
   | "next"
   | "page"
+  | "project"
   | "pull_request"
   | "repository"
+  | "schedule"
+  | "sender"
   | "status"
   | "stopped"
+  | "subject"
   | "tools"
   | "web_search"
 
@@ -96,7 +97,6 @@ export type ExecutionItem = {
   title: string
   source: ExecutionSource
   task: string
-  taskSource?: ExecutionTaskSource
   trigger: string
   createdAt: number
   details: ExecutionDetail[]

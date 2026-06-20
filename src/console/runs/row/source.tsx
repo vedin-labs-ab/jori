@@ -1,15 +1,9 @@
-import {
-  CircleDotDashed,
-  File,
-  GitPullRequestArrow,
-  type LucideIcon,
-  Repeat2,
-} from "lucide-react"
+import { toolSurfaceLabel } from "@contracts/integrations"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../shared/dot"
 import { ProviderLogo } from "../../shared/logo/provider"
-import { type ExecutionSource, type SourceDatum } from "../types"
+import { type ExecutionSource } from "../types"
 
 export function SourceLine({ source }: { source: ExecutionSource }) {
   const items = sourceItems(source)
@@ -39,25 +33,9 @@ function sourceItems(source: ExecutionSource): SourceItem[] {
     ...optionalItem(
       "surface",
       source.surface === undefined ? undefined : (
-        <ProviderDatum datum={source.surface} />
+        <ProviderDatum surface={source.surface} />
       )
     ),
-    ...optionalItem(
-      "kind",
-      source.kind === undefined ? undefined : (
-        <SourceTypeDatum datum={source.kind} />
-      )
-    ),
-    ...optionalItem(
-      "event",
-      source.event === undefined ? undefined : (
-        <SourceTypeDatum datum={source.event} />
-      )
-    ),
-    ...source.metadata.map((item) => ({
-      key: `metadata-${item.type}-${item.label}`,
-      content: <MetadataDatum datum={item} surface={source.surface?.type} />,
-    })),
     ...optionalItem(
       "stop",
       source.stop === undefined ? undefined : (
@@ -89,132 +67,13 @@ function SourceItem({
   )
 }
 
-function ProviderDatum({ datum }: { datum: SourceDatum }) {
+function ProviderDatum({ surface }: { surface: string }) {
   return (
     <span className="inline-flex min-w-0 items-center gap-1">
-      <ProviderLogo surface={datum.type} />
+      <ProviderLogo surface={surface} />
       <span className="truncate font-medium text-foreground">
-        {datum.label}
+        {toolSurfaceLabel(surface)}
       </span>
-    </span>
-  )
-}
-
-function SourceTypeDatum({ datum }: { datum: SourceDatum }) {
-  return (
-    <span
-      className="truncate font-medium font-mono text-foreground"
-      title={datum.label}
-    >
-      {datum.type}
-    </span>
-  )
-}
-
-function MetadataDatum({ datum, surface }: MetadataRendererProps) {
-  const Renderer = metadataRenderers[datum.type] ?? PlainMetadataDatum
-
-  return <Renderer datum={datum} surface={surface} />
-}
-
-type MetadataRendererProps = {
-  datum: SourceDatum
-  surface?: string
-}
-
-type MetadataRenderer = (props: MetadataRendererProps) => ReactNode
-
-const metadataRenderers: Record<string, MetadataRenderer> = {
-  channel: ChannelDatum,
-  issue: IssueDatum,
-  page: PageDatum,
-  pull_request: PullRequestDatum,
-  repository: RepositoryDatum,
-  schedule: ScheduleDatum,
-}
-
-function RepositoryDatum({ datum }: MetadataRendererProps) {
-  return (
-    <span
-      className="inline-flex min-w-0 items-center gap-1 font-medium text-foreground"
-      title={datum.label}
-    >
-      <RepositoryIcon className="size-3 shrink-0 text-muted-foreground/70" />
-      <span className="truncate">{repositoryLabel(datum.label)}</span>
-    </span>
-  )
-}
-
-function PullRequestDatum({ datum }: MetadataRendererProps) {
-  return (
-    <IconMetadataDatum
-      datum={{ ...datum, label: pullRequestLabel(datum.label) }}
-      icon={GitPullRequestArrow}
-    />
-  )
-}
-
-function ChannelDatum({ datum }: MetadataRendererProps) {
-  return (
-    <span
-      className="inline-flex h-5 max-w-64 min-w-0 items-center rounded-md bg-current/10 px-1.5 font-medium text-[#1264A3] dark:text-[#31B9E5]"
-      title={datum.label}
-    >
-      <span className="truncate">#{channelLabel(datum.label)}</span>
-    </span>
-  )
-}
-
-function IssueDatum({ datum, surface }: MetadataRendererProps) {
-  if (surface === "github") {
-    return (
-      <IconMetadataDatum
-        datum={{ ...datum, label: issueNumberLabel(datum.label) }}
-        icon={CircleDotDashed}
-        title={datum.label}
-      />
-    )
-  }
-
-  if (surface !== "linear") {
-    return <PlainMetadataDatum datum={datum} />
-  }
-
-  return <IconMetadataDatum datum={datum} icon={CircleDotDashed} />
-}
-
-function PageDatum({ datum }: MetadataRendererProps) {
-  return <IconMetadataDatum datum={datum} icon={File} />
-}
-
-function ScheduleDatum({ datum }: MetadataRendererProps) {
-  return <IconMetadataDatum datum={datum} icon={Repeat2} />
-}
-
-function PlainMetadataDatum({ datum }: MetadataRendererProps) {
-  return (
-    <span className="truncate font-medium text-foreground" title={datum.label}>
-      {datum.label}
-    </span>
-  )
-}
-
-function IconMetadataDatum({
-  datum,
-  icon: Icon,
-  title = datum.label,
-}: {
-  datum: SourceDatum
-  icon: LucideIcon
-  title?: string
-}) {
-  return (
-    <span
-      className="inline-flex min-w-0 items-center gap-1 font-medium text-foreground"
-      title={title}
-    >
-      <Icon className="size-3 shrink-0 text-muted-foreground/70" />
-      <span className="truncate">{datum.label}</span>
     </span>
   )
 }
@@ -231,22 +90,6 @@ export function RepositoryIcon({ className }: { className?: string }) {
       <path d="M7 18.25a.25.25 0 0 1 .25-.25h5a.25.25 0 0 1 .25.25v5.01a.25.25 0 0 1-.397.201l-2.206-1.604a.25.25 0 0 0-.294 0L7.397 23.46a.25.25 0 0 1-.397-.2v-5.01Z" />
     </svg>
   )
-}
-
-function repositoryLabel(label: string) {
-  return label.split("/").filter(Boolean).at(-1) ?? label
-}
-
-function pullRequestLabel(label: string) {
-  return label.match(/^#\d+/)?.[0] ?? label
-}
-
-function issueNumberLabel(label: string) {
-  return label.match(/^#\d+/)?.[0] ?? label
-}
-
-function channelLabel(label: string) {
-  return label.startsWith("#") ? label.slice(1) : label
 }
 
 function optionalItem(key: string, content: ReactNode | undefined) {

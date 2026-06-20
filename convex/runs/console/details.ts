@@ -9,17 +9,16 @@ export function runDetailSummary(input: {
   stoppedBy: string | undefined
   tools: Parameters<typeof toolDetails>[0]
 }) {
-  const snapshotDetails = input.run.snapshot.details
+  const snapshotContext = input.run.snapshot.context
 
   return {
     details: uniqueDetails([
       stoppedDetail(input.run, input.stoppedBy),
       decisionDetail(input.approval),
-      ...(input.run.cause.type === "time" ? snapshotDetails : []),
+      ...(input.run.cause.type === "time" ? snapshotContext : []),
       ...toolDetails(input.tools),
-      ...(input.run.cause.type === "time" ? [] : snapshotDetails),
+      ...(input.run.cause.type === "time" ? [] : snapshotContext),
     ]),
-    taskSource: input.run.snapshot.taskSource,
   }
 }
 

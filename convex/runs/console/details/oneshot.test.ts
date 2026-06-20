@@ -21,9 +21,7 @@ test("includes one-shot automation access details", async () => {
 
   expect(summary.source).toEqual({
     type: "automation",
-    surface: { type: "milo", label: "Milo" },
-    kind: { type: "one-shot", label: "one-shot" },
-    metadata: [],
+    surface: "milo",
   })
   expect(summary.details).toEqual([
     {

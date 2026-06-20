@@ -87,9 +87,7 @@ function executionWithApprovalTool(): ExecutionItem {
     searchableText: "",
     source: {
       type: "message",
-      kind: { type: "reply", label: "reply" },
-      surface: { type: "slack", label: "Slack" },
-      metadata: [{ type: "channel", label: "#product" }],
+      surface: "slack",
     },
     status: "completed",
     task: "Create a Notion page.",
@@ -140,9 +138,7 @@ function executionWithSingleAccessToolGroups(): ExecutionItem {
     searchableText: "",
     source: {
       type: "message",
-      kind: { type: "reply", label: "reply" },
-      surface: { type: "slack", label: "Slack" },
-      metadata: [{ type: "channel", label: "#product" }],
+      surface: "slack",
     },
     status: "completed",
     task: "Review tool access.",

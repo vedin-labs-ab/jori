@@ -21,12 +21,9 @@ test("stores automation display data directly", () => {
       title: "Daily digest",
       source: {
         type: "automation",
-        surface: { type: "milo", label: "Milo" },
-        kind: { type: "one-shot", label: "one-shot" },
-        metadata: [],
+        surface: "milo",
       },
-      trigger: "Time automation",
-      details: [],
+      context: [],
     },
   })
 })
@@ -46,22 +43,16 @@ test("snapshots message source details and source link", () => {
       title: "Please summarize this thread.",
       source: {
         type: "message",
-        kind: { type: "mention", label: "mention" },
-        surface: { type: "slack", label: "Slack" },
-        metadata: [{ type: "channel", label: "#product" }],
+        surface: "slack",
+        url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=team",
       },
-      trigger: "Slack message",
-      details: [
+      context: [
         {
           type: "channel",
           label: "#product",
           url: "https://slack.com/app_redirect?channel=C123&team=team",
         },
       ],
-      taskSource: {
-        label: "Source",
-        url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=team",
-      },
     },
   })
 })

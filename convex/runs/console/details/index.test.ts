@@ -101,8 +101,7 @@ function manualRun(title: string, task: string) {
     snapshot: {
       title,
       ...automationDisplay({
-        source: { type: "manual", metadata: [] },
-        trigger: "Manual run",
+        source: { type: "manual" },
       }),
     },
     createdAt: 0,
@@ -119,9 +118,8 @@ function eventRun(title: string, task: string) {
     snapshot: {
       title,
       ...eventAutomationDisplay({
-        surface: { type: "github", label: "GitHub" },
-        event: { type: "issue.comment.created", label: "New issue comment" },
-        details: [
+        surface: "github",
+        context: [
           {
             type: "repository",
             label: "vedin-labs/frontier",

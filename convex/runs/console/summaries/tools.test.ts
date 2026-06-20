@@ -115,9 +115,8 @@ function eventRun() {
     snapshot: {
       title: "Deep analysis",
       ...eventAutomationDisplay({
-        surface: { type: "slack", label: "Slack" },
-        event: { type: "message.created", label: "New channel message" },
-        metadata: [{ type: "channel", label: "C123" }],
+        context: [{ type: "channel", label: "C123" }],
+        surface: "slack",
       }),
     },
   }
@@ -129,8 +128,8 @@ function messageRun(kind: "mention" | "reply") {
     snapshot: {
       title: "Please summarize this thread.",
       ...messageDisplay({
+        context: [{ type: "channel", label: "C123" }],
         kind,
-        metadata: [{ type: "channel", label: "C123" }],
       }),
     },
   }
