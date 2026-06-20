@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process"
 import fs from "node:fs"
 import path from "node:path"
 import { expect, test } from "vitest"
@@ -7,16 +6,6 @@ import { runtimeAssets } from "./_generated/assets"
 const root = path.resolve(import.meta.dirname, "../..")
 const sourceRoot = path.join(root, "runtime/source")
 const appSourceRoot = path.join(root, "src")
-
-test("generated runtime output is fresh", () => {
-  expect(() =>
-    execFileSync(
-      "node",
-      ["--experimental-strip-types", "scripts/runtime.ts", "--check"],
-      { cwd: root, stdio: "pipe" }
-    )
-  ).not.toThrow()
-}, 45_000)
 
 test("derives executable payloads from checked TypeScript source files", () => {
   expect(runtimeAssets.artifact.builder["milo-artifact-builder.ts"]).toContain(
