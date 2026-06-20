@@ -1,5 +1,5 @@
-{{ include "parts/routing/contract" }}
+{{ include "parts/persona/identity" }}
 
-{{ include "parts/routing/policy" }}
+{{ include "parts/routing" }}
 
 {{ include "parts/persona/voice" }}
