@@ -8,7 +8,7 @@ test("includes linked GitHub pull request details", async () => {
     eventRun({
       title: "GitHub PR event",
       task: "Handle the pull request comment.",
-      display: githubDisplay(),
+      snapshot: githubDisplay(),
     })
   )
   const summary = await summarizeRun(
@@ -44,7 +44,7 @@ test("formats Linear issue details with a colon", async () => {
     eventRun({
       title: "Linear event",
       task: "Handle the Linear issue comment.",
-      display: linearDisplay(),
+      snapshot: linearDisplay(),
     })
   )
   const summary = await summarizeRun(
@@ -63,7 +63,7 @@ test("formats Linear issue details with a colon", async () => {
 })
 
 function eventRun(input: {
-  display: ReturnType<typeof eventAutomationDisplay>
+  snapshot: ReturnType<typeof eventAutomationDisplay>
   task: string
   title: string
 }) {
@@ -71,10 +71,12 @@ function eventRun(input: {
     _id: "run",
     _creationTime: 0,
     tenantId: "tenant",
-    reason: { type: "event", eventId: "event" },
-    title: input.title,
-    task: input.task,
-    display: input.display,
+    cause: { type: "event", eventId: "event" },
+    instructions: input.task,
+    snapshot: {
+      title: input.title,
+      ...input.snapshot,
+    },
     createdAt: 0,
   }
 }
@@ -201,9 +203,8 @@ function testRun(
   overrides: Record<string, unknown> = {}
 ) {
   return {
-    promptId: "prompt",
     status: "completed",
-    finishedAt: 1000,
+    endedAt: 1000,
     ...run,
     ...overrides,
   } as Parameters<typeof summarizeRun>[1]
@@ -218,6 +219,7 @@ function fakeQueryCtx(docs: Record<string, unknown>) {
           first: async () => null,
           order: () => ({
             first: async () => null,
+            take: async () => [],
           }),
         }),
       }),

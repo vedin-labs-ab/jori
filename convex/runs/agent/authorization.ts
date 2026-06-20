@@ -9,6 +9,7 @@ import {
   resolveToolModes,
 } from "../../permissions/catalog"
 import { type AgentRuntimeInput } from "./input"
+import { toolExecutionType } from "./tools/policy"
 
 export async function authorizeApprovedTool(
   ctx: ActionCtx,
@@ -28,7 +29,7 @@ export async function authorizeApprovedTool(
   )
   const mode = resolveToolMode(toolModes, approval.tool)
 
-  if (!canUseToolMode(mode, input.type)) {
+  if (!canUseToolMode(mode, toolExecutionType(input.type))) {
     throw new Error(`Tool is no longer available: ${approval.tool}`)
   }
 

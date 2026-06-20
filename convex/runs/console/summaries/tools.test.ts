@@ -4,20 +4,7 @@ import { eventAutomationDisplay, messageDisplay } from "../display"
 import { summarizeRun } from "../summaries"
 
 test("shows stored tools for event automation runs", async () => {
-  const run = testRun(
-    {
-      automationId: "missing-automation",
-      reason: { type: "event", eventId: "event" },
-      title: "Deep analysis",
-      task: "Perform the deep analysis.",
-      display: eventAutomationDisplay({
-        surface: { type: "slack", label: "Slack" },
-        event: { type: "message.created", label: "New channel message" },
-        metadata: [{ type: "channel", label: "C123" }],
-      }),
-    },
-    { toolSnapshot: slackToolSnapshot() }
-  )
+  const run = testRun(eventRun(), { preparedTools: slackToolSnapshot() })
   const summary = await summarizeRun(
     fakeQueryCtx({
       event: event(),
@@ -32,20 +19,7 @@ test("shows stored tools for event automation runs", async () => {
 })
 
 test("shows stored blocked web search for event automation runs", async () => {
-  const run = testRun(
-    {
-      automationId: "missing-automation",
-      reason: { type: "event", eventId: "event" },
-      title: "Deep analysis",
-      task: "Perform the deep analysis.",
-      display: eventAutomationDisplay({
-        surface: { type: "slack", label: "Slack" },
-        event: { type: "message.created", label: "New channel message" },
-        metadata: [{ type: "channel", label: "C123" }],
-      }),
-    },
-    { toolSnapshot: slackToolSnapshot(false) }
-  )
+  const run = testRun(eventRun(), { preparedTools: slackToolSnapshot(false) })
   const summary = await summarizeRun(
     fakeQueryCtx({
       event: event(),
@@ -60,18 +34,9 @@ test("shows stored blocked web search for event automation runs", async () => {
 
 test("shows stored tools for mention and reply runs", async () => {
   for (const kind of ["mention", "reply"] as const) {
-    const run = testRun(
-      {
-        reason: { type: "message", messageId: "message", kind },
-        title: "Please summarize this thread.",
-        task: "Please summarize this thread.",
-        display: messageDisplay({
-          kind,
-          metadata: [{ type: "channel", label: "C123" }],
-        }),
-      },
-      { toolSnapshot: slackToolSnapshot() }
-    )
+    const run = testRun(messageRun(kind), {
+      preparedTools: slackToolSnapshot(),
+    })
     const summary = await summarizeRun(
       fakeQueryCtx({
         integration: slackIntegration(),
@@ -88,18 +53,9 @@ test("shows stored tools for mention and reply runs", async () => {
 
 test("marks approval-required access counts in mention and reply runs", async () => {
   for (const kind of ["mention", "reply"] as const) {
-    const run = testRun(
-      {
-        reason: { type: "message", messageId: "message", kind },
-        title: "Please summarize this thread.",
-        task: "Please summarize this thread.",
-        display: messageDisplay({
-          kind,
-          metadata: [{ type: "channel", label: "C123" }],
-        }),
-      },
-      { toolSnapshot: slackToolSnapshot(true, "read") }
-    )
+    const run = testRun(messageRun(kind), {
+      preparedTools: slackToolSnapshot(true, "read"),
+    })
     const summary = await summarizeRun(
       fakeQueryCtx({
         integration: slackIntegration(),
@@ -116,16 +72,8 @@ test("marks approval-required access counts in mention and reply runs", async ()
 function slackIntegration() {
   return {
     _id: "integration",
-    _creationTime: 0,
     tenantId: "tenant",
     integration: "slack",
-    scope: "tenant",
-    externalId: "slack-team",
-    credentials: {},
-    status: "active",
-    createdBy: "user",
-    createdAt: 0,
-    updatedAt: 0,
   }
 }
 
@@ -138,12 +86,8 @@ function event() {
     integration: "slack",
     key: "slack:event",
     type: "message.created",
-    data: {
-      channel: { id: "C123", name: "social" },
-      ts: "1700000000.000000",
-    },
+    data: { channel: { id: "C123", name: "social" } },
     metadata: [{ type: "channel", label: "#social" }],
-    createdAt: 0,
   }
 }
 
@@ -158,11 +102,37 @@ function message(kind: "mention" | "reply") {
     externalId: `slack:${kind}`,
     mentioned: kind === "mention",
     text: "Please summarize this thread.",
-    data: {
-      channel: { id: "C123", name: "social" },
-      ts: "1700000000.000000",
-    },
+    data: { channel: { id: "C123", name: "social" } },
     createdAt: 0,
+  }
+}
+
+function eventRun() {
+  return {
+    automationId: "missing-automation",
+    cause: { type: "event", eventId: "event" },
+    instructions: "Perform the deep analysis.",
+    snapshot: {
+      title: "Deep analysis",
+      ...eventAutomationDisplay({
+        surface: { type: "slack", label: "Slack" },
+        event: { type: "message.created", label: "New channel message" },
+        metadata: [{ type: "channel", label: "C123" }],
+      }),
+    },
+  }
+}
+
+function messageRun(kind: "mention" | "reply") {
+  return {
+    cause: { type: "message", messageId: "message", kind },
+    snapshot: {
+      title: "Please summarize this thread.",
+      ...messageDisplay({
+        kind,
+        metadata: [{ type: "channel", label: "C123" }],
+      }),
+    },
   }
 }
 
@@ -174,10 +144,9 @@ function testRun(
     _id: "run",
     _creationTime: 0,
     tenantId: "tenant",
-    promptId: "prompt",
     status: "completed",
     createdAt: 0,
-    finishedAt: 1000,
+    endedAt: 1000,
     ...run,
     ...overrides,
   } as Parameters<typeof summarizeRun>[1]
@@ -240,6 +209,8 @@ function slackTools(approvalAccess?: "read" | "write") {
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {
+  const preparedTools = (docs.run as { preparedTools?: unknown }).preparedTools
+
   return {
     db: {
       get: async (id: string) => docs[id] ?? null,
@@ -248,6 +219,15 @@ function fakeQueryCtx(docs: Record<string, unknown>) {
           first: async () => null,
           order: () => ({
             first: async () => null,
+            take: async () =>
+              preparedTools === undefined
+                ? []
+                : [
+                    {
+                      type: "run.prepared",
+                      payload: { tools: preparedTools },
+                    },
+                  ],
           }),
         }),
       }),

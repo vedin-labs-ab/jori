@@ -20,6 +20,7 @@ export async function summarizeRun(
     approval: context.requestedApproval,
     run: context.run,
     stoppedBy,
+    tools: context.prepared.tools,
   })
 
   return {
@@ -32,9 +33,8 @@ export async function summarizeRun(
     trigger: triggerLabel(context),
     createdAt: run.createdAt,
     details: detailSummary.details,
-    finishedAt: run.finishedAt,
+    endedAt: run.endedAt,
     durationMs: getDuration(run),
-    traceFileId: storedTraceFileId(run),
     error: run.error,
     approval:
       context.requestedApproval === null
@@ -54,18 +54,12 @@ export async function summarizeRun(
   }
 }
 
-function storedTraceFileId(run: Doc<"runs">) {
-  const trace = run.trace
-
-  return trace !== undefined && "fileId" in trace ? trace.fileId : undefined
-}
-
 function getDuration(run: Doc<"runs">) {
-  if (run.finishedAt === undefined) {
+  if (run.endedAt === undefined) {
     return undefined
   }
 
-  return Math.max(0, run.finishedAt - run.createdAt)
+  return Math.max(0, run.endedAt - run.createdAt)
 }
 
 function searchableText(
@@ -84,15 +78,15 @@ function searchableText(
     input.approval?.handoff.objective,
     input.approval?.handoff.progress,
     input.approval?.tool,
-    input.run.display.trigger,
-    input.run?.reason.type,
+    input.run.snapshot.trigger,
+    input.run.cause.type,
     input.task,
     sourceSearchText(input.source),
-    ...input.run.display.details.flatMap((detail) => [
+    ...input.run.snapshot.details.flatMap((detail) => [
       detail.type,
       detail.label,
     ]),
-    input.run.display.taskSource?.label,
+    input.run.snapshot.taskSource?.label,
   ]
     .filter(Boolean)
     .join(" ")

@@ -9,14 +9,14 @@ export async function createAutomationRun(
     automation: Doc<"automations">
     event?: Doc<"events"> | null
     integration?: Doc<"integrations"> | null
-    reason: Doc<"runs">["reason"]
+    cause: Doc<"runs">["cause"]
     now: number
   }
 ) {
   const runId = await ctx.db.insert("runs", {
     tenantId: args.automation.tenantId,
     automationId: args.automation._id,
-    reason: args.reason,
+    cause: args.cause,
     ...createAutomationRunSnapshot(args),
     status: "queued",
     createdBy: args.automation.createdBy,

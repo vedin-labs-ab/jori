@@ -140,7 +140,7 @@ async function insertRun(
 ) {
   return await ctx.db.insert("runs", {
     tenantId: args.integration.tenantId,
-    reason: {
+    cause: {
       type: "message",
       messageId: args.message._id,
       kind: args.kind,

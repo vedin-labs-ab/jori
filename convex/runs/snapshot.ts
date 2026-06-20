@@ -1,25 +1,29 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { automationDisplay, messageDisplay } from "./display"
-import { type runDisplay } from "./schema"
+import { type runSnapshot } from "./schema"
 
-type RunDisplay = Infer<typeof runDisplay>
+type RunSnapshot = Infer<typeof runSnapshot>
 
-type RunSnapshot = {
-  display: RunDisplay
-  task: string
-  title: string
+type RunSnapshotInput = {
+  instructions?: string
+  snapshot: RunSnapshot
 }
 
 export function createAutomationRunSnapshot(input: {
   automation: Doc<"automations">
   event?: Doc<"events"> | null
   integration?: Doc<"integrations"> | null
-}): RunSnapshot {
+}): RunSnapshotInput {
   return {
-    title: normalizeRequiredRunText(input.automation.name, "Run title"),
-    task: normalizeRequiredRunText(input.automation.instructions, "Run task"),
-    display: automationDisplay(input),
+    instructions: normalizeRequiredRunText(
+      input.automation.instructions,
+      "Run instructions"
+    ),
+    snapshot: {
+      title: normalizeRequiredRunText(input.automation.name, "Run title"),
+      ...automationDisplay(input),
+    },
   }
 }
 
@@ -27,13 +31,38 @@ export function createMessageRunSnapshot(input: {
   integration: Doc<"integrations">
   kind: "mention" | "reply"
   message: Doc<"messages">
-}): RunSnapshot {
-  const task = normalizeRequiredRunText(input.message.text ?? "", "Run task")
+}): RunSnapshotInput {
+  const text = normalizeRequiredRunText(input.message.text ?? "", "Run title")
 
   return {
-    title: firstLine(task),
-    task,
-    display: messageDisplay(input),
+    snapshot: {
+      title: firstLine(text),
+      ...messageDisplay(input),
+    },
+  }
+}
+
+export function createInstructionRunSnapshot(input: {
+  instructions: string
+  parent?: Doc<"runs">
+  title?: string
+}): RunSnapshotInput {
+  const instructions = normalizeRequiredRunText(
+    input.instructions,
+    "Run instructions"
+  )
+
+  return {
+    instructions,
+    snapshot: {
+      ...(input.parent?.snapshot ?? manualSnapshot()),
+      title: normalizeTitle(input.title, instructions),
+      trigger: input.parent === undefined ? "Manual" : "Subagent",
+      source: input.parent?.snapshot.source ?? {
+        type: "manual",
+        metadata: [],
+      },
+    },
   }
 }
 
@@ -45,6 +74,24 @@ function firstLine(text: string) {
   }
 
   return line.length > 90 ? `${line.slice(0, 87)}...` : line
+}
+
+function normalizeTitle(title: string | undefined, instructions: string) {
+  const value = title?.trim() || firstLine(instructions)
+
+  return value.length > 90 ? `${value.slice(0, 87)}...` : value
+}
+
+function manualSnapshot(): RunSnapshot {
+  return {
+    title: "Manual run",
+    source: {
+      type: "manual",
+      metadata: [],
+    },
+    trigger: "Manual",
+    details: [],
+  }
 }
 
 function normalizeRequiredRunText(text: string, label: string) {

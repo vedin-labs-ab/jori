@@ -27,13 +27,10 @@ export const stop = mutation({
 
     const now = Date.now()
 
-    // Clearing trace credentials revokes live trace access immediately.
     await ctx.db.patch(run._id, {
       status: "stopped",
       stoppedBy: stoppedByLabel(identity),
-      stoppedAt: now,
-      finishedAt: now,
-      trace: undefined,
+      endedAt: now,
     })
 
     await ctx.runMutation(internal.runtime.outbox.enqueueCancellation, {

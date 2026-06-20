@@ -1,10 +1,11 @@
 import { type Doc } from "../../_generated/dataModel"
 
-type RunDisplay = Doc<"runs">["display"]
+type RunSnapshot = Doc<"runs">["snapshot"]
+type RunSnapshotInput = Omit<RunSnapshot, "title">
 
 export function automationDisplay(
-  overrides: Partial<RunDisplay> = {}
-): RunDisplay {
+  overrides: Partial<RunSnapshotInput> = {}
+): RunSnapshotInput {
   return {
     source: {
       type: "automation",
@@ -17,11 +18,11 @@ export function automationDisplay(
 }
 
 export function eventAutomationDisplay(input: {
-  details?: RunDisplay["details"]
-  event?: NonNullable<RunDisplay["source"]["event"]>
-  metadata?: RunDisplay["source"]["metadata"]
-  surface?: NonNullable<RunDisplay["source"]["surface"]>
-}): RunDisplay {
+  details?: RunSnapshot["details"]
+  event?: NonNullable<RunSnapshot["source"]["event"]>
+  metadata?: RunSnapshot["source"]["metadata"]
+  surface?: NonNullable<RunSnapshot["source"]["surface"]>
+}): RunSnapshotInput {
   return automationDisplay({
     source: {
       type: "automation",
@@ -38,12 +39,12 @@ export function eventAutomationDisplay(input: {
 }
 
 export function messageDisplay(input: {
-  details?: RunDisplay["details"]
+  details?: RunSnapshot["details"]
   kind: "mention" | "reply"
-  metadata?: RunDisplay["source"]["metadata"]
-  surface?: NonNullable<RunDisplay["source"]["surface"]>
-  taskSource?: RunDisplay["taskSource"]
-}): RunDisplay {
+  metadata?: RunSnapshot["source"]["metadata"]
+  surface?: NonNullable<RunSnapshot["source"]["surface"]>
+  taskSource?: RunSnapshot["taskSource"]
+}): RunSnapshotInput {
   const surface = input.surface ?? { type: "slack", label: "Slack" }
 
   return {
@@ -59,7 +60,7 @@ export function messageDisplay(input: {
   }
 }
 
-export function oneShotDisplay(): RunDisplay {
+export function oneShotDisplay(): RunSnapshotInput {
   return automationDisplay({
     source: {
       type: "automation",
@@ -71,9 +72,9 @@ export function oneShotDisplay(): RunDisplay {
 }
 
 export function recurringDisplay(input: {
-  details?: RunDisplay["details"]
+  details?: RunSnapshot["details"]
   schedule?: string
-}): RunDisplay {
+}): RunSnapshotInput {
   return automationDisplay({
     source: {
       type: "automation",

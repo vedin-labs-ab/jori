@@ -15,7 +15,7 @@ export const getInputByRun = internalQuery({
       return null
     }
 
-    if (run.reason.type === "message") {
+    if (run.cause.type === "message") {
       return await getMessageInput(ctx, { run })
     }
 
@@ -23,7 +23,7 @@ export const getInputByRun = internalQuery({
       return await getAutomationInput(ctx, { run })
     }
 
-    return null
+    return await getInstructionInput(ctx, { run })
   },
 })
 
@@ -33,11 +33,11 @@ async function getMessageInput(
     run: Doc<"runs">
   }
 ) {
-  if (args.run.reason.type !== "message") {
+  if (args.run.cause.type !== "message") {
     return null
   }
 
-  const message = await ctx.db.get(args.run.reason.messageId)
+  const message = await ctx.db.get(args.run.cause.messageId)
 
   if (message === null || message.tenantId !== args.run.tenantId) {
     return null
@@ -98,8 +98,8 @@ async function getAutomationInput(
   }
 
   const event =
-    args.run.reason.type === "event"
-      ? await ctx.db.get(args.run.reason.eventId)
+    args.run.cause.type === "event"
+      ? await ctx.db.get(args.run.cause.eventId)
       : null
   const integration =
     event === null || event.tenantId !== args.run.tenantId
@@ -123,6 +123,30 @@ async function getAutomationInput(
         : null,
     integrations: integrations.filter((integration) =>
       hasIntegrationTools(automation.access, integration._id)
+    ),
+  }
+}
+
+async function getInstructionInput(
+  ctx: QueryCtx,
+  args: {
+    run: Doc<"runs">
+  }
+) {
+  const instructions = args.run.instructions?.trim()
+
+  if (instructions === undefined || instructions === "") {
+    return null
+  }
+
+  return {
+    type: "instruction" as const,
+    run: args.run,
+    instructions,
+    integrations: await listActiveIntegrations(
+      ctx,
+      args.run.tenantId,
+      args.run.createdBy
     ),
   }
 }

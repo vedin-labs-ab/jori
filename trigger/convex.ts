@@ -96,12 +96,12 @@ export class MiloConvexClient {
   }
 
   async createChildRun(args: {
-    parentRunId: ConvexId<"runs">
+    parentId: ConvexId<"runs">
     task: string
     title?: string
   }) {
     return await this.client.action(api.runtime.children.create, {
-      parentRunId: args.parentRunId,
+      parentId: args.parentId,
       secret: this.secret,
       task: args.task,
       title: args.title,

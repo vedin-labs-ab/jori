@@ -8,6 +8,7 @@ import {
   type ToolPermission,
   type ToolSurface,
 } from "../permissions/catalog"
+import { toolExecutionType } from "../runs/agent/tools/policy"
 import {
   formatProviderError,
   jsonError,
@@ -133,7 +134,9 @@ function authorizeTool(
 
   const mode = resolveToolMode(context.toolModes, request.tool)
 
-  if (!canUseToolMode(mode, context.input.type)) {
+  const executionType = toolExecutionType(context.input.type)
+
+  if (!canUseToolMode(mode, executionType)) {
     if (mode === "prompted" && context.input.type === "automation") {
       throw new Error(
         `Tool requires approval and cannot run in automations: ${request.tool}`

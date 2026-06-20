@@ -8,7 +8,10 @@ import {
   type ToolSurface,
 } from "../permissions/catalog"
 import { type AgentRuntimeInput } from "../runs/agent/input"
-import { canUseToolPermission } from "../runs/agent/tools/policy"
+import {
+  canUseToolPermission,
+  toolExecutionType,
+} from "../runs/agent/tools/policy"
 import {
   integrations as integrationCatalog,
   toolSurfaceLabel,
@@ -128,7 +131,7 @@ function isRunPermission(
   return (
     isSelectedForRun(context.input, permission) &&
     canUseToolPermission({
-      executionType: context.input.type,
+      executionType: toolExecutionType(context.input.type),
       permission,
       toolModes: context.toolModes,
     })

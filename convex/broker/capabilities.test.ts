@@ -117,13 +117,12 @@ function run(): Doc<"runs"> {
     _creationTime: 0,
     tenantId: "tenant",
     status: "running",
-    task: "Task",
-    title: "Task",
+    instructions: "Task",
     createdBy: "user",
     createdAt: 0,
-    updatedAt: 0,
-    reason: { type: "manual" },
-    display: {
+    cause: { type: "manual" },
+    snapshot: {
+      title: "Task",
       source: {
         type: "manual",
         metadata: [],

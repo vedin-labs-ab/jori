@@ -25,7 +25,7 @@ export function TraceTerminal({
 }) {
   const isOngoing =
     execution.status === "queued" || execution.status === "running"
-  const hasAvailableTrace = isOngoing || execution.traceFileId !== undefined
+  const hasAvailableTrace = isOngoing
   const [hasLoadedTrace, setHasLoadedTrace] = useState(hasAvailableTrace)
 
   useEffect(() => {
@@ -63,7 +63,6 @@ function ConnectedTerminal({
     runId: runId as RunId,
     tenantId,
   })
-  const [hasConnectedTrace, setHasConnectedTrace] = useState(false)
   const {
     lines,
     retryStoredTrace,
@@ -72,15 +71,8 @@ function ConnectedTerminal({
     streamStatus,
     trimmedLineCount,
   } = useTraceLines(connection)
-  const isFinalizingTrace =
-    connection?.type === "missing" && hasConnectedTrace && lines.length === 0
+  const isFinalizingTrace = false
   const trace = useMemo(() => formatTrace(lines), [lines])
-
-  useEffect(() => {
-    if (connection?.type === "live" || connection?.type === "stored") {
-      setHasConnectedTrace(true)
-    }
-  }, [connection?.type])
 
   return (
     <TerminalFrame

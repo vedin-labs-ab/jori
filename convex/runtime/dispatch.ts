@@ -65,8 +65,8 @@ async function performOperation(ctx: DispatchCtx, item: Doc<"outbox">) {
     case "run.cancel":
       configureTrigger()
 
-      if (operation.triggerRunId !== undefined) {
-        await runs.cancel(operation.triggerRunId)
+      if (operation.workerId !== undefined) {
+        await runs.cancel(operation.workerId)
       }
 
       if (operation.sandboxId !== undefined) {
@@ -100,12 +100,6 @@ async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
     agentTaskId,
     {
       runId: operation.runId,
-      ...(operation.parentRunId === undefined
-        ? {}
-        : { parentRunId: operation.parentRunId }),
-      ...(operation.rootRunId === undefined
-        ? {}
-        : { rootRunId: operation.rootRunId }),
     },
     {
       idempotencyKey: item.idempotencyKey,

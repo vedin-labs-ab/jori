@@ -86,7 +86,7 @@ export type ExecutionDetail = {
   type: ExecutionDetailType
   label: string
   url?: string
-  at?: number
+  timestamp?: number
   groups?: ExecutionDetailGroup[]
 }
 
@@ -100,9 +100,8 @@ export type ExecutionItem = {
   trigger: string
   createdAt: number
   details: ExecutionDetail[]
-  finishedAt?: number
+  endedAt?: number
   durationMs?: number
-  traceFileId?: string
   error?: string
   approval: {
     id: string

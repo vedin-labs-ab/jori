@@ -76,11 +76,11 @@ export function ExecutionFacts({ details }: { details: ExecutionDetail[] }) {
 function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
   const meta = detailMeta[detail.type]
   const time =
-    detail.at === undefined
+    detail.timestamp === undefined
       ? undefined
       : usesUtcTime(detail.type)
-        ? absoluteUtcTime(detail.at)
-        : absoluteTime(detail.at)
+        ? absoluteUtcTime(detail.timestamp)
+        : absoluteTime(detail.timestamp)
 
   if (isPayloadDetail(detail)) {
     return <PayloadFact detail={detail} label={meta.label} time={time} />
@@ -233,5 +233,5 @@ function usesUtcTime(type: ExecutionDetailType) {
 }
 
 function detailKey(detail: ExecutionDetail) {
-  return `${detail.type}:${detail.url ?? detail.label}:${detail.at ?? ""}`
+  return `${detail.type}:${detail.url ?? detail.label}:${detail.timestamp ?? ""}`
 }

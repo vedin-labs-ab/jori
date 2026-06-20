@@ -25,8 +25,8 @@ export function runSource(
   stoppedBy: string | undefined
 ): RunSource {
   const source: RunSource = {
-    ...context.run.display.source,
-    metadata: [...context.run.display.source.metadata],
+    ...context.run.snapshot.source,
+    metadata: [...context.run.snapshot.source.metadata],
   }
 
   if (stoppedBy !== undefined) {

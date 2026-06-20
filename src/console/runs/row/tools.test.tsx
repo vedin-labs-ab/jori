@@ -82,7 +82,7 @@ function executionWithApprovalTool(): ExecutionItem {
       },
     ],
     durationMs: 1000,
-    finishedAt: 1700000001000,
+    endedAt: 1700000001000,
     id: "execution",
     searchableText: "",
     source: {
@@ -135,7 +135,7 @@ function executionWithSingleAccessToolGroups(): ExecutionItem {
       },
     ],
     durationMs: 1000,
-    finishedAt: 1700000001000,
+    endedAt: 1700000001000,
     id: "execution",
     searchableText: "",
     source: {

@@ -1,13 +1,11 @@
-import { type Doc } from "../../_generated/dataModel"
+import { type RunToolSnapshot } from "../agent/tools/snapshot"
 import {
   compactDetails,
   detail,
   type ExecutionDetailGroup,
 } from "../display/detail"
 
-type ToolSnapshot = Doc<"runs">["toolSnapshot"]
-
-export function toolDetails(snapshot: ToolSnapshot) {
+export function toolDetails(snapshot: RunToolSnapshot | undefined) {
   if (snapshot === undefined) {
     return []
   }
@@ -22,7 +20,7 @@ export function toolDetails(snapshot: ToolSnapshot) {
   ])
 }
 
-function toolsDetail(groups: NonNullable<ToolSnapshot>["groups"]) {
+function toolsDetail(groups: RunToolSnapshot["groups"]) {
   const detailGroups = groups
     .map((group) =>
       group.tools.length === 0

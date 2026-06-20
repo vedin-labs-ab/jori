@@ -3,13 +3,13 @@ import { v } from "convex/values"
 import { toolSurfaceValidator } from "../shared/integrations"
 import { sourceMetadataValidator } from "../shared/sources/schema"
 
-const sourceDatum = v.object({
+const snapshotDatum = v.object({
   type: v.string(),
   label: v.string(),
   url: v.optional(v.string()),
 })
 
-const runDisplayDetailType = v.union(
+const runSnapshotDetailType = v.union(
   v.literal("channel"),
   v.literal("comment"),
   v.literal("decision"),
@@ -25,14 +25,15 @@ const runDisplayDetailType = v.union(
   v.literal("web_search")
 )
 
-export const runDisplayDetail = v.object({
-  type: runDisplayDetailType,
+export const runSnapshotDetail = v.object({
+  type: runSnapshotDetailType,
   label: v.string(),
   url: v.optional(v.string()),
-  at: v.optional(v.number()),
+  timestamp: v.optional(v.number()),
 })
 
-export const runDisplay = v.object({
+export const runSnapshot = v.object({
+  title: v.string(),
   source: v.object({
     type: v.union(
       v.literal("automation"),
@@ -40,13 +41,13 @@ export const runDisplay = v.object({
       v.literal("manual"),
       v.literal("message")
     ),
-    event: v.optional(sourceDatum),
-    kind: v.optional(sourceDatum),
+    event: v.optional(snapshotDatum),
+    kind: v.optional(snapshotDatum),
     metadata: sourceMetadataValidator,
-    surface: v.optional(sourceDatum),
+    surface: v.optional(snapshotDatum),
   }),
   trigger: v.string(),
-  details: v.array(runDisplayDetail),
+  details: v.array(runSnapshotDetail),
   taskSource: v.optional(
     v.object({
       label: v.string(),
@@ -55,7 +56,7 @@ export const runDisplay = v.object({
   ),
 })
 
-export const runReason = v.union(
+export const runCause = v.union(
   v.object({
     type: v.literal("time"),
     scheduledAt: v.number(),
@@ -105,37 +106,20 @@ export const toolSnapshot = v.object({
 export const runs = defineTable({
   tenantId: v.string(),
   automationId: v.optional(v.id("automations")),
-  parentRunId: v.optional(v.id("runs")),
-  rootRunId: v.optional(v.id("runs")),
-  reason: runReason,
-  title: v.string(),
-  task: v.string(),
-  display: runDisplay,
+  parentId: v.optional(v.id("runs")),
+  rootId: v.optional(v.id("runs")),
+  cause: runCause,
+  instructions: v.optional(v.string()),
+  snapshot: runSnapshot,
   status: runStatus,
-  promptId: v.optional(v.id("_storage")),
-  toolSnapshot: v.optional(toolSnapshot),
-  sandboxId: v.optional(v.string()),
-  triggerRunId: v.optional(v.string()),
+  workerId: v.optional(v.string()),
   error: v.optional(v.string()),
-  trace: v.optional(
-    v.union(
-      v.object({
-        host: v.string(),
-        token: v.string(),
-      }),
-      v.object({
-        fileId: v.id("_storage"),
-      })
-    )
-  ),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
-  finishedAt: v.optional(v.number()),
+  endedAt: v.optional(v.number()),
   stoppedBy: v.optional(v.string()),
-  stoppedAt: v.optional(v.number()),
 })
   .index("by_tenant", ["tenantId"])
   .index("by_automation", ["automationId"])
-  .index("by_parent", ["parentRunId"])
-  .index("by_root", ["rootRunId"])
-  .index("by_trigger", ["triggerRunId"])
+  .index("by_parent", ["parentId"])
+  .index("by_root", ["rootId"])

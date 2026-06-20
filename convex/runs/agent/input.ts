@@ -27,4 +27,14 @@ export type AutomationRuntimeInput = {
   event: Doc<"events"> | null
 }
 
-export type AgentRuntimeInput = MessageRuntimeInput | AutomationRuntimeInput
+export type InstructionRuntimeInput = {
+  type: "instruction"
+  run: Doc<"runs">
+  integrations: RuntimeIntegration[]
+  instructions: string
+}
+
+export type AgentRuntimeInput =
+  | AutomationRuntimeInput
+  | InstructionRuntimeInput
+  | MessageRuntimeInput

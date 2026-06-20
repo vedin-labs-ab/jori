@@ -104,7 +104,7 @@ async function patchRunStatus(
     await ctx.db.patch(args.runId, {
       status: "completed",
       error: undefined,
-      finishedAt: Date.now(),
+      endedAt: Date.now(),
     })
 
     return
@@ -118,7 +118,7 @@ async function patchRunStatus(
     await ctx.db.patch(args.runId, {
       status: "failed",
       error: readPayloadString(args.payload, "error"),
-      finishedAt: Date.now(),
+      endedAt: Date.now(),
     })
   }
 }

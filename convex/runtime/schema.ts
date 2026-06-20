@@ -5,8 +5,6 @@ const runtimeOperation = v.union(
   v.object({
     type: v.literal("run.start"),
     runId: v.id("runs"),
-    parentRunId: v.optional(v.id("runs")),
-    rootRunId: v.optional(v.id("runs")),
   }),
   v.object({
     type: v.literal("approval.resume"),
@@ -18,7 +16,7 @@ const runtimeOperation = v.union(
     type: v.literal("run.cancel"),
     runId: v.id("runs"),
     sandboxId: v.optional(v.string()),
-    triggerRunId: v.optional(v.string()),
+    workerId: v.optional(v.string()),
   }),
   v.object({
     type: v.literal("reply.send"),

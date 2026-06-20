@@ -87,7 +87,7 @@ function oneShotExecution({
     createdAt: 1700000000000,
     details,
     durationMs: 1000,
-    finishedAt: 1700000001000,
+    endedAt: 1700000001000,
     id: "execution",
     searchableText: "",
     source: {
