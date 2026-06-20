@@ -1,3 +1,4 @@
+import { isWebTool } from "../../contracts/permissions/web"
 import { type ActionCtx } from "../_generated/server"
 import { canUseAutomationTool } from "../automations/access"
 import {
@@ -144,6 +145,16 @@ function authorizeTool(
     }
 
     throw new Error(`Tool is blocked: ${request.tool}`)
+  }
+
+  if (
+    context.input.type === "automation" &&
+    isWebTool(request.tool) &&
+    !context.input.automation.access.web
+  ) {
+    throw new Error(
+      `Tool is not allowed by automation web access: ${request.tool}`
+    )
   }
 
   return { mode, permission }

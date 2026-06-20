@@ -1,5 +1,59 @@
 import { type JsonObject, type MiloToolOptions } from "./types"
 
+export type WebSearchInput = {
+  query: string
+  limit?: number
+  includeDomains?: string[]
+  excludeDomains?: string[]
+  maxCharacters?: number
+}
+
+export type WebFetchInput = {
+  url: string
+  highlightQuery?: string
+  maxCharacters?: number
+}
+
+export type WebProviderTrace = {
+  name: "exa"
+  operation: "contents" | "search"
+  requestId: string
+  resolvedSearchType?: string
+  searchTimeMs?: number
+  statuses?: Array<{
+    id: string
+    source: string
+    status: string
+  }>
+}
+
+export type WebResult = {
+  url: string
+  title: string | null
+  source: {
+    provider: "exa"
+    id: string
+    author?: string
+    faviconUrl?: string
+    imageUrl?: string
+    publishedAt?: string
+    score?: number
+  }
+  snippet: string | null
+  highlights: string[]
+  content: {
+    text: string | null
+    characters: number
+    truncated: boolean
+  }
+}
+
+export type WebToolResult = {
+  provider: WebProviderTrace
+  results: WebResult[]
+  truncated: boolean
+}
+
 export type GmailFormat = "full" | "metadata" | "minimal"
 export type GmailHeader = JsonObject & { name?: string; value?: string }
 export type GmailPayload = JsonObject & { headers?: GmailHeader[] }
@@ -57,6 +111,8 @@ export type GmailDraftInput = {
 }
 
 export type MiloToolInputs = {
+  web_search: WebSearchInput
+  web_fetch: WebFetchInput
   google_gmail_search_threads: { q?: string; maxResults?: number }
   google_gmail_get_thread: { threadId: string; format?: GmailFormat }
   google_gmail_get_threads: { threadIds: string[]; format?: GmailFormat }
@@ -68,6 +124,8 @@ export type MiloToolInputs = {
 }
 
 export type MiloToolResults = {
+  web_search: WebToolResult
+  web_fetch: WebToolResult
   google_gmail_search_threads: GmailThreadSearchResult
   google_gmail_get_thread: GmailThread
   google_gmail_get_threads: GmailThread[]

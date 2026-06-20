@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { codingToolDefinitions } from "../../contracts/coding"
+import { isWebTool } from "../../contracts/permissions/web"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
@@ -185,7 +186,10 @@ function permissionGroups(
   }> = [
     {
       surface: "milo" as const,
-      permissions: getEnabledToolPermissions("milo", toolModes, executionType),
+      permissions: filterWebPermissions(
+        input,
+        getEnabledToolPermissions("milo", toolModes, executionType)
+      ),
     },
   ]
   const seen = new Set<ToolSurface>(["milo"])
@@ -210,6 +214,17 @@ function permissionGroups(
   }
 
   return groups.filter((group) => group.permissions.length > 0)
+}
+
+function filterWebPermissions(
+  input: AgentRuntimeInput,
+  permissions: ToolPermission[]
+) {
+  if (input.type !== "automation" || input.automation.access.web) {
+    return permissions
+  }
+
+  return permissions.filter((permission) => !isWebTool(permission.tool))
 }
 
 function selectedTools(

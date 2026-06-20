@@ -1,3 +1,4 @@
+import { isWebTool } from "../../contracts/permissions/web"
 import { getIntegrationTools } from "../automations/access"
 import {
   getToolPermissionsBySurface,
@@ -142,8 +143,12 @@ function isSelectedForRun(
   input: AgentRuntimeInput,
   permission: ToolPermission
 ) {
-  if (input.type !== "automation" || permission.surface === "milo") {
+  if (input.type !== "automation") {
     return true
+  }
+
+  if (permission.surface === "milo") {
+    return !isWebTool(permission.tool) || input.automation.access.web
   }
 
   const integration = input.integrations.find(

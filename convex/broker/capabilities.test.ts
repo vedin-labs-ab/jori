@@ -63,6 +63,30 @@ test("limits automation run tools to selected unattended access", () => {
   )
 })
 
+test("hides web tools from automation runs without web access", () => {
+  const github = integration("github")
+  const blocked = listCapabilities(
+    context({
+      connectedIntegrations: [github],
+      input: automationInput(github, ["github_get_issue"], false),
+      toolModes: new Map(),
+    })
+  )
+  const allowed = listCapabilities(
+    context({
+      connectedIntegrations: [github],
+      input: automationInput(github, ["github_get_issue"], true),
+      toolModes: new Map(),
+    })
+  )
+
+  expect(miloTools(blocked)).not.toContain("web_search")
+  expect(miloTools(blocked)).not.toContain("web_fetch")
+  expect(miloTools(allowed)).toEqual(
+    expect.arrayContaining(["web_search", "web_fetch"])
+  )
+})
+
 function context(args: {
   connectedIntegrations: Doc<"integrations">[]
   input: AgentRuntimeInput
@@ -94,7 +118,8 @@ function messageInput(integrations: Doc<"integrations">[]): AgentRuntimeInput {
 
 function automationInput(
   integration: Doc<"integrations">,
-  tools: string[]
+  tools: string[],
+  web = false
 ): AgentRuntimeInput {
   return {
     type: "automation",
@@ -102,13 +127,21 @@ function automationInput(
     automation: {
       access: {
         integrations: [{ id: integration._id, tools }],
-        web: false,
+        web,
       },
     } as Doc<"automations">,
     event: null,
     integration: null,
     integrations: [integration],
   }
+}
+
+function miloTools(capabilities: ReturnType<typeof listCapabilities>) {
+  return (
+    capabilities.run
+      .find((group) => group.surface === "milo")
+      ?.tools.map((tool) => tool.tool) ?? []
+  )
 }
 
 function run(): Doc<"runs"> {

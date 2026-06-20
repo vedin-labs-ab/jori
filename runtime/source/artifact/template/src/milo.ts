@@ -19,6 +19,11 @@ export type {
   MiloToolInputs,
   MiloToolName,
   MiloToolResults,
+  WebFetchInput,
+  WebProviderTrace,
+  WebResult,
+  WebSearchInput,
+  WebToolResult,
 } from "./milo/tools"
 export type {
   ArtifactContract,

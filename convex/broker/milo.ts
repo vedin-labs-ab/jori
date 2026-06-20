@@ -6,6 +6,7 @@ import {
   isMiloAttachmentTool,
 } from "../attachments/mcp"
 import { callMiloAutomationTool } from "../automations/mcp"
+import { callWebTool } from "./tools/web"
 
 type MiloToolRequest = {
   tool: string
@@ -29,6 +30,10 @@ export async function callMiloTool(
     return await callMiloArtifactTool(ctx, toMiloContext(run), request)
   }
 
+  if (request.tool === "web_search" || request.tool === "web_fetch") {
+    return await callWebTool(request.tool, normalizeToolArgs(request.args))
+  }
+
   return await callMiloAutomationTool(ctx, toMiloContext(run), request)
 }
 
@@ -42,4 +47,12 @@ function toMiloContext(run: {
     createdBy: run.createdBy,
     runId: run._id,
   }
+}
+
+function normalizeToolArgs(args: unknown) {
+  if (typeof args !== "object" || args === null || Array.isArray(args)) {
+    return {}
+  }
+
+  return args as Record<string, unknown>
 }

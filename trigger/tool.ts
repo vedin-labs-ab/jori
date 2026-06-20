@@ -10,6 +10,7 @@ import { errorDetails, runtimeEvent } from "./events"
 import { type ModelToolCall } from "./model/types"
 import { executeCodingTool } from "./sandbox/coding"
 import { type SandboxRuntime } from "./sandbox/types"
+import { providerTrace } from "./trace"
 import {
   type ApprovalDecision,
   type JsonObject,
@@ -237,6 +238,7 @@ function toToolContent(result: unknown) {
 
 function toDetails(result: unknown): RuntimeToolTraceDetails {
   return {
+    ...providerTrace(result),
     result: summarizeResult(result),
   }
 }

@@ -47,6 +47,10 @@ function createMiloClient(raw: RawMiloClient): MiloClient {
     model: Object.freeze({
       prompt,
     }),
+    web: Object.freeze({
+      search: toolMethod(raw, "web_search"),
+      fetch: toolMethod(raw, "web_fetch"),
+    }),
     gmail: Object.freeze({
       searchThreads: toolMethod(raw, "google_gmail_search_threads"),
       getThread: toolMethod(raw, "google_gmail_get_thread"),
