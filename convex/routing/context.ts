@@ -58,11 +58,11 @@ async function getActiveRun(
 
   const conversation = await ctx.db
     .query("conversations")
-    .withIndex("by_conversation", (query) =>
+    .withIndex("by_tenant_and_integration_and_external", (query) =>
       query
         .eq("tenantId", input.integration.tenantId)
         .eq("integrationId", input.integration._id)
-        .eq("conversationId", conversationId)
+        .eq("externalId", conversationId)
     )
     .first()
 

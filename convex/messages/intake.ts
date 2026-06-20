@@ -13,7 +13,6 @@ import {
   messageIntegrationValidator,
   type ObservedMessage,
   observedMessageArgs,
-  resolveMessageOwner,
 } from "./data"
 import { recordAutomationEvent } from "./events"
 
@@ -144,23 +143,17 @@ async function shouldRouteMessage(
   }
 
   const audience = messageAudience(args.message, args.integration)
-  const createdBy = await resolveMessageOwner(ctx, {
-    tenantId: args.integration.tenantId,
-    message: args.message,
-  })
   const conversation =
     audience.isAddressed || audience.isDirect
       ? await ensureConversation(ctx, {
           tenantId: args.integration.tenantId,
           integrationId: args.integration._id,
-          conversationId: args.message.conversationId,
-          createdBy,
-          now: args.now,
+          externalId: args.message.conversationId,
         })
       : await findConversation(ctx, {
           tenantId: args.integration.tenantId,
           integrationId: args.integration._id,
-          conversationId: args.message.conversationId,
+          externalId: args.message.conversationId,
         })
 
   return conversation !== null && hasText(args.message)

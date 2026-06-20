@@ -4,8 +4,9 @@ import { v } from "convex/values"
 export const conversations = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
-  conversationId: v.string(),
-  rootRunId: v.optional(v.id("runs")),
-  createdBy: v.optional(v.string()),
-  createdAt: v.number(),
-}).index("by_conversation", ["tenantId", "integrationId", "conversationId"])
+  externalId: v.string(),
+}).index("by_tenant_and_integration_and_external", [
+  "tenantId",
+  "integrationId",
+  "externalId",
+])

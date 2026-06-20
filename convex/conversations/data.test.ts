@@ -5,14 +5,7 @@ import { startMessageRun } from "./data"
 
 test("starts new conversation message runs as mentions", async () => {
   const ctx = fakeMutationCtx()
-  const result = await startMessageRun(ctx, {
-    conversation: null,
-    integration: integration(),
-    message: message("Please help."),
-    conversationKey: "conversation",
-    createdBy: "user",
-    now: 1000,
-  })
+  const result = await startMessageRun(ctx, runArgs())
 
   expect(result.status).toBe("started")
   expect(inserted(ctx, "runs")).toEqual([
@@ -22,8 +15,7 @@ test("starts new conversation message runs as mentions", async () => {
   ])
   expect(inserted(ctx, "conversations")).toEqual([
     expect.objectContaining({
-      conversationId: "conversation",
-      rootRunId: "runs-1",
+      externalId: "conversation",
     }),
   ])
   expect(inserted(ctx, "sessions")).toEqual([
@@ -56,12 +48,8 @@ test("continues active conversation sessions without starting another run", asyn
   ])
 
   const result = await startMessageRun(ctx, {
+    ...runArgs({ message: message("Steer this.") }),
     conversation,
-    integration: integration(),
-    message: message("Steer this."),
-    conversationKey: "conversation",
-    createdBy: "user",
-    now: 1000,
   })
 
   expect(result).toMatchObject({
@@ -80,12 +68,8 @@ test("starts reply runs when the previous session is terminal", async () => {
   ])
 
   const result = await startMessageRun(ctx, {
+    ...runArgs({ message: message("Following up.") }),
     conversation,
-    integration: integration(),
-    message: message("Following up."),
-    conversationKey: "conversation",
-    createdBy: "user",
-    now: 1000,
   })
 
   expect(result.status).toBe("started")
@@ -102,15 +86,44 @@ test("starts reply runs when the previous session is terminal", async () => {
   })
 })
 
+test("starts existing conversations without sessions as mentions", async () => {
+  const conversation = conversationDoc()
+  const ctx = fakeMutationCtx([["conversations", conversation]])
+
+  const result = await startMessageRun(ctx, {
+    ...runArgs({ message: message("First routed task.") }),
+    conversation,
+  })
+
+  expect(result.status).toBe("started")
+  expect(inserted(ctx, "runs")).toEqual([
+    expect.objectContaining({
+      cause: { type: "message", messageId: "message", kind: "mention" },
+    }),
+  ])
+})
+
 function conversationDoc(): Doc<"conversations"> {
   return {
     _id: id<"conversations">("conversation-doc"),
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
-    conversationId: "conversation",
-    rootRunId: id<"runs">("root-run"),
-    createdAt: 0,
+    externalId: "conversation",
+  }
+}
+
+type StartArgs = Parameters<typeof startMessageRun>[1]
+
+function runArgs(overrides: Partial<StartArgs> = {}): StartArgs {
+  return {
+    conversation: null,
+    integration: integration(),
+    message: message("Please help."),
+    createdBy: "user",
+    externalId: "conversation",
+    now: 1000,
+    ...overrides,
   }
 }
 
@@ -189,19 +202,16 @@ type Seed = [string, Record<string, unknown>]
 type FakeCtx = MutationCtx & {
   inserts: Array<{ table: string; doc: unknown }>
   patches: Array<{ id: string; patch: unknown }>
-  scheduled: Array<{ args: unknown; delay: number }>
 }
 
 function fakeMutationCtx(seed: Seed[] = []): FakeCtx {
   const inserts: Array<{ table: string; doc: unknown }> = []
   const patches: Array<{ id: string; patch: unknown }> = []
-  const scheduled: Array<{ args: unknown; delay: number }> = []
   const rows = new Map(seed.map(([, doc]) => [String(doc._id), doc]))
 
   return {
     inserts,
     patches,
-    scheduled,
     db: {
       get: async (rowId: string) => rows.get(rowId) ?? null,
       insert: async (table: string, doc: Record<string, unknown>) => {
@@ -239,11 +249,7 @@ function fakeMutationCtx(seed: Seed[] = []): FakeCtx {
       }),
     },
     scheduler: {
-      runAfter: async (delay: number, _reference: unknown, args: unknown) => {
-        scheduled.push({ args, delay })
-
-        return "scheduled"
-      },
+      runAfter: async () => "scheduled",
     },
   } as unknown as FakeCtx
 }
