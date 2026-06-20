@@ -56,8 +56,8 @@ async function getActiveRun(
     return null
   }
 
-  const conversation = await ctx.db
-    .query("conversations")
+  const watch = await ctx.db
+    .query("watches")
     .withIndex("by_tenant_and_integration_and_external", (query) =>
       query
         .eq("tenantId", input.integration.tenantId)
@@ -66,15 +66,13 @@ async function getActiveRun(
     )
     .first()
 
-  if (conversation === null) {
+  if (watch === null) {
     return null
   }
 
   const session = await ctx.db
     .query("sessions")
-    .withIndex("by_conversation", (query) =>
-      query.eq("conversationId", conversation._id)
-    )
+    .withIndex("by_watch", (query) => query.eq("watchId", watch._id))
     .first()
 
   if (session?.runId === undefined) {

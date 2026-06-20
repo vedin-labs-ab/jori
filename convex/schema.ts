@@ -14,7 +14,6 @@ import {
 } from "./artifacts/schema"
 import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
-import { conversations } from "./conversations/schema"
 import { events } from "./events/schema"
 import { files } from "./files/schema"
 import { identities } from "./identity/schema"
@@ -26,6 +25,7 @@ import { runs } from "./runs/schema"
 import { outbox, sandboxes, traces } from "./runtime/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
+import { watches } from "./watches/schema"
 
 export default defineSchema({
   skills,
@@ -37,7 +37,7 @@ export default defineSchema({
   subscriptions,
   events,
   runs,
-  conversations,
+  watches,
   sessions,
   approvals,
   routing,

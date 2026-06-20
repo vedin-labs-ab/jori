@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
 export const sessions = defineTable({
-  conversationId: v.id("conversations"),
+  watchId: v.id("watches"),
   runId: v.optional(v.id("runs")),
   cursor: v.optional(
     v.object({
@@ -12,5 +12,5 @@ export const sessions = defineTable({
   ),
   updatedAt: v.number(),
 })
-  .index("by_conversation", ["conversationId"])
+  .index("by_watch", ["watchId"])
   .index("by_run", ["runId"])

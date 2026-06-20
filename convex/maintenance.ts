@@ -15,7 +15,7 @@ const tableRegistry: Record<TableName, true> = {
   subscriptions: true,
   events: true,
   runs: true,
-  conversations: true,
+  watches: true,
   sessions: true,
   approvals: true,
   routing: true,

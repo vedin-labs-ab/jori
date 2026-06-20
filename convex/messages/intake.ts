@@ -1,11 +1,11 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { ensureConversation, findConversation } from "../conversations/data"
 import { getLinearBotId } from "../providers/linear/data"
 import { getSlackBotUserId } from "../providers/slack/data"
 import { messageAudience } from "../routing/surface"
 import { getActorExternalId, isUserActor, withActorKind } from "../shared/actor"
+import { ensureWatch, findWatch } from "../watches/data"
 import {
   findActiveIntegration,
   findMessageByExternalId,
@@ -143,20 +143,20 @@ async function shouldRouteMessage(
   }
 
   const audience = messageAudience(args.message, args.integration)
-  const conversation =
+  const watch =
     audience.isAddressed || audience.isDirect
-      ? await ensureConversation(ctx, {
+      ? await ensureWatch(ctx, {
           tenantId: args.integration.tenantId,
           integrationId: args.integration._id,
           externalId: args.message.conversationId,
         })
-      : await findConversation(ctx, {
+      : await findWatch(ctx, {
           tenantId: args.integration.tenantId,
           integrationId: args.integration._id,
           externalId: args.message.conversationId,
         })
 
-  return conversation !== null && hasText(args.message)
+  return watch !== null && hasText(args.message)
 }
 
 function hasText(message: Doc<"messages">) {
