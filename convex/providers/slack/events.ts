@@ -60,15 +60,43 @@ export function getSlackMessage(payload: SlackEventPayload) {
     observedAt: Number.isFinite(Number(event.ts))
       ? Math.round(Number(event.ts) * 1000)
       : undefined,
-    data: {
-      channelId: event.channel,
-      eventId: payload.event_id,
-      ts: event.ts,
-      threadTs: event.thread_ts,
-      channelType: event.channel_type,
-      subtype: event.subtype,
-      botId: event.bot_id,
-    },
+    data: slackMessageData(payload, event),
+  }
+}
+
+function slackMessageData(payload: SlackEventPayload, event: SlackEvent) {
+  return {
+    ts: event.ts,
+    ...optionalObject("channel", slackChannel(event)),
+    ...optionalObject("thread", slackThread(event)),
+    ...optionalObject("event", slackEvent(payload, event)),
+    ...optionalString("botId", event.bot_id),
+  }
+}
+
+function slackChannel(event: SlackEvent) {
+  if (event.channel === undefined) {
+    return undefined
+  }
+
+  return {
+    id: event.channel,
+    ...optionalString("type", event.channel_type),
+  }
+}
+
+function slackThread(event: SlackEvent) {
+  return event.thread_ts === undefined ? undefined : { ts: event.thread_ts }
+}
+
+function slackEvent(payload: SlackEventPayload, event: SlackEvent) {
+  if (payload.event_id === undefined && event.subtype === undefined) {
+    return undefined
+  }
+
+  return {
+    ...optionalString("id", payload.event_id),
+    ...optionalString("subtype", event.subtype),
   }
 }
 
@@ -94,4 +122,15 @@ function getSlackMessageType(event: SlackEvent) {
   }
 
   return "message"
+}
+
+function optionalObject(
+  key: string,
+  value: Record<string, unknown> | undefined
+) {
+  return value === undefined ? {} : { [key]: value }
+}
+
+function optionalString(key: string, value: string | undefined) {
+  return value === undefined || value === "" ? {} : { [key]: value }
 }

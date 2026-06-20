@@ -138,8 +138,11 @@ function event() {
     integration: "slack",
     key: "slack:event",
     type: "message.created",
-    data: { channelId: "C123", ts: "1700000000.000000" },
-    metadata: [{ type: "channel", label: "C123" }],
+    data: {
+      channel: { id: "C123", name: "social" },
+      ts: "1700000000.000000",
+    },
+    metadata: [{ type: "channel", label: "#social" }],
     createdAt: 0,
   }
 }
@@ -154,7 +157,10 @@ function message(kind: "mention" | "reply") {
     type: "message.channels",
     externalId: `slack:${kind}`,
     text: "Please summarize this thread.",
-    metadata: [{ type: "channel", label: "C123" }],
+    data: {
+      channel: { id: "C123", name: "social" },
+      ts: "1700000000.000000",
+    },
     createdAt: 0,
   }
 }

@@ -3,7 +3,10 @@ import { assemblePrompt } from "."
 import { runtimeInput } from "./fixtures"
 
 test("renders recent conversation context without duplicating the trigger", () => {
-  const input = runtimeInput("slack", { channelId: "C123", ts: "123.456" })
+  const input = runtimeInput("slack", {
+    channel: { id: "C123" },
+    ts: "123.456",
+  })
 
   if (input.type !== "message") {
     throw new Error("Expected message input.")

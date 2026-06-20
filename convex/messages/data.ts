@@ -4,7 +4,6 @@ import { type MutationCtx } from "../_generated/server"
 import { resolveUserIdByEmail } from "../identity/identities"
 import { type Actor, actorValidator, getActorEmail } from "../shared/actor"
 import { type Integration } from "../shared/integrations"
-import { createSourceMetadata } from "../shared/sources/metadata"
 
 export const messageIntegrationValidator = v.union(
   v.literal("github"),
@@ -80,11 +79,6 @@ export async function insertMessage(
     conversationId: input.message.conversationId,
     text: input.message.text,
     data: input.message.data,
-    metadata: createSourceMetadata({
-      integration: input.integration.integration,
-      event: input.message.type,
-      data: input.message.data,
-    }),
     observedAt: input.message.observedAt,
     createdAt: Date.now(),
   })

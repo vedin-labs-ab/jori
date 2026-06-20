@@ -79,7 +79,10 @@ test("uses stored message snapshots instead of message text", async () => {
         type: "message.channels",
         externalId: "slack:message",
         text: "Please summarize this thread.\n\nKeep it concise.",
-        metadata: [{ type: "channel", label: "C123" }],
+        data: {
+          channel: { id: "C123", name: "product" },
+          ts: "1700000000.000000",
+        },
         createdAt: 0,
       },
       run,

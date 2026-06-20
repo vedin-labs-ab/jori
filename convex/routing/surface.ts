@@ -1,6 +1,11 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { readProviderDataString } from "../providers/data"
-import { getSlackBotId, getSlackChannelType } from "../providers/slack/data"
+import {
+  getSlackBotId,
+  getSlackChannelId,
+  getSlackChannelType,
+  getSlackMessageTs,
+  getSlackThreadTs,
+} from "../providers/slack/data"
 import { readDataNumber, readDataObject, readDataString } from "../shared/data"
 
 export type MessageAudience = {
@@ -171,8 +176,8 @@ function linearReplyAddress(message: Doc<"messages">): ReplyAddress | null {
 }
 
 function slackReplyAddress(message: Doc<"messages">): ReplyAddress | null {
-  const channelId = readProviderDataString(message.data, "channelId")
-  const messageTs = readProviderDataString(message.data, "ts")
+  const channelId = getSlackChannelId(message.data)
+  const messageTs = getSlackMessageTs(message.data)
 
   if (channelId === undefined || messageTs === undefined) {
     return null
@@ -181,6 +186,6 @@ function slackReplyAddress(message: Doc<"messages">): ReplyAddress | null {
   return {
     channelId,
     type: "slack",
-    threadTs: readProviderDataString(message.data, "threadTs") ?? messageTs,
+    threadTs: getSlackThreadTs(message.data) ?? messageTs,
   }
 }

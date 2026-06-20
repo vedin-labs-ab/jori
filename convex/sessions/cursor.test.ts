@@ -63,7 +63,6 @@ function message(
     type: "message",
     externalId: messageId,
     text,
-    metadata: [],
     createdAt: creationTime,
   }
 }

@@ -1,4 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
+import { getSlackChannelId, getSlackMessageTs } from "../providers/slack/data"
 import { slackMessageUrl } from "../providers/slack/links"
 import { toolSurfaceLabel } from "../shared/integrations"
 import { getToolLabel } from "./slack/labels"
@@ -47,8 +48,8 @@ function approvalSource({
   message: Doc<"messages"> | null
 }) {
   const messageUrl = slackMessageUrl({
-    channelId: readString(message?.data, "channelId"),
-    messageTs: readString(message?.data, "ts"),
+    channelId: getSlackChannelId(message?.data),
+    messageTs: getSlackMessageTs(message?.data),
     teamId:
       integration?.integration === "slack" ? integration.externalId : null,
   })
@@ -98,14 +99,4 @@ function deliveryLabel(delivery: Doc<"approvals">["delivery"]) {
   }
 
   return `Delivered to ${toolSurfaceLabel(delivery.integration)}`
-}
-
-function readString(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null || !(key in data)) {
-    return undefined
-  }
-
-  const value = data[key as keyof typeof data]
-
-  return typeof value === "string" && value !== "" ? value : undefined
 }

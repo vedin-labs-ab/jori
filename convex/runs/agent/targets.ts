@@ -69,7 +69,8 @@ function requireLinearTarget(data: unknown): RuntimeTarget {
 }
 
 function requireSlackTarget(data: unknown): RuntimeTarget {
-  const channelId = readDataString(data, "channelId")
+  const channel = readDataObject(data, "channel")
+  const channelId = readDataString(channel, "id")
 
   if (channelId === undefined || channelId === "") {
     throw new Error("Missing Slack channel target")

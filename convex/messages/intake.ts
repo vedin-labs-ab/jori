@@ -67,15 +67,31 @@ function observedMessage(
 ): ObservedMessage {
   return {
     ...message,
+    type: normalizeType(message, integration),
     actor: normalizeActor(message.actor, integration),
   }
+}
+
+function normalizeType(
+  message: ObservedMessage,
+  integration: Doc<"integrations">
+) {
+  if (integration.integration !== "slack" || message.type === "app_mention") {
+    return message.type
+  }
+
+  const botId = getSlackBotId(integration.data)
+
+  return botId !== undefined && (message.text ?? "").includes(`<@${botId}>`)
+    ? "app_mention"
+    : message.type
 }
 
 function normalizeActor(
   actor: ObservedMessage["actor"],
   integration: Doc<"integrations">
 ) {
-  const actorId = getActorExternalId(actor, integration.integration)
+  const actorId = getActorExternalId(actor)
   const selfId = selfActorId(integration)
 
   return actorId !== undefined && actorId === selfId

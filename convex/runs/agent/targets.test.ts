@@ -35,7 +35,7 @@ describe("runtime targets", () => {
   })
 
   test("extracts Slack channel targets", () => {
-    expect(requireMessageTarget("slack", { channelId: "C123" })).toEqual({
+    expect(requireMessageTarget("slack", { channel: { id: "C123" } })).toEqual({
       integration: "slack",
       channelId: "C123",
     })

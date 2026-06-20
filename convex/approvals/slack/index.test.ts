@@ -102,7 +102,6 @@ test("replaces Slack approval buttons with a decision summary", () => {
       summary: "Post a follow-up message in Slack.",
       decidedBy: {
         kind: "user",
-        integration: "slack",
         externalId: "U123",
       },
     } as SlackApprovalDecisionResult["approval"],
@@ -112,7 +111,7 @@ test("replaces Slack approval buttons with a decision summary", () => {
 
   expect(response.replace_original).toBe(true)
   expect(card.slack_icon).toEqual({ type: "icon", name: "thumbs-down" })
-  expect(rendered).toContain("Denied by <@U123> at <!date^")
+  expect(rendered).toContain("Denied by U123 at <!date^")
   expect(rendered).toContain("Post a follow-up message in Slack.")
   expect(rendered).toContain("Send Slack message")
   expect(rendered).not.toContain("ABC12345")

@@ -126,7 +126,6 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
     type: hydratedMessage.type,
     externalId: hydratedMessage.externalId,
     actor: createIntegrationActor({
-      integration: "linear",
       externalId: hydratedMessage.actorId,
       kind: hydratedMessage.actorKind,
       email: hydratedMessage.actorEmail,

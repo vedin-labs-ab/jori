@@ -1,6 +1,11 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { updateSlackMessage } from "../../broker/tools/slack"
+import {
+  getSlackChannelId,
+  getSlackMessageTs,
+  getSlackThreadTs,
+} from "../../providers/slack/data"
 import { createIntegrationActor } from "../../shared/actor"
 import { decideSlackApproval } from "../runtime"
 import {
@@ -31,7 +36,7 @@ export async function handleSlackApprovalDecision(
     return false
   }
 
-  const channelId = readString(input.data, "channelId")
+  const channelId = getSlackChannelId(input.data)
 
   if (channelId === undefined) {
     return true
@@ -43,14 +48,12 @@ export async function handleSlackApprovalDecision(
     {
       accountId: input.accountId,
       actor: createIntegrationActor({
-        integration: "slack",
         externalId: input.actorId,
         email: input.actorEmail,
         name: input.actorName,
       }),
       channelId,
-      threadTs:
-        readString(input.data, "threadTs") ?? readString(input.data, "ts"),
+      threadTs: getSlackThreadTs(input.data) ?? getSlackMessageTs(input.data),
       code: approvalDecision.code,
       decision: approvalDecision.decision,
     }
@@ -72,7 +75,6 @@ export async function handleSlackApprovalInteraction(
   const result = await decideSlackApproval(ctx, {
     accountId: interaction.accountId,
     actor: createIntegrationActor({
-      integration: "slack",
       externalId: interaction.actorId,
     }),
     channelId: interaction.channelId,
@@ -183,16 +185,6 @@ function readApprovalCode(value: unknown) {
   } catch {
     return null
   }
-}
-
-function readString(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null || !(key in data)) {
-    return undefined
-  }
-
-  const value = data[key as keyof typeof data]
-
-  return typeof value === "string" && value !== "" ? value : undefined
 }
 
 function okResponse() {

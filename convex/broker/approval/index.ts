@@ -8,6 +8,11 @@ import {
   resolveToolMode,
   type ToolSurface,
 } from "../../permissions/catalog"
+import {
+  getSlackChannelId,
+  getSlackMessageTs,
+  getSlackThreadTs,
+} from "../../providers/slack/data"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { type Actor, createUserActor } from "../../shared/actor"
 import { postSlackMessage } from "../tools/slack"
@@ -218,7 +223,7 @@ function getSlackTarget(input: AgentRuntimeInput) {
     return null
   }
 
-  const channelId = readString(input.message.data, "channelId")
+  const channelId = getSlackChannelId(input.message.data)
 
   if (channelId === undefined) {
     return null
@@ -227,8 +232,8 @@ function getSlackTarget(input: AgentRuntimeInput) {
   return {
     channelId,
     threadTs:
-      readString(input.message.data, "threadTs") ??
-      readString(input.message.data, "ts"),
+      getSlackThreadTs(input.message.data) ??
+      getSlackMessageTs(input.message.data),
   }
 }
 

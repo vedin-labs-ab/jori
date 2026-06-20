@@ -46,8 +46,7 @@ function slackDetails({
   text: string | undefined
 }) {
   const channel = readDataObject(data, "channel")
-  const channelId =
-    readDataString(data, "channelId") ?? readDataString(channel, "id")
+  const channelId = readDataString(channel, "id")
   const teamId =
     integration?.integration === "slack" ? integration.externalId : null
   const messageTs = readDataString(data, "ts")

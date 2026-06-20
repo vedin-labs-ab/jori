@@ -9,7 +9,7 @@ describe("Slack and GitHub message automation event projection", () => {
         integration: integration("slack"),
         message: {
           externalId: "slack:T123:1",
-          data: { channelId: "C123" },
+          data: { channel: { id: "C123" } },
         },
       })
     ).toMatchObject([
