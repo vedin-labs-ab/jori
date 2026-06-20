@@ -79,7 +79,15 @@ function eventAutomationDisplay(input: {
   integration: Doc<"integrations"> | null
 }): RunSnapshotBody {
   const event = input.event
-  const integration = event?.integration
+  const integration = input.integration?.integration
+  const metadata =
+    event === null || integration === undefined
+      ? []
+      : createSourceMetadata({
+          data: event.data,
+          event: event.type,
+          integration,
+        })
   const context =
     event === null
       ? []
@@ -87,7 +95,7 @@ function eventAutomationDisplay(input: {
           data: event.data,
           integration: input.integration,
           integrationKey: integration,
-          metadata: event.metadata,
+          metadata,
           text: event.text,
         })
   const sourceUrl = sourceUrlFrom(context)

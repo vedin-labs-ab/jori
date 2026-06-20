@@ -148,7 +148,6 @@ function githubIssueCommentEvent() {
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: "integration",
-    integration: "github",
     key: "github:event",
     type: "issue.comment.created",
     text: "Can you investigate this failing callback?",
@@ -168,8 +167,6 @@ function githubIssueCommentEvent() {
         url: "https://github.com/vedin-labs/frontier/issues/42#comment-123",
       },
     },
-    metadata: [],
-    createdAt: 0,
   }
 }
 

@@ -189,8 +189,7 @@ async function projectTriggerForConsole(
   return {
     integration: integration?.integration,
     event: trigger.event,
-    criteria: trigger.criteria,
-    filter: trigger.filter,
+    match: trigger.match,
   }
 }
 

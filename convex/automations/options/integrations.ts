@@ -1,6 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import {
-  type AutomationEventCriteria,
+  type AutomationEventMatch,
   type AutomationEventOptionSource,
 } from "../events"
 import { OptionUnavailable } from "./common"
@@ -40,7 +40,7 @@ export async function searchIntegrationOptions(args: {
   integration: Doc<"integrations">
   source: AutomationEventOptionSource
   query: string
-  criteria: AutomationEventCriteria | undefined
+  match: AutomationEventMatch | undefined
 }): Promise<AutomationEventOptionSearchResult> {
   try {
     return {
@@ -62,12 +62,12 @@ async function loadIntegrationOptions(args: {
   integration: Doc<"integrations">
   source: AutomationEventOptionSource
   query: string
-  criteria: AutomationEventCriteria | undefined
+  match: AutomationEventMatch | undefined
 }) {
   const loaderArgs = {
     integration: args.integration,
     query: args.query,
-    criteria: args.criteria,
+    match: args.match,
   }
 
   if (args.source === "slack.channels") {

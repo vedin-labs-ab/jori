@@ -127,7 +127,6 @@ function githubPullRequestCommentEvent() {
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: "integration",
-    integration: "github",
     key: "github:event",
     type: "pull_request.review_comment.created",
     text: "Can you check this pull request?",
@@ -148,8 +147,6 @@ function githubPullRequestCommentEvent() {
         url: "https://github.com/vedin-labs/frontier/pull/42#comment-123",
       },
     },
-    metadata: [],
-    createdAt: 0,
   }
 }
 
@@ -159,7 +156,6 @@ function linearIssueCommentEvent() {
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: "integration",
-    integration: "linear",
     key: "linear:event",
     type: "issue.comment.created",
     text: "Please take a look.",
@@ -172,8 +168,6 @@ function linearIssueCommentEvent() {
       },
       commentId: "comment-123",
     },
-    metadata: [],
-    createdAt: 0,
   }
 }
 

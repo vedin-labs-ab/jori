@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
-import { applyEventCriteriaChange, removeEventCriterion } from "./criteria"
+import { applyEventMatchChange, removeEventMatch } from "./match"
 import { EventParameterControl } from "./parameter"
 
 export function EventScopeFields({
@@ -57,7 +57,7 @@ export function EventScopeFields({
 
   function removeCondition(key: string) {
     setAddedKeys((keys) => keys.filter((addedKey) => addedKey !== key))
-    onValuesChange(removeEventCriterion({ key, parameters, values }))
+    onValuesChange(removeEventMatch({ key, parameters, values }))
   }
 
   return (
@@ -73,7 +73,7 @@ export function EventScopeFields({
           values={values}
           onValueChange={(value) =>
             onValuesChange(
-              applyEventCriteriaChange({
+              applyEventMatchChange({
                 key: parameter.key,
                 parameters,
                 value,

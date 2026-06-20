@@ -3,14 +3,14 @@ import {
   getAutomationEventDefinition,
 } from "@contracts/automations/events"
 import { describe, expect, test } from "vitest"
-import { applyEventCriteriaChange, removeEventCriterion } from "./criteria"
+import { applyEventMatchChange, removeEventMatch } from "./match"
 
-describe("automation event criteria hard dependencies", () => {
-  test("clears hard dependent criteria when a parent changes", () => {
+describe("automation event match hard dependencies", () => {
+  test("clears hard dependent match when a parent changes", () => {
     const event = requireEvent("github", "issue.comment.created")
 
     expect(
-      applyEventCriteriaChange({
+      applyEventMatchChange({
         key: "repo",
         parameters: event.parameters ?? [],
         value: "milo/api",
@@ -22,7 +22,7 @@ describe("automation event criteria hard dependencies", () => {
     ).toEqual({ repo: "milo/api" })
   })
 
-  test("preserves dependent criteria when a parent value is unchanged", () => {
+  test("preserves dependent match when a parent value is unchanged", () => {
     const event = requireEvent("github", "issue.comment.created")
     const values = {
       repo: "milo/app",
@@ -30,7 +30,7 @@ describe("automation event criteria hard dependencies", () => {
     }
 
     expect(
-      applyEventCriteriaChange({
+      applyEventMatchChange({
         key: "repo",
         parameters: event.parameters ?? [],
         value: "milo/app",
@@ -40,12 +40,12 @@ describe("automation event criteria hard dependencies", () => {
   })
 })
 
-describe("automation event criteria Linear dependencies", () => {
-  test("clears transitive Linear scope criteria when the team changes", () => {
+describe("automation event match Linear dependencies", () => {
+  test("clears transitive Linear scope match when the team changes", () => {
     const event = requireEvent("linear", "issue.comment.created")
 
     expect(
-      applyEventCriteriaChange({
+      applyEventMatchChange({
         key: "team",
         parameters: event.parameters ?? [],
         value: "team-b",
@@ -58,11 +58,11 @@ describe("automation event criteria Linear dependencies", () => {
     ).toEqual({ team: "team-b" })
   })
 
-  test("clears Linear issue criteria when the project changes", () => {
+  test("clears Linear issue match when the project changes", () => {
     const event = requireEvent("linear", "issue.comment.created")
 
     expect(
-      applyEventCriteriaChange({
+      applyEventMatchChange({
         key: "project",
         parameters: event.parameters ?? [],
         value: "project-b",
@@ -75,11 +75,11 @@ describe("automation event criteria Linear dependencies", () => {
     ).toEqual({ team: "team-a", project: "project-b" })
   })
 
-  test("preserves Linear scope criteria when only the issue changes", () => {
+  test("preserves Linear scope match when only the issue changes", () => {
     const event = requireEvent("linear", "issue.comment.created")
 
     expect(
-      applyEventCriteriaChange({
+      applyEventMatchChange({
         key: "issue",
         parameters: event.parameters ?? [],
         value: "issue-b",
@@ -97,12 +97,12 @@ describe("automation event criteria Linear dependencies", () => {
   })
 })
 
-describe("automation event criteria text dependencies", () => {
+describe("automation event match text dependencies", () => {
   test("clears review comment path when its pull request changes", () => {
     const event = requireEvent("github", "pull_request.review_comment.edited")
 
     expect(
-      applyEventCriteriaChange({
+      applyEventMatchChange({
         key: "pr",
         parameters: event.parameters ?? [],
         value: "43",
@@ -116,12 +116,12 @@ describe("automation event criteria text dependencies", () => {
   })
 })
 
-describe("automation event criteria removal", () => {
-  test("keeps soft-dependent criteria when a scoping condition is removed", () => {
+describe("automation event match removal", () => {
+  test("keeps soft-dependent match when a scoping condition is removed", () => {
     const event = requireEvent("linear", "issue.comment.edited")
 
     expect(
-      removeEventCriterion({
+      removeEventMatch({
         key: "team",
         parameters: event.parameters ?? [],
         values: {
@@ -133,11 +133,11 @@ describe("automation event criteria removal", () => {
     ).toEqual({ project: "project-a", issue: "issue-a" })
   })
 
-  test("clears hard-dependent criteria when their parent is removed", () => {
+  test("clears hard-dependent match when their parent is removed", () => {
     const event = requireEvent("github", "issue.comment.created")
 
     expect(
-      removeEventCriterion({
+      removeEventMatch({
         key: "repo",
         parameters: event.parameters ?? [],
         values: {

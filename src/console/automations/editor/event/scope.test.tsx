@@ -39,7 +39,7 @@ describe("automation event conditions", () => {
     renderEventFields({
       eventIntegration: "linear",
       event: "issue.comment.created",
-      eventCriteria: {
+      eventMatch: {
         issue: "issue-a",
         project: "project-a",
         team: "team-a",
@@ -84,14 +84,14 @@ describe("automation event condition editing", () => {
     ).toBeNull()
   })
 
-  test("removes a condition and clears its criteria value", () => {
+  test("removes a condition and clears its match value", () => {
     const onValuesChange = vi.fn()
 
     renderEventFields(
       {
         eventIntegration: "linear",
         event: "issue.comment.created",
-        eventCriteria: { team: "team-a" },
+        eventMatch: { team: "team-a" },
       },
       onValuesChange
     )
@@ -102,7 +102,7 @@ describe("automation event condition editing", () => {
 
     expect(screen.queryByLabelText("Team")).toBeNull()
     expect(onValuesChange).toHaveBeenCalledWith(
-      expect.objectContaining({ eventCriteria: {} })
+      expect.objectContaining({ eventMatch: {} })
     )
   })
 

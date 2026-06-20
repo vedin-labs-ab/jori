@@ -106,9 +106,8 @@ test("resumes paused event automation from status icon", () => {
       status: "paused",
       type: "event",
       trigger: {
-        criteria: undefined,
+        match: undefined,
         event: "issue.comment.created",
-        filter: undefined,
         integration: "github",
       },
     }),
@@ -139,9 +138,8 @@ test("shows resume action while paused event icon is focused", () => {
       status: "paused",
       type: "event",
       trigger: {
-        criteria: undefined,
+        match: undefined,
         event: "issue.comment.created",
-        filter: undefined,
         integration: "github",
       },
     }),

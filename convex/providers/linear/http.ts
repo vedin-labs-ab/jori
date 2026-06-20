@@ -161,7 +161,7 @@ async function hydrateLinearMessage(
     {
       accountId: message.accountId,
       event,
-      criteria: linearIssueCriteria(message),
+      match: linearIssueMatch(message),
     }
   )
 
@@ -175,7 +175,7 @@ async function hydrateLinearMessage(
   )
 }
 
-function linearIssueCriteria(message: LinearMessage) {
+function linearIssueMatch(message: LinearMessage) {
   return {
     issue: message.data.issueId,
     ...(message.data.teamId === undefined ? {} : { team: message.data.teamId }),

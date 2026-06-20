@@ -21,7 +21,7 @@ export function EventOptionField({
   tenantId,
   integration,
   parameter,
-  criteria,
+  match,
   disabled,
   disabledMessage,
   id,
@@ -31,7 +31,7 @@ export function EventOptionField({
 }: EventOptionFieldProps) {
   const [isOpen, setIsOpen] = useState(false)
   const { isLoading, message, options, setQuery } = useEventOptions({
-    criteria,
+    match,
     disabled,
     integration,
     isOpen,
@@ -81,7 +81,7 @@ type EventOptionFieldProps = {
   tenantId: string
   integration: AutomationEventIntegration
   parameter: Extract<AutomationEventParameter, { type: "option" }>
-  criteria: Record<string, string>
+  match: Record<string, string>
   disabled: boolean
   disabledMessage: string | undefined
   id: string
@@ -91,7 +91,7 @@ type EventOptionFieldProps = {
 }
 
 function useEventOptions({
-  criteria,
+  match,
   disabled,
   integration,
   isOpen,
@@ -99,7 +99,7 @@ function useEventOptions({
   tenantId,
 }: Pick<
   EventOptionFieldProps,
-  "criteria" | "disabled" | "integration" | "parameter" | "tenantId"
+  "match" | "disabled" | "integration" | "parameter" | "tenantId"
 > & {
   isOpen: boolean
 }) {
@@ -118,23 +118,14 @@ function useEventOptions({
       integration,
       query,
       parameter,
-      criteria,
+      match,
       search,
       setIsLoading,
       setMessage,
       setOptions,
       tenantId,
     })
-  }, [
-    isOpen,
-    disabled,
-    integration,
-    query,
-    parameter,
-    criteria,
-    search,
-    tenantId,
-  ])
+  }, [isOpen, disabled, integration, query, parameter, match, search, tenantId])
 
   return { isLoading, message, options, setQuery }
 }

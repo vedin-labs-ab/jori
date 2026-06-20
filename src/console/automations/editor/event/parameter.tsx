@@ -32,7 +32,7 @@ export function EventParameterControl({
         tenantId={tenantId}
         integration={integration}
         parameter={parameter}
-        criteria={values}
+        match={values}
         disabled={dependencyLabel !== undefined}
         disabledMessage={
           dependencyLabel === undefined

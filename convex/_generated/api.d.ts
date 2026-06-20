@@ -103,6 +103,7 @@ import type * as broker_tools_slack_index from "../broker/tools/slack/index.js";
 import type * as broker_tools_slack_upload from "../broker/tools/slack/upload.js";
 import type * as events_data from "../events/data.js";
 import type * as events_ingest from "../events/ingest.js";
+import type * as events_payload from "../events/payload.js";
 import type * as files_attachments from "../files/attachments.js";
 import type * as files_data from "../files/data.js";
 import type * as files_mcp from "../files/mcp.js";
@@ -381,6 +382,7 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/slack/upload": typeof broker_tools_slack_upload;
   "events/data": typeof events_data;
   "events/ingest": typeof events_ingest;
+  "events/payload": typeof events_payload;
   "files/attachments": typeof files_attachments;
   "files/data": typeof files_data;
   "files/mcp": typeof files_mcp;

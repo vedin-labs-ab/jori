@@ -1,9 +1,7 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
+import { eventMatch } from "../events/schema"
 import { integrationValidator } from "../shared/integrations"
-
-const eventCriteriaValue = v.union(v.string(), v.number())
-const eventCriteria = v.record(v.string(), eventCriteriaValue)
 
 export const accessInput = v.object({
   integrations: v.array(
@@ -35,8 +33,7 @@ export const triggerInput = v.union(
   v.object({
     integration: integrationValidator,
     event: v.string(),
-    criteria: v.optional(eventCriteria),
-    filter: v.optional(v.string()),
+    match: v.optional(eventMatch),
   })
 )
 
@@ -53,8 +50,7 @@ export const trigger = v.union(
   v.object({
     integrationId: v.id("integrations"),
     event: v.string(),
-    criteria: v.optional(eventCriteria),
-    filter: v.optional(v.string()),
+    match: v.optional(eventMatch),
   })
 )
 

@@ -11,9 +11,9 @@ import {
   readArray,
   readNestedString,
   readRecord,
-  requireCriterion,
   requiredOptionNumber,
   requiredOptionString,
+  requireMatch,
 } from "./common"
 
 export async function searchGitHubRepositories(args: OptionLoaderArgs) {
@@ -47,7 +47,7 @@ async function searchGitHubIssueLike(
   kind: "issue" | "pr"
 ) {
   const token = requireGitHubToken(args.integration)
-  const repo = requireCriterion(args.criteria, "repo", "repository")
+  const repo = requireMatch(args.match, "repo", "repository")
   const result = await githubJson(token, "/search/issues", {
     q: [normalizeQuery(args.query), `repo:${repo}`, `is:${kind}`]
       .filter(Boolean)

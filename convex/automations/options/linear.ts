@@ -6,7 +6,7 @@ import {
   maxOptions,
   normalizeQuery,
   type OptionLoaderArgs,
-  optionalCriterion,
+  optionalMatch,
   optionalOptionString,
   optionMatches,
   readArray,
@@ -48,7 +48,7 @@ export async function searchLinearProjects(args: OptionLoaderArgs) {
     variables: { first: maxOptions },
   })
   const normalizedQuery = normalizeQuery(args.query)
-  const teamId = optionalCriterion(args.criteria, "team")
+  const teamId = optionalMatch(args.match, "team")
 
   return readArray(result.data?.projects?.nodes)
     .map(readRecord)
@@ -67,12 +67,12 @@ export async function searchLinearProjects(args: OptionLoaderArgs) {
 export async function searchLinearIssues(args: OptionLoaderArgs) {
   const normalizedQuery = normalizeQuery(args.query)
   const result = await linearGraphql(args, issueSearchBody(normalizedQuery))
-  const teamId = optionalCriterion(args.criteria, "team")
-  const projectId = optionalCriterion(args.criteria, "project")
+  const teamId = optionalMatch(args.match, "team")
+  const projectId = optionalMatch(args.match, "project")
 
   return readArray(result.data?.issues?.nodes)
     .map(readRecord)
-    .filter((issue) => issueMatchesCriteria(issue, teamId, projectId))
+    .filter((issue) => issueMatchesMatch(issue, teamId, projectId))
     .map((issue) => ({
       value: requiredOptionString(issue.id),
       label: `${requiredOptionString(issue.identifier)} ${requiredOptionString(issue.title)}`,
@@ -155,7 +155,7 @@ function projectTeamSummary(project: Record<string, unknown>) {
   return teams.length === 0 ? undefined : teams.join(", ")
 }
 
-function issueMatchesCriteria(
+function issueMatchesMatch(
   issue: Record<string, unknown>,
   teamId: string | undefined,
   projectId: string | undefined

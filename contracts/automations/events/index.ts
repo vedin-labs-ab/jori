@@ -1,18 +1,18 @@
 import { type Integration } from "../../integrations"
 import { automationEventCatalog, automationEventOptionSources } from "./catalog"
 import {
-  type AutomationEventCriteria,
   type AutomationEventDefinition,
+  type AutomationEventMatch,
   type AutomationEventOptionSource,
   type AutomationEventParameter,
 } from "./catalog/types"
 
 export { automationEventCatalog, automationEventOptionSources } from "./catalog"
 export type {
-  AutomationEventCriteria,
-  AutomationEventCriteriaValue,
   AutomationEventDefinition,
   AutomationEventIntegrationDefinition,
+  AutomationEventMatch,
+  AutomationEventMatchValue,
   AutomationEventOptionSource,
   AutomationEventParameter,
 } from "./catalog/types"
@@ -95,20 +95,20 @@ export function automationEventParameterResetKeys(
   ]
 }
 
-export function normalizeAutomationEventCriteria(
+export function normalizeAutomationEventMatch(
   definition: AutomationEventDefinition,
-  criteria: Record<string, unknown> | undefined
+  match: Record<string, unknown> | undefined
 ) {
   const parameters = definition.parameters ?? []
-  const input = criteria ?? {}
+  const input = match ?? {}
 
   if (typeof input !== "object" || input === null || Array.isArray(input)) {
-    throw new Error("Event criteria must be a key-value object.")
+    throw new Error("Event match must be a key-value object.")
   }
 
-  assertKnownCriteriaKeys(parameters, input)
+  assertKnownMatchKeys(parameters, input)
 
-  const normalized: AutomationEventCriteria = {}
+  const normalized: AutomationEventMatch = {}
 
   for (const parameter of parameters) {
     const value = normalizeAutomationEventParameter(
@@ -139,52 +139,27 @@ export function assertAutomationEventIsAvailable(
   throw new Error(definition.availability.message ?? pendingIntegrationDelivery)
 }
 
-export function automationEventCriteriaKey(
-  criteria: AutomationEventCriteria | undefined
+export function automationEventMatchKey(
+  match: AutomationEventMatch | undefined
 ) {
-  if (criteria === undefined || Object.keys(criteria).length === 0) {
+  if (match === undefined || Object.keys(match).length === 0) {
     return undefined
   }
 
   return JSON.stringify(
-    Object.entries(criteria).sort(([left], [right]) =>
-      left.localeCompare(right)
-    )
+    Object.entries(match).sort(([left], [right]) => left.localeCompare(right))
   )
 }
 
-export function legacyAutomationEventCriteria(
-  definition: AutomationEventDefinition,
-  filter: string | undefined
-) {
-  const normalized = normalizeOptionalText(filter)
-
-  if (normalized === undefined) {
-    return undefined
-  }
-
-  const parameter = definition.parameters?.[0]
-
-  return parameter === undefined
-    ? undefined
-    : normalizeAutomationEventCriteria(definition, {
-        [parameter.key]: normalized,
-      })
-}
-
-function assertKnownCriteriaKeys(
+function assertKnownMatchKeys(
   parameters: readonly AutomationEventParameter[],
-  criteria: Record<string, unknown>
+  match: Record<string, unknown>
 ) {
   const knownKeys = new Set(parameters.map((parameter) => parameter.key))
 
-  for (const key of Object.keys(criteria)) {
-    if (
-      !knownKeys.has(key) &&
-      criteria[key] !== undefined &&
-      criteria[key] !== ""
-    ) {
-      throw new Error(`Unknown event criterion: ${key}.`)
+  for (const key of Object.keys(match)) {
+    if (!knownKeys.has(key) && match[key] !== undefined && match[key] !== "") {
+      throw new Error(`Unknown event match key: ${key}.`)
     }
   }
 }

@@ -15,13 +15,12 @@ describe("Slack and GitHub message automation event projection", () => {
     ).toMatchObject([
       {
         type: "message.created",
-        resource: "C123",
-        criteria: { channel: "C123" },
+        match: { channel: "C123" },
       },
     ])
   })
 
-  test("projects GitHub issue comments to created issue criteria", () => {
+  test("projects GitHub issue comments to created issue match", () => {
     expect(
       readAutomationEventsForMessage({
         integration: integration("github"),
@@ -39,12 +38,12 @@ describe("Slack and GitHub message automation event projection", () => {
     ).toMatchObject([
       {
         type: "issue.comment.created",
-        criteria: { repo: "milo/app", issue: "42" },
+        match: { repo: "milo/app", issue: "42" },
       },
     ])
   })
 
-  test("projects GitHub pull request comments to edited pull request criteria", () => {
+  test("projects GitHub pull request comments to edited pull request match", () => {
     expect(
       readAutomationEventsForMessage({
         integration: integration("github"),
@@ -62,14 +61,14 @@ describe("Slack and GitHub message automation event projection", () => {
     ).toMatchObject([
       {
         type: "pull_request.comment.edited",
-        criteria: { repo: "milo/app", pr: "42" },
+        match: { repo: "milo/app", pr: "42" },
       },
     ])
   })
 })
 
 describe("review and Linear message automation event projection", () => {
-  test("projects GitHub review comments to pull request path criteria", () => {
+  test("projects GitHub review comments to pull request path match", () => {
     expect(
       readAutomationEventsForMessage({
         integration: integration("github"),
@@ -87,12 +86,12 @@ describe("review and Linear message automation event projection", () => {
     ).toMatchObject([
       {
         type: "pull_request.review_comment.edited",
-        criteria: { repo: "milo/app", pr: "12", path: "src/app.ts" },
+        match: { repo: "milo/app", pr: "12", path: "src/app.ts" },
       },
     ])
   })
 
-  test("projects Linear created comments with team and project criteria", () => {
+  test("projects Linear created comments with team and project match", () => {
     expect(
       readAutomationEventsForMessage({
         integration: integration("linear"),
@@ -109,7 +108,7 @@ describe("review and Linear message automation event projection", () => {
     ).toMatchObject([
       {
         type: "issue.comment.created",
-        criteria: {
+        match: {
           issue: "issue-id",
           team: "team-id",
           project: "project-id",
@@ -133,7 +132,7 @@ describe("review and Linear message automation event projection", () => {
     ).toMatchObject([
       {
         type: "issue.comment.edited",
-        criteria: {
+        match: {
           issue: "issue-id",
         },
       },

@@ -3,7 +3,7 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalQuery } from "../../_generated/server"
 import { isLinearIssueCommentEvent } from "../../automations/names"
 
-const issueCriteria = v.object({
+const issueMatch = v.object({
   issue: v.string(),
   team: v.optional(v.string()),
 })
@@ -22,7 +22,7 @@ export const issueProject = internalQuery({
   args: {
     accountId: v.string(),
     event: v.string(),
-    criteria: issueCriteria,
+    match: issueMatch,
   },
   handler: async (ctx, args): Promise<IssueProjectHydrationPlan> => {
     const integration = await ctx.db
@@ -55,7 +55,7 @@ export const issueProject = internalQuery({
           automation,
           integrationId: integration._id,
           event: args.event,
-          criteria: args.criteria,
+          match: args.match,
         })
       ),
     }
@@ -66,7 +66,7 @@ export function shouldHydrateLinearIssueProject(args: {
   automation: Doc<"automations">
   integrationId: Id<"integrations">
   event: string
-  criteria: {
+  match: {
     issue: string
     team?: string
   }
@@ -78,25 +78,25 @@ export function shouldHydrateLinearIssueProject(args: {
     !("integrationId" in trigger) ||
     trigger.integrationId !== args.integrationId ||
     trigger.event !== args.event ||
-    trigger.criteria?.project === undefined
+    trigger.match?.project === undefined
   ) {
     return false
   }
 
   return (
-    knownCriterionMatches(trigger.criteria, "issue", args.criteria.issue) &&
-    knownCriterionMatches(trigger.criteria, "team", args.criteria.team)
+    matchAllowsKnownValue(trigger.match, "issue", args.match.issue) &&
+    matchAllowsKnownValue(trigger.match, "team", args.match.team)
   )
 }
 
-function knownCriterionMatches(
-  criteria: NonNullable<
-    Extract<Doc<"automations">["trigger"], { event: string }>["criteria"]
+function matchAllowsKnownValue(
+  match: NonNullable<
+    Extract<Doc<"automations">["trigger"], { event: string }>["match"]
   >,
   key: string,
   value: string | undefined
 ) {
-  const expected = criteria[key]
+  const expected = match[key]
 
   return expected === undefined || value === undefined || expected === value
 }

@@ -3,8 +3,8 @@ import { describe, expect, test } from "vitest"
 import { type AutomationFormValues, emptyAutomationForm } from "../../types"
 import { createAutomationArgs } from "."
 
-describe("automation event payload criteria", () => {
-  test("creates event automation args with required option criteria", () => {
+describe("automation event payload match", () => {
+  test("creates event automation args with required option match", () => {
     expect(
       createAutomationArgs(
         eventForm({
@@ -12,7 +12,7 @@ describe("automation event payload criteria", () => {
           instructions: "Read Slack and post to Slack.",
           eventIntegration: "slack",
           event: "message.created",
-          eventCriteria: { channel: "C123" },
+          eventMatch: { channel: "C123" },
           surfaces: [{ integration: "slack", tools: slackTools() }],
         })
       )
@@ -22,20 +22,20 @@ describe("automation event payload criteria", () => {
         trigger: {
           integration: "slack",
           event: "message.created",
-          criteria: { channel: "C123" },
+          match: { channel: "C123" },
         },
       },
     })
   })
 
-  test("creates event automation args with multiple criteria", () => {
+  test("creates event automation args with multiple match", () => {
     expect(createAutomationArgs(githubReviewForm())).toMatchObject({
       args: {
         type: "event",
         trigger: {
           integration: "github",
           event: "pull_request.review_comment.edited",
-          criteria: {
+          match: {
             repo: "milo/app",
             pr: "42",
             path: "src/app.ts",
@@ -47,7 +47,7 @@ describe("automation event payload criteria", () => {
 })
 
 describe("automation event payload validation", () => {
-  test("requires event criteria declared by the catalog", () => {
+  test("requires event match declared by the catalog", () => {
     expect(
       createAutomationArgs(
         eventForm({
@@ -55,7 +55,7 @@ describe("automation event payload validation", () => {
           instructions: "Read Slack and post to Slack.",
           eventIntegration: "slack",
           event: "message.created",
-          eventCriteria: {},
+          eventMatch: {},
           surfaces: [{ integration: "slack", tools: slackTools() }],
         })
       )
@@ -70,7 +70,7 @@ describe("automation event payload validation", () => {
           instructions: "Read Gmail and draft with Gmail.",
           eventIntegration: "gmail",
           event: "message.received",
-          eventCriteria: { from: "person@example.com" },
+          eventMatch: { from: "person@example.com" },
           surfaces: [
             {
               integration: "gmail",
@@ -93,7 +93,7 @@ describe("automation event payload validation", () => {
           instructions: "Read Slack and post to Slack.",
           eventIntegration: "slack",
           event: "page.updated",
-          eventCriteria: { channel: "C123" },
+          eventMatch: { channel: "C123" },
           surfaces: [{ integration: "slack", tools: slackTools() }],
         })
       )
@@ -107,7 +107,7 @@ function githubReviewForm() {
     instructions: "Read GitHub and post to Slack.",
     eventIntegration: "github",
     event: "pull_request.review_comment.edited",
-    eventCriteria: {
+    eventMatch: {
       repo: "milo/app",
       pr: "42",
       path: "src/app.ts",

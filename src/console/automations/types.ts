@@ -42,7 +42,7 @@ export type AutomationFormValues = {
   runAt: string
   eventIntegration: AutomationEventIntegration
   event: string
-  eventCriteria: Record<string, string>
+  eventMatch: Record<string, string>
   webSearch: boolean
   surfaces: AutomationSurfaceFormValue[]
 }
@@ -61,7 +61,7 @@ export const emptyAutomationForm: AutomationFormValues = {
   runAt: "",
   eventIntegration: "slack",
   event: defaultEvent.value,
-  eventCriteria: {},
+  eventMatch: {},
   webSearch: true,
   surfaces: [],
 }

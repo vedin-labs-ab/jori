@@ -14,9 +14,9 @@ export type NotionAutomationEvent = {
   workspaceId: string
   key: string
   type: "comment.created" | "page.updated"
-  resource?: string
-  criteria: Record<string, string>
+  match: Record<string, string>
   actor?: Actor
+  pageId: string
   data: Record<string, unknown>
   observedAt?: number
 }
@@ -46,8 +46,8 @@ function readPageUpdatedEvent(event: NotionEvent) {
   return [
     createAutomationEvent(event, {
       type: "page.updated",
-      resource: event.entity.id,
-      criteria: { page: event.entity.id },
+      pageId: event.entity.id,
+      match: { page: event.entity.id },
       data: { pageId: event.entity.id },
     }),
   ]
@@ -67,8 +67,8 @@ function readCommentCreatedEvent(event: NotionEvent) {
   return [
     createAutomationEvent(event, {
       type: "comment.created",
-      resource: pageId,
-      criteria: { page: pageId },
+      pageId,
+      match: { page: pageId },
       data: {
         commentId: event.entity.id,
         pageId,
@@ -81,8 +81,8 @@ function createAutomationEvent(
   event: NotionEvent,
   automationEvent: {
     type: NotionAutomationEvent["type"]
-    resource: string
-    criteria: Record<string, string>
+    pageId: string
+    match: Record<string, string>
     data: Record<string, unknown>
   }
 ): NotionAutomationEvent {
@@ -90,9 +90,9 @@ function createAutomationEvent(
     workspaceId: event.workspaceId,
     key: `notion:${event.workspaceId}:${event.id}:${automationEvent.type}`,
     type: automationEvent.type,
-    resource: automationEvent.resource,
-    criteria: automationEvent.criteria,
+    match: automationEvent.match,
     actor: event.actor,
+    pageId: automationEvent.pageId,
     data: {
       notionEventId: event.id,
       notionEventType: event.type,
@@ -104,8 +104,6 @@ function createAutomationEvent(
       apiVersion: event.apiVersion,
       entity: event.entity,
       parent: event.parent,
-      updatedBlocks: readRecordArray(event.rawData, "updated_blocks"),
-      updatedProperties: readRecordArray(event.rawData, "updated_properties"),
       ...automationEvent.data,
     },
     observedAt: event.observedAt,
@@ -206,14 +204,6 @@ function readTimestamp(record: Record<string, unknown>) {
   const milliseconds = Date.parse(timestamp)
 
   return Number.isFinite(milliseconds) ? milliseconds : undefined
-}
-
-function readRecordArray(record: Record<string, unknown>, key: string) {
-  const values = readArray(readValue(record, key)).filter(
-    (value) => typeof value === "object" && value !== null
-  )
-
-  return values.length === 0 ? undefined : values
 }
 
 function readRecord(value: unknown): Record<string, unknown> {

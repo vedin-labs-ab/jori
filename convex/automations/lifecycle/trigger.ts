@@ -4,8 +4,7 @@ import { type MutationCtx } from "../../_generated/server"
 import {
   assertAutomationEventIsAvailable,
   getAutomationEventDefinition,
-  legacyAutomationEventCriteria,
-  normalizeAutomationEventCriteria,
+  normalizeAutomationEventMatch,
 } from "../events"
 import { resolveEventIntegration } from "../integrations"
 import { getTimeTrigger, getTimeTriggerAt } from "../schedule/timing"
@@ -37,11 +36,7 @@ export async function resolveTrigger(
 
     assertAutomationEventIsAvailable(definition)
 
-    const criteria = normalizeAutomationEventCriteria(
-      definition,
-      args.trigger.criteria ??
-        legacyAutomationEventCriteria(definition, args.trigger.filter)
-    )
+    const match = normalizeAutomationEventMatch(definition, args.trigger.match)
 
     return {
       integrationId: (
@@ -52,7 +47,7 @@ export async function resolveTrigger(
         })
       )._id,
       event: definition.value,
-      criteria,
+      match,
     }
   }
 

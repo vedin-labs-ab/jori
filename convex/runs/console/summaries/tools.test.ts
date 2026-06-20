@@ -83,11 +83,9 @@ function event() {
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: "integration",
-    integration: "slack",
     key: "slack:event",
     type: "message.created",
     data: { channel: { id: "C123", name: "social" } },
-    metadata: [{ type: "channel", label: "#social" }],
   }
 }
 

@@ -46,7 +46,7 @@ function githubAutomationRuntimeInput() {
       trigger: {
         integrationId: github._id,
         event: "pull_request.review_comment.edited",
-        criteria: { repo: "acme/app" },
+        match: { repo: "acme/app" },
       },
       status: "active",
       createdAt: 0,
@@ -59,7 +59,7 @@ function githubAutomationRuntimeInput() {
       integrationId: github._id,
       key: "github:delivery",
       type: "pull_request.review_comment.edited",
-      criteria: { path: "README.md", pr: "12", repo: "acme/app" },
+      match: { path: "README.md", pr: "12", repo: "acme/app" },
       text: "This is a great change.",
       data: {
         repository: { fullName: "acme/app" },
@@ -70,7 +70,6 @@ function githubAutomationRuntimeInput() {
           kind: "pull_request_review",
         },
       },
-      createdAt: 0,
     },
   } as unknown as Parameters<typeof assemblePrompt>[0]
 }
