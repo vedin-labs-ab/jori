@@ -19,17 +19,17 @@ export function collectPendingBatch(
 ) {
   const pending: Doc<"messages">[] = []
   let cursor: Doc<"messages"> | undefined
-  let seenLastMessage = session.lastConsumedMessageId === undefined
+  let seenLastMessage = session.cursor === undefined
 
   for (let index = 0; index < messages.length; index += 1) {
     const message = messages[index]
 
-    if (message._id === session.lastConsumedMessageId) {
+    if (message._id === session.cursor?.messageId) {
       seenLastMessage = true
       continue
     }
 
-    if (!isAfterSessionCursor(message, session, seenLastMessage)) {
+    if (!isAfterSessionCursor(message, session.cursor, seenLastMessage)) {
       continue
     }
 
@@ -86,18 +86,18 @@ export function normalizeLimit(limit: number | undefined) {
 
 function isAfterSessionCursor(
   message: Doc<"messages">,
-  session: Doc<"sessions">,
+  cursor: Doc<"sessions">["cursor"],
   seenLastMessage: boolean
 ) {
-  if (session.lastConsumedAt === undefined) {
+  if (cursor === undefined) {
     return true
   }
 
-  if (message._creationTime < session.lastConsumedAt) {
+  if (message._creationTime < cursor.timestamp) {
     return false
   }
 
-  return message._creationTime !== session.lastConsumedAt || seenLastMessage
+  return message._creationTime !== cursor.timestamp || seenLastMessage
 }
 
 function hasText(message: Doc<"messages">) {

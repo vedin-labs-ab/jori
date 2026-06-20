@@ -39,11 +39,7 @@ export async function continueTerminalConversationSession(
     )
     .first()
 
-  if (
-    session === null ||
-    session.state !== "active" ||
-    !(await isTerminalSession(ctx, session))
-  ) {
+  if (session === null || !(await isTerminalSession(ctx, session))) {
     return
   }
 
@@ -140,11 +136,13 @@ function hasText(message: Doc<"messages">) {
 }
 
 async function isTerminalSession(ctx: MutationCtx, session: Doc<"sessions">) {
-  if (session.runId === undefined) {
+  const runId = session.runId
+
+  if (runId === undefined) {
     return false
   }
 
-  const run = await ctx.db.get(session.runId)
+  const run = await ctx.db.get(runId)
 
   return run !== null && isTerminalStatus(run.status)
 }
