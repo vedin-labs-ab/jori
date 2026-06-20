@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { codingToolDefinitions } from "../../contracts/coding"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
@@ -26,21 +27,10 @@ import { requireWorkerSecret } from "./shared"
 import { recordTrace } from "./traces"
 
 const sandboxTools = [
-  {
-    name: "sandbox_run_command",
-    description: "Run a shell command in the run sandbox.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["command"],
-      properties: {
-        command: { type: "string" },
-        cwd: { type: "string" },
-        timeoutMs: { type: "number" },
-      },
-    },
-    route: "sandbox",
-  },
+  ...codingToolDefinitions.map((tool) => ({
+    ...tool,
+    route: "sandbox" as const,
+  })),
   {
     name: "spawn_subagent",
     description: "Start a child Milo agent run for a delegated task.",

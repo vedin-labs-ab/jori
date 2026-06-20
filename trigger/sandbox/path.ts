@@ -1,6 +1,12 @@
 import path from "node:path"
 import { sandboxWorkspace } from "./artifacts"
 
+export function sandboxWorkspacePath(value: string | undefined) {
+  return value === undefined || value.trim() === ""
+    ? sandboxWorkspace
+    : sandboxPath(value)
+}
+
 export function sandboxPath(value: string) {
   const normalized = value.trim() === "" ? "repository" : value.trim()
   const filePath = normalized.startsWith("/")
