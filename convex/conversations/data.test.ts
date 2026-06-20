@@ -35,7 +35,16 @@ test("starts new conversation message runs as mentions", async () => {
       state: "active",
     }),
   ])
-  expect(inserted(ctx, "outbox")).toHaveLength(1)
+  expect(inserted(ctx, "outbox")).toEqual([
+    expect.objectContaining({
+      idempotencyKey: "run:runs-1",
+      operation: expect.objectContaining({
+        runId: "runs-1",
+        type: "run.start",
+      }),
+      state: "pending",
+    }),
+  ])
 })
 
 test("continues active conversation sessions without starting another run", async () => {

@@ -3,14 +3,10 @@ import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { findConversation, startMessageRun } from "../conversations/data"
 import { resolveUserIdByEmail } from "../identity/identities"
+import { queueReply } from "../runtime/replies/queue"
 import { getActorEmail } from "../shared/actor"
 import { continueTerminalSession } from "./continuation"
-import {
-  activeMessageIntegration,
-  findRoutingByMessage,
-  hasActiveClaim,
-  routingReplyClaimMs,
-} from "./data"
+import { activeMessageIntegration, findRoutingByMessage } from "./data"
 import { routingRoute } from "./schema"
 import { replyAddress } from "./surface"
 
@@ -44,12 +40,12 @@ export const applyDecision = internalMutation({
     const existing = await findRoutingByMessage(ctx, message._id)
 
     if (existing !== null) {
-      return await claimPendingReply(ctx, {
-        integration,
+      await queueQuickReply(ctx, {
         message,
-        now: args.now,
         routing: existing,
       })
+
+      return { status: "routed" as const, routingId: existing._id }
     }
 
     return await createRouting(ctx, {
@@ -72,21 +68,25 @@ async function createRouting(
 ) {
   const run = await maybeStartAgentRun(ctx, input)
   const address = replyAddress(input.message)
-  const shouldReply = input.decision.reply !== undefined && address !== null
+  const reply = input.decision.reply
+  const shouldReply = reply !== undefined && address !== null
   const routingId = await ctx.db.insert("routing", {
-    tenantId: input.message.tenantId,
-    integrationId: input.message.integrationId,
     messageId: input.message._id,
-    conversationId: input.message.conversationId,
     route: input.decision.route,
     reply: input.decision.reply,
-    model: input.decision.model,
-    error: input.decision.error,
     runId: run.runId,
-    replyClaimUntil: shouldReply ? input.now + routingReplyClaimMs : undefined,
     createdAt: input.now,
-    updatedAt: input.now,
   })
+
+  if (shouldReply) {
+    await queueReply(ctx, {
+      kind: "quick",
+      messageId: input.message._id,
+      routingId,
+      tenantId: input.message.tenantId,
+      text: reply,
+    })
+  }
 
   await continueTerminalSession(ctx, {
     integration: input.integration,
@@ -97,14 +97,6 @@ async function createRouting(
 
   return {
     status: "routed" as const,
-    reply: shouldReply
-      ? {
-          address,
-          integration: input.integration,
-          routingId,
-          text: input.decision.reply,
-        }
-      : null,
     routingId,
   }
 }
@@ -142,41 +134,27 @@ async function maybeStartAgentRun(
   return { runId: run.runId }
 }
 
-async function claimPendingReply(
+async function queueQuickReply(
   ctx: MutationCtx,
   input: {
-    integration: Doc<"integrations">
     message: Doc<"messages">
-    now: number
     routing: Doc<"routing">
   }
 ) {
-  const address = replyAddress(input.message)
-
   if (
     input.routing.reply === undefined ||
-    input.routing.replyMessageTs !== undefined ||
-    address === null ||
-    hasActiveClaim(input.routing.replyClaimUntil, input.now)
+    replyAddress(input.message) === null
   ) {
-    return { status: "routed" as const, reply: null }
+    return
   }
 
-  await ctx.db.patch(input.routing._id, {
-    replyClaimUntil: input.now + routingReplyClaimMs,
-    replyError: undefined,
-    updatedAt: input.now,
+  await queueReply(ctx, {
+    kind: "quick",
+    messageId: input.message._id,
+    routingId: input.routing._id,
+    tenantId: input.message.tenantId,
+    text: input.routing.reply,
   })
-
-  return {
-    status: "routed" as const,
-    reply: {
-      address,
-      integration: input.integration,
-      routingId: input.routing._id,
-      text: input.routing.reply,
-    },
-  }
 }
 
 type RoutingDecision = {

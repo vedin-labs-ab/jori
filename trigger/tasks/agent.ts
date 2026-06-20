@@ -223,7 +223,7 @@ async function completeRun(
     attempt,
     {
       content,
-      delivered: delivery.delivered,
+      queued: delivery.queued,
     }
   )
   await recordRunEvent(

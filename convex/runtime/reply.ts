@@ -1,8 +1,6 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { action } from "../_generated/server"
-import { deliverFinalReply } from "../routing/delivery"
-import { type ReplyTarget } from "../routing/surface"
 import { requireWorkerSecret } from "./shared"
 
 export const deliverFinal = action({
@@ -12,24 +10,23 @@ export const deliverFinal = action({
     secret: v.string(),
   },
   returns: v.object({
-    delivered: v.boolean(),
+    queued: v.boolean(),
   }),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ queued: boolean }> => {
     requireWorkerSecret(args.secret)
 
     if (args.content.trim() === "") {
-      return { delivered: false }
+      return { queued: false }
     }
 
-    const target = (await ctx.runMutation(
-      internal.routing.replies.claimFinalReply,
-      { runId: args.runId, now: Date.now() }
-    )) as ReplyTarget | null
+    const outboxId: unknown = await ctx.runMutation(
+      internal.runtime.replies.queue.enqueueFinalReply,
+      {
+        content: args.content,
+        runId: args.runId,
+      }
+    )
 
-    if (target === null) {
-      return { delivered: false }
-    }
-
-    return await deliverFinalReply(ctx, args.content, target)
+    return { queued: outboxId !== null }
   },
 })

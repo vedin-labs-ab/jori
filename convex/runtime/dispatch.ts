@@ -6,6 +6,7 @@ import { agentTaskId, cleanupTaskId } from "../../contracts/runtime"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
+import { sendOutboxReply } from "./replies/delivery"
 import { formatRuntimeError } from "./shared"
 
 const batchSize = 5
@@ -15,8 +16,6 @@ export const drain = internalAction({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
-    configureTrigger()
-
     for (let index = 0; index < batchSize; index += 1) {
       const item = (await ctx.runMutation(internal.runtime.outbox.claimNext, {
         now: Date.now(),
@@ -52,16 +51,20 @@ async function performOperation(ctx: DispatchCtx, item: Doc<"outbox">) {
   const operation = item.operation
 
   switch (operation.type) {
-    case "enqueueRun":
+    case "run.start":
       return await triggerAgentRun(ctx, item)
-    case "resumeApproval":
+    case "approval.resume":
+      configureTrigger()
+
       await wait.completeToken(operation.waitpointTokenId, {
         approvalId: operation.approvalId,
         decision: operation.decision,
       })
 
       return undefined
-    case "cancelRun":
+    case "run.cancel":
+      configureTrigger()
+
       if (operation.triggerRunId !== undefined) {
         await runs.cancel(operation.triggerRunId)
       }
@@ -71,15 +74,19 @@ async function performOperation(ctx: DispatchCtx, item: Doc<"outbox">) {
       }
 
       return undefined
+    case "reply.send":
+      return await sendOutboxReply(ctx, item)
   }
 }
 
 async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
   const operation = item.operation
 
-  if (operation.type !== "enqueueRun") {
+  if (operation.type !== "run.start") {
     return undefined
   }
+
+  configureTrigger()
 
   const run = (await ctx.runQuery(internal.runs.records.get, {
     runId: operation.runId,
@@ -122,7 +129,7 @@ function isTerminalRun(run: Doc<"runs">) {
 async function triggerSandboxCleanup(item: Doc<"outbox">) {
   const operation = item.operation
 
-  if (operation.type !== "cancelRun" || operation.sandboxId === undefined) {
+  if (operation.type !== "run.cancel" || operation.sandboxId === undefined) {
     return
   }
 
