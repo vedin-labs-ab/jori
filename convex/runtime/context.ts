@@ -81,7 +81,7 @@ export const load = action({
       {
         runId: args.runId,
       }
-    )) as { sandboxId: string } | null
+    )) as { externalId: string } | null
 
     if (input === null || run === null) {
       throw new Error("Runtime context not found.")
@@ -112,7 +112,7 @@ export const load = action({
       run: {
         id: input.run._id,
         rootId: input.run.rootId ?? null,
-        sandboxId: sandbox?.sandboxId ?? null,
+        sandboxId: sandbox?.externalId ?? null,
         status: run.status,
         tenantId: input.run.tenantId,
       },

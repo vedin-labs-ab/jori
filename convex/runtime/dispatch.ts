@@ -151,7 +151,7 @@ async function cancelRun(ctx: DispatchCtx, item: Doc<"outbox">) {
   }
 
   if (sandbox !== null) {
-    await triggerSandboxCleanup(item, sandbox.sandboxId)
+    await triggerSandboxCleanup(item, sandbox.externalId)
   }
 
   return undefined

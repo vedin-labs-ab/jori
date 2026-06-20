@@ -62,20 +62,15 @@ export const logs = defineTable({
 export const sandboxes = defineTable({
   tenantId: v.string(),
   runId: v.id("runs"),
-  provider: v.literal("e2b"),
-  sandboxId: v.string(),
+  externalId: v.string(),
   status: v.union(
-    v.literal("created"),
-    v.literal("running"),
-    v.literal("reconnected"),
+    v.literal("active"),
     v.literal("cleaned"),
     v.literal("failed")
   ),
-  traceHost: v.optional(v.string()),
-  lastError: v.optional(v.string()),
+  error: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
-  cleanedAt: v.optional(v.number()),
 })
-  .index("by_run", ["runId"])
-  .index("by_sandbox", ["sandboxId"])
+  .index("by_run_and_status", ["runId", "status"])
+  .index("by_external_id", ["externalId"])

@@ -172,22 +172,25 @@ export class MiloConvexClient {
     return new Uint8Array(await response.arrayBuffer())
   }
 
-  async upsertSandbox(args: {
-    runId: ConvexId<"runs">
-    sandboxId: string
-    status: "created" | "reconnected" | "running"
-    traceHost?: string
-  }) {
+  async upsertSandbox(args: { externalId: string; runId: ConvexId<"runs"> }) {
     await this.client.mutation(api.runtime.sandboxes.upsert, {
       ...args,
       secret: this.secret,
     })
   }
 
-  async markSandboxCleaned(args: { sandboxId: string }) {
+  async markSandboxCleaned(args: { error?: string; externalId: string }) {
+    const input =
+      args.error === undefined
+        ? { externalId: args.externalId, secret: this.secret }
+        : {
+            error: args.error,
+            externalId: args.externalId,
+            secret: this.secret,
+          }
+
     await this.client.mutation(api.runtime.sandboxes.markCleaned, {
-      sandboxId: args.sandboxId,
-      secret: this.secret,
+      ...input,
     })
   }
 }
