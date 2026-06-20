@@ -106,34 +106,36 @@ export const miloToolInputSchemas = {
   list_capabilities: objectSchema({
     properties: {},
   }),
-  save_file: objectSchema({
+  save_attachment: objectSchema({
     required: ["path"],
     properties: {
       path: stringProperty(
-        "Local file path to persist. Use this before sharing or attaching generated files."
+        "Local sandbox file path to persist as a run attachment for tools that send attachments."
       ),
       name: stringProperty("Optional filename to show to recipients."),
       mimeType: stringProperty(
         "Optional content type, for example image/png or application/pdf."
       ),
-      description: stringProperty("Optional short description of the file."),
+      description: stringProperty(
+        "Optional short description of the attachment."
+      ),
     },
   }),
-  search_files: objectSchema({
+  search_attachments: objectSchema({
     properties: {
       query: stringProperty(
-        "Substring matched against file names, descriptions, and content types."
+        "Substring matched against attachment names, descriptions, and content types."
       ),
       mimeType: stringProperty(
         "Optional content type filter, for example image/png or image/."
       ),
-      limit: numberProperty("Maximum files to return.", 1, 100),
+      limit: numberProperty("Maximum attachments to return.", 1, 100),
     },
   }),
-  read_file: objectSchema({
-    required: ["fileId"],
+  read_attachment: objectSchema({
+    required: ["attachmentId"],
     properties: {
-      fileId: stringProperty("File ID."),
+      attachmentId: stringProperty("Attachment ID."),
     },
   }),
   ...artifactToolInputSchemas,

@@ -1,12 +1,12 @@
 import { wait } from "@trigger.dev/sdk/v3"
 import { type ToolSurface } from "../contracts/integrations"
-import { type MiloConvexClient } from "./convex"
-import { errorDetails, runtimeEvent } from "./events"
 import {
   materializeSandboxResult,
   prepareMiloToolInput,
-  saveSandboxFile,
-} from "./files"
+  saveSandboxAttachment,
+} from "./attachments"
+import { type MiloConvexClient } from "./convex"
+import { errorDetails, runtimeEvent } from "./events"
 import { type ModelToolCall } from "./model/types"
 import { type SandboxRuntime } from "./sandbox/types"
 import {
@@ -136,8 +136,8 @@ async function callConvexTool(
   input: JsonObject,
   approved?: boolean
 ) {
-  if (surface === "milo" && tool === "save_file") {
-    return await saveSandboxFile(runtime, input)
+  if (surface === "milo" && tool === "save_attachment") {
+    return await saveSandboxAttachment(runtime, input)
   }
 
   const result = await runtime.convex.callTool({

@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
-export const files = defineTable({
+export const attachments = defineTable({
   tenantId: v.string(),
   runId: v.id("runs"),
   storageId: v.id("_storage"),

@@ -9,7 +9,7 @@ import {
 import { optionalString } from "../shared/input"
 import { authenticateBrokerRequest } from "./auth"
 
-export async function handleFileUploadRequest(
+export async function handleAttachmentUploadRequest(
   ctx: ActionCtx,
   request: Request
 ) {
@@ -21,18 +21,18 @@ export async function handleFileUploadRequest(
 
   const requestUrl = new URL(request.url)
   const bytes = new Uint8Array(await request.arrayBuffer())
-  const maxFileBytes = 25 * 1024 * 1024
+  const maxAttachmentBytes = 25 * 1024 * 1024
 
   if (bytes.byteLength === 0) {
-    return jsonError("File is empty", 400)
+    return jsonError("Attachment is empty", 400)
   }
 
-  if (bytes.byteLength > maxFileBytes) {
-    return jsonError("File exceeds the 25 MB limit", 400)
+  if (bytes.byteLength > maxAttachmentBytes) {
+    return jsonError("Attachment exceeds the 25 MB limit", 400)
   }
 
   const mimeType = normalizeMimeType(request.headers.get("content-type"))
-  const name = normalizeFileName(requestUrl.searchParams.get("name"))
+  const name = normalizeAttachmentName(requestUrl.searchParams.get("name"))
   const description = optionalString(requestUrl.searchParams.get("description"))
   let storageId: Id<"_storage"> | undefined
 
@@ -43,8 +43,8 @@ export async function handleFileUploadRequest(
       })
     )
 
-    const fileId: Id<"files"> = await ctx.runMutation(
-      internal.files.data.record,
+    const attachmentId: Id<"attachments"> = await ctx.runMutation(
+      internal.attachments.data.record,
       {
         tenantId: context.run.tenantId,
         runId: context.run._id,
@@ -58,7 +58,7 @@ export async function handleFileUploadRequest(
     const url = await ctx.storage.getUrl(storageId)
 
     return Response.json({
-      fileId,
+      attachmentId,
       name,
       mimeType,
       size: bytes.byteLength,
@@ -69,11 +69,14 @@ export async function handleFileUploadRequest(
       await ctx.storage.delete(storageId)
     }
 
-    return jsonError(formatProviderError(error, "File upload failed"), 400)
+    return jsonError(
+      formatProviderError(error, "Attachment upload failed"),
+      400
+    )
   }
 }
 
-function normalizeFileName(value: string | null) {
+function normalizeAttachmentName(value: string | null) {
   const name = value
     ?.trim()
     .split(/[\\/]/)
@@ -81,7 +84,7 @@ function normalizeFileName(value: string | null) {
     ?.replace(/[\r\n]/g, " ")
     .slice(0, 160)
 
-  return name === undefined || name === "" ? "file" : name
+  return name === undefined || name === "" ? "attachment" : name
 }
 
 function normalizeMimeType(value: string | null) {

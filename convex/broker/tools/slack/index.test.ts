@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc } from "../../../_generated/dataModel"
-import { fileContext } from "../fixtures"
+import { attachmentContext } from "../fixtures"
 import { callSlackTool } from "."
 
 const originalFetch = globalThis.fetch
@@ -69,8 +69,8 @@ describe("Slack message tool", () => {
   })
 })
 
-describe("Slack file uploads", () => {
-  test("uploads file attachments as Slack files", async () => {
+describe("Slack attachments", () => {
+  test("uploads run attachments as Slack files", async () => {
     const calls = mockSlackFetch([
       {
         ok: true,
@@ -88,12 +88,12 @@ describe("Slack file uploads", () => {
       slackIntegration(),
       "conversations_add_message",
       {
-        attachments: [{ fileId: "file-id" }],
+        attachments: [{ attachmentId: "attachment-id" }],
         channel: "C123",
         text: "Here is the image.",
         thread_ts: "123.456",
       },
-      fileContext()
+      attachmentContext()
     )
 
     expect(result).toEqual({

@@ -3,7 +3,7 @@ import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId, type JsonObject } from "./types"
 
-const maxFileBytes = 25 * 1024 * 1024
+const maxAttachmentBytes = 25 * 1024 * 1024
 const mimeTypesByExtension: Record<string, string> = {
   ".csv": "text/csv",
   ".gif": "image/gif",
@@ -41,19 +41,22 @@ export async function prepareMiloToolInput(
   }
 }
 
-export async function saveSandboxFile(runtime: ToolRuntime, input: JsonObject) {
+export async function saveSandboxAttachment(
+  runtime: ToolRuntime,
+  input: JsonObject
+) {
   const filePath = sandboxFilePath(requiredString(input.path, "path"))
   const bytes = await runtime.sandbox.readFile(filePath)
 
   if (bytes.byteLength === 0) {
-    throw new Error("File is empty")
+    throw new Error("Attachment is empty")
   }
 
-  if (bytes.byteLength > maxFileBytes) {
-    throw new Error("File exceeds the 25 MB limit")
+  if (bytes.byteLength > maxAttachmentBytes) {
+    throw new Error("Attachment exceeds the 25 MB limit")
   }
 
-  return await runtime.convex.uploadFile({
+  return await runtime.convex.uploadAttachment({
     bytes,
     description: optionalString(input.description),
     mimeType: optionalString(input.mimeType) ?? inferMimeType(filePath),
@@ -124,8 +127,8 @@ function inferMimeType(filePath: string) {
   )
 }
 
-export type UploadedFile = {
-  fileId: ConvexId<"files">
+export type UploadedAttachment = {
+  attachmentId: ConvexId<"attachments">
   mimeType: string
   name: string
   size: number
