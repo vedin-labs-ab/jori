@@ -50,15 +50,17 @@ export function objectProperty(description: string) {
   }
 }
 
-export function fileAttachmentsProperty() {
+export function runAttachmentsProperty() {
   return {
     type: "array",
     description:
-      "Files to attach. Prefer this over sending file links when the destination supports attachments. Save local files with save_file or find existing files with search_files, then pass file IDs here.",
+      "Run attachments to send. Create them with save_attachment or find existing attachments with search_attachments, then pass attachment IDs here.",
     items: objectSchema({
-      required: ["fileId"],
+      required: ["attachmentId"],
       properties: {
-        fileId: stringProperty("File ID returned by save_file."),
+        attachmentId: stringProperty(
+          "Attachment ID returned by save_attachment."
+        ),
         name: stringProperty("Optional attachment filename override."),
         mimeType: stringProperty("Optional attachment content type override."),
       },

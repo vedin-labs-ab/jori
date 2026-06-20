@@ -110,14 +110,14 @@ export class MiloConvexClient {
     })
   }
 
-  async uploadFile(args: {
+  async uploadAttachment(args: {
     bytes: Uint8Array
     description?: string
     mimeType: string
     name: string
     runId: ConvexId<"runs">
   }) {
-    const url = new URL("/milo/files", requireConvexSiteUrl())
+    const url = new URL("/milo/attachments", requireConvexSiteUrl())
     url.searchParams.set("name", args.name)
 
     if (args.description !== undefined) {
@@ -136,7 +136,7 @@ export class MiloConvexClient {
     const result = (await response.json().catch(() => null)) as unknown
 
     if (!response.ok) {
-      throw new Error(fileUploadError(result))
+      throw new Error(attachmentUploadError(result))
     }
 
     return result
@@ -230,7 +230,7 @@ function requireWorkerSecret() {
   return secret
 }
 
-function fileUploadError(value: unknown) {
+function attachmentUploadError(value: unknown) {
   if (
     typeof value === "object" &&
     value !== null &&
@@ -240,7 +240,7 @@ function fileUploadError(value: unknown) {
     return value.error
   }
 
-  return "File upload failed"
+  return "Attachment upload failed"
 }
 
 function toArrayBuffer(bytes: Uint8Array) {

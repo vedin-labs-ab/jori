@@ -12,10 +12,10 @@ import {
   artifactTrees,
   artifactVersions,
 } from "./artifacts/schema"
+import { attachments } from "./attachments/schema"
 import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
 import { events } from "./events/schema"
-import { files } from "./files/schema"
 import { identities } from "./identity/schema"
 import { integrations } from "./integrations/schema"
 import { messages } from "./messages/schema"
@@ -29,7 +29,7 @@ import { watches } from "./watches/schema"
 
 export default defineSchema({
   skills,
-  files,
+  attachments,
   identities,
   integrations,
   messages,

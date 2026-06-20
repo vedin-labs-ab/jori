@@ -6,8 +6,8 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 
-const maxFileSearchResults = 100
-const maxFilesScanned = 500
+const maxAttachmentSearchResults = 100
+const maxAttachmentsScanned = 500
 
 export const record = internalMutation({
   args: {
@@ -20,7 +20,7 @@ export const record = internalMutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("files", {
+    return await ctx.db.insert("attachments", {
       ...args,
       createdAt: Date.now(),
     })
@@ -38,21 +38,25 @@ export const search = internalQuery({
     const limit = normalizeLimit(args.limit)
     const query = normalizeSearchText(args.query)
     const mimeType = normalizeSearchText(args.mimeType)
-    const files = await ctx.db
-      .query("files")
+    const attachments = await ctx.db
+      .query("attachments")
       .withIndex("by_tenant_and_created_at", (index) =>
         index.eq("tenantId", args.tenantId)
       )
       .order("desc")
-      .take(maxFilesScanned)
-    const matches = files
+      .take(maxAttachmentsScanned)
+    const matches = attachments
       .filter(
-        (file) => matchesQuery(file, query) && matchesMimeType(file, mimeType)
+        (attachment) =>
+          matchesQuery(attachment, query) &&
+          matchesMimeType(attachment, mimeType)
       )
       .slice(0, limit)
 
     return await Promise.all(
-      matches.map(async (file) => await summarizeFile(ctx, file))
+      matches.map(
+        async (attachment) => await summarizeAttachment(ctx, attachment)
+      )
     )
   },
 })
@@ -60,48 +64,48 @@ export const search = internalQuery({
 export const read = internalQuery({
   args: {
     tenantId: v.string(),
-    fileId: v.id("files"),
+    attachmentId: v.id("attachments"),
   },
   handler: async (ctx, args) => {
-    const file = await ctx.db.get(args.fileId)
+    const attachment = await ctx.db.get(args.attachmentId)
 
-    if (file === null || file.tenantId !== args.tenantId) {
+    if (attachment === null || attachment.tenantId !== args.tenantId) {
       return null
     }
 
-    return await summarizeFile(ctx, file)
+    return await summarizeAttachment(ctx, attachment)
   },
 })
 
 export const getForTenant = internalQuery({
   args: {
     tenantId: v.string(),
-    fileId: v.id("files"),
+    attachmentId: v.id("attachments"),
   },
   handler: async (ctx, args) => {
-    const file = await ctx.db.get(args.fileId)
+    const attachment = await ctx.db.get(args.attachmentId)
 
-    if (file === null || file.tenantId !== args.tenantId) {
+    if (attachment === null || attachment.tenantId !== args.tenantId) {
       return null
     }
 
-    return file
+    return attachment
   },
 })
 
 export const getForRun = internalQuery({
   args: {
-    fileId: v.id("files"),
+    attachmentId: v.id("attachments"),
     runId: v.id("runs"),
   },
   handler: async (ctx, args) => {
-    const file = await ctx.db.get(args.fileId)
+    const attachment = await ctx.db.get(args.attachmentId)
 
-    if (file === null || file.runId !== args.runId) {
+    if (attachment === null || attachment.runId !== args.runId) {
       return null
     }
 
-    return file
+    return attachment
   },
 })
 
@@ -110,7 +114,7 @@ function normalizeLimit(value: number | undefined) {
     return 25
   }
 
-  return Math.max(1, Math.min(maxFileSearchResults, Math.trunc(value)))
+  return Math.max(1, Math.min(maxAttachmentSearchResults, Math.trunc(value)))
 }
 
 function normalizeSearchText(value: string | undefined) {
@@ -119,38 +123,47 @@ function normalizeSearchText(value: string | undefined) {
   return normalized === "" ? undefined : normalized
 }
 
-function matchesQuery(file: Doc<"files">, query: string | undefined) {
+function matchesQuery(
+  attachment: Doc<"attachments">,
+  query: string | undefined
+) {
   if (query === undefined) {
     return true
   }
 
-  return [file.name, file.description, file.mimeType].some(
+  return [attachment.name, attachment.description, attachment.mimeType].some(
     (value) => value?.toLowerCase().includes(query) === true
   )
 }
 
-function matchesMimeType(file: Doc<"files">, mimeType: string | undefined) {
+function matchesMimeType(
+  attachment: Doc<"attachments">,
+  mimeType: string | undefined
+) {
   if (mimeType === undefined) {
     return true
   }
 
-  const fileMimeType = file.mimeType.toLowerCase()
+  const attachmentMimeType = attachment.mimeType.toLowerCase()
 
   return mimeType.endsWith("/")
-    ? fileMimeType.startsWith(mimeType)
-    : fileMimeType === mimeType
+    ? attachmentMimeType.startsWith(mimeType)
+    : attachmentMimeType === mimeType
 }
 
-async function summarizeFile(ctx: QueryCtx, file: Doc<"files">) {
+async function summarizeAttachment(
+  ctx: QueryCtx,
+  attachment: Doc<"attachments">
+) {
   return {
-    fileId: file._id,
-    name: file.name,
-    mimeType: file.mimeType,
-    size: file.size,
-    createdAt: file.createdAt,
-    url: await ctx.storage.getUrl(file.storageId),
-    ...(file.description === undefined
+    attachmentId: attachment._id,
+    name: attachment.name,
+    mimeType: attachment.mimeType,
+    size: attachment.size,
+    createdAt: attachment.createdAt,
+    url: await ctx.storage.getUrl(attachment.storageId),
+    ...(attachment.description === undefined
       ? {}
-      : { description: file.description }),
+      : { description: attachment.description }),
   }
 }

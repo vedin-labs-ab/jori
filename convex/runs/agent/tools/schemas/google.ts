@@ -1,8 +1,8 @@
 import {
-  fileAttachmentsProperty,
   numberProperty,
   objectProperty,
   objectSchema,
+  runAttachmentsProperty,
   type SchemaMap,
   stringArrayProperty,
   stringProperty,
@@ -110,7 +110,7 @@ function gmailMessageSchema() {
   return objectSchema({
     required: ["to", "subject", "body"],
     properties: {
-      attachments: fileAttachmentsProperty(),
+      attachments: runAttachmentsProperty(),
       bcc: stringArrayProperty("BCC recipient email addresses."),
       body: stringProperty("Message body."),
       bodyType: {
@@ -129,7 +129,7 @@ function gmailDraftSchema() {
   return objectSchema({
     required: ["body"],
     properties: {
-      attachments: fileAttachmentsProperty(),
+      attachments: runAttachmentsProperty(),
       bcc: stringArrayProperty(
         "BCC recipient email addresses. Standalone drafts only."
       ),

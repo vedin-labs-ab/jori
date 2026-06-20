@@ -31,7 +31,11 @@ export type GmailMessageWriteInput = {
   to: string[]
   subject: string
   body: string
-  attachments?: Array<{ fileId: string; name?: string; mimeType?: string }>
+  attachments?: Array<{
+    attachmentId: string
+    name?: string
+    mimeType?: string
+  }>
   bcc?: string[]
   bodyType?: "Text" | "HTML"
   cc?: string[]
@@ -42,7 +46,11 @@ export type GmailDraftInput = {
   threadId?: string
   to?: string[]
   subject?: string
-  attachments?: Array<{ fileId: string; name?: string; mimeType?: string }>
+  attachments?: Array<{
+    attachmentId: string
+    name?: string
+    mimeType?: string
+  }>
   bcc?: string[]
   bodyType?: "Text" | "HTML"
   cc?: string[]

@@ -1,8 +1,11 @@
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { callMiloArtifactTool, isMiloArtifactTool } from "../artifacts/mcp"
+import {
+  callMiloAttachmentTool,
+  isMiloAttachmentTool,
+} from "../attachments/mcp"
 import { callMiloAutomationTool } from "../automations/mcp"
-import { callMiloFileTool, isMiloFileTool } from "../files/mcp"
 
 type MiloToolRequest = {
   tool: string
@@ -18,8 +21,8 @@ export async function callMiloTool(
   },
   request: MiloToolRequest
 ): Promise<unknown> {
-  if (isMiloFileTool(request.tool)) {
-    return await callMiloFileTool(ctx, run, request)
+  if (isMiloAttachmentTool(request.tool)) {
+    return await callMiloAttachmentTool(ctx, run, request)
   }
 
   if (isMiloArtifactTool(request.tool)) {

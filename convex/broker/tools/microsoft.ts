@@ -1,5 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
-import { type FileContext, readFileAttachments } from "../../files/attachments"
+import {
+  type AttachmentContext,
+  readRunAttachments,
+} from "../../attachments/read"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import { base64EncodeBytes } from "../../shared/encoding"
 import { fetchJson } from "../../shared/http"
@@ -16,7 +19,7 @@ export async function callMicrosoftTool(
   integration: Doc<"integrations">,
   tool: string,
   args: Record<string, unknown>,
-  context?: FileContext
+  context?: AttachmentContext
 ) {
   const credentials = requireMicrosoftCredentials(integration)
 
@@ -44,7 +47,7 @@ async function callMicrosoftEmailTool(
   token: string,
   tool: string,
   args: Record<string, unknown>,
-  context?: FileContext
+  context?: AttachmentContext
 ) {
   if (tool === "microsoft_email_search_messages") {
     return await searchMessages(token, args)
@@ -58,7 +61,7 @@ async function callMicrosoftEmailTool(
   }
 
   if (tool === "microsoft_email_send_message") {
-    const attachments = await readFileAttachments(context, args.attachments, {
+    const attachments = await readRunAttachments(context, args.attachments, {
       maxBytes: 3 * 1024 * 1024,
     })
 
@@ -73,7 +76,7 @@ async function callMicrosoftEmailTool(
   }
 
   if (tool === "microsoft_email_create_draft") {
-    const attachments = await readFileAttachments(context, args.attachments, {
+    const attachments = await readRunAttachments(context, args.attachments, {
       maxBytes: 3 * 1024 * 1024,
     })
 
@@ -215,7 +218,7 @@ function microsoftSendUpdatesQuery(args: Record<string, unknown>) {
 
 function buildMicrosoftMessage(
   args: Record<string, unknown>,
-  attachments: Awaited<ReturnType<typeof readFileAttachments>> = []
+  attachments: Awaited<ReturnType<typeof readRunAttachments>> = []
 ) {
   return {
     subject: requiredString(args.subject, "subject"),

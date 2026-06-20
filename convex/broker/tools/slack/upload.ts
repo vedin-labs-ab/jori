@@ -1,4 +1,4 @@
-import { type FileAttachment } from "../../../files/attachments"
+import { type RunAttachment } from "../../../attachments/read"
 import {
   requiredSlackResultString,
   slackFormApi,
@@ -8,7 +8,7 @@ import {
 export async function postSlackFiles(
   token: string,
   args: {
-    attachments: FileAttachment[]
+    attachments: RunAttachment[]
     channel: string
     text: string
     thread_ts?: string
@@ -28,7 +28,7 @@ export async function postSlackFiles(
   })
 }
 
-async function uploadSlackFile(token: string, attachment: FileAttachment) {
+async function uploadSlackFile(token: string, attachment: RunAttachment) {
   const ticket = await slackFormApi(token, "files.getUploadURLExternal", {
     filename: attachment.name,
     length: attachment.bytes.byteLength,

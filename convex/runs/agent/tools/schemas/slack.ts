@@ -1,7 +1,7 @@
 import {
-  fileAttachmentsProperty,
   numberProperty,
   objectSchema,
+  runAttachmentsProperty,
   type SchemaMap,
   stringProperty,
 } from "./common"
@@ -56,7 +56,7 @@ export const slackToolInputSchemas = {
   conversations_add_message: objectSchema({
     required: ["channel", "text"],
     properties: {
-      attachments: fileAttachmentsProperty(),
+      attachments: runAttachmentsProperty(),
       blocks: {
         type: "array",
         description:

@@ -1,8 +1,8 @@
 import {
-  fileAttachmentsProperty,
   numberProperty,
   objectProperty,
   objectSchema,
+  runAttachmentsProperty,
   type SchemaMap,
   stringArrayProperty,
   stringProperty,
@@ -57,7 +57,7 @@ function microsoftMessageSchema(properties: Record<string, unknown> = {}) {
   return objectSchema({
     required: ["to", "subject", "body"],
     properties: {
-      attachments: fileAttachmentsProperty(),
+      attachments: runAttachmentsProperty(),
       bcc: stringArrayProperty("BCC recipient email addresses."),
       body: stringProperty("Message body."),
       bodyType: {

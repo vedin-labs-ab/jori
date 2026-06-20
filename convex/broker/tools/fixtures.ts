@@ -1,6 +1,6 @@
 import { vi } from "vitest"
 
-export function fileContext() {
+export function attachmentContext() {
   return {
     run: {
       _id: "run-id",
@@ -18,7 +18,7 @@ export function fileContext() {
         threadTs: "123.456",
       })),
       runQuery: vi.fn(async () => ({
-        _id: "file-id",
+        _id: "attachment-id",
         _creationTime: 0,
         tenantId: "tenant",
         runId: "run-id",

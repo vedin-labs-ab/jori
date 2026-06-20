@@ -49,6 +49,9 @@ import type * as artifacts_tools_diagnostics from "../artifacts/tools/diagnostic
 import type * as artifacts_tools_input from "../artifacts/tools/input.js";
 import type * as artifacts_tools_platform from "../artifacts/tools/platform.js";
 import type * as artifacts_tools_prompt from "../artifacts/tools/prompt.js";
+import type * as attachments_data from "../attachments/data.js";
+import type * as attachments_mcp from "../attachments/mcp.js";
+import type * as attachments_read from "../attachments/read.js";
 import type * as automations_access from "../automations/access.js";
 import type * as automations_console from "../automations/console.js";
 import type * as automations_events from "../automations/events.js";
@@ -79,9 +82,9 @@ import type * as automations_schedule_timing from "../automations/schedule/timin
 import type * as automations_subscriptions_data from "../automations/subscriptions/data.js";
 import type * as broker_approval_args from "../broker/approval/args.js";
 import type * as broker_approval_index from "../broker/approval/index.js";
+import type * as broker_attachments from "../broker/attachments.js";
 import type * as broker_auth from "../broker/auth.js";
 import type * as broker_capabilities from "../broker/capabilities.js";
-import type * as broker_files from "../broker/files.js";
 import type * as broker_mcp from "../broker/mcp.js";
 import type * as broker_milo from "../broker/milo.js";
 import type * as broker_tools_context from "../broker/tools/context.js";
@@ -104,9 +107,6 @@ import type * as broker_tools_slack_upload from "../broker/tools/slack/upload.js
 import type * as events_data from "../events/data.js";
 import type * as events_ingest from "../events/ingest.js";
 import type * as events_payload from "../events/payload.js";
-import type * as files_attachments from "../files/attachments.js";
-import type * as files_data from "../files/data.js";
-import type * as files_mcp from "../files/mcp.js";
 import type * as http from "../http.js";
 import type * as identity_access from "../identity/access.js";
 import type * as identity_clerk from "../identity/clerk.js";
@@ -328,6 +328,9 @@ declare const fullApi: ApiFromModules<{
   "artifacts/tools/input": typeof artifacts_tools_input;
   "artifacts/tools/platform": typeof artifacts_tools_platform;
   "artifacts/tools/prompt": typeof artifacts_tools_prompt;
+  "attachments/data": typeof attachments_data;
+  "attachments/mcp": typeof attachments_mcp;
+  "attachments/read": typeof attachments_read;
   "automations/access": typeof automations_access;
   "automations/console": typeof automations_console;
   "automations/events": typeof automations_events;
@@ -358,9 +361,9 @@ declare const fullApi: ApiFromModules<{
   "automations/subscriptions/data": typeof automations_subscriptions_data;
   "broker/approval/args": typeof broker_approval_args;
   "broker/approval/index": typeof broker_approval_index;
+  "broker/attachments": typeof broker_attachments;
   "broker/auth": typeof broker_auth;
   "broker/capabilities": typeof broker_capabilities;
-  "broker/files": typeof broker_files;
   "broker/mcp": typeof broker_mcp;
   "broker/milo": typeof broker_milo;
   "broker/tools/context": typeof broker_tools_context;
@@ -383,9 +386,6 @@ declare const fullApi: ApiFromModules<{
   "events/data": typeof events_data;
   "events/ingest": typeof events_ingest;
   "events/payload": typeof events_payload;
-  "files/attachments": typeof files_attachments;
-  "files/data": typeof files_data;
-  "files/mcp": typeof files_mcp;
   http: typeof http;
   "identity/access": typeof identity_access;
   "identity/clerk": typeof identity_clerk;

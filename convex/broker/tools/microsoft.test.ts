@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc } from "../../_generated/dataModel"
-import { fileContext } from "./fixtures"
+import { attachmentContext } from "./fixtures"
 import { callMicrosoftTool } from "./microsoft"
 
 const originalFetch = globalThis.fetch
@@ -11,19 +11,19 @@ afterEach(() => {
 })
 
 describe("Outlook email tools", () => {
-  test("sends file attachments as Graph file attachments", async () => {
+  test("sends run attachments as Graph file attachments", async () => {
     const calls = mockMicrosoftFetch(null)
 
     const result = await callMicrosoftTool(
       microsoftEmailIntegration(),
       "microsoft_email_send_message",
       {
-        attachments: [{ fileId: "file-id" }],
+        attachments: [{ attachmentId: "attachment-id" }],
         body: "See attached.",
         subject: "File",
         to: ["recipient@example.com"],
       },
-      fileContext()
+      attachmentContext()
     )
 
     expect(result).toBe("sent")

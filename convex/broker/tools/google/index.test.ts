@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc } from "../../../_generated/dataModel"
-import { fileContext } from "../fixtures"
+import { attachmentContext } from "../fixtures"
 import { callGoogleTool } from "."
 
 const originalFetch = globalThis.fetch
@@ -161,20 +161,20 @@ describe("Gmail thread draft tools", () => {
   })
 })
 
-describe("Gmail file attachments", () => {
-  test("sends attachments from files", async () => {
+describe("Gmail attachments", () => {
+  test("sends run attachments", async () => {
     const calls = mockGoogleFetch({ id: "sent-message" })
 
     await callGoogleTool(
       gmailIntegration(),
       "google_gmail_send_message",
       {
-        attachments: [{ fileId: "file-id" }],
+        attachments: [{ attachmentId: "attachment-id" }],
         body: "See attached.",
         subject: "File",
         to: ["recipient@example.com"],
       },
-      fileContext()
+      attachmentContext()
     )
 
     const raw = readRawMessage(calls[0]?.body)
