@@ -4,7 +4,7 @@ import { createMessageRunSnapshot } from "../runs/snapshot"
 import { queueRun } from "../runtime/outbox"
 import { findSession, isReusableSession, startSession } from "../sessions/data"
 
-export async function findConversation(
+export async function findWatch(
   ctx: MutationCtx,
   args: {
     tenantId: string
@@ -19,7 +19,7 @@ export async function findConversation(
   const externalId = args.externalId
 
   return await ctx.db
-    .query("conversations")
+    .query("watches")
     .withIndex("by_tenant_and_integration_and_external", (query) =>
       query
         .eq("tenantId", args.tenantId)
@@ -29,7 +29,7 @@ export async function findConversation(
     .first()
 }
 
-export async function ensureConversation(
+export async function ensureWatch(
   ctx: MutationCtx,
   args: {
     tenantId: string
@@ -37,25 +37,25 @@ export async function ensureConversation(
     externalId: string | undefined
   }
 ) {
-  const conversation = await findConversation(ctx, args)
+  const watch = await findWatch(ctx, args)
 
-  if (conversation !== null || args.externalId === undefined) {
-    return conversation
+  if (watch !== null || args.externalId === undefined) {
+    return watch
   }
 
-  const conversationId = await ctx.db.insert("conversations", {
+  const watchId = await ctx.db.insert("watches", {
     tenantId: args.tenantId,
     integrationId: args.integrationId,
     externalId: args.externalId,
   })
 
-  return await ctx.db.get(conversationId)
+  return await ctx.db.get(watchId)
 }
 
 export async function startMessageRun(
   ctx: MutationCtx,
   args: {
-    conversation: Doc<"conversations"> | null
+    watch: Doc<"watches"> | null
     integration: Doc<"integrations">
     message: Doc<"messages">
     createdBy: string | undefined
@@ -64,20 +64,19 @@ export async function startMessageRun(
     replaceActiveSession?: boolean
   }
 ) {
-  const conversation = args.conversation
-  const session =
-    conversation === null ? null : await findSession(ctx, conversation._id)
+  const watch = args.watch
+  const session = watch === null ? null : await findSession(ctx, watch._id)
   const activeSession =
     session === null || args.replaceActiveSession === true
       ? null
       : await isReusableSession(ctx, session)
 
-  if (conversation !== null && activeSession !== null) {
+  if (watch !== null && activeSession !== null) {
     return {
       status: "continued" as const,
-      conversationId: conversation._id,
       messageId: args.message._id,
       sessionId: activeSession._id,
+      watchId: watch._id,
       ...(activeSession.runId === undefined
         ? {}
         : { runId: activeSession.runId }),
@@ -87,17 +86,17 @@ export async function startMessageRun(
   const kind = session === null ? "mention" : "reply"
   const runId = await insertRun(ctx, { ...args, kind })
 
-  const conversationId =
-    conversation === null
-      ? await ctx.db.insert("conversations", {
+  const watchId =
+    watch === null
+      ? await ctx.db.insert("watches", {
           tenantId: args.integration.tenantId,
           integrationId: args.integration._id,
           externalId: args.externalId,
         })
-      : conversation._id
+      : watch._id
 
   const sessionId = await startSession(ctx, {
-    conversationId,
+    watchId,
     message: args.message,
     runId,
     now: args.now,
@@ -107,10 +106,10 @@ export async function startMessageRun(
 
   return {
     status: "started" as const,
-    conversationId,
     messageId: args.message._id,
     runId,
     sessionId,
+    watchId,
   }
 }
 

@@ -1,10 +1,10 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { findConversation, startMessageRun } from "../conversations/data"
 import { resolveUserIdByEmail } from "../identity/identities"
 import { queueReply } from "../runtime/replies/queue"
 import { getActorEmail } from "../shared/actor"
+import { findWatch, startMessageRun } from "../watches/data"
 import { continueTerminalSession } from "./continuation"
 import { activeMessageIntegration, findRoutingByMessage } from "./data"
 import { routingRoute } from "./schema"
@@ -114,7 +114,7 @@ async function maybeStartAgentRun(
     return {}
   }
 
-  const conversation = await findConversation(ctx, {
+  const watch = await findWatch(ctx, {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
     externalId: input.message.conversationId,
@@ -124,12 +124,12 @@ async function maybeStartAgentRun(
     email: getActorEmail(input.message.actor),
   })
   const run = await startMessageRun(ctx, {
-    conversation,
     integration: input.integration,
     message: input.message,
     createdBy,
     externalId: input.message.conversationId ?? input.message.externalId,
     now: input.now,
+    watch,
   })
   return { runId: run.runId }
 }

@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
-export const conversations = defineTable({
+export const watches = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
   externalId: v.string(),

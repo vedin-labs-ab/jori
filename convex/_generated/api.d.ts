@@ -101,8 +101,6 @@ import type * as broker_tools_microsoft from "../broker/tools/microsoft.js";
 import type * as broker_tools_notion from "../broker/tools/notion.js";
 import type * as broker_tools_slack_index from "../broker/tools/slack/index.js";
 import type * as broker_tools_slack_upload from "../broker/tools/slack/upload.js";
-import type * as conversations_continuation from "../conversations/continuation.js";
-import type * as conversations_data from "../conversations/data.js";
 import type * as events_data from "../events/data.js";
 import type * as events_ingest from "../events/ingest.js";
 import type * as files_attachments from "../files/attachments.js";
@@ -278,6 +276,8 @@ import type * as shared_integrations from "../shared/integrations.js";
 import type * as shared_sources_metadata from "../shared/sources/metadata.js";
 import type * as skills_catalog from "../skills/catalog.js";
 import type * as skills_data from "../skills/data.js";
+import type * as watches_continuation from "../watches/continuation.js";
+import type * as watches_data from "../watches/data.js";
 
 import type {
   ApiFromModules,
@@ -379,8 +379,6 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/notion": typeof broker_tools_notion;
   "broker/tools/slack/index": typeof broker_tools_slack_index;
   "broker/tools/slack/upload": typeof broker_tools_slack_upload;
-  "conversations/continuation": typeof conversations_continuation;
-  "conversations/data": typeof conversations_data;
   "events/data": typeof events_data;
   "events/ingest": typeof events_ingest;
   "files/attachments": typeof files_attachments;
@@ -556,6 +554,8 @@ declare const fullApi: ApiFromModules<{
   "shared/sources/metadata": typeof shared_sources_metadata;
   "skills/catalog": typeof skills_catalog;
   "skills/data": typeof skills_data;
+  "watches/continuation": typeof watches_continuation;
+  "watches/data": typeof watches_data;
 }>;
 
 /**

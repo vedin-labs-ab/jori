@@ -1,7 +1,7 @@
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { continueTerminalConversationSession } from "../conversations/continuation"
-import { findConversation } from "../conversations/data"
+import { continueTerminalWatchSession } from "../watches/continuation"
+import { findWatch } from "../watches/data"
 
 export async function continueTerminalSession(
   ctx: MutationCtx,
@@ -16,18 +16,18 @@ export async function continueTerminalSession(
     return
   }
 
-  const conversation = await findConversation(ctx, {
+  const watch = await findWatch(ctx, {
     tenantId: input.integration.tenantId,
     integrationId: input.integration._id,
     externalId: input.message.conversationId,
   })
 
-  if (conversation === null) {
+  if (watch === null) {
     return
   }
 
-  await continueTerminalConversationSession(ctx, {
-    conversationId: conversation._id,
+  await continueTerminalWatchSession(ctx, {
     now: input.now,
+    watchId: watch._id,
   })
 }

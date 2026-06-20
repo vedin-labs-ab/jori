@@ -3,7 +3,7 @@ import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { startMessageRun } from "./data"
 
-test("starts new conversation message runs as mentions", async () => {
+test("starts new watch message runs as mentions", async () => {
   const ctx = fakeMutationCtx()
   const result = await startMessageRun(ctx, runArgs())
 
@@ -13,14 +13,14 @@ test("starts new conversation message runs as mentions", async () => {
       cause: { type: "message", messageId: "message", kind: "mention" },
     }),
   ])
-  expect(inserted(ctx, "conversations")).toEqual([
+  expect(inserted(ctx, "watches")).toEqual([
     expect.objectContaining({
       externalId: "conversation",
     }),
   ])
   expect(inserted(ctx, "sessions")).toEqual([
     expect.objectContaining({
-      conversationId: "conversations-2",
+      watchId: "watches-2",
       cursor: {
         messageId: "message",
         timestamp: 0,
@@ -40,16 +40,16 @@ test("starts new conversation message runs as mentions", async () => {
   ])
 })
 
-test("continues active conversation sessions without starting another run", async () => {
-  const conversation = conversationDoc()
+test("continues active watch sessions without starting another run", async () => {
+  const watch = watchDoc()
   const ctx = fakeMutationCtx([
-    ["conversations", conversation],
-    ...activeSessionSeed(conversation, "active-run", "running"),
+    ["watches", watch],
+    ...activeSessionSeed(watch, "active-run", "running"),
   ])
 
   const result = await startMessageRun(ctx, {
     ...runArgs({ message: message("Steer this.") }),
-    conversation,
+    watch,
   })
 
   expect(result).toMatchObject({
@@ -61,15 +61,15 @@ test("continues active conversation sessions without starting another run", asyn
 })
 
 test("starts reply runs when the previous session is terminal", async () => {
-  const conversation = conversationDoc()
+  const watch = watchDoc()
   const ctx = fakeMutationCtx([
-    ["conversations", conversation],
-    ...activeSessionSeed(conversation, "old-run", "completed"),
+    ["watches", watch],
+    ...activeSessionSeed(watch, "old-run", "completed"),
   ])
 
   const result = await startMessageRun(ctx, {
     ...runArgs({ message: message("Following up.") }),
-    conversation,
+    watch,
   })
 
   expect(result.status).toBe("started")
@@ -86,13 +86,13 @@ test("starts reply runs when the previous session is terminal", async () => {
   })
 })
 
-test("starts existing conversations without sessions as mentions", async () => {
-  const conversation = conversationDoc()
-  const ctx = fakeMutationCtx([["conversations", conversation]])
+test("starts existing watches without sessions as mentions", async () => {
+  const watch = watchDoc()
+  const ctx = fakeMutationCtx([["watches", watch]])
 
   const result = await startMessageRun(ctx, {
     ...runArgs({ message: message("First routed task.") }),
-    conversation,
+    watch,
   })
 
   expect(result.status).toBe("started")
@@ -103,9 +103,9 @@ test("starts existing conversations without sessions as mentions", async () => {
   ])
 })
 
-function conversationDoc(): Doc<"conversations"> {
+function watchDoc(): Doc<"watches"> {
   return {
-    _id: id<"conversations">("conversation-doc"),
+    _id: id<"watches">("watch-doc"),
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
@@ -117,7 +117,7 @@ type StartArgs = Parameters<typeof startMessageRun>[1]
 
 function runArgs(overrides: Partial<StartArgs> = {}): StartArgs {
   return {
-    conversation: null,
+    watch: null,
     integration: integration(),
     message: message("Please help."),
     createdBy: "user",
@@ -160,7 +160,7 @@ function message(text: string, data?: unknown) {
 }
 
 function activeSessionSeed(
-  conversation: Doc<"conversations">,
+  watch: Doc<"watches">,
   runId: string,
   status: "completed" | "running"
 ): Seed[] {
@@ -170,7 +170,7 @@ function activeSessionSeed(
       {
         _id: id<"sessions">("session"),
         _creationTime: 0,
-        conversationId: conversation._id,
+        watchId: watch._id,
         runId: id<"runs">(runId),
         updatedAt: 0,
       },

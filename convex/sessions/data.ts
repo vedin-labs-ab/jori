@@ -19,9 +19,9 @@ type QueryLikeCtx = MutationCtx | QueryCtx
 
 export async function findReusableSession(
   ctx: MutationCtx,
-  conversationId: Id<"conversations">
+  watchId: Id<"watches">
 ) {
-  const session = await findSession(ctx, conversationId)
+  const session = await findSession(ctx, watchId)
 
   return session === null ? null : await isReusableSession(ctx, session)
 }
@@ -42,13 +42,13 @@ export async function isReusableSession(
 export async function startSession(
   ctx: MutationCtx,
   args: {
-    conversationId: Id<"conversations">
+    watchId: Id<"watches">
     message: Doc<"messages">
     now: number
     runId: Id<"runs">
   }
 ) {
-  const existing = await findSession(ctx, args.conversationId)
+  const existing = await findSession(ctx, args.watchId)
   const patch = {
     cursor: messageCursor(args.message),
     runId: args.runId,
@@ -61,7 +61,7 @@ export async function startSession(
   }
 
   return await ctx.db.insert("sessions", {
-    conversationId: args.conversationId,
+    watchId: args.watchId,
     ...patch,
   })
 }
@@ -92,17 +92,17 @@ async function readPendingBatch(
   session: Doc<"sessions">,
   limit = defaultDrainLimit
 ): Promise<PendingBatch> {
-  const conversation = await ctx.db.get(session.conversationId)
+  const watch = await ctx.db.get(session.watchId)
 
-  if (conversation === null) {
+  if (watch === null) {
     return { hasMore: false, messages: [] }
   }
 
   const takeLimit = Math.min(Math.max(1, limit), maxPendingReadLimit)
   const candidates = await queryConversationMessages(ctx, {
-    conversation,
     session,
     limit: maxPendingReadLimit + 1,
+    watch,
   })
   const scanned = candidates.slice(0, maxPendingReadLimit)
 
@@ -177,33 +177,28 @@ async function findRouting(ctx: MutationCtx, message: Doc<"messages">) {
     .first()
 }
 
-export async function findSession(
-  ctx: QueryLikeCtx,
-  conversationId: Id<"conversations">
-) {
+export async function findSession(ctx: QueryLikeCtx, watchId: Id<"watches">) {
   return await ctx.db
     .query("sessions")
-    .withIndex("by_conversation", (query) =>
-      query.eq("conversationId", conversationId)
-    )
+    .withIndex("by_watch", (query) => query.eq("watchId", watchId))
     .first()
 }
 
 async function queryConversationMessages(
   ctx: QueryLikeCtx,
   args: {
-    conversation: Doc<"conversations">
     limit: number
     session: Doc<"sessions">
+    watch: Doc<"watches">
   }
 ) {
   return await ctx.db
     .query("messages")
     .withIndex("by_conversation", (query) => {
       const scoped = query
-        .eq("tenantId", args.conversation.tenantId)
-        .eq("integrationId", args.conversation.integrationId)
-        .eq("conversationId", args.conversation.externalId)
+        .eq("tenantId", args.watch.tenantId)
+        .eq("integrationId", args.watch.integrationId)
+        .eq("conversationId", args.watch.externalId)
 
       return args.session.cursor === undefined
         ? scoped

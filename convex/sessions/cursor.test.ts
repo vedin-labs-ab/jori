@@ -36,7 +36,7 @@ function session(messageId: string, timestamp: number): Doc<"sessions"> {
   return {
     _id: id<"sessions">("session"),
     _creationTime: 0,
-    conversationId: id<"conversations">("conversation"),
+    watchId: id<"watches">("watch"),
     cursor: {
       messageId: id<"messages">(messageId),
       timestamp,
