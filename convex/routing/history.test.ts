@@ -9,12 +9,12 @@ describe("message routing conversation history", () => {
     expect(
       mergeRecentConversation([
         entry("message-2", "User", "thanks", 3000, "message.channels"),
-        entry("milo-1", "Milo", "What can I help with?", 2000, "milo.reply"),
+        entry("milo-1", "Milo", "On it.", 2000, "milo.reply"),
         entry("message-1", "User", "hello", 1000, "message.channels"),
       ])
     ).toEqual([
       entry("message-1", "User", "hello", 1000, "message.channels"),
-      entry("milo-1", "Milo", "What can I help with?", 2000, "milo.reply"),
+      entry("milo-1", "Milo", "On it.", 2000, "milo.reply"),
       entry("message-2", "User", "thanks", 3000, "message.channels"),
     ])
   })

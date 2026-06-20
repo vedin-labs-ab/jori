@@ -91,31 +91,29 @@ describe("message intake routing request", () => {
 })
 
 describe("message intake routing decisions", () => {
-  test("does not silently ignore mentioned small talk", async () => {
+  test("keeps addressed model ignores ignored", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ route: "ignore" })
     )
 
     await expect(decideRoute(context({ isAddressed: true }))).resolves.toEqual({
       model: "test-model",
-      reply: "What can I help with?",
-      route: "reply",
+      route: "ignore",
     })
   })
 
-  test("recovers when a respond route omits message text", async () => {
+  test("ignores malformed respond routes without message text", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ route: "respond" })
     )
 
     await expect(decideRoute(context({ isAddressed: true }))).resolves.toEqual({
       model: "test-model",
-      reply: "What can I help with?",
-      route: "reply",
+      route: "ignore",
     })
   })
 
-  test("routes model-ignored active work back to the agent", async () => {
+  test("keeps model-ignored active work ignored", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ route: "ignore" })
     )
@@ -133,7 +131,7 @@ describe("message intake routing decisions", () => {
       )
     ).resolves.toEqual({
       model: "test-model",
-      route: "agent",
+      route: "ignore",
     })
   })
 
@@ -158,7 +156,7 @@ describe("message intake routing decisions", () => {
     await expect(decideRoute(context({ isAddressed: true }))).resolves.toEqual({
       model: "test-model",
       reply: "Hey Albin.",
-      route: "reply",
+      route: "respond",
     })
   })
 })
@@ -227,7 +225,7 @@ function context(
 function modelResponse(content: {
   message?: string
   reply?: string
-  route: "agent" | "ignore" | "reply" | "respond"
+  route: "agent" | "ignore" | "respond"
 }) {
   return modelTextResponse(JSON.stringify(content))
 }

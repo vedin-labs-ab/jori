@@ -9,7 +9,7 @@ export async function continueTerminalSession(
     integration: Doc<"integrations">
     message: Doc<"messages">
     now: number
-    route: "agent" | "ignore" | "reply"
+    route: "agent" | "ignore" | "respond"
   }
 ) {
   if (input.route === "agent" || input.message.conversationId === undefined) {
