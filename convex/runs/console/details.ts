@@ -3,9 +3,8 @@ import { getActorDisplayName } from "../../shared/actor"
 import { detail, uniqueDetails } from "../display/detail"
 import { toolDetails } from "./tools"
 
-export function executionDetailSummary(input: {
+export function runDetailSummary(input: {
   approval: Doc<"approvals"> | null
-  execution: Doc<"executions">
   run: Doc<"runs">
   stoppedBy: string | undefined
 }) {
@@ -13,26 +12,23 @@ export function executionDetailSummary(input: {
 
   return {
     details: uniqueDetails([
-      stoppedDetail(input.execution, input.stoppedBy),
+      stoppedDetail(input.run, input.stoppedBy),
       decisionDetail(input.approval),
       ...(input.run.reason.type === "time" ? displayDetails : []),
-      ...toolDetails(input.execution.toolSnapshot),
+      ...toolDetails(input.run.toolSnapshot),
       ...(input.run.reason.type === "time" ? [] : displayDetails),
     ]),
     taskSource: input.run.display.taskSource,
   }
 }
 
-function stoppedDetail(
-  execution: Doc<"executions">,
-  stoppedBy: string | undefined
-) {
-  if (execution.status !== "stopped") {
+function stoppedDetail(run: Doc<"runs">, stoppedBy: string | undefined) {
+  if (run.status !== "stopped") {
     return undefined
   }
 
   return detail("stopped", stoppedBy ?? "Stopped", {
-    at: execution.stoppedAt ?? execution.finishedAt,
+    at: run.stoppedAt ?? run.finishedAt,
   })
 }
 

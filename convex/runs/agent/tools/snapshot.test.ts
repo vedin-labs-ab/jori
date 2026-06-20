@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
-import { createExecutionToolSnapshot } from "./snapshot"
+import { createRunToolSnapshot } from "./snapshot"
 import { type RuntimeToolCapabilityTool } from "./types"
 
-test("stores all surface tool capabilities for execution details", () => {
+test("stores all surface tool capabilities for run details", () => {
   const miloTools = [
     {
       access: "write" as const,
@@ -13,7 +13,7 @@ test("stores all surface tool capabilities for execution details", () => {
   ]
 
   expect(
-    createExecutionToolSnapshot({
+    createRunToolSnapshot({
       webSearch: true,
       capabilities: [
         {

@@ -121,8 +121,7 @@ describe("message intake routing decisions", () => {
     await expect(
       decideRoute(
         context({
-          activeExecution: {
-            executionId: "execution" as Id<"executions">,
+          activeRun: {
             latestStatus: "tool.waiting",
             runId: "run" as Id<"runs">,
             status: "running",
@@ -212,7 +211,7 @@ function context(
   }
 
   return {
-    activeExecution: null,
+    activeRun: null,
     currentMessage,
     integration: "slack",
     isAddressed: false,

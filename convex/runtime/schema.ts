@@ -5,7 +5,6 @@ const runtimeOperation = v.union(
   v.object({
     type: v.literal("enqueueRun"),
     runId: v.id("runs"),
-    executionId: v.id("executions"),
     parentRunId: v.optional(v.id("runs")),
     rootRunId: v.optional(v.id("runs")),
   }),
@@ -17,7 +16,6 @@ const runtimeOperation = v.union(
   }),
   v.object({
     type: v.literal("cancelRun"),
-    executionId: v.id("executions"),
     runId: v.id("runs"),
     sandboxId: v.optional(v.string()),
     triggerRunId: v.optional(v.string()),
@@ -45,10 +43,9 @@ export const outbox = defineTable({
   .index("by_idempotency", ["idempotencyKey"])
   .index("by_tenant", ["tenantId"])
 
-export const runtimeEvents = defineTable({
+export const logs = defineTable({
   tenantId: v.string(),
   runId: v.id("runs"),
-  executionId: v.optional(v.id("executions")),
   eventKey: v.string(),
   source: v.string(),
   type: v.string(),
@@ -61,10 +58,9 @@ export const runtimeEvents = defineTable({
   .index("by_run", ["runId", "createdAt"])
   .index("by_key", ["eventKey"])
 
-export const runtimeSandboxes = defineTable({
+export const sandboxes = defineTable({
   tenantId: v.string(),
   runId: v.id("runs"),
-  executionId: v.id("executions"),
   provider: v.literal("e2b"),
   sandboxId: v.string(),
   status: v.union(
@@ -80,6 +76,5 @@ export const runtimeSandboxes = defineTable({
   updatedAt: v.number(),
   cleanedAt: v.optional(v.number()),
 })
-  .index("by_execution", ["executionId"])
   .index("by_run", ["runId"])
   .index("by_sandbox", ["sandboxId"])

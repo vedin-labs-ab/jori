@@ -1,42 +1,41 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
-import { getExecutionContext } from "./context"
-import { executionDetailSummary } from "./details"
-import { executionTask, executionTitle, triggerLabel } from "./labels"
-import { executionSource, sourceSearchText } from "./source"
+import { getRunContext } from "./context"
+import { runDetailSummary } from "./details"
+import { runTask, runTitle, triggerLabel } from "./labels"
+import { runSource, sourceSearchText } from "./source"
 
-export async function summarizeExecution(
+export async function summarizeRun(
   ctx: QueryCtx,
-  execution: Doc<"executions">,
+  run: Doc<"runs">,
   requestedApproval?: Doc<"approvals">
 ) {
-  const context = await getExecutionContext(ctx, execution, requestedApproval)
-  const title = executionTitle(context)
-  const task = executionTask(context)
-  const stoppedBy = await stoppedByLabel(ctx, execution)
-  const source = executionSource(context, stoppedBy)
-  const detailSummary = executionDetailSummary({
+  const context = await getRunContext(ctx, run, requestedApproval)
+  const title = runTitle(context)
+  const task = runTask(context)
+  const stoppedBy = await stoppedByLabel(ctx, run)
+  const source = runSource(context, stoppedBy)
+  const detailSummary = runDetailSummary({
     approval: context.requestedApproval,
-    execution,
     run: context.run,
     stoppedBy,
   })
 
   return {
-    id: execution._id,
-    status: execution.status,
+    id: run._id,
+    status: run.status,
     title,
     source,
     task,
     taskSource: detailSummary.taskSource,
     trigger: triggerLabel(context),
-    createdAt: execution.createdAt,
+    createdAt: run.createdAt,
     details: detailSummary.details,
-    finishedAt: execution.finishedAt,
-    durationMs: getDuration(execution),
-    traceFileId: storedTraceFileId(execution),
-    error: execution.error,
+    finishedAt: run.finishedAt,
+    durationMs: getDuration(run),
+    traceFileId: storedTraceFileId(run),
+    error: run.error,
     approval:
       context.requestedApproval === null
         ? null
@@ -47,7 +46,6 @@ export async function summarizeExecution(
             message: context.message,
           }),
     searchableText: searchableText({
-      execution,
       title,
       source,
       task,
@@ -56,32 +54,32 @@ export async function summarizeExecution(
   }
 }
 
-function storedTraceFileId(execution: Doc<"executions">) {
-  const trace = execution.trace
+function storedTraceFileId(run: Doc<"runs">) {
+  const trace = run.trace
 
   return trace !== undefined && "fileId" in trace ? trace.fileId : undefined
 }
 
-function getDuration(execution: Doc<"executions">) {
-  if (execution.finishedAt === undefined) {
+function getDuration(run: Doc<"runs">) {
+  if (run.finishedAt === undefined) {
     return undefined
   }
 
-  return Math.max(0, execution.finishedAt - execution.createdAt)
+  return Math.max(0, run.finishedAt - run.createdAt)
 }
 
 function searchableText(
-  input: Awaited<ReturnType<typeof getExecutionContext>> & {
-    execution: Doc<"executions">
-    source: ReturnType<typeof executionSource>
+  input: Awaited<ReturnType<typeof getRunContext>> & {
+    run: Doc<"runs">
+    source: ReturnType<typeof runSource>
     task: string
     title: string
   }
 ) {
   return [
     input.title,
-    input.execution.status,
-    input.execution.error,
+    input.run.status,
+    input.run.error,
     input.approval?.summary,
     input.approval?.handoff.objective,
     input.approval?.handoff.progress,
@@ -101,8 +99,8 @@ function searchableText(
     .toLowerCase()
 }
 
-async function stoppedByLabel(ctx: QueryCtx, execution: Doc<"executions">) {
-  const stoppedBy = execution.stoppedBy
+async function stoppedByLabel(ctx: QueryCtx, run: Doc<"runs">) {
+  const stoppedBy = run.stoppedBy
 
   if (stoppedBy === undefined || stoppedBy === "") {
     return undefined
@@ -116,7 +114,7 @@ async function stoppedByLabel(ctx: QueryCtx, execution: Doc<"executions">) {
     .query("identities")
     .withIndex("by_tenant_provider_user", (query) =>
       query
-        .eq("tenantId", execution.tenantId)
+        .eq("tenantId", run.tenantId)
         .eq("provider", "clerk")
         .eq("userId", stoppedBy)
     )

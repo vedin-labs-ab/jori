@@ -7,14 +7,12 @@ export type JsonObject = Record<string, unknown>
 export type ConvexId<TableName extends string> = GenericId<TableName>
 
 export type AgentRunPayload = {
-  executionId: ConvexId<"executions">
   parentRunId?: ConvexId<"runs">
   rootRunId?: ConvexId<"runs">
   runId: ConvexId<"runs">
 }
 
 export type SandboxCleanupPayload = {
-  executionId: ConvexId<"executions">
   runId: ConvexId<"runs">
   sandboxId: string
 }
@@ -32,15 +30,12 @@ export type RuntimeTool = {
 }
 
 export type RuntimeContext = {
-  execution: {
-    id: ConvexId<"executions">
-    sandboxId: string | null
-    status: "completed" | "failed" | "queued" | "running" | "stopped"
-  }
   prompt: string
   run: {
     id: ConvexId<"runs">
     rootRunId: ConvexId<"runs"> | null
+    sandboxId: string | null
+    status: "completed" | "failed" | "queued" | "running" | "stopped"
     task: string
     tenantId: string
     title: string
@@ -79,7 +74,6 @@ export type RuntimeEventType =
 
 export type RuntimeEventInput = {
   attempt?: number
-  executionId: ConvexId<"executions">
   payload?: JsonObject
   runId: ConvexId<"runs">
   sequence: number

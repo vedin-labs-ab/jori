@@ -11,18 +11,18 @@ export { fetchGitHubTarball }
 
 export async function callProviderTool(args: {
   ctx: ActionCtx
-  execution?: Doc<"executions">
   integration: Doc<"integrations">
+  run?: Doc<"runs">
   tool: string
   toolArgs: Record<string, unknown>
 }) {
   const integration = args.integration.integration
   const context =
-    args.execution === undefined
+    args.run === undefined
       ? undefined
       : {
           ctx: args.ctx,
-          execution: args.execution,
+          run: args.run,
         }
 
   if (integration === "slack") {

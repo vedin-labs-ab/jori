@@ -4,19 +4,19 @@ import { requireTenantAccess } from "../identity/access"
 
 export const trace = query({
   args: {
-    executionId: v.id("executions"),
+    runId: v.id("runs"),
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
     await requireTenantAccess(ctx, args.tenantId)
 
-    const execution = await ctx.db.get(args.executionId)
+    const run = await ctx.db.get(args.runId)
 
-    if (execution === null || execution.tenantId !== args.tenantId) {
+    if (run === null || run.tenantId !== args.tenantId) {
       return { type: "missing" as const }
     }
 
-    const trace = execution.trace
+    const trace = run.trace
 
     if (trace !== undefined && "fileId" in trace) {
       const url = await ctx.storage.getUrl(trace.fileId)
@@ -33,7 +33,7 @@ export const trace = query({
       }
     }
 
-    if (execution.status === "queued" || execution.status === "running") {
+    if (run.status === "queued" || run.status === "running") {
       return { type: "pending" as const }
     }
 

@@ -11,20 +11,32 @@ type MiloToolRequest = {
 
 export async function callMiloTool(
   ctx: ActionCtx,
-  execution: {
+  run: {
     tenantId: string
     createdBy?: string
-    runId?: Id<"runs">
+    _id?: Id<"runs">
   },
   request: MiloToolRequest
 ): Promise<unknown> {
   if (isMiloFileTool(request.tool)) {
-    return await callMiloFileTool(ctx, execution, request)
+    return await callMiloFileTool(ctx, run, request)
   }
 
   if (isMiloArtifactTool(request.tool)) {
-    return await callMiloArtifactTool(ctx, execution, request)
+    return await callMiloArtifactTool(ctx, toMiloContext(run), request)
   }
 
-  return await callMiloAutomationTool(ctx, execution, request)
+  return await callMiloAutomationTool(ctx, toMiloContext(run), request)
+}
+
+function toMiloContext(run: {
+  tenantId: string
+  createdBy?: string
+  _id?: Id<"runs">
+}) {
+  return {
+    tenantId: run.tenantId,
+    createdBy: run.createdBy,
+    runId: run._id,
+  }
 }

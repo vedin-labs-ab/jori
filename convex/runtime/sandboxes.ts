@@ -4,7 +4,6 @@ import { requireWorkerSecret } from "./shared"
 
 export const upsert = mutation({
   args: {
-    executionId: v.id("executions"),
     runId: v.id("runs"),
     sandboxId: v.string(),
     secret: v.string(),
@@ -19,23 +18,22 @@ export const upsert = mutation({
   handler: async (ctx, args) => {
     requireWorkerSecret(args.secret)
 
-    const execution = await ctx.db.get(args.executionId)
+    const run = await ctx.db.get(args.runId)
 
-    if (execution === null || execution.runId !== args.runId) {
-      throw new Error("Execution not found.")
+    if (run === null) {
+      throw new Error("Run not found.")
     }
 
     const existing = await ctx.db
-      .query("runtimeSandboxes")
+      .query("sandboxes")
       .withIndex("by_sandbox", (query) => query.eq("sandboxId", args.sandboxId))
       .first()
     const now = Date.now()
 
     if (existing === null) {
-      await ctx.db.insert("runtimeSandboxes", {
-        tenantId: execution.tenantId,
+      await ctx.db.insert("sandboxes", {
+        tenantId: run.tenantId,
         runId: args.runId,
-        executionId: args.executionId,
         provider: "e2b",
         sandboxId: args.sandboxId,
         status: args.status,
@@ -51,7 +49,7 @@ export const upsert = mutation({
       })
     }
 
-    await ctx.db.patch(args.executionId, {
+    await ctx.db.patch(args.runId, {
       sandboxId: args.sandboxId,
     })
 
@@ -61,7 +59,6 @@ export const upsert = mutation({
 
 export const markCleaned = mutation({
   args: {
-    executionId: v.id("executions"),
     error: v.optional(v.string()),
     sandboxId: v.string(),
     secret: v.string(),
@@ -71,7 +68,7 @@ export const markCleaned = mutation({
     requireWorkerSecret(args.secret)
 
     const existing = await ctx.db
-      .query("runtimeSandboxes")
+      .query("sandboxes")
       .withIndex("by_sandbox", (query) => query.eq("sandboxId", args.sandboxId))
       .first()
 
@@ -84,10 +81,10 @@ export const markCleaned = mutation({
       })
     }
 
-    const execution = await ctx.db.get(args.executionId)
+    const run = existing === null ? null : await ctx.db.get(existing.runId)
 
-    if (execution?.sandboxId === args.sandboxId) {
-      await ctx.db.patch(args.executionId, {
+    if (run?.sandboxId === args.sandboxId) {
+      await ctx.db.patch(run._id, {
         sandboxId: undefined,
       })
     }

@@ -15,7 +15,7 @@ const approvalTtlMs = 30 * 60 * 1000
 export const create = internalMutation({
   args: {
     tenantId: v.string(),
-    executionId: v.id("executions"),
+    runId: v.id("runs"),
     surface: toolSurfaceValidator,
     tool: v.string(),
     args: v.any(),

@@ -55,11 +55,12 @@ export const insert = internalMutation({
         ...parent.display,
         trigger: "Subagent",
       },
+      status: "queued",
       createdBy: parent.createdBy,
       createdAt: Date.now(),
     })
 
-    await ctx.runMutation(internal.runtime.outbox.ensureRunQueued, { runId })
+    await ctx.runMutation(internal.runtime.outbox.ensureQueued, { runId })
 
     return { runId }
   },

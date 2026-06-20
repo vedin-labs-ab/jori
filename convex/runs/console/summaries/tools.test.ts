@@ -1,30 +1,30 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
 import { eventAutomationDisplay, messageDisplay } from "../display"
-import { summarizeExecution } from "../summaries"
+import { summarizeRun } from "../summaries"
 
 test("shows stored tools for event automation runs", async () => {
-  const summary = await summarizeExecution(
+  const run = testRun(
+    {
+      automationId: "missing-automation",
+      reason: { type: "event", eventId: "event" },
+      title: "Deep analysis",
+      task: "Perform the deep analysis.",
+      display: eventAutomationDisplay({
+        surface: { type: "slack", label: "Slack" },
+        event: { type: "message.created", label: "New channel message" },
+        metadata: [{ type: "channel", label: "C123" }],
+      }),
+    },
+    { toolSnapshot: slackToolSnapshot() }
+  )
+  const summary = await summarizeRun(
     fakeQueryCtx({
       event: event(),
       integration: slackIntegration(),
-      run: {
-        _id: "run",
-        _creationTime: 0,
-        tenantId: "tenant",
-        automationId: "missing-automation",
-        reason: { type: "event", eventId: "event" },
-        title: "Deep analysis",
-        task: "Perform the deep analysis.",
-        display: eventAutomationDisplay({
-          surface: { type: "slack", label: "Slack" },
-          event: { type: "message.created", label: "New channel message" },
-          metadata: [{ type: "channel", label: "C123" }],
-        }),
-        createdAt: 0,
-      },
+      run,
     }),
-    execution({ toolSnapshot: slackToolSnapshot() })
+    run
   )
 
   expect(summary.details).toContainEqual(slackToolsDetail())
@@ -32,27 +32,27 @@ test("shows stored tools for event automation runs", async () => {
 })
 
 test("shows stored blocked web search for event automation runs", async () => {
-  const summary = await summarizeExecution(
+  const run = testRun(
+    {
+      automationId: "missing-automation",
+      reason: { type: "event", eventId: "event" },
+      title: "Deep analysis",
+      task: "Perform the deep analysis.",
+      display: eventAutomationDisplay({
+        surface: { type: "slack", label: "Slack" },
+        event: { type: "message.created", label: "New channel message" },
+        metadata: [{ type: "channel", label: "C123" }],
+      }),
+    },
+    { toolSnapshot: slackToolSnapshot(false) }
+  )
+  const summary = await summarizeRun(
     fakeQueryCtx({
       event: event(),
       integration: slackIntegration(),
-      run: {
-        _id: "run",
-        _creationTime: 0,
-        tenantId: "tenant",
-        automationId: "missing-automation",
-        reason: { type: "event", eventId: "event" },
-        title: "Deep analysis",
-        task: "Perform the deep analysis.",
-        display: eventAutomationDisplay({
-          surface: { type: "slack", label: "Slack" },
-          event: { type: "message.created", label: "New channel message" },
-          metadata: [{ type: "channel", label: "C123" }],
-        }),
-        createdAt: 0,
-      },
+      run,
     }),
-    execution({ toolSnapshot: slackToolSnapshot(false) })
+    run
   )
 
   expect(summary.details).toContainEqual(webSearchDetail("Blocked"))
@@ -60,25 +60,25 @@ test("shows stored blocked web search for event automation runs", async () => {
 
 test("shows stored tools for mention and reply runs", async () => {
   for (const kind of ["mention", "reply"] as const) {
-    const summary = await summarizeExecution(
+    const run = testRun(
+      {
+        reason: { type: "message", messageId: "message", kind },
+        title: "Please summarize this thread.",
+        task: "Please summarize this thread.",
+        display: messageDisplay({
+          kind,
+          metadata: [{ type: "channel", label: "C123" }],
+        }),
+      },
+      { toolSnapshot: slackToolSnapshot() }
+    )
+    const summary = await summarizeRun(
       fakeQueryCtx({
         integration: slackIntegration(),
         message: message(kind),
-        run: {
-          _id: "run",
-          _creationTime: 0,
-          tenantId: "tenant",
-          reason: { type: "message", messageId: "message", kind },
-          title: "Please summarize this thread.",
-          task: "Please summarize this thread.",
-          display: messageDisplay({
-            kind,
-            metadata: [{ type: "channel", label: "C123" }],
-          }),
-          createdAt: 0,
-        },
+        run,
       }),
-      execution({ toolSnapshot: slackToolSnapshot() })
+      run
     )
 
     expect(summary.details).toContainEqual(slackToolsDetail())
@@ -88,25 +88,25 @@ test("shows stored tools for mention and reply runs", async () => {
 
 test("marks approval-required access counts in mention and reply runs", async () => {
   for (const kind of ["mention", "reply"] as const) {
-    const summary = await summarizeExecution(
+    const run = testRun(
+      {
+        reason: { type: "message", messageId: "message", kind },
+        title: "Please summarize this thread.",
+        task: "Please summarize this thread.",
+        display: messageDisplay({
+          kind,
+          metadata: [{ type: "channel", label: "C123" }],
+        }),
+      },
+      { toolSnapshot: slackToolSnapshot(true, "read") }
+    )
+    const summary = await summarizeRun(
       fakeQueryCtx({
         integration: slackIntegration(),
         message: message(kind),
-        run: {
-          _id: "run",
-          _creationTime: 0,
-          tenantId: "tenant",
-          reason: { type: "message", messageId: "message", kind },
-          title: "Please summarize this thread.",
-          task: "Please summarize this thread.",
-          display: messageDisplay({
-            kind,
-            metadata: [{ type: "channel", label: "C123" }],
-          }),
-          createdAt: 0,
-        },
+        run,
       }),
-      execution({ toolSnapshot: slackToolSnapshot(true, "read") })
+      run
     )
 
     expect(summary.details).toContainEqual(slackToolsDetail("read"))
@@ -159,18 +159,21 @@ function message(kind: "mention" | "reply") {
   }
 }
 
-function execution(overrides: Record<string, unknown>) {
+function testRun(
+  run: Record<string, unknown>,
+  overrides: Record<string, unknown> = {}
+) {
   return {
-    _id: "execution",
+    _id: "run",
     _creationTime: 0,
     tenantId: "tenant",
-    runId: "run",
     promptId: "prompt",
     status: "completed",
     createdAt: 0,
     finishedAt: 1000,
+    ...run,
     ...overrides,
-  } as Parameters<typeof summarizeExecution>[1]
+  } as Parameters<typeof summarizeRun>[1]
 }
 
 function slackToolSnapshot(

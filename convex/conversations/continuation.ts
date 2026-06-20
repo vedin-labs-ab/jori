@@ -140,15 +140,15 @@ function hasText(message: Doc<"messages">) {
 }
 
 async function isTerminalSession(ctx: MutationCtx, session: Doc<"sessions">) {
-  if (session.executionId === undefined) {
+  if (session.runId === undefined) {
     return false
   }
 
-  const execution = await ctx.db.get(session.executionId)
+  const run = await ctx.db.get(session.runId)
 
-  return execution !== null && isTerminalStatus(execution.status)
+  return run !== null && isTerminalStatus(run.status)
 }
 
-function isTerminalStatus(status: Doc<"executions">["status"]) {
+function isTerminalStatus(status: Doc<"runs">["status"]) {
   return status === "completed" || status === "failed" || status === "stopped"
 }

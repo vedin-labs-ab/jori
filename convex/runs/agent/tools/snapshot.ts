@@ -2,12 +2,12 @@ import { type Infer } from "convex/values"
 import { type toolSnapshot } from "../../schema"
 import { type RuntimeToolCapability } from "./types"
 
-export type ExecutionToolSnapshot = Infer<typeof toolSnapshot>
+export type RunToolSnapshot = Infer<typeof toolSnapshot>
 
-export function createExecutionToolSnapshot(input: {
+export function createRunToolSnapshot(input: {
   capabilities: RuntimeToolCapability[]
   webSearch: boolean
-}): ExecutionToolSnapshot {
+}): RunToolSnapshot {
   return {
     groups: input.capabilities.map((capability) => ({
       surface: capability.surface,

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest"
-import { displayNowForExecution, executionClockInterval } from "./time"
+import { displayNowForRun, runClockInterval } from "./time"
 import { type ExecutionItem } from "./types"
 
-const baseExecution: ExecutionItem = {
+const baseRun: ExecutionItem = {
   approval: null,
   createdAt: 1700000000123,
   details: [],
@@ -17,15 +17,15 @@ const baseExecution: ExecutionItem = {
   trigger: "Manual",
 }
 
-describe("execution clock timing", () => {
-  test("uses a minute interval for settled executions", () => {
-    expect(executionClockInterval([baseExecution], 1700000065123)).toBe(60_000)
+describe("run clock timing", () => {
+  test("uses a minute interval for settled runs", () => {
+    expect(runClockInterval([baseRun], 1700000065123)).toBe(60_000)
   })
 
-  test("uses a second interval while an execution is active", () => {
+  test("uses a second interval while a run is active", () => {
     expect(
-      executionClockInterval(
-        [{ ...baseExecution, finishedAt: undefined, status: "running" }],
+      runClockInterval(
+        [{ ...baseRun, finishedAt: undefined, status: "running" }],
         1700000065123
       )
     ).toBe(1000)
@@ -33,10 +33,10 @@ describe("execution clock timing", () => {
 
   test("uses a second interval while a pending approval is live", () => {
     expect(
-      executionClockInterval(
+      runClockInterval(
         [
           {
-            ...baseExecution,
+            ...baseRun,
             approval: {
               decidedAt: undefined,
               delivery: undefined,
@@ -56,9 +56,7 @@ describe("execution clock timing", () => {
     ).toBe(1000)
   })
 
-  test("buckets display time for settled executions", () => {
-    expect(displayNowForExecution(baseExecution, 1700000065123)).toBe(
-      1700000040000
-    )
+  test("buckets display time for settled runs", () => {
+    expect(displayNowForRun(baseRun, 1700000065123)).toBe(1700000040000)
   })
 })

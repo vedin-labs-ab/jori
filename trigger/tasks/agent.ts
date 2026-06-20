@@ -38,11 +38,10 @@ export const miloAgentRun = task({
     const sandbox = new E2BSandboxRuntime(
       convex,
       context.run.id,
-      context.execution.id,
-      context.execution.sandboxId
+      context.run.sandboxId
     )
 
-    if (isTerminalStatus(context.execution.status)) {
+    if (isTerminalStatus(context.run.status)) {
       await sandbox.cleanup()
 
       return {
@@ -70,7 +69,7 @@ export const miloAgentRun = task({
   },
 })
 
-function isTerminalStatus(status: RuntimeContext["execution"]["status"]) {
+function isTerminalStatus(status: RuntimeContext["run"]["status"]) {
   return status === "completed" || status === "failed" || status === "stopped"
 }
 
@@ -269,7 +268,6 @@ async function recordRunEvent(
   await convex.recordEvent(
     runtimeEvent({
       attempt,
-      executionId: context.execution.id,
       payload,
       runId: context.run.id,
       sequence,

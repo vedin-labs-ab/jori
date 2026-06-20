@@ -1,13 +1,8 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
-import {
-  internalMutation,
-  internalQuery,
-  type QueryCtx,
-} from "../_generated/server"
+import { internalQuery, type QueryCtx } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
 import { recentConversation } from "../routing/history"
-import { toolSnapshot } from "./schema"
 
 export const getInputByRun = internalQuery({
   args: {
@@ -146,39 +141,12 @@ async function getMessageRouting(ctx: QueryCtx, messageId: Id<"messages">) {
       }
 }
 
-export const create = internalMutation({
-  args: {
-    runId: v.id("runs"),
-    promptId: v.optional(v.id("_storage")),
-    toolSnapshot: v.optional(toolSnapshot),
-    approvalId: v.optional(v.id("approvals")),
-  },
-  handler: async (ctx, args): Promise<Id<"executions"> | null> => {
-    const run = await ctx.db.get(args.runId)
-
-    if (run === null) {
-      return null
-    }
-
-    return await ctx.db.insert("executions", {
-      tenantId: run.tenantId,
-      runId: run._id,
-      approvalId: args.approvalId,
-      promptId: args.promptId,
-      toolSnapshot: args.toolSnapshot,
-      status: "queued",
-      createdBy: run.createdBy,
-      createdAt: Date.now(),
-    })
-  },
-})
-
 export const get = internalQuery({
   args: {
-    executionId: v.id("executions"),
+    runId: v.id("runs"),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.executionId)
+    return await ctx.db.get(args.runId)
   },
 })
 
@@ -202,32 +170,3 @@ async function listActiveIntegrations(
     return ownerId !== undefined && integration.ownerId === ownerId
   })
 }
-
-export const finish = internalMutation({
-  args: {
-    executionId: v.id("executions"),
-    fileId: v.optional(v.id("_storage")),
-    error: v.optional(v.string()),
-    status: v.union(v.literal("completed"), v.literal("failed")),
-  },
-  handler: async (ctx, args) => {
-    const execution = await ctx.db.get(args.executionId)
-    const wasStopped = execution?.status === "stopped"
-
-    await ctx.db.patch(args.executionId, {
-      ...(wasStopped
-        ? {}
-        : {
-            status: args.status,
-            error: args.status === "failed" ? args.error : undefined,
-            finishedAt: Date.now(),
-          }),
-      trace:
-        args.fileId === undefined
-          ? undefined
-          : {
-              fileId: args.fileId,
-            },
-    })
-  },
-})

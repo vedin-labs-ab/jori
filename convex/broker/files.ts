@@ -46,8 +46,8 @@ export async function handleFileUploadRequest(
     const fileId: Id<"files"> = await ctx.runMutation(
       internal.files.data.record,
       {
-        tenantId: context.execution.tenantId,
-        executionId: context.execution._id,
+        tenantId: context.run.tenantId,
+        runId: context.run._id,
         storageId,
         name,
         mimeType,

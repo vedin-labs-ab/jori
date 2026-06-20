@@ -1,18 +1,19 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
 import { automationDisplay, eventAutomationDisplay } from "../display"
-import { summarizeExecution } from "../summaries"
+import { summarizeRun } from "../summaries"
 
-test("includes stopped details for stopped executions", async () => {
-  const summary = await summarizeExecution(
+test("includes stopped details for stopped runs", async () => {
+  const run = testRun(manualRun("Manual run", "Stop this run."), {
+    status: "stopped",
+    stoppedAt: 2000,
+    stoppedBy: "albin@example.com",
+  })
+  const summary = await summarizeRun(
     fakeQueryCtx({
-      run: manualRun("Manual run", "Stop this run."),
+      run,
     }),
-    execution({
-      status: "stopped",
-      stoppedAt: 2000,
-      stoppedBy: "albin@example.com",
-    })
+    run
   )
 
   expect(summary.details).toContainEqual({
@@ -23,16 +24,17 @@ test("includes stopped details for stopped executions", async () => {
 })
 
 test("includes approved decision actor details", async () => {
-  const summary = await summarizeExecution(
+  const run = testRun(manualRun("Approval run", "Ask for approval."))
+  const summary = await summarizeRun(
     fakeQueryCtx({
-      run: manualRun("Approval run", "Ask for approval."),
+      run,
     }),
-    execution(),
+    run,
     {
       _id: "approval",
       _creationTime: 0,
       tenantId: "tenant",
-      executionId: "execution",
+      runId: "run",
       surface: "slack",
       tool: "chat_postMessage",
       args: {},
@@ -49,7 +51,7 @@ test("includes approved decision actor details", async () => {
       createdAt: 0,
       expiresAt: 1000,
       decidedAt: 500,
-    } as Parameters<typeof summarizeExecution>[2]
+    } as Parameters<typeof summarizeRun>[2]
   )
 
   expect(summary.details).toContainEqual({
@@ -60,13 +62,14 @@ test("includes approved decision actor details", async () => {
 })
 
 test("includes linked provider source details", async () => {
-  const summary = await summarizeExecution(
+  const run = testRun(eventRun("GitHub event", "Handle the issue comment."))
+  const summary = await summarizeRun(
     fakeQueryCtx({
       event: githubIssueCommentEvent(),
       integration: githubIntegration(),
-      run: eventRun("GitHub event", "Handle the issue comment."),
+      run,
     }),
-    execution()
+    run
   )
 
   expect(summary.details).toEqual([
@@ -184,18 +187,17 @@ function githubIntegration() {
   }
 }
 
-function execution(overrides: Record<string, unknown> = {}) {
+function testRun(
+  run: Record<string, unknown>,
+  overrides: Record<string, unknown> = {}
+) {
   return {
-    _id: "execution",
-    _creationTime: 0,
-    tenantId: "tenant",
-    runId: "run",
     promptId: "prompt",
     status: "completed",
-    createdAt: 0,
     finishedAt: 1000,
+    ...run,
     ...overrides,
-  } as Parameters<typeof summarizeExecution>[1]
+  } as Parameters<typeof summarizeRun>[1]
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {

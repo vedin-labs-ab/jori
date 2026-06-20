@@ -16,7 +16,6 @@ import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
 import { conversations } from "./conversations/schema"
 import { events } from "./events/schema"
-import { executions } from "./executions/schema"
 import { files } from "./files/schema"
 import { identities } from "./identity/schema"
 import { integrations } from "./integrations/schema"
@@ -24,7 +23,7 @@ import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
 import { routing } from "./routing/schema"
 import { runs } from "./runs/schema"
-import { outbox, runtimeEvents, runtimeSandboxes } from "./runtime/schema"
+import { logs, outbox, sandboxes } from "./runtime/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
 
@@ -41,11 +40,10 @@ export default defineSchema({
   conversations,
   sessions,
   approvals,
-  executions,
   routing,
-  runtimeEvents,
+  logs,
   outbox,
-  runtimeSandboxes,
+  sandboxes,
   permissions,
   artifacts,
   artifactVersions,

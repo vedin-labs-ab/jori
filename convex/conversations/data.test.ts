@@ -24,6 +24,7 @@ test("starts new conversation message runs as mentions", async () => {
     expect.objectContaining({
       conversationId: "conversation",
       rootRunId: "runs-1",
+      runId: "runs-1",
     }),
   ])
   expect(inserted(ctx, "sessions")).toEqual([
@@ -34,12 +35,6 @@ test("starts new conversation message runs as mentions", async () => {
       state: "active",
     }),
   ])
-  expect(ctx.patches).toContainEqual({
-    id: "sessions-3",
-    patch: expect.objectContaining({
-      executionId: "executions-4",
-    }),
-  })
   expect(inserted(ctx, "outbox")).toHaveLength(1)
 })
 
@@ -90,16 +85,16 @@ test("starts reply runs when the previous session is terminal", async () => {
     }),
   ])
   expect(ctx.patches).toContainEqual({
-    id: "session",
+    id: "conversation-doc",
     patch: expect.objectContaining({
       runId: "runs-1",
-      state: "active",
     }),
   })
   expect(ctx.patches).toContainEqual({
     id: "session",
     patch: expect.objectContaining({
-      executionId: "executions-2",
+      runId: "runs-1",
+      state: "active",
     }),
   })
 })
@@ -163,18 +158,16 @@ function activeSessionSeed(
         conversationId: conversation._id,
         state: "active",
         runId: id<"runs">(runId),
-        executionId: id<"executions">("execution"),
         createdAt: 0,
         updatedAt: 0,
       },
     ],
     [
-      "executions",
+      "runs",
       {
-        _id: id<"executions">("execution"),
+        _id: id<"runs">(runId),
         _creationTime: 0,
         tenantId: "tenant",
-        runId: id<"runs">(runId),
         status,
         createdAt: 0,
       },

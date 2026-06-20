@@ -5,29 +5,21 @@ import {
   eventAutomationDisplay,
   messageDisplay,
 } from "../display"
-import { summarizeExecution } from "../summaries"
+import { summarizeRun } from "../summaries"
 
 test("uses stored automation snapshots when the automation document is unavailable", async () => {
-  const summary = await summarizeExecution(
-    fakeQueryCtx({
-      run: {
-        _id: "run",
-        _creationTime: 0,
-        tenantId: "tenant",
-        automationId: "missing-automation",
-        reason: { type: "event", eventId: "event" },
-        title: "Deep analysis",
-        task: "Perform the deep analysis.",
-        display: eventAutomationDisplay({
-          surface: { type: "slack", label: "Slack" },
-          event: { type: "message.created", label: "New channel message" },
-          metadata: [{ type: "channel", label: "C123" }],
-        }),
-        createdAt: 0,
-      },
+  const run = testRun({
+    automationId: "missing-automation",
+    reason: { type: "event", eventId: "event" },
+    title: "Deep analysis",
+    task: "Perform the deep analysis.",
+    display: eventAutomationDisplay({
+      surface: { type: "slack", label: "Slack" },
+      event: { type: "message.created", label: "New channel message" },
+      metadata: [{ type: "channel", label: "C123" }],
     }),
-    execution()
-  )
+  })
+  const summary = await summarizeRun(fakeQueryCtx({ run }), run)
 
   expect(summary.title).toBe("Deep analysis")
   expect(summary.task).toBe("Perform the deep analysis.")
@@ -42,28 +34,20 @@ test("uses stored automation snapshots when the automation document is unavailab
 })
 
 test("uses stored message snapshots when the message document is unavailable", async () => {
-  const summary = await summarizeExecution(
-    fakeQueryCtx({
-      run: {
-        _id: "run",
-        _creationTime: 0,
-        tenantId: "tenant",
-        reason: {
-          type: "message",
-          messageId: "missing-message",
-          kind: "mention",
-        },
-        title: "Please summarize this thread.",
-        task: "Please summarize this thread.\n\nKeep it concise.",
-        display: messageDisplay({
-          kind: "mention",
-          metadata: [{ type: "channel", label: "C123" }],
-        }),
-        createdAt: 0,
-      },
+  const run = testRun({
+    reason: {
+      type: "message",
+      messageId: "missing-message",
+      kind: "mention",
+    },
+    title: "Please summarize this thread.",
+    task: "Please summarize this thread.\n\nKeep it concise.",
+    display: messageDisplay({
+      kind: "mention",
+      metadata: [{ type: "channel", label: "C123" }],
     }),
-    execution()
-  )
+  })
+  const summary = await summarizeRun(fakeQueryCtx({ run }), run)
 
   expect(summary.source).toEqual({
     type: "message",
@@ -74,7 +58,16 @@ test("uses stored message snapshots when the message document is unavailable", a
 })
 
 test("uses stored message snapshots instead of message text", async () => {
-  const summary = await summarizeExecution(
+  const run = testRun({
+    reason: { type: "message", messageId: "message", kind: "reply" },
+    title: "Please summarize this thread.",
+    task: "Stored task.",
+    display: messageDisplay({
+      kind: "reply",
+      metadata: [{ type: "channel", label: "C123" }],
+    }),
+  })
+  const summary = await summarizeRun(
     fakeQueryCtx({
       integration: slackIntegration(),
       message: {
@@ -89,21 +82,9 @@ test("uses stored message snapshots instead of message text", async () => {
         metadata: [{ type: "channel", label: "C123" }],
         createdAt: 0,
       },
-      run: {
-        _id: "run",
-        _creationTime: 0,
-        tenantId: "tenant",
-        reason: { type: "message", messageId: "message", kind: "reply" },
-        title: "Please summarize this thread.",
-        task: "Stored task.",
-        display: messageDisplay({
-          kind: "reply",
-          metadata: [{ type: "channel", label: "C123" }],
-        }),
-        createdAt: 0,
-      },
+      run,
     }),
-    execution()
+    run
   )
 
   expect(summary.title).toBe("Please summarize this thread.")
@@ -118,35 +99,27 @@ test("uses stored message snapshots instead of message text", async () => {
 })
 
 test("summarizes mention runs with source task links", async () => {
-  const summary = await summarizeExecution(
-    fakeQueryCtx({
-      run: {
-        _id: "run",
-        _creationTime: 0,
-        tenantId: "tenant",
-        reason: { type: "message", messageId: "message", kind: "mention" },
-        title: "Please summarize this thread.",
-        task: "Please summarize this thread.",
-        display: messageDisplay({
-          kind: "mention",
-          metadata: [{ type: "channel", label: "#product" }],
-          details: [
-            {
-              type: "channel",
-              label: "#product",
-              url: "https://slack.com/app_redirect?channel=C123&team=slack-team",
-            },
-          ],
-          taskSource: {
-            label: "Source",
-            url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=slack-team",
-          },
-        }),
-        createdAt: 0,
+  const run = testRun({
+    reason: { type: "message", messageId: "message", kind: "mention" },
+    title: "Please summarize this thread.",
+    task: "Please summarize this thread.",
+    display: messageDisplay({
+      kind: "mention",
+      metadata: [{ type: "channel", label: "#product" }],
+      details: [
+        {
+          type: "channel",
+          label: "#product",
+          url: "https://slack.com/app_redirect?channel=C123&team=slack-team",
+        },
+      ],
+      taskSource: {
+        label: "Source",
+        url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=slack-team",
       },
     }),
-    execution()
-  )
+  })
+  const summary = await summarizeRun(fakeQueryCtx({ run }), run)
 
   expect(summary.source).toEqual({
     type: "message",
@@ -168,7 +141,14 @@ test("summarizes mention runs with source task links", async () => {
 })
 
 test("keeps stored automation snapshots when the automation changes", async () => {
-  const summary = await summarizeExecution(
+  const run = testRun({
+    automationId: "automation",
+    reason: { type: "time", scheduledAt: 0 },
+    title: "Original automation name",
+    task: "Original automation instructions.",
+    display: automationDisplay(),
+  })
+  const summary = await summarizeRun(
     fakeQueryCtx({
       automation: {
         _id: "automation",
@@ -182,19 +162,9 @@ test("keeps stored automation snapshots when the automation changes", async () =
         createdAt: 0,
         updatedAt: 0,
       },
-      run: {
-        _id: "run",
-        _creationTime: 0,
-        tenantId: "tenant",
-        automationId: "automation",
-        reason: { type: "time", scheduledAt: 0 },
-        title: "Original automation name",
-        task: "Original automation instructions.",
-        display: automationDisplay(),
-        createdAt: 0,
-      },
+      run,
     }),
-    execution()
+    run
   )
 
   expect(summary.title).toBe("Original automation name")
@@ -221,18 +191,17 @@ function slackIntegration() {
   }
 }
 
-function execution(overrides: Record<string, unknown> = {}) {
+function testRun(overrides: Record<string, unknown>) {
   return {
-    _id: "execution",
+    _id: "run",
     _creationTime: 0,
     tenantId: "tenant",
-    runId: "run",
     promptId: "prompt",
     status: "completed",
     createdAt: 0,
     finishedAt: 1000,
     ...overrides,
-  } as Parameters<typeof summarizeExecution>[1]
+  } as Parameters<typeof summarizeRun>[1]
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {

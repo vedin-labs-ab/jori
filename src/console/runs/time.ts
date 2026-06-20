@@ -3,29 +3,26 @@ import { type ExecutionItem } from "./types"
 const liveIntervalMs = 1000
 const settledIntervalMs = 60_000
 
-export function executionClockInterval(
-  executions: ExecutionItem[],
-  now: number
-) {
-  return executions.some((execution) => needsLiveClock(execution, now))
+export function runClockInterval(runs: ExecutionItem[], now: number) {
+  return runs.some((run) => needsLiveClock(run, now))
     ? liveIntervalMs
     : settledIntervalMs
 }
 
-export function displayNowForExecution(execution: ExecutionItem, now: number) {
-  if (needsLiveClock(execution, now)) {
+export function displayNowForRun(run: ExecutionItem, now: number) {
+  if (needsLiveClock(run, now)) {
     return now
   }
 
   return Math.floor(now / settledIntervalMs) * settledIntervalMs
 }
 
-function needsLiveClock(execution: ExecutionItem, now: number) {
+function needsLiveClock(run: ExecutionItem, now: number) {
   return (
-    execution.status === "queued" ||
-    execution.status === "running" ||
-    (execution.approval !== null &&
-      execution.approval.state === "pending" &&
-      execution.approval.expiresAt > now)
+    run.status === "queued" ||
+    run.status === "running" ||
+    (run.approval !== null &&
+      run.approval.state === "pending" &&
+      run.approval.expiresAt > now)
   )
 }

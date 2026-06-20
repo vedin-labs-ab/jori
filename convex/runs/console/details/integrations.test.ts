@@ -1,20 +1,23 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
 import { eventAutomationDisplay } from "../display"
-import { summarizeExecution } from "../summaries"
+import { summarizeRun } from "../summaries"
 
 test("includes linked GitHub pull request details", async () => {
-  const summary = await summarizeExecution(
+  const run = testRun(
+    eventRun({
+      title: "GitHub PR event",
+      task: "Handle the pull request comment.",
+      display: githubDisplay(),
+    })
+  )
+  const summary = await summarizeRun(
     fakeQueryCtx({
       event: githubPullRequestCommentEvent(),
       integration: githubIntegration(),
-      run: eventRun({
-        title: "GitHub PR event",
-        task: "Handle the pull request comment.",
-        display: githubDisplay(),
-      }),
+      run,
     }),
-    execution()
+    run
   )
 
   expect(summary.details).toEqual([
@@ -37,16 +40,19 @@ test("includes linked GitHub pull request details", async () => {
 })
 
 test("formats Linear issue details with a colon", async () => {
-  const summary = await summarizeExecution(
+  const run = testRun(
+    eventRun({
+      title: "Linear event",
+      task: "Handle the Linear issue comment.",
+      display: linearDisplay(),
+    })
+  )
+  const summary = await summarizeRun(
     fakeQueryCtx({
       event: linearIssueCommentEvent(),
-      run: eventRun({
-        title: "Linear event",
-        task: "Handle the Linear issue comment.",
-        display: linearDisplay(),
-      }),
+      run,
     }),
-    execution()
+    run
   )
 
   expect(summary.details).toContainEqual({
@@ -190,18 +196,17 @@ function githubIntegration() {
   }
 }
 
-function execution(overrides: Record<string, unknown> = {}) {
+function testRun(
+  run: Record<string, unknown>,
+  overrides: Record<string, unknown> = {}
+) {
   return {
-    _id: "execution",
-    _creationTime: 0,
-    tenantId: "tenant",
-    runId: "run",
     promptId: "prompt",
     status: "completed",
-    createdAt: 0,
     finishedAt: 1000,
+    ...run,
     ...overrides,
-  } as Parameters<typeof summarizeExecution>[1]
+  } as Parameters<typeof summarizeRun>[1]
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {

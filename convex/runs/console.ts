@@ -6,18 +6,18 @@ import {
   type ApprovalFilter,
   approvalFilterValidator,
   approvalMatchesFilter,
-  executionFilterValidator,
-  executionMatchesFilter,
+  runFilterValidator,
+  runMatchesFilter,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
-import { summarizeExecution } from "./console/summaries"
+import { summarizeRun } from "./console/summaries"
 
-type ExecutionSummary = Awaited<ReturnType<typeof summarizeExecution>>
+type RunSummary = Awaited<ReturnType<typeof summarizeRun>>
 
 export const page = query({
   args: {
     approvalFilter: approvalFilterValidator,
-    executionFilter: executionFilterValidator,
+    runFilter: runFilterValidator,
     query: v.string(),
     tenantId: v.string(),
     paginationOpts: paginationOptsValidator,
@@ -31,11 +31,11 @@ export const page = query({
 
     const offset = parseCursor(args.paginationOpts.cursor)
     const normalizedQuery = normalizeQuery(args.query)
-    const rows: ExecutionSummary[] = []
+    const rows: RunSummary[] = []
     let matchingIndex = 0
     let hasMore = false
-    const executions = ctx.db
-      .query("executions")
+    const runs = ctx.db
+      .query("runs")
       .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
       .order("desc")
 
@@ -44,14 +44,12 @@ export const page = query({
       normalizedQuery
     )
 
-    for await (const execution of executions) {
-      if (!executionMatchesFilter(execution, args.executionFilter)) {
+    for await (const run of runs) {
+      if (!runMatchesFilter(run, args.runFilter)) {
         continue
       }
 
-      const summary = shouldMatchSummary
-        ? await summarizeExecution(ctx, execution)
-        : null
+      const summary = shouldMatchSummary ? await summarizeRun(ctx, run) : null
 
       if (
         summary !== null &&
@@ -70,7 +68,7 @@ export const page = query({
         break
       }
 
-      rows.push(summary ?? (await summarizeExecution(ctx, execution)))
+      rows.push(summary ?? (await summarizeRun(ctx, run)))
       matchingIndex += 1
     }
 
@@ -85,7 +83,7 @@ export const page = query({
 export const stats = query({
   args: {
     approvalFilter: approvalFilterValidator,
-    executionFilter: executionFilterValidator,
+    runFilter: runFilterValidator,
     query: v.string(),
     tenantId: v.string(),
   },
@@ -97,25 +95,25 @@ export const stats = query({
     if (args.approvalFilter === "pending") {
       return {
         filteredCount: await countPendingApprovals(ctx, {
-          executionFilter: args.executionFilter,
+          runFilter: args.runFilter,
           normalizedQuery,
           tenantId: args.tenantId,
         }),
-        totalCount: await countExecutions(ctx, args.tenantId),
+        totalCount: await countRuns(ctx, args.tenantId),
       }
     }
 
     let filteredCount = 0
     let totalCount = 0
-    const executions = ctx.db
-      .query("executions")
+    const runs = ctx.db
+      .query("runs")
       .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
       .order("desc")
 
-    for await (const execution of executions) {
+    for await (const run of runs) {
       totalCount += 1
 
-      if (!executionMatchesFilter(execution, args.executionFilter)) {
+      if (!runMatchesFilter(run, args.runFilter)) {
         continue
       }
 
@@ -124,7 +122,7 @@ export const stats = query({
         continue
       }
 
-      const summary = await summarizeExecution(ctx, execution)
+      const summary = await summarizeRun(ctx, run)
 
       if (matchesSummary(summary, args.approvalFilter, normalizedQuery)) {
         filteredCount += 1
@@ -135,13 +133,13 @@ export const stats = query({
   },
 })
 
-async function countExecutions(ctx: QueryCtx, tenantId: string) {
+async function countRuns(ctx: QueryCtx, tenantId: string) {
   let count = 0
-  const executions = ctx.db
-    .query("executions")
+  const runs = ctx.db
+    .query("runs")
     .withIndex("by_tenant", (index) => index.eq("tenantId", tenantId))
 
-  for await (const _execution of executions) {
+  for await (const _run of runs) {
     count += 1
   }
 
@@ -167,7 +165,7 @@ function needsSummary(filter: ApprovalFilter, normalizedQuery: string) {
 }
 
 function matchesSummary(
-  summary: ExecutionSummary,
+  summary: RunSummary,
   filter: ApprovalFilter,
   normalizedQuery: string
 ) {

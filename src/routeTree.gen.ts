@@ -10,9 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SkillsRouteImport } from './routes/skills'
+import { Route as RunsRouteImport } from './routes/runs'
 import { Route as PlaybooksRouteImport } from './routes/playbooks'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
-import { Route as ExecutionsRouteImport } from './routes/executions'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as ArtifactsRouteImport } from './routes/artifacts'
@@ -25,6 +25,11 @@ const SkillsRoute = SkillsRouteImport.update({
   path: '/skills',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RunsRoute = RunsRouteImport.update({
+  id: '/runs',
+  path: '/runs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlaybooksRoute = PlaybooksRouteImport.update({
   id: '/playbooks',
   path: '/playbooks',
@@ -33,11 +38,6 @@ const PlaybooksRoute = PlaybooksRouteImport.update({
 const IntegrationsRoute = IntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExecutionsRoute = ExecutionsRouteImport.update({
-  id: '/executions',
-  path: '/executions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConsoleRoute = ConsoleRouteImport.update({
@@ -77,9 +77,9 @@ export interface FileRoutesByFullPath {
   '/artifacts': typeof ArtifactsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playbooks': typeof PlaybooksRoute
+  '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
@@ -88,9 +88,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playbooks': typeof PlaybooksRoute
+  '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
   '/artifacts': typeof ArtifactsIndexRoute
   '/artifacts/$artifactId': typeof ArtifactsArtifactIdIndexRoute
@@ -101,9 +101,9 @@ export interface FileRoutesById {
   '/artifacts': typeof ArtifactsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/executions': typeof ExecutionsRoute
   '/integrations': typeof IntegrationsRoute
   '/playbooks': typeof PlaybooksRoute
+  '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
@@ -115,9 +115,9 @@ export interface FileRouteTypes {
     | '/artifacts'
     | '/automations'
     | '/console'
-    | '/executions'
     | '/integrations'
     | '/playbooks'
+    | '/runs'
     | '/skills'
     | '/artifacts/'
     | '/artifacts/$artifactId/'
@@ -126,9 +126,9 @@ export interface FileRouteTypes {
     | '/'
     | '/automations'
     | '/console'
-    | '/executions'
     | '/integrations'
     | '/playbooks'
+    | '/runs'
     | '/skills'
     | '/artifacts'
     | '/artifacts/$artifactId'
@@ -138,9 +138,9 @@ export interface FileRouteTypes {
     | '/artifacts'
     | '/automations'
     | '/console'
-    | '/executions'
     | '/integrations'
     | '/playbooks'
+    | '/runs'
     | '/skills'
     | '/artifacts/'
     | '/artifacts/$artifactId/'
@@ -151,9 +151,9 @@ export interface RootRouteChildren {
   ArtifactsRoute: typeof ArtifactsRouteWithChildren
   AutomationsRoute: typeof AutomationsRoute
   ConsoleRoute: typeof ConsoleRoute
-  ExecutionsRoute: typeof ExecutionsRoute
   IntegrationsRoute: typeof IntegrationsRoute
   PlaybooksRoute: typeof PlaybooksRoute
+  RunsRoute: typeof RunsRoute
   SkillsRoute: typeof SkillsRoute
 }
 
@@ -164,6 +164,13 @@ declare module '@tanstack/react-router' {
       path: '/skills'
       fullPath: '/skills'
       preLoaderRoute: typeof SkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/runs': {
+      id: '/runs'
+      path: '/runs'
+      fullPath: '/runs'
+      preLoaderRoute: typeof RunsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/playbooks': {
@@ -178,13 +185,6 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/executions': {
-      id: '/executions'
-      path: '/executions'
-      fullPath: '/executions'
-      preLoaderRoute: typeof ExecutionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/console': {
@@ -251,9 +251,9 @@ const rootRouteChildren: RootRouteChildren = {
   ArtifactsRoute: ArtifactsRouteWithChildren,
   AutomationsRoute: AutomationsRoute,
   ConsoleRoute: ConsoleRoute,
-  ExecutionsRoute: ExecutionsRoute,
   IntegrationsRoute: IntegrationsRoute,
   PlaybooksRoute: PlaybooksRoute,
+  RunsRoute: RunsRoute,
   SkillsRoute: SkillsRoute,
 }
 export const routeTree = rootRouteImport

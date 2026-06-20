@@ -1,14 +1,14 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { type ExecutionFilter, executionMatchesFilter } from "./filters"
-import { summarizeExecution } from "./summaries"
+import { type RunFilter, runMatchesFilter } from "./filters"
+import { summarizeRun } from "./summaries"
 
-type ExecutionSummary = Awaited<ReturnType<typeof summarizeExecution>>
+type RunSummary = Awaited<ReturnType<typeof summarizeRun>>
 
 export async function pagePendingApprovals(
   ctx: QueryCtx,
   args: {
-    executionFilter: ExecutionFilter
+    runFilter: RunFilter
     query: string
     tenantId: string
     paginationOpts: {
@@ -19,17 +19,17 @@ export async function pagePendingApprovals(
 ) {
   const offset = parseCursor(args.paginationOpts.cursor)
   const normalizedQuery = normalizeQuery(args.query)
-  const rows: ExecutionSummary[] = []
+  const rows: RunSummary[] = []
   const now = Date.now()
   let matchingIndex = 0
   let hasMore = false
 
-  for await (const { approval, execution } of pendingApprovalExecutions(ctx, {
-    executionFilter: args.executionFilter,
+  for await (const { approval, run } of pendingApprovalRuns(ctx, {
     now,
+    runFilter: args.runFilter,
     tenantId: args.tenantId,
   })) {
-    const summary = await summarizeExecution(ctx, execution, approval)
+    const summary = await summarizeRun(ctx, run, approval)
 
     if (!matchesSearch(summary, normalizedQuery)) {
       continue
@@ -59,17 +59,17 @@ export async function pagePendingApprovals(
 export async function countPendingApprovals(
   ctx: QueryCtx,
   args: {
-    executionFilter: ExecutionFilter
     normalizedQuery: string
+    runFilter: RunFilter
     tenantId: string
   }
 ) {
   const now = Date.now()
   let count = 0
 
-  for await (const { approval, execution } of pendingApprovalExecutions(ctx, {
-    executionFilter: args.executionFilter,
+  for await (const { approval, run } of pendingApprovalRuns(ctx, {
     now,
+    runFilter: args.runFilter,
     tenantId: args.tenantId,
   })) {
     if (args.normalizedQuery === "") {
@@ -77,7 +77,7 @@ export async function countPendingApprovals(
       continue
     }
 
-    const summary = await summarizeExecution(ctx, execution, approval)
+    const summary = await summarizeRun(ctx, run, approval)
 
     if (matchesSearch(summary, args.normalizedQuery)) {
       count += 1
@@ -87,35 +87,35 @@ export async function countPendingApprovals(
   return count
 }
 
-async function* pendingApprovalExecutions(
+async function* pendingApprovalRuns(
   ctx: QueryCtx,
   args: {
-    executionFilter: ExecutionFilter
     now: number
+    runFilter: RunFilter
     tenantId: string
   }
 ) {
-  const seenExecutionIds = new Set<string>()
+  const seenRunIds = new Set<string>()
   const approvals = pendingApprovalQuery(ctx, args.tenantId, args.now)
 
   for await (const approval of approvals) {
     if (
       !isPendingApproval(approval, args.now) ||
-      seenExecutionIds.has(approval.executionId)
+      seenRunIds.has(approval.runId)
     ) {
       continue
     }
 
-    const execution = await ctx.db.get(approval.executionId)
+    const run = await ctx.db.get(approval.runId)
 
-    if (execution === null || execution.tenantId !== args.tenantId) {
+    if (run === null || run.tenantId !== args.tenantId) {
       continue
     }
 
-    seenExecutionIds.add(execution._id)
+    seenRunIds.add(run._id)
 
-    if (executionMatchesFilter(execution, args.executionFilter)) {
-      yield { approval, execution }
+    if (runMatchesFilter(run, args.runFilter)) {
+      yield { approval, run }
     }
   }
 }
@@ -143,7 +143,7 @@ function normalizeQuery(query: string) {
   return query.trim().toLowerCase()
 }
 
-function matchesSearch(summary: ExecutionSummary, normalizedQuery: string) {
+function matchesSearch(summary: RunSummary, normalizedQuery: string) {
   return (
     normalizedQuery === "" || summary.searchableText.includes(normalizedQuery)
   )

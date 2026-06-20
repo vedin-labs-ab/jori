@@ -3,16 +3,6 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
 import { getIntegrationTools } from "../automations/access"
-import { type AgentRuntimeInput } from "../executions/agent/input"
-import { assemblePrompt } from "../executions/agent/prompt"
-import { createRuntimeToolCapability } from "../executions/agent/tools/bundles"
-import { getPromptedTools } from "../executions/agent/tools/policy"
-import { getEnabledToolPermissions } from "../executions/agent/tools/resolve"
-import {
-  emptyObjectSchema,
-  getToolInputSchema,
-} from "../executions/agent/tools/schemas"
-import { createExecutionToolSnapshot } from "../executions/agent/tools/snapshot"
 import {
   type PermissionMode,
   resolveToolMode,
@@ -20,6 +10,16 @@ import {
   type ToolPermission,
   type ToolSurface,
 } from "../permissions/catalog"
+import { type AgentRuntimeInput } from "../runs/agent/input"
+import { assemblePrompt } from "../runs/agent/prompt"
+import { createRuntimeToolCapability } from "../runs/agent/tools/bundles"
+import { getPromptedTools } from "../runs/agent/tools/policy"
+import { getEnabledToolPermissions } from "../runs/agent/tools/resolve"
+import {
+  emptyObjectSchema,
+  getToolInputSchema,
+} from "../runs/agent/tools/schemas"
+import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
 import { withApprovalSchema } from "./schemas"
 import { requireWorkerSecret } from "./shared"
 
@@ -57,7 +57,6 @@ const sandboxTools = [
 
 export const load = action({
   args: {
-    executionId: v.id("executions"),
     runId: v.id("runs"),
     secret: v.string(),
   },
@@ -65,16 +64,13 @@ export const load = action({
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
 
-    const input = (await ctx.runQuery(
-      internal.executions.records.getInputByRun,
-      {
-        runId: args.runId,
-      }
-    )) as AgentRuntimeInput | null
-    const execution = (await ctx.runQuery(internal.executions.records.get, {
-      executionId: args.executionId,
+    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
+      runId: args.runId,
+    })) as AgentRuntimeInput | null
+    const run = (await ctx.runQuery(internal.runs.records.get, {
+      runId: args.runId,
     })) as {
-      _id: Id<"executions">
+      _id: Id<"runs">
       sandboxId?: string
       status: "completed" | "failed" | "queued" | "running" | "stopped"
     } | null
@@ -82,7 +78,7 @@ export const load = action({
       runId: args.runId,
     })
 
-    if (input === null || execution === null) {
+    if (input === null || run === null) {
       throw new Error("Runtime context not found.")
     }
 
@@ -97,25 +93,22 @@ export const load = action({
       new Blob([prompt], { type: "text/markdown" })
     )
 
-    await ctx.runMutation(internal.runtime.context.prepareExecution, {
-      executionId: args.executionId,
+    await ctx.runMutation(internal.runtime.context.prepareRun, {
+      runId: args.runId,
       promptId,
-      toolSnapshot: createExecutionToolSnapshot({
+      toolSnapshot: createRunToolSnapshot({
         capabilities: permissions.capabilities,
         webSearch: input.type !== "automation" || input.automation.access.web,
       }),
     })
 
     return {
-      execution: {
-        id: execution._id,
-        sandboxId: execution.sandboxId ?? null,
-        status: execution.status,
-      },
       prompt,
       run: {
         id: input.run._id,
         rootRunId: input.run.rootRunId ?? null,
+        sandboxId: run.sandboxId ?? null,
+        status: run.status,
         task: input.run.task,
         tenantId: input.run.tenantId,
         title: input.run.title,
@@ -131,15 +124,15 @@ export const load = action({
   },
 })
 
-export const prepareExecution = internalMutation({
+export const prepareRun = internalMutation({
   args: {
-    executionId: v.id("executions"),
+    runId: v.id("runs"),
     promptId: v.id("_storage"),
     toolSnapshot: v.any(),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.executionId, {
+    await ctx.db.patch(args.runId, {
       promptId: args.promptId,
       toolSnapshot: args.toolSnapshot,
     })

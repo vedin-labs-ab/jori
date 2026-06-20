@@ -1,10 +1,6 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
-import {
-  internalMutation,
-  type MutationCtx,
-  type QueryCtx,
-} from "../_generated/server"
+import { type Doc } from "../_generated/dataModel"
+import { internalMutation, type MutationCtx } from "../_generated/server"
 import { findConversation, startMessageRun } from "../conversations/data"
 import { resolveUserIdByEmail } from "../identity/identities"
 import { getActorEmail } from "../shared/actor"
@@ -87,7 +83,6 @@ async function createRouting(
     model: input.decision.model,
     error: input.decision.error,
     runId: run.runId,
-    executionId: run.executionId,
     replyClaimUntil: shouldReply ? input.now + routingReplyClaimMs : undefined,
     createdAt: input.now,
     updatedAt: input.now,
@@ -144,10 +139,7 @@ async function maybeStartAgentRun(
     createdBy,
     now: input.now,
   })
-  const executionId =
-    run.runId === undefined ? undefined : await findExecutionId(ctx, run.runId)
-
-  return { executionId, runId: run.runId }
+  return { runId: run.runId }
 }
 
 async function claimPendingReply(
@@ -212,13 +204,4 @@ function normalizeReply(reply: string | undefined) {
   const value = reply?.trim()
 
   return value === "" ? undefined : value
-}
-
-async function findExecutionId(ctx: QueryCtx, runId: Id<"runs">) {
-  const execution = await ctx.db
-    .query("executions")
-    .withIndex("by_run", (query) => query.eq("runId", runId))
-    .first()
-
-  return execution?._id
 }

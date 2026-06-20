@@ -49,7 +49,7 @@ export const ExecutionRow = memo(function ExecutionRow({
         {isOngoing ? (
           <StopExecution
             className="mr-3 shrink-0"
-            executionId={execution.id}
+            runId={execution.id}
             tenantId={tenantId}
           />
         ) : null}

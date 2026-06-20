@@ -21,21 +21,19 @@ import {
 } from "@/components/ui/tooltip"
 import { api } from "../../../../convex/_generated/api"
 
-type ExecutionId = FunctionArgs<
-  typeof api.executions.control.stop
->["executionId"]
+type RunId = FunctionArgs<typeof api.runs.control.stop>["runId"]
 
 export function StopExecution({
   className,
-  executionId,
+  runId,
   tenantId,
 }: {
   className?: string
-  executionId: string
+  runId: string
   tenantId: string
 }) {
   const { error, isOpen, isStopping, setOpen, stopExecution } =
-    useStopExecution({ executionId, tenantId })
+    useStopExecution({ runId, tenantId })
 
   return (
     <AlertDialog
@@ -100,13 +98,13 @@ export function StopExecution({
 }
 
 function useStopExecution({
-  executionId,
+  runId,
   tenantId,
 }: {
-  executionId: string
+  runId: string
   tenantId: string
 }) {
-  const stop = useMutation(api.executions.control.stop)
+  const stop = useMutation(api.runs.control.stop)
   const [isOpen, setIsOpen] = useState(false)
   const [isStopping, setIsStopping] = useState(false)
   const [error, setError] = useState<string>()
@@ -130,7 +128,7 @@ function useStopExecution({
 
     try {
       await stop({
-        executionId: executionId as ExecutionId,
+        runId: runId as RunId,
         tenantId,
       })
       setIsOpen(false)

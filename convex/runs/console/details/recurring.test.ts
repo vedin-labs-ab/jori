@@ -1,24 +1,28 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
 import { recurringDisplay } from "../display"
-import { summarizeExecution } from "../summaries"
+import { summarizeRun } from "../summaries"
 
 test("includes recurring automation details", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 9)
   const nextAt = Date.UTC(2026, 5, 15, 9)
-  const summary = await summarizeExecution(
-    fakeQueryCtx({
-      automation: recurringAutomation({ nextAt }),
-      integration: slackIntegration(),
-      run: recurringRun(scheduledAt, {
-        details: [{ type: "next", label: "Next", at: nextAt }],
-      }),
+  const run = testRun(
+    recurringRun(scheduledAt, {
+      details: [{ type: "next", label: "Next", at: nextAt }],
     }),
-    execution({
+    {
       createdAt: scheduledAt + 1000,
       finishedAt: scheduledAt + 2000,
       toolSnapshot: slackToolSnapshot(),
-    })
+    }
+  )
+  const summary = await summarizeRun(
+    fakeQueryCtx({
+      automation: recurringAutomation({ nextAt }),
+      integration: slackIntegration(),
+      run,
+    }),
+    run
   )
 
   expect(summary.source).toEqual({
@@ -47,15 +51,19 @@ test("includes recurring automation details", async () => {
 test("includes paused recurring automation status without next run details", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 9)
   const nextAt = Date.UTC(2026, 5, 15, 9)
-  const summary = await summarizeExecution(
+  const run = testRun(
+    recurringRun(scheduledAt, {
+      details: [{ type: "status", label: "Paused" }],
+    }),
+    { createdAt: scheduledAt + 1000, finishedAt: scheduledAt + 2000 }
+  )
+  const summary = await summarizeRun(
     fakeQueryCtx({
       automation: recurringAutomation({ nextAt, status: "paused" }),
       integration: slackIntegration(),
-      run: recurringRun(scheduledAt, {
-        details: [{ type: "status", label: "Paused" }],
-      }),
+      run,
     }),
-    execution({ createdAt: scheduledAt + 1000, finishedAt: scheduledAt + 2000 })
+    run
   )
 
   expect(summary.details).toContainEqual({
@@ -134,18 +142,17 @@ function slackIntegration() {
   }
 }
 
-function execution(overrides: Record<string, unknown> = {}) {
+function testRun(
+  run: Record<string, unknown>,
+  overrides: Record<string, unknown> = {}
+) {
   return {
-    _id: "execution",
-    _creationTime: 0,
-    tenantId: "tenant",
-    runId: "run",
     promptId: "prompt",
     status: "completed",
-    createdAt: 0,
     finishedAt: 1000,
+    ...run,
     ...overrides,
-  } as Parameters<typeof summarizeExecution>[1]
+  } as Parameters<typeof summarizeRun>[1]
 }
 
 function slackToolSnapshot() {

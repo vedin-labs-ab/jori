@@ -1,21 +1,22 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
 import { oneShotDisplay } from "../display"
-import { summarizeExecution } from "../summaries"
+import { summarizeRun } from "../summaries"
 
 test("includes one-shot automation access details", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
-  const summary = await summarizeExecution(
+  const run = testRun(oneShotRun(scheduledAt), {
+    createdAt: scheduledAt + 1000,
+    finishedAt: scheduledAt + 2000,
+    toolSnapshot: slackToolSnapshot(true),
+  })
+  const summary = await summarizeRun(
     fakeQueryCtx({
       automation: oneShotAutomation(scheduledAt),
       integration: slackIntegration(),
-      run: oneShotRun(scheduledAt),
+      run,
     }),
-    execution({
-      createdAt: scheduledAt + 1000,
-      finishedAt: scheduledAt + 2000,
-      toolSnapshot: slackToolSnapshot(true),
-    })
+    run
   )
 
   expect(summary.source).toEqual({
@@ -42,17 +43,18 @@ test("includes one-shot automation access details", async () => {
 
 test("marks one-shot automation web search as blocked when disabled", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
-  const summary = await summarizeExecution(
+  const run = testRun(oneShotRun(scheduledAt), {
+    createdAt: scheduledAt + 1000,
+    finishedAt: scheduledAt + 2000,
+    toolSnapshot: slackToolSnapshot(false),
+  })
+  const summary = await summarizeRun(
     fakeQueryCtx({
       automation: oneShotAutomation(scheduledAt, false),
       integration: slackIntegration(),
-      run: oneShotRun(scheduledAt),
+      run,
     }),
-    execution({
-      createdAt: scheduledAt + 1000,
-      finishedAt: scheduledAt + 2000,
-      toolSnapshot: slackToolSnapshot(false),
-    })
+    run
   )
 
   expect(summary.details).toContainEqual({
@@ -117,18 +119,17 @@ function slackIntegration() {
   }
 }
 
-function execution(overrides: Record<string, unknown> = {}) {
+function testRun(
+  run: Record<string, unknown>,
+  overrides: Record<string, unknown> = {}
+) {
   return {
-    _id: "execution",
-    _creationTime: 0,
-    tenantId: "tenant",
-    runId: "run",
     promptId: "prompt",
     status: "completed",
-    createdAt: 0,
     finishedAt: 1000,
+    ...run,
     ...overrides,
-  } as Parameters<typeof summarizeExecution>[1]
+  } as Parameters<typeof summarizeRun>[1]
 }
 
 function slackToolSnapshot(webSearch: boolean) {

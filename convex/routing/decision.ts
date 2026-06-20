@@ -140,7 +140,7 @@ function normalizeDecision(value: unknown): IntakeDecision {
 }
 
 function fallbackDecision(context: MessageRoutingContext): IntakeDecision {
-  if (context.activeExecution !== null || context.isDirect) {
+  if (context.activeRun !== null || context.isDirect) {
     return { route: "agent" }
   }
 
