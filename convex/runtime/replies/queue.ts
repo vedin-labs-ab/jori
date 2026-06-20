@@ -46,7 +46,7 @@ export async function queueReply(
 ) {
   return await enqueueOperation(ctx, {
     tenantId: args.tenantId,
-    idempotencyKey: `reply:${args.routingId}:${args.kind}`,
+    key: `reply:${args.routingId}:${args.kind}`,
     operation: {
       type: "reply.send",
       kind: args.kind,

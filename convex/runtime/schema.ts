@@ -10,13 +10,10 @@ const runtimeOperation = v.union(
     type: v.literal("approval.resume"),
     approvalId: v.id("approvals"),
     decision: v.union(v.literal("approved"), v.literal("denied")),
-    waitpointTokenId: v.string(),
   }),
   v.object({
     type: v.literal("run.cancel"),
     runId: v.id("runs"),
-    sandboxId: v.optional(v.string()),
-    workerId: v.optional(v.string()),
   }),
   v.object({
     type: v.literal("reply.send"),
@@ -30,23 +27,22 @@ const runtimeOperation = v.union(
 export const outbox = defineTable({
   tenantId: v.string(),
   operation: runtimeOperation,
-  idempotencyKey: v.string(),
-  state: v.union(
+  key: v.string(),
+  status: v.union(
     v.literal("pending"),
     v.literal("processing"),
     v.literal("sent"),
     v.literal("failed")
   ),
   attempts: v.number(),
-  nextAttemptAt: v.number(),
-  lastError: v.optional(v.string()),
-  externalId: v.optional(v.string()),
+  dueAt: v.number(),
+  error: v.optional(v.string()),
+  receiptId: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
 })
-  .index("by_state_and_next_attempt", ["state", "nextAttemptAt"])
-  .index("by_idempotency", ["idempotencyKey"])
-  .index("by_tenant", ["tenantId"])
+  .index("by_status_and_due_at", ["status", "dueAt"])
+  .index("by_key", ["key"])
 
 export const logs = defineTable({
   tenantId: v.string(),

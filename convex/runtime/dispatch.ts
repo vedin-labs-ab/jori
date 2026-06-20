@@ -26,10 +26,10 @@ export const drain = internalAction({
       }
 
       try {
-        const externalId = await performOperation(ctx, item)
+        const receiptId = await performOperation(ctx, item)
         await ctx.runMutation(internal.runtime.outbox.markSent, {
           outboxId: item._id,
-          externalId,
+          receiptId,
         })
       } catch (error) {
         await ctx.runMutation(internal.runtime.outbox.markFailed, {
@@ -54,26 +54,9 @@ async function performOperation(ctx: DispatchCtx, item: Doc<"outbox">) {
     case "run.start":
       return await triggerAgentRun(ctx, item)
     case "approval.resume":
-      configureTrigger()
-
-      await wait.completeToken(operation.waitpointTokenId, {
-        approvalId: operation.approvalId,
-        decision: operation.decision,
-      })
-
-      return undefined
+      return await resumeApproval(ctx, operation)
     case "run.cancel":
-      configureTrigger()
-
-      if (operation.workerId !== undefined) {
-        await runs.cancel(operation.workerId)
-      }
-
-      if (operation.sandboxId !== undefined) {
-        await triggerSandboxCleanup(item)
-      }
-
-      return undefined
+      return await cancelRun(ctx, item)
     case "reply.send":
       return await sendOutboxReply(ctx, item)
   }
@@ -86,8 +69,6 @@ async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
     return undefined
   }
 
-  configureTrigger()
-
   const run = (await ctx.runQuery(internal.runs.records.get, {
     runId: operation.runId,
   })) as Doc<"runs"> | null
@@ -96,13 +77,15 @@ async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
     return undefined
   }
 
+  configureTrigger()
+
   const handle = await tasks.trigger(
     agentTaskId,
     {
       runId: operation.runId,
     },
     {
-      idempotencyKey: item.idempotencyKey,
+      idempotencyKey: item.key,
       maxDuration: maxAgentDurationSeconds,
       tags: runtimeTags(item),
       ttl: "14d",
@@ -120,10 +103,64 @@ function isTerminalRun(run: Doc<"runs">) {
   )
 }
 
-async function triggerSandboxCleanup(item: Doc<"outbox">) {
+async function resumeApproval(
+  ctx: DispatchCtx,
+  operation: Extract<Doc<"outbox">["operation"], { type: "approval.resume" }>
+) {
+  const approval = (await ctx.runQuery(internal.approvals.approvals.get, {
+    approvalId: operation.approvalId,
+  })) as Doc<"approvals"> | null
+
+  if (approval?.waitpointTokenId === undefined) {
+    return undefined
+  }
+
+  configureTrigger()
+
+  await wait.completeToken(approval.waitpointTokenId, {
+    approvalId: operation.approvalId,
+    decision: operation.decision,
+  })
+
+  return undefined
+}
+
+async function cancelRun(ctx: DispatchCtx, item: Doc<"outbox">) {
   const operation = item.operation
 
-  if (operation.type !== "run.cancel" || operation.sandboxId === undefined) {
+  if (operation.type !== "run.cancel") {
+    return undefined
+  }
+
+  const run = (await ctx.runQuery(internal.runs.records.get, {
+    runId: operation.runId,
+  })) as Doc<"runs"> | null
+
+  const sandbox = (await ctx.runQuery(internal.runtime.sandboxes.activeByRun, {
+    runId: operation.runId,
+  })) as Doc<"sandboxes"> | null
+
+  if (run?.workerId === undefined && sandbox === null) {
+    return undefined
+  }
+
+  configureTrigger()
+
+  if (run?.workerId !== undefined) {
+    await runs.cancel(run.workerId)
+  }
+
+  if (sandbox !== null) {
+    await triggerSandboxCleanup(item, sandbox.sandboxId)
+  }
+
+  return undefined
+}
+
+async function triggerSandboxCleanup(item: Doc<"outbox">, sandboxId: string) {
+  const operation = item.operation
+
+  if (operation.type !== "run.cancel") {
     return
   }
 
@@ -131,10 +168,10 @@ async function triggerSandboxCleanup(item: Doc<"outbox">) {
     cleanupTaskId,
     {
       runId: operation.runId,
-      sandboxId: operation.sandboxId,
+      sandboxId,
     },
     {
-      idempotencyKey: `${item.idempotencyKey}:sandbox:${operation.sandboxId}`,
+      idempotencyKey: `${item.key}:sandbox:${sandboxId}`,
       maxDuration: 300,
       tags: runtimeTags(item),
       ttl: "1h",
