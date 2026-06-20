@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { toolSnapshot } from "../runs/schema"
 
 const runtimeOperation = v.union(
   v.object({
@@ -44,20 +45,77 @@ export const outbox = defineTable({
   .index("by_status_and_due_at", ["status", "dueAt"])
   .index("by_key", ["key"])
 
-export const logs = defineTable({
+export const traceSource = v.union(
+  v.literal("convex.runtime"),
+  v.literal("trigger.approval"),
+  v.literal("trigger.run"),
+  v.literal("trigger.tool")
+)
+
+export const traceType = v.union(
+  v.literal("message.final"),
+  v.literal("run.completed"),
+  v.literal("run.failed"),
+  v.literal("run.prepared"),
+  v.literal("run.started"),
+  v.literal("tool.completed"),
+  v.literal("tool.failed"),
+  v.literal("tool.started"),
+  v.literal("tool.waiting")
+)
+
+const traceToolRoute = v.union(
+  v.literal("convex"),
+  v.literal("sandbox"),
+  v.literal("subagent")
+)
+
+const traceValueSummary = v.object({
+  type: v.union(
+    v.literal("array"),
+    v.literal("boolean"),
+    v.literal("null"),
+    v.literal("number"),
+    v.literal("object"),
+    v.literal("string")
+  ),
+  preview: v.optional(v.string()),
+  size: v.optional(v.number()),
+})
+
+export const traceData = v.union(
+  v.object({
+    error: v.string(),
+  }),
+  v.object({
+    name: v.string(),
+    route: traceToolRoute,
+    error: v.optional(v.string()),
+    result: v.optional(traceValueSummary),
+  }),
+  v.object({
+    promptId: v.id("_storage"),
+    tools: toolSnapshot,
+  }),
+  v.object({
+    queued: v.boolean(),
+  })
+)
+
+export const traces = defineTable({
   tenantId: v.string(),
   runId: v.id("runs"),
-  eventKey: v.string(),
-  source: v.string(),
-  type: v.string(),
+  key: v.string(),
+  source: traceSource,
+  type: traceType,
   sequence: v.optional(v.number()),
-  toolCallId: v.optional(v.string()),
+  callId: v.optional(v.string()),
   attempt: v.optional(v.number()),
-  payload: v.optional(v.any()),
-  createdAt: v.number(),
+  data: v.optional(traceData),
+  timestamp: v.number(),
 })
-  .index("by_run", ["runId", "createdAt"])
-  .index("by_key", ["eventKey"])
+  .index("by_run_and_timestamp", ["runId", "timestamp"])
+  .index("by_key", ["key"])
 
 export const sandboxes = defineTable({
   tenantId: v.string(),

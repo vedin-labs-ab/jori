@@ -6,7 +6,9 @@ import {
   type ConvexId,
   type JsonObject,
   type RuntimeContext,
+  type RuntimeEventInput,
   type RuntimeMessage,
+  type RuntimeTraceSource,
 } from "./types"
 
 export class MiloConvexClient {
@@ -22,15 +24,15 @@ export class MiloConvexClient {
 
   async recordEvent(args: {
     attempt?: number
-    eventKey: string
-    payload?: JsonObject
+    callId?: string
+    data?: RuntimeEventInput["data"]
+    key: string
     runId: ConvexId<"runs">
     sequence: number
-    source: string
-    toolCallId?: string
-    type: string
+    source: RuntimeTraceSource
+    type: RuntimeEventInput["type"]
   }) {
-    await this.client.mutation(api.runtime.logs.record, {
+    await this.client.mutation(api.runtime.traces.record, {
       ...args,
       secret: this.secret,
     })

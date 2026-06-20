@@ -17,6 +17,36 @@ export type SandboxCleanupPayload = {
 
 export type RuntimeToolRoute = "convex" | "sandbox" | "subagent"
 
+export type RuntimeTraceSource =
+  | "trigger.approval"
+  | "trigger.run"
+  | "trigger.tool"
+
+export type RuntimeValueSummary = {
+  type: "array" | "boolean" | "null" | "number" | "object" | "string"
+  preview?: string
+  size?: number
+}
+
+export type RuntimeErrorTraceData = {
+  error: string
+}
+
+export type RuntimeToolTraceData = {
+  name: string
+  route: RuntimeToolRoute
+  error?: string
+  result?: RuntimeValueSummary
+}
+
+export type RuntimeQueueTraceData = {
+  queued: boolean
+}
+
+export type RuntimeRunTraceData = RuntimeErrorTraceData | RuntimeQueueTraceData
+
+export type RuntimeTraceData = RuntimeRunTraceData | RuntimeToolTraceData
+
 export type RuntimeTool = {
   description: string
   inputSchema: JsonObject
@@ -71,11 +101,11 @@ export type RuntimeEventType =
 
 export type RuntimeEventInput = {
   attempt?: number
-  payload?: JsonObject
+  callId?: string
+  data?: RuntimeTraceData
   runId: ConvexId<"runs">
   sequence: number
-  source: string
-  toolCallId?: string
+  source: RuntimeTraceSource
   type: RuntimeEventType
 }
 

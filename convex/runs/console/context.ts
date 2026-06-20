@@ -48,24 +48,22 @@ async function getLatestRequestedApproval(ctx: QueryCtx, run: Doc<"runs">) {
 }
 
 async function getPreparedRun(ctx: QueryCtx, run: Doc<"runs">) {
-  const logs = await ctx.db
-    .query("logs")
-    .withIndex("by_run", (index) => index.eq("runId", run._id))
-    .order("desc")
-    .take(25)
-  const prepared = logs.find((log) => log.type === "run.prepared")
+  const prepared = await ctx.db
+    .query("traces")
+    .withIndex("by_key", (index) => index.eq("key", `run:${run._id}:prepared`))
+    .first()
 
   return {
-    tools: readToolSnapshot(prepared?.payload),
+    tools: readToolSnapshot(prepared?.data),
   }
 }
 
-function readToolSnapshot(payload: unknown): RunToolSnapshot | undefined {
-  if (typeof payload !== "object" || payload === null) {
+function readToolSnapshot(data: unknown): RunToolSnapshot | undefined {
+  if (typeof data !== "object" || data === null) {
     return undefined
   }
 
-  const tools = "tools" in payload ? payload.tools : undefined
+  const tools = "tools" in data ? data.tools : undefined
 
   return isToolSnapshot(tools) ? tools : undefined
 }

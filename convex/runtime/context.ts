@@ -20,8 +20,10 @@ import {
   getToolInputSchema,
 } from "../runs/agent/tools/schemas"
 import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
+import { toolSnapshot } from "../runs/schema"
 import { withApprovalSchema } from "./schemas"
 import { requireWorkerSecret } from "./shared"
+import { recordTrace } from "./traces"
 
 const sandboxTools = [
   {
@@ -131,7 +133,7 @@ export const prepareRun = internalMutation({
   args: {
     runId: v.id("runs"),
     promptId: v.id("_storage"),
-    tools: v.any(),
+    tools: toolSnapshot,
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -141,27 +143,15 @@ export const prepareRun = internalMutation({
       return null
     }
 
-    const eventKey = `run:${args.runId}:prepared`
-    const existing = await ctx.db
-      .query("logs")
-      .withIndex("by_key", (query) => query.eq("eventKey", eventKey))
-      .first()
-
-    if (existing !== null) {
-      return null
-    }
-
-    await ctx.db.insert("logs", {
-      tenantId: run.tenantId,
-      runId: args.runId,
-      eventKey,
+    await recordTrace(ctx, {
+      run,
+      key: `run:${args.runId}:prepared`,
       source: "convex.runtime",
       type: "run.prepared",
-      payload: {
+      data: {
         promptId: args.promptId,
         tools: args.tools,
       },
-      createdAt: Date.now(),
     })
 
     return null

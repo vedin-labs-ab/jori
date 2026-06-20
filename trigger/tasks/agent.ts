@@ -12,10 +12,10 @@ import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
 import {
   type AgentRunPayload,
   agentTaskId,
-  type JsonObject,
   type RuntimeContext,
   type RuntimeEventType,
   type RuntimeMessage,
+  type RuntimeRunTraceData,
 } from "../types"
 
 const maxAttempts = 3
@@ -221,18 +221,14 @@ async function completeRun(
     "message.final",
     sequence,
     attempt,
-    {
-      content,
-      queued: delivery.queued,
-    }
+    { queued: delivery.queued }
   )
   await recordRunEvent(
     runtime.convex,
     runtime.context,
     "run.completed",
     sequence + 1,
-    attempt,
-    { content }
+    attempt
   )
 }
 
@@ -264,12 +260,12 @@ async function recordRunEvent(
   type: RuntimeEventType,
   sequence: number,
   attempt: number,
-  payload?: JsonObject
+  data?: RuntimeRunTraceData
 ) {
   await convex.recordEvent(
     runtimeEvent({
       attempt,
-      payload,
+      data,
       runId: context.run.id,
       sequence,
       source: "trigger.run",

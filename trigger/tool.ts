@@ -14,7 +14,11 @@ import {
   type JsonObject,
   type RuntimeContext,
   type RuntimeTool,
+  type RuntimeToolTraceData,
+  type RuntimeValueSummary,
 } from "./types"
+
+type RuntimeToolTraceDetails = Omit<RuntimeToolTraceData, "name" | "route">
 
 export type ToolRuntime = {
   convex: MiloConvexClient
@@ -95,15 +99,14 @@ async function executeConvexTool(
   })
   await runtime.convex.recordEvent(
     runtimeEvent({
-      payload: {
+      data: {
         name: tool.name,
         route: tool.route,
-        waitpointTokenId: token.id,
       },
       runId: runtime.context.run.id,
       sequence: 0,
       source: "trigger.approval",
-      toolCallId: call.id,
+      callId: call.id,
       type: "tool.waiting",
     })
   )
@@ -176,20 +179,20 @@ async function recordToolEvent(
   },
   tool: RuntimeTool,
   type: "tool.completed" | "tool.failed" | "tool.started",
-  payload?: JsonObject
+  data?: RuntimeToolTraceDetails
 ) {
   await args.runtime.convex.recordEvent(
     runtimeEvent({
       attempt: args.attempt,
-      payload: {
+      data: {
         name: tool.name,
         route: tool.route,
-        ...payload,
+        ...data,
       },
       runId: args.runtime.context.run.id,
       sequence: args.sequence,
       source: "trigger.tool",
-      toolCallId: args.call.id,
+      callId: args.call.id,
       type,
     })
   )
@@ -239,8 +242,35 @@ function toToolContent(result: unknown) {
   return JSON.stringify(result ?? null)
 }
 
-function toDetails(result: unknown): JsonObject {
+function toDetails(result: unknown): RuntimeToolTraceDetails {
   return {
-    result: result ?? null,
+    result: summarizeResult(result),
+  }
+}
+
+function summarizeResult(result: unknown): RuntimeValueSummary {
+  if (result === null || result === undefined) {
+    return { type: "null" }
+  }
+
+  if (Array.isArray(result)) {
+    return { type: "array", size: result.length }
+  }
+
+  switch (typeof result) {
+    case "boolean":
+      return { type: "boolean" }
+    case "number":
+      return { preview: String(result), type: "number" }
+    case "object":
+      return { type: "object", size: Object.keys(result).length }
+    case "string":
+      return {
+        preview: result.slice(0, 500),
+        size: result.length,
+        type: "string",
+      }
+    default:
+      return { type: "null" }
   }
 }

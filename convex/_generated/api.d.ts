@@ -257,7 +257,6 @@ import type * as runtime__generated_assets from "../runtime/_generated/assets.js
 import type * as runtime_children from "../runtime/children.js";
 import type * as runtime_context from "../runtime/context.js";
 import type * as runtime_dispatch from "../runtime/dispatch.js";
-import type * as runtime_logs from "../runtime/logs.js";
 import type * as runtime_outbox from "../runtime/outbox.js";
 import type * as runtime_replies_delivery from "../runtime/replies/delivery.js";
 import type * as runtime_replies_queue from "../runtime/replies/queue.js";
@@ -267,6 +266,7 @@ import type * as runtime_schemas from "../runtime/schemas.js";
 import type * as runtime_sessions from "../runtime/sessions.js";
 import type * as runtime_shared from "../runtime/shared.js";
 import type * as runtime_tools from "../runtime/tools.js";
+import type * as runtime_traces from "../runtime/traces.js";
 import type * as sessions_cursor from "../sessions/cursor.js";
 import type * as sessions_data from "../sessions/data.js";
 import type * as shared_actor from "../shared/actor.js";
@@ -535,7 +535,6 @@ declare const fullApi: ApiFromModules<{
   "runtime/children": typeof runtime_children;
   "runtime/context": typeof runtime_context;
   "runtime/dispatch": typeof runtime_dispatch;
-  "runtime/logs": typeof runtime_logs;
   "runtime/outbox": typeof runtime_outbox;
   "runtime/replies/delivery": typeof runtime_replies_delivery;
   "runtime/replies/queue": typeof runtime_replies_queue;
@@ -545,6 +544,7 @@ declare const fullApi: ApiFromModules<{
   "runtime/sessions": typeof runtime_sessions;
   "runtime/shared": typeof runtime_shared;
   "runtime/tools": typeof runtime_tools;
+  "runtime/traces": typeof runtime_traces;
   "sessions/cursor": typeof sessions_cursor;
   "sessions/data": typeof sessions_data;
   "shared/actor": typeof shared_actor;

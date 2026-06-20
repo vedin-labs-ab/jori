@@ -191,23 +191,28 @@ function fakeQueryCtx(docs: Record<string, unknown>) {
   return {
     db: {
       get: async (id: string) => docs[id] ?? null,
-      query: () => ({
-        withIndex: () => ({
-          first: async () => null,
-          order: () => ({
-            first: async () => null,
-            take: async () =>
-              preparedTools === undefined
-                ? []
-                : [
-                    {
-                      type: "run.prepared",
-                      payload: { tools: preparedTools },
-                    },
-                  ],
-          }),
-        }),
-      }),
+      query: (table: string) => fakeQuery(table, preparedTools),
     },
   } as unknown as QueryCtx
+}
+
+function fakeQuery(table: string, preparedTools: unknown) {
+  return {
+    withIndex: () =>
+      table === "traces"
+        ? {
+            first: async () =>
+              preparedTools === undefined
+                ? null
+                : {
+                    data: { tools: preparedTools },
+                    type: "run.prepared",
+                  },
+          }
+        : {
+            order: () => ({
+              first: async () => null,
+            }),
+          },
+  }
 }
