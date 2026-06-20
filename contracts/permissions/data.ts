@@ -2,6 +2,7 @@ import { githubToolPermissionRows } from "./github"
 import { googleToolPermissionRows } from "./google"
 import { type ToolPermissionRow } from "./index"
 import { notionToolPermissionRows } from "./notion"
+import { webToolPermissionRows } from "./web"
 
 export const toolPermissionRows = [
   [
@@ -34,6 +35,7 @@ export const toolPermissionRows = [
     "Inspect a saved run attachment by attachment ID.",
     "read",
   ],
+  ...webToolPermissionRows,
   [
     "milo",
     "search_artifacts",

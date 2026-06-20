@@ -55,6 +55,10 @@ export type MiloClient = Readonly<{
       options?: MiloToolOptions
     ) => Promise<MiloPromptResult<z.output<TSchema>>>
   }>
+  web: Readonly<{
+    search: ToolMethod<"web_search">
+    fetch: ToolMethod<"web_fetch">
+  }>
   gmail: Readonly<{
     searchThreads: ToolMethod<"google_gmail_search_threads">
     getThread: ToolMethod<"google_gmail_get_thread">

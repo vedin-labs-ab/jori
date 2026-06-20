@@ -36,6 +36,10 @@ export type RuntimeToolTraceData = {
   name: string
   route: RuntimeToolRoute
   error?: string
+  providerTrace?: {
+    provider: string
+    requestId: string
+  }
   result?: RuntimeValueSummary
 }
 

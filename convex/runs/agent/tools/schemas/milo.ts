@@ -4,6 +4,7 @@ import {
   numberProperty,
   objectProperty,
   objectSchema,
+  stringArrayProperty,
   stringProperty,
 } from "./common"
 
@@ -136,6 +137,38 @@ export const miloToolInputSchemas = {
     required: ["attachmentId"],
     properties: {
       attachmentId: stringProperty("Attachment ID."),
+    },
+  }),
+  web_search: objectSchema({
+    required: ["query"],
+    properties: {
+      query: stringProperty("Public web search query."),
+      limit: numberProperty("Maximum search results to return.", 1, 10),
+      includeDomains: stringArrayProperty(
+        "Optional public domains to include, such as example.com."
+      ),
+      excludeDomains: stringArrayProperty(
+        "Optional public domains to exclude, such as example.com."
+      ),
+      maxCharacters: numberProperty(
+        "Maximum text characters to return per result.",
+        250,
+        4000
+      ),
+    },
+  }),
+  web_fetch: objectSchema({
+    required: ["url"],
+    properties: {
+      url: stringProperty("Public http(s) URL to fetch."),
+      highlightQuery: stringProperty(
+        "Optional query used to extract highlights from the page."
+      ),
+      maxCharacters: numberProperty(
+        "Maximum text characters to return from the page.",
+        1000,
+        20000
+      ),
     },
   }),
   ...artifactToolInputSchemas,

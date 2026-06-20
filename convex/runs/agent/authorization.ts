@@ -1,3 +1,4 @@
+import { isWebTool } from "../../../contracts/permissions/web"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
@@ -31,6 +32,16 @@ export async function authorizeApprovedTool(
 
   if (!canUseToolMode(mode, toolExecutionType(input.type))) {
     throw new Error(`Tool is no longer available: ${approval.tool}`)
+  }
+
+  if (
+    input.type === "automation" &&
+    isWebTool(approval.tool) &&
+    !input.automation.access.web
+  ) {
+    throw new Error(
+      `Tool is not allowed by automation web access: ${approval.tool}`
+    )
   }
 
   if (approval.surface !== "milo" && input.type === "automation") {

@@ -91,6 +91,12 @@ export const traceData = v.union(
     name: v.string(),
     route: traceToolRoute,
     error: v.optional(v.string()),
+    providerTrace: v.optional(
+      v.object({
+        provider: v.string(),
+        requestId: v.string(),
+      })
+    ),
     result: v.optional(traceValueSummary),
   }),
   v.object({
