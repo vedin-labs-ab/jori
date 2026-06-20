@@ -101,6 +101,7 @@ test("replaces Slack approval buttons with a decision summary", () => {
       tool: "conversations_add_message",
       summary: "Post a follow-up message in Slack.",
       decidedBy: {
+        kind: "user",
         integration: "slack",
         externalId: "U123",
       },
@@ -128,6 +129,7 @@ test("renders Milo approval decisions with the Clerk approver identity", () => {
       tool: "notion_create_page",
       summary: "Create a new Notion page.",
       decidedBy: {
+        kind: "user",
         userId: "user_123",
         name: "Albin Vedin",
         email: "albin@example.com",

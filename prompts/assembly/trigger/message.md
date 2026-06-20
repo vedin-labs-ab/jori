@@ -6,10 +6,16 @@ Current UTC time: {{time.utc}}.
 Target:
 {{message.target}}
 
+Recent conversation:
+{{message.conversation}}
+
 Message:
 ```text
 {{message.text}}
 ```
+
+Intake:
+{{message.routing}}
 
 Context:
 - The message is the starting point, not necessarily the whole request. For

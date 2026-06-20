@@ -6,6 +6,7 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
+import { recentConversation } from "../routing/history"
 import { toolSnapshot } from "./schema"
 
 export const getInputByRun = internalQuery({
@@ -70,6 +71,8 @@ async function getMessageInput(
     message,
     integration,
     integrations,
+    conversation: await recentConversation(ctx, message, integration),
+    routing: await getMessageRouting(ctx, message._id),
   }
 }
 
@@ -127,6 +130,20 @@ async function getAutomationInput(
       hasIntegrationTools(automation.access, integration._id)
     ),
   }
+}
+
+async function getMessageRouting(ctx: QueryCtx, messageId: Id<"messages">) {
+  const routing = await ctx.db
+    .query("routing")
+    .withIndex("by_message", (query) => query.eq("messageId", messageId))
+    .first()
+
+  return routing === null
+    ? null
+    : {
+        reply: routing.reply ?? null,
+        route: routing.route,
+      }
 }
 
 export const create = internalMutation({

@@ -67,14 +67,44 @@ function createMessageValues(
 ) {
   return {
     message: {
+      conversation: formatMessageConversation(input),
       delivery: getMessageDelivery(input.messageIntegration),
       integration: getIntegrationLabel(input.messageIntegration),
       progress: getMessageProgress(input.messageIntegration),
+      routing: formatMessageRouting(input.routing),
       target: getMessageTarget(input.messageIntegration, input.message.data),
       text: input.message.text ?? "",
     },
     time: { utc: createPromptTime() },
   }
+}
+
+function formatMessageConversation(
+  input: Extract<AgentRuntimeInput, { type: "message" }>
+) {
+  const entries = input.conversation.filter(
+    (entry) => entry.id !== input.message._id
+  )
+
+  if (entries.length === 0) {
+    return "- None"
+  }
+
+  return entries.map(formatMessageConversationEntry).join("\n\n")
+}
+
+function formatMessageConversationEntry(
+  entry: Extract<AgentRuntimeInput, { type: "message" }>["conversation"][number]
+) {
+  const observed = entry.observedAt ?? entry.createdAt
+  const actor = entry.actor === null ? "" : ` | actor=${entry.actor}`
+
+  return [
+    `- ${new Date(observed).toISOString()} | source=${entry.source} | authority=${entry.source === "user" ? "authoritative" : "soft"} | type=${entry.type}${actor}`,
+    "```text",
+    entry.text,
+    "```",
+  ].join("\n")
 }
 
 function createAutomationValues(
@@ -124,6 +154,19 @@ function formatSelectedTools(tools: readonly string[]) {
   }
 
   return tools.map((tool) => getToolPermission(tool)?.label ?? tool).join(", ")
+}
+
+function formatMessageRouting(
+  routing: Extract<AgentRuntimeInput, { type: "message" }>["routing"]
+) {
+  if (routing === null) {
+    return "- None"
+  }
+
+  return formatTargetLines([
+    targetLine("Intake route", routing.route),
+    targetLine("Quick reply", routing.reply ?? undefined),
+  ])
 }
 
 function formatAutomationTrigger(

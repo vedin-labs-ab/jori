@@ -5,7 +5,7 @@ export const conversations = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
   conversationId: v.string(),
-  rootRunId: v.id("runs"),
+  rootRunId: v.optional(v.id("runs")),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
 }).index("by_conversation", ["tenantId", "integrationId", "conversationId"])

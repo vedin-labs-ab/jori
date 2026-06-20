@@ -1,15 +1,8 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { findRoutingByMessage } from "../routing/data"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { createQueuedExecution } from "../runtime/outbox"
-import { maxPendingReadLimit } from "../sessions/cursor"
-import {
-  findReusableSession,
-  readPendingMessages,
-  startSession,
-  stopSession,
-} from "../sessions/data"
+import { findReusableSession, startSession } from "../sessions/data"
 
 export async function findConversation(
   ctx: MutationCtx,
@@ -34,6 +27,33 @@ export async function findConversation(
         .eq("conversationId", conversationId)
     )
     .first()
+}
+
+export async function ensureConversation(
+  ctx: MutationCtx,
+  args: {
+    tenantId: string
+    integrationId: Id<"integrations">
+    conversationId: string | undefined
+    createdBy: string | undefined
+    now: number
+  }
+) {
+  const conversation = await findConversation(ctx, args)
+
+  if (conversation !== null || args.conversationId === undefined) {
+    return conversation
+  }
+
+  const conversationId = await ctx.db.insert("conversations", {
+    tenantId: args.tenantId,
+    integrationId: args.integrationId,
+    conversationId: args.conversationId,
+    createdBy: args.createdBy,
+    createdAt: args.now,
+  })
+
+  return await ctx.db.get(conversationId)
 }
 
 export async function startMessageRun(
@@ -66,7 +86,10 @@ export async function startMessageRun(
     }
   }
 
-  const kind = conversation === null ? "mention" : "reply"
+  const kind =
+    conversation === null || conversation.rootRunId === undefined
+      ? "mention"
+      : "reply"
   const runId = await insertRun(ctx, { ...args, kind })
 
   const conversationId =
@@ -80,6 +103,10 @@ export async function startMessageRun(
           createdAt: args.now,
         })
       : conversation._id
+
+  if (conversation !== null && conversation.rootRunId === undefined) {
+    await ctx.db.patch(conversation._id, { rootRunId: runId })
+  }
 
   const sessionId = await startSession(ctx, {
     conversationId,
@@ -125,141 +152,4 @@ async function insertRun(
     createdBy: args.createdBy,
     createdAt: args.now,
   })
-}
-
-export async function continuePendingConversationRun(
-  ctx: MutationCtx,
-  args: {
-    runId: Id<"runs">
-    now: number
-  }
-) {
-  const session = await ctx.db
-    .query("sessions")
-    .withIndex("by_run", (query) => query.eq("runId", args.runId))
-    .first()
-
-  if (session === null || session.runId !== args.runId) {
-    return
-  }
-
-  await continueSession(ctx, session, args.now)
-}
-
-export async function continueTerminalConversationSession(
-  ctx: MutationCtx,
-  args: {
-    conversationId: Id<"conversations">
-    now: number
-  }
-) {
-  const session = await ctx.db
-    .query("sessions")
-    .withIndex("by_conversation", (query) =>
-      query.eq("conversationId", args.conversationId)
-    )
-    .first()
-
-  if (
-    session === null ||
-    session.state !== "active" ||
-    !(await isTerminalSession(ctx, session))
-  ) {
-    return
-  }
-
-  await continueSession(ctx, session, args.now)
-}
-
-async function continueSession(
-  ctx: MutationCtx,
-  session: Doc<"sessions">,
-  now: number
-) {
-  const pending = await readPendingContinuationMessage(ctx, session)
-
-  if (pending.status === "wait") {
-    return
-  }
-
-  if (pending.message === undefined) {
-    await stopSession(ctx, session, now)
-    return
-  }
-
-  const conversation = await ctx.db.get(session.conversationId)
-
-  if (conversation === null) {
-    await stopSession(ctx, session, now)
-    return
-  }
-
-  const integration = await ctx.db.get(conversation.integrationId)
-
-  if (integration === null || integration.status !== "active") {
-    await stopSession(ctx, session, now)
-    return
-  }
-
-  await startMessageRun(ctx, {
-    conversation,
-    integration,
-    message: pending.message,
-    conversationKey: conversation.conversationId,
-    createdBy: conversation.createdBy,
-    now,
-    replaceActiveSession: true,
-  })
-}
-
-async function readPendingContinuationMessage(
-  ctx: MutationCtx,
-  session: Doc<"sessions">
-) {
-  const messages = await readPendingMessages(ctx, session, maxPendingReadLimit)
-
-  for (const message of messages) {
-    const action = await readContinuationAction(ctx, message)
-
-    if (action === "start") {
-      return { status: "start" as const, message }
-    }
-
-    if (action === "wait") {
-      return { status: "wait" as const }
-    }
-  }
-
-  return { status: "idle" as const }
-}
-
-async function readContinuationAction(
-  ctx: MutationCtx,
-  message: Doc<"messages">
-) {
-  if (message.integration !== "slack") {
-    return "start"
-  }
-
-  const routing = await findRoutingByMessage(ctx, message._id)
-
-  if (routing === null) {
-    return "wait"
-  }
-
-  return routing.route === "agent" ? "start" : "skip"
-}
-
-async function isTerminalSession(ctx: MutationCtx, session: Doc<"sessions">) {
-  if (session.executionId === undefined) {
-    return false
-  }
-
-  const execution = await ctx.db.get(session.executionId)
-
-  return execution !== null && isTerminalStatus(execution.status)
-}
-
-function isTerminalStatus(status: Doc<"executions">["status"]) {
-  return status === "completed" || status === "failed" || status === "stopped"
 }

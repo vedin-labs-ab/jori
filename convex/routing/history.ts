@@ -1,6 +1,6 @@
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
-import { getActorDisplayName } from "../shared/actor"
+import { type ActorKind, getActorDisplayName } from "../shared/actor"
 import { routingMessageText } from "./surface"
 
 const recentConversationLimit = 16
@@ -10,6 +10,7 @@ export type RoutingConversationEntry = {
   createdAt: number
   id: string
   observedAt: number | null
+  source: ActorKind | "unknown"
   text: string
   type: string
 }
@@ -43,6 +44,7 @@ export function messageEntry(
     createdAt: message.createdAt,
     id: message._id,
     observedAt: message.observedAt ?? null,
+    source: message.actor?.kind ?? "unknown",
     text: routingMessageText(message, integration),
     type: message.type,
   }
@@ -154,6 +156,7 @@ function miloReplyEntry(args: {
     createdAt: args.createdAt,
     id: args.id,
     observedAt: null,
+    source: "self",
     text: args.text,
     type: args.type,
   }

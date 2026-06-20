@@ -1,4 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
+import { getActorDisplayName } from "../shared/actor"
 
 export const defaultDrainLimit = 20
 export const maxDrainLimit = 50
@@ -55,6 +56,8 @@ export function formatRuntimeMessage(
   routing: Pick<Doc<"routing">, "reply" | "route"> | null = null
 ) {
   return {
+    actor: getActorDisplayName(message.actor) ?? null,
+    authority: message.actor?.kind === "user" ? "authoritative" : "soft",
     id: message._id,
     createdAt: message.createdAt,
     integration: message.integration,
@@ -66,6 +69,7 @@ export function formatRuntimeMessage(
             reply: routing.reply ?? null,
             route: routing.route,
           },
+    source: message.actor?.kind ?? "unknown",
     text: message.text ?? "",
     type: message.type,
   }

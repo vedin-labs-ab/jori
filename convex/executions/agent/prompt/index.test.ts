@@ -77,11 +77,9 @@ describe("runtime prompts", () => {
     )
     expect(prompt).toContain("Current UTC time:")
 
-    if (provider === "slack") {
-      expect(prompt).toContain("Slack already shows Milo is working")
-    } else {
-      expect(prompt).toContain("The requester cannot see you working.")
-    }
+    expect(prompt).toContain(
+      `${toolSurfaceLabel} already has the intake reply state`
+    )
 
     for (const line of targetLines) {
       expect(prompt).toContain(line)
@@ -112,28 +110,20 @@ describe("runtime prompts", () => {
     expect(prompt).toContain("- Reply thread timestamp: 123.000")
   })
 
-  test("tells Slack runs that final delivery is automatic", () => {
-    const prompt = assemblePrompt(
-      runtimeInput("slack", { channelId: "C123", ts: "123.456" })
-    )
-
-    expect(prompt).toContain("Milo will post it as a reply")
-    expect(prompt).toContain("Use Slack write tools only")
-    expect(prompt).toContain("not for routine replies")
-    expect(prompt).not.toContain("The requester cannot see you working")
-    expect(prompt).not.toContain("If a reply is useful, send it to this target")
-  })
-
-  test("keeps manual target delivery for non-Slack messages", () => {
+  test("tells message runs that final delivery is automatic", () => {
     const prompt = assemblePrompt(
       runtimeInput("github", {
-        repository: { owner: "acme", name: "app" },
+        repository: { fullName: "acme/app" },
+        issueNumber: 12,
         comment: { id: "comment-id", kind: "issue_comment" },
       })
     )
 
-    expect(prompt).toContain("If a reply is useful, send it to this target")
-    expect(prompt).not.toContain("Milo will post it as a reply")
+    expect(prompt).toContain("Milo will post it as a reply")
+    expect(prompt).toContain("Use GitHub write tools only")
+    expect(prompt).toContain("not for routine replies")
+    expect(prompt).not.toContain("The requester cannot see you working")
+    expect(prompt).not.toContain("If a reply is useful, send it to this target")
   })
 })
 

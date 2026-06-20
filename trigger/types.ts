@@ -52,6 +52,8 @@ export type RuntimeContext = {
 }
 
 export type RuntimeMessage = {
+  actor: string | null
+  authority: "authoritative" | "soft"
   createdAt: number
   id: ConvexId<"messages">
   integration: string
@@ -60,6 +62,7 @@ export type RuntimeMessage = {
     reply: string | null
     route: "agent" | "ignore" | "reply"
   } | null
+  source: "bot" | "self" | "unknown" | "user"
   text: string
   type: string
 }

@@ -1,8 +1,3 @@
-import { type FunctionReference } from "convex/server"
-import { type Id } from "../_generated/dataModel"
-import { type ActionCtx } from "../_generated/server"
-import { type Actor } from "../shared/actor"
-
 export type ProviderCallbackStatus = "connected" | "error"
 
 const callbackStateMaxAgeMs = 10 * 60 * 1000
@@ -48,36 +43,4 @@ export async function readCallbackState<
   }
 
   return { ok: true, state }
-}
-
-type ObservedMessage = {
-  accountId: string
-  type: string
-  externalId: string
-  actor?: Actor
-  conversationId?: string
-  text?: string
-  observedAt?: number
-  data?: unknown
-}
-
-type IngestMessageResult =
-  | { status: "started"; runId: Id<"runs"> }
-  | { status: "continued"; runId?: Id<"runs">; sessionId: Id<"sessions"> }
-  | { status: "missing_integration" | "ignored_bot" | "duplicate" }
-  | { status: "ignored" | "ignored_empty"; messageId: Id<"messages"> }
-
-export async function ingestProviderMessage(
-  ctx: ActionCtx,
-  record: FunctionReference<
-    "mutation",
-    "internal",
-    ObservedMessage,
-    IngestMessageResult
-  >,
-  message: ObservedMessage
-) {
-  await ctx.runMutation(record, message)
-
-  return Response.json({ ok: true })
 }

@@ -66,6 +66,8 @@ function getIssueCommentMessage(
       `${action}:${comment.id}:${comment.updated_at ?? comment.created_at ?? ""}`
     ),
     actorId: getSenderId(payload),
+    actorKind: getSenderKind(payload),
+    actorName: payload.sender?.login,
     conversationId: `${repository.fullName}#${issue.number}`,
     text: comment.body,
     observedAt: getObservedAt(comment.updated_at ?? comment.created_at),
@@ -127,6 +129,8 @@ function getPullRequestReviewCommentMessage(
       `${action}:${comment.id}:${comment.updated_at ?? comment.created_at ?? ""}`
     ),
     actorId: getSenderId(payload),
+    actorKind: getSenderKind(payload),
+    actorName: payload.sender?.login,
     conversationId: `${repository.fullName}#${pullRequest.number}`,
     text: comment.body,
     observedAt: getObservedAt(comment.updated_at ?? comment.created_at),
@@ -215,6 +219,10 @@ function getSenderId(payload: GitHubWebhookPayload) {
   }
 
   return String(payload.sender.id)
+}
+
+function getSenderKind(payload: GitHubWebhookPayload) {
+  return payload.sender?.type === "Bot" ? ("bot" as const) : ("user" as const)
 }
 
 function getObservedAt(timestamp: string | undefined) {

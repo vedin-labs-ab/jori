@@ -2,7 +2,6 @@ import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { createIntegrationActor } from "../../shared/actor"
 import {
-  ingestProviderMessage,
   readCallbackState,
   redirectWithStatus,
   unauthorizedResponse,
@@ -95,23 +94,24 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
-  return await ingestProviderMessage(
-    ctx,
-    internal.messages.ingest.recordGitHubMessage,
-    {
-      accountId: message.accountId,
-      type: message.type,
-      externalId: message.externalId,
-      actor: createIntegrationActor({
-        integration: "github",
-        externalId: message.actorId,
-      }),
-      conversationId: message.conversationId,
-      text: message.text,
-      observedAt: message.observedAt,
-      data: message.data,
-    }
-  )
+  await ctx.runMutation(internal.messages.intake.record, {
+    accountId: message.accountId,
+    integration: "github",
+    type: message.type,
+    externalId: message.externalId,
+    actor: createIntegrationActor({
+      integration: "github",
+      externalId: message.actorId,
+      kind: message.actorKind,
+      name: message.actorName,
+    }),
+    conversationId: message.conversationId,
+    text: message.text,
+    observedAt: message.observedAt,
+    data: message.data,
+  })
+
+  return Response.json({ ok: true })
 }
 
 function normalizeInstallationProfile(profile: GitHubInstallationProfile) {
