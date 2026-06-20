@@ -67,24 +67,44 @@ function observedMessage(
 ): ObservedMessage {
   return {
     ...message,
-    type: normalizeType(message, integration),
+    mentioned: normalizeMentioned(message, integration),
     actor: normalizeActor(message.actor, integration),
   }
 }
 
-function normalizeType(
+function normalizeMentioned(
   message: ObservedMessage,
   integration: Doc<"integrations">
 ) {
-  if (integration.integration !== "slack" || message.type === "app_mention") {
-    return message.type
+  if (message.mentioned === true) {
+    return true
   }
 
+  if (integration.integration === "slack") {
+    return slackMentionsMilo(message.text, integration)
+  }
+
+  if (
+    integration.integration === "github" ||
+    integration.integration === "linear"
+  ) {
+    return mentionsMilo(message.text)
+  }
+
+  return false
+}
+
+function slackMentionsMilo(
+  text: string | undefined,
+  integration: Doc<"integrations">
+) {
   const botId = getSlackBotId(integration.data)
 
-  return botId !== undefined && (message.text ?? "").includes(`<@${botId}>`)
-    ? "app_mention"
-    : message.type
+  return botId !== undefined && (text ?? "").includes(`<@${botId}>`)
+}
+
+function mentionsMilo(text: string | undefined) {
+  return text !== undefined && /(?:^|\W)@milo(?:$|\W)/i.test(text)
 }
 
 function normalizeActor(

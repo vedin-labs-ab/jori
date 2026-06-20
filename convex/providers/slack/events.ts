@@ -52,6 +52,7 @@ export function getSlackMessage(payload: SlackEventPayload) {
     accountId,
     type: getSlackMessageType(event),
     externalId,
+    mentioned: event.type === "app_mention",
     actorId: event.user ?? event.bot_id,
     actorKind:
       event.bot_id === undefined ? ("user" as const) : ("bot" as const),
@@ -79,10 +80,7 @@ function slackChannel(event: SlackEvent) {
     return undefined
   }
 
-  return {
-    id: event.channel,
-    ...optionalString("type", event.channel_type),
-  }
+  return { id: event.channel }
 }
 
 function slackThread(event: SlackEvent) {
@@ -101,8 +99,8 @@ function slackEvent(payload: SlackEventPayload, event: SlackEvent) {
 }
 
 function getSlackMessageType(event: SlackEvent) {
-  if (event.type !== "message") {
-    return event.type ?? "message"
+  if (event.type !== "message" && event.type !== "app_mention") {
+    return "message.unknown"
   }
 
   if (event.channel_type === "channel") {
@@ -121,7 +119,7 @@ function getSlackMessageType(event: SlackEvent) {
     return "message.mpim"
   }
 
-  return "message"
+  return "message.unknown"
 }
 
 function optionalObject(

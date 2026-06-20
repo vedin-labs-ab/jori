@@ -21,9 +21,10 @@ describe("Slack event messages", () => {
       })
     ).toMatchObject({
       type: "message.channels",
+      mentioned: false,
       conversationId: "1710000000.000100",
       data: {
-        channel: { id: "C123", type: "channel" },
+        channel: { id: "C123" },
         event: { id: "E123" },
         thread: { ts: "1710000000.000100" },
         ts: "1710000000.000200",
@@ -31,7 +32,24 @@ describe("Slack event messages", () => {
     })
   })
 
-  test("preserves native Slack app mention events", () => {
+  test("stores native Slack app mentions as message types", () => {
+    expect(
+      getSlackMessage({
+        type: "event_callback",
+        team_id: "T123",
+        event: {
+          type: "app_mention",
+          user: "U123",
+          channel: "C123",
+          channel_type: "channel",
+          text: "<@UBOT> hello",
+          ts: "1710000000.000200",
+        },
+      })
+    ).toMatchObject({ mentioned: true, type: "message.channels" })
+  })
+
+  test("uses an unknown message type when Slack omits the channel kind", () => {
     expect(
       getSlackMessage({
         type: "event_callback",
@@ -44,6 +62,6 @@ describe("Slack event messages", () => {
           ts: "1710000000.000200",
         },
       })
-    ).toMatchObject({ type: "app_mention" })
+    ).toMatchObject({ mentioned: true, type: "message.unknown" })
   })
 })

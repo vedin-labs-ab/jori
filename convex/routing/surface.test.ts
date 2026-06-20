@@ -30,13 +30,13 @@ describe("routing surface addressing", () => {
   test("detects GitHub and Linear Milo mentions", () => {
     expect(
       messageAudience(
-        message({ integration: "github", text: "@milo please check" }),
+        message({ integration: "github", mentioned: true }),
         integration({})
       )
     ).toMatchObject({ isAddressed: true, isDirect: false })
     expect(
       messageAudience(
-        message({ integration: "linear", text: "Follow-up for @Milo" }),
+        message({ integration: "linear", mentioned: true }),
         integration({})
       )
     ).toMatchObject({ isAddressed: true, isDirect: false })
@@ -46,6 +46,18 @@ describe("routing surface addressing", () => {
         integration({})
       )
     ).toMatchObject({ isAddressed: false, isDirect: false })
+  })
+
+  test("treats Slack mentions and direct messages as addressed separately", () => {
+    expect(
+      messageAudience(
+        message({ mentioned: true, type: "message.channels" }),
+        integration({})
+      )
+    ).toMatchObject({ isAddressed: true, isDirect: false })
+    expect(
+      messageAudience(message({ type: "message.im" }), integration({}))
+    ).toMatchObject({ isAddressed: true, isDirect: true })
   })
 
   test("resolves GitHub and Linear reply targets", () => {
@@ -77,7 +89,9 @@ describe("routing surface addressing", () => {
 function message(overrides: Partial<Doc<"messages">>) {
   return {
     integration: "slack",
+    mentioned: false,
     text: "",
+    type: "message.channels",
     ...overrides,
   } as Doc<"messages">
 }
