@@ -31,7 +31,7 @@ export async function decideRoute(
   try {
     const response = await sendOpenRouterChat(createRequest(context))
     const text = readAssistantText(response)
-    const decision = normalizeDecision(JSON.parse(text), context)
+    const decision = normalizeDecision(parseDecisionJson(text), context)
 
     return { ...decision, model: response.model }
   } catch (error) {
@@ -195,6 +195,31 @@ function readAssistantText(
   }
 
   throw new Error("Intake model returned empty content.")
+}
+
+function parseDecisionJson(text: string) {
+  try {
+    return JSON.parse(text)
+  } catch (error) {
+    const extracted = extractJsonObject(text)
+
+    if (extracted === null) {
+      throw error
+    }
+
+    return JSON.parse(extracted)
+  }
+}
+
+function extractJsonObject(text: string) {
+  const start = text.indexOf("{")
+  const end = text.lastIndexOf("}")
+
+  if (start === -1 || end <= start) {
+    return null
+  }
+
+  return text.slice(start, end + 1)
 }
 
 function normalizeReply(value: unknown) {

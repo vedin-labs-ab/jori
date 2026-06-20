@@ -72,6 +72,22 @@ describe("message intake routing request", () => {
       ],
     })
   })
+
+  test("sends first-match routing precedence", async () => {
+    vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
+      modelResponse({ route: "reply", reply: "Hey." })
+    )
+
+    await decideRoute(context({ isAddressed: true }))
+
+    const prompt = lastSystemPrompt()
+    expect(prompt).toContain("Choose by first match:")
+    expect(prompt).toContain("addressed/direct greeting")
+    expect(prompt).toContain("uncertain addressed/direct")
+    expect(prompt.indexOf("addressed/direct greeting")).toBeLessThan(
+      prompt.indexOf("uncertain addressed/direct")
+    )
+  })
 })
 
 describe("message intake routing decisions", () => {
@@ -131,6 +147,20 @@ describe("message intake routing decisions", () => {
       route: "ignore",
     })
   })
+
+  test("accepts a JSON decision wrapped in stray prose", async () => {
+    vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
+      modelTextResponse(
+        'This is a greeting.\n\n{"route":"reply","reply":"Hey Albin."}'
+      )
+    )
+
+    await expect(decideRoute(context({ isAddressed: true }))).resolves.toEqual({
+      model: "test-model",
+      reply: "Hey Albin.",
+      route: "reply",
+    })
+  })
 })
 
 function restoreIntakeModel(value: string | undefined) {
@@ -160,6 +190,16 @@ function lastRoutingSchema() {
   return responseFormat?.jsonSchema?.schema
 }
 
+function lastSystemPrompt() {
+  const [message] = lastRoutingRequest().messages
+
+  if (message?.role === "system" && typeof message.content === "string") {
+    return message.content
+  }
+
+  throw new Error("Expected message intake to send a system prompt.")
+}
+
 function context(
   overrides: Partial<MessageRoutingContext> = {}
 ): MessageRoutingContext {
@@ -187,12 +227,16 @@ function modelResponse(content: {
   reply?: string
   route: "agent" | "ignore" | "reply"
 }) {
+  return modelTextResponse(JSON.stringify(content))
+}
+
+function modelTextResponse(content: string) {
   return {
     choices: [
       {
         finishReason: "stop",
         message: {
-          content: JSON.stringify(content),
+          content,
         },
       },
     ],
