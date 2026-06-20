@@ -87,14 +87,14 @@ async function getActiveRun(
     return null
   }
 
-  const log = await ctx.db
-    .query("logs")
-    .withIndex("by_run", (query) => query.eq("runId", run._id))
+  const trace = await ctx.db
+    .query("traces")
+    .withIndex("by_run_and_timestamp", (query) => query.eq("runId", run._id))
     .order("desc")
     .first()
 
   return {
-    latestStatus: log?.type ?? null,
+    latestStatus: trace?.type ?? null,
     runId: run._id,
     status: run.status,
   }

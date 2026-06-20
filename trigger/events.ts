@@ -1,36 +1,37 @@
 import {
   type ConvexId,
-  type JsonObject,
+  type RuntimeErrorTraceData,
   type RuntimeEventInput,
   type RuntimeEventType,
+  type RuntimeTraceSource,
 } from "./types"
 
 export function runtimeEvent(args: RuntimeEventInput) {
   return {
     ...args,
-    eventKey: eventKey(args),
+    key: traceKey(args),
   }
 }
 
-export function eventKey(args: {
+export function traceKey(args: {
   attempt?: number
+  callId?: string
   runId: ConvexId<"runs">
   sequence: number
-  source: string
-  toolCallId?: string
+  source: RuntimeTraceSource
   type: RuntimeEventType
 }) {
-  const tool = args.toolCallId === undefined ? "" : `:${args.toolCallId}`
+  const call = args.callId === undefined ? "" : `:${args.callId}`
   const attempt = args.attempt === undefined ? "" : `:attempt-${args.attempt}`
 
   return (
     [args.runId, args.source, args.sequence.toString(), args.type].join(":") +
-    tool +
+    call +
     attempt
   )
 }
 
-export function errorDetails(error: unknown): JsonObject {
+export function errorDetails(error: unknown): RuntimeErrorTraceData {
   return {
     error: formatError(error),
   }

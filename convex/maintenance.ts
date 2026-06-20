@@ -19,7 +19,7 @@ const tableRegistry: Record<TableName, true> = {
   sessions: true,
   approvals: true,
   routing: true,
-  logs: true,
+  traces: true,
   outbox: true,
   sandboxes: true,
   permissions: true,

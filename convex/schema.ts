@@ -23,7 +23,7 @@ import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
 import { routing } from "./routing/schema"
 import { runs } from "./runs/schema"
-import { logs, outbox, sandboxes } from "./runtime/schema"
+import { outbox, sandboxes, traces } from "./runtime/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
 
@@ -41,7 +41,7 @@ export default defineSchema({
   sessions,
   approvals,
   routing,
-  logs,
+  traces,
   outbox,
   sandboxes,
   permissions,

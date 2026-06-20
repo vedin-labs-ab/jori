@@ -1,20 +1,21 @@
 import { v } from "convex/values"
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, mutation } from "../_generated/server"
 import { continuePendingConversationRun } from "../conversations/continuation"
+import { traceData, traceSource, traceType } from "./schema"
 import { requireWorkerSecret } from "./shared"
 
 export const record = mutation({
   args: {
     attempt: v.optional(v.number()),
-    eventKey: v.string(),
-    payload: v.optional(v.any()),
+    callId: v.optional(v.string()),
+    data: v.optional(traceData),
+    key: v.string(),
     runId: v.id("runs"),
     secret: v.string(),
     sequence: v.optional(v.number()),
-    source: v.string(),
-    toolCallId: v.optional(v.string()),
-    type: v.string(),
+    source: traceSource,
+    type: traceType,
   },
   returns: v.object({
     created: v.boolean(),
@@ -22,46 +23,69 @@ export const record = mutation({
   handler: async (ctx, args) => {
     requireWorkerSecret(args.secret)
 
-    const existing = await ctx.db
-      .query("logs")
-      .withIndex("by_key", (query) => query.eq("eventKey", args.eventKey))
-      .first()
-
-    if (existing !== null) {
-      return { created: false }
-    }
-
     const run = await ctx.db.get(args.runId)
 
     if (run === null) {
       throw new Error("Run not found.")
     }
 
-    await ctx.db.insert("logs", {
-      tenantId: run.tenantId,
-      runId: args.runId,
-      eventKey: args.eventKey,
-      source: args.source,
-      type: args.type,
-      sequence: args.sequence,
-      toolCallId: args.toolCallId,
-      attempt: args.attempt,
-      payload: args.payload,
-      createdAt: Date.now(),
+    const created = await recordTrace(ctx, {
+      ...args,
+      run,
     })
 
-    await patchRunStatus(ctx, args)
-    await patchSessionStatus(ctx, args)
+    if (created) {
+      await patchRunStatus(ctx, args)
+      await patchSessionStatus(ctx, args)
+    }
 
-    return { created: true }
+    return { created }
   },
 })
+
+export async function recordTrace(
+  ctx: MutationCtx,
+  args: {
+    attempt?: number
+    callId?: string
+    data?: Doc<"traces">["data"]
+    key: string
+    run: Doc<"runs">
+    sequence?: number
+    source: Doc<"traces">["source"]
+    type: Doc<"traces">["type"]
+  }
+) {
+  const existing = await ctx.db
+    .query("traces")
+    .withIndex("by_key", (query) => query.eq("key", args.key))
+    .first()
+
+  if (existing !== null) {
+    return false
+  }
+
+  await ctx.db.insert("traces", {
+    tenantId: args.run.tenantId,
+    runId: args.run._id,
+    key: args.key,
+    source: args.source,
+    type: args.type,
+    sequence: args.sequence,
+    callId: args.callId,
+    attempt: args.attempt,
+    data: args.data,
+    timestamp: Date.now(),
+  })
+
+  return true
+}
 
 async function patchSessionStatus(
   ctx: MutationCtx,
   args: {
     runId: Id<"runs">
-    type: string
+    type: Doc<"traces">["type"]
   }
 ) {
   if (args.type !== "run.completed" && args.type !== "run.failed") {
@@ -77,9 +101,9 @@ async function patchSessionStatus(
 async function patchRunStatus(
   ctx: MutationCtx,
   args: {
+    data?: Doc<"traces">["data"]
     runId: Id<"runs">
-    payload?: unknown
-    type: string
+    type: Doc<"traces">["type"]
   }
 ) {
   const run = await ctx.db.get(args.runId)
@@ -117,18 +141,18 @@ async function patchRunStatus(
 
     await ctx.db.patch(args.runId, {
       status: "failed",
-      error: readPayloadString(args.payload, "error"),
+      error: readDataString(args.data, "error"),
       endedAt: Date.now(),
     })
   }
 }
 
-function readPayloadString(payload: unknown, key: string) {
-  if (typeof payload !== "object" || payload === null || !(key in payload)) {
+function readDataString(data: Doc<"traces">["data"], key: string) {
+  if (typeof data !== "object" || data === null || !(key in data)) {
     return undefined
   }
 
-  const value = payload[key as keyof typeof payload]
+  const value = data[key as keyof typeof data]
 
   return typeof value === "string" ? value : undefined
 }
