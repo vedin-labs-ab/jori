@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
-  getSlackBotId,
+  getSlackBotUserId,
   getSlackChannelId,
   getSlackMessageTs,
   getSlackThreadTs,
@@ -109,11 +109,11 @@ function slackRoutingMessageText(
   text: string,
   integration: Doc<"integrations">
 ) {
-  const botId = getSlackBotId(integration.data)
+  const botUserId = getSlackBotUserId(integration.data)
 
-  return botId === undefined
+  return botUserId === undefined
     ? text
-    : text.replace(slackUserMentionPattern(botId), "@Milo")
+    : text.replace(slackUserMentionPattern(botUserId), "@Milo")
 }
 
 function slackUserMentionPattern(userId: string) {

@@ -3,7 +3,7 @@ import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { ensureConversation, findConversation } from "../conversations/data"
 import { getLinearBotId } from "../providers/linear/data"
-import { getSlackBotId } from "../providers/slack/data"
+import { getSlackBotUserId } from "../providers/slack/data"
 import { messageAudience } from "../routing/surface"
 import { getActorExternalId, isUserActor, withActorKind } from "../shared/actor"
 import {
@@ -98,9 +98,9 @@ function slackMentionsMilo(
   text: string | undefined,
   integration: Doc<"integrations">
 ) {
-  const botId = getSlackBotId(integration.data)
+  const botUserId = getSlackBotUserId(integration.data)
 
-  return botId !== undefined && (text ?? "").includes(`<@${botId}>`)
+  return botUserId !== undefined && (text ?? "").includes(`<@${botUserId}>`)
 }
 
 function mentionsMilo(text: string | undefined) {
@@ -121,7 +121,7 @@ function normalizeActor(
 
 function selfActorId(integration: Doc<"integrations">) {
   if (integration.integration === "slack") {
-    return getSlackBotId(integration.data)
+    return getSlackBotUserId(integration.data)
   }
 
   if (integration.integration === "linear") {

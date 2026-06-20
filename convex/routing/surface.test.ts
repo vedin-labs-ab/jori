@@ -9,7 +9,7 @@ describe("routing surface text", () => {
         message({
           text: "<@U0B96KZ7WJG> hello <@UOTHER>",
         }),
-        integration({ data: { botId: "U0B96KZ7WJG" } })
+        integration({ data: { botUserId: "U0B96KZ7WJG" } })
       )
     ).toBe("@Milo hello <@UOTHER>")
   })
@@ -20,7 +20,7 @@ describe("routing surface text", () => {
         message({
           text: "<@U0B96KZ7WJG|milo> hello",
         }),
-        integration({ data: { botId: "U0B96KZ7WJG" } })
+        integration({ data: { botUserId: "U0B96KZ7WJG" } })
       )
     ).toBe("@Milo hello")
   })

@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 
 export type ActorKind = "bot" | "self" | "user"
+export type ActorAlias = { type: string; id: string }
 
 export type Actor =
   | { kind: "user"; userId: string; name?: string; email?: string }
@@ -8,6 +9,7 @@ export type Actor =
   | {
       kind: ActorKind
       externalId: string
+      aliases?: ActorAlias[]
       name?: string
       email?: string
     }
@@ -32,6 +34,9 @@ export const actorValidator = v.union(
   v.object({
     kind: actorKindValidator,
     externalId: v.string(),
+    aliases: v.optional(
+      v.array(v.object({ type: v.string(), id: v.string() }))
+    ),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
   })
@@ -108,6 +113,7 @@ function nonEmptyActorFields(fields: { name?: string; email?: string }) {
 
 export function createIntegrationActor(args: {
   externalId?: string
+  aliases?: ActorAlias[]
   kind?: ActorKind
   name?: string
   email?: string
@@ -116,6 +122,7 @@ export function createIntegrationActor(args: {
     return {
       kind: args.kind ?? "user",
       externalId: args.externalId,
+      ...nonEmptyAliases(args.aliases),
       ...nonEmptyActorFields({
         email: args.email,
         name: args.name,
@@ -128,6 +135,14 @@ export function createIntegrationActor(args: {
   }
 
   return undefined
+}
+
+function nonEmptyAliases(aliases: ActorAlias[] | undefined) {
+  const values = aliases?.filter(
+    (alias) => alias.id !== "" && alias.type !== ""
+  )
+
+  return values === undefined || values.length === 0 ? {} : { aliases: values }
 }
 
 export function withActorKind(

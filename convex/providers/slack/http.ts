@@ -94,7 +94,7 @@ export async function handleSlackOAuthCallback(
       botScopes: tokenResult.scope,
       botToken,
       team: tokenResult.team,
-      botId: tokenResult.bot_user_id,
+      botUserId: tokenResult.bot_user_id,
       userScopes: tokenResult.authed_user?.scope,
       userToken,
     }
@@ -175,6 +175,7 @@ async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
     mentioned: message.mentioned,
     actor: createIntegrationActor({
       externalId: message.actorId,
+      aliases: message.actorAliases,
       kind: message.actorKind,
       email: actorProfile?.email,
       name: actorProfile?.name,

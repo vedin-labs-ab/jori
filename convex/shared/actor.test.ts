@@ -28,4 +28,16 @@ describe("actors", () => {
 
     expect(getActorDisplayName(actor)).toBe("U123")
   })
+
+  test("keeps typed provider aliases on integration actors", () => {
+    expect(
+      createIntegrationActor({
+        aliases: [{ type: "slack.bot", id: "B123" }],
+        externalId: "U123",
+      })
+    ).toMatchObject({
+      aliases: [{ type: "slack.bot", id: "B123" }],
+      externalId: "U123",
+    })
+  })
 })
