@@ -8,6 +8,7 @@ import {
 import { type MiloConvexClient } from "./convex"
 import { errorDetails, runtimeEvent } from "./events"
 import { type ModelToolCall } from "./model/types"
+import { executeCodingTool } from "./sandbox/coding"
 import { type SandboxRuntime } from "./sandbox/types"
 import {
   type ApprovalDecision,
@@ -66,7 +67,11 @@ async function executeTool(
     case "convex":
       return await executeConvexTool(runtime, tool, call)
     case "sandbox":
-      return await executeSandboxTool(runtime, call.args)
+      return await executeCodingTool({
+        input: call.args,
+        sandbox: runtime.sandbox,
+        tool: tool.name,
+      })
     case "subagent":
       return await executeSubagentTool(runtime, call.args)
   }
@@ -154,14 +159,6 @@ async function callConvexTool(
   return await materializeSandboxResult(runtime, result)
 }
 
-async function executeSandboxTool(runtime: ToolRuntime, input: JsonObject) {
-  return await runtime.sandbox.runCommand({
-    command: requiredString(input.command, "command"),
-    cwd: optionalString(input.cwd),
-    timeoutMs: optionalNumber(input.timeoutMs),
-  })
-}
-
 async function executeSubagentTool(runtime: ToolRuntime, input: JsonObject) {
   return await runtime.convex.createChildRun({
     parentId: runtime.context.run.id,
@@ -232,10 +229,6 @@ function requiredString(value: unknown, name: string) {
 
 function optionalString(value: unknown) {
   return typeof value === "string" && value.trim() !== "" ? value : undefined
-}
-
-function optionalNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }
 
 function toToolContent(result: unknown) {
