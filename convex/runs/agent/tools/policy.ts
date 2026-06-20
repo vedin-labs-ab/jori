@@ -6,6 +6,7 @@ import {
 } from "../../../permissions/catalog"
 
 export type ToolExecutionType = "automation" | "message"
+export type RuntimeExecutionType = ToolExecutionType | "instruction"
 
 export type ToolPermissionInput = {
   executionType: ToolExecutionType
@@ -37,4 +38,10 @@ export function canUseToolPermission(input: {
     resolveToolMode(input.toolModes, input.permission.tool),
     input.executionType
   )
+}
+
+export function toolExecutionType(
+  executionType: RuntimeExecutionType
+): ToolExecutionType {
+  return executionType === "automation" ? "automation" : "message"
 }

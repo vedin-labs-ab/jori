@@ -29,7 +29,7 @@ test("renders recurring automation details", () => {
         metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
       },
       details: [
-        { type: "next", label: "Next", at: 1700125200000 },
+        { type: "next", label: "Next", timestamp: 1700125200000 },
         {
           type: "tools",
           label: "Slack · Read 1 · Write 1",
@@ -79,7 +79,7 @@ function execution(
     createdAt: 1700000000000,
     details: overrides.details ?? [],
     durationMs: 1000,
-    finishedAt: 1700000001000,
+    endedAt: 1700000001000,
     id: "execution",
     searchableText: "",
     source: overrides.source ?? {

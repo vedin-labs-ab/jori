@@ -7,8 +7,6 @@ export type JsonObject = Record<string, unknown>
 export type ConvexId<TableName extends string> = GenericId<TableName>
 
 export type AgentRunPayload = {
-  parentRunId?: ConvexId<"runs">
-  rootRunId?: ConvexId<"runs">
   runId: ConvexId<"runs">
 }
 
@@ -33,12 +31,10 @@ export type RuntimeContext = {
   prompt: string
   run: {
     id: ConvexId<"runs">
-    rootRunId: ConvexId<"runs"> | null
+    rootId: ConvexId<"runs"> | null
     sandboxId: string | null
     status: "completed" | "failed" | "queued" | "running" | "stopped"
-    task: string
     tenantId: string
-    title: string
   }
   session: {
     id: ConvexId<"sessions">

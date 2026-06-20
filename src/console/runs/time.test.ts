@@ -7,7 +7,7 @@ const baseRun: ExecutionItem = {
   createdAt: 1700000000123,
   details: [],
   durationMs: 1200,
-  finishedAt: 1700000001323,
+  endedAt: 1700000001323,
   id: "run-1",
   searchableText: "completed run",
   source: { type: "manual", metadata: [] },
@@ -25,7 +25,7 @@ describe("run clock timing", () => {
   test("uses a second interval while a run is active", () => {
     expect(
       runClockInterval(
-        [{ ...baseRun, finishedAt: undefined, status: "running" }],
+        [{ ...baseRun, endedAt: undefined, status: "running" }],
         1700000065123
       )
     ).toBe(1000)

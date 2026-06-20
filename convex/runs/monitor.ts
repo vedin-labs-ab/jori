@@ -16,23 +16,6 @@ export const trace = query({
       return { type: "missing" as const }
     }
 
-    const trace = run.trace
-
-    if (trace !== undefined && "fileId" in trace) {
-      const url = await ctx.storage.getUrl(trace.fileId)
-
-      return url === null
-        ? { type: "missing" as const }
-        : { type: "stored" as const, url }
-    }
-
-    if (trace !== undefined && "host" in trace) {
-      return {
-        type: "live" as const,
-        url: `https://${trace.host}/trace?token=${trace.token}`,
-      }
-    }
-
     if (run.status === "queued" || run.status === "running") {
       return { type: "pending" as const }
     }

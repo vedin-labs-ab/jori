@@ -8,12 +8,12 @@ test("includes recurring automation details", async () => {
   const nextAt = Date.UTC(2026, 5, 15, 9)
   const run = testRun(
     recurringRun(scheduledAt, {
-      details: [{ type: "next", label: "Next", at: nextAt }],
+      details: [{ type: "next", label: "Next", timestamp: nextAt }],
     }),
     {
       createdAt: scheduledAt + 1000,
-      finishedAt: scheduledAt + 2000,
-      toolSnapshot: slackToolSnapshot(),
+      endedAt: scheduledAt + 2000,
+      preparedTools: slackToolSnapshot(),
     }
   )
   const summary = await summarizeRun(
@@ -32,7 +32,7 @@ test("includes recurring automation details", async () => {
     metadata: [{ type: "schedule", label: "Daily at 09:00 UTC" }],
   })
   expect(summary.details).toEqual([
-    { type: "next", label: "Next", at: nextAt },
+    { type: "next", label: "Next", timestamp: nextAt },
     {
       type: "tools",
       label: "Slack · Read 1 · Write 1",
@@ -55,7 +55,7 @@ test("includes paused recurring automation status without next run details", asy
     recurringRun(scheduledAt, {
       details: [{ type: "status", label: "Paused" }],
     }),
-    { createdAt: scheduledAt + 1000, finishedAt: scheduledAt + 2000 }
+    { createdAt: scheduledAt + 1000, endedAt: scheduledAt + 2000 }
   )
   const summary = await summarizeRun(
     fakeQueryCtx({
@@ -82,10 +82,12 @@ function recurringRun(
     _creationTime: 0,
     tenantId: "tenant",
     automationId: "automation",
-    reason: { type: "time", scheduledAt },
-    title: "Daily image",
-    task: "Generate a team image.",
-    display: recurringDisplay(display),
+    cause: { type: "time", scheduledAt },
+    instructions: "Generate a team image.",
+    snapshot: {
+      title: "Daily image",
+      ...recurringDisplay(display),
+    },
     createdAt: scheduledAt + 1000,
   }
 }
@@ -147,9 +149,8 @@ function testRun(
   overrides: Record<string, unknown> = {}
 ) {
   return {
-    promptId: "prompt",
     status: "completed",
-    finishedAt: 1000,
+    endedAt: 1000,
     ...run,
     ...overrides,
   } as Parameters<typeof summarizeRun>[1]
@@ -186,6 +187,8 @@ function slackTools() {
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {
+  const preparedTools = (docs.run as { preparedTools?: unknown }).preparedTools
+
   return {
     db: {
       get: async (id: string) => docs[id] ?? null,
@@ -194,6 +197,15 @@ function fakeQueryCtx(docs: Record<string, unknown>) {
           first: async () => null,
           order: () => ({
             first: async () => null,
+            take: async () =>
+              preparedTools === undefined
+                ? []
+                : [
+                    {
+                      type: "run.prepared",
+                      payload: { tools: preparedTools },
+                    },
+                  ],
           }),
         }),
       }),

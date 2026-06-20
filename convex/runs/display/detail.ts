@@ -31,7 +31,7 @@ export type ExecutionDetail = {
   type: ExecutionDetailType
   label: string
   url?: string
-  at?: number
+  timestamp?: number
   groups?: ExecutionDetailGroup[]
 }
 
@@ -39,8 +39,8 @@ export function detail(
   type: ExecutionDetailType,
   label: string | undefined,
   options: {
-    at?: number
     groups?: ExecutionDetailGroup[]
+    timestamp?: number
     url?: string
   } = {}
 ): ExecutionDetail | undefined {
@@ -56,7 +56,9 @@ export function detail(
     ...(options.url === undefined || options.url === ""
       ? {}
       : { url: options.url }),
-    ...(options.at === undefined ? {} : { at: options.at }),
+    ...(options.timestamp === undefined
+      ? {}
+      : { timestamp: options.timestamp }),
     ...(options.groups === undefined || options.groups.length === 0
       ? {}
       : { groups: options.groups }),

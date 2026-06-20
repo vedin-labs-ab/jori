@@ -7,8 +7,8 @@ test("includes one-shot automation access details", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
   const run = testRun(oneShotRun(scheduledAt), {
     createdAt: scheduledAt + 1000,
-    finishedAt: scheduledAt + 2000,
-    toolSnapshot: slackToolSnapshot(true),
+    endedAt: scheduledAt + 2000,
+    preparedTools: slackToolSnapshot(true),
   })
   const summary = await summarizeRun(
     fakeQueryCtx({
@@ -45,8 +45,8 @@ test("marks one-shot automation web search as blocked when disabled", async () =
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
   const run = testRun(oneShotRun(scheduledAt), {
     createdAt: scheduledAt + 1000,
-    finishedAt: scheduledAt + 2000,
-    toolSnapshot: slackToolSnapshot(false),
+    endedAt: scheduledAt + 2000,
+    preparedTools: slackToolSnapshot(false),
   })
   const summary = await summarizeRun(
     fakeQueryCtx({
@@ -69,10 +69,12 @@ function oneShotRun(scheduledAt: number) {
     _creationTime: 0,
     tenantId: "tenant",
     automationId: "automation",
-    reason: { type: "time", scheduledAt },
-    title: "Daily image",
-    task: "Generate a team image.",
-    display: oneShotDisplay(),
+    cause: { type: "time", scheduledAt },
+    instructions: "Generate a team image.",
+    snapshot: {
+      title: "Daily image",
+      ...oneShotDisplay(),
+    },
     createdAt: scheduledAt + 1000,
   }
 }
@@ -85,7 +87,7 @@ function oneShotAutomation(scheduledAt: number, webSearch = true) {
     name: "Daily image",
     instructions: "Generate a team image.",
     type: "once",
-    trigger: { at: scheduledAt },
+    trigger: { timestamp: scheduledAt },
     access: {
       integrations: [
         {
@@ -124,9 +126,8 @@ function testRun(
   overrides: Record<string, unknown> = {}
 ) {
   return {
-    promptId: "prompt",
     status: "completed",
-    finishedAt: 1000,
+    endedAt: 1000,
     ...run,
     ...overrides,
   } as Parameters<typeof summarizeRun>[1]
@@ -163,6 +164,8 @@ function slackTools() {
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {
+  const preparedTools = (docs.run as { preparedTools?: unknown }).preparedTools
+
   return {
     db: {
       get: async (id: string) => docs[id] ?? null,
@@ -171,6 +174,15 @@ function fakeQueryCtx(docs: Record<string, unknown>) {
           first: async () => null,
           order: () => ({
             first: async () => null,
+            take: async () =>
+              preparedTools === undefined
+                ? []
+                : [
+                    {
+                      type: "run.prepared",
+                      payload: { tools: preparedTools },
+                    },
+                  ],
           }),
         }),
       }),

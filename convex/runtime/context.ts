@@ -13,7 +13,7 @@ import {
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { assemblePrompt } from "../runs/agent/prompt"
 import { createRuntimeToolCapability } from "../runs/agent/tools/bundles"
-import { getPromptedTools } from "../runs/agent/tools/policy"
+import { getPromptedTools, toolExecutionType } from "../runs/agent/tools/policy"
 import { getEnabledToolPermissions } from "../runs/agent/tools/resolve"
 import {
   emptyObjectSchema,
@@ -71,12 +71,17 @@ export const load = action({
       runId: args.runId,
     })) as {
       _id: Id<"runs">
-      sandboxId?: string
       status: "completed" | "failed" | "queued" | "running" | "stopped"
     } | null
     const session = await ctx.runQuery(internal.sessions.data.getByRun, {
       runId: args.runId,
     })
+    const sandbox = (await ctx.runQuery(
+      internal.runtime.sandboxes.activeByRun,
+      {
+        runId: args.runId,
+      }
+    )) as { sandboxId: string } | null
 
     if (input === null || run === null) {
       throw new Error("Runtime context not found.")
@@ -84,7 +89,7 @@ export const load = action({
 
     const permissions = await runtimePermissions(ctx, input)
     const promptedTools = getPromptedTools({
-      executionType: input.type,
+      executionType: toolExecutionType(input.type),
       permissions: permissions.all,
       toolModes: permissions.toolModes,
     })
@@ -96,7 +101,7 @@ export const load = action({
     await ctx.runMutation(internal.runtime.context.prepareRun, {
       runId: args.runId,
       promptId,
-      toolSnapshot: createRunToolSnapshot({
+      tools: createRunToolSnapshot({
         capabilities: permissions.capabilities,
         webSearch: input.type !== "automation" || input.automation.access.web,
       }),
@@ -106,12 +111,10 @@ export const load = action({
       prompt,
       run: {
         id: input.run._id,
-        rootRunId: input.run.rootRunId ?? null,
-        sandboxId: run.sandboxId ?? null,
+        rootId: input.run.rootId ?? null,
+        sandboxId: sandbox?.sandboxId ?? null,
         status: run.status,
-        task: input.run.task,
         tenantId: input.run.tenantId,
-        title: input.run.title,
       },
       session:
         session === null
@@ -128,13 +131,37 @@ export const prepareRun = internalMutation({
   args: {
     runId: v.id("runs"),
     promptId: v.id("_storage"),
-    toolSnapshot: v.any(),
+    tools: v.any(),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.runId, {
-      promptId: args.promptId,
-      toolSnapshot: args.toolSnapshot,
+    const run = await ctx.db.get(args.runId)
+
+    if (run === null) {
+      return null
+    }
+
+    const eventKey = `run:${args.runId}:prepared`
+    const existing = await ctx.db
+      .query("logs")
+      .withIndex("by_key", (query) => query.eq("eventKey", eventKey))
+      .first()
+
+    if (existing !== null) {
+      return null
+    }
+
+    await ctx.db.insert("logs", {
+      tenantId: run.tenantId,
+      runId: args.runId,
+      eventKey,
+      source: "convex.runtime",
+      type: "run.prepared",
+      payload: {
+        promptId: args.promptId,
+        tools: args.tools,
+      },
+      createdAt: Date.now(),
     })
 
     return null
@@ -171,7 +198,7 @@ function permissionGroups(
   input: AgentRuntimeInput,
   toolModes: ReadonlyMap<string, PermissionMode>
 ) {
-  const executionType = input.type
+  const executionType = toolExecutionType(input.type)
   const groups: Array<{
     permissions: ToolPermission[]
     surface: ToolSurface

@@ -54,12 +54,32 @@ function createTriggerPart(input: AgentRuntimeInput, isInitialRun: boolean) {
     )
   }
 
+  if (input.type === "instruction") {
+    return renderPromptTemplate(
+      isInitialRun
+        ? promptTemplates["trigger/instruction"]
+        : promptTemplates["reference/instruction"],
+      createInstructionValues(input)
+    )
+  }
+
   return renderPromptTemplate(
     isInitialRun
       ? promptTemplates["trigger/message"]
       : promptTemplates["reference/message"],
     createMessageValues(input)
   )
+}
+
+function createInstructionValues(
+  input: Extract<AgentRuntimeInput, { type: "instruction" }>
+) {
+  return {
+    instruction: {
+      text: input.instructions,
+    },
+    time: { utc: createPromptTime() },
+  }
 }
 
 function createMessageValues(
@@ -172,17 +192,17 @@ function formatMessageRouting(
 function formatAutomationTrigger(
   input: Extract<AgentRuntimeInput, { type: "automation" }>
 ) {
-  const reason = input.run.reason
+  const cause = input.run.cause
 
-  if (reason.type === "time") {
-    return `Time at ${new Date(reason.scheduledAt).toISOString()}`
+  if (cause.type === "time") {
+    return `Time at ${new Date(cause.scheduledAt).toISOString()}`
   }
 
-  if (reason.type === "event") {
+  if (cause.type === "event") {
     return "Integration event"
   }
 
-  if (reason.type === "manual") {
+  if (cause.type === "manual") {
     return "Manual"
   }
 

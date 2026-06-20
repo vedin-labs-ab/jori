@@ -27,7 +27,7 @@ function githubAutomationRuntimeInput() {
       _creationTime: 0,
       tenantId: "tenant",
       automationId: "automation",
-      reason: { type: "event", eventId: "event" },
+      cause: { type: "event", eventId: "event" },
       createdAt: 0,
     },
     integration: github,

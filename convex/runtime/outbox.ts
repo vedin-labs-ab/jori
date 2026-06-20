@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { findActiveSandbox } from "./sandboxes"
 import { formatRuntimeError } from "./shared"
 
 const maxAttempts = 8
@@ -65,14 +66,16 @@ export const enqueueCancellation = internalMutation({
       return null
     }
 
+    const sandbox = await findActiveSandbox(ctx, run._id)
+
     return await enqueueOperation(ctx, {
       tenantId: run.tenantId,
       idempotencyKey: `cancel:${run._id}`,
       operation: {
         type: "run.cancel",
         runId: run._id,
-        sandboxId: run.sandboxId,
-        triggerRunId: run.triggerRunId,
+        sandboxId: sandbox?.sandboxId,
+        workerId: run.workerId,
       },
     })
   },
@@ -175,8 +178,6 @@ async function enqueueRun(ctx: MutationCtx, run: Doc<"runs">) {
     operation: {
       type: "run.start",
       runId: run._id,
-      parentRunId: run.parentRunId,
-      rootRunId: run.rootRunId,
     },
   })
 }
@@ -222,7 +223,7 @@ async function applyExternalId(
   }
 
   await ctx.db.patch(item.operation.runId, {
-    triggerRunId: externalId,
+    workerId: externalId,
   })
 }
 

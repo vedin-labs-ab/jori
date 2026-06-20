@@ -60,11 +60,11 @@ export async function queueReply(
 async function findRunMessage(ctx: MutationCtx, runId: Id<"runs">) {
   const run = await ctx.db.get(runId)
 
-  if (run === null || run.reason.type !== "message") {
+  if (run === null || run.cause.type !== "message") {
     return null
   }
 
-  const message = await ctx.db.get(run.reason.messageId)
+  const message = await ctx.db.get(run.cause.messageId)
 
   return message === null || message.tenantId !== run.tenantId ? null : message
 }

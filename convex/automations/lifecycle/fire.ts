@@ -27,7 +27,7 @@ export async function fireAutomation(
   if (automation.type === "once") {
     const runId = await createAutomationRun(ctx, {
       automation,
-      reason: {
+      cause: {
         type: "time",
         scheduledAt: args.expectedAt,
       },
@@ -50,7 +50,7 @@ export async function fireAutomation(
   const trigger = await scheduleNextCronAutomation(ctx, automation, now)
   const runId = await createAutomationRun(ctx, {
     automation: { ...automation, trigger },
-    reason: {
+    cause: {
       type: "time",
       scheduledAt: args.expectedAt,
     },
@@ -92,7 +92,7 @@ export async function startEventAutomations(
         automation,
         event: args.event,
         integration,
-        reason: {
+        cause: {
           type: "event",
           eventId: args.event._id,
         },

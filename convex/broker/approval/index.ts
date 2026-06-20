@@ -215,7 +215,7 @@ function getSlackApprovalDelivery(
 }
 
 function getSlackTarget(input: AgentRuntimeInput) {
-  if (input.type === "automation") {
+  if (input.type !== "message") {
     return null
   }
 

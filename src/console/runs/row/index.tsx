@@ -134,7 +134,7 @@ function ExpandedExecution({
 }
 
 function durationFor(execution: ExecutionItem, now: number) {
-  if (execution.finishedAt === undefined) {
+  if (execution.endedAt === undefined) {
     return Math.max(0, now - execution.createdAt)
   }
 

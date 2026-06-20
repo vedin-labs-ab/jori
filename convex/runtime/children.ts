@@ -2,11 +2,12 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { action, internalMutation } from "../_generated/server"
+import { createInstructionRunSnapshot } from "../runs/snapshot"
 import { requireWorkerSecret } from "./shared"
 
 export const create = action({
   args: {
-    parentRunId: v.id("runs"),
+    parentId: v.id("runs"),
     secret: v.string(),
     task: v.string(),
     title: v.optional(v.string()),
@@ -18,7 +19,7 @@ export const create = action({
     requireWorkerSecret(args.secret)
 
     return (await ctx.runMutation(internal.runtime.children.insert, {
-      parentRunId: args.parentRunId,
+      parentId: args.parentId,
       task: args.task,
       title: args.title,
     })) as { runId: Id<"runs"> }
@@ -27,7 +28,7 @@ export const create = action({
 
 export const insert = internalMutation({
   args: {
-    parentRunId: v.id("runs"),
+    parentId: v.id("runs"),
     task: v.string(),
     title: v.optional(v.string()),
   },
@@ -35,7 +36,7 @@ export const insert = internalMutation({
     runId: v.id("runs"),
   }),
   handler: async (ctx, args): Promise<{ runId: Id<"runs"> }> => {
-    const parent = await ctx.db.get(args.parentRunId)
+    const parent = await ctx.db.get(args.parentId)
 
     if (parent === null) {
       throw new Error("Parent run not found.")
@@ -43,18 +44,17 @@ export const insert = internalMutation({
 
     const runId = await ctx.db.insert("runs", {
       tenantId: parent.tenantId,
-      parentRunId: parent._id,
-      rootRunId: parent.rootRunId ?? parent._id,
-      reason: {
+      parentId: parent._id,
+      rootId: parent.rootId ?? parent._id,
+      cause: {
         type: "manual",
         userId: parent.createdBy,
       },
-      title: normalizeTitle(args.title, args.task),
-      task: args.task,
-      display: {
-        ...parent.display,
-        trigger: "Subagent",
-      },
+      ...createInstructionRunSnapshot({
+        instructions: args.task,
+        parent,
+        title: args.title,
+      }),
       status: "queued",
       createdBy: parent.createdBy,
       createdAt: Date.now(),
@@ -65,13 +65,3 @@ export const insert = internalMutation({
     return { runId }
   },
 })
-
-function normalizeTitle(title: string | undefined, task: string) {
-  const value = title?.trim() || task.trim().split("\n").find(Boolean)
-
-  if (value === undefined || value === "") {
-    throw new Error("Child run task cannot be empty.")
-  }
-
-  return value.length > 90 ? `${value.slice(0, 87)}...` : value
-}

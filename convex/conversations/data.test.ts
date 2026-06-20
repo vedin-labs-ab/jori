@@ -17,7 +17,7 @@ test("starts new conversation message runs as mentions", async () => {
   expect(result.status).toBe("started")
   expect(inserted(ctx, "runs")).toEqual([
     expect.objectContaining({
-      reason: { type: "message", messageId: "message", kind: "mention" },
+      cause: { type: "message", messageId: "message", kind: "mention" },
     }),
   ])
   expect(inserted(ctx, "conversations")).toEqual([
@@ -91,7 +91,7 @@ test("starts reply runs when the previous session is terminal", async () => {
   expect(result.status).toBe("started")
   expect(inserted(ctx, "runs")).toEqual([
     expect.objectContaining({
-      reason: { type: "message", messageId: "message", kind: "reply" },
+      cause: { type: "message", messageId: "message", kind: "reply" },
     }),
   ])
   expect(ctx.patches).toContainEqual({

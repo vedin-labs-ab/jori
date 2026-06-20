@@ -4,7 +4,7 @@ import { getAutomationEventDefinition } from "../../automations/events"
 import { toolSurfaceLabel } from "../../shared/integrations"
 import { createSourceMetadata } from "../../shared/sources/metadata"
 import { type SourceMetadataItem } from "../../shared/sources/schema"
-import { type runDisplay } from "../schema"
+import { type runSnapshot } from "../schema"
 import {
   compactDetails,
   detail,
@@ -14,13 +14,14 @@ import {
 import { originDetails } from "./origin"
 import { cronScheduleLabel } from "./schedule"
 
-type RunDisplay = Infer<typeof runDisplay>
+type RunSnapshot = Infer<typeof runSnapshot>
+type RunSnapshotBody = Omit<RunSnapshot, "title">
 
 export function automationDisplay(input: {
   automation: Doc<"automations">
   event?: Doc<"events"> | null
   integration?: Doc<"integrations"> | null
-}): RunDisplay {
+}): RunSnapshotBody {
   if (input.automation.type === "event") {
     return eventAutomationDisplay({
       event: input.event ?? null,
@@ -35,7 +36,7 @@ export function messageDisplay(input: {
   integration: Doc<"integrations">
   kind: "mention" | "reply"
   message: Doc<"messages">
-}): RunDisplay {
+}): RunSnapshotBody {
   const metadata = createSourceMetadata({
     data: input.message.data,
     event: input.message.type,
@@ -69,7 +70,7 @@ export function messageDisplay(input: {
 function eventAutomationDisplay(input: {
   event: Doc<"events"> | null
   integration: Doc<"integrations"> | null
-}): RunDisplay {
+}): RunSnapshotBody {
   const event = input.event
   const integration = event?.integration
 
@@ -106,7 +107,9 @@ function eventAutomationDisplay(input: {
   }
 }
 
-function timeAutomationDisplay(automation: Doc<"automations">): RunDisplay {
+function timeAutomationDisplay(
+  automation: Doc<"automations">
+): RunSnapshotBody {
   const trigger = automation.trigger
   const isRecurring = automation.type === "cron" && "expression" in trigger
 
@@ -151,7 +154,7 @@ function recurringAutomationDetails(input: {
 }) {
   return compactDetails([
     input.status === "active"
-      ? detail("next", "Next", { at: input.trigger.nextAt })
+      ? detail("next", "Next", { timestamp: input.trigger.nextAt })
       : undefined,
     input.status === "active"
       ? undefined
@@ -215,6 +218,6 @@ function toRunDisplayDetail(detail: ExecutionDetail) {
     type: detail.type,
     label: detail.label,
     ...(detail.url === undefined ? {} : { url: detail.url }),
-    ...(detail.at === undefined ? {} : { at: detail.at }),
+    ...(detail.timestamp === undefined ? {} : { timestamp: detail.timestamp }),
   }
 }

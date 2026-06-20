@@ -13,7 +13,7 @@ export function automationRuntimeInput(webSearch = true) {
       _creationTime: 0,
       tenantId: "tenant",
       automationId: "automation",
-      reason: {
+      cause: {
         type: "time",
         scheduledAt: Date.UTC(2026, 5, 12, 9),
       },
@@ -57,7 +57,7 @@ export function linearAutomationRuntimeInput() {
       _creationTime: 0,
       tenantId: "tenant",
       automationId: "automation",
-      reason: { type: "event", eventId: "event" },
+      cause: { type: "event", eventId: "event" },
       createdAt: 0,
     },
     integration: linear,
@@ -116,7 +116,7 @@ export function notionAutomationRuntimeInput() {
       _creationTime: 0,
       tenantId: "tenant",
       automationId: "automation",
-      reason: {
+      cause: {
         type: "event",
         eventId: "event",
       },
@@ -185,7 +185,7 @@ export function runtimeInput(
       _id: "run",
       _creationTime: 0,
       tenantId: "tenant",
-      reason: {
+      cause: {
         type: "message",
         messageId: "message",
         kind: "mention",

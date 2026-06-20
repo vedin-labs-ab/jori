@@ -1,6 +1,14 @@
 import { v } from "convex/values"
-import { mutation } from "../_generated/server"
+import { type Id } from "../_generated/dataModel"
+import {
+  internalQuery,
+  type MutationCtx,
+  mutation,
+  type QueryCtx,
+} from "../_generated/server"
 import { requireWorkerSecret } from "./shared"
+
+const activeSandboxStatuses = new Set(["created", "running", "reconnected"])
 
 export const upsert = mutation({
   args: {
@@ -49,10 +57,6 @@ export const upsert = mutation({
       })
     }
 
-    await ctx.db.patch(args.runId, {
-      sandboxId: args.sandboxId,
-    })
-
     return null
   },
 })
@@ -81,14 +85,34 @@ export const markCleaned = mutation({
       })
     }
 
-    const run = existing === null ? null : await ctx.db.get(existing.runId)
-
-    if (run?.sandboxId === args.sandboxId) {
-      await ctx.db.patch(run._id, {
-        sandboxId: undefined,
-      })
-    }
-
     return null
   },
 })
+
+export const activeByRun = internalQuery({
+  args: {
+    runId: v.id("runs"),
+  },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    return await findActiveSandbox(ctx, args.runId)
+  },
+})
+
+export async function findActiveSandbox(
+  ctx: MutationCtx | QueryCtx,
+  runId: Id<"runs">
+) {
+  const sandboxes = ctx.db
+    .query("sandboxes")
+    .withIndex("by_run", (query) => query.eq("runId", runId))
+    .order("desc")
+
+  for await (const sandbox of sandboxes) {
+    if (activeSandboxStatuses.has(sandbox.status)) {
+      return sandbox
+    }
+  }
+
+  return null
+}

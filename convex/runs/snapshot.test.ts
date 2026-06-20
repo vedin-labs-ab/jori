@@ -16,9 +16,9 @@ test("stores automation display data directly", () => {
       }),
     })
   ).toEqual({
-    title: "Daily digest",
-    task: "Summarize Slack and send the digest.",
-    display: {
+    instructions: "Summarize Slack and send the digest.",
+    snapshot: {
+      title: "Daily digest",
       source: {
         type: "automation",
         surface: { type: "milo", label: "Milo" },
@@ -42,9 +42,8 @@ test("snapshots message source details and source link", () => {
       }),
     })
   ).toEqual({
-    title: "Please summarize this thread.",
-    task: "Please summarize this thread.",
-    display: {
+    snapshot: {
+      title: "Please summarize this thread.",
       source: {
         type: "message",
         kind: { type: "mention", label: "mention" },
@@ -67,14 +66,14 @@ test("snapshots message source details and source link", () => {
   })
 })
 
-test("rejects empty run tasks", () => {
+test("rejects empty run titles", () => {
   expect(() =>
     createMessageRunSnapshot({
       integration: integration(),
       kind: "reply",
       message: message("   "),
     })
-  ).toThrow("Run task cannot be empty.")
+  ).toThrow("Run title cannot be empty.")
 })
 
 function automation(

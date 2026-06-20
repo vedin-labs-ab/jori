@@ -161,7 +161,7 @@ async function executeSandboxTool(runtime: ToolRuntime, input: JsonObject) {
 
 async function executeSubagentTool(runtime: ToolRuntime, input: JsonObject) {
   return await runtime.convex.createChildRun({
-    parentRunId: runtime.context.run.id,
+    parentId: runtime.context.run.id,
     task: requiredString(input.task, "task"),
     title: optionalString(input.title),
   })
