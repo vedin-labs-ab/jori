@@ -21,7 +21,7 @@ export function searchEventOptions({
   integration,
   query,
   parameter,
-  criteria,
+  match,
   search,
   setIsLoading,
   setMessage,
@@ -31,7 +31,7 @@ export function searchEventOptions({
   integration: AutomationEventIntegration
   query: string
   parameter: Extract<AutomationEventParameter, { type: "option" }>
-  criteria: Record<string, string>
+  match: Record<string, string>
   search: SearchAction
   setIsLoading: (isLoading: boolean) => void
   setMessage: (message: string | undefined) => void
@@ -48,7 +48,7 @@ export function searchEventOptions({
       integration,
       source: parameter.source,
       query,
-      criteria,
+      match,
     })
       .then((result) => {
         if (isCancelled) {

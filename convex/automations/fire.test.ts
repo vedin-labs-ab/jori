@@ -3,7 +3,7 @@ import { type Doc } from "../_generated/dataModel"
 import { matchesEvent } from "./lifecycle/fire"
 
 describe("automation event matching", () => {
-  test("matches when trigger criteria are a subset of event criteria", () => {
+  test("matches when trigger match are a subset of event match", () => {
     expect(
       matchesEvent(
         automation({ repo: "milo/app" }),
@@ -12,7 +12,7 @@ describe("automation event matching", () => {
     ).toBe(true)
   })
 
-  test("rejects mismatched criteria", () => {
+  test("rejects mismatched match", () => {
     expect(
       matchesEvent(
         automation({ repo: "milo/app", issue: "41" }),
@@ -23,8 +23,8 @@ describe("automation event matching", () => {
 })
 
 function automation(
-  criteria: NonNullable<
-    Extract<Doc<"automations">["trigger"], { event: string }>["criteria"]
+  match: NonNullable<
+    Extract<Doc<"automations">["trigger"], { event: string }>["match"]
   >
 ): Doc<"automations"> {
   return {
@@ -38,7 +38,7 @@ function automation(
     trigger: {
       integrationId: "integration",
       event: "issue.comment.created",
-      criteria,
+      match,
     },
     status: "active",
     createdAt: 0,
@@ -46,9 +46,7 @@ function automation(
   } as unknown as Doc<"automations">
 }
 
-function event(
-  criteria: NonNullable<Doc<"events">["criteria"]>
-): Doc<"events"> {
+function event(match: NonNullable<Doc<"events">["match"]>): Doc<"events"> {
   return {
     _id: "event",
     _creationTime: 0,
@@ -56,7 +54,7 @@ function event(
     integrationId: "integration",
     key: "event-key",
     type: "issue.comment.created",
-    criteria,
+    match,
     createdAt: 0,
   } as unknown as Doc<"events">
 }

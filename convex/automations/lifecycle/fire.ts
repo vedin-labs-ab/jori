@@ -123,35 +123,19 @@ export function matchesEvent(
     return false
   }
 
-  const triggerCriteria = trigger.criteria ?? legacyTriggerCriteria(trigger)
+  const triggerMatch = trigger.match
 
-  if (triggerCriteria === undefined) {
+  if (triggerMatch === undefined) {
     return true
   }
 
-  const eventCriteria = event.criteria ?? legacyEventCriteria(event)
+  const eventMatch = event.match
 
-  if (eventCriteria === undefined) {
+  if (eventMatch === undefined) {
     return false
   }
 
-  return Object.entries(triggerCriteria).every(
-    ([key, value]) => eventCriteria[key] === value
+  return Object.entries(triggerMatch).every(
+    ([key, value]) => eventMatch[key] === value
   )
-}
-
-function legacyTriggerCriteria(
-  trigger: Extract<Doc<"automations">["trigger"], { integrationId: string }>
-): Record<string, string> | undefined {
-  return trigger.filter === undefined || trigger.filter === ""
-    ? undefined
-    : { resource: trigger.filter }
-}
-
-function legacyEventCriteria(
-  event: Doc<"events">
-): Record<string, string> | undefined {
-  return event.resource === undefined || event.resource === ""
-    ? undefined
-    : { resource: event.resource }
 }

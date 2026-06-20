@@ -1,15 +1,13 @@
 import { v } from "convex/values"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { recordEvent } from "../../events/data"
+import { eventData, eventMatch } from "../../events/schema"
 import {
   type Actor,
   actorValidator,
   getActorExternalId,
 } from "../../shared/actor"
 import { readProviderDataString } from "../data"
-
-const eventCriteriaValue = v.union(v.string(), v.number())
-const eventCriteria = v.record(v.string(), eventCriteriaValue)
 
 export function getNotionBotId(data: unknown) {
   return readProviderDataString(data, "botId")
@@ -20,10 +18,9 @@ export const recordWebhookEvent = internalMutation({
     workspaceId: v.string(),
     key: v.string(),
     type: v.string(),
-    resource: v.optional(v.string()),
-    criteria: v.optional(eventCriteria),
+    match: v.optional(eventMatch),
     actor: v.optional(actorValidator),
-    data: v.optional(v.any()),
+    data: v.optional(eventData),
     observedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -41,8 +38,7 @@ export const recordWebhookEvent = internalMutation({
       integration,
       key: args.key,
       type: args.type,
-      resource: args.resource,
-      criteria: args.criteria,
+      match: args.match,
       actor: args.actor,
       data: args.data,
       observedAt: args.observedAt,

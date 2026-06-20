@@ -35,7 +35,6 @@ export function formatEvent(
   return formatTargetLines([
     targetLine("Type", event.type),
     targetLine("Integration", formatIntegrationLabel(integration)),
-    targetLine("Resource", event.resource),
     ...getIntegrationTargetLines(integration, event.data),
     targetLine("Text", event.text),
   ])

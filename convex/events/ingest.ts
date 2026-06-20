@@ -2,16 +2,17 @@ import { v } from "convex/values"
 import { internalMutation } from "../_generated/server"
 import { actorValidator } from "../shared/actor"
 import { recordEvent } from "./data"
+import { eventData, eventMatch } from "./schema"
 
 export const record = internalMutation({
   args: {
     integrationId: v.id("integrations"),
     key: v.string(),
     type: v.string(),
-    resource: v.optional(v.string()),
+    match: v.optional(eventMatch),
     actor: v.optional(actorValidator),
     text: v.optional(v.string()),
-    data: v.optional(v.any()),
+    data: v.optional(eventData),
     observedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -25,7 +26,7 @@ export const record = internalMutation({
       integration,
       key: args.key,
       type: args.type,
-      resource: args.resource,
+      match: args.match,
       actor: args.actor,
       text: args.text,
       data: args.data,

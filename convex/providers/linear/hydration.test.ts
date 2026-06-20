@@ -5,13 +5,13 @@ import { shouldHydrateLinearIssueProject } from "./hydration"
 const integrationId = "linear-integration" as Id<"integrations">
 
 describe("Linear issue project hydration pruning", () => {
-  test("hydrates project-gated automations that match known criteria", () => {
+  test("hydrates project-gated automations that match known values", () => {
     expect(
       shouldHydrateLinearIssueProject({
         automation: automation({ issue: "issue-id", team: "team-id" }),
         integrationId,
         event: "issue.comment.created",
-        criteria: { issue: "issue-id", team: "team-id" },
+        match: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(true)
   })
@@ -25,7 +25,7 @@ describe("Linear issue project hydration pruning", () => {
         }),
         integrationId,
         event: "issue.comment.edited",
-        criteria: { issue: "issue-id", team: "team-id" },
+        match: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(true)
   })
@@ -36,20 +36,20 @@ describe("Linear issue project hydration pruning", () => {
         automation: automation({ issue: "issue-id", team: "team-id" }),
         integrationId,
         event: "issue.comment.created",
-        criteria: { issue: "issue-id" },
+        match: { issue: "issue-id" },
       })
     ).toBe(true)
   })
 })
 
 describe("Linear issue project hydration rejection", () => {
-  test("skips hydration when known criteria rule out the automation", () => {
+  test("skips hydration when known values rule out the automation", () => {
     expect(
       shouldHydrateLinearIssueProject({
         automation: automation({ issue: "other-issue", team: "team-id" }),
         integrationId,
         event: "issue.comment.created",
-        criteria: { issue: "issue-id", team: "team-id" },
+        match: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(false)
 
@@ -58,7 +58,7 @@ describe("Linear issue project hydration rejection", () => {
         automation: automation({ issue: "issue-id", team: "other-team" }),
         integrationId,
         event: "issue.comment.created",
-        criteria: { issue: "issue-id", team: "team-id" },
+        match: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(false)
   })
@@ -69,7 +69,7 @@ describe("Linear issue project hydration rejection", () => {
         automation: automation({ project: null }),
         integrationId,
         event: "issue.comment.created",
-        criteria: { issue: "issue-id", team: "team-id" },
+        match: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(false)
 
@@ -78,23 +78,23 @@ describe("Linear issue project hydration rejection", () => {
         automation: automation({ event: "other.event" }),
         integrationId,
         event: "issue.comment.created",
-        criteria: { issue: "issue-id", team: "team-id" },
+        match: { issue: "issue-id", team: "team-id" },
       })
     ).toBe(false)
   })
 })
 
 function automation(
-  criteria: {
+  match: {
     event?: string
     issue?: string
     project?: string | null
     team?: string
   } = {}
 ): Doc<"automations"> {
-  const { event, issue, team } = criteria
+  const { event, issue, team } = match
   const project =
-    criteria.project === null ? undefined : (criteria.project ?? "project-id")
+    match.project === null ? undefined : (match.project ?? "project-id")
 
   return {
     _creationTime: 0,
@@ -109,19 +109,19 @@ function automation(
     trigger: {
       integrationId,
       event: event ?? "issue.comment.created",
-      criteria: eventCriteria({ issue, project, team }),
+      match: eventMatch({ issue, project, team }),
     },
     updatedAt: 0,
   }
 }
 
-function eventCriteria(criteria: {
+function eventMatch(match: {
   issue?: string
   project?: string
   team?: string
 }) {
   return Object.fromEntries(
-    Object.entries(criteria).filter((entry): entry is [string, string] => {
+    Object.entries(match).filter((entry): entry is [string, string] => {
       return entry[1] !== undefined
     })
   )

@@ -94,8 +94,8 @@ const triggerSchema = () => ({
           description: "Supported event name for the selected integration.",
           enum: eventEnum,
         },
-        criteria: objectProperty(
-          'Normalized event criteria keyed by catalog parameter name, such as {"channel":"C123"} or {"repo":"owner/repo","issue":"123"}.'
+        match: objectProperty(
+          'Normalized event match keyed by catalog parameter name, such as {"channel":"C123"} or {"repo":"owner/repo","issue":"123"}.'
         ),
       },
     }),

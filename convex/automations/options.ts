@@ -16,7 +16,7 @@ import {
   searchIntegrationOptions,
 } from "./options/integrations"
 
-const criteriaValidator = v.record(v.string(), v.union(v.string(), v.number()))
+const matchValidator = v.record(v.string(), v.union(v.string(), v.number()))
 
 export const search = action({
   args: {
@@ -24,7 +24,7 @@ export const search = action({
     integration: integrationValidator,
     source: v.string(),
     query: v.string(),
-    criteria: v.optional(criteriaValidator),
+    match: v.optional(matchValidator),
   },
   handler: async (ctx, args): Promise<AutomationEventOptionSearchResult> => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
@@ -57,7 +57,7 @@ export const search = action({
       integration,
       source: args.source,
       query: args.query,
-      criteria: args.criteria,
+      match: args.match,
     })
   },
 })

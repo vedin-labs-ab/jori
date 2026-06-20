@@ -89,9 +89,8 @@ function eventAutomation(): Automation {
     status: "active",
     type: "event",
     trigger: {
-      criteria: undefined,
+      match: undefined,
       event: "issue.comment.created",
-      filter: undefined,
       integration: "github",
     },
   } as unknown as Automation

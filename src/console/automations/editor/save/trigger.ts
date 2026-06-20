@@ -1,5 +1,5 @@
 import {
-  type AutomationEventCriteria,
+  type AutomationEventMatch,
   getAutomationEventDefinition,
   getDefaultAutomationEvent,
   isAutomationEventIntegration,
@@ -11,8 +11,8 @@ import {
   type AutomationFormValues,
   emptyAutomationForm,
 } from "../../types"
-import { readAutomationEventCriteria } from "../event/rules"
-import { criteriaKey, eventCriteriaFormValues } from "./criteria"
+import { readAutomationEventMatch } from "../event/rules"
+import { eventMatchFormValues, matchKey } from "./match"
 
 export type TriggerSpec =
   | { at: string }
@@ -20,7 +20,7 @@ export type TriggerSpec =
   | {
       integration: AutomationFormValues["eventIntegration"]
       event: string
-      criteria?: AutomationEventCriteria
+      match?: AutomationEventMatch
     }
 
 export function buildAutomationTriggerSpec(
@@ -48,13 +48,10 @@ export function buildAutomationTriggerSpec(
       return { error: "Choose a supported automation event." }
     }
 
-    const criteria = readAutomationEventCriteria(
-      definition,
-      values.eventCriteria
-    )
+    const match = readAutomationEventMatch(definition, values.eventMatch)
 
-    if ("error" in criteria) {
-      return criteria
+    if ("error" in match) {
+      return match
     }
 
     return {
@@ -62,7 +59,7 @@ export function buildAutomationTriggerSpec(
       trigger: {
         integration: values.eventIntegration,
         event: definition.value,
-        criteria: criteria.value,
+        match: match.value,
       },
     }
   }
@@ -108,8 +105,7 @@ export function hasAutomationTriggerChanged(
     return (
       values.eventIntegration !== existingValues.eventIntegration ||
       values.event.trim() !== existingValues.event ||
-      criteriaKey(values.eventCriteria) !==
-        criteriaKey(existingValues.eventCriteria)
+      matchKey(values.eventMatch) !== matchKey(existingValues.eventMatch)
     )
   }
 
@@ -126,7 +122,7 @@ export function triggerFormValues(automation: Automation) {
       runAt: "",
       eventIntegration: emptyAutomationForm.eventIntegration,
       event: emptyAutomationForm.event,
-      eventCriteria: {},
+      eventMatch: {},
     }
   }
 
@@ -146,10 +142,8 @@ export function triggerFormValues(automation: Automation) {
       runAt: "",
       eventIntegration: integration,
       event: definition.value,
-      eventCriteria:
-        definition.value === trigger.event
-          ? eventCriteriaFormValues(definition, trigger)
-          : {},
+      eventMatch:
+        definition.value === trigger.event ? eventMatchFormValues(trigger) : {},
     }
   }
 
@@ -159,6 +153,6 @@ export function triggerFormValues(automation: Automation) {
     runAt: "at" in trigger ? toDatetimeLocal(trigger.at) : "",
     eventIntegration: emptyAutomationForm.eventIntegration,
     event: emptyAutomationForm.event,
-    eventCriteria: {},
+    eventMatch: {},
   }
 }

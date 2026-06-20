@@ -158,7 +158,7 @@ function renderEventOptionField(
       tenantId="tenant"
       integration="slack"
       parameter={channelParameter}
-      criteria={{}}
+      match={{}}
       disabled={false}
       disabledMessage={undefined}
       id="automation-event-channel"

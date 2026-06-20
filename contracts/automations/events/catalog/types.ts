@@ -26,7 +26,7 @@ type AutomationEventParameterBase = {
   placeholder: string
   required: boolean
   description?: string
-  /** Criteria keys that clear this value when they change. */
+  /** Match keys that clear this value when they change. */
   resetsOn?: readonly string[]
 }
 
@@ -43,7 +43,7 @@ export type AutomationEventParameter =
   | (AutomationEventParameterBase & {
       type: "option"
       source: AutomationEventOptionSource
-      /** Criteria keys required before this option source can load and reset when changed. */
+      /** Match keys required before this option source can load and reset when changed. */
       dependsOn?: readonly string[]
     })
 
@@ -65,8 +65,5 @@ export type AutomationEventIntegrationDefinition = {
   events: readonly AutomationEventDefinition[]
 }
 
-export type AutomationEventCriteriaValue = string | number
-export type AutomationEventCriteria = Record<
-  string,
-  AutomationEventCriteriaValue
->
+export type AutomationEventMatchValue = string | number
+export type AutomationEventMatch = Record<string, AutomationEventMatchValue>

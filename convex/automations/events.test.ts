@@ -3,18 +3,18 @@ import {
   assertAutomationEventIsAvailable,
   automationEventParameterResetKeys,
   getAutomationEventDefinition,
-  normalizeAutomationEventCriteria,
+  normalizeAutomationEventMatch,
 } from "./events"
 
-describe("automation event catalog criteria", () => {
-  test("normalizes required option and optional text criteria", () => {
+describe("automation event catalog match", () => {
+  test("normalizes required option and optional text match", () => {
     const definition = requireEvent(
       "github",
       "pull_request.review_comment.edited"
     )
 
     expect(
-      normalizeAutomationEventCriteria(definition, {
+      normalizeAutomationEventMatch(definition, {
         repo: " milo/app ",
         pr: "42",
         path: " src/app.ts ",
@@ -26,22 +26,22 @@ describe("automation event catalog criteria", () => {
     })
   })
 
-  test("normalizes number criteria", () => {
+  test("normalizes number match", () => {
     const definition = requireEvent("googleCalendar", "event.starting_soon")
 
     expect(
-      normalizeAutomationEventCriteria(definition, {
+      normalizeAutomationEventMatch(definition, {
         calendar: "primary",
         leadMinutes: "15",
       })
     ).toEqual({ calendar: "primary", leadMinutes: 15 })
   })
 
-  test("rejects invalid email criteria", () => {
+  test("rejects invalid email match", () => {
     const definition = requireEvent("gmail", "message.received")
 
     expect(() =>
-      normalizeAutomationEventCriteria(definition, {
+      normalizeAutomationEventMatch(definition, {
         from: "not an email",
       })
     ).toThrow("From must be an email address.")

@@ -57,7 +57,7 @@ export function EventFields({
               onValuesChange({
                 ...values,
                 event,
-                eventCriteria: {},
+                eventMatch: {},
               })
             }
             value={selectedEvent.value}
@@ -79,10 +79,10 @@ export function EventFields({
         tenantId={tenantId}
         integration={values.eventIntegration}
         event={selectedEvent}
-        onValuesChange={(eventCriteria) =>
-          onValuesChange({ ...values, eventCriteria })
+        onValuesChange={(eventMatch) =>
+          onValuesChange({ ...values, eventMatch })
         }
-        values={values.eventCriteria}
+        values={values.eventMatch}
       />
     </div>
   )
@@ -138,7 +138,7 @@ function onIntegrationChange({
     ...values,
     eventIntegration: integration,
     event: event.value,
-    eventCriteria: {},
+    eventMatch: {},
   })
 }
 

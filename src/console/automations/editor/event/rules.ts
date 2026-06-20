@@ -1,20 +1,20 @@
 import {
-  type AutomationEventCriteria,
   type AutomationEventDefinition,
+  type AutomationEventMatch,
   assertAutomationEventIsAvailable,
-  normalizeAutomationEventCriteria,
+  normalizeAutomationEventMatch,
 } from "@contracts/automations/events"
 
-export function readAutomationEventCriteria(
+export function readAutomationEventMatch(
   definition: AutomationEventDefinition,
   value: Record<string, string>
-): { value: AutomationEventCriteria | undefined } | { error: string } {
+): { value: AutomationEventMatch | undefined } | { error: string } {
   try {
     assertAutomationEventIsAvailable(definition)
-    return { value: normalizeAutomationEventCriteria(definition, value) }
+    return { value: normalizeAutomationEventMatch(definition, value) }
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "Invalid event criteria.",
+      error: error instanceof Error ? error.message : "Invalid event match.",
     }
   }
 }

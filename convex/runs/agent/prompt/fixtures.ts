@@ -76,7 +76,7 @@ export function linearAutomationRuntimeInput() {
       trigger: {
         integrationId: linear._id,
         event: "issue.comment.edited",
-        criteria: { team: "team-id" },
+        match: { team: "team-id" },
       },
       status: "active",
       createdAt: 0,
@@ -89,7 +89,7 @@ export function linearAutomationRuntimeInput() {
       integrationId: linear._id,
       key: "linear:delivery",
       type: "issue.comment.edited",
-      criteria: { issue: "issue-id", team: "team-id" },
+      match: { issue: "issue-id", team: "team-id" },
       text: "i wonder if this is worth spending time on",
       data: {
         issueId: "issue-id",
@@ -101,7 +101,6 @@ export function linearAutomationRuntimeInput() {
         commentId: "comment-id",
         url: "https://linear.app/acme/issue/VED-1/get-familiar#comment-id",
       },
-      createdAt: 0,
     },
   } as unknown as Parameters<typeof assemblePrompt>[0]
 }
@@ -143,7 +142,7 @@ export function notionAutomationRuntimeInput() {
       trigger: {
         integrationId: notion._id,
         event: "comment.created",
-        criteria: { page: "page-id" },
+        match: { page: "page-id" },
       },
       status: "active",
       createdAt: 0,
@@ -161,16 +160,16 @@ function notionCommentEvent(integrationId: string) {
     integrationId,
     key: "notion:workspace:event",
     type: "comment.created",
-    criteria: { page: "page-id" },
+    match: { page: "page-id" },
     data: {
       pageId: "page-id",
       commentId: "comment-id",
+      workspaceId: "workspace-id",
       notionEventId: "notion-event-id",
       notionEventType: "comment.created",
       entity: { id: "comment-id", type: "comment" },
       parent: { id: "block-id", type: "block" },
     },
-    createdAt: 0,
   }
 }
 

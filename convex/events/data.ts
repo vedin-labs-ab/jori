@@ -1,7 +1,8 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { startEventAutomations } from "../automations/lifecycle"
-import { createSourceMetadata } from "../shared/sources/metadata"
+import { normalizeEventData } from "./payload"
+import { type EventMatch } from "./schema"
 
 export async function recordEvent(
   ctx: MutationCtx,
@@ -9,8 +10,7 @@ export async function recordEvent(
     integration: Doc<"integrations">
     key: string
     type: string
-    resource?: string
-    criteria?: Doc<"events">["criteria"]
+    match?: EventMatch
     actor?: Doc<"events">["actor"]
     text?: string
     data?: unknown
@@ -36,21 +36,13 @@ export async function recordEvent(
   const eventId = await ctx.db.insert("events", {
     tenantId: args.integration.tenantId,
     integrationId: args.integration._id,
-    integration: args.integration.integration,
     key: args.key,
     type: args.type,
-    resource: args.resource,
-    criteria: args.criteria,
+    match: args.match,
     actor: args.actor,
     text: args.text,
-    data: args.data,
-    metadata: createSourceMetadata({
-      integration: args.integration.integration,
-      event: args.type,
-      data: args.data,
-    }),
+    data: normalizeEventData(args.data),
     observedAt: args.observedAt,
-    createdAt: now,
   })
   const event = await ctx.db.get(eventId)
 

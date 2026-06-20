@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { automationEventCriteriaKey } from "../events"
+import { automationEventMatchKey } from "../events"
 
 type EventTrigger = Extract<Doc<"automations">["trigger"], { event: string }>
 
@@ -12,7 +12,7 @@ export async function ensureSubscription(
   }
 ) {
   const now = Date.now()
-  const criteriaKey = automationEventCriteriaKey(args.trigger.criteria)
+  const matchKey = automationEventMatchKey(args.trigger.match)
   const existing = await findSubscription(ctx, args.trigger)
 
   if (existing !== null) {
@@ -28,8 +28,8 @@ export async function ensureSubscription(
     tenantId: args.tenantId,
     integrationId: args.trigger.integrationId,
     event: args.trigger.event,
-    criteria: args.trigger.criteria,
-    criteriaKey,
+    match: args.trigger.match,
+    matchKey,
     status: "active",
     createdAt: now,
     updatedAt: now,
@@ -60,28 +60,14 @@ export async function releaseSubscription(
 }
 
 async function findSubscription(ctx: MutationCtx, trigger: EventTrigger) {
-  const criteriaKey = automationEventCriteriaKey(trigger.criteria)
-  const subscription = await ctx.db
-    .query("subscriptions")
-    .withIndex("by_integration_event_criteria", (index) =>
-      index
-        .eq("integrationId", trigger.integrationId)
-        .eq("event", trigger.event)
-        .eq("criteriaKey", criteriaKey)
-    )
-    .first()
-
-  if (subscription !== null || trigger.filter === undefined) {
-    return subscription
-  }
-
+  const matchKey = automationEventMatchKey(trigger.match)
   return await ctx.db
     .query("subscriptions")
-    .withIndex("by_integration_event_resource", (index) =>
+    .withIndex("by_integration_event_match", (index) =>
       index
         .eq("integrationId", trigger.integrationId)
         .eq("event", trigger.event)
-        .eq("resource", trigger.filter)
+        .eq("matchKey", matchKey)
     )
     .first()
 }
@@ -113,8 +99,8 @@ async function hasMatchingAutomation(
       "integrationId" in trigger &&
       trigger.integrationId === args.trigger.integrationId &&
       trigger.event === args.trigger.event &&
-      automationEventCriteriaKey(trigger.criteria) ===
-        automationEventCriteriaKey(args.trigger.criteria)
+      automationEventMatchKey(trigger.match) ===
+        automationEventMatchKey(args.trigger.match)
     )
   })
 }

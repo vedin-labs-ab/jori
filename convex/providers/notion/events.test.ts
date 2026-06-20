@@ -18,8 +18,8 @@ test("projects Notion page content updates to page events", () => {
       workspaceId: "workspace-id",
       key: "notion:workspace-id:notion-event-id:page.updated",
       type: "page.updated",
-      resource: "page-id",
-      criteria: { page: "page-id" },
+      pageId: "page-id",
+      match: { page: "page-id" },
       actor: { kind: "user", externalId: "author-id" },
       observedAt: Date.parse("2026-06-12T08:00:00.000Z"),
       data: expect.objectContaining({
@@ -27,7 +27,6 @@ test("projects Notion page content updates to page events", () => {
         notionEventId: "notion-event-id",
         notionEventType: "page.content_updated",
         parent: { id: "parent-page-id", type: "page" },
-        updatedBlocks: [{ id: "block-id", type: "block" }],
       }),
     }),
   ])
@@ -48,12 +47,11 @@ test("projects Notion data source child page updates to page events", () => {
   expect(events).toEqual([
     expect.objectContaining({
       type: "page.updated",
-      resource: "page-id",
-      criteria: { page: "page-id" },
+      pageId: "page-id",
+      match: { page: "page-id" },
       data: expect.objectContaining({
         pageId: "page-id",
         parent: { id: "data-source-id", type: "data_source" },
-        updatedProperties: [{ id: "property-id", action: "updated" }],
       }),
     }),
   ])
@@ -74,8 +72,8 @@ test("projects Notion created comments to page comment events", () => {
   expect(events).toEqual([
     expect.objectContaining({
       type: "comment.created",
-      resource: "page-id",
-      criteria: { page: "page-id" },
+      pageId: "page-id",
+      match: { page: "page-id" },
       data: expect.objectContaining({
         commentId: "comment-id",
         pageId: "page-id",

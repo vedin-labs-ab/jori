@@ -1,5 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
-import { type AutomationEventCriteria } from "../events"
+import { type AutomationEventMatch } from "../events"
 
 export const maxOptions = 50
 
@@ -9,12 +9,12 @@ export type AutomationEventOption = {
   description?: string
 }
 
-export function requireCriterion(
-  criteria: AutomationEventCriteria | undefined,
+export function requireMatch(
+  match: AutomationEventMatch | undefined,
   key: string,
   label: string
 ) {
-  const value = optionalCriterion(criteria, key)
+  const value = optionalMatch(match, key)
 
   if (value === undefined) {
     throw new OptionUnavailable(`Choose ${label} first.`)
@@ -23,11 +23,11 @@ export function requireCriterion(
   return value
 }
 
-export function optionalCriterion(
-  criteria: AutomationEventCriteria | undefined,
+export function optionalMatch(
+  match: AutomationEventMatch | undefined,
   key: string
 ) {
-  const value = criteria?.[key]
+  const value = match?.[key]
 
   return typeof value === "string" && value.trim() !== ""
     ? value.trim()
@@ -103,7 +103,7 @@ export function normalizeQuery(value: string) {
 export type OptionLoaderArgs = {
   integration: Doc<"integrations">
   query: string
-  criteria: AutomationEventCriteria | undefined
+  match: AutomationEventMatch | undefined
 }
 
 export class OptionUnavailable extends Error {}

@@ -8,6 +8,8 @@ import {
   pullRequestReviewCommentEvent,
 } from "../automations/names"
 import { recordEvent } from "../events/data"
+import { normalizeEventData } from "../events/payload"
+import { type EventData, type EventMatch } from "../events/schema"
 import { getSlackChannelId } from "../providers/slack/data"
 import { type Actor } from "../shared/actor"
 
@@ -22,11 +24,10 @@ type AutomationEventMessage = {
 type AutomationEventRecord = {
   key: string
   type: string
-  resource?: string
-  criteria?: Doc<"events">["criteria"]
+  match?: EventMatch
   actor?: Actor
   text?: string
-  data?: unknown
+  data?: EventData
   observedAt?: number
 }
 
@@ -43,8 +44,7 @@ export async function recordAutomationEvent(
       integration: input.integration,
       key: event.key,
       type: event.type,
-      resource: event.resource,
-      criteria: event.criteria,
+      match: event.match,
       actor: event.actor,
       text: event.text,
       data: event.data,
@@ -83,8 +83,7 @@ function readSlackAutomationEvents(message: AutomationEventMessage) {
   return [
     baseEvent(message, {
       type: "message.created",
-      resource: channelId,
-      criteria: { channel: channelId },
+      match: { channel: channelId },
     }),
   ]
 }
@@ -121,7 +120,7 @@ function readGitHubIssueCommentEvent(
     return [
       baseEvent(message, {
         type: pullRequestCommentEvent[action],
-        criteria: {
+        match: {
           repo,
           pr: String(pullNumber ?? issueNumber),
         },
@@ -132,7 +131,7 @@ function readGitHubIssueCommentEvent(
   return [
     baseEvent(message, {
       type: issueCommentEvent[action],
-      criteria: {
+      match: {
         repo,
         issue: String(issueNumber),
       },
@@ -155,10 +154,10 @@ function readGitHubPullRequestReviewCommentEvent(
   return [
     baseEvent(message, {
       type: pullRequestReviewCommentEvent[action],
-      criteria: {
+      match: {
         repo,
         pr: String(pullNumber),
-        ...optionalCriterion("path", readNestedString(data, "comment", "path")),
+        ...optionalMatch("path", readNestedString(data, "comment", "path")),
       },
     }),
   ]
@@ -176,10 +175,10 @@ function readLinearAutomationEvents(message: AutomationEventMessage) {
   return [
     baseEvent(message, {
       type: issueCommentEvent[action],
-      criteria: {
+      match: {
         issue: issueId,
-        ...optionalCriterion("team", readString(data, "teamId")),
-        ...optionalCriterion("project", readString(data, "projectId")),
+        ...optionalMatch("team", readString(data, "teamId")),
+        ...optionalMatch("project", readString(data, "projectId")),
       },
     }),
   ]
@@ -187,21 +186,20 @@ function readLinearAutomationEvents(message: AutomationEventMessage) {
 
 function baseEvent(
   message: AutomationEventMessage,
-  event: Pick<AutomationEventRecord, "criteria" | "resource" | "type">
+  event: Pick<AutomationEventRecord, "match" | "type">
 ): AutomationEventRecord {
   return {
     key: message.externalId,
     type: event.type,
-    resource: event.resource,
-    criteria: event.criteria,
+    match: event.match,
     actor: message.actor,
     text: message.text,
-    data: message.data,
+    data: normalizeEventData(message.data),
     observedAt: message.observedAt,
   }
 }
 
-function optionalCriterion(key: string, value: string | undefined) {
+function optionalMatch(key: string, value: string | undefined) {
   return value === undefined ? {} : { [key]: value }
 }
 

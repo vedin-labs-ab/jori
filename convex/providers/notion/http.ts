@@ -1,5 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { normalizeEventData } from "../../events/payload"
 import {
   readCallbackState,
   redirectWithStatus,
@@ -108,18 +109,23 @@ export async function handleNotionEvents(ctx: ActionCtx, request: Request) {
   }
 
   for (const event of readNotionAutomationEvents(payload)) {
-    const data = await enrichNotionEventData(ctx, {
-      data: event.data,
-      pageId: event.resource,
-      workspaceId: event.workspaceId,
-    })
+    const data = normalizeEventData(
+      await enrichNotionEventData(ctx, {
+        data: event.data,
+        pageId: event.pageId,
+        workspaceId: event.workspaceId,
+      })
+    )
+
+    if (data === undefined) {
+      continue
+    }
 
     await ctx.runMutation(internal.providers.notion.data.recordWebhookEvent, {
       workspaceId: event.workspaceId,
       key: event.key,
       type: event.type,
-      resource: event.resource,
-      criteria: event.criteria,
+      match: event.match,
       actor: event.actor,
       data,
       observedAt: event.observedAt,

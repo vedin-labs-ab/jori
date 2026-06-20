@@ -1,8 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-
-const eventCriteriaValue = v.union(v.string(), v.number())
-const eventCriteria = v.record(v.string(), eventCriteriaValue)
+import { eventMatch } from "../../events/schema"
 
 export const subscriptionStatus = v.union(
   v.literal("active"),
@@ -14,9 +12,8 @@ export const subscriptions = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
   event: v.string(),
-  resource: v.optional(v.string()),
-  criteria: v.optional(eventCriteria),
-  criteriaKey: v.optional(v.string()),
+  match: v.optional(eventMatch),
+  matchKey: v.optional(v.string()),
   externalId: v.optional(v.string()),
   cursor: v.optional(v.string()),
   expiresAt: v.optional(v.number()),
@@ -26,14 +23,5 @@ export const subscriptions = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 })
-  .index("by_integration_event_resource", [
-    "integrationId",
-    "event",
-    "resource",
-  ])
-  .index("by_integration_event_criteria", [
-    "integrationId",
-    "event",
-    "criteriaKey",
-  ])
+  .index("by_integration_event_match", ["integrationId", "event", "matchKey"])
   .index("by_tenant_and_status", ["tenantId", "status"])

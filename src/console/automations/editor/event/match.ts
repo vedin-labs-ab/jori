@@ -3,7 +3,7 @@ import {
   automationEventParameterResetKeys,
 } from "@contracts/automations/events"
 
-export function applyEventCriteriaChange({
+export function applyEventMatchChange({
   key,
   parameters,
   value,
@@ -20,14 +20,14 @@ export function applyEventCriteriaChange({
 
   const nextValues = { ...values, [key]: value }
 
-  for (const dependentKey of eventCriteriaDependents(parameters, key)) {
+  for (const dependentKey of eventMatchDependents(parameters, key)) {
     delete nextValues[dependentKey]
   }
 
   return nextValues
 }
 
-export function removeEventCriterion({
+export function removeEventMatch({
   key,
   parameters,
   values,
@@ -40,7 +40,7 @@ export function removeEventCriterion({
 
   delete nextValues[key]
 
-  for (const dependentKey of eventCriteriaDependents(
+  for (const dependentKey of eventMatchDependents(
     parameters,
     key,
     hardDependencyKeys
@@ -51,7 +51,7 @@ export function removeEventCriterion({
   return nextValues
 }
 
-export function eventCriteriaDependents(
+export function eventMatchDependents(
   parameters: readonly AutomationEventParameter[],
   changedKey: string,
   resetKeys: (
