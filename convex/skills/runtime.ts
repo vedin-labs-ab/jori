@@ -28,6 +28,10 @@ export function getRuntimeSkillForIntegration(integration: Integration) {
   )
 }
 
+export function formatRuntimeSkill(skill: RuntimeSkill) {
+  return [`## ${skill.name}`, skill.body].join("\n\n")
+}
+
 function isRuntimeSkillName(name: string): name is RuntimeSkillName {
   return runtimeSkillNameSet.has(name)
 }
