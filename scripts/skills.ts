@@ -6,7 +6,6 @@ export type Skill = {
   body: string
   category: string
   communication?: {
-    overview: string
     parts: Record<string, string>
   }
   description: string
@@ -61,9 +60,7 @@ async function readSkill(directory: string): Promise<Skill> {
     ...(parsed.associatedIntegrations === undefined
       ? {}
       : { associatedIntegrations: parsed.associatedIntegrations }),
-    ...(parts === undefined
-      ? {}
-      : { communication: { overview: parsed.overview, parts } }),
+    ...(parts === undefined ? {} : { communication: { parts } }),
     body,
   }
 }
@@ -160,16 +157,16 @@ function parseFrontmatter(value: string, filePath: string): Frontmatter {
 }
 
 function formatSkillBody(overview: string, parts?: Record<string, string>) {
-  if (parts === undefined) {
-    return overview
-  }
-
   return [
     overview,
-    ...Object.entries(parts).map(([name, body]) =>
-      [`## ${formatTitle(name)}`, body].join("\n\n")
-    ),
-  ].join("\n\n")
+    ...(parts === undefined
+      ? []
+      : Object.entries(parts).map(([name, body]) =>
+          [`## ${formatTitle(name)}`, body].join("\n\n")
+        )),
+  ]
+    .filter((section) => section.length > 0)
+    .join("\n\n")
 }
 
 function sortCommunicationParts(parts: Record<string, string>) {

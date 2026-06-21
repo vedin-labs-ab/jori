@@ -4,5 +4,3 @@ description: Format Slack replies with native `text`, Slack `mrkdwn`, documented
 category: Communication
 associatedIntegrations: slack
 ---
-
-Format Slack messages so they feel native: direct, compact, and easy to scan.

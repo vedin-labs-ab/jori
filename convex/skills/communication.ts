@@ -1,31 +1,26 @@
 import { type Integration, integrationLabels } from "../shared/integrations"
-import {
-  formatRuntimeSkillTitle,
-  getRuntimeSkillForIntegration,
-  type RuntimeSkill,
-} from "./runtime"
+import { getRuntimeSkillForIntegration, type RuntimeSkill } from "./runtime"
 
 export type CommunicationCapability = "files" | "interactive" | "rich" | "text"
 export type CommunicationProfile = "agent-final-reply" | "routing-message"
 
-type CommunicationContract = "final-reply-text" | "routing-message-text"
 type CapabilityMap = {
   default: readonly CommunicationCapability[]
 } & Partial<Record<Integration, readonly CommunicationCapability[]>>
 
 type ProfileDefinition = {
   capabilities: CapabilityMap
-  contract: CommunicationContract
 }
+
+const nativeMessageGuidance =
+  "Format messages so they feel native: direct, compact, and easy to scan."
 
 const profiles = {
   "agent-final-reply": {
     capabilities: { default: ["text"] },
-    contract: "final-reply-text",
   },
   "routing-message": {
     capabilities: { default: ["text"] },
-    contract: "routing-message-text",
   },
 } as const satisfies Record<CommunicationProfile, ProfileDefinition>
 
@@ -45,12 +40,10 @@ export function createCommunicationGuidance(args: {
   return [
     "# Communication",
     "",
-    `Destination: ${integrationLabels[args.integration]}`,
+    `Destination: \`${integrationLabels[args.integration]}\``,
     "",
-    formatSkillParts(skill, capabilities),
-    "",
-    "Output contract:",
-    ...contractLines(profile.contract),
+    nativeMessageGuidance,
+    ...formatSkillParts(skill, capabilities),
   ].join("\n")
 }
 
@@ -65,44 +58,34 @@ function formatSkillParts(
   const communication = skill.communication
 
   if (communication === undefined) {
-    return formatSkillHeader(skill, [])
+    return []
   }
 
   const supportedParts: Partial<Record<CommunicationCapability, string>> =
     communication.parts
-  const parts = capabilities.flatMap((capability) =>
+  return capabilities.flatMap((capability) =>
     formatPart(capability, supportedParts[capability])
   )
-
-  return formatSkillHeader(skill, [communication.overview, ...parts])
-}
-
-function formatSkillHeader(skill: RuntimeSkill, sections: string[]) {
-  return [`## ${formatRuntimeSkillTitle(skill)}`, ...sections]
-    .filter((section) => section.length > 0)
-    .join("\n\n")
 }
 
 function formatPart(capability: CommunicationCapability, body?: string) {
   return body === undefined
     ? []
-    : [[`### ${formatCapabilityTitle(capability)}`, body].join("\n\n")]
-}
-
-function contractLines(contract: CommunicationContract) {
-  if (contract === "routing-message-text") {
-    return [
-      "- If route is `respond`, `message` must be one text string.",
-      "- Do not emit blocks, attachments, files, buttons, tables, or JSON payloads.",
-    ]
-  }
-
-  return [
-    "- Milo will send your final answer as one text message, not a rich payload.",
-    "- Do not emit blocks, attachments, files, buttons, tables, or JSON payloads in the final answer.",
-  ]
+    : ["", [`## ${formatCapabilityTitle(capability)}`, body].join("\n\n")]
 }
 
 function formatCapabilityTitle(capability: CommunicationCapability) {
-  return capability.charAt(0).toUpperCase() + capability.slice(1)
+  if (capability === "text") {
+    return "Format"
+  }
+
+  if (capability === "rich") {
+    return "Rich Messages"
+  }
+
+  if (capability === "interactive") {
+    return "Interactive Controls"
+  }
+
+  return "Files"
 }
