@@ -47,6 +47,7 @@ function context(
     integration: "slack",
     isAddressed: true,
     isDirect: false,
+    isMentioned: true,
     recentMessages: [currentMessage],
     ...overrides,
   }

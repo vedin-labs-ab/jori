@@ -210,6 +210,7 @@ import type * as routing_decision from "../routing/decision.js";
 import type * as routing_guidance from "../routing/guidance.js";
 import type * as routing_history from "../routing/history.js";
 import type * as routing_message from "../routing/message.js";
+import type * as routing_payload from "../routing/payload.js";
 import type * as routing_records from "../routing/records.js";
 import type * as routing_surface from "../routing/surface.js";
 import type * as runs_agent_authorization from "../runs/agent/authorization.js";
@@ -498,6 +499,7 @@ declare const fullApi: ApiFromModules<{
   "routing/guidance": typeof routing_guidance;
   "routing/history": typeof routing_history;
   "routing/message": typeof routing_message;
+  "routing/payload": typeof routing_payload;
   "routing/records": typeof routing_records;
   "routing/surface": typeof routing_surface;
   "runs/agent/authorization": typeof runs_agent_authorization;
