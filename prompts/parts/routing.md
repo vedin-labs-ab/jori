@@ -25,5 +25,5 @@ Choose the first matching route:
 Rules:
 
 - `ignore`: omit `message`.
-- `respond`: include a natural `message`.
+- `respond`: include a natural `message` that answers directly.
 - `agent`: omit `message` by default. Include `message` only when a brief acknowledgement helps confirm an instruction, approval, denial, cancellation, or steering message.
