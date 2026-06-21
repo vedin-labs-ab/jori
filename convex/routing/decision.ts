@@ -7,7 +7,7 @@ import { promptTemplates } from "../prompts/generated"
 import { type MessageRoutingContext } from "./context"
 import { createRoutingGuidance } from "./guidance"
 
-const defaultIntakeModel = "z-ai/glm-5.2"
+const defaultIntakeModel = "minimax/minimax-m3"
 const maxOutputTokens = 256
 const intakeProviderRouting = {
   requireParameters: true,
@@ -54,7 +54,7 @@ function createRequest(context: MessageRoutingContext): OpenRouterChatInput {
     messages: routeMessages(context),
     model: readIntakeModel(),
     provider: intakeProviderRouting,
-    reasoning: { effort: "none" },
+    reasoning: { effort: "low" },
     responseFormat: {
       type: "json_schema",
       jsonSchema: {
