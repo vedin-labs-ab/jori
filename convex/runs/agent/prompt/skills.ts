@@ -1,9 +1,5 @@
-import { integrationLabels } from "../../../shared/integrations"
 import { createCommunicationGuidance } from "../../../skills/communication"
-import {
-  getRuntimeSkillForIntegration,
-  listRuntimeSkills,
-} from "../../../skills/runtime"
+import { listRuntimeSkills } from "../../../skills/runtime"
 import { type AgentRuntimeInput } from "../input"
 
 export function createSkillInstructions(input: AgentRuntimeInput) {
@@ -20,15 +16,10 @@ function createMessageCommunicationGuidance(input: AgentRuntimeInput) {
     return null
   }
 
-  const skill = getRuntimeSkillForIntegration(input.messageIntegration)
-
-  return skill === null
-    ? null
-    : createCommunicationGuidance({
-        contract: "final-reply-text",
-        destination: integrationLabels[input.messageIntegration],
-        skill,
-      })
+  return createCommunicationGuidance({
+    integration: input.messageIntegration,
+    profile: "agent-final-reply",
+  })
 }
 
 function createSkillDiscoveryInstructions() {

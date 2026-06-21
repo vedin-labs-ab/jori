@@ -95,7 +95,7 @@ describe("message intake routing request", () => {
 })
 
 describe("message intake routing guidance", () => {
-  test("adds the Slack skill body for quick replies", async () => {
+  test("adds Slack text guidance for quick replies", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ message: "Hey.", route: "respond" })
     )
@@ -105,12 +105,13 @@ describe("message intake routing guidance", () => {
     const prompt = lastSystemPrompt()
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("Destination: Slack")
-    expect(prompt).toContain("This contract narrows the loaded communication")
-    expect(prompt).toContain(
-      "If you include `message`, it must be a single string."
-    )
     expect(prompt).toContain("## Slack")
-    expect(prompt).toContain(skills.slack.body)
+    expect(prompt).toContain("### Text")
+    expect(prompt).toContain(skills.slack.communication.parts.text)
+    expect(prompt).toContain(
+      "If route is `respond`, `message` must be one text string."
+    )
+    expect(prompt).not.toContain(skills.slack.communication.parts.rich)
   })
 
   test("does not add Slack guidance for non-Slack routing", async () => {
