@@ -151,13 +151,12 @@ describe("runtime skill prompts", () => {
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("Destination: Slack")
-    expect(prompt).toContain("This contract narrows the loaded communication")
+    expect(prompt).toContain("### Text")
     expect(prompt).toContain("one text message, not a rich payload")
     expect(prompt).toContain("Do not emit blocks")
-    expect(prompt).toContain("Loaded communication skill: `slack`")
     expect(prompt).toContain("## Slack")
     expect(prompt).toContain("Write Slack `mrkdwn` only")
-    expect(prompt).toContain("Do not use app-callback controls")
+    expect(prompt).not.toContain("Do not use app-callback controls")
   })
 })
 
