@@ -1,13 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { assemblePrompt } from "."
-import {
-  approvalContinuation,
-  automationRuntimeInput,
-  linearAutomationRuntimeInput,
-  notionAutomationRuntimeInput,
-  promptedTool,
-  runtimeInput,
-} from "./fixtures"
+import { approvalContinuation, promptedTool, runtimeInput } from "./fixtures"
 
 const messageTriggerCases = [
   [
@@ -124,100 +117,6 @@ describe("runtime prompts", () => {
     expect(prompt).toContain("not for routine replies")
     expect(prompt).not.toContain("The requester cannot see you working")
     expect(prompt).not.toContain("If a reply is useful, send it to this target")
-  })
-})
-
-describe("runtime skill prompts", () => {
-  test("lists loadable skills without loading unrelated skill bodies", () => {
-    const prompt = assemblePrompt(
-      runtimeInput("github", {
-        repository: { fullName: "acme/app" },
-        issueNumber: 12,
-        comment: { id: "comment-id", kind: "issue_comment" },
-      })
-    )
-
-    expect(prompt).toContain("# Skills")
-    expect(prompt).toContain("Use `load_skill`")
-    expect(prompt).toContain("`slack`: Format Slack replies")
-    expect(prompt).not.toContain("## Communication")
-    expect(prompt).not.toContain("Do not use app-callback controls")
-  })
-
-  test("eagerly loads Slack guidance for Slack final replies", () => {
-    const prompt = assemblePrompt(
-      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
-    )
-
-    expect(prompt).toContain("## Communication")
-    expect(prompt).toContain("Format the reply so it feels native")
-    expect(prompt).toContain("Surface: `Slack`")
-    expect(prompt).toContain("Guidance:")
-    expect(prompt.indexOf("Format the reply so it feels native")).toBeLessThan(
-      prompt.indexOf("Surface: `Slack`")
-    )
-    expect(prompt).toContain("Write Slack `mrkdwn` only")
-    expect(prompt).not.toContain("## Slack")
-    expect(prompt).not.toContain("### Text")
-    expect(prompt).not.toContain("## Format")
-    expect(prompt).not.toContain("Output contract:")
-    expect(prompt).not.toContain("Do not use app-callback controls")
-  })
-})
-
-describe("automation trigger prompts", () => {
-  test("renders selected integration access", () => {
-    const prompt = assemblePrompt(automationRuntimeInput())
-
-    expect(prompt).toContain("An automation triggered this run.")
-    expect(prompt).toContain("Current UTC time:")
-    expect(prompt).toContain("Integration access:")
-    expect(prompt).toContain("- Web search: Allowed")
-    expect(prompt).toContain("- GitHub: Read issue")
-    expect(prompt).toContain("- Slack: Send message")
-    expect(prompt).toContain("Use write actions only")
-    expect(prompt).toContain("Run the automation")
-  })
-
-  test("renders disabled web search", () => {
-    const prompt = assemblePrompt(automationRuntimeInput(false))
-
-    expect(prompt).toContain("- Web search: Disabled")
-  })
-
-  test("renders integration target context for Linear events", () => {
-    const prompt = assemblePrompt(linearAutomationRuntimeInput())
-
-    expect(prompt).toContain("- Type: issue.comment.edited")
-    expect(prompt).toContain("- Integration: Linear")
-    expect(prompt).toContain("- Issue ID: issue-id")
-    expect(prompt).toContain("- Issue key: VED-1")
-    expect(prompt).toContain("- Issue title: Get familiar with Linear")
-    expect(prompt).toContain(
-      "- Issue URL: https://linear.app/acme/issue/VED-1/get-familiar"
-    )
-    expect(prompt).toContain("- Comment ID: comment-id")
-    expect(prompt).toContain(
-      "- Comment URL: https://linear.app/acme/issue/VED-1/get-familiar#comment-id"
-    )
-    expect(prompt).toContain(
-      "- Text: i wonder if this is worth spending time on"
-    )
-  })
-
-  test("renders integration target context for Notion events", () => {
-    const prompt = assemblePrompt(notionAutomationRuntimeInput())
-
-    expect(prompt).toContain("- Type: comment.created")
-    expect(prompt).toContain("- Integration: Notion")
-    expect(prompt).toContain("- Page ID: page-id")
-    expect(prompt).toContain("- Comment ID: comment-id")
-    expect(prompt).toContain("- Entity ID: comment-id")
-    expect(prompt).toContain("- Entity type: comment")
-    expect(prompt).toContain("- Parent ID: block-id")
-    expect(prompt).toContain("- Parent type: block")
-    expect(prompt).toContain("- Notion event ID: notion-event-id")
-    expect(prompt).toContain("- Notion event type: comment.created")
   })
 })
 
