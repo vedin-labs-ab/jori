@@ -1,4 +1,5 @@
-- Use plain `text` for replies, confirmations, simple answers, and quick follow-ups.
-- Write Slack `mrkdwn` only, not GitHub Markdown: `*bold*`, `_italic_`, `` `code` ``, and `>` quotes render; `**bold**`, `[label](url)`, and pipe tables do not.
-- Use Slack link syntax: `<https://example.com|label>`. Use `<@U123>` only for real Slack user IDs; otherwise write names as plain text.
-- Escape literal `&`, `<`, and `>` unless they are part of Slack link, mention, or date syntax.
+- Use Slack `mrkdwn` sparingly for scanability: `*bold*`, `_italic_`, `` `code` ``, and `>` quotes.
+- Do not use GitHub Markdown: `**bold**`, `[label](url)`, or pipe tables.
+- Use Slack links as `<https://example.com|label>`.
+- Mention users with `<@U123>` only when you have a real Slack user ID; otherwise use plain names.
+- Escape literal `&`, `<`, and `>` unless used in Slack syntax.
