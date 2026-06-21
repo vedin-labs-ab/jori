@@ -129,12 +129,21 @@ export const sandboxes = defineTable({
   externalId: v.string(),
   status: v.union(
     v.literal("active"),
+    v.literal("idle"),
     v.literal("cleaned"),
     v.literal("failed")
   ),
+  watchId: v.optional(v.id("watches")),
+  expiresAt: v.optional(v.number()),
   error: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
 })
   .index("by_run_and_status", ["runId", "status"])
   .index("by_external_id", ["externalId"])
+  .index("by_tenant_and_watch_and_status_and_expires_at", [
+    "tenantId",
+    "watchId",
+    "status",
+    "expiresAt",
+  ])

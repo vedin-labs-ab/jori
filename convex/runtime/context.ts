@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { codingToolDefinitions } from "../../contracts/coding"
 import { isWebTool } from "../../contracts/permissions/web"
 import { internal } from "../_generated/api"
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
 import { getIntegrationTools } from "../automations/access"
 import {
@@ -66,20 +66,17 @@ export const load = action({
       _id: Id<"runs">
       status: "completed" | "failed" | "queued" | "running" | "stopped"
     } | null
-    const session = await ctx.runQuery(internal.sessions.data.getByRun, {
-      runId: args.runId,
-    })
-    const sandbox = (await ctx.runQuery(
-      internal.runtime.sandboxes.activeByRun,
-      {
-        runId: args.runId,
-      }
-    )) as { externalId: string } | null
-
     if (input === null || run === null) {
       throw new Error("Runtime context not found.")
     }
 
+    const session = await ctx.runQuery(internal.sessions.data.getByRun, {
+      runId: args.runId,
+    })
+    const sandbox = await loadSandboxReference(ctx, {
+      runId: args.runId,
+      status: run.status,
+    })
     const permissions = await runtimePermissions(ctx, input)
     const promptedTools = getPromptedTools({
       executionType: toolExecutionType(input.type),
@@ -119,6 +116,28 @@ export const load = action({
     }
   },
 })
+
+async function loadSandboxReference(
+  ctx: ActionCtx,
+  args: {
+    runId: Id<"runs">
+    status: Doc<"runs">["status"]
+  }
+) {
+  if (isTerminalStatus(args.status)) {
+    return (await ctx.runQuery(internal.runtime.sandboxes.retainedByRun, {
+      runId: args.runId,
+    })) as { externalId: string } | null
+  }
+
+  return (await ctx.runMutation(internal.runtime.sandboxes.claimForRun, {
+    runId: args.runId,
+  })) as { externalId: string } | null
+}
+
+function isTerminalStatus(status: Doc<"runs">["status"]) {
+  return status === "completed" || status === "failed" || status === "stopped"
+}
 
 export const prepareRun = internalMutation({
   args: {

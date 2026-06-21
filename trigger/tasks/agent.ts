@@ -17,6 +17,7 @@ import {
   type RuntimeMessage,
   type RuntimeRunTraceData,
 } from "../types"
+import { releaseSandbox } from "./sandbox"
 
 const maxAttempts = 3
 const maxModelSteps = 30
@@ -59,7 +60,7 @@ export const miloAgentRun = task({
         model: new OpenRouterModelRuntime(),
         runtime: { convex, context, sandbox },
       })
-      await sandbox.cleanup()
+      await releaseSandbox({ context, sandbox })
 
       return output
     } catch (error) {

@@ -11,6 +11,7 @@ export type AgentRunPayload = {
 }
 
 export type SandboxCleanupPayload = {
+  expiresAt?: number
   runId: ConvexId<"runs">
   sandboxId: string
 }

@@ -11,6 +11,10 @@ export default defineConfig({
   dirs: ["trigger/tasks"],
   runtime: "node-22",
   maxDuration: 7200,
+  processKeepAlive: {
+    enabled: true,
+    maxExecutionsPerProcess: 25,
+  },
   retries: {
     default: {
       maxAttempts: 3,
