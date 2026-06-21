@@ -136,9 +136,12 @@ async function cancelRun(ctx: DispatchCtx, item: Doc<"outbox">) {
     runId: operation.runId,
   })) as Doc<"runs"> | null
 
-  const sandbox = (await ctx.runQuery(internal.runtime.sandboxes.activeByRun, {
-    runId: operation.runId,
-  })) as Doc<"sandboxes"> | null
+  const sandbox = (await ctx.runQuery(
+    internal.runtime.sandboxes.retainedByRun,
+    {
+      runId: operation.runId,
+    }
+  )) as Doc<"sandboxes"> | null
 
   if (run?.workerId === undefined && sandbox === null) {
     return undefined

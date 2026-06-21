@@ -118,6 +118,21 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     this.sandboxId = null
   }
 
+  async release() {
+    if (this.sandboxId === null) {
+      return null
+    }
+
+    const lease = await this.convex.releaseSandbox({
+      externalId: this.sandboxId,
+      runId: this.runId,
+    })
+
+    return lease === null
+      ? null
+      : { expiresAt: lease.expiresAt, sandboxId: this.sandboxId }
+  }
+
   private async ensureSandbox() {
     if (this.sandbox !== undefined) {
       return this.sandbox

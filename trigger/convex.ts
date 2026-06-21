@@ -181,6 +181,30 @@ export class MiloConvexClient {
     })
   }
 
+  async releaseSandbox(args: {
+    externalId: string
+    runId: ConvexId<"runs">
+  }): Promise<{ expiresAt: number } | null> {
+    return (await this.client.mutation(api.runtime.sandboxes.release, {
+      ...args,
+      secret: this.secret,
+    })) as { expiresAt: number } | null
+  }
+
+  async reserveExpiredSandboxCleanup(args: {
+    expiresAt: number
+    externalId: string
+    runId: ConvexId<"runs">
+  }): Promise<boolean> {
+    return (await this.client.mutation(
+      api.runtime.sandboxes.reserveExpiredCleanup,
+      {
+        ...args,
+        secret: this.secret,
+      }
+    )) as boolean
+  }
+
   async markSandboxCleaned(args: { error?: string; externalId: string }) {
     const input =
       args.error === undefined
