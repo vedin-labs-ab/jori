@@ -18,26 +18,11 @@ import {
 } from "./types"
 
 const agentModel = "z-ai/glm-5.2"
-const defaultReasoningEffort = "xhigh"
+const agentReasoningEffort = "xhigh"
 const agentProviderRouting = {
   require_parameters: true,
   sort: "price",
 } satisfies NonNullable<OpenRouterChatSettings["provider"]>
-const reasoningEfforts = new Set([
-  "high",
-  "low",
-  "medium",
-  "minimal",
-  "none",
-  "xhigh",
-])
-export type ReasoningEffort =
-  | "high"
-  | "low"
-  | "medium"
-  | "minimal"
-  | "none"
-  | "xhigh"
 
 export class OpenRouterModelRuntime implements ModelRuntime {
   private readonly config = requireModelConfig()
@@ -55,12 +40,11 @@ export class OpenRouterModelRuntime implements ModelRuntime {
     tools: ModelTool[]
   }): Promise<ModelResponse> {
     const prompt = toAiPrompt(args.messages)
-    const reasoningEffort = readReasoningEffort()
     const response = await generateText({
       ...prompt,
       model: this.provider.chat(
         this.config.model,
-        createOpenRouterModelSettings(reasoningEffort)
+        createOpenRouterModelSettings()
       ),
       toolChoice: args.tools.length === 0 ? "none" : "auto",
       tools: toAiTools(args.tools),
@@ -82,14 +66,10 @@ export class OpenRouterModelRuntime implements ModelRuntime {
   }
 }
 
-export function createOpenRouterModelSettings(
-  reasoningEffort: ReasoningEffort | undefined
-): OpenRouterChatSettings {
+export function createOpenRouterModelSettings(): OpenRouterChatSettings {
   return {
     provider: agentProviderRouting,
-    ...(reasoningEffort === undefined
-      ? {}
-      : { reasoning: { effort: reasoningEffort } }),
+    reasoning: { effort: agentReasoningEffort },
   }
 }
 
@@ -217,20 +197,6 @@ function requireModelConfig() {
     apiKey,
     model: agentModel,
   }
-}
-
-function readReasoningEffort() {
-  const effort =
-    readEnvironmentVariable("MILO_OPENROUTER_REASONING_EFFORT") ??
-    defaultReasoningEffort
-
-  if (!reasoningEfforts.has(effort)) {
-    throw new Error(
-      "MILO_OPENROUTER_REASONING_EFFORT must be high, low, medium, minimal, none, or xhigh"
-    )
-  }
-
-  return effort as ReasoningEffort
 }
 
 function readEnvironmentVariable(name: string) {
