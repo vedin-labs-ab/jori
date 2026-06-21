@@ -127,6 +127,35 @@ describe("runtime prompts", () => {
   })
 })
 
+describe("runtime skill prompts", () => {
+  test("lists loadable skills without loading unrelated skill bodies", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("github", {
+        repository: { fullName: "acme/app" },
+        issueNumber: 12,
+        comment: { id: "comment-id", kind: "issue_comment" },
+      })
+    )
+
+    expect(prompt).toContain("# Skills")
+    expect(prompt).toContain("Use `load_skill`")
+    expect(prompt).toContain("`slack`: Format Slack replies")
+    expect(prompt).toContain("Routine final replies are delivered as text")
+    expect(prompt).not.toContain("Do not use app-callback controls")
+  })
+
+  test("eagerly loads Slack guidance for Slack final replies", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
+    )
+
+    expect(prompt).toContain("Loaded skills:")
+    expect(prompt).toContain("## slack")
+    expect(prompt).toContain("Write Slack `mrkdwn` only")
+    expect(prompt).toContain("Do not use app-callback controls")
+  })
+})
+
 describe("automation trigger prompts", () => {
   test("renders selected integration access", () => {
     const prompt = assemblePrompt(automationRuntimeInput())

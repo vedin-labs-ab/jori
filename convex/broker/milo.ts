@@ -6,6 +6,7 @@ import {
   isMiloAttachmentTool,
 } from "../attachments/mcp"
 import { callMiloAutomationTool } from "../automations/mcp"
+import { callMiloSkillTool, isMiloSkillTool } from "../skills/mcp"
 import { callWebTool } from "./tools/web"
 
 type MiloToolRequest = {
@@ -32,6 +33,10 @@ export async function callMiloTool(
 
   if (request.tool === "web_search" || request.tool === "web_fetch") {
     return await callWebTool(request.tool, normalizeToolArgs(request.args))
+  }
+
+  if (isMiloSkillTool(request.tool)) {
+    return callMiloSkillTool(request)
   }
 
   return await callMiloAutomationTool(ctx, toMiloContext(run), request)

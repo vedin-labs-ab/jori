@@ -93,6 +93,30 @@ describe("message intake routing request", () => {
   })
 })
 
+describe("message intake routing guidance", () => {
+  test("adds compact Slack guidance for quick replies", async () => {
+    vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
+      modelResponse({ message: "Hey.", route: "respond" })
+    )
+
+    await decideRoute(context({ isAddressed: true }))
+
+    expect(lastSystemPrompt()).toContain(
+      "format it for Slack `mrkdwn`, not GitHub Markdown"
+    )
+  })
+
+  test("does not add Slack guidance for non-Slack routing", async () => {
+    vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
+      modelResponse({ route: "agent" })
+    )
+
+    await decideRoute(context({ integration: "github", isAddressed: true }))
+
+    expect(lastSystemPrompt()).not.toContain("Slack `mrkdwn`")
+  })
+})
+
 describe("message intake routing decisions", () => {
   test("keeps addressed model ignores ignored", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(

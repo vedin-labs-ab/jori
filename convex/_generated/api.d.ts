@@ -206,6 +206,7 @@ import type * as routing_context from "../routing/context.js";
 import type * as routing_continuation from "../routing/continuation.js";
 import type * as routing_data from "../routing/data.js";
 import type * as routing_decision from "../routing/decision.js";
+import type * as routing_guidance from "../routing/guidance.js";
 import type * as routing_history from "../routing/history.js";
 import type * as routing_message from "../routing/message.js";
 import type * as routing_records from "../routing/records.js";
@@ -217,6 +218,7 @@ import type * as runs_agent_prompt_fixtures from "../runs/agent/prompt/fixtures.
 import type * as runs_agent_prompt_index from "../runs/agent/prompt/index.js";
 import type * as runs_agent_prompt_instructions from "../runs/agent/prompt/instructions.js";
 import type * as runs_agent_prompt_integration from "../runs/agent/prompt/integration.js";
+import type * as runs_agent_prompt_skills from "../runs/agent/prompt/skills.js";
 import type * as runs_agent_prompt_target from "../runs/agent/prompt/target.js";
 import type * as runs_agent_targets from "../runs/agent/targets.js";
 import type * as runs_agent_tools_bundles from "../runs/agent/tools/bundles.js";
@@ -280,6 +282,8 @@ import type * as shared_integrations from "../shared/integrations.js";
 import type * as shared_sources_metadata from "../shared/sources/metadata.js";
 import type * as skills_catalog from "../skills/catalog.js";
 import type * as skills_data from "../skills/data.js";
+import type * as skills_mcp from "../skills/mcp.js";
+import type * as skills_runtime from "../skills/runtime.js";
 import type * as watches_continuation from "../watches/continuation.js";
 import type * as watches_data from "../watches/data.js";
 
@@ -488,6 +492,7 @@ declare const fullApi: ApiFromModules<{
   "routing/continuation": typeof routing_continuation;
   "routing/data": typeof routing_data;
   "routing/decision": typeof routing_decision;
+  "routing/guidance": typeof routing_guidance;
   "routing/history": typeof routing_history;
   "routing/message": typeof routing_message;
   "routing/records": typeof routing_records;
@@ -499,6 +504,7 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/prompt/index": typeof runs_agent_prompt_index;
   "runs/agent/prompt/instructions": typeof runs_agent_prompt_instructions;
   "runs/agent/prompt/integration": typeof runs_agent_prompt_integration;
+  "runs/agent/prompt/skills": typeof runs_agent_prompt_skills;
   "runs/agent/prompt/target": typeof runs_agent_prompt_target;
   "runs/agent/targets": typeof runs_agent_targets;
   "runs/agent/tools/bundles": typeof runs_agent_tools_bundles;
@@ -562,6 +568,8 @@ declare const fullApi: ApiFromModules<{
   "shared/sources/metadata": typeof shared_sources_metadata;
   "skills/catalog": typeof skills_catalog;
   "skills/data": typeof skills_data;
+  "skills/mcp": typeof skills_mcp;
+  "skills/runtime": typeof skills_runtime;
   "watches/continuation": typeof watches_continuation;
   "watches/data": typeof watches_data;
 }>;

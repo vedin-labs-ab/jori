@@ -15,6 +15,14 @@ export const toolPermissionRows = [
   ],
   [
     "milo",
+    "load_skill",
+    "Load skill",
+    "Load full instructions for an available Milo skill.",
+    "read",
+    "required",
+  ],
+  [
+    "milo",
     "save_attachment",
     "Save attachment",
     "Persist a generated sandbox file as a run attachment for tools that send attachments.",
