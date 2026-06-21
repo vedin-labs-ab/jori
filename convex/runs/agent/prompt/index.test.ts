@@ -150,11 +150,11 @@ describe("runtime skill prompts", () => {
     )
 
     expect(prompt).toContain("## Communication")
-    expect(prompt).toContain("Format messages so they feel native")
-    expect(prompt).toContain("Destination: `Slack`")
+    expect(prompt).toContain("Format the reply so it feels native")
+    expect(prompt).toContain("Surface: `Slack`")
     expect(prompt).toContain("Guidance:")
-    expect(prompt.indexOf("Format messages so they feel native")).toBeLessThan(
-      prompt.indexOf("Destination: `Slack`")
+    expect(prompt.indexOf("Format the reply so it feels native")).toBeLessThan(
+      prompt.indexOf("Surface: `Slack`")
     )
     expect(prompt).toContain("Write Slack `mrkdwn` only")
     expect(prompt).not.toContain("## Slack")

@@ -25,7 +25,7 @@ test("formats connected integrations with compact permission buckets", () => {
     "- GitHub | yes: repos, issues, PRs, files | no: post comments"
   )
   expect(summary).toContain(
-    "Available: Linear, Gmail, Google Calendar, Google Drive, Notion, Outlook Mail, Microsoft Calendar"
+    "Connectable: Linear, Gmail, Google Calendar, Google Drive, Notion, Outlook Mail, Microsoft Calendar"
   )
 })
 

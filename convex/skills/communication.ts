@@ -13,7 +13,7 @@ type ProfileDefinition = {
 }
 
 const nativeMessageGuidance =
-  "Format messages so they feel native: direct, compact, and easy to scan."
+  "Format the reply so it feels native: direct, compact, and easy to scan."
 
 const profiles = {
   "agent-final-reply": {
@@ -42,7 +42,7 @@ export function createCommunicationGuidance(args: {
     "",
     nativeMessageGuidance,
     "",
-    `Destination: \`${integrationLabels[args.integration]}\``,
+    `Surface: \`${integrationLabels[args.integration]}\``,
     ...formatGuidance(skill, capabilities),
   ].join("\n")
 }

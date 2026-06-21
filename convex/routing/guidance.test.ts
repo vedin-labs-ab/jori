@@ -10,7 +10,7 @@ test("adds capability guidance before communication guidance", () => {
         "Connected:",
         "- Slack | yes: channels | ask: send replies",
         "",
-        "Available: GitHub",
+        "Connectable: GitHub",
       ].join("\n"),
     })
   )
@@ -21,7 +21,7 @@ test("adds capability guidance before communication guidance", () => {
     "`yes` = usable now; `ask` = approval required; `no` = blocked"
   )
   expect(text).toContain("- Slack | yes: channels | ask: send replies")
-  expect(text).toContain("Available: GitHub")
+  expect(text).toContain("Connectable: GitHub")
   expect(text.indexOf("## Capabilities")).toBeLessThan(
     text.indexOf("## Communication")
   )
