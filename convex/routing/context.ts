@@ -44,6 +44,7 @@ export const getMessageContext = internalQuery({
       integration: message.integration,
       isAddressed: audience.isAddressed,
       isDirect: audience.isDirect,
+      isMentioned: audience.isMentioned,
       recentMessages,
     }
   },
@@ -123,5 +124,6 @@ export type MessageRoutingContext = {
   integration: Doc<"messages">["integration"]
   isAddressed: MessageAudience["isAddressed"]
   isDirect: MessageAudience["isDirect"]
+  isMentioned: MessageAudience["isMentioned"]
   recentMessages: Awaited<ReturnType<typeof recentConversation>>
 }

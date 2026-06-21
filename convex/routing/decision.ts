@@ -6,6 +6,7 @@ import {
 import { promptTemplates } from "../prompts/generated"
 import { type MessageRoutingContext } from "./context"
 import { createRoutingGuidance } from "./guidance"
+import { createRoutingPayload } from "./payload"
 
 const intakeModel = "minimax/minimax-m3"
 const maxOutputTokens = 256
@@ -76,20 +77,9 @@ function routeMessages(
     },
     {
       role: "user",
-      content: JSON.stringify(routeUserContext(context)),
+      content: JSON.stringify(createRoutingPayload(context)),
     },
   ]
-}
-
-function routeUserContext(context: MessageRoutingContext) {
-  return {
-    activeRun: context.activeRun,
-    currentMessage: context.currentMessage,
-    integration: context.integration,
-    isAddressed: context.isAddressed,
-    isDirect: context.isDirect,
-    recentMessages: context.recentMessages,
-  }
 }
 
 function routeSystemPrompt(context: MessageRoutingContext) {

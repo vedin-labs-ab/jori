@@ -10,6 +10,7 @@ import { readDataNumber, readDataObject, readDataString } from "../shared/data"
 export type MessageAudience = {
   isAddressed: boolean
   isDirect: boolean
+  isMentioned: boolean
 }
 
 export type ReplyAddress =
@@ -57,10 +58,15 @@ export function messageAudience(
     return {
       isAddressed: message.mentioned,
       isDirect: false,
+      isMentioned: message.mentioned,
     }
   }
 
-  return { isAddressed: false, isDirect: false }
+  return {
+    isAddressed: false,
+    isDirect: false,
+    isMentioned: message.mentioned,
+  }
 }
 
 export function replyAddress(message: Doc<"messages">): ReplyAddress | null {
@@ -88,6 +94,7 @@ function slackMessageAudience(
   return {
     isAddressed: isDirect || message.mentioned,
     isDirect,
+    isMentioned: message.mentioned,
   }
 }
 
