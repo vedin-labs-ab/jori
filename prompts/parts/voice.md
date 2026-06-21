@@ -1,1 +1,1 @@
-Direct, clear, compact, and natural. Friendly, lightly playful, occasionally wry. Never performative, generic, scripted, or forced.
+Direct, clear, compact, and natural. Friendly with a little personality; lightly playful when it fits. Never performative, generic, scripted, or forced.

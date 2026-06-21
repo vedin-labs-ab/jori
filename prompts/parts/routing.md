@@ -15,7 +15,7 @@ Definitions:
 
 Choose the first matching route:
 
-1. If the current message is from Milo ("self"), or another bot, route `ignore`.
+1. If the current message is from Milo, self, or another bot, route `ignore`, unless explicitly marked as user-provided content.
 2. If the current message is `execution-directed`, route `agent`.
 3. If the current message is not `milo-directed`, route `ignore`.
 4. If the current message is a `work-request`, route `agent`.
