@@ -104,12 +104,16 @@ describe("message intake routing guidance", () => {
 
     const prompt = lastSystemPrompt()
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("Destination: `Slack`")
     expect(prompt).toContain("Format messages so they feel native")
-    expect(prompt).toContain("## Format")
+    expect(prompt).toContain("Destination: `Slack`")
+    expect(prompt).toContain("Guidance:")
+    expect(prompt.indexOf("Format messages so they feel native")).toBeLessThan(
+      prompt.indexOf("Destination: `Slack`")
+    )
     expect(prompt).toContain(skills.slack.communication.parts.text)
     expect(prompt).not.toContain("## Slack")
     expect(prompt).not.toContain("### Text")
+    expect(prompt).not.toContain("## Format")
     expect(prompt).not.toContain("Output contract:")
     expect(prompt).not.toContain(skills.slack.communication.parts.rich)
   })
