@@ -76,7 +76,6 @@ function expectedAddressing() {
   return {
     isDirect: false,
     isMentioned: true,
-    isAddressed: true,
   }
 }
 
