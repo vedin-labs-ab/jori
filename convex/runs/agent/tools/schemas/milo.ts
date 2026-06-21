@@ -1,4 +1,5 @@
 import { automationEventCatalog } from "../../../../automations/events"
+import { runtimeSkillNames } from "../../../../skills/runtime"
 import { artifactToolInputSchemas } from "./artifacts"
 import {
   numberProperty,
@@ -106,6 +107,16 @@ const triggerSchema = () => ({
 export const miloToolInputSchemas = {
   list_capabilities: objectSchema({
     properties: {},
+  }),
+  load_skill: objectSchema({
+    required: ["name"],
+    properties: {
+      name: {
+        type: "string",
+        description: "Available Milo skill name.",
+        enum: runtimeSkillNames,
+      },
+    },
   }),
   save_attachment: objectSchema({
     required: ["path"],

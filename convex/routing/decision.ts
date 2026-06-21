@@ -5,6 +5,7 @@ import {
 } from "../model"
 import { promptTemplates } from "../prompts/generated"
 import { type MessageRoutingContext } from "./context"
+import { createRoutingGuidance } from "./guidance"
 
 const defaultIntakeModel = "z-ai/glm-5.2"
 const maxOutputTokens = 256
@@ -71,13 +72,21 @@ function routeMessages(
   return [
     {
       role: "system",
-      content: promptTemplates.routing,
+      content: routeSystemPrompt(context),
     },
     {
       role: "user",
       content: JSON.stringify(context),
     },
   ]
+}
+
+function routeSystemPrompt(context: MessageRoutingContext) {
+  const guidance = createRoutingGuidance(context)
+
+  return guidance === null
+    ? promptTemplates.routing
+    : [promptTemplates.routing, guidance].join("\n\n")
 }
 
 function intakeDecisionSchema() {

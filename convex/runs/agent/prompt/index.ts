@@ -16,6 +16,7 @@ import {
   createApprovalContinuationPrompt,
 } from "./continuation"
 import { createToolApprovalInstructions } from "./instructions"
+import { createSkillInstructions } from "./skills"
 import {
   formatEvent,
   formatTargetLines,
@@ -32,6 +33,7 @@ export function assemblePrompt(
 ): string {
   const parts = [
     promptTemplates.persona,
+    createSkillInstructions(input),
     ...(promptedTools.length === 0
       ? []
       : [createToolApprovalInstructions(promptedTools)]),
