@@ -145,7 +145,7 @@ export function createRoutingCapabilityGuidance(summary: string | null) {
   return [
     "## Capabilities",
     "",
-    "For broad capability questions, answer from the listed items. `yes` = usable now; `ask` = approval required; `no` = blocked. Route `agent` for live checks, exact access, or actions.",
+    "For broad capability questions, answer from the listed items. `yes` = usable now; `ask` = approval required; `no` = blocked. Route `agent` for actions or connection-specific details not listed here.",
     "",
     summary,
   ].join("\n")
@@ -160,7 +160,7 @@ export function formatRoutingCapabilitySummary(args: {
     "milo",
     ...integrationCatalog.filter((surface) => connected.has(surface)),
   ]
-  const available = integrationCatalog
+  const connectable = integrationCatalog
     .filter((integration) => !connected.has(integration))
     .map((integration) => integrationLabels[integration])
 
@@ -170,7 +170,9 @@ export function formatRoutingCapabilitySummary(args: {
       connectedLine(surface, args.toolModes)
     ),
     "",
-    `Available: ${available.length === 0 ? "None" : available.join(", ")}`,
+    `Connectable: ${
+      connectable.length === 0 ? "None" : connectable.join(", ")
+    }`,
   ].join("\n")
 }
 
