@@ -42,7 +42,7 @@ function context(
 
   return {
     activeRun: null,
-    capabilitySummary: null,
+    capabilitySummary: capabilitySummary(),
     currentMessage,
     integration: "slack",
     isAddressed: true,
@@ -50,4 +50,13 @@ function context(
     recentMessages: [currentMessage],
     ...overrides,
   }
+}
+
+function capabilitySummary() {
+  return [
+    "Connected:",
+    "- Milo | yes: capabilities",
+    "",
+    "Connectable: Slack",
+  ].join("\n")
 }

@@ -88,7 +88,7 @@ describe("message intake routing request", () => {
 })
 
 describe("message intake routing guidance", () => {
-  test("adds Slack text guidance for quick replies", async () => {
+  test("adds capabilities and Slack text guidance for quick replies", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ message: "Hey.", route: "respond" })
     )
@@ -96,10 +96,16 @@ describe("message intake routing guidance", () => {
     await decideRoute(context({ isAddressed: true }))
 
     const prompt = lastSystemPrompt()
+    expect(prompt).toContain("## Capabilities")
+    expect(prompt).toContain("- Milo | yes: capabilities")
+    expect(prompt).toContain("Connectable: Slack")
     expect(prompt).toContain("## Communication")
     expect(prompt).toContain("Format the reply so it feels native")
     expect(prompt).toContain("Surface: `Slack`")
     expect(prompt).toContain("Guidance:")
+    expect(prompt.indexOf("## Capabilities")).toBeLessThan(
+      prompt.indexOf("## Communication")
+    )
     expect(prompt.indexOf("Format the reply so it feels native")).toBeLessThan(
       prompt.indexOf("Surface: `Slack`")
     )
@@ -235,7 +241,7 @@ function context(
 
   return {
     activeRun: null,
-    capabilitySummary: null,
+    capabilitySummary: capabilitySummary(),
     currentMessage,
     integration: "slack",
     isAddressed: false,
@@ -243,6 +249,15 @@ function context(
     recentMessages: [currentMessage],
     ...overrides,
   }
+}
+
+function capabilitySummary() {
+  return [
+    "Connected:",
+    "- Milo | yes: capabilities",
+    "",
+    "Connectable: Slack",
+  ].join("\n")
 }
 
 function modelResponse(content: {

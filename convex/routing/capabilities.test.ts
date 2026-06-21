@@ -1,9 +1,6 @@
 import { expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import {
-  formatRoutingCapabilitySummary,
-  isRoutingCapabilityQuestion,
-} from "./capabilities"
+import { formatRoutingCapabilitySummary } from "./capabilities"
 
 test("formats connected integrations with compact permission buckets", () => {
   const summary = formatRoutingCapabilitySummary({
@@ -26,14 +23,6 @@ test("formats connected integrations with compact permission buckets", () => {
   )
   expect(summary).toContain(
     "Connectable: Linear, Gmail, Google Calendar, Google Drive, Notion, Outlook Mail, Microsoft Calendar"
-  )
-})
-
-test("detects broad capability questions", () => {
-  expect(isRoutingCapabilityQuestion("What tools do you have?")).toBe(true)
-  expect(isRoutingCapabilityQuestion("What can Milo do?")).toBe(true)
-  expect(isRoutingCapabilityQuestion("Can you inspect repo acme/web?")).toBe(
-    false
   )
 })
 
