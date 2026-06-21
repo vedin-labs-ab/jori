@@ -9,7 +9,6 @@ export function createRoutingPayload(context: MessageRoutingContext) {
     addressing: {
       isDirect: context.isDirect,
       isMentioned: context.isMentioned,
-      isAddressed: context.isAddressed,
     },
     context: {
       history: routingPayloadHistory(context),
