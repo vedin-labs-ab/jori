@@ -72,3 +72,26 @@ export async function getUserIntegrationForOwner(
     .order("desc")
     .first()
 }
+
+export async function listActiveIntegrationsForOwner(
+  ctx: QueryLikeCtx,
+  args: {
+    tenantId: string
+    ownerId?: string | undefined
+  }
+) {
+  const integrations = await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_and_status", (query) =>
+      query.eq("tenantId", args.tenantId).eq("status", "active")
+    )
+    .collect()
+
+  return integrations.filter((integration) => {
+    if (integration.scope !== "user") {
+      return true
+    }
+
+    return args.ownerId !== undefined && integration.ownerId === args.ownerId
+  })
+}

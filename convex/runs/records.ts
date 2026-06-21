@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
+import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { recentConversation } from "../routing/history"
 
 export const getInputByRun = internalQuery({
@@ -179,18 +180,8 @@ async function listActiveIntegrations(
   tenantId: string,
   ownerId: string | undefined
 ) {
-  const integrations = await ctx.db
-    .query("integrations")
-    .withIndex("by_tenant_and_status", (query) =>
-      query.eq("tenantId", tenantId).eq("status", "active")
-    )
-    .collect()
-
-  return integrations.filter((integration) => {
-    if (integration.scope !== "user") {
-      return true
-    }
-
-    return ownerId !== undefined && integration.ownerId === ownerId
+  return await listActiveIntegrationsForOwner(ctx, {
+    ownerId,
+    tenantId,
   })
 }
