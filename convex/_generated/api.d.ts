@@ -202,6 +202,7 @@ import type * as providers_slack_install from "../providers/slack/install.js";
 import type * as providers_slack_links from "../providers/slack/links.js";
 import type * as providers_slack_oauth from "../providers/slack/oauth.js";
 import type * as providers_slack_signing from "../providers/slack/signing.js";
+import type * as routing_capabilities from "../routing/capabilities.js";
 import type * as routing_context from "../routing/context.js";
 import type * as routing_continuation from "../routing/continuation.js";
 import type * as routing_data from "../routing/data.js";
@@ -489,6 +490,7 @@ declare const fullApi: ApiFromModules<{
   "providers/slack/links": typeof providers_slack_links;
   "providers/slack/oauth": typeof providers_slack_oauth;
   "providers/slack/signing": typeof providers_slack_signing;
+  "routing/capabilities": typeof routing_capabilities;
   "routing/context": typeof routing_context;
   "routing/continuation": typeof routing_continuation;
   "routing/data": typeof routing_data;

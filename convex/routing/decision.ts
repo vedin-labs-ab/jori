@@ -76,9 +76,20 @@ function routeMessages(
     },
     {
       role: "user",
-      content: JSON.stringify(context),
+      content: JSON.stringify(routeUserContext(context)),
     },
   ]
+}
+
+function routeUserContext(context: MessageRoutingContext) {
+  return {
+    activeRun: context.activeRun,
+    currentMessage: context.currentMessage,
+    integration: context.integration,
+    isAddressed: context.isAddressed,
+    isDirect: context.isDirect,
+    recentMessages: context.recentMessages,
+  }
 }
 
 function routeSystemPrompt(context: MessageRoutingContext) {

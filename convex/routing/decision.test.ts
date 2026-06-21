@@ -251,6 +251,7 @@ function context(
 
   return {
     activeRun: null,
+    capabilitySummary: null,
     currentMessage,
     integration: "slack",
     isAddressed: false,
