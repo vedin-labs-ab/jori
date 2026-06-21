@@ -28,12 +28,13 @@ describe("message intake routing request", () => {
     await decideRoute(context({ isAddressed: true }))
 
     expect(lastRoutingRequest()).toMatchObject({
-      maxTokens: 128,
+      maxTokens: 256,
       model: "z-ai/glm-5.2",
       provider: {
         requireParameters: true,
         sort: "latency",
       },
+      reasoning: { effort: "none" },
     })
   })
 
