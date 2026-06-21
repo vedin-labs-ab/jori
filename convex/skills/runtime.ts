@@ -29,9 +29,16 @@ export function getRuntimeSkillForIntegration(integration: Integration) {
 }
 
 export function formatRuntimeSkill(skill: RuntimeSkill) {
-  return [`## ${skill.name}`, skill.body].join("\n\n")
+  return [`## ${formatSkillTitle(skill.name)}`, skill.body].join("\n\n")
 }
 
 function isRuntimeSkillName(name: string): name is RuntimeSkillName {
   return runtimeSkillNameSet.has(name)
+}
+
+function formatSkillTitle(name: RuntimeSkillName) {
+  return name
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ")
 }

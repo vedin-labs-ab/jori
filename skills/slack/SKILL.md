@@ -5,8 +5,6 @@ category: Communication
 associatedIntegrations: slack
 ---
 
-# Slack
-
 Format Slack messages so they feel native: direct, compact, and easy to scan.
 
 - Use plain `text` for short replies, confirmations, simple answers, and quick follow-ups.
