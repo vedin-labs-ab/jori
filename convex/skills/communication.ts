@@ -38,7 +38,7 @@ export function createCommunicationGuidance(args: {
   const capabilities = capabilitiesFor(profile.capabilities, args.integration)
 
   return [
-    "# Communication",
+    "## Communication",
     "",
     nativeMessageGuidance,
     "",

@@ -103,7 +103,7 @@ describe("message intake routing guidance", () => {
     await decideRoute(context({ isAddressed: true }))
 
     const prompt = lastSystemPrompt()
-    expect(prompt).toContain("# Communication")
+    expect(prompt).toContain("## Communication")
     expect(prompt).toContain("Format messages so they feel native")
     expect(prompt).toContain("Destination: `Slack`")
     expect(prompt).toContain("Guidance:")
@@ -125,7 +125,7 @@ describe("message intake routing guidance", () => {
 
     await decideRoute(context({ integration: "github", isAddressed: true }))
 
-    expect(lastSystemPrompt()).not.toContain("# Communication")
+    expect(lastSystemPrompt()).not.toContain("## Communication")
   })
 })
 

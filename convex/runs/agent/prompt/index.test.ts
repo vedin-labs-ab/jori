@@ -140,7 +140,7 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("# Skills")
     expect(prompt).toContain("Use `load_skill`")
     expect(prompt).toContain("`slack`: Format Slack replies")
-    expect(prompt).not.toContain("# Communication")
+    expect(prompt).not.toContain("## Communication")
     expect(prompt).not.toContain("Do not use app-callback controls")
   })
 
@@ -149,7 +149,7 @@ describe("runtime skill prompts", () => {
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
-    expect(prompt).toContain("# Communication")
+    expect(prompt).toContain("## Communication")
     expect(prompt).toContain("Format messages so they feel native")
     expect(prompt).toContain("Destination: `Slack`")
     expect(prompt).toContain("Guidance:")

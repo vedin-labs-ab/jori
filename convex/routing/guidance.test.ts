@@ -23,7 +23,7 @@ test("adds capability guidance before communication guidance", () => {
   expect(text).toContain("- Slack | yes: channels | ask: send replies")
   expect(text).toContain("Available: GitHub")
   expect(text.indexOf("## Capabilities")).toBeLessThan(
-    text.indexOf("# Communication")
+    text.indexOf("## Communication")
   )
 })
 

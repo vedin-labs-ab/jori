@@ -145,7 +145,7 @@ export function createRoutingCapabilityGuidance(summary: string | null) {
   return [
     "## Capabilities",
     "",
-    "For broad questions about Milo's capabilities, answer only from this section. `yes` = usable now; `ask` = approval required; `no` = blocked. Route `agent` for live checks, exact access, or actions.",
+    "For broad capability questions, answer from the listed items. `yes` = usable now; `ask` = approval required; `no` = blocked. Route `agent` for live checks, exact access, or actions.",
     "",
     summary,
   ].join("\n")
