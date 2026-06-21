@@ -7,7 +7,7 @@ import { promptTemplates } from "../prompts/generated"
 import { type MessageRoutingContext } from "./context"
 import { createRoutingGuidance } from "./guidance"
 
-const defaultIntakeModel = "minimax/minimax-m3"
+const intakeModel = "minimax/minimax-m3"
 const maxOutputTokens = 256
 const intakeProviderRouting = {
   requireParameters: true,
@@ -52,7 +52,7 @@ function createRequest(context: MessageRoutingContext): OpenRouterChatInput {
   return {
     maxTokens: maxOutputTokens,
     messages: routeMessages(context),
-    model: readIntakeModel(),
+    model: intakeModel,
     provider: intakeProviderRouting,
     reasoning: { effort: "low" },
     responseFormat: {
@@ -218,10 +218,4 @@ function normalizeReply(value: unknown) {
 
 function hasText(value: string) {
   return value.trim() !== ""
-}
-
-function readIntakeModel() {
-  const model = process.env.OPENROUTER_INTAKE_MODEL?.trim()
-
-  return model === undefined || model === "" ? defaultIntakeModel : model
 }

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 import { type Id } from "../_generated/dataModel"
 import { sendOpenRouterChat } from "../model"
 import { skills } from "../prompts/generated"
@@ -9,19 +9,12 @@ vi.mock("../model", () => ({
   sendOpenRouterChat: vi.fn(),
 }))
 
-const originalIntakeModel = process.env.OPENROUTER_INTAKE_MODEL
-
 beforeEach(() => {
   vi.clearAllMocks()
 })
 
-afterEach(() => {
-  restoreIntakeModel(originalIntakeModel)
-})
-
 describe("message intake routing request", () => {
-  test("uses GLM 5.2 with latency-prioritized provider routing", async () => {
-    process.env.OPENROUTER_INTAKE_MODEL = ""
+  test("uses MiniMax M3 with latency-prioritized provider routing", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ route: "agent" })
     )
@@ -30,12 +23,12 @@ describe("message intake routing request", () => {
 
     expect(lastRoutingRequest()).toMatchObject({
       maxTokens: 256,
-      model: "z-ai/glm-5.2",
+      model: "minimax/minimax-m3",
       provider: {
         requireParameters: true,
         sort: "latency",
       },
-      reasoning: { effort: "none" },
+      reasoning: { effort: "low" },
     })
   })
 
@@ -198,15 +191,6 @@ describe("message intake routing decisions", () => {
     })
   })
 })
-
-function restoreIntakeModel(value: string | undefined) {
-  if (value === undefined) {
-    delete process.env.OPENROUTER_INTAKE_MODEL
-    return
-  }
-
-  process.env.OPENROUTER_INTAKE_MODEL = value
-}
 
 function lastRoutingRequest() {
   const [request] = vi.mocked(sendOpenRouterChat).mock.calls.at(-1) ?? []
