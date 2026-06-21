@@ -55,7 +55,6 @@ function createRequest(context: MessageRoutingContext): OpenRouterChatInput {
     messages: routeMessages(context),
     model: intakeModel,
     provider: intakeProviderRouting,
-    reasoning: { effort: "low" },
     responseFormat: {
       type: "json_schema",
       jsonSchema: {
