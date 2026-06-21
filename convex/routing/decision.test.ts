@@ -78,11 +78,11 @@ describe("message intake routing request", () => {
     const prompt = lastSystemPrompt()
     expect(prompt).toContain("## Task")
     expect(prompt).toContain("Choose the first matching route:")
-    expect(prompt).toContain("assistant-directed message")
-    expect(prompt).toContain("execution-related")
-    expect(prompt).toContain("still uncertain")
-    expect(prompt.indexOf("assistant-directed message")).toBeLessThan(
-      prompt.indexOf("still uncertain")
+    expect(prompt).toContain("milo-directed")
+    expect(prompt).toContain("execution-directed")
+    expect(prompt).toContain("work-request")
+    expect(prompt.indexOf("execution-directed")).toBeLessThan(
+      prompt.indexOf("work-request")
     )
   })
 })
@@ -100,15 +100,19 @@ describe("message intake routing guidance", () => {
     expect(prompt).toContain("- Milo | yes: capabilities")
     expect(prompt).toContain("Connectable: Slack")
     expect(prompt).toContain("## Communication")
-    expect(prompt).toContain("Format the reply so it feels native")
+    expect(prompt).toContain(
+      "For `message`, format the response natively for the reply surface."
+    )
     expect(prompt).toContain("Surface: `Slack`")
     expect(prompt).toContain("Guidance:")
     expect(prompt.indexOf("## Capabilities")).toBeLessThan(
       prompt.indexOf("## Communication")
     )
-    expect(prompt.indexOf("Format the reply so it feels native")).toBeLessThan(
-      prompt.indexOf("Surface: `Slack`")
-    )
+    expect(
+      prompt.indexOf(
+        "For `message`, format the response natively for the reply surface."
+      )
+    ).toBeLessThan(prompt.indexOf("Surface: `Slack`"))
     expect(prompt).toContain(skills.slack.communication.parts.text)
     expect(prompt).not.toContain("## Slack")
     expect(prompt).not.toContain("### Text")

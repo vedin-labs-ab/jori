@@ -13,7 +13,7 @@ type ProfileDefinition = {
 }
 
 const nativeMessageGuidance =
-  "Format the reply so it feels native: direct, compact, and easy to scan."
+  "For `message`, format the response natively for the reply surface."
 
 const profiles = {
   "agent-final-reply": {
