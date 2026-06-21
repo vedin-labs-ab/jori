@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { type Id } from "../_generated/dataModel"
 import { sendOpenRouterChat } from "../model"
+import { skills } from "../prompts/generated"
 import { type MessageRoutingContext } from "./context"
 import { decideRoute } from "./decision"
 
@@ -94,16 +95,17 @@ describe("message intake routing request", () => {
 })
 
 describe("message intake routing guidance", () => {
-  test("adds compact Slack guidance for quick replies", async () => {
+  test("adds the Slack skill body for quick replies", async () => {
     vi.mocked(sendOpenRouterChat).mockResolvedValueOnce(
       modelResponse({ message: "Hey.", route: "respond" })
     )
 
     await decideRoute(context({ isAddressed: true }))
 
-    expect(lastSystemPrompt()).toContain(
-      "format it for Slack `mrkdwn`, not GitHub Markdown"
-    )
+    const prompt = lastSystemPrompt()
+    expect(prompt).toContain("Surface guidance:")
+    expect(prompt).toContain("## slack")
+    expect(prompt).toContain(skills.slack.body)
   })
 
   test("does not add Slack guidance for non-Slack routing", async () => {

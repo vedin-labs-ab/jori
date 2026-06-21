@@ -1,4 +1,5 @@
 import {
+  formatRuntimeSkill,
   getRuntimeSkillForIntegration,
   listRuntimeSkills,
   type RuntimeSkill,
@@ -49,9 +50,5 @@ function formatLoadedSkills(skills: RuntimeSkill[]) {
     return []
   }
 
-  return ["", "Loaded skills:", "", ...skills.map(formatLoadedSkill)]
-}
-
-function formatLoadedSkill(skill: RuntimeSkill) {
-  return [`## ${skill.name}`, skill.body].join("\n\n")
+  return ["", "Loaded skills:", "", ...skills.map(formatRuntimeSkill)]
 }
