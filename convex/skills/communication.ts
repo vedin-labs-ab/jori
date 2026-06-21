@@ -40,10 +40,10 @@ export function createCommunicationGuidance(args: {
   return [
     "# Communication",
     "",
-    `Destination: \`${integrationLabels[args.integration]}\``,
-    "",
     nativeMessageGuidance,
-    ...formatSkillParts(skill, capabilities),
+    "",
+    `Destination: \`${integrationLabels[args.integration]}\``,
+    ...formatGuidance(skill, capabilities),
   ].join("\n")
 }
 
@@ -51,7 +51,7 @@ function capabilitiesFor(map: CapabilityMap, integration: Integration) {
   return map[integration] ?? map.default
 }
 
-function formatSkillParts(
+function formatGuidance(
   skill: RuntimeSkill,
   capabilities: readonly CommunicationCapability[]
 ) {
@@ -63,29 +63,13 @@ function formatSkillParts(
 
   const supportedParts: Partial<Record<CommunicationCapability, string>> =
     communication.parts
-  return capabilities.flatMap((capability) =>
-    formatPart(capability, supportedParts[capability])
+  const parts = capabilities.flatMap((capability) =>
+    formatPart(supportedParts[capability])
   )
+
+  return parts.length === 0 ? [] : ["", "Guidance:", "", parts.join("\n")]
 }
 
-function formatPart(capability: CommunicationCapability, body?: string) {
-  return body === undefined
-    ? []
-    : ["", [`## ${formatCapabilityTitle(capability)}`, body].join("\n\n")]
-}
-
-function formatCapabilityTitle(capability: CommunicationCapability) {
-  if (capability === "text") {
-    return "Format"
-  }
-
-  if (capability === "rich") {
-    return "Rich Messages"
-  }
-
-  if (capability === "interactive") {
-    return "Interactive Controls"
-  }
-
-  return "Files"
+function formatPart(body?: string) {
+  return body === undefined ? [] : [body]
 }

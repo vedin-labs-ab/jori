@@ -150,12 +150,16 @@ describe("runtime skill prompts", () => {
     )
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("Destination: `Slack`")
     expect(prompt).toContain("Format messages so they feel native")
-    expect(prompt).toContain("## Format")
+    expect(prompt).toContain("Destination: `Slack`")
+    expect(prompt).toContain("Guidance:")
+    expect(prompt.indexOf("Format messages so they feel native")).toBeLessThan(
+      prompt.indexOf("Destination: `Slack`")
+    )
     expect(prompt).toContain("Write Slack `mrkdwn` only")
     expect(prompt).not.toContain("## Slack")
     expect(prompt).not.toContain("### Text")
+    expect(prompt).not.toContain("## Format")
     expect(prompt).not.toContain("Output contract:")
     expect(prompt).not.toContain("Do not use app-callback controls")
   })
