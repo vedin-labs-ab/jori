@@ -103,8 +103,13 @@ describe("message intake routing guidance", () => {
     await decideRoute(context({ isAddressed: true }))
 
     const prompt = lastSystemPrompt()
-    expect(prompt).toContain("Surface guidance:")
-    expect(prompt).toContain("## slack")
+    expect(prompt).toContain("# Communication")
+    expect(prompt).toContain("Destination: Slack")
+    expect(prompt).toContain("This contract narrows the loaded communication")
+    expect(prompt).toContain(
+      "If you include `message`, it must be a single string."
+    )
+    expect(prompt).toContain("## Slack")
     expect(prompt).toContain(skills.slack.body)
   })
 
@@ -115,7 +120,7 @@ describe("message intake routing guidance", () => {
 
     await decideRoute(context({ integration: "github", isAddressed: true }))
 
-    expect(lastSystemPrompt()).not.toContain("Slack `mrkdwn`")
+    expect(lastSystemPrompt()).not.toContain("# Communication")
   })
 })
 

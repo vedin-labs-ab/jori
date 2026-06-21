@@ -1,7 +1,6 @@
-import {
-  formatRuntimeSkill,
-  getRuntimeSkillForIntegration,
-} from "../skills/runtime"
+import { integrationLabels } from "../shared/integrations"
+import { createCommunicationGuidance } from "../skills/communication"
+import { getRuntimeSkillForIntegration } from "../skills/runtime"
 import { type MessageRoutingContext } from "./context"
 
 export function createRoutingGuidance(context: MessageRoutingContext) {
@@ -11,5 +10,9 @@ export function createRoutingGuidance(context: MessageRoutingContext) {
     return null
   }
 
-  return ["Surface guidance:", formatRuntimeSkill(skill)].join("\n\n")
+  return createCommunicationGuidance({
+    contract: "routing-message-text",
+    destination: integrationLabels[context.integration],
+    skill,
+  })
 }
