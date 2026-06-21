@@ -28,8 +28,8 @@ describe("message intake routing request", () => {
         requireParameters: true,
         sort: "latency",
       },
-      reasoning: { effort: "low" },
     })
+    expect(lastRoutingRequest()).not.toHaveProperty("reasoning")
   })
 
   test("sends route-specific structured output schema", async () => {
