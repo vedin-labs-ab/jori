@@ -17,7 +17,6 @@ import {
   type ToolSurface,
   toolSurfaceLabel,
 } from "../shared/integrations"
-import { routingMessageText } from "./surface"
 
 const permissionBuckets = ["yes", "ask", "no"] as const
 
@@ -98,27 +97,13 @@ const toolTerms: Record<string, string> = {
   web_search: "web search",
 }
 
-export async function maybeCreateRoutingCapabilitySummary(
+export async function createRoutingCapabilitySummary(
   ctx: QueryCtx,
   args: {
     integration: Doc<"integrations">
-    isAddressed: boolean
-    isDirect: boolean
     message: Doc<"messages">
   }
 ) {
-  if (!args.isAddressed && !args.isDirect) {
-    return null
-  }
-
-  if (
-    !isRoutingCapabilityQuestion(
-      routingMessageText(args.message, args.integration)
-    )
-  ) {
-    return null
-  }
-
   const [ownerId, overrides] = await Promise.all([
     resolveUserIdByEmail(ctx, {
       email: getActorEmail(args.message.actor),
@@ -137,11 +122,7 @@ export async function maybeCreateRoutingCapabilitySummary(
   })
 }
 
-export function createRoutingCapabilityGuidance(summary: string | null) {
-  if (summary === null) {
-    return null
-  }
-
+export function createRoutingCapabilityGuidance(summary: string) {
   return [
     "## Capabilities",
     "",
@@ -175,22 +156,6 @@ export function formatRoutingCapabilitySummary(args: {
     }`,
   ].join("\n")
 }
-
-export function isRoutingCapabilityQuestion(text: string) {
-  const normalized = text.toLowerCase()
-
-  return capabilityPatterns.some((pattern) => pattern.test(normalized))
-}
-
-const capabilityPatterns = [
-  /\bavailable (?:integrations|tools|capabilities)\b/,
-  /\bconnected (?:integrations|tools|capabilities)\b/,
-  /\bwhat (?:can|could) (?:you|milo) (?:do|use|access)\b/,
-  /\bwhat (?:tools|integrations|capabilities|abilities)\b/,
-  /\bwhat do (?:you|milo) (?:have|support|access)\b/,
-  /\bwhich (?:tools|integrations|capabilities)\b/,
-  /\b(?:your|milo's) (?:tools|integrations|capabilities|abilities)\b/,
-] as const
 
 function connectedSurfaces(
   integrations: Pick<Doc<"integrations">, "integration">[]

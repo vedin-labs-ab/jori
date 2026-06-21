@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
-import { maybeCreateRoutingCapabilitySummary } from "./capabilities"
+import { createRoutingCapabilitySummary } from "./capabilities"
 import { activeMessageIntegration } from "./data"
 import { messageEntry, recentConversation } from "./history"
 import { type MessageAudience, messageAudience } from "./surface"
@@ -30,10 +30,8 @@ export const getMessageContext = internalQuery({
         integration,
         message,
       }),
-      maybeCreateRoutingCapabilitySummary(ctx, {
+      createRoutingCapabilitySummary(ctx, {
         integration,
-        isAddressed: audience.isAddressed,
-        isDirect: audience.isDirect,
         message,
       }),
       recentConversation(ctx, message, integration),
@@ -120,7 +118,7 @@ export type MessageRoutingContext = {
     runId: Doc<"runs">["_id"]
     status: string
   } | null
-  capabilitySummary: string | null
+  capabilitySummary: string
   currentMessage: ReturnType<typeof messageEntry>
   integration: Doc<"messages">["integration"]
   isAddressed: MessageAudience["isAddressed"]
