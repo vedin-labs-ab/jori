@@ -6,7 +6,6 @@ import { agentTaskId, cleanupTaskId } from "../../contracts/runtime"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { sendOutboxReply } from "./replies/delivery"
 import { formatRuntimeError } from "./shared"
 
 const batchSize = 5
@@ -57,8 +56,6 @@ async function performOperation(ctx: DispatchCtx, item: Doc<"outbox">) {
       return await resumeApproval(ctx, operation)
     case "run.cancel":
       return await cancelRun(ctx, item)
-    case "reply.send":
-      return await sendOutboxReply(ctx, item)
   }
 }
 

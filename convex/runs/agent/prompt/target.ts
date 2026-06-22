@@ -1,6 +1,4 @@
 import { integrationLabels } from "../../../automations/integrations"
-import { promptTemplates } from "../../../prompts/generated"
-import { renderPromptTemplate } from "../../../prompts/render"
 import {
   readDataNumber,
   readDataObject,
@@ -13,22 +11,6 @@ export function getMessageTarget(
   data: unknown
 ) {
   return formatTargetLines(getIntegrationTargetLines(integration, data))
-}
-
-export function getMessageDelivery(integration: MessageIntegration) {
-  return renderPromptTemplate(promptTemplates["message/delivery"], {
-    surface: {
-      label: integrationLabels[integration],
-    },
-  }).trim()
-}
-
-export function getMessageProgress(integration: MessageIntegration) {
-  return renderPromptTemplate(promptTemplates["message/progress"], {
-    surface: {
-      label: integrationLabels[integration],
-    },
-  }).trim()
 }
 
 export function formatEvent(

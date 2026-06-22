@@ -44,11 +44,7 @@ export type RuntimeToolTraceData = {
   result?: RuntimeValueSummary
 }
 
-export type RuntimeQueueTraceData = {
-  queued: boolean
-}
-
-export type RuntimeRunTraceData = RuntimeErrorTraceData | RuntimeQueueTraceData
+export type RuntimeRunTraceData = RuntimeErrorTraceData
 
 export type RuntimeTraceData = RuntimeRunTraceData | RuntimeToolTraceData
 
@@ -91,7 +87,6 @@ export type RuntimeMessage = {
 }
 
 export type RuntimeEventType =
-  | "message.final"
   | "run.completed"
   | "run.failed"
   | "run.started"

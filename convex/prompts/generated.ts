@@ -51,10 +51,6 @@ export const promptTemplates = {
     '# Communication\n\nFormat replies natively for the reply surface.\n\nSurface: `{{surface.label}}`{{? communication.guidance prefix="\\n\\n"}}\n',
   "conversation/message":
     "- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}\n```text\n{{message.text}}\n```\n",
-  "message/delivery":
-    "- Return the final answer normally; Milo will post it as a reply to this source\n  conversation.\n- Use {{surface.label}} write tools only for intentional extra messages or file\n  delivery, not for routine replies to this source conversation.\n",
-  "message/progress":
-    "- {{surface.label}} already has the intake reply state. Do not send routine\n  acknowledgements or progress updates to the source conversation.\n",
   "reference/automation":
     "# Original Trigger\n\nAn automation started this task. For reference:\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n- Instructions: {{automation.instructions}}\n\nIntegration access:\n{{access.summary}}\n\nEvent:\n{{event.details}}\n",
   "reference/instruction":

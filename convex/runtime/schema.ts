@@ -15,13 +15,6 @@ const runtimeOperation = v.union(
   v.object({
     type: v.literal("run.cancel"),
     runId: v.id("runs"),
-  }),
-  v.object({
-    type: v.literal("reply.send"),
-    kind: v.literal("final"),
-    messageId: v.id("messages"),
-    runId: v.id("runs"),
-    text: v.string(),
   })
 )
 
@@ -53,7 +46,6 @@ export const traceSource = v.union(
 )
 
 export const traceType = v.union(
-  v.literal("message.final"),
   v.literal("run.completed"),
   v.literal("run.failed"),
   v.literal("run.prepared"),
@@ -102,9 +94,6 @@ export const traceData = v.union(
   v.object({
     promptId: v.id("_storage"),
     tools: toolSnapshot,
-  }),
-  v.object({
-    queued: v.boolean(),
   })
 )
 
