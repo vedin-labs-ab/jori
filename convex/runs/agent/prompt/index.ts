@@ -32,6 +32,7 @@ export function assemblePrompt(
   continuation?: ApprovalContinuation
 ): string {
   const communication = createCommunicationInstructions(input)
+  const context = createContextInstructions()
   const skills = createSkillInstructions({
     omittedNames: omittedSkillNames(communication),
   })
@@ -41,6 +42,7 @@ export function assemblePrompt(
         agent: {
           approvals: createApprovalInstructions(promptedTools),
           communication: promptBlock(communication?.body ?? ""),
+          context,
           skills: promptBlock(skills),
           trigger: promptBlock(createTriggerPart(input, true)),
         },
@@ -52,6 +54,7 @@ export function assemblePrompt(
           continuation: promptBlock(
             createApprovalContinuationPrompt(continuation)
           ),
+          context,
           reference: promptBlock(createTriggerPart(input, false)),
           skills: promptBlock(skills),
         },
@@ -68,6 +71,12 @@ function createApprovalInstructions(promptedTools: ToolPermission[]) {
   return promptedTools.length === 0
     ? ""
     : promptBlock(createToolApprovalInstructions(promptedTools))
+}
+
+function createContextInstructions() {
+  return renderPromptTemplate(promptTemplates["context/message"], {
+    time: { utc: createPromptTime() },
+  }).trim()
 }
 
 function promptBlock(value: string) {
@@ -108,7 +117,6 @@ function createInstructionValues(
     instruction: {
       text: input.instructions,
     },
-    time: { utc: createPromptTime() },
   }
 }
 
@@ -124,7 +132,6 @@ function createMessageValues(
       integration: getIntegrationLabel(input.messageIntegration),
       target: getMessageTarget(input.messageIntegration, input.message.data),
     },
-    time: { utc: createPromptTime() },
   }
 }
 
@@ -177,7 +184,6 @@ function createAutomationValues(
     event: {
       details: formatEvent(input.event, input.integration?.integration),
     },
-    time: { utc: createPromptTime() },
   }
 }
 

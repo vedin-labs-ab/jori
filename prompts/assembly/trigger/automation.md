@@ -1,7 +1,6 @@
 # Trigger
 
 An automation triggered this run.
-Current UTC time: {{time.utc}}.
 
 Automation:
 - ID: {{automation.id}}

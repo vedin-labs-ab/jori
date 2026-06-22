@@ -68,7 +68,7 @@ describe("runtime prompts", () => {
     expect(prompt).toContain(
       `A ${toolSurfaceLabel} message triggered this run.`
     )
-    expect(prompt).toContain("Current UTC time:")
+    expectContextBefore(prompt, "# Trigger")
 
     for (const line of targetLines) {
       expect(prompt).toContain(line)
@@ -168,6 +168,7 @@ describe("approval continuation prompts", () => {
     )
 
     expect(prompt).toContain("# Original Trigger")
+    expectSingleContext(prompt)
     expect(prompt).toContain("# Approval Decision")
     expect(prompt).toContain("approved the action")
     expect(prompt).toContain("Create the calendar event")
@@ -202,4 +203,20 @@ function githubMessageInput() {
     issueNumber: 12,
     comment: { id: "comment-id", kind: "issue_comment" },
   })
+}
+
+function expectContextBefore(prompt: string, section: string) {
+  expectSingleContext(prompt)
+  expect(prompt.indexOf("## Voice")).toBeLessThan(prompt.indexOf("## Context"))
+  expect(prompt.indexOf("## Context")).toBeLessThan(
+    prompt.indexOf("## Principles")
+  )
+  expect(prompt.indexOf("Current UTC time:")).toBeLessThan(
+    prompt.indexOf(section)
+  )
+}
+
+function expectSingleContext(prompt: string) {
+  expect(prompt).toContain("## Context\n\nCurrent UTC time:")
+  expect(prompt.match(/Current UTC time:/g)).toHaveLength(1)
 }

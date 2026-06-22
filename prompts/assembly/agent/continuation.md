@@ -4,6 +4,8 @@
 
 {{ include "parts/voice" }}
 
+{{agent.context}}
+
 ## Principles
 
 {{ include "parts/principles" }}

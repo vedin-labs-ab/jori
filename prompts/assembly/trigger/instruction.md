@@ -1,7 +1,6 @@
 # Trigger
 
 Manual instructions triggered this run.
-Current UTC time: {{time.utc}}.
 
 Instructions:
 ```text

@@ -1,6 +1,5 @@
 import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
-import { createPromptTime } from "../../../prompts/time"
 
 export type ApprovalContinuation = {
   decision: "approved" | "denied"
@@ -31,7 +30,6 @@ export function createApprovalContinuationPrompt(
     decision,
     handoff: continuation.handoff,
     result: stringifyPromptJson(continuation.result),
-    time: { utc: createPromptTime() },
   })
 }
 
