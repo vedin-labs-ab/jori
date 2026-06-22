@@ -1,4 +1,4 @@
-## Communication
+# Communication
 
 For `message`, format the response natively for the reply surface.
 
