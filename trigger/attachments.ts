@@ -135,6 +135,23 @@ export type UploadedAttachment = {
   url: string | null
 }
 
+export function parseUploadedAttachment(value: unknown): UploadedAttachment {
+  if (!isRecord(value)) {
+    throw new Error("Attachment upload returned an invalid response.")
+  }
+
+  return {
+    attachmentId: readString(
+      value.attachmentId,
+      "attachmentId"
+    ) as ConvexId<"attachments">,
+    mimeType: readString(value.mimeType, "mimeType"),
+    name: readString(value.name, "name"),
+    size: readNumber(value.size, "size"),
+    url: value.url === null ? null : readString(value.url, "url"),
+  }
+}
+
 function githubTarballDownload(value: unknown) {
   if (!isRecord(value) || !isRecord(value.download)) {
     return undefined
@@ -163,4 +180,20 @@ function githubTarballDownload(value: unknown) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+function readString(value: unknown, name: string) {
+  if (typeof value !== "string") {
+    throw new Error(`Attachment upload response is missing ${name}.`)
+  }
+
+  return value
+}
+
+function readNumber(value: unknown, name: string) {
+  if (typeof value !== "number") {
+    throw new Error(`Attachment upload response is missing ${name}.`)
+  }
+
+  return value
 }

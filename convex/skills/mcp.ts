@@ -1,4 +1,8 @@
-import { getRuntimeSkill, listRuntimeSkills } from "./runtime"
+import {
+  getRuntimeSkill,
+  listRuntimeSkills,
+  runtimeSkillAssociatedIntegrations,
+} from "./runtime"
 
 type MiloSkillToolRequest = {
   args?: unknown
@@ -31,7 +35,7 @@ export function callMiloSkillTool(request: MiloSkillToolRequest) {
       name: skill.name,
       category: skill.category,
       description: skill.description,
-      associatedIntegrations: skill.associatedIntegrations,
+      associatedIntegrations: runtimeSkillAssociatedIntegrations(skill),
       instructions: skill.body,
     },
   }
@@ -42,7 +46,7 @@ function skillMetadata() {
     name: skill.name,
     category: skill.category,
     description: skill.description,
-    associatedIntegrations: skill.associatedIntegrations,
+    associatedIntegrations: runtimeSkillAssociatedIntegrations(skill),
   }))
 }
 

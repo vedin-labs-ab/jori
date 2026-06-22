@@ -14,6 +14,7 @@ describe("runtime skill prompts", () => {
 
     expect(prompt).toContain("# Skills")
     expect(prompt).toContain("Use `load_skill`")
+    expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).toContain("`slack`: Format Slack replies")
     expect(prompt).not.toContain("# Communication")
     expect(prompt).not.toContain("## Guidance")
@@ -31,9 +32,10 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("call the appropriate communication tool")
     expect(prompt).toContain("Surface: `Slack`")
     expect(prompt).toContain("## Guidance")
-    expect(prompt).not.toContain("# Skills")
-    expect(prompt).not.toContain("Available skills:")
-    expect(prompt).not.toContain("Use `load_skill`")
+    expect(prompt).toContain("# Skills")
+    expect(prompt).toContain("Available skills:")
+    expect(prompt).toContain("Use `load_skill`")
+    expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).not.toContain("`slack`: Format Slack replies")
     expect(prompt.indexOf("Write for the reply surface.")).toBeLessThan(
       prompt.indexOf("Surface: `Slack`")
