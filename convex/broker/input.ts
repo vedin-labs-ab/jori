@@ -1,4 +1,4 @@
-import { type JsonObject, type JsonValue } from "../../contracts/json"
+import { type JsonObject } from "../../contracts/json"
 import { getToolInputSchema } from "../runs/agent/tools/schemas"
 
 type JsonSchema = Record<string, unknown>
@@ -27,7 +27,9 @@ export function normalizeBrokerToolInput(
 }
 
 function validateValue(value: unknown, schema: JsonSchema, path: string) {
-  const variants = readSchemaArray(schema.oneOf)
+  const variants = Array.isArray(schema.oneOf)
+    ? schema.oneOf.filter(isJsonSchema)
+    : []
 
   if (variants.length > 0) {
     validateOneOf(value, variants, path)
@@ -52,8 +54,9 @@ function validateValue(value: unknown, schema: JsonSchema, path: string) {
     return
   }
 
-  if (type === "string" && typeof value !== "string") {
-    throw new Error(`${path} must be a string`)
+  if (type === "string") {
+    validateString(value, schema, path)
+    return
   }
 
   if (type === "number") {
@@ -81,7 +84,7 @@ function validateOneOf(value: unknown, variants: JsonSchema[], path: string) {
 }
 
 function validateEnum(value: unknown, schema: JsonSchema, path: string) {
-  const values = readJsonArray(schema.enum)
+  const values = Array.isArray(schema.enum) ? schema.enum : []
 
   if (values.length > 0 && !values.some((item) => item === value)) {
     throw new Error(`${path} must be one of: ${values.join(", ")}`)
@@ -146,7 +149,7 @@ function validateArray(value: unknown, schema: JsonSchema, path: string) {
     throw new Error(`${path} must be an array`)
   }
 
-  const itemSchema = readSchema(schema.items)
+  const itemSchema = isJsonSchema(schema.items) ? schema.items : undefined
 
   if (itemSchema === undefined) {
     return
@@ -174,6 +177,36 @@ function validateNumber(value: unknown, schema: JsonSchema, path: string) {
   }
 }
 
+function validateString(value: unknown, schema: JsonSchema, path: string) {
+  if (typeof value !== "string") {
+    throw new Error(`${path} must be a string`)
+  }
+
+  const minLength = readNumber(schema.minLength)
+  const maxLength = readNumber(schema.maxLength)
+  const pattern = readString(schema.pattern)
+
+  if (minLength !== undefined && value.length < minLength) {
+    throw new Error(`${path} must be at least ${minLength} characters`)
+  }
+
+  if (maxLength !== undefined && value.length > maxLength) {
+    throw new Error(`${path} must be at most ${maxLength} characters`)
+  }
+
+  if (pattern !== undefined && !new RegExp(pattern).test(value)) {
+    throw new Error(`${path} has invalid format`)
+  }
+
+  if (schema.format === "uri") {
+    try {
+      new URL(value)
+    } catch {
+      throw new Error(`${path} must be a valid URI`)
+    }
+  }
+}
+
 function readSchemaMap(value: unknown) {
   if (!isJsonSchema(value)) {
     return {}
@@ -186,22 +219,10 @@ function readSchemaMap(value: unknown) {
   )
 }
 
-function readSchemaArray(value: unknown) {
-  return Array.isArray(value) ? value.filter(isJsonSchema) : []
-}
-
-function readJsonArray(value: unknown) {
-  return Array.isArray(value) ? value.filter(isJsonValue) : []
-}
-
 function readStringArray(value: unknown) {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : []
-}
-
-function readSchema(value: unknown) {
-  return isJsonSchema(value) ? value : undefined
 }
 
 function readString(value: unknown) {
@@ -220,17 +241,4 @@ function isJsonObject(value: unknown): value is JsonObject {
   return isJsonSchema(value)
 }
 
-function isJsonValue(value: unknown): value is JsonValue {
-  return (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean" ||
-    Array.isArray(value) ||
-    isJsonObject(value)
-  )
-}
-
-function hasOwn(value: object, key: string) {
-  return Object.hasOwn(value, key)
-}
+const hasOwn = Object.hasOwn

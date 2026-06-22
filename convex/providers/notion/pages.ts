@@ -1,9 +1,8 @@
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { fetchJsonObject } from "../../shared/http"
 import { readArray, readRecord } from "../../shared/input"
-import { notionApiUrl, notionApiVersion } from "./config"
+import { notionJson } from "./api"
 import { requireNotionCredentials } from "./credentials"
 
 type NotionPageContext = {
@@ -81,17 +80,10 @@ export async function fetchNotionPageContext(
 ): Promise<NotionPageContext | undefined> {
   try {
     const page = readRecord(
-      await fetchJsonObject(
-        `${notionApiUrl}/pages/${encodeURIComponent(pageId)}`,
-        {
-          method: "GET",
-          headers: {
-            authorization: `Bearer ${
-              requireNotionCredentials(integration).tokens.access
-            }`,
-            "notion-version": notionApiVersion,
-          },
-        }
+      await notionJson(
+        requireNotionCredentials(integration).tokens.access,
+        "GET",
+        `/pages/${encodeURIComponent(pageId)}`
       )
     )
 

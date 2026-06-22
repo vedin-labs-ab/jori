@@ -103,6 +103,7 @@ import type * as broker_tools_index from "../broker/tools/index.js";
 import type * as broker_tools_linear from "../broker/tools/linear.js";
 import type * as broker_tools_microsoft from "../broker/tools/microsoft.js";
 import type * as broker_tools_notion from "../broker/tools/notion.js";
+import type * as broker_tools_notion_upload from "../broker/tools/notion_upload.js";
 import type * as broker_tools_slack_index from "../broker/tools/slack/index.js";
 import type * as broker_tools_slack_upload from "../broker/tools/slack/upload.js";
 import type * as broker_tools_web from "../broker/tools/web.js";
@@ -182,6 +183,7 @@ import type * as providers_microsoft_identity from "../providers/microsoft/ident
 import type * as providers_microsoft_install from "../providers/microsoft/install.js";
 import type * as providers_microsoft_oauth from "../providers/microsoft/oauth.js";
 import type * as providers_microsoft_signing from "../providers/microsoft/signing.js";
+import type * as providers_notion_api from "../providers/notion/api.js";
 import type * as providers_notion_config from "../providers/notion/config.js";
 import type * as providers_notion_credentials from "../providers/notion/credentials.js";
 import type * as providers_notion_data from "../providers/notion/data.js";
@@ -231,6 +233,7 @@ import type * as runs_agent_tools_schemas_linear from "../runs/agent/tools/schem
 import type * as runs_agent_tools_schemas_microsoft from "../runs/agent/tools/schemas/microsoft.js";
 import type * as runs_agent_tools_schemas_milo from "../runs/agent/tools/schemas/milo.js";
 import type * as runs_agent_tools_schemas_notion from "../runs/agent/tools/schemas/notion.js";
+import type * as runs_agent_tools_schemas_notion_media from "../runs/agent/tools/schemas/notion_media.js";
 import type * as runs_agent_tools_schemas_slack from "../runs/agent/tools/schemas/slack.js";
 import type * as runs_agent_tools_snapshot from "../runs/agent/tools/snapshot.js";
 import type * as runs_agent_tools_types from "../runs/agent/tools/types.js";
@@ -382,6 +385,7 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/linear": typeof broker_tools_linear;
   "broker/tools/microsoft": typeof broker_tools_microsoft;
   "broker/tools/notion": typeof broker_tools_notion;
+  "broker/tools/notion_upload": typeof broker_tools_notion_upload;
   "broker/tools/slack/index": typeof broker_tools_slack_index;
   "broker/tools/slack/upload": typeof broker_tools_slack_upload;
   "broker/tools/web": typeof broker_tools_web;
@@ -461,6 +465,7 @@ declare const fullApi: ApiFromModules<{
   "providers/microsoft/install": typeof providers_microsoft_install;
   "providers/microsoft/oauth": typeof providers_microsoft_oauth;
   "providers/microsoft/signing": typeof providers_microsoft_signing;
+  "providers/notion/api": typeof providers_notion_api;
   "providers/notion/config": typeof providers_notion_config;
   "providers/notion/credentials": typeof providers_notion_credentials;
   "providers/notion/data": typeof providers_notion_data;
@@ -510,6 +515,7 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/microsoft": typeof runs_agent_tools_schemas_microsoft;
   "runs/agent/tools/schemas/milo": typeof runs_agent_tools_schemas_milo;
   "runs/agent/tools/schemas/notion": typeof runs_agent_tools_schemas_notion;
+  "runs/agent/tools/schemas/notion_media": typeof runs_agent_tools_schemas_notion_media;
   "runs/agent/tools/schemas/slack": typeof runs_agent_tools_schemas_slack;
   "runs/agent/tools/snapshot": typeof runs_agent_tools_snapshot;
   "runs/agent/tools/types": typeof runs_agent_tools_types;
