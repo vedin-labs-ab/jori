@@ -1,7 +1,6 @@
 # Trigger
 
 A {{message.integration}} message triggered this run.
-Current UTC time: {{time.utc}}.
 
 Target:
 
