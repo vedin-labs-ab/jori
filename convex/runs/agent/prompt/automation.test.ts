@@ -11,8 +11,8 @@ describe("automation trigger prompts", () => {
     const prompt = assemblePrompt(automationRuntimeInput())
 
     expect(prompt).toContain("An automation triggered this run.")
-    expect(prompt).toContain("## Context\n\nCurrent UTC time:")
-    expect(prompt.match(/Current UTC time:/g)).toHaveLength(1)
+    expect(prompt).toContain("## Context\n\nRun started at:")
+    expect(prompt.match(/Run started at:/g)).toHaveLength(1)
     expect(prompt).toContain("Integration access:")
     expect(prompt).toContain("- Web search: Allowed")
     expect(prompt).toContain("- GitHub: Read issue")

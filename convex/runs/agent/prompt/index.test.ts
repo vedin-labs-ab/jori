@@ -211,12 +211,12 @@ function expectContextBefore(prompt: string, section: string) {
   expect(prompt.indexOf("## Context")).toBeLessThan(
     prompt.indexOf("## Principles")
   )
-  expect(prompt.indexOf("Current UTC time:")).toBeLessThan(
+  expect(prompt.indexOf("Run started at:")).toBeLessThan(
     prompt.indexOf(section)
   )
 }
 
 function expectSingleContext(prompt: string) {
-  expect(prompt).toContain("## Context\n\nCurrent UTC time:")
-  expect(prompt.match(/Current UTC time:/g)).toHaveLength(1)
+  expect(prompt).toContain("## Context\n\nRun started at:")
+  expect(prompt.match(/Run started at:/g)).toHaveLength(1)
 }
