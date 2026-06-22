@@ -16,16 +16,16 @@ export function getMessageTarget(
 export function getMessageDelivery(integration: MessageIntegration) {
   if (integration === "github") {
     return [
-      "- For GitHub issue or pull request replies, call `github_add_issue_comment` with the target repository and issue or pull request number.",
-      "- For GitHub inline review thread replies, call `github_reply_to_pull_request_review_comment` when the target includes a review thread comment ID.",
+      "- For GitHub issue or pull request start updates, replies, results, blockers, pivots, and status updates, call `github_add_issue_comment` with the target repository and issue or pull request number.",
+      "- For GitHub inline review thread replies, call `github_reply_to_pull_request_review_comment` when the target includes a review thread comment ID. Assistant completion text is private and will not post to GitHub.",
     ].join("\n")
   }
 
   if (integration === "linear") {
-    return "- For Linear replies, call `linear_add_comment` with the target Issue ID."
+    return "- For Linear start updates, replies, results, blockers, pivots, and status updates, call `linear_add_comment` with the target Issue ID. Assistant completion text is private and will not post to Linear."
   }
 
-  return "- For Slack replies, call `conversations_add_message` with `channel` set to the Channel ID and `thread_ts` set to the Reply thread timestamp."
+  return "- For Slack start updates, replies, results, blockers, pivots, and status updates, call `conversations_add_message` with `channel` set to the Channel ID and `thread_ts` set to the Reply thread timestamp. Assistant completion text is private and will not post to Slack."
 }
 
 export function formatEvent(
