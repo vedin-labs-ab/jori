@@ -10,7 +10,7 @@
 
 ### Change Workflow
 
-- For code changes, use a fresh worktree from latest `main` on a dedicated `codex/<task-name>` branch.
+- For code changes, use a fresh worktree under `~/.worktrees/<repo-name>/<task-name>` from latest `main` on a dedicated `task/<task-name>` branch.
 - Keep each task isolated; never share mutable branches across agents.
 - Commit completed work on the task branch after required checks pass.
 - Before updating `main`, rebase the task branch on latest `main`, resolve conflicts, and rerun checks.
