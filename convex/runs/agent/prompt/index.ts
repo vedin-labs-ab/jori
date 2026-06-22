@@ -147,14 +147,17 @@ function formatMessageConversationEntry(
   entry: Extract<AgentRuntimeInput, { type: "message" }>["conversation"][number]
 ) {
   const observed = entry.observedAt ?? entry.createdAt
-  const actor = entry.actor === null ? "" : ` | actor=${entry.actor}`
 
-  return [
-    `- ${new Date(observed).toISOString()} | source=${entry.source} | authority=${entry.source === "user" ? "authoritative" : "soft"} | type=${entry.type}${actor}`,
-    "```text",
-    entry.text,
-    "```",
-  ].join("\n")
+  return renderPromptTemplate(promptTemplates["conversation/message"], {
+    message: {
+      actor: entry.actor,
+      authority: entry.source === "user" ? "authoritative" : "soft",
+      observedAt: new Date(observed).toISOString(),
+      source: entry.source,
+      text: entry.text,
+      type: entry.type,
+    },
+  }).trim()
 }
 
 function createAutomationValues(

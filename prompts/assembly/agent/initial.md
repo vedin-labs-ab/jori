@@ -8,7 +8,4 @@
 
 {{ include "parts/principles" }}
 
-{{agent.skills}}
-{{agent.communication}}
-{{agent.approvals}}
-{{agent.trigger}}
+{{agent.skills}}{{? agent.communication prefix="\n\n"}}{{? agent.approvals prefix="\n\n"}}{{agent.trigger prefix="\n\n"}}
