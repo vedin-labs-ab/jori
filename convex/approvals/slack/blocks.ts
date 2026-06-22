@@ -10,6 +10,8 @@ import {
 import { createDecisionTitle, getDecisionIcon } from "./decision"
 import { getToolLabel } from "./labels"
 
+const slackCardBodyLimit = 200
+
 export type SlackApprovalInteraction = {
   accountId: string
   actorId?: string
@@ -90,7 +92,7 @@ function createSlackApprovalBlocks(args: {
       icon: "edit",
       title: "Approval required",
       subtitle: getToolLabel(args.tool),
-      body: truncateSlackText(args.summary, 2800),
+      body: truncateSlackText(args.summary, slackCardBodyLimit),
       subtext: `Expires at ${formatSlackTime(
         toSlackTimestamp(args.expiresAt)
       )}`,
@@ -109,7 +111,7 @@ function createExpirationBlocks(args: {
       icon: "archive",
       title: "Request expired",
       subtitle: getToolLabel(args.tool),
-      body: truncateSlackText(args.summary, 2800),
+      body: truncateSlackText(args.summary, slackCardBodyLimit),
       subtext: `Expired at ${formatSlackTime(
         toSlackTimestamp(args.expiresAt)
       )}`,
@@ -146,7 +148,7 @@ function createDecisionBlocks(
         fallbackActor: formatSlackActor(interaction.actorId),
       }),
       subtitle,
-      body: summary ?? result.message,
+      body: truncateSlackText(summary ?? result.message, slackCardBodyLimit),
     }),
   ]
 }
@@ -165,7 +167,7 @@ function createConsoleDecisionBlocks(
       icon: getDecisionIcon(result.status, result.approval?.decision),
       title: createDecisionTitle(result, { surface: "milo" }),
       subtitle,
-      body: summary ?? result.message,
+      body: truncateSlackText(summary ?? result.message, slackCardBodyLimit),
     }),
   ]
 }

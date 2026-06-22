@@ -108,7 +108,7 @@ async function* pendingApprovalRuns(
 
     const run = await ctx.db.get(approval.runId)
 
-    if (run === null || run.tenantId !== args.tenantId) {
+    if (run === null || run.tenantId !== args.tenantId || isTerminalRun(run)) {
       continue
     }
 
@@ -154,5 +154,13 @@ function isPendingApproval(approval: Doc<"approvals">, now: number) {
     approval.consumedAt === undefined &&
     approval.decision === undefined &&
     approval.expiresAt > now
+  )
+}
+
+function isTerminalRun(run: Doc<"runs">) {
+  return (
+    run.status === "completed" ||
+    run.status === "failed" ||
+    run.status === "stopped"
   )
 }

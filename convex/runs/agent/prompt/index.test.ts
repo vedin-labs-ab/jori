@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { assemblePrompt } from "."
-import { approvalContinuation, promptedTool, runtimeInput } from "./fixtures"
+import { promptedTool, runtimeInput } from "./fixtures"
 
 const messageTriggerCases = [
   [
@@ -147,7 +147,8 @@ describe("approval request prompts", () => {
     expect(prompt).toContain("# Approvals")
     expect(prompt).toContain("notion_create_page")
     expect(prompt).toContain("do not ask for approval in chat")
-    expect(prompt).toContain("approves or denies the action")
+    expect(prompt).toContain("pauses this run")
+    expect(prompt).toContain("denied` or `expired")
   })
 
   test("omits the approvals section without prompted tools", () => {
@@ -156,44 +157,6 @@ describe("approval request prompts", () => {
     )
 
     expect(prompt).not.toContain("# Approvals")
-  })
-})
-
-describe("approval continuation prompts", () => {
-  test("renders approved action results", () => {
-    const prompt = assemblePrompt(
-      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-      [promptedTool()],
-      approvalContinuation()
-    )
-
-    expect(prompt).toContain("# Original Trigger")
-    expectSingleContext(prompt)
-    expect(prompt).toContain("# Approval Decision")
-    expect(prompt).toContain("approved the action")
-    expect(prompt).toContain("Create the calendar event")
-    expect(prompt).toContain("Found a time")
-    expect(prompt).toContain("google_calendar_create_event")
-    expect(prompt).toContain('"eventId":"event-123"')
-    expect(prompt).toContain("Do not repeat the approved action")
-    expect(prompt).toContain("report what failed instead of retrying")
-    expect(prompt).not.toContain("Handle the request")
-  })
-
-  test("renders denied action results", () => {
-    const prompt = assemblePrompt(
-      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-      [promptedTool()],
-      approvalContinuation("denied")
-    )
-
-    expect(prompt).toContain("# Original Trigger")
-    expect(prompt).toContain("# Approval Decision")
-    expect(prompt).toContain("denied the action")
-    expect(prompt).toContain("Do not run the denied action")
-    expect(prompt).toContain("If a safe path remains, continue")
-    expect(prompt).toContain('"code":"approval_denied"')
-    expect(prompt).not.toContain("Handle the request")
   })
 })
 

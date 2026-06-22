@@ -35,11 +35,12 @@ test("parses Slack approval button payloads", () => {
 })
 
 test("renders Slack approval requests as compact cards", () => {
+  const summary = "Create a new Notion page under Customer Discovery."
   const request = createSlackApprovalRequest({
     code: "ABC12345",
     surface: "notion",
     tool: "notion_create_page",
-    summary: "Create a new Notion page under Customer Discovery.",
+    summary,
     expiresAt: 1_710_000_000_000,
   })
   const card = request.blocks[0] as Record<string, unknown>
@@ -59,6 +60,7 @@ test("renders Slack approval requests as compact cards", () => {
   expect(JSON.stringify(card.body)).toContain(
     "Create a new Notion page under Customer Discovery."
   )
+  expect(JSON.stringify(request.text)).toContain(summary)
   expect(card.subtext).toMatchObject({
     type: "mrkdwn",
   })
@@ -72,6 +74,21 @@ test("renders Slack approval requests as compact cards", () => {
   ])
   expect(actions[0]).not.toHaveProperty("style")
   expect(actions[1]).toMatchObject({ style: "primary" })
+})
+
+test("keeps Slack approval card bodies within card limits", () => {
+  const request = createSlackApprovalRequest({
+    code: "ABC12345",
+    surface: "notion",
+    tool: "notion_create_page",
+    summary: "A".repeat(240),
+    expiresAt: 1_710_000_000_000,
+  })
+  const card = request.blocks[0] as Record<string, unknown>
+  const body = card.body as { text: string }
+
+  expect(body.text).toHaveLength(200)
+  expect(body.text.endsWith("...")).toBe(true)
 })
 
 test("replaces Slack approval buttons with a decision summary", () => {

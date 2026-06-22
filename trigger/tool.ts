@@ -1,5 +1,5 @@
-import { wait } from "@trigger.dev/sdk/v3"
 import { type ToolSurface } from "../contracts/integrations"
+import { awaitPromptedToolApproval } from "./approval"
 import {
   materializeSandboxResult,
   prepareMiloToolInput,
@@ -12,7 +12,6 @@ import { executeCodingTool } from "./sandbox/coding"
 import { type SandboxRuntime } from "./sandbox/types"
 import { providerTrace } from "./trace"
 import {
-  type ApprovalDecision,
   type JsonObject,
   type RuntimeContext,
   type RuntimeTool,
@@ -90,49 +89,19 @@ async function executeConvexTool(
     return await callConvexTool(runtime, surface, toolName, call.args)
   }
 
-  const token = await wait.createToken({
-    idempotencyKey: `${runtime.context.run.id}:${call.id}`,
-    tags: [runtime.context.run.id, `tool:${toolName}`],
-    timeout: "24h",
-  })
-
-  await runtime.convex.requestApproval({
-    input: call.args,
-    runId: runtime.context.run.id,
-    surface,
-    tool: toolName,
-    waitpointTokenId: token.id,
-  })
-  await runtime.convex.recordEvent(
-    runtimeEvent({
-      data: {
-        name: tool.name,
-        route: tool.route,
-      },
-      runId: runtime.context.run.id,
-      sequence: 0,
-      source: "trigger.approval",
-      callId: call.id,
-      type: "tool.waiting",
-    })
-  )
-
-  const decision = await wait.forToken<ApprovalDecision>(token).unwrap()
-
-  if (decision.decision !== "approved") {
-    return {
-      approvalId: decision.approvalId ?? null,
-      status: "denied",
-    }
-  }
-
-  return await callConvexTool(
+  const approval = await awaitPromptedToolApproval({
+    call,
     runtime,
     surface,
+    tool,
     toolName,
-    stripApproval(call.args),
-    true
-  )
+  })
+
+  if (!approval.approved) {
+    return approval.result
+  }
+
+  return await callConvexTool(runtime, surface, toolName, approval.input, true)
 }
 
 async function callConvexTool(
@@ -212,12 +181,6 @@ function requireSurface(tool: RuntimeTool): ToolSurface {
   }
 
   return tool.surface
-}
-
-function stripApproval(input: JsonObject) {
-  const { approval: _approval, ...rest } = input
-
-  return rest
 }
 
 function requiredString(value: unknown, name: string) {

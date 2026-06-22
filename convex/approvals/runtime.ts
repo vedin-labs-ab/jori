@@ -16,7 +16,14 @@ export type SlackApprovalDecisionArgs = {
 }
 
 export type SlackApprovalDecisionResult = {
-  status: "approved" | "denied" | "missing" | "consumed" | "decided" | "expired"
+  status:
+    | "approved"
+    | "closed"
+    | "consumed"
+    | "decided"
+    | "denied"
+    | "expired"
+    | "missing"
   message: string
   integration?: Doc<"integrations">
   approval?: Doc<"approvals">
@@ -54,7 +61,16 @@ export const expireApproval = internalAction({
       }
     )
 
-    if (target === null || target.integration === null) {
+    if (target === null) {
+      return
+    }
+
+    await enqueueApprovalResume(ctx, {
+      approvalId: target.approval._id,
+      decision: "denied",
+    })
+
+    if (target.integration === null) {
       return
     }
 
@@ -136,7 +152,7 @@ export async function decideApproval(
   })
 
   if (result.status === "approved") {
-    await ctx.runMutation(internal.runtime.outbox.enqueueApprovalResume, {
+    await enqueueApprovalResume(ctx, {
       approvalId: args.approval._id,
       decision: "approved",
     })
@@ -150,7 +166,7 @@ export async function decideApproval(
   }
 
   if (result.status === "denied") {
-    await ctx.runMutation(internal.runtime.outbox.enqueueApprovalResume, {
+    await enqueueApprovalResume(ctx, {
       approvalId: args.approval._id,
       decision: "denied",
     })
@@ -163,12 +179,29 @@ export async function decideApproval(
     }
   }
 
+  if (result.status === "expired") {
+    await enqueueApprovalResume(ctx, {
+      approvalId: args.approval._id,
+      decision: "denied",
+    })
+  }
+
   return {
     status: result.status,
     integration: args.integration,
     approval: result.approval,
     message: decisionStatusMessage(result.status, result.approval),
   }
+}
+
+async function enqueueApprovalResume(
+  ctx: ActionCtx,
+  args: {
+    approvalId: Doc<"approvals">["_id"]
+    decision: "approved" | "denied"
+  }
+) {
+  await ctx.runMutation(internal.runtime.outbox.enqueueApprovalResume, args)
 }
 
 async function postSlackDecisionMessage(
@@ -187,9 +220,13 @@ async function postSlackDecisionMessage(
 }
 
 function decisionStatusMessage(
-  status: "missing" | "consumed" | "decided" | "expired",
+  status: "closed" | "consumed" | "decided" | "expired" | "missing",
   approval?: Doc<"approvals">
 ) {
+  if (status === "closed") {
+    return "This run is no longer active."
+  }
+
   if (status === "expired") {
     return "That approval request has expired."
   }

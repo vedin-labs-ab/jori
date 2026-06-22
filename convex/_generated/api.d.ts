@@ -207,7 +207,6 @@ import type * as providers_slack_signing from "../providers/slack/signing.js";
 import type * as runs_agent_authorization from "../runs/agent/authorization.js";
 import type * as runs_agent_input from "../runs/agent/input.js";
 import type * as runs_agent_prompt_communication from "../runs/agent/prompt/communication.js";
-import type * as runs_agent_prompt_continuation from "../runs/agent/prompt/continuation.js";
 import type * as runs_agent_prompt_fixtures from "../runs/agent/prompt/fixtures.js";
 import type * as runs_agent_prompt_index from "../runs/agent/prompt/index.js";
 import type * as runs_agent_prompt_instructions from "../runs/agent/prompt/instructions.js";
@@ -485,7 +484,6 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/authorization": typeof runs_agent_authorization;
   "runs/agent/input": typeof runs_agent_input;
   "runs/agent/prompt/communication": typeof runs_agent_prompt_communication;
-  "runs/agent/prompt/continuation": typeof runs_agent_prompt_continuation;
   "runs/agent/prompt/fixtures": typeof runs_agent_prompt_fixtures;
   "runs/agent/prompt/index": typeof runs_agent_prompt_index;
   "runs/agent/prompt/instructions": typeof runs_agent_prompt_instructions;
