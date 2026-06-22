@@ -20,7 +20,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as ArtifactsIndexRouteImport } from './routes/artifacts/index'
 import { Route as ArtifactsArtifactIdIndexRouteImport } from './routes/artifacts/$artifactId/index'
-import { Route as IntegrationsSetupMockRouteImport } from './routes/integrations/setup/mock'
 import { Route as IntegrationsSetupTokenRouteImport } from './routes/integrations/setup/$token'
 
 const SkillsRoute = SkillsRouteImport.update({
@@ -79,11 +78,6 @@ const ArtifactsArtifactIdIndexRoute =
     path: '/$artifactId/',
     getParentRoute: () => ArtifactsRoute,
   } as any)
-const IntegrationsSetupMockRoute = IntegrationsSetupMockRouteImport.update({
-  id: '/setup/mock',
-  path: '/setup/mock',
-  getParentRoute: () => IntegrationsRoute,
-} as any)
 const IntegrationsSetupTokenRoute = IntegrationsSetupTokenRouteImport.update({
   id: '/setup/$token',
   path: '/setup/$token',
@@ -102,7 +96,6 @@ export interface FileRoutesByFullPath {
   '/artifacts/': typeof ArtifactsIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
-  '/integrations/setup/mock': typeof IntegrationsSetupMockRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -115,7 +108,6 @@ export interface FileRoutesByTo {
   '/artifacts': typeof ArtifactsIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
   '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
-  '/integrations/setup/mock': typeof IntegrationsSetupMockRoute
   '/artifacts/$artifactId': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRoutesById {
@@ -131,7 +123,6 @@ export interface FileRoutesById {
   '/artifacts/': typeof ArtifactsIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
-  '/integrations/setup/mock': typeof IntegrationsSetupMockRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -148,7 +139,6 @@ export interface FileRouteTypes {
     | '/artifacts/'
     | '/integrations/'
     | '/integrations/setup/$token'
-    | '/integrations/setup/mock'
     | '/artifacts/$artifactId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -161,7 +151,6 @@ export interface FileRouteTypes {
     | '/artifacts'
     | '/integrations'
     | '/integrations/setup/$token'
-    | '/integrations/setup/mock'
     | '/artifacts/$artifactId'
   id:
     | '__root__'
@@ -176,7 +165,6 @@ export interface FileRouteTypes {
     | '/artifacts/'
     | '/integrations/'
     | '/integrations/setup/$token'
-    | '/integrations/setup/mock'
     | '/artifacts/$artifactId/'
   fileRoutesById: FileRoutesById
 }
@@ -270,13 +258,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtifactsArtifactIdIndexRouteImport
       parentRoute: typeof ArtifactsRoute
     }
-    '/integrations/setup/mock': {
-      id: '/integrations/setup/mock'
-      path: '/setup/mock'
-      fullPath: '/integrations/setup/mock'
-      preLoaderRoute: typeof IntegrationsSetupMockRouteImport
-      parentRoute: typeof IntegrationsRoute
-    }
     '/integrations/setup/$token': {
       id: '/integrations/setup/$token'
       path: '/setup/$token'
@@ -304,13 +285,11 @@ const ArtifactsRouteWithChildren = ArtifactsRoute._addFileChildren(
 interface IntegrationsRouteChildren {
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   IntegrationsSetupTokenRoute: typeof IntegrationsSetupTokenRoute
-  IntegrationsSetupMockRoute: typeof IntegrationsSetupMockRoute
 }
 
 const IntegrationsRouteChildren: IntegrationsRouteChildren = {
   IntegrationsIndexRoute: IntegrationsIndexRoute,
   IntegrationsSetupTokenRoute: IntegrationsSetupTokenRoute,
-  IntegrationsSetupMockRoute: IntegrationsSetupMockRoute,
 }
 
 const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(
