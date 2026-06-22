@@ -129,6 +129,21 @@ describe("runtime prompts", () => {
 })
 
 describe("runtime delivery prompts", () => {
+  test("renders first-action start update guidance", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
+    )
+
+    expect(prompt).toContain("first-action note")
+    expect(prompt).toContain("not an acknowledgement plus plan")
+    expect(prompt).toContain("Vary the sentence shape")
+    expect(prompt).toContain(
+      "I'll find a Notion parent first, then ask for your approval"
+    )
+    expect(prompt).toContain("Looking up Emma now")
+    expect(prompt).not.toContain("Got it. I'll find the right Notion parent")
+  })
+
   test("renders Slack delivery as an explicit message tool call", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
