@@ -26,21 +26,24 @@ describe("runtime skill prompts", () => {
     )
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("Format replies natively for the reply surface.")
+    expect(prompt).toContain("Write for the reply surface.")
     expect(prompt).toContain("Surface: `Slack`")
     expect(prompt).toContain("Guidance:")
     expect(prompt).not.toContain("# Skills")
     expect(prompt).not.toContain("Available skills:")
     expect(prompt).not.toContain("Use `load_skill`")
     expect(prompt).not.toContain("`slack`: Format Slack replies")
-    expect(
-      prompt.indexOf("Format replies natively for the reply surface.")
-    ).toBeLessThan(prompt.indexOf("Surface: `Slack`"))
-    expect(prompt).toContain("Use Slack `mrkdwn` sparingly")
+    expect(prompt.indexOf("Write for the reply surface.")).toBeLessThan(
+      prompt.indexOf("Surface: `Slack`")
+    )
+    expect(prompt).toContain("Format Slack messages with Slack `mrkdwn`")
+    expect(prompt).toContain(
+      "Use Slack `blocks` when native structure makes the message easier to scan."
+    )
+    expect(prompt).toContain("Never use interactive Slack surfaces or controls")
     expect(prompt).not.toContain("## Slack")
     expect(prompt).not.toContain("### Text")
     expect(prompt).not.toContain("## Format")
     expect(prompt).not.toContain("Output contract:")
-    expect(prompt).not.toContain("Do not use app-callback controls")
   })
 })

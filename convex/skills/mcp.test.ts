@@ -9,7 +9,9 @@ test("loads an available runtime skill", () => {
     skill: {
       name: "slack",
       associatedIntegrations: ["slack"],
-      instructions: expect.stringContaining("Use Slack `mrkdwn` sparingly"),
+      instructions: expect.stringContaining(
+        "Format Slack messages with Slack `mrkdwn`"
+      ),
     },
   })
 })
@@ -20,7 +22,9 @@ test("loads complete instructions with all communication parts", () => {
   ).toMatchObject({
     status: "loaded",
     skill: {
-      instructions: expect.stringContaining("Use Slack-native `blocks`"),
+      instructions: expect.stringContaining(
+        "Use Slack `blocks` when native structure"
+      ),
     },
   })
 })

@@ -16,7 +16,7 @@ type ProfileDefinition = {
 
 const profiles = {
   "agent-final-reply": {
-    capabilities: { default: ["text"] },
+    capabilities: { default: ["text"], slack: ["text", "rich"] },
   },
 } as const satisfies Record<CommunicationProfile, ProfileDefinition>
 
