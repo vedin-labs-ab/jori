@@ -29,11 +29,11 @@ export const approvals = defineTable({
   runId: v.id("runs"),
   surface: toolSurfaceValidator,
   tool: v.string(),
-  args: v.any(),
+  args: v.string(),
   summary: v.string(),
   handoff: approvalHandoff,
   code: v.string(),
-  waitpointTokenId: v.optional(v.string()),
+  waitpointId: v.optional(v.string()),
   requestedBy: actorValidator,
   decidedBy: v.optional(actorValidator),
   decision: v.optional(approvalDecision),
@@ -45,7 +45,7 @@ export const approvals = defineTable({
   consumedAt: v.optional(v.number()),
 })
   .index("by_tenant_and_code", ["tenantId", "code"])
-  .index("by_waitpoint", ["waitpointTokenId"])
+  .index("by_waitpoint", ["waitpointId"])
   .index("by_run", ["runId"])
   .index("by_tenant_and_created_at", ["tenantId", "createdAt"])
   .index("by_tenant_and_expires_at", ["tenantId", "expiresAt"])

@@ -1,4 +1,5 @@
 import { describe, expect, test, vi } from "vitest"
+import { encodeToolInput } from "../../contracts/tool-transport"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
@@ -75,7 +76,7 @@ function approvalDoc(): Doc<"approvals"> {
   return {
     _creationTime: 0,
     _id: "approval_1" as Id<"approvals">,
-    args: {},
+    args: encodeToolInput({}).inputJson,
     code: "ABC12345",
     createdAt: 0,
     expiresAt: 1,
@@ -90,7 +91,7 @@ function approvalDoc(): Doc<"approvals"> {
     surface: "notion",
     tenantId: "tenant",
     tool: "notion_create_page",
-    waitpointTokenId: "waitpoint_1",
+    waitpointId: "waitpoint_1",
   }
 }
 

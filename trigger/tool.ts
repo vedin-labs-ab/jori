@@ -1,5 +1,5 @@
 import { type ToolSurface } from "../contracts/integrations"
-import { encodeUnknownJson } from "../contracts/json"
+import { encodeToolResult } from "../contracts/tool-transport"
 import { awaitPromptedToolApproval } from "./approval"
 import {
   materializeSandboxResult,
@@ -200,7 +200,7 @@ function optionalString(value: unknown) {
 }
 
 function toToolContent(result: unknown) {
-  return encodeUnknownJson(result ?? null)
+  return encodeToolResult(result)
 }
 
 function toolErrorResult(message: string): JsonObject {

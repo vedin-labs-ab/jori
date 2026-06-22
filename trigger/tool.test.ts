@@ -50,7 +50,7 @@ test("prompted tools wait for approval before executing", async () => {
     runId: "run_1",
     surface: "notion",
     tool: "notion_create_page",
-    waitpointTokenId: "waitpoint_1",
+    waitpointId: "waitpoint_1",
   })
   expect(runtime.convex.callTool).toHaveBeenCalledWith({
     approved: true,

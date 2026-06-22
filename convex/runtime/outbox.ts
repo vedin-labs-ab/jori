@@ -36,7 +36,7 @@ export const enqueueApprovalResume = internalMutation({
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)
 
-    if (approval === null || approval.waitpointTokenId === undefined) {
+    if (approval === null || approval.waitpointId === undefined) {
       return null
     }
 

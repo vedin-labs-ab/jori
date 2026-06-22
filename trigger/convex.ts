@@ -1,6 +1,6 @@
 import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../contracts/integrations"
-import { decodeJson, encodeJson } from "../contracts/json"
+import { decodeToolResult, encodeToolInput } from "../contracts/tool-transport"
 import { api } from "../convex/_generated/api"
 import {
   type AgentRunPayload,
@@ -48,14 +48,14 @@ export class MiloConvexClient {
   }) {
     const result = await this.client.action(api.runtime.tools.call, {
       approved: args.approved,
-      argsJson: encodeJson(args.input),
+      ...encodeToolInput(args.input),
       runId: args.runId,
       secret: this.secret,
       surface: args.surface,
       tool: args.tool,
     })
 
-    return decodeJson(result)
+    return decodeToolResult(result)
   }
 
   async drainSessionMessages(args: {
@@ -77,15 +77,15 @@ export class MiloConvexClient {
     runId: ConvexId<"runs">
     surface: ToolSurface
     tool: string
-    waitpointTokenId: string
+    waitpointId: string
   }) {
     return await this.client.action(api.runtime.tools.requestApproval, {
-      argsJson: encodeJson(args.input),
+      ...encodeToolInput(args.input),
       runId: args.runId,
       secret: this.secret,
       surface: args.surface,
       tool: args.tool,
-      waitpointTokenId: args.waitpointTokenId,
+      waitpointId: args.waitpointId,
     })
   }
 
