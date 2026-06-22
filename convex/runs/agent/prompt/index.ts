@@ -11,6 +11,7 @@ import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
 import { createPromptTime } from "../../../prompts/time"
 import { type AgentRuntimeInput, type MessageIntegration } from "../input"
+import { createCommunicationInstructions } from "./communication"
 import {
   type ApprovalContinuation,
   createApprovalContinuationPrompt,
@@ -31,24 +32,37 @@ export function assemblePrompt(
   promptedTools: ToolPermission[] = [],
   continuation?: ApprovalContinuation
 ): string {
+  const communication = createCommunicationInstructions(input)
+  const skills = createSkillInstructions({
+    omittedNames: omittedSkillNames(communication),
+  })
+
   return continuation === undefined
     ? renderPromptTemplate(promptTemplates["agent/initial"], {
         agent: {
           approvals: createApprovalInstructions(promptedTools),
-          skills: promptBlock(createSkillInstructions(input)),
+          communication: promptBlock(communication?.body ?? ""),
+          skills: promptBlock(skills),
           trigger: promptBlock(createTriggerPart(input, true)),
         },
       })
     : renderPromptTemplate(promptTemplates["agent/continuation"], {
         agent: {
           approvals: createApprovalInstructions(promptedTools),
+          communication: promptBlock(communication?.body ?? ""),
           continuation: promptBlock(
             createApprovalContinuationPrompt(continuation)
           ),
           reference: promptBlock(createTriggerPart(input, false)),
-          skills: promptBlock(createSkillInstructions(input)),
+          skills: promptBlock(skills),
         },
       })
+}
+
+function omittedSkillNames(
+  communication: ReturnType<typeof createCommunicationInstructions>
+) {
+  return new Set(communication === null ? [] : [communication.skill.name])
 }
 
 function createApprovalInstructions(promptedTools: ToolPermission[]) {
