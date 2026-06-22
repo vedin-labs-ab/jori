@@ -10,6 +10,8 @@ import {
   type OpenRouterChatMessage,
   sendOpenRouterChat,
 } from "../../model"
+import { promptTemplates } from "../../prompts/generated"
+import { renderPromptTemplate } from "../../prompts/render"
 import { requiredString } from "../../shared/input"
 import {
   type ArtifactPromptRequestDiagnostics,
@@ -121,11 +123,11 @@ function promptMessages(
   return [
     {
       role: "system",
-      content: [
-        input.instruction,
-        "Return only JSON that matches the provided response schema.",
-        "Do not spend tokens on hidden reasoning.",
-      ].join("\n\n"),
+      content: renderPromptTemplate(promptTemplates["artifact/model"], {
+        artifact: {
+          instruction: input.instruction,
+        },
+      }),
     },
     {
       role: "user",

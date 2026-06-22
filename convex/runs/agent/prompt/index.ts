@@ -31,19 +31,34 @@ export function assemblePrompt(
   promptedTools: ToolPermission[] = [],
   continuation?: ApprovalContinuation
 ): string {
-  const parts = [
-    promptTemplates.persona,
-    createSkillInstructions(input),
-    ...(promptedTools.length === 0
-      ? []
-      : [createToolApprovalInstructions(promptedTools)]),
-    createTriggerPart(input, continuation === undefined),
-    ...(continuation === undefined
-      ? []
-      : [createApprovalContinuationPrompt(continuation)]),
-  ]
+  return continuation === undefined
+    ? renderPromptTemplate(promptTemplates["agent/initial"], {
+        agent: {
+          approvals: createApprovalInstructions(promptedTools),
+          skills: promptBlock(createSkillInstructions(input)),
+          trigger: promptBlock(createTriggerPart(input, true)),
+        },
+      })
+    : renderPromptTemplate(promptTemplates["agent/continuation"], {
+        agent: {
+          approvals: createApprovalInstructions(promptedTools),
+          continuation: promptBlock(
+            createApprovalContinuationPrompt(continuation)
+          ),
+          reference: promptBlock(createTriggerPart(input, false)),
+          skills: promptBlock(createSkillInstructions(input)),
+        },
+      })
+}
 
-  return parts.join("\n\n")
+function createApprovalInstructions(promptedTools: ToolPermission[]) {
+  return promptedTools.length === 0
+    ? ""
+    : promptBlock(createToolApprovalInstructions(promptedTools))
+}
+
+function promptBlock(value: string) {
+  return value.trim()
 }
 
 function createTriggerPart(input: AgentRuntimeInput, isInitialRun: boolean) {

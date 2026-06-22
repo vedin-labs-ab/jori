@@ -1,3 +1,5 @@
+import { promptTemplates } from "../prompts/generated"
+import { renderPromptTemplate } from "../prompts/render"
 import { type Integration, integrationLabels } from "../shared/integrations"
 import { getRuntimeSkillForIntegration, type RuntimeSkill } from "./runtime"
 
@@ -11,9 +13,6 @@ type CapabilityMap = {
 type ProfileDefinition = {
   capabilities: CapabilityMap
 }
-
-const nativeMessageGuidance =
-  "For `message`, format the response natively for the reply surface."
 
 const profiles = {
   "agent-final-reply": {
@@ -34,21 +33,21 @@ export function createCommunicationGuidance(args: {
   const profile = profiles[args.profile]
   const capabilities = capabilitiesFor(profile.capabilities, args.integration)
 
-  return [
-    "## Communication",
-    "",
-    nativeMessageGuidance,
-    "",
-    `Surface: \`${integrationLabels[args.integration]}\``,
-    ...formatGuidance(skill, capabilities),
-  ].join("\n")
+  return renderPromptTemplate(promptTemplates["communication/message"], {
+    communication: {
+      guidance: createGuidanceBlock(skill, capabilities),
+    },
+    surface: {
+      label: integrationLabels[args.integration],
+    },
+  }).trim()
 }
 
 function capabilitiesFor(map: CapabilityMap, integration: Integration) {
   return map[integration] ?? map.default
 }
 
-function formatGuidance(
+function createGuidanceBlock(
   skill: RuntimeSkill,
   capabilities: readonly CommunicationCapability[]
 ) {
@@ -64,7 +63,13 @@ function formatGuidance(
     formatPart(supportedParts[capability])
   )
 
-  return parts.length === 0 ? [] : ["", "Guidance:", "", parts.join("\n")]
+  return parts.length === 0
+    ? ""
+    : renderPromptTemplate(promptTemplates["communication/guidance"], {
+        guidance: {
+          parts: parts.join("\n"),
+        },
+      }).trim()
 }
 
 function formatPart(body?: string) {

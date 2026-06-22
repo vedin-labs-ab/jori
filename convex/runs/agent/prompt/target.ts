@@ -1,4 +1,6 @@
 import { integrationLabels } from "../../../automations/integrations"
+import { promptTemplates } from "../../../prompts/generated"
+import { renderPromptTemplate } from "../../../prompts/render"
 import {
   readDataNumber,
   readDataObject,
@@ -14,14 +16,19 @@ export function getMessageTarget(
 }
 
 export function getMessageDelivery(integration: MessageIntegration) {
-  return [
-    "- Return the final answer normally; Milo will post it as a reply to this source conversation.",
-    `- Use ${integrationLabels[integration]} write tools only for intentional extra messages or file delivery, not for routine replies to this source conversation.`,
-  ].join("\n")
+  return renderPromptTemplate(promptTemplates["message/delivery"], {
+    surface: {
+      label: integrationLabels[integration],
+    },
+  }).trim()
 }
 
 export function getMessageProgress(integration: MessageIntegration) {
-  return `- ${integrationLabels[integration]} already has the intake reply state. Do not send routine acknowledgements or progress updates to the source conversation.`
+  return renderPromptTemplate(promptTemplates["message/progress"], {
+    surface: {
+      label: integrationLabels[integration],
+    },
+  }).trim()
 }
 
 export function formatEvent(
