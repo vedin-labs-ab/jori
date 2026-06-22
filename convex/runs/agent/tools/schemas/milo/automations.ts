@@ -1,4 +1,5 @@
 import { automationEventCatalog } from "../../../../../automations/events"
+import { integrations as integrationEnum } from "../../../../../shared/integrations"
 import {
   numberProperty,
   objectProperty,
@@ -6,17 +7,6 @@ import {
   stringProperty,
 } from "../common"
 
-const integrationEnum = [
-  "slack",
-  "linear",
-  "github",
-  "gmail",
-  "googleCalendar",
-  "googleDrive",
-  "notion",
-  "microsoftEmail",
-  "microsoftCalendar",
-]
 const eventIntegrationEnum = automationEventCatalog.map(
   (definition) => definition.integration
 )

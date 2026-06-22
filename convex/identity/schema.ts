@@ -3,7 +3,9 @@ import { type Infer, v } from "convex/values"
 
 export const identityProvider = v.union(
   v.literal("clerk"),
+  v.literal("github"),
   v.literal("google"),
+  v.literal("linear"),
   v.literal("microsoft"),
   v.literal("slack")
 )

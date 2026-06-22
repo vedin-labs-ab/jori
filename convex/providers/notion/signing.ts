@@ -1,3 +1,4 @@
+import { type Id } from "../../_generated/dataModel"
 import {
   createSignedState,
   hmacSha256Hex,
@@ -11,6 +12,7 @@ export type NotionInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
+  setupLinkId?: Id<"setupLinks">
 }
 
 export async function createSignedNotionState(state: NotionInstallState) {

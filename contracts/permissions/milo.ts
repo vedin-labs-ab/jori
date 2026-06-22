@@ -19,6 +19,14 @@ export const miloToolPermissionRows = [
   ],
   [
     "milo",
+    "offer_integration_setup",
+    "Offer integration setup",
+    "Create a Milo setup link for an integration and offer it in the current interactive surface when possible.",
+    "write",
+    "required",
+  ],
+  [
+    "milo",
     "save_attachment",
     "Save attachment",
     "Save a sandbox file as a run attachment.",

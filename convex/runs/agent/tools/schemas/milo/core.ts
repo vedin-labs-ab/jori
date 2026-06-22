@@ -1,3 +1,4 @@
+import { integrations as integrationEnum } from "../../../../../shared/integrations"
 import { runtimeSkillNames } from "../../../../../skills/runtime"
 import {
   numberProperty,
@@ -17,6 +18,16 @@ export const coreMiloToolInputSchemas = {
         type: "string",
         description: "Available Milo skill name.",
         enum: runtimeSkillNames,
+      },
+    },
+  }),
+  offer_integration_setup: objectSchema({
+    required: ["integration"],
+    properties: {
+      integration: {
+        type: "string",
+        description: "Integration the user wants to connect.",
+        enum: integrationEnum,
       },
     },
   }),

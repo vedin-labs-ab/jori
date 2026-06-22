@@ -6,7 +6,12 @@ import {
   isMiloAttachmentTool,
 } from "../attachments/mcp"
 import { callMiloAutomationTool } from "../automations/mcp"
+import {
+  callIntegrationSetupTool,
+  isIntegrationSetupTool,
+} from "../integrations/setup/mcp"
 import { callMiloSkillTool, isMiloSkillTool } from "../skills/mcp"
+import { type ApprovalBrokerContext } from "./approval"
 import { callWebTool } from "./tools/web"
 
 type MiloToolRequest = {
@@ -16,13 +21,19 @@ type MiloToolRequest = {
 
 export async function callMiloTool(
   ctx: ActionCtx,
-  run: {
-    tenantId: string
-    createdBy?: string
-    _id?: Id<"runs">
-  },
+  context: ApprovalBrokerContext | MiloRunContext,
   request: MiloToolRequest
 ): Promise<unknown> {
+  const run = isBrokerContext(context) ? context.run : context
+
+  if (isIntegrationSetupTool(request.tool)) {
+    if (!isBrokerContext(context)) {
+      throw new Error("Integration setup links require broker context.")
+    }
+
+    return await callIntegrationSetupTool(ctx, context, request)
+  }
+
   if (isMiloAttachmentTool(request.tool)) {
     return await callMiloAttachmentTool(ctx, run, request)
   }
@@ -42,11 +53,13 @@ export async function callMiloTool(
   return await callMiloAutomationTool(ctx, toMiloContext(run), request)
 }
 
-function toMiloContext(run: {
+type MiloRunContext = {
   tenantId: string
   createdBy?: string
   _id?: Id<"runs">
-}) {
+}
+
+function toMiloContext(run: MiloRunContext) {
   return {
     tenantId: run.tenantId,
     createdBy: run.createdBy,
@@ -60,4 +73,10 @@ function normalizeToolArgs(args: unknown) {
   }
 
   return args as Record<string, unknown>
+}
+
+function isBrokerContext(
+  context: ApprovalBrokerContext | MiloRunContext
+): context is ApprovalBrokerContext {
+  return "input" in context
 }

@@ -1,6 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { readCallbackState, redirectWithStatus } from "../http"
+import { completeSetupLink, failSetupLink } from "../install"
 import {
   type MicrosoftIntegration,
   microsoftIntegrationConfigs,
@@ -11,7 +12,10 @@ import {
   fetchMicrosoftInstallationProfile,
   requireMicrosoftClientId,
 } from "./oauth"
-import { parseSignedMicrosoftState } from "./signing"
+import {
+  type MicrosoftInstallState,
+  parseSignedMicrosoftState,
+} from "./signing"
 
 export async function handleMicrosoftInstall(
   request: Request,
@@ -75,7 +79,11 @@ export async function handleMicrosoftOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    return redirectWithMicrosoftStatus(state.returnUrl, integration, "error")
+    return await redirectWithMicrosoftSetupError(ctx, {
+      state,
+      integration,
+      error: `${surface.integration} OAuth token exchange failed.`,
+    })
   }
 
   let profile: Awaited<ReturnType<typeof fetchMicrosoftInstallationProfile>>
@@ -85,29 +93,84 @@ export async function handleMicrosoftOAuthCallback(
       accessToken: tokenResult.access_token,
     })
   } catch {
-    return redirectWithMicrosoftStatus(state.returnUrl, integration, "error")
+    return await redirectWithMicrosoftSetupError(ctx, {
+      state,
+      integration,
+      error: `${surface.integration} installation profile could not be loaded.`,
+    })
   }
 
   try {
-    await ctx.runMutation(
-      internal.providers.microsoft.install.recordOAuthInstallation,
-      {
-        integration,
-        tenantId: state.tenantId,
-        createdBy: state.createdBy,
-        microsoftTenantId: profile.tenant.id,
-        accessToken: tokenResult.access_token,
-        refreshToken: tokenResult.refresh_token,
-        expiresAt: Date.now() + tokenResult.expires_in * 1000,
-        scope: tokenResult.scope,
-        profile,
-      }
-    )
+    await recordMicrosoftSetupInstallation(ctx, {
+      integration,
+      profile,
+      state,
+      tokenResult,
+    })
   } catch {
-    return redirectWithMicrosoftStatus(state.returnUrl, integration, "error")
+    return await redirectWithMicrosoftSetupError(ctx, {
+      state,
+      integration,
+      error: `${surface.integration} installation could not be recorded.`,
+    })
   }
 
   return redirectWithMicrosoftStatus(state.returnUrl, integration, "connected")
+}
+
+async function recordMicrosoftSetupInstallation(
+  ctx: ActionCtx,
+  args: {
+    integration: MicrosoftIntegration
+    state: MicrosoftInstallState
+    tokenResult: {
+      access_token: string
+      refresh_token?: string
+      expires_in: number
+      scope?: string
+    }
+    profile: Awaited<ReturnType<typeof fetchMicrosoftInstallationProfile>>
+  }
+) {
+  const integrationId = await ctx.runMutation(
+    internal.providers.microsoft.install.recordOAuthInstallation,
+    {
+      integration: args.integration,
+      tenantId: args.state.tenantId,
+      createdBy: args.state.createdBy,
+      microsoftTenantId: args.profile.tenant.id,
+      accessToken: args.tokenResult.access_token,
+      refreshToken: args.tokenResult.refresh_token,
+      expiresAt: Date.now() + args.tokenResult.expires_in * 1000,
+      scope: args.tokenResult.scope,
+      profile: args.profile,
+    }
+  )
+
+  await completeSetupLink(ctx, {
+    setupLinkId: args.state.setupLinkId,
+    integrationId,
+  })
+}
+
+async function redirectWithMicrosoftSetupError(
+  ctx: ActionCtx,
+  args: {
+    state: MicrosoftInstallState
+    integration: MicrosoftIntegration
+    error: string
+  }
+) {
+  await failSetupLink(ctx, {
+    setupLinkId: args.state.setupLinkId,
+    error: args.error,
+  })
+
+  return redirectWithMicrosoftStatus(
+    args.state.returnUrl,
+    args.integration,
+    "error"
+  )
 }
 
 function redirectWithMicrosoftStatus(

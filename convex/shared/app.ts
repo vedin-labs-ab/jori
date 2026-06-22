@@ -1,0 +1,33 @@
+const appUrlEnv = "MILO_APP_URL"
+
+export type RuntimeEnvironment = Record<string, string | undefined>
+
+export function readAppOrigin(environment: RuntimeEnvironment = process.env) {
+  const value = environment[appUrlEnv]?.trim()
+
+  if (value === undefined || value === "") {
+    return undefined
+  }
+
+  let url: URL
+
+  try {
+    url = new URL(value.replace(/\/+$/, ""))
+  } catch {
+    throw new Error(appUrlError(value))
+  }
+
+  if (
+    url.origin !== value.replace(/\/+$/, "") ||
+    url.pathname !== "/" ||
+    (url.protocol !== "https:" && url.protocol !== "http:")
+  ) {
+    throw new Error(appUrlError(value))
+  }
+
+  return url.origin
+}
+
+function appUrlError(value: string) {
+  return `${appUrlEnv} must be an http(s) origin, received ${JSON.stringify(value)}.`
+}

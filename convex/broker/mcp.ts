@@ -94,7 +94,7 @@ export async function callBrokerTool(
       return await createPromptedToolApproval(ctx, context, request)
     }
 
-    return await callMiloTool(ctx, context.run, {
+    return await callMiloTool(ctx, context, {
       ...request,
       args: normalizeBrokerToolInput(request.tool, request.args),
     })

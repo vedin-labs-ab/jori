@@ -1,6 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { readCallbackState, redirectWithStatus } from "../http"
+import { completeSetupLink, failSetupLink } from "../install"
 import {
   type GoogleIntegration,
   googleIntegrationConfigs,
@@ -11,7 +12,7 @@ import {
   fetchGoogleInstallationProfile,
   requireGoogleClientId,
 } from "./oauth"
-import { parseSignedGoogleState } from "./signing"
+import { type GoogleInstallState, parseSignedGoogleState } from "./signing"
 
 export async function handleGoogleInstall(
   request: Request,
@@ -83,7 +84,11 @@ export async function handleGoogleOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    return redirectWithGoogleStatus(state.returnUrl, integration, "error")
+    return await redirectWithGoogleSetupError(ctx, {
+      state,
+      integration,
+      error: `${surface.integration} OAuth token exchange failed.`,
+    })
   }
 
   let profile: Awaited<ReturnType<typeof fetchGoogleInstallationProfile>>
@@ -91,28 +96,83 @@ export async function handleGoogleOAuthCallback(
   try {
     profile = await fetchGoogleInstallationProfile(tokenResult.access_token)
   } catch {
-    return redirectWithGoogleStatus(state.returnUrl, integration, "error")
+    return await redirectWithGoogleSetupError(ctx, {
+      state,
+      integration,
+      error: `${surface.integration} installation profile could not be loaded.`,
+    })
   }
 
   try {
-    await ctx.runMutation(
-      internal.providers.google.install.recordOAuthInstallation,
-      {
-        integration,
-        tenantId: state.tenantId,
-        createdBy: state.createdBy,
-        accessToken: tokenResult.access_token,
-        refreshToken: tokenResult.refresh_token,
-        expiresAt: Date.now() + tokenResult.expires_in * 1000,
-        scope: tokenResult.scope,
-        profile,
-      }
-    )
+    await recordGoogleSetupInstallation(ctx, {
+      integration,
+      profile,
+      state,
+      tokenResult,
+    })
   } catch {
-    return redirectWithGoogleStatus(state.returnUrl, integration, "error")
+    return await redirectWithGoogleSetupError(ctx, {
+      state,
+      integration,
+      error: `${surface.integration} installation could not be recorded.`,
+    })
   }
 
   return redirectWithGoogleStatus(state.returnUrl, integration, "connected")
+}
+
+async function recordGoogleSetupInstallation(
+  ctx: ActionCtx,
+  args: {
+    integration: GoogleIntegration
+    state: GoogleInstallState
+    tokenResult: {
+      access_token: string
+      refresh_token?: string
+      expires_in: number
+      scope?: string
+    }
+    profile: Awaited<ReturnType<typeof fetchGoogleInstallationProfile>>
+  }
+) {
+  const integrationId = await ctx.runMutation(
+    internal.providers.google.install.recordOAuthInstallation,
+    {
+      integration: args.integration,
+      tenantId: args.state.tenantId,
+      createdBy: args.state.createdBy,
+      accessToken: args.tokenResult.access_token,
+      refreshToken: args.tokenResult.refresh_token,
+      expiresAt: Date.now() + args.tokenResult.expires_in * 1000,
+      scope: args.tokenResult.scope,
+      profile: args.profile,
+    }
+  )
+
+  await completeSetupLink(ctx, {
+    setupLinkId: args.state.setupLinkId,
+    integrationId,
+  })
+}
+
+async function redirectWithGoogleSetupError(
+  ctx: ActionCtx,
+  args: {
+    state: GoogleInstallState
+    integration: GoogleIntegration
+    error: string
+  }
+) {
+  await failSetupLink(ctx, {
+    setupLinkId: args.state.setupLinkId,
+    error: args.error,
+  })
+
+  return redirectWithGoogleStatus(
+    args.state.returnUrl,
+    args.integration,
+    "error"
+  )
 }
 
 function redirectWithGoogleStatus(

@@ -1,3 +1,4 @@
+import { type Id } from "../../_generated/dataModel"
 import {
   createSignedState,
   hmacSha256Hex,
@@ -12,6 +13,7 @@ export type SlackInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
+  setupLinkId?: Id<"setupLinks">
 }
 
 export function requireSlackSigningSecret() {

@@ -1,3 +1,4 @@
+import { type Id } from "../../_generated/dataModel"
 import { requireProviderEnv } from "../oauth"
 import {
   createSignedState,
@@ -12,6 +13,7 @@ export type LinearInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
+  setupLinkId?: Id<"setupLinks">
 }
 
 export async function createSignedLinearState(state: LinearInstallState) {
