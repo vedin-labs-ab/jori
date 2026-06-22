@@ -98,7 +98,7 @@ async function runAgentLoop(args: {
         continue
       }
 
-      await completeRun(args.runtime, step, args.attempt, response.content)
+      await completeRun(args.runtime, step, args.attempt)
 
       return {
         message: response.content,
@@ -198,28 +198,15 @@ async function runToolCalls(
 async function completeRun(
   runtime: ToolRuntime,
   step: number,
-  attempt: number,
-  content: string
+  attempt: number
 ) {
   const sequence = step * toolSequenceOffset
 
-  const delivery = await runtime.convex.deliverFinalMessage({
-    content,
-    runId: runtime.context.run.id,
-  })
-  await recordRunEvent(
-    runtime.convex,
-    runtime.context,
-    "message.final",
-    sequence,
-    attempt,
-    { queued: delivery.queued }
-  )
   await recordRunEvent(
     runtime.convex,
     runtime.context,
     "run.completed",
-    sequence + 1,
+    sequence,
     attempt
   )
 }

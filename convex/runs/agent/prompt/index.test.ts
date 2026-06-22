@@ -70,15 +70,11 @@ describe("runtime prompts", () => {
     )
     expect(prompt).toContain("Current UTC time:")
 
-    expect(prompt).toContain(
-      `${toolSurfaceLabel} already has the intake reply state`
-    )
-
     for (const line of targetLines) {
       expect(prompt).toContain(line)
     }
 
-    expect(prompt).toContain("Handle the request.")
+    expect(prompt).toContain("Report the result back to this thread")
   })
 
   test("uses Slack message timestamp as the default reply thread", () => {
@@ -103,7 +99,7 @@ describe("runtime prompts", () => {
     expect(prompt).toContain("- Reply thread timestamp: 123.000")
   })
 
-  test("tells message runs that final delivery is automatic", () => {
+  test("omits automatic final delivery instructions", () => {
     const prompt = assemblePrompt(
       runtimeInput("github", {
         repository: { fullName: "acme/app" },
@@ -112,9 +108,9 @@ describe("runtime prompts", () => {
       })
     )
 
-    expect(prompt).toContain("Milo will post it as a reply")
-    expect(prompt).toContain("Use GitHub write tools only")
-    expect(prompt).toContain("not for routine replies")
+    expect(prompt).not.toMatch(/Milo will .*post it/)
+    expect(prompt).not.toContain("Use GitHub write tools only")
+    expect(prompt).not.toContain("not for routine replies")
     expect(prompt).not.toContain("The requester cannot see you working")
     expect(prompt).not.toContain("If a reply is useful, send it to this target")
   })
