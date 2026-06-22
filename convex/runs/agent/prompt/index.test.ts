@@ -79,6 +79,9 @@ describe("runtime prompts", () => {
     expect(prompt).not.toContain("\nHistory:\n")
     expect(prompt).toContain("- 1970-01-01T00:00:01.000Z | user | Albin Vedin")
     expect(prompt).toContain("Report the result back to this thread")
+    expect(prompt).toContain(
+      "reporting means calling the appropriate communication tool"
+    )
   })
 
   test("renders Slack trigger text with actor metadata and readable Milo mention", () => {
@@ -126,6 +129,20 @@ describe("runtime prompts", () => {
 })
 
 describe("runtime delivery prompts", () => {
+  test("renders Slack delivery as an explicit message tool call", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
+    )
+
+    expect(prompt).toContain(
+      "Assistant completion text is internal trace output"
+    )
+    expect(prompt).toContain(
+      "call `conversations_add_message` with `channel` set to the Channel ID"
+    )
+    expect(prompt).toContain("`thread_ts` set to the Reply thread timestamp")
+  })
+
   test("omits automatic final delivery instructions", () => {
     const prompt = assemblePrompt(githubMessageInput())
 
