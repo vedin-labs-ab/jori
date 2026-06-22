@@ -57,8 +57,6 @@ export const promptTemplates = {
     "# Original Trigger\n\nManual instructions started this task. For reference:\n\n```text\n{{instruction.text}}\n```\n",
   "reference/message":
     "# Original Trigger\n\nA {{message.integration}} message started this task. For reference:\n\nTarget:\n{{message.target}}\n\nOriginal message:\n{{message.current}}\n",
-  "session/message":
-    'New {{message.integration}} message in the active conversation.\nSource: {{message.source}}\nAuthority: {{message.authority}}\n{{? message.actor prefix="Actor: " suffix="\\n"}}Type: {{message.type}}\n{{? message.identifiers prefix="Identifiers: " suffix="\\n"}}Mentioned Milo: {{message.mentioned}}\nObserved at: {{message.observedAt}}\n\nMessage:\n```text\n{{message.text}}\n```\n',
   "skills/discovery":
     "# Skills\n\nUse `load_skill` to load full instructions for an available skill when needed.\n\nAvailable skills:\n{{skills.available}}\n",
   "skills/loaded": "## {{skill.title}}\n\n{{skill.body}}\n",
