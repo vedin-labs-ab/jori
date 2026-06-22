@@ -1,4 +1,5 @@
-import { type SkillId, skills } from "../prompts/generated"
+import { promptTemplates, type SkillId, skills } from "../prompts/generated"
+import { renderPromptTemplate } from "../prompts/render"
 import { type Integration } from "../shared/integrations"
 
 export const runtimeSkillNames = ["slack"] as const satisfies readonly SkillId[]
@@ -29,7 +30,12 @@ export function getRuntimeSkillForIntegration(integration: Integration) {
 }
 
 export function formatRuntimeSkill(skill: RuntimeSkill) {
-  return [`## ${formatRuntimeSkillTitle(skill)}`, skill.body].join("\n\n")
+  return renderPromptTemplate(promptTemplates["skills/loaded"], {
+    skill: {
+      body: skill.body,
+      title: formatRuntimeSkillTitle(skill),
+    },
+  })
 }
 
 export function formatRuntimeSkillTitle(skill: RuntimeSkill) {
