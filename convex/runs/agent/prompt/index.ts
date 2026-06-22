@@ -152,23 +152,10 @@ function formatMessageEntry(
       actor: entry.actor ?? "unknown",
       identifiers: entry.identifiers.join(", "),
       observedAt: new Date(observed).toISOString(),
-      speaker: formatMessageSpeaker(entry.source),
+      speaker: entry.source,
       text: entry.text,
     },
   }).trim()
-}
-
-function formatMessageSpeaker(
-  source: Extract<
-    AgentRuntimeInput,
-    { type: "message" }
-  >["conversation"][number]["source"]
-) {
-  if (source === "self") {
-    return "system"
-  }
-
-  return source
 }
 
 function createAutomationValues(

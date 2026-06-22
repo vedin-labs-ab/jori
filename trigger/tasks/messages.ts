@@ -10,16 +10,8 @@ export function formatSessionMessage(message: RuntimeMessage) {
       actor: message.actor ?? "unknown",
       identifiers: message.identifiers.join(", "),
       observedAt: new Date(observed).toISOString(),
-      speaker: formatMessageSpeaker(message.source),
+      speaker: message.source,
       text: message.text,
     },
   }).trim()
-}
-
-function formatMessageSpeaker(source: RuntimeMessage["source"]) {
-  if (source === "self") {
-    return "system"
-  }
-
-  return source
 }

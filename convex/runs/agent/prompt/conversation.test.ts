@@ -18,7 +18,7 @@ test("renders recent conversation context without duplicating the trigger", () =
   expect(prompt).toContain(
     "- 1970-01-01T00:00:01.000Z | user | Albin | slack_id=U123"
   )
-  expect(prompt).toContain("- 1970-01-01T00:00:02.000Z | system | Milo")
+  expect(prompt).toContain("- 1970-01-01T00:00:02.000Z | self | Milo")
   expect(prompt).toContain("- 1970-01-01T00:00:03.000Z | bot | CI")
   expect(prompt).toContain("- 1970-01-01T00:00:03.500Z | bot | unknown")
   expect(prompt).not.toContain("source=")
