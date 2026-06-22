@@ -1,67 +1,60 @@
-import { AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react"
 import { type ReactNode, useState } from "react"
-import { Button } from "@/components/ui/button"
 import { FullscreenSkeletonLoader } from "@/console/shared/loading"
-import { RootStateFrame } from "@/shared/state"
+import { IntegrationSetupOutcome } from "./outcome"
 
-type SetupPreviewState = "connecting" | "connected" | "error"
+type SetupPreviewState = "connecting" | "connected" | "expired" | "failed"
 
-const previewStates = ["connecting", "connected", "error"] as const
+const previewStates = ["connecting", "connected", "failed", "expired"] as const
 
 export function IntegrationSetupMock() {
   const [state, setState] = useState<SetupPreviewState>("connecting")
   const controls = <PreviewControls state={state} setState={setState} />
 
   if (state === "connected") {
-    return <ConnectedSetupPreview controls={controls} />
+    return (
+      <PreviewFrame controls={controls}>
+        <IntegrationSetupOutcome variant="connected" />
+      </PreviewFrame>
+    )
   }
 
-  if (state === "error") {
-    return <ErrorSetupPreview controls={controls} />
+  if (state === "expired") {
+    return (
+      <PreviewFrame controls={controls}>
+        <IntegrationSetupOutcome variant="expired" />
+      </PreviewFrame>
+    )
   }
 
-  return <ConnectingSetupPreview controls={controls} />
-}
+  if (state === "connecting") {
+    return <ConnectingSetupPreview controls={controls} />
+  }
 
-function ConnectedSetupPreview({ controls }: { controls: ReactNode }) {
   return (
-    <RootStateFrame
-      action={
-        <Button asChild variant="outline">
-          <a href="/integrations">View integrations</a>
-        </Button>
-      }
-      description="GitHub is connected and available to Milo."
-      icon={<CheckCircle2 />}
-      title="Integration connected"
-    >
-      {controls}
-    </RootStateFrame>
-  )
-}
-
-function ErrorSetupPreview({ controls }: { controls: ReactNode }) {
-  return (
-    <RootStateFrame
-      action={
-        <Button type="button">
-          <RotateCcw />
-          Try again
-        </Button>
-      }
-      description="The provider did not finish connecting. Try again when ready."
-      icon={<AlertTriangle />}
-      title="Setup link needs attention"
-    >
-      {controls}
-    </RootStateFrame>
+    <PreviewFrame controls={controls}>
+      <IntegrationSetupOutcome onRetry={() => undefined} variant="failed" />
+    </PreviewFrame>
   )
 }
 
 function ConnectingSetupPreview({ controls }: { controls: ReactNode }) {
   return (
-    <>
+    <PreviewFrame controls={controls}>
       <FullscreenSkeletonLoader />
+    </PreviewFrame>
+  )
+}
+
+function PreviewFrame({
+  children,
+  controls,
+}: {
+  children: ReactNode
+  controls: ReactNode
+}) {
+  return (
+    <>
+      {children}
       <div className="fixed right-4 bottom-4 z-[60]">{controls}</div>
     </>
   )
