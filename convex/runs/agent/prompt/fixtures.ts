@@ -227,31 +227,3 @@ export function promptedTool(): ToolPermission {
     defaultMode: "prompted",
   }
 }
-
-export function approvalContinuation(
-  decision: "approved" | "denied" = "approved"
-) {
-  return {
-    decision,
-    handoff: {
-      objective: "Create the calendar event and confirm it in Slack.",
-      progress: "Found a time that works for the attendees.",
-      next: "Tell the Slack thread the event was created.",
-    },
-    action: {
-      surface: "googleCalendar",
-      tool: "google_calendar_create_event",
-      summary: "Create a 30 minute design review.",
-      args: { title: "Design review" },
-    },
-    result:
-      decision === "approved"
-        ? { eventId: "event-123" }
-        : {
-            error: {
-              code: "approval_denied",
-              message: "The user denied approval for this action.",
-            },
-          },
-  }
-}

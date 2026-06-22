@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { approvalTtlMs } from "../../contracts/approvals"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import {
@@ -9,8 +10,6 @@ import {
 import { actorValidator } from "../shared/actor"
 import { toolSurfaceValidator } from "../shared/integrations"
 import { approvalDecision, approvalDelivery, approvalHandoff } from "./schema"
-
-const approvalTtlMs = 30 * 60 * 1000
 
 export const create = internalMutation({
   args: {
@@ -173,8 +172,14 @@ export const decide = internalMutation({
       return { status: "consumed" as const, approval }
     }
 
-    if (Date.now() > approval.expiresAt) {
+    if (Date.now() >= approval.expiresAt) {
       return { status: "expired" as const, approval }
+    }
+
+    const run = await ctx.db.get(approval.runId)
+
+    if (run === null || isTerminalRun(run)) {
+      return { status: "closed" as const, approval }
     }
 
     await cancelApprovalFunction(ctx, approval)
@@ -200,42 +205,19 @@ export const decide = internalMutation({
   },
 })
 
-export const claimDecisionContinuation = internalMutation({
-  args: {
-    approvalId: v.id("approvals"),
-    decision: approvalDecision,
-  },
-  handler: async (ctx, args) => {
-    const approval = await ctx.db.get(args.approvalId)
-
-    if (!isReadyToContinue(approval, args.decision)) {
-      return null
-    }
-
-    await ctx.db.patch(approval._id, {
-      consumedAt: Date.now(),
-    })
-
-    return approval
-  },
-})
-
-function isReadyToContinue(
-  approval: Doc<"approvals"> | null,
-  decision: Doc<"approvals">["decision"]
-): approval is Doc<"approvals"> {
-  return (
-    approval !== null &&
-    approval.decision === decision &&
-    approval.consumedAt === undefined
-  )
+function isPendingApproval(approval: Doc<"approvals">) {
+  return approval.decision === undefined && approval.consumedAt === undefined
 }
 
 function isExpiredPendingApproval(approval: Doc<"approvals">) {
+  return isPendingApproval(approval) && Date.now() >= approval.expiresAt
+}
+
+function isTerminalRun(run: Doc<"runs">) {
   return (
-    approval.decision === undefined &&
-    approval.consumedAt === undefined &&
-    Date.now() > approval.expiresAt
+    run.status === "completed" ||
+    run.status === "failed" ||
+    run.status === "stopped"
   )
 }
 

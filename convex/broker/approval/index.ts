@@ -32,6 +32,16 @@ type SlackApprovalDelivery = {
   threadTs?: string
 }
 
+type SlackApprovalRequest = {
+  approvalId: Id<"approvals">
+  code: string
+  surface: ToolSurface
+  tool: string
+  summary: string
+  expiresAt: number
+  delivery: SlackApprovalDelivery
+}
+
 export async function createPromptedToolApproval(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
@@ -93,7 +103,7 @@ export async function createPromptedToolApproval(
   const delivery = getSlackApprovalDelivery(context)
 
   if (delivery !== null) {
-    await deliverSlackApproval(ctx, {
+    await tryDeliverSlackApproval(ctx, {
       approvalId: approval.approvalId,
       code,
       surface: request.surface,
@@ -108,7 +118,7 @@ export async function createPromptedToolApproval(
     status: "approval_requested",
     approvalId: approval.approvalId,
     code,
-    instruction: `Stop now. The user can approve with: approve ${code}`,
+    instruction: `Approval requested. The user can approve with: approve ${code}`,
   }
 }
 
@@ -124,17 +134,20 @@ function findSurfaceIntegration(
   )
 }
 
+async function tryDeliverSlackApproval(
+  ctx: ActionCtx,
+  args: SlackApprovalRequest
+) {
+  try {
+    await deliverSlackApproval(ctx, args)
+  } catch {
+    return
+  }
+}
+
 async function deliverSlackApproval(
   ctx: ActionCtx,
-  args: {
-    approvalId: Id<"approvals">
-    code: string
-    surface: ToolSurface
-    tool: string
-    summary: string
-    expiresAt: number
-    delivery: SlackApprovalDelivery
-  }
+  args: SlackApprovalRequest
 ) {
   const message = createSlackApprovalRequest({
     code: args.code,

@@ -106,7 +106,8 @@ export type RuntimeEventInput = {
   type: RuntimeEventType
 }
 
-export type ApprovalDecision = {
+export type ApprovalResolution = {
   approvalId?: ConvexId<"approvals">
   decision: "approved" | "denied"
+  reason?: "expired"
 }

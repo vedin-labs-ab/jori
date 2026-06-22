@@ -33,6 +33,10 @@ export function getDecisionIcon(
     return "thumbs-down"
   }
 
+  if (status === "closed" || status === "expired") {
+    return "archive"
+  }
+
   return "check"
 }
 
@@ -50,6 +54,10 @@ function getDecisionTitle(
 
   if (status === "expired") {
     return "Request expired"
+  }
+
+  if (status === "closed") {
+    return "Run closed"
   }
 
   return "Approval unavailable"

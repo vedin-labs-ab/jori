@@ -13,10 +13,6 @@ import { renderPromptTemplate } from "../../../prompts/render"
 import { createPromptTime } from "../../../prompts/time"
 import { type AgentRuntimeInput, type MessageIntegration } from "../input"
 import { createCommunicationInstructions } from "./communication"
-import {
-  type ApprovalContinuation,
-  createApprovalContinuationPrompt,
-} from "./continuation"
 import { createToolApprovalInstructions } from "./instructions"
 import { createSkillInstructions } from "./skills"
 import {
@@ -28,8 +24,7 @@ import {
 
 export function assemblePrompt(
   input: AgentRuntimeInput,
-  promptedTools: ToolPermission[] = [],
-  continuation?: ApprovalContinuation
+  promptedTools: ToolPermission[] = []
 ): string {
   const communication = createCommunicationInstructions(input)
   const context = createContextInstructions()
@@ -37,28 +32,15 @@ export function assemblePrompt(
     omittedNames: omittedSkillNames(communication),
   })
 
-  return continuation === undefined
-    ? renderPromptTemplate(promptTemplates["agent/initial"], {
-        agent: {
-          approvals: createApprovalInstructions(promptedTools),
-          communication: promptBlock(communication?.body ?? ""),
-          context,
-          skills: promptBlock(skills),
-          trigger: promptBlock(createTriggerPart(input, true)),
-        },
-      })
-    : renderPromptTemplate(promptTemplates["agent/continuation"], {
-        agent: {
-          approvals: createApprovalInstructions(promptedTools),
-          communication: promptBlock(communication?.body ?? ""),
-          continuation: promptBlock(
-            createApprovalContinuationPrompt(continuation)
-          ),
-          context,
-          reference: promptBlock(createTriggerPart(input, false)),
-          skills: promptBlock(skills),
-        },
-      })
+  return renderPromptTemplate(promptTemplates["agent/initial"], {
+    agent: {
+      approvals: createApprovalInstructions(promptedTools),
+      communication: promptBlock(communication?.body ?? ""),
+      context,
+      skills: promptBlock(skills),
+      trigger: promptBlock(createTriggerPart(input, true)),
+    },
+  })
 }
 
 function omittedSkillNames(

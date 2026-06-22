@@ -117,7 +117,23 @@ async function resumeApproval(
   await wait.completeToken(approval.waitpointTokenId, {
     approvalId: operation.approvalId,
     decision: operation.decision,
+    reason: approvalResolutionReason(approval, operation.decision),
   })
+
+  return undefined
+}
+
+function approvalResolutionReason(
+  approval: Doc<"approvals">,
+  decision: "approved" | "denied"
+) {
+  if (
+    decision === "denied" &&
+    approval.decision === undefined &&
+    Date.now() >= approval.expiresAt
+  ) {
+    return "expired"
+  }
 
   return undefined
 }
