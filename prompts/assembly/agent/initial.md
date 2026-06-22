@@ -7,5 +7,4 @@
 ## Principles
 
 {{ include "parts/principles" }}
-
-{{agent.skills}}{{? agent.communication prefix="\n\n"}}{{? agent.approvals prefix="\n\n"}}{{agent.trigger prefix="\n\n"}}
+{{? agent.skills prefix="\n"}}{{? agent.communication prefix="\n\n"}}{{? agent.approvals prefix="\n\n"}}{{agent.trigger prefix="\n\n"}}
