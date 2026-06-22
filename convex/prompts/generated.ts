@@ -50,7 +50,7 @@ export const promptTemplates = {
   "communication/message":
     '# Communication\n\nFormat replies natively for the reply surface.\n\nSurface: `{{surface.label}}`{{? communication.guidance prefix="\\n\\n"}}\n',
   "conversation/message":
-    '- {{message.observedAt}} | source={{message.source}} | authority={{message.authority}} | type={{message.type}}{{? message.actor prefix=" | actor="}}\n```text\n{{message.text}}\n```\n',
+    "- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}\n```text\n{{message.text}}\n```\n",
   "message/delivery":
     "- Return the final answer normally; Milo will post it as a reply to this source\n  conversation.\n- Use {{surface.label}} write tools only for intentional extra messages or file\n  delivery, not for routine replies to this source conversation.\n",
   "message/progress":
@@ -71,7 +71,7 @@ export const promptTemplates = {
   "trigger/instruction":
     "# Trigger\n\nManual instructions triggered this run.\nCurrent UTC time: {{time.utc}}.\n\nInstructions:\n```text\n{{instruction.text}}\n```\n\nHandle the request. Use write actions only when they are necessary for the\nrequested outcome. If you cannot complete the task, report the blocker and the\nnext useful step.\n",
   "trigger/message":
-    "# Trigger\n\nA {{message.integration}} message triggered this run.\nCurrent UTC time: {{time.utc}}.\n\nTarget:\n{{message.target}}\n\nRecent conversation:\n{{message.conversation}}\n\nMessage:\n```text\n{{message.text}}\n```\n\nContext:\n- The message is the starting point, not necessarily the whole request. For\n  non-trivial work, check the surrounding thread or related discussion before\n  acting; skip this only when the message is self-contained and the next step\n  is obvious.\n- This target does not limit which tools you may use; when the work or its\n  result lives elsewhere, report the outcome here.\n- If no reply or action is useful, complete silently with an empty final\n  response.\n{{message.delivery}}\n{{message.progress}}\n- While working, send an update only when it changes what the requester knows\n  or should expect: a significant finding, a change of approach, or a blocker.\n  Never post an update that only says you are still working.\n\nHandle the request.\n",
+    "# Trigger\n\nA {{message.integration}} message triggered this run.\nCurrent UTC time: {{time.utc}}.\n\nTarget:\n{{message.target}}\n\nRecent messages:\n{{message.conversation}}\n\nMessage:\n```text\n{{message.text}}\n```\n\nContext:\n- The message is the starting point, not necessarily the whole request. For\n  non-trivial work, check the surrounding thread or related discussion before\n  acting; skip this only when the message is self-contained and the next step\n  is obvious.\n- This target does not limit which tools you may use; when the work or its\n  result lives elsewhere, report the outcome here.\n- If no reply or action is useful, complete silently with an empty final\n  response.\n{{message.delivery}}\n{{message.progress}}\n- While working, send an update only when it changes what the requester knows\n  or should expect: a significant finding, a change of approach, or a blocker.\n  Never post an update that only says you are still working.\n\nHandle the request.\n",
 } as const
 
 export type SkillId = keyof typeof skills

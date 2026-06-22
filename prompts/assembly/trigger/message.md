@@ -6,7 +6,7 @@ Current UTC time: {{time.utc}}.
 Target:
 {{message.target}}
 
-Recent conversation:
+Recent messages:
 {{message.conversation}}
 
 Message:
