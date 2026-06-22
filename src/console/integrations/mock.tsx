@@ -1,12 +1,7 @@
-import {
-  AlertTriangle,
-  CheckCircle2,
-  LoaderCircle,
-  Plug,
-  RotateCcw,
-} from "lucide-react"
+import { AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { FullscreenSkeletonLoader } from "@/console/shared/loading"
 import { RootStateFrame } from "@/shared/state"
 
 type SetupPreviewState = "connecting" | "connected" | "error"
@@ -65,23 +60,10 @@ function ErrorSetupPreview({ controls }: { controls: ReactNode }) {
 
 function ConnectingSetupPreview({ controls }: { controls: ReactNode }) {
   return (
-    <RootStateFrame
-      action={
-        <Button disabled type="button">
-          <LoaderCircle className="animate-spin" />
-          Opening provider
-        </Button>
-      }
-      description="Milo is preparing the authorization request for GitHub."
-      icon={<LoaderCircle className="animate-spin" />}
-      title="Connecting GitHub"
-    >
-      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-        <Plug className="size-4" />
-        GitHub requested from Slack
-      </div>
-      {controls}
-    </RootStateFrame>
+    <>
+      <FullscreenSkeletonLoader />
+      <div className="fixed right-4 bottom-4 z-[60]">{controls}</div>
+    </>
   )
 }
 

@@ -1,13 +1,9 @@
 import { useMutation } from "convex/react"
-import {
-  AlertTriangle,
-  CheckCircle2,
-  LoaderCircle,
-  RotateCcw,
-} from "lucide-react"
+import { AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { readErrorMessage } from "@/console/shared/error"
+import { FullscreenSkeletonLoader } from "@/console/shared/loading"
 import { RootStateFrame } from "@/shared/state"
 import { api } from "../../../convex/_generated/api"
 
@@ -137,19 +133,7 @@ function SetupErrorView({
 }
 
 function ConnectingSetupView() {
-  return (
-    <RootStateFrame
-      action={
-        <Button disabled type="button">
-          <LoaderCircle className="animate-spin" />
-          Opening provider
-        </Button>
-      }
-      description="Milo is preparing the authorization request."
-      icon={<LoaderCircle className="animate-spin" />}
-      title="Connecting integration"
-    />
-  )
+  return <FullscreenSkeletonLoader />
 }
 
 function setupReturnUrl() {
