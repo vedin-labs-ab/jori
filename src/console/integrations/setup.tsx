@@ -1,18 +1,18 @@
 import { useMutation } from "convex/react"
-import { AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
 import { readErrorMessage } from "@/console/shared/error"
 import { FullscreenSkeletonLoader } from "@/console/shared/loading"
-import { RootStateFrame } from "@/shared/state"
 import { api } from "../../../convex/_generated/api"
+import { IntegrationSetupOutcome } from "./outcome"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
+
+type SetupErrorKind = "expired" | "retryable" | "terminal"
 
 type SetupState =
   | { status: "connecting" }
   | { status: "connected" }
-  | { status: "error"; message: string }
+  | { kind: SetupErrorKind; status: "error" }
 
 export function IntegrationSetup({ token }: { token: string }) {
   const { retry, state } = useIntegrationSetup(token)
@@ -22,7 +22,7 @@ export function IntegrationSetup({ token }: { token: string }) {
   }
 
   if (state.status === "error") {
-    return <SetupErrorView message={state.message} retry={retry} />
+    return <SetupErrorView kind={state.kind} retry={retry} />
   }
 
   return <ConnectingSetupView />
@@ -35,9 +35,8 @@ function useIntegrationSetup(token: string) {
   const [state, setState] = useState<SetupState>(
     providerError
       ? {
+          kind: "retryable",
           status: "error",
-          message:
-            "The provider did not finish connecting. Try again when ready.",
         }
       : { status: "connecting" }
   )
@@ -48,7 +47,7 @@ function useIntegrationSetup(token: string) {
     }
 
     if (!convexSiteUrl) {
-      setState({ status: "error", message: "Missing VITE_CONVEX_SITE_URL." })
+      setState({ kind: "terminal", status: "error" })
       return
     }
 
@@ -74,12 +73,14 @@ function useIntegrationSetup(token: string) {
         window.location.assign(installUrl.toString())
       } catch (error) {
         if (!cancelled) {
+          const message = readErrorMessage(
+            error,
+            "This setup link could not be opened."
+          )
+
           setState({
+            kind: classifySetupError(message),
             status: "error",
-            message: readErrorMessage(
-              error,
-              "This setup link could not be opened."
-            ),
           })
         }
       }
@@ -96,40 +97,25 @@ function useIntegrationSetup(token: string) {
 }
 
 function ConnectedSetupView() {
-  return (
-    <RootStateFrame
-      action={
-        <Button asChild variant="outline">
-          <a href="/integrations">View integrations</a>
-        </Button>
-      }
-      description="The integration is connected and available to Milo."
-      icon={<CheckCircle2 />}
-      title="Integration connected"
-    />
-  )
+  return <IntegrationSetupOutcome variant="connected" />
 }
 
 function SetupErrorView({
-  message,
+  kind,
   retry,
 }: {
-  message: string
+  kind: SetupErrorKind
   retry: () => void
 }) {
-  return (
-    <RootStateFrame
-      action={
-        <Button onClick={retry} type="button">
-          <RotateCcw />
-          Try again
-        </Button>
-      }
-      description={message}
-      icon={<AlertTriangle />}
-      title="Setup link needs attention"
-    />
-  )
+  if (kind === "expired") {
+    return <IntegrationSetupOutcome variant="expired" />
+  }
+
+  if (kind === "terminal") {
+    return <IntegrationSetupOutcome variant="terminal" />
+  }
+
+  return <IntegrationSetupOutcome onRetry={retry} variant="failed" />
 }
 
 function ConnectingSetupView() {
@@ -153,4 +139,26 @@ function readProviderError() {
   const search = new URLSearchParams(window.location.search)
 
   return Array.from(search.values()).some((value) => value === "error")
+}
+
+function classifySetupError(message: string): SetupErrorKind {
+  const normalized = message.toLowerCase()
+
+  if (
+    normalized.includes("expired") ||
+    normalized.includes("not found") ||
+    normalized.includes("already claimed")
+  ) {
+    return "expired"
+  }
+
+  if (
+    normalized.includes("missing") ||
+    normalized.includes("must be") ||
+    normalized.includes("another user")
+  ) {
+    return "terminal"
+  }
+
+  return "retryable"
 }
