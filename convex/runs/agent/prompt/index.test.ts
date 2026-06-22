@@ -137,6 +137,8 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("first-action note")
     expect(prompt).toContain("not an acknowledgement plus plan")
     expect(prompt).toContain("Vary the sentence shape")
+    expect(prompt).toContain("Start update shape for this run:")
+    expect(prompt).toContain("do not mention the shape")
     expect(prompt).toContain(
       "I'll find a Notion parent first, then ask for your approval"
     )
