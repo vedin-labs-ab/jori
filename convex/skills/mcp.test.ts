@@ -1,4 +1,8 @@
 import { expect, test } from "vitest"
+import {
+  decodeToolResult,
+  encodeToolResult,
+} from "../../contracts/tool-transport"
 import { callMiloSkillTool } from "./mcp"
 
 test("loads an available runtime skill", () => {
@@ -25,6 +29,22 @@ test("loads complete instructions with all communication parts", () => {
       instructions: expect.stringContaining(
         "Use Slack `blocks` when native structure"
       ),
+    },
+  })
+})
+
+test("loads non-integration skills with JSON-safe metadata", () => {
+  const result = callMiloSkillTool({
+    tool: "load_skill",
+    args: { name: "image-generation" },
+  })
+
+  expect(decodeToolResult(encodeToolResult(result))).toMatchObject({
+    status: "loaded",
+    skill: {
+      name: "image-generation",
+      associatedIntegrations: [],
+      instructions: expect.stringContaining("Call `generate_image`"),
     },
   })
 })
