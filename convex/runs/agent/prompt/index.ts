@@ -150,14 +150,25 @@ function formatMessageConversationEntry(
 
   return renderPromptTemplate(promptTemplates["conversation/message"], {
     message: {
-      actor: entry.actor,
-      authority: entry.source === "user" ? "authoritative" : "soft",
+      actor: entry.actor ?? "unknown",
       observedAt: new Date(observed).toISOString(),
-      source: entry.source,
+      speaker: formatMessageSpeaker(entry.source),
       text: entry.text,
-      type: entry.type,
     },
   }).trim()
+}
+
+function formatMessageSpeaker(
+  source: Extract<
+    AgentRuntimeInput,
+    { type: "message" }
+  >["conversation"][number]["source"]
+) {
+  if (source === "self") {
+    return "system"
+  }
+
+  return source
 }
 
 function createAutomationValues(

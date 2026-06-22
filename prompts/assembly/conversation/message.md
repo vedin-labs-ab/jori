@@ -1,4 +1,4 @@
-- {{message.observedAt}} | source={{message.source}} | authority={{message.authority}} | type={{message.type}}{{? message.actor prefix=" | actor="}}
+- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}
 ```text
 {{message.text}}
 ```

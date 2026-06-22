@@ -13,19 +13,25 @@ type ConversationEntry = MessageInput["conversation"][number]
 test("renders recent conversation context without duplicating the trigger", () => {
   const prompt = assemblePrompt(messageInputWithConversation())
 
-  expect(prompt).toContain(
-    "source=user | authority=authoritative | type=message | actor=Albin"
-  )
-  expect(prompt).toContain(
-    "source=self | authority=soft | type=milo.reply | actor=Milo"
-  )
-  expect(prompt).toContain(
-    "source=bot | authority=soft | type=message | actor=CI"
-  )
-  expect(prompt).toContain("source=bot | authority=soft | type=event\n")
-  expect(prompt).not.toContain("type=event | actor=")
+  expect(prompt).toContain("Recent messages:")
+  expect(prompt).not.toContain("Recent conversation:")
+  expect(prompt).toContain("- 1970-01-01T00:00:01.000Z | user | Albin")
+  expect(prompt).toContain("- 1970-01-01T00:00:02.000Z | system | Milo")
+  expect(prompt).toContain("- 1970-01-01T00:00:03.000Z | bot | CI")
+  expect(prompt).toContain("- 1970-01-01T00:00:03.500Z | bot | unknown")
+  expect(prompt).not.toContain("source=")
+  expect(prompt).not.toContain("authority=")
+  expect(prompt).not.toContain("type=event")
   expect(prompt).toContain("I can take a quick look.")
   expect(prompt).not.toContain("Duplicate trigger context.")
+})
+
+test("keeps explicit empty recent messages context", () => {
+  const prompt = assemblePrompt(
+    runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
+  )
+
+  expect(prompt).toContain("Recent messages:\n- None")
 })
 
 function messageInputWithConversation() {

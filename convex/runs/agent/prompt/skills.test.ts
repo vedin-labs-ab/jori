@@ -16,6 +16,7 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("Use `load_skill`")
     expect(prompt).toContain("`slack`: Format Slack replies")
     expect(prompt).not.toContain("# Communication")
+    expect(prompt).not.toContain("Guidance:")
     expect(prompt).not.toContain("Do not use app-callback controls")
   })
 
