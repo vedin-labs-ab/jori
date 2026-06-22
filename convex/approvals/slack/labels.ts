@@ -18,6 +18,7 @@ const toolLabels: Record<string, string> = {
   conversations_replies: "Read Slack thread replies",
   conversations_search_messages: "Search Slack messages",
   delete_automation: "Delete automation",
+  generate_image: "Generate image",
   google_calendar_create_event: "Create Google Calendar event",
   google_calendar_get_event: "Read Google Calendar event",
   google_calendar_list_events: "List Google Calendar events",

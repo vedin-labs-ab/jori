@@ -10,6 +10,7 @@ import {
   tool,
 } from "ai"
 import { toJsonObject } from "../../contracts/json"
+import { requireOpenRouterRuntimeConfig } from "./config"
 import {
   type ModelMessage,
   type ModelResponse,
@@ -26,14 +27,14 @@ const agentProviderRouting = {
 } satisfies NonNullable<OpenRouterChatSettings["provider"]>
 
 export class OpenRouterModelRuntime implements ModelRuntime {
-  private readonly config = requireModelConfig()
+  private readonly config = {
+    ...requireOpenRouterRuntimeConfig(),
+    model: agentModel,
+  }
   private readonly provider = createOpenRouter({
     apiKey: this.config.apiKey,
-    appName: readEnvironmentVariable("OPENROUTER_APP_TITLE") ?? "Milo",
-    appUrl:
-      readEnvironmentVariable("OPENROUTER_HTTP_REFERER") ??
-      readEnvironmentVariable("CONVEX_SITE_URL") ??
-      readEnvironmentVariable("VITE_CONVEX_SITE_URL"),
+    appName: this.config.appName,
+    appUrl: this.config.appUrl,
   })
 
   async complete(args: {
@@ -185,23 +186,4 @@ function readToolInput(value: unknown) {
   }
 
   return toJsonObject(value)
-}
-
-function requireModelConfig() {
-  const apiKey = readEnvironmentVariable("OPENROUTER_API_KEY")
-
-  if (apiKey === undefined) {
-    throw new Error("Missing OPENROUTER_API_KEY")
-  }
-
-  return {
-    apiKey,
-    model: agentModel,
-  }
-}
-
-function readEnvironmentVariable(name: string) {
-  const value = process.env[name]?.trim()
-
-  return value === "" ? undefined : value
 }

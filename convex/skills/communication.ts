@@ -58,7 +58,7 @@ function createGuidanceBlock(
   skill: RuntimeSkill,
   capabilities: readonly CommunicationCapability[]
 ) {
-  const communication = skill.communication
+  const communication = runtimeSkillCommunication(skill)
 
   if (communication === undefined) {
     return ""
@@ -81,4 +81,8 @@ function createGuidanceBlock(
 
 function formatPart(body?: string) {
   return body === undefined ? [] : [body]
+}
+
+function runtimeSkillCommunication(skill: RuntimeSkill) {
+  return "communication" in skill ? skill.communication : undefined
 }

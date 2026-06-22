@@ -2,6 +2,7 @@ import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../contracts/integrations"
 import { decodeToolResult, encodeToolInput } from "../contracts/tool-transport"
 import { api } from "../convex/_generated/api"
+import { parseUploadedAttachment, type UploadedAttachment } from "./attachments"
 import {
   type AgentRunPayload,
   type ConvexId,
@@ -108,7 +109,7 @@ export class MiloConvexClient {
     mimeType: string
     name: string
     runId: ConvexId<"runs">
-  }) {
+  }): Promise<UploadedAttachment> {
     const url = new URL("/milo/attachments", requireConvexSiteUrl())
     url.searchParams.set("name", args.name)
 
@@ -131,7 +132,7 @@ export class MiloConvexClient {
       throw new Error(attachmentUploadError(result))
     }
 
-    return result
+    return parseUploadedAttachment(result)
   }
 
   async fetchGitHubTarball(args: {

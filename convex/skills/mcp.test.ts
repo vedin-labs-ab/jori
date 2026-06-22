@@ -35,10 +35,13 @@ test("returns available skills when a skill is unknown", () => {
   ).toMatchObject({
     status: "not_found",
     name: "github",
-    availableSkills: [
+    availableSkills: expect.arrayContaining([
+      expect.objectContaining({
+        name: "image-generation",
+      }),
       expect.objectContaining({
         name: "slack",
       }),
-    ],
+    ]),
   })
 })

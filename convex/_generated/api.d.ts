@@ -231,7 +231,9 @@ import type * as runs_agent_tools_schemas_google from "../runs/agent/tools/schem
 import type * as runs_agent_tools_schemas_index from "../runs/agent/tools/schemas/index.js";
 import type * as runs_agent_tools_schemas_linear from "../runs/agent/tools/schemas/linear.js";
 import type * as runs_agent_tools_schemas_microsoft from "../runs/agent/tools/schemas/microsoft.js";
-import type * as runs_agent_tools_schemas_milo from "../runs/agent/tools/schemas/milo.js";
+import type * as runs_agent_tools_schemas_milo_automations from "../runs/agent/tools/schemas/milo/automations.js";
+import type * as runs_agent_tools_schemas_milo_core from "../runs/agent/tools/schemas/milo/core.js";
+import type * as runs_agent_tools_schemas_milo_index from "../runs/agent/tools/schemas/milo/index.js";
 import type * as runs_agent_tools_schemas_notion from "../runs/agent/tools/schemas/notion.js";
 import type * as runs_agent_tools_schemas_notion_media from "../runs/agent/tools/schemas/notion_media.js";
 import type * as runs_agent_tools_schemas_slack from "../runs/agent/tools/schemas/slack.js";
@@ -512,7 +514,9 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/index": typeof runs_agent_tools_schemas_index;
   "runs/agent/tools/schemas/linear": typeof runs_agent_tools_schemas_linear;
   "runs/agent/tools/schemas/microsoft": typeof runs_agent_tools_schemas_microsoft;
-  "runs/agent/tools/schemas/milo": typeof runs_agent_tools_schemas_milo;
+  "runs/agent/tools/schemas/milo/automations": typeof runs_agent_tools_schemas_milo_automations;
+  "runs/agent/tools/schemas/milo/core": typeof runs_agent_tools_schemas_milo_core;
+  "runs/agent/tools/schemas/milo/index": typeof runs_agent_tools_schemas_milo_index;
   "runs/agent/tools/schemas/notion": typeof runs_agent_tools_schemas_notion;
   "runs/agent/tools/schemas/notion_media": typeof runs_agent_tools_schemas_notion_media;
   "runs/agent/tools/schemas/slack": typeof runs_agent_tools_schemas_slack;

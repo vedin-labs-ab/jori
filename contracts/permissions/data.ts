@@ -1,48 +1,12 @@
 import { githubToolPermissionRows } from "./github"
 import { googleToolPermissionRows } from "./google"
 import { type ToolPermissionRow } from "./index"
+import { miloToolPermissionRows } from "./milo"
 import { notionToolPermissionRows } from "./notion"
 import { webToolPermissionRows } from "./web"
 
 export const toolPermissionRows = [
-  [
-    "milo",
-    "list_capabilities",
-    "List capabilities",
-    "List current run tools, connected integration capabilities, and integrations available to connect.",
-    "read",
-    "required",
-  ],
-  [
-    "milo",
-    "load_skill",
-    "Load skill",
-    "Load full instructions for an available Milo skill.",
-    "read",
-    "required",
-  ],
-  [
-    "milo",
-    "save_attachment",
-    "Save attachment",
-    "Persist a generated sandbox file as a run attachment for tools that send attachments.",
-    "write",
-    "required",
-  ],
-  [
-    "milo",
-    "search_attachments",
-    "Search attachments",
-    "Find saved run attachments that can be reused or sent.",
-    "read",
-  ],
-  [
-    "milo",
-    "read_attachment",
-    "Read attachment",
-    "Inspect a saved run attachment by attachment ID.",
-    "read",
-  ],
+  ...miloToolPermissionRows,
   ...webToolPermissionRows,
   [
     "milo",

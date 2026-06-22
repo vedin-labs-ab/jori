@@ -8,6 +8,7 @@ import {
 } from "./attachments"
 import { type MiloConvexClient } from "./convex"
 import { errorDetails, runtimeEvent } from "./events"
+import { generateImageAttachment } from "./images/index"
 import { type ModelToolCall } from "./model/types"
 import { executeCodingTool } from "./sandbox/coding"
 import { type SandboxRuntime } from "./sandbox/types"
@@ -117,6 +118,10 @@ async function callConvexTool(
 ) {
   if (surface === "milo" && tool === "save_attachment") {
     return await saveSandboxAttachment(runtime, input)
+  }
+
+  if (surface === "milo" && tool === "generate_image") {
+    return await generateImageAttachment(runtime, input)
   }
 
   const result = await runtime.convex.callTool({
