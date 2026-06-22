@@ -1,6 +1,4 @@
 import { task } from "@trigger.dev/sdk/v3"
-import { promptTemplates } from "../../convex/prompts/generated"
-import { renderPromptTemplate } from "../../convex/prompts/render"
 import { MiloConvexClient } from "../convex"
 import { errorDetails, runtimeEvent } from "../events"
 import { OpenRouterModelRuntime } from "../model/openrouter"
@@ -16,9 +14,9 @@ import {
   agentTaskId,
   type RuntimeContext,
   type RuntimeEventType,
-  type RuntimeMessage,
   type RuntimeRunTraceData,
 } from "../types"
+import { formatSessionMessage } from "./messages"
 import { releaseSandbox } from "./sandbox"
 
 const maxAttempts = 3
@@ -150,24 +148,6 @@ async function appendSessionMessages(
   }
 
   return appended
-}
-
-function formatSessionMessage(message: RuntimeMessage) {
-  const observed = message.observedAt ?? message.createdAt
-
-  return renderPromptTemplate(promptTemplates["session/message"], {
-    message: {
-      actor: message.actor,
-      authority: message.authority,
-      identifiers: message.identifiers.join(", "),
-      integration: message.integration,
-      mentioned: message.mentioned ? "yes" : "no",
-      observedAt: new Date(observed).toISOString(),
-      source: message.source,
-      text: message.text,
-      type: message.type,
-    },
-  }).trim()
 }
 
 async function runToolCalls(
