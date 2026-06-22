@@ -90,6 +90,12 @@ export function readNested(
     : undefined
 }
 
-export function readArray(value: unknown) {
+export function readRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {}
+}
+
+export function readArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : []
 }

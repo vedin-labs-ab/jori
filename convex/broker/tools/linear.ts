@@ -1,8 +1,13 @@
 import { type Doc } from "../../_generated/dataModel"
 import { linearGraphqlUrl } from "../../providers/linear/config"
 import { requireLinearCredentials } from "../../providers/linear/credentials"
-import { fetchJson } from "../../shared/http"
-import { boundedNumber, requiredString } from "../../shared/input"
+import { fetchJsonObject } from "../../shared/http"
+import {
+  boundedNumber,
+  readArray,
+  readRecord,
+  requiredString,
+} from "../../shared/input"
 
 export async function callLinearTool(
   integration: Doc<"integrations">,
@@ -54,8 +59,12 @@ export async function callLinearTool(
       issuesById.set(String(exactIssue.id), exactIssue)
     }
 
-    for (const issue of result.data?.issues?.nodes ?? []) {
-      issuesById.set(String(issue.id), issue)
+    for (const issue of readArray(
+      readRecord(readRecord(result.data).issues).nodes
+    )) {
+      const record = readRecord(issue)
+
+      issuesById.set(String(record.id), record)
     }
 
     return { query, issues: [...issuesById.values()] }
@@ -92,7 +101,7 @@ export async function callLinearTool(
       variables: { id: requiredString(args.issueId, "issueId") },
     })
 
-    return result.data?.issue ?? null
+    return readRecord(result.data).issue ?? null
   }
 
   if (tool === "linear_list_comments") {
@@ -120,7 +129,9 @@ export async function callLinearTool(
       },
     })
 
-    return result.data?.issue?.comments?.nodes ?? []
+    return readArray(
+      readRecord(readRecord(readRecord(result.data).issue).comments).nodes
+    )
   }
 
   if (tool === "linear_add_comment") {
@@ -178,11 +189,11 @@ async function getLinearIssueSummaryByIdentifier(token: string, query: string) {
     variables: { id: query.toUpperCase() },
   })
 
-  return result.data?.issue ?? null
+  return readOptionalRecord(readRecord(result.data).issue)
 }
 
 async function linearGraphql(token: string, body: Record<string, unknown>) {
-  const result = await fetchJson(linearGraphqlUrl, {
+  const result = await fetchJsonObject(linearGraphqlUrl, {
     method: "POST",
     headers: {
       authorization: `Bearer ${token}`,
@@ -196,4 +207,10 @@ async function linearGraphql(token: string, body: Record<string, unknown>) {
   }
 
   return result
+}
+
+function readOptionalRecord(value: unknown) {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? readRecord(value)
+    : null
 }

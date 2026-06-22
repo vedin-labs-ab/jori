@@ -17,7 +17,7 @@ export const create = internalMutation({
     runId: v.id("runs"),
     surface: toolSurfaceValidator,
     tool: v.string(),
-    args: v.any(),
+    argsJson: v.string(),
     summary: v.string(),
     handoff: approvalHandoff,
     code: v.string(),
@@ -40,7 +40,16 @@ export const create = internalMutation({
 
     const expiresAt = now + approvalTtlMs
     const approvalId = await ctx.db.insert("approvals", {
-      ...args,
+      tenantId: args.tenantId,
+      runId: args.runId,
+      surface: args.surface,
+      tool: args.tool,
+      args: args.argsJson,
+      summary: args.summary,
+      handoff: args.handoff,
+      code: args.code,
+      waitpointTokenId: args.waitpointTokenId,
+      requestedBy: args.requestedBy,
       createdAt: now,
       expiresAt,
     })

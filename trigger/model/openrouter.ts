@@ -9,6 +9,7 @@ import {
   type ToolSet,
   tool,
 } from "ai"
+import { toJsonObject } from "../../contracts/json"
 import {
   type ModelMessage,
   type ModelResponse,
@@ -183,7 +184,7 @@ function readToolInput(value: unknown) {
     return {}
   }
 
-  return value as Record<string, unknown>
+  return toJsonObject(value)
 }
 
 function requireModelConfig() {

@@ -5,13 +5,16 @@ import { jsonErrorResponse } from "../../../shared/http"
 import {
   boundedNumber,
   optionalString,
+  readArray,
   readNested,
+  readRecord,
   requiredNumber,
   requiredString,
 } from "../../../shared/input"
 import {
   githubHeaders,
   githubJson,
+  githubJsonObject,
   repositoryPath,
   requireGitHubRuntimeToken,
 } from "./client"
@@ -96,20 +99,22 @@ function cloneRepository(_token: string, args: Record<string, unknown>) {
 }
 
 async function listRepositories(token: string, args: Record<string, unknown>) {
-  const result = await githubJson(token, "/installation/repositories", {
+  const result = await githubJsonObject(token, "/installation/repositories", {
     per_page: boundedNumber(args.perPage, 30, 1, 100),
     page: boundedNumber(args.page, 1, 1, 100),
   })
 
   return {
     totalCount: result.total_count,
-    repositories: (result.repositories ?? []).map(summarizeRepository),
+    repositories: readArray(result.repositories)
+      .map(readRecord)
+      .map(summarizeRepository),
   }
 }
 
 async function getRepository(token: string, args: Record<string, unknown>) {
   return summarizeRepository(
-    await githubJson(token, repositoryPath(args.owner, args.repo))
+    await githubJsonObject(token, repositoryPath(args.owner, args.repo))
   )
 }
 
@@ -125,7 +130,7 @@ async function searchIssues(token: string, args: Record<string, unknown>) {
     args.state === "open" || args.state === "closed"
       ? ` state:${args.state}`
       : ""
-  const result = await githubJson(token, "/search/issues", {
+  const result = await githubJsonObject(token, "/search/issues", {
     q: scopedQuery + state,
     per_page: boundedNumber(args.perPage, 30, 1, 100),
     page: boundedNumber(args.page, 1, 1, 100),
@@ -133,16 +138,18 @@ async function searchIssues(token: string, args: Record<string, unknown>) {
 
   return {
     totalCount: result.total_count,
-    items: (result.items ?? []).map((item: Record<string, unknown>) => ({
-      title: item.title,
-      number: item.number,
-      state: item.state,
-      repositoryUrl: item.repository_url,
-      htmlUrl: item.html_url,
-      pullRequest: item.pull_request !== undefined,
-      updatedAt: item.updated_at,
-      user: readNested(item, "user", "login"),
-    })),
+    items: readArray(result.items)
+      .map(readRecord)
+      .map((item) => ({
+        title: item.title,
+        number: item.number,
+        state: item.state,
+        repositoryUrl: item.repository_url,
+        htmlUrl: item.html_url,
+        pullRequest: item.pull_request !== undefined,
+        updatedAt: item.updated_at,
+        user: readNested(item, "user", "login"),
+      })),
   }
 }
 
@@ -150,7 +157,7 @@ async function getIssue(token: string, args: Record<string, unknown>) {
   const issueNumber = requiredNumber(args.issueNumber, "issueNumber")
   const commentsLimit = boundedNumber(args.comments, 30, 0, 100)
   const issuePath = `${repositoryPath(args.owner, args.repo)}/issues/${issueNumber}`
-  const issue = await githubJson(token, issuePath)
+  const issue = await githubJsonObject(token, issuePath)
   const comments =
     commentsLimit === 0
       ? []
@@ -160,14 +167,14 @@ async function getIssue(token: string, args: Record<string, unknown>) {
 
   return {
     issue: summarizeIssue(issue),
-    comments: comments.map(summarizeComment),
+    comments: readArray(comments).map(readRecord).map(summarizeComment),
   }
 }
 
 async function getPullRequest(token: string, args: Record<string, unknown>) {
   const pullNumber = requiredNumber(args.pullNumber, "pullNumber")
   return summarizePullRequest(
-    await githubJson(
+    await githubJsonObject(
       token,
       `${repositoryPath(args.owner, args.repo)}/pulls/${pullNumber}`
     )
@@ -186,31 +193,37 @@ async function getFile(token: string, args: Record<string, unknown>) {
   if (Array.isArray(result)) {
     return {
       type: "directory",
-      entries: result.map((entry) => ({
-        name: entry.name,
-        path: entry.path,
-        type: entry.type,
-        size: entry.size,
-        htmlUrl: entry.html_url,
-      })),
+      entries: result.map((entry) => {
+        const file = readRecord(entry)
+
+        return {
+          name: file.name,
+          path: file.path,
+          type: file.type,
+          size: file.size,
+          htmlUrl: file.html_url,
+        }
+      }),
     }
   }
 
-  if (result.type !== "file") {
-    return result
+  const file = readRecord(result)
+
+  if (file.type !== "file") {
+    return file
   }
 
   const content =
-    result.encoding === "base64" && typeof result.content === "string"
-      ? base64Decode(result.content)
+    file.encoding === "base64" && typeof file.content === "string"
+      ? base64Decode(file.content)
       : ""
 
   return {
-    name: result.name,
-    path: result.path,
-    sha: result.sha,
-    size: result.size,
-    htmlUrl: result.html_url,
+    name: file.name,
+    path: file.path,
+    sha: file.sha,
+    size: file.size,
+    htmlUrl: file.html_url,
     truncated: content.length > 100_000,
     content: content.slice(0, 100_000),
   }

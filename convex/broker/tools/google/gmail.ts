@@ -7,6 +7,8 @@ import { googleJson } from "../../../providers/google/api"
 import {
   optionalString,
   optionalStringArray,
+  readArray,
+  readRecord,
   requiredString,
   requiredStringArray,
 } from "../../../shared/input"
@@ -191,10 +193,12 @@ async function readGmailReplyContext(
     `https://gmail.googleapis.com/gmail/v1/users/me/threads/${encodeURIComponent(threadId)}?format=metadata`
   )
   const accountEmail = requireIntegrationEmail(integration)
-  const messages = [...(thread.messages ?? [])].sort(
-    (left, right) =>
-      Number(left.internalDate ?? 0) - Number(right.internalDate ?? 0)
-  )
+  const messages = readArray(thread.messages)
+    .map(readRecord)
+    .sort(
+      (left, right) =>
+        Number(left.internalDate ?? 0) - Number(right.internalDate ?? 0)
+    )
   const latestExternalMessage = [...messages].reverse().find((message) => {
     const from = parseOptionalEmailAddress(getHeader(message, "from"))
 

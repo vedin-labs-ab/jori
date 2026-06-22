@@ -1,3 +1,5 @@
+import { type JsonObject } from "../../contracts/json"
+
 export type SandboxCommandInput = {
   command: string
   cwd?: string
@@ -22,7 +24,7 @@ export type SandboxWriteFile = {
 }
 
 export type SandboxRuntime = {
-  buildArtifact(workspacePath: string): Promise<Record<string, unknown>>
+  buildArtifact(workspacePath: string): Promise<JsonObject>
   cleanup(): Promise<void>
   extractTarball(
     input: SandboxExtractTarballInput

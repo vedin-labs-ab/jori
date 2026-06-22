@@ -1,3 +1,4 @@
+import { type JsonObject } from "../../contracts/json"
 import { isWebTool } from "../../contracts/permissions/web"
 import { type ActionCtx } from "../_generated/server"
 import { canUseAutomationTool } from "../automations/access"
@@ -74,7 +75,7 @@ export async function callBrokerTool(
     approved?: boolean
     surface: ToolSurface
     tool: string
-    args: Record<string, unknown>
+    args: JsonObject
     waitpointTokenId?: string
   }
 ): Promise<unknown> {

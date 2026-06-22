@@ -1,9 +1,15 @@
 import { type GenericId } from "convex/values"
 import { type ToolSurface } from "../contracts/integrations"
+import { type JsonObject } from "../contracts/json"
 
+export type {
+  JsonArray,
+  JsonObject,
+  JsonPrimitive,
+  JsonValue,
+} from "../contracts/json"
 export { agentTaskId, cleanupTaskId } from "../contracts/runtime"
 
-export type JsonObject = Record<string, unknown>
 export type ConvexId<TableName extends string> = GenericId<TableName>
 
 export type AgentRunPayload = {

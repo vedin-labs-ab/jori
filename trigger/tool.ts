@@ -1,4 +1,5 @@
 import { type ToolSurface } from "../contracts/integrations"
+import { encodeUnknownJson } from "../contracts/json"
 import { awaitPromptedToolApproval } from "./approval"
 import {
   materializeSandboxResult,
@@ -43,8 +44,11 @@ export async function executeToolCall(args: {
 
     return toToolContent(result)
   } catch (error) {
-    await recordToolEvent(args, tool, "tool.failed", errorDetails(error))
-    throw error
+    const details = errorDetails(error)
+
+    await recordToolEvent(args, tool, "tool.failed", details)
+
+    return toToolContent(toolErrorResult(details.error))
   }
 }
 
@@ -196,7 +200,16 @@ function optionalString(value: unknown) {
 }
 
 function toToolContent(result: unknown) {
-  return JSON.stringify(result ?? null)
+  return encodeUnknownJson(result ?? null)
+}
+
+function toolErrorResult(message: string): JsonObject {
+  return {
+    error: {
+      message,
+    },
+    status: "error",
+  }
 }
 
 function toDetails(result: unknown): RuntimeToolTraceDetails {

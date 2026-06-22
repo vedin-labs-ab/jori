@@ -1,7 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { notionApiUrl, notionApiVersion } from "../../providers/notion/config"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
-import { fetchJson } from "../../shared/http"
+import { fetchJsonObject } from "../../shared/http"
 import { optionalString, requiredString } from "../../shared/input"
 
 export async function callNotionTool(
@@ -145,7 +145,7 @@ async function notionJson(
     }
   }
 
-  return await fetchJson(url.toString(), {
+  return await fetchJsonObject(url.toString(), {
     method,
     headers: {
       authorization: `Bearer ${token}`,

@@ -1,4 +1,4 @@
-import { readArray, readNested } from "../../../shared/input"
+import { readArray, readNested, readRecord } from "../../../shared/input"
 
 export function summarizeRepository(repository: Record<string, unknown>) {
   return {
@@ -22,9 +22,9 @@ export function summarizeIssue(issue: Record<string, unknown>) {
     htmlUrl: issue.html_url,
     pullRequest: issue.pull_request !== undefined,
     author: readNested(issue, "user", "login"),
-    assignees: readArray(issue.assignees).map((user) => user.login),
+    assignees: readArray(issue.assignees).map((user) => readRecord(user).login),
     labels: readArray(issue.labels).map((label) =>
-      typeof label === "string" ? label : label.name
+      typeof label === "string" ? label : readRecord(label).name
     ),
     createdAt: issue.created_at,
     updatedAt: issue.updated_at,
