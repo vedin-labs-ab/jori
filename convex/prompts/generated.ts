@@ -46,9 +46,9 @@ export const promptTemplates = {
     "# Approvals\n\nThese tools need explicit user approval: {{tools.names}}.\n\nTheir schemas require an `approval` object with `summary` and `handoff`. The tool call sends the approval request; do not ask for approval in chat.\nDo useful work that does not depend on the decision first.\nWrite `approval.handoff` for a fresh agent that continues after the user approves or denies the action.\nIf the result is `approval_requested`, stop.\n",
   "artifact/model":
     "{{artifact.instruction}}\n\nReturn only JSON that matches the provided response schema.\n\nDo not spend tokens on hidden reasoning.\n",
-  "communication/guidance": "Guidance:\n\n{{guidance.parts}}\n",
+  "communication/guidance": "## Guidance\n\n{{guidance.parts}}\n",
   "communication/message":
-    '# Communication\n\nWrite for the reply surface. Use its native formatting, syntax, and conventions\ninstead of generic Markdown. Keep replies conversational; avoid direct platform\nmentions unless needed to disambiguate in a busy thread.\n\nSurface: `{{surface.label}}`{{? communication.guidance prefix="\\n\\n"}}\n',
+    '# Communication\n\nWrite for the reply surface. Use its native formatting, syntax, and conventions.\nKeep replies conversational; avoid direct platform mentions unless needed to\ndisambiguate in a busy thread.\n\nSurface: `{{surface.label}}`{{? communication.guidance prefix="\\n\\n"}}\n',
   "conversation/message":
     '- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{{? message.identifiers prefix=" | "}}\n```text\n{{message.text}}\n```\n',
   "reference/automation":
