@@ -5,22 +5,26 @@ import { listRuntimeSkills } from "../../../skills/runtime"
 export function createSkillInstructions(args: {
   omittedNames: ReadonlySet<string>
 }) {
+  const available = listAvailableSkills(args.omittedNames)
+
+  if (available.length === 0) {
+    return ""
+  }
+
   return renderPromptTemplate(promptTemplates["skills/discovery"], {
     skills: {
-      available: formatAvailableSkills(args.omittedNames),
+      available: formatAvailableSkills(available),
     },
   })
 }
 
-function formatAvailableSkills(omittedNames: ReadonlySet<string>) {
-  const available = listRuntimeSkills().filter(
-    (skill) => !omittedNames.has(skill.name)
-  )
+function listAvailableSkills(omittedNames: ReadonlySet<string>) {
+  return listRuntimeSkills().filter((skill) => !omittedNames.has(skill.name))
+}
 
-  if (available.length === 0) {
-    return "- None"
-  }
-
+function formatAvailableSkills(
+  available: ReturnType<typeof listRuntimeSkills>
+) {
   return available
     .map((skill) => `- \`${skill.name}\`: ${skill.description}`)
     .join("\n")
