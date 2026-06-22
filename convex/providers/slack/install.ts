@@ -3,6 +3,7 @@ import {
   internalMutation,
   internalQuery,
   mutation,
+  type QueryCtx,
 } from "../../_generated/server"
 import { buildInstallState } from "../install"
 import { createSignedSlackState } from "./signing"
@@ -21,30 +22,28 @@ export const getUserToken = internalQuery({
   args: {
     accountId: v.string(),
   },
+  returns: v.union(v.string(), v.null()),
   handler: async (ctx, args) => {
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_integration_and_external", (query) =>
-        query.eq("integration", "slack").eq("externalId", args.accountId)
-      )
-      .first()
+    const integration = await findActiveSlackIntegration(ctx, args.accountId)
 
-    if (integration === null || integration.status !== "active") {
-      return null
-    }
+    return readSlackUserToken(integration?.credentials) ?? null
+  },
+})
 
-    const credentials = integration.credentials
+export const getProfileLookupTarget = internalQuery({
+  args: {
+    accountId: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      tenantId: v.string(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const integration = await findActiveSlackIntegration(ctx, args.accountId)
 
-    if (
-      typeof credentials === "object" &&
-      credentials !== null &&
-      "user" in credentials &&
-      typeof credentials.user === "string"
-    ) {
-      return credentials.user
-    }
-
-    return null
+    return integration === null ? null : { tenantId: integration.tenantId }
   },
 })
 
@@ -116,3 +115,27 @@ export const recordOAuthInstallation = internalMutation({
     })
   },
 })
+
+async function findActiveSlackIntegration(ctx: QueryCtx, accountId: string) {
+  const integration = await ctx.db
+    .query("integrations")
+    .withIndex("by_integration_and_external", (query) =>
+      query.eq("integration", "slack").eq("externalId", accountId)
+    )
+    .first()
+
+  return integration?.status === "active" ? integration : null
+}
+
+function readSlackUserToken(credentials: unknown) {
+  if (
+    typeof credentials === "object" &&
+    credentials !== null &&
+    "user" in credentials &&
+    typeof credentials.user === "string"
+  ) {
+    return credentials.user
+  }
+
+  return undefined
+}

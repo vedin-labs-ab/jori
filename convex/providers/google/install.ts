@@ -214,6 +214,7 @@ async function upsertGoogleIdentity(
     profile: {
       id: string
       email: string
+      name?: string
     }
   }
 ) {
@@ -223,5 +224,6 @@ async function upsertGoogleIdentity(
     provider: "google",
     externalId: args.profile.id,
     email: args.profile.email,
+    name: args.profile.name,
   })
 }
