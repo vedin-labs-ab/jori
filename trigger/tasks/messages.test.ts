@@ -20,7 +20,7 @@ test("formats drained messages like conversation messages", () => {
 
   expect(
     formatted
-  ).toBe(`- 2026-06-22T09:34:35.618Z | system | Milo | slack_id=U0B96KZ7WJG
+  ).toBe(`- 2026-06-22T09:34:35.618Z | self | Milo | slack_id=U0B96KZ7WJG
 \`\`\`text
 Here's what I've got.
 \`\`\``)
