@@ -1,6 +1,6 @@
+import { calendarEventProperty } from "./calendar"
 import {
   numberProperty,
-  objectProperty,
   objectSchema,
   runAttachmentsProperty,
   type SchemaMap,
@@ -29,7 +29,7 @@ export const microsoftToolInputSchemas = {
   microsoft_email_update_message: objectSchema({
     required: ["messageId", "message"],
     properties: {
-      message: objectProperty("Partial Microsoft Graph message payload."),
+      message: microsoftMessagePatchProperty(),
       messageId: stringProperty("Outlook message or draft ID."),
     },
   }),
@@ -46,7 +46,11 @@ export const microsoftToolInputSchemas = {
       eventId: stringProperty("Microsoft Graph event ID."),
     },
   }),
-  microsoft_calendar_create_event: microsoftCalendarWriteSchema(["event"]),
+  microsoft_calendar_create_event: microsoftCalendarWriteSchema(
+    ["event"],
+    {},
+    calendarEventProperty("microsoft", "create")
+  ),
   microsoft_calendar_update_event: microsoftCalendarWriteSchema(
     ["eventId", "event"],
     { eventId: stringProperty("Microsoft Graph event ID.") }
@@ -73,14 +77,55 @@ function microsoftMessageSchema(properties: Record<string, unknown> = {}) {
   })
 }
 
+function microsoftMessagePatchProperty() {
+  return {
+    ...objectSchema({
+      properties: {
+        bccRecipients: graphRecipientsProperty(),
+        body: objectSchema({
+          required: ["content"],
+          properties: {
+            content: stringProperty("Message body content."),
+            contentType: { type: "string", enum: ["Text", "HTML"] },
+          },
+        }),
+        ccRecipients: graphRecipientsProperty(),
+        subject: stringProperty("Message subject."),
+        toRecipients: graphRecipientsProperty(),
+      },
+    }),
+    additionalProperties: true,
+    description: "Partial Microsoft Graph message payload.",
+  }
+}
+
+function graphRecipientsProperty() {
+  return {
+    type: "array",
+    items: objectSchema({
+      required: ["emailAddress"],
+      properties: {
+        emailAddress: objectSchema({
+          required: ["address"],
+          properties: {
+            address: stringProperty("Recipient email address."),
+            name: stringProperty("Recipient display name."),
+          },
+        }),
+      },
+    }),
+  }
+}
+
 function microsoftCalendarWriteSchema(
   required: string[],
-  properties: Record<string, unknown> = {}
+  properties: Record<string, unknown> = {},
+  event = calendarEventProperty("microsoft", "update")
 ) {
   return objectSchema({
     required,
     properties: {
-      event: objectProperty("Microsoft Graph event payload."),
+      event,
       sendUpdates: {
         type: "string",
         enum: ["all", "none"],
