@@ -7,6 +7,7 @@ import {
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
+import { completeSetupLink, failSetupLink } from "../install"
 import {
   linearOAuthAuthorizeUrl,
   linearOAuthCallbackPath,
@@ -73,6 +74,11 @@ export async function handleLinearOAuthCallback(
   })
 
   if ("error" in tokenResult) {
+    await failSetupLink(ctx, {
+      setupLinkId: state.setupLinkId,
+      error: "Linear OAuth token exchange failed.",
+    })
+
     return redirectWithStatus(state.returnUrl, "linear", "error")
   }
 
@@ -81,10 +87,15 @@ export async function handleLinearOAuthCallback(
   try {
     profile = await fetchLinearInstallationProfile(tokenResult.access_token)
   } catch {
+    await failSetupLink(ctx, {
+      setupLinkId: state.setupLinkId,
+      error: "Linear installation profile could not be loaded.",
+    })
+
     return redirectWithStatus(state.returnUrl, "linear", "error")
   }
 
-  await ctx.runMutation(
+  const integrationId = await ctx.runMutation(
     internal.providers.linear.install.recordOAuthInstallation,
     {
       tenantId: state.tenantId,
@@ -96,6 +107,11 @@ export async function handleLinearOAuthCallback(
       profile,
     }
   )
+
+  await completeSetupLink(ctx, {
+    setupLinkId: state.setupLinkId,
+    integrationId,
+  })
 
   return redirectWithStatus(state.returnUrl, "linear", "connected")
 }

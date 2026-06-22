@@ -1,3 +1,4 @@
+import { type Id } from "../../_generated/dataModel"
 import { createSignedState, parseSignedState } from "../signing"
 import { type GoogleIntegration } from "./config"
 import { requireGoogleClientSecret } from "./oauth"
@@ -8,6 +9,7 @@ export type GoogleInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
+  setupLinkId?: Id<"setupLinks">
 }
 
 export async function createSignedGoogleState(state: GoogleInstallState) {

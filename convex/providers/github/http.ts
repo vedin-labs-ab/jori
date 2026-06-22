@@ -6,6 +6,7 @@ import {
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
+import { completeSetupLink, failSetupLink } from "../install"
 import {
   fetchGitHubInstallationProfile,
   type GitHubInstallationProfile,
@@ -62,14 +63,27 @@ export async function handleGitHubInstallCallback(
   try {
     profile = await fetchGitHubInstallationProfile(installationId)
   } catch {
+    await failSetupLink(ctx, {
+      setupLinkId: state.setupLinkId,
+      error: "GitHub installation profile could not be loaded.",
+    })
+
     return redirectWithStatus(state.returnUrl, "github", "error")
   }
 
-  await ctx.runMutation(internal.providers.github.install.recordInstallation, {
-    tenantId: state.tenantId,
-    createdBy: state.createdBy,
-    installationId,
-    profile: normalizeInstallationProfile(profile),
+  const integrationId = await ctx.runMutation(
+    internal.providers.github.install.recordInstallation,
+    {
+      tenantId: state.tenantId,
+      createdBy: state.createdBy,
+      installationId,
+      profile: normalizeInstallationProfile(profile),
+    }
+  )
+
+  await completeSetupLink(ctx, {
+    setupLinkId: state.setupLinkId,
+    integrationId,
   })
 
   return redirectWithStatus(state.returnUrl, "github", "connected")

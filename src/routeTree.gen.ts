@@ -19,6 +19,7 @@ import { Route as ArtifactsRouteImport } from './routes/artifacts'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArtifactsIndexRouteImport } from './routes/artifacts/index'
 import { Route as ArtifactsArtifactIdIndexRouteImport } from './routes/artifacts/$artifactId/index'
+import { Route as IntegrationsSetupTokenRouteImport } from './routes/integrations/setup/$token'
 
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
@@ -71,28 +72,35 @@ const ArtifactsArtifactIdIndexRoute =
     path: '/$artifactId/',
     getParentRoute: () => ArtifactsRoute,
   } as any)
+const IntegrationsSetupTokenRoute = IntegrationsSetupTokenRouteImport.update({
+  id: '/setup/$token',
+  path: '/setup/$token',
+  getParentRoute: () => IntegrationsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/artifacts': typeof ArtifactsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/integrations': typeof IntegrationsRoute
+  '/integrations': typeof IntegrationsRouteWithChildren
   '/playbooks': typeof PlaybooksRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
+  '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/integrations': typeof IntegrationsRoute
+  '/integrations': typeof IntegrationsRouteWithChildren
   '/playbooks': typeof PlaybooksRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
   '/artifacts': typeof ArtifactsIndexRoute
+  '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
   '/artifacts/$artifactId': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRoutesById {
@@ -101,11 +109,12 @@ export interface FileRoutesById {
   '/artifacts': typeof ArtifactsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/integrations': typeof IntegrationsRoute
+  '/integrations': typeof IntegrationsRouteWithChildren
   '/playbooks': typeof PlaybooksRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
+  '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/runs'
     | '/skills'
     | '/artifacts/'
+    | '/integrations/setup/$token'
     | '/artifacts/$artifactId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/runs'
     | '/skills'
     | '/artifacts'
+    | '/integrations/setup/$token'
     | '/artifacts/$artifactId'
   id:
     | '__root__'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/runs'
     | '/skills'
     | '/artifacts/'
+    | '/integrations/setup/$token'
     | '/artifacts/$artifactId/'
   fileRoutesById: FileRoutesById
 }
@@ -151,7 +163,7 @@ export interface RootRouteChildren {
   ArtifactsRoute: typeof ArtifactsRouteWithChildren
   AutomationsRoute: typeof AutomationsRoute
   ConsoleRoute: typeof ConsoleRoute
-  IntegrationsRoute: typeof IntegrationsRoute
+  IntegrationsRoute: typeof IntegrationsRouteWithChildren
   PlaybooksRoute: typeof PlaybooksRoute
   RunsRoute: typeof RunsRoute
   SkillsRoute: typeof SkillsRoute
@@ -229,6 +241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtifactsArtifactIdIndexRouteImport
       parentRoute: typeof ArtifactsRoute
     }
+    '/integrations/setup/$token': {
+      id: '/integrations/setup/$token'
+      path: '/setup/$token'
+      fullPath: '/integrations/setup/$token'
+      preLoaderRoute: typeof IntegrationsSetupTokenRouteImport
+      parentRoute: typeof IntegrationsRoute
+    }
   }
 }
 
@@ -246,12 +265,24 @@ const ArtifactsRouteWithChildren = ArtifactsRoute._addFileChildren(
   ArtifactsRouteChildren,
 )
 
+interface IntegrationsRouteChildren {
+  IntegrationsSetupTokenRoute: typeof IntegrationsSetupTokenRoute
+}
+
+const IntegrationsRouteChildren: IntegrationsRouteChildren = {
+  IntegrationsSetupTokenRoute: IntegrationsSetupTokenRoute,
+}
+
+const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(
+  IntegrationsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArtifactsRoute: ArtifactsRouteWithChildren,
   AutomationsRoute: AutomationsRoute,
   ConsoleRoute: ConsoleRoute,
-  IntegrationsRoute: IntegrationsRoute,
+  IntegrationsRoute: IntegrationsRouteWithChildren,
   PlaybooksRoute: PlaybooksRoute,
   RunsRoute: RunsRoute,
   SkillsRoute: SkillsRoute,

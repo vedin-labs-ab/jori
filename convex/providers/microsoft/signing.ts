@@ -1,3 +1,4 @@
+import { type Id } from "../../_generated/dataModel"
 import { createSignedState, parseSignedState } from "../signing"
 import { type MicrosoftIntegration } from "./config"
 import { requireMicrosoftClientSecret } from "./oauth"
@@ -8,6 +9,7 @@ export type MicrosoftInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
+  setupLinkId?: Id<"setupLinks">
 }
 
 export async function createSignedMicrosoftState(state: MicrosoftInstallState) {
