@@ -1,6 +1,8 @@
-import { expect, test } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
+import { type ActionCtx } from "../../_generated/server"
+import { getActorDisplayName } from "../../shared/actor"
 import { type SlackApprovalDecisionResult } from "../runtime"
-import { parseSlackApprovalInteraction } from "."
+import { createSlackApprovalActor, parseSlackApprovalInteraction } from "."
 import {
   createSlackApprovalRequest,
   createSlackConsoleDecisionResponse,
@@ -32,6 +34,37 @@ test("parses Slack approval button payloads", () => {
     code: "ABC12345",
     decision: "approved",
   })
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+test("hydrates Slack approval actors with profile names", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      Response.json({
+        ok: true,
+        user: {
+          profile: {
+            email: "albin@example.com",
+            real_name: "Albin Vedin",
+          },
+        },
+      })
+    )
+  )
+  const ctx = {
+    runQuery: vi.fn(async () => "xoxp-user-token"),
+  } as unknown as ActionCtx
+
+  const actor = await createSlackApprovalActor(ctx, {
+    accountId: "T123",
+    actorId: "U123",
+  })
+
+  expect(getActorDisplayName(actor)).toBe("Albin Vedin")
 })
 
 test("renders Slack approval requests as compact cards", () => {
