@@ -17,6 +17,7 @@ import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as ArtifactsRouteImport } from './routes/artifacts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as ArtifactsIndexRouteImport } from './routes/artifacts/index'
 import { Route as ArtifactsArtifactIdIndexRouteImport } from './routes/artifacts/$artifactId/index'
 import { Route as IntegrationsSetupTokenRouteImport } from './routes/integrations/setup/$token'
@@ -61,6 +62,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => IntegrationsRoute,
+} as any)
 const ArtifactsIndexRoute = ArtifactsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
+  '/integrations/': typeof IntegrationsIndexRoute
   '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
@@ -95,11 +102,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/integrations': typeof IntegrationsRouteWithChildren
   '/playbooks': typeof PlaybooksRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
   '/artifacts': typeof ArtifactsIndexRoute
+  '/integrations': typeof IntegrationsIndexRoute
   '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
   '/artifacts/$artifactId': typeof ArtifactsArtifactIdIndexRoute
 }
@@ -114,6 +121,7 @@ export interface FileRoutesById {
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
+  '/integrations/': typeof IntegrationsIndexRoute
   '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
@@ -129,6 +137,7 @@ export interface FileRouteTypes {
     | '/runs'
     | '/skills'
     | '/artifacts/'
+    | '/integrations/'
     | '/integrations/setup/$token'
     | '/artifacts/$artifactId/'
   fileRoutesByTo: FileRoutesByTo
@@ -136,11 +145,11 @@ export interface FileRouteTypes {
     | '/'
     | '/automations'
     | '/console'
-    | '/integrations'
     | '/playbooks'
     | '/runs'
     | '/skills'
     | '/artifacts'
+    | '/integrations'
     | '/integrations/setup/$token'
     | '/artifacts/$artifactId'
   id:
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/runs'
     | '/skills'
     | '/artifacts/'
+    | '/integrations/'
     | '/integrations/setup/$token'
     | '/artifacts/$artifactId/'
   fileRoutesById: FileRoutesById
@@ -227,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/integrations/': {
+      id: '/integrations/'
+      path: '/'
+      fullPath: '/integrations/'
+      preLoaderRoute: typeof IntegrationsIndexRouteImport
+      parentRoute: typeof IntegrationsRoute
+    }
     '/artifacts/': {
       id: '/artifacts/'
       path: '/'
@@ -266,10 +283,12 @@ const ArtifactsRouteWithChildren = ArtifactsRoute._addFileChildren(
 )
 
 interface IntegrationsRouteChildren {
+  IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   IntegrationsSetupTokenRoute: typeof IntegrationsSetupTokenRoute
 }
 
 const IntegrationsRouteChildren: IntegrationsRouteChildren = {
+  IntegrationsIndexRoute: IntegrationsIndexRoute,
   IntegrationsSetupTokenRoute: IntegrationsSetupTokenRoute,
 }
 
