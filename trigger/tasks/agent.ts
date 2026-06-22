@@ -1,4 +1,6 @@
 import { task } from "@trigger.dev/sdk/v3"
+import { promptTemplates } from "../../convex/prompts/generated"
+import { renderPromptTemplate } from "../../convex/prompts/render"
 import { MiloConvexClient } from "../convex"
 import { errorDetails, runtimeEvent } from "../events"
 import { OpenRouterModelRuntime } from "../model/openrouter"
@@ -153,20 +155,18 @@ async function appendSessionMessages(
 function formatSessionMessage(message: RuntimeMessage) {
   const observed = message.observedAt ?? message.createdAt
 
-  return [
-    `New ${message.integration} message in the active conversation.`,
-    `Source: ${message.source}`,
-    `Authority: ${message.authority}`,
-    ...(message.actor === null ? [] : [`Actor: ${message.actor}`]),
-    `Type: ${message.type}`,
-    `Mentioned Milo: ${message.mentioned ? "yes" : "no"}`,
-    `Observed at: ${new Date(observed).toISOString()}`,
-    "",
-    "Message:",
-    "```text",
-    message.text,
-    "```",
-  ].join("\n")
+  return renderPromptTemplate(promptTemplates["session/message"], {
+    message: {
+      actor: message.actor,
+      authority: message.authority,
+      integration: message.integration,
+      mentioned: message.mentioned ? "yes" : "no",
+      observedAt: new Date(observed).toISOString(),
+      source: message.source,
+      text: message.text,
+      type: message.type,
+    },
+  }).trim()
 }
 
 async function runToolCalls(
