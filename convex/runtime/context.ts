@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { withApprovalSchema } from "../../contracts/approvals"
 import { codingToolDefinitions } from "../../contracts/coding"
 import { isWebTool } from "../../contracts/permissions/web"
 import { internal } from "../_generated/api"
@@ -23,7 +24,6 @@ import {
 } from "../runs/agent/tools/schemas"
 import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
 import { toolSnapshot } from "../runs/schema"
-import { withApprovalSchema } from "./schemas"
 import { requireWorkerSecret } from "./shared"
 import { recordTrace } from "./traces"
 

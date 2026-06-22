@@ -9,7 +9,7 @@ import {
 } from "../_generated/server"
 import { actorValidator } from "../shared/actor"
 import { toolSurfaceValidator } from "../shared/integrations"
-import { approvalDecision, approvalDelivery, approvalHandoff } from "./schema"
+import { approvalDecision, approvalDelivery } from "./schema"
 
 export const create = internalMutation({
   args: {
@@ -19,7 +19,6 @@ export const create = internalMutation({
     tool: v.string(),
     inputJson: v.string(),
     summary: v.string(),
-    handoff: approvalHandoff,
     code: v.string(),
     waitpointId: v.optional(v.string()),
     requestedBy: actorValidator,
@@ -46,7 +45,6 @@ export const create = internalMutation({
       tool: args.tool,
       args: args.inputJson,
       summary: args.summary,
-      handoff: args.handoff,
       code: args.code,
       waitpointId: args.waitpointId,
       requestedBy: args.requestedBy,

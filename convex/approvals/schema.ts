@@ -7,11 +7,6 @@ export const approvalDecision = v.union(
   v.literal("approved"),
   v.literal("denied")
 )
-export const approvalHandoff = v.object({
-  objective: v.string(),
-  progress: v.string(),
-  next: v.string(),
-})
 export const approvalDelivery = v.union(
   v.object({
     integration: v.literal("slack"),
@@ -31,7 +26,6 @@ export const approvals = defineTable({
   tool: v.string(),
   args: v.string(),
   summary: v.string(),
-  handoff: approvalHandoff,
   code: v.string(),
   waitpointId: v.optional(v.string()),
   requestedBy: actorValidator,

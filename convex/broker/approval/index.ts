@@ -97,7 +97,6 @@ export async function createPromptedToolApproval(
       tool: request.tool,
       ...encodeToolInput(request.args),
       summary: request.summary,
-      handoff: request.handoff,
       code,
       waitpointId: args.waitpointId,
       requestedBy,

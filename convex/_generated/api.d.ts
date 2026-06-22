@@ -261,7 +261,6 @@ import type * as runtime_context from "../runtime/context.js";
 import type * as runtime_dispatch from "../runtime/dispatch.js";
 import type * as runtime_outbox from "../runtime/outbox.js";
 import type * as runtime_sandboxes from "../runtime/sandboxes.js";
-import type * as runtime_schemas from "../runtime/schemas.js";
 import type * as runtime_sessions from "../runtime/sessions.js";
 import type * as runtime_shared from "../runtime/shared.js";
 import type * as runtime_tools from "../runtime/tools.js";
@@ -543,7 +542,6 @@ declare const fullApi: ApiFromModules<{
   "runtime/dispatch": typeof runtime_dispatch;
   "runtime/outbox": typeof runtime_outbox;
   "runtime/sandboxes": typeof runtime_sandboxes;
-  "runtime/schemas": typeof runtime_schemas;
   "runtime/sessions": typeof runtime_sessions;
   "runtime/shared": typeof runtime_shared;
   "runtime/tools": typeof runtime_tools;
