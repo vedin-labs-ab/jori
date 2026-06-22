@@ -1,5 +1,6 @@
 import { type JsonObject } from "../../../contracts/json"
 import { type ToolSurface } from "../../shared/integrations"
+import { normalizeBrokerToolInput } from "../input"
 
 export type PromptedToolApproval = {
   surface: ToolSurface
@@ -31,7 +32,7 @@ export function parsePromptedToolApproval(args: {
   return {
     surface: args.surface,
     tool: args.tool,
-    args: toolArgs,
+    args: normalizeBrokerToolInput(args.tool, toolArgs),
     summary: approval.summary,
     handoff: approval.handoff,
   }

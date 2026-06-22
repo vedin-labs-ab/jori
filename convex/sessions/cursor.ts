@@ -36,7 +36,7 @@ export function collectPendingBatch(
 
     cursor = message
 
-    if (hasText(message)) {
+    if (isRuntimeInputMessage(message)) {
       pending.push(message)
     }
 
@@ -102,4 +102,8 @@ function hasText(message: Doc<"messages">) {
   const text = message.text?.trim()
 
   return text !== undefined && text !== ""
+}
+
+function isRuntimeInputMessage(message: Doc<"messages">) {
+  return hasText(message) && message.actor?.kind !== "self"
 }

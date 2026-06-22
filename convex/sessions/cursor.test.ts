@@ -32,6 +32,44 @@ test("does not advance past the returned message limit", () => {
   expect(batch.hasMore).toBe(true)
 })
 
+test("advances across self messages without returning them as user input", () => {
+  const batch = collectPendingBatch(
+    [
+      message("last", 1, "Already consumed."),
+      message("approval", 2, "Milo needs approval.", {
+        actor: { externalId: "UBOT", kind: "self" },
+      }),
+      message("next", 3, "Follow up.", {
+        actor: { externalId: "U123", kind: "user" },
+      }),
+    ],
+    session("last", 1),
+    10,
+    false
+  )
+
+  expect(batch.messages.map((item) => item._id)).toEqual(["next"])
+  expect(batch.cursor?._id).toBe("next")
+  expect(batch.hasMore).toBe(false)
+})
+
+test("advances the cursor when only self messages are pending", () => {
+  const batch = collectPendingBatch(
+    [
+      message("last", 1, "Already consumed."),
+      message("approval", 2, "Milo needs approval.", {
+        actor: { externalId: "UBOT", kind: "self" },
+      }),
+    ],
+    session("last", 1),
+    10,
+    false
+  )
+
+  expect(batch.messages).toEqual([])
+  expect(batch.cursor?._id).toBe("approval")
+})
+
 test("formats runtime messages with normalized text and identifiers", () => {
   expect(
     formatRuntimeMessage(

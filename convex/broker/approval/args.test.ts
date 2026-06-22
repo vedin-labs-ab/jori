@@ -6,8 +6,12 @@ test("extracts approval metadata and strips it from tool args", () => {
     surface: "notion",
     tool: "notion_create_page",
     args: {
-      parent: { type: "workspace" },
-      title: "Random page",
+      parent: { page_id: "page_1" },
+      properties: {
+        title: {
+          title: [{ text: { content: "Random page" } }],
+        },
+      },
       approval: {
         summary: "Create a random Notion page.",
         handoff: {
@@ -21,8 +25,12 @@ test("extracts approval metadata and strips it from tool args", () => {
 
   expect(approval.summary).toBe("Create a random Notion page.")
   expect(approval.args).toEqual({
-    parent: { type: "workspace" },
-    title: "Random page",
+    parent: { page_id: "page_1" },
+    properties: {
+      title: {
+        title: [{ text: { content: "Random page" } }],
+      },
+    },
   })
 })
 

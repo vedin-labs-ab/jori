@@ -23,6 +23,7 @@ import {
 } from "./approval"
 import { authenticateBrokerRequest } from "./auth"
 import { listCapabilities } from "./capabilities"
+import { normalizeBrokerToolInput } from "./input"
 import { callMiloTool } from "./milo"
 import { callProviderTool, fetchGitHubTarball } from "./tools"
 
@@ -38,7 +39,10 @@ export async function handleGitHubTarballRequest(
     return unauthorizedResponse()
   }
 
-  const args = normalizeToolArgs(await request.json().catch(() => null))
+  const args = normalizeBrokerToolInput(
+    "github_clone_repository",
+    await request.json().catch(() => null)
+  )
   const { permission } = authorizeTool(context, {
     surface: "github",
     tool: "github_clone_repository",
@@ -90,7 +94,10 @@ export async function callBrokerTool(
       return await createPromptedToolApproval(ctx, context, request)
     }
 
-    return await callMiloTool(ctx, context.run, request)
+    return await callMiloTool(ctx, context.run, {
+      ...request,
+      args: normalizeBrokerToolInput(request.tool, request.args),
+    })
   }
 
   const surface = request.surface
@@ -109,12 +116,14 @@ export async function callBrokerTool(
     return await createPromptedToolApproval(ctx, context, request)
   }
 
+  const toolArgs = normalizeBrokerToolInput(request.tool, request.args)
+
   return await callProviderTool({
     ctx,
     integration,
     run: context.run,
     tool: request.tool,
-    toolArgs: request.args,
+    toolArgs,
   })
 }
 
@@ -198,12 +207,4 @@ function findSurfaceIntegration(
         integration.status === "active" && integration.integration === surface
     ) ?? null
   )
-}
-
-function normalizeToolArgs(args: unknown) {
-  if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    return {}
-  }
-
-  return args as Record<string, unknown>
 }

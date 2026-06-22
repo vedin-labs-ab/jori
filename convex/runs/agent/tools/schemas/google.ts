@@ -1,6 +1,6 @@
+import { calendarEventProperty } from "./calendar"
 import {
   numberProperty,
-  objectProperty,
   objectSchema,
   runAttachmentsProperty,
   type SchemaMap,
@@ -46,7 +46,11 @@ export const googleToolInputSchemas = {
       eventId: stringProperty("Google Calendar event ID."),
     },
   }),
-  google_calendar_create_event: calendarWriteSchema(["event"]),
+  google_calendar_create_event: calendarWriteSchema(
+    ["event"],
+    {},
+    calendarEventProperty("google", "create")
+  ),
   google_calendar_update_event: calendarWriteSchema(["eventId", "event"], {
     eventId: stringProperty("Google Calendar event ID."),
   }),
@@ -185,13 +189,14 @@ function gmailBatchReadSchema(idsProperty: string) {
 
 function calendarWriteSchema(
   required: string[],
-  properties: Record<string, unknown> = {}
+  properties: Record<string, unknown> = {},
+  event = calendarEventProperty("google", "update")
 ) {
   return objectSchema({
     required,
     properties: {
       calendarId: stringProperty("Calendar ID. Defaults to primary."),
-      event: objectProperty("Google Calendar event payload."),
+      event,
       sendUpdates: {
         type: "string",
         enum: ["all", "externalOnly", "none"],
