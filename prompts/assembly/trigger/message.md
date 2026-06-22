@@ -4,29 +4,21 @@ A {{message.integration}} message triggered this run.
 Current UTC time: {{time.utc}}.
 
 Target:
+
 {{message.target}}
 
-Recent messages:
+History:
+
 {{message.conversation}}
 
 Message:
+
 ```text
 {{message.text}}
 ```
 
 Context:
-- The message is the starting point, not necessarily the whole request. For
-  non-trivial work, check the surrounding thread or related discussion before
-  acting; skip this only when the message is self-contained and the next step
-  is obvious.
-- This target does not limit which tools you may use; when the work or its
-  result lives elsewhere, report the outcome here.
-- If no reply or action is useful, complete silently with an empty final
-  response.
-{{message.delivery}}
-{{message.progress}}
-- While working, send an update only when it changes what the requester knows
-  or should expect: a significant finding, a change of approach, or a blocker.
-  Never post an update that only says you are still working.
-
-Handle the request.
+- Treat the message as the entry point. For non-trivial work, check surrounding context unless the next step is obvious.
+- Use any needed tools. Report the result back to this thread unless the work clearly belongs elsewhere.
+- Do not send routine acknowledgements or “still working” updates. Send updates only for material findings, pivots, or blockers.
+- If no useful reply or action exists, finish silently.
