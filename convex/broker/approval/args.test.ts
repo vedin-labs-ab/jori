@@ -14,11 +14,6 @@ test("extracts approval metadata and strips it from tool args", () => {
       },
       approval: {
         summary: "Create a random Notion page.",
-        handoff: {
-          objective: "Create the page and confirm it in Slack.",
-          progress: "The user asked for a random page at the root.",
-          next: "Reply with the created page link.",
-        },
       },
     },
   })
@@ -41,5 +36,5 @@ test("requires approval metadata", () => {
       tool: "notion_create_page",
       args: {},
     })
-  ).toThrow("Include approval summary and handoff")
+  ).toThrow("Include approval.summary")
 })

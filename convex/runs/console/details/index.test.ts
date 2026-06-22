@@ -39,11 +39,6 @@ test("includes approved decision actor details", async () => {
       tool: "chat_postMessage",
       args: {},
       summary: "Send a message.",
-      handoff: {
-        objective: "Send a message",
-        progress: "Ready",
-        next: "Send",
-      },
       code: "code",
       requestedBy: { kind: "user", email: "requester@example.com" },
       decidedBy: { kind: "user", email: "approver@example.com" },

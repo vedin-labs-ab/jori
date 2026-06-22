@@ -1,5 +1,9 @@
 import { wait } from "@trigger.dev/sdk/v3"
-import { approvalWaitTimeout } from "../contracts/approvals"
+import {
+  approvalSummaryValidationError,
+  approvalWaitTimeout,
+  readApprovalSummary,
+} from "../contracts/approvals"
 import { type ToolSurface } from "../contracts/integrations"
 import { runtimeEvent } from "./events"
 import { type ModelToolCall } from "./model/types"
@@ -27,6 +31,8 @@ export async function awaitPromptedToolApproval(args: {
   tool: Pick<RuntimeTool, "name" | "route">
   toolName: string
 }): Promise<PromptedToolApprovalResult> {
+  requireApprovalSummary(args.call.args, args.toolName)
+
   const token = await wait.createToken({
     idempotencyKey: `${args.runtime.context.run.id}:${args.call.id}`,
     tags: [args.runtime.context.run.id, `tool:${args.toolName}`],
@@ -57,6 +63,12 @@ export async function awaitPromptedToolApproval(args: {
   }
 
   return { approved: true, input: stripApproval(args.call.args) }
+}
+
+function requireApprovalSummary(input: JsonObject, toolName: string) {
+  if (readApprovalSummary(input) === null) {
+    throw new Error(approvalSummaryValidationError(toolName))
+  }
 }
 
 async function recordWaitingEvent(

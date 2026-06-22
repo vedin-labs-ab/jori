@@ -80,11 +80,6 @@ function approvalDoc(): Doc<"approvals"> {
     code: "ABC12345",
     createdAt: 0,
     expiresAt: 1,
-    handoff: {
-      next: "Report back.",
-      objective: "Create a page.",
-      progress: "Ready.",
-    },
     requestedBy: userActor(),
     runId: "run_1" as Id<"runs">,
     summary: "Create a page.",

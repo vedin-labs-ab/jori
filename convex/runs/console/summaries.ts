@@ -74,8 +74,6 @@ function searchableText(
     input.run.status,
     input.run.error,
     input.approval?.summary,
-    input.approval?.handoff.objective,
-    input.approval?.handoff.progress,
     input.approval?.tool,
     input.run.cause.type,
     input.task,

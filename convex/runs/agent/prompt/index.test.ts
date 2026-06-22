@@ -184,6 +184,9 @@ describe("approval request prompts", () => {
 
     expect(prompt).toContain("# Approvals")
     expect(prompt).toContain("notion_create_page")
+    expect(prompt).toContain("include `approval.summary`")
+    expect(prompt).toContain("human approving the action")
+    expect(prompt).not.toContain("approval.handoff")
     expect(prompt).toContain("do not ask for approval in chat")
     expect(prompt).toContain("pauses this run")
     expect(prompt).toContain("denied` or `expired")

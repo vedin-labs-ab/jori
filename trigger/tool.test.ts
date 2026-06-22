@@ -86,6 +86,48 @@ test("prompted tools return denied results without executing", async () => {
   expect(runtime.convex.callTool).not.toHaveBeenCalled()
 })
 
+test("prompted tools return repairable validation errors before approval", async () => {
+  const runtime = createRuntime()
+
+  const content = await executeToolCall({
+    attempt: 1,
+    call: promptedToolCall({ approval: false }),
+    runtime,
+    sequence: 100,
+  })
+
+  expect(JSON.parse(content)).toEqual({
+    error: {
+      message:
+        "Tool requires approval: notion_create_page. Include approval.summary as a 1-500 character user-facing sentence describing the exact action. Retry the same tool call with approval.summary included.",
+    },
+    status: "error",
+  })
+  expect(waitMock.createToken).not.toHaveBeenCalled()
+  expect(runtime.convex.requestApproval).not.toHaveBeenCalled()
+  expect(runtime.convex.callTool).not.toHaveBeenCalled()
+})
+
+test("prompted tools reject blank approval summaries before approval", async () => {
+  const runtime = createRuntime()
+
+  const content = await executeToolCall({
+    attempt: 1,
+    call: promptedToolCall({ summary: " " }),
+    runtime,
+    sequence: 100,
+  })
+
+  expect(JSON.parse(content)).toMatchObject({
+    error: {
+      message: expect.stringContaining("Include approval.summary"),
+    },
+    status: "error",
+  })
+  expect(waitMock.createToken).not.toHaveBeenCalled()
+  expect(runtime.convex.requestApproval).not.toHaveBeenCalled()
+})
+
 test("prompted tools return expired results on waitpoint timeout", async () => {
   const runtime = createRuntime()
 
@@ -181,17 +223,20 @@ function id<TableName extends string>(value: string) {
   return value as ConvexId<TableName>
 }
 
-function promptedToolCall() {
+function promptedToolCall(
+  options: { approval?: boolean; summary?: string } = {}
+) {
+  const includeApproval = options.approval ?? true
+
   return {
     args: {
-      approval: {
-        handoff: {
-          next: "Report the created page.",
-          objective: "Create launch notes.",
-          progress: "Drafted title.",
-        },
-        summary: "Create launch notes in Notion.",
-      },
+      ...(includeApproval
+        ? {
+            approval: {
+              summary: options.summary ?? "Create launch notes in Notion.",
+            },
+          }
+        : {}),
       title: "Launch notes",
     },
     id: "call_1",
