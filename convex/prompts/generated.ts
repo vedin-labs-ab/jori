@@ -48,17 +48,17 @@ export const promptTemplates = {
     "{{artifact.instruction}}\n\nReturn only JSON that matches the provided response schema.\n\nDo not spend tokens on hidden reasoning.\n",
   "communication/guidance": "Guidance:\n\n{{guidance.parts}}\n",
   "communication/message":
-    '# Communication\n\nWrite for the reply surface. Use its native formatting, syntax, and conventions instead of generic Markdown.\n\nSurface: `{{surface.label}}`{{? communication.guidance prefix="\\n\\n"}}\n',
+    '# Communication\n\nWrite for the reply surface. Use its native formatting, syntax, and conventions\ninstead of generic Markdown. Keep replies conversational; avoid direct platform\nmentions unless needed to disambiguate in a busy thread.\n\nSurface: `{{surface.label}}`{{? communication.guidance prefix="\\n\\n"}}\n',
   "conversation/message":
-    "- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}\n```text\n{{message.text}}\n```\n",
+    '- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{{? message.identifiers prefix=" | "}}\n```text\n{{message.text}}\n```\n',
   "reference/automation":
     "# Original Trigger\n\nAn automation started this task. For reference:\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n- Instructions: {{automation.instructions}}\n\nIntegration access:\n{{access.summary}}\n\nEvent:\n{{event.details}}\n",
   "reference/instruction":
     "# Original Trigger\n\nManual instructions started this task. For reference:\n\n```text\n{{instruction.text}}\n```\n",
   "reference/message":
-    "# Original Trigger\n\nA {{message.integration}} message started this task. For reference:\n\nTarget:\n{{message.target}}\n\nMessage:\n```text\n{{message.text}}\n```\n",
+    "# Original Trigger\n\nA {{message.integration}} message started this task. For reference:\n\nTarget:\n{{message.target}}\n\nOriginal message:\n{{message.current}}\n",
   "session/message":
-    'New {{message.integration}} message in the active conversation.\nSource: {{message.source}}\nAuthority: {{message.authority}}\n{{? message.actor prefix="Actor: " suffix="\\n"}}Type: {{message.type}}\nMentioned Milo: {{message.mentioned}}\nObserved at: {{message.observedAt}}\n\nMessage:\n```text\n{{message.text}}\n```\n',
+    'New {{message.integration}} message in the active conversation.\nSource: {{message.source}}\nAuthority: {{message.authority}}\n{{? message.actor prefix="Actor: " suffix="\\n"}}Type: {{message.type}}\n{{? message.identifiers prefix="Identifiers: " suffix="\\n"}}Mentioned Milo: {{message.mentioned}}\nObserved at: {{message.observedAt}}\n\nMessage:\n```text\n{{message.text}}\n```\n',
   "skills/discovery":
     "# Skills\n\nUse `load_skill` to load full instructions for an available skill when needed.\n\nAvailable skills:\n{{skills.available}}\n",
   "skills/loaded": "## {{skill.title}}\n\n{{skill.body}}\n",
@@ -67,7 +67,7 @@ export const promptTemplates = {
   "trigger/instruction":
     "# Trigger\n\nManual instructions triggered this run.\nCurrent UTC time: {{time.utc}}.\n\nInstructions:\n```text\n{{instruction.text}}\n```\n\nHandle the request. Use write actions only when they are necessary for the\nrequested outcome. If you cannot complete the task, report the blocker and the\nnext useful step.\n",
   "trigger/message":
-    "# Trigger\n\nA {{message.integration}} message triggered this run.\nCurrent UTC time: {{time.utc}}.\n\nTarget:\n\n{{message.target}}\n\nHistory:\n\n{{message.conversation}}\n\nMessage:\n\n```text\n{{message.text}}\n```\n\nRuntime:\n- Treat the message as the entry point. For non-trivial work, check surrounding context unless the next step is obvious.\n- Use any needed tools. Report the result back to this thread unless the work clearly belongs elsewhere.\n- Do not send routine acknowledgements or “still working” updates. Send updates only for material findings, pivots, or blockers.\n- If the message does not require a reply or action, finish silently.\n",
+    "# Trigger\n\nA {{message.integration}} message triggered this run.\nCurrent UTC time: {{time.utc}}.\n\nTarget:\n\n{{message.target}}\n\nRecent messages:\n\n{{message.conversation}}\n\nCurrent message:\n\n{{message.current}}\n\nRuntime:\n- Treat the message as the entry point. For non-trivial work, check surrounding context unless the next step is obvious.\n- Use any needed tools. Report the result back to this thread unless the work clearly belongs elsewhere.\n- Do not send routine acknowledgements or “still working” updates. Send updates only for material findings, pivots, or blockers.\n- If the message does not require a reply or action, finish silently.\n",
 } as const
 
 export type SkillId = keyof typeof skills

@@ -5,6 +5,7 @@ import {
   getSlackMessageTs,
   getSlackThreadTs,
 } from "../providers/slack/data"
+import { getActorExternalId } from "../shared/actor"
 import { readDataNumber, readDataObject, readDataString } from "../shared/data"
 
 export type MessageAudience = {
@@ -33,6 +34,11 @@ export type ReplyAddress =
       type: "slack"
     }
 
+export type MessageActorIdentifier = {
+  key: string
+  value: string
+}
+
 export function messageText(
   message: Doc<"messages">,
   integration: Doc<"integrations">
@@ -44,6 +50,24 @@ export function messageText(
   }
 
   return text
+}
+
+export function messageActorIdentifiers(
+  message: Doc<"messages">
+): MessageActorIdentifier[] {
+  const externalId = getActorExternalId(message.actor)
+
+  if (externalId === undefined || externalId === "") {
+    return []
+  }
+
+  return [{ key: surfaceIdentifierKey(message.integration), value: externalId }]
+}
+
+export function messageActorIdentifierLabels(message: Doc<"messages">) {
+  return messageActorIdentifiers(message).map((identifier) => {
+    return `${identifier.key}=${identifier.value}`
+  })
 }
 
 export function messageAudience(
@@ -83,6 +107,22 @@ export function replyAddress(message: Doc<"messages">): ReplyAddress | null {
   }
 
   return null
+}
+
+function surfaceIdentifierKey(integration: Doc<"messages">["integration"]) {
+  if (integration === "github") {
+    return "github_id"
+  }
+
+  if (integration === "linear") {
+    return "linear_id"
+  }
+
+  if (integration === "slack") {
+    return "slack_id"
+  }
+
+  return `${integration}_id`
 }
 
 function slackMessageAudience(

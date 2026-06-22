@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
-import { collectPendingBatch } from "./cursor"
+import { collectPendingBatch, formatRuntimeMessage } from "./cursor"
 
 test("advances the cursor across non-text messages", () => {
   const batch = collectPendingBatch(
@@ -32,6 +32,22 @@ test("does not advance past the returned message limit", () => {
   expect(batch.hasMore).toBe(true)
 })
 
+test("formats runtime messages with normalized text and identifiers", () => {
+  expect(
+    formatRuntimeMessage(
+      message("next", 3, "<@UBOT> follow-up", {
+        actor: { externalId: "U123", kind: "user", name: "Albin" },
+        mentioned: true,
+      }),
+      integration({ data: { botUserId: "UBOT" } })
+    )
+  ).toMatchObject({
+    actor: "Albin",
+    identifiers: ["slack_id=U123"],
+    text: "@Milo follow-up",
+  })
+})
+
 function session(messageId: string, timestamp: number): Doc<"sessions"> {
   return {
     _id: id<"sessions">("session"),
@@ -48,7 +64,8 @@ function session(messageId: string, timestamp: number): Doc<"sessions"> {
 function message(
   messageId: string,
   creationTime: number,
-  text?: string
+  text?: string,
+  overrides: Partial<Doc<"messages">> = {}
 ): Doc<"messages"> {
   return {
     _id: id<"messages">(messageId),
@@ -61,7 +78,15 @@ function message(
     mentioned: false,
     text,
     createdAt: creationTime,
+    ...overrides,
   }
+}
+
+function integration(overrides: Partial<Doc<"integrations">>) {
+  return {
+    data: {},
+    ...overrides,
+  } as Doc<"integrations">
 }
 
 function id<TableName extends keyof DataModel>(value: string) {

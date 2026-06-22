@@ -1,6 +1,11 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import { messageAudience, messageText, replyAddress } from "./surface"
+import {
+  messageActorIdentifiers,
+  messageAudience,
+  messageText,
+  replyAddress,
+} from "./surface"
 
 describe("message surface text", () => {
   test("replaces Milo's Slack mention with a readable name", () => {
@@ -23,6 +28,16 @@ describe("message surface text", () => {
         integration({ data: { botUserId: "U0B96KZ7WJG" } })
       )
     ).toBe("@Milo hello")
+  })
+
+  test("exposes the actor surface identifier when available", () => {
+    expect(
+      messageActorIdentifiers(
+        message({
+          actor: { externalId: "U123", kind: "user", name: "Albin" },
+        })
+      )
+    ).toEqual([{ key: "slack_id", value: "U123" }])
   })
 })
 

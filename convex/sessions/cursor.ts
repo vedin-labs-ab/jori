@@ -1,4 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
+import { messageActorIdentifierLabels, messageText } from "../messages/surface"
 import { getActorDisplayName } from "../shared/actor"
 
 export const defaultDrainLimit = 20
@@ -51,17 +52,24 @@ export function collectPendingBatch(
   return { cursor, hasMore, messages: pending }
 }
 
-export function formatRuntimeMessage(message: Doc<"messages">) {
+export function formatRuntimeMessage(
+  message: Doc<"messages">,
+  integration: Doc<"integrations"> | null
+) {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
     authority: message.actor?.kind === "user" ? "authoritative" : "soft",
     id: message._id,
+    identifiers: messageActorIdentifierLabels(message),
     createdAt: message.createdAt,
     integration: message.integration,
     mentioned: message.mentioned,
     observedAt: message.observedAt ?? null,
     source: message.actor?.kind ?? "unknown",
-    text: message.text ?? "",
+    text:
+      integration === null
+        ? (message.text ?? "")
+        : messageText(message, integration),
     type: message.type,
   }
 }

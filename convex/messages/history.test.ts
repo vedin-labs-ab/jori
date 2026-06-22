@@ -28,6 +28,7 @@ function entry(
     actor,
     createdAt,
     id,
+    identifiers: [],
     observedAt: null,
     source: actor === "Milo" ? "self" : "user",
     text,

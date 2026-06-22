@@ -9,6 +9,7 @@ export function promptIntegration(integration: string): Doc<"integrations"> {
     scope: "tenant",
     externalId: `${integration}-account`,
     credentials: {},
+    data: integration === "slack" ? { botUserId: "UBOT" } : {},
     status: "active",
     createdBy: "user",
     createdAt: 0,
