@@ -1,8 +1,7 @@
 import { v } from "convex/values"
 import { type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
-import { findRoutingByMessage } from "../../routing/data"
-import { replyAddress } from "../../routing/surface"
+import { replyAddress } from "../../messages/surface"
 import { enqueueOperation } from "../outbox"
 
 export const enqueueFinalReply = internalMutation({
@@ -18,16 +17,10 @@ export const enqueueFinalReply = internalMutation({
       return null
     }
 
-    const routing = await findRoutingByMessage(ctx, message._id)
-
-    if (routing === null || routing.route !== "agent") {
-      return null
-    }
-
     return await queueReply(ctx, {
       kind: "final",
       messageId: message._id,
-      routingId: routing._id,
+      runId: args.runId,
       tenantId: message.tenantId,
       text: args.content,
     })
@@ -37,21 +30,21 @@ export const enqueueFinalReply = internalMutation({
 export async function queueReply(
   ctx: MutationCtx,
   args: {
-    kind: "final" | "quick"
+    kind: "final"
     messageId: Id<"messages">
-    routingId: Id<"routing">
+    runId: Id<"runs">
     tenantId: string
     text: string
   }
 ) {
   return await enqueueOperation(ctx, {
     tenantId: args.tenantId,
-    key: `reply:${args.routingId}:${args.kind}`,
+    key: `reply:${args.runId}:${args.kind}`,
     operation: {
       type: "reply.send",
       kind: args.kind,
       messageId: args.messageId,
-      routingId: args.routingId,
+      runId: args.runId,
       text: args.text,
     },
   })

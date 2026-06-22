@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import { messageAudience, replyAddress, routingMessageText } from "./surface"
+import { messageAudience, messageText, replyAddress } from "./surface"
 
-describe("routing surface text", () => {
+describe("message surface text", () => {
   test("replaces Milo's Slack mention with a readable name", () => {
     expect(
-      routingMessageText(
+      messageText(
         message({
           text: "<@U0B96KZ7WJG> hello <@UOTHER>",
         }),
@@ -16,7 +16,7 @@ describe("routing surface text", () => {
 
   test("handles Slack mention labels", () => {
     expect(
-      routingMessageText(
+      messageText(
         message({
           text: "<@U0B96KZ7WJG|milo> hello",
         }),
@@ -26,7 +26,7 @@ describe("routing surface text", () => {
   })
 })
 
-describe("routing surface addressing", () => {
+describe("message surface addressing", () => {
   test("detects GitHub and Linear Milo mentions", () => {
     expect(
       messageAudience(

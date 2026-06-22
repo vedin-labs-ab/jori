@@ -7,9 +7,9 @@ test("queues reply delivery as an idempotent outbox operation", async () => {
   const ctx = fakeMutationCtx()
 
   const outboxId = await queueReply(ctx, {
-    kind: "quick",
+    kind: "final",
     messageId: id<"messages">("message"),
-    routingId: id<"routing">("routing"),
+    runId: id<"runs">("run"),
     tenantId: "tenant",
     text: "On it.",
   })
@@ -19,12 +19,12 @@ test("queues reply delivery as an idempotent outbox operation", async () => {
     {
       table: "outbox",
       doc: expect.objectContaining({
-        key: "reply:routing:quick",
+        key: "reply:run:final",
         operation: {
           type: "reply.send",
-          kind: "quick",
+          kind: "final",
           messageId: "message",
-          routingId: "routing",
+          runId: "run",
           text: "On it.",
         },
         status: "pending",

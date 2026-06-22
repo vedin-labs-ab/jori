@@ -35,7 +35,7 @@ describe("runtime skill prompts", () => {
         "For `message`, format the response natively for the reply surface."
       )
     ).toBeLessThan(prompt.indexOf("Surface: `Slack`"))
-    expect(prompt).toContain("Write Slack `mrkdwn` only")
+    expect(prompt).toContain("Use Slack `mrkdwn` sparingly")
     expect(prompt).not.toContain("## Slack")
     expect(prompt).not.toContain("### Text")
     expect(prompt).not.toContain("## Format")

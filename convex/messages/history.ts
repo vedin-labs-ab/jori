@@ -1,11 +1,11 @@
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { type ActorKind, getActorDisplayName } from "../shared/actor"
-import { routingMessageText } from "./surface"
+import { messageText } from "./surface"
 
 const recentConversationLimit = 16
 
-export type RoutingConversationEntry = {
+export type ConversationEntry = {
   actor: string | null
   createdAt: number
   id: string
@@ -33,19 +33,19 @@ export async function recentConversation(
 export function messageEntry(
   message: Doc<"messages">,
   integration: Doc<"integrations">
-): RoutingConversationEntry {
+): ConversationEntry {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
     createdAt: message.createdAt,
     id: message._id,
     observedAt: message.observedAt ?? null,
     source: message.actor?.kind ?? "unknown",
-    text: routingMessageText(message, integration),
+    text: messageText(message, integration),
     type: message.type,
   }
 }
 
-export function mergeRecentConversation(entries: RoutingConversationEntry[]) {
+export function mergeRecentConversation(entries: ConversationEntry[]) {
   return [...entries]
     .sort(
       (left, right) =>

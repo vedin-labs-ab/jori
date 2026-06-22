@@ -18,7 +18,6 @@ const tableRegistry: Record<TableName, true> = {
   watches: true,
   sessions: true,
   approvals: true,
-  routing: true,
   traces: true,
   outbox: true,
   sandboxes: true,

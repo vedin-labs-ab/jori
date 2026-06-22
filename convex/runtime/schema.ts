@@ -18,9 +18,9 @@ const runtimeOperation = v.union(
   }),
   v.object({
     type: v.literal("reply.send"),
-    kind: v.union(v.literal("quick"), v.literal("final")),
+    kind: v.literal("final"),
     messageId: v.id("messages"),
-    routingId: v.id("routing"),
+    runId: v.id("runs"),
     text: v.string(),
   })
 )

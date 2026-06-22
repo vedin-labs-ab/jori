@@ -33,14 +33,14 @@ export type ReplyAddress =
       type: "slack"
     }
 
-export function routingMessageText(
+export function messageText(
   message: Doc<"messages">,
   integration: Doc<"integrations">
 ) {
   const text = message.text ?? ""
 
   if (message.integration === "slack") {
-    return slackRoutingMessageText(text, integration)
+    return slackMessageText(text, integration)
   }
 
   return text
@@ -102,10 +102,7 @@ function isSlackDirectMessage(type: string) {
   return type === "message.im" || type === "message.mpim"
 }
 
-function slackRoutingMessageText(
-  text: string,
-  integration: Doc<"integrations">
-) {
+function slackMessageText(text: string, integration: Doc<"integrations">) {
   const botUserId = getSlackBotUserId(integration.data)
 
   return botUserId === undefined

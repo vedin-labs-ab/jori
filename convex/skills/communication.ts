@@ -2,7 +2,7 @@ import { type Integration, integrationLabels } from "../shared/integrations"
 import { getRuntimeSkillForIntegration, type RuntimeSkill } from "./runtime"
 
 export type CommunicationCapability = "files" | "interactive" | "rich" | "text"
-export type CommunicationProfile = "agent-final-reply" | "routing-message"
+export type CommunicationProfile = "agent-final-reply"
 
 type CapabilityMap = {
   default: readonly CommunicationCapability[]
@@ -17,9 +17,6 @@ const nativeMessageGuidance =
 
 const profiles = {
   "agent-final-reply": {
-    capabilities: { default: ["text"] },
-  },
-  "routing-message": {
     capabilities: { default: ["text"] },
   },
 } as const satisfies Record<CommunicationProfile, ProfileDefinition>

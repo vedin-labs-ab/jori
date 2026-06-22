@@ -51,10 +51,7 @@ export function collectPendingBatch(
   return { cursor, hasMore, messages: pending }
 }
 
-export function formatRuntimeMessage(
-  message: Doc<"messages">,
-  routing: Pick<Doc<"routing">, "reply" | "route"> | null = null
-) {
+export function formatRuntimeMessage(message: Doc<"messages">) {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
     authority: message.actor?.kind === "user" ? "authoritative" : "soft",
@@ -63,13 +60,6 @@ export function formatRuntimeMessage(
     integration: message.integration,
     mentioned: message.mentioned,
     observedAt: message.observedAt ?? null,
-    routing:
-      routing === null
-        ? null
-        : {
-            reply: routing.reply ?? null,
-            route: routing.route,
-          },
     source: message.actor?.kind ?? "unknown",
     text: message.text ?? "",
     type: message.type,
