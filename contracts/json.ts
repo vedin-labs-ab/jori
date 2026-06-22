@@ -5,14 +5,20 @@ export type JsonObject = {
 }
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive
 
-export function encodeJson(value: JsonValue) {
+declare const encodedJsonBrand: unique symbol
+
+export type EncodedJson = string & {
+  readonly [encodedJsonBrand]: "EncodedJson"
+}
+
+export function encodeJson(value: JsonValue): EncodedJson {
   const encoded = JSON.stringify(value)
 
   if (encoded === undefined) {
     throw new Error("Could not encode JSON value")
   }
 
-  return encoded
+  return encoded as EncodedJson
 }
 
 export function encodeUnknownJson(value: unknown) {

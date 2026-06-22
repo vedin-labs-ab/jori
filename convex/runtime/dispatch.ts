@@ -108,13 +108,13 @@ async function resumeApproval(
     approvalId: operation.approvalId,
   })) as Doc<"approvals"> | null
 
-  if (approval?.waitpointTokenId === undefined) {
+  if (approval?.waitpointId === undefined) {
     return undefined
   }
 
   configureTrigger()
 
-  await wait.completeToken(approval.waitpointTokenId, {
+  await wait.completeToken(approval.waitpointId, {
     approvalId: operation.approvalId,
     decision: operation.decision,
     reason: approvalResolutionReason(approval, operation.decision),

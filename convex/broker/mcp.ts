@@ -76,7 +76,7 @@ export async function callBrokerTool(
     surface: ToolSurface
     tool: string
     args: JsonObject
-    waitpointTokenId?: string
+    waitpointId?: string
   }
 ): Promise<unknown> {
   if (request.surface === "milo") {

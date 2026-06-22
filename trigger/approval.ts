@@ -38,7 +38,7 @@ export async function awaitPromptedToolApproval(args: {
     runId: args.runtime.context.run.id,
     surface: args.surface,
     tool: args.toolName,
-    waitpointTokenId: token.id,
+    waitpointId: token.id,
   })
   await recordWaitingEvent(args.runtime, args.call, args.tool)
 

@@ -1,5 +1,8 @@
 import { v } from "convex/values"
-import { decodeJsonObject, encodeUnknownJson } from "../../contracts/json"
+import {
+  decodeToolInput,
+  encodeToolResult,
+} from "../../contracts/tool-transport"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, action } from "../_generated/server"
@@ -16,7 +19,7 @@ import { requireWorkerSecret } from "./shared"
 export const call = action({
   args: {
     approved: v.optional(v.boolean()),
-    argsJson: v.string(),
+    inputJson: v.string(),
     runId: v.id("runs"),
     secret: v.string(),
     surface: toolSurfaceValidator,
@@ -31,24 +34,24 @@ export const call = action({
       await loadBrokerContext(ctx, args.runId),
       {
         approved: args.approved,
-        args: decodeJsonObject(args.argsJson),
+        args: decodeToolInput(args),
         surface: args.surface,
         tool: args.tool,
       }
     )
 
-    return encodeUnknownJson(result)
+    return encodeToolResult(result)
   },
 })
 
 export const requestApproval = action({
   args: {
-    argsJson: v.string(),
+    inputJson: v.string(),
     runId: v.id("runs"),
     secret: v.string(),
     surface: toolSurfaceValidator,
     tool: v.string(),
-    waitpointTokenId: v.string(),
+    waitpointId: v.string(),
   },
   returns: v.object({
     approvalId: v.id("approvals"),
@@ -63,10 +66,10 @@ export const requestApproval = action({
       ctx,
       await loadBrokerContext(ctx, args.runId),
       {
-        args: decodeJsonObject(args.argsJson),
+        args: decodeToolInput(args),
         surface: args.surface,
         tool: args.tool,
-        waitpointTokenId: args.waitpointTokenId,
+        waitpointId: args.waitpointId,
       }
     )
   },

@@ -1,4 +1,5 @@
-import { encodeJson, type JsonObject } from "../../../contracts/json"
+import { type JsonObject } from "../../../contracts/json"
+import { encodeToolInput } from "../../../contracts/tool-transport"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
@@ -50,7 +51,7 @@ export async function createPromptedToolApproval(
     surface: ToolSurface
     tool: string
     args: JsonObject
-    waitpointTokenId?: string
+    waitpointId?: string
   }
 ): Promise<{
   approvalId: Id<"approvals">
@@ -94,11 +95,11 @@ export async function createPromptedToolApproval(
       runId: context.run._id,
       surface: request.surface,
       tool: request.tool,
-      argsJson: encodeJson(request.args),
+      ...encodeToolInput(request.args),
       summary: request.summary,
       handoff: request.handoff,
       code,
-      waitpointTokenId: args.waitpointTokenId,
+      waitpointId: args.waitpointId,
       requestedBy,
     })
   const delivery = getSlackApprovalDelivery(context)
