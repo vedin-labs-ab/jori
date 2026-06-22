@@ -17,6 +17,30 @@ export async function getSlackActorProfile(
     return undefined
   }
 
+  const target = await ctx.runQuery(
+    internal.providers.slack.install.getProfileLookupTarget,
+    {
+      accountId: args.accountId,
+    }
+  )
+
+  if (target === null) {
+    return undefined
+  }
+
+  const cached = await ctx.runQuery(
+    internal.identity.identities.resolveProviderActorProfileRecord,
+    {
+      tenantId: target.tenantId,
+      provider: "slack",
+      externalId: args.actorId,
+    }
+  )
+
+  if (cached !== null) {
+    return cached
+  }
+
   const userToken = await ctx.runQuery(
     internal.providers.slack.install.getUserToken,
     {
@@ -42,9 +66,21 @@ export async function getSlackActorProfile(
 
   const profile = readSlackProfile(body.user)
 
-  return profile.email === undefined && profile.name === undefined
-    ? undefined
-    : profile
+  if (profile.email === undefined && profile.name === undefined) {
+    return undefined
+  }
+
+  try {
+    await cacheSlackActorProfile(ctx, {
+      actorId: args.actorId,
+      profile,
+      tenantId: target.tenantId,
+    })
+  } catch {
+    // Profile caching must not make the approval interaction fail.
+  }
+
+  return profile
 }
 
 type SlackUserInfo =
@@ -86,4 +122,34 @@ function normalizeSlackProfileString(value: string | undefined) {
   const trimmed = value?.trim()
 
   return trimmed === undefined || trimmed === "" ? undefined : trimmed
+}
+
+async function cacheSlackActorProfile(
+  ctx: ActionCtx,
+  args: {
+    actorId: string
+    profile: SlackActorProfile
+    tenantId: string
+  }
+) {
+  const userId = await ctx.runQuery(
+    internal.identity.identities.resolveUserIdByEmailRecord,
+    {
+      tenantId: args.tenantId,
+      email: args.profile.email,
+    }
+  )
+
+  if (userId === null) {
+    return
+  }
+
+  await ctx.runMutation(internal.identity.identities.upsertProviderIdentity, {
+    tenantId: args.tenantId,
+    userId,
+    provider: "slack",
+    externalId: args.actorId,
+    email: args.profile.email,
+    name: args.profile.name,
+  })
 }
