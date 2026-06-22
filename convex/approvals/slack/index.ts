@@ -6,6 +6,7 @@ import {
   getSlackMessageTs,
   getSlackThreadTs,
 } from "../../providers/slack/data"
+import { getSlackActorProfile } from "../../providers/slack/directory/users"
 import { createIntegrationActor } from "../../shared/actor"
 import { decideSlackApproval } from "../runtime"
 import {
@@ -74,8 +75,9 @@ export async function handleSlackApprovalInteraction(
 
   const result = await decideSlackApproval(ctx, {
     accountId: interaction.accountId,
-    actor: createIntegrationActor({
-      externalId: interaction.actorId,
+    actor: await createSlackApprovalActor(ctx, {
+      accountId: interaction.accountId,
+      actorId: interaction.actorId,
     }),
     channelId: interaction.channelId,
     threadTs: interaction.threadTs,
@@ -94,6 +96,27 @@ export async function handleSlackApprovalInteraction(
   }
 
   return okResponse()
+}
+
+export async function createSlackApprovalActor(
+  ctx: ActionCtx,
+  args: {
+    accountId: string
+    actorId: string | undefined
+    actorEmail?: string
+    actorName?: string
+  }
+) {
+  const profile = await getSlackActorProfile(ctx, {
+    accountId: args.accountId,
+    actorId: args.actorId,
+  })
+
+  return createIntegrationActor({
+    externalId: args.actorId,
+    email: profile?.email ?? args.actorEmail,
+    name: profile?.name ?? args.actorName,
+  })
 }
 
 function parseApprovalDecision(text: string | undefined) {
