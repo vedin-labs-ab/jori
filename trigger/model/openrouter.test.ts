@@ -5,9 +5,10 @@ describe("OpenRouter model runtime settings", () => {
   test("uses hard-coded provider routing and reasoning for agent calls", () => {
     expect(createOpenRouterModelSettings()).toEqual({
       provider: {
-        ignore: ["GMICloud"],
+        allow_fallbacks: true,
+        only: ["Wafer", "Z.AI", "Fireworks", "Together"],
+        order: ["Wafer", "Z.AI", "Fireworks", "Together"],
         require_parameters: true,
-        sort: "price",
       },
       reasoning: {
         effort: "xhigh",

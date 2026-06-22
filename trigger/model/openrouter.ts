@@ -21,12 +21,12 @@ import {
 
 const agentModel = "z-ai/glm-5.2"
 const agentReasoningEffort = "xhigh"
+const agentProviderOrder = ["Wafer", "Z.AI", "Fireworks", "Together"]
 const agentProviderRouting = {
-  // GMICloud intermittently returns private assistant text instead of native
-  // tool_calls for full Milo agent requests even with tools provided.
-  ignore: ["GMICloud"],
+  allow_fallbacks: true,
+  only: agentProviderOrder,
+  order: agentProviderOrder,
   require_parameters: true,
-  sort: "price",
 } satisfies NonNullable<OpenRouterChatSettings["provider"]>
 
 export class OpenRouterModelRuntime implements ModelRuntime {
