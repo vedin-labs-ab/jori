@@ -74,7 +74,32 @@ describe("runtime prompts", () => {
       expect(prompt).toContain(line)
     }
 
+    expect(prompt).toContain("Recent messages:")
+    expect(prompt).toContain("Current message:")
+    expect(prompt).not.toContain("\nHistory:\n")
+    expect(prompt).toContain("- 1970-01-01T00:00:01.000Z | user | Albin Vedin")
     expect(prompt).toContain("Report the result back to this thread")
+  })
+
+  test("renders Slack trigger text with actor metadata and readable Milo mention", () => {
+    const input = runtimeInput("slack", {
+      channel: { id: "C123" },
+      ts: "123.456",
+    })
+
+    if (input.type !== "message") {
+      throw new Error("Expected message input.")
+    }
+
+    input.message.text = "<@UBOT> what tools do u have?"
+
+    const prompt = assemblePrompt(input)
+
+    expect(prompt).toContain(
+      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | slack_id=UACTOR"
+    )
+    expect(prompt).toContain("@Milo what tools do u have?")
+    expect(prompt).not.toContain("<@UBOT> what tools do u have?")
   })
 
   test("uses Slack message timestamp as the default reply thread", () => {
@@ -98,15 +123,11 @@ describe("runtime prompts", () => {
     expect(prompt).toContain("- Message timestamp: 123.456")
     expect(prompt).toContain("- Reply thread timestamp: 123.000")
   })
+})
 
+describe("runtime delivery prompts", () => {
   test("omits automatic final delivery instructions", () => {
-    const prompt = assemblePrompt(
-      runtimeInput("github", {
-        repository: { fullName: "acme/app" },
-        issueNumber: 12,
-        comment: { id: "comment-id", kind: "issue_comment" },
-      })
-    )
+    const prompt = assemblePrompt(githubMessageInput())
 
     expect(prompt).not.toMatch(/Milo will .*post it/)
     expect(prompt).not.toContain("Use GitHub write tools only")
@@ -174,3 +195,11 @@ describe("approval continuation prompts", () => {
     expect(prompt).not.toContain("Handle the request")
   })
 })
+
+function githubMessageInput() {
+  return runtimeInput("github", {
+    repository: { fullName: "acme/app" },
+    issueNumber: 12,
+    comment: { id: "comment-id", kind: "issue_comment" },
+  })
+}

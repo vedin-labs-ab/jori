@@ -159,6 +159,7 @@ function formatSessionMessage(message: RuntimeMessage) {
     message: {
       actor: message.actor,
       authority: message.authority,
+      identifiers: message.identifiers.join(", "),
       integration: message.integration,
       mentioned: message.mentioned ? "yes" : "no",
       observedAt: new Date(observed).toISOString(),

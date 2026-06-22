@@ -152,19 +152,33 @@ export const drainMessages = internalMutation({
 
     return {
       hasMore: batch.hasMore,
-      messages: formatRuntimeMessages(batch.messages),
+      messages: await formatRuntimeMessages(ctx, batch.messages, session),
     }
   },
 })
 
-function formatRuntimeMessages(messages: Doc<"messages">[]) {
+async function formatRuntimeMessages(
+  ctx: QueryLikeCtx,
+  messages: Doc<"messages">[],
+  session: Doc<"sessions">
+) {
   const result: ReturnType<typeof formatRuntimeMessage>[] = []
+  const integration = await getSessionIntegration(ctx, session)
 
   for (const message of messages) {
-    result.push(formatRuntimeMessage(message))
+    result.push(formatRuntimeMessage(message, integration))
   }
 
   return result
+}
+
+async function getSessionIntegration(
+  ctx: QueryLikeCtx,
+  session: Doc<"sessions">
+) {
+  const watch = await ctx.db.get(session.watchId)
+
+  return watch === null ? null : await ctx.db.get(watch.integrationId)
 }
 
 export async function findSession(ctx: QueryLikeCtx, watchId: Id<"watches">) {

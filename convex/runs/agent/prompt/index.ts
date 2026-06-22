@@ -3,6 +3,7 @@ import {
   getIntegrationTools,
 } from "../../../automations/access"
 import { integrationLabels } from "../../../automations/integrations"
+import { messageEntry } from "../../../messages/history"
 import {
   getToolPermission,
   type ToolPermission,
@@ -117,9 +118,11 @@ function createMessageValues(
   return {
     message: {
       conversation: formatMessageConversation(input),
+      current: formatMessageEntry(
+        messageEntry(input.message, input.integration)
+      ),
       integration: getIntegrationLabel(input.messageIntegration),
       target: getMessageTarget(input.messageIntegration, input.message.data),
-      text: input.message.text ?? "",
     },
     time: { utc: createPromptTime() },
   }
@@ -136,10 +139,10 @@ function formatMessageConversation(
     return "- None"
   }
 
-  return entries.map(formatMessageConversationEntry).join("\n\n")
+  return entries.map(formatMessageEntry).join("\n\n")
 }
 
-function formatMessageConversationEntry(
+function formatMessageEntry(
   entry: Extract<AgentRuntimeInput, { type: "message" }>["conversation"][number]
 ) {
   const observed = entry.observedAt ?? entry.createdAt
@@ -147,6 +150,7 @@ function formatMessageConversationEntry(
   return renderPromptTemplate(promptTemplates["conversation/message"], {
     message: {
       actor: entry.actor ?? "unknown",
+      identifiers: entry.identifiers.join(", "),
       observedAt: new Date(observed).toISOString(),
       speaker: formatMessageSpeaker(entry.source),
       text: entry.text,

@@ -78,6 +78,7 @@ export type RuntimeMessage = {
   authority: "authoritative" | "soft"
   createdAt: number
   id: ConvexId<"messages">
+  identifiers: string[]
   integration: string
   mentioned: boolean
   observedAt: number | null

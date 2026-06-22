@@ -7,15 +7,13 @@ Target:
 
 {{message.target}}
 
-History:
+Recent messages:
 
 {{message.conversation}}
 
-Message:
+Current message:
 
-```text
-{{message.text}}
-```
+{{message.current}}
 
 Runtime:
 - Treat the message as the entry point. For non-trivial work, check surrounding context unless the next step is obvious.
