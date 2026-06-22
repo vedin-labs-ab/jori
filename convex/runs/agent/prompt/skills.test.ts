@@ -30,6 +30,8 @@ describe("runtime skill prompts", () => {
     )
     expect(prompt).toContain("Surface: `Slack`")
     expect(prompt).toContain("Guidance:")
+    expect(prompt).toContain("Available skills:\n- None")
+    expect(prompt).not.toContain("`slack`: Format Slack replies")
     expect(
       prompt.indexOf(
         "For `message`, format the response natively for the reply surface."

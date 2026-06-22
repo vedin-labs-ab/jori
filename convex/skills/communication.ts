@@ -33,15 +33,22 @@ export function createCommunicationGuidance(args: {
   const profile = profiles[args.profile]
   const capabilities = capabilitiesFor(profile.capabilities, args.integration)
 
-  return renderPromptTemplate(promptTemplates["communication/message"], {
-    communication: {
-      guidance: createGuidanceBlock(skill, capabilities),
-    },
-    surface: {
-      label: integrationLabels[args.integration],
-    },
-  }).trim()
+  return {
+    body: renderPromptTemplate(promptTemplates["communication/message"], {
+      communication: {
+        guidance: createGuidanceBlock(skill, capabilities),
+      },
+      surface: {
+        label: integrationLabels[args.integration],
+      },
+    }).trim(),
+    skill,
+  }
 }
+
+export type CommunicationGuidance = NonNullable<
+  ReturnType<typeof createCommunicationGuidance>
+>
 
 function capabilitiesFor(map: CapabilityMap, integration: Integration) {
   return map[integration] ?? map.default
@@ -54,7 +61,7 @@ function createGuidanceBlock(
   const communication = skill.communication
 
   if (communication === undefined) {
-    return []
+    return ""
   }
 
   const supportedParts: Partial<Record<CommunicationCapability, string>> =
