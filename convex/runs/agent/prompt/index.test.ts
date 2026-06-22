@@ -80,7 +80,7 @@ describe("runtime prompts", () => {
     expect(prompt).toContain("- 1970-01-01T00:00:01.000Z | user | Albin Vedin")
     expect(prompt).toContain("Report the result back to this thread")
     expect(prompt).toContain(
-      "reporting means calling the appropriate communication tool"
+      "Report, reply, update, and send mean calling the appropriate communication tool"
     )
   })
 
@@ -140,6 +140,10 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("Start update shape for this run:")
     expect(prompt).toContain("do not mention the shape")
     expect(prompt).toContain(
+      "your next action must be the communication tool call"
+    )
+    expect(prompt).toContain("Put the user-visible text in the tool input")
+    expect(prompt).toContain(
       "I'll find a Notion parent first, then ask for your approval"
     )
     expect(prompt).toContain("Looking up Emma now")
@@ -151,13 +155,13 @@ describe("runtime delivery prompts", () => {
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
-    expect(prompt).toContain(
-      "Assistant completion text is internal trace output"
-    )
+    expect(prompt).toContain("Assistant completion text is private run output")
+    expect(prompt).toContain("The requester never sees it")
     expect(prompt).toContain(
       "call `conversations_add_message` with `channel` set to the Channel ID"
     )
     expect(prompt).toContain("`thread_ts` set to the Reply thread timestamp")
+    expect(prompt).toContain("will not post to Slack")
   })
 
   test("omits automatic final delivery instructions", () => {

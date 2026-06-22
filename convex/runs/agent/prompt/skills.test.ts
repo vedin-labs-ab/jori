@@ -27,9 +27,8 @@ describe("runtime skill prompts", () => {
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("Write for the reply surface.")
-    expect(prompt).toContain(
-      "Assistant completion text is internal trace output"
-    )
+    expect(prompt).toContain("Assistant completion text is private run output")
+    expect(prompt).toContain("call the appropriate communication tool")
     expect(prompt).toContain("Surface: `Slack`")
     expect(prompt).toContain("## Guidance")
     expect(prompt).not.toContain("# Skills")
