@@ -1,6 +1,7 @@
 # Communication
 
-For `message`, format the response natively for the reply surface.
+Format replies natively for the reply surface.
 
 Surface: `{{surface.label}}`
+
 {{communication.guidance}}
