@@ -1,3 +1,3 @@
 ## Context
 
-Current UTC time: {{time.utc}}.
+Run started at: {{time.utc}}.

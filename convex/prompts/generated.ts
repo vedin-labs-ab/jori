@@ -49,7 +49,7 @@ export const promptTemplates = {
   "communication/guidance": "## Guidance\n\n{{guidance.parts}}\n",
   "communication/message":
     '# Communication\n\nWrite for the reply surface. Use its native formatting, syntax, and conventions. Keep replies conversational: address the thread naturally, use names only when they add warmth or clarity, and reserve direct platform mentions for attention, handoff, or accountability.\n\nSurface: `{{surface.label}}`{{? communication.guidance prefix="\\n\\n"}}\n',
-  "context/message": "## Context\n\nCurrent UTC time: {{time.utc}}.\n",
+  "context/message": "## Context\n\nRun started at: {{time.utc}}.\n",
   "conversation/message":
     '- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{{? message.identifiers prefix=" | "}}\n```text\n{{message.text}}\n```\n',
   "reference/automation":
