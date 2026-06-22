@@ -56,7 +56,12 @@ export async function callProviderTool(args: {
   }
 
   if (integration === "notion") {
-    return await callNotionTool(args.integration, args.tool, args.toolArgs)
+    return await callNotionTool(
+      args.integration,
+      args.tool,
+      args.toolArgs,
+      context
+    )
   }
 
   if (integration === "microsoftEmail" || integration === "microsoftCalendar") {

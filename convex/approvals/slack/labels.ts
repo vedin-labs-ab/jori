@@ -63,6 +63,7 @@ const toolLabels: Record<string, string> = {
   notion_query_data_source: "Query Notion data source",
   notion_search: "Search Notion",
   notion_update_page: "Update Notion page",
+  notion_upload_file: "Upload Notion file",
   read_attachment: "Read attachment",
   read_automation: "Read automation",
   save_attachment: "Save attachment",

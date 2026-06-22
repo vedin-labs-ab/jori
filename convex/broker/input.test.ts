@@ -10,14 +10,47 @@ test("broker input schemas cover every permissioned tool", () => {
   expect(missing).toEqual([])
 })
 
-test("broker input validation rejects unsupported Notion page icons before approval", () => {
-  expect(() =>
+test("broker input validation accepts writable Notion page icon and cover shapes", () => {
+  expect(
     normalizeBrokerToolInput("notion_create_page", {
+      cover: {
+        type: "external",
+        external: { url: "https://example.com/cover.png" },
+      },
       icon: { type: "emoji", emoji: "🪿" },
       parent: { page_id: "page_1" },
       properties: { title: { title: [{ text: { content: "Draft" } }] } },
     })
-  ).toThrow("notion_create_page.icon is not supported")
+  ).toMatchObject({ icon: { emoji: "🪿" } })
+
+  expect(
+    normalizeBrokerToolInput("notion_update_page", {
+      cover: { type: "file_upload", file_upload: { id: "upload_1" } },
+      icon: { type: "icon", icon: { color: "blue", name: "book" } },
+      pageId: "page_1",
+    })
+  ).toMatchObject({ cover: { type: "file_upload" } })
+})
+
+test("broker input validation rejects unsupported Notion page media shapes", () => {
+  expect(() =>
+    normalizeBrokerToolInput("notion_create_page", {
+      icon: { type: "file", file: { url: "https://example.com/icon.png" } },
+      parent: { page_id: "page_1" },
+      properties: { title: { title: [{ text: { content: "Draft" } }] } },
+    })
+  ).toThrow("notion_create_page.icon")
+
+  expect(() =>
+    normalizeBrokerToolInput("notion_create_page", {
+      cover: {
+        type: "external",
+        external: { url: "http://example.com/cover.png" },
+      },
+      parent: { page_id: "page_1" },
+      properties: { title: { title: [{ text: { content: "Draft" } }] } },
+    })
+  ).toThrow("notion_create_page.cover.external.url has invalid format")
 })
 
 test("broker input validation rejects Notion blocks that combine multiple block types", () => {

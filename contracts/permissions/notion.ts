@@ -52,6 +52,13 @@ export const notionToolPermissionRows = [
   ],
   [
     "notion",
+    "notion_upload_file",
+    "Upload file",
+    "Upload a saved run attachment to Notion for page icons, covers, or file properties.",
+    "write",
+  ],
+  [
+    "notion",
     "notion_append_block_children",
     "Append blocks",
     "Append blocks to a Notion page or block.",

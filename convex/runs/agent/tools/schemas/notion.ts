@@ -5,6 +5,7 @@ import {
   type SchemaMap,
   stringProperty,
 } from "./common"
+import { notionCoverProperty, notionIconProperty } from "./notion_media"
 
 export const notionToolInputSchemas = {
   notion_search: objectSchema({
@@ -39,6 +40,8 @@ export const notionToolInputSchemas = {
     required: ["parent", "properties"],
     properties: {
       children: notionChildrenProperty(),
+      cover: notionCoverProperty(),
+      icon: notionIconProperty(),
       parent: notionParentProperty(),
       properties: objectProperty("Notion page properties."),
     },
@@ -47,6 +50,8 @@ export const notionToolInputSchemas = {
     required: ["pageId"],
     properties: {
       archived: { type: "boolean" },
+      cover: notionCoverProperty(),
+      icon: notionIconProperty(),
       in_trash: { type: "boolean" },
       pageId: stringProperty("Notion page ID."),
       properties: objectProperty("Notion page properties."),
@@ -66,6 +71,23 @@ export const notionToolInputSchemas = {
       discussionId: stringProperty("Discussion ID for a reply."),
       markdown: stringProperty("Comment text in Notion-supported Markdown."),
       pageId: stringProperty("Page ID for a top-level comment."),
+    },
+  }),
+  notion_upload_file: objectSchema({
+    required: ["attachmentId"],
+    properties: {
+      attachmentId: stringProperty(
+        "Run attachment ID returned by save_attachment or search_attachments."
+      ),
+      contentType: stringProperty(
+        "Optional Notion file content_type override."
+      ),
+      filename: {
+        ...stringProperty(
+          "Optional filename override. Notion allows up to 900 UTF-8 bytes."
+        ),
+        minLength: 1,
+      },
     },
   }),
 } satisfies SchemaMap

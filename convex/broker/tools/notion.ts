@@ -1,13 +1,15 @@
 import { type Doc } from "../../_generated/dataModel"
-import { notionApiUrl, notionApiVersion } from "../../providers/notion/config"
+import { type AttachmentContext } from "../../attachments/read"
+import { notionJson } from "../../providers/notion/api"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
-import { fetchJsonObject } from "../../shared/http"
 import { optionalString, requiredString } from "../../shared/input"
+import { uploadNotionFile } from "./notion_upload"
 
 export async function callNotionTool(
   integration: Doc<"integrations">,
   tool: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  context?: AttachmentContext
 ) {
   const handler = notionToolHandlers[tool]
 
@@ -17,14 +19,18 @@ export async function callNotionTool(
 
   return await handler(
     requireNotionCredentials(integration).tokens.access,
-    args
+    args,
+    context
   )
 }
 
-const notionToolHandlers: Record<
-  string,
-  (token: string, args: Record<string, unknown>) => Promise<unknown>
-> = {
+type NotionToolHandler = (
+  token: string,
+  args: Record<string, unknown>,
+  context?: AttachmentContext
+) => Promise<unknown>
+
+const notionToolHandlers: Record<string, NotionToolHandler> = {
   notion_append_block_children: appendBlockChildren,
   notion_create_comment: createComment,
   notion_create_page: createPage,
@@ -34,6 +40,7 @@ const notionToolHandlers: Record<
   notion_query_data_source: queryDataSource,
   notion_search: search,
   notion_update_page: updatePage,
+  notion_upload_file: uploadNotionFile,
 }
 
 async function search(token: string, args: Record<string, unknown>) {
@@ -127,32 +134,6 @@ async function createComment(token: string, args: Record<string, unknown>) {
       ? { discussion_id: discussionId }
       : { parent: { page_id: pageId } }),
     markdown: requiredString(args.markdown, "markdown"),
-  })
-}
-
-async function notionJson(
-  token: string,
-  method: string,
-  path: string,
-  body?: unknown,
-  queryParams: Record<string, unknown> = {}
-) {
-  const url = new URL(notionApiUrl + path)
-
-  for (const [key, value] of Object.entries(queryParams)) {
-    if (value !== undefined) {
-      url.searchParams.set(key, String(value))
-    }
-  }
-
-  return await fetchJsonObject(url.toString(), {
-    method,
-    headers: {
-      authorization: `Bearer ${token}`,
-      "content-type": "application/json",
-      "notion-version": notionApiVersion,
-    },
-    body,
   })
 }
 
