@@ -22,6 +22,9 @@ import {
 const agentModel = "z-ai/glm-5.2"
 const agentReasoningEffort = "xhigh"
 const agentProviderRouting = {
+  // GMICloud intermittently returns private assistant text instead of native
+  // tool_calls for full Milo agent requests even with tools provided.
+  ignore: ["GMICloud"],
   require_parameters: true,
   sort: "price",
 } satisfies NonNullable<OpenRouterChatSettings["provider"]>
