@@ -38,7 +38,7 @@ export const promptTemplates = {
     "{{artifact.instruction}}\n\nReturn only JSON that matches the provided response schema.\n\nDo not spend tokens on hidden reasoning.\n",
   "communication/guidance": "## Guidance\n\n{{guidance.parts}}\n",
   "communication/message":
-    '# Communication\n\nWrite for the reply surface. Use its native formatting, syntax, and conventions. Keep replies conversational: address the thread naturally, use names only when they add warmth or clarity, and reserve direct platform mentions for attention, handoff, or accountability.\n\nSurface: `{{surface.label}}`{{? communication.guidance prefix="\\n\\n"}}\n',
+    '# Communication\n\nWrite for the reply surface. Use its native formatting, syntax, and conventions. Keep replies conversational: address the thread naturally, use names only when they add warmth or clarity, and reserve direct platform mentions for attention, handoff, or accountability.\n\nAssistant completion text is internal trace output; it is not posted to the user. When a reply, update, or final result should be visible, send it with the appropriate communication tool for the surface. If no user-visible message is needed, finish silently.\n\nSurface: `{{surface.label}}`{{? communication.guidance prefix="\\n\\n"}}\n',
   "context/message": "## Context\n\nRun started at: {{time.utc}}.\n",
   "conversation/message":
     '- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{{? message.identifiers prefix=" | "}}\n```text\n{{message.text}}\n```\n',
@@ -56,7 +56,7 @@ export const promptTemplates = {
   "trigger/instruction":
     "# Trigger\n\nManual instructions triggered this run.\n\nInstructions:\n```text\n{{instruction.text}}\n```\n\nHandle the request. Use write actions only when they are necessary for the\nrequested outcome. If you cannot complete the task, report the blocker and the\nnext useful step.\n",
   "trigger/message":
-    "# Trigger\n\nA {{message.integration}} message triggered this run.\n\nTarget:\n\n{{message.target}}\n\nRecent messages:\n\n{{message.conversation}}\n\nCurrent message:\n\n{{message.current}}\n\nRuntime:\n- Treat the message as the entry point. For non-trivial work, check surrounding context unless the next step is obvious.\n- Use any needed tools. Report the result back to this thread unless the work clearly belongs elsewhere.\n- Do not narrate progress. Send a message only for a concrete first step, result, blocker, material pivot, or terse phase update when work takes longer than ~10 seconds with no visible output.\n- If the message does not require a reply or action, finish silently.\n",
+    '# Trigger\n\nA {{message.integration}} message triggered this run.\n\nTarget:\n\n{{message.target}}\n\nRecent messages:\n\n{{message.conversation}}\n\nCurrent message:\n\n{{message.current}}\n\nRuntime:\n- Treat the message as the entry point. For non-trivial work, check surrounding context unless the next step is obvious.\n- Use any needed tools. Report the result back to this thread unless the work clearly belongs elsewhere; reporting means calling the appropriate communication tool, not only writing assistant completion text.{{? message.delivery prefix="\\n"}}\n- Do not narrate progress. Send a message with a communication tool only for a concrete first step, result, blocker, material pivot, or terse phase update when work takes longer than ~10 seconds with no visible output.\n- If the message does not require a reply or action, finish silently.\n',
 } as const
 
 export type SkillId = keyof typeof skills

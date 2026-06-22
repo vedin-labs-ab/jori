@@ -18,6 +18,7 @@ import { createSkillInstructions } from "./skills"
 import {
   formatEvent,
   formatTargetLines,
+  getMessageDelivery,
   getMessageTarget,
   targetLine,
 } from "./target"
@@ -111,6 +112,7 @@ function createMessageValues(
       current: formatMessageEntry(
         messageEntry(input.message, input.integration)
       ),
+      delivery: getMessageDelivery(input.messageIntegration),
       integration: getIntegrationLabel(input.messageIntegration),
       target: getMessageTarget(input.messageIntegration, input.message.data),
     },
