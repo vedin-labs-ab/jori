@@ -1,3 +1,10 @@
+import {
+  type JsonObject,
+  type JsonValue,
+  toJsonObject,
+  toJsonValue,
+} from "../../contracts/json"
+
 export async function fetchJson(
   url: string,
   options: {
@@ -6,21 +13,29 @@ export async function fetchJson(
     body?: unknown
     emptyResponse?: unknown
   }
-) {
+): Promise<JsonValue> {
   const response = await fetch(url, {
     method: options.method,
     headers: options.headers,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   })
   const text = await response.text()
-  const result =
+  const parsed: unknown =
     text === "" ? (options.emptyResponse ?? null) : JSON.parse(text)
+  const result = toJsonValue(parsed)
 
   if (!response.ok) {
     throw new Error(`Provider API request failed: ${JSON.stringify(result)}`)
   }
 
   return result
+}
+
+export async function fetchJsonObject(
+  url: string,
+  options: Parameters<typeof fetchJson>[1]
+): Promise<JsonObject> {
+  return toJsonObject(await fetchJson(url, options))
 }
 
 export function jsonErrorResponse(message: string, status: number) {

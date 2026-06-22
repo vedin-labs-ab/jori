@@ -1,9 +1,10 @@
+import { type JsonObject } from "../../../contracts/json"
 import { type ToolSurface } from "../../shared/integrations"
 
 export type PromptedToolApproval = {
   surface: ToolSurface
   tool: string
-  args: Record<string, unknown>
+  args: JsonObject
   summary: string
   handoff: {
     objective: string
@@ -15,7 +16,7 @@ export type PromptedToolApproval = {
 export function parsePromptedToolApproval(args: {
   surface: ToolSurface
   tool: string
-  args: Record<string, unknown>
+  args: JsonObject
 }): PromptedToolApproval {
   const approval = args.args.approval
 
@@ -47,7 +48,7 @@ function isApprovalObject(
     return false
   }
 
-  const candidate = approval as Record<string, unknown>
+  const candidate = approval as JsonObject
 
   return (
     typeof candidate.summary === "string" &&
@@ -59,12 +60,14 @@ function isApprovalObject(
 function isApprovalHandoff(
   handoff: unknown
 ): handoff is PromptedToolApproval["handoff"] {
+  const candidate = handoff as JsonObject
+
   return (
     typeof handoff === "object" &&
     handoff !== null &&
     !Array.isArray(handoff) &&
-    typeof (handoff as Record<string, unknown>).objective === "string" &&
-    typeof (handoff as Record<string, unknown>).progress === "string" &&
-    typeof (handoff as Record<string, unknown>).next === "string"
+    typeof candidate.objective === "string" &&
+    typeof candidate.progress === "string" &&
+    typeof candidate.next === "string"
   )
 }

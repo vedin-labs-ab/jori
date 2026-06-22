@@ -1,5 +1,5 @@
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
-import { fetchJson } from "../../shared/http"
+import { fetchJsonObject } from "../../shared/http"
 import {
   maxOptions,
   normalizeQuery,
@@ -58,7 +58,7 @@ async function microsoftGraph(
     }
   }
 
-  return await fetchJson(url.toString(), {
+  return await fetchJsonObject(url.toString(), {
     method: "GET",
     headers: {
       authorization: `Bearer ${credentials.tokens.access}`,

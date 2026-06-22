@@ -1,3 +1,4 @@
+import { encodeJson, type JsonObject } from "../../../contracts/json"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
@@ -48,7 +49,7 @@ export async function createPromptedToolApproval(
   args: {
     surface: ToolSurface
     tool: string
-    args: Record<string, unknown>
+    args: JsonObject
     waitpointTokenId?: string
   }
 ): Promise<{
@@ -93,7 +94,7 @@ export async function createPromptedToolApproval(
       runId: context.run._id,
       surface: request.surface,
       tool: request.tool,
-      args: request.args,
+      argsJson: encodeJson(request.args),
       summary: request.summary,
       handoff: request.handoff,
       code,

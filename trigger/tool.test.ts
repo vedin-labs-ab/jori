@@ -108,7 +108,42 @@ test("prompted tools return expired results on waitpoint timeout", async () => {
   expect(runtime.convex.callTool).not.toHaveBeenCalled()
 })
 
-function createRuntime(): ToolRuntime {
+test("tool failures are returned to the agent instead of thrown", async () => {
+  const runtime = createRuntime({
+    mode: "allowed",
+  })
+  runtime.convex.callTool = vi.fn(async () => {
+    throw new Error("Provider rejected the request")
+  })
+
+  const content = await executeToolCall({
+    attempt: 1,
+    call: simpleToolCall(),
+    runtime,
+    sequence: 100,
+  })
+
+  expect(JSON.parse(content)).toEqual({
+    error: {
+      message: "Provider rejected the request",
+    },
+    status: "error",
+  })
+  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+    expect.objectContaining({
+      data: {
+        error: "Provider rejected the request",
+        name: "notion_create_page",
+        route: "convex",
+      },
+      type: "tool.failed",
+    })
+  )
+})
+
+function createRuntime(
+  options: { mode?: "allowed" | "prompted" } = {}
+): ToolRuntime {
   return {
     convex: {
       callTool: vi.fn(),
@@ -131,7 +166,7 @@ function createRuntime(): ToolRuntime {
         {
           description: "Create a Notion page.",
           inputSchema: {},
-          mode: "prompted",
+          mode: options.mode ?? "prompted",
           name: "notion_create_page",
           route: "convex",
           surface: "notion",
@@ -158,6 +193,26 @@ function promptedToolCall() {
         summary: "Create launch notes in Notion.",
       },
       title: "Launch notes",
+    },
+    id: "call_1",
+    name: "notion_create_page",
+  }
+}
+
+function simpleToolCall() {
+  return {
+    args: {
+      parent: {
+        page_id: "page_1",
+      },
+      properties: {
+        Företag: {
+          title: [{ text: { content: "Vedin Labs" } }],
+        },
+        "Status 😀": {
+          rich_text: [{ text: { content: "Ready" } }],
+        },
+      },
     },
     id: "call_1",
     name: "notion_create_page",

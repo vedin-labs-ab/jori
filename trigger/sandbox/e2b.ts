@@ -1,4 +1,5 @@
 import { CommandExitError, type CommandResult, Sandbox } from "e2b"
+import { type JsonObject, toJsonObject } from "../../contracts/json"
 import { type MiloConvexClient } from "../convex"
 import { type ConvexId } from "../types"
 import {
@@ -91,7 +92,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     }
   }
 
-  async buildArtifact(workspacePath: string): Promise<Record<string, unknown>> {
+  async buildArtifact(workspacePath: string): Promise<JsonObject> {
     await this.prepareArtifactRuntime()
     const result = await this.runCommand({
       command: artifactBuildCommand(workspacePath),
@@ -254,11 +255,11 @@ function compactCommandFailure(result: SandboxCommandResult) {
 function parseArtifactBuild(stdout: string) {
   const parsed = JSON.parse(stdout) as unknown
 
-  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+  try {
+    return toJsonObject(parsed)
+  } catch {
     throw new Error("Artifact builder returned an invalid payload.")
   }
-
-  return parsed as Record<string, unknown>
 }
 
 function requireSandboxTemplate() {

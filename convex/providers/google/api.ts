@@ -1,11 +1,12 @@
-import { fetchJson } from "../../shared/http"
+import { toJsonValue } from "../../../contracts/json"
+import { fetchJsonObject } from "../../shared/http"
 
 export async function googleJson(
   token: string,
   url: string,
   options: { method?: string; body?: unknown } = {}
 ) {
-  return await fetchJson(url, {
+  return await fetchJsonObject(url, {
     method: options.method ?? "GET",
     headers: {
       authorization: `Bearer ${token}`,
@@ -29,7 +30,8 @@ export async function googleMultipartJson(
     body: options.body,
   })
   const text = await response.text()
-  const result = text === "" ? null : JSON.parse(text)
+  const parsed: unknown = text === "" ? null : JSON.parse(text)
+  const result = toJsonValue(parsed)
 
   if (!response.ok) {
     throw new Error(`Provider API request failed: ${JSON.stringify(result)}`)

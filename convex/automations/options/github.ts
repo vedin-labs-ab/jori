@@ -1,6 +1,6 @@
 import { githubApiUrl } from "../../providers/github/config"
 import { requireGitHubCredentials } from "../../providers/github/credentials"
-import { fetchJson } from "../../shared/http"
+import { fetchJsonObject } from "../../shared/http"
 import {
   compactDescription,
   maxOptions,
@@ -93,7 +93,7 @@ async function githubJson(
     }
   }
 
-  return await fetchJson(url.toString(), {
+  return await fetchJsonObject(url.toString(), {
     method: "GET",
     headers: {
       authorization: `Bearer ${token}`,

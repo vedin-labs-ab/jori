@@ -1,6 +1,6 @@
 import { linearGraphqlUrl } from "../../providers/linear/config"
 import { requireLinearCredentials } from "../../providers/linear/credentials"
-import { fetchJson } from "../../shared/http"
+import { fetchJsonObject } from "../../shared/http"
 import {
   compactDescription,
   maxOptions,
@@ -26,7 +26,7 @@ export async function searchLinearTeams(args: OptionLoaderArgs) {
   })
   const normalizedQuery = normalizeQuery(args.query)
 
-  return readArray(result.data?.teams?.nodes)
+  return readArray(readRecord(readRecord(result.data).teams).nodes)
     .map(readRecord)
     .map((team) => ({
       value: requiredOptionString(team.id),
@@ -50,7 +50,7 @@ export async function searchLinearProjects(args: OptionLoaderArgs) {
   const normalizedQuery = normalizeQuery(args.query)
   const teamId = optionalMatch(args.match, "team")
 
-  return readArray(result.data?.projects?.nodes)
+  return readArray(readRecord(readRecord(result.data).projects).nodes)
     .map(readRecord)
     .filter((project) => projectMatchesTeam(project, teamId))
     .map((project) => ({
@@ -70,7 +70,7 @@ export async function searchLinearIssues(args: OptionLoaderArgs) {
   const teamId = optionalMatch(args.match, "team")
   const projectId = optionalMatch(args.match, "project")
 
-  return readArray(result.data?.issues?.nodes)
+  return readArray(readRecord(readRecord(result.data).issues).nodes)
     .map(readRecord)
     .filter((issue) => issueMatchesMatch(issue, teamId, projectId))
     .map((issue) => ({
@@ -89,7 +89,7 @@ async function linearGraphql(
   body: Record<string, unknown>
 ) {
   const credentials = requireLinearCredentials(args.integration)
-  const result = await fetchJson(linearGraphqlUrl, {
+  const result = await fetchJsonObject(linearGraphqlUrl, {
     method: "POST",
     headers: {
       authorization: `Bearer ${credentials.tokens.access}`,

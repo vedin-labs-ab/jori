@@ -1,7 +1,7 @@
 import { notionApiUrl, notionApiVersion } from "../../providers/notion/config"
 import { requireNotionCredentials } from "../../providers/notion/credentials"
 import { notionPageTitle } from "../../providers/notion/pages"
-import { fetchJson } from "../../shared/http"
+import { fetchJsonObject } from "../../shared/http"
 import {
   maxOptions,
   type OptionLoaderArgs,
@@ -36,7 +36,7 @@ async function notionJson(
 ) {
   const credentials = requireNotionCredentials(args.integration)
 
-  return await fetchJson(notionApiUrl + path, {
+  return await fetchJsonObject(notionApiUrl + path, {
     method: "POST",
     headers: {
       authorization: `Bearer ${credentials.tokens.access}`,

@@ -1,7 +1,8 @@
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { fetchJson } from "../../shared/http"
+import { fetchJsonObject } from "../../shared/http"
+import { readArray, readRecord } from "../../shared/input"
 import { notionApiUrl, notionApiVersion } from "./config"
 import { requireNotionCredentials } from "./credentials"
 
@@ -80,15 +81,18 @@ export async function fetchNotionPageContext(
 ): Promise<NotionPageContext | undefined> {
   try {
     const page = readRecord(
-      await fetchJson(`${notionApiUrl}/pages/${encodeURIComponent(pageId)}`, {
-        method: "GET",
-        headers: {
-          authorization: `Bearer ${
-            requireNotionCredentials(integration).tokens.access
-          }`,
-          "notion-version": notionApiVersion,
-        },
-      })
+      await fetchJsonObject(
+        `${notionApiUrl}/pages/${encodeURIComponent(pageId)}`,
+        {
+          method: "GET",
+          headers: {
+            authorization: `Bearer ${
+              requireNotionCredentials(integration).tokens.access
+            }`,
+            "notion-version": notionApiVersion,
+          },
+        }
+      )
     )
 
     return {
@@ -105,16 +109,6 @@ function notionRichTextPlainText(value: unknown) {
   const text = readRecord(value).plain_text
 
   return typeof text === "string" ? text : ""
-}
-
-function readRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {}
-}
-
-function readArray(value: unknown) {
-  return Array.isArray(value) ? value : []
 }
 
 function readString(record: Record<string, unknown>, key: string) {

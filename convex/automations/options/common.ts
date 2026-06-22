@@ -58,7 +58,7 @@ export function readRecord(value: unknown) {
     : {}
 }
 
-export function readArray(value: unknown) {
+export function readArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : []
 }
 

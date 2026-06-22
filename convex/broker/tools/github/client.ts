@@ -1,7 +1,7 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { githubApiUrl } from "../../../providers/github/config"
 import { requireGitHubCredentials } from "../../../providers/github/credentials"
-import { fetchJson } from "../../../shared/http"
+import { fetchJson, fetchJsonObject } from "../../../shared/http"
 import { requiredString } from "../../../shared/input"
 
 export function requireGitHubRuntimeToken(integration: Doc<"integrations">) {
@@ -20,6 +20,27 @@ export async function githubJson(
   query: Record<string, unknown> = {},
   options: { method?: string; body?: unknown } = {}
 ) {
+  return await fetchJson(githubUrl(path, query), {
+    method: options.method ?? "GET",
+    headers: githubHeaders(token),
+    body: options.body,
+  })
+}
+
+export async function githubJsonObject(
+  token: string,
+  path: string,
+  query: Record<string, unknown> = {},
+  options: { method?: string; body?: unknown } = {}
+) {
+  return await fetchJsonObject(githubUrl(path, query), {
+    method: options.method ?? "GET",
+    headers: githubHeaders(token),
+    body: options.body,
+  })
+}
+
+function githubUrl(path: string, query: Record<string, unknown>) {
   const url = new URL(githubApiUrl + path)
 
   for (const [key, value] of Object.entries(query)) {
@@ -28,11 +49,7 @@ export async function githubJson(
     }
   }
 
-  return await fetchJson(url.toString(), {
-    method: options.method ?? "GET",
-    headers: githubHeaders(token),
-    body: options.body,
-  })
+  return url.toString()
 }
 
 export function githubHeaders(token: string) {
