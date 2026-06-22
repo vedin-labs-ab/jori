@@ -5,9 +5,9 @@ import { type ActionCtx, internalQuery } from "../../_generated/server"
 import { callGitHubTool } from "../../broker/tools/github"
 import { callLinearTool } from "../../broker/tools/linear"
 import { postSlackMessage } from "../../broker/tools/slack"
+import { activeMessageIntegration } from "../../messages/data"
+import { type ReplyAddress, replyAddress } from "../../messages/surface"
 import { readProviderDataString } from "../../providers/data"
-import { activeMessageIntegration } from "../../routing/data"
-import { type ReplyAddress, replyAddress } from "../../routing/surface"
 
 export async function sendOutboxReply(ctx: ActionCtx, item: Doc<"outbox">) {
   const operation = item.operation

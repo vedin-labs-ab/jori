@@ -1,7 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveMessageOwner } from "../messages/data"
-import { findRoutingByMessage } from "../routing/data"
 import { maxPendingReadLimit } from "../sessions/cursor"
 import { readPendingMessages, stopSession } from "../sessions/data"
 import { isUserActor } from "../shared/actor"
@@ -52,10 +51,6 @@ async function continueSession(
 ) {
   const pending = await readPendingContinuationMessage(ctx, session)
 
-  if (pending.status === "wait") {
-    return
-  }
-
   if (pending.message === undefined) {
     await stopSession(ctx, session, now)
     return
@@ -96,39 +91,20 @@ async function readPendingContinuationMessage(
   const messages = await readPendingMessages(ctx, session, maxPendingReadLimit)
 
   for (const message of messages) {
-    const action = await readContinuationAction(ctx, message)
-
-    if (action === "start") {
+    if (shouldStartContinuation(message)) {
       return { status: "start" as const, message }
-    }
-
-    if (action === "wait") {
-      return { status: "wait" as const }
     }
   }
 
   return { status: "idle" as const }
 }
 
-async function readContinuationAction(
-  ctx: MutationCtx,
-  message: Doc<"messages">
-) {
+function shouldStartContinuation(message: Doc<"messages">) {
   if (!isUserActor(message.actor)) {
-    return "skip"
+    return false
   }
 
-  if (!hasText(message)) {
-    return "skip"
-  }
-
-  const routing = await findRoutingByMessage(ctx, message._id)
-
-  if (routing === null) {
-    return "wait"
-  }
-
-  return routing.route === "agent" ? "start" : "skip"
+  return hasText(message)
 }
 
 function hasText(message: Doc<"messages">) {

@@ -93,7 +93,6 @@ function createMessageValues(
       delivery: getMessageDelivery(input.messageIntegration),
       integration: getIntegrationLabel(input.messageIntegration),
       progress: getMessageProgress(input.messageIntegration),
-      routing: formatMessageRouting(input.routing),
       target: getMessageTarget(input.messageIntegration, input.message.data),
       text: input.message.text ?? "",
     },
@@ -176,19 +175,6 @@ function formatSelectedTools(tools: readonly string[]) {
   }
 
   return tools.map((tool) => getToolPermission(tool)?.label ?? tool).join(", ")
-}
-
-function formatMessageRouting(
-  routing: Extract<AgentRuntimeInput, { type: "message" }>["routing"]
-) {
-  if (routing === null) {
-    return "- None"
-  }
-
-  return formatTargetLines([
-    targetLine("Intake route", routing.route),
-    targetLine("Quick reply", routing.reply ?? undefined),
-  ])
 }
 
 function formatAutomationTrigger(

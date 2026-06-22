@@ -14,9 +14,6 @@ Message:
 {{message.text}}
 ```
 
-Intake:
-{{message.routing}}
-
 Context:
 - The message is the starting point, not necessarily the whole request. For
   non-trivial work, check the surrounding thread or related discussion before
@@ -24,6 +21,8 @@ Context:
   is obvious.
 - This target does not limit which tools you may use; when the work or its
   result lives elsewhere, report the outcome here.
+- If no reply or action is useful, complete silently with an empty final
+  response.
 {{message.delivery}}
 {{message.progress}}
 - While working, send an update only when it changes what the requester knows

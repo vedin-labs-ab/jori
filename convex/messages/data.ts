@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
+import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { resolveUserIdByEmail } from "../identity/identities"
 import { type Actor, actorValidator, getActorEmail } from "../shared/actor"
 import { type Integration } from "../shared/integrations"
@@ -52,6 +52,18 @@ export async function findActiveIntegration(
   }
 
   return integration
+}
+
+export async function activeMessageIntegration(
+  ctx: QueryCtx,
+  message: Doc<"messages">
+) {
+  const integration = await ctx.db.get(message.integrationId)
+
+  return integration?.integration === message.integration &&
+    integration.status === "active"
+    ? integration
+    : null
 }
 
 export async function findMessageByExternalId(

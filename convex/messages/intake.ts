@@ -1,11 +1,9 @@
-import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { getLinearBotId } from "../providers/linear/data"
 import { getSlackBotUserId } from "../providers/slack/data"
-import { messageAudience } from "../routing/surface"
 import { getActorExternalId, isUserActor, withActorKind } from "../shared/actor"
-import { ensureWatch, findWatch } from "../watches/data"
+import { ensureWatch, findWatch, startMessageRun } from "../watches/data"
 import {
   findActiveIntegration,
   findMessageByExternalId,
@@ -13,8 +11,10 @@ import {
   messageIntegrationValidator,
   type ObservedMessage,
   observedMessageArgs,
+  resolveMessageOwner,
 } from "./data"
 import { recordAutomationEvent } from "./events"
+import { messageAudience } from "./surface"
 
 export const record = internalMutation({
   args: {
@@ -48,15 +48,29 @@ export const record = internalMutation({
       await recordAutomationEvent(ctx, { integration, message: observed, now })
     }
 
-    if (!(await shouldRouteMessage(ctx, { integration, message, now }))) {
+    const watch = await messageRunWatch(ctx, { integration, message })
+
+    if (watch === null) {
       return { status: "recorded" as const, messageId: message._id }
     }
 
-    await ctx.scheduler.runAfter(0, internal.routing.message.route, {
-      messageId: message._id,
+    const run = await startMessageRun(ctx, {
+      integration,
+      message,
+      createdBy: await resolveMessageOwner(ctx, {
+        tenantId: integration.tenantId,
+        message,
+      }),
+      externalId: message.conversationId ?? message.externalId,
+      now,
+      watch,
     })
 
-    return { status: "routed" as const, messageId: message._id }
+    return {
+      status: "queued" as const,
+      messageId: message._id,
+      runId: run.runId,
+    }
   },
 })
 
@@ -130,33 +144,34 @@ function selfActorId(integration: Doc<"integrations">) {
   return undefined
 }
 
-async function shouldRouteMessage(
+async function messageRunWatch(
   ctx: MutationCtx,
   args: {
     integration: Doc<"integrations">
     message: Doc<"messages">
-    now: number
   }
 ) {
   if (!isUserActor(args.message.actor)) {
-    return false
+    return null
   }
 
   const audience = messageAudience(args.message, args.integration)
-  const watch =
-    audience.isAddressed || audience.isDirect
-      ? await ensureWatch(ctx, {
-          tenantId: args.integration.tenantId,
-          integrationId: args.integration._id,
-          externalId: args.message.conversationId,
-        })
-      : await findWatch(ctx, {
-          tenantId: args.integration.tenantId,
-          integrationId: args.integration._id,
-          externalId: args.message.conversationId,
-        })
 
-  return watch !== null && hasText(args.message)
+  if (!hasText(args.message)) {
+    return null
+  }
+
+  return audience.isAddressed || audience.isDirect
+    ? await ensureWatch(ctx, {
+        tenantId: args.integration.tenantId,
+        integrationId: args.integration._id,
+        externalId: args.message.conversationId,
+      })
+    : await findWatch(ctx, {
+        tenantId: args.integration.tenantId,
+        integrationId: args.integration._id,
+        externalId: args.message.conversationId,
+      })
 }
 
 function hasText(message: Doc<"messages">) {

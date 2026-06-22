@@ -110,7 +110,6 @@ function messageInput(integrations: Doc<"integrations">[]): AgentRuntimeInput {
     run: run(),
     message: {} as Doc<"messages">,
     conversation: [],
-    routing: null,
     integration: source ?? integration("slack"),
     integrations,
   }

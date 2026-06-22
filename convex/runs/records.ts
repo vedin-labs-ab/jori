@@ -1,9 +1,9 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
-import { recentConversation } from "../routing/history"
+import { recentConversation } from "../messages/history"
 
 export const getInputByRun = internalQuery({
   args: {
@@ -68,7 +68,6 @@ async function getMessageInput(
     integration,
     integrations,
     conversation: await recentConversation(ctx, message, integration),
-    routing: await getMessageRouting(ctx, message._id),
   }
 }
 
@@ -150,20 +149,6 @@ async function getInstructionInput(
       args.run.createdBy
     ),
   }
-}
-
-async function getMessageRouting(ctx: QueryCtx, messageId: Id<"messages">) {
-  const routing = await ctx.db
-    .query("routing")
-    .withIndex("by_message", (query) => query.eq("messageId", messageId))
-    .first()
-
-  return routing === null
-    ? null
-    : {
-        reply: routing.reply ?? null,
-        route: routing.route,
-      }
 }
 
 export const get = internalQuery({

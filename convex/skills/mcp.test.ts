@@ -9,7 +9,7 @@ test("loads an available runtime skill", () => {
     skill: {
       name: "slack",
       associatedIntegrations: ["slack"],
-      instructions: expect.stringContaining("Write Slack `mrkdwn` only"),
+      instructions: expect.stringContaining("Use Slack `mrkdwn` sparingly"),
     },
   })
 })

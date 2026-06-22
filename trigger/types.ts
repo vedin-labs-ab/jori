@@ -85,10 +85,6 @@ export type RuntimeMessage = {
   integration: string
   mentioned: boolean
   observedAt: number | null
-  routing: {
-    reply: string | null
-    route: "agent" | "ignore" | "respond"
-  } | null
   source: "bot" | "self" | "unknown" | "user"
   text: string
   type: string
