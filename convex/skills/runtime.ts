@@ -34,9 +34,7 @@ export function getRuntimeSkillForIntegration(integration: Integration) {
 }
 
 export function runtimeSkillAssociatedIntegrations(skill: RuntimeSkill) {
-  return "associatedIntegrations" in skill
-    ? skill.associatedIntegrations
-    : undefined
+  return "associatedIntegrations" in skill ? skill.associatedIntegrations : []
 }
 
 export function formatRuntimeSkill(skill: RuntimeSkill) {
