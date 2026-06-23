@@ -95,11 +95,12 @@ export type RuntimeContext = {
 
 export type RuntimeMessage = {
   actor: string | null
+  actorIds: string[]
   authority: "authoritative" | "soft"
   createdAt: number
   id: ConvexId<"messages">
-  identifiers: string[]
   integration: string
+  messageIds: string[]
   mentioned: boolean
   observedAt: number | null
   source: "bot" | "self" | "unknown" | "user"

@@ -189,7 +189,8 @@ function formatMessageEntry(
   return renderPromptTemplate(promptTemplates["conversation/message"], {
     message: {
       actor: entry.actor ?? "unknown",
-      identifiers: entry.identifiers.join(", "),
+      actorIds: entry.actorIds.join(", "),
+      messageIds: entry.messageIds.join(", "),
       observedAt: new Date(observed).toISOString(),
       speaker: entry.source,
       text: entry.text,

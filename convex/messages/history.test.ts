@@ -26,9 +26,10 @@ function entry(
 ): ConversationEntry {
   return {
     actor,
+    actorIds: [],
     createdAt,
     id,
-    identifiers: [],
+    messageIds: [],
     observedAt: null,
     source: actor === "Milo" ? "self" : "user",
     text,

@@ -16,7 +16,7 @@ test("renders recent conversation context without duplicating the trigger", () =
   expect(prompt).toContain("Recent messages:")
   expect(prompt).not.toContain("Recent conversation:")
   expect(prompt).toContain(
-    "- 1970-01-01T00:00:01.000Z | user | Albin | slack_id=U123"
+    "- 1970-01-01T00:00:01.000Z | user | Albin | message_ids=[slack:message:123.456] | actor_ids=[slack:user:U123]"
   )
   expect(prompt).toContain("- 1970-01-01T00:00:02.000Z | self | Milo")
   expect(prompt).toContain("- 1970-01-01T00:00:03.000Z | bot | CI")
@@ -56,9 +56,10 @@ function recentConversation(): ConversationEntry[] {
   return [
     {
       actor: "Albin",
+      actorIds: ["slack:user:U123"],
       createdAt: 1_000,
       id: "previous-user-message",
-      identifiers: ["slack_id=U123"],
+      messageIds: ["slack:message:123.456"],
       observedAt: null,
       source: "user",
       text: "Can you check this?",
@@ -66,9 +67,10 @@ function recentConversation(): ConversationEntry[] {
     },
     {
       actor: "Milo",
+      actorIds: [],
       createdAt: 2_000,
       id: "previous-quick-reply",
-      identifiers: [],
+      messageIds: [],
       observedAt: null,
       source: "self",
       text: "I can take a quick look.",
@@ -76,9 +78,10 @@ function recentConversation(): ConversationEntry[] {
     },
     {
       actor: "CI",
+      actorIds: [],
       createdAt: 3_000,
       id: "previous-bot-message",
-      identifiers: [],
+      messageIds: [],
       observedAt: null,
       source: "bot",
       text: "Build failed.",
@@ -86,9 +89,10 @@ function recentConversation(): ConversationEntry[] {
     },
     {
       actor: null,
+      actorIds: [],
       createdAt: 3_500,
       id: "previous-system-message",
-      identifiers: [],
+      messageIds: [],
       observedAt: null,
       source: "bot",
       text: "Deployment started.",
@@ -96,9 +100,10 @@ function recentConversation(): ConversationEntry[] {
     },
     {
       actor: "Albin",
+      actorIds: [],
       createdAt: 4_000,
       id: "message",
-      identifiers: [],
+      messageIds: [],
       observedAt: null,
       source: "user",
       text: "Duplicate trigger context.",

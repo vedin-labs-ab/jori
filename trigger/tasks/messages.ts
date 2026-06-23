@@ -10,7 +10,8 @@ export function formatSessionMessage(message: RuntimeMessage) {
   return renderPromptTemplate(promptTemplates["conversation/message"], {
     message: {
       actor: message.actor ?? "unknown",
-      identifiers: message.identifiers.join(", "),
+      actorIds: message.actorIds.join(", "),
+      messageIds: message.messageIds.join(", "),
       observedAt: new Date(observed).toISOString(),
       speaker: message.source,
       text: message.text,
