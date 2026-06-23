@@ -1,29 +1,18 @@
 import { task } from "@trigger.dev/sdk/v3"
-import { promptTemplates } from "../../convex/prompts/generated"
 import { MiloConvexClient } from "../convex"
-import { errorDetails, runtimeEvent } from "../events"
+import { errorDetails } from "../events"
 import { OpenRouterModelRuntime } from "../model/openrouter"
-import {
-  type ModelMessage,
-  type ModelRuntime,
-  type ModelToolCall,
-} from "../model/types"
 import { E2BSandboxRuntime } from "../sandbox/e2b"
-import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
 import {
   type AgentRunPayload,
   agentTaskId,
   type RuntimeContext,
-  type RuntimeEventType,
-  type RuntimeRunTraceData,
 } from "../types"
-import { formatSessionMessage } from "./messages"
+import { recordRunEvent } from "./events"
+import { runAgentLoop } from "./loop"
 import { releaseSandbox } from "./sandbox"
 
 const maxAttempts = 3
-const invalidStopRepairInstruction = promptTemplates["repair/invalid"].trim()
-const maxModelSteps = 30
-const toolSequenceOffset = 100
 
 export const miloAgentRun = task({
   id: agentTaskId,
@@ -76,157 +65,6 @@ function isTerminalStatus(status: RuntimeContext["run"]["status"]) {
   return status === "completed" || status === "failed" || status === "stopped"
 }
 
-export async function runAgentLoop(args: {
-  attempt: number
-  model: ModelRuntime
-  runtime: ToolRuntime
-}) {
-  const messages: ModelMessage[] = [
-    {
-      content: args.runtime.context.prompt,
-      role: "system",
-    },
-  ]
-  const tools = modelTools(args.runtime.context.tools)
-  let repairingInvalidStop = false
-
-  for (let step = 1; step <= maxModelSteps; step += 1) {
-    if (await appendSessionMessages(args.runtime, messages)) {
-      repairingInvalidStop = false
-    }
-
-    const response = await args.model.complete({ messages, tools })
-
-    if (response.type === "stop") {
-      if (await appendSessionMessages(args.runtime, messages)) {
-        repairingInvalidStop = false
-        continue
-      }
-
-      if (!isEmptyStop(response.content)) {
-        if (repairingInvalidStop) {
-          throw new Error("Model returned non-empty stop content after repair.")
-        }
-
-        appendInvalidStopRepair(messages, response.content)
-        repairingInvalidStop = true
-        continue
-      }
-
-      await completeRun(args.runtime, step, args.attempt)
-
-      return {
-        message: "",
-        status: "completed",
-      }
-    }
-
-    repairingInvalidStop = false
-    messages.push({
-      content: response.content,
-      role: "assistant",
-      toolCalls: response.toolCalls,
-    })
-    await runToolCalls(args.runtime, messages, response.toolCalls, {
-      attempt: args.attempt,
-      step,
-    })
-  }
-
-  throw new Error("Model loop exceeded the maximum step count.")
-}
-
-function isEmptyStop(content: string) {
-  const normalized = content.trim()
-
-  return normalized === "" || normalized === '""' || normalized === "''"
-}
-
-function appendInvalidStopRepair(messages: ModelMessage[], content: string) {
-  messages.push({
-    content,
-    role: "assistant",
-  })
-  messages.push({
-    content: invalidStopRepairInstruction,
-    role: "user",
-  })
-}
-
-async function appendSessionMessages(
-  runtime: ToolRuntime,
-  messages: ModelMessage[]
-) {
-  const session = runtime.context.session
-
-  if (session === null) {
-    return false
-  }
-
-  let appended = false
-  let hasMore = true
-
-  while (hasMore) {
-    const drained = await runtime.convex.drainSessionMessages({
-      sessionId: session.id,
-    })
-
-    hasMore = drained.hasMore
-
-    for (const message of drained.messages) {
-      messages.push({
-        content: formatSessionMessage(message),
-        role: "user",
-      })
-      appended = true
-    }
-  }
-
-  return appended
-}
-
-async function runToolCalls(
-  runtime: ToolRuntime,
-  messages: ModelMessage[],
-  calls: ModelToolCall[],
-  meta: { attempt: number; step: number }
-) {
-  let index = 0
-
-  for (const call of calls) {
-    const content = await executeToolCall({
-      attempt: meta.attempt,
-      call,
-      runtime,
-      sequence: meta.step * toolSequenceOffset + index,
-    })
-
-    messages.push({
-      content,
-      role: "tool",
-      toolCallId: call.id,
-      toolName: call.name,
-    })
-    index += 1
-  }
-}
-
-async function completeRun(
-  runtime: ToolRuntime,
-  step: number,
-  attempt: number
-) {
-  const sequence = step * toolSequenceOffset
-
-  await recordRunEvent(
-    runtime.convex,
-    runtime.context,
-    "run.completed",
-    sequence,
-    attempt
-  )
-}
-
 async function handleFailure(args: {
   attempt: number
   context: RuntimeContext
@@ -247,24 +85,4 @@ async function handleFailure(args: {
     errorDetails(args.error)
   )
   await args.sandbox.cleanup()
-}
-
-async function recordRunEvent(
-  convex: MiloConvexClient,
-  context: RuntimeContext,
-  type: RuntimeEventType,
-  sequence: number,
-  attempt: number,
-  data?: RuntimeRunTraceData
-) {
-  await convex.recordEvent(
-    runtimeEvent({
-      attempt,
-      data,
-      runId: context.run.id,
-      sequence,
-      source: "trigger.run",
-      type,
-    })
-  )
 }
