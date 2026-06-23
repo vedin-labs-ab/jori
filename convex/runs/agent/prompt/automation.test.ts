@@ -23,6 +23,7 @@ describe("automation trigger prompts", () => {
     )
     expect(prompt).toContain("Finish the run by calling `finish_run`")
     expect(prompt).not.toContain("send_reply")
+    expectNoSyntheticBlankLines(prompt)
   })
 
   test("renders disabled web search", () => {
@@ -66,3 +67,7 @@ describe("automation trigger prompts", () => {
     expect(prompt).toContain("- Notion event type: comment.created")
   })
 })
+
+function expectNoSyntheticBlankLines(prompt: string) {
+  expect(prompt).not.toMatch(/\n{3,}/)
+}
