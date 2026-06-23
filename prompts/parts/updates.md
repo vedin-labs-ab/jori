@@ -1,6 +1,6 @@
 Send one short start update before the first non-communication tool call, unless the task is simple enough to answer directly or with one quick read/lookup whose result can be reported immediately.
 
-A start update is required for approvals, writes, research, deliverables, or any task likely to need 2 or more non-communication tool calls. If required, the next action must be the active surface’s communication tool.
+A start update is required for approvals, writes, research, deliverables, or any task likely to need 2 or more non-communication tool calls. If required on an active requester surface, the next action must be `send_reply`.
 
 Make updates useful, not ceremonial. Lead with what the requester benefits from knowing: the concrete action, decision, constraint, blocker, or next step.
 

@@ -131,9 +131,7 @@ describe("runtime delivery prompts", () => {
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
-    expect(prompt).toContain(
-      "For work that will not produce an immediate user-visible result"
-    )
+    expect(prompt).toContain("Send one short start update")
     expect(prompt).toContain("Make updates useful, not ceremonial")
     expect(prompt).toContain("After a start update, stay quiet")
     expect(prompt).toContain(
@@ -153,12 +151,12 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain(
       "When instructed to send, reply, report, update, tell the user, or let them know"
     )
-    expect(prompt).toContain("call the appropriate communication tool")
+    expect(prompt).toContain("call `send_reply`")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Completion")
     expect(prompt).toContain("Assistant completion text is private run output")
-    expect(prompt).toContain("finish with an empty assistant completion")
+    expect(prompt).toContain("finish by calling `finish_run`")
   })
 
   test("omits automatic final delivery instructions", () => {
