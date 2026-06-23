@@ -75,6 +75,7 @@ describe("runtime prompts", () => {
       expect(prompt).toContain(line)
     }
 
+    expect(prompt).toContain(targetLines.join("\n"))
     expect(prompt).toContain("Recent messages:")
     expect(prompt).toContain("Current message:")
     expect(prompt).not.toContain("\nHistory:\n")
