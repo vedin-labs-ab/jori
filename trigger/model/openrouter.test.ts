@@ -6,8 +6,8 @@ describe("OpenRouter model runtime settings", () => {
     expect(createOpenRouterModelSettings()).toEqual({
       provider: {
         allow_fallbacks: true,
-        only: ["Wafer", "Z.AI", "Fireworks", "Together"],
-        order: ["Wafer", "Z.AI", "Fireworks", "Together"],
+        only: ["Wafer", "Fireworks", "Together"],
+        order: ["Wafer", "Fireworks", "Together"],
         require_parameters: true,
       },
       reasoning: {
