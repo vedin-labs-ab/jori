@@ -59,7 +59,7 @@ export class OpenRouterModelRuntime implements ModelRuntime {
     if (toolCalls.length === 0) {
       return {
         content: response.text,
-        type: "message",
+        type: "stop",
       }
     }
 

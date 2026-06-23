@@ -20,6 +20,11 @@ import { formatSessionMessage } from "./messages"
 import { releaseSandbox } from "./sandbox"
 
 const maxAttempts = 3
+const invalidStopRepairInstruction = [
+  "Invalid stop. Assistant completion text is private and must be empty.",
+  "If this text should be visible to the requester, send it with the appropriate communication tool.",
+  "If no visible message is needed, return an empty assistant completion.",
+].join(" ")
 const maxModelSteps = 30
 const toolSequenceOffset = 100
 
@@ -74,7 +79,7 @@ function isTerminalStatus(status: RuntimeContext["run"]["status"]) {
   return status === "completed" || status === "failed" || status === "stopped"
 }
 
-async function runAgentLoop(args: {
+export async function runAgentLoop(args: {
   attempt: number
   model: ModelRuntime
   runtime: ToolRuntime
@@ -86,24 +91,40 @@ async function runAgentLoop(args: {
     },
   ]
   const tools = modelTools(args.runtime.context.tools)
+  let repairingInvalidStop = false
 
   for (let step = 1; step <= maxModelSteps; step += 1) {
-    await appendSessionMessages(args.runtime, messages)
+    if (await appendSessionMessages(args.runtime, messages)) {
+      repairingInvalidStop = false
+    }
+
     const response = await args.model.complete({ messages, tools })
 
-    if (response.type === "message") {
+    if (response.type === "stop") {
       if (await appendSessionMessages(args.runtime, messages)) {
+        repairingInvalidStop = false
+        continue
+      }
+
+      if (!isEmptyStop(response.content)) {
+        if (repairingInvalidStop) {
+          throw new Error("Model returned non-empty stop content after repair.")
+        }
+
+        appendInvalidStopRepair(messages, response.content)
+        repairingInvalidStop = true
         continue
       }
 
       await completeRun(args.runtime, step, args.attempt)
 
       return {
-        message: response.content,
+        message: "",
         status: "completed",
       }
     }
 
+    repairingInvalidStop = false
     messages.push({
       content: response.content,
       role: "assistant",
@@ -116,6 +137,21 @@ async function runAgentLoop(args: {
   }
 
   throw new Error("Model loop exceeded the maximum step count.")
+}
+
+function isEmptyStop(content: string) {
+  return content.trim() === ""
+}
+
+function appendInvalidStopRepair(messages: ModelMessage[], content: string) {
+  messages.push({
+    content,
+    role: "assistant",
+  })
+  messages.push({
+    content: invalidStopRepairInstruction,
+    role: "user",
+  })
 }
 
 async function appendSessionMessages(

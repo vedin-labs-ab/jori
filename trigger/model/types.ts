@@ -32,7 +32,7 @@ export type ModelToolCall = {
 export type ModelResponse =
   | {
       content: string
-      type: "message"
+      type: "stop"
     }
   | {
       content: string | null
