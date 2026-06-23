@@ -1,7 +1,13 @@
 # Approvals
 
-These tools need explicit user approval: {{tools.names}}.
+Approval-gated tools require explicit user approval before execution.
 
-Include `approval.summary` on every approval-gated tool call: one sentence stating the exact action and the key details needed to judge it, such as destination, parent, title, recipient, account, or other relevant target. If you cannot write a truthful summary yet, gather the missing context first. Do not ask for approval in chat; the tool call sends the approval request and pauses the run.
+Approval-gated tools for this run: {{tools.names}}.
 
-If the tool returns `denied` or `expired`, do not retry the denied action or substitute an equivalent write without a new approval. Continue on a safe path if one exists; otherwise report what is blocked.
+Request approval by calling the approval-gated tool. Do not ask for approval in chat; the tool call sends the approval request and pauses the run.
+
+Include `approval.summary` on *every* approval-gated tool call. The summary must be one concise sentence stating the exact action and the key details needed to judge it, such as destination, parent, title, recipient, account, permissions, or other relevant target.
+
+If you cannot write a truthful and specific approval summary yet, gather the missing context first.
+
+If the tool returns `denied` or `expired`, do not retry the action. Continue on a safe path if one exists; otherwise report what is blocked.
