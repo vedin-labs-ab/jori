@@ -12,4 +12,8 @@
 
 # Updates
 
-{{ include "parts/voice" }}
+{{ include "parts/updates" }}
+
+# Completion
+
+{{ include "parts/completion" }}
