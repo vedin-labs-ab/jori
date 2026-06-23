@@ -1,4 +1,4 @@
-import { optionalString, requiredString } from "./input"
+import { requiredString } from "./input"
 import { type ToolRuntime } from "./tool"
 import { type JsonObject } from "./types"
 
@@ -11,10 +11,6 @@ export async function executeActiveSurfaceTool(
 ) {
   if (args.name === "send_reply") {
     return await sendActiveReply(runtime, args.input)
-  }
-
-  if (args.name === "finish_run") {
-    return finishActiveRun(runtime, args.input)
   }
 
   throw new Error(`Unknown active surface tool: ${args.name}`)
@@ -34,24 +30,6 @@ async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
   return {
     finished: false,
     value: result,
-  }
-}
-
-function finishActiveRun(runtime: ToolRuntime, input: JsonObject) {
-  const activeSurface = requireActiveSurface(runtime)
-  const reason = optionalString(input.reason)
-
-  if (!activeSurface.replySent && reason === undefined) {
-    throw new Error("finish_run requires reason when no reply was sent.")
-  }
-
-  return {
-    finished: true,
-    value: {
-      reason: reason ?? null,
-      replied: activeSurface.replySent,
-      status: "finished",
-    },
   }
 }
 

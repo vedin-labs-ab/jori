@@ -266,7 +266,11 @@ import type * as runtime__generated_assets from "../runtime/_generated/assets.js
 import type * as runtime_children from "../runtime/children.js";
 import type * as runtime_context from "../runtime/context.js";
 import type * as runtime_dispatch from "../runtime/dispatch.js";
+import type * as runtime_lifecycle_snapshot from "../runtime/lifecycle/snapshot.js";
+import type * as runtime_lifecycle_tools from "../runtime/lifecycle/tools.js";
 import type * as runtime_outbox from "../runtime/outbox.js";
+import type * as runtime_permissions_index from "../runtime/permissions/index.js";
+import type * as runtime_permissions_tools from "../runtime/permissions/tools.js";
 import type * as runtime_sandbox from "../runtime/sandbox.js";
 import type * as runtime_sandboxes from "../runtime/sandboxes.js";
 import type * as runtime_sessions from "../runtime/sessions.js";
@@ -559,7 +563,11 @@ declare const fullApi: ApiFromModules<{
   "runtime/children": typeof runtime_children;
   "runtime/context": typeof runtime_context;
   "runtime/dispatch": typeof runtime_dispatch;
+  "runtime/lifecycle/snapshot": typeof runtime_lifecycle_snapshot;
+  "runtime/lifecycle/tools": typeof runtime_lifecycle_tools;
   "runtime/outbox": typeof runtime_outbox;
+  "runtime/permissions/index": typeof runtime_permissions_index;
+  "runtime/permissions/tools": typeof runtime_permissions_tools;
   "runtime/sandbox": typeof runtime_sandbox;
   "runtime/sandboxes": typeof runtime_sandboxes;
   "runtime/sessions": typeof runtime_sessions;

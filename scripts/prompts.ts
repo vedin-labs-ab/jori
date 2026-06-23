@@ -7,7 +7,6 @@ const skillsDir = path.join(root, "skills")
 const promptsDir = path.join(root, "prompts")
 const outputFile = path.join(root, "convex", "prompts", "generated.ts")
 const promptAssemblyPrefix = "assembly/"
-const promptIncludePattern = /\{\{\s*include\s+"([^"]+)"\s*\}\}/g
 
 const skills = await readSkills(skillsDir)
 const promptTemplates = await readPromptTemplates(promptsDir)
@@ -30,13 +29,12 @@ async function readPromptTemplates(
   directory: string
 ): Promise<Record<string, string>> {
   const sources = await readPromptSources(directory)
-  const entries = Object.entries(sources).filter(([id]) => isPromptAssembly(id))
 
   return sortObject(
     Object.fromEntries(
-      entries.map(([id]) => [
-        promptAssemblyId(id),
-        resolvePromptTemplate(id, sources),
+      Object.entries(sources).map(([id, source]) => [
+        promptTemplateId(id),
+        formatPromptTemplate(source),
       ])
     )
   )
@@ -72,57 +70,18 @@ async function readPromptSources(
   return sortObject(result)
 }
 
-function resolvePromptTemplate(
-  id: string,
-  sources: Record<string, string>,
-  stack: string[] = []
-): string {
-  const source = sources[id]
-
-  if (source === undefined) {
-    throw new Error(`Prompt template ${id} does not exist.`)
+function promptTemplateId(id: string) {
+  if (!id.startsWith(promptAssemblyPrefix)) {
+    return id
   }
 
-  if (stack.includes(id)) {
-    throw new Error(`Circular prompt include: ${[...stack, id].join(" -> ")}`)
-  }
-
-  return formatPromptTemplate(
-    source.replace(promptIncludePattern, (_match, rawIncludeId: string) =>
-      resolvePromptTemplate(normalizeIncludeId(rawIncludeId), sources, [
-        ...stack,
-        id,
-      ]).trim()
-    )
-  )
-}
-
-function normalizeIncludeId(id: string) {
-  const normalized = id.trim().replace(/\.md$/, "")
-
-  if (
-    normalized === "" ||
-    normalized.startsWith("/") ||
-    normalized.includes("..")
-  ) {
-    throw new Error(`Invalid prompt include: ${id}`)
-  }
-
-  return normalized
-}
-
-function isPromptAssembly(id: string) {
-  return id.startsWith(promptAssemblyPrefix)
-}
-
-function promptAssemblyId(id: string) {
   const assemblyId = id.slice(promptAssemblyPrefix.length)
 
-  if (assemblyId === "") {
-    throw new Error(`Invalid prompt assembly file: ${id}`)
+  if (assemblyId !== "") {
+    return assemblyId
   }
 
-  return assemblyId
+  throw new Error(`Invalid prompt assembly file: ${id}`)
 }
 
 function validatePromptId(id: string) {

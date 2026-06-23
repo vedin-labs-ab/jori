@@ -5,7 +5,7 @@ import { type ConvexId, type RuntimeTool } from "../types"
 import { runAgentLoop } from "./loop"
 
 test("active surface stops are repaired back to finish_run", async () => {
-  const runtime = createRuntime({ tools: [finishRunTool()] })
+  const runtime = createRuntime({ tools: [sendReplyTool(), finishRunTool()] })
   const model = createModel([
     { content: "", type: "stop" },
     {
@@ -34,7 +34,10 @@ test("active surface stops are repaired back to finish_run", async () => {
           role: "user",
         }),
       ]),
-      tools: [expect.objectContaining({ name: "finish_run" })],
+      tools: [
+        expect.objectContaining({ name: "send_reply" }),
+        expect.objectContaining({ name: "finish_run" }),
+      ],
     })
   )
   expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
@@ -137,7 +140,7 @@ function finishRunTool(): RuntimeTool {
     description: "Finish run.",
     inputSchema: {},
     name: "finish_run",
-    route: "active_surface",
+    route: "run",
   }
 }
 

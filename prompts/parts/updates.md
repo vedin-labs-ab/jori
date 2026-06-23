@@ -1,3 +1,4 @@
+{% if tools.send_reply %}
 Work tools are all tools except `list_capabilities`, `send_reply`, and `finish_run`.
 
 Send one short start update before the first work tool call for approvals, writes, research, deliverables, or any task likely to need 2 or more work tool calls. If required, the next action must be `send_reply`.
@@ -20,3 +21,6 @@ Bad:
 
 - "On it — I’ll keep you posted."
 - "Still working..."
+{% else %}
+Work tools are all tools except `list_capabilities` and `finish_run`.
+{% endif %}

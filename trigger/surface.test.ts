@@ -29,51 +29,6 @@ test("send_reply routes through Convex and marks the active surface replied", as
   })
 })
 
-test("finish_run requires a reason when no reply was sent", async () => {
-  const runtime = createRuntime()
-
-  const result = await executeToolCall({
-    attempt: 1,
-    call: {
-      args: {},
-      id: "call_1",
-      name: "finish_run",
-    },
-    runtime,
-    sequence: 100,
-  })
-
-  expect(result.finished).toBe(false)
-  expect(JSON.parse(result.content)).toEqual({
-    error: {
-      message: "finish_run requires reason when no reply was sent.",
-    },
-    status: "error",
-  })
-})
-
-test("finish_run completes after a reply", async () => {
-  const runtime = createRuntime({ replySent: true })
-
-  const result = await executeToolCall({
-    attempt: 1,
-    call: {
-      args: {},
-      id: "call_1",
-      name: "finish_run",
-    },
-    runtime,
-    sequence: 100,
-  })
-
-  expect(result.finished).toBe(true)
-  expect(JSON.parse(result.content)).toEqual({
-    reason: null,
-    replied: true,
-    status: "finished",
-  })
-})
-
 function createRuntime(options: { replySent?: boolean } = {}): ToolRuntime {
   return {
     convex: {
@@ -94,7 +49,7 @@ function createRuntime(options: { replySent?: boolean } = {}): ToolRuntime {
         tenantId: "tenant",
       },
       session: null,
-      tools: [sendReplyTool(), finishRunTool()],
+      tools: [sendReplyTool()],
     },
     sandbox: {} as ToolRuntime["sandbox"],
   }
@@ -106,16 +61,6 @@ function sendReplyTool(): RuntimeTool {
     description: "Send reply.",
     inputSchema: {},
     name: "send_reply",
-    route: "active_surface",
-  }
-}
-
-function finishRunTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Finish run.",
-    inputSchema: {},
-    name: "finish_run",
     route: "active_surface",
   }
 }

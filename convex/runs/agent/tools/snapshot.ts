@@ -9,10 +9,12 @@ export type RunToolSnapshotTool =
 export function createRunToolSnapshot(input: {
   activeSurfaceTools?: RunToolSnapshotTool[]
   capabilities: RuntimeToolCapability[]
+  lifecycleTools?: RunToolSnapshotTool[]
   webSearch: boolean
 }): RunToolSnapshot {
   return {
     groups: [
+      ...lifecycleGroups(input.lifecycleTools),
       ...activeSurfaceGroups(input.activeSurfaceTools),
       ...input.capabilities.map((capability) => ({
         surface: capability.surface,
@@ -22,6 +24,18 @@ export function createRunToolSnapshot(input: {
     ],
     webSearch: input.webSearch,
   }
+}
+
+function lifecycleGroups(tools: RunToolSnapshotTool[] | undefined) {
+  return tools === undefined || tools.length === 0
+    ? []
+    : [
+        {
+          surface: "milo" as const,
+          label: "Run",
+          tools,
+        },
+      ]
 }
 
 function activeSurfaceGroups(tools: RunToolSnapshotTool[] | undefined) {

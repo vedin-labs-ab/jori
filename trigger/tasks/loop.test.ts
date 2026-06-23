@@ -8,97 +8,124 @@ test.each([
   ["empty content", ""],
   ["literal double-quoted empty string", '""'],
   ["literal single-quoted empty string", "''"],
-])("completes when the model stops with %s", async (_label, content) => {
-  const runtime = createRuntime()
-  const model = createModel([{ content, type: "stop" }])
-
-  await expect(runAgentLoop({ attempt: 1, model, runtime })).resolves.toEqual({
-    message: "",
-    status: "completed",
-  })
-  expect(model.complete).toHaveBeenCalledTimes(1)
-  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
-    expect.objectContaining({ type: "run.completed" })
-  )
-})
-
-test("repairs a non-empty stop once before completing", async () => {
-  const runtime = createRuntime({
-    tools: [slackMessageTool()],
-  })
-  const model = createModel([
-    { content: "I sent the result to Slack.", type: "stop" },
-    { content: "", type: "stop" },
-  ])
-
-  await runAgentLoop({ attempt: 1, model, runtime })
-
-  expect(model.complete).toHaveBeenCalledTimes(2)
-  expect(model.complete).toHaveBeenNthCalledWith(
-    1,
-    expect.objectContaining({
-      tools: [
-        expect.objectContaining({
-          name: "conversations_add_message",
-        }),
-      ],
-    })
-  )
-  expect(model.complete).toHaveBeenLastCalledWith(
-    expect.objectContaining({
-      messages: expect.arrayContaining([
-        { content: "I sent the result to Slack.", role: "assistant" },
-        expect.objectContaining({
-          content: expect.stringContaining("Invalid stop"),
-          role: "user",
-        }),
-      ]),
-      tools: [],
-    })
-  )
-})
-
-test("fails repeated non-empty stops", async () => {
+])("repairs %s stops back to finish_run", async (_label, content) => {
   const runtime = createRuntime()
   const model = createModel([
-    { content: "Here is the result.", type: "stop" },
-    { content: "Still here.", type: "stop" },
-  ])
-
-  await expect(runAgentLoop({ attempt: 1, model, runtime })).rejects.toThrow(
-    "Model returned non-empty stop content after repair."
-  )
-  expect(runtime.convex.recordEvent).not.toHaveBeenCalledWith(
-    expect.objectContaining({ type: "run.completed" })
-  )
-})
-
-test("fails tool calls during repair without executing them", async () => {
-  const runtime = createRuntime({
-    tools: [slackMessageTool()],
-  })
-  const model = createModel([
-    { content: "Hey Albin! What can I help with?", type: "stop" },
+    { content, type: "stop" },
     {
       content: null,
       toolCalls: [
         {
-          args: {
-            channel: "C123",
-            text: "Hey Albin! What can I help with?",
-          },
+          args: {},
           id: "call_1",
-          name: "conversations_add_message",
+          name: "finish_run",
         },
       ],
       type: "tool_calls",
     },
   ])
 
-  await expect(runAgentLoop({ attempt: 1, model, runtime })).rejects.toThrow(
-    "Model returned tool calls during repair."
+  await expect(runAgentLoop({ attempt: 1, model, runtime })).resolves.toEqual({
+    message: "",
+    status: "completed",
+  })
+  expect(model.complete).toHaveBeenCalledTimes(2)
+  expect(model.complete).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      messages: expect.arrayContaining([
+        expect.objectContaining({
+          content: expect.stringContaining("Call `finish_run`"),
+          role: "user",
+        }),
+      ]),
+      tools: [expect.objectContaining({ name: "finish_run" })],
+    })
   )
-  expect(runtime.convex.callTool).not.toHaveBeenCalled()
+  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+    expect.objectContaining({ type: "run.completed" })
+  )
+})
+
+test("repairs a non-empty stop without disabling tools", async () => {
+  const runtime = createRuntime({
+    tools: [finishRunTool(), slackMessageTool()],
+  })
+  const model = createModel([
+    { content: "I sent the result to Slack.", type: "stop" },
+    {
+      content: null,
+      toolCalls: [
+        {
+          args: {},
+          id: "call_1",
+          name: "finish_run",
+        },
+      ],
+      type: "tool_calls",
+    },
+  ])
+
+  await runAgentLoop({ attempt: 1, model, runtime })
+
+  expect(model.complete).toHaveBeenCalledTimes(2)
+  expect(model.complete).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      messages: expect.arrayContaining([
+        { content: "I sent the result to Slack.", role: "assistant" },
+        expect.objectContaining({
+          content: expect.stringContaining("Call `finish_run`"),
+          role: "user",
+        }),
+      ]),
+      tools: [
+        expect.objectContaining({ name: "finish_run" }),
+        expect.objectContaining({ name: "conversations_add_message" }),
+      ],
+    })
+  )
+})
+
+test("allows tool calls after stop repair", async () => {
+  const runtime = createRuntime({
+    tools: [finishRunTool(), slackMessageTool()],
+  })
+  const model = createModel([
+    { content: "Posting the answer.", type: "stop" },
+    {
+      content: null,
+      toolCalls: [
+        {
+          args: {
+            channel: "C123",
+            text: "Posting the answer.",
+          },
+          id: "call_1",
+          name: "conversations_add_message",
+        },
+        {
+          args: {},
+          id: "call_2",
+          name: "finish_run",
+        },
+      ],
+      type: "tool_calls",
+    },
+  ])
+
+  await runAgentLoop({ attempt: 1, model, runtime })
+
+  expect(runtime.convex.callTool).toHaveBeenCalledWith(
+    expect.objectContaining({
+      input: {
+        channel: "C123",
+        text: "Posting the answer.",
+      },
+      tool: "conversations_add_message",
+    })
+  )
+  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+    expect.objectContaining({ type: "run.completed" })
+  )
 })
 
 function createModel(
@@ -120,7 +147,7 @@ function createModel(
 function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
   return {
     convex: {
-      callTool: vi.fn(),
+      callTool: vi.fn(async () => ({ status: "sent" })),
       recordEvent: vi.fn(),
       sendReply: vi.fn(async () => ({ status: "sent" })),
     },
@@ -135,10 +162,20 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
         tenantId: "tenant",
       },
       session: null,
-      tools: options.tools ?? [],
+      tools: options.tools ?? [finishRunTool()],
     },
     sandbox: {},
   } as unknown as ToolRuntime
+}
+
+function finishRunTool(): RuntimeTool {
+  return {
+    access: "write",
+    description: "Finish run.",
+    inputSchema: {},
+    name: "finish_run",
+    route: "run",
+  }
 }
 
 function slackMessageTool(): RuntimeTool {

@@ -1,3 +1,4 @@
+import { replyAddress } from "../../../messages/surface"
 import {
   type CommunicationGuidance,
   createCommunicationGuidance,
@@ -7,7 +8,7 @@ import { type AgentRuntimeInput } from "../input"
 export function createCommunicationInstructions(
   input: AgentRuntimeInput
 ): CommunicationGuidance | null {
-  if (input.type !== "message") {
+  if (input.type !== "message" || replyAddress(input.message) === null) {
     return null
   }
 

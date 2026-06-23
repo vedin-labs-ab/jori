@@ -1,28 +1,18 @@
 import { v } from "convex/values"
-import { withApprovalSchema } from "../../contracts/approvals"
-import { isWebTool } from "../../contracts/permissions/web"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
-import { getIntegrationTools } from "../automations/access"
-import {
-  type PermissionMode,
-  resolveToolMode,
-  resolveToolModes,
-  type ToolPermission,
-  type ToolSurface,
-} from "../permissions/catalog"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { assemblePrompt } from "../runs/agent/prompt"
-import { createRuntimeToolCapability } from "../runs/agent/tools/bundles"
 import { getPromptedTools, toolExecutionType } from "../runs/agent/tools/policy"
-import { getEnabledToolPermissions } from "../runs/agent/tools/resolve"
-import {
-  emptyObjectSchema,
-  getToolInputSchema,
-} from "../runs/agent/tools/schemas"
 import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
 import { toolSnapshot } from "../runs/schema"
+import { runLifecycleToolSnapshot } from "./lifecycle/snapshot"
+import { runLifecycleTools } from "./lifecycle/tools"
+import {
+  type RuntimePermissions,
+  runtimePermissions,
+} from "./permissions/index"
 import { sandboxTools } from "./sandbox"
 import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
@@ -60,12 +50,16 @@ export const load = action({
     })
     const permissions = await runtimePermissions(ctx, input)
     const activeSurface = await loadActiveSurface(ctx, input, args.runId)
+    const lifecycleTools = runLifecycleTools()
     const promptedTools = getPromptedTools({
       executionType: toolExecutionType(input.type),
       permissions: permissions.all,
       toolModes: permissions.toolModes,
     })
-    const prompt = assemblePrompt(input, promptedTools)
+    const prompt = assemblePrompt(input, {
+      activeSurface: activeSurface.state,
+      promptedTools,
+    })
     const promptId = await ctx.storage.store(
       new Blob([prompt], { type: "text/markdown" })
     )
@@ -73,33 +67,83 @@ export const load = action({
     await ctx.runMutation(internal.runtime.context.prepareRun, {
       runId: args.runId,
       promptId,
-      tools: createRunToolSnapshot({
-        activeSurfaceTools: activeSurfaceToolSnapshot(activeSurface.tools),
-        capabilities: permissions.capabilities,
-        webSearch: input.type !== "automation" || input.automation.access.web,
-      }),
+      tools: runtimeToolSnapshot(
+        input,
+        activeSurface,
+        lifecycleTools,
+        permissions
+      ),
     })
 
-    return {
+    return runtimeResponse({
+      activeSurface,
+      input,
+      lifecycleTools,
+      permissions,
       prompt,
-      run: {
-        id: input.run._id,
-        rootId: input.run.rootId ?? null,
-        sandboxId: sandbox?.externalId ?? null,
-        status: run.status,
-        tenantId: input.run.tenantId,
-      },
-      session:
-        session === null
-          ? null
-          : {
-              id: session._id,
-            },
-      activeSurface: activeSurface.state,
-      tools: [...activeSurface.tools, ...permissions.tools, ...sandboxTools],
-    }
+      run,
+      sandbox,
+      session,
+    })
   },
 })
+
+type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
+type LoadedRun = {
+  _id: Id<"runs">
+  status: "completed" | "failed" | "queued" | "running" | "stopped"
+}
+type LoadedSandbox = { externalId: string } | null
+type LoadedSession = { _id: Id<"sessions"> } | null
+
+function runtimeToolSnapshot(
+  input: AgentRuntimeInput,
+  activeSurface: LoadedActiveSurface,
+  lifecycleTools: ReturnType<typeof runLifecycleTools>,
+  permissions: RuntimePermissions
+) {
+  return createRunToolSnapshot({
+    activeSurfaceTools: activeSurfaceToolSnapshot(activeSurface.tools),
+    capabilities: permissions.capabilities,
+    lifecycleTools: runLifecycleToolSnapshot(lifecycleTools),
+    webSearch: input.type !== "automation" || input.automation.access.web,
+  })
+}
+
+function runtimeResponse(args: {
+  activeSurface: LoadedActiveSurface
+  input: AgentRuntimeInput
+  lifecycleTools: ReturnType<typeof runLifecycleTools>
+  permissions: RuntimePermissions
+  prompt: string
+  run: LoadedRun
+  sandbox: LoadedSandbox
+  session: LoadedSession
+}) {
+  return {
+    prompt: args.prompt,
+    run: {
+      id: args.input.run._id,
+      rootId: args.input.run.rootId ?? null,
+      sandboxId: args.sandbox?.externalId ?? null,
+      status: args.run.status,
+      tenantId: args.input.run.tenantId,
+    },
+    session:
+      args.session === null
+        ? null
+        : {
+            id: args.session._id,
+          },
+    activeSurface: args.activeSurface.state,
+    tools: [
+      ...args.lifecycleTools,
+      ...args.activeSurface.tools,
+      ...args.permissions.tools,
+      ...sandboxTools,
+    ],
+  }
+}
 
 async function loadSandboxReference(
   ctx: ActionCtx,
@@ -151,110 +195,3 @@ export const prepareRun = internalMutation({
     return null
   },
 })
-
-async function runtimePermissions(ctx: ActionCtx, input: AgentRuntimeInput) {
-  const overrides = await ctx.runQuery(
-    internal.permissions.tools.listForRuntime,
-    {
-      tenantId: input.run.tenantId,
-    }
-  )
-  const toolModes = resolveToolModes(overrides)
-  const groups = permissionGroups(input, toolModes)
-  const capabilities = groups.map((group) =>
-    createRuntimeToolCapability(group.surface, group.permissions, toolModes)
-  )
-  const tools = groups.flatMap((group) =>
-    group.permissions.map((permission) =>
-      toolDescriptor(group.surface, permission, toolModes)
-    )
-  )
-
-  return {
-    all: groups.flatMap((group) => group.permissions),
-    capabilities,
-    tools,
-    toolModes,
-  }
-}
-
-function permissionGroups(
-  input: AgentRuntimeInput,
-  toolModes: ReadonlyMap<string, PermissionMode>
-) {
-  const executionType = toolExecutionType(input.type)
-  const groups: Array<{
-    permissions: ToolPermission[]
-    surface: ToolSurface
-  }> = [
-    {
-      surface: "milo" as const,
-      permissions: filterWebPermissions(
-        input,
-        getEnabledToolPermissions("milo", toolModes, executionType)
-      ),
-    },
-  ]
-  const seen = new Set<ToolSurface>(["milo"])
-
-  for (const integration of input.integrations) {
-    const surface = integration.integration as ToolSurface
-
-    if (seen.has(surface)) {
-      continue
-    }
-
-    seen.add(surface)
-    groups.push({
-      surface,
-      permissions: getEnabledToolPermissions(
-        surface,
-        toolModes,
-        executionType,
-        selectedTools(input, integration._id)
-      ),
-    })
-  }
-
-  return groups.filter((group) => group.permissions.length > 0)
-}
-
-function filterWebPermissions(
-  input: AgentRuntimeInput,
-  permissions: ToolPermission[]
-) {
-  if (input.type !== "automation" || input.automation.access.web) {
-    return permissions
-  }
-
-  return permissions.filter((permission) => !isWebTool(permission.tool))
-}
-
-function selectedTools(
-  input: AgentRuntimeInput,
-  integrationId: Id<"integrations">
-) {
-  return input.type === "automation"
-    ? getIntegrationTools(input.automation.access, integrationId)
-    : undefined
-}
-
-function toolDescriptor(
-  surface: ToolSurface,
-  permission: ToolPermission,
-  toolModes: ReadonlyMap<string, PermissionMode>
-) {
-  const mode = resolveToolMode(toolModes, permission.tool)
-  const inputSchema = getToolInputSchema(permission.tool) ?? emptyObjectSchema()
-
-  return {
-    access: permission.access,
-    name: permission.tool,
-    description: permission.description,
-    inputSchema:
-      mode === "prompted" ? withApprovalSchema(inputSchema) : inputSchema,
-    mode,
-    route: "convex",
-    surface,
-  }
-}
