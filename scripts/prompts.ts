@@ -97,7 +97,7 @@ function validatePromptId(id: string) {
 }
 
 function formatPromptTemplate(source: string) {
-  return `${source.trim()}\n`
+  return source.trim()
 }
 
 function sortObject<Value>(
