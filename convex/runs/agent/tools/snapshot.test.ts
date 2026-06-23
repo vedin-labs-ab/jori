@@ -45,6 +45,62 @@ test("stores all surface tool capabilities for run details", () => {
   })
 })
 
+test("stores active surface tools ahead of provider capabilities", () => {
+  expect(
+    createRunToolSnapshot({
+      activeSurfaceTools: [
+        {
+          access: "write",
+          description: "Send a visible reply.",
+          label: "Send reply",
+          tool: "send_reply",
+        },
+        {
+          access: "write",
+          description: "Finish this run.",
+          label: "Finish run",
+          tool: "finish_run",
+        },
+      ],
+      webSearch: true,
+      capabilities: [
+        {
+          surface: "slack",
+          label: "Slack",
+          tools: slackTools(),
+        },
+      ],
+    })
+  ).toEqual({
+    groups: [
+      {
+        surface: "milo",
+        label: "Active surface",
+        tools: [
+          {
+            access: "write",
+            description: "Send a visible reply.",
+            label: "Send reply",
+            tool: "send_reply",
+          },
+          {
+            access: "write",
+            description: "Finish this run.",
+            label: "Finish run",
+            tool: "finish_run",
+          },
+        ],
+      },
+      {
+        surface: "slack",
+        label: "Slack",
+        tools: slackTools(),
+      },
+    ],
+    webSearch: true,
+  })
+})
+
 function slackTools(): RuntimeToolCapabilityTool[] {
   return [
     {
