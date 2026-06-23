@@ -1,6 +1,6 @@
 import { promptTemplates } from "../prompts/generated"
 import { renderPromptTemplate } from "../prompts/render"
-import { type Integration, integrationLabels } from "../shared/integrations"
+import { type Integration } from "../shared/integrations"
 import { getRuntimeSkillForIntegration, type RuntimeSkill } from "./runtime"
 
 export type CommunicationCapability = "files" | "interactive" | "rich" | "text"
@@ -37,9 +37,6 @@ export function createCommunicationGuidance(args: {
     body: renderPromptTemplate(promptTemplates["communication/message"], {
       communication: {
         guidance: createGuidanceBlock(skill, capabilities),
-      },
-      surface: {
-        label: integrationLabels[args.integration],
       },
     }).trim(),
     skill,

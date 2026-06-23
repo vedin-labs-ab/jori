@@ -32,7 +32,8 @@ describe("runtime skill prompts", () => {
     )
     expect(prompt).toContain("Assistant completion text is private run output")
     expect(prompt).toContain("call the appropriate communication tool")
-    expect(prompt).toContain("Current surface: `Slack`")
+    expect(prompt).toContain("Active surface: `Slack`")
+    expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("## Guidance")
     expect(prompt).toContain("# Skills")
     expect(prompt).toContain("Available skills:")
@@ -43,7 +44,7 @@ describe("runtime skill prompts", () => {
       prompt.indexOf(
         "When instructed to send, reply, report, update, tell the user, or let them know"
       )
-    ).toBeLessThan(prompt.indexOf("Current surface: `Slack`"))
+    ).toBeLessThan(prompt.indexOf("# Updates"))
     expect(prompt).toContain("Format Slack messages with Slack `mrkdwn`")
     expect(prompt).toContain(
       "Use Slack `blocks` when structure makes the message easier to scan"

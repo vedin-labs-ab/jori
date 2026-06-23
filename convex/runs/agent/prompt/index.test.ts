@@ -68,6 +68,7 @@ describe("runtime prompts", () => {
     expect(prompt).toContain(
       `A ${toolSurfaceLabel} message triggered this run.`
     )
+    expect(prompt).toContain(`Active surface: \`${toolSurfaceLabel}\``)
     expectRunBefore(prompt, "# Trigger")
 
     for (const line of targetLines) {
@@ -153,7 +154,8 @@ describe("runtime delivery prompts", () => {
       "When instructed to send, reply, report, update, tell the user, or let them know"
     )
     expect(prompt).toContain("call the appropriate communication tool")
-    expect(prompt).toContain("Current surface: `Slack`")
+    expect(prompt).toContain("Active surface: `Slack`")
+    expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Completion")
     expect(prompt).toContain("Assistant completion text is private run output")
     expect(prompt).toContain("finish with an empty assistant completion")
@@ -208,6 +210,9 @@ function expectRunBefore(prompt: string, section: string) {
   expectSingleRun(prompt)
   expect(prompt.indexOf("# Voice")).toBeLessThan(prompt.indexOf("# Run"))
   expect(prompt.indexOf("# Run")).toBeLessThan(prompt.indexOf("# Principles"))
+  expect(prompt.indexOf("Active surface:")).toBeLessThan(
+    prompt.indexOf("# Principles")
+  )
   expect(prompt.indexOf("# Principles")).toBeLessThan(
     prompt.indexOf("# Security")
   )

@@ -27,7 +27,7 @@ export function assemblePrompt(
   promptedTools: ToolPermission[] = []
 ): string {
   const communication = createCommunicationInstructions(input)
-  const run = createRunInstructions()
+  const run = createRunInstructions(input)
   const skills = createSkillInstructions({
     omittedNames: omittedSkillNames(communication),
   })
@@ -55,8 +55,9 @@ function createApprovalInstructions(promptedTools: ToolPermission[]) {
     : promptBlock(createToolApprovalInstructions(promptedTools))
 }
 
-function createRunInstructions() {
+function createRunInstructions(input: AgentRuntimeInput) {
   return renderPromptTemplate(promptTemplates["run/message"], {
+    surface: { label: getActiveSurfaceLabel(input) },
     time: { utc: createPromptTime() },
   }).trim()
 }
@@ -115,6 +116,12 @@ function createMessageValues(
       target: getMessageTarget(input.messageIntegration, input.message.data),
     },
   }
+}
+
+function getActiveSurfaceLabel(input: AgentRuntimeInput) {
+  return input.type === "message"
+    ? getIntegrationLabel(input.messageIntegration)
+    : "None"
 }
 
 function formatMessageConversation(

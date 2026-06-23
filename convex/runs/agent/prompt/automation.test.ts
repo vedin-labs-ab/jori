@@ -12,6 +12,7 @@ describe("automation trigger prompts", () => {
 
     expect(prompt).toContain("An automation triggered this run.")
     expect(prompt).toContain("# Run\n\nRun started at:")
+    expect(prompt).toContain("Active surface: `None`")
     expect(prompt.match(/Run started at:/g)).toHaveLength(1)
     expect(prompt).toContain("Integration access:")
     expect(prompt).toContain("- Web search: Allowed")
