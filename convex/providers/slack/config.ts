@@ -6,8 +6,12 @@ export const slackOAuthCallbackPath = "/slack/oauth/callback"
 
 export const slackBotScopes = [
   "app_mentions:read",
+  "channels:history",
   "chat:write",
   "files:write",
+  "groups:history",
+  "im:history",
+  "mpim:history",
   "reactions:write",
 ]
 
