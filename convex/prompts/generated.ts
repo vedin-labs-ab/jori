@@ -55,6 +55,8 @@ export const promptTemplates = {
     "# Original Trigger\n\nManual instructions started this task. For reference:\n\n```text\n{{instruction.text}}\n```\n",
   "reference/message":
     "# Original Trigger\n\nA {{message.integration}} message started this task. For reference:\n\nTarget:\n{{message.target}}\n\nOriginal message:\n{{message.current}}\n",
+  "repair/invalid":
+    "Invalid stop. Assistant completion text is private and must be empty. If this text should be visible to the requester, send it with the appropriate communication tool. If no visible message is needed, return an empty assistant completion.\n",
   "skills/discovery":
     "# Skills\n\nUse `load_skill` to load full instructions for an available skill when needed.\n\nAvailable skills:\n{{skills.available}}\n",
   "skills/loaded": "## {{skill.title}}\n\n{{skill.body}}\n",

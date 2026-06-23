@@ -1,4 +1,5 @@
 import { task } from "@trigger.dev/sdk/v3"
+import { promptTemplates } from "../../convex/prompts/generated"
 import { MiloConvexClient } from "../convex"
 import { errorDetails, runtimeEvent } from "../events"
 import { OpenRouterModelRuntime } from "../model/openrouter"
@@ -20,11 +21,7 @@ import { formatSessionMessage } from "./messages"
 import { releaseSandbox } from "./sandbox"
 
 const maxAttempts = 3
-const invalidStopRepairInstruction = [
-  "Invalid stop. Assistant completion text is private and must be empty.",
-  "If this text should be visible to the requester, send it with the appropriate communication tool.",
-  "If no visible message is needed, return an empty assistant completion.",
-].join(" ")
+const invalidStopRepairInstruction = promptTemplates["repair/invalid"].trim()
 const maxModelSteps = 30
 const toolSequenceOffset = 100
 
