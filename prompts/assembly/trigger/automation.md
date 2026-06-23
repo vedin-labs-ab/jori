@@ -13,7 +13,3 @@ Integration access:
 
 Event:
 {{event.details}}
-
-Run the automation using this integration access. Use write actions only for
-integrations marked Write or Read/write. If you cannot complete the task with
-the available access, stop and report the blocker.

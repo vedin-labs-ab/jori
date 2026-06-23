@@ -1,4 +1,8 @@
-Use Slack `blocks` when native structure makes the message easier to scan.
+Choose the clearest Slack format for the message.
+
+Use plain `mrkdwn` for short conversational replies, simple answers, quick clarifications, and terse status updates.
+
+Use Slack `blocks` when structure makes the message easier to scan, especially for results, blockers with next steps, research summaries, generated deliverables, grouped findings, small tables, previews, or messages with multiple sections.
 
 When using `blocks`:
 
