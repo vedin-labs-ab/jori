@@ -27,22 +27,22 @@ describe("runtime skill prompts", () => {
     )
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("Write for the reply surface.")
+    expect(prompt).toContain("Write for the active surface.")
     expect(prompt).toContain("Assistant completion text is private run output")
     expect(prompt).toContain("call the appropriate communication tool")
-    expect(prompt).toContain("Surface: `Slack`")
+    expect(prompt).toContain("Current surface: `Slack`")
     expect(prompt).toContain("## Guidance")
     expect(prompt).toContain("# Skills")
     expect(prompt).toContain("Available skills:")
     expect(prompt).toContain("Use `load_skill`")
     expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).not.toContain("`slack`: Format Slack replies")
-    expect(prompt.indexOf("Write for the reply surface.")).toBeLessThan(
-      prompt.indexOf("Surface: `Slack`")
+    expect(prompt.indexOf("Write for the active surface.")).toBeLessThan(
+      prompt.indexOf("Current surface: `Slack`")
     )
     expect(prompt).toContain("Format Slack messages with Slack `mrkdwn`")
     expect(prompt).toContain(
-      "Use Slack `blocks` when native structure makes the message easier to scan."
+      "Use Slack `blocks` when structure makes the message easier to scan"
     )
     expect(prompt).toContain("Never use interactive Slack surfaces or controls")
     expect(prompt).not.toContain("## Slack")
