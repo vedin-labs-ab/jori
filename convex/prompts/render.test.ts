@@ -45,4 +45,14 @@ describe("renderPromptTemplate", () => {
       renderPromptTemplate('{% include "parts/identity" %}', {})
     ).toContain("You are Milo")
   })
+
+  test("collapses repeated blank lines outside fenced blocks", () => {
+    expect(renderPromptTemplate("A\n\n\nB", {})).toBe("A\n\nB")
+  })
+
+  test("preserves repeated blank lines inside fenced blocks", () => {
+    expect(renderPromptTemplate("A\n\n```text\nB\n\n\nC\n```\n\n\nD", {})).toBe(
+      "A\n\n```text\nB\n\n\nC\n```\n\nD"
+    )
+  })
 })

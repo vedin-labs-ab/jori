@@ -157,6 +157,10 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("# Completion")
     expect(prompt).toContain("Assistant completion text is private run output")
     expect(prompt).toContain("Finish the run by calling `finish_run`")
+    expect(prompt).toContain(
+      "Finish the run by calling `finish_run`.\n\nIf a visible reply"
+    )
+    expectNoSyntheticBlankLines(prompt)
   })
 
   test("omits automatic final delivery instructions", () => {
@@ -185,6 +189,7 @@ describe("approval request prompts", () => {
     expect(prompt).toContain("Do not ask for approval in chat")
     expect(prompt).toContain("pauses the run")
     expect(prompt).toContain("denied` or `expired")
+    expectNoSyntheticBlankLines(prompt)
   })
 
   test("omits the approvals section without prompted tools", () => {
@@ -223,4 +228,8 @@ function expectRunBefore(prompt: string, section: string) {
 function expectSingleRun(prompt: string) {
   expect(prompt).toContain("# Run\n\nRun started at:")
   expect(prompt.match(/Run started at:/g)).toHaveLength(1)
+}
+
+function expectNoSyntheticBlankLines(prompt: string) {
+  expect(prompt).not.toMatch(/\n{3,}/)
 }

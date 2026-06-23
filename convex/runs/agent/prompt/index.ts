@@ -40,10 +40,10 @@ export function assemblePrompt(
 
   return renderPromptTemplate(promptTemplates["agent/initial"], {
     agent: {
-      approvals: createApprovalInstructions(promptedTools),
-      communication: promptBlock(communication?.body ?? ""),
+      approvals: optionalPromptBlock(createApprovalInstructions(promptedTools)),
+      communication: optionalPromptBlock(communication?.body ?? ""),
       run,
-      skills: promptBlock(skills),
+      skills: optionalPromptBlock(skills),
       trigger: promptBlock(createTriggerPart(input, true)),
     },
     run: {
@@ -93,6 +93,12 @@ function createRunInstructions(input: AgentRuntimeInput) {
 
 function promptBlock(value: string) {
   return value.trim()
+}
+
+function optionalPromptBlock(value: string) {
+  const block = promptBlock(value)
+
+  return block === "" ? null : block
 }
 
 function createTriggerPart(input: AgentRuntimeInput, isInitialRun: boolean) {
