@@ -69,6 +69,36 @@ describe("Slack message tool", () => {
   })
 })
 
+describe("Slack reaction tool", () => {
+  test("adds an emoji reaction with the bot token", async () => {
+    const calls = mockSlackFetch({ ok: true })
+
+    const result = await callSlackTool(
+      slackIntegration(),
+      "conversations_add_reaction",
+      {
+        channel: "C123",
+        name: ":white_check_mark:",
+        timestamp: "1782231485.491049",
+      }
+    )
+
+    expect(result).toEqual({ ok: true })
+    expect(calls).toHaveLength(1)
+    expect(calls[0]?.url).toBe("https://slack.com/api/reactions.add")
+    expect(calls[0]?.method).toBe("POST")
+    expect(calls[0]?.headers).toMatchObject({
+      authorization: "Bearer bot-token",
+      "content-type": "application/json; charset=utf-8",
+    })
+    expect(calls[0]?.body).toEqual({
+      channel: "C123",
+      name: "white_check_mark",
+      timestamp: "1782231485.491049",
+    })
+  })
+})
+
 describe("Slack attachments", () => {
   test("uploads run attachments as Slack files", async () => {
     const calls = mockSlackFetch([
