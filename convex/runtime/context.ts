@@ -26,6 +26,7 @@ import { toolSnapshot } from "../runs/schema"
 import { sandboxTools } from "./sandbox"
 import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
+import { activeSurfaceToolSnapshot } from "./surface/tools"
 import { recordTrace } from "./traces"
 
 export const load = action({
@@ -73,6 +74,7 @@ export const load = action({
       runId: args.runId,
       promptId,
       tools: createRunToolSnapshot({
+        activeSurfaceTools: activeSurfaceToolSnapshot(activeSurface.tools),
         capabilities: permissions.capabilities,
         webSearch: input.type !== "automation" || input.automation.access.web,
       }),

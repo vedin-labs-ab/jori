@@ -1,5 +1,6 @@
 import { type JsonObject } from "../../../contracts/json"
 import { type MessageIntegration } from "../../runs/agent/input"
+import { type RunToolSnapshotTool } from "../../runs/agent/tools/snapshot"
 
 export type ActiveSurfaceTool = {
   access: "write"
@@ -30,6 +31,25 @@ export function activeSurfaceTools(
       route: "active_surface",
     },
   ]
+}
+
+export function activeSurfaceToolSnapshot(
+  tools: ActiveSurfaceTool[]
+): RunToolSnapshotTool[] {
+  return tools.map((tool) => ({
+    access: tool.access,
+    description: tool.description,
+    label: activeSurfaceToolLabel(tool.name),
+    tool: tool.name,
+  }))
+}
+
+function activeSurfaceToolLabel(name: ActiveSurfaceTool["name"]) {
+  if (name === "send_reply") {
+    return "Send reply"
+  }
+
+  return "Finish run"
 }
 
 function sendReplySchema(surface: MessageIntegration): JsonObject {
