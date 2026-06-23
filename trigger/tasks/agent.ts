@@ -137,7 +137,9 @@ export async function runAgentLoop(args: {
 }
 
 function isEmptyStop(content: string) {
-  return content.trim() === ""
+  const normalized = content.trim()
+
+  return normalized === "" || normalized === '""' || normalized === "''"
 }
 
 function appendInvalidStopRepair(messages: ModelMessage[], content: string) {
