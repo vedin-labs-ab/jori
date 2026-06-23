@@ -11,14 +11,15 @@ describe("automation trigger prompts", () => {
     const prompt = assemblePrompt(automationRuntimeInput())
 
     expect(prompt).toContain("An automation triggered this run.")
-    expect(prompt).toContain("## Context\n\nRun started at:")
+    expect(prompt).toContain("# Run\n\nRun started at:")
     expect(prompt.match(/Run started at:/g)).toHaveLength(1)
     expect(prompt).toContain("Integration access:")
     expect(prompt).toContain("- Web search: Allowed")
     expect(prompt).toContain("- GitHub: Read issue")
     expect(prompt).toContain("- Slack: Send message")
-    expect(prompt).toContain("Use write actions only")
-    expect(prompt).toContain("Run the automation")
+    expect(prompt.indexOf("# Completion")).toBeLessThan(
+      prompt.indexOf("# Trigger")
+    )
   })
 
   test("renders disabled web search", () => {

@@ -78,10 +78,6 @@ describe("runtime prompts", () => {
     expect(prompt).toContain("Current message:")
     expect(prompt).not.toContain("\nHistory:\n")
     expect(prompt).toContain("- 1970-01-01T00:00:01.000Z | user | Albin Vedin")
-    expect(prompt).toContain("Report the result back to this thread")
-    expect(prompt).toContain(
-      "Report, reply, update, and send mean calling the appropriate communication tool"
-    )
   })
 
   test("renders Slack trigger text with actor metadata and readable Milo mention", () => {
@@ -129,39 +125,39 @@ describe("runtime prompts", () => {
 })
 
 describe("runtime delivery prompts", () => {
-  test("renders first-action start update guidance", () => {
+  test("renders start update guidance", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
-    expect(prompt).toContain("first-action note")
-    expect(prompt).toContain("not an acknowledgement plus plan")
-    expect(prompt).toContain("Vary the sentence shape")
-    expect(prompt).toContain("Start update shape for this run:")
-    expect(prompt).toContain("do not mention the shape")
     expect(prompt).toContain(
-      "your next action must be the communication tool call"
+      "For work that will not produce an immediate final reply"
     )
-    expect(prompt).toContain("Put the user-visible text in the tool input")
+    expect(prompt).toContain("Skip the start update for simple replies")
+    expect(prompt).toContain("Make updates useful, not ceremonial")
+    expect(prompt).toContain("After a start update, stay quiet")
     expect(prompt).toContain(
-      "I'll find a Notion parent first, then ask for your approval"
+      "I’ll find the Notion parent first, then ask for approval"
     )
     expect(prompt).toContain("Looking up Emma now")
-    expect(prompt).not.toContain("Got it. I'll find the right Notion parent")
+    expect(prompt).toContain("Bad:")
+    expect(prompt).toContain("On it, I’ll keep you posted")
   })
 
-  test("renders Slack delivery as an explicit message tool call", () => {
+  test("renders Slack communication and completion sections", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
-    expect(prompt).toContain("Assistant completion text is private run output")
-    expect(prompt).toContain("The requester never sees it")
+    expect(prompt).toContain("# Communication")
     expect(prompt).toContain(
-      "call `conversations_add_message` with `channel` set to the Channel ID"
+      "User-visible communication happens ONLY through the active surface’s tools."
     )
-    expect(prompt).toContain("`thread_ts` set to the Reply thread timestamp")
-    expect(prompt).toContain("will not post to Slack")
+    expect(prompt).toContain("call the appropriate communication tool")
+    expect(prompt).toContain("Current surface: `Slack`")
+    expect(prompt).toContain("# Completion")
+    expect(prompt).toContain("Assistant completion text is private run output")
+    expect(prompt).toContain("finish with an empty assistant completion")
   })
 
   test("omits automatic final delivery instructions", () => {
@@ -211,16 +207,18 @@ function githubMessageInput() {
 
 function expectContextBefore(prompt: string, section: string) {
   expectSingleContext(prompt)
-  expect(prompt.indexOf("## Voice")).toBeLessThan(prompt.indexOf("## Context"))
-  expect(prompt.indexOf("## Context")).toBeLessThan(
-    prompt.indexOf("## Principles")
+  expect(prompt.indexOf("# Voice")).toBeLessThan(prompt.indexOf("# Run"))
+  expect(prompt.indexOf("# Run")).toBeLessThan(prompt.indexOf("# Principles"))
+  expect(prompt.indexOf("# Principles")).toBeLessThan(
+    prompt.indexOf("# Security")
   )
+  expect(prompt.indexOf("# Security")).toBeLessThan(prompt.indexOf(section))
   expect(prompt.indexOf("Run started at:")).toBeLessThan(
     prompt.indexOf(section)
   )
 }
 
 function expectSingleContext(prompt: string) {
-  expect(prompt).toContain("## Context\n\nRun started at:")
+  expect(prompt).toContain("# Run\n\nRun started at:")
   expect(prompt.match(/Run started at:/g)).toHaveLength(1)
 }

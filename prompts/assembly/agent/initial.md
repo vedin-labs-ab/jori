@@ -8,7 +8,11 @@
 
 # Principles
 
-{{ include "parts/principles" }}{{? agent.skills prefix="\n\n"}}{{? agent.communication prefix="\n\n"}}{{? agent.approvals prefix="\n\n"}}{{agent.trigger prefix="\n\n"}}
+{{ include "parts/principles" }}
+
+# Security
+
+{{ include "parts/security" }}{{? agent.skills prefix="\n\n"}}{{? agent.communication prefix="\n\n"}}{{? agent.approvals prefix="\n\n"}}
 
 # Updates
 
@@ -16,4 +20,4 @@
 
 # Completion
 
-{{ include "parts/completion" }}
+{{ include "parts/completion" }}{{agent.trigger prefix="\n\n"}}
