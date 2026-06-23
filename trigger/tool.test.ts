@@ -174,6 +174,7 @@ test("tool failures are returned to the agent instead of thrown", async () => {
   expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
     expect.objectContaining({
       data: {
+        access: "write",
         error: "Provider rejected the request",
         name: "notion_create_page",
         route: "convex",
@@ -206,6 +207,7 @@ function createRuntime(
       session: null,
       tools: [
         {
+          access: "write",
           description: "Create a Notion page.",
           inputSchema: {},
           mode: options.mode ?? "prompted",

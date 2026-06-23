@@ -21,7 +21,10 @@ import {
   type RuntimeValueSummary,
 } from "./types"
 
-type RuntimeToolTraceDetails = Omit<RuntimeToolTraceData, "name" | "route">
+type RuntimeToolTraceDetails = Omit<
+  RuntimeToolTraceData,
+  "access" | "name" | "route"
+>
 
 export type ToolRuntime = {
   convex: MiloConvexClient
@@ -161,6 +164,7 @@ async function recordToolEvent(
     runtimeEvent({
       attempt: args.attempt,
       data: {
+        access: tool.access,
         name: tool.name,
         route: tool.route,
         ...data,

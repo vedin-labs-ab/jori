@@ -1,6 +1,5 @@
 import { v } from "convex/values"
 import { withApprovalSchema } from "../../contracts/approvals"
-import { codingToolDefinitions } from "../../contracts/coding"
 import { isWebTool } from "../../contracts/permissions/web"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
@@ -24,29 +23,9 @@ import {
 } from "../runs/agent/tools/schemas"
 import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
 import { toolSnapshot } from "../runs/schema"
+import { sandboxTools } from "./sandbox"
 import { requireWorkerSecret } from "./shared"
 import { recordTrace } from "./traces"
-
-const sandboxTools = [
-  ...codingToolDefinitions.map((tool) => ({
-    ...tool,
-    route: "sandbox" as const,
-  })),
-  {
-    name: "spawn_subagent",
-    description: "Start a child Milo agent run for a delegated task.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      required: ["task"],
-      properties: {
-        task: { type: "string" },
-        title: { type: "string" },
-      },
-    },
-    route: "subagent",
-  },
-] as const
 
 export const load = action({
   args: {
@@ -264,6 +243,7 @@ function toolDescriptor(
   const inputSchema = getToolInputSchema(permission.tool) ?? emptyObjectSchema()
 
   return {
+    access: permission.access,
     name: permission.tool,
     description: permission.description,
     inputSchema:

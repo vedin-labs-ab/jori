@@ -61,6 +61,7 @@ const traceToolRoute = v.union(
   v.literal("sandbox"),
   v.literal("subagent")
 )
+const traceToolAccess = v.union(v.literal("read"), v.literal("write"))
 
 const traceValueSummary = v.object({
   type: v.union(
@@ -80,6 +81,7 @@ export const traceData = v.union(
     error: v.string(),
   }),
   v.object({
+    access: v.optional(traceToolAccess),
     name: v.string(),
     route: traceToolRoute,
     error: v.optional(v.string()),

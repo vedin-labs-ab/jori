@@ -1,6 +1,7 @@
 import { type GenericId } from "convex/values"
 import { type ToolSurface } from "../contracts/integrations"
 import { type JsonObject } from "../contracts/json"
+import { type ToolAccess } from "../contracts/permissions"
 
 export type {
   JsonArray,
@@ -40,6 +41,7 @@ export type RuntimeErrorTraceData = {
 }
 
 export type RuntimeToolTraceData = {
+  access?: ToolAccess
   name: string
   route: RuntimeToolRoute
   error?: string
@@ -55,6 +57,7 @@ export type RuntimeRunTraceData = RuntimeErrorTraceData
 export type RuntimeTraceData = RuntimeRunTraceData | RuntimeToolTraceData
 
 export type RuntimeTool = {
+  access: ToolAccess
   description: string
   inputSchema: JsonObject
   mode?: "allowed" | "blocked" | "prompted" | "required"
