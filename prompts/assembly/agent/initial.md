@@ -22,7 +22,7 @@
 {{agent.communication}}
 {% endif %}
 
-{%- if agent.approvals -%}
+{% if agent.approvals %}
 {{agent.approvals}}
 {% endif %}
 

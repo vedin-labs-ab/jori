@@ -189,6 +189,7 @@ describe("approval request prompts", () => {
     expect(prompt).toContain("Do not ask for approval in chat")
     expect(prompt).toContain("pauses the run")
     expect(prompt).toContain("denied` or `expired")
+    expect(prompt).toContain("Callbacks are not handled.\n\n# Approvals")
     expectNoSyntheticBlankLines(prompt)
   })
 
