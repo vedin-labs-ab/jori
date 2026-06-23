@@ -1,0 +1,1 @@
+Invalid stop. Assistant completion text is private and must be empty. If this text should be visible to the requester, send it with the appropriate communication tool. If no visible message is needed, return an empty assistant completion.
