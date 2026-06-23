@@ -21,7 +21,7 @@ import {
 
 const agentModel = "z-ai/glm-5.2"
 const agentReasoningEffort = "xhigh"
-const agentProviderOrder = ["Wafer", "Z.AI", "Fireworks", "Together"]
+const agentProviderOrder = ["Wafer", "Fireworks", "Together"]
 const agentProviderRouting = {
   allow_fallbacks: true,
   only: agentProviderOrder,
