@@ -18,25 +18,16 @@ import { createSkillInstructions } from "./skills"
 import {
   formatEvent,
   formatTargetLines,
-  getMessageDelivery,
   getMessageTarget,
   targetLine,
 } from "./target"
-
-const startUpdateShapes = [
-  "action first: start with the first concrete action",
-  "lookup first: start with what you are checking now",
-  "object first: start with the thing being worked on",
-  "safeguard first: start with the approval, permission, or write boundary",
-  "preparation first: start with what you will draft or prepare before acting",
-] as const
 
 export function assemblePrompt(
   input: AgentRuntimeInput,
   promptedTools: ToolPermission[] = []
 ): string {
   const communication = createCommunicationInstructions(input)
-  const context = createContextInstructions()
+  const run = createRunInstructions()
   const skills = createSkillInstructions({
     omittedNames: omittedSkillNames(communication),
   })
@@ -45,7 +36,7 @@ export function assemblePrompt(
     agent: {
       approvals: createApprovalInstructions(promptedTools),
       communication: promptBlock(communication?.body ?? ""),
-      context,
+      run,
       skills: promptBlock(skills),
       trigger: promptBlock(createTriggerPart(input, true)),
     },
@@ -64,8 +55,8 @@ function createApprovalInstructions(promptedTools: ToolPermission[]) {
     : promptBlock(createToolApprovalInstructions(promptedTools))
 }
 
-function createContextInstructions() {
-  return renderPromptTemplate(promptTemplates["context/message"], {
+function createRunInstructions() {
+  return renderPromptTemplate(promptTemplates["run/message"], {
     time: { utc: createPromptTime() },
   }).trim()
 }
@@ -120,24 +111,10 @@ function createMessageValues(
       current: formatMessageEntry(
         messageEntry(input.message, input.integration)
       ),
-      delivery: getMessageDelivery(input.messageIntegration),
       integration: getIntegrationLabel(input.messageIntegration),
-      startUpdateShape: getStartUpdateShape(input.run._id),
       target: getMessageTarget(input.messageIntegration, input.message.data),
     },
   }
-}
-
-function getStartUpdateShape(seed: string) {
-  let hash = 0
-
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0
-  }
-
-  return (
-    startUpdateShapes[hash % startUpdateShapes.length] ?? startUpdateShapes[0]
-  )
 }
 
 function formatMessageConversation(

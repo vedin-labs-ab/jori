@@ -4,7 +4,7 @@
 
 {{ include "parts/voice" }}
 
-{{agent.context}}
+{{agent.run}}
 
 # Principles
 
