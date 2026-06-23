@@ -68,7 +68,7 @@ describe("runtime prompts", () => {
     expect(prompt).toContain(
       `A ${toolSurfaceLabel} message triggered this run.`
     )
-    expectContextBefore(prompt, "# Trigger")
+    expectRunBefore(prompt, "# Trigger")
 
     for (const line of targetLines) {
       expect(prompt).toContain(line)
@@ -131,9 +131,8 @@ describe("runtime delivery prompts", () => {
     )
 
     expect(prompt).toContain(
-      "For work that will not produce an immediate final reply"
+      "For work that will not produce an immediate user-visible result"
     )
-    expect(prompt).toContain("Skip the start update for simple replies")
     expect(prompt).toContain("Make updates useful, not ceremonial")
     expect(prompt).toContain("After a start update, stay quiet")
     expect(prompt).toContain(
@@ -141,7 +140,7 @@ describe("runtime delivery prompts", () => {
     )
     expect(prompt).toContain("Looking up Emma now")
     expect(prompt).toContain("Bad:")
-    expect(prompt).toContain("On it, I’ll keep you posted")
+    expect(prompt).toContain("On it — I’ll keep you posted")
   })
 
   test("renders Slack communication and completion sections", () => {
@@ -151,7 +150,7 @@ describe("runtime delivery prompts", () => {
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain(
-      "User-visible communication happens ONLY through the active surface’s tools."
+      "When instructed to send, reply, report, update, tell the user, or let them know"
     )
     expect(prompt).toContain("call the appropriate communication tool")
     expect(prompt).toContain("Current surface: `Slack`")
@@ -205,8 +204,8 @@ function githubMessageInput() {
   })
 }
 
-function expectContextBefore(prompt: string, section: string) {
-  expectSingleContext(prompt)
+function expectRunBefore(prompt: string, section: string) {
+  expectSingleRun(prompt)
   expect(prompt.indexOf("# Voice")).toBeLessThan(prompt.indexOf("# Run"))
   expect(prompt.indexOf("# Run")).toBeLessThan(prompt.indexOf("# Principles"))
   expect(prompt.indexOf("# Principles")).toBeLessThan(
@@ -218,7 +217,7 @@ function expectContextBefore(prompt: string, section: string) {
   )
 }
 
-function expectSingleContext(prompt: string) {
+function expectSingleRun(prompt: string) {
   expect(prompt).toContain("# Run\n\nRun started at:")
   expect(prompt.match(/Run started at:/g)).toHaveLength(1)
 }
