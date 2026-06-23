@@ -18,11 +18,11 @@
 {{agent.skills}}
 {% endif %}
 
-{% if agent.communication %}
+{%- if agent.communication %}
 {{agent.communication}}
 {% endif %}
 
-{% if agent.approvals %}
+{%- if agent.approvals -%}
 {{agent.approvals}}
 {% endif %}
 
