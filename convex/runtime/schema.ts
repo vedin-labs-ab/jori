@@ -59,6 +59,7 @@ export const traceType = v.union(
 const traceToolRoute = v.union(
   v.literal("active_surface"),
   v.literal("convex"),
+  v.literal("run"),
   v.literal("sandbox"),
   v.literal("subagent")
 )

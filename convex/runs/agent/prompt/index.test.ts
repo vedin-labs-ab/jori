@@ -156,7 +156,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Completion")
     expect(prompt).toContain("Assistant completion text is private run output")
-    expect(prompt).toContain("finish by calling `finish_run`")
+    expect(prompt).toContain("Finish the run by calling `finish_run`")
   })
 
   test("omits automatic final delivery instructions", () => {
@@ -174,7 +174,7 @@ describe("approval request prompts", () => {
   test("lists prompted tools and the approval contract", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-      [promptedTool()]
+      { promptedTools: [promptedTool()] }
     )
 
     expect(prompt).toContain("# Approvals")

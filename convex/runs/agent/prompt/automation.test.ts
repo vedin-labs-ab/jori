@@ -21,6 +21,8 @@ describe("automation trigger prompts", () => {
     expect(prompt.indexOf("# Completion")).toBeLessThan(
       prompt.indexOf("# Trigger")
     )
+    expect(prompt).toContain("Finish the run by calling `finish_run`")
+    expect(prompt).not.toContain("send_reply")
   })
 
   test("renders disabled web search", () => {

@@ -31,6 +31,7 @@ export type ActiveSurface = {
 export type RuntimeToolRoute =
   | "active_surface"
   | "convex"
+  | "run"
   | "sandbox"
   | "subagent"
 

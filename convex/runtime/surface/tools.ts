@@ -6,7 +6,7 @@ export type ActiveSurfaceTool = {
   access: "write"
   description: string
   inputSchema: JsonObject
-  name: "finish_run" | "send_reply"
+  name: "send_reply"
   route: "active_surface"
 }
 
@@ -22,14 +22,6 @@ export function activeSurfaceTools(
       name: "send_reply",
       route: "active_surface",
     },
-    {
-      access: "write",
-      description:
-        "Finish this active-surface run. If no send_reply was sent in this run, include reason explaining why no visible reply is warranted. The reason is internal and is not shown to the requester.",
-      inputSchema: finishRunSchema(),
-      name: "finish_run",
-      route: "active_surface",
-    },
   ]
 }
 
@@ -39,17 +31,9 @@ export function activeSurfaceToolSnapshot(
   return tools.map((tool) => ({
     access: tool.access,
     description: tool.description,
-    label: activeSurfaceToolLabel(tool.name),
+    label: "Send reply",
     tool: tool.name,
   }))
-}
-
-function activeSurfaceToolLabel(name: ActiveSurfaceTool["name"]) {
-  if (name === "send_reply") {
-    return "Send reply"
-  }
-
-  return "Finish run"
 }
 
 function sendReplySchema(surface: MessageIntegration): JsonObject {
@@ -74,19 +58,5 @@ function sendReplySchema(surface: MessageIntegration): JsonObject {
     additionalProperties: false,
     required: ["text"],
     properties,
-  }
-}
-
-function finishRunSchema(): JsonObject {
-  return {
-    type: "object",
-    additionalProperties: false,
-    properties: {
-      reason: {
-        type: "string",
-        description:
-          "Internal reason for finishing without a visible reply. Required when no send_reply was sent in this run.",
-      },
-    },
   }
 }

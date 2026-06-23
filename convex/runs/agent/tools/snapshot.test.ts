@@ -48,18 +48,20 @@ test("stores all surface tool capabilities for run details", () => {
 test("stores active surface tools ahead of provider capabilities", () => {
   expect(
     createRunToolSnapshot({
+      lifecycleTools: [
+        {
+          access: "write",
+          description: "Finish this run.",
+          label: "Finish run",
+          tool: "finish_run",
+        },
+      ],
       activeSurfaceTools: [
         {
           access: "write",
           description: "Send a visible reply.",
           label: "Send reply",
           tool: "send_reply",
-        },
-        {
-          access: "write",
-          description: "Finish this run.",
-          label: "Finish run",
-          tool: "finish_run",
         },
       ],
       webSearch: true,
@@ -75,6 +77,18 @@ test("stores active surface tools ahead of provider capabilities", () => {
     groups: [
       {
         surface: "milo",
+        label: "Run",
+        tools: [
+          {
+            access: "write",
+            description: "Finish this run.",
+            label: "Finish run",
+            tool: "finish_run",
+          },
+        ],
+      },
+      {
+        surface: "milo",
         label: "Active surface",
         tools: [
           {
@@ -82,12 +96,6 @@ test("stores active surface tools ahead of provider capabilities", () => {
             description: "Send a visible reply.",
             label: "Send reply",
             tool: "send_reply",
-          },
-          {
-            access: "write",
-            description: "Finish this run.",
-            label: "Finish run",
-            tool: "finish_run",
           },
         ],
       },

@@ -4,6 +4,7 @@ import {
 } from "../../../automations/access"
 import { integrationLabels } from "../../../automations/integrations"
 import { messageEntry } from "../../../messages/history"
+import { replyAddress } from "../../../messages/surface"
 import {
   getToolPermission,
   type ToolPermission,
@@ -24,10 +25,15 @@ import {
 
 export function assemblePrompt(
   input: AgentRuntimeInput,
-  promptedTools: ToolPermission[] = []
+  options: {
+    activeSurface?: PromptActiveSurface | null
+    promptedTools?: ToolPermission[]
+  } = {}
 ): string {
   const communication = createCommunicationInstructions(input)
   const run = createRunInstructions(input)
+  const activeSurface = options.activeSurface ?? defaultActiveSurface(input)
+  const promptedTools = options.promptedTools ?? []
   const skills = createSkillInstructions({
     omittedNames: omittedSkillNames(communication),
   })
@@ -40,7 +46,30 @@ export function assemblePrompt(
       skills: promptBlock(skills),
       trigger: promptBlock(createTriggerPart(input, true)),
     },
+    run: {
+      type: input.type,
+    },
+    surface: {
+      active: activeSurface !== null,
+      integration: activeSurface?.surface ?? null,
+    },
+    tools: {
+      finish_run: true,
+      send_reply: activeSurface !== null,
+    },
   })
+}
+
+type PromptActiveSurface = {
+  surface: MessageIntegration
+}
+
+function defaultActiveSurface(
+  input: AgentRuntimeInput
+): PromptActiveSurface | null {
+  return input.type === "message" && replyAddress(input.message) !== null
+    ? { surface: input.messageIntegration }
+    : null
 }
 
 function omittedSkillNames(

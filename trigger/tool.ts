@@ -11,6 +11,7 @@ import { errorDetails } from "./events"
 import { generateImageAttachment } from "./images/index"
 import { optionalString, requiredString } from "./input"
 import { type ModelToolCall } from "./model/types"
+import { executeRunTool } from "./run"
 import { executeCodingTool } from "./sandbox/coding"
 import { type SandboxRuntime } from "./sandbox/types"
 import { executeActiveSurfaceTool } from "./surface"
@@ -86,6 +87,11 @@ async function executeTool(
       })
     case "convex":
       return toolResult(await executeConvexTool(runtime, tool, call))
+    case "run":
+      return executeRunTool(runtime, {
+        input: call.args,
+        name: call.name,
+      })
     case "sandbox":
       return toolResult(
         await executeCodingTool({

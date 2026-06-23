@@ -2,40 +2,47 @@ import { describe, expect, test } from "vitest"
 import { renderPromptTemplate } from "./render"
 
 describe("renderPromptTemplate", () => {
-  test("renders required values", () => {
+  test("renders values", () => {
     expect(
-      renderPromptTemplate("Hello {{user.name}}.", {
+      renderPromptTemplate("Hello {{ user.name }}.", {
         user: { name: "Albin" },
       })
     ).toBe("Hello Albin.")
   })
 
-  test("throws when required values are missing", () => {
-    expect(() => renderPromptTemplate("Hello {{user.name}}.", {})).toThrow(
-      "Missing prompt template value: user.name"
+  test("throws when required output values are missing", () => {
+    expect(() => renderPromptTemplate("Hello {{ user.name }}.", {})).toThrow(
+      "undefined variable: user"
     )
   })
 
-  test("omits optional values when missing or empty", () => {
-    expect(renderPromptTemplate('A{{? missing prefix=" B"}} C', {})).toBe("A C")
+  test("renders boolean conditionals", () => {
     expect(
-      renderPromptTemplate('A{{? value prefix=" B"}} C', { value: " " })
+      renderPromptTemplate("A{% if tools.send_reply %} B{% endif %} C", {
+        tools: { send_reply: true },
+      })
+    ).toBe("A B C")
+    expect(
+      renderPromptTemplate("A{% if tools.send_reply %} B{% endif %} C", {
+        tools: { send_reply: false },
+      })
     ).toBe("A C")
   })
 
-  test("adds optional prefixes and suffixes only for present values", () => {
+  test("renders string equality conditionals", () => {
     expect(
-      renderPromptTemplate('A{{? value prefix="\\n" suffix="!"}}', {
-        value: "B",
-      })
-    ).toBe("A\nB!")
+      renderPromptTemplate(
+        '{% if surface.integration == "slack" %}Slack{% endif %}',
+        {
+          surface: { integration: "slack" },
+        }
+      )
+    ).toBe("Slack")
   })
 
-  test("supports prefixes and suffixes on required values", () => {
+  test("renders includes from the prompt registry", () => {
     expect(
-      renderPromptTemplate('{{value prefix="[" suffix="]"}}', {
-        value: "A",
-      })
-    ).toBe("[A]")
+      renderPromptTemplate('{% include "parts/identity" %}', {})
+    ).toContain("You are Milo")
   })
 })
