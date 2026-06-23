@@ -122,8 +122,10 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
     convex: {
       callTool: vi.fn(),
       recordEvent: vi.fn(),
+      sendReply: vi.fn(async () => ({ status: "sent" })),
     },
     context: {
+      activeSurface: null,
       prompt: "system",
       run: {
         id: id<"runs">("run_1"),

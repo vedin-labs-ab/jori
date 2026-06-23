@@ -7,7 +7,7 @@ import {
 import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
 import { type RuntimeContext } from "../types"
 import { recordRunEvent } from "./events"
-import { formatSessionMessage } from "./messages"
+import { appendSessionMessages } from "./messages"
 
 type AgentLoopPhase = "normal" | "repair"
 type AgentLoopOutput = {
@@ -25,6 +25,12 @@ type StopResult =
     }
 
 const invalidStopRepairInstruction = promptTemplates["repair/invalid"].trim()
+const activeSurfaceStopInstruction = [
+  "The run is not finished.",
+  "Assistant completion text is private and is not visible to the requester.",
+  "Send any needed visible reply with `send_reply`, then call `finish_run`.",
+  "If no visible reply is warranted, call `finish_run` with `reason`.",
+].join(" ")
 const maxModelSteps = 30
 const toolSequenceOffset = 100
 
@@ -79,10 +85,20 @@ export async function runAgentLoop(args: {
       role: "assistant",
       toolCalls: response.toolCalls,
     })
-    await runToolCalls(args.runtime, messages, response.toolCalls, {
-      attempt: args.attempt,
-      step,
-    })
+    const tools = await runToolCalls(
+      args.runtime,
+      messages,
+      response.toolCalls,
+      {
+        attempt: args.attempt,
+        step,
+      }
+    )
+
+    if (tools.finished) {
+      await completeRun(args.runtime, tools.sequence + 1, args.attempt)
+      return completedOutput()
+    }
   }
 
   throw new Error("Model loop exceeded the maximum step count.")
@@ -100,6 +116,11 @@ async function handleStopResponse(args: {
     return { kind: "continue", phase: "normal" }
   }
 
+  if (args.runtime.context.activeSurface !== null) {
+    appendActiveSurfaceStopRepair(args.messages, args.content)
+    return { kind: "continue", phase: "normal" }
+  }
+
   if (!isEmptyStop(args.content)) {
     if (args.phase === "repair") {
       throw new Error("Model returned non-empty stop content after repair.")
@@ -109,14 +130,11 @@ async function handleStopResponse(args: {
     return { kind: "continue", phase: "repair" }
   }
 
-  await completeRun(args.runtime, args.step, args.attempt)
+  await completeRun(args.runtime, stepSequence(args.step), args.attempt)
 
   return {
     kind: "completed",
-    output: {
-      message: "",
-      status: "completed",
-    },
+    output: completedOutput(),
   }
 }
 
@@ -144,36 +162,21 @@ function appendInvalidStopRepair(messages: ModelMessage[], content: string) {
   })
 }
 
-async function appendSessionMessages(
-  runtime: ToolRuntime,
-  messages: ModelMessage[]
+function appendActiveSurfaceStopRepair(
+  messages: ModelMessage[],
+  content: string
 ) {
-  const session = runtime.context.session
-
-  if (session === null) {
-    return false
-  }
-
-  let appended = false
-  let hasMore = true
-
-  while (hasMore) {
-    const drained = await runtime.convex.drainSessionMessages({
-      sessionId: session.id,
+  if (!isEmptyStop(content)) {
+    messages.push({
+      content,
+      role: "assistant",
     })
-
-    hasMore = drained.hasMore
-
-    for (const message of drained.messages) {
-      messages.push({
-        content: formatSessionMessage(message),
-        role: "user",
-      })
-      appended = true
-    }
   }
 
-  return appended
+  messages.push({
+    content: activeSurfaceStopInstruction,
+    role: "user",
+  })
 }
 
 async function runToolCalls(
@@ -185,30 +188,36 @@ async function runToolCalls(
   let index = 0
 
   for (const call of calls) {
-    const content = await executeToolCall({
+    const sequence = meta.step * toolSequenceOffset + index
+    const result = await executeToolCall({
       attempt: meta.attempt,
       call,
       runtime,
-      sequence: meta.step * toolSequenceOffset + index,
+      sequence,
     })
 
     messages.push({
-      content,
+      content: result.content,
       role: "tool",
       toolCallId: call.id,
       toolName: call.name,
     })
+
+    if (result.finished) {
+      return { finished: true, sequence }
+    }
+
     index += 1
   }
+
+  return { finished: false, sequence: meta.step * toolSequenceOffset + index }
 }
 
 async function completeRun(
   runtime: ToolRuntime,
-  step: number,
+  sequence: number,
   attempt: number
 ) {
-  const sequence = step * toolSequenceOffset
-
   await recordRunEvent(
     runtime.convex,
     runtime.context,
@@ -216,4 +225,15 @@ async function completeRun(
     sequence,
     attempt
   )
+}
+
+function stepSequence(step: number) {
+  return step * toolSequenceOffset
+}
+
+function completedOutput(): AgentLoopOutput {
+  return {
+    message: "",
+    status: "completed",
+  }
 }

@@ -25,6 +25,7 @@ import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
 import { toolSnapshot } from "../runs/schema"
 import { sandboxTools } from "./sandbox"
 import { requireWorkerSecret } from "./shared"
+import { loadActiveSurface } from "./surface"
 import { recordTrace } from "./traces"
 
 export const load = action({
@@ -57,6 +58,7 @@ export const load = action({
       status: run.status,
     })
     const permissions = await runtimePermissions(ctx, input)
+    const activeSurface = await loadActiveSurface(ctx, input, args.runId)
     const promptedTools = getPromptedTools({
       executionType: toolExecutionType(input.type),
       permissions: permissions.all,
@@ -91,7 +93,8 @@ export const load = action({
           : {
               id: session._id,
             },
-      tools: [...permissions.tools, ...sandboxTools],
+      activeSurface: activeSurface.state,
+      tools: [...activeSurface.tools, ...permissions.tools, ...sandboxTools],
     }
   },
 })

@@ -23,7 +23,16 @@ export type SandboxCleanupPayload = {
   sandboxId: string
 }
 
-export type RuntimeToolRoute = "convex" | "sandbox" | "subagent"
+export type ActiveSurface = {
+  replySent: boolean
+  surface: "github" | "linear" | "slack"
+}
+
+export type RuntimeToolRoute =
+  | "active_surface"
+  | "convex"
+  | "sandbox"
+  | "subagent"
 
 export type RuntimeTraceSource =
   | "trigger.approval"
@@ -68,6 +77,7 @@ export type RuntimeTool = {
 }
 
 export type RuntimeContext = {
+  activeSurface: ActiveSurface | null
   prompt: string
   run: {
     id: ConvexId<"runs">

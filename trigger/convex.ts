@@ -59,6 +59,19 @@ export class MiloConvexClient {
     return decodeToolResult(result)
   }
 
+  async sendReply(args: {
+    blocks?: JsonObject[]
+    runId: ConvexId<"runs">
+    text: string
+  }) {
+    return await this.client.action(api.runtime.surface.sendReply, {
+      blocks: args.blocks,
+      runId: args.runId,
+      secret: this.secret,
+      text: args.text,
+    })
+  }
+
   async drainSessionMessages(args: {
     limit?: number
     sessionId: ConvexId<"sessions">

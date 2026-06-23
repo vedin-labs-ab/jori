@@ -32,7 +32,7 @@ test("prompted tools wait for approval before executing", async () => {
   })
   runtime.convex.callTool = vi.fn(async () => ({ ok: true }))
 
-  const content = await executeToolCall({
+  const { content } = await executeToolCall({
     attempt: 1,
     call: promptedToolCall(),
     runtime,
@@ -72,7 +72,7 @@ test("prompted tools return denied results without executing", async () => {
     },
   })
 
-  const content = await executeToolCall({
+  const { content } = await executeToolCall({
     attempt: 1,
     call: promptedToolCall(),
     runtime,
@@ -89,7 +89,7 @@ test("prompted tools return denied results without executing", async () => {
 test("prompted tools return repairable validation errors before approval", async () => {
   const runtime = createRuntime()
 
-  const content = await executeToolCall({
+  const { content } = await executeToolCall({
     attempt: 1,
     call: promptedToolCall({ approval: false }),
     runtime,
@@ -111,7 +111,7 @@ test("prompted tools return repairable validation errors before approval", async
 test("prompted tools reject blank approval summaries before approval", async () => {
   const runtime = createRuntime()
 
-  const content = await executeToolCall({
+  const { content } = await executeToolCall({
     attempt: 1,
     call: promptedToolCall({ summary: " " }),
     runtime,
@@ -136,7 +136,7 @@ test("prompted tools return expired results on waitpoint timeout", async () => {
     ok: false,
   })
 
-  const content = await executeToolCall({
+  const { content } = await executeToolCall({
     attempt: 1,
     call: promptedToolCall(),
     runtime,
@@ -158,7 +158,7 @@ test("tool failures are returned to the agent instead of thrown", async () => {
     throw new Error("Provider rejected the request")
   })
 
-  const content = await executeToolCall({
+  const { content } = await executeToolCall({
     attempt: 1,
     call: simpleToolCall(),
     runtime,
@@ -196,6 +196,7 @@ function createRuntime(
       })),
     } as unknown as ToolRuntime["convex"],
     context: {
+      activeSurface: null,
       prompt: "system",
       run: {
         id: id<"runs">("run_1"),

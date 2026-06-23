@@ -31,7 +31,7 @@ describe("runtime skill prompts", () => {
       "When instructed to send, reply, report, update, tell the user, or let them know"
     )
     expect(prompt).toContain("Assistant completion text is private run output")
-    expect(prompt).toContain("call the appropriate communication tool")
+    expect(prompt).toContain("call `send_reply`")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("## Guidance")

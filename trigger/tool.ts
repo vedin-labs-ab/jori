@@ -7,24 +7,20 @@ import {
   saveSandboxAttachment,
 } from "./attachments"
 import { type MiloConvexClient } from "./convex"
-import { errorDetails, runtimeEvent } from "./events"
+import { errorDetails } from "./events"
 import { generateImageAttachment } from "./images/index"
+import { optionalString, requiredString } from "./input"
 import { type ModelToolCall } from "./model/types"
 import { executeCodingTool } from "./sandbox/coding"
 import { type SandboxRuntime } from "./sandbox/types"
-import { providerTrace } from "./trace"
-import {
-  type JsonObject,
-  type RuntimeContext,
-  type RuntimeTool,
-  type RuntimeToolTraceData,
-  type RuntimeValueSummary,
-} from "./types"
+import { executeActiveSurfaceTool } from "./surface"
+import { recordToolEvent, toolTraceDetails } from "./trace"
+import { type JsonObject, type RuntimeContext, type RuntimeTool } from "./types"
 
-type RuntimeToolTraceDetails = Omit<
-  RuntimeToolTraceData,
-  "access" | "name" | "route"
->
+export type ToolCallResult = {
+  content: string
+  finished: boolean
+}
 
 export type ToolRuntime = {
   convex: MiloConvexClient
@@ -37,22 +33,33 @@ export async function executeToolCall(args: {
   call: ModelToolCall
   runtime: ToolRuntime
   sequence: number
-}) {
+}): Promise<ToolCallResult> {
   const tool = findTool(args.runtime.context.tools, args.call.name)
 
-  await recordToolEvent(args, tool, "tool.started")
+  await recordToolEvent(eventArgs(args), tool, "tool.started")
 
   try {
     const result = await executeTool(args.runtime, tool, args.call)
-    await recordToolEvent(args, tool, "tool.completed", toDetails(result))
+    await recordToolEvent(
+      eventArgs(args),
+      tool,
+      "tool.completed",
+      toolTraceDetails(result.value)
+    )
 
-    return toToolContent(result)
+    return {
+      content: toToolContent(result.value),
+      finished: result.finished,
+    }
   } catch (error) {
     const details = errorDetails(error)
 
-    await recordToolEvent(args, tool, "tool.failed", details)
+    await recordToolEvent(eventArgs(args), tool, "tool.failed", details)
 
-    return toToolContent(toolErrorResult(details.error))
+    return {
+      content: toToolContent(toolErrorResult(details.error)),
+      finished: false,
+    }
   }
 }
 
@@ -72,16 +79,23 @@ async function executeTool(
   call: ModelToolCall
 ) {
   switch (tool.route) {
-    case "convex":
-      return await executeConvexTool(runtime, tool, call)
-    case "sandbox":
-      return await executeCodingTool({
+    case "active_surface":
+      return await executeActiveSurfaceTool(runtime, {
         input: call.args,
-        sandbox: runtime.sandbox,
-        tool: tool.name,
+        name: call.name,
       })
+    case "convex":
+      return toolResult(await executeConvexTool(runtime, tool, call))
+    case "sandbox":
+      return toolResult(
+        await executeCodingTool({
+          input: call.args,
+          sandbox: runtime.sandbox,
+          tool: tool.name,
+        })
+      )
     case "subagent":
-      return await executeSubagentTool(runtime, call.args)
+      return toolResult(await executeSubagentTool(runtime, call.args))
   }
 }
 
@@ -149,35 +163,6 @@ async function executeSubagentTool(runtime: ToolRuntime, input: JsonObject) {
   })
 }
 
-async function recordToolEvent(
-  args: {
-    attempt: number
-    call: ModelToolCall
-    runtime: ToolRuntime
-    sequence: number
-  },
-  tool: RuntimeTool,
-  type: "tool.completed" | "tool.failed" | "tool.started",
-  data?: RuntimeToolTraceDetails
-) {
-  await args.runtime.convex.recordEvent(
-    runtimeEvent({
-      attempt: args.attempt,
-      data: {
-        access: tool.access,
-        name: tool.name,
-        route: tool.route,
-        ...data,
-      },
-      runId: args.runtime.context.run.id,
-      sequence: args.sequence,
-      source: "trigger.tool",
-      callId: args.call.id,
-      type,
-    })
-  )
-}
-
 function findTool(tools: RuntimeTool[], name: string) {
   const tool = tools.find((candidate) => candidate.name === name)
 
@@ -196,16 +181,23 @@ function requireSurface(tool: RuntimeTool): ToolSurface {
   return tool.surface
 }
 
-function requiredString(value: unknown, name: string) {
-  if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`Missing ${name}`)
+function eventArgs(args: {
+  attempt: number
+  call: ModelToolCall
+  runtime: ToolRuntime
+  sequence: number
+}) {
+  return {
+    attempt: args.attempt,
+    call: args.call,
+    convex: args.runtime.convex,
+    context: args.runtime.context,
+    sequence: args.sequence,
   }
-
-  return value
 }
 
-function optionalString(value: unknown) {
-  return typeof value === "string" && value.trim() !== "" ? value : undefined
+function toolResult(value: unknown, finished = false) {
+  return { finished, value }
 }
 
 function toToolContent(result: unknown) {
@@ -218,39 +210,5 @@ function toolErrorResult(message: string): JsonObject {
       message,
     },
     status: "error",
-  }
-}
-
-function toDetails(result: unknown): RuntimeToolTraceDetails {
-  return {
-    ...providerTrace(result),
-    result: summarizeResult(result),
-  }
-}
-
-function summarizeResult(result: unknown): RuntimeValueSummary {
-  if (result === null || result === undefined) {
-    return { type: "null" }
-  }
-
-  if (Array.isArray(result)) {
-    return { type: "array", size: result.length }
-  }
-
-  switch (typeof result) {
-    case "boolean":
-      return { type: "boolean" }
-    case "number":
-      return { preview: String(result), type: "number" }
-    case "object":
-      return { type: "object", size: Object.keys(result).length }
-    case "string":
-      return {
-        preview: result.slice(0, 500),
-        size: result.length,
-        type: "string",
-      }
-    default:
-      return { type: "null" }
   }
 }

@@ -27,7 +27,7 @@ test("loads complete instructions with all communication parts", () => {
     status: "loaded",
     skill: {
       instructions: expect.stringContaining(
-        "Use Slack `blocks` when native structure"
+        "Use Slack `blocks` when structure makes the message easier to scan"
       ),
     },
   })
