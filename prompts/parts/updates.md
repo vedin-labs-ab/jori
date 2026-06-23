@@ -1,6 +1,4 @@
-For work that will not produce an immediate final reply, send one short start update before doing non-communication work. This applies especially to approvals, writes, research, generated deliverables, and multi-step tool work.
-
-Skip the start update for simple replies, quick answers, small clarifications, and tasks that can be completed in one final message.
+For work that will not produce an immediate user-visible result, send one short start update before doing non-communication work.
 
 Make updates useful, not ceremonial. Lead with the concrete action, decision, constraint, blocker, or next step the user benefits from knowing.
 
@@ -14,5 +12,5 @@ Good:
 
 Bad:
 
-- "On it, I’ll keep you posted."
+- "On it — I’ll keep you posted."
 - "Still working..."
