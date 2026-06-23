@@ -6,11 +6,15 @@ import {
 } from "../../../shared/data"
 import { type AgentRuntimeInput, type MessageIntegration } from "../input"
 
-export function getMessageTarget(
+export function createMessageTargetValues(
   integration: MessageIntegration,
   data: unknown
 ) {
-  return formatTargetLines(getIntegrationTargetLines(integration, data))
+  return {
+    github: integration === "github" ? getGitHubTargetValues(data) : null,
+    linear: integration === "linear" ? getLinearTargetValues(data) : null,
+    slack: integration === "slack" ? getSlackTargetValues(data) : null,
+  }
 }
 
 export function formatEvent(
@@ -29,8 +33,11 @@ export function formatEvent(
   ])
 }
 
-export function targetLine(label: string, value: string | number | undefined) {
-  if (value === undefined || value === "") {
+export function targetLine(
+  label: string,
+  value: string | number | null | undefined
+) {
+  if (value === null || value === undefined || value === "") {
     return null
   }
 
@@ -83,52 +90,84 @@ function isKnownIntegration(
 }
 
 function getGitHubTargetLines(data: unknown) {
+  const target = getGitHubTargetValues(data)
+
+  return [
+    targetLine("Repository", target.repository),
+    targetLine("Issue number", target.issueNumber),
+    targetLine("Pull request number", target.pullNumber),
+    targetLine("Comment ID", target.commentId),
+    targetLine("Comment kind", target.commentKind),
+    targetLine("Review thread comment ID", target.reviewThreadCommentId),
+  ]
+}
+
+function getGitHubTargetValues(data: unknown) {
   const repository = readDataObject(data, "repository")
   const comment = readDataObject(data, "comment")
   const commentKind = readDataString(comment, "kind")
 
-  return [
-    targetLine("Repository", readDataString(repository, "fullName")),
-    targetLine("Issue number", readDataNumber(data, "issueNumber")),
-    targetLine("Pull request number", readDataNumber(data, "pullNumber")),
-    targetLine("Comment ID", readDataString(comment, "id")),
-    targetLine("Comment kind", commentKind),
-    targetLine(
-      "Review thread comment ID",
+  return {
+    commentId: readDataString(comment, "id") ?? null,
+    commentKind: commentKind ?? null,
+    issueNumber: readDataNumber(data, "issueNumber") ?? null,
+    pullNumber: readDataNumber(data, "pullNumber") ?? null,
+    repository: readDataString(repository, "fullName") ?? null,
+    reviewThreadCommentId:
       commentKind === "pull_request_review"
         ? (readDataString(comment, "inReplyToId") ??
-            readDataString(comment, "id"))
-        : undefined
-    ),
-  ]
+          readDataString(comment, "id") ??
+          null)
+        : null,
+  }
 }
 
 function getLinearTargetLines(data: unknown) {
-  const issue = readDataObject(data, "issue")
+  const target = getLinearTargetValues(data)
 
   return [
-    targetLine("Issue ID", readDataString(data, "issueId")),
-    targetLine("Issue key", readDataString(data, "issueIdentifier")),
-    targetLine("Issue title", readDataString(issue, "title")),
-    targetLine("Issue URL", readDataString(issue, "url")),
-    targetLine("Comment ID", readDataString(data, "commentId")),
-    targetLine("Comment URL", readDataString(data, "url")),
+    targetLine("Issue ID", target.issueId),
+    targetLine("Issue key", target.issueIdentifier),
+    targetLine("Issue title", target.issueTitle),
+    targetLine("Issue URL", target.issueUrl),
+    targetLine("Comment ID", target.commentId),
+    targetLine("Comment URL", target.commentUrl),
   ]
 }
 
+function getLinearTargetValues(data: unknown) {
+  const issue = readDataObject(data, "issue")
+
+  return {
+    commentId: readDataString(data, "commentId") ?? null,
+    commentUrl: readDataString(data, "url") ?? null,
+    issueId: readDataString(data, "issueId") ?? null,
+    issueIdentifier: readDataString(data, "issueIdentifier") ?? null,
+    issueTitle: readDataString(issue, "title") ?? null,
+    issueUrl: readDataString(issue, "url") ?? null,
+  }
+}
+
 function getSlackTargetLines(data: unknown) {
+  const target = getSlackTargetValues(data)
+
+  return [
+    targetLine("Channel ID", target.channelId),
+    targetLine("Message timestamp", target.messageTimestamp),
+    targetLine("Thread timestamp", target.threadTimestamp),
+  ]
+}
+
+function getSlackTargetValues(data: unknown) {
   const channel = readDataObject(data, "channel")
   const thread = readDataObject(data, "thread")
   const messageTs = readDataString(data, "ts")
 
-  return [
-    targetLine("Channel ID", readDataString(channel, "id")),
-    targetLine("Message timestamp", messageTs),
-    targetLine(
-      "Reply thread timestamp",
-      readDataString(thread, "ts") ?? messageTs
-    ),
-  ]
+  return {
+    channelId: readDataString(channel, "id") ?? null,
+    messageTimestamp: messageTs ?? null,
+    threadTimestamp: readDataString(thread, "ts") ?? messageTs ?? null,
+  }
 }
 
 function getNotionTargetLines(data: unknown) {

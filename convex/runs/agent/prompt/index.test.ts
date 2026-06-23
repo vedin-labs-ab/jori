@@ -54,7 +54,7 @@ const messageTriggerCases = [
     [
       "- Channel ID: C123",
       "- Message timestamp: 123.456",
-      "- Reply thread timestamp: 123.456",
+      "- Thread timestamp: 123.456",
     ],
   ],
 ] as const
@@ -78,6 +78,7 @@ describe("runtime prompts", () => {
     expect(prompt).toContain("Recent messages:")
     expect(prompt).toContain("Current message:")
     expect(prompt).not.toContain("\nHistory:\n")
+    expect(prompt).not.toContain("{{message.target}}")
     expect(prompt).toContain("- 1970-01-01T00:00:01.000Z | user | Albin Vedin")
   })
 
@@ -107,8 +108,9 @@ describe("runtime prompts", () => {
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
-    expect(prompt).toContain("- Reply thread timestamp: 123.456")
-    expect(prompt).not.toContain("- Reply thread timestamp: undefined")
+    expect(prompt).toContain("- Thread timestamp: 123.456")
+    expect(prompt).not.toContain("- Thread timestamp: undefined")
+    expect(prompt).not.toContain("- Reply thread timestamp:")
   })
 
   test("uses Slack thread timestamp when the trigger is already threaded", () => {
@@ -121,7 +123,7 @@ describe("runtime prompts", () => {
     )
 
     expect(prompt).toContain("- Message timestamp: 123.456")
-    expect(prompt).toContain("- Reply thread timestamp: 123.000")
+    expect(prompt).toContain("- Thread timestamp: 123.000")
   })
 })
 
