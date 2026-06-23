@@ -17,9 +17,9 @@ import { createCommunicationInstructions } from "./communication"
 import { createToolApprovalInstructions } from "./instructions"
 import { createSkillInstructions } from "./skills"
 import {
+  createMessageTargetValues,
   formatEvent,
   formatTargetLines,
-  getMessageTarget,
   targetLine,
 } from "./target"
 
@@ -141,14 +141,22 @@ function createInstructionValues(
 function createMessageValues(
   input: Extract<AgentRuntimeInput, { type: "message" }>
 ) {
+  const target = createMessageTargetValues(
+    input.messageIntegration,
+    input.message.data
+  )
+
   return {
     message: {
       conversation: formatMessageConversation(input),
       current: formatMessageEntry(
         messageEntry(input.message, input.integration)
       ),
+      github: target.github,
       integration: getIntegrationLabel(input.messageIntegration),
-      target: getMessageTarget(input.messageIntegration, input.message.data),
+      linear: target.linear,
+      slack: target.slack,
+      surface: input.messageIntegration,
     },
   }
 }

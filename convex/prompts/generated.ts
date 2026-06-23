@@ -65,18 +65,24 @@ export const promptTemplates = {
   "reference/instruction":
     "# Original Trigger\n\nManual instructions started this task. For reference:\n\n```text\n{{instruction.text}}\n```",
   "reference/message":
-    "# Original Trigger\n\nA {{message.integration}} message started this task. For reference:\n\nTarget:\n{{message.target}}\n\nOriginal message:\n{{message.current}}",
+    '# Original Trigger\n\nA {{message.integration}} message started this task. For reference:\n\nTarget:\n\n{% if message.surface == "github" %}\n{% include "target/github" %}\n{% endif %}\n{% if message.surface == "linear" %}\n{% include "target/linear" %}\n{% endif %}\n{% if message.surface == "slack" %}\n{% include "target/slack" %}\n{% endif %}\n\nOriginal message:\n{{message.current}}',
   "run/message":
     "# Run\n\nRun started at: {{time.utc}}.\n\nActive surface: `{{surface.label}}`",
   "skills/discovery":
     "# Skills\n\nUse `load_skill` to load full instructions for an available skill when needed.\n\nAvailable skills:\n{{skills.available}}",
   "skills/loaded": "## {{skill.title}}\n\n{{skill.body}}",
+  "target/github":
+    "{% if message.github.repository %}\n- Repository: {{message.github.repository}}\n{% endif %}\n{% if message.github.issueNumber %}\n- Issue number: {{message.github.issueNumber}}\n{% endif %}\n{% if message.github.pullNumber %}\n- Pull request number: {{message.github.pullNumber}}\n{% endif %}\n{% if message.github.commentId %}\n- Comment ID: {{message.github.commentId}}\n{% endif %}\n{% if message.github.commentKind %}\n- Comment kind: {{message.github.commentKind}}\n{% endif %}\n{% if message.github.reviewThreadCommentId %}\n- Review thread comment ID: {{message.github.reviewThreadCommentId}}\n{% endif %}",
+  "target/linear":
+    "{% if message.linear.issueId %}\n- Issue ID: {{message.linear.issueId}}\n{% endif %}\n{% if message.linear.issueIdentifier %}\n- Issue key: {{message.linear.issueIdentifier}}\n{% endif %}\n{% if message.linear.issueTitle %}\n- Issue title: {{message.linear.issueTitle}}\n{% endif %}\n{% if message.linear.issueUrl %}\n- Issue URL: {{message.linear.issueUrl}}\n{% endif %}\n{% if message.linear.commentId %}\n- Comment ID: {{message.linear.commentId}}\n{% endif %}\n{% if message.linear.commentUrl %}\n- Comment URL: {{message.linear.commentUrl}}\n{% endif %}",
+  "target/slack":
+    "{% if message.slack.channelId %}\n- Channel ID: {{message.slack.channelId}}\n{% endif %}\n{% if message.slack.messageTimestamp %}\n- Message timestamp: {{message.slack.messageTimestamp}}\n{% endif %}\n{% if message.slack.threadTimestamp %}\n- Thread timestamp: {{message.slack.threadTimestamp}}\n{% endif %}",
   "trigger/automation":
     "# Trigger\n\nAn automation triggered this run.\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n- Instructions: {{automation.instructions}}\n\nIntegration access:\n{{access.summary}}\n\nEvent:\n{{event.details}}",
   "trigger/instruction":
     "# Trigger\n\nManual instructions triggered this run.\n\nInstructions:\n```text\n{{instruction.text}}\n```",
   "trigger/message":
-    "# Trigger\n\nA {{message.integration}} message triggered this run.\n\nTarget:\n\n{{message.target}}\n\nRecent messages:\n\n{{message.conversation}}\n\nCurrent message:\n\n{{message.current}}",
+    '# Trigger\n\nA {{message.integration}} message triggered this run.\n\nTarget:\n\n{% if message.surface == "github" %}\n{% include "target/github" %}\n{% endif %}\n{% if message.surface == "linear" %}\n{% include "target/linear" %}\n{% endif %}\n{% if message.surface == "slack" %}\n{% include "target/slack" %}\n{% endif %}\n\nRecent messages:\n\n{{message.conversation}}\n\nCurrent message:\n\n{{message.current}}',
 } as const
 
 export type SkillId = keyof typeof skills
