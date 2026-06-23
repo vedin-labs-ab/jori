@@ -116,6 +116,10 @@ export async function callSlackTool(
     return await postSlackMessageTool(integration, args, context)
   }
 
+  if (tool === "conversations_add_reaction") {
+    return await addSlackReaction(credentials.bot, args)
+  }
+
   throw new Error(`Unknown Slack tool: ${tool}`)
 }
 
@@ -164,6 +168,14 @@ async function postSlackMessageTool(
   })
 }
 
+async function addSlackReaction(token: string, args: Record<string, unknown>) {
+  return await slackJsonApi(token, "reactions.add", {
+    channel: requiredString(args.channel, "channel"),
+    name: requiredReactionName(args.name),
+    timestamp: requiredString(args.timestamp, "timestamp"),
+  })
+}
+
 function optionalBlocks(value: unknown) {
   if (value === undefined || value === null) {
     return undefined
@@ -180,4 +192,14 @@ function optionalBlocks(value: unknown) {
   }
 
   return value.length === 0 ? undefined : (value as SlackBlock[])
+}
+
+function requiredReactionName(value: unknown) {
+  const name = requiredString(value, "name").replace(/^:+|:+$/g, "")
+
+  if (name === "") {
+    throw new Error("name is required")
+  }
+
+  return name
 }

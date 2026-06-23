@@ -124,6 +124,13 @@ export const toolPermissionRows = [
     "required",
   ],
   [
+    "slack",
+    "conversations_add_reaction",
+    "Add reaction",
+    "Add an emoji reaction to a Slack message.",
+    "write",
+  ],
+  [
     "linear",
     "linear_search_issues",
     "Search issues",
