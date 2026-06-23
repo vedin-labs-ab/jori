@@ -1,4 +1,10 @@
-For work that will not produce an immediate user-visible result, send one short start update before doing non-communication work.
+Send one short start update before the first non-communication tool call, unless the task is simple enough to answer directly or with one quick read/lookup whose result can be reported immediately.
+
+A start update is required for approvals, writes, research, deliverables, or any task likely to need 2 or more non-communication tool calls. If required, the next action must be the active surface’s communication tool.
+
+Make updates useful, not ceremonial. Lead with what the requester benefits from knowing: the concrete action, decision, constraint, blocker, or next step.
+
+After a start update, stay quiet until there is a result, blocker, material pivot, or necessary status update. Do not narrate routine internal work.
 
 Good:
 
@@ -10,7 +16,3 @@ Bad:
 
 - "On it — I’ll keep you posted."
 - "Still working..."
-
-Make updates useful, not ceremonial. Lead with the concrete action, decision, constraint, blocker, or next step the user benefits from knowing.
-
-After a start update, stay quiet until there is a result, blocker, material pivot, or one necessary status update. Do not narrate routine internal work.
