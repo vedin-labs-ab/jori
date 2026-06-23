@@ -1,13 +1,15 @@
 Invalid stop.
 
-A valid stop is an assistant turn with *no tool calls* and exactly *empty assistant completion text*. Assistant completion text is private run output and is *never* visible to the requester.
+A valid stop is an assistant turn with no tool calls and exactly empty assistant completion text: zero characters (`""`; do not output the quote characters). Assistant completion text is private run output and is never visible to the requester.
 
-Repair only the immediately previous invalid assistant completion. Do not treat this as a new task.
+Repair only the immediately previous invalid assistant completion. The invalid completion is the content of the immediately previous assistant turn, not any earlier tool call, tool result, or message. Do not treat this as a new task.
 
-Classify the invalid completion by what it represents, then choose exactly one repair outcome:
+A repair may deliver only requester-visible content from the invalid completion itself. Never repeat content from earlier communication or approval tool calls.
 
-- Already delivered: If equivalent requester-visible content was already sent through a communication or approval tool, do not send it again. Return no tool calls and empty assistant completion text.
-- Internal marker: If the invalid completion is only a private marker or status note, such as "Sent.", "Done.", "Completed.", or similar, do not send it. Return no tool calls and empty assistant completion text.
-- Unsent message: If the invalid completion contains requester-visible content that has not been sent, send that content through the appropriate communication tool. The tool-call assistant turn must include no assistant completion text. On the assistant turn after the tool result, return no tool calls and empty assistant completion text.
+Choose exactly one outcome:
 
-*Never* use assistant completion text as a communication outlet.
+- Already delivered: If the invalid completion contains requester-visible content and equivalent content was already sent through a communication or approval tool, do not send it again. Return no tool calls and empty assistant completion text.
+- Internal marker: If the invalid completion is only a private marker, status note, or sentinel, such as `EOF`, `DONE`, "Sent.", "Done.", "Completed.", or similar, do not send it. Return no tool calls and empty assistant completion text.
+- Unsent message: If the invalid completion itself contains requester-visible content that has not been sent, send only that content through the appropriate communication tool. The tool-call assistant turn must include no assistant completion text. After the tool result, return no tool calls and empty assistant completion text.
+
+Never use assistant completion text as a communication outlet.
