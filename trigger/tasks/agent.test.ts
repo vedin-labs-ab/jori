@@ -4,14 +4,19 @@ import { type ToolRuntime } from "../tool"
 import { type ConvexId } from "../types"
 import { runAgentLoop } from "./agent"
 
-test("completes when the model stops with empty content", async () => {
+test.each([
+  ["empty content", ""],
+  ["literal double-quoted empty string", '""'],
+  ["literal single-quoted empty string", "''"],
+])("completes when the model stops with %s", async (_label, content) => {
   const runtime = createRuntime()
-  const model = createModel([{ content: "", type: "stop" }])
+  const model = createModel([{ content, type: "stop" }])
 
   await expect(runAgentLoop({ attempt: 1, model, runtime })).resolves.toEqual({
     message: "",
     status: "completed",
   })
+  expect(model.complete).toHaveBeenCalledTimes(1)
   expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
     expect.objectContaining({ type: "run.completed" })
   )
