@@ -5,11 +5,12 @@ import { formatSessionMessage } from "./messages"
 test("formats drained messages like conversation messages", () => {
   const message = {
     actor: "Milo",
+    actorIds: ["slack:user:U0B96KZ7WJG"],
     authority: "soft",
     createdAt: Date.parse("2026-06-22T09:34:35.000Z"),
     id: id<"messages">("message"),
-    identifiers: ["slack_id=U0B96KZ7WJG"],
     integration: "slack",
+    messageIds: ["slack:message:1782231485.491049"],
     mentioned: false,
     observedAt: Date.parse("2026-06-22T09:34:35.618Z"),
     source: "self",
@@ -20,7 +21,7 @@ test("formats drained messages like conversation messages", () => {
 
   expect(
     formatted
-  ).toBe(`- 2026-06-22T09:34:35.618Z | self | Milo | slack_id=U0B96KZ7WJG
+  ).toBe(`- 2026-06-22T09:34:35.618Z | self | Milo | message_ids=[slack:message:1782231485.491049] | actor_ids=[slack:user:U0B96KZ7WJG]
 \`\`\`text
 Here's what I've got.
 \`\`\``)

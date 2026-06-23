@@ -1,8 +1,9 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
 import {
-  messageActorIdentifiers,
+  messageActorIds,
   messageAudience,
+  messageIds,
   messageText,
   replyAddress,
 } from "./surface"
@@ -30,14 +31,17 @@ describe("message surface text", () => {
     ).toBe("@Milo hello")
   })
 
-  test("exposes the actor surface identifier when available", () => {
+  test("exposes Slack actor and message identifiers when available", () => {
     expect(
-      messageActorIdentifiers(
+      messageActorIds(
         message({
           actor: { externalId: "U123", kind: "user", name: "Albin" },
         })
       )
-    ).toEqual([{ key: "slack_id", value: "U123" }])
+    ).toEqual(["slack:user:U123"])
+    expect(messageIds(message({ data: { ts: "1782231485.491049" } }))).toEqual([
+      "slack:message:1782231485.491049",
+    ])
   })
 })
 

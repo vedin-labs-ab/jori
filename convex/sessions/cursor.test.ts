@@ -70,18 +70,20 @@ test("advances the cursor when only self messages are pending", () => {
   expect(batch.cursor?._id).toBe("approval")
 })
 
-test("formats runtime messages with normalized text and identifiers", () => {
+test("formats runtime messages with normalized text and Slack identifiers", () => {
   expect(
     formatRuntimeMessage(
       message("next", 3, "<@UBOT> follow-up", {
         actor: { externalId: "U123", kind: "user", name: "Albin" },
+        data: { ts: "123.456" },
         mentioned: true,
       }),
       integration({ data: { botUserId: "UBOT" } })
     )
   ).toMatchObject({
     actor: "Albin",
-    identifiers: ["slack_id=U123"],
+    actorIds: ["slack:user:U123"],
+    messageIds: ["slack:message:123.456"],
     text: "@Milo follow-up",
   })
 })

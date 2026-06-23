@@ -47,7 +47,7 @@ export const promptTemplates = {
   "communication/message":
     "# Communication\n\nWhen instructed to send, reply, report, update, tell the user, or let them know on the active surface, call `send_reply`. Never use assistant completion text as a communication outlet.\n\nKeep messages natural, compact, and scannable. Address the thread naturally, use names only when they add warmth or clarity, and use direct platform mentions sparingly and only when needed for attention, handoff, or accountability.\n\nLead with the result, blocker, decision, or useful next step.\n\n{% if communication.guidance %}\n{{communication.guidance}}\n{% endif %}",
   "conversation/message":
-    "- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{% if message.identifiers %} | {{message.identifiers}}{% endif %}\n```text\n{{message.text}}\n```",
+    "- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{% if message.messageIds %} | message_ids=[{{message.messageIds}}]{% endif %}{% if message.actorIds %} | actor_ids=[{{message.actorIds}}]{% endif %}\n```text\n{{message.text}}\n```",
   "parts/completion":
     "Finish the run by calling `finish_run`.\n\n{% if tools.send_reply %}\nIf a visible reply, update, blocker, or question is needed, call `send_reply` before `finish_run`.\n\nIf no visible reply is warranted, call `finish_run` with an internal `reason`.\n{% endif %}\n\nAssistant completion text is private run output. It is *never* visible to the requester and must not be used for replies, updates, results, blockers, or any other form of user communication.",
   "parts/identity":

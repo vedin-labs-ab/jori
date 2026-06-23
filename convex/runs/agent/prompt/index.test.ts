@@ -98,7 +98,7 @@ describe("runtime prompts", () => {
     const prompt = assemblePrompt(input)
 
     expect(prompt).toContain(
-      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | slack_id=UACTOR"
+      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | message_ids=[slack:message:123.456] | actor_ids=[slack:user:UACTOR]"
     )
     expect(prompt).toContain("@Milo what tools do u have?")
     expect(prompt).not.toContain("<@UBOT> what tools do u have?")

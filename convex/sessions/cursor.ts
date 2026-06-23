@@ -1,5 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
-import { messageActorIdentifierLabels, messageText } from "../messages/surface"
+import { messageActorIds, messageIds, messageText } from "../messages/surface"
 import { getActorDisplayName } from "../shared/actor"
 
 export const defaultDrainLimit = 20
@@ -58,9 +58,10 @@ export function formatRuntimeMessage(
 ) {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
+    actorIds: messageActorIds(message),
     authority: message.actor?.kind === "user" ? "authoritative" : "soft",
     id: message._id,
-    identifiers: messageActorIdentifierLabels(message),
+    messageIds: messageIds(message),
     createdAt: message.createdAt,
     integration: message.integration,
     mentioned: message.mentioned,
