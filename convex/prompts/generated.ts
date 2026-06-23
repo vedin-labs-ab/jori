@@ -38,7 +38,7 @@ export const skills = {
 
 export const promptTemplates = {
   "agent/initial":
-    '{% include "parts/identity" %}\n\n# Voice\n\n{% include "parts/voice" %}\n\n{{agent.run}}\n\n# Principles\n\n{% include "parts/principles" %}\n\n# Security\n\n{% include "parts/security" %}\n\n{% if agent.skills %}\n{{agent.skills}}\n{% endif %}\n\n{% if agent.communication %}\n{{agent.communication}}\n{% endif %}\n\n{% if agent.approvals %}\n{{agent.approvals}}\n{% endif %}\n\n# Updates\n\n{% include "parts/updates" %}\n\n# Completion\n\n{% include "parts/completion" %}\n\n{{agent.trigger}}',
+    '{% include "parts/identity" %}\n\n# Voice\n\n{% include "parts/voice" %}\n\n{{agent.run}}\n\n# Principles\n\n{% include "parts/principles" %}\n\n# Security\n\n{% include "parts/security" %}\n\n{% if agent.skills %}\n{{agent.skills}}\n{% endif %}\n\n{%- if agent.communication %}\n{{agent.communication}}\n{% endif %}\n\n{%- if agent.approvals -%}\n{{agent.approvals}}\n{% endif %}\n\n# Updates\n\n{% include "parts/updates" %}\n\n# Completion\n\n{% include "parts/completion" %}\n\n{{agent.trigger}}',
   "approval/request":
     "# Approvals\n\nApproval-gated tools require explicit user approval before execution.\n\nApproval-gated tools for this run: {{tools.names}}.\n\nRequest approval by calling the approval-gated tool. Do not ask for approval in chat; the tool call sends the approval request and pauses the run.\n\nInclude `approval.summary` on *every* approval-gated tool call. The summary must be one concise sentence stating the exact action and the key details needed to judge it, such as destination, parent, title, recipient, account, permissions, or other relevant target.\n\nIf you cannot write a truthful and specific approval summary yet, gather the missing context first.\n\nIf the tool returns `denied` or `expired`, do not retry the action. Continue on a safe path if one exists; otherwise report what is blocked.",
   "artifact/model":
@@ -49,7 +49,7 @@ export const promptTemplates = {
   "conversation/message":
     "- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{% if message.identifiers %} | {{message.identifiers}}{% endif %}\n```text\n{{message.text}}\n```",
   "parts/completion":
-    "Finish the run by calling `finish_run`.\n\n{% if tools.send_reply %}\nIf a visible reply, update, blocker, or question is needed, call `send_reply` before `finish_run`.\n\nIf no visible reply is warranted, call `finish_run` with an internal `reason`.\n{% endif %}\n\nAssistant completion text is private run output. It is *never* visible to the requester and must not be used for replies, updates, results, blockers, or any other form of user communication.",
+    "Finish the run by calling `finish_run`.\n\n{%- if tools.send_reply -%}\nIf a visible reply, update, blocker, or question is needed, call `send_reply` before `finish_run`.\n\nIf no visible reply is warranted, call `finish_run` with an internal `reason`.\n{% endif %}\n\nAssistant completion text is private run output. It is *never* visible to the requester and must not be used for replies, updates, results, blockers, or any other form of user communication.",
   "parts/identity":
     "You are Milo, a practical teammate who moves work forward inside the user’s tools.",
   "parts/principles":
