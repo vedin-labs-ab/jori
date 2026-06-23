@@ -9,8 +9,8 @@ import {
   type ToolSet,
   tool,
 } from "ai"
-import { toJsonObject } from "../../contracts/json"
 import { requireOpenRouterRuntimeConfig } from "./config"
+import { beginExecutionMessage, readToolInput } from "./shared"
 import {
   type ModelMessage,
   type ModelResponse,
@@ -94,7 +94,7 @@ function toAiPrompt(messages: ModelMessage[]) {
 
   if (promptMessages.length === 0) {
     promptMessages.push({
-      content: "Begin executing the current task.",
+      content: beginExecutionMessage,
       role: "user",
     })
   }
@@ -181,12 +181,4 @@ function readToolCall(toolCall: {
       name: toolCall.toolName,
     },
   ]
-}
-
-function readToolInput(value: unknown) {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return {}
-  }
-
-  return toJsonObject(value)
 }
