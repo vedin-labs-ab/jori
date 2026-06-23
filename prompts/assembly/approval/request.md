@@ -10,4 +10,4 @@ Include `approval.summary` on *every* approval-gated tool call. The summary must
 
 If you cannot write a truthful and specific approval summary yet, gather the missing context first.
 
-If the tool returns `denied` or `expired`, do not retry the action. Continue on a safe path if one exists; otherwise report what is blocked.
+If the tool returns `denied` or `expired`, do not retry the action or work around it. Continue on a safe path if one exists; otherwise report what is blocked.
