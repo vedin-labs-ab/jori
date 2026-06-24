@@ -25,14 +25,6 @@ export const approvalDelivery = v.union(
     }),
   })
 )
-export const approvalEventType = v.union(
-  v.literal("approval.created"),
-  v.literal("approval.delivered"),
-  v.literal("approval.approved"),
-  v.literal("approval.denied"),
-  v.literal("approval.cancelled"),
-  v.literal("approval.expired")
-)
 
 export const approvals = defineTable({
   tenantId: v.string(),
@@ -62,22 +54,3 @@ export const approvals = defineTable({
   .index("by_run", ["runId"])
   .index("by_tenant_and_created_at", ["tenantId", "createdAt"])
   .index("by_tenant_and_expires_at", ["tenantId", "expiresAt"])
-
-export const approvalEvents = defineTable({
-  tenantId: v.string(),
-  approvalId: v.id("approvals"),
-  runId: v.id("runs"),
-  surface: toolSurfaceValidator,
-  status: approvalStatus,
-  type: approvalEventType,
-  data: v.optional(
-    v.object({
-      actor: v.optional(actorValidator),
-      delivery: v.optional(approvalDelivery),
-      reason: v.optional(v.string()),
-    })
-  ),
-  createdAt: v.number(),
-})
-  .index("by_approval_and_created_at", ["approvalId", "createdAt"])
-  .index("by_tenant_and_created_at", ["tenantId", "createdAt"])

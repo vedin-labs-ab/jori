@@ -1,5 +1,5 @@
 import { defineSchema } from "convex/server"
-import { approvalEvents, approvals } from "./approvals/schema"
+import { approvals } from "./approvals/schema"
 import {
   artifactAssets,
   artifactBlobs,
@@ -18,7 +18,7 @@ import { subscriptions } from "./automations/subscriptions/schema"
 import { events } from "./events/schema"
 import { identities } from "./identity/schema"
 import { integrations } from "./integrations/schema"
-import { setupLinkEvents, setupLinks } from "./integrations/setup/schema"
+import { setupLinks } from "./integrations/setup/schema"
 import { messageConversations, messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
 import { runs } from "./runs/schema"
@@ -26,6 +26,7 @@ import { outbox, sandboxes, traces } from "./runtime/schema"
 import { waiters } from "./runtime/waiters/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
+import { transitions } from "./transitions"
 import { watches } from "./watches/schema"
 
 export default defineSchema({
@@ -34,7 +35,6 @@ export default defineSchema({
   identities,
   integrations,
   setupLinks,
-  setupLinkEvents,
   messages,
   messageConversations,
   automations,
@@ -44,7 +44,7 @@ export default defineSchema({
   watches,
   sessions,
   approvals,
-  approvalEvents,
+  transitions,
   traces,
   outbox,
   waiters,

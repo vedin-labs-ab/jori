@@ -2,10 +2,21 @@ import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { wakeRun } from "../../runtime/waiters/data"
 import { type Actor } from "../../shared/actor"
-import { recordSetupLinkEvent } from "./events"
+import { recordTransition } from "../../transitions"
 
 type SetupLinkPatch = Partial<Omit<Doc<"setupLinks">, "_creationTime" | "_id">>
 type SetupLinkDelivery = NonNullable<Doc<"setupLinks">["delivery"]>
+
+export async function recordSetupLinkCreated(
+  ctx: MutationCtx,
+  link: Doc<"setupLinks">
+) {
+  await recordTransition(ctx, {
+    tenantId: link.tenantId,
+    subject: { kind: "setupLink", id: link._id },
+    type: "created",
+  })
+}
 
 export async function markSetupLinkConnected(
   ctx: MutationCtx,
@@ -32,11 +43,11 @@ export async function markSetupLinkConnected(
   })
 
   if (updated !== null) {
-    await recordSetupLinkEvent(ctx, {
-      data: result,
-      link: updated,
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "setupLink", id: updated._id },
       syncSurface: true,
-      type: "offer.connected",
+      type: "connected",
     })
     await wakeOfferRun(ctx, updated)
   }
@@ -65,11 +76,11 @@ export async function markSetupLinkCancelled(
   })
 
   if (updated !== null) {
-    await recordSetupLinkEvent(ctx, {
-      data: args.actor === undefined ? undefined : { actor: args.actor },
-      link: updated,
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "setupLink", id: updated._id },
       syncSurface: true,
-      type: "offer.cancelled",
+      type: "cancelled",
     })
     await wakeOfferRun(ctx, updated)
   }
@@ -107,11 +118,11 @@ export async function markSetupLinkFailed(
   })
 
   if (updated !== null) {
-    await recordSetupLinkEvent(ctx, {
-      data: { error: args.error },
-      link: updated,
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "setupLink", id: updated._id },
       syncSurface: true,
-      type: "offer.failed",
+      type: "failed",
     })
     await wakeOfferRun(ctx, updated)
   }
@@ -133,10 +144,11 @@ export async function markSetupLinkExpired(
   })
 
   if (updated !== null) {
-    await recordSetupLinkEvent(ctx, {
-      link: updated,
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "setupLink", id: updated._id },
       syncSurface: true,
-      type: "offer.expired",
+      type: "expired",
     })
     await wakeOfferRun(ctx, updated)
   }
@@ -153,10 +165,11 @@ export async function recordSetupLinkDelivery(
   })
 
   if (updated !== null) {
-    await recordSetupLinkEvent(ctx, {
-      data: { delivery },
-      link: updated,
-      type: "offer.delivered",
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "setupLink", id: updated._id },
+      syncSurface: isSettled(updated),
+      type: "delivered",
     })
   }
 }
