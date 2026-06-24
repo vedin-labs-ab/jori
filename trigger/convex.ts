@@ -65,10 +65,15 @@ export class MiloConvexClient {
     text: string
   }) {
     return await this.client.action(api.runtime.surface.sendReply, {
-      blocks: args.blocks,
-      runId: args.runId,
+      ...args,
       secret: this.secret,
-      text: args.text,
+    })
+  }
+
+  async addReaction(args: { emoji: string; runId: ConvexId<"runs"> }) {
+    return await this.client.action(api.runtime.surface.addReaction, {
+      ...args,
+      secret: this.secret,
     })
   }
 

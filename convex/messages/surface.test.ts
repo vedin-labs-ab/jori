@@ -5,6 +5,7 @@ import {
   messageAudience,
   messageIds,
   messageText,
+  reactionAddress,
   replyAddress,
 } from "./surface"
 
@@ -58,7 +59,7 @@ describe("message surface text", () => {
   })
 })
 
-describe("message surface addressing", () => {
+describe("message surface audience", () => {
   test("detects GitHub and Linear Milo mentions", () => {
     expect(
       messageAudience(
@@ -91,7 +92,9 @@ describe("message surface addressing", () => {
       messageAudience(message({ type: "message.im" }), integration({}))
     ).toMatchObject({ isAddressed: true, isDirect: true })
   })
+})
 
+describe("message surface targets", () => {
   test("resolves GitHub and Linear reply targets", () => {
     expect(
       replyAddress(
@@ -115,6 +118,30 @@ describe("message surface addressing", () => {
         message({ integration: "linear", data: { issueId: "ISS-1" } })
       )
     ).toEqual({ type: "linear", issueId: "ISS-1" })
+  })
+
+  test("resolves active surface reaction targets", () => {
+    expect(
+      reactionAddress(
+        message({ data: { channel: { id: "C123" }, ts: "123.456" } })
+      )
+    ).toEqual({
+      channelId: "C123",
+      messageTs: "123.456",
+      type: "slack",
+    })
+    expect(
+      reactionAddress(
+        message({
+          integration: "linear",
+          data: { commentId: "comment-id", issueId: "issue-id" },
+        })
+      )
+    ).toEqual({
+      commentId: "comment-id",
+      issueId: "issue-id",
+      type: "linear",
+    })
   })
 })
 

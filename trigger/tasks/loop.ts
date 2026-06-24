@@ -99,7 +99,10 @@ function appendStopRepair(
   }
 
   messages.push({
-    content: stopRepairInstruction(hasTool(tools, "send_reply")),
+    content: stopRepairInstruction({
+      canReact: hasTool(tools, "add_reaction"),
+      canReply: hasTool(tools, "send_reply"),
+    }),
     role: "user",
   })
 }
@@ -108,22 +111,28 @@ function hasTool(tools: RuntimeContext["tools"], name: string) {
   return tools.some((tool) => tool.name === name && tool.mode !== "blocked")
 }
 
-function stopRepairInstruction(canReply: boolean) {
+function stopRepairInstruction(args: { canReact: boolean; canReply: boolean }) {
   const instructions = [
     "The run is not finished.",
     "Assistant completion text is private and is not visible to the requester.",
   ]
 
-  if (canReply) {
+  if (args.canReply) {
     instructions.push(
-      "Send any needed visible reply with `send_reply`, then call `finish_run`.",
-      "If no visible reply is warranted, call `finish_run` with `reason`."
+      visibleCommunicationInstruction(args.canReact),
+      "If no visible communication is warranted, call `finish_run` with `reason`."
     )
   } else {
     instructions.push("Call `finish_run` when the run is done.")
   }
 
   return instructions.join(" ")
+}
+
+function visibleCommunicationInstruction(canReact: boolean) {
+  const tools = canReact ? "`send_reply` or `add_reaction`" : "`send_reply`"
+
+  return `Send any needed visible communication with ${tools}, then call \`finish_run\`.`
 }
 
 async function runToolCalls(

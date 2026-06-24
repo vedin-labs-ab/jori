@@ -2,7 +2,7 @@ import { expect, test, vi } from "vitest"
 import { executeToolCall, type ToolRuntime } from "./tool"
 import { type ConvexId, type RuntimeTool } from "./types"
 
-test("finish_run requires a reason when an active surface has no reply", async () => {
+test("finish_run requires a reason when an active surface has no communication", async () => {
   const runtime = createRuntime()
 
   const result = await executeToolCall({
@@ -19,14 +19,15 @@ test("finish_run requires a reason when an active surface has no reply", async (
   expect(result.finished).toBe(false)
   expect(JSON.parse(result.content)).toEqual({
     error: {
-      message: "finish_run requires reason when no reply was sent.",
+      message:
+        "finish_run requires reason when no visible communication was sent.",
     },
     status: "error",
   })
 })
 
-test("finish_run completes after a reply", async () => {
-  const runtime = createRuntime({ replySent: true })
+test("finish_run completes after visible communication", async () => {
+  const runtime = createRuntime({ communicated: true })
 
   const result = await executeToolCall({
     attempt: 1,
@@ -41,8 +42,8 @@ test("finish_run completes after a reply", async () => {
 
   expect(result.finished).toBe(true)
   expect(JSON.parse(result.content)).toEqual({
+    communicated: true,
     reason: null,
-    replied: true,
     status: "finished",
   })
 })
@@ -63,8 +64,8 @@ test("finish_run completes automation runs without a reason", async () => {
 
   expect(result.finished).toBe(true)
   expect(JSON.parse(result.content)).toEqual({
+    communicated: false,
     reason: null,
-    replied: false,
     status: "finished",
   })
 })
@@ -72,7 +73,7 @@ test("finish_run completes automation runs without a reason", async () => {
 function createRuntime(
   options: {
     activeSurface?: ToolRuntime["context"]["activeSurface"]
-    replySent?: boolean
+    communicated?: boolean
   } = {}
 ): ToolRuntime {
   return {
@@ -98,12 +99,12 @@ function createRuntime(
 
 function activeSurfaceState(options: {
   activeSurface?: ToolRuntime["context"]["activeSurface"]
-  replySent?: boolean
+  communicated?: boolean
 }): ToolRuntime["context"]["activeSurface"] {
   return "activeSurface" in options
     ? (options.activeSurface ?? null)
     : {
-        replySent: options.replySent ?? false,
+        communicated: options.communicated ?? false,
         surface: "slack",
       }
 }

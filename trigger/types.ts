@@ -24,7 +24,7 @@ export type SandboxCleanupPayload = {
 }
 
 export type ActiveSurface = {
-  replySent: boolean
+  communicated: boolean
   surface: "github" | "linear" | "slack"
 }
 

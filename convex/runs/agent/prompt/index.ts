@@ -4,7 +4,10 @@ import {
 } from "../../../automations/access"
 import { integrationLabels } from "../../../automations/integrations"
 import { messageEntry } from "../../../messages/history"
-import { replyAddress } from "../../../messages/surface"
+import {
+  replyAddress,
+  supportsSurfaceReaction,
+} from "../../../messages/surface"
 import {
   getToolPermission,
   type ToolPermission,
@@ -54,6 +57,9 @@ export function assemblePrompt(
       integration: activeSurface?.surface ?? null,
     },
     tools: {
+      add_reaction:
+        activeSurface !== null &&
+        supportsSurfaceReaction(activeSurface.surface),
       finish_run: true,
       send_reply: activeSurface !== null,
     },

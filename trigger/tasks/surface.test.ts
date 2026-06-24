@@ -106,7 +106,7 @@ function createRuntime(options: { tools: RuntimeTool[] }): ToolRuntime {
     },
     context: {
       activeSurface: {
-        replySent: false,
+        communicated: false,
         surface: "slack",
       },
       prompt: "system",
