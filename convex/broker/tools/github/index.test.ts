@@ -1,6 +1,53 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
+import { encodeToolResult } from "../../../../contracts/tool-transport"
 import { type Doc } from "../../../_generated/dataModel"
 import { callGitHubTool } from "./index"
+
+describe("GitHub clone provider tool", () => {
+  test("returns a JSON-safe clone download descriptor", async () => {
+    const result = await callGitHubTool(
+      githubIntegration(),
+      "github_clone_repository",
+      {
+        owner: "acme",
+        repo: "app",
+      }
+    )
+
+    expect(result).toEqual({
+      download: {
+        kind: "github_tarball",
+        owner: "acme",
+        repo: "app",
+      },
+    })
+    expect(() => encodeToolResult(result)).not.toThrow()
+  })
+
+  test("preserves explicit clone destination and ref", async () => {
+    const result = await callGitHubTool(
+      githubIntegration(),
+      "github_clone_repository",
+      {
+        directory: "workspace-app",
+        owner: "acme",
+        ref: "main",
+        repo: "app",
+      }
+    )
+
+    expect(result).toEqual({
+      download: {
+        directory: "workspace-app",
+        kind: "github_tarball",
+        owner: "acme",
+        ref: "main",
+        repo: "app",
+      },
+    })
+    expect(() => encodeToolResult(result)).not.toThrow()
+  })
+})
 
 describe("GitHub provider tools", () => {
   afterEach(() => {

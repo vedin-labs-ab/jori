@@ -1,3 +1,4 @@
+import { type JsonObject } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
 import { githubApiUrl } from "../../../providers/github/config"
 import { base64Decode } from "../../../shared/encoding"
@@ -87,14 +88,18 @@ const githubToolHandlers: Record<
 }
 
 function cloneRepository(_token: string, args: Record<string, unknown>) {
+  const directory = optionalString(args.directory)
+  const ref = optionalString(args.ref)
+  const download = {
+    kind: "github_tarball",
+    owner: requiredString(args.owner, "owner"),
+    repo: requiredString(args.repo, "repo"),
+    ...(directory === undefined ? {} : { directory }),
+    ...(ref === undefined ? {} : { ref }),
+  } satisfies JsonObject
+
   return {
-    download: {
-      kind: "github_tarball",
-      owner: requiredString(args.owner, "owner"),
-      repo: requiredString(args.repo, "repo"),
-      directory: optionalString(args.directory),
-      ref: optionalString(args.ref),
-    },
+    download,
   }
 }
 
