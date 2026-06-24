@@ -30,11 +30,11 @@ test("renders a URL button for the requested integration", () => {
       },
       title: {
         type: "mrkdwn",
-        text: "Setup request",
+        text: "Connection request",
       },
       subtitle: {
         type: "mrkdwn",
-        text: "Connect GitHub",
+        text: "Configure GitHub",
       },
       body: {
         type: "mrkdwn",
@@ -80,16 +80,16 @@ test("renders connected updates without the setup button", () => {
   })
   const card = message.blocks[0] as Record<string, unknown>
 
-  expect(message.text).toContain("Gmail set up by Albin Vedin")
+  expect(message.text).toContain("Gmail connected by Albin Vedin")
   expect(message.blocks).toHaveLength(1)
   expect(card.slack_icon).toEqual({ type: "icon", name: "check" })
   expect(card).not.toHaveProperty("actions")
   expect(card.title).toMatchObject({
     type: "mrkdwn",
-    text: "Set up by Albin Vedin",
+    text: "Connected by Albin Vedin",
   })
   expect(JSON.stringify(card.subtext)).toContain(
-    "Set up at <!date^1699999000^{time}|"
+    "Connected at <!date^1699999000^{time}|"
   )
   expect(JSON.stringify(card.subtext)).not.toContain("manage")
 })
@@ -110,15 +110,16 @@ test("renders cancelled updates without setup actions", () => {
   const card = message.blocks[0] as Record<string, unknown>
   const subtext = card.subtext as { text: string }
 
-  expect(message.text).toContain("Google Drive setup offer cancelled by Albin")
+  expect(message.text).toContain("Google Drive connection cancelled by Albin")
   expect(card).not.toHaveProperty("actions")
+  expect(card.slack_icon).toEqual({ type: "icon", name: "archive" })
   expect(card.title).toMatchObject({
     type: "mrkdwn",
     text: "Cancelled by Albin Vedin",
   })
   expect(card.subtitle).toMatchObject({
     type: "mrkdwn",
-    text: "Connect Google Drive",
+    text: "Configure Google Drive",
   })
   expect(subtext.text).toContain("Cancelled at <!date^1699999000^{time}|")
   expect(subtext.text).not.toContain("Ask Milo")

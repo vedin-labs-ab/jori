@@ -44,7 +44,7 @@ export function createSlackSetupLinkMessage(args: {
           name: setupCardIcon(status),
         },
         title: setupCardTitle({ actor: args.actor, status }),
-        subtitle: `Connect ${label}`,
+        subtitle: `Configure ${label}`,
         body: summary,
         subtext: setupSubtext({
           expiresAt: args.expiresAt,
@@ -71,16 +71,16 @@ function setupTitle(args: {
     const actor = getActorDisplayName(args.actor)
 
     return actor === undefined
-      ? `${args.label} setup offer cancelled`
-      : `${args.label} setup offer cancelled by ${actor}`
+      ? `${args.label} connection cancelled`
+      : `${args.label} connection cancelled by ${actor}`
   }
 
   if (args.status === "connected") {
     const actor = getActorDisplayName(args.actor)
 
     return actor === undefined
-      ? `${args.label} set up in Milo`
-      : `${args.label} set up by ${actor}`
+      ? `${args.label} connected to Milo`
+      : `${args.label} connected by ${actor}`
   }
 
   if (args.status === "failed") {
@@ -88,7 +88,7 @@ function setupTitle(args: {
   }
 
   if (args.status === "expired") {
-    return `${args.label} setup offer expired`
+    return `${args.label} connection request expired`
   }
 
   return `Connect ${args.label} to Milo`
@@ -102,14 +102,14 @@ function setupCardTitle(args: {
     const actor = getActorDisplayName(args.actor)
 
     return actor === undefined
-      ? "Setup offer cancelled"
+      ? "Connection cancelled"
       : `Cancelled by ${actor}`
   }
 
   if (args.status === "connected") {
     const actor = getActorDisplayName(args.actor)
 
-    return actor === undefined ? "Setup complete" : `Set up by ${actor}`
+    return actor === undefined ? "Connection complete" : `Connected by ${actor}`
   }
 
   if (args.status === "failed") {
@@ -117,13 +117,17 @@ function setupCardTitle(args: {
   }
 
   if (args.status === "expired") {
-    return "Setup offer expired"
+    return "Connection request expired"
   }
 
-  return "Setup request"
+  return "Connection request"
 }
 
 function setupCardIcon(status: SlackSetupLinkStatus) {
+  if (status === "cancelled") {
+    return "archive"
+  }
+
   return status === "connected" ? "check" : "link"
 }
 
@@ -133,11 +137,11 @@ function setupFallback(
   expiresAt: number
 ) {
   if (status === "cancelled") {
-    return `The ${label} setup offer was cancelled.`
+    return `The ${label} connection request was cancelled.`
   }
 
   if (status === "connected") {
-    return `${label} is set up.`
+    return `${label} is connected.`
   }
 
   if (status === "failed") {
@@ -145,7 +149,7 @@ function setupFallback(
   }
 
   if (status === "expired") {
-    return `The ${label} setup offer expired.`
+    return `The ${label} connection request expired.`
   }
 
   return `Expires at ${formatSlackTime(toSlackTimestamp(expiresAt))}`
@@ -205,7 +209,7 @@ function setupSubtext(args: {
   }
 
   if (args.status === "connected") {
-    return `Set up at ${formatSlackTime(
+    return `Connected at ${formatSlackTime(
       toSlackTimestamp(args.updatedAt ?? Date.now())
     )}`
   }
