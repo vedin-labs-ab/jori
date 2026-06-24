@@ -149,6 +149,7 @@ function createDecisionBlocks(
       }),
       subtitle,
       body: truncateSlackText(summary ?? result.message, slackCardBodyLimit),
+      subtext: createDecisionSubtext(result),
     }),
   ]
 }
@@ -168,6 +169,7 @@ function createConsoleDecisionBlocks(
       title: createDecisionTitle(result, { surface: "milo" }),
       subtitle,
       body: truncateSlackText(summary ?? result.message, slackCardBodyLimit),
+      subtext: createDecisionSubtext(result),
     }),
   ]
 }
@@ -200,4 +202,29 @@ function createApprovalActions(code: string) {
 
 function formatSlackActor(actorId: string | undefined) {
   return actorId === undefined ? "unknown user" : `<@${actorId}>`
+}
+
+function createDecisionSubtext(result: SlackApprovalDecisionResult) {
+  return `${getDecisionTimeLabel(result)} at ${formatSlackTime(
+    Math.floor(Date.now() / 1000)
+  )}`
+}
+
+function getDecisionTimeLabel(result: SlackApprovalDecisionResult) {
+  if (
+    result.status === "approved" ||
+    result.approval?.decision === "approved"
+  ) {
+    return "Approved"
+  }
+
+  if (result.status === "denied" || result.approval?.decision === "denied") {
+    return "Denied"
+  }
+
+  if (result.status === "closed") {
+    return "Closed"
+  }
+
+  return "Updated"
 }

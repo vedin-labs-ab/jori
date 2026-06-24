@@ -1,6 +1,5 @@
 import { getActorDisplayName } from "../../shared/actor"
 import { type SlackApprovalDecisionResult } from "../runtime"
-import { formatSlackTime } from "./cards"
 
 export function createDecisionTitle(
   result: SlackApprovalDecisionResult,
@@ -10,10 +9,9 @@ export function createDecisionTitle(
   } = {}
 ) {
   const title = getDecisionTitle(result.status, result.approval?.decision)
-  const time = formatSlackTime(Math.floor(Date.now() / 1000))
 
   if (!isDecisionStatus(result.status, result.approval?.decision)) {
-    return `${title} at ${time}`
+    return title
   }
 
   const actor =
@@ -22,7 +20,7 @@ export function createDecisionTitle(
     "unknown user"
   const surface = args.surface === "milo" ? " in Milo" : ""
 
-  return `${title} by ${actor}${surface} at ${time}`
+  return `${title} by ${actor}${surface}`
 }
 
 export function getDecisionIcon(

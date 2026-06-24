@@ -7,6 +7,7 @@ import {
   internalQuery,
 } from "../../_generated/server"
 import { updateSlackMessage } from "../../broker/tools/slack"
+import { actorValidator } from "../../shared/actor"
 import { createSlackSetupLinkMessage } from "./slack"
 import { markSetupLinkCancelled, markSetupLinkExpired } from "./transition"
 
@@ -67,6 +68,7 @@ export const markExpired = internalMutation({
 export const cancel = internalMutation({
   args: {
     accountId: v.string(),
+    actor: v.optional(actorValidator),
     channelId: v.string(),
     messageTs: v.string(),
     setupLinkId: v.id("setupLinks"),
@@ -99,7 +101,10 @@ export const cancel = internalMutation({
       return null
     }
 
-    await markSetupLinkCancelled(ctx, link, Date.now())
+    await markSetupLinkCancelled(ctx, link, {
+      actor: args.actor,
+      now: Date.now(),
+    })
 
     return null
   },
@@ -146,6 +151,7 @@ async function syncSlackSurface(target: {
   const message = createSlackSetupLinkMessage({
     expiresAt: target.link.expiresAt,
     integration: target.link.integration,
+    actor: target.link.result?.actor,
     status: target.link.status,
     summary: target.link.summary ?? "Milo requested this connection.",
     updatedAt: target.link.updatedAt,

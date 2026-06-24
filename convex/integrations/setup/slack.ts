@@ -5,6 +5,7 @@ import {
   toSlackTimestamp,
   truncateSlackText,
 } from "../../providers/slack/format"
+import { type Actor, getActorDisplayName } from "../../shared/actor"
 import { type Integration, integrationLabel } from "../../shared/integrations"
 import { setupLinkCancelActionId, setupLinkOpenActionId } from "./interaction"
 
@@ -18,6 +19,7 @@ type SlackSetupLinkStatus =
   | "pending"
 
 export function createSlackSetupLinkMessage(args: {
+  actor?: Actor
   expiresAt: number
   integration: Integration
   setupLinkId?: Id<"setupLinks">
@@ -28,7 +30,7 @@ export function createSlackSetupLinkMessage(args: {
 }) {
   const label = integrationLabel(args.integration)
   const status = args.status ?? "pending"
-  const title = setupTitle(status, label)
+  const title = setupTitle({ actor: args.actor, label, status })
   const summary = truncateSlackText(args.summary, setupLinkSummaryLimit)
 
   return {
@@ -41,12 +43,11 @@ export function createSlackSetupLinkMessage(args: {
           type: "icon",
           name: "link",
         },
-        title: setupCardTitle(status),
-        subtitle: label,
+        title: setupCardTitle({ actor: args.actor, status }),
+        subtitle: `Connect ${label}`,
         body: summary,
         subtext: setupSubtext({
           expiresAt: args.expiresAt,
-          label,
           status,
           updatedAt: args.updatedAt,
         }),
@@ -61,40 +62,55 @@ export function createSlackSetupLinkMessage(args: {
   }
 }
 
-function setupTitle(status: SlackSetupLinkStatus, label: string) {
-  if (status === "cancelled") {
-    return `${label} setup offer cancelled`
+function setupTitle(args: {
+  actor: Actor | undefined
+  label: string
+  status: SlackSetupLinkStatus
+}) {
+  if (args.status === "cancelled") {
+    const actor = getActorDisplayName(args.actor)
+
+    return actor === undefined
+      ? `${args.label} setup offer cancelled`
+      : `${args.label} setup offer cancelled by ${actor}`
   }
 
-  if (status === "connected") {
-    return `${label} connected to Milo`
+  if (args.status === "connected") {
+    return `${args.label} connected to Milo`
   }
 
-  if (status === "failed") {
-    return `${label} connection failed`
+  if (args.status === "failed") {
+    return `${args.label} connection failed`
   }
 
-  if (status === "expired") {
-    return `${label} setup offer expired`
+  if (args.status === "expired") {
+    return `${args.label} setup offer expired`
   }
 
-  return `Connect ${label} to Milo`
+  return `Connect ${args.label} to Milo`
 }
 
-function setupCardTitle(status: SlackSetupLinkStatus) {
-  if (status === "cancelled") {
-    return "Setup offer cancelled"
+function setupCardTitle(args: {
+  actor: Actor | undefined
+  status: SlackSetupLinkStatus
+}) {
+  if (args.status === "cancelled") {
+    const actor = getActorDisplayName(args.actor)
+
+    return actor === undefined
+      ? "Setup offer cancelled"
+      : `Cancelled by ${actor}`
   }
 
-  if (status === "connected") {
+  if (args.status === "connected") {
     return "Connection complete"
   }
 
-  if (status === "failed") {
+  if (args.status === "failed") {
     return "Connection failed"
   }
 
-  if (status === "expired") {
+  if (args.status === "expired") {
     return "Setup offer expired"
   }
 
@@ -169,7 +185,6 @@ function setupActions(args: {
 
 function setupSubtext(args: {
   expiresAt: number
-  label: string
   status: SlackSetupLinkStatus
   updatedAt: number | undefined
 }) {
@@ -182,19 +197,17 @@ function setupSubtext(args: {
   if (args.status === "connected") {
     return `Connected at ${formatSlackTime(
       toSlackTimestamp(args.updatedAt ?? Date.now())
-    )}. You can manage ${args.label} access from Milo.`
+    )}`
   }
 
   if (args.status === "failed") {
     return `Failed at ${formatSlackTime(
       toSlackTimestamp(args.updatedAt ?? Date.now())
-    )}. Ask Milo for a new setup offer.`
+    )}`
   }
 
   if (args.status === "expired") {
-    return `Expired at ${formatSlackTime(
-      toSlackTimestamp(args.expiresAt)
-    )}. Ask Milo for a new setup offer.`
+    return `Expired at ${formatSlackTime(toSlackTimestamp(args.expiresAt))}`
   }
 
   return `Expires at ${formatSlackTime(toSlackTimestamp(args.expiresAt))}`

@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type Actor } from "../../shared/actor"
 import { recordSetupLinkEvent } from "./events"
 
 type SetupLinkPatch = Partial<Omit<Doc<"setupLinks">, "_creationTime" | "_id">>
@@ -43,7 +44,10 @@ export async function markSetupLinkConnected(
 export async function markSetupLinkCancelled(
   ctx: MutationCtx,
   link: Doc<"setupLinks">,
-  now: number
+  args: {
+    actor: Actor | undefined
+    now: number
+  }
 ) {
   if (
     link.status === "cancelled" ||
@@ -57,12 +61,14 @@ export async function markSetupLinkCancelled(
   await cancelSetupFunction(ctx, link)
   const updated = await patchAndRead(ctx, link._id, {
     functionId: undefined,
+    result: args.actor === undefined ? undefined : { actor: args.actor },
     status: "cancelled",
-    updatedAt: now,
+    updatedAt: args.now,
   })
 
   if (updated !== null) {
     await recordSetupLinkEvent(ctx, {
+      data: args.actor === undefined ? undefined : { actor: args.actor },
       link: updated,
       syncSurface: true,
       type: "offer.cancelled",

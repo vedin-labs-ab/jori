@@ -34,7 +34,7 @@ test("renders a URL button for the requested integration", () => {
       },
       subtitle: {
         type: "mrkdwn",
-        text: "GitHub",
+        text: "Connect GitHub",
       },
       body: {
         type: "mrkdwn",
@@ -85,10 +85,16 @@ test("renders connected updates without the setup button", () => {
   expect(JSON.stringify(card.subtext)).toContain(
     "Connected at <!date^1699999000^{time}|"
   )
+  expect(JSON.stringify(card.subtext)).not.toContain("manage")
 })
 
 test("renders cancelled updates without setup actions", () => {
   const message = createSlackSetupLinkMessage({
+    actor: {
+      kind: "user",
+      externalId: "U123",
+      name: "Albin Vedin",
+    },
     expiresAt: 1_700_000_000_000,
     integration: "googleDrive",
     status: "cancelled",
@@ -98,15 +104,44 @@ test("renders cancelled updates without setup actions", () => {
   const card = message.blocks[0] as Record<string, unknown>
   const subtext = card.subtext as { text: string }
 
-  expect(message.text).toContain("Google Drive setup offer cancelled")
+  expect(message.text).toContain("Google Drive setup offer cancelled by Albin")
   expect(card).not.toHaveProperty("actions")
   expect(card.title).toMatchObject({
     type: "mrkdwn",
-    text: "Setup offer cancelled",
+    text: "Cancelled by Albin Vedin",
+  })
+  expect(card.subtitle).toMatchObject({
+    type: "mrkdwn",
+    text: "Connect Google Drive",
   })
   expect(subtext.text).toContain("Cancelled at <!date^1699999000^{time}|")
   expect(subtext.text).not.toContain("Ask Milo")
   expect(subtext.text.endsWith(".")).toBe(false)
+})
+
+test("renders terminal setup timestamps as footnotes", () => {
+  const failed = createSlackSetupLinkMessage({
+    expiresAt: 1_700_000_000_000,
+    integration: "googleDrive",
+    status: "failed",
+    summary: "Google Drive is needed before I can read files.",
+    updatedAt: 1_699_999_000_000,
+  }).blocks[0] as Record<string, unknown>
+  const expired = createSlackSetupLinkMessage({
+    expiresAt: 1_700_000_000_000,
+    integration: "googleDrive",
+    status: "expired",
+    summary: "Google Drive is needed before I can read files.",
+  }).blocks[0] as Record<string, unknown>
+
+  expect(JSON.stringify(failed.subtext)).toContain(
+    "Failed at <!date^1699999000^{time}|"
+  )
+  expect(JSON.stringify(expired.subtext)).toContain(
+    "Expired at <!date^1700000000^{time}|"
+  )
+  expect(JSON.stringify(failed.subtext)).not.toContain("Ask Milo")
+  expect(JSON.stringify(expired.subtext)).not.toContain("Ask Milo")
 })
 
 test("keeps setup card bodies within card limits", () => {
@@ -130,6 +165,7 @@ test("parses setup cancellation interactions", () => {
     parseSlackSetupLinkCancelInteraction({
       type: "block_actions",
       team: { id: "T123" },
+      user: { id: "U123" },
       channel: { id: "C123" },
       message: { ts: "1710000000.000100" },
       actions: [
@@ -141,6 +177,7 @@ test("parses setup cancellation interactions", () => {
     })
   ).toEqual({
     accountId: "T123",
+    actorId: "U123",
     channelId: "C123",
     messageTs: "1710000000.000100",
     setupLinkId,

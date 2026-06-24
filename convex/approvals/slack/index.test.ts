@@ -128,9 +128,17 @@ test("replaces Slack approval buttons with a decision summary", () => {
 
   expect(response.replace_original).toBe(true)
   expect(card.slack_icon).toEqual({ type: "icon", name: "thumbs-down" })
-  expect(rendered).toContain("Denied by U123 at <!date^")
+  expect(card.title).toMatchObject({
+    type: "mrkdwn",
+    text: "Denied by U123",
+  })
+  expect(card.subtext).toMatchObject({
+    type: "mrkdwn",
+  })
+  expect(JSON.stringify(card.subtext)).toContain("Denied at <!date^")
   expect(rendered).toContain("Post a follow-up message in Slack.")
   expect(rendered).toContain("Send Slack message")
+  expect(rendered).not.toContain("Denied by U123 at <!date^")
   expect(rendered).not.toContain("ABC12345")
   expect(rendered).not.toContain("Expires in")
   expect(rendered).not.toContain('"type":"actions"')
@@ -157,8 +165,37 @@ test("renders Milo approval decisions with the Clerk approver identity", () => {
 
   expect(response.replace_original).toBe(true)
   expect(card.slack_icon).toEqual({ type: "icon", name: "check" })
-  expect(rendered).toContain("Approved by Albin Vedin in Milo at <!date^")
+  expect(card.title).toMatchObject({
+    type: "mrkdwn",
+    text: "Approved by Albin Vedin in Milo",
+  })
+  expect(JSON.stringify(card.subtext)).toContain("Approved at <!date^")
+  expect(rendered).not.toContain("Approved by Albin Vedin in Milo at <!date^")
   expect(rendered).toContain("Create a new Notion page.")
+})
+
+test("renders non-decision approval updates with timestamp footnotes", () => {
+  const response = createSlackDecisionResponse(
+    {
+      accountId: "T123",
+      channelId: "C123",
+      code: "ABC12345",
+      decision: "denied",
+      messageTs: "1710000000.000100",
+    },
+    {
+      status: "closed",
+      message: "This run is no longer active.",
+    }
+  )
+  const card = response.blocks[0] as Record<string, unknown>
+
+  expect(card.title).toMatchObject({
+    type: "mrkdwn",
+    text: "Run closed",
+  })
+  expect(JSON.stringify(card.title)).not.toContain("<!date^")
+  expect(JSON.stringify(card.subtext)).toContain("Closed at <!date^")
 })
 
 test("renders expired Slack approvals without actions", () => {
