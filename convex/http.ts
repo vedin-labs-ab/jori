@@ -7,7 +7,7 @@ import {
   handleArtifactToolRequest,
 } from "./artifacts/serve/http"
 import { handleAttachmentUploadRequest } from "./broker/attachments"
-import { handleGitHubTarballRequest } from "./broker/mcp"
+import { handleGitHubCloneCredentialsRequest } from "./broker/mcp"
 import {
   handleGitHubEvents,
   handleGitHubInstall,
@@ -65,10 +65,10 @@ http.route({
 })
 
 http.route({
-  path: "/milo/github/tarball",
+  path: "/milo/github/clone-credentials",
   method: "POST",
   handler: httpAction((ctx, request) =>
-    handleGitHubTarballRequest(ctx, request)
+    handleGitHubCloneCredentialsRequest(ctx, request)
   ),
 })
 

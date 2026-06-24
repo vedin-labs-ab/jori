@@ -1,13 +1,13 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { callGitHubTool, fetchGitHubTarball } from "./github"
+import { callGitHubTool, createGitHubCloneCredentials } from "./github"
 import { callGoogleTool } from "./google"
 import { callLinearTool } from "./linear"
 import { callMicrosoftTool } from "./microsoft"
 import { callNotionTool } from "./notion"
 import { callSlackTool } from "./slack"
 
-export { fetchGitHubTarball }
+export { createGitHubCloneCredentials }
 
 export async function callProviderTool(args: {
   ctx: ActionCtx

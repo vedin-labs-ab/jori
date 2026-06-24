@@ -12,10 +12,13 @@ export type SandboxCommandResult = {
   stdout: string
 }
 
-export type SandboxExtractTarballInput = {
-  bytes: Uint8Array
+export type SandboxCloneRepositoryInput = {
   directory?: string | null
+  ref?: string
+  remoteUrl: string
   repository: string
+  token: string
+  username: string
 }
 
 export type SandboxWriteFile = {
@@ -26,9 +29,13 @@ export type SandboxWriteFile = {
 export type SandboxRuntime = {
   buildArtifact(workspacePath: string): Promise<JsonObject>
   cleanup(): Promise<void>
-  extractTarball(
-    input: SandboxExtractTarballInput
-  ): Promise<{ directory: string; repository: string }>
+  cloneRepository(input: SandboxCloneRepositoryInput): Promise<{
+    directory: string
+    git: true
+    ref?: string
+    remoteUrl: string
+    repository: string
+  }>
   readFile(path: string): Promise<Uint8Array>
   runCommand(input: SandboxCommandInput): Promise<SandboxCommandResult>
   writeFiles(files: SandboxWriteFile[]): Promise<void>

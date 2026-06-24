@@ -69,23 +69,23 @@ export async function materializeSandboxResult(
   runtime: ToolRuntime,
   result: unknown
 ) {
-  const download = githubTarballDownload(result)
+  const clone = githubRepositoryClone(result)
 
-  if (download === undefined) {
+  if (clone === undefined) {
     return result
   }
 
-  const bytes = await runtime.convex.fetchGitHubTarball({
-    owner: download.owner,
-    ref: download.ref,
-    repo: download.repo,
+  const credentials = await runtime.convex.fetchGitHubCloneCredentials({
+    owner: clone.owner,
+    repo: clone.repo,
     runId: runtime.context.run.id,
   })
 
-  return await runtime.sandbox.extractTarball({
-    bytes,
-    directory: download.directory,
-    repository: `${download.owner}/${download.repo}`,
+  return await runtime.sandbox.cloneRepository({
+    ...credentials,
+    directory: clone.directory,
+    ref: clone.ref,
+    repository: `${clone.owner}/${clone.repo}`,
   })
 }
 
@@ -152,29 +152,29 @@ export function parseUploadedAttachment(value: unknown): UploadedAttachment {
   }
 }
 
-function githubTarballDownload(value: unknown) {
-  if (!isRecord(value) || !isRecord(value.download)) {
+function githubRepositoryClone(value: unknown) {
+  if (!isRecord(value) || !isRecord(value.clone)) {
     return undefined
   }
 
-  const download = value.download
+  const clone = value.clone
 
   if (
-    download.kind !== "github_tarball" ||
-    typeof download.owner !== "string" ||
-    typeof download.repo !== "string"
+    clone.kind !== "github_repository" ||
+    typeof clone.owner !== "string" ||
+    typeof clone.repo !== "string"
   ) {
     return undefined
   }
 
   return {
     directory:
-      typeof download.directory === "string" || download.directory === null
-        ? download.directory
+      typeof clone.directory === "string" || clone.directory === null
+        ? clone.directory
         : undefined,
-    owner: download.owner,
-    ref: typeof download.ref === "string" ? download.ref : undefined,
-    repo: download.repo,
+    owner: clone.owner,
+    ref: typeof clone.ref === "string" ? clone.ref : undefined,
+    repo: clone.repo,
   }
 }
 
