@@ -8,7 +8,7 @@ type MessageInput = Extract<
     type: "message"
   }
 >
-type ConversationEntry = MessageInput["conversation"][number]
+type ConversationEntry = MessageInput["conversation"]["entries"][number]
 
 test("renders recent conversation context without duplicating the trigger", () => {
   const prompt = assemblePrompt(messageInputWithConversation())
@@ -39,6 +39,17 @@ test("keeps explicit empty recent messages context", () => {
   expect(prompt).toContain("Recent messages:\n\n- None")
 })
 
+test("renders previous message counts when recent context is truncated", () => {
+  const prompt = assemblePrompt(messageInputWithTruncatedConversation())
+
+  expect(prompt).toContain(
+    "Recent messages (showing 15 of 36 previous messages):"
+  )
+  expect(prompt).toContain("Previous message 1")
+  expect(prompt).toContain("Previous message 15")
+  expect(prompt).not.toContain("Current trigger.")
+})
+
 function messageInputWithConversation() {
   const input = runtimeInput("slack", {
     channel: { id: "C123" },
@@ -54,62 +65,93 @@ function messageInputWithConversation() {
   return input
 }
 
-function recentConversation(): ConversationEntry[] {
-  return [
-    {
-      actor: "Albin",
-      actorIds: ["slack:user:U123"],
-      createdAt: 1_000,
-      id: "previous-user-message",
-      messageIds: ["slack:message:123.456"],
-      observedAt: null,
-      source: "user",
-      text: "Can you check this?",
-      type: "message",
-    },
-    {
-      actor: "Milo",
-      actorIds: [],
-      createdAt: 2_000,
-      id: "previous-quick-reply",
-      messageIds: [],
-      observedAt: null,
-      source: "self",
-      text: "I can take a quick look.",
-      type: "milo.reply",
-    },
-    {
-      actor: "CI",
-      actorIds: [],
-      createdAt: 3_000,
-      id: "previous-bot-message",
-      messageIds: [],
-      observedAt: null,
-      source: "bot",
-      text: "Build failed.",
-      type: "message",
-    },
-    {
-      actor: null,
-      actorIds: [],
-      createdAt: 3_500,
-      id: "previous-system-message",
-      messageIds: [],
-      observedAt: null,
-      source: "bot",
-      text: "Deployment started.",
-      type: "event",
-    },
-    {
-      actor: "Albin",
-      actorIds: [],
-      createdAt: 4_000,
-      id: "message",
-      messageIds: [],
-      observedAt: null,
-      source: "user",
-      text: "Duplicate trigger context.",
-      type: "message",
-    },
-  ]
+function messageInputWithTruncatedConversation() {
+  const input = runtimeInput("slack", {
+    channel: { id: "C123" },
+    ts: "123.456",
+  })
+
+  if (input.type !== "message") {
+    throw new Error("Expected message input.")
+  }
+
+  input.conversation = {
+    entries: [
+      ...Array.from({ length: 15 }, (_, index) =>
+        entry({
+          createdAt: index + 1,
+          id: `previous-${index + 1}`,
+          text: `Previous message ${index + 1}`,
+        })
+      ),
+      entry({
+        createdAt: 20,
+        id: "message",
+        text: "Current trigger.",
+      }),
+    ],
+    totalMessages: 37,
+  }
+
+  return input
+}
+
+function recentConversation() {
+  return {
+    entries: [
+      entry({
+        actor: "Albin",
+        actorIds: ["slack:user:U123"],
+        createdAt: 1_000,
+        id: "previous-user-message",
+        messageIds: ["slack:message:123.456"],
+        text: "Can you check this?",
+      }),
+      entry({
+        actor: "Milo",
+        createdAt: 2_000,
+        id: "previous-quick-reply",
+        source: "self",
+        text: "I can take a quick look.",
+        type: "milo.reply",
+      }),
+      entry({
+        actor: "CI",
+        createdAt: 3_000,
+        id: "previous-bot-message",
+        source: "bot",
+        text: "Build failed.",
+      }),
+      entry({
+        actor: null,
+        createdAt: 3_500,
+        id: "previous-system-message",
+        source: "bot",
+        text: "Deployment started.",
+        type: "event",
+      }),
+      entry({
+        actor: "Albin",
+        createdAt: 4_000,
+        id: "message",
+        text: "Duplicate trigger context.",
+      }),
+    ],
+    totalMessages: 5,
+  }
+}
+
+function entry(
+  args: Partial<ConversationEntry> & Pick<ConversationEntry, "id" | "text">
+): ConversationEntry {
+  return {
+    actor: "Albin",
+    actorIds: [],
+    createdAt: 0,
+    messageIds: [],
+    observedAt: null,
+    source: "user",
+    type: "message",
+    ...args,
+  }
 }

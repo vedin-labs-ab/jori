@@ -82,7 +82,7 @@ export const promptTemplates = {
   "trigger/instruction":
     "# Trigger\n\nManual instructions triggered this run.\n\nInstructions:\n```text\n{{instruction.text}}\n```",
   "trigger/message":
-    '# Trigger\n\nA {{message.integration}} message triggered this run.\n\nTarget:\n\n{% if message.surface == "github" %}\n{% include "target/github" %}\n{% endif %}\n{% if message.surface == "linear" %}\n{% include "target/linear" %}\n{% endif %}\n{% if message.surface == "slack" %}\n{% include "target/slack" %}\n{% endif %}\n\nRecent messages:\n\n{{message.conversation}}\n\nCurrent message:\n\n{{message.current}}',
+    '# Trigger\n\nA {{message.integration}} message triggered this run.\n\nTarget:\n\n{% if message.surface == "github" %}\n{% include "target/github" %}\n{% endif %}\n{% if message.surface == "linear" %}\n{% include "target/linear" %}\n{% endif %}\n{% if message.surface == "slack" %}\n{% include "target/slack" %}\n{% endif %}\n\nRecent messages{% if message.conversationSummary %} {{message.conversationSummary}}{% endif %}:\n\n{{message.conversation}}\n\nCurrent message:\n\n{{message.current}}',
 } as const
 
 export type SkillId = keyof typeof skills

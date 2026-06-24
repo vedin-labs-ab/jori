@@ -3,7 +3,6 @@ import {
   getIntegrationTools,
 } from "../../../automations/access"
 import { integrationLabels } from "../../../automations/integrations"
-import { messageEntry } from "../../../messages/history"
 import { replyAddress } from "../../../messages/surface"
 import {
   getToolPermission,
@@ -14,6 +13,7 @@ import { renderPromptTemplate } from "../../../prompts/render"
 import { createPromptTime } from "../../../prompts/time"
 import { type AgentRuntimeInput, type MessageIntegration } from "../input"
 import { createCommunicationInstructions } from "./communication"
+import { createMessageConversationValues } from "./conversation"
 import { createToolApprovalInstructions } from "./instructions"
 import { createSkillInstructions } from "./skills"
 import {
@@ -149,13 +149,13 @@ function createMessageValues(
     input.messageIntegration,
     input.message.data
   )
+  const conversation = createMessageConversationValues(input)
 
   return {
     message: {
-      conversation: formatMessageConversation(input),
-      current: formatMessageEntry(
-        messageEntry(input.message, input.integration)
-      ),
+      conversation: conversation.body,
+      conversationSummary: conversation.summary,
+      current: conversation.current,
       github: target.github,
       integration: getIntegrationLabel(input.messageIntegration),
       linear: target.linear,
@@ -169,41 +169,6 @@ function getActiveSurfaceLabel(input: AgentRuntimeInput) {
   return input.type === "message"
     ? getIntegrationLabel(input.messageIntegration)
     : "None"
-}
-
-function formatMessageConversation(
-  input: Extract<AgentRuntimeInput, { type: "message" }>
-) {
-  const entries = input.conversation.filter(
-    (entry) => entry.id !== input.message._id
-  )
-
-  if (entries.length === 0) {
-    return "- None"
-  }
-
-  return entries.map(formatMessageEntry).join("\n\n")
-}
-
-function formatMessageEntry(
-  entry: Extract<AgentRuntimeInput, { type: "message" }>["conversation"][number]
-) {
-  const observed = entry.observedAt ?? entry.createdAt
-
-  return renderPromptTemplate(promptTemplates["conversation/message"], {
-    message: {
-      actor: entry.actor ?? "unknown",
-      actorIds: formatEntryIds(entry.actorIds),
-      messageIds: formatEntryIds(entry.messageIds),
-      observedAt: new Date(observed).toISOString(),
-      speaker: entry.source,
-      text: entry.text,
-    },
-  }).trim()
-}
-
-function formatEntryIds(ids: string[]) {
-  return ids.length === 0 ? null : ids.join(", ")
 }
 
 function createAutomationValues(
