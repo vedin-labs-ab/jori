@@ -9,7 +9,7 @@ export type WebToolResult = {
   provider: {
     name: "exa"
     operation: WebOperation
-    requestId: string
+    requestId?: string
     resolvedSearchType?: string
     searchTimeMs?: number
     statuses?: Array<{
@@ -53,9 +53,9 @@ export function normalizeWebResponse(
 ): WebToolResult {
   return {
     provider: normalizeProviderTrace(response, args.operation),
-    results: response.results.map((result) =>
-      normalizeWebResult(result, args.maxCharacters)
-    ),
+    results: response.results
+      .map((result) => normalizeWebResult(result, args.maxCharacters))
+      .filter((result): result is WebResult => result !== null),
     truncated: response.results.length >= args.requestedResults,
   }
 }
@@ -64,49 +64,52 @@ function normalizeProviderTrace(
   response: ExaResponse,
   operation: WebOperation
 ): WebToolResult["provider"] {
+  const requestId = readString(response.requestId)
+  const resolvedSearchType = readString(response.resolvedSearchType)
+  const searchTimeMs = readNumber(response.searchTime)
+  const statuses = normalizeStatuses(response.statuses)
+
   return {
     name: "exa",
     operation,
-    requestId: response.requestId,
-    ...(response.resolvedSearchType === undefined
-      ? {}
-      : { resolvedSearchType: response.resolvedSearchType }),
-    ...(response.searchTime === undefined
-      ? {}
-      : { searchTimeMs: response.searchTime }),
-    ...(response.statuses === undefined
-      ? {}
-      : {
-          statuses: response.statuses.map((status) => ({
-            id: status.id,
-            source: status.source,
-            status: status.status,
-          })),
-        }),
+    ...(requestId === null ? {} : { requestId }),
+    ...(resolvedSearchType === null ? {} : { resolvedSearchType }),
+    ...(searchTimeMs === null ? {} : { searchTimeMs }),
+    ...(statuses.length === 0 ? {} : { statuses }),
   }
 }
 
 function normalizeWebResult(
   result: ExaResult,
   maxCharacters: number
-): WebResult {
+): WebResult | null {
   const contentFields = result as ExaResult & Record<string, unknown>
   const content = truncateText(readString(contentFields.text), maxCharacters)
   const highlights = readHighlights(contentFields.highlights, maxCharacters)
+  const url = readString(result.url)
+
+  if (url === null) {
+    return null
+  }
+
+  const id = readString(result.id) ?? url
+  const author = readString(result.author)
+  const faviconUrl = readString(result.favicon)
+  const imageUrl = readString(result.image)
+  const publishedAt = readString(result.publishedDate)
+  const score = readNumber(result.score)
 
   return {
-    url: result.url,
-    title: result.title,
+    url,
+    title: readString(result.title),
     source: {
       provider: "exa",
-      id: result.id,
-      ...(result.author === undefined ? {} : { author: result.author }),
-      ...(result.favicon === undefined ? {} : { faviconUrl: result.favicon }),
-      ...(result.image === undefined ? {} : { imageUrl: result.image }),
-      ...(result.publishedDate === undefined
-        ? {}
-        : { publishedAt: result.publishedDate }),
-      ...(result.score === undefined ? {} : { score: result.score }),
+      id,
+      ...(author === null ? {} : { author }),
+      ...(faviconUrl === null ? {} : { faviconUrl }),
+      ...(imageUrl === null ? {} : { imageUrl }),
+      ...(publishedAt === null ? {} : { publishedAt }),
+      ...(score === null ? {} : { score }),
     },
     snippet: firstSnippet(highlights, content.text),
     highlights,
@@ -116,6 +119,33 @@ function normalizeWebResult(
       truncated: content.truncated,
     },
   }
+}
+
+function normalizeStatuses(value: unknown) {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value.flatMap((entry) => {
+    const status = readStatus(entry)
+
+    return status === null ? [] : [status]
+  })
+}
+
+function readStatus(value: unknown) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null
+  }
+
+  const entry = value as Record<string, unknown>
+  const id = readString(entry.id)
+  const source = readString(entry.source)
+  const status = readString(entry.status)
+
+  return id === null || source === null || status === null
+    ? null
+    : { id, source, status }
 }
 
 function readHighlights(value: unknown, maxCharacters: number) {
@@ -143,6 +173,10 @@ function firstSnippet(highlights: string[], text: string | null) {
 
 function readString(value: unknown) {
   return typeof value === "string" ? value : null
+}
+
+function readNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null
 }
 
 function truncateText(value: string | null, maxCharacters: number) {

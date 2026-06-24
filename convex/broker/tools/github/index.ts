@@ -1,8 +1,6 @@
 import { type JsonObject } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
-import { githubApiUrl } from "../../../providers/github/config"
 import { base64Decode } from "../../../shared/encoding"
-import { jsonErrorResponse } from "../../../shared/http"
 import {
   boundedNumber,
   optionalString,
@@ -13,7 +11,6 @@ import {
   requiredString,
 } from "../../../shared/input"
 import {
-  githubHeaders,
   githubJson,
   githubJsonObject,
   repositoryPath,
@@ -27,35 +24,18 @@ import {
   summarizeRepository,
 } from "./format"
 
-export async function fetchGitHubTarball(args: {
+export function createGitHubCloneCredentials(args: {
   integration: Doc<"integrations">
   owner: string
   repo: string
-  ref?: string
 }) {
   const token = requireGitHubRuntimeToken(args.integration)
-  const suffix =
-    args.ref === undefined || args.ref === ""
-      ? ""
-      : `/${encodeURIComponent(args.ref)}`
-  const response = await fetch(
-    `${githubApiUrl}/repos/${encodeURIComponent(args.owner)}/${encodeURIComponent(args.repo)}/tarball${suffix}`,
-    {
-      headers: githubHeaders(token),
-      redirect: "follow",
-    }
-  )
 
-  if (!response.ok) {
-    return jsonErrorResponse("GitHub archive download failed", response.status)
+  return {
+    remoteUrl: `https://github.com/${encodeURIComponent(args.owner)}/${encodeURIComponent(args.repo)}.git`,
+    token,
+    username: "x-access-token",
   }
-
-  return new Response(response.body, {
-    status: 200,
-    headers: {
-      "content-type": "application/gzip",
-    },
-  })
 }
 
 export async function callGitHubTool(
@@ -90,8 +70,8 @@ const githubToolHandlers: Record<
 function cloneRepository(_token: string, args: Record<string, unknown>) {
   const directory = optionalString(args.directory)
   const ref = optionalString(args.ref)
-  const download = {
-    kind: "github_tarball",
+  const clone = {
+    kind: "github_repository",
     owner: requiredString(args.owner, "owner"),
     repo: requiredString(args.repo, "repo"),
     ...(directory === undefined ? {} : { directory }),
@@ -99,7 +79,7 @@ function cloneRepository(_token: string, args: Record<string, unknown>) {
   } satisfies JsonObject
 
   return {
-    download,
+    clone,
   }
 }
 

@@ -1,4 +1,3 @@
-import { CommandExitError, type CommandResult, Sandbox } from "e2b"
 import { type JsonObject, toJsonObject } from "../../contracts/json"
 import { type MiloConvexClient } from "../convex"
 import { type ConvexId } from "../types"
@@ -7,20 +6,31 @@ import {
   artifactRunnerFile,
   artifactRuntimeFiles,
 } from "./artifacts"
-import { toArrayBuffer } from "./buffer"
-import { sandboxPath, shellQuote } from "./path"
 import {
+  connectSandbox,
+  createSandbox,
+  type E2BSandbox,
+  killE2BSandbox,
+  normalizeCommandResult,
+  runSandboxCommand,
+  toArrayBuffer,
+} from "./e2b-support"
+import { compactFailure } from "./output"
+import { sandboxPath } from "./path"
+import {
+  gitAskpassScript,
+  gitCloneCommand,
+  temporaryGitCredentialPath,
+} from "./script"
+import {
+  type SandboxCloneRepositoryInput,
   type SandboxCommandInput,
   type SandboxCommandResult,
-  type SandboxExtractTarballInput,
   type SandboxRuntime,
   type SandboxWriteFile,
 } from "./types"
 
-type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
-
 const defaultCommandTimeoutMs = 20 * 60 * 1000
-const defaultSandboxTimeoutMs = 60 * 60 * 1000
 
 export class E2BSandboxRuntime implements SandboxRuntime {
   private artifactRuntimeReady = false
@@ -62,32 +72,38 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     )
   }
 
-  async extractTarball(input: SandboxExtractTarballInput) {
-    const archivePath = `/tmp/milo-github-${Date.now()}-${Math.random().toString(36).slice(2)}.tar.gz`
+  async cloneRepository(input: SandboxCloneRepositoryInput) {
     const directory = sandboxPath(input.directory ?? "repository")
+    const tokenPath = temporaryGitCredentialPath("token")
+    const askpassPath = temporaryGitCredentialPath("askpass")
 
-    await this.writeFiles([{ content: input.bytes, path: archivePath }])
+    await this.writeFiles([
+      { content: input.token, path: tokenPath },
+      {
+        content: gitAskpassScript(tokenPath, input.username),
+        path: askpassPath,
+      },
+    ])
 
     const result = await this.runCommand({
-      command: [
-        "set -eu",
-        `directory=${shellQuote(directory)}`,
-        'if [ -d "$directory" ] && [ -n "$(ls -A "$directory")" ]; then',
-        '  echo "Clone directory is not empty" >&2',
-        "  exit 1",
-        "fi",
-        'mkdir -p "$directory"',
-        `tar -xzf ${shellQuote(archivePath)} --strip-components 1 -C "$directory"`,
-        `rm -f ${shellQuote(archivePath)}`,
-      ].join("\n"),
+      command: gitCloneCommand({
+        askpassPath,
+        directory,
+        ref: input.ref,
+        remoteUrl: input.remoteUrl,
+        tokenPath,
+      }),
     })
 
     if (result.exitCode !== 0) {
-      throw new Error(compactCommandFailure(result))
+      throw new Error(compactFailure(result))
     }
 
     return {
       directory,
+      git: true as const,
+      ...(input.ref === undefined ? {} : { ref: input.ref }),
+      remoteUrl: input.remoteUrl,
       repository: input.repository,
     }
   }
@@ -100,7 +116,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     })
 
     if (result.exitCode !== 0) {
-      throw new Error(compactCommandFailure(result))
+      throw new Error(compactFailure(result))
     }
 
     return parseArtifactBuild(result.stdout)
@@ -174,84 +190,6 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   }
 }
 
-export async function killE2BSandbox(args: {
-  convex: MiloConvexClient
-  sandboxId: string
-}) {
-  await Sandbox.kill(args.sandboxId, { apiKey: requireE2BApiKey() }).catch(
-    () => false
-  )
-  await args.convex.markSandboxCleaned({
-    externalId: args.sandboxId,
-  })
-}
-
-async function connectSandbox(sandboxId: string) {
-  return await Sandbox.connect(sandboxId, {
-    apiKey: requireE2BApiKey(),
-    timeoutMs: defaultSandboxTimeoutMs,
-  })
-}
-
-async function createSandbox(runId: ConvexId<"runs">) {
-  return await Sandbox.create(requireSandboxTemplate(), {
-    apiKey: requireE2BApiKey(),
-    allowInternetAccess: true,
-    lifecycle: {
-      autoResume: true,
-      onTimeout: "pause",
-    },
-    metadata: {
-      app: "milo",
-      runId,
-      runtime: "trigger",
-    },
-    timeoutMs: defaultSandboxTimeoutMs,
-  })
-}
-
-function normalizeCommandResult(result: CommandResult): SandboxCommandResult {
-  return {
-    exitCode: result.exitCode,
-    stderr: result.stderr,
-    stdout: result.stdout,
-  }
-}
-
-async function runSandboxCommand(
-  sandbox: E2BSandbox,
-  input: SandboxCommandInput
-): Promise<CommandResult> {
-  try {
-    return await sandbox.commands.run(input.command, {
-      cwd: input.cwd,
-      timeoutMs: input.timeoutMs ?? defaultCommandTimeoutMs,
-    })
-  } catch (error) {
-    if (error instanceof CommandExitError) {
-      return {
-        error: error.error,
-        exitCode: error.exitCode,
-        stderr: error.stderr,
-        stdout: error.stdout,
-      }
-    }
-
-    throw error
-  }
-}
-
-function compactCommandFailure(result: SandboxCommandResult) {
-  const output = [result.stdout, result.stderr]
-    .filter((value) => value.trim() !== "")
-    .join("\n")
-    .slice(0, 12_000)
-
-  return output === ""
-    ? `Command failed with exit code ${result.exitCode}.`
-    : output
-}
-
 function parseArtifactBuild(stdout: string) {
   const parsed = JSON.parse(stdout) as unknown
 
@@ -260,18 +198,4 @@ function parseArtifactBuild(stdout: string) {
   } catch {
     throw new Error("Artifact builder returned an invalid payload.")
   }
-}
-
-function requireSandboxTemplate() {
-  return process.env.MILO_E2B_TEMPLATE?.trim() || "milo-codex"
-}
-
-function requireE2BApiKey() {
-  const apiKey = process.env.E2B_API_KEY?.trim()
-
-  if (apiKey === undefined || apiKey === "") {
-    throw new Error("Missing E2B_API_KEY")
-  }
-
-  return apiKey
 }

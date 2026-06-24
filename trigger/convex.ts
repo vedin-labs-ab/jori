@@ -3,6 +3,7 @@ import { type ToolSurface } from "../contracts/integrations"
 import { decodeToolResult, encodeToolInput } from "../contracts/tool-transport"
 import { api } from "../convex/_generated/api"
 import { parseUploadedAttachment, type UploadedAttachment } from "./attachments"
+import { fetchGitHubCloneCredentials as fetchGitHubCloneCredentialsHttp } from "./github"
 import {
   type AgentRunPayload,
   type ConvexId,
@@ -146,36 +147,16 @@ export class MiloConvexClient {
     return parseUploadedAttachment(result)
   }
 
-  async fetchGitHubTarball(args: {
+  async fetchGitHubCloneCredentials(args: {
     owner: string
-    ref?: string
     repo: string
     runId: ConvexId<"runs">
   }) {
-    const response = await fetch(
-      new URL("/milo/github/tarball", requireConvexSiteUrl()),
-      {
-        body: JSON.stringify({
-          owner: args.owner,
-          ref: args.ref,
-          repo: args.repo,
-        }),
-        headers: {
-          "content-type": "application/json",
-          "x-milo-run-id": args.runId,
-          "x-milo-worker-secret": this.secret,
-        },
-        method: "POST",
-      }
-    )
-
-    if (!response.ok) {
-      throw new Error(
-        await response.text().catch(() => "GitHub tarball failed")
-      )
-    }
-
-    return new Uint8Array(await response.arrayBuffer())
+    return await fetchGitHubCloneCredentialsHttp({
+      ...args,
+      secret: this.secret,
+      siteUrl: requireConvexSiteUrl(),
+    })
   }
 
   async upsertSandbox(args: { externalId: string; runId: ConvexId<"runs"> }) {
@@ -226,49 +207,37 @@ export class MiloConvexClient {
 }
 
 function requireConvexUrl() {
-  const url =
-    process.env.CONVEX_URL?.trim() || process.env.VITE_CONVEX_URL?.trim()
-
-  if (url === undefined || url === "") {
-    throw new Error("Missing CONVEX_URL")
-  }
-
-  return url
+  return requireEnv("CONVEX_URL", "VITE_CONVEX_URL")
 }
 
 function requireConvexSiteUrl() {
-  const url =
-    process.env.CONVEX_SITE_URL?.trim() ||
-    process.env.VITE_CONVEX_SITE_URL?.trim()
-
-  if (url === undefined || url === "") {
-    throw new Error("Missing CONVEX_SITE_URL")
-  }
-
-  return url
+  return requireEnv("CONVEX_SITE_URL", "VITE_CONVEX_SITE_URL")
 }
 
 function requireWorkerSecret() {
-  const secret = process.env.MILO_WORKER_SECRET?.trim()
+  return requireEnv("MILO_WORKER_SECRET")
+}
 
-  if (secret === undefined || secret === "") {
-    throw new Error("Missing MILO_WORKER_SECRET")
+function requireEnv(name: string, fallback?: string) {
+  const value = process.env[name]?.trim() || process.env[fallback ?? ""]?.trim()
+
+  if (value === undefined || value === "") {
+    throw new Error(`Missing ${name}`)
   }
 
-  return secret
+  return value
 }
 
 function attachmentUploadError(value: unknown) {
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "error" in value &&
-    typeof value.error === "string"
-  ) {
+  if (isRecord(value) && typeof value.error === "string") {
     return value.error
   }
 
   return "Attachment upload failed"
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
 function toArrayBuffer(bytes: Uint8Array) {

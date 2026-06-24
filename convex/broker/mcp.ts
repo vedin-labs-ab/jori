@@ -16,7 +16,7 @@ import {
   jsonError,
   unauthorizedResponse,
 } from "../shared/http"
-import { optionalString, requiredString } from "../shared/input"
+import { requiredString } from "../shared/input"
 import {
   type ApprovalBrokerContext,
   createPromptedToolApproval,
@@ -25,11 +25,11 @@ import { authenticateBrokerRequest } from "./auth"
 import { listCapabilities } from "./capabilities"
 import { normalizeBrokerToolInput } from "./input"
 import { callMiloTool } from "./milo"
-import { callProviderTool, fetchGitHubTarball } from "./tools"
+import { callProviderTool, createGitHubCloneCredentials } from "./tools"
 
 type BrokerContext = ApprovalBrokerContext
 
-export async function handleGitHubTarballRequest(
+export async function handleGitHubCloneCredentialsRequest(
   ctx: ActionCtx,
   request: Request
 ) {
@@ -58,15 +58,21 @@ export async function handleGitHubTarballRequest(
   }
 
   try {
-    return await fetchGitHubTarball({
-      integration,
-      owner: requiredString(args.owner, "owner"),
-      repo: requiredString(args.repo, "repo"),
-      ref: optionalString(args.ref),
-    })
+    return Response.json(
+      createGitHubCloneCredentials({
+        integration,
+        owner: requiredString(args.owner, "owner"),
+        repo: requiredString(args.repo, "repo"),
+      }),
+      {
+        headers: {
+          "cache-control": "no-store",
+        },
+      }
+    )
   } catch (error) {
     return jsonError(
-      formatProviderError(error, "GitHub tarball request failed"),
+      formatProviderError(error, "GitHub clone credentials request failed"),
       400
     )
   }

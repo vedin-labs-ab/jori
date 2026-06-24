@@ -6,8 +6,8 @@ import { afterEach, expect, test } from "vitest"
 import { sandboxWorkspace } from "./artifacts"
 import { executeCodingTool } from "./coding"
 import {
+  type SandboxCloneRepositoryInput,
   type SandboxCommandInput,
-  type SandboxExtractTarballInput,
   type SandboxRuntime,
   type SandboxWriteFile,
 } from "./types"
@@ -167,8 +167,13 @@ class LocalSandbox implements SandboxRuntime {
     return {}
   }
 
-  async extractTarball(input: SandboxExtractTarballInput) {
-    return { directory: input.directory ?? "repository", repository: "" }
+  async cloneRepository(input: SandboxCloneRepositoryInput) {
+    return {
+      directory: input.directory ?? "repository",
+      git: true as const,
+      remoteUrl: input.remoteUrl,
+      repository: input.repository,
+    }
   }
 
   private mapCommand(command: string) {

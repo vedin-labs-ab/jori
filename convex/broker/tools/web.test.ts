@@ -1,4 +1,5 @@
 import { beforeEach, expect, test, vi } from "vitest"
+import { encodeToolResult } from "../../../contracts/tool-transport"
 import { callWebTool } from "./web"
 
 const exaMock = vi.hoisted(() => ({
@@ -56,6 +57,49 @@ test("fetches Exa contents with a sanitized public URL", async () => {
 
   expectFetchRequest()
   expectFetchResult(result)
+})
+
+test("normalizes sparse Exa contents into JSON-safe results", async () => {
+  exaMock.getContents.mockResolvedValue({
+    results: [
+      {
+        id: undefined,
+        url: "https://example.com/page",
+        title: undefined,
+        highlights: [undefined, "Relevant"],
+        text: undefined,
+      },
+      {
+        id: "missing-url",
+        title: "Skipped",
+      },
+    ],
+    statuses: [{ id: undefined, source: "exa", status: "success" }],
+  })
+
+  const result = await callFetch()
+
+  expect(result).toMatchObject({
+    provider: {
+      name: "exa",
+      operation: "contents",
+    },
+    results: [
+      {
+        url: "https://example.com/page",
+        title: null,
+        source: {
+          id: "https://example.com/page",
+          provider: "exa",
+        },
+        highlights: ["Relevant"],
+        content: {
+          text: null,
+        },
+      },
+    ],
+  })
+  expect(() => encodeToolResult(result)).not.toThrow()
 })
 
 test("blocks private-network and credentialed URLs before Exa sees them", async () => {

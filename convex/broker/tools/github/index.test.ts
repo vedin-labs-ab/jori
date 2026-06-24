@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { encodeToolResult } from "../../../../contracts/tool-transport"
 import { type Doc } from "../../../_generated/dataModel"
-import { callGitHubTool } from "./index"
+import { callGitHubTool, createGitHubCloneCredentials } from "./index"
 
 describe("GitHub clone provider tool", () => {
-  test("returns a JSON-safe clone download descriptor", async () => {
+  test("returns a JSON-safe clone descriptor", async () => {
     const result = await callGitHubTool(
       githubIntegration(),
       "github_clone_repository",
@@ -15,8 +15,8 @@ describe("GitHub clone provider tool", () => {
     )
 
     expect(result).toEqual({
-      download: {
-        kind: "github_tarball",
+      clone: {
+        kind: "github_repository",
         owner: "acme",
         repo: "app",
       },
@@ -37,15 +37,29 @@ describe("GitHub clone provider tool", () => {
     )
 
     expect(result).toEqual({
-      download: {
+      clone: {
         directory: "workspace-app",
-        kind: "github_tarball",
+        kind: "github_repository",
         owner: "acme",
         ref: "main",
         repo: "app",
       },
     })
     expect(() => encodeToolResult(result)).not.toThrow()
+  })
+
+  test("creates clone credentials without exposing them through clone results", () => {
+    expect(
+      createGitHubCloneCredentials({
+        integration: githubIntegration(),
+        owner: "acme",
+        repo: "app",
+      })
+    ).toEqual({
+      remoteUrl: "https://github.com/acme/app.git",
+      token: "github-token",
+      username: "x-access-token",
+    })
   })
 })
 
