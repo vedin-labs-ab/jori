@@ -120,7 +120,7 @@ function setupCardTitle(args: {
     return "Connection request expired"
   }
 
-  return "Connection request"
+  return "Connect request"
 }
 
 function setupCardIcon(status: SlackSetupLinkStatus) {
