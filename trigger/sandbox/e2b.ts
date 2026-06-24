@@ -33,6 +33,9 @@ import {
 } from "./types"
 
 const defaultCommandTimeoutMs = 20 * 60 * 1000
+const legacyArtifactRuntime = "/home/user/milo-workspace"
+const artifactNodeModules = `${sandboxArtifactRuntime}/node_modules`
+const legacyArtifactNodeModules = `${legacyArtifactRuntime}/node_modules`
 
 export class E2BSandboxRuntime implements SandboxRuntime {
   private artifactRuntimeReady = false
@@ -206,11 +209,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     }
 
     const result = await runSandboxCommand(this.sandbox, {
-      command: [
-        "set -eu",
-        `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxArtifactRuntime)}`,
-        `chmod 755 ${shellQuote(sandboxWorkspace)}`,
-      ].join("\n"),
+      command: workspaceBootstrapCommand(),
     })
 
     if (result.exitCode !== 0) {
@@ -219,6 +218,21 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
     this.workspaceReady = true
   }
+}
+
+export function workspaceBootstrapCommand() {
+  return [
+    "set -eu",
+    `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxArtifactRuntime)}`,
+    [
+      `if [ ! -e ${shellQuote(artifactNodeModules)} ]`,
+      `  && [ ! -L ${shellQuote(artifactNodeModules)} ]`,
+      `  && [ -d ${shellQuote(legacyArtifactNodeModules)} ]; then`,
+    ].join(" "),
+    `  ln -s ${shellQuote(legacyArtifactNodeModules)} ${shellQuote(artifactNodeModules)}`,
+    "fi",
+    `chmod 755 ${shellQuote(sandboxWorkspace)}`,
+  ].join("\n")
 }
 
 function parseArtifactBuild(stdout: string) {
