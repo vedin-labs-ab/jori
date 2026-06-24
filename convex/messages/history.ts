@@ -17,19 +17,30 @@ export type ConversationEntry = {
   type: string
 }
 
+export type RecentConversation = {
+  entries: ConversationEntry[]
+  totalMessages: number
+}
+
 export async function recentConversation(
   ctx: QueryCtx,
   message: Doc<"messages">,
   integration: Doc<"integrations">
-) {
+): Promise<RecentConversation> {
   const messages =
     message.conversationId === undefined
       ? [message]
       : await recentMessages(ctx, message)
+  const entries = messages.map((entry) => messageEntry(entry, integration))
 
-  return mergeRecentConversation(
-    messages.map((entry) => messageEntry(entry, integration))
-  )
+  return {
+    entries: mergeRecentConversation(entries),
+    totalMessages: await totalConversationMessages(
+      ctx,
+      message,
+      entries.length
+    ),
+  }
 }
 
 export function messageEntry(
@@ -75,4 +86,28 @@ async function recentMessages(ctx: QueryCtx, message: Doc<"messages">) {
     )
     .order("desc")
     .take(recentConversationLimit)
+}
+
+async function totalConversationMessages(
+  ctx: QueryCtx,
+  message: Doc<"messages">,
+  fallbackCount: number
+) {
+  const conversationId = message.conversationId
+
+  if (conversationId === undefined) {
+    return fallbackCount
+  }
+
+  const conversation = await ctx.db
+    .query("messageConversations")
+    .withIndex("by_conversation", (query) =>
+      query
+        .eq("tenantId", message.tenantId)
+        .eq("integrationId", message.integrationId)
+        .eq("externalId", conversationId)
+    )
+    .first()
+
+  return conversation?.messageCount ?? fallbackCount
 }

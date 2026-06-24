@@ -14,7 +14,7 @@ Target:
 {% include "target/slack" %}
 {% endif %}
 
-Recent messages:
+Recent messages{% if message.conversationSummary %} {{message.conversationSummary}}{% endif %}:
 
 {{message.conversation}}
 
