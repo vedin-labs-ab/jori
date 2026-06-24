@@ -31,6 +31,7 @@ function codingToolAccess(name: CodingToolName): ToolAccess {
   switch (name) {
     case "glob":
     case "grep":
+    case "git":
     case "read":
       return "read"
     case "apply_patch":

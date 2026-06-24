@@ -1,3 +1,4 @@
+import { validateReadOnlyGitArgs } from "../../contracts/git"
 import { sandboxWorkspace } from "./artifacts"
 import { compactFailure } from "./output"
 import { shellQuote } from "./path"
@@ -26,57 +27,137 @@ export function temporaryGitCredentialPath(label: string) {
   return `/tmp/milo-github-${label}-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
-export function gitAskpassScript(tokenPath: string, username: string) {
+export function gitCredentialHelperScript(tokenPath: string, username: string) {
+  const operation = shellParameter(1, "get")
+
   return [
     "#!/bin/sh",
-    'case "$1" in',
-    `  *Username*) printf "%s\\n" ${shellQuote(username)} ;;`,
-    `  *Password*) cat ${shellQuote(tokenPath)} ;;`,
-    '  *) printf "\\n" ;;',
+    `token=${shellQuote(tokenPath)}`,
+    `case "${operation}" in`,
+    "  get)",
+    `    printf "username=%s\\n" ${shellQuote(username)}`,
+    '    printf "password=%s\\n" "$(cat "$token")"',
+    "    ;;",
+    "  *) ;;",
     "esac",
     "",
   ].join("\n")
 }
 
 export function gitCloneCommand(args: {
-  askpassPath: string
   directory: string
+  helperPath: string
   ref?: string
   remoteUrl: string
   tokenPath: string
 }) {
   return [
     "set -eu",
-    `askpass=${shellQuote(args.askpassPath)}`,
     `directory=${shellQuote(args.directory)}`,
+    `helper=${shellQuote(args.helperPath)}`,
     `remote=${shellQuote(args.remoteUrl)}`,
     `token=${shellQuote(args.tokenPath)}`,
     `ref=${shellQuote(args.ref ?? "")}`,
-    'cleanup() { rm -f "$askpass" "$token"; }',
+    'cleanup() { rm -f "$helper" "$token"; }',
     "trap cleanup EXIT",
     'if [ -d "$directory" ] && [ -n "$(ls -A "$directory")" ]; then',
     '  echo "Clone directory is not empty" >&2',
     "  exit 1",
     "fi",
     'mkdir -p "$(dirname "$directory")"',
-    'chmod 700 "$askpass"',
+    'chmod 700 "$helper"',
     'chmod 600 "$token"',
-    'GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass" git clone --depth 50 "$remote" "$directory"',
+    'git_auth() { GIT_TERMINAL_PROMPT=0 git -c credential.helper= -c credential.helper="!$helper" "$@"; }',
+    'git_auth clone --depth 50 "$remote" "$directory"',
     'cd "$directory"',
     'git remote set-url origin "$remote"',
+    "git config --local --unset-all credential.helper >/dev/null 2>&1 || true",
     'if [ -n "$ref" ]; then',
-    '  if git ls-remote --exit-code --heads origin "$ref" >/dev/null 2>&1; then',
-    '    git fetch --depth 50 origin "$ref:refs/remotes/origin/$ref"',
+    '  if git_auth ls-remote --exit-code --heads origin "$ref" >/dev/null 2>&1; then',
+    '    git_auth fetch --depth 50 origin "$ref:refs/remotes/origin/$ref"',
     '    git checkout -B "$ref" "origin/$ref"',
-    '  elif git ls-remote --exit-code --tags origin "$ref" >/dev/null 2>&1; then',
-    '    git fetch --depth 50 origin "refs/tags/$ref:refs/tags/$ref"',
+    '  elif git_auth ls-remote --exit-code --tags origin "$ref" >/dev/null 2>&1; then',
+    '    git_auth fetch --depth 50 origin "refs/tags/$ref:refs/tags/$ref"',
     '    git checkout --detach "refs/tags/$ref"',
     "  else",
-    '    git fetch --depth 50 origin "$ref"',
+    '    git_auth fetch --depth 50 origin "$ref"',
     "    git checkout --detach FETCH_HEAD",
     "  fi",
     "fi",
   ].join("\n")
+}
+
+export function readOnlyGitCommand(cwd: string, args: string[]) {
+  validateReadOnlyGitArgs(args)
+
+  return [
+    `cd ${shellQuote(cwd)} || exit 2`,
+    `GIT_OPTIONAL_LOCKS=0 git ${args.map(shellQuote).join(" ")}`,
+  ].join("\n")
+}
+
+export function gitBashGuard() {
+  const subcommand = shellParameter(1)
+
+  return [
+    'milo_real_git="$(command -v git)" || exit 2',
+    'milo_git_guard="$(mktemp -d)" || exit 2',
+    'cleanup_git_guard() { rm -rf "$milo_git_guard"; }',
+    "trap cleanup_git_guard EXIT",
+    "cat > \"$milo_git_guard/git\" <<'MILO_READ_ONLY_GIT'",
+    "#!/bin/sh",
+    `case "${subcommand}" in`,
+    ...readOnlyGitShellCases("    "),
+    "  *)",
+    '    echo "git is read-only in bash; use the git tool for inspection and apply_patch for writes." >&2',
+    "    exit 2",
+    "    ;;",
+    "esac",
+    'case " $* " in',
+    '  *" --output "*|*" --output="*)',
+    '    echo "git --output is not allowed in read-only mode." >&2',
+    "    exit 2",
+    "    ;;",
+    "esac",
+    'GIT_OPTIONAL_LOCKS=0 exec "$MILO_REAL_GIT" "$@"',
+    "MILO_READ_ONLY_GIT",
+    'chmod 700 "$milo_git_guard/git"',
+    'export MILO_REAL_GIT="$milo_real_git"',
+    'PATH="$milo_git_guard:$PATH"',
+    "export PATH",
+  ].join("\n")
+}
+
+function readOnlyGitShellCases(indent: string) {
+  const subcommand = shellParameter(2)
+
+  return [
+    `${indent}blame|cat-file|describe|diff|for-each-ref|grep|log|ls-files|ls-tree|merge-base|name-rev|rev-list|rev-parse|shortlog|show|show-branch|show-ref|status|whatchanged) ;;`,
+    `${indent}branch)`,
+    `${indent}  case " $* " in *" -d "*|*" -D "*|*" --delete "*|*" -m "*|*" -M "*|*" --move "*|*" -c "*|*" -C "*|*" --copy "*) exit 2 ;; esac`,
+    `${indent}  case " $* " in *" --list "*|*" -l "*) ;; *) seen=; for arg do if [ -z "$seen" ]; then seen=1; else case "$arg" in -*) ;; *) exit 2 ;; esac; fi; done ;; esac`,
+    `${indent}  ;;`,
+    `${indent}config)`,
+    `${indent}  case " $* " in *" --get "*|*" --get-all "*|*" --get-regexp "*|*" --list "*|*" -l "*) ;; *) exit 2 ;; esac`,
+    `${indent}  ;;`,
+    `${indent}remote)`,
+    `${indent}  case "${subcommand}" in ""|-v|get-url|show) ;; *) exit 2 ;; esac`,
+    `${indent}  ;;`,
+    `${indent}stash)`,
+    `${indent}  case "${subcommand}" in list|show) ;; *) exit 2 ;; esac`,
+    `${indent}  ;;`,
+    `${indent}tag)`,
+    `${indent}  case " $* " in *" -a "*|*" -d "*|*" -f "*|*" -s "*) exit 2 ;; esac`,
+    `${indent}  case "$#" in 1) ;; *) case " $* " in *" --list "*|*" -l "*) ;; *) exit 2 ;; esac ;; esac`,
+    `${indent}  ;;`,
+    `${indent}worktree)`,
+    `${indent}  case "${subcommand}" in list) ;; *) exit 2 ;; esac`,
+    `${indent}  ;;`,
+  ]
+}
+
+function shellParameter(index: number, fallback = "") {
+  return `$${`{${index}:-${fallback}}`}`
 }
 
 function scriptCommand(script: string, input: Record<string, unknown>) {

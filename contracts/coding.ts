@@ -2,6 +2,7 @@ export const codingToolNames = [
   "read",
   "grep",
   "glob",
+  "git",
   "apply_patch",
   "bash",
 ] as const
@@ -42,6 +43,18 @@ export const codingToolDefinitions = [
       pattern: stringSchema("Glob pattern, for example src/**/*.ts."),
       path: stringSchema("Optional workspace directory to search within."),
       limit: numberSchema("Maximum paths to return."),
+    }),
+  },
+  {
+    name: "git",
+    description:
+      "Run a read-only git command in the workspace sandbox. Use this for status, history, diffs, blame, and object inspection. Git writes such as add, commit, checkout, reset, fetch, pull, and push are not allowed.",
+    inputSchema: objectSchema(["args"], {
+      args: arraySchema(
+        'Git arguments without the leading git executable, for example ["log", "--oneline", "-5"].'
+      ),
+      cwd: stringSchema("Optional workspace directory to run from."),
+      timeoutMs: numberSchema("Optional command timeout in milliseconds."),
     }),
   },
   {
@@ -89,5 +102,15 @@ function stringSchema(description: string) {
   return {
     type: "string",
     description,
+  }
+}
+
+function arraySchema(description: string) {
+  return {
+    type: "array",
+    description,
+    items: {
+      type: "string",
+    },
   }
 }

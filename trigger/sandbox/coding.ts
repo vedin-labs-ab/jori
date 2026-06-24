@@ -1,4 +1,5 @@
 import { type CodingToolName, isCodingToolName } from "../../contracts/coding"
+import { validateReadOnlyGitArgs } from "../../contracts/git"
 import { sandboxWorkspace } from "./artifacts"
 import { readWorkspaceFile } from "./files"
 import {
@@ -10,6 +11,7 @@ import {
 import { boundedText } from "./output"
 import { applyWorkspacePatch } from "./patch"
 import { sandboxWorkspacePath, shellQuote } from "./path"
+import { gitBashGuard, readOnlyGitCommand } from "./script"
 import { globWorkspace, grepWorkspace } from "./search"
 import { type SandboxRuntime } from "./types"
 
@@ -41,11 +43,27 @@ async function executeKnownCodingTool(args: {
       return await grepWorkspace(args.sandbox, args.input)
     case "glob":
       return await globWorkspace(args.sandbox, args.input)
+    case "git":
+      return await runGit(args.sandbox, args.input)
     case "apply_patch":
       return await applyWorkspacePatch(args.sandbox, args.input)
     case "bash":
       return await runBash(args.sandbox, args.input)
   }
+}
+
+async function runGit(sandbox: SandboxRuntime, input: Record<string, unknown>) {
+  const args = requiredStringArray(input.args, "args")
+  const cwd = sandboxWorkspacePath(optionalString(input.cwd))
+  validateReadOnlyGitArgs(args)
+
+  const result = await sandbox.runCommand({
+    command: gitCommand(cwd, args),
+    cwd: sandboxWorkspace,
+    timeoutMs: boundedTimeoutMs(input.timeoutMs),
+  })
+
+  return commandOutput(result)
 }
 
 async function runBash(
@@ -58,6 +76,15 @@ async function runBash(
     cwd: sandboxWorkspace,
     timeoutMs: boundedTimeoutMs(input.timeoutMs),
   })
+
+  return commandOutput(result)
+}
+
+function commandOutput(result: {
+  exitCode: number
+  stderr: string
+  stdout: string
+}) {
   const stdout = boundedText(result.stdout)
   const stderr = boundedText(result.stderr)
 
@@ -70,7 +97,15 @@ async function runBash(
   }
 }
 
+function gitCommand(cwd: string, args: string[]) {
+  return [...workspaceGuard(cwd), readOnlyGitCommand(cwd, args)].join("\n")
+}
+
 function bashCommand(cwd: string, command: string) {
+  return [...workspaceGuard(cwd), gitBashGuard(), command].join("\n")
+}
+
+function workspaceGuard(cwd: string) {
   return [
     `workspace=${shellQuote(sandboxWorkspace)}`,
     `target=${shellQuote(cwd)}`,
@@ -81,6 +116,19 @@ function bashCommand(cwd: string, command: string) {
     "  exit 2",
     "esac",
     'cd "$current" || exit 2',
-    command,
-  ].join("\n")
+  ]
+}
+
+function requiredStringArray(value: unknown, name: string) {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`${name} is required`)
+  }
+
+  return value.map((entry) => {
+    if (typeof entry !== "string" || entry === "") {
+      throw new Error(`${name} must contain only non-empty strings`)
+    }
+
+    return entry
+  })
 }
