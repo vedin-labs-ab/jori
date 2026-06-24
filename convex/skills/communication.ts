@@ -14,6 +14,11 @@ type ProfileDefinition = {
   capabilities: CapabilityMap
 }
 
+export type CommunicationGuidance = {
+  body: string
+  skill: RuntimeSkill | null
+}
+
 const profiles = {
   "agent-final-reply": {
     capabilities: { default: ["text"], slack: ["text", "rich"] },
@@ -24,30 +29,26 @@ export function createCommunicationGuidance(args: {
   integration: Integration
   profile: CommunicationProfile
   reactions: boolean
-}) {
+}): CommunicationGuidance {
   const skill = getRuntimeSkillForIntegration(args.integration)
-
-  if (skill === null) {
-    return null
-  }
-
   const profile = profiles[args.profile]
-  const capabilities = capabilitiesFor(profile.capabilities, args.integration)
 
   return {
     body: renderPromptTemplate(promptTemplates["communication/message"], {
       communication: {
-        guidance: createGuidanceBlock(skill, capabilities),
+        guidance:
+          skill === null
+            ? ""
+            : createGuidanceBlock(
+                skill,
+                capabilitiesFor(profile.capabilities, args.integration)
+              ),
         reactions: args.reactions,
       },
     }).trim(),
     skill,
   }
 }
-
-export type CommunicationGuidance = NonNullable<
-  ReturnType<typeof createCommunicationGuidance>
->
 
 function capabilitiesFor(map: CapabilityMap, integration: Integration) {
   return map[integration] ?? map.default
