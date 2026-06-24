@@ -9,7 +9,10 @@
  */
 
 import type * as approvals_approvals from "../approvals/approvals.js";
+import type * as approvals_cancel from "../approvals/cancel.js";
 import type * as approvals_console from "../approvals/console.js";
+import type * as approvals_execution from "../approvals/execution.js";
+import type * as approvals_queries from "../approvals/queries.js";
 import type * as approvals_runtime from "../approvals/runtime.js";
 import type * as approvals_slack_blocks from "../approvals/slack/blocks.js";
 import type * as approvals_slack_cards from "../approvals/slack/cards.js";
@@ -289,6 +292,8 @@ import type * as runtime_surface_reply from "../runtime/surface/reply.js";
 import type * as runtime_surface_tools from "../runtime/surface/tools.js";
 import type * as runtime_tools from "../runtime/tools.js";
 import type * as runtime_traces from "../runtime/traces.js";
+import type * as runtime_waiters_data from "../runtime/waiters/data.js";
+import type * as runtime_waiters_handoffs from "../runtime/waiters/handoffs.js";
 import type * as sessions_cursor from "../sessions/cursor.js";
 import type * as sessions_data from "../sessions/data.js";
 import type * as shared_actor from "../shared/actor.js";
@@ -315,7 +320,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "approvals/approvals": typeof approvals_approvals;
+  "approvals/cancel": typeof approvals_cancel;
   "approvals/console": typeof approvals_console;
+  "approvals/execution": typeof approvals_execution;
+  "approvals/queries": typeof approvals_queries;
   "approvals/runtime": typeof approvals_runtime;
   "approvals/slack/blocks": typeof approvals_slack_blocks;
   "approvals/slack/cards": typeof approvals_slack_cards;
@@ -595,6 +603,8 @@ declare const fullApi: ApiFromModules<{
   "runtime/surface/tools": typeof runtime_surface_tools;
   "runtime/tools": typeof runtime_tools;
   "runtime/traces": typeof runtime_traces;
+  "runtime/waiters/data": typeof runtime_waiters_data;
+  "runtime/waiters/handoffs": typeof runtime_waiters_handoffs;
   "sessions/cursor": typeof sessions_cursor;
   "sessions/data": typeof sessions_data;
   "shared/actor": typeof shared_actor;

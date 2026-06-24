@@ -32,6 +32,33 @@ export const coreMiloToolInputSchemas = {
       summary: stringProperty(
         "One concise user-facing sentence explaining why this integration needs to be connected for the current request."
       ),
+      wait: {
+        type: "boolean",
+        description:
+          "Set true to pause the run until this offer is connected, cancelled, or expires when you need the integration to continue. Omit for proactive or optional offers.",
+      },
+    },
+  }),
+  cancel_approval_request: objectSchema({
+    required: ["approvalId", "reason"],
+    properties: {
+      approvalId: stringProperty(
+        "ID of the pending approval request to withdraw, returned when you requested it."
+      ),
+      reason: stringProperty(
+        "Short explanation of why the request is no longer needed."
+      ),
+    },
+  }),
+  cancel_connection_offer: objectSchema({
+    required: ["setupLinkId", "reason"],
+    properties: {
+      setupLinkId: stringProperty(
+        "ID of the pending setup offer to withdraw, returned when you offered it."
+      ),
+      reason: stringProperty(
+        "Short explanation of why the offer is no longer needed."
+      ),
     },
   }),
   save_attachment: objectSchema({

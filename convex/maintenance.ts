@@ -23,6 +23,7 @@ const tableRegistry: Record<TableName, true> = {
   approvals: true,
   traces: true,
   outbox: true,
+  waiters: true,
   sandboxes: true,
   permissions: true,
   artifacts: true,

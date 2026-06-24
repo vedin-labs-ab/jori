@@ -148,6 +148,7 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
   return {
     convex: {
       callTool: vi.fn(async () => ({ status: "sent" })),
+      loadRunHandoffs: vi.fn(async () => ({ approvals: [], offers: [] })),
       recordEvent: vi.fn(),
       sendReply: vi.fn(async () => ({ status: "sent" })),
     },

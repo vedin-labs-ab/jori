@@ -1,5 +1,9 @@
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
+import {
+  cancelApprovalRequest,
+  isCancelApprovalTool,
+} from "../approvals/cancel"
 import { callMiloArtifactTool, isMiloArtifactTool } from "../artifacts/mcp"
 import {
   callMiloAttachmentTool,
@@ -8,6 +12,8 @@ import {
 import { callMiloAutomationTool } from "../automations/mcp"
 import {
   callIntegrationSetupTool,
+  cancelConnectionOffer,
+  isCancelConnectionOfferTool,
   isIntegrationSetupTool,
 } from "../integrations/setup/mcp"
 import { callMiloSkillTool, isMiloSkillTool } from "../skills/mcp"
@@ -24,15 +30,15 @@ export async function callMiloTool(
   context: ApprovalBrokerContext | MiloRunContext,
   request: MiloToolRequest
 ): Promise<unknown> {
-  const run = isBrokerContext(context) ? context.run : context
-
-  if (isIntegrationSetupTool(request.tool)) {
-    if (!isBrokerContext(context)) {
-      throw new Error("Integration setup links require broker context.")
-    }
-
-    return await callIntegrationSetupTool(ctx, context, request)
+  if (isBrokerScopedMiloTool(request.tool)) {
+    return await callBrokerScopedMiloTool(
+      ctx,
+      requireBrokerContext(context),
+      request
+    )
   }
+
+  const run = isBrokerContext(context) ? context.run : context
 
   if (isMiloAttachmentTool(request.tool)) {
     return await callMiloAttachmentTool(ctx, run, request)
@@ -51,6 +57,40 @@ export async function callMiloTool(
   }
 
   return await callMiloAutomationTool(ctx, toMiloContext(run), request)
+}
+
+function isBrokerScopedMiloTool(tool: string) {
+  return (
+    isIntegrationSetupTool(tool) ||
+    isCancelApprovalTool(tool) ||
+    isCancelConnectionOfferTool(tool)
+  )
+}
+
+async function callBrokerScopedMiloTool(
+  ctx: ActionCtx,
+  context: ApprovalBrokerContext,
+  request: MiloToolRequest
+) {
+  if (isIntegrationSetupTool(request.tool)) {
+    return await callIntegrationSetupTool(ctx, context, request)
+  }
+
+  if (isCancelApprovalTool(request.tool)) {
+    return await cancelApprovalRequest(ctx, context.run, request.args)
+  }
+
+  return await cancelConnectionOffer(ctx, context.run, request.args)
+}
+
+function requireBrokerContext(
+  context: ApprovalBrokerContext | MiloRunContext
+): ApprovalBrokerContext {
+  if (!isBrokerContext(context)) {
+    throw new Error("This tool requires an interactive run.")
+  }
+
+  return context
 }
 
 type MiloRunContext = {

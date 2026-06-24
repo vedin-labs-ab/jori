@@ -7,6 +7,13 @@ export const approvalDecision = v.union(
   v.literal("approved"),
   v.literal("denied")
 )
+export const approvalStatus = v.union(
+  v.literal("pending"),
+  v.literal("approved"),
+  v.literal("denied"),
+  v.literal("cancelled"),
+  v.literal("expired")
+)
 export const approvalDelivery = v.union(
   v.object({
     integration: v.literal("slack"),
@@ -27,19 +34,22 @@ export const approvals = defineTable({
   args: v.string(),
   summary: v.string(),
   code: v.string(),
-  waitpointId: v.optional(v.string()),
+  status: approvalStatus,
   requestedBy: actorValidator,
   decidedBy: v.optional(actorValidator),
-  decision: v.optional(approvalDecision),
+  cancelledBy: v.optional(actorValidator),
+  cancelReason: v.optional(v.string()),
   createdAt: v.number(),
   expiresAt: v.number(),
   functionId: v.optional(v.id("_scheduled_functions")),
   delivery: v.optional(approvalDelivery),
   decidedAt: v.optional(v.number()),
+  claimedAt: v.optional(v.number()),
   consumedAt: v.optional(v.number()),
+  result: v.optional(v.string()),
 })
   .index("by_tenant_and_code", ["tenantId", "code"])
-  .index("by_waitpoint", ["waitpointId"])
+  .index("by_run_and_status", ["runId", "status"])
   .index("by_run", ["runId"])
   .index("by_tenant_and_created_at", ["tenantId", "createdAt"])
   .index("by_tenant_and_expires_at", ["tenantId", "expiresAt"])

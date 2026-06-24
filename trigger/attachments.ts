@@ -182,6 +182,21 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
+export function attachmentUploadError(value: unknown) {
+  if (isRecord(value) && typeof value.error === "string") {
+    return value.error
+  }
+
+  return "Attachment upload failed"
+}
+
+export function toArrayBuffer(bytes: Uint8Array) {
+  const copy = new Uint8Array(bytes.byteLength)
+  copy.set(bytes)
+
+  return copy.buffer
+}
+
 function readString(value: unknown, name: string) {
   if (typeof value !== "string") {
     throw new Error(`Attachment upload response is missing ${name}.`)

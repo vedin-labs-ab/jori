@@ -220,5 +220,14 @@ function approvalMeta(
     }
   }
 
+  if (approval.state === "cancelled") {
+    return {
+      Icon: X,
+      iconClassName: "text-muted-foreground",
+      label: "Cancelled by Milo",
+      tooltip: "Milo withdrew this request",
+    }
+  }
+
   return null
 }

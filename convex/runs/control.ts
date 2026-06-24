@@ -7,6 +7,7 @@ import {
   readClerkUserName,
   requireClerkUserId,
 } from "../identity/users"
+import { wakeRun } from "../runtime/waiters/data"
 
 export const stop = mutation({
   args: {
@@ -33,6 +34,7 @@ export const stop = mutation({
       endedAt: now,
     })
 
+    await wakeRun(ctx, { runId: run._id, reason: "run_cancelled" })
     await ctx.runMutation(internal.runtime.outbox.enqueueCancellation, {
       runId: run._id,
     })

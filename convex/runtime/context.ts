@@ -88,6 +88,43 @@ export const load = action({
   },
 })
 
+export const reload = action({
+  args: {
+    runId: v.id("runs"),
+    secret: v.string(),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<unknown> => {
+    requireWorkerSecret(args.secret)
+
+    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
+      runId: args.runId,
+    })) as AgentRuntimeInput | null
+
+    if (input === null) {
+      throw new Error("Runtime context not found.")
+    }
+
+    const permissions = await runtimePermissions(ctx, input)
+    const activeSurface = await loadActiveSurface(ctx, input, args.runId)
+    const lifecycleTools = runLifecycleTools()
+    const promptedTools = getPromptedTools({
+      executionType: toolExecutionType(input.type),
+      permissions: permissions.all,
+      toolModes: permissions.toolModes,
+    })
+
+    return {
+      prompt: assemblePrompt(input, {
+        activeSurface: activeSurface.state,
+        promptedTools,
+      }),
+      activeSurface: activeSurface.state,
+      tools: runtimeTools(lifecycleTools, activeSurface, permissions),
+    }
+  },
+})
+
 type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
 type LoadedRun = {
   _id: Id<"runs">
@@ -137,13 +174,25 @@ function runtimeResponse(args: {
             id: args.session._id,
           },
     activeSurface: args.activeSurface.state,
-    tools: [
-      ...args.lifecycleTools,
-      ...args.activeSurface.tools,
-      ...args.permissions.tools,
-      ...sandboxTools,
-    ],
+    tools: runtimeTools(
+      args.lifecycleTools,
+      args.activeSurface,
+      args.permissions
+    ),
   }
+}
+
+function runtimeTools(
+  lifecycleTools: ReturnType<typeof runLifecycleTools>,
+  activeSurface: LoadedActiveSurface,
+  permissions: RuntimePermissions
+) {
+  return [
+    ...lifecycleTools,
+    ...activeSurface.tools,
+    ...permissions.tools,
+    ...sandboxTools,
+  ]
 }
 
 async function loadSandboxReference(

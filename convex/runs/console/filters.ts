@@ -11,7 +11,12 @@ export type ApprovalFilter =
   | "expired"
   | "none"
 
-export type ApprovalState = "pending" | "approved" | "denied" | "expired"
+export type ApprovalState =
+  | "pending"
+  | "approved"
+  | "denied"
+  | "cancelled"
+  | "expired"
 
 export const runFilterValidator = v.union(
   v.literal("all"),

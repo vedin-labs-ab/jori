@@ -2,11 +2,8 @@ import { v } from "convex/values"
 import { approvalTtlMs } from "../../contracts/approvals"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
-import {
-  internalMutation,
-  internalQuery,
-  type MutationCtx,
-} from "../_generated/server"
+import { internalMutation, type MutationCtx } from "../_generated/server"
+import { wakeRun } from "../runtime/waiters/data"
 import { actorValidator } from "../shared/actor"
 import { toolSurfaceValidator } from "../shared/integrations"
 import { approvalDecision, approvalDelivery } from "./schema"
@@ -20,23 +17,21 @@ export const create = internalMutation({
     inputJson: v.string(),
     summary: v.string(),
     code: v.string(),
-    waitpointId: v.optional(v.string()),
     requestedBy: actorValidator,
   },
   handler: async (ctx, args) => {
-    const existing = await ctx.db
-      .query("approvals")
-      .withIndex("by_tenant_and_code", (query) =>
-        query.eq("tenantId", args.tenantId).eq("code", args.code)
-      )
-      .first()
+    const reusable = await findReusableApproval(ctx, args)
 
-    if (existing !== null) {
-      throw new Error("Approval code collision")
+    if (reusable !== null) {
+      return {
+        approvalId: reusable._id,
+        code: reusable.code,
+        expiresAt: reusable.expiresAt,
+        reused: true,
+      }
     }
 
     const now = Date.now()
-
     const expiresAt = now + approvalTtlMs
     const approvalId = await ctx.db.insert("approvals", {
       tenantId: args.tenantId,
@@ -46,7 +41,7 @@ export const create = internalMutation({
       args: args.inputJson,
       summary: args.summary,
       code: args.code,
-      waitpointId: args.waitpointId,
+      status: "pending",
       requestedBy: args.requestedBy,
       createdAt: now,
       expiresAt,
@@ -54,55 +49,12 @@ export const create = internalMutation({
     const functionId = await ctx.scheduler.runAt(
       expiresAt,
       internal.approvals.runtime.expireApproval,
-      {
-        approvalId,
-      }
+      { approvalId }
     )
 
     await ctx.db.patch(approvalId, { functionId })
 
-    return { approvalId, expiresAt }
-  },
-})
-
-export const get = internalQuery({
-  args: {
-    approvalId: v.id("approvals"),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.approvalId)
-  },
-})
-
-export const getExpirationTarget = internalQuery({
-  args: {
-    approvalId: v.id("approvals"),
-  },
-  handler: async (ctx, args) => {
-    const approval = await ctx.db.get(args.approvalId)
-
-    if (approval === null || !isExpiredPendingApproval(approval)) {
-      return null
-    }
-
-    const delivery = approval.delivery
-
-    if (delivery === undefined) {
-      return { approval, integration: null }
-    }
-
-    const integration = await ctx.db.get(delivery.integrationId)
-
-    if (
-      integration === null ||
-      integration.status !== "active" ||
-      integration.tenantId !== approval.tenantId ||
-      integration.integration !== delivery.integration
-    ) {
-      return { approval, integration: null }
-    }
-
-    return { approval, integration }
+    return { approvalId, code: args.code, expiresAt, reused: false }
   },
 })
 
@@ -118,43 +70,9 @@ export const recordDelivery = internalMutation({
       return null
     }
 
-    await ctx.db.patch(approval._id, {
-      delivery: args.delivery,
-    })
+    await ctx.db.patch(approval._id, { delivery: args.delivery })
 
     return { ...approval, delivery: args.delivery }
-  },
-})
-
-export const getSlackDecisionTarget = internalQuery({
-  args: {
-    accountId: v.string(),
-    code: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_integration_and_external", (query) =>
-        query.eq("integration", "slack").eq("externalId", args.accountId)
-      )
-      .first()
-
-    if (integration === null || integration.status !== "active") {
-      return null
-    }
-
-    const approval = await ctx.db
-      .query("approvals")
-      .withIndex("by_tenant_and_code", (query) =>
-        query.eq("tenantId", integration.tenantId).eq("code", args.code)
-      )
-      .first()
-
-    if (approval === null) {
-      return { integration, approval: null }
-    }
-
-    return { integration, approval }
   },
 })
 
@@ -171,12 +89,8 @@ export const decide = internalMutation({
       return { status: "missing" as const }
     }
 
-    if (approval.decision !== undefined) {
-      return { status: "decided" as const, approval }
-    }
-
-    if (approval.consumedAt !== undefined) {
-      return { status: "consumed" as const, approval }
+    if (approval.status !== "pending") {
+      return { status: settledStatus(approval), approval }
     }
 
     if (Date.now() >= approval.expiresAt) {
@@ -193,31 +107,116 @@ export const decide = internalMutation({
     const decidedAt = Date.now()
 
     await ctx.db.patch(approval._id, {
-      decision: args.decision,
+      status: args.decision,
       decidedBy: args.decidedBy,
       decidedAt,
       functionId: undefined,
     })
+    await wakeApprovalRun(ctx, approval)
 
     return {
       status: args.decision,
       approval: {
         ...approval,
-        decision: args.decision,
+        status: args.decision,
         decidedBy: args.decidedBy,
-        decidedAt,
-        functionId: undefined,
       },
     }
   },
 })
 
-function isPendingApproval(approval: Doc<"approvals">) {
-  return approval.decision === undefined && approval.consumedAt === undefined
+export const cancel = internalMutation({
+  args: {
+    approvalId: v.id("approvals"),
+    runId: v.id("runs"),
+    tenantId: v.string(),
+    cancelledBy: v.optional(actorValidator),
+    reason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const approval = await ctx.db.get(args.approvalId)
+
+    if (
+      approval === null ||
+      approval.runId !== args.runId ||
+      approval.tenantId !== args.tenantId
+    ) {
+      return { status: "missing" as const }
+    }
+
+    if (approval.status !== "pending") {
+      return { status: settledStatus(approval), approval }
+    }
+
+    await cancelApprovalFunction(ctx, approval)
+    await ctx.db.patch(approval._id, {
+      status: "cancelled",
+      cancelReason: args.reason,
+      cancelledBy: args.cancelledBy,
+      functionId: undefined,
+    })
+    await wakeApprovalRun(ctx, approval)
+
+    return { status: "cancelled" as const, approval }
+  },
+})
+
+export const expire = internalMutation({
+  args: {
+    approvalId: v.id("approvals"),
+  },
+  handler: async (ctx, args) => {
+    const approval = await ctx.db.get(args.approvalId)
+
+    if (
+      approval === null ||
+      approval.status !== "pending" ||
+      Date.now() < approval.expiresAt
+    ) {
+      return null
+    }
+
+    await ctx.db.patch(approval._id, {
+      status: "expired",
+      functionId: undefined,
+    })
+    await wakeApprovalRun(ctx, approval)
+
+    return approval
+  },
+})
+
+async function findReusableApproval(
+  ctx: MutationCtx,
+  args: { runId: Doc<"runs">["_id"]; tool: string; inputJson: string }
+) {
+  const pending = ctx.db
+    .query("approvals")
+    .withIndex("by_run_and_status", (query) =>
+      query.eq("runId", args.runId).eq("status", "pending")
+    )
+
+  for await (const approval of pending) {
+    if (approval.tool === args.tool && approval.args === args.inputJson) {
+      return approval
+    }
+  }
+
+  return null
 }
 
-function isExpiredPendingApproval(approval: Doc<"approvals">) {
-  return isPendingApproval(approval) && Date.now() >= approval.expiresAt
+async function wakeApprovalRun(ctx: MutationCtx, approval: Doc<"approvals">) {
+  await wakeRun(ctx, {
+    runId: approval.runId,
+    reason: "approval_resolved",
+    subject: { kind: "approval", approvalId: approval._id },
+  })
+}
+
+function settledStatus(approval: Doc<"approvals">) {
+  return approval.status === "expired"
+    ? ("expired" as const)
+    : ("decided" as const)
 }
 
 function isTerminalRun(run: Doc<"runs">) {

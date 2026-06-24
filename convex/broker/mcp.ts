@@ -1,5 +1,6 @@
 import { type JsonObject } from "../../contracts/json"
 import { isWebTool } from "../../contracts/permissions/web"
+import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { canUseAutomationTool } from "../automations/access"
 import {
@@ -78,16 +79,16 @@ export async function handleGitHubCloneCredentialsRequest(
   }
 }
 
+type BrokerToolRequest = {
+  surface: ToolSurface
+  tool: string
+  args: JsonObject
+}
+
 export async function callBrokerTool(
   ctx: ActionCtx,
   context: BrokerContext,
-  request: {
-    approved?: boolean
-    surface: ToolSurface
-    tool: string
-    args: JsonObject
-    waitpointId?: string
-  }
+  request: BrokerToolRequest
 ): Promise<unknown> {
   if (request.surface === "milo") {
     const { mode } = authorizeTool(context, request)
@@ -96,41 +97,89 @@ export async function callBrokerTool(
       return listCapabilities(context)
     }
 
-    if (mode === "prompted" && request.approved !== true) {
+    if (mode === "prompted") {
       return await createPromptedToolApproval(ctx, context, request)
     }
 
-    return await callMiloTool(ctx, context, {
-      ...request,
-      args: normalizeBrokerToolInput(request.tool, request.args),
-    })
+    return await runMiloTool(ctx, context, request)
   }
 
-  const surface = request.surface
   const { mode, permission } = authorizeTool(context, request)
-  const integration = await authorizeSurfaceTool(context, {
+  const integration = await requireSurfaceIntegration(context, {
     permission,
-    surface,
+    surface: request.surface,
     tool: request.tool,
   })
 
-  if (integration === null) {
-    throw new Error(`No active ${request.surface} integration is available`)
-  }
-
-  if (mode === "prompted" && request.approved !== true) {
+  if (mode === "prompted") {
     return await createPromptedToolApproval(ctx, context, request)
   }
 
-  const toolArgs = normalizeBrokerToolInput(request.tool, request.args)
+  return await runProviderTool(ctx, context, integration, request)
+}
 
+export async function executeApprovedTool(
+  ctx: ActionCtx,
+  context: BrokerContext,
+  request: BrokerToolRequest
+): Promise<unknown> {
+  if (request.surface === "milo") {
+    authorizeTool(context, request)
+
+    return await runMiloTool(ctx, context, request)
+  }
+
+  const { permission } = authorizeTool(context, request)
+  const integration = await requireSurfaceIntegration(context, {
+    permission,
+    surface: request.surface,
+    tool: request.tool,
+  })
+
+  return await runProviderTool(ctx, context, integration, request)
+}
+
+async function runMiloTool(
+  ctx: ActionCtx,
+  context: BrokerContext,
+  request: BrokerToolRequest
+) {
+  return await callMiloTool(ctx, context, {
+    tool: request.tool,
+    args: normalizeBrokerToolInput(request.tool, request.args),
+  })
+}
+
+async function runProviderTool(
+  ctx: ActionCtx,
+  context: BrokerContext,
+  integration: Doc<"integrations">,
+  request: BrokerToolRequest
+) {
   return await callProviderTool({
     ctx,
     integration,
     run: context.run,
     tool: request.tool,
-    toolArgs,
+    toolArgs: normalizeBrokerToolInput(request.tool, request.args),
   })
+}
+
+async function requireSurfaceIntegration(
+  context: BrokerContext,
+  request: {
+    permission: ToolPermission
+    surface: Exclude<ToolSurface, "milo">
+    tool: string
+  }
+) {
+  const integration = await authorizeSurfaceTool(context, request)
+
+  if (integration === null) {
+    throw new Error(`No active ${request.surface} integration is available`)
+  }
+
+  return integration
 }
 
 function authorizeTool(

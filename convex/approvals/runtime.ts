@@ -16,14 +16,7 @@ export type SlackApprovalDecisionArgs = {
 }
 
 export type SlackApprovalDecisionResult = {
-  status:
-    | "approved"
-    | "closed"
-    | "consumed"
-    | "decided"
-    | "denied"
-    | "expired"
-    | "missing"
+  status: "approved" | "closed" | "decided" | "denied" | "expired" | "missing"
   message: string
   integration?: Doc<"integrations">
   approval?: Doc<"approvals">
@@ -55,7 +48,7 @@ export const expireApproval = internalAction({
   },
   handler: async (ctx, args) => {
     const target = await ctx.runQuery(
-      internal.approvals.approvals.getExpirationTarget,
+      internal.approvals.queries.getExpirationTarget,
       {
         approvalId: args.approvalId,
       }
@@ -65,9 +58,8 @@ export const expireApproval = internalAction({
       return
     }
 
-    await enqueueApprovalResume(ctx, {
+    await ctx.runMutation(internal.approvals.approvals.expire, {
       approvalId: target.approval._id,
-      decision: "denied",
     })
 
     if (target.integration === null) {
@@ -96,7 +88,7 @@ export async function decideSlackApproval(
   args: SlackApprovalDecisionArgs
 ): Promise<SlackApprovalDecisionResult> {
   const target = await ctx.runQuery(
-    internal.approvals.approvals.getSlackDecisionTarget,
+    internal.approvals.queries.getSlackDecisionTarget,
     {
       accountId: args.accountId,
       code: args.code,
@@ -151,57 +143,12 @@ export async function decideApproval(
     decidedBy: args.decidedBy,
   })
 
-  if (result.status === "approved") {
-    await enqueueApprovalResume(ctx, {
-      approvalId: args.approval._id,
-      decision: "approved",
-    })
-
-    return {
-      status: "approved",
-      integration: args.integration,
-      approval: result.approval,
-      message: "Approved. Milo is continuing the run.",
-    }
-  }
-
-  if (result.status === "denied") {
-    await enqueueApprovalResume(ctx, {
-      approvalId: args.approval._id,
-      decision: "denied",
-    })
-
-    return {
-      status: "denied",
-      integration: args.integration,
-      approval: result.approval,
-      message: "Denied. Milo is continuing without this action.",
-    }
-  }
-
-  if (result.status === "expired") {
-    await enqueueApprovalResume(ctx, {
-      approvalId: args.approval._id,
-      decision: "denied",
-    })
-  }
-
   return {
     status: result.status,
     integration: args.integration,
     approval: result.approval,
-    message: decisionStatusMessage(result.status, result.approval),
+    message: decisionMessage(result.status, result.approval),
   }
-}
-
-async function enqueueApprovalResume(
-  ctx: ActionCtx,
-  args: {
-    approvalId: Doc<"approvals">["_id"]
-    decision: "approved" | "denied"
-  }
-) {
-  await ctx.runMutation(internal.runtime.outbox.enqueueApprovalResume, args)
 }
 
 async function postSlackDecisionMessage(
@@ -219,10 +166,18 @@ async function postSlackDecisionMessage(
   })
 }
 
-function decisionStatusMessage(
-  status: "closed" | "consumed" | "decided" | "expired" | "missing",
+function decisionMessage(
+  status: SlackApprovalDecisionResult["status"],
   approval?: Doc<"approvals">
 ) {
+  if (status === "approved") {
+    return "Approved. Milo is continuing the run."
+  }
+
+  if (status === "denied") {
+    return "Denied. Milo is continuing without this action."
+  }
+
   if (status === "closed") {
     return "This run is no longer active."
   }
@@ -231,17 +186,25 @@ function decisionStatusMessage(
     return "That approval request has expired."
   }
 
-  if (approval?.decision === "approved") {
-    return "This request was already approved."
-  }
-
-  if (approval?.decision === "denied") {
-    return "This request was already denied."
-  }
-
-  if (status === "decided" || status === "consumed") {
-    return "This request was already decided."
+  if (status === "decided") {
+    return alreadySettledMessage(approval)
   }
 
   return "That approval request no longer exists."
+}
+
+function alreadySettledMessage(approval?: Doc<"approvals">) {
+  if (approval?.status === "approved") {
+    return "This request was already approved."
+  }
+
+  if (approval?.status === "denied") {
+    return "This request was already denied."
+  }
+
+  if (approval?.status === "cancelled") {
+    return "This request was cancelled."
+  }
+
+  return "This request was already decided."
 }

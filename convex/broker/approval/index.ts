@@ -44,6 +44,8 @@ type SlackApprovalRequest = {
   delivery: SlackApprovalDelivery
 }
 
+const workerOnlyMiloTools = ["save_attachment", "generate_image"]
+
 export async function createPromptedToolApproval(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
@@ -51,7 +53,6 @@ export async function createPromptedToolApproval(
     surface: ToolSurface
     tool: string
     args: JsonObject
-    waitpointId?: string
   }
 ): Promise<{
   approvalId: Id<"approvals">
@@ -72,12 +73,15 @@ export async function createPromptedToolApproval(
 
   const mode = resolveToolMode(context.toolModes, request.tool)
 
-  if (mode === "blocked") {
-    throw new Error(`Tool is blocked: ${request.tool}`)
-  }
-
   if (mode !== "prompted") {
     throw new Error(`Tool does not require approval: ${request.tool}`)
+  }
+
+  if (
+    request.surface === "milo" &&
+    workerOnlyMiloTools.includes(request.tool)
+  ) {
+    throw new Error(`Tool cannot be approval-gated: ${request.tool}`)
   }
 
   if (
@@ -87,26 +91,22 @@ export async function createPromptedToolApproval(
     throw new Error(`No active ${request.surface} integration is available`)
   }
 
-  const requestedBy = createRequestedBy(context)
-  const code = createApprovalCode()
-  const approval: { approvalId: Id<"approvals">; expiresAt: number } =
-    await ctx.runMutation(internal.approvals.approvals.create, {
-      tenantId: context.run.tenantId,
-      runId: context.run._id,
-      surface: request.surface,
-      tool: request.tool,
-      ...encodeToolInput(request.args),
-      summary: request.summary,
-      code,
-      waitpointId: args.waitpointId,
-      requestedBy,
-    })
+  const approval = await ctx.runMutation(internal.approvals.approvals.create, {
+    tenantId: context.run.tenantId,
+    runId: context.run._id,
+    surface: request.surface,
+    tool: request.tool,
+    ...encodeToolInput(request.args),
+    summary: request.summary,
+    code: createApprovalCode(),
+    requestedBy: createRequestedBy(context),
+  })
   const delivery = getSlackApprovalDelivery(context)
 
-  if (delivery !== null) {
+  if (!approval.reused && delivery !== null) {
     await tryDeliverSlackApproval(ctx, {
       approvalId: approval.approvalId,
-      code,
+      code: approval.code,
       surface: request.surface,
       tool: request.tool,
       summary: request.summary,
@@ -118,8 +118,8 @@ export async function createPromptedToolApproval(
   return {
     status: "approval_requested",
     approvalId: approval.approvalId,
-    code,
-    instruction: `Approval requested. The user can approve with: approve ${code}`,
+    code: approval.code,
+    instruction: `Approval requested. The user can approve with: approve ${approval.code}`,
   }
 }
 

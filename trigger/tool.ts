@@ -1,6 +1,5 @@
 import { type ToolSurface } from "../contracts/integrations"
 import { encodeToolResult } from "../contracts/tool-transport"
-import { awaitPromptedToolApproval } from "./approval"
 import {
   materializeSandboxResult,
   prepareMiloToolInput,
@@ -114,36 +113,33 @@ async function executeConvexTool(
   const surface = requireSurface(tool)
   const toolName = tool.tool ?? tool.name
 
-  if (tool.mode !== "prompted") {
-    const result = await callConvexTool(runtime, surface, toolName, call.args)
-    markVisibleCommunication(runtime, toolName, result)
-    return result
+  if (tool.mode === "prompted") {
+    return await requestPromptedApproval(runtime, surface, toolName, call.args)
   }
 
-  const approval = await awaitPromptedToolApproval({
-    call,
-    runtime,
-    surface,
-    tool,
-    toolName,
-  })
-
-  if (!approval.approved) {
-    return approval.result
-  }
-
-  const result = await callConvexTool(
-    runtime,
-    surface,
-    toolName,
-    approval.input,
-    true
-  )
+  const result = await callConvexTool(runtime, surface, toolName, call.args)
   markVisibleCommunication(runtime, toolName, result)
   return result
 }
 
-function markVisibleCommunication(
+async function requestPromptedApproval(
+  runtime: ToolRuntime,
+  surface: ToolSurface,
+  tool: string,
+  args: JsonObject
+) {
+  const input =
+    surface === "milo" ? await prepareMiloToolInput(runtime, tool, args) : args
+
+  return await runtime.convex.requestApproval({
+    input,
+    runId: runtime.context.run.id,
+    surface,
+    tool,
+  })
+}
+
+export function markVisibleCommunication(
   runtime: ToolRuntime,
   toolName: string,
   result: unknown
@@ -162,8 +158,7 @@ async function callConvexTool(
   runtime: ToolRuntime,
   surface: ToolSurface,
   tool: string,
-  input: JsonObject,
-  approved?: boolean
+  input: JsonObject
 ) {
   if (surface === "milo" && tool === "save_attachment") {
     return await saveSandboxAttachment(runtime, input)
@@ -174,7 +169,6 @@ async function callConvexTool(
   }
 
   const result = await runtime.convex.callTool({
-    approved,
     input:
       surface === "milo"
         ? await prepareMiloToolInput(runtime, tool, input)

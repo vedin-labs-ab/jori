@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { toolSnapshot } from "../runs/schema"
+import { waiterReason, waiterSubject } from "./waiters/schema"
 
 const runtimeOperation = v.union(
   v.object({
@@ -8,13 +9,14 @@ const runtimeOperation = v.union(
     runId: v.id("runs"),
   }),
   v.object({
-    type: v.literal("approval.resume"),
-    approvalId: v.id("approvals"),
-    decision: v.union(v.literal("approved"), v.literal("denied")),
-  }),
-  v.object({
     type: v.literal("run.cancel"),
     runId: v.id("runs"),
+  }),
+  v.object({
+    type: v.literal("waiter.wake"),
+    waiterId: v.id("waiters"),
+    reason: waiterReason,
+    subject: v.optional(waiterSubject),
   })
 )
 

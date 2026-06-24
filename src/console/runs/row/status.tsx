@@ -109,6 +109,7 @@ function StatusGlyph({
 const approvalStatusLabels = {
   approved: "Approved",
   denied: "Denied",
+  cancelled: "Cancelled",
   expired: "Approval expired",
   pending: "Needs approval",
 } satisfies Record<ApprovalState, string>
@@ -124,6 +125,7 @@ const executionStatusLabels = {
 const approvalStatusIcons = {
   approved: UserCheck,
   denied: UserX,
+  cancelled: UserX,
   expired: ClockAlert,
   pending: UserPen,
 } satisfies Record<ApprovalState, LucideIcon>
@@ -158,6 +160,7 @@ export function ApprovalStatusMeta({
 const approvalStatusClasses = {
   approved: "text-emerald-800",
   denied: "text-destructive",
+  cancelled: "text-muted-foreground",
   expired: "text-warning",
   pending: "text-warning",
 } satisfies Record<ApprovalState, string>

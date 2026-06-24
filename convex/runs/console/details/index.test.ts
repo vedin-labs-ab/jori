@@ -42,7 +42,7 @@ test("includes approved decision actor details", async () => {
       code: "code",
       requestedBy: { kind: "user", email: "requester@example.com" },
       decidedBy: { kind: "user", email: "approver@example.com" },
-      decision: "approved",
+      status: "approved",
       createdAt: 0,
       expiresAt: 1000,
       decidedAt: 500,
