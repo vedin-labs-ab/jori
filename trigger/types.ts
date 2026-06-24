@@ -46,6 +46,22 @@ export type RuntimeValueSummary = {
   size?: number
 }
 
+export type RuntimeToolInputSummary = {
+  args?: string[]
+  command?: string
+  cwd?: string
+  directory?: string
+  include?: string
+  limit?: number
+  offset?: number
+  owner?: string
+  path?: string
+  pattern?: string
+  ref?: string
+  repo?: string
+  timeoutMs?: number
+}
+
 export type RuntimeErrorTraceData = {
   error: string
 }
@@ -59,6 +75,7 @@ export type RuntimeToolTraceData = {
     provider: string
     requestId: string
   }
+  input?: RuntimeToolInputSummary
   result?: RuntimeValueSummary
 }
 

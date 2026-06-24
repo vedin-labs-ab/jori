@@ -47,7 +47,7 @@ export const githubToolPermissionRows = [
     "github",
     "github_clone_repository",
     "Clone repository",
-    "Clone a GitHub repository into the workspace.",
+    "Clone a GitHub repository into the workspace as a real Git working copy. Use this instead of git clone in bash.",
     "read",
   ],
   [

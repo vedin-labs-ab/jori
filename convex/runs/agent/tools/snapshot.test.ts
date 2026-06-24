@@ -109,6 +109,57 @@ test("stores active surface tools ahead of provider capabilities", () => {
   })
 })
 
+test("stores workspace tools after provider capabilities", () => {
+  const gitTool = {
+    access: "read" as const,
+    description: "Inspect Git history.",
+    label: "Git",
+    tool: "git",
+  }
+
+  expect(
+    createRunToolSnapshot({
+      capabilities: [
+        {
+          surface: "github",
+          label: "GitHub",
+          tools: [
+            {
+              access: "read",
+              description: "Clone a repository.",
+              label: "Clone repository",
+              tool: "github_clone_repository",
+            },
+          ],
+        },
+      ],
+      sandboxTools: [gitTool],
+      webSearch: false,
+    })
+  ).toEqual({
+    groups: [
+      {
+        surface: "github",
+        label: "GitHub",
+        tools: [
+          {
+            access: "read",
+            description: "Clone a repository.",
+            label: "Clone repository",
+            tool: "github_clone_repository",
+          },
+        ],
+      },
+      {
+        surface: "milo",
+        label: "Workspace",
+        tools: [gitTool],
+      },
+    ],
+    webSearch: false,
+  })
+})
+
 function slackTools(): RuntimeToolCapabilityTool[] {
   return [
     {

@@ -3,6 +3,7 @@ import {
   codingToolDefinitions,
 } from "../../contracts/coding"
 import { type ToolAccess } from "../../contracts/permissions"
+import { type RunToolSnapshotTool } from "../runs/agent/tools/snapshot"
 
 export const sandboxTools = [
   ...codingToolDefinitions.map((tool) => ({
@@ -38,4 +39,23 @@ function codingToolAccess(name: CodingToolName): ToolAccess {
     case "bash":
       return "write"
   }
+}
+
+export function sandboxToolSnapshot(): RunToolSnapshotTool[] {
+  return sandboxTools.map((tool) => ({
+    access: tool.access,
+    description: tool.description,
+    label: toolLabel(tool.name),
+    tool: tool.name,
+  }))
+}
+
+function toolLabel(name: string) {
+  const [first = "", ...rest] = name.split("_")
+
+  return [capitalize(first), ...rest].join(" ")
+}
+
+function capitalize(value: string) {
+  return value === "" ? value : value[0].toUpperCase() + value.slice(1)
 }

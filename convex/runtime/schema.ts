@@ -78,6 +78,22 @@ const traceValueSummary = v.object({
   size: v.optional(v.number()),
 })
 
+const traceToolInputSummary = v.object({
+  args: v.optional(v.array(v.string())),
+  command: v.optional(v.string()),
+  cwd: v.optional(v.string()),
+  directory: v.optional(v.string()),
+  include: v.optional(v.string()),
+  limit: v.optional(v.number()),
+  offset: v.optional(v.number()),
+  owner: v.optional(v.string()),
+  path: v.optional(v.string()),
+  pattern: v.optional(v.string()),
+  ref: v.optional(v.string()),
+  repo: v.optional(v.string()),
+  timeoutMs: v.optional(v.number()),
+})
+
 export const traceData = v.union(
   v.object({
     error: v.string(),
@@ -93,6 +109,7 @@ export const traceData = v.union(
         requestId: v.string(),
       })
     ),
+    input: v.optional(traceToolInputSummary),
     result: v.optional(traceValueSummary),
   }),
   v.object({
