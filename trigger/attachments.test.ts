@@ -16,7 +16,7 @@ test("materializes GitHub clone descriptors as Git working copies", async () => 
       },
     })
   ).resolves.toEqual({
-    directory: "/home/user/milo-workspace/repository",
+    directory: "/home/user/milo-workspace",
     git: true,
     ref: "main",
     remoteUrl: "https://github.com/acme/app.git",
@@ -62,7 +62,7 @@ function cloneRuntime(): ToolRuntime {
     },
     sandbox: {
       cloneRepository: vi.fn(async (input) => ({
-        directory: "/home/user/milo-workspace/repository",
+        directory: input.directory ?? "/home/user/milo-workspace",
         git: true,
         ref: input.ref,
         remoteUrl: input.remoteUrl,

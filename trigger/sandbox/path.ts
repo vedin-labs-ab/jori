@@ -7,6 +7,12 @@ export function sandboxWorkspacePath(value: string | undefined) {
     : sandboxPath(value)
 }
 
+export function sandboxClonePath(value: string | null | undefined) {
+  return value === undefined || value === null || value.trim() === ""
+    ? sandboxWorkspace
+    : sandboxPath(value)
+}
+
 export function sandboxPath(value: string) {
   const normalized = value.trim() === "" ? "repository" : value.trim()
   const filePath = normalized.startsWith("/")

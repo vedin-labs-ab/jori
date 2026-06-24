@@ -16,7 +16,7 @@ import {
   toArrayBuffer,
 } from "./e2b-support"
 import { compactFailure } from "./output"
-import { sandboxPath } from "./path"
+import { sandboxClonePath } from "./path"
 import {
   gitCloneCommand,
   gitCredentialHelperScript,
@@ -73,7 +73,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   }
 
   async cloneRepository(input: SandboxCloneRepositoryInput) {
-    const directory = sandboxPath(input.directory ?? "repository")
+    const directory = sandboxClonePath(input.directory)
     const tokenPath = temporaryGitCredentialPath("token")
     const helperPath = temporaryGitCredentialPath("helper")
 
