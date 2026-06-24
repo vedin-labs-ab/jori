@@ -24,16 +24,20 @@ export async function markSetupLinkConnected(
   }
 
   await cancelSetupFunction(ctx, link)
+  const result = {
+    ...(link.claim?.actor === undefined ? {} : { actor: link.claim.actor }),
+    integrationId: args.integrationId,
+  }
   const updated = await patchAndRead(ctx, link._id, {
     functionId: undefined,
     status: "connected",
-    result: { integrationId: args.integrationId },
+    result,
     updatedAt: args.now,
   })
 
   if (updated !== null) {
     await recordSetupLinkEvent(ctx, {
-      data: { integrationId: args.integrationId },
+      data: result,
       link: updated,
       syncSurface: true,
       type: "offer.connected",

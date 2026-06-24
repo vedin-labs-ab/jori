@@ -41,7 +41,7 @@ export function createSlackSetupLinkMessage(args: {
       createSlackCard({
         icon: {
           type: "icon",
-          name: "link",
+          name: setupCardIcon(status),
         },
         title: setupCardTitle({ actor: args.actor, status }),
         subtitle: `Connect ${label}`,
@@ -76,7 +76,11 @@ function setupTitle(args: {
   }
 
   if (args.status === "connected") {
-    return `${args.label} connected to Milo`
+    const actor = getActorDisplayName(args.actor)
+
+    return actor === undefined
+      ? `${args.label} set up in Milo`
+      : `${args.label} set up by ${actor}`
   }
 
   if (args.status === "failed") {
@@ -103,7 +107,9 @@ function setupCardTitle(args: {
   }
 
   if (args.status === "connected") {
-    return "Connection complete"
+    const actor = getActorDisplayName(args.actor)
+
+    return actor === undefined ? "Setup complete" : `Set up by ${actor}`
   }
 
   if (args.status === "failed") {
@@ -114,7 +120,11 @@ function setupCardTitle(args: {
     return "Setup offer expired"
   }
 
-  return "Connection request"
+  return "Setup request"
+}
+
+function setupCardIcon(status: SlackSetupLinkStatus) {
+  return status === "connected" ? "check" : "link"
 }
 
 function setupFallback(
@@ -127,7 +137,7 @@ function setupFallback(
   }
 
   if (status === "connected") {
-    return `${label} is connected.`
+    return `${label} is set up.`
   }
 
   if (status === "failed") {
@@ -195,7 +205,7 @@ function setupSubtext(args: {
   }
 
   if (args.status === "connected") {
-    return `Connected at ${formatSlackTime(
+    return `Set up at ${formatSlackTime(
       toSlackTimestamp(args.updatedAt ?? Date.now())
     )}`
   }
