@@ -34,7 +34,7 @@ test("renders a URL button for the requested integration", () => {
       },
       subtitle: {
         type: "mrkdwn",
-        text: "Configure GitHub",
+        text: "Set up GitHub",
       },
       body: {
         type: "mrkdwn",
@@ -119,7 +119,7 @@ test("renders cancelled updates without setup actions", () => {
   })
   expect(card.subtitle).toMatchObject({
     type: "mrkdwn",
-    text: "Configure Google Drive",
+    text: "Set up Google Drive",
   })
   expect(subtext.text).toContain("Cancelled at <!date^1699999000^{time}|")
   expect(subtext.text).not.toContain("Ask Milo")
