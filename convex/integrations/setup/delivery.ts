@@ -10,7 +10,7 @@ import {
 } from "../../providers/slack/data"
 import { readAppOrigin } from "../../shared/app"
 import { type Integration } from "../../shared/integrations"
-import { integrationLogoUrl } from "./logos"
+import { integrationSlackIconUrl } from "./logos"
 import { createSlackSetupLinkMessage } from "./slack"
 
 export async function tryDeliverSetupOffer(
@@ -48,7 +48,7 @@ async function tryDeliverSlackSetupLink(
     const message = createSlackSetupLinkMessage({
       expiresAt: args.expiresAt,
       integration: args.integration,
-      logoUrl: integrationLogoUrl(args.integration, requireAppOrigin()),
+      iconUrl: integrationSlackIconUrl(args.integration, requireAppOrigin()),
       summary: args.summary,
       url: args.url,
     })

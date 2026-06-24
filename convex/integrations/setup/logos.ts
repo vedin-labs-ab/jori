@@ -1,17 +1,20 @@
 import { type Integration } from "../../shared/integrations"
 
-const logoPaths = {
-  slack: "/logos/integrations/slack.svg",
-  linear: "/logos/integrations/linear.svg",
-  github: "/logos/integrations/github.svg",
-  gmail: "/logos/integrations/gmail.svg",
-  googleCalendar: "/logos/integrations/google-calendar.svg",
-  googleDrive: "/logos/integrations/google-drive.svg",
-  notion: "/logos/integrations/notion.svg",
-  microsoftEmail: "/logos/integrations/microsoft-email.svg",
-  microsoftCalendar: "/logos/integrations/microsoft-calendar.svg",
+const slackIconPaths = {
+  slack: "/logos/integrations/png/slack.png",
+  linear: "/logos/integrations/png/linear.png",
+  github: "/logos/integrations/png/github.png",
+  gmail: "/logos/integrations/png/gmail.png",
+  googleCalendar: "/logos/integrations/png/google-calendar.png",
+  googleDrive: "/logos/integrations/png/google-drive.png",
+  notion: "/logos/integrations/png/notion.png",
+  microsoftEmail: "/logos/integrations/png/microsoft-email.png",
+  microsoftCalendar: "/logos/integrations/png/microsoft-calendar.png",
 } satisfies Record<Integration, string>
 
-export function integrationLogoUrl(integration: Integration, origin: string) {
-  return new URL(logoPaths[integration], origin).toString()
+export function integrationSlackIconUrl(
+  integration: Integration,
+  origin: string
+) {
+  return new URL(slackIconPaths[integration], origin).toString()
 }

@@ -8,7 +8,7 @@ import {
 } from "../../_generated/server"
 import { updateSlackMessage } from "../../broker/tools/slack"
 import { readAppOrigin } from "../../shared/app"
-import { integrationLogoUrl } from "./logos"
+import { integrationSlackIconUrl } from "./logos"
 import { createSlackSetupLinkMessage } from "./slack"
 import { markSetupLinkExpired } from "./transition"
 
@@ -119,7 +119,7 @@ async function syncSlackSurface(target: {
   const message = createSlackSetupLinkMessage({
     expiresAt: target.link.expiresAt,
     integration: target.link.integration,
-    logoUrl: integrationLogoUrl(target.link.integration, origin),
+    iconUrl: integrationSlackIconUrl(target.link.integration, origin),
     status: target.link.status,
     summary: target.link.summary ?? "Milo requested this connection.",
     updatedAt: target.link.updatedAt,

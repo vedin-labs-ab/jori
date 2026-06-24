@@ -1,3 +1,4 @@
+import { createSlackCard } from "../../providers/slack/card"
 import {
   formatSlackTime,
   toSlackTimestamp,
@@ -13,7 +14,7 @@ type SlackSetupLinkStatus = "connected" | "expired" | "failed" | "pending"
 export function createSlackSetupLinkMessage(args: {
   expiresAt: number
   integration: Integration
-  logoUrl: string
+  iconUrl: string
   status?: SlackSetupLinkStatus
   summary: string
   updatedAt?: number
@@ -29,33 +30,23 @@ export function createSlackSetupLinkMessage(args: {
       "\n"
     ),
     blocks: [
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `*${title}*\n\n${summary}`,
-        },
-        accessory: {
+      createSlackCard({
+        icon: {
           type: "image",
-          image_url: args.logoUrl,
+          image_url: args.iconUrl,
           alt_text: `${label} logo`,
         },
-      },
-      ...setupActionBlocks(status, label, args.url),
-      {
-        type: "context",
-        elements: [
-          {
-            type: "mrkdwn",
-            text: setupSubtext({
-              expiresAt: args.expiresAt,
-              label,
-              status,
-              updatedAt: args.updatedAt,
-            }),
-          },
-        ],
-      },
+        title: setupCardTitle(status),
+        subtitle: label,
+        body: summary,
+        subtext: setupSubtext({
+          expiresAt: args.expiresAt,
+          label,
+          status,
+          updatedAt: args.updatedAt,
+        }),
+        actions: setupActions(status, label, args.url),
+      }),
     ],
   }
 }
@@ -102,6 +93,22 @@ function setupTitle(status: SlackSetupLinkStatus, label: string) {
   return `Connect ${label} to Milo`
 }
 
+function setupCardTitle(status: SlackSetupLinkStatus) {
+  if (status === "connected") {
+    return "Connection complete"
+  }
+
+  if (status === "failed") {
+    return "Connection failed"
+  }
+
+  if (status === "expired") {
+    return "Setup offer expired"
+  }
+
+  return "Connection required"
+}
+
 function setupFallback(
   status: SlackSetupLinkStatus,
   label: string,
@@ -122,31 +129,26 @@ function setupFallback(
   return `Expires at ${formatSlackTime(toSlackTimestamp(expiresAt))}.`
 }
 
-function setupActionBlocks(
+function setupActions(
   status: SlackSetupLinkStatus,
   label: string,
   url: string | undefined
 ) {
   if (status !== "pending" || url === undefined) {
-    return []
+    return undefined
   }
 
   return [
     {
-      type: "actions",
-      elements: [
-        {
-          type: "button",
-          action_id: setupLinkActionId,
-          style: "primary",
-          text: {
-            type: "plain_text",
-            text: `Connect ${label}`,
-            emoji: false,
-          },
-          url,
-        },
-      ],
+      type: "button",
+      action_id: setupLinkActionId,
+      style: "primary",
+      text: {
+        type: "plain_text",
+        text: `Connect ${label}`,
+        emoji: false,
+      },
+      url,
     },
   ]
 }
@@ -158,24 +160,24 @@ function setupSubtext(args: {
   updatedAt: number | undefined
 }) {
   if (args.status === "connected") {
-    return `:lock: Connected at ${formatSlackTime(
+    return `Connected at ${formatSlackTime(
       toSlackTimestamp(args.updatedAt ?? Date.now())
     )}. You can manage ${args.label} access from Milo.`
   }
 
   if (args.status === "failed") {
-    return `:lock: Failed at ${formatSlackTime(
+    return `Failed at ${formatSlackTime(
       toSlackTimestamp(args.updatedAt ?? Date.now())
     )}. You'll review permissions before connecting.`
   }
 
   if (args.status === "expired") {
-    return `:lock: Expired at ${formatSlackTime(
+    return `Expired at ${formatSlackTime(
       toSlackTimestamp(args.expiresAt)
     )}. Ask Milo for a new setup offer.`
   }
 
-  return `:lock: Expires at ${formatSlackTime(
+  return `Expires at ${formatSlackTime(
     toSlackTimestamp(args.expiresAt)
   )}. You'll review permissions before connecting.`
 }
