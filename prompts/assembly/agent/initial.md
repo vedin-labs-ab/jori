@@ -10,6 +10,10 @@
 
 {% include "parts/principles" %}
 
+# Codebase Work
+
+For repository tasks, clone with provider tools, inspect Git with `git`, inspect files with `read`/`grep`/`glob`, edit with `apply_patch`, and avoid Git through `bash`.
+
 # Security
 
 {% include "parts/security" %}

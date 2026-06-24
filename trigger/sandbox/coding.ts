@@ -102,7 +102,12 @@ function gitCommand(cwd: string, args: string[]) {
 }
 
 function bashCommand(cwd: string, command: string) {
-  return [...workspaceGuard(cwd), gitBashGuard(), command].join("\n")
+  return [
+    ...workspaceGuard(cwd),
+    "set -o pipefail 2>/dev/null || true",
+    gitBashGuard(),
+    command,
+  ].join("\n")
 }
 
 function workspaceGuard(cwd: string) {

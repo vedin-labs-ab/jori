@@ -13,7 +13,7 @@ import {
   type RuntimePermissions,
   runtimePermissions,
 } from "./permissions/index"
-import { sandboxTools } from "./sandbox"
+import { sandboxToolSnapshot, sandboxTools } from "./sandbox"
 import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
 import { activeSurfaceToolSnapshot } from "./surface/tools"
@@ -106,6 +106,7 @@ function runtimeToolSnapshot(
     activeSurfaceTools: activeSurfaceToolSnapshot(activeSurface.tools),
     capabilities: permissions.capabilities,
     lifecycleTools: runLifecycleToolSnapshot(lifecycleTools),
+    sandboxTools: sandboxToolSnapshot(),
     webSearch: input.type !== "automation" || input.automation.access.web,
   })
 }

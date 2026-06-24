@@ -48,7 +48,7 @@ export const codingToolDefinitions = [
   {
     name: "git",
     description:
-      "Run a read-only git command in the workspace sandbox. Use this for status, history, diffs, blame, and object inspection. Git writes such as add, commit, checkout, reset, fetch, pull, and push are not allowed.",
+      'Preferred tool for read-only Git inspection after a repository is cloned into the workspace. Use args without the leading git executable, for example ["status", "--short"], ["log", "--oneline", "-10"], ["show", "--stat", "<sha>"], or ["diff", "<base>...HEAD"]. Git writes such as add, commit, checkout, reset, fetch, pull, and push are not allowed.',
     inputSchema: objectSchema(["args"], {
       args: arraySchema(
         'Git arguments without the leading git executable, for example ["log", "--oneline", "-5"].'
@@ -66,7 +66,8 @@ export const codingToolDefinitions = [
   },
   {
     name: "bash",
-    description: "Run a one-shot shell command in the workspace sandbox.",
+    description:
+      "Run a one-shot shell command in the workspace sandbox for non-Git work. Use provider clone tools to clone repositories, the git tool for Git inspection, and apply_patch for file edits.",
     inputSchema: objectSchema(["command"], {
       command: stringSchema("Shell command to execute."),
       cwd: stringSchema("Optional workspace directory to run from."),

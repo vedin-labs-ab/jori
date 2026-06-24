@@ -10,6 +10,7 @@ export function createRunToolSnapshot(input: {
   activeSurfaceTools?: RunToolSnapshotTool[]
   capabilities: RuntimeToolCapability[]
   lifecycleTools?: RunToolSnapshotTool[]
+  sandboxTools?: RunToolSnapshotTool[]
   webSearch: boolean
 }): RunToolSnapshot {
   return {
@@ -21,6 +22,7 @@ export function createRunToolSnapshot(input: {
         label: capability.label,
         tools: capability.tools,
       })),
+      ...workspaceGroups(input.sandboxTools),
     ],
     webSearch: input.webSearch,
   }
@@ -45,6 +47,18 @@ function activeSurfaceGroups(tools: RunToolSnapshotTool[] | undefined) {
         {
           surface: "milo" as const,
           label: "Active surface",
+          tools,
+        },
+      ]
+}
+
+function workspaceGroups(tools: RunToolSnapshotTool[] | undefined) {
+  return tools === undefined || tools.length === 0
+    ? []
+    : [
+        {
+          surface: "milo" as const,
+          label: "Workspace",
           tools,
         },
       ]
