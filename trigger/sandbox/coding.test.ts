@@ -5,6 +5,7 @@ import path from "node:path"
 import { afterEach, expect, test } from "vitest"
 import { sandboxWorkspace } from "./artifacts"
 import { executeCodingTool } from "./coding"
+import { sandboxClonePath } from "./path"
 import {
   type SandboxCloneRepositoryInput,
   type SandboxCommandInput,
@@ -93,6 +94,29 @@ test("applies patches inside the workspace and rejects escaping paths", async ()
       tool: "apply_patch",
     })
   ).rejects.toThrow("escapes the Milo workspace")
+})
+
+test("applies patches from an explicit workspace cwd", async () => {
+  const sandbox = createLocalSandbox({ "repo/src/file.txt": "old\n" })
+
+  await executeCodingTool({
+    input: {
+      cwd: "repo",
+      patch: [
+        "--- a/src/file.txt",
+        "+++ b/src/file.txt",
+        "@@ -1 +1 @@",
+        "-old",
+        "+new",
+      ].join("\n"),
+    },
+    sandbox,
+    tool: "apply_patch",
+  })
+
+  expect(
+    fs.readFileSync(path.join(sandbox.root, "repo/src/file.txt"), "utf8")
+  ).toBe("new\n")
 })
 
 test("runs bash from a workspace cwd and rejects outside cwd values", async () => {
@@ -230,7 +254,10 @@ class LocalSandbox implements SandboxRuntime {
 
   async cloneRepository(input: SandboxCloneRepositoryInput) {
     return {
-      directory: input.directory ?? sandboxWorkspace,
+      directory: sandboxClonePath({
+        repository: input.repository,
+        value: input.directory,
+      }),
       git: true as const,
       remoteUrl: input.remoteUrl,
       repository: input.repository,

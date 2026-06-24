@@ -1,6 +1,7 @@
-import { requiredString } from "./input"
+import { sandboxWorkspace } from "./artifacts"
+import { optionalString, requiredString } from "./input"
 import { boundedText, compactFailure } from "./output"
-import { shellQuote } from "./path"
+import { sandboxWorkspacePath, shellQuote } from "./path"
 import { type SandboxRuntime } from "./types"
 
 const maxPatchChars = 500_000
@@ -10,6 +11,7 @@ export async function applyWorkspacePatch(
   input: Record<string, unknown>
 ) {
   const patch = requiredString(input.patch, "patch")
+  const cwd = sandboxWorkspacePath(optionalString(input.cwd))
 
   if (patch.length > maxPatchChars) {
     throw new Error(`Patch exceeds ${maxPatchChars} characters.`)
@@ -20,8 +22,8 @@ export async function applyWorkspacePatch(
   await sandbox.writeFiles([{ content, path: patchPath }])
 
   const result = await sandbox.runCommand({
-    command: applyCommand(patchPath),
-    cwd: "/home/user/milo-workspace",
+    command: applyCommand(patchPath, cwd),
+    cwd: sandboxWorkspace,
     timeoutMs: 120_000,
   })
 
@@ -36,12 +38,14 @@ export async function applyWorkspacePatch(
   }
 }
 
-function applyCommand(patchPath: string) {
+function applyCommand(patchPath: string, cwd: string) {
   return [
     "set -eu",
     `export patch_file=${shellQuote(patchPath)}`,
+    `export patch_cwd=${shellQuote(cwd)}`,
     "trap 'rm -f \"$patch_file\"' EXIT",
     validationCommand(),
+    'cd "$patch_cwd"',
     'git apply --check --whitespace=nowarn "$patch_file"',
     'git apply --whitespace=nowarn "$patch_file"',
   ].join("\n")
@@ -52,9 +56,10 @@ function validationCommand() {
 import fs from "node:fs";
 import path from "node:path";
 
-const workspace = "/home/user/milo-workspace";
+const workspace = ${JSON.stringify(sandboxWorkspace)};
 const patch = await fs.promises.readFile(process.env.patch_file, "utf8");
 const root = await fs.promises.realpath(workspace);
+const base = await resolveBase(process.env.patch_cwd);
 
 if (patch.includes("GIT binary patch") || patch.includes("new file mode 120000")) {
   throw new Error("Binary and symlink patches are not supported.");
@@ -94,13 +99,28 @@ async function assertWorkspacePath(filePath) {
     throw new Error("Patch path escapes the Milo workspace: " + filePath);
   }
 
-  const target = path.join(root, normalized);
+  const target = path.join(base, normalized);
   const parent = await nearestExistingParent(path.dirname(target));
   const relative = path.relative(root, await fs.promises.realpath(parent));
 
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
     throw new Error("Patch path escapes the Milo workspace: " + filePath);
   }
+}
+
+async function resolveBase(value) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new Error("patch cwd is required.");
+  }
+
+  const real = await fs.promises.realpath(value);
+  const relative = path.relative(root, real);
+
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error("Patch cwd must be inside the Milo workspace.");
+  }
+
+  return real;
 }
 
 async function nearestExistingParent(directory) {

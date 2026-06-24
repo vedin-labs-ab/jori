@@ -3,7 +3,7 @@ import path from "node:path"
 import { type BuilderConfig } from "./types.ts"
 
 export const workspace =
-  process.env.MILO_WORKSPACE ?? "/home/user/milo-workspace"
+  process.env.MILO_WORKSPACE ?? "/home/user/.milo/artifacts/runtime"
 export const nodeModulesPath = path.join(workspace, "node_modules")
 export const maxArtifactFiles = 120
 export const maxArtifactFileBytes = 512 * 1024

@@ -60,18 +60,35 @@ export function gitCloneCommand(args: {
     `ref=${shellQuote(args.ref ?? "")}`,
     'cleanup() { rm -f "$helper" "$token"; }',
     "trap cleanup EXIT",
+    'chmod 700 "$helper"',
+    'chmod 600 "$token"',
+    'git_auth() { GIT_TERMINAL_PROMPT=0 git -c credential.helper= -c credential.helper="!$helper" "$@"; }',
+    'if [ -d "$directory/.git" ]; then',
+    '  existing_remote="$(git -C "$directory" remote get-url origin 2>/dev/null || true)"',
+    '  if [ "$existing_remote" != "$remote" ]; then',
+    '    echo "Clone directory already contains a different Git repository" >&2',
+    "    exit 1",
+    "  fi",
+    '  cd "$directory"',
+    '  git remote set-url origin "$remote"',
+    ...gitCheckoutRefLines(),
+    "  exit 0",
+    "fi",
     'if [ -d "$directory" ] && [ -n "$(ls -A "$directory")" ]; then',
     '  echo "Clone directory is not empty" >&2',
     "  exit 1",
     "fi",
     'mkdir -p "$(dirname "$directory")"',
-    'chmod 700 "$helper"',
-    'chmod 600 "$token"',
-    'git_auth() { GIT_TERMINAL_PROMPT=0 git -c credential.helper= -c credential.helper="!$helper" "$@"; }',
     'git_auth clone --depth 50 "$remote" "$directory"',
     'cd "$directory"',
     'git remote set-url origin "$remote"',
     "git config --local --unset-all credential.helper >/dev/null 2>&1 || true",
+    ...gitCheckoutRefLines(),
+  ].join("\n")
+}
+
+function gitCheckoutRefLines() {
+  return [
     'if [ -n "$ref" ]; then',
     '  if git_auth ls-remote --exit-code --heads origin "$ref" >/dev/null 2>&1; then',
     '    git_auth fetch --depth 50 origin "$ref:refs/remotes/origin/$ref"',
@@ -84,7 +101,7 @@ export function gitCloneCommand(args: {
     "    git checkout --detach FETCH_HEAD",
     "  fi",
     "fi",
-  ].join("\n")
+  ]
 }
 
 export function readOnlyGitCommand(cwd: string, args: string[]) {

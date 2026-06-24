@@ -1,4 +1,9 @@
 import {
+  sandboxArtifactRuntime,
+  sandboxInternalRoot,
+  sandboxWorkspace,
+} from "../../contracts/sandbox"
+import {
   artifactEntrypoint,
   platformArtifactSourcePathPrefixes,
   platformArtifactSourcePaths,
@@ -7,17 +12,18 @@ import {
 import { runtimeAssets } from "../../convex/runtime/_generated/assets"
 import { type SandboxWriteFile } from "./types"
 
-export const sandboxWorkspace = "/home/user/milo-workspace"
-const artifactBuilderConfigPath = `${sandboxWorkspace}/.milo/artifact-builder.json`
-const artifactTemplatePath = `${sandboxWorkspace}/.milo/artifact-template`
-const artifactRunnerPath = `${sandboxWorkspace}/.milo/build-artifact.mjs`
+export { sandboxArtifactRuntime, sandboxInternalRoot, sandboxWorkspace }
+
+const artifactBuilderConfigPath = `${sandboxArtifactRuntime}/.milo/artifact-builder.json`
+const artifactTemplatePath = `${sandboxInternalRoot}/artifacts/template`
+const artifactRunnerPath = `${sandboxArtifactRuntime}/.milo/build-artifact.mjs`
 
 export function artifactRuntimeFiles(): SandboxWriteFile[] {
   return [
     ...Object.entries(runtimeAssets.artifact.builder).map(
       ([filePath, content]) => ({
         content,
-        path: `${sandboxWorkspace}/${filePath}`,
+        path: `${sandboxArtifactRuntime}/${filePath}`,
       })
     ),
     {
@@ -35,6 +41,8 @@ export function artifactRuntimeFiles(): SandboxWriteFile[] {
 
 export function artifactBuildCommand(workspacePath: string) {
   return [
+    `MILO_WORKSPACE=${shellQuote(sandboxArtifactRuntime)}`,
+    `MILO_ARTIFACT_BUILDER_CONFIG=${shellQuote(artifactBuilderConfigPath)}`,
     "node",
     "--experimental-strip-types",
     shellQuote(artifactRunnerPath),

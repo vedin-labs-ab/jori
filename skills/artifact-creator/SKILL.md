@@ -267,8 +267,8 @@ prompting. Those are part of the artifact platform.
 
 1. Apply `frontend-design`.
 2. Inspect existing artifact source with `read_artifact` when updating.
-3. Copy the template into a working folder under
-   `/home/user/milo-workspace/artifacts/`.
+3. Copy the template from `/home/user/.milo/artifacts/template` into a working
+   folder under `/home/user/workspace/artifacts/`.
 4. Edit only artifact-owned `src/**` files.
 5. Run `npm run check` inside the artifact folder.
 6. Fix validation failures and rerun the check.
@@ -276,8 +276,8 @@ prompting. Those are part of the artifact platform.
    using the artifact folder as `workspacePath`.
 
 The workspace layout is known. Do not run broad directory discovery across
-`/home/user/milo-workspace`, `node_modules`, `.milo`, or platform-owned files.
-When you need file context, inspect only the artifact folder and the
+`/home/user/workspace`, `/home/user/.milo`, `node_modules`, or platform-owned
+files. When you need file context, inspect only the artifact folder and the
 artifact-owned `src/**` files.
 
 `npm run check` is the local equivalent of publish validation: it formats,
@@ -299,7 +299,7 @@ Provide:
 - `access`: `personal` unless the user asks for an organization-visible
   artifact.
 - `workspacePath`: artifact workspace directory under
-  `/home/user/milo-workspace`.
+  `/home/user/workspace/artifacts`.
 - `message`: concise version note when useful.
 - `capabilities`: narrow runtime tool grants, only when needed.
 

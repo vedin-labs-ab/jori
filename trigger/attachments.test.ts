@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { materializeSandboxResult } from "./attachments"
+import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId } from "./types"
 
@@ -16,7 +17,7 @@ test("materializes GitHub clone descriptors as Git working copies", async () => 
       },
     })
   ).resolves.toEqual({
-    directory: "/home/user/milo-workspace",
+    directory: `${sandboxWorkspace}/app`,
     git: true,
     ref: "main",
     remoteUrl: "https://github.com/acme/app.git",
@@ -62,7 +63,7 @@ function cloneRuntime(): ToolRuntime {
     },
     sandbox: {
       cloneRepository: vi.fn(async (input) => ({
-        directory: input.directory ?? "/home/user/milo-workspace",
+        directory: input.directory ?? `${sandboxWorkspace}/app`,
         git: true,
         ref: input.ref,
         remoteUrl: input.remoteUrl,

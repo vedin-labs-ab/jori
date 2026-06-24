@@ -5,6 +5,8 @@ import {
   artifactBuildCommand,
   artifactRunnerFile,
   artifactRuntimeFiles,
+  sandboxArtifactRuntime,
+  sandboxWorkspace,
 } from "./artifacts"
 import {
   connectSandbox,
@@ -16,7 +18,7 @@ import {
   toArrayBuffer,
 } from "./e2b-support"
 import { compactFailure } from "./output"
-import { sandboxClonePath } from "./path"
+import { sandboxClonePath, shellQuote } from "./path"
 import {
   gitCloneCommand,
   gitCredentialHelperScript,
@@ -36,6 +38,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   private artifactRuntimeReady = false
   private sandbox: E2BSandbox | undefined
   private sandboxId: string | null
+  private workspaceReady = false
 
   constructor(
     private readonly convex: MiloConvexClient,
@@ -73,7 +76,10 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   }
 
   async cloneRepository(input: SandboxCloneRepositoryInput) {
-    const directory = sandboxClonePath(input.directory)
+    const directory = sandboxClonePath({
+      repository: input.repository,
+      value: input.directory,
+    })
     const tokenPath = temporaryGitCredentialPath("token")
     const helperPath = temporaryGitCredentialPath("helper")
 
@@ -133,6 +139,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     })
     this.sandbox = undefined
     this.sandboxId = null
+    this.workspaceReady = false
   }
 
   async release() {
@@ -152,12 +159,15 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
   private async ensureSandbox() {
     if (this.sandbox !== undefined) {
+      await this.ensureWorkspace()
+
       return this.sandbox
     }
 
     if (this.sandboxId !== null) {
       this.sandbox = await connectSandbox(this.sandboxId)
       await this.persistSandbox()
+      await this.ensureWorkspace()
 
       return this.sandbox
     }
@@ -165,6 +175,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     this.sandbox = await createSandbox(this.runId)
     this.sandboxId = this.sandbox.sandboxId
     await this.persistSandbox()
+    await this.ensureWorkspace()
 
     return this.sandbox
   }
@@ -187,6 +198,26 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
     await this.writeFiles([...artifactRuntimeFiles(), artifactRunnerFile()])
     this.artifactRuntimeReady = true
+  }
+
+  private async ensureWorkspace() {
+    if (this.workspaceReady || this.sandbox === undefined) {
+      return
+    }
+
+    const result = await runSandboxCommand(this.sandbox, {
+      command: [
+        "set -eu",
+        `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxArtifactRuntime)}`,
+        `chmod 755 ${shellQuote(sandboxWorkspace)}`,
+      ].join("\n"),
+    })
+
+    if (result.exitCode !== 0) {
+      throw new Error(compactFailure(normalizeCommandResult(result)))
+    }
+
+    this.workspaceReady = true
   }
 }
 
