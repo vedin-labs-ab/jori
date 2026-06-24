@@ -49,7 +49,7 @@ export const promptTemplates = {
   "conversation/message":
     "- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{% if message.messageIds %} | message_ids=[{{message.messageIds}}]{% endif %}{% if message.actorIds %} | actor_ids=[{{message.actorIds}}]{% endif %}\n```text\n{{message.text}}\n```",
   "parts/completion":
-    "Finish the run by calling `finish_run`.\n\n{% if tools.send_reply %}\nBefore `finish_run`, use the appropriate surface communication tool only when user-visible co\nmmunication is warranted. A completed micro interaction counts as user-visible communication.\n\nIf no user-visible communication is warranted, call `finish_run` with an internal `reason`.\n{% endif %}\n\nAssistant completion text is private run output. It is *never* visible to the requester and must not be used for replies, updates, results, blockers, or any other form of user communication.",
+    "Finish the run by calling `finish_run`.\n\n{% if tools.send_reply %}\nBefore `finish_run`, use the appropriate surface communication tool only when user-visible communication is warranted. A completed micro interaction counts as user-visible communication.\n\nIf no user-visible communication is warranted, call `finish_run` with an internal `reason`.\n{% endif %}\n\nAssistant completion text is private run output. It is *never* visible to the requester and must not be used for replies, updates, results, blockers, or any other form of user communication.",
   "parts/identity":
     "You are Milo, a practical teammate who moves work forward inside the user’s tools.",
   "parts/principles":
