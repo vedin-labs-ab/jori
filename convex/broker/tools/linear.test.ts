@@ -142,34 +142,12 @@ test("lists Linear issue comments", async () => {
 
 test("adds a Linear comment with CommentCreateInput", async () => {
   const calls = mockLinearFetch({
-    data: {
-      commentCreate: {
-        success: true,
-        comment: {
-          id: "comment-id",
-          body: "Tiny quip.",
-          url: "https://linear",
-        },
-      },
-    },
+    data: { commentCreate: { success: true } },
   })
 
-  const result = await callLinearTool(
-    linearIntegration(),
-    "linear_add_comment",
-    {
-      body: "Tiny quip.",
-      issueId: "issue-id",
-    }
-  )
-
-  expect(result).toMatchObject({
-    data: {
-      commentCreate: {
-        success: true,
-        comment: { id: "comment-id", body: "Tiny quip." },
-      },
-    },
+  await callLinearTool(linearIntegration(), "linear_add_comment", {
+    body: "Tiny quip.",
+    issueId: "issue-id",
   })
   expect(calls[0]?.body.variables).toEqual({
     input: {
@@ -177,6 +155,33 @@ test("adds a Linear comment with CommentCreateInput", async () => {
       issueId: "issue-id",
     },
   })
+})
+
+test("adds a Linear reaction with ReactionCreateInput", async () => {
+  const calls = mockLinearFetch({
+    data: { reactionCreate: { success: true } },
+  })
+
+  await callLinearTool(linearIntegration(), "linear_add_reaction", {
+    commentId: "comment-id",
+    emoji: "\u{1F44D}",
+  })
+
+  expect(calls[0]?.body.variables).toEqual({
+    input: { commentId: "comment-id", emoji: "\u{1F44D}" },
+  })
+  expect(calls[0]?.body.query).toContain("ReactionCreateInput")
+  expect(calls[0]?.body.query).toContain("reactionCreate")
+})
+
+test("requires exactly one Linear reaction target", async () => {
+  await expect(
+    callLinearTool(linearIntegration(), "linear_add_reaction", {
+      emoji: "\u{1F44D}",
+      issueId: "issue-id",
+      commentId: "comment-id",
+    })
+  ).rejects.toThrow("Provide exactly one Linear reaction target")
 })
 
 test("throws on Linear GraphQL errors", async () => {

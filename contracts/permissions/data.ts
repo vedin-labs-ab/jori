@@ -153,6 +153,13 @@ export const toolPermissionRows = [
     "write",
     "required",
   ],
+  [
+    "linear",
+    "linear_add_reaction",
+    "Add reaction",
+    "Add an emoji reaction to a Linear issue, comment, or project update.",
+    "write",
+  ],
   ...githubToolPermissionRows,
   ...googleToolPermissionRows,
   ...notionToolPermissionRows,
