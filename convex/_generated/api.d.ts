@@ -276,7 +276,6 @@ import type * as runtime_sandboxes from "../runtime/sandboxes.js";
 import type * as runtime_sessions from "../runtime/sessions.js";
 import type * as runtime_shared from "../runtime/shared.js";
 import type * as runtime_surface from "../runtime/surface.js";
-import type * as runtime_surface_reaction from "../runtime/surface/reaction.js";
 import type * as runtime_surface_reply from "../runtime/surface/reply.js";
 import type * as runtime_surface_tools from "../runtime/surface/tools.js";
 import type * as runtime_tools from "../runtime/tools.js";
@@ -574,7 +573,6 @@ declare const fullApi: ApiFromModules<{
   "runtime/sessions": typeof runtime_sessions;
   "runtime/shared": typeof runtime_shared;
   "runtime/surface": typeof runtime_surface;
-  "runtime/surface/reaction": typeof runtime_surface_reaction;
   "runtime/surface/reply": typeof runtime_surface_reply;
   "runtime/surface/tools": typeof runtime_surface_tools;
   "runtime/tools": typeof runtime_tools;

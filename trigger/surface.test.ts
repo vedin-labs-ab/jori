@@ -29,37 +29,11 @@ test("send_reply routes through Convex and marks the active surface communicated
   })
 })
 
-test("add_reaction routes through Convex and marks the active surface communicated", async () => {
-  const runtime = createRuntime({ tools: [addReactionTool()] })
-
-  const result = await executeToolCall({
-    attempt: 1,
-    call: {
-      args: {
-        emoji: ":eyes:",
-      },
-      id: "call_1",
-      name: "add_reaction",
-    },
-    runtime,
-    sequence: 100,
-  })
-
-  expect(result.finished).toBe(false)
-  expect(JSON.parse(result.content)).toEqual({ status: "sent" })
-  expect(runtime.context.activeSurface?.communicated).toBe(true)
-  expect(runtime.convex.addReaction).toHaveBeenCalledWith({
-    emoji: ":eyes:",
-    runId: "run_1",
-  })
-})
-
 function createRuntime(
   options: { communicated?: boolean; tools?: RuntimeTool[] } = {}
 ): ToolRuntime {
   return {
     convex: {
-      addReaction: vi.fn(async () => ({ status: "sent" })),
       recordEvent: vi.fn(),
       sendReply: vi.fn(async () => ({ status: "sent" })),
     } as unknown as ToolRuntime["convex"],
@@ -80,16 +54,6 @@ function createRuntime(
       tools: options.tools ?? [sendReplyTool()],
     },
     sandbox: {} as ToolRuntime["sandbox"],
-  }
-}
-
-function addReactionTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Add reaction.",
-    inputSchema: {},
-    name: "add_reaction",
-    route: "active_surface",
   }
 }
 

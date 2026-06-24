@@ -116,7 +116,7 @@ export async function callSlackTool(
     return await postSlackMessageTool(integration, args, context)
   }
 
-  if (tool === "conversations_add_reaction") {
+  if (tool === "slack_add_reaction") {
     return await addSlackReaction(credentials.bot, args)
   }
 

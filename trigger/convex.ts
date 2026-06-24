@@ -70,13 +70,6 @@ export class MiloConvexClient {
     })
   }
 
-  async addReaction(args: { emoji: string; runId: ConvexId<"runs"> }) {
-    return await this.client.action(api.runtime.surface.addReaction, {
-      ...args,
-      secret: this.secret,
-    })
-  }
-
   async drainSessionMessages(args: {
     limit?: number
     sessionId: ConvexId<"sessions">

@@ -5,7 +5,6 @@ import {
   messageAudience,
   messageIds,
   messageText,
-  reactionAddress,
   replyAddress,
 } from "./surface"
 
@@ -118,30 +117,6 @@ describe("message surface targets", () => {
         message({ integration: "linear", data: { issueId: "ISS-1" } })
       )
     ).toEqual({ type: "linear", issueId: "ISS-1" })
-  })
-
-  test("resolves active surface reaction targets", () => {
-    expect(
-      reactionAddress(
-        message({ data: { channel: { id: "C123" }, ts: "123.456" } })
-      )
-    ).toEqual({
-      channelId: "C123",
-      messageTs: "123.456",
-      type: "slack",
-    })
-    expect(
-      reactionAddress(
-        message({
-          integration: "linear",
-          data: { commentId: "comment-id", issueId: "issue-id" },
-        })
-      )
-    ).toEqual({
-      commentId: "comment-id",
-      issueId: "issue-id",
-      type: "linear",
-    })
   })
 })
 

@@ -13,10 +13,6 @@ export async function executeActiveSurfaceTool(
     return await sendActiveReply(runtime, args.input)
   }
 
-  if (args.name === "add_reaction") {
-    return await addActiveReaction(runtime, args.input)
-  }
-
   throw new Error(`Unknown active surface tool: ${args.name}`)
 }
 
@@ -27,22 +23,6 @@ async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
     blocks: optionalBlocks(input.blocks),
     runId: runtime.context.run.id,
     text: requiredString(input.text, "text"),
-  })
-
-  activeSurface.communicated = true
-
-  return {
-    finished: false,
-    value: result,
-  }
-}
-
-async function addActiveReaction(runtime: ToolRuntime, input: JsonObject) {
-  const activeSurface = requireActiveSurface(runtime)
-
-  const result = await runtime.convex.addReaction({
-    emoji: requiredString(input.emoji, "emoji"),
-    runId: runtime.context.run.id,
   })
 
   activeSurface.communicated = true
