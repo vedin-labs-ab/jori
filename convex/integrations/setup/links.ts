@@ -2,11 +2,16 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { internalMutation, mutation } from "../../_generated/server"
 import { requireTenantAccess } from "../../identity/access"
-import { requireClerkUserId } from "../../identity/users"
+import {
+  readClerkUserEmail,
+  readClerkUserName,
+  requireClerkUserId,
+} from "../../identity/users"
 import {
   createSignedInstallState,
   installPathForIntegration,
 } from "../../providers/install"
+import { createUserActor } from "../../shared/actor"
 import { integrationValidator } from "../../shared/integrations"
 import { recordSetupLinkEvent } from "./events"
 import {
@@ -109,6 +114,10 @@ export const claim = mutation({
 
     const identity = await requireTenantAccess(ctx, link.tenantId)
     const userId = requireClerkUserId(identity)
+    const actor = createUserActor(userId, {
+      email: readClerkUserEmail(identity),
+      name: readClerkUserName(identity),
+    })
     const now = Date.now()
 
     if (link.status === "cancelled") {
@@ -142,7 +151,10 @@ export const claim = mutation({
 
     await ctx.db.patch(link._id, {
       status: "claimed",
-      claim: link.claim ?? { userId, at: now },
+      claim:
+        link.claim === undefined
+          ? { userId, actor, at: now }
+          : { ...link.claim, actor: link.claim.actor ?? actor },
       result: undefined,
       updatedAt: now,
     })

@@ -63,6 +63,7 @@ export const setupLinks = defineTable({
   claim: v.optional(
     v.object({
       userId: v.string(),
+      actor: v.optional(actorValidator),
       at: v.number(),
     })
   ),

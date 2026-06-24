@@ -30,7 +30,7 @@ test("renders a URL button for the requested integration", () => {
       },
       title: {
         type: "mrkdwn",
-        text: "Connection request",
+        text: "Setup request",
       },
       subtitle: {
         type: "mrkdwn",
@@ -67,6 +67,11 @@ test("renders a URL button for the requested integration", () => {
 
 test("renders connected updates without the setup button", () => {
   const message = createSlackSetupLinkMessage({
+    actor: {
+      kind: "user",
+      userId: "user_123",
+      name: "Albin Vedin",
+    },
     expiresAt: 1_700_000_000_000,
     integration: "gmail",
     status: "connected",
@@ -75,15 +80,16 @@ test("renders connected updates without the setup button", () => {
   })
   const card = message.blocks[0] as Record<string, unknown>
 
-  expect(message.text).toContain("Gmail connected to Milo")
+  expect(message.text).toContain("Gmail set up by Albin Vedin")
   expect(message.blocks).toHaveLength(1)
+  expect(card.slack_icon).toEqual({ type: "icon", name: "check" })
   expect(card).not.toHaveProperty("actions")
   expect(card.title).toMatchObject({
     type: "mrkdwn",
-    text: "Connection complete",
+    text: "Set up by Albin Vedin",
   })
   expect(JSON.stringify(card.subtext)).toContain(
-    "Connected at <!date^1699999000^{time}|"
+    "Set up at <!date^1699999000^{time}|"
   )
   expect(JSON.stringify(card.subtext)).not.toContain("manage")
 })
