@@ -16,6 +16,7 @@ test("renders a URL button for the requested integration", () => {
     url: "https://app.milo.example/integrations/setup/token",
   })
   const card = message.blocks[0] as Record<string, unknown>
+  const subtext = card.subtext as { text: string }
   const actions = card.actions as Record<string, unknown>[]
 
   expect(message.text).toContain("Connect GitHub to Milo")
@@ -56,9 +57,8 @@ test("renders a URL button for the requested integration", () => {
       ],
     },
   ])
-  expect(JSON.stringify(card.subtext)).toContain(
-    "Expires at <!date^1700000000^{time}|"
-  )
+  expect(subtext.text).toContain("Expires at <!date^1700000000^{time}|")
+  expect(subtext.text.endsWith(".")).toBe(false)
   expect(JSON.stringify(card.subtext)).not.toContain("review permissions")
   expect(actions).toHaveLength(2)
   expect(actions[0]).not.toHaveProperty("style")
@@ -96,6 +96,7 @@ test("renders cancelled updates without setup actions", () => {
     updatedAt: 1_699_999_000_000,
   })
   const card = message.blocks[0] as Record<string, unknown>
+  const subtext = card.subtext as { text: string }
 
   expect(message.text).toContain("Google Drive setup offer cancelled")
   expect(card).not.toHaveProperty("actions")
@@ -103,9 +104,9 @@ test("renders cancelled updates without setup actions", () => {
     type: "mrkdwn",
     text: "Setup offer cancelled",
   })
-  expect(JSON.stringify(card.subtext)).toContain(
-    "Cancelled at <!date^1699999000^{time}|"
-  )
+  expect(subtext.text).toContain("Cancelled at <!date^1699999000^{time}|")
+  expect(subtext.text).not.toContain("Ask Milo")
+  expect(subtext.text.endsWith(".")).toBe(false)
 })
 
 test("keeps setup card bodies within card limits", () => {
