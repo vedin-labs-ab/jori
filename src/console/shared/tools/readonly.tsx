@@ -2,7 +2,7 @@ import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { SeparatorDot } from "../shared/dot"
+import { SeparatorDot } from "../dot"
 import {
   accessLabel,
   groupToolsByAccess,

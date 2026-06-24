@@ -1,7 +1,7 @@
 import { Workflow, Wrench } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { DetailRow } from "../../shared/details"
-import { ToolGroupsValue } from "../../tools"
+import { ToolGroupsValue } from "../../shared/tools"
 import { automationSummary, type CapabilityGroup } from "../format"
 import { type ArtifactSummary } from "../types"
 

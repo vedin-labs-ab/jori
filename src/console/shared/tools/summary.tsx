@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { MiloLogo } from "@/shared/brand"
-import { providerLogoPath } from "../shared/logo/path"
+import { providerLogoPath } from "../logo/path"
 
 type ToolSurfaceLogoSize = "sm" | "md"
 
