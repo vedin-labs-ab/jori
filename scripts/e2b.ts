@@ -73,6 +73,8 @@ function createImageCheckCommand() {
     `test -x ${shellQuote(`${sandboxArtifactRuntime}/node_modules/.bin/tsc`)}`,
     `test -x ${shellQuote(`${sandboxArtifactRuntime}/node_modules/.bin/biome`)}`,
     `test -x ${shellQuote(`${sandboxArtifactRuntime}/node_modules/.bin/vite`)}`,
+    `test -x ${shellQuote(`${sandboxArtifactRuntime}/node_modules/.bin/shadcn`)}`,
+    `cd ${shellQuote(sandboxArtifactRuntime)}`,
     `node -e ${JSON.stringify(imageCheckScript())}`,
   ].join("\n")
 }
@@ -85,7 +87,6 @@ function imageCheckScript() {
     "await import('lucide-react')",
     "await import('@tailwindcss/vite')",
     "await import('tailwindcss')",
-    "await import('shadcn')",
   ].join(";")
 }
 
