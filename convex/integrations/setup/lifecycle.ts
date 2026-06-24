@@ -7,12 +7,10 @@ import {
   internalQuery,
 } from "../../_generated/server"
 import { updateSlackMessage } from "../../broker/tools/slack"
-import { readAppOrigin } from "../../shared/app"
-import { integrationSlackIconUrl } from "./logos"
 import { createSlackSetupLinkMessage } from "./slack"
-import { markSetupLinkExpired } from "./transition"
+import { markSetupLinkCancelled, markSetupLinkExpired } from "./transition"
 
-type TerminalSetupStatus = "connected" | "expired" | "failed"
+type TerminalSetupStatus = "cancelled" | "connected" | "expired" | "failed"
 
 export const expire = internalAction({
   args: {
@@ -54,14 +52,54 @@ export const markExpired = internalMutation({
 
     if (
       link === null ||
-      link.status === "connected" ||
-      link.status === "expired" ||
+      terminalStatus(link.status) !== null ||
       Date.now() < link.expiresAt
     ) {
       return null
     }
 
     await markSetupLinkExpired(ctx, link, Date.now())
+
+    return null
+  },
+})
+
+export const cancel = internalMutation({
+  args: {
+    accountId: v.string(),
+    channelId: v.string(),
+    messageTs: v.string(),
+    setupLinkId: v.id("setupLinks"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const link = await ctx.db.get(args.setupLinkId)
+
+    if (link === null) {
+      return null
+    }
+
+    const delivery = link.delivery
+
+    if (
+      delivery?.integration !== "slack" ||
+      delivery.data.channelId !== args.channelId ||
+      delivery.data.messageTs !== args.messageTs
+    ) {
+      return null
+    }
+
+    const integration = await ctx.db.get(delivery.integrationId)
+
+    if (
+      integration === null ||
+      integration.integration !== delivery.integration ||
+      integration.externalId !== args.accountId
+    ) {
+      return null
+    }
+
+    await markSetupLinkCancelled(ctx, link, Date.now())
 
     return null
   },
@@ -79,14 +117,9 @@ export const getSurfaceTarget = internalQuery({
     }
 
     const status = terminalStatus(link.status)
-
-    if (status === null) {
-      return null
-    }
-
     const delivery = link.delivery
 
-    if (delivery === undefined) {
+    if (status === null || delivery === undefined) {
       return null
     }
 
@@ -110,16 +143,9 @@ async function syncSlackSurface(target: {
   integration: Doc<"integrations">
   link: Doc<"setupLinks"> & { status: TerminalSetupStatus }
 }) {
-  const origin = readAppOrigin()
-
-  if (origin === undefined) {
-    throw new Error("MILO_APP_URL must be configured to update setup offers.")
-  }
-
   const message = createSlackSetupLinkMessage({
     expiresAt: target.link.expiresAt,
     integration: target.link.integration,
-    iconUrl: integrationSlackIconUrl(target.link.integration, origin),
     status: target.link.status,
     summary: target.link.summary ?? "Milo requested this connection.",
     updatedAt: target.link.updatedAt,
@@ -136,7 +162,14 @@ async function syncSlackSurface(target: {
 function terminalStatus(
   status: Doc<"setupLinks">["status"]
 ): TerminalSetupStatus | null {
-  return status === "connected" || status === "expired" || status === "failed"
-    ? status
-    : null
+  if (
+    status === "cancelled" ||
+    status === "connected" ||
+    status === "expired" ||
+    status === "failed"
+  ) {
+    return status
+  }
+
+  return null
 }

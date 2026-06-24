@@ -5,7 +5,7 @@ import {
   handleSlackApprovalInteraction,
   isSlackApprovalDecisionText,
 } from "../../approvals/slack"
-import { isSlackSetupLinkInteraction } from "../../integrations/setup/slack"
+import { handleSlackSetupLinkInteraction } from "../../integrations/setup/interaction"
 import { createIntegrationActor } from "../../shared/actor"
 import {
   readCallbackState,
@@ -75,9 +75,13 @@ export async function handleSlackOAuthCallback(
   })
 
   const botToken =
-    tokenResult.ok === true ? getSlackBotToken(tokenResult) : undefined
+    tokenResult.ok === true && tokenResult.access_token !== ""
+      ? tokenResult.access_token
+      : undefined
   const userToken =
-    tokenResult.ok === true ? getSlackUserToken(tokenResult) : undefined
+    tokenResult.ok === true && tokenResult.authed_user?.access_token !== ""
+      ? tokenResult.authed_user?.access_token
+      : undefined
 
   if (
     tokenResult.ok !== true ||
@@ -228,23 +232,9 @@ export async function handleSlackInteractions(
     return new Response("Invalid Slack interaction payload", { status: 400 })
   }
 
-  if (isSlackSetupLinkInteraction(parsed)) {
+  if (await handleSlackSetupLinkInteraction(ctx, parsed)) {
     return Response.json({ ok: true })
   }
 
   return await handleSlackApprovalInteraction(ctx, parsed)
-}
-
-function getSlackBotToken(tokenResult: { access_token?: string }) {
-  const token = tokenResult.access_token
-
-  return token === "" ? undefined : token
-}
-
-function getSlackUserToken(tokenResult: {
-  authed_user?: { access_token?: string }
-}) {
-  const token = tokenResult.authed_user?.access_token
-
-  return token === "" ? undefined : token
 }

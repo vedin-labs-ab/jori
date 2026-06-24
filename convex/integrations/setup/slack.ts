@@ -1,3 +1,4 @@
+import { type Id } from "../../_generated/dataModel"
 import { createSlackCard } from "../../providers/slack/card"
 import {
   formatSlackTime,
@@ -5,16 +6,21 @@ import {
   truncateSlackText,
 } from "../../providers/slack/format"
 import { type Integration, integrationLabel } from "../../shared/integrations"
+import { setupLinkCancelActionId, setupLinkOpenActionId } from "./interaction"
 
-const setupLinkActionId = "milo_setup_link_open"
 const setupLinkSummaryLimit = 200
 
-type SlackSetupLinkStatus = "connected" | "expired" | "failed" | "pending"
+type SlackSetupLinkStatus =
+  | "cancelled"
+  | "connected"
+  | "expired"
+  | "failed"
+  | "pending"
 
 export function createSlackSetupLinkMessage(args: {
   expiresAt: number
   integration: Integration
-  iconUrl: string
+  setupLinkId?: Id<"setupLinks">
   status?: SlackSetupLinkStatus
   summary: string
   updatedAt?: number
@@ -32,9 +38,8 @@ export function createSlackSetupLinkMessage(args: {
     blocks: [
       createSlackCard({
         icon: {
-          type: "image",
-          image_url: args.iconUrl,
-          alt_text: `${label} logo`,
+          type: "icon",
+          name: "link",
         },
         title: setupCardTitle(status),
         subtitle: label,
@@ -45,39 +50,22 @@ export function createSlackSetupLinkMessage(args: {
           status,
           updatedAt: args.updatedAt,
         }),
-        actions: setupActions(status, label, args.url),
+        actions: setupActions({
+          label,
+          setupLinkId: args.setupLinkId,
+          status,
+          url: args.url,
+        }),
       }),
     ],
   }
 }
 
-export function isSlackSetupLinkInteraction(payload: unknown) {
-  return readActionIds(payload).includes(setupLinkActionId)
-}
-
-function readActionIds(payload: unknown) {
-  if (typeof payload !== "object" || payload === null) {
-    return []
-  }
-
-  const actions = (payload as { actions?: unknown }).actions
-
-  if (!Array.isArray(actions)) {
-    return []
-  }
-
-  return actions.flatMap((action) => {
-    if (typeof action !== "object" || action === null) {
-      return []
-    }
-
-    const actionId = (action as { action_id?: unknown }).action_id
-
-    return typeof actionId === "string" ? [actionId] : []
-  })
-}
-
 function setupTitle(status: SlackSetupLinkStatus, label: string) {
+  if (status === "cancelled") {
+    return `${label} setup offer cancelled`
+  }
+
   if (status === "connected") {
     return `${label} connected to Milo`
   }
@@ -94,6 +82,10 @@ function setupTitle(status: SlackSetupLinkStatus, label: string) {
 }
 
 function setupCardTitle(status: SlackSetupLinkStatus) {
+  if (status === "cancelled") {
+    return "Setup offer cancelled"
+  }
+
   if (status === "connected") {
     return "Connection complete"
   }
@@ -106,7 +98,7 @@ function setupCardTitle(status: SlackSetupLinkStatus) {
     return "Setup offer expired"
   }
 
-  return "Connection required"
+  return "Connection request"
 }
 
 function setupFallback(
@@ -114,6 +106,10 @@ function setupFallback(
   label: string,
   expiresAt: number
 ) {
+  if (status === "cancelled") {
+    return `The ${label} setup offer was cancelled.`
+  }
+
   if (status === "connected") {
     return `${label} is connected.`
   }
@@ -129,28 +125,46 @@ function setupFallback(
   return `Expires at ${formatSlackTime(toSlackTimestamp(expiresAt))}.`
 }
 
-function setupActions(
-  status: SlackSetupLinkStatus,
-  label: string,
+function setupActions(args: {
+  label: string
+  setupLinkId: Id<"setupLinks"> | undefined
+  status: SlackSetupLinkStatus
   url: string | undefined
-) {
-  if (status !== "pending" || url === undefined) {
+}) {
+  if (args.status !== "pending") {
     return undefined
   }
 
-  return [
-    {
+  const actions: Record<string, unknown>[] = []
+
+  if (args.setupLinkId !== undefined) {
+    actions.push({
       type: "button",
-      action_id: setupLinkActionId,
+      action_id: setupLinkCancelActionId,
+      text: {
+        type: "plain_text",
+        text: "Cancel",
+        emoji: false,
+      },
+      value: JSON.stringify({ setupLinkId: args.setupLinkId }),
+    })
+  }
+
+  if (args.url !== undefined) {
+    actions.push({
+      type: "button",
+      action_id: setupLinkOpenActionId,
       style: "primary",
       text: {
         type: "plain_text",
-        text: `Connect ${label}`,
+        text: `Connect ${args.label}`,
         emoji: false,
       },
-      url,
-    },
-  ]
+      url: args.url,
+    })
+  }
+
+  return actions.length === 0 ? undefined : actions
 }
 
 function setupSubtext(args: {
@@ -159,6 +173,12 @@ function setupSubtext(args: {
   status: SlackSetupLinkStatus
   updatedAt: number | undefined
 }) {
+  if (args.status === "cancelled") {
+    return `Cancelled at ${formatSlackTime(
+      toSlackTimestamp(args.updatedAt ?? Date.now())
+    )}. Ask Milo for a new setup offer.`
+  }
+
   if (args.status === "connected") {
     return `Connected at ${formatSlackTime(
       toSlackTimestamp(args.updatedAt ?? Date.now())
@@ -168,7 +188,7 @@ function setupSubtext(args: {
   if (args.status === "failed") {
     return `Failed at ${formatSlackTime(
       toSlackTimestamp(args.updatedAt ?? Date.now())
-    )}. You'll review permissions before connecting.`
+    )}. Ask Milo for a new setup offer.`
   }
 
   if (args.status === "expired") {
@@ -177,7 +197,5 @@ function setupSubtext(args: {
     )}. Ask Milo for a new setup offer.`
   }
 
-  return `Expires at ${formatSlackTime(
-    toSlackTimestamp(args.expiresAt)
-  )}. You'll review permissions before connecting.`
+  return `Expires at ${formatSlackTime(toSlackTimestamp(args.expiresAt))}.`
 }
