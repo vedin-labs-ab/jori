@@ -33,4 +33,15 @@ export const linearToolInputSchemas = {
       issueId: stringProperty("Linear issue UUID."),
     },
   }),
+  linear_add_reaction: objectSchema({
+    required: ["emoji"],
+    properties: {
+      commentId: stringProperty("Linear comment UUID to react to."),
+      emoji: stringProperty("Emoji reaction value to send to Linear."),
+      issueId: stringProperty("Linear issue UUID to react to."),
+      projectUpdateId: stringProperty(
+        "Linear project update UUID to react to."
+      ),
+    },
+  }),
 } satisfies SchemaMap

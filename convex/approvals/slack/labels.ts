@@ -44,6 +44,7 @@ const toolLabels: Record<string, string> = {
   github_list_repositories: "List GitHub repositories",
   github_search_issues: "Search GitHub issues and pull requests",
   linear_add_comment: "Add Linear comment",
+  linear_add_reaction: "Add Linear reaction",
   linear_get_issue: "Read Linear issue",
   linear_list_comments: "Read Linear comments",
   linear_search_issues: "Search Linear issues",
