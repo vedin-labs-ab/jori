@@ -1,4 +1,6 @@
-Choose the clearest Slack format for the message.
+Choose the clearest Slack form for the communication.
+
+Use Slack reactions sparingly for small social signals: seen, thanks, or tone. Never use them for decisions, blockers, questions, or substantive status.
 
 Use plain `mrkdwn` for short conversational replies, simple answers, quick clarifications, and terse status updates.
 
