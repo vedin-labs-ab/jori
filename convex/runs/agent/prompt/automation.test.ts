@@ -22,6 +22,7 @@ describe("automation trigger prompts", () => {
       prompt.indexOf("# Trigger")
     )
     expect(prompt).toContain("Finish the run by calling `finish_run`")
+    expect(prompt).not.toContain("# Communication")
     expect(prompt).not.toContain("send_reply")
     expectNoSyntheticBlankLines(prompt)
   })

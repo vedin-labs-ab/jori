@@ -176,6 +176,20 @@ describe("runtime delivery prompts", () => {
     expectNoSyntheticBlankLines(prompt)
   })
 
+  test.each(
+    messageTriggerCases
+  )("renders generic communication guidance for %s message runs", (provider, data) => {
+    const prompt = assemblePrompt(runtimeInput(provider, data))
+
+    expect(prompt).toContain("# Communication")
+    expect(prompt).toContain(
+      "When asked to communicate on the active surface, choose the smallest sufficient visible action"
+    )
+    expect(prompt).toContain("Use `send_reply`")
+    expect(prompt).toContain("# Completion")
+    expect(prompt).toContain("Assistant completion text is private run output")
+  })
+
   test("omits automatic final delivery instructions", () => {
     const prompt = assemblePrompt(githubMessageInput())
 

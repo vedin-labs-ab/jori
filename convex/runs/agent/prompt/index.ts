@@ -75,7 +75,11 @@ function defaultActiveSurface(
 function omittedSkillNames(
   communication: ReturnType<typeof createCommunicationInstructions>
 ) {
-  return new Set(communication === null ? [] : [communication.skill.name])
+  if (communication === null || communication.skill === null) {
+    return new Set<string>()
+  }
+
+  return new Set([communication.skill.name])
 }
 
 function createApprovalInstructions(promptedTools: ToolPermission[]) {
