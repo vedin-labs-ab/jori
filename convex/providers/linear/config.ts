@@ -4,4 +4,9 @@ export const linearOAuthRevokeUrl = "https://api.linear.app/oauth/revoke"
 export const linearGraphqlUrl = "https://api.linear.app/graphql"
 export const linearOAuthCallbackPath = "/linear/oauth/callback"
 
-export const linearOAuthScopes = ["read", "comments:create", "app:mentionable"]
+export const linearOAuthScopes = [
+  "read",
+  "write",
+  "comments:create",
+  "app:mentionable",
+]
