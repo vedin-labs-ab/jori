@@ -11,6 +11,7 @@ const tableRegistry: Record<TableName, true> = {
   identities: true,
   integrations: true,
   setupLinks: true,
+  setupLinkEvents: true,
   messages: true,
   messageConversations: true,
   automations: true,

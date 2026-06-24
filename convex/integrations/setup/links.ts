@@ -1,21 +1,29 @@
 import { v } from "convex/values"
-import {
-  internalMutation,
-  type MutationCtx,
-  mutation,
-} from "../../_generated/server"
+import { internal } from "../../_generated/api"
+import { internalMutation, mutation } from "../../_generated/server"
 import { requireTenantAccess } from "../../identity/access"
-import { upsertIdentity } from "../../identity/identities"
 import { requireClerkUserId } from "../../identity/users"
 import {
   createSignedInstallState,
   installPathForIntegration,
 } from "../../providers/install"
-import { readAppOrigin } from "../../shared/app"
 import { integrationValidator } from "../../shared/integrations"
-import { type SetupLinkSource, setupLinkSource } from "./schema"
-import { surfaceIdentityProvider } from "./source"
+import { recordSetupLinkEvent } from "./events"
+import {
+  findSetupLinkByToken,
+  normalizeSetupReturnUrl,
+  setupLinkLocation,
+  upsertSetupSourceIdentity,
+} from "./helpers"
+import { setupLinkDelivery, setupLinkSource } from "./schema"
 import { createSetupToken, hashSetupToken } from "./tokens"
+import {
+  markSetupLinkConnected,
+  markSetupLinkExpired,
+  markSetupLinkFailed,
+  patchAndRead,
+  recordSetupLinkDelivery,
+} from "./transition"
 
 const setupLinkTtlMs = 30 * 60 * 1000
 
@@ -23,6 +31,7 @@ export const create = internalMutation({
   args: {
     tenantId: v.string(),
     integration: integrationValidator,
+    summary: v.string(),
     source: setupLinkSource,
   },
   returns: v.object({
@@ -36,23 +45,38 @@ export const create = internalMutation({
     const token = createSetupToken()
     const location = setupLinkLocation(token)
     const now = Date.now()
+    const expiresAt = now + setupLinkTtlMs
     const setupLinkId = await ctx.db.insert("setupLinks", {
       tenantId: args.tenantId,
       integration: args.integration,
       tokenHash: await hashSetupToken(token),
       status: "pending",
+      summary: args.summary,
       source: args.source,
-      expiresAt: now + setupLinkTtlMs,
+      expiresAt,
       createdAt: now,
       updatedAt: now,
     })
+    const functionId = await ctx.scheduler.runAt(
+      expiresAt,
+      internal.integrations.setup.lifecycle.expire,
+      { setupLinkId }
+    )
+    const link = await patchAndRead(ctx, setupLinkId, { functionId })
+
+    if (link !== null) {
+      await recordSetupLinkEvent(ctx, {
+        link,
+        type: "offer.created",
+      })
+    }
 
     return {
       setupLinkId,
       integration: args.integration,
       url: location.url,
       urlPath: location.urlPath,
-      expiresAt: now + setupLinkTtlMs,
+      expiresAt,
     }
   },
 })
@@ -77,7 +101,7 @@ export const claim = mutation({
     })
   ),
   handler: async (ctx, args) => {
-    const link = await findByToken(ctx, args.token)
+    const link = await findSetupLinkByToken(ctx, args.token)
 
     if (link === null) {
       throw new Error("Setup link not found.")
@@ -88,6 +112,7 @@ export const claim = mutation({
     const now = Date.now()
 
     if (link.expiresAt <= now && link.status !== "connected") {
+      await markSetupLinkExpired(ctx, link, now)
       throw new Error("This setup link has expired.")
     }
 
@@ -95,7 +120,7 @@ export const claim = mutation({
       throw new Error("This setup link was already claimed by another user.")
     }
 
-    await upsertSourceIdentity(ctx, {
+    await upsertSetupSourceIdentity(ctx, {
       tenantId: link.tenantId,
       userId,
       source: link.source,
@@ -156,99 +181,38 @@ export const complete = internalMutation({
     const now = Date.now()
 
     if (args.integrationId !== undefined) {
-      await ctx.db.patch(link._id, {
-        status: "connected",
-        result: { integrationId: args.integrationId },
-        updatedAt: now,
+      await markSetupLinkConnected(ctx, link, {
+        integrationId: args.integrationId,
+        now,
       })
 
       return null
     }
 
-    await ctx.db.patch(link._id, {
-      status: "failed",
-      result: {
-        error: args.error ?? "Provider authorization failed.",
-      },
-      updatedAt: now,
+    await markSetupLinkFailed(ctx, link, {
+      error: args.error ?? "Provider authorization failed.",
+      now,
     })
 
     return null
   },
 })
 
-function setupLinkLocation(token: string) {
-  const urlPath = `/integrations/setup/${encodeURIComponent(token)}`
-  const origin = requireAppOrigin()
-
-  return {
-    url: new URL(urlPath, origin).toString(),
-    urlPath,
-  }
-}
-
-async function findByToken(ctx: MutationCtx, token: string) {
-  const tokenHash = await hashSetupToken(token)
-
-  return await ctx.db
-    .query("setupLinks")
-    .withIndex("by_token_hash", (query) => query.eq("tokenHash", tokenHash))
-    .first()
-}
-
-async function upsertSourceIdentity(
-  ctx: MutationCtx,
+export const recordDelivery = internalMutation({
   args: {
-    tenantId: string
-    userId: string
-    source: SetupLinkSource
-  }
-) {
-  const provider = surfaceIdentityProvider(args.source.surface)
-  const actor = args.source.actor
+    setupLinkId: v.id("setupLinks"),
+    delivery: setupLinkDelivery,
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const link = await ctx.db.get(args.setupLinkId)
 
-  if (provider === undefined || actor === undefined) {
-    return
-  }
+    if (link === null) {
+      return null
+    }
 
-  await upsertIdentity(ctx, {
-    tenantId: args.tenantId,
-    userId: args.userId,
-    provider,
-    externalId: actor.externalId,
-    email: actor.email,
-    name: actor.name,
-  })
-}
+    await recordSetupLinkDelivery(ctx, link, args.delivery)
 
-function normalizeSetupReturnUrl(returnUrl: string) {
-  let url: URL
-
-  try {
-    url = new URL(returnUrl)
-  } catch {
-    throw new Error("Setup return URL must be absolute.")
-  }
-
-  if (
-    url.origin !== requireAppOrigin() ||
-    !url.pathname.startsWith("/integrations/setup/")
-  ) {
-    throw new Error("Setup return URL must point to a Milo setup link.")
-  }
-
-  url.search = ""
-  url.hash = ""
-
-  return url.toString()
-}
-
-function requireAppOrigin() {
-  const origin = readAppOrigin()
-
-  if (origin === undefined) {
-    throw new Error("MILO_APP_URL must be configured to create setup links.")
-  }
-
-  return origin
-}
+    return null
+  },
+})

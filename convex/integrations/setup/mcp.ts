@@ -1,18 +1,12 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { type ApprovalBrokerContext } from "../../broker/approval"
-import { postSlackMessage } from "../../broker/tools/slack"
-import {
-  getSlackChannelId,
-  getSlackMessageTs,
-  getSlackThreadTs,
-} from "../../providers/slack/data"
 import {
   type Integration,
   integrationLabel,
   integrations,
 } from "../../shared/integrations"
-import { createSlackSetupLinkMessage } from "./slack"
+import { tryDeliverSetupOffer } from "./delivery"
 import { setupSourceFromInput } from "./source"
 
 const setupTool = "offer_integration_setup"
@@ -39,7 +33,8 @@ export async function callIntegrationSetupTool(
     throw new Error("Integration setup links require an interactive run.")
   }
 
-  const integration = readRequestedIntegration(request.args)
+  const setupRequest = readSetupRequest(request.args)
+  const integration = setupRequest.integration
   const label = integrationLabel(integration)
   const existing = findConnectedIntegration(context, integration)
 
@@ -55,11 +50,15 @@ export async function callIntegrationSetupTool(
   const link = await ctx.runMutation(internal.integrations.setup.links.create, {
     tenantId: context.run.tenantId,
     integration,
+    summary: setupRequest.summary,
     source: setupSourceFromInput(context.input),
   })
-  const delivery = await tryDeliverSlackSetupLink(context, {
+  const delivery = await tryDeliverSetupOffer(ctx, context, {
+    expiresAt: link.expiresAt,
     integration,
+    summary: setupRequest.summary,
     url: link.url,
+    setupLinkId: link.setupLinkId,
   })
 
   return {
@@ -71,67 +70,9 @@ export async function callIntegrationSetupTool(
     expiresAt: link.expiresAt,
     message:
       delivery.status === "delivered"
-        ? `Sent a ${label} setup button in Slack.`
-        : `Open this link to connect ${label}: ${link.url}`,
+        ? `Posted a ${label} setup offer in Slack. Do not send a separate reply for this offer.`
+        : `No native setup offer was delivered. Send this setup link if the user needs it: ${link.url}`,
     delivery,
-  }
-}
-
-async function tryDeliverSlackSetupLink(
-  context: ApprovalBrokerContext,
-  args: {
-    integration: Integration
-    url: string
-  }
-) {
-  const target = getSlackTarget(context)
-
-  if (target === null) {
-    return { status: "created" as const }
-  }
-
-  try {
-    const message = createSlackSetupLinkMessage(args)
-
-    await postSlackMessage(target.integration, {
-      channel: target.channelId,
-      thread_ts: target.threadTs,
-      text: message.text,
-      blocks: message.blocks,
-    })
-
-    return {
-      status: "delivered" as const,
-      surface: "slack" as const,
-      channelId: target.channelId,
-      threadTs: target.threadTs,
-    }
-  } catch {
-    return { status: "created" as const }
-  }
-}
-
-function getSlackTarget(context: ApprovalBrokerContext) {
-  if (context.input.type !== "message") {
-    return null
-  }
-
-  if (context.input.messageIntegration !== "slack") {
-    return null
-  }
-
-  const channelId = getSlackChannelId(context.input.message.data)
-
-  if (channelId === undefined) {
-    return null
-  }
-
-  return {
-    integration: context.input.integration,
-    channelId,
-    threadTs:
-      getSlackThreadTs(context.input.message.data) ??
-      getSlackMessageTs(context.input.message.data),
   }
 }
 
@@ -146,7 +87,10 @@ function findConnectedIntegration(
   )
 }
 
-function readRequestedIntegration(args: unknown): Integration {
+function readSetupRequest(args: unknown): {
+  integration: Integration
+  summary: string
+} {
   if (typeof args !== "object" || args === null || Array.isArray(args)) {
     throw new Error("offer_integration_setup requires an integration.")
   }
@@ -157,9 +101,20 @@ function readRequestedIntegration(args: unknown): Integration {
     throw new Error("offer_integration_setup received an unknown integration.")
   }
 
-  return integration
+  return {
+    integration,
+    summary: readSummary((args as { summary?: unknown }).summary),
+  }
 }
 
 function isIntegration(value: unknown): value is Integration {
   return integrations.includes(value as Integration)
+}
+
+function readSummary(value: unknown) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new Error("offer_integration_setup requires a summary.")
+  }
+
+  return value.trim()
 }
