@@ -1,6 +1,6 @@
 Choose the clearest Slack form for the communication.
 
-Use Slack reactions sparingly for small social signals: seen, thanks, tone, or conversational closure. When that is enough, prefer a reaction over `send_reply`. Never use reactions for decisions, blockers, questions, or substantive status.
+Use Slack reactions for small social signals: seen, thanks, tone, or conversational closure. Never use reactions for decisions, blockers, questions, or substantive status.
 
 Use plain `mrkdwn` for short conversational replies, simple answers, quick clarifications, and terse status updates.
 
