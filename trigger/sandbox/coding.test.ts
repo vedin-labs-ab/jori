@@ -118,6 +118,45 @@ test("runs bash from a workspace cwd and rejects outside cwd values", async () =
   ).rejects.toThrow("Sandbox path must be inside the Milo workspace")
 })
 
+test("runs read-only git commands against a real repository", async () => {
+  await expect(
+    executeCodingTool({
+      input: { args: ["log", "--oneline", "-1"] },
+      sandbox: createGitSandbox(),
+      tool: "git",
+    })
+  ).resolves.toMatchObject({
+    exitCode: 0,
+    stderr: "",
+    stdout: expect.stringContaining("initial"),
+  })
+})
+
+test("rejects mutating git commands in the git tool", async () => {
+  await expect(
+    executeCodingTool({
+      input: { args: ["checkout", "-b", "work"] },
+      sandbox: createGitSandbox(),
+      tool: "git",
+    })
+  ).rejects.toThrow("git checkout is not allowed")
+})
+
+test("guards git writes inside bash commands", async () => {
+  const sandbox = createGitSandbox()
+
+  await expect(
+    executeCodingTool({
+      input: { command: "git status --short && command git checkout -b work" },
+      sandbox,
+      tool: "bash",
+    })
+  ).resolves.toMatchObject({
+    exitCode: 2,
+    stderr: expect.stringContaining("git is read-only in bash"),
+  })
+})
+
 function createLocalSandbox(files: Record<string, string>) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "milo-tools-"))
   roots.push(root)
@@ -130,6 +169,28 @@ function createLocalSandbox(files: Record<string, string>) {
   }
 
   return new LocalSandbox(root)
+}
+
+function createGitSandbox() {
+  const sandbox = createLocalSandbox({ "file.txt": "hello\n" })
+  runGit(sandbox.root, "init")
+  runGit(sandbox.root, "config", "user.email", "milo@example.com")
+  runGit(sandbox.root, "config", "user.name", "Milo")
+  runGit(sandbox.root, "add", "file.txt")
+  runGit(sandbox.root, "commit", "-m", "initial")
+
+  return sandbox
+}
+
+function runGit(cwd: string, ...args: string[]) {
+  const result = spawnSync("git", args, {
+    cwd,
+    encoding: "utf8",
+  })
+
+  if (result.status !== 0) {
+    throw new Error(result.stderr)
+  }
 }
 
 class LocalSandbox implements SandboxRuntime {

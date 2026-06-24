@@ -18,8 +18,8 @@ import {
 import { compactFailure } from "./output"
 import { sandboxPath } from "./path"
 import {
-  gitAskpassScript,
   gitCloneCommand,
+  gitCredentialHelperScript,
   temporaryGitCredentialPath,
 } from "./script"
 import {
@@ -75,21 +75,21 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   async cloneRepository(input: SandboxCloneRepositoryInput) {
     const directory = sandboxPath(input.directory ?? "repository")
     const tokenPath = temporaryGitCredentialPath("token")
-    const askpassPath = temporaryGitCredentialPath("askpass")
+    const helperPath = temporaryGitCredentialPath("helper")
 
     await this.writeFiles([
       { content: input.token, path: tokenPath },
       {
-        content: gitAskpassScript(tokenPath, input.username),
-        path: askpassPath,
+        content: gitCredentialHelperScript(tokenPath, input.username),
+        path: helperPath,
       },
     ])
 
     const result = await this.runCommand({
       command: gitCloneCommand({
-        askpassPath,
         directory,
         ref: input.ref,
+        helperPath,
         remoteUrl: input.remoteUrl,
         tokenPath,
       }),
