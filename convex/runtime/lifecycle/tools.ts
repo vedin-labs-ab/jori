@@ -14,7 +14,7 @@ export function runLifecycleTools(): RunLifecycleTool[] {
     {
       access: "write",
       description:
-        "Finish this agentic run. If this run has an active requester surface and no send_reply was sent, include reason explaining why no visible reply is warranted. The reason is internal and is not shown to the requester.",
+        "Finish this agentic run. If this run has an active requester surface and no visible communication was sent, include reason explaining why none is warranted. The reason is internal and is not shown to the requester.",
       inputSchema: finishRunSchema(),
       name: "finish_run",
       route: "run",
@@ -30,7 +30,7 @@ function finishRunSchema(): JsonObject {
       reason: {
         type: "string",
         description:
-          "Internal reason for finishing. Required when this run has an active requester surface and no send_reply was sent.",
+          "Internal reason for finishing. Required when this run has an active requester surface and no visible communication was sent.",
       },
     },
   }

@@ -1,7 +1,5 @@
 Choose the clearest Slack form for the communication.
 
-Use Slack reactions for small social signals: seen, thanks, tone, or conversational closure. Never use reactions for decisions, blockers, questions, or substantive status.
-
 Use plain `mrkdwn` for short conversational replies, simple answers, quick clarifications, and terse status updates.
 
 Use Slack `blocks` when structure makes the message easier to scan, especially for results, blockers with next steps, research summaries, generated deliverables, grouped findings, small tables, previews, or messages with multiple sections.

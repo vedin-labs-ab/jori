@@ -28,10 +28,10 @@ describe("runtime skill prompts", () => {
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain(
-      "When instructed to send, reply, report, update, tell the user, or let them know"
+      "Use `send_reply` when the response needs words; use `add_reaction` when a small signal is enough"
     )
     expect(prompt).toContain("Assistant completion text is private run output")
-    expect(prompt).toContain("call `send_reply`")
+    expect(prompt).toContain("Use `send_reply` for words")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("## Guidance")
@@ -40,11 +40,9 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("Use `load_skill`")
     expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).not.toContain("`slack`: Format Slack replies")
-    expect(
-      prompt.indexOf(
-        "When instructed to send, reply, report, update, tell the user, or let them know"
-      )
-    ).toBeLessThan(prompt.indexOf("# Updates"))
+    expect(prompt.indexOf("Use `send_reply`")).toBeLessThan(
+      prompt.indexOf("# Updates")
+    )
     expect(prompt).toContain("Format Slack messages with Slack `mrkdwn`")
     expect(prompt).toContain(
       "Escape literal `&`, `<`, and `>` unless they are part of valid Slack syntax.\n\nChoose the clearest Slack form for the communication."

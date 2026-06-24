@@ -18,21 +18,23 @@ export function executeRunTool(
 
 function finishRun(runtime: ToolRuntime, input: JsonObject) {
   const reason = optionalString(input.reason)
-  const replied = runtime.context.activeSurface?.replySent ?? false
+  const communicated = runtime.context.activeSurface?.communicated ?? false
 
   if (
     runtime.context.activeSurface !== null &&
-    !replied &&
+    !communicated &&
     reason === undefined
   ) {
-    throw new Error("finish_run requires reason when no reply was sent.")
+    throw new Error(
+      "finish_run requires reason when no visible communication was sent."
+    )
   }
 
   return {
     finished: true,
     value: {
+      communicated,
       reason: reason ?? null,
-      replied,
       status: "finished",
     },
   }

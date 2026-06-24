@@ -23,6 +23,7 @@ const profiles = {
 export function createCommunicationGuidance(args: {
   integration: Integration
   profile: CommunicationProfile
+  reactions: boolean
 }) {
   const skill = getRuntimeSkillForIntegration(args.integration)
 
@@ -37,6 +38,7 @@ export function createCommunicationGuidance(args: {
     body: renderPromptTemplate(promptTemplates["communication/message"], {
       communication: {
         guidance: createGuidanceBlock(skill, capabilities),
+        reactions: args.reactions,
       },
     }).trim(),
     skill,

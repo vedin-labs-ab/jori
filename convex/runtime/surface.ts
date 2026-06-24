@@ -7,22 +7,23 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { replyAddress } from "../messages/surface"
+import { reactionAddress, replyAddress } from "../messages/surface"
 import {
   type AgentRuntimeInput,
   type MessageIntegration,
 } from "../runs/agent/input"
 import { requiredString } from "../shared/input"
 import { requireWorkerSecret } from "./shared"
+import { addSurfaceReaction } from "./surface/reaction"
 import { optionalSlackBlocks, sendSurfaceReply } from "./surface/reply"
 import { type ActiveSurfaceTool, activeSurfaceTools } from "./surface/tools"
 
 type ActiveSurfaceState = {
-  replySent: boolean
+  communicated: boolean
 }
 
 type ActiveSurface = {
-  replySent: boolean
+  communicated: boolean
   surface: MessageIntegration
 }
 
@@ -45,7 +46,7 @@ export async function loadActiveSurface(
 
   return {
     state: {
-      replySent: current.replySent,
+      communicated: current.communicated,
       surface: input.messageIntegration,
     },
     tools: activeSurfaceTools(input.messageIntegration),
@@ -57,11 +58,11 @@ export const state = internalQuery({
     runId: v.id("runs"),
   },
   returns: v.object({
-    replySent: v.boolean(),
+    communicated: v.boolean(),
   }),
   handler: async (ctx, args): Promise<ActiveSurfaceState> => {
     return {
-      replySent: await hasCompletedReplyTrace(ctx, args.runId),
+      communicated: await hasCompletedCommunicationTrace(ctx, args.runId),
     }
   },
 })
@@ -106,17 +107,58 @@ export const sendReply = action({
   },
 })
 
-async function hasCompletedReplyTrace(ctx: QueryCtx, runId: Id<"runs">) {
+export const addReaction = action({
+  args: {
+    runId: v.id("runs"),
+    secret: v.string(),
+    emoji: v.string(),
+  },
+  returns: v.object({
+    status: v.literal("sent"),
+  }),
+  handler: async (ctx, args) => {
+    requireWorkerSecret(args.secret)
+
+    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
+      runId: args.runId,
+    })) as AgentRuntimeInput | null
+
+    if (input === null || input.type !== "message") {
+      throw new Error("Run has no active surface.")
+    }
+
+    if (input.integration.status !== "active") {
+      throw new Error("Active surface integration is not active.")
+    }
+
+    const address = reactionAddress(input.message)
+
+    if (address === null) {
+      throw new Error("Run has no active reaction target.")
+    }
+
+    await addSurfaceReaction(ctx, input, address, {
+      emoji: requiredString(args.emoji, "emoji"),
+    })
+
+    return { status: "sent" as const }
+  },
+})
+
+async function hasCompletedCommunicationTrace(
+  ctx: QueryCtx,
+  runId: Id<"runs">
+) {
   const traces = await ctx.db
     .query("traces")
     .withIndex("by_run_and_timestamp", (query) => query.eq("runId", runId))
     .order("desc")
     .take(500)
 
-  return traces.some(isCompletedReplyTrace)
+  return traces.some(isCompletedCommunicationTrace)
 }
 
-function isCompletedReplyTrace(trace: Doc<"traces">) {
+function isCompletedCommunicationTrace(trace: Doc<"traces">) {
   const data = trace.data
 
   return (
@@ -124,6 +166,6 @@ function isCompletedReplyTrace(trace: Doc<"traces">) {
     typeof data === "object" &&
     data !== null &&
     "name" in data &&
-    data.name === "send_reply"
+    (data.name === "send_reply" || data.name === "add_reaction")
   )
 }
