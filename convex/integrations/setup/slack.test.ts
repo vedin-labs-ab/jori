@@ -30,7 +30,7 @@ test("renders a URL button for the requested integration", () => {
       },
       title: {
         type: "mrkdwn",
-        text: "Connection request",
+        text: "Connect request",
       },
       subtitle: {
         type: "mrkdwn",
