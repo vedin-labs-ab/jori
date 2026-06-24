@@ -91,7 +91,7 @@ describe("runtime prompts", () => {
     const prompt = assemblePrompt(input)
 
     expect(prompt).toContain(
-      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | message_ids=[slack:message:123.456] | actor_ids=[slack:user:UACTOR]"
+      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | message_ids=[internal:message:message, slack:message:123.456] | actor_ids=[slack:user:UACTOR]"
     )
     expect(prompt).toContain("@Milo what tools do u have?")
     expect(prompt).not.toContain("<@UBOT> what tools do u have?")
@@ -131,7 +131,7 @@ describe("runtime Linear prompt metadata", () => {
     )
 
     expect(prompt).toContain(
-      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | message_ids=[linear:comment:comment-id] | actor_ids=[linear:user:UACTOR]"
+      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | message_ids=[internal:message:message, linear:comment:comment-id] | actor_ids=[linear:user:UACTOR]"
     )
     expect(prompt).not.toContain("message_ids=[]")
     expect(prompt).not.toContain("actor_ids=[]")

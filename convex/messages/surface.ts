@@ -60,15 +60,17 @@ export function messageActorIds(message: Doc<"messages">) {
 }
 
 export function messageIds(message: Doc<"messages">) {
+  const internalIds = [`internal:message:${message._id}`]
+
   if (message.integration === "linear") {
-    return linearMessageIds(message)
+    return [...internalIds, ...linearMessageIds(message)]
   }
 
   if (message.integration === "slack") {
-    return slackMessageIds(message)
+    return [...internalIds, ...slackMessageIds(message)]
   }
 
-  return []
+  return internalIds
 }
 
 function linearActorIds(message: Doc<"messages">) {

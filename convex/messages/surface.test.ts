@@ -40,6 +40,7 @@ describe("message surface text", () => {
       )
     ).toEqual(["slack:user:U123"])
     expect(messageIds(message({ data: { ts: "1782231485.491049" } }))).toEqual([
+      "internal:message:message",
       "slack:message:1782231485.491049",
     ])
   })
@@ -54,7 +55,10 @@ describe("message surface text", () => {
     expect(messageActorIds(linearMessage)).toEqual([
       "linear:user:linear-user-id",
     ])
-    expect(messageIds(linearMessage)).toEqual(["linear:comment:comment-id"])
+    expect(messageIds(linearMessage)).toEqual([
+      "internal:message:message",
+      "linear:comment:comment-id",
+    ])
   })
 })
 
@@ -122,6 +126,7 @@ describe("message surface targets", () => {
 
 function message(overrides: Partial<Doc<"messages">>) {
   return {
+    _id: "message",
     integration: "slack",
     mentioned: false,
     text: "",

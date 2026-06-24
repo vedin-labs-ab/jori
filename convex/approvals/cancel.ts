@@ -17,6 +17,7 @@ export async function cancelApprovalRequest(
   const input = parseCancelInput(args)
   const result = await ctx.runMutation(internal.approvals.approvals.cancel, {
     approvalId: input.approvalId,
+    messageId: input.messageId,
     runId: run._id,
     tenantId: run.tenantId,
     reason: input.reason,
@@ -28,22 +29,29 @@ export async function cancelApprovalRequest(
 function parseCancelInput(args: unknown) {
   if (typeof args !== "object" || args === null || Array.isArray(args)) {
     throw new Error(
-      "cancel_approval_request requires an approvalId and reason."
+      "cancel_approval_request requires an approvalId, messageId, and reason."
     )
   }
 
-  const record = args as { approvalId?: unknown; reason?: unknown }
+  const record = args as {
+    approvalId?: unknown
+    messageId?: unknown
+    reason?: unknown
+  }
 
   return {
     approvalId: requiredString(
       record.approvalId,
       "approvalId"
     ) as Id<"approvals">,
+    messageId: requiredString(record.messageId, "messageId") as Id<"messages">,
     reason: requiredString(record.reason, "reason"),
   }
 }
 
-function cancelResult(status: "cancelled" | "missing" | "decided" | "expired") {
+function cancelResult(
+  status: "cancelled" | "invalid_message" | "missing" | "decided" | "expired"
+) {
   if (status === "cancelled") {
     return {
       status: "cancelled" as const,
@@ -55,6 +63,14 @@ function cancelResult(status: "cancelled" | "missing" | "decided" | "expired") {
     return {
       status: "missing" as const,
       message: "No matching pending approval request was found for this run.",
+    }
+  }
+
+  if (status === "invalid_message") {
+    return {
+      status: "invalid_message" as const,
+      message:
+        "messageId must reference a user message in this run's conversation.",
     }
   }
 
