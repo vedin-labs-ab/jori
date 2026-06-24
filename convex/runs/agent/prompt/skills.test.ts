@@ -47,6 +47,9 @@ describe("runtime skill prompts", () => {
     ).toBeLessThan(prompt.indexOf("# Updates"))
     expect(prompt).toContain("Format Slack messages with Slack `mrkdwn`")
     expect(prompt).toContain(
+      "Escape literal `&`, `<`, and `>` unless they are part of valid Slack syntax.\n\nChoose the clearest Slack form for the communication."
+    )
+    expect(prompt).toContain(
       "Use Slack `blocks` when structure makes the message easier to scan"
     )
     expect(prompt).toContain("Never use interactive Slack surfaces or controls")

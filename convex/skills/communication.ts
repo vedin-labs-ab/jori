@@ -71,7 +71,7 @@ function createGuidanceBlock(
     ? ""
     : renderPromptTemplate(promptTemplates["communication/guidance"], {
         guidance: {
-          parts: parts.join("\n"),
+          parts: parts.join("\n\n"),
         },
       }).trim()
 }
