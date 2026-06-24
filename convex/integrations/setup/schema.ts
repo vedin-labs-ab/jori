@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
+import { actorValidator } from "../../shared/actor"
 import {
   integrationValidator,
   toolSurfaceValidator,
@@ -67,6 +68,7 @@ export const setupLinks = defineTable({
   ),
   result: v.optional(
     v.object({
+      actor: v.optional(actorValidator),
       integrationId: v.optional(v.id("integrations")),
       error: v.optional(v.string()),
     })
@@ -94,6 +96,7 @@ export const setupLinkEvents = defineTable({
   data: v.optional(
     v.object({
       delivery: v.optional(setupLinkDelivery),
+      actor: v.optional(actorValidator),
       error: v.optional(v.string()),
       integrationId: v.optional(v.id("integrations")),
     })

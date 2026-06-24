@@ -1,12 +1,15 @@
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
+import { getSlackActorProfile } from "../../providers/slack/directory/users"
+import { createIntegrationActor } from "../../shared/actor"
 
 export const setupLinkOpenActionId = "milo_setup_link_open"
 export const setupLinkCancelActionId = "milo_setup_link_cancel"
 
 export type SlackSetupLinkCancelInteraction = {
   accountId: string
+  actorId?: string
   channelId: string
   messageTs: string
   setupLinkId: Id<"setupLinks">
@@ -19,7 +22,15 @@ export async function handleSlackSetupLinkInteraction(
   const cancel = parseSlackSetupLinkCancelInteraction(payload)
 
   if (cancel !== null) {
-    await ctx.runMutation(internal.integrations.setup.lifecycle.cancel, cancel)
+    const actor = await createSlackSetupLinkActor(ctx, cancel)
+
+    await ctx.runMutation(internal.integrations.setup.lifecycle.cancel, {
+      accountId: cancel.accountId,
+      ...(actor === undefined ? {} : { actor }),
+      channelId: cancel.channelId,
+      messageTs: cancel.messageTs,
+      setupLinkId: cancel.setupLinkId,
+    })
     return true
   }
 
@@ -42,6 +53,7 @@ export function parseSlackSetupLinkCancelInteraction(payload: unknown) {
   }
 
   const accountId = readNestedString(payload.team, "id")
+  const actorId = readNestedString(payload.user, "id")
   const channelId = readNestedString(payload.channel, "id")
   const messageTs = readNestedString(payload.message, "ts")
   const setupLinkId = readSetupLinkId(action.value)
@@ -57,10 +69,27 @@ export function parseSlackSetupLinkCancelInteraction(payload: unknown) {
 
   return {
     accountId,
+    ...(actorId === null ? {} : { actorId }),
     channelId,
     messageTs,
     setupLinkId,
   } satisfies SlackSetupLinkCancelInteraction
+}
+
+async function createSlackSetupLinkActor(
+  ctx: ActionCtx,
+  interaction: SlackSetupLinkCancelInteraction
+) {
+  const profile = await getSlackActorProfile(ctx, {
+    accountId: interaction.accountId,
+    actorId: interaction.actorId,
+  })
+
+  return createIntegrationActor({
+    externalId: interaction.actorId,
+    email: profile?.email,
+    name: profile?.name,
+  })
 }
 
 function readActionIds(payload: unknown) {
