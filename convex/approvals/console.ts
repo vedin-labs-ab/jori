@@ -1,8 +1,6 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
-import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
-import { updateSlackMessage } from "../broker/tools/slack"
 import { requireTenantAccess } from "../identity/access"
 import {
   readClerkUserEmail,
@@ -10,8 +8,7 @@ import {
   requireClerkUserId,
 } from "../identity/users"
 import { createUserActor } from "../shared/actor"
-import { decideApproval, type SlackApprovalDecisionResult } from "./runtime"
-import { createSlackConsoleDecisionResponse } from "./slack/blocks"
+import { decideApproval } from "./runtime"
 
 export const decide = action({
   args: {
@@ -34,16 +31,13 @@ export const decide = action({
     }
 
     const result = await decideApproval(ctx, {
-      approval: target.approval,
+      approval: target,
       decidedBy: createUserActor(requireClerkUserId(identity), {
         email: readClerkUserEmail(identity),
         name: readClerkUserName(identity),
       }),
       decision: args.decision,
-      integration: target.integration ?? undefined,
     })
-
-    await updateDeliveredApproval(target, result)
 
     return {
       message: result.message,
@@ -64,46 +58,6 @@ export const getDecisionTarget = internalQuery({
       return null
     }
 
-    const delivery = approval.delivery
-
-    if (delivery?.integration !== "slack") {
-      return { approval, integration: null }
-    }
-
-    const integration = await ctx.db.get(delivery.integrationId)
-
-    if (
-      integration === null ||
-      integration.status !== "active" ||
-      integration.tenantId !== approval.tenantId ||
-      integration.integration !== delivery.integration
-    ) {
-      return { approval, integration: null }
-    }
-
-    return { approval, integration }
+    return approval
   },
 })
-
-async function updateDeliveredApproval(
-  target: {
-    approval: Doc<"approvals">
-    integration: Doc<"integrations"> | null
-  },
-  result: SlackApprovalDecisionResult
-) {
-  const delivery = target.approval.delivery
-
-  if (target.integration === null || delivery?.integration !== "slack") {
-    return
-  }
-
-  const response = createSlackConsoleDecisionResponse(result)
-
-  await updateSlackMessage(target.integration, {
-    channel: delivery.data.channelId,
-    ts: delivery.data.messageTs,
-    text: response.text,
-    blocks: response.blocks,
-  })
-}

@@ -1,5 +1,5 @@
 import { defineSchema } from "convex/server"
-import { approvals } from "./approvals/schema"
+import { approvalEvents, approvals } from "./approvals/schema"
 import {
   artifactAssets,
   artifactBlobs,
@@ -44,6 +44,7 @@ export default defineSchema({
   watches,
   sessions,
   approvals,
+  approvalEvents,
   traces,
   outbox,
   waiters,

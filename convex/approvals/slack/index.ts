@@ -1,6 +1,5 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { updateSlackMessage } from "../../broker/tools/slack"
 import {
   getSlackChannelId,
   getSlackMessageTs,
@@ -9,10 +8,7 @@ import {
 import { getSlackActorProfile } from "../../providers/slack/directory/users"
 import { createIntegrationActor } from "../../shared/actor"
 import { decideSlackApproval } from "../runtime"
-import {
-  createSlackDecisionResponse,
-  type SlackApprovalInteraction,
-} from "./blocks"
+import { type SlackApprovalInteraction } from "./blocks"
 
 type SlackApprovalDecisionInput = {
   accountId: string
@@ -73,7 +69,7 @@ export async function handleSlackApprovalInteraction(
     return okResponse()
   }
 
-  const result = await decideSlackApproval(ctx, {
+  await decideSlackApproval(ctx, {
     accountId: interaction.accountId,
     actor: await createSlackApprovalActor(ctx, {
       accountId: interaction.accountId,
@@ -84,16 +80,6 @@ export async function handleSlackApprovalInteraction(
     code: interaction.code,
     decision: interaction.decision,
   })
-  const response = createSlackDecisionResponse(interaction, result)
-
-  if (result.integration !== undefined) {
-    await updateSlackMessage(result.integration, {
-      channel: interaction.channelId,
-      ts: interaction.messageTs,
-      text: response.text,
-      blocks: response.blocks,
-    })
-  }
 
   return okResponse()
 }

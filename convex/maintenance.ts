@@ -21,6 +21,7 @@ const tableRegistry: Record<TableName, true> = {
   watches: true,
   sessions: true,
   approvals: true,
+  approvalEvents: true,
   traces: true,
   outbox: true,
   waiters: true,
