@@ -230,7 +230,7 @@ class LocalSandbox implements SandboxRuntime {
 
   async cloneRepository(input: SandboxCloneRepositoryInput) {
     return {
-      directory: input.directory ?? "repository",
+      directory: input.directory ?? sandboxWorkspace,
       git: true as const,
       remoteUrl: input.remoteUrl,
       repository: input.repository,
