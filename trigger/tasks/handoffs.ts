@@ -1,7 +1,4 @@
-import {
-  decodeToolResult,
-  encodeToolResult,
-} from "../../contracts/tool-transport"
+import { decodeToolResult, encodeToolResult } from "../../contracts/transport"
 import { materializeSandboxResult } from "../attachments"
 import { type ModelMessage } from "../model/types"
 import { markVisibleCommunication, type ToolRuntime } from "../tool"

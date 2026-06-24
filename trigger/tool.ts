@@ -1,5 +1,5 @@
 import { type ToolSurface } from "../contracts/integrations"
-import { encodeToolResult } from "../contracts/tool-transport"
+import { encodeToolResult } from "../contracts/transport"
 import {
   materializeSandboxResult,
   prepareMiloToolInput,

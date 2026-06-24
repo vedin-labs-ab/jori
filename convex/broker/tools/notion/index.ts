@@ -1,9 +1,9 @@
-import { type Doc } from "../../_generated/dataModel"
-import { type AttachmentContext } from "../../attachments/read"
-import { notionJson } from "../../providers/notion/api"
-import { requireNotionCredentials } from "../../providers/notion/credentials"
-import { optionalString, requiredString } from "../../shared/input"
-import { uploadNotionFile } from "./notion_upload"
+import { type Doc } from "../../../_generated/dataModel"
+import { type AttachmentContext } from "../../../attachments/read"
+import { notionJson } from "../../../providers/notion/api"
+import { requireNotionCredentials } from "../../../providers/notion/credentials"
+import { optionalString, requiredString } from "../../../shared/input"
+import { uploadNotionFile } from "./upload"
 
 export async function callNotionTool(
   integration: Doc<"integrations">,

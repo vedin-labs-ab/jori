@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest"
-import { encodeToolResult } from "../../contracts/tool-transport"
+import { encodeToolResult } from "../../contracts/transport"
 import { type ModelMessage } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type RuntimeTool } from "../types"

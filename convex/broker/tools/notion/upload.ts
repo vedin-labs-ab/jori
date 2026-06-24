@@ -2,9 +2,9 @@ import {
   type AttachmentContext,
   type RunAttachment,
   readRunAttachments,
-} from "../../attachments/read"
-import { notionJson, notionMultipartJson } from "../../providers/notion/api"
-import { optionalString, requiredString } from "../../shared/input"
+} from "../../../attachments/read"
+import { notionJson, notionMultipartJson } from "../../../providers/notion/api"
+import { optionalString, requiredString } from "../../../shared/input"
 
 const maxSinglePartUploadBytes = 20 * 1024 * 1024
 const maxFilenameBytes = 900

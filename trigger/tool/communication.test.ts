@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest"
-import { executeToolCall, type ToolRuntime } from "./tool"
-import { type ConvexId, type RuntimeTool } from "./types"
+import { executeToolCall, type ToolRuntime } from "../tool"
+import { type ConvexId, type RuntimeTool } from "../types"
 
 test("provider reaction tools mark the active surface communicated", async () => {
   const runtime = createRuntime({

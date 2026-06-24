@@ -4,8 +4,8 @@ import {
   objectSchema,
   type SchemaMap,
   stringProperty,
-} from "./common"
-import { notionCoverProperty, notionIconProperty } from "./notion_media"
+} from "../common"
+import { notionCoverProperty, notionIconProperty } from "./media"
 
 export const notionToolInputSchemas = {
   notion_search: objectSchema({

@@ -1,4 +1,4 @@
-import { boundedNumber, requiredString } from "../../shared/input"
+import { boundedNumber, requiredString } from "../../../shared/input"
 
 const defaultFetchCharacters = 8000
 const defaultSearchCharacters = 1200

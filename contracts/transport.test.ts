@@ -4,7 +4,7 @@ import {
   decodeToolResult,
   encodeToolInput,
   encodeToolResult,
-} from "./tool-transport"
+} from "./transport"
 
 describe("tool JSON transport", () => {
   test("uses a single encoded input field", () => {

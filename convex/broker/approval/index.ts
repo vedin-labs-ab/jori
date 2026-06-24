@@ -1,5 +1,5 @@
 import { type JsonObject } from "../../../contracts/json"
-import { encodeToolInput } from "../../../contracts/tool-transport"
+import { encodeToolInput } from "../../../contracts/transport"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
