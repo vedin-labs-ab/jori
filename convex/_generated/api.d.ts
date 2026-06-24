@@ -10,6 +10,7 @@
 
 import type * as approvals_approvals from "../approvals/approvals.js";
 import type * as approvals_cancel from "../approvals/cancel.js";
+import type * as approvals_cancellation from "../approvals/cancellation.js";
 import type * as approvals_console from "../approvals/console.js";
 import type * as approvals_execution from "../approvals/execution.js";
 import type * as approvals_lifecycle from "../approvals/lifecycle.js";
@@ -324,6 +325,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   "approvals/approvals": typeof approvals_approvals;
   "approvals/cancel": typeof approvals_cancel;
+  "approvals/cancellation": typeof approvals_cancellation;
   "approvals/console": typeof approvals_console;
   "approvals/execution": typeof approvals_execution;
   "approvals/lifecycle": typeof approvals_lifecycle;

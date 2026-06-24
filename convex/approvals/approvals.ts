@@ -5,6 +5,7 @@ import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { actorValidator } from "../shared/actor"
 import { toolSurfaceValidator } from "../shared/integrations"
+import { resolveCancellationActor } from "./cancellation"
 import { approvalDecision, approvalDelivery } from "./schema"
 import {
   markApprovalCancelled,
@@ -131,9 +132,9 @@ export const decide = internalMutation({
 export const cancel = internalMutation({
   args: {
     approvalId: v.id("approvals"),
+    messageId: v.id("messages"),
     runId: v.id("runs"),
     tenantId: v.string(),
-    cancelledBy: v.optional(actorValidator),
     reason: v.string(),
   },
   handler: async (ctx, args) => {
@@ -151,8 +152,18 @@ export const cancel = internalMutation({
       return { status: settledStatus(approval), approval }
     }
 
+    const cancelledBy = await resolveCancellationActor(ctx, {
+      messageId: args.messageId,
+      runId: args.runId,
+      tenantId: args.tenantId,
+    })
+
+    if (cancelledBy === null) {
+      return { status: "invalid_message" as const, approval }
+    }
+
     const updated = await markApprovalCancelled(ctx, approval, {
-      cancelledBy: args.cancelledBy,
+      cancelledBy,
       now: Date.now(),
       reason: args.reason,
     })

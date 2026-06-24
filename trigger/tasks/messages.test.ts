@@ -10,7 +10,7 @@ test("formats drained messages like conversation messages", () => {
     createdAt: Date.parse("2026-06-22T09:34:35.000Z"),
     id: id<"messages">("message"),
     integration: "slack",
-    messageIds: ["slack:message:1782231485.491049"],
+    messageIds: ["internal:message:message", "slack:message:1782231485.491049"],
     mentioned: false,
     observedAt: Date.parse("2026-06-22T09:34:35.618Z"),
     source: "self",
@@ -21,7 +21,7 @@ test("formats drained messages like conversation messages", () => {
 
   expect(
     formatted
-  ).toBe(`- 2026-06-22T09:34:35.618Z | self | Milo | message_ids=[slack:message:1782231485.491049] | actor_ids=[slack:user:U0B96KZ7WJG]
+  ).toBe(`- 2026-06-22T09:34:35.618Z | self | Milo | message_ids=[internal:message:message, slack:message:1782231485.491049] | actor_ids=[slack:user:U0B96KZ7WJG]
 \`\`\`text
 Here's what I've got.
 \`\`\``)

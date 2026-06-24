@@ -29,7 +29,7 @@ export const miloToolPermissionRows = [
     "milo",
     "cancel_approval_request",
     "Cancel approval request",
-    "Withdraw a pending approval request you previously made in this run. Requires a short reason.",
+    "Withdraw a pending approval request in this run. Requires a short reason and the Milo internal message id for the user message that requested cancellation.",
     "write",
     "required",
   ],
