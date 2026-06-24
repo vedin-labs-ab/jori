@@ -44,7 +44,7 @@ export function createSlackSetupLinkMessage(args: {
           name: setupCardIcon(status),
         },
         title: setupCardTitle({ actor: args.actor, status }),
-        subtitle: `Configure ${label}`,
+        subtitle: `Set up ${label}`,
         body: summary,
         subtext: setupSubtext({
           expiresAt: args.expiresAt,
