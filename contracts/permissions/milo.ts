@@ -21,7 +21,7 @@ export const miloToolPermissionRows = [
     "milo",
     "offer_integration_setup",
     "Offer integration setup",
-    "Create a Milo setup link for an integration and offer it in the current interactive surface when possible.",
+    "Create a Milo setup link for an integration and offer it in the current interactive surface when possible. Include a concise summary for the setup offer card.",
     "write",
     "required",
   ],

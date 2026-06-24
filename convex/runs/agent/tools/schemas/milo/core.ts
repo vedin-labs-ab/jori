@@ -22,13 +22,16 @@ export const coreMiloToolInputSchemas = {
     },
   }),
   offer_integration_setup: objectSchema({
-    required: ["integration"],
+    required: ["integration", "summary"],
     properties: {
       integration: {
         type: "string",
         description: "Integration the user wants to connect.",
         enum: integrationEnum,
       },
+      summary: stringProperty(
+        "One concise user-facing sentence explaining why this integration needs to be connected for the current request."
+      ),
     },
   }),
   save_attachment: objectSchema({

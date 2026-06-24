@@ -1,5 +1,5 @@
 {% if tools.send_reply %}
-Work tools are all tools except `list_capabilities`, `send_reply`, `finish_run`, and surface-specific reaction tools used only for visible communication.
+Work tools are all tools except `list_capabilities`, `offer_integration_setup`, `send_reply`, `finish_run`, and surface-specific reaction tools used only for visible communication.
 
 Send one short start update before the first work tool call for approvals, writes, research, deliverables, or any task likely to need 2 or more work tool calls. If required, the next action must be `send_reply`.
 

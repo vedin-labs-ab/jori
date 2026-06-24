@@ -6,6 +6,7 @@ import {
   prepareMiloToolInput,
   saveSandboxAttachment,
 } from "./attachments"
+import { isVisibleCommunicationTool } from "./communication"
 import { type MiloConvexClient } from "./convex"
 import { errorDetails } from "./events"
 import { generateImageAttachment } from "./images/index"
@@ -115,7 +116,7 @@ async function executeConvexTool(
 
   if (tool.mode !== "prompted") {
     const result = await callConvexTool(runtime, surface, toolName, call.args)
-    markVisibleCommunication(runtime, toolName)
+    markVisibleCommunication(runtime, toolName, result)
     return result
   }
 
@@ -138,20 +139,23 @@ async function executeConvexTool(
     approval.input,
     true
   )
-  markVisibleCommunication(runtime, toolName)
+  markVisibleCommunication(runtime, toolName, result)
   return result
 }
 
-function markVisibleCommunication(runtime: ToolRuntime, toolName: string) {
+function markVisibleCommunication(
+  runtime: ToolRuntime,
+  toolName: string,
+  result: unknown
+) {
   const activeSurface = runtime.context.activeSurface
 
-  if (activeSurface !== null && isVisibleCommunicationTool(toolName)) {
+  if (
+    activeSurface !== null &&
+    isVisibleCommunicationTool(toolName, result, activeSurface.surface)
+  ) {
     activeSurface.communicated = true
   }
-}
-
-function isVisibleCommunicationTool(toolName: string) {
-  return toolName === "linear_add_reaction" || toolName === "slack_add_reaction"
 }
 
 async function callConvexTool(
