@@ -3,10 +3,17 @@ import { approvalTtlMs } from "../../contracts/approvals"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { wakeRun } from "../runtime/waiters/data"
 import { actorValidator } from "../shared/actor"
 import { toolSurfaceValidator } from "../shared/integrations"
 import { approvalDecision, approvalDelivery } from "./schema"
+import {
+  markApprovalCancelled,
+  markApprovalDecided,
+  markApprovalExpired,
+  patchAndRead,
+  recordApprovalCreated,
+  recordApprovalDelivery,
+} from "./transition"
 
 export const create = internalMutation({
   args: {
@@ -51,8 +58,11 @@ export const create = internalMutation({
       internal.approvals.runtime.expireApproval,
       { approvalId }
     )
+    const approval = await patchAndRead(ctx, approvalId, { functionId })
 
-    await ctx.db.patch(approvalId, { functionId })
+    if (approval !== null) {
+      await recordApprovalCreated(ctx, approval)
+    }
 
     return { approvalId, code: args.code, expiresAt, reused: false }
   },
@@ -70,9 +80,9 @@ export const recordDelivery = internalMutation({
       return null
     }
 
-    await ctx.db.patch(approval._id, { delivery: args.delivery })
+    const updated = await recordApprovalDelivery(ctx, approval, args.delivery)
 
-    return { ...approval, delivery: args.delivery }
+    return updated ?? { ...approval, delivery: args.delivery }
   },
 })
 
@@ -94,7 +104,9 @@ export const decide = internalMutation({
     }
 
     if (Date.now() >= approval.expiresAt) {
-      return { status: "expired" as const, approval }
+      const updated = await markApprovalExpired(ctx, approval)
+
+      return { status: "expired" as const, approval: updated ?? approval }
     }
 
     const run = await ctx.db.get(approval.runId)
@@ -103,24 +115,15 @@ export const decide = internalMutation({
       return { status: "closed" as const, approval }
     }
 
-    await cancelApprovalFunction(ctx, approval)
-    const decidedAt = Date.now()
-
-    await ctx.db.patch(approval._id, {
-      status: args.decision,
+    const updated = await markApprovalDecided(ctx, approval, {
       decidedBy: args.decidedBy,
-      decidedAt,
-      functionId: undefined,
+      decision: args.decision,
+      now: Date.now(),
     })
-    await wakeApprovalRun(ctx, approval)
 
     return {
       status: args.decision,
-      approval: {
-        ...approval,
-        status: args.decision,
-        decidedBy: args.decidedBy,
-      },
+      approval: updated ?? approval,
     }
   },
 })
@@ -148,16 +151,13 @@ export const cancel = internalMutation({
       return { status: settledStatus(approval), approval }
     }
 
-    await cancelApprovalFunction(ctx, approval)
-    await ctx.db.patch(approval._id, {
-      status: "cancelled",
-      cancelReason: args.reason,
+    const updated = await markApprovalCancelled(ctx, approval, {
       cancelledBy: args.cancelledBy,
-      functionId: undefined,
+      now: Date.now(),
+      reason: args.reason,
     })
-    await wakeApprovalRun(ctx, approval)
 
-    return { status: "cancelled" as const, approval }
+    return { status: "cancelled" as const, approval: updated ?? approval }
   },
 })
 
@@ -176,13 +176,9 @@ export const expire = internalMutation({
       return null
     }
 
-    await ctx.db.patch(approval._id, {
-      status: "expired",
-      functionId: undefined,
-    })
-    await wakeApprovalRun(ctx, approval)
+    const updated = await markApprovalExpired(ctx, approval)
 
-    return approval
+    return updated ?? approval
   },
 })
 
@@ -205,14 +201,6 @@ async function findReusableApproval(
   return null
 }
 
-async function wakeApprovalRun(ctx: MutationCtx, approval: Doc<"approvals">) {
-  await wakeRun(ctx, {
-    runId: approval.runId,
-    reason: "approval_resolved",
-    subject: { kind: "approval", approvalId: approval._id },
-  })
-}
-
 function settledStatus(approval: Doc<"approvals">) {
   return approval.status === "expired"
     ? ("expired" as const)
@@ -225,15 +213,4 @@ function isTerminalRun(run: Doc<"runs">) {
     run.status === "failed" ||
     run.status === "stopped"
   )
-}
-
-async function cancelApprovalFunction(
-  ctx: MutationCtx,
-  approval: Doc<"approvals">
-) {
-  if (approval.functionId === undefined) {
-    return
-  }
-
-  await ctx.scheduler.cancel(approval.functionId)
 }

@@ -1,0 +1,173 @@
+import { type Doc } from "../_generated/dataModel"
+import { type MutationCtx } from "../_generated/server"
+import { wakeRun } from "../runtime/waiters/data"
+import { type Actor } from "../shared/actor"
+import { recordApprovalEvent } from "./events"
+
+type ApprovalPatch = Partial<Omit<Doc<"approvals">, "_creationTime" | "_id">>
+type ApprovalDelivery = NonNullable<Doc<"approvals">["delivery"]>
+
+export async function recordApprovalCreated(
+  ctx: MutationCtx,
+  approval: Doc<"approvals">
+) {
+  await recordApprovalEvent(ctx, {
+    approval,
+    type: "approval.created",
+  })
+}
+
+export async function recordApprovalDelivery(
+  ctx: MutationCtx,
+  approval: Doc<"approvals">,
+  delivery: ApprovalDelivery
+) {
+  const updated = await patchAndRead(ctx, approval._id, { delivery })
+
+  if (updated !== null) {
+    await recordApprovalEvent(ctx, {
+      approval: updated,
+      data: { delivery },
+      syncSurface: hasTerminalSurfaceState(updated),
+      type: "approval.delivered",
+    })
+  }
+
+  return updated
+}
+
+export async function markApprovalDecided(
+  ctx: MutationCtx,
+  approval: Doc<"approvals">,
+  args: {
+    decidedBy: Actor
+    decision: "approved" | "denied"
+    now: number
+  }
+) {
+  if (approval.status !== "pending") {
+    return approval
+  }
+
+  await cancelApprovalFunction(ctx, approval)
+  const updated = await patchAndRead(ctx, approval._id, {
+    status: args.decision,
+    decidedBy: args.decidedBy,
+    decidedAt: args.now,
+    functionId: undefined,
+  })
+
+  if (updated !== null) {
+    await recordApprovalEvent(ctx, {
+      approval: updated,
+      data: { actor: args.decidedBy },
+      syncSurface: true,
+      type:
+        args.decision === "approved" ? "approval.approved" : "approval.denied",
+    })
+    await wakeApprovalRun(ctx, updated)
+  }
+
+  return updated
+}
+
+export async function markApprovalCancelled(
+  ctx: MutationCtx,
+  approval: Doc<"approvals">,
+  args: {
+    cancelledBy: Actor | undefined
+    now: number
+    reason: string
+  }
+) {
+  if (approval.status !== "pending") {
+    return approval
+  }
+
+  await cancelApprovalFunction(ctx, approval)
+  const updated = await patchAndRead(ctx, approval._id, {
+    status: "cancelled",
+    cancelReason: args.reason,
+    cancelledBy: args.cancelledBy,
+    cancelledAt: args.now,
+    functionId: undefined,
+  })
+
+  if (updated !== null) {
+    await recordApprovalEvent(ctx, {
+      approval: updated,
+      data: {
+        ...(args.cancelledBy === undefined ? {} : { actor: args.cancelledBy }),
+        reason: args.reason,
+      },
+      syncSurface: true,
+      type: "approval.cancelled",
+    })
+    await wakeApprovalRun(ctx, updated)
+  }
+
+  return updated
+}
+
+export async function markApprovalExpired(
+  ctx: MutationCtx,
+  approval: Doc<"approvals">
+) {
+  if (approval.status !== "pending") {
+    return approval
+  }
+
+  const updated = await patchAndRead(ctx, approval._id, {
+    status: "expired",
+    functionId: undefined,
+  })
+
+  if (updated !== null) {
+    await recordApprovalEvent(ctx, {
+      approval: updated,
+      syncSurface: true,
+      type: "approval.expired",
+    })
+    await wakeApprovalRun(ctx, updated)
+  }
+
+  return updated
+}
+
+export async function patchAndRead(
+  ctx: MutationCtx,
+  approvalId: Doc<"approvals">["_id"],
+  patch: ApprovalPatch
+) {
+  await ctx.db.patch(approvalId, patch)
+
+  return await ctx.db.get(approvalId)
+}
+
+async function cancelApprovalFunction(
+  ctx: MutationCtx,
+  approval: Doc<"approvals">
+) {
+  if (approval.functionId === undefined) {
+    return
+  }
+
+  await ctx.scheduler.cancel(approval.functionId)
+}
+
+async function wakeApprovalRun(ctx: MutationCtx, approval: Doc<"approvals">) {
+  await wakeRun(ctx, {
+    runId: approval.runId,
+    reason: "approval_resolved",
+    subject: { kind: "approval", approvalId: approval._id },
+  })
+}
+
+function hasTerminalSurfaceState(approval: Doc<"approvals">) {
+  return (
+    approval.status === "approved" ||
+    approval.status === "cancelled" ||
+    approval.status === "denied" ||
+    approval.status === "expired"
+  )
+}

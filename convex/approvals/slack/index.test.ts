@@ -1,12 +1,8 @@
 import { expect, test } from "vitest"
-import { type SlackApprovalDecisionResult } from "../runtime"
+import { type Doc } from "../../_generated/dataModel"
 import { parseSlackApprovalInteraction } from "."
-import {
-  createSlackApprovalRequest,
-  createSlackConsoleDecisionResponse,
-  createSlackDecisionResponse,
-  createSlackExpirationResponse,
-} from "./blocks"
+import { createSlackApprovalRequest } from "./blocks"
+import { createSlackApprovalSurfaceMessage } from "./surface"
 
 test("parses Slack approval button payloads", () => {
   expect(
@@ -91,123 +87,75 @@ test("keeps Slack approval card bodies within card limits", () => {
   expect(body.text.endsWith("...")).toBe(true)
 })
 
-test("replaces Slack approval buttons with a decision summary", () => {
-  const interaction = parseSlackApprovalInteraction({
-    type: "block_actions",
-    team: { id: "T123" },
-    user: { id: "U123" },
-    channel: { id: "C123" },
-    message: { ts: "1710000000.000100" },
-    actions: [
-      {
-        action_id: "milo_approval_deny",
-        value: JSON.stringify({ code: "ABC12345" }),
-      },
-    ],
-  })
-
-  if (interaction === null) {
-    throw new Error("Expected Slack approval interaction")
-  }
-
-  const response = createSlackDecisionResponse(interaction, {
-    status: "denied",
-    message: "Denied.",
-    approval: {
-      surface: "slack",
-      tool: "conversations_add_message",
-      summary: "Post a follow-up message in Slack.",
-      decidedBy: {
-        kind: "user",
-        externalId: "U123",
-      },
-    } as SlackApprovalDecisionResult["approval"],
-  })
-  const rendered = JSON.stringify(response)
-  const card = response.blocks[0] as Record<string, unknown>
-
-  expect(response.replace_original).toBe(true)
-  expect(card.slack_icon).toEqual({ type: "icon", name: "thumbs-down" })
-  expect(card.title).toMatchObject({
-    type: "mrkdwn",
-    text: "Denied by U123",
-  })
-  expect(card.subtext).toMatchObject({
-    type: "mrkdwn",
-  })
-  expect(JSON.stringify(card.subtext)).toContain("Denied at <!date^")
-  expect(rendered).toContain("Post a follow-up message in Slack.")
-  expect(rendered).toContain("Send Slack message")
-  expect(rendered).not.toContain("Denied by U123 at <!date^")
-  expect(rendered).not.toContain("ABC12345")
-  expect(rendered).not.toContain("Expires in")
-  expect(rendered).not.toContain('"type":"actions"')
-})
-
-test("renders Milo approval decisions with the Clerk approver identity", () => {
-  const response = createSlackConsoleDecisionResponse({
+test("renders approved delivered approvals with the Milo approver", () => {
+  const response = createSlackApprovalSurfaceMessage({
+    surface: "notion",
+    tool: "notion_create_page",
+    summary: "Create a new Notion page.",
     status: "approved",
-    message: "Approved. Continuing the run.",
-    approval: {
-      surface: "notion",
-      tool: "notion_create_page",
-      summary: "Create a new Notion page.",
-      decidedBy: {
-        kind: "user",
-        userId: "user_123",
-        name: "Albin Vedin",
-        email: "albin@example.com",
-      },
-    } as SlackApprovalDecisionResult["approval"],
-  })
+    decidedAt: 1_710_000_000_000,
+    decidedBy: {
+      kind: "user",
+      userId: "user_123",
+      name: "Albin Vedin",
+      email: "albin@example.com",
+    },
+  } as Doc<"approvals">)
   const rendered = JSON.stringify(response)
   const card = response.blocks[0] as Record<string, unknown>
 
-  expect(response.replace_original).toBe(true)
+  expect(response.text).toBe("Approved. Milo is continuing the run.")
   expect(card.slack_icon).toEqual({ type: "icon", name: "check" })
   expect(card.title).toMatchObject({
     type: "mrkdwn",
     text: "Approved by Albin Vedin in Milo",
   })
-  expect(JSON.stringify(card.subtext)).toContain("Approved at <!date^")
+  expect(rendered).toContain("Approved at <!date^1710000000^{time}|")
   expect(rendered).not.toContain("Approved by Albin Vedin in Milo at <!date^")
   expect(rendered).toContain("Create a new Notion page.")
+  expect(rendered).not.toContain('"actions"')
 })
 
-test("renders non-decision approval updates with timestamp footnotes", () => {
-  const response = createSlackDecisionResponse(
-    {
-      accountId: "T123",
-      channelId: "C123",
-      code: "ABC12345",
-      decision: "denied",
-      messageTs: "1710000000.000100",
+test("renders denied delivered approvals with the Slack approver", () => {
+  const response = createSlackApprovalSurfaceMessage({
+    surface: "slack",
+    tool: "conversations_add_message",
+    summary: "Post a follow-up message in Slack.",
+    status: "denied",
+    decidedAt: 1_710_000_000_000,
+    decidedBy: {
+      kind: "user",
+      externalId: "U123",
     },
-    {
-      status: "closed",
-      message: "This run is no longer active.",
-    }
-  )
-  const card = response.blocks[0] as Record<string, unknown>
-
-  expect(card.title).toMatchObject({
-    type: "mrkdwn",
-    text: "Run closed",
-  })
-  expect(JSON.stringify(card.title)).not.toContain("<!date^")
-  expect(JSON.stringify(card.subtext)).toContain("Closed at <!date^")
-})
-
-test("renders expired Slack approvals without actions", () => {
-  const response = createSlackExpirationResponse({
-    tool: "notion_create_page",
-    summary: "Create a new Notion page under Customer Discovery.",
-    expiresAt: 1_710_000_000_000,
-  })
+  } as Doc<"approvals">)
   const rendered = JSON.stringify(response)
   const card = response.blocks[0] as Record<string, unknown>
 
-  expect(response.replace_original).toBe(true)
+  expect(response.text).toBe("Denied. Milo is continuing without this action.")
+  expect(card.slack_icon).toEqual({ type: "icon", name: "thumbs-down" })
+  expect(card.title).toMatchObject({
+    type: "mrkdwn",
+    text: "Denied by U123",
+  })
+  expect(rendered).toContain("Denied at <!date^1710000000^{time}|")
+  expect(rendered).toContain("Post a follow-up message in Slack.")
+  expect(rendered).toContain("Send Slack message")
+  expect(rendered).not.toContain("Denied by U123 at <!date^")
+  expect(rendered).not.toContain('"actions"')
+})
+
+test("renders expired delivered approvals without actions", () => {
+  const response = createSlackApprovalSurfaceMessage({
+    surface: "notion",
+    tool: "notion_create_page",
+    summary: "Create a new Notion page under Customer Discovery.",
+    status: "expired",
+    expiresAt: 1_710_000_000_000,
+  } as Doc<"approvals">)
+  const rendered = JSON.stringify(response)
+  const card = response.blocks[0] as Record<string, unknown>
+
+  expect(response.text).toBe("Request expired. Milo skipped this action.")
   expect(card.slack_icon).toEqual({ type: "icon", name: "archive" })
   expect(card.title).toMatchObject({
     type: "mrkdwn",
@@ -222,5 +170,25 @@ test("renders expired Slack approvals without actions", () => {
   )
   expect(rendered).toContain("Expired at <!date^1710000000^{time}|")
   expect(rendered).not.toContain("Expires at")
+  expect(rendered).not.toContain('"actions"')
+})
+
+test("renders cancelled delivered approvals without actions", () => {
+  const response = createSlackApprovalSurfaceMessage({
+    surface: "notion",
+    tool: "notion_create_page",
+    summary: "Create a new Notion page.",
+    status: "cancelled",
+    cancelReason: "No longer needed.",
+    cancelledAt: 1_710_000_000_000,
+  } as Doc<"approvals">)
+  const rendered = JSON.stringify(response)
+  const card = response.blocks[0] as Record<string, unknown>
+
+  expect(response.text).toBe("Request cancelled. Milo skipped this action.")
+  expect(card.slack_icon).toEqual({ type: "icon", name: "archive" })
+  expect(card.title).toMatchObject({ text: "Request cancelled" })
+  expect(rendered).toContain("Create a new Notion page.")
+  expect(rendered).toContain("Cancelled at <!date^1710000000^{time}|")
   expect(rendered).not.toContain('"actions"')
 })

@@ -1,17 +1,11 @@
 import { type SlackBlock } from "../../broker/tools/slack"
 import { type ToolSurface } from "../../shared/integrations"
-import { type SlackApprovalDecisionResult } from "../runtime"
 import {
   createApprovalCard,
   formatSlackTime,
   toSlackTimestamp,
   truncateSlackText,
 } from "./cards"
-import {
-  approvalOutcome,
-  createDecisionTitle,
-  getDecisionIcon,
-} from "./decision"
 import { getToolLabel } from "./labels"
 
 const slackCardBodyLimit = 200
@@ -43,47 +37,6 @@ export function createSlackApprovalRequest(args: {
   }
 }
 
-export function createSlackDecisionResponse(
-  interaction: SlackApprovalInteraction,
-  result: SlackApprovalDecisionResult
-) {
-  if (result.status === "expired" && result.approval !== undefined) {
-    return createSlackExpirationResponse(result.approval)
-  }
-
-  return {
-    replace_original: true,
-    text: createDecisionFallbackText(result),
-    blocks: createDecisionBlocks(interaction, result),
-  }
-}
-
-export function createSlackConsoleDecisionResponse(
-  result: SlackApprovalDecisionResult
-) {
-  if (result.status === "expired" && result.approval !== undefined) {
-    return createSlackExpirationResponse(result.approval)
-  }
-
-  return {
-    replace_original: true,
-    text: createDecisionFallbackText(result),
-    blocks: createConsoleDecisionBlocks(result),
-  }
-}
-
-export function createSlackExpirationResponse(args: {
-  tool: string
-  summary: string
-  expiresAt: number
-}) {
-  return {
-    replace_original: true,
-    text: "Request expired. Milo skipped this action.",
-    blocks: createExpirationBlocks(args),
-  }
-}
-
 function createSlackApprovalBlocks(args: {
   code: string
   surface: ToolSurface
@@ -101,79 +54,6 @@ function createSlackApprovalBlocks(args: {
         toSlackTimestamp(args.expiresAt)
       )}`,
       actions: createApprovalActions(args.code),
-    }),
-  ]
-}
-
-function createExpirationBlocks(args: {
-  tool: string
-  summary: string
-  expiresAt: number
-}): SlackBlock[] {
-  return [
-    createApprovalCard({
-      icon: "archive",
-      title: "Request expired",
-      subtitle: getToolLabel(args.tool),
-      body: truncateSlackText(args.summary, slackCardBodyLimit),
-      subtext: `Expired at ${formatSlackTime(
-        toSlackTimestamp(args.expiresAt)
-      )}`,
-    }),
-  ]
-}
-
-function createDecisionFallbackText(result: SlackApprovalDecisionResult) {
-  if (result.status === "approved") {
-    return "Approved. Milo is continuing the run."
-  }
-
-  if (result.status === "denied") {
-    return "Denied. Milo is continuing without this action."
-  }
-
-  return result.message
-}
-
-function createDecisionBlocks(
-  interaction: SlackApprovalInteraction,
-  result: SlackApprovalDecisionResult
-): SlackBlock[] {
-  const summary = result.approval?.summary
-  const subtitle =
-    result.approval === undefined
-      ? undefined
-      : getToolLabel(result.approval.tool)
-
-  return [
-    createApprovalCard({
-      icon: getDecisionIcon(result.status, approvalOutcome(result.approval)),
-      title: createDecisionTitle(result, {
-        fallbackActor: formatSlackActor(interaction.actorId),
-      }),
-      subtitle,
-      body: truncateSlackText(summary ?? result.message, slackCardBodyLimit),
-      subtext: createDecisionSubtext(result),
-    }),
-  ]
-}
-
-function createConsoleDecisionBlocks(
-  result: SlackApprovalDecisionResult
-): SlackBlock[] {
-  const summary = result.approval?.summary
-  const subtitle =
-    result.approval === undefined
-      ? undefined
-      : getToolLabel(result.approval.tool)
-
-  return [
-    createApprovalCard({
-      icon: getDecisionIcon(result.status, approvalOutcome(result.approval)),
-      title: createDecisionTitle(result, { surface: "milo" }),
-      subtitle,
-      body: truncateSlackText(summary ?? result.message, slackCardBodyLimit),
-      subtext: createDecisionSubtext(result),
     }),
   ]
 }
@@ -202,32 +82,4 @@ function createApprovalActions(code: string) {
       value: JSON.stringify({ code }),
     },
   ]
-}
-
-function formatSlackActor(actorId: string | undefined) {
-  return actorId === undefined ? "unknown user" : `<@${actorId}>`
-}
-
-function createDecisionSubtext(result: SlackApprovalDecisionResult) {
-  return `${getDecisionTimeLabel(result)} at ${formatSlackTime(
-    Math.floor(Date.now() / 1000)
-  )}`
-}
-
-function getDecisionTimeLabel(result: SlackApprovalDecisionResult) {
-  const outcome = approvalOutcome(result.approval)
-
-  if (result.status === "approved" || outcome === "approved") {
-    return "Approved"
-  }
-
-  if (result.status === "denied" || outcome === "denied") {
-    return "Denied"
-  }
-
-  if (result.status === "closed") {
-    return "Closed"
-  }
-
-  return "Updated"
 }

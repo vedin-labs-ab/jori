@@ -2,9 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { postSlackMessage, updateSlackMessage } from "../broker/tools/slack"
+import { postSlackMessage } from "../broker/tools/slack"
 import { type Actor, actorValidator } from "../shared/actor"
-import { createSlackExpirationResponse } from "./slack/blocks"
+import { type ApprovalDecisionResult, approvalDecisionMessage } from "./result"
 
 export type SlackApprovalDecisionArgs = {
   accountId: string
@@ -13,13 +13,6 @@ export type SlackApprovalDecisionArgs = {
   threadTs?: string
   code: string
   decision: "approved" | "denied"
-}
-
-export type SlackApprovalDecisionResult = {
-  status: "approved" | "closed" | "decided" | "denied" | "expired" | "missing"
-  message: string
-  integration?: Doc<"integrations">
-  approval?: Doc<"approvals">
 }
 
 export const handleSlackDecision = internalAction({
@@ -47,38 +40,8 @@ export const expireApproval = internalAction({
     approvalId: v.id("approvals"),
   },
   handler: async (ctx, args) => {
-    const target = await ctx.runQuery(
-      internal.approvals.queries.getExpirationTarget,
-      {
-        approvalId: args.approvalId,
-      }
-    )
-
-    if (target === null) {
-      return
-    }
-
     await ctx.runMutation(internal.approvals.approvals.expire, {
-      approvalId: target.approval._id,
-    })
-
-    if (target.integration === null) {
-      return
-    }
-
-    const delivery = target.approval.delivery
-
-    if (delivery?.integration !== "slack") {
-      return
-    }
-
-    const response = createSlackExpirationResponse(target.approval)
-
-    await updateSlackMessage(target.integration, {
-      channel: delivery.data.channelId,
-      ts: delivery.data.messageTs,
-      text: response.text,
-      blocks: response.blocks,
+      approvalId: args.approvalId,
     })
   },
 })
@@ -86,7 +49,7 @@ export const expireApproval = internalAction({
 export async function decideSlackApproval(
   ctx: ActionCtx,
   args: SlackApprovalDecisionArgs
-): Promise<SlackApprovalDecisionResult> {
+): Promise<ApprovalDecisionResult> {
   const target = await ctx.runQuery(
     internal.approvals.queries.getSlackDecisionTarget,
     {
@@ -136,7 +99,7 @@ export async function decideApproval(
     decision: "approved" | "denied"
     integration?: Doc<"integrations">
   }
-): Promise<SlackApprovalDecisionResult> {
+): Promise<ApprovalDecisionResult> {
   const result = await ctx.runMutation(internal.approvals.approvals.decide, {
     approvalId: args.approval._id,
     decision: args.decision,
@@ -147,7 +110,7 @@ export async function decideApproval(
     status: result.status,
     integration: args.integration,
     approval: result.approval,
-    message: decisionMessage(result.status, result.approval),
+    message: approvalDecisionMessage(result.status, result.approval),
   }
 }
 
@@ -164,47 +127,4 @@ async function postSlackDecisionMessage(
     text,
     thread_ts: args.threadTs,
   })
-}
-
-function decisionMessage(
-  status: SlackApprovalDecisionResult["status"],
-  approval?: Doc<"approvals">
-) {
-  if (status === "approved") {
-    return "Approved. Milo is continuing the run."
-  }
-
-  if (status === "denied") {
-    return "Denied. Milo is continuing without this action."
-  }
-
-  if (status === "closed") {
-    return "This run is no longer active."
-  }
-
-  if (status === "expired") {
-    return "That approval request has expired."
-  }
-
-  if (status === "decided") {
-    return alreadySettledMessage(approval)
-  }
-
-  return "That approval request no longer exists."
-}
-
-function alreadySettledMessage(approval?: Doc<"approvals">) {
-  if (approval?.status === "approved") {
-    return "This request was already approved."
-  }
-
-  if (approval?.status === "denied") {
-    return "This request was already denied."
-  }
-
-  if (approval?.status === "cancelled") {
-    return "This request was cancelled."
-  }
-
-  return "This request was already decided."
 }
