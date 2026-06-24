@@ -28,7 +28,7 @@ describe("runtime skill prompts", () => {
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain(
-      "Use `send_reply` when the response needs words; use `add_reaction` when a small signal is enough"
+      "Use `send_reply` when the response needs words; use the active surface's integration-specific reaction tool when a small signal is enough"
     )
     expect(prompt).toContain("Assistant completion text is private run output")
     expect(prompt).toContain("Use `send_reply` for words")

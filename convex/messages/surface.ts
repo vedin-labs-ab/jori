@@ -34,18 +34,6 @@ export type ReplyAddress =
       type: "slack"
     }
 
-export type ReactionAddress =
-  | {
-      commentId?: string
-      issueId?: string
-      type: "linear"
-    }
-  | {
-      channelId: string
-      messageTs: string
-      type: "slack"
-    }
-
 export function messageText(
   message: Doc<"messages">,
   integration: Doc<"integrations">
@@ -154,20 +142,6 @@ export function replyAddress(message: Doc<"messages">): ReplyAddress | null {
   return null
 }
 
-export function reactionAddress(
-  message: Doc<"messages">
-): ReactionAddress | null {
-  if (message.integration === "linear") {
-    return linearReactionAddress(message)
-  }
-
-  if (message.integration === "slack") {
-    return slackReactionAddress(message)
-  }
-
-  return null
-}
-
 export function supportsSurfaceReaction(integration: string) {
   return integration === "linear" || integration === "slack"
 }
@@ -249,21 +223,6 @@ function linearReplyAddress(message: Doc<"messages">): ReplyAddress | null {
   return issueId === undefined ? null : { type: "linear", issueId }
 }
 
-function linearReactionAddress(
-  message: Doc<"messages">
-): ReactionAddress | null {
-  const commentId = readDataString(message.data, "commentId")
-  const issueId = readDataString(message.data, "issueId")
-
-  if (commentId !== undefined) {
-    return issueId === undefined
-      ? { type: "linear", commentId }
-      : { type: "linear", commentId, issueId }
-  }
-
-  return issueId === undefined ? null : { type: "linear", issueId }
-}
-
 function slackReplyAddress(message: Doc<"messages">): ReplyAddress | null {
   const channelId = getSlackChannelId(message.data)
   const messageTs = getSlackMessageTs(message.data)
@@ -277,15 +236,4 @@ function slackReplyAddress(message: Doc<"messages">): ReplyAddress | null {
     type: "slack",
     threadTs: getSlackThreadTs(message.data) ?? messageTs,
   }
-}
-
-function slackReactionAddress(
-  message: Doc<"messages">
-): ReactionAddress | null {
-  const channelId = getSlackChannelId(message.data)
-  const messageTs = getSlackMessageTs(message.data)
-
-  return channelId === undefined || messageTs === undefined
-    ? null
-    : { channelId, messageTs, type: "slack" }
 }

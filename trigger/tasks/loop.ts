@@ -77,7 +77,7 @@ async function handleStopResponse(args: {
     return
   }
 
-  appendStopRepair(args.messages, args.content, args.runtime.context.tools)
+  appendStopRepair(args.messages, args.content, args.runtime.context)
 }
 
 function isEmptyStop(content: string) {
@@ -89,7 +89,7 @@ function isEmptyStop(content: string) {
 function appendStopRepair(
   messages: ModelMessage[],
   content: string,
-  tools: RuntimeContext["tools"]
+  context: RuntimeContext
 ) {
   if (!isEmptyStop(content)) {
     messages.push({
@@ -100,8 +100,8 @@ function appendStopRepair(
 
   messages.push({
     content: stopRepairInstruction({
-      canReact: hasTool(tools, "add_reaction"),
-      canReply: hasTool(tools, "send_reply"),
+      canReact: hasSurfaceReactionTool(context),
+      canReply: hasTool(context.tools, "send_reply"),
     }),
     role: "user",
   })
@@ -130,9 +130,25 @@ function stopRepairInstruction(args: { canReact: boolean; canReply: boolean }) {
 }
 
 function visibleCommunicationInstruction(canReact: boolean) {
-  const tools = canReact ? "`send_reply` or `add_reaction`" : "`send_reply`"
+  const tools = canReact
+    ? "`send_reply` or the surface-specific reaction tool"
+    : "`send_reply`"
 
   return `Send any needed visible communication with ${tools}, then call \`finish_run\`.`
+}
+
+function hasSurfaceReactionTool(context: RuntimeContext) {
+  const surface = context.activeSurface?.surface
+
+  if (surface === "linear") {
+    return hasTool(context.tools, "linear_add_reaction")
+  }
+
+  if (surface === "slack") {
+    return hasTool(context.tools, "slack_add_reaction")
+  }
+
+  return false
 }
 
 async function runToolCalls(

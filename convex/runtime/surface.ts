@@ -7,14 +7,13 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { reactionAddress, replyAddress } from "../messages/surface"
+import { replyAddress } from "../messages/surface"
 import {
   type AgentRuntimeInput,
   type MessageIntegration,
 } from "../runs/agent/input"
 import { requiredString } from "../shared/input"
 import { requireWorkerSecret } from "./shared"
-import { addSurfaceReaction } from "./surface/reaction"
 import { optionalSlackBlocks, sendSurfaceReply } from "./surface/reply"
 import { type ActiveSurfaceTool, activeSurfaceTools } from "./surface/tools"
 
@@ -107,44 +106,6 @@ export const sendReply = action({
   },
 })
 
-export const addReaction = action({
-  args: {
-    runId: v.id("runs"),
-    secret: v.string(),
-    emoji: v.string(),
-  },
-  returns: v.object({
-    status: v.literal("sent"),
-  }),
-  handler: async (ctx, args) => {
-    requireWorkerSecret(args.secret)
-
-    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
-      runId: args.runId,
-    })) as AgentRuntimeInput | null
-
-    if (input === null || input.type !== "message") {
-      throw new Error("Run has no active surface.")
-    }
-
-    if (input.integration.status !== "active") {
-      throw new Error("Active surface integration is not active.")
-    }
-
-    const address = reactionAddress(input.message)
-
-    if (address === null) {
-      throw new Error("Run has no active reaction target.")
-    }
-
-    await addSurfaceReaction(ctx, input, address, {
-      emoji: requiredString(args.emoji, "emoji"),
-    })
-
-    return { status: "sent" as const }
-  },
-})
-
 async function hasCompletedCommunicationTrace(
   ctx: QueryCtx,
   runId: Id<"runs">
@@ -166,6 +127,14 @@ function isCompletedCommunicationTrace(trace: Doc<"traces">) {
     typeof data === "object" &&
     data !== null &&
     "name" in data &&
-    (data.name === "send_reply" || data.name === "add_reaction")
+    isVisibleCommunicationTool(data.name)
+  )
+}
+
+function isVisibleCommunicationTool(name: unknown) {
+  return (
+    name === "send_reply" ||
+    name === "linear_add_reaction" ||
+    name === "slack_add_reaction"
   )
 }

@@ -75,7 +75,7 @@ describe("Slack reaction tool", () => {
 
     const result = await callSlackTool(
       slackIntegration(),
-      "conversations_add_reaction",
+      "slack_add_reaction",
       {
         channel: "C123",
         name: ":white_check_mark:",

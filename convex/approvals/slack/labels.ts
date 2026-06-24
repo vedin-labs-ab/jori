@@ -12,7 +12,7 @@ function humanizeToolName(tool: string) {
 
 const toolLabels: Record<string, string> = {
   add_automation: "Add automation",
-  conversations_add_reaction: "Add Slack reaction",
+  slack_add_reaction: "Add Slack reaction",
   channels_list: "List Slack channels",
   conversations_add_message: "Send Slack message",
   conversations_history: "Read Slack channel history",

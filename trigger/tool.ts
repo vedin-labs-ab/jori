@@ -114,7 +114,9 @@ async function executeConvexTool(
   const toolName = tool.tool ?? tool.name
 
   if (tool.mode !== "prompted") {
-    return await callConvexTool(runtime, surface, toolName, call.args)
+    const result = await callConvexTool(runtime, surface, toolName, call.args)
+    markVisibleCommunication(runtime, toolName)
+    return result
   }
 
   const approval = await awaitPromptedToolApproval({
@@ -129,7 +131,27 @@ async function executeConvexTool(
     return approval.result
   }
 
-  return await callConvexTool(runtime, surface, toolName, approval.input, true)
+  const result = await callConvexTool(
+    runtime,
+    surface,
+    toolName,
+    approval.input,
+    true
+  )
+  markVisibleCommunication(runtime, toolName)
+  return result
+}
+
+function markVisibleCommunication(runtime: ToolRuntime, toolName: string) {
+  const activeSurface = runtime.context.activeSurface
+
+  if (activeSurface !== null && isVisibleCommunicationTool(toolName)) {
+    activeSurface.communicated = true
+  }
+}
+
+function isVisibleCommunicationTool(toolName: string) {
+  return toolName === "linear_add_reaction" || toolName === "slack_add_reaction"
 }
 
 async function callConvexTool(

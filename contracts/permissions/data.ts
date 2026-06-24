@@ -125,7 +125,7 @@ export const toolPermissionRows = [
   ],
   [
     "slack",
-    "conversations_add_reaction",
+    "slack_add_reaction",
     "Add reaction",
     "Add an emoji reaction to a Slack message.",
     "write",

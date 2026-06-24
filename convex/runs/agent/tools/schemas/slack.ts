@@ -68,7 +68,7 @@ export const slackToolInputSchemas = {
       thread_ts: stringProperty("Thread timestamp for a threaded reply."),
     },
   }),
-  conversations_add_reaction: objectSchema({
+  slack_add_reaction: objectSchema({
     required: ["channel", "name", "timestamp"],
     properties: {
       channel: stringProperty("Slack channel ID."),
