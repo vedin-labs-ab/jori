@@ -11,7 +11,6 @@
 import type * as approvals_approvals from "../approvals/approvals.js";
 import type * as approvals_cancel from "../approvals/cancel.js";
 import type * as approvals_console from "../approvals/console.js";
-import type * as approvals_events from "../approvals/events.js";
 import type * as approvals_execution from "../approvals/execution.js";
 import type * as approvals_lifecycle from "../approvals/lifecycle.js";
 import type * as approvals_queries from "../approvals/queries.js";
@@ -134,7 +133,6 @@ import type * as integrations_lookup from "../integrations/lookup.js";
 import type * as integrations_revoke from "../integrations/revoke.js";
 import type * as integrations_runtime from "../integrations/runtime.js";
 import type * as integrations_setup_delivery from "../integrations/setup/delivery.js";
-import type * as integrations_setup_events from "../integrations/setup/events.js";
 import type * as integrations_setup_helpers from "../integrations/setup/helpers.js";
 import type * as integrations_setup_interaction from "../integrations/setup/interaction.js";
 import type * as integrations_setup_lifecycle from "../integrations/setup/lifecycle.js";
@@ -313,6 +311,7 @@ import type * as skills_communication from "../skills/communication.js";
 import type * as skills_data from "../skills/data.js";
 import type * as skills_mcp from "../skills/mcp.js";
 import type * as skills_runtime from "../skills/runtime.js";
+import type * as transitions from "../transitions.js";
 import type * as watches_continuation from "../watches/continuation.js";
 import type * as watches_data from "../watches/data.js";
 
@@ -326,7 +325,6 @@ declare const fullApi: ApiFromModules<{
   "approvals/approvals": typeof approvals_approvals;
   "approvals/cancel": typeof approvals_cancel;
   "approvals/console": typeof approvals_console;
-  "approvals/events": typeof approvals_events;
   "approvals/execution": typeof approvals_execution;
   "approvals/lifecycle": typeof approvals_lifecycle;
   "approvals/queries": typeof approvals_queries;
@@ -449,7 +447,6 @@ declare const fullApi: ApiFromModules<{
   "integrations/revoke": typeof integrations_revoke;
   "integrations/runtime": typeof integrations_runtime;
   "integrations/setup/delivery": typeof integrations_setup_delivery;
-  "integrations/setup/events": typeof integrations_setup_events;
   "integrations/setup/helpers": typeof integrations_setup_helpers;
   "integrations/setup/interaction": typeof integrations_setup_interaction;
   "integrations/setup/lifecycle": typeof integrations_setup_lifecycle;
@@ -628,6 +625,7 @@ declare const fullApi: ApiFromModules<{
   "skills/data": typeof skills_data;
   "skills/mcp": typeof skills_mcp;
   "skills/runtime": typeof skills_runtime;
+  transitions: typeof transitions;
   "watches/continuation": typeof watches_continuation;
   "watches/data": typeof watches_data;
 }>;

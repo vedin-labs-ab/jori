@@ -2,7 +2,7 @@ import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { wakeRun } from "../runtime/waiters/data"
 import { type Actor } from "../shared/actor"
-import { recordApprovalEvent } from "./events"
+import { recordTransition } from "../transitions"
 
 type ApprovalPatch = Partial<Omit<Doc<"approvals">, "_creationTime" | "_id">>
 type ApprovalDelivery = NonNullable<Doc<"approvals">["delivery"]>
@@ -11,9 +11,10 @@ export async function recordApprovalCreated(
   ctx: MutationCtx,
   approval: Doc<"approvals">
 ) {
-  await recordApprovalEvent(ctx, {
-    approval,
-    type: "approval.created",
+  await recordTransition(ctx, {
+    tenantId: approval.tenantId,
+    subject: { kind: "approval", id: approval._id },
+    type: "created",
   })
 }
 
@@ -25,11 +26,11 @@ export async function recordApprovalDelivery(
   const updated = await patchAndRead(ctx, approval._id, { delivery })
 
   if (updated !== null) {
-    await recordApprovalEvent(ctx, {
-      approval: updated,
-      data: { delivery },
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "approval", id: updated._id },
       syncSurface: hasTerminalSurfaceState(updated),
-      type: "approval.delivered",
+      type: "delivered",
     })
   }
 
@@ -58,12 +59,11 @@ export async function markApprovalDecided(
   })
 
   if (updated !== null) {
-    await recordApprovalEvent(ctx, {
-      approval: updated,
-      data: { actor: args.decidedBy },
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "approval", id: updated._id },
       syncSurface: true,
-      type:
-        args.decision === "approved" ? "approval.approved" : "approval.denied",
+      type: args.decision,
     })
     await wakeApprovalRun(ctx, updated)
   }
@@ -94,14 +94,11 @@ export async function markApprovalCancelled(
   })
 
   if (updated !== null) {
-    await recordApprovalEvent(ctx, {
-      approval: updated,
-      data: {
-        ...(args.cancelledBy === undefined ? {} : { actor: args.cancelledBy }),
-        reason: args.reason,
-      },
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "approval", id: updated._id },
       syncSurface: true,
-      type: "approval.cancelled",
+      type: "cancelled",
     })
     await wakeApprovalRun(ctx, updated)
   }
@@ -123,10 +120,11 @@ export async function markApprovalExpired(
   })
 
   if (updated !== null) {
-    await recordApprovalEvent(ctx, {
-      approval: updated,
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "approval", id: updated._id },
       syncSurface: true,
-      type: "approval.expired",
+      type: "expired",
     })
     await wakeApprovalRun(ctx, updated)
   }

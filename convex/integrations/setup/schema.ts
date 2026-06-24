@@ -15,15 +15,6 @@ export const setupLinkStatus = v.union(
   v.literal("expired")
 )
 
-export const setupLinkEventType = v.union(
-  v.literal("offer.created"),
-  v.literal("offer.delivered"),
-  v.literal("offer.cancelled"),
-  v.literal("offer.connected"),
-  v.literal("offer.failed"),
-  v.literal("offer.expired")
-)
-
 export const setupLinkSourceActor = v.object({
   externalId: v.string(),
   email: v.optional(v.string()),
@@ -91,23 +82,3 @@ export const setupLinks = defineTable({
     "integration",
     "status",
   ])
-
-export const setupLinkEvents = defineTable({
-  tenantId: v.string(),
-  setupLinkId: v.id("setupLinks"),
-  integration: integrationValidator,
-  sourceSurface: toolSurfaceValidator,
-  status: setupLinkStatus,
-  type: setupLinkEventType,
-  data: v.optional(
-    v.object({
-      delivery: v.optional(setupLinkDelivery),
-      actor: v.optional(actorValidator),
-      error: v.optional(v.string()),
-      integrationId: v.optional(v.id("integrations")),
-    })
-  ),
-  createdAt: v.number(),
-})
-  .index("by_setup_link_and_created_at", ["setupLinkId", "createdAt"])
-  .index("by_tenant_and_created_at", ["tenantId", "createdAt"])

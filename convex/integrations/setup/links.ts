@@ -18,7 +18,6 @@ import {
 } from "../../providers/install"
 import { createUserActor } from "../../shared/actor"
 import { integrationValidator } from "../../shared/integrations"
-import { recordSetupLinkEvent } from "./events"
 import {
   findSetupLinkByToken,
   normalizeSetupReturnUrl,
@@ -33,6 +32,7 @@ import {
   markSetupLinkExpired,
   markSetupLinkFailed,
   patchAndRead,
+  recordSetupLinkCreated,
   recordSetupLinkDelivery,
 } from "./transition"
 
@@ -79,7 +79,7 @@ export const create = internalMutation({
     const link = await patchAndRead(ctx, setupLinkId, { functionId })
 
     if (link !== null) {
-      await recordSetupLinkEvent(ctx, { link, type: "offer.created" })
+      await recordSetupLinkCreated(ctx, link)
       await supersedePriorOffers(ctx, { link, now })
     }
 
