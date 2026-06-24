@@ -111,6 +111,10 @@ export const claim = mutation({
     const userId = requireClerkUserId(identity)
     const now = Date.now()
 
+    if (link.status === "cancelled") {
+      throw new Error("This setup offer was cancelled.")
+    }
+
     if (link.expiresAt <= now && link.status !== "connected") {
       await markSetupLinkExpired(ctx, link, now)
       throw new Error("This setup link has expired.")

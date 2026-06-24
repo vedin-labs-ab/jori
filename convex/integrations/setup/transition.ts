@@ -13,7 +13,12 @@ export async function markSetupLinkConnected(
     now: number
   }
 ) {
-  if (link.status === "connected") {
+  if (
+    link.status === "cancelled" ||
+    link.status === "connected" ||
+    link.status === "expired" ||
+    link.status === "failed"
+  ) {
     return
   }
 
@@ -35,6 +40,36 @@ export async function markSetupLinkConnected(
   }
 }
 
+export async function markSetupLinkCancelled(
+  ctx: MutationCtx,
+  link: Doc<"setupLinks">,
+  now: number
+) {
+  if (
+    link.status === "cancelled" ||
+    link.status === "connected" ||
+    link.status === "expired" ||
+    link.status === "failed"
+  ) {
+    return
+  }
+
+  await cancelSetupFunction(ctx, link)
+  const updated = await patchAndRead(ctx, link._id, {
+    functionId: undefined,
+    status: "cancelled",
+    updatedAt: now,
+  })
+
+  if (updated !== null) {
+    await recordSetupLinkEvent(ctx, {
+      link: updated,
+      syncSurface: true,
+      type: "offer.cancelled",
+    })
+  }
+}
+
 export async function markSetupLinkFailed(
   ctx: MutationCtx,
   link: Doc<"setupLinks">,
@@ -43,11 +78,18 @@ export async function markSetupLinkFailed(
     now: number
   }
 ) {
-  if (link.status === "connected" || link.status === "expired") {
+  if (
+    link.status === "cancelled" ||
+    link.status === "connected" ||
+    link.status === "expired" ||
+    link.status === "failed"
+  ) {
     return
   }
 
+  await cancelSetupFunction(ctx, link)
   const updated = await patchAndRead(ctx, link._id, {
+    functionId: undefined,
     status: "failed",
     result: { error: args.error },
     updatedAt: args.now,
@@ -68,7 +110,12 @@ export async function markSetupLinkExpired(
   link: Doc<"setupLinks">,
   now: number
 ) {
-  if (link.status === "connected" || link.status === "expired") {
+  if (
+    link.status === "cancelled" ||
+    link.status === "connected" ||
+    link.status === "expired" ||
+    link.status === "failed"
+  ) {
     return
   }
 

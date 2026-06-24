@@ -8,9 +8,7 @@ import {
   getSlackMessageTs,
   getSlackThreadTs,
 } from "../../providers/slack/data"
-import { readAppOrigin } from "../../shared/app"
 import { type Integration } from "../../shared/integrations"
-import { integrationSlackIconUrl } from "./logos"
 import { createSlackSetupLinkMessage } from "./slack"
 
 export async function tryDeliverSetupOffer(
@@ -48,7 +46,7 @@ async function tryDeliverSlackSetupLink(
     const message = createSlackSetupLinkMessage({
       expiresAt: args.expiresAt,
       integration: args.integration,
-      iconUrl: integrationSlackIconUrl(args.integration, requireAppOrigin()),
+      setupLinkId: args.setupLinkId,
       summary: args.summary,
       url: args.url,
     })
@@ -124,14 +122,4 @@ function readString(data: unknown, key: string) {
   const value = data[key as keyof typeof data]
 
   return typeof value === "string" && value !== "" ? value : undefined
-}
-
-function requireAppOrigin() {
-  const origin = readAppOrigin()
-
-  if (origin === undefined) {
-    throw new Error("MILO_APP_URL must be configured to create setup offers.")
-  }
-
-  return origin
 }

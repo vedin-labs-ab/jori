@@ -8,6 +8,7 @@ import {
 export const setupLinkStatus = v.union(
   v.literal("pending"),
   v.literal("claimed"),
+  v.literal("cancelled"),
   v.literal("connected"),
   v.literal("failed"),
   v.literal("expired")
@@ -16,6 +17,7 @@ export const setupLinkStatus = v.union(
 export const setupLinkEventType = v.union(
   v.literal("offer.created"),
   v.literal("offer.delivered"),
+  v.literal("offer.cancelled"),
   v.literal("offer.connected"),
   v.literal("offer.failed"),
   v.literal("offer.expired")
