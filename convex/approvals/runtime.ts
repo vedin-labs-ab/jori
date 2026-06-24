@@ -27,7 +27,7 @@ export const handleSlackDecision = internalAction({
   handler: async (ctx, args) => {
     const result = await decideSlackApproval(ctx, args)
 
-    if (result.integration === undefined) {
+    if (result.integration === undefined || result.status === "approved") {
       return
     }
 
