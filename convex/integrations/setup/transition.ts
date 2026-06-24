@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { wakeRun } from "../../runtime/waiters/data"
 import { type Actor } from "../../shared/actor"
 import { recordSetupLinkEvent } from "./events"
 
@@ -14,12 +15,7 @@ export async function markSetupLinkConnected(
     now: number
   }
 ) {
-  if (
-    link.status === "cancelled" ||
-    link.status === "connected" ||
-    link.status === "expired" ||
-    link.status === "failed"
-  ) {
+  if (isSettled(link)) {
     return
   }
 
@@ -42,6 +38,7 @@ export async function markSetupLinkConnected(
       syncSurface: true,
       type: "offer.connected",
     })
+    await wakeOfferRun(ctx, updated)
   }
 }
 
@@ -50,22 +47,19 @@ export async function markSetupLinkCancelled(
   link: Doc<"setupLinks">,
   args: {
     actor: Actor | undefined
+    reason?: string
     now: number
   }
 ) {
-  if (
-    link.status === "cancelled" ||
-    link.status === "connected" ||
-    link.status === "expired" ||
-    link.status === "failed"
-  ) {
+  if (isSettled(link)) {
     return
   }
 
   await cancelSetupFunction(ctx, link)
+  const result = cancelledResult(args)
   const updated = await patchAndRead(ctx, link._id, {
     functionId: undefined,
-    result: args.actor === undefined ? undefined : { actor: args.actor },
+    result,
     status: "cancelled",
     updatedAt: args.now,
   })
@@ -77,6 +71,18 @@ export async function markSetupLinkCancelled(
       syncSurface: true,
       type: "offer.cancelled",
     })
+    await wakeOfferRun(ctx, updated)
+  }
+}
+
+function cancelledResult(args: { actor: Actor | undefined; reason?: string }) {
+  if (args.actor === undefined && args.reason === undefined) {
+    return undefined
+  }
+
+  return {
+    ...(args.actor === undefined ? {} : { actor: args.actor }),
+    ...(args.reason === undefined ? {} : { reason: args.reason }),
   }
 }
 
@@ -88,12 +94,7 @@ export async function markSetupLinkFailed(
     now: number
   }
 ) {
-  if (
-    link.status === "cancelled" ||
-    link.status === "connected" ||
-    link.status === "expired" ||
-    link.status === "failed"
-  ) {
+  if (isSettled(link)) {
     return
   }
 
@@ -112,6 +113,7 @@ export async function markSetupLinkFailed(
       syncSurface: true,
       type: "offer.failed",
     })
+    await wakeOfferRun(ctx, updated)
   }
 }
 
@@ -120,12 +122,7 @@ export async function markSetupLinkExpired(
   link: Doc<"setupLinks">,
   now: number
 ) {
-  if (
-    link.status === "cancelled" ||
-    link.status === "connected" ||
-    link.status === "expired" ||
-    link.status === "failed"
-  ) {
+  if (isSettled(link)) {
     return
   }
 
@@ -141,6 +138,7 @@ export async function markSetupLinkExpired(
       syncSurface: true,
       type: "offer.expired",
     })
+    await wakeOfferRun(ctx, updated)
   }
 }
 
@@ -179,4 +177,25 @@ async function cancelSetupFunction(ctx: MutationCtx, link: Doc<"setupLinks">) {
   }
 
   await ctx.scheduler.cancel(link.functionId)
+}
+
+function isSettled(link: Doc<"setupLinks">) {
+  return (
+    link.status === "cancelled" ||
+    link.status === "connected" ||
+    link.status === "expired" ||
+    link.status === "failed"
+  )
+}
+
+async function wakeOfferRun(ctx: MutationCtx, link: Doc<"setupLinks">) {
+  if (link.runId === undefined || link.awaited !== true) {
+    return
+  }
+
+  await wakeRun(ctx, {
+    runId: link.runId,
+    reason: "connection_resolved",
+    subject: { kind: "connection", setupLinkId: link._id },
+  })
 }

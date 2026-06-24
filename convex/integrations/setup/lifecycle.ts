@@ -110,6 +110,45 @@ export const cancel = internalMutation({
   },
 })
 
+export const cancelForRun = internalMutation({
+  args: {
+    setupLinkId: v.id("setupLinks"),
+    runId: v.id("runs"),
+    tenantId: v.string(),
+    reason: v.string(),
+  },
+  returns: v.object({
+    status: v.union(
+      v.literal("cancelled"),
+      v.literal("missing"),
+      v.literal("settled")
+    ),
+  }),
+  handler: async (ctx, args) => {
+    const link = await ctx.db.get(args.setupLinkId)
+
+    if (
+      link === null ||
+      link.runId !== args.runId ||
+      link.tenantId !== args.tenantId
+    ) {
+      return { status: "missing" as const }
+    }
+
+    if (link.status !== "pending" && link.status !== "claimed") {
+      return { status: "settled" as const }
+    }
+
+    await markSetupLinkCancelled(ctx, link, {
+      actor: undefined,
+      reason: args.reason,
+      now: Date.now(),
+    })
+
+    return { status: "cancelled" as const }
+  },
+})
+
 export const getSurfaceTarget = internalQuery({
   args: {
     setupLinkId: v.id("setupLinks"),

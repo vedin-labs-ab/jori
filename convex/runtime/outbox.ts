@@ -27,31 +27,6 @@ export const ensureQueued = internalMutation({
   },
 })
 
-export const enqueueApprovalResume = internalMutation({
-  args: {
-    approvalId: v.id("approvals"),
-    decision: v.union(v.literal("approved"), v.literal("denied")),
-  },
-  returns: v.any(),
-  handler: async (ctx, args) => {
-    const approval = await ctx.db.get(args.approvalId)
-
-    if (approval === null || approval.waitpointId === undefined) {
-      return null
-    }
-
-    return await enqueueOperation(ctx, {
-      tenantId: approval.tenantId,
-      key: `approval:${approval._id}:${args.decision}`,
-      operation: {
-        type: "approval.resume",
-        approvalId: approval._id,
-        decision: args.decision,
-      },
-    })
-  },
-})
-
 export const enqueueCancellation = internalMutation({
   args: {
     runId: v.id("runs"),

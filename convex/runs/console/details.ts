@@ -33,7 +33,7 @@ function stoppedDetail(run: Doc<"runs">, stoppedBy: string | undefined) {
 }
 
 function decisionDetail(approval: Doc<"approvals"> | null) {
-  if (approval?.decision !== "approved") {
+  if (approval?.status !== "approved") {
     return undefined
   }
 

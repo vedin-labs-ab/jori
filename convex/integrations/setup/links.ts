@@ -1,6 +1,11 @@
 import { v } from "convex/values"
 import { internal } from "../../_generated/api"
-import { internalMutation, mutation } from "../../_generated/server"
+import { type Doc } from "../../_generated/dataModel"
+import {
+  internalMutation,
+  type MutationCtx,
+  mutation,
+} from "../../_generated/server"
 import { requireTenantAccess } from "../../identity/access"
 import {
   readClerkUserEmail,
@@ -23,6 +28,7 @@ import {
 import { setupLinkDelivery, setupLinkSource } from "./schema"
 import { createSetupToken, hashSetupToken } from "./tokens"
 import {
+  markSetupLinkCancelled,
   markSetupLinkConnected,
   markSetupLinkExpired,
   markSetupLinkFailed,
@@ -38,6 +44,7 @@ export const create = internalMutation({
     integration: integrationValidator,
     summary: v.string(),
     source: setupLinkSource,
+    awaited: v.optional(v.boolean()),
   },
   returns: v.object({
     setupLinkId: v.id("setupLinks"),
@@ -58,6 +65,8 @@ export const create = internalMutation({
       status: "pending",
       summary: args.summary,
       source: args.source,
+      runId: args.source.runId,
+      awaited: args.awaited,
       expiresAt,
       createdAt: now,
       updatedAt: now,
@@ -70,10 +79,8 @@ export const create = internalMutation({
     const link = await patchAndRead(ctx, setupLinkId, { functionId })
 
     if (link !== null) {
-      await recordSetupLinkEvent(ctx, {
-        link,
-        type: "offer.created",
-      })
+      await recordSetupLinkEvent(ctx, { link, type: "offer.created" })
+      await supersedePriorOffers(ctx, { link, now })
     }
 
     return {
@@ -85,6 +92,43 @@ export const create = internalMutation({
     }
   },
 })
+
+async function supersedePriorOffers(
+  ctx: MutationCtx,
+  args: { link: Doc<"setupLinks">; now: number }
+) {
+  if (args.link.awaited !== true || args.link.runId === undefined) {
+    return
+  }
+
+  const offers = ctx.db
+    .query("setupLinks")
+    .withIndex("by_run_and_status", (query) =>
+      query.eq("runId", args.link.runId)
+    )
+
+  for await (const offer of offers) {
+    if (canSupersede(offer, args.link)) {
+      await markSetupLinkCancelled(ctx, offer, {
+        actor: undefined,
+        reason: "Replaced by a newer setup offer.",
+        now: args.now,
+      })
+    }
+  }
+}
+
+function canSupersede(
+  offer: Doc<"setupLinks">,
+  replacement: Doc<"setupLinks">
+) {
+  return (
+    offer._id !== replacement._id &&
+    offer.awaited === true &&
+    offer.integration === replacement.integration &&
+    (offer.status === "pending" || offer.status === "claimed")
+  )
+}
 
 export const claim = mutation({
   args: {

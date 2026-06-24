@@ -23,6 +23,7 @@ import { messageConversations, messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
 import { runs } from "./runs/schema"
 import { outbox, sandboxes, traces } from "./runtime/schema"
+import { waiters } from "./runtime/waiters/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
 import { watches } from "./watches/schema"
@@ -45,6 +46,7 @@ export default defineSchema({
   approvals,
   traces,
   outbox,
+  waiters,
   sandboxes,
   permissions,
   artifacts,

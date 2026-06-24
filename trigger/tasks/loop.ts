@@ -1,17 +1,23 @@
 import {
   type ModelMessage,
+  type ModelResponse,
   type ModelRuntime,
   type ModelToolCall,
 } from "../model/types"
 import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
 import { type RuntimeContext } from "../types"
 import { recordRunEvent } from "./events"
+import { reconcileHandoffs } from "./handoffs"
 import { appendSessionMessages } from "./messages"
+import { parkRun } from "./waiter"
 
 type AgentLoopOutput = {
   message: ""
-  status: "completed"
+  status: "completed" | "stopped"
 }
+type YieldKind = "finish" | "stop"
+type YieldOutcome = "finished" | "continue" | "aborted"
+
 const maxModelSteps = 30
 const toolSequenceOffset = 100
 
@@ -27,6 +33,8 @@ export async function runAgentLoop(args: {
     },
   ]
 
+  await reconcileHandoffs(args.runtime, messages)
+
   for (let step = 1; step <= maxModelSteps; step += 1) {
     await appendSessionMessages(args.runtime, messages)
 
@@ -34,50 +42,90 @@ export async function runAgentLoop(args: {
       messages,
       tools: modelTools(args.runtime.context.tools),
     })
+    const outcome =
+      response.type === "stop"
+        ? await settleYield(args.runtime, messages, "stop", response.content)
+        : await runModelToolStep(args, messages, response, step)
 
-    if (response.type === "stop") {
-      await handleStopResponse({
-        content: response.content,
-        messages,
-        runtime: args.runtime,
-      })
-      continue
+    if (outcome === "finished") {
+      return completedOutput()
     }
 
-    messages.push({
-      content: response.content,
-      role: "assistant",
-      toolCalls: response.toolCalls,
-    })
-    const tools = await runToolCalls(
-      args.runtime,
-      messages,
-      response.toolCalls,
-      {
-        attempt: args.attempt,
-        step,
-      }
-    )
-
-    if (tools.finished) {
-      await completeRun(args.runtime, tools.sequence + 1, args.attempt)
-      return completedOutput()
+    if (outcome === "aborted") {
+      return stoppedOutput()
     }
   }
 
   throw new Error("Model loop exceeded the maximum step count.")
 }
 
-async function handleStopResponse(args: {
-  content: string
-  messages: ModelMessage[]
-  runtime: ToolRuntime
-}) {
-  if (await appendSessionMessages(args.runtime, args.messages)) {
-    return
+async function runModelToolStep(
+  args: { attempt: number; runtime: ToolRuntime },
+  messages: ModelMessage[],
+  response: Extract<ModelResponse, { type: "tool_calls" }>,
+  step: number
+): Promise<YieldOutcome> {
+  messages.push({
+    content: response.content,
+    role: "assistant",
+    toolCalls: response.toolCalls,
+  })
+  const tools = await runToolCalls(args.runtime, messages, response.toolCalls, {
+    attempt: args.attempt,
+    step,
+  })
+
+  if (!tools.finished) {
+    return "continue"
   }
 
-  appendStopRepair(args.messages, args.content, args.runtime.context)
+  const outcome = await settleYield(args.runtime, messages, "finish")
+
+  if (outcome === "finished") {
+    await completeRun(args.runtime, tools.sequence + 1, args.attempt)
+  }
+
+  return outcome
+}
+
+async function settleYield(
+  runtime: ToolRuntime,
+  messages: ModelMessage[],
+  kind: YieldKind,
+  content?: string
+): Promise<YieldOutcome> {
+  for (;;) {
+    const { progressed, pending } = await reconcileHandoffs(runtime, messages)
+
+    if (progressed) {
+      return "continue"
+    }
+
+    if (pending.length === 0) {
+      return finalizeYield(messages, runtime.context, kind, content)
+    }
+
+    const wake = await parkRun(runtime, pending)
+
+    if (wake.reason === "run_cancelled") {
+      return "aborted"
+    }
+  }
+}
+
+function finalizeYield(
+  messages: ModelMessage[],
+  context: RuntimeContext,
+  kind: YieldKind,
+  content?: string
+): YieldOutcome {
+  if (kind === "finish") {
+    return "finished"
+  }
+
+  appendStopRepair(messages, content ?? "", context)
+
+  return "continue"
 }
 
 function isEmptyStop(content: string) {
@@ -203,5 +251,12 @@ function completedOutput(): AgentLoopOutput {
   return {
     message: "",
     status: "completed",
+  }
+}
+
+function stoppedOutput(): AgentLoopOutput {
+  return {
+    message: "",
+    status: "stopped",
   }
 }

@@ -144,8 +144,43 @@ export type RuntimeEventInput = {
   type: RuntimeEventType
 }
 
-export type ApprovalResolution = {
-  approvalId?: ConvexId<"approvals">
-  decision: "approved" | "denied"
-  reason?: "expired"
+export type WaiterWakeReason =
+  | "approval_resolved"
+  | "connection_resolved"
+  | "message"
+  | "run_cancelled"
+  | "expired"
+
+export type WaiterWake = {
+  reason: WaiterWakeReason
+  subject?: unknown
+}
+
+export type ApprovalHandoff = {
+  id: ConvexId<"approvals">
+  status: "pending" | "approved" | "denied" | "cancelled" | "expired"
+  surface: ToolSurface
+  tool: string
+  summary: string
+  code: string
+  expiresAt: number
+}
+
+export type OfferHandoff = {
+  id: ConvexId<"setupLinks">
+  integration: string
+  status:
+    | "pending"
+    | "claimed"
+    | "cancelled"
+    | "connected"
+    | "failed"
+    | "expired"
+  summary: string | null
+  expiresAt: number
+}
+
+export type RunHandoffs = {
+  approvals: ApprovalHandoff[]
+  offers: OfferHandoff[]
 }

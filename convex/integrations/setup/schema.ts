@@ -59,6 +59,8 @@ export const setupLinks = defineTable({
   status: setupLinkStatus,
   summary: v.optional(v.string()),
   source: setupLinkSource,
+  runId: v.optional(v.id("runs")),
+  awaited: v.optional(v.boolean()),
   delivery: v.optional(setupLinkDelivery),
   claim: v.optional(
     v.object({
@@ -72,15 +74,18 @@ export const setupLinks = defineTable({
       actor: v.optional(actorValidator),
       integrationId: v.optional(v.id("integrations")),
       error: v.optional(v.string()),
+      reason: v.optional(v.string()),
     })
   ),
   functionId: v.optional(v.id("_scheduled_functions")),
   expiresAt: v.number(),
   createdAt: v.number(),
   updatedAt: v.number(),
+  consumedAt: v.optional(v.number()),
 })
   .index("by_token_hash", ["tokenHash"])
   .index("by_tenant_and_status", ["tenantId", "status"])
+  .index("by_run_and_status", ["runId", "status"])
   .index("by_tenant_and_integration_and_status", [
     "tenantId",
     "integration",

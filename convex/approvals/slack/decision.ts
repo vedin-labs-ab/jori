@@ -1,5 +1,18 @@
+import { type Doc } from "../../_generated/dataModel"
 import { getActorDisplayName } from "../../shared/actor"
 import { type SlackApprovalDecisionResult } from "../runtime"
+
+export function approvalOutcome(approval?: Doc<"approvals">) {
+  if (approval?.status === "approved") {
+    return "approved" as const
+  }
+
+  if (approval?.status === "denied") {
+    return "denied" as const
+  }
+
+  return undefined
+}
 
 export function createDecisionTitle(
   result: SlackApprovalDecisionResult,
@@ -8,9 +21,10 @@ export function createDecisionTitle(
     surface?: "milo"
   } = {}
 ) {
-  const title = getDecisionTitle(result.status, result.approval?.decision)
+  const outcome = approvalOutcome(result.approval)
+  const title = getDecisionTitle(result.status, outcome)
 
-  if (!isDecisionStatus(result.status, result.approval?.decision)) {
+  if (!isDecisionStatus(result.status, outcome)) {
     return title
   }
 

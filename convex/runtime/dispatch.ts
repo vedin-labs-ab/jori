@@ -52,8 +52,8 @@ async function performOperation(ctx: DispatchCtx, item: Doc<"outbox">) {
   switch (operation.type) {
     case "run.start":
       return await triggerAgentRun(ctx, item)
-    case "approval.resume":
-      return await resumeApproval(ctx, operation)
+    case "waiter.wake":
+      return await wakeWaiter(ctx, operation)
     case "run.cancel":
       return await cancelRun(ctx, item)
   }
@@ -100,40 +100,24 @@ function isTerminalRun(run: Doc<"runs">) {
   )
 }
 
-async function resumeApproval(
+async function wakeWaiter(
   ctx: DispatchCtx,
-  operation: Extract<Doc<"outbox">["operation"], { type: "approval.resume" }>
+  operation: Extract<Doc<"outbox">["operation"], { type: "waiter.wake" }>
 ) {
-  const approval = (await ctx.runQuery(internal.approvals.approvals.get, {
-    approvalId: operation.approvalId,
-  })) as Doc<"approvals"> | null
+  const waiter = (await ctx.runQuery(internal.runtime.waiters.data.get, {
+    waiterId: operation.waiterId,
+  })) as Doc<"waiters"> | null
 
-  if (approval?.waitpointId === undefined) {
+  if (waiter === null) {
     return undefined
   }
 
   configureTrigger()
 
-  await wait.completeToken(approval.waitpointId, {
-    approvalId: operation.approvalId,
-    decision: operation.decision,
-    reason: approvalResolutionReason(approval, operation.decision),
+  await wait.completeToken(waiter.waitpointId, {
+    reason: operation.reason,
+    ...(operation.subject === undefined ? {} : { subject: operation.subject }),
   })
-
-  return undefined
-}
-
-function approvalResolutionReason(
-  approval: Doc<"approvals">,
-  decision: "approved" | "denied"
-) {
-  if (
-    decision === "denied" &&
-    approval.decision === undefined &&
-    Date.now() >= approval.expiresAt
-  ) {
-    return "expired"
-  }
 
   return undefined
 }

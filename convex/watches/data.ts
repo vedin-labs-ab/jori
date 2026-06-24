@@ -2,6 +2,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { queueRun } from "../runtime/outbox"
+import { wakeRun } from "../runtime/waiters/data"
 import { findSession, isReusableSession, startSession } from "../sessions/data"
 
 export async function findWatch(
@@ -72,6 +73,14 @@ export async function startMessageRun(
       : await isReusableSession(ctx, session)
 
   if (watch !== null && activeSession !== null) {
+    if (activeSession.runId !== undefined) {
+      await wakeRun(ctx, {
+        runId: activeSession.runId,
+        reason: "message",
+        subject: { kind: "message", messageId: args.message._id },
+      })
+    }
+
     return {
       status: "continued" as const,
       messageId: args.message._id,

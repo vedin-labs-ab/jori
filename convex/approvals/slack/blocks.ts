@@ -7,7 +7,11 @@ import {
   toSlackTimestamp,
   truncateSlackText,
 } from "./cards"
-import { createDecisionTitle, getDecisionIcon } from "./decision"
+import {
+  approvalOutcome,
+  createDecisionTitle,
+  getDecisionIcon,
+} from "./decision"
 import { getToolLabel } from "./labels"
 
 const slackCardBodyLimit = 200
@@ -143,7 +147,7 @@ function createDecisionBlocks(
 
   return [
     createApprovalCard({
-      icon: getDecisionIcon(result.status, result.approval?.decision),
+      icon: getDecisionIcon(result.status, approvalOutcome(result.approval)),
       title: createDecisionTitle(result, {
         fallbackActor: formatSlackActor(interaction.actorId),
       }),
@@ -165,7 +169,7 @@ function createConsoleDecisionBlocks(
 
   return [
     createApprovalCard({
-      icon: getDecisionIcon(result.status, result.approval?.decision),
+      icon: getDecisionIcon(result.status, approvalOutcome(result.approval)),
       title: createDecisionTitle(result, { surface: "milo" }),
       subtitle,
       body: truncateSlackText(summary ?? result.message, slackCardBodyLimit),
@@ -211,14 +215,13 @@ function createDecisionSubtext(result: SlackApprovalDecisionResult) {
 }
 
 function getDecisionTimeLabel(result: SlackApprovalDecisionResult) {
-  if (
-    result.status === "approved" ||
-    result.approval?.decision === "approved"
-  ) {
+  const outcome = approvalOutcome(result.approval)
+
+  if (result.status === "approved" || outcome === "approved") {
     return "Approved"
   }
 
-  if (result.status === "denied" || result.approval?.decision === "denied") {
+  if (result.status === "denied" || outcome === "denied") {
     return "Denied"
   }
 

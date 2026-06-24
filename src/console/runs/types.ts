@@ -29,7 +29,12 @@ export type ExecutionStatus =
   | "completed"
   | "failed"
   | "stopped"
-export type ApprovalState = "pending" | "approved" | "denied" | "expired"
+export type ApprovalState =
+  | "pending"
+  | "approved"
+  | "denied"
+  | "cancelled"
+  | "expired"
 
 export type SourceDatum = {
   type: string

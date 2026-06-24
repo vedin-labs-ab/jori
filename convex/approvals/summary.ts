@@ -27,8 +27,8 @@ export function summarizeApproval(args: {
 }
 
 function getApprovalState(approval: Doc<"approvals">) {
-  if (approval.decision !== undefined) {
-    return approval.decision
+  if (approval.status !== "pending") {
+    return approval.status
   }
 
   return Date.now() > approval.expiresAt

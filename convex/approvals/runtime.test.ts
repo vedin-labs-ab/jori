@@ -6,18 +6,12 @@ import { type Actor } from "../shared/actor"
 import { decideApproval } from "./runtime"
 
 describe("approval runtime decisions", () => {
-  test("resumes expired waitpoints as denied approvals", async () => {
+  test("reports expired approvals without a second mutation", async () => {
     const approval = approvalDoc()
-    const ctx = actionCtx(async (args) => {
-      if ("decidedBy" in args) {
-        return {
-          status: "expired" as const,
-          approval,
-        }
-      }
-
-      return null
-    })
+    const ctx = actionCtx(async () => ({
+      status: "expired" as const,
+      approval,
+    }))
 
     const result = await decideApproval(ctx, {
       approval,
@@ -26,10 +20,8 @@ describe("approval runtime decisions", () => {
     })
 
     expect(result.status).toBe("expired")
-    expect(ctx.runMutation).toHaveBeenCalledWith(expect.anything(), {
-      approvalId: approval._id,
-      decision: "denied",
-    })
+    expect(result.message).toContain("expired")
+    expect(ctx.runMutation).toHaveBeenCalledTimes(1)
   })
 
   test("does not resume approvals for closed runs", async () => {
@@ -82,11 +74,11 @@ function approvalDoc(): Doc<"approvals"> {
     expiresAt: 1,
     requestedBy: userActor(),
     runId: "run_1" as Id<"runs">,
+    status: "pending",
     summary: "Create a page.",
     surface: "notion",
     tenantId: "tenant",
     tool: "notion_create_page",
-    waitpointId: "waitpoint_1",
   }
 }
 

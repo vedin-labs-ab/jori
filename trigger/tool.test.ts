@@ -1,36 +1,13 @@
-import { wait } from "@trigger.dev/sdk/v3"
 import { beforeEach, expect, test, vi } from "vitest"
-import { approvalWaitTimeout } from "../contracts/approvals"
 import { executeToolCall, type ToolRuntime } from "./tool"
 import { type ConvexId } from "./types"
 
-vi.mock("@trigger.dev/sdk/v3", () => ({
-  wait: {
-    createToken: vi.fn(),
-    forToken: vi.fn(),
-  },
-}))
-
-const waitMock = vi.mocked(wait)
-
 beforeEach(() => {
   vi.clearAllMocks()
-  waitMock.createToken.mockResolvedValue({
-    id: "waitpoint_1",
-  } as Awaited<ReturnType<typeof wait.createToken>>)
 })
 
-test("prompted tools wait for approval before executing", async () => {
+test("prompted tools request approval without executing", async () => {
   const runtime = createRuntime()
-
-  waitMock.forToken.mockResolvedValue({
-    ok: true,
-    output: {
-      approvalId: "approval_1",
-      decision: "approved",
-    },
-  })
-  runtime.convex.callTool = vi.fn(async () => ({ ok: true }))
 
   const { content } = await executeToolCall({
     attempt: 1,
@@ -39,113 +16,17 @@ test("prompted tools wait for approval before executing", async () => {
     sequence: 100,
   })
 
-  expect(JSON.parse(content)).toEqual({ ok: true })
-  expect(waitMock.createToken).toHaveBeenCalledWith({
-    idempotencyKey: "run_1:call_1",
-    tags: ["run_1", "tool:notion_create_page"],
-    timeout: approvalWaitTimeout,
+  expect(JSON.parse(content)).toEqual({
+    approvalId: "approval_1",
+    code: "ABC123",
+    instruction: "Approval requested.",
+    status: "approval_requested",
   })
   expect(runtime.convex.requestApproval).toHaveBeenCalledWith({
     input: promptedToolCall().args,
     runId: "run_1",
     surface: "notion",
     tool: "notion_create_page",
-    waitpointId: "waitpoint_1",
-  })
-  expect(runtime.convex.callTool).toHaveBeenCalledWith({
-    approved: true,
-    input: { title: "Launch notes" },
-    runId: "run_1",
-    surface: "notion",
-    tool: "notion_create_page",
-  })
-})
-
-test("prompted tools return denied results without executing", async () => {
-  const runtime = createRuntime()
-
-  waitMock.forToken.mockResolvedValue({
-    ok: true,
-    output: {
-      approvalId: "approval_1",
-      decision: "denied",
-    },
-  })
-
-  const { content } = await executeToolCall({
-    attempt: 1,
-    call: promptedToolCall(),
-    runtime,
-    sequence: 100,
-  })
-
-  expect(JSON.parse(content)).toEqual({
-    approvalId: "approval_1",
-    status: "denied",
-  })
-  expect(runtime.convex.callTool).not.toHaveBeenCalled()
-})
-
-test("prompted tools return repairable validation errors before approval", async () => {
-  const runtime = createRuntime()
-
-  const { content } = await executeToolCall({
-    attempt: 1,
-    call: promptedToolCall({ approval: false }),
-    runtime,
-    sequence: 100,
-  })
-
-  expect(JSON.parse(content)).toEqual({
-    error: {
-      message:
-        "Tool requires approval: notion_create_page. Include approval.summary as a 1-500 character user-facing sentence describing the exact action. Retry the same tool call with approval.summary included.",
-    },
-    status: "error",
-  })
-  expect(waitMock.createToken).not.toHaveBeenCalled()
-  expect(runtime.convex.requestApproval).not.toHaveBeenCalled()
-  expect(runtime.convex.callTool).not.toHaveBeenCalled()
-})
-
-test("prompted tools reject blank approval summaries before approval", async () => {
-  const runtime = createRuntime()
-
-  const { content } = await executeToolCall({
-    attempt: 1,
-    call: promptedToolCall({ summary: " " }),
-    runtime,
-    sequence: 100,
-  })
-
-  expect(JSON.parse(content)).toMatchObject({
-    error: {
-      message: expect.stringContaining("Include approval.summary"),
-    },
-    status: "error",
-  })
-  expect(waitMock.createToken).not.toHaveBeenCalled()
-  expect(runtime.convex.requestApproval).not.toHaveBeenCalled()
-})
-
-test("prompted tools return expired results on waitpoint timeout", async () => {
-  const runtime = createRuntime()
-
-  waitMock.forToken.mockResolvedValue({
-    error: new Error("Waitpoint timed out"),
-    ok: false,
-  })
-
-  const { content } = await executeToolCall({
-    attempt: 1,
-    call: promptedToolCall(),
-    runtime,
-    sequence: 100,
-  })
-
-  expect(JSON.parse(content)).toEqual({
-    approvalId: "approval_1",
-    status: "expired",
   })
   expect(runtime.convex.callTool).not.toHaveBeenCalled()
 })
@@ -193,6 +74,9 @@ function createRuntime(
       recordEvent: vi.fn(),
       requestApproval: vi.fn(async () => ({
         approvalId: id<"approvals">("approval_1"),
+        code: "ABC123",
+        instruction: "Approval requested.",
+        status: "approval_requested",
       })),
     } as unknown as ToolRuntime["convex"],
     context: {
@@ -226,20 +110,12 @@ function id<TableName extends string>(value: string) {
   return value as ConvexId<TableName>
 }
 
-function promptedToolCall(
-  options: { approval?: boolean; summary?: string } = {}
-) {
-  const includeApproval = options.approval ?? true
-
+function promptedToolCall() {
   return {
     args: {
-      ...(includeApproval
-        ? {
-            approval: {
-              summary: options.summary ?? "Create launch notes in Notion.",
-            },
-          }
-        : {}),
+      approval: {
+        summary: "Create launch notes in Notion.",
+      },
       title: "Launch notes",
     },
     id: "call_1",

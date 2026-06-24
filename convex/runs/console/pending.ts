@@ -150,11 +150,7 @@ function matchesSearch(summary: RunSummary, normalizedQuery: string) {
 }
 
 function isPendingApproval(approval: Doc<"approvals">, now: number) {
-  return (
-    approval.consumedAt === undefined &&
-    approval.decision === undefined &&
-    approval.expiresAt > now
-  )
+  return approval.status === "pending" && approval.expiresAt > now
 }
 
 function isTerminalRun(run: Doc<"runs">) {
