@@ -10,7 +10,7 @@ import {
   ToolGroupSection,
   ToolGroupsFrame,
   ToolRowContent,
-} from "@/console/tools"
+} from "@/console/shared/tools"
 import { cn } from "@/lib/utils"
 import { type ToolPermission } from "../../../../permissions/types"
 import {

@@ -1,4 +1,4 @@
-import { ToolAccessSummary } from "../../tools/summary"
+import { ToolAccessSummary } from "../../shared/tools/summary"
 import { type Automation } from "../types"
 
 export function AutomationToolSummary({

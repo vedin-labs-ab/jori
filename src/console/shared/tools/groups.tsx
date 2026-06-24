@@ -10,8 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { SeparatorDot } from "../shared/dot"
-import { ProviderLogo } from "../shared/logo/provider"
+import { SeparatorDot } from "../dot"
+import { ProviderLogo } from "../logo/provider"
 import { type ToolCapability } from "./model"
 import { ReadonlyToolGroups } from "./readonly"
 

@@ -27,7 +27,7 @@ import {
 } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, absoluteUtcTime } from "../../shared/time"
-import { ToolGroupsValue } from "../../tools"
+import { ToolGroupsValue } from "../../shared/tools"
 import { type ExecutionDetail, type ExecutionDetailType } from "../types"
 import { RepositoryIcon } from "./source"
 
