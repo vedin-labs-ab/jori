@@ -127,24 +127,14 @@ function getLinearTargetLines(data: unknown) {
 
   return [
     targetLine("Issue ID", target.issueId),
-    targetLine("Issue key", target.issueIdentifier),
-    targetLine("Issue title", target.issueTitle),
-    targetLine("Issue URL", target.issueUrl),
     targetLine("Comment ID", target.commentId),
-    targetLine("Comment URL", target.commentUrl),
   ]
 }
 
 function getLinearTargetValues(data: unknown) {
-  const issue = readDataObject(data, "issue")
-
   return {
     commentId: readDataString(data, "commentId") ?? null,
-    commentUrl: readDataString(data, "url") ?? null,
     issueId: readDataString(data, "issueId") ?? null,
-    issueIdentifier: readDataString(data, "issueIdentifier") ?? null,
-    issueTitle: readDataString(issue, "title") ?? null,
-    issueUrl: readDataString(issue, "url") ?? null,
   }
 }
 

@@ -189,13 +189,17 @@ function formatMessageEntry(
   return renderPromptTemplate(promptTemplates["conversation/message"], {
     message: {
       actor: entry.actor ?? "unknown",
-      actorIds: entry.actorIds.join(", "),
-      messageIds: entry.messageIds.join(", "),
+      actorIds: formatEntryIds(entry.actorIds),
+      messageIds: formatEntryIds(entry.messageIds),
       observedAt: new Date(observed).toISOString(),
       speaker: entry.source,
       text: entry.text,
     },
   }).trim()
+}
+
+function formatEntryIds(ids: string[]) {
+  return ids.length === 0 ? null : ids.join(", ")
 }
 
 function createAutomationValues(

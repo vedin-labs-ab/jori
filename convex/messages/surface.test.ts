@@ -43,6 +43,19 @@ describe("message surface text", () => {
       "slack:message:1782231485.491049",
     ])
   })
+
+  test("exposes Linear actor and comment identifiers when available", () => {
+    const linearMessage = message({
+      actor: { externalId: "linear-user-id", kind: "user", name: "Albin" },
+      data: { commentId: "comment-id" },
+      integration: "linear",
+    })
+
+    expect(messageActorIds(linearMessage)).toEqual([
+      "linear:user:linear-user-id",
+    ])
+    expect(messageIds(linearMessage)).toEqual(["linear:comment:comment-id"])
+  })
 })
 
 describe("message surface addressing", () => {
