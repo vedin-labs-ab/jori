@@ -38,14 +38,7 @@ const messageTriggerCases = [
       url: "https://linear.app/acme/issue/ISSUE-1/ship-target-context#comment-id",
     },
     "Linear",
-    [
-      "- Issue ID: issue-id",
-      "- Issue key: ISSUE-1",
-      "- Issue title: Ship target context",
-      "- Issue URL: https://linear.app/acme/issue/ISSUE-1/ship-target-context",
-      "- Comment ID: comment-id",
-      "- Comment URL: https://linear.app/acme/issue/ISSUE-1/ship-target-context#comment-id",
-    ],
+    ["- Issue ID: issue-id", "- Comment ID: comment-id"],
   ],
   [
     "slack",
@@ -128,6 +121,23 @@ describe("runtime prompts", () => {
   })
 })
 
+describe("runtime Linear prompt metadata", () => {
+  test("renders Linear trigger text with actor and comment metadata", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("linear", {
+        commentId: "comment-id",
+        issueId: "issue-id",
+      })
+    )
+
+    expect(prompt).toContain(
+      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | message_ids=[linear:comment:comment-id] | actor_ids=[linear:user:UACTOR]"
+    )
+    expect(prompt).not.toContain("message_ids=[]")
+    expect(prompt).not.toContain("actor_ids=[]")
+  })
+})
+
 describe("runtime delivery prompts", () => {
   test("renders start update guidance", () => {
     const prompt = assemblePrompt(
@@ -152,16 +162,16 @@ describe("runtime delivery prompts", () => {
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain(
-      "When instructed to send, reply, report, update, tell the user, or let them know"
+      "When asked to communicate on the active surface, choose the smallest sufficient visible action"
     )
-    expect(prompt).toContain("call `send_reply`")
+    expect(prompt).toContain("Use `send_reply`")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Completion")
     expect(prompt).toContain("Assistant completion text is private run output")
     expect(prompt).toContain("Finish the run by calling `finish_run`")
     expect(prompt).toContain(
-      "Finish the run by calling `finish_run`.\n\nIf a visible reply"
+      "Before `finish_run`, use the appropriate surface communication tool"
     )
     expectNoSyntheticBlankLines(prompt)
   })

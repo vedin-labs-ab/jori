@@ -48,10 +48,46 @@ export function messageText(
 }
 
 export function messageActorIds(message: Doc<"messages">) {
-  if (message.integration !== "slack") {
+  if (message.integration === "linear") {
+    return linearActorIds(message)
+  }
+
+  if (message.integration === "slack") {
+    return slackActorIds(message)
+  }
+
+  return []
+}
+
+export function messageIds(message: Doc<"messages">) {
+  if (message.integration === "linear") {
+    return linearMessageIds(message)
+  }
+
+  if (message.integration === "slack") {
+    return slackMessageIds(message)
+  }
+
+  return []
+}
+
+function linearActorIds(message: Doc<"messages">) {
+  const externalId = getActorExternalId(message.actor)
+
+  if (externalId === undefined || externalId === "") {
     return []
   }
 
+  return [`${linearActorIdPrefix(message.actor?.kind)}:${externalId}`]
+}
+
+function linearMessageIds(message: Doc<"messages">) {
+  const commentId = readDataString(message.data, "commentId")
+
+  return commentId === undefined ? [] : [`linear:comment:${commentId}`]
+}
+
+function slackActorIds(message: Doc<"messages">) {
   const externalId = getActorExternalId(message.actor)
 
   if (externalId === undefined || externalId === "") {
@@ -61,11 +97,7 @@ export function messageActorIds(message: Doc<"messages">) {
   return [`${slackActorIdPrefix(message.actor?.kind)}:${externalId}`]
 }
 
-export function messageIds(message: Doc<"messages">) {
-  if (message.integration !== "slack") {
-    return []
-  }
-
+function slackMessageIds(message: Doc<"messages">) {
   const ts = getSlackMessageTs(message.data)
 
   return ts === undefined ? [] : [`slack:message:${ts}`]
@@ -112,6 +144,10 @@ export function replyAddress(message: Doc<"messages">): ReplyAddress | null {
 
 function slackActorIdPrefix(kind: ActorKind | undefined) {
   return kind === "bot" ? "slack:bot" : "slack:user"
+}
+
+function linearActorIdPrefix(kind: ActorKind | undefined) {
+  return kind === "bot" ? "linear:bot" : "linear:user"
 }
 
 function slackMessageAudience(

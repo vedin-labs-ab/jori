@@ -21,6 +21,8 @@ test("renders recent conversation context without duplicating the trigger", () =
   expect(prompt).toContain("- 1970-01-01T00:00:02.000Z | self | Milo")
   expect(prompt).toContain("- 1970-01-01T00:00:03.000Z | bot | CI")
   expect(prompt).toContain("- 1970-01-01T00:00:03.500Z | bot | unknown")
+  expect(prompt).not.toContain("message_ids=[]")
+  expect(prompt).not.toContain("actor_ids=[]")
   expect(prompt).not.toContain("source=")
   expect(prompt).not.toContain("authority=")
   expect(prompt).not.toContain("type=event")

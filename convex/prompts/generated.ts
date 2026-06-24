@@ -74,7 +74,7 @@ export const promptTemplates = {
   "target/github":
     "{% if message.github.repository %}- Repository: {{message.github.repository}}\n{% endif %}{% if message.github.issueNumber %}- Issue number: {{message.github.issueNumber}}\n{% endif %}{% if message.github.pullNumber %}- Pull request number: {{message.github.pullNumber}}\n{% endif %}{% if message.github.commentId %}- Comment ID: {{message.github.commentId}}\n{% endif %}{% if message.github.commentKind %}- Comment kind: {{message.github.commentKind}}\n{% endif %}{% if message.github.reviewThreadCommentId %}- Review thread comment ID: {{message.github.reviewThreadCommentId}}\n{% endif %}",
   "target/linear":
-    "{% if message.linear.issueId %}- Issue ID: {{message.linear.issueId}}\n{% endif %}{% if message.linear.issueIdentifier %}- Issue key: {{message.linear.issueIdentifier}}\n{% endif %}{% if message.linear.issueTitle %}- Issue title: {{message.linear.issueTitle}}\n{% endif %}{% if message.linear.issueUrl %}- Issue URL: {{message.linear.issueUrl}}\n{% endif %}{% if message.linear.commentId %}- Comment ID: {{message.linear.commentId}}\n{% endif %}{% if message.linear.commentUrl %}- Comment URL: {{message.linear.commentUrl}}\n{% endif %}",
+    "{% if message.linear.issueId %}- Issue ID: {{message.linear.issueId}}\n{% endif %}{% if message.linear.commentId %}- Comment ID: {{message.linear.commentId}}\n{% endif %}",
   "target/slack":
     "{% if message.slack.channelId %}- Channel ID: {{message.slack.channelId}}\n{% endif %}{% if message.slack.messageTimestamp %}- Message timestamp: {{message.slack.messageTimestamp}}\n{% endif %}{% if message.slack.threadTimestamp %}- Thread timestamp: {{message.slack.threadTimestamp}}\n{% endif %}",
   "trigger/automation":
