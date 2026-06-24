@@ -68,7 +68,7 @@ test("generates artifact sandbox dependencies from template package manifest", (
   )
   expect(runtimeAssets.artifact.dependencies).toContain("@biomejs/biome@2.4.12")
   expect(artifactPackageScripts().check).toBe(
-    "node --experimental-strip-types ../../milo-artifact-builder.ts check ."
+    "node --experimental-strip-types /home/user/.milo/artifacts/runtime/milo-artifact-builder.ts check ."
   )
 })
 

@@ -61,7 +61,7 @@ test("generates an image through OpenRouter and saves it as an attachment", asyn
   expect(runtime.writeFiles).toHaveBeenCalledWith([
     {
       content: imageBytes,
-      path: "/home/user/milo-workspace/generated-images/hero.png",
+      path: "/home/user/workspace/generated-images/hero.png",
     },
   ])
   expect(runtime.uploadAttachment).toHaveBeenCalledWith({

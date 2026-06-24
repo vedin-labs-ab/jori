@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "check": "node --experimental-strip-types ../../milo-artifact-builder.ts check ."
+    "check": "node --experimental-strip-types /home/user/.milo/artifacts/runtime/milo-artifact-builder.ts check ."
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

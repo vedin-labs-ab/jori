@@ -1,3 +1,4 @@
+import { sandboxWorkspace } from "./artifacts"
 import { boundedInteger, requiredString } from "./input"
 import { runJsonScript } from "./script"
 import { type SandboxRuntime } from "./types"
@@ -24,7 +25,7 @@ import path from "node:path";
 import readline from "node:readline";
 
 const input = JSON.parse(process.env.MILO_TOOL_INPUT ?? "{}");
-const workspace = "/home/user/milo-workspace";
+const workspace = ${JSON.stringify(sandboxWorkspace)};
 const maxChars = 20_000;
 
 const file = await resolveFile(input.path);

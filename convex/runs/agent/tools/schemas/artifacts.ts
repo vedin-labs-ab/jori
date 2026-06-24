@@ -25,7 +25,7 @@ const artifactAccessProperty = {
 }
 
 const artifactWorkspacePathProperty = stringProperty(
-  "Path to the artifact workspace directory under /home/user/milo-workspace. Copy the template there, edit artifact-owned src/** files, and run npm run check before publishing. The MCP server validates this exact workspace and derives source, build assets, and contract."
+  "Path to the artifact workspace directory under /home/user/workspace/artifacts. Copy the template there, edit artifact-owned src/** files, and run npm run check before publishing. The MCP server validates this exact workspace and derives source, build assets, and contract."
 )
 
 const artifactStateProperties = {

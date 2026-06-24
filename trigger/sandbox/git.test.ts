@@ -5,6 +5,7 @@ import path from "node:path"
 import { afterEach, expect, test } from "vitest"
 import { sandboxWorkspace } from "./artifacts"
 import { executeCodingTool } from "./coding"
+import { sandboxClonePath } from "./path"
 import {
   type SandboxCloneRepositoryInput,
   type SandboxCommandInput,
@@ -81,7 +82,10 @@ class LocalSandbox implements SandboxRuntime {
 
   async cloneRepository(input: SandboxCloneRepositoryInput) {
     return {
-      directory: input.directory ?? sandboxWorkspace,
+      directory: sandboxClonePath({
+        repository: input.repository,
+        value: input.directory,
+      }),
       git: true as const,
       remoteUrl: input.remoteUrl,
       repository: input.repository,

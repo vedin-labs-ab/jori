@@ -58,7 +58,7 @@ export const githubToolInputSchemas = {
     required: ["owner", "repo"],
     properties: {
       directory: stringProperty(
-        "Empty workspace-relative destination directory for the Git working copy. Omit this for the default workspace root."
+        "Empty workspace-relative destination directory for the Git working copy. Omit to clone into /home/user/workspace/<repo>."
       ),
       owner: stringProperty("Repository owner."),
       ref: stringProperty("Branch, tag, or commit SHA."),

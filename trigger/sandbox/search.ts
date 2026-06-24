@@ -1,3 +1,4 @@
+import { sandboxWorkspace } from "./artifacts"
 import { boundedInteger, optionalString, requiredString } from "./input"
 import { runJsonScript } from "./script"
 import { type SandboxRuntime } from "./types"
@@ -43,7 +44,7 @@ import path from "node:path";
 import readline from "node:readline";
 
 const input = JSON.parse(process.env.MILO_TOOL_INPUT ?? "{}");
-const workspace = "/home/user/milo-workspace";
+const workspace = ${JSON.stringify(sandboxWorkspace)};
 const skipped = new Set([".git", "node_modules", "dist"]);
 
 const root = await fs.promises.realpath(workspace);
