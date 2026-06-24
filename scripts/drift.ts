@@ -24,7 +24,7 @@ const skippedPathParts = new Set([
 const rules: DriftRule[] = [
   {
     buildPattern: () => new RegExp(`\\b${["args", "Json"].join("")}\\b`),
-    message: "Use inputJson through contracts/tool-transport.ts.",
+    message: "Use inputJson through contracts/transport.ts.",
   },
   {
     buildPattern: () =>

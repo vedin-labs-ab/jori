@@ -1,4 +1,4 @@
-import { objectSchema, stringProperty } from "./common"
+import { objectSchema, stringProperty } from "../common"
 
 const nativeIconColors = [
   "gray",

@@ -4,8 +4,8 @@ import Exa, {
   type RegularSearchOptions,
   type SearchResponse,
 } from "exa-js"
-import { normalizeWebFetchInput, normalizeWebSearchInput } from "./web_input"
-import { normalizeWebResponse } from "./web_output"
+import { normalizeWebFetchInput, normalizeWebSearchInput } from "./input"
+import { normalizeWebResponse } from "./output"
 
 const searchTimeoutMs = 12_000
 const fetchTimeoutMs = 15_000

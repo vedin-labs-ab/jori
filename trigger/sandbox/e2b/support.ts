@@ -1,7 +1,7 @@
 import { CommandExitError, type CommandResult, Sandbox } from "e2b"
-import { type MiloConvexClient } from "../convex"
-import { type ConvexId } from "../types"
-import { type SandboxCommandInput, type SandboxCommandResult } from "./types"
+import { type MiloConvexClient } from "../../convex"
+import { type ConvexId } from "../../types"
+import { type SandboxCommandInput, type SandboxCommandResult } from "../types"
 
 export type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
 

@@ -1,6 +1,6 @@
 import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../contracts/integrations"
-import { decodeToolResult, encodeToolInput } from "../contracts/tool-transport"
+import { decodeToolResult, encodeToolInput } from "../contracts/transport"
 import { api } from "../convex/_generated/api"
 import {
   fetchGitHubCloneCredentials,

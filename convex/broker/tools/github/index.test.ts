@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { encodeToolResult } from "../../../../contracts/tool-transport"
+import { encodeToolResult } from "../../../../contracts/transport"
 import { type Doc } from "../../../_generated/dataModel"
 import { callGitHubTool, createGitHubCloneCredentials } from "./index"
 

@@ -1,8 +1,5 @@
 import { expect, test } from "vitest"
-import {
-  decodeToolResult,
-  encodeToolResult,
-} from "../../contracts/tool-transport"
+import { decodeToolResult, encodeToolResult } from "../../contracts/transport"
 import { callMiloSkillTool } from "./mcp"
 
 test("loads an available runtime skill", () => {

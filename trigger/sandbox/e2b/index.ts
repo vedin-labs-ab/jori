@@ -1,13 +1,27 @@
-import { type JsonObject, toJsonObject } from "../../contracts/json"
-import { type MiloConvexClient } from "../convex"
-import { type ConvexId } from "../types"
+import { type JsonObject, toJsonObject } from "../../../contracts/json"
+import { type MiloConvexClient } from "../../convex"
+import { type ConvexId } from "../../types"
 import {
   artifactBuildCommand,
   artifactRunnerFile,
   artifactRuntimeFiles,
   sandboxArtifactRuntime,
   sandboxWorkspace,
-} from "./artifacts"
+} from "../artifacts"
+import { compactFailure } from "../output"
+import { sandboxClonePath, shellQuote } from "../path"
+import {
+  gitCloneCommand,
+  gitCredentialHelperScript,
+  temporaryGitCredentialPath,
+} from "../script"
+import {
+  type SandboxCloneRepositoryInput,
+  type SandboxCommandInput,
+  type SandboxCommandResult,
+  type SandboxRuntime,
+  type SandboxWriteFile,
+} from "../types"
 import {
   connectSandbox,
   createSandbox,
@@ -16,21 +30,7 @@ import {
   normalizeCommandResult,
   runSandboxCommand,
   toArrayBuffer,
-} from "./e2b-support"
-import { compactFailure } from "./output"
-import { sandboxClonePath, shellQuote } from "./path"
-import {
-  gitCloneCommand,
-  gitCredentialHelperScript,
-  temporaryGitCredentialPath,
-} from "./script"
-import {
-  type SandboxCloneRepositoryInput,
-  type SandboxCommandInput,
-  type SandboxCommandResult,
-  type SandboxRuntime,
-  type SandboxWriteFile,
-} from "./types"
+} from "./support"
 
 const defaultCommandTimeoutMs = 20 * 60 * 1000
 const legacyArtifactRuntime = "/home/user/milo-workspace"
