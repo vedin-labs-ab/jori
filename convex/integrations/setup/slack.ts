@@ -122,7 +122,7 @@ function setupFallback(
     return `The ${label} setup offer expired.`
   }
 
-  return `Expires at ${formatSlackTime(toSlackTimestamp(expiresAt))}.`
+  return `Expires at ${formatSlackTime(toSlackTimestamp(expiresAt))}`
 }
 
 function setupActions(args: {
@@ -176,7 +176,7 @@ function setupSubtext(args: {
   if (args.status === "cancelled") {
     return `Cancelled at ${formatSlackTime(
       toSlackTimestamp(args.updatedAt ?? Date.now())
-    )}. Ask Milo for a new setup offer.`
+    )}`
   }
 
   if (args.status === "connected") {
@@ -197,5 +197,5 @@ function setupSubtext(args: {
     )}. Ask Milo for a new setup offer.`
   }
 
-  return `Expires at ${formatSlackTime(toSlackTimestamp(args.expiresAt))}.`
+  return `Expires at ${formatSlackTime(toSlackTimestamp(args.expiresAt))}`
 }
