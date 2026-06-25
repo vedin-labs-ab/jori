@@ -168,7 +168,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Completion")
-    expect(prompt).toContain("Assistant completion text is private run output")
+    expect(prompt).toContain("outside a tool call reach no one")
     expect(prompt).toContain("Finish the run by calling `finish_run`")
     expect(prompt).toContain(
       "Before `finish_run`, use the appropriate surface communication tool"
@@ -187,7 +187,7 @@ describe("runtime delivery prompts", () => {
     )
     expect(prompt).toContain("Use `send_reply`")
     expect(prompt).toContain("# Completion")
-    expect(prompt).toContain("Assistant completion text is private run output")
+    expect(prompt).toContain("outside a tool call reach no one")
   })
 
   test("omits automatic final delivery instructions", () => {
@@ -198,6 +198,20 @@ describe("runtime delivery prompts", () => {
     expect(prompt).not.toContain("not for routine replies")
     expect(prompt).not.toContain("The requester cannot see you working")
     expect(prompt).not.toContain("If a reply is useful, send it to this target")
+  })
+})
+
+describe("delivery contract prompts", () => {
+  test("renders the channel contract section", () => {
+    const prompt = assemblePrompt(
+      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
+    )
+
+    expect(prompt).toContain("# Delivery")
+    expect(prompt).toContain(
+      "Everything that reaches the user or any system happens through a tool call"
+    )
+    expect(prompt).toContain("outside a tool call reach no one")
   })
 })
 
@@ -240,7 +254,10 @@ function githubMessageInput() {
 function expectRunBefore(prompt: string, section: string) {
   expectSingleRun(prompt)
   expect(prompt.indexOf("# Voice")).toBeLessThan(prompt.indexOf("# Run"))
-  expect(prompt.indexOf("# Run")).toBeLessThan(prompt.indexOf("# Principles"))
+  expect(prompt.indexOf("# Run")).toBeLessThan(prompt.indexOf("# Delivery"))
+  expect(prompt.indexOf("# Delivery")).toBeLessThan(
+    prompt.indexOf("# Principles")
+  )
   expect(prompt.indexOf("Active surface:")).toBeLessThan(
     prompt.indexOf("# Principles")
   )

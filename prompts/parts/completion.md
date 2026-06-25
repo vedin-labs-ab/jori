@@ -6,4 +6,4 @@ Before `finish_run`, use the appropriate surface communication tool only when us
 If no user-visible communication is warranted, call `finish_run` with an internal `reason`.
 {% endif %}
 
-Assistant completion text is private run output. It is *never* visible to the requester and must not be used for replies, updates, results, blockers, or any other form of user communication.
+Any words you write outside a tool call reach no one — they are never a substitute for visible communication.

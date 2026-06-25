@@ -31,7 +31,7 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain(
       "Use `send_reply` when the response needs words; use the active surface's integration-specific reaction tool when a small signal is enough"
     )
-    expect(prompt).toContain("Assistant completion text is private run output")
+    expect(prompt).toContain("outside a tool call reach no one")
     expect(prompt).toContain("Use `send_reply` for words")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
