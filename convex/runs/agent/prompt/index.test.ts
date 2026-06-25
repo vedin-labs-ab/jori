@@ -161,18 +161,13 @@ describe("runtime delivery prompts", () => {
     )
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain(
-      "When asked to communicate on the active surface, choose the smallest sufficient visible action"
-    )
-    expect(prompt).toContain("Use `send_reply`")
+    expect(prompt).toContain("default to the lightest touch that lands it")
+    expect(prompt).toContain("worded `send_reply`")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Completion")
-    expect(prompt).toContain("outside a tool call reach no one")
     expect(prompt).toContain("Finish the run by calling `finish_run`")
-    expect(prompt).toContain(
-      "Before `finish_run`, use the appropriate surface communication tool"
-    )
+    expect(prompt).toContain("Ending the run needs no closing message")
     expectNoSyntheticBlankLines(prompt)
   })
 
@@ -182,12 +177,10 @@ describe("runtime delivery prompts", () => {
     const prompt = assemblePrompt(runtimeInput(provider, data))
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain(
-      "When asked to communicate on the active surface, choose the smallest sufficient visible action"
-    )
-    expect(prompt).toContain("Use `send_reply`")
+    expect(prompt).toContain("default to the lightest touch that lands it")
+    expect(prompt).toContain("worded `send_reply`")
     expect(prompt).toContain("# Completion")
-    expect(prompt).toContain("outside a tool call reach no one")
+    expect(prompt).toContain("Ending the run needs no closing message")
   })
 
   test("omits automatic final delivery instructions", () => {

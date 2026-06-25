@@ -17,7 +17,7 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).toContain("`slack`: Format Slack replies")
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("Use `send_reply`")
+    expect(prompt).toContain("worded `send_reply`")
     expect(prompt).not.toContain("## Guidance")
     expect(prompt).not.toContain("Do not use app-callback controls")
   })
@@ -28,11 +28,9 @@ describe("runtime skill prompts", () => {
     )
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain(
-      "Use `send_reply` when the response needs words; use the active surface's integration-specific reaction tool when a small signal is enough"
-    )
+    expect(prompt).toContain("default to the lightest touch that lands it")
     expect(prompt).toContain("outside a tool call reach no one")
-    expect(prompt).toContain("Use `send_reply` for words")
+    expect(prompt).toContain("Ending the run needs no closing message")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("## Guidance")
@@ -41,7 +39,7 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("Use `load_skill`")
     expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).not.toContain("`slack`: Format Slack replies")
-    expect(prompt.indexOf("Use `send_reply`")).toBeLessThan(
+    expect(prompt.indexOf("# Communication")).toBeLessThan(
       prompt.indexOf("# Updates")
     )
     expect(prompt).toContain("Format Slack messages with Slack `mrkdwn`")
