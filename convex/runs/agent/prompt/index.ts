@@ -1,13 +1,6 @@
-import {
-  type AutomationAccess,
-  getIntegrationTools,
-} from "../../../automations/access"
 import { integrationLabels } from "../../../automations/integrations"
 import { replyAddress } from "../../../messages/surface"
-import {
-  getToolPermission,
-  type ToolPermission,
-} from "../../../permissions/catalog"
+import { type ToolPermission } from "../../../permissions/catalog"
 import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
 import { createPromptTime } from "../../../prompts/time"
@@ -16,12 +9,7 @@ import { createCommunicationInstructions } from "./communication"
 import { createMessageConversationValues } from "./conversation"
 import { createToolApprovalInstructions } from "./instructions"
 import { createSkillInstructions } from "./skills"
-import {
-  createMessageTargetValues,
-  formatEvent,
-  formatTargetLines,
-  targetLine,
-} from "./target"
+import { createMessageTargetValues, formatEvent } from "./target"
 
 export function assemblePrompt(
   input: AgentRuntimeInput,
@@ -31,8 +19,8 @@ export function assemblePrompt(
   } = {}
 ): string {
   const communication = createCommunicationInstructions(input)
-  const run = createRunInstructions(input)
   const activeSurface = options.activeSurface ?? defaultActiveSurface(input)
+  const run = createRunInstructions(activeSurface)
   const promptedTools = options.promptedTools ?? []
   const skills = createSkillInstructions({
     omittedNames: omittedSkillNames(communication),
@@ -88,9 +76,15 @@ function createApprovalInstructions(promptedTools: ToolPermission[]) {
     : promptBlock(createToolApprovalInstructions(promptedTools))
 }
 
-function createRunInstructions(input: AgentRuntimeInput) {
+function createRunInstructions(activeSurface: PromptActiveSurface | null) {
   return renderPromptTemplate(promptTemplates["run/message"], {
-    surface: { label: getActiveSurfaceLabel(input) },
+    surface: {
+      active: activeSurface !== null,
+      label:
+        activeSurface === null
+          ? null
+          : getIntegrationLabel(activeSurface.surface),
+    },
     time: { utc: createPromptTime() },
   }).trim()
 }
@@ -165,58 +159,23 @@ function createMessageValues(
   }
 }
 
-function getActiveSurfaceLabel(input: AgentRuntimeInput) {
-  return input.type === "message"
-    ? getIntegrationLabel(input.messageIntegration)
-    : "None"
-}
-
 function createAutomationValues(
   input: Extract<AgentRuntimeInput, { type: "automation" }>
 ) {
   return {
-    access: {
-      summary: formatAutomationAccess(
-        input.automation.access,
-        input.integrations
-      ),
-    },
     automation: {
       id: input.automation._id,
       name: input.automation.name,
       instructions: input.automation.instructions,
       trigger: formatAutomationTrigger(input),
     },
-    event: {
-      details: formatEvent(input.event, input.integration?.integration),
-    },
+    event:
+      input.event === null
+        ? null
+        : {
+            details: formatEvent(input.event, input.integration?.integration),
+          },
   }
-}
-
-function formatAutomationAccess(
-  access: AutomationAccess,
-  integrations: Extract<
-    AgentRuntimeInput,
-    { type: "automation" }
-  >["integrations"]
-) {
-  return formatTargetLines([
-    targetLine("Web search", access.web ? "Allowed" : "Disabled"),
-    ...integrations.map((integration) =>
-      targetLine(
-        integrationLabels[integration.integration],
-        formatSelectedTools(getIntegrationTools(access, integration._id))
-      )
-    ),
-  ])
-}
-
-function formatSelectedTools(tools: readonly string[]) {
-  if (tools.length === 0) {
-    return "No tools"
-  }
-
-  return tools.map((tool) => getToolPermission(tool)?.label ?? tool).join(", ")
 }
 
 function formatAutomationTrigger(

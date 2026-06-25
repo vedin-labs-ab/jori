@@ -7,17 +7,17 @@ import {
 } from "./fixtures"
 
 describe("automation trigger prompts", () => {
-  test("renders selected integration access", () => {
+  test("omits empty automation context", () => {
     const prompt = assemblePrompt(automationRuntimeInput())
 
     expect(prompt).toContain("An automation triggered this run.")
     expect(prompt).toContain("# Run\n\nRun started at:")
-    expect(prompt).toContain("Active surface: `None`")
+    expect(prompt).not.toContain("Active surface:")
     expect(prompt.match(/Run started at:/g)).toHaveLength(1)
-    expect(prompt).toContain("Integration access:")
-    expect(prompt).toContain("- Web search: Allowed")
-    expect(prompt).toContain("- GitHub: Read issue")
-    expect(prompt).toContain("- Slack: Send message")
+    expect(prompt).not.toContain("Integration access:")
+    expect(prompt).not.toContain("- Web search:")
+    expect(prompt).not.toContain("\nEvent:\n")
+    expect(prompt).not.toContain("- None")
     expect(prompt.indexOf("# Completion")).toBeLessThan(
       prompt.indexOf("# Trigger")
     )
@@ -27,15 +27,11 @@ describe("automation trigger prompts", () => {
     expectNoSyntheticBlankLines(prompt)
   })
 
-  test("renders disabled web search", () => {
-    const prompt = assemblePrompt(automationRuntimeInput(false))
-
-    expect(prompt).toContain("- Web search: Disabled")
-  })
-
   test("renders integration target context for Linear events", () => {
     const prompt = assemblePrompt(linearAutomationRuntimeInput())
 
+    expect(prompt).toContain("\nEvent:\n")
+    expect(prompt).not.toContain("Integration access:")
     expect(prompt).toContain("- Type: issue.comment.edited")
     expect(prompt).toContain("- Integration: Linear")
     expect(prompt).toContain("- Issue ID: issue-id")
@@ -56,6 +52,7 @@ describe("automation trigger prompts", () => {
   test("renders integration target context for Notion events", () => {
     const prompt = assemblePrompt(notionAutomationRuntimeInput())
 
+    expect(prompt).toContain("\nEvent:\n")
     expect(prompt).toContain("- Type: comment.created")
     expect(prompt).toContain("- Integration: Notion")
     expect(prompt).toContain("- Page ID: page-id")

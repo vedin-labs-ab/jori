@@ -8,8 +8,7 @@ Automation:
 - Trigger: {{automation.trigger}}
 - Instructions: {{automation.instructions}}
 
-Integration access:
-{{access.summary}}
-
+{% if event %}
 Event:
 {{event.details}}
+{% endif %}
