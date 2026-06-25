@@ -33,7 +33,8 @@ const maxSchemaBytes = 64 * 1024
 const defaultPromptOutputTokens = 1000
 const minPromptOutputTokens = 64
 const maxPromptOutputTokens = 16_000
-const defaultArtifactPromptModel = "z-ai/glm-5.2"
+const defaultArtifactPromptModel = "openai/gpt-5.5"
+const artifactReasoningEffort = "medium"
 
 export async function promptModel(
   context: ArtifactPlatformContext,
@@ -68,6 +69,7 @@ export function createArtifactPromptRequest(
     messages: promptMessages(context, input),
     maxTokens: input.maxOutputTokens,
     provider: { requireParameters: true, sort: "latency" },
+    reasoning: { effort: artifactReasoningEffort },
     responseFormat: {
       type: "json_schema",
       jsonSchema: {
@@ -89,7 +91,7 @@ export function createArtifactPromptRequestDiagnostics(
   return {
     maxOutputTokens: input.maxOutputTokens,
     messageBytes: encodedJsonBytes(request.messages),
-    reasoningEffort: "none",
+    reasoningEffort: artifactReasoningEffort,
     responseFormat: "json_schema",
     schemaBytes: encodedJsonBytes(input.outputSchema),
   }

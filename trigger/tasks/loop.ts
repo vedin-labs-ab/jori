@@ -39,6 +39,7 @@ export async function runAgentLoop(args: {
     await appendSessionMessages(args.runtime, messages)
 
     const response = await args.model.complete({
+      firstTurn: step === 1,
       messages,
       tools: modelTools(args.runtime.context.tools),
     })

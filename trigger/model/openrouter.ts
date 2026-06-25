@@ -19,13 +19,12 @@ import {
   type ModelToolCall,
 } from "./types"
 
-const agentModel = "z-ai/glm-5.2"
-const agentReasoningEffort = "xhigh"
-const agentProviderOrder = ["Wafer", "Fireworks", "Together"]
+const agentModel = "openai/gpt-5.5"
+// The first turn produces the start update and is optimized for latency; later
+// turns do the actual work and reason harder. Effort levels are code config.
+const firstTurnReasoningEffort = "low"
+const defaultReasoningEffort = "medium"
 const agentProviderRouting = {
-  allow_fallbacks: true,
-  only: agentProviderOrder,
-  order: agentProviderOrder,
   require_parameters: true,
 } satisfies NonNullable<OpenRouterChatSettings["provider"]>
 
@@ -41,6 +40,7 @@ export class OpenRouterModelRuntime implements ModelRuntime {
   })
 
   async complete(args: {
+    firstTurn: boolean
     messages: ModelMessage[]
     tools: ModelTool[]
   }): Promise<ModelResponse> {
@@ -49,7 +49,7 @@ export class OpenRouterModelRuntime implements ModelRuntime {
       ...prompt,
       model: this.provider.chat(
         this.config.model,
-        createOpenRouterModelSettings()
+        createOpenRouterModelSettings(args.firstTurn)
       ),
       toolChoice: args.tools.length === 0 ? "none" : "auto",
       tools: toAiTools(args.tools),
@@ -71,10 +71,14 @@ export class OpenRouterModelRuntime implements ModelRuntime {
   }
 }
 
-export function createOpenRouterModelSettings(): OpenRouterChatSettings {
+export function createOpenRouterModelSettings(
+  firstTurn: boolean
+): OpenRouterChatSettings {
   return {
     provider: agentProviderRouting,
-    reasoning: { effort: agentReasoningEffort },
+    reasoning: {
+      effort: firstTurn ? firstTurnReasoningEffort : defaultReasoningEffort,
+    },
   }
 }
 
