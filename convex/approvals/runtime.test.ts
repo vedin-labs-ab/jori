@@ -9,7 +9,7 @@ import {
   parseApprovalDecisionText,
 } from "./runtime"
 
-describe("approval text commands", () => {
+describe("approval command parsing", () => {
   test("parses provider-neutral text commands", () => {
     expect(parseApprovalDecisionText("approve yd4uefnv")).toEqual({
       code: "YD4UEFNV",
@@ -23,6 +23,46 @@ describe("approval text commands", () => {
     expect(parseApprovalDecisionText("approve abc")).toBeNull()
   })
 
+  test("accepts copied approval commands with message formatting", () => {
+    expect(parseApprovalDecisionText("`approve yd4uefnv`")).toEqual({
+      code: "YD4UEFNV",
+      decision: "approved",
+    })
+    expect(parseApprovalDecisionText("```deny ABC12345```")).toEqual({
+      code: "ABC12345",
+      decision: "denied",
+    })
+    expect(parseApprovalDecisionText("```text\napprove yd4uefnv\n```")).toEqual(
+      {
+        code: "YD4UEFNV",
+        decision: "approved",
+      }
+    )
+    expect(parseApprovalDecisionText('"deny ABC12345"')).toEqual({
+      code: "ABC12345",
+      decision: "denied",
+    })
+    expect(parseApprovalDecisionText("approve ABC12345.")).toEqual({
+      code: "ABC12345",
+      decision: "approved",
+    })
+    expect(parseApprovalDecisionText("`approve ABC12345`!")).toEqual({
+      code: "ABC12345",
+      decision: "approved",
+    })
+  })
+
+  test("rejects approval commands embedded in prose or other text", () => {
+    expect(parseApprovalDecisionText("123approve ABC12345-")).toBeNull()
+    expect(parseApprovalDecisionText("I copied `approve ABC12345`")).toBeNull()
+    expect(parseApprovalDecisionText("do not approve ABC12345")).toBeNull()
+    expect(
+      parseApprovalDecisionText("approve ABC12345 or deny ABC12345")
+    ).toBeNull()
+  })
+})
+
+describe("approval text commands", () => {
   test("resolves text decisions by integration account", async () => {
     const approval = approvalDoc()
     const integration = integrationDoc("linear")

@@ -49,7 +49,8 @@ export function isApprovalDecisionText(text: string | undefined) {
 }
 
 export function parseApprovalDecisionText(text: string | undefined) {
-  const match = text?.match(/^\s*(approve|deny)\s+([A-Za-z0-9]{6,})\s*$/i)
+  const commandText = normalizeApprovalDecisionText(text)
+  const match = commandText?.match(/^(approve|deny)\s+([A-Za-z0-9]{6,})$/i)
 
   if (match === undefined || match === null) {
     return null
@@ -59,6 +60,51 @@ export function parseApprovalDecisionText(text: string | undefined) {
     decision: match[1].toLowerCase() === "approve" ? "approved" : "denied",
     code: normalizeApprovalCode(match[2]),
   } as const
+}
+
+function normalizeApprovalDecisionText(text: string | undefined) {
+  let current = text?.trim()
+
+  if (current === undefined || current === "") {
+    return null
+  }
+
+  for (let attempts = 0; attempts < 4; attempts += 1) {
+    const next = stripApprovalFormatting(current).trim()
+
+    if (next === current) {
+      return current
+    }
+
+    current = next
+  }
+
+  return current
+}
+
+function stripApprovalFormatting(text: string) {
+  const unpunctuated = text.replace(/[.!?]+\s*$/, "")
+
+  return (
+    stripCodeFence(unpunctuated) ??
+    stripInlineCode(unpunctuated) ??
+    stripQuotes(unpunctuated) ??
+    unpunctuated
+  )
+}
+
+function stripCodeFence(text: string) {
+  return text.match(/^```[A-Za-z0-9_-]*\n([\s\S]*?)\n?```$/)?.[1] ?? null
+}
+
+function stripInlineCode(text: string) {
+  return text.match(/^(`{1,3})([^`\n]+)\1$/)?.[2] ?? null
+}
+
+function stripQuotes(text: string) {
+  const match = text.match(/^(["'])([\s\S]*?)\1$/)
+
+  return match?.[2] ?? null
 }
 
 export async function decideApprovalByAccount(
