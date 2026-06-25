@@ -63,13 +63,13 @@ export const promptTemplates = {
   "parts/voice":
     "Direct, clear, and compact. Sound like a person, not a product. Skip the warmup, vary your sentence length, use plain words over jargon, and say what you actually think rather than what sounds professionally safe. Friendly with a little personality; lightly playful when it fits. Never performative, generic, scripted, or forced.",
   "reference/automation":
-    "# Original Trigger\n\nAn automation started this task. For reference:\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n- Instructions: {{automation.instructions}}\n\nIntegration access:\n{{access.summary}}\n\nEvent:\n{{event.details}}",
+    "# Original Trigger\n\nAn automation started this task. For reference:\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n- Instructions: {{automation.instructions}}\n\n{% if event %}\nEvent:\n{{event.details}}\n{% endif %}",
   "reference/instruction":
     "# Original Trigger\n\nManual instructions started this task. For reference:\n\n```text\n{{instruction.text}}\n```",
   "reference/message":
     '# Original Trigger\n\nA {{message.integration}} message started this task. For reference:\n\nTarget:\n\n{% if message.surface == "github" %}\n{% include "target/github" %}\n{% endif %}\n{% if message.surface == "linear" %}\n{% include "target/linear" %}\n{% endif %}\n{% if message.surface == "slack" %}\n{% include "target/slack" %}\n{% endif %}\n\nOriginal message:\n{{message.current}}',
   "run/message":
-    "# Run\n\nRun started at: {{time.utc}}.\n\nActive surface: `{{surface.label}}`",
+    "# Run\n\nRun started at: {{time.utc}}.\n\n{% if surface.active %}\nActive surface: `{{surface.label}}`\n{% endif %}",
   "skills/discovery":
     "# Skills\n\nUse `load_skill` to load full instructions for an available skill when needed.\n\nAvailable skills:\n{{skills.available}}",
   "skills/loaded": "## {{skill.title}}\n\n{{skill.body}}",
@@ -80,7 +80,7 @@ export const promptTemplates = {
   "target/slack":
     "{% if message.slack.channelId %}- Channel ID: {{message.slack.channelId}}\n{% endif %}{% if message.slack.messageTimestamp %}- Message timestamp: {{message.slack.messageTimestamp}}\n{% endif %}{% if message.slack.threadTimestamp %}- Thread timestamp: {{message.slack.threadTimestamp}}\n{% endif %}",
   "trigger/automation":
-    "# Trigger\n\nAn automation triggered this run.\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n- Instructions: {{automation.instructions}}\n\nIntegration access:\n{{access.summary}}\n\nEvent:\n{{event.details}}",
+    "# Trigger\n\nAn automation triggered this run.\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n- Instructions: {{automation.instructions}}\n\n{% if event %}\nEvent:\n{{event.details}}\n{% endif %}",
   "trigger/instruction":
     "# Trigger\n\nManual instructions triggered this run.\n\nInstructions:\n```text\n{{instruction.text}}\n```",
   "trigger/message":

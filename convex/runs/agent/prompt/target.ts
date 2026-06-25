@@ -6,6 +6,10 @@ import {
 } from "../../../shared/data"
 import { type AgentRuntimeInput, type MessageIntegration } from "../input"
 
+type AutomationEvent = NonNullable<
+  Extract<AgentRuntimeInput, { type: "automation" }>["event"]
+>
+
 export function createMessageTargetValues(
   integration: MessageIntegration,
   data: unknown
@@ -18,13 +22,9 @@ export function createMessageTargetValues(
 }
 
 export function formatEvent(
-  event: Extract<AgentRuntimeInput, { type: "automation" }>["event"],
+  event: AutomationEvent,
   integration: string | undefined
 ) {
-  if (event === null) {
-    return "- None"
-  }
-
   return formatTargetLines([
     targetLine("Type", event.type),
     targetLine("Integration", formatIntegrationLabel(integration)),
