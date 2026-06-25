@@ -128,6 +128,41 @@ test("allows tool calls after stop repair", async () => {
   )
 })
 
+test("marks the run failed when model steps are exhausted", async () => {
+  const runtime = createRuntime({
+    tools: [finishRunTool(), slackMessageTool()],
+  })
+  const model = createModel(
+    Array.from({ length: 30 }, (_value, index) => ({
+      content: null,
+      toolCalls: [
+        {
+          args: {
+            channel: "C123",
+            text: `attempt ${index}`,
+          },
+          id: `call_${index}`,
+          name: "conversations_add_message",
+        },
+      ],
+      type: "tool_calls" as const,
+    }))
+  )
+
+  await expect(runAgentLoop({ attempt: 1, model, runtime })).resolves.toEqual({
+    message: "",
+    status: "failed",
+  })
+
+  expect(model.complete).toHaveBeenCalledTimes(30)
+  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+    expect.objectContaining({
+      data: { error: "Model loop exceeded the maximum step count." },
+      type: "run.failed",
+    })
+  )
+})
+
 function createModel(
   responses: Awaited<ReturnType<ModelRuntime["complete"]>>[]
 ) {
