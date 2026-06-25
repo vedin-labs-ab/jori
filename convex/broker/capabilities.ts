@@ -118,7 +118,7 @@ function capabilityTool(
 ): CapabilityTool {
   return {
     access: permission.access,
-    description: permission.description,
+    description: permission.usage,
     label: permission.label,
     mode: resolveToolMode(toolModes, permission.tool),
     tool: permission.tool,

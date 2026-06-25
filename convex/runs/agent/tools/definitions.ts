@@ -23,7 +23,7 @@ export function getSurfaceToolDefinitions(
 
   return getToolPermissionsBySurface(surface).map((permission) => ({
     name: permission.tool,
-    description: permission.description,
+    description: permission.usage,
     inputSchema:
       executionType === "message" &&
       resolveToolMode(input.toolModes, permission.tool) === "prompted"

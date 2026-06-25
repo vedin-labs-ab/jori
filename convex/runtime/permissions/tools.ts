@@ -71,7 +71,7 @@ export function toolDescriptor(
   return {
     access: permission.access,
     name: permission.tool,
-    description: permission.description,
+    description: permission.usage,
     inputSchema:
       mode === "prompted" ? withApprovalSchema(inputSchema) : inputSchema,
     mode,

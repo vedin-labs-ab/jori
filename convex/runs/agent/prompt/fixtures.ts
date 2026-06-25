@@ -223,6 +223,8 @@ export function promptedTool(): ToolPermission {
     tool: "notion_create_page",
     label: "Create Notion page",
     description: "Create a Notion page or database record.",
+    usage:
+      "Create a Notion page or database record. Confirm the parent and properties before creating.",
     access: "write",
     defaultMode: "prompted",
   }
