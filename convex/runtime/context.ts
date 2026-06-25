@@ -7,6 +7,7 @@ import { assemblePrompt } from "../runs/agent/prompt"
 import { getPromptedTools, toolExecutionType } from "../runs/agent/tools/policy"
 import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
 import { toolSnapshot } from "../runs/schema"
+import { type RuntimeSkill, runtimeSkillNames } from "../skills/runtime"
 import { runLifecycleToolSnapshot } from "./lifecycle/snapshot"
 import { runLifecycleTools } from "./lifecycle/tools"
 import {
@@ -44,9 +45,11 @@ export const load = action({
       throw new Error("Runtime context not found.")
     }
 
+    const skills = await loadRuntimeSkills(ctx, input.run.tenantId)
+    const skillNames = runtimeSkillNames(skills)
     const [sandbox, permissions, activeSurface] = await Promise.all([
       loadSandboxReference(ctx, { runId: args.runId, status: run.status }),
-      runtimePermissions(ctx, input),
+      runtimePermissions(ctx, input, skillNames),
       loadActiveSurface(ctx, input, args.runId),
     ])
     const lifecycleTools = runLifecycleTools()
@@ -58,6 +61,7 @@ export const load = action({
     const prompt = assemblePrompt(input, {
       activeSurface: activeSurface.state,
       promptedTools,
+      skills,
     })
 
     await ctx.runMutation(internal.runtime.context.prepareRun, {
@@ -100,7 +104,12 @@ export const reload = action({
       throw new Error("Runtime context not found.")
     }
 
-    const permissions = await runtimePermissions(ctx, input)
+    const skills = await loadRuntimeSkills(ctx, input.run.tenantId)
+    const permissions = await runtimePermissions(
+      ctx,
+      input,
+      runtimeSkillNames(skills)
+    )
     const activeSurface = await loadActiveSurface(ctx, input, args.runId)
     const lifecycleTools = runLifecycleTools()
     const promptedTools = getPromptedTools({
@@ -113,6 +122,7 @@ export const reload = action({
       prompt: assemblePrompt(input, {
         activeSurface: activeSurface.state,
         promptedTools,
+        skills,
       }),
       activeSurface: activeSurface.state,
       tools: runtimeTools(lifecycleTools, activeSurface, permissions),
@@ -124,6 +134,12 @@ type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
 type LoadedRun = {
   _id: Id<"runs">
   status: "completed" | "failed" | "queued" | "running" | "stopped"
+}
+
+async function loadRuntimeSkills(ctx: ActionCtx, tenantId: string) {
+  return (await ctx.runQuery(internal.skills.catalog.listForRuntime, {
+    tenantId,
+  })) as RuntimeSkill[]
 }
 type LoadedSandbox = { externalId: string } | null
 type LoadedSession = { _id: Id<"sessions"> } | null

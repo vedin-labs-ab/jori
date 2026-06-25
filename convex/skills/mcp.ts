@@ -1,6 +1,9 @@
+import { internal } from "../_generated/api"
+import { type ActionCtx } from "../_generated/server"
 import {
   getRuntimeSkill,
   listRuntimeSkills,
+  type RuntimeSkill,
   runtimeSkillAssociatedIntegrations,
 } from "./runtime"
 
@@ -9,23 +12,42 @@ type MiloSkillToolRequest = {
   tool: string
 }
 
+type MiloSkillRun = {
+  tenantId: string
+}
+
 export function isMiloSkillTool(tool: string) {
   return tool === "load_skill"
 }
 
-export function callMiloSkillTool(request: MiloSkillToolRequest) {
+export async function callMiloSkillTool(
+  ctx: ActionCtx,
+  run: MiloSkillRun,
+  request: MiloSkillToolRequest
+) {
+  const skills = (await ctx.runQuery(internal.skills.catalog.listForRuntime, {
+    tenantId: run.tenantId,
+  })) as RuntimeSkill[]
+
+  return loadMiloSkillTool(skills, request)
+}
+
+export function loadMiloSkillTool(
+  skills: readonly RuntimeSkill[],
+  request: MiloSkillToolRequest
+) {
   if (!isMiloSkillTool(request.tool)) {
     throw new Error(`Unknown Milo skill tool: ${request.tool}`)
   }
 
   const name = readSkillName(request.args)
-  const skill = name === null ? null : getRuntimeSkill(name)
+  const skill = name === null ? null : getRuntimeSkill(skills, name)
 
   if (skill === null) {
     return {
       status: "not_found" as const,
       name,
-      availableSkills: skillMetadata(),
+      availableSkills: skillMetadata(skills),
     }
   }
 
@@ -41,8 +63,8 @@ export function callMiloSkillTool(request: MiloSkillToolRequest) {
   }
 }
 
-function skillMetadata() {
-  return listRuntimeSkills().map((skill) => ({
+function skillMetadata(skills: readonly RuntimeSkill[]) {
+  return listRuntimeSkills(skills).map((skill) => ({
     name: skill.name,
     category: skill.category,
     description: skill.description,

@@ -1,10 +1,17 @@
 import { expect, test } from "vitest"
 import { decodeToolResult, encodeToolResult } from "../../contracts/transport"
-import { callMiloSkillTool } from "./mcp"
+import {
+  runtimeSkill,
+  runtimeSkills,
+} from "../runs/agent/prompt/skill_fixtures"
+import { loadMiloSkillTool } from "./mcp"
 
 test("loads an available runtime skill", () => {
   expect(
-    callMiloSkillTool({ tool: "load_skill", args: { name: "slack" } })
+    loadMiloSkillTool(runtimeSkills(), {
+      tool: "load_skill",
+      args: { name: "slack" },
+    })
   ).toMatchObject({
     status: "loaded",
     skill: {
@@ -19,7 +26,10 @@ test("loads an available runtime skill", () => {
 
 test("loads complete instructions with all communication parts", () => {
   expect(
-    callMiloSkillTool({ tool: "load_skill", args: { name: "slack" } })
+    loadMiloSkillTool(runtimeSkills(), {
+      tool: "load_skill",
+      args: { name: "slack" },
+    })
   ).toMatchObject({
     status: "loaded",
     skill: {
@@ -31,7 +41,7 @@ test("loads complete instructions with all communication parts", () => {
 })
 
 test("loads non-integration skills with JSON-safe metadata", () => {
-  const result = callMiloSkillTool({
+  const result = loadMiloSkillTool(runtimeSkills(), {
     tool: "load_skill",
     args: { name: "image-generation" },
   })
@@ -48,11 +58,20 @@ test("loads non-integration skills with JSON-safe metadata", () => {
 
 test("returns available skills when a skill is unknown", () => {
   expect(
-    callMiloSkillTool({ tool: "load_skill", args: { name: "github" } })
+    loadMiloSkillTool(runtimeSkills(), {
+      tool: "load_skill",
+      args: { name: "github" },
+    })
   ).toMatchObject({
     status: "not_found",
     name: "github",
     availableSkills: expect.arrayContaining([
+      expect.objectContaining({
+        name: "artifact-creator",
+      }),
+      expect.objectContaining({
+        name: "frontend-design",
+      }),
       expect.objectContaining({
         name: "image-generation",
       }),
@@ -60,5 +79,31 @@ test("returns available skills when a skill is unknown", () => {
         name: "slack",
       }),
     ]),
+  })
+})
+
+test("tenant skills override global skills with the same name", () => {
+  expect(
+    loadMiloSkillTool(
+      runtimeSkills([
+        runtimeSkill({
+          tenantId: "tenant",
+          name: "image-generation",
+          description: "Tenant image rules.",
+          body: "# Tenant Images\n\nUse the tenant image style.",
+        }),
+      ]),
+      {
+        tool: "load_skill",
+        args: { name: "image-generation" },
+      }
+    )
+  ).toMatchObject({
+    status: "loaded",
+    skill: {
+      name: "image-generation",
+      description: "Tenant image rules.",
+      instructions: expect.stringContaining("tenant image style"),
+    },
   })
 })

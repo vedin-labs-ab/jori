@@ -7,7 +7,8 @@ import { permissionGroups, toolDescriptor } from "./tools"
 
 export async function runtimePermissions(
   ctx: ActionCtx,
-  input: AgentRuntimeInput
+  input: AgentRuntimeInput,
+  skillNames: readonly string[] = []
 ) {
   const overrides = await ctx.runQuery(
     internal.permissions.tools.listForRuntime,
@@ -22,7 +23,7 @@ export async function runtimePermissions(
   )
   const tools = groups.flatMap((group) =>
     group.permissions.map((permission) =>
-      toolDescriptor(group.surface, permission, toolModes)
+      toolDescriptor(group.surface, permission, toolModes, skillNames)
     )
   )
 

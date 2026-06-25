@@ -13,7 +13,7 @@ import { toolExecutionType } from "../../runs/agent/tools/policy"
 import { getEnabledToolPermissions } from "../../runs/agent/tools/resolve"
 import {
   emptyObjectSchema,
-  getToolInputSchema,
+  getRuntimeToolInputSchema,
 } from "../../runs/agent/tools/schemas"
 
 export function permissionGroups(
@@ -60,10 +60,13 @@ export function permissionGroups(
 export function toolDescriptor(
   surface: ToolSurface,
   permission: ToolPermission,
-  toolModes: ReadonlyMap<string, PermissionMode>
+  toolModes: ReadonlyMap<string, PermissionMode>,
+  skillNames: readonly string[] = []
 ) {
   const mode = resolveToolMode(toolModes, permission.tool)
-  const inputSchema = getToolInputSchema(permission.tool) ?? emptyObjectSchema()
+  const inputSchema =
+    getRuntimeToolInputSchema(permission.tool, { skillNames }) ??
+    emptyObjectSchema()
 
   return {
     access: permission.access,

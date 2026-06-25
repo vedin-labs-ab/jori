@@ -4,6 +4,7 @@ import { type ToolPermission } from "../../../permissions/catalog"
 import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
 import { createPromptTime } from "../../../prompts/time"
+import { type RuntimeSkill } from "../../../skills/runtime"
 import { type AgentRuntimeInput, type MessageIntegration } from "../input"
 import { createCommunicationInstructions } from "./communication"
 import { createMessageConversationValues } from "./conversation"
@@ -16,14 +17,17 @@ export function assemblePrompt(
   options: {
     activeSurface?: PromptActiveSurface | null
     promptedTools?: ToolPermission[]
+    skills?: readonly RuntimeSkill[]
   } = {}
 ): string {
-  const communication = createCommunicationInstructions(input)
+  const runtimeSkills = options.skills ?? []
+  const communication = createCommunicationInstructions(input, runtimeSkills)
   const activeSurface = options.activeSurface ?? defaultActiveSurface(input)
   const run = createRunInstructions(activeSurface)
   const promptedTools = options.promptedTools ?? []
   const skills = createSkillInstructions({
     omittedNames: omittedSkillNames(communication),
+    skills: runtimeSkills,
   })
 
   return renderPromptTemplate(promptTemplates["agent/initial"], {

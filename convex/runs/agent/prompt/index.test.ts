@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { assemblePrompt } from "."
 import { promptedTool, runtimeInput } from "./fixtures"
+import { runtimeSkills } from "./skill_fixtures"
 
 const messageTriggerCases = [
   [
@@ -212,7 +213,7 @@ describe("approval request prompts", () => {
   test("lists prompted tools and the approval contract", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-      { promptedTools: [promptedTool()] }
+      { promptedTools: [promptedTool()], skills: runtimeSkills() }
     )
 
     expect(prompt).toContain("# Approvals")
