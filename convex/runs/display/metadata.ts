@@ -1,5 +1,10 @@
-import { type Integration } from "../integrations"
-import { type SourceMetadataItem } from "./schema"
+import { type Integration } from "../../shared/integrations"
+
+export type SourceMetadataItem = {
+  type: string
+  label: string
+  url?: string
+}
 
 export function createSourceMetadata(args: {
   data: unknown
