@@ -125,7 +125,7 @@ async function settleYield(
 
     const wake = await parkRun(runtime, pending)
 
-    if (wake.reason === "run_cancelled") {
+    if (wake.reason === "cancelled") {
       return "aborted"
     }
   }

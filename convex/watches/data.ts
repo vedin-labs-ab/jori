@@ -82,7 +82,7 @@ export async function startMessageRun(
       const woken = await wakeRun(ctx, {
         runId: activeSession.runId,
         reason: "message",
-        subject: { kind: "message", messageId: args.message._id },
+        subject: { kind: "message", id: args.message._id },
       })
 
       if (
