@@ -22,7 +22,7 @@ type ArtifactPromptProviderDiagnostics = {
 export type ArtifactPromptRequestDiagnostics = {
   maxOutputTokens: number
   messageBytes: number
-  reasoningEffort: "none"
+  reasoningEffort: "none" | "low" | "medium" | "high"
   responseFormat: "json_schema"
   schemaBytes: number
 }

@@ -44,15 +44,15 @@ function platformContext(): ArtifactPlatformContext {
 }
 
 describe("artifact prompt model contract", () => {
-  test("uses GLM 5.2 by default while allowing env overrides", () => {
+  test("uses GPT-5.5 by default while allowing env overrides", () => {
     const originalModel = process.env.OPENROUTER_ARTIFACT_MODEL
 
     try {
       process.env.OPENROUTER_ARTIFACT_MODEL = ""
-      expect(readArtifactModel()).toBe("z-ai/glm-5.2")
-
-      process.env.OPENROUTER_ARTIFACT_MODEL = "openai/gpt-5.5"
       expect(readArtifactModel()).toBe("openai/gpt-5.5")
+
+      process.env.OPENROUTER_ARTIFACT_MODEL = "z-ai/glm-5.2"
+      expect(readArtifactModel()).toBe("z-ai/glm-5.2")
     } finally {
       restoreArtifactModel(originalModel)
     }
@@ -139,7 +139,7 @@ describe("artifact prompt provider request", () => {
       requireParameters: true,
       sort: "latency",
     })
-    expect(request.reasoning).toBeUndefined()
+    expect(request.reasoning).toEqual({ effort: "medium" })
     expect(request.plugins).toBeUndefined()
   })
 
@@ -152,7 +152,7 @@ describe("artifact prompt provider request", () => {
     expect(createArtifactPromptRequestDiagnostics(request, input)).toEqual({
       maxOutputTokens: 512,
       messageBytes: expect.any(Number),
-      reasoningEffort: "none",
+      reasoningEffort: "medium",
       responseFormat: "json_schema",
       schemaBytes: expect.any(Number),
     })

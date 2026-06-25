@@ -115,7 +115,7 @@ export const traceData = v.union(
     result: v.optional(traceValueSummary),
   }),
   v.object({
-    promptId: v.id("_storage"),
+    promptId: v.optional(v.id("_storage")),
     tools: toolSnapshot,
   })
 )

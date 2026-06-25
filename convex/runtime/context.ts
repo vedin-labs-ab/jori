@@ -28,28 +28,27 @@ export const load = action({
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
 
-    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
-      runId: args.runId,
-    })) as AgentRuntimeInput | null
-    const run = (await ctx.runQuery(internal.runs.records.get, {
-      runId: args.runId,
-    })) as {
-      _id: Id<"runs">
-      status: "completed" | "failed" | "queued" | "running" | "stopped"
-    } | null
+    const [input, run, session] = (await Promise.all([
+      ctx.runQuery(internal.runs.records.getInputByRun, { runId: args.runId }),
+      ctx.runQuery(internal.runs.records.get, { runId: args.runId }),
+      ctx.runQuery(internal.sessions.data.getByRun, { runId: args.runId }),
+    ])) as [
+      AgentRuntimeInput | null,
+      {
+        _id: Id<"runs">
+        status: "completed" | "failed" | "queued" | "running" | "stopped"
+      } | null,
+      LoadedSession,
+    ]
     if (input === null || run === null) {
       throw new Error("Runtime context not found.")
     }
 
-    const session = await ctx.runQuery(internal.sessions.data.getByRun, {
-      runId: args.runId,
-    })
-    const sandbox = await loadSandboxReference(ctx, {
-      runId: args.runId,
-      status: run.status,
-    })
-    const permissions = await runtimePermissions(ctx, input)
-    const activeSurface = await loadActiveSurface(ctx, input, args.runId)
+    const [sandbox, permissions, activeSurface] = await Promise.all([
+      loadSandboxReference(ctx, { runId: args.runId, status: run.status }),
+      runtimePermissions(ctx, input),
+      loadActiveSurface(ctx, input, args.runId),
+    ])
     const lifecycleTools = runLifecycleTools()
     const promptedTools = getPromptedTools({
       executionType: toolExecutionType(input.type),
@@ -60,13 +59,9 @@ export const load = action({
       activeSurface: activeSurface.state,
       promptedTools,
     })
-    const promptId = await ctx.storage.store(
-      new Blob([prompt], { type: "text/markdown" })
-    )
 
     await ctx.runMutation(internal.runtime.context.prepareRun, {
       runId: args.runId,
-      promptId,
       tools: runtimeToolSnapshot(
         input,
         activeSurface,
@@ -220,7 +215,6 @@ function isTerminalStatus(status: Doc<"runs">["status"]) {
 export const prepareRun = internalMutation({
   args: {
     runId: v.id("runs"),
-    promptId: v.id("_storage"),
     tools: toolSnapshot,
   },
   returns: v.null(),
@@ -237,7 +231,6 @@ export const prepareRun = internalMutation({
       source: "convex.runtime",
       type: "run.prepared",
       data: {
-        promptId: args.promptId,
         tools: args.tools,
       },
     })

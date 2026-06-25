@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, test } from "vitest"
-import {
-  requireAgentModelProvider,
-  requireBasetenRuntimeConfig,
-} from "./config"
+import { requireOpenRouterRuntimeConfig } from "./config"
 
 const environmentNames = [
-  "BASETEN_API_KEY",
-  "MILO_AGENT_MODEL_PROVIDER",
+  "OPENROUTER_API_KEY",
+  "OPENROUTER_APP_TITLE",
+  "OPENROUTER_HTTP_REFERER",
+  "CONVEX_SITE_URL",
+  "VITE_CONVEX_SITE_URL",
 ] as const
 
 const originalEnvironment = new Map(
@@ -26,41 +26,25 @@ describe("agent model runtime config", () => {
     }
   })
 
-  test("uses OpenRouter by default", () => {
-    delete process.env.MILO_AGENT_MODEL_PROVIDER
+  test("requires an OpenRouter API key", () => {
+    delete process.env.OPENROUTER_API_KEY
 
-    expect(requireAgentModelProvider()).toBe("openrouter")
-  })
-
-  test("allows Baseten as the agent model provider", () => {
-    process.env.MILO_AGENT_MODEL_PROVIDER = " baseten "
-
-    expect(requireAgentModelProvider()).toBe("baseten")
-  })
-
-  test("rejects unsupported agent model providers", () => {
-    process.env.MILO_AGENT_MODEL_PROVIDER = "zai"
-
-    expect(() => requireAgentModelProvider()).toThrow(
-      "Unsupported MILO_AGENT_MODEL_PROVIDER: zai"
+    expect(() => requireOpenRouterRuntimeConfig()).toThrow(
+      "Missing OPENROUTER_API_KEY"
     )
   })
 
-  test("requires a Baseten API key", () => {
-    delete process.env.BASETEN_API_KEY
+  test("reads OpenRouter runtime settings with defaults", () => {
+    process.env.OPENROUTER_API_KEY = " key "
+    delete process.env.OPENROUTER_APP_TITLE
+    delete process.env.OPENROUTER_HTTP_REFERER
+    delete process.env.CONVEX_SITE_URL
+    delete process.env.VITE_CONVEX_SITE_URL
 
-    expect(() => requireBasetenRuntimeConfig()).toThrow(
-      "Missing BASETEN_API_KEY"
-    )
-  })
-
-  test("reads Baseten runtime settings", () => {
-    process.env.BASETEN_API_KEY = " key "
-
-    expect(requireBasetenRuntimeConfig()).toEqual({
+    expect(requireOpenRouterRuntimeConfig()).toEqual({
       apiKey: "key",
-      endpoint: "https://inference.baseten.co/v1/chat/completions",
-      model: "zai-org/GLM-5.2",
+      appName: "Milo",
+      appUrl: undefined,
     })
   })
 })
