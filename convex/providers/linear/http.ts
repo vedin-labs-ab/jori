@@ -8,6 +8,7 @@ import {
   unauthorizedResponse,
 } from "../http"
 import { completeSetupLink, failSetupLink } from "../install"
+import { handleLinearApprovalDecision } from "./approvals"
 import {
   linearOAuthAuthorizeUrl,
   linearOAuthCallbackPath,
@@ -135,6 +136,10 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
   }
 
   const hydratedMessage = await hydrateLinearMessage(ctx, message)
+
+  if (await handleLinearApprovalDecision(ctx, hydratedMessage)) {
+    return Response.json({ ok: true })
+  }
 
   await ctx.runMutation(internal.messages.intake.record, {
     accountId: hydratedMessage.accountId,

@@ -88,6 +88,7 @@ import type * as automations_schedule_labels from "../automations/schedule/label
 import type * as automations_schedule_timing from "../automations/schedule/timing.js";
 import type * as automations_subscriptions_data from "../automations/subscriptions/data.js";
 import type * as broker_approval_args from "../broker/approval/args.js";
+import type * as broker_approval_delivery from "../broker/approval/delivery.js";
 import type * as broker_approval_index from "../broker/approval/index.js";
 import type * as broker_attachments from "../broker/attachments.js";
 import type * as broker_auth from "../broker/auth.js";
@@ -181,6 +182,7 @@ import type * as providers_google_scope from "../providers/google/scope.js";
 import type * as providers_google_signing from "../providers/google/signing.js";
 import type * as providers_http from "../providers/http.js";
 import type * as providers_install from "../providers/install.js";
+import type * as providers_linear_approvals from "../providers/linear/approvals.js";
 import type * as providers_linear_config from "../providers/linear/config.js";
 import type * as providers_linear_credentials from "../providers/linear/credentials.js";
 import type * as providers_linear_data from "../providers/linear/data.js";
@@ -403,6 +405,7 @@ declare const fullApi: ApiFromModules<{
   "automations/schedule/timing": typeof automations_schedule_timing;
   "automations/subscriptions/data": typeof automations_subscriptions_data;
   "broker/approval/args": typeof broker_approval_args;
+  "broker/approval/delivery": typeof broker_approval_delivery;
   "broker/approval/index": typeof broker_approval_index;
   "broker/attachments": typeof broker_attachments;
   "broker/auth": typeof broker_auth;
@@ -496,6 +499,7 @@ declare const fullApi: ApiFromModules<{
   "providers/google/signing": typeof providers_google_signing;
   "providers/http": typeof providers_http;
   "providers/install": typeof providers_install;
+  "providers/linear/approvals": typeof providers_linear_approvals;
   "providers/linear/config": typeof providers_linear_config;
   "providers/linear/credentials": typeof providers_linear_credentials;
   "providers/linear/data": typeof providers_linear_data;

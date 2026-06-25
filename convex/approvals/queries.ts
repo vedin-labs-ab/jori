@@ -1,16 +1,20 @@
 import { v } from "convex/values"
 import { internalQuery } from "../_generated/server"
+import { integrationValidator } from "../shared/integrations"
 
-export const getSlackDecisionTarget = internalQuery({
+export const getDecisionTarget = internalQuery({
   args: {
     accountId: v.string(),
     code: v.string(),
+    integration: integrationValidator,
   },
   handler: async (ctx, args) => {
     const integration = await ctx.db
       .query("integrations")
       .withIndex("by_integration_and_external", (query) =>
-        query.eq("integration", "slack").eq("externalId", args.accountId)
+        query
+          .eq("integration", args.integration)
+          .eq("externalId", args.accountId)
       )
       .first()
 

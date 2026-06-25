@@ -3,22 +3,16 @@ import { encodeToolInput } from "../../../contracts/transport"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { createSlackApprovalRequest } from "../../approvals/slack/blocks"
 import {
   getToolPermission,
   type PermissionMode,
   resolveToolMode,
   type ToolSurface,
 } from "../../permissions/catalog"
-import {
-  getSlackChannelId,
-  getSlackMessageTs,
-  getSlackThreadTs,
-} from "../../providers/slack/data"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { type Actor, createUserActor } from "../../shared/actor"
-import { postSlackMessage } from "../tools/slack"
 import { parsePromptedToolApproval } from "./args"
+import { deliverApprovalRequest } from "./delivery"
 
 export type ApprovalBrokerContext = {
   connectedIntegrations: Doc<"integrations">[]
@@ -26,22 +20,6 @@ export type ApprovalBrokerContext = {
   integrations: Doc<"integrations">[]
   run: Doc<"runs">
   toolModes: ReadonlyMap<string, PermissionMode>
-}
-
-type SlackApprovalDelivery = {
-  integration: Doc<"integrations">
-  channelId: string
-  threadTs?: string
-}
-
-type SlackApprovalRequest = {
-  approvalId: Id<"approvals">
-  code: string
-  surface: ToolSurface
-  tool: string
-  summary: string
-  expiresAt: number
-  delivery: SlackApprovalDelivery
 }
 
 const workerOnlyMiloTools = ["save_attachment", "generate_image"]
@@ -101,25 +79,22 @@ export async function createPromptedToolApproval(
     code: createApprovalCode(),
     requestedBy: createRequestedBy(context),
   })
-  const delivery = getSlackApprovalDelivery(context)
-
-  if (!approval.reused && delivery !== null) {
-    await tryDeliverSlackApproval(ctx, {
+  const delivered =
+    !approval.reused &&
+    (await deliverApprovalRequest(ctx, context, {
       approvalId: approval.approvalId,
       code: approval.code,
       surface: request.surface,
       tool: request.tool,
       summary: request.summary,
       expiresAt: approval.expiresAt,
-      delivery,
-    })
-  }
+    }))
 
   return {
     status: "approval_requested",
     approvalId: approval.approvalId,
     code: approval.code,
-    instruction: `Approval requested. The user can approve with: approve ${approval.code}`,
+    instruction: approvalInstruction(approval.code, delivered),
   }
 }
 
@@ -133,57 +108,6 @@ function findSurfaceIntegration(
         integration.status === "active" && integration.integration === surface
     ) ?? null
   )
-}
-
-async function tryDeliverSlackApproval(
-  ctx: ActionCtx,
-  args: SlackApprovalRequest
-) {
-  try {
-    await deliverSlackApproval(ctx, args)
-  } catch {
-    return
-  }
-}
-
-async function deliverSlackApproval(
-  ctx: ActionCtx,
-  args: SlackApprovalRequest
-) {
-  const message = createSlackApprovalRequest({
-    code: args.code,
-    surface: args.surface,
-    tool: args.tool,
-    summary: args.summary,
-    expiresAt: args.expiresAt,
-  })
-
-  const response = await postSlackMessage(args.delivery.integration, {
-    channel: args.delivery.channelId,
-    thread_ts: args.delivery.threadTs,
-    text: message.text,
-    blocks: message.blocks,
-  })
-  const messageTs = readString(response, "ts")
-
-  if (messageTs === undefined) {
-    throw new Error("Slack approval message response is missing ts")
-  }
-
-  await ctx.runMutation(internal.approvals.approvals.recordDelivery, {
-    approvalId: args.approvalId,
-    delivery: {
-      integration: "slack",
-      integrationId: args.delivery.integration._id,
-      data: {
-        channelId: readString(response, "channel") ?? args.delivery.channelId,
-        messageTs,
-        ...(args.delivery.threadTs === undefined
-          ? {}
-          : { threadTs: args.delivery.threadTs }),
-      },
-    },
-  })
 }
 
 function createRequestedBy(context: ApprovalBrokerContext): Actor {
@@ -208,59 +132,6 @@ function createRequestedBy(context: ApprovalBrokerContext): Actor {
   throw new Error("Approval request requires a known requester")
 }
 
-function getSlackApprovalDelivery(
-  context: ApprovalBrokerContext
-): SlackApprovalDelivery | null {
-  const target = getSlackTarget(context.input)
-
-  if (target === null) {
-    return null
-  }
-
-  const integration = context.integrations.find(
-    (candidate) => candidate.integration === "slack"
-  )
-
-  if (integration === undefined) {
-    return null
-  }
-
-  return { ...target, integration }
-}
-
-function getSlackTarget(input: AgentRuntimeInput) {
-  if (input.type !== "message") {
-    return null
-  }
-
-  if (input.messageIntegration !== "slack") {
-    return null
-  }
-
-  const channelId = getSlackChannelId(input.message.data)
-
-  if (channelId === undefined) {
-    return null
-  }
-
-  return {
-    channelId,
-    threadTs:
-      getSlackThreadTs(input.message.data) ??
-      getSlackMessageTs(input.message.data),
-  }
-}
-
-function readString(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null || !(key in data)) {
-    return undefined
-  }
-
-  const value = data[key as keyof typeof data]
-
-  return typeof value === "string" && value !== "" ? value : undefined
-}
-
 function createApprovalCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
   const bytes = new Uint8Array(8)
@@ -268,4 +139,10 @@ function createApprovalCode() {
   crypto.getRandomValues(bytes)
 
   return Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("")
+}
+
+function approvalInstruction(code: string, delivered: boolean) {
+  return delivered
+    ? "Approval requested. Approval instructions were sent to the conversation."
+    : `Approval requested. The user can approve with: approve ${code}`
 }

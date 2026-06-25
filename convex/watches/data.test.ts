@@ -239,12 +239,15 @@ function fakeMutationCtx(seed: Seed[] = []): FakeCtx {
 
           build(query)
 
-          return {
+          const result = {
             first: async () =>
               [...rows.values()].find(
                 (row) => rowTable(row, table) && matches(row, filters)
               ) ?? null,
+            order: (_direction: "asc" | "desc") => result,
           }
+
+          return result
         },
       }),
     },

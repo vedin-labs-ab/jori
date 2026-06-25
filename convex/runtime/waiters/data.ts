@@ -23,7 +23,7 @@ export async function wakeRun(
   const waiter = await findActiveWaiter(ctx, args.runId)
 
   if (waiter === null) {
-    return
+    return false
   }
 
   const now = Date.now()
@@ -45,6 +45,8 @@ export async function wakeRun(
       ...(args.subject === undefined ? {} : { subject: args.subject }),
     },
   })
+
+  return true
 }
 
 async function findActiveWaiter(ctx: MutationCtx, runId: Id<"runs">) {

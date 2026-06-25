@@ -2,36 +2,34 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { postSlackMessage } from "../broker/tools/slack"
 import { type Actor, actorValidator } from "../shared/actor"
+import {
+  type Integration,
+  integrationLabel,
+  integrationValidator,
+} from "../shared/integrations"
 import { type ApprovalDecisionResult, approvalDecisionMessage } from "./result"
 
-export type SlackApprovalDecisionArgs = {
+export type ApprovalDecision = "approved" | "denied"
+
+export type AccountApprovalDecisionArgs = {
   accountId: string
   actor?: Actor
-  channelId: string
-  threadTs?: string
+  integration: Integration
   code: string
-  decision: "approved" | "denied"
+  decision: ApprovalDecision
 }
 
-export const handleSlackDecision = internalAction({
+export const handleTextDecision = internalAction({
   args: {
     accountId: v.string(),
     actor: v.optional(actorValidator),
-    channelId: v.string(),
-    threadTs: v.optional(v.string()),
+    integration: integrationValidator,
     code: v.string(),
     decision: v.union(v.literal("approved"), v.literal("denied")),
   },
   handler: async (ctx, args) => {
-    const result = await decideSlackApproval(ctx, args)
-
-    if (result.integration === undefined || result.status === "approved") {
-      return
-    }
-
-    await postSlackDecisionMessage(result.integration, args, result.message)
+    return await decideApprovalByAccount(ctx, args)
   },
 })
 
@@ -46,15 +44,33 @@ export const expireApproval = internalAction({
   },
 })
 
-export async function decideSlackApproval(
+export function isApprovalDecisionText(text: string | undefined) {
+  return parseApprovalDecisionText(text) !== null
+}
+
+export function parseApprovalDecisionText(text: string | undefined) {
+  const match = text?.match(/^\s*(approve|deny)\s+([A-Za-z0-9]{6,})\s*$/i)
+
+  if (match === undefined || match === null) {
+    return null
+  }
+
+  return {
+    decision: match[1].toLowerCase() === "approve" ? "approved" : "denied",
+    code: normalizeApprovalCode(match[2]),
+  } as const
+}
+
+export async function decideApprovalByAccount(
   ctx: ActionCtx,
-  args: SlackApprovalDecisionArgs
+  args: AccountApprovalDecisionArgs
 ): Promise<ApprovalDecisionResult> {
   const target = await ctx.runQuery(
-    internal.approvals.queries.getSlackDecisionTarget,
+    internal.approvals.queries.getDecisionTarget,
     {
       accountId: args.accountId,
-      code: args.code,
+      code: normalizeApprovalCode(args.code),
+      integration: args.integration,
     }
   )
 
@@ -78,8 +94,7 @@ export async function decideSlackApproval(
       status: "missing",
       integration: target.integration,
       approval: target.approval,
-      message:
-        "Couldn't identify the Slack user, so the decision wasn't recorded.",
+      message: `Couldn't identify the ${integrationLabel(args.integration)} user, so the decision wasn't recorded.`,
     }
   }
 
@@ -96,7 +111,7 @@ export async function decideApproval(
   args: {
     approval: Doc<"approvals">
     decidedBy: Actor
-    decision: "approved" | "denied"
+    decision: ApprovalDecision
     integration?: Doc<"integrations">
   }
 ): Promise<ApprovalDecisionResult> {
@@ -114,17 +129,6 @@ export async function decideApproval(
   }
 }
 
-async function postSlackDecisionMessage(
-  integration: Doc<"integrations">,
-  args: {
-    channelId: string
-    threadTs?: string
-  },
-  text: string
-) {
-  await postSlackMessage(integration, {
-    channel: args.channelId,
-    text,
-    thread_ts: args.threadTs,
-  })
+function normalizeApprovalCode(code: string) {
+  return code.trim().toUpperCase()
 }

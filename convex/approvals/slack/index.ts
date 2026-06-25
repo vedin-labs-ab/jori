@@ -1,13 +1,20 @@
+import { v } from "convex/values"
 import { internal } from "../../_generated/api"
-import { type ActionCtx } from "../../_generated/server"
+import { type Doc } from "../../_generated/dataModel"
+import { type ActionCtx, internalAction } from "../../_generated/server"
+import { postSlackMessage } from "../../broker/tools/slack"
 import {
   getSlackChannelId,
   getSlackMessageTs,
   getSlackThreadTs,
 } from "../../providers/slack/data"
 import { getSlackActorProfile } from "../../providers/slack/directory/users"
-import { createIntegrationActor } from "../../shared/actor"
-import { decideSlackApproval } from "../runtime"
+import { actorValidator, createIntegrationActor } from "../../shared/actor"
+import {
+  decideApprovalByAccount,
+  isApprovalDecisionText,
+  parseApprovalDecisionText,
+} from "../runtime"
 import { type SlackApprovalInteraction } from "./blocks"
 
 type SlackApprovalDecisionInput = {
@@ -20,14 +27,40 @@ type SlackApprovalDecisionInput = {
 }
 
 export function isSlackApprovalDecisionText(text: string | undefined) {
-  return parseApprovalDecision(text) !== null
+  return isApprovalDecisionText(text)
 }
+
+export const handleDecision = internalAction({
+  args: {
+    accountId: v.string(),
+    actor: v.optional(actorValidator),
+    channelId: v.string(),
+    threadTs: v.optional(v.string()),
+    code: v.string(),
+    decision: v.union(v.literal("approved"), v.literal("denied")),
+  },
+  handler: async (ctx, args) => {
+    const result = await decideApprovalByAccount(ctx, {
+      accountId: args.accountId,
+      actor: args.actor,
+      code: args.code,
+      decision: args.decision,
+      integration: "slack",
+    })
+
+    if (result.integration === undefined || result.status === "approved") {
+      return
+    }
+
+    await postSlackDecisionMessage(result.integration, args, result.message)
+  },
+})
 
 export async function handleSlackApprovalDecision(
   ctx: ActionCtx,
   input: SlackApprovalDecisionInput
 ) {
-  const approvalDecision = parseApprovalDecision(input.text)
+  const approvalDecision = parseApprovalDecisionText(input.text)
 
   if (approvalDecision === null) {
     return false
@@ -41,7 +74,7 @@ export async function handleSlackApprovalDecision(
 
   await ctx.scheduler.runAfter(
     0,
-    internal.approvals.runtime.handleSlackDecision,
+    internal.approvals.slack.index.handleDecision,
     {
       accountId: input.accountId,
       actor: createIntegrationActor({
@@ -69,16 +102,15 @@ export async function handleSlackApprovalInteraction(
     return okResponse()
   }
 
-  await decideSlackApproval(ctx, {
+  await decideApprovalByAccount(ctx, {
     accountId: interaction.accountId,
     actor: await createSlackApprovalActor(ctx, {
       accountId: interaction.accountId,
       actorId: interaction.actorId,
     }),
-    channelId: interaction.channelId,
-    threadTs: interaction.threadTs,
     code: interaction.code,
     decision: interaction.decision,
+    integration: "slack",
   })
 
   return okResponse()
@@ -103,19 +135,6 @@ export async function createSlackApprovalActor(
     email: profile?.email ?? args.actorEmail,
     name: profile?.name ?? args.actorName,
   })
-}
-
-function parseApprovalDecision(text: string | undefined) {
-  const match = text?.match(/^\s*(approve|deny)\s+([A-Za-z0-9]{6,})\s*$/i)
-
-  if (match === undefined || match === null) {
-    return null
-  }
-
-  return {
-    decision: match[1].toLowerCase() === "approve" ? "approved" : "denied",
-    code: match[2].toUpperCase(),
-  } as const
 }
 
 export function parseSlackApprovalInteraction(payload: unknown) {
@@ -198,6 +217,21 @@ function readApprovalCode(value: unknown) {
 
 function okResponse() {
   return new Response(null, { status: 200 })
+}
+
+async function postSlackDecisionMessage(
+  integration: Doc<"integrations">,
+  args: {
+    channelId: string
+    threadTs?: string
+  },
+  text: string
+) {
+  await postSlackMessage(integration, {
+    channel: args.channelId,
+    text,
+    thread_ts: args.threadTs,
+  })
 }
 
 function readNestedString(value: unknown, key: string) {

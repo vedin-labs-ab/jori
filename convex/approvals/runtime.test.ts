@@ -3,7 +3,57 @@ import { encodeToolInput } from "../../contracts/transport"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
-import { decideApproval } from "./runtime"
+import {
+  decideApproval,
+  decideApprovalByAccount,
+  parseApprovalDecisionText,
+} from "./runtime"
+
+describe("approval text commands", () => {
+  test("parses provider-neutral text commands", () => {
+    expect(parseApprovalDecisionText("approve yd4uefnv")).toEqual({
+      code: "YD4UEFNV",
+      decision: "approved",
+    })
+    expect(parseApprovalDecisionText(" deny ABC12345 ")).toEqual({
+      code: "ABC12345",
+      decision: "denied",
+    })
+    expect(parseApprovalDecisionText("@milo approve ABC12345")).toBeNull()
+    expect(parseApprovalDecisionText("approve abc")).toBeNull()
+  })
+
+  test("resolves text decisions by integration account", async () => {
+    const approval = approvalDoc()
+    const integration = integrationDoc("linear")
+    const ctx = actionCtx(
+      async () => ({
+        status: "approved" as const,
+        approval,
+      }),
+      async () => ({ approval, integration })
+    )
+
+    const result = await decideApprovalByAccount(ctx, {
+      accountId: "linear-org",
+      actor: userActor(),
+      code: "abc12345",
+      decision: "approved",
+      integration: "linear",
+    })
+
+    expect(result).toMatchObject({
+      approval,
+      integration,
+      status: "approved",
+    })
+    expect(ctx.runQuery).toHaveBeenCalledWith(expect.anything(), {
+      accountId: "linear-org",
+      code: "ABC12345",
+      integration: "linear",
+    })
+  })
+})
 
 describe("approval runtime decisions", () => {
   test("reports expired approvals without a second mutation", async () => {
@@ -52,15 +102,22 @@ describe("approval runtime decisions", () => {
 })
 
 function actionCtx(
-  runMutation: (args: Record<string, unknown>) => Promise<unknown>
+  runMutation: (args: Record<string, unknown>) => Promise<unknown>,
+  runQuery: (args: Record<string, unknown>) => Promise<unknown> = async () =>
+    null
 ) {
   return {
     runMutation: vi.fn(
       async (_reference: unknown, args: Record<string, unknown>) =>
         runMutation(args)
     ),
+    runQuery: vi.fn(
+      async (_reference: unknown, args: Record<string, unknown>) =>
+        runQuery(args)
+    ),
   } as unknown as ActionCtx & {
     runMutation: ReturnType<typeof vi.fn>
+    runQuery: ReturnType<typeof vi.fn>
   }
 }
 
@@ -86,5 +143,23 @@ function userActor(): Actor {
   return {
     kind: "user",
     userId: "user_1",
+  }
+}
+
+function integrationDoc(
+  integration: Doc<"integrations">["integration"]
+): Doc<"integrations"> {
+  return {
+    _creationTime: 0,
+    _id: "integration_1" as Id<"integrations">,
+    createdAt: 0,
+    createdBy: "user_1",
+    credentials: {},
+    externalId: "linear-org",
+    integration,
+    scope: "tenant",
+    status: "active",
+    tenantId: "tenant",
+    updatedAt: 0,
   }
 }
