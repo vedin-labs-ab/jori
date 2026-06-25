@@ -1,15 +1,15 @@
-import { type ConnectionStatus } from "./card"
+import { type IntegrationCardStatus } from "./card"
 
 export type AccountStatus = {
   externalId: string
   email?: string
   name?: string
-  status: Exclude<ConnectionStatus, undefined>
+  status: Exclude<IntegrationCardStatus, undefined>
 } | null
 
 export type WorkspaceStatus = {
   externalId: string
-  status: Exclude<ConnectionStatus, undefined>
+  status: Exclude<IntegrationCardStatus, undefined>
 } | null
 
 export function getAccountHeadline(

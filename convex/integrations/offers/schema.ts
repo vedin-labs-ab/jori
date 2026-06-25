@@ -6,7 +6,7 @@ import {
   toolSurfaceValidator,
 } from "../../shared/integrations"
 
-export const setupLinkStatus = v.union(
+export const integrationOfferStatus = v.union(
   v.literal("pending"),
   v.literal("claimed"),
   v.literal("cancelled"),
@@ -15,21 +15,21 @@ export const setupLinkStatus = v.union(
   v.literal("expired")
 )
 
-export const setupLinkSourceActor = v.object({
+export const integrationOfferSourceActor = v.object({
   externalId: v.string(),
   email: v.optional(v.string()),
   name: v.optional(v.string()),
 })
 
-export const setupLinkSource = v.object({
+export const integrationOfferSource = v.object({
   surface: toolSurfaceValidator,
   integrationId: v.optional(v.id("integrations")),
-  actor: v.optional(setupLinkSourceActor),
+  actor: v.optional(integrationOfferSourceActor),
   messageId: v.optional(v.id("messages")),
   runId: v.optional(v.id("runs")),
 })
 
-export const setupLinkDelivery = v.union(
+export const integrationOfferDelivery = v.union(
   v.object({
     integration: v.literal("slack"),
     integrationId: v.id("integrations"),
@@ -41,18 +41,18 @@ export const setupLinkDelivery = v.union(
   })
 )
 
-export type SetupLinkSource = Infer<typeof setupLinkSource>
+export type IntegrationOfferSource = Infer<typeof integrationOfferSource>
 
-export const setupLinks = defineTable({
+export const integrationOffers = defineTable({
   tenantId: v.string(),
   integration: integrationValidator,
   tokenHash: v.string(),
-  status: setupLinkStatus,
+  status: integrationOfferStatus,
   summary: v.optional(v.string()),
-  source: setupLinkSource,
+  source: integrationOfferSource,
   runId: v.optional(v.id("runs")),
   awaited: v.optional(v.boolean()),
-  delivery: v.optional(setupLinkDelivery),
+  delivery: v.optional(integrationOfferDelivery),
   claim: v.optional(
     v.object({
       userId: v.string(),

@@ -43,13 +43,13 @@ export const consumeApproval = mutation({
 export const consumeOffer = mutation({
   args: {
     secret: v.string(),
-    setupLinkId: v.id("setupLinks"),
+    integrationOfferId: v.id("integrationOffers"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     requireWorkerSecret(args.secret)
 
-    const offer = await ctx.db.get(args.setupLinkId)
+    const offer = await ctx.db.get(args.integrationOfferId)
 
     if (offer !== null && offer.consumedAt === undefined) {
       await ctx.db.patch(offer._id, { consumedAt: Date.now() })
@@ -70,7 +70,7 @@ async function loadApprovalHandoffs(ctx: QueryCtx, runId: Id<"runs">) {
 
 async function loadOfferHandoffs(ctx: QueryCtx, runId: Id<"runs">) {
   const offers = await ctx.db
-    .query("setupLinks")
+    .query("integrationOffers")
     .withIndex("by_run_and_status", (query) => query.eq("runId", runId))
     .take(scanLimit)
 
@@ -95,7 +95,7 @@ function toApprovalHandoff(approval: Doc<"approvals">) {
   }
 }
 
-function toOfferHandoff(offer: Doc<"setupLinks">) {
+function toOfferHandoff(offer: Doc<"integrationOffers">) {
   return {
     id: offer._id,
     integration: offer.integration,

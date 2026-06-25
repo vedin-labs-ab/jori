@@ -11,11 +11,11 @@ import {
 } from "../attachments/mcp"
 import { callMiloAutomationTool } from "../automations/mcp"
 import {
-  callIntegrationSetupTool,
-  cancelConnectionOffer,
-  isCancelConnectionOfferTool,
-  isIntegrationSetupTool,
-} from "../integrations/setup/mcp"
+  callIntegrationOfferTool,
+  cancelIntegrationOffer,
+  isCancelIntegrationOfferTool,
+  isIntegrationOfferTool,
+} from "../integrations/offers/mcp"
 import { callMiloSkillTool, isMiloSkillTool } from "../skills/mcp"
 import { type ApprovalBrokerContext } from "./approval"
 import { callWebTool } from "./tools/web"
@@ -61,9 +61,9 @@ export async function callMiloTool(
 
 function isBrokerScopedMiloTool(tool: string) {
   return (
-    isIntegrationSetupTool(tool) ||
+    isIntegrationOfferTool(tool) ||
     isCancelApprovalTool(tool) ||
-    isCancelConnectionOfferTool(tool)
+    isCancelIntegrationOfferTool(tool)
   )
 }
 
@@ -72,15 +72,15 @@ async function callBrokerScopedMiloTool(
   context: ApprovalBrokerContext,
   request: MiloToolRequest
 ) {
-  if (isIntegrationSetupTool(request.tool)) {
-    return await callIntegrationSetupTool(ctx, context, request)
+  if (isIntegrationOfferTool(request.tool)) {
+    return await callIntegrationOfferTool(ctx, context, request)
   }
 
   if (isCancelApprovalTool(request.tool)) {
     return await cancelApprovalRequest(ctx, context.run, request.args)
   }
 
-  return await cancelConnectionOffer(ctx, context.run, request.args)
+  return await cancelIntegrationOffer(ctx, context.run, request.args)
 }
 
 function requireBrokerContext(

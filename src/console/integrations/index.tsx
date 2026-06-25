@@ -3,19 +3,19 @@ import { ConsolePage } from "../page"
 import { NativePermissionsCard } from "../permissions"
 import { useToolPermissions } from "../permissions/controller"
 import { ConsoleContentGrid } from "../shared/layout"
-import { GitHubConnection } from "./connections/github"
+import { GitHubIntegration } from "./providers/github"
 import {
-  GmailConnection,
-  GoogleCalendarConnection,
-  GoogleDriveConnection,
-} from "./connections/google"
-import { LinearConnection } from "./connections/linear"
+  GmailIntegration,
+  GoogleCalendarIntegration,
+  GoogleDriveIntegration,
+} from "./providers/google"
+import { LinearIntegration } from "./providers/linear"
 import {
-  MicrosoftCalendarConnection,
-  MicrosoftEmailConnection,
-} from "./connections/microsoft"
-import { NotionConnection } from "./connections/notion"
-import { SlackConnection } from "./connections/slack"
+  MicrosoftCalendarIntegration,
+  MicrosoftEmailIntegration,
+} from "./providers/microsoft"
+import { NotionIntegration } from "./providers/notion"
+import { SlackIntegration } from "./providers/slack"
 
 export function Integrations() {
   return (
@@ -36,11 +36,11 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
       </TabsList>
       <TabsContent value="tenant" asChild>
         <ConsoleContentGrid className="md:grid-cols-2">
-          <SlackConnection permissions={permissions} tenantId={tenantId} />
-          <LinearConnection permissions={permissions} tenantId={tenantId} />
-          <GitHubConnection permissions={permissions} tenantId={tenantId} />
-          <NotionConnection permissions={permissions} tenantId={tenantId} />
-          <GoogleDriveConnection
+          <SlackIntegration permissions={permissions} tenantId={tenantId} />
+          <LinearIntegration permissions={permissions} tenantId={tenantId} />
+          <GitHubIntegration permissions={permissions} tenantId={tenantId} />
+          <NotionIntegration permissions={permissions} tenantId={tenantId} />
+          <GoogleDriveIntegration
             permissions={permissions}
             tenantId={tenantId}
           />
@@ -49,16 +49,16 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
       </TabsContent>
       <TabsContent value="user" asChild>
         <ConsoleContentGrid className="md:grid-cols-2">
-          <GmailConnection permissions={permissions} tenantId={tenantId} />
-          <GoogleCalendarConnection
+          <GmailIntegration permissions={permissions} tenantId={tenantId} />
+          <GoogleCalendarIntegration
             permissions={permissions}
             tenantId={tenantId}
           />
-          <MicrosoftEmailConnection
+          <MicrosoftEmailIntegration
             permissions={permissions}
             tenantId={tenantId}
           />
-          <MicrosoftCalendarConnection
+          <MicrosoftCalendarIntegration
             permissions={permissions}
             tenantId={tenantId}
           />

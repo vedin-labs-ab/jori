@@ -21,7 +21,7 @@ export const coreMiloToolInputSchemas = {
       },
     },
   }),
-  offer_integration_setup: objectSchema({
+  offer_integration: objectSchema({
     required: ["integration", "summary"],
     properties: {
       integration: {
@@ -53,11 +53,11 @@ export const coreMiloToolInputSchemas = {
       ),
     },
   }),
-  cancel_connection_offer: objectSchema({
-    required: ["setupLinkId", "reason"],
+  cancel_integration_offer: objectSchema({
+    required: ["integrationOfferId", "reason"],
     properties: {
-      setupLinkId: stringProperty(
-        "ID of the pending setup offer to withdraw, returned when you offered it."
+      integrationOfferId: stringProperty(
+        "ID of the pending integration offer to withdraw, returned when you offered it."
       ),
       reason: stringProperty(
         "Short explanation of why the offer is no longer needed."

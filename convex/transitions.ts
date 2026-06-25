@@ -12,7 +12,7 @@ const approvalTransitionType = v.union(
   v.literal("cancelled"),
   v.literal("expired")
 )
-const setupLinkTransitionType = v.union(
+const integrationOfferTransitionType = v.union(
   v.literal("created"),
   v.literal("delivered"),
   v.literal("cancelled"),
@@ -30,18 +30,18 @@ const approvalTransition = v.object({
   type: approvalTransitionType,
   createdAt: v.number(),
 })
-const setupLinkTransition = v.object({
+const integrationOfferTransition = v.object({
   tenantId: v.string(),
   subject: v.object({
-    kind: v.literal("setupLink"),
-    id: v.id("setupLinks"),
+    kind: v.literal("integrationOffer"),
+    id: v.id("integrationOffers"),
   }),
-  type: setupLinkTransitionType,
+  type: integrationOfferTransitionType,
   createdAt: v.number(),
 })
 
 export const transitions = defineTable(
-  v.union(approvalTransition, setupLinkTransition)
+  v.union(approvalTransition, integrationOfferTransition)
 )
   .index("by_subject_and_created_at", [
     "subject.kind",
@@ -58,7 +58,7 @@ type ApprovalTransitionType =
   | "cancelled"
   | "expired"
 
-type SetupLinkTransitionType =
+type IntegrationOfferTransitionType =
   | "created"
   | "delivered"
   | "cancelled"
@@ -72,13 +72,13 @@ type ApprovalTransitionInput = {
   type: ApprovalTransitionType
   syncSurface?: boolean
 }
-type SetupLinkTransitionInput = {
+type IntegrationOfferTransitionInput = {
   tenantId: string
-  subject: { kind: "setupLink"; id: Id<"setupLinks"> }
-  type: SetupLinkTransitionType
+  subject: { kind: "integrationOffer"; id: Id<"integrationOffers"> }
+  type: IntegrationOfferTransitionType
   syncSurface?: boolean
 }
-type TransitionInput = ApprovalTransitionInput | SetupLinkTransitionInput
+type TransitionInput = ApprovalTransitionInput | IntegrationOfferTransitionInput
 
 export async function recordTransition(
   ctx: MutationCtx,
@@ -123,12 +123,12 @@ async function scheduleSurfaceSync(
         approvalId: subject.id,
       })
       return
-    case "setupLink":
+    case "integrationOffer":
       await ctx.scheduler.runAfter(
         0,
-        internal.integrations.setup.lifecycle.sync,
+        internal.integrations.offers.lifecycle.sync,
         {
-          setupLinkId: subject.id,
+          integrationOfferId: subject.id,
         }
       )
       return

@@ -1,17 +1,14 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import {
-  IntegrationConnection,
-  type IntegrationConnectionConfig,
-} from "../connection/card"
-import { getWorkspaceHeadline } from "../connection/headline"
+import { IntegrationCard, type IntegrationCardConfig } from "../card/card"
+import { getWorkspaceHeadline } from "../card/headline"
 
 const linearConfig = {
   action: "Connect Linear",
   connectedDetail:
     "Milo responds to mentions, reads issue context, and comments on issues.",
-  connectError: "Could not start the Linear connection.",
+  connectError: "Could not start the Linear integration.",
   emptyDetail:
     "Connect Linear so Milo can respond to mentions and comment on issues.",
   installPath: "/linear/install",
@@ -22,9 +19,9 @@ const linearConfig = {
     src: "https://svgl.app/library/linear.svg",
   },
   integration: "linear",
-} satisfies IntegrationConnectionConfig
+} satisfies IntegrationCardConfig
 
-export function LinearConnection({
+export function LinearIntegration({
   permissions,
   tenantId,
 }: {
@@ -39,7 +36,7 @@ export function LinearConnection({
   })
 
   return (
-    <IntegrationConnection
+    <IntegrationCard
       config={linearConfig}
       createInstallState={createInstallState}
       headline={getWorkspaceHeadline(

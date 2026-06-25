@@ -10,7 +10,7 @@ const tableRegistry: Record<TableName, true> = {
   attachments: true,
   identities: true,
   integrations: true,
-  setupLinks: true,
+  integrationOffers: true,
   messages: true,
   automations: true,
   subscriptions: true,

@@ -1,20 +1,14 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import {
-  IntegrationConnection,
-  type IntegrationConnectionConfig,
-} from "../connection/card"
-import {
-  getAccountHeadline,
-  getWorkspaceHeadline,
-} from "../connection/headline"
+import { IntegrationCard, type IntegrationCardConfig } from "../card/card"
+import { getAccountHeadline, getWorkspaceHeadline } from "../card/headline"
 
 const gmailConfig = {
   action: "Connect Gmail",
   connectedDetail:
     "Connected for you only. Milo can read and reply to your email when you ask.",
-  connectError: "Could not start the Gmail connection.",
+  connectError: "Could not start the Gmail integration.",
   emptyDetail:
     "Connect your Gmail account. This connects only you, not the whole organization.",
   installPath: "/gmail/install",
@@ -25,13 +19,13 @@ const gmailConfig = {
     src: "https://svgl.app/library/gmail.svg",
   },
   integration: "gmail",
-} satisfies IntegrationConnectionConfig
+} satisfies IntegrationCardConfig
 
 const calendarConfig = {
   action: "Connect Calendar",
   connectedDetail:
     "Connected for you only. Milo can read, create, and update your events when you ask.",
-  connectError: "Could not start the Google Calendar connection.",
+  connectError: "Could not start the Google Calendar integration.",
   emptyDetail:
     "Connect your Google Calendar. This connects only you, not the whole organization.",
   installPath: "/google-calendar/install",
@@ -42,13 +36,13 @@ const calendarConfig = {
     src: "https://svgl.app/library/google-calendar.svg",
   },
   integration: "googleCalendar",
-} satisfies IntegrationConnectionConfig
+} satisfies IntegrationCardConfig
 
 const driveConfig = {
   action: "Connect Drive",
   connectedDetail:
     "Shared with your organization. Milo can search, read, create, and update files when you ask.",
-  connectError: "Could not start the Google Drive connection.",
+  connectError: "Could not start the Google Drive integration.",
   emptyDetail:
     "Connect Google Drive for your organization. Any run can use it when you ask.",
   installPath: "/google-drive/install",
@@ -59,9 +53,9 @@ const driveConfig = {
     src: "https://svgl.app/library/drive.svg",
   },
   integration: "googleDrive",
-} satisfies IntegrationConnectionConfig
+} satisfies IntegrationCardConfig
 
-export function GmailConnection({
+export function GmailIntegration({
   permissions,
   tenantId,
 }: {
@@ -76,7 +70,7 @@ export function GmailConnection({
   })
 
   return (
-    <IntegrationConnection
+    <IntegrationCard
       config={gmailConfig}
       createInstallState={createInstallState}
       headline={getAccountHeadline(status, gmailConfig.label)}
@@ -87,7 +81,7 @@ export function GmailConnection({
   )
 }
 
-export function GoogleDriveConnection({
+export function GoogleDriveIntegration({
   permissions,
   tenantId,
 }: {
@@ -102,7 +96,7 @@ export function GoogleDriveConnection({
   })
 
   return (
-    <IntegrationConnection
+    <IntegrationCard
       config={driveConfig}
       createInstallState={createInstallState}
       headline={getWorkspaceHeadline(
@@ -119,7 +113,7 @@ export function GoogleDriveConnection({
   )
 }
 
-export function GoogleCalendarConnection({
+export function GoogleCalendarIntegration({
   permissions,
   tenantId,
 }: {
@@ -134,7 +128,7 @@ export function GoogleCalendarConnection({
   })
 
   return (
-    <IntegrationConnection
+    <IntegrationCard
       config={calendarConfig}
       createInstallState={createInstallState}
       headline={getAccountHeadline(status, calendarConfig.label)}

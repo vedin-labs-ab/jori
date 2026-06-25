@@ -3,36 +3,36 @@ import { useEffect, useMemo, useState } from "react"
 import { readErrorMessage } from "@/console/shared/error"
 import { FullscreenSkeletonLoader } from "@/console/shared/loading"
 import { api } from "../../../convex/_generated/api"
-import { IntegrationSetupOutcome } from "./outcome"
+import { IntegrationOfferOutcome } from "./outcome"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 
-type SetupErrorKind = "expired" | "retryable" | "terminal"
+type OfferErrorKind = "expired" | "retryable" | "terminal"
 
-type SetupState =
+type OfferState =
   | { status: "connecting" }
   | { status: "connected" }
-  | { kind: SetupErrorKind; status: "error" }
+  | { kind: OfferErrorKind; status: "error" }
 
-export function IntegrationSetup({ token }: { token: string }) {
-  const { retry, state } = useIntegrationSetup(token)
+export function IntegrationOffer({ token }: { token: string }) {
+  const { retry, state } = useIntegrationOffer(token)
 
   if (state.status === "connected") {
-    return <ConnectedSetupView />
+    return <ConnectedOfferView />
   }
 
   if (state.status === "error") {
-    return <SetupErrorView kind={state.kind} retry={retry} />
+    return <OfferErrorView kind={state.kind} retry={retry} />
   }
 
-  return <ConnectingSetupView />
+  return <ConnectingOfferView />
 }
 
-function useIntegrationSetup(token: string) {
-  const claim = useMutation(api.integrations.setup.links.claim)
+function useIntegrationOffer(token: string) {
+  const claim = useMutation(api.integrations.offers.records.claim)
   const providerError = useMemo(readProviderError, [])
   const [retryCount, setRetryCount] = useState(0)
-  const [state, setState] = useState<SetupState>(
+  const [state, setState] = useState<OfferState>(
     providerError
       ? {
           kind: "retryable",
@@ -57,7 +57,10 @@ function useIntegrationSetup(token: string) {
       setState({ status: "connecting" })
 
       try {
-        const result = await claim({ token, returnUrl: setupReturnUrl() })
+        const result = await claim({
+          token,
+          returnUrl: integrationOfferReturnUrl(),
+        })
 
         if (cancelled) {
           return
@@ -75,11 +78,11 @@ function useIntegrationSetup(token: string) {
         if (!cancelled) {
           const message = readErrorMessage(
             error,
-            "This setup link could not be opened."
+            "This integration offer could not be opened."
           )
 
           setState({
-            kind: classifySetupError(message),
+            kind: classifyOfferError(message),
             status: "error",
           })
         }
@@ -96,33 +99,33 @@ function useIntegrationSetup(token: string) {
   return { state, retry: () => setRetryCount((count) => count + 1) }
 }
 
-function ConnectedSetupView() {
-  return <IntegrationSetupOutcome variant="connected" />
+function ConnectedOfferView() {
+  return <IntegrationOfferOutcome variant="connected" />
 }
 
-function SetupErrorView({
+function OfferErrorView({
   kind,
   retry,
 }: {
-  kind: SetupErrorKind
+  kind: OfferErrorKind
   retry: () => void
 }) {
   if (kind === "expired") {
-    return <IntegrationSetupOutcome variant="expired" />
+    return <IntegrationOfferOutcome variant="expired" />
   }
 
   if (kind === "terminal") {
-    return <IntegrationSetupOutcome variant="terminal" />
+    return <IntegrationOfferOutcome variant="terminal" />
   }
 
-  return <IntegrationSetupOutcome onRetry={retry} variant="failed" />
+  return <IntegrationOfferOutcome onRetry={retry} variant="failed" />
 }
 
-function ConnectingSetupView() {
+function ConnectingOfferView() {
   return <FullscreenSkeletonLoader />
 }
 
-function setupReturnUrl() {
+function integrationOfferReturnUrl() {
   const url = new URL(window.location.href)
 
   url.search = ""
@@ -141,7 +144,7 @@ function readProviderError() {
   return Array.from(search.values()).some((value) => value === "error")
 }
 
-function classifySetupError(message: string): SetupErrorKind {
+function classifyOfferError(message: string): OfferErrorKind {
   const normalized = message.toLowerCase()
 
   if (

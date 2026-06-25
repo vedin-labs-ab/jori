@@ -17,8 +17,8 @@ import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
 import { events } from "./events/schema"
 import { identities } from "./identity/schema"
+import { integrationOffers } from "./integrations/offers/schema"
 import { integrations } from "./integrations/schema"
-import { setupLinks } from "./integrations/setup/schema"
 import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
 import { runs } from "./runs/schema"
@@ -34,7 +34,7 @@ export default defineSchema({
   attachments,
   identities,
   integrations,
-  setupLinks,
+  integrationOffers,
   messages,
   automations,
   subscriptions,

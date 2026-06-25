@@ -1,12 +1,12 @@
 import { type MutationCtx } from "../../_generated/server"
 import { upsertIdentity } from "../../identity/identities"
 import { readAppOrigin } from "../../shared/app"
-import { type SetupLinkSource } from "./schema"
+import { type IntegrationOfferSource } from "./schema"
 import { surfaceIdentityProvider } from "./source"
-import { hashSetupToken } from "./tokens"
+import { hashIntegrationOfferToken } from "./tokens"
 
-export function setupLinkLocation(token: string) {
-  const urlPath = `/integrations/setup/${encodeURIComponent(token)}`
+export function integrationOfferLocation(token: string) {
+  const urlPath = `/integrations/offers/${encodeURIComponent(token)}`
   const origin = requireAppOrigin()
 
   return {
@@ -15,21 +15,24 @@ export function setupLinkLocation(token: string) {
   }
 }
 
-export async function findSetupLinkByToken(ctx: MutationCtx, token: string) {
-  const tokenHash = await hashSetupToken(token)
+export async function findIntegrationOfferByToken(
+  ctx: MutationCtx,
+  token: string
+) {
+  const tokenHash = await hashIntegrationOfferToken(token)
 
   return await ctx.db
-    .query("setupLinks")
+    .query("integrationOffers")
     .withIndex("by_token_hash", (query) => query.eq("tokenHash", tokenHash))
     .first()
 }
 
-export async function upsertSetupSourceIdentity(
+export async function upsertIntegrationOfferSourceIdentity(
   ctx: MutationCtx,
   args: {
     tenantId: string
     userId: string
-    source: SetupLinkSource
+    source: IntegrationOfferSource
   }
 ) {
   const provider = surfaceIdentityProvider(args.source.surface)
@@ -49,20 +52,22 @@ export async function upsertSetupSourceIdentity(
   })
 }
 
-export function normalizeSetupReturnUrl(returnUrl: string) {
+export function normalizeIntegrationOfferReturnUrl(returnUrl: string) {
   let url: URL
 
   try {
     url = new URL(returnUrl)
   } catch {
-    throw new Error("Setup return URL must be absolute.")
+    throw new Error("Integration offer return URL must be absolute.")
   }
 
   if (
     url.origin !== requireAppOrigin() ||
-    !url.pathname.startsWith("/integrations/setup/")
+    !url.pathname.startsWith("/integrations/offers/")
   ) {
-    throw new Error("Setup return URL must point to a Milo setup link.")
+    throw new Error(
+      "Integration offer return URL must point to a Milo integration offer."
+    )
   }
 
   url.search = ""
@@ -75,7 +80,9 @@ function requireAppOrigin() {
   const origin = readAppOrigin()
 
   if (origin === undefined) {
-    throw new Error("MILO_APP_URL must be configured to create setup links.")
+    throw new Error(
+      "MILO_APP_URL must be configured to create integration offers."
+    )
   }
 
   return origin

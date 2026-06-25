@@ -1,8 +1,11 @@
 import { describe, expect, test } from "vitest"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
-import { setupSourceFromInput, surfaceIdentityProvider } from "./source"
+import {
+  integrationOfferSourceFromInput,
+  surfaceIdentityProvider,
+} from "./source"
 
-describe("setup link source", () => {
+describe("integration offer source", () => {
   test("captures the current message surface and actor identity", () => {
     const input = {
       type: "message",
@@ -20,7 +23,7 @@ describe("setup link source", () => {
       },
     } as unknown as AgentRuntimeInput
 
-    expect(setupSourceFromInput(input)).toEqual({
+    expect(integrationOfferSourceFromInput(input)).toEqual({
       surface: "slack",
       integrationId: "integration_1",
       messageId: "message_1",
@@ -39,7 +42,7 @@ describe("setup link source", () => {
       run: { _id: "run_1" },
     } as unknown as AgentRuntimeInput
 
-    expect(setupSourceFromInput(input)).toEqual({
+    expect(integrationOfferSourceFromInput(input)).toEqual({
       surface: "milo",
       runId: "run_1",
     })

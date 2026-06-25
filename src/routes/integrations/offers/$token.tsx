@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { IntegrationSetup } from "@/console/integrations/setup"
+import { IntegrationOffer } from "@/console/integrations/offer"
 import { ConsolePage } from "@/console/page"
 
-export const Route = createFileRoute("/integrations/setup/$token")({
+export const Route = createFileRoute("/integrations/offers/$token")({
   component: () => {
     const { token } = Route.useParams()
 
     return (
       <ConsolePage chrome="none" chromeContent={null}>
-        {() => <IntegrationSetup token={token} />}
+        {() => <IntegrationOffer token={token} />}
       </ConsolePage>
     )
   },

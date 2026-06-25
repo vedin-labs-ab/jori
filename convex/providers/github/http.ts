@@ -6,7 +6,7 @@ import {
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
-import { completeSetupLink, failSetupLink } from "../install"
+import { completeIntegrationOffer, failIntegrationOffer } from "../install"
 import {
   fetchGitHubInstallationProfile,
   type GitHubInstallationProfile,
@@ -63,8 +63,8 @@ export async function handleGitHubInstallCallback(
   try {
     profile = await fetchGitHubInstallationProfile(installationId)
   } catch {
-    await failSetupLink(ctx, {
-      setupLinkId: state.setupLinkId,
+    await failIntegrationOffer(ctx, {
+      integrationOfferId: state.integrationOfferId,
       error: "GitHub installation profile could not be loaded.",
     })
 
@@ -81,8 +81,8 @@ export async function handleGitHubInstallCallback(
     }
   )
 
-  await completeSetupLink(ctx, {
-    setupLinkId: state.setupLinkId,
+  await completeIntegrationOffer(ctx, {
+    integrationOfferId: state.integrationOfferId,
     integrationId,
   })
 

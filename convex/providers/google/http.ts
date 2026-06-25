@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { readCallbackState, redirectWithStatus } from "../http"
-import { completeSetupLink, failSetupLink } from "../install"
+import { completeIntegrationOffer, failIntegrationOffer } from "../install"
 import {
   type GoogleIntegration,
   googleIntegrationConfigs,
@@ -84,7 +84,7 @@ export async function handleGoogleOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    return await redirectWithGoogleSetupError(ctx, {
+    return await redirectWithGoogleInstallError(ctx, {
       state,
       integration,
       error: `${surface.integration} OAuth token exchange failed.`,
@@ -96,7 +96,7 @@ export async function handleGoogleOAuthCallback(
   try {
     profile = await fetchGoogleInstallationProfile(tokenResult.access_token)
   } catch {
-    return await redirectWithGoogleSetupError(ctx, {
+    return await redirectWithGoogleInstallError(ctx, {
       state,
       integration,
       error: `${surface.integration} installation profile could not be loaded.`,
@@ -104,14 +104,14 @@ export async function handleGoogleOAuthCallback(
   }
 
   try {
-    await recordGoogleSetupInstallation(ctx, {
+    await recordGoogleInstallation(ctx, {
       integration,
       profile,
       state,
       tokenResult,
     })
   } catch {
-    return await redirectWithGoogleSetupError(ctx, {
+    return await redirectWithGoogleInstallError(ctx, {
       state,
       integration,
       error: `${surface.integration} installation could not be recorded.`,
@@ -121,7 +121,7 @@ export async function handleGoogleOAuthCallback(
   return redirectWithGoogleStatus(state.returnUrl, integration, "connected")
 }
 
-async function recordGoogleSetupInstallation(
+async function recordGoogleInstallation(
   ctx: ActionCtx,
   args: {
     integration: GoogleIntegration
@@ -149,13 +149,13 @@ async function recordGoogleSetupInstallation(
     }
   )
 
-  await completeSetupLink(ctx, {
-    setupLinkId: args.state.setupLinkId,
+  await completeIntegrationOffer(ctx, {
+    integrationOfferId: args.state.integrationOfferId,
     integrationId,
   })
 }
 
-async function redirectWithGoogleSetupError(
+async function redirectWithGoogleInstallError(
   ctx: ActionCtx,
   args: {
     state: GoogleInstallState
@@ -163,8 +163,8 @@ async function redirectWithGoogleSetupError(
     error: string
   }
 ) {
-  await failSetupLink(ctx, {
-    setupLinkId: args.state.setupLinkId,
+  await failIntegrationOffer(ctx, {
+    integrationOfferId: args.state.integrationOfferId,
     error: args.error,
   })
 

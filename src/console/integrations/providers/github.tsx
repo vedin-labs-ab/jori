@@ -1,17 +1,14 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import {
-  IntegrationConnection,
-  type IntegrationConnectionConfig,
-} from "../connection/card"
-import { getWorkspaceHeadline } from "../connection/headline"
+import { IntegrationCard, type IntegrationCardConfig } from "../card/card"
+import { getWorkspaceHeadline } from "../card/headline"
 
 const githubConfig = {
   action: "Connect GitHub",
   connectedDetail:
     "Milo responds to mentions, reads the connected repositories, and replies in issue and pull request threads.",
-  connectError: "Could not start the GitHub connection.",
+  connectError: "Could not start the GitHub integration.",
   emptyDetail:
     "Install the GitHub App so Milo can respond to mentions in issues and pull requests.",
   installPath: "/github/install",
@@ -22,9 +19,9 @@ const githubConfig = {
     src: "https://svgl.app/library/github_light.svg",
   },
   integration: "github",
-} satisfies IntegrationConnectionConfig
+} satisfies IntegrationCardConfig
 
-export function GitHubConnection({
+export function GitHubIntegration({
   permissions,
   tenantId,
 }: {
@@ -39,7 +36,7 @@ export function GitHubConnection({
   })
 
   return (
-    <IntegrationConnection
+    <IntegrationCard
       config={githubConfig}
       createInstallState={createInstallState}
       headline={getWorkspaceHeadline(

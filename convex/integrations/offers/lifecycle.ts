@@ -8,31 +8,38 @@ import {
 } from "../../_generated/server"
 import { updateSlackMessage } from "../../broker/tools/slack"
 import { actorValidator } from "../../shared/actor"
-import { createSlackSetupLinkMessage } from "./slack"
-import { markSetupLinkCancelled, markSetupLinkExpired } from "./transition"
+import { createSlackIntegrationOfferMessage } from "./slack"
+import {
+  markIntegrationOfferCancelled,
+  markIntegrationOfferExpired,
+} from "./transition"
 
-type TerminalSetupStatus = "cancelled" | "connected" | "expired" | "failed"
+type TerminalIntegrationOfferStatus =
+  | "cancelled"
+  | "connected"
+  | "expired"
+  | "failed"
 
 export const expire = internalAction({
   args: {
-    setupLinkId: v.id("setupLinks"),
+    integrationOfferId: v.id("integrationOffers"),
   },
   handler: async (ctx, args) => {
-    await ctx.runMutation(internal.integrations.setup.lifecycle.markExpired, {
-      setupLinkId: args.setupLinkId,
+    await ctx.runMutation(internal.integrations.offers.lifecycle.markExpired, {
+      integrationOfferId: args.integrationOfferId,
     })
   },
 })
 
 export const sync = internalAction({
   args: {
-    setupLinkId: v.id("setupLinks"),
+    integrationOfferId: v.id("integrationOffers"),
   },
   handler: async (ctx, args) => {
     const target = await ctx.runQuery(
-      internal.integrations.setup.lifecycle.getSurfaceTarget,
+      internal.integrations.offers.lifecycle.getSurfaceTarget,
       {
-        setupLinkId: args.setupLinkId,
+        integrationOfferId: args.integrationOfferId,
       }
     )
 
@@ -46,20 +53,20 @@ export const sync = internalAction({
 
 export const markExpired = internalMutation({
   args: {
-    setupLinkId: v.id("setupLinks"),
+    integrationOfferId: v.id("integrationOffers"),
   },
   handler: async (ctx, args) => {
-    const link = await ctx.db.get(args.setupLinkId)
+    const offer = await ctx.db.get(args.integrationOfferId)
 
     if (
-      link === null ||
-      terminalStatus(link.status) !== null ||
-      Date.now() < link.expiresAt
+      offer === null ||
+      terminalStatus(offer.status) !== null ||
+      Date.now() < offer.expiresAt
     ) {
       return null
     }
 
-    await markSetupLinkExpired(ctx, link, Date.now())
+    await markIntegrationOfferExpired(ctx, offer, Date.now())
 
     return null
   },
@@ -71,17 +78,17 @@ export const cancel = internalMutation({
     actor: v.optional(actorValidator),
     channelId: v.string(),
     messageTs: v.string(),
-    setupLinkId: v.id("setupLinks"),
+    integrationOfferId: v.id("integrationOffers"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const link = await ctx.db.get(args.setupLinkId)
+    const offer = await ctx.db.get(args.integrationOfferId)
 
-    if (link === null) {
+    if (offer === null) {
       return null
     }
 
-    const delivery = link.delivery
+    const delivery = offer.delivery
 
     if (
       delivery?.integration !== "slack" ||
@@ -101,7 +108,7 @@ export const cancel = internalMutation({
       return null
     }
 
-    await markSetupLinkCancelled(ctx, link, {
+    await markIntegrationOfferCancelled(ctx, offer, {
       actor: args.actor,
       now: Date.now(),
     })
@@ -112,7 +119,7 @@ export const cancel = internalMutation({
 
 export const cancelForRun = internalMutation({
   args: {
-    setupLinkId: v.id("setupLinks"),
+    integrationOfferId: v.id("integrationOffers"),
     runId: v.id("runs"),
     tenantId: v.string(),
     reason: v.string(),
@@ -125,21 +132,21 @@ export const cancelForRun = internalMutation({
     ),
   }),
   handler: async (ctx, args) => {
-    const link = await ctx.db.get(args.setupLinkId)
+    const offer = await ctx.db.get(args.integrationOfferId)
 
     if (
-      link === null ||
-      link.runId !== args.runId ||
-      link.tenantId !== args.tenantId
+      offer === null ||
+      offer.runId !== args.runId ||
+      offer.tenantId !== args.tenantId
     ) {
       return { status: "missing" as const }
     }
 
-    if (link.status !== "pending" && link.status !== "claimed") {
+    if (offer.status !== "pending" && offer.status !== "claimed") {
       return { status: "settled" as const }
     }
 
-    await markSetupLinkCancelled(ctx, link, {
+    await markIntegrationOfferCancelled(ctx, offer, {
       actor: undefined,
       reason: args.reason,
       now: Date.now(),
@@ -151,17 +158,17 @@ export const cancelForRun = internalMutation({
 
 export const getSurfaceTarget = internalQuery({
   args: {
-    setupLinkId: v.id("setupLinks"),
+    integrationOfferId: v.id("integrationOffers"),
   },
   handler: async (ctx, args) => {
-    const link = await ctx.db.get(args.setupLinkId)
+    const offer = await ctx.db.get(args.integrationOfferId)
 
-    if (link === null) {
+    if (offer === null) {
       return null
     }
 
-    const status = terminalStatus(link.status)
-    const delivery = link.delivery
+    const status = terminalStatus(offer.status)
+    const delivery = offer.delivery
 
     if (status === null || delivery === undefined) {
       return null
@@ -172,28 +179,31 @@ export const getSurfaceTarget = internalQuery({
     if (
       integration === null ||
       integration.status !== "active" ||
-      integration.tenantId !== link.tenantId ||
+      integration.tenantId !== offer.tenantId ||
       integration.integration !== delivery.integration
     ) {
       return null
     }
 
-    return { delivery, integration, link: { ...link, status } }
+    return { delivery, integration, offer: { ...offer, status } }
   },
 })
 
 async function syncSlackSurface(target: {
-  delivery: Extract<Doc<"setupLinks">["delivery"], { integration: "slack" }>
+  delivery: Extract<
+    Doc<"integrationOffers">["delivery"],
+    { integration: "slack" }
+  >
   integration: Doc<"integrations">
-  link: Doc<"setupLinks"> & { status: TerminalSetupStatus }
+  offer: Doc<"integrationOffers"> & { status: TerminalIntegrationOfferStatus }
 }) {
-  const message = createSlackSetupLinkMessage({
-    expiresAt: target.link.expiresAt,
-    integration: target.link.integration,
-    actor: target.link.result?.actor,
-    status: target.link.status,
-    summary: target.link.summary ?? "Milo requested this connection.",
-    updatedAt: target.link.updatedAt,
+  const message = createSlackIntegrationOfferMessage({
+    expiresAt: target.offer.expiresAt,
+    integration: target.offer.integration,
+    actor: target.offer.result?.actor,
+    status: target.offer.status,
+    summary: target.offer.summary ?? "Milo requested this integration.",
+    updatedAt: target.offer.updatedAt,
   })
 
   await updateSlackMessage(target.integration, {
@@ -205,8 +215,8 @@ async function syncSlackSurface(target: {
 }
 
 function terminalStatus(
-  status: Doc<"setupLinks">["status"]
-): TerminalSetupStatus | null {
+  status: Doc<"integrationOffers">["status"]
+): TerminalIntegrationOfferStatus | null {
   if (
     status === "cancelled" ||
     status === "connected" ||

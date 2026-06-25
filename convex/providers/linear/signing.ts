@@ -13,7 +13,7 @@ export type LinearInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
-  setupLinkId?: Id<"setupLinks">
+  integrationOfferId?: Id<"integrationOffers">
 }
 
 export async function createSignedLinearState(state: LinearInstallState) {

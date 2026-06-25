@@ -6,15 +6,15 @@ import {
   getActorExternalId,
 } from "../../shared/actor"
 import { type ToolSurface } from "../../shared/integrations"
-import { type SetupLinkSource } from "./schema"
+import { type IntegrationOfferSource } from "./schema"
 
 const surfaceIdentityProviders = ["github", "linear", "slack"] as const
 
 export type SurfaceIdentityProvider = (typeof surfaceIdentityProviders)[number]
 
-export function setupSourceFromInput(
+export function integrationOfferSourceFromInput(
   input: AgentRuntimeInput
-): SetupLinkSource {
+): IntegrationOfferSource {
   if (input.type !== "message") {
     return {
       surface: "milo",

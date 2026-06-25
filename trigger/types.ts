@@ -146,7 +146,7 @@ export type RuntimeEventInput = {
 
 export type WaiterWakeReason =
   | "approval_resolved"
-  | "connection_resolved"
+  | "integration_resolved"
   | "message"
   | "run_cancelled"
   | "expired"
@@ -167,7 +167,7 @@ export type ApprovalHandoff = {
 }
 
 export type OfferHandoff = {
-  id: ConvexId<"setupLinks">
+  id: ConvexId<"integrationOffers">
   integration: string
   status:
     | "pending"

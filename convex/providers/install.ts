@@ -18,7 +18,7 @@ export type ProviderInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
-  setupLinkId?: Id<"setupLinks">
+  integrationOfferId?: Id<"integrationOffers">
 }
 
 export async function buildInstallState(
@@ -26,7 +26,7 @@ export async function buildInstallState(
   args: {
     tenantId: string
     returnUrl: string
-    setupLinkId?: Id<"setupLinks">
+    integrationOfferId?: Id<"integrationOffers">
   }
 ): Promise<ProviderInstallState> {
   const identity = await requireTenantAccess(ctx, args.tenantId)
@@ -36,9 +36,9 @@ export async function buildInstallState(
     createdBy: requireClerkUserId(identity),
     returnUrl: args.returnUrl,
     createdAt: Date.now(),
-    ...(args.setupLinkId === undefined
+    ...(args.integrationOfferId === undefined
       ? {}
-      : { setupLinkId: args.setupLinkId }),
+      : { integrationOfferId: args.integrationOfferId }),
   }
 }
 
@@ -48,7 +48,7 @@ export async function createSignedInstallState(
   args: {
     tenantId: string
     returnUrl: string
-    setupLinkId?: Id<"setupLinks">
+    integrationOfferId?: Id<"integrationOffers">
   }
 ) {
   const state = await buildInstallState(ctx, args)
@@ -92,30 +92,30 @@ export function installPathForIntegration(integration: Integration) {
   }
 }
 
-export async function completeSetupLink(
+export async function completeIntegrationOffer(
   ctx: ActionCtx,
   args: {
-    setupLinkId?: Id<"setupLinks">
+    integrationOfferId?: Id<"integrationOffers">
     integrationId: Id<"integrations">
   }
 ) {
-  if (args.setupLinkId === undefined) {
+  if (args.integrationOfferId === undefined) {
     return
   }
 
-  await ctx.runMutation(internal.integrations.setup.links.complete, args)
+  await ctx.runMutation(internal.integrations.offers.updates.complete, args)
 }
 
-export async function failSetupLink(
+export async function failIntegrationOffer(
   ctx: ActionCtx,
   args: {
-    setupLinkId?: Id<"setupLinks">
+    integrationOfferId?: Id<"integrationOffers">
     error?: string
   }
 ) {
-  if (args.setupLinkId === undefined) {
+  if (args.integrationOfferId === undefined) {
     return
   }
 
-  await ctx.runMutation(internal.integrations.setup.links.complete, args)
+  await ctx.runMutation(internal.integrations.offers.updates.complete, args)
 }

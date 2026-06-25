@@ -20,7 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as ArtifactsIndexRouteImport } from './routes/artifacts/index'
 import { Route as ArtifactsArtifactIdIndexRouteImport } from './routes/artifacts/$artifactId/index'
-import { Route as IntegrationsSetupTokenRouteImport } from './routes/integrations/setup/$token'
+import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
 
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
@@ -78,9 +78,9 @@ const ArtifactsArtifactIdIndexRoute =
     path: '/$artifactId/',
     getParentRoute: () => ArtifactsRoute,
   } as any)
-const IntegrationsSetupTokenRoute = IntegrationsSetupTokenRouteImport.update({
-  id: '/setup/$token',
-  path: '/setup/$token',
+const IntegrationsOffersTokenRoute = IntegrationsOffersTokenRouteImport.update({
+  id: '/offers/$token',
+  path: '/offers/$token',
   getParentRoute: () => IntegrationsRoute,
 } as any)
 
@@ -95,7 +95,7 @@ export interface FileRoutesByFullPath {
   '/skills': typeof SkillsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
-  '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
+  '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -107,7 +107,7 @@ export interface FileRoutesByTo {
   '/skills': typeof SkillsRoute
   '/artifacts': typeof ArtifactsIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
-  '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
+  '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/artifacts/$artifactId': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRoutesById {
@@ -122,7 +122,7 @@ export interface FileRoutesById {
   '/skills': typeof SkillsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
-  '/integrations/setup/$token': typeof IntegrationsSetupTokenRoute
+  '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -138,7 +138,7 @@ export interface FileRouteTypes {
     | '/skills'
     | '/artifacts/'
     | '/integrations/'
-    | '/integrations/setup/$token'
+    | '/integrations/offers/$token'
     | '/artifacts/$artifactId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -150,7 +150,7 @@ export interface FileRouteTypes {
     | '/skills'
     | '/artifacts'
     | '/integrations'
-    | '/integrations/setup/$token'
+    | '/integrations/offers/$token'
     | '/artifacts/$artifactId'
   id:
     | '__root__'
@@ -164,7 +164,7 @@ export interface FileRouteTypes {
     | '/skills'
     | '/artifacts/'
     | '/integrations/'
-    | '/integrations/setup/$token'
+    | '/integrations/offers/$token'
     | '/artifacts/$artifactId/'
   fileRoutesById: FileRoutesById
 }
@@ -258,11 +258,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtifactsArtifactIdIndexRouteImport
       parentRoute: typeof ArtifactsRoute
     }
-    '/integrations/setup/$token': {
-      id: '/integrations/setup/$token'
-      path: '/setup/$token'
-      fullPath: '/integrations/setup/$token'
-      preLoaderRoute: typeof IntegrationsSetupTokenRouteImport
+    '/integrations/offers/$token': {
+      id: '/integrations/offers/$token'
+      path: '/offers/$token'
+      fullPath: '/integrations/offers/$token'
+      preLoaderRoute: typeof IntegrationsOffersTokenRouteImport
       parentRoute: typeof IntegrationsRoute
     }
   }
@@ -284,12 +284,12 @@ const ArtifactsRouteWithChildren = ArtifactsRoute._addFileChildren(
 
 interface IntegrationsRouteChildren {
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
-  IntegrationsSetupTokenRoute: typeof IntegrationsSetupTokenRoute
+  IntegrationsOffersTokenRoute: typeof IntegrationsOffersTokenRoute
 }
 
 const IntegrationsRouteChildren: IntegrationsRouteChildren = {
   IntegrationsIndexRoute: IntegrationsIndexRoute,
-  IntegrationsSetupTokenRoute: IntegrationsSetupTokenRoute,
+  IntegrationsOffersTokenRoute: IntegrationsOffersTokenRoute,
 }
 
 const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(

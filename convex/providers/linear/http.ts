@@ -7,7 +7,7 @@ import {
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
-import { completeSetupLink, failSetupLink } from "../install"
+import { completeIntegrationOffer, failIntegrationOffer } from "../install"
 import { handleLinearApprovalDecision } from "./approvals"
 import {
   linearOAuthAuthorizeUrl,
@@ -75,8 +75,8 @@ export async function handleLinearOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    await failSetupLink(ctx, {
-      setupLinkId: state.setupLinkId,
+    await failIntegrationOffer(ctx, {
+      integrationOfferId: state.integrationOfferId,
       error: "Linear OAuth token exchange failed.",
     })
 
@@ -88,8 +88,8 @@ export async function handleLinearOAuthCallback(
   try {
     profile = await fetchLinearInstallationProfile(tokenResult.access_token)
   } catch {
-    await failSetupLink(ctx, {
-      setupLinkId: state.setupLinkId,
+    await failIntegrationOffer(ctx, {
+      integrationOfferId: state.integrationOfferId,
       error: "Linear installation profile could not be loaded.",
     })
 
@@ -109,8 +109,8 @@ export async function handleLinearOAuthCallback(
     }
   )
 
-  await completeSetupLink(ctx, {
-    setupLinkId: state.setupLinkId,
+  await completeIntegrationOffer(ctx, {
+    integrationOfferId: state.integrationOfferId,
     integrationId,
   })
 

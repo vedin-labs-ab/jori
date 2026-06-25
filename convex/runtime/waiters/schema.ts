@@ -3,7 +3,7 @@ import { v } from "convex/values"
 
 export const waiterReason = v.union(
   v.literal("approval_resolved"),
-  v.literal("connection_resolved"),
+  v.literal("integration_resolved"),
   v.literal("message"),
   v.literal("run_cancelled"),
   v.literal("expired")
@@ -11,7 +11,10 @@ export const waiterReason = v.union(
 
 export const waiterSubject = v.union(
   v.object({ kind: v.literal("approval"), approvalId: v.id("approvals") }),
-  v.object({ kind: v.literal("connection"), setupLinkId: v.id("setupLinks") }),
+  v.object({
+    kind: v.literal("integrationOffer"),
+    integrationOfferId: v.id("integrationOffers"),
+  }),
   v.object({ kind: v.literal("message"), messageId: v.id("messages") })
 )
 

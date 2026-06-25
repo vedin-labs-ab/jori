@@ -13,7 +13,7 @@ export type SlackInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
-  setupLinkId?: Id<"setupLinks">
+  integrationOfferId?: Id<"integrationOffers">
 }
 
 export function requireSlackSigningSecret() {

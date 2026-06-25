@@ -10,7 +10,7 @@ export function isVisibleCommunicationTool(
   }
 
   return (
-    toolName === "offer_integration_setup" &&
+    toolName === "offer_integration" &&
     deliveredOnActiveSurface(result, activeSurface)
   )
 }

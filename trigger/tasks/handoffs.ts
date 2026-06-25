@@ -104,7 +104,7 @@ async function reconcileOffer(
     return false
   }
 
-  await runtime.convex.markOfferConsumed({ setupLinkId: offer.id })
+  await runtime.convex.markOfferConsumed({ integrationOfferId: offer.id })
 
   if (offer.status === "connected") {
     await refreshRuntimeContext(runtime, messages)
@@ -166,12 +166,12 @@ function approvalOutcomeNote(approval: ApprovalHandoff) {
 
 function offerOutcomeNote(offer: OfferHandoff) {
   if (offer.status === "failed") {
-    return `The ${offer.integration} connection failed. Continue without it or report what is blocked.`
+    return `The ${offer.integration} integration failed. Continue without it or report what is blocked.`
   }
 
   if (offer.status === "expired") {
-    return `The ${offer.integration} setup offer expired. Continue without it or report what is blocked.`
+    return `The ${offer.integration} integration offer expired. Continue without it or report what is blocked.`
   }
 
-  return `The ${offer.integration} setup offer was cancelled. Continue without it.`
+  return `The ${offer.integration} integration offer was cancelled. Continue without it.`
 }

@@ -1,17 +1,14 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import {
-  IntegrationConnection,
-  type IntegrationConnectionConfig,
-} from "../connection/card"
-import { getWorkspaceHeadline } from "../connection/headline"
+import { IntegrationCard, type IntegrationCardConfig } from "../card/card"
+import { getWorkspaceHeadline } from "../card/headline"
 
 const notionConfig = {
   action: "Connect Notion",
   connectedDetail:
     "Milo can search shared content, read and update pages, and add comments.",
-  connectError: "Could not start the Notion connection.",
+  connectError: "Could not start the Notion integration.",
   emptyDetail:
     "Connect Notion so Milo can work with the pages and databases you share.",
   installPath: "/notion/install",
@@ -22,9 +19,9 @@ const notionConfig = {
     src: "https://svgl.app/library/notion.svg",
   },
   integration: "notion",
-} satisfies IntegrationConnectionConfig
+} satisfies IntegrationCardConfig
 
-export function NotionConnection({
+export function NotionIntegration({
   permissions,
   tenantId,
 }: {
@@ -39,7 +36,7 @@ export function NotionConnection({
   })
 
   return (
-    <IntegrationConnection
+    <IntegrationCard
       config={notionConfig}
       createInstallState={createInstallState}
       headline={getWorkspaceHeadline(

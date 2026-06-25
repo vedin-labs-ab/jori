@@ -1,19 +1,19 @@
 import { expect, test } from "vitest"
 import { type Id } from "../../_generated/dataModel"
 import {
-  isSlackSetupLinkInteraction,
-  parseSlackSetupLinkCancelInteraction,
+  isSlackIntegrationOfferInteraction,
+  parseSlackIntegrationOfferCancelInteraction,
 } from "./interaction"
-import { createSlackSetupLinkMessage } from "./slack"
+import { createSlackIntegrationOfferMessage } from "./slack"
 
 test("renders a URL button for the requested integration", () => {
-  const setupLinkId = "setup-link" as Id<"setupLinks">
-  const message = createSlackSetupLinkMessage({
+  const integrationOfferId = "integration-offer" as Id<"integrationOffers">
+  const message = createSlackIntegrationOfferMessage({
     expiresAt: 1_700_000_000_000,
     integration: "github",
-    setupLinkId,
+    integrationOfferId,
     summary: "GitHub is needed before I can inspect the repository.",
-    url: "https://app.milo.example/integrations/setup/token",
+    url: "https://app.milo.example/integrations/offers/token",
   })
   const card = message.blocks[0] as Record<string, unknown>
   const subtext = card.subtext as { text: string }
@@ -30,11 +30,11 @@ test("renders a URL button for the requested integration", () => {
       },
       title: {
         type: "mrkdwn",
-        text: "Connect request",
+        text: "Integration offer",
       },
       subtitle: {
         type: "mrkdwn",
-        text: "Set up GitHub",
+        text: "Connect GitHub",
       },
       body: {
         type: "mrkdwn",
@@ -46,13 +46,13 @@ test("renders a URL button for the requested integration", () => {
       actions: [
         {
           type: "button",
-          action_id: "milo_setup_link_cancel",
-          value: JSON.stringify({ setupLinkId }),
+          action_id: "milo_integration_offer_cancel",
+          value: JSON.stringify({ integrationOfferId }),
         },
         {
           type: "button",
-          action_id: "milo_setup_link_open",
-          url: "https://app.milo.example/integrations/setup/token",
+          action_id: "milo_integration_offer_open",
+          url: "https://app.milo.example/integrations/offers/token",
         },
       ],
     },
@@ -65,8 +65,8 @@ test("renders a URL button for the requested integration", () => {
   expect(actions[1]).toMatchObject({ style: "primary" })
 })
 
-test("renders connected updates without the setup button", () => {
-  const message = createSlackSetupLinkMessage({
+test("renders connected updates without the offer button", () => {
+  const message = createSlackIntegrationOfferMessage({
     actor: {
       kind: "user",
       userId: "user_123",
@@ -94,8 +94,8 @@ test("renders connected updates without the setup button", () => {
   expect(JSON.stringify(card.subtext)).not.toContain("manage")
 })
 
-test("renders cancelled updates without setup actions", () => {
-  const message = createSlackSetupLinkMessage({
+test("renders cancelled updates without offer actions", () => {
+  const message = createSlackIntegrationOfferMessage({
     actor: {
       kind: "user",
       externalId: "U123",
@@ -110,7 +110,9 @@ test("renders cancelled updates without setup actions", () => {
   const card = message.blocks[0] as Record<string, unknown>
   const subtext = card.subtext as { text: string }
 
-  expect(message.text).toContain("Google Drive connection cancelled by Albin")
+  expect(message.text).toContain(
+    "Google Drive integration offer cancelled by Albin"
+  )
   expect(card).not.toHaveProperty("actions")
   expect(card.slack_icon).toEqual({ type: "icon", name: "archive" })
   expect(card.title).toMatchObject({
@@ -119,22 +121,22 @@ test("renders cancelled updates without setup actions", () => {
   })
   expect(card.subtitle).toMatchObject({
     type: "mrkdwn",
-    text: "Set up Google Drive",
+    text: "Connect Google Drive",
   })
   expect(subtext.text).toContain("Cancelled at <!date^1699999000^{time}|")
   expect(subtext.text).not.toContain("Ask Milo")
   expect(subtext.text.endsWith(".")).toBe(false)
 })
 
-test("renders terminal setup timestamps as footnotes", () => {
-  const failed = createSlackSetupLinkMessage({
+test("renders terminal integration offer timestamps as footnotes", () => {
+  const failed = createSlackIntegrationOfferMessage({
     expiresAt: 1_700_000_000_000,
     integration: "googleDrive",
     status: "failed",
     summary: "Google Drive is needed before I can read files.",
     updatedAt: 1_699_999_000_000,
   }).blocks[0] as Record<string, unknown>
-  const expired = createSlackSetupLinkMessage({
+  const expired = createSlackIntegrationOfferMessage({
     expiresAt: 1_700_000_000_000,
     integration: "googleDrive",
     status: "expired",
@@ -151,12 +153,12 @@ test("renders terminal setup timestamps as footnotes", () => {
   expect(JSON.stringify(expired.subtext)).not.toContain("Ask Milo")
 })
 
-test("keeps setup card bodies within card limits", () => {
-  const message = createSlackSetupLinkMessage({
+test("keeps integration offer card bodies within card limits", () => {
+  const message = createSlackIntegrationOfferMessage({
     expiresAt: 1_700_000_000_000,
     integration: "googleCalendar",
     summary: "A".repeat(240),
-    url: "https://app.milo.example/integrations/setup/token",
+    url: "https://app.milo.example/integrations/offers/token",
   })
   const card = message.blocks[0] as Record<string, unknown>
   const body = card.body as { text: string }
@@ -165,11 +167,11 @@ test("keeps setup card bodies within card limits", () => {
   expect(body.text.endsWith("...")).toBe(true)
 })
 
-test("parses setup cancellation interactions", () => {
-  const setupLinkId = "setup-link" as Id<"setupLinks">
+test("parses integration offer cancellation interactions", () => {
+  const integrationOfferId = "integration-offer" as Id<"integrationOffers">
 
   expect(
-    parseSlackSetupLinkCancelInteraction({
+    parseSlackIntegrationOfferCancelInteraction({
       type: "block_actions",
       team: { id: "T123" },
       user: { id: "U123" },
@@ -177,8 +179,8 @@ test("parses setup cancellation interactions", () => {
       message: { ts: "1710000000.000100" },
       actions: [
         {
-          action_id: "milo_setup_link_cancel",
-          value: JSON.stringify({ setupLinkId }),
+          action_id: "milo_integration_offer_cancel",
+          value: JSON.stringify({ integrationOfferId }),
         },
       ],
     })
@@ -187,18 +189,18 @@ test("parses setup cancellation interactions", () => {
     actorId: "U123",
     channelId: "C123",
     messageTs: "1710000000.000100",
-    setupLinkId,
+    integrationOfferId,
   })
 })
 
-test("recognizes setup URL button interactions", () => {
+test("recognizes integration offer URL button interactions", () => {
   expect(
-    isSlackSetupLinkInteraction({
-      actions: [{ action_id: "milo_setup_link_open" }],
+    isSlackIntegrationOfferInteraction({
+      actions: [{ action_id: "milo_integration_offer_open" }],
     })
   ).toBe(true)
   expect(
-    isSlackSetupLinkInteraction({
+    isSlackIntegrationOfferInteraction({
       actions: [{ action_id: "other" }],
     })
   ).toBe(false)

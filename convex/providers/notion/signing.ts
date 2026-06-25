@@ -12,7 +12,7 @@ export type NotionInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
-  setupLinkId?: Id<"setupLinks">
+  integrationOfferId?: Id<"integrationOffers">
 }
 
 export async function createSignedNotionState(state: NotionInstallState) {

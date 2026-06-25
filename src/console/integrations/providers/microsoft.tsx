@@ -1,17 +1,14 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import {
-  IntegrationConnection,
-  type IntegrationConnectionConfig,
-} from "../connection/card"
-import { getAccountHeadline } from "../connection/headline"
+import { IntegrationCard, type IntegrationCardConfig } from "../card/card"
+import { getAccountHeadline } from "../card/headline"
 
 const emailConfig = {
   action: "Connect Outlook",
   connectedDetail:
     "Connected for you only. Milo can read, draft, and send your mail when you ask.",
-  connectError: "Could not start the Outlook connection.",
+  connectError: "Could not start the Outlook integration.",
   emptyDetail:
     "Connect your Outlook account. This connects only you, not the whole organization.",
   installPath: "/microsoft-email/install",
@@ -22,13 +19,13 @@ const emailConfig = {
     src: "https://svgl.app/library/microsoft-outlook.svg",
   },
   integration: "microsoftEmail",
-} satisfies IntegrationConnectionConfig
+} satisfies IntegrationCardConfig
 
 const calendarConfig = {
   action: "Connect Calendar",
   connectedDetail:
     "Connected for you only. Milo can read, create, and update your events when you ask.",
-  connectError: "Could not start the Microsoft Calendar connection.",
+  connectError: "Could not start the Microsoft Calendar integration.",
   emptyDetail:
     "Connect your Microsoft Calendar. This connects only you, not the whole organization.",
   installPath: "/microsoft-calendar/install",
@@ -39,9 +36,9 @@ const calendarConfig = {
     src: "https://svgl.app/library/microsoft.svg",
   },
   integration: "microsoftCalendar",
-} satisfies IntegrationConnectionConfig
+} satisfies IntegrationCardConfig
 
-export function MicrosoftEmailConnection({
+export function MicrosoftEmailIntegration({
   permissions,
   tenantId,
 }: {
@@ -56,7 +53,7 @@ export function MicrosoftEmailConnection({
   })
 
   return (
-    <IntegrationConnection
+    <IntegrationCard
       config={emailConfig}
       createInstallState={createInstallState}
       headline={getAccountHeadline(status, emailConfig.label)}
@@ -67,7 +64,7 @@ export function MicrosoftEmailConnection({
   )
 }
 
-export function MicrosoftCalendarConnection({
+export function MicrosoftCalendarIntegration({
   permissions,
   tenantId,
 }: {
@@ -82,7 +79,7 @@ export function MicrosoftCalendarConnection({
   })
 
   return (
-    <IntegrationConnection
+    <IntegrationCard
       config={calendarConfig}
       createInstallState={createInstallState}
       headline={getAccountHeadline(status, calendarConfig.label)}
