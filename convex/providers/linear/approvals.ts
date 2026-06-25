@@ -18,11 +18,7 @@ export async function handleLinearApprovalDecision(
   ctx: ActionCtx,
   message: LinearApprovalMessage
 ) {
-  if (message.actorKind !== "user") {
-    return false
-  }
-
-  const command = parseApprovalDecisionText(message.text)
+  const command = linearApprovalDecision(message)
 
   if (command === null) {
     return false
@@ -42,4 +38,16 @@ export async function handleLinearApprovalDecision(
   })
 
   return true
+}
+
+export function isLinearApprovalDecision(message: LinearApprovalMessage) {
+  return linearApprovalDecision(message) !== null
+}
+
+function linearApprovalDecision(message: LinearApprovalMessage) {
+  if (message.actorKind !== "user") {
+    return null
+  }
+
+  return parseApprovalDecisionText(message.text)
 }

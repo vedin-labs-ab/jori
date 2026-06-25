@@ -1,7 +1,8 @@
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { type ActorKind, getActorDisplayName } from "../shared/actor"
-import { messageActorIds, messageIds, messageText } from "./surface"
+import { messageActorIds, messageIdentifiers } from "./identifiers"
+import { messageText } from "./surface"
 
 const recentConversationLimit = 16
 
@@ -10,7 +11,7 @@ export type ConversationEntry = {
   actorIds: string[]
   createdAt: number
   id: string
-  messageIds: string[]
+  identifiers: string[]
   observedAt: number | null
   source: ActorKind | "unknown"
   text: string
@@ -48,7 +49,7 @@ export function messageEntry(
     actorIds: messageActorIds(message),
     createdAt: message.createdAt,
     id: message._id,
-    messageIds: messageIds(message),
+    identifiers: messageIdentifiers(message),
     observedAt: message.observedAt ?? null,
     source: message.actor?.kind ?? "unknown",
     text: messageText(message, integration),

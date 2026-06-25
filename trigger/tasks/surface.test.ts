@@ -109,6 +109,7 @@ function createRuntime(options: { tools: RuntimeTool[] }): ToolRuntime {
       activeSurface: {
         communicated: false,
         surface: "slack",
+        target: null,
       },
       prompt: "system",
       run: {

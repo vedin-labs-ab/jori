@@ -7,12 +7,16 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { replyAddress } from "../messages/surface"
+import {
+  messageIdentifiers,
+  messageReplyTargetIdentifier,
+} from "../messages/identifiers"
+import { replyAddress } from "../messages/targets"
 import {
   type AgentRuntimeInput,
   type MessageIntegration,
 } from "../runs/agent/input"
-import { requiredString } from "../shared/input"
+import { optionalString, requiredString } from "../shared/input"
 import { requireWorkerSecret } from "./shared"
 import { optionalSlackBlocks, sendSurfaceReply } from "./surface/reply"
 import { type ActiveSurfaceTool, activeSurfaceTools } from "./surface/tools"
@@ -24,6 +28,7 @@ type ActiveSurfaceState = {
 type ActiveSurface = {
   communicated: boolean
   surface: MessageIntegration
+  target: string | null
 }
 
 export async function loadActiveSurface(
@@ -47,6 +52,7 @@ export async function loadActiveSurface(
     state: {
       communicated: current.communicated,
       surface: input.messageIntegration,
+      target: messageReplyTargetIdentifier(input.message),
     },
     tools: activeSurfaceTools(input.messageIntegration),
   }
@@ -66,12 +72,28 @@ export const state = internalQuery({
   },
 })
 
+export const canUseReplyTarget = internalQuery({
+  args: {
+    messageId: v.id("messages"),
+    target: v.string(),
+  },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const message = await ctx.db.get(args.messageId)
+
+    return message === null
+      ? false
+      : await isVisibleConversationIdentifier(ctx, message, args.target)
+  },
+})
+
 export const sendReply = action({
   args: {
     runId: v.id("runs"),
     secret: v.string(),
     text: v.string(),
     blocks: v.optional(v.array(v.any())),
+    target: v.optional(v.string()),
   },
   returns: v.object({
     status: v.literal("sent"),
@@ -91,10 +113,23 @@ export const sendReply = action({
       throw new Error("Active reply integration is not active.")
     }
 
-    const address = replyAddress(input.message)
+    const target = normalizeReplyTarget(args.target)
+    const address = replyAddress(input.message, target)
 
     if (address === null) {
       throw new Error("Run has no active reply target.")
+    }
+
+    if (
+      target !== undefined &&
+      !(await ctx.runQuery(internal.runtime.surface.canUseReplyTarget, {
+        messageId: input.message._id,
+        target,
+      }))
+    ) {
+      throw new Error(
+        "send_reply target is not available in the active conversation."
+      )
     }
 
     await sendSurfaceReply(ctx, input, address, {
@@ -105,6 +140,47 @@ export const sendReply = action({
     return { status: "sent" as const }
   },
 })
+
+async function isVisibleConversationIdentifier(
+  ctx: QueryCtx,
+  message: Doc<"messages">,
+  target: string
+) {
+  if (hasIdentifier(message, target)) {
+    return true
+  }
+
+  if (message.conversationId === undefined) {
+    return false
+  }
+
+  const messages = await ctx.db
+    .query("messages")
+    .withIndex("by_conversation", (query) =>
+      query
+        .eq("tenantId", message.tenantId)
+        .eq("integrationId", message.integrationId)
+        .eq("conversationId", message.conversationId)
+    )
+    .order("desc")
+    .take(100)
+
+  return messages.some((candidate) => hasIdentifier(candidate, target))
+}
+
+function hasIdentifier(message: Doc<"messages">, target: string) {
+  return messageIdentifiers(message).includes(target)
+}
+
+function normalizeReplyTarget(value: unknown) {
+  const target = optionalString(value)
+
+  if (value !== undefined && target === undefined) {
+    throw new Error("target must be a non-empty string.")
+  }
+
+  return target
+}
 
 async function hasCompletedCommunicationTrace(
   ctx: QueryCtx,

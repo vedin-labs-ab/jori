@@ -11,7 +11,7 @@ export function formatSessionMessage(message: RuntimeMessage) {
     message: {
       actor: message.actor ?? "unknown",
       actorIds: message.actorIds.join(", "),
-      messageIds: message.messageIds.join(", "),
+      identifiers: message.identifiers.join(", "),
       observedAt: new Date(observed).toISOString(),
       speaker: message.source,
       text: message.text,
@@ -40,6 +40,7 @@ export async function appendSessionMessages(
     hasMore = drained.hasMore
 
     for (const message of drained.messages) {
+      updateActiveSurfaceTarget(runtime, message)
       messages.push({
         content: formatSessionMessage(message),
         role: "user",
@@ -49,4 +50,15 @@ export async function appendSessionMessages(
   }
 
   return appended
+}
+
+function updateActiveSurfaceTarget(
+  runtime: ToolRuntime,
+  message: RuntimeMessage
+) {
+  const activeSurface = runtime.context.activeSurface
+
+  if (activeSurface !== null && message.replyTarget !== null) {
+    activeSurface.target = message.replyTarget
+  }
 }

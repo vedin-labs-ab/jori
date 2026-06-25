@@ -83,6 +83,7 @@ type BrokerToolRequest = {
   surface: ToolSurface
   tool: string
   args: JsonObject
+  replyTarget?: string
 }
 
 export async function callBrokerTool(

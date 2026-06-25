@@ -1,4 +1,4 @@
-import { requiredString } from "./input"
+import { optionalString, requiredString } from "./input"
 import { type ToolRuntime } from "./tool"
 import { type JsonObject } from "./types"
 
@@ -18,19 +18,33 @@ export async function executeActiveSurfaceTool(
 
 async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
   const activeSurface = requireActiveSurface(runtime)
+  const explicitTarget = optionalTarget(input.target)
+  const target = explicitTarget ?? activeSurface.target
 
   const result = await runtime.convex.sendReply({
     blocks: optionalBlocks(input.blocks),
     runId: runtime.context.run.id,
     text: requiredString(input.text, "text"),
+    ...(target === null ? {} : { target }),
   })
 
   activeSurface.communicated = true
+  activeSurface.target = explicitTarget ?? activeSurface.target
 
   return {
     finished: false,
     value: result,
   }
+}
+
+function optionalTarget(value: unknown) {
+  const target = optionalString(value)
+
+  if (value !== undefined && value !== null && target === undefined) {
+    throw new Error("target must be a non-empty string")
+  }
+
+  return target
 }
 
 function optionalBlocks(value: unknown) {

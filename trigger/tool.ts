@@ -130,9 +130,13 @@ async function requestPromptedApproval(
 ) {
   const input =
     surface === "milo" ? await prepareMiloToolInput(runtime, tool, args) : args
+  const replyTarget = runtime.context.activeSurface?.target
 
   return await runtime.convex.requestApproval({
     input,
+    ...(replyTarget === undefined || replyTarget === null
+      ? {}
+      : { replyTarget }),
     runId: runtime.context.run.id,
     surface,
     tool,

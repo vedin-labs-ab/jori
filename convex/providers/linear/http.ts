@@ -8,7 +8,10 @@ import {
   unauthorizedResponse,
 } from "../http"
 import { completeIntegrationOffer, failIntegrationOffer } from "../install"
-import { handleLinearApprovalDecision } from "./approvals"
+import {
+  handleLinearApprovalDecision,
+  isLinearApprovalDecision,
+} from "./approvals"
 import {
   linearOAuthAuthorizeUrl,
   linearOAuthCallbackPath,
@@ -137,31 +140,43 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
 
   const hydratedMessage = await hydrateLinearMessage(ctx, message)
 
-  if (await handleLinearApprovalDecision(ctx, hydratedMessage)) {
+  if (isLinearApprovalDecision(hydratedMessage)) {
+    await recordLinearMessage(ctx, hydratedMessage, "record")
+    await handleLinearApprovalDecision(ctx, hydratedMessage)
     return Response.json({ ok: true })
   }
 
-  await ctx.runMutation(internal.messages.intake.record, {
-    accountId: hydratedMessage.accountId,
-    integration: "linear",
-    type: hydratedMessage.type,
-    externalId: hydratedMessage.externalId,
-    actor: createIntegrationActor({
-      externalId: hydratedMessage.actorId,
-      kind: hydratedMessage.actorKind,
-      email: hydratedMessage.actorEmail,
-      name: hydratedMessage.actorName,
-    }),
-    conversationId: hydratedMessage.conversationId,
-    text: hydratedMessage.text,
-    observedAt: hydratedMessage.observedAt,
-    data: hydratedMessage.data,
-  })
+  await recordLinearMessage(ctx, hydratedMessage)
 
   return Response.json({ ok: true })
 }
 
 type LinearMessage = NonNullable<ReturnType<typeof getLinearMessage>>
+type LinearRecordMode = "record" | "record_and_run"
+
+async function recordLinearMessage(
+  ctx: ActionCtx,
+  message: LinearMessage,
+  mode?: LinearRecordMode
+) {
+  await ctx.runMutation(internal.messages.intake.record, {
+    accountId: message.accountId,
+    integration: "linear",
+    ...(mode === undefined ? {} : { mode }),
+    type: message.type,
+    externalId: message.externalId,
+    actor: createIntegrationActor({
+      externalId: message.actorId,
+      kind: message.actorKind,
+      email: message.actorEmail,
+      name: message.actorName,
+    }),
+    conversationId: message.conversationId,
+    text: message.text,
+    observedAt: message.observedAt,
+    data: message.data,
+  })
+}
 
 async function hydrateLinearMessage(
   ctx: ActionCtx,

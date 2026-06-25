@@ -27,10 +27,36 @@ export const linearToolInputSchemas = {
     },
   }),
   linear_add_comment: objectSchema({
-    required: ["issueId", "body"],
+    required: ["target", "body"],
     properties: {
       body: stringProperty("Markdown comment body."),
-      issueId: stringProperty("Linear issue UUID."),
+      target: {
+        description:
+          "Where to add the comment. Use issue for issue-level comments, or comment for a reply under an existing Linear comment.",
+        oneOf: [
+          objectSchema({
+            required: ["type", "id"],
+            properties: {
+              id: stringProperty(
+                "Linear issue UUID, often the value after linear:issue: in identifiers."
+              ),
+              type: { const: "issue", description: "Post on the issue." },
+            },
+          }),
+          objectSchema({
+            required: ["type", "id"],
+            properties: {
+              id: stringProperty(
+                "Linear parent comment UUID, often the value after linear:thread: in identifiers."
+              ),
+              type: {
+                const: "comment",
+                description: "Post as a reply under this comment.",
+              },
+            },
+          }),
+        ],
+      },
     },
   }),
   linear_add_reaction: objectSchema({

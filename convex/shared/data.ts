@@ -1,7 +1,9 @@
 export function readDataObject(data: unknown, key: string) {
   const value = readDataValue(data, key)
 
-  return typeof value === "object" && value !== null ? value : undefined
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined
 }
 
 export function readDataNumber(data: unknown, key: string) {

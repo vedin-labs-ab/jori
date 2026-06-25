@@ -2,11 +2,10 @@ import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
 import {
   messageActorIds,
-  messageAudience,
-  messageIds,
-  messageText,
-  replyAddress,
-} from "./surface"
+  messageIdentifiers,
+  messageReplyTargetIdentifier,
+} from "./identifiers"
+import { messageAudience, messageText, replyAddress } from "./surface"
 
 describe("message surface text", () => {
   test("replaces Milo's Slack mention with a readable name", () => {
@@ -39,26 +38,38 @@ describe("message surface text", () => {
         })
       )
     ).toEqual(["slack:user:U123"])
-    expect(messageIds(message({ data: { ts: "1782231485.491049" } }))).toEqual([
+    expect(
+      messageIdentifiers(message({ data: { ts: "1782231485.491049" } }))
+    ).toEqual([
       "internal:message:message",
       "slack:message:1782231485.491049",
+      "slack:thread:1782231485.491049",
     ])
   })
 
   test("exposes Linear actor and comment identifiers when available", () => {
     const linearMessage = message({
       actor: { externalId: "linear-user-id", kind: "user", name: "Albin" },
-      data: { commentId: "comment-id" },
+      data: {
+        commentId: "reply-id",
+        issueId: "issue-id",
+        parentCommentId: "thread-id",
+      },
       integration: "linear",
     })
 
     expect(messageActorIds(linearMessage)).toEqual([
       "linear:user:linear-user-id",
     ])
-    expect(messageIds(linearMessage)).toEqual([
+    expect(messageIdentifiers(linearMessage)).toEqual([
       "internal:message:message",
-      "linear:comment:comment-id",
+      "linear:issue:issue-id",
+      "linear:comment:reply-id",
+      "linear:thread:thread-id",
     ])
+    expect(messageReplyTargetIdentifier(linearMessage)).toBe(
+      "linear:thread:thread-id"
+    )
   })
 })
 
@@ -120,7 +131,21 @@ describe("message surface targets", () => {
       replyAddress(
         message({ integration: "linear", data: { issueId: "ISS-1" } })
       )
-    ).toEqual({ type: "linear", issueId: "ISS-1" })
+    ).toEqual({ type: "linear", target: { id: "ISS-1", type: "issue" } })
+    expect(
+      replyAddress(
+        message({
+          integration: "linear",
+          data: { issueId: "ISS-1", parentCommentId: "comment-id" },
+        })
+      )
+    ).toEqual({ type: "linear", target: { id: "comment-id", type: "comment" } })
+    expect(
+      replyAddress(
+        message({ integration: "linear" }),
+        "linear:thread:comment-id"
+      )
+    ).toEqual({ type: "linear", target: { id: "comment-id", type: "comment" } })
   })
 })
 

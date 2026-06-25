@@ -94,8 +94,8 @@ async function sendLinearReply(
   text: string
 ) {
   await postLinearComment(integration, {
-    issueId: address.issueId,
     body: text,
+    target: address.target,
   })
 }
 

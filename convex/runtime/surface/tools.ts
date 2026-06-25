@@ -31,7 +31,7 @@ function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
   return {
     access: "write",
     description:
-      "Send a visible reply or update to the active requester surface. Milo routes it to the current Slack thread, GitHub conversation, or Linear issue; do not include routing fields.",
+      "Send a visible reply or update to the active requester surface. Milo routes it to the latest requester message by default. On Linear, set target only when intentionally replying to a different visible issue or comment thread identifier.",
     inputSchema: sendReplySchema(surface),
     name: "send_reply",
     route: "active_surface",
@@ -52,6 +52,14 @@ function sendReplySchema(surface: MessageIntegration): JsonObject {
       description:
         "Optional Slack Block Kit blocks. Always include concise fallback text.",
       items: { type: "object", additionalProperties: true },
+    }
+  }
+
+  if (surface === "linear") {
+    properties.target = {
+      type: "string",
+      description:
+        "Optional Linear reply target from a visible identifiers=[...] list, such as linear:issue:<id> or linear:thread:<comment-id>. Omit to follow the latest requester message.",
     }
   }
 

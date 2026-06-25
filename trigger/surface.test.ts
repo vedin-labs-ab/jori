@@ -29,8 +29,69 @@ test("send_reply routes through Convex and marks the active surface communicated
   })
 })
 
+test("send_reply forwards the active Linear target by default", async () => {
+  const runtime = createRuntime({
+    activeSurface: {
+      communicated: false,
+      surface: "linear",
+      target: "linear:thread:comment-id",
+    },
+  })
+
+  await executeToolCall({
+    attempt: 1,
+    call: {
+      args: { text: "Done" },
+      id: "call_1",
+      name: "send_reply",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(runtime.convex.sendReply).toHaveBeenCalledWith({
+    blocks: undefined,
+    runId: "run_1",
+    target: "linear:thread:comment-id",
+    text: "Done",
+  })
+})
+
+test("send_reply can override the active Linear target", async () => {
+  const runtime = createRuntime({
+    activeSurface: {
+      communicated: false,
+      surface: "linear",
+      target: "linear:thread:old-comment-id",
+    },
+  })
+
+  await executeToolCall({
+    attempt: 1,
+    call: {
+      args: { target: "linear:issue:issue-id", text: "Issue-level update" },
+      id: "call_1",
+      name: "send_reply",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(runtime.convex.sendReply).toHaveBeenCalledWith({
+    blocks: undefined,
+    runId: "run_1",
+    target: "linear:issue:issue-id",
+    text: "Issue-level update",
+  })
+  expect(runtime.context.activeSurface?.target).toBe("linear:issue:issue-id")
+})
+
 function createRuntime(
-  options: { communicated?: boolean; tools?: RuntimeTool[] } = {}
+  options: {
+    activeSurface?: ToolRuntime["context"]["activeSurface"]
+    communicated?: boolean
+    tools?: RuntimeTool[]
+  } = {}
 ): ToolRuntime {
   return {
     convex: {
@@ -38,9 +99,10 @@ function createRuntime(
       sendReply: vi.fn(async () => ({ status: "sent" })),
     } as unknown as ToolRuntime["convex"],
     context: {
-      activeSurface: {
+      activeSurface: options.activeSurface ?? {
         communicated: options.communicated ?? false,
         surface: "slack",
+        target: null,
       },
       prompt: "system",
       run: {

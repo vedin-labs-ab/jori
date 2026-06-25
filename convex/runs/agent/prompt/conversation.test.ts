@@ -16,12 +16,12 @@ test("renders recent conversation context without duplicating the trigger", () =
   expect(prompt).toContain("Recent messages:")
   expect(prompt).not.toContain("Recent conversation:")
   expect(prompt).toContain(
-    "- 1970-01-01T00:00:01.000Z | user | Albin | message_ids=[internal:message:previous-user-message, slack:message:123.456] | actor_ids=[slack:user:U123]"
+    "- 1970-01-01T00:00:01.000Z | user | Albin | identifiers=[internal:message:previous-user-message, slack:message:123.456] | actor_ids=[slack:user:U123]"
   )
   expect(prompt).toContain("- 1970-01-01T00:00:02.000Z | self | Milo")
   expect(prompt).toContain("- 1970-01-01T00:00:03.000Z | bot | CI")
   expect(prompt).toContain("- 1970-01-01T00:00:03.500Z | bot | unknown")
-  expect(prompt).not.toContain("message_ids=[]")
+  expect(prompt).not.toContain("identifiers=[]")
   expect(prompt).not.toContain("actor_ids=[]")
   expect(prompt).not.toContain("source=")
   expect(prompt).not.toContain("authority=")
@@ -102,7 +102,7 @@ function recentConversation() {
         actorIds: ["slack:user:U123"],
         createdAt: 1_000,
         id: "previous-user-message",
-        messageIds: [
+        identifiers: [
           "internal:message:previous-user-message",
           "slack:message:123.456",
         ],
@@ -149,7 +149,7 @@ function entry(
     actor: "Albin",
     actorIds: [],
     createdAt: 0,
-    messageIds: [],
+    identifiers: [],
     observedAt: null,
     source: "user",
     type: "message",
