@@ -1,7 +1,5 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
-import { createSourceMetadata } from "../../shared/sources/metadata"
-import { type SourceMetadataItem } from "../../shared/sources/schema"
 import { type runSnapshot } from "../schema"
 import {
   compactDetails,
@@ -10,6 +8,7 @@ import {
   type ExecutionDetailType,
   uniqueDetails,
 } from "./detail"
+import { createSourceMetadata, type SourceMetadataItem } from "./metadata"
 import { originDetails } from "./origin"
 import { cronScheduleLabel } from "./schedule"
 

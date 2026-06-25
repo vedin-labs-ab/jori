@@ -5,11 +5,8 @@ import {
   readDataObject,
   readDataString,
 } from "../../shared/data"
-import {
-  githubIssueLikeLabel,
-  issueIdentifierLabel,
-} from "../../shared/sources/metadata"
 import { commentLabel, compactDetails, detail, snippet } from "./detail"
+import { githubIssueLikeLabel, issueIdentifierLabel } from "./metadata"
 
 export function originDetails(input: {
   data: unknown

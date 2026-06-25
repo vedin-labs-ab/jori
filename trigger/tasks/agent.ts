@@ -2,15 +2,15 @@ import { task } from "@trigger.dev/sdk/v3"
 import { MiloConvexClient } from "../convex"
 import { errorDetails } from "../events"
 import { createModelRuntime } from "../model/runtime"
+import { recordRunEvent } from "../runs/events"
+import { runAgentLoop } from "../runs/loop"
+import { releaseSandbox } from "../runs/sandbox"
 import { E2BSandboxRuntime } from "../sandbox/e2b"
 import {
   type AgentRunPayload,
   agentTaskId,
   type RuntimeContext,
 } from "../types"
-import { recordRunEvent } from "./events"
-import { runAgentLoop } from "./loop"
-import { releaseSandbox } from "./sandbox"
 
 const maxAttempts = 3
 
