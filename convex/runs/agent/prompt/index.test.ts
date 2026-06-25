@@ -167,7 +167,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Completion")
     expect(prompt).toContain("Finish the run by calling `finish_run`")
-    expect(prompt).toContain("Ending the run needs no closing message")
+    expect(prompt).toContain("No closing message is required")
     expectNoSyntheticBlankLines(prompt)
   })
 
@@ -180,7 +180,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("default to the lightest touch that lands it")
     expect(prompt).toContain("worded `send_reply`")
     expect(prompt).toContain("# Completion")
-    expect(prompt).toContain("Ending the run needs no closing message")
+    expect(prompt).toContain("No closing message is required")
   })
 
   test("omits automatic final delivery instructions", () => {
@@ -202,7 +202,7 @@ describe("delivery contract prompts", () => {
 
     expect(prompt).toContain("# Delivery")
     expect(prompt).toContain(
-      "Everything that reaches the user or any system happens through a tool call"
+      "Everything that reaches the requester or any system happens through a tool call"
     )
     expect(prompt).toContain("outside a tool call reach no one")
   })
@@ -223,7 +223,10 @@ describe("approval request prompts", () => {
     expect(prompt).toContain("Do not ask for approval in chat")
     expect(prompt).toContain("the run pauses on its own")
     expect(prompt).toContain("`denied`, `expired`, or `cancelled`")
-    expect(prompt).toContain("Callbacks are not handled.\n\n# Approvals")
+    expect(prompt.indexOf("# Approvals")).toBeLessThan(
+      prompt.indexOf("# Communication")
+    )
+    expect(prompt).toContain("Callbacks are not handled.\n\n# Updates")
     expectNoSyntheticBlankLines(prompt)
   })
 
