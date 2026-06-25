@@ -19,7 +19,7 @@ import { events } from "./events/schema"
 import { identities } from "./identity/schema"
 import { integrations } from "./integrations/schema"
 import { setupLinks } from "./integrations/setup/schema"
-import { messageConversations, messages } from "./messages/schema"
+import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
 import { runs } from "./runs/schema"
 import { outbox, sandboxes, traces } from "./runtime/schema"
@@ -36,7 +36,6 @@ export default defineSchema({
   integrations,
   setupLinks,
   messages,
-  messageConversations,
   automations,
   subscriptions,
   events,
