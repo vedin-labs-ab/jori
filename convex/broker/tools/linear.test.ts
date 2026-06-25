@@ -165,11 +165,12 @@ test("posts a Linear comment reply through the first-class comment helper", asyn
 
   await postLinearComment(linearIntegration(), {
     body: "Approval required.",
-    target: { id: "comment-id", type: "comment" },
+    target: { id: "comment-id", issueId: "issue-id", type: "comment" },
   })
   expect(calls[0]?.body.variables).toEqual({
     input: {
       body: "Approval required.",
+      issueId: "issue-id",
       parentId: "comment-id",
     },
   })

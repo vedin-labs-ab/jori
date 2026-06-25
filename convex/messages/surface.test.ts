@@ -139,13 +139,19 @@ describe("message surface targets", () => {
           data: { issueId: "ISS-1", parentCommentId: "comment-id" },
         })
       )
-    ).toEqual({ type: "linear", target: { id: "comment-id", type: "comment" } })
+    ).toEqual({
+      type: "linear",
+      target: { id: "comment-id", issueId: "ISS-1", type: "comment" },
+    })
     expect(
       replyAddress(
-        message({ integration: "linear" }),
+        message({ integration: "linear", data: { issueId: "ISS-1" } }),
         "linear:thread:comment-id"
       )
-    ).toEqual({ type: "linear", target: { id: "comment-id", type: "comment" } })
+    ).toEqual({
+      type: "linear",
+      target: { id: "comment-id", issueId: "ISS-1", type: "comment" },
+    })
   })
 })
 
