@@ -1,9 +1,27 @@
 import { defineTable } from "convex/server"
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import { internal } from "./_generated/api"
-import { type Id } from "./_generated/dataModel"
 import { type MutationCtx } from "./_generated/server"
 
+const approvalSubject = v.object({
+  kind: v.literal("approval"),
+  id: v.id("approvals"),
+})
+const integrationOfferSubject = v.object({
+  kind: v.literal("integrationOffer"),
+  id: v.id("integrationOffers"),
+})
+const transitionSubject = v.union(approvalSubject, integrationOfferSubject)
+const transitionType = v.union(
+  v.literal("created"),
+  v.literal("delivered"),
+  v.literal("approved"),
+  v.literal("denied"),
+  v.literal("cancelled"),
+  v.literal("connected"),
+  v.literal("expired"),
+  v.literal("failed")
+)
 const approvalTransitionType = v.union(
   v.literal("created"),
   v.literal("delivered"),
@@ -22,28 +40,12 @@ const integrationOfferTransitionType = v.union(
   v.literal("expired")
 )
 
-const approvalTransition = v.object({
+export const transitions = defineTable({
   tenantId: v.string(),
-  subject: v.object({
-    kind: v.literal("approval"),
-    id: v.id("approvals"),
-  }),
-  type: approvalTransitionType,
+  subject: transitionSubject,
+  type: transitionType,
   createdAt: v.number(),
 })
-const integrationOfferTransition = v.object({
-  tenantId: v.string(),
-  subject: v.object({
-    kind: v.literal("integrationOffer"),
-    id: v.id("integrationOffers"),
-  }),
-  type: integrationOfferTransitionType,
-  createdAt: v.number(),
-})
-
-export const transitions = defineTable(
-  v.union(approvalTransition, integrationOfferTransition)
-)
   .index("by_subject_and_created_at", [
     "subject.kind",
     "subject.id",
@@ -51,34 +53,18 @@ export const transitions = defineTable(
   ])
   .index("by_tenant_and_created_at", ["tenantId", "createdAt"])
 
-type ApprovalTransitionType =
-  | "created"
-  | "delivered"
-  | "approved"
-  | "denied"
-  | "cancelled"
-  | "expired"
-  | "failed"
-
-type IntegrationOfferTransitionType =
-  | "created"
-  | "delivered"
-  | "cancelled"
-  | "connected"
-  | "failed"
-  | "expired"
-
-type ApprovalTransitionInput = {
+type TransitionInputBase = {
   tenantId: string
-  subject: { kind: "approval"; id: Id<"approvals"> }
-  type: ApprovalTransitionType
   syncSurface?: boolean
 }
-type IntegrationOfferTransitionInput = {
-  tenantId: string
-  subject: { kind: "integrationOffer"; id: Id<"integrationOffers"> }
-  type: IntegrationOfferTransitionType
-  syncSurface?: boolean
+
+type ApprovalTransitionInput = TransitionInputBase & {
+  subject: Infer<typeof approvalSubject>
+  type: Infer<typeof approvalTransitionType>
+}
+type IntegrationOfferTransitionInput = TransitionInputBase & {
+  subject: Infer<typeof integrationOfferSubject>
+  type: Infer<typeof integrationOfferTransitionType>
 }
 type TransitionInput = ApprovalTransitionInput | IntegrationOfferTransitionInput
 
@@ -88,31 +74,16 @@ export async function recordTransition(
 ) {
   const createdAt = Date.now()
 
-  if (isApprovalTransition(args)) {
-    await ctx.db.insert("transitions", {
-      tenantId: args.tenantId,
-      subject: args.subject,
-      type: args.type,
-      createdAt,
-    })
-  } else {
-    await ctx.db.insert("transitions", {
-      tenantId: args.tenantId,
-      subject: args.subject,
-      type: args.type,
-      createdAt,
-    })
-  }
+  await ctx.db.insert("transitions", {
+    tenantId: args.tenantId,
+    subject: args.subject,
+    type: args.type,
+    createdAt,
+  })
 
   if (args.syncSurface === true) {
     await scheduleSurfaceSync(ctx, args.subject)
   }
-}
-
-function isApprovalTransition(
-  args: TransitionInput
-): args is ApprovalTransitionInput {
-  return args.subject.kind === "approval"
 }
 
 async function scheduleSurfaceSync(
