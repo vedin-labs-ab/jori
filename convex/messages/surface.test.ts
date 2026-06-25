@@ -3,6 +3,7 @@ import { type Doc } from "../_generated/dataModel"
 import {
   messageActorIds,
   messageIdentifiers,
+  messageMatchesReplyTargetIdentifier,
   messageReplyTargetIdentifier,
 } from "./identifiers"
 import { messageAudience, messageText, replyAddress } from "./surface"
@@ -29,7 +30,9 @@ describe("message surface text", () => {
       )
     ).toBe("@Milo hello")
   })
+})
 
+describe("Slack message identifiers", () => {
   test("exposes Slack actor and message identifiers when available", () => {
     expect(
       messageActorIds(
@@ -46,8 +49,39 @@ describe("message surface text", () => {
       "slack:thread:1782231485.491049",
     ])
   })
+})
 
-  test("exposes Linear actor and comment identifiers when available", () => {
+describe("Linear message identifiers", () => {
+  test("exposes Linear issue comment identifiers when available", () => {
+    const linearMessage = message({
+      actor: { externalId: "linear-user-id", kind: "user", name: "Albin" },
+      data: {
+        commentId: "comment-id",
+        issueId: "issue-id",
+      },
+      integration: "linear",
+    })
+
+    expect(messageActorIds(linearMessage)).toEqual([
+      "linear:user:linear-user-id",
+    ])
+    expect(messageIdentifiers(linearMessage)).toEqual([
+      "internal:message:message",
+      "linear:issue:issue-id",
+      "linear:comment:comment-id",
+    ])
+    expect(messageReplyTargetIdentifier(linearMessage)).toBe(
+      "linear:issue:issue-id"
+    )
+    expect(
+      messageMatchesReplyTargetIdentifier(
+        linearMessage,
+        "linear:thread:comment-id"
+      )
+    ).toBe(true)
+  })
+
+  test("exposes Linear subcomment identifiers when available", () => {
     const linearMessage = message({
       actor: { externalId: "linear-user-id", kind: "user", name: "Albin" },
       data: {

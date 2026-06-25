@@ -8,7 +8,7 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 import {
-  messageIdentifiers,
+  messageMatchesReplyTargetIdentifier,
   messageReplyTargetIdentifier,
 } from "../messages/identifiers"
 import { replyAddress } from "../messages/targets"
@@ -146,7 +146,7 @@ async function isVisibleConversationIdentifier(
   message: Doc<"messages">,
   target: string
 ) {
-  if (hasIdentifier(message, target)) {
+  if (messageMatchesReplyTargetIdentifier(message, target)) {
     return true
   }
 
@@ -165,11 +165,9 @@ async function isVisibleConversationIdentifier(
     .order("desc")
     .take(100)
 
-  return messages.some((candidate) => hasIdentifier(candidate, target))
-}
-
-function hasIdentifier(message: Doc<"messages">, target: string) {
-  return messageIdentifiers(message).includes(target)
+  return messages.some((candidate) =>
+    messageMatchesReplyTargetIdentifier(candidate, target)
+  )
 }
 
 function normalizeReplyTarget(value: unknown) {

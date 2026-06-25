@@ -59,7 +59,7 @@ function sendReplySchema(surface: MessageIntegration): JsonObject {
     properties.commentId = {
       type: "string",
       description:
-        "Optional Linear comment UUID to reply under. Use the value after linear:comment: or linear:thread: in identifiers=[...]. Omit to reply in the current Linear context.",
+        "Optional Linear comment UUID to reply under. Use the value after a visible linear:comment: identifier, or linear:thread: when continuing that existing comment thread. Omit to reply in the current Linear context.",
     }
   }
 

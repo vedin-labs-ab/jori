@@ -131,7 +131,7 @@ describe("runtime Linear prompt metadata", () => {
     )
 
     expect(prompt).toContain(
-      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | identifiers=[internal:message:message, linear:issue:issue-id, linear:comment:comment-id, linear:thread:comment-id] | actor_ids=[linear:user:UACTOR]"
+      "- 1970-01-01T00:00:01.000Z | user | Albin Vedin | identifiers=[internal:message:message, linear:issue:issue-id, linear:comment:comment-id] | actor_ids=[linear:user:UACTOR]"
     )
     expect(prompt).not.toContain("identifiers=[]")
     expect(prompt).not.toContain("actor_ids=[]")
