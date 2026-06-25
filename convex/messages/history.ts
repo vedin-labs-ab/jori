@@ -19,7 +19,7 @@ export type ConversationEntry = {
 
 export type RecentConversation = {
   entries: ConversationEntry[]
-  totalMessages: number
+  hasMoreMessages: boolean
 }
 
 export async function recentConversation(
@@ -35,11 +35,7 @@ export async function recentConversation(
 
   return {
     entries: mergeRecentConversation(entries),
-    totalMessages: await totalConversationMessages(
-      ctx,
-      message,
-      entries.length
-    ),
+    hasMoreMessages: messages.length > recentConversationLimit,
   }
 }
 
@@ -85,29 +81,5 @@ async function recentMessages(ctx: QueryCtx, message: Doc<"messages">) {
         .eq("conversationId", conversationId)
     )
     .order("desc")
-    .take(recentConversationLimit)
-}
-
-async function totalConversationMessages(
-  ctx: QueryCtx,
-  message: Doc<"messages">,
-  fallbackCount: number
-) {
-  const conversationId = message.conversationId
-
-  if (conversationId === undefined) {
-    return fallbackCount
-  }
-
-  const conversation = await ctx.db
-    .query("messageConversations")
-    .withIndex("by_conversation", (query) =>
-      query
-        .eq("tenantId", message.tenantId)
-        .eq("integrationId", message.integrationId)
-        .eq("externalId", conversationId)
-    )
-    .first()
-
-  return conversation?.messageCount ?? fallbackCount
+    .take(recentConversationLimit + 1)
 }

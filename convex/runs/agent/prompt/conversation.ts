@@ -17,22 +17,12 @@ export function createMessageConversationValues(input: MessageInput) {
         ? "- None"
         : entries.map(formatMessageEntry).join("\n\n"),
     current: formatMessageEntry(messageEntry(input.message, input.integration)),
-    summary: formatConversationSummary(entries.length, input),
+    summary: formatConversationSummary(input),
   }
 }
 
-function formatConversationSummary(
-  shownPreviousMessages: number,
-  input: MessageInput
-) {
-  const totalPreviousMessages = Math.max(
-    0,
-    input.conversation.totalMessages - 1
-  )
-
-  return shownPreviousMessages < totalPreviousMessages
-    ? `(showing ${shownPreviousMessages} of ${totalPreviousMessages} previous messages)`
-    : null
+function formatConversationSummary(input: MessageInput) {
+  return input.conversation.hasMoreMessages ? "(older messages omitted)" : null
 }
 
 function formatMessageEntry(entry: PromptMessageEntry) {

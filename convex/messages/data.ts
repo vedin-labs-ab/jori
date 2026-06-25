@@ -104,54 +104,7 @@ export async function insertMessage(
     throw new Error("Message insert failed.")
   }
 
-  await incrementConversationCount(ctx, {
-    conversationId: message.conversationId,
-    integration: input.integration,
-    now,
-  })
-
   return message
-}
-
-async function incrementConversationCount(
-  ctx: MutationCtx,
-  args: {
-    conversationId: string | undefined
-    integration: Doc<"integrations">
-    now: number
-  }
-) {
-  if (args.conversationId === undefined) {
-    return
-  }
-
-  const conversationId = args.conversationId
-  const conversation = await ctx.db
-    .query("messageConversations")
-    .withIndex("by_conversation", (query) =>
-      query
-        .eq("tenantId", args.integration.tenantId)
-        .eq("integrationId", args.integration._id)
-        .eq("externalId", conversationId)
-    )
-    .first()
-
-  if (conversation === null) {
-    await ctx.db.insert("messageConversations", {
-      tenantId: args.integration.tenantId,
-      integrationId: args.integration._id,
-      externalId: conversationId,
-      messageCount: 1,
-      createdAt: args.now,
-      updatedAt: args.now,
-    })
-    return
-  }
-
-  await ctx.db.patch(conversation._id, {
-    messageCount: conversation.messageCount + 1,
-    updatedAt: args.now,
-  })
 }
 
 export async function resolveMessageOwner(

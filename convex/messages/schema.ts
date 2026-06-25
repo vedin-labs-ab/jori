@@ -19,12 +19,3 @@ export const messages = defineTable({
 })
   .index("by_external_id", ["externalId"])
   .index("by_conversation", ["tenantId", "integrationId", "conversationId"])
-
-export const messageConversations = defineTable({
-  tenantId: v.string(),
-  integrationId: v.id("integrations"),
-  externalId: v.string(),
-  messageCount: v.number(),
-  createdAt: v.number(),
-  updatedAt: v.number(),
-}).index("by_conversation", ["tenantId", "integrationId", "externalId"])

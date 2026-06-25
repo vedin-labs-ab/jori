@@ -39,12 +39,10 @@ test("keeps explicit empty recent messages context", () => {
   expect(prompt).toContain("Recent messages:\n\n- None")
 })
 
-test("renders previous message counts when recent context is truncated", () => {
+test("renders an omitted history note when recent context is truncated", () => {
   const prompt = assemblePrompt(messageInputWithTruncatedConversation())
 
-  expect(prompt).toContain(
-    "Recent messages (showing 15 of 36 previous messages):"
-  )
+  expect(prompt).toContain("Recent messages (older messages omitted):")
   expect(prompt).toContain("Previous message 1")
   expect(prompt).toContain("Previous message 15")
   expect(prompt).not.toContain("Current trigger.")
@@ -90,7 +88,7 @@ function messageInputWithTruncatedConversation() {
         text: "Current trigger.",
       }),
     ],
-    totalMessages: 37,
+    hasMoreMessages: true,
   }
 
   return input
@@ -140,7 +138,7 @@ function recentConversation() {
         text: "Duplicate trigger context.",
       }),
     ],
-    totalMessages: 5,
+    hasMoreMessages: false,
   }
 }
 
