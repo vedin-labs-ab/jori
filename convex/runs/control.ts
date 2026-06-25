@@ -8,6 +8,7 @@ import {
   requireClerkUserId,
 } from "../identity/users"
 import { wakeRun } from "../runtime/waiters/data"
+import { createUserActor } from "../shared/actor"
 
 export const stop = mutation({
   args: {
@@ -30,7 +31,7 @@ export const stop = mutation({
 
     await ctx.db.patch(run._id, {
       status: "stopped",
-      stoppedBy: stoppedByLabel(identity),
+      stoppedBy: stoppedByActor(identity),
       endedAt: now,
     })
 
@@ -43,14 +44,13 @@ export const stop = mutation({
   },
 })
 
-function stoppedByLabel(identity: {
+function stoppedByActor(identity: {
   email?: string
   name?: string
   subject?: string
 }) {
-  return (
-    readClerkUserName(identity) ??
-    readClerkUserEmail(identity) ??
-    requireClerkUserId(identity)
-  )
+  return createUserActor(requireClerkUserId(identity), {
+    email: readClerkUserEmail(identity),
+    name: readClerkUserName(identity),
+  })
 }

@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { actorValidator } from "../shared/actor"
 import { toolSurfaceValidator } from "../shared/integrations"
 
 const runSnapshotContextType = v.union(
@@ -105,7 +106,7 @@ export const runs = defineTable({
   createdBy: v.optional(v.string()),
   createdAt: v.number(),
   endedAt: v.optional(v.number()),
-  stoppedBy: v.optional(v.string()),
+  stoppedBy: v.optional(actorValidator),
 })
   .index("by_tenant", ["tenantId"])
   .index("by_automation", ["automationId"])
