@@ -11,6 +11,7 @@ export type ReplyTargetIdentifier = string
 export type LinearReplyTarget =
   | {
       id: string
+      issueId: string
       type: "comment"
     }
   | {
@@ -66,13 +67,14 @@ function replyAddressForTarget(
   target: ReplyTargetIdentifier
 ) {
   if (message.integration === "linear") {
-    return linearReplyAddressForTarget(target)
+    return linearReplyAddressForTarget(message, target)
   }
 
   return null
 }
 
 function linearReplyAddressForTarget(
+  message: Doc<"messages">,
   target: ReplyTargetIdentifier
 ): ReplyAddress | null {
   const issueId = targetValue(target, "linear:issue")
@@ -82,10 +84,14 @@ function linearReplyAddressForTarget(
   }
 
   const commentId = targetValue(target, "linear:thread")
+  const commentIssueId = readDataString(message.data, "issueId")
 
-  return commentId === null
+  return commentId === null || commentIssueId === undefined
     ? null
-    : { type: "linear", target: { id: commentId, type: "comment" } }
+    : {
+        type: "linear",
+        target: { id: commentId, issueId: commentIssueId, type: "comment" },
+      }
 }
 
 function githubReplyAddress(message: Doc<"messages">): ReplyAddress | null {
@@ -131,16 +137,18 @@ function githubReviewReplyAddress(
 
 function linearReplyAddress(message: Doc<"messages">): ReplyAddress | null {
   const parentCommentId = readDataString(message.data, "parentCommentId")
-
-  if (parentCommentId !== undefined) {
-    return { type: "linear", target: { id: parentCommentId, type: "comment" } }
-  }
-
   const issueId = readDataString(message.data, "issueId")
 
-  return issueId === undefined
-    ? null
-    : { type: "linear", target: { id: issueId, type: "issue" } }
+  if (issueId === undefined) {
+    return null
+  }
+
+  return parentCommentId === undefined
+    ? { type: "linear", target: { id: issueId, type: "issue" } }
+    : {
+        type: "linear",
+        target: { id: parentCommentId, issueId, type: "comment" },
+      }
 }
 
 function slackReplyAddress(message: Doc<"messages">): ReplyAddress | null {

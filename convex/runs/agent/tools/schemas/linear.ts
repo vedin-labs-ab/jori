@@ -44,10 +44,13 @@ export const linearToolInputSchemas = {
             },
           }),
           objectSchema({
-            required: ["type", "id"],
+            required: ["type", "id", "issueId"],
             properties: {
               id: stringProperty(
                 "Linear parent comment UUID, often the value after linear:thread: in identifiers."
+              ),
+              issueId: stringProperty(
+                "Linear issue UUID that contains the parent comment, often the value after linear:issue: in identifiers."
               ),
               type: {
                 const: "comment",

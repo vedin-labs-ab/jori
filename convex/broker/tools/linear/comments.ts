@@ -6,6 +6,7 @@ import { linearGraphql } from "./client"
 export type LinearCommentTarget =
   | {
       id: string
+      issueId: string
       type: "comment"
     }
   | {
@@ -47,7 +48,7 @@ function commentCreateInput(args: Record<string, unknown>) {
     body: requiredString(args.body, "body"),
     ...(target.type === "issue"
       ? { issueId: target.id }
-      : { parentId: target.id }),
+      : { issueId: target.issueId, parentId: target.id }),
   }
 }
 
@@ -56,8 +57,16 @@ function readTarget(value: unknown): LinearCommentTarget {
   const id = requiredString(target.id, "target.id")
   const type = requiredString(target.type, "target.type")
 
-  if (type === "issue" || type === "comment") {
+  if (type === "issue") {
     return { id, type }
+  }
+
+  if (type === "comment") {
+    return {
+      id,
+      issueId: requiredString(target.issueId, "target.issueId"),
+      type,
+    }
   }
 
   throw new Error("target.type must be issue or comment")
