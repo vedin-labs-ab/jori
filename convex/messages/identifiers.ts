@@ -34,6 +34,19 @@ export function messageReplyTargetIdentifier(message: Doc<"messages">) {
   return null
 }
 
+export function messageMatchesReplyTargetIdentifier(
+  message: Doc<"messages">,
+  target: string
+) {
+  const identifiers = messageIdentifiers(message)
+  const commentIdentifier = commentIdentifierForThreadTarget(target)
+
+  return (
+    identifiers.includes(target) ||
+    (commentIdentifier !== null && identifiers.includes(commentIdentifier))
+  )
+}
+
 function surfaceIdentifiers(message: Doc<"messages">) {
   if (message.integration === "linear") {
     return linearIdentifiers(message)
@@ -53,7 +66,7 @@ function surfaceIdentifiers(message: Doc<"messages">) {
 function linearIdentifiers(message: Doc<"messages">) {
   const issueId = readDataString(message.data, "issueId")
   const commentId = readDataString(message.data, "commentId")
-  const threadId = readDataString(message.data, "parentCommentId") ?? commentId
+  const threadId = readDataString(message.data, "parentCommentId")
 
   return [
     identifier("linear:issue", issueId),
@@ -118,6 +131,21 @@ function linearActorIdPrefix(kind: ActorKind | undefined) {
 
 function identifier(prefix: string, value: string | undefined) {
   return value === undefined || value === "" ? null : `${prefix}:${value}`
+}
+
+function commentIdentifierForThreadTarget(target: string) {
+  const commentId = identifierValue(target, "linear:thread")
+
+  return commentId === null ? null : `linear:comment:${commentId}`
+}
+
+function identifierValue(value: string, prefix: string) {
+  const fullPrefix = `${prefix}:`
+  const identifier = value.startsWith(fullPrefix)
+    ? value.slice(fullPrefix.length)
+    : null
+
+  return identifier === "" ? null : identifier
 }
 
 function unique(
