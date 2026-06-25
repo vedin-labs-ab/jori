@@ -12,7 +12,8 @@ export const approvalStatus = v.union(
   v.literal("approved"),
   v.literal("denied"),
   v.literal("cancelled"),
-  v.literal("expired")
+  v.literal("expired"),
+  v.literal("failed")
 )
 export const approvalDelivery = v.union(
   v.object({
@@ -25,6 +26,12 @@ export const approvalDelivery = v.union(
     }),
   })
 )
+export const approvalDeliveryFailure = v.object({
+  failedAt: v.number(),
+  message: v.string(),
+  operation: v.string(),
+  surface: toolSurfaceValidator,
+})
 
 export const approvals = defineTable({
   tenantId: v.string(),
@@ -43,6 +50,7 @@ export const approvals = defineTable({
   expiresAt: v.number(),
   functionId: v.optional(v.id("_scheduled_functions")),
   delivery: v.optional(approvalDelivery),
+  deliveryFailure: v.optional(approvalDeliveryFailure),
   cancelledAt: v.optional(v.number()),
   decidedAt: v.optional(v.number()),
   claimedAt: v.optional(v.number()),

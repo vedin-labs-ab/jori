@@ -7,6 +7,7 @@ export type ApprovalDecisionStatus =
   | "decided"
   | "denied"
   | "expired"
+  | "failed"
   | "missing"
 
 export type ApprovalDecisionResult = {
@@ -36,6 +37,10 @@ export function approvalDecisionMessage(
     return "That approval request has expired."
   }
 
+  if (status === "failed") {
+    return "That approval request failed before it could be delivered."
+  }
+
   if (status === "cancelled") {
     return "This request was cancelled."
   }
@@ -58,6 +63,10 @@ function alreadySettledMessage(approval?: Doc<"approvals">) {
 
   if (approval?.status === "cancelled") {
     return "This request was cancelled."
+  }
+
+  if (approval?.status === "failed") {
+    return "This request failed before it could be delivered."
   }
 
   return "This request was already decided."

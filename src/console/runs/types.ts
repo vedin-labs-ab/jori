@@ -35,6 +35,7 @@ export type ApprovalState =
   | "denied"
   | "cancelled"
   | "expired"
+  | "failed"
 
 export type SourceDatum = {
   type: string

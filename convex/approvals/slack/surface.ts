@@ -63,6 +63,10 @@ function fallbackText(approval: Doc<"approvals">) {
     return "Request expired. Milo skipped this action."
   }
 
+  if (approval.status === "failed") {
+    return "Request failed. Milo skipped this action."
+  }
+
   return "Approval request updated."
 }
 
@@ -71,7 +75,7 @@ function icon(status: Doc<"approvals">["status"]) {
     return "thumbs-down"
   }
 
-  if (status === "cancelled" || status === "expired") {
+  if (status === "cancelled" || status === "expired" || status === "failed") {
     return "archive"
   }
 
@@ -93,6 +97,10 @@ function title(approval: Doc<"approvals">) {
 
   if (approval.status === "expired") {
     return "Request expired"
+  }
+
+  if (approval.status === "failed") {
+    return "Request failed"
   }
 
   return "Approval updated"
@@ -127,6 +135,10 @@ function subtext(approval: Doc<"approvals">) {
 
   if (approval.status === "expired") {
     return `Expired at ${formatSlackTime(toSlackTimestamp(approval.expiresAt))}`
+  }
+
+  if (approval.status === "failed") {
+    return "Approval delivery failed"
   }
 
   return `Updated at ${formatSlackTime(toSlackTimestamp(Date.now()))}`

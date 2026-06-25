@@ -10,7 +10,8 @@ const approvalTransitionType = v.union(
   v.literal("approved"),
   v.literal("denied"),
   v.literal("cancelled"),
-  v.literal("expired")
+  v.literal("expired"),
+  v.literal("failed")
 )
 const integrationOfferTransitionType = v.union(
   v.literal("created"),
@@ -57,6 +58,7 @@ type ApprovalTransitionType =
   | "denied"
   | "cancelled"
   | "expired"
+  | "failed"
 
 type IntegrationOfferTransitionType =
   | "created"

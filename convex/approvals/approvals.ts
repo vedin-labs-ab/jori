@@ -6,11 +6,16 @@ import { internalMutation, type MutationCtx } from "../_generated/server"
 import { actorValidator } from "../shared/actor"
 import { toolSurfaceValidator } from "../shared/integrations"
 import { resolveCancellationActor } from "./cancellation"
-import { approvalDecision, approvalDelivery } from "./schema"
+import {
+  approvalDecision,
+  approvalDelivery,
+  approvalDeliveryFailure,
+} from "./schema"
 import {
   markApprovalCancelled,
   markApprovalDecided,
   markApprovalExpired,
+  markApprovalFailed,
   patchAndRead,
   recordApprovalCreated,
   recordApprovalDelivery,
@@ -84,6 +89,24 @@ export const recordDelivery = internalMutation({
     const updated = await recordApprovalDelivery(ctx, approval, args.delivery)
 
     return updated ?? { ...approval, delivery: args.delivery }
+  },
+})
+
+export const recordDeliveryFailure = internalMutation({
+  args: {
+    approvalId: v.id("approvals"),
+    failure: approvalDeliveryFailure,
+  },
+  handler: async (ctx, args) => {
+    const approval = await ctx.db.get(args.approvalId)
+
+    if (approval === null) {
+      return null
+    }
+
+    const updated = await markApprovalFailed(ctx, approval, args.failure)
+
+    return updated ?? { ...approval, deliveryFailure: args.failure }
   },
 })
 
@@ -213,9 +236,11 @@ async function findReusableApproval(
 }
 
 function settledStatus(approval: Doc<"approvals">) {
-  return approval.status === "expired"
-    ? ("expired" as const)
-    : ("decided" as const)
+  if (approval.status === "expired" || approval.status === "failed") {
+    return approval.status
+  }
+
+  return "decided" as const
 }
 
 function isTerminalRun(run: Doc<"runs">) {

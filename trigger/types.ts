@@ -158,7 +158,7 @@ export type WaiterWake = {
 
 export type ApprovalHandoff = {
   id: ConvexId<"approvals">
-  status: "pending" | "approved" | "denied" | "cancelled" | "expired"
+  status: "pending" | "approved" | "denied" | "cancelled" | "expired" | "failed"
   surface: ToolSurface
   tool: string
   summary: string

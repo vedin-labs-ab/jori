@@ -50,7 +50,13 @@ function parseCancelInput(args: unknown) {
 }
 
 function cancelResult(
-  status: "cancelled" | "invalid_message" | "missing" | "decided" | "expired"
+  status:
+    | "cancelled"
+    | "invalid_message"
+    | "missing"
+    | "decided"
+    | "expired"
+    | "failed"
 ) {
   if (status === "cancelled") {
     return {

@@ -1,6 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { type Doc } from "../../_generated/dataModel"
 import { callLinearTool } from "./linear"
+import { postLinearComment } from "./linear/comments"
 
 const originalFetch = globalThis.fetch
 
@@ -152,6 +153,23 @@ test("adds a Linear comment with CommentCreateInput", async () => {
   expect(calls[0]?.body.variables).toEqual({
     input: {
       body: "Tiny quip.",
+      issueId: "issue-id",
+    },
+  })
+})
+
+test("posts a Linear comment through the first-class comment helper", async () => {
+  const calls = mockLinearFetch({
+    data: { commentCreate: { success: true } },
+  })
+
+  await postLinearComment(linearIntegration(), {
+    body: "Approval required.",
+    issueId: "issue-id",
+  })
+  expect(calls[0]?.body.variables).toEqual({
+    input: {
+      body: "Approval required.",
       issueId: "issue-id",
     },
   })

@@ -81,6 +81,7 @@ function isSurfaceSyncStatus(status: Doc<"approvals">["status"]) {
     status === "approved" ||
     status === "cancelled" ||
     status === "denied" ||
-    status === "expired"
+    status === "expired" ||
+    status === "failed"
   )
 }

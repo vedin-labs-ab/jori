@@ -161,6 +161,10 @@ function approvalOutcomeNote(approval: ApprovalHandoff) {
     return `Approval ${approval.code} for \`${approval.tool}\` expired before a decision. Do not retry; continue on a safe path or report what is blocked.`
   }
 
+  if (approval.status === "failed") {
+    return `Approval ${approval.code} for \`${approval.tool}\` failed before it could be delivered. Do not retry; report what is blocked.`
+  }
+
   return `Approval ${approval.code} for \`${approval.tool}\` was cancelled. Do not retry it.`
 }
 

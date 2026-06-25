@@ -39,6 +39,24 @@ test("surfaces a denied handoff and consumes it without executing", async () => 
   expect(messages.at(-1)?.content).toContain("denied")
 })
 
+test("surfaces a failed approval delivery without executing", async () => {
+  const runtime = createRuntime({
+    approvals: [approvalHandoff("failed")],
+  })
+  const messages: ModelMessage[] = []
+
+  const result = await reconcileHandoffs(runtime, messages)
+
+  expect(runtime.convex.executeApproval).not.toHaveBeenCalled()
+  expect(runtime.convex.markApprovalConsumed).toHaveBeenCalledWith({
+    approvalId: "approval_1",
+  })
+  expect(result.progressed).toBe(true)
+  expect(messages.at(-1)?.content).toContain(
+    "failed before it could be delivered"
+  )
+})
+
 test("keeps a pending handoff as a wait without progress", async () => {
   const runtime = createRuntime({
     approvals: [approvalHandoff("pending")],
@@ -107,7 +125,7 @@ function createRuntime(options: {
   }
 }
 
-function approvalHandoff(status: "approved" | "denied" | "pending") {
+function approvalHandoff(status: "approved" | "denied" | "failed" | "pending") {
   return {
     id: id<"approvals">("approval_1"),
     status,

@@ -108,7 +108,10 @@ import type * as broker_tools_google_gmail from "../broker/tools/google/gmail.js
 import type * as broker_tools_google_index from "../broker/tools/google/index.js";
 import type * as broker_tools_google_read from "../broker/tools/google/read.js";
 import type * as broker_tools_index from "../broker/tools/index.js";
-import type * as broker_tools_linear from "../broker/tools/linear.js";
+import type * as broker_tools_linear_client from "../broker/tools/linear/client.js";
+import type * as broker_tools_linear_comments from "../broker/tools/linear/comments.js";
+import type * as broker_tools_linear_index from "../broker/tools/linear/index.js";
+import type * as broker_tools_linear_reactions from "../broker/tools/linear/reactions.js";
 import type * as broker_tools_microsoft from "../broker/tools/microsoft.js";
 import type * as broker_tools_notion_index from "../broker/tools/notion/index.js";
 import type * as broker_tools_notion_upload from "../broker/tools/notion/upload.js";
@@ -426,7 +429,10 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/google/index": typeof broker_tools_google_index;
   "broker/tools/google/read": typeof broker_tools_google_read;
   "broker/tools/index": typeof broker_tools_index;
-  "broker/tools/linear": typeof broker_tools_linear;
+  "broker/tools/linear/client": typeof broker_tools_linear_client;
+  "broker/tools/linear/comments": typeof broker_tools_linear_comments;
+  "broker/tools/linear/index": typeof broker_tools_linear_index;
+  "broker/tools/linear/reactions": typeof broker_tools_linear_reactions;
   "broker/tools/microsoft": typeof broker_tools_microsoft;
   "broker/tools/notion/index": typeof broker_tools_notion_index;
   "broker/tools/notion/upload": typeof broker_tools_notion_upload;
