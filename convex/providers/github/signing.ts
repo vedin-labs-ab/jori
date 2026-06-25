@@ -11,7 +11,7 @@ export type GitHubInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
-  setupLinkId?: Id<"setupLinks">
+  integrationOfferId?: Id<"integrationOffers">
 }
 
 export async function createSignedGitHubState(state: GitHubInstallState) {

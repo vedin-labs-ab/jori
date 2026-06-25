@@ -4,38 +4,42 @@ import { wakeRun } from "../../runtime/waiters/data"
 import { type Actor } from "../../shared/actor"
 import { recordTransition } from "../../transitions"
 
-type SetupLinkPatch = Partial<Omit<Doc<"setupLinks">, "_creationTime" | "_id">>
-type SetupLinkDelivery = NonNullable<Doc<"setupLinks">["delivery"]>
+type IntegrationOfferPatch = Partial<
+  Omit<Doc<"integrationOffers">, "_creationTime" | "_id">
+>
+type IntegrationOfferDelivery = NonNullable<
+  Doc<"integrationOffers">["delivery"]
+>
 
-export async function recordSetupLinkCreated(
+export async function recordIntegrationOfferCreated(
   ctx: MutationCtx,
-  link: Doc<"setupLinks">
+  offer: Doc<"integrationOffers">
 ) {
   await recordTransition(ctx, {
-    tenantId: link.tenantId,
-    subject: { kind: "setupLink", id: link._id },
+    tenantId: offer.tenantId,
+    subject: { kind: "integrationOffer", id: offer._id },
     type: "created",
   })
 }
 
-export async function markSetupLinkConnected(
+export async function markIntegrationOfferConnected(
   ctx: MutationCtx,
-  link: Doc<"setupLinks">,
+  offer: Doc<"integrationOffers">,
   args: {
     integrationId: Doc<"integrations">["_id"]
     now: number
   }
 ) {
-  if (isSettled(link)) {
+  if (isSettled(offer)) {
     return
   }
 
-  await cancelSetupFunction(ctx, link)
+  await cancelExpiration(ctx, offer)
   const result = {
-    ...(link.claim?.actor === undefined ? {} : { actor: link.claim.actor }),
+    ...(offer.claim?.actor === undefined ? {} : { actor: offer.claim.actor }),
     integrationId: args.integrationId,
   }
-  const updated = await patchAndRead(ctx, link._id, {
+  const updated = await patchAndRead(ctx, offer._id, {
     functionId: undefined,
     status: "connected",
     result,
@@ -45,7 +49,7 @@ export async function markSetupLinkConnected(
   if (updated !== null) {
     await recordTransition(ctx, {
       tenantId: updated.tenantId,
-      subject: { kind: "setupLink", id: updated._id },
+      subject: { kind: "integrationOffer", id: updated._id },
       syncSurface: true,
       type: "connected",
     })
@@ -53,22 +57,22 @@ export async function markSetupLinkConnected(
   }
 }
 
-export async function markSetupLinkCancelled(
+export async function markIntegrationOfferCancelled(
   ctx: MutationCtx,
-  link: Doc<"setupLinks">,
+  offer: Doc<"integrationOffers">,
   args: {
     actor: Actor | undefined
     reason?: string
     now: number
   }
 ) {
-  if (isSettled(link)) {
+  if (isSettled(offer)) {
     return
   }
 
-  await cancelSetupFunction(ctx, link)
+  await cancelExpiration(ctx, offer)
   const result = cancelledResult(args)
-  const updated = await patchAndRead(ctx, link._id, {
+  const updated = await patchAndRead(ctx, offer._id, {
     functionId: undefined,
     result,
     status: "cancelled",
@@ -78,7 +82,7 @@ export async function markSetupLinkCancelled(
   if (updated !== null) {
     await recordTransition(ctx, {
       tenantId: updated.tenantId,
-      subject: { kind: "setupLink", id: updated._id },
+      subject: { kind: "integrationOffer", id: updated._id },
       syncSurface: true,
       type: "cancelled",
     })
@@ -97,20 +101,20 @@ function cancelledResult(args: { actor: Actor | undefined; reason?: string }) {
   }
 }
 
-export async function markSetupLinkFailed(
+export async function markIntegrationOfferFailed(
   ctx: MutationCtx,
-  link: Doc<"setupLinks">,
+  offer: Doc<"integrationOffers">,
   args: {
     error: string
     now: number
   }
 ) {
-  if (isSettled(link)) {
+  if (isSettled(offer)) {
     return
   }
 
-  await cancelSetupFunction(ctx, link)
-  const updated = await patchAndRead(ctx, link._id, {
+  await cancelExpiration(ctx, offer)
+  const updated = await patchAndRead(ctx, offer._id, {
     functionId: undefined,
     status: "failed",
     result: { error: args.error },
@@ -120,7 +124,7 @@ export async function markSetupLinkFailed(
   if (updated !== null) {
     await recordTransition(ctx, {
       tenantId: updated.tenantId,
-      subject: { kind: "setupLink", id: updated._id },
+      subject: { kind: "integrationOffer", id: updated._id },
       syncSurface: true,
       type: "failed",
     })
@@ -128,16 +132,16 @@ export async function markSetupLinkFailed(
   }
 }
 
-export async function markSetupLinkExpired(
+export async function markIntegrationOfferExpired(
   ctx: MutationCtx,
-  link: Doc<"setupLinks">,
+  offer: Doc<"integrationOffers">,
   now: number
 ) {
-  if (isSettled(link)) {
+  if (isSettled(offer)) {
     return
   }
 
-  const updated = await patchAndRead(ctx, link._id, {
+  const updated = await patchAndRead(ctx, offer._id, {
     functionId: undefined,
     status: "expired",
     updatedAt: now,
@@ -146,7 +150,7 @@ export async function markSetupLinkExpired(
   if (updated !== null) {
     await recordTransition(ctx, {
       tenantId: updated.tenantId,
-      subject: { kind: "setupLink", id: updated._id },
+      subject: { kind: "integrationOffer", id: updated._id },
       syncSurface: true,
       type: "expired",
     })
@@ -154,12 +158,12 @@ export async function markSetupLinkExpired(
   }
 }
 
-export async function recordSetupLinkDelivery(
+export async function recordIntegrationOfferDelivery(
   ctx: MutationCtx,
-  link: Doc<"setupLinks">,
-  delivery: SetupLinkDelivery
+  offer: Doc<"integrationOffers">,
+  delivery: IntegrationOfferDelivery
 ) {
-  const updated = await patchAndRead(ctx, link._id, {
+  const updated = await patchAndRead(ctx, offer._id, {
     delivery,
     updatedAt: Date.now(),
   })
@@ -167,7 +171,7 @@ export async function recordSetupLinkDelivery(
   if (updated !== null) {
     await recordTransition(ctx, {
       tenantId: updated.tenantId,
-      subject: { kind: "setupLink", id: updated._id },
+      subject: { kind: "integrationOffer", id: updated._id },
       syncSurface: isSettled(updated),
       type: "delivered",
     })
@@ -176,39 +180,42 @@ export async function recordSetupLinkDelivery(
 
 export async function patchAndRead(
   ctx: MutationCtx,
-  setupLinkId: Doc<"setupLinks">["_id"],
-  patch: SetupLinkPatch
+  integrationOfferId: Doc<"integrationOffers">["_id"],
+  patch: IntegrationOfferPatch
 ) {
-  await ctx.db.patch(setupLinkId, patch)
+  await ctx.db.patch(integrationOfferId, patch)
 
-  return await ctx.db.get(setupLinkId)
+  return await ctx.db.get(integrationOfferId)
 }
 
-async function cancelSetupFunction(ctx: MutationCtx, link: Doc<"setupLinks">) {
-  if (link.functionId === undefined) {
+async function cancelExpiration(
+  ctx: MutationCtx,
+  offer: Doc<"integrationOffers">
+) {
+  if (offer.functionId === undefined) {
     return
   }
 
-  await ctx.scheduler.cancel(link.functionId)
+  await ctx.scheduler.cancel(offer.functionId)
 }
 
-function isSettled(link: Doc<"setupLinks">) {
+function isSettled(offer: Doc<"integrationOffers">) {
   return (
-    link.status === "cancelled" ||
-    link.status === "connected" ||
-    link.status === "expired" ||
-    link.status === "failed"
+    offer.status === "cancelled" ||
+    offer.status === "connected" ||
+    offer.status === "expired" ||
+    offer.status === "failed"
   )
 }
 
-async function wakeOfferRun(ctx: MutationCtx, link: Doc<"setupLinks">) {
-  if (link.runId === undefined || link.awaited !== true) {
+async function wakeOfferRun(ctx: MutationCtx, offer: Doc<"integrationOffers">) {
+  if (offer.runId === undefined || offer.awaited !== true) {
     return
   }
 
   await wakeRun(ctx, {
-    runId: link.runId,
-    reason: "connection_resolved",
-    subject: { kind: "connection", setupLinkId: link._id },
+    runId: offer.runId,
+    reason: "integration_resolved",
+    subject: { kind: "integrationOffer", integrationOfferId: offer._id },
   })
 }

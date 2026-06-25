@@ -9,29 +9,29 @@ import {
   getSlackThreadTs,
 } from "../../providers/slack/data"
 import { type Integration } from "../../shared/integrations"
-import { createSlackSetupLinkMessage } from "./slack"
+import { createSlackIntegrationOfferMessage } from "./slack"
 
-export async function tryDeliverSetupOffer(
+export async function tryDeliverIntegrationOffer(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
   args: {
     expiresAt: number
     integration: Integration
-    setupLinkId: Id<"setupLinks">
+    integrationOfferId: Id<"integrationOffers">
     summary: string
     url: string
   }
 ) {
-  return await tryDeliverSlackSetupLink(ctx, context, args)
+  return await tryDeliverSlackIntegrationOffer(ctx, context, args)
 }
 
-async function tryDeliverSlackSetupLink(
+async function tryDeliverSlackIntegrationOffer(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
   args: {
     expiresAt: number
     integration: Integration
-    setupLinkId: Id<"setupLinks">
+    integrationOfferId: Id<"integrationOffers">
     summary: string
     url: string
   }
@@ -43,10 +43,10 @@ async function tryDeliverSlackSetupLink(
   }
 
   try {
-    const message = createSlackSetupLinkMessage({
+    const message = createSlackIntegrationOfferMessage({
       expiresAt: args.expiresAt,
       integration: args.integration,
-      setupLinkId: args.setupLinkId,
+      integrationOfferId: args.integrationOfferId,
       summary: args.summary,
       url: args.url,
     })
@@ -60,11 +60,11 @@ async function tryDeliverSlackSetupLink(
     const messageTs = readString(response, "ts")
 
     if (messageTs === undefined) {
-      throw new Error("Slack setup offer response is missing ts")
+      throw new Error("Slack integration offer response is missing ts")
     }
 
-    await ctx.runMutation(internal.integrations.setup.links.recordDelivery, {
-      setupLinkId: args.setupLinkId,
+    await ctx.runMutation(internal.integrations.offers.updates.recordDelivery, {
+      integrationOfferId: args.integrationOfferId,
       delivery: {
         integration: "slack",
         integrationId: target.integration._id,

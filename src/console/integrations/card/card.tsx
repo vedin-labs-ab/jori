@@ -12,10 +12,10 @@ import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"
 import { type CreateInstallState, useIntegrationInstall } from "./install"
 
-export type ConnectionStatus = "active" | "paused" | undefined
+export type IntegrationCardStatus = "active" | "paused" | undefined
 export type { SurfaceLogo } from "../../shared/surface"
 
-export type IntegrationConnectionConfig = {
+export type IntegrationCardConfig = {
   action: string
   connectedDetail: string
   connectError: string
@@ -28,11 +28,11 @@ export type IntegrationConnectionConfig = {
 }
 
 type IntegrationStatus = {
-  status: Exclude<ConnectionStatus, undefined>
+  status: Exclude<IntegrationCardStatus, undefined>
   url?: string
 } | null
 
-export function IntegrationConnection({
+export function IntegrationCard({
   config,
   createInstallState,
   headline,
@@ -40,7 +40,7 @@ export function IntegrationConnection({
   status,
   tenantId,
 }: {
-  config: IntegrationConnectionConfig
+  config: IntegrationCardConfig
   createInstallState: CreateInstallState
   headline: string
   permissions: ToolPermissionController
@@ -92,12 +92,12 @@ export function IntegrationConnection({
       }
       description={isConnected ? config.connectedDetail : config.emptyDetail}
       logo={config.logo}
-      status={<ConnectionStatusLine headline={headline} status={status} />}
+      status={<IntegrationStatusLine headline={headline} status={status} />}
       title={config.label}
     >
       {error === undefined && !isConnected ? undefined : (
         <>
-          <ConnectionError error={error} />
+          <IntegrationError error={error} />
           {isConnected ? (
             <IntegrationPermissions
               controller={permissions}
@@ -110,7 +110,7 @@ export function IntegrationConnection({
   )
 }
 
-function ConnectionStatusLine({
+function IntegrationStatusLine({
   headline,
   status,
 }: {
@@ -177,14 +177,14 @@ function getStatusDotClassName(status: IntegrationStatus | undefined) {
   return "bg-muted-foreground/40"
 }
 
-function ConnectionError({ error }: { error: string | undefined }) {
+function IntegrationError({ error }: { error: string | undefined }) {
   if (error === undefined) {
     return null
   }
 
   return (
     <Alert variant="destructive">
-      <AlertTitle>Connection error</AlertTitle>
+      <AlertTitle>Integration error</AlertTitle>
       <AlertDescription>{error}</AlertDescription>
     </Alert>
   )

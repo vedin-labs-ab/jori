@@ -5,14 +5,14 @@ import {
   handleSlackApprovalInteraction,
   isSlackApprovalDecisionText,
 } from "../../approvals/slack"
-import { handleSlackSetupLinkInteraction } from "../../integrations/setup/interaction"
+import { handleSlackIntegrationOfferInteraction } from "../../integrations/offers/interaction"
 import { createIntegrationActor } from "../../shared/actor"
 import {
   readCallbackState,
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
-import { completeSetupLink, failSetupLink } from "../install"
+import { completeIntegrationOffer, failIntegrationOffer } from "../install"
 import {
   slackBotScopes,
   slackInstallUserScopes,
@@ -88,8 +88,8 @@ export async function handleSlackOAuthCallback(
     botToken === undefined ||
     userToken === undefined
   ) {
-    await failSetupLink(ctx, {
-      setupLinkId: state.setupLinkId,
+    await failIntegrationOffer(ctx, {
+      integrationOfferId: state.integrationOfferId,
       error: "Slack OAuth did not return required bot and user tokens.",
     })
 
@@ -111,8 +111,8 @@ export async function handleSlackOAuthCallback(
     }
   )
 
-  await completeSetupLink(ctx, {
-    setupLinkId: state.setupLinkId,
+  await completeIntegrationOffer(ctx, {
+    integrationOfferId: state.integrationOfferId,
     integrationId,
   })
 
@@ -232,7 +232,7 @@ export async function handleSlackInteractions(
     return new Response("Invalid Slack interaction payload", { status: 400 })
   }
 
-  if (await handleSlackSetupLinkInteraction(ctx, parsed)) {
+  if (await handleSlackIntegrationOfferInteraction(ctx, parsed)) {
     return Response.json({ ok: true })
   }
 

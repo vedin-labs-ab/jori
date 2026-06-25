@@ -4,7 +4,7 @@ import {
   type IntegrationCallbackIntegration,
   type IntegrationCallbackStatus,
   useIntegrationCallbackStatuses,
-} from "./connection/status"
+} from "./card/status"
 
 type VisibleCallbackStatus = Exclude<IntegrationCallbackStatus, null>
 
@@ -60,49 +60,49 @@ const integrationCallbackAlerts = [
   callbackAlert(
     "slack",
     "error",
-    "Slack connection failed",
+    "Slack integration failed",
     "Slack didn't finish connecting. Try again, and check the Slack app's OAuth settings if it keeps failing."
   ),
   callbackAlert(
     "linear",
     "error",
-    "Linear connection failed",
+    "Linear integration failed",
     "Linear didn't finish connecting. Try again, and check the Linear OAuth app settings if it keeps failing."
   ),
   callbackAlert(
     "microsoftEmail",
     "error",
-    "Outlook Mail connection failed",
+    "Outlook Mail integration failed",
     "Microsoft didn't finish connecting. Try again, and check the Microsoft app permissions if it keeps failing."
   ),
   callbackAlert(
     "microsoftCalendar",
     "error",
-    "Microsoft Calendar connection failed",
+    "Microsoft Calendar integration failed",
     "Microsoft didn't finish connecting. Try again, and check the Microsoft app permissions if it keeps failing."
   ),
   callbackAlert(
     "github",
     "error",
-    "GitHub connection failed",
+    "GitHub integration failed",
     "GitHub didn't finish installing the app. Try again, and check the GitHub App settings if it keeps failing."
   ),
   callbackAlert(
     "gmail",
     "error",
-    "Gmail connection failed",
+    "Gmail integration failed",
     "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
   ),
   callbackAlert(
     "googleCalendar",
     "error",
-    "Google Calendar connection failed",
+    "Google Calendar integration failed",
     "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
   ),
   callbackAlert(
     "googleDrive",
     "error",
-    "Google Drive connection failed",
+    "Google Drive integration failed",
     "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
   ),
 ]

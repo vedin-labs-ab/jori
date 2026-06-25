@@ -1,6 +1,6 @@
 import { base64EncodeBytes } from "../../shared/encoding"
 
-export function createSetupToken() {
+export function createIntegrationOfferToken() {
   const bytes = new Uint8Array(32)
 
   crypto.getRandomValues(bytes)
@@ -8,7 +8,7 @@ export function createSetupToken() {
   return base64Url(base64EncodeBytes(bytes))
 }
 
-export async function hashSetupToken(token: string) {
+export async function hashIntegrationOfferToken(token: string) {
   const digest = await crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(token)

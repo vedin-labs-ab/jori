@@ -62,7 +62,7 @@ test("refreshes runtime tools when an awaited offer connects", async () => {
 
   expect(runtime.convex.reloadContext).toHaveBeenCalledWith({ runId: "run_1" })
   expect(runtime.convex.markOfferConsumed).toHaveBeenCalledWith({
-    setupLinkId: "offer_1",
+    integrationOfferId: "offer_1",
   })
   expect(runtime.context.tools).toEqual([refreshedTool()])
   expect(messages[0]).toEqual({ content: "refreshed", role: "system" })
@@ -121,7 +121,7 @@ function approvalHandoff(status: "approved" | "denied" | "pending") {
 
 function offerHandoff(status: "connected") {
   return {
-    id: id<"setupLinks">("offer_1"),
+    id: id<"integrationOffers">("offer_1"),
     integration: "notion",
     status,
     summary: null,

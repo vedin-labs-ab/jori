@@ -1,17 +1,14 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import {
-  IntegrationConnection,
-  type IntegrationConnectionConfig,
-} from "../connection/card"
-import { getWorkspaceHeadline } from "../connection/headline"
+import { IntegrationCard, type IntegrationCardConfig } from "../card/card"
+import { getWorkspaceHeadline } from "../card/headline"
 
 const slackConfig = {
   action: "Connect Slack",
   connectedDetail:
     "Milo responds to mentions, searches conversation context, and replies in threads.",
-  connectError: "Could not start the Slack connection.",
+  connectError: "Could not start the Slack integration.",
   emptyDetail:
     "Install the Slack app so Milo can respond to mentions where your team talks.",
   installPath: "/slack/install",
@@ -22,9 +19,9 @@ const slackConfig = {
     src: "https://svgl.app/library/slack.svg",
   },
   integration: "slack",
-} satisfies IntegrationConnectionConfig
+} satisfies IntegrationCardConfig
 
-export function SlackConnection({
+export function SlackIntegration({
   permissions,
   tenantId,
 }: {
@@ -37,7 +34,7 @@ export function SlackConnection({
   const status = useQuery(api.integrations.status.getSlackStatus, { tenantId })
 
   return (
-    <IntegrationConnection
+    <IntegrationCard
       config={slackConfig}
       createInstallState={createInstallState}
       headline={getWorkspaceHeadline(

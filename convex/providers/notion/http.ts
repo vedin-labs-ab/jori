@@ -6,7 +6,7 @@ import {
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
-import { completeSetupLink, failSetupLink } from "../install"
+import { completeIntegrationOffer, failIntegrationOffer } from "../install"
 import { notionOAuthAuthorizeUrl, notionOAuthCallbackPath } from "./config"
 import { readNotionAutomationEvents } from "./events"
 import { exchangeNotionAuthorizationCode, requireNotionClientId } from "./oauth"
@@ -68,8 +68,8 @@ export async function handleNotionOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    await failSetupLink(ctx, {
-      setupLinkId: state.setupLinkId,
+    await failIntegrationOffer(ctx, {
+      integrationOfferId: state.integrationOfferId,
       error: "Notion OAuth token exchange failed.",
     })
 
@@ -93,8 +93,8 @@ export async function handleNotionOAuthCallback(
     }
   )
 
-  await completeSetupLink(ctx, {
-    setupLinkId: state.setupLinkId,
+  await completeIntegrationOffer(ctx, {
+    integrationOfferId: state.integrationOfferId,
     integrationId,
   })
 

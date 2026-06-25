@@ -8,36 +8,36 @@ import {
   integrationLabel,
   integrations,
 } from "../../shared/integrations"
-import { tryDeliverSetupOffer } from "./delivery"
-import { setupSourceFromInput } from "./source"
+import { tryDeliverIntegrationOffer } from "./delivery"
+import { integrationOfferSourceFromInput } from "./source"
 
-const setupTool = "offer_integration_setup"
-const cancelOfferTool = "cancel_connection_offer"
+const offerTool = "offer_integration"
+const cancelOfferTool = "cancel_integration_offer"
 
-type SetupToolRequest = {
+type OfferToolRequest = {
   tool: string
   args?: unknown
 }
 
-export function isIntegrationSetupTool(tool: string) {
-  return tool === setupTool
+export function isIntegrationOfferTool(tool: string) {
+  return tool === offerTool
 }
 
-export async function callIntegrationSetupTool(
+export async function callIntegrationOfferTool(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
-  request: SetupToolRequest
+  request: OfferToolRequest
 ) {
-  if (!isIntegrationSetupTool(request.tool)) {
-    throw new Error(`Unknown integration setup tool: ${request.tool}`)
+  if (!isIntegrationOfferTool(request.tool)) {
+    throw new Error(`Unknown integration offer tool: ${request.tool}`)
   }
 
   if (context.input.type === "automation") {
-    throw new Error("Integration setup links require an interactive run.")
+    throw new Error("Integration offers require an interactive run.")
   }
 
-  const setupRequest = readSetupRequest(request.args)
-  const integration = setupRequest.integration
+  const offerRequest = readOfferRequest(request.args)
+  const integration = offerRequest.integration
   const label = integrationLabel(integration)
   const existing = findConnectedIntegration(context, integration)
 
@@ -50,53 +50,56 @@ export async function callIntegrationSetupTool(
     }
   }
 
-  const link = await ctx.runMutation(internal.integrations.setup.links.create, {
-    tenantId: context.run.tenantId,
+  const offer = await ctx.runMutation(
+    internal.integrations.offers.records.create,
+    {
+      tenantId: context.run.tenantId,
+      integration,
+      summary: offerRequest.summary,
+      source: integrationOfferSourceFromInput(context.input),
+      awaited: offerRequest.wait,
+    }
+  )
+  const delivery = await tryDeliverIntegrationOffer(ctx, context, {
+    expiresAt: offer.expiresAt,
     integration,
-    summary: setupRequest.summary,
-    source: setupSourceFromInput(context.input),
-    awaited: setupRequest.wait,
-  })
-  const delivery = await tryDeliverSetupOffer(ctx, context, {
-    expiresAt: link.expiresAt,
-    integration,
-    summary: setupRequest.summary,
-    url: link.url,
-    setupLinkId: link.setupLinkId,
+    summary: offerRequest.summary,
+    url: offer.url,
+    integrationOfferId: offer.integrationOfferId,
   })
 
   return {
     status: delivery.status,
     integration,
-    setupLinkId: link.setupLinkId,
-    url: link.url,
-    urlPath: link.urlPath,
-    expiresAt: link.expiresAt,
-    waiting: setupRequest.wait,
-    message: setupOfferMessage({
+    integrationOfferId: offer.integrationOfferId,
+    url: offer.url,
+    urlPath: offer.urlPath,
+    expiresAt: offer.expiresAt,
+    waiting: offerRequest.wait,
+    message: integrationOfferMessage({
       delivered: delivery.status === "delivered",
       label,
-      url: link.url,
-      wait: setupRequest.wait,
+      url: offer.url,
+      wait: offerRequest.wait,
     }),
     delivery,
   }
 }
 
-export function isCancelConnectionOfferTool(tool: string) {
+export function isCancelIntegrationOfferTool(tool: string) {
   return tool === cancelOfferTool
 }
 
-export async function cancelConnectionOffer(
+export async function cancelIntegrationOffer(
   ctx: ActionCtx,
   run: { _id: Id<"runs">; tenantId: string },
   args: unknown
 ) {
   const input = parseCancelOffer(args)
   const result = await ctx.runMutation(
-    internal.integrations.setup.lifecycle.cancelForRun,
+    internal.integrations.offers.lifecycle.cancelForRun,
     {
-      setupLinkId: input.setupLinkId,
+      integrationOfferId: input.integrationOfferId,
       runId: run._id,
       tenantId: run.tenantId,
       reason: input.reason,
@@ -106,15 +109,15 @@ export async function cancelConnectionOffer(
   return offerCancelResult(result.status)
 }
 
-function setupOfferMessage(args: {
+function integrationOfferMessage(args: {
   delivered: boolean
   label: string
   url: string
   wait: boolean
 }) {
   const base = args.delivered
-    ? `Posted a ${args.label} setup offer in Slack. Do not send a separate reply for this offer.`
-    : `No native setup offer was delivered. Send this setup link if the user needs it: ${args.url}`
+    ? `Posted a ${args.label} integration offer in Slack. Do not send a separate reply for this offer.`
+    : `No native integration offer was delivered. Send this integration offer URL if the user needs it: ${args.url}`
 
   if (!args.wait) {
     return base
@@ -126,17 +129,17 @@ function setupOfferMessage(args: {
 function parseCancelOffer(args: unknown) {
   if (typeof args !== "object" || args === null || Array.isArray(args)) {
     throw new Error(
-      "cancel_connection_offer requires a setupLinkId and reason."
+      "cancel_integration_offer requires an integrationOfferId and reason."
     )
   }
 
-  const record = args as { setupLinkId?: unknown; reason?: unknown }
+  const record = args as { integrationOfferId?: unknown; reason?: unknown }
 
   return {
-    setupLinkId: requiredString(
-      record.setupLinkId,
-      "setupLinkId"
-    ) as Id<"setupLinks">,
+    integrationOfferId: requiredString(
+      record.integrationOfferId,
+      "integrationOfferId"
+    ) as Id<"integrationOffers">,
     reason: requiredString(record.reason, "reason"),
   }
 }
@@ -145,20 +148,20 @@ function offerCancelResult(status: "cancelled" | "missing" | "settled") {
   if (status === "cancelled") {
     return {
       status: "cancelled" as const,
-      message: "Cancelled the pending connection offer.",
+      message: "Cancelled the pending integration offer.",
     }
   }
 
   if (status === "missing") {
     return {
       status: "missing" as const,
-      message: "No matching pending connection offer was found for this run.",
+      message: "No matching pending integration offer was found for this run.",
     }
   }
 
   return {
     status: "already_resolved" as const,
-    message: "That connection offer was already resolved.",
+    message: "That integration offer was already resolved.",
   }
 }
 
@@ -173,13 +176,13 @@ function findConnectedIntegration(
   )
 }
 
-function readSetupRequest(args: unknown): {
+function readOfferRequest(args: unknown): {
   integration: Integration
   summary: string
   wait: boolean
 } {
   if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    throw new Error("offer_integration_setup requires an integration.")
+    throw new Error("offer_integration requires an integration.")
   }
 
   const record = args as {
@@ -189,7 +192,7 @@ function readSetupRequest(args: unknown): {
   }
 
   if (!isIntegration(record.integration)) {
-    throw new Error("offer_integration_setup received an unknown integration.")
+    throw new Error("offer_integration received an unknown integration.")
   }
 
   return {
@@ -205,7 +208,7 @@ function isIntegration(value: unknown): value is Integration {
 
 function readSummary(value: unknown) {
   if (typeof value !== "string" || value.trim() === "") {
-    throw new Error("offer_integration_setup requires a summary.")
+    throw new Error("offer_integration requires a summary.")
   }
 
   return value.trim()

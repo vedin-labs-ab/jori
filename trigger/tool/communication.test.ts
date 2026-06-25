@@ -22,11 +22,11 @@ test("provider reaction tools mark the active surface communicated", async () =>
   expect(runtime.context.activeSurface?.communicated).toBe(true)
 })
 
-test("delivered setup offers mark the active surface communicated", async () => {
+test("delivered integration offers mark the active surface communicated", async () => {
   const runtime = createRuntime({
     result: { delivery: { status: "delivered", surface: "slack" } },
     surface: "slack",
-    tool: setupOfferTool(),
+    tool: integrationOfferTool(),
   })
 
   await executeToolCall({
@@ -34,7 +34,7 @@ test("delivered setup offers mark the active surface communicated", async () => 
     call: {
       args: { integration: "gmail", summary: "Gmail is needed here." },
       id: "call_1",
-      name: "offer_integration_setup",
+      name: "offer_integration",
     },
     runtime,
     sequence: 100,
@@ -43,11 +43,11 @@ test("delivered setup offers mark the active surface communicated", async () => 
   expect(runtime.context.activeSurface?.communicated).toBe(true)
 })
 
-test("undelivered setup offers do not mark visible communication", async () => {
+test("undelivered integration offers do not mark visible communication", async () => {
   const runtime = createRuntime({
     result: { delivery: { status: "created" } },
     surface: "slack",
-    tool: setupOfferTool(),
+    tool: integrationOfferTool(),
   })
 
   await executeToolCall({
@@ -55,7 +55,7 @@ test("undelivered setup offers do not mark visible communication", async () => {
     call: {
       args: { integration: "gmail", summary: "Gmail is needed here." },
       id: "call_1",
-      name: "offer_integration_setup",
+      name: "offer_integration",
     },
     runtime,
     sequence: 100,
@@ -106,13 +106,13 @@ function linearReactionTool(): RuntimeTool {
   }
 }
 
-function setupOfferTool(): RuntimeTool {
+function integrationOfferTool(): RuntimeTool {
   return {
     access: "write",
-    description: "Offer integration setup.",
+    description: "Offer integration.",
     inputSchema: {},
     mode: "required",
-    name: "offer_integration_setup",
+    name: "offer_integration",
     route: "convex",
     surface: "milo",
   }

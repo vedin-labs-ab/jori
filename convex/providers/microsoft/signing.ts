@@ -9,7 +9,7 @@ export type MicrosoftInstallState = {
   createdBy: string
   returnUrl: string
   createdAt: number
-  setupLinkId?: Id<"setupLinks">
+  integrationOfferId?: Id<"integrationOffers">
 }
 
 export async function createSignedMicrosoftState(state: MicrosoftInstallState) {

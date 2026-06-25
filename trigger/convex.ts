@@ -92,9 +92,11 @@ export class MiloConvexClient {
     })
   }
 
-  async markOfferConsumed(args: { setupLinkId: ConvexId<"setupLinks"> }) {
+  async markOfferConsumed(args: {
+    integrationOfferId: ConvexId<"integrationOffers">
+  }) {
     await this.client.mutation(api.runtime.waiters.handoffs.consumeOffer, {
-      setupLinkId: args.setupLinkId,
+      integrationOfferId: args.integrationOfferId,
       secret: this.secret,
     })
   }

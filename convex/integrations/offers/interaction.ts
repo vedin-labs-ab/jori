@@ -4,51 +4,51 @@ import { type ActionCtx } from "../../_generated/server"
 import { getSlackActorProfile } from "../../providers/slack/directory/users"
 import { createIntegrationActor } from "../../shared/actor"
 
-export const setupLinkOpenActionId = "milo_setup_link_open"
-export const setupLinkCancelActionId = "milo_setup_link_cancel"
+export const integrationOfferOpenActionId = "milo_integration_offer_open"
+export const integrationOfferCancelActionId = "milo_integration_offer_cancel"
 
-export type SlackSetupLinkCancelInteraction = {
+export type SlackIntegrationOfferCancelInteraction = {
   accountId: string
   actorId?: string
   channelId: string
   messageTs: string
-  setupLinkId: Id<"setupLinks">
+  integrationOfferId: Id<"integrationOffers">
 }
 
-export async function handleSlackSetupLinkInteraction(
+export async function handleSlackIntegrationOfferInteraction(
   ctx: ActionCtx,
   payload: unknown
 ) {
-  const cancel = parseSlackSetupLinkCancelInteraction(payload)
+  const cancel = parseSlackIntegrationOfferCancelInteraction(payload)
 
   if (cancel !== null) {
-    const actor = await createSlackSetupLinkActor(ctx, cancel)
+    const actor = await createSlackIntegrationOfferActor(ctx, cancel)
 
-    await ctx.runMutation(internal.integrations.setup.lifecycle.cancel, {
+    await ctx.runMutation(internal.integrations.offers.lifecycle.cancel, {
       accountId: cancel.accountId,
       ...(actor === undefined ? {} : { actor }),
       channelId: cancel.channelId,
       messageTs: cancel.messageTs,
-      setupLinkId: cancel.setupLinkId,
+      integrationOfferId: cancel.integrationOfferId,
     })
     return true
   }
 
-  return isSlackSetupLinkInteraction(payload)
+  return isSlackIntegrationOfferInteraction(payload)
 }
 
-export function isSlackSetupLinkInteraction(payload: unknown) {
-  return readActionIds(payload).includes(setupLinkOpenActionId)
+export function isSlackIntegrationOfferInteraction(payload: unknown) {
+  return readActionIds(payload).includes(integrationOfferOpenActionId)
 }
 
-export function parseSlackSetupLinkCancelInteraction(payload: unknown) {
+export function parseSlackIntegrationOfferCancelInteraction(payload: unknown) {
   if (!isObject(payload) || payload.type !== "block_actions") {
     return null
   }
 
   const action = readFirstAction(payload.actions)
 
-  if (action?.action_id !== setupLinkCancelActionId) {
+  if (action?.action_id !== integrationOfferCancelActionId) {
     return null
   }
 
@@ -56,13 +56,13 @@ export function parseSlackSetupLinkCancelInteraction(payload: unknown) {
   const actorId = readNestedString(payload.user, "id")
   const channelId = readNestedString(payload.channel, "id")
   const messageTs = readNestedString(payload.message, "ts")
-  const setupLinkId = readSetupLinkId(action.value)
+  const integrationOfferId = readIntegrationOfferId(action.value)
 
   if (
     accountId === null ||
     channelId === null ||
     messageTs === null ||
-    setupLinkId === null
+    integrationOfferId === null
   ) {
     return null
   }
@@ -72,13 +72,13 @@ export function parseSlackSetupLinkCancelInteraction(payload: unknown) {
     ...(actorId === null ? {} : { actorId }),
     channelId,
     messageTs,
-    setupLinkId,
-  } satisfies SlackSetupLinkCancelInteraction
+    integrationOfferId,
+  } satisfies SlackIntegrationOfferCancelInteraction
 }
 
-async function createSlackSetupLinkActor(
+async function createSlackIntegrationOfferActor(
   ctx: ActionCtx,
-  interaction: SlackSetupLinkCancelInteraction
+  interaction: SlackIntegrationOfferCancelInteraction
 ) {
   const profile = await getSlackActorProfile(ctx, {
     accountId: interaction.accountId,
@@ -132,7 +132,7 @@ function readNestedString(value: unknown, key: string) {
   return typeof child === "string" && child !== "" ? child : null
 }
 
-function readSetupLinkId(value: unknown) {
+function readIntegrationOfferId(value: unknown) {
   if (typeof value !== "string" || value === "") {
     return null
   }
@@ -140,8 +140,8 @@ function readSetupLinkId(value: unknown) {
   try {
     const parsed = JSON.parse(value) as unknown
 
-    return isObject(parsed) && typeof parsed.setupLinkId === "string"
-      ? (parsed.setupLinkId as Id<"setupLinks">)
+    return isObject(parsed) && typeof parsed.integrationOfferId === "string"
+      ? (parsed.integrationOfferId as Id<"integrationOffers">)
       : null
   } catch {
     return null

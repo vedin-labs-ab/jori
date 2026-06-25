@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { readCallbackState, redirectWithStatus } from "../http"
-import { completeSetupLink, failSetupLink } from "../install"
+import { completeIntegrationOffer, failIntegrationOffer } from "../install"
 import {
   type MicrosoftIntegration,
   microsoftIntegrationConfigs,
@@ -79,7 +79,7 @@ export async function handleMicrosoftOAuthCallback(
   })
 
   if ("error" in tokenResult) {
-    return await redirectWithMicrosoftSetupError(ctx, {
+    return await redirectWithMicrosoftInstallError(ctx, {
       state,
       integration,
       error: `${surface.integration} OAuth token exchange failed.`,
@@ -93,7 +93,7 @@ export async function handleMicrosoftOAuthCallback(
       accessToken: tokenResult.access_token,
     })
   } catch {
-    return await redirectWithMicrosoftSetupError(ctx, {
+    return await redirectWithMicrosoftInstallError(ctx, {
       state,
       integration,
       error: `${surface.integration} installation profile could not be loaded.`,
@@ -101,14 +101,14 @@ export async function handleMicrosoftOAuthCallback(
   }
 
   try {
-    await recordMicrosoftSetupInstallation(ctx, {
+    await recordMicrosoftInstallation(ctx, {
       integration,
       profile,
       state,
       tokenResult,
     })
   } catch {
-    return await redirectWithMicrosoftSetupError(ctx, {
+    return await redirectWithMicrosoftInstallError(ctx, {
       state,
       integration,
       error: `${surface.integration} installation could not be recorded.`,
@@ -118,7 +118,7 @@ export async function handleMicrosoftOAuthCallback(
   return redirectWithMicrosoftStatus(state.returnUrl, integration, "connected")
 }
 
-async function recordMicrosoftSetupInstallation(
+async function recordMicrosoftInstallation(
   ctx: ActionCtx,
   args: {
     integration: MicrosoftIntegration
@@ -147,13 +147,13 @@ async function recordMicrosoftSetupInstallation(
     }
   )
 
-  await completeSetupLink(ctx, {
-    setupLinkId: args.state.setupLinkId,
+  await completeIntegrationOffer(ctx, {
+    integrationOfferId: args.state.integrationOfferId,
     integrationId,
   })
 }
 
-async function redirectWithMicrosoftSetupError(
+async function redirectWithMicrosoftInstallError(
   ctx: ActionCtx,
   args: {
     state: MicrosoftInstallState
@@ -161,8 +161,8 @@ async function redirectWithMicrosoftSetupError(
     error: string
   }
 ) {
-  await failSetupLink(ctx, {
-    setupLinkId: args.state.setupLinkId,
+  await failIntegrationOffer(ctx, {
+    integrationOfferId: args.state.integrationOfferId,
     error: args.error,
   })
 

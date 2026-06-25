@@ -2,10 +2,10 @@ import { AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 
-type SetupOutcomeVariant = "connected" | "expired" | "failed" | "terminal"
+type OfferOutcomeVariant = "connected" | "expired" | "failed" | "terminal"
 
-const setupOutcomeContent: Record<
-  SetupOutcomeVariant,
+const offerOutcomeContent: Record<
+  OfferOutcomeVariant,
   {
     description: string
     icon: ReactNode
@@ -19,31 +19,31 @@ const setupOutcomeContent: Record<
   },
   expired: {
     description:
-      "Ask Milo for a new setup link, or open integrations to connect manually.",
+      "Ask Milo for a new integration offer, or open integrations to connect manually.",
     icon: <AlertTriangle />,
-    title: "Setup link expired",
+    title: "Integration offer expired",
   },
   failed: {
     description: "We couldn't finish connecting. Try again when you're ready.",
     icon: <AlertTriangle />,
-    title: "Connection failed",
+    title: "Integration failed",
   },
   terminal: {
     description:
-      "Milo couldn't open this setup link. Open integrations to connect manually.",
+      "Milo couldn't open this integration offer. Open integrations to connect manually.",
     icon: <AlertTriangle />,
-    title: "Setup link unavailable",
+    title: "Integration offer unavailable",
   },
 }
 
-export function IntegrationSetupOutcome({
+export function IntegrationOfferOutcome({
   onRetry,
   variant,
 }: {
   onRetry?: () => void
-  variant: SetupOutcomeVariant
+  variant: OfferOutcomeVariant
 }) {
-  const content = setupOutcomeContent[variant]
+  const content = offerOutcomeContent[variant]
 
   return (
     <main className="grid min-h-svh place-items-center bg-background px-6 py-10">
@@ -59,18 +59,18 @@ export function IntegrationSetupOutcome({
             {content.description}
           </p>
         </div>
-        <SetupOutcomeActions onRetry={onRetry} variant={variant} />
+        <OfferOutcomeActions onRetry={onRetry} variant={variant} />
       </section>
     </main>
   )
 }
 
-function SetupOutcomeActions({
+function OfferOutcomeActions({
   onRetry,
   variant,
 }: {
   onRetry?: () => void
-  variant: SetupOutcomeVariant
+  variant: OfferOutcomeVariant
 }) {
   const hasRetry = variant === "failed" && onRetry !== undefined
 
