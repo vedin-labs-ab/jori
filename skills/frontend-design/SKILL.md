@@ -1,16 +1,15 @@
 ---
 name: frontend-design
-description: Design Milo-native artifact and frontend UI. Use for creating, revising, simplifying, or evaluating layouts, flows, dashboards, tools, forms, empty states, and artifact experiences. Focuses on outcome-first product design, shadcn/ui primitives, restrained Milo styling, and distilled useful surfaces.
+description: Design good UI for any surface Milo renders — artifacts, served HTML assets, dashboards, tools, forms, empty states. Use when creating, revising, simplifying, or evaluating layout, visual hierarchy, required states, copy, and interaction. Outcome-first product design, not platform mechanics.
 category: Milo
 ---
 
 # Frontend Design
 
-Design Milo-native product interfaces that help users get value quickly. The UI
+Design Milo-native UI that helps users get value quickly. This applies to any
+surface Milo renders — an artifact, served HTML, or any other view. The result
 should feel like part of Milo, not a standalone mini-site, demo, or decorative
-artifact.
-
-Use this skill for Milo artifact UI work, especially with `artifact-creator`.
+page.
 
 ## Design Goal
 
@@ -19,13 +18,11 @@ Start from the user outcome, not the component layout.
 Before designing, identify:
 
 - What is the user trying to understand, decide, or do?
-- What information is required for that outcome?
-- What actions are required, and which one is primary?
-- What can be removed, hidden, combined, or delayed?
-- What states must exist for the experience to be trustworthy?
+- What information does that outcome require?
+- What actions does it require, and which one is primary?
 
-A good artifact makes the useful thing obvious. It should not make the user
-inspect a decorative interface to find the value.
+Good UI makes the useful thing obvious. The user should not have to inspect a
+decorative interface to find the value.
 
 ## Milo Design Language
 
@@ -51,25 +48,8 @@ Avoid:
 - Repeated icon-heading-description blocks.
 - Modals as the first solution.
 - Decorative motion.
-- Custom controls when shadcn/ui already has the primitive.
 
 The interface should disappear into the task.
-
-## Use Existing Components
-
-Rely on Milo-provided shadcn/ui primitives and template styling.
-
-Do not recreate common components from scratch when a primitive exists.
-Buttons, inputs, selects, dialogs, tabs, tables, badges, cards, separators,
-skeletons, alerts, menus, and tooltips should use the provided component
-vocabulary.
-
-Style with Tailwind `className` only. Keep styling close to the component and
-aligned with the template tokens. Do not modify global CSS unless the artifact
-explicitly requires a reusable local pattern.
-
-Default to Milo-native component behavior and styling. Add custom visual
-treatment only when it clarifies hierarchy, state, or workflow.
 
 ## Distill the Surface
 
@@ -126,7 +106,7 @@ Avoid explanatory filler, restated headings, and vague product language.
 
 ## Layout Guidance
 
-Choose layout based on the artifact's job.
+Choose layout based on the surface's job.
 
 Use:
 
@@ -156,8 +136,8 @@ Consider:
 - Disabled or permission-limited actions.
 - Success or completion feedback.
 
-A Milo artifact should feel trustworthy when things are missing, slow, partial,
-or failed.
+The UI should feel trustworthy when things are missing, slow, partial, or
+failed.
 
 ## Interaction Guidance
 
@@ -178,9 +158,8 @@ Before handing off a design or implementation, verify:
 
 - The primary outcome is obvious.
 - The primary action is visually clear.
-- The UI uses Milo/shadcn primitives wherever available.
 - There are no decorative gradients or marketing patterns.
 - The layout contains only sections that support the outcome.
 - Copy is short, concrete, and non-redundant.
 - Empty, loading, error, and success states are accounted for.
-- The artifact feels like Milo, not a separate app.
+- The UI feels like Milo, not a separate app.

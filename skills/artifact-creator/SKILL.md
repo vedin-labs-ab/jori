@@ -6,100 +6,81 @@ category: Milo
 
 # Artifact Creator
 
-Use this skill when creating or updating a Milo artifact.
-
-Before planning or building the UI, apply the `frontend-design` skill. Let it
-decide the outcome, layout, sections, states, and simplest Milo-native
-experience.
+Before planning or building the UI, apply the `frontend-design` skill — let it
+decide the outcome, layout, sections, states, and simplest experience. This
+skill owns the artifact platform on top of that: the template, SDK, contract,
+capabilities, components, and the validate-then-publish flow.
 
 ## Mental Model
 
 A Milo artifact is a versioned React + TypeScript mini-app served inside a
-sandboxed iframe.
-
-Milo owns the shell, SDK, theme, shadcn/ui primitives, build pipeline, and
-serving path. The artifact owns only task-specific source files under `src/**`.
+sandboxed iframe. Milo owns the shell, SDK, theme, shadcn/ui primitives, build
+pipeline, and serving path. The artifact owns only task-specific files under
+`src/**`.
 
 Build an artifact when the user needs a persistent interactive surface: a
 tracker, review queue, dashboard, workspace, setup flow, calculator, editor,
-report, or automation-backed view. Do not create an artifact for a one-off
-answer that is better as a normal message.
+report, or automation-backed view. Skip it for a one-off answer that works
+better as a normal message. If the request implies several unrelated tools,
+build a separate artifact for each.
 
-## Interpret the Request
+## Plan the Artifact
 
-Before writing code, identify:
+Beyond the UX that `frontend-design` covers, settle the artifact-specific pieces
+before writing code:
 
-- The user outcome: what should the artifact help them understand, decide, or
-  do?
-- The primary artifact surface: list, table, form, timeline, split view, editor,
-  dashboard, or focused tool.
-- The data model: what state is local to the user, shared across users, or
-  produced by automation?
-- The actions: what can happen inside the artifact, and which actions need
-  brokered tools?
-- The lifecycle states: loading, empty, populated, error, partial data, long
-  content, and success.
-
-Keep the artifact focused. If the request implies multiple unrelated tools,
-build separate artifacts.
+- Data model: which state is personal to one user versus shared across the
+  organization?
+- Brokered tools: which actions call external tools, so the UI needs capability
+  grants?
+- Producer mode: how does state get written?
+  - Interactive-only: the UI writes results from user actions.
+  - Automation-backed: an artifact-owned automation writes state; the UI
+    subscribes and renders.
+  - Hybrid: the UI can refresh on demand while an automation keeps state fresh.
 
 ## Platform Contract
 
-Use the platform template as immutable infrastructure.
+Treat the template as immutable infrastructure. It provides:
 
-The template provides:
-
-- `@/milo` for artifact SDK access.
-- `@/milo/contract` for contract-only helpers that must run during Node-side
+- `@/milo` for the artifact SDK.
+- `@/milo/contract` for contract-only helpers that load during Node-side
   validation.
 - `@/components/ui/*` for Milo-owned shadcn/ui primitives.
-- `@/milo.css`, `src/main.tsx`, config files, theme, and build pipeline.
+- `@/milo.css`, `src/main.tsx`, config, theme, and the build pipeline.
 
-Create `src/App.tsx` and `src/contract.ts`. `src/App.tsx` exports a default
-React component or named `App` component. `src/contract.ts` exports a named
-`contract` constant created with `defineArtifactContract`. Add optional
-`src/styles.css` and optional relative imports under `src/**`.
+You create `src/App.tsx` and `src/contract.ts`, plus optional `src/styles.css`
+and relative imports under `src/**`. `src/App.tsx` exports a default or named
+`App` component. `src/contract.ts` exports a named `contract` from
+`defineArtifactContract`.
 
-Do not publish platform-owned files: package/config files, `index.html`,
+Do not publish platform-owned files: package and config files, `index.html`,
 `src/main.tsx`, `src/milo.ts`, `src/milo.css`, `src/components/ui/**`,
 `src/lib/utils.ts`, `src/vite-env.d.ts`, `node_modules`, or `dist`.
 
-Do not use direct platform or network APIs: `fetch`, `XMLHttpRequest`,
+Do not reach for raw platform or network APIs — `fetch`, `XMLHttpRequest`,
 `WebSocket`, `localStorage`, `sessionStorage`, Clerk, Convex clients, or
-environment variables. Use the Milo SDK.
+environment variables. Go through the Milo SDK.
 
-## SDK Use
+Build the UI from the shadcn/ui primitives in `@/components/ui/*` — buttons,
+inputs, selects, dialogs, tabs, tables, badges, cards, separators, skeletons,
+alerts, menus, tooltips. Style with Tailwind `className` aligned to the template
+tokens; leave global CSS alone unless the artifact needs a reusable local
+pattern. Add custom visual treatment only when it clarifies hierarchy, state, or
+workflow.
 
-Artifact runtime code should use `@/milo` for platform access. Contract files
-should use `@/milo/contract` so local and publish validation can load contracts
-without initializing browser-only runtime APIs.
+## State
 
-Use:
+The contract is the artifact's durable-state API. Any domain state that must
+survive reloads, be shared, or be written by an automation belongs in
+contract-backed Milo state. Keep `useState` for ephemeral UI only — selected
+row, open dialog, pending form text, loading flags — never for important domain
+state.
 
-- `defineArtifactContract` from `@/milo/contract` in `src/contract.ts` for the
-  artifact's durable state contract. This file is required even when the
-  artifact has no durable state.
-- `milo.state.read/replace/patch/subscribe` with contract refs, never raw keys.
-- `useMiloState(contract.state.someEntry)` for React state that mirrors one
-  contract entry and should update when Milo state changes.
-- `milo.model.prompt` for bounded semantic model help. This requires a strict
-  Zod object schema and returns parsed `output`, not best-effort JSON.
-  `maxOutputTokens` is optional, output-only, defaults to 1000, and must be an
-  integer from 64 to 16000. Omit it unless the response schema clearly needs a
-  smaller or larger output budget.
-- Typed wrappers for granted integration tools when available. Prefer batch read
-  wrappers after searches.
-- `milo.callTool(tool, args, options?)` only for approved brokered tools listed
-  in the artifact's capabilities.
+Runtime code reads through `@/milo`; `src/contract.ts` imports from
+`@/milo/contract` so validation can load the contract without browser-only APIs.
 
-Think of the artifact contract as the product API for the artifact. All durable
-domain state that must survive reloads, be shared, or be written by automations
-belongs in contract-backed Milo state. React `useState` is fine for ephemeral UI
-state such as selected row, open dialog, pending form text, and transient loading
-flags. Do not keep important domain state only in local component state.
-
-State is contract-bound. Define it once in `src/contract.ts` with strict Zod
-object schemas:
+Define state once in `src/contract.ts` with strict Zod object schemas:
 
 ```ts
 import { z } from "zod"
@@ -132,7 +113,8 @@ export const contract = defineArtifactContract({
 })
 ```
 
-Use that same contract in UI code:
+Read and write through contract refs, never raw keys. `useMiloState` mirrors one
+contract entry into React and re-renders when it changes:
 
 ```ts
 import { milo, useMiloState } from "@/milo"
@@ -150,21 +132,12 @@ const { value, patch, status, error } = useMiloState(
 )
 ```
 
-For partial updates, use `milo.state.patch`. The SDK reads the current document,
-merges the patch, validates the full result with the Zod schema, and then writes
-it with version protection. Use `replace` when writing a complete document.
+Use `patch` for partial updates — the SDK reads the document, merges, validates
+against the schema, and writes with version protection — and `replace` to write
+a complete document. Set `scope: "personal"` for user-local state and
+`scope: "shared"` for automation outputs or team-visible state.
 
-For user-local state, use `scope: "personal"` in the contract entry. For
-automation outputs or team-visible state, use `scope: "shared"`.
-
-The publish tools derive the stored artifact contract from `src/contract.ts`.
-Never provide a manual contract payload. Never delete `src/contract.ts`, loosen
-schemas, replace live data with mock data, or remove state to bypass local
-check or publish failures. Fix the root cause and rerun the local check. If the
-root cause cannot be fixed with the available source, stop and report the exact
-validation error.
-
-If no durable state is needed, still create the required contract:
+Every artifact needs a contract, even with no durable state:
 
 ```ts
 import { defineArtifactContract } from "@/milo/contract"
@@ -172,22 +145,21 @@ import { defineArtifactContract } from "@/milo/contract"
 export const contract = defineArtifactContract({ version: 1, state: {} })
 ```
 
-Choose a producer mode before building:
+On first render, subscribe to contract state and show any existing value at
+once. If required data is missing or stale, run the primary load automatically
+with cached tool calls — do not gate the artifact behind a first "Scan" button.
+Reserve explicit refresh controls, and `{ forceRefresh: true }`, for
+user-requested freshness.
 
-- Interactive-only: the UI reads external tools, prompts models when needed, and
-  writes durable results to `milo.state` from user actions.
-- Automation-backed: an artifact-owned automation writes contract state in the
-  background, and the UI mostly subscribes and renders.
-- Hybrid: the UI can run an immediate refresh while an automation keeps the same
-  contract state fresh later.
+## Models and Data
 
-Default to seamless loading. On first render, subscribe to contract state and
-show any existing value immediately. If required data is missing or stale, run
-the primary load automatically with cached tool calls; do not require the user
-to click a first "Scan" button. Keep explicit refresh controls for user-requested
-freshness and pass `{ forceRefresh: true }` only from those explicit refreshes.
+Use deterministic sources first. Pull facts, counts, IDs, dates, participants,
+links, and statuses from structured tool outputs and existing Milo state. Reach
+for `milo.model.prompt` only for semantic work: judgment, classification,
+summarization, ranking, extraction from unstructured text, and drafting.
 
-Prompt model calls must define the expected result beside the call:
+`milo.model.prompt` takes a strict Zod object schema and returns parsed
+`output`, not best-effort JSON. Define the schema beside the call:
 
 ```ts
 import { z } from "zod"
@@ -207,140 +179,96 @@ const { output } = await milo.model.prompt({
 })
 ```
 
-For prompt output budgets, use the smallest range that fits the schema:
+`maxOutputTokens` is optional (default 1000, integer 64-16000). Use the smallest
+range that fits the schema: omit it for normal outputs, 64-512 for labels,
+scores, and short summaries, 1000-4000 for lists and short drafts, and
+4000-16000 only for large reports or many drafted replies. Handle a failed
+prompt in UI state; never fall back silently to empty data.
 
-- Omit `maxOutputTokens` for normal structured outputs.
-- Use 64-512 for labels, scores, IDs, and short summaries.
-- Use 1000-4000 for lists, grouped summaries, and short drafted text.
-- Use 4000-16000 only for intentionally large reports, many items, or multiple
-  drafted replies.
+When an integration offers search/list and read/detail tools, retrieve in
+stages: discover candidates with cheap search, list, or metadata reads; prompt
+only when deterministic filters cannot decide relevance; hydrate full records
+only for candidates that need high-trust output or write actions; and ground
+consequential output in those full records, not snippets alone.
 
-Handle prompt errors explicitly in UI state. A failed prompt means the schema,
-model, or request failed validation; do not silently fall back to empty data.
-
-Use deterministic data before prompting. Prefer structured tool outputs and
-existing Milo state for facts, counts, IDs, dates, participants, links, and
-statuses. Use `milo.model.prompt` for semantic judgment, classification,
-summarization, ranking, extraction from unstructured text, and drafting. When
-producing high-trust output, first discover candidate records with deterministic
-tools, then send only the relevant fields to the model with a strict output
-schema.
-
-For integrations with search/list and read/detail tools, use a staged retrieval
-pipeline:
-
-- Use cheap search, list, or metadata reads for candidate discovery.
-- Prompt only when deterministic filters cannot decide relevance or priority.
-- Hydrate full records only for candidates that need high-trust output,
-  user-visible conclusions, or write actions.
-- Ground drafting, recommendations, approvals, updates, and other consequential
-  output in the full relevant record context, not snippets or summaries alone.
-
-Caching is handled by the Milo SDK and broker. External read tools and
-`milo.model.prompt` are cached automatically for at least 15 minutes. You may
-pass `{ cacheTtlMs }` to request up to 60 minutes for stable external reads or
-expensive prompts, and `{ forceRefresh: true }` when the UI needs fresh external
-data for the same exact arguments. Do not build custom caches around
-`milo.state`; artifact state is Milo-owned and should be read live.
+The SDK and broker cache external reads and `milo.model.prompt` for at least 15
+minutes. Pass `{ cacheTtlMs }` for up to 60 minutes on stable reads or expensive
+prompts, and `{ forceRefresh: true }` when you need fresh data for the same
+arguments. Do not cache `milo.state` yourself; it is Milo-owned and read live.
 
 ## Capabilities
 
-Capabilities are grants for tools the artifact UI may call at runtime.
+Capabilities grant the tools the UI may call at runtime, through `milo.callTool`
+or typed integration wrappers. Keep them narrow:
 
-Keep grants narrow:
+- Grant only tools the UI actually calls, and prefer read tools.
+- Grant batch reads over single-record reads called in a loop.
+- Put write tools behind clear user-confirmed actions, and prefer
+  draft/prepare/preview tools over immediate send/mutate/publish.
+- Add `integrationId` to target a specific connected account, and `versionPinned`
+  to scope a grant to the published version.
 
-- Grant only tools the UI actually calls.
-- Prefer read tools.
-- For search-and-review flows, grant batch reads when available instead of
-  calling single-record read tools in a loop.
-- Use write tools only behind clear user-confirmed actions.
-- Prefer draft, prepare, or preview tools over immediate send, mutate, or
-  publish tools when the user should review the output first.
-- Include `integrationId` when the grant must target a specific connected
-  account.
-- Use `versionPinned` when a grant should apply only to the published version.
+Do not grant platform SDK tools like state or model prompting — those are part
+of the platform, not capabilities.
 
-Do not add capabilities for platform SDK tools such as state or model
-prompting. Those are part of the artifact platform.
-
-## Workflow
+## Build and Publish
 
 1. Apply `frontend-design`.
-2. Inspect existing artifact source with `read_artifact` when updating.
+2. When updating, read the current source with `read_artifact`.
 3. Copy the template from `/home/user/.milo/artifacts/template` into a working
    folder under `/home/user/workspace/artifacts/`.
 4. Edit only artifact-owned `src/**` files.
-5. Run `npm run check` inside the artifact folder.
-6. Fix validation failures and rerun the check.
-7. Publish only after checks pass with `create_artifact` or `update_artifact`
-   using the artifact folder as `workspacePath`.
+5. Run `npm run check` in the artifact folder; fix failures and rerun until
+   green.
+6. Publish with `create_artifact` (new) or `update_artifact` (existing).
 
-The workspace layout is known. Do not run broad directory discovery across
-`/home/user/workspace`, `/home/user/.milo`, `node_modules`, or platform-owned
-files. When you need file context, inspect only the artifact folder and the
-artifact-owned `src/**` files.
+The workspace layout is known — inspect only the artifact folder and its
+`src/**` files, never broad directories like `/home/user/workspace`,
+`/home/user/.milo`, or `node_modules`.
 
-`npm run check` is the local equivalent of publish validation: it formats,
-typechecks, validates the contract, runs Biome, and builds. Use it as the
-single validation path. Do not run separate formatting or broad lint commands
-unless a specific check error requires focused debugging.
+`npm run check` is the local mirror of publish validation: it formats,
+typechecks, validates the contract, runs Biome, and builds. Use it as the single
+validation path; publish runs the same checks again before storing source and
+assets, so treat publish as the final step, not the iteration loop. Never loosen
+schemas, swap in mock data, or delete contract state to get past a failure — fix
+the root cause and rerun. If you cannot fix it with the available source, stop
+and report the exact validation error.
 
-The publish tool repeats the same validation, then stores the artifact source
-and assets. Treat publish as the final step, not the iteration loop.
-
-## Publishing
-
-Use `create_artifact` for new artifacts and `update_artifact` for existing
-ones.
-
-Provide:
+Publish derives the stored contract from `src/contract.ts`; never hand-write a
+contract payload or inline source files. Pass:
 
 - `title`: short artifact title.
 - `access`: `personal` unless the user asks for an organization-visible
   artifact.
-- `workspacePath`: artifact workspace directory under
-  `/home/user/workspace/artifacts`.
-- `message`: concise version note when useful.
-- `capabilities`: narrow runtime tool grants, only when needed.
+- `workspacePath`: the artifact folder under `/home/user/workspace/artifacts`.
+- `message`: a concise version note when useful.
+- `capabilities`: narrow runtime grants, only when needed.
 
-Do not inline source files in the publish call. Milo validates, formats, builds,
-derives the contract from `src/contract.ts`, and stores source from
-`workspacePath`.
-
-After a successful publish, use the returned `url` when present, otherwise use
-the returned `urlPath`, in the user-facing handoff. Do not hand off only raw
-artifact IDs.
+Hand off with the returned `url`, or `urlPath` when there is no `url` — never a
+raw artifact ID.
 
 ## Automations
 
-Artifact automations are owned by the artifact. They are producers for artifact
-contract state entries.
-
-If the artifact needs background work:
+An artifact can own automations that produce its contract state in the
+background. To add one:
 
 - Publish the artifact with `src/contract.ts`.
-- Create an automation with `artifactId` set to the published artifact ID.
-- Instruct the automation to write outputs with `update_artifact_state` using
-  `contractName`, for example `reviewQueueLatest`.
-- Instruct the automation to read prior state with `read_artifact_state` using
-  the same `contractName`.
+- Create the automation with `artifactId` set to the published artifact.
+- Have it write outputs with `update_artifact_state` and read prior state with
+  `read_artifact_state`, both keyed by `contractName` (for example
+  `reviewQueueLatest`).
 
-Automations use the same stored artifact contract as the UI. When an
-artifact-owned automation calls artifact state tools, `artifactId` can be
-omitted because Milo infers it from the run. The automation must write values
-that match the stored contract schema; invalid writes fail instead of silently
-storing stale or malformed data.
+The automation shares the UI's stored contract, so `artifactId` is inferred and
+can be omitted from those calls. Writes must match the contract schema; invalid
+writes fail rather than store malformed data.
 
 ## Final Check
 
-Before handoff, verify:
+Before handoff, confirm the judgment calls that `npm run check` cannot:
 
-- The UI follows `frontend-design`.
-- The source includes only artifact-owned files.
-- The artifact uses Milo SDK instead of forbidden APIs.
+- The UI follows `frontend-design` and includes only artifact-owned files.
+- Important domain state is contract-backed, not stranded in React state.
+- Reads and writes go through the SDK and contract refs, never raw keys or
+  forbidden APIs.
 - Capabilities are minimal and justified.
-- `src/contract.ts` exists and exports `contract`.
-- State reads/writes use contract refs or contract names, not raw keys.
-- Important domain state is contract-backed, not only local React state.
-- Loading, empty, error, and success states exist.
-- Local artifact checks pass before publish.
+- Local checks pass before publish.
