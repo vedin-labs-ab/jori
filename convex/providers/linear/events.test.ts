@@ -11,6 +11,7 @@ describe("Linear webhook messages", () => {
         organizationId: "org-id",
         data: {
           id: "comment-id",
+          parentId: "parent-comment-id",
           issueId: "issue-id",
           body: "Updated comment",
           updatedAt: "2026-06-12T12:00:00Z",
@@ -24,6 +25,7 @@ describe("Linear webhook messages", () => {
       data: {
         action: "update",
         eventType: "Comment",
+        parentCommentId: "parent-comment-id",
       },
     })
   })

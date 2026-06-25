@@ -106,6 +106,7 @@ function activeSurfaceState(options: {
     : {
         communicated: options.communicated ?? false,
         surface: "slack",
+        target: null,
       }
 }
 

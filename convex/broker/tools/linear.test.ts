@@ -148,7 +148,7 @@ test("adds a Linear comment with CommentCreateInput", async () => {
 
   await callLinearTool(linearIntegration(), "linear_add_comment", {
     body: "Tiny quip.",
-    issueId: "issue-id",
+    target: { id: "issue-id", type: "issue" },
   })
   expect(calls[0]?.body.variables).toEqual({
     input: {
@@ -158,19 +158,19 @@ test("adds a Linear comment with CommentCreateInput", async () => {
   })
 })
 
-test("posts a Linear comment through the first-class comment helper", async () => {
+test("posts a Linear comment reply through the first-class comment helper", async () => {
   const calls = mockLinearFetch({
     data: { commentCreate: { success: true } },
   })
 
   await postLinearComment(linearIntegration(), {
     body: "Approval required.",
-    issueId: "issue-id",
+    target: { id: "comment-id", type: "comment" },
   })
   expect(calls[0]?.body.variables).toEqual({
     input: {
       body: "Approval required.",
-      issueId: "issue-id",
+      parentId: "comment-id",
     },
   })
 })

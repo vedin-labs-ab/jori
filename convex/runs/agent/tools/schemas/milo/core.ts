@@ -46,7 +46,7 @@ export const coreMiloToolInputSchemas = {
         "ID of the pending approval request to withdraw, returned when you requested it."
       ),
       messageId: stringProperty(
-        "Milo internal message id for the user message that requested this cancellation. Use the value after internal:message: from that message's message_ids list. Do not pass Slack, GitHub, or Linear message ids."
+        "Milo internal message id for the user message that requested this cancellation. Use the value after internal:message: from that message's identifiers list. Do not pass Slack, GitHub, or Linear message ids."
       ),
       reason: stringProperty(
         "Short explanation of why the request is no longer needed."

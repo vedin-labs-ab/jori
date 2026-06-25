@@ -22,6 +22,7 @@ type ApprovalClaim =
 export const call = action({
   args: {
     inputJson: v.string(),
+    replyTarget: v.optional(v.string()),
     runId: v.id("runs"),
     secret: v.string(),
     surface: toolSurfaceValidator,
@@ -36,6 +37,7 @@ export const call = action({
       await loadBrokerContext(ctx, args.runId),
       {
         args: decodeToolInput(args),
+        replyTarget: args.replyTarget,
         surface: args.surface,
         tool: args.tool,
       }

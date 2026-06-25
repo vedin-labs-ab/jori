@@ -1,3 +1,4 @@
+import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { getLinearBotId } from "../providers/linear/data"
@@ -19,6 +20,7 @@ import { messageAudience } from "./surface"
 export const record = internalMutation({
   args: {
     integration: messageIntegrationValidator,
+    mode: v.optional(v.union(v.literal("record"), v.literal("record_and_run"))),
     ...observedMessageArgs,
   },
   handler: async (ctx, args) => {
@@ -43,6 +45,11 @@ export const record = internalMutation({
     const observed = observedMessage(args, integration)
     const message = await insertMessage(ctx, { integration, message: observed })
     const now = Date.now()
+    const mode = args.mode ?? "record_and_run"
+
+    if (mode === "record") {
+      return { status: "recorded" as const, messageId: message._id }
+    }
 
     if (isUserActor(message.actor)) {
       await recordAutomationEvent(ctx, { integration, message: observed, now })

@@ -21,6 +21,7 @@ type ApprovalDeliveryContext = {
 type ApprovalDeliveryArgs = {
   approvalId: Id<"approvals">
   code: string
+  replyTarget?: string
   surface: ToolSurface
   tool: string
   summary: string
@@ -119,7 +120,7 @@ async function deliverTextApproval(
     throw new Error(`Cannot deliver approval requests for ${input.type} runs.`)
   }
 
-  const address = replyAddress(input.message)
+  const address = replyAddress(input.message, args.replyTarget)
 
   if (address === null) {
     throw new Error(

@@ -83,7 +83,12 @@ test("formats runtime messages with normalized text and Slack identifiers", () =
   ).toMatchObject({
     actor: "Albin",
     actorIds: ["slack:user:U123"],
-    messageIds: ["internal:message:next", "slack:message:123.456"],
+    identifiers: [
+      "internal:message:next",
+      "slack:message:123.456",
+      "slack:thread:123.456",
+    ],
+    replyTarget: null,
     text: "@Milo follow-up",
   })
 })

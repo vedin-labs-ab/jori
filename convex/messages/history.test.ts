@@ -29,7 +29,7 @@ function entry(
     actorIds: [],
     createdAt,
     id,
-    messageIds: [],
+    identifiers: [],
     observedAt: null,
     source: actor === "Milo" ? "self" : "user",
     text,

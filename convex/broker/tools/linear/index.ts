@@ -93,6 +93,7 @@ export async function callLinearTool(
                 createdAt
                 updatedAt
                 url
+                parent { id }
                 user { id name }
               }
             }
@@ -118,6 +119,7 @@ export async function callLinearTool(
                 createdAt
                 updatedAt
                 url
+                parent { id }
                 user { id name }
               }
             }

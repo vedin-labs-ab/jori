@@ -137,6 +137,7 @@ export class MiloConvexClient {
   async sendReply(args: {
     blocks?: JsonObject[]
     runId: ConvexId<"runs">
+    target?: string
     text: string
   }) {
     return await this.client.action(api.runtime.surface.sendReply, {
@@ -161,12 +162,16 @@ export class MiloConvexClient {
 
   async requestApproval(args: {
     input: JsonObject
+    replyTarget?: string
     runId: ConvexId<"runs">
     surface: ToolSurface
     tool: string
   }) {
     return await this.client.action(api.runtime.tools.requestApproval, {
       ...encodeToolInput(args.input),
+      ...(args.replyTarget === undefined
+        ? {}
+        : { replyTarget: args.replyTarget }),
       runId: args.runId,
       secret: this.secret,
       surface: args.surface,

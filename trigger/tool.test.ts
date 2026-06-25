@@ -31,6 +31,29 @@ test("prompted tools request approval without executing", async () => {
   expect(runtime.convex.callTool).not.toHaveBeenCalled()
 })
 
+test("prompted tools carry the active reply target into approval delivery", async () => {
+  const runtime = createRuntime({
+    activeSurface: {
+      communicated: false,
+      surface: "linear",
+      target: "linear:thread:comment-id",
+    },
+  })
+
+  await executeToolCall({
+    attempt: 1,
+    call: promptedToolCall(),
+    runtime,
+    sequence: 100,
+  })
+
+  expect(runtime.convex.requestApproval).toHaveBeenCalledWith(
+    expect.objectContaining({
+      replyTarget: "linear:thread:comment-id",
+    })
+  )
+})
+
 test("tool failures are returned to the agent instead of thrown", async () => {
   const runtime = createRuntime({
     mode: "allowed",
@@ -66,7 +89,10 @@ test("tool failures are returned to the agent instead of thrown", async () => {
 })
 
 function createRuntime(
-  options: { mode?: "allowed" | "prompted" } = {}
+  options: {
+    activeSurface?: ToolRuntime["context"]["activeSurface"]
+    mode?: "allowed" | "prompted"
+  } = {}
 ): ToolRuntime {
   return {
     convex: {
@@ -80,7 +106,7 @@ function createRuntime(
       })),
     } as unknown as ToolRuntime["convex"],
     context: {
-      activeSurface: null,
+      activeSurface: options.activeSurface ?? null,
       prompt: "system",
       run: {
         id: id<"runs">("run_1"),

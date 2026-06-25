@@ -26,6 +26,7 @@ export type SandboxCleanupPayload = {
 export type ActiveSurface = {
   communicated: boolean
   surface: "github" | "linear" | "slack"
+  target: string | null
 }
 
 export type RuntimeToolRoute =
@@ -116,10 +117,11 @@ export type RuntimeMessage = {
   authority: "authoritative" | "soft"
   createdAt: number
   id: ConvexId<"messages">
+  identifiers: string[]
   integration: string
-  messageIds: string[]
   mentioned: boolean
   observedAt: number | null
+  replyTarget: string | null
   source: "bot" | "self" | "unknown" | "user"
   text: string
   type: string

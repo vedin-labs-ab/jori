@@ -31,6 +31,7 @@ export async function createPromptedToolApproval(
     surface: ToolSurface
     tool: string
     args: JsonObject
+    replyTarget?: string
   }
 ): Promise<{
   approvalId: Id<"approvals">
@@ -83,6 +84,7 @@ export async function createPromptedToolApproval(
     await deliverApprovalRequest(ctx, context, {
       approvalId: approval.approvalId,
       code: approval.code,
+      replyTarget: args.replyTarget,
       surface: request.surface,
       tool: request.tool,
       summary: request.summary,

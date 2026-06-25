@@ -78,6 +78,7 @@ function createRuntime(options: {
       activeSurface: {
         communicated: false,
         surface: options.surface ?? "linear",
+        target: null,
       },
       prompt: "system",
       run: {

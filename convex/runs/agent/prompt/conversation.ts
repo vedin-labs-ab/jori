@@ -32,7 +32,7 @@ function formatMessageEntry(entry: PromptMessageEntry) {
     message: {
       actor: entry.actor ?? "unknown",
       actorIds: formatEntryIds(entry.actorIds),
-      messageIds: formatEntryIds(entry.messageIds),
+      identifiers: formatEntryIds(entry.identifiers),
       observedAt: new Date(observed).toISOString(),
       speaker: entry.source,
       text: entry.text,

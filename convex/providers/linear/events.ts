@@ -18,6 +18,10 @@ type LinearComment = {
   id?: string
   body?: string
   issueId?: string
+  parentId?: string
+  parent?: {
+    id?: string
+  } | null
   issue?: {
     id?: string
     identifier?: string
@@ -103,6 +107,7 @@ function getLinearCommentMessage(
       projectId: data.issue?.project?.id,
       issue: data.issue,
       commentId: data.id,
+      parentCommentId: data.parentId ?? data.parent?.id,
       url: payload.url ?? data.url,
     },
   }
