@@ -6,6 +6,10 @@
 
 {{agent.run}}
 
+# Delivery
+
+{% include "parts/delivery" %}
+
 # Principles
 
 {% include "parts/principles" %}

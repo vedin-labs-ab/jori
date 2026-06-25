@@ -65,6 +65,7 @@ async function runModelToolStep(
   response: Extract<ModelResponse, { type: "tool_calls" }>,
   step: number
 ): Promise<YieldOutcome> {
+  reportUndeliveredText(args.runtime, response, step)
   messages.push({
     content: response.content,
     role: "assistant",
@@ -86,6 +87,23 @@ async function runModelToolStep(
   }
 
   return outcome
+}
+
+function reportUndeliveredText(
+  runtime: ToolRuntime,
+  response: Extract<ModelResponse, { type: "tool_calls" }>,
+  step: number
+) {
+  if (response.content === null || response.content.trim() === "") {
+    return
+  }
+
+  console.warn("Assistant text outside a tool call was not delivered.", {
+    length: response.content.length,
+    runId: runtime.context.run.id,
+    step,
+    tools: response.toolCalls.map((call) => call.name),
+  })
 }
 
 async function settleYield(
@@ -162,7 +180,7 @@ function hasTool(tools: RuntimeContext["tools"], name: string) {
 function stopRepairInstruction(args: { canReact: boolean; canReply: boolean }) {
   const instructions = [
     "The run is not finished.",
-    "Assistant completion text is private and is not visible to the requester.",
+    "Any words you write outside a tool call reach no one.",
   ]
 
   if (args.canReply) {
