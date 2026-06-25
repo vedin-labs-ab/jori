@@ -144,12 +144,7 @@ export type RuntimeEventInput = {
   type: RuntimeEventType
 }
 
-export type WaiterWakeReason =
-  | "approval_resolved"
-  | "integration_resolved"
-  | "message"
-  | "run_cancelled"
-  | "expired"
+export type WaiterWakeReason = "resolved" | "message" | "cancelled" | "expired"
 
 export type WaiterWake = {
   reason: WaiterWakeReason

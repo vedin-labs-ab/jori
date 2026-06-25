@@ -26,7 +26,7 @@ export async function parkRun(
 
   if (await raceResolved(runtime)) {
     await runtime.convex.expireWaiter({ waiterId })
-    return { reason: "approval_resolved" }
+    return { reason: "resolved" }
   }
 
   const result = await wait.forToken<WaiterWake>(token)

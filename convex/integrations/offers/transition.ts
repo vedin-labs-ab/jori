@@ -215,7 +215,7 @@ async function wakeOfferRun(ctx: MutationCtx, offer: Doc<"integrationOffers">) {
 
   await wakeRun(ctx, {
     runId: offer.runId,
-    reason: "integration_resolved",
-    subject: { kind: "integrationOffer", integrationOfferId: offer._id },
+    reason: "resolved",
+    subject: { kind: "offer", id: offer._id },
   })
 }

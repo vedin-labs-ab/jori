@@ -135,6 +135,7 @@ async function cancelStaleWaiters(ctx: MutationCtx, runId: Id<"runs">) {
   for await (const waiter of stale) {
     await ctx.db.patch(waiter._id, {
       status: "cancelled",
+      reason: "cancelled",
       updatedAt: Date.now(),
     })
   }

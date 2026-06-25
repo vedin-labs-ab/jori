@@ -2,20 +2,16 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
 export const waiterReason = v.union(
-  v.literal("approval_resolved"),
-  v.literal("integration_resolved"),
+  v.literal("resolved"),
   v.literal("message"),
-  v.literal("run_cancelled"),
+  v.literal("cancelled"),
   v.literal("expired")
 )
 
 export const waiterSubject = v.union(
-  v.object({ kind: v.literal("approval"), approvalId: v.id("approvals") }),
-  v.object({
-    kind: v.literal("integrationOffer"),
-    integrationOfferId: v.id("integrationOffers"),
-  }),
-  v.object({ kind: v.literal("message"), messageId: v.id("messages") })
+  v.object({ kind: v.literal("approval"), id: v.id("approvals") }),
+  v.object({ kind: v.literal("offer"), id: v.id("integrationOffers") }),
+  v.object({ kind: v.literal("message"), id: v.id("messages") })
 )
 
 export const waiterStatus = v.union(

@@ -185,8 +185,8 @@ async function cancelApprovalFunction(
 async function wakeApprovalRun(ctx: MutationCtx, approval: Doc<"approvals">) {
   await wakeRun(ctx, {
     runId: approval.runId,
-    reason: "approval_resolved",
-    subject: { kind: "approval", approvalId: approval._id },
+    reason: "resolved",
+    subject: { kind: "approval", id: approval._id },
   })
 }
 
