@@ -2,7 +2,7 @@ import { calendarEventProperty } from "./calendar"
 import {
   numberProperty,
   objectSchema,
-  runAttachmentsProperty,
+  runAssetsProperty,
   type SchemaMap,
   stringArrayProperty,
   stringProperty,
@@ -114,7 +114,7 @@ function gmailMessageSchema() {
   return objectSchema({
     required: ["to", "subject", "body"],
     properties: {
-      attachments: runAttachmentsProperty(),
+      assets: runAssetsProperty(),
       bcc: stringArrayProperty("BCC recipient email addresses."),
       body: stringProperty("Message body."),
       bodyType: {
@@ -133,7 +133,7 @@ function gmailDraftSchema() {
   return objectSchema({
     required: ["body"],
     properties: {
-      attachments: runAttachmentsProperty(),
+      assets: runAssetsProperty(),
       bcc: stringArrayProperty(
         "BCC recipient email addresses. Standalone drafts only."
       ),

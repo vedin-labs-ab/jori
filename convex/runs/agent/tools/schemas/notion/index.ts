@@ -74,10 +74,10 @@ export const notionToolInputSchemas = {
     },
   }),
   notion_upload_file: objectSchema({
-    required: ["attachmentId"],
+    required: ["assetId"],
     properties: {
-      attachmentId: stringProperty(
-        "Run attachment ID returned by save_attachment or search_attachments."
+      assetId: stringProperty(
+        "Run asset ID returned by save_asset or search_assets."
       ),
       contentType: stringProperty(
         "Optional Notion file content_type override."

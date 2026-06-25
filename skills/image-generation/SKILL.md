@@ -1,6 +1,6 @@
 ---
 name: image-generation
-description: Generate Milo image assets with the `generate_image` tool and save them as run attachments.
+description: Generate Milo image assets with the `generate_image` tool and save them as run assets.
 category: Milo
 ---
 
@@ -11,7 +11,7 @@ mockup, diagram-like image, social image, icon concept, texture, background, or
 other generated bitmap.
 
 Call `generate_image` for the actual image. Do not claim an image was created
-unless the tool returned a successful attachment.
+unless the tool returned a successful asset.
 
 ## Tool Contract
 
@@ -22,14 +22,14 @@ Use:
   "prompt": "Complete image prompt.",
   "save": {
     "name": "optional-file-name",
-    "description": "optional attachment description"
+    "description": "optional asset description"
   }
 }
 ```
 
 Only `prompt` is required. Use `save.name` when the image has an obvious durable
-name. Use `save.description` when it will help the user distinguish the
-attachment later.
+name. Use `save.description` when it will help the user distinguish the asset
+later.
 
 ## Workflow
 
@@ -44,9 +44,9 @@ State important negatives only when they prevent likely mistakes.
 Generate one image per distinct asset. If the user asks for several unrelated
 assets, call `generate_image` separately for each one with a clear filename.
 
-After the tool succeeds, reference the returned attachment and workspace path.
+After the tool succeeds, reference the returned asset and workspace path.
 If the image is meant for another tool or an artifact, use the returned `path`
-or `attachmentId` instead of regenerating it.
+or `assetId` instead of regenerating it.
 
 ## Prompt Quality
 

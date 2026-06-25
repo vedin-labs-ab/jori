@@ -2,8 +2,8 @@ import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 
-export type RunAttachment = {
-  attachmentId: Id<"attachments">
+export type RunAsset = {
+  assetId: Id<"assets">
   name: string
   mimeType: string
   size: number
@@ -11,88 +11,85 @@ export type RunAttachment = {
   bytes: Uint8Array
 }
 
-export type AttachmentContext = {
+export type AssetContext = {
   ctx: ActionCtx
   run: Doc<"runs">
 }
 
-export async function readRunAttachments(
-  context: AttachmentContext | undefined,
+export async function readRunAssets(
+  context: AssetContext | undefined,
   value: unknown,
   options: { maxBytes?: number } = {}
-): Promise<RunAttachment[]> {
-  const inputs = readAttachmentInputs(value)
+): Promise<RunAsset[]> {
+  const inputs = readAssetInputs(value)
 
   if (inputs.length === 0) {
     return []
   }
 
   if (context === undefined) {
-    throw new Error("Attachments are not available in this context")
+    throw new Error("Assets are not available in this context")
   }
 
-  const attachments: RunAttachment[] = []
+  const assets: RunAsset[] = []
 
   for (const input of inputs) {
-    const attachment = await context.ctx.runQuery(
-      internal.attachments.data.getForTenant,
+    const asset = await context.ctx.runQuery(
+      internal.assets.data.getForTenant,
       {
         tenantId: context.run.tenantId,
-        attachmentId: input.attachmentId as Id<"attachments">,
+        assetId: input.assetId as Id<"assets">,
       }
     )
 
-    if (attachment === null) {
-      throw new Error(`Unknown attachment: ${input.attachmentId}`)
+    if (asset === null) {
+      throw new Error(`Unknown asset: ${input.assetId}`)
     }
 
-    if (options.maxBytes !== undefined && attachment.size > options.maxBytes) {
+    if (options.maxBytes !== undefined && asset.size > options.maxBytes) {
       throw new Error(
-        `${attachment.name} exceeds the ${formatBytes(options.maxBytes)} attachment limit`
+        `${asset.name} exceeds the ${formatBytes(options.maxBytes)} asset limit`
       )
     }
 
-    const blob = await context.ctx.storage.get(attachment.storageId)
+    const blob = await context.ctx.storage.get(asset.storageId)
 
     if (blob === null) {
-      throw new Error(`Attachment is missing: ${attachment.name}`)
+      throw new Error(`Asset is missing: ${asset.name}`)
     }
 
-    attachments.push({
-      attachmentId: attachment._id,
-      name: input.name ?? attachment.name,
-      mimeType: input.mimeType ?? attachment.mimeType,
-      size: attachment.size,
-      description: attachment.description,
+    assets.push({
+      assetId: asset._id,
+      name: input.name ?? asset.name,
+      mimeType: input.mimeType ?? asset.mimeType,
+      size: asset.size,
+      description: asset.description,
       bytes: new Uint8Array(await blob.arrayBuffer()),
     })
   }
 
-  return attachments
+  return assets
 }
 
-function readAttachmentInputs(value: unknown) {
+function readAssetInputs(value: unknown) {
   if (value === undefined || value === null) {
     return []
   }
 
   if (!Array.isArray(value)) {
-    throw new Error("attachments must be an array")
+    throw new Error("assets must be an array")
   }
 
   return value.map((item, index) => {
     if (typeof item !== "object" || item === null || Array.isArray(item)) {
-      throw new Error(`attachments[${index}] must be an object`)
+      throw new Error(`assets[${index}] must be an object`)
     }
 
     const input = item as Record<string, unknown>
-    const attachmentId = requiredString(
-      input.attachmentId,
-      `attachments[${index}].attachmentId`
-    )
+    const assetId = requiredString(input.assetId, `assets[${index}].assetId`)
 
     return {
-      attachmentId,
+      assetId,
       name: optionalString(input.name),
       mimeType: optionalString(input.mimeType),
     }

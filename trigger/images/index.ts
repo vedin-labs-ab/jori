@@ -14,7 +14,7 @@ type GenerateImageInput = {
 
 const generatedImageDirectory = "generated-images"
 
-export async function generateImageAttachment(
+export async function generateImageAsset(
   runtime: ToolRuntime,
   input: JsonObject
 ) {
@@ -30,7 +30,7 @@ export async function generateImageAttachment(
     },
   ])
 
-  const attachment = await runtime.convex.uploadAttachment({
+  const asset = await runtime.convex.uploadAsset({
     bytes: generated.bytes,
     description: request.save.description,
     mimeType: generated.mimeType,
@@ -40,7 +40,7 @@ export async function generateImageAttachment(
 
   return {
     image: {
-      ...attachment,
+      ...asset,
       model: generated.model,
       path: workspacePath,
     },

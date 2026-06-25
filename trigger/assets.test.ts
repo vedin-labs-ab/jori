@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest"
-import { materializeSandboxResult } from "./attachments"
+import { materializeSandboxResult } from "./assets"
 import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId } from "./types"

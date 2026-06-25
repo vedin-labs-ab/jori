@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { generateImageAttachment } from "./images/index"
+import { generateImageAsset } from "./images/index"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId } from "./types"
 
@@ -15,7 +15,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-test("generates an image through OpenRouter and saves it as an attachment", async () => {
+test("generates an image through OpenRouter and saves it as an asset", async () => {
   const imageBytes = new Uint8Array(Buffer.from("milo-image"))
   const fetchMock = mockFetch(
     Response.json(
@@ -45,7 +45,7 @@ test("generates an image through OpenRouter and saves it as an attachment", asyn
   )
   const runtime = createRuntime()
 
-  const result = await generateImageAttachment(runtime.runtime, {
+  const result = await generateImageAsset(runtime.runtime, {
     prompt: "A clean product hero image for Milo.",
     save: {
       description: "Product hero",
@@ -64,7 +64,7 @@ test("generates an image through OpenRouter and saves it as an attachment", asyn
       path: "/home/user/workspace/generated-images/hero.png",
     },
   ])
-  expect(runtime.uploadAttachment).toHaveBeenCalledWith({
+  expect(runtime.uploadAsset).toHaveBeenCalledWith({
     bytes: imageBytes,
     description: "Product hero",
     mimeType: "image/png",
@@ -73,7 +73,7 @@ test("generates an image through OpenRouter and saves it as an attachment", asyn
   })
   expect(result).toEqual({
     image: {
-      attachmentId: "attachment_1",
+      assetId: "asset_1",
       mimeType: "image/png",
       model: "google/gemini-3.1-flash-image",
       name: "hero.png",
@@ -104,20 +104,18 @@ test("returns a repairable error when OpenRouter produces no image", async () =>
   )
 
   await expect(
-    generateImageAttachment(createRuntime().runtime, {
+    generateImageAsset(createRuntime().runtime, {
       prompt: "Create a launch image.",
     })
   ).rejects.toThrow("OpenRouter did not return a generated image.")
 })
 
-type UploadAttachmentInput = Parameters<
-  ToolRuntime["convex"]["uploadAttachment"]
->[0]
+type UploadAssetInput = Parameters<ToolRuntime["convex"]["uploadAsset"]>[0]
 type WriteFilesInput = Parameters<ToolRuntime["sandbox"]["writeFiles"]>[0]
 
 function createRuntime() {
-  const uploadAttachment = vi.fn(async (args: UploadAttachmentInput) => ({
-    attachmentId: "attachment_1" as ConvexId<"attachments">,
+  const uploadAsset = vi.fn(async (args: UploadAssetInput) => ({
+    assetId: "asset_1" as ConvexId<"assets">,
     mimeType: args.mimeType,
     name: args.name,
     size: args.bytes.byteLength,
@@ -131,7 +129,7 @@ function createRuntime() {
       },
     },
     convex: {
-      uploadAttachment,
+      uploadAsset,
     },
     sandbox: {
       writeFiles,
@@ -140,7 +138,7 @@ function createRuntime() {
 
   return {
     runtime,
-    uploadAttachment,
+    uploadAsset,
     writeFiles,
   }
 }

@@ -6,9 +6,9 @@ test("stores all surface tool capabilities for run details", () => {
   const miloTools = [
     {
       access: "write" as const,
-      description: "Persist a generated attachment.",
-      label: "Save attachment",
-      tool: "save_attachment",
+      description: "Persist a generated asset.",
+      label: "Save asset",
+      tool: "save_asset",
     },
   ]
 

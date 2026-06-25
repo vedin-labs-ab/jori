@@ -1,4 +1,4 @@
-import { type RunAttachment } from "../../../attachments/read"
+import { type RunAsset } from "../../../assets/read"
 import {
   requiredSlackResultString,
   slackFormApi,
@@ -8,7 +8,7 @@ import {
 export async function postSlackFiles(
   token: string,
   args: {
-    attachments: RunAttachment[]
+    assets: RunAsset[]
     channel: string
     text: string
     thread_ts?: string
@@ -16,8 +16,8 @@ export async function postSlackFiles(
 ) {
   const files = []
 
-  for (const attachment of args.attachments) {
-    files.push(await uploadSlackFile(token, attachment))
+  for (const asset of args.assets) {
+    files.push(await uploadSlackFile(token, asset))
   }
 
   return await slackJsonApi(token, "files.completeUploadExternal", {
@@ -28,24 +28,23 @@ export async function postSlackFiles(
   })
 }
 
-async function uploadSlackFile(token: string, attachment: RunAttachment) {
+async function uploadSlackFile(token: string, asset: RunAsset) {
   const ticket = await slackFormApi(token, "files.getUploadURLExternal", {
-    filename: attachment.name,
-    length: attachment.bytes.byteLength,
-    ...(attachment.description === undefined ||
-    !attachment.mimeType.startsWith("image/")
+    filename: asset.name,
+    length: asset.bytes.byteLength,
+    ...(asset.description === undefined || !asset.mimeType.startsWith("image/")
       ? {}
-      : { alt_txt: attachment.description.slice(0, 1000) }),
+      : { alt_txt: asset.description.slice(0, 1000) }),
   })
   const uploadUrl = requiredSlackResultString(ticket, "upload_url")
   const fileId = requiredSlackResultString(ticket, "file_id")
   const response = await fetch(uploadUrl, {
     method: "POST",
     headers: {
-      "content-type": attachment.mimeType,
+      "content-type": asset.mimeType,
     },
-    body: new Blob([copyBytesToArrayBuffer(attachment.bytes)], {
-      type: attachment.mimeType,
+    body: new Blob([copyBytesToArrayBuffer(asset.bytes)], {
+      type: asset.mimeType,
     }),
   })
 
@@ -55,7 +54,7 @@ async function uploadSlackFile(token: string, attachment: RunAttachment) {
 
   return {
     id: fileId,
-    title: attachment.name,
+    title: asset.name,
   }
 }
 

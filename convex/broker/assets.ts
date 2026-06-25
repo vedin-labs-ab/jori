@@ -9,7 +9,7 @@ import {
 import { optionalString } from "../shared/input"
 import { authenticateBrokerRequest } from "./auth"
 
-export async function handleAttachmentUploadRequest(
+export async function handleAssetUploadRequest(
   ctx: ActionCtx,
   request: Request
 ) {
@@ -21,18 +21,18 @@ export async function handleAttachmentUploadRequest(
 
   const requestUrl = new URL(request.url)
   const bytes = new Uint8Array(await request.arrayBuffer())
-  const maxAttachmentBytes = 25 * 1024 * 1024
+  const maxAssetBytes = 25 * 1024 * 1024
 
   if (bytes.byteLength === 0) {
-    return jsonError("Attachment is empty", 400)
+    return jsonError("Asset is empty", 400)
   }
 
-  if (bytes.byteLength > maxAttachmentBytes) {
-    return jsonError("Attachment exceeds the 25 MB limit", 400)
+  if (bytes.byteLength > maxAssetBytes) {
+    return jsonError("Asset exceeds the 25 MB limit", 400)
   }
 
   const mimeType = normalizeMimeType(request.headers.get("content-type"))
-  const name = normalizeAttachmentName(requestUrl.searchParams.get("name"))
+  const name = normalizeAssetName(requestUrl.searchParams.get("name"))
   const description = optionalString(requestUrl.searchParams.get("description"))
   let storageId: Id<"_storage"> | undefined
 
@@ -43,8 +43,8 @@ export async function handleAttachmentUploadRequest(
       })
     )
 
-    const attachmentId: Id<"attachments"> = await ctx.runMutation(
-      internal.attachments.data.record,
+    const assetId: Id<"assets"> = await ctx.runMutation(
+      internal.assets.data.record,
       {
         tenantId: context.run.tenantId,
         runId: context.run._id,
@@ -58,7 +58,7 @@ export async function handleAttachmentUploadRequest(
     const url = await ctx.storage.getUrl(storageId)
 
     return Response.json({
-      attachmentId,
+      assetId,
       name,
       mimeType,
       size: bytes.byteLength,
@@ -69,14 +69,11 @@ export async function handleAttachmentUploadRequest(
       await ctx.storage.delete(storageId)
     }
 
-    return jsonError(
-      formatProviderError(error, "Attachment upload failed"),
-      400
-    )
+    return jsonError(formatProviderError(error, "Asset upload failed"), 400)
   }
 }
 
-function normalizeAttachmentName(value: string | null) {
+function normalizeAssetName(value: string | null) {
   const name = value
     ?.trim()
     .split(/[\\/]/)
@@ -84,7 +81,7 @@ function normalizeAttachmentName(value: string | null) {
     ?.replace(/[\r\n]/g, " ")
     .slice(0, 160)
 
-  return name === undefined || name === "" ? "attachment" : name
+  return name === undefined || name === "" ? "asset" : name
 }
 
 function normalizeMimeType(value: string | null) {
