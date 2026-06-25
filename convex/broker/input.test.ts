@@ -192,6 +192,56 @@ test("broker input validation accepts representative provider write inputs", () 
   ).toMatchObject({ event: { subject: "Planning" } })
 })
 
+test("broker input validation coerces numeric Slack timestamps", () => {
+  expect(
+    normalizeBrokerToolInput("slack_add_reaction", {
+      channel: "C123",
+      name: "sparkles",
+      timestamp: 1782382133.099689,
+    })
+  ).toEqual({
+    channel: "C123",
+    name: "sparkles",
+    timestamp: "1782382133.099689",
+  })
+
+  expect(
+    normalizeBrokerToolInput("conversations_replies", {
+      channel: "C123",
+      ts: 1782380950.661619,
+    })
+  ).toMatchObject({ ts: "1782380950.661619" })
+
+  expect(
+    normalizeBrokerToolInput("conversations_history", {
+      channel: "C123",
+      latest: 1782382133.099689,
+      oldest: 1782380950.661619,
+    })
+  ).toMatchObject({
+    latest: "1782382133.099689",
+    oldest: "1782380950.661619",
+  })
+
+  expect(
+    normalizeBrokerToolInput("conversations_add_message", {
+      channel: "C123",
+      text: "Hello",
+      thread_ts: 1782380950.661619,
+    })
+  ).toMatchObject({ thread_ts: "1782380950.661619" })
+})
+
+test("broker input validation keeps non-timestamp Slack strings strict", () => {
+  expect(() =>
+    normalizeBrokerToolInput("slack_add_reaction", {
+      channel: 123,
+      name: "sparkles",
+      timestamp: 1782382133.099689,
+    })
+  ).toThrow("slack_add_reaction.channel must be a string")
+})
+
 function timedEvent(titleKey: "subject" | "summary") {
   return {
     [titleKey]: "Planning",
