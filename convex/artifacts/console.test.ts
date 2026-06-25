@@ -13,7 +13,7 @@ test("summarizes artifact capabilities by canonical tool surface", () => {
   ).toEqual({
     access: "read",
     approvedAt: 1,
-    description: "Search Gmail threads.",
+    description: "Search your Gmail threads.",
     integrationId: undefined,
     label: "Search threads",
     surface: "gmail",

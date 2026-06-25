@@ -1,0 +1,61 @@
+import { type ToolPermissionRow } from "./index"
+
+export const slackToolPermissionRows = [
+  [
+    "slack",
+    "channels_list",
+    "List channels",
+    "List Slack channels.",
+    "List Slack channels. Use to find a channel id before reading or posting.",
+    "read",
+  ],
+  [
+    "slack",
+    "conversations_history",
+    "Read channel history",
+    "Read messages in a Slack channel.",
+    "Read recent messages in a Slack channel. Use to get context before replying or summarizing.",
+    "read",
+  ],
+  [
+    "slack",
+    "conversations_replies",
+    "Read thread replies",
+    "Read replies in a Slack thread.",
+    "Read the messages in a Slack thread. Use to get full thread context before replying.",
+    "read",
+  ],
+  [
+    "slack",
+    "conversations_search_messages",
+    "Search messages",
+    "Search Slack messages.",
+    "Search Slack messages by query. Use to find relevant messages across channels before reading them.",
+    "read",
+  ],
+  [
+    "slack",
+    "users_search",
+    "Search users",
+    "Find people in your Slack workspace.",
+    "Search Slack users by name or handle. Use to resolve a person to a user id before mentioning or messaging them.",
+    "read",
+  ],
+  [
+    "slack",
+    "conversations_add_message",
+    "Send message",
+    "Post a message to Slack.",
+    "Post a message to a Slack channel or thread. Confirm the destination before sending; reply in-thread when continuing a conversation.",
+    "write",
+    "required",
+  ],
+  [
+    "slack",
+    "slack_add_reaction",
+    "Add reaction",
+    "React to a Slack message with an emoji.",
+    "Add an emoji reaction to a Slack message. Use as a lightweight acknowledgement instead of a worded reply.",
+    "write",
+  ],
+] satisfies ToolPermissionRow[]

@@ -16,4 +16,12 @@ describe("permission catalog", () => {
       expect(knownSurfaces.has(surface)).toBe(true)
     }
   })
+
+  test("keeps user-facing description and agent-facing usage distinct", () => {
+    for (const permission of toolPermissions) {
+      expect(permission.description.trim().length).toBeGreaterThan(0)
+      expect(permission.usage.trim().length).toBeGreaterThan(0)
+      expect(permission.description).not.toBe(permission.usage)
+    }
+  })
 })

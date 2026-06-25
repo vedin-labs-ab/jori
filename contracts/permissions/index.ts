@@ -18,7 +18,10 @@ export type ToolPermission = {
   tool: string
   surface: ToolSurface
   label: string
+  /** User-facing: shown in permission settings and capability lists. */
   description: string
+  /** Agent-facing: the tool description the model reads when choosing to call. */
+  usage: string
   access: ToolAccess
   defaultMode: PermissionMode
 }
@@ -39,16 +42,18 @@ export type ToolPermissionRow = readonly [
   tool: string,
   label: string,
   description: string,
+  usage: string,
   access: ToolAccess,
   defaultMode?: PermissionMode,
 ]
 
 export const toolPermissions = toolPermissionRows.map(
-  ([surface, tool, label, description, access, defaultMode]) => ({
+  ([surface, tool, label, description, usage, access, defaultMode]) => ({
     surface,
     tool,
     label,
     description,
+    usage,
     access,
     defaultMode: defaultMode ?? "allowed",
   })

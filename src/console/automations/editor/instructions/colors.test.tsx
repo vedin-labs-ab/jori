@@ -83,6 +83,7 @@ describe("automation instructions blocked marker colors", () => {
         {
           access: "read",
           description: "Read issue",
+          usage: "Use github_get_issue.",
           label: "Read issue",
           mode: "blocked",
           overrideMode: "blocked",
