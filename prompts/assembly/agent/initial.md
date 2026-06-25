@@ -22,12 +22,12 @@
 {{agent.skills}}
 {% endif %}
 
-{%- if agent.communication %}
-{{agent.communication}}
-{% endif %}
-
 {% if agent.approvals %}
 {{agent.approvals}}
+{% endif %}
+
+{%- if agent.communication %}
+{{agent.communication}}
 {% endif %}
 
 # Updates
