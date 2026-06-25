@@ -1,9 +1,18 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { requireLinearCredentials } from "../../../providers/linear/credentials"
-import { requiredString } from "../../../shared/input"
+import {
+  readRecord,
+  requiredObject,
+  requiredString,
+} from "../../../shared/input"
 import { linearGraphql } from "./client"
 
 type ReactionTargetField = "commentId" | "issueId" | "projectUpdateId"
+type ReactionTargetType = "comment" | "issue" | "projectUpdate"
+type LinearReactionTarget = {
+  id: string
+  type: ReactionTargetType
+}
 
 export async function addLinearReaction(
   integration: Doc<"integrations">,
@@ -38,28 +47,31 @@ function reactionInput(args: Record<string, unknown>) {
 }
 
 function reactionTarget(args: Record<string, unknown>) {
-  const targets = [
-    targetField("commentId", args.commentId),
-    targetField("issueId", args.issueId),
-    targetField("projectUpdateId", args.projectUpdateId),
-  ].filter((target) => target !== null)
+  const target = readReactionTarget(args.target)
+  const field = reactionTargetField(target.type)
 
-  if (targets.length !== 1) {
-    throw new Error(
-      "Provide exactly one Linear reaction target: commentId, issueId, or projectUpdateId."
-    )
-  }
-
-  return Object.fromEntries(targets)
+  return { [field]: target.id }
 }
 
-function targetField(
-  field: ReactionTargetField,
-  value: unknown
-): [ReactionTargetField, string] | null {
-  if (value === undefined || value === null) {
-    return null
+function readReactionTarget(value: unknown): LinearReactionTarget {
+  const target = readRecord(requiredObject(value, "target"))
+  const id = requiredString(target.id, "target.id")
+  const type = requiredString(target.type, "target.type")
+
+  if (type === "comment" || type === "issue" || type === "projectUpdate") {
+    return { id, type }
   }
 
-  return [field, requiredString(value, field)]
+  throw new Error("target.type must be comment, issue, or projectUpdate")
+}
+
+function reactionTargetField(type: ReactionTargetType): ReactionTargetField {
+  switch (type) {
+    case "comment":
+      return "commentId"
+    case "issue":
+      return "issueId"
+    case "projectUpdate":
+      return "projectUpdateId"
+  }
 }
