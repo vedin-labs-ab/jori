@@ -1,5 +1,5 @@
 import { type Doc } from "../../../_generated/dataModel"
-import { type AttachmentContext } from "../../../attachments/read"
+import { type AssetContext } from "../../../assets/read"
 import { notionJson } from "../../../providers/notion/api"
 import { requireNotionCredentials } from "../../../providers/notion/credentials"
 import { optionalString, requiredString } from "../../../shared/input"
@@ -9,7 +9,7 @@ export async function callNotionTool(
   integration: Doc<"integrations">,
   tool: string,
   args: Record<string, unknown>,
-  context?: AttachmentContext
+  context?: AssetContext
 ) {
   const handler = notionToolHandlers[tool]
 
@@ -27,7 +27,7 @@ export async function callNotionTool(
 type NotionToolHandler = (
   token: string,
   args: Record<string, unknown>,
-  context?: AttachmentContext
+  context?: AssetContext
 ) => Promise<unknown>
 
 const notionToolHandlers: Record<string, NotionToolHandler> = {

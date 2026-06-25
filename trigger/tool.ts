@@ -3,12 +3,12 @@ import { encodeToolResult } from "../contracts/transport"
 import {
   materializeSandboxResult,
   prepareMiloToolInput,
-  saveSandboxAttachment,
-} from "./attachments"
+  saveSandboxAsset,
+} from "./assets"
 import { isVisibleCommunicationTool } from "./communication"
 import { type MiloConvexClient } from "./convex"
 import { errorDetails } from "./events"
-import { generateImageAttachment } from "./images/index"
+import { generateImageAsset } from "./images/index"
 import { optionalString, requiredString } from "./input"
 import { type ModelToolCall } from "./model/types"
 import { executeRunTool } from "./run"
@@ -164,12 +164,12 @@ async function callConvexTool(
   tool: string,
   input: JsonObject
 ) {
-  if (surface === "milo" && tool === "save_attachment") {
-    return await saveSandboxAttachment(runtime, input)
+  if (surface === "milo" && tool === "save_asset") {
+    return await saveSandboxAsset(runtime, input)
   }
 
   if (surface === "milo" && tool === "generate_image") {
-    return await generateImageAttachment(runtime, input)
+    return await generateImageAsset(runtime, input)
   }
 
   const result = await runtime.convex.callTool({

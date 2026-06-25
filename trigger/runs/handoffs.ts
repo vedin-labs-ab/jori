@@ -1,5 +1,5 @@
 import { decodeToolResult, encodeToolResult } from "../../contracts/transport"
-import { materializeSandboxResult } from "../attachments"
+import { materializeSandboxResult } from "../assets"
 import { type ModelMessage } from "../model/types"
 import { markVisibleCommunication, type ToolRuntime } from "../tool"
 import {

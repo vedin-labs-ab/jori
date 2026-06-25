@@ -1,13 +1,13 @@
 import {
-  attachmentUploadError,
-  parseUploadedAttachment,
+  assetUploadError,
+  parseUploadedAsset,
   toArrayBuffer,
-  type UploadedAttachment,
-} from "./attachments"
+  type UploadedAsset,
+} from "./assets"
 import { fetchGitHubCloneCredentials as fetchGitHubCloneCredentialsHttp } from "./github"
 import { type ConvexId } from "./types"
 
-export type UploadAttachmentArgs = {
+export type UploadAssetArgs = {
   bytes: Uint8Array
   description?: string
   mimeType: string
@@ -33,11 +33,11 @@ export function requireWorkerSecret() {
   return requireEnv("MILO_WORKER_SECRET")
 }
 
-export async function uploadAttachment(
+export async function uploadAsset(
   secret: string,
-  args: UploadAttachmentArgs
-): Promise<UploadedAttachment> {
-  const url = new URL("/milo/attachments", requireConvexSiteUrl())
+  args: UploadAssetArgs
+): Promise<UploadedAsset> {
+  const url = new URL("/milo/assets", requireConvexSiteUrl())
   url.searchParams.set("name", args.name)
 
   if (args.description !== undefined) {
@@ -56,10 +56,10 @@ export async function uploadAttachment(
   const result = (await response.json().catch(() => null)) as unknown
 
   if (!response.ok) {
-    throw new Error(attachmentUploadError(result))
+    throw new Error(assetUploadError(result))
   }
 
-  return parseUploadedAttachment(result)
+  return parseUploadedAsset(result)
 }
 
 export async function fetchGitHubCloneCredentials(

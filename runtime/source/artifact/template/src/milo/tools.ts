@@ -85,8 +85,8 @@ export type GmailMessageWriteInput = {
   to: string[]
   subject: string
   body: string
-  attachments?: Array<{
-    attachmentId: string
+  assets?: Array<{
+    assetId: string
     name?: string
     mimeType?: string
   }>
@@ -100,8 +100,8 @@ export type GmailDraftInput = {
   threadId?: string
   to?: string[]
   subject?: string
-  attachments?: Array<{
-    attachmentId: string
+  assets?: Array<{
+    assetId: string
     name?: string
     mimeType?: string
   }>

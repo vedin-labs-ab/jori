@@ -1,7 +1,7 @@
 import {
   numberProperty,
   objectSchema,
-  runAttachmentsProperty,
+  runAssetsProperty,
   type SchemaMap,
   stringProperty,
 } from "./common"
@@ -56,11 +56,11 @@ export const slackToolInputSchemas = {
   conversations_add_message: objectSchema({
     required: ["channel", "text"],
     properties: {
-      attachments: runAttachmentsProperty(),
+      assets: runAssetsProperty(),
       blocks: {
         type: "array",
         description:
-          "Optional Block Kit blocks for text-only messages. When attachments are provided, text is used as the file upload comment.",
+          "Optional Block Kit blocks for text-only messages. When assets are provided, text is used as the file upload comment.",
         items: { type: "object", additionalProperties: true },
       },
       channel: stringProperty("Slack channel ID."),

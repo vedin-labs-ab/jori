@@ -7,8 +7,8 @@ import {
   type GitHubCloneArgs,
   requireConvexUrl,
   requireWorkerSecret,
-  type UploadAttachmentArgs,
-  uploadAttachment,
+  type UploadAssetArgs,
+  uploadAsset,
 } from "./transport"
 import {
   type ActiveSurface,
@@ -192,8 +192,8 @@ export class MiloConvexClient {
     })
   }
 
-  async uploadAttachment(args: UploadAttachmentArgs) {
-    return await uploadAttachment(this.secret, args)
+  async uploadAsset(args: UploadAssetArgs) {
+    return await uploadAsset(this.secret, args)
   }
 
   async fetchGitHubCloneCredentials(args: GitHubCloneArgs) {

@@ -1,9 +1,9 @@
 import { type Doc } from "../../../_generated/dataModel"
 import {
-  type AttachmentContext,
-  type RunAttachment,
-  readRunAttachments,
-} from "../../../attachments/read"
+  type AssetContext,
+  type RunAsset,
+  readRunAssets,
+} from "../../../assets/read"
 import { slackJsonApi, slackQueryApi } from "../../../providers/slack/api"
 import { requireSlackCredentials } from "../../../providers/slack/credentials"
 import {
@@ -22,15 +22,15 @@ export async function postSlackMessage(
     text: string
     thread_ts?: string
     blocks?: SlackBlock[]
-    attachments?: RunAttachment[]
+    assets?: RunAsset[]
   }
 ) {
   const credentials = requireSlackCredentials(integration)
-  const attachments = args.attachments ?? []
+  const assets = args.assets ?? []
 
-  if (attachments.length > 0) {
+  if (assets.length > 0) {
     return await postSlackFiles(credentials.bot, {
-      attachments,
+      assets,
       channel: args.channel,
       text: args.text,
       thread_ts: args.thread_ts,
@@ -68,7 +68,7 @@ export async function callSlackTool(
   integration: Doc<"integrations">,
   tool: string,
   args: Record<string, unknown>,
-  context?: AttachmentContext
+  context?: AssetContext
 ) {
   const credentials = requireSlackCredentials(integration)
 
@@ -149,9 +149,9 @@ async function searchSlackUsers(token: string, args: Record<string, unknown>) {
 async function postSlackMessageTool(
   integration: Doc<"integrations">,
   args: Record<string, unknown>,
-  context?: AttachmentContext
+  context?: AssetContext
 ) {
-  const attachments = await readRunAttachments(context, args.attachments, {
+  const assets = await readRunAssets(context, args.assets, {
     maxBytes: 25 * 1024 * 1024,
   })
   const channel = requiredString(args.channel, "channel")
@@ -160,7 +160,7 @@ async function postSlackMessageTool(
   const blocks = optionalBlocks(args.blocks)
 
   return await postSlackMessage(integration, {
-    attachments,
+    assets,
     blocks,
     channel,
     text,

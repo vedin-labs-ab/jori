@@ -56,9 +56,9 @@ import type * as artifacts_tools_diagnostics from "../artifacts/tools/diagnostic
 import type * as artifacts_tools_input from "../artifacts/tools/input.js";
 import type * as artifacts_tools_platform from "../artifacts/tools/platform.js";
 import type * as artifacts_tools_prompt from "../artifacts/tools/prompt.js";
-import type * as attachments_data from "../attachments/data.js";
-import type * as attachments_mcp from "../attachments/mcp.js";
-import type * as attachments_read from "../attachments/read.js";
+import type * as assets_data from "../assets/data.js";
+import type * as assets_mcp from "../assets/mcp.js";
+import type * as assets_read from "../assets/read.js";
 import type * as automations_access from "../automations/access.js";
 import type * as automations_console from "../automations/console.js";
 import type * as automations_events from "../automations/events.js";
@@ -90,7 +90,7 @@ import type * as automations_subscriptions_data from "../automations/subscriptio
 import type * as broker_approval_args from "../broker/approval/args.js";
 import type * as broker_approval_delivery from "../broker/approval/delivery.js";
 import type * as broker_approval_index from "../broker/approval/index.js";
-import type * as broker_attachments from "../broker/attachments.js";
+import type * as broker_assets from "../broker/assets.js";
 import type * as broker_auth from "../broker/auth.js";
 import type * as broker_capabilities from "../broker/capabilities.js";
 import type * as broker_input from "../broker/input.js";
@@ -380,9 +380,9 @@ declare const fullApi: ApiFromModules<{
   "artifacts/tools/input": typeof artifacts_tools_input;
   "artifacts/tools/platform": typeof artifacts_tools_platform;
   "artifacts/tools/prompt": typeof artifacts_tools_prompt;
-  "attachments/data": typeof attachments_data;
-  "attachments/mcp": typeof attachments_mcp;
-  "attachments/read": typeof attachments_read;
+  "assets/data": typeof assets_data;
+  "assets/mcp": typeof assets_mcp;
+  "assets/read": typeof assets_read;
   "automations/access": typeof automations_access;
   "automations/console": typeof automations_console;
   "automations/events": typeof automations_events;
@@ -414,7 +414,7 @@ declare const fullApi: ApiFromModules<{
   "broker/approval/args": typeof broker_approval_args;
   "broker/approval/delivery": typeof broker_approval_delivery;
   "broker/approval/index": typeof broker_approval_index;
-  "broker/attachments": typeof broker_attachments;
+  "broker/assets": typeof broker_assets;
   "broker/auth": typeof broker_auth;
   "broker/capabilities": typeof broker_capabilities;
   "broker/input": typeof broker_input;

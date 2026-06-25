@@ -6,7 +6,7 @@ import {
   handleArtifactStaticAssetRequest,
   handleArtifactToolRequest,
 } from "./artifacts/serve/http"
-import { handleAttachmentUploadRequest } from "./broker/attachments"
+import { handleAssetUploadRequest } from "./broker/assets"
 import { handleGitHubCloneCredentialsRequest } from "./broker/mcp"
 import {
   handleGitHubEvents,
@@ -73,11 +73,9 @@ http.route({
 })
 
 http.route({
-  path: "/milo/attachments",
+  path: "/milo/assets",
   method: "POST",
-  handler: httpAction((ctx, request) =>
-    handleAttachmentUploadRequest(ctx, request)
-  ),
+  handler: httpAction((ctx, request) => handleAssetUploadRequest(ctx, request)),
 })
 
 http.route({

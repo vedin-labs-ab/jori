@@ -22,7 +22,7 @@ export type ApprovalBrokerContext = {
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
-const workerOnlyMiloTools = ["save_attachment", "generate_image"]
+const workerOnlyMiloTools = ["save_asset", "generate_image"]
 
 export async function createPromptedToolApproval(
   ctx: ActionCtx,

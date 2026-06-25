@@ -1,8 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
-import {
-  type AttachmentContext,
-  readRunAttachments,
-} from "../../attachments/read"
+import { type AssetContext, readRunAssets } from "../../assets/read"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
 import { base64EncodeBytes } from "../../shared/encoding"
 import { fetchJson } from "../../shared/http"
@@ -19,7 +16,7 @@ export async function callMicrosoftTool(
   integration: Doc<"integrations">,
   tool: string,
   args: Record<string, unknown>,
-  context?: AttachmentContext
+  context?: AssetContext
 ) {
   const credentials = requireMicrosoftCredentials(integration)
 
@@ -47,7 +44,7 @@ async function callMicrosoftEmailTool(
   token: string,
   tool: string,
   args: Record<string, unknown>,
-  context?: AttachmentContext
+  context?: AssetContext
 ) {
   if (tool === "microsoft_email_search_messages") {
     return await searchMessages(token, args)
@@ -61,14 +58,14 @@ async function callMicrosoftEmailTool(
   }
 
   if (tool === "microsoft_email_send_message") {
-    const attachments = await readRunAttachments(context, args.attachments, {
+    const assets = await readRunAssets(context, args.assets, {
       maxBytes: 3 * 1024 * 1024,
     })
 
     await microsoftGraph(token, "/me/sendMail", {
       method: "POST",
       body: {
-        message: buildMicrosoftMessage(args, attachments),
+        message: buildMicrosoftMessage(args, assets),
         saveToSentItems: args.saveToSentItems !== false,
       },
     })
@@ -76,13 +73,13 @@ async function callMicrosoftEmailTool(
   }
 
   if (tool === "microsoft_email_create_draft") {
-    const attachments = await readRunAttachments(context, args.attachments, {
+    const assets = await readRunAssets(context, args.assets, {
       maxBytes: 3 * 1024 * 1024,
     })
 
     return await microsoftGraph(token, "/me/messages", {
       method: "POST",
-      body: buildMicrosoftMessage(args, attachments),
+      body: buildMicrosoftMessage(args, assets),
     })
   }
 
@@ -218,7 +215,7 @@ function microsoftSendUpdatesQuery(args: Record<string, unknown>) {
 
 function buildMicrosoftMessage(
   args: Record<string, unknown>,
-  attachments: Awaited<ReturnType<typeof readRunAttachments>> = []
+  assets: Awaited<ReturnType<typeof readRunAssets>> = []
 ) {
   return {
     subject: requiredString(args.subject, "subject"),
@@ -229,14 +226,14 @@ function buildMicrosoftMessage(
     toRecipients: recipients(requiredStringArray(args.to, "to")),
     ccRecipients: recipients(optionalStringArray(args.cc)),
     bccRecipients: recipients(optionalStringArray(args.bcc)),
-    ...(attachments.length === 0
+    ...(assets.length === 0
       ? {}
       : {
-          attachments: attachments.map((attachment) => ({
+          attachments: assets.map((asset) => ({
             "@odata.type": "#microsoft.graph.fileAttachment",
-            name: attachment.name,
-            contentType: attachment.mimeType,
-            contentBytes: base64EncodeBytes(attachment.bytes),
+            name: asset.name,
+            contentType: asset.mimeType,
+            contentBytes: base64EncodeBytes(asset.bytes),
           })),
         }),
   }

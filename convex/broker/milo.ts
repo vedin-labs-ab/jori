@@ -5,10 +5,7 @@ import {
   isCancelApprovalTool,
 } from "../approvals/cancel"
 import { callMiloArtifactTool, isMiloArtifactTool } from "../artifacts/mcp"
-import {
-  callMiloAttachmentTool,
-  isMiloAttachmentTool,
-} from "../attachments/mcp"
+import { callMiloAssetTool, isMiloAssetTool } from "../assets/mcp"
 import { callMiloAutomationTool } from "../automations/mcp"
 import {
   callIntegrationOfferTool,
@@ -40,8 +37,8 @@ export async function callMiloTool(
 
   const run = isBrokerContext(context) ? context.run : context
 
-  if (isMiloAttachmentTool(request.tool)) {
-    return await callMiloAttachmentTool(ctx, run, request)
+  if (isMiloAssetTool(request.tool)) {
+    return await callMiloAssetTool(ctx, run, request)
   }
 
   if (isMiloArtifactTool(request.tool)) {

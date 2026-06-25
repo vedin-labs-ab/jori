@@ -54,19 +54,17 @@ export const coreMiloToolInputSchemas = {
       ),
     },
   }),
-  save_attachment: objectSchema({
+  save_asset: objectSchema({
     required: ["path"],
     properties: {
       path: stringProperty(
-        "Local sandbox file path to persist as a run attachment for tools that send attachments."
+        "Local sandbox file path to persist as a run asset for tools that send assets."
       ),
       name: stringProperty("Optional filename to show to recipients."),
       mimeType: stringProperty(
         "Optional content type, for example image/png or application/pdf."
       ),
-      description: stringProperty(
-        "Optional short description of the attachment."
-      ),
+      description: stringProperty("Optional short description of the asset."),
     },
   }),
   generate_image: objectSchema({
@@ -76,26 +74,26 @@ export const coreMiloToolInputSchemas = {
       save: objectSchema({
         properties: {
           name: stringProperty("Optional generated image filename."),
-          description: stringProperty("Optional attachment description."),
+          description: stringProperty("Optional asset description."),
         },
       }),
     },
   }),
-  search_attachments: objectSchema({
+  search_assets: objectSchema({
     properties: {
       query: stringProperty(
-        "Substring matched against attachment names, descriptions, and content types."
+        "Substring matched against asset names, descriptions, and content types."
       ),
       mimeType: stringProperty(
         "Optional content type filter, for example image/png or image/."
       ),
-      limit: numberProperty("Maximum attachments to return.", 1, 100),
+      limit: numberProperty("Maximum assets to return.", 1, 100),
     },
   }),
-  read_attachment: objectSchema({
-    required: ["attachmentId"],
+  read_asset: objectSchema({
+    required: ["assetId"],
     properties: {
-      attachmentId: stringProperty("Attachment ID."),
+      assetId: stringProperty("Asset ID."),
     },
   }),
   web_search: objectSchema({

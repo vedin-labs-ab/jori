@@ -41,7 +41,7 @@ test("creates Notion pages with icon and cover payloads", async () => {
   })
 })
 
-test("uploads run attachments to Notion file uploads", async () => {
+test("uploads run assets to Notion file uploads", async () => {
   const calls = mockNotionFetch((url: Parameters<typeof fetch>[0]) => {
     const pathname = new URL(String(url)).pathname
 
@@ -54,8 +54,8 @@ test("uploads run attachments to Notion file uploads", async () => {
   const result = await callNotionTool(
     notionIntegration(),
     "notion_upload_file",
-    { attachmentId: "attachment_1" },
-    attachmentContext()
+    { assetId: "asset_1" },
+    assetContext()
   )
 
   expect(result).toMatchObject({
@@ -130,10 +130,10 @@ function isResponder(
   return typeof value === "function"
 }
 
-function attachmentContext() {
+function assetContext() {
   return {
     ctx: {
-      runQuery: vi.fn(async () => attachment()),
+      runQuery: vi.fn(async () => asset()),
       storage: {
         get: vi.fn(async () => new Blob(["data"], { type: "image/png" })),
       },
@@ -142,9 +142,9 @@ function attachmentContext() {
   }
 }
 
-function attachment(): Doc<"attachments"> {
+function asset(): Doc<"assets"> {
   return {
-    _id: "attachment_1",
+    _id: "asset_1",
     _creationTime: 0,
     tenantId: "tenant",
     runId: "run_1",
@@ -153,7 +153,7 @@ function attachment(): Doc<"attachments"> {
     mimeType: "image/png",
     size: 4,
     createdAt: 0,
-  } as Doc<"attachments">
+  } as Doc<"assets">
 }
 
 function notionIntegration(): Doc<"integrations"> {

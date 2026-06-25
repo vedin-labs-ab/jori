@@ -3,7 +3,7 @@ import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId, type JsonObject } from "./types"
 
-const maxAttachmentBytes = 25 * 1024 * 1024
+const maxAssetBytes = 25 * 1024 * 1024
 const mimeTypesByExtension: Record<string, string> = {
   ".csv": "text/csv",
   ".gif": "image/gif",
@@ -41,7 +41,7 @@ export async function prepareMiloToolInput(
   }
 }
 
-export async function saveSandboxAttachment(
+export async function saveSandboxAsset(
   runtime: ToolRuntime,
   input: JsonObject
 ) {
@@ -49,14 +49,14 @@ export async function saveSandboxAttachment(
   const bytes = await runtime.sandbox.readFile(filePath)
 
   if (bytes.byteLength === 0) {
-    throw new Error("Attachment is empty")
+    throw new Error("Asset is empty")
   }
 
-  if (bytes.byteLength > maxAttachmentBytes) {
-    throw new Error("Attachment exceeds the 25 MB limit")
+  if (bytes.byteLength > maxAssetBytes) {
+    throw new Error("Asset exceeds the 25 MB limit")
   }
 
-  return await runtime.convex.uploadAttachment({
+  return await runtime.convex.uploadAsset({
     bytes,
     description: optionalString(input.description),
     mimeType: optionalString(input.mimeType) ?? inferMimeType(filePath),
@@ -127,24 +127,21 @@ function inferMimeType(filePath: string) {
   )
 }
 
-export type UploadedAttachment = {
-  attachmentId: ConvexId<"attachments">
+export type UploadedAsset = {
+  assetId: ConvexId<"assets">
   mimeType: string
   name: string
   size: number
   url: string | null
 }
 
-export function parseUploadedAttachment(value: unknown): UploadedAttachment {
+export function parseUploadedAsset(value: unknown): UploadedAsset {
   if (!isRecord(value)) {
-    throw new Error("Attachment upload returned an invalid response.")
+    throw new Error("Asset upload returned an invalid response.")
   }
 
   return {
-    attachmentId: readString(
-      value.attachmentId,
-      "attachmentId"
-    ) as ConvexId<"attachments">,
+    assetId: readString(value.assetId, "assetId") as ConvexId<"assets">,
     mimeType: readString(value.mimeType, "mimeType"),
     name: readString(value.name, "name"),
     size: readNumber(value.size, "size"),
@@ -182,12 +179,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
-export function attachmentUploadError(value: unknown) {
+export function assetUploadError(value: unknown) {
   if (isRecord(value) && typeof value.error === "string") {
     return value.error
   }
 
-  return "Attachment upload failed"
+  return "Asset upload failed"
 }
 
 export function toArrayBuffer(bytes: Uint8Array) {
@@ -199,7 +196,7 @@ export function toArrayBuffer(bytes: Uint8Array) {
 
 function readString(value: unknown, name: string) {
   if (typeof value !== "string") {
-    throw new Error(`Attachment upload response is missing ${name}.`)
+    throw new Error(`Asset upload response is missing ${name}.`)
   }
 
   return value
@@ -207,7 +204,7 @@ function readString(value: unknown, name: string) {
 
 function readNumber(value: unknown, name: string) {
   if (typeof value !== "number") {
-    throw new Error(`Attachment upload response is missing ${name}.`)
+    throw new Error(`Asset upload response is missing ${name}.`)
   }
 
   return value
