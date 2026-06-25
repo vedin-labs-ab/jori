@@ -79,22 +79,22 @@ export async function createPromptedToolApproval(
     code: createApprovalCode(),
     requestedBy: createRequestedBy(context),
   })
-  const delivered =
-    !approval.reused &&
-    (await deliverApprovalRequest(ctx, context, {
+  if (!approval.reused) {
+    await deliverApprovalRequest(ctx, context, {
       approvalId: approval.approvalId,
       code: approval.code,
       surface: request.surface,
       tool: request.tool,
       summary: request.summary,
       expiresAt: approval.expiresAt,
-    }))
+    })
+  }
 
   return {
     status: "approval_requested",
     approvalId: approval.approvalId,
     code: approval.code,
-    instruction: approvalInstruction(approval.code, delivered),
+    instruction: approvalInstruction(approval.reused),
   }
 }
 
@@ -141,8 +141,8 @@ function createApprovalCode() {
   return Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("")
 }
 
-function approvalInstruction(code: string, delivered: boolean) {
-  return delivered
-    ? "Approval requested. Approval instructions were sent to the conversation."
-    : `Approval requested. The user can approve with: approve ${code}`
+function approvalInstruction(reused: boolean) {
+  return reused
+    ? "Approval request is already pending."
+    : "Approval requested. Approval instructions were sent to the conversation."
 }

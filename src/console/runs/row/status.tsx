@@ -111,6 +111,7 @@ const approvalStatusLabels = {
   denied: "Denied",
   cancelled: "Cancelled",
   expired: "Approval expired",
+  failed: "Approval failed",
   pending: "Needs approval",
 } satisfies Record<ApprovalState, string>
 
@@ -127,6 +128,7 @@ const approvalStatusIcons = {
   denied: UserX,
   cancelled: UserX,
   expired: ClockAlert,
+  failed: AlertCircle,
   pending: UserPen,
 } satisfies Record<ApprovalState, LucideIcon>
 
@@ -162,6 +164,7 @@ const approvalStatusClasses = {
   denied: "text-destructive",
   cancelled: "text-muted-foreground",
   expired: "text-warning",
+  failed: "text-destructive",
   pending: "text-warning",
 } satisfies Record<ApprovalState, string>
 

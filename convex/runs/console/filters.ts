@@ -17,6 +17,7 @@ export type ApprovalState =
   | "denied"
   | "cancelled"
   | "expired"
+  | "failed"
 
 export const runFilterValidator = v.union(
   v.literal("all"),

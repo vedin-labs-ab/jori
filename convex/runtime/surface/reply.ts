@@ -1,7 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { callGitHubTool } from "../../broker/tools/github"
-import { callLinearTool } from "../../broker/tools/linear"
+import { postLinearComment } from "../../broker/tools/linear/comments"
 import {
   postSlackMessage,
   type SlackBlock,
@@ -23,25 +23,19 @@ export async function sendSurfaceReply(
     integration: input.integration,
   })
 
-  if (address.type === "slack") {
-    await postSlackMessage(integration, {
-      blocks: args.blocks,
-      channel: address.channelId,
-      text: args.text,
-      thread_ts: address.threadTs,
-    })
-    return
+  switch (address.type) {
+    case "slack":
+      await sendSlackReply(integration, address, args)
+      return
+    case "linear":
+      await sendLinearReply(integration, address, args.text)
+      return
+    case "github":
+      await sendGitHubReply(integration, address, args.text)
+      return
   }
 
-  if (address.type === "linear") {
-    await callLinearTool(integration, "linear_add_comment", {
-      issueId: address.issueId,
-      body: args.text,
-    })
-    return
-  }
-
-  await sendGitHubReply(integration, address, args.text)
+  assertNever(address)
 }
 
 export function optionalSlackBlocks(value: unknown): SlackBlock[] | undefined {
@@ -92,6 +86,37 @@ function githubCommentId(value: string | undefined) {
   }
 
   return id
+}
+
+async function sendLinearReply(
+  integration: Doc<"integrations">,
+  address: Extract<ReplyAddress, { type: "linear" }>,
+  text: string
+) {
+  await postLinearComment(integration, {
+    issueId: address.issueId,
+    body: text,
+  })
+}
+
+async function sendSlackReply(
+  integration: Doc<"integrations">,
+  address: Extract<ReplyAddress, { type: "slack" }>,
+  args: {
+    blocks?: SlackBlock[]
+    text: string
+  }
+) {
+  await postSlackMessage(integration, {
+    blocks: args.blocks,
+    channel: address.channelId,
+    text: args.text,
+    thread_ts: address.threadTs,
+  })
+}
+
+function assertNever(value: never): never {
+  throw new Error(`Unsupported reply target: ${JSON.stringify(value)}`)
 }
 
 function isSlackBlock(value: unknown): value is SlackBlock {

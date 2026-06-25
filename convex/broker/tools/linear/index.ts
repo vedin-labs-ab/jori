@@ -1,15 +1,14 @@
-import { type Doc } from "../../_generated/dataModel"
-import { linearGraphqlUrl } from "../../providers/linear/config"
-import { requireLinearCredentials } from "../../providers/linear/credentials"
-import { fetchJsonObject } from "../../shared/http"
+import { type Doc } from "../../../_generated/dataModel"
+import { requireLinearCredentials } from "../../../providers/linear/credentials"
 import {
   boundedNumber,
   readArray,
   readRecord,
   requiredString,
-} from "../../shared/input"
-
-type ReactionTargetField = "commentId" | "issueId" | "projectUpdateId"
+} from "../../../shared/input"
+import { linearGraphql } from "./client"
+import { postLinearComment } from "./comments"
+import { addLinearReaction } from "./reactions"
 
 export async function callLinearTool(
   integration: Doc<"integrations">,
@@ -137,42 +136,11 @@ export async function callLinearTool(
   }
 
   if (tool === "linear_add_comment") {
-    return await linearGraphql(credentials.tokens.access, {
-      query: `
-        mutation MiloAddComment($input: CommentCreateInput!) {
-          commentCreate(input: $input) {
-            success
-            comment { id body url }
-          }
-        }
-      `,
-      variables: {
-        input: {
-          issueId: requiredString(args.issueId, "issueId"),
-          body: requiredString(args.body, "body"),
-        },
-      },
-    })
+    return await postLinearComment(integration, args)
   }
 
   if (tool === "linear_add_reaction") {
-    return await linearGraphql(credentials.tokens.access, {
-      query: `
-        mutation MiloAddReaction($input: ReactionCreateInput!) {
-          reactionCreate(input: $input) {
-            success
-            reaction {
-              id
-              emoji
-              user { id name }
-            }
-          }
-        }
-      `,
-      variables: {
-        input: reactionInput(args),
-      },
-    })
+    return await addLinearReaction(integration, args)
   }
 
   throw new Error(`Unknown Linear tool: ${tool}`)
@@ -186,40 +154,6 @@ function normalizeSearchQuery(query: string) {
   }
 
   return unquoted
-}
-
-function reactionInput(args: Record<string, unknown>) {
-  return {
-    emoji: requiredString(args.emoji, "emoji"),
-    ...reactionTarget(args),
-  }
-}
-
-function reactionTarget(args: Record<string, unknown>) {
-  const targets = [
-    targetField("commentId", args.commentId),
-    targetField("issueId", args.issueId),
-    targetField("projectUpdateId", args.projectUpdateId),
-  ].filter((target) => target !== null)
-
-  if (targets.length !== 1) {
-    throw new Error(
-      "Provide exactly one Linear reaction target: commentId, issueId, or projectUpdateId."
-    )
-  }
-
-  return Object.fromEntries(targets)
-}
-
-function targetField(
-  field: ReactionTargetField,
-  value: unknown
-): [ReactionTargetField, string] | null {
-  if (value === undefined || value === null) {
-    return null
-  }
-
-  return [field, requiredString(value, field)]
 }
 
 async function getLinearIssueSummaryByIdentifier(token: string, query: string) {
@@ -246,23 +180,6 @@ async function getLinearIssueSummaryByIdentifier(token: string, query: string) {
   })
 
   return readOptionalRecord(readRecord(result.data).issue)
-}
-
-async function linearGraphql(token: string, body: Record<string, unknown>) {
-  const result = await fetchJsonObject(linearGraphqlUrl, {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${token}`,
-      "content-type": "application/json",
-    },
-    body,
-  })
-
-  if (result?.errors !== undefined) {
-    throw new Error(`Linear GraphQL request failed: ${JSON.stringify(result)}`)
-  }
-
-  return result
 }
 
 function readOptionalRecord(value: unknown) {

@@ -1,6 +1,7 @@
 import { useAction } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import {
+  AlertCircle,
   Check,
   Clock3,
   Loader2,
@@ -226,6 +227,15 @@ function approvalMeta(
       iconClassName: "text-muted-foreground",
       label: "Cancelled by Milo",
       tooltip: "Milo withdrew this request",
+    }
+  }
+
+  if (approval.state === "failed") {
+    return {
+      Icon: AlertCircle,
+      iconClassName: "text-destructive",
+      label: "Approval delivery failed",
+      tooltip: "Milo could not deliver this approval request",
     }
   }
 

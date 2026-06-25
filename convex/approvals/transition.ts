@@ -6,6 +6,7 @@ import { recordTransition } from "../transitions"
 
 type ApprovalPatch = Partial<Omit<Doc<"approvals">, "_creationTime" | "_id">>
 type ApprovalDelivery = NonNullable<Doc<"approvals">["delivery"]>
+type ApprovalDeliveryFailure = NonNullable<Doc<"approvals">["deliveryFailure"]>
 
 export async function recordApprovalCreated(
   ctx: MutationCtx,
@@ -132,6 +133,34 @@ export async function markApprovalExpired(
   return updated
 }
 
+export async function markApprovalFailed(
+  ctx: MutationCtx,
+  approval: Doc<"approvals">,
+  failure: ApprovalDeliveryFailure
+) {
+  if (approval.status !== "pending") {
+    return approval
+  }
+
+  await cancelApprovalFunction(ctx, approval)
+  const updated = await patchAndRead(ctx, approval._id, {
+    deliveryFailure: failure,
+    functionId: undefined,
+    status: "failed",
+  })
+
+  if (updated !== null) {
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "approval", id: updated._id },
+      type: "failed",
+    })
+    await wakeApprovalRun(ctx, updated)
+  }
+
+  return updated
+}
+
 export async function patchAndRead(
   ctx: MutationCtx,
   approvalId: Doc<"approvals">["_id"],
@@ -166,6 +195,7 @@ function hasTerminalSurfaceState(approval: Doc<"approvals">) {
     approval.status === "approved" ||
     approval.status === "cancelled" ||
     approval.status === "denied" ||
-    approval.status === "expired"
+    approval.status === "expired" ||
+    approval.status === "failed"
   )
 }

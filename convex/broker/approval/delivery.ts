@@ -38,28 +38,43 @@ export async function deliverApprovalRequest(
   context: ApprovalDeliveryContext,
   args: ApprovalDeliveryArgs
 ) {
+  try {
+    await deliverApproval(ctx, context, args)
+  } catch (caught) {
+    const message = errorMessage(caught)
+
+    await ctx.runMutation(internal.approvals.approvals.recordDeliveryFailure, {
+      approvalId: args.approvalId,
+      failure: {
+        failedAt: Date.now(),
+        message,
+        operation: deliveryOperation(context),
+        surface: deliverySurface(context, args),
+      },
+    })
+
+    throw new Error(
+      `Approval delivery failed for ${args.surface}.${args.tool}: ${message}`
+    )
+  }
+}
+
+async function deliverApproval(
+  ctx: ActionCtx,
+  context: ApprovalDeliveryContext,
+  args: ApprovalDeliveryArgs
+) {
   const slackDelivery = getSlackApprovalDelivery(context)
 
   if (slackDelivery !== null) {
-    return await tryDeliverSlackApproval(ctx, {
+    await deliverSlackApproval(ctx, {
       ...args,
       delivery: slackDelivery,
     })
+    return
   }
 
-  return await tryDeliverTextApproval(ctx, context.input, args)
-}
-
-async function tryDeliverSlackApproval(
-  ctx: ActionCtx,
-  args: ApprovalDeliveryArgs & { delivery: SlackApprovalDelivery }
-) {
-  try {
-    await deliverSlackApproval(ctx, args)
-    return true
-  } catch {
-    return false
-  }
+  await deliverTextApproval(ctx, context.input, args)
 }
 
 async function deliverSlackApproval(
@@ -95,29 +110,26 @@ async function deliverSlackApproval(
   })
 }
 
-async function tryDeliverTextApproval(
+async function deliverTextApproval(
   ctx: ActionCtx,
   input: AgentRuntimeInput,
   args: ApprovalDeliveryArgs
 ) {
   if (input.type !== "message") {
-    return false
+    throw new Error(`Cannot deliver approval requests for ${input.type} runs.`)
   }
 
   const address = replyAddress(input.message)
 
   if (address === null) {
-    return false
+    throw new Error(
+      `Cannot resolve a ${input.messageIntegration} reply target for approval delivery.`
+    )
   }
 
-  try {
-    await sendSurfaceReply(ctx, input, address, {
-      text: textApprovalRequest(args),
-    })
-    return true
-  } catch {
-    return false
-  }
+  await sendSurfaceReply(ctx, input, address, {
+    text: textApprovalRequest(args),
+  })
 }
 
 function textApprovalRequest(args: ApprovalDeliveryArgs) {
@@ -165,6 +177,27 @@ function getSlackTarget(input: AgentRuntimeInput) {
       getSlackThreadTs(input.message.data) ??
       getSlackMessageTs(input.message.data),
   }
+}
+
+function deliverySurface(
+  context: ApprovalDeliveryContext,
+  args: ApprovalDeliveryArgs
+) {
+  return context.input.type === "message"
+    ? context.input.messageIntegration
+    : args.surface
+}
+
+function deliveryOperation(context: ApprovalDeliveryContext) {
+  if (getSlackApprovalDelivery(context) !== null) {
+    return "slack.approval_message"
+  }
+
+  return "surface.text_reply"
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error)
 }
 
 function readString(data: unknown, key: string) {
