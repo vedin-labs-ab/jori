@@ -53,7 +53,7 @@ export async function callMiloTool(
   }
 
   if (isMiloSkillTool(request.tool)) {
-    return callMiloSkillTool(request)
+    return await callMiloSkillTool(ctx, run, request)
   }
 
   return await callMiloAutomationTool(ctx, toMiloContext(run), request)

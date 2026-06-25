@@ -1,5 +1,4 @@
 import { integrations as integrationEnum } from "../../../../../shared/integrations"
-import { runtimeSkillNames } from "../../../../../skills/runtime"
 import {
   numberProperty,
   objectSchema,
@@ -11,16 +10,7 @@ export const coreMiloToolInputSchemas = {
   list_capabilities: objectSchema({
     properties: {},
   }),
-  load_skill: objectSchema({
-    required: ["name"],
-    properties: {
-      name: {
-        type: "string",
-        description: "Available Milo skill name.",
-        enum: runtimeSkillNames,
-      },
-    },
-  }),
+  load_skill: loadSkillInputSchema(),
   offer_integration: objectSchema({
     required: ["integration", "summary"],
     properties: {
@@ -140,4 +130,17 @@ export const coreMiloToolInputSchemas = {
       ),
     },
   }),
+}
+
+export function loadSkillInputSchema(skillNames: readonly string[] = []) {
+  return objectSchema({
+    required: ["name"],
+    properties: {
+      name: {
+        type: "string",
+        description: "Available Milo skill name.",
+        ...(skillNames.length === 0 ? {} : { enum: skillNames }),
+      },
+    },
+  })
 }

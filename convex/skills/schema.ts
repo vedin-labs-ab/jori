@@ -8,6 +8,11 @@ export const skills = defineTable({
   description: v.string(),
   category: v.optional(v.string()),
   associatedIntegrations: v.optional(v.array(integrationValidator)),
+  communication: v.optional(
+    v.object({
+      parts: v.record(v.string(), v.string()),
+    })
+  ),
   body: v.string(),
   createdBy: v.optional(v.string()),
   createdAt: v.number(),

@@ -18,6 +18,9 @@ import {
 type SeedSkill = {
   associatedIntegrations?: readonly string[]
   category: string
+  communication?: {
+    parts: Record<string, string>
+  }
   name: string
   description: string
   body: string
@@ -174,7 +177,12 @@ export const listForRuntime = internalQuery({
       id: skill._id,
       tenantId: skill.tenantId,
       name: skill.name,
+      category: skill.category ?? "General",
+      associatedIntegrations: skill.associatedIntegrations ?? [],
       description: skill.description,
+      ...(skill.communication === undefined
+        ? {}
+        : { communication: skill.communication }),
       body: skill.body,
     }))
   },
@@ -203,6 +211,9 @@ export const syncGlobalSkills = internalMutation({
           name: input.name,
           category: input.category,
           associatedIntegrations: input.associatedIntegrations,
+          ...(input.communication === undefined
+            ? {}
+            : { communication: input.communication }),
           description: input.description,
           body: input.body,
           createdAt: now,
@@ -214,6 +225,7 @@ export const syncGlobalSkills = internalMutation({
       await ctx.db.patch(existingSkill._id, {
         category: input.category,
         associatedIntegrations: input.associatedIntegrations,
+        communication: input.communication,
         description: input.description,
         body: input.body,
         updatedAt: now,

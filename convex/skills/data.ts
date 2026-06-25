@@ -1,7 +1,12 @@
 import { type MutationCtx } from "../_generated/server"
 import { type Integration, integrations } from "../shared/integrations"
 
+type SkillCommunication = {
+  parts: Record<string, string>
+}
+
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const skillCommunicationPartNamePattern = /^[a-z]+$/
 const skillNameMaxLength = 64
 const skillCategoryMaxLength = 64
 const skillDescriptionMaxLength = 320
@@ -11,6 +16,7 @@ const integrationNames = new Set<string>(integrations)
 export function normalizeSkillInput(input: {
   associatedIntegrations?: readonly string[]
   category: string
+  communication?: SkillCommunication
   name: string
   description: string
   body: string
@@ -22,6 +28,7 @@ export function normalizeSkillInput(input: {
   const associatedIntegrations = normalizeAssociatedIntegrations(
     input.associatedIntegrations ?? []
   )
+  const communication = normalizeCommunication(input.communication)
 
   if (!skillNamePattern.test(name) || name.length > skillNameMaxLength) {
     throw new Error(
@@ -44,7 +51,14 @@ export function normalizeSkillInput(input: {
     throw new Error("Skill instructions must be 1–24,000 characters.")
   }
 
-  return { name, category, description, associatedIntegrations, body }
+  return {
+    name,
+    category,
+    description,
+    associatedIntegrations,
+    ...(communication === undefined ? {} : { communication }),
+    body,
+  }
 }
 
 export async function requireUniqueTenantSkillName(
@@ -96,4 +110,31 @@ function normalizeAssociatedIntegrations(
   }
 
   return result
+}
+
+function normalizeCommunication(
+  communication: SkillCommunication | undefined
+): SkillCommunication | undefined {
+  if (communication === undefined) {
+    return undefined
+  }
+
+  const parts: Record<string, string> = {}
+
+  for (const [rawName, rawBody] of Object.entries(communication.parts)) {
+    const name = rawName.trim()
+    const body = rawBody.trim()
+
+    if (!skillCommunicationPartNamePattern.test(name)) {
+      throw new Error("Skill communication part names must be lowercase words.")
+    }
+
+    if (body.length === 0 || body.length > skillBodyMaxLength) {
+      throw new Error("Skill communication parts must be 1–24,000 characters.")
+    }
+
+    parts[name] = body
+  }
+
+  return Object.keys(parts).length === 0 ? undefined : { parts }
 }

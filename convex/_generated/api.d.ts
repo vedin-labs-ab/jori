@@ -242,6 +242,7 @@ import type * as runs_agent_prompt_fixtures from "../runs/agent/prompt/fixtures.
 import type * as runs_agent_prompt_index from "../runs/agent/prompt/index.js";
 import type * as runs_agent_prompt_instructions from "../runs/agent/prompt/instructions.js";
 import type * as runs_agent_prompt_integration from "../runs/agent/prompt/integration.js";
+import type * as runs_agent_prompt_skill_fixtures from "../runs/agent/prompt/skill_fixtures.js";
 import type * as runs_agent_prompt_skills from "../runs/agent/prompt/skills.js";
 import type * as runs_agent_prompt_target from "../runs/agent/prompt/target.js";
 import type * as runs_agent_targets from "../runs/agent/targets.js";
@@ -565,6 +566,7 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/prompt/index": typeof runs_agent_prompt_index;
   "runs/agent/prompt/instructions": typeof runs_agent_prompt_instructions;
   "runs/agent/prompt/integration": typeof runs_agent_prompt_integration;
+  "runs/agent/prompt/skill_fixtures": typeof runs_agent_prompt_skill_fixtures;
   "runs/agent/prompt/skills": typeof runs_agent_prompt_skills;
   "runs/agent/prompt/target": typeof runs_agent_prompt_target;
   "runs/agent/targets": typeof runs_agent_targets;
