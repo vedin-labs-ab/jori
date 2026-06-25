@@ -13,10 +13,10 @@ test("exposes only send_reply as an active surface tool", () => {
   ])
 })
 
-test("exposes Linear reply targets only on the Linear active surface", () => {
+test("exposes Linear comment targeting only on the Linear active surface", () => {
   expect(activeSurfaceTools("linear")[0]?.inputSchema).toMatchObject({
     properties: {
-      target: {
+      commentId: {
         type: "string",
       },
       text: {
@@ -26,7 +26,7 @@ test("exposes Linear reply targets only on the Linear active surface", () => {
   })
   expect(activeSurfaceTools("slack")[0]?.inputSchema).not.toMatchObject({
     properties: {
-      target: expect.anything(),
+      commentId: expect.anything(),
     },
   })
 })

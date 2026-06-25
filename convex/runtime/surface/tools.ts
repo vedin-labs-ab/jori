@@ -31,7 +31,7 @@ function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
   return {
     access: "write",
     description:
-      "Send a visible reply or update to the active requester surface. Milo routes it to the latest requester message by default. On Linear, set target only when intentionally replying to a different visible issue or comment thread identifier.",
+      "Send a visible reply or update to the active requester surface. Milo routes it to the current requester context by default. On Linear, set commentId only when intentionally replying under a specific visible comment.",
     inputSchema: sendReplySchema(surface),
     name: "send_reply",
     route: "active_surface",
@@ -56,10 +56,10 @@ function sendReplySchema(surface: MessageIntegration): JsonObject {
   }
 
   if (surface === "linear") {
-    properties.target = {
+    properties.commentId = {
       type: "string",
       description:
-        "Optional Linear reply target from a visible identifiers=[...] list, such as linear:issue:<id> or linear:thread:<comment-id>. Omit to follow the latest requester message.",
+        "Optional Linear comment UUID to reply under. Use the value after linear:comment: or linear:thread: in identifiers=[...]. Omit to reply in the current Linear context.",
     }
   }
 

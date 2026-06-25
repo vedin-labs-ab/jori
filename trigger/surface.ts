@@ -18,7 +18,7 @@ export async function executeActiveSurfaceTool(
 
 async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
   const activeSurface = requireActiveSurface(runtime)
-  const explicitTarget = optionalTarget(input.target)
+  const explicitTarget = optionalReplyTarget(input, activeSurface.surface)
   const target = explicitTarget ?? activeSurface.target
 
   const result = await runtime.convex.sendReply({
@@ -37,14 +37,20 @@ async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
   }
 }
 
-function optionalTarget(value: unknown) {
-  const target = optionalString(value)
+function optionalReplyTarget(input: JsonObject, surface: string) {
+  const commentId = optionalString(input.commentId)
 
-  if (value !== undefined && value !== null && target === undefined) {
-    throw new Error("target must be a non-empty string")
+  if (input.commentId !== undefined && input.commentId !== null) {
+    if (commentId === undefined) {
+      throw new Error("commentId must be a non-empty string")
+    }
+
+    if (surface !== "linear") {
+      throw new Error("commentId is only supported on Linear")
+    }
   }
 
-  return target
+  return commentId === undefined ? undefined : `linear:thread:${commentId}`
 }
 
 function optionalBlocks(value: unknown) {
