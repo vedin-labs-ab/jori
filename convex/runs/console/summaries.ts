@@ -1,6 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
+import { getActorDisplayName } from "../../shared/actor"
 import { getRunContext } from "./context"
 import { runDetailSummary } from "./details"
 import { runTask, runTitle, triggerLabel } from "./labels"
@@ -14,12 +15,12 @@ export async function summarizeRun(
   const context = await getRunContext(ctx, run, requestedApproval)
   const title = runTitle(context)
   const task = runTask(context)
-  const stoppedBy = await stoppedByLabel(ctx, run)
-  const source = runSource(context, stoppedBy)
+  const stoppedByLabel = getActorDisplayName(run.stoppedBy)
+  const source = runSource(context, stoppedByLabel)
   const detailSummary = runDetailSummary({
     approval: context.requestedApproval,
     run: context.run,
-    stoppedBy,
+    stoppedBy: stoppedByLabel,
     tools: context.prepared.tools,
   })
 
@@ -86,32 +87,4 @@ function searchableText(
     .filter(Boolean)
     .join(" ")
     .toLowerCase()
-}
-
-async function stoppedByLabel(ctx: QueryCtx, run: Doc<"runs">) {
-  const stoppedBy = run.stoppedBy
-
-  if (stoppedBy === undefined || stoppedBy === "") {
-    return undefined
-  }
-
-  if (!isClerkUserId(stoppedBy)) {
-    return stoppedBy
-  }
-
-  const identity = await ctx.db
-    .query("identities")
-    .withIndex("by_tenant_provider_user", (query) =>
-      query
-        .eq("tenantId", run.tenantId)
-        .eq("provider", "clerk")
-        .eq("userId", stoppedBy)
-    )
-    .first()
-
-  return identity?.email ?? stoppedBy
-}
-
-function isClerkUserId(value: string) {
-  return value.startsWith("user_")
 }

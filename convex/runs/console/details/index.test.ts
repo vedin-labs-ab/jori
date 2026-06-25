@@ -7,7 +7,7 @@ test("includes stopped details for stopped runs", async () => {
   const run = testRun(manualRun("Manual run", "Stop this run."), {
     status: "stopped",
     endedAt: 2000,
-    stoppedBy: "albin@example.com",
+    stoppedBy: { kind: "user", email: "albin@example.com" },
   })
   const summary = await summarizeRun(
     fakeQueryCtx({
