@@ -13,12 +13,13 @@ import { parkRun } from "./waiter"
 
 type AgentLoopOutput = {
   message: ""
-  status: "completed" | "stopped"
+  status: "completed" | "failed" | "stopped"
 }
 type YieldKind = "finish" | "stop"
 type YieldOutcome = "finished" | "continue" | "aborted"
 
 const maxModelSteps = 30
+const maxModelStepsError = "Model loop exceeded the maximum step count."
 const toolSequenceOffset = 100
 
 export async function runAgentLoop(args: {
@@ -57,7 +58,8 @@ export async function runAgentLoop(args: {
     }
   }
 
-  throw new Error("Model loop exceeded the maximum step count.")
+  await failRun(args.runtime, args.attempt)
+  return { message: "", status: "failed" }
 }
 
 async function runModelToolStep(
@@ -263,6 +265,17 @@ async function completeRun(
     "run.completed",
     sequence,
     attempt
+  )
+}
+
+async function failRun(runtime: ToolRuntime, attempt: number) {
+  await recordRunEvent(
+    runtime.convex,
+    runtime.context,
+    "run.failed",
+    maxModelSteps * toolSequenceOffset + toolSequenceOffset,
+    attempt,
+    { error: maxModelStepsError }
   )
 }
 
