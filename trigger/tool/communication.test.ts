@@ -11,7 +11,7 @@ test("provider reaction tools mark the active surface communicated", async () =>
   await executeToolCall({
     attempt: 1,
     call: {
-      args: { commentId: "comment_1", emoji: "👍" },
+      args: { emoji: "👍", target: { id: "comment_1", type: "comment" } },
       id: "call_1",
       name: "linear_add_reaction",
     },

@@ -63,14 +63,52 @@ export const linearToolInputSchemas = {
     },
   }),
   linear_add_reaction: objectSchema({
-    required: ["emoji"],
+    required: ["target", "emoji"],
     properties: {
-      commentId: stringProperty("Linear comment UUID to react to."),
       emoji: stringProperty("Emoji reaction value to send to Linear."),
-      issueId: stringProperty("Linear issue UUID to react to."),
-      projectUpdateId: stringProperty(
-        "Linear project update UUID to react to."
-      ),
+      target: {
+        description:
+          "Where to add the reaction. Use comment for comments and subcomments, issue for issues, or projectUpdate for project updates.",
+        oneOf: [
+          objectSchema({
+            required: ["type", "id"],
+            properties: {
+              id: stringProperty(
+                "Linear comment or subcomment UUID. Use the value after linear:comment: for the message itself, or linear:thread: for the parent comment thread."
+              ),
+              type: {
+                type: "string",
+                enum: ["comment"],
+                description: "React to a Linear comment or subcomment.",
+              },
+            },
+          }),
+          objectSchema({
+            required: ["type", "id"],
+            properties: {
+              id: stringProperty(
+                "Linear issue UUID, often the value after linear:issue: in identifiers."
+              ),
+              type: {
+                type: "string",
+                enum: ["issue"],
+                description: "React to the Linear issue.",
+              },
+            },
+          }),
+          objectSchema({
+            required: ["type", "id"],
+            properties: {
+              id: stringProperty("Linear project update UUID."),
+              type: {
+                type: "string",
+                enum: ["projectUpdate"],
+                description: "React to a Linear project update.",
+              },
+            },
+          }),
+        ],
+      },
     },
   }),
 } satisfies SchemaMap

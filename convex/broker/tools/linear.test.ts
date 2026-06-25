@@ -176,31 +176,42 @@ test("posts a Linear comment reply through the first-class comment helper", asyn
   })
 })
 
-test("adds a Linear reaction with ReactionCreateInput", async () => {
+test.each([
+  [
+    "comment",
+    { id: "comment-id", type: "comment" },
+    { commentId: "comment-id" },
+  ],
+  ["issue", { id: "issue-id", type: "issue" }, { issueId: "issue-id" }],
+  [
+    "project update",
+    { id: "project-update-id", type: "projectUpdate" },
+    { projectUpdateId: "project-update-id" },
+  ],
+])("adds a Linear reaction to a %s", async (_, target, expectedTarget) => {
   const calls = mockLinearFetch({
     data: { reactionCreate: { success: true } },
   })
 
   await callLinearTool(linearIntegration(), "linear_add_reaction", {
-    commentId: "comment-id",
     emoji: "\u{1F44D}",
+    target,
   })
 
   expect(calls[0]?.body.variables).toEqual({
-    input: { commentId: "comment-id", emoji: "\u{1F44D}" },
+    input: { emoji: "\u{1F44D}", ...expectedTarget },
   })
   expect(calls[0]?.body.query).toContain("ReactionCreateInput")
   expect(calls[0]?.body.query).toContain("reactionCreate")
 })
 
-test("requires exactly one Linear reaction target", async () => {
+test("requires a supported Linear reaction target", async () => {
   await expect(
     callLinearTool(linearIntegration(), "linear_add_reaction", {
       emoji: "\u{1F44D}",
-      issueId: "issue-id",
-      commentId: "comment-id",
+      target: { id: "target-id", type: "unsupported" },
     })
-  ).rejects.toThrow("Provide exactly one Linear reaction target")
+  ).rejects.toThrow("target.type must be comment, issue, or projectUpdate")
 })
 
 test("throws on Linear GraphQL errors", async () => {
