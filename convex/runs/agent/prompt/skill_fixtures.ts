@@ -1,11 +1,11 @@
 import { type RuntimeSkill } from "../../../skills/runtime"
 
 const slackTextGuidance =
+  "Most replies are a line or two of plain `mrkdwn`. Reach for structure only when it earns its place.\n\n" +
   "Format Slack messages with Slack `mrkdwn`, NOT GitHub Markdown.\n\n" +
   "Escape literal `&`, `<`, and `>` unless they are part of valid Slack syntax."
 
 const slackRichGuidance =
-  "Use plain `mrkdwn` for short conversational replies, simple answers, quick clarifications, and terse status updates.\n\n" +
   "Use Slack `blocks` when structure makes the message easier to scan.\n\n" +
   "Never use interactive Slack surfaces or controls. Callbacks are not handled."
 

@@ -41,7 +41,7 @@ function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
 function addReactionTool(surface: MessageIntegration): ActiveSurfaceTool {
   return {
     access: "write",
-    description: addReactionDescription(surface),
+    description: "Add a visible reaction on the active requester surface.",
     inputSchema: addReactionSchema(surface),
     name: "add_reaction",
     route: "active_surface",
@@ -198,19 +198,6 @@ function githubReactionTarget(): JsonObject {
       },
     },
   }
-}
-
-function addReactionDescription(surface: MessageIntegration) {
-  const suffix = {
-    github:
-      "Use GitHub reaction keywords only. Reactions are for lightweight acknowledgement; use send_reply for information, blockers, questions, decisions, or results.",
-    linear:
-      "Use the visible Unicode emoji. Reactions are for lightweight acknowledgement; use send_reply for information, blockers, questions, decisions, or results.",
-    slack:
-      "Use Slack emoji names without colons. Reactions are for lightweight acknowledgement; use send_reply for information, blockers, questions, decisions, or results.",
-  } satisfies Record<MessageIntegration, string>
-
-  return `Add a visible reaction on the active requester surface. ${suffix[surface]}`
 }
 
 function activeSurfaceToolLabel(name: ActiveSurfaceTool["name"]) {
