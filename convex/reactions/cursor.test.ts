@@ -2,62 +2,73 @@ import { expect, test } from "vitest"
 import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
 import { collectPendingReactionBatch, formatRuntimeReaction } from "./cursor"
 
+const self = { externalId: "UBOT", kind: "self" as const }
+const user = { externalId: "U123", kind: "user" as const }
+
 test("drains only reactions to Milo-authored targets", () => {
   const batch = collectPendingReactionBatch(
     [
-      reaction("last", 1, {
-        targetActor: { externalId: "UBOT", kind: "self" },
-      }),
-      reaction("other", 2, {
-        targetActor: { externalId: "U123", kind: "user" },
-      }),
-      reaction("self", 3, {
-        targetActor: { externalId: "UBOT", kind: "self" },
-      }),
+      reaction("a", 1, { targetActor: self }),
+      reaction("b", 2, { targetActor: user }),
+      reaction("c", 3, { targetActor: self }),
     ],
-    session("last", 1),
+    session({ updatedAt: 1, creationTime: 1 }),
     10,
     false
   )
 
-  expect(batch.reactions.map((item) => item._id)).toEqual(["self"])
-  expect(batch.cursor?._id).toBe("self")
+  expect(batch.reactions.map((item) => item._id)).toEqual(["c"])
+  expect(batch.cursor?._id).toBe("c")
   expect(batch.hasMore).toBe(false)
 })
 
-test("supports timestamp-only reaction cursors for new runs", () => {
+test("re-drains a row whose status changed after the cursor", () => {
+  const batch = collectPendingReactionBatch(
+    [reaction("r", 7, { creationTime: 5, removedAt: 700, targetActor: self })],
+    session({ updatedAt: 5, creationTime: 5 }),
+    10,
+    false
+  )
+
+  expect(batch.reactions.map((item) => item._id)).toEqual(["r"])
+  expect(batch.cursor?._id).toBe("r")
+})
+
+test("breaks updatedAt ties on creation time", () => {
   const batch = collectPendingReactionBatch(
     [
-      reaction("same", 10, {
-        targetActor: { externalId: "UBOT", kind: "self" },
-      }),
-      reaction("next", 11, {
-        targetActor: { externalId: "UBOT", kind: "self" },
-      }),
+      reaction("earlier", 5, { creationTime: 3, targetActor: self }),
+      reaction("later", 5, { creationTime: 9, targetActor: self }),
     ],
-    {
-      _id: id<"sessions">("session"),
-      _creationTime: 0,
-      watchId: id<"watches">("watch"),
-      reactionCursor: { timestamp: 10 },
-      updatedAt: 0,
-    },
+    session({ updatedAt: 5, creationTime: 5 }),
     10,
     false
   )
 
-  expect(batch.reactions.map((item) => item._id)).toEqual(["next"])
-  expect(batch.cursor?._id).toBe("next")
-  expect(batch.hasMore).toBe(false)
+  expect(batch.reactions.map((item) => item._id)).toEqual(["later"])
 })
 
-test("formats runtime reactions with target identifiers and preview", () => {
+test("drains reactions after a timestamp-only start cursor", () => {
+  const batch = collectPendingReactionBatch(
+    [
+      reaction("before", 9, { targetActor: self }),
+      reaction("after", 11, { targetActor: self }),
+    ],
+    session({ updatedAt: 10 }),
+    10,
+    false
+  )
+
+  expect(batch.reactions.map((item) => item._id)).toEqual(["after"])
+})
+
+test("formats added and removed runtime reactions", () => {
   expect(
     formatRuntimeReaction(
-      reaction("reaction", 1, {
+      reaction("added", 1, {
         actor: { externalId: "U123", kind: "user", name: "Albin" },
         reaction: "✅",
-        targetActor: { externalId: "UBOT", kind: "self" },
+        targetActor: self,
         targetIdentifiers: ["linear:issue:ISS-1", "linear:comment:comment"],
         targetText: "I can proceed with option B.",
       })
@@ -70,39 +81,48 @@ test("formats runtime reactions with target identifiers and preview", () => {
     target: "Milo",
     type: "reaction.added",
   })
+
+  expect(
+    formatRuntimeReaction(
+      reaction("removed", 4, { removedAt: 400, targetActor: self })
+    )
+  ).toMatchObject({ observedAt: 400, type: "reaction.removed" })
 })
 
-function session(reactionId: string, timestamp: number): Doc<"sessions"> {
+function session(reactionCursor?: {
+  updatedAt: number
+  creationTime?: number
+}): Doc<"sessions"> {
   return {
     _id: id<"sessions">("session"),
     _creationTime: 0,
     watchId: id<"watches">("watch"),
-    reactionCursor: {
-      reactionId: id<"reactions">(reactionId),
-      timestamp,
-    },
+    reactionCursor,
     updatedAt: 0,
   }
 }
 
 function reaction(
   reactionId: string,
-  createdAt: number,
-  overrides: Partial<Doc<"reactions">> = {}
+  updatedAt: number,
+  overrides: Partial<Doc<"reactions">> & { creationTime?: number } = {}
 ): Doc<"reactions"> {
+  const { creationTime, ...rest } = overrides
+
   return {
     _id: id<"reactions">(reactionId),
-    _creationTime: createdAt,
+    _creationTime: creationTime ?? updatedAt,
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
     integration: "linear",
-    key: reactionId,
-    action: "added",
     reaction: "👍",
+    actorKey: "actor",
     targetKey: "linear:comment:comment",
     targetIdentifiers: ["linear:comment:comment"],
-    createdAt,
-    ...overrides,
+    conversationId: "ISS-1",
+    updatedAt,
+    createdAt: creationTime ?? updatedAt,
+    ...rest,
   }
 }
 

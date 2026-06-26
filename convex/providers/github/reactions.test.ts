@@ -38,7 +38,6 @@ test("normalizes GitHub REST reactions into reaction snapshots", async () => {
         kind: "user",
         name: "albin",
       },
-      key: "github:reaction:123",
       observedAt: Date.parse("2026-06-25T13:58:12Z"),
       reaction: "👍",
     },

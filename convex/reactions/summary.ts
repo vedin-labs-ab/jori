@@ -1,9 +1,9 @@
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { messageReactionTargetKey } from "../messages/identifiers"
-import { getActorDisplayName, getActorExternalId } from "../shared/actor"
+import { getActorDisplayName } from "../shared/actor"
 
-const maxReactionEventsPerTarget = 200
+const maxReactionsPerTarget = 200
 const maxReactionGroups = 3
 const maxActorNames = 2
 
@@ -22,8 +22,8 @@ export async function reactionSummariesForMessages(
   const targets = uniqueMessageTargets(messages)
 
   for (const target of targets) {
-    const reactions = await reactionsForTarget(ctx, target)
-    const summary = formatReactionSummary(activeReactions(reactions))
+    const reactions = await activeReactionsForTarget(ctx, target)
+    const summary = formatReactionSummary(reactions)
 
     if (summary !== null) {
       for (const messageId of target.messageIds) {
@@ -70,49 +70,28 @@ function uniqueMessageTargets(messages: Doc<"messages">[]) {
   return [...targets.values()]
 }
 
-async function reactionsForTarget(
+async function activeReactionsForTarget(
   ctx: QueryLikeCtx,
   target: {
     integrationId: Doc<"messages">["integrationId"]
     key: string
   }
-) {
-  return await ctx.db
+): Promise<ActiveReaction[]> {
+  const rows = await ctx.db
     .query("reactions")
     .withIndex("by_integration_and_target", (query) =>
       query
         .eq("integrationId", target.integrationId)
         .eq("targetKey", target.key)
     )
-    .order("desc")
-    .take(maxReactionEventsPerTarget)
-}
+    .take(maxReactionsPerTarget)
 
-function activeReactions(reactions: Doc<"reactions">[]) {
-  const latest = new Map<string, Doc<"reactions">>()
-
-  for (const reaction of reactions) {
-    const key = `${actorKey(reaction)}:${reaction.reaction}`
-
-    if (!latest.has(key)) {
-      latest.set(key, reaction)
-    }
-  }
-
-  return [...latest.values()]
-    .filter((reaction) => reaction.action === "added")
+  return rows
+    .filter((reaction) => reaction.removedAt === undefined)
     .map((reaction) => ({
       actor: getActorDisplayName(reaction.actor) ?? "unknown",
       reaction: reaction.reaction,
     }))
-}
-
-function actorKey(reaction: Doc<"reactions">) {
-  return (
-    getActorExternalId(reaction.actor) ??
-    getActorDisplayName(reaction.actor) ??
-    reaction.key
-  )
 }
 
 function formatReactionSummary(reactions: ActiveReaction[]) {

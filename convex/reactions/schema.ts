@@ -9,28 +9,24 @@ export const reactions = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
   integration: integrationValidator,
-  key: v.string(),
-  action: reactionAction,
-  reaction: v.string(),
-  actor: v.optional(actorValidator),
-  targetKey: v.string(),
-  targetIdentifiers: v.array(v.string()),
-  targetActor: v.optional(actorValidator),
-  targetText: v.optional(v.string()),
-  targetMessageId: v.optional(v.id("messages")),
   conversationId: v.optional(v.string()),
+  targetKey: v.string(),
+  targetMessageId: v.optional(v.id("messages")),
+  targetActor: v.optional(actorValidator),
+  targetIdentifiers: v.array(v.string()),
+  targetText: v.optional(v.string()),
+  actor: v.optional(actorValidator),
+  actorKey: v.string(),
+  reaction: v.string(),
+  removedAt: v.optional(v.number()),
   observedAt: v.optional(v.number()),
+  updatedAt: v.number(),
   createdAt: v.number(),
 })
-  .index("by_integration_and_key", ["integrationId", "key"])
-  .index("by_integration_and_target", [
-    "integrationId",
-    "targetKey",
-    "createdAt",
-  ])
-  .index("by_conversation_and_created", [
+  .index("by_integration_and_target", ["integrationId", "targetKey"])
+  .index("by_conversation_and_updated", [
     "tenantId",
     "integrationId",
     "conversationId",
-    "createdAt",
+    "updatedAt",
   ])

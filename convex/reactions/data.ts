@@ -4,7 +4,13 @@ import { messageReactionTargetIdentifiers } from "../messages/identifiers"
 import { isGitHubSelfActor } from "../providers/github/data"
 import { getLinearBotId } from "../providers/linear/data"
 import { getSlackBotUserId } from "../providers/slack/data"
-import { type Actor, getActorExternalId, withActorKind } from "../shared/actor"
+import {
+  type Actor,
+  getActorDisplayName,
+  getActorEmail,
+  getActorExternalId,
+  withActorKind,
+} from "../shared/actor"
 import { type Integration } from "../shared/integrations"
 
 export type ReactionAction = "added" | "removed"
@@ -16,6 +22,27 @@ export type ReactionTarget = {
   actor?: Actor
   text?: string
   conversationId?: string
+}
+
+export type ReactionSnapshotItem = {
+  reaction: string
+  actor?: Actor
+  observedAt?: number
+}
+
+export type ReactionSnapshotTarget = {
+  target: ReactionTarget
+  reactions: ReactionSnapshotItem[]
+}
+
+export type ReactionSnapshotPlan = {
+  accountId: string
+  integration: ReactionIntegration
+  targets: ReactionSnapshotTarget[]
+}
+
+export type EnrichedReactionTarget = ReactionTarget & {
+  messageId?: Id<"messages">
 }
 
 export async function findActiveReactionIntegration(
@@ -39,64 +66,13 @@ export async function findActiveReactionIntegration(
   return integration
 }
 
-export async function recordReaction(
-  ctx: MutationCtx,
-  args: {
-    integration: Doc<"integrations">
-    key: string
-    action: ReactionAction
-    reaction: string
-    actor?: Actor
-    target: ReactionTarget
-    observedAt?: number
-  }
-): Promise<
-  | { status: "duplicate"; reactionId: Id<"reactions"> }
-  | { status: "recorded"; reactionId: Id<"reactions"> }
-> {
-  const existing = await ctx.db
-    .query("reactions")
-    .withIndex("by_integration_and_key", (query) =>
-      query.eq("integrationId", args.integration._id).eq("key", args.key)
-    )
-    .first()
-
-  if (existing !== null) {
-    return { status: "duplicate", reactionId: existing._id }
-  }
-
-  const target = await enrichReactionTarget(ctx, {
-    integration: args.integration,
-    target: args.target,
-  })
-  const reactionId = await ctx.db.insert("reactions", {
-    tenantId: args.integration.tenantId,
-    integrationId: args.integration._id,
-    integration: args.integration.integration,
-    key: args.key,
-    action: args.action,
-    reaction: args.reaction,
-    actor: args.actor,
-    targetKey: target.key,
-    targetIdentifiers: target.identifiers,
-    targetActor: normalizeTargetActor(target.actor, args.integration),
-    targetText: target.text,
-    targetMessageId: target.messageId,
-    conversationId: target.conversationId,
-    observedAt: args.observedAt,
-    createdAt: Date.now(),
-  })
-
-  return { status: "recorded", reactionId }
-}
-
-async function enrichReactionTarget(
+export async function enrichReactionTarget(
   ctx: MutationCtx,
   args: {
     integration: Doc<"integrations">
     target: ReactionTarget
   }
-) {
+): Promise<EnrichedReactionTarget> {
   const message = await findReactionTargetMessage(ctx, {
     integrationId: args.integration._id,
     targetKey: args.target.key,
@@ -108,7 +84,10 @@ async function enrichReactionTarget(
 
   return {
     ...args.target,
-    actor: args.target.actor ?? message.actor,
+    actor: normalizeTargetActor(
+      args.target.actor ?? message.actor,
+      args.integration
+    ),
     conversationId: message.conversationId ?? args.target.conversationId,
     identifiers: mergeIdentifiers(
       args.target.identifiers,
@@ -117,6 +96,25 @@ async function enrichReactionTarget(
     messageId: message._id,
     text: args.target.text ?? message.text,
   }
+}
+
+export function reactionActorKey(actor: Actor | undefined) {
+  return (
+    getActorExternalId(actor) ??
+    getActorEmail(actor) ??
+    getActorDisplayName(actor) ??
+    "unknown"
+  )
+}
+
+export function isReactionIntegration(
+  integration: Integration
+): integration is ReactionIntegration {
+  return (
+    integration === "github" ||
+    integration === "linear" ||
+    integration === "slack"
+  )
 }
 
 async function findReactionTargetMessage(
@@ -170,14 +168,4 @@ function selfActorId(
   }
 
   return undefined
-}
-
-export function isReactionIntegration(
-  integration: Integration
-): integration is ReactionIntegration {
-  return (
-    integration === "github" ||
-    integration === "linear" ||
-    integration === "slack"
-  )
 }

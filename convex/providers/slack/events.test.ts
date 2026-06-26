@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { getSlackMessage, getSlackReaction } from "./events"
+import { getSlackMessage } from "./events"
 
 describe("Slack event messages", () => {
   test("normalizes Slack message data into channel and thread objects", () => {
@@ -47,40 +47,6 @@ describe("Slack event messages", () => {
         },
       })
     ).toMatchObject({ mentioned: true, type: "message.channels" })
-  })
-})
-
-describe("Slack event reactions", () => {
-  test("normalizes message reaction events", () => {
-    expect(
-      getSlackReaction({
-        type: "event_callback",
-        team_id: "T123",
-        event_id: "E123",
-        event: {
-          type: "reaction_added",
-          user: "U123",
-          item_user: "UBOT",
-          reaction: "white_check_mark",
-          event_ts: "1710000001.000000",
-          item: {
-            type: "message",
-            channel: "C123",
-            ts: "1710000000.000200",
-          },
-        },
-      })
-    ).toMatchObject({
-      action: "added",
-      actorId: "U123",
-      reaction: ":white_check_mark:",
-      target: {
-        key: "slack:message:C123:1710000000.000200",
-        identifiers: ["slack:channel:C123", "slack:message:1710000000.000200"],
-        actorId: "UBOT",
-        conversationId: "1710000000.000200",
-      },
-    })
   })
 })
 

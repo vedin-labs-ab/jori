@@ -12,8 +12,8 @@ export const sessions = defineTable({
   ),
   reactionCursor: v.optional(
     v.object({
-      reactionId: v.optional(v.id("reactions")),
-      timestamp: v.number(),
+      updatedAt: v.number(),
+      creationTime: v.optional(v.number()),
     })
   ),
   updatedAt: v.number(),
