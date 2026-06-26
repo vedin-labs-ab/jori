@@ -18,6 +18,7 @@ test("renders recent conversation context without duplicating the trigger", () =
   expect(prompt).toContain(
     "- 1970-01-01T00:00:01.000Z | user | Albin | identifiers=[internal:message:previous-user-message, slack:message:123.456] | actor_ids=[slack:user:U123]"
   )
+  expect(prompt).toContain("reactions=[👍 x2 (Nina, Omar)]")
   expect(prompt).toContain("- 1970-01-01T00:00:02.000Z | self | Milo")
   expect(prompt).toContain("- 1970-01-01T00:00:03.000Z | bot | CI")
   expect(prompt).toContain("- 1970-01-01T00:00:03.500Z | bot | unknown")
@@ -106,6 +107,7 @@ function recentConversation() {
           "internal:message:previous-user-message",
           "slack:message:123.456",
         ],
+        reactions: "👍 x2 (Nina, Omar)",
         text: "Can you check this?",
       }),
       entry({
@@ -151,6 +153,7 @@ function entry(
     createdAt: 0,
     identifiers: [],
     observedAt: null,
+    reactions: null,
     source: "user",
     type: "message",
     ...args,

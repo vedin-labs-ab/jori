@@ -12,6 +12,7 @@ export const slackBotScopes = [
   "groups:history",
   "im:history",
   "mpim:history",
+  "reactions:read",
   "reactions:write",
 ]
 

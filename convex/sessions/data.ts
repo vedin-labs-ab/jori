@@ -7,6 +7,12 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 import {
+  defaultReactionDrainLimit,
+  formatRuntimeReaction,
+  readPendingReactions,
+} from "../reactions/cursor"
+import { reactionSummariesForMessages } from "../reactions/summary"
+import {
   collectPendingBatch,
   defaultDrainLimit,
   formatRuntimeMessage,
@@ -51,6 +57,7 @@ export async function startSession(
   const existing = await findSession(ctx, args.watchId)
   const patch = {
     cursor: messageCursor(args.message),
+    reactionCursor: reactionStartCursor(args.now),
     runId: args.runId,
     updatedAt: args.now,
   }
@@ -137,11 +144,16 @@ export const drainMessages = internalMutation({
     const session = await ctx.db.get(args.sessionId)
 
     if (session?.runId === undefined) {
-      return { hasMore: false, messages: [] }
+      return { hasMore: false, interactions: [], messages: [] }
     }
 
     const limit = normalizeLimit(args.limit)
     const batch = await readPendingBatch(ctx, session, limit)
+    const reactions = await readPendingReactions(
+      ctx,
+      session,
+      args.limit ?? defaultReactionDrainLimit
+    )
 
     if (batch.cursor !== undefined) {
       await ctx.db.patch(session._id, {
@@ -150,8 +162,16 @@ export const drainMessages = internalMutation({
       })
     }
 
+    if (reactions.cursor !== undefined) {
+      await ctx.db.patch(session._id, {
+        reactionCursor: reactionCursor(reactions.cursor),
+        updatedAt: Date.now(),
+      })
+    }
+
     return {
-      hasMore: batch.hasMore,
+      hasMore: batch.hasMore || reactions.hasMore,
+      interactions: reactions.reactions.map(formatRuntimeReaction),
       messages: await formatRuntimeMessages(ctx, batch.messages, session),
     }
   },
@@ -164,9 +184,12 @@ async function formatRuntimeMessages(
 ) {
   const result: ReturnType<typeof formatRuntimeMessage>[] = []
   const integration = await getSessionIntegration(ctx, session)
+  const reactions = await reactionSummariesForMessages(ctx, messages)
 
   for (const message of messages) {
-    result.push(formatRuntimeMessage(message, integration))
+    result.push(
+      formatRuntimeMessage(message, integration, reactions.get(message._id))
+    )
   }
 
   return result
@@ -221,4 +244,15 @@ function messageCursor(message: Doc<"messages">) {
     messageId: message._id,
     timestamp: message._creationTime,
   }
+}
+
+function reactionCursor(reaction: Doc<"reactions">) {
+  return {
+    reactionId: reaction._id,
+    timestamp: reaction.createdAt,
+  }
+}
+
+function reactionStartCursor(timestamp: number) {
+  return { timestamp }
 }

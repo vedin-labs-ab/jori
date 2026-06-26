@@ -10,6 +10,12 @@ export const sessions = defineTable({
       timestamp: v.number(),
     })
   ),
+  reactionCursor: v.optional(
+    v.object({
+      reactionId: v.optional(v.id("reactions")),
+      timestamp: v.number(),
+    })
+  ),
   updatedAt: v.number(),
 })
   .index("by_watch", ["watchId"])

@@ -59,7 +59,8 @@ export function collectPendingBatch(
 
 export function formatRuntimeMessage(
   message: Doc<"messages">,
-  integration: Doc<"integrations"> | null
+  integration: Doc<"integrations"> | null,
+  reactions?: string
 ) {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
@@ -71,6 +72,7 @@ export function formatRuntimeMessage(
     integration: message.integration,
     mentioned: message.mentioned,
     observedAt: message.observedAt ?? null,
+    reactions: reactions ?? null,
     replyTarget: messageReplyTargetIdentifier(message),
     source: message.actor?.kind ?? "unknown",
     text:

@@ -14,6 +14,37 @@ export function messageIdentifiers(message: Doc<"messages">) {
   ].filter(unique)
 }
 
+export function messageReactionTargetIdentifiers(message: Doc<"messages">) {
+  return surfaceIdentifiers(message).filter(unique)
+}
+
+export function messageReactionTargetKey(message: Doc<"messages">) {
+  if (message.targetKey !== undefined) {
+    return message.targetKey
+  }
+
+  return messageDataReactionTargetKey(message.integration, message.data)
+}
+
+export function messageDataReactionTargetKey(
+  integration: string,
+  data: unknown
+) {
+  if (integration === "linear") {
+    return linearTargetKey(data)
+  }
+
+  if (integration === "slack") {
+    return slackTargetKey(data)
+  }
+
+  if (integration === "github") {
+    return githubTargetKey(data)
+  }
+
+  return undefined
+}
+
 export function messageActorIds(message: Doc<"messages">) {
   if (message.integration === "linear") {
     return actorId(message, linearActorIdPrefix)
@@ -75,6 +106,14 @@ function linearIdentifiers(message: Doc<"messages">) {
   ]
 }
 
+function linearTargetKey(data: unknown) {
+  return (
+    identifier("linear:comment", readDataString(data, "commentId")) ??
+    identifier("linear:issue", readDataString(data, "issueId")) ??
+    undefined
+  )
+}
+
 function linearReplyTargetIdentifier(message: Doc<"messages">) {
   const parentCommentId = readDataString(message.data, "parentCommentId")
   const issueId = readDataString(message.data, "issueId")
@@ -97,15 +136,83 @@ function slackIdentifiers(message: Doc<"messages">) {
   ]
 }
 
+function slackTargetKey(data: unknown) {
+  const channelId = getSlackChannelId(data)
+  const messageTs = getSlackMessageTs(data)
+
+  return channelId === undefined || messageTs === undefined
+    ? undefined
+    : `slack:message:${channelId}:${messageTs}`
+}
+
 function githubIdentifiers(message: Doc<"messages">) {
   const repository = readDataObject(message.data, "repository")
   const fullName = readDataString(repository, "fullName")
   const comment = readDataObject(message.data, "comment")
+  const issueNumber = readDataStringValue(message.data, "issueNumber")
+  const pullNumber = readDataStringValue(message.data, "pullNumber")
 
   return [
     identifier("github:repository", fullName),
+    identifier("github:issue", issueNumberKey(fullName, issueNumber)),
+    identifier("github:pull", issueNumberKey(fullName, pullNumber)),
     identifier("github:comment", readDataString(comment, "id")),
   ]
+}
+
+function githubTargetKey(data: unknown) {
+  const repository = readDataObject(data, "repository")
+  const fullName = readDataString(repository, "fullName")
+  const comment = readDataObject(data, "comment")
+  const commentId = readDataString(comment, "id")
+
+  if (fullName !== undefined && commentId !== undefined) {
+    return `github:comment:${fullName}:${commentId}`
+  }
+
+  const pullNumber = readDataStringValue(data, "pullNumber")
+  const issueNumber = readDataStringValue(data, "issueNumber")
+  const targetNumber = pullNumber ?? issueNumber
+  const issueKey = issueNumberKey(fullName, targetNumber)
+
+  if (issueKey === undefined) {
+    return undefined
+  }
+
+  return `github:${pullNumber === undefined ? "issue" : "pull"}:${issueKey}`
+}
+
+function issueNumberKey(
+  repository: string | undefined,
+  number: string | undefined
+) {
+  return repository === undefined || number === undefined
+    ? undefined
+    : `${repository}#${number}`
+}
+
+function readDataStringValue(data: unknown, key: string) {
+  const value = readDataString(data, key)
+
+  if (value !== undefined) {
+    return value
+  }
+
+  const numberValue = readDataNumberValue(data, key)
+
+  return numberValue === undefined ? undefined : String(numberValue)
+}
+
+function readDataNumberValue(data: unknown, key: string) {
+  if (typeof data !== "object" || data === null) {
+    return undefined
+  }
+
+  const value = (data as Record<string, unknown>)[key]
+
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.trunc(value)
+    : undefined
 }
 
 function actorId(

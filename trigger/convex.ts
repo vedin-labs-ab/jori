@@ -18,6 +18,7 @@ import {
   type RunHandoffs,
   type RuntimeContext,
   type RuntimeEventInput,
+  type RuntimeInteraction,
   type RuntimeMessage,
   type RuntimeTool,
   type RuntimeTraceSource,
@@ -156,6 +157,7 @@ export class MiloConvexClient {
       sessionId: args.sessionId,
     })) as {
       hasMore: boolean
+      interactions: RuntimeInteraction[]
       messages: RuntimeMessage[]
     }
   }

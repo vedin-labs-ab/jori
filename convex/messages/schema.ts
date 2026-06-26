@@ -12,6 +12,7 @@ export const messages = defineTable({
   mentioned: v.boolean(),
   actor: v.optional(actorValidator),
   conversationId: v.optional(v.string()),
+  targetKey: v.optional(v.string()),
   text: v.optional(v.string()),
   data: v.optional(v.any()),
   observedAt: v.optional(v.number()),
@@ -19,3 +20,4 @@ export const messages = defineTable({
 })
   .index("by_external_id", ["externalId"])
   .index("by_conversation", ["tenantId", "integrationId", "conversationId"])
+  .index("by_integration_and_target", ["integrationId", "targetKey"])

@@ -121,10 +121,25 @@ export type RuntimeMessage = {
   integration: string
   mentioned: boolean
   observedAt: number | null
+  reactions: string | null
   replyTarget: string | null
   source: "bot" | "self" | "unknown" | "user"
   text: string
   type: string
+}
+
+export type RuntimeInteraction = {
+  actor: string | null
+  actorIds: string[]
+  createdAt: number
+  id: ConvexId<"reactions">
+  identifiers: string[]
+  observedAt: number | null
+  preview: string | null
+  reaction: string
+  source: "bot" | "self" | "unknown" | "user"
+  target: string
+  type: "reaction.added" | "reaction.removed"
 }
 
 export type RuntimeEventType =
