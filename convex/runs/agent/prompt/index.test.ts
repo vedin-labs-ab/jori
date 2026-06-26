@@ -145,9 +145,9 @@ describe("runtime delivery prompts", () => {
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
-    expect(prompt).toContain("Send one short start update")
+    expect(prompt).toContain("Send a short heads-up with `send_reply`")
     expect(prompt).toContain("Make updates useful, not ceremonial")
-    expect(prompt).toContain("After a start update, stay quiet")
+    expect(prompt).toContain("After the heads-up, stay quiet")
     expect(prompt).toContain(
       "I’ll find the Notion parent first, then ask for approval"
     )
@@ -162,8 +162,8 @@ describe("runtime delivery prompts", () => {
     )
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("default to the lightest touch that lands it")
-    expect(prompt).toContain("Reach for `send_reply`")
+    expect(prompt).toContain("use the lightest action that delivers it")
+    expect(prompt).toContain("Use `send_reply`")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Finish")
@@ -178,8 +178,8 @@ describe("runtime delivery prompts", () => {
     const prompt = assemblePrompt(runtimeInput(provider, data))
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("default to the lightest touch that lands it")
-    expect(prompt).toContain("Reach for `send_reply`")
+    expect(prompt).toContain("use the lightest action that delivers it")
+    expect(prompt).toContain("Use `send_reply`")
     expect(prompt).toContain("# Finish")
     expect(prompt).toContain("No closing message is required")
   })

@@ -1,3 +1,5 @@
+Most replies are a line or two of plain `mrkdwn`. Reach for structure only when it earns its place.
+
 Format Slack messages with Slack `mrkdwn`, NOT GitHub Markdown.
 
 Use Slack-native formatting:

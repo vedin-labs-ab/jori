@@ -16,7 +16,7 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).toContain("`slack`: Format Slack replies")
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("Reach for `send_reply`")
+    expect(prompt).toContain("Use `send_reply`")
     expect(prompt).not.toContain("# Format")
     expect(prompt).not.toContain("Do not use app-callback controls")
   })
@@ -28,7 +28,7 @@ describe("runtime skill prompts", () => {
     )
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("default to the lightest touch that lands it")
+    expect(prompt).toContain("use the lightest action that delivers it")
     expect(prompt).toContain("outside a tool call reach no one")
     expect(prompt).toContain("No closing message is required")
     expect(prompt).toContain("Active surface: `Slack`")
@@ -44,7 +44,10 @@ describe("runtime skill prompts", () => {
     )
     expect(prompt).toContain("Format Slack messages with Slack `mrkdwn`")
     expect(prompt).toContain(
-      "Escape literal `&`, `<`, and `>` unless they are part of valid Slack syntax.\n\nUse plain `mrkdwn` for short conversational replies, simple answers, quick clarifications, and terse status updates."
+      "Most replies are a line or two of plain `mrkdwn`. Reach for structure only when it earns its place."
+    )
+    expect(prompt).toContain(
+      "Escape literal `&`, `<`, and `>` unless they are part of valid Slack syntax.\n\nUse Slack `blocks` when structure makes the message easier to scan."
     )
     expect(prompt).toContain(
       "Use Slack `blocks` when structure makes the message easier to scan"
