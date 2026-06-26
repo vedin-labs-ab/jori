@@ -34,7 +34,6 @@ describe("Linear webhook messages", () => {
 describe("Linear webhook reactions", () => {
   test("normalizes app user comment reaction notifications", () => {
     const reaction = getLinearReaction({
-      deliveryId: "delivery-id",
       payload: {
         type: "AppUserNotification",
         action: "issueCommentReaction",

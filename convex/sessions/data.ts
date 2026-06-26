@@ -248,11 +248,11 @@ function messageCursor(message: Doc<"messages">) {
 
 function reactionCursor(reaction: Doc<"reactions">) {
   return {
-    reactionId: reaction._id,
-    timestamp: reaction.createdAt,
+    creationTime: reaction._creationTime,
+    updatedAt: reaction.updatedAt,
   }
 }
 
-function reactionStartCursor(timestamp: number) {
-  return { timestamp }
+function reactionStartCursor(updatedAt: number) {
+  return { updatedAt }
 }

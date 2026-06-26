@@ -152,10 +152,7 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
-  const reaction = getLinearReaction({
-    payload,
-    deliveryId: request.headers.get("linear-delivery"),
-  })
+  const reaction = getLinearReaction({ payload })
 
   if (reaction !== null) {
     await recordLinearReaction(ctx, reaction)
@@ -196,7 +193,6 @@ async function recordLinearReaction(ctx: ActionCtx, reaction: LinearReaction) {
   await ctx.runMutation(internal.reactions.intake.record, {
     accountId: reaction.accountId,
     integration: "linear",
-    key: reaction.externalId,
     action: reaction.action,
     reaction: reaction.reaction,
     actor: createIntegrationActor({

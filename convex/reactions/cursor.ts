@@ -8,6 +8,8 @@ export const maxPendingReactionReadLimit = maxReactionDrainLimit + 1
 
 type QueryLikeCtx = MutationCtx | QueryCtx
 
+type ReactionCursor = NonNullable<Doc<"sessions">["reactionCursor"]>
+
 export type ReactionBatch = {
   cursor?: Doc<"reactions">
   hasMore: boolean
@@ -49,17 +51,11 @@ export function collectPendingReactionBatch(
 ): ReactionBatch {
   const pending: Doc<"reactions">[] = []
   let cursor: Doc<"reactions"> | undefined
-  let seenLastReaction = session.reactionCursor === undefined
 
   for (let index = 0; index < reactions.length; index += 1) {
     const reaction = reactions[index]
 
-    if (reaction._id === session.reactionCursor?.reactionId) {
-      seenLastReaction = true
-      continue
-    }
-
-    if (!isAfterReactionCursor(reaction, session, seenLastReaction)) {
+    if (!isAfterReactionCursor(reaction, session.reactionCursor)) {
       continue
     }
 
@@ -82,7 +78,9 @@ export function collectPendingReactionBatch(
 }
 
 export function formatRuntimeReaction(reaction: Doc<"reactions">) {
-  const observed = reaction.observedAt ?? reaction.createdAt
+  const removed = reaction.removedAt !== undefined
+  const observed =
+    (removed ? reaction.removedAt : reaction.observedAt) ?? reaction.updatedAt
 
   return {
     actor: getActorDisplayName(reaction.actor) ?? null,
@@ -95,7 +93,7 @@ export function formatRuntimeReaction(reaction: Doc<"reactions">) {
     reaction: reaction.reaction,
     source: reaction.actor?.kind ?? "unknown",
     target: reactionTargetLabel(reaction),
-    type: `reaction.${reaction.action}` as const,
+    type: removed ? ("reaction.removed" as const) : ("reaction.added" as const),
   }
 }
 
@@ -106,35 +104,17 @@ function reactionActorIds(reaction: Doc<"reactions">) {
     return []
   }
 
-  if (reaction.integration === "linear") {
-    return [
-      `linear:${reaction.actor?.kind === "bot" ? "bot" : "user"}:${externalId}`,
-    ]
-  }
+  const kind = reaction.actor?.kind === "bot" ? "bot" : "user"
 
-  if (reaction.integration === "slack") {
-    return [
-      `slack:${reaction.actor?.kind === "bot" ? "bot" : "user"}:${externalId}`,
-    ]
-  }
-
-  if (reaction.integration === "github") {
-    return [
-      `github:${reaction.actor?.kind === "bot" ? "bot" : "user"}:${externalId}`,
-    ]
-  }
-
-  return []
+  return [`${reaction.integration}:${kind}:${externalId}`]
 }
 
 function reactionTargetLabel(reaction: Doc<"reactions">) {
-  const targetActor = getActorDisplayName(reaction.targetActor)
-
   if (reaction.targetActor?.kind === "self") {
     return "Milo"
   }
 
-  return targetActor ?? "message"
+  return getActorDisplayName(reaction.targetActor) ?? "message"
 }
 
 async function queryConversationReactions(
@@ -147,7 +127,7 @@ async function queryConversationReactions(
 ) {
   return await ctx.db
     .query("reactions")
-    .withIndex("by_conversation_and_created", (query) => {
+    .withIndex("by_conversation_and_updated", (query) => {
       const scoped = query
         .eq("tenantId", args.watch.tenantId)
         .eq("integrationId", args.watch.integrationId)
@@ -155,7 +135,7 @@ async function queryConversationReactions(
 
       return args.session.reactionCursor === undefined
         ? scoped
-        : scoped.gte("createdAt", args.session.reactionCursor.timestamp)
+        : scoped.gte("updatedAt", args.session.reactionCursor.updatedAt)
     })
     .order("asc")
     .take(args.limit)
@@ -163,20 +143,20 @@ async function queryConversationReactions(
 
 function isAfterReactionCursor(
   reaction: Doc<"reactions">,
-  session: Doc<"sessions">,
-  seenLastReaction: boolean
+  cursor: ReactionCursor | undefined
 ) {
-  const cursor = session.reactionCursor
-
   if (cursor === undefined) {
     return true
   }
 
-  if (reaction.createdAt < cursor.timestamp) {
-    return false
+  if (reaction.updatedAt !== cursor.updatedAt) {
+    return reaction.updatedAt > cursor.updatedAt
   }
 
-  return reaction.createdAt !== cursor.timestamp || seenLastReaction
+  return (
+    cursor.creationTime === undefined ||
+    reaction._creationTime > cursor.creationTime
+  )
 }
 
 function isRuntimeInputReaction(reaction: Doc<"reactions">) {

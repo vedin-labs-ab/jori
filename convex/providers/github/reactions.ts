@@ -1,10 +1,21 @@
 import { v } from "convex/values"
-import { type Doc } from "../../_generated/dataModel"
-import { internalQuery, type QueryCtx } from "../../_generated/server"
-import { type ReactionSnapshotItem } from "../../reactions/sync"
+import { internal } from "../../_generated/api"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import {
+  type ActionCtx,
+  internalQuery,
+  type QueryCtx,
+} from "../../_generated/server"
+import {
+  type ReactionSnapshotItem,
+  type ReactionSnapshotPlan,
+  type ReactionSnapshotTarget,
+} from "../../reactions/data"
 import { createIntegrationActor } from "../../shared/actor"
 import { readRecord } from "../../shared/input"
 import { githubJsonArray } from "./api"
+import { createGitHubInstallationToken } from "./app"
+import { requireGitHubCredentials } from "./credentials"
 import { isGitHubSelfActor } from "./data"
 import {
   type GitHubReactionSyncTarget,
@@ -15,6 +26,7 @@ import {
 const defaultTargetLimit = 20
 const maxTargetLimit = 50
 const reactionsPerTarget = 100
+const tokenRefreshBufferMs = 5 * 60 * 1000
 
 const githubReactionLabels: Record<string, string> = {
   "+1": "👍",
@@ -77,6 +89,70 @@ export const sessionTargets = internalQuery({
   },
 })
 
+export async function githubReactionSnapshots(
+  ctx: ActionCtx,
+  sessionId: Id<"sessions">
+): Promise<ReactionSnapshotPlan | null> {
+  const plan = (await ctx.runQuery(
+    internal.providers.github.reactions.sessionTargets,
+    { sessionId }
+  )) as GitHubReactionSyncPlan | null
+
+  if (plan === null || plan.targets.length === 0) {
+    return null
+  }
+
+  const token = await ensureGitHubReactionToken(ctx, plan.integration)
+  const targets: ReactionSnapshotTarget[] = []
+
+  for (const target of plan.targets) {
+    targets.push({
+      reactions: await fetchGitHubReactionSnapshot(token, target),
+      target: target.target,
+    })
+  }
+
+  return {
+    accountId: plan.integration.externalId,
+    integration: "github",
+    targets,
+  }
+}
+
+async function ensureGitHubReactionToken(
+  ctx: ActionCtx,
+  integration: Doc<"integrations">
+) {
+  const credentials = requireGitHubCredentials(integration)
+  const accessToken = credentials.tokens?.access
+
+  if (
+    accessToken !== undefined &&
+    credentials.expiresAt !== undefined &&
+    credentials.expiresAt > Date.now() + tokenRefreshBufferMs
+  ) {
+    return accessToken
+  }
+
+  const tokenResult = await createGitHubInstallationToken(
+    credentials.installationId
+  )
+  const expiresAt = Date.parse(tokenResult.expires_at)
+
+  if (Number.isFinite(expiresAt)) {
+    await ctx.runMutation(
+      internal.providers.github.install.updateInstallationCredentials,
+      {
+        accessToken: tokenResult.token,
+        expiresAt,
+        integrationId: integration._id,
+      }
+    )
+  }
+
+  return tokenResult.token
+}
+
 export async function fetchGitHubReactionSnapshot(
   token: string,
   target: GitHubReactionSyncTarget
@@ -131,7 +207,6 @@ function githubReactionSnapshotItem(
   const user = readRecord(reaction.user)
 
   return {
-    key: `github:reaction:${id}`,
     reaction: githubReactionLabels[content] ?? content,
     actor: createIntegrationActor({
       externalId: stringValue(readNumber(user, "id")),

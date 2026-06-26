@@ -26,7 +26,7 @@ test("starts new watch message runs as mentions", async () => {
         timestamp: 0,
       },
       reactionCursor: {
-        timestamp: 1000,
+        updatedAt: 1000,
       },
       runId: "runs-1",
     }),
@@ -85,7 +85,7 @@ test("starts reply runs when the previous session is terminal", async () => {
     id: "session",
     patch: expect.objectContaining({
       reactionCursor: {
-        timestamp: 1000,
+        updatedAt: 1000,
       },
       runId: "runs-1",
     }),

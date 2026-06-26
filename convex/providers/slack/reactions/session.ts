@@ -1,12 +1,43 @@
 import { v } from "convex/values"
-import { type Doc } from "../../../_generated/dataModel"
-import { internalQuery, type QueryCtx } from "../../../_generated/server"
+import { internal } from "../../../_generated/api"
+import { type Doc, type Id } from "../../../_generated/dataModel"
+import {
+  type ActionCtx,
+  internalQuery,
+  type QueryCtx,
+} from "../../../_generated/server"
+import { type ReactionSnapshotPlan } from "../../../reactions/data"
+import { requireSlackCredentials } from "../credentials"
 import { getSlackChannelId } from "../data"
+import { fetchSlackReactionSnapshots } from "./snapshot"
 
 export type SlackReactionSyncPlan = {
   channelId: string
   integration: Doc<"integrations">
   threadTs: string
+}
+
+export async function slackReactionSnapshots(
+  ctx: ActionCtx,
+  sessionId: Id<"sessions">
+): Promise<ReactionSnapshotPlan | null> {
+  const plan = (await ctx.runQuery(
+    internal.providers.slack.reactions.session.sessionTarget,
+    { sessionId }
+  )) as SlackReactionSyncPlan | null
+
+  if (plan === null) {
+    return null
+  }
+
+  return {
+    accountId: plan.integration.externalId,
+    integration: "slack",
+    targets: await fetchSlackReactionSnapshots(
+      requireSlackCredentials(plan.integration).user,
+      plan
+    ),
+  }
 }
 
 export const sessionTarget = internalQuery({

@@ -21,11 +21,7 @@ import {
 } from "./config"
 import { enrichSlackMessageData } from "./directory/channels"
 import { getSlackActorProfile } from "./directory/users"
-import {
-  getSlackMessage,
-  getSlackReaction,
-  type SlackEventPayload,
-} from "./events"
+import { getSlackMessage, type SlackEventPayload } from "./events"
 import { exchangeSlackAuthorizationCode, requireSlackClientId } from "./oauth"
 import { parseSignedSlackState, verifySlackRequest } from "./signing"
 
@@ -147,12 +143,6 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return await handleSlackMessageEvent(ctx, message)
   }
 
-  const reaction = getSlackReaction(payload)
-
-  if (reaction !== null) {
-    return await handleSlackReactionEvent(ctx, reaction)
-  }
-
   return Response.json({ ok: true })
 }
 
@@ -218,43 +208,6 @@ async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
 }
 
 type SlackMessage = NonNullable<ReturnType<typeof getSlackMessage>>
-type SlackReaction = NonNullable<ReturnType<typeof getSlackReaction>>
-
-async function handleSlackReactionEvent(
-  ctx: ActionCtx,
-  reaction: SlackReaction
-) {
-  const actorProfile = await getSlackActorProfile(ctx, {
-    accountId: reaction.accountId,
-    actorId: reaction.actorId,
-  })
-
-  await ctx.runMutation(internal.reactions.intake.record, {
-    accountId: reaction.accountId,
-    integration: "slack",
-    key: reaction.externalId,
-    action: reaction.action,
-    reaction: reaction.reaction,
-    actor: createIntegrationActor({
-      externalId: reaction.actorId,
-      kind: "user",
-      email: actorProfile?.email,
-      name: actorProfile?.name,
-    }),
-    target: {
-      key: reaction.target.key,
-      identifiers: reaction.target.identifiers,
-      actor: createIntegrationActor({
-        externalId: reaction.target.actorId,
-        kind: "user",
-      }),
-      conversationId: reaction.target.conversationId,
-    },
-    observedAt: reaction.observedAt,
-  })
-
-  return Response.json({ ok: true })
-}
 
 export async function handleSlackInteractions(
   ctx: ActionCtx,

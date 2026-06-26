@@ -1,16 +1,13 @@
-import { type ReactionTarget } from "../../../reactions/data"
-import { type ReactionSnapshotItem } from "../../../reactions/sync"
+import {
+  type ReactionSnapshotItem,
+  type ReactionSnapshotTarget,
+} from "../../../reactions/data"
 import { createIntegrationActor } from "../../../shared/actor"
 import { readRecord } from "../../../shared/input"
 import { slackQueryApi } from "../api"
 import { type SlackReactionSyncPlan } from "./session"
 
 const repliesLimit = 100
-
-export type SlackReactionSnapshot = {
-  reactions: ReactionSnapshotItem[]
-  target: ReactionTarget
-}
 
 export async function fetchSlackReactionSnapshots(
   token: string,
@@ -22,7 +19,7 @@ export async function fetchSlackReactionSnapshots(
     ts: plan.threadTs,
   })
   const messages = Array.isArray(result?.messages) ? result.messages : []
-  const snapshots: SlackReactionSnapshot[] = []
+  const snapshots: ReactionSnapshotTarget[] = []
 
   for (const value of messages) {
     const snapshot = slackMessageReactionSnapshot(plan.channelId, value)
@@ -38,7 +35,7 @@ export async function fetchSlackReactionSnapshots(
 function slackMessageReactionSnapshot(
   channelId: string,
   value: unknown
-): SlackReactionSnapshot | null {
+): ReactionSnapshotTarget | null {
   const message = readRecord(value)
   const messageTs = readString(message, "ts")
 
@@ -47,7 +44,7 @@ function slackMessageReactionSnapshot(
   }
 
   return {
-    reactions: slackReactionItems(channelId, messageTs, message.reactions),
+    reactions: slackReactionItems(message.reactions),
     target: {
       key: `slack:message:${channelId}:${messageTs}`,
       identifiers: [`slack:channel:${channelId}`, `slack:message:${messageTs}`],
@@ -55,11 +52,7 @@ function slackMessageReactionSnapshot(
   }
 }
 
-function slackReactionItems(
-  channelId: string,
-  messageTs: string,
-  value: unknown
-) {
+function slackReactionItems(value: unknown) {
   const items: ReactionSnapshotItem[] = []
   const reactions = Array.isArray(value) ? value : []
 
@@ -78,7 +71,6 @@ function slackReactionItems(
           externalId: userId,
           kind: "user",
         }),
-        key: `slack:reaction:${channelId}:${messageTs}:${name}:${userId}`,
         reaction: `:${name}:`,
       })
     }

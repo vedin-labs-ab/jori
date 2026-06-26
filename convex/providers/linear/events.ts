@@ -68,10 +68,7 @@ export function getLinearMessage(args: {
   return null
 }
 
-export function getLinearReaction(args: {
-  payload: LinearWebhookPayload
-  deliveryId: string | null
-}) {
+export function getLinearReaction(args: { payload: LinearWebhookPayload }) {
   const action = args.payload.action
   const accountId = args.payload.organizationId
 
@@ -102,17 +99,6 @@ export function getLinearReaction(args: {
     actorEmail: actor.email,
     actorId: actor.id,
     actorName: actor.name,
-    externalId: createLinearExternalId(
-      accountId,
-      args.deliveryId,
-      [
-        action,
-        commentId,
-        actor.id,
-        reaction,
-        args.payload.webhookId ?? args.payload.webhookTimestamp,
-      ].join(":")
-    ),
     observedAt: getObservedAt(args.payload, args.payload.createdAt),
     reaction,
     target: {

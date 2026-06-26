@@ -42,7 +42,6 @@ test("normalizes Slack thread reactions into reaction snapshots", async () => {
             externalId: "U123",
             kind: "user",
           },
-          key: "slack:reaction:C123:1710000000.000100:white_check_mark:U123",
           reaction: ":white_check_mark:",
         },
         {
@@ -50,7 +49,6 @@ test("normalizes Slack thread reactions into reaction snapshots", async () => {
             externalId: "U123",
             kind: "user",
           },
-          key: "slack:reaction:C123:1710000000.000100:eyes:U123",
           reaction: ":eyes:",
         },
         {
@@ -58,7 +56,6 @@ test("normalizes Slack thread reactions into reaction snapshots", async () => {
             externalId: "U456",
             kind: "user",
           },
-          key: "slack:reaction:C123:1710000000.000100:eyes:U456",
           reaction: ":eyes:",
         },
       ],

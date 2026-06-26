@@ -1,13 +1,9 @@
 import { v } from "convex/values"
 import { internalMutation } from "../_generated/server"
 import { actorValidator } from "../shared/actor"
-import {
-  findActiveReactionIntegration,
-  type ReactionIntegration,
-  recordReaction,
-} from "./data"
+import { reconcileTargetReactions, recordReactionEvent } from "./apply"
+import { findActiveReactionIntegration } from "./data"
 import { reactionAction } from "./schema"
-import { syncReactionSnapshot } from "./sync"
 
 const reactionIntegration = v.union(
   v.literal("github"),
@@ -27,7 +23,6 @@ export const record = internalMutation({
   args: {
     accountId: v.string(),
     integration: reactionIntegration,
-    key: v.string(),
     action: reactionAction,
     reaction: v.string(),
     actor: v.optional(actorValidator),
@@ -37,27 +32,23 @@ export const record = internalMutation({
   handler: async (ctx, args) => {
     const integration = await findActiveReactionIntegration(ctx, {
       accountId: args.accountId,
-      integration: args.integration as ReactionIntegration,
+      integration: args.integration,
     })
 
     if (integration === null) {
       return { status: "missing_integration" as const }
     }
 
-    const result = await recordReaction(ctx, {
-      integration,
-      key: args.key,
+    const result = await recordReactionEvent(ctx, {
       action: args.action,
-      reaction: args.reaction,
       actor: args.actor,
-      target: args.target,
+      integration,
       observedAt: args.observedAt,
+      reaction: args.reaction,
+      target: args.target,
     })
 
-    return {
-      status: result.status,
-      reactionId: result.reactionId,
-    }
+    return { status: "recorded" as const, recorded: result.recorded }
   },
 })
 
@@ -68,7 +59,6 @@ export const sync = internalMutation({
     target: reactionTarget,
     reactions: v.array(
       v.object({
-        key: v.string(),
         reaction: v.string(),
         actor: v.optional(actorValidator),
         observedAt: v.optional(v.number()),
@@ -78,7 +68,7 @@ export const sync = internalMutation({
   handler: async (ctx, args) => {
     const integration = await findActiveReactionIntegration(ctx, {
       accountId: args.accountId,
-      integration: args.integration as ReactionIntegration,
+      integration: args.integration,
     })
 
     if (integration === null) {
@@ -87,7 +77,7 @@ export const sync = internalMutation({
 
     return {
       status: "synced" as const,
-      ...(await syncReactionSnapshot(ctx, {
+      ...(await reconcileTargetReactions(ctx, {
         integration,
         reactions: args.reactions,
         target: args.target,
