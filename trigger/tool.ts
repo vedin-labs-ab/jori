@@ -13,6 +13,7 @@ import { optionalString, requiredString } from "./input"
 import { type ModelToolCall } from "./model/types"
 import { executeRunTool } from "./run"
 import { executeCodingTool } from "./sandbox/coding"
+import { prepareProviderToolInput } from "./sandbox/source"
 import { type SandboxRuntime } from "./sandbox/types"
 import { executeActiveSurfaceTool } from "./surface"
 import { recordToolEvent, toolTraceDetails } from "./trace"
@@ -129,7 +130,9 @@ async function requestPromptedApproval(
   args: JsonObject
 ) {
   const input =
-    surface === "milo" ? await prepareMiloToolInput(runtime, tool, args) : args
+    surface === "milo"
+      ? await prepareMiloToolInput(runtime, tool, args)
+      : await prepareProviderToolInput(runtime, surface, tool, args)
   const replyTarget = runtime.context.activeSurface?.target
 
   return await runtime.convex.requestApproval({
@@ -176,7 +179,7 @@ async function callConvexTool(
     input:
       surface === "milo"
         ? await prepareMiloToolInput(runtime, tool, input)
-        : input,
+        : await prepareProviderToolInput(runtime, surface, tool, input),
     runId: runtime.context.run.id,
     surface,
     tool,

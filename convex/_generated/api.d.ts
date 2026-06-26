@@ -102,7 +102,10 @@ import type * as broker_tools_github_client from "../broker/tools/github/client.
 import type * as broker_tools_github_comments from "../broker/tools/github/comments.js";
 import type * as broker_tools_github_format from "../broker/tools/github/format.js";
 import type * as broker_tools_github_index from "../broker/tools/github/index.js";
+import type * as broker_tools_github_publish from "../broker/tools/github/publish.js";
+import type * as broker_tools_github_pulls from "../broker/tools/github/pulls.js";
 import type * as broker_tools_github_reactions from "../broker/tools/github/reactions.js";
+import type * as broker_tools_github_source from "../broker/tools/github/source.js";
 import type * as broker_tools_google_drive from "../broker/tools/google/drive.js";
 import type * as broker_tools_google_format from "../broker/tools/google/format.js";
 import type * as broker_tools_google_gmail from "../broker/tools/google/gmail.js";
@@ -270,7 +273,9 @@ import type * as runs_agent_tools_schemas_milo_core from "../runs/agent/tools/sc
 import type * as runs_agent_tools_schemas_milo_index from "../runs/agent/tools/schemas/milo/index.js";
 import type * as runs_agent_tools_schemas_notion_index from "../runs/agent/tools/schemas/notion/index.js";
 import type * as runs_agent_tools_schemas_notion_media from "../runs/agent/tools/schemas/notion/media.js";
+import type * as runs_agent_tools_schemas_reactions from "../runs/agent/tools/schemas/reactions.js";
 import type * as runs_agent_tools_schemas_slack from "../runs/agent/tools/schemas/slack.js";
+import type * as runs_agent_tools_schemas_source from "../runs/agent/tools/schemas/source.js";
 import type * as runs_agent_tools_snapshot from "../runs/agent/tools/snapshot.js";
 import type * as runs_agent_tools_types from "../runs/agent/tools/types.js";
 import type * as runs_console from "../runs/console.js";
@@ -431,7 +436,10 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/github/comments": typeof broker_tools_github_comments;
   "broker/tools/github/format": typeof broker_tools_github_format;
   "broker/tools/github/index": typeof broker_tools_github_index;
+  "broker/tools/github/publish": typeof broker_tools_github_publish;
+  "broker/tools/github/pulls": typeof broker_tools_github_pulls;
   "broker/tools/github/reactions": typeof broker_tools_github_reactions;
+  "broker/tools/github/source": typeof broker_tools_github_source;
   "broker/tools/google/drive": typeof broker_tools_google_drive;
   "broker/tools/google/format": typeof broker_tools_google_format;
   "broker/tools/google/gmail": typeof broker_tools_google_gmail;
@@ -599,7 +607,9 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/milo/index": typeof runs_agent_tools_schemas_milo_index;
   "runs/agent/tools/schemas/notion/index": typeof runs_agent_tools_schemas_notion_index;
   "runs/agent/tools/schemas/notion/media": typeof runs_agent_tools_schemas_notion_media;
+  "runs/agent/tools/schemas/reactions": typeof runs_agent_tools_schemas_reactions;
   "runs/agent/tools/schemas/slack": typeof runs_agent_tools_schemas_slack;
+  "runs/agent/tools/schemas/source": typeof runs_agent_tools_schemas_source;
   "runs/agent/tools/snapshot": typeof runs_agent_tools_snapshot;
   "runs/agent/tools/types": typeof runs_agent_tools_types;
   "runs/console": typeof runs_console;

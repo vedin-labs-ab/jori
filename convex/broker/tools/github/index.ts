@@ -23,6 +23,13 @@ import {
   summarizePullRequest,
   summarizeRepository,
 } from "./format"
+import { commitToPullRequest, createPullRequest } from "./publish"
+import {
+  addCommentReaction,
+  listPullRequestFiles,
+  listPullRequestReviewComments,
+  updatePullRequest,
+} from "./pulls"
 import { addGitHubReaction } from "./reactions"
 
 export function createGitHubCloneCredentials(args: {
@@ -57,16 +64,22 @@ const githubToolHandlers: Record<
   string,
   (token: string, args: Record<string, unknown>) => Promise<unknown> | unknown
 > = {
+  github_add_comment_reaction: addCommentReaction,
   github_add_reaction: addGitHubReaction,
   github_add_issue_comment: addIssueComment,
   github_clone_repository: cloneRepository,
+  github_commit_to_pull_request: commitToPullRequest,
+  github_create_pull_request: createPullRequest,
   github_get_file: getFile,
   github_get_issue: getIssue,
   github_get_pull_request: getPullRequest,
   github_get_repository: getRepository,
+  github_list_pull_request_files: listPullRequestFiles,
+  github_list_pull_request_review_comments: listPullRequestReviewComments,
   github_list_repositories: listRepositories,
   github_reply_to_pull_request_review_comment: replyToPullRequestReviewComment,
   github_search_issues: searchIssues,
+  github_update_pull_request: updatePullRequest,
 }
 
 function cloneRepository(_token: string, args: Record<string, unknown>) {

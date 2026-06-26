@@ -2,8 +2,15 @@ import {
   numberProperty,
   objectSchema,
   type SchemaMap,
+  stringArrayProperty,
   stringProperty,
 } from "./common"
+import {
+  githubCommentReactionSubjectProperty,
+  githubReactionContentProperty,
+  githubReactionTargetProperty,
+} from "./reactions"
+import { sourceChangesProperty } from "./source"
 
 export const githubToolInputSchemas = {
   github_list_repositories: objectSchema({
@@ -90,67 +97,93 @@ export const githubToolInputSchemas = {
   github_add_reaction: objectSchema({
     required: ["owner", "repo", "target", "content"],
     properties: {
-      content: {
-        type: "string",
-        enum: [
-          "+1",
-          "-1",
-          "laugh",
-          "confused",
-          "heart",
-          "hooray",
-          "rocket",
-          "eyes",
-        ],
-        description: "GitHub reaction content to add.",
-      },
+      content: githubReactionContentProperty("GitHub reaction content to add."),
       owner: stringProperty("Repository owner."),
       repo: stringProperty("Repository name."),
-      target: {
-        description: "GitHub issue, pull request, or comment to react to.",
-        oneOf: [
-          objectSchema({
-            required: ["type", "issueNumber"],
-            properties: {
-              issueNumber: numberProperty(
-                "Issue or pull request number to react to.",
-                1
-              ),
-              type: {
-                type: "string",
-                enum: ["issue"],
-                description: "React to an issue or pull request.",
-              },
-            },
-          }),
-          objectSchema({
-            required: ["type", "commentId"],
-            properties: {
-              commentId: numberProperty(
-                "Issue comment ID, including pull request conversation comments.",
-                1
-              ),
-              type: {
-                type: "string",
-                enum: ["issue_comment"],
-                description:
-                  "React to an issue comment or pull request conversation comment.",
-              },
-            },
-          }),
-          objectSchema({
-            required: ["type", "commentId"],
-            properties: {
-              commentId: numberProperty("Pull request review comment ID.", 1),
-              type: {
-                type: "string",
-                enum: ["pull_request_review_comment"],
-                description: "React to an inline pull request review comment.",
-              },
-            },
-          }),
-        ],
+      target: githubReactionTargetProperty(),
+    },
+  }),
+  github_list_pull_request_files: pullRequestPageSchema(
+    "Pull request changed files page."
+  ),
+  github_list_pull_request_review_comments: pullRequestPageSchema(
+    "Pull request review comments page."
+  ),
+  github_commit_to_pull_request: objectSchema({
+    required: ["owner", "repo", "pullNumber", "commitMessage"],
+    properties: {
+      changes: sourceChangesProperty(),
+      commitMessage: stringProperty("Commit message for the new PR commit."),
+      directory: stringProperty(
+        "Workspace-relative cloned repository directory. Omit to use /home/user/workspace/<repo>."
+      ),
+      owner: stringProperty("Repository owner."),
+      paths: stringArrayProperty(
+        "Optional repository-relative paths to include in the commit."
+      ),
+      pullNumber: numberProperty("Pull request number.", 1),
+      repo: stringProperty("Repository name."),
+    },
+  }),
+  github_create_pull_request: objectSchema({
+    required: ["owner", "repo", "title"],
+    properties: {
+      base: stringProperty(
+        "Base branch. Omit to use the repository default branch."
+      ),
+      body: stringProperty("GitHub-flavored Markdown pull request body."),
+      branch: stringProperty(
+        "New branch name when creating a PR from local source changes. Omit to use a Milo-generated branch."
+      ),
+      changes: sourceChangesProperty(),
+      commitMessage: stringProperty(
+        "Commit message for local source changes. Omit to use the PR title."
+      ),
+      directory: stringProperty(
+        "Workspace-relative cloned repository directory. Omit to use /home/user/workspace/<repo>."
+      ),
+      draft: booleanProperty("Create the pull request as a draft."),
+      head: stringProperty(
+        "Existing head branch to open a PR from. Omit when creating a PR from local source changes."
+      ),
+      maintainerCanModify: booleanProperty(
+        "Allow maintainers to modify the pull request branch."
+      ),
+      owner: stringProperty("Repository owner."),
+      paths: stringArrayProperty(
+        "Optional repository-relative paths to include when creating a commit from local changes."
+      ),
+      repo: stringProperty("Repository name."),
+      title: stringProperty("Pull request title."),
+    },
+  }),
+  github_add_comment_reaction: objectSchema({
+    required: ["owner", "repo", "commentId", "subject", "content"],
+    properties: {
+      commentId: numberProperty("GitHub comment ID.", 1),
+      content: githubReactionContentProperty("GitHub reaction content."),
+      owner: stringProperty("Repository owner."),
+      repo: stringProperty("Repository name."),
+      subject: githubCommentReactionSubjectProperty(),
+    },
+  }),
+  github_update_pull_request: objectSchema({
+    required: ["owner", "repo", "pullNumber"],
+    properties: {
+      base: stringProperty("New base branch."),
+      body: stringProperty("Updated GitHub-flavored Markdown body."),
+      maintainerCanModify: booleanProperty(
+        "Allow maintainers to modify the pull request branch."
+      ),
+      owner: stringProperty("Repository owner."),
+      pullNumber: numberProperty("Pull request number.", 1),
+      repo: stringProperty("Repository name."),
+      state: {
+        type: "string",
+        enum: ["open", "closed"],
+        description: "Updated pull request state.",
       },
+      title: stringProperty("Updated pull request title."),
     },
   }),
 } satisfies SchemaMap
@@ -163,4 +196,21 @@ function repositorySchema() {
       repo: stringProperty("Repository name."),
     },
   })
+}
+
+function pullRequestPageSchema(description: string) {
+  return objectSchema({
+    required: ["owner", "repo", "pullNumber"],
+    properties: {
+      owner: stringProperty("Repository owner."),
+      page: numberProperty(description, 1, 100),
+      perPage: numberProperty("Items per page.", 1, 100),
+      pullNumber: numberProperty("Pull request number.", 1),
+      repo: stringProperty("Repository name."),
+    },
+  })
+}
+
+function booleanProperty(description: string) {
+  return { type: "boolean", description }
 }
