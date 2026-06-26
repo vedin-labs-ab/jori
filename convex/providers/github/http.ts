@@ -1,6 +1,10 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { createIntegrationActor } from "../../shared/actor"
+import {
+  handleUserTextApprovalDecision,
+  isUserApprovalDecisionText,
+} from "../../approvals/runtime"
+import { type Actor, createIntegrationActor } from "../../shared/actor"
 import {
   readCallbackState,
   redirectWithStatus,
@@ -108,23 +112,71 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
+  await handleGitHubMessageEvent(ctx, message)
+
+  return Response.json({ ok: true })
+}
+
+type GitHubMessage = NonNullable<ReturnType<typeof getGitHubMessage>>
+type GitHubRecordMode = "record" | "record_and_run"
+
+export async function handleGitHubMessageEvent(
+  ctx: ActionCtx,
+  message: GitHubMessage
+) {
+  const actor = createGitHubActor(message)
+
+  if (
+    isUserApprovalDecisionText({
+      actorKind: message.actorKind,
+      text: message.text,
+    })
+  ) {
+    await recordGitHubMessage(ctx, message, {
+      actor,
+      mode: "record",
+    })
+    await handleUserTextApprovalDecision(ctx, {
+      accountId: message.accountId,
+      actor,
+      actorKind: message.actorKind,
+      integration: "github",
+      text: message.text,
+    })
+    return
+  }
+
+  await recordGitHubMessage(ctx, message, { actor })
+}
+
+async function recordGitHubMessage(
+  ctx: ActionCtx,
+  message: GitHubMessage,
+  options: {
+    actor: Actor | undefined
+    mode?: GitHubRecordMode
+  }
+) {
   await ctx.runMutation(internal.messages.intake.record, {
     accountId: message.accountId,
     integration: "github",
+    ...(options.mode === undefined ? {} : { mode: options.mode }),
     type: message.type,
     externalId: message.externalId,
-    actor: createIntegrationActor({
-      externalId: message.actorId,
-      kind: message.actorKind,
-      name: message.actorName,
-    }),
+    actor: options.actor,
     conversationId: message.conversationId,
     text: message.text,
     observedAt: message.observedAt,
     data: message.data,
   })
+}
 
-  return Response.json({ ok: true })
+function createGitHubActor(message: GitHubMessage) {
+  return createIntegrationActor({
+    externalId: message.actorId,
+    kind: message.actorKind,
+    name: message.actorName,
+  })
 }
 
 function normalizeInstallationProfile(profile: GitHubInstallationProfile) {

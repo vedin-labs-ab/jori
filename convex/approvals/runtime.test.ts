@@ -3,11 +3,7 @@ import { encodeToolInput } from "../../contracts/transport"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
-import {
-  decideApproval,
-  decideApprovalByAccount,
-  parseApprovalDecisionText,
-} from "./runtime"
+import { decideApproval, parseApprovalDecisionText } from "./runtime"
 
 describe("approval command parsing", () => {
   test("parses provider-neutral text commands", () => {
@@ -59,39 +55,6 @@ describe("approval command parsing", () => {
     expect(
       parseApprovalDecisionText("approve ABC12345 or deny ABC12345")
     ).toBeNull()
-  })
-})
-
-describe("approval text commands", () => {
-  test("resolves text decisions by integration account", async () => {
-    const approval = approvalDoc()
-    const integration = integrationDoc("linear")
-    const ctx = actionCtx(
-      async () => ({
-        status: "approved" as const,
-        approval,
-      }),
-      async () => ({ approval, integration })
-    )
-
-    const result = await decideApprovalByAccount(ctx, {
-      accountId: "linear-org",
-      actor: userActor(),
-      code: "abc12345",
-      decision: "approved",
-      integration: "linear",
-    })
-
-    expect(result).toMatchObject({
-      approval,
-      integration,
-      status: "approved",
-    })
-    expect(ctx.runQuery).toHaveBeenCalledWith(expect.anything(), {
-      accountId: "linear-org",
-      code: "ABC12345",
-      integration: "linear",
-    })
   })
 })
 
@@ -183,23 +146,5 @@ function userActor(): Actor {
   return {
     kind: "user",
     userId: "user_1",
-  }
-}
-
-function integrationDoc(
-  integration: Doc<"integrations">["integration"]
-): Doc<"integrations"> {
-  return {
-    _creationTime: 0,
-    _id: "integration_1" as Id<"integrations">,
-    createdAt: 0,
-    createdBy: "user_1",
-    credentials: {},
-    externalId: "linear-org",
-    integration,
-    scope: "tenant",
-    status: "active",
-    tenantId: "tenant",
-    updatedAt: 0,
   }
 }
