@@ -1,4 +1,5 @@
 import path from "node:path"
+import { isArtifactPublishTool } from "../contracts/artifact-publish"
 import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId, type JsonObject } from "./types"
@@ -24,7 +25,7 @@ export async function prepareMiloToolInput(
   tool: string,
   input: JsonObject
 ) {
-  if (tool !== "create_artifact" && tool !== "update_artifact") {
+  if (!isArtifactPublishTool(tool)) {
     return input
   }
 

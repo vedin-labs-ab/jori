@@ -15,7 +15,7 @@ import { type SandboxWriteFile } from "./types"
 export { sandboxArtifactRuntime, sandboxInternalRoot, sandboxWorkspace }
 
 const artifactBuilderConfigPath = `${sandboxArtifactRuntime}/.milo/artifact-builder.json`
-const artifactTemplatePath = `${sandboxInternalRoot}/artifacts/template`
+export const artifactTemplatePath = `${sandboxInternalRoot}/artifacts/template`
 const artifactRunnerPath = `${sandboxArtifactRuntime}/.milo/build-artifact.mjs`
 
 export function artifactRuntimeFiles(): SandboxWriteFile[] {
