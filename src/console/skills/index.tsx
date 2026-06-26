@@ -78,7 +78,7 @@ export function SkillsCard({ tenantId }: { tenantId: string }) {
 }
 
 function useSkillFilters() {
-  const [view, setView] = useState<SkillFilterView>("all")
+  const [view, setView] = useState<SkillFilterView>("tenant")
   const [searchTerm, setSearchTerm] = useState("")
 
   return { searchTerm, setSearchTerm, setView, view }
