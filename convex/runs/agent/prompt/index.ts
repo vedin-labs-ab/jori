@@ -21,8 +21,10 @@ export function assemblePrompt(
   } = {}
 ): string {
   const runtimeSkills = options.skills ?? []
-  const communication = createCommunicationInstructions(input, runtimeSkills)
   const activeSurface = options.activeSurface ?? defaultActiveSurface(input)
+  const communication = createCommunicationInstructions(input, runtimeSkills, {
+    activeSurface: activeSurface !== null,
+  })
   const run = createRunInstructions(activeSurface)
   const promptedTools = options.promptedTools ?? []
   const skills = createSkillInstructions({
@@ -46,6 +48,7 @@ export function assemblePrompt(
       integration: activeSurface?.surface ?? null,
     },
     tools: {
+      add_reaction: activeSurface !== null,
       finish_run: true,
       send_reply: activeSurface !== null,
     },

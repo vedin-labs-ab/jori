@@ -5,7 +5,9 @@ import { type ConvexId, type RuntimeTool } from "../types"
 import { runAgentLoop } from "./loop"
 
 test("active surface stops are repaired back to finish_run", async () => {
-  const runtime = createRuntime({ tools: [sendReplyTool(), finishRunTool()] })
+  const runtime = createRuntime({
+    tools: [sendReplyTool(), addReactionTool(), finishRunTool()],
+  })
   const model = createModel([
     { content: "", type: "stop" },
     {
@@ -33,9 +35,16 @@ test("active surface stops are repaired back to finish_run", async () => {
           content: expect.stringContaining("call `finish_run`"),
           role: "user",
         }),
+        expect.objectContaining({
+          content: expect.stringContaining(
+            "visible communication with `send_reply` or `add_reaction`"
+          ),
+          role: "user",
+        }),
       ]),
       tools: [
         expect.objectContaining({ name: "send_reply" }),
+        expect.objectContaining({ name: "add_reaction" }),
         expect.objectContaining({ name: "finish_run" }),
       ],
     })
@@ -151,6 +160,7 @@ function createRuntime(options: {
 }): ToolRuntime {
   return {
     convex: {
+      addReaction: vi.fn(async () => ({ status: "added" })),
       callTool: vi.fn(),
       loadRunHandoffs: vi.fn(async () => ({ approvals: [], offers: [] })),
       recordEvent: vi.fn(),
@@ -194,6 +204,16 @@ function sendReplyTool(): RuntimeTool {
     description: "Send reply.",
     inputSchema: {},
     name: "send_reply",
+    route: "active_surface",
+  }
+}
+
+function addReactionTool(): RuntimeTool {
+  return {
+    access: "write",
+    description: "Add reaction.",
+    inputSchema: {},
+    name: "add_reaction",
     route: "active_surface",
   }
 }

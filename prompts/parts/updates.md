@@ -1,5 +1,5 @@
 {% if tools.send_reply %}
-Send one short start update with `send_reply` before the first work tool call for approvals, writes, research, deliverables, coding, or any task likely to need 2 or more work tool calls. Work tools are the ones that do the task — everything except `list_capabilities`, `offer_integration`, `send_reply`, and `finish_run`.
+Send one short start update with `send_reply` before the first work tool call for approvals, writes, research, deliverables, coding, or any task likely to need 2 or more work tool calls. Work tools are the ones that do the task — everything except `list_capabilities`, `offer_integration`, `send_reply`, `add_reaction`, and `finish_run`.
 
 Skip the start update only when the task can be answered directly or with one quick read/lookup whose result can be reported immediately.
 

@@ -6,14 +6,14 @@ export type ActiveSurfaceTool = {
   access: "write"
   description: string
   inputSchema: JsonObject
-  name: "send_reply"
+  name: "add_reaction" | "send_reply"
   route: "active_surface"
 }
 
 export function activeSurfaceTools(
   surface: MessageIntegration
 ): ActiveSurfaceTool[] {
-  return [sendReplyTool(surface)]
+  return [sendReplyTool(surface), addReactionTool(surface)]
 }
 
 export function activeSurfaceToolSnapshot(
@@ -22,7 +22,7 @@ export function activeSurfaceToolSnapshot(
   return tools.map((tool) => ({
     access: tool.access,
     description: tool.description,
-    label: "Send reply",
+    label: activeSurfaceToolLabel(tool.name),
     tool: tool.name,
   }))
 }
@@ -34,6 +34,16 @@ function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
       "Send a visible reply or update to the active requester surface. Milo routes it to the current requester context by default. On Linear, set commentId only when intentionally replying under a specific visible comment.",
     inputSchema: sendReplySchema(surface),
     name: "send_reply",
+    route: "active_surface",
+  }
+}
+
+function addReactionTool(surface: MessageIntegration): ActiveSurfaceTool {
+  return {
+    access: "write",
+    description: addReactionDescription(surface),
+    inputSchema: addReactionSchema(surface),
+    name: "add_reaction",
     route: "active_surface",
   }
 }
@@ -69,4 +79,140 @@ function sendReplySchema(surface: MessageIntegration): JsonObject {
     required: ["text"],
     properties,
   }
+}
+
+function addReactionSchema(surface: MessageIntegration): JsonObject {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["reaction", "target"],
+    properties: {
+      reaction: reactionProperty(surface),
+      target: reactionTargetProperty(surface),
+    },
+  }
+}
+
+function reactionProperty(surface: MessageIntegration): JsonObject {
+  if (surface === "github") {
+    return {
+      type: "string",
+      enum: [
+        "+1",
+        "-1",
+        "laugh",
+        "confused",
+        "heart",
+        "hooray",
+        "rocket",
+        "eyes",
+      ],
+      description: "GitHub reaction keyword.",
+    }
+  }
+
+  return {
+    type: "string",
+    description:
+      surface === "slack"
+        ? "Slack emoji name without surrounding colons, for example thumbsup or white_check_mark. Custom emoji names are allowed."
+        : "Linear emoji reaction value, for example a thumbs-up or check mark emoji.",
+  }
+}
+
+function reactionTargetProperty(surface: MessageIntegration): JsonObject {
+  if (surface === "slack") {
+    return slackReactionTarget()
+  }
+
+  if (surface === "linear") {
+    return linearReactionTarget()
+  }
+
+  return githubReactionTarget()
+}
+
+function slackReactionTarget(): JsonObject {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["messageTs"],
+    description: "Slack message to react to in the active conversation.",
+    properties: {
+      messageTs: {
+        type: "string",
+        description:
+          "Slack message timestamp. Use the value after a visible slack:message: identifier.",
+      },
+    },
+  }
+}
+
+function linearReactionTarget(): JsonObject {
+  return {
+    description: "Linear issue or comment to react to.",
+    oneOf: [
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["type", "commentId"],
+        properties: {
+          type: { const: "comment", description: "React to a comment." },
+          commentId: {
+            type: "string",
+            description:
+              "Linear comment UUID. Use the value after a visible linear:comment: identifier.",
+          },
+        },
+      },
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["type", "issueId"],
+        properties: {
+          type: { const: "issue", description: "React to the issue." },
+          issueId: {
+            type: "string",
+            description:
+              "Linear issue UUID. Use the value after a visible linear:issue: identifier.",
+          },
+        },
+      },
+    ],
+  }
+}
+
+function githubReactionTarget(): JsonObject {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["type", "commentId"],
+    description: "GitHub comment to react to.",
+    properties: {
+      type: { const: "comment", description: "React to a comment." },
+      commentId: {
+        type: "number",
+        minimum: 1,
+        description:
+          "Numeric GitHub comment ID. Use the value after a visible github:comment: identifier.",
+      },
+    },
+  }
+}
+
+function addReactionDescription(surface: MessageIntegration) {
+  const suffix = {
+    github:
+      "Use GitHub reaction keywords only. Reactions are for lightweight acknowledgement; use send_reply for information, blockers, questions, decisions, or results.",
+    linear:
+      "Use the visible Unicode emoji. Reactions are for lightweight acknowledgement; use send_reply for information, blockers, questions, decisions, or results.",
+    slack:
+      "Use Slack emoji names without colons. Reactions are for lightweight acknowledgement; use send_reply for information, blockers, questions, decisions, or results.",
+  } satisfies Record<MessageIntegration, string>
+
+  return `Add a visible reaction on the active requester surface. ${suffix[surface]}`
+}
+
+function activeSurfaceToolLabel(name: ActiveSurfaceTool["name"]) {
+  return name === "send_reply" ? "Send reply" : "Add reaction"
 }
