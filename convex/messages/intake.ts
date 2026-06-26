@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { isGitHubSelfActor } from "../providers/github/data"
 import { getLinearBotId } from "../providers/linear/data"
 import { getSlackBotUserId } from "../providers/slack/data"
 import { getActorExternalId, isUserActor, withActorKind } from "../shared/actor"
@@ -131,6 +132,10 @@ function normalizeActor(
   actor: ObservedMessage["actor"],
   integration: Doc<"integrations">
 ) {
+  if (isGitHubSelfActor(actor, integration)) {
+    return withActorKind(actor, "self")
+  }
+
   const actorId = getActorExternalId(actor)
   const selfId = selfActorId(integration)
 
@@ -140,12 +145,12 @@ function normalizeActor(
 }
 
 function selfActorId(integration: Doc<"integrations">) {
-  if (integration.integration === "slack") {
-    return getSlackBotUserId(integration.data)
-  }
-
   if (integration.integration === "linear") {
     return getLinearBotId(integration.data)
+  }
+
+  if (integration.integration === "slack") {
+    return getSlackBotUserId(integration.data)
   }
 
   return undefined

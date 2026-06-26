@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { messageReactionTargetIdentifiers } from "../messages/identifiers"
+import { isGitHubSelfActor } from "../providers/github/data"
 import { getLinearBotId } from "../providers/linear/data"
 import { getSlackBotUserId } from "../providers/slack/data"
 import { type Actor, getActorExternalId, withActorKind } from "../shared/actor"
@@ -145,6 +146,10 @@ function normalizeTargetActor(
   actor: Actor | undefined,
   integration: Pick<Doc<"integrations">, "data" | "integration">
 ) {
+  if (isGitHubSelfActor(actor, integration)) {
+    return withActorKind(actor, "self")
+  }
+
   const actorId = getActorExternalId(actor)
   const selfId = selfActorId(integration)
 

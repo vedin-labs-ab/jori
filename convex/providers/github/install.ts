@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
 import { buildInstallState } from "../install"
 import { requireGitHubCredentials } from "./credentials"
+import { githubIntegrationData } from "./data"
 import { createSignedGitHubState } from "./signing"
 
 export const createInstallState = mutation({
@@ -21,6 +22,7 @@ export const recordInstallation = internalMutation({
     installationId: v.string(),
     profile: v.object({
       id: v.number(),
+      app_slug: v.optional(v.string()),
       html_url: v.optional(v.string()),
       account: v.optional(
         v.object({
@@ -56,7 +58,7 @@ export const recordInstallation = internalMutation({
         status: "active",
         createdBy: args.createdBy,
         updatedAt: now,
-        data: undefined,
+        data: githubIntegrationData(args.profile),
       })
 
       return existing._id
@@ -75,6 +77,7 @@ export const recordInstallation = internalMutation({
       createdBy: args.createdBy,
       createdAt: now,
       updatedAt: now,
+      data: githubIntegrationData(args.profile),
     })
   },
 })

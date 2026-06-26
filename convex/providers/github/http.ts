@@ -130,6 +130,7 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
 function normalizeInstallationProfile(profile: GitHubInstallationProfile) {
   return {
     id: profile.id,
+    app_slug: profile.app_slug,
     html_url: profile.html_url,
     account:
       profile.account === undefined
