@@ -79,10 +79,10 @@ async function activeReactionsForTarget(
 ): Promise<ActiveReaction[]> {
   const rows = await ctx.db
     .query("reactions")
-    .withIndex("by_integration_and_target", (query) =>
+    .withIndex("by_integration_and_target_key", (query) =>
       query
         .eq("integrationId", target.integrationId)
-        .eq("targetKey", target.key)
+        .eq("target.key", target.key)
     )
     .take(maxReactionsPerTarget)
 

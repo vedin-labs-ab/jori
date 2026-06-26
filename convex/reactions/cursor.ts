@@ -87,9 +87,9 @@ export function formatRuntimeReaction(reaction: Doc<"reactions">) {
     actorIds: reactionActorIds(reaction),
     createdAt: reaction.createdAt,
     id: reaction._id,
-    identifiers: reaction.targetIdentifiers,
+    identifiers: reaction.target.identifiers,
     observedAt: observed,
-    preview: reaction.targetText ?? null,
+    preview: reaction.target.text ?? null,
     reaction: reaction.reaction,
     source: reaction.actor?.kind ?? "unknown",
     target: reactionTargetLabel(reaction),
@@ -110,11 +110,11 @@ function reactionActorIds(reaction: Doc<"reactions">) {
 }
 
 function reactionTargetLabel(reaction: Doc<"reactions">) {
-  if (reaction.targetActor?.kind === "self") {
+  if (reaction.target.actor?.kind === "self") {
     return "Milo"
   }
 
-  return getActorDisplayName(reaction.targetActor) ?? "message"
+  return getActorDisplayName(reaction.target.actor) ?? "message"
 }
 
 async function queryConversationReactions(
@@ -127,16 +127,19 @@ async function queryConversationReactions(
 ) {
   return await ctx.db
     .query("reactions")
-    .withIndex("by_conversation_and_updated", (query) => {
-      const scoped = query
-        .eq("tenantId", args.watch.tenantId)
-        .eq("integrationId", args.watch.integrationId)
-        .eq("conversationId", args.watch.externalId)
+    .withIndex(
+      "by_tenant_and_integration_and_target_conversation_and_updated",
+      (query) => {
+        const scoped = query
+          .eq("tenantId", args.watch.tenantId)
+          .eq("integrationId", args.watch.integrationId)
+          .eq("target.conversationId", args.watch.externalId)
 
-      return args.session.reactionCursor === undefined
-        ? scoped
-        : scoped.gte("updatedAt", args.session.reactionCursor.updatedAt)
-    })
+        return args.session.reactionCursor === undefined
+          ? scoped
+          : scoped.gte("updatedAt", args.session.reactionCursor.updatedAt)
+      }
+    )
     .order("asc")
     .take(args.limit)
 }
@@ -160,5 +163,5 @@ function isAfterReactionCursor(
 }
 
 function isRuntimeInputReaction(reaction: Doc<"reactions">) {
-  return reaction.targetActor?.kind === "self"
+  return reaction.target.actor?.kind === "self"
 }

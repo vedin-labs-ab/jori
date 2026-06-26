@@ -41,10 +41,6 @@ export type ReactionSnapshotPlan = {
   targets: ReactionSnapshotTarget[]
 }
 
-export type EnrichedReactionTarget = ReactionTarget & {
-  messageId?: Id<"messages">
-}
-
 export async function findActiveReactionIntegration(
   ctx: MutationCtx,
   args: {
@@ -72,14 +68,14 @@ export async function enrichReactionTarget(
     integration: Doc<"integrations">
     target: ReactionTarget
   }
-): Promise<EnrichedReactionTarget> {
+): Promise<ReactionTarget> {
   const message = await findReactionTargetMessage(ctx, {
     integrationId: args.integration._id,
     targetKey: args.target.key,
   })
 
   if (message === null) {
-    return { ...args.target, messageId: undefined }
+    return args.target
   }
 
   return {
@@ -93,7 +89,6 @@ export async function enrichReactionTarget(
       args.target.identifiers,
       messageReactionTargetIdentifiers(message)
     ),
-    messageId: message._id,
     text: args.target.text ?? message.text,
   }
 }

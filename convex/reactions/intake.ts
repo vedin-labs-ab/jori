@@ -3,21 +3,13 @@ import { internalMutation } from "../_generated/server"
 import { actorValidator } from "../shared/actor"
 import { reconcileTargetReactions, recordReactionEvent } from "./apply"
 import { findActiveReactionIntegration } from "./data"
-import { reactionAction } from "./schema"
+import { reactionAction, reactionTarget } from "./schema"
 
 const reactionIntegration = v.union(
   v.literal("github"),
   v.literal("linear"),
   v.literal("slack")
 )
-
-const reactionTarget = v.object({
-  key: v.string(),
-  identifiers: v.array(v.string()),
-  actor: v.optional(actorValidator),
-  text: v.optional(v.string()),
-  conversationId: v.optional(v.string()),
-})
 
 export const record = internalMutation({
   args: {

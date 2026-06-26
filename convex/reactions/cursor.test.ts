@@ -8,9 +8,9 @@ const user = { externalId: "U123", kind: "user" as const }
 test("drains only reactions to Milo-authored targets", () => {
   const batch = collectPendingReactionBatch(
     [
-      reaction("a", 1, { targetActor: self }),
-      reaction("b", 2, { targetActor: user }),
-      reaction("c", 3, { targetActor: self }),
+      reaction("a", 1, { target: reactionTarget({ actor: self }) }),
+      reaction("b", 2, { target: reactionTarget({ actor: user }) }),
+      reaction("c", 3, { target: reactionTarget({ actor: self }) }),
     ],
     session({ updatedAt: 1, creationTime: 1 }),
     10,
@@ -24,7 +24,13 @@ test("drains only reactions to Milo-authored targets", () => {
 
 test("re-drains a row whose status changed after the cursor", () => {
   const batch = collectPendingReactionBatch(
-    [reaction("r", 7, { creationTime: 5, removedAt: 700, targetActor: self })],
+    [
+      reaction("r", 7, {
+        creationTime: 5,
+        removedAt: 700,
+        target: reactionTarget({ actor: self }),
+      }),
+    ],
     session({ updatedAt: 5, creationTime: 5 }),
     10,
     false
@@ -37,8 +43,14 @@ test("re-drains a row whose status changed after the cursor", () => {
 test("breaks updatedAt ties on creation time", () => {
   const batch = collectPendingReactionBatch(
     [
-      reaction("earlier", 5, { creationTime: 3, targetActor: self }),
-      reaction("later", 5, { creationTime: 9, targetActor: self }),
+      reaction("earlier", 5, {
+        creationTime: 3,
+        target: reactionTarget({ actor: self }),
+      }),
+      reaction("later", 5, {
+        creationTime: 9,
+        target: reactionTarget({ actor: self }),
+      }),
     ],
     session({ updatedAt: 5, creationTime: 5 }),
     10,
@@ -51,8 +63,8 @@ test("breaks updatedAt ties on creation time", () => {
 test("drains reactions after a timestamp-only start cursor", () => {
   const batch = collectPendingReactionBatch(
     [
-      reaction("before", 9, { targetActor: self }),
-      reaction("after", 11, { targetActor: self }),
+      reaction("before", 9, { target: reactionTarget({ actor: self }) }),
+      reaction("after", 11, { target: reactionTarget({ actor: self }) }),
     ],
     session({ updatedAt: 10 }),
     10,
@@ -68,9 +80,11 @@ test("formats added and removed runtime reactions", () => {
       reaction("added", 1, {
         actor: { externalId: "U123", kind: "user", name: "Albin" },
         reaction: "✅",
-        targetActor: self,
-        targetIdentifiers: ["linear:issue:ISS-1", "linear:comment:comment"],
-        targetText: "I can proceed with option B.",
+        target: reactionTarget({
+          actor: self,
+          identifiers: ["linear:issue:ISS-1", "linear:comment:comment"],
+          text: "I can proceed with option B.",
+        }),
       })
     )
   ).toMatchObject({
@@ -84,7 +98,10 @@ test("formats added and removed runtime reactions", () => {
 
   expect(
     formatRuntimeReaction(
-      reaction("removed", 4, { removedAt: 400, targetActor: self })
+      reaction("removed", 4, {
+        removedAt: 400,
+        target: reactionTarget({ actor: self }),
+      })
     )
   ).toMatchObject({ observedAt: 400, type: "reaction.removed" })
 })
@@ -116,13 +133,22 @@ function reaction(
     integrationId: id<"integrations">("integration"),
     integration: "linear",
     reaction: "👍",
-    actorKey: "actor",
-    targetKey: "linear:comment:comment",
-    targetIdentifiers: ["linear:comment:comment"],
-    conversationId: "ISS-1",
+    observedAt: updatedAt,
+    target: reactionTarget(),
     updatedAt,
     createdAt: creationTime ?? updatedAt,
     ...rest,
+  }
+}
+
+function reactionTarget(
+  overrides: Partial<Doc<"reactions">["target"]> = {}
+): Doc<"reactions">["target"] {
+  return {
+    key: "linear:comment:comment",
+    conversationId: "ISS-1",
+    identifiers: ["linear:comment:comment"],
+    ...overrides,
   }
 }
 

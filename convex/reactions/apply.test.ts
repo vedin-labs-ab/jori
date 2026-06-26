@@ -39,6 +39,8 @@ test("reconcile inserts present reactions and tombstones absent ones", async () 
   const rows = reactionRows(ctx)
   expect(rows).toHaveLength(2)
   expect(rows.filter(isActive).map((row) => row.reaction)).toEqual(["👀"])
+  expect(rows.every((row) => typeof row.observedAt === "number")).toBe(true)
+  expect(rows.every((row) => row.target.key === target.key)).toBe(true)
 })
 
 test("re-adding a removed reaction reuses the row and clears the tombstone", async () => {
@@ -190,8 +192,18 @@ function rowsFor(
     (row) =>
       typeof row._id === "string" &&
       row._id.startsWith(prefix) &&
-      filters.every(([field, value]) => row[field] === value)
+      filters.every(([field, value]) => fieldValue(row, field) === value)
   )
+}
+
+function fieldValue(row: Record<string, unknown>, field: string) {
+  return field.split(".").reduce<unknown>((value, key) => {
+    if (typeof value !== "object" || value === null) {
+      return undefined
+    }
+
+    return (value as Record<string, unknown>)[key]
+  }, row)
 }
 
 function tableIdPrefix(table: string) {
