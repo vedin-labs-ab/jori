@@ -9,7 +9,11 @@ export type {
   JsonPrimitive,
   JsonValue,
 } from "../contracts/json"
-export { agentTaskId, cleanupTaskId } from "../contracts/runtime"
+export {
+  agentTaskId,
+  cleanupTaskId,
+  type SurfaceReactionTarget,
+} from "../contracts/runtime"
 
 export type ConvexId<TableName extends string> = GenericId<TableName>
 

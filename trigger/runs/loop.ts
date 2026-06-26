@@ -169,7 +169,7 @@ function appendStopRepair(
 
   messages.push({
     content: stopRepairInstruction({
-      canReply: hasTool(context.tools, "send_reply"),
+      visibleTools: visibleCommunicationTools(context.tools),
     }),
     role: "user",
   })
@@ -179,15 +179,15 @@ function hasTool(tools: RuntimeContext["tools"], name: string) {
   return tools.some((tool) => tool.name === name && tool.mode !== "blocked")
 }
 
-function stopRepairInstruction(args: { canReply: boolean }) {
+function stopRepairInstruction(args: { visibleTools: string[] }) {
   const instructions = [
     "The run is not finished.",
     "Any words you write outside a tool call reach no one.",
   ]
 
-  if (args.canReply) {
+  if (args.visibleTools.length > 0) {
     instructions.push(
-      visibleCommunicationInstruction(),
+      visibleCommunicationInstruction(args.visibleTools),
       "If no visible communication is warranted, call `finish_run` with `reason`."
     )
   } else {
@@ -197,8 +197,16 @@ function stopRepairInstruction(args: { canReply: boolean }) {
   return instructions.join(" ")
 }
 
-function visibleCommunicationInstruction() {
-  return "Send any needed visible communication with `send_reply`, then call `finish_run`."
+function visibleCommunicationTools(tools: RuntimeContext["tools"]) {
+  return ["send_reply", "add_reaction"].filter((tool) => hasTool(tools, tool))
+}
+
+function visibleCommunicationInstruction(tools: string[]) {
+  return `Send any needed visible communication with ${toolList(tools)}, then call \`finish_run\`.`
+}
+
+function toolList(tools: string[]) {
+  return tools.map((tool) => `\`${tool}\``).join(" or ")
 }
 
 async function runToolCalls(

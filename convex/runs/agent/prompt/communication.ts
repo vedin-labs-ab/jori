@@ -8,9 +8,14 @@ import { type AgentRuntimeInput } from "../input"
 
 export function createCommunicationInstructions(
   input: AgentRuntimeInput,
-  skills: readonly RuntimeSkill[]
+  skills: readonly RuntimeSkill[],
+  options: { activeSurface: boolean }
 ): CommunicationGuidance | null {
-  if (input.type !== "message" || replyAddress(input.message) === null) {
+  if (
+    !options.activeSurface ||
+    input.type !== "message" ||
+    replyAddress(input.message) === null
+  ) {
     return null
   }
 
@@ -18,5 +23,9 @@ export function createCommunicationInstructions(
     integration: input.messageIntegration,
     profile: "agent-final-reply",
     skills,
+    tools: {
+      add_reaction: true,
+      send_reply: true,
+    },
   })
 }

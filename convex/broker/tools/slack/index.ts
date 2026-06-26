@@ -64,6 +64,19 @@ export async function updateSlackMessage(
   })
 }
 
+export async function addSlackMessageReaction(
+  integration: Doc<"integrations">,
+  args: {
+    channel: string
+    name: string
+    timestamp: string
+  }
+) {
+  const credentials = requireSlackCredentials(integration)
+
+  return await addSlackReaction(credentials.bot, args)
+}
+
 export async function callSlackTool(
   integration: Doc<"integrations">,
   tool: string,

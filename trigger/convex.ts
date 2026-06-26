@@ -22,6 +22,7 @@ import {
   type RuntimeMessage,
   type RuntimeTool,
   type RuntimeTraceSource,
+  type SurfaceReactionTarget,
 } from "./types"
 
 export class MiloConvexClient {
@@ -142,6 +143,17 @@ export class MiloConvexClient {
     text: string
   }) {
     return await this.client.action(api.runtime.surface.sendReply, {
+      ...args,
+      secret: this.secret,
+    })
+  }
+
+  async addReaction(args: {
+    reaction: string
+    runId: ConvexId<"runs">
+    target: SurfaceReactionTarget
+  }) {
+    return await this.client.action(api.runtime.surface.reactions.add, {
       ...args,
       secret: this.secret,
     })

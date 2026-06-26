@@ -206,5 +206,5 @@ function isCompletedCommunicationTrace(trace: Doc<"traces">) {
 }
 
 function isVisibleCommunicationTool(name: unknown) {
-  return name === "send_reply"
+  return name === "send_reply" || name === "add_reaction"
 }
