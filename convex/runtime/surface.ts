@@ -208,6 +208,7 @@ function isCompletedCommunicationTrace(trace: Doc<"traces">) {
 function isVisibleCommunicationTool(name: unknown) {
   return (
     name === "send_reply" ||
+    name === "github_add_reaction" ||
     name === "linear_add_reaction" ||
     name === "slack_add_reaction"
   )

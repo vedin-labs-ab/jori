@@ -45,6 +45,44 @@ test("active surface stops are repaired back to finish_run", async () => {
   )
 })
 
+test("GitHub active surface repair can use reactions", async () => {
+  const runtime = createRuntime({
+    surface: "github",
+    tools: [sendReplyTool(), githubReactionTool(), finishRunTool()],
+  })
+  const model = createModel([
+    { content: "", type: "stop" },
+    {
+      content: null,
+      toolCalls: [
+        {
+          args: {
+            reason: "The requester only needed an acknowledgement.",
+          },
+          id: "call_1",
+          name: "finish_run",
+        },
+      ],
+      type: "tool_calls",
+    },
+  ])
+
+  await runAgentLoop({ attempt: 1, model, runtime })
+
+  expect(model.complete).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      messages: expect.arrayContaining([
+        expect.objectContaining({
+          content: expect.stringContaining(
+            "`send_reply` or the surface-specific reaction tool"
+          ),
+          role: "user",
+        }),
+      ]),
+    })
+  )
+})
+
 test("active surface replies complete only after finish_run", async () => {
   const runtime = createRuntime({ tools: [sendReplyTool(), finishRunTool()] })
   const model = createModel([
@@ -97,7 +135,10 @@ function createModel(
   } satisfies ModelRuntime
 }
 
-function createRuntime(options: { tools: RuntimeTool[] }): ToolRuntime {
+function createRuntime(options: {
+  surface?: "github" | "linear" | "slack"
+  tools: RuntimeTool[]
+}): ToolRuntime {
   return {
     convex: {
       callTool: vi.fn(),
@@ -108,7 +149,7 @@ function createRuntime(options: { tools: RuntimeTool[] }): ToolRuntime {
     context: {
       activeSurface: {
         communicated: false,
-        surface: "slack",
+        surface: options.surface ?? "slack",
         target: null,
       },
       prompt: "system",
@@ -124,6 +165,17 @@ function createRuntime(options: { tools: RuntimeTool[] }): ToolRuntime {
     },
     sandbox: {},
   } as unknown as ToolRuntime
+}
+
+function githubReactionTool(): RuntimeTool {
+  return {
+    access: "write",
+    description: "Add GitHub reaction.",
+    inputSchema: {},
+    name: "github_add_reaction",
+    route: "convex",
+    surface: "github",
+  }
 }
 
 function sendReplyTool(): RuntimeTool {

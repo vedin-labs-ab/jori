@@ -5,7 +5,11 @@ export function isVisibleCommunicationTool(
   result: unknown,
   activeSurface: ToolSurface
 ) {
-  if (toolName === "linear_add_reaction" || toolName === "slack_add_reaction") {
+  if (
+    toolName === "github_add_reaction" ||
+    toolName === "linear_add_reaction" ||
+    toolName === "slack_add_reaction"
+  ) {
     return true
   }
 

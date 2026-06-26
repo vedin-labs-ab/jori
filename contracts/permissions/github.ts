@@ -75,4 +75,12 @@ export const githubToolPermissionRows = [
     "write",
     "required",
   ],
+  [
+    "github",
+    "github_add_reaction",
+    "Add reaction",
+    "React to a GitHub issue, pull request, or comment.",
+    "Add a GitHub reaction to an issue, pull request, issue comment, pull request conversation comment, or inline review comment. Use as a lightweight acknowledgement instead of a worded reply.",
+    "write",
+  ],
 ] satisfies ToolPermissionRow[]

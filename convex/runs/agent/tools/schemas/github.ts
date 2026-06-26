@@ -87,6 +87,72 @@ export const githubToolInputSchemas = {
       repo: stringProperty("Repository name."),
     },
   }),
+  github_add_reaction: objectSchema({
+    required: ["owner", "repo", "target", "content"],
+    properties: {
+      content: {
+        type: "string",
+        enum: [
+          "+1",
+          "-1",
+          "laugh",
+          "confused",
+          "heart",
+          "hooray",
+          "rocket",
+          "eyes",
+        ],
+        description: "GitHub reaction content to add.",
+      },
+      owner: stringProperty("Repository owner."),
+      repo: stringProperty("Repository name."),
+      target: {
+        description: "GitHub issue, pull request, or comment to react to.",
+        oneOf: [
+          objectSchema({
+            required: ["type", "issueNumber"],
+            properties: {
+              issueNumber: numberProperty(
+                "Issue or pull request number to react to.",
+                1
+              ),
+              type: {
+                type: "string",
+                enum: ["issue"],
+                description: "React to an issue or pull request.",
+              },
+            },
+          }),
+          objectSchema({
+            required: ["type", "commentId"],
+            properties: {
+              commentId: numberProperty(
+                "Issue comment ID, including pull request conversation comments.",
+                1
+              ),
+              type: {
+                type: "string",
+                enum: ["issue_comment"],
+                description:
+                  "React to an issue comment or pull request conversation comment.",
+              },
+            },
+          }),
+          objectSchema({
+            required: ["type", "commentId"],
+            properties: {
+              commentId: numberProperty("Pull request review comment ID.", 1),
+              type: {
+                type: "string",
+                enum: ["pull_request_review_comment"],
+                description: "React to an inline pull request review comment.",
+              },
+            },
+          }),
+        ],
+      },
+    },
+  }),
 } satisfies SchemaMap
 
 function repositorySchema() {

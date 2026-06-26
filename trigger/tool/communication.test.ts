@@ -2,18 +2,37 @@ import { expect, test, vi } from "vitest"
 import { executeToolCall, type ToolRuntime } from "../tool"
 import { type ConvexId, type RuntimeTool } from "../types"
 
-test("provider reaction tools mark the active surface communicated", async () => {
+test.each([
+  [
+    "github",
+    githubReactionTool(),
+    {
+      content: "+1",
+      owner: "acme",
+      repo: "app",
+      target: { commentId: 123, type: "issue_comment" },
+    },
+    "github_add_reaction",
+  ],
+  [
+    "linear",
+    linearReactionTool(),
+    { emoji: "👍", target: { id: "comment_1", type: "comment" } },
+    "linear_add_reaction",
+  ],
+] as const)("%s reaction tools mark the active surface communicated", async (surface, tool, args, name) => {
   const runtime = createRuntime({
     result: { ok: true },
-    tool: linearReactionTool(),
+    surface,
+    tool,
   })
 
   await executeToolCall({
     attempt: 1,
     call: {
-      args: { emoji: "👍", target: { id: "comment_1", type: "comment" } },
+      args,
       id: "call_1",
-      name: "linear_add_reaction",
+      name,
     },
     runtime,
     sequence: 100,
@@ -104,6 +123,18 @@ function linearReactionTool(): RuntimeTool {
     name: "linear_add_reaction",
     route: "convex",
     surface: "linear",
+  }
+}
+
+function githubReactionTool(): RuntimeTool {
+  return {
+    access: "write",
+    description: "Add GitHub reaction.",
+    inputSchema: {},
+    mode: "allowed",
+    name: "github_add_reaction",
+    route: "convex",
+    surface: "github",
   }
 }
 
