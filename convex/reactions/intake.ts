@@ -7,6 +7,7 @@ import {
   recordReaction,
 } from "./data"
 import { reactionAction } from "./schema"
+import { syncReactionSnapshot } from "./sync"
 
 const reactionIntegration = v.union(
   v.literal("github"),
@@ -56,6 +57,41 @@ export const record = internalMutation({
     return {
       status: result.status,
       reactionId: result.reactionId,
+    }
+  },
+})
+
+export const sync = internalMutation({
+  args: {
+    accountId: v.string(),
+    integration: reactionIntegration,
+    target: reactionTarget,
+    reactions: v.array(
+      v.object({
+        key: v.string(),
+        reaction: v.string(),
+        actor: v.optional(actorValidator),
+        observedAt: v.optional(v.number()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const integration = await findActiveReactionIntegration(ctx, {
+      accountId: args.accountId,
+      integration: args.integration as ReactionIntegration,
+    })
+
+    if (integration === null) {
+      return { status: "missing_integration" as const }
+    }
+
+    return {
+      status: "synced" as const,
+      ...(await syncReactionSnapshot(ctx, {
+        integration,
+        reactions: args.reactions,
+        target: args.target,
+      })),
     }
   },
 })

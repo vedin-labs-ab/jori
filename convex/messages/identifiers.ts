@@ -1,4 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
+import { githubActorId } from "../providers/github/data"
 import {
   getSlackChannelId,
   getSlackMessageTs,
@@ -46,6 +47,10 @@ export function messageDataReactionTargetKey(
 }
 
 export function messageActorIds(message: Doc<"messages">) {
+  if (message.integration === "github") {
+    return githubActorId(message.actor)
+  }
+
   if (message.integration === "linear") {
     return actorId(message, linearActorIdPrefix)
   }
