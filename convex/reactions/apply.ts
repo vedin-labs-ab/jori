@@ -2,7 +2,6 @@ import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
 import {
-  type EnrichedReactionTarget,
   enrichReactionTarget,
   type ReactionAction,
   type ReactionSnapshotItem,
@@ -14,7 +13,7 @@ const maxReactionsPerTarget = 500
 
 type ReactionTargetState = {
   byKey: Map<string, Doc<"reactions">>
-  enriched: EnrichedReactionTarget
+  enriched: ReactionTarget
   integration: Doc<"integrations">
   rows: Doc<"reactions">[]
 }
@@ -100,8 +99,8 @@ async function loadReactionTargetState(
   const enriched = await enrichReactionTarget(ctx, { integration, target })
   const rows = await ctx.db
     .query("reactions")
-    .withIndex("by_integration_and_target", (query) =>
-      query.eq("integrationId", integration._id).eq("targetKey", enriched.key)
+    .withIndex("by_integration_and_target_key", (query) =>
+      query.eq("integrationId", integration._id).eq("target.key", enriched.key)
     )
     .take(maxReactionsPerTarget)
   const byKey = new Map(rows.map((row) => [rowKey(row), row]))
@@ -148,7 +147,7 @@ async function activateReaction(
   }
 
   await ctx.db.patch(existing._id, {
-    observedAt: input.observedAt ?? existing.observedAt,
+    observedAt: input.observedAt ?? Date.now(),
     removedAt: undefined,
     updatedAt: nextUpdatedAt(existing.updatedAt),
   })
@@ -161,18 +160,18 @@ function newReactionRow(state: ReactionTargetState, input: PresenceInput) {
 
   return {
     actor: input.actor,
-    actorKey: reactionActorKey(input.actor),
-    conversationId: state.enriched.conversationId,
     createdAt: now,
     integration: state.integration.integration,
     integrationId: state.integration._id,
-    observedAt: input.observedAt,
+    observedAt: input.observedAt ?? now,
     reaction: input.reaction,
-    targetActor: state.enriched.actor,
-    targetIdentifiers: state.enriched.identifiers,
-    targetKey: state.enriched.key,
-    targetMessageId: state.enriched.messageId,
-    targetText: state.enriched.text,
+    target: {
+      actor: state.enriched.actor,
+      conversationId: state.enriched.conversationId,
+      identifiers: state.enriched.identifiers,
+      key: state.enriched.key,
+      text: state.enriched.text,
+    },
     tenantId: state.integration.tenantId,
     updatedAt: now,
   }
@@ -187,7 +186,7 @@ function presenceKey(actor: Actor | undefined, reaction: string) {
 }
 
 function rowKey(row: Doc<"reactions">) {
-  return `${row.actorKey}:${row.reaction}`
+  return presenceKey(row.actor, row.reaction)
 }
 
 function nextUpdatedAt(previous: number) {

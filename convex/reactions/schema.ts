@@ -5,28 +5,30 @@ import { integrationValidator } from "../shared/integrations"
 
 export const reactionAction = v.union(v.literal("added"), v.literal("removed"))
 
+export const reactionTarget = v.object({
+  key: v.string(),
+  conversationId: v.optional(v.string()),
+  actor: v.optional(actorValidator),
+  identifiers: v.array(v.string()),
+  text: v.optional(v.string()),
+})
+
 export const reactions = defineTable({
   tenantId: v.string(),
   integrationId: v.id("integrations"),
   integration: integrationValidator,
-  conversationId: v.optional(v.string()),
-  targetKey: v.string(),
-  targetMessageId: v.optional(v.id("messages")),
-  targetActor: v.optional(actorValidator),
-  targetIdentifiers: v.array(v.string()),
-  targetText: v.optional(v.string()),
+  target: reactionTarget,
   actor: v.optional(actorValidator),
-  actorKey: v.string(),
   reaction: v.string(),
   removedAt: v.optional(v.number()),
-  observedAt: v.optional(v.number()),
+  observedAt: v.number(),
   updatedAt: v.number(),
   createdAt: v.number(),
 })
-  .index("by_integration_and_target", ["integrationId", "targetKey"])
-  .index("by_conversation_and_updated", [
+  .index("by_integration_and_target_key", ["integrationId", "target.key"])
+  .index("by_tenant_and_integration_and_target_conversation_and_updated", [
     "tenantId",
     "integrationId",
-    "conversationId",
+    "target.conversationId",
     "updatedAt",
   ])
