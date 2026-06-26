@@ -240,6 +240,8 @@ import type * as providers_slack_http from "../providers/slack/http.js";
 import type * as providers_slack_install from "../providers/slack/install.js";
 import type * as providers_slack_links from "../providers/slack/links.js";
 import type * as providers_slack_oauth from "../providers/slack/oauth.js";
+import type * as providers_slack_reactions_session from "../providers/slack/reactions/session.js";
+import type * as providers_slack_reactions_snapshot from "../providers/slack/reactions/snapshot.js";
 import type * as providers_slack_signing from "../providers/slack/signing.js";
 import type * as reactions_cursor from "../reactions/cursor.js";
 import type * as reactions_data from "../reactions/data.js";
@@ -578,6 +580,8 @@ declare const fullApi: ApiFromModules<{
   "providers/slack/install": typeof providers_slack_install;
   "providers/slack/links": typeof providers_slack_links;
   "providers/slack/oauth": typeof providers_slack_oauth;
+  "providers/slack/reactions/session": typeof providers_slack_reactions_session;
+  "providers/slack/reactions/snapshot": typeof providers_slack_reactions_snapshot;
   "providers/slack/signing": typeof providers_slack_signing;
   "reactions/cursor": typeof reactions_cursor;
   "reactions/data": typeof reactions_data;
