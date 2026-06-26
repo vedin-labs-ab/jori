@@ -24,7 +24,7 @@ import {
 } from "./approval"
 import { authenticateBrokerRequest } from "./auth"
 import { listCapabilities } from "./capabilities"
-import { normalizeBrokerToolInput } from "./input"
+import { normalizeBrokerToolInput, normalizeMiloToolInput } from "./input"
 import { callMiloTool } from "./milo"
 import { callProviderTool, createGitHubCloneCredentials } from "./tools"
 
@@ -147,7 +147,7 @@ async function runMiloTool(
 ) {
   return await callMiloTool(ctx, context, {
     tool: request.tool,
-    args: normalizeBrokerToolInput(request.tool, request.args),
+    args: normalizeMiloToolInput(request.tool, request.args),
   })
 }
 

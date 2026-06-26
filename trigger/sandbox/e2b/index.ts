@@ -33,12 +33,8 @@ import {
 } from "./support"
 
 const defaultCommandTimeoutMs = 20 * 60 * 1000
-const legacyArtifactRuntime = "/home/user/milo-workspace"
-const artifactNodeModules = `${sandboxArtifactRuntime}/node_modules`
-const legacyArtifactNodeModules = `${legacyArtifactRuntime}/node_modules`
 
 export class E2BSandboxRuntime implements SandboxRuntime {
-  private artifactRuntimeReady = false
   private sandbox: E2BSandbox | undefined
   private sandboxId: string | null
   private workspaceReady = false
@@ -67,15 +63,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   async writeFiles(files: SandboxWriteFile[]) {
     const sandbox = await this.ensureSandbox()
 
-    await sandbox.files.write(
-      files.map((file) => ({
-        data:
-          file.content instanceof Uint8Array
-            ? toArrayBuffer(file.content)
-            : file.content,
-        path: file.path,
-      }))
-    )
+    await writeSandboxFiles(sandbox, files)
   }
 
   async cloneRepository(input: SandboxCloneRepositoryInput) {
@@ -118,7 +106,6 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   }
 
   async buildArtifact(workspacePath: string): Promise<JsonObject> {
-    await this.prepareArtifactRuntime()
     const result = await this.runCommand({
       command: artifactBuildCommand(workspacePath),
       timeoutMs: defaultCommandTimeoutMs,
@@ -194,19 +181,17 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     })
   }
 
-  private async prepareArtifactRuntime() {
-    if (this.artifactRuntimeReady) {
-      return
-    }
-
-    await this.writeFiles([...artifactRuntimeFiles(), artifactRunnerFile()])
-    this.artifactRuntimeReady = true
-  }
-
   private async ensureWorkspace() {
     if (this.workspaceReady || this.sandbox === undefined) {
       return
     }
+
+    // Provision the artifact builder and template up front so the agent can copy
+    // the template and run local checks before publishing, not only at build time.
+    await writeSandboxFiles(this.sandbox, [
+      ...artifactRuntimeFiles(),
+      artifactRunnerFile(),
+    ])
 
     const result = await runSandboxCommand(this.sandbox, {
       command: workspaceBootstrapCommand(),
@@ -220,17 +205,25 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   }
 }
 
+async function writeSandboxFiles(
+  sandbox: E2BSandbox,
+  files: SandboxWriteFile[]
+) {
+  await sandbox.files.write(
+    files.map((file) => ({
+      data:
+        file.content instanceof Uint8Array
+          ? toArrayBuffer(file.content)
+          : file.content,
+      path: file.path,
+    }))
+  )
+}
+
 export function workspaceBootstrapCommand() {
   return [
     "set -eu",
     `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxArtifactRuntime)}`,
-    [
-      `if [ ! -e ${shellQuote(artifactNodeModules)} ]`,
-      `  && [ ! -L ${shellQuote(artifactNodeModules)} ]`,
-      `  && [ -d ${shellQuote(legacyArtifactNodeModules)} ]; then`,
-    ].join(" "),
-    `  ln -s ${shellQuote(legacyArtifactNodeModules)} ${shellQuote(artifactNodeModules)}`,
-    "fi",
     `chmod 755 ${shellQuote(sandboxWorkspace)}`,
   ].join("\n")
 }

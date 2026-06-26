@@ -1,3 +1,4 @@
+import { isArtifactPublishTool } from "../../contracts/artifact-publish"
 import { type JsonObject } from "../../contracts/json"
 import { getToolInputSchema } from "../runs/agent/tools/schemas"
 
@@ -5,6 +6,21 @@ type JsonSchema = Record<string, unknown>
 
 export function hasBrokerToolInputSchema(tool: string) {
   return getToolInputSchema(tool) !== undefined
+}
+
+export function normalizeMiloToolInput(
+  tool: string,
+  input: unknown
+): JsonObject {
+  if (isArtifactPublishTool(tool)) {
+    if (!isJsonObject(input)) {
+      throw new Error(`${tool} must be an object`)
+    }
+
+    return input
+  }
+
+  return normalizeBrokerToolInput(tool, input)
 }
 
 export function normalizeBrokerToolInput(

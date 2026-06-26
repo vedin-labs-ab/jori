@@ -11,8 +11,5 @@ test("bootstraps the visible workspace and internal artifact runtime", () => {
   expect(command).toContain(
     `mkdir -p '${sandboxWorkspace}' '${sandboxArtifactRuntime}'`
   )
-  expect(command).toContain(
-    `ln -s '/home/user/milo-workspace/node_modules' '${sandboxArtifactRuntime}/node_modules'`
-  )
   expect(command).toContain(`chmod 755 '${sandboxWorkspace}'`)
 })
