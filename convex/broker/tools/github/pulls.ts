@@ -7,7 +7,11 @@ import {
   requiredNumber,
 } from "../../../shared/input"
 import { githubJson, githubJsonObject, repositoryPath } from "./client"
-import { summarizeComment, summarizePullRequest } from "./format"
+import {
+  compactGitHubSummary,
+  summarizeComment,
+  summarizePullRequest,
+} from "./format"
 import { normalizeBranchName } from "./source"
 
 export async function listPullRequestFiles(
@@ -114,7 +118,7 @@ function pullRequestUpdateBody(args: Record<string, unknown>) {
 }
 
 function summarizePullRequestFile(file: Record<string, unknown>) {
-  return {
+  return compactGitHubSummary({
     additions: file.additions,
     blobUrl: file.blob_url,
     changes: file.changes,
@@ -124,11 +128,11 @@ function summarizePullRequestFile(file: Record<string, unknown>) {
     rawUrl: file.raw_url,
     sha: file.sha,
     status: file.status,
-  }
+  })
 }
 
 function summarizePullRequestReviewComment(comment: Record<string, unknown>) {
-  return {
+  return compactGitHubSummary({
     ...summarizeComment(comment),
     commitId: comment.commit_id,
     diffHunk: comment.diff_hunk,
@@ -138,16 +142,16 @@ function summarizePullRequestReviewComment(comment: Record<string, unknown>) {
     path: comment.path,
     pullRequestReviewId: comment.pull_request_review_id,
     side: comment.side,
-  }
+  })
 }
 
 function summarizeReaction(reaction: Record<string, unknown>) {
-  return {
+  return compactGitHubSummary({
     content: reaction.content,
     createdAt: reaction.created_at,
     id: reaction.id,
     user: readNested(reaction, "user", "login"),
-  }
+  })
 }
 
 function requiredCommentSubject(value: unknown) {

@@ -1,4 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest"
+import { encodeToolResult } from "../../../../contracts/transport"
 import { type Doc } from "../../../_generated/dataModel"
 import { callGitHubTool } from "./index"
 
@@ -37,9 +38,21 @@ test("lists pull request files with pagination", async () => {
   expect(fetchMock.mock.calls[0]?.[0]).toBe(
     "https://api.github.com/repos/acme/app/pulls/12/files?page=2&per_page=50"
   )
-  expect(result).toMatchObject({
-    files: [{ additions: 2, filename: "PRODUCT.md", status: "modified" }],
+  expect(result).toEqual({
+    files: [
+      {
+        additions: 2,
+        blobUrl: "https://github.com/acme/app/blob/main/PRODUCT.md",
+        changes: 3,
+        deletions: 1,
+        filename: "PRODUCT.md",
+        rawUrl: "https://github.com/acme/app/raw/main/PRODUCT.md",
+        sha: "file-sha",
+        status: "modified",
+      },
+    ],
   })
+  expect(() => encodeToolResult(result)).not.toThrow()
 })
 
 test("lists pull request review comments", async () => {
@@ -64,9 +77,18 @@ test("lists pull request review comments", async () => {
   expect(fetchMock.mock.calls[0]?.[0]).toBe(
     "https://api.github.com/repos/acme/app/pulls/12/comments?page=1&per_page=30"
   )
-  expect(result).toMatchObject({
-    comments: [{ author: "reviewer", id: 456, path: "PRODUCT.md" }],
+  expect(result).toEqual({
+    comments: [
+      {
+        author: "reviewer",
+        body: "Use website here.",
+        htmlUrl: "https://github.com/acme/app/pull/12#discussion_r456",
+        id: 456,
+        path: "PRODUCT.md",
+      },
+    ],
   })
+  expect(() => encodeToolResult(result)).not.toThrow()
 })
 
 test("adds reactions to pull request review comments", async () => {
