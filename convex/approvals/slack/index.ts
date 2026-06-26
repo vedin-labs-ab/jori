@@ -10,11 +10,7 @@ import {
 } from "../../providers/slack/data"
 import { getSlackActorProfile } from "../../providers/slack/directory/users"
 import { actorValidator, createIntegrationActor } from "../../shared/actor"
-import {
-  decideApprovalByAccount,
-  isApprovalDecisionText,
-  parseApprovalDecisionText,
-} from "../runtime"
+import { decideApprovalByAccount, parseApprovalDecisionText } from "../runtime"
 import { type SlackApprovalInteraction } from "./blocks"
 
 type SlackApprovalDecisionInput = {
@@ -24,10 +20,6 @@ type SlackApprovalDecisionInput = {
   actorName?: string
   text?: string
   data: unknown
-}
-
-export function isSlackApprovalDecisionText(text: string | undefined) {
-  return isApprovalDecisionText(text)
 }
 
 export const handleDecision = internalAction({

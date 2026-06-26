@@ -20,6 +20,14 @@ export type AccountApprovalDecisionArgs = {
   decision: ApprovalDecision
 }
 
+export type TextApprovalDecisionArgs = {
+  accountId: string
+  actor?: Actor
+  actorKind?: Actor["kind"]
+  integration: Integration
+  text?: string
+}
+
 export const handleTextDecision = internalAction({
   args: {
     accountId: v.string(),
@@ -48,6 +56,34 @@ export function isApprovalDecisionText(text: string | undefined) {
   return parseApprovalDecisionText(text) !== null
 }
 
+export function isUserApprovalDecisionText(args: {
+  actorKind?: Actor["kind"]
+  text?: string
+}) {
+  return parseUserApprovalDecisionText(args) !== null
+}
+
+export async function handleUserTextApprovalDecision(
+  ctx: ActionCtx,
+  args: TextApprovalDecisionArgs
+) {
+  const command = parseUserApprovalDecisionText(args)
+
+  if (command === null) {
+    return false
+  }
+
+  await decideApprovalByAccount(ctx, {
+    accountId: args.accountId,
+    actor: args.actor,
+    code: command.code,
+    decision: command.decision,
+    integration: args.integration,
+  })
+
+  return true
+}
+
 export function parseApprovalDecisionText(text: string | undefined) {
   const commandText = normalizeApprovalDecisionText(text)
   const match = commandText?.match(/^(approve|deny)\s+([A-Za-z0-9]{6,})$/i)
@@ -60,6 +96,17 @@ export function parseApprovalDecisionText(text: string | undefined) {
     decision: match[1].toLowerCase() === "approve" ? "approved" : "denied",
     code: normalizeApprovalCode(match[2]),
   } as const
+}
+
+function parseUserApprovalDecisionText(args: {
+  actorKind?: Actor["kind"]
+  text?: string
+}) {
+  if (args.actorKind !== "user") {
+    return null
+  }
+
+  return parseApprovalDecisionText(args.text)
 }
 
 function normalizeApprovalDecisionText(text: string | undefined) {

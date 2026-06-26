@@ -1,9 +1,9 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { isUserApprovalDecisionText } from "../../approvals/runtime"
 import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
-  isSlackApprovalDecisionText,
 } from "../../approvals/slack"
 import { handleSlackIntegrationOfferInteraction } from "../../integrations/offers/interaction"
 import { createIntegrationActor } from "../../shared/actor"
@@ -158,8 +158,10 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
 
 async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
   if (
-    message.actorKind === "user" &&
-    isSlackApprovalDecisionText(message.text)
+    isUserApprovalDecisionText({
+      actorKind: message.actorKind,
+      text: message.text,
+    })
   ) {
     const actorProfile = await getSlackActorProfile(ctx, {
       accountId: message.accountId,
