@@ -31,6 +31,7 @@ function entry(
     id,
     identifiers: [],
     observedAt: null,
+    reactions: null,
     source: actor === "Milo" ? "self" : "user",
     text,
     type,

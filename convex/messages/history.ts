@@ -1,5 +1,6 @@
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
+import { reactionSummariesForMessages } from "../reactions/summary"
 import { type ActorKind, getActorDisplayName } from "../shared/actor"
 import { messageActorIds, messageIdentifiers } from "./identifiers"
 import { messageText } from "./surface"
@@ -13,6 +14,7 @@ export type ConversationEntry = {
   id: string
   identifiers: string[]
   observedAt: number | null
+  reactions: string | null
   source: ActorKind | "unknown"
   text: string
   type: string
@@ -32,7 +34,10 @@ export async function recentConversation(
     message.conversationId === undefined
       ? [message]
       : await recentMessages(ctx, message)
-  const entries = messages.map((entry) => messageEntry(entry, integration))
+  const reactions = await reactionSummariesForMessages(ctx, messages)
+  const entries = messages.map((entry) =>
+    messageEntry(entry, integration, reactions.get(entry._id))
+  )
 
   return {
     entries: mergeRecentConversation(entries),
@@ -42,7 +47,8 @@ export async function recentConversation(
 
 export function messageEntry(
   message: Doc<"messages">,
-  integration: Doc<"integrations">
+  integration: Doc<"integrations">,
+  reactions?: string
 ): ConversationEntry {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
@@ -51,6 +57,7 @@ export function messageEntry(
     id: message._id,
     identifiers: messageIdentifiers(message),
     observedAt: message.observedAt ?? null,
+    reactions: reactions ?? null,
     source: message.actor?.kind ?? "unknown",
     text: messageText(message, integration),
     type: message.type,

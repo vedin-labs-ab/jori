@@ -21,6 +21,7 @@ import { integrationOffers } from "./integrations/offers/schema"
 import { integrations } from "./integrations/schema"
 import { messages } from "./messages/schema"
 import { permissions } from "./permissions/schema"
+import { reactions } from "./reactions/schema"
 import { runs } from "./runs/schema"
 import { outbox, sandboxes, traces } from "./runtime/schema"
 import { waiters } from "./runtime/waiters/schema"
@@ -49,6 +50,7 @@ export default defineSchema({
   waiters,
   sandboxes,
   permissions,
+  reactions,
   artifacts,
   artifactVersions,
   artifactTrees,

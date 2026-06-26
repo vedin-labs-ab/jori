@@ -4,6 +4,7 @@ import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { resolveUserIdByEmail } from "../identity/identities"
 import { type Actor, actorValidator, getActorEmail } from "../shared/actor"
 import { type Integration } from "../shared/integrations"
+import { messageDataReactionTargetKey } from "./identifiers"
 
 export const messageIntegrationValidator = v.union(
   v.literal("github"),
@@ -93,6 +94,10 @@ export async function insertMessage(
     mentioned: input.message.mentioned ?? false,
     actor: input.message.actor,
     conversationId: input.message.conversationId,
+    targetKey: messageDataReactionTargetKey(
+      input.integration.integration,
+      input.message.data
+    ),
     text: input.message.text,
     data: input.message.data,
     observedAt: input.message.observedAt,

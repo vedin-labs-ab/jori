@@ -25,6 +25,9 @@ test("starts new watch message runs as mentions", async () => {
         messageId: "message",
         timestamp: 0,
       },
+      reactionCursor: {
+        timestamp: 1000,
+      },
       runId: "runs-1",
     }),
   ])
@@ -81,6 +84,9 @@ test("starts reply runs when the previous session is terminal", async () => {
   expect(ctx.patches).toContainEqual({
     id: "session",
     patch: expect.objectContaining({
+      reactionCursor: {
+        timestamp: 1000,
+      },
       runId: "runs-1",
     }),
   })

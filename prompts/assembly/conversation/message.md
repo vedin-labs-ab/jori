@@ -1,4 +1,4 @@
-- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{% if message.identifiers %} | identifiers=[{{message.identifiers}}]{% endif %}{% if message.actorIds %} | actor_ids=[{{message.actorIds}}]{% endif %}
+- {{message.observedAt}} | {{message.speaker}} | {{message.actor}}{% if message.identifiers %} | identifiers=[{{message.identifiers}}]{% endif %}{% if message.actorIds %} | actor_ids=[{{message.actorIds}}]{% endif %}{% if message.reactions %} | reactions=[{{message.reactions}}]{% endif %}
 ```text
 {{message.text}}
 ```

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { getLinearMessage } from "./events"
+import { getLinearMessage, getLinearReaction } from "./events"
 
 describe("Linear webhook messages", () => {
   test("keeps comment action in the provider message type", () => {
@@ -26,6 +26,47 @@ describe("Linear webhook messages", () => {
         action: "update",
         eventType: "Comment",
         parentCommentId: "parent-comment-id",
+      },
+    })
+  })
+})
+
+describe("Linear webhook reactions", () => {
+  test("normalizes app user comment reaction notifications", () => {
+    const reaction = getLinearReaction({
+      deliveryId: "delivery-id",
+      payload: {
+        type: "AppUserNotification",
+        action: "issueCommentReaction",
+        organizationId: "org-id",
+        appUserId: "bot-id",
+        createdAt: "2026-06-12T12:00:00Z",
+        notification: {
+          emoji: "✅",
+          actor: {
+            id: "user-id",
+            name: "Albin",
+            email: "albin@example.com",
+          },
+          issue: { id: "issue-id" },
+          comment: {
+            id: "comment-id",
+            body: "I can proceed with option B.",
+          },
+        },
+      },
+    })
+
+    expect(reaction).toMatchObject({
+      action: "added",
+      actorId: "user-id",
+      reaction: "✅",
+      target: {
+        key: "linear:comment:comment-id",
+        identifiers: ["linear:issue:issue-id", "linear:comment:comment-id"],
+        actorId: "bot-id",
+        conversationId: "issue-id",
+        text: "I can proceed with option B.",
       },
     })
   })

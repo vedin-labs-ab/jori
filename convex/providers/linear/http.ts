@@ -17,7 +17,11 @@ import {
   linearOAuthCallbackPath,
   linearOAuthScopes,
 } from "./config"
-import { getLinearMessage, type LinearWebhookPayload } from "./events"
+import {
+  getLinearMessage,
+  getLinearReaction,
+  type LinearWebhookPayload,
+} from "./events"
 import { fetchLinearIssueContext, type LinearIssueContext } from "./issues"
 import {
   exchangeLinearAuthorizationCode,
@@ -134,24 +138,34 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
     deliveryId: request.headers.get("linear-delivery"),
   })
 
-  if (message === null) {
+  if (message !== null) {
+    const hydratedMessage = await hydrateLinearMessage(ctx, message)
+
+    if (isLinearApprovalDecision(hydratedMessage)) {
+      await recordLinearMessage(ctx, hydratedMessage, "record")
+      await handleLinearApprovalDecision(ctx, hydratedMessage)
+      return Response.json({ ok: true })
+    }
+
+    await recordLinearMessage(ctx, hydratedMessage)
+
     return Response.json({ ok: true })
   }
 
-  const hydratedMessage = await hydrateLinearMessage(ctx, message)
+  const reaction = getLinearReaction({
+    payload,
+    deliveryId: request.headers.get("linear-delivery"),
+  })
 
-  if (isLinearApprovalDecision(hydratedMessage)) {
-    await recordLinearMessage(ctx, hydratedMessage, "record")
-    await handleLinearApprovalDecision(ctx, hydratedMessage)
-    return Response.json({ ok: true })
+  if (reaction !== null) {
+    await recordLinearReaction(ctx, reaction)
   }
-
-  await recordLinearMessage(ctx, hydratedMessage)
 
   return Response.json({ ok: true })
 }
 
 type LinearMessage = NonNullable<ReturnType<typeof getLinearMessage>>
+type LinearReaction = NonNullable<ReturnType<typeof getLinearReaction>>
 type LinearRecordMode = "record" | "record_and_run"
 
 async function recordLinearMessage(
@@ -175,6 +189,33 @@ async function recordLinearMessage(
     text: message.text,
     observedAt: message.observedAt,
     data: message.data,
+  })
+}
+
+async function recordLinearReaction(ctx: ActionCtx, reaction: LinearReaction) {
+  await ctx.runMutation(internal.reactions.intake.record, {
+    accountId: reaction.accountId,
+    integration: "linear",
+    key: reaction.externalId,
+    action: reaction.action,
+    reaction: reaction.reaction,
+    actor: createIntegrationActor({
+      externalId: reaction.actorId,
+      kind: "user",
+      email: reaction.actorEmail,
+      name: reaction.actorName,
+    }),
+    target: {
+      key: reaction.target.key,
+      identifiers: reaction.target.identifiers,
+      actor: createIntegrationActor({
+        externalId: reaction.target.actorId,
+        kind: "user",
+      }),
+      conversationId: reaction.target.conversationId,
+      text: reaction.target.text,
+    },
+    observedAt: reaction.observedAt,
   })
 }
 

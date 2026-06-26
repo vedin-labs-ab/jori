@@ -34,6 +34,7 @@ function formatMessageEntry(entry: PromptMessageEntry) {
       actorIds: formatEntryIds(entry.actorIds),
       identifiers: formatEntryIds(entry.identifiers),
       observedAt: new Date(observed).toISOString(),
+      reactions: entry.reactions,
       speaker: entry.source,
       text: entry.text,
     },

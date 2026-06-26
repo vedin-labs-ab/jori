@@ -1,6 +1,7 @@
 export type LinearWebhookPayload = {
   action?: string
   type?: string
+  appUserId?: string
   actor?: {
     id?: string
     type?: string
@@ -9,8 +10,10 @@ export type LinearWebhookPayload = {
   }
   createdAt?: string
   data?: LinearComment
+  notification?: unknown
   organizationId?: string
   url?: string
+  webhookId?: string
   webhookTimestamp?: number
 }
 
@@ -65,6 +68,66 @@ export function getLinearMessage(args: {
   return null
 }
 
+export function getLinearReaction(args: {
+  payload: LinearWebhookPayload
+  deliveryId: string | null
+}) {
+  const action = args.payload.action
+  const accountId = args.payload.organizationId
+
+  if (
+    args.payload.type !== "AppUserNotification" ||
+    action !== "issueCommentReaction" ||
+    accountId === undefined
+  ) {
+    return null
+  }
+
+  const notification = readRecord(args.payload.notification)
+  const reaction = readReaction(notification)
+  const comment = readRecordValue(notification, "comment")
+  const issue = readRecordValue(notification, "issue")
+  const commentId = readString(comment, "id")
+  const issueId = readString(issue, "id") ?? readString(notification, "issueId")
+
+  if (reaction === undefined || commentId === undefined) {
+    return null
+  }
+
+  const actor = readActor(notification, args.payload)
+
+  return {
+    accountId,
+    action: "added" as const,
+    actorEmail: actor.email,
+    actorId: actor.id,
+    actorName: actor.name,
+    externalId: createLinearExternalId(
+      accountId,
+      args.deliveryId,
+      [
+        action,
+        commentId,
+        actor.id,
+        reaction,
+        args.payload.webhookId ?? args.payload.webhookTimestamp,
+      ].join(":")
+    ),
+    observedAt: getObservedAt(args.payload, args.payload.createdAt),
+    reaction,
+    target: {
+      key: `linear:comment:${commentId}`,
+      identifiers: [
+        ...(issueId === undefined ? [] : [`linear:issue:${issueId}`]),
+        `linear:comment:${commentId}`,
+      ],
+      actorId: args.payload.appUserId,
+      conversationId: issueId,
+      text: readString(comment, "body"),
+    },
+  }
+}
+
 function getLinearCommentMessage(
   payload: LinearWebhookPayload,
   accountId: string,
@@ -111,6 +174,43 @@ function getLinearCommentMessage(
       url: payload.url ?? data.url,
     },
   }
+}
+
+function readReaction(notification: Record<string, unknown>) {
+  return (
+    readString(notification, "emoji") ??
+    readString(notification, "reactionEmoji") ??
+    readString(readRecordValue(notification, "reaction"), "emoji")
+  )
+}
+
+function readActor(
+  notification: Record<string, unknown>,
+  payload: LinearWebhookPayload
+) {
+  const actor = readRecordValue(notification, "actor")
+
+  return {
+    email: readString(actor, "email") ?? payload.actor?.email,
+    id: readString(actor, "id") ?? payload.actor?.id,
+    name: readString(actor, "name") ?? payload.actor?.name,
+  }
+}
+
+function readRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {}
+}
+
+function readRecordValue(data: Record<string, unknown>, key: string) {
+  return readRecord(data[key])
+}
+
+function readString(data: Record<string, unknown>, key: string) {
+  const value = data[key]
+
+  return typeof value === "string" && value !== "" ? value : undefined
 }
 
 function isRelevantLinearEvent(type: string, action: string | undefined) {

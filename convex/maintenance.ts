@@ -12,6 +12,7 @@ const tableRegistry: Record<TableName, true> = {
   integrations: true,
   integrationOffers: true,
   messages: true,
+  reactions: true,
   automations: true,
   subscriptions: true,
   events: true,
