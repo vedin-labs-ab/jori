@@ -8,4 +8,6 @@ Use Slack-native formatting:
 
 Do not use Markdown-style links `[label](url)`, double-asterisk bold `**bold**`, headings like `# Heading`, HTML, or pipe tables unless intentionally showing syntax.
 
+Emoji shortcodes render as emojis only outside `inline code` and code blocks.
+
 Escape literal `&`, `<`, and `>` unless they are part of valid Slack syntax.
