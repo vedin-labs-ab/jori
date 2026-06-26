@@ -1,7 +1,7 @@
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { messageReactionTargetKey } from "../messages/identifiers"
-import { getActorDisplayName } from "../shared/actor"
+import { type Actor } from "../shared/actor"
 
 const maxReactionsPerTarget = 200
 const maxReactionGroups = 3
@@ -10,7 +10,7 @@ const maxActorNames = 2
 type QueryLikeCtx = MutationCtx | QueryCtx
 
 type ActiveReaction = {
-  actor: string
+  actor?: string
   reaction: string
 }
 
@@ -89,7 +89,7 @@ async function activeReactionsForTarget(
   return rows
     .filter((reaction) => reaction.removedAt === undefined)
     .map((reaction) => ({
-      actor: getActorDisplayName(reaction.actor) ?? "unknown",
+      actor: reactionActorName(reaction.actor),
       reaction: reaction.reaction,
     }))
 }
@@ -112,25 +112,35 @@ function formatReactionSummary(reactions: ActiveReaction[]) {
 }
 
 function reactionGroups(reactions: ActiveReaction[]) {
-  const groups = new Map<string, string[]>()
+  const groups = new Map<
+    string,
+    {
+      actors: string[]
+      count: number
+      reaction: string
+    }
+  >()
 
   for (const reaction of reactions) {
-    groups.set(reaction.reaction, [
-      ...(groups.get(reaction.reaction) ?? []),
-      reaction.actor,
-    ])
+    const group = groups.get(reaction.reaction) ?? {
+      actors: [],
+      count: 0,
+      reaction: reaction.reaction,
+    }
+
+    group.count += 1
+
+    if (reaction.actor !== undefined) {
+      group.actors.push(reaction.actor)
+    }
+
+    groups.set(reaction.reaction, group)
   }
 
-  return [...groups.entries()]
-    .map(([reaction, actors]) => ({
-      actors,
-      count: actors.length,
-      reaction,
-    }))
-    .sort(
-      (left, right) =>
-        right.count - left.count || left.reaction.localeCompare(right.reaction)
-    )
+  return [...groups.values()].sort(
+    (left, right) =>
+      right.count - left.count || left.reaction.localeCompare(right.reaction)
+  )
 }
 
 function formatReactionGroup(group: {
@@ -138,14 +148,34 @@ function formatReactionGroup(group: {
   count: number
   reaction: string
 }) {
-  return `${group.reaction} x${group.count} (${formatActors(group.actors)})`
+  const actors = formatActors(group.actors, group.count)
+
+  return actors === null
+    ? `${group.reaction} x${group.count}`
+    : `${group.reaction} x${group.count} (${actors})`
 }
 
-function formatActors(actors: string[]) {
+function formatActors(actors: string[], count: number) {
   const visible = actors.slice(0, maxActorNames)
-  const overflow = actors.length - visible.length
+  const overflow = count - visible.length
+
+  if (visible.length === 0) {
+    return null
+  }
 
   return overflow === 0
     ? visible.join(", ")
     : [...visible, `+${overflow}`].join(", ")
+}
+
+function reactionActorName(actor: Actor | undefined) {
+  if (actor === undefined) {
+    return undefined
+  }
+
+  if ("externalId" in actor) {
+    return actor.kind === "self" ? "Milo" : actor.name
+  }
+
+  return "userId" in actor ? actor.name : undefined
 }

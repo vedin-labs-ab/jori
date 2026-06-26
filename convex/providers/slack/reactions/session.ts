@@ -6,9 +6,24 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../../../_generated/server"
-import { type ReactionSnapshotPlan } from "../../../reactions/data"
+import {
+  type ReactionSnapshotItem,
+  type ReactionSnapshotPlan,
+  type ReactionSnapshotTarget,
+} from "../../../reactions/data"
+import {
+  type Actor,
+  type ActorAlias,
+  type ActorKind,
+  createIntegrationActor,
+  getActorExternalId,
+} from "../../../shared/actor"
 import { requireSlackCredentials } from "../credentials"
 import { getSlackChannelId } from "../data"
+import {
+  getSlackActorProfile,
+  type SlackActorProfile,
+} from "../directory/users"
 import { fetchSlackReactionSnapshots } from "./snapshot"
 
 export type SlackReactionSyncPlan = {
@@ -30,14 +45,35 @@ export async function slackReactionSnapshots(
     return null
   }
 
+  const targets = await fetchSlackReactionSnapshots(
+    requireSlackCredentials(plan.integration).user,
+    plan
+  )
+
   return {
     accountId: plan.integration.externalId,
     integration: "slack",
-    targets: await fetchSlackReactionSnapshots(
-      requireSlackCredentials(plan.integration).user,
-      plan
+    targets: applySlackReactionProfiles(
+      targets,
+      await slackReactionActorProfiles(
+        ctx,
+        plan.integration.externalId,
+        targets
+      )
     ),
   }
+}
+
+export function applySlackReactionProfiles(
+  targets: ReactionSnapshotTarget[],
+  profiles: ReadonlyMap<string, SlackActorProfile>
+): ReactionSnapshotTarget[] {
+  return targets.map((target) => ({
+    ...target,
+    reactions: target.reactions.map((reaction) =>
+      applySlackReactionProfile(reaction, profiles)
+    ),
+  }))
 }
 
 export const sessionTarget = internalQuery({
@@ -98,4 +134,74 @@ async function conversationChannelId(
     .first()
 
   return message === null ? null : (getSlackChannelId(message.data) ?? null)
+}
+
+async function slackReactionActorProfiles(
+  ctx: ActionCtx,
+  accountId: string,
+  targets: ReactionSnapshotTarget[]
+) {
+  const actorIds = uniqueReactionActorIds(targets)
+  const entries = await Promise.all(
+    actorIds.map(async (actorId) => [
+      actorId,
+      await getSlackActorProfile(ctx, { accountId, actorId }),
+    ])
+  )
+
+  return new Map(
+    entries.filter(
+      (entry): entry is [string, SlackActorProfile] => entry[1] !== undefined
+    )
+  )
+}
+
+function uniqueReactionActorIds(targets: ReactionSnapshotTarget[]) {
+  const actorIds = new Set<string>()
+
+  for (const target of targets) {
+    for (const reaction of target.reactions) {
+      const externalId = getActorExternalId(reaction.actor)
+
+      if (externalId !== undefined) {
+        actorIds.add(externalId)
+      }
+    }
+  }
+
+  return [...actorIds]
+}
+
+function applySlackReactionProfile(
+  reaction: ReactionSnapshotItem,
+  profiles: ReadonlyMap<string, SlackActorProfile>
+): ReactionSnapshotItem {
+  const externalId = getActorExternalId(reaction.actor)
+  const profile =
+    externalId === undefined ? undefined : profiles.get(externalId)
+
+  if (profile === undefined) {
+    return reaction
+  }
+
+  return {
+    ...reaction,
+    actor: createIntegrationActor({
+      aliases: actorAliases(reaction.actor),
+      email: profile.email,
+      externalId,
+      kind: actorKind(reaction.actor),
+      name: profile.name,
+    }),
+  }
+}
+
+function actorKind(actor: Actor | undefined): ActorKind {
+  return actor !== undefined && "externalId" in actor ? actor.kind : "user"
+}
+
+function actorAliases(actor: Actor | undefined): ActorAlias[] | undefined {
+  return actor !== undefined && "externalId" in actor
+    ? actor.aliases
+    : undefined
 }
