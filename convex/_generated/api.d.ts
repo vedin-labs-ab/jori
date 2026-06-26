@@ -102,6 +102,7 @@ import type * as broker_tools_github_client from "../broker/tools/github/client.
 import type * as broker_tools_github_comments from "../broker/tools/github/comments.js";
 import type * as broker_tools_github_format from "../broker/tools/github/format.js";
 import type * as broker_tools_github_index from "../broker/tools/github/index.js";
+import type * as broker_tools_github_reactions from "../broker/tools/github/reactions.js";
 import type * as broker_tools_google_drive from "../broker/tools/google/drive.js";
 import type * as broker_tools_google_format from "../broker/tools/google/format.js";
 import type * as broker_tools_google_gmail from "../broker/tools/google/gmail.js";
@@ -426,6 +427,7 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/github/comments": typeof broker_tools_github_comments;
   "broker/tools/github/format": typeof broker_tools_github_format;
   "broker/tools/github/index": typeof broker_tools_github_index;
+  "broker/tools/github/reactions": typeof broker_tools_github_reactions;
   "broker/tools/google/drive": typeof broker_tools_google_drive;
   "broker/tools/google/format": typeof broker_tools_google_format;
   "broker/tools/google/gmail": typeof broker_tools_google_gmail;

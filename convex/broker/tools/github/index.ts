@@ -23,6 +23,7 @@ import {
   summarizePullRequest,
   summarizeRepository,
 } from "./format"
+import { addGitHubReaction } from "./reactions"
 
 export function createGitHubCloneCredentials(args: {
   integration: Doc<"integrations">
@@ -56,6 +57,7 @@ const githubToolHandlers: Record<
   string,
   (token: string, args: Record<string, unknown>) => Promise<unknown> | unknown
 > = {
+  github_add_reaction: addGitHubReaction,
   github_add_issue_comment: addIssueComment,
   github_clone_repository: cloneRepository,
   github_get_file: getFile,

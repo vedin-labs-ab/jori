@@ -213,6 +213,10 @@ function hasSurfaceReactionTool(context: RuntimeContext) {
     return hasTool(context.tools, "linear_add_reaction")
   }
 
+  if (surface === "github") {
+    return hasTool(context.tools, "github_add_reaction")
+  }
+
   if (surface === "slack") {
     return hasTool(context.tools, "slack_add_reaction")
   }
