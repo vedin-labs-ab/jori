@@ -15,6 +15,7 @@ import {
   runtimePermissions,
 } from "./permissions/index"
 import { sandboxToolSnapshot, sandboxTools } from "./sandbox"
+import { syncSessionReactions } from "./sessions"
 import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
 import { activeSurfaceToolSnapshot } from "./surface/tools"
@@ -29,17 +30,23 @@ export const load = action({
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
 
-    const [input, run, session] = (await Promise.all([
+    const session = (await ctx.runQuery(internal.sessions.data.getByRun, {
+      runId: args.runId,
+    })) as LoadedSession
+
+    if (session !== null) {
+      await syncSessionReactions(ctx, session._id)
+    }
+
+    const [input, run] = (await Promise.all([
       ctx.runQuery(internal.runs.records.getInputByRun, { runId: args.runId }),
       ctx.runQuery(internal.runs.records.get, { runId: args.runId }),
-      ctx.runQuery(internal.sessions.data.getByRun, { runId: args.runId }),
     ])) as [
       AgentRuntimeInput | null,
       {
         _id: Id<"runs">
         status: "completed" | "failed" | "queued" | "running" | "stopped"
       } | null,
-      LoadedSession,
     ]
     if (input === null || run === null) {
       throw new Error("Runtime context not found.")
@@ -95,6 +102,14 @@ export const reload = action({
   returns: v.any(),
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
+
+    const session = (await ctx.runQuery(internal.sessions.data.getByRun, {
+      runId: args.runId,
+    })) as LoadedSession
+
+    if (session !== null) {
+      await syncSessionReactions(ctx, session._id)
+    }
 
     const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
       runId: args.runId,
