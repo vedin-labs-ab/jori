@@ -1,3 +1,0 @@
-## Guidance
-
-{{guidance.parts}}

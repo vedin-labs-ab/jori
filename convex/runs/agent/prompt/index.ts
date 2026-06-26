@@ -35,7 +35,8 @@ export function assemblePrompt(
   return renderPromptTemplate(promptTemplates["agent/initial"], {
     agent: {
       approvals: optionalPromptBlock(createApprovalInstructions(promptedTools)),
-      communication: optionalPromptBlock(communication?.body ?? ""),
+      communication: optionalPromptBlock(communication?.communication ?? ""),
+      format: optionalPromptBlock(communication?.format ?? ""),
       run,
       skills: optionalPromptBlock(skills),
       trigger: promptBlock(createTriggerPart(input, true)),

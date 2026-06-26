@@ -15,7 +15,8 @@ type ProfileDefinition = {
 }
 
 export type CommunicationGuidance = {
-  body: string
+  communication: string
+  format: string
   skill: RuntimeSkill | null
 }
 
@@ -38,18 +39,17 @@ export function createCommunicationGuidance(args: {
   const profile = profiles[args.profile]
 
   return {
-    body: renderPromptTemplate(promptTemplates["communication/message"], {
-      communication: {
-        guidance:
-          skill === null
-            ? ""
-            : createGuidanceBlock(
-                skill,
-                capabilitiesFor(profile.capabilities, args.integration)
-              ),
-      },
-      tools: args.tools,
-    }).trim(),
+    communication: renderPromptTemplate(
+      promptTemplates["communication/message"],
+      { tools: args.tools }
+    ).trim(),
+    format:
+      skill === null
+        ? ""
+        : createFormatBlock(
+            skill,
+            capabilitiesFor(profile.capabilities, args.integration)
+          ),
     skill,
   }
 }
@@ -58,7 +58,7 @@ function capabilitiesFor(map: CapabilityMap, integration: Integration) {
   return map[integration] ?? map.default
 }
 
-function createGuidanceBlock(
+function createFormatBlock(
   skill: RuntimeSkill,
   capabilities: readonly CommunicationCapability[]
 ) {
@@ -76,8 +76,8 @@ function createGuidanceBlock(
 
   return parts.length === 0
     ? ""
-    : renderPromptTemplate(promptTemplates["communication/guidance"], {
-        guidance: {
+    : renderPromptTemplate(promptTemplates["format/message"], {
+        format: {
           parts: parts.join("\n\n"),
         },
       }).trim()

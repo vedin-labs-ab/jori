@@ -18,9 +18,7 @@ describe("automation trigger prompts", () => {
     expect(prompt).not.toContain("- Web search:")
     expect(prompt).not.toContain("\nEvent:\n")
     expect(prompt).not.toContain("- None")
-    expect(prompt.indexOf("# Completion")).toBeLessThan(
-      prompt.indexOf("# Trigger")
-    )
+    expect(prompt.indexOf("# Finish")).toBeLessThan(prompt.indexOf("# Trigger"))
     expect(prompt).toContain("Finish the run by calling `finish_run`")
     expect(prompt).not.toContain("# Communication")
     expect(prompt).not.toContain("send_reply")
