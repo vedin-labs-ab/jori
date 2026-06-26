@@ -28,7 +28,6 @@ const profiles = {
 export function createCommunicationGuidance(args: {
   integration: Integration
   profile: CommunicationProfile
-  reactions: boolean
   skills: readonly RuntimeSkill[]
 }): CommunicationGuidance {
   const skill = getRuntimeSkillForIntegration(args.skills, args.integration)
@@ -44,7 +43,6 @@ export function createCommunicationGuidance(args: {
                 skill,
                 capabilitiesFor(profile.capabilities, args.integration)
               ),
-        reactions: args.reactions,
       },
     }).trim(),
     skill,

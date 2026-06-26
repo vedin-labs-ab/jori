@@ -163,7 +163,7 @@ describe("runtime delivery prompts", () => {
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("default to the lightest touch that lands it")
-    expect(prompt).toContain("worded `send_reply`")
+    expect(prompt).toContain("Reach for `send_reply`")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Completion")
@@ -179,7 +179,7 @@ describe("runtime delivery prompts", () => {
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("default to the lightest touch that lands it")
-    expect(prompt).toContain("worded `send_reply`")
+    expect(prompt).toContain("Reach for `send_reply`")
     expect(prompt).toContain("# Completion")
     expect(prompt).toContain("No closing message is required")
   })

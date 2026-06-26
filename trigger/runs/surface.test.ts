@@ -45,10 +45,10 @@ test("active surface stops are repaired back to finish_run", async () => {
   )
 })
 
-test("GitHub active surface repair can use reactions", async () => {
+test("active surface repair uses send_reply even with provider reactions", async () => {
   const runtime = createRuntime({
     surface: "github",
-    tools: [sendReplyTool(), githubReactionTool(), finishRunTool()],
+    tools: [sendReplyTool(), githubCommentReactionTool(), finishRunTool()],
   })
   const model = createModel([
     { content: "", type: "stop" },
@@ -74,8 +74,18 @@ test("GitHub active surface repair can use reactions", async () => {
       messages: expect.arrayContaining([
         expect.objectContaining({
           content: expect.stringContaining(
-            "`send_reply` or the surface-specific reaction tool"
+            "visible communication with `send_reply`"
           ),
+          role: "user",
+        }),
+      ]),
+    })
+  )
+  expect(model.complete).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      messages: expect.not.arrayContaining([
+        expect.objectContaining({
+          content: expect.stringContaining("surface-specific reaction"),
           role: "user",
         }),
       ]),
@@ -167,12 +177,12 @@ function createRuntime(options: {
   } as unknown as ToolRuntime
 }
 
-function githubReactionTool(): RuntimeTool {
+function githubCommentReactionTool(): RuntimeTool {
   return {
     access: "write",
-    description: "Add GitHub reaction.",
+    description: "Add GitHub comment reaction.",
     inputSchema: {},
-    name: "github_add_reaction",
+    name: "github_add_comment_reaction",
     route: "convex",
     surface: "github",
   }

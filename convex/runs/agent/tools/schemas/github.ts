@@ -8,7 +8,6 @@ import {
 import {
   githubCommentReactionSubjectProperty,
   githubReactionContentProperty,
-  githubReactionTargetProperty,
 } from "./reactions"
 import { sourceChangesProperty } from "./source"
 
@@ -92,15 +91,6 @@ export const githubToolInputSchemas = {
       owner: stringProperty("Repository owner."),
       pullNumber: numberProperty("Pull request number.", 1),
       repo: stringProperty("Repository name."),
-    },
-  }),
-  github_add_reaction: objectSchema({
-    required: ["owner", "repo", "target", "content"],
-    properties: {
-      content: githubReactionContentProperty("GitHub reaction content to add."),
-      owner: stringProperty("Repository owner."),
-      repo: stringProperty("Repository name."),
-      target: githubReactionTargetProperty(),
     },
   }),
   github_list_pull_request_files: pullRequestPageSchema(

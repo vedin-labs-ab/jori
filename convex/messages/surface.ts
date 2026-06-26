@@ -54,14 +54,6 @@ export function messageAudience(
   }
 }
 
-export function supportsSurfaceReaction(integration: string) {
-  return (
-    integration === "github" ||
-    integration === "linear" ||
-    integration === "slack"
-  )
-}
-
 function slackMessageAudience(
   message: Doc<"messages">,
   _integration: Doc<"integrations">

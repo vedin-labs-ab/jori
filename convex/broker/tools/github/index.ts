@@ -30,7 +30,6 @@ import {
   listPullRequestReviewComments,
   updatePullRequest,
 } from "./pulls"
-import { addGitHubReaction } from "./reactions"
 
 export function createGitHubCloneCredentials(args: {
   integration: Doc<"integrations">
@@ -65,7 +64,6 @@ const githubToolHandlers: Record<
   (token: string, args: Record<string, unknown>) => Promise<unknown> | unknown
 > = {
   github_add_comment_reaction: addCommentReaction,
-  github_add_reaction: addGitHubReaction,
   github_add_issue_comment: addIssueComment,
   github_clone_repository: cloneRepository,
   github_commit_to_pull_request: commitToPullRequest,

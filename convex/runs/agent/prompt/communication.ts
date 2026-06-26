@@ -1,7 +1,4 @@
-import {
-  replyAddress,
-  supportsSurfaceReaction,
-} from "../../../messages/surface"
+import { replyAddress } from "../../../messages/surface"
 import {
   type CommunicationGuidance,
   createCommunicationGuidance,
@@ -20,7 +17,6 @@ export function createCommunicationInstructions(
   return createCommunicationGuidance({
     integration: input.messageIntegration,
     profile: "agent-final-reply",
-    reactions: supportsSurfaceReaction(input.messageIntegration),
     skills,
   })
 }
