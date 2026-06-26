@@ -166,7 +166,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("Reach for `send_reply`")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
-    expect(prompt).toContain("# Completion")
+    expect(prompt).toContain("# Finish")
     expect(prompt).toContain("Finish the run by calling `finish_run`")
     expect(prompt).toContain("No closing message is required")
     expectNoSyntheticBlankLines(prompt)
@@ -180,7 +180,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("default to the lightest touch that lands it")
     expect(prompt).toContain("Reach for `send_reply`")
-    expect(prompt).toContain("# Completion")
+    expect(prompt).toContain("# Finish")
     expect(prompt).toContain("No closing message is required")
   })
 
@@ -195,13 +195,13 @@ describe("runtime delivery prompts", () => {
   })
 })
 
-describe("delivery contract prompts", () => {
+describe("output contract prompts", () => {
   test("renders the channel contract section", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
 
-    expect(prompt).toContain("# Delivery")
+    expect(prompt).toContain("# Output")
     expect(prompt).toContain(
       "Everything that reaches the requester or any system happens through a tool call"
     )
@@ -224,10 +224,10 @@ describe("approval request prompts", () => {
     expect(prompt).toContain("Do not ask for approval in chat")
     expect(prompt).toContain("the run pauses on its own")
     expect(prompt).toContain("`denied`, `expired`, or `cancelled`")
-    expect(prompt.indexOf("# Approvals")).toBeLessThan(
-      prompt.indexOf("# Communication")
+    expect(prompt.indexOf("# Communication")).toBeLessThan(
+      prompt.indexOf("# Approvals")
     )
-    expect(prompt).toContain("Callbacks are not handled.\n\n# Updates")
+    expect(prompt).toContain("Callbacks are not handled.\n\n# Approvals")
     expectNoSyntheticBlankLines(prompt)
   })
 
@@ -250,18 +250,15 @@ function githubMessageInput() {
 
 function expectRunBefore(prompt: string, section: string) {
   expectSingleRun(prompt)
-  expect(prompt.indexOf("# Voice")).toBeLessThan(prompt.indexOf("# Run"))
-  expect(prompt.indexOf("# Run")).toBeLessThan(prompt.indexOf("# Delivery"))
-  expect(prompt.indexOf("# Delivery")).toBeLessThan(
-    prompt.indexOf("# Principles")
-  )
+  expect(prompt.indexOf("# Voice")).toBeLessThan(prompt.indexOf("# Work"))
+  expect(prompt.indexOf("# Work")).toBeLessThan(prompt.indexOf("# Security"))
+  expect(prompt.indexOf("# Security")).toBeLessThan(prompt.indexOf("# Output"))
+  expect(prompt.indexOf("# Output")).toBeLessThan(prompt.indexOf("# Finish"))
+  expect(prompt.indexOf("# Finish")).toBeLessThan(prompt.indexOf("# Run"))
+  expect(prompt.indexOf("# Run")).toBeLessThan(prompt.indexOf(section))
   expect(prompt.indexOf("Active surface:")).toBeLessThan(
-    prompt.indexOf("# Principles")
+    prompt.indexOf(section)
   )
-  expect(prompt.indexOf("# Principles")).toBeLessThan(
-    prompt.indexOf("# Security")
-  )
-  expect(prompt.indexOf("# Security")).toBeLessThan(prompt.indexOf(section))
   expect(prompt.indexOf("Run started at:")).toBeLessThan(
     prompt.indexOf(section)
   )

@@ -4,38 +4,38 @@
 
 {% include "parts/voice" %}
 
-{{agent.run}}
+# Work
 
-# Delivery
-
-{% include "parts/delivery" %}
-
-# Principles
-
-{% include "parts/principles" %}
+{% include "parts/work" %}
 
 # Security
 
 {% include "parts/security" %}
 
+# Output
+
+{% include "parts/output" %}
+
+# Finish
+
+{% include "parts/finish" %}
+
 {% if agent.skills %}
 {{agent.skills}}
-{% endif %}
-
-{% if agent.approvals %}
-{{agent.approvals}}
 {% endif %}
 
 {%- if agent.communication %}
 {{agent.communication}}
 {% endif %}
 
-# Updates
+{%- if agent.format %}
+{{agent.format}}
+{% endif %}
 
-{% include "parts/updates" %}
+{% if agent.approvals %}
+{{agent.approvals}}
+{% endif %}
 
-# Completion
-
-{% include "parts/completion" %}
+{{agent.run}}
 
 {{agent.trigger}}
