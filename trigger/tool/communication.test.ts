@@ -5,22 +5,29 @@ import { type ConvexId, type RuntimeTool } from "../types"
 test.each([
   [
     "github",
-    githubReactionTool(),
+    providerTool("github", "github_add_comment_reaction"),
     {
       content: "+1",
       owner: "acme",
       repo: "app",
-      target: { commentId: 123, type: "issue_comment" },
+      commentId: 123,
+      subject: "issue_comment",
     },
-    "github_add_reaction",
+    "github_add_comment_reaction",
   ],
   [
     "linear",
-    linearReactionTool(),
+    providerTool("linear", "linear_add_reaction"),
     { emoji: "👍", target: { id: "comment_1", type: "comment" } },
     "linear_add_reaction",
   ],
-] as const)("%s reaction tools mark the active surface communicated", async (surface, tool, args, name) => {
+  [
+    "slack",
+    providerTool("slack", "slack_add_reaction"),
+    { channel: "C123", name: "thumbsup", timestamp: "123.456" },
+    "slack_add_reaction",
+  ],
+] as const)("%s reaction tools do not mark the active surface communicated", async (surface, tool, args, name) => {
   const runtime = createRuntime({
     result: { ok: true },
     surface,
@@ -38,7 +45,7 @@ test.each([
     sequence: 100,
   })
 
-  expect(runtime.context.activeSurface?.communicated).toBe(true)
+  expect(runtime.context.activeSurface?.communicated).toBe(false)
 })
 
 test("delivered integration offers mark the active surface communicated", async () => {
@@ -114,27 +121,18 @@ function createRuntime(options: {
   }
 }
 
-function linearReactionTool(): RuntimeTool {
+function providerTool(
+  surface: "github" | "linear" | "slack",
+  name: string
+): RuntimeTool {
   return {
     access: "write",
-    description: "Add Linear reaction.",
+    description: "Provider tool.",
     inputSchema: {},
     mode: "allowed",
-    name: "linear_add_reaction",
+    name,
     route: "convex",
-    surface: "linear",
-  }
-}
-
-function githubReactionTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Add GitHub reaction.",
-    inputSchema: {},
-    mode: "allowed",
-    name: "github_add_reaction",
-    route: "convex",
-    surface: "github",
+    surface,
   }
 }
 

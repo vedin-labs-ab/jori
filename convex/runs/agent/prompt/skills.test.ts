@@ -16,7 +16,7 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).toContain("`slack`: Format Slack replies")
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("worded `send_reply`")
+    expect(prompt).toContain("Reach for `send_reply`")
     expect(prompt).not.toContain("## Guidance")
     expect(prompt).not.toContain("Do not use app-callback controls")
   })

@@ -5,14 +5,6 @@ export function isVisibleCommunicationTool(
   result: unknown,
   activeSurface: ToolSurface
 ) {
-  if (
-    toolName === "github_add_reaction" ||
-    toolName === "linear_add_reaction" ||
-    toolName === "slack_add_reaction"
-  ) {
-    return true
-  }
-
   return (
     toolName === "offer_integration" &&
     deliveredOnActiveSurface(result, activeSurface)

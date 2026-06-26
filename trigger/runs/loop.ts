@@ -169,7 +169,6 @@ function appendStopRepair(
 
   messages.push({
     content: stopRepairInstruction({
-      canReact: hasSurfaceReactionTool(context),
       canReply: hasTool(context.tools, "send_reply"),
     }),
     role: "user",
@@ -180,7 +179,7 @@ function hasTool(tools: RuntimeContext["tools"], name: string) {
   return tools.some((tool) => tool.name === name && tool.mode !== "blocked")
 }
 
-function stopRepairInstruction(args: { canReact: boolean; canReply: boolean }) {
+function stopRepairInstruction(args: { canReply: boolean }) {
   const instructions = [
     "The run is not finished.",
     "Any words you write outside a tool call reach no one.",
@@ -188,7 +187,7 @@ function stopRepairInstruction(args: { canReact: boolean; canReply: boolean }) {
 
   if (args.canReply) {
     instructions.push(
-      visibleCommunicationInstruction(args.canReact),
+      visibleCommunicationInstruction(),
       "If no visible communication is warranted, call `finish_run` with `reason`."
     )
   } else {
@@ -198,30 +197,8 @@ function stopRepairInstruction(args: { canReact: boolean; canReply: boolean }) {
   return instructions.join(" ")
 }
 
-function visibleCommunicationInstruction(canReact: boolean) {
-  const tools = canReact
-    ? "`send_reply` or the surface-specific reaction tool"
-    : "`send_reply`"
-
-  return `Send any needed visible communication with ${tools}, then call \`finish_run\`.`
-}
-
-function hasSurfaceReactionTool(context: RuntimeContext) {
-  const surface = context.activeSurface?.surface
-
-  if (surface === "linear") {
-    return hasTool(context.tools, "linear_add_reaction")
-  }
-
-  if (surface === "github") {
-    return hasTool(context.tools, "github_add_reaction")
-  }
-
-  if (surface === "slack") {
-    return hasTool(context.tools, "slack_add_reaction")
-  }
-
-  return false
+function visibleCommunicationInstruction() {
+  return "Send any needed visible communication with `send_reply`, then call `finish_run`."
 }
 
 async function runToolCalls(
