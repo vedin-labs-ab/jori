@@ -119,7 +119,7 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
           >
             {task.label}
           </span>
-          <span className="shrink-0 text-xs">{elapsedLabel(task, now)}</span>
+          <ElapsedTime>{elapsedLabel(task, now)}</ElapsedTime>
           <ChevronDown className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
         </button>
       </TaskTrigger>
@@ -153,15 +153,21 @@ function ExplorationItem({
         className={cn(
           "min-w-0 flex-1 truncate",
           itemTone(item.status),
-          isLive(item.status) ? "shimmer" : null
+          item.status === "active" ? "shimmer" : null
         )}
       >
         {item.label}
       </span>
-      <span className="shrink-0 text-muted-foreground">
-        {elapsedLabel(item, now)}
-      </span>
+      <ElapsedTime>{elapsedLabel(item, now)}</ElapsedTime>
     </TaskItem>
+  )
+}
+
+function ElapsedTime({ children }: { children: string }) {
+  return (
+    <span className="min-w-14 shrink-0 text-right text-muted-foreground text-xs tabular-nums">
+      {children}
+    </span>
   )
 }
 
