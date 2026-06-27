@@ -46,10 +46,10 @@ export function ContextProfile({
 
   return (
     <>
-      <Card className="gap-5 py-0 ring-inset">
-        <CardHeader className="flex flex-row items-start justify-between gap-4 p-4 sm:p-5">
+      <Card className="gap-0 py-0 ring-inset">
+        <CardHeader className="flex flex-row items-start justify-between gap-4 p-4 pb-3 sm:p-5 sm:pb-4">
           <div className="grid gap-1">
-            <CardTitle className="text-base">{title}</CardTitle>
+            <CardTitle className="text-lg">{title}</CardTitle>
             <p className="text-muted-foreground text-xs/relaxed">
               {approvalDescription(profile)}
             </p>
@@ -63,7 +63,7 @@ export function ContextProfile({
             Edit
           </Button>
         </CardHeader>
-        <CardContent className="grid gap-5 p-4 pt-0 sm:p-5 sm:pt-0">
+        <CardContent className="grid gap-6 p-4 pt-0 sm:p-5 sm:pt-0">
           <DiscoveryPanel discovery={discovery} />
           {profile?.proposed === undefined ? null : (
             <ProposedPanel tenantId={tenantId} proposed={profile.proposed} />
