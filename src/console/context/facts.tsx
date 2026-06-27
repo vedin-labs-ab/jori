@@ -1,4 +1,6 @@
+import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
+import { ContextSectionTitle } from "./section"
 import { type ContextFacts, isFactPresent } from "./types"
 
 export function FactsBody({
@@ -11,8 +13,8 @@ export function FactsBody({
   return (
     <div className="grid gap-5">
       <Identity facts={facts} showName={showName} />
-      <ProductList products={facts.products} />
-      <AliasList aliases={facts.aliases} />
+      <ProductSection products={facts.products} />
+      <AliasSection aliases={facts.aliases} />
     </div>
   )
 }
@@ -33,80 +35,87 @@ function Identity({
 
   return (
     <div className="grid max-w-3xl gap-2">
-      {hasName ? (
-        <h2 className="font-heading text-lg font-medium text-foreground">
-          {facts.name}
-        </h2>
-      ) : null}
-      {hasSummary ? (
-        <p className="max-w-[72ch] text-muted-foreground text-sm/relaxed">
-          {facts.summary}
-        </p>
-      ) : null}
+      {hasName ? <OrganizationName>{facts.name}</OrganizationName> : null}
+      {hasSummary ? <SummaryText>{facts.summary}</SummaryText> : null}
     </div>
   )
 }
 
-function ProductList({ products }: { products: ContextFacts["products"] }) {
+export function SummaryText({ children }: { children: ReactNode }) {
+  return (
+    <p className="max-w-[72ch] text-muted-foreground text-sm/relaxed">
+      {children}
+    </p>
+  )
+}
+
+export function OrganizationName({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="font-heading text-lg font-medium text-foreground">
+      {children}
+    </h2>
+  )
+}
+
+function ProductSection({ products }: { products: ContextFacts["products"] }) {
   if (products.length === 0) {
     return null
   }
 
   return (
     <section className="grid max-w-3xl gap-2.5">
-      <SectionLabel count={products.length}>Products</SectionLabel>
-      <ul className="grid gap-3">
-        {products.map((product) => (
-          <li key={product.name} className="grid gap-0.5">
-            <h3 className="font-heading text-sm font-medium text-foreground">
-              {product.name}
-            </h3>
-            {isFactPresent(product.description) ? (
-              <p className="text-muted-foreground text-xs/relaxed">
-                {product.description}
-              </p>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+      <ContextSectionTitle count={products.length}>
+        Products
+      </ContextSectionTitle>
+      <ProductsContent products={products} />
     </section>
   )
 }
 
-function AliasList({ aliases }: { aliases: string[] }) {
+export function ProductsContent({
+  products,
+}: {
+  products: ContextFacts["products"]
+}) {
+  return (
+    <ul className="grid gap-3">
+      {products.map((product) => (
+        <li key={product.name} className="grid gap-0.5">
+          <h3 className="font-heading text-sm font-medium text-foreground">
+            {product.name}
+          </h3>
+          {isFactPresent(product.description) ? (
+            <p className="text-muted-foreground text-xs/relaxed">
+              {product.description}
+            </p>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function AliasSection({ aliases }: { aliases: string[] }) {
   if (aliases.length === 0) {
     return null
   }
 
   return (
     <section className="grid gap-2">
-      <SectionLabel>Also known as</SectionLabel>
-      <div className="flex flex-wrap gap-1.5">
-        {aliases.map((alias) => (
-          <Badge key={alias} variant="secondary">
-            {alias}
-          </Badge>
-        ))}
-      </div>
+      <ContextSectionTitle>Also known as</ContextSectionTitle>
+      <AliasesContent aliases={aliases} />
     </section>
   )
 }
 
-function SectionLabel({
-  children,
-  count,
-}: {
-  children: string
-  count?: number
-}) {
+export function AliasesContent({ aliases }: { aliases: string[] }) {
   return (
-    <span className="flex items-baseline gap-1.5 font-medium text-muted-foreground text-xs">
-      <span>{children}</span>
-      {count === undefined ? null : (
-        <span className="font-normal text-muted-foreground/70 tabular-nums">
-          ({count})
-        </span>
-      )}
-    </span>
+    <div className="flex flex-wrap gap-1.5">
+      {aliases.map((alias) => (
+        <Badge key={alias} variant="secondary">
+          {alias}
+        </Badge>
+      ))}
+    </div>
   )
 }

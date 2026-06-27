@@ -68,7 +68,9 @@ export function ContextProfile({
           {profile?.proposed === undefined ? null : (
             <ProposalReview
               current={facts}
+              primaryWebsite={website}
               proposed={profile.proposed}
+              sources={sources}
               tenantId={tenantId}
             />
           )}
