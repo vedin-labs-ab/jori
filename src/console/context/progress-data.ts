@@ -2,6 +2,7 @@ import { type DiscoveryStep, type OrganizationDiscovery } from "./types"
 import { sourceLabel } from "./url"
 
 export type DiscoveryItemStatus = "active" | "completed" | "failed" | "queued"
+export type DiscoveryTaskStatus = DiscoveryItemStatus | "warning"
 
 export type DiscoveryTaskItem = {
   endedAt?: number
@@ -19,7 +20,7 @@ export type DiscoveryTask = {
   key: string
   label: string
   startedAt: number
-  status: DiscoveryItemStatus
+  status: DiscoveryTaskStatus
 }
 
 type StepEntry = {
@@ -36,7 +37,9 @@ export function createDiscoveryTasks(
   discovery: NonNullable<OrganizationDiscovery>,
   now: number
 ): DiscoveryTask[] {
-  return taskGroups(discovery, now).map((group) => toTask(group, now))
+  return taskGroups(discovery, now).map((group) =>
+    toTask(discovery, group, now)
+  )
 }
 
 function taskGroups(
@@ -55,10 +58,11 @@ function taskGroups(
 }
 
 function toTask(
+  discovery: NonNullable<OrganizationDiscovery>,
   [key, items]: [string, DiscoveryTaskItem[]],
   now: number
 ): DiscoveryTask {
-  const status = taskStatus(items)
+  const status = taskStatus(discovery, items)
 
   return {
     elapsedMs: taskElapsedMs(items, now),
@@ -115,7 +119,7 @@ function nextStep(steps: DiscoveryStep[], entry: StepEntry) {
 
 function itemStatus(
   discovery: NonNullable<OrganizationDiscovery>,
-  step: DiscoveryStep,
+  step: ExplorationStep,
   next: DiscoveryStep | undefined,
   now: number
 ): DiscoveryItemStatus {
@@ -123,7 +127,7 @@ function itemStatus(
     return "queued"
   }
 
-  if (next?.kind === "error" && next.at <= now) {
+  if (isPageError(next, step.url, now)) {
     return "failed"
   }
 
@@ -156,21 +160,34 @@ function itemEnd(
   return next?.at ?? discovery.endedAt
 }
 
-function taskStatus(items: DiscoveryTaskItem[]): DiscoveryItemStatus {
-  if (items.some((item) => item.status === "failed")) {
-    return "failed"
-  }
+function isPageError(
+  step: DiscoveryStep | undefined,
+  url: string,
+  now: number
+) {
+  return step?.kind === "error" && step.url === url && step.at <= now
+}
 
+function taskStatus(
+  discovery: NonNullable<OrganizationDiscovery>,
+  items: DiscoveryTaskItem[]
+): DiscoveryTaskStatus {
   if (items.some((item) => item.status === "active")) {
     return "active"
   }
 
-  return items.every((item) => item.status === "queued")
-    ? "queued"
-    : "completed"
+  if (items.every((item) => item.status === "queued")) {
+    return "queued"
+  }
+
+  if (items.some((item) => item.status === "failed")) {
+    return discovery.status === "failed" ? "failed" : "warning"
+  }
+
+  return "completed"
 }
 
-function taskEnd(items: DiscoveryTaskItem[], status: DiscoveryItemStatus) {
+function taskEnd(items: DiscoveryTaskItem[], status: DiscoveryTaskStatus) {
   const endedAt = Math.max(
     ...items.map((item) => item.endedAt ?? item.startedAt)
   )

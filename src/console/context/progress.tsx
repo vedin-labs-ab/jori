@@ -26,6 +26,7 @@ import {
   type DiscoveryItemStatus,
   type DiscoveryTask,
   type DiscoveryTaskItem,
+  type DiscoveryTaskStatus,
 } from "./progress-data"
 import { type OrganizationDiscovery } from "./types"
 
@@ -177,9 +178,13 @@ function ElapsedTime({ children }: { children: string | null }) {
   )
 }
 
-function TaskStatusIcon({ status }: { status: DiscoveryItemStatus }) {
+function TaskStatusIcon({ status }: { status: DiscoveryTaskStatus }) {
   if (status === "failed") {
     return <TriangleAlert className="size-4 shrink-0 text-destructive" />
+  }
+
+  if (status === "warning") {
+    return <TriangleAlert className="size-4 shrink-0 text-warning" />
   }
 
   if (status === "completed") {
@@ -207,7 +212,7 @@ function ItemStatusIcon({ status }: { status: DiscoveryItemStatus }) {
   return <CircleDashed className={className} />
 }
 
-function isLive(status: DiscoveryItemStatus) {
+function isLive(status: DiscoveryTaskStatus) {
   return status === "active" || status === "queued"
 }
 
