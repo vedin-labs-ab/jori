@@ -136,9 +136,7 @@ function ExplorationItem({
 }) {
   return (
     <TaskItem className="flex h-6 min-w-0 items-center gap-2 text-xs">
-      <IconSlot size="sm">
-        {showStatus ? <ItemStatusIcon status={item.status} /> : null}
-      </IconSlot>
+      {showStatus ? <ItemStatusIcon status={item.status} /> : null}
       <span
         className={cn(
           "min-w-0 flex-1 truncate text-foreground",

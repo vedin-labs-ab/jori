@@ -106,6 +106,16 @@ describe("discovery completion state", () => {
     expect(discoveryReadyForReview(run)).toBe(true)
   })
 
+  test("keeps completed summary done when the client clock lags behind", () => {
+    const run = discovery([summaryStep(5, 10, "Drafting profile")])
+    const [task] = createDiscoveryTasks(run, 9000)
+
+    expect(task).toMatchObject({
+      status: "completed",
+    })
+    expect(discoveryReadyForReview(run)).toBe(true)
+  })
+
   test("keeps an uncompleted summary active while the run is running", () => {
     const run = discovery([summaryStep(5, null, "Drafting profile")], {
       status: "running",

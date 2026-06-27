@@ -108,7 +108,7 @@ export function DiscoveryWorkingStep({
         <DialogTitle>{workingTitle({ failed, ready })}</DialogTitle>
         <DialogDescription>{workingDescription(discovery)}</DialogDescription>
       </DialogHeader>
-      <div className="max-h-64 min-h-24 overflow-y-auto pr-1 [scrollbar-gutter:stable]">
+      <div className="max-h-64 overflow-y-auto pr-1 [scrollbar-gutter:stable]">
         {starting ? (
           <StartingExtraction />
         ) : (
