@@ -50,7 +50,7 @@ async function discover(ctx: ActionCtx, tenantId: string, primaryUrl: string) {
   }
 
   await step(ctx, tenantId, "reading", `Reading ${host}`, primaryUrl)
-  const home = await crawlPage(primaryUrl)
+  const home = await crawl(ctx, tenantId, primaryUrl)
 
   if (home === null) {
     throw new Error("Could not read any content from the website.")
@@ -113,7 +113,7 @@ async function explore(
 
   for (const url of chosen) {
     await step(ctx, tenantId, "exploring", `Exploring ${shortPath(url)}`, url)
-    const page = await crawlPage(url)
+    const page = await crawl(ctx, tenantId, url)
 
     if (page !== null) {
       pages.push(page)
@@ -121,6 +121,22 @@ async function explore(
   }
 
   return pages
+}
+
+async function crawl(ctx: ActionCtx, tenantId: string, url: string) {
+  try {
+    const page = await crawlPage(url)
+
+    if (page !== null) {
+      return page
+    }
+  } catch {
+    // Page failures are recorded here; callers decide whether to keep going.
+  }
+
+  await step(ctx, tenantId, "error", `Could not read ${shortPath(url)}`, url)
+
+  return null
 }
 
 function extractionPages(pages: CrawledPage[]) {

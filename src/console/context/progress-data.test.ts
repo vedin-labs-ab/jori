@@ -35,15 +35,56 @@ describe("createDiscoveryTasks", () => {
   })
 })
 
-function discovery(steps: DiscoveryStep[]): Discovery {
+describe("discovery page failures", () => {
+  test("marks page failures as task warnings when discovery succeeds", () => {
+    const [task] = createDiscoveryTasks(
+      discovery([
+        step(0, "reading", "Reading homepage", "https://example.com/"),
+        step(5, "exploring", "Exploring about", "https://example.com/about"),
+        step(8, "error", "Could not read about", "https://example.com/about"),
+        step(12, "extracting", "Summarizing what we found"),
+        step(20, "done", "Draft ready for review"),
+      ]),
+      20_000
+    )
+
+    expect(task?.status).toBe("warning")
+    expect(task?.items.map((item) => item.status)).toEqual([
+      "completed",
+      "failed",
+    ])
+  })
+
+  test("keeps page failures destructive when discovery fails", () => {
+    const [task] = createDiscoveryTasks(
+      discovery(
+        [
+          step(0, "reading", "Reading homepage", "https://example.com/"),
+          step(5, "error", "Could not read homepage", "https://example.com/"),
+        ],
+        "failed"
+      ),
+      20_000
+    )
+
+    expect(task?.status).toBe("failed")
+    expect(task?.items[0]?.status).toBe("failed")
+  })
+})
+
+function discovery(
+  steps: DiscoveryStep[],
+  status: Discovery["status"] = "succeeded"
+): Discovery {
   return {
     _creationTime: 0,
     _id: "discovery" as Discovery["_id"],
     endedAt: 25_000,
     startedAt: 0,
-    status: "succeeded",
+    status,
     steps,
     tenantId: "tenant",
+    ...(status === "failed" ? { error: "Discovery failed." } : {}),
   }
 }
 
