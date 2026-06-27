@@ -6,6 +6,25 @@ type Discovery = NonNullable<OrganizationDiscovery>
 type DiscoveryStep = Discovery["steps"][number]
 
 describe("createDiscoveryTasks", () => {
+  test("creates standalone summary tasks from extracting steps", () => {
+    const tasks = createDiscoveryTasks(
+      discovery([
+        step(0, "reading", "Reading homepage", "https://example.com/"),
+        step(5, "extracting", "Drafting profile"),
+        step(10, "done", "Draft ready for review"),
+      ]),
+      10_000
+    )
+
+    expect(tasks.map((task) => task.type)).toEqual(["exploration", "summary"])
+    expect(tasks[1]).toMatchObject({
+      elapsedMs: 5000,
+      items: [],
+      label: "Drafting profile",
+      status: "completed",
+    })
+  })
+
   test("excludes idle gaps from task elapsed time", () => {
     const [task] = createDiscoveryTasks(
       discovery([

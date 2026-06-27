@@ -89,6 +89,10 @@ export function DiscoveryWorkingStep({
   onReviewProfile?: () => void
 }) {
   const succeeded = discovery?.status === "succeeded"
+  const running =
+    discovery === undefined ||
+    discovery === null ||
+    discovery.status === "running"
 
   return (
     <>
@@ -104,8 +108,12 @@ export function DiscoveryWorkingStep({
         )}
       </div>
       <DialogFooter>
-        <Button onClick={succeeded ? onReviewProfile : onClose}>
-          {succeeded ? "Review profile" : "Close"}
+        <Button
+          disabled={running}
+          onClick={succeeded ? onReviewProfile : onClose}
+        >
+          {running ? <Loader2 className="size-4 animate-spin" /> : null}
+          {workingActionLabel(discovery?.status)}
         </Button>
       </DialogFooter>
     </>
@@ -143,4 +151,16 @@ function workingDescription(discovery: OrganizationDiscovery | undefined) {
   }
 
   return "This usually takes under a minute. You can close this; it keeps going."
+}
+
+function workingActionLabel(status: string | undefined) {
+  if (status === "succeeded") {
+    return "Review profile"
+  }
+
+  if (status === "failed") {
+    return "Close"
+  }
+
+  return "Extracting"
 }

@@ -18,6 +18,29 @@ export type ContextSource = NonNullable<OrganizationSources>[number]
 export type DiscoveryRun = NonNullable<OrganizationDiscovery>
 export type DiscoveryStep = DiscoveryRun["steps"][number]
 
+export type DiscoveryItemStatus = "active" | "completed" | "failed" | "queued"
+export type DiscoveryTaskStatus = DiscoveryItemStatus | "warning"
+
+export type DiscoveryTaskItem = {
+  endedAt?: number
+  key: string
+  label: string
+  startedAt: number
+  status: DiscoveryItemStatus
+  url: string
+}
+
+export type DiscoveryTask = {
+  elapsedMs: number
+  endedAt?: number
+  items: DiscoveryTaskItem[]
+  key: string
+  label: string
+  startedAt: number
+  status: DiscoveryTaskStatus
+  type: "exploration" | "summary"
+}
+
 export type ContextFacts = Pick<
   NonNullable<OrganizationProfile>,
   "name" | "aliases" | "domains" | "products" | "summary"

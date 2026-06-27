@@ -2,6 +2,7 @@ import {
   Check,
   ChevronDown,
   CircleDashed,
+  FileText,
   LoaderCircle,
   Search,
   TriangleAlert,
@@ -13,22 +14,15 @@ import {
   TaskItem,
   TaskTrigger,
 } from "@/components/ai-elements/task"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { createDiscoveryTasks } from "./progress-data"
 import {
-  createDiscoveryTasks,
   type DiscoveryItemStatus,
   type DiscoveryTask,
   type DiscoveryTaskItem,
   type DiscoveryTaskStatus,
-} from "./progress-data"
-import { type OrganizationDiscovery } from "./types"
+  type OrganizationDiscovery,
+} from "./types"
 
 export function DiscoveryProgress({
   discovery,
@@ -50,48 +44,34 @@ export function DiscoveryProgress({
   return (
     <div className="grid gap-4">
       {tasks.map((task) => (
-        <DomainTask key={task.key} now={now} task={task} />
+        <DiscoveryTaskRow key={task.key} now={now} task={task} />
       ))}
     </div>
   )
 }
 
-export function DiscoveryCard({
-  discovery,
-}: {
-  discovery: OrganizationDiscovery | undefined
-}) {
-  if (
-    discovery === undefined ||
-    discovery === null ||
-    discovery.status === "succeeded"
-  ) {
-    return null
+function DiscoveryTaskRow({ now, task }: { now: number; task: DiscoveryTask }) {
+  if (task.type === "summary") {
+    return <SummaryTask now={now} task={task} />
   }
 
-  const running = discovery.status === "running"
+  return <DomainTask now={now} task={task} />
+}
 
+function SummaryTask({ now, task }: { now: number; task: DiscoveryTask }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          {running ? (
-            <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
-          ) : (
-            <TriangleAlert className="size-4 text-destructive" />
-          )}
-          {running ? "Exploring your website" : "Discovery didn't finish"}
-        </CardTitle>
-        <CardDescription>
-          {running
-            ? "Reading your site and drafting your organization profile."
-            : (discovery.error ?? "Something went wrong.")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <DiscoveryProgress discovery={discovery} />
-      </CardContent>
-    </Card>
+    <div className="flex min-w-0 items-center gap-2 rounded-md text-muted-foreground text-sm">
+      <TaskStatusIcon status={task.status} type={task.type} />
+      <span
+        className={cn(
+          "min-w-0 flex-1 truncate text-left font-medium",
+          isLive(task.status) ? "shimmer" : null
+        )}
+      >
+        {task.label}
+      </span>
+      <ElapsedTime>{elapsedLabel(task, now)}</ElapsedTime>
+    </div>
   )
 }
 
@@ -112,7 +92,7 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
           className="group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors outline-none hover:text-foreground focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           type="button"
         >
-          <TaskStatusIcon status={task.status} />
+          <TaskStatusIcon status={task.status} type={task.type} />
           <span
             className={cn(
               "min-w-0 flex-1 truncate text-left font-medium",
@@ -178,7 +158,13 @@ function ElapsedTime({ children }: { children: string | null }) {
   )
 }
 
-function TaskStatusIcon({ status }: { status: DiscoveryTaskStatus }) {
+function TaskStatusIcon({
+  status,
+  type,
+}: {
+  status: DiscoveryTaskStatus
+  type: DiscoveryTask["type"]
+}) {
   if (status === "failed") {
     return <TriangleAlert className="size-4 shrink-0 text-destructive" />
   }
@@ -189,6 +175,14 @@ function TaskStatusIcon({ status }: { status: DiscoveryTaskStatus }) {
 
   if (status === "completed") {
     return <Check className="size-4 shrink-0 text-primary" />
+  }
+
+  if (type === "summary" && status === "active") {
+    return <LoaderCircle className="size-4 shrink-0 animate-spin" />
+  }
+
+  if (type === "summary") {
+    return <FileText className="size-4 shrink-0" />
   }
 
   return <Search className="size-4 shrink-0" />
