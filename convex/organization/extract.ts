@@ -44,7 +44,7 @@ function normalizeFacts(value: Record<string, unknown>): OrganizationFacts {
     ...optionalString("name", value.name),
     ...optionalString("summary", value.summary),
     aliases: readStrings(value.aliases),
-    domains: readStrings(value.domains),
+    domains: readDomains(value.domains),
   }
 }
 
@@ -65,4 +65,36 @@ function readStrings(value: unknown) {
     .filter((item) => item !== "")
 
   return [...new Set(items)].slice(0, maxListItems)
+}
+
+// Canonicalize to bare, deduped hostnames so the rendered list is consistent no
+// matter how the model formats a domain ("https://www.acme.com/" -> "acme.com").
+function readDomains(value: unknown) {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  const hosts = value.flatMap((item) =>
+    typeof item === "string" ? canonicalHost(item) : []
+  )
+
+  return [...new Set(hosts)].slice(0, maxListItems)
+}
+
+function canonicalHost(value: string): string[] {
+  const trimmed = value.trim()
+
+  if (trimmed === "") {
+    return []
+  }
+
+  try {
+    const url = new URL(
+      trimmed.includes("://") ? trimmed : `https://${trimmed}`
+    )
+
+    return [url.hostname.replace(/^www\./, "").toLowerCase()]
+  } catch {
+    return []
+  }
 }
