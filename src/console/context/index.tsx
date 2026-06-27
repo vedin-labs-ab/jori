@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { api } from "../../../convex/_generated/api"
 import { type ActiveOrganization, ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
@@ -30,13 +31,23 @@ function ContextView({
 
   return (
     <ConsolePageLayout>
-      <ContextProfile
-        tenantId={tenantId}
-        website={website}
-        discovery={discovery}
-        profile={profile}
-        sources={sources}
-      />
+      <Tabs defaultValue="organization" className="gap-4">
+        <TabsList className="w-fit !h-7">
+          <TabsTrigger value="organization">Organization</TabsTrigger>
+          <TabsTrigger disabled value="layers">
+            Layers
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="organization">
+          <ContextProfile
+            tenantId={tenantId}
+            website={website}
+            discovery={discovery}
+            profile={profile}
+            sources={sources}
+          />
+        </TabsContent>
+      </Tabs>
     </ConsolePageLayout>
   )
 }

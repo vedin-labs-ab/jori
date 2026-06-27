@@ -2,7 +2,6 @@ import { useAction, useMutation } from "convex/react"
 import { Loader2, TriangleAlert } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -13,6 +12,7 @@ import { SourcesSection, WebsitesSection } from "./sources"
 import {
   type ContextFacts,
   hasFacts,
+  isFactPresent,
   type OrganizationDiscovery,
   type OrganizationProfile,
   type OrganizationSources,
@@ -40,13 +40,17 @@ export function ContextProfile({
 
   const facts = profile === null || !hasFacts(profile) ? null : profile
   const hasSources = sources === undefined || sources.length > 0
+  const title =
+    facts !== null && isFactPresent(facts.name) ? facts.name : "Organization"
 
   return (
     <>
-      <Card className="gap-0 py-0 ring-inset">
-        <CardHeader className="flex flex-row items-start justify-between gap-4 border-b p-4 sm:p-5">
+      <section className="grid gap-5">
+        <header className="flex flex-row items-start justify-between gap-4">
           <div className="grid gap-1">
-            <CardTitle>Organization</CardTitle>
+            <h2 className="font-heading text-sm font-medium text-foreground">
+              {title}
+            </h2>
             <p className="text-muted-foreground text-xs/relaxed">
               {approvalDescription(profile)}
             </p>
@@ -59,13 +63,17 @@ export function ContextProfile({
           >
             Edit
           </Button>
-        </CardHeader>
-        <CardContent className="grid gap-5 p-4 sm:p-5">
+        </header>
+        <div className="grid gap-5">
           <DiscoveryPanel discovery={discovery} />
           {profile?.proposed === undefined ? null : (
             <ProposedPanel tenantId={tenantId} proposed={profile.proposed} />
           )}
-          {facts === null ? <EmptyProfile /> : <FactsBody facts={facts} />}
+          {facts === null ? (
+            <EmptyProfile />
+          ) : (
+            <FactsBody facts={facts} showName={false} />
+          )}
           <WebsitesSection
             domains={facts?.domains ?? []}
             primaryWebsite={website}
@@ -76,8 +84,8 @@ export function ContextProfile({
               <SourcesSection sources={sources} />
             </>
           ) : null}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
       {editorOpen ? (
         <OrganizationEditDialog
           tenantId={tenantId}
