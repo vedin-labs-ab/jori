@@ -84,7 +84,7 @@ export function DiscoveryWorkingStep({
         <DialogTitle>{workingTitle(discovery?.status)}</DialogTitle>
         <DialogDescription>{workingDescription(discovery)}</DialogDescription>
       </DialogHeader>
-      <div className="max-h-64 overflow-y-auto py-1">
+      <div className="max-h-64 overflow-y-auto">
         <DiscoveryProgress discovery={discovery} />
       </div>
       <DialogFooter>
