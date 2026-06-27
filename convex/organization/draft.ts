@@ -10,12 +10,11 @@ import {
   hostFromUrl,
 } from "./crawl"
 import { extractFacts } from "./extract"
-import { missingFacts, type OrganizationFacts } from "./facts"
+import { type OrganizationFacts } from "./facts"
 import { selectLinks } from "./select"
 import { type SourceSnapshot } from "./sources"
 
-const initialPages = 5
-const followUpPages = 3
+const maxPages = 7
 
 type StepKind = "page" | "summary"
 
@@ -26,9 +25,8 @@ type DraftResult = {
 
 // Crawls an organization's first-party pages, extracts structured facts with the
 // model, and writes a proposed draft for human approval. The model decides which
-// links to read from the homepage, and gets one targeted follow-up round if a
-// key fact is still missing. Progress is streamed to the discovery row so the
-// console can show it live.
+// links to read from the homepage. Progress is streamed to the discovery row so
+// the console can show it live.
 export const run = internalAction({
   args: { tenantId: v.string(), primaryUrl: v.string() },
   handler: async (ctx, args) => {
@@ -60,35 +58,23 @@ async function discover(ctx: ActionCtx, tenantId: string, primaryUrl: string) {
     throw new Error("Could not read any content from the website.")
   }
 
-  let pages = await explore(ctx, tenantId, {
-    host,
+  const pages = [home]
+  const chosen = await selectLinks({
     primaryUrl,
-    pages: [home],
-    limit: initialPages,
-    missing: [],
+    candidates: candidateLinks(host, pages),
+    limit: maxPages,
   })
 
-  const firstDraft = await extractDraft(ctx, tenantId, primaryUrl, pages)
+  for (const url of chosen) {
+    const page = await crawl(ctx, tenantId, `Exploring ${shortPath(url)}`, url)
 
-  const missing = missingFacts(firstDraft.facts)
-
-  if (missing.length > 0) {
-    await completeStep(ctx, tenantId, firstDraft.startedAt)
-    pages = await explore(ctx, tenantId, {
-      host,
-      primaryUrl,
-      pages,
-      limit: followUpPages,
-      missing,
-    })
-
-    const finalDraft = await extractDraft(ctx, tenantId, primaryUrl, pages)
-    await proposeDraft(ctx, tenantId, primaryUrl, pages, finalDraft)
-
-    return
+    if (page !== null) {
+      pages.push(page)
+    }
   }
 
-  await proposeDraft(ctx, tenantId, primaryUrl, pages, firstDraft)
+  const draft = await extractDraft(ctx, tenantId, primaryUrl, pages)
+  await proposeDraft(ctx, tenantId, primaryUrl, pages, draft)
 }
 
 async function proposeDraft(
@@ -120,39 +106,6 @@ async function writeDraft(
     sources: pages.map(toSource),
     website: primaryUrl,
   })
-}
-
-// One navigation round: the model picks links to read from those discovered so
-// far, and we fetch them. Returns the page set extended with whatever was read.
-async function explore(
-  ctx: ActionCtx,
-  tenantId: string,
-  args: {
-    host: string
-    primaryUrl: string
-    pages: CrawledPage[]
-    limit: number
-    missing: string[]
-  }
-): Promise<CrawledPage[]> {
-  const chosen = await selectLinks({
-    primaryUrl: args.primaryUrl,
-    candidates: candidateLinks(args.host, args.pages),
-    limit: args.limit,
-    missing: args.missing,
-  })
-
-  const pages = [...args.pages]
-
-  for (const url of chosen) {
-    const page = await crawl(ctx, tenantId, `Exploring ${shortPath(url)}`, url)
-
-    if (page !== null) {
-      pages.push(page)
-    }
-  }
-
-  return pages
 }
 
 async function crawl(
