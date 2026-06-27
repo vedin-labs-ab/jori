@@ -10,6 +10,7 @@ import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DiscoveryProgress } from "./progress"
+import { discoveryFailed, discoveryReadyForReview } from "./progress-data"
 import { type OrganizationDiscovery } from "./types"
 
 export function WebsiteDiscoveryStep({
@@ -88,16 +89,18 @@ export function DiscoveryWorkingStep({
   onClose: () => void
   onReviewProfile?: () => void
 }) {
-  const succeeded = discovery?.status === "succeeded"
+  const ready = discoveryReadyForReview(discovery)
+  const failed = discoveryFailed(discovery)
   const running =
     discovery === undefined ||
     discovery === null ||
     discovery.status === "running"
+  const reviewable = ready && onReviewProfile !== undefined
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{workingTitle(discovery?.status)}</DialogTitle>
+        <DialogTitle>{workingTitle({ failed, ready })}</DialogTitle>
         <DialogDescription>{workingDescription(discovery)}</DialogDescription>
       </DialogHeader>
       <div className="max-h-64 overflow-y-auto">
@@ -110,10 +113,10 @@ export function DiscoveryWorkingStep({
       <DialogFooter>
         <Button
           disabled={running}
-          onClick={succeeded ? onReviewProfile : onClose}
+          onClick={reviewable ? onReviewProfile : onClose}
         >
           {running ? <Loader2 className="size-4 animate-spin" /> : null}
-          {workingActionLabel(discovery?.status)}
+          {workingActionLabel({ failed, ready, reviewable })}
         </Button>
       </DialogFooter>
     </>
@@ -129,12 +132,12 @@ function StartingExtraction() {
   )
 }
 
-function workingTitle(status: string | undefined) {
-  if (status === "succeeded") {
+function workingTitle({ failed, ready }: { failed: boolean; ready: boolean }) {
+  if (ready) {
     return "Your profile is ready to review"
   }
 
-  if (status === "failed") {
+  if (failed) {
     return "We hit a snag"
   }
 
@@ -142,24 +145,36 @@ function workingTitle(status: string | undefined) {
 }
 
 function workingDescription(discovery: OrganizationDiscovery | undefined) {
-  if (discovery?.status === "succeeded") {
+  if (discoveryReadyForReview(discovery)) {
     return "Review and approve what Milo drafted from your site."
   }
 
-  if (discovery?.status === "failed") {
-    return discovery.error ?? "Discovery didn't finish."
+  if (discoveryFailed(discovery)) {
+    return discovery?.errors[0] ?? "Discovery didn't finish."
   }
 
   return "This usually takes under a minute. You can close this; it keeps going."
 }
 
-function workingActionLabel(status: string | undefined) {
-  if (status === "succeeded") {
+function workingActionLabel({
+  failed,
+  ready,
+  reviewable,
+}: {
+  failed: boolean
+  ready: boolean
+  reviewable: boolean
+}) {
+  if (reviewable) {
     return "Review profile"
   }
 
-  if (status === "failed") {
+  if (failed) {
     return "Close"
+  }
+
+  if (ready) {
+    return "Done"
   }
 
   return "Extracting"

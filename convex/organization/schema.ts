@@ -50,24 +50,22 @@ export const organizationSources = defineTable({
   .index("by_check_at", ["checkAt"])
 
 export const discoveryStepKind = v.union(
-  v.literal("reading"),
-  v.literal("exploring"),
-  v.literal("extracting"),
-  v.literal("done"),
-  v.literal("error")
+  v.literal("page"),
+  v.literal("summary")
 )
 
 export const discoveryStep = v.object({
-  at: v.number(),
+  completedAt: v.optional(v.number()),
+  error: v.optional(v.string()),
   kind: discoveryStepKind,
   label: v.string(),
+  startedAt: v.number(),
   url: v.optional(v.string()),
 })
 
 export const discoveryStatus = v.union(
   v.literal("running"),
-  v.literal("succeeded"),
-  v.literal("failed")
+  v.literal("completed")
 )
 
 // High-churn progress for the latest discovery run, kept separate from the
@@ -79,5 +77,5 @@ export const organizationDiscovery = defineTable({
   steps: v.array(discoveryStep),
   startedAt: v.number(),
   endedAt: v.optional(v.number()),
-  error: v.optional(v.string()),
+  errors: v.array(v.string()),
 }).index("by_tenant", ["tenantId"])
