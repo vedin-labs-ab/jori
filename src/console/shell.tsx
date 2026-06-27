@@ -9,11 +9,11 @@ import {
 } from "@clerk/tanstack-react-start"
 import { Link, useRouterState } from "@tanstack/react-router"
 import {
-  Building2,
   Cable,
   CalendarClock,
   ChevronsUpDown,
   Component,
+  Layers,
   LayoutDashboard,
   Library,
   ListChecks,
@@ -68,7 +68,7 @@ const consoleNavigation = [
   { icon: Component, label: "Artifacts", to: "/artifacts" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
-  { icon: Building2, label: "Context", to: "/context" },
+  { icon: Layers, label: "Context", to: "/context" },
 ] as const
 
 export function PublicConsoleFrame({

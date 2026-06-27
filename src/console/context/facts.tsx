@@ -1,18 +1,30 @@
 import { Badge } from "@/components/ui/badge"
 import { type ContextFacts, isFactPresent } from "./types"
 
-export function FactsBody({ facts }: { facts: ContextFacts }) {
+export function FactsBody({
+  facts,
+  showName = true,
+}: {
+  facts: ContextFacts
+  showName?: boolean
+}) {
   return (
     <div className="grid gap-5">
-      <Identity facts={facts} />
+      <Identity facts={facts} showName={showName} />
       <ProductList products={facts.products} />
       <AliasList aliases={facts.aliases} />
     </div>
   )
 }
 
-function Identity({ facts }: { facts: ContextFacts }) {
-  const hasName = isFactPresent(facts.name)
+function Identity({
+  facts,
+  showName,
+}: {
+  facts: ContextFacts
+  showName: boolean
+}) {
+  const hasName = showName && isFactPresent(facts.name)
   const hasSummary = isFactPresent(facts.summary)
 
   if (!hasName && !hasSummary) {
