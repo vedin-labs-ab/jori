@@ -4,16 +4,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import { ContextSectionTitle } from "./section"
 import { type ContextFacts, type OrganizationSources } from "./types"
+import { sourceLabel, type WebsiteItem, websiteItems } from "./url"
 
 type OrganizationSource = OrganizationSources[number]
-
-type WebsiteItem = {
-  href: string
-  key: string
-  label: string
-  main: boolean
-}
 
 const visibleSourceCount = 3
 
@@ -32,29 +27,58 @@ export function WebsitesSection({
 
   return (
     <section className="grid gap-2.5">
-      <SectionTitle count={websites.length}>Websites</SectionTitle>
-      <div className="flex flex-wrap gap-1.5">
-        {websites.map((website) => (
-          <Button
-            asChild
-            className="h-8 justify-start gap-2 px-2.5 text-xs"
-            key={website.key}
-            size="sm"
-            variant="outline"
-          >
-            <a href={website.href} rel="noreferrer" target="_blank">
-              <Globe2 className="size-3.5 text-muted-foreground" />
-              <span>{website.label}</span>
-              {website.main ? <Badge variant="secondary">Main</Badge> : null}
-            </a>
-          </Button>
-        ))}
-      </div>
+      <ContextSectionTitle count={websites.length}>
+        Websites
+      </ContextSectionTitle>
+      <WebsitesContent websites={websites} />
     </section>
   )
 }
 
+export function WebsitesContent({ websites }: { websites: WebsiteItem[] }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {websites.map((website) => (
+        <Button
+          asChild
+          className="h-8 justify-start gap-2 px-2.5 text-xs"
+          key={website.key}
+          size="sm"
+          variant="outline"
+        >
+          <a href={website.href} rel="noreferrer" target="_blank">
+            <Globe2 className="size-3.5 text-muted-foreground" />
+            <span>{website.label}</span>
+            {website.main ? <Badge variant="secondary">Main</Badge> : null}
+          </a>
+        </Button>
+      ))}
+    </div>
+  )
+}
+
 export function SourcesSection({
+  sources,
+}: {
+  sources: OrganizationSources | undefined
+}) {
+  if (sources === undefined) {
+    return <Skeleton className="h-28 w-full rounded-lg" />
+  }
+
+  if (sources.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="grid gap-2.5">
+      <ContextSectionTitle count={sources.length}>Sources</ContextSectionTitle>
+      <SourcesContent sources={sources} />
+    </section>
+  )
+}
+
+export function SourcesContent({
   sources,
 }: {
   sources: OrganizationSources | undefined
@@ -75,8 +99,7 @@ export function SourcesSection({
   const hiddenCount = sources.length - visibleSources.length
 
   return (
-    <section className="grid gap-2.5">
-      <SectionTitle count={sources.length}>Sources</SectionTitle>
+    <>
       <ul className="grid gap-1">
         {visibleSources.map((source) => (
           <SourceRow key={source.url} source={source} />
@@ -96,7 +119,7 @@ export function SourcesSection({
           />
         </Button>
       ) : null}
-    </section>
+    </>
   )
 }
 
@@ -115,88 +138,5 @@ function SourceRow({ source }: { source: OrganizationSource }) {
         </a>
       </Button>
     </li>
-  )
-}
-
-function websiteItems(
-  domains: ContextFacts["domains"],
-  primaryWebsite: string | undefined
-): WebsiteItem[] {
-  const primary = websiteValue(primaryWebsite)
-  const seen = new Set<string>()
-
-  return [primaryWebsite, ...domains].flatMap((value) => {
-    const website = websiteValue(value)
-
-    if (website === null || seen.has(website.key)) {
-      return []
-    }
-
-    seen.add(website.key)
-
-    return [{ ...website, main: primary?.key === website.key }]
-  })
-}
-
-function websiteValue(value: string | undefined) {
-  const trimmed = value?.trim()
-
-  if (trimmed === undefined || trimmed === "") {
-    return null
-  }
-
-  const url = parseUrl(trimmed)
-
-  if (url === null) {
-    return { href: trimmed, key: trimmed.toLowerCase(), label: trimmed }
-  }
-
-  const hostname = url.hostname.replace(/^www[.]/, "")
-  const key = `${hostname}${url.port === "" ? "" : `:${url.port}`}`
-
-  return {
-    href: url.origin,
-    key: key.toLowerCase(),
-    label: key,
-  }
-}
-
-function sourceLabel(value: string) {
-  const url = parseUrl(value)
-
-  if (url === null) {
-    return value
-  }
-
-  const hostname = url.hostname.replace(/^www[.]/, "")
-  const path = url.pathname === "/" ? "/" : url.pathname.replace(/\/$/, "")
-
-  return `${hostname}${path}${url.search}`
-}
-
-function parseUrl(value: string) {
-  const withScheme = /^https?:\/\//i.test(value) ? value : `https://${value}`
-
-  try {
-    return new URL(withScheme)
-  } catch {
-    return null
-  }
-}
-
-function SectionTitle({
-  children,
-  count,
-}: {
-  children: string
-  count: number
-}) {
-  return (
-    <h3 className="flex items-baseline gap-1.5 font-medium text-muted-foreground text-xs">
-      <span>{children}</span>
-      <span className="font-normal text-muted-foreground/70 tabular-nums">
-        ({count})
-      </span>
-    </h3>
   )
 }
