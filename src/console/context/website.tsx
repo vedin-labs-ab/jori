@@ -82,10 +82,14 @@ export function WebsiteDiscoveryStep({
 export function DiscoveryWorkingStep({
   discovery,
   onClose,
+  onReviewProfile,
 }: {
   discovery: OrganizationDiscovery | undefined
   onClose: () => void
+  onReviewProfile?: () => void
 }) {
+  const succeeded = discovery?.status === "succeeded"
+
   return (
     <>
       <DialogHeader>
@@ -100,8 +104,8 @@ export function DiscoveryWorkingStep({
         )}
       </div>
       <DialogFooter>
-        <Button onClick={onClose}>
-          {discovery?.status === "succeeded" ? "Review profile" : "Close"}
+        <Button onClick={succeeded ? onReviewProfile : onClose}>
+          {succeeded ? "Review profile" : "Close"}
         </Button>
       </DialogFooter>
     </>
@@ -110,7 +114,7 @@ export function DiscoveryWorkingStep({
 
 function StartingExtraction() {
   return (
-    <div className="flex items-center gap-2 rounded-md border border-dashed p-3 text-muted-foreground text-xs/relaxed">
+    <div className="flex items-center gap-2 text-muted-foreground text-xs/relaxed">
       <Loader2 className="size-3.5 animate-spin" />
       <span>Starting extraction</span>
     </div>

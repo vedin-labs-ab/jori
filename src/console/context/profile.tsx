@@ -31,6 +31,7 @@ export function ContextProfile({
   sources: OrganizationSources | undefined
 }) {
   const [editorOpen, setEditorOpen] = useState(false)
+  const [reviewOpen, setReviewOpen] = useState(false)
 
   if (profile === undefined) {
     return <Skeleton className="h-96 w-full rounded-xl" />
@@ -67,6 +68,8 @@ export function ContextProfile({
           {profile?.proposed === undefined ? null : (
             <ProposalReview
               current={facts}
+              onOpenChange={setReviewOpen}
+              open={reviewOpen}
               primaryWebsite={website}
               proposed={profile.proposed}
               sources={sources}
@@ -96,6 +99,10 @@ export function ContextProfile({
           website={website}
           discovery={discovery}
           onOpenChange={setEditorOpen}
+          onReviewProfile={() => {
+            setEditorOpen(false)
+            setReviewOpen(true)
+          }}
         />
       ) : null}
     </>
