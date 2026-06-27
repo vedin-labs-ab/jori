@@ -133,7 +133,6 @@ import type * as identity_clerk from "../identity/clerk.js";
 import type * as identity_clerk_data from "../identity/clerk/data.js";
 import type * as identity_clerk_profile from "../identity/clerk/profile.js";
 import type * as identity_identities from "../identity/identities.js";
-import type * as identity_organization from "../identity/organization.js";
 import type * as identity_users from "../identity/users.js";
 import type * as integrations_catalog from "../integrations/catalog.js";
 import type * as integrations_data from "../integrations/data.js";
@@ -485,7 +484,6 @@ declare const fullApi: ApiFromModules<{
   "identity/clerk/data": typeof identity_clerk_data;
   "identity/clerk/profile": typeof identity_clerk_profile;
   "identity/identities": typeof identity_identities;
-  "identity/organization": typeof identity_organization;
   "identity/users": typeof identity_users;
   "integrations/catalog": typeof integrations_catalog;
   "integrations/data": typeof integrations_data;
