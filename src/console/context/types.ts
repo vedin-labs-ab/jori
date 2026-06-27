@@ -9,6 +9,10 @@ export type OrganizationDiscovery = FunctionReturnType<
   typeof api.organization.discovery.get
 >
 
+export type OrganizationSources = FunctionReturnType<
+  typeof api.organization.sources.list
+>
+
 export type DiscoveryRun = NonNullable<OrganizationDiscovery>
 export type DiscoveryStep = DiscoveryRun["steps"][number]
 

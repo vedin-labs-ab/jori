@@ -3,8 +3,6 @@ import { api } from "../../../convex/_generated/api"
 import { type ActiveOrganization, ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
 import { ContextProfile } from "./profile"
-import { DiscoveryCard } from "./progress"
-import { WebsitePanel } from "./website"
 
 export function OrganizationContext() {
   return (
@@ -28,16 +26,17 @@ function ContextView({
 }) {
   const profile = useQuery(api.organization.profile.get, { tenantId })
   const discovery = useQuery(api.organization.discovery.get, { tenantId })
+  const sources = useQuery(api.organization.sources.list, { tenantId })
 
   return (
-    <ConsolePageLayout className="gap-6">
-      <WebsitePanel
+    <ConsolePageLayout className="mx-auto w-full max-w-4xl gap-4">
+      <ContextProfile
         tenantId={tenantId}
         website={website}
-        isRunning={discovery?.status === "running"}
+        discovery={discovery}
+        profile={profile}
+        sources={sources}
       />
-      <DiscoveryCard discovery={discovery} />
-      <ContextProfile tenantId={tenantId} profile={profile} />
     </ConsolePageLayout>
   )
 }
