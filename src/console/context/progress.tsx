@@ -151,8 +151,7 @@ function ExplorationItem({
       {showStatus ? <ItemStatusIcon status={item.status} /> : null}
       <span
         className={cn(
-          "min-w-0 flex-1 truncate",
-          itemTone(item.status),
+          "min-w-0 flex-1 truncate text-foreground",
           item.status === "active" ? "shimmer" : null
         )}
       >
@@ -163,7 +162,11 @@ function ExplorationItem({
   )
 }
 
-function ElapsedTime({ children }: { children: string }) {
+function ElapsedTime({ children }: { children: string | null }) {
+  if (children === null) {
+    return null
+  }
+
   return (
     <span className="min-w-14 shrink-0 text-right text-muted-foreground text-xs tabular-nums">
       {children}
@@ -172,6 +175,10 @@ function ElapsedTime({ children }: { children: string }) {
 }
 
 function TaskStatusIcon({ status }: { status: DiscoveryItemStatus }) {
+  if (status === "failed") {
+    return <TriangleAlert className="size-4 shrink-0 text-destructive" />
+  }
+
   if (status === "completed") {
     return <Check className="size-4 shrink-0 text-primary" />
   }
@@ -224,7 +231,7 @@ function elapsedLabel(
   now: number
 ) {
   if (item.status === "queued") {
-    return "Queued"
+    return null
   }
 
   const endedAt = item.endedAt ?? now
@@ -251,12 +258,4 @@ function iconTone(status: DiscoveryItemStatus) {
   }
 
   return "text-muted-foreground"
-}
-
-function itemTone(status: DiscoveryItemStatus) {
-  if (status === "failed") {
-    return "text-destructive"
-  }
-
-  return "text-foreground"
 }
