@@ -1,4 +1,4 @@
-import { useAction, useMutation } from "convex/react"
+import { useAction } from "convex/react"
 import { Loader2, TriangleAlert } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -9,9 +9,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../convex/_generated/api"
 import { FactsBody } from "./facts"
 import { DiscoveryProgress } from "./progress"
+import { ProposalReview } from "./proposal"
 import { SourcesSection, WebsitesSection } from "./sources"
 import {
-  type ContextFacts,
   hasFacts,
   isFactPresent,
   type OrganizationDiscovery,
@@ -66,7 +66,11 @@ export function ContextProfile({
         <CardContent className="grid gap-6 p-4 pt-0 sm:p-5 sm:pt-0">
           <DiscoveryPanel discovery={discovery} />
           {profile?.proposed === undefined ? null : (
-            <ProposedPanel tenantId={tenantId} proposed={profile.proposed} />
+            <ProposalReview
+              current={facts}
+              proposed={profile.proposed}
+              tenantId={tenantId}
+            />
           )}
           {facts === null ? (
             <EmptyProfile />
@@ -94,45 +98,6 @@ export function ContextProfile({
         />
       ) : null}
     </>
-  )
-}
-
-function ProposedPanel({
-  tenantId,
-  proposed,
-}: {
-  tenantId: string
-  proposed: ContextFacts
-}) {
-  const approve = useMutation(api.organization.profile.approve)
-  const [approving, setApproving] = useState(false)
-
-  const onApprove = async () => {
-    setApproving(true)
-
-    try {
-      await approve({ tenantId })
-    } finally {
-      setApproving(false)
-    }
-  }
-
-  return (
-    <section className="grid gap-4 rounded-md border bg-muted/20 p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="grid gap-1">
-          <h3 className="font-heading text-sm font-medium">Proposed update</h3>
-          <p className="text-muted-foreground text-xs/relaxed">
-            Review the latest extraction before it is added to agent context.
-          </p>
-        </div>
-        <Button onClick={() => void onApprove()} disabled={approving} size="sm">
-          {approving ? <Loader2 className="size-4 animate-spin" /> : null}
-          {approving ? "Approving" : "Approve"}
-        </Button>
-      </div>
-      <FactsBody facts={proposed} />
-    </section>
   )
 }
 
