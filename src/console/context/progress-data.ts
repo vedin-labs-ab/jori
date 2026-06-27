@@ -1,27 +1,13 @@
-import { type DiscoveryStep, type OrganizationDiscovery } from "./types"
+import { taskElapsedMs } from "./progress-time"
+import {
+  type DiscoveryItemStatus,
+  type DiscoveryStep,
+  type DiscoveryTask,
+  type DiscoveryTaskItem,
+  type DiscoveryTaskStatus,
+  type OrganizationDiscovery,
+} from "./types"
 import { sourceLabel } from "./url"
-
-export type DiscoveryItemStatus = "active" | "completed" | "failed" | "queued"
-export type DiscoveryTaskStatus = DiscoveryItemStatus | "warning"
-
-export type DiscoveryTaskItem = {
-  endedAt?: number
-  key: string
-  label: string
-  startedAt: number
-  status: DiscoveryItemStatus
-  url: string
-}
-
-export type DiscoveryTask = {
-  elapsedMs: number
-  endedAt?: number
-  items: DiscoveryTaskItem[]
-  key: string
-  label: string
-  startedAt: number
-  status: DiscoveryTaskStatus
-}
 
 type StepEntry = {
   index: number
@@ -37,8 +23,18 @@ export function createDiscoveryTasks(
   discovery: NonNullable<OrganizationDiscovery>,
   now: number
 ): DiscoveryTask[] {
+  return [
+    ...explorationTasks(discovery, now),
+    ...summaryTasks(discovery, now),
+  ].sort((left, right) => left.startedAt - right.startedAt)
+}
+
+function explorationTasks(
+  discovery: NonNullable<OrganizationDiscovery>,
+  now: number
+) {
   return taskGroups(discovery, now).map((group) =>
-    toTask(discovery, group, now)
+    toExplorationTask(discovery, group, now)
   )
 }
 
@@ -57,7 +53,7 @@ function taskGroups(
   return [...groups.entries()]
 }
 
-function toTask(
+function toExplorationTask(
   discovery: NonNullable<OrganizationDiscovery>,
   [key, items]: [string, DiscoveryTaskItem[]],
   now: number
@@ -71,7 +67,40 @@ function toTask(
     label: key,
     startedAt: Math.min(...items.map((item) => item.startedAt)),
     status,
+    type: "exploration",
     ...taskEnd(items, status),
+  }
+}
+
+function summaryTasks(
+  discovery: NonNullable<OrganizationDiscovery>,
+  now: number
+) {
+  return discovery.steps.flatMap((step, index) =>
+    step.kind === "extracting"
+      ? [toSummaryTask(discovery, step, discovery.steps[index + 1], now)]
+      : []
+  )
+}
+
+function toSummaryTask(
+  discovery: NonNullable<OrganizationDiscovery>,
+  step: DiscoveryStep,
+  next: DiscoveryStep | undefined,
+  now: number
+): DiscoveryTask {
+  const status = summaryStatus(discovery, step, next, now)
+  const endedAt = summaryEnd(discovery, status, next)
+
+  return {
+    elapsedMs: summaryElapsedMs(step, endedAt, now),
+    items: [],
+    key: `${step.at}-${step.label}`,
+    label: step.label,
+    startedAt: step.at,
+    status,
+    type: "summary",
+    ...(endedAt === undefined ? {} : { endedAt }),
   }
 }
 
@@ -187,52 +216,59 @@ function taskStatus(
   return "completed"
 }
 
+function summaryStatus(
+  discovery: NonNullable<OrganizationDiscovery>,
+  step: DiscoveryStep,
+  next: DiscoveryStep | undefined,
+  now: number
+): DiscoveryTaskStatus {
+  if (step.at > now) {
+    return "queued"
+  }
+
+  if (next === undefined || next.at > now) {
+    return finalTaskStatus(discovery)
+  }
+
+  return "completed"
+}
+
+function finalTaskStatus(
+  discovery: NonNullable<OrganizationDiscovery>
+): DiscoveryTaskStatus {
+  if (discovery.status === "failed") {
+    return "failed"
+  }
+
+  return discovery.status === "running" ? "active" : "completed"
+}
+
+function summaryEnd(
+  discovery: NonNullable<OrganizationDiscovery>,
+  status: DiscoveryTaskStatus,
+  next: DiscoveryStep | undefined
+) {
+  if (status === "active" || status === "queued") {
+    return undefined
+  }
+
+  return next?.at ?? discovery.endedAt
+}
+
+function summaryElapsedMs(
+  step: DiscoveryStep,
+  endedAt: number | undefined,
+  now: number
+) {
+  return Math.max(0, (endedAt ?? now) - step.at)
+}
+
 function taskEnd(items: DiscoveryTaskItem[], status: DiscoveryTaskStatus) {
   const endedAt = Math.max(
     ...items.map((item) => item.endedAt ?? item.startedAt)
   )
 
   return status === "active" || status === "queued" ? {} : { endedAt }
-}
-
-type TimeInterval = {
-  end: number
-  start: number
-}
-
-function taskElapsedMs(items: DiscoveryTaskItem[], now: number) {
-  return mergedElapsedMs(items.flatMap((item) => itemInterval(item, now) ?? []))
-}
-
-function itemInterval(
-  item: DiscoveryTaskItem,
-  now: number
-): TimeInterval | null {
-  if (item.status === "queued") {
-    return null
-  }
-
-  const end = item.endedAt ?? now
-
-  return end <= item.startedAt ? null : { end, start: item.startedAt }
-}
-
-function mergedElapsedMs(intervals: TimeInterval[]) {
-  let elapsed = 0
-  let current: TimeInterval | null = null
-
-  for (const interval of [...intervals].sort((a, b) => a.start - b.start)) {
-    if (current === null) {
-      current = { ...interval }
-    } else if (interval.start <= current.end) {
-      current.end = Math.max(current.end, interval.end)
-    } else {
-      elapsed += current.end - current.start
-      current = { ...interval }
-    }
-  }
-
-  return current === null ? elapsed : elapsed + current.end - current.start
 }
 
 function domainKey(url: string) {

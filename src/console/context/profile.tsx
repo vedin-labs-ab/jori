@@ -1,4 +1,4 @@
-import { Loader2, TriangleAlert } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -6,7 +6,6 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { OrganizationEditDialog } from "./edit"
 import { FactsBody } from "./facts"
-import { DiscoveryProgress } from "./progress"
 import { ProposalReview } from "./proposal"
 import { SourcesSection, WebsitesSection } from "./sources"
 import {
@@ -59,12 +58,13 @@ export function ContextProfile({
             type="button"
             variant="outline"
           >
-            {extracting ? <Loader2 className="animate-spin" /> : null}
+            {extracting ? (
+              <Loader2 className="size-4 animate-spin text-muted-foreground" />
+            ) : null}
             {extracting ? "Extracting" : "Edit"}
           </Button>
         </CardHeader>
         <CardContent className="grid gap-6 p-4 pt-0 sm:p-5 sm:pt-0">
-          <DiscoveryPanel discovery={discovery} />
           {profile?.proposed === undefined ? null : (
             <ProposalReview
               current={facts}
@@ -106,45 +106,6 @@ export function ContextProfile({
         />
       ) : null}
     </>
-  )
-}
-
-function DiscoveryPanel({
-  discovery,
-}: {
-  discovery: OrganizationDiscovery | undefined
-}) {
-  if (
-    discovery === undefined ||
-    discovery === null ||
-    discovery.status === "succeeded"
-  ) {
-    return null
-  }
-
-  const running = discovery.status === "running"
-
-  return (
-    <section className="grid gap-3 rounded-md border bg-muted/20 p-4">
-      <div className="flex items-start gap-3">
-        {running ? (
-          <Loader2 className="mt-0.5 size-4 animate-spin text-muted-foreground" />
-        ) : (
-          <TriangleAlert className="mt-0.5 size-4 text-destructive" />
-        )}
-        <div className="grid gap-1">
-          <h3 className="font-heading text-sm font-medium">
-            {running ? "Exploring your website" : "Discovery did not finish"}
-          </h3>
-          <p className="text-muted-foreground text-xs/relaxed">
-            {running
-              ? "Reading your site and drafting an organization profile."
-              : (discovery.error ?? "Something went wrong.")}
-          </p>
-        </div>
-      </div>
-      <DiscoveryProgress discovery={discovery} />
-    </section>
   )
 }
 

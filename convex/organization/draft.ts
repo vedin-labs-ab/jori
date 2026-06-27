@@ -64,7 +64,7 @@ async function discover(ctx: ActionCtx, tenantId: string, primaryUrl: string) {
     missing: [],
   })
 
-  await step(ctx, tenantId, "extracting", "Summarizing what we found")
+  await step(ctx, tenantId, "extracting", "Drafting profile")
   let facts = await extractFacts({ primaryUrl, pages: extractionPages(pages) })
 
   const missing = missingFacts(facts)
@@ -77,6 +77,7 @@ async function discover(ctx: ActionCtx, tenantId: string, primaryUrl: string) {
       limit: followUpPages,
       missing,
     })
+    await step(ctx, tenantId, "extracting", "Drafting profile")
     facts = await extractFacts({ primaryUrl, pages: extractionPages(pages) })
   }
 
