@@ -1,6 +1,7 @@
 import { useAction } from "convex/react"
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { parseWebsiteAddress } from "../../../contracts/website"
 import { api } from "../../../convex/_generated/api"
 import { type OrganizationDiscovery } from "./types"
 import { websiteDomainKey } from "./url"
@@ -26,13 +27,11 @@ export function OrganizationEditDialog({
   const [error, setError] = useState<string | null>(null)
   const [pendingStartedAt, setPendingStartedAt] = useState<number | null>(null)
   const validationError = websiteValidationError(value, website)
-  const workingDiscovery =
-    pendingStartedAt === null || discovery?.startedAt !== pendingStartedAt
-      ? discovery
-      : undefined
+  const normalizedWebsite = parseWebsiteAddress(value)?.href ?? null
+  const workingDiscovery = visibleDiscovery(discovery, pendingStartedAt)
 
   const onContinue = async () => {
-    if (validationError !== null) {
+    if (validationError !== null || normalizedWebsite === null) {
       return
     }
 
@@ -41,10 +40,10 @@ export function OrganizationEditDialog({
     setPendingStartedAt(discovery?.startedAt ?? null)
 
     try {
-      await discover({ tenantId, website: value.trim() })
+      await discover({ tenantId, website: normalizedWebsite })
       setStep("working")
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Couldn't start.")
+      setError(discoveryStartError(caught))
       setPendingStartedAt(null)
     } finally {
       setSubmitting(false)
@@ -88,12 +87,39 @@ function websiteValidationError(value: string, current: string | undefined) {
     return null
   }
 
-  const currentKey = websiteDomainKey(current)
-  const nextKey = websiteDomainKey(value)
+  const next = parseWebsiteAddress(value)
 
-  if (currentKey === null || nextKey === null || currentKey !== nextKey) {
+  if (next === null) {
+    return "Enter a public website, like example.com."
+  }
+
+  const currentKey = websiteDomainKey(current)
+
+  if (currentKey === null || currentKey !== next.key) {
     return null
   }
 
   return "Enter a different website domain to run a new extraction."
+}
+
+function visibleDiscovery(
+  discovery: OrganizationDiscovery | undefined,
+  pendingStartedAt: number | null
+) {
+  if (pendingStartedAt === null || discovery?.startedAt !== pendingStartedAt) {
+    return discovery
+  }
+
+  return undefined
+}
+
+function discoveryStartError(caught: unknown) {
+  if (
+    caught instanceof Error &&
+    caught.message.includes("website must target a public website")
+  ) {
+    return "Enter a public website, like example.com."
+  }
+
+  return "Couldn't start extraction."
 }
