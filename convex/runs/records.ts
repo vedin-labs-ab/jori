@@ -4,6 +4,7 @@ import { internalQuery, type QueryCtx } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { recentConversation } from "../messages/history"
+import { readApprovedFacts } from "../organization/profile"
 
 export const getInputByRun = internalQuery({
   args: {
@@ -68,6 +69,7 @@ async function getMessageInput(
     integration,
     integrations,
     conversation: await recentConversation(ctx, message, integration),
+    organization: await readApprovedFacts(ctx, args.run.tenantId),
   }
 }
 
@@ -124,6 +126,7 @@ async function getAutomationInput(
     integrations: integrations.filter((integration) =>
       hasIntegrationTools(automation.access, integration._id)
     ),
+    organization: await readApprovedFacts(ctx, args.run.tenantId),
   }
 }
 
@@ -148,6 +151,7 @@ async function getInstructionInput(
       args.run.tenantId,
       args.run.createdBy
     ),
+    organization: await readApprovedFacts(ctx, args.run.tenantId),
   }
 }
 

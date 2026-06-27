@@ -112,6 +112,7 @@ function messageInput(integrations: Doc<"integrations">[]): AgentRuntimeInput {
     conversation: { entries: [], hasMoreMessages: false },
     integration: source ?? integration("slack"),
     integrations,
+    organization: null,
   }
 }
 
@@ -132,6 +133,7 @@ function automationInput(
     event: null,
     integration: null,
     integrations: [integration],
+    organization: null,
   }
 }
 

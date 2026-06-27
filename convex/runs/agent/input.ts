@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type RecentConversation } from "../../messages/history"
+import { type OrganizationFacts } from "../../organization/facts"
 
 export type MessageIntegration = "github" | "linear" | "slack"
 export type RuntimeIntegration = Doc<"integrations">
@@ -12,6 +13,7 @@ export type MessageRuntimeInput = {
   integrations: RuntimeIntegration[]
   message: Doc<"messages">
   conversation: RecentConversation
+  organization: OrganizationFacts | null
 }
 
 export type AutomationRuntimeInput = {
@@ -21,6 +23,7 @@ export type AutomationRuntimeInput = {
   integrations: RuntimeIntegration[]
   automation: Doc<"automations">
   event: Doc<"events"> | null
+  organization: OrganizationFacts | null
 }
 
 export type InstructionRuntimeInput = {
@@ -28,6 +31,7 @@ export type InstructionRuntimeInput = {
   run: Doc<"runs">
   integrations: RuntimeIntegration[]
   instructions: string
+  organization: OrganizationFacts | null
 }
 
 export type AgentRuntimeInput =
