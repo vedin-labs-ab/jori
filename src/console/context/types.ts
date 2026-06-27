@@ -1,0 +1,30 @@
+import { type FunctionReturnType } from "convex/server"
+import { type api } from "../../../convex/_generated/api"
+
+export type OrganizationProfile = FunctionReturnType<
+  typeof api.organization.profile.get
+>
+
+export type OrganizationDiscovery = FunctionReturnType<
+  typeof api.organization.discovery.get
+>
+
+export type DiscoveryRun = NonNullable<OrganizationDiscovery>
+export type DiscoveryStep = DiscoveryRun["steps"][number]
+
+export type ContextFacts = Pick<
+  NonNullable<OrganizationProfile>,
+  "name" | "aliases" | "domains" | "products" | "summary"
+>
+
+export function hasFacts(facts: ContextFacts) {
+  if (isFactPresent(facts.name) || isFactPresent(facts.summary)) {
+    return true
+  }
+
+  return facts.products.length + facts.aliases.length + facts.domains.length > 0
+}
+
+export function isFactPresent(value: string | undefined): value is string {
+  return value !== undefined && value.trim() !== ""
+}

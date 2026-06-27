@@ -20,6 +20,11 @@ import { identities } from "./identity/schema"
 import { integrationOffers } from "./integrations/offers/schema"
 import { integrations } from "./integrations/schema"
 import { messages } from "./messages/schema"
+import {
+  organizationDiscovery,
+  organizationProfile,
+  organizationSources,
+} from "./organization/schema"
 import { permissions } from "./permissions/schema"
 import { reactions } from "./reactions/schema"
 import { runs } from "./runs/schema"
@@ -37,6 +42,9 @@ export default defineSchema({
   integrations,
   integrationOffers,
   messages,
+  organizationProfile,
+  organizationSources,
+  organizationDiscovery,
   automations,
   subscriptions,
   events,

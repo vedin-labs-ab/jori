@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { api } from "../../convex/_generated/api"
 import { IntegrationCallbackAlerts } from "./integrations/callback"
+import { OnboardingGate } from "./onboarding/gate"
 import { FullscreenSkeletonLoader } from "./shared/loading"
 import { ConsoleShell, PublicConsoleFrame } from "./shell"
 
@@ -183,6 +184,7 @@ function SignedInView({
   const content = (
     <>
       <ClerkIdentitySync tenantId={organization.id} />
+      <OnboardingGate />
       {children(organization)}
     </>
   )
