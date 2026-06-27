@@ -96,6 +96,7 @@ export function DiscoveryCard({
 
 function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
   const [open, setOpen] = useState(() => task.status !== "completed")
+  const showTaskElapsed = !open || task.items.length > 1
 
   useEffect(() => {
     if (isLive(task.status)) {
@@ -119,7 +120,9 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
           >
             {task.label}
           </span>
-          <ElapsedTime>{elapsedLabel(task, now)}</ElapsedTime>
+          <ElapsedTime>
+            {showTaskElapsed ? elapsedLabel(task, now) : null}
+          </ElapsedTime>
           <ChevronDown className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
         </button>
       </TaskTrigger>
