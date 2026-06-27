@@ -84,7 +84,7 @@ export function SourcesSection({
       </ul>
       {hiddenCount > 0 || expanded ? (
         <Button
-          className="w-fit justify-self-start text-muted-foreground hover:text-foreground"
+          className="w-fit justify-self-start px-0 text-muted-foreground hover:text-foreground"
           onClick={() => setExpanded((value) => !value)}
           size="sm"
           type="button"
@@ -105,7 +105,7 @@ function SourceRow({ source }: { source: OrganizationSource }) {
     <li className="min-w-0">
       <Button
         asChild
-        className="max-w-full justify-start text-foreground hover:text-foreground"
+        className="max-w-full justify-start px-0 text-foreground hover:text-foreground"
         size="sm"
         variant="link"
       >
