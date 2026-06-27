@@ -29,7 +29,7 @@ function ContextView({
   const sources = useQuery(api.organization.sources.list, { tenantId })
 
   return (
-    <ConsolePageLayout className="mx-auto w-full max-w-4xl gap-4">
+    <ConsolePageLayout>
       <ContextProfile
         tenantId={tenantId}
         website={website}

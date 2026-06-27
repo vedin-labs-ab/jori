@@ -31,19 +31,19 @@ export function WebsitesSection({
   }
 
   return (
-    <section className="grid gap-3">
+    <section className="grid gap-2.5">
       <SectionTitle>Websites</SectionTitle>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {websites.map((website) => (
           <Button
             asChild
-            className="h-9 justify-start gap-2 px-3 text-sm"
+            className="h-8 justify-start gap-2 px-2.5 text-xs"
             key={website.key}
             size="sm"
             variant="outline"
           >
             <a href={website.href} rel="noreferrer" target="_blank">
-              <Globe2 className="size-4 text-muted-foreground" />
+              <Globe2 className="size-3.5 text-muted-foreground" />
               <span>{website.label}</span>
               {website.main ? <Badge variant="secondary">Main</Badge> : null}
             </a>
@@ -75,7 +75,7 @@ export function SourcesSection({
   const hiddenCount = sources.length - visibleSources.length
 
   return (
-    <section className="grid gap-3">
+    <section className="grid gap-2.5">
       <SectionTitle>Sources</SectionTitle>
       <ul className="grid gap-2">
         {visibleSources.map((source) => (
@@ -84,7 +84,7 @@ export function SourcesSection({
       </ul>
       {hiddenCount > 0 || expanded ? (
         <Button
-          className="w-fit px-0 text-muted-foreground"
+          className="h-7 w-fit px-0 text-muted-foreground text-xs"
           onClick={() => setExpanded((value) => !value)}
           size="sm"
           type="button"
@@ -105,8 +105,8 @@ export function SourcesSection({
 
 function SourceRow({ source }: { source: OrganizationSource }) {
   return (
-    <li className="flex min-w-0 items-center gap-3 text-sm">
-      <FileText className="size-4 shrink-0 text-muted-foreground" />
+    <li className="flex min-w-0 items-center gap-2.5 text-xs">
+      <FileText className="size-3.5 shrink-0 text-muted-foreground" />
       <a
         className="min-w-0 truncate text-foreground underline-offset-4 hover:underline"
         href={source.url}
@@ -187,6 +187,6 @@ function parseUrl(value: string) {
 
 function SectionTitle({ children }: { children: string }) {
   return (
-    <h3 className="text-sm font-semibold text-muted-foreground">{children}</h3>
+    <h3 className="font-medium text-muted-foreground text-xs">{children}</h3>
   )
 }

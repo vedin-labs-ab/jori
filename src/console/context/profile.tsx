@@ -43,25 +43,24 @@ export function ContextProfile({
 
   return (
     <>
-      <Card className="gap-0 overflow-hidden py-0 shadow-sm">
-        <CardHeader className="flex flex-row items-start justify-between gap-4 border-b px-6 py-5 sm:px-8">
+      <Card className="gap-0 py-0 ring-inset">
+        <CardHeader className="flex flex-row items-start justify-between gap-4 border-b p-4 sm:p-5">
           <div className="grid gap-1">
-            <CardTitle className="text-2xl font-semibold tracking-tight">
-              Organization
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <CardTitle>Organization</CardTitle>
+            <p className="text-muted-foreground text-xs/relaxed">
               {approvalDescription(profile)}
             </p>
           </div>
           <Button
             onClick={() => setEditorOpen(true)}
+            size="sm"
             type="button"
             variant="outline"
           >
             Edit
           </Button>
         </CardHeader>
-        <CardContent className="grid gap-7 px-6 py-7 sm:px-8">
+        <CardContent className="grid gap-5 p-4 sm:p-5">
           <DiscoveryPanel discovery={discovery} />
           {profile?.proposed === undefined ? null : (
             <ProposedPanel tenantId={tenantId} proposed={profile.proposed} />
@@ -112,15 +111,15 @@ function ProposedPanel({
   }
 
   return (
-    <section className="grid gap-4 rounded-lg border bg-muted/20 p-4">
+    <section className="grid gap-4 rounded-md border bg-muted/20 p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="grid gap-1">
-          <h3 className="font-semibold">Proposed update</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-heading text-sm font-medium">Proposed update</h3>
+          <p className="text-muted-foreground text-xs/relaxed">
             Review the latest extraction before it is added to agent context.
           </p>
         </div>
-        <Button onClick={() => void onApprove()} disabled={approving}>
+        <Button onClick={() => void onApprove()} disabled={approving} size="sm">
           {approving ? <Loader2 className="size-4 animate-spin" /> : null}
           {approving ? "Approving" : "Approve"}
         </Button>
@@ -146,7 +145,7 @@ function DiscoveryPanel({
   const running = discovery.status === "running"
 
   return (
-    <section className="grid gap-3 rounded-lg border bg-muted/20 p-4">
+    <section className="grid gap-3 rounded-md border bg-muted/20 p-4">
       <div className="flex items-start gap-3">
         {running ? (
           <Loader2 className="mt-0.5 size-4 animate-spin text-muted-foreground" />
@@ -154,10 +153,10 @@ function DiscoveryPanel({
           <TriangleAlert className="mt-0.5 size-4 text-destructive" />
         )}
         <div className="grid gap-1">
-          <h3 className="font-semibold">
+          <h3 className="font-heading text-sm font-medium">
             {running ? "Exploring your website" : "Discovery did not finish"}
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-xs/relaxed">
             {running
               ? "Reading your site and drafting an organization profile."
               : (discovery.error ?? "Something went wrong.")}
@@ -232,7 +231,7 @@ function OrganizationEditDialog({
 
 function EmptyProfile() {
   return (
-    <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+    <div className="rounded-md border border-dashed p-4 text-muted-foreground text-xs/relaxed">
       Add your website to discover your organization profile.
     </div>
   )
