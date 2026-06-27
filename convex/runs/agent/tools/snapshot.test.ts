@@ -45,59 +45,57 @@ test("stores all surface tool capabilities for run details", () => {
   })
 })
 
-test("stores active surface tools ahead of provider capabilities", () => {
+test("stores all native Milo tools in one group", () => {
+  const finishRunTool = {
+    access: "write" as const,
+    description: "Finish this run.",
+    label: "Finish run",
+    tool: "finish_run",
+  }
+  const sendReplyTool = {
+    access: "write" as const,
+    description: "Send a visible reply.",
+    label: "Send reply",
+    tool: "send_reply",
+  }
+  const saveAssetTool = {
+    access: "write" as const,
+    description: "Persist a generated asset.",
+    label: "Save asset",
+    tool: "save_asset",
+  }
+  const gitTool = {
+    access: "read" as const,
+    description: "Inspect Git history.",
+    label: "Git",
+    tool: "git",
+  }
+
   expect(
     createRunToolSnapshot({
-      lifecycleTools: [
-        {
-          access: "write",
-          description: "Finish this run.",
-          label: "Finish run",
-          tool: "finish_run",
-        },
-      ],
-      activeSurfaceTools: [
-        {
-          access: "write",
-          description: "Send a visible reply.",
-          label: "Send reply",
-          tool: "send_reply",
-        },
-      ],
-      webSearch: true,
+      activeSurfaceTools: [sendReplyTool],
       capabilities: [
+        {
+          surface: "milo",
+          label: "Milo",
+          tools: [saveAssetTool],
+        },
         {
           surface: "slack",
           label: "Slack",
           tools: slackTools(),
         },
       ],
+      lifecycleTools: [finishRunTool],
+      sandboxTools: [gitTool],
+      webSearch: true,
     })
   ).toEqual({
     groups: [
       {
         surface: "milo",
-        label: "Run",
-        tools: [
-          {
-            access: "write",
-            description: "Finish this run.",
-            label: "Finish run",
-            tool: "finish_run",
-          },
-        ],
-      },
-      {
-        surface: "milo",
-        label: "Active surface",
-        tools: [
-          {
-            access: "write",
-            description: "Send a visible reply.",
-            label: "Send reply",
-            tool: "send_reply",
-          },
-        ],
+        label: "Milo",
+        tools: [finishRunTool, sendReplyTool, saveAssetTool, gitTool],
       },
       {
         surface: "slack",
@@ -116,6 +114,12 @@ test("stores workspace tools after provider capabilities", () => {
     label: "Git",
     tool: "git",
   }
+  const cloneTool = {
+    access: "read" as const,
+    description: "Clone a repository.",
+    label: "Clone repository",
+    tool: "github_clone_repository",
+  }
 
   expect(
     createRunToolSnapshot({
@@ -123,14 +127,7 @@ test("stores workspace tools after provider capabilities", () => {
         {
           surface: "github",
           label: "GitHub",
-          tools: [
-            {
-              access: "read",
-              description: "Clone a repository.",
-              label: "Clone repository",
-              tool: "github_clone_repository",
-            },
-          ],
+          tools: [cloneTool],
         },
       ],
       sandboxTools: [gitTool],
@@ -141,18 +138,11 @@ test("stores workspace tools after provider capabilities", () => {
       {
         surface: "github",
         label: "GitHub",
-        tools: [
-          {
-            access: "read",
-            description: "Clone a repository.",
-            label: "Clone repository",
-            tool: "github_clone_repository",
-          },
-        ],
+        tools: [cloneTool],
       },
       {
         surface: "milo",
-        label: "Workspace",
+        label: "Milo",
         tools: [gitTool],
       },
     ],

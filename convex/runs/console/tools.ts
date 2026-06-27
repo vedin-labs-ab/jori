@@ -1,4 +1,7 @@
-import { type RunToolSnapshot } from "../agent/tools/snapshot"
+import {
+  consolidateMiloToolGroups,
+  type RunToolSnapshot,
+} from "../agent/tools/snapshot"
 import {
   compactDetails,
   detail,
@@ -21,7 +24,7 @@ export function toolDetails(snapshot: RunToolSnapshot | undefined) {
 }
 
 function toolsDetail(groups: RunToolSnapshot["groups"]) {
-  const detailGroups = groups
+  const detailGroups = consolidateMiloToolGroups(groups)
     .map((group) =>
       group.tools.length === 0
         ? undefined
