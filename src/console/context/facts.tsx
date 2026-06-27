@@ -54,9 +54,7 @@ function ProductList({ products }: { products: ContextFacts["products"] }) {
 
   return (
     <section className="grid max-w-3xl gap-2.5">
-      <SectionLabel>
-        {products.length === 1 ? "Product" : "Products"}
-      </SectionLabel>
+      <SectionLabel count={products.length}>Products</SectionLabel>
       <ul className="grid gap-3">
         {products.map((product) => (
           <li key={product.name} className="grid gap-0.5">
@@ -94,10 +92,21 @@ function AliasList({ aliases }: { aliases: string[] }) {
   )
 }
 
-function SectionLabel({ children }: { children: string }) {
+function SectionLabel({
+  children,
+  count,
+}: {
+  children: string
+  count?: number
+}) {
   return (
-    <span className="font-medium text-muted-foreground text-xs">
-      {children}
+    <span className="flex items-baseline gap-1.5 font-medium text-muted-foreground text-xs">
+      <span>{children}</span>
+      {count === undefined ? null : (
+        <span className="font-normal text-muted-foreground/70 tabular-nums">
+          ({count})
+        </span>
+      )}
     </span>
   )
 }
