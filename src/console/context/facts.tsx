@@ -3,7 +3,7 @@ import { type ContextFacts, isFactPresent } from "./types"
 
 export function FactsBody({ facts }: { facts: ContextFacts }) {
   return (
-    <div className="grid gap-7">
+    <div className="grid gap-5">
       <Identity facts={facts} />
       <ProductList products={facts.products} />
       <AliasList aliases={facts.aliases} />
@@ -20,14 +20,16 @@ function Identity({ facts }: { facts: ContextFacts }) {
   }
 
   return (
-    <div className="grid max-w-3xl gap-3">
+    <div className="grid max-w-3xl gap-2">
       {hasName ? (
-        <h2 className="text-3xl font-semibold tracking-tight text-foreground">
+        <h2 className="font-heading text-lg font-medium text-foreground">
           {facts.name}
         </h2>
       ) : null}
       {hasSummary ? (
-        <p className="text-base leading-7 text-foreground">{facts.summary}</p>
+        <p className="max-w-[72ch] text-muted-foreground text-sm/relaxed">
+          {facts.summary}
+        </p>
       ) : null}
     </div>
   )
@@ -39,18 +41,18 @@ function ProductList({ products }: { products: ContextFacts["products"] }) {
   }
 
   return (
-    <section className="grid max-w-3xl gap-3">
+    <section className="grid max-w-3xl gap-2.5">
       <SectionLabel>
         {products.length === 1 ? "Product" : "Products"}
       </SectionLabel>
-      <ul className="grid gap-4">
+      <ul className="grid gap-3">
         {products.map((product) => (
-          <li key={product.name} className="grid gap-1">
-            <h3 className="text-base font-semibold text-foreground">
+          <li key={product.name} className="grid gap-0.5">
+            <h3 className="font-heading text-sm font-medium text-foreground">
               {product.name}
             </h3>
             {isFactPresent(product.description) ? (
-              <p className="text-sm leading-6 text-muted-foreground">
+              <p className="text-muted-foreground text-xs/relaxed">
                 {product.description}
               </p>
             ) : null}
@@ -69,7 +71,7 @@ function AliasList({ aliases }: { aliases: string[] }) {
   return (
     <section className="grid gap-2">
       <SectionLabel>Also known as</SectionLabel>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {aliases.map((alias) => (
           <Badge key={alias} variant="secondary">
             {alias}
@@ -82,7 +84,7 @@ function AliasList({ aliases }: { aliases: string[] }) {
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <span className="text-sm font-semibold text-muted-foreground">
+    <span className="font-medium text-muted-foreground text-xs">
       {children}
     </span>
   )
