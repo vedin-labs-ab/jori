@@ -77,14 +77,13 @@ export function SourcesSection({
   return (
     <section className="grid gap-2.5">
       <SectionTitle>Sources</SectionTitle>
-      <ul className="grid gap-2">
+      <ul className="grid gap-1">
         {visibleSources.map((source) => (
           <SourceRow key={source.url} source={source} />
         ))}
       </ul>
       {hiddenCount > 0 || expanded ? (
         <Button
-          className="h-7 w-fit px-0 text-muted-foreground text-xs"
           onClick={() => setExpanded((value) => !value)}
           size="sm"
           type="button"
@@ -92,10 +91,7 @@ export function SourcesSection({
         >
           {expanded ? "Show less" : `+${hiddenCount} more`}
           <ChevronDown
-            className={cn(
-              "size-4 transition-transform",
-              expanded && "rotate-180"
-            )}
+            className={cn("transition-transform", expanded && "rotate-180")}
           />
         </Button>
       ) : null}
@@ -105,16 +101,18 @@ export function SourcesSection({
 
 function SourceRow({ source }: { source: OrganizationSource }) {
   return (
-    <li className="flex min-w-0 items-center gap-2.5 text-xs">
-      <FileText className="size-3.5 shrink-0 text-muted-foreground" />
-      <a
-        className="min-w-0 truncate text-foreground underline-offset-4 hover:underline"
-        href={source.url}
-        rel="noreferrer"
-        target="_blank"
+    <li className="min-w-0">
+      <Button
+        asChild
+        className="max-w-full justify-start"
+        size="sm"
+        variant="link"
       >
-        {sourceLabel(source.url)}
-      </a>
+        <a href={source.url} rel="noreferrer" target="_blank">
+          <FileText aria-hidden="true" />
+          <span className="min-w-0 truncate">{sourceLabel(source.url)}</span>
+        </a>
+      </Button>
     </li>
   )
 }
