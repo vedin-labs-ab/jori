@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { type Id } from "../../../convex/_generated/dataModel"
 import { type OrganizationDiscovery } from "./types"
 import { DiscoveryWorkingStep } from "./website"
 
@@ -112,7 +111,7 @@ function discovery(
 ): PreviewDiscovery {
   return {
     _creationTime: baseTime,
-    _id: "preview-discovery" as Id<"organizationDiscovery">,
+    _id: "preview-discovery" as PreviewDiscovery["_id"],
     startedAt: baseTime,
     tenantId: "preview-tenant",
     ...input,
