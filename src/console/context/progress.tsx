@@ -7,7 +7,7 @@ import {
   Search,
   TriangleAlert,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 import {
   Task,
   TaskContent,
@@ -42,7 +42,7 @@ export function DiscoveryProgress({
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 overflow-visible">
       {tasks.map((task) => (
         <DiscoveryTaskRow key={task.key} now={now} task={task} />
       ))}
@@ -60,8 +60,10 @@ function DiscoveryTaskRow({ now, task }: { now: number; task: DiscoveryTask }) {
 
 function SummaryTask({ now, task }: { now: number; task: DiscoveryTask }) {
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-md text-muted-foreground text-sm">
-      <TaskStatusIcon status={task.status} type={task.type} />
+    <div className="flex h-7 min-w-0 items-center gap-2 rounded-md text-muted-foreground text-sm">
+      <IconSlot>
+        <TaskStatusIcon status={task.status} type={task.type} />
+      </IconSlot>
       <span
         className={cn(
           "min-w-0 flex-1 truncate text-left font-medium",
@@ -89,10 +91,12 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
     <Task open={open} onOpenChange={setOpen}>
       <TaskTrigger title={task.label}>
         <button
-          className="group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors outline-none hover:text-foreground focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="group flex h-7 w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors outline-none hover:text-foreground focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           type="button"
         >
-          <TaskStatusIcon status={task.status} type={task.type} />
+          <IconSlot>
+            <TaskStatusIcon status={task.status} type={task.type} />
+          </IconSlot>
           <span
             className={cn(
               "min-w-0 flex-1 truncate text-left font-medium",
@@ -107,7 +111,7 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
           <ChevronDown className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
         </button>
       </TaskTrigger>
-      <TaskContent className="mt-2">
+      <TaskContent className="mt-2 data-[state=closed]:hidden data-[state=closed]:animate-none data-[state=open]:animate-none">
         {task.items.map((item) => (
           <ExplorationItem
             item={item}
@@ -131,8 +135,10 @@ function ExplorationItem({
   showStatus: boolean
 }) {
   return (
-    <TaskItem className="flex min-w-0 items-center gap-2 text-xs">
-      {showStatus ? <ItemStatusIcon status={item.status} /> : null}
+    <TaskItem className="flex h-6 min-w-0 items-center gap-2 text-xs">
+      <IconSlot size="sm">
+        {showStatus ? <ItemStatusIcon status={item.status} /> : null}
+      </IconSlot>
       <span
         className={cn(
           "min-w-0 flex-1 truncate text-foreground",
@@ -147,12 +153,33 @@ function ExplorationItem({
 }
 
 function ElapsedTime({ children }: { children: string | null }) {
-  if (children === null) {
-    return null
-  }
-
   return (
-    <span className="min-w-14 shrink-0 text-right text-muted-foreground text-xs tabular-nums">
+    <span
+      className={cn(
+        "w-16 shrink-0 text-right text-muted-foreground text-xs tabular-nums",
+        children === null && "invisible"
+      )}
+    >
+      {children ?? "0s"}
+    </span>
+  )
+}
+
+function IconSlot({
+  children,
+  size = "md",
+}: {
+  children: ReactNode
+  size?: "md" | "sm"
+}) {
+  return (
+    <span
+      aria-hidden={children === null ? "true" : undefined}
+      className={cn(
+        "flex shrink-0 items-center justify-center",
+        size === "md" ? "size-4" : "size-3.5"
+      )}
+    >
       {children}
     </span>
   )

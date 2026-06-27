@@ -109,13 +109,39 @@ export const finish = internalMutation({
       return
     }
 
+    const endedAt = Date.now()
+
     await ctx.db.patch(discovery._id, {
       status: "completed",
-      endedAt: Date.now(),
+      endedAt,
+      steps: closeOpenSteps(discovery.steps, endedAt, args.error),
       errors: appendError(discovery.errors, args.error),
     })
   },
 })
+
+function closeOpenSteps(
+  steps: Array<{
+    completedAt?: number
+    error?: string
+    kind: "page" | "summary"
+    label: string
+    startedAt: number
+    url?: string
+  }>,
+  completedAt: number,
+  error: string | undefined
+) {
+  return steps.map((step) =>
+    step.completedAt !== undefined || step.error !== undefined
+      ? step
+      : {
+          ...step,
+          completedAt,
+          ...(error === undefined ? {} : { error }),
+        }
+  )
+}
 
 function appendError(errors: string[], error: string | undefined) {
   if (error === undefined || errors.includes(error)) {
