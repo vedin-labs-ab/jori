@@ -32,7 +32,7 @@ export function WebsitesSection({
 
   return (
     <section className="grid gap-2.5">
-      <SectionTitle>Websites</SectionTitle>
+      <SectionTitle count={websites.length}>Websites</SectionTitle>
       <div className="flex flex-wrap gap-1.5">
         {websites.map((website) => (
           <Button
@@ -76,7 +76,7 @@ export function SourcesSection({
 
   return (
     <section className="grid gap-2.5">
-      <SectionTitle>Sources</SectionTitle>
+      <SectionTitle count={sources.length}>Sources</SectionTitle>
       <ul className="grid gap-1">
         {visibleSources.map((source) => (
           <SourceRow key={source.url} source={source} />
@@ -84,6 +84,7 @@ export function SourcesSection({
       </ul>
       {hiddenCount > 0 || expanded ? (
         <Button
+          className="w-fit justify-self-start text-muted-foreground hover:text-foreground"
           onClick={() => setExpanded((value) => !value)}
           size="sm"
           type="button"
@@ -104,12 +105,12 @@ function SourceRow({ source }: { source: OrganizationSource }) {
     <li className="min-w-0">
       <Button
         asChild
-        className="max-w-full justify-start"
+        className="max-w-full justify-start text-foreground hover:text-foreground"
         size="sm"
         variant="link"
       >
         <a href={source.url} rel="noreferrer" target="_blank">
-          <FileText aria-hidden="true" />
+          <FileText aria-hidden="true" className="text-muted-foreground" />
           <span className="min-w-0 truncate">{sourceLabel(source.url)}</span>
         </a>
       </Button>
@@ -183,8 +184,19 @@ function parseUrl(value: string) {
   }
 }
 
-function SectionTitle({ children }: { children: string }) {
+function SectionTitle({
+  children,
+  count,
+}: {
+  children: string
+  count: number
+}) {
   return (
-    <h3 className="font-medium text-muted-foreground text-xs">{children}</h3>
+    <h3 className="flex items-baseline gap-1.5 font-medium text-muted-foreground text-xs">
+      <span>{children}</span>
+      <span className="font-normal text-muted-foreground/70 tabular-nums">
+        ({count})
+      </span>
+    </h3>
   )
 }
