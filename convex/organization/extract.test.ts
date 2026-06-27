@@ -18,7 +18,6 @@ describe("extractFacts", () => {
         aliases: [],
         domains: ["https://milo.example"],
         name: "Milo",
-        products: [],
         summary: "Milo helps teams move work forward inside their tools.",
       })
     )

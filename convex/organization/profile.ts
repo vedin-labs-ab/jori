@@ -128,7 +128,6 @@ async function writeProposed(
       tenantId: input.tenantId,
       aliases: [],
       domains: [],
-      products: [],
       proposed,
       updatedAt: Date.now(),
     })
@@ -144,7 +143,6 @@ function toFacts(source: OrganizationFacts): OrganizationFacts {
     name: source.name,
     aliases: source.aliases,
     domains: source.domains,
-    products: source.products,
     summary: source.summary,
   }
 }

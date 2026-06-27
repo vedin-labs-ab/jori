@@ -1,5 +1,5 @@
 import { Separator } from "@/components/ui/separator"
-import { AliasesContent, ProductsContent } from "../facts"
+import { AliasesContent } from "../facts"
 import { SourcesContent, WebsitesContent } from "../sources"
 import {
   type ContextFacts,
@@ -52,11 +52,6 @@ export function ProposalReviewBody({
         proposed={proposed}
         status={statuses.summary}
       />
-      <OptionalProducts
-        current={approved}
-        proposed={proposed}
-        status={statuses.products}
-      />
       <OptionalAliases
         current={approved}
         proposed={proposed}
@@ -102,32 +97,6 @@ function OptionalSummary({
       proposedEmpty={!hasSummary(proposed)}
       status={status}
       title="Summary"
-    />
-  )
-}
-
-function OptionalProducts({
-  current,
-  proposed,
-  status,
-}: {
-  current: ContextFacts
-  proposed: ContextFacts
-  status: ProposalSectionStatus
-}) {
-  if (current.products.length === 0 && proposed.products.length === 0) {
-    return null
-  }
-
-  return (
-    <ReviewSection
-      count={proposed.products.length}
-      current={<ProductsContent products={current.products} />}
-      currentEmpty={current.products.length === 0}
-      proposed={<ProductsContent products={proposed.products} />}
-      proposedEmpty={proposed.products.length === 0}
-      status={status}
-      title="Products"
     />
   )
 }

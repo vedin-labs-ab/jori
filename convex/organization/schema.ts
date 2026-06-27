@@ -8,7 +8,6 @@ export const factsFields = {
   name: v.optional(v.string()),
   aliases: v.array(v.string()),
   domains: v.array(v.string()),
-  products: v.array(v.object({ name: v.string(), description: v.string() })),
   summary: v.optional(v.string()),
 }
 

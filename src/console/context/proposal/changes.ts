@@ -1,12 +1,7 @@
 import { type ContextFacts, type ContextSource } from "../types"
 import { websiteItems } from "../url"
 
-export type ProposalSectionKey =
-  | "aliases"
-  | "products"
-  | "sources"
-  | "summary"
-  | "websites"
+export type ProposalSectionKey = "aliases" | "sources" | "summary" | "websites"
 
 export type ProposalSectionStatus = "changed" | "unchanged"
 
@@ -19,7 +14,6 @@ export const emptyFacts: ContextFacts = {
   aliases: [],
   domains: [],
   name: undefined,
-  products: [],
   summary: undefined,
 }
 
@@ -40,7 +34,6 @@ export function proposalStatuses(
       listValues(approved.aliases),
       listValues(proposed.aliases)
     ),
-    products: statusFor(productValues(approved), productValues(proposed)),
     sources: statusFor(
       sourceValues(input.currentSources),
       sourceValues(input.proposedSources)
@@ -66,17 +59,6 @@ function summaryValues(facts: ContextFacts) {
     taggedValue("name", facts.name),
     taggedValue("summary", facts.summary),
   ].filter((value): value is string => value !== null)
-}
-
-function productValues(facts: ContextFacts) {
-  return facts.products
-    .map((product) =>
-      [product.name, product.description]
-        .map((value) => value.trim())
-        .join("\n")
-    )
-    .filter((value) => value.trim() !== "")
-    .sort()
 }
 
 function listValues(values: string[]) {

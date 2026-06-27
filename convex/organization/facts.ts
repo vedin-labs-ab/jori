@@ -6,21 +6,15 @@ export type OrganizationFacts = Infer<typeof organizationFacts>
 export const emptyFacts: OrganizationFacts = {
   aliases: [],
   domains: [],
-  products: [],
 }
 
-// The high-value facts that signal whether coverage was good enough. When one is
-// still missing after the first pass, discovery does one targeted follow-up to
-// fill it rather than settling for a thin draft.
+// The high-value fact that signals whether coverage was good enough. When it is
+// still missing after the first pass, discovery does one targeted follow-up.
 export function missingFacts(facts: OrganizationFacts): string[] {
   const missing: string[] = []
 
   if (facts.summary === undefined || facts.summary.trim() === "") {
     missing.push("summary")
-  }
-
-  if (facts.products.length === 0) {
-    missing.push("products")
   }
 
   return missing
@@ -39,12 +33,6 @@ function serializeFacts(facts: OrganizationFacts) {
     summary: clean(facts.summary),
     aliases: unique(facts.aliases),
     domains: unique(facts.domains),
-    products: [...facts.products]
-      .map((product) => ({
-        name: product.name.trim(),
-        description: product.description.trim(),
-      }))
-      .sort((left, right) => left.name.localeCompare(right.name)),
   })
 }
 

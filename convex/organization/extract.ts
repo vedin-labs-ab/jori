@@ -4,30 +4,17 @@ import { emptyFacts, type OrganizationFacts } from "./facts"
 import { requestStructured } from "./structured"
 
 const maxOutputTokens = 1200
-const maxProducts = 8
 const maxListItems = 12
 
 const factsSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["name", "summary", "aliases", "domains", "products"],
+  required: ["name", "summary", "aliases", "domains"],
   properties: {
     name: { type: ["string", "null"] },
     summary: { type: ["string", "null"] },
     aliases: { type: "array", items: { type: "string" } },
     domains: { type: "array", items: { type: "string" } },
-    products: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["name", "description"],
-        properties: {
-          name: { type: "string" },
-          description: { type: "string" },
-        },
-      },
-    },
   },
 }
 
@@ -58,7 +45,6 @@ function normalizeFacts(value: Record<string, unknown>): OrganizationFacts {
     ...optionalString("summary", value.summary),
     aliases: readStrings(value.aliases),
     domains: readStrings(value.domains),
-    products: readProducts(value.products),
   }
 }
 
@@ -79,25 +65,4 @@ function readStrings(value: unknown) {
     .filter((item) => item !== "")
 
   return [...new Set(items)].slice(0, maxListItems)
-}
-
-function readProducts(value: unknown) {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value.flatMap(readProduct).slice(0, maxProducts)
-}
-
-function readProduct(value: unknown) {
-  if (typeof value !== "object" || value === null) {
-    return []
-  }
-
-  const record = value as Record<string, unknown>
-  const name = typeof record.name === "string" ? record.name.trim() : ""
-  const description =
-    typeof record.description === "string" ? record.description.trim() : ""
-
-  return name === "" ? [] : [{ name, description }]
 }

@@ -43,7 +43,7 @@ export type DiscoveryTask = {
 
 export type ContextFacts = Pick<
   NonNullable<OrganizationProfile>,
-  "name" | "aliases" | "domains" | "products" | "summary"
+  "name" | "aliases" | "domains" | "summary"
 >
 
 export type ContextProposal = NonNullable<
@@ -55,7 +55,7 @@ export function hasFacts(facts: ContextFacts) {
     return true
   }
 
-  return facts.products.length + facts.aliases.length + facts.domains.length > 0
+  return facts.aliases.length + facts.domains.length > 0
 }
 
 export function isFactPresent(value: string | undefined): value is string {

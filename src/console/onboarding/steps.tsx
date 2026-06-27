@@ -55,7 +55,7 @@ export function WebsiteStep({
 }) {
   return (
     <WebsiteDiscoveryStep
-      description="Milo reads only your public site to learn your name, products, and how you describe yourselves."
+      description="Milo reads only your public site to learn your name and how you describe yourselves."
       error={error}
       inputId="onboarding-website"
       isSubmitting={isSubmitting}

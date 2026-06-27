@@ -13,7 +13,6 @@ export function FactsBody({
   return (
     <div className="grid gap-5">
       <Identity facts={facts} showName={showName} />
-      <ProductSection products={facts.products} />
       <AliasSection aliases={facts.aliases} />
     </div>
   )
@@ -54,44 +53,6 @@ export function OrganizationName({ children }: { children: ReactNode }) {
     <h2 className="font-heading text-lg font-medium text-foreground">
       {children}
     </h2>
-  )
-}
-
-function ProductSection({ products }: { products: ContextFacts["products"] }) {
-  if (products.length === 0) {
-    return null
-  }
-
-  return (
-    <section className="grid max-w-3xl gap-2.5">
-      <ContextSectionTitle count={products.length}>
-        Products
-      </ContextSectionTitle>
-      <ProductsContent products={products} />
-    </section>
-  )
-}
-
-export function ProductsContent({
-  products,
-}: {
-  products: ContextFacts["products"]
-}) {
-  return (
-    <ul className="grid gap-3">
-      {products.map((product) => (
-        <li key={product.name} className="grid gap-0.5">
-          <h3 className="font-heading text-sm font-medium text-foreground">
-            {product.name}
-          </h3>
-          {isFactPresent(product.description) ? (
-            <p className="text-muted-foreground text-xs/relaxed">
-              {product.description}
-            </p>
-          ) : null}
-        </li>
-      ))}
-    </ul>
   )
 }
 
