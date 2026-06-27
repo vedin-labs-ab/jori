@@ -35,7 +35,7 @@ describe("extractFacts", () => {
     }
 
     await expect(extractFacts(input)).resolves.toMatchObject({
-      domains: ["https://milo.example"],
+      domains: ["milo.example"],
       name: "Milo",
     })
 
