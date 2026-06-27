@@ -1,7 +1,7 @@
 import { v } from "convex/values"
+import { normalizeWebsiteAddress } from "../../contracts/website"
 import { internal } from "../_generated/api"
 import { type ActionCtx, action } from "../_generated/server"
-import { normalizePublicHttpUrl } from "../broker/tools/web/input"
 import { requireTenantAccess } from "../identity/access"
 
 // Marks onboarding as seen (so the welcome flow never reopens) and, when a
@@ -55,11 +55,7 @@ function normalizeWebsite(website: string | undefined) {
     return undefined
   }
 
-  const withScheme = /^https?:\/\//i.test(trimmed)
-    ? trimmed
-    : `https://${trimmed}`
-
-  return normalizePublicHttpUrl(withScheme, "website")
+  return normalizeWebsiteAddress(trimmed, "website")
 }
 
 async function patchClerkMetadata(

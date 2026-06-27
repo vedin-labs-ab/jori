@@ -1,9 +1,10 @@
+import {
+  parseWebsiteAddress,
+  type WebsiteAddress,
+} from "../../../contracts/website"
 import { type ContextFacts } from "./types"
 
-export type WebsiteItem = {
-  href: string
-  key: string
-  label: string
+export type WebsiteItem = WebsiteAddress & {
   main: boolean
 }
 
@@ -11,11 +12,11 @@ export function websiteItems(
   domains: ContextFacts["domains"],
   primaryWebsite: string | undefined
 ): WebsiteItem[] {
-  const primary = websiteValue(primaryWebsite)
+  const primary = parseWebsiteAddress(primaryWebsite)
   const seen = new Set<string>()
 
   return [primaryWebsite, ...domains].flatMap((value) => {
-    const website = websiteValue(value)
+    const website = parseWebsiteAddress(value)
 
     if (website === null || seen.has(website.key)) {
       return []
@@ -41,30 +42,7 @@ export function sourceLabel(value: string) {
 }
 
 export function websiteDomainKey(value: string | undefined) {
-  return websiteValue(value)?.key ?? null
-}
-
-function websiteValue(value: string | undefined) {
-  const trimmed = value?.trim()
-
-  if (trimmed === undefined || trimmed === "") {
-    return null
-  }
-
-  const url = parseUrl(trimmed)
-
-  if (url === null) {
-    return { href: trimmed, key: trimmed.toLowerCase(), label: trimmed }
-  }
-
-  const hostname = url.hostname.replace(/^www[.]/, "")
-  const key = `${hostname}${url.port === "" ? "" : `:${url.port}`}`
-
-  return {
-    href: url.origin,
-    key: key.toLowerCase(),
-    label: key,
-  }
+  return parseWebsiteAddress(value)?.key ?? null
 }
 
 function parseUrl(value: string) {
