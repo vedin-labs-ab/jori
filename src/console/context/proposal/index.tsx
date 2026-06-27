@@ -52,7 +52,7 @@ export function ProposalReview({
 function ProposalAlert() {
   return (
     <Alert className="bg-muted/20">
-      <FilePenLine className="mt-0.5" />
+      <FilePenLine />
       <AlertTitle>New proposal available</AlertTitle>
       <AlertDescription>
         Review changes before they are added to context.
