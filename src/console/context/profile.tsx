@@ -1,12 +1,10 @@
-import { useAction } from "convex/react"
 import { Loader2, TriangleAlert } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { api } from "../../../convex/_generated/api"
+import { OrganizationEditDialog } from "./edit"
 import { FactsBody } from "./facts"
 import { DiscoveryProgress } from "./progress"
 import { ProposalReview } from "./proposal"
@@ -18,7 +16,6 @@ import {
   type OrganizationProfile,
   type OrganizationSources,
 } from "./types"
-import { DiscoveryWorkingStep, WebsiteDiscoveryStep } from "./website"
 
 export function ContextProfile({
   tenantId,
@@ -141,67 +138,6 @@ function DiscoveryPanel({
       </div>
       <DiscoveryProgress discovery={discovery} />
     </section>
-  )
-}
-
-function OrganizationEditDialog({
-  tenantId,
-  website,
-  discovery,
-  onOpenChange,
-}: {
-  tenantId: string
-  website: string | undefined
-  discovery: OrganizationDiscovery | undefined
-  onOpenChange: (open: boolean) => void
-}) {
-  const discover = useAction(api.organization.onboarding.discover)
-  const [step, setStep] = useState<"website" | "working">(
-    discovery?.status === "running" ? "working" : "website"
-  )
-  const [value, setValue] = useState(website ?? "")
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const onContinue = async () => {
-    setSubmitting(true)
-    setError(null)
-
-    try {
-      await discover({ tenantId, website: value.trim() })
-      setStep("working")
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Couldn't start.")
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        {step === "website" ? (
-          <WebsiteDiscoveryStep
-            continueLabel="Run extraction"
-            description="Change the main website Milo uses, then rerun extraction to draft updated organization facts."
-            error={error}
-            inputId="context-website"
-            isSubmitting={submitting}
-            onContinue={() => void onContinue()}
-            onSkip={() => onOpenChange(false)}
-            onWebsiteChange={setValue}
-            skipLabel="Cancel"
-            title="Edit main website"
-            website={value}
-          />
-        ) : (
-          <DiscoveryWorkingStep
-            discovery={discovery}
-            onClose={() => onOpenChange(false)}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
   )
 }
 
