@@ -16,10 +16,3 @@ Websites:
 - {{domain}}
 {%- endfor %}
 {%- endif %}
-{%- if organization.products %}
-
-Products:
-{%- for product in organization.products %}
-- {{product.name}}{% if product.description %}: {{product.description}}{% endif %}
-{%- endfor %}
-{%- endif %}

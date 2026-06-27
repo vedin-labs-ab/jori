@@ -98,7 +98,6 @@ function createOrganizationInstructions(input: AgentRuntimeInput) {
       summary: facts.summary ?? null,
       aliases: facts.aliases.length === 0 ? null : facts.aliases.join(", "),
       domains: facts.domains.length === 0 ? null : facts.domains,
-      products: facts.products.length === 0 ? null : facts.products,
     },
   }).trim()
 }

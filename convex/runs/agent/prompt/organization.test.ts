@@ -11,16 +11,6 @@ test("renders organization facts before the run section", () => {
         summary: "Builds agent workspaces for engineering teams.",
         aliases: ["Milo", "Milo AI"],
         domains: ["https://milo.example", "https://milo.dev"],
-        products: [
-          {
-            name: "Milo",
-            description: "An agent workspace for product engineering.",
-          },
-          {
-            name: "Relay",
-            description: "A coordination layer for background work.",
-          },
-        ],
       },
     },
     { promptedTools: [promptedTool()] }
@@ -36,11 +26,7 @@ test("renders organization facts before the run section", () => {
   expect(prompt).toContain("- https://milo.example")
   expect(prompt).toContain("- https://milo.dev")
   expect(prompt).not.toContain("Website:")
-  expect(prompt).toContain("Products:")
-  expect(prompt).toContain(
-    "- Milo: An agent workspace for product engineering."
-  )
-  expect(prompt).toContain("- Relay: A coordination layer for background work.")
+  expect(prompt).not.toContain("Products:")
   expect(prompt.indexOf("# Approvals")).toBeLessThan(
     prompt.indexOf("# Organization")
   )
@@ -48,21 +34,19 @@ test("renders organization facts before the run section", () => {
   expectNoSyntheticBlankLines(prompt)
 })
 
-test("omits empty website and product sections", () => {
+test("omits the website section without websites", () => {
   const prompt = assemblePrompt({
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
     organization: {
       name: "Milo Labs",
       aliases: [],
       domains: [],
-      products: [],
     },
   })
 
   expect(prompt).toContain("# Organization")
   expect(prompt).toContain("Name: Milo Labs")
   expect(prompt).not.toContain("Websites:")
-  expect(prompt).not.toContain("Products:")
   expectNoSyntheticBlankLines(prompt)
 })
 
