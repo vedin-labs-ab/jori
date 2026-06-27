@@ -47,7 +47,7 @@ export function DiscoveryProgress({
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 p-0.5">
       {tasks.map((task) => (
         <DomainTask key={task.key} now={now} task={task} />
       ))}
@@ -107,10 +107,10 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
     <Task open={open} onOpenChange={setOpen}>
       <TaskTrigger title={task.label}>
         <button
-          className="group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+          className="group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           type="button"
         >
-          <Search className="size-4 shrink-0" />
+          <TaskStatusIcon status={task.status} />
           <span
             className={cn(
               "min-w-0 flex-1 truncate text-left font-medium",
@@ -125,7 +125,12 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
       </TaskTrigger>
       <TaskContent className="mt-2">
         {task.items.map((item) => (
-          <ExplorationItem item={item} key={item.key} now={now} />
+          <ExplorationItem
+            item={item}
+            key={item.key}
+            now={now}
+            showStatus={task.status !== "completed"}
+          />
         ))}
       </TaskContent>
     </Task>
@@ -135,13 +140,15 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
 function ExplorationItem({
   item,
   now,
+  showStatus,
 }: {
   item: DiscoveryTaskItem
   now: number
+  showStatus: boolean
 }) {
   return (
     <TaskItem className="flex min-w-0 items-center gap-2 text-xs">
-      <StatusIcon status={item.status} />
+      {showStatus ? <ItemStatusIcon status={item.status} /> : null}
       <span
         className={cn(
           "min-w-0 flex-1 truncate",
@@ -158,7 +165,15 @@ function ExplorationItem({
   )
 }
 
-function StatusIcon({ status }: { status: DiscoveryItemStatus }) {
+function TaskStatusIcon({ status }: { status: DiscoveryItemStatus }) {
+  if (status === "completed") {
+    return <Check className="size-4 shrink-0 text-primary" />
+  }
+
+  return <Search className="size-4 shrink-0" />
+}
+
+function ItemStatusIcon({ status }: { status: DiscoveryItemStatus }) {
   const className = cn("size-3.5 shrink-0", iconTone(status))
 
   if (status === "active") {
@@ -198,7 +213,8 @@ function useProgressTime(discovery: OrganizationDiscovery | undefined) {
 }
 
 function elapsedLabel(
-  item: Pick<DiscoveryTask, "endedAt" | "startedAt" | "status">,
+  item: Pick<DiscoveryTask, "endedAt" | "startedAt" | "status"> &
+    Partial<Pick<DiscoveryTask, "elapsedMs">>,
   now: number
 ) {
   if (item.status === "queued") {
@@ -206,7 +222,8 @@ function elapsedLabel(
   }
 
   const endedAt = item.endedAt ?? now
-  const seconds = Math.max(0, Math.round((endedAt - item.startedAt) / 1000))
+  const elapsedMs = item.elapsedMs ?? endedAt - item.startedAt
+  const seconds = Math.max(0, Math.round(elapsedMs / 1000))
 
   if (seconds < 60) {
     return `${seconds}s`
@@ -220,7 +237,7 @@ function elapsedLabel(
 
 function iconTone(status: DiscoveryItemStatus) {
   if (status === "completed") {
-    return "text-foreground"
+    return "text-primary"
   }
 
   if (status === "failed") {

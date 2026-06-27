@@ -13,6 +13,7 @@ export type DiscoveryTaskItem = {
 }
 
 export type DiscoveryTask = {
+  elapsedMs: number
   endedAt?: number
   items: DiscoveryTaskItem[]
   key: string
@@ -35,7 +36,7 @@ export function createDiscoveryTasks(
   discovery: NonNullable<OrganizationDiscovery>,
   now: number
 ): DiscoveryTask[] {
-  return taskGroups(discovery, now).map(toTask)
+  return taskGroups(discovery, now).map((group) => toTask(group, now))
 }
 
 function taskGroups(
@@ -53,10 +54,14 @@ function taskGroups(
   return [...groups.entries()]
 }
 
-function toTask([key, items]: [string, DiscoveryTaskItem[]]): DiscoveryTask {
+function toTask(
+  [key, items]: [string, DiscoveryTaskItem[]],
+  now: number
+): DiscoveryTask {
   const status = taskStatus(items)
 
   return {
+    elapsedMs: taskElapsedMs(items, now),
     key,
     items,
     label: key,
@@ -171,6 +176,46 @@ function taskEnd(items: DiscoveryTaskItem[], status: DiscoveryItemStatus) {
   )
 
   return status === "active" || status === "queued" ? {} : { endedAt }
+}
+
+type TimeInterval = {
+  end: number
+  start: number
+}
+
+function taskElapsedMs(items: DiscoveryTaskItem[], now: number) {
+  return mergedElapsedMs(items.flatMap((item) => itemInterval(item, now) ?? []))
+}
+
+function itemInterval(
+  item: DiscoveryTaskItem,
+  now: number
+): TimeInterval | null {
+  if (item.status === "queued") {
+    return null
+  }
+
+  const end = item.endedAt ?? now
+
+  return end <= item.startedAt ? null : { end, start: item.startedAt }
+}
+
+function mergedElapsedMs(intervals: TimeInterval[]) {
+  let elapsed = 0
+  let current: TimeInterval | null = null
+
+  for (const interval of [...intervals].sort((a, b) => a.start - b.start)) {
+    if (current === null) {
+      current = { ...interval }
+    } else if (interval.start <= current.end) {
+      current.end = Math.max(current.end, interval.end)
+    } else {
+      elapsed += current.end - current.start
+      current = { ...interval }
+    }
+  }
+
+  return current === null ? elapsed : elapsed + current.end - current.start
 }
 
 function domainKey(url: string) {
