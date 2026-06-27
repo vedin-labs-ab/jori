@@ -88,18 +88,34 @@ function ProposalDialog({
   tenantId: string
 }) {
   const approve = useMutation(api.organization.profile.approve)
-  const [approving, setApproving] = useState(false)
+  const dismiss = useMutation(api.organization.profile.dismiss)
+  const [pendingAction, setPendingAction] = useState<
+    "approve" | "dismiss" | null
+  >(null)
 
   const onApprove = async () => {
-    setApproving(true)
+    setPendingAction("approve")
 
     try {
       await approve({ tenantId })
       onClose()
     } finally {
-      setApproving(false)
+      setPendingAction(null)
     }
   }
+
+  const onDismiss = async () => {
+    setPendingAction("dismiss")
+
+    try {
+      await dismiss({ tenantId })
+      onClose()
+    } finally {
+      setPendingAction(null)
+    }
+  }
+
+  const pending = pendingAction !== null
 
   return (
     <DialogContent className="sm:max-w-3xl">
@@ -116,12 +132,21 @@ function ProposalDialog({
         sources={sources}
       />
       <DialogFooter>
-        <Button disabled={approving} onClick={onClose} variant="outline">
-          Cancel
+        <Button
+          disabled={pending}
+          onClick={() => void onDismiss()}
+          variant="outline"
+        >
+          {pendingAction === "dismiss" ? (
+            <Loader2 className="animate-spin" />
+          ) : null}
+          {pendingAction === "dismiss" ? "Discarding" : "Discard proposal"}
         </Button>
-        <Button disabled={approving} onClick={() => void onApprove()}>
-          {approving ? <Loader2 className="animate-spin" /> : null}
-          {approving ? "Approving" : "Approve update"}
+        <Button disabled={pending} onClick={() => void onApprove()}>
+          {pendingAction === "approve" ? (
+            <Loader2 className="animate-spin" />
+          ) : null}
+          {pendingAction === "approve" ? "Approving" : "Approve update"}
         </Button>
       </DialogFooter>
     </DialogContent>

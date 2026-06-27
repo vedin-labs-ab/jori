@@ -46,6 +46,23 @@ export const approve = mutation({
   },
 })
 
+export const dismiss = mutation({
+  args: { tenantId: v.string() },
+  handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+    const profile = await readProfile(ctx, args.tenantId)
+
+    if (profile === null || profile.proposed === undefined) {
+      throw new Error("There is no proposed update to discard.")
+    }
+
+    await ctx.db.patch(profile._id, {
+      proposed: undefined,
+      updatedAt: Date.now(),
+    })
+  },
+})
+
 export const propose = internalMutation({
   args: { tenantId: v.string(), facts: organizationFacts },
   handler: async (ctx, args) => {
