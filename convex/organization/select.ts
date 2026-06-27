@@ -15,14 +15,12 @@ const selectionSchema = {
   },
 }
 
-// Asks the model which candidate links to read next. `missing` lists the facts
-// still needed (empty on the first pass); the model targets those gaps. Returns
-// a subset of the candidates, capped to `limit`.
+// Asks the model which candidate links to read next. Returns a subset of the
+// candidates, capped to `limit`.
 export async function selectLinks(options: {
   primaryUrl: string
   candidates: string[]
   limit: number
-  missing: string[]
 }): Promise<string[]> {
   if (options.candidates.length === 0 || options.limit <= 0) {
     return []
@@ -36,7 +34,6 @@ export async function selectLinks(options: {
     user: JSON.stringify({
       primaryUrl: options.primaryUrl,
       limit: options.limit,
-      missing: options.missing,
       links: considered,
     }),
     maxTokens: maxSelectionTokens,

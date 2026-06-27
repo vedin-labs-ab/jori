@@ -8,18 +8,6 @@ export const emptyFacts: OrganizationFacts = {
   domains: [],
 }
 
-// The high-value fact that signals whether coverage was good enough. When it is
-// still missing after the first pass, discovery does one targeted follow-up.
-export function missingFacts(facts: OrganizationFacts): string[] {
-  const missing: string[] = []
-
-  if (facts.summary === undefined || facts.summary.trim() === "") {
-    missing.push("summary")
-  }
-
-  return missing
-}
-
 // Stable structural comparison so the watcher only proposes a new draft when the
 // extracted facts actually differ from what is live — not on cosmetic reordering
 // or whitespace from the model.
