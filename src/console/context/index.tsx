@@ -3,19 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
-import { DiscoveryModalPreview } from "./preview"
 import { ContextProfile } from "./profile"
 import { type OrganizationSources } from "./types"
 
 export function OrganizationContext() {
   return (
     <ConsolePage>
-      {(organization) => (
-        <>
-          <ContextView tenantId={organization.id} />
-          <DiscoveryModalPreview />
-        </>
-      )}
+      {(organization) => <ContextView tenantId={organization.id} />}
     </ConsolePage>
   )
 }
