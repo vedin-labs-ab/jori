@@ -47,7 +47,7 @@ export function DiscoveryProgress({
   }
 
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-4">
       {tasks.map((task) => (
         <DomainTask key={task.key} now={now} task={task} />
       ))}
@@ -95,15 +95,28 @@ export function DiscoveryCard({
 }
 
 function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
+  const [open, setOpen] = useState(() => task.status !== "completed")
+
+  useEffect(() => {
+    if (isLive(task.status)) {
+      setOpen(true)
+    }
+  }, [task.status])
+
   return (
-    <Task defaultOpen={task.status !== "completed"}>
+    <Task open={open} onOpenChange={setOpen}>
       <TaskTrigger title={task.label}>
         <button
-          className="group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
           type="button"
         >
           <Search className="size-4 shrink-0" />
-          <span className="min-w-0 flex-1 truncate text-left font-medium">
+          <span
+            className={cn(
+              "min-w-0 flex-1 truncate text-left font-medium",
+              isLive(task.status) && !open ? "shimmer" : null
+            )}
+          >
             {task.label}
           </span>
           <span className="shrink-0 text-xs">{elapsedLabel(task, now)}</span>
@@ -127,13 +140,16 @@ function ExplorationItem({
   now: number
 }) {
   return (
-    <TaskItem className="flex min-w-0 items-start gap-2 text-xs">
+    <TaskItem className="flex min-w-0 items-center gap-2 text-xs">
       <StatusIcon status={item.status} />
-      <span className="grid min-w-0 flex-1 gap-0.5">
-        <span className={cn("truncate", itemTone(item.status))}>
-          {item.label}
-        </span>
-        <span className="truncate text-muted-foreground">{item.url}</span>
+      <span
+        className={cn(
+          "min-w-0 flex-1 truncate",
+          itemTone(item.status),
+          isLive(item.status) ? "shimmer" : null
+        )}
+      >
+        {item.label}
       </span>
       <span className="shrink-0 text-muted-foreground">
         {elapsedLabel(item, now)}
@@ -143,7 +159,7 @@ function ExplorationItem({
 }
 
 function StatusIcon({ status }: { status: DiscoveryItemStatus }) {
-  const className = cn("mt-0.5 size-3.5 shrink-0", iconTone(status))
+  const className = cn("size-3.5 shrink-0", iconTone(status))
 
   if (status === "active") {
     return <LoaderCircle className={cn(className, "animate-spin")} />
@@ -158,6 +174,10 @@ function StatusIcon({ status }: { status: DiscoveryItemStatus }) {
   }
 
   return <CircleDashed className={className} />
+}
+
+function isLive(status: DiscoveryItemStatus) {
+  return status === "active" || status === "queued"
 }
 
 function useProgressTime(discovery: OrganizationDiscovery | undefined) {

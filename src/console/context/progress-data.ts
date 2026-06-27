@@ -190,7 +190,7 @@ function pageLabel(url: string | undefined) {
     const parsed = new URL(url)
     const path = `${parsed.pathname}${parsed.search}`.replace(/\/$/, "")
 
-    return path === "" ? "Homepage" : path
+    return path === "" ? "/" : path
   } catch {
     return sourceLabel(url)
   }
