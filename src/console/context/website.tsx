@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DiscoveryProgress } from "./progress"
@@ -22,6 +23,7 @@ export function WebsiteDiscoveryStep({
   onWebsiteChange,
   skipLabel = "Skip",
   title,
+  validationError = null,
   website,
 }: {
   continueLabel?: string
@@ -34,8 +36,12 @@ export function WebsiteDiscoveryStep({
   onWebsiteChange: (value: string) => void
   skipLabel?: string
   title: string
+  validationError?: string | null
   website: string
 }) {
+  const fieldError = validationError ?? error
+  const errorId = `${inputId}-error`
+
   return (
     <>
       <DialogHeader>
@@ -45,15 +51,15 @@ export function WebsiteDiscoveryStep({
       <div className="grid gap-2 py-1">
         <Label htmlFor={inputId}>Website</Label>
         <Input
+          aria-describedby={fieldError === null ? undefined : errorId}
+          aria-invalid={fieldError === null ? undefined : true}
           id={inputId}
           value={website}
           onChange={(event) => onWebsiteChange(event.target.value)}
           placeholder="yourcompany.com"
           disabled={isSubmitting}
         />
-        {error === null ? null : (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
+        <FieldError id={errorId}>{fieldError}</FieldError>
       </div>
       <DialogFooter>
         <Button variant="ghost" onClick={onSkip} disabled={isSubmitting}>
@@ -61,7 +67,9 @@ export function WebsiteDiscoveryStep({
         </Button>
         <Button
           onClick={onContinue}
-          disabled={isSubmitting || website.trim() === ""}
+          disabled={
+            isSubmitting || website.trim() === "" || validationError !== null
+          }
         >
           {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
           {continueLabel}
@@ -85,7 +93,11 @@ export function DiscoveryWorkingStep({
         <DialogDescription>{workingDescription(discovery)}</DialogDescription>
       </DialogHeader>
       <div className="max-h-64 overflow-y-auto">
-        <DiscoveryProgress discovery={discovery} />
+        {discovery === undefined || discovery === null ? (
+          <StartingExtraction />
+        ) : (
+          <DiscoveryProgress discovery={discovery} />
+        )}
       </div>
       <DialogFooter>
         <Button onClick={onClose}>
@@ -93,6 +105,15 @@ export function DiscoveryWorkingStep({
         </Button>
       </DialogFooter>
     </>
+  )
+}
+
+function StartingExtraction() {
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-dashed p-3 text-muted-foreground text-xs/relaxed">
+      <Loader2 className="size-3.5 animate-spin" />
+      <span>Starting extraction</span>
+    </div>
   )
 }
 

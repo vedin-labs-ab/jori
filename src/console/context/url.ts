@@ -40,6 +40,10 @@ export function sourceLabel(value: string) {
   return `${hostname}${path}${url.search}`
 }
 
+export function websiteDomainKey(value: string | undefined) {
+  return websiteValue(value)?.key ?? null
+}
+
 function websiteValue(value: string | undefined) {
   const trimmed = value?.trim()
 
