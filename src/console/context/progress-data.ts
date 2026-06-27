@@ -139,18 +139,18 @@ function stepStatus(
   step: DiscoveryStep,
   now: number
 ): DiscoveryItemStatus {
-  if (step.startedAt > now) {
-    return "queued"
-  }
-
   if (step.error !== undefined) {
     return "failed"
   }
 
   const completedAt = stepCompletedAt(discovery, step)
 
-  if (completedAt !== undefined && completedAt <= now) {
+  if (completedAt !== undefined) {
     return "completed"
+  }
+
+  if (step.startedAt > now) {
+    return "queued"
   }
 
   return "active"
