@@ -47,7 +47,7 @@ export function DiscoveryProgress({
   }
 
   return (
-    <div className="grid gap-4 p-0.5">
+    <div className="grid gap-4">
       {tasks.map((task) => (
         <DomainTask key={task.key} now={now} task={task} />
       ))}
@@ -107,7 +107,7 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
     <Task open={open} onOpenChange={setOpen}>
       <TaskTrigger title={task.label}>
         <button
-          className="group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors outline-none hover:text-foreground focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           type="button"
         >
           <TaskStatusIcon status={task.status} />
