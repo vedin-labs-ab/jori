@@ -1,4 +1,4 @@
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import {
   internalMutation,
   internalQuery,
@@ -7,6 +7,9 @@ import {
   query,
 } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
+import { type organizationSourceSnapshot } from "./schema"
+
+export type SourceSnapshot = Infer<typeof organizationSourceSnapshot>
 
 const dayMs = 24 * 60 * 60 * 1000
 const processedIntervalMs = 14 * dayMs
@@ -17,6 +20,7 @@ const maxSourcesPerTenant = 50
 export const seed = internalMutation({
   args: { tenantId: v.string(), url: v.string() },
   handler: async (ctx, args) => {
+    await demoteOtherPrimaries(ctx, args.tenantId, args.url)
     const existing = await readByUrl(ctx, args.tenantId, args.url)
 
     if (existing !== null) {
@@ -44,6 +48,10 @@ export const upsert = internalMutation({
     primary: v.boolean(),
   },
   handler: async (ctx, args) => {
+    if (args.primary) {
+      await demoteOtherPrimaries(ctx, args.tenantId, args.url)
+    }
+
     const existing = await readByUrl(ctx, args.tenantId, args.url)
     const checkAt = Date.now() + processedIntervalMs
 
@@ -67,6 +75,41 @@ export const upsert = internalMutation({
     })
   },
 })
+
+export async function replaceApprovedSources(
+  ctx: MutationCtx,
+  tenantId: string,
+  sources: SourceSnapshot[]
+) {
+  const existing = await readByTenant(ctx, tenantId)
+
+  for (const source of existing) {
+    await ctx.db.delete(source._id)
+  }
+
+  const checkAt = Date.now() + processedIntervalMs
+
+  for (const source of uniqueSnapshots(sources).slice(0, maxSourcesPerTenant)) {
+    await ctx.db.insert("organizationSources", {
+      tenantId,
+      url: source.url,
+      primary: source.primary,
+      checkAt,
+      ...(source.hash === undefined ? {} : { hash: source.hash }),
+    })
+  }
+}
+
+export async function readApprovedSources(
+  ctx: QueryCtx | MutationCtx,
+  tenantId: string
+): Promise<SourceSnapshot[]> {
+  return (await readByTenant(ctx, tenantId)).map(toSnapshot)
+}
+
+export function sourcesEqual(left: SourceSnapshot[], right: SourceSnapshot[]) {
+  return serializeSnapshots(left) === serializeSnapshots(right)
+}
 
 export const primaryUrl = internalQuery({
   args: { tenantId: v.string() },
@@ -101,7 +144,21 @@ function compareSources(
   return left.url.localeCompare(right.url)
 }
 
-async function readByTenant(ctx: QueryCtx, tenantId: string) {
+async function demoteOtherPrimaries(
+  ctx: MutationCtx,
+  tenantId: string,
+  primaryUrl: string
+) {
+  const sources = await readByTenant(ctx, tenantId)
+
+  for (const source of sources) {
+    if (source.primary && source.url !== primaryUrl) {
+      await ctx.db.patch(source._id, { primary: false })
+    }
+  }
+}
+
+async function readByTenant(ctx: QueryCtx | MutationCtx, tenantId: string) {
   return await ctx.db
     .query("organizationSources")
     .withIndex("by_tenant_and_url", (q) => q.eq("tenantId", tenantId))
@@ -119,4 +176,50 @@ async function readByUrl(
       q.eq("tenantId", tenantId).eq("url", url)
     )
     .unique()
+}
+
+function toSnapshot(source: {
+  hash?: string
+  primary: boolean
+  url: string
+}): SourceSnapshot {
+  return {
+    url: source.url,
+    primary: source.primary,
+    ...(source.hash === undefined ? {} : { hash: source.hash }),
+  }
+}
+
+function uniqueSnapshots(sources: SourceSnapshot[]) {
+  const byUrl = new Map<string, SourceSnapshot>()
+
+  for (const source of sources) {
+    const key = normalizeUrl(source.url)
+    const existing = byUrl.get(key)
+    const hash = source.hash ?? existing?.hash
+
+    byUrl.set(key, {
+      url: source.url,
+      primary: source.primary || existing?.primary === true,
+      ...(hash === undefined ? {} : { hash }),
+    })
+  }
+
+  return [...byUrl.values()]
+}
+
+function serializeSnapshots(sources: SourceSnapshot[]) {
+  return JSON.stringify(
+    uniqueSnapshots(sources)
+      .map((source) => ({
+        hash: source.hash ?? null,
+        primary: source.primary,
+        url: normalizeUrl(source.url),
+      }))
+      .sort((left, right) => left.url.localeCompare(right.url))
+  )
+}
+
+function normalizeUrl(url: string) {
+  return url.trim().toLowerCase()
 }

@@ -1,7 +1,12 @@
-import { type ContextFacts } from "../types"
+import { type ContextFacts, type ContextSource } from "../types"
 import { websiteItems } from "../url"
 
-export type ProposalSectionKey = "aliases" | "products" | "summary" | "websites"
+export type ProposalSectionKey =
+  | "aliases"
+  | "products"
+  | "sources"
+  | "summary"
+  | "websites"
 
 export type ProposalSectionStatus = "changed" | "unchanged"
 
@@ -21,7 +26,12 @@ export const emptyFacts: ContextFacts = {
 export function proposalStatuses(
   current: ContextFacts | null,
   proposed: ContextFacts,
-  primaryWebsite: string | undefined
+  input: {
+    currentSources: ContextSource[] | undefined
+    currentWebsite: string | undefined
+    proposedSources: ContextSource[] | undefined
+    proposedWebsite: string | undefined
+  }
 ): ProposalSectionStatuses {
   const approved = approvedFacts(current)
 
@@ -31,10 +41,14 @@ export function proposalStatuses(
       listValues(proposed.aliases)
     ),
     products: statusFor(productValues(approved), productValues(proposed)),
+    sources: statusFor(
+      sourceValues(input.currentSources),
+      sourceValues(input.proposedSources)
+    ),
     summary: statusFor(summaryValues(approved), summaryValues(proposed)),
     websites: statusFor(
-      websiteValues(approved, primaryWebsite),
-      websiteValues(proposed, primaryWebsite)
+      websiteValues(approved, input.currentWebsite),
+      websiteValues(proposed, input.proposedWebsite)
     ),
   }
 }
@@ -78,6 +92,16 @@ function websiteValues(
 ) {
   return websiteItems(facts.domains, primaryWebsite)
     .map((website) => website.key)
+    .sort()
+}
+
+function sourceValues(sources: ContextSource[] | undefined) {
+  return (sources ?? [])
+    .map((source) =>
+      [source.url, String(source.primary)]
+        .map((value) => value.trim())
+        .join("\n")
+    )
     .sort()
 }
 

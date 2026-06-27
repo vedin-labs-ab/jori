@@ -6,6 +6,7 @@ import {
   internalAction,
   internalMutation,
   internalQuery,
+  type MutationCtx,
 } from "../_generated/server"
 import { fetchReadableText, hashText } from "./crawl"
 
@@ -78,9 +79,25 @@ export const record = internalMutation({
       changedAt: now,
       checkAt: now + processedIntervalMs,
     })
+
+    const primaryUrl = await readPrimaryUrl(ctx, current.tenantId)
+
     // The draft re-baselines hashes; rare concurrent changes may double-run it.
     await ctx.scheduler.runAfter(0, internal.organization.draft.run, {
+      primaryUrl: primaryUrl ?? current.url,
       tenantId: current.tenantId,
     })
   },
 })
+
+async function readPrimaryUrl(
+  ctx: { db: MutationCtx["db"] },
+  tenantId: string
+) {
+  const sources = await ctx.db
+    .query("organizationSources")
+    .withIndex("by_tenant_and_url", (q) => q.eq("tenantId", tenantId))
+    .take(sweepBatch)
+
+  return sources.find((source) => source.primary)?.url ?? null
+}

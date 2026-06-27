@@ -5,6 +5,7 @@ import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
 import { type CrawledPage, crawlPage, discoverUrls, hostFromUrl } from "./crawl"
 import { extractFacts } from "./extract"
+import { type SourceSnapshot } from "./sources"
 
 type StepKind = "reading" | "exploring" | "extracting" | "done" | "error"
 
@@ -12,14 +13,14 @@ type StepKind = "reading" | "exploring" | "extracting" | "done" | "error"
 // model, and writes a proposed draft for human approval. Progress is streamed to
 // the discovery row so the console can show it live.
 export const run = internalAction({
-  args: { tenantId: v.string() },
+  args: { tenantId: v.string(), primaryUrl: v.string() },
   handler: async (ctx, args) => {
     await ctx.runMutation(internal.organization.discovery.start, {
       tenantId: args.tenantId,
     })
 
     try {
-      await discover(ctx, args.tenantId)
+      await discover(ctx, args.tenantId, args.primaryUrl)
       await ctx.runMutation(internal.organization.discovery.finish, {
         tenantId: args.tenantId,
       })
@@ -29,33 +30,26 @@ export const run = internalAction({
   },
 })
 
-async function discover(ctx: ActionCtx, tenantId: string) {
-  const primaryUrl = await ctx.runQuery(
-    internal.organization.sources.primaryUrl,
-    { tenantId }
-  )
-
-  if (primaryUrl === null) {
-    throw new Error("No website has been set for this organization.")
-  }
-
+async function discover(ctx: ActionCtx, tenantId: string, primaryUrl: string) {
   const host = hostFromUrl(primaryUrl)
 
   if (host === null) {
     throw new Error("The organization website is not a valid URL.")
   }
 
-  const pages = await collectPages(ctx, tenantId, primaryUrl, host)
+  const result = await collectPages(ctx, tenantId, primaryUrl, host)
 
-  if (pages.length === 0) {
+  if (result.pages.length === 0) {
     throw new Error("Could not read any content from the website.")
   }
 
   await step(ctx, tenantId, "extracting", "Summarizing what we found")
-  const facts = await extractFacts({ primaryUrl, pages })
+  const facts = await extractFacts({ primaryUrl, pages: result.pages })
   await ctx.runMutation(internal.organization.profile.propose, {
     tenantId,
     facts,
+    sources: result.sources,
+    website: primaryUrl,
   })
   await step(ctx, tenantId, "done", "Draft ready for review")
 }
@@ -65,14 +59,15 @@ async function collectPages(
   tenantId: string,
   primaryUrl: string,
   host: string
-): Promise<CrawledPage[]> {
+): Promise<{ pages: CrawledPage[]; sources: SourceSnapshot[] }> {
   const pages: CrawledPage[] = []
+  const sources: SourceSnapshot[] = []
   await step(ctx, tenantId, "reading", `Reading ${host}`, primaryUrl)
   const primary = await crawlPage(primaryUrl)
 
   if (primary !== null) {
     pages.push(primary)
-    await baseline(ctx, tenantId, primary, true)
+    sources.push(sourceSnapshot(primary, true))
   }
 
   for (const url of await discoverUrls(host, primaryUrl)) {
@@ -81,25 +76,15 @@ async function collectPages(
 
     if (page !== null) {
       pages.push(page)
-      await baseline(ctx, tenantId, page, false)
+      sources.push(sourceSnapshot(page, false))
     }
   }
 
-  return pages
+  return { pages, sources }
 }
 
-async function baseline(
-  ctx: ActionCtx,
-  tenantId: string,
-  page: CrawledPage,
-  primary: boolean
-) {
-  await ctx.runMutation(internal.organization.sources.upsert, {
-    tenantId,
-    url: page.url,
-    hash: page.hash,
-    primary,
-  })
+function sourceSnapshot(page: CrawledPage, primary: boolean): SourceSnapshot {
+  return { url: page.url, hash: page.hash, primary }
 }
 
 async function step(

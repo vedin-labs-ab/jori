@@ -13,12 +13,18 @@ export type OrganizationSources = FunctionReturnType<
   typeof api.organization.sources.list
 >
 
+export type ContextSource = NonNullable<OrganizationSources>[number]
+
 export type DiscoveryRun = NonNullable<OrganizationDiscovery>
 export type DiscoveryStep = DiscoveryRun["steps"][number]
 
 export type ContextFacts = Pick<
   NonNullable<OrganizationProfile>,
   "name" | "aliases" | "domains" | "products" | "summary"
+>
+
+export type ContextProposal = NonNullable<
+  NonNullable<OrganizationProfile>["proposed"]
 >
 
 export function hasFacts(facts: ContextFacts) {
