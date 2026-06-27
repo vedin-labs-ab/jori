@@ -102,8 +102,9 @@ test("renders Slack channels as channel chips", () => {
   const chip = screen.getByText("#product").parentElement
 
   expect(screen.getByText("mention")).toBeDefined()
-  expect(chip?.className).toContain("bg-primary/10")
-  expect(chip?.className).toContain("text-primary")
+  expect(chip?.className).toContain("bg-current/10")
+  expect(chip?.className).toContain("text-[#1264A3]")
+  expect(chip?.className).toContain("dark:text-[#31B9E5]")
 })
 
 test("renders GitHub source details compactly", () => {
