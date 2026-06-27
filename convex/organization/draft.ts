@@ -3,15 +3,27 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { type CrawledPage, crawlPage, discoverUrls, hostFromUrl } from "./crawl"
+import {
+  type CrawledPage,
+  candidateLinks,
+  crawlPage,
+  hostFromUrl,
+} from "./crawl"
 import { extractFacts } from "./extract"
+import { missingFacts } from "./facts"
+import { selectLinks } from "./select"
 import { type SourceSnapshot } from "./sources"
+
+const initialPages = 5
+const followUpPages = 3
 
 type StepKind = "reading" | "exploring" | "extracting" | "done" | "error"
 
 // Crawls an organization's first-party pages, extracts structured facts with the
-// model, and writes a proposed draft for human approval. Progress is streamed to
-// the discovery row so the console can show it live.
+// model, and writes a proposed draft for human approval. The model decides which
+// links to read from the homepage, and gets one targeted follow-up round if a
+// key fact is still missing. Progress is streamed to the discovery row so the
+// console can show it live.
 export const run = internalAction({
   args: { tenantId: v.string(), primaryUrl: v.string() },
   handler: async (ctx, args) => {
@@ -37,54 +49,86 @@ async function discover(ctx: ActionCtx, tenantId: string, primaryUrl: string) {
     throw new Error("The organization website is not a valid URL.")
   }
 
-  const result = await collectPages(ctx, tenantId, primaryUrl, host)
+  await step(ctx, tenantId, "reading", `Reading ${host}`, primaryUrl)
+  const home = await crawlPage(primaryUrl)
 
-  if (result.pages.length === 0) {
+  if (home === null) {
     throw new Error("Could not read any content from the website.")
   }
 
+  let pages = await explore(ctx, tenantId, {
+    host,
+    primaryUrl,
+    pages: [home],
+    limit: initialPages,
+    missing: [],
+  })
+
   await step(ctx, tenantId, "extracting", "Summarizing what we found")
-  const facts = await extractFacts({ primaryUrl, pages: result.pages })
+  let facts = await extractFacts({ primaryUrl, pages: extractionPages(pages) })
+
+  const missing = missingFacts(facts)
+
+  if (missing.length > 0) {
+    pages = await explore(ctx, tenantId, {
+      host,
+      primaryUrl,
+      pages,
+      limit: followUpPages,
+      missing,
+    })
+    facts = await extractFacts({ primaryUrl, pages: extractionPages(pages) })
+  }
+
   await ctx.runMutation(internal.organization.profile.propose, {
     tenantId,
     facts,
-    sources: result.sources,
+    sources: pages.map(toSource),
     website: primaryUrl,
   })
   await step(ctx, tenantId, "done", "Draft ready for review")
 }
 
-async function collectPages(
+// One navigation round: the model picks links to read from those discovered so
+// far, and we fetch them. Returns the page set extended with whatever was read.
+async function explore(
   ctx: ActionCtx,
   tenantId: string,
-  primaryUrl: string,
-  host: string
-): Promise<{ pages: CrawledPage[]; sources: SourceSnapshot[] }> {
-  const pages: CrawledPage[] = []
-  const sources: SourceSnapshot[] = []
-  await step(ctx, tenantId, "reading", `Reading ${host}`, primaryUrl)
-  const primary = await crawlPage(primaryUrl)
-
-  if (primary !== null) {
-    pages.push(primary)
-    sources.push(sourceSnapshot(primary, true))
+  args: {
+    host: string
+    primaryUrl: string
+    pages: CrawledPage[]
+    limit: number
+    missing: string[]
   }
+): Promise<CrawledPage[]> {
+  const chosen = await selectLinks({
+    primaryUrl: args.primaryUrl,
+    candidates: candidateLinks(args.host, args.pages),
+    limit: args.limit,
+    missing: args.missing,
+  })
 
-  for (const url of await discoverUrls(host, primaryUrl)) {
+  const pages = [...args.pages]
+
+  for (const url of chosen) {
     await step(ctx, tenantId, "exploring", `Exploring ${shortPath(url)}`, url)
     const page = await crawlPage(url)
 
     if (page !== null) {
       pages.push(page)
-      sources.push(sourceSnapshot(page, false))
     }
   }
 
-  return { pages, sources }
+  return pages
 }
 
-function sourceSnapshot(page: CrawledPage, primary: boolean): SourceSnapshot {
-  return { url: page.url, hash: page.hash, primary }
+function extractionPages(pages: CrawledPage[]) {
+  return pages.map((page) => ({ url: page.url, text: page.text }))
+}
+
+function toSource(page: CrawledPage, index: number): SourceSnapshot {
+  return { url: page.url, hash: page.hash, primary: index === 0 }
 }
 
 async function step(

@@ -1,14 +1,8 @@
-import {
-  type OpenRouterChatInput,
-  type OpenRouterChatMessage,
-  sendOpenRouterChat,
-} from "../model"
 import { promptTemplates } from "../prompts/generated"
 import { renderPromptTemplate } from "../prompts/render"
 import { emptyFacts, type OrganizationFacts } from "./facts"
+import { requestStructured } from "./structured"
 
-const model = "openai/gpt-5.5"
-const reasoningEffort = "low"
 const maxOutputTokens = 1200
 const maxProducts = 8
 const maxListItems = 12
@@ -45,78 +39,16 @@ export type ExtractionInput = {
 export async function extractFacts(
   input: ExtractionInput
 ): Promise<OrganizationFacts> {
-  const response = await sendOpenRouterChat(buildRequest(input))
-
-  return normalizeFacts(parseJson(readContent(response)))
-}
-
-function buildRequest(input: ExtractionInput): OpenRouterChatInput {
-  return {
-    model,
+  const value = await requestStructured({
+    schemaName: "organization_facts",
+    schema: factsSchema,
+    system: renderPromptTemplate(promptTemplates["organization/discovery"], {}),
+    user: JSON.stringify({ primaryUrl: input.primaryUrl, pages: input.pages }),
     maxTokens: maxOutputTokens,
-    provider: { requireParameters: true, sort: "latency" },
-    reasoning: { effort: reasoningEffort },
-    responseFormat: {
-      type: "json_schema",
-      jsonSchema: {
-        name: "organization_facts",
-        strict: true,
-        schema: factsSchema,
-      },
-    },
-    messages: buildMessages(input),
-  }
-}
+    reasoning: "medium",
+  })
 
-function buildMessages(input: ExtractionInput): OpenRouterChatMessage[] {
-  return [
-    {
-      role: "system",
-      content: renderPromptTemplate(
-        promptTemplates["organization/discovery"],
-        {}
-      ),
-    },
-    {
-      role: "user",
-      content: JSON.stringify({
-        primaryUrl: input.primaryUrl,
-        pages: input.pages,
-      }),
-    },
-  ]
-}
-
-function readContent(response: Awaited<ReturnType<typeof sendOpenRouterChat>>) {
-  const choice = response.choices[0]
-
-  if (choice === undefined) {
-    throw new Error("The discovery model returned no choices.")
-  }
-
-  if (choice.finishReason === "length") {
-    throw new Error("The discovery model response was truncated.")
-  }
-
-  const content = choice.message.content
-
-  if (typeof content !== "string" || content.trim() === "") {
-    throw new Error("The discovery model returned empty content.")
-  }
-
-  return content
-}
-
-function parseJson(text: string): Record<string, unknown> {
-  try {
-    const value: unknown = JSON.parse(text)
-
-    return typeof value === "object" && value !== null && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {}
-  } catch {
-    throw new Error("The discovery model returned invalid JSON.")
-  }
+  return normalizeFacts(value)
 }
 
 function normalizeFacts(value: Record<string, unknown>): OrganizationFacts {
