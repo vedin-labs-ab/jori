@@ -27,6 +27,8 @@ import { ProposalReviewBody } from "./review"
 
 type ProposalReviewProps = {
   current: ContextFacts | null
+  onOpenChange?: (open: boolean) => void
+  open?: boolean
   primaryWebsite: string | undefined
   proposed: ContextProposal
   sources: OrganizationSources | undefined
@@ -35,19 +37,23 @@ type ProposalReviewProps = {
 
 export function ProposalReview({
   current,
+  onOpenChange,
+  open,
   primaryWebsite,
   proposed,
   sources,
   tenantId,
 }: ProposalReviewProps) {
-  const [open, setOpen] = useState(false)
+  const [localOpen, setLocalOpen] = useState(false)
+  const dialogOpen = open ?? localOpen
+  const setDialogOpen = onOpenChange ?? setLocalOpen
 
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
+    <Dialog onOpenChange={setDialogOpen} open={dialogOpen}>
       <ProposalAlert />
       <ProposalDialog
         current={current}
-        onClose={() => setOpen(false)}
+        onClose={() => setDialogOpen(false)}
         primaryWebsite={primaryWebsite}
         proposed={proposed}
         sources={sources}

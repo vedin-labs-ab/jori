@@ -12,11 +12,13 @@ export function OrganizationEditDialog({
   website,
   discovery,
   onOpenChange,
+  onReviewProfile,
 }: {
   tenantId: string
   website: string | undefined
   discovery: OrganizationDiscovery | undefined
   onOpenChange: (open: boolean) => void
+  onReviewProfile: () => void
 }) {
   const discover = useAction(api.organization.onboarding.discover)
   const [step, setStep] = useState<"website" | "working">(
@@ -75,6 +77,7 @@ export function OrganizationEditDialog({
           <DiscoveryWorkingStep
             discovery={workingDiscovery}
             onClose={() => onOpenChange(false)}
+            onReviewProfile={onReviewProfile}
           />
         )}
       </DialogContent>
