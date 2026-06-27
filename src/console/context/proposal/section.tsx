@@ -33,7 +33,7 @@ export function ReviewSection({
   return (
     <section className="grid gap-2.5">
       <ContextSectionTitle
-        action={<StatusBadge status={status} />}
+        action={status === "changed" ? <ChangedBadge /> : undefined}
         count={count}
       >
         {title}
@@ -88,10 +88,7 @@ function CurrentDisclosure({
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="mt-1 grid gap-2 rounded-md border bg-muted/20 p-3">
-          <span className="font-medium text-muted-foreground text-xs">
-            Currently approved
-          </span>
+        <div className="mt-1 rounded-md border bg-muted/20 p-3">
           {empty ? <EmptyValue /> : current}
         </div>
       </CollapsibleContent>
@@ -99,12 +96,6 @@ function CurrentDisclosure({
   )
 }
 
-function StatusBadge({ status }: { status: ProposalSectionStatus }) {
-  const changed = status === "changed"
-
-  return (
-    <Badge variant={changed ? "secondary" : "outline"}>
-      {changed ? "Changed" : "Unchanged"}
-    </Badge>
-  )
+function ChangedBadge() {
+  return <Badge variant="secondary">Changed</Badge>
 }
