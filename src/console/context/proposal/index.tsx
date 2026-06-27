@@ -17,7 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Separator } from "@/components/ui/separator"
 import { api } from "../../../../convex/_generated/api"
 import { type ContextFacts, type OrganizationSources } from "../types"
 import { ProposalReviewBody } from "./review"
@@ -110,14 +109,12 @@ function ProposalDialog({
           Review the latest extraction before adding it to context.
         </DialogDescription>
       </DialogHeader>
-      <Separator />
       <ProposalReviewBody
         current={current}
         primaryWebsite={primaryWebsite}
         proposed={proposed}
         sources={sources}
       />
-      <Separator />
       <DialogFooter>
         <Button disabled={approving} onClick={onClose} variant="outline">
           Cancel
