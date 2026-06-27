@@ -1,17 +1,20 @@
 import { describe, expect, test } from "vitest"
-import { createDiscoveryTasks } from "./progress-data"
+import {
+  createDiscoveryTasks,
+  discoveryFailed,
+  discoveryReadyForReview,
+} from "./progress-data"
 import { type OrganizationDiscovery } from "./types"
 
 type Discovery = NonNullable<OrganizationDiscovery>
 type DiscoveryStep = Discovery["steps"][number]
 
 describe("createDiscoveryTasks", () => {
-  test("creates standalone summary tasks from extracting steps", () => {
+  test("creates standalone summary tasks from summary steps", () => {
     const tasks = createDiscoveryTasks(
       discovery([
-        step(0, "reading", "Reading homepage", "https://example.com/"),
-        step(5, "extracting", "Drafting profile"),
-        step(10, "done", "Draft ready for review"),
+        pageStep(0, 5, "https://example.com/"),
+        summaryStep(5, 10, "Drafting profile"),
       ]),
       10_000
     )
@@ -28,10 +31,9 @@ describe("createDiscoveryTasks", () => {
   test("excludes idle gaps from task elapsed time", () => {
     const [task] = createDiscoveryTasks(
       discovery([
-        step(0, "reading", "Reading homepage", "https://example.com/"),
-        step(5, "extracting", "Summarizing homepage"),
-        step(20, "exploring", "Exploring about", "https://example.com/about"),
-        step(25, "done", "Done"),
+        pageStep(0, 5, "https://example.com/"),
+        summaryStep(5, 20, "Summarizing homepage"),
+        pageStep(20, 25, "https://example.com/about"),
       ]),
       25_000
     )
@@ -42,10 +44,9 @@ describe("createDiscoveryTasks", () => {
   test("does not double count overlapping task intervals", () => {
     const [task] = createDiscoveryTasks(
       discovery([
-        step(5, "reading", "Reading homepage", "https://example.com/"),
-        step(10, "exploring", "Exploring team", "https://example.com/team"),
-        step(5, "exploring", "Exploring about", "https://example.com/about"),
-        step(10, "done", "Done"),
+        pageStep(5, 10, "https://example.com/"),
+        pageStep(5, 10, "https://example.com/team"),
+        pageStep(5, 10, "https://example.com/about"),
       ]),
       10_000
     )
@@ -58,11 +59,9 @@ describe("discovery page failures", () => {
   test("marks page failures as task warnings when discovery succeeds", () => {
     const [task] = createDiscoveryTasks(
       discovery([
-        step(0, "reading", "Reading homepage", "https://example.com/"),
-        step(5, "exploring", "Exploring about", "https://example.com/about"),
-        step(8, "error", "Could not read about", "https://example.com/about"),
-        step(12, "extracting", "Summarizing what we found"),
-        step(20, "done", "Draft ready for review"),
+        pageStep(0, 5, "https://example.com/"),
+        pageStep(5, 8, "https://example.com/about", "Could not read about"),
+        summaryStep(12, 20, "Summarizing what we found"),
       ]),
       20_000
     )
@@ -76,13 +75,7 @@ describe("discovery page failures", () => {
 
   test("keeps page failures destructive when discovery fails", () => {
     const [task] = createDiscoveryTasks(
-      discovery(
-        [
-          step(0, "reading", "Reading homepage", "https://example.com/"),
-          step(5, "error", "Could not read homepage", "https://example.com/"),
-        ],
-        "failed"
-      ),
+      discovery([pageStep(0, 5, "https://example.com/", "Could not read")]),
       20_000
     )
 
@@ -91,32 +84,72 @@ describe("discovery page failures", () => {
   })
 })
 
-function discovery(
-  steps: DiscoveryStep[],
-  status: Discovery["status"] = "succeeded"
-): Discovery {
+describe("discovery completion state", () => {
+  test("treats the latest completed summary as reviewable", () => {
+    const run = discovery([
+      pageStep(0, 5, "https://example.com/"),
+      summaryStep(5, 10, "Drafting profile"),
+    ])
+
+    expect(discoveryReadyForReview(run)).toBe(true)
+    expect(discoveryFailed(run)).toBe(false)
+  })
+
+  test("treats a latest summary error as a failed run", () => {
+    const run = discovery([
+      summaryStep(0, 5, "First pass"),
+      summaryStep(10, 15, "Drafting profile", "Could not draft profile"),
+    ])
+
+    expect(discoveryReadyForReview(run)).toBe(false)
+    expect(discoveryFailed(run)).toBe(true)
+  })
+})
+
+function discovery(steps: DiscoveryStep[]): Discovery {
   return {
     _creationTime: 0,
     _id: "discovery" as Discovery["_id"],
     endedAt: 25_000,
+    errors: stepErrors(steps),
     startedAt: 0,
-    status,
+    status: "completed",
     steps,
     tenantId: "tenant",
-    ...(status === "failed" ? { error: "Discovery failed." } : {}),
   }
 }
 
-function step(
-  seconds: number,
-  kind: DiscoveryStep["kind"],
-  label: string,
-  url?: string
+function pageStep(
+  startSeconds: number,
+  endSeconds: number,
+  url: string,
+  error?: string
 ): DiscoveryStep {
   return {
-    at: seconds * 1000,
-    kind,
-    label,
-    ...(url === undefined ? {} : { url }),
+    completedAt: endSeconds * 1000,
+    kind: "page",
+    label: `Reading ${url}`,
+    startedAt: startSeconds * 1000,
+    url,
+    ...(error === undefined ? {} : { error }),
   }
+}
+
+function summaryStep(
+  startSeconds: number,
+  endSeconds: number,
+  label: string,
+  error?: string
+): DiscoveryStep {
+  return {
+    completedAt: endSeconds * 1000,
+    kind: "summary",
+    label,
+    startedAt: startSeconds * 1000,
+    ...(error === undefined ? {} : { error }),
+  }
+}
+
+function stepErrors(steps: DiscoveryStep[]) {
+  return steps.flatMap((step) => (step.error === undefined ? [] : [step.error]))
 }

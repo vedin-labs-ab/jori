@@ -28,6 +28,7 @@ export const start = internalMutation({
       status: "running" as const,
       steps: [],
       startedAt: Date.now(),
+      errors: [],
     }
 
     if (existing === null) {
@@ -40,7 +41,7 @@ export const start = internalMutation({
   },
 })
 
-export const step = internalMutation({
+export const startStep = internalMutation({
   args: {
     tenantId: v.string(),
     kind: discoveryStepKind,
@@ -51,17 +52,50 @@ export const step = internalMutation({
     const discovery = await readDiscovery(ctx, args.tenantId)
 
     if (discovery === null) {
-      return
+      throw new Error("Discovery run has not started.")
     }
 
+    const startedAt = Date.now()
     const entry = {
-      at: Date.now(),
       kind: args.kind,
       label: args.label,
+      startedAt,
       ...(args.url === undefined ? {} : { url: args.url }),
     }
     await ctx.db.patch(discovery._id, {
       steps: [...discovery.steps, entry].slice(-maxSteps),
+    })
+
+    return startedAt
+  },
+})
+
+export const completeStep = internalMutation({
+  args: {
+    tenantId: v.string(),
+    startedAt: v.number(),
+    error: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const discovery = await readDiscovery(ctx, args.tenantId)
+
+    if (discovery === null) {
+      return
+    }
+
+    const completedAt = Date.now()
+
+    await ctx.db.patch(discovery._id, {
+      steps: discovery.steps.map((step) =>
+        step.startedAt === args.startedAt
+          ? {
+              ...step,
+              completedAt,
+              ...(args.error === undefined ? {} : { error: args.error }),
+            }
+          : step
+      ),
+      errors: appendError(discovery.errors, args.error),
     })
   },
 })
@@ -76,12 +110,20 @@ export const finish = internalMutation({
     }
 
     await ctx.db.patch(discovery._id, {
-      status: args.error === undefined ? "succeeded" : "failed",
+      status: "completed",
       endedAt: Date.now(),
-      ...(args.error === undefined ? {} : { error: args.error }),
+      errors: appendError(discovery.errors, args.error),
     })
   },
 })
+
+function appendError(errors: string[], error: string | undefined) {
+  if (error === undefined || errors.includes(error)) {
+    return errors
+  }
+
+  return [...errors, error]
+}
 
 async function readDiscovery(ctx: QueryCtx | MutationCtx, tenantId: string) {
   return await ctx.db
