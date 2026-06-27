@@ -41,6 +41,7 @@ export function ContextProfile({
 
   const facts = profile === null || !hasFacts(profile) ? null : profile
   const hasSources = sources === undefined || sources.length > 0
+  const extracting = discovery?.status === "running"
   const title =
     facts !== null && isFactPresent(facts.name) ? facts.name : "Organization"
 
@@ -60,7 +61,8 @@ export function ContextProfile({
             type="button"
             variant="outline"
           >
-            Edit
+            {extracting ? <Loader2 className="animate-spin" /> : null}
+            {extracting ? "Extracting" : "Edit"}
           </Button>
         </CardHeader>
         <CardContent className="grid gap-6 p-4 pt-0 sm:p-5 sm:pt-0">
