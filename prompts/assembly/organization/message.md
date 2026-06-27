@@ -10,7 +10,11 @@ Summary: {{organization.summary}}
 Also known as: {{organization.aliases}}
 {%- endif %}
 {%- if organization.domains %}
-Website: {{organization.domains}}
+
+Websites:
+{%- for domain in organization.domains %}
+- {{domain}}
+{%- endfor %}
 {%- endif %}
 {%- if organization.products %}
 
