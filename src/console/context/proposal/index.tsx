@@ -1,5 +1,5 @@
 import { useMutation } from "convex/react"
-import { Loader2, RefreshCw } from "lucide-react"
+import { FilePenLine, Loader2 } from "lucide-react"
 import { useState } from "react"
 import {
   Alert,
@@ -51,13 +51,13 @@ export function ProposalReview({
 
 function ProposalAlert() {
   return (
-    <Alert>
-      <RefreshCw />
+    <Alert className="bg-muted/20">
+      <FilePenLine className="mt-0.5" />
       <AlertTitle>New proposal available</AlertTitle>
       <AlertDescription>
         Review changes before they are added to context.
       </AlertDescription>
-      <AlertAction>
+      <AlertAction className="top-1/2 -translate-y-1/2">
         <DialogTrigger asChild>
           <Button size="sm" type="button">
             Review
