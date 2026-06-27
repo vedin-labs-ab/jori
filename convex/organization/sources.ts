@@ -4,7 +4,9 @@ import {
   internalQuery,
   type MutationCtx,
   type QueryCtx,
+  query,
 } from "../_generated/server"
+import { requireTenantAccess } from "../identity/access"
 
 const dayMs = 24 * 60 * 60 * 1000
 const processedIntervalMs = 14 * dayMs
@@ -69,14 +71,42 @@ export const upsert = internalMutation({
 export const primaryUrl = internalQuery({
   args: { tenantId: v.string() },
   handler: async (ctx, args) => {
-    const sources = await ctx.db
-      .query("organizationSources")
-      .withIndex("by_tenant_and_url", (q) => q.eq("tenantId", args.tenantId))
-      .take(maxSourcesPerTenant)
+    const sources = await readByTenant(ctx, args.tenantId)
 
     return sources.find((source) => source.primary)?.url ?? null
   },
 })
+
+export const list = query({
+  args: { tenantId: v.string() },
+  handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+
+    const sources = await readByTenant(ctx, args.tenantId)
+
+    return sources
+      .map((source) => ({ primary: source.primary, url: source.url }))
+      .sort(compareSources)
+  },
+})
+
+function compareSources(
+  left: { primary: boolean; url: string },
+  right: { primary: boolean; url: string }
+) {
+  if (left.primary !== right.primary) {
+    return left.primary ? -1 : 1
+  }
+
+  return left.url.localeCompare(right.url)
+}
+
+async function readByTenant(ctx: QueryCtx, tenantId: string) {
+  return await ctx.db
+    .query("organizationSources")
+    .withIndex("by_tenant_and_url", (q) => q.eq("tenantId", tenantId))
+    .take(maxSourcesPerTenant)
+}
 
 async function readByUrl(
   ctx: QueryCtx | MutationCtx,
