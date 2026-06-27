@@ -52,8 +52,46 @@ test("uses stored message snapshots when the message document is unavailable", a
   const summary = await summarizeRun(fakeQueryCtx({ run }), run)
 
   expect(summary.source).toEqual({
+    kind: { label: "mention", type: "mention" },
     type: "message",
     surface: "slack",
+  })
+})
+
+test("summarizes event source labels from already-loaded event context", async () => {
+  const run = testRun({
+    cause: { type: "event", eventId: "event" },
+    snapshot: {
+      title: "Review the pull request comment.",
+      ...eventAutomationDisplay({
+        context: [{ type: "repository", label: "frontier" }],
+        surface: "github",
+      }),
+    },
+  })
+  const summary = await summarizeRun(
+    fakeQueryCtx({
+      event: {
+        _id: "event",
+        _creationTime: 0,
+        tenantId: "tenant",
+        integrationId: "integration",
+        key: "github:event",
+        type: "pull_request.review_comment.created",
+      },
+      integration: githubIntegration(),
+      run,
+    }),
+    run
+  )
+
+  expect(summary.source).toEqual({
+    event: {
+      label: "Pull request review comment created",
+      type: "pull_request.review_comment.created",
+    },
+    surface: "github",
+    type: "automation",
   })
 })
 
@@ -95,6 +133,7 @@ test("uses source message text for message tasks", async () => {
   expect(summary.title).toBe("Please summarize this thread.")
   expect(summary.task).toBe("Please summarize this thread.\n\nKeep it concise.")
   expect(summary.source).toEqual({
+    kind: { label: "reply", type: "reply" },
     type: "message",
     surface: "slack",
   })
@@ -122,6 +161,7 @@ test("summarizes mention runs with source task links", async () => {
   const summary = await summarizeRun(fakeQueryCtx({ run }), run)
 
   expect(summary.source).toEqual({
+    kind: { label: "mention", type: "mention" },
     type: "message",
     surface: "slack",
     url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=slack-team",
@@ -184,6 +224,13 @@ function slackIntegration() {
     createdBy: "user",
     createdAt: 0,
     updatedAt: 0,
+  }
+}
+
+function githubIntegration() {
+  return {
+    ...slackIntegration(),
+    integration: "github",
   }
 }
 

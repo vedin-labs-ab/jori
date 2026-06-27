@@ -1,12 +1,39 @@
 import { toolSurfaceLabel } from "@contracts/integrations"
 import { type ReactNode } from "react"
-import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../shared/dot"
 import { ProviderLogo } from "../../shared/logo/provider"
-import { type ExecutionSource } from "../types"
+import {
+  type ExecutionDetail,
+  type ExecutionDetailType,
+  type ExecutionSource,
+  type SourceDatum,
+} from "../types"
+import { SourceMetadataDatum } from "./metadata"
 
-export function SourceLine({ source }: { source: ExecutionSource }) {
-  const items = sourceItems(source)
+const sourceMetadataTypes = new Set<ExecutionDetailType>([
+  "calendar_event",
+  "channel",
+  "file",
+  "folder",
+  "issue",
+  "page",
+  "project",
+  "pull_request",
+  "repository",
+  "schedule",
+  "sender",
+  "status",
+  "subject",
+])
+
+export function SourceLine({
+  details = [],
+  source,
+}: {
+  details?: readonly ExecutionDetail[]
+  source: ExecutionSource
+}) {
+  const items = sourceItems(source, details)
 
   if (items.length === 0) {
     return null
@@ -28,7 +55,10 @@ type SourceItem = {
   key: string
 }
 
-function sourceItems(source: ExecutionSource): SourceItem[] {
+function sourceItems(
+  source: ExecutionSource,
+  details: readonly ExecutionDetail[]
+): SourceItem[] {
   return [
     ...optionalItem(
       "surface",
@@ -36,6 +66,19 @@ function sourceItems(source: ExecutionSource): SourceItem[] {
         <ProviderDatum surface={source.surface} />
       )
     ),
+    ...optionalItem(
+      "kind",
+      source.kind === undefined ? undefined : (
+        <SourceTypeDatum datum={source.kind} />
+      )
+    ),
+    ...optionalItem(
+      "event",
+      source.event === undefined ? undefined : (
+        <SourceTypeDatum datum={source.event} />
+      )
+    ),
+    ...sourceDetailItems(details, source.surface),
     ...optionalItem(
       "stop",
       source.stop === undefined ? undefined : (
@@ -78,17 +121,30 @@ function ProviderDatum({ surface }: { surface: string }) {
   )
 }
 
-export function RepositoryIcon({ className }: { className?: string }) {
+function SourceTypeDatum({ datum }: { datum: SourceDatum }) {
   return (
-    <svg
-      aria-hidden="true"
-      className={cn("size-3", className)}
-      fill="currentColor"
-      viewBox="0 0 24 24"
+    <span
+      className="truncate font-medium font-mono text-foreground"
+      title={datum.label}
     >
-      <path d="M3 2.75A2.75 2.75 0 0 1 5.75 0h14.5a.75.75 0 0 1 .75.75v20.5a.75.75 0 0 1-.75.75h-6a.75.75 0 0 1 0-1.5h5.25v-4H6A1.5 1.5 0 0 0 4.5 18v.75c0 .716.43 1.334 1.05 1.605a.75.75 0 0 1-.6 1.374A3.251 3.251 0 0 1 3 18.75ZM19.5 1.5H5.75c-.69 0-1.25.56-1.25 1.25v12.651A2.989 2.989 0 0 1 6 15h13.5Z" />
-      <path d="M7 18.25a.25.25 0 0 1 .25-.25h5a.25.25 0 0 1 .25.25v5.01a.25.25 0 0 1-.397.201l-2.206-1.604a.25.25 0 0 0-.294 0L7.397 23.46a.25.25 0 0 1-.397-.2v-5.01Z" />
-    </svg>
+      {datum.type}
+    </span>
+  )
+}
+
+function sourceDetailItems(
+  details: readonly ExecutionDetail[],
+  surface: string | undefined
+): SourceItem[] {
+  return details.flatMap((detail) =>
+    sourceMetadataTypes.has(detail.type)
+      ? [
+          {
+            content: <SourceMetadataDatum detail={detail} surface={surface} />,
+            key: `detail-${detail.type}-${detail.url ?? detail.label}`,
+          },
+        ]
+      : []
   )
 }
 

@@ -23,6 +23,7 @@ test("renders recurring automation details", () => {
       task: "Generate a team image.",
       title: "Daily image",
       source: {
+        kind: { label: "recurring", type: "recurring" },
         type: "automation",
         surface: "milo",
       },
@@ -45,10 +46,13 @@ test("renders recurring automation details", () => {
     })
   )
 
+  expect(screen.getByText("recurring")).toBeDefined()
+  expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
+
   fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
 
   expect(screen.getByText("Milo")).toBeDefined()
-  expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
+  expect(screen.getAllByText("Daily at 09:00 UTC").length).toBeGreaterThan(1)
   expect(screen.getByText("Schedule")).toBeDefined()
   expect(screen.queryByText("Occurrence")).toBeNull()
   expect(screen.getByText("Next")).toBeDefined()

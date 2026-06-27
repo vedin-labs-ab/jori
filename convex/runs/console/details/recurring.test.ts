@@ -26,6 +26,7 @@ test("includes recurring automation details", async () => {
   )
 
   expect(summary.source).toEqual({
+    kind: { label: "recurring", type: "recurring" },
     type: "automation",
     surface: "milo",
   })
