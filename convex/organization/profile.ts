@@ -97,6 +97,15 @@ function toFacts(source: OrganizationFacts): OrganizationFacts {
   }
 }
 
+export async function readApprovedFacts(
+  ctx: QueryCtx | MutationCtx,
+  tenantId: string
+): Promise<OrganizationFacts | null> {
+  const profile = await readProfile(ctx, tenantId)
+
+  return profile === null ? null : toFacts(profile)
+}
+
 async function readProfile(ctx: QueryCtx | MutationCtx, tenantId: string) {
   return await ctx.db
     .query("organizationProfile")

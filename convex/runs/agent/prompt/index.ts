@@ -37,6 +37,7 @@ export function assemblePrompt(
       approvals: optionalPromptBlock(createApprovalInstructions(promptedTools)),
       communication: optionalPromptBlock(communication?.communication ?? ""),
       format: optionalPromptBlock(communication?.format ?? ""),
+      organization: optionalPromptBlock(createOrganizationInstructions(input)),
       run,
       skills: optionalPromptBlock(skills),
       trigger: promptBlock(createTriggerPart(input, true)),
@@ -82,6 +83,24 @@ function createApprovalInstructions(promptedTools: ToolPermission[]) {
   return promptedTools.length === 0
     ? ""
     : promptBlock(createToolApprovalInstructions(promptedTools))
+}
+
+function createOrganizationInstructions(input: AgentRuntimeInput) {
+  const facts = input.organization
+
+  if (!facts?.name) {
+    return ""
+  }
+
+  return renderPromptTemplate(promptTemplates["organization/message"], {
+    organization: {
+      name: facts.name,
+      summary: facts.summary ?? null,
+      aliases: facts.aliases.length === 0 ? null : facts.aliases.join(", "),
+      domains: facts.domains.length === 0 ? null : facts.domains.join(", "),
+      products: facts.products.length === 0 ? null : facts.products,
+    },
+  }).trim()
 }
 
 function createRunInstructions(activeSurface: PromptActiveSurface | null) {
