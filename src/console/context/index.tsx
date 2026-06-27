@@ -4,14 +4,15 @@ import { api } from "../../../convex/_generated/api"
 import { type ActiveOrganization, ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
 import { ContextProfile } from "./profile"
+import { type OrganizationSources } from "./types"
 
 export function OrganizationContext() {
   return (
     <ConsolePage>
       {(organization) => (
         <ContextView
+          fallbackWebsite={readWebsite(organization)}
           tenantId={organization.id}
-          website={readWebsite(organization)}
         />
       )}
     </ConsolePage>
@@ -20,14 +21,15 @@ export function OrganizationContext() {
 
 function ContextView({
   tenantId,
-  website,
+  fallbackWebsite,
 }: {
   tenantId: string
-  website: string | undefined
+  fallbackWebsite: string | undefined
 }) {
   const profile = useQuery(api.organization.profile.get, { tenantId })
   const discovery = useQuery(api.organization.discovery.get, { tenantId })
   const sources = useQuery(api.organization.sources.list, { tenantId })
+  const website = readPrimaryWebsite(sources) ?? fallbackWebsite
 
   return (
     <ConsolePageLayout>
@@ -58,4 +60,8 @@ function readWebsite(organization: ActiveOrganization) {
   return typeof website === "string" && website.trim() !== ""
     ? website
     : undefined
+}
+
+function readPrimaryWebsite(sources: OrganizationSources | undefined) {
+  return sources?.find((source) => source.primary)?.url
 }

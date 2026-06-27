@@ -5,10 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { ContextSectionTitle } from "./section"
-import { type ContextFacts, type OrganizationSources } from "./types"
+import { type ContextFacts, type ContextSource } from "./types"
 import { sourceLabel, type WebsiteItem, websiteItems } from "./url"
-
-type OrganizationSource = OrganizationSources[number]
 
 const visibleSourceCount = 3
 
@@ -60,7 +58,7 @@ export function WebsitesContent({ websites }: { websites: WebsiteItem[] }) {
 export function SourcesSection({
   sources,
 }: {
-  sources: OrganizationSources | undefined
+  sources: ContextSource[] | undefined
 }) {
   if (sources === undefined) {
     return <Skeleton className="h-28 w-full rounded-lg" />
@@ -81,7 +79,7 @@ export function SourcesSection({
 export function SourcesContent({
   sources,
 }: {
-  sources: OrganizationSources | undefined
+  sources: ContextSource[] | undefined
 }) {
   const [expanded, setExpanded] = useState(false)
 
@@ -123,7 +121,7 @@ export function SourcesContent({
   )
 }
 
-function SourceRow({ source }: { source: OrganizationSource }) {
+function SourceRow({ source }: { source: ContextSource }) {
   return (
     <li className="min-w-0">
       <Button

@@ -14,12 +14,25 @@ export const factsFields = {
 
 export const organizationFacts = v.object(factsFields)
 
+export const organizationSourceSnapshot = v.object({
+  url: v.string(),
+  primary: v.boolean(),
+  hash: v.optional(v.string()),
+})
+
 // One row per tenant. Top-level fields are live/approved and read on the hot
 // path; `proposed` holds a draft awaiting human approval (absent when none).
 export const organizationProfile = defineTable({
   tenantId: v.string(),
   ...factsFields,
-  proposed: v.optional(v.object({ ...factsFields, generatedAt: v.number() })),
+  proposed: v.optional(
+    v.object({
+      ...factsFields,
+      generatedAt: v.number(),
+      sources: v.optional(v.array(organizationSourceSnapshot)),
+      website: v.optional(v.string()),
+    })
+  ),
   approvedAt: v.optional(v.number()),
   updatedAt: v.number(),
 }).index("by_tenant", ["tenantId"])

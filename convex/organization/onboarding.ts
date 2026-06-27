@@ -5,13 +5,13 @@ import { normalizePublicHttpUrl } from "../broker/tools/web/input"
 import { requireTenantAccess } from "../identity/access"
 
 // Marks onboarding as seen (so the welcome flow never reopens) and, when a
-// website is provided, seeds it and kicks off discovery.
+// website is provided, kicks off discovery for a proposed organization profile.
 export const complete = action({
   args: { tenantId: v.string(), website: v.optional(v.string()) },
   handler: async (ctx, args) => {
     await requireTenantAccess(ctx, args.tenantId)
     const website = normalizeWebsite(args.website)
-    await patchClerkMetadata(args.tenantId, { onboarded: true, website })
+    await patchClerkMetadata(args.tenantId, { onboarded: true })
 
     if (website !== undefined) {
       await startDiscovery(ctx, args.tenantId, website)
@@ -25,11 +25,6 @@ export const discover = action({
   handler: async (ctx, args) => {
     await requireTenantAccess(ctx, args.tenantId)
     const website = normalizeWebsite(args.website)
-
-    if (website !== undefined) {
-      await patchClerkMetadata(args.tenantId, { website })
-    }
-
     await startDiscovery(ctx, args.tenantId, website)
   },
 })
@@ -39,13 +34,6 @@ async function startDiscovery(
   tenantId: string,
   website: string | undefined
 ) {
-  if (website !== undefined) {
-    await ctx.runMutation(internal.organization.sources.seed, {
-      tenantId,
-      url: website,
-    })
-  }
-
   const primaryUrl =
     website ??
     (await ctx.runQuery(internal.organization.sources.primaryUrl, { tenantId }))
@@ -54,7 +42,10 @@ async function startDiscovery(
     throw new Error("Add a website before running discovery.")
   }
 
-  await ctx.scheduler.runAfter(0, internal.organization.draft.run, { tenantId })
+  await ctx.scheduler.runAfter(0, internal.organization.draft.run, {
+    tenantId,
+    primaryUrl,
+  })
 }
 
 function normalizeWebsite(website: string | undefined) {
@@ -73,7 +64,7 @@ function normalizeWebsite(website: string | undefined) {
 
 async function patchClerkMetadata(
   tenantId: string,
-  metadata: { onboarded?: boolean; website?: string }
+  metadata: { onboarded?: boolean }
 ) {
   const clerkSecretKey = process.env.CLERK_SECRET_KEY
 
@@ -98,11 +89,10 @@ async function patchClerkMetadata(
   }
 }
 
-function cleanMetadata(metadata: { onboarded?: boolean; website?: string }) {
+function cleanMetadata(metadata: { onboarded?: boolean }) {
   return {
     ...(metadata.onboarded === undefined
       ? {}
       : { onboarded: metadata.onboarded }),
-    ...(metadata.website === undefined ? {} : { website: metadata.website }),
   }
 }

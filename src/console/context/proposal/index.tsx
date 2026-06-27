@@ -18,13 +18,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { api } from "../../../../convex/_generated/api"
-import { type ContextFacts, type OrganizationSources } from "../types"
+import {
+  type ContextFacts,
+  type ContextProposal,
+  type OrganizationSources,
+} from "../types"
 import { ProposalReviewBody } from "./review"
 
 type ProposalReviewProps = {
   current: ContextFacts | null
   primaryWebsite: string | undefined
-  proposed: ContextFacts
+  proposed: ContextProposal
   sources: OrganizationSources | undefined
   tenantId: string
 }
@@ -83,7 +87,7 @@ function ProposalDialog({
   current: ContextFacts | null
   onClose: () => void
   primaryWebsite: string | undefined
-  proposed: ContextFacts
+  proposed: ContextProposal
   sources: OrganizationSources | undefined
   tenantId: string
 }) {

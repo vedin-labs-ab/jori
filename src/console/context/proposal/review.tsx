@@ -3,6 +3,8 @@ import { AliasesContent, ProductsContent } from "../facts"
 import { SourcesContent, WebsitesContent } from "../sources"
 import {
   type ContextFacts,
+  type ContextProposal,
+  type ContextSource,
   isFactPresent,
   type OrganizationSources,
 } from "../types"
@@ -17,7 +19,7 @@ import { ReviewSection, SummaryContent } from "./section"
 type ProposalReviewBodyProps = {
   current: ContextFacts | null
   primaryWebsite: string | undefined
-  proposed: ContextFacts
+  proposed: ContextProposal
   sources: OrganizationSources | undefined
 }
 
@@ -28,10 +30,20 @@ export function ProposalReviewBody({
   sources,
 }: ProposalReviewBodyProps) {
   const approved = approvedFacts(current)
-  const statuses = proposalStatuses(current, proposed, primaryWebsite)
+  const proposedWebsite = proposed.website ?? primaryWebsite
+  const proposedSources = proposed.sources ?? sources
+  const statuses = proposalStatuses(current, proposed, {
+    currentSources: sources,
+    currentWebsite: primaryWebsite,
+    proposedSources,
+    proposedWebsite,
+  })
   const currentWebsites = websiteItems(approved.domains, primaryWebsite)
-  const proposedWebsites = websiteItems(proposed.domains, primaryWebsite)
-  const hasSources = sources === undefined || sources.length > 0
+  const proposedWebsites = websiteItems(proposed.domains, proposedWebsite)
+  const hasSources =
+    sources === undefined ||
+    proposedSources === undefined ||
+    sources.length + proposedSources.length > 0
 
   return (
     <div className="grid max-h-[60vh] gap-5 overflow-y-auto pr-1">
@@ -58,14 +70,10 @@ export function ProposalReviewBody({
       {hasSources ? (
         <>
           <Separator />
-          <ReviewSection
-            count={sources?.length}
-            current={null}
-            currentEmpty
-            proposed={<SourcesContent sources={sources} />}
-            proposedEmpty={sources !== undefined && sources.length === 0}
-            status="unchanged"
-            title="Sources"
+          <OptionalSources
+            current={sources}
+            proposed={proposedSources}
+            status={statuses.sources}
           />
         </>
       ) : null}
@@ -145,6 +153,28 @@ function OptionalAliases({
       proposedEmpty={proposed.aliases.length === 0}
       status={status}
       title="Also known as"
+    />
+  )
+}
+
+function OptionalSources({
+  current,
+  proposed,
+  status,
+}: {
+  current: ContextSource[] | undefined
+  proposed: ContextSource[] | undefined
+  status: ProposalSectionStatus
+}) {
+  return (
+    <ReviewSection
+      count={proposed?.length}
+      current={<SourcesContent sources={current} />}
+      currentEmpty={current !== undefined && current.length === 0}
+      proposed={<SourcesContent sources={proposed} />}
+      proposedEmpty={proposed !== undefined && proposed.length === 0}
+      status={status}
+      title="Sources"
     />
   )
 }
