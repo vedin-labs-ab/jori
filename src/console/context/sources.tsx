@@ -107,7 +107,7 @@ export function SourcesContent({
       </ul>
       {hiddenCount > 0 || expanded ? (
         <Button
-          className="w-fit justify-self-start px-0 text-muted-foreground hover:text-foreground"
+          className="w-fit justify-self-start text-muted-foreground hover:text-foreground"
           onClick={() => setExpanded((value) => !value)}
           size="sm"
           type="button"
