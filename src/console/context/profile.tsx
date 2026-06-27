@@ -2,6 +2,7 @@ import { useAction, useMutation } from "convex/react"
 import { Loader2, TriangleAlert } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -45,12 +46,10 @@ export function ContextProfile({
 
   return (
     <>
-      <section className="grid gap-5">
-        <header className="flex flex-row items-start justify-between gap-4">
+      <Card className="gap-5 py-0 ring-inset">
+        <CardHeader className="flex flex-row items-start justify-between gap-4 p-4 sm:p-5">
           <div className="grid gap-1">
-            <h2 className="font-heading text-sm font-medium text-foreground">
-              {title}
-            </h2>
+            <CardTitle className="text-base">{title}</CardTitle>
             <p className="text-muted-foreground text-xs/relaxed">
               {approvalDescription(profile)}
             </p>
@@ -63,8 +62,8 @@ export function ContextProfile({
           >
             Edit
           </Button>
-        </header>
-        <div className="grid gap-5">
+        </CardHeader>
+        <CardContent className="grid gap-5 p-4 pt-0 sm:p-5 sm:pt-0">
           <DiscoveryPanel discovery={discovery} />
           {profile?.proposed === undefined ? null : (
             <ProposedPanel tenantId={tenantId} proposed={profile.proposed} />
@@ -84,8 +83,8 @@ export function ContextProfile({
               <SourcesSection sources={sources} />
             </>
           ) : null}
-        </div>
-      </section>
+        </CardContent>
+      </Card>
       {editorOpen ? (
         <OrganizationEditDialog
           tenantId={tenantId}
