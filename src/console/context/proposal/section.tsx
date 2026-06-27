@@ -81,10 +81,10 @@ function CurrentDisclosure({
           type="button"
           variant="link"
         >
+          {open ? "Hide current" : "Show current"}
           <ChevronDown
             className={cn("transition-transform", open && "rotate-180")}
           />
-          {open ? "Hide current" : "Show current"}
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
