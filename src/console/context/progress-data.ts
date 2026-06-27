@@ -44,7 +44,7 @@ function taskGroups(
   const groups = new Map<string, DiscoveryTaskItem[]>()
 
   for (const entry of explorationEntries(discovery.steps)) {
-    const item = toItem(entry, now)
+    const item = toItem(discovery, entry, now)
     const key = domainKey(item.url)
     groups.set(key, [...(groups.get(key) ?? []), item])
   }
@@ -76,13 +76,17 @@ function summaryTasks(
   now: number
 ) {
   return discovery.steps.flatMap((step) =>
-    step.kind === "summary" ? [toSummaryTask(step, now)] : []
+    step.kind === "summary" ? [toSummaryTask(discovery, step, now)] : []
   )
 }
 
-function toSummaryTask(step: DiscoveryStep, now: number): DiscoveryTask {
-  const status = stepStatus(step, now)
-  const endedAt = stepEnd(step, status)
+function toSummaryTask(
+  discovery: NonNullable<OrganizationDiscovery>,
+  step: DiscoveryStep,
+  now: number
+): DiscoveryTask {
+  const status = stepStatus(discovery, step, now)
+  const endedAt = stepEnd(discovery, step, status)
 
   return {
     elapsedMs: summaryElapsedMs(step, endedAt, now),
@@ -96,9 +100,13 @@ function toSummaryTask(step: DiscoveryStep, now: number): DiscoveryTask {
   }
 }
 
-function toItem(entry: StepEntry, now: number): DiscoveryTaskItem {
-  const status = stepStatus(entry.step, now)
-  const endedAt = stepEnd(entry.step, status)
+function toItem(
+  discovery: NonNullable<OrganizationDiscovery>,
+  entry: StepEntry,
+  now: number
+): DiscoveryTaskItem {
+  const status = stepStatus(discovery, entry.step, now)
+  const endedAt = stepEnd(discovery, entry.step, status)
 
   return {
     key: `${entry.step.startedAt}-${entry.step.url}`,
@@ -126,7 +134,11 @@ function isExplorationStep(step: DiscoveryStep): step is ExplorationStep {
   return step.kind === "page" && step.url !== undefined
 }
 
-function stepStatus(step: DiscoveryStep, now: number): DiscoveryItemStatus {
+function stepStatus(
+  discovery: NonNullable<OrganizationDiscovery>,
+  step: DiscoveryStep,
+  now: number
+): DiscoveryItemStatus {
   if (step.startedAt > now) {
     return "queued"
   }
@@ -135,19 +147,36 @@ function stepStatus(step: DiscoveryStep, now: number): DiscoveryItemStatus {
     return "failed"
   }
 
-  if (step.completedAt !== undefined && step.completedAt <= now) {
+  const completedAt = stepCompletedAt(discovery, step)
+
+  if (completedAt !== undefined && completedAt <= now) {
     return "completed"
   }
 
   return "active"
 }
 
-function stepEnd(step: DiscoveryStep, status: DiscoveryItemStatus) {
+function stepEnd(
+  discovery: NonNullable<OrganizationDiscovery>,
+  step: DiscoveryStep,
+  status: DiscoveryItemStatus
+) {
   if (status === "active" || status === "queued") {
     return undefined
   }
 
-  return step.completedAt
+  return stepCompletedAt(discovery, step)
+}
+
+function stepCompletedAt(
+  discovery: NonNullable<OrganizationDiscovery>,
+  step: DiscoveryStep
+) {
+  return step.completedAt ?? completedRunFallback(discovery)
+}
+
+function completedRunFallback(discovery: NonNullable<OrganizationDiscovery>) {
+  return discovery.status === "completed" ? discovery.endedAt : undefined
 }
 
 function taskStatus(
@@ -223,7 +252,7 @@ export function discoveryReadyForReview(
 
   return (
     summary !== null &&
-    summary.completedAt !== undefined &&
+    stepCompletedAt(discovery, summary) !== undefined &&
     summary.error === undefined
   )
 }

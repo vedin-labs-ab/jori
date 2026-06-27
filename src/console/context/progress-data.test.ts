@@ -95,6 +95,30 @@ describe("discovery completion state", () => {
     expect(discoveryFailed(run)).toBe(false)
   })
 
+  test("uses the run end time when a completed summary has no completion time", () => {
+    const run = discovery([summaryStep(5, null, "Drafting profile")])
+    const [task] = createDiscoveryTasks(run, 25_000)
+
+    expect(task).toMatchObject({
+      elapsedMs: 20_000,
+      status: "completed",
+    })
+    expect(discoveryReadyForReview(run)).toBe(true)
+  })
+
+  test("keeps an uncompleted summary active while the run is running", () => {
+    const run = discovery([summaryStep(5, null, "Drafting profile")], {
+      status: "running",
+    })
+    const [task] = createDiscoveryTasks(run, 12_000)
+
+    expect(task).toMatchObject({
+      elapsedMs: 7000,
+      status: "active",
+    })
+    expect(discoveryReadyForReview(run)).toBe(false)
+  })
+
   test("treats a latest summary error as a failed run", () => {
     const run = discovery([
       summaryStep(0, 5, "First pass"),
@@ -106,16 +130,21 @@ describe("discovery completion state", () => {
   })
 })
 
-function discovery(steps: DiscoveryStep[]): Discovery {
+function discovery(
+  steps: DiscoveryStep[],
+  options: { status?: Discovery["status"] } = {}
+): Discovery {
+  const status = options.status ?? "completed"
+
   return {
     _creationTime: 0,
     _id: "discovery" as Discovery["_id"],
-    endedAt: 25_000,
     errors: stepErrors(steps),
     startedAt: 0,
-    status: "completed",
+    status,
     steps,
     tenantId: "tenant",
+    ...(status === "completed" ? { endedAt: 25_000 } : {}),
   }
 }
 
@@ -137,15 +166,15 @@ function pageStep(
 
 function summaryStep(
   startSeconds: number,
-  endSeconds: number,
+  endSeconds: number | null,
   label: string,
   error?: string
 ): DiscoveryStep {
   return {
-    completedAt: endSeconds * 1000,
     kind: "summary",
     label,
     startedAt: startSeconds * 1000,
+    ...(endSeconds === null ? {} : { completedAt: endSeconds * 1000 }),
     ...(error === undefined ? {} : { error }),
   }
 }
