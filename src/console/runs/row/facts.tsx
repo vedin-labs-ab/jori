@@ -29,7 +29,7 @@ import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, absoluteUtcTime } from "../../shared/time"
 import { ToolGroupsValue } from "../../shared/tools"
 import { type ExecutionDetail, type ExecutionDetailType } from "../types"
-import { RepositoryIcon } from "./source"
+import { RepositoryIcon } from "./metadata"
 
 const detailMeta = {
   calendar_event: { icon: CalendarDays, label: "Event" },

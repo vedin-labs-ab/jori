@@ -69,7 +69,7 @@ function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
   return (
     <div className="grid min-w-0 max-w-[56ch] gap-1">
       <div className="truncate font-medium text-sm">{execution.title}</div>
-      <SourceLine source={execution.source} />
+      <SourceLine details={execution.details} source={execution.source} />
     </div>
   )
 }

@@ -20,6 +20,7 @@ test("includes one-shot automation access details", async () => {
   )
 
   expect(summary.source).toEqual({
+    kind: { label: "one-shot", type: "one-shot" },
     type: "automation",
     surface: "milo",
   })

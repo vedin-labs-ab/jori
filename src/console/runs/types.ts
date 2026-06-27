@@ -45,6 +45,8 @@ export type SourceDatum = {
 
 export type ExecutionSource = {
   type: "automation" | "event" | "manual" | "message"
+  event?: SourceDatum
+  kind?: SourceDatum
   surface?: string
   stop?: {
     actor: SourceDatum

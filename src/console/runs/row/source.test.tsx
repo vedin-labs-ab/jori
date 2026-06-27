@@ -31,6 +31,27 @@ test("renders provider source labels", () => {
   expect(container.querySelector("img")).toBeDefined()
 })
 
+test("renders source kind and event labels", () => {
+  render(
+    <SourceLine
+      source={{
+        event: {
+          label: "Issue comment created",
+          type: "issue.comment.created",
+        },
+        kind: { label: "mention", type: "mention" },
+        surface: "github",
+        type: "automation",
+      }}
+    />
+  )
+
+  expect(screen.getByText("mention").className).toContain("font-mono")
+  expect(screen.getByText("issue.comment.created").className).toContain(
+    "font-mono"
+  )
+})
+
 test("renders Milo source labels", () => {
   const { container } = render(
     <SourceLine
@@ -43,6 +64,72 @@ test("renders Milo source labels", () => {
 
   expect(screen.getByText("Milo").className).toContain("font-medium")
   expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
+})
+
+test("renders recurring automation source details", () => {
+  const { container } = render(
+    <SourceLine
+      details={[{ type: "schedule", label: "Daily at 09:00 UTC" }]}
+      source={{
+        kind: { label: "recurring", type: "recurring" },
+        surface: "milo",
+        type: "automation",
+      }}
+    />
+  )
+
+  expect(screen.getByText("recurring")).toBeDefined()
+  expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
+  expect(
+    Array.from(container.querySelectorAll("svg[aria-hidden='true']")).some(
+      (element) => element.classList.contains("lucide-repeat-2")
+    )
+  ).toBe(true)
+})
+
+test("renders Slack channels as channel chips", () => {
+  render(
+    <SourceLine
+      details={[{ type: "channel", label: "#product" }]}
+      source={{
+        kind: { label: "mention", type: "mention" },
+        surface: "slack",
+        type: "message",
+      }}
+    />
+  )
+
+  const chip = screen.getByText("#product").parentElement
+
+  expect(screen.getByText("mention")).toBeDefined()
+  expect(chip?.className).toContain("bg-primary/10")
+  expect(chip?.className).toContain("text-primary")
+})
+
+test("renders GitHub source details compactly", () => {
+  render(
+    <SourceLine
+      details={[
+        { type: "repository", label: "vedin-labs/frontier" },
+        { type: "pull_request", label: "#42 Add execution metadata" },
+        { type: "comment", label: "This stays in the expanded panel." },
+      ]}
+      source={{
+        event: {
+          label: "Pull request review comment created",
+          type: "pull_request.review_comment.created",
+        },
+        surface: "github",
+        type: "automation",
+      }}
+    />
+  )
+
+  expect(screen.getByText("GitHub")).toBeDefined()
+  expect(screen.getByText("pull_request.review_comment.created")).toBeDefined()
+  expect(screen.getByText("frontier")).toBeDefined()
+  expect(screen.getByText("#42")).toBeDefined()
+  expect(screen.queryByText("This stays in the expanded panel.")).toBeNull()
 })
 
 test("renders stopped actors", () => {
