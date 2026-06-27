@@ -7,7 +7,7 @@ type PreviewMode = "failed" | "running" | "succeeded"
 type PreviewDiscovery = NonNullable<OrganizationDiscovery>
 
 const searchParam = "discoveryPreview"
-const baseTime = Date.UTC(2026, 5, 27, 10, 30)
+const previewElapsedMs = 48_000
 
 // Temporary design harness for iterating on the discovery modal.
 // Remove this file and the render in context/index.tsx when the design settles.
@@ -65,61 +65,73 @@ function previewDiscovery(mode: PreviewMode): PreviewDiscovery {
 }
 
 function runningDiscovery(): PreviewDiscovery {
-  return discovery({
+  const startedAt = previewStartedAt()
+
+  return discovery(startedAt, {
     status: "running",
     steps: [
-      homepageStep(0),
-      aboutStep(12),
-      enterpriseStep(24),
-      step(37, "extracting", "Summarizing what we found"),
+      homepageStep(startedAt, 0),
+      aboutStep(startedAt, 12),
+      linkedInStep(startedAt, 32),
+      youtubeStep(startedAt, 70),
     ],
   })
 }
 
 function failedDiscovery(): PreviewDiscovery {
-  return discovery({
-    endedAt: baseTime + 52_000,
+  const startedAt = previewStartedAt()
+
+  return discovery(startedAt, {
+    endedAt: startedAt + 52_000,
     error:
       "We could not read enough public website content to draft a profile.",
     status: "failed",
     steps: [
-      homepageStep(0),
-      aboutStep(18),
-      businessStep(31),
-      step(52, "error", "Stopped before extraction"),
+      homepageStep(startedAt, 0),
+      aboutStep(startedAt, 18),
+      businessStep(startedAt, 31),
+      step(startedAt, 52, "error", "Stopped before extraction"),
     ],
   })
 }
 
 function succeededDiscovery(): PreviewDiscovery {
-  return discovery({
-    endedAt: baseTime + 64_000,
+  const startedAt = previewStartedAt()
+
+  return discovery(startedAt, {
+    endedAt: startedAt + 64_000,
     status: "succeeded",
     steps: [
-      homepageStep(0),
-      aboutStep(14),
-      enterpriseStep(33),
-      step(48, "extracting", "Summarizing what we found"),
-      step(64, "done", "Draft ready for review"),
+      homepageStep(startedAt, 0),
+      aboutStep(startedAt, 14),
+      enterpriseStep(startedAt, 33),
+      step(startedAt, 48, "extracting", "Summarizing what we found"),
+      step(startedAt, 64, "done", "Draft ready for review"),
     ],
   })
 }
 
 function discovery(
+  startedAt: number,
   input: Pick<PreviewDiscovery, "status" | "steps"> &
     Partial<Pick<PreviewDiscovery, "endedAt" | "error">>
 ): PreviewDiscovery {
   return {
-    _creationTime: baseTime,
+    _creationTime: startedAt,
     _id: "preview-discovery" as PreviewDiscovery["_id"],
-    startedAt: baseTime,
+    startedAt,
     tenantId: "preview-tenant",
     ...input,
   }
 }
 
-function homepageStep(offsetSeconds: number) {
+function previewStartedAt() {
+  return Date.now() - previewElapsedMs
+}
+
+function homepageStep(startedAt: number, offsetSeconds: number) {
   return step(
+    startedAt,
     offsetSeconds,
     "reading",
     "Reading epidemicsound.com",
@@ -127,8 +139,9 @@ function homepageStep(offsetSeconds: number) {
   )
 }
 
-function aboutStep(offsetSeconds: number) {
+function aboutStep(startedAt: number, offsetSeconds: number) {
   return step(
+    startedAt,
     offsetSeconds,
     "exploring",
     "Exploring /about",
@@ -136,8 +149,9 @@ function aboutStep(offsetSeconds: number) {
   )
 }
 
-function businessStep(offsetSeconds: number) {
+function businessStep(startedAt: number, offsetSeconds: number) {
   return step(
+    startedAt,
     offsetSeconds,
     "exploring",
     "Exploring /business",
@@ -145,8 +159,9 @@ function businessStep(offsetSeconds: number) {
   )
 }
 
-function enterpriseStep(offsetSeconds: number) {
+function enterpriseStep(startedAt: number, offsetSeconds: number) {
   return step(
+    startedAt,
     offsetSeconds,
     "exploring",
     "Exploring /enterprise",
@@ -154,14 +169,35 @@ function enterpriseStep(offsetSeconds: number) {
   )
 }
 
+function linkedInStep(startedAt: number, offsetSeconds: number) {
+  return step(
+    startedAt,
+    offsetSeconds,
+    "exploring",
+    "Exploring linkedin.com/company/epidemic-sound",
+    "https://www.linkedin.com/company/epidemic-sound"
+  )
+}
+
+function youtubeStep(startedAt: number, offsetSeconds: number) {
+  return step(
+    startedAt,
+    offsetSeconds,
+    "exploring",
+    "Exploring youtube.com/@epidemicsound",
+    "https://www.youtube.com/@epidemicsound"
+  )
+}
+
 function step(
+  startedAt: number,
   offsetSeconds: number,
   kind: PreviewDiscovery["steps"][number]["kind"],
   label: string,
   url?: string
 ) {
   return {
-    at: baseTime + offsetSeconds * 1000,
+    at: startedAt + offsetSeconds * 1000,
     kind,
     label,
     ...(url === undefined ? {} : { url }),
