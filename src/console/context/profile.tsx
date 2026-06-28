@@ -146,7 +146,7 @@ function ContextActionContent({
 
 function EmptyProfile() {
   return (
-    <Empty className="min-h-32 rounded-md border">
+    <Empty className="min-h-32 rounded-md">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Building2 />
