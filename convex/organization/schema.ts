@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { actorValidator } from "../shared/actor"
 
 // The durable identity facts about an organization. This single shape is reused
 // three ways: the live (approved) columns on the profile, the pending draft, and
@@ -33,6 +34,7 @@ export const organizationProfile = defineTable({
     })
   ),
   approvedAt: v.optional(v.number()),
+  approvedBy: v.optional(actorValidator),
   updatedAt: v.number(),
 }).index("by_tenant", ["tenantId"])
 

@@ -166,13 +166,32 @@ function approvalDescription(profile: OrganizationProfile | null) {
     return "Approved facts are added to every run as context."
   }
 
-  return `Approved ${formatDate(profile.approvedAt)}`
+  const date = formatDate(profile.approvedAt)
+  const approver = approvalActorName(profile.approvedBy)
+
+  return approver === undefined
+    ? `Approved on ${date}`
+    : `Approved by ${approver} on ${date}`
 }
 
 function formatDate(timestamp: number) {
   return new Date(timestamp).toLocaleDateString(undefined, {
     year: "numeric",
-    month: "short",
+    month: "long",
     day: "numeric",
   })
+}
+
+type ApprovalActor = NonNullable<NonNullable<OrganizationProfile>["approvedBy"]>
+
+function approvalActorName(actor: ApprovalActor | undefined) {
+  if (actor === undefined) {
+    return undefined
+  }
+
+  if ("externalId" in actor) {
+    return actor.kind === "self" ? "Milo" : (actor.name ?? actor.email)
+  }
+
+  return "userId" in actor ? (actor.name ?? actor.email) : actor.email
 }
