@@ -42,9 +42,20 @@ export function WebsiteDiscoveryStep({
 }) {
   const fieldError = validationError ?? error
   const errorId = `${inputId}-error`
+  const canSubmit =
+    !isSubmitting && website.trim() !== "" && validationError === null
 
   return (
-    <>
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => {
+        event.preventDefault()
+
+        if (canSubmit) {
+          onContinue()
+        }
+      }}
+    >
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
@@ -63,20 +74,20 @@ export function WebsiteDiscoveryStep({
         <FieldError id={errorId}>{fieldError}</FieldError>
       </div>
       <DialogFooter>
-        <Button variant="ghost" onClick={onSkip} disabled={isSubmitting}>
+        <Button
+          variant="ghost"
+          onClick={onSkip}
+          disabled={isSubmitting}
+          type="button"
+        >
           {skipLabel}
         </Button>
-        <Button
-          onClick={onContinue}
-          disabled={
-            isSubmitting || website.trim() === "" || validationError !== null
-          }
-        >
+        <Button disabled={!canSubmit} type="submit">
           {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
           {continueLabel}
         </Button>
       </DialogFooter>
-    </>
+    </form>
   )
 }
 
