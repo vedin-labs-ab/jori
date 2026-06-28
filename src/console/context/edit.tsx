@@ -7,19 +7,21 @@ import { type OrganizationDiscovery } from "./types"
 import { websiteDomainKey } from "./url"
 import { DiscoveryWorkingStep, WebsiteDiscoveryStep } from "./website"
 
+type OrganizationEditDialogProps = {
+  tenantId: string
+  website: string | undefined
+  discovery: OrganizationDiscovery | undefined
+  onOpenChange: (open: boolean) => void
+  onReviewProfile: () => void
+}
+
 export function OrganizationEditDialog({
   tenantId,
   website,
   discovery,
   onOpenChange,
   onReviewProfile,
-}: {
-  tenantId: string
-  website: string | undefined
-  discovery: OrganizationDiscovery | undefined
-  onOpenChange: (open: boolean) => void
-  onReviewProfile: () => void
-}) {
+}: OrganizationEditDialogProps) {
   const discover = useAction(api.organization.onboarding.discover)
   const [step, setStep] = useState<"website" | "working">(
     discovery?.status === "running" ? "working" : "website"
@@ -27,13 +29,17 @@ export function OrganizationEditDialog({
   const [value, setValue] = useState(website ?? "")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showValidationError, setShowValidationError] = useState(false)
   const [pendingStartedAt, setPendingStartedAt] = useState<number | null>(null)
   const validationError = websiteValidationError(value, website)
+  const visibleValidationError = showValidationError ? validationError : null
   const normalizedWebsite = parseWebsiteAddress(value)?.href ?? null
   const workingDiscovery = visibleDiscovery(discovery, pendingStartedAt)
+  const close = () => onOpenChange(false)
 
   const onContinue = async () => {
     if (validationError !== null || normalizedWebsite === null) {
+      setShowValidationError(true)
       return
     }
 
@@ -52,36 +58,69 @@ export function OrganizationEditDialog({
     }
   }
 
+  const onWebsiteChange = (next: string) => {
+    setValue(next)
+    setError(null)
+    setShowValidationError(false)
+  }
+
   return (
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         {step === "website" ? (
-          <WebsiteDiscoveryStep
-            continueLabel="Run extraction"
-            description="Change the main website Milo uses, then rerun extraction to draft updated organization facts."
+          <WebsiteEditStep
             error={error}
-            inputId="context-website"
-            isSubmitting={submitting}
-            onContinue={() => void onContinue()}
-            onSkip={() => onOpenChange(false)}
-            onWebsiteChange={(next) => {
-              setValue(next)
-              setError(null)
-            }}
-            skipLabel="Cancel"
-            title="Edit main website"
-            validationError={validationError}
+            onClose={close}
+            onContinue={onContinue}
+            onWebsiteChange={onWebsiteChange}
+            submitting={submitting}
+            validationError={visibleValidationError}
             website={value}
           />
         ) : (
           <DiscoveryWorkingStep
             discovery={workingDiscovery}
-            onClose={() => onOpenChange(false)}
+            onClose={close}
             onReviewProfile={onReviewProfile}
           />
         )}
       </DialogContent>
     </Dialog>
+  )
+}
+
+function WebsiteEditStep({
+  error,
+  onClose,
+  onContinue,
+  onWebsiteChange,
+  submitting,
+  validationError,
+  website,
+}: {
+  error: string | null
+  onClose: () => void
+  onContinue: () => Promise<void>
+  onWebsiteChange: (value: string) => void
+  submitting: boolean
+  validationError: string | null
+  website: string
+}) {
+  return (
+    <WebsiteDiscoveryStep
+      continueLabel="Run extraction"
+      description="Change the main website Milo uses, then rerun extraction to draft updated organization facts."
+      error={error}
+      inputId="context-website"
+      isSubmitting={submitting}
+      onContinue={() => void onContinue()}
+      onSkip={onClose}
+      onWebsiteChange={onWebsiteChange}
+      skipLabel="Cancel"
+      title="Edit main website"
+      validationError={validationError}
+      website={website}
+    />
   )
 }
 
