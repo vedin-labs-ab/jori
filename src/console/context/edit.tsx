@@ -61,7 +61,6 @@ export function OrganizationEditDialog({
   const onWebsiteChange = (next: string) => {
     setValue(next)
     setError(null)
-    setShowValidationError(false)
   }
 
   return (
