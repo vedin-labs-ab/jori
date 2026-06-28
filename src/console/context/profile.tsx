@@ -1,7 +1,14 @@
-import { Loader2 } from "lucide-react"
+import { Building2, Loader2, Plus } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { OrganizationEditDialog } from "./edit"
@@ -58,10 +65,10 @@ export function ContextProfile({
             type="button"
             variant="outline"
           >
-            {extracting ? (
-              <Loader2 className="size-4 animate-spin text-muted-foreground" />
-            ) : null}
-            {extracting ? "Extracting" : "Edit"}
+            <ContextActionContent
+              extracting={extracting}
+              isEmpty={facts === null}
+            />
           </Button>
         </CardHeader>
         <CardContent className="grid gap-6 p-4 pt-0 sm:p-5 sm:pt-0">
@@ -109,11 +116,48 @@ export function ContextProfile({
   )
 }
 
+function ContextActionContent({
+  extracting,
+  isEmpty,
+}: {
+  extracting: boolean
+  isEmpty: boolean
+}) {
+  if (extracting) {
+    return (
+      <>
+        <Loader2 className="size-4 animate-spin text-muted-foreground" />
+        Extracting
+      </>
+    )
+  }
+
+  if (isEmpty) {
+    return (
+      <>
+        <Plus className="text-muted-foreground" />
+        Add
+      </>
+    )
+  }
+
+  return "Edit"
+}
+
 function EmptyProfile() {
   return (
-    <div className="rounded-md border border-dashed p-4 text-muted-foreground text-xs/relaxed">
-      Add your website to discover your organization profile.
-    </div>
+    <Empty className="min-h-32 rounded-md border">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Building2 />
+        </EmptyMedia>
+        <EmptyTitle>No organization context</EmptyTitle>
+        <EmptyDescription>
+          Add your website to discover and approve facts Milo can use in every
+          run.
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   )
 }
 
