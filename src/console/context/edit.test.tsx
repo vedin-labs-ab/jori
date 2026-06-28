@@ -52,6 +52,15 @@ describe("organization edit website validation", () => {
     expect(button.getAttribute("disabled")).toBe("")
     expect(discoverMock).not.toHaveBeenCalled()
 
+    fireEvent.change(input, { target: { value: "localhost" } })
+
+    expect(screen.queryByText(validationMessage)).toBeNull()
+    expect(
+      screen.getByText("Enter a public website, like example.com.")
+    ).toBeDefined()
+    expect(input.getAttribute("aria-invalid")).toBe("true")
+    expect(button.getAttribute("disabled")).toBe("")
+
     fireEvent.change(input, { target: { value: "https://example.com" } })
 
     expect(input.getAttribute("aria-invalid")).toBeNull()
