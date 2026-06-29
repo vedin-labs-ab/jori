@@ -78,19 +78,21 @@ function SummaryTask({ now, task }: { now: number; task: DiscoveryTask }) {
 }
 
 function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
-  const [open, setOpen] = useState(() => task.status !== "completed")
+  const [preference, setPreference] = useState<OpenPreference | null>(null)
+  const preferredOpen =
+    preference?.key === task.key && preference.status === task.status
+      ? preference.open
+      : null
+  const open = preferredOpen ?? isLive(task.status)
   const showTaskElapsed = !open || task.items.length > 1
 
-  useEffect(() => {
-    if (isLive(task.status)) {
-      setOpen(true)
-    } else {
-      setOpen(false)
-    }
-  }, [task.status])
-
   return (
-    <Task open={open} onOpenChange={setOpen}>
+    <Task
+      onOpenChange={(nextOpen) =>
+        setPreference({ key: task.key, open: nextOpen, status: task.status })
+      }
+      open={open}
+    >
       <TaskTrigger title={task.label}>
         <button
           className="group flex h-7 w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors outline-none hover:text-foreground focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
@@ -125,6 +127,12 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
       </TaskContent>
     </Task>
   )
+}
+
+type OpenPreference = {
+  key: string
+  open: boolean
+  status: DiscoveryTaskStatus
 }
 
 function ExplorationItem({
