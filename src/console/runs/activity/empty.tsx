@@ -39,12 +39,12 @@ export function ActivitySkeleton() {
         >
           <div className="relative flex justify-center">
             {index === 0 ? null : (
-              <span className="absolute top-0 h-1 w-px bg-border" />
+              <span className="absolute top-0 h-2 w-px bg-border" />
             )}
             {index === skeletonRows.length - 1 ? null : (
-              <span className="absolute top-8 bottom-0 w-px bg-border" />
+              <span className="absolute top-9 bottom-0 w-px bg-border" />
             )}
-            <Skeleton className="relative z-10 mt-1 size-7 rounded-full" />
+            <Skeleton className="relative z-10 mt-2 size-7 rounded-full" />
           </div>
           <div className="grid min-h-9 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-1">
             <div className="flex min-w-0 items-center gap-3">

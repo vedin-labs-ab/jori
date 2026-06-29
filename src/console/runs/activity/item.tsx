@@ -116,12 +116,13 @@ function ToolGroup({
       <Task className="min-w-0" defaultOpen={false}>
         <TaskTrigger className="group/activity-task" title={entry.title}>
           <button
-            className="group/activity-task flex w-full min-w-0 items-center gap-3 text-left outline-none focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="group/activity-task flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-md text-left text-muted-foreground text-sm transition-colors outline-none hover:text-foreground focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             type="button"
           >
             <ActivityTaskHeader
               className="flex-1"
               description={entry.description}
+              interactive
               meta={
                 <ActivityEntryMeta
                   durationMs={entry.durationMs}
@@ -132,7 +133,7 @@ function ToolGroup({
               }
               title={entry.title}
             />
-            <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]/activity-task:rotate-180" />
+            <ChevronDown className="size-4 shrink-0 text-current transition-transform group-data-[state=open]/activity-task:rotate-180" />
           </button>
         </TaskTrigger>
         <TaskContent className="data-[state=closed]:hidden data-[state=closed]:animate-none data-[state=open]:animate-none [&>div]:mt-2 [&>div]:space-y-1.5">
@@ -168,11 +169,13 @@ function ToolGroupItem({ item }: { item: ActivityItemType }) {
 function ActivityTaskHeader({
   className,
   description,
+  interactive = false,
   meta,
   title,
 }: {
   className?: string
   description?: string
+  interactive?: boolean
   meta: ReactNode
   title: string
 }) {
@@ -184,7 +187,12 @@ function ActivityTaskHeader({
       )}
     >
       <div className="flex min-w-0 items-baseline gap-3">
-        <span className="min-w-0 truncate font-medium text-foreground text-sm">
+        <span
+          className={cn(
+            "min-w-0 truncate font-medium text-sm",
+            interactive ? "text-current" : "text-foreground"
+          )}
+        >
           {title}
         </span>
         {description === undefined ? null : (
@@ -213,12 +221,12 @@ function TimelineRow({
     <li className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] gap-3">
       <div className="relative flex justify-center">
         {isFirst ? null : (
-          <span className="absolute top-0 h-1 w-px bg-border" />
+          <span className="absolute top-0 h-2 w-px bg-border" />
         )}
         {isLast ? null : (
-          <span className="absolute top-8 bottom-0 w-px bg-border" />
+          <span className="absolute top-9 bottom-0 w-px bg-border" />
         )}
-        <span className="relative z-10 mt-1 grid size-7 place-items-center rounded-full border bg-background text-muted-foreground">
+        <span className="relative z-10 mt-2 grid size-7 place-items-center rounded-full border bg-background text-muted-foreground">
           {icon}
         </span>
       </div>
