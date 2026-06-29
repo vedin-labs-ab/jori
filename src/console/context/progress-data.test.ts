@@ -55,6 +55,56 @@ describe("createDiscoveryTasks", () => {
   })
 })
 
+describe("discovery exploration state", () => {
+  test("keeps exploration active while discovery is still selecting paths", () => {
+    const [task] = createDiscoveryTasks(
+      discovery([pageStep(0, 5, "https://example.com/")], {
+        status: "running",
+      }),
+      8_000
+    )
+
+    expect(task).toMatchObject({
+      status: "active",
+      items: [{ status: "completed" }],
+    })
+  })
+
+  test("shows selected paths as queued before their crawl starts", () => {
+    const [task] = createDiscoveryTasks(
+      discovery(
+        [
+          pageStep(0, 5, "https://example.com/"),
+          queuedPageStep(5, "https://example.com/about"),
+        ],
+        { status: "running" }
+      ),
+      8_000
+    )
+
+    expect(task).toMatchObject({
+      status: "active",
+      items: [{ status: "completed" }, { status: "queued" }],
+    })
+  })
+
+  test("completes exploration once summary starts with no queued paths", () => {
+    const tasks = createDiscoveryTasks(
+      discovery(
+        [
+          pageStep(0, 5, "https://example.com/"),
+          pageStep(5, 10, "https://example.com/about"),
+          summaryStep(10, null, "Drafting profile"),
+        ],
+        { status: "running" }
+      ),
+      12_000
+    )
+
+    expect(tasks.map((task) => task.status)).toEqual(["completed", "active"])
+  })
+})
+
 describe("discovery page failures", () => {
   test("marks page failures as task warnings when discovery succeeds", () => {
     const [task] = createDiscoveryTasks(
@@ -166,11 +216,22 @@ function pageStep(
 ): DiscoveryStep {
   return {
     completedAt: endSeconds * 1000,
+    id: `page-${startSeconds}-${url}`,
     kind: "page",
     label: `Reading ${url}`,
     startedAt: startSeconds * 1000,
     url,
     ...(error === undefined ? {} : { error }),
+  }
+}
+
+function queuedPageStep(queueSeconds: number, url: string): DiscoveryStep {
+  return {
+    id: `queued-page-${queueSeconds}-${url}`,
+    kind: "page",
+    label: `Exploring ${url}`,
+    queuedAt: queueSeconds * 1000,
+    url,
   }
 }
 
@@ -181,6 +242,7 @@ function summaryStep(
   error?: string
 ): DiscoveryStep {
   return {
+    id: `summary-${startSeconds}-${label}`,
     kind: "summary",
     label,
     startedAt: startSeconds * 1000,

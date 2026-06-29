@@ -84,6 +84,8 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
   useEffect(() => {
     if (isLive(task.status)) {
       setOpen(true)
+    } else {
+      setOpen(false)
     }
   }, [task.status])
 
