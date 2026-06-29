@@ -2,34 +2,25 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { ActivityItem } from "./item"
+import { ActivityItem, ActivityTimeline } from "./item"
 import { type ActivityItem as ActivityItemType } from "./types"
 
 afterEach(() => {
   cleanup()
 })
 
-test("expands activity details from the row control", () => {
+test("renders a compact non-collapsible activity item", () => {
   render(
     <TooltipProvider>
       <ActivityItem item={activityItem()} now={1700000002000} />
     </TooltipProvider>
   )
 
-  const row = screen.getByRole("button", { name: /read file/i })
-
-  expect(screen.queryByText("Path")).toBeNull()
-  expect(screen.queryByText("done")).toBeNull()
-  expect(screen.queryByRole("status", { name: "Running now" })).toBeNull()
+  expect(screen.getByText("Read file")).toBeDefined()
+  expect(screen.getByText("src/app.tsx")).toBeDefined()
   expect(screen.getByText("1s")).toBeDefined()
-
-  fireEvent.click(row)
-
-  expect(screen.getByText("Path")).toBeDefined()
-  expect(screen.getByText("Path").closest("div")?.className).not.toContain(
-    "border-t"
-  )
-  expect(screen.getAllByText("src/app.tsx").length).toBeGreaterThan(1)
+  expect(screen.queryByRole("button", { name: /read file/i })).toBeNull()
+  expect(screen.queryByText("Path")).toBeNull()
 })
 
 test("shows a live indicator only for live activity", () => {
@@ -68,6 +59,40 @@ test("does not pulse historical running-status events", () => {
   expect(screen.queryByRole("status", { name: "Running now" })).toBeNull()
 })
 
+test("groups consecutive tool calls into an expandable task", () => {
+  render(
+    <TooltipProvider>
+      <ActivityTimeline
+        items={[
+          activityItem({
+            description: undefined,
+            id: "run-started",
+            kind: "run",
+            title: "Run started",
+          }),
+          activityItem({ id: "read", title: "Read file" }),
+          activityItem({
+            description: "https://example.com",
+            id: "fetch",
+            title: "Fetch page",
+          }),
+        ]}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  const group = screen.getByRole("button", { name: /ran 2 actions/i })
+
+  expect(group).toBeDefined()
+  expect(screen.getByText("2 actions · 2 results")).toBeDefined()
+
+  fireEvent.click(group)
+
+  expect(screen.getByText("Read file")).toBeDefined()
+  expect(screen.getByText("Fetch page")).toBeDefined()
+})
+
 function activityItem(
   overrides: Partial<ActivityItemType> = {}
 ): ActivityItemType {
@@ -76,6 +101,7 @@ function activityItem(
     description: "src/app.tsx",
     details: [{ label: "Path", value: "src/app.tsx" }],
     durationMs: 1200,
+    endedAt: 1700000001200,
     id: "activity",
     kind: "tool",
     startedAt: 1700000000000,

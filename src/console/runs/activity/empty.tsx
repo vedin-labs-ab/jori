@@ -7,14 +7,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  RunRowContent,
-  RunRowControl,
-  RunRowFrame,
-  RunRowHeader,
-  RunRowList,
-  RunRowMeta,
-} from "../row/layout"
 
 const skeletonRows = ["first", "second", "third"] as const
 
@@ -39,23 +31,27 @@ export function ActivityEmpty() {
 
 export function ActivitySkeleton() {
   return (
-    <RunRowList>
-      {skeletonRows.map((row) => (
-        <RunRowFrame key={row}>
-          <RunRowHeader>
-            <RunRowControl>
-              <Skeleton className="size-4 rounded-full" />
-              <RunRowContent title={<Skeleton className="h-4 w-40" />}>
-                <Skeleton className="h-3 w-56" />
-                <Skeleton className="h-3 w-24" />
-              </RunRowContent>
-              <RunRowMeta>
-                <Skeleton className="h-6 w-16 rounded-md" />
-              </RunRowMeta>
-            </RunRowControl>
-          </RunRowHeader>
-        </RunRowFrame>
+    <div className="grid min-w-0">
+      {skeletonRows.map((row, index) => (
+        <div
+          className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] gap-3"
+          key={row}
+        >
+          <div className="relative flex justify-center">
+            {index === skeletonRows.length - 1 ? null : (
+              <span className="absolute top-7 bottom-0 w-px bg-border" />
+            )}
+            <Skeleton className="relative z-10 mt-1 size-7 rounded-full" />
+          </div>
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b py-2.5">
+            <div className="flex min-w-0 items-center gap-3">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-44" />
+            </div>
+            <Skeleton className="h-3 w-20" />
+          </div>
+        </div>
       ))}
-    </RunRowList>
+    </div>
   )
 }

@@ -1,12 +1,16 @@
 import {
+  AlertCircle,
   Bot,
-  ChevronsUpDown,
+  CheckCircle2,
   Cpu,
+  FileText,
   Hourglass,
-  ListChecks,
   type LucideIcon,
   Package,
+  Play,
   Plug,
+  Search,
+  Send,
   ShieldCheck,
   Timer,
   Wrench,
@@ -16,7 +20,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
 import { RelativeTime } from "../../shared/details"
 import { formatDuration, relativeTime } from "../../shared/time"
 import { MetaPill } from "../row/status"
@@ -32,7 +35,7 @@ const kindIcons = {
   asset: Package,
   model: Cpu,
   offer: Plug,
-  run: ListChecks,
+  run: Play,
   tool: Wrench,
   wait: Hourglass,
 } satisfies Record<ActivityKind, LucideIcon>
@@ -48,41 +51,82 @@ const kindLabels = {
   wait: "Wait",
 } satisfies Record<ActivityKind, string>
 
-export function ActivityIcon({
-  isExpandable,
-  item,
+export function ActivityIcon({ item }: { item: ActivityItem }) {
+  return (
+    <ActivityTimelineIcon
+      icon={itemIcon(item)}
+      kind={item.kind}
+      status={item.status}
+    />
+  )
+}
+
+export function ActivityTimelineIcon({
+  icon,
+  kind,
+  status,
 }: {
-  isExpandable: boolean
-  item: ActivityItem
+  icon?: LucideIcon
+  kind: ActivityKind
+  status: ActivityStatus
 }) {
-  const Icon = kindIcons[item.kind]
-  const label = `${kindLabels[item.kind]} ${statusLabel(item.status)}`
+  const Icon = icon ?? kindIcons[kind]
+  const label = `${kindLabels[kind]} ${statusLabel(status)}`
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <span
           aria-label={label}
-          className="relative mt-0.5 inline-flex size-4 shrink-0 items-center justify-center"
+          className="relative inline-flex size-4 shrink-0 items-center justify-center"
           role="img"
         >
-          <span
-            className={cn(
-              "inline-flex size-4 items-center justify-center",
-              isExpandable &&
-                "transition-opacity duration-150 group-focus-visible/run-row:opacity-0 group-hover/run-row:opacity-0"
-            )}
-          >
+          <span className="inline-flex size-4 items-center justify-center">
             <Icon className="size-3.5 text-muted-foreground" />
           </span>
-          {isExpandable ? (
-            <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/run-row:opacity-100 group-hover/run-row:opacity-100" />
-          ) : null}
         </span>
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
   )
+}
+
+function itemIcon(item: ActivityItem) {
+  if (item.kind === "run") {
+    return runIcon(item.status)
+  }
+
+  if (item.kind !== "tool") {
+    return kindIcons[item.kind]
+  }
+
+  const title = item.title.toLowerCase()
+
+  if (title.includes("send") || title.includes("reply")) {
+    return Send
+  }
+
+  if (title.includes("search") || title.includes("find")) {
+    return Search
+  }
+
+  if (title.includes("read")) {
+    return FileText
+  }
+
+  return Wrench
+}
+
+function runIcon(status: ActivityStatus) {
+  if (status === "completed") {
+    return CheckCircle2
+  }
+
+  if (status === "failed") {
+    return AlertCircle
+  }
+
+  return Play
 }
 
 export function ActivityMeta({
@@ -93,15 +137,33 @@ export function ActivityMeta({
   now: number
 }) {
   return (
+    <ActivityEntryMeta
+      durationMs={item.durationMs}
+      isLive={item.isLive === true}
+      now={now}
+      startedAt={item.startedAt}
+    />
+  )
+}
+
+export function ActivityEntryMeta({
+  durationMs,
+  isLive,
+  now,
+  startedAt,
+}: {
+  durationMs?: number
+  isLive: boolean
+  now: number
+  startedAt: number
+}) {
+  return (
     <>
-      {item.durationMs === undefined ? null : (
-        <MetaPill icon={Timer} label={formatDuration(item.durationMs)} />
+      {durationMs === undefined ? null : (
+        <MetaPill icon={Timer} label={formatDuration(durationMs)} />
       )}
-      <RelativeTime
-        absolute={item.startedAt}
-        value={relativeTime(item.startedAt, now)}
-      />
-      <ActivityLiveIndicator isLive={item.isLive === true} />
+      <RelativeTime absolute={startedAt} value={relativeTime(startedAt, now)} />
+      <ActivityLiveIndicator isLive={isLive} />
     </>
   )
 }
