@@ -1,6 +1,10 @@
 import { type Doc } from "../../_generated/dataModel"
-import { readEventData } from "./read"
-import { type ActivityDetail, type ActivityItem } from "./types"
+import { type EventData, readEventData } from "./read"
+import {
+  type ActivityDetail,
+  type ActivityItem,
+  type ActivityTokenUsage,
+} from "./types"
 
 export function projectModelTraces(
   traces: Doc<"traces">[],
@@ -50,17 +54,43 @@ function projectModelTerminal(
 ): ActivityItem {
   const event = readEventData(trace.data)
   const failed = trace.type === "model.failed"
+  const tokenUsage = modelTokenUsage(event?.metrics)
 
   return {
     id: trace._id,
     kind: "model",
     status: failed ? "failed" : "completed",
     title: event?.title ?? (failed ? "Model request failed" : "Model step"),
-    description: event?.summary,
+    description: failed ? event?.summary : undefined,
     details: modelDetails(trace.data),
     durationMs: event?.metrics?.durationMs,
     endedAt: trace.timestamp,
     startedAt: started?.timestamp ?? trace.timestamp,
+    tokenUsage,
+  }
+}
+
+function modelTokenUsage(
+  metrics: EventData["metrics"] | undefined
+): ActivityTokenUsage | undefined {
+  if (
+    metrics?.inputTokens === undefined &&
+    metrics?.outputTokens === undefined &&
+    metrics?.reasoningTokens === undefined &&
+    metrics?.totalTokens === undefined
+  ) {
+    return undefined
+  }
+
+  const input = metrics.inputTokens ?? 0
+  const output = metrics.outputTokens ?? 0
+  const reasoning = metrics.reasoningTokens ?? 0
+
+  return {
+    input,
+    output,
+    reasoning,
+    total: metrics.totalTokens ?? input + output + reasoning,
   }
 }
 

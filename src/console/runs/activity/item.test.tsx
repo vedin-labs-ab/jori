@@ -61,6 +61,49 @@ test("does not pulse historical running-status events", () => {
   expect(screen.queryByRole("status", { name: "Running now" })).toBeNull()
 })
 
+test("renders model token usage instead of selected action text", () => {
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          description: "Selected 1 action.",
+          kind: "model",
+          title: "Model step completed",
+          tokenUsage: {
+            input: 1200,
+            output: 80,
+            reasoning: 20,
+            total: 1300,
+          },
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(
+    screen.getByText(/in 1.2K · out 80 · reasoning 20 · total 1.3K/)
+  ).toBeDefined()
+  expect(screen.queryByText("Selected 1 action.")).toBeNull()
+})
+
+test("omits low-value send reply result descriptions", () => {
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          description: "Returned object (1).",
+          title: "Send reply",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(screen.getByText("Send reply")).toBeDefined()
+  expect(screen.queryByText("Returned object (1).")).toBeNull()
+})
+
 test("groups consecutive tool calls into an expandable task", () => {
   render(
     <TooltipProvider>

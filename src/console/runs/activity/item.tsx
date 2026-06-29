@@ -16,6 +16,7 @@ import {
 } from "./metadata"
 import { type ActivityTimelineEntry, createActivityTimeline } from "./timeline"
 import { type ActivityItem as ActivityItemType } from "./types"
+import { ActivityTokenUsage } from "./usage"
 
 export function ActivityTimeline({
   items,
@@ -87,13 +88,25 @@ export function ActivityItem({
     >
       <Task className="min-w-0" defaultOpen={false}>
         <ActivityTaskHeader
-          description={item.description}
+          description={activityDescription(item)}
           meta={<ActivityMeta item={item} now={now} />}
           title={item.title}
         />
       </Task>
     </TimelineRow>
   )
+}
+
+function activityDescription(item: ActivityItemType) {
+  if (item.tokenUsage !== undefined) {
+    return <ActivityTokenUsage usage={item.tokenUsage} />
+  }
+
+  if (item.kind === "tool" && item.title.toLowerCase() === "send reply") {
+    return undefined
+  }
+
+  return item.description
 }
 
 function ToolGroup({
@@ -174,7 +187,7 @@ function ActivityTaskHeader({
   title,
 }: {
   className?: string
-  description?: string
+  description?: ReactNode
   interactive?: boolean
   meta: ReactNode
   title: string

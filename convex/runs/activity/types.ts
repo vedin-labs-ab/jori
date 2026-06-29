@@ -29,6 +29,13 @@ export type ActivityDetail = {
   value: string
 }
 
+export type ActivityTokenUsage = {
+  input: number
+  output: number
+  reasoning: number
+  total: number
+}
+
 export type ActivityItem = {
   id: string
   kind: ActivityKind
@@ -41,6 +48,7 @@ export type ActivityItem = {
   endedAt?: number
   isLive?: boolean
   startedAt: number
+  tokenUsage?: ActivityTokenUsage
 }
 
 export type ActivityData = {
