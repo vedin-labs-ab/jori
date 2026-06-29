@@ -68,10 +68,10 @@ export function StatusIcon({
           className="relative inline-flex size-4 shrink-0 items-center justify-center"
           role="img"
         >
-          <span className="inline-flex transition-opacity duration-150 group-focus-visible/execution-row:opacity-0 group-hover/execution-row:opacity-0">
+          <span className="inline-flex transition-opacity duration-150 group-focus-visible/run-row:opacity-0 group-hover/run-row:opacity-0">
             <StatusGlyph approvalState={approvalState} status={status} />
           </span>
-          <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/execution-row:opacity-100 group-hover/execution-row:opacity-100" />
+          <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/run-row:opacity-100 group-hover/run-row:opacity-100" />
         </span>
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
