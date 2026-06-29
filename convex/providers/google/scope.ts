@@ -1,4 +1,4 @@
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { type GoogleIntegration } from "./config"
 
@@ -7,7 +7,7 @@ export async function findExistingGoogleIntegration(
   args: {
     integration: GoogleIntegration
     tenantId: string
-    createdBy: string
+    createdBy: Id<"persons">
   }
 ): Promise<Doc<"integrations"> | null> {
   if (getGoogleIntegrationScope(args.integration) === "tenant") {

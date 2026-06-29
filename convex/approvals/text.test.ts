@@ -5,26 +5,26 @@ import { type ActionCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
 import {
   decideApprovalByAccount,
-  handleUserTextApprovalDecision,
-  isUserApprovalDecisionText,
+  handlePersonTextApprovalDecision,
+  isPersonApprovalDecisionText,
 } from "./runtime"
 
 test("detects exact user approval commands", () => {
   expect(
-    isUserApprovalDecisionText({
-      actorKind: "user",
+    isPersonApprovalDecisionText({
+      actorKind: "person",
       text: "approve yd4uefnv",
     })
   ).toBe(true)
   expect(
-    isUserApprovalDecisionText({
+    isPersonApprovalDecisionText({
       actorKind: "bot",
       text: "approve yd4uefnv",
     })
   ).toBe(false)
   expect(
-    isUserApprovalDecisionText({
-      actorKind: "user",
+    isPersonApprovalDecisionText({
+      actorKind: "person",
       text: "@milo approve yd4uefnv",
     })
   ).toBe(false)
@@ -66,14 +66,14 @@ test("handles provider text decisions through the shared path", async () => {
     async () => ({ approval, integration })
   )
 
-  const handled = await handleUserTextApprovalDecision(ctx, {
+  const handled = await handlePersonTextApprovalDecision(ctx, {
     accountId: "github-installation",
     actor: {
       externalId: "49404620",
-      kind: "user",
+      kind: "person",
       name: "albinvedin",
     },
-    actorKind: "user",
+    actorKind: "person",
     integration: "github",
     text: "approve abc12345",
   })
@@ -88,7 +88,7 @@ test("handles provider text decisions through the shared path", async () => {
     approvalId: approval._id,
     decidedBy: {
       externalId: "49404620",
-      kind: "user",
+      kind: "person",
       name: "albinvedin",
     },
     decision: "approved",
@@ -98,7 +98,7 @@ test("handles provider text decisions through the shared path", async () => {
 test("ignores bot-authored provider text commands", async () => {
   const ctx = actionCtx(async () => null)
 
-  const handled = await handleUserTextApprovalDecision(ctx, {
+  const handled = await handlePersonTextApprovalDecision(ctx, {
     accountId: "github-installation",
     actor: {
       externalId: "292075993",
@@ -155,8 +155,8 @@ function approvalDoc(): Doc<"approvals"> {
 
 function userActor(): Actor {
   return {
-    kind: "user",
-    userId: "user_1",
+    kind: "person",
+    personId: "person_1" as Id<"persons">,
   }
 }
 
@@ -167,7 +167,7 @@ function integrationDoc(
     _creationTime: 0,
     _id: "integration_1" as Id<"integrations">,
     createdAt: 0,
-    createdBy: "user_1",
+    createdBy: "person_1" as Id<"persons">,
     credentials: {},
     externalId: "linear-org",
     integration,

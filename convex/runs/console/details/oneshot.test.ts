@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { oneShotDisplay } from "../display"
 import { summarizeRun } from "../summaries"
@@ -97,7 +98,7 @@ function oneShotAutomation(scheduledAt: number, webSearch = true) {
       web: webSearch,
     },
     status: "completed",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
     firedAt: scheduledAt,
@@ -114,7 +115,7 @@ function slackIntegration() {
     externalId: "slack-team",
     credentials: {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   }

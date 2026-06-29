@@ -1,4 +1,4 @@
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 
 const artifactSummaryLimit = 100
@@ -7,7 +7,7 @@ export async function searchArtifacts(
   ctx: QueryCtx,
   args: {
     tenantId: string
-    userId: string
+    personId: Id<"persons">
     query?: string
     includeArchived?: boolean
     limit?: number
@@ -26,7 +26,7 @@ export async function searchArtifacts(
   return artifacts
     .filter(
       (artifact) =>
-        canAccessArtifact(artifact, args.userId) &&
+        canAccessArtifact(artifact, args.personId) &&
         (args.includeArchived === true || artifact.archivedAt === undefined) &&
         matchesArtifactQuery(artifact, query)
     )
@@ -35,9 +35,9 @@ export async function searchArtifacts(
 
 export function canAccessArtifact(
   artifact: Pick<Doc<"artifacts">, "access" | "ownerId">,
-  userId: string
+  personId: Id<"persons">
 ) {
-  return artifact.access === "organization" || artifact.ownerId === userId
+  return artifact.access === "organization" || artifact.ownerId === personId
 }
 
 export function summarizeArtifact(artifact: Doc<"artifacts">) {

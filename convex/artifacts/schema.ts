@@ -41,7 +41,7 @@ export const artifactContract = v.object({
 
 export const artifacts = defineTable({
   tenantId: v.string(),
-  ownerId: v.string(),
+  ownerId: v.id("persons"),
   title: v.string(),
   access: artifactAccess,
   contract: v.optional(artifactContract),
@@ -62,7 +62,7 @@ export const artifactVersions = defineTable({
   entrypoint: v.string(),
   sdk: v.string(),
   message: v.optional(v.string()),
-  createdBy: v.string(),
+  createdBy: v.id("persons"),
   createdAt: v.number(),
 })
   .index("by_artifact", ["artifactId"])
@@ -100,7 +100,7 @@ export const artifactTools = defineTable({
   versionId: v.optional(v.id("artifactVersions")),
   tool: v.string(),
   integrationId: v.optional(v.id("integrations")),
-  approvedBy: v.string(),
+  approvedBy: v.id("persons"),
   approvedAt: v.number(),
   revokedAt: v.optional(v.number()),
 })
@@ -111,7 +111,7 @@ export const artifactSessions = defineTable({
   tenantId: v.string(),
   artifactId: v.id("artifacts"),
   versionId: v.id("artifactVersions"),
-  userId: v.string(),
+  personId: v.id("persons"),
   access: artifactAccess,
   status: v.union(v.literal("active"), v.literal("ended")),
   tokenSecret: v.string(),
@@ -121,7 +121,7 @@ export const artifactSessions = defineTable({
   expiresAt: v.number(),
 })
   .index("by_artifact", ["artifactId"])
-  .index("by_user_and_artifact", ["userId", "artifactId"])
+  .index("by_person_and_artifact", ["personId", "artifactId"])
 
 export const artifactAssets = defineTable({
   tenantId: v.string(),
@@ -139,7 +139,7 @@ export const artifactAssets = defineTable({
 export const artifactState = defineTable({
   tenantId: v.string(),
   artifactId: v.id("artifacts"),
-  userId: v.optional(v.string()),
+  personId: v.optional(v.id("persons")),
   scope: artifactStateScope,
   contractName: v.optional(v.string()),
   schemaName: v.optional(v.string()),
@@ -151,10 +151,10 @@ export const artifactState = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 })
-  .index("by_artifact_and_scope_and_user_and_key", [
+  .index("by_artifact_and_scope_and_person_and_key", [
     "artifactId",
     "scope",
-    "userId",
+    "personId",
     "key",
   ])
   .index("by_artifact_and_scope_and_key", ["artifactId", "scope", "key"])
@@ -163,7 +163,7 @@ export const artifactCaches = defineTable({
   tenantId: v.string(),
   artifactId: v.id("artifacts"),
   versionId: v.id("artifactVersions"),
-  userId: v.string(),
+  personId: v.id("persons"),
   surface: v.string(),
   tool: v.string(),
   integrationId: v.optional(v.id("integrations")),
@@ -175,9 +175,9 @@ export const artifactCaches = defineTable({
 })
   .index("by_artifact", ["artifactId"])
   .index("by_artifact_and_key", ["artifactId", "cacheKey"])
-  .index("by_artifact_and_user_and_surface", [
+  .index("by_artifact_and_person_and_surface", [
     "artifactId",
-    "userId",
+    "personId",
     "surface",
   ])
   .index("by_expires_at", ["expiresAt"])

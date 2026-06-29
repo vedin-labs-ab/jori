@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { type Doc } from "../../../_generated/dataModel"
+import { type Doc, type Id } from "../../../_generated/dataModel"
 import { assetContext } from "../fixtures"
 import { callSlackTool } from "."
 
@@ -263,7 +263,7 @@ function slackIntegration(): Doc<"integrations"> {
       user: "user-token",
     },
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

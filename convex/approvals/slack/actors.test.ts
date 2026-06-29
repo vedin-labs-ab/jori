@@ -52,11 +52,13 @@ test("hydrates Slack approval actors with profile names", async () => {
   expect(getActorDisplayName(actor)).toBe("ÅÄÖ 😊")
   expect(ctx.runMutation).toHaveBeenCalledWith(expect.anything(), {
     tenantId: "tenant_1",
-    userId: "user_123",
     provider: "slack",
-    externalId: "U123",
-    email: "albin@example.com",
-    name: "ÅÄÖ 😊",
+    actor: {
+      kind: "person",
+      externalId: "U123",
+      email: "albin@example.com",
+      name: "ÅÄÖ 😊",
+    },
   })
   expect(accountLookupCount).toBe(2)
 })

@@ -1,4 +1,4 @@
-import { type Doc } from "../../../_generated/dataModel"
+import { type Doc, type Id } from "../../../_generated/dataModel"
 
 export function runtimeMilo() {
   return {
@@ -14,14 +14,16 @@ export function integration(integration: string): Doc<"integrations"> {
     tenantId: "tenant",
     integration,
     scope: isUserScopedIntegration(integration) ? "user" : "tenant",
-    ownerId: isUserScopedIntegration(integration) ? "user" : undefined,
+    ownerId: isUserScopedIntegration(integration)
+      ? ("person" as Id<"persons">)
+      : undefined,
     externalId: `${integration}-account`,
     email: isUserScopedIntegration(integration)
       ? "user@example.com"
       : undefined,
     credentials: credentials(integration),
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

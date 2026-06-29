@@ -42,7 +42,7 @@ export async function callMiloAutomationTool(
   ctx: ActionCtx,
   execution: {
     tenantId: string
-    createdBy?: string
+    createdBy?: Id<"persons">
   },
   request: MiloMcpRequest
 ) {

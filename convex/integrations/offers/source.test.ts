@@ -15,7 +15,7 @@ describe("integration offer source", () => {
       message: {
         _id: "message_1",
         actor: {
-          kind: "user",
+          kind: "person",
           externalId: "U123",
           email: "ada@example.com",
           name: "Ada",

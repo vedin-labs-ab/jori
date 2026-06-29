@@ -7,6 +7,7 @@ type TableName = keyof DataModel
 
 const tableRegistry: Record<TableName, true> = {
   skills: true,
+  persons: true,
   assets: true,
   identities: true,
   integrations: true,

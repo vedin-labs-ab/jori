@@ -1,4 +1,4 @@
-import { type Doc } from "../../../_generated/dataModel"
+import { type Doc, type Id } from "../../../_generated/dataModel"
 
 export function promptIntegration(integration: string): Doc<"integrations"> {
   return {
@@ -11,7 +11,7 @@ export function promptIntegration(integration: string): Doc<"integrations"> {
     credentials: {},
     data: integration === "slack" ? { botUserId: "UBOT" } : {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

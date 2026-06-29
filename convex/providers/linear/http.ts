@@ -197,7 +197,7 @@ async function recordLinearReaction(ctx: ActionCtx, reaction: LinearReaction) {
     reaction: reaction.reaction,
     actor: createIntegrationActor({
       externalId: reaction.actorId,
-      kind: "user",
+      kind: "person",
       email: reaction.actorEmail,
       name: reaction.actorName,
     }),
@@ -206,7 +206,7 @@ async function recordLinearReaction(ctx: ActionCtx, reaction: LinearReaction) {
       identifiers: reaction.target.identifiers,
       actor: createIntegrationActor({
         externalId: reaction.target.actorId,
-        kind: "user",
+        kind: "person",
       }),
       conversationId: reaction.target.conversationId,
       text: reaction.target.text,

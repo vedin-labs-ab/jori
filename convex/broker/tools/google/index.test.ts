@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { type Doc } from "../../../_generated/dataModel"
+import { type Doc, type Id } from "../../../_generated/dataModel"
 import { assetContext } from "../fixtures"
 import { callGoogleTool } from "."
 
@@ -266,7 +266,7 @@ function gmailIntegration(): Doc<"integrations"> {
     tenantId: "tenant",
     integration: "gmail",
     scope: "user",
-    ownerId: "user",
+    ownerId: "person" as Id<"persons">,
     externalId: "google-account",
     email: "sender@example.com",
     credentials: {
@@ -274,7 +274,7 @@ function gmailIntegration(): Doc<"integrations"> {
       expiresAt: Date.now() + 60_000,
     },
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

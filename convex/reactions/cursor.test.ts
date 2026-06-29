@@ -3,7 +3,7 @@ import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
 import { collectPendingReactionBatch, formatRuntimeReaction } from "./cursor"
 
 const self = { externalId: "UBOT", kind: "self" as const }
-const user = { externalId: "U123", kind: "user" as const }
+const user = { externalId: "U123", kind: "person" as const }
 
 test("drains only reactions to Milo-authored targets", () => {
   const batch = collectPendingReactionBatch(
@@ -78,7 +78,7 @@ test("formats added and removed runtime reactions", () => {
   expect(
     formatRuntimeReaction(
       reaction("added", 1, {
-        actor: { externalId: "U123", kind: "user", name: "Albin" },
+        actor: { externalId: "U123", kind: "person", name: "Albin" },
         reaction: "✅",
         target: reactionTarget({
           actor: self,

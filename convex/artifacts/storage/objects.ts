@@ -33,7 +33,7 @@ export async function insertVersion(
     entrypoint: string
     sdk: string
     message?: string
-    createdBy: string
+    createdBy: Id<"persons">
     createdAt: number
   }
 ) {

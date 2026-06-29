@@ -14,7 +14,7 @@ export const skills = defineTable({
     })
   ),
   body: v.string(),
-  createdBy: v.optional(v.string()),
+  createdBy: v.optional(v.id("persons")),
   createdAt: v.number(),
   updatedAt: v.number(),
 })

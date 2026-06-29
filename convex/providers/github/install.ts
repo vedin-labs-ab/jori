@@ -18,7 +18,7 @@ export const createInstallState = mutation({
 export const recordInstallation = internalMutation({
   args: {
     tenantId: v.string(),
-    createdBy: v.string(),
+    createdBy: v.id("persons"),
     installationId: v.string(),
     profile: v.object({
       id: v.number(),

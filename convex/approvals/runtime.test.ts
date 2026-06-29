@@ -144,7 +144,7 @@ function approvalDoc(): Doc<"approvals"> {
 
 function userActor(): Actor {
   return {
-    kind: "user",
-    userId: "user_1",
+    kind: "person",
+    personId: "person_1" as Id<"persons">,
   }
 }

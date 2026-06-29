@@ -5,7 +5,8 @@ import {
   mutation,
   query,
 } from "../_generated/server"
-import { requireClerkUserId } from "../identity/users"
+import { requireTenantAccess } from "../identity/access"
+import { ensureCurrentPerson } from "../persons/clerk"
 import {
   type ConfigurablePermissionMode,
   getToolPermission,
@@ -28,11 +29,7 @@ export const list = query({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    if (identity === null) {
-      return null
-    }
+    await requireTenantAccess(ctx, args.tenantId)
 
     const overrides = await listPermissionOverrides(ctx, args.tenantId)
     const modes = resolveToolModes(overrides)
@@ -55,11 +52,7 @@ export const set = mutation({
     mode: permissionModeValidator,
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    if (identity === null) {
-      throw new Error("Authentication required")
-    }
+    await requireTenantAccess(ctx, args.tenantId)
 
     const permission = getToolPermission(args.tool)
 
@@ -72,7 +65,7 @@ export const set = mutation({
     }
 
     const existing = await getOverride(ctx, args.tenantId, args.tool)
-    const userId = requireClerkUserId(identity)
+    const personId = await ensureCurrentPerson(ctx, args.tenantId)
 
     if (args.mode === permission.defaultMode) {
       if (existing !== null) {
@@ -87,13 +80,13 @@ export const set = mutation({
         tenantId: args.tenantId,
         tool: args.tool,
         mode: args.mode,
-        updatedBy: userId,
+        updatedBy: personId,
         updatedAt: Date.now(),
       })
     } else {
       await ctx.db.patch(existing._id, {
         mode: args.mode,
-        updatedBy: userId,
+        updatedBy: personId,
         updatedAt: Date.now(),
       })
     }

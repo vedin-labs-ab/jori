@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
 import { canAccessArtifact } from "./access"
 import {
   createSessionTokenPayload,
@@ -100,18 +100,22 @@ describe("artifact source validation", () => {
 
 describe("artifact access", () => {
   test("keeps personal artifacts owner-only", () => {
-    expect(canAccessArtifact(artifact("personal", "user_1"), "user_1")).toBe(
-      true
-    )
-    expect(canAccessArtifact(artifact("personal", "user_1"), "user_2")).toBe(
+    const ownerId = id<"persons">("person_1")
+    const otherId = id<"persons">("person_2")
+
+    expect(canAccessArtifact(artifact("personal", ownerId), ownerId)).toBe(true)
+    expect(canAccessArtifact(artifact("personal", ownerId), otherId)).toBe(
       false
     )
   })
 
   test("allows tenant members to open organization artifacts", () => {
-    expect(
-      canAccessArtifact(artifact("organization", "user_1"), "user_2")
-    ).toBe(true)
+    const ownerId = id<"persons">("person_1")
+    const otherId = id<"persons">("person_2")
+
+    expect(canAccessArtifact(artifact("organization", ownerId), otherId)).toBe(
+      true
+    )
   })
 })
 
@@ -146,7 +150,7 @@ describe("artifact session tokens", () => {
     const payload = {
       sessionId: "session" as Id<"artifactSessions">,
       tenantId: "tenant",
-      userId: "user",
+      personId: "person" as Id<"persons">,
       artifactId: "artifact" as Id<"artifacts">,
       versionId: "version" as Id<"artifactVersions">,
       secret: "secret",
@@ -194,7 +198,11 @@ function minimalBuildAssets() {
 
 function artifact(
   access: Doc<"artifacts">["access"],
-  ownerId: string
+  ownerId: Id<"persons">
 ): Pick<Doc<"artifacts">, "access" | "ownerId"> {
   return { access, ownerId }
+}
+
+function id<TableName extends keyof DataModel>(value: string) {
+  return value as Id<TableName>
 }

@@ -32,7 +32,7 @@ function entry(
     identifiers: [],
     observedAt: null,
     reactions: null,
-    source: actor === "Milo" ? "self" : "user",
+    source: actor === "Milo" ? "self" : "person",
     text,
     type,
   }

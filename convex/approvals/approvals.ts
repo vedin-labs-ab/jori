@@ -6,6 +6,7 @@ import { internalMutation, type MutationCtx } from "../_generated/server"
 import { actorValidator } from "../shared/actor"
 import { toolSurfaceValidator } from "../shared/integrations"
 import { resolveCancellationActor } from "./cancellation"
+import { resolveApprovalActor } from "./lifecycle"
 import {
   approvalDecision,
   approvalDelivery,
@@ -33,6 +34,11 @@ export const create = internalMutation({
     requestedBy: actorValidator,
   },
   handler: async (ctx, args) => {
+    await resolveApprovalActor(ctx, {
+      actor: args.requestedBy,
+      surface: args.surface,
+      tenantId: args.tenantId,
+    })
     const reusable = await findReusableApproval(ctx, args)
 
     if (reusable !== null) {
@@ -139,6 +145,11 @@ export const decide = internalMutation({
       return { status: "closed" as const, approval }
     }
 
+    await resolveApprovalActor(ctx, {
+      actor: args.decidedBy,
+      surface: approval.surface,
+      tenantId: approval.tenantId,
+    })
     const updated = await markApprovalDecided(ctx, approval, {
       decidedBy: args.decidedBy,
       decision: args.decision,
@@ -185,6 +196,11 @@ export const cancel = internalMutation({
       return { status: "invalid_message" as const, approval }
     }
 
+    await resolveApprovalActor(ctx, {
+      actor: cancelledBy,
+      surface: approval.surface,
+      tenantId: approval.tenantId,
+    })
     const updated = await markApprovalCancelled(ctx, approval, {
       cancelledBy,
       now: Date.now(),

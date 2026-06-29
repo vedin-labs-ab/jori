@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { readVerifiedClerkEmails } from "./profile"
+import { readVerifiedClerkEmails } from "./clerkProfile"
 
 describe("Clerk profile email parsing", () => {
   test("keeps only verified email addresses", () => {

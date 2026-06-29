@@ -48,7 +48,7 @@ export const insert = internalMutation({
       rootId: parent.rootId ?? parent._id,
       cause: {
         type: "manual",
-        userId: parent.createdBy,
+        personId: parent.createdBy,
       },
       ...createInstructionRunSnapshot({
         instructions: args.task,

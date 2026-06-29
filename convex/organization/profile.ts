@@ -9,12 +9,9 @@ import {
   query,
 } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
-import {
-  readClerkUserEmail,
-  readClerkUserName,
-  requireClerkUserId,
-} from "../identity/users"
-import { createUserActor } from "../shared/actor"
+import { readClerkUserEmail, readClerkUserName } from "../identity/users"
+import { ensureCurrentPerson } from "../persons/clerk"
+import { createPersonActor } from "../shared/actor"
 import { factsEqual, type OrganizationFacts } from "./facts"
 import { organizationFacts, organizationSourceSnapshot } from "./schema"
 import {
@@ -42,6 +39,7 @@ export const approve = mutation({
   args: { tenantId: v.string() },
   handler: async (ctx, args) => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
+    const personId = await ensureCurrentPerson(ctx, args.tenantId)
     const profile = await readProfile(ctx, args.tenantId)
 
     if (profile === null || profile.proposed === undefined) {
@@ -53,7 +51,7 @@ export const approve = mutation({
       ...toFacts(profile.proposed),
       proposed: undefined,
       approvedAt: now,
-      approvedBy: createUserActor(requireClerkUserId(identity), {
+      approvedBy: createPersonActor(personId, {
         email: readClerkUserEmail(identity),
         name: readClerkUserName(identity),
       }),

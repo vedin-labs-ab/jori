@@ -7,16 +7,13 @@ import {
   mutation,
 } from "../../_generated/server"
 import { requireTenantAccess } from "../../identity/access"
-import {
-  readClerkUserEmail,
-  readClerkUserName,
-  requireClerkUserId,
-} from "../../identity/users"
+import { readClerkUserEmail, readClerkUserName } from "../../identity/users"
+import { ensureCurrentPerson } from "../../persons/clerk"
 import {
   createSignedInstallState,
   installPathForIntegration,
 } from "../../providers/install"
-import { createUserActor } from "../../shared/actor"
+import { createPersonActor } from "../../shared/actor"
 import { integrationValidator } from "../../shared/integrations"
 import {
   findIntegrationOfferByToken,
@@ -157,8 +154,8 @@ export const claim = mutation({
     }
 
     const identity = await requireTenantAccess(ctx, offer.tenantId)
-    const userId = requireClerkUserId(identity)
-    const actor = createUserActor(userId, {
+    const personId = await ensureCurrentPerson(ctx, offer.tenantId)
+    const actor = createPersonActor(personId, {
       email: readClerkUserEmail(identity),
       name: readClerkUserName(identity),
     })
@@ -173,15 +170,15 @@ export const claim = mutation({
       throw new Error("This integration offer has expired.")
     }
 
-    if (offer.claim !== undefined && offer.claim.userId !== userId) {
+    if (offer.claim !== undefined && offer.claim.personId !== personId) {
       throw new Error(
-        "This integration offer was already claimed by another user."
+        "This integration offer was already claimed by another person."
       )
     }
 
     await upsertIntegrationOfferSourceIdentity(ctx, {
       tenantId: offer.tenantId,
-      userId,
+      personId,
       source: offer.source,
     })
 
@@ -199,7 +196,7 @@ export const claim = mutation({
       status: "claimed",
       claim:
         offer.claim === undefined
-          ? { userId, actor, at: now }
+          ? { personId, actor, at: now }
           : { ...offer.claim, actor: offer.claim.actor ?? actor },
       result: undefined,
       updatedAt: now,

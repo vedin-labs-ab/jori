@@ -8,7 +8,7 @@ import {
   type MutationCtx,
 } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
+import { resolveCurrentPerson } from "../persons/clerk"
 import {
   type Integration,
   integrationValidator,
@@ -75,11 +75,11 @@ export const getDisconnectTarget = internalQuery({
     tenantId: v.string(),
   },
   handler: async (ctx, args): Promise<DisconnectTarget | null> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
-    const userId = requireClerkUserId(identity)
+    await requireTenantAccess(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.tenantId)
     const integration = isUserScopedIntegration(args.integration)
       ? await getUserIntegrationForOwner(ctx, {
-          ownerId: userId,
+          ownerId: personId,
           integration: args.integration,
           tenantId: args.tenantId,
         })
@@ -147,7 +147,7 @@ export const finishDisconnect = internalMutation({
     credentials: v.any(),
     externalId: v.string(),
     integrationId: v.id("integrations"),
-    ownerId: v.optional(v.string()),
+    ownerId: v.optional(v.id("persons")),
     integration: integrationValidator,
     tenantId: v.string(),
   },
@@ -168,7 +168,7 @@ async function getIntegrationsToDelete(
     credentials: unknown
     externalId: string
     integrationId: Id<"integrations">
-    ownerId?: string | undefined
+    ownerId?: Id<"persons"> | undefined
     integration: Integration
     tenantId: string
   }

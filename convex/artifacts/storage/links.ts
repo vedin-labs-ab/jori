@@ -23,7 +23,7 @@ export async function insertCapabilities(
     tenantId: string
     artifactId: Id<"artifacts">
     versionId: Id<"artifactVersions">
-    approvedBy: string
+    approvedBy: Id<"persons">
     capabilities: Array<{
       tool: string
       integrationId?: Id<"integrations">

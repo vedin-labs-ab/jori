@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { parseSlackApprovalInteraction } from "."
 import { createSlackApprovalRequest } from "./blocks"
 import { createSlackApprovalSurfaceMessage } from "./surface"
@@ -95,8 +95,8 @@ test("renders approved delivered approvals with the Milo approver", () => {
     status: "approved",
     decidedAt: 1_710_000_000_000,
     decidedBy: {
-      kind: "user",
-      userId: "user_123",
+      kind: "person",
+      personId: "person_123" as Id<"persons">,
       name: "Albin Vedin",
       email: "albin@example.com",
     },
@@ -124,7 +124,7 @@ test("renders denied delivered approvals with the Slack approver", () => {
     status: "denied",
     decidedAt: 1_710_000_000_000,
     decidedBy: {
-      kind: "user",
+      kind: "person",
       externalId: "U123",
     },
   } as Doc<"approvals">)

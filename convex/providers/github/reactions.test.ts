@@ -35,7 +35,7 @@ test("normalizes GitHub REST reactions into reaction snapshots", async () => {
     {
       actor: {
         externalId: "456",
-        kind: "user",
+        kind: "person",
         name: "albin",
       },
       observedAt: Date.parse("2026-06-25T13:58:12Z"),

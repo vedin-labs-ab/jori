@@ -50,7 +50,7 @@ export const getProfileLookupTarget = internalQuery({
 export const recordOAuthInstallation = internalMutation({
   args: {
     tenantId: v.string(),
-    createdBy: v.string(),
+    createdBy: v.id("persons"),
     accountId: v.string(),
     botScopes: v.optional(v.string()),
     botToken: v.string(),

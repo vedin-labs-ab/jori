@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+import { type Id } from "../_generated/dataModel"
 import { callMiloArtifactTool } from "./mcp"
 import { createArtifactSourceSnapshot, hashArtifactSource } from "./source"
 import { validateArtifactBuild } from "./source/build"
@@ -40,7 +41,7 @@ describe("artifact MCP publishing", () => {
       ctx as never,
       {
         tenantId: "tenant",
-        createdBy: "user",
+        createdBy: "person" as Id<"persons">,
       },
       {
         tool: "create_artifact",

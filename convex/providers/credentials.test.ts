@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { requireGitHubCredentials } from "./github/credentials"
 import { requireGoogleCredentials } from "./google/credentials"
 
@@ -56,12 +56,12 @@ function integration(credentials: unknown): Doc<"integrations"> {
     tenantId: "tenant",
     integration: "gmail",
     scope: "user",
-    ownerId: "user",
+    ownerId: "person" as Id<"persons">,
     externalId: "account",
     email: "user@example.com",
     credentials,
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

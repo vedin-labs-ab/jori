@@ -68,8 +68,8 @@ test("renders a URL button for the requested integration", () => {
 test("renders connected updates without the offer button", () => {
   const message = createSlackIntegrationOfferMessage({
     actor: {
-      kind: "user",
-      userId: "user_123",
+      kind: "person",
+      personId: "person_123" as Id<"persons">,
       name: "Albin Vedin",
     },
     expiresAt: 1_700_000_000_000,
@@ -97,7 +97,7 @@ test("renders connected updates without the offer button", () => {
 test("renders cancelled updates without offer actions", () => {
   const message = createSlackIntegrationOfferMessage({
     actor: {
-      kind: "user",
+      kind: "person",
       externalId: "U123",
       name: "Albin Vedin",
     },

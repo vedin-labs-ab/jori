@@ -15,7 +15,7 @@ export const authorizeTool = internalQuery({
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
     versionId: v.id("artifactVersions"),
-    userId: v.string(),
+    personId: v.id("persons"),
     tool: v.string(),
     integrationId: v.optional(v.id("integrations")),
   },
@@ -32,7 +32,7 @@ export const authorizeTool = internalQuery({
       artifact === null ||
       artifact.tenantId !== args.tenantId ||
       artifact.archivedAt !== undefined ||
-      !canAccessArtifact(artifact, args.userId)
+      !canAccessArtifact(artifact, args.personId)
     ) {
       throw new Error("Artifact not found.")
     }
@@ -66,7 +66,7 @@ export const authorizeTool = internalQuery({
         ? null
         : await findRuntimeIntegration(ctx, {
             tenantId: args.tenantId,
-            userId: args.userId,
+            personId: args.personId,
             surface: permission.surface,
             integrationId: capability.integrationId ?? args.integrationId,
           })
@@ -115,7 +115,7 @@ async function findRuntimeIntegration(
   ctx: QueryCtx,
   args: {
     tenantId: string
-    userId: string
+    personId: Id<"persons">
     surface: Exclude<Doc<"integrations">["integration"], "milo">
     integrationId?: Id<"integrations">
   }
@@ -126,18 +126,28 @@ async function findRuntimeIntegration(
     return isUsableIntegration(integration, args) ? integration : null
   }
 
-  const integrations = await ctx.db
-    .query("integrations")
-    .withIndex("by_tenant_and_status", (index) =>
-      index.eq("tenantId", args.tenantId).eq("status", "active")
-    )
-    .collect()
+  if (isUserScopedIntegration(args.surface)) {
+    const integration = await ctx.db
+      .query("integrations")
+      .withIndex("by_tenant_and_integration_and_owner", (index) =>
+        index
+          .eq("tenantId", args.tenantId)
+          .eq("integration", args.surface)
+          .eq("ownerId", args.personId)
+      )
+      .first()
 
-  return (
-    integrations.find((integration) =>
-      isUsableIntegration(integration, args)
-    ) ?? null
-  )
+    return isUsableIntegration(integration, args) ? integration : null
+  }
+
+  const integration = await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_and_integration", (index) =>
+      index.eq("tenantId", args.tenantId).eq("integration", args.surface)
+    )
+    .first()
+
+  return isUsableIntegration(integration, args) ? integration : null
 }
 
 function matchesIntegration(
@@ -155,7 +165,7 @@ function isUsableIntegration(
   integration: Doc<"integrations"> | null,
   args: {
     tenantId: string
-    userId: string
+    personId: Id<"persons">
     surface: Doc<"integrations">["integration"]
   }
 ) {
@@ -170,6 +180,6 @@ function isUsableIntegration(
 
   return (
     !isUserScopedIntegration(integration.integration) ||
-    integration.ownerId === args.userId
+    integration.ownerId === args.personId
   )
 }

@@ -40,7 +40,7 @@ test("advances across self messages without returning them as user input", () =>
         actor: { externalId: "UBOT", kind: "self" },
       }),
       message("next", 3, "Follow up.", {
-        actor: { externalId: "U123", kind: "user" },
+        actor: { externalId: "U123", kind: "person" },
       }),
     ],
     session("last", 1),
@@ -74,7 +74,7 @@ test("formats runtime messages with normalized text and Slack identifiers", () =
   expect(
     formatRuntimeMessage(
       message("next", 3, "<@UBOT> follow-up", {
-        actor: { externalId: "U123", kind: "user", name: "Albin" },
+        actor: { externalId: "U123", kind: "person", name: "Albin" },
         data: { ts: "123.456" },
         mentioned: true,
       }),

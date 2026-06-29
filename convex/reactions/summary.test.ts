@@ -8,7 +8,7 @@ const targetKey = "slack:message:C123:1710000000.000100"
 test("omits opaque reaction actor ids from message summaries", async () => {
   const result = await reactionSummariesForMessages(
     fakeQueryCtx([
-      reaction("one", ":eyes:", { externalId: "U123", kind: "user" }),
+      reaction("one", ":eyes:", { externalId: "U123", kind: "person" }),
     ]),
     [message()]
   )
@@ -21,16 +21,16 @@ test("shows available reaction actor names and counts unnamed actors", async () 
     fakeQueryCtx([
       reaction("one", ":white_check_mark:", {
         externalId: "U123",
-        kind: "user",
+        kind: "person",
         name: "Albin",
       }),
       reaction("two", ":white_check_mark:", {
         externalId: "U456",
-        kind: "user",
+        kind: "person",
       }),
       reaction("three", ":white_check_mark:", {
         externalId: "U789",
-        kind: "user",
+        kind: "person",
         name: "Sarah",
       }),
     ]),

@@ -9,7 +9,7 @@ import { requireNotionClientSecret } from "./oauth"
 
 export type NotionInstallState = {
   tenantId: string
-  createdBy: string
+  createdBy: Id<"persons">
   returnUrl: string
   createdAt: number
   integrationOfferId?: Id<"integrationOffers">

@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
+import { type Id } from "../_generated/dataModel"
 import { mutation } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
 import {
@@ -7,8 +8,9 @@ import {
   readClerkUserName,
   requireClerkUserId,
 } from "../identity/users"
+import { ensureClerkPerson } from "../persons/clerk"
 import { wakeRun } from "../runtime/waiters/data"
-import { createUserActor } from "../shared/actor"
+import { createPersonActor } from "../shared/actor"
 
 export const stop = mutation({
   args: {
@@ -17,6 +19,12 @@ export const stop = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
+    const personId = await ensureClerkPerson(ctx, {
+      tenantId: args.tenantId,
+      clerkSubject: requireClerkUserId(identity),
+      email: readClerkUserEmail(identity),
+      name: readClerkUserName(identity),
+    })
     const run = await ctx.db.get(args.runId)
 
     if (run === null || run.tenantId !== args.tenantId) {
@@ -31,7 +39,7 @@ export const stop = mutation({
 
     await ctx.db.patch(run._id, {
       status: "stopped",
-      stoppedBy: stoppedByActor(identity),
+      stoppedBy: stoppedByActor(personId, identity),
       endedAt: now,
     })
 
@@ -44,12 +52,15 @@ export const stop = mutation({
   },
 })
 
-function stoppedByActor(identity: {
-  email?: string
-  name?: string
-  subject?: string
-}) {
-  return createUserActor(requireClerkUserId(identity), {
+function stoppedByActor(
+  personId: Id<"persons">,
+  identity: {
+    email?: string
+    name?: string
+    subject?: string
+  }
+) {
+  return createPersonActor(personId, {
     email: readClerkUserEmail(identity),
     name: readClerkUserName(identity),
   })

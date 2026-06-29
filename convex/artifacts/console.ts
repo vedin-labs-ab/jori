@@ -2,9 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
-import { checkTenantAccess, requireTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
+import { checkTenantAccess } from "../identity/access"
 import { getToolPermission } from "../permissions/catalog"
+import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
 import { canAccessArtifact, searchArtifacts } from "./access"
 
 export const list = query({
@@ -24,10 +24,10 @@ export const list = query({
       }
     }
 
-    const userId = requireClerkUserId(access.identity)
+    const personId = await resolveCurrentPerson(ctx, args.tenantId)
     const artifacts = await searchArtifacts(ctx, {
       tenantId: args.tenantId,
-      userId,
+      personId,
       query: args.query,
       includeArchived: args.includeArchived,
       limit: 100,
@@ -60,13 +60,13 @@ export const get = query({
       }
     }
 
-    const userId = requireClerkUserId(access.identity)
+    const personId = await resolveCurrentPerson(ctx, args.tenantId)
     const artifact = await ctx.db.get(args.artifactId)
 
     if (
       artifact === null ||
       artifact.tenantId !== args.tenantId ||
-      !canAccessArtifact(artifact, userId)
+      !canAccessArtifact(artifact, personId)
     ) {
       return {
         status: "not_found" as const,
@@ -94,7 +94,7 @@ export const remove = mutation({
     archived?: true
     deleted?: true
   }> => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await ensureCurrentPerson(ctx, args.tenantId)
 
     return await ctx.runMutation(internal.artifacts.records.remove, args)
   },
@@ -109,7 +109,7 @@ export const restore = mutation({
     ctx,
     args
   ): Promise<{ artifactId: Id<"artifacts">; restored: true }> => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await ensureCurrentPerson(ctx, args.tenantId)
 
     return await ctx.runMutation(internal.artifacts.records.restore, args)
   },

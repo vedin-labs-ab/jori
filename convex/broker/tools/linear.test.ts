@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { callLinearTool } from "./linear"
 import { postLinearComment } from "./linear/comments"
 
@@ -263,7 +263,7 @@ function linearIntegration(): Doc<"integrations"> {
       expiresAt: Date.now() + 60_000,
     },
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

@@ -19,7 +19,7 @@ import {
 export const publishCreated = internalMutation({
   args: {
     tenantId: v.string(),
-    ownerId: v.string(),
+    ownerId: v.id("persons"),
     title: v.string(),
     access: artifactAccess,
     contract: artifactContract,
@@ -67,7 +67,7 @@ export const publishUpdated = internalMutation({
   args: {
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
-    updatedBy: v.string(),
+    updatedBy: v.id("persons"),
     title: v.optional(v.string()),
     access: v.optional(artifactAccess),
     contract: artifactContract,

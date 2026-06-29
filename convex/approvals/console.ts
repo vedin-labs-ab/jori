@@ -2,12 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { action, internalQuery } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
-import {
-  readClerkUserEmail,
-  readClerkUserName,
-  requireClerkUserId,
-} from "../identity/users"
-import { createUserActor } from "../shared/actor"
+import { readClerkUserEmail, readClerkUserName } from "../identity/users"
+import { ensureCurrentPersonFromAction } from "../persons/clerk"
+import { createPersonActor } from "../shared/actor"
 import { decideApproval } from "./runtime"
 
 export const decide = action({
@@ -30,9 +27,10 @@ export const decide = action({
       throw new Error("Approval not found.")
     }
 
+    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
     const result = await decideApproval(ctx, {
       approval: target,
-      decidedBy: createUserActor(requireClerkUserId(identity), {
+      decidedBy: createPersonActor(personId, {
         email: readClerkUserEmail(identity),
         name: readClerkUserName(identity),
       }),

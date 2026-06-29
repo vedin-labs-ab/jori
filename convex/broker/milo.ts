@@ -92,7 +92,7 @@ function requireBrokerContext(
 
 type MiloRunContext = {
   tenantId: string
-  createdBy?: string
+  createdBy?: Id<"persons">
   _id?: Id<"runs">
 }
 

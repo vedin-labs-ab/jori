@@ -15,7 +15,7 @@ export type ArtifactPlatformContext = {
   tenantId: string
   artifactId: Id<"artifacts">
   versionId: Id<"artifactVersions">
-  userId: string
+  personId: Id<"persons">
 }
 
 type ArtifactPlatformRequest = {
@@ -26,7 +26,7 @@ type ArtifactPlatformRequest = {
 type ArtifactDataContext = {
   tenantId: string
   artifactId: Id<"artifacts">
-  userId: string
+  personId: Id<"persons">
 }
 
 const platformTools = new Set([
@@ -116,6 +116,6 @@ function artifactDataContext(
   return {
     tenantId: context.tenantId,
     artifactId: context.artifactId,
-    userId: context.userId,
+    personId: context.personId,
   }
 }

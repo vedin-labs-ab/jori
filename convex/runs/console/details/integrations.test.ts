@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { eventAutomationDisplay } from "../display"
 import { summarizeRun } from "../summaries"
@@ -181,7 +182,7 @@ function githubIntegration() {
     externalId: "github-installation",
     credentials: {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   }

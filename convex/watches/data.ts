@@ -12,7 +12,7 @@ type StartMessageRunArgs = {
   watch: Doc<"watches"> | null
   integration: Doc<"integrations">
   message: Doc<"messages">
-  createdBy: string | undefined
+  createdBy: Id<"persons"> | undefined
   externalId: string
   now: number
   replaceActiveSession?: boolean
@@ -220,7 +220,7 @@ async function insertRun(
   args: {
     integration: Doc<"integrations">
     message: Doc<"messages">
-    createdBy: string | undefined
+    createdBy: Id<"persons"> | undefined
     now: number
     kind: "mention" | "reply"
   }

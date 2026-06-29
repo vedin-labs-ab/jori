@@ -1,4 +1,4 @@
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import {
   type Integration,
@@ -14,7 +14,7 @@ export async function resolveEventIntegration(
   ctx: QueryLikeCtx,
   args: {
     integration: Integration
-    createdBy: string | undefined
+    createdBy: Id<"persons"> | undefined
     tenantId: string
   }
 ) {
@@ -25,7 +25,7 @@ async function resolveIntegration(
   ctx: QueryLikeCtx,
   args: {
     integration: Integration
-    createdBy: string | undefined
+    createdBy: Id<"persons"> | undefined
     tenantId: string
   }
 ): Promise<Doc<"integrations">> {

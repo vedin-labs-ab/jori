@@ -31,7 +31,7 @@ test("formats drained reaction interactions compactly", () => {
 
   expect(
     formatted
-  ).toBe(`- 2026-06-22T09:35:00.000Z | reaction.added | user | Albin | reaction=✅ | identifiers=[linear:issue:ISS-1, linear:comment:comment] | actor_ids=[linear:user:user]
+  ).toBe(`- 2026-06-22T09:35:00.000Z | reaction.added | person | Albin | reaction=✅ | identifiers=[linear:issue:ISS-1, linear:comment:comment] | actor_ids=[linear:user:user]
 \`\`\`text
 Reacted ✅ to Milo's message: "I can proceed with option B."
 \`\`\``)
@@ -106,7 +106,7 @@ function runtimeInteraction(
     observedAt: Date.parse("2026-06-22T09:35:00.000Z"),
     preview: "I can proceed with option B.",
     reaction: "✅",
-    source: "user",
+    source: "person",
     target: "Milo",
     type: "reaction.added",
     ...overrides,

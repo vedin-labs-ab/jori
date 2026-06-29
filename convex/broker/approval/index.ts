@@ -10,7 +10,7 @@ import {
   type ToolSurface,
 } from "../../permissions/catalog"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
-import { type Actor, createUserActor } from "../../shared/actor"
+import { type Actor, createPersonActor } from "../../shared/actor"
 import { parsePromptedToolApproval } from "./args"
 import { deliverApprovalRequest } from "./delivery"
 
@@ -114,14 +114,14 @@ function findSurfaceIntegration(
 
 function createRequestedBy(context: ApprovalBrokerContext): Actor {
   if (context.input.run.createdBy !== undefined) {
-    return createUserActor(context.input.run.createdBy)
+    return createPersonActor(context.input.run.createdBy)
   }
 
   if (context.input.type === "automation") {
     const createdBy = context.input.automation.createdBy
 
     if (createdBy !== undefined) {
-      return createUserActor(createdBy)
+      return createPersonActor(createdBy)
     }
   }
 

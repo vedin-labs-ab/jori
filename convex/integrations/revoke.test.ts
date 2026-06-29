@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { revokeIntegrationAccess } from "./revoke"
 
 afterEach(() => {
@@ -135,7 +135,7 @@ function integration(
     _id: `${integration}-integration`,
     externalId: `${integration}-account`,
     createdAt: Date.now(),
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     credentials,
     integration,
     scope:

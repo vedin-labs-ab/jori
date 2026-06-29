@@ -1,7 +1,7 @@
 import { type ActionCtx } from "../../_generated/server"
 import {
-  handleUserTextApprovalDecision,
-  isUserApprovalDecisionText,
+  handlePersonTextApprovalDecision,
+  isPersonApprovalDecisionText,
 } from "../../approvals/runtime"
 import { createIntegrationActor } from "../../shared/actor"
 
@@ -9,7 +9,7 @@ type LinearApprovalMessage = {
   accountId: string
   actorEmail?: string
   actorId?: string
-  actorKind: "bot" | "user"
+  actorKind: "bot" | "person"
   actorName?: string
   text?: string
 }
@@ -18,7 +18,7 @@ export async function handleLinearApprovalDecision(
   ctx: ActionCtx,
   message: LinearApprovalMessage
 ) {
-  return await handleUserTextApprovalDecision(ctx, {
+  return await handlePersonTextApprovalDecision(ctx, {
     accountId: message.accountId,
     actor: createIntegrationActor({
       email: message.actorEmail,
@@ -33,7 +33,7 @@ export async function handleLinearApprovalDecision(
 }
 
 export function isLinearApprovalDecision(message: LinearApprovalMessage) {
-  return isUserApprovalDecisionText({
+  return isPersonApprovalDecisionText({
     actorKind: message.actorKind,
     text: message.text,
   })

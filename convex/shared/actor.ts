@@ -1,11 +1,12 @@
 import { v } from "convex/values"
+import { type Id } from "../_generated/dataModel"
 
-export type ActorKind = "bot" | "self" | "user"
+export type ActorKind = "bot" | "person" | "self"
 export type ActorAlias = { type: string; id: string }
 
 export type Actor =
-  | { kind: "user"; userId: string; name?: string; email?: string }
-  | { kind: "user"; email: string }
+  | { kind: "person"; personId: Id<"persons">; name?: string; email?: string }
+  | { kind: "person"; email: string }
   | {
       kind: ActorKind
       externalId: string
@@ -16,19 +17,19 @@ export type Actor =
 
 export const actorKindValidator = v.union(
   v.literal("bot"),
-  v.literal("self"),
-  v.literal("user")
+  v.literal("person"),
+  v.literal("self")
 )
 
 export const actorValidator = v.union(
   v.object({
-    kind: v.literal("user"),
-    userId: v.string(),
+    kind: v.literal("person"),
+    personId: v.id("persons"),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
   }),
   v.object({
-    kind: v.literal("user"),
+    kind: v.literal("person"),
     email: v.string(),
   }),
   v.object({
@@ -42,26 +43,26 @@ export const actorValidator = v.union(
   })
 )
 
-export function createUserActor(
-  userId: string,
+export function createPersonActor(
+  personId: Id<"persons">,
   profile?: { name?: string; email?: string }
 ): Actor
-export function createUserActor(userId: undefined): undefined
-export function createUserActor(
-  userId: string | undefined,
+export function createPersonActor(personId: undefined): undefined
+export function createPersonActor(
+  personId: Id<"persons"> | undefined,
   profile?: { name?: string; email?: string }
 ): Actor | undefined
-export function createUserActor(
-  userId: string | undefined,
+export function createPersonActor(
+  personId: Id<"persons"> | undefined,
   profile: { name?: string; email?: string } = {}
 ): Actor | undefined {
-  if (userId === undefined) {
+  if (personId === undefined) {
     return undefined
   }
 
   return {
-    kind: "user",
-    userId,
+    kind: "person",
+    personId,
     ...nonEmptyActorFields(profile),
   }
 }
@@ -83,15 +84,15 @@ export function getActorDisplayName(actor: Actor | undefined) {
     return actor.name ?? actor.email ?? actor.externalId
   }
 
-  if ("userId" in actor) {
-    return actor.name ?? actor.email ?? actor.userId
+  if ("personId" in actor) {
+    return actor.name ?? actor.email ?? actor.personId
   }
 
   return actor.email
 }
 
-export function isUserActor(actor: Actor | undefined) {
-  return actor?.kind === "user"
+export function isPersonActor(actor: Actor | undefined) {
+  return actor?.kind === "person"
 }
 
 export function getActorExternalId(actor: Actor | undefined) {
@@ -120,7 +121,7 @@ export function createIntegrationActor(args: {
 }): Actor | undefined {
   if (args.externalId !== undefined && args.externalId !== "") {
     return {
-      kind: args.kind ?? "user",
+      kind: args.kind ?? "person",
       externalId: args.externalId,
       ...nonEmptyAliases(args.aliases),
       ...nonEmptyActorFields({
@@ -131,7 +132,7 @@ export function createIntegrationActor(args: {
   }
 
   if (args.email !== undefined && args.email !== "") {
-    return { kind: "user", email: args.email }
+    return { kind: "person", email: args.email }
   }
 
   return undefined

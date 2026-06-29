@@ -20,7 +20,7 @@ test("projects Notion page content updates to page events", () => {
       type: "page.updated",
       pageId: "page-id",
       match: { page: "page-id" },
-      actor: { kind: "user", externalId: "author-id" },
+      actor: { kind: "person", externalId: "author-id" },
       observedAt: Date.parse("2026-06-12T08:00:00.000Z"),
       data: expect.objectContaining({
         pageId: "page-id",

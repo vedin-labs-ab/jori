@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   type MutationCtx,
   mutation,
@@ -7,7 +7,7 @@ import {
   query,
 } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
+import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
 import {
   type Integration,
   isUserScopedIntegration,
@@ -64,8 +64,7 @@ export const eventIntegrations = query({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
-    const ownerId = requireClerkUserId(identity)
+    const ownerId = await resolveCurrentPerson(ctx, args.tenantId)
 
     return {
       integrations: await Promise.all(
@@ -92,10 +91,10 @@ export const create = mutation({
     trigger: triggerInput,
   },
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const createdBy = await ensureCurrentPerson(ctx, args.tenantId)
     const automation = await createAutomation(ctx, {
       ...args,
-      createdBy: requireClerkUserId(identity),
+      createdBy,
     })
 
     return await toConsoleAutomation(ctx, automation)
@@ -197,7 +196,7 @@ async function hasActiveIntegration(
   ctx: QueryCtx,
   args: {
     integration: Integration
-    ownerId: string
+    ownerId: Id<"persons">
     tenantId: string
   }
 ) {

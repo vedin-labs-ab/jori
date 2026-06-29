@@ -5,8 +5,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { action, internalAction } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
+import { ensureCurrentPersonFromAction } from "../persons/clerk"
 import {
   type PublishArtifactArgs,
   type PublishResult,
@@ -50,7 +49,7 @@ const publishArgs = {
 type SessionResult = {
   sessionId: Id<"artifactSessions">
   tenantId: string
-  userId: string
+  personId: Id<"persons">
   artifactId: Id<"artifacts">
   versionId: Id<"artifactVersions">
   secret: string
@@ -61,12 +60,12 @@ type SessionResult = {
 export const create = action({
   args: publishArgs,
   handler: async (ctx, args): Promise<PublishResult> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
 
     return await publishArtifact(ctx, {
       ...args,
       mode: "create",
-      userId: requireClerkUserId(identity),
+      personId,
     } satisfies PublishArtifactArgs)
   },
 })
@@ -77,12 +76,12 @@ export const update = action({
     artifactId: v.id("artifacts"),
   },
   handler: async (ctx, args): Promise<PublishResult> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
 
     return await publishArtifact(ctx, {
       ...args,
       mode: "update",
-      userId: requireClerkUserId(identity),
+      personId,
     } satisfies PublishArtifactArgs)
   },
 })
@@ -94,12 +93,12 @@ export const read = action({
     versionId: v.optional(v.id("artifactVersions")),
   },
   handler: async (ctx, args): Promise<SourceReadResult> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
     const artifact = await ctx.runQuery(
       internal.artifacts.queries.readForAgent,
       {
         tenantId: args.tenantId,
-        userId: requireClerkUserId(identity),
+        personId,
         artifactId: args.artifactId,
       }
     )
@@ -114,7 +113,7 @@ export const createSession = action({
     artifactId: v.id("artifacts"),
   },
   handler: async (ctx, args): Promise<SessionResult> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
     const now = Date.now()
     const expiresAt = now + 60 * 60 * 1000
     const record: Omit<SessionResult, "token"> = await ctx.runMutation(
@@ -122,7 +121,7 @@ export const createSession = action({
       {
         tenantId: args.tenantId,
         artifactId: args.artifactId,
-        userId: requireClerkUserId(identity),
+        personId,
         secret: randomTokenSecret(),
         now,
         expiresAt,
@@ -135,7 +134,7 @@ export const createSession = action({
       token: createSessionTokenPayload({
         sessionId: record.sessionId,
         tenantId: record.tenantId,
-        userId: record.userId,
+        personId: record.personId,
         artifactId: record.artifactId,
         versionId: record.versionId,
         secret: record.secret,
@@ -148,13 +147,13 @@ export const createSession = action({
 export const createFromAgent = internalAction({
   args: {
     ...publishArgs,
-    userId: v.string(),
+    personId: v.id("persons"),
   },
   handler: async (ctx, args): Promise<PublishResult> => {
     return await publishArtifact(ctx, {
       ...args,
       mode: "create",
-      userId: args.userId,
+      personId: args.personId,
     } satisfies PublishArtifactArgs)
   },
 })
@@ -163,13 +162,13 @@ export const updateFromAgent = internalAction({
   args: {
     ...publishArgs,
     artifactId: v.id("artifacts"),
-    userId: v.string(),
+    personId: v.id("persons"),
   },
   handler: async (ctx, args): Promise<PublishResult> => {
     return await publishArtifact(ctx, {
       ...args,
       mode: "update",
-      userId: args.userId,
+      personId: args.personId,
     } satisfies PublishArtifactArgs)
   },
 })

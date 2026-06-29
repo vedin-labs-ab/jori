@@ -69,7 +69,7 @@ function slackReactionItems(value: unknown) {
       items.push({
         actor: createIntegrationActor({
           externalId: userId,
-          kind: "user",
+          kind: "person",
         }),
         reaction: `:${name}:`,
       })

@@ -14,7 +14,7 @@ test("applies Slack profile names to reaction actors", () => {
         {
           actor: {
             externalId: "U123",
-            kind: "user",
+            kind: "person",
             name: "Albin",
           },
           reaction: ":eyes:",
@@ -22,7 +22,7 @@ test("applies Slack profile names to reaction actors", () => {
         {
           actor: {
             externalId: "U456",
-            kind: "user",
+            kind: "person",
           },
           reaction: ":white_check_mark:",
         },
@@ -41,14 +41,14 @@ function target(): ReactionSnapshotTarget {
       {
         actor: {
           externalId: "U123",
-          kind: "user",
+          kind: "person",
         },
         reaction: ":eyes:",
       },
       {
         actor: {
           externalId: "U456",
-          kind: "user",
+          kind: "person",
         },
         reaction: ":white_check_mark:",
       },
