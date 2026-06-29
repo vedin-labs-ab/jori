@@ -22,6 +22,9 @@ test("exposes Linear comment targeting only on the Linear active surface", () =>
       commentId: {
         type: "string",
       },
+      final: {
+        type: "boolean",
+      },
       text: {
         type: "string",
       },
@@ -38,6 +41,7 @@ test("uses surface-specific reaction target schemas", () => {
   expect(tool("slack", "add_reaction")?.inputSchema).toMatchObject({
     required: ["reaction", "target"],
     properties: {
+      final: { type: "boolean" },
       reaction: { type: "string" },
       target: {
         required: ["messageTs"],

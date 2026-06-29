@@ -31,7 +31,7 @@ function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
   return {
     access: "write",
     description:
-      "Send a visible reply or update to the active requester surface. Milo routes it to the current requester context by default. On Linear, set commentId only when intentionally replying under a specific visible comment.",
+      "Send a visible reply or update to the active requester surface. Milo routes it to the current requester context by default. Use `final` only when this successful reply should finish the run. On Linear, set commentId only when intentionally replying under a specific visible comment.",
     inputSchema: sendReplySchema(surface),
     name: "send_reply",
     route: "active_surface",
@@ -41,7 +41,8 @@ function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
 function addReactionTool(surface: MessageIntegration): ActiveSurfaceTool {
   return {
     access: "write",
-    description: "Add a visible reaction on the active requester surface.",
+    description:
+      "Add a visible reaction on the active requester surface. Use `final` only when this successful reaction should finish the run.",
     inputSchema: addReactionSchema(surface),
     name: "add_reaction",
     route: "active_surface",
@@ -54,6 +55,7 @@ function sendReplySchema(surface: MessageIntegration): JsonObject {
       type: "string",
       description: "Visible reply or update text for the requester.",
     },
+    final: finalProperty("reply"),
   }
 
   if (surface === "slack") {
@@ -87,9 +89,17 @@ function addReactionSchema(surface: MessageIntegration): JsonObject {
     additionalProperties: false,
     required: ["reaction", "target"],
     properties: {
+      final: finalProperty("reaction"),
       reaction: reactionProperty(surface),
       target: reactionTargetProperty(surface),
     },
+  }
+}
+
+function finalProperty(action: "reaction" | "reply"): JsonObject {
+  return {
+    type: "boolean",
+    description: `Set true only when this ${action} is the final useful action for the run. The run completes after the ${action} succeeds. Omit or set false when more work, tool calls, or communication may still be needed.`,
   }
 }
 
