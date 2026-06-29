@@ -69,6 +69,7 @@ function projectAgent(run: Doc<"runs">): ActivityItem {
     durationMs:
       run.endedAt === undefined ? undefined : run.endedAt - run.createdAt,
     endedAt: run.endedAt,
+    isLive: run.status === "running",
     startedAt: run.createdAt,
   }
 }

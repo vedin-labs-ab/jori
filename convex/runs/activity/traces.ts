@@ -5,10 +5,12 @@ import { projectToolTraces } from "./tool"
 import { type ActivityItem, type ActivityStatus } from "./types"
 
 export function projectTraceActivity(traces: Doc<"traces">[]) {
+  const isRunLive = !traces.some((trace) => isTerminalRunTrace(trace))
+
   return [
     ...projectRunTraces(traces),
-    ...projectModelTraces(traces),
-    ...projectToolTraces(traces),
+    ...projectModelTraces(traces, isRunLive),
+    ...projectToolTraces(traces, isRunLive),
   ]
 }
 
@@ -36,6 +38,10 @@ function projectRunTraces(traces: Doc<"traces">[]): ActivityItem[] {
 
     return []
   })
+}
+
+function isTerminalRunTrace(trace: Doc<"traces">) {
+  return trace.type === "run.completed" || trace.type === "run.failed"
 }
 
 function traceItem(
