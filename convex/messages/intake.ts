@@ -18,7 +18,6 @@ import {
   messageIntegrationValidator,
   type ObservedMessage,
   observedMessageArgs,
-  resolveMessageOwner,
 } from "./data"
 import { recordAutomationEvent } from "./events"
 import { messageAudience } from "./surface"
@@ -49,7 +48,7 @@ export const record = internalMutation({
     }
 
     const observed = observedMessage(args, integration)
-    await resolveActor(ctx, {
+    const createdBy = await resolveActor(ctx, {
       tenantId: integration.tenantId,
       provider: args.integration,
       actor: observed.actor,
@@ -75,11 +74,7 @@ export const record = internalMutation({
     const run = await startMessageRun(ctx, {
       integration,
       message,
-      createdBy: await resolveMessageOwner(ctx, {
-        integration: args.integration,
-        tenantId: integration.tenantId,
-        message,
-      }),
+      createdBy,
       externalId: message.conversationId ?? message.externalId,
       now,
       watch,
