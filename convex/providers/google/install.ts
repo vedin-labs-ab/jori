@@ -5,7 +5,7 @@ import {
   type MutationCtx,
   mutation,
 } from "../../_generated/server"
-import { linkIdentityToPerson } from "../../persons/links"
+import { linkSetupIdentity } from "../../persons/install"
 import { readRefreshToken } from "../credentials"
 import { buildInstallState } from "../install"
 import { type GoogleIntegration } from "./config"
@@ -88,20 +88,28 @@ export const recordOAuthInstallation = internalMutation({
     }
     const values = createGoogleIntegrationValues(args, credentials, now)
 
+    const integrationId =
+      existing === null
+        ? await ctx.db.insert("integrations", {
+            ...values,
+            createdAt: now,
+          })
+        : existing._id
+
     if (existing !== null) {
       await ctx.db.patch(existing._id, { ...values, data: undefined })
-
-      await upsertGoogleIdentity(ctx, args)
-
-      return existing._id
     }
 
-    const integrationId = await ctx.db.insert("integrations", {
-      ...values,
-      createdAt: now,
+    await linkSetupIdentity(ctx, {
+      tenantId: args.tenantId,
+      personId: args.createdBy,
+      provider: "google",
+      identity: {
+        externalId: args.profile.id,
+        email: args.profile.email,
+        name: args.profile.name,
+      },
     })
-
-    await upsertGoogleIdentity(ctx, args)
 
     return integrationId
   },
@@ -204,28 +212,5 @@ async function createInstallState(
   return await createSignedGoogleState({
     integration,
     ...(await buildInstallState(ctx, args)),
-  })
-}
-
-async function upsertGoogleIdentity(
-  ctx: MutationCtx,
-  args: {
-    tenantId: string
-    createdBy: Id<"persons">
-    profile: {
-      id: string
-      email: string
-      name?: string
-    }
-  }
-) {
-  await linkIdentityToPerson(ctx, {
-    tenantId: args.tenantId,
-    personId: args.createdBy,
-    provider: "google",
-    externalId: args.profile.id,
-    method: "oauth",
-    email: args.profile.email,
-    name: args.profile.name,
   })
 }

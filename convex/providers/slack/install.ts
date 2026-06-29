@@ -5,6 +5,10 @@ import {
   mutation,
   type QueryCtx,
 } from "../../_generated/server"
+import {
+  linkSetupIdentity,
+  setupIdentityValidator,
+} from "../../persons/install"
 import { buildInstallState } from "../install"
 import { createSignedSlackState } from "./signing"
 
@@ -61,6 +65,7 @@ export const recordOAuthInstallation = internalMutation({
     botUserId: v.optional(v.string()),
     userScopes: v.optional(v.string()),
     userToken: v.string(),
+    setupIdentity: v.optional(setupIdentityValidator),
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -84,6 +89,23 @@ export const recordOAuthInstallation = internalMutation({
       botUserId: args.botUserId,
     }
 
+    const integrationId =
+      existing === null
+        ? await ctx.db.insert("integrations", {
+            tenantId: args.tenantId,
+            integration: "slack",
+            scope: "tenant",
+            externalId: args.accountId,
+            name: args.team.name,
+            credentials,
+            status: "active",
+            createdBy: args.createdBy,
+            createdAt: now,
+            updatedAt: now,
+            data,
+          })
+        : existing._id
+
     if (existing !== null) {
       await ctx.db.patch(existing._id, {
         tenantId: args.tenantId,
@@ -96,23 +118,16 @@ export const recordOAuthInstallation = internalMutation({
         updatedAt: now,
         data,
       })
-
-      return existing._id
     }
 
-    return await ctx.db.insert("integrations", {
+    await linkSetupIdentity(ctx, {
       tenantId: args.tenantId,
-      integration: "slack",
-      scope: "tenant",
-      externalId: args.accountId,
-      name: args.team.name,
-      credentials,
-      status: "active",
-      createdBy: args.createdBy,
-      createdAt: now,
-      updatedAt: now,
-      data,
+      personId: args.createdBy,
+      provider: "slack",
+      identity: args.setupIdentity,
     })
+
+    return integrationId
   },
 })
 

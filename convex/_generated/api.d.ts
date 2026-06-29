@@ -178,6 +178,7 @@ import type * as permissions_tools from "../permissions/tools.js";
 import type * as persons_clerk from "../persons/clerk.js";
 import type * as persons_data from "../persons/data.js";
 import type * as persons_email from "../persons/email.js";
+import type * as persons_install from "../persons/install.js";
 import type * as persons_links from "../persons/links.js";
 import type * as persons_matching from "../persons/matching.js";
 import type * as persons_merge from "../persons/merge.js";
@@ -548,6 +549,7 @@ declare const fullApi: ApiFromModules<{
   "persons/clerk": typeof persons_clerk;
   "persons/data": typeof persons_data;
   "persons/email": typeof persons_email;
+  "persons/install": typeof persons_install;
   "persons/links": typeof persons_links;
   "persons/matching": typeof persons_matching;
   "persons/merge": typeof persons_merge;
