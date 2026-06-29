@@ -1,4 +1,4 @@
-import { ListChecks } from "lucide-react"
+import { Logs } from "lucide-react"
 import {
   Empty,
   EmptyDescription,
@@ -17,7 +17,7 @@ export function ActivityEmpty() {
         className="bg-background text-muted-foreground"
         variant="icon"
       >
-        <ListChecks />
+        <Logs />
       </EmptyMedia>
       <EmptyHeader>
         <EmptyTitle>No activity yet</EmptyTitle>

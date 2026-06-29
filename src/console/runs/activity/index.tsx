@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import { ListChecks } from "lucide-react"
+import { Logs } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { api } from "../../../../convex/_generated/api"
 import { DetailRow } from "../../shared/details"
@@ -26,7 +26,7 @@ export function RunActivity({
 
   return (
     <DetailRow
-      icon={ListChecks}
+      icon={Logs}
       iconClassName="text-muted-foreground"
       label="Activity"
     >
