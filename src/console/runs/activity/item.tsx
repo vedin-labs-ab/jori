@@ -155,11 +155,13 @@ function ToolGroup({
     <TimelineRow
       icon={
         <ActivityTimelineIcon
+          iconClassName="group-hover/activity-task-row:text-foreground"
           icon={toolGroupIcon(entry.toolKind)}
           kind="tool"
           status={entry.status}
         />
       }
+      interactive
       isFirst={isFirst}
       isLast={isLast}
     >
@@ -172,7 +174,6 @@ function ToolGroup({
             <ActivityTaskHeader
               className="flex-1"
               description={entry.description}
-              interactive
               isLive={entry.isLive}
               meta={
                 <ActivityEntryMeta
@@ -225,14 +226,12 @@ function ToolGroupItem({ item }: { item: ActivityItemType }) {
 function ActivityTaskHeader({
   className,
   description,
-  interactive = false,
   isLive = false,
   meta,
   title,
 }: {
   className?: string
   description?: ReactNode
-  interactive?: boolean
   isLive?: boolean
   meta: ReactNode
   title: string
@@ -246,10 +245,7 @@ function ActivityTaskHeader({
     >
       <div className="flex min-w-0 items-center gap-3 overflow-hidden">
         <TaskLabel
-          className={cn(
-            "max-w-[50%] shrink-0 truncate font-medium text-sm",
-            interactive ? "text-current" : "text-foreground"
-          )}
+          className="max-w-[50%] shrink-0 truncate font-medium text-foreground text-sm"
           shimmer={isLive}
         >
           {title}
@@ -284,16 +280,23 @@ function toolGroupIcon(
 function TimelineRow({
   children,
   icon,
+  interactive = false,
   isFirst,
   isLast,
 }: {
   children: ReactNode
   icon: ReactNode
+  interactive?: boolean
   isFirst: boolean
   isLast: boolean
 }) {
   return (
-    <li className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] gap-3">
+    <li
+      className={cn(
+        "grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] gap-3",
+        interactive ? "group/activity-task-row" : null
+      )}
+    >
       <div className="relative flex justify-center">
         {isFirst ? null : (
           <span className="absolute top-0 h-2 w-px bg-border" />
