@@ -12,6 +12,7 @@ import {
   RunRowControl,
   RunRowFrame,
   RunRowHeader,
+  RunRowList,
   RunRowMeta,
 } from "../row/layout"
 
@@ -38,9 +39,9 @@ export function ActivityEmpty() {
 
 export function ActivitySkeleton() {
   return (
-    <div className="grid gap-2 p-2">
+    <RunRowList>
       {skeletonRows.map((row) => (
-        <RunRowFrame className="bg-background/80" key={row}>
+        <RunRowFrame key={row}>
           <RunRowHeader>
             <RunRowControl>
               <Skeleton className="size-4 rounded-full" />
@@ -55,6 +56,6 @@ export function ActivitySkeleton() {
           </RunRowHeader>
         </RunRowFrame>
       ))}
-    </div>
+    </RunRowList>
   )
 }

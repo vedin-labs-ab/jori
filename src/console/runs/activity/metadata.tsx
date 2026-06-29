@@ -1,19 +1,25 @@
 import {
   Bot,
   Brain,
+  ChevronsUpDown,
   FileArchive,
   Hourglass,
   ListChecks,
   type LucideIcon,
   PlugZap,
   ShieldCheck,
+  Timer,
   Wrench,
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { RelativeTime } from "../../shared/details"
-import { SeparatorDot } from "../../shared/dot"
 import { formatDuration, relativeTime } from "../../shared/time"
+import { MetaPill } from "../row/status"
 import {
   type ActivityItem,
   type ActivityKind,
@@ -31,33 +37,56 @@ const kindIcons = {
   wait: Hourglass,
 } satisfies Record<ActivityKind, LucideIcon>
 
-export function ActivityIcon({ item }: { item: ActivityItem }) {
+const kindLabels = {
+  agent: "Agent",
+  approval: "Approval",
+  asset: "Asset",
+  model: "Model",
+  offer: "Connection",
+  run: "Run",
+  tool: "Tool",
+  wait: "Wait",
+} satisfies Record<ActivityKind, string>
+
+export function ActivityIcon({
+  isExpandable,
+  item,
+}: {
+  isExpandable: boolean
+  item: ActivityItem
+}) {
   const Icon = kindIcons[item.kind]
+  const label = `${kindLabels[item.kind]} ${statusLabel(item.status)}`
 
   return (
-    <span className="relative mt-0.5 grid size-4 shrink-0 place-items-center">
-      <StatusDot status={item.status} />
-      <Icon className="size-3.5 text-muted-foreground" />
-    </span>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          aria-label={label}
+          className="relative mt-0.5 inline-flex size-4 shrink-0 items-center justify-center"
+          role="img"
+        >
+          <span
+            className={cn(
+              "relative inline-flex size-4 items-center justify-center",
+              isExpandable &&
+                "transition-opacity duration-150 group-focus-visible/run-row:opacity-0 group-hover/run-row:opacity-0"
+            )}
+          >
+            <StatusDot status={item.status} />
+            <Icon className="size-3.5 text-muted-foreground" />
+          </span>
+          {isExpandable ? (
+            <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/run-row:opacity-100 group-hover/run-row:opacity-100" />
+          ) : null}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   )
 }
 
-export function ActivityBadges({ item }: { item: ActivityItem }) {
-  return (
-    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-      <Badge className="capitalize" variant={statusVariant(item.status)}>
-        {statusLabel(item.status)}
-      </Badge>
-      {item.access === undefined ? null : (
-        <Badge className="capitalize" variant="outline">
-          {item.access}
-        </Badge>
-      )}
-    </div>
-  )
-}
-
-export function ActivityTime({
+export function ActivityMeta({
   item,
   now,
 }: {
@@ -65,18 +94,15 @@ export function ActivityTime({
   now: number
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-2 text-muted-foreground text-xs">
+    <>
+      {item.durationMs === undefined ? null : (
+        <MetaPill icon={Timer} label={formatDuration(item.durationMs)} />
+      )}
       <RelativeTime
         absolute={item.startedAt}
         value={relativeTime(item.startedAt, now)}
       />
-      {item.durationMs === undefined ? null : (
-        <>
-          <SeparatorDot className="text-muted-foreground/60" />
-          <span>{formatDuration(item.durationMs)}</span>
-        </>
-      )}
-    </div>
+    </>
   )
 }
 
@@ -93,22 +119,6 @@ function StatusDot({ status }: { status: ActivityStatus }) {
       />
     </span>
   )
-}
-
-function statusVariant(status: ActivityStatus) {
-  if (status === "failed" || status === "denied") {
-    return "destructive"
-  }
-
-  if (
-    status === "completed" ||
-    status === "approved" ||
-    status === "connected"
-  ) {
-    return "secondary"
-  }
-
-  return "outline"
 }
 
 function dotClass(status: ActivityStatus) {
