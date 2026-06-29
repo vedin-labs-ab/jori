@@ -58,7 +58,7 @@ test("keeps failed search metadata compact and hides raw details", () => {
   expect(
     screen.getByRole("dialog", { name: "Search web failed" })
   ).toBeDefined()
-  expect(screen.getByText("Error details")).toBeDefined()
+  expect(screen.queryByText("Error details")).toBeNull()
   expect(screen.queryByRole("button", { name: /close/i })).toBeNull()
   expect(screen.getByText(error)).toBeDefined()
 })
