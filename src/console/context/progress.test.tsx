@@ -58,6 +58,25 @@ describe("discovery progress expansion", () => {
   })
 })
 
+describe("discovery progress timing", () => {
+  test("does not render NaN for queued paths", () => {
+    render(
+      <DiscoveryProgress
+        discovery={discovery(
+          [
+            pageStep(0, 5, "https://example.com/"),
+            queuedPageStep(5, "https://example.com/about"),
+          ],
+          { status: "running" }
+        )}
+      />
+    )
+
+    expect(screen.getByText("/about")).toBeDefined()
+    expect(screen.queryByText(/NaN/)).toBeNull()
+  })
+})
+
 function discovery(
   steps: DiscoveryStep[],
   options: { status?: Discovery["status"] } = {}
@@ -87,6 +106,17 @@ function pageStep(
     kind: "page",
     label: `Reading ${url}`,
     startedAt: startSeconds * 1000,
+    url,
+  }
+}
+
+function queuedPageStep(queueSeconds: number, url: string): DiscoveryStep {
+  return {
+    id: `queued-page-${queueSeconds}-${url}`,
+    kind: "page",
+    label: `Exploring ${url}`,
+    queuedAt: queueSeconds * 1000,
+    startedAt: queueSeconds * 1000,
     url,
   }
 }

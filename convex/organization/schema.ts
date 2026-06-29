@@ -57,6 +57,7 @@ export const discoveryStepKind = v.union(
 )
 
 export const discoveryStep = v.object({
+  activeAt: v.optional(v.number()),
   completedAt: v.optional(v.number()),
   error: v.optional(v.string()),
   id: v.optional(v.string()),
