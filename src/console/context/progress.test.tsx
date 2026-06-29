@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
 import { DiscoveryProgress } from "./progress"
 import { type OrganizationDiscovery } from "./types"
@@ -11,8 +11,31 @@ afterEach(() => {
   cleanup()
 })
 
-describe("discovery progress domain paths", () => {
-  test("hides path subitems as soon as the domain completes", () => {
+describe("discovery progress manual expansion", () => {
+  test("opens live domain tasks by default and lets users toggle them", () => {
+    render(
+      <DiscoveryProgress
+        discovery={discovery([pageStep(0, 5, "https://example.com/")], {
+          status: "running",
+        })}
+      />
+    )
+
+    const trigger = screen.getByRole("button", { name: /example[.]com/ })
+    expect(trigger.getAttribute("aria-expanded")).toBe("true")
+
+    fireEvent.click(trigger)
+
+    expect(trigger.getAttribute("aria-expanded")).toBe("false")
+
+    fireEvent.click(trigger)
+
+    expect(trigger.getAttribute("aria-expanded")).toBe("true")
+  })
+})
+
+describe("discovery progress completion expansion", () => {
+  test("closes a domain task as soon as it completes", () => {
     const { rerender } = render(
       <DiscoveryProgress
         discovery={discovery([pageStep(0, 5, "https://example.com/")], {
@@ -21,8 +44,11 @@ describe("discovery progress domain paths", () => {
       />
     )
 
-    expect(screen.getByText("example.com")).toBeDefined()
-    expect(screen.getByText("/")).toBeDefined()
+    expect(
+      screen
+        .getByRole("button", { name: /example[.]com/ })
+        .getAttribute("aria-expanded")
+    ).toBe("true")
 
     rerender(
       <DiscoveryProgress
@@ -36,11 +62,14 @@ describe("discovery progress domain paths", () => {
       />
     )
 
-    expect(screen.getByText("example.com")).toBeDefined()
-    expect(screen.queryByText("/")).toBeNull()
+    expect(
+      screen
+        .getByRole("button", { name: /example[.]com/ })
+        .getAttribute("aria-expanded")
+    ).toBe("false")
   })
 
-  test("does not render path subitems for completed domains", () => {
+  test("lets completed domain tasks be reopened manually", () => {
     render(
       <DiscoveryProgress
         discovery={discovery([
@@ -50,8 +79,13 @@ describe("discovery progress domain paths", () => {
       />
     )
 
-    expect(screen.getByText("example.com")).toBeDefined()
-    expect(screen.queryByText("/")).toBeNull()
+    const trigger = screen.getByRole("button", { name: /example[.]com/ })
+    expect(trigger.getAttribute("aria-expanded")).toBe("false")
+
+    fireEvent.click(trigger)
+
+    expect(trigger.getAttribute("aria-expanded")).toBe("true")
+    expect(screen.getByText("/")).toBeDefined()
   })
 })
 

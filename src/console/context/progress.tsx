@@ -1,5 +1,6 @@
 import {
   Check,
+  ChevronDown,
   CircleDashed,
   FileText,
   LoaderCircle,
@@ -7,7 +8,12 @@ import {
   TriangleAlert,
 } from "lucide-react"
 import { type ReactNode, useEffect, useState } from "react"
-import { TaskItem } from "@/components/ai-elements/task"
+import {
+  Task,
+  TaskContent,
+  TaskItem,
+  TaskTrigger,
+} from "@/components/ai-elements/task"
 import { cn } from "@/lib/utils"
 import { createDiscoveryTasks } from "./progress-data"
 import {
@@ -72,36 +78,56 @@ function SummaryTask({ now, task }: { now: number; task: DiscoveryTask }) {
 }
 
 function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
-  const live = isLive(task.status)
-  const showTaskElapsed = !live || task.items.length > 1
+  const [preference, setPreference] = useState<OpenPreference | null>(null)
+  const preferredOpen =
+    preference?.key === task.key && preference.status === task.status
+      ? preference.open
+      : null
+  const open = preferredOpen ?? isLive(task.status)
+  const showTaskElapsed = !open || task.items.length > 1
 
   return (
-    <div className="grid gap-2">
-      <div className="flex h-7 min-w-0 items-center gap-2 rounded-md text-muted-foreground text-sm">
-        <IconSlot>
-          <TaskStatusIcon status={task.status} type={task.type} />
-        </IconSlot>
-        <span
-          className={cn(
-            "min-w-0 flex-1 truncate text-left font-medium",
-            live ? "shimmer" : null
-          )}
+    <Task
+      onOpenChange={(nextOpen) =>
+        setPreference({ key: task.key, open: nextOpen, status: task.status })
+      }
+      open={open}
+    >
+      <TaskTrigger title={task.label}>
+        <button
+          className="group flex h-7 w-full min-w-0 cursor-pointer items-center gap-2 rounded-md text-muted-foreground text-sm transition-colors outline-none hover:text-foreground focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          type="button"
         >
-          {task.label}
-        </span>
-        <ElapsedTime>
-          {showTaskElapsed ? elapsedLabel(task, now) : null}
-        </ElapsedTime>
-      </div>
-      {live ? (
-        <div className="grid gap-1 border-muted border-l pl-4">
-          {task.items.map((item) => (
-            <ExplorationItem item={item} key={item.key} now={now} showStatus />
-          ))}
-        </div>
-      ) : null}
-    </div>
+          <IconSlot>
+            <TaskStatusIcon status={task.status} type={task.type} />
+          </IconSlot>
+          <span
+            className={cn(
+              "min-w-0 flex-1 truncate text-left font-medium",
+              isLive(task.status) && !open ? "shimmer" : null
+            )}
+          >
+            {task.label}
+          </span>
+          <ElapsedTime>
+            {showTaskElapsed ? elapsedLabel(task, now) : null}
+          </ElapsedTime>
+          <ChevronDown className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+        </button>
+      </TaskTrigger>
+      <TaskContent className="mt-2 data-[state=closed]:hidden data-[state=closed]:animate-none data-[state=open]:animate-none">
+        {task.items.map((item) => (
+          <ExplorationItem item={item} key={item.key} now={now} showStatus />
+        ))}
+      </TaskContent>
+    </Task>
   )
+}
+
+type OpenPreference = {
+  key: string
+  open: boolean
+  status: DiscoveryTaskStatus
 }
 
 function ExplorationItem({
