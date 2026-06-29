@@ -17,6 +17,7 @@ import {
   type ModelRuntime,
   type ModelTool,
   type ModelToolCall,
+  type ModelUsage,
 } from "./types"
 
 const agentModel = "openai/gpt-5.5"
@@ -59,6 +60,7 @@ export class OpenRouterModelRuntime implements ModelRuntime {
     if (toolCalls.length === 0) {
       return {
         content: response.text,
+        usage: readModelUsage(response),
         type: "stop",
       }
     }
@@ -66,6 +68,7 @@ export class OpenRouterModelRuntime implements ModelRuntime {
     return {
       content: response.text === "" ? null : response.text,
       toolCalls,
+      usage: readModelUsage(response),
       type: "tool_calls",
     }
   }
@@ -185,4 +188,39 @@ function readToolCall(toolCall: {
       name: toolCall.toolName,
     },
   ]
+}
+
+function readModelUsage(response: { usage?: unknown }): ModelUsage | undefined {
+  const usage = response.usage
+
+  if (typeof usage !== "object" || usage === null) {
+    return undefined
+  }
+
+  return compactUsage({
+    inputTokens: readNumber(usage, "inputTokens"),
+    outputTokens: readNumber(usage, "outputTokens"),
+    reasoningTokens: readNumber(usage, "reasoningTokens"),
+    totalTokens: readNumber(usage, "totalTokens"),
+  })
+}
+
+function compactUsage(usage: ModelUsage) {
+  const entries = Object.entries(usage).filter(
+    ([, value]) => value !== undefined
+  )
+
+  return entries.length === 0
+    ? undefined
+    : (Object.fromEntries(entries) as ModelUsage)
+}
+
+function readNumber(record: object, key: string) {
+  if (!(key in record)) {
+    return undefined
+  }
+
+  const value = record[key as keyof typeof record]
+
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }

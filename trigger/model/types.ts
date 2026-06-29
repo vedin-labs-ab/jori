@@ -29,14 +29,23 @@ export type ModelToolCall = {
   name: string
 }
 
+export type ModelUsage = {
+  inputTokens?: number
+  outputTokens?: number
+  reasoningTokens?: number
+  totalTokens?: number
+}
+
 export type ModelResponse =
   | {
       content: string
+      usage?: ModelUsage
       type: "stop"
     }
   | {
       content: string | null
       toolCalls: ModelToolCall[]
+      usage?: ModelUsage
       type: "tool_calls"
     }
 

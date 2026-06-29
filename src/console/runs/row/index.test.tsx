@@ -1,9 +1,13 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, beforeAll, describe, expect, test } from "vitest"
+import { afterEach, beforeAll, describe, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ExecutionItem } from "../types"
 import { ExecutionRow } from "./index"
+
+vi.mock("convex/react", () => ({
+  useQuery: () => ({ items: [], status: "loaded" }),
+}))
 
 beforeAll(() => {
   globalThis.ResizeObserver = class {

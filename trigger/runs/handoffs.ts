@@ -7,9 +7,11 @@ import {
   type OfferHandoff,
   type RunHandoffs,
 } from "../types"
+import { recordApprovalResolved, recordOfferResolved } from "./activity"
 import { appendSessionMessages } from "./messages"
 
-export type HandoffDeadline = { expiresAt: number }
+export type HandoffKind = "approval" | "offer"
+export type HandoffDeadline = { expiresAt: number; kind: HandoffKind }
 
 export type ReconcileResult = {
   progressed: boolean
@@ -62,6 +64,8 @@ async function reconcileApproval(
     return false
   }
 
+  await recordApprovalResolved(runtime, approval)
+
   if (approval.status === "approved") {
     await executeApprovedAction(runtime, messages, approval)
     return true
@@ -104,6 +108,7 @@ async function reconcileOffer(
     return false
   }
 
+  await recordOfferResolved(runtime, offer)
   await runtime.convex.markOfferConsumed({ integrationOfferId: offer.id })
 
   if (offer.status === "connected") {
@@ -140,10 +145,13 @@ async function refreshRuntimeContext(
 function pendingDeadlines(handoffs: RunHandoffs): HandoffDeadline[] {
   const approvals = handoffs.approvals
     .filter((approval) => approval.status === "pending")
-    .map((approval) => ({ expiresAt: approval.expiresAt }))
+    .map((approval) => ({
+      expiresAt: approval.expiresAt,
+      kind: "approval" as const,
+    }))
   const offers = handoffs.offers
     .filter((offer) => offer.status === "pending" || offer.status === "claimed")
-    .map((offer) => ({ expiresAt: offer.expiresAt }))
+    .map((offer) => ({ expiresAt: offer.expiresAt, kind: "offer" as const }))
 
   return [...approvals, ...offers]
 }
