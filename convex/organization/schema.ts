@@ -59,9 +59,11 @@ export const discoveryStepKind = v.union(
 export const discoveryStep = v.object({
   completedAt: v.optional(v.number()),
   error: v.optional(v.string()),
+  id: v.optional(v.string()),
   kind: discoveryStepKind,
   label: v.string(),
-  startedAt: v.number(),
+  queuedAt: v.optional(v.number()),
+  startedAt: v.optional(v.number()),
   url: v.optional(v.string()),
 })
 

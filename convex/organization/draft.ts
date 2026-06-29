@@ -1,5 +1,6 @@
 "use node"
 
+import { randomUUID } from "node:crypto"
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
@@ -20,7 +21,12 @@ type StepKind = "page" | "summary"
 
 type DraftResult = {
   facts: OrganizationFacts
-  startedAt: number
+  stepId: string
+}
+
+type QueuedCrawl = {
+  stepId: string
+  url: string
 }
 
 // Crawls an organization's first-party pages, extracts structured facts with the
@@ -64,9 +70,10 @@ async function discover(ctx: ActionCtx, tenantId: string, primaryUrl: string) {
     candidates: candidateLinks(host, pages),
     limit: maxPages,
   })
+  const queued = await queueCrawls(ctx, tenantId, chosen)
 
-  for (const url of chosen) {
-    const page = await crawl(ctx, tenantId, `Exploring ${shortPath(url)}`, url)
+  for (const queuedCrawl of queued) {
+    const page = await crawlQueued(ctx, tenantId, queuedCrawl)
 
     if (page !== null) {
       pages.push(page)
@@ -86,9 +93,9 @@ async function proposeDraft(
 ) {
   try {
     await writeDraft(ctx, tenantId, primaryUrl, pages, draft.facts)
-    await completeStep(ctx, tenantId, draft.startedAt)
+    await completeStep(ctx, tenantId, draft.stepId)
   } catch (error) {
-    await completeStep(ctx, tenantId, draft.startedAt, messageFrom(error))
+    await completeStep(ctx, tenantId, draft.stepId, messageFrom(error))
     throw error
   }
 }
@@ -114,13 +121,54 @@ async function crawl(
   label: string,
   url: string
 ) {
-  const startedAt = await startStep(ctx, tenantId, "page", label, url)
+  const stepId = await startStep(ctx, tenantId, "page", label, url)
 
   try {
     const page = await crawlPage(url)
 
     if (page !== null) {
-      await completeStep(ctx, tenantId, startedAt)
+      await completeStep(ctx, tenantId, stepId)
+      return page
+    }
+  } catch {
+    // Page failures are recorded here; callers decide whether to keep going.
+  }
+
+  await completeStep(ctx, tenantId, stepId, `Could not read ${shortPath(url)}`)
+
+  return null
+}
+
+async function queueCrawls(ctx: ActionCtx, tenantId: string, urls: string[]) {
+  const queued: QueuedCrawl[] = []
+
+  for (const url of urls) {
+    const stepId = await queueStep(
+      ctx,
+      tenantId,
+      "page",
+      `Exploring ${shortPath(url)}`,
+      url
+    )
+
+    queued.push({ stepId, url })
+  }
+
+  return queued
+}
+
+async function crawlQueued(
+  ctx: ActionCtx,
+  tenantId: string,
+  queued: QueuedCrawl
+) {
+  await activateStep(ctx, tenantId, queued.stepId)
+
+  try {
+    const page = await crawlPage(queued.url)
+
+    if (page !== null) {
+      await completeStep(ctx, tenantId, queued.stepId)
       return page
     }
   } catch {
@@ -130,8 +178,8 @@ async function crawl(
   await completeStep(
     ctx,
     tenantId,
-    startedAt,
-    `Could not read ${shortPath(url)}`
+    queued.stepId,
+    `Could not read ${shortPath(queued.url)}`
   )
 
   return null
@@ -143,20 +191,15 @@ async function extractDraft(
   primaryUrl: string,
   pages: CrawledPage[]
 ): Promise<DraftResult> {
-  const startedAt = await startStep(
-    ctx,
-    tenantId,
-    "summary",
-    "Drafting profile"
-  )
+  const stepId = await startStep(ctx, tenantId, "summary", "Drafting profile")
 
   try {
     return {
       facts: await extractFacts({ primaryUrl, pages: extractionPages(pages) }),
-      startedAt,
+      stepId,
     }
   } catch (error) {
-    await completeStep(ctx, tenantId, startedAt, messageFrom(error))
+    await completeStep(ctx, tenantId, stepId, messageFrom(error))
     throw error
   }
 }
@@ -176,28 +219,55 @@ async function startStep(
   label: string,
   url?: string
 ) {
-  const startedAt: number = await ctx.runMutation(
-    internal.organization.discovery.startStep,
-    {
-      tenantId,
-      kind,
-      label,
-      ...(url === undefined ? {} : { url }),
-    }
-  )
+  const stepId = randomUUID()
 
-  return startedAt
+  await ctx.runMutation(internal.organization.discovery.startStep, {
+    id: stepId,
+    tenantId,
+    kind,
+    label,
+    ...(url === undefined ? {} : { url }),
+  })
+
+  return stepId
+}
+
+async function queueStep(
+  ctx: ActionCtx,
+  tenantId: string,
+  kind: StepKind,
+  label: string,
+  url?: string
+) {
+  const stepId = randomUUID()
+
+  await ctx.runMutation(internal.organization.discovery.queueStep, {
+    id: stepId,
+    tenantId,
+    kind,
+    label,
+    ...(url === undefined ? {} : { url }),
+  })
+
+  return stepId
+}
+
+async function activateStep(ctx: ActionCtx, tenantId: string, stepId: string) {
+  await ctx.runMutation(internal.organization.discovery.activateStep, {
+    tenantId,
+    id: stepId,
+  })
 }
 
 async function completeStep(
   ctx: ActionCtx,
   tenantId: string,
-  startedAt: number,
+  stepId: string,
   error?: string
 ) {
   await ctx.runMutation(internal.organization.discovery.completeStep, {
     tenantId,
-    startedAt,
+    id: stepId,
     ...(error === undefined ? {} : { error }),
   })
 }

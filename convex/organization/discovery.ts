@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { type Doc } from "../_generated/dataModel"
 import {
   internalMutation,
   type MutationCtx,
@@ -9,6 +10,14 @@ import { requireTenantAccess } from "../identity/access"
 import { discoveryStepKind } from "./schema"
 
 const maxSteps = 40
+const stepArgs = {
+  id: v.string(),
+  kind: discoveryStepKind,
+  label: v.string(),
+  url: v.optional(v.string()),
+}
+
+type DiscoveryStep = Doc<"organizationDiscovery">["steps"][number]
 
 export const get = query({
   args: { tenantId: v.string() },
@@ -44,26 +53,63 @@ export const start = internalMutation({
 export const startStep = internalMutation({
   args: {
     tenantId: v.string(),
-    kind: discoveryStepKind,
-    label: v.string(),
-    url: v.optional(v.string()),
+    ...stepArgs,
   },
   handler: async (ctx, args) => {
-    const discovery = await readDiscovery(ctx, args.tenantId)
-
-    if (discovery === null) {
-      throw new Error("Discovery run has not started.")
-    }
-
+    const discovery = await requireDiscovery(ctx, args.tenantId)
     const startedAt = Date.now()
-    const entry = {
+
+    await appendStep(ctx, discovery, {
+      id: args.id,
       kind: args.kind,
       label: args.label,
       startedAt,
       ...(args.url === undefined ? {} : { url: args.url }),
+    })
+
+    return startedAt
+  },
+})
+
+export const queueStep = internalMutation({
+  args: {
+    tenantId: v.string(),
+    ...stepArgs,
+  },
+  handler: async (ctx, args) => {
+    const discovery = await requireDiscovery(ctx, args.tenantId)
+    const queuedAt = Date.now()
+
+    await appendStep(ctx, discovery, {
+      id: args.id,
+      kind: args.kind,
+      label: args.label,
+      queuedAt,
+      ...(args.url === undefined ? {} : { url: args.url }),
+    })
+
+    return queuedAt
+  },
+})
+
+export const activateStep = internalMutation({
+  args: {
+    tenantId: v.string(),
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const discovery = await readDiscovery(ctx, args.tenantId)
+
+    const startedAt = Date.now()
+
+    if (discovery === null) {
+      return startedAt
     }
+
     await ctx.db.patch(discovery._id, {
-      steps: [...discovery.steps, entry].slice(-maxSteps),
+      steps: discovery.steps.map((step) =>
+        step.id === args.id ? { ...step, startedAt } : step
+      ),
     })
 
     return startedAt
@@ -73,7 +119,7 @@ export const startStep = internalMutation({
 export const completeStep = internalMutation({
   args: {
     tenantId: v.string(),
-    startedAt: v.number(),
+    id: v.string(),
     error: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -87,7 +133,7 @@ export const completeStep = internalMutation({
 
     await ctx.db.patch(discovery._id, {
       steps: discovery.steps.map((step) =>
-        step.startedAt === args.startedAt
+        step.id === args.id
           ? {
               ...step,
               completedAt,
@@ -120,15 +166,28 @@ export const finish = internalMutation({
   },
 })
 
+async function requireDiscovery(ctx: MutationCtx, tenantId: string) {
+  const discovery = await readDiscovery(ctx, tenantId)
+
+  if (discovery === null) {
+    throw new Error("Discovery run has not started.")
+  }
+
+  return discovery
+}
+
+async function appendStep(
+  ctx: MutationCtx,
+  discovery: Doc<"organizationDiscovery">,
+  entry: DiscoveryStep
+) {
+  await ctx.db.patch(discovery._id, {
+    steps: [...discovery.steps, entry].slice(-maxSteps),
+  })
+}
+
 function closeOpenSteps(
-  steps: Array<{
-    completedAt?: number
-    error?: string
-    kind: "page" | "summary"
-    label: string
-    startedAt: number
-    url?: string
-  }>,
+  steps: DiscoveryStep[],
   completedAt: number,
   error: string | undefined
 ) {
