@@ -252,7 +252,10 @@ function ActivityTaskHeader({
         </TaskLabel>
         {description === undefined ? null : (
           <>
-            <Separator className="h-4" orientation="vertical" />
+            <Separator
+              className="data-vertical:h-4 data-vertical:self-center"
+              orientation="vertical"
+            />
             <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden text-muted-foreground text-xs">
               {description}
             </span>
