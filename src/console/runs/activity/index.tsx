@@ -4,9 +4,8 @@ import { ListChecks } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { api } from "../../../../convex/_generated/api"
 import { DetailRow } from "../../shared/details"
-import { RunRowList } from "../row/layout"
 import { ActivityEmpty, ActivitySkeleton } from "./empty"
-import { ActivityItem } from "./item"
+import { ActivityTimeline } from "./item"
 import { type ActivityResult } from "./types"
 
 type RunId = FunctionArgs<typeof api.runs.activity.index.list>["runId"]
@@ -57,11 +56,9 @@ function ActivityContent({
         {activityCaption(activity.items.length)}
       </div>
       <ScrollArea className="max-h-[28rem]">
-        <RunRowList className="pr-2">
-          {activity.items.map((item) => (
-            <ActivityItem item={item} key={item.id} now={now} />
-          ))}
-        </RunRowList>
+        <div className="pr-2">
+          <ActivityTimeline items={activity.items} now={now} />
+        </div>
       </ScrollArea>
     </div>
   )
