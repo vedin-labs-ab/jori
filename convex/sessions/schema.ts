@@ -7,7 +7,7 @@ const messageSubcursor = v.object({
 })
 
 const reactionSubcursor = v.object({
-  createdAt: v.optional(v.number()),
+  createdAt: v.number(),
   updatedAt: v.number(),
 })
 

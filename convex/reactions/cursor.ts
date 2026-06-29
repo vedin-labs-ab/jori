@@ -160,9 +160,7 @@ function isAfterReactionCursor(
     return reaction.updatedAt > cursor.updatedAt
   }
 
-  return (
-    cursor.createdAt === undefined || reaction._creationTime > cursor.createdAt
-  )
+  return reaction._creationTime > cursor.createdAt
 }
 
 function isRuntimeInputReaction(reaction: Doc<"reactions">) {

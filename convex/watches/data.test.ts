@@ -5,7 +5,7 @@ import { startMessageRun } from "./data"
 
 const expectedCursor = {
   message: { createdAt: 0, messageId: "message" },
-  reaction: { updatedAt: 1000 },
+  reaction: { createdAt: 1000, updatedAt: 1000 },
 }
 
 test("starts new watch message runs as mentions", async () => {
