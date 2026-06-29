@@ -8,6 +8,7 @@ export type SlackTokenResponse =
       bot_user_id?: string
       scope?: string
       authed_user?: {
+        id?: string
         access_token?: string
         scope?: string
       }

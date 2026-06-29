@@ -108,6 +108,7 @@ export async function handleSlackOAuthCallback(
       botUserId: tokenResult.bot_user_id,
       userScopes: tokenResult.authed_user?.scope,
       userToken,
+      setupIdentity: slackSetupIdentity(tokenResult.authed_user?.id),
     }
   )
 
@@ -117,6 +118,10 @@ export async function handleSlackOAuthCallback(
   })
 
   return redirectWithStatus(state.returnUrl, "slack", "connected")
+}
+
+function slackSetupIdentity(externalId: string | undefined) {
+  return externalId === undefined ? undefined : { externalId }
 }
 
 export async function handleSlackEvents(ctx: ActionCtx, request: Request) {

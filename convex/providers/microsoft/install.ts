@@ -5,10 +5,11 @@ import {
   type MutationCtx,
   mutation,
 } from "../../_generated/server"
+import { linkSetupIdentity } from "../../persons/install"
 import { readRefreshToken } from "../credentials"
 import { buildInstallState } from "../install"
 import { type MicrosoftIntegration } from "./config"
-import { getMicrosoftIdentityEmail, upsertMicrosoftIdentity } from "./identity"
+import { getMicrosoftIdentityEmail } from "./identity"
 import { createSignedMicrosoftState } from "./signing"
 
 const microsoftIntegration = v.union(
@@ -104,12 +105,15 @@ export const recordOAuthInstallation = internalMutation({
       data,
     })
 
-    await upsertMicrosoftIdentity(ctx, {
+    await linkSetupIdentity(ctx, {
       tenantId: args.tenantId,
       personId: args.createdBy,
-      microsoftTenantId: args.microsoftTenantId,
-      email,
-      profile: args.profile,
+      provider: "microsoft",
+      identity: {
+        externalId: args.profile.user.id,
+        email,
+        name: args.profile.user.displayName,
+      },
     })
 
     return integrationId
