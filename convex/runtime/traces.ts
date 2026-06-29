@@ -29,6 +29,10 @@ export const record = mutation({
       throw new Error("Run not found.")
     }
 
+    if (run.status === "stopped") {
+      return { created: false }
+    }
+
     const created = await recordTrace(ctx, {
       ...args,
       run,
@@ -53,6 +57,7 @@ export async function recordTrace(
     run: Doc<"runs">
     sequence?: number
     source: Doc<"traces">["source"]
+    timestamp?: number
     type: Doc<"traces">["type"]
   }
 ) {
@@ -75,7 +80,7 @@ export async function recordTrace(
     callId: args.callId,
     attempt: args.attempt,
     data: args.data,
-    timestamp: Date.now(),
+    timestamp: args.timestamp ?? Date.now(),
   })
 
   return true

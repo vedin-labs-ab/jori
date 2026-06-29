@@ -12,6 +12,7 @@ import {
   Search,
   Send,
   ShieldCheck,
+  Square,
   Timer,
   Wrench,
 } from "lucide-react"
@@ -131,6 +132,10 @@ function runIcon(status: ActivityStatus) {
 
   if (status === "failed") {
     return AlertCircle
+  }
+
+  if (status === "stopped") {
+    return Square
   }
 
   return Play
