@@ -17,7 +17,7 @@ import {
   ActivityMeta,
   ActivityTimelineIcon,
 } from "./metadata"
-import { TimelineRow } from "./row"
+import { ActivityMetadataLine, TimelineRow } from "./row"
 import { type ActivityTimelineEntry, createActivityTimeline } from "./timeline"
 import { ActivityToolMetadata } from "./tool-metadata"
 import { type ActivityItem as ActivityItemType } from "./types"
@@ -215,9 +215,7 @@ function ToolGroupItem({ item }: { item: ActivityItemType }) {
           {item.title}
         </TaskLabel>
         {description === undefined ? null : (
-          <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden text-muted-foreground">
-            {description}
-          </span>
+          <ActivityMetadataLine>{description}</ActivityMetadataLine>
         )}
       </div>
       <span className="shrink-0 text-muted-foreground tabular-nums">
@@ -260,9 +258,9 @@ function ActivityTaskHeader({
               className="data-vertical:h-4 data-vertical:self-center"
               orientation="vertical"
             />
-            <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden text-muted-foreground text-xs">
+            <ActivityMetadataLine className="text-xs">
               {description}
-            </span>
+            </ActivityMetadataLine>
           </>
         )}
       </div>

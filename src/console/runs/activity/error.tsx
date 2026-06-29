@@ -18,7 +18,7 @@ export function ActivityFailureDescription({
   title: string
 }) {
   return (
-    <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
+    <span className="inline-flex min-w-0 max-w-full items-center gap-2 overflow-hidden whitespace-nowrap">
       <span className="min-w-0 truncate text-muted-foreground">
         {activityToolFailureSummary(title)}
       </span>
@@ -38,7 +38,7 @@ function ActivityErrorAction({
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className="h-5 px-1.5 text-destructive hover:text-destructive"
+          className="h-5 shrink-0 px-1.5 text-destructive hover:text-destructive"
           size="xs"
           type="button"
           variant="ghost"

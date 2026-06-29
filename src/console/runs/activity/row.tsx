@@ -1,6 +1,29 @@
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
+export function ActivityMetadataLine({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex min-w-0 max-w-full flex-1 basis-0 items-center overflow-hidden whitespace-nowrap text-muted-foreground",
+        className
+      )}
+    >
+      {isPrimitiveText(children) ? (
+        <span className="min-w-0 truncate">{children}</span>
+      ) : (
+        children
+      )}
+    </span>
+  )
+}
+
 export function TimelineRow({
   children,
   icon,
@@ -35,4 +58,8 @@ export function TimelineRow({
       <div className="min-w-0 py-1">{children}</div>
     </li>
   )
+}
+
+function isPrimitiveText(value: ReactNode) {
+  return typeof value === "string" || typeof value === "number"
 }
