@@ -8,7 +8,10 @@ export function initialCursor(
 ): SessionCursor {
   return {
     message: messageCursor(message),
-    reaction: { updatedAt: reactionUpdatedAt },
+    reaction: {
+      createdAt: reactionUpdatedAt,
+      updatedAt: reactionUpdatedAt,
+    },
   }
 }
 

@@ -60,18 +60,29 @@ test("breaks updatedAt ties on cursor createdAt", () => {
   expect(batch.reactions.map((item) => item._id)).toEqual(["later"])
 })
 
-test("drains reactions after an updatedAt-only start cursor", () => {
+test("drains reactions after a synthetic start cursor", () => {
   const batch = collectPendingReactionBatch(
     [
       reaction("before", 9, { target: reactionTarget({ actor: self }) }),
+      reaction("same-before", 10, {
+        storedAt: 9,
+        target: reactionTarget({ actor: self }),
+      }),
+      reaction("same-after", 10, {
+        storedAt: 11,
+        target: reactionTarget({ actor: self }),
+      }),
       reaction("after", 11, { target: reactionTarget({ actor: self }) }),
     ],
-    session({ updatedAt: 10 }),
+    session({ updatedAt: 10, createdAt: 10 }),
     10,
     false
   )
 
-  expect(batch.reactions.map((item) => item._id)).toEqual(["after"])
+  expect(batch.reactions.map((item) => item._id)).toEqual([
+    "same-after",
+    "after",
+  ])
 })
 
 test("formats added and removed runtime reactions", () => {
@@ -107,7 +118,7 @@ test("formats added and removed runtime reactions", () => {
 })
 
 function session(reaction?: {
-  createdAt?: number
+  createdAt: number
   updatedAt: number
 }): Doc<"sessions"> {
   return {
