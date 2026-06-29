@@ -48,7 +48,6 @@ export const googleToolPermissionRows = [
     "Reply to a Gmail thread.",
     "Reply to the latest message in a Gmail thread. Use to continue an existing conversation rather than starting a new one.",
     "write",
-    "required",
   ],
   [
     "gmail",
@@ -57,7 +56,6 @@ export const googleToolPermissionRows = [
     "Send a new email from your Gmail account.",
     "Send a new Gmail email. Use for a fresh message; reply to a thread instead when continuing a conversation.",
     "write",
-    "required",
   ],
   [
     "gmail",
