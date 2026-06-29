@@ -14,7 +14,7 @@ export function ActivityTokenUsage({ usage }: { usage: TokenUsage }) {
   }
 
   return (
-    <span className="inline-flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
+    <span className="inline-flex min-w-0 max-w-full items-center gap-1.5 overflow-hidden whitespace-nowrap text-muted-foreground text-xs">
       <Cpu className="size-3.5 shrink-0" />
       <span className="min-w-0 truncate">
         {metrics

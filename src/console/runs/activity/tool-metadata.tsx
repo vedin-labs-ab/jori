@@ -71,7 +71,7 @@ const ToolMetadataContent = forwardRef<
 >(function ToolMetadataContent({ items }, ref) {
   return (
     <span
-      className="inline-flex min-w-0 max-w-full items-center overflow-hidden"
+      className="inline-flex min-w-0 max-w-full items-center overflow-hidden whitespace-nowrap"
       ref={ref}
     >
       {items.map((item, index) => (
