@@ -8,6 +8,7 @@ export const identityProvider = v.union(
   v.literal("google"),
   v.literal("linear"),
   v.literal("microsoft"),
+  v.literal("notion"),
   v.literal("slack")
 )
 

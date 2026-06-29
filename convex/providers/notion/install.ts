@@ -1,5 +1,9 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
+import {
+  linkSetupIdentity,
+  setupIdentityValidator,
+} from "../../persons/install"
 import { buildInstallState } from "../install"
 import { createSignedNotionState } from "./signing"
 
@@ -26,6 +30,7 @@ export const recordOAuthInstallation = internalMutation({
       workspaceIcon: v.optional(v.string()),
       duplicatedTemplateId: v.optional(v.string()),
     }),
+    setupIdentity: v.optional(setupIdentityValidator),
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -49,6 +54,24 @@ export const recordOAuthInstallation = internalMutation({
       duplicatedTemplateId: args.profile.duplicatedTemplateId,
     }
 
+    const integrationId =
+      existing === null
+        ? await ctx.db.insert("integrations", {
+            tenantId: args.tenantId,
+            integration: "notion",
+            scope: "tenant",
+            externalId: args.profile.workspaceId,
+            name: args.profile.workspaceName,
+            avatar: args.profile.workspaceIcon,
+            credentials,
+            status: "active",
+            createdBy: args.createdBy,
+            createdAt: now,
+            updatedAt: now,
+            data,
+          })
+        : existing._id
+
     if (existing !== null) {
       await ctx.db.patch(existing._id, {
         tenantId: args.tenantId,
@@ -62,24 +85,16 @@ export const recordOAuthInstallation = internalMutation({
         updatedAt: now,
         data,
       })
-
-      return existing._id
     }
 
-    return await ctx.db.insert("integrations", {
+    await linkSetupIdentity(ctx, {
       tenantId: args.tenantId,
-      integration: "notion",
-      scope: "tenant",
-      externalId: args.profile.workspaceId,
-      name: args.profile.workspaceName,
-      avatar: args.profile.workspaceIcon,
-      credentials,
-      status: "active",
-      createdBy: args.createdBy,
-      createdAt: now,
-      updatedAt: now,
-      data,
+      personId: args.createdBy,
+      provider: "notion",
+      identity: args.setupIdentity,
     })
+
+    return integrationId
   },
 })
 

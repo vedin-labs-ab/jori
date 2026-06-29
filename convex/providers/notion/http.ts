@@ -9,7 +9,11 @@ import {
 import { completeIntegrationOffer, failIntegrationOffer } from "../install"
 import { notionOAuthAuthorizeUrl, notionOAuthCallbackPath } from "./config"
 import { readNotionAutomationEvents } from "./events"
-import { exchangeNotionAuthorizationCode, requireNotionClientId } from "./oauth"
+import {
+  exchangeNotionAuthorizationCode,
+  readNotionSetupIdentity,
+  requireNotionClientId,
+} from "./oauth"
 import { enrichNotionEventData } from "./pages"
 import { parseSignedNotionState, verifyNotionWebhookRequest } from "./signing"
 
@@ -90,6 +94,7 @@ export async function handleNotionOAuthCallback(
         workspaceIcon: tokenResult.workspace_icon ?? undefined,
         duplicatedTemplateId: tokenResult.duplicated_template_id ?? undefined,
       },
+      setupIdentity: readNotionSetupIdentity(tokenResult),
     }
   )
 

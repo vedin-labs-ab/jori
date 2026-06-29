@@ -11,6 +11,7 @@ export type NotionTokenResponse =
       workspace_name: string | null
       workspace_id: string
       duplicated_template_id: string | null
+      owner?: NotionTokenOwner
       request_id?: string
     }
   | {
@@ -19,6 +20,37 @@ export type NotionTokenResponse =
       code?: string
       request_id?: string
     }
+
+type NotionTokenOwner = {
+  type: string
+  user?: {
+    id?: string
+    name?: string | null
+    person?: {
+      email?: string | null
+    }
+  }
+}
+
+export function readNotionSetupIdentity(
+  tokenResult: NotionTokenResponse
+): { externalId: string; email?: string; name?: string } | undefined {
+  if ("error" in tokenResult || tokenResult.owner?.type !== "user") {
+    return undefined
+  }
+
+  const user = tokenResult.owner.user
+
+  if (user?.id === undefined) {
+    return undefined
+  }
+
+  return {
+    externalId: user.id,
+    email: normalizeNullableText(user.person?.email),
+    name: normalizeNullableText(user.name),
+  }
+}
 
 export function requireNotionClientId() {
   return requireProviderEnv("NOTION_CLIENT_ID")
@@ -61,4 +93,10 @@ async function notionOAuthToken(body: Record<string, string>) {
   })
 
   return (await response.json()) as NotionTokenResponse
+}
+
+function normalizeNullableText(value: string | null | undefined) {
+  const trimmed = value?.trim()
+
+  return trimmed === undefined || trimmed === "" ? undefined : trimmed
 }
