@@ -1,13 +1,13 @@
 import {
   Bot,
-  Brain,
   ChevronsUpDown,
-  FileArchive,
   Hourglass,
   ListChecks,
   type LucideIcon,
-  PlugZap,
+  Package,
+  Plug,
   ShieldCheck,
+  Sparkles,
   Timer,
   Wrench,
 } from "lucide-react"
@@ -29,9 +29,9 @@ import {
 const kindIcons = {
   agent: Bot,
   approval: ShieldCheck,
-  asset: FileArchive,
-  model: Brain,
-  offer: PlugZap,
+  asset: Package,
+  model: Sparkles,
+  offer: Plug,
   run: ListChecks,
   tool: Wrench,
   wait: Hourglass,
@@ -68,12 +68,11 @@ export function ActivityIcon({
         >
           <span
             className={cn(
-              "relative inline-flex size-4 items-center justify-center",
+              "inline-flex size-4 items-center justify-center",
               isExpandable &&
                 "transition-opacity duration-150 group-focus-visible/run-row:opacity-0 group-hover/run-row:opacity-0"
             )}
           >
-            <StatusDot status={item.status} />
             <Icon className="size-3.5 text-muted-foreground" />
           </span>
           {isExpandable ? (
@@ -102,43 +101,31 @@ export function ActivityMeta({
         absolute={item.startedAt}
         value={relativeTime(item.startedAt, now)}
       />
+      <ActivityLiveIndicator status={item.status} />
     </>
   )
 }
 
-function StatusDot({ status }: { status: ActivityStatus }) {
-  const active = status === "running" || status === "waiting"
+function ActivityLiveIndicator({ status }: { status: ActivityStatus }) {
+  if (status !== "running") {
+    return null
+  }
 
   return (
-    <span className="-right-0.5 -top-0.5 absolute grid size-2.5 place-items-center rounded-full bg-background">
-      {active ? (
-        <span className="absolute size-1.5 animate-ping rounded-full bg-primary opacity-70" />
-      ) : null}
-      <span
-        className={cn("relative block size-1.5 rounded-full", dotClass(status))}
-      />
-    </span>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          aria-label="Running now"
+          className="relative inline-flex size-2 shrink-0"
+          role="status"
+        >
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-60" />
+          <span className="relative inline-flex size-2 rounded-full bg-primary" />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>Running now</TooltipContent>
+    </Tooltip>
   )
-}
-
-function dotClass(status: ActivityStatus) {
-  if (status === "failed" || status === "denied") {
-    return "bg-destructive"
-  }
-
-  if (
-    status === "completed" ||
-    status === "approved" ||
-    status === "connected"
-  ) {
-    return "bg-emerald-600"
-  }
-
-  if (status === "cancelled" || status === "expired" || status === "stopped") {
-    return "bg-muted-foreground"
-  }
-
-  return "bg-primary"
 }
 
 function statusLabel(status: ActivityStatus) {
