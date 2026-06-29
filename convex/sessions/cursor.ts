@@ -11,6 +11,10 @@ export const defaultDrainLimit = 20
 export const maxDrainLimit = 50
 export const maxPendingReadLimit = maxDrainLimit + 1
 
+type MessageCursor = NonNullable<
+  NonNullable<Doc<"sessions">["cursor"]>["message"]
+>
+
 export type PendingBatch = {
   cursor?: Doc<"messages">
   hasMore: boolean
@@ -25,17 +29,18 @@ export function collectPendingBatch(
 ) {
   const pending: Doc<"messages">[] = []
   let cursor: Doc<"messages"> | undefined
-  let seenLastMessage = session.cursor === undefined
+  const messageCursor = session.cursor?.message
+  let seenLastMessage = messageCursor === undefined
 
   for (let index = 0; index < messages.length; index += 1) {
     const message = messages[index]
 
-    if (message._id === session.cursor?.messageId) {
+    if (message._id === messageCursor?.messageId) {
       seenLastMessage = true
       continue
     }
 
-    if (!isAfterSessionCursor(message, session.cursor, seenLastMessage)) {
+    if (!isAfterSessionCursor(message, messageCursor, seenLastMessage)) {
       continue
     }
 
@@ -93,18 +98,18 @@ export function normalizeLimit(limit: number | undefined) {
 
 function isAfterSessionCursor(
   message: Doc<"messages">,
-  cursor: Doc<"sessions">["cursor"],
+  cursor: MessageCursor | undefined,
   seenLastMessage: boolean
 ) {
   if (cursor === undefined) {
     return true
   }
 
-  if (message._creationTime < cursor.timestamp) {
+  if (message._creationTime < cursor.createdAt) {
     return false
   }
 
-  return message._creationTime !== cursor.timestamp || seenLastMessage
+  return message._creationTime !== cursor.createdAt || seenLastMessage
 }
 
 function hasText(message: Doc<"messages">) {

@@ -93,14 +93,16 @@ test("formats runtime messages with normalized text and Slack identifiers", () =
   })
 })
 
-function session(messageId: string, timestamp: number): Doc<"sessions"> {
+function session(messageId: string, createdAt: number): Doc<"sessions"> {
   return {
     _id: id<"sessions">("session"),
     _creationTime: 0,
     watchId: id<"watches">("watch"),
     cursor: {
-      messageId: id<"messages">(messageId),
-      timestamp,
+      message: {
+        createdAt,
+        messageId: id<"messages">(messageId),
+      },
     },
     updatedAt: 0,
   }
@@ -108,13 +110,13 @@ function session(messageId: string, timestamp: number): Doc<"sessions"> {
 
 function message(
   messageId: string,
-  creationTime: number,
+  storedAt: number,
   text?: string,
   overrides: Partial<Doc<"messages">> = {}
 ): Doc<"messages"> {
   return {
     _id: id<"messages">(messageId),
-    _creationTime: creationTime,
+    _creationTime: storedAt,
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
@@ -122,7 +124,7 @@ function message(
     externalId: messageId,
     mentioned: false,
     text,
-    createdAt: creationTime,
+    createdAt: storedAt,
     ...overrides,
   }
 }

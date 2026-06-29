@@ -12,7 +12,7 @@ test("drains only reactions to Milo-authored targets", () => {
       reaction("b", 2, { target: reactionTarget({ actor: user }) }),
       reaction("c", 3, { target: reactionTarget({ actor: self }) }),
     ],
-    session({ updatedAt: 1, creationTime: 1 }),
+    session({ updatedAt: 1, createdAt: 1 }),
     10,
     false
   )
@@ -26,12 +26,12 @@ test("re-drains a row whose status changed after the cursor", () => {
   const batch = collectPendingReactionBatch(
     [
       reaction("r", 7, {
-        creationTime: 5,
+        storedAt: 5,
         removedAt: 700,
         target: reactionTarget({ actor: self }),
       }),
     ],
-    session({ updatedAt: 5, creationTime: 5 }),
+    session({ updatedAt: 5, createdAt: 5 }),
     10,
     false
   )
@@ -40,19 +40,19 @@ test("re-drains a row whose status changed after the cursor", () => {
   expect(batch.cursor?._id).toBe("r")
 })
 
-test("breaks updatedAt ties on creation time", () => {
+test("breaks updatedAt ties on cursor createdAt", () => {
   const batch = collectPendingReactionBatch(
     [
       reaction("earlier", 5, {
-        creationTime: 3,
+        storedAt: 3,
         target: reactionTarget({ actor: self }),
       }),
       reaction("later", 5, {
-        creationTime: 9,
+        storedAt: 9,
         target: reactionTarget({ actor: self }),
       }),
     ],
-    session({ updatedAt: 5, creationTime: 5 }),
+    session({ updatedAt: 5, createdAt: 5 }),
     10,
     false
   )
@@ -60,7 +60,7 @@ test("breaks updatedAt ties on creation time", () => {
   expect(batch.reactions.map((item) => item._id)).toEqual(["later"])
 })
 
-test("drains reactions after a timestamp-only start cursor", () => {
+test("drains reactions after an updatedAt-only start cursor", () => {
   const batch = collectPendingReactionBatch(
     [
       reaction("before", 9, { target: reactionTarget({ actor: self }) }),
@@ -106,15 +106,15 @@ test("formats added and removed runtime reactions", () => {
   ).toMatchObject({ observedAt: 400, type: "reaction.removed" })
 })
 
-function session(reactionCursor?: {
+function session(reaction?: {
+  createdAt?: number
   updatedAt: number
-  creationTime?: number
 }): Doc<"sessions"> {
   return {
     _id: id<"sessions">("session"),
     _creationTime: 0,
     watchId: id<"watches">("watch"),
-    reactionCursor,
+    ...(reaction === undefined ? {} : { cursor: { reaction } }),
     updatedAt: 0,
   }
 }
@@ -122,13 +122,13 @@ function session(reactionCursor?: {
 function reaction(
   reactionId: string,
   updatedAt: number,
-  overrides: Partial<Doc<"reactions">> & { creationTime?: number } = {}
+  overrides: Partial<Doc<"reactions">> & { storedAt?: number } = {}
 ): Doc<"reactions"> {
-  const { creationTime, ...rest } = overrides
+  const { storedAt, ...rest } = overrides
 
   return {
     _id: id<"reactions">(reactionId),
-    _creationTime: creationTime ?? updatedAt,
+    _creationTime: storedAt ?? updatedAt,
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
     integration: "linear",
@@ -136,7 +136,7 @@ function reaction(
     observedAt: updatedAt,
     target: reactionTarget(),
     updatedAt,
-    createdAt: creationTime ?? updatedAt,
+    createdAt: storedAt ?? updatedAt,
     ...rest,
   }
 }

@@ -3,6 +3,11 @@ import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { startMessageRun } from "./data"
 
+const expectedCursor = {
+  message: { createdAt: 0, messageId: "message" },
+  reaction: { updatedAt: 1000 },
+}
+
 test("starts new watch message runs as mentions", async () => {
   const ctx = fakeMutationCtx()
   const result = await startMessageRun(ctx, runArgs())
@@ -21,13 +26,7 @@ test("starts new watch message runs as mentions", async () => {
   expect(inserted(ctx, "sessions")).toEqual([
     expect.objectContaining({
       watchId: "watches-2",
-      cursor: {
-        messageId: "message",
-        timestamp: 0,
-      },
-      reactionCursor: {
-        updatedAt: 1000,
-      },
+      cursor: expectedCursor,
       runId: "runs-1",
     }),
   ])
@@ -84,9 +83,7 @@ test("starts reply runs when the previous session is terminal", async () => {
   expect(ctx.patches).toContainEqual({
     id: "session",
     patch: expect.objectContaining({
-      reactionCursor: {
-        updatedAt: 1000,
-      },
+      cursor: expectedCursor,
       runId: "runs-1",
     }),
   })
