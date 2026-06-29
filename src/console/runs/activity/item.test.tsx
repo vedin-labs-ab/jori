@@ -32,17 +32,40 @@ test("expands activity details from the row control", () => {
   expect(screen.getAllByText("src/app.tsx").length).toBeGreaterThan(1)
 })
 
-test("shows a live indicator only for running activity", () => {
+test("shows a live indicator only for live activity", () => {
   render(
     <TooltipProvider>
       <ActivityItem
-        item={activityItem({ durationMs: undefined, status: "running" })}
+        item={activityItem({
+          durationMs: undefined,
+          isLive: true,
+          status: "running",
+        })}
         now={1700000002000}
       />
     </TooltipProvider>
   )
 
   expect(screen.getByRole("status", { name: "Running now" })).toBeDefined()
+})
+
+test("does not pulse historical running-status events", () => {
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          details: undefined,
+          durationMs: undefined,
+          kind: "run",
+          status: "running",
+          title: "Run started",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(screen.queryByRole("status", { name: "Running now" })).toBeNull()
 })
 
 function activityItem(

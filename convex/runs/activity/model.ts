@@ -2,7 +2,10 @@ import { type Doc } from "../../_generated/dataModel"
 import { readEventData } from "./read"
 import { type ActivityDetail, type ActivityItem } from "./types"
 
-export function projectModelTraces(traces: Doc<"traces">[]): ActivityItem[] {
+export function projectModelTraces(
+  traces: Doc<"traces">[],
+  isRunLive: boolean
+): ActivityItem[] {
   const starts = new Map<string, Doc<"traces">>()
   const terminals = new Map<string, Doc<"traces">>()
 
@@ -20,11 +23,14 @@ export function projectModelTraces(traces: Doc<"traces">[]): ActivityItem[] {
     ),
     ...[...starts]
       .filter(([key]) => !terminals.has(key))
-      .map(([, trace]) => projectModelStart(trace)),
+      .map(([, trace]) => projectModelStart(trace, isRunLive)),
   ]
 }
 
-function projectModelStart(trace: Doc<"traces">): ActivityItem {
+function projectModelStart(
+  trace: Doc<"traces">,
+  isRunLive: boolean
+): ActivityItem {
   const event = readEventData(trace.data)
 
   return {
@@ -33,6 +39,7 @@ function projectModelStart(trace: Doc<"traces">): ActivityItem {
     status: "running",
     title: event?.title ?? "Thinking",
     details: modelDetails(trace.data),
+    isLive: isRunLive,
     startedAt: trace.timestamp,
   }
 }

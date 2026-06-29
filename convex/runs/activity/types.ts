@@ -39,6 +39,7 @@ export type ActivityItem = {
   details?: ActivityDetail[]
   durationMs?: number
   endedAt?: number
+  isLive?: boolean
   startedAt: number
 }
 

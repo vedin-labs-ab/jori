@@ -1,13 +1,13 @@
 import {
   Bot,
   ChevronsUpDown,
+  Cpu,
   Hourglass,
   ListChecks,
   type LucideIcon,
   Package,
   Plug,
   ShieldCheck,
-  Sparkles,
   Timer,
   Wrench,
 } from "lucide-react"
@@ -30,7 +30,7 @@ const kindIcons = {
   agent: Bot,
   approval: ShieldCheck,
   asset: Package,
-  model: Sparkles,
+  model: Cpu,
   offer: Plug,
   run: ListChecks,
   tool: Wrench,
@@ -101,13 +101,13 @@ export function ActivityMeta({
         absolute={item.startedAt}
         value={relativeTime(item.startedAt, now)}
       />
-      <ActivityLiveIndicator status={item.status} />
+      <ActivityLiveIndicator isLive={item.isLive === true} />
     </>
   )
 }
 
-function ActivityLiveIndicator({ status }: { status: ActivityStatus }) {
-  if (status !== "running") {
+function ActivityLiveIndicator({ isLive }: { isLive: boolean }) {
+  if (!isLive) {
     return null
   }
 

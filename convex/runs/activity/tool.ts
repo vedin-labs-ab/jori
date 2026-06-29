@@ -18,7 +18,10 @@ import {
 const hiddenToolNames = new Set(["finish_run", "start_agent"])
 const toolTerminalTypes = new Set(["tool.completed", "tool.failed"])
 
-export function projectToolTraces(traces: Doc<"traces">[]): ActivityItem[] {
+export function projectToolTraces(
+  traces: Doc<"traces">[],
+  isRunLive: boolean
+): ActivityItem[] {
   const labels = toolLabels(traces)
   const groups = new Map<string, Doc<"traces">[]>()
 
@@ -33,12 +36,15 @@ export function projectToolTraces(traces: Doc<"traces">[]): ActivityItem[] {
     groups.set(key, [...(groups.get(key) ?? []), trace])
   }
 
-  return [...groups.values()].map((group) => projectToolGroup(group, labels))
+  return [...groups.values()].map((group) =>
+    projectToolGroup(group, labels, isRunLive)
+  )
 }
 
 function projectToolGroup(
   group: Doc<"traces">[],
-  labels: Map<string, ToolLabel>
+  labels: Map<string, ToolLabel>,
+  isRunLive: boolean
 ): ActivityItem {
   const started = group.find((trace) => trace.type === "tool.started")
   const terminal = group.find((trace) => toolTerminalTypes.has(trace.type))
@@ -59,6 +65,7 @@ function projectToolGroup(
     details: toolDetails(started?.data, terminal?.data),
     durationMs: endedAt === undefined ? undefined : endedAt - startedAt,
     endedAt,
+    isLive: status === "running" && isRunLive,
     startedAt,
   }
 }
