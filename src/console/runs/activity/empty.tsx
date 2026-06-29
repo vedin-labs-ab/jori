@@ -7,6 +7,13 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  RunRowContent,
+  RunRowControl,
+  RunRowFrame,
+  RunRowHeader,
+  RunRowMeta,
+} from "../row/layout"
 
 const skeletonRows = ["first", "second", "third"] as const
 
@@ -33,13 +40,20 @@ export function ActivitySkeleton() {
   return (
     <div className="grid gap-2 p-2">
       {skeletonRows.map((row) => (
-        <div className="flex items-start gap-3" key={row}>
-          <Skeleton className="mt-1 size-4 rounded-full" />
-          <div className="grid flex-1 gap-2">
-            <Skeleton className="h-4 w-2/5" />
-            <Skeleton className="h-3 w-3/5" />
-          </div>
-        </div>
+        <RunRowFrame className="bg-background/80" key={row}>
+          <RunRowHeader>
+            <RunRowControl>
+              <Skeleton className="size-4 rounded-full" />
+              <RunRowContent title={<Skeleton className="h-4 w-40" />}>
+                <Skeleton className="h-3 w-56" />
+                <Skeleton className="h-3 w-24" />
+              </RunRowContent>
+              <RunRowMeta>
+                <Skeleton className="h-6 w-16 rounded-md" />
+              </RunRowMeta>
+            </RunRowControl>
+          </RunRowHeader>
+        </RunRowFrame>
       ))}
     </div>
   )

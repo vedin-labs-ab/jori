@@ -6,6 +6,14 @@ import { RunActivity } from "../activity"
 import { type ExecutionItem } from "../types"
 import { ApprovalCallout } from "./approval"
 import { ExecutionFacts } from "./facts"
+import {
+  RunRowBody,
+  RunRowContent,
+  RunRowControl,
+  RunRowFrame,
+  RunRowHeader,
+  RunRowMeta,
+} from "./layout"
 import { SourceLine } from "./source"
 import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
 import { StopExecution } from "./stop"
@@ -26,13 +34,19 @@ export const ExecutionRow = memo(function ExecutionRow({
     execution.status === "queued" || execution.status === "running"
 
   return (
-    <article className="overflow-hidden rounded-md bg-background ring-1 ring-foreground/10 ring-inset transition-shadow focus-within:ring-2 focus-within:ring-ring/50">
-      <div className="flex items-center">
-        <button
-          className="group/execution-row grid min-w-0 flex-1 grid-cols-[auto_1fr] items-center gap-3 p-3 text-left outline-none md:grid-cols-[auto_1fr_auto]"
-          onClick={() => setIsOpen((current) => !current)}
-          type="button"
-        >
+    <RunRowFrame>
+      <RunRowHeader
+        action={
+          isOngoing ? (
+            <StopExecution
+              className="mr-3 shrink-0"
+              runId={execution.id}
+              tenantId={tenantId}
+            />
+          ) : undefined
+        }
+      >
+        <RunRowControl onClick={() => setIsOpen((current) => !current)}>
           <StatusIcon
             approval={execution.approval}
             now={now}
@@ -45,15 +59,8 @@ export const ExecutionRow = memo(function ExecutionRow({
             isOpen={isOpen}
             now={now}
           />
-        </button>
-        {isOngoing ? (
-          <StopExecution
-            className="mr-3 shrink-0"
-            runId={execution.id}
-            tenantId={tenantId}
-          />
-        ) : null}
-      </div>
+        </RunRowControl>
+      </RunRowHeader>
       {isOpen ? (
         <ExpandedExecution
           execution={execution}
@@ -61,16 +68,15 @@ export const ExecutionRow = memo(function ExecutionRow({
           tenantId={tenantId}
         />
       ) : null}
-    </article>
+    </RunRowFrame>
   )
 })
 
 function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
   return (
-    <div className="grid min-w-0 max-w-[56ch] gap-1">
-      <div className="truncate font-medium text-sm">{execution.title}</div>
+    <RunRowContent title={execution.title}>
       <SourceLine details={execution.details} source={execution.source} />
-    </div>
+    </RunRowContent>
   )
 }
 
@@ -86,7 +92,7 @@ function ExecutionMeta({
   now: number
 }) {
   return (
-    <div className="col-span-2 flex flex-wrap items-center gap-3 justify-self-start md:col-span-1 md:justify-self-end">
+    <RunRowMeta>
       {hasLivePendingApproval(execution.approval, now) ? (
         <ApprovalStatusMeta
           expiresAt={execution.approval.expiresAt}
@@ -101,7 +107,7 @@ function ExecutionMeta({
         absolute={execution.createdAt}
         value={relativeTime(execution.createdAt, now)}
       />
-    </div>
+    </RunRowMeta>
   )
 }
 
@@ -115,7 +121,7 @@ function ExpandedExecution({
   tenantId: string
 }) {
   return (
-    <div className="grid gap-0">
+    <RunRowBody>
       <TaskDetail sourceUrl={execution.source.url} task={execution.task} />
       <ExecutionFacts details={execution.details} />
       {execution.approval !== null ? (
@@ -129,7 +135,7 @@ function ExpandedExecution({
         <ErrorDetail value={execution.error} />
       ) : null}
       <RunActivity now={now} runId={execution.id} tenantId={tenantId} />
-    </div>
+    </RunRowBody>
   )
 }
 
