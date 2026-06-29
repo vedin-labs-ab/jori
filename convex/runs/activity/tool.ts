@@ -5,12 +5,14 @@ import {
   readToolAccess,
   readToolError,
   readToolInput,
+  readToolMetadata,
   readToolName,
   readToolResult,
 } from "./read"
 import {
   type ActivityDetail,
   type ActivityItem,
+  type ActivityMetadataItem,
   type ActivityStatus,
   type ToolLabel,
 } from "./types"
@@ -54,6 +56,7 @@ function projectToolGroup(
   const status = toolStatus(trace)
   const startedAt = started?.timestamp ?? trace.timestamp
   const endedAt = terminal?.timestamp
+  const metadata = toolMetadata(started?.data, terminal?.data)
 
   return {
     id: trace._id,
@@ -61,11 +64,12 @@ function projectToolGroup(
     status,
     title: toolTitle(name, label, status),
     access: label?.access ?? readToolAccess(trace.data),
-    description: toolDescription(started?.data, terminal?.data),
+    description: toolDescription(started?.data, terminal?.data, metadata),
     details: toolDetails(started?.data, terminal?.data),
     durationMs: endedAt === undefined ? undefined : endedAt - startedAt,
     endedAt,
     isLive: status === "running" && isRunLive,
+    metadata: metadata.length === 0 ? undefined : metadata,
     startedAt,
   }
 }
@@ -82,13 +86,45 @@ function toolTitle(
 
 function toolDescription(
   started: Doc<"traces">["data"] | undefined,
-  terminal: Doc<"traces">["data"] | undefined
+  terminal: Doc<"traces">["data"] | undefined,
+  metadata: ReturnType<typeof toolMetadata>
 ) {
+  const error = readToolError(terminal)
+
+  if (error !== undefined) {
+    return error
+  }
+
+  if (metadata.length > 0) {
+    return undefined
+  }
+
   return (
-    readToolError(terminal) ??
     inputDescription(readToolInput(started)) ??
     resultDescription(readToolResult(terminal))
   )
+}
+
+function toolMetadata(
+  started: Doc<"traces">["data"] | undefined,
+  terminal: Doc<"traces">["data"] | undefined
+) {
+  const seen = new Set<string>()
+  const result: ActivityMetadataItem[] = []
+
+  for (const item of [
+    ...readToolMetadata(started),
+    ...readToolMetadata(terminal),
+  ]) {
+    const key = `${item.kind}:${item.text}`
+
+    if (!seen.has(key)) {
+      seen.add(key)
+      result.push(item)
+    }
+  }
+
+  return result
 }
 
 function inputDescription(input: Record<string, unknown> | undefined) {

@@ -53,7 +53,7 @@ export async function executeToolCall(args: {
       eventArgs(args),
       tool,
       "tool.completed",
-      toolTraceDetails(result.value)
+      toolTraceDetails(tool.name, args.call.args, result.value)
     )
 
     return {

@@ -108,6 +108,11 @@ const traceToolInputSummary = v.object({
   timeoutMs: v.optional(v.number()),
 })
 
+const traceToolMetadataItem = v.object({
+  kind: v.union(v.literal("target"), v.literal("scope"), v.literal("outcome")),
+  text: v.string(),
+})
+
 const traceSubject = v.union(
   v.object({ kind: v.literal("agent"), id: v.id("runs") }),
   v.object({ kind: v.literal("approval"), id: v.id("approvals") }),
@@ -160,6 +165,7 @@ export const traceData = v.union(
     name: v.string(),
     route: traceToolRoute,
     error: v.optional(v.string()),
+    metadata: v.optional(v.array(traceToolMetadataItem)),
     providerTrace: v.optional(
       v.object({
         provider: v.string(),

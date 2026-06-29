@@ -1,5 +1,6 @@
 import { type MiloConvexClient } from "./convex"
 import { runtimeEvent } from "./events"
+import { toolInputMetadataTrace, toolResultMetadataTrace } from "./metadata"
 import { type ModelToolCall } from "./model/types"
 import {
   type RuntimeContext,
@@ -66,6 +67,7 @@ export async function recordToolEvent(
         name: tool.name,
         route: tool.route,
         ...toolInputTrace(tool.name, args.call.args, type),
+        ...toolInputMetadataTrace(tool.name, args.call.args),
         ...data,
       },
       runId: args.context.run.id,
@@ -113,9 +115,14 @@ function toolInputSummary(
   }
 }
 
-export function toolTraceDetails(result: unknown): RuntimeToolTraceDetails {
+export function toolTraceDetails(
+  tool: string,
+  input: unknown,
+  result: unknown
+): RuntimeToolTraceDetails {
   return {
     ...providerTrace(result),
+    ...toolResultMetadataTrace(tool, input, result),
     result: summarizeResult(result),
   }
 }

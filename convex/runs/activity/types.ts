@@ -1,3 +1,4 @@
+import { type RuntimeToolMetadataItem } from "../../../contracts/runtime"
 import { type Doc } from "../../_generated/dataModel"
 
 export type ActivityStatus =
@@ -36,6 +37,8 @@ export type ActivityTokenUsage = {
   total: number
 }
 
+export type ActivityMetadataItem = RuntimeToolMetadataItem
+
 export type ActivityItem = {
   id: string
   kind: ActivityKind
@@ -47,6 +50,7 @@ export type ActivityItem = {
   durationMs?: number
   endedAt?: number
   isLive?: boolean
+  metadata?: ActivityMetadataItem[]
   startedAt: number
   tokenUsage?: ActivityTokenUsage
 }
