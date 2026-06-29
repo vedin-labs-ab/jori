@@ -101,7 +101,10 @@ export type RuntimeTraceSubject =
 export type RuntimeTraceMetrics = {
   approvals?: number
   durationMs?: number
+  inputCacheReadTokens?: number
+  inputCacheWriteTokens?: number
   inputTokens?: number
+  inputUncachedTokens?: number
   messages?: number
   offers?: number
   outputTokens?: number

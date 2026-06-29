@@ -29,7 +29,10 @@ export type ArtifactPromptRequestDiagnostics = {
 
 type ArtifactPromptUsageDiagnostics = {
   completionTokens?: number
+  promptCacheReadTokens?: number
+  promptCacheWriteTokens?: number
   promptTokens?: number
+  promptUncachedTokens?: number
   reasoningTokens?: number
   totalTokens?: number
 }
@@ -57,6 +60,10 @@ type ArtifactPromptResponse = {
     completionTokens?: number
     completionTokensDetails?: {
       reasoningTokens?: number | null
+    } | null
+    promptTokensDetails?: {
+      cachedTokens?: number
+      cacheWriteTokens?: number
     } | null
     promptTokens?: number
     totalTokens?: number
@@ -109,11 +116,28 @@ function usageDiagnostics(
     return undefined
   }
 
+  const promptCacheReadTokens = usage.promptTokensDetails?.cachedTokens
+
   return {
     completionTokens: usage.completionTokens,
+    promptCacheReadTokens,
+    promptCacheWriteTokens: usage.promptTokensDetails?.cacheWriteTokens,
     promptTokens: usage.promptTokens,
+    promptUncachedTokens: promptUncachedTokens(
+      usage.promptTokens,
+      promptCacheReadTokens
+    ),
     reasoningTokens:
       usage.completionTokensDetails?.reasoningTokens ?? undefined,
     totalTokens: usage.totalTokens,
   }
+}
+
+function promptUncachedTokens(
+  promptTokens: number | undefined,
+  promptCacheReadTokens: number | undefined
+) {
+  return promptTokens === undefined || promptCacheReadTokens === undefined
+    ? undefined
+    : Math.max(0, promptTokens - promptCacheReadTokens)
 }

@@ -46,7 +46,10 @@ export type MiloPromptDiagnostics = {
   serviceTier?: string | null
   usage?: {
     completionTokens?: number
+    promptCacheReadTokens?: number
+    promptCacheWriteTokens?: number
     promptTokens?: number
+    promptUncachedTokens?: number
     reasoningTokens?: number
     totalTokens?: number
   }

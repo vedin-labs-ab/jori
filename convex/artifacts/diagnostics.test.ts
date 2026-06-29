@@ -30,6 +30,10 @@ const response = {
   usage: {
     completionTokens: 25,
     completionTokensDetails: { reasoningTokens: 5 },
+    promptTokensDetails: {
+      cachedTokens: 60,
+      cacheWriteTokens: 10,
+    },
     promptTokens: 100,
     totalTokens: 125,
   },
@@ -61,7 +65,10 @@ const diagnostics = {
   serviceTier: "default",
   usage: {
     completionTokens: 25,
+    promptCacheReadTokens: 60,
+    promptCacheWriteTokens: 10,
     promptTokens: 100,
+    promptUncachedTokens: 40,
     reasoningTokens: 5,
     totalTokens: 125,
   },
