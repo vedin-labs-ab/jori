@@ -63,6 +63,7 @@ export const traceType = v.union(
   v.literal("run.prepared"),
   v.literal("run.resumed"),
   v.literal("run.started"),
+  v.literal("run.stopped"),
   v.literal("run.waiting"),
   v.literal("tool.completed"),
   v.literal("tool.failed"),

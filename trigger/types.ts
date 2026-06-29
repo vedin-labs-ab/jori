@@ -212,6 +212,7 @@ export type RuntimeEventType =
   | "run.failed"
   | "run.resumed"
   | "run.started"
+  | "run.stopped"
   | "run.waiting"
   | "tool.completed"
   | "tool.failed"

@@ -4,8 +4,13 @@ import { readEventData, readTraceError } from "./read"
 import { projectToolTraces } from "./tool"
 import { type ActivityItem, type ActivityStatus } from "./types"
 
-export function projectTraceActivity(traces: Doc<"traces">[]) {
-  const isRunLive = !traces.some((trace) => isTerminalRunTrace(trace))
+export function projectTraceActivity(
+  traces: Doc<"traces">[],
+  runStatus: Doc<"runs">["status"]
+) {
+  const isRunLive =
+    isLiveRunStatus(runStatus) &&
+    !traces.some((trace) => isTerminalRunTrace(trace))
 
   return [
     ...projectRunTraces(traces),
@@ -32,6 +37,10 @@ function projectRunTraces(traces: Doc<"traces">[]): ActivityItem[] {
       ]
     }
 
+    if (trace.type === "run.stopped") {
+      return [eventTraceItem(trace, "run")]
+    }
+
     if (trace.type === "asset.saved") {
       return [eventTraceItem(trace, "asset")]
     }
@@ -41,7 +50,15 @@ function projectRunTraces(traces: Doc<"traces">[]): ActivityItem[] {
 }
 
 function isTerminalRunTrace(trace: Doc<"traces">) {
-  return trace.type === "run.completed" || trace.type === "run.failed"
+  return (
+    trace.type === "run.completed" ||
+    trace.type === "run.failed" ||
+    trace.type === "run.stopped"
+  )
+}
+
+function isLiveRunStatus(status: Doc<"runs">["status"]) {
+  return status === "queued" || status === "running"
 }
 
 function traceItem(

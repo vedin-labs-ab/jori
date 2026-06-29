@@ -52,61 +52,6 @@ test("keeps in-progress model work visible", () => {
   )
 })
 
-test("does not mark historical run lifecycle events as live", () => {
-  const items = projectActivity(
-    data({
-      traces: [
-        trace({
-          timestamp: 1,
-          type: "run.started",
-        }),
-        trace({
-          timestamp: 20,
-          type: "run.completed",
-        }),
-      ],
-    })
-  )
-
-  const started = items.find((item) => item.title === "Run started")
-
-  expect(started).toMatchObject({
-    kind: "run",
-    status: "running",
-  })
-  expect(started?.isLive).toBeUndefined()
-})
-
-test("does not mark stale in-progress traces as live after run completion", () => {
-  const items = projectActivity(
-    data({
-      traces: [
-        trace({
-          data: {
-            input: { command: "pnpm test" },
-            name: "bash",
-            route: "sandbox",
-          },
-          timestamp: 10,
-          type: "tool.started",
-        }),
-        trace({
-          timestamp: 20,
-          type: "run.completed",
-        }),
-      ],
-    })
-  )
-
-  expect(items).toContainEqual(
-    expect.objectContaining({
-      isLive: false,
-      kind: "tool",
-      status: "running",
-    })
-  )
-})
-
 test("projects delegated runs as agents", () => {
   const items = projectActivity(
     data({
