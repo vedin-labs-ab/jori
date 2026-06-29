@@ -20,15 +20,34 @@ test("expands activity details from the row control", () => {
 
   expect(screen.queryByText("Path")).toBeNull()
   expect(screen.queryByText("done")).toBeNull()
+  expect(screen.queryByRole("status", { name: "Running now" })).toBeNull()
   expect(screen.getByText("1s")).toBeDefined()
 
   fireEvent.click(row)
 
   expect(screen.getByText("Path")).toBeDefined()
+  expect(screen.getByText("Path").closest("div")?.className).not.toContain(
+    "border-t"
+  )
   expect(screen.getAllByText("src/app.tsx").length).toBeGreaterThan(1)
 })
 
-function activityItem(): ActivityItemType {
+test("shows a live indicator only for running activity", () => {
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({ durationMs: undefined, status: "running" })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(screen.getByRole("status", { name: "Running now" })).toBeDefined()
+})
+
+function activityItem(
+  overrides: Partial<ActivityItemType> = {}
+): ActivityItemType {
   return {
     access: "read",
     description: "src/app.tsx",
@@ -39,5 +58,6 @@ function activityItem(): ActivityItemType {
     startedAt: 1700000000000,
     status: "completed",
     title: "Read file",
+    ...overrides,
   }
 }

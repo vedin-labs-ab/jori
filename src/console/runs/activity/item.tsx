@@ -52,7 +52,7 @@ export function ActivityItem({
 
 function ActivityDetails({ item }: { item: ActivityItemType }) {
   return (
-    <div className="border-t px-3 py-3">
+    <div className="px-3 py-3">
       <dl className="grid gap-1.5 text-xs sm:grid-cols-[8rem_minmax(0,1fr)]">
         {item.details?.map((detail) => (
           <ActivityDetail
