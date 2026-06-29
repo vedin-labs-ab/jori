@@ -4,11 +4,10 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { CodeBlockBody, CopyButton } from "../../shared/details"
+import { CopyButton } from "../../shared/details"
 import { activityToolFailureSummary } from "./tool-summary"
 
 export function ActivityFailureDescription({
@@ -48,19 +47,24 @@ function ActivityErrorAction({
           <ChevronRight data-icon="inline-end" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            Full error details from the failed tool call.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid min-w-0 overflow-hidden rounded-md bg-muted">
-          <div className="flex min-w-0 items-center justify-between gap-2 border-b px-2.5 py-1.5 text-muted-foreground">
-            <span className="min-w-0 truncate">Error details</span>
+      <DialogContent
+        className="gap-0 overflow-hidden bg-muted p-0 sm:max-w-3xl"
+        showCloseButton={false}
+      >
+        <DialogTitle className="sr-only">{title}</DialogTitle>
+        <DialogDescription className="sr-only">
+          Full error details from the failed tool call.
+        </DialogDescription>
+        <div className="grid min-w-0 overflow-hidden">
+          <div className="flex min-w-0 items-center justify-between gap-2 border-b px-3 py-2 text-muted-foreground">
+            <span className="min-w-0 truncate font-medium">Error details</span>
             <CopyButton label="error" value={value} />
           </div>
-          <CodeBlockBody value={value} />
+          <pre className="max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed">
+            <code className="block whitespace-pre-wrap break-words">
+              {value}
+            </code>
+          </pre>
         </div>
       </DialogContent>
     </Dialog>

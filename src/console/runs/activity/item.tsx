@@ -5,7 +5,7 @@ import {
   Search,
   Send,
 } from "lucide-react"
-import { type ReactNode } from "react"
+import { type ReactNode, useState } from "react"
 import {
   Task,
   TaskContent,
@@ -151,11 +151,16 @@ function ToolGroup({
   isLast: boolean
   now: number
 }) {
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
     <TimelineRow
       icon={
         <ActivityTimelineIcon
-          iconClassName="group-hover/activity-task-row:text-foreground"
+          iconClassName={cn(
+            "group-hover/activity-task-row:text-foreground",
+            isOpen ? "text-foreground" : null
+          )}
           icon={toolGroupIcon(entry.toolKind)}
           kind="tool"
           status={entry.status}
@@ -165,7 +170,7 @@ function ToolGroup({
       isFirst={isFirst}
       isLast={isLast}
     >
-      <Task className="min-w-0" defaultOpen={false}>
+      <Task className="min-w-0" onOpenChange={setIsOpen} open={isOpen}>
         <TaskTrigger className="group/activity-task" title={entry.title}>
           <button
             className="group/activity-task flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-md text-left text-muted-foreground text-sm transition-colors outline-none hover:text-foreground focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"

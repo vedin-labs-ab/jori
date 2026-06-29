@@ -40,7 +40,7 @@ test("renders a compact non-collapsible activity item", () => {
   expect(screen.queryByText("Path")).toBeNull()
 })
 
-test("shows a live indicator only for live activity", () => {
+test("shimmers live activity without a separate live indicator", () => {
   render(
     <TooltipProvider>
       <ActivityItem
@@ -54,7 +54,7 @@ test("shows a live indicator only for live activity", () => {
     </TooltipProvider>
   )
 
-  expect(screen.getByRole("status", { name: "Running now" })).toBeDefined()
+  expect(screen.queryByRole("status", { name: "Running now" })).toBeNull()
   expect(screen.getByText("2s")).toBeDefined()
   expect(screen.getByText("Read file").className).toContain("shimmer")
 })
