@@ -80,5 +80,6 @@ export const notionToolPermissionRows = [
     "Comment on a Notion page.",
     "Add a comment or discussion reply on a Notion page. Use to respond in-thread.",
     "write",
+    "required",
   ],
 ] satisfies ToolPermissionRow[]

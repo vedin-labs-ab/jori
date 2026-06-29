@@ -41,5 +41,6 @@ export const linearToolPermissionRows = [
     "React to a Linear issue, comment, or update with an emoji.",
     "Add an emoji reaction to a Linear issue, comment, or project update. Use as a lightweight acknowledgement.",
     "write",
+    "required",
   ],
 ] satisfies ToolPermissionRow[]
