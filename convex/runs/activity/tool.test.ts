@@ -50,6 +50,45 @@ test("projects compact tool metadata over generic result descriptions", () => {
   )
 })
 
+test("does not synthesize descriptions from result shape", () => {
+  const items = projectActivity(
+    data({
+      traces: [
+        trace({
+          callId: "call-1",
+          data: {
+            access: "read",
+            name: "web_search",
+            route: "convex",
+          },
+          timestamp: 10,
+          type: "tool.started",
+        }),
+        trace({
+          callId: "call-1",
+          data: {
+            access: "read",
+            name: "web_search",
+            result: { size: 3, type: "object" },
+            route: "convex",
+          },
+          timestamp: 24,
+          type: "tool.completed",
+        }),
+      ],
+    })
+  )
+
+  expect(items).toContainEqual(
+    expect.objectContaining({
+      description: undefined,
+      kind: "tool",
+      metadata: undefined,
+      title: "Web Search",
+    })
+  )
+})
+
 function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],
