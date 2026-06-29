@@ -1,70 +1,24 @@
 import { type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
-import { canonicalPersonId, canonicalPersonIds } from "./data"
+import { type MutationCtx } from "../_generated/server"
 import { identifyingEmail } from "./email"
-import { mergePersons } from "./merge"
+import { mergeWinner } from "./merge"
 
-const emailPersonLimit = 5
+// A single human plausibly spans a few surface identities; many more sharing one
+// email means a shared/role address, so we stop converging on it.
+const emailIdentityLimit = 5
 
-type PersonCtx = MutationCtx | QueryCtx
-
-export async function findEmailTarget(
+// Converge every person that shares an identifying email into one survivor, chosen
+// by link-method precedence. Returns the survivor, or undefined when the email is
+// non-identifying or spans too many identities to be trusted.
+export async function convergeEmail(
   ctx: MutationCtx,
   tenantId: string,
   email: string | undefined
-) {
-  const personIds = await readEmailPersonIds(ctx, tenantId, email)
-
-  if (personIds.length === 0) {
-    return undefined
-  }
-
-  const target = personIds[0]
-
-  for (const personId of personIds.slice(1)) {
-    await mergePersons(ctx, {
-      sourcePersonId: personId,
-      targetPersonId: target,
-      tenantId,
-    })
-  }
-
-  return target
-}
-
-export async function convergeByEmail(
-  ctx: MutationCtx,
-  args: {
-    tenantId: string
-    personId: Id<"persons">
-    email: string | undefined
-  }
-) {
-  const personIds = await readEmailPersonIds(ctx, args.tenantId, args.email)
-  let target = await canonicalPersonId(ctx, args.personId)
-
-  for (const personId of personIds) {
-    if (personId !== target) {
-      target = await mergePersons(ctx, {
-        sourcePersonId: personId,
-        targetPersonId: target,
-        tenantId: args.tenantId,
-      })
-    }
-  }
-
-  return target
-}
-
-async function readEmailPersonIds(
-  ctx: PersonCtx,
-  tenantId: string,
-  email: string | undefined
-) {
+): Promise<Id<"persons"> | undefined> {
   const normalized = identifyingEmail(email)
 
   if (normalized === undefined) {
-    return []
+    return undefined
   }
 
   const identities = await ctx.db
@@ -72,14 +26,18 @@ async function readEmailPersonIds(
     .withIndex("by_tenant_email", (index) =>
       index.eq("tenantId", tenantId).eq("email", normalized)
     )
-    .take(emailPersonLimit + 1)
+    .take(emailIdentityLimit + 1)
 
-  if (identities.length > emailPersonLimit) {
-    return []
+  if (identities.length > emailIdentityLimit) {
+    return undefined
   }
 
-  return await canonicalPersonIds(
+  return await mergeWinner(
     ctx,
-    identities.map((identity) => identity.personId)
+    tenantId,
+    identities.map((identity) => ({
+      personId: identity.personId,
+      method: identity.link.method,
+    }))
   )
 }

@@ -2,7 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { type LinkMethod } from "../identity/schema"
 import { canonicalPersonId } from "./data"
+import { outranks, selectSurvivor } from "./rows"
 
 const identityBatchSize = 100
 const artifactBatchSize = 50
@@ -51,6 +53,48 @@ export async function mergePersons(
   })
 
   return targetPersonId
+}
+
+// The one place merge direction is decided. Converge candidate persons into a
+// single survivor chosen by link-method precedence, so observation can never
+// supersede a proven identity. Returns the survivor, or undefined when empty.
+export async function mergeWinner(
+  ctx: MutationCtx,
+  tenantId: string,
+  candidates: { personId: Id<"persons">; method: LinkMethod }[]
+): Promise<Id<"persons"> | undefined> {
+  const strongest = new Map<Id<"persons">, LinkMethod>()
+
+  for (const candidate of candidates) {
+    const personId = await canonicalPersonId(ctx, candidate.personId)
+    const current = strongest.get(personId)
+
+    if (current === undefined || outranks(candidate.method, current)) {
+      strongest.set(personId, candidate.method)
+    }
+  }
+
+  const deduped = [...strongest].map(([personId, method]) => ({
+    personId,
+    method,
+  }))
+  const survivor = selectSurvivor(deduped)
+
+  if (survivor === undefined) {
+    return undefined
+  }
+
+  for (const { personId } of deduped) {
+    if (personId !== survivor) {
+      await mergePersons(ctx, {
+        sourcePersonId: personId,
+        targetPersonId: survivor,
+        tenantId,
+      })
+    }
+  }
+
+  return survivor
 }
 
 export const rewritePersonIdentities = internalMutation({

@@ -3,15 +3,14 @@ import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { type IdentityProvider, type LinkMethod } from "../identity/schema"
 import { canonicalPersonId, createPerson } from "./data"
 import { normalizeEmail } from "./email"
-import { convergeByEmail, findEmailTarget } from "./matching"
-import { mergePersons } from "./merge"
+import { convergeEmail } from "./matching"
+import { mergeWinner } from "./merge"
 import {
   findIdentity,
   type IdentityProfile,
   insertIdentity,
   normalizeExternalId,
   normalizeProfile,
-  outranks,
   patchIdentity,
 } from "./rows"
 
@@ -39,15 +38,11 @@ export async function resolveIdentity(
   if (existing !== null) {
     const personId = await canonicalPersonId(ctx, existing.personId)
     await patchIdentity(ctx, existing, { ...args, externalId, personId })
-    return await convergeByEmail(ctx, {
-      email: profile.email,
-      personId,
-      tenantId: args.tenantId,
-    })
+    return (await convergeEmail(ctx, args.tenantId, profile.email)) ?? personId
   }
 
   const target =
-    (await findEmailTarget(ctx, args.tenantId, profile.email)) ??
+    (await convergeEmail(ctx, args.tenantId, profile.email)) ??
     (await createPerson(ctx, { tenantId: args.tenantId }))
 
   return await linkIdentityToPerson(ctx, {
@@ -94,11 +89,7 @@ export async function linkIdentityToPerson(
 
   await ensureEmailIdentity(ctx, { ...args, personId, profile })
 
-  return await convergeByEmail(ctx, {
-    email: profile.email,
-    personId,
-    tenantId: args.tenantId,
-  })
+  return (await convergeEmail(ctx, args.tenantId, profile.email)) ?? personId
 }
 
 export async function resolvePersonByIdentity(
@@ -135,18 +126,12 @@ async function resolveLinkConflict(
     return args.personId
   }
 
-  const [sourcePersonId, targetPersonId] = outranks(
-    args.method,
-    existing.link.method
+  return (
+    (await mergeWinner(ctx, args.tenantId, [
+      { personId: existingPersonId, method: existing.link.method },
+      { personId: args.personId, method: args.method },
+    ])) ?? args.personId
   )
-    ? [existingPersonId, args.personId]
-    : [args.personId, existingPersonId]
-
-  return await mergePersons(ctx, {
-    sourcePersonId,
-    targetPersonId,
-    tenantId: args.tenantId,
-  })
 }
 
 async function ensureEmailIdentity(
