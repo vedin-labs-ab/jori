@@ -1,12 +1,28 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, expect, test } from "vitest"
+import { afterAll, afterEach, beforeAll, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ActivityItem, ActivityTimeline } from "./item"
 import { type ActivityItem as ActivityItemType } from "./types"
 
+const originalResizeObserver = globalThis.ResizeObserver
+
+class TestResizeObserver {
+  disconnect() {}
+  observe() {}
+  unobserve() {}
+}
+
+beforeAll(() => {
+  globalThis.ResizeObserver = TestResizeObserver as typeof ResizeObserver
+})
+
 afterEach(() => {
   cleanup()
+})
+
+afterAll(() => {
+  globalThis.ResizeObserver = originalResizeObserver
 })
 
 test("renders a compact non-collapsible activity item", () => {
@@ -40,6 +56,7 @@ test("shows a live indicator only for live activity", () => {
 
   expect(screen.getByRole("status", { name: "Running now" })).toBeDefined()
   expect(screen.getByText("2s")).toBeDefined()
+  expect(screen.getByText("Read file").className).toContain("shimmer")
 })
 
 test("does not pulse historical running-status events", () => {
@@ -126,6 +143,32 @@ test("renders compact tool metadata instead of generic descriptions", () => {
   expect(screen.queryByText("Returned object (3).")).toBeNull()
 })
 
+test("keeps failed tool error details behind an explicit action", () => {
+  const error = "Server Error Uncaught Error: web_search failed"
+
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          description: error,
+          details: [{ label: "Error", value: error }],
+          status: "failed",
+          title: "Search web failed",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(screen.getByText("Search web failed")).toBeDefined()
+  expect(screen.getByRole("button", { name: /show error/i })).toBeDefined()
+  expect(screen.queryByText(error)).toBeNull()
+
+  fireEvent.click(screen.getByRole("button", { name: /show error/i }))
+
+  expect(screen.getByText(error)).toBeDefined()
+})
+
 test("groups consecutive tool calls into an expandable task", () => {
   render(
     <TooltipProvider>
@@ -196,6 +239,47 @@ test("labels same-family tool groups with specific wording", () => {
 
   expect(screen.getByText("first query")).toBeDefined()
   expect(screen.getByText("second query")).toBeDefined()
+})
+
+test("shimmers active tool groups and expanded active subitems", () => {
+  render(
+    <TooltipProvider>
+      <ActivityTimeline
+        items={[
+          activityItem({
+            description: undefined,
+            id: "run-started",
+            kind: "run",
+            title: "Run started",
+          }),
+          activityItem({
+            durationMs: undefined,
+            endedAt: undefined,
+            id: "search-a",
+            isLive: true,
+            metadata: [{ kind: "target", text: "current query" }],
+            status: "running",
+            title: "Search web",
+          }),
+          activityItem({
+            id: "search-b",
+            metadata: [{ kind: "target", text: "previous query" }],
+            title: "Search web",
+          }),
+        ]}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  const group = screen.getByRole("button", { name: /searching web/i })
+
+  expect(screen.getByText("Searching web").className).toContain("shimmer")
+
+  fireEvent.click(group)
+
+  const activeSubitem = screen.getAllByText("Search web")[0]
+  expect(activeSubitem.className).toContain("shimmer")
 })
 
 function activityItem(

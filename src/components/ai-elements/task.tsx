@@ -35,6 +35,18 @@ export const TaskItem = ({ children, className, ...props }: TaskItemProps) => (
   </div>
 )
 
+export type TaskLabelProps = ComponentProps<"span"> & {
+  shimmer?: boolean
+}
+
+export const TaskLabel = ({
+  className,
+  shimmer = false,
+  ...props
+}: TaskLabelProps) => (
+  <span className={cn(shimmer ? "shimmer" : null, className)} {...props} />
+)
+
 export type TaskProps = ComponentProps<typeof Collapsible>
 
 export const Task = ({
