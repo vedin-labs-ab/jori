@@ -167,35 +167,8 @@ export function ActivityEntryMeta({
   const visibleDurationMs =
     durationMs ?? (isLive ? Math.max(0, now - startedAt) : undefined)
 
-  return (
-    <>
-      {visibleDurationMs === undefined ? null : (
-        <MetaPill icon={Timer} label={formatDuration(visibleDurationMs)} />
-      )}
-      <ActivityLiveIndicator isLive={isLive} />
-    </>
-  )
-}
-
-function ActivityLiveIndicator({ isLive }: { isLive: boolean }) {
-  if (!isLive) {
-    return null
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          aria-label="Running now"
-          className="relative inline-flex size-2 shrink-0"
-          role="status"
-        >
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-60" />
-          <span className="relative inline-flex size-2 rounded-full bg-primary" />
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>Running now</TooltipContent>
-    </Tooltip>
+  return visibleDurationMs === undefined ? null : (
+    <MetaPill icon={Timer} label={formatDuration(visibleDurationMs)} />
   )
 }
 

@@ -23,7 +23,7 @@ export async function completeModelStep(args: {
     attempt: args.attempt,
     data: {
       status: "running",
-      title: modelTitle(args.firstTurn),
+      title: "Thinking",
     },
     sequence,
     source: "trigger.model",
@@ -106,10 +106,6 @@ function modelSummary(response: Awaited<ReturnType<ModelRuntime["complete"]>>) {
   }
 
   return "Returned control without an action."
-}
-
-function modelTitle(firstTurn: boolean) {
-  return firstTurn ? "Starting reasoning" : "Thinking"
 }
 
 function modelSequence(step: number) {

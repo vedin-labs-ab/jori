@@ -55,6 +55,11 @@ test("keeps failed search metadata compact and hides raw details", () => {
 
   fireEvent.click(screen.getByRole("button", { name: /show error/i }))
 
+  expect(
+    screen.getByRole("dialog", { name: "Search web failed" })
+  ).toBeDefined()
+  expect(screen.getByText("Error details")).toBeDefined()
+  expect(screen.queryByRole("button", { name: /close/i })).toBeNull()
   expect(screen.getByText(error)).toBeDefined()
 })
 
