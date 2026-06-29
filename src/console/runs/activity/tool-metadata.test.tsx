@@ -82,6 +82,27 @@ test("keeps web search metadata focused on query and result count", () => {
   expect(screen.queryByText("in theverge.com, techcrunch.com")).toBeNull()
 })
 
+test("renders reaction shortcodes as emoji", () => {
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          metadata: [
+            { kind: "target", text: ":thumbsup:" },
+            { kind: "outcome", text: "reaction added" },
+          ],
+          title: "Add reaction",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(screen.getByText("👍")).toBeDefined()
+  expect(screen.getByText("reaction added")).toBeDefined()
+  expect(screen.queryByText(":thumbsup:")).toBeNull()
+})
+
 function activityItem(
   overrides: Partial<ActivityItemType> = {}
 ): ActivityItemType {

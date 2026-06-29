@@ -1,3 +1,4 @@
+import { reactionDisplayLabel } from "@contracts/reactions"
 import {
   forwardRef,
   type RefObject,
@@ -99,12 +100,25 @@ const ToolMetadataContent = forwardRef<
 })
 
 function displayMetadata(title: string, items: ToolMetadataItems) {
-  const inlineItems = inlineMetadata(title, items)
+  const displayItems = reactionMetadata(title, items)
+  const inlineItems = inlineMetadata(title, displayItems)
 
   return {
     inlineItems,
-    tooltipItems: items,
+    tooltipItems: displayItems,
   }
+}
+
+function reactionMetadata(title: string, items: ToolMetadataItems) {
+  if (activityToolKindForTitle(title) !== "reaction") {
+    return items
+  }
+
+  return items.map((item) =>
+    item.kind === "target"
+      ? { ...item, text: reactionDisplayLabel(item.text) ?? item.text }
+      : item
+  )
 }
 
 function inlineMetadata(title: string, items: ToolMetadataItems) {
@@ -121,6 +135,7 @@ function inlineMetadata(title: string, items: ToolMetadataItems) {
       ])
     case "generic":
     case "read":
+    case "reaction":
     case "send":
       return items
   }
