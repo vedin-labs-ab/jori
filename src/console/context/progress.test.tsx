@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
 import { DiscoveryProgress } from "./progress"
 import { type OrganizationDiscovery } from "./types"
@@ -11,8 +11,8 @@ afterEach(() => {
   cleanup()
 })
 
-describe("discovery progress expansion", () => {
-  test("closes a domain task as soon as it completes", () => {
+describe("discovery progress domain paths", () => {
+  test("hides path subitems as soon as the domain completes", () => {
     const { rerender } = render(
       <DiscoveryProgress
         discovery={discovery([pageStep(0, 5, "https://example.com/")], {
@@ -21,8 +21,8 @@ describe("discovery progress expansion", () => {
       />
     )
 
-    const trigger = screen.getByRole("button", { name: /example[.]com/ })
-    expect(trigger.getAttribute("aria-expanded")).toBe("true")
+    expect(screen.getByText("example.com")).toBeDefined()
+    expect(screen.getByText("/")).toBeDefined()
 
     rerender(
       <DiscoveryProgress
@@ -36,10 +36,11 @@ describe("discovery progress expansion", () => {
       />
     )
 
-    expect(trigger.getAttribute("aria-expanded")).toBe("false")
+    expect(screen.getByText("example.com")).toBeDefined()
+    expect(screen.queryByText("/")).toBeNull()
   })
 
-  test("lets completed domain tasks be reopened manually", () => {
+  test("does not render path subitems for completed domains", () => {
     render(
       <DiscoveryProgress
         discovery={discovery([
@@ -49,12 +50,8 @@ describe("discovery progress expansion", () => {
       />
     )
 
-    const trigger = screen.getByRole("button", { name: /example[.]com/ })
-    expect(trigger.getAttribute("aria-expanded")).toBe("false")
-
-    fireEvent.click(trigger)
-
-    expect(trigger.getAttribute("aria-expanded")).toBe("true")
+    expect(screen.getByText("example.com")).toBeDefined()
+    expect(screen.queryByText("/")).toBeNull()
   })
 })
 
