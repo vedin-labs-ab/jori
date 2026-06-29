@@ -16,20 +16,22 @@ export function activityToolKind(items: ToolSummaryItem[]): ActivityToolKind {
     return "generic"
   }
 
-  const firstKind = activityToolFamily(firstItem.title)
+  const firstKind = activityToolKindForTitle(firstItem.title)
 
   if (firstKind === "generic") {
     return "generic"
   }
 
-  return items.every((item) => activityToolFamily(item.title) === firstKind)
+  return items.every(
+    (item) => activityToolKindForTitle(item.title) === firstKind
+  )
     ? firstKind
     : "generic"
 }
 
 export function activityToolFailureSummary(title: string) {
   return [
-    activityToolCount(1, activityToolFamily(title)),
+    activityToolCount(1, activityToolKindForTitle(title)),
     countText(1, "error"),
   ].join(" · ")
 }
@@ -58,7 +60,7 @@ export function activityToolOutcomeSummary({
   return parts.join(" · ")
 }
 
-function activityToolFamily(title: string): ActivityToolKind {
+export function activityToolKindForTitle(title: string): ActivityToolKind {
   const normalizedTitle = title.toLowerCase()
 
   if (normalizedTitle.includes("search") && normalizedTitle.includes("web")) {
