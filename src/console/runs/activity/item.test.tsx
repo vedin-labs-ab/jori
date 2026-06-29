@@ -160,6 +160,44 @@ test("groups consecutive tool calls into an expandable task", () => {
   expect(screen.getByText("Fetch page")).toBeDefined()
 })
 
+test("labels same-family tool groups with specific wording", () => {
+  render(
+    <TooltipProvider>
+      <ActivityTimeline
+        items={[
+          activityItem({
+            description: undefined,
+            id: "run-started",
+            kind: "run",
+            title: "Run started",
+          }),
+          activityItem({
+            id: "search-a",
+            metadata: [{ kind: "target", text: "first query" }],
+            title: "Search web",
+          }),
+          activityItem({
+            id: "search-b",
+            metadata: [{ kind: "target", text: "second query" }],
+            title: "Search web",
+          }),
+        ]}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  const group = screen.getByRole("button", { name: /searched web/i })
+
+  expect(group).toBeDefined()
+  expect(screen.getByText("2 queries · 2 results")).toBeDefined()
+
+  fireEvent.click(group)
+
+  expect(screen.getByText("first query")).toBeDefined()
+  expect(screen.getByText("second query")).toBeDefined()
+})
+
 function activityItem(
   overrides: Partial<ActivityItemType> = {}
 ): ActivityItemType {
