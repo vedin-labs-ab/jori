@@ -355,6 +355,7 @@ import type * as runtime_traces from "../runtime/traces.js";
 import type * as runtime_waiters_data from "../runtime/waiters/data.js";
 import type * as runtime_waiters_handoffs from "../runtime/waiters/handoffs.js";
 import type * as sessions_cursor from "../sessions/cursor.js";
+import type * as sessions_cursors from "../sessions/cursors.js";
 import type * as sessions_data from "../sessions/data.js";
 import type * as shared_actor from "../shared/actor.js";
 import type * as shared_app from "../shared/app.js";
@@ -726,6 +727,7 @@ declare const fullApi: ApiFromModules<{
   "runtime/waiters/data": typeof runtime_waiters_data;
   "runtime/waiters/handoffs": typeof runtime_waiters_handoffs;
   "sessions/cursor": typeof sessions_cursor;
+  "sessions/cursors": typeof sessions_cursors;
   "sessions/data": typeof sessions_data;
   "shared/actor": typeof shared_actor;
   "shared/app": typeof shared_app;

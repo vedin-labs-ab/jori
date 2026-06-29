@@ -20,6 +20,7 @@ import {
   normalizeLimit,
   type PendingBatch,
 } from "./cursor"
+import { cursorWithMessage, cursorWithReaction, initialCursor } from "./cursors"
 
 type QueryLikeCtx = MutationCtx | QueryCtx
 
@@ -56,8 +57,7 @@ export async function startSession(
 ) {
   const existing = await findSession(ctx, args.watchId)
   const patch = {
-    cursor: messageCursor(args.message),
-    reactionCursor: reactionStartCursor(args.now),
+    cursor: initialCursor(args.message, args.now),
     runId: args.runId,
     updatedAt: args.now,
   }
@@ -154,17 +154,14 @@ export const drainMessages = internalMutation({
       session,
       args.limit ?? defaultReactionDrainLimit
     )
+    const cursor = nextSessionCursor(session.cursor, {
+      message: batch.cursor,
+      reaction: reactions.cursor,
+    })
 
-    if (batch.cursor !== undefined) {
+    if (cursor !== undefined) {
       await ctx.db.patch(session._id, {
-        cursor: messageCursor(batch.cursor),
-        updatedAt: Date.now(),
-      })
-    }
-
-    if (reactions.cursor !== undefined) {
-      await ctx.db.patch(session._id, {
-        reactionCursor: reactionCursor(reactions.cursor),
+        cursor,
         updatedAt: Date.now(),
       })
     }
@@ -222,14 +219,15 @@ async function queryConversationMessages(
   return await ctx.db
     .query("messages")
     .withIndex("by_conversation", (query) => {
+      const cursor = args.session.cursor?.message
       const scoped = query
         .eq("tenantId", args.watch.tenantId)
         .eq("integrationId", args.watch.integrationId)
         .eq("conversationId", args.watch.externalId)
 
-      return args.session.cursor === undefined
+      return cursor === undefined
         ? scoped
-        : scoped.gte("_creationTime", args.session.cursor.timestamp)
+        : scoped.gte("_creationTime", cursor.createdAt)
     })
     .order("asc")
     .take(args.limit)
@@ -239,20 +237,22 @@ function isTerminalStatus(status: Doc<"runs">["status"]) {
   return status === "completed" || status === "failed" || status === "stopped"
 }
 
-function messageCursor(message: Doc<"messages">) {
-  return {
-    messageId: message._id,
-    timestamp: message._creationTime,
+function nextSessionCursor(
+  cursor: Doc<"sessions">["cursor"],
+  updates: {
+    message?: Doc<"messages">
+    reaction?: Doc<"reactions">
   }
-}
+) {
+  let next = cursor
 
-function reactionCursor(reaction: Doc<"reactions">) {
-  return {
-    creationTime: reaction._creationTime,
-    updatedAt: reaction.updatedAt,
+  if (updates.message !== undefined) {
+    next = cursorWithMessage(next, updates.message)
   }
-}
 
-function reactionStartCursor(updatedAt: number) {
-  return { updatedAt }
+  if (updates.reaction !== undefined) {
+    next = cursorWithReaction(next, updates.reaction)
+  }
+
+  return next === cursor ? undefined : next
 }

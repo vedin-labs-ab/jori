@@ -8,7 +8,9 @@ export const maxPendingReactionReadLimit = maxReactionDrainLimit + 1
 
 type QueryLikeCtx = MutationCtx | QueryCtx
 
-type ReactionCursor = NonNullable<Doc<"sessions">["reactionCursor"]>
+type ReactionCursor = NonNullable<
+  NonNullable<Doc<"sessions">["cursor"]>["reaction"]
+>
 
 export type ReactionBatch = {
   cursor?: Doc<"reactions">
@@ -55,7 +57,7 @@ export function collectPendingReactionBatch(
   for (let index = 0; index < reactions.length; index += 1) {
     const reaction = reactions[index]
 
-    if (!isAfterReactionCursor(reaction, session.reactionCursor)) {
+    if (!isAfterReactionCursor(reaction, session.cursor?.reaction)) {
       continue
     }
 
@@ -135,9 +137,11 @@ async function queryConversationReactions(
           .eq("integrationId", args.watch.integrationId)
           .eq("target.conversationId", args.watch.externalId)
 
-        return args.session.reactionCursor === undefined
+        const cursor = args.session.cursor?.reaction
+
+        return cursor === undefined
           ? scoped
-          : scoped.gte("updatedAt", args.session.reactionCursor.updatedAt)
+          : scoped.gte("updatedAt", cursor.updatedAt)
       }
     )
     .order("asc")
@@ -157,8 +161,7 @@ function isAfterReactionCursor(
   }
 
   return (
-    cursor.creationTime === undefined ||
-    reaction._creationTime > cursor.creationTime
+    cursor.createdAt === undefined || reaction._creationTime > cursor.createdAt
   )
 }
 
