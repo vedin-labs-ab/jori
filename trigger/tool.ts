@@ -12,6 +12,7 @@ import { generateImageAsset } from "./images/index"
 import { optionalString, requiredString } from "./input"
 import { type ModelToolCall } from "./model/types"
 import { executeRunTool } from "./run"
+import { recordToolResultActivity } from "./runs/activity"
 import { executeCodingTool } from "./sandbox/coding"
 import { prepareProviderToolInput } from "./sandbox/source"
 import { type SandboxRuntime } from "./sandbox/types"
@@ -42,6 +43,12 @@ export async function executeToolCall(args: {
 
   try {
     const result = await executeTool(args.runtime, tool, args.call)
+    await recordToolResultActivity({
+      ...eventArgs(args),
+      callId: args.call.id,
+      result: result.value,
+      toolName: tool.name,
+    })
     await recordToolEvent(
       eventArgs(args),
       tool,
@@ -101,8 +108,8 @@ async function executeTool(
           tool: tool.name,
         })
       )
-    case "subagent":
-      return toolResult(await executeSubagentTool(runtime, call.args))
+    case "agent":
+      return toolResult(await executeAgentTool(runtime, call.args))
   }
 }
 
@@ -188,8 +195,8 @@ async function callConvexTool(
   return await materializeSandboxResult(runtime, result)
 }
 
-async function executeSubagentTool(runtime: ToolRuntime, input: JsonObject) {
-  return await runtime.convex.createChildRun({
+async function executeAgentTool(runtime: ToolRuntime, input: JsonObject) {
+  return await runtime.convex.createAgentRun({
     parentId: runtime.context.run.id,
     task: requiredString(input.task, "task"),
     title: optionalString(input.title),

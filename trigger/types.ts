@@ -34,14 +34,15 @@ export type ActiveSurface = {
 }
 
 export type RuntimeToolRoute =
+  | "agent"
   | "active_surface"
   | "convex"
   | "run"
   | "sandbox"
-  | "subagent"
 
 export type RuntimeTraceSource =
   | "trigger.approval"
+  | "trigger.model"
   | "trigger.run"
   | "trigger.tool"
 
@@ -86,7 +87,51 @@ export type RuntimeToolTraceData = {
 
 export type RuntimeRunTraceData = RuntimeErrorTraceData
 
-export type RuntimeTraceData = RuntimeRunTraceData | RuntimeToolTraceData
+export type RuntimeTraceSubject =
+  | { kind: "agent"; id: ConvexId<"runs"> }
+  | { kind: "approval"; id: ConvexId<"approvals"> }
+  | { kind: "asset"; id: ConvexId<"assets"> }
+  | { kind: "offer"; id: ConvexId<"integrationOffers"> }
+  | { kind: "waiter"; id: ConvexId<"waiters"> }
+
+export type RuntimeTraceMetrics = {
+  approvals?: number
+  durationMs?: number
+  inputTokens?: number
+  messages?: number
+  offers?: number
+  outputTokens?: number
+  reasoningTokens?: number
+  toolCalls?: number
+  totalTokens?: number
+}
+
+export type RuntimeTraceStatus =
+  | "approved"
+  | "cancelled"
+  | "completed"
+  | "connected"
+  | "denied"
+  | "expired"
+  | "failed"
+  | "pending"
+  | "requested"
+  | "running"
+  | "stopped"
+  | "waiting"
+
+export type RuntimeEventTraceData = {
+  metrics?: RuntimeTraceMetrics
+  status?: RuntimeTraceStatus
+  subject?: RuntimeTraceSubject
+  summary?: string
+  title: string
+}
+
+export type RuntimeTraceData =
+  | RuntimeEventTraceData
+  | RuntimeRunTraceData
+  | RuntimeToolTraceData
 
 export type RuntimeTool = {
   access: ToolAccess
@@ -147,9 +192,20 @@ export type RuntimeInteraction = {
 }
 
 export type RuntimeEventType =
+  | "agent.started"
+  | "approval.requested"
+  | "approval.resolved"
+  | "asset.saved"
+  | "model.completed"
+  | "model.failed"
+  | "model.started"
+  | "offer.requested"
+  | "offer.resolved"
   | "run.completed"
   | "run.failed"
+  | "run.resumed"
   | "run.started"
+  | "run.waiting"
   | "tool.completed"
   | "tool.failed"
   | "tool.started"

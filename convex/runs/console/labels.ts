@@ -31,5 +31,5 @@ export function triggerLabel(context: RunContext) {
     return "Time automation"
   }
 
-  return context.run.parentId === undefined ? "Manual" : "Subagent"
+  return context.run.parentId === undefined ? "Manual" : "Agent"
 }

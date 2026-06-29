@@ -43,15 +43,27 @@ export const outbox = defineTable({
 export const traceSource = v.union(
   v.literal("convex.runtime"),
   v.literal("trigger.approval"),
+  v.literal("trigger.model"),
   v.literal("trigger.run"),
   v.literal("trigger.tool")
 )
 
 export const traceType = v.union(
+  v.literal("agent.started"),
+  v.literal("approval.requested"),
+  v.literal("approval.resolved"),
+  v.literal("asset.saved"),
+  v.literal("model.completed"),
+  v.literal("model.failed"),
+  v.literal("model.started"),
+  v.literal("offer.requested"),
+  v.literal("offer.resolved"),
   v.literal("run.completed"),
   v.literal("run.failed"),
   v.literal("run.prepared"),
+  v.literal("run.resumed"),
   v.literal("run.started"),
+  v.literal("run.waiting"),
   v.literal("tool.completed"),
   v.literal("tool.failed"),
   v.literal("tool.started"),
@@ -59,11 +71,11 @@ export const traceType = v.union(
 )
 
 const traceToolRoute = v.union(
+  v.literal("agent"),
   v.literal("active_surface"),
   v.literal("convex"),
   v.literal("run"),
-  v.literal("sandbox"),
-  v.literal("subagent")
+  v.literal("sandbox")
 )
 const traceToolAccess = v.union(v.literal("read"), v.literal("write"))
 
@@ -96,6 +108,49 @@ const traceToolInputSummary = v.object({
   timeoutMs: v.optional(v.number()),
 })
 
+const traceSubject = v.union(
+  v.object({ kind: v.literal("agent"), id: v.id("runs") }),
+  v.object({ kind: v.literal("approval"), id: v.id("approvals") }),
+  v.object({ kind: v.literal("asset"), id: v.id("assets") }),
+  v.object({ kind: v.literal("offer"), id: v.id("integrationOffers") }),
+  v.object({ kind: v.literal("waiter"), id: v.id("waiters") })
+)
+
+const traceMetricSummary = v.object({
+  approvals: v.optional(v.number()),
+  durationMs: v.optional(v.number()),
+  inputTokens: v.optional(v.number()),
+  messages: v.optional(v.number()),
+  offers: v.optional(v.number()),
+  outputTokens: v.optional(v.number()),
+  reasoningTokens: v.optional(v.number()),
+  toolCalls: v.optional(v.number()),
+  totalTokens: v.optional(v.number()),
+})
+
+const traceEventStatus = v.union(
+  v.literal("approved"),
+  v.literal("cancelled"),
+  v.literal("completed"),
+  v.literal("connected"),
+  v.literal("denied"),
+  v.literal("expired"),
+  v.literal("failed"),
+  v.literal("pending"),
+  v.literal("requested"),
+  v.literal("running"),
+  v.literal("stopped"),
+  v.literal("waiting")
+)
+
+const traceEventData = v.object({
+  metrics: v.optional(traceMetricSummary),
+  status: v.optional(traceEventStatus),
+  subject: v.optional(traceSubject),
+  summary: v.optional(v.string()),
+  title: v.string(),
+})
+
 export const traceData = v.union(
   v.object({
     error: v.string(),
@@ -117,7 +172,8 @@ export const traceData = v.union(
   v.object({
     promptId: v.optional(v.id("_storage")),
     tools: toolSnapshot,
-  })
+  }),
+  traceEventData
 )
 
 export const traces = defineTable({

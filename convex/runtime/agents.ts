@@ -18,7 +18,7 @@ export const create = action({
   handler: async (ctx, args): Promise<{ runId: Id<"runs"> }> => {
     requireWorkerSecret(args.secret)
 
-    return (await ctx.runMutation(internal.runtime.children.insert, {
+    return (await ctx.runMutation(internal.runtime.agents.insert, {
       parentId: args.parentId,
       task: args.task,
       title: args.title,

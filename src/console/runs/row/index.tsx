@@ -2,6 +2,7 @@ import { Timer } from "lucide-react"
 import { memo, useState } from "react"
 import { ErrorDetail, RelativeTime } from "../../shared/details"
 import { formatDuration, relativeTime } from "../../shared/time"
+import { RunActivity } from "../activity"
 import { type ExecutionItem } from "../types"
 import { ApprovalCallout } from "./approval"
 import { ExecutionFacts } from "./facts"
@@ -9,7 +10,6 @@ import { SourceLine } from "./source"
 import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
 import { StopExecution } from "./stop"
 import { TaskDetail } from "./task"
-import { TraceTerminal } from "./terminal"
 
 export const ExecutionRow = memo(function ExecutionRow({
   execution,
@@ -128,7 +128,7 @@ function ExpandedExecution({
       {execution.error !== undefined ? (
         <ErrorDetail value={execution.error} />
       ) : null}
-      <TraceTerminal execution={execution} tenantId={tenantId} />
+      <RunActivity now={now} runId={execution.id} tenantId={tenantId} />
     </div>
   )
 }

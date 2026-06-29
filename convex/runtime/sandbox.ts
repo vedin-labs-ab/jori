@@ -13,8 +13,8 @@ export const sandboxTools = [
   })),
   {
     access: "write" as const,
-    name: "spawn_subagent",
-    description: "Start a child Milo agent run for a delegated task.",
+    name: "start_agent",
+    description: "Start a Milo agent run for a delegated task.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -24,7 +24,7 @@ export const sandboxTools = [
         title: { type: "string" },
       },
     },
-    route: "subagent",
+    route: "agent",
   },
 ] as const
 

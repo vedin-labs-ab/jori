@@ -9,6 +9,7 @@ import { type RuntimeContext } from "../types"
 import { recordRunEvent } from "./events"
 import { reconcileHandoffs } from "./handoffs"
 import { appendSessionMessages } from "./messages"
+import { completeModelStep } from "./model"
 import { parkRun } from "./waiter"
 
 type AgentLoopOutput = {
@@ -39,10 +40,15 @@ export async function runAgentLoop(args: {
   for (let step = 1; step <= maxModelSteps; step += 1) {
     await appendSessionMessages(args.runtime, messages)
 
-    const response = await args.model.complete({
+    const tools = modelTools(args.runtime.context.tools)
+    const response = await completeModelStep({
+      attempt: args.attempt,
       firstTurn: step === 1,
       messages,
-      tools: modelTools(args.runtime.context.tools),
+      model: args.model,
+      runtime: args.runtime,
+      step,
+      tools,
     })
     const outcome =
       response.type === "stop"
