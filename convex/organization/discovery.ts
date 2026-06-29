@@ -60,6 +60,7 @@ export const startStep = internalMutation({
     const startedAt = Date.now()
 
     await appendStep(ctx, discovery, {
+      activeAt: startedAt,
       id: args.id,
       kind: args.kind,
       label: args.label,
@@ -85,6 +86,7 @@ export const queueStep = internalMutation({
       kind: args.kind,
       label: args.label,
       queuedAt,
+      startedAt: queuedAt,
       ...(args.url === undefined ? {} : { url: args.url }),
     })
 
@@ -100,19 +102,21 @@ export const activateStep = internalMutation({
   handler: async (ctx, args) => {
     const discovery = await readDiscovery(ctx, args.tenantId)
 
-    const startedAt = Date.now()
+    const activeAt = Date.now()
 
     if (discovery === null) {
-      return startedAt
+      return activeAt
     }
 
     await ctx.db.patch(discovery._id, {
       steps: discovery.steps.map((step) =>
-        step.id === args.id ? { ...step, startedAt } : step
+        step.id === args.id
+          ? { ...step, activeAt, startedAt: step.startedAt ?? activeAt }
+          : step
       ),
     })
 
-    return startedAt
+    return activeAt
   },
 })
 

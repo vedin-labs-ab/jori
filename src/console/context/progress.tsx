@@ -273,6 +273,11 @@ function elapsedLabel(
 
   const endedAt = item.endedAt ?? now
   const elapsedMs = item.elapsedMs ?? endedAt - item.startedAt
+
+  if (!Number.isFinite(elapsedMs)) {
+    return null
+  }
+
   const seconds = Math.max(0, Math.round(elapsedMs / 1000))
 
   if (seconds < 60) {

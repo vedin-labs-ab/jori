@@ -146,7 +146,7 @@ function stepStatus(
     return "completed"
   }
 
-  if (step.startedAt === undefined) {
+  if (step.activeAt === undefined && step.queuedAt !== undefined) {
     return "queued"
   }
 
@@ -221,7 +221,7 @@ function stepTime(
   discovery: NonNullable<OrganizationDiscovery>,
   step: DiscoveryStep
 ) {
-  return step.startedAt ?? step.queuedAt ?? discovery.startedAt
+  return step.activeAt ?? step.startedAt ?? step.queuedAt ?? discovery.startedAt
 }
 
 function hasSummaryStep(steps: DiscoveryStep[]) {

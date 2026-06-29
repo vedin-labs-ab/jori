@@ -231,6 +231,7 @@ function queuedPageStep(queueSeconds: number, url: string): DiscoveryStep {
     kind: "page",
     label: `Exploring ${url}`,
     queuedAt: queueSeconds * 1000,
+    startedAt: queueSeconds * 1000,
     url,
   }
 }
