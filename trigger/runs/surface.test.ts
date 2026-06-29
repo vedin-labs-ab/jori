@@ -138,6 +138,38 @@ test("active surface replies complete only after finish_run", async () => {
   )
 })
 
+test("active surface final replies complete without finish_run", async () => {
+  const runtime = createRuntime({ tools: [sendReplyTool(), finishRunTool()] })
+  const model = createModel([
+    {
+      content: null,
+      toolCalls: [
+        {
+          args: {
+            final: true,
+            text: "Here is the answer.",
+          },
+          id: "call_1",
+          name: "send_reply",
+        },
+      ],
+      type: "tool_calls",
+    },
+  ])
+
+  await runAgentLoop({ attempt: 1, model, runtime })
+
+  expect(model.complete).toHaveBeenCalledTimes(1)
+  expect(runtime.convex.sendReply).toHaveBeenCalledWith({
+    blocks: undefined,
+    runId: "run_1",
+    text: "Here is the answer.",
+  })
+  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+    expect.objectContaining({ type: "run.completed" })
+  )
+})
+
 function createModel(
   responses: Awaited<ReturnType<ModelRuntime["complete"]>>[]
 ) {

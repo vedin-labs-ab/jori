@@ -208,7 +208,7 @@ function visibleCommunicationTools(tools: RuntimeContext["tools"]) {
 }
 
 function visibleCommunicationInstruction(tools: string[]) {
-  return `Send any needed visible communication with ${toolList(tools)}, then call \`finish_run\`.`
+  return `Send any needed visible communication with ${toolList(tools)}. If that communication is the final useful action, set \`final: true\`; otherwise call \`finish_run\` when no useful work remains.`
 }
 
 function toolList(tools: string[]) {

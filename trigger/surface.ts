@@ -36,7 +36,7 @@ async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
   activeSurface.target = explicitTarget ?? activeSurface.target
 
   return {
-    finished: false,
+    finished: optionalFinal(input.final),
     value: result,
   }
 }
@@ -52,9 +52,21 @@ async function addActiveReaction(runtime: ToolRuntime, input: JsonObject) {
   activeSurface.communicated = true
 
   return {
-    finished: false,
+    finished: optionalFinal(input.final),
     value: result,
   }
+}
+
+function optionalFinal(value: unknown) {
+  if (value === undefined || value === null) {
+    return false
+  }
+
+  if (typeof value !== "boolean") {
+    throw new Error("final must be a boolean")
+  }
+
+  return value
 }
 
 function optionalReplyTarget(input: JsonObject, surface: string) {

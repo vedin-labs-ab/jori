@@ -169,8 +169,12 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Finish")
-    expect(prompt).toContain("Finish the run by calling `finish_run`")
-    expect(prompt).toContain("No closing message is required")
+    expect(prompt).toContain("Finish the run when no useful work remains")
+    expect(prompt).toContain("Use `finish_run` to complete the run")
+    expect(prompt).toContain(
+      "include an internal `reason` explaining why none was warranted"
+    )
+    expect(prompt).toContain("set the `final` field to `true`")
     expectNoSyntheticBlankLines(prompt)
   })
 
@@ -183,7 +187,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("use the lightest action that delivers it")
     expect(prompt).toContain("Use `send_reply`")
     expect(prompt).toContain("# Finish")
-    expect(prompt).toContain("No closing message is required")
+    expect(prompt).toContain("set the `final` field to `true`")
   })
 
   test("omits automatic final delivery instructions", () => {
