@@ -1,7 +1,5 @@
 import { Cpu } from "lucide-react"
-import { type ActivityItem } from "./types"
-
-type TokenUsage = NonNullable<ActivityItem["tokenUsage"]>
+import { type TokenUsage, visibleTokenUsageMetrics } from "./usage-data"
 
 const tokenFormat = new Intl.NumberFormat("en", {
   maximumFractionDigits: 1,
@@ -9,11 +7,19 @@ const tokenFormat = new Intl.NumberFormat("en", {
 })
 
 export function ActivityTokenUsage({ usage }: { usage: TokenUsage }) {
+  const metrics = visibleTokenUsageMetrics(usage)
+
+  if (metrics.length === 0) {
+    return null
+  }
+
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
       <Cpu className="size-3.5 shrink-0" />
       <span className="min-w-0 truncate">
-        {`in ${formatTokens(usage.input)} · out ${formatTokens(usage.output)} · reasoning ${formatTokens(usage.reasoning)} · total ${formatTokens(usage.total)}`}
+        {metrics
+          .map((metric) => `${metric.label} ${formatTokens(metric.value)}`)
+          .join(" · ")}
       </span>
     </span>
   )
