@@ -13,7 +13,7 @@ export function toolResultMetadata(
   tool: string,
   result: unknown
 ): RuntimeToolMetadataItem[] {
-  if (tool === "send_reply") {
+  if (tool === "send_reply" || tool.includes("reaction")) {
     return []
   }
 
@@ -79,10 +79,6 @@ function writeOutcomeText(tool: string, result: unknown) {
 
   if (tool.includes("add_comment")) {
     return "comment posted"
-  }
-
-  if (tool.includes("reaction")) {
-    return "reaction added"
   }
 
   if (tool.includes("create")) {

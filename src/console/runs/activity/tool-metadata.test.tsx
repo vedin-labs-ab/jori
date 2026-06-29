@@ -82,7 +82,7 @@ test("keeps web search metadata focused on query and result count", () => {
   expect(screen.queryByText("in theverge.com, techcrunch.com")).toBeNull()
 })
 
-test("renders reaction shortcodes as emoji", () => {
+test("renders reaction shortcodes as emoji without redundant outcomes", () => {
   render(
     <TooltipProvider>
       <ActivityItem
@@ -99,7 +99,7 @@ test("renders reaction shortcodes as emoji", () => {
   )
 
   expect(screen.getByText("👍")).toBeDefined()
-  expect(screen.getByText("reaction added")).toBeDefined()
+  expect(screen.queryByText("reaction added")).toBeNull()
   expect(screen.queryByText(":thumbsup:")).toBeNull()
 })
 

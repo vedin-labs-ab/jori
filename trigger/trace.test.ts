@@ -106,4 +106,7 @@ test.each([
   expect(toolInputMetadataTrace(tool, input)).toEqual({
     metadata: [{ kind: "target", text: reaction }],
   })
+  expect(toolResultMetadataTrace(tool, input, { ok: true })).toEqual({
+    metadata: [{ kind: "target", text: reaction }],
+  })
 })
