@@ -162,7 +162,7 @@ function ToolGroup({
 function ToolGroupItem({ item }: { item: ActivityItemType }) {
   return (
     <TaskItem className="grid h-7 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-xs">
-      <div className="flex min-w-0 items-baseline gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         <span className="min-w-0 truncate font-medium text-foreground">
           {item.title}
         </span>
@@ -199,7 +199,7 @@ function ActivityTaskHeader({
         className
       )}
     >
-      <div className="flex min-w-0 items-baseline gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         <span
           className={cn(
             "min-w-0 truncate font-medium text-sm",
@@ -209,7 +209,7 @@ function ActivityTaskHeader({
           {title}
         </span>
         {description === undefined ? null : (
-          <span className="min-w-0 truncate text-muted-foreground text-xs">
+          <span className="inline-flex min-w-0 items-center truncate text-muted-foreground text-xs">
             {description}
           </span>
         )}
