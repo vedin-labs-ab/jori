@@ -1,0 +1,101 @@
+// @vitest-environment jsdom
+import { cleanup, render, screen } from "@testing-library/react"
+import { afterAll, afterEach, beforeAll, expect, test } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { ActivityItem } from "./item"
+import { type ActivityItem as ActivityItemType } from "./types"
+
+const originalResizeObserver = globalThis.ResizeObserver
+
+class TestResizeObserver {
+  disconnect() {}
+  observe() {}
+  unobserve() {}
+}
+
+beforeAll(() => {
+  globalThis.ResizeObserver = TestResizeObserver as typeof ResizeObserver
+})
+
+afterEach(() => {
+  cleanup()
+})
+
+afterAll(() => {
+  globalThis.ResizeObserver = originalResizeObserver
+})
+
+test("keeps fetched web page metadata focused on URL and page count", () => {
+  const pageTitle =
+    "limited preview trusted partners government GPT-5.6 Sol announcement"
+
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          metadata: [
+            {
+              kind: "target",
+              text: "openai.com/index/previewing-gpt-5-6-sol",
+            },
+            { kind: "outcome", text: pageTitle },
+            { kind: "outcome", text: "1 page" },
+          ],
+          title: "Fetch web page",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(
+    screen.getByText("openai.com/index/previewing-gpt-5-6-sol")
+  ).toBeDefined()
+  expect(screen.getByText("1 page")).toBeDefined()
+  expect(screen.queryByText(pageTitle)).toBeNull()
+})
+
+test("keeps web search metadata focused on query and result count", () => {
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          metadata: [
+            {
+              kind: "target",
+              text: "site:theverge.com OR site:techcrunch.com",
+            },
+            { kind: "scope", text: "in theverge.com, techcrunch.com" },
+            { kind: "outcome", text: "3 results" },
+          ],
+          title: "Search web",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(
+    screen.getByText("site:theverge.com OR site:techcrunch.com")
+  ).toBeDefined()
+  expect(screen.getByText("3 results")).toBeDefined()
+  expect(screen.queryByText("in theverge.com, techcrunch.com")).toBeNull()
+})
+
+function activityItem(
+  overrides: Partial<ActivityItemType> = {}
+): ActivityItemType {
+  return {
+    access: "read",
+    description: "src/app.tsx",
+    details: [{ label: "Path", value: "src/app.tsx" }],
+    durationMs: 1200,
+    endedAt: 1700000001200,
+    id: "activity",
+    kind: "tool",
+    startedAt: 1700000000000,
+    status: "completed",
+    title: "Read file",
+    ...overrides,
+  }
+}

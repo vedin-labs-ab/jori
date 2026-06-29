@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { activityToolKindForTitle } from "./tool-summary"
 import { type ActivityItem } from "./types"
 
 type ToolMetadataItems = NonNullable<ActivityItem["metadata"]>
@@ -23,10 +24,19 @@ const metadataLabels = {
   target: "Target",
 } satisfies Record<ToolMetadataItem["kind"], string>
 
-export function ActivityToolMetadata({ items }: { items: ToolMetadataItems }) {
+export function ActivityToolMetadata({
+  items,
+  title,
+}: {
+  items: ToolMetadataItems
+  title: string
+}) {
   const contentRef = useRef<HTMLSpanElement>(null)
   const isOverflowing = useOverflowingContent(contentRef)
-  const content = <ToolMetadataContent items={items} ref={contentRef} />
+  const metadata = displayMetadata(title, items)
+  const content = (
+    <ToolMetadataContent items={metadata.inlineItems} ref={contentRef} />
+  )
 
   if (!isOverflowing) {
     return content
@@ -37,7 +47,7 @@ export function ActivityToolMetadata({ items }: { items: ToolMetadataItems }) {
       <TooltipTrigger asChild>{content}</TooltipTrigger>
       <TooltipContent className="max-w-sm items-stretch px-3 py-2 text-left">
         <dl className="grid gap-1.5">
-          {items.map((item) => (
+          {metadata.tooltipItems.map((item) => (
             <div
               className="grid min-w-0 grid-cols-[3.75rem_minmax(0,1fr)] gap-2"
               key={metadataKey(item)}
@@ -67,7 +77,7 @@ const ToolMetadataContent = forwardRef<
         <span
           className={cn(
             "inline-flex min-w-0 items-center",
-            item.kind === "outcome" ? "shrink-0" : "shrink"
+            isCompactOutcome(item) ? "shrink-0" : "shrink"
           )}
           key={metadataKey(item)}
         >
@@ -77,7 +87,7 @@ const ToolMetadataContent = forwardRef<
           <span
             className={cn(
               "truncate",
-              item.kind === "outcome" ? "shrink-0" : "min-w-0"
+              isCompactOutcome(item) ? "shrink-0" : "min-w-0"
             )}
           >
             {item.text}
@@ -87,6 +97,80 @@ const ToolMetadataContent = forwardRef<
     </span>
   )
 })
+
+function displayMetadata(title: string, items: ToolMetadataItems) {
+  const inlineItems = inlineMetadata(title, items)
+
+  return {
+    inlineItems,
+    tooltipItems: items,
+  }
+}
+
+function inlineMetadata(title: string, items: ToolMetadataItems) {
+  switch (activityToolKindForTitle(title)) {
+    case "web-fetch":
+      return compactMetadata(items, [
+        firstMetadataItem(items, "target"),
+        firstOutcome(items, "page"),
+      ])
+    case "web-search":
+      return compactMetadata(items, [
+        firstMetadataItem(items, "target"),
+        firstOutcome(items, "result"),
+      ])
+    case "generic":
+    case "read":
+    case "send":
+      return items
+  }
+}
+
+function compactMetadata(
+  fallbackItems: ToolMetadataItems,
+  candidates: Array<ToolMetadataItem | undefined>
+) {
+  const items = candidates.filter((item) => item !== undefined)
+
+  return items.length === 0 ? fallbackItems : dedupeMetadata(items)
+}
+
+function dedupeMetadata(items: ToolMetadataItem[]) {
+  const seen = new Set<string>()
+  const result: ToolMetadataItem[] = []
+
+  for (const item of items) {
+    const key = metadataKey(item)
+
+    if (!seen.has(key)) {
+      seen.add(key)
+      result.push(item)
+    }
+  }
+
+  return result
+}
+
+function firstMetadataItem(
+  items: ToolMetadataItems,
+  kind: ToolMetadataItem["kind"]
+) {
+  return items.find((item) => item.kind === kind)
+}
+
+function firstOutcome(items: ToolMetadataItems, noun: string) {
+  return items.find(
+    (item) => item.kind === "outcome" && isCountOutcome(item.text, noun)
+  )
+}
+
+function isCompactOutcome(item: ToolMetadataItem) {
+  return item.kind === "outcome" && item.text.length <= 24
+}
+
+function isCountOutcome(text: string, noun: string) {
+  return new RegExp(`^\\d[\\d,.]*\\s+${noun}s?$`, "i").test(text)
+}
 
 function useOverflowingContent(ref: RefObject<HTMLElement | null>) {
   const [isOverflowing, setIsOverflowing] = useState(false)
