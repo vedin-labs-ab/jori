@@ -1,10 +1,4 @@
-import {
-  ChevronDown,
-  FileText,
-  type LucideIcon,
-  Search,
-  Send,
-} from "lucide-react"
+import { ChevronDown, FileText, Search, Send } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import {
   Task,
@@ -13,6 +7,7 @@ import {
   TaskLabel,
   TaskTrigger,
 } from "@/components/ai-elements/task"
+import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "../../shared/time"
 import { ActivityFailureDescription } from "./error"
@@ -256,9 +251,12 @@ function ActivityTaskHeader({
           {title}
         </TaskLabel>
         {description === undefined ? null : (
-          <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden text-muted-foreground text-xs">
-            {description}
-          </span>
+          <>
+            <Separator className="h-4" orientation="vertical" />
+            <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden text-muted-foreground text-xs">
+              {description}
+            </span>
+          </>
         )}
       </div>
       <div className="flex shrink-0 items-center gap-3">{meta}</div>
@@ -268,7 +266,7 @@ function ActivityTaskHeader({
 
 function toolGroupIcon(
   toolKind: Extract<ActivityTimelineEntry, { type: "tool-group" }>["toolKind"]
-): LucideIcon | undefined {
+) {
   switch (toolKind) {
     case "generic":
       return undefined
