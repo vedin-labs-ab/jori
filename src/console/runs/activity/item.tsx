@@ -10,10 +10,12 @@ import {
   Task,
   TaskContent,
   TaskItem,
+  TaskLabel,
   TaskTrigger,
 } from "@/components/ai-elements/task"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "../../shared/time"
+import { ActivityFailureDescription } from "./error"
 import {
   ActivityEntryMeta,
   ActivityIcon,
@@ -96,6 +98,7 @@ export function ActivityItem({
       <Task className="min-w-0" defaultOpen={false}>
         <ActivityTaskHeader
           description={activityDescription(item)}
+          isLive={item.isLive === true}
           meta={<ActivityMeta item={item} now={now} />}
           title={item.title}
         />
@@ -105,6 +108,18 @@ export function ActivityItem({
 }
 
 function activityDescription(item: ActivityItemType) {
+  const error = activityError(item)
+
+  if (error !== undefined) {
+    return (
+      <ActivityFailureDescription
+        error={error}
+        metadata={item.metadata}
+        title={item.title}
+      />
+    )
+  }
+
   if (item.tokenUsage !== undefined) {
     return <ActivityTokenUsage usage={item.tokenUsage} />
   }
@@ -118,6 +133,17 @@ function activityDescription(item: ActivityItemType) {
   }
 
   return item.description
+}
+
+function activityError(item: ActivityItemType) {
+  if (item.kind !== "tool" || item.status !== "failed") {
+    return undefined
+  }
+
+  return (
+    item.details?.find((detail) => detail.label === "Error")?.value ??
+    item.description
+  )
 }
 
 function ToolGroup({
@@ -153,6 +179,7 @@ function ToolGroup({
               className="flex-1"
               description={entry.description}
               interactive
+              isLive={entry.isLive}
               meta={
                 <ActivityEntryMeta
                   durationMs={entry.durationMs}
@@ -182,9 +209,12 @@ function ToolGroupItem({ item }: { item: ActivityItemType }) {
   return (
     <TaskItem className="grid h-7 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-xs">
       <div className="flex min-w-0 items-center gap-3 overflow-hidden">
-        <span className="max-w-[14rem] shrink-0 truncate font-medium text-foreground">
+        <TaskLabel
+          className="max-w-[14rem] shrink-0 truncate font-medium text-foreground"
+          shimmer={item.isLive === true}
+        >
           {item.title}
-        </span>
+        </TaskLabel>
         {description === undefined ? null : (
           <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden text-muted-foreground">
             {description}
@@ -202,12 +232,14 @@ function ActivityTaskHeader({
   className,
   description,
   interactive = false,
+  isLive = false,
   meta,
   title,
 }: {
   className?: string
   description?: ReactNode
   interactive?: boolean
+  isLive?: boolean
   meta: ReactNode
   title: string
 }) {
@@ -219,14 +251,15 @@ function ActivityTaskHeader({
       )}
     >
       <div className="flex min-w-0 items-center gap-3 overflow-hidden">
-        <span
+        <TaskLabel
           className={cn(
             "max-w-[50%] shrink-0 truncate font-medium text-sm",
             interactive ? "text-current" : "text-foreground"
           )}
+          shimmer={isLive}
         >
           {title}
-        </span>
+        </TaskLabel>
         {description === undefined ? null : (
           <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden text-muted-foreground text-xs">
             {description}
