@@ -56,8 +56,7 @@ function ActivityErrorAction({
           Full error details from the failed tool call.
         </DialogDescription>
         <div className="grid min-w-0 overflow-hidden">
-          <div className="flex min-w-0 items-center justify-between gap-2 border-b px-3 py-2 text-muted-foreground">
-            <span className="min-w-0 truncate font-medium">Error details</span>
+          <div className="flex min-w-0 items-center justify-end border-b px-3 py-2">
             <CopyButton label="error" value={value} />
           </div>
           <pre className="max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed">
