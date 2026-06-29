@@ -20,8 +20,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { RelativeTime } from "../../shared/details"
-import { formatDuration, relativeTime } from "../../shared/time"
+import { formatDuration } from "../../shared/time"
 import { MetaPill } from "../row/status"
 import {
   type ActivityItem,
@@ -157,12 +156,14 @@ export function ActivityEntryMeta({
   now: number
   startedAt: number
 }) {
+  const visibleDurationMs =
+    durationMs ?? (isLive ? Math.max(0, now - startedAt) : undefined)
+
   return (
     <>
-      {durationMs === undefined ? null : (
-        <MetaPill icon={Timer} label={formatDuration(durationMs)} />
+      {visibleDurationMs === undefined ? null : (
+        <MetaPill icon={Timer} label={formatDuration(visibleDurationMs)} />
       )}
-      <RelativeTime absolute={startedAt} value={relativeTime(startedAt, now)} />
       <ActivityLiveIndicator isLive={isLive} />
     </>
   )

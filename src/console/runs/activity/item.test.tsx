@@ -20,6 +20,7 @@ test("renders a compact non-collapsible activity item", () => {
   expect(screen.getByText("src/app.tsx")).toBeDefined()
   expect(screen.getByText("1s")).toBeDefined()
   expect(screen.queryByRole("button", { name: /read file/i })).toBeNull()
+  expect(screen.queryByText("just now")).toBeNull()
   expect(screen.queryByText("Path")).toBeNull()
 })
 
@@ -38,6 +39,7 @@ test("shows a live indicator only for live activity", () => {
   )
 
   expect(screen.getByRole("status", { name: "Running now" })).toBeDefined()
+  expect(screen.getByText("2s")).toBeDefined()
 })
 
 test("does not pulse historical running-status events", () => {

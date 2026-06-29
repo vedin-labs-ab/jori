@@ -31,6 +31,7 @@ export function ActivityTimeline({
       {entries.map((entry, index) => (
         <ActivityTimelineRow
           entry={entry}
+          isFirst={index === 0}
           isLast={index === entries.length - 1}
           key={entry.id}
           now={now}
@@ -42,61 +43,83 @@ export function ActivityTimeline({
 
 function ActivityTimelineRow({
   entry,
+  isFirst,
   isLast,
   now,
 }: {
   entry: ActivityTimelineEntry
+  isFirst: boolean
   isLast: boolean
   now: number
 }) {
   if (entry.type === "tool-group") {
-    return <ToolGroup entry={entry} isLast={isLast} now={now} />
+    return (
+      <ToolGroup entry={entry} isFirst={isFirst} isLast={isLast} now={now} />
+    )
   }
 
-  return <ActivityItem isLast={isLast} item={entry.item} now={now} />
+  return (
+    <ActivityItem
+      isFirst={isFirst}
+      isLast={isLast}
+      item={entry.item}
+      now={now}
+    />
+  )
 }
 
 export function ActivityItem({
+  isFirst = true,
   isLast = true,
   item,
   now,
 }: {
+  isFirst?: boolean
   isLast?: boolean
   item: ActivityItemType
   now: number
 }) {
   return (
-    <TimelineRow icon={<ActivityIcon item={item} />} isLast={isLast}>
-      <ActivityLine
-        description={item.description}
-        meta={<ActivityMeta item={item} now={now} />}
-        title={item.title}
-      />
+    <TimelineRow
+      icon={<ActivityIcon item={item} />}
+      isFirst={isFirst}
+      isLast={isLast}
+    >
+      <Task className="min-w-0" defaultOpen={false}>
+        <ActivityTaskHeader
+          description={item.description}
+          meta={<ActivityMeta item={item} now={now} />}
+          title={item.title}
+        />
+      </Task>
     </TimelineRow>
   )
 }
 
 function ToolGroup({
   entry,
+  isFirst,
   isLast,
   now,
 }: {
   entry: Extract<ActivityTimelineEntry, { type: "tool-group" }>
+  isFirst: boolean
   isLast: boolean
   now: number
 }) {
   return (
     <TimelineRow
       icon={<ActivityTimelineIcon kind="tool" status={entry.status} />}
+      isFirst={isFirst}
       isLast={isLast}
     >
-      <Task defaultOpen={false}>
+      <Task className="min-w-0" defaultOpen={false}>
         <TaskTrigger className="group/activity-task" title={entry.title}>
           <button
-            className="group/activity-task flex min-h-8 w-full min-w-0 items-center gap-3 text-left outline-none focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="group/activity-task flex w-full min-w-0 items-center gap-3 text-left outline-none focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             type="button"
           >
-            <ActivityLine
+            <ActivityTaskHeader
               className="flex-1"
               description={entry.description}
               meta={
@@ -112,7 +135,7 @@ function ToolGroup({
             <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]/activity-task:rotate-180" />
           </button>
         </TaskTrigger>
-        <TaskContent className="mt-1 data-[state=closed]:hidden data-[state=closed]:animate-none data-[state=open]:animate-none">
+        <TaskContent className="data-[state=closed]:hidden data-[state=closed]:animate-none data-[state=open]:animate-none [&>div]:mt-2 [&>div]:space-y-1.5">
           {entry.items.map((item) => (
             <ToolGroupItem item={item} key={item.id} />
           ))}
@@ -124,8 +147,8 @@ function ToolGroup({
 
 function ToolGroupItem({ item }: { item: ActivityItemType }) {
   return (
-    <TaskItem className="grid min-h-6 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-xs">
-      <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+    <TaskItem className="grid h-7 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-xs">
+      <div className="flex min-w-0 items-baseline gap-3">
         <span className="min-w-0 truncate font-medium text-foreground">
           {item.title}
         </span>
@@ -142,7 +165,7 @@ function ToolGroupItem({ item }: { item: ActivityItemType }) {
   )
 }
 
-function ActivityLine({
+function ActivityTaskHeader({
   className,
   description,
   meta,
@@ -156,11 +179,11 @@ function ActivityLine({
   return (
     <div
       className={cn(
-        "grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3",
+        "grid min-h-9 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3",
         className
       )}
     >
-      <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+      <div className="flex min-w-0 items-baseline gap-3">
         <span className="min-w-0 truncate font-medium text-foreground text-sm">
           {title}
         </span>
@@ -178,27 +201,28 @@ function ActivityLine({
 function TimelineRow({
   children,
   icon,
+  isFirst,
   isLast,
 }: {
   children: ReactNode
   icon: ReactNode
+  isFirst: boolean
   isLast: boolean
 }) {
   return (
     <li className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] gap-3">
       <div className="relative flex justify-center">
+        {isFirst ? null : (
+          <span className="absolute top-0 h-1 w-px bg-border" />
+        )}
         {isLast ? null : (
-          <span className="absolute top-7 bottom-0 w-px bg-border" />
+          <span className="absolute top-8 bottom-0 w-px bg-border" />
         )}
         <span className="relative z-10 mt-1 grid size-7 place-items-center rounded-full border bg-background text-muted-foreground">
           {icon}
         </span>
       </div>
-      <div
-        className={cn("min-w-0 border-b py-2.5", isLast ? "border-b-0" : null)}
-      >
-        {children}
-      </div>
+      <div className="min-w-0 py-1">{children}</div>
     </li>
   )
 }
