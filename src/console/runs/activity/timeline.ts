@@ -1,11 +1,11 @@
+import {
+  type ActivityToolKind,
+  activityToolKind,
+  activityToolOutcomeSummary,
+} from "./tool-summary"
 import { type ActivityItem } from "./types"
 
-export type ActivityToolGroupKind =
-  | "generic"
-  | "read"
-  | "send"
-  | "web-fetch"
-  | "web-search"
+export type ActivityToolGroupKind = ActivityToolKind
 
 export type ActivityTimelineEntry =
   | {
@@ -59,7 +59,7 @@ function flushToolGroup(
     return
   }
 
-  const toolKind = toolGroupKind(items)
+  const toolKind = activityToolKind(items)
 
   entries.push({
     description: toolGroupDescription(items, toolKind),
@@ -111,84 +111,12 @@ function toolGroupDescription(
 ) {
   const failed = items.filter((item) => item.status === "failed").length
   const completed = items.filter((item) => item.status === "completed").length
-  const parts = [toolGroupCount(items.length, toolKind)]
-
-  if (completed > 0) {
-    parts.push(completed === 1 ? "1 result" : `${completed} results`)
-  }
-
-  if (failed > 0) {
-    parts.push(failed === 1 ? "1 failed" : `${failed} failed`)
-  }
-
-  return parts.join(" · ")
-}
-
-function toolGroupKind(items: ActivityItem[]): ActivityToolGroupKind {
-  const firstItem = items[0]
-
-  if (firstItem === undefined) {
-    return "generic"
-  }
-
-  const firstKind = toolFamily(firstItem)
-
-  if (firstKind === "generic") {
-    return "generic"
-  }
-
-  return items.every((item) => toolFamily(item) === firstKind)
-    ? firstKind
-    : "generic"
-}
-
-function toolFamily(item: ActivityItem): ActivityToolGroupKind {
-  const title = item.title.toLowerCase()
-
-  if (title.includes("search") && title.includes("web")) {
-    return "web-search"
-  }
-
-  if (title.includes("fetch") && titleIncludesAny(title, ["page", "web"])) {
-    return "web-fetch"
-  }
-
-  if (title.includes("send") || title.includes("reply")) {
-    return "send"
-  }
-
-  if (title.includes("read")) {
-    return "read"
-  }
-
-  return "generic"
-}
-
-function toolGroupCount(count: number, toolKind: ActivityToolGroupKind) {
-  switch (toolKind) {
-    case "generic":
-      return countText(count, "action")
-    case "read":
-      return countText(count, "file")
-    case "send":
-      return countText(count, "reply")
-    case "web-fetch":
-      return countText(count, "page")
-    case "web-search":
-      return countText(count, "query")
-  }
-}
-
-function countText(count: number, singular: string) {
-  return count === 1 ? `1 ${singular}` : `${count} ${pluralize(singular)}`
-}
-
-function pluralize(singular: string) {
-  return singular.endsWith("y") ? `${singular.slice(0, -1)}ies` : `${singular}s`
-}
-
-function titleIncludesAny(title: string, terms: string[]) {
-  return terms.some((term) => title.includes(term))
+  return activityToolOutcomeSummary({
+    completed,
+    failed,
+    toolKind,
+    total: items.length,
+  })
 }
 
 function toolGroupDuration(items: ActivityItem[]) {

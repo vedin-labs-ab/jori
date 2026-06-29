@@ -111,13 +111,7 @@ function activityDescription(item: ActivityItemType) {
   const error = activityError(item)
 
   if (error !== undefined) {
-    return (
-      <ActivityFailureDescription
-        error={error}
-        metadata={item.metadata}
-        title={item.title}
-      />
-    )
+    return <ActivityFailureDescription error={error} title={item.title} />
   }
 
   if (item.tokenUsage !== undefined) {

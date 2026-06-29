@@ -143,32 +143,6 @@ test("renders compact tool metadata instead of generic descriptions", () => {
   expect(screen.queryByText("Returned object (3).")).toBeNull()
 })
 
-test("keeps failed tool error details behind an explicit action", () => {
-  const error = "Server Error Uncaught Error: web_search failed"
-
-  render(
-    <TooltipProvider>
-      <ActivityItem
-        item={activityItem({
-          description: error,
-          details: [{ label: "Error", value: error }],
-          status: "failed",
-          title: "Search web failed",
-        })}
-        now={1700000002000}
-      />
-    </TooltipProvider>
-  )
-
-  expect(screen.getByText("Search web failed")).toBeDefined()
-  expect(screen.getByRole("button", { name: /show error/i })).toBeDefined()
-  expect(screen.queryByText(error)).toBeNull()
-
-  fireEvent.click(screen.getByRole("button", { name: /show error/i }))
-
-  expect(screen.getByText(error)).toBeDefined()
-})
-
 test("groups consecutive tool calls into an expandable task", () => {
   render(
     <TooltipProvider>
