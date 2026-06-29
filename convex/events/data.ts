@@ -75,6 +75,7 @@ function actorIdentityProvider(
   if (
     integration === "github" ||
     integration === "linear" ||
+    integration === "notion" ||
     integration === "slack"
   ) {
     return integration
