@@ -114,10 +114,22 @@ function reactionMetadata(title: string, items: ToolMetadataItems) {
     return items
   }
 
-  return items.map((item) =>
-    item.kind === "target"
-      ? { ...item, text: reactionDisplayLabel(item.text) ?? item.text }
-      : item
+  const targets = items
+    .filter((item) => item.kind === "target")
+    .map((item) => ({
+      ...item,
+      text: reactionDisplayLabel(item.text) ?? item.text,
+    }))
+
+  return targets.length > 0
+    ? targets
+    : items.filter((item) => !isReactionOutcome(item))
+}
+
+function isReactionOutcome(item: ToolMetadataItem) {
+  return (
+    item.kind === "outcome" &&
+    item.text.trim().toLowerCase() === "reaction added"
   )
 }
 
