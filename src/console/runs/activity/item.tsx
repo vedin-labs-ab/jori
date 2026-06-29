@@ -1,4 +1,10 @@
-import { ChevronDown } from "lucide-react"
+import {
+  ChevronDown,
+  FileText,
+  type LucideIcon,
+  Search,
+  Send,
+} from "lucide-react"
 import { type ReactNode } from "react"
 import {
   Task,
@@ -13,9 +19,9 @@ import {
   ActivityIcon,
   ActivityMeta,
   ActivityTimelineIcon,
-  ActivityToolMetadata,
 } from "./metadata"
 import { type ActivityTimelineEntry, createActivityTimeline } from "./timeline"
+import { ActivityToolMetadata } from "./tool-metadata"
 import { type ActivityItem as ActivityItemType } from "./types"
 import { ActivityTokenUsage } from "./usage"
 
@@ -127,7 +133,13 @@ function ToolGroup({
 }) {
   return (
     <TimelineRow
-      icon={<ActivityTimelineIcon kind="tool" status={entry.status} />}
+      icon={
+        <ActivityTimelineIcon
+          icon={toolGroupIcon(entry.toolKind)}
+          kind="tool"
+          status={entry.status}
+        />
+      }
       isFirst={isFirst}
       isLast={isLast}
     >
@@ -169,12 +181,12 @@ function ToolGroupItem({ item }: { item: ActivityItemType }) {
 
   return (
     <TaskItem className="grid h-7 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-xs">
-      <div className="flex min-w-0 items-center gap-3">
-        <span className="min-w-0 truncate font-medium text-foreground">
+      <div className="flex min-w-0 items-center gap-3 overflow-hidden">
+        <span className="max-w-[14rem] shrink-0 truncate font-medium text-foreground">
           {item.title}
         </span>
         {description === undefined ? null : (
-          <span className="min-w-0 truncate text-muted-foreground">
+          <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden text-muted-foreground">
             {description}
           </span>
         )}
@@ -206,17 +218,17 @@ function ActivityTaskHeader({
         className
       )}
     >
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3 overflow-hidden">
         <span
           className={cn(
-            "min-w-0 truncate font-medium text-sm",
+            "max-w-[50%] shrink-0 truncate font-medium text-sm",
             interactive ? "text-current" : "text-foreground"
           )}
         >
           {title}
         </span>
         {description === undefined ? null : (
-          <span className="inline-flex min-w-0 items-center truncate text-muted-foreground text-xs">
+          <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden text-muted-foreground text-xs">
             {description}
           </span>
         )}
@@ -224,6 +236,22 @@ function ActivityTaskHeader({
       <div className="flex shrink-0 items-center gap-3">{meta}</div>
     </div>
   )
+}
+
+function toolGroupIcon(
+  toolKind: Extract<ActivityTimelineEntry, { type: "tool-group" }>["toolKind"]
+): LucideIcon | undefined {
+  switch (toolKind) {
+    case "generic":
+      return undefined
+    case "read":
+    case "web-fetch":
+      return FileText
+    case "send":
+      return Send
+    case "web-search":
+      return Search
+  }
 }
 
 function TimelineRow({
