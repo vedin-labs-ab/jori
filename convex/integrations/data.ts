@@ -1,6 +1,7 @@
+import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { checkTenantAccess } from "../identity/access"
-import { getClerkUserId } from "../identity/users"
+import { resolveCurrentPerson } from "../persons/clerk"
 import { type Integration } from "../shared/integrations"
 
 type QueryLikeCtx = QueryCtx | MutationCtx
@@ -28,7 +29,7 @@ export async function getTenantIntegration(
 }
 
 export async function getUserIntegration(
-  ctx: QueryLikeCtx,
+  ctx: QueryCtx,
   args: {
     integration: Integration
     tenantId: string
@@ -40,14 +41,16 @@ export async function getUserIntegration(
     return null
   }
 
-  const userId = getClerkUserId(access.identity)
+  const ownerId = await resolveCurrentPerson(ctx, args.tenantId).catch(
+    () => undefined
+  )
 
-  if (userId === undefined) {
+  if (ownerId === undefined) {
     return null
   }
 
   return await getUserIntegrationForOwner(ctx, {
-    ownerId: userId,
+    ownerId,
     integration: args.integration,
     tenantId: args.tenantId,
   })
@@ -56,7 +59,7 @@ export async function getUserIntegration(
 export async function getUserIntegrationForOwner(
   ctx: QueryLikeCtx,
   args: {
-    ownerId: string
+    ownerId: Id<"persons">
     integration: Integration
     tenantId: string
   }
@@ -77,7 +80,7 @@ export async function listActiveIntegrationsForOwner(
   ctx: QueryLikeCtx,
   args: {
     tenantId: string
-    ownerId?: string | undefined
+    ownerId?: Id<"persons"> | undefined
   }
 ) {
   const integrations = await ctx.db
@@ -85,7 +88,7 @@ export async function listActiveIntegrationsForOwner(
     .withIndex("by_tenant_and_status", (query) =>
       query.eq("tenantId", args.tenantId).eq("status", "active")
     )
-    .collect()
+    .take(200)
 
   return integrations.filter((integration) => {
     if (integration.scope !== "user") {

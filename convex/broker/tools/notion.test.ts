@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { callNotionTool } from "./notion"
 
@@ -166,7 +166,7 @@ function notionIntegration(): Doc<"integrations"> {
     externalId: "workspace",
     credentials: { tokens: { access: "notion-token" } },
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

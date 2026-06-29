@@ -1,10 +1,15 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { resolveActor } from "../persons/resolve"
 import { isGitHubSelfActor } from "../providers/github/data"
 import { getLinearBotId } from "../providers/linear/data"
 import { getSlackBotUserId } from "../providers/slack/data"
-import { getActorExternalId, isUserActor, withActorKind } from "../shared/actor"
+import {
+  getActorExternalId,
+  isPersonActor,
+  withActorKind,
+} from "../shared/actor"
 import { ensureWatch, findWatch, startMessageRun } from "../watches/data"
 import {
   findActiveIntegration,
@@ -44,6 +49,11 @@ export const record = internalMutation({
     }
 
     const observed = observedMessage(args, integration)
+    await resolveActor(ctx, {
+      tenantId: integration.tenantId,
+      provider: args.integration,
+      actor: observed.actor,
+    })
     const message = await insertMessage(ctx, { integration, message: observed })
     const now = Date.now()
     const mode = args.mode ?? "record_and_run"
@@ -52,7 +62,7 @@ export const record = internalMutation({
       return { status: "recorded" as const, messageId: message._id }
     }
 
-    if (isUserActor(message.actor)) {
+    if (isPersonActor(message.actor)) {
       await recordAutomationEvent(ctx, { integration, message: observed, now })
     }
 
@@ -66,6 +76,7 @@ export const record = internalMutation({
       integration,
       message,
       createdBy: await resolveMessageOwner(ctx, {
+        integration: args.integration,
         tenantId: integration.tenantId,
         message,
       }),
@@ -163,7 +174,7 @@ async function messageRunWatch(
     message: Doc<"messages">
   }
 ) {
-  if (!isUserActor(args.message.actor)) {
+  if (!isPersonActor(args.message.actor)) {
     return null
   }
 

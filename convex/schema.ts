@@ -26,6 +26,7 @@ import {
   organizationSources,
 } from "./organization/schema"
 import { permissions } from "./permissions/schema"
+import { persons } from "./persons/schema"
 import { reactions } from "./reactions/schema"
 import { runs } from "./runs/schema"
 import { outbox, sandboxes, traces } from "./runtime/schema"
@@ -38,6 +39,7 @@ import { watches } from "./watches/schema"
 export default defineSchema({
   skills,
   assets,
+  persons,
   identities,
   integrations,
   integrationOffers,

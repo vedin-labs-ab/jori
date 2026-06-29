@@ -13,7 +13,7 @@ import { type AutomationTriggerInput, type AutomationType } from "../schema"
 export async function resolveTrigger(
   ctx: MutationCtx,
   args: {
-    createdBy: string | undefined
+    createdBy: Id<"persons"> | undefined
     tenantId: string
     type: AutomationType
     trigger: AutomationTriggerInput

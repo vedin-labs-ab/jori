@@ -15,7 +15,7 @@ export async function resolveCancellationActor(
   if (
     message === null ||
     message.tenantId !== args.tenantId ||
-    message.actor?.kind !== "user"
+    message.actor?.kind !== "person"
   ) {
     return null
   }

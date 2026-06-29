@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { type Doc } from "../../../_generated/dataModel"
+import { type Doc, type Id } from "../../../_generated/dataModel"
 import { assemblePrompt } from "."
 
 describe("GitHub automation prompts", () => {
@@ -84,7 +84,7 @@ function githubIntegration(): Doc<"integrations"> {
     externalId: "github-account",
     credentials: {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

@@ -120,7 +120,7 @@ function watch(): Doc<"watches"> {
 
 function userActor(): Actor {
   return {
-    kind: "user",
+    kind: "person",
     externalId: "U123",
     name: "Albin",
   }

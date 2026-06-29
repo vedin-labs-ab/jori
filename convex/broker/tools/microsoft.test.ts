@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { assetContext } from "./fixtures"
 import { callMicrosoftTool } from "./microsoft"
 
@@ -68,7 +68,7 @@ function microsoftEmailIntegration(): Doc<"integrations"> {
     tenantId: "tenant",
     integration: "microsoftEmail",
     scope: "user",
-    ownerId: "user",
+    ownerId: "person" as Id<"persons">,
     externalId: "microsoft-account",
     email: "sender@example.com",
     credentials: {
@@ -77,7 +77,7 @@ function microsoftEmailIntegration(): Doc<"integrations"> {
       tenantId: "microsoft-tenant",
     },
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

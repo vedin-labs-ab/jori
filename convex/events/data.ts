@@ -1,6 +1,8 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { startEventAutomations } from "../automations/lifecycle"
+import { type IdentityProvider } from "../identity/schema"
+import { resolveActor } from "../persons/resolve"
 import { normalizeEventData } from "./payload"
 import { type EventMatch } from "./schema"
 
@@ -33,6 +35,16 @@ export async function recordEvent(
   }
 
   const now = args.now ?? Date.now()
+  const provider = actorIdentityProvider(args.integration.integration)
+
+  if (provider !== undefined) {
+    await resolveActor(ctx, {
+      tenantId: args.integration.tenantId,
+      provider,
+      actor: args.actor,
+    })
+  }
+
   const eventId = await ctx.db.insert("events", {
     tenantId: args.integration.tenantId,
     integrationId: args.integration._id,
@@ -55,4 +67,18 @@ export async function recordEvent(
     eventId,
     runIds: await startEventAutomations(ctx, { event, now }),
   }
+}
+
+function actorIdentityProvider(
+  integration: Doc<"integrations">["integration"]
+): IdentityProvider | undefined {
+  if (
+    integration === "github" ||
+    integration === "linear" ||
+    integration === "slack"
+  ) {
+    return integration
+  }
+
+  return undefined
 }

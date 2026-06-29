@@ -45,7 +45,7 @@ export type PublishArtifactArgs =
       contract?: unknown
       source: ArtifactSourceFile[]
       build: ArtifactBuildInput
-      userId: string
+      personId: Id<"persons">
       message?: string
       capabilities?: ArtifactCapabilityInput[]
     }
@@ -58,7 +58,7 @@ export type PublishArtifactArgs =
       contract?: unknown
       source: ArtifactSourceFile[]
       build: ArtifactBuildInput
-      userId: string
+      personId: Id<"persons">
       message?: string
       capabilities?: ArtifactCapabilityInput[]
     }
@@ -110,12 +110,12 @@ export async function publishArtifact(
       args.mode === "create"
         ? await ctx.runMutation(internal.artifacts.records.publishCreated, {
             ...common,
-            ownerId: args.userId,
+            ownerId: args.personId,
           })
         : await ctx.runMutation(internal.artifacts.records.publishUpdated, {
             ...common,
             artifactId: args.artifactId,
-            updatedBy: args.userId,
+            updatedBy: args.personId,
           })
 
     return {

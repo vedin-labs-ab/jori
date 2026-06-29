@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { buildInstallState } from "./install"
 
@@ -12,7 +13,7 @@ describe("buildInstallState", () => {
 
     expect(state).toMatchObject({
       tenantId: "tenant_1",
-      createdBy: "user_1",
+      createdBy: "person_1" as Id<"persons">,
       returnUrl: "https://app.example/integrations",
     })
     expect(state.createdAt).toBeLessThanOrEqual(Date.now())
@@ -45,6 +46,22 @@ function createCtx(identity: Record<string, unknown> | null) {
   return {
     auth: {
       getUserIdentity: async () => identity,
+    },
+    db: {
+      get: async () => null,
+      insert: async () => "person_1",
+      patch: async () => undefined,
+      query: () => ({
+        withIndex: () => ({
+          first: async () =>
+            identity === null
+              ? null
+              : {
+                  personId: "person_1" as Id<"persons">,
+                  link: { method: "oauth" },
+                },
+        }),
+      }),
     },
   } as unknown as MutationCtx
 }

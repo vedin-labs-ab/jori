@@ -132,24 +132,14 @@ async function cacheSlackActorProfile(
     tenantId: string
   }
 ) {
-  const userId = await ctx.runQuery(
-    internal.identity.identities.resolveUserIdByEmailRecord,
-    {
-      tenantId: args.tenantId,
-      email: args.profile.email,
-    }
-  )
-
-  if (userId === null) {
-    return
-  }
-
-  await ctx.runMutation(internal.identity.identities.upsertProviderIdentity, {
+  await ctx.runMutation(internal.persons.resolve.resolveActorRecord, {
     tenantId: args.tenantId,
-    userId,
     provider: "slack",
-    externalId: args.actorId,
-    email: args.profile.email,
-    name: args.profile.name,
+    actor: {
+      kind: "person",
+      externalId: args.actorId,
+      email: args.profile.email,
+      name: args.profile.name,
+    },
   })
 }

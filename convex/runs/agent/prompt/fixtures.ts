@@ -206,7 +206,7 @@ export function runtimeInput(
       mentioned: true,
       actor: {
         externalId: "UACTOR",
-        kind: "user",
+        kind: "person",
         name: "Albin Vedin",
       },
       text: "Please help.",

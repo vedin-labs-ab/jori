@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
   internalQuery,
@@ -30,7 +30,7 @@ export const read = internalQuery({
   args: {
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
-    userId: v.string(),
+    personId: v.id("persons"),
     contractName: v.string(),
   },
   handler: async (ctx, args) => {
@@ -46,7 +46,7 @@ export const list = internalQuery({
   args: {
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
-    userId: v.string(),
+    personId: v.id("persons"),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -72,7 +72,7 @@ export const update = internalMutation({
   args: {
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
-    userId: v.string(),
+    personId: v.id("persons"),
     contractName: v.string(),
     expectedVersion: v.optional(v.number()),
     write: stateWrite,
@@ -126,7 +126,7 @@ async function insertStateDocument(
   args: {
     tenantId: string
     artifactId: Doc<"artifacts">["_id"]
-    userId: string
+    personId: Id<"persons">
   },
   entry: ArtifactContractStateEntry,
   value: unknown
@@ -135,7 +135,7 @@ async function insertStateDocument(
   const documentId = await ctx.db.insert("artifactState", {
     tenantId: args.tenantId,
     artifactId: args.artifactId,
-    userId: stateUserId(entry.scope, args.userId),
+    personId: statePersonId(entry.scope, args.personId),
     scope: entry.scope,
     contractName: entry.name,
     schemaHash: entry.schemaHash,
@@ -181,7 +181,7 @@ async function requireStateArtifact(
   args: {
     tenantId: string
     artifactId: Doc<"artifacts">["_id"]
-    userId: string
+    personId: Id<"persons">
   }
 ) {
   const artifact = await ctx.db.get(args.artifactId)
@@ -189,7 +189,7 @@ async function requireStateArtifact(
   if (
     artifact === null ||
     artifact.tenantId !== args.tenantId ||
-    !canAccessArtifact(artifact, args.userId)
+    !canAccessArtifact(artifact, args.personId)
   ) {
     throw new Error("Artifact not found.")
   }
@@ -202,16 +202,16 @@ async function findStateDocument(
   args: {
     artifactId: Doc<"artifacts">["_id"]
     entry: ArtifactContractStateEntry
-    userId: string
+    personId: Id<"persons">
   }
 ) {
   return await ctx.db
     .query("artifactState")
-    .withIndex("by_artifact_and_scope_and_user_and_key", (index) =>
+    .withIndex("by_artifact_and_scope_and_person_and_key", (index) =>
       index
         .eq("artifactId", args.artifactId)
         .eq("scope", args.entry.scope)
-        .eq("userId", stateUserId(args.entry.scope, args.userId))
+        .eq("personId", statePersonId(args.entry.scope, args.personId))
         .eq("key", args.entry.key)
     )
     .first()
@@ -240,8 +240,11 @@ function summarizeStateDocument(
   }
 }
 
-function stateUserId(scope: Doc<"artifactState">["scope"], userId: string) {
-  return scope === "personal" ? userId : undefined
+function statePersonId(
+  scope: Doc<"artifactState">["scope"],
+  personId: Id<"persons">
+) {
+  return scope === "personal" ? personId : undefined
 }
 
 function normalizeListLimit(limit: number | undefined) {

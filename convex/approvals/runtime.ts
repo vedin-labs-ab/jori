@@ -56,18 +56,18 @@ export function isApprovalDecisionText(text: string | undefined) {
   return parseApprovalDecisionText(text) !== null
 }
 
-export function isUserApprovalDecisionText(args: {
+export function isPersonApprovalDecisionText(args: {
   actorKind?: Actor["kind"]
   text?: string
 }) {
-  return parseUserApprovalDecisionText(args) !== null
+  return parsePersonApprovalDecisionText(args) !== null
 }
 
-export async function handleUserTextApprovalDecision(
+export async function handlePersonTextApprovalDecision(
   ctx: ActionCtx,
   args: TextApprovalDecisionArgs
 ) {
-  const command = parseUserApprovalDecisionText(args)
+  const command = parsePersonApprovalDecisionText(args)
 
   if (command === null) {
     return false
@@ -98,11 +98,11 @@ export function parseApprovalDecisionText(text: string | undefined) {
   } as const
 }
 
-function parseUserApprovalDecisionText(args: {
+function parsePersonApprovalDecisionText(args: {
   actorKind?: Actor["kind"]
   text?: string
 }) {
-  if (args.actorKind !== "user") {
+  if (args.actorKind !== "person") {
     return null
   }
 

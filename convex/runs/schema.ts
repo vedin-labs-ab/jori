@@ -61,7 +61,7 @@ export const runCause = v.union(
   }),
   v.object({
     type: v.literal("manual"),
-    userId: v.optional(v.string()),
+    personId: v.optional(v.id("persons")),
   })
 )
 
@@ -103,7 +103,7 @@ export const runs = defineTable({
   status: runStatus,
   workerId: v.optional(v.string()),
   error: v.optional(v.string()),
-  createdBy: v.optional(v.string()),
+  createdBy: v.optional(v.id("persons")),
   createdAt: v.number(),
   endedAt: v.optional(v.number()),
   stoppedBy: v.optional(actorValidator),

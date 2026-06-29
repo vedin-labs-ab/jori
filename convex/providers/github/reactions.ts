@@ -210,7 +210,7 @@ function githubReactionSnapshotItem(
     reaction: githubReactionLabels[content] ?? content,
     actor: createIntegrationActor({
       externalId: stringValue(readNumber(user, "id")),
-      kind: readString(user, "type") === "Bot" ? "bot" : "user",
+      kind: readString(user, "type") === "Bot" ? "bot" : "person",
       name: readString(user, "login"),
     }),
     observedAt: parseTimestamp(readString(reaction, "created_at")),

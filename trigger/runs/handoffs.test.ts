@@ -67,7 +67,7 @@ test("keeps a pending handoff as a wait without progress", async () => {
 
   expect(runtime.convex.executeApproval).not.toHaveBeenCalled()
   expect(result.progressed).toBe(false)
-  expect(result.pending).toEqual([{ expiresAt: 1000 }])
+  expect(result.pending).toEqual([{ expiresAt: 1000, kind: "approval" }])
 })
 
 test("refreshes runtime tools when an awaited offer connects", async () => {
@@ -102,6 +102,7 @@ function createRuntime(options: {
       })),
       markApprovalConsumed: vi.fn(),
       markOfferConsumed: vi.fn(),
+      recordEvent: vi.fn(),
       reloadContext: vi.fn(async () => ({
         prompt: "refreshed",
         tools: [refreshedTool()],

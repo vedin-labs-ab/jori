@@ -1,10 +1,11 @@
 import { v } from "convex/values"
+import { type Id } from "../../_generated/dataModel"
 import {
   internalMutation,
   type MutationCtx,
   mutation,
 } from "../../_generated/server"
-import { upsertIdentity } from "../../identity/identities"
+import { linkIdentityToPerson } from "../../persons/links"
 import { readRefreshToken } from "../credentials"
 import { buildInstallState } from "../install"
 import { type GoogleIntegration } from "./config"
@@ -54,7 +55,7 @@ export const recordOAuthInstallation = internalMutation({
   args: {
     integration: googleIntegration,
     tenantId: v.string(),
-    createdBy: v.string(),
+    createdBy: v.id("persons"),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
     expiresAt: v.number(),
@@ -110,7 +111,7 @@ function createGoogleIntegrationValues(
   args: {
     integration: GoogleIntegration
     tenantId: string
-    createdBy: string
+    createdBy: Id<"persons">
     profile: {
       id: string
       email: string
@@ -210,7 +211,7 @@ async function upsertGoogleIdentity(
   ctx: MutationCtx,
   args: {
     tenantId: string
-    createdBy: string
+    createdBy: Id<"persons">
     profile: {
       id: string
       email: string
@@ -218,11 +219,12 @@ async function upsertGoogleIdentity(
     }
   }
 ) {
-  await upsertIdentity(ctx, {
+  await linkIdentityToPerson(ctx, {
     tenantId: args.tenantId,
-    userId: args.createdBy,
+    personId: args.createdBy,
     provider: "google",
     externalId: args.profile.id,
+    method: "oauth",
     email: args.profile.email,
     name: args.profile.name,
   })

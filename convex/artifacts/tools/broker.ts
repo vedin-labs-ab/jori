@@ -125,7 +125,7 @@ async function callAuthorizedMiloTool(
     ctx,
     {
       tenantId: context.tenantId,
-      createdBy: context.userId,
+      createdBy: context.personId,
     },
     { tool, args }
   )
@@ -167,7 +167,7 @@ async function callAuthorizedExternalTool(
   await ctx.runMutation(internal.artifacts.tools.cache.invalidate, {
     tenantId: context.tenantId,
     artifactId: context.artifactId,
-    userId: context.userId,
+    personId: context.personId,
     surface: authorization.permission.surface,
     integrationId: authorization.integration._id,
   })
@@ -192,7 +192,7 @@ async function callCachedArtifactTool(
     tenantId: context.tenantId,
     artifactId: context.artifactId,
     versionId: context.versionId,
-    userId: context.userId,
+    personId: context.personId,
     surface: input.surface,
     tool: input.tool,
     integrationId: input.integrationId,
@@ -204,7 +204,7 @@ async function callCachedArtifactTool(
       tenantId: context.tenantId,
       artifactId: context.artifactId,
       versionId: context.versionId,
-      userId: context.userId,
+      personId: context.personId,
       surface: input.surface,
       tool: input.tool,
       integrationId: input.integrationId,
@@ -224,7 +224,7 @@ async function callCachedArtifactTool(
       tenantId: context.tenantId,
       artifactId: context.artifactId,
       versionId: context.versionId,
-      userId: context.userId,
+      personId: context.personId,
       surface: input.surface,
       tool: input.tool,
       integrationId: input.integrationId,

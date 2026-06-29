@@ -155,7 +155,7 @@ function platformContext(): ArtifactPlatformContext {
     tenantId: "tenant",
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
-    userId: "user",
+    personId: "person" as Id<"persons">,
   }
 }
 
@@ -164,7 +164,7 @@ function slackIntegration(): Doc<"integrations"> {
     _creationTime: 0,
     _id: "integration" as Id<"integrations">,
     createdAt: 0,
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     credentials: { tokens: { access: "user-token", bot: "bot-token" } },
     externalId: "T123",
     integration: "slack",

@@ -75,7 +75,7 @@ export const automations = defineTable({
   access,
   trigger,
   status,
-  createdBy: v.optional(v.string()),
+  createdBy: v.optional(v.id("persons")),
   createdAt: v.number(),
   updatedAt: v.number(),
   firedAt: v.optional(v.number()),

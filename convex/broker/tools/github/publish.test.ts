@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { type Doc } from "../../../_generated/dataModel"
+import { type Doc, type Id } from "../../../_generated/dataModel"
 import { callGitHubTool } from "./index"
 
 const headSha = "a".repeat(40)
@@ -171,7 +171,7 @@ function githubIntegration(): Doc<"integrations"> {
       tokens: { access: "github-token" },
     },
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

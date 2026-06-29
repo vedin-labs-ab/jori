@@ -56,7 +56,7 @@ export function getSlackMessage(payload: SlackEventPayload) {
     actorId: event.user ?? event.bot_id,
     actorAliases: slackActorAliases(event),
     actorKind:
-      event.bot_id === undefined ? ("user" as const) : ("bot" as const),
+      event.bot_id === undefined ? ("person" as const) : ("bot" as const),
     conversationId: event.thread_ts ?? event.ts,
     text: event.text,
     observedAt: Number.isFinite(Number(event.ts))

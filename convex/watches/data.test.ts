@@ -126,7 +126,7 @@ function runArgs(overrides: Partial<StartArgs> = {}): StartArgs {
     watch: null,
     integration: integration(),
     message: message("Please help."),
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     externalId: "conversation",
     now: 1000,
     ...overrides,
@@ -143,7 +143,7 @@ function integration() {
     externalId: "team",
     credentials: {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Parameters<typeof startMessageRun>[1]["integration"]

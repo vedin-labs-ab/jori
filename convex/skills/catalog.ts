@@ -6,7 +6,7 @@ import {
   query,
 } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
+import { ensureCurrentPerson } from "../persons/clerk"
 import { skills as globalSkillSeed } from "../prompts/generated"
 import { integrationValidator } from "../shared/integrations"
 import {
@@ -81,13 +81,13 @@ export const create = mutation({
     body: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    await requireTenantAccess(ctx, args.tenantId)
     const input = normalizeSkillInput(args)
 
     await requireUniqueTenantSkillName(ctx, args.tenantId, input.name)
 
     const now = Date.now()
-    const userId = requireClerkUserId(identity)
+    const personId = await ensureCurrentPerson(ctx, args.tenantId)
 
     return await ctx.db.insert("skills", {
       tenantId: args.tenantId,
@@ -96,7 +96,7 @@ export const create = mutation({
       associatedIntegrations: input.associatedIntegrations,
       description: input.description,
       body: input.body,
-      createdBy: userId,
+      createdBy: personId,
       createdAt: now,
       updatedAt: now,
     })

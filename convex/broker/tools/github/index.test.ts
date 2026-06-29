@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { encodeToolResult } from "../../../../contracts/transport"
-import { type Doc } from "../../../_generated/dataModel"
+import { type Doc, type Id } from "../../../_generated/dataModel"
 import { callGitHubTool, createGitHubCloneCredentials } from "./index"
 
 afterEach(() => {
@@ -135,7 +135,7 @@ function githubIntegration(): Doc<"integrations"> {
       tokens: { access: "github-token" },
     },
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

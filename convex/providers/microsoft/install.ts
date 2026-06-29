@@ -40,7 +40,7 @@ export const recordOAuthInstallation = internalMutation({
   args: {
     integration: microsoftIntegration,
     tenantId: v.string(),
-    createdBy: v.string(),
+    createdBy: v.id("persons"),
     microsoftTenantId: v.string(),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
@@ -106,7 +106,7 @@ export const recordOAuthInstallation = internalMutation({
 
     await upsertMicrosoftIdentity(ctx, {
       tenantId: args.tenantId,
-      userId: args.createdBy,
+      personId: args.createdBy,
       microsoftTenantId: args.microsoftTenantId,
       email,
       profile: args.profile,
@@ -123,7 +123,7 @@ async function upsertMicrosoftIntegration(
     now: number
     tenantId: string
     integration: MicrosoftIntegration
-    ownerId: string
+    ownerId: Id<"persons">
     externalId: string
     name: string | undefined
     email: string | undefined

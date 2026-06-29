@@ -193,5 +193,5 @@ function approvalActorName(actor: ApprovalActor | undefined) {
     return actor.kind === "self" ? "Milo" : (actor.name ?? actor.email)
   }
 
-  return "userId" in actor ? (actor.name ?? actor.email) : actor.email
+  return "personId" in actor ? (actor.name ?? actor.email) : actor.email
 }

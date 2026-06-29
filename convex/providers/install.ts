@@ -1,8 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, type MutationCtx } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
+import { ensureCurrentPerson } from "../persons/clerk"
 import { type Integration } from "../shared/integrations"
 import { createSignedGitHubState } from "./github/signing"
 import { googleIntegrationConfigs } from "./google/config"
@@ -15,7 +14,7 @@ import { createSignedSlackState } from "./slack/signing"
 
 export type ProviderInstallState = {
   tenantId: string
-  createdBy: string
+  createdBy: Id<"persons">
   returnUrl: string
   createdAt: number
   integrationOfferId?: Id<"integrationOffers">
@@ -29,11 +28,9 @@ export async function buildInstallState(
     integrationOfferId?: Id<"integrationOffers">
   }
 ): Promise<ProviderInstallState> {
-  const identity = await requireTenantAccess(ctx, args.tenantId)
-
   return {
     tenantId: args.tenantId,
-    createdBy: requireClerkUserId(identity),
+    createdBy: await ensureCurrentPerson(ctx, args.tenantId),
     returnUrl: args.returnUrl,
     createdAt: Date.now(),
     ...(args.integrationOfferId === undefined

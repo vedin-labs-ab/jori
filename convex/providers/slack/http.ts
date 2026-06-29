@@ -1,6 +1,6 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { isUserApprovalDecisionText } from "../../approvals/runtime"
+import { isPersonApprovalDecisionText } from "../../approvals/runtime"
 import {
   handleSlackApprovalDecision,
   handleSlackApprovalInteraction,
@@ -148,7 +148,7 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
 
 async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
   if (
-    isUserApprovalDecisionText({
+    isPersonApprovalDecisionText({
       actorKind: message.actorKind,
       text: message.text,
     })
@@ -173,7 +173,7 @@ async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
   }
 
   const [actorProfile, data] = await Promise.all([
-    message.actorKind === "user"
+    message.actorKind === "person"
       ? getSlackActorProfile(ctx, {
           accountId: message.accountId,
           actorId: message.actorId,

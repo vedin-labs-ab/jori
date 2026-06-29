@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { recurringDisplay } from "../display"
 import { summarizeRun } from "../summaries"
@@ -121,7 +122,7 @@ function recurringAutomation({
       web: true,
     },
     status,
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
     firedAt: nextAt,
@@ -138,7 +139,7 @@ function slackIntegration() {
     externalId: "slack-team",
     credentials: {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   }

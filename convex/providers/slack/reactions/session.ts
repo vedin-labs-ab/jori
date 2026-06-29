@@ -197,7 +197,7 @@ function applySlackReactionProfile(
 }
 
 function actorKind(actor: Actor | undefined): ActorKind {
-  return actor !== undefined && "externalId" in actor ? actor.kind : "user"
+  return actor !== undefined && "externalId" in actor ? actor.kind : "person"
 }
 
 function actorAliases(actor: Actor | undefined): ActorAlias[] | undefined {

@@ -1,8 +1,8 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import {
-  handleUserTextApprovalDecision,
-  isUserApprovalDecisionText,
+  handlePersonTextApprovalDecision,
+  isPersonApprovalDecisionText,
 } from "../../approvals/runtime"
 import { type Actor, createIntegrationActor } from "../../shared/actor"
 import {
@@ -127,7 +127,7 @@ export async function handleGitHubMessageEvent(
   const actor = createGitHubActor(message)
 
   if (
-    isUserApprovalDecisionText({
+    isPersonApprovalDecisionText({
       actorKind: message.actorKind,
       text: message.text,
     })
@@ -136,7 +136,7 @@ export async function handleGitHubMessageEvent(
       actor,
       mode: "record",
     })
-    await handleUserTextApprovalDecision(ctx, {
+    await handlePersonTextApprovalDecision(ctx, {
       accountId: message.accountId,
       actor,
       actorKind: message.actorKind,

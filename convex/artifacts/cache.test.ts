@@ -66,7 +66,7 @@ function cacheKeyInput() {
     tenantId: "tenant",
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
-    userId: "user",
+    personId: "person" as Id<"persons">,
     surface: "slack",
     tool: "conversations_replies",
     integrationId: "integration" as Id<"integrations">,

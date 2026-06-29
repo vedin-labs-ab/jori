@@ -1,5 +1,6 @@
+import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { upsertIdentity } from "../../identity/identities"
+import { linkIdentityToPerson } from "../../persons/links"
 import { type MicrosoftInstallationProfile } from "./oauth"
 
 export function getMicrosoftIdentityEmail(
@@ -12,17 +13,18 @@ export async function upsertMicrosoftIdentity(
   ctx: MutationCtx,
   args: {
     tenantId: string
-    userId: string
+    personId: Id<"persons">
     microsoftTenantId: string
     email: string | undefined
     profile: MicrosoftInstallationProfile
   }
 ) {
-  await upsertIdentity(ctx, {
+  await linkIdentityToPerson(ctx, {
     tenantId: args.tenantId,
-    userId: args.userId,
+    personId: args.personId,
     provider: "microsoft",
     externalId: args.profile.user.id,
+    method: "oauth",
     email: args.email,
     name: args.profile.user.displayName,
   })

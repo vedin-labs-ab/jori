@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { integration } from "../runs/agent/tools/fixtures"
 import { type ApprovalBrokerContext } from "./approval"
@@ -152,7 +152,7 @@ function run(): Doc<"runs"> {
     tenantId: "tenant",
     status: "running",
     instructions: "Task",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     cause: { type: "manual" },
     snapshot: {

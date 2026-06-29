@@ -7,7 +7,7 @@ export const createSessionRecord = internalMutation({
   args: {
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
-    userId: v.string(),
+    personId: v.id("persons"),
     secret: v.string(),
     now: v.number(),
     expiresAt: v.number(),
@@ -16,7 +16,7 @@ export const createSessionRecord = internalMutation({
   handler: async (ctx, args) => {
     const artifact = await getTenantArtifact(ctx, args)
 
-    if (!canAccessArtifact(artifact, args.userId)) {
+    if (!canAccessArtifact(artifact, args.personId)) {
       throw new Error("Artifact not found.")
     }
 
@@ -28,7 +28,7 @@ export const createSessionRecord = internalMutation({
       tenantId: artifact.tenantId,
       artifactId: artifact._id,
       versionId: artifact.versionId,
-      userId: args.userId,
+      personId: args.personId,
       access: artifact.access,
       status: "active",
       tokenSecret: args.secret,
@@ -41,7 +41,7 @@ export const createSessionRecord = internalMutation({
     return {
       sessionId,
       tenantId: artifact.tenantId,
-      userId: args.userId,
+      personId: args.personId,
       artifactId: artifact._id,
       versionId: artifact.versionId,
       secret: args.secret,
@@ -56,7 +56,7 @@ export const authorizeSession = internalMutation({
     artifactId: v.id("artifacts"),
     versionId: v.id("artifactVersions"),
     tenantId: v.string(),
-    userId: v.string(),
+    personId: v.id("persons"),
     secret: v.string(),
     tokenExpiresAt: v.number(),
     now: v.number(),
@@ -70,7 +70,7 @@ export const authorizeSession = internalMutation({
       session.artifactId !== args.artifactId ||
       session.versionId !== args.versionId ||
       session.tenantId !== args.tenantId ||
-      session.userId !== args.userId ||
+      session.personId !== args.personId ||
       session.tokenSecret !== args.secret ||
       session.expiresAt <= args.now ||
       args.tokenExpiresAt <= args.now ||

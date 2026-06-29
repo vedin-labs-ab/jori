@@ -34,7 +34,7 @@ export async function createAutomation(
     access: AutomationAccessInput
     type: AutomationType
     trigger: AutomationTriggerInput
-    createdBy?: string
+    createdBy?: Id<"persons">
   }
 ) {
   const now = Date.now()

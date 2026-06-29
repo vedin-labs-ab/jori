@@ -141,7 +141,7 @@ function getLinearCommentMessage(
     actorKind:
       payload.actor?.type === "application"
         ? ("bot" as const)
-        : ("user" as const),
+        : ("person" as const),
     actorName: payload.actor?.name,
     conversationId: issueId,
     text: data.body,

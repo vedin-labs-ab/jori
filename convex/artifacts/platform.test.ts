@@ -37,7 +37,7 @@ describe("artifact platform tools", () => {
         args: {
           tenantId: "tenant",
           artifactId: "artifact",
-          userId: "user",
+          personId: "person" as Id<"persons">,
           contractName: "emailTriageLatest",
         },
       },
@@ -46,7 +46,7 @@ describe("artifact platform tools", () => {
         args: {
           tenantId: "tenant",
           artifactId: "artifact",
-          userId: "user",
+          personId: "person" as Id<"persons">,
           contractName: "emailTriageLatest",
           expectedVersion: 1,
           write: { type: "replace", value: { threads: [] } },
@@ -110,6 +110,6 @@ function createPlatformContext(): ArtifactPlatformContext {
     tenantId: "tenant",
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
-    userId: "user",
+    personId: "person" as Id<"persons">,
   }
 }

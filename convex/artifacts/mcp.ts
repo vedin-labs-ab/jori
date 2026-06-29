@@ -35,31 +35,31 @@ export async function callMiloArtifactTool(
   ctx: ActionCtx,
   execution: {
     tenantId: string
-    createdBy?: string
+    createdBy?: Id<"persons">
     runId?: Id<"runs">
   },
   request: MiloArtifactRequest
 ): Promise<unknown> {
   const args = normalizeToolArgs(request.args)
-  const userId = execution.createdBy
+  const personId = execution.createdBy
 
-  if (userId === undefined) {
+  if (personId === undefined) {
     throw new Error("Artifact tools require an authenticated execution user.")
   }
 
   switch (request.tool) {
     case "create_artifact":
-      return await createArtifact(ctx, execution.tenantId, userId, args)
+      return await createArtifact(ctx, execution.tenantId, personId, args)
     case "update_artifact":
-      return await updateArtifact(ctx, execution.tenantId, userId, args)
+      return await updateArtifact(ctx, execution.tenantId, personId, args)
     case "search_artifacts":
-      return await searchArtifacts(ctx, execution.tenantId, userId, args)
+      return await searchArtifacts(ctx, execution.tenantId, personId, args)
     case "read_artifact":
-      return await readArtifact(ctx, execution.tenantId, userId, args)
+      return await readArtifact(ctx, execution.tenantId, personId, args)
     case "read_artifact_state":
-      return await readArtifactState(ctx, execution, userId, args)
+      return await readArtifactState(ctx, execution, personId, args)
     case "update_artifact_state":
-      return await updateArtifactState(ctx, execution, userId, args)
+      return await updateArtifactState(ctx, execution, personId, args)
     case "delete_artifact":
       return await deleteArtifact(ctx, execution.tenantId, args)
     default:
@@ -70,12 +70,12 @@ export async function callMiloArtifactTool(
 async function createArtifact(
   ctx: ActionCtx,
   tenantId: string,
-  userId: string,
+  personId: Id<"persons">,
   args: Record<string, unknown>
 ): Promise<unknown> {
   return await ctx.runAction(internal.artifacts.actions.createFromAgent, {
     tenantId,
-    userId,
+    personId,
     title: requiredString(args.title, "title"),
     access: normalizeAccess(args.access),
     contract: args.contract,
@@ -89,12 +89,12 @@ async function createArtifact(
 async function updateArtifact(
   ctx: ActionCtx,
   tenantId: string,
-  userId: string,
+  personId: Id<"persons">,
   args: Record<string, unknown>
 ): Promise<unknown> {
   return await ctx.runAction(internal.artifacts.actions.updateFromAgent, {
     tenantId,
-    userId,
+    personId,
     artifactId: requiredArtifactId(args.artifactId),
     title: requiredString(args.title, "title"),
     access: normalizeAccess(args.access),
@@ -109,12 +109,12 @@ async function updateArtifact(
 async function searchArtifacts(
   ctx: ActionCtx,
   tenantId: string,
-  userId: string,
+  personId: Id<"persons">,
   args: Record<string, unknown>
 ): Promise<unknown> {
   return await ctx.runQuery(internal.artifacts.queries.searchForAgent, {
     tenantId,
-    userId,
+    personId,
     query: optionalString(args.query),
     includeArchived: args.includeArchived === true,
     limit: boundedNumber(args.limit, 25, 1, 100),
@@ -124,7 +124,7 @@ async function searchArtifacts(
 async function readArtifact(
   ctx: ActionCtx,
   tenantId: string,
-  userId: string,
+  personId: Id<"persons">,
   args: Record<string, unknown>
 ): Promise<unknown> {
   const artifactId = requiredArtifactId(args.artifactId)
@@ -132,7 +132,7 @@ async function readArtifact(
     internal.artifacts.queries.readForAgent,
     {
       tenantId,
-      userId,
+      personId,
       artifactId,
     }
   )) as Record<string, unknown> | null
@@ -155,12 +155,12 @@ async function readArtifact(
 async function readArtifactState(
   ctx: ActionCtx,
   execution: { tenantId: string; runId?: Id<"runs"> },
-  userId: string,
+  personId: Id<"persons">,
   args: Record<string, unknown>
 ) {
   return await ctx.runQuery(internal.artifacts.state.read, {
     tenantId: execution.tenantId,
-    userId,
+    personId,
     artifactId: await resolveArtifactId(
       ctx,
       execution.tenantId,
@@ -174,12 +174,12 @@ async function readArtifactState(
 async function updateArtifactState(
   ctx: ActionCtx,
   execution: { tenantId: string; runId?: Id<"runs"> },
-  userId: string,
+  personId: Id<"persons">,
   args: Record<string, unknown>
 ) {
   return await ctx.runMutation(internal.artifacts.state.update, {
     tenantId: execution.tenantId,
-    userId,
+    personId,
     artifactId: await resolveArtifactId(
       ctx,
       execution.tenantId,

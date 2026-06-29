@@ -189,7 +189,7 @@ function readAuthor(record: Record<string, unknown>): Actor | undefined {
   return author === undefined
     ? undefined
     : {
-        kind: "user",
+        kind: "person",
         externalId: author.id,
       }
 }

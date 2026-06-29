@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
@@ -167,7 +167,7 @@ export const get = internalQuery({
 async function listActiveIntegrations(
   ctx: QueryCtx,
   tenantId: string,
-  ownerId: string | undefined
+  ownerId: Id<"persons"> | undefined
 ) {
   return await listActiveIntegrationsForOwner(ctx, {
     ownerId,

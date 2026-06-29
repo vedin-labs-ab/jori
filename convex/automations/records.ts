@@ -20,7 +20,7 @@ export const create = internalMutation({
     access: accessInput,
     type: automationType,
     trigger: triggerInput,
-    createdBy: v.optional(v.string()),
+    createdBy: v.optional(v.id("persons")),
   },
   handler: async (ctx, args) => await createAutomation(ctx, args),
 })

@@ -16,7 +16,7 @@ export const createInstallState = mutation({
 export const recordOAuthInstallation = internalMutation({
   args: {
     tenantId: v.string(),
-    createdBy: v.string(),
+    createdBy: v.id("persons"),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
     profile: v.object({

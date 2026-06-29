@@ -40,21 +40,21 @@ test("normalizes Slack thread reactions into reaction snapshots", async () => {
         {
           actor: {
             externalId: "U123",
-            kind: "user",
+            kind: "person",
           },
           reaction: ":white_check_mark:",
         },
         {
           actor: {
             externalId: "U123",
-            kind: "user",
+            kind: "person",
           },
           reaction: ":eyes:",
         },
         {
           actor: {
             externalId: "U456",
-            kind: "user",
+            kind: "person",
           },
           reaction: ":eyes:",
         },

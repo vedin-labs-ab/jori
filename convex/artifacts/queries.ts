@@ -29,7 +29,7 @@ export const getExistingBlobIds = internalQuery({
 export const searchForAgent = internalQuery({
   args: {
     tenantId: v.string(),
-    userId: v.string(),
+    personId: v.id("persons"),
     query: v.optional(v.string()),
     includeArchived: v.optional(v.boolean()),
     limit: v.optional(v.number()),
@@ -44,7 +44,7 @@ export const searchForAgent = internalQuery({
 export const readForAgent = internalQuery({
   args: {
     tenantId: v.string(),
-    userId: v.string(),
+    personId: v.id("persons"),
     artifactId: v.id("artifacts"),
   },
   handler: async (ctx, args) => {
@@ -53,7 +53,7 @@ export const readForAgent = internalQuery({
     if (
       artifact === null ||
       artifact.tenantId !== args.tenantId ||
-      !canAccessArtifact(artifact, args.userId)
+      !canAccessArtifact(artifact, args.personId)
     ) {
       return null
     }

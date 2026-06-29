@@ -79,7 +79,7 @@ function automation(
     tenantId: "tenant",
     access: { integrations: [], web: false },
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
     ...overrides,
@@ -98,7 +98,7 @@ function integration(): Parameters<
     externalId: "team",
     credentials: {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   }

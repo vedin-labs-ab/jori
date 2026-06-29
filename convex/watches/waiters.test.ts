@@ -34,7 +34,7 @@ type StartArgs = Parameters<typeof startMessageRun>[1]
 
 function runArgs(overrides: Partial<StartArgs> = {}): StartArgs {
   return {
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     externalId: "conversation",
     integration: integration(),
     message: message(),
@@ -59,7 +59,7 @@ function integration(): StartArgs["integration"] {
     _creationTime: 0,
     _id: id<"integrations">("integration"),
     createdAt: 0,
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     credentials: {},
     externalId: "team",
     integration: "slack",

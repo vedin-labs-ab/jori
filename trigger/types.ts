@@ -176,7 +176,7 @@ export type RuntimeMessage = {
   observedAt: number | null
   reactions: string | null
   replyTarget: string | null
-  source: "bot" | "self" | "unknown" | "user"
+  source: "bot" | "person" | "self" | "unknown"
   text: string
   type: string
 }
@@ -190,7 +190,7 @@ export type RuntimeInteraction = {
   observedAt: number | null
   preview: string | null
   reaction: string
-  source: "bot" | "self" | "unknown" | "user"
+  source: "bot" | "person" | "self" | "unknown"
   target: string
   type: "reaction.added" | "reaction.removed"
 }

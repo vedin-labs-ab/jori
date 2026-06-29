@@ -1,5 +1,6 @@
+import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { upsertIdentity } from "../../identity/identities"
+import { linkIdentityToPerson } from "../../persons/links"
 import { readAppOrigin } from "../../shared/app"
 import { type IntegrationOfferSource } from "./schema"
 import { surfaceIdentityProvider } from "./source"
@@ -31,7 +32,7 @@ export async function upsertIntegrationOfferSourceIdentity(
   ctx: MutationCtx,
   args: {
     tenantId: string
-    userId: string
+    personId: Id<"persons">
     source: IntegrationOfferSource
   }
 ) {
@@ -42,11 +43,12 @@ export async function upsertIntegrationOfferSourceIdentity(
     return
   }
 
-  await upsertIdentity(ctx, {
+  await linkIdentityToPerson(ctx, {
     tenantId: args.tenantId,
-    userId: args.userId,
+    personId: args.personId,
     provider,
     externalId: actor.externalId,
+    method: "observed",
     email: actor.email,
     name: actor.name,
   })

@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { automationDisplay, eventAutomationDisplay } from "../display"
 import { summarizeRun } from "../summaries"
@@ -7,7 +8,7 @@ test("includes stopped details for stopped runs", async () => {
   const run = testRun(manualRun("Manual run", "Stop this run."), {
     status: "stopped",
     endedAt: 2000,
-    stoppedBy: { kind: "user", email: "albin@example.com" },
+    stoppedBy: { kind: "person", email: "albin@example.com" },
   })
   const summary = await summarizeRun(
     fakeQueryCtx({
@@ -40,8 +41,8 @@ test("includes approved decision actor details", async () => {
       args: {},
       summary: "Send a message.",
       code: "code",
-      requestedBy: { kind: "user", email: "requester@example.com" },
-      decidedBy: { kind: "user", email: "approver@example.com" },
+      requestedBy: { kind: "person", email: "requester@example.com" },
+      decidedBy: { kind: "person", email: "approver@example.com" },
       status: "approved",
       createdAt: 0,
       expiresAt: 1000,
@@ -175,7 +176,7 @@ function githubIntegration() {
     externalId: "github-installation",
     credentials: {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   }

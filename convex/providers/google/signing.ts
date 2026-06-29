@@ -6,7 +6,7 @@ import { requireGoogleClientSecret } from "./oauth"
 export type GoogleInstallState = {
   integration: GoogleIntegration
   tenantId: string
-  createdBy: string
+  createdBy: Id<"persons">
   returnUrl: string
   createdAt: number
   integrationOfferId?: Id<"integrationOffers">

@@ -6,7 +6,7 @@ import { requireMicrosoftClientSecret } from "./oauth"
 export type MicrosoftInstallState = {
   integration: MicrosoftIntegration
   tenantId: string
-  createdBy: string
+  createdBy: Id<"persons">
   returnUrl: string
   createdAt: number
   integrationOfferId?: Id<"integrationOffers">

@@ -16,7 +16,7 @@ test("handles exact Linear text approval commands", async () => {
     accountId: "linear-org",
     actorEmail: "albin@example.com",
     actorId: "linear-user",
-    actorKind: "user",
+    actorKind: "person",
     actorName: "Albin Vedin",
     text: "approve yd4uefnv",
   })
@@ -32,7 +32,7 @@ test("handles exact Linear text approval commands", async () => {
     decidedBy: {
       email: "albin@example.com",
       externalId: "linear-user",
-      kind: "user",
+      kind: "person",
       name: "Albin Vedin",
     },
     decision: "approved",
@@ -44,7 +44,7 @@ test("lets ordinary Linear messages fall through to intake", async () => {
 
   const handled = await handleLinearApprovalDecision(ctx, {
     accountId: "linear-org",
-    actorKind: "user",
+    actorKind: "person",
     text: "hello milo",
   })
 
@@ -76,7 +76,7 @@ function approvalDoc(): Doc<"approvals"> {
     code: "YD4UEFNV",
     createdAt: 0,
     expiresAt: 1,
-    requestedBy: { kind: "user", userId: "user_1" },
+    requestedBy: { kind: "person", personId: "person_1" as Id<"persons"> },
     runId: "run_1" as Id<"runs">,
     status: "pending",
     summary: "Create a page.",
@@ -91,7 +91,7 @@ function integrationDoc(): Doc<"integrations"> {
     _creationTime: 0,
     _id: "integration_1" as Id<"integrations">,
     createdAt: 0,
-    createdBy: "user_1",
+    createdBy: "person_1" as Id<"persons">,
     credentials: {},
     externalId: "linear-org",
     integration: "linear",

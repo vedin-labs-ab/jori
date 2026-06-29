@@ -39,7 +39,7 @@ function platformContext(): ArtifactPlatformContext {
     tenantId: "tenant",
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
-    userId: "user",
+    personId: "person" as Id<"persons">,
   }
 }
 

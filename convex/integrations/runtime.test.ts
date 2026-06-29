@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { prepareIntegrationForRuntime } from "./runtime"
 
@@ -120,7 +120,7 @@ function githubIntegration(credentials: unknown): Doc<"integrations"> {
     externalId: "98765",
     credentials,
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"integrations">

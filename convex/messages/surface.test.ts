@@ -37,7 +37,7 @@ describe("Slack message identifiers", () => {
     expect(
       messageActorIds(
         message({
-          actor: { externalId: "U123", kind: "user", name: "Albin" },
+          actor: { externalId: "U123", kind: "person", name: "Albin" },
         })
       )
     ).toEqual(["slack:user:U123"])
@@ -54,7 +54,7 @@ describe("Slack message identifiers", () => {
 describe("Linear message identifiers", () => {
   test("exposes Linear issue comment identifiers when available", () => {
     const linearMessage = message({
-      actor: { externalId: "linear-user-id", kind: "user", name: "Albin" },
+      actor: { externalId: "linear-user-id", kind: "person", name: "Albin" },
       data: {
         commentId: "comment-id",
         issueId: "issue-id",
@@ -83,7 +83,7 @@ describe("Linear message identifiers", () => {
 
   test("exposes Linear subcomment identifiers when available", () => {
     const linearMessage = message({
-      actor: { externalId: "linear-user-id", kind: "user", name: "Albin" },
+      actor: { externalId: "linear-user-id", kind: "person", name: "Albin" },
       data: {
         commentId: "reply-id",
         issueId: "issue-id",

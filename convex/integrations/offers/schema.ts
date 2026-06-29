@@ -55,7 +55,7 @@ export const integrationOffers = defineTable({
   delivery: v.optional(integrationOfferDelivery),
   claim: v.optional(
     v.object({
-      userId: v.string(),
+      personId: v.id("persons"),
       actor: v.optional(actorValidator),
       at: v.number(),
     })

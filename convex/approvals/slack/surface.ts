@@ -113,7 +113,7 @@ function actorTitle(label: string, actor: Doc<"approvals">["decidedBy"]) {
     return label
   }
 
-  const surface = actor !== undefined && "userId" in actor ? " in Milo" : ""
+  const surface = actor !== undefined && "personId" in actor ? " in Milo" : ""
 
   return `${label} by ${name}${surface}`
 }

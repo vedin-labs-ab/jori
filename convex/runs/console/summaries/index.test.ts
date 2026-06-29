@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import {
   automationDisplay,
@@ -195,7 +196,7 @@ test("keeps stored automation snapshots when the automation changes", async () =
         instructions: "Updated automation instructions.",
         trigger: { type: "time" },
         access: { integrations: [] },
-        createdBy: "user",
+        createdBy: "person" as Id<"persons">,
         createdAt: 0,
         updatedAt: 0,
       },
@@ -221,7 +222,7 @@ function slackIntegration() {
     externalId: "slack-team",
     credentials: {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
   }

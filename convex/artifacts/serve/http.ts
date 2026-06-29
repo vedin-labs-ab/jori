@@ -85,7 +85,7 @@ export async function handleArtifactToolRequest(
           tenantId: session.tenantId,
           artifactId: session.artifactId,
           versionId: session.versionId,
-          userId: session.userId,
+          personId: session.personId,
         },
         body
       )

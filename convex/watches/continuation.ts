@@ -1,9 +1,9 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { resolveMessageOwner } from "../messages/data"
+import { type MessageIntegration, resolveMessageOwner } from "../messages/data"
 import { maxPendingReadLimit } from "../sessions/cursor"
 import { readPendingMessages, stopSession } from "../sessions/data"
-import { isUserActor } from "../shared/actor"
+import { isPersonActor } from "../shared/actor"
 import { startMessageRun } from "./data"
 
 export async function continuePendingWatchRun(
@@ -70,10 +70,16 @@ async function continueSession(
     return
   }
 
+  if (!isMessageIntegration(pending.message.integration)) {
+    await stopSession(ctx, session, now)
+    return
+  }
+
   await startMessageRun(ctx, {
     integration,
     message: pending.message,
     createdBy: await resolveMessageOwner(ctx, {
+      integration: pending.message.integration,
       tenantId: integration.tenantId,
       message: pending.message,
     }),
@@ -100,7 +106,7 @@ async function readPendingContinuationMessage(
 }
 
 function shouldStartContinuation(message: Doc<"messages">) {
-  if (!isUserActor(message.actor)) {
+  if (!isPersonActor(message.actor)) {
     return false
   }
 
@@ -111,6 +117,16 @@ function hasText(message: Doc<"messages">) {
   const text = message.text?.trim()
 
   return text !== undefined && text !== ""
+}
+
+function isMessageIntegration(
+  integration: Doc<"messages">["integration"]
+): integration is MessageIntegration {
+  return (
+    integration === "github" ||
+    integration === "linear" ||
+    integration === "slack"
+  )
 }
 
 async function isTerminalSession(ctx: MutationCtx, session: Doc<"sessions">) {

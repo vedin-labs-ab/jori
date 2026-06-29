@@ -7,8 +7,8 @@ const target = {
   key: "github:comment:acme/app:123",
   identifiers: ["github:comment:123"],
 }
-const albin = { externalId: "456", kind: "user" as const, name: "Albin" }
-const sarah = { externalId: "789", kind: "user" as const, name: "Sarah" }
+const albin = { externalId: "456", kind: "person" as const, name: "Albin" }
+const sarah = { externalId: "789", kind: "person" as const, name: "Sarah" }
 
 test("reconcile inserts present reactions and tombstones absent ones", async () => {
   const ctx = fakeMutationCtx([["messages", targetMessage()]])
@@ -112,7 +112,7 @@ function githubIntegration(): Doc<"integrations"> {
     externalId: "installation",
     credentials: {},
     status: "active",
-    createdBy: "user",
+    createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
     data: { appSlug: "milo", botLogin: "milo[bot]" },

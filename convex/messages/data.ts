@@ -1,8 +1,8 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
-import { resolveUserIdByEmail } from "../identity/identities"
-import { type Actor, actorValidator, getActorEmail } from "../shared/actor"
+import { resolveActor } from "../persons/resolve"
+import { type Actor, actorValidator } from "../shared/actor"
 import { type Integration } from "../shared/integrations"
 import { messageDataReactionTargetKey } from "./identifiers"
 
@@ -115,12 +115,14 @@ export async function insertMessage(
 export async function resolveMessageOwner(
   ctx: MutationCtx,
   input: {
+    integration: MessageIntegration
     message: ObservedMessage
     tenantId: string
   }
 ) {
-  return await resolveUserIdByEmail(ctx, {
+  return await resolveActor(ctx, {
     tenantId: input.tenantId,
-    email: getActorEmail(input.message.actor),
+    provider: input.integration,
+    actor: input.message.actor,
   })
 }

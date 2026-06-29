@@ -177,5 +177,5 @@ function reactionActorName(actor: Actor | undefined) {
     return actor.kind === "self" ? "Milo" : actor.name
   }
 
-  return "userId" in actor ? actor.name : undefined
+  return "personId" in actor ? actor.name : undefined
 }

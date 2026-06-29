@@ -222,7 +222,7 @@ function getSenderId(payload: GitHubWebhookPayload) {
 }
 
 function getSenderKind(payload: GitHubWebhookPayload) {
-  return payload.sender?.type === "Bot" ? ("bot" as const) : ("user" as const)
+  return payload.sender?.type === "Bot" ? ("bot" as const) : ("person" as const)
 }
 
 function getObservedAt(timestamp: string | undefined) {

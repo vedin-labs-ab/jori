@@ -23,7 +23,7 @@ export async function resolveAccessInput(
   args: {
     access: AutomationAccessInput
     artifactId?: Id<"artifacts">
-    createdBy: string | undefined
+    createdBy: Id<"persons"> | undefined
     tenantId: string
   }
 ): Promise<AutomationAccess> {

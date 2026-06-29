@@ -16,7 +16,7 @@ export type ArtifactToolCacheKeyInput = {
   tenantId: string
   artifactId: Id<"artifacts">
   versionId: Id<"artifactVersions">
-  userId: string
+  personId: Id<"persons">
   surface: string
   tool: string
   integrationId?: Id<"integrations">
@@ -28,7 +28,7 @@ export const read = internalMutation({
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
     versionId: v.id("artifactVersions"),
-    userId: v.string(),
+    personId: v.id("persons"),
     surface: v.string(),
     tool: v.string(),
     integrationId: v.optional(v.id("integrations")),
@@ -60,7 +60,7 @@ export const write = internalMutation({
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
     versionId: v.id("artifactVersions"),
-    userId: v.string(),
+    personId: v.id("persons"),
     surface: v.string(),
     tool: v.string(),
     integrationId: v.optional(v.id("integrations")),
@@ -80,7 +80,7 @@ export const write = internalMutation({
         tenantId: args.tenantId,
         artifactId: args.artifactId,
         versionId: args.versionId,
-        userId: args.userId,
+        personId: args.personId,
         surface: args.surface,
         tool: args.tool,
         integrationId: args.integrationId,
@@ -108,17 +108,17 @@ export const invalidate = internalMutation({
   args: {
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
-    userId: v.string(),
+    personId: v.id("persons"),
     surface: v.string(),
     integrationId: v.optional(v.id("integrations")),
   },
   handler: async (ctx, args) => {
     const documents = await ctx.db
       .query("artifactCaches")
-      .withIndex("by_artifact_and_user_and_surface", (index) =>
+      .withIndex("by_artifact_and_person_and_surface", (index) =>
         index
           .eq("artifactId", args.artifactId)
-          .eq("userId", args.userId)
+          .eq("personId", args.personId)
           .eq("surface", args.surface)
       )
       .take(maintenanceLimit)
@@ -175,7 +175,7 @@ async function findCacheDocument(
     tenantId: string
     artifactId: Id<"artifacts">
     versionId: Id<"artifactVersions">
-    userId: string
+    personId: Id<"persons">
     surface: string
     tool: string
     integrationId?: Id<"integrations">
@@ -195,7 +195,7 @@ async function findCacheDocument(
 
   return document.tenantId === args.tenantId &&
     document.versionId === args.versionId &&
-    document.userId === args.userId &&
+    document.personId === args.personId &&
     document.surface === args.surface &&
     document.tool === args.tool &&
     document.integrationId === args.integrationId

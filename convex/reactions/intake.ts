@@ -1,8 +1,14 @@
 import { v } from "convex/values"
 import { internalMutation } from "../_generated/server"
+import { resolveActor } from "../persons/resolve"
 import { actorValidator } from "../shared/actor"
 import { reconcileTargetReactions, recordReactionEvent } from "./apply"
-import { findActiveReactionIntegration } from "./data"
+import {
+  findActiveReactionIntegration,
+  type ReactionIntegration,
+  type ReactionSnapshotItem,
+  type ReactionTarget,
+} from "./data"
 import { reactionAction, reactionTarget } from "./schema"
 
 const reactionIntegration = v.union(
@@ -31,6 +37,12 @@ export const record = internalMutation({
       return { status: "missing_integration" as const }
     }
 
+    await resolveReactionActors(ctx, {
+      actor: args.actor,
+      integration,
+      provider: args.integration,
+      target: args.target,
+    })
     const result = await recordReactionEvent(ctx, {
       action: args.action,
       actor: args.actor,
@@ -67,6 +79,13 @@ export const sync = internalMutation({
       return { status: "missing_integration" as const }
     }
 
+    await resolveReactionActors(ctx, {
+      integration,
+      provider: args.integration,
+      reactions: args.reactions,
+      target: args.target,
+    })
+
     return {
       status: "synced" as const,
       ...(await reconcileTargetReactions(ctx, {
@@ -77,3 +96,35 @@ export const sync = internalMutation({
     }
   },
 })
+
+async function resolveReactionActors(
+  ctx: Parameters<typeof resolveActor>[0],
+  args: {
+    actor?: ReactionSnapshotItem["actor"]
+    integration: NonNullable<
+      Awaited<ReturnType<typeof findActiveReactionIntegration>>
+    >
+    provider: ReactionIntegration
+    reactions?: ReactionSnapshotItem[]
+    target: ReactionTarget
+  }
+) {
+  await resolveActor(ctx, {
+    actor: args.actor,
+    provider: args.provider,
+    tenantId: args.integration.tenantId,
+  })
+  await resolveActor(ctx, {
+    actor: args.target.actor,
+    provider: args.provider,
+    tenantId: args.integration.tenantId,
+  })
+
+  for (const reaction of args.reactions ?? []) {
+    await resolveActor(ctx, {
+      actor: reaction.actor,
+      provider: args.provider,
+      tenantId: args.integration.tenantId,
+    })
+  }
+}

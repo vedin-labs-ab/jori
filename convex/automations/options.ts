@@ -3,8 +3,8 @@ import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
+import { ensureCurrentPersonFromAction } from "../persons/clerk"
 import { integrationValidator } from "../shared/integrations"
 import {
   integrationUsesAutomationEventOptionSource,
@@ -27,7 +27,7 @@ export const search = action({
     match: v.optional(matchValidator),
   },
   handler: async (ctx, args): Promise<AutomationEventOptionSearchResult> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    await requireTenantAccess(ctx, args.tenantId)
 
     if (
       !isAutomationEventOptionSource(args.source) ||
@@ -41,7 +41,7 @@ export const search = action({
       {
         tenantId: args.tenantId,
         integration: args.integration,
-        createdBy: requireClerkUserId(identity),
+        createdBy: await ensureCurrentPersonFromAction(ctx, args.tenantId),
       }
     )
 
@@ -76,7 +76,7 @@ export const integration = internalQuery({
   args: {
     tenantId: v.string(),
     integration: integrationValidator,
-    createdBy: v.string(),
+    createdBy: v.id("persons"),
   },
   handler: async (ctx, args): Promise<IntegrationLookup> => {
     try {
