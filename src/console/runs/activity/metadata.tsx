@@ -1,8 +1,8 @@
 import {
   AlertCircle,
   Bot,
-  CheckCircle2,
-  Cpu,
+  Brain,
+  Check,
   FileText,
   Hourglass,
   type LucideIcon,
@@ -32,7 +32,7 @@ const kindIcons = {
   agent: Bot,
   approval: ShieldCheck,
   asset: Package,
-  model: Cpu,
+  model: Brain,
   offer: Plug,
   run: Play,
   tool: Wrench,
@@ -118,7 +118,7 @@ function itemIcon(item: ActivityItem) {
 
 function runIcon(status: ActivityStatus) {
   if (status === "completed") {
-    return CheckCircle2
+    return Check
   }
 
   if (status === "failed") {
