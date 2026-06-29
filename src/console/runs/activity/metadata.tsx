@@ -20,6 +20,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import { formatDuration } from "../../shared/time"
 import { MetaPill } from "../row/status"
 import {
@@ -62,10 +63,12 @@ export function ActivityIcon({ item }: { item: ActivityItem }) {
 
 export function ActivityTimelineIcon({
   icon,
+  iconClassName,
   kind,
   status,
 }: {
   icon?: LucideIcon
+  iconClassName?: string
   kind: ActivityKind
   status: ActivityStatus
 }) {
@@ -81,7 +84,12 @@ export function ActivityTimelineIcon({
           role="img"
         >
           <span className="inline-flex size-4 items-center justify-center">
-            <Icon className="size-3.5 text-muted-foreground" />
+            <Icon
+              className={cn(
+                "size-3.5 text-muted-foreground transition-colors",
+                iconClassName
+              )}
+            />
           </span>
         </span>
       </TooltipTrigger>
