@@ -99,10 +99,7 @@ function toolDescription(
     return undefined
   }
 
-  return (
-    inputDescription(readToolInput(started)) ??
-    resultDescription(readToolResult(terminal))
-  )
+  return inputDescription(readToolInput(started))
 }
 
 function toolMetadata(
@@ -178,16 +175,6 @@ function resultDetails(result: ReturnType<typeof readToolResult>) {
       ? undefined
       : { label: "Result size", value: String(result.size) },
   ].filter((detail) => detail !== undefined)
-}
-
-function resultDescription(result: ReturnType<typeof readToolResult>) {
-  if (result === undefined) {
-    return undefined
-  }
-
-  return result.size === undefined
-    ? `Returned ${result.type}.`
-    : `Returned ${result.type} (${result.size}).`
 }
 
 function errorDetails(error: string | undefined): ActivityDetail[] {
