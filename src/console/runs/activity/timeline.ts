@@ -96,6 +96,8 @@ function toolGroupTitle(
         : `Ran ${items.length} actions`
     case "read":
       return isRunning ? "Reading files" : "Read files"
+    case "reaction":
+      return isRunning ? "Adding reactions" : "Added reactions"
     case "send":
       return isRunning ? "Sending replies" : "Sent replies"
     case "web-fetch":

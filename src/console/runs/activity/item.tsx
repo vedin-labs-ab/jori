@@ -1,4 +1,4 @@
-import { ChevronDown, FileText, Search, Send } from "lucide-react"
+import { ChevronDown, FileText, Search, Send, SmilePlus } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import {
   Task,
@@ -276,6 +276,8 @@ function toolGroupIcon(
     case "read":
     case "web-fetch":
       return FileText
+    case "reaction":
+      return SmilePlus
     case "send":
       return Send
     case "web-search":

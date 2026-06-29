@@ -12,6 +12,7 @@ import {
   Search,
   Send,
   ShieldCheck,
+  SmilePlus,
   Square,
   Timer,
   Wrench,
@@ -112,6 +113,10 @@ function itemIcon(item: ActivityItem) {
 
   if (title.includes("send") || title.includes("reply")) {
     return Send
+  }
+
+  if (title.includes("reaction")) {
+    return SmilePlus
   }
 
   if (title.includes("search") || title.includes("find")) {

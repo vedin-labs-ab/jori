@@ -96,3 +96,14 @@ test("summarizes email write metadata without body content", () => {
     ],
   })
 })
+
+test.each([
+  ["add_reaction", { reaction: "thumbsup" }, "👍"],
+  ["slack_add_reaction", { name: "white_check_mark" }, "✅"],
+  ["github_add_comment_reaction", { content: "hooray" }, "🎉"],
+  ["linear_add_reaction", { emoji: "👍" }, "👍"],
+] as const)("formats %s reaction metadata as emoji", (tool, input, reaction) => {
+  expect(toolInputMetadataTrace(tool, input)).toEqual({
+    metadata: [{ kind: "target", text: reaction }],
+  })
+})

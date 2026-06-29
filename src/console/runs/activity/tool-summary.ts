@@ -1,6 +1,7 @@
 export type ActivityToolKind =
   | "generic"
   | "read"
+  | "reaction"
   | "send"
   | "web-fetch"
   | "web-search"
@@ -74,6 +75,10 @@ export function activityToolKindForTitle(title: string): ActivityToolKind {
     return "web-fetch"
   }
 
+  if (normalizedTitle.includes("reaction")) {
+    return "reaction"
+  }
+
   if (normalizedTitle.includes("send") || normalizedTitle.includes("reply")) {
     return "send"
   }
@@ -91,6 +96,8 @@ function activityToolCount(count: number, toolKind: ActivityToolKind) {
       return countText(count, "action")
     case "read":
       return countText(count, "file")
+    case "reaction":
+      return countText(count, "reaction")
     case "send":
       return countText(count, "reply")
     case "web-fetch":

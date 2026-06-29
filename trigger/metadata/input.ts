@@ -9,6 +9,7 @@ import {
   readString,
   readStringArray,
 } from "./helpers"
+import { reactionInputMetadata } from "./reactions"
 
 export function toolInputMetadata(
   tool: string,
@@ -16,6 +17,10 @@ export function toolInputMetadata(
 ): RuntimeToolMetadataItem[] {
   if (tool === "send_reply") {
     return []
+  }
+
+  if (tool.includes("reaction")) {
+    return compactMetadata(reactionInputMetadata(input))
   }
 
   return compactMetadata([
@@ -89,16 +94,6 @@ function githubInputMetadata(tool: string, input: Record<string, unknown>) {
 }
 
 function messageInputMetadata(tool: string, input: Record<string, unknown>) {
-  if (tool.includes("reaction")) {
-    return [
-      item(
-        "target",
-        reactionLabel(readString(input.name) ?? readString(input.reaction))
-      ),
-      item("scope", targetObjectLabel(input.target)),
-    ]
-  }
-
   if (tool.includes("search")) {
     return [item("target", readString(input.query) ?? readString(input.q))]
   }
@@ -226,10 +221,6 @@ function targetObjectLabel(value: unknown) {
   }
 
   return type === undefined ? id : `${type} ${id}`
-}
-
-function reactionLabel(value: string | undefined) {
-  return value === undefined ? undefined : `:${value.replace(/^:+|:+$/g, "")}:`
 }
 
 function arrayLength(value: unknown) {
