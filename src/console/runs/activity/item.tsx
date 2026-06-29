@@ -1,6 +1,4 @@
-import { ChevronDown } from "lucide-react"
 import { useState } from "react"
-import { cn } from "@/lib/utils"
 import {
   RunRowBody,
   RunRowContent,
@@ -9,7 +7,7 @@ import {
   RunRowHeader,
   RunRowMeta,
 } from "../row/layout"
-import { ActivityBadges, ActivityIcon, ActivityTime } from "./metadata"
+import { ActivityIcon, ActivityMeta } from "./metadata"
 import { type ActivityItem as ActivityItemType } from "./types"
 
 export function ActivityItem({
@@ -23,33 +21,23 @@ export function ActivityItem({
   const hasDetails = item.details !== undefined && item.details.length > 0
 
   return (
-    <RunRowFrame className="bg-background/80">
+    <RunRowFrame>
       <RunRowHeader>
         <RunRowControl
           onClick={
             hasDetails ? () => setIsOpen((current) => !current) : undefined
           }
         >
-          <ActivityIcon item={item} />
+          <ActivityIcon isExpandable={hasDetails} item={item} />
           <RunRowContent title={item.title}>
             {item.description === undefined ? null : (
               <p className="line-clamp-2 text-muted-foreground text-xs/relaxed">
                 {item.description}
               </p>
             )}
-            <ActivityTime item={item} now={now} />
           </RunRowContent>
-          <RunRowMeta className="items-center gap-2">
-            <ActivityBadges item={item} />
-            {hasDetails ? (
-              <ChevronDown
-                aria-hidden="true"
-                className={cn(
-                  "size-4 shrink-0 text-muted-foreground transition-transform duration-150",
-                  isOpen && "rotate-180"
-                )}
-              />
-            ) : null}
+          <RunRowMeta>
+            <ActivityMeta item={item} now={now} />
           </RunRowMeta>
         </RunRowControl>
       </RunRowHeader>

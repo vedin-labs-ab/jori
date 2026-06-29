@@ -19,6 +19,8 @@ test("expands activity details from the row control", () => {
   const row = screen.getByRole("button", { name: /read file/i })
 
   expect(screen.queryByText("Path")).toBeNull()
+  expect(screen.queryByText("done")).toBeNull()
+  expect(screen.getByText("1s")).toBeDefined()
 
   fireEvent.click(row)
 
