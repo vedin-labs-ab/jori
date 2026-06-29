@@ -104,6 +104,28 @@ test("omits low-value send reply result descriptions", () => {
   expect(screen.queryByText("Returned object (1).")).toBeNull()
 })
 
+test("renders compact tool metadata instead of generic descriptions", () => {
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          description: "Returned object (3).",
+          metadata: [
+            { kind: "target", text: "current example" },
+            { kind: "outcome", text: "3 results" },
+          ],
+          title: "Search web",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(screen.getByText("current example")).toBeDefined()
+  expect(screen.getByText("3 results")).toBeDefined()
+  expect(screen.queryByText("Returned object (3).")).toBeNull()
+})
+
 test("groups consecutive tool calls into an expandable task", () => {
   render(
     <TooltipProvider>

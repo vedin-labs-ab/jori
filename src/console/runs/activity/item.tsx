@@ -13,6 +13,7 @@ import {
   ActivityIcon,
   ActivityMeta,
   ActivityTimelineIcon,
+  ActivityToolMetadata,
 } from "./metadata"
 import { type ActivityTimelineEntry, createActivityTimeline } from "./timeline"
 import { type ActivityItem as ActivityItemType } from "./types"
@@ -102,6 +103,10 @@ function activityDescription(item: ActivityItemType) {
     return <ActivityTokenUsage usage={item.tokenUsage} />
   }
 
+  if (item.metadata !== undefined && item.metadata.length > 0) {
+    return <ActivityToolMetadata items={item.metadata} />
+  }
+
   if (item.kind === "tool" && item.title.toLowerCase() === "send reply") {
     return undefined
   }
@@ -160,15 +165,17 @@ function ToolGroup({
 }
 
 function ToolGroupItem({ item }: { item: ActivityItemType }) {
+  const description = activityDescription(item)
+
   return (
     <TaskItem className="grid h-7 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-xs">
       <div className="flex min-w-0 items-center gap-3">
         <span className="min-w-0 truncate font-medium text-foreground">
           {item.title}
         </span>
-        {item.description === undefined ? null : (
+        {description === undefined ? null : (
           <span className="min-w-0 truncate text-muted-foreground">
-            {item.description}
+            {description}
           </span>
         )}
       </div>

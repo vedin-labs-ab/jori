@@ -12,8 +12,11 @@ export type {
 export {
   agentTaskId,
   cleanupTaskId,
+  type RuntimeToolMetadataItem,
   type SurfaceReactionTarget,
 } from "../contracts/runtime"
+
+import { type RuntimeToolMetadataItem } from "../contracts/runtime"
 
 export type ConvexId<TableName extends string> = GenericId<TableName>
 
@@ -77,6 +80,7 @@ export type RuntimeToolTraceData = {
   name: string
   route: RuntimeToolRoute
   error?: string
+  metadata?: RuntimeToolMetadataItem[]
   providerTrace?: {
     provider: string
     requestId: string

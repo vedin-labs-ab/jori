@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { toolInputMetadataTrace, toolResultMetadataTrace } from "./metadata"
 import { toolInputTrace } from "./trace"
 
 test("summarizes git tool inputs without command output", () => {
@@ -46,4 +47,52 @@ test("does not summarize unknown or completed tool calls", () => {
   expect(toolInputTrace("git", { args: ["status"] }, "tool.completed")).toEqual(
     {}
   )
+})
+
+test("summarizes web search metadata without exposing result snippets", () => {
+  const input = {
+    query: "current example",
+    includeDomains: ["example.com"],
+  }
+
+  expect(toolInputMetadataTrace("web_search", input)).toEqual({
+    metadata: [
+      { kind: "target", text: "current example" },
+      { kind: "scope", text: "in example.com" },
+    ],
+  })
+  expect(
+    toolResultMetadataTrace("web_search", input, {
+      provider: { name: "exa", requestId: "request-1" },
+      results: [
+        {
+          title: "Private title",
+          snippet: "Sensitive page excerpt",
+          url: "https://example.com/a",
+        },
+      ],
+      truncated: false,
+    })
+  ).toEqual({
+    metadata: [
+      { kind: "target", text: "current example" },
+      { kind: "scope", text: "in example.com" },
+      { kind: "outcome", text: "1 result" },
+    ],
+  })
+})
+
+test("summarizes email write metadata without body content", () => {
+  expect(
+    toolInputMetadataTrace("google_gmail_send_message", {
+      body: "Do not show this body",
+      subject: "Launch notes",
+      to: ["ada@example.com", "grace@example.com"],
+    })
+  ).toEqual({
+    metadata: [
+      { kind: "target", text: "Launch notes" },
+      { kind: "scope", text: "2 recipients" },
+    ],
+  })
 })

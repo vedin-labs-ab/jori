@@ -1,4 +1,8 @@
-import { type ActivityStatus, type ToolLabel } from "./types"
+import {
+  type ActivityMetadataItem,
+  type ActivityStatus,
+  type ToolLabel,
+} from "./types"
 
 export type EventData = {
   metrics?: {
@@ -70,6 +74,12 @@ export function readToolInput(data: unknown) {
   return asRecord(asRecord(data)?.input)
 }
 
+export function readToolMetadata(data: unknown): ActivityMetadataItem[] {
+  const metadata = asRecord(data)?.metadata
+
+  return Array.isArray(metadata) ? metadata.flatMap(readMetadataItem) : []
+}
+
 export function readToolName(data: unknown) {
   return readString(asRecord(data)?.name)
 }
@@ -120,6 +130,27 @@ function readPreparedTool(value: unknown): ToolLabel[] {
       tool,
     },
   ]
+}
+
+function readMetadataItem(value: unknown): ActivityMetadataItem[] {
+  if (!isRecord(value)) {
+    return []
+  }
+
+  const kind = readMetadataKind(value.kind)
+  const text = readString(value.text)
+
+  return kind === undefined || text === undefined ? [] : [{ kind, text }]
+}
+
+function readMetadataKind(
+  value: unknown
+): ActivityMetadataItem["kind"] | undefined {
+  if (value === "target" || value === "scope" || value === "outcome") {
+    return value
+  }
+
+  return undefined
 }
 
 function readMetrics(value: unknown): EventData["metrics"] {

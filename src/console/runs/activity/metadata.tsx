@@ -169,6 +169,32 @@ export function ActivityEntryMeta({
   )
 }
 
+export function ActivityToolMetadata({
+  items,
+}: {
+  items: NonNullable<ActivityItem["metadata"]>
+}) {
+  return (
+    <span className="inline-flex min-w-0 items-center overflow-hidden">
+      {items.map((item, index) => (
+        <span
+          className="inline-flex min-w-0 items-center"
+          key={metadataKey(item)}
+        >
+          {index === 0 ? null : (
+            <span className="mx-1.5 shrink-0 text-muted-foreground/70">·</span>
+          )}
+          <span className="min-w-0 truncate">{item.text}</span>
+        </span>
+      ))}
+    </span>
+  )
+}
+
+function metadataKey(item: NonNullable<ActivityItem["metadata"]>[number]) {
+  return `${item.kind}:${item.text}`
+}
+
 function ActivityLiveIndicator({ isLive }: { isLive: boolean }) {
   if (!isLive) {
     return null
