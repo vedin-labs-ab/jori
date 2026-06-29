@@ -17,8 +17,8 @@ import {
   type ModelRuntime,
   type ModelTool,
   type ModelToolCall,
-  type ModelUsage,
 } from "./types"
+import { readModelUsage } from "./usage"
 
 const agentModel = "openai/gpt-5.5"
 // The first turn produces the start update and is optimized for latency; later
@@ -188,39 +188,4 @@ function readToolCall(toolCall: {
       name: toolCall.toolName,
     },
   ]
-}
-
-function readModelUsage(response: { usage?: unknown }): ModelUsage | undefined {
-  const usage = response.usage
-
-  if (typeof usage !== "object" || usage === null) {
-    return undefined
-  }
-
-  return compactUsage({
-    inputTokens: readNumber(usage, "inputTokens"),
-    outputTokens: readNumber(usage, "outputTokens"),
-    reasoningTokens: readNumber(usage, "reasoningTokens"),
-    totalTokens: readNumber(usage, "totalTokens"),
-  })
-}
-
-function compactUsage(usage: ModelUsage) {
-  const entries = Object.entries(usage).filter(
-    ([, value]) => value !== undefined
-  )
-
-  return entries.length === 0
-    ? undefined
-    : (Object.fromEntries(entries) as ModelUsage)
-}
-
-function readNumber(record: object, key: string) {
-  if (!(key in record)) {
-    return undefined
-  }
-
-  const value = record[key as keyof typeof record]
-
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }

@@ -90,7 +90,10 @@ function modelMetrics(
 ): RuntimeTraceMetrics {
   return {
     durationMs,
+    inputCacheReadTokens: response.usage?.inputCacheReadTokens,
+    inputCacheWriteTokens: response.usage?.inputCacheWriteTokens,
     inputTokens: response.usage?.inputTokens,
+    inputUncachedTokens: response.usage?.inputUncachedTokens,
     outputTokens: response.usage?.outputTokens,
     reasoningTokens: response.usage?.reasoningTokens,
     toolCalls: response.type === "tool_calls" ? response.toolCalls.length : 0,

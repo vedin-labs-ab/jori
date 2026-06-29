@@ -124,7 +124,10 @@ const traceSubject = v.union(
 const traceMetricSummary = v.object({
   approvals: v.optional(v.number()),
   durationMs: v.optional(v.number()),
+  inputCacheReadTokens: v.optional(v.number()),
+  inputCacheWriteTokens: v.optional(v.number()),
   inputTokens: v.optional(v.number()),
+  inputUncachedTokens: v.optional(v.number()),
   messages: v.optional(v.number()),
   offers: v.optional(v.number()),
   outputTokens: v.optional(v.number()),

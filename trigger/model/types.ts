@@ -30,7 +30,10 @@ export type ModelToolCall = {
 }
 
 export type ModelUsage = {
+  inputCacheReadTokens?: number
+  inputCacheWriteTokens?: number
   inputTokens?: number
+  inputUncachedTokens?: number
   outputTokens?: number
   reasoningTokens?: number
   totalTokens?: number

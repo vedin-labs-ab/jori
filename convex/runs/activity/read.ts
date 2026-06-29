@@ -7,7 +7,10 @@ import {
 export type EventData = {
   metrics?: {
     durationMs?: number
+    inputCacheReadTokens?: number
+    inputCacheWriteTokens?: number
     inputTokens?: number
+    inputUncachedTokens?: number
     outputTokens?: number
     reasoningTokens?: number
     toolCalls?: number
@@ -160,7 +163,10 @@ function readMetrics(value: unknown): EventData["metrics"] {
 
   return {
     durationMs: readNumber(value.durationMs),
+    inputCacheReadTokens: readNumber(value.inputCacheReadTokens),
+    inputCacheWriteTokens: readNumber(value.inputCacheWriteTokens),
     inputTokens: readNumber(value.inputTokens),
+    inputUncachedTokens: readNumber(value.inputUncachedTokens),
     outputTokens: readNumber(value.outputTokens),
     reasoningTokens: readNumber(value.reasoningTokens),
     toolCalls: readNumber(value.toolCalls),
