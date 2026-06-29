@@ -9,25 +9,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CodeBlockBody, CopyButton } from "../../shared/details"
-import { ActivityToolMetadata } from "./tool-metadata"
-import { type ActivityItem } from "./types"
+import { activityToolFailureSummary } from "./tool-summary"
 
 export function ActivityFailureDescription({
   error,
-  metadata,
   title,
 }: {
   error: string
-  metadata: ActivityItem["metadata"]
   title: string
 }) {
   return (
     <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
-      {metadata === undefined || metadata.length === 0 ? null : (
-        <span className="inline-flex min-w-0 flex-1 basis-0 items-center overflow-hidden">
-          <ActivityToolMetadata items={metadata} />
-        </span>
-      )}
+      <span className="min-w-0 truncate text-muted-foreground">
+        {activityToolFailureSummary(title)}
+      </span>
       <ActivityErrorAction title={title} value={error} />
     </span>
   )
