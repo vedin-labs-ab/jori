@@ -24,6 +24,7 @@ export const microsoftToolPermissionRows = [
     "Send a new email from your Outlook account.",
     "Send a new Outlook email. Use for a fresh message; create a draft instead when the user should review first.",
     "write",
+    "required",
   ],
   [
     "microsoftEmail",

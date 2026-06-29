@@ -57,5 +57,6 @@ export const slackToolPermissionRows = [
     "React to a Slack message with an emoji.",
     "Add an emoji reaction to a Slack message. Use as a lightweight acknowledgement instead of a worded reply.",
     "write",
+    "required",
   ],
 ] satisfies ToolPermissionRow[]

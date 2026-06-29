@@ -98,7 +98,6 @@ export const githubToolPermissionRows = [
     "Commit local source changes to an existing pull request.",
     "Append a non-force commit with local workspace changes to an existing same-repository pull request branch. Use after editing and verifying a cloned repo.",
     "write",
-    "prompted",
   ],
   [
     "github",
@@ -107,7 +106,6 @@ export const githubToolPermissionRows = [
     "Create a GitHub pull request.",
     "Create a pull request, optionally from local workspace changes on a new branch. Use after editing and verifying a cloned repo.",
     "write",
-    "prompted",
   ],
   [
     "github",
@@ -116,6 +114,7 @@ export const githubToolPermissionRows = [
     "React to a GitHub issue comment or pull request review comment.",
     "Add a GitHub reaction to an issue comment, pull request conversation comment, or inline review comment by comment ID.",
     "write",
+    "required",
   ],
   [
     "github",
@@ -124,6 +123,5 @@ export const githubToolPermissionRows = [
     "Update GitHub pull request metadata.",
     "Update pull request metadata such as title, body, state, base branch, or maintainer edit permissions.",
     "write",
-    "prompted",
   ],
 ] satisfies ToolPermissionRow[]
