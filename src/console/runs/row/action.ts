@@ -72,16 +72,16 @@ const approvalClasses = {
   cancelled: "text-muted-foreground",
   expired: "text-warning",
   failed: "text-destructive",
-  pending: "text-warning",
+  pending: "text-muted-foreground",
 } satisfies Record<ApprovalState, string>
 
 const offerClasses = {
   cancelled: "text-muted-foreground",
-  claimed: "text-warning",
+  claimed: "text-muted-foreground",
   connected: "text-emerald-800",
   expired: "text-warning",
   failed: "text-destructive",
-  pending: "text-warning",
+  pending: "text-muted-foreground",
 } satisfies Record<OfferState, string>
 
 export function getActionStatus({

@@ -105,7 +105,6 @@ function OfferActions({
     <div className="grid gap-2">
       <div className="flex flex-wrap justify-end gap-2">
         <Button
-          className="text-destructive hover:text-destructive"
           disabled={pendingAction !== undefined}
           onClick={() => void submit("cancel")}
           size="sm"
@@ -150,18 +149,45 @@ async function connectOffer(
     throw new Error("Missing VITE_CONVEX_SITE_URL.")
   }
 
-  const result = await claim({
-    ...offerIds(offer, runId, tenantId),
-    returnUrl: runOfferReturnUrl(),
-  })
+  const tab = openConnectTab()
 
-  if (result.status === "connected") {
-    return
+  try {
+    const result = await claim({
+      ...offerIds(offer, runId, tenantId),
+      returnUrl: runOfferReturnUrl(),
+    })
+
+    if (result.status === "connected") {
+      tab.close()
+      return
+    }
+
+    tab.location.href = installUrl(result).toString()
+  } catch (caught) {
+    tab.close()
+    throw caught instanceof Error
+      ? caught
+      : new Error("Could not open integration offer.")
   }
+}
 
+function installUrl(result: Extract<ClaimResult, { status: "ready" }>) {
   const installUrl = new URL(result.installPath, convexSiteUrl)
   installUrl.searchParams.set("state", result.state)
-  window.location.assign(installUrl.toString())
+
+  return installUrl
+}
+
+function openConnectTab() {
+  const tab = window.open("about:blank", "_blank")
+
+  if (tab === null) {
+    throw new Error("Could not open integration offer.")
+  }
+
+  tab.opener = null
+
+  return tab
 }
 
 function cancelArgs(offer: Offer, runId: string, tenantId: string): CancelArgs {

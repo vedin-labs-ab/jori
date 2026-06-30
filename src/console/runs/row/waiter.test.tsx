@@ -22,7 +22,7 @@ test("uses a neutral waiting icon for active waiters", () => {
   expect(status.querySelector(".animate-spin")).toBeNull()
 })
 
-test("uses a warning waiting icon for live integration offers", () => {
+test("uses a muted waiting icon for live integration offers", () => {
   render(
     <TooltipProvider>
       <StatusIcon
@@ -37,6 +37,6 @@ test("uses a warning waiting icon for live integration offers", () => {
 
   const status = screen.getByRole("img", { name: "Completed, Needs action" })
 
-  expect(status.querySelector(".text-warning")).not.toBeNull()
+  expect(status.querySelector(".text-muted-foreground")).not.toBeNull()
   expect(status.querySelector(".animate-spin")).toBeNull()
 })
