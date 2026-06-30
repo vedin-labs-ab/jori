@@ -156,18 +156,18 @@ export function RunRequestSection({
 }) {
   return (
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
-      <div className="flex items-start gap-2 font-medium">
+      <div className="flex items-start gap-1.5 font-medium">
         <LabelIcon className="mt-0.5 size-3.5 text-muted-foreground" />
         {label}
       </div>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="inline-flex min-w-0 items-center gap-2 font-medium text-sm">
+          <span className="inline-flex min-w-0 items-center gap-1.5 font-medium text-sm">
             {titleIcon}
             <span className="truncate">{title}</span>
           </span>
         </div>
-        <p className="mt-3 text-foreground text-sm leading-relaxed">
+        <p className="mt-2.5 text-foreground text-sm leading-relaxed">
           {summary}
         </p>
         <RunRequestFooter actions={actions} meta={meta} />
@@ -188,7 +188,7 @@ function RunRequestFooter({
   }
 
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
       <RunRequestMetaItem meta={meta} />
       {actions ?? null}
     </div>
