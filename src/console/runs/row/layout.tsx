@@ -1,4 +1,8 @@
-import { type ReactNode } from "react"
+import {
+  type FocusEventHandler,
+  type PointerEventHandler,
+  type ReactNode,
+} from "react"
 import { cn } from "@/lib/utils"
 
 export function RunRowFrame({
@@ -49,10 +53,14 @@ export function RunRowControl({
   children,
   className,
   onClick,
+  onFocus,
+  onPointerEnter,
 }: {
   children: ReactNode
   className?: string
+  onFocus?: FocusEventHandler<HTMLButtonElement>
   onClick?: () => void
+  onPointerEnter?: PointerEventHandler<HTMLButtonElement>
 }) {
   const controlClassName = cn(
     "group/run-row grid min-w-0 flex-1 grid-cols-[auto_1fr] items-center gap-3 p-3 text-left outline-none md:grid-cols-[auto_1fr_auto]",
@@ -64,7 +72,13 @@ export function RunRowControl({
   }
 
   return (
-    <button className={controlClassName} onClick={onClick} type="button">
+    <button
+      className={controlClassName}
+      onClick={onClick}
+      onFocus={onFocus}
+      onPointerEnter={onPointerEnter}
+      type="button"
+    >
       {children}
     </button>
   )

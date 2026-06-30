@@ -21,7 +21,7 @@ afterEach(() => {
   cleanup()
 })
 
-test("renders recurring automation details", () => {
+test("renders recurring automation details", async () => {
   renderExecutionRow(
     execution({
       task: "Generate a team image.",
@@ -54,6 +54,8 @@ test("renders recurring automation details", () => {
   expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
 
   fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
+
+  await screen.findByText("Tools")
 
   expect(screen.getByText("Milo")).toBeDefined()
   expect(screen.getAllByText("Daily at 09:00 UTC").length).toBeGreaterThan(1)

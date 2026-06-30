@@ -1,11 +1,9 @@
 import { Timer } from "lucide-react"
-import { memo, useState } from "react"
-import { ErrorDetail, RelativeTime } from "../../shared/details"
+import { lazy, memo, Suspense, useCallback, useState } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { RelativeTime } from "../../shared/details"
 import { formatDuration, relativeTime } from "../../shared/time"
-import { RunActivity } from "../activity"
 import { type ExecutionItem } from "../types"
-import { ApprovalCallout } from "./approval"
-import { ExecutionFacts } from "./facts"
 import {
   RunRowBody,
   RunRowContent,
@@ -17,7 +15,17 @@ import {
 import { SourceLine } from "./source"
 import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
 import { StopExecution } from "./stop"
-import { TaskDetail } from "./task"
+
+let expandedExecutionModule: Promise<typeof import("./expanded")> | undefined
+
+function loadExpandedExecution() {
+  expandedExecutionModule ??= import("./expanded")
+  return expandedExecutionModule
+}
+
+const ExpandedExecution = lazy(async () => ({
+  default: (await loadExpandedExecution()).ExpandedExecution,
+}))
 
 export const ExecutionRow = memo(function ExecutionRow({
   execution,
@@ -29,6 +37,9 @@ export const ExecutionRow = memo(function ExecutionRow({
   tenantId: string
 }) {
   const [isOpen, setIsOpen] = useState(false)
+  const preloadExpandedExecution = useCallback(() => {
+    void loadExpandedExecution()
+  }, [])
   const durationMs = durationFor(execution, now)
   const isOngoing =
     execution.status === "queued" || execution.status === "running"
@@ -46,7 +57,14 @@ export const ExecutionRow = memo(function ExecutionRow({
           ) : undefined
         }
       >
-        <RunRowControl onClick={() => setIsOpen((current) => !current)}>
+        <RunRowControl
+          onClick={() => {
+            preloadExpandedExecution()
+            setIsOpen((current) => !current)
+          }}
+          onFocus={preloadExpandedExecution}
+          onPointerEnter={preloadExpandedExecution}
+        >
           <StatusIcon
             approval={execution.approval}
             now={now}
@@ -63,11 +81,13 @@ export const ExecutionRow = memo(function ExecutionRow({
         </RunRowControl>
       </RunRowHeader>
       {isOpen ? (
-        <ExpandedExecution
-          execution={execution}
-          now={now}
-          tenantId={tenantId}
-        />
+        <Suspense fallback={<ExpandedExecutionFallback />}>
+          <ExpandedExecution
+            execution={execution}
+            now={now}
+            tenantId={tenantId}
+          />
+        </Suspense>
       ) : null}
     </RunRowFrame>
   )
@@ -112,30 +132,23 @@ function ExecutionMeta({
   )
 }
 
-function ExpandedExecution({
-  execution,
-  now,
-  tenantId,
-}: {
-  execution: ExecutionItem
-  now: number
-  tenantId: string
-}) {
+function ExpandedExecutionFallback() {
   return (
     <RunRowBody>
-      <TaskDetail sourceUrl={execution.source.url} task={execution.task} />
-      <ExecutionFacts details={execution.details} />
-      {execution.approval !== null ? (
-        <ApprovalCallout
-          approval={execution.approval}
-          now={now}
-          tenantId={tenantId}
-        />
-      ) : null}
-      {execution.error !== undefined ? (
-        <ErrorDetail value={execution.error} />
-      ) : null}
-      <RunActivity now={now} runId={execution.id} tenantId={tenantId} />
+      <div
+        aria-label="Loading run details"
+        className="grid gap-3 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]"
+        role="status"
+      >
+        <div className="flex items-center gap-2">
+          <Skeleton className="size-3.5" />
+          <Skeleton className="h-3 w-14" />
+        </div>
+        <div className="grid min-w-0 gap-2">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-3 w-2/3" />
+        </div>
+      </div>
     </RunRowBody>
   )
 }
