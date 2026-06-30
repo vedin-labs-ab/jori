@@ -239,14 +239,19 @@ function execution(
   overrides: Pick<ExecutionItem, "task" | "title"> &
     Partial<Pick<ExecutionItem, "approval" | "details" | "offer" | "source">>
 ): ExecutionItem {
+  const approval = overrides.approval ?? null
+  const offer = overrides.offer ?? null
+
   return {
-    approval: overrides.approval ?? null,
+    approval,
+    approvals: approval === null ? [] : [approval],
     createdAt: 1700000000000,
     details: overrides.details ?? [],
     durationMs: 1000,
     endedAt: 1700000001000,
     id: "execution",
-    offer: overrides.offer ?? null,
+    offer,
+    offers: offer === null ? [] : [offer],
     searchableText: "",
     source: overrides.source ?? {
       type: "automation",

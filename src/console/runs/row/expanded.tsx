@@ -20,17 +20,17 @@ export function ExpandedExecution({
     <RunRowBody>
       <TaskDetail sourceUrl={execution.source.url} task={execution.task} />
       <ExecutionFacts details={execution.details} />
-      {execution.approval !== null ? (
+      {execution.approvals.length > 0 ? (
         <ApprovalCallout
-          approval={execution.approval}
+          approvals={execution.approvals}
           now={now}
           tenantId={tenantId}
         />
       ) : null}
-      {execution.offer !== null ? (
+      {execution.offers.length > 0 ? (
         <OfferCallout
           now={now}
-          offer={execution.offer}
+          offers={execution.offers}
           runId={execution.id}
           tenantId={tenantId}
         />

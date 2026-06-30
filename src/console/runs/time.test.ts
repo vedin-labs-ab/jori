@@ -4,12 +4,14 @@ import { type ExecutionItem } from "./types"
 
 const baseRun: ExecutionItem = {
   approval: null,
+  approvals: [],
   createdAt: 1700000000123,
   details: [],
   durationMs: 1200,
   endedAt: 1700000001323,
   id: "run-1",
   offer: null,
+  offers: [],
   searchableText: "completed run",
   source: { type: "manual" },
   status: "completed",
@@ -34,23 +36,26 @@ describe("run clock timing", () => {
   })
 
   test("uses a second interval while a pending approval is live", () => {
+    const approval = {
+      decidedAt: undefined,
+      delivery: undefined,
+      expiresAt: 1700000066000,
+      id: "approval-1",
+      surface: "slack",
+      source: undefined,
+      state: "pending" as const,
+      summary: "Approve this run",
+      tool: "slack.postMessage",
+      toolLabel: "Post Slack message",
+    }
+
     expect(
       runClockInterval(
         [
           {
             ...baseRun,
-            approval: {
-              decidedAt: undefined,
-              delivery: undefined,
-              expiresAt: 1700000066000,
-              id: "approval-1",
-              surface: "slack",
-              source: undefined,
-              state: "pending",
-              summary: "Approve this run",
-              tool: "slack.postMessage",
-              toolLabel: "Post Slack message",
-            },
+            approval,
+            approvals: [approval],
           },
         ],
         1700000065123
@@ -82,20 +87,23 @@ describe("run clock timing", () => {
 })
 
 test("uses a second interval while a pending offer is live", () => {
+  const offer = {
+    expiresAt: 1700000066000,
+    id: "offer-1",
+    integration: "notion" as const,
+    integrationLabel: "Notion",
+    state: "pending" as const,
+    summary: "Connect Notion so Milo can continue.",
+    updatedAt: 1700000000000,
+  }
+
   expect(
     runClockInterval(
       [
         {
           ...baseRun,
-          offer: {
-            expiresAt: 1700000066000,
-            id: "offer-1",
-            integration: "notion",
-            integrationLabel: "Notion",
-            state: "pending",
-            summary: "Connect Notion so Milo can continue.",
-            updatedAt: 1700000000000,
-          },
+          offer,
+          offers: [offer],
         },
       ],
       1700000065123

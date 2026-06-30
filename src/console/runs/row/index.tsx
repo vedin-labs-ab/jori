@@ -48,6 +48,8 @@ export const ExecutionRow = memo(function ExecutionRow({
   const durationMs = durationFor(execution, now)
   const isOngoing =
     execution.status === "queued" || execution.status === "running"
+  const approvalIndicator = actionApprovalIndicator(execution, now)
+  const offerIndicator = actionOfferIndicator(execution, now)
 
   return (
     <RunRowFrame>
@@ -71,9 +73,9 @@ export const ExecutionRow = memo(function ExecutionRow({
           onPointerEnter={preloadExpandedExecution}
         >
           <StatusIcon
-            approval={execution.approval}
+            approval={approvalIndicator}
             now={now}
-            offer={execution.offer}
+            offer={offerIndicator}
             status={execution.status}
             waiter={execution.waiter ?? null}
           />
@@ -118,19 +120,21 @@ function ExecutionMeta({
   isOpen: boolean
   now: number
 }) {
+  const liveApproval = livePendingApproval(execution.approvals, now)
+  const liveOffer = livePendingOffer(execution.offers, now)
+
   return (
     <RunRowMeta>
-      {hasLivePendingApproval(execution.approval, now) ? (
+      {liveApproval !== null ? (
         <ApprovalStatusMeta
-          expiresAt={execution.approval.expiresAt}
+          expiresAt={liveApproval.expiresAt}
           isVisible={!isOpen}
           now={now}
         />
       ) : null}
-      {!hasLivePendingApproval(execution.approval, now) &&
-      hasLivePendingOffer(execution.offer, now) ? (
+      {liveApproval === null && liveOffer !== null ? (
         <OfferStatusMeta
-          expiresAt={execution.offer.expiresAt}
+          expiresAt={liveOffer.expiresAt}
           isVisible={!isOpen}
           now={now}
         />
@@ -175,24 +179,31 @@ function durationFor(execution: ExecutionItem, now: number) {
   return execution.durationMs
 }
 
-function hasLivePendingApproval(
-  approval: ExecutionItem["approval"],
+function actionApprovalIndicator(execution: ExecutionItem, now: number) {
+  return livePendingApproval(execution.approvals, now) ?? execution.approval
+}
+
+function actionOfferIndicator(execution: ExecutionItem, now: number) {
+  return livePendingOffer(execution.offers, now) ?? execution.offer
+}
+
+function livePendingApproval(
+  approvals: ExecutionItem["approvals"],
   now: number
-): approval is NonNullable<ExecutionItem["approval"]> {
+) {
   return (
-    approval !== null &&
-    approval.state === "pending" &&
-    approval.expiresAt > now
+    approvals.find(
+      (approval) => approval.state === "pending" && approval.expiresAt > now
+    ) ?? null
   )
 }
 
-function hasLivePendingOffer(
-  offer: ExecutionItem["offer"],
-  now: number
-): offer is NonNullable<ExecutionItem["offer"]> {
+function livePendingOffer(offers: ExecutionItem["offers"], now: number) {
   return (
-    offer !== null &&
-    (offer.state === "pending" || offer.state === "claimed") &&
-    offer.expiresAt > now
+    offers.find(
+      (offer) =>
+        (offer.state === "pending" || offer.state === "claimed") &&
+        offer.expiresAt > now
+    ) ?? null
   )
 }

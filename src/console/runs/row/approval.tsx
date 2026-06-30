@@ -6,30 +6,49 @@ import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
 import { ProviderLogo } from "../../shared/logo/provider"
 import { absoluteTime, formatDuration } from "../../shared/time"
-import { type ExecutionItem } from "../types"
+import { useRunRequestCarousel } from "../request/carousel"
+import { type ExecutionApproval } from "../types"
 import { type RunRequestMeta, RunRequestSection } from "./layout"
 
 type ApprovalDecisionArgs = FunctionArgs<typeof api.approvals.console.decide>
 
 export function ApprovalCallout({
-  approval,
+  approvals,
   now,
   tenantId,
 }: {
-  approval: NonNullable<ExecutionItem["approval"]>
+  approvals: ExecutionApproval[]
   now: number
   tenantId: string
 }) {
+  const carousel = useRunRequestCarousel(approvals.length)
+  const approval = approvals[carousel.index] ?? approvals[0]
+
+  if (approval === undefined) {
+    return null
+  }
+
   return (
     <RunRequestSection
       actions={
         approval.state === "pending" ? (
-          <ApprovalActions approval={approval} tenantId={tenantId} />
+          <ApprovalActions
+            key={approval.id}
+            approval={approval}
+            tenantId={tenantId}
+          />
         ) : undefined
       }
       label="Approval"
       labelIcon={UserPen}
       meta={approvalMeta(approval, now)}
+      navigation={{
+        count: approvals.length,
+        index: carousel.index,
+        itemLabel: "approval",
+        onNext: carousel.onNext,
+        onPrevious: carousel.onPrevious,
+      }}
       summary={approval.summary}
       title={approval.toolLabel}
       titleIcon={<ProviderLogo className="size-4" surface={approval.surface} />}
@@ -41,7 +60,7 @@ function ApprovalActions({
   approval,
   tenantId,
 }: {
-  approval: NonNullable<ExecutionItem["approval"]>
+  approval: ExecutionApproval
   tenantId: string
 }) {
   const decide = useAction(api.approvals.console.decide)
@@ -107,10 +126,7 @@ function ApprovalActions({
   )
 }
 
-function expirationLabel(
-  approval: NonNullable<ExecutionItem["approval"]>,
-  now: number
-) {
+function expirationLabel(approval: ExecutionApproval, now: number) {
   if (now >= approval.expiresAt) {
     return `Expired at ${absoluteTime(approval.expiresAt)}`
   }
@@ -119,7 +135,7 @@ function expirationLabel(
 }
 
 function approvalMeta(
-  approval: NonNullable<ExecutionItem["approval"]>,
+  approval: ExecutionApproval,
   now: number
 ): RunRequestMeta | null {
   if (approval.state === "pending" || approval.state === "expired") {

@@ -24,6 +24,16 @@ export async function summarizeRun(
     stoppedBy: stoppedByLabel,
     tools: context.prepared.tools,
   })
+  const approvals = context.approvals.map((approval, index) =>
+    summarizeApproval({
+      approval,
+      approvalDeliveryIntegration:
+        context.approvalDeliveryIntegrations[index] ?? null,
+      integration: context.integration,
+      message: context.message,
+    })
+  )
+  const offers = context.integrationOffers.map(summarizeRunOffer)
 
   return {
     id: run._id,
@@ -37,19 +47,10 @@ export async function summarizeRun(
     endedAt: run.endedAt,
     durationMs: getDuration(run),
     error: run.error,
-    approval:
-      context.requestedApproval === null
-        ? null
-        : summarizeApproval({
-            approval: context.requestedApproval,
-            approvalDeliveryIntegration: context.approvalDeliveryIntegration,
-            integration: context.integration,
-            message: context.message,
-          }),
-    offer:
-      context.integrationOffer === null
-        ? null
-        : summarizeRunOffer(context.integrationOffer),
+    approval: approvals[0] ?? null,
+    approvals,
+    offer: offers[0] ?? null,
+    offers,
     waiter:
       context.activeWaiter === null
         ? null
@@ -87,10 +88,11 @@ function searchableText(
     input.title,
     input.run.status,
     input.run.error,
-    input.approval?.summary,
-    input.approval?.tool,
-    input.integrationOffer?.summary,
-    input.integrationOffer?.integration,
+    ...input.approvals.flatMap((approval) => [approval.summary, approval.tool]),
+    ...input.integrationOffers.flatMap((offer) => [
+      offer.summary,
+      offer.integration,
+    ]),
     input.run.cause.type,
     input.task,
     sourceSearchText(input.source),

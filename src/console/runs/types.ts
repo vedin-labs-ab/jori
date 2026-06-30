@@ -108,6 +108,38 @@ export type ExecutionDetail = {
   groups?: ExecutionDetailGroup[]
 }
 
+export type ExecutionApproval = {
+  id: string
+  state: ApprovalState
+  tool: string
+  toolLabel: string
+  summary: string
+  surface: string
+  expiresAt: number
+  decidedAt?: number
+  delivery?: string
+  source?: {
+    label: string
+    surface?: string
+    url?: string
+  }
+}
+
+export type ExecutionOffer = {
+  id: string
+  state: OfferState
+  integration: Integration
+  integrationLabel: string
+  summary: string
+  expiresAt: number
+  updatedAt: number
+  delivery?: string
+  result?: {
+    error?: string
+    reason?: string
+  }
+}
+
 export type ExecutionItem = {
   id: string
   status: ExecutionStatus
@@ -120,36 +152,10 @@ export type ExecutionItem = {
   endedAt?: number
   durationMs?: number
   error?: string
-  approval: {
-    id: string
-    state: ApprovalState
-    tool: string
-    toolLabel: string
-    summary: string
-    surface: string
-    expiresAt: number
-    decidedAt?: number
-    delivery?: string
-    source?: {
-      label: string
-      surface?: string
-      url?: string
-    }
-  } | null
-  offer: {
-    id: string
-    state: OfferState
-    integration: Integration
-    integrationLabel: string
-    summary: string
-    expiresAt: number
-    updatedAt: number
-    delivery?: string
-    result?: {
-      error?: string
-      reason?: string
-    }
-  } | null
+  approval: ExecutionApproval | null
+  approvals: ExecutionApproval[]
+  offer: ExecutionOffer | null
+  offers: ExecutionOffer[]
   waiter?: {
     id: string
     state: "waiting"

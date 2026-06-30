@@ -1,18 +1,20 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { type RunToolSnapshot } from "../agent/tools/snapshot"
-import { getLatestRunOffer } from "./offers"
+import { getRunOffers } from "./offers"
 
 export async function getRunContext(
   ctx: QueryCtx,
   run: Doc<"runs">,
   requestedApproval: Doc<"approvals"> | undefined
 ) {
-  const [runApproval, activeWaiter, integrationOffer] = await Promise.all([
-    requestedApproval ?? getLatestRequestedApproval(ctx, run),
+  const [runApprovals, activeWaiter, integrationOffers] = await Promise.all([
+    getRunApprovals(ctx, run),
     getActiveWaiter(ctx, run),
-    getLatestRunOffer(ctx, run),
+    getRunOffers(ctx, run),
   ])
+  const runApproval = requestedApproval ?? runApprovals[0] ?? null
+  const approvals = prioritizeApprovals(runApprovals, runApproval)
   const message =
     run.cause.type === "message" ? await ctx.db.get(run.cause.messageId) : null
   const automation =
@@ -25,19 +27,22 @@ export async function getRunContext(
         ? null
         : await ctx.db.get(event.integrationId)
       : await ctx.db.get(message.integrationId)
-  const approvalDeliveryIntegration =
-    runApproval?.delivery === undefined
-      ? null
-      : await ctx.db.get(runApproval.delivery.integrationId)
+  const approvalDeliveryIntegrations = await Promise.all(
+    approvals.map((approval) =>
+      approval.delivery === undefined
+        ? null
+        : ctx.db.get(approval.delivery.integrationId)
+    )
+  )
 
   return {
     activeWaiter,
-    approval: runApproval,
-    approvalDeliveryIntegration,
+    approvalDeliveryIntegrations,
+    approvals,
     automation,
     event,
     integration,
-    integrationOffer,
+    integrationOffers,
     message,
     prepared: await getPreparedRun(ctx, run),
     requestedApproval: runApproval,
@@ -45,12 +50,26 @@ export async function getRunContext(
   }
 }
 
-async function getLatestRequestedApproval(ctx: QueryCtx, run: Doc<"runs">) {
+async function getRunApprovals(ctx: QueryCtx, run: Doc<"runs">) {
   return await ctx.db
     .query("approvals")
     .withIndex("by_run", (index) => index.eq("runId", run._id))
     .order("desc")
-    .first()
+    .take(50)
+}
+
+function prioritizeApprovals(
+  approvals: Doc<"approvals">[],
+  primary: Doc<"approvals"> | null
+) {
+  if (primary === null) {
+    return approvals
+  }
+
+  return [
+    primary,
+    ...approvals.filter((approval) => approval._id !== primary._id),
+  ]
 }
 
 async function getActiveWaiter(ctx: QueryCtx, run: Doc<"runs">) {

@@ -15,14 +15,15 @@ import { api } from "../../../../convex/_generated/api"
 import { readErrorMessage } from "../../shared/error"
 import { IntegrationLogo } from "../../shared/logo/integration"
 import { absoluteTime, formatDuration } from "../../shared/time"
-import { type ExecutionItem } from "../types"
+import { useRunRequestCarousel } from "../request/carousel"
+import { type ExecutionOffer } from "../types"
 import { type RunRequestMeta, RunRequestSection } from "./layout"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 
 type ClaimArgs = FunctionArgs<typeof api.runs.console.offers.claim>
 type CancelArgs = FunctionArgs<typeof api.runs.console.offers.cancel>
-type Offer = NonNullable<ExecutionItem["offer"]>
+type Offer = ExecutionOffer
 type OfferAction = "cancel" | "connect"
 type ClaimResult =
   | {
@@ -38,25 +39,44 @@ type ClaimResult =
 
 export function OfferCallout({
   now,
-  offer,
+  offers,
   runId,
   tenantId,
 }: {
   now: number
-  offer: Offer
+  offers: Offer[]
   runId: string
   tenantId: string
 }) {
+  const carousel = useRunRequestCarousel(offers.length)
+  const offer = offers[carousel.index] ?? offers[0]
+
+  if (offer === undefined) {
+    return null
+  }
+
   return (
     <RunRequestSection
       actions={
         isLiveOffer(offer, now) ? (
-          <OfferActions offer={offer} runId={runId} tenantId={tenantId} />
+          <OfferActions
+            key={offer.id}
+            offer={offer}
+            runId={runId}
+            tenantId={tenantId}
+          />
         ) : undefined
       }
       label="Offer"
       labelIcon={Plug}
       meta={offerMeta(offer, now)}
+      navigation={{
+        count: offers.length,
+        index: carousel.index,
+        itemLabel: "integration offer",
+        onNext: carousel.onNext,
+        onPrevious: carousel.onPrevious,
+      }}
       summary={offer.summary}
       title={`Connect ${offer.integrationLabel}`}
       titleIcon={
