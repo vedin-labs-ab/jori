@@ -4,6 +4,7 @@ import { type ExecutionItem } from "../types"
 import { ApprovalCallout } from "./approval"
 import { ExecutionFacts } from "./facts"
 import { RunRowBody } from "./layout"
+import { OfferCallout } from "./offer"
 import { TaskDetail } from "./task"
 
 export function ExpandedExecution({
@@ -23,6 +24,14 @@ export function ExpandedExecution({
         <ApprovalCallout
           approval={execution.approval}
           now={now}
+          tenantId={tenantId}
+        />
+      ) : null}
+      {execution.offer !== null ? (
+        <OfferCallout
+          now={now}
+          offer={execution.offer}
+          runId={execution.id}
           tenantId={tenantId}
         />
       ) : null}

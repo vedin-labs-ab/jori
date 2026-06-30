@@ -5,6 +5,7 @@ import { getActorDisplayName } from "../../shared/actor"
 import { getRunContext } from "./context"
 import { runDetailSummary } from "./details"
 import { runTask, runTitle, triggerLabel } from "./labels"
+import { summarizeRunOffer } from "./offers"
 import { runSource, sourceSearchText } from "./source"
 
 export async function summarizeRun(
@@ -45,6 +46,10 @@ export async function summarizeRun(
             integration: context.integration,
             message: context.message,
           }),
+    offer:
+      context.integrationOffer === null
+        ? null
+        : summarizeRunOffer(context.integrationOffer),
     waiter:
       context.activeWaiter === null
         ? null
@@ -84,6 +89,8 @@ function searchableText(
     input.run.error,
     input.approval?.summary,
     input.approval?.tool,
+    input.integrationOffer?.summary,
+    input.integrationOffer?.integration,
     input.run.cause.type,
     input.task,
     sourceSearchText(input.source),

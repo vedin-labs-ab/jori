@@ -229,10 +229,15 @@ function fakeQuery(table: string, preparedTools: unknown) {
                     type: "run.prepared",
                   },
           }
-        : {
-            order: () => ({
-              first: async () => null,
-            }),
-          },
+        : emptyQueryResult(),
+  }
+}
+
+function emptyQueryResult() {
+  return {
+    async *[Symbol.asyncIterator]() {},
+    first: async () => null,
+    order: () => emptyQueryResult(),
+    take: async () => [],
   }
 }

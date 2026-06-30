@@ -3,13 +3,9 @@ import {
   CheckCircle2,
   ChevronsUpDown,
   Circle,
-  ClockAlert,
   Hourglass,
   Loader2,
   type LucideIcon,
-  UserCheck,
-  UserPen,
-  UserX,
 } from "lucide-react"
 import {
   Tooltip,
@@ -19,11 +15,13 @@ import {
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../shared/dot"
 import { formatDuration } from "../../shared/time"
+import { type ExecutionItem, type ExecutionStatus } from "../types"
 import {
-  type ApprovalState,
-  type ExecutionItem,
-  type ExecutionStatus,
-} from "../types"
+  type ActionStatus,
+  type ApprovalIndicator,
+  getActionStatus,
+  type OfferIndicator,
+} from "./action"
 
 const statusIconClasses = {
   completed: "text-emerald-800",
@@ -41,11 +39,6 @@ const statusIcons = {
   stopped: Circle,
 } satisfies Record<ExecutionStatus, LucideIcon>
 
-type ApprovalIndicator = Pick<
-  NonNullable<ExecutionItem["approval"]>,
-  "expiresAt" | "state"
-> | null
-
 type WaiterIndicator = Pick<
   NonNullable<ExecutionItem["waiter"]>,
   "state"
@@ -54,20 +47,21 @@ type WaiterIndicator = Pick<
 export function StatusIcon({
   approval,
   now,
+  offer,
   status,
   waiter,
 }: {
   approval: ApprovalIndicator
   now: number
+  offer: OfferIndicator
   status: ExecutionStatus
   waiter: WaiterIndicator
 }) {
-  const approvalState = effectiveApprovalState(approval, now)
-  const isWaitingForInput =
-    approvalState === null && waiter?.state === "waiting"
+  const actionStatus = getActionStatus({ approval, now, offer })
+  const isWaitingForInput = actionStatus === null && waiter?.state === "waiting"
   const label =
-    approvalState !== null
-      ? `${executionStatusLabels[status]}, ${approvalStatusLabels[approvalState]}`
+    actionStatus !== null
+      ? `${executionStatusLabels[status]}, ${actionStatus.label}`
       : isWaitingForInput
         ? waitingStatusLabel
         : executionStatusLabels[status]
@@ -82,7 +76,7 @@ export function StatusIcon({
         >
           <span className="inline-flex transition-opacity duration-150 group-focus-visible/run-row:opacity-0 group-hover/run-row:opacity-0">
             <StatusGlyph
-              approvalState={approvalState}
+              actionStatus={actionStatus}
               isWaitingForInput={isWaitingForInput}
               status={status}
             />
@@ -96,17 +90,17 @@ export function StatusIcon({
 }
 
 function StatusGlyph({
-  approvalState,
+  actionStatus,
   isWaitingForInput,
   status,
 }: {
-  approvalState: ApprovalState | null
+  actionStatus: ActionStatus | null
   isWaitingForInput: boolean
   status: ExecutionStatus
 }) {
   const Icon =
-    approvalState !== null
-      ? approvalStatusIcons[approvalState]
+    actionStatus !== null
+      ? actionStatus.Icon
       : isWaitingForInput
         ? Hourglass
         : statusIcons[status]
@@ -115,10 +109,10 @@ function StatusGlyph({
     <Icon
       className={cn(
         "size-4",
-        approvalState !== null
-          ? approvalStatusClasses[approvalState]
+        actionStatus !== null
+          ? actionStatus.className
           : statusIconClasses[status],
-        approvalState === null &&
+        actionStatus === null &&
           !isWaitingForInput &&
           (status === "queued" || status === "running") &&
           "animate-spin"
@@ -126,15 +120,6 @@ function StatusGlyph({
     />
   )
 }
-
-const approvalStatusLabels = {
-  approved: "Approved",
-  denied: "Denied",
-  cancelled: "Cancelled",
-  expired: "Approval expired",
-  failed: "Approval failed",
-  pending: "Needs approval",
-} satisfies Record<ApprovalState, string>
 
 const executionStatusLabels = {
   completed: "Completed",
@@ -146,15 +131,6 @@ const executionStatusLabels = {
 
 const waitingStatusLabel = "Waiting for input"
 
-const approvalStatusIcons = {
-  approved: UserCheck,
-  denied: UserX,
-  cancelled: UserX,
-  expired: ClockAlert,
-  failed: AlertCircle,
-  pending: UserPen,
-} satisfies Record<ApprovalState, LucideIcon>
-
 export function ApprovalStatusMeta({
   expiresAt,
   isVisible,
@@ -165,45 +141,61 @@ export function ApprovalStatusMeta({
   now: number
 }) {
   return (
+    <ExpiringStatusMeta
+      expiresAt={expiresAt}
+      isVisible={isVisible}
+      label="Needs approval"
+      now={now}
+    />
+  )
+}
+
+export function OfferStatusMeta({
+  expiresAt,
+  isVisible,
+  now,
+}: {
+  expiresAt: number
+  isVisible: boolean
+  now: number
+}) {
+  return (
+    <ExpiringStatusMeta
+      expiresAt={expiresAt}
+      isVisible={isVisible}
+      label="Needs action"
+      now={now}
+    />
+  )
+}
+
+function ExpiringStatusMeta({
+  expiresAt,
+  isVisible,
+  label,
+  now,
+}: {
+  expiresAt: number
+  isVisible: boolean
+  label: string
+  now: number
+}) {
+  return (
     <span
       aria-hidden={!isVisible}
       className={cn(
         "inline-flex origin-left items-center gap-1 overflow-hidden whitespace-nowrap text-xs transition-[max-width,opacity,transform] duration-200 ease-out",
-        approvalStatusClasses.pending,
+        "text-warning",
         isVisible
           ? "max-w-56 scale-x-100 opacity-100"
           : "pointer-events-none max-w-0 scale-x-95 opacity-0"
       )}
     >
-      <span>Needs approval</span>
+      <span>{label}</span>
       <SeparatorDot />
       <span>{formatDuration(Math.max(0, expiresAt - now))}</span>
     </span>
   )
-}
-
-const approvalStatusClasses = {
-  approved: "text-emerald-800",
-  denied: "text-destructive",
-  cancelled: "text-muted-foreground",
-  expired: "text-warning",
-  failed: "text-destructive",
-  pending: "text-warning",
-} satisfies Record<ApprovalState, string>
-
-function effectiveApprovalState(
-  approval: ApprovalIndicator,
-  now: number
-): ApprovalState | null {
-  if (approval === null) {
-    return null
-  }
-
-  if (approval.state === "pending" && approval.expiresAt <= now) {
-    return "expired"
-  }
-
-  return approval.state
 }
 
 export function MetaPill({

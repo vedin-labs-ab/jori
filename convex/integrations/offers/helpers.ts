@@ -55,6 +55,19 @@ export async function upsertIntegrationOfferSourceIdentity(
 }
 
 export function normalizeIntegrationOfferReturnUrl(returnUrl: string) {
+  return normalizeOfferReturnUrl(returnUrl, (url) =>
+    url.pathname.startsWith("/integrations/offers/")
+  )
+}
+
+export function normalizeConsoleIntegrationOfferReturnUrl(returnUrl: string) {
+  return normalizeOfferReturnUrl(returnUrl, (url) => url.pathname === "/runs")
+}
+
+function normalizeOfferReturnUrl(
+  returnUrl: string,
+  isAllowedPath: (url: URL) => boolean
+) {
   let url: URL
 
   try {
@@ -63,10 +76,7 @@ export function normalizeIntegrationOfferReturnUrl(returnUrl: string) {
     throw new Error("Integration offer return URL must be absolute.")
   }
 
-  if (
-    url.origin !== requireAppOrigin() ||
-    !url.pathname.startsWith("/integrations/offers/")
-  ) {
+  if (url.origin !== requireAppOrigin() || !isAllowedPath(url)) {
     throw new Error(
       "Integration offer return URL must point to a Milo integration offer."
     )

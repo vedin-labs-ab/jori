@@ -1,3 +1,5 @@
+import { type Integration } from "@contracts/integrations"
+
 export const pageSize = 25
 
 export const runFilterOptions = [
@@ -34,6 +36,13 @@ export type ApprovalState =
   | "approved"
   | "denied"
   | "cancelled"
+  | "expired"
+  | "failed"
+export type OfferState =
+  | "pending"
+  | "claimed"
+  | "cancelled"
+  | "connected"
   | "expired"
   | "failed"
 
@@ -125,6 +134,20 @@ export type ExecutionItem = {
       label: string
       surface?: string
       url?: string
+    }
+  } | null
+  offer: {
+    id: string
+    state: OfferState
+    integration: Integration
+    integrationLabel: string
+    summary: string
+    expiresAt: number
+    updatedAt: number
+    delivery?: string
+    result?: {
+      error?: string
+      reason?: string
     }
   } | null
   waiter?: {

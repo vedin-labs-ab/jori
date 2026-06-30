@@ -92,6 +92,7 @@ function executionWithApprovalTool(): ExecutionItem {
     durationMs: 1000,
     endedAt: 1700000001000,
     id: "execution",
+    offer: null,
     searchableText: "",
     source: {
       type: "message",
@@ -143,6 +144,7 @@ function executionWithSingleAccessToolGroups(): ExecutionItem {
     durationMs: 1000,
     endedAt: 1700000001000,
     id: "execution",
+    offer: null,
     searchableText: "",
     source: {
       type: "message",

@@ -34,6 +34,20 @@ import {
 } from "./transition"
 
 const integrationOfferTtlMs = 30 * 60 * 1000
+export const integrationOfferClaimResult = v.union(
+  v.object({
+    status: v.literal("ready"),
+    integration: integrationValidator,
+    installPath: v.string(),
+    state: v.string(),
+    expiresAt: v.number(),
+  }),
+  v.object({
+    status: v.literal("connected"),
+    integration: integrationValidator,
+    integrationId: v.optional(v.id("integrations")),
+  })
+)
 
 export const create = internalMutation({
   args: {
@@ -132,20 +146,7 @@ export const claim = mutation({
     token: v.string(),
     returnUrl: v.string(),
   },
-  returns: v.union(
-    v.object({
-      status: v.literal("ready"),
-      integration: integrationValidator,
-      installPath: v.string(),
-      state: v.string(),
-      expiresAt: v.number(),
-    }),
-    v.object({
-      status: v.literal("connected"),
-      integration: integrationValidator,
-      integrationId: v.optional(v.id("integrations")),
-    })
-  ),
+  returns: integrationOfferClaimResult,
   handler: async (ctx, args) => {
     const offer = await findIntegrationOfferByToken(ctx, args.token)
 
@@ -153,68 +154,121 @@ export const claim = mutation({
       throw new Error("Integration offer not found.")
     }
 
-    const identity = await requireTenantAccess(ctx, offer.tenantId)
-    const personId = await ensureCurrentPerson(ctx, offer.tenantId)
-    const actor = createPersonActor(personId, {
-      email: readClerkUserEmail(identity),
-      name: readClerkUserName(identity),
+    return await claimIntegrationOffer(ctx, {
+      offer,
+      returnUrl: normalizeIntegrationOfferReturnUrl(args.returnUrl),
     })
-    const now = Date.now()
-
-    if (offer.status === "cancelled") {
-      throw new Error("This integration offer was cancelled.")
-    }
-
-    if (offer.expiresAt <= now && offer.status !== "connected") {
-      await markIntegrationOfferExpired(ctx, offer, now)
-      throw new Error("This integration offer has expired.")
-    }
-
-    if (offer.claim !== undefined && offer.claim.personId !== personId) {
-      throw new Error(
-        "This integration offer was already claimed by another person."
-      )
-    }
-
-    await upsertIntegrationOfferSourceIdentity(ctx, {
-      tenantId: offer.tenantId,
-      personId,
-      source: offer.source,
-    })
-
-    if (offer.status === "connected") {
-      return {
-        status: "connected" as const,
-        integration: offer.integration,
-        ...(offer.result?.integrationId === undefined
-          ? {}
-          : { integrationId: offer.result.integrationId }),
-      }
-    }
-
-    await ctx.db.patch(offer._id, {
-      status: "claimed",
-      claim:
-        offer.claim === undefined
-          ? { personId, actor, at: now }
-          : { ...offer.claim, actor: offer.claim.actor ?? actor },
-      result: undefined,
-      updatedAt: now,
-    })
-
-    const returnUrl = normalizeIntegrationOfferReturnUrl(args.returnUrl)
-    const state = await createSignedInstallState(ctx, offer.integration, {
-      tenantId: offer.tenantId,
-      returnUrl,
-      integrationOfferId: offer._id,
-    })
-
-    return {
-      status: "ready" as const,
-      integration: offer.integration,
-      installPath: installPathForIntegration(offer.integration),
-      state,
-      expiresAt: offer.expiresAt,
-    }
   },
 })
+
+export async function claimIntegrationOffer(
+  ctx: MutationCtx,
+  args: { offer: Doc<"integrationOffers">; returnUrl: string }
+) {
+  const { actor, personId } = await readClaimActor(ctx, args.offer)
+  const now = Date.now()
+
+  await requireClaimableOffer(ctx, args.offer, { now, personId })
+  await upsertIntegrationOfferSourceIdentity(ctx, {
+    tenantId: args.offer.tenantId,
+    personId,
+    source: args.offer.source,
+  })
+
+  if (args.offer.status === "connected") {
+    return connectedOfferResult(args.offer)
+  }
+
+  await markOfferClaimed(ctx, args.offer, { actor, now, personId })
+
+  return await readyOfferResult(ctx, {
+    offer: args.offer,
+    returnUrl: args.returnUrl,
+  })
+}
+
+async function readClaimActor(
+  ctx: MutationCtx,
+  offer: Doc<"integrationOffers">
+) {
+  const identity = await requireTenantAccess(ctx, offer.tenantId)
+  const personId = await ensureCurrentPerson(ctx, offer.tenantId)
+
+  return {
+    actor: createPersonActor(personId, {
+      email: readClerkUserEmail(identity),
+      name: readClerkUserName(identity),
+    }),
+    personId,
+  }
+}
+
+async function requireClaimableOffer(
+  ctx: MutationCtx,
+  offer: Doc<"integrationOffers">,
+  args: { now: number; personId: Doc<"persons">["_id"] }
+) {
+  if (offer.status === "cancelled") {
+    throw new Error("This integration offer was cancelled.")
+  }
+
+  if (offer.expiresAt <= args.now && offer.status !== "connected") {
+    await markIntegrationOfferExpired(ctx, offer, args.now)
+    throw new Error("This integration offer has expired.")
+  }
+
+  if (offer.claim !== undefined && offer.claim.personId !== args.personId) {
+    throw new Error(
+      "This integration offer was already claimed by another person."
+    )
+  }
+}
+
+function connectedOfferResult(offer: Doc<"integrationOffers">) {
+  return {
+    status: "connected" as const,
+    integration: offer.integration,
+    ...(offer.result?.integrationId === undefined
+      ? {}
+      : { integrationId: offer.result.integrationId }),
+  }
+}
+
+async function markOfferClaimed(
+  ctx: MutationCtx,
+  offer: Doc<"integrationOffers">,
+  args: {
+    actor: ReturnType<typeof createPersonActor>
+    now: number
+    personId: Doc<"persons">["_id"]
+  }
+) {
+  await ctx.db.patch(offer._id, {
+    status: "claimed",
+    claim:
+      offer.claim === undefined
+        ? { personId: args.personId, actor: args.actor, at: args.now }
+        : { ...offer.claim, actor: offer.claim.actor ?? args.actor },
+    result: undefined,
+    updatedAt: args.now,
+  })
+}
+
+async function readyOfferResult(
+  ctx: MutationCtx,
+  args: { offer: Doc<"integrationOffers">; returnUrl: string }
+) {
+  const state = await createSignedInstallState(ctx, args.offer.integration, {
+    tenantId: args.offer.tenantId,
+    returnUrl: args.returnUrl,
+    integrationOfferId: args.offer._id,
+  })
+
+  return {
+    status: "ready" as const,
+    integration: args.offer.integration,
+    installPath: installPathForIntegration(args.offer.integration),
+    state,
+    expiresAt: args.offer.expiresAt,
+  }
+}

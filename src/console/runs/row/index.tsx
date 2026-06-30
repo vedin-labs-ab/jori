@@ -13,7 +13,12 @@ import {
   RunRowMeta,
 } from "./layout"
 import { SourceLine } from "./source"
-import { ApprovalStatusMeta, MetaPill, StatusIcon } from "./status"
+import {
+  ApprovalStatusMeta,
+  MetaPill,
+  OfferStatusMeta,
+  StatusIcon,
+} from "./status"
 import { StopExecution } from "./stop"
 
 let expandedExecutionModule: Promise<typeof import("./expanded")> | undefined
@@ -68,6 +73,7 @@ export const ExecutionRow = memo(function ExecutionRow({
           <StatusIcon
             approval={execution.approval}
             now={now}
+            offer={execution.offer}
             status={execution.status}
             waiter={execution.waiter ?? null}
           />
@@ -121,6 +127,14 @@ function ExecutionMeta({
           now={now}
         />
       ) : null}
+      {!hasLivePendingApproval(execution.approval, now) &&
+      hasLivePendingOffer(execution.offer, now) ? (
+        <OfferStatusMeta
+          expiresAt={execution.offer.expiresAt}
+          isVisible={!isOpen}
+          now={now}
+        />
+      ) : null}
       {durationMs !== undefined ? (
         <MetaPill icon={Timer} label={formatDuration(durationMs)} />
       ) : null}
@@ -169,5 +183,16 @@ function hasLivePendingApproval(
     approval !== null &&
     approval.state === "pending" &&
     approval.expiresAt > now
+  )
+}
+
+function hasLivePendingOffer(
+  offer: ExecutionItem["offer"],
+  now: number
+): offer is NonNullable<ExecutionItem["offer"]> {
+  return (
+    offer !== null &&
+    (offer.state === "pending" || offer.state === "claimed") &&
+    offer.expiresAt > now
   )
 }
