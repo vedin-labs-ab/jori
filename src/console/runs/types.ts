@@ -127,5 +127,10 @@ export type ExecutionItem = {
       url?: string
     }
   } | null
+  waiter?: {
+    id: string
+    state: "waiting"
+    expiresAt: number
+  } | null
   searchableText: string
 }

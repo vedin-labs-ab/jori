@@ -4,6 +4,7 @@ import {
   ChevronsUpDown,
   Circle,
   ClockAlert,
+  Hourglass,
   Loader2,
   type LucideIcon,
   UserCheck,
@@ -45,20 +46,31 @@ type ApprovalIndicator = Pick<
   "expiresAt" | "state"
 > | null
 
+type WaiterIndicator = Pick<
+  NonNullable<ExecutionItem["waiter"]>,
+  "state"
+> | null
+
 export function StatusIcon({
   approval,
   now,
   status,
+  waiter,
 }: {
   approval: ApprovalIndicator
   now: number
   status: ExecutionStatus
+  waiter: WaiterIndicator
 }) {
   const approvalState = effectiveApprovalState(approval, now)
+  const isWaitingForInput =
+    approvalState === null && waiter?.state === "waiting"
   const label =
-    approvalState === null
-      ? executionStatusLabels[status]
-      : `${executionStatusLabels[status]}, ${approvalStatusLabels[approvalState]}`
+    approvalState !== null
+      ? `${executionStatusLabels[status]}, ${approvalStatusLabels[approvalState]}`
+      : isWaitingForInput
+        ? waitingStatusLabel
+        : executionStatusLabels[status]
 
   return (
     <Tooltip>
@@ -69,7 +81,11 @@ export function StatusIcon({
           role="img"
         >
           <span className="inline-flex transition-opacity duration-150 group-focus-visible/run-row:opacity-0 group-hover/run-row:opacity-0">
-            <StatusGlyph approvalState={approvalState} status={status} />
+            <StatusGlyph
+              approvalState={approvalState}
+              isWaitingForInput={isWaitingForInput}
+              status={status}
+            />
           </span>
           <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/run-row:opacity-100 group-hover/run-row:opacity-100" />
         </span>
@@ -81,24 +97,29 @@ export function StatusIcon({
 
 function StatusGlyph({
   approvalState,
+  isWaitingForInput,
   status,
 }: {
   approvalState: ApprovalState | null
+  isWaitingForInput: boolean
   status: ExecutionStatus
 }) {
   const Icon =
-    approvalState === null
-      ? statusIcons[status]
-      : approvalStatusIcons[approvalState]
+    approvalState !== null
+      ? approvalStatusIcons[approvalState]
+      : isWaitingForInput
+        ? Hourglass
+        : statusIcons[status]
 
   return (
     <Icon
       className={cn(
         "size-4",
-        approvalState === null
-          ? statusIconClasses[status]
-          : approvalStatusClasses[approvalState],
+        approvalState !== null
+          ? approvalStatusClasses[approvalState]
+          : statusIconClasses[status],
         approvalState === null &&
+          !isWaitingForInput &&
           (status === "queued" || status === "running") &&
           "animate-spin"
       )}
@@ -122,6 +143,8 @@ const executionStatusLabels = {
   running: "Running",
   stopped: "Stopped",
 } satisfies Record<ExecutionStatus, string>
+
+const waitingStatusLabel = "Waiting for input"
 
 const approvalStatusIcons = {
   approved: UserCheck,

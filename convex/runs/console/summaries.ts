@@ -45,6 +45,14 @@ export async function summarizeRun(
             integration: context.integration,
             message: context.message,
           }),
+    waiter:
+      context.activeWaiter === null
+        ? null
+        : {
+            id: context.activeWaiter._id,
+            expiresAt: context.activeWaiter.expiresAt,
+            state: "waiting" as const,
+          },
     searchableText: searchableText({
       title,
       source,

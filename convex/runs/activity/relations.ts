@@ -62,6 +62,8 @@ function projectAsset(asset: Doc<"assets">): ActivityItem {
 }
 
 function projectWaiter(waiter: Doc<"waiters">): ActivityItem {
+  const endedAt = waiter.status === "waiting" ? undefined : waiter.updatedAt
+
   return {
     id: waiter._id,
     kind: "wait",
@@ -69,8 +71,9 @@ function projectWaiter(waiter: Doc<"waiters">): ActivityItem {
     title: waiter.status === "waiting" ? "Waiting for input" : "Run resumed",
     description:
       waiter.reason === undefined ? undefined : waiterReason(waiter.reason),
-    durationMs: waiter.updatedAt - waiter.createdAt,
-    endedAt: waiter.status === "waiting" ? undefined : waiter.updatedAt,
+    durationMs: endedAt === undefined ? undefined : endedAt - waiter.createdAt,
+    endedAt,
+    isLive: waiter.status === "waiting",
     startedAt: waiter.createdAt,
   }
 }
