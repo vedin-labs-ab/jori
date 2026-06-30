@@ -30,7 +30,7 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("use the lightest action that delivers it")
     expect(prompt).toContain("outside a tool call reach no one")
-    expect(prompt).toContain("No closing message is required")
+    expect(prompt).toContain("plain closure usually get no response")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Format")
