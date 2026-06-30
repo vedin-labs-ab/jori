@@ -95,7 +95,7 @@ async function executeTool(
         name: call.name,
       })
     case "convex":
-      return toolResult(await executeConvexTool(runtime, tool, call))
+      return await executeConvexTool(runtime, tool, call)
     case "run":
       return executeRunTool(runtime, {
         input: call.args,
@@ -123,12 +123,14 @@ async function executeConvexTool(
   const toolName = tool.tool ?? tool.name
 
   if (tool.mode === "prompted") {
-    return await requestPromptedApproval(runtime, surface, toolName, call.args)
+    return toolResult(
+      await requestPromptedApproval(runtime, surface, toolName, call.args)
+    )
   }
 
   const result = await callConvexTool(runtime, surface, toolName, call.args)
   markVisibleCommunication(runtime, toolName, result)
-  return result
+  return toolResult(result, shouldFinishConvexTool(toolName, result))
 }
 
 async function requestPromptedApproval(
@@ -239,6 +241,27 @@ function eventArgs(args: {
 
 function toolResult(value: unknown, finished = false) {
   return { finished, value }
+}
+
+function shouldFinishConvexTool(toolName: string, result: unknown) {
+  return (
+    toolName === "offer_integration" &&
+    isDeliveredAwaitedIntegrationOffer(result)
+  )
+}
+
+function isDeliveredAwaitedIntegrationOffer(result: unknown) {
+  if (!isRecord(result) || result.waiting !== true) {
+    return false
+  }
+
+  const delivery = result.delivery
+
+  return isRecord(delivery) && delivery.status === "delivered"
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
 function toToolContent(result: unknown) {

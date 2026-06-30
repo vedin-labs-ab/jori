@@ -7,3 +7,7 @@ If no visible communication has been sent, include an internal `reason` explaini
 {% if tools.send_reply or tools.add_reaction %}
 When the final useful action is `send_reply` or `add_reaction`, set the `final` field to `true`. The run completes if the tool succeeds.
 {% endif %}
+
+{% if tools.offer_integration %}
+When a missing integration is required to continue, set `wait: true` on `offer_integration`. If the offer is delivered, the run pauses after the tool succeeds until the integration connects, is cancelled, or expires.
+{% endif %}

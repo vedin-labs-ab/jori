@@ -25,7 +25,7 @@ export const coreMiloToolInputSchemas = {
       wait: {
         type: "boolean",
         description:
-          "Set true to pause the run until this offer is connected, cancelled, or expires when you need the integration to continue. Omit for proactive or optional offers.",
+          "Set true only when this integration is required to continue the current request. If the offer is delivered, the run pauses after the tool succeeds until the integration connects, is cancelled, or expires. Omit or set false for proactive or optional offers, or when more work or communication may still be needed.",
       },
     },
   }),
