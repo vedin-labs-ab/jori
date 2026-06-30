@@ -52,52 +52,68 @@ const provider = v.union(
 )
 const text = v.union(v.string(), v.null())
 
+// Each trace's `data` shape is defined once here and shared by both its row
+// variant (below) and the `traceData` union the record mutation validates
+// against, so the two cannot drift.
+const preparedData = v.object({ tools: toolSnapshot })
+const offerData = v.object({ offer: v.id("integrationOffers") })
+const approvalData = v.object({ approval: v.id("approvals") })
+const assetData = v.object({ asset: v.id("assets") })
+const agentData = v.object({ child: v.id("runs") })
+const waiterData = v.object({ waiter: v.id("waiters") })
+const errorData = v.object({ error: v.string() })
+const modelData = v.object({ usage, output: text, reasoning: text })
+const toolStartedData = v.object({ tool, input: v.any() })
+const toolCompletedData = v.object({ tool, result, provider })
+const toolFailedData = v.object({ tool, input: v.any(), error: v.string() })
+const toolWaitingData = v.object({ tool })
+
 const runPrepared = v.object({
   ...base,
   type: v.literal("run.prepared"),
-  data: v.object({ tools: toolSnapshot }),
+  data: preparedData,
 })
 const runStopped = v.object({ ...base, type: v.literal("run.stopped") })
 
 const offerRequested = v.object({
   ...timeline,
   type: v.literal("offer.requested"),
-  data: v.object({ offer: v.id("integrationOffers") }),
+  data: offerData,
 })
 const offerResolved = v.object({
   ...timeline,
   type: v.literal("offer.resolved"),
-  data: v.object({ offer: v.id("integrationOffers") }),
+  data: offerData,
 })
 const approvalRequested = v.object({
   ...timeline,
   type: v.literal("approval.requested"),
-  data: v.object({ approval: v.id("approvals") }),
+  data: approvalData,
 })
 const approvalResolved = v.object({
   ...timeline,
   type: v.literal("approval.resolved"),
-  data: v.object({ approval: v.id("approvals") }),
+  data: approvalData,
 })
 const assetSaved = v.object({
   ...timeline,
   type: v.literal("asset.saved"),
-  data: v.object({ asset: v.id("assets") }),
+  data: assetData,
 })
 const agentStarted = v.object({
   ...timeline,
   type: v.literal("agent.started"),
-  data: v.object({ child: v.id("runs") }),
+  data: agentData,
 })
 const runWaiting = v.object({
   ...timeline,
   type: v.literal("run.waiting"),
-  data: v.object({ waiter: v.id("waiters") }),
+  data: waiterData,
 })
 const runResumed = v.object({
   ...timeline,
   type: v.literal("run.resumed"),
-  data: v.object({ waiter: v.id("waiters") }),
+  data: waiterData,
 })
 
 const runStarted = v.object({ ...worker, type: v.literal("run.started") })
@@ -105,40 +121,40 @@ const runCompleted = v.object({ ...worker, type: v.literal("run.completed") })
 const runFailed = v.object({
   ...worker,
   type: v.literal("run.failed"),
-  data: v.object({ error: v.string() }),
+  data: errorData,
 })
 
 const modelStarted = v.object({ ...worker, type: v.literal("model.started") })
 const modelCompleted = v.object({
   ...worker,
   type: v.literal("model.completed"),
-  data: v.object({ usage, output: text, reasoning: text }),
+  data: modelData,
 })
 const modelFailed = v.object({
   ...worker,
   type: v.literal("model.failed"),
-  data: v.object({ error: v.string() }),
+  data: errorData,
 })
 
 const toolStarted = v.object({
   ...call,
   type: v.literal("tool.started"),
-  data: v.object({ tool, input: v.any() }),
+  data: toolStartedData,
 })
 const toolCompleted = v.object({
   ...call,
   type: v.literal("tool.completed"),
-  data: v.object({ tool, result, provider }),
+  data: toolCompletedData,
 })
 const toolFailed = v.object({
   ...call,
   type: v.literal("tool.failed"),
-  data: v.object({ tool, input: v.any(), error: v.string() }),
+  data: toolFailedData,
 })
 const toolWaiting = v.object({
   ...call,
   type: v.literal("tool.waiting"),
-  data: v.object({ tool }),
+  data: toolWaitingData,
 })
 
 export const traceType = v.union(
@@ -165,18 +181,18 @@ export const traceType = v.union(
 )
 
 export const traceData = v.union(
-  v.object({ tools: toolSnapshot }),
-  v.object({ offer: v.id("integrationOffers") }),
-  v.object({ approval: v.id("approvals") }),
-  v.object({ asset: v.id("assets") }),
-  v.object({ child: v.id("runs") }),
-  v.object({ waiter: v.id("waiters") }),
-  v.object({ error: v.string() }),
-  v.object({ usage, output: text, reasoning: text }),
-  v.object({ tool, input: v.any() }),
-  v.object({ tool, result, provider }),
-  v.object({ tool, input: v.any(), error: v.string() }),
-  v.object({ tool })
+  preparedData,
+  offerData,
+  approvalData,
+  assetData,
+  agentData,
+  waiterData,
+  errorData,
+  modelData,
+  toolStartedData,
+  toolCompletedData,
+  toolFailedData,
+  toolWaitingData
 )
 
 export const traces = defineTable(
