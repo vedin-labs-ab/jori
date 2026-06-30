@@ -169,11 +169,25 @@ function matchesSummary(
   filter: ApprovalFilter,
   normalizedQuery: string
 ) {
-  if (!approvalMatchesFilter(summary.approval?.state, filter)) {
+  if (!matchesApprovalFilter(summary, filter)) {
     return false
   }
 
   return (
     normalizedQuery === "" || summary.searchableText.includes(normalizedQuery)
+  )
+}
+
+function matchesApprovalFilter(summary: RunSummary, filter: ApprovalFilter) {
+  if (filter === "any") {
+    return true
+  }
+
+  if (filter === "none") {
+    return summary.approvals.length === 0
+  }
+
+  return summary.approvals.some((approval) =>
+    approvalMatchesFilter(approval.state, filter)
   )
 }

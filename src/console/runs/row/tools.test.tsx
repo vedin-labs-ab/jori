@@ -75,6 +75,7 @@ test("omits empty access counts in message run details", async () => {
 function executionWithApprovalTool(): ExecutionItem {
   return {
     approval: null,
+    approvals: [],
     createdAt: 1700000000000,
     details: [
       {
@@ -93,6 +94,7 @@ function executionWithApprovalTool(): ExecutionItem {
     endedAt: 1700000001000,
     id: "execution",
     offer: null,
+    offers: [],
     searchableText: "",
     source: {
       type: "message",
@@ -108,6 +110,7 @@ function executionWithApprovalTool(): ExecutionItem {
 function executionWithSingleAccessToolGroups(): ExecutionItem {
   return {
     approval: null,
+    approvals: [],
     createdAt: 1700000000000,
     details: [
       {
@@ -145,6 +148,7 @@ function executionWithSingleAccessToolGroups(): ExecutionItem {
     endedAt: 1700000001000,
     id: "execution",
     offer: null,
+    offers: [],
     searchableText: "",
     source: {
       type: "message",

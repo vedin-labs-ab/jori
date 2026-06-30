@@ -84,12 +84,14 @@ function execution(
 ): ExecutionItem {
   return {
     approval: null,
+    approvals: [],
     createdAt: 1700000000000,
     details: overrides.details ?? [],
     durationMs: 1000,
     endedAt: 1700000001000,
     id: "execution",
     offer: null,
+    offers: [],
     searchableText: "",
     source: overrides.source ?? {
       type: "automation",

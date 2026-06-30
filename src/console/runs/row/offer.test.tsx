@@ -47,23 +47,79 @@ test("renders live integration offers like action requests", async () => {
   expect(screen.getByRole("button", { name: "Connect" })).toBeDefined()
 })
 
-function executionWithOffer(): ExecutionItem {
+test("pages through multiple integration offers", async () => {
+  render(
+    <TooltipProvider>
+      <ExecutionRow
+        execution={executionWithOffer({
+          offers: [
+            {
+              expiresAt: 1700001800000,
+              id: "offer-1",
+              integration: "notion",
+              integrationLabel: "Notion",
+              state: "pending",
+              summary: "Connect Notion so Milo can create the page.",
+              updatedAt: 1700000001000,
+            },
+            {
+              expiresAt: 1700001900000,
+              id: "offer-2",
+              integration: "slack",
+              integrationLabel: "Slack",
+              state: "pending",
+              summary: "Connect Slack so Milo can send the update.",
+              updatedAt: 1700000002000,
+            },
+          ],
+        })}
+        now={1700000001000}
+        tenantId="tenant"
+      />
+    </TooltipProvider>
+  )
+
+  fireEvent.click(screen.getByRole("button", { name: /offer test/i }))
+
+  await screen.findByText("Connect Notion so Milo can create the page.")
+
+  fireEvent.click(
+    screen.getByRole("button", { name: "Next integration offer" })
+  )
+
+  expect(screen.getByText("Connect Slack")).toBeDefined()
+  expect(
+    screen.getByText("Connect Slack so Milo can send the update.")
+  ).toBeDefined()
+  expect(
+    screen.queryByText("Connect Notion so Milo can create the page.")
+  ).toBeNull()
+})
+
+function executionWithOffer(
+  overrides: Partial<Pick<ExecutionItem, "offer" | "offers">> = {}
+): ExecutionItem {
+  const offer = overrides.offer ??
+    overrides.offers?.[0] ?? {
+      expiresAt: 1700001800000,
+      id: "offer",
+      integration: "notion" as const,
+      integrationLabel: "Notion",
+      state: "pending" as const,
+      summary: "Connect Notion so Milo can create the requested page.",
+      updatedAt: 1700000001000,
+    }
+
   return {
     approval: null,
+    approvals: [],
     createdAt: 1700000000000,
     details: [],
     durationMs: 1000,
     endedAt: 1700000001000,
     id: "execution",
-    offer: {
-      expiresAt: 1700001800000,
-      id: "offer",
-      integration: "notion",
-      integrationLabel: "Notion",
-      state: "pending",
-      summary: "Connect Notion so Milo can create the requested page.",
-      updatedAt: 1700000001000,
-    },
+    offer,
+    offers: overrides.offers ?? [offer],
     searchableText: "",
     source: {
       type: "automation",

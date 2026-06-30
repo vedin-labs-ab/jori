@@ -27,6 +27,7 @@ test("includes the latest integration offer for the run", async () => {
     summary: "Connect Notion so Milo can create the requested page.",
     updatedAt: 10,
   })
+  expect(summary.offers).toHaveLength(1)
   expect(summary.searchableText).toContain("connect notion")
 })
 
@@ -44,6 +45,10 @@ test("uses the newest integration offer for the run", async () => {
   )
 
   expect(summary.offer?.id).toBe("new-offer")
+  expect(summary.offers.map((offer) => offer.id)).toEqual([
+    "new-offer",
+    "old-offer",
+  ])
 })
 
 function testRun(title: string) {

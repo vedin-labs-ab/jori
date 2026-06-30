@@ -71,19 +71,17 @@ export const cancel = mutation({
   },
 })
 
-export async function getLatestRunOffer(ctx: QueryCtx, run: Doc<"runs">) {
-  let latest: Doc<"integrationOffers"> | null = null
+export async function getRunOffers(ctx: QueryCtx, run: Doc<"runs">) {
+  const runOffers: Doc<"integrationOffers">[] = []
   const offers = ctx.db
     .query("integrationOffers")
     .withIndex("by_run_and_status", (index) => index.eq("runId", run._id))
 
   for await (const offer of offers) {
-    if (latest === null || offer.createdAt > latest.createdAt) {
-      latest = offer
-    }
+    runOffers.push(offer)
   }
 
-  return latest
+  return runOffers.sort((left, right) => right.createdAt - left.createdAt)
 }
 
 export function summarizeRunOffer(offer: Doc<"integrationOffers">) {

@@ -5,6 +5,8 @@ import {
   type ReactNode,
 } from "react"
 import { cn } from "@/lib/utils"
+import { type RunRequestNavigation } from "../request/carousel"
+import { RunRequestPager } from "../request/pager"
 
 export function RunRowFrame({
   children,
@@ -136,6 +138,7 @@ export function RunRequestSection({
   label,
   labelIcon: LabelIcon,
   meta,
+  navigation,
   summary,
   title,
   titleIcon,
@@ -144,6 +147,7 @@ export function RunRequestSection({
   label: string
   labelIcon: LucideIcon
   meta: RunRequestMeta | null
+  navigation?: RunRequestNavigation
   summary: string
   title: string
   titleIcon: ReactNode
@@ -155,11 +159,14 @@ export function RunRequestSection({
         {label}
       </div>
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="inline-flex min-w-0 items-center gap-1.5 font-medium text-sm">
-            {titleIcon}
-            <span className="truncate">{title}</span>
-          </span>
+        <div className="flex min-h-5 items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="inline-flex min-w-0 items-center gap-1.5 font-medium text-sm">
+              {titleIcon}
+              <span className="truncate">{title}</span>
+            </span>
+          </div>
+          <RunRequestPager navigation={navigation} />
         </div>
         <p className="mt-2.5 text-foreground text-sm leading-relaxed">
           {summary}
