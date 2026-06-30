@@ -56,19 +56,26 @@ export class OpenRouterModelRuntime implements ModelRuntime {
       tools: toAiTools(args.tools),
     })
     const toolCalls = response.toolCalls.flatMap(readToolCall)
+    const output = nullableText(response.text)
+    const reasoning = readReasoningText(response)
+    const usage = readModelUsage(response)
 
     if (toolCalls.length === 0) {
       return {
         content: response.text,
-        usage: readModelUsage(response),
+        output,
+        reasoning,
+        usage,
         type: "stop",
       }
     }
 
     return {
       content: response.text === "" ? null : response.text,
+      output,
+      reasoning,
       toolCalls,
-      usage: readModelUsage(response),
+      usage,
       type: "tool_calls",
     }
   }
@@ -188,4 +195,12 @@ function readToolCall(toolCall: {
       name: toolCall.toolName,
     },
   ]
+}
+
+function readReasoningText(response: { reasoningText?: unknown }) {
+  return nullableText(response.reasoningText)
+}
+
+function nullableText(value: unknown) {
+  return typeof value === "string" && value.trim() !== "" ? value : null
 }

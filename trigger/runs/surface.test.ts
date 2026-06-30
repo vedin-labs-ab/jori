@@ -3,6 +3,7 @@ import { type ModelRuntime } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type RuntimeTool } from "../types"
 import { runAgentLoop } from "./loop"
+import { type QueuedModelResponse, queuedModelResponses } from "./test-model"
 
 test("active surface stops are repaired back to finish_run", async () => {
   const runtime = createRuntime({
@@ -170,12 +171,12 @@ test("active surface final replies complete without finish_run", async () => {
   )
 })
 
-function createModel(
-  responses: Awaited<ReturnType<ModelRuntime["complete"]>>[]
-) {
+function createModel(responses: QueuedModelResponse[]) {
+  const queue = queuedModelResponses(responses)
+
   return {
     complete: vi.fn(async () => {
-      const response = responses.shift()
+      const response = queue.shift()
 
       if (response === undefined) {
         throw new Error("No model response queued.")
@@ -236,7 +237,7 @@ function sendReplyTool(): RuntimeTool {
     description: "Send reply.",
     inputSchema: {},
     name: "send_reply",
-    route: "active_surface",
+    route: "surface",
   }
 }
 
@@ -246,7 +247,7 @@ function addReactionTool(): RuntimeTool {
     description: "Add reaction.",
     inputSchema: {},
     name: "add_reaction",
-    route: "active_surface",
+    route: "surface",
   }
 }
 

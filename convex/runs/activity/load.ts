@@ -9,17 +9,20 @@ export async function loadActivityData(
   ctx: QueryCtx,
   run: Doc<"runs">
 ): Promise<ActivityData> {
-  const [traces, approvals, offers, waiters, agents] = await Promise.all([
-    loadTraces(ctx, run._id),
-    loadApprovals(ctx, run._id),
-    loadOffers(ctx, run._id),
-    loadWaiters(ctx, run._id),
-    loadAgents(ctx, run._id),
-  ])
+  const [traces, approvals, offers, waiters, agents, assets] =
+    await Promise.all([
+      loadTraces(ctx, run._id),
+      loadApprovals(ctx, run._id),
+      loadOffers(ctx, run._id),
+      loadWaiters(ctx, run._id),
+      loadAgents(ctx, run._id),
+      loadAssets(ctx, run._id),
+    ])
 
   return {
     agents,
     approvals,
+    assets,
     offers,
     run,
     traces,
@@ -88,6 +91,14 @@ async function loadAgents(ctx: QueryCtx, parentId: Id<"runs">) {
   return await ctx.db
     .query("runs")
     .withIndex("by_parent", (query) => query.eq("parentId", parentId))
+    .order("asc")
+    .take(relationLimit)
+}
+
+async function loadAssets(ctx: QueryCtx, runId: Id<"runs">) {
+  return await ctx.db
+    .query("assets")
+    .withIndex("by_run", (query) => query.eq("runId", runId))
     .order("asc")
     .take(relationLimit)
 }

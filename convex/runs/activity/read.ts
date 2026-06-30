@@ -1,45 +1,23 @@
-import {
-  type ActivityMetadataItem,
-  type ActivityStatus,
-  type ToolLabel,
-} from "./types"
+import { type ToolLabel } from "./types"
 
-export type EventData = {
-  metrics?: {
-    durationMs?: number
-    inputCacheReadTokens?: number
-    inputCacheWriteTokens?: number
-    inputTokens?: number
-    inputUncachedTokens?: number
-    outputTokens?: number
-    reasoningTokens?: number
-    toolCalls?: number
-    totalTokens?: number
-  }
-  status?: ActivityStatus
-  summary?: string
-  title: string
-}
+export type ToolResult =
+  | { kind: "string"; preview: string; length: number }
+  | { kind: "number"; preview: string }
+  | { kind: "boolean" }
+  | { kind: "null" }
+  | { kind: "array"; size: number }
+  | { kind: "object"; size: number }
 
-export type ToolResult = {
-  preview?: string
-  size?: number
-  type: string
-}
-
-export function readEventData(data: unknown): EventData | undefined {
-  const record = asRecord(data)
-
-  if (record === undefined || typeof record.title !== "string") {
-    return undefined
-  }
-
-  return {
-    metrics: readMetrics(record.metrics),
-    status: readStatus(record.status),
-    summary: readString(record.summary),
-    title: record.title,
-  }
+export type ModelUsage = {
+  durationMs: number
+  inputTokens: number
+  inputCacheReadTokens: number
+  inputCacheWriteTokens: number
+  inputUncachedTokens: number
+  outputTokens: number
+  reasoningTokens: number
+  totalTokens: number
+  toolCalls: number
 }
 
 export function readPreparedTools(data: unknown) {
@@ -63,50 +41,118 @@ export function readTraceError(data: unknown) {
   return readString(asRecord(data)?.error)
 }
 
-export function readToolAccess(data: unknown) {
-  const access = asRecord(data)?.access
+export function readModelUsage(data: unknown): ModelUsage | undefined {
+  const usage = asRecord(asRecord(data)?.usage)
 
-  return access === "read" || access === "write" ? access : undefined
+  if (usage === undefined) {
+    return undefined
+  }
+
+  return {
+    durationMs: readNumber(usage.durationMs) ?? 0,
+    inputTokens: readNumber(usage.inputTokens) ?? 0,
+    inputCacheReadTokens: readNumber(usage.inputCacheReadTokens) ?? 0,
+    inputCacheWriteTokens: readNumber(usage.inputCacheWriteTokens) ?? 0,
+    inputUncachedTokens: readNumber(usage.inputUncachedTokens) ?? 0,
+    outputTokens: readNumber(usage.outputTokens) ?? 0,
+    reasoningTokens: readNumber(usage.reasoningTokens) ?? 0,
+    totalTokens: readNumber(usage.totalTokens) ?? 0,
+    toolCalls: readNumber(usage.toolCalls) ?? 0,
+  }
+}
+
+export function readToolAccess(data: unknown): ToolLabel["access"] | undefined {
+  return readTool(data)?.access
 }
 
 export function readToolError(data: unknown) {
-  return readString(asRecord(data)?.error)
+  return readTraceError(data)
 }
 
 export function readToolInput(data: unknown) {
   return asRecord(asRecord(data)?.input)
 }
 
-export function readToolMetadata(data: unknown): ActivityMetadataItem[] {
-  const metadata = asRecord(data)?.metadata
-
-  return Array.isArray(metadata) ? metadata.flatMap(readMetadataItem) : []
-}
-
 export function readToolName(data: unknown) {
-  return readString(asRecord(data)?.name)
+  return readTool(data)?.name
 }
 
-export function readToolResult(data: unknown) {
+export function readToolResult(data: unknown): ToolResult | undefined {
   const result = asRecord(asRecord(data)?.result)
+  const kind = readString(result?.kind)
 
-  if (result === undefined) {
+  if (kind === undefined) {
     return undefined
   }
 
-  const type = readString(result.type)
-
-  return type === undefined
-    ? undefined
-    : {
-        preview: readString(result.preview),
-        size: readNumber(result.size),
-        type,
-      }
+  return readResultByKind(kind, result)
 }
 
-export function readToolRoute(data: unknown) {
-  return readString(asRecord(data)?.route)
+function readTool(
+  data: unknown
+):
+  | { access: NonNullable<ToolLabel["access"]>; name: string; route: string }
+  | undefined {
+  const tool = asRecord(asRecord(data)?.tool)
+  const name = readString(tool?.name)
+  const route = readString(tool?.route)
+  const access =
+    tool?.access === "read" || tool?.access === "write"
+      ? tool.access
+      : undefined
+
+  if (name === undefined || route === undefined || access === undefined) {
+    return undefined
+  }
+
+  return { access, name, route }
+}
+
+function readResultByKind(
+  kind: string,
+  result: Record<string, unknown> | undefined
+): ToolResult | undefined {
+  switch (kind) {
+    case "array":
+    case "object":
+      return resultSize(kind, result)
+    case "boolean":
+    case "null":
+      return { kind }
+    case "number":
+      return resultPreview(kind, result)
+    case "string":
+      return resultString(result)
+    default:
+      return undefined
+  }
+}
+
+function resultSize(
+  kind: "array" | "object",
+  result: Record<string, unknown> | undefined
+) {
+  const size = readNumber(result?.size)
+
+  return size === undefined ? undefined : { kind, size }
+}
+
+function resultPreview(
+  kind: "number",
+  result: Record<string, unknown> | undefined
+) {
+  const preview = readString(result?.preview)
+
+  return preview === undefined ? undefined : { kind, preview }
+}
+
+function resultString(result: Record<string, unknown> | undefined) {
+  const preview = readString(result?.preview)
+  const length = readNumber(result?.length)
+
+  return preview === undefined || length === undefined
+    ? undefined
+    : { kind: "string" as const, preview, length }
 }
 
 function readPreparedTool(value: unknown): ToolLabel[] {
@@ -133,68 +179,6 @@ function readPreparedTool(value: unknown): ToolLabel[] {
       tool,
     },
   ]
-}
-
-function readMetadataItem(value: unknown): ActivityMetadataItem[] {
-  if (!isRecord(value)) {
-    return []
-  }
-
-  const kind = readMetadataKind(value.kind)
-  const text = readString(value.text)
-
-  return kind === undefined || text === undefined ? [] : [{ kind, text }]
-}
-
-function readMetadataKind(
-  value: unknown
-): ActivityMetadataItem["kind"] | undefined {
-  if (value === "target" || value === "scope" || value === "outcome") {
-    return value
-  }
-
-  return undefined
-}
-
-function readMetrics(value: unknown): EventData["metrics"] {
-  if (!isRecord(value)) {
-    return undefined
-  }
-
-  return {
-    durationMs: readNumber(value.durationMs),
-    inputCacheReadTokens: readNumber(value.inputCacheReadTokens),
-    inputCacheWriteTokens: readNumber(value.inputCacheWriteTokens),
-    inputTokens: readNumber(value.inputTokens),
-    inputUncachedTokens: readNumber(value.inputUncachedTokens),
-    outputTokens: readNumber(value.outputTokens),
-    reasoningTokens: readNumber(value.reasoningTokens),
-    toolCalls: readNumber(value.toolCalls),
-    totalTokens: readNumber(value.totalTokens),
-  }
-}
-
-function readStatus(value: unknown) {
-  return typeof value === "string" && isActivityStatus(value)
-    ? value
-    : undefined
-}
-
-function isActivityStatus(value: string): value is ActivityStatus {
-  return [
-    "approved",
-    "cancelled",
-    "completed",
-    "connected",
-    "denied",
-    "expired",
-    "failed",
-    "pending",
-    "requested",
-    "running",
-    "stopped",
-    "waiting",
-  ].includes(value)
 }
 
 function readNumber(value: unknown) {

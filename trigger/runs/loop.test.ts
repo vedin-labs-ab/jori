@@ -3,6 +3,7 @@ import { type ModelRuntime } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type RuntimeTool } from "../types"
 import { runAgentLoop } from "./loop"
+import { type QueuedModelResponse, queuedModelResponses } from "./test-model"
 
 test.each([
   ["empty content", ""],
@@ -163,12 +164,12 @@ test("marks the run failed when model steps are exhausted", async () => {
   )
 })
 
-function createModel(
-  responses: Awaited<ReturnType<ModelRuntime["complete"]>>[]
-) {
+function createModel(responses: QueuedModelResponse[]) {
+  const queue = queuedModelResponses(responses)
+
   return {
     complete: vi.fn(async () => {
-      const response = responses.shift()
+      const response = queue.shift()
 
       if (response === undefined) {
         throw new Error("No model response queued.")

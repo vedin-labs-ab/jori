@@ -1,18 +1,17 @@
 import { type Doc } from "../../_generated/dataModel"
-import { fieldLabel, formatToolName } from "./format"
+import { formatToolName, inputDescription, inputDetails } from "./format"
+import { toolMetadata } from "./metadata"
 import {
   readPreparedTools,
   readToolAccess,
   readToolError,
   readToolInput,
-  readToolMetadata,
   readToolName,
   readToolResult,
 } from "./read"
 import {
   type ActivityDetail,
   type ActivityItem,
-  type ActivityMetadataItem,
   type ActivityStatus,
   type ToolLabel,
 } from "./types"
@@ -51,21 +50,29 @@ function projectToolGroup(
   const started = group.find((trace) => trace.type === "tool.started")
   const terminal = group.find((trace) => toolTerminalTypes.has(trace.type))
   const trace = terminal ?? started ?? group[0]
-  const name = readToolName(trace.data) ?? "tool"
+  const traceData = readTraceData(trace)
+  const startedData = started === undefined ? undefined : readTraceData(started)
+  const terminalData =
+    terminal === undefined ? undefined : readTraceData(terminal)
+  const name = readToolName(traceData) ?? "tool"
   const label = labels.get(name)
   const status = toolStatus(trace)
   const startedAt = started?.timestamp ?? trace.timestamp
   const endedAt = terminal?.timestamp
-  const metadata = toolMetadata(started?.data, terminal?.data)
+  const metadata = toolMetadata({
+    input: readToolInput(startedData),
+    result: readToolResult(terminalData),
+    tool: name,
+  })
 
   return {
     id: trace._id,
     kind: "tool",
     status,
     title: toolTitle(name, label, status),
-    access: label?.access ?? readToolAccess(trace.data),
-    description: toolDescription(started?.data, terminal?.data, metadata),
-    details: toolDetails(started?.data, terminal?.data),
+    access: label?.access ?? readToolAccess(traceData),
+    description: toolDescription(startedData, terminalData, metadata),
+    details: toolDetails(startedData, terminalData),
     durationMs: endedAt === undefined ? undefined : endedAt - startedAt,
     endedAt,
     isLive: status === "running" && isRunLive,
@@ -85,8 +92,8 @@ function toolTitle(
 }
 
 function toolDescription(
-  started: Doc<"traces">["data"] | undefined,
-  terminal: Doc<"traces">["data"] | undefined,
+  started: unknown,
+  terminal: unknown,
   metadata: ReturnType<typeof toolMetadata>
 ) {
   const error = readToolError(terminal)
@@ -102,66 +109,12 @@ function toolDescription(
   return inputDescription(readToolInput(started))
 }
 
-function toolMetadata(
-  started: Doc<"traces">["data"] | undefined,
-  terminal: Doc<"traces">["data"] | undefined
-) {
-  const seen = new Set<string>()
-  const result: ActivityMetadataItem[] = []
-
-  for (const item of [
-    ...readToolMetadata(started),
-    ...readToolMetadata(terminal),
-  ]) {
-    const key = `${item.kind}:${item.text}`
-
-    if (!seen.has(key)) {
-      seen.add(key)
-      result.push(item)
-    }
-  }
-
-  return result
-}
-
-function inputDescription(input: Record<string, unknown> | undefined) {
-  if (input === undefined) {
-    return undefined
-  }
-
-  return (
-    stringField(input.command) ??
-    stringArrayField(input.args) ??
-    stringField(input.pattern) ??
-    stringField(input.path) ??
-    stringField(input.directory) ??
-    stringField(input.repo)
-  )
-}
-
-function toolDetails(
-  started: Doc<"traces">["data"] | undefined,
-  terminal: Doc<"traces">["data"] | undefined
-) {
+function toolDetails(started: unknown, terminal: unknown) {
   return [
     ...inputDetails(readToolInput(started)),
     ...resultDetails(readToolResult(terminal)),
     ...errorDetails(readToolError(terminal)),
   ]
-}
-
-function inputDetails(input: Record<string, unknown> | undefined) {
-  if (input === undefined) {
-    return []
-  }
-
-  return Object.entries(input).flatMap(([key, value]) => {
-    const detail = detailValue(value)
-
-    return detail === undefined
-      ? []
-      : [{ label: fieldLabel(key), value: detail }]
-  })
 }
 
 function resultDetails(result: ReturnType<typeof readToolResult>) {
@@ -170,10 +123,13 @@ function resultDetails(result: ReturnType<typeof readToolResult>) {
   }
 
   return [
-    { label: "Result", value: result.type },
-    result.size === undefined
+    { label: "Result", value: result.kind },
+    result.kind !== "string" || result.length === undefined
       ? undefined
-      : { label: "Result size", value: String(result.size) },
+      : { label: "Result length", value: String(result.length) },
+    "size" in result
+      ? { label: "Result size", value: String(result.size) }
+      : undefined,
   ].filter((detail) => detail !== undefined)
 }
 
@@ -194,7 +150,7 @@ function groupedToolName(trace: Doc<"traces">) {
     return undefined
   }
 
-  const name = readToolName(trace.data)
+  const name = readToolName(readTraceData(trace))
 
   return name === undefined || hiddenToolNames.has(name) ? undefined : name
 }
@@ -203,7 +159,7 @@ function toolLabels(traces: Doc<"traces">[]) {
   const labels = new Map<string, ToolLabel>()
 
   for (const trace of traces) {
-    for (const tool of readPreparedTools(trace.data)) {
+    for (const tool of readPreparedTools(readTraceData(trace))) {
       labels.set(tool.tool, tool)
     }
   }
@@ -212,30 +168,24 @@ function toolLabels(traces: Doc<"traces">[]) {
 }
 
 function toolTraceKey(trace: Doc<"traces">, name: string) {
-  return trace.callId ?? `${trace.attempt ?? 0}:${trace.sequence ?? 0}:${name}`
+  return (
+    traceCallId(trace) ??
+    `${traceAttempt(trace)}:${traceSequence(trace) ?? 0}:${name}`
+  )
 }
 
-function detailValue(value: unknown) {
-  if (typeof value === "string") {
-    return value
-  }
-
-  if (typeof value === "number") {
-    return String(value)
-  }
-
-  return Array.isArray(value) ? stringArrayField(value) : undefined
+function readTraceData(trace: Doc<"traces">) {
+  return "data" in trace ? trace.data : undefined
 }
 
-function stringField(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
+function traceCallId(trace: Doc<"traces">) {
+  return "callId" in trace ? trace.callId : undefined
 }
 
-function stringArrayField(value: unknown) {
-  return Array.isArray(value) &&
-    value.every((entry) => typeof entry === "string")
-    ? value.join(" ")
-    : undefined
+function traceAttempt(trace: Doc<"traces">) {
+  return "attempt" in trace ? trace.attempt : 0
+}
+
+function traceSequence(trace: Doc<"traces">) {
+  return "sequence" in trace ? trace.sequence : undefined
 }

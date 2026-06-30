@@ -3,12 +3,13 @@ import {
   type RuntimeErrorTraceData,
   type RuntimeEventInput,
   type RuntimeEventType,
-  type RuntimeTraceSource,
 } from "./types"
 
 export function runtimeEvent(args: RuntimeEventInput) {
+  const { keyId, ...event } = args
+
   return {
-    ...args,
+    ...event,
     key: traceKey(args),
   }
 }
@@ -16,18 +17,17 @@ export function runtimeEvent(args: RuntimeEventInput) {
 export function traceKey(args: {
   attempt?: number
   callId?: string
+  keyId?: string
   runId: ConvexId<"runs">
   sequence: number
-  source: RuntimeTraceSource
   type: RuntimeEventType
 }) {
-  const call = args.callId === undefined ? "" : `:${args.callId}`
+  const keyId = args.keyId ?? args.callId
+  const key = keyId === undefined ? "" : `:${keyId}`
   const attempt = args.attempt === undefined ? "" : `:attempt-${args.attempt}`
 
   return (
-    [args.runId, args.source, args.sequence.toString(), args.type].join(":") +
-    call +
-    attempt
+    [args.runId, args.sequence.toString(), args.type].join(":") + key + attempt
   )
 }
 

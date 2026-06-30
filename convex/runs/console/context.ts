@@ -54,18 +54,18 @@ async function getPreparedRun(ctx: QueryCtx, run: Doc<"runs">) {
     .first()
 
   return {
-    tools: readToolSnapshot(prepared?.data),
+    tools: readPreparedTools(prepared),
   }
 }
 
-function readToolSnapshot(data: unknown): RunToolSnapshot | undefined {
-  if (typeof data !== "object" || data === null) {
+function readPreparedTools(
+  prepared: Doc<"traces"> | null
+): RunToolSnapshot | undefined {
+  if (prepared?.type !== "run.prepared") {
     return undefined
   }
 
-  const tools = "tools" in data ? data.tools : undefined
-
-  return isToolSnapshot(tools) ? tools : undefined
+  return isToolSnapshot(prepared.data.tools) ? prepared.data.tools : undefined
 }
 
 function isToolSnapshot(value: unknown): value is RunToolSnapshot {

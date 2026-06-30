@@ -144,7 +144,6 @@ function trace(runId: string, timestamp: number): Seed {
       _id: id<"traces">("trace"),
       key: `trace:${runId}:${timestamp}`,
       runId: id<"runs">(runId),
-      source: "trigger.run",
       tenantId: "tenant",
       timestamp,
       type: "run.started",

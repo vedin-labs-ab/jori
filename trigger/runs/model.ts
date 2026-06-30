@@ -1,10 +1,11 @@
+import { formatError } from "../events"
 import {
   type ModelMessage,
   type ModelRuntime,
   type ModelTool,
 } from "../model/types"
 import { type ToolRuntime } from "../tool"
-import { type RuntimeTraceMetrics } from "../types"
+import { type RuntimeModelUsage } from "../types"
 import { recordActivityEvent } from "./events"
 
 export async function completeModelStep(args: {
@@ -21,12 +22,7 @@ export async function completeModelStep(args: {
 
   await recordActivityEvent(args.runtime.convex, args.runtime.context, {
     attempt: args.attempt,
-    data: {
-      status: "running",
-      title: "Thinking",
-    },
     sequence,
-    source: "trigger.model",
     type: "model.started",
   })
 
@@ -48,13 +44,8 @@ export async function completeModelStep(args: {
   } catch (error) {
     await recordActivityEvent(args.runtime.convex, args.runtime.context, {
       attempt: args.attempt,
-      data: {
-        summary: error instanceof Error ? error.message : "Unknown model error",
-        status: "failed",
-        title: "Model request failed",
-      },
+      data: { error: formatError(error) },
       sequence,
-      source: "trigger.model",
       type: "model.failed",
     })
     throw error
@@ -73,42 +64,24 @@ function recordModelCompleted(
   return recordActivityEvent(runtime.convex, runtime.context, {
     attempt: args.attempt,
     data: {
-      metrics: modelMetrics(args.response, args.durationMs),
-      status: "completed",
-      summary: modelSummary(args.response),
-      title: "Model step completed",
+      usage: modelUsage(args.response, args.durationMs),
+      output: args.response.output,
+      reasoning: args.response.reasoning,
     },
     sequence: args.sequence,
-    source: "trigger.model",
     type: "model.completed",
   })
 }
 
-function modelMetrics(
+function modelUsage(
   response: Awaited<ReturnType<ModelRuntime["complete"]>>,
   durationMs: number
-): RuntimeTraceMetrics {
+): RuntimeModelUsage {
   return {
     durationMs,
-    inputCacheReadTokens: response.usage?.inputCacheReadTokens,
-    inputCacheWriteTokens: response.usage?.inputCacheWriteTokens,
-    inputTokens: response.usage?.inputTokens,
-    inputUncachedTokens: response.usage?.inputUncachedTokens,
-    outputTokens: response.usage?.outputTokens,
-    reasoningTokens: response.usage?.reasoningTokens,
+    ...response.usage,
     toolCalls: response.type === "tool_calls" ? response.toolCalls.length : 0,
-    totalTokens: response.usage?.totalTokens,
   }
-}
-
-function modelSummary(response: Awaited<ReturnType<ModelRuntime["complete"]>>) {
-  if (response.type === "tool_calls") {
-    return response.toolCalls.length === 1
-      ? "Selected 1 action."
-      : `Selected ${response.toolCalls.length} actions.`
-  }
-
-  return "Returned control without an action."
 }
 
 function modelSequence(step: number) {

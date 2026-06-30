@@ -1,9 +1,15 @@
-import { v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx, mutation } from "../_generated/server"
-import { continuePendingWatchRun } from "../watches/continuation"
-import { traceData, traceSource, traceType } from "./schema"
-import { requireWorkerSecret } from "./shared"
+import { type Infer, v } from "convex/values"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { type MutationCtx, mutation } from "../../_generated/server"
+import { continuePendingWatchRun } from "../../watches/continuation"
+import { requireWorkerSecret } from "../shared"
+import { traceData, traceType } from "./schema"
+
+type TraceData = Infer<typeof traceData>
+type TraceInsert = WithoutSystemFields<Doc<"traces">>
+type WithoutSystemFields<Row> = Row extends unknown
+  ? Omit<Row, "_creationTime" | "_id">
+  : never
 
 export const record = mutation({
   args: {
@@ -14,7 +20,6 @@ export const record = mutation({
     runId: v.id("runs"),
     secret: v.string(),
     sequence: v.optional(v.number()),
-    source: traceSource,
     type: traceType,
   },
   returns: v.object({
@@ -52,11 +57,10 @@ export async function recordTrace(
   args: {
     attempt?: number
     callId?: string
-    data?: Doc<"traces">["data"]
+    data?: TraceData
     key: string
     run: Doc<"runs">
     sequence?: number
-    source: Doc<"traces">["source"]
     timestamp?: number
     type: Doc<"traces">["type"]
   }
@@ -70,20 +74,32 @@ export async function recordTrace(
     return false
   }
 
-  await ctx.db.insert("traces", {
+  await ctx.db.insert("traces", traceInsert(args))
+
+  return true
+}
+
+function traceInsert(args: {
+  attempt?: number
+  callId?: string
+  data?: TraceData
+  key: string
+  run: Doc<"runs">
+  sequence?: number
+  timestamp?: number
+  type: Doc<"traces">["type"]
+}): TraceInsert {
+  return {
     tenantId: args.run.tenantId,
     runId: args.run._id,
     key: args.key,
-    source: args.source,
     type: args.type,
-    sequence: args.sequence,
-    callId: args.callId,
-    attempt: args.attempt,
-    data: args.data,
+    ...(args.sequence === undefined ? {} : { sequence: args.sequence }),
+    ...(args.attempt === undefined ? {} : { attempt: args.attempt }),
+    ...(args.callId === undefined ? {} : { callId: args.callId }),
+    ...(args.data === undefined ? {} : { data: args.data }),
     timestamp: args.timestamp ?? Date.now(),
-  })
-
-  return true
+  } as TraceInsert
 }
 
 async function patchSessionStatus(
@@ -106,7 +122,7 @@ async function patchSessionStatus(
 async function patchRunStatus(
   ctx: MutationCtx,
   args: {
-    data?: Doc<"traces">["data"]
+    data?: TraceData
     runId: Id<"runs">
     type: Doc<"traces">["type"]
   }
@@ -146,18 +162,16 @@ async function patchRunStatus(
 
     await ctx.db.patch(args.runId, {
       status: "failed",
-      error: readDataString(args.data, "error"),
+      error: readRunFailedError(args.data),
       endedAt: Date.now(),
     })
   }
 }
 
-function readDataString(data: Doc<"traces">["data"], key: string) {
-  if (typeof data !== "object" || data === null || !(key in data)) {
-    return undefined
+function readRunFailedError(data: TraceData | undefined) {
+  if (data === undefined || !("error" in data)) {
+    throw new Error("Run failed trace is missing an error.")
   }
 
-  const value = data[key as keyof typeof data]
-
-  return typeof value === "string" ? value : undefined
+  return data.error
 }

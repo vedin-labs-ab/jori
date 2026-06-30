@@ -19,7 +19,7 @@ import { syncSessionReactions } from "./sessions"
 import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
 import { activeSurfaceToolSnapshot } from "./surface/tools"
-import { recordTrace } from "./traces"
+import { recordTrace } from "./traces/data"
 
 export const load = action({
   args: {
@@ -259,7 +259,6 @@ export const prepareRun = internalMutation({
     await recordTrace(ctx, {
       run,
       key: `run:${args.runId}:prepared`,
-      source: "convex.runtime",
       type: "run.prepared",
       data: {
         tools: args.tools,

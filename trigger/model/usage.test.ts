@@ -42,12 +42,28 @@ describe("model usage", () => {
         },
       })
     ).toEqual({
+      inputCacheReadTokens: 0,
+      inputCacheWriteTokens: 0,
       inputTokens: 10,
+      inputUncachedTokens: 0,
+      outputTokens: 0,
+      reasoningTokens: 0,
+      totalTokens: 0,
     })
   })
 
-  test("returns undefined when no usage values are present", () => {
-    expect(readModelUsage({ usage: {} })).toBeUndefined()
-    expect(readModelUsage({})).toBeUndefined()
+  test("returns zero defaults when no usage values are present", () => {
+    const empty = {
+      inputCacheReadTokens: 0,
+      inputCacheWriteTokens: 0,
+      inputTokens: 0,
+      inputUncachedTokens: 0,
+      outputTokens: 0,
+      reasoningTokens: 0,
+      totalTokens: 0,
+    }
+
+    expect(readModelUsage({ usage: {} })).toEqual(empty)
+    expect(readModelUsage({})).toEqual(empty)
   })
 })

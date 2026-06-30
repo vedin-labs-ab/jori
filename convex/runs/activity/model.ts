@@ -1,5 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
-import { type EventData, readEventData } from "./read"
+import { type ModelUsage, readModelUsage, readTraceError } from "./read"
 import {
   type ActivityDetail,
   type ActivityItem,
@@ -35,14 +35,11 @@ function projectModelStart(
   trace: Doc<"traces">,
   isRunLive: boolean
 ): ActivityItem {
-  const event = readEventData(trace.data)
-
   return {
     id: trace._id,
     kind: "model",
     status: "running",
-    title: event?.title ?? "Thinking",
-    details: modelDetails(trace.data),
+    title: "Thinking",
     isLive: isRunLive,
     startedAt: trace.timestamp,
   }
@@ -52,77 +49,92 @@ function projectModelTerminal(
   trace: Doc<"traces">,
   started: Doc<"traces"> | undefined
 ): ActivityItem {
-  const event = readEventData(trace.data)
   const failed = trace.type === "model.failed"
-  const tokenUsage = modelTokenUsage(event?.metrics)
+  const data = readTraceData(trace)
+  const usage = readModelUsage(data)
 
   return {
     id: trace._id,
     kind: "model",
     status: failed ? "failed" : "completed",
-    title: event?.title ?? (failed ? "Model request failed" : "Model step"),
-    description: failed ? event?.summary : undefined,
-    details: modelDetails(trace.data),
-    durationMs: event?.metrics?.durationMs,
+    title: failed ? "Model request failed" : "Model step completed",
+    description: failed ? readTraceError(data) : modelSummary(usage),
+    details: modelDetails(usage),
+    durationMs: usage?.durationMs,
     endedAt: trace.timestamp,
     startedAt: started?.timestamp ?? trace.timestamp,
-    tokenUsage,
+    tokenUsage: modelTokenUsage(usage),
   }
+}
+
+function modelSummary(usage: ModelUsage | undefined) {
+  const toolCalls = usage?.toolCalls ?? 0
+
+  if (toolCalls === 0) {
+    return "Returned control without an action."
+  }
+
+  return toolCalls === 1
+    ? "Selected 1 action."
+    : `Selected ${toolCalls} actions.`
 }
 
 function modelTokenUsage(
-  metrics: EventData["metrics"] | undefined
+  usage: ModelUsage | undefined
 ): ActivityTokenUsage | undefined {
-  if (
-    metrics?.inputTokens === undefined &&
-    metrics?.outputTokens === undefined &&
-    metrics?.reasoningTokens === undefined &&
-    metrics?.totalTokens === undefined
-  ) {
+  if (usage === undefined) {
     return undefined
   }
 
-  const input = metrics.inputTokens ?? 0
-  const output = metrics.outputTokens ?? 0
-  const reasoning = metrics.reasoningTokens ?? 0
-
   return {
-    input,
-    output,
-    reasoning,
-    total: metrics.totalTokens ?? input + output + reasoning,
+    input: usage.inputTokens,
+    output: usage.outputTokens,
+    reasoning: usage.reasoningTokens,
+    total: usage.totalTokens,
   }
 }
 
-function modelDetails(data: Doc<"traces">["data"] | undefined) {
-  const metrics = readEventData(data)?.metrics
-
-  if (metrics === undefined) {
+function modelDetails(usage: ModelUsage | undefined) {
+  if (usage === undefined) {
     return undefined
   }
 
-  return [
-    metricDetail("Input tokens", metrics.inputTokens),
-    metricDetail("Output tokens", metrics.outputTokens),
-    metricDetail("Reasoning tokens", metrics.reasoningTokens),
-    metricDetail("Total tokens", metrics.totalTokens),
-    metricDetail("Tool calls", metrics.toolCalls),
+  const details = [
+    metricDetail("Input tokens", usage.inputTokens),
+    metricDetail("Output tokens", usage.outputTokens),
+    metricDetail("Reasoning tokens", usage.reasoningTokens),
+    metricDetail("Total tokens", usage.totalTokens),
+    metricDetail("Tool calls", usage.toolCalls),
   ].filter((detail) => detail !== undefined)
+
+  return details.length === 0 ? undefined : details
 }
 
 function metricDetail(
   label: string,
-  value: number | undefined
+  value: number
 ): ActivityDetail | undefined {
-  return value === undefined
+  return value === 0
     ? undefined
     : { label, value: new Intl.NumberFormat("en").format(value) }
 }
 
 function modelTraceKey(trace: Doc<"traces">) {
-  return `${trace.attempt ?? 0}:${trace.sequence ?? trace.timestamp}`
+  return `${traceAttempt(trace)}:${traceSequence(trace) ?? trace.timestamp}`
 }
 
 function isTerminalModelTrace(trace: Doc<"traces">) {
   return trace.type === "model.completed" || trace.type === "model.failed"
+}
+
+function readTraceData(trace: Doc<"traces">) {
+  return "data" in trace ? trace.data : undefined
+}
+
+function traceAttempt(trace: Doc<"traces">) {
+  return "attempt" in trace ? trace.attempt : 0
+}
+
+function traceSequence(trace: Doc<"traces">) {
+  return "sequence" in trace ? trace.sequence : undefined
 }

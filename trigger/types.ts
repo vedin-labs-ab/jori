@@ -1,6 +1,6 @@
 import { type GenericId } from "convex/values"
 import { type ToolSurface } from "../contracts/integrations"
-import { type JsonObject } from "../contracts/json"
+import { type JsonObject, type JsonValue } from "../contracts/json"
 import { type ToolAccess } from "../contracts/permissions"
 
 export type {
@@ -15,8 +15,6 @@ export {
   type RuntimeToolMetadataItem,
   type SurfaceReactionTarget,
 } from "../contracts/runtime"
-
-import { type RuntimeToolMetadataItem } from "../contracts/runtime"
 
 export type ConvexId<TableName extends string> = GenericId<TableName>
 
@@ -38,107 +36,79 @@ export type ActiveSurface = {
 
 export type RuntimeToolRoute =
   | "agent"
-  | "active_surface"
+  // Distinct from ToolSurface/activeSurface, which names integrations like Slack.
+  | "surface"
   | "convex"
   | "run"
   | "sandbox"
 
-export type RuntimeTraceSource =
-  | "trigger.approval"
-  | "trigger.model"
-  | "trigger.run"
-  | "trigger.tool"
-
-export type RuntimeValueSummary = {
-  type: "array" | "boolean" | "null" | "number" | "object" | "string"
-  preview?: string
-  size?: number
-}
-
-export type RuntimeToolInputSummary = {
-  args?: string[]
-  command?: string
-  cwd?: string
-  directory?: string
-  include?: string
-  limit?: number
-  offset?: number
-  owner?: string
-  path?: string
-  pattern?: string
-  ref?: string
-  repo?: string
-  timeoutMs?: number
-}
+export type RuntimeValueSummary =
+  | { kind: "string"; preview: string; length: number }
+  | { kind: "number"; preview: string }
+  | { kind: "boolean" }
+  | { kind: "null" }
+  | { kind: "array"; size: number }
+  | { kind: "object"; size: number }
 
 export type RuntimeErrorTraceData = {
   error: string
 }
 
-export type RuntimeToolTraceData = {
-  access?: ToolAccess
+export type RuntimeToolTraceTool = {
+  access: ToolAccess
   name: string
   route: RuntimeToolRoute
-  error?: string
-  metadata?: RuntimeToolMetadataItem[]
-  providerTrace?: {
-    provider: string
-    requestId: string
-  }
-  input?: RuntimeToolInputSummary
-  result?: RuntimeValueSummary
 }
+
+export type RuntimeToolProviderTrace = {
+  name: string
+  request: string
+} | null
+
+export type RuntimeToolTraceData =
+  | { tool: RuntimeToolTraceTool; input: JsonValue | null }
+  | {
+      tool: RuntimeToolTraceTool
+      result: RuntimeValueSummary
+      provider: RuntimeToolProviderTrace
+    }
+  | { tool: RuntimeToolTraceTool; input: JsonValue | null; error: string }
+  | { tool: RuntimeToolTraceTool }
+
+export type RuntimeModelUsage = {
+  durationMs: number
+  inputTokens: number
+  inputCacheReadTokens: number
+  inputCacheWriteTokens: number
+  inputUncachedTokens: number
+  outputTokens: number
+  reasoningTokens: number
+  totalTokens: number
+  toolCalls: number
+}
+
+export type RuntimeModelTraceData = {
+  usage: RuntimeModelUsage
+  output: string | null
+  reasoning: string | null
+}
+
+export type RuntimeRelationTraceData =
+  | { approval: ConvexId<"approvals"> }
+  | { offer: ConvexId<"integrationOffers"> }
+  | { asset: ConvexId<"assets"> }
+  | { child: ConvexId<"runs"> }
+  | { waiter: ConvexId<"waiters"> }
 
 export type RuntimeRunTraceData = RuntimeErrorTraceData
 
-export type RuntimeTraceSubject =
-  | { kind: "agent"; id: ConvexId<"runs"> }
-  | { kind: "approval"; id: ConvexId<"approvals"> }
-  | { kind: "asset"; id: ConvexId<"assets"> }
-  | { kind: "offer"; id: ConvexId<"integrationOffers"> }
-  | { kind: "waiter"; id: ConvexId<"waiters"> }
-
-export type RuntimeTraceMetrics = {
-  approvals?: number
-  durationMs?: number
-  inputCacheReadTokens?: number
-  inputCacheWriteTokens?: number
-  inputTokens?: number
-  inputUncachedTokens?: number
-  messages?: number
-  offers?: number
-  outputTokens?: number
-  reasoningTokens?: number
-  toolCalls?: number
-  totalTokens?: number
-}
-
-export type RuntimeTraceStatus =
-  | "approved"
-  | "cancelled"
-  | "completed"
-  | "connected"
-  | "denied"
-  | "expired"
-  | "failed"
-  | "pending"
-  | "requested"
-  | "running"
-  | "stopped"
-  | "waiting"
-
-export type RuntimeEventTraceData = {
-  metrics?: RuntimeTraceMetrics
-  status?: RuntimeTraceStatus
-  subject?: RuntimeTraceSubject
-  summary?: string
-  title: string
-}
-
-export type RuntimeTraceData =
-  | RuntimeEventTraceData
-  | RuntimeRunTraceData
+export type RuntimeEventTraceData =
+  | RuntimeErrorTraceData
+  | RuntimeModelTraceData
+  | RuntimeRelationTraceData
   | RuntimeToolTraceData
+
+export type RuntimeTraceData = RuntimeEventTraceData | RuntimeRunTraceData
 
 export type RuntimeTool = {
   access: ToolAccess
@@ -223,9 +193,9 @@ export type RuntimeEventInput = {
   attempt?: number
   callId?: string
   data?: RuntimeTraceData
+  keyId?: string
   runId: ConvexId<"runs">
   sequence: number
-  source: RuntimeTraceSource
   type: RuntimeEventType
 }
 

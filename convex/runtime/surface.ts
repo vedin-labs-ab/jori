@@ -194,15 +194,11 @@ async function hasCompletedCommunicationTrace(
 }
 
 function isCompletedCommunicationTrace(trace: Doc<"traces">) {
-  const data = trace.data
+  if (trace.type !== "tool.completed") {
+    return false
+  }
 
-  return (
-    trace.type === "tool.completed" &&
-    typeof data === "object" &&
-    data !== null &&
-    "name" in data &&
-    isVisibleCommunicationTool(data.name)
-  )
+  return isVisibleCommunicationTool(trace.data.tool.name)
 }
 
 function isVisibleCommunicationTool(name: unknown) {

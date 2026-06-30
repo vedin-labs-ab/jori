@@ -7,7 +7,7 @@ export type ActiveSurfaceTool = {
   description: string
   inputSchema: JsonObject
   name: "add_reaction" | "send_reply"
-  route: "active_surface"
+  route: "surface"
 }
 
 export function activeSurfaceTools(
@@ -34,7 +34,7 @@ function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
       "Send a visible reply or update to the active requester surface. Milo routes it to the current requester context by default. Use `final` only when this successful reply should finish the run. On Linear, set commentId only when intentionally replying under a specific visible comment.",
     inputSchema: sendReplySchema(surface),
     name: "send_reply",
-    route: "active_surface",
+    route: "surface",
   }
 }
 
@@ -45,7 +45,7 @@ function addReactionTool(surface: MessageIntegration): ActiveSurfaceTool {
       "Add a visible reaction on the active requester surface. Use `final` only when this successful reaction should finish the run.",
     inputSchema: addReactionSchema(surface),
     name: "add_reaction",
-    route: "active_surface",
+    route: "surface",
   }
 }
 
