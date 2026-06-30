@@ -167,9 +167,9 @@ export function RunRequestSection({
             <span className="truncate">{title}</span>
           </span>
         </div>
-        <blockquote className="mt-2.5 border-l pl-3 text-foreground text-sm italic leading-relaxed">
+        <p className="mt-2.5 text-foreground text-sm leading-relaxed">
           {summary}
-        </blockquote>
+        </p>
         <RunRequestFooter actions={actions} meta={meta} />
       </div>
     </div>
