@@ -6,6 +6,7 @@ import { type ExecutionItem } from "../types"
 import { ExecutionRow } from "./index"
 
 vi.mock("convex/react", () => ({
+  useMutation: () => vi.fn(),
   useQuery: () => ({ items: [], status: "loaded" }),
 }))
 
@@ -236,7 +237,7 @@ function renderExecutionRow(item: ExecutionItem) {
 
 function execution(
   overrides: Pick<ExecutionItem, "task" | "title"> &
-    Partial<Pick<ExecutionItem, "approval" | "details" | "source">>
+    Partial<Pick<ExecutionItem, "approval" | "details" | "offer" | "source">>
 ): ExecutionItem {
   return {
     approval: overrides.approval ?? null,
@@ -245,6 +246,7 @@ function execution(
     durationMs: 1000,
     endedAt: 1700000001000,
     id: "execution",
+    offer: overrides.offer ?? null,
     searchableText: "",
     source: overrides.source ?? {
       type: "automation",

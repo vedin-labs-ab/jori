@@ -1,8 +1,14 @@
+import { type LucideIcon } from "lucide-react"
 import {
   type FocusEventHandler,
   type PointerEventHandler,
   type ReactNode,
 } from "react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 export function RunRowFrame({
@@ -122,4 +128,89 @@ export function RunRowMeta({
 
 export function RunRowBody({ children }: { children: ReactNode }) {
   return <div className="grid gap-0">{children}</div>
+}
+
+export type RunRequestMeta = {
+  Icon: LucideIcon
+  iconClassName?: string
+  label: string
+  tooltip: string
+}
+
+export function RunRequestSection({
+  actions,
+  label,
+  labelIcon: LabelIcon,
+  meta,
+  summary,
+  title,
+  titleIcon,
+}: {
+  actions?: ReactNode
+  label: string
+  labelIcon: LucideIcon
+  meta: RunRequestMeta | null
+  summary: string
+  title: string
+  titleIcon: ReactNode
+}) {
+  return (
+    <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
+      <div className="flex items-start gap-2 font-medium">
+        <LabelIcon className="mt-0.5 size-3.5 text-muted-foreground" />
+        {label}
+      </div>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="inline-flex min-w-0 items-center gap-2 font-medium text-sm">
+            {titleIcon}
+            <span className="truncate">{title}</span>
+          </span>
+        </div>
+        <p className="mt-3 text-foreground text-sm leading-relaxed">
+          {summary}
+        </p>
+        <RunRequestFooter actions={actions} meta={meta} />
+      </div>
+    </div>
+  )
+}
+
+function RunRequestFooter({
+  actions,
+  meta,
+}: {
+  actions?: ReactNode
+  meta: RunRequestMeta | null
+}) {
+  if (actions === undefined && meta === null) {
+    return null
+  }
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+      <RunRequestMetaItem meta={meta} />
+      {actions ?? null}
+    </div>
+  )
+}
+
+function RunRequestMetaItem({ meta }: { meta: RunRequestMeta | null }) {
+  if (meta === null) {
+    return null
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center gap-1.5">
+            <meta.Icon className={cn("size-3.5", meta.iconClassName)} />
+            {meta.label}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>{meta.tooltip}</TooltipContent>
+      </Tooltip>
+    </div>
+  )
 }

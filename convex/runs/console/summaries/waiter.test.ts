@@ -56,14 +56,20 @@ function fakeQueryCtx(docs: { activeWaiter?: Doc<"waiters"> }) {
       get: async () => null,
       query: (table: string) => ({
         withIndex: () => ({
+          async *[Symbol.asyncIterator]() {},
           first: async () =>
             table === "waiters" ? (docs.activeWaiter ?? null) : null,
-          order: () => ({
-            first: async () => null,
-            take: async () => [],
-          }),
+          order: () => emptyQueryResult(),
         }),
       }),
     },
   } as unknown as QueryCtx
+}
+
+function emptyQueryResult() {
+  return {
+    async *[Symbol.asyncIterator]() {},
+    first: async () => null,
+    take: async () => [],
+  }
 }

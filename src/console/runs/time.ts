@@ -24,6 +24,9 @@ function needsLiveClock(run: ExecutionItem, now: number) {
     run.waiter?.state === "waiting" ||
     (run.approval !== null &&
       run.approval.state === "pending" &&
-      run.approval.expiresAt > now)
+      run.approval.expiresAt > now) ||
+    (run.offer !== null &&
+      (run.offer.state === "pending" || run.offer.state === "claimed") &&
+      run.offer.expiresAt > now)
   )
 }

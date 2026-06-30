@@ -1,15 +1,17 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { type RunToolSnapshot } from "../agent/tools/snapshot"
+import { getLatestRunOffer } from "./offers"
 
 export async function getRunContext(
   ctx: QueryCtx,
   run: Doc<"runs">,
   requestedApproval: Doc<"approvals"> | undefined
 ) {
-  const [runApproval, activeWaiter] = await Promise.all([
+  const [runApproval, activeWaiter, integrationOffer] = await Promise.all([
     requestedApproval ?? getLatestRequestedApproval(ctx, run),
     getActiveWaiter(ctx, run),
+    getLatestRunOffer(ctx, run),
   ])
   const message =
     run.cause.type === "message" ? await ctx.db.get(run.cause.messageId) : null
@@ -35,6 +37,7 @@ export async function getRunContext(
     automation,
     event,
     integration,
+    integrationOffer,
     message,
     prepared: await getPreparedRun(ctx, run),
     requestedApproval: runApproval,

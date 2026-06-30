@@ -321,6 +321,7 @@ import type * as runs_console_details from "../runs/console/details.js";
 import type * as runs_console_display from "../runs/console/display.js";
 import type * as runs_console_filters from "../runs/console/filters.js";
 import type * as runs_console_labels from "../runs/console/labels.js";
+import type * as runs_console_offers from "../runs/console/offers.js";
 import type * as runs_console_pending from "../runs/console/pending.js";
 import type * as runs_console_source from "../runs/console/source.js";
 import type * as runs_console_summaries from "../runs/console/summaries.js";
@@ -695,6 +696,7 @@ declare const fullApi: ApiFromModules<{
   "runs/console/display": typeof runs_console_display;
   "runs/console/filters": typeof runs_console_filters;
   "runs/console/labels": typeof runs_console_labels;
+  "runs/console/offers": typeof runs_console_offers;
   "runs/console/pending": typeof runs_console_pending;
   "runs/console/source": typeof runs_console_source;
   "runs/console/summaries": typeof runs_console_summaries;

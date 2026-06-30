@@ -9,6 +9,7 @@ const baseRun: ExecutionItem = {
   durationMs: 1200,
   endedAt: 1700000001323,
   id: "run-1",
+  offer: null,
   searchableText: "completed run",
   source: { type: "manual" },
   status: "completed",
@@ -78,4 +79,26 @@ describe("run clock timing", () => {
   test("buckets display time for settled runs", () => {
     expect(displayNowForRun(baseRun, 1700000065123)).toBe(1700000040000)
   })
+})
+
+test("uses a second interval while a pending offer is live", () => {
+  expect(
+    runClockInterval(
+      [
+        {
+          ...baseRun,
+          offer: {
+            expiresAt: 1700000066000,
+            id: "offer-1",
+            integration: "notion",
+            integrationLabel: "Notion",
+            state: "pending",
+            summary: "Connect Notion so Milo can continue.",
+            updatedAt: 1700000000000,
+          },
+        },
+      ],
+      1700000065123
+    )
+  ).toBe(1000)
 })

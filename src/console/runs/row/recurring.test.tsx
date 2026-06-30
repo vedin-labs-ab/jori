@@ -89,6 +89,7 @@ function execution(
     durationMs: 1000,
     endedAt: 1700000001000,
     id: "execution",
+    offer: null,
     searchableText: "",
     source: overrides.source ?? {
       type: "automation",

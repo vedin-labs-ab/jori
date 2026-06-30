@@ -1,26 +1,13 @@
 import { useAction } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import {
-  AlertCircle,
-  Check,
-  Clock3,
-  Loader2,
-  type LucideIcon,
-  UserPen,
-  X,
-} from "lucide-react"
+import { AlertCircle, Check, Clock3, Loader2, UserPen, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
 import { ProviderLogo } from "../../shared/logo/provider"
 import { absoluteTime, formatDuration } from "../../shared/time"
 import { type ExecutionItem } from "../types"
+import { type RunRequestMeta, RunRequestSection } from "./layout"
 
 type ApprovalDecisionArgs = FunctionArgs<typeof api.approvals.console.decide>
 
@@ -34,43 +21,19 @@ export function ApprovalCallout({
   tenantId: string
 }) {
   return (
-    <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
-      <div className="flex items-start gap-2 font-medium">
-        <UserPen className="mt-0.5 size-3.5 text-muted-foreground" />
-        Approval
-      </div>
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="inline-flex min-w-0 items-center gap-2 font-medium text-sm">
-            <ProviderLogo className="size-4" surface={approval.surface} />
-            <span className="truncate">{approval.toolLabel}</span>
-          </span>
-        </div>
-        <p className="mt-3 text-foreground text-sm leading-relaxed">
-          {approval.summary}
-        </p>
-        <ApprovalFooter approval={approval} now={now} tenantId={tenantId} />
-      </div>
-    </div>
-  )
-}
-
-function ApprovalFooter({
-  approval,
-  now,
-  tenantId,
-}: {
-  approval: NonNullable<ExecutionItem["approval"]>
-  now: number
-  tenantId: string
-}) {
-  return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-      <ApprovalMeta approval={approval} now={now} />
-      {approval.state === "pending" ? (
-        <ApprovalActions approval={approval} tenantId={tenantId} />
-      ) : null}
-    </div>
+    <RunRequestSection
+      actions={
+        approval.state === "pending" ? (
+          <ApprovalActions approval={approval} tenantId={tenantId} />
+        ) : undefined
+      }
+      label="Approval"
+      labelIcon={UserPen}
+      meta={approvalMeta(approval, now)}
+      summary={approval.summary}
+      title={approval.toolLabel}
+      titleIcon={<ProviderLogo className="size-4" surface={approval.surface} />}
+    />
   )
 }
 
@@ -144,34 +107,6 @@ function ApprovalActions({
   )
 }
 
-function ApprovalMeta({
-  approval,
-  now,
-}: {
-  approval: NonNullable<ExecutionItem["approval"]>
-  now: number
-}) {
-  const meta = approvalMeta(approval, now)
-
-  if (meta === null) {
-    return null
-  }
-
-  return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex items-center gap-1.5">
-            <meta.Icon className={cn("size-3.5", meta.iconClassName)} />
-            {meta.label}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent>{meta.tooltip}</TooltipContent>
-      </Tooltip>
-    </div>
-  )
-}
-
 function expirationLabel(
   approval: NonNullable<ExecutionItem["approval"]>,
   now: number
@@ -186,12 +121,7 @@ function expirationLabel(
 function approvalMeta(
   approval: NonNullable<ExecutionItem["approval"]>,
   now: number
-): {
-  Icon: LucideIcon
-  iconClassName?: string
-  label: string
-  tooltip: string
-} | null {
+): RunRequestMeta | null {
   if (approval.state === "pending" || approval.state === "expired") {
     const hasExpired = now >= approval.expiresAt
 

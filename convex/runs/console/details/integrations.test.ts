@@ -205,14 +205,17 @@ function fakeQueryCtx(docs: Record<string, unknown>) {
     db: {
       get: async (id: string) => docs[id] ?? null,
       query: () => ({
-        withIndex: () => ({
-          first: async () => null,
-          order: () => ({
-            first: async () => null,
-            take: async () => [],
-          }),
-        }),
+        withIndex: () => emptyQueryResult(),
       }),
     },
   } as unknown as QueryCtx
+}
+
+function emptyQueryResult() {
+  return {
+    async *[Symbol.asyncIterator]() {},
+    first: async () => null,
+    order: () => emptyQueryResult(),
+    take: async () => [],
+  }
 }
