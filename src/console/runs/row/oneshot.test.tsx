@@ -28,7 +28,7 @@ afterEach(() => {
 })
 
 describe("execution row one-shot details", () => {
-  test("renders one-shot automation details", () => {
+  test("renders one-shot automation details", async () => {
     renderExecutionRow(
       oneShotExecution({
         details: [slackToolsDetail(), { type: "web_search", label: "Allowed" }],
@@ -36,6 +36,8 @@ describe("execution row one-shot details", () => {
     )
 
     fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
+
+    await screen.findByText("Tools")
 
     expect(screen.getByText("Milo")).toBeDefined()
     expect(screen.queryByText("Scheduled")).toBeNull()
@@ -51,11 +53,13 @@ describe("execution row one-shot details", () => {
     expect(screen.getByText("Allowed")).toBeDefined()
   })
 
-  test("opens read-only tool details", () => {
+  test("opens read-only tool details", async () => {
     renderExecutionRow(oneShotExecution({ details: [slackToolsDetail()] }))
 
     fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
-    fireEvent.click(screen.getByRole("button", { name: "Open Slack tools" }))
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Open Slack tools" })
+    )
 
     const dialog = screen.getByRole("dialog")
 

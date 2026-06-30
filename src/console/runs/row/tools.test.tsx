@@ -21,7 +21,7 @@ afterEach(() => {
   cleanup()
 })
 
-test("marks approval-required tools in message run details", () => {
+test("marks approval-required tools in message run details", async () => {
   render(
     <TooltipProvider>
       <ExecutionRow
@@ -34,6 +34,8 @@ test("marks approval-required tools in message run details", () => {
 
   fireEvent.click(screen.getByRole("button", { name: /create a notion page/i }))
 
+  await screen.findByRole("button", { name: "Open Notion tools" })
+
   expect(screen.getByText(hasTextContent("Write 1*"))).toBeDefined()
   expect(screen.getByText("*").className).toContain("text-warning")
 
@@ -45,7 +47,7 @@ test("marks approval-required tools in message run details", () => {
   expect(screen.getAllByText("*")).toHaveLength(1)
 })
 
-test("omits empty access counts in message run details", () => {
+test("omits empty access counts in message run details", async () => {
   render(
     <TooltipProvider>
       <ExecutionRow
@@ -57,6 +59,8 @@ test("omits empty access counts in message run details", () => {
   )
 
   fireEvent.click(screen.getByRole("button", { name: /review tool access/i }))
+
+  await screen.findByRole("button", { name: "Open GitHub tools" })
 
   expect(
     screen.getByRole("button", { name: "Open GitHub tools" })

@@ -22,7 +22,7 @@ afterEach(() => {
 })
 
 describe("execution row task details", () => {
-  test("renders the execution task", () => {
+  test("renders the execution task", async () => {
     renderExecutionRow(
       execution({
         task: "Summarize the Notion launch plan.",
@@ -32,12 +32,14 @@ describe("execution row task details", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /notion test/i }))
 
+    await screen.findByText("Task")
+
     expect(screen.getAllByText("Task")).toHaveLength(1)
     expect(screen.getByRole("button", { name: "Copy Task" })).toBeDefined()
     expect(screen.getByText("Summarize the Notion launch plan.")).toBeDefined()
   })
 
-  test("does not render the title as the task", () => {
+  test("does not render the title as the task", async () => {
     renderExecutionRow(
       execution({
         task: "Use the Notion page context to update the team.",
@@ -49,6 +51,8 @@ describe("execution row task details", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /notion test/i }))
 
+    await screen.findByText("Use the Notion page context to update the team.")
+
     expect(
       screen.getByText("Use the Notion page context to update the team.")
     ).toBeDefined()
@@ -57,7 +61,7 @@ describe("execution row task details", () => {
 })
 
 describe("execution row message details", () => {
-  test("renders message run task source without duplicate message detail", () => {
+  test("renders message run task source without duplicate message detail", async () => {
     renderExecutionRow(
       execution({
         task: "Please summarize this thread.",
@@ -87,6 +91,8 @@ describe("execution row message details", () => {
       screen.getByRole("button", { name: /please summarize this thread/i })
     )
 
+    await screen.findByText("Tools")
+
     expect(screen.getAllByText("Slack").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Task")).toHaveLength(1)
     expect(screen.getByText("Tools")).toBeDefined()
@@ -107,7 +113,7 @@ describe("execution row message details", () => {
 })
 
 describe("execution row approval details", () => {
-  test("does not render the approval request source link", () => {
+  test("does not render the approval request source link", async () => {
     renderExecutionRow(
       execution({
         approval: {
@@ -132,6 +138,8 @@ describe("execution row approval details", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /approval test/i }))
 
+    await screen.findByText("Approval")
+
     expect(screen.getByText("Approval")).toBeDefined()
     expect(screen.getByText("Send the requested Slack update.")).toBeDefined()
     expect(screen.queryByText("Request message")).toBeNull()
@@ -139,7 +147,7 @@ describe("execution row approval details", () => {
 })
 
 describe("execution row linked details", () => {
-  test("renders execution details with links", () => {
+  test("renders execution details with links", async () => {
     renderExecutionRow(
       execution({
         task: "Review the issue comment.",
@@ -160,6 +168,8 @@ describe("execution row linked details", () => {
     )
 
     fireEvent.click(screen.getByRole("button", { name: /github test/i }))
+
+    await screen.findByText("Repository")
 
     expect(screen.getByText("Repository")).toBeDefined()
     expect(screen.getByText("Comment")).toBeDefined()
@@ -184,7 +194,7 @@ describe("execution row linked details", () => {
 })
 
 describe("execution row pull request details", () => {
-  test("renders pull request details as a plain linked fact", () => {
+  test("renders pull request details as a plain linked fact", async () => {
     renderExecutionRow(
       execution({
         task: "Review the pull request comment.",
@@ -200,6 +210,8 @@ describe("execution row pull request details", () => {
     )
 
     fireEvent.click(screen.getByRole("button", { name: /github pr test/i }))
+
+    await screen.findByText("Pull request")
 
     expect(screen.getByText("Pull request")).toBeDefined()
     const pullRequestLink = screen.getByRole("link", {
