@@ -129,6 +129,38 @@ test("labels approved approvals as approved actions", () => {
   )
 })
 
+test("marks active waiters as live intervals", () => {
+  const items = projectActivity(
+    data({
+      waiters: [
+        {
+          _creationTime: 1000,
+          _id: id<"waiters">("waiter"),
+          createdAt: 1000,
+          expiresAt: 2000,
+          runId: id<"runs">("run"),
+          status: "waiting",
+          tenantId: "tenant",
+          updatedAt: 1000,
+          waitpointId: "waitpoint",
+        } as Doc<"waiters">,
+      ],
+    })
+  )
+  const item = items.find((candidate) => candidate.kind === "wait")
+
+  expect(item).toEqual(
+    expect.objectContaining({
+      id: "waiter",
+      isLive: true,
+      status: "waiting",
+      title: "Waiting for input",
+    })
+  )
+  expect(item?.durationMs).toBeUndefined()
+  expect(item?.endedAt).toBeUndefined()
+})
+
 function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],

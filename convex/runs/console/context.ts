@@ -7,8 +7,10 @@ export async function getRunContext(
   run: Doc<"runs">,
   requestedApproval: Doc<"approvals"> | undefined
 ) {
-  const runApproval =
-    requestedApproval ?? (await getLatestRequestedApproval(ctx, run))
+  const [runApproval, activeWaiter] = await Promise.all([
+    requestedApproval ?? getLatestRequestedApproval(ctx, run),
+    getActiveWaiter(ctx, run),
+  ])
   const message =
     run.cause.type === "message" ? await ctx.db.get(run.cause.messageId) : null
   const automation =
@@ -27,6 +29,7 @@ export async function getRunContext(
       : await ctx.db.get(runApproval.delivery.integrationId)
 
   return {
+    activeWaiter,
     approval: runApproval,
     approvalDeliveryIntegration,
     automation,
@@ -44,6 +47,19 @@ async function getLatestRequestedApproval(ctx: QueryCtx, run: Doc<"runs">) {
     .query("approvals")
     .withIndex("by_run", (index) => index.eq("runId", run._id))
     .order("desc")
+    .first()
+}
+
+async function getActiveWaiter(ctx: QueryCtx, run: Doc<"runs">) {
+  if (run.status !== "running") {
+    return null
+  }
+
+  return await ctx.db
+    .query("waiters")
+    .withIndex("by_run_and_status", (index) =>
+      index.eq("runId", run._id).eq("status", "waiting")
+    )
     .first()
 }
 

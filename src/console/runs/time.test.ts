@@ -15,6 +15,7 @@ const baseRun: ExecutionItem = {
   task: "Completed run",
   title: "Completed run",
   trigger: "Manual",
+  waiter: null,
 }
 
 describe("run clock timing", () => {
@@ -48,6 +49,24 @@ describe("run clock timing", () => {
               summary: "Approve this run",
               tool: "slack.postMessage",
               toolLabel: "Post Slack message",
+            },
+          },
+        ],
+        1700000065123
+      )
+    ).toBe(1000)
+  })
+
+  test("uses a second interval while a waiter is active", () => {
+    expect(
+      runClockInterval(
+        [
+          {
+            ...baseRun,
+            waiter: {
+              expiresAt: 1700001800000,
+              id: "waiter-1",
+              state: "waiting",
             },
           },
         ],

@@ -51,6 +51,7 @@ export const ExecutionRow = memo(function ExecutionRow({
             approval={execution.approval}
             now={now}
             status={execution.status}
+            waiter={execution.waiter ?? null}
           />
           <ExecutionTitle execution={execution} />
           <ExecutionMeta
