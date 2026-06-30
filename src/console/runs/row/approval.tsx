@@ -129,7 +129,6 @@ function approvalMeta(
       Icon: Clock3,
       iconClassName: hasExpired ? "text-warning" : undefined,
       label: expirationLabel(approval, now),
-      tooltip: absoluteTime(approval.expiresAt),
     }
   }
 
@@ -138,7 +137,6 @@ function approvalMeta(
       Icon: Check,
       iconClassName: "text-primary",
       label: `Approved at ${absoluteTime(approval.decidedAt)}`,
-      tooltip: absoluteTime(approval.decidedAt),
     }
   }
 
@@ -147,7 +145,6 @@ function approvalMeta(
       Icon: X,
       iconClassName: "text-destructive",
       label: `Denied at ${absoluteTime(approval.decidedAt)}`,
-      tooltip: absoluteTime(approval.decidedAt),
     }
   }
 
@@ -156,7 +153,6 @@ function approvalMeta(
       Icon: X,
       iconClassName: "text-muted-foreground",
       label: "Cancelled by Milo",
-      tooltip: "Milo withdrew this request",
     }
   }
 
@@ -165,7 +161,6 @@ function approvalMeta(
       Icon: AlertCircle,
       iconClassName: "text-destructive",
       label: "Approval delivery failed",
-      tooltip: "Milo could not deliver this approval request",
     }
   }
 

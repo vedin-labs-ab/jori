@@ -4,11 +4,6 @@ import {
   type PointerEventHandler,
   type ReactNode,
 } from "react"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 export function RunRowFrame({
@@ -134,7 +129,6 @@ export type RunRequestMeta = {
   Icon: LucideIcon
   iconClassName?: string
   label: string
-  tooltip: string
 }
 
 export function RunRequestSection({
@@ -202,15 +196,10 @@ function RunRequestMetaItem({ meta }: { meta: RunRequestMeta | null }) {
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex items-center gap-1.5">
-            <meta.Icon className={cn("size-3.5", meta.iconClassName)} />
-            {meta.label}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent>{meta.tooltip}</TooltipContent>
-      </Tooltip>
+      <span className="inline-flex items-center gap-1.5">
+        <meta.Icon className={cn("size-3.5", meta.iconClassName)} />
+        {meta.label}
+      </span>
     </div>
   )
 }
