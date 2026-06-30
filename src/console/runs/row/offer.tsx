@@ -222,7 +222,6 @@ function offerMeta(offer: Offer, now: number): RunRequestMeta | null {
       Icon: Clock3,
       iconClassName: hasExpired ? "text-warning" : undefined,
       label: expirationLabel(offer, now),
-      tooltip: absoluteTime(offer.expiresAt),
     }
   }
 
@@ -231,7 +230,6 @@ function offerMeta(offer: Offer, now: number): RunRequestMeta | null {
       Icon: Check,
       iconClassName: "text-primary",
       label: `Connected at ${absoluteTime(offer.updatedAt)}`,
-      tooltip: absoluteTime(offer.updatedAt),
     }
   }
 
@@ -240,7 +238,6 @@ function offerMeta(offer: Offer, now: number): RunRequestMeta | null {
       Icon: X,
       iconClassName: "text-muted-foreground",
       label: `Cancelled at ${absoluteTime(offer.updatedAt)}`,
-      tooltip: offer.result?.reason ?? absoluteTime(offer.updatedAt),
     }
   }
 
@@ -249,7 +246,6 @@ function offerMeta(offer: Offer, now: number): RunRequestMeta | null {
       Icon: Clock3,
       iconClassName: "text-warning",
       label: `Expired at ${absoluteTime(offer.expiresAt)}`,
-      tooltip: absoluteTime(offer.expiresAt),
     }
   }
 
@@ -258,7 +254,6 @@ function offerMeta(offer: Offer, now: number): RunRequestMeta | null {
       Icon: AlertCircle,
       iconClassName: "text-destructive",
       label: "Integration failed",
-      tooltip: offer.result?.error ?? "Milo could not connect this integration",
     }
   }
 
