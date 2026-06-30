@@ -25,7 +25,7 @@ export const miloToolPermissionRows = [
     "offer_integration",
     "Offer integration",
     "Offer to connect an integration so Milo can use it.",
-    "Offer an integration the run needs and surface it in the active conversation. Include a concise summary for the offer card; set wait to true to pause the run until it connects when you cannot continue without it.",
+    "Offer an integration the run needs and surface it in the active conversation. Include a concise summary for the offer card. Set `wait: true` only when that integration is required to continue; if the offer is delivered, the run pauses after the tool succeeds.",
     "write",
     "required",
   ],

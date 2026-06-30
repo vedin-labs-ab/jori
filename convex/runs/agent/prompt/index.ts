@@ -31,6 +31,7 @@ export function assemblePrompt(
     omittedNames: omittedSkillNames(communication),
     skills: runtimeSkills,
   })
+  const offerIntegration = input.type !== "automation"
 
   return renderPromptTemplate(promptTemplates["agent/initial"], {
     agent: {
@@ -52,6 +53,7 @@ export function assemblePrompt(
     tools: {
       add_reaction: activeSurface !== null,
       finish_run: true,
+      offer_integration: offerIntegration,
       send_reply: activeSurface !== null,
     },
   })

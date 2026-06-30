@@ -69,6 +69,64 @@ test("delivered integration offers mark the active surface communicated", async 
   expect(runtime.context.activeSurface?.communicated).toBe(true)
 })
 
+test("delivered awaited integration offers finish the tool step", async () => {
+  const runtime = createRuntime({
+    result: {
+      delivery: { status: "delivered", surface: "slack" },
+      waiting: true,
+    },
+    surface: "slack",
+    tool: integrationOfferTool(),
+  })
+
+  const result = await executeToolCall({
+    attempt: 1,
+    call: {
+      args: {
+        integration: "gmail",
+        summary: "Gmail is needed here.",
+        wait: true,
+      },
+      id: "call_1",
+      name: "offer_integration",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(result.finished).toBe(true)
+  expect(runtime.context.activeSurface?.communicated).toBe(true)
+})
+
+test.each([
+  ["not awaited", { delivery: { status: "delivered" } }],
+  ["not delivered", { delivery: { status: "created" }, waiting: true }],
+  ["already connected", { status: "connected", waiting: true }],
+] as const)("integration offers do not finish when %s", async (_label, result) => {
+  const runtime = createRuntime({
+    result,
+    surface: "slack",
+    tool: integrationOfferTool(),
+  })
+
+  const output = await executeToolCall({
+    attempt: 1,
+    call: {
+      args: {
+        integration: "gmail",
+        summary: "Gmail is needed here.",
+        wait: true,
+      },
+      id: "call_1",
+      name: "offer_integration",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(output.finished).toBe(false)
+})
+
 test("undelivered integration offers do not mark visible communication", async () => {
   const runtime = createRuntime({
     result: { delivery: { status: "created" } },
