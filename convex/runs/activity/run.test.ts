@@ -35,8 +35,7 @@ test("does not mark stale in-progress traces as live after run completion", () =
         trace({
           data: {
             input: { command: "pnpm test" },
-            name: "bash",
-            route: "sandbox",
+            tool: { access: "write", name: "bash", route: "sandbox" },
           },
           timestamp: 10,
           type: "tool.started",
@@ -61,14 +60,16 @@ test("does not mark stale in-progress traces as live after run completion", () =
 test("projects stopped runs as terminal activity", () => {
   const items = projectActivity(
     data({
-      run: run({ status: "stopped" }),
+      run: run({
+        status: "stopped",
+        stoppedBy: {
+          kind: "person",
+          name: "Albin",
+          personId: id<"persons">("person"),
+        },
+      }),
       traces: [
         trace({
-          data: {
-            status: "stopped",
-            summary: "Stopped by Albin",
-            title: "Run stopped",
-          },
           timestamp: 20,
           type: "run.stopped",
         }),
@@ -92,19 +93,10 @@ test("does not mark stale in-progress traces as live after run stop", () => {
       run: run({ status: "stopped" }),
       traces: [
         trace({
-          data: {
-            metrics: { toolCalls: 1 },
-            status: "running",
-            title: "Thinking",
-          },
           timestamp: 10,
           type: "model.started",
         }),
         trace({
-          data: {
-            status: "stopped",
-            title: "Run stopped",
-          },
           timestamp: 20,
           type: "run.stopped",
         }),
@@ -126,6 +118,7 @@ function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],
     approvals: [],
+    assets: [],
     offers: [],
     run: run({}),
     traces: [],
@@ -144,7 +137,6 @@ function trace(
     key: `trace:${overrides.timestamp}`,
     runId: id<"runs">("run"),
     sequence: undefined,
-    source: "trigger.run",
     tenantId: "tenant",
     ...overrides,
   } as Doc<"traces">

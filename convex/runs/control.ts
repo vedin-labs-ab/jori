@@ -9,7 +9,7 @@ import {
   requireClerkUserId,
 } from "../identity/users"
 import { ensureClerkPerson } from "../persons/clerk"
-import { recordTrace } from "../runtime/traces"
+import { recordTrace } from "../runtime/traces/data"
 import { wakeRun } from "../runtime/waiters/data"
 import { createPersonActor } from "../shared/actor"
 
@@ -42,14 +42,8 @@ export const stop = mutation({
     await recordTrace(ctx, {
       run,
       key: `run:${run._id}:stopped`,
-      source: "convex.runtime",
       timestamp: now,
       type: "run.stopped",
-      data: {
-        status: "stopped",
-        title: "Run stopped",
-        ...stoppedSummary(identity),
-      },
     })
 
     await ctx.db.patch(run._id, {
@@ -79,10 +73,4 @@ function stoppedByActor(
     email: readClerkUserEmail(identity),
     name: readClerkUserName(identity),
   })
-}
-
-function stoppedSummary(identity: { email?: string; name?: string }) {
-  const label = readClerkUserName(identity) ?? readClerkUserEmail(identity)
-
-  return label === undefined ? {} : { summary: `Stopped by ${label}` }
 }

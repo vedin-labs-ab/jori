@@ -21,7 +21,6 @@ import {
   type RuntimeInteraction,
   type RuntimeMessage,
   type RuntimeTool,
-  type RuntimeTraceSource,
   type SurfaceReactionTarget,
 } from "./types"
 
@@ -43,10 +42,9 @@ export class MiloConvexClient {
     key: string
     runId: ConvexId<"runs">
     sequence: number
-    source: RuntimeTraceSource
     type: RuntimeEventInput["type"]
   }) {
-    await this.client.mutation(api.runtime.traces.record, {
+    await this.client.mutation(api.runtime.traces.data.record, {
       ...args,
       secret: this.secret,
     })

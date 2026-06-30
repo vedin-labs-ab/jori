@@ -1,25 +1,29 @@
 import { type Doc } from "../../_generated/dataModel"
+import { getActorDisplayName } from "../../shared/actor"
 import { projectModelTraces } from "./model"
-import { readEventData, readTraceError } from "./read"
+import { readTraceError } from "./read"
 import { projectToolTraces } from "./tool"
 import { type ActivityItem, type ActivityStatus } from "./types"
 
 export function projectTraceActivity(
   traces: Doc<"traces">[],
-  runStatus: Doc<"runs">["status"]
+  run: Doc<"runs">
 ) {
   const isRunLive =
-    isLiveRunStatus(runStatus) &&
+    isLiveRunStatus(run.status) &&
     !traces.some((trace) => isTerminalRunTrace(trace))
 
   return [
-    ...projectRunTraces(traces),
+    ...projectRunTraces(traces, run),
     ...projectModelTraces(traces, isRunLive),
     ...projectToolTraces(traces, isRunLive),
   ]
 }
 
-function projectRunTraces(traces: Doc<"traces">[]): ActivityItem[] {
+function projectRunTraces(
+  traces: Doc<"traces">[],
+  run: Doc<"runs">
+): ActivityItem[] {
   return traces.flatMap((trace) => {
     if (trace.type === "run.started") {
       return [traceItem(trace, "run", "running", "Run started")]
@@ -38,11 +42,11 @@ function projectRunTraces(traces: Doc<"traces">[]): ActivityItem[] {
     }
 
     if (trace.type === "run.stopped") {
-      return [eventTraceItem(trace, "run")]
-    }
-
-    if (trace.type === "asset.saved") {
-      return [eventTraceItem(trace, "asset")]
+      return [
+        traceItem(trace, "run", "stopped", "Run stopped", {
+          description: stoppedDescription(run),
+        }),
+      ]
     }
 
     return []
@@ -78,19 +82,8 @@ function traceItem(
   }
 }
 
-function eventTraceItem(
-  trace: Doc<"traces">,
-  kind: ActivityItem["kind"]
-): ActivityItem {
-  const event = readEventData(trace.data)
+function stoppedDescription(run: Doc<"runs">) {
+  const actor = getActorDisplayName(run.stoppedBy)
 
-  return traceItem(
-    trace,
-    kind,
-    event?.status ?? "completed",
-    event?.title ?? kind,
-    {
-      description: event?.summary,
-    }
-  )
+  return actor === undefined ? undefined : `Stopped by ${actor}`
 }

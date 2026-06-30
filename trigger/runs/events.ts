@@ -5,7 +5,6 @@ import {
   type RuntimeEventTraceData,
   type RuntimeEventType,
   type RuntimeRunTraceData,
-  type RuntimeTraceSource,
 } from "../types"
 
 export async function recordRunEvent(
@@ -19,10 +18,9 @@ export async function recordRunEvent(
   await convex.recordEvent(
     runtimeEvent({
       attempt,
-      data,
+      ...(data === undefined ? {} : { data }),
       runId: context.run.id,
       sequence,
-      source: "trigger.run",
       type,
     })
   )
@@ -34,9 +32,9 @@ export async function recordActivityEvent(
   input: {
     attempt?: number
     callId?: string
-    data: RuntimeEventTraceData
+    data?: RuntimeEventTraceData
+    keyId?: string
     sequence: number
-    source: RuntimeTraceSource
     type: RuntimeEventType
   }
 ) {
@@ -44,10 +42,10 @@ export async function recordActivityEvent(
     runtimeEvent({
       attempt: input.attempt,
       callId: input.callId,
-      data: input.data,
+      ...(input.data === undefined ? {} : { data: input.data }),
+      keyId: input.keyId,
       runId: context.run.id,
       sequence: input.sequence,
-      source: input.source,
       type: input.type,
     })
   )

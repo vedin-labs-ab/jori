@@ -1,29 +1,34 @@
 import { type MiloConvexClient } from "./convex"
 import { runtimeEvent } from "./events"
-import { toolInputMetadataTrace, toolResultMetadataTrace } from "./metadata"
 import { type ModelToolCall } from "./model/types"
 import {
+  type JsonValue,
   type RuntimeContext,
   type RuntimeTool,
-  type RuntimeToolInputSummary,
-  type RuntimeToolTraceData,
+  type RuntimeToolProviderTrace,
+  type RuntimeToolTraceTool,
   type RuntimeValueSummary,
 } from "./types"
 
-type RuntimeToolTraceDetails = Omit<
-  RuntimeToolTraceData,
-  "access" | "name" | "route"
->
+const maxToolInputBytes = 32 * 1024
+const textEncoder = new TextEncoder()
 
-export function providerTrace(
-  result: unknown
-): Pick<RuntimeToolTraceData, "providerTrace"> {
+type ToolEventType = "tool.completed" | "tool.failed" | "tool.started"
+type RuntimeToolCompletedDetails = {
+  provider: RuntimeToolProviderTrace
+  result: RuntimeValueSummary
+}
+type RuntimeToolFailedDetails = {
+  error: string
+}
+
+export function providerTrace(result: unknown): RuntimeToolProviderTrace {
   if (
     typeof result !== "object" ||
     result === null ||
     !("provider" in result)
   ) {
-    return {}
+    return null
   }
 
   const provider = result.provider
@@ -36,211 +41,149 @@ export function providerTrace(
     typeof provider.name !== "string" ||
     typeof provider.requestId !== "string"
   ) {
-    return {}
+    return null
   }
 
   return {
-    providerTrace: {
-      provider: provider.name,
-      requestId: provider.requestId,
-    },
+    name: provider.name,
+    request: provider.requestId,
   }
 }
 
 export async function recordToolEvent(
-  args: {
-    attempt: number
-    call: ModelToolCall
-    convex: MiloConvexClient
-    context: RuntimeContext
-    sequence: number
-  },
+  args: ToolEventArgs,
   tool: RuntimeTool,
-  type: "tool.completed" | "tool.failed" | "tool.started",
-  data?: RuntimeToolTraceDetails
+  type: "tool.completed",
+  details: RuntimeToolCompletedDetails
+): Promise<void>
+export async function recordToolEvent(
+  args: ToolEventArgs,
+  tool: RuntimeTool,
+  type: "tool.failed",
+  details: RuntimeToolFailedDetails
+): Promise<void>
+export async function recordToolEvent(
+  args: ToolEventArgs,
+  tool: RuntimeTool,
+  type: "tool.started"
+): Promise<void>
+export async function recordToolEvent(
+  args: ToolEventArgs,
+  tool: RuntimeTool,
+  type: ToolEventType,
+  details?: RuntimeToolCompletedDetails | RuntimeToolFailedDetails
 ) {
   await args.convex.recordEvent(
     runtimeEvent({
       attempt: args.attempt,
-      data: {
-        access: tool.access,
-        name: tool.name,
-        route: tool.route,
-        ...toolInputTrace(tool.name, args.call.args, type),
-        ...toolInputMetadataTrace(tool.name, args.call.args),
-        ...data,
-      },
+      callId: args.call.id,
+      data: toolTraceData(tool, type, args.call.args, details),
       runId: args.context.run.id,
       sequence: args.sequence,
-      source: "trigger.tool",
-      callId: args.call.id,
       type,
     })
   )
 }
 
-export function toolInputTrace(
-  tool: string,
-  input: unknown,
-  type: "tool.completed" | "tool.failed" | "tool.started"
-): Pick<RuntimeToolTraceData, "input"> {
-  if (type !== "tool.started" || !isRecord(input)) {
-    return {}
+export function traceToolInput(input: JsonValue): JsonValue | null {
+  const encoded = JSON.stringify(input)
+
+  if (encoded === undefined) {
+    return null
   }
 
-  const summary = toolInputSummary(tool, input)
-
-  return summary === undefined ? {} : { input: summary }
+  return textEncoder.encode(encoded).byteLength > maxToolInputBytes
+    ? null
+    : input
 }
 
-function toolInputSummary(
-  tool: string,
-  input: Record<string, unknown>
-): RuntimeToolInputSummary | undefined {
-  switch (tool) {
-    case "bash":
-      return bashInputSummary(input)
-    case "git":
-      return gitInputSummary(input)
-    case "glob":
-      return globInputSummary(input)
-    case "grep":
-      return grepInputSummary(input)
-    case "github_clone_repository":
-      return githubCloneInputSummary(input)
-    case "read":
-      return readInputSummary(input)
-    default:
-      return undefined
-  }
-}
-
-export function toolTraceDetails(
-  tool: string,
-  input: unknown,
-  result: unknown
-): RuntimeToolTraceDetails {
+export function toolTraceDetails(result: unknown): RuntimeToolCompletedDetails {
   return {
-    ...providerTrace(result),
-    ...toolResultMetadataTrace(tool, input, result),
+    provider: providerTrace(result),
     result: summarizeResult(result),
+  }
+}
+
+function toolTraceData(
+  runtimeTool: RuntimeTool,
+  type: ToolEventType,
+  input: JsonValue,
+  details: RuntimeToolCompletedDetails | RuntimeToolFailedDetails | undefined
+) {
+  const tool = traceTool(runtimeTool)
+
+  if (type === "tool.completed") {
+    return { tool, ...completedDetails(details) }
+  }
+
+  const traceInput = traceToolInput(input)
+
+  if (type === "tool.failed") {
+    return { tool, input: traceInput, error: failedDetails(details).error }
+  }
+
+  return { tool, input: traceInput }
+}
+
+function completedDetails(
+  details: RuntimeToolCompletedDetails | RuntimeToolFailedDetails | undefined
+): RuntimeToolCompletedDetails {
+  if (details === undefined || !("result" in details)) {
+    throw new Error("Completed tool trace is missing result details.")
+  }
+
+  return details
+}
+
+function failedDetails(
+  details: RuntimeToolCompletedDetails | RuntimeToolFailedDetails | undefined
+): RuntimeToolFailedDetails {
+  if (details === undefined || !("error" in details)) {
+    throw new Error("Failed tool trace is missing error details.")
+  }
+
+  return details
+}
+
+function traceTool(tool: RuntimeTool): RuntimeToolTraceTool {
+  return {
+    access: tool.access,
+    name: tool.name,
+    route: tool.route,
   }
 }
 
 function summarizeResult(result: unknown): RuntimeValueSummary {
   if (result === null || result === undefined) {
-    return { type: "null" }
+    return { kind: "null" }
   }
 
   if (Array.isArray(result)) {
-    return { type: "array", size: result.length }
+    return { kind: "array", size: result.length }
   }
 
   switch (typeof result) {
     case "boolean":
-      return { type: "boolean" }
+      return { kind: "boolean" }
     case "number":
-      return { preview: String(result), type: "number" }
+      return { kind: "number", preview: String(result) }
     case "object":
-      return { type: "object", size: Object.keys(result).length }
+      return { kind: "object", size: Object.keys(result).length }
     case "string":
       return {
+        kind: "string",
+        length: result.length,
         preview: result.slice(0, 500),
-        size: result.length,
-        type: "string",
       }
     default:
-      return { type: "null" }
+      return { kind: "null" }
   }
 }
 
-function bashInputSummary(
-  input: Record<string, unknown>
-): RuntimeToolInputSummary {
-  return compactSummary({
-    command: readString(input.command, 500),
-    cwd: readString(input.cwd, 200),
-    timeoutMs: readNumber(input.timeoutMs),
-  })
-}
-
-function gitInputSummary(
-  input: Record<string, unknown>
-): RuntimeToolInputSummary {
-  return compactSummary({
-    args: readStringArray(input.args, 40, 200),
-    cwd: readString(input.cwd, 200),
-    timeoutMs: readNumber(input.timeoutMs),
-  })
-}
-
-function grepInputSummary(
-  input: Record<string, unknown>
-): RuntimeToolInputSummary {
-  return compactSummary({
-    include: readString(input.include, 200),
-    limit: readNumber(input.limit),
-    path: readString(input.path, 200),
-    pattern: readString(input.pattern, 500),
-  })
-}
-
-function globInputSummary(
-  input: Record<string, unknown>
-): RuntimeToolInputSummary {
-  return compactSummary({
-    limit: readNumber(input.limit),
-    path: readString(input.path, 200),
-    pattern: readString(input.pattern, 500),
-  })
-}
-
-function githubCloneInputSummary(
-  input: Record<string, unknown>
-): RuntimeToolInputSummary {
-  return compactSummary({
-    directory: readString(input.directory, 200),
-    owner: readString(input.owner, 200),
-    ref: readString(input.ref, 200),
-    repo: readString(input.repo, 200),
-  })
-}
-
-function readInputSummary(
-  input: Record<string, unknown>
-): RuntimeToolInputSummary {
-  return compactSummary({
-    limit: readNumber(input.limit),
-    offset: readNumber(input.offset),
-    path: readString(input.path, 200),
-  })
-}
-
-function compactSummary(input: RuntimeToolInputSummary) {
-  return Object.fromEntries(
-    Object.entries(input).filter(([, value]) => value !== undefined)
-  ) as RuntimeToolInputSummary
-}
-
-function readString(value: unknown, limit: number) {
-  return typeof value === "string" ? value.slice(0, limit) : undefined
-}
-
-function readStringArray(value: unknown, limit: number, itemLimit: number) {
-  if (!Array.isArray(value)) {
-    return undefined
-  }
-
-  return value
-    .filter((item): item is string => typeof item === "string")
-    .slice(0, limit)
-    .map((item) => item.slice(0, itemLimit))
-}
-
-function readNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
+type ToolEventArgs = {
+  attempt: number
+  call: ModelToolCall
+  convex: MiloConvexClient
+  context: RuntimeContext
+  sequence: number
 }

@@ -7,17 +7,19 @@ test("projects token usage for completed model steps", () => {
     [
       trace({
         data: {
-          metrics: {
+          output: null,
+          reasoning: null,
+          usage: {
             durationMs: 3000,
+            inputCacheReadTokens: 0,
+            inputCacheWriteTokens: 0,
             inputTokens: 1200,
+            inputUncachedTokens: 0,
             outputTokens: 80,
             reasoningTokens: 20,
             totalTokens: 1300,
             toolCalls: 1,
           },
-          status: "completed",
-          summary: "Selected 1 action.",
-          title: "Model step completed",
         },
         sequence: 99,
         timestamp: 20,
@@ -29,7 +31,7 @@ test("projects token usage for completed model steps", () => {
 
   expect(items).toContainEqual(
     expect.objectContaining({
-      description: undefined,
+      description: "Selected 1 action.",
       kind: "model",
       tokenUsage: {
         input: 1200,
@@ -51,7 +53,6 @@ function trace(
     key: `trace:${overrides.timestamp}`,
     runId: id<"runs">("run"),
     sequence: undefined,
-    source: "trigger.model",
     tenantId: "tenant",
     ...overrides,
   } as Doc<"traces">

@@ -57,6 +57,7 @@ export type ActivityItem = {
 
 export type ActivityData = {
   approvals: Doc<"approvals">[]
+  assets: Doc<"assets">[]
   agents: Doc<"runs">[]
   offers: Doc<"integrationOffers">[]
   run: Doc<"runs">

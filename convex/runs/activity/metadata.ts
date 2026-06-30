@@ -1,36 +1,55 @@
-import { type RuntimeToolMetadataItem } from "../types"
+import { reactionDisplayLabel } from "../../../contracts/reactions"
 import {
+  arrayLength,
+  channelLabel,
   compactMetadata,
   countText,
   displayUrl,
+  domainScope,
+  fileTarget,
   isRecord,
+  issueOrPullTarget,
   item,
-  readNumber,
+  noun,
   readString,
   readStringArray,
+  repositoryLabel,
+  targetObjectLabel,
 } from "./helpers"
-import { reactionInputMetadata } from "./reactions"
+import { type ToolResult } from "./read"
 
-export function toolInputMetadata(
-  tool: string,
-  input: Record<string, unknown>
-): RuntimeToolMetadataItem[] {
-  if (tool === "send_reply") {
+export function toolMetadata(args: {
+  input: Record<string, unknown> | undefined
+  result: ToolResult | undefined
+  tool: string
+}) {
+  if (args.tool === "send_reply") {
     return []
   }
 
-  if (tool.includes("reaction")) {
-    return compactMetadata(reactionInputMetadata(input))
+  return compactMetadata([
+    ...reactionMetadata(args.tool, args.input),
+    ...inputMetadata(args.tool, args.input),
+    ...resultMetadata(args.tool, args.result),
+  ])
+}
+
+function inputMetadata(
+  tool: string,
+  input: Record<string, unknown> | undefined
+) {
+  if (input === undefined || tool.includes("reaction")) {
+    return []
   }
 
-  return compactMetadata([
+  return [
     ...webInputMetadata(tool, input),
     ...codeInputMetadata(tool, input),
     ...githubInputMetadata(tool, input),
     ...messageInputMetadata(tool, input),
     ...resourceInputMetadata(tool, input),
     ...genericInputMetadata(input),
-  ])
+  ]
 }
 
 function webInputMetadata(tool: string, input: Record<string, unknown>) {
@@ -42,14 +61,12 @@ function webInputMetadata(tool: string, input: Record<string, unknown>) {
     ]
   }
 
-  if (tool === "web_fetch") {
-    return [
-      item("target", displayUrl(readString(input.url))),
-      item("scope", readString(input.highlightQuery)),
-    ]
-  }
-
-  return []
+  return tool === "web_fetch"
+    ? [
+        item("target", displayUrl(readString(input.url))),
+        item("scope", readString(input.highlightQuery)),
+      ]
+    : []
 }
 
 function codeInputMetadata(tool: string, input: Record<string, unknown>) {
@@ -109,17 +126,9 @@ function messageInputMetadata(tool: string, input: Record<string, unknown>) {
     return [item("target", readString(input.threadId))]
   }
 
-  if (tool.includes("add_message")) {
-    return [
-      item("target", channelLabel(input.channel)),
-      item(
-        "scope",
-        readString(input.thread_ts) === undefined ? undefined : "thread"
-      ),
-    ]
-  }
-
-  return []
+  return tool.includes("add_message")
+    ? [item("target", channelLabel(input.channel))]
+    : []
 }
 
 function resourceInputMetadata(tool: string, input: Record<string, unknown>) {
@@ -159,70 +168,35 @@ function genericInputMetadata(input: Record<string, unknown>) {
   ]
 }
 
-function repositoryLabel(input: Record<string, unknown>) {
-  const owner = readString(input.owner)
-  const repo = readString(input.repo)
-
-  return owner === undefined || repo === undefined
-    ? undefined
-    : `${owner}/${repo}`
-}
-
-function issueOrPullTarget(input: Record<string, unknown>) {
-  const repo = repositoryLabel(input)
-  const number = readNumber(input.issueNumber) ?? readNumber(input.pullNumber)
-
-  return repo === undefined || number === undefined
-    ? undefined
-    : `${repo}#${number}`
-}
-
-function fileTarget(input: Record<string, unknown>) {
-  const repo = repositoryLabel(input)
-  const path = readString(input.path)
-
-  if (path === undefined) {
-    return repo
+function resultMetadata(tool: string, result: ToolResult | undefined) {
+  if (result === undefined || tool.includes("reaction")) {
+    return []
   }
 
-  return repo === undefined ? path : `${repo}/${path}`
-}
-
-function domainScope(value: unknown, prefix: string) {
-  const domains = readStringArray(value)
-
-  if (domains === undefined || domains.length === 0) {
-    return undefined
+  if (result.kind === "array") {
+    return [item("outcome", countText(result.size, noun(tool)))]
   }
 
-  return item("scope", `${prefix} ${domains.slice(0, 2).join(", ")}`)
+  return []
 }
 
-function channelLabel(value: unknown) {
-  const channel = readString(value)
-
-  if (channel === undefined) {
-    return undefined
+function reactionMetadata(
+  tool: string,
+  input: Record<string, unknown> | undefined
+) {
+  if (input === undefined || !tool.includes("reaction")) {
+    return []
   }
 
-  return channel.startsWith("#") ? channel : `channel ${channel}`
-}
-
-function targetObjectLabel(value: unknown) {
-  if (!isRecord(value)) {
-    return undefined
-  }
-
-  const id = readString(value.id)
-  const type = readString(value.type)
-
-  if (id === undefined) {
-    return undefined
-  }
-
-  return type === undefined ? id : `${type} ${id}`
-}
-
-function arrayLength(value: unknown) {
-  return Array.isArray(value) ? value.length : undefined
+  return [
+    item(
+      "target",
+      reactionDisplayLabel(
+        readString(input.reaction) ??
+          readString(input.name) ??
+          readString(input.content) ??
+          readString(input.emoji)
+      )
+    ),
+  ]
 }

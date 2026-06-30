@@ -222,7 +222,7 @@ function sendReplyTool(): RuntimeTool {
     description: "Send reply.",
     inputSchema: {},
     name: "send_reply",
-    route: "active_surface",
+    route: "surface",
   }
 }
 
@@ -232,7 +232,7 @@ function addReactionTool(): RuntimeTool {
     description: "Add reaction.",
     inputSchema: {},
     name: "add_reaction",
-    route: "active_surface",
+    route: "surface",
   }
 }
 

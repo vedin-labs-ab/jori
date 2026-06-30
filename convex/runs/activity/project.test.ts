@@ -9,8 +9,9 @@ test("groups tool traces into a safe activity item", () => {
 
   expect(item).toMatchObject({
     access: "read",
-    description: "src/app.tsx",
+    description: undefined,
     durationMs: 14,
+    metadata: [{ kind: "target", text: "src/app.tsx" }],
     status: "completed",
     title: "Read file",
   })
@@ -18,7 +19,7 @@ test("groups tool traces into a safe activity item", () => {
     expect.arrayContaining([
       { label: "Path", value: "src/app.tsx" },
       { label: "Result", value: "string" },
-      { label: "Result size", value: "1200" },
+      { label: "Result length", value: "1200" },
     ])
   )
   expect(JSON.stringify(item)).not.toContain("secret file body")
@@ -29,11 +30,6 @@ test("keeps in-progress model work visible", () => {
     data({
       traces: [
         trace({
-          data: {
-            metrics: { toolCalls: 4 },
-            status: "running",
-            title: "Thinking",
-          },
           sequence: 99,
           timestamp: 10,
           type: "model.started",
@@ -104,6 +100,7 @@ function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],
     approvals: [],
+    assets: [],
     offers: [],
     run: run({}),
     traces: [],
@@ -140,10 +137,8 @@ function toolTraces() {
     trace({
       callId: "call-1",
       data: {
-        access: "read",
         input: { path: "src/app.tsx" },
-        name: "read",
-        route: "sandbox",
+        tool: { access: "read", name: "read", route: "sandbox" },
       },
       timestamp: 10,
       type: "tool.started",
@@ -151,10 +146,13 @@ function toolTraces() {
     trace({
       callId: "call-1",
       data: {
-        access: "read",
-        name: "read",
-        result: { preview: "secret file body", size: 1200, type: "string" },
-        route: "sandbox",
+        provider: null,
+        result: {
+          kind: "string",
+          length: 1200,
+          preview: "secret file body",
+        },
+        tool: { access: "read", name: "read", route: "sandbox" },
       },
       timestamp: 24,
       type: "tool.completed",
@@ -172,7 +170,6 @@ function trace(
     key: `trace:${overrides.timestamp}`,
     runId: id<"runs">("run"),
     sequence: undefined,
-    source: "trigger.run",
     tenantId: "tenant",
     ...overrides,
   } as Doc<"traces">

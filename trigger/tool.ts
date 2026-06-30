@@ -44,16 +44,17 @@ export async function executeToolCall(args: {
   try {
     const result = await executeTool(args.runtime, tool, args.call)
     await recordToolResultActivity({
-      ...eventArgs(args),
-      callId: args.call.id,
+      convex: args.runtime.convex,
+      context: args.runtime.context,
       result: result.value,
+      sequence: args.sequence,
       toolName: tool.name,
     })
     await recordToolEvent(
       eventArgs(args),
       tool,
       "tool.completed",
-      toolTraceDetails(tool.name, args.call.args, result.value)
+      toolTraceDetails(result.value)
     )
 
     return {
@@ -88,7 +89,7 @@ async function executeTool(
   call: ModelToolCall
 ) {
   switch (tool.route) {
-    case "active_surface":
+    case "surface":
       return await executeActiveSurfaceTool(runtime, {
         input: call.args,
         name: call.name,

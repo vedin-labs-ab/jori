@@ -10,8 +10,6 @@ import {
 import { recordActivityEvent } from "./events"
 
 export async function recordToolResultActivity(args: {
-  attempt: number
-  callId: string
   convex: MiloConvexClient
   context: RuntimeContext
   result: unknown
@@ -25,11 +23,9 @@ export async function recordToolResultActivity(args: {
   }
 
   await recordActivityEvent(args.convex, args.context, {
-    attempt: args.attempt,
-    callId: `${args.callId}:${event.callId}`,
     data: event.data,
+    keyId: event.keyId,
     sequence: args.sequence,
-    source: event.source,
     type: event.type,
   })
 }
@@ -39,15 +35,9 @@ export async function recordApprovalResolved(
   approval: ApprovalHandoff
 ) {
   await recordActivityEvent(runtime.convex, runtime.context, {
-    callId: approval.id,
-    data: {
-      status: approval.status,
-      subject: { kind: "approval", id: approval.id },
-      summary: approval.summary,
-      title: approvalStatusTitle(approval.status),
-    },
+    data: { approval: approval.id },
+    keyId: approval.id,
     sequence: 800_000,
-    source: "trigger.approval",
     type: "approval.resolved",
   })
 }
@@ -57,23 +47,16 @@ export async function recordOfferResolved(
   offer: OfferHandoff
 ) {
   await recordActivityEvent(runtime.convex, runtime.context, {
-    callId: offer.id,
-    data: {
-      status: offerTraceStatus(offer.status),
-      subject: { kind: "offer", id: offer.id },
-      summary: offer.summary ?? undefined,
-      title: offerStatusTitle(offer.status),
-    },
+    data: { offer: offer.id },
+    keyId: offer.id,
     sequence: 810_000,
-    source: "trigger.run",
     type: "offer.resolved",
   })
 }
 
 type ToolResultEvent = {
-  callId: string
   data: RuntimeEventTraceData
-  source: "trigger.approval" | "trigger.run"
+  keyId: string
   type: RuntimeEventType
 }
 
@@ -108,13 +91,8 @@ function approvalEvent(
   }
 
   return {
-    callId: approvalId,
-    data: {
-      status: "requested",
-      subject: { kind: "approval", id: approvalId as ConvexId<"approvals"> },
-      title: "Approval requested",
-    },
-    source: "trigger.approval",
+    data: { approval: approvalId as ConvexId<"approvals"> },
+    keyId: approvalId,
     type: "approval.requested",
   }
 }
@@ -128,18 +106,9 @@ function offerEvent(
     return undefined
   }
 
-  const integration = readString(result.integration)
-
   return {
-    callId: offerId,
-    data: {
-      status: "requested",
-      subject: { kind: "offer", id: offerId as ConvexId<"integrationOffers"> },
-      summary:
-        integration === undefined ? undefined : `${integration} requested`,
-      title: "Integration offered",
-    },
-    source: "trigger.run",
+    data: { offer: offerId as ConvexId<"integrationOffers"> },
+    keyId: offerId,
     type: "offer.requested",
   }
 }
@@ -155,13 +124,8 @@ function agentEvent(
   }
 
   return {
-    callId: runId,
-    data: {
-      status: "running",
-      subject: { kind: "agent", id: runId as ConvexId<"runs"> },
-      title: "Agent started",
-    },
-    source: "trigger.run",
+    data: { child: runId as ConvexId<"runs"> },
+    keyId: runId,
     type: "agent.started",
   }
 }
@@ -176,54 +140,10 @@ function assetEvent(
   }
 
   return {
-    callId: assetId,
-    data: {
-      status: "completed",
-      subject: { kind: "asset", id: assetId as ConvexId<"assets"> },
-      summary: readString(result.name),
-      title: "Asset saved",
-    },
-    source: "trigger.run",
+    data: { asset: assetId as ConvexId<"assets"> },
+    keyId: assetId,
     type: "asset.saved",
   }
-}
-
-function approvalStatusTitle(status: ApprovalHandoff["status"]) {
-  switch (status) {
-    case "approved":
-      return "Approval approved"
-    case "cancelled":
-      return "Approval cancelled"
-    case "denied":
-      return "Approval denied"
-    case "expired":
-      return "Approval expired"
-    case "failed":
-      return "Approval failed"
-    case "pending":
-      return "Approval pending"
-  }
-}
-
-function offerStatusTitle(status: OfferHandoff["status"]) {
-  switch (status) {
-    case "cancelled":
-      return "Integration offer cancelled"
-    case "claimed":
-      return "Integration offer claimed"
-    case "connected":
-      return "Integration connected"
-    case "expired":
-      return "Integration offer expired"
-    case "failed":
-      return "Integration offer failed"
-    case "pending":
-      return "Integration offer pending"
-  }
-}
-
-function offerTraceStatus(status: OfferHandoff["status"]) {
-  return status === "claimed" ? "pending" : status
 }
 
 function readString(value: unknown) {

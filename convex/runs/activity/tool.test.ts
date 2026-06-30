@@ -3,17 +3,18 @@ import { type Doc, type Id, type TableNames } from "../../_generated/dataModel"
 import { projectActivity } from "./project"
 import { type ActivityData } from "./types"
 
-test("projects compact tool metadata over generic result descriptions", () => {
+test("projects compact tool metadata from raw input", () => {
   const items = projectActivity(
     data({
       traces: [
         trace({
           callId: "call-1",
           data: {
-            access: "read",
-            metadata: [{ kind: "target", text: "current example" }],
-            name: "web_search",
-            route: "convex",
+            input: {
+              includeDomains: ["example.com"],
+              query: "current example",
+            },
+            tool: { access: "read", name: "web_search", route: "convex" },
           },
           timestamp: 10,
           type: "tool.started",
@@ -21,14 +22,9 @@ test("projects compact tool metadata over generic result descriptions", () => {
         trace({
           callId: "call-1",
           data: {
-            access: "read",
-            metadata: [
-              { kind: "target", text: "current example" },
-              { kind: "outcome", text: "3 results" },
-            ],
-            name: "web_search",
-            result: { size: 3, type: "object" },
-            route: "convex",
+            provider: null,
+            result: { kind: "object", size: 3 },
+            tool: { access: "read", name: "web_search", route: "convex" },
           },
           timestamp: 24,
           type: "tool.completed",
@@ -43,7 +39,7 @@ test("projects compact tool metadata over generic result descriptions", () => {
       kind: "tool",
       metadata: [
         { kind: "target", text: "current example" },
-        { kind: "outcome", text: "3 results" },
+        { kind: "scope", text: "in example.com" },
       ],
       title: "Web Search",
     })
@@ -57,9 +53,8 @@ test("does not synthesize descriptions from result shape", () => {
         trace({
           callId: "call-1",
           data: {
-            access: "read",
-            name: "web_search",
-            route: "convex",
+            input: { query: "current example" },
+            tool: { access: "read", name: "web_search", route: "convex" },
           },
           timestamp: 10,
           type: "tool.started",
@@ -67,10 +62,9 @@ test("does not synthesize descriptions from result shape", () => {
         trace({
           callId: "call-1",
           data: {
-            access: "read",
-            name: "web_search",
-            result: { size: 3, type: "object" },
-            route: "convex",
+            provider: null,
+            result: { kind: "object", size: 3 },
+            tool: { access: "read", name: "web_search", route: "convex" },
           },
           timestamp: 24,
           type: "tool.completed",
@@ -83,7 +77,7 @@ test("does not synthesize descriptions from result shape", () => {
     expect.objectContaining({
       description: undefined,
       kind: "tool",
-      metadata: undefined,
+      metadata: [{ kind: "target", text: "current example" }],
       title: "Web Search",
     })
   )
@@ -93,6 +87,7 @@ function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],
     approvals: [],
+    assets: [],
     offers: [],
     run: run(),
     traces: [],
@@ -111,7 +106,6 @@ function trace(
     key: `trace:${overrides.timestamp}`,
     runId: id<"runs">("run"),
     sequence: undefined,
-    source: "trigger.tool",
     tenantId: "tenant",
     ...overrides,
   } as Doc<"traces">

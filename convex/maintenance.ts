@@ -104,6 +104,29 @@ export const databaseBatch = internalMutation({
   },
 })
 
+export const tracesBatch = internalMutation({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  returns: v.object({
+    deletedCount: v.number(),
+    hasMore: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const limit = normalizeBatchLimit(args.limit)
+    const rows = await takeRows(ctx, "traces", limit)
+
+    for (const row of rows) {
+      await ctx.db.delete(row._id as never)
+    }
+
+    return {
+      deletedCount: rows.length,
+      hasMore: await hasRemainingTableRows(ctx, "traces"),
+    }
+  },
+})
+
 function normalizeBatchLimit(value?: number) {
   if (value === undefined) {
     return defaultBatchLimit
@@ -124,12 +147,16 @@ async function takeRows(ctx: MutationCtx, table: TableName, limit: number) {
 
 async function hasRemainingRows(ctx: MutationCtx) {
   for (const table of tables) {
-    const rows = await takeRows(ctx, table, 1)
-
-    if (rows.length > 0) {
+    if (await hasRemainingTableRows(ctx, table)) {
       return true
     }
   }
 
   return false
+}
+
+async function hasRemainingTableRows(ctx: MutationCtx, table: TableName) {
+  const rows = await takeRows(ctx, table, 1)
+
+  return rows.length > 0
 }

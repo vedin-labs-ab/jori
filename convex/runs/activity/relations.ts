@@ -10,6 +10,7 @@ export function projectRelationActivity(data: ActivityData): ActivityItem[] {
   return [
     ...data.approvals.map(projectApproval),
     ...data.offers.map(projectOffer),
+    ...data.assets.map(projectAsset),
     ...data.waiters.map(projectWaiter),
     ...data.agents.map(projectAgent),
   ]
@@ -42,6 +43,21 @@ function projectOffer(offer: Doc<"integrationOffers">): ActivityItem {
     durationMs: offer.updatedAt - offer.createdAt,
     endedAt: offer.updatedAt,
     startedAt: offer.createdAt,
+  }
+}
+
+function projectAsset(asset: Doc<"assets">): ActivityItem {
+  return {
+    id: asset._id,
+    kind: "asset",
+    status: "completed",
+    title: "Asset saved",
+    description: asset.name,
+    details: [
+      { label: "Type", value: asset.mimeType },
+      { label: "Size", value: formatBytes(asset.size) },
+    ],
+    startedAt: asset.createdAt,
   }
 }
 
@@ -97,4 +113,11 @@ function waiterStatus(status: Doc<"waiters">["status"]): ActivityStatus {
 
 function agentStatus(status: Doc<"runs">["status"]): ActivityStatus {
   return status === "queued" ? "pending" : status
+}
+
+function formatBytes(value: number) {
+  return new Intl.NumberFormat("en", {
+    maximumFractionDigits: 1,
+    notation: "compact",
+  }).format(value)
 }
