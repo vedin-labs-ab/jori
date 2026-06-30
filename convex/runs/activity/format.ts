@@ -37,7 +37,11 @@ export function agentTitle(status: Doc<"runs">["status"]) {
 }
 
 export function approvalTitle(status: Doc<"approvals">["status"]) {
-  return status === "pending" ? "Waiting for approval" : `Approval ${status}`
+  if (status === "pending") {
+    return "Waiting for approval"
+  }
+
+  return status === "approved" ? "Action approved" : `Approval ${status}`
 }
 
 export function fieldLabel(value: string) {

@@ -40,6 +40,16 @@ test("renders a compact non-collapsible activity item", () => {
   expect(screen.queryByText("Path")).toBeNull()
 })
 
+test("does not attach low-value tooltips to timeline icons", () => {
+  render(
+    <TooltipProvider>
+      <ActivityItem item={activityItem()} now={1700000002000} />
+    </TooltipProvider>
+  )
+
+  expect(document.querySelector('[data-slot="tooltip-trigger"]')).toBeNull()
+})
+
 test("shimmers live activity without a separate live indicator", () => {
   render(
     <TooltipProvider>

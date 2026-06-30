@@ -96,6 +96,39 @@ test("marks running delegated agents as live", () => {
   )
 })
 
+test("labels approved approvals as approved actions", () => {
+  const items = projectActivity(
+    data({
+      approvals: [
+        {
+          _creationTime: 0,
+          _id: id<"approvals">("approval"),
+          args: "{}",
+          code: "ABC123",
+          createdAt: 1000,
+          decidedAt: 1400,
+          expiresAt: 2000,
+          requestedBy: { kind: "self", externalId: "milo" },
+          runId: id<"runs">("run"),
+          status: "approved",
+          summary: "Create the page.",
+          surface: "notion",
+          tenantId: "tenant",
+          tool: "notion_create_page",
+        } as Doc<"approvals">,
+      ],
+    })
+  )
+
+  expect(items).toContainEqual(
+    expect.objectContaining({
+      kind: "approval",
+      status: "approved",
+      title: "Action approved",
+    })
+  )
+})
+
 function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],

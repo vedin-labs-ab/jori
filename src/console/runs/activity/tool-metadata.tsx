@@ -78,7 +78,7 @@ const ToolMetadataContent = forwardRef<
         <span
           className={cn(
             "inline-flex min-w-0 items-center",
-            isCompactOutcome(item) ? "shrink-0" : "shrink"
+            isCompactOutcome(item) ? "shrink-0" : "min-w-0 flex-1 basis-0"
           )}
           key={metadataKey(item)}
         >

@@ -79,6 +79,13 @@ test("keeps web search metadata focused on query and result count", () => {
     screen.getByText("site:theverge.com OR site:techcrunch.com")
   ).toBeDefined()
   expect(screen.getByText("3 results")).toBeDefined()
+  expect(
+    screen.getByText("site:theverge.com OR site:techcrunch.com").parentElement
+      ?.className
+  ).toContain("flex-1")
+  expect(screen.getByText("3 results").parentElement?.className).toContain(
+    "shrink-0"
+  )
   expect(screen.queryByText("in theverge.com, techcrunch.com")).toBeNull()
 })
 

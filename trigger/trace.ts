@@ -162,6 +162,12 @@ function summarizeResult(result: unknown): RuntimeValueSummary {
     return { kind: "array", size: result.length }
   }
 
+  const nestedResults = resultArray(result)
+
+  if (nestedResults !== undefined) {
+    return { kind: "array", size: nestedResults.length }
+  }
+
   switch (typeof result) {
     case "boolean":
       return { kind: "boolean" }
@@ -178,6 +184,14 @@ function summarizeResult(result: unknown): RuntimeValueSummary {
     default:
       return { kind: "null" }
   }
+}
+
+function resultArray(result: unknown) {
+  if (typeof result !== "object" || result === null || !("results" in result)) {
+    return undefined
+  }
+
+  return Array.isArray(result.results) ? result.results : undefined
 }
 
 type ToolEventArgs = {

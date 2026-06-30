@@ -38,6 +38,6 @@ test("captures provider request metadata on completed tool results", () => {
     })
   ).toEqual({
     provider: { name: "exa", request: "request-1" },
-    result: { kind: "object", size: 2 },
+    result: { kind: "array", size: 1 },
   })
 })

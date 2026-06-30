@@ -17,11 +17,6 @@ import {
   Timer,
   Wrench,
 } from "lucide-react"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "../../shared/time"
 import { MetaPill } from "../row/status"
@@ -78,25 +73,20 @@ export function ActivityTimelineIcon({
   const label = `${kindLabels[kind]} ${statusLabel(status)}`
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          aria-label={label}
-          className="relative inline-flex size-4 shrink-0 items-center justify-center"
-          role="img"
-        >
-          <span className="inline-flex size-4 items-center justify-center">
-            <Icon
-              className={cn(
-                "size-3.5 text-muted-foreground transition-colors",
-                iconClassName
-              )}
-            />
-          </span>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+    <span
+      aria-label={label}
+      className="relative inline-flex size-4 shrink-0 items-center justify-center"
+      role="img"
+    >
+      <span className="inline-flex size-4 items-center justify-center">
+        <Icon
+          className={cn(
+            "size-3.5 text-muted-foreground transition-colors",
+            iconClassName
+          )}
+        />
+      </span>
+    </span>
   )
 }
 
