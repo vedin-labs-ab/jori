@@ -22,7 +22,7 @@ beforeEach(() => {
   triggerWait.forToken.mockReset()
 })
 
-test("final visible actions keep waiting after one of several offers resolves", async () => {
+test("final visible actions think after one of several offers resolves", async () => {
   triggerWait.forToken
     .mockResolvedValueOnce({
       ok: true,
@@ -37,41 +37,12 @@ test("final visible actions keep waiting after one of several offers resolves", 
     })
 
   const runtime = createRuntime({
-    handoffs: [
-      emptyHandoffs(),
-      {
-        approvals: [],
-        offers: [
-          offerHandoff("offer_github", "github", "pending", 1000),
-          offerHandoff("offer_drive", "googleDrive", "pending", 2000),
-        ],
-      },
-      emptyHandoffs(),
-    ],
-    subjects: {
-      approvals: [],
-      offers: [
-        offerHandoff("offer_github", "github", "cancelled", 1000),
-        offerHandoff("offer_drive", "googleDrive", "pending", 2000),
-      ],
-    },
+    handoffs: offerHandoffSequence(),
+    subjects: resolvedOfferSubjects(),
   })
   const model = createModel([
-    {
-      content: null,
-      toolCalls: [
-        {
-          args: {
-            final: true,
-            reaction: "fire",
-            target: { messageTs: "123.456" },
-          },
-          id: "call_1",
-          name: "add_reaction",
-        },
-      ],
-      type: "tool_calls",
-    },
+    reactionResponse("call_1", "fire"),
+    reactionResponse("call_2", "eyes"),
   ])
 
   await expect(runAgentLoop({ attempt: 1, model, runtime })).resolves.toEqual({
@@ -79,7 +50,13 @@ test("final visible actions keep waiting after one of several offers resolves", 
     status: "stopped",
   })
 
-  expect(model.complete).toHaveBeenCalledTimes(1)
+  expect(model.complete).toHaveBeenCalledTimes(2)
+  expect(model.complete.mock.calls[1]?.[0].messages).toContainEqual(
+    expect.objectContaining({
+      content: expect.stringContaining("cancelled"),
+      role: "user",
+    })
+  )
   expect(runtime.convex.markOfferConsumed).toHaveBeenCalledWith({
     integrationOfferId: "offer_github",
   })
@@ -90,11 +67,50 @@ test("final visible actions keep waiting after one of several offers resolves", 
   })
 })
 
+function offerHandoffSequence(): RunHandoffs[] {
+  return [
+    emptyHandoffs(),
+    { approvals: [], offers: [githubOffer("pending"), driveOffer()] },
+    { approvals: [], offers: [driveOffer()] },
+    { approvals: [], offers: [driveOffer()] },
+    { approvals: [], offers: [driveOffer()] },
+    emptyHandoffs(),
+  ]
+}
+
+function resolvedOfferSubjects(): RunHandoffs {
+  return {
+    approvals: [],
+    offers: [githubOffer("cancelled"), driveOffer()],
+  }
+}
+
+function reactionResponse(
+  callId: string,
+  reaction: string
+): QueuedModelResponse {
+  return {
+    content: null,
+    toolCalls: [
+      {
+        args: {
+          final: true,
+          reaction,
+          target: { messageTs: "123.456" },
+        },
+        id: callId,
+        name: "add_reaction",
+      },
+    ],
+    type: "tool_calls",
+  }
+}
+
 function createModel(responses: QueuedModelResponse[]) {
   const queue = queuedModelResponses(responses)
 
   return {
-    complete: vi.fn(async () => {
+    complete: vi.fn<ModelRuntime["complete"]>(async () => {
       const response = queue.shift()
 
       if (response === undefined) {
@@ -147,6 +163,14 @@ function createRuntime(options: {
 
 function emptyHandoffs(): RunHandoffs {
   return { approvals: [], offers: [] }
+}
+
+function githubOffer(status: "cancelled" | "pending") {
+  return offerHandoff("offer_github", "github", status, 1000)
+}
+
+function driveOffer() {
+  return offerHandoff("offer_drive", "googleDrive", "pending", 2000)
 }
 
 function offerHandoff(

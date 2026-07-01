@@ -26,7 +26,7 @@ beforeEach(() => {
   })
 })
 
-test("parks again when one handoff resolves and another remains active", async () => {
+test("thinks after one handoff resolves before parking on another", async () => {
   const runtime = createRuntime([
     emptyHandoffs(),
     {
@@ -44,6 +44,11 @@ test("parks again when one handoff resolves and another remains active", async (
       toolCalls: [{ args: {}, id: "call_1", name: "finish_run" }],
       type: "tool_calls",
     },
+    {
+      content: null,
+      toolCalls: [{ args: {}, id: "call_2", name: "finish_run" }],
+      type: "tool_calls",
+    },
   ])
 
   await expect(runAgentLoop({ attempt: 1, model, runtime })).resolves.toEqual({
@@ -51,7 +56,13 @@ test("parks again when one handoff resolves and another remains active", async (
     status: "stopped",
   })
 
-  expect(model.complete).toHaveBeenCalledTimes(1)
+  expect(model.complete).toHaveBeenCalledTimes(2)
+  expect(model.complete.mock.calls[1]?.[0].messages).toContainEqual(
+    expect.objectContaining({
+      content: expect.stringContaining("denied"),
+      role: "user",
+    })
+  )
   expect(runtime.convex.markApprovalConsumed).toHaveBeenCalledWith({
     approvalId: "approval_1",
   })
@@ -70,7 +81,7 @@ function createModel(responses: QueuedModelResponse[]) {
   const queue = queuedModelResponses(responses)
 
   return {
-    complete: vi.fn(async () => {
+    complete: vi.fn<ModelRuntime["complete"]>(async () => {
       const response = queue.shift()
 
       if (response === undefined) {
