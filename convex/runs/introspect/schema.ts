@@ -1,4 +1,4 @@
-import { v } from "convex/values"
+import { type ObjectType, v } from "convex/values"
 import { runStatus } from "../schema"
 
 export const runScope = v.union(
@@ -43,3 +43,6 @@ export const searchRunActivityArgs = {
   cursor: v.optional(v.string()),
   limit: v.optional(v.number()),
 }
+
+export type SearchRunActivityArgs = ObjectType<typeof searchRunActivityArgs>
+export type SearchRunsArgs = ObjectType<typeof searchRunsArgs>

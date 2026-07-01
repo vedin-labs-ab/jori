@@ -6,6 +6,7 @@ import { canSee } from "./access"
 import {
   matchesActivityFilter,
   normalizeQuery,
+  normalizeTimestamp,
   projectMatches,
 } from "./filters"
 import { normalizeRunId } from "./ids"
@@ -79,11 +80,3 @@ export const searchRunActivity = internalQuery({
     return { cursor: page.cursor, items: page.page }
   },
 })
-
-function normalizeTimestamp(value: number | undefined) {
-  if (value === undefined || !Number.isFinite(value) || value <= 0) {
-    return undefined
-  }
-
-  return value
-}

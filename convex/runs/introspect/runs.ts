@@ -1,15 +1,14 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { normalizeRunId, normalizeRunIds } from "./ids"
+import { type SearchRunsArgs } from "./schema"
 
 const runScanLimit = 300
 
-export type SearchRunArgs = {
-  parentId?: string
-  rootId?: string
-  runIds?: string[]
-  scope?: "conversation" | "tenant" | "all"
-}
+export type SearchRunArgs = Pick<
+  SearchRunsArgs,
+  "parentId" | "rootId" | "runIds" | "scope"
+>
 
 export async function loadCandidateRuns(
   ctx: QueryCtx,

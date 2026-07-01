@@ -1,6 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
+import { readRecord } from "../shared/input"
 import { type AutomationAccessInput } from "./access"
 import { type AutomationTriggerInput, type AutomationType } from "./schema"
 
@@ -48,7 +49,7 @@ export async function callMiloAutomationTool(
   },
   request: MiloMcpRequest
 ) {
-  const args = normalizeToolArgs(request.args)
+  const args = readRecord(request.args)
 
   if (request.tool === "add_automation") {
     return await ctx.runMutation(internal.automations.records.create, {
@@ -87,12 +88,4 @@ export async function callMiloAutomationTool(
   }
 
   throw new Error(`Unknown Milo tool: ${request.tool}`)
-}
-
-function normalizeToolArgs(args: unknown) {
-  if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    return {}
-  }
-
-  return args
 }
