@@ -1,5 +1,6 @@
 import { type RuntimeToolMetadataItem } from "../../../contracts/runtime"
 import { type Doc } from "../../_generated/dataModel"
+import { type Integration } from "../../shared/integrations"
 
 export type ActivityStatus =
   | "approved"
@@ -49,6 +50,7 @@ export type ActivityItem = {
   details?: ActivityDetail[]
   durationMs?: number
   endedAt?: number
+  integration?: Integration
   isLive?: boolean
   metadata?: ActivityMetadataItem[]
   startedAt: number

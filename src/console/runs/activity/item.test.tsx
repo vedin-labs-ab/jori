@@ -40,6 +40,31 @@ test("renders a compact non-collapsible activity item", () => {
   expect(screen.queryByText("Path")).toBeNull()
 })
 
+test("renders integration offer descriptions as provider identity", () => {
+  const summary = "Connect GitHub so Milo can inspect repositories."
+
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          description: summary,
+          integration: "github",
+          kind: "offer",
+          title: "Integration offer expired",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  expect(screen.getByText("Integration offer expired")).toBeDefined()
+  expect(screen.getByText("GitHub")).toBeDefined()
+  expect(screen.queryByText(summary)).toBeNull()
+  expect(
+    document.querySelector('img[src="/logos/integrations/github.svg"]')
+  ).toBeDefined()
+})
+
 test("does not attach low-value tooltips to timeline icons", () => {
   render(
     <TooltipProvider>

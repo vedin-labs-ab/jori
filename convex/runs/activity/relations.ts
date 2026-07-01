@@ -42,6 +42,7 @@ function projectOffer(offer: Doc<"integrationOffers">): ActivityItem {
     details: [{ label: "Integration", value: offer.integration }],
     durationMs: offer.updatedAt - offer.createdAt,
     endedAt: offer.updatedAt,
+    integration: offer.integration,
     startedAt: offer.createdAt,
   }
 }
