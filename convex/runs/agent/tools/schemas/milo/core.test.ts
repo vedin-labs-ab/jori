@@ -17,3 +17,15 @@ test("integration offers use shared final semantics instead of wait", () => {
   })
   expect(schema.properties.wait).toBeUndefined()
 })
+
+test("run search schema tells agents to omit unused optional fields", () => {
+  const schema = coreMiloToolInputSchemas.search_runs as {
+    description: string
+    properties: Record<string, { description?: string }>
+  }
+
+  expect(schema.description).toContain("Omit optional fields")
+  expect(schema.properties.since.description).toContain("Omit instead")
+  expect(schema.properties.runIds.description).toContain("empty array")
+  expect(schema.properties.cursor.description).toContain("first page")
+})
