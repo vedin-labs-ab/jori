@@ -2,12 +2,16 @@ export type JsonSchema = Record<string, unknown>
 export type SchemaMap = Record<string, JsonSchema>
 
 export function objectSchema(args: {
+  description?: string
   required?: string[]
   properties?: Record<string, unknown>
 }): JsonSchema {
   return {
     type: "object",
     additionalProperties: false,
+    ...(args.description === undefined
+      ? {}
+      : { description: args.description }),
     ...(args.required === undefined ? {} : { required: args.required }),
     properties: args.properties ?? {},
   }
