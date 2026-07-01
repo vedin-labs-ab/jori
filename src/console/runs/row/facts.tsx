@@ -29,6 +29,7 @@ import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, absoluteUtcTime } from "../../shared/time"
 import { ToolGroupsValue } from "../../shared/tools"
 import { type ExecutionDetail, type ExecutionDetailType } from "../types"
+import { RunSectionLabel } from "./layout"
 import { RepositoryIcon } from "./metadata"
 
 const detailMeta = {
@@ -110,7 +111,7 @@ function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
     <InlineFact
       detail={detail}
       icon={meta.icon}
-      label={meta.label}
+      label={detailLabel(detail, meta.label)}
       time={time}
     />
   )
@@ -124,7 +125,7 @@ function InlineFact({
 }: {
   detail: ExecutionDetail
   icon: DetailIcon
-  label: string
+  label: ReactNode
   time: string | undefined
 }) {
   const hasValue = !timeOnlyFieldTypes.has(detail.type)
@@ -242,6 +243,17 @@ function FactValue({ detail }: { detail: ExecutionDetail }) {
   }
 
   return <DetailLink href={detail.url}>{detail.label}</DetailLink>
+}
+
+function detailLabel(detail: ExecutionDetail, label: string) {
+  if (detail.type !== "tools") {
+    return label
+  }
+
+  const count =
+    detail.groups?.reduce((total, group) => total + group.tools.length, 0) ?? 0
+
+  return <RunSectionLabel label={{ count, singular: "Tool" }} />
 }
 
 function isPayloadDetail(detail: ExecutionDetail) {
