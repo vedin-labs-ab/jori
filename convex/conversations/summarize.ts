@@ -17,7 +17,7 @@ const summarySchema = {
     summary: { type: "string" },
   },
 }
-const defaultSummaryModel = "z-ai/glm-5.2"
+const defaultSummaryModel = "openai/gpt-5.5"
 
 export const run = internalAction({
   args: { conversationId: v.id("conversations") },
