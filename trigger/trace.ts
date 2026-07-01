@@ -174,7 +174,7 @@ function summarizeResult(result: unknown): RuntimeValueSummary {
     case "number":
       return { kind: "number", preview: String(result) }
     case "object":
-      return { kind: "object", size: Object.keys(result).length }
+      return objectSummary(result)
     case "string":
       return {
         kind: "string",
@@ -192,6 +192,31 @@ function resultArray(result: unknown) {
   }
 
   return Array.isArray(result.results) ? result.results : undefined
+}
+
+function objectSummary(result: object): RuntimeValueSummary {
+  const record = result as Record<string, unknown>
+  const itemKey = itemArrayKey(record)
+
+  return {
+    kind: "object",
+    size: Object.keys(record).length,
+    ...(itemKey === undefined
+      ? {}
+      : {
+          hasMore: hasMoreItems(record),
+          itemCount: (record[itemKey] as unknown[]).length,
+          itemKey,
+        }),
+  }
+}
+
+function itemArrayKey(record: Record<string, unknown>) {
+  return ["runs", "items"].find((key) => Array.isArray(record[key]))
+}
+
+function hasMoreItems(record: Record<string, unknown>) {
+  return typeof record.cursor === "string" && record.cursor.trim() !== ""
 }
 
 type ToolEventArgs = {

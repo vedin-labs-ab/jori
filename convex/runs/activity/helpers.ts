@@ -3,7 +3,7 @@ import { type ActivityMetadataItem } from "./types"
 type MetadataKind = ActivityMetadataItem["kind"]
 
 const maxTextLength = 80
-const maxItems = 3
+const maxItems = 5
 
 export function repositoryLabel(input: Record<string, unknown>) {
   const owner = readString(input.owner)

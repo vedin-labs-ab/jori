@@ -48,7 +48,13 @@ export type RuntimeValueSummary =
   | { kind: "boolean" }
   | { kind: "null" }
   | { kind: "array"; size: number }
-  | { kind: "object"; size: number }
+  | {
+      hasMore?: boolean
+      itemCount?: number
+      itemKey?: string
+      kind: "object"
+      size: number
+    }
 
 export type RuntimeErrorTraceData = {
   error: string

@@ -20,6 +20,7 @@ type ToolMetadataItems = NonNullable<ActivityItem["metadata"]>
 type ToolMetadataItem = ToolMetadataItems[number]
 
 const metadataLabels = {
+  filter: "Filter",
   outcome: "Result",
   scope: "Scope",
   target: "Target",

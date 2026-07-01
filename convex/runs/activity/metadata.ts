@@ -16,6 +16,7 @@ import {
   repositoryLabel,
   targetObjectLabel,
 } from "./helpers"
+import { runIntrospectionMetadata } from "./metadata/runs"
 import { type ToolResult } from "./read"
 
 export function toolMetadata(args: {
@@ -25,6 +26,16 @@ export function toolMetadata(args: {
 }) {
   if (args.tool === "send_reply") {
     return []
+  }
+
+  const runMetadata = runIntrospectionMetadata(
+    args.tool,
+    args.input,
+    args.result
+  )
+
+  if (runMetadata.length > 0) {
+    return compactMetadata(runMetadata)
   }
 
   return compactMetadata([

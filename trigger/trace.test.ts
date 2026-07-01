@@ -41,3 +41,31 @@ test("captures provider request metadata on completed tool results", () => {
     result: { kind: "array", size: 1 },
   })
 })
+
+test("summarizes list-like object tool results", () => {
+  expect(
+    toolTraceDetails({
+      cursor: "next-page",
+      runs: [{ runId: "run-1" }, { runId: "run-2" }],
+    }).result
+  ).toEqual({
+    hasMore: true,
+    itemCount: 2,
+    itemKey: "runs",
+    kind: "object",
+    size: 2,
+  })
+
+  expect(
+    toolTraceDetails({
+      cursor: null,
+      items: [],
+    }).result
+  ).toEqual({
+    hasMore: false,
+    itemCount: 0,
+    itemKey: "items",
+    kind: "object",
+    size: 2,
+  })
+})
