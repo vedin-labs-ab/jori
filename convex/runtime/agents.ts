@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { action, internalMutation } from "../_generated/server"
+import { resolveRunAudience } from "../runs/introspect/audience"
 import { createInstructionRunSnapshot } from "../runs/snapshot"
 import { requireWorkerSecret } from "./shared"
 
@@ -55,6 +56,12 @@ export const insert = internalMutation({
         parent,
         title: args.title,
       }),
+      ...(await resolveRunAudience(ctx, {
+        run: {
+          createdBy: parent.createdBy,
+          parentId: parent._id,
+        },
+      })),
       status: "queued",
       createdBy: parent.createdBy,
       createdAt: Date.now(),

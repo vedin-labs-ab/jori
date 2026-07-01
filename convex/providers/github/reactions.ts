@@ -57,13 +57,17 @@ export const sessionTargets = internalQuery({
       return null
     }
 
-    const watch = await ctx.db.get(session.watchId)
-
-    if (watch === null) {
+    if (session.conversationId === undefined) {
       return null
     }
 
-    const integration = await ctx.db.get(watch.integrationId)
+    const conversation = await ctx.db.get(session.conversationId)
+
+    if (conversation === null) {
+      return null
+    }
+
+    const integration = await ctx.db.get(conversation.integrationId)
 
     if (
       integration?.integration !== "github" ||
@@ -75,7 +79,7 @@ export const sessionTargets = internalQuery({
     const messages = await recentConversationMessages(ctx, {
       integration,
       limit: normalizeLimit(args.limit),
-      watch,
+      conversation,
     })
 
     return {
@@ -178,16 +182,16 @@ async function recentConversationMessages(
   args: {
     integration: Doc<"integrations">
     limit: number
-    watch: Doc<"watches">
+    conversation: Doc<"conversations">
   }
 ) {
   return await ctx.db
     .query("messages")
     .withIndex("by_conversation", (query) =>
       query
-        .eq("tenantId", args.watch.tenantId)
+        .eq("tenantId", args.conversation.tenantId)
         .eq("integrationId", args.integration._id)
-        .eq("conversationId", args.watch.externalId)
+        .eq("conversationId", args.conversation.externalId)
     )
     .order("desc")
     .take(args.limit)

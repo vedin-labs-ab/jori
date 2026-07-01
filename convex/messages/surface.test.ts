@@ -6,7 +6,12 @@ import {
   messageMatchesReplyTargetIdentifier,
   messageReplyTargetIdentifier,
 } from "./identifiers"
-import { messageAudience, messageText, replyAddress } from "./surface"
+import {
+  conversationVisibility,
+  messageAudience,
+  messageText,
+  replyAddress,
+} from "./surface"
 
 describe("message surface text", () => {
   test("replaces Milo's Slack mention with a readable name", () => {
@@ -139,6 +144,35 @@ describe("message surface audience", () => {
     expect(
       messageAudience(message({ type: "message.im" }), integration({}))
     ).toMatchObject({ isAddressed: true, isDirect: true })
+  })
+})
+
+describe("conversation visibility", () => {
+  test("classifies public and private surfaces", () => {
+    expect(
+      conversationVisibility(
+        message({ type: "message.channels" }),
+        integration({ integration: "slack" })
+      )
+    ).toBe("public")
+    expect(
+      conversationVisibility(
+        message({ type: "message.groups" }),
+        integration({ integration: "slack" })
+      )
+    ).toBe("private")
+    expect(
+      conversationVisibility(
+        message({ integration: "github" }),
+        integration({ integration: "github" })
+      )
+    ).toBe("public")
+    expect(
+      conversationVisibility(
+        message({ integration: "gmail" }),
+        integration({ integration: "gmail" })
+      )
+    ).toBe("private")
   })
 })
 

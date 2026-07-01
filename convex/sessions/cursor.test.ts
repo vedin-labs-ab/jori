@@ -97,7 +97,7 @@ function session(messageId: string, createdAt: number): Doc<"sessions"> {
   return {
     _id: id<"sessions">("session"),
     _creationTime: 0,
-    watchId: id<"watches">("watch"),
+    conversationId: id<"conversations">("conversation"),
     cursor: {
       message: {
         createdAt,

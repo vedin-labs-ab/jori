@@ -124,7 +124,7 @@ function session(reaction?: {
   return {
     _id: id<"sessions">("session"),
     _creationTime: 0,
-    watchId: id<"watches">("watch"),
+    conversationId: id<"conversations">("conversation"),
     ...(reaction === undefined ? {} : { cursor: { reaction } }),
     updatedAt: 0,
   }

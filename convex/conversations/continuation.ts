@@ -6,7 +6,7 @@ import { readPendingMessages, stopSession } from "../sessions/data"
 import { isPersonActor } from "../shared/actor"
 import { startMessageRun } from "./data"
 
-export async function continuePendingWatchRun(
+export async function continuePendingConversationRun(
   ctx: MutationCtx,
   args: {
     runId: Id<"runs">
@@ -25,16 +25,18 @@ export async function continuePendingWatchRun(
   await continueSession(ctx, session, args.now)
 }
 
-export async function continueTerminalWatchSession(
+export async function continueTerminalConversationSession(
   ctx: MutationCtx,
   args: {
-    watchId: Id<"watches">
+    conversationId: Id<"conversations">
     now: number
   }
 ) {
   const session = await ctx.db
     .query("sessions")
-    .withIndex("by_watch", (query) => query.eq("watchId", args.watchId))
+    .withIndex("by_conversation", (query) =>
+      query.eq("conversationId", args.conversationId)
+    )
     .first()
 
   if (session === null || !(await isTerminalSession(ctx, session))) {
@@ -56,14 +58,19 @@ async function continueSession(
     return
   }
 
-  const watch = await ctx.db.get(session.watchId)
-
-  if (watch === null) {
+  if (session.conversationId === undefined) {
     await stopSession(ctx, session, now)
     return
   }
 
-  const integration = await ctx.db.get(watch.integrationId)
+  const conversation = await ctx.db.get(session.conversationId)
+
+  if (conversation === null) {
+    await stopSession(ctx, session, now)
+    return
+  }
+
+  const integration = await ctx.db.get(conversation.integrationId)
 
   if (integration === null || integration.status !== "active") {
     await stopSession(ctx, session, now)
@@ -83,10 +90,10 @@ async function continueSession(
       tenantId: integration.tenantId,
       message: pending.message,
     }),
-    externalId: watch.externalId,
+    externalId: conversation.externalId,
     now,
     replaceActiveSession: true,
-    watch,
+    conversation,
   })
 }
 

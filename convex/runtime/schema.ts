@@ -49,7 +49,8 @@ export const sandboxes = defineTable({
     v.literal("cleaned"),
     v.literal("failed")
   ),
-  watchId: v.optional(v.id("watches")),
+  conversationId: v.optional(v.id("conversations")),
+  watchId: v.optional(v.string()),
   expiresAt: v.optional(v.number()),
   error: v.optional(v.string()),
   createdAt: v.number(),
@@ -57,9 +58,9 @@ export const sandboxes = defineTable({
 })
   .index("by_run_and_status", ["runId", "status"])
   .index("by_external_id", ["externalId"])
-  .index("by_tenant_and_watch_and_status_and_expires_at", [
+  .index("by_tenant_and_conversation_and_status_and_expires_at", [
     "tenantId",
-    "watchId",
+    "conversationId",
     "status",
     "expiresAt",
   ])

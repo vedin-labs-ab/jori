@@ -19,6 +19,7 @@ type UpdateAutomationArgs = {
   artifactId?: Id<"artifacts">
   name?: string
   instructions?: string
+  visibility?: Doc<"automations">["visibility"]
   access?: AutomationAccessInput
   type?: AutomationType
   trigger?: AutomationTriggerInput
@@ -31,6 +32,7 @@ export async function createAutomation(
     artifactId?: Id<"artifacts">
     name: string
     instructions: string
+    visibility?: Doc<"automations">["visibility"]
     access: AutomationAccessInput
     type: AutomationType
     trigger: AutomationTriggerInput
@@ -52,6 +54,7 @@ export async function createAutomation(
     artifactId: args.artifactId,
     name: normalizeRequiredText(args.name, "name"),
     instructions: normalizeRequiredText(args.instructions, "instructions"),
+    visibility: normalizeVisibility(args.visibility),
     type: args.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,
@@ -120,6 +123,10 @@ async function buildAutomationPatch(
       args.instructions,
       "instructions"
     )
+  }
+
+  if (args.visibility !== undefined) {
+    patch.visibility = normalizeVisibility(args.visibility)
   }
 
   if (args.artifactId !== undefined) {
@@ -234,6 +241,12 @@ function isSameEventTrigger(
     left.event === right.event &&
     automationEventMatchKey(left.match) === automationEventMatchKey(right.match)
   )
+}
+
+function normalizeVisibility(
+  visibility: Doc<"automations">["visibility"] | undefined
+) {
+  return visibility ?? "private"
 }
 
 async function requireArtifact(

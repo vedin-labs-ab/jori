@@ -4,10 +4,10 @@ import { type MutationCtx } from "../_generated/server"
 import { startMessageRun } from "./data"
 
 test("starts reply runs when a waiter wake never resumed the run", async () => {
-  const currentWatch = watch()
+  const currentConversation = conversation()
   const ctx = fakeMutationCtx([
-    ["watches", currentWatch],
-    session(currentWatch, "stale-run"),
+    ["conversations", currentConversation],
+    session(currentConversation, "stale-run"),
     run("stale-run", "running", 0),
     waiter("stale-run", "woken", 1000),
     trace("stale-run", 500),
@@ -15,7 +15,7 @@ test("starts reply runs when a waiter wake never resumed the run", async () => {
 
   const result = await startMessageRun(ctx, {
     ...runArgs({ now: 10 * 60 * 1000 }),
-    watch: currentWatch,
+    conversation: currentConversation,
   })
 
   expect(result.status).toBe("started")
@@ -39,18 +39,19 @@ function runArgs(overrides: Partial<StartArgs> = {}): StartArgs {
     integration: integration(),
     message: message(),
     now: 1000,
-    watch: null,
+    conversation: null,
     ...overrides,
   }
 }
 
-function watch(): Doc<"watches"> {
+function conversation(): Doc<"conversations"> {
   return {
     _creationTime: 0,
-    _id: id<"watches">("watch"),
+    _id: id<"conversations">("conversation"),
     externalId: "conversation",
     integrationId: id<"integrations">("integration"),
     tenantId: "tenant",
+    visibility: "public",
   }
 }
 
@@ -85,7 +86,10 @@ function message(): StartArgs["message"] {
   }
 }
 
-function session(currentWatch: Doc<"watches">, runId: string): Seed {
+function session(
+  currentConversation: Doc<"conversations">,
+  runId: string
+): Seed {
   return [
     "sessions",
     {
@@ -93,7 +97,7 @@ function session(currentWatch: Doc<"watches">, runId: string): Seed {
       _id: id<"sessions">("session"),
       runId: id<"runs">(runId),
       updatedAt: 0,
-      watchId: currentWatch._id,
+      conversationId: currentConversation._id,
     },
   ]
 }

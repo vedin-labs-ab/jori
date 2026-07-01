@@ -1,7 +1,7 @@
 import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx, mutation } from "../../_generated/server"
-import { continuePendingWatchRun } from "../../watches/continuation"
+import { continuePendingConversationRun } from "../../conversations/continuation"
 import { requireWorkerSecret } from "../shared"
 import { traceData, traceType } from "./schema"
 
@@ -113,7 +113,7 @@ async function patchSessionStatus(
     return
   }
 
-  await continuePendingWatchRun(ctx, {
+  await continuePendingConversationRun(ctx, {
     runId: args.runId,
     now: Date.now(),
   })

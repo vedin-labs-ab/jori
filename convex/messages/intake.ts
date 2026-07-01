@@ -1,6 +1,11 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import {
+  ensureConversation,
+  findConversation,
+  startMessageRun,
+} from "../conversations/data"
 import { resolveActor } from "../persons/resolve"
 import { isGitHubSelfActor } from "../providers/github/data"
 import { getLinearBotId } from "../providers/linear/data"
@@ -10,7 +15,6 @@ import {
   isPersonActor,
   withActorKind,
 } from "../shared/actor"
-import { ensureWatch, findWatch, startMessageRun } from "../watches/data"
 import {
   findActiveIntegration,
   findMessageByExternalId,
@@ -65,9 +69,12 @@ export const record = internalMutation({
       await recordAutomationEvent(ctx, { integration, message: observed, now })
     }
 
-    const watch = await messageRunWatch(ctx, { integration, message })
+    const conversation = await messageRunConversation(ctx, {
+      integration,
+      message,
+    })
 
-    if (watch === null) {
+    if (conversation === null) {
       return { status: "recorded" as const, messageId: message._id }
     }
 
@@ -77,7 +84,7 @@ export const record = internalMutation({
       createdBy,
       externalId: message.conversationId ?? message.externalId,
       now,
-      watch,
+      conversation,
     })
 
     return {
@@ -162,7 +169,7 @@ function selfActorId(integration: Doc<"integrations">) {
   return undefined
 }
 
-async function messageRunWatch(
+async function messageRunConversation(
   ctx: MutationCtx,
   args: {
     integration: Doc<"integrations">
@@ -180,12 +187,12 @@ async function messageRunWatch(
   }
 
   return audience.isAddressed || audience.isDirect
-    ? await ensureWatch(ctx, {
-        tenantId: args.integration.tenantId,
-        integrationId: args.integration._id,
+    ? await ensureConversation(ctx, {
         externalId: args.message.conversationId,
+        integration: args.integration,
+        message: args.message,
       })
-    : await findWatch(ctx, {
+    : await findConversation(ctx, {
         tenantId: args.integration.tenantId,
         integrationId: args.integration._id,
         externalId: args.message.conversationId,

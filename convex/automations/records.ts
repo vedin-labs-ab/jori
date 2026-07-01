@@ -9,7 +9,12 @@ import {
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
-import { accessInput, automationType, triggerInput } from "./schema"
+import {
+  accessInput,
+  automationType,
+  automationVisibility,
+  triggerInput,
+} from "./schema"
 
 export const create = internalMutation({
   args: {
@@ -17,6 +22,7 @@ export const create = internalMutation({
     artifactId: v.optional(v.id("artifacts")),
     name: v.string(),
     instructions: v.string(),
+    visibility: v.optional(automationVisibility),
     access: accessInput,
     type: automationType,
     trigger: triggerInput,
@@ -58,6 +64,7 @@ export const update = internalMutation({
     artifactId: v.optional(v.id("artifacts")),
     name: v.optional(v.string()),
     instructions: v.optional(v.string()),
+    visibility: v.optional(automationVisibility),
     access: v.optional(accessInput),
     type: v.optional(automationType),
     trigger: v.optional(triggerInput),

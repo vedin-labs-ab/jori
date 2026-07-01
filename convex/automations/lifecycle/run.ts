@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { resolveRunAudience } from "../../runs/introspect/audience"
 import { createAutomationRunSnapshot } from "../../runs/snapshot"
 import { queueRun } from "../../runtime/outbox"
 
@@ -18,6 +19,10 @@ export async function createAutomationRun(
     automationId: args.automation._id,
     cause: args.cause,
     ...createAutomationRunSnapshot(args),
+    ...(await resolveRunAudience(ctx, {
+      origin: { automation: args.automation },
+      run: { createdBy: args.automation.createdBy },
+    })),
     status: "queued",
     createdBy: args.automation.createdBy,
     createdAt: args.now,

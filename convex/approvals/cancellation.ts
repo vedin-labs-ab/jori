@@ -29,19 +29,29 @@ export async function resolveCancellationActor(
     return null
   }
 
-  const watch = await ctx.db.get(session.watchId)
+  if (session.conversationId === undefined) {
+    return null
+  }
 
-  if (watch === null || !isMessageInWatch(message, watch)) {
+  const conversation = await ctx.db.get(session.conversationId)
+
+  if (
+    conversation === null ||
+    !isMessageInConversation(message, conversation)
+  ) {
     return null
   }
 
   return message.actor
 }
 
-function isMessageInWatch(message: Doc<"messages">, watch: Doc<"watches">) {
+function isMessageInConversation(
+  message: Doc<"messages">,
+  conversation: Doc<"conversations">
+) {
   return (
-    message.tenantId === watch.tenantId &&
-    message.integrationId === watch.integrationId &&
-    message.conversationId === watch.externalId
+    message.tenantId === conversation.tenantId &&
+    message.integrationId === conversation.integrationId &&
+    message.conversationId === conversation.externalId
   )
 }

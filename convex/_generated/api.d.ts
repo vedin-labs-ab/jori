@@ -123,6 +123,9 @@ import type * as broker_tools_slack_upload from "../broker/tools/slack/upload.js
 import type * as broker_tools_web_index from "../broker/tools/web/index.js";
 import type * as broker_tools_web_input from "../broker/tools/web/input.js";
 import type * as broker_tools_web_output from "../broker/tools/web/output.js";
+import type * as conversations_continuation from "../conversations/continuation.js";
+import type * as conversations_data from "../conversations/data.js";
+import type * as conversations_fresh from "../conversations/fresh.js";
 import type * as crons from "../crons.js";
 import type * as events_data from "../events/data.js";
 import type * as events_ingest from "../events/ingest.js";
@@ -332,6 +335,14 @@ import type * as runs_display_index from "../runs/display/index.js";
 import type * as runs_display_metadata from "../runs/display/metadata.js";
 import type * as runs_display_origin from "../runs/display/origin.js";
 import type * as runs_display_schedule from "../runs/display/schedule.js";
+import type * as runs_introspect_access from "../runs/introspect/access.js";
+import type * as runs_introspect_audience from "../runs/introspect/audience.js";
+import type * as runs_introspect_filters from "../runs/introspect/filters.js";
+import type * as runs_introspect_mcp from "../runs/introspect/mcp.js";
+import type * as runs_introspect_page from "../runs/introspect/page.js";
+import type * as runs_introspect_project from "../runs/introspect/project.js";
+import type * as runs_introspect_query from "../runs/introspect/query.js";
+import type * as runs_introspect_runs from "../runs/introspect/runs.js";
 import type * as runs_monitor from "../runs/monitor.js";
 import type * as runs_records from "../runs/records.js";
 import type * as runs_snapshot from "../runs/snapshot.js";
@@ -345,6 +356,7 @@ import type * as runtime_outbox from "../runtime/outbox.js";
 import type * as runtime_permissions_index from "../runtime/permissions/index.js";
 import type * as runtime_permissions_tools from "../runtime/permissions/tools.js";
 import type * as runtime_sandbox from "../runtime/sandbox.js";
+import type * as runtime_sandbox_lookup from "../runtime/sandbox_lookup.js";
 import type * as runtime_sandboxes from "../runtime/sandboxes.js";
 import type * as runtime_sessions from "../runtime/sessions.js";
 import type * as runtime_shared from "../runtime/shared.js";
@@ -373,8 +385,6 @@ import type * as skills_data from "../skills/data.js";
 import type * as skills_mcp from "../skills/mcp.js";
 import type * as skills_runtime from "../skills/runtime.js";
 import type * as transitions from "../transitions.js";
-import type * as watches_continuation from "../watches/continuation.js";
-import type * as watches_data from "../watches/data.js";
 
 import type {
   ApiFromModules,
@@ -498,6 +508,9 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/web/index": typeof broker_tools_web_index;
   "broker/tools/web/input": typeof broker_tools_web_input;
   "broker/tools/web/output": typeof broker_tools_web_output;
+  "conversations/continuation": typeof conversations_continuation;
+  "conversations/data": typeof conversations_data;
+  "conversations/fresh": typeof conversations_fresh;
   crons: typeof crons;
   "events/data": typeof events_data;
   "events/ingest": typeof events_ingest;
@@ -707,6 +720,14 @@ declare const fullApi: ApiFromModules<{
   "runs/display/metadata": typeof runs_display_metadata;
   "runs/display/origin": typeof runs_display_origin;
   "runs/display/schedule": typeof runs_display_schedule;
+  "runs/introspect/access": typeof runs_introspect_access;
+  "runs/introspect/audience": typeof runs_introspect_audience;
+  "runs/introspect/filters": typeof runs_introspect_filters;
+  "runs/introspect/mcp": typeof runs_introspect_mcp;
+  "runs/introspect/page": typeof runs_introspect_page;
+  "runs/introspect/project": typeof runs_introspect_project;
+  "runs/introspect/query": typeof runs_introspect_query;
+  "runs/introspect/runs": typeof runs_introspect_runs;
   "runs/monitor": typeof runs_monitor;
   "runs/records": typeof runs_records;
   "runs/snapshot": typeof runs_snapshot;
@@ -720,6 +741,7 @@ declare const fullApi: ApiFromModules<{
   "runtime/permissions/index": typeof runtime_permissions_index;
   "runtime/permissions/tools": typeof runtime_permissions_tools;
   "runtime/sandbox": typeof runtime_sandbox;
+  "runtime/sandbox_lookup": typeof runtime_sandbox_lookup;
   "runtime/sandboxes": typeof runtime_sandboxes;
   "runtime/sessions": typeof runtime_sessions;
   "runtime/shared": typeof runtime_shared;
@@ -748,8 +770,6 @@ declare const fullApi: ApiFromModules<{
   "skills/mcp": typeof skills_mcp;
   "skills/runtime": typeof skills_runtime;
   transitions: typeof transitions;
-  "watches/continuation": typeof watches_continuation;
-  "watches/data": typeof watches_data;
 }>;
 
 /**

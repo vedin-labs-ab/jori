@@ -23,6 +23,22 @@ export const miloToolPermissionRows = [
   ],
   [
     "milo",
+    "search_runs",
+    "Search runs",
+    "Find previous Milo runs visible to the current run.",
+    "Search prior runs to recover context before non-trivial work. Default to the current conversation; widen scope deliberately. Visibility is enforced, so missing results do not prove nothing happened. Cite runId values when using prior context.",
+    "read",
+  ],
+  [
+    "milo",
+    "search_run_activity",
+    "Search run activity",
+    "Inspect activity from a visible previous Milo run.",
+    "Inspect one visible run after search_runs. Use filters and pagination instead of enumerating everything. Prior-run reasoning and raw tool payloads are not available; cite the inspected runId.",
+    "read",
+  ],
+  [
+    "milo",
     "offer_integration",
     "Offer integration",
     "Offer to connect an integration so Milo can use it.",

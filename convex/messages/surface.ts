@@ -1,5 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
-import { getSlackBotUserId } from "../providers/slack/data"
+import { getSlackBotUserId, getSlackChannelType } from "../providers/slack/data"
 
 export {
   messageActorIds,
@@ -17,6 +17,8 @@ export type MessageAudience = {
   isDirect: boolean
   isMentioned: boolean
 }
+
+export type ConversationVisibility = "private" | "public"
 
 export function messageText(
   message: Doc<"messages">,
@@ -54,11 +56,29 @@ export function messageAudience(
   }
 }
 
+export function conversationVisibility(
+  message: Doc<"messages">,
+  integration: Doc<"integrations">
+): ConversationVisibility {
+  if (integration.integration === "slack") {
+    return slackVisibility(message)
+  }
+
+  if (
+    integration.integration === "github" ||
+    integration.integration === "linear"
+  ) {
+    return "public"
+  }
+
+  return "private"
+}
+
 function slackMessageAudience(
   message: Doc<"messages">,
   _integration: Doc<"integrations">
 ): MessageAudience {
-  const isDirect = isSlackDirectMessage(message.type)
+  const isDirect = isSlackDirectMessage(message)
 
   return {
     isAddressed: isDirect || message.mentioned,
@@ -67,8 +87,14 @@ function slackMessageAudience(
   }
 }
 
-function isSlackDirectMessage(type: string) {
-  return type === "message.im" || type === "message.mpim"
+function isSlackDirectMessage(message: Doc<"messages">) {
+  const channelType = getSlackChannelType(message.type)
+
+  return channelType === "im" || channelType === "mpim"
+}
+
+function slackVisibility(message: Doc<"messages">): ConversationVisibility {
+  return getSlackChannelType(message.type) === "channel" ? "public" : "private"
 }
 
 function slackMessageText(text: string, integration: Doc<"integrations">) {

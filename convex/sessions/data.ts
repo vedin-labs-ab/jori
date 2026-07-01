@@ -26,9 +26,9 @@ type QueryLikeCtx = MutationCtx | QueryCtx
 
 export async function findReusableSession(
   ctx: MutationCtx,
-  watchId: Id<"watches">
+  conversationId: Id<"conversations">
 ) {
-  const session = await findSession(ctx, watchId)
+  const session = await findSession(ctx, conversationId)
 
   return session === null ? null : await isReusableSession(ctx, session)
 }
@@ -49,13 +49,13 @@ export async function isReusableSession(
 export async function startSession(
   ctx: MutationCtx,
   args: {
-    watchId: Id<"watches">
+    conversationId: Id<"conversations">
     message: Doc<"messages">
     now: number
     runId: Id<"runs">
   }
 ) {
-  const existing = await findSession(ctx, args.watchId)
+  const existing = await findSession(ctx, args.conversationId)
   const patch = {
     cursor: initialCursor(args.message, args.now),
     runId: args.runId,
@@ -68,7 +68,7 @@ export async function startSession(
   }
 
   return await ctx.db.insert("sessions", {
-    watchId: args.watchId,
+    conversationId: args.conversationId,
     ...patch,
   })
 }
@@ -99,9 +99,13 @@ async function readPendingBatch(
   session: Doc<"sessions">,
   limit = defaultDrainLimit
 ): Promise<PendingBatch> {
-  const watch = await ctx.db.get(session.watchId)
+  if (session.conversationId === undefined) {
+    return { hasMore: false, messages: [] }
+  }
 
-  if (watch === null) {
+  const conversation = await ctx.db.get(session.conversationId)
+
+  if (conversation === null) {
     return { hasMore: false, messages: [] }
   }
 
@@ -109,7 +113,7 @@ async function readPendingBatch(
   const candidates = await queryConversationMessages(ctx, {
     session,
     limit: maxPendingReadLimit + 1,
-    watch,
+    conversation,
   })
   const scanned = candidates.slice(0, maxPendingReadLimit)
 
@@ -196,15 +200,26 @@ async function getSessionIntegration(
   ctx: QueryLikeCtx,
   session: Doc<"sessions">
 ) {
-  const watch = await ctx.db.get(session.watchId)
+  if (session.conversationId === undefined) {
+    return null
+  }
 
-  return watch === null ? null : await ctx.db.get(watch.integrationId)
+  const conversation = await ctx.db.get(session.conversationId)
+
+  return conversation === null
+    ? null
+    : await ctx.db.get(conversation.integrationId)
 }
 
-export async function findSession(ctx: QueryLikeCtx, watchId: Id<"watches">) {
+export async function findSession(
+  ctx: QueryLikeCtx,
+  conversationId: Id<"conversations">
+) {
   return await ctx.db
     .query("sessions")
-    .withIndex("by_watch", (query) => query.eq("watchId", watchId))
+    .withIndex("by_conversation", (query) =>
+      query.eq("conversationId", conversationId)
+    )
     .first()
 }
 
@@ -213,7 +228,7 @@ async function queryConversationMessages(
   args: {
     limit: number
     session: Doc<"sessions">
-    watch: Doc<"watches">
+    conversation: Doc<"conversations">
   }
 ) {
   return await ctx.db
@@ -221,9 +236,9 @@ async function queryConversationMessages(
     .withIndex("by_conversation", (query) => {
       const cursor = args.session.cursor?.message
       const scoped = query
-        .eq("tenantId", args.watch.tenantId)
-        .eq("integrationId", args.watch.integrationId)
-        .eq("conversationId", args.watch.externalId)
+        .eq("tenantId", args.conversation.tenantId)
+        .eq("integrationId", args.conversation.integrationId)
+        .eq("conversationId", args.conversation.externalId)
 
       return cursor === undefined
         ? scoped

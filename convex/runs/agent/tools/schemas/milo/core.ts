@@ -7,11 +7,77 @@ import {
   stringProperty,
 } from "../common"
 
+const runStatusEnum = ["queued", "running", "completed", "failed", "stopped"]
+const runScopeEnum = ["conversation", "tenant", "all"]
+const runSourceEnum = ["slack", "github", "linear", "automation"]
+const activityFilterEnum = [
+  "tool",
+  "model",
+  "approval",
+  "asset",
+  "agent",
+  "error",
+]
+
 export const coreMiloToolInputSchemas = {
   list_capabilities: objectSchema({
     properties: {},
   }),
   load_skill: loadSkillInputSchema(),
+  search_runs: objectSchema({
+    properties: {
+      query: stringProperty(
+        "Substring matched against title, task, and context labels."
+      ),
+      scope: {
+        type: "string",
+        enum: runScopeEnum,
+        description:
+          "Relevance scope within enforced visibility. Defaults to conversation; use tenant or all deliberately.",
+      },
+      status: {
+        type: "string",
+        enum: runStatusEnum,
+        description: "Optional run status filter.",
+      },
+      source: {
+        type: "string",
+        enum: runSourceEnum,
+        description: "Optional source filter.",
+      },
+      since: numberProperty(
+        "Only runs created at or after this epoch millisecond."
+      ),
+      until: numberProperty(
+        "Only runs created at or before this epoch millisecond."
+      ),
+      rootId: stringProperty("Root run ID for delegation-tree navigation."),
+      parentId: stringProperty("Parent run ID for direct child navigation."),
+      runIds: stringArrayProperty("Known run IDs to resolve directly."),
+      cursor: stringProperty(
+        "Opaque cursor from a previous search_runs response."
+      ),
+      limit: numberProperty("Maximum runs to return.", 1, 50),
+    },
+  }),
+  search_run_activity: objectSchema({
+    required: ["runId"],
+    properties: {
+      runId: stringProperty("Run ID returned by search_runs."),
+      filter: {
+        type: "array",
+        description: "Optional activity kinds to include.",
+        items: {
+          type: "string",
+          enum: activityFilterEnum,
+        },
+      },
+      cursor: stringProperty(
+        "Opaque cursor from a previous search_run_activity response."
+      ),
+      limit: numberProperty("Maximum activity items to return.", 1, 50),
+    },
+  }),
   offer_integration: objectSchema({
     required: ["integration", "summary"],
     properties: {
