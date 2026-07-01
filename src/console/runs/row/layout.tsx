@@ -133,6 +133,11 @@ export type RunRequestMeta = {
   label: string
 }
 
+type RunRequestSectionLabel = {
+  count: number
+  singular: string
+}
+
 export function RunRequestSection({
   actions,
   label,
@@ -144,7 +149,7 @@ export function RunRequestSection({
   titleIcon,
 }: {
   actions?: ReactNode
-  label: string
+  label: RunRequestSectionLabel
   labelIcon: LucideIcon
   meta: RunRequestMeta | null
   navigation?: RunRequestNavigation
@@ -156,7 +161,7 @@ export function RunRequestSection({
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
       <div className="flex items-start gap-1.5 font-medium">
         <LabelIcon className="mt-0.5 size-3.5 text-muted-foreground" />
-        {label}
+        <RunRequestSectionLabel label={label} />
       </div>
       <div className="min-w-0">
         <div className="flex min-h-5 items-start justify-between gap-3">
@@ -175,6 +180,23 @@ export function RunRequestSection({
       </div>
     </div>
   )
+}
+
+function RunRequestSectionLabel({ label }: { label: RunRequestSectionLabel }) {
+  return (
+    <span className="inline-flex min-w-0 items-baseline gap-1">
+      <span>{requestLabelText(label)}</span>
+      {label.count > 1 ? (
+        <span className="font-normal text-[0.625rem] text-muted-foreground leading-none tabular-nums">
+          {label.count}
+        </span>
+      ) : null}
+    </span>
+  )
+}
+
+function requestLabelText(label: RunRequestSectionLabel) {
+  return label.count === 1 ? label.singular : `${label.singular}s`
 }
 
 function RunRequestFooter({

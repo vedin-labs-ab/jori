@@ -67,7 +67,7 @@ export function OfferCallout({
           />
         ) : undefined
       }
-      label="Offer"
+      label={{ count: offers.length, singular: "Offer" }}
       labelIcon={Plug}
       meta={offerMeta(offer, now)}
       navigation={{

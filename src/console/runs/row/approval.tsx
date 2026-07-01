@@ -39,7 +39,7 @@ export function ApprovalCallout({
           />
         ) : undefined
       }
-      label="Approval"
+      label={{ count: approvals.length, singular: "Approval" }}
       labelIcon={UserPen}
       meta={approvalMeta(approval, now)}
       navigation={{

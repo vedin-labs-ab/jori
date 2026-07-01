@@ -83,6 +83,9 @@ test("pages through multiple integration offers", async () => {
 
   await screen.findByText("Connect Notion so Milo can create the page.")
 
+  expect(screen.getByText("Offers")).toBeDefined()
+  expect(screen.getByText("2")).toBeDefined()
+
   fireEvent.click(
     screen.getByRole("button", { name: "Next integration offer" })
   )
