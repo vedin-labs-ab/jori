@@ -7,7 +7,7 @@ import {
   matchesActivityFilter,
   normalizeQuery,
   normalizeTimestamp,
-  projectMatches,
+  pageRunMatches,
 } from "./filters"
 import { normalizeRunId } from "./ids"
 import { pageItems } from "./page"
@@ -28,21 +28,24 @@ export const searchRuns = internalQuery({
     }
 
     const candidates = await loadCandidateRuns(ctx, current, args)
-    const summaries = await projectMatches(ctx, {
-      candidates,
-      current,
-      query: normalizeQuery(args.query),
-      source: args.source,
-      status: args.status,
-      since: normalizeTimestamp(args.since),
-      until: normalizeTimestamp(args.until),
-    })
-    const page = pageItems(summaries, {
-      cursor: args.cursor,
-      limit: args.limit,
-    })
+    const page = await pageRunMatches(
+      ctx,
+      {
+        candidates,
+        current,
+        query: normalizeQuery(args.query),
+        source: args.source,
+        status: args.status,
+        since: normalizeTimestamp(args.since),
+        until: normalizeTimestamp(args.until),
+      },
+      {
+        cursor: args.cursor,
+        limit: args.limit,
+      }
+    )
 
-    return { cursor: page.cursor, runs: page.page }
+    return { cursor: page.cursor, runs: page.runs }
   },
 })
 

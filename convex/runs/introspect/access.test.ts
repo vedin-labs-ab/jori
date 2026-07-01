@@ -40,6 +40,13 @@ test("allows tenant runs and only matching private buckets", () => {
   expect(canSee(current, run({ audienceScope: "person" }))).toBe(false)
 })
 
+test("denies conversation runs without a conversation id", () => {
+  const current = run({ audienceScope: "conversation" })
+  const candidate = run({ audienceScope: "conversation" })
+
+  expect(canSee(current, candidate)).toBe(false)
+})
+
 function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
   return {
     _creationTime: 0,
