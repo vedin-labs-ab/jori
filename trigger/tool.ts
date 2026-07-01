@@ -1,4 +1,5 @@
 import { type ToolSurface } from "../contracts/integrations"
+import { readFinal } from "../contracts/runtime"
 import { encodeToolResult } from "../contracts/transport"
 import {
   materializeSandboxResult,
@@ -123,14 +124,18 @@ async function executeConvexTool(
   const toolName = tool.tool ?? tool.name
 
   if (tool.mode === "prompted") {
+    const finished = readFinal(call.args)
+
     return toolResult(
-      await requestPromptedApproval(runtime, surface, toolName, call.args)
+      await requestPromptedApproval(runtime, surface, toolName, call.args),
+      finished
     )
   }
 
+  const finished = shouldFinishConvexTool(toolName, call.args)
   const result = await callConvexTool(runtime, surface, toolName, call.args)
   markVisibleCommunication(runtime, toolName, result)
-  return toolResult(result, shouldFinishConvexTool(toolName, result))
+  return toolResult(result, finished)
 }
 
 async function requestPromptedApproval(
@@ -243,25 +248,8 @@ function toolResult(value: unknown, finished = false) {
   return { finished, value }
 }
 
-function shouldFinishConvexTool(toolName: string, result: unknown) {
-  return (
-    toolName === "offer_integration" &&
-    isDeliveredAwaitedIntegrationOffer(result)
-  )
-}
-
-function isDeliveredAwaitedIntegrationOffer(result: unknown) {
-  if (!isRecord(result) || result.waiting !== true) {
-    return false
-  }
-
-  const delivery = result.delivery
-
-  return isRecord(delivery) && delivery.status === "delivered"
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
+function shouldFinishConvexTool(toolName: string, input: JsonObject) {
+  return toolName === "offer_integration" && readFinal(input)
 }
 
 function toToolContent(result: unknown) {

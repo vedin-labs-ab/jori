@@ -54,6 +54,57 @@ test("prompted tools carry the active reply target into approval delivery", asyn
   )
 })
 
+test("prompted tools can finish the tool step with final", async () => {
+  const runtime = createRuntime()
+
+  const result = await executeToolCall({
+    attempt: 1,
+    call: {
+      ...promptedToolCall(),
+      args: {
+        ...promptedToolCall().args,
+        final: true,
+      },
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(result.finished).toBe(true)
+  expect(runtime.convex.requestApproval).toHaveBeenCalledWith({
+    input: {
+      ...promptedToolCall().args,
+      final: true,
+    },
+    runId: "run_1",
+    surface: "notion",
+    tool: "notion_create_page",
+  })
+})
+
+test("prompted tools reject invalid final before requesting approval", async () => {
+  const runtime = createRuntime()
+
+  const result = await executeToolCall({
+    attempt: 1,
+    call: {
+      ...promptedToolCall(),
+      args: {
+        ...promptedToolCall().args,
+        final: "true",
+      },
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(JSON.parse(result.content)).toEqual({
+    error: { message: "final must be a boolean" },
+    status: "error",
+  })
+  expect(runtime.convex.requestApproval).not.toHaveBeenCalled()
+})
+
 test("tool failures are returned to the agent instead of thrown", async () => {
   const runtime = createRuntime({
     mode: "allowed",

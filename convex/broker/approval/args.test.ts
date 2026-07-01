@@ -15,6 +15,7 @@ test("extracts approval metadata and strips it from tool args", () => {
       approval: {
         summary: "Create a random Notion page.",
       },
+      final: true,
     },
   })
 

@@ -1,3 +1,4 @@
+import { finalProperty } from "../../../../../../contracts/runtime"
 import { integrations as integrationEnum } from "../../../../../shared/integrations"
 import {
   numberProperty,
@@ -22,11 +23,7 @@ export const coreMiloToolInputSchemas = {
       summary: stringProperty(
         "One concise user-facing sentence explaining why this integration needs to be connected for the current request."
       ),
-      wait: {
-        type: "boolean",
-        description:
-          "Set true only when this integration is required to continue the current request. If the offer is delivered, the run pauses after the tool succeeds until the integration connects, is cancelled, or expires. Omit or set false for proactive or optional offers, or when more work or communication may still be needed.",
-      },
+      final: finalProperty(),
     },
   }),
   cancel_approval_request: objectSchema({

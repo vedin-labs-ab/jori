@@ -174,7 +174,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain(
       "include an internal `reason` explaining why none was warranted"
     )
-    expect(prompt).toContain("set the `final` field to `true`")
+    expect(prompt).toContain("set the root `final` field to `true`")
     expectNoSyntheticBlankLines(prompt)
   })
 
@@ -187,7 +187,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("use the lightest action that delivers it")
     expect(prompt).toContain("Use `send_reply`")
     expect(prompt).toContain("# Finish")
-    expect(prompt).toContain("set the `final` field to `true`")
+    expect(prompt).toContain("set the root `final` field to `true`")
   })
 
   test("omits automatic final delivery instructions", () => {

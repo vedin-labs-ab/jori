@@ -51,7 +51,6 @@ export const integrationOffers = defineTable({
   summary: v.optional(v.string()),
   source: integrationOfferSource,
   runId: v.optional(v.id("runs")),
-  awaited: v.optional(v.boolean()),
   delivery: v.optional(integrationOfferDelivery),
   claim: v.optional(
     v.object({

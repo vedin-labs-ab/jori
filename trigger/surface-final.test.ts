@@ -56,6 +56,31 @@ test("send_reply final does not finish when delivery fails", async () => {
   expect(runtime.context.activeSurface?.communicated).toBe(false)
 })
 
+test("send_reply rejects invalid final before sending", async () => {
+  const runtime = createRuntime()
+
+  const result = await executeToolCall({
+    attempt: 1,
+    call: {
+      args: {
+        final: "true",
+        text: "Done",
+      },
+      id: "call_1",
+      name: "send_reply",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(JSON.parse(result.content)).toEqual({
+    error: { message: "final must be a boolean" },
+    status: "error",
+  })
+  expect(runtime.convex.sendReply).not.toHaveBeenCalled()
+  expect(runtime.context.activeSurface?.communicated).toBe(false)
+})
+
 test("add_reaction can finish the run after a successful final reaction", async () => {
   const runtime = createRuntime({ tools: [addReactionTool()] })
 

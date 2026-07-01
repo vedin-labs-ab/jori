@@ -1,4 +1,5 @@
 import { type JsonObject } from "./json"
+import { finalProperty } from "./runtime"
 
 export const approvalTtlSeconds = 30 * 60
 export const approvalTtlMs = approvalTtlSeconds * 1000
@@ -18,6 +19,7 @@ export function withApprovalSchema(schema: Record<string, unknown> = {}) {
     properties: {
       ...properties,
       approval: approvalMetadataSchema(),
+      final: finalProperty(),
     },
     required: [...new Set([...required, "approval"])],
   }

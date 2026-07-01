@@ -57,7 +57,6 @@ export async function callIntegrationOfferTool(
       integration,
       summary: offerRequest.summary,
       source: integrationOfferSourceFromInput(context.input),
-      awaited: offerRequest.wait,
     }
   )
   const delivery = await tryDeliverIntegrationOffer(ctx, context, {
@@ -75,12 +74,10 @@ export async function callIntegrationOfferTool(
     url: offer.url,
     urlPath: offer.urlPath,
     expiresAt: offer.expiresAt,
-    waiting: offerRequest.wait,
     message: integrationOfferMessage({
       delivered: delivery.status === "delivered",
       label,
       url: offer.url,
-      wait: offerRequest.wait,
     }),
     delivery,
   }
@@ -113,17 +110,10 @@ function integrationOfferMessage(args: {
   delivered: boolean
   label: string
   url: string
-  wait: boolean
 }) {
-  const base = args.delivered
+  return args.delivered
     ? `Posted a ${args.label} integration offer in Slack. Do not send a separate reply for this offer.`
     : `No native integration offer was delivered. Send this integration offer URL if the user needs it: ${args.url}`
-
-  if (!args.wait) {
-    return base
-  }
-
-  return `${base} The run is paused until ${args.label} connects, the offer is cancelled, or it expires.`
 }
 
 function parseCancelOffer(args: unknown) {
@@ -179,7 +169,6 @@ function findConnectedIntegration(
 function readOfferRequest(args: unknown): {
   integration: Integration
   summary: string
-  wait: boolean
 } {
   if (typeof args !== "object" || args === null || Array.isArray(args)) {
     throw new Error("offer_integration requires an integration.")
@@ -188,7 +177,6 @@ function readOfferRequest(args: unknown): {
   const record = args as {
     integration?: unknown
     summary?: unknown
-    wait?: unknown
   }
 
   if (!isIntegration(record.integration)) {
@@ -198,7 +186,6 @@ function readOfferRequest(args: unknown): {
   return {
     integration: record.integration,
     summary: readSummary(record.summary),
-    wait: record.wait === true,
   }
 }
 

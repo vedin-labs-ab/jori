@@ -1,3 +1,4 @@
+import { readFinal } from "../contracts/runtime"
 import { optionalString, requiredString } from "./input"
 import { type ToolRuntime } from "./tool"
 import { type JsonObject, type SurfaceReactionTarget } from "./types"
@@ -21,6 +22,7 @@ export async function executeActiveSurfaceTool(
 }
 
 async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
+  const finished = readFinal(input)
   const activeSurface = requireActiveSurface(runtime)
   const explicitTarget = optionalReplyTarget(input, activeSurface.surface)
   const target = explicitTarget ?? activeSurface.target
@@ -36,12 +38,13 @@ async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
   activeSurface.target = explicitTarget ?? activeSurface.target
 
   return {
-    finished: optionalFinal(input.final),
+    finished,
     value: result,
   }
 }
 
 async function addActiveReaction(runtime: ToolRuntime, input: JsonObject) {
+  const finished = readFinal(input)
   const activeSurface = requireActiveSurface(runtime)
   const result = await runtime.convex.addReaction({
     reaction: requiredReaction(input.reaction, activeSurface.surface),
@@ -52,21 +55,9 @@ async function addActiveReaction(runtime: ToolRuntime, input: JsonObject) {
   activeSurface.communicated = true
 
   return {
-    finished: optionalFinal(input.final),
+    finished,
     value: result,
   }
-}
-
-function optionalFinal(value: unknown) {
-  if (value === undefined || value === null) {
-    return false
-  }
-
-  if (typeof value !== "boolean") {
-    throw new Error("final must be a boolean")
-  }
-
-  return value
 }
 
 function optionalReplyTarget(input: JsonObject, surface: string) {

@@ -22,7 +22,7 @@ Make updates useful, not ceremonial: say what materially helps the requester, no
 
 After the heads-up, stay quiet until something material changes — a result, a blocker, a change of plan, or a message that needs your response.
 
-When an awaited integration connects, send one short update: confirm the connection, then say what continues next or that the task is done.
+When an integration offer connects, send one short update: confirm the connection, then say what continues next or that the task is done.
 
 If the requester asks, corrects, steers, or adds context, respond or adapt before continuing.
 
