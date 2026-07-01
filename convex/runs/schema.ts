@@ -73,7 +73,7 @@ export const runStatus = v.union(
   v.literal("stopped")
 )
 
-export const audienceScope = v.union(
+export const runVisibilityScope = v.union(
   v.literal("tenant"),
   v.literal("conversation"),
   v.literal("person")
@@ -103,7 +103,7 @@ export const runs = defineTable({
   automationId: v.optional(v.id("automations")),
   parentId: v.optional(v.id("runs")),
   rootId: v.optional(v.id("runs")),
-  audienceScope: v.optional(audienceScope),
+  scope: v.optional(runVisibilityScope),
   conversationId: v.optional(v.id("conversations")),
   cause: runCause,
   instructions: v.optional(v.string()),
@@ -121,9 +121,9 @@ export const runs = defineTable({
   .index("by_parent", ["parentId"])
   .index("by_root", ["rootId"])
   .index("by_conversation_and_created_at", ["conversationId", "createdAt"])
-  .index("by_tenant_and_audience_scope_and_created_at", [
+  .index("by_tenant_and_scope_and_created_at", [
     "tenantId",
-    "audienceScope",
+    "scope",
     "createdAt",
   ])
   .index("by_tenant_and_created_by_and_created_at", [

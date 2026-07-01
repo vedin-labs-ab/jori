@@ -15,7 +15,7 @@ test("starts new conversation message runs as mentions", async () => {
   expect(result.status).toBe("started")
   expect(inserted(ctx, "runs")).toEqual([
     expect.objectContaining({
-      audienceScope: "tenant",
+      scope: "tenant",
       cause: { type: "message", messageId: "message", kind: "mention" },
       conversationId: "conversations-1",
     }),

@@ -4,17 +4,17 @@ import { canSee } from "./access"
 
 test("allows tenant runs and only matching private buckets", () => {
   const current = run({
-    audienceScope: "conversation",
+    scope: "conversation",
     conversationId: id<"conversations">("conversation"),
     createdBy: id<"persons">("person"),
   })
 
-  expect(canSee(current, run({ audienceScope: "tenant" }))).toBe(true)
+  expect(canSee(current, run({ scope: "tenant" }))).toBe(true)
   expect(
     canSee(
       current,
       run({
-        audienceScope: "conversation",
+        scope: "conversation",
         conversationId: id<"conversations">("conversation"),
       })
     )
@@ -23,7 +23,7 @@ test("allows tenant runs and only matching private buckets", () => {
     canSee(
       current,
       run({
-        audienceScope: "conversation",
+        scope: "conversation",
         conversationId: id<"conversations">("other"),
       })
     )
@@ -32,17 +32,17 @@ test("allows tenant runs and only matching private buckets", () => {
     canSee(
       current,
       run({
-        audienceScope: "person",
+        scope: "person",
         createdBy: id<"persons">("person"),
       })
     )
   ).toBe(true)
-  expect(canSee(current, run({ audienceScope: "person" }))).toBe(false)
+  expect(canSee(current, run({ scope: "person" }))).toBe(false)
 })
 
 test("denies conversation runs without a conversation id", () => {
-  const current = run({ audienceScope: "conversation" })
-  const candidate = run({ audienceScope: "conversation" })
+  const current = run({ scope: "conversation" })
+  const candidate = run({ scope: "conversation" })
 
   expect(canSee(current, candidate)).toBe(false)
 })
@@ -51,7 +51,7 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
   return {
     _creationTime: 0,
     _id: id<"runs">("run"),
-    audienceScope: "person",
+    scope: "person",
     cause: { type: "manual" },
     createdAt: 0,
     snapshot: { context: [], source: { type: "manual" }, title: "Run" },

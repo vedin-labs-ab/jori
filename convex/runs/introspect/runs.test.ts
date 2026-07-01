@@ -6,7 +6,7 @@ import { loadCandidateRuns, type SearchRunArgs } from "./runs"
 test("loads candidates by explicit search mode", async () => {
   const harness = context()
   const current = run({
-    audienceScope: "conversation",
+    scope: "conversation",
     conversationId: id<"conversations">("conversation"),
   })
 
@@ -95,7 +95,7 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
   return {
     _creationTime: 0,
     _id: id<"runs">("run"),
-    audienceScope: "tenant",
+    scope: "tenant",
     cause: { type: "manual" },
     createdAt: 0,
     snapshot: { context: [], source: { type: "manual" }, title: "Run" },

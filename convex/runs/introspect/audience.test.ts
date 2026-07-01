@@ -17,7 +17,7 @@ test("resolves conversation and automation audiences", async () => {
       run: {},
     })
   ).resolves.toEqual({
-    audienceScope: "tenant",
+    scope: "tenant",
     conversationId: id<"conversations">("conversation"),
   })
   await expect(
@@ -31,7 +31,7 @@ test("resolves conversation and automation audiences", async () => {
       run: {},
     })
   ).resolves.toEqual({
-    audienceScope: "conversation",
+    scope: "conversation",
     conversationId: id<"conversations">("conversation"),
   })
   await expect(
@@ -39,7 +39,7 @@ test("resolves conversation and automation audiences", async () => {
       origin: { automation: automation() },
       run: {},
     })
-  ).resolves.toEqual({ audienceScope: "person" })
+  ).resolves.toEqual({ scope: "person" })
 })
 
 function conversation(

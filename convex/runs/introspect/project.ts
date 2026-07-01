@@ -14,7 +14,7 @@ export async function projectRunSummary(ctx: QueryCtx, run: Doc<"runs">) {
     title: runTitle(context),
     task: runTask(context),
     trigger: triggerLabel(context),
-    audienceScope: run.audienceScope ?? "person",
+    scope: run.scope ?? "person",
     status: run.status,
     source: run.snapshot.source,
     context: run.snapshot.context,
