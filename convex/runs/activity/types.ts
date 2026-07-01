@@ -1,6 +1,6 @@
 import { type RuntimeToolMetadataItem } from "../../../contracts/runtime"
 import { type Doc } from "../../_generated/dataModel"
-import { type Integration } from "../../shared/integrations"
+import { type Integration, type ToolSurface } from "../../shared/integrations"
 
 export type ActivityStatus =
   | "approved"
@@ -54,6 +54,8 @@ export type ActivityItem = {
   isLive?: boolean
   metadata?: ActivityMetadataItem[]
   startedAt: number
+  surface?: ToolSurface
+  toolLabel?: string
   tokenUsage?: ActivityTokenUsage
 }
 

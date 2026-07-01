@@ -1,4 +1,4 @@
-import { type Integration, integrationLabel } from "@contracts/integrations"
+import { integrationLabel } from "@contracts/integrations"
 import { ChevronDown, FileText, Search, Send, SmilePlus } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import {
@@ -10,7 +10,6 @@ import {
 } from "@/components/ai-elements/task"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
-import { IntegrationLogo } from "../../shared/logo/integration"
 import { formatDuration } from "../../shared/time"
 import { ActivityFailureDescription } from "./error"
 import {
@@ -19,7 +18,11 @@ import {
   ActivityMeta,
   ActivityTimelineIcon,
 } from "./metadata"
-import { ActivityMetadataLine, TimelineRow } from "./row"
+import {
+  ActivityMetadataLine,
+  ActivitySurfaceDescription,
+  TimelineRow,
+} from "./row"
 import { type ActivityTimelineEntry, createActivityTimeline } from "./timeline"
 import { ActivityToolMetadata } from "./tool-metadata"
 import { type ActivityItem as ActivityItemType } from "./types"
@@ -113,8 +116,22 @@ function activityDescription(item: ActivityItemType) {
     return <ActivityFailureDescription error={error} title={item.title} />
   }
 
+  if (item.kind === "approval" && item.toolLabel !== undefined) {
+    return (
+      <ActivitySurfaceDescription
+        label={item.toolLabel}
+        surface={item.surface}
+      />
+    )
+  }
+
   if (item.kind === "offer" && item.integration !== undefined) {
-    return <OfferIntegrationDescription integration={item.integration} />
+    return (
+      <ActivitySurfaceDescription
+        label={integrationLabel(item.integration)}
+        surface={item.integration}
+      />
+    )
   }
 
   if (item.tokenUsage !== undefined) {
@@ -132,19 +149,6 @@ function activityDescription(item: ActivityItemType) {
   }
 
   return item.description
-}
-
-function OfferIntegrationDescription({
-  integration,
-}: {
-  integration: Integration
-}) {
-  return (
-    <span className="inline-flex min-w-0 items-center gap-1.5">
-      <IntegrationLogo decorative integration={integration} size="sm" />
-      <span className="min-w-0 truncate">{integrationLabel(integration)}</span>
-    </span>
-  )
 }
 
 function activityError(item: ActivityItemType) {
