@@ -125,21 +125,19 @@ async function settleYield(
   let refreshSubjects: HandoffSubject[] = []
 
   for (;;) {
-    const { messageProgressed, pending, progressed } = await reconcileHandoffs(
+    const { pending, progressed } = await reconcileHandoffs(
       runtime,
       messages,
       refreshSubjects
     )
     refreshSubjects = []
 
-    if (pending.length === 0) {
-      return progressed
-        ? "continue"
-        : finalizeYield(messages, runtime.context, kind, content)
+    if (progressed) {
+      return "continue"
     }
 
-    if (messageProgressed) {
-      return "continue"
+    if (pending.length === 0) {
+      return finalizeYield(messages, runtime.context, kind, content)
     }
 
     const wake = await parkRun(runtime, pending)
