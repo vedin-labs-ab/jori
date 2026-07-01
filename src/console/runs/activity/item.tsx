@@ -1,3 +1,4 @@
+import { type Integration, integrationLabel } from "@contracts/integrations"
 import { ChevronDown, FileText, Search, Send, SmilePlus } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import {
@@ -9,6 +10,7 @@ import {
 } from "@/components/ai-elements/task"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
+import { IntegrationLogo } from "../../shared/logo/integration"
 import { formatDuration } from "../../shared/time"
 import { ActivityFailureDescription } from "./error"
 import {
@@ -111,6 +113,10 @@ function activityDescription(item: ActivityItemType) {
     return <ActivityFailureDescription error={error} title={item.title} />
   }
 
+  if (item.kind === "offer" && item.integration !== undefined) {
+    return <OfferIntegrationDescription integration={item.integration} />
+  }
+
   if (item.tokenUsage !== undefined) {
     return hasVisibleTokenUsage(item.tokenUsage) ? (
       <ActivityTokenUsage usage={item.tokenUsage} />
@@ -126,6 +132,19 @@ function activityDescription(item: ActivityItemType) {
   }
 
   return item.description
+}
+
+function OfferIntegrationDescription({
+  integration,
+}: {
+  integration: Integration
+}) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      <IntegrationLogo decorative integration={integration} size="sm" />
+      <span className="min-w-0 truncate">{integrationLabel(integration)}</span>
+    </span>
+  )
 }
 
 function activityError(item: ActivityItemType) {
