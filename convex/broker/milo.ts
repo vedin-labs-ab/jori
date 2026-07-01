@@ -17,6 +17,7 @@ import {
   callRunIntrospectionTool,
   isRunIntrospectionTool,
 } from "../runs/introspect/mcp"
+import { readRecord } from "../shared/input"
 import { callMiloSkillTool, isMiloSkillTool } from "../skills/mcp"
 import { type ApprovalBrokerContext } from "./approval"
 import { callWebTool } from "./tools/web"
@@ -50,7 +51,7 @@ export async function callMiloTool(
   }
 
   if (request.tool === "web_search" || request.tool === "web_fetch") {
-    return await callWebTool(request.tool, normalizeToolArgs(request.args))
+    return await callWebTool(request.tool, readRecord(request.args))
   }
 
   if (isMiloSkillTool(request.tool)) {
@@ -110,14 +111,6 @@ function toMiloContext(run: MiloRunContext) {
     createdBy: run.createdBy,
     runId: run._id,
   }
-}
-
-function normalizeToolArgs(args: unknown) {
-  if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    return {}
-  }
-
-  return args as Record<string, unknown>
 }
 
 function isBrokerContext(

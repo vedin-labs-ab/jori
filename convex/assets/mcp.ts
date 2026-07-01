@@ -1,6 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
+import { readRecord } from "../shared/input"
 
 type MiloAssetRequest = {
   tool: string
@@ -30,7 +31,7 @@ export async function callMiloAssetTool(
   },
   request: MiloAssetRequest
 ): Promise<unknown> {
-  const args = normalizeToolArgs(request.args)
+  const args = readRecord(request.args)
 
   if (request.tool === "search_assets") {
     return await ctx.runQuery(internal.assets.data.search, {
@@ -47,12 +48,4 @@ export async function callMiloAssetTool(
   }
 
   throw new Error(`Unknown Milo asset tool: ${request.tool}`)
-}
-
-function normalizeToolArgs(args: unknown) {
-  if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    return {}
-  }
-
-  return args
 }

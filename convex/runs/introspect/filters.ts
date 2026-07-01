@@ -58,6 +58,14 @@ export function normalizeQuery(query: string | undefined) {
   return value === "" ? undefined : value
 }
 
+export function normalizeTimestamp(value: number | undefined) {
+  if (value === undefined || !Number.isFinite(value) || value <= 0) {
+    return undefined
+  }
+
+  return value
+}
+
 function matchesRun(
   current: Doc<"runs">,
   run: Doc<"runs">,

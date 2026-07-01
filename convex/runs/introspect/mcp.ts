@@ -1,6 +1,8 @@
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
+import { readRecord } from "../../shared/input"
+import { type SearchRunActivityArgs, type SearchRunsArgs } from "./schema"
 
 type IntrospectionRequest = {
   args?: unknown
@@ -9,27 +11,6 @@ type IntrospectionRequest = {
 
 type RunContext = {
   _id?: Id<"runs">
-}
-
-type SearchRunsArgs = {
-  cursor?: string
-  limit?: number
-  parentId?: string
-  query?: string
-  rootId?: string
-  runIds?: string[]
-  scope?: "conversation" | "tenant" | "all"
-  since?: number
-  source?: "slack" | "github" | "linear" | "automation"
-  status?: "queued" | "running" | "completed" | "failed" | "stopped"
-  until?: number
-}
-
-type SearchRunActivityArgs = {
-  cursor?: string
-  filter?: ("agent" | "approval" | "asset" | "error" | "model" | "tool")[]
-  limit?: number
-  runId: string
 }
 
 const runIntrospectionTools = new Set(["search_runs", "search_run_activity"])
@@ -47,7 +28,7 @@ export async function callRunIntrospectionTool(
     throw new Error("Run introspection requires a current run.")
   }
 
-  const args = normalizeToolArgs(request.args)
+  const args = readRecord(request.args)
 
   if (request.tool === "search_runs") {
     return await ctx.runQuery(internal.runs.introspect.query.searchRuns, {
@@ -67,12 +48,4 @@ export async function callRunIntrospectionTool(
   }
 
   throw new Error(`Unknown run introspection tool: ${request.tool}`)
-}
-
-function normalizeToolArgs(args: unknown) {
-  if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    return {}
-  }
-
-  return args
 }

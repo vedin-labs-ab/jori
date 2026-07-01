@@ -4,6 +4,7 @@ import { type ActionCtx } from "../../_generated/server"
 import { callMiloTool } from "../../broker/milo"
 import { callProviderTool } from "../../broker/tools"
 import { prepareIntegrationForRuntime } from "../../integrations/runtime"
+import { readRecord } from "../../shared/input"
 import {
   type ArtifactToolCacheOptions,
   canStoreArtifactToolCacheValue,
@@ -38,7 +39,7 @@ export async function callArtifactTool(
   context: ArtifactPlatformContext,
   request: ArtifactToolRequest
 ) {
-  const args = normalizeToolArgs(request.args)
+  const args = readRecord(request.args)
   const cache = normalizeArtifactToolCacheOptions({
     ttlMs: request.cacheTtlMs,
     forceRefresh: request.forceRefresh,
@@ -73,14 +74,6 @@ export async function callArtifactTool(
       tool: request.tool,
     }
   )
-}
-
-function normalizeToolArgs(args: unknown) {
-  if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    return {}
-  }
-
-  return args as Record<string, unknown>
 }
 
 async function callPlatformTool(

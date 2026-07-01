@@ -5,16 +5,10 @@ import {
   requiredString,
 } from "../../shared/input"
 
+export { readRecord as normalizeToolArgs } from "../../shared/input"
+
 export function requiredArtifactId(value: unknown) {
   return requiredString(value, "artifactId") as Id<"artifacts">
-}
-
-export function normalizeToolArgs(args: unknown) {
-  if (typeof args !== "object" || args === null || Array.isArray(args)) {
-    return {}
-  }
-
-  return args as Record<string, unknown>
 }
 
 export function normalizeAccess(value: unknown) {
