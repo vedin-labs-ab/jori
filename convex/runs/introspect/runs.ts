@@ -81,10 +81,10 @@ async function queryByScope(
     return await queryConversationRuns(ctx, current)
   }
 
-  return uniqueRuns([
+  return [
     ...(await queryTenantRuns(ctx, current)),
     ...(await queryPrivateRuns(ctx, current)),
-  ])
+  ]
 }
 
 function isTenantScope(

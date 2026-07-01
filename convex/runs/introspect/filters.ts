@@ -2,6 +2,7 @@ import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { type ActivityItem } from "../activity/types"
 import { canSee } from "./access"
+import { pageItems } from "./page"
 import {
   matchesSummaryQuery,
   projectRunSummary,
@@ -19,22 +20,65 @@ type RunFilters = {
   until?: number
 }
 
-export async function projectMatches(ctx: QueryCtx, filters: RunFilters) {
+type PageArgs = {
+  cursor?: string
+  limit?: number
+}
+
+export async function pageRunMatches(
+  ctx: QueryCtx,
+  filters: RunFilters,
+  args: PageArgs
+) {
+  const runs = matchingRuns(filters)
+
+  if (filters.query === undefined) {
+    const page = pageItems(runs, args)
+
+    return {
+      cursor: page.cursor,
+      runs: await projectRunSummaries(ctx, page.page),
+    }
+  }
+
+  const summaries = await projectMatchingSummaries(ctx, runs, filters.query)
+  const page = pageItems(summaries, args)
+
+  return { cursor: page.cursor, runs: page.page }
+}
+
+function matchingRuns(filters: RunFilters) {
+  return uniqueRuns(filters.candidates)
+    .filter((run) => matchesRun(filters.current, run, filters))
+    .sort((left, right) => right.createdAt - left.createdAt)
+}
+
+async function projectMatchingSummaries(
+  ctx: QueryCtx,
+  runs: Doc<"runs">[],
+  query: string
+) {
   const summaries: RunSummary[] = []
 
-  for (const run of uniqueRuns(filters.candidates)) {
-    if (!matchesRun(filters.current, run, filters)) {
-      continue
-    }
-
+  for (const run of runs) {
     const summary = await projectRunSummary(ctx, run)
 
-    if (matchesSummaryQuery(summary, filters.query)) {
+    if (matchesSummaryQuery(summary, query)) {
       summaries.push(summary)
     }
   }
 
-  return summaries.sort((left, right) => right.startedAt - left.startedAt)
+  return summaries
+}
+
+async function projectRunSummaries(ctx: QueryCtx, runs: Doc<"runs">[]) {
+  const summaries: RunSummary[] = []
+
+  for (const run of runs) {
+    summaries.push(await projectRunSummary(ctx, run))
+  }
+
+  return summaries
 }
 
 export function matchesActivityFilter(

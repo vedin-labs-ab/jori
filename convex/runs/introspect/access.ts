@@ -12,7 +12,10 @@ export function canSee(current: Doc<"runs">, candidate: Doc<"runs">) {
   }
 
   if (audienceScope === "conversation") {
-    return candidate.conversationId === current.conversationId
+    return (
+      candidate.conversationId !== undefined &&
+      candidate.conversationId === current.conversationId
+    )
   }
 
   return (

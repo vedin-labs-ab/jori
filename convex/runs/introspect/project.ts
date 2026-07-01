@@ -4,7 +4,6 @@ import { runTask, runTitle, triggerLabel } from "../console/labels"
 
 export async function projectRunSummary(ctx: QueryCtx, run: Doc<"runs">) {
   const context = {
-    automation: await loadAutomation(ctx, run),
     message: await loadMessage(ctx, run),
     run,
   }
@@ -51,12 +50,6 @@ async function loadMessage(ctx: QueryCtx, run: Doc<"runs">) {
   return run.cause.type === "message"
     ? await ctx.db.get(run.cause.messageId)
     : null
-}
-
-async function loadAutomation(ctx: QueryCtx, run: Doc<"runs">) {
-  return run.automationId === undefined
-    ? null
-    : await ctx.db.get(run.automationId)
 }
 
 function scrubError(error: string | undefined) {

@@ -1,3 +1,5 @@
+import { boundedNumber } from "../../shared/input"
+
 const defaultLimit = 15
 const maxLimit = 50
 
@@ -5,11 +7,7 @@ export function normalizeLimit(
   value: number | undefined,
   fallback = defaultLimit
 ) {
-  if (value === undefined || !Number.isFinite(value)) {
-    return fallback
-  }
-
-  return Math.max(1, Math.min(maxLimit, Math.trunc(value)))
+  return boundedNumber(value, fallback, 1, maxLimit)
 }
 
 export function readCursor(cursor: string | undefined) {
