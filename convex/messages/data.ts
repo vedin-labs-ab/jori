@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { resolveActor } from "../persons/resolve"
 import { type Actor, actorValidator } from "../shared/actor"
@@ -20,7 +20,7 @@ export const observedMessageArgs = {
   externalId: v.string(),
   mentioned: v.optional(v.boolean()),
   actor: v.optional(actorValidator),
-  conversationId: v.optional(v.string()),
+  conversationId: v.string(),
   text: v.optional(v.string()),
   observedAt: v.optional(v.number()),
   data: v.optional(v.any()),
@@ -31,7 +31,7 @@ export type ObservedMessage = {
   externalId: string
   mentioned?: boolean
   actor?: Actor
-  conversationId?: string
+  conversationId: string
   text?: string
   observedAt?: number
   data?: unknown
@@ -82,6 +82,7 @@ export async function insertMessage(
   input: {
     integration: Doc<"integrations">
     message: ObservedMessage
+    personId: Id<"persons"> | undefined
   }
 ): Promise<Doc<"messages">> {
   const now = Date.now()
@@ -93,6 +94,7 @@ export async function insertMessage(
     externalId: input.message.externalId,
     mentioned: input.message.mentioned ?? false,
     actor: input.message.actor,
+    personId: input.personId,
     conversationId: input.message.conversationId,
     targetKey: messageDataReactionTargetKey(
       input.integration.integration,
@@ -116,10 +118,14 @@ export async function resolveMessageOwner(
   ctx: MutationCtx,
   input: {
     integration: MessageIntegration
-    message: ObservedMessage
+    message: ObservedMessage | Doc<"messages">
     tenantId: string
   }
 ) {
+  if ("personId" in input.message && input.message.personId !== undefined) {
+    return input.message.personId
+  }
+
   return await resolveActor(ctx, {
     tenantId: input.tenantId,
     provider: input.integration,

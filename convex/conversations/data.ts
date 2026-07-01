@@ -7,6 +7,7 @@ import { queueRun } from "../runtime/outbox"
 import { wakeRun } from "../runtime/waiters/data"
 import { findSession, isReusableSession, startSession } from "../sessions/data"
 import { isFreshRunWithoutWaiter } from "./fresh"
+import { findConversation } from "./resolve"
 
 type StartMessageRunArgs = {
   conversation: Doc<"conversations"> | null
@@ -18,35 +19,10 @@ type StartMessageRunArgs = {
   replaceActiveSession?: boolean
 }
 
-export async function findConversation(
-  ctx: MutationCtx,
-  args: {
-    tenantId: string
-    integrationId: Id<"integrations">
-    externalId: string | undefined
-  }
-) {
-  if (args.externalId === undefined) {
-    return null
-  }
-
-  const externalId = args.externalId
-
-  return await ctx.db
-    .query("conversations")
-    .withIndex("by_tenant_and_integration_and_external", (query) =>
-      query
-        .eq("tenantId", args.tenantId)
-        .eq("integrationId", args.integrationId)
-        .eq("externalId", externalId)
-    )
-    .first()
-}
-
 export async function ensureConversation(
   ctx: MutationCtx,
   args: {
-    externalId: string | undefined
+    externalId: string
     integration: Doc<"integrations">
     message: Doc<"messages">
   }
@@ -57,7 +33,7 @@ export async function ensureConversation(
     externalId: args.externalId,
   })
 
-  if (conversation !== null || args.externalId === undefined) {
+  if (conversation !== null) {
     return conversation
   }
 

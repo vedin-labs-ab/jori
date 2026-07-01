@@ -80,6 +80,7 @@ function message(): StartArgs["message"] {
     integration: "slack",
     integrationId: id<"integrations">("integration"),
     mentioned: false,
+    conversationId: "conversation",
     tenantId: "tenant",
     text: "Still there?",
     type: "message.channels",

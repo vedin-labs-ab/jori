@@ -95,6 +95,7 @@ function message(): Doc<"messages"> {
     type: "message.channels",
     externalId: "message",
     mentioned: false,
+    conversationId: "conversation",
     targetKey,
     text: "test",
     createdAt: 0,

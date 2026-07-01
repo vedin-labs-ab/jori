@@ -9,6 +9,7 @@ import { type AgentRuntimeInput, type MessageIntegration } from "../input"
 import { createCommunicationInstructions } from "./communication"
 import { createMessageConversationValues } from "./conversation"
 import { createToolApprovalInstructions } from "./instructions"
+import { createRecentActivityInstructions } from "./recency"
 import { createSkillInstructions } from "./skills"
 import { createMessageTargetValues, formatEvent } from "./target"
 
@@ -39,6 +40,7 @@ export function assemblePrompt(
       communication: optionalPromptBlock(communication?.communication ?? ""),
       format: optionalPromptBlock(communication?.format ?? ""),
       organization: optionalPromptBlock(createOrganizationInstructions(input)),
+      recency: optionalPromptBlock(createRecentActivityInstructions(input)),
       run,
       skills: optionalPromptBlock(skills),
       trigger: promptBlock(createTriggerPart(input, true)),

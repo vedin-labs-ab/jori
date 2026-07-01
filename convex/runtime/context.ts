@@ -39,7 +39,10 @@ export const load = action({
     }
 
     const [input, run] = (await Promise.all([
-      ctx.runQuery(internal.runs.records.getInputByRun, { runId: args.runId }),
+      ctx.runQuery(internal.runs.records.getInputByRun, {
+        runId: args.runId,
+        now: Date.now(),
+      }),
       ctx.runQuery(internal.runs.records.get, { runId: args.runId }),
     ])) as [
       AgentRuntimeInput | null,
@@ -113,6 +116,7 @@ export const reload = action({
 
     const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
       runId: args.runId,
+      now: Date.now(),
     })) as AgentRuntimeInput | null
 
     if (input === null) {

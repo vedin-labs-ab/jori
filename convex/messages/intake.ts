@@ -1,11 +1,9 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import {
-  ensureConversation,
-  findConversation,
-  startMessageRun,
-} from "../conversations/data"
+import { ensureConversation, startMessageRun } from "../conversations/data"
+import { findConversation } from "../conversations/resolve"
+import { scheduleConversationSummary } from "../conversations/schedule"
 import { resolveActor } from "../persons/resolve"
 import { isGitHubSelfActor } from "../providers/github/data"
 import { getLinearBotId } from "../providers/linear/data"
@@ -57,7 +55,11 @@ export const record = internalMutation({
       provider: args.integration,
       actor: observed.actor,
     })
-    const message = await insertMessage(ctx, { integration, message: observed })
+    const message = await insertMessage(ctx, {
+      integration,
+      message: observed,
+      personId: createdBy,
+    })
     const now = Date.now()
     const mode = args.mode ?? "record_and_run"
 
@@ -82,10 +84,11 @@ export const record = internalMutation({
       integration,
       message,
       createdBy,
-      externalId: message.conversationId ?? message.externalId,
+      externalId: message.conversationId,
       now,
       conversation,
     })
+    await scheduleConversationSummary(ctx, conversation, now)
 
     return {
       status: "queued" as const,

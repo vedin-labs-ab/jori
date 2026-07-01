@@ -226,10 +226,16 @@ describe("message surface targets", () => {
 function message(overrides: Partial<Doc<"messages">>) {
   return {
     _id: "message",
+    _creationTime: 0,
+    tenantId: "tenant",
+    integrationId: "integration",
     integration: "slack",
+    externalId: "external",
     mentioned: false,
+    conversationId: "conversation",
     text: "",
     type: "message.channels",
+    createdAt: 0,
     ...overrides,
   } as Doc<"messages">
 }

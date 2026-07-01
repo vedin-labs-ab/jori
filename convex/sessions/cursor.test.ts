@@ -123,6 +123,7 @@ function message(
     type: "message",
     externalId: messageId,
     mentioned: false,
+    conversationId: "conversation",
     text,
     createdAt: storedAt,
     ...overrides,

@@ -125,6 +125,7 @@ function message(messageId: Id<"messages">, text: string): Doc<"messages"> {
     integration: "slack",
     integrationId: id<"integrations">("integration"),
     mentioned: true,
+    conversationId: "conversation",
     tenantId: "tenant",
     text,
     type: "message",
