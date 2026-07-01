@@ -1,5 +1,5 @@
-import { promptTemplates } from "../prompts/generated"
-import { renderPromptTemplate } from "../prompts/render"
+import { promptTemplates } from "../../prompts/generated"
+import { renderPromptTemplate } from "../../prompts/render"
 import { emptyFacts, type OrganizationFacts } from "./facts"
 import { requestStructured } from "./structured"
 

@@ -1,14 +1,14 @@
 import {
-  sandboxArtifactRuntime,
-  sandboxInternalRoot,
-  sandboxWorkspace,
-} from "../../contracts/sandbox"
-import {
   artifactEntrypoint,
   platformArtifactSourcePathPrefixes,
   platformArtifactSourcePaths,
   requiredArtifactSourcePaths,
-} from "../../convex/artifacts/source/template"
+} from "../../contracts/artifacts/source"
+import {
+  sandboxArtifactRuntime,
+  sandboxInternalRoot,
+  sandboxWorkspace,
+} from "../../contracts/sandbox"
 import { runtimeAssets } from "../../convex/runtime/_generated/assets"
 import { type SandboxWriteFile } from "./types"
 

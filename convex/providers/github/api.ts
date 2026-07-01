@@ -1,5 +1,31 @@
-import { fetchJson } from "../../shared/http"
+import { fetchJson, fetchJsonObject } from "../../shared/http"
 import { githubApiUrl } from "./config"
+
+export async function githubJson(
+  token: string,
+  path: string,
+  query: Record<string, unknown> = {},
+  options: { method?: string; body?: unknown } = {}
+) {
+  return await fetchJson(githubUrl(path, query), {
+    method: options.method ?? "GET",
+    headers: githubHeaders(token),
+    body: options.body,
+  })
+}
+
+export async function githubJsonObject(
+  token: string,
+  path: string,
+  query: Record<string, unknown> = {},
+  options: { method?: string; body?: unknown } = {}
+) {
+  return await fetchJsonObject(githubUrl(path, query), {
+    method: options.method ?? "GET",
+    headers: githubHeaders(token),
+    body: options.body,
+  })
+}
 
 export async function githubJsonArray(
   token: string,

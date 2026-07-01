@@ -1,5 +1,6 @@
 "use node"
 
+import { artifactEntrypoint } from "../../contracts/artifacts/source"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
@@ -16,7 +17,6 @@ import {
   type BuildAsset,
   validateArtifactBuild,
 } from "./source/build"
-import { artifactEntrypoint } from "./source/template"
 
 type PublishedVersion = {
   artifactId: Id<"artifacts">

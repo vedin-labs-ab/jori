@@ -1,5 +1,7 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { requireLinearCredentials } from "../../../providers/linear/credentials"
+import { postLinearComment } from "../../../providers/linear/delivery/comments"
+import { addLinearReaction } from "../../../providers/linear/delivery/reactions"
 import {
   boundedNumber,
   readArray,
@@ -7,8 +9,6 @@ import {
   requiredString,
 } from "../../../shared/input"
 import { linearGraphql } from "./client"
-import { postLinearComment } from "./comments"
-import { addLinearReaction } from "./reactions"
 
 export async function callLinearTool(
   integration: Doc<"integrations">,

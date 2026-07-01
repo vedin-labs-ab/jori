@@ -1,5 +1,5 @@
 import path from "node:path"
-import { isArtifactPublishTool } from "../contracts/artifact-publish"
+import { isArtifactPublishTool } from "../contracts/artifacts/publish"
 import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId, type JsonObject } from "./types"

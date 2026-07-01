@@ -1,17 +1,16 @@
 import {
+  compactGitHubSummary,
+  summarizeComment,
+  summarizePullRequest,
+} from "../../../providers/github/delivery/format"
+import {
   boundedNumber,
   optionalString,
   readArray,
-  readNested,
   readRecord,
   requiredNumber,
 } from "../../../shared/input"
 import { githubJson, githubJsonObject, repositoryPath } from "./client"
-import {
-  compactGitHubSummary,
-  summarizeComment,
-  summarizePullRequest,
-} from "./format"
 import { normalizeBranchName } from "./source"
 
 export async function listPullRequestFiles(
@@ -50,30 +49,6 @@ export async function listPullRequestReviewComments(
       .map(readRecord)
       .map(summarizePullRequestReviewComment),
   }
-}
-
-export async function addCommentReaction(
-  token: string,
-  args: Record<string, unknown>
-) {
-  const subject = requiredCommentSubject(args.subject)
-  const path =
-    subject === "issue_comment"
-      ? `${repositoryPath(args.owner, args.repo)}/issues/comments/${requiredNumber(args.commentId, "commentId")}/reactions`
-      : `${repositoryPath(args.owner, args.repo)}/pulls/comments/${requiredNumber(args.commentId, "commentId")}/reactions`
-  const result = await githubJsonObject(
-    token,
-    path,
-    {},
-    {
-      method: "POST",
-      body: {
-        content: requiredReactionContent(args.content),
-      },
-    }
-  )
-
-  return summarizeReaction(result)
 }
 
 export async function updatePullRequest(
@@ -143,42 +118,6 @@ function summarizePullRequestReviewComment(comment: Record<string, unknown>) {
     pullRequestReviewId: comment.pull_request_review_id,
     side: comment.side,
   })
-}
-
-function summarizeReaction(reaction: Record<string, unknown>) {
-  return compactGitHubSummary({
-    content: reaction.content,
-    createdAt: reaction.created_at,
-    id: reaction.id,
-    user: readNested(reaction, "user", "login"),
-  })
-}
-
-function requiredCommentSubject(value: unknown) {
-  if (value === "issue_comment" || value === "pull_request_review_comment") {
-    return value
-  }
-
-  throw new Error(
-    "subject must be issue_comment or pull_request_review_comment"
-  )
-}
-
-function requiredReactionContent(value: unknown) {
-  if (
-    value === "+1" ||
-    value === "-1" ||
-    value === "laugh" ||
-    value === "confused" ||
-    value === "heart" ||
-    value === "hooray" ||
-    value === "rocket" ||
-    value === "eyes"
-  ) {
-    return value
-  }
-
-  throw new Error("content is not a supported GitHub reaction")
 }
 
 function readPullRequestState(value: unknown) {

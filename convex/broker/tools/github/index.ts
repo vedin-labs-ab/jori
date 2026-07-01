@@ -1,5 +1,16 @@
 import { type JsonObject } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
+import {
+  addGitHubCommentReaction,
+  addIssueComment,
+  replyToPullRequestReviewComment,
+} from "../../../providers/github/delivery/comments"
+import {
+  summarizeComment,
+  summarizeIssue,
+  summarizePullRequest,
+  summarizeRepository,
+} from "../../../providers/github/delivery/format"
 import { base64Decode } from "../../../shared/encoding"
 import {
   boundedNumber,
@@ -16,16 +27,8 @@ import {
   repositoryPath,
   requireGitHubRuntimeToken,
 } from "./client"
-import { addIssueComment, replyToPullRequestReviewComment } from "./comments"
-import {
-  summarizeComment,
-  summarizeIssue,
-  summarizePullRequest,
-  summarizeRepository,
-} from "./format"
 import { commitToPullRequest, createPullRequest } from "./publish"
 import {
-  addCommentReaction,
   listPullRequestFiles,
   listPullRequestReviewComments,
   updatePullRequest,
@@ -63,7 +66,7 @@ const githubToolHandlers: Record<
   string,
   (token: string, args: Record<string, unknown>) => Promise<unknown> | unknown
 > = {
-  github_add_comment_reaction: addCommentReaction,
+  github_add_comment_reaction: addGitHubCommentReaction,
   github_add_issue_comment: addIssueComment,
   github_clone_repository: cloneRepository,
   github_commit_to_pull_request: commitToPullRequest,

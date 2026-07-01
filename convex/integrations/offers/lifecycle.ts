@@ -6,7 +6,7 @@ import {
   internalMutation,
   internalQuery,
 } from "../../_generated/server"
-import { updateSlackMessage } from "../../broker/tools/slack"
+import { updateSlackMessage } from "../../providers/slack/delivery/messages"
 import { actorValidator } from "../../shared/actor"
 import { createSlackIntegrationOfferMessage } from "./slack"
 import {

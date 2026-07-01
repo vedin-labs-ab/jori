@@ -2,12 +2,12 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../../_generated/server"
-import { postSlackMessage } from "../../broker/tools/slack"
 import {
   getSlackChannelId,
   getSlackMessageTs,
   getSlackThreadTs,
 } from "../../providers/slack/data"
+import { postSlackMessage } from "../../providers/slack/delivery/messages"
 import { getSlackActorProfile } from "../../providers/slack/directory/users"
 import { actorValidator, createIntegrationActor } from "../../shared/actor"
 import { decideApprovalByAccount, parseApprovalDecisionText } from "../runtime"
