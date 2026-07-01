@@ -30,15 +30,15 @@ export const searchRunsArgs = {
   source: v.optional(runSource),
   since: v.optional(v.number()),
   until: v.optional(v.number()),
-  rootId: v.optional(v.id("runs")),
-  parentId: v.optional(v.id("runs")),
-  runIds: v.optional(v.array(v.id("runs"))),
+  rootId: v.optional(v.string()),
+  parentId: v.optional(v.string()),
+  runIds: v.optional(v.array(v.string())),
   cursor: v.optional(v.string()),
   limit: v.optional(v.number()),
 }
 
 export const searchRunActivityArgs = {
-  runId: v.id("runs"),
+  runId: v.string(),
   filter: v.optional(v.array(activityFilter)),
   cursor: v.optional(v.string()),
   limit: v.optional(v.number()),

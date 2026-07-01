@@ -8,6 +8,7 @@ import {
   normalizeQuery,
   projectMatches,
 } from "./filters"
+import { normalizeRunId } from "./ids"
 import { pageItems } from "./page"
 import { loadCandidateRuns } from "./runs"
 import { searchRunActivityArgs, searchRunsArgs } from "./schema"
@@ -32,8 +33,8 @@ export const searchRuns = internalQuery({
       query: normalizeQuery(args.query),
       source: args.source,
       status: args.status,
-      since: args.since,
-      until: args.until,
+      since: normalizeTimestamp(args.since),
+      until: normalizeTimestamp(args.until),
     })
     const page = pageItems(summaries, {
       cursor: args.cursor,
@@ -51,9 +52,15 @@ export const searchRunActivity = internalQuery({
   },
   returns: v.any(),
   handler: async (ctx, args) => {
+    const targetRunId = normalizeRunId(ctx, args.runId)
+
+    if (targetRunId === undefined || targetRunId === null) {
+      return { cursor: null, items: [] }
+    }
+
     const [current, target] = await Promise.all([
       ctx.db.get(args.currentRunId),
-      ctx.db.get(args.runId),
+      ctx.db.get(targetRunId),
     ])
 
     if (current === null || target === null || !canSee(current, target)) {
@@ -72,3 +79,11 @@ export const searchRunActivity = internalQuery({
     return { cursor: page.cursor, items: page.page }
   },
 })
+
+function normalizeTimestamp(value: number | undefined) {
+  if (value === undefined || !Number.isFinite(value) || value <= 0) {
+    return undefined
+  }
+
+  return value
+}
