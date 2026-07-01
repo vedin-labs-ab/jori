@@ -5,7 +5,11 @@ import {
   type ToolSurface,
 } from "../../../permissions/catalog"
 import { type ToolExecutionType, type ToolPermissionInput } from "./policy"
-import { emptyObjectSchema, getToolInputSchema } from "./schemas"
+import {
+  emptyObjectSchema,
+  getToolInputSchema,
+  withOptionalFieldGuidance,
+} from "./schemas"
 
 export type McpToolDefinition = {
   name: string
@@ -27,7 +31,9 @@ export function getSurfaceToolDefinitions(
     inputSchema:
       executionType === "message" &&
       resolveToolMode(input.toolModes, permission.tool) === "prompted"
-        ? withApprovalSchema(getToolInputSchema(permission.tool))
+        ? withOptionalFieldGuidance(
+            withApprovalSchema(getToolInputSchema(permission.tool))
+          )
         : (getToolInputSchema(permission.tool) ?? emptyObjectSchema()),
   })) satisfies McpToolDefinition[]
 }

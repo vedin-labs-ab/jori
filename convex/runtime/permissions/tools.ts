@@ -14,6 +14,7 @@ import { getEnabledToolPermissions } from "../../runs/agent/tools/resolve"
 import {
   emptyObjectSchema,
   getRuntimeToolInputSchema,
+  withOptionalFieldGuidance,
 } from "../../runs/agent/tools/schemas"
 
 export function permissionGroups(
@@ -73,7 +74,9 @@ export function toolDescriptor(
     name: permission.tool,
     description: permission.usage,
     inputSchema:
-      mode === "prompted" ? withApprovalSchema(inputSchema) : inputSchema,
+      mode === "prompted"
+        ? withOptionalFieldGuidance(withApprovalSchema(inputSchema))
+        : inputSchema,
     mode,
     route: "convex" as const,
     surface,
