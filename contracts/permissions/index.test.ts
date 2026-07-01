@@ -79,4 +79,13 @@ describe("permission catalog", () => {
       expect(permissionsByTool.get(tool)?.defaultMode).toBe("allowed")
     }
   })
+
+  test("documents summarized model reasoning on run activity", () => {
+    const activityPermission = toolPermissions.find(
+      (permission) => permission.tool === "search_run_activity"
+    )
+
+    expect(activityPermission?.usage).toContain("Summarized model reasoning")
+    expect(activityPermission?.usage).toContain("not a verbatim transcript")
+  })
 })

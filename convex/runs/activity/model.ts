@@ -1,5 +1,10 @@
 import { type Doc } from "../../_generated/dataModel"
-import { type ModelUsage, readModelUsage, readTraceError } from "./read"
+import {
+  type ModelUsage,
+  readModelReasoning,
+  readModelUsage,
+  readTraceError,
+} from "./read"
 import {
   type ActivityDetail,
   type ActivityItem,
@@ -52,6 +57,7 @@ function projectModelTerminal(
   const failed = trace.type === "model.failed"
   const data = readTraceData(trace)
   const usage = readModelUsage(data)
+  const reasoning = failed ? undefined : readModelReasoning(data)
 
   return {
     id: trace._id,
@@ -62,6 +68,7 @@ function projectModelTerminal(
     details: modelDetails(usage),
     durationMs: usage?.durationMs,
     endedAt: trace.timestamp,
+    ...(reasoning === undefined ? {} : { reasoning }),
     startedAt: started?.timestamp ?? trace.timestamp,
     tokenUsage: modelTokenUsage(usage),
   }

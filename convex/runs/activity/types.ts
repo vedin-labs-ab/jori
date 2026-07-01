@@ -53,6 +53,7 @@ export type ActivityItem = {
   integration?: Integration
   isLive?: boolean
   metadata?: ActivityMetadataItem[]
+  reasoning?: string
   startedAt: number
   surface?: ToolSurface
   toolLabel?: string
