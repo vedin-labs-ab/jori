@@ -106,13 +106,13 @@ export function offerTitle(status: Doc<"integrationOffers">["status"]) {
 export function waiterReason(reason: NonNullable<Doc<"waiters">["reason"]>) {
   switch (reason) {
     case "cancelled":
-      return "The wait was cancelled."
+      return "Wait cancelled"
     case "expired":
-      return "The wait expired."
+      return "Wait expired"
     case "message":
-      return "New requester input arrived."
+      return "New input arrived"
     case "resolved":
-      return "A pending handoff was resolved."
+      return "Handoff resolved"
   }
 }
 
