@@ -2,14 +2,14 @@ import { wait } from "@trigger.dev/sdk/v3"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type WaiterWake } from "../types"
 import { recordActivityEvent } from "./events"
-import { type HandoffDeadline, hasResolvedHandoffs } from "./handoffs"
+import { hasResolvedHandoffs, type PendingHandoff } from "./handoffs"
 
 const parkGraceMs = 5000
 const minTimeoutSeconds = 5
 
 export async function parkRun(
   runtime: ToolRuntime,
-  pending: HandoffDeadline[]
+  pending: PendingHandoff[]
 ): Promise<WaiterWake> {
   const deadline = earliestDeadline(pending)
   const token = await wait.createToken({
@@ -54,7 +54,7 @@ async function raceResolved(runtime: ToolRuntime) {
   return hasResolvedHandoffs(handoffs)
 }
 
-function earliestDeadline(pending: HandoffDeadline[]) {
+function earliestDeadline(pending: PendingHandoff[]) {
   return pending.reduce(
     (earliest, handoff) => Math.min(earliest, handoff.expiresAt),
     Number.POSITIVE_INFINITY

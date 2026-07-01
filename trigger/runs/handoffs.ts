@@ -11,14 +11,16 @@ import {
 import { recordApprovalResolved, recordOfferResolved } from "./activity"
 import { appendSessionMessages } from "./messages"
 
-export type HandoffKind = "approval" | "offer"
-export type HandoffDeadline = HandoffSubject & { expiresAt: number }
+export type PendingHandoff = {
+  expiresAt: number
+  subject: HandoffSubject
+}
 
 export type ReconcileResult = {
   handoffProgressed: boolean
   messageProgressed: boolean
   progressed: boolean
-  pending: HandoffDeadline[]
+  pending: PendingHandoff[]
 }
 
 export async function reconcileHandoffs(
@@ -51,17 +53,19 @@ export async function reconcileHandoffs(
     handoffProgressed,
     messageProgressed,
     progressed,
-    pending: pendingDeadlines(handoffs),
+    pending: pendingHandoffs(handoffs),
   }
 }
 
 export function hasResolvedHandoffs(handoffs: RunHandoffs) {
   return (
-    handoffs.approvals.some((approval) => approval.status !== "pending") ||
-    handoffs.offers.some(
-      (offer) => offer.status !== "pending" && offer.status !== "claimed"
-    )
+    handoffs.approvals.some((approval) => !isPendingApproval(approval)) ||
+    handoffs.offers.some((offer) => !isPendingOffer(offer))
   )
+}
+
+export function pendingHandoffSubjects(pending: PendingHandoff[]) {
+  return pending.map((handoff) => handoff.subject)
 }
 
 async function reconcileApproval(
@@ -69,7 +73,7 @@ async function reconcileApproval(
   messages: ModelMessage[],
   approval: ApprovalHandoff
 ) {
-  if (approval.status === "pending") {
+  if (isPendingApproval(approval)) {
     return false
   }
 
@@ -113,7 +117,7 @@ async function reconcileOffer(
   messages: ModelMessage[],
   offer: OfferHandoff
 ) {
-  if (offer.status === "pending" || offer.status === "claimed") {
+  if (isPendingOffer(offer)) {
     return false
   }
 
@@ -151,23 +155,34 @@ async function refreshRuntimeContext(
   }
 }
 
-function pendingDeadlines(handoffs: RunHandoffs): HandoffDeadline[] {
+function pendingHandoffs(handoffs: RunHandoffs): PendingHandoff[] {
   const approvals = handoffs.approvals
-    .filter((approval) => approval.status === "pending")
-    .map((approval) => ({
-      expiresAt: approval.expiresAt,
-      id: approval.id,
-      kind: "approval" as const,
-    }))
+    .filter(isPendingApproval)
+    .map((approval) =>
+      pendingHandoff({ id: approval.id, kind: "approval" }, approval.expiresAt)
+    )
   const offers = handoffs.offers
-    .filter((offer) => offer.status === "pending" || offer.status === "claimed")
-    .map((offer) => ({
-      expiresAt: offer.expiresAt,
-      id: offer.id,
-      kind: "offer" as const,
-    }))
+    .filter(isPendingOffer)
+    .map((offer) =>
+      pendingHandoff({ id: offer.id, kind: "offer" }, offer.expiresAt)
+    )
 
   return [...approvals, ...offers]
+}
+
+function pendingHandoff(
+  subject: HandoffSubject,
+  expiresAt: number
+): PendingHandoff {
+  return { expiresAt, subject }
+}
+
+function isPendingApproval(approval: ApprovalHandoff) {
+  return approval.status === "pending"
+}
+
+function isPendingOffer(offer: OfferHandoff) {
+  return offer.status === "pending" || offer.status === "claimed"
 }
 
 async function loadSubjectHandoffs(

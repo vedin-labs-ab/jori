@@ -75,7 +75,10 @@ test("keeps a pending handoff as a wait without progress", async () => {
   expect(result.handoffProgressed).toBe(false)
   expect(result.messageProgressed).toBe(false)
   expect(result.pending).toEqual([
-    { expiresAt: 1000, id: "approval_1", kind: "approval" },
+    {
+      expiresAt: 1000,
+      subject: { id: "approval_1", kind: "approval" },
+    },
   ])
 })
 
@@ -91,7 +94,10 @@ test("keeps a pending offer as a wait without progress", async () => {
   expect(result.handoffProgressed).toBe(false)
   expect(result.messageProgressed).toBe(false)
   expect(result.pending).toEqual([
-    { expiresAt: 2000, id: "offer_1", kind: "offer" },
+    {
+      expiresAt: 2000,
+      subject: { id: "offer_1", kind: "offer" },
+    },
   ])
 })
 

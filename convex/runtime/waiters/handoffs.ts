@@ -10,6 +10,8 @@ const handoffSubject = v.union(
 )
 
 type HandoffSubject = Infer<typeof handoffSubject>
+type ApprovalHandoff = ReturnType<typeof toApprovalHandoff>
+type OfferHandoff = ReturnType<typeof toOfferHandoff>
 
 export const load = query({
   args: {
@@ -97,21 +99,27 @@ async function loadOfferHandoffs(ctx: QueryCtx, runId: Id<"runs">) {
 }
 
 async function loadSubjectHandoffs(ctx: QueryCtx, subjects: HandoffSubject[]) {
-  const approvals = []
-  const offers = []
+  const approvals: ApprovalHandoff[] = []
+  const offers: OfferHandoff[] = []
 
   for (const subject of subjects) {
     if (subject.kind === "approval") {
-      const approval = await ctx.db.get(subject.id)
+      const handoff = toUnconsumedHandoff(
+        await ctx.db.get(subject.id),
+        toApprovalHandoff
+      )
 
-      if (approval !== null && isUnconsumed(approval)) {
-        approvals.push(toApprovalHandoff(approval))
+      if (handoff !== null) {
+        approvals.push(handoff)
       }
     } else {
-      const offer = await ctx.db.get(subject.id)
+      const handoff = toUnconsumedHandoff(
+        await ctx.db.get(subject.id),
+        toOfferHandoff
+      )
 
-      if (offer !== null && isUnconsumed(offer)) {
-        offers.push(toOfferHandoff(offer))
+      if (handoff !== null) {
+        offers.push(handoff)
       }
     }
   }
@@ -121,6 +129,13 @@ async function loadSubjectHandoffs(ctx: QueryCtx, subjects: HandoffSubject[]) {
 
 function isUnconsumed(record: { consumedAt?: number }) {
   return record.consumedAt === undefined
+}
+
+function toUnconsumedHandoff<Source extends { consumedAt?: number }, Handoff>(
+  record: Source | null,
+  toHandoff: (record: Source) => Handoff
+) {
+  return record !== null && isUnconsumed(record) ? toHandoff(record) : null
 }
 
 function toApprovalHandoff(approval: Doc<"approvals">) {
