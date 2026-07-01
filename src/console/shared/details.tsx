@@ -199,7 +199,7 @@ export function DetailRow({
   children: React.ReactNode
   icon: DetailIcon
   iconClassName: string
-  label: string
+  label: ReactNode
 }) {
   return (
     <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">

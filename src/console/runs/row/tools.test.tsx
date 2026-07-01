@@ -36,6 +36,12 @@ test("marks approval-required tools in message run details", async () => {
 
   await screen.findByRole("button", { name: "Open Notion tools" })
 
+  const count = screen.getByText("2")
+
+  expect(screen.getByText("Tools")).toBeDefined()
+  expect(count.className).toContain("font-normal")
+  expect(count.className).toContain("text-[0.625rem]")
+  expect(count.className).toContain("text-muted-foreground")
   expect(screen.getByText(hasTextContent("Write 1*"))).toBeDefined()
   expect(screen.getByText("*").className).toContain("text-warning")
 
@@ -72,6 +78,26 @@ test("omits empty access counts in message run details", async () => {
   expect(screen.queryByText("Write 0")).toBeNull()
 })
 
+test("renders singular label for one tool in message run details", async () => {
+  render(
+    <TooltipProvider>
+      <ExecutionRow
+        execution={executionWithSingleTool()}
+        now={1700000001000}
+        tenantId="tenant"
+      />
+    </TooltipProvider>
+  )
+
+  fireEvent.click(screen.getByRole("button", { name: /read a github issue/i }))
+
+  await screen.findByRole("button", { name: "Open GitHub tools" })
+
+  expect(screen.getByText("Tool")).toBeDefined()
+  expect(screen.queryByText("Tools")).toBeNull()
+  expect(screen.queryByText("1")).toBeNull()
+})
+
 function executionWithApprovalTool(): ExecutionItem {
   return {
     approval: null,
@@ -104,6 +130,48 @@ function executionWithApprovalTool(): ExecutionItem {
     task: "Create a Notion page.",
     title: "Create a Notion page.",
     trigger: "Slack message",
+  }
+}
+
+function executionWithSingleTool(): ExecutionItem {
+  return {
+    approval: null,
+    approvals: [],
+    createdAt: 1700000000000,
+    details: [
+      {
+        type: "tools",
+        label: "GitHub · Read 1",
+        groups: [
+          {
+            type: "github",
+            label: "GitHub",
+            tools: [
+              {
+                access: "read" as const,
+                description: "Read GitHub issues.",
+                label: "Read issue",
+                tool: "github_get_issue",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    durationMs: 1000,
+    endedAt: 1700000001000,
+    id: "execution",
+    offer: null,
+    offers: [],
+    searchableText: "",
+    source: {
+      type: "message",
+      surface: "github",
+    },
+    status: "completed",
+    task: "Read a GitHub issue.",
+    title: "Read a GitHub issue.",
+    trigger: "GitHub issue",
   }
 }
 
