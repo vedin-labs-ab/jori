@@ -7,7 +7,7 @@ const runScanLimit = 300
 
 export type SearchRunArgs = Pick<
   SearchRunsArgs,
-  "parentId" | "rootId" | "runIds" | "scope"
+  "mode" | "parentId" | "rootId" | "runIds" | "scope"
 >
 
 export async function loadCandidateRuns(
@@ -15,13 +15,26 @@ export async function loadCandidateRuns(
   current: Doc<"runs">,
   args: SearchRunArgs
 ) {
-  const runIds = normalizeRunIds(ctx, args.runIds)
-
-  if (runIds !== undefined) {
-    return await loadRunIds(ctx, runIds)
+  switch (args.mode) {
+    case "search":
+      return await queryByScope(ctx, current, args.scope ?? "conversation")
+    case "ids":
+      return await loadKnownRuns(ctx, args.runIds)
+    case "children":
+      return await loadByParent(ctx, args.parentId)
+    case "tree":
+      return await loadByRoot(ctx, args.rootId)
   }
+}
 
-  const parentId = normalizeRunId(ctx, args.parentId)
+async function loadKnownRuns(ctx: QueryCtx, values: string[] | undefined) {
+  const runIds = normalizeRunIds(ctx, values)
+
+  return runIds === undefined ? [] : await loadRunIds(ctx, runIds)
+}
+
+async function loadByParent(ctx: QueryCtx, value: string | undefined) {
+  const parentId = normalizeRunId(ctx, value)
 
   if (parentId === null) {
     return []
@@ -31,7 +44,11 @@ export async function loadCandidateRuns(
     return await queryByParent(ctx, parentId)
   }
 
-  const rootId = normalizeRunId(ctx, args.rootId)
+  return []
+}
+
+async function loadByRoot(ctx: QueryCtx, value: string | undefined) {
+  const rootId = normalizeRunId(ctx, value)
 
   if (rootId === null) {
     return []
@@ -41,7 +58,7 @@ export async function loadCandidateRuns(
     return await queryByRoot(ctx, rootId)
   }
 
-  return await queryByScope(ctx, current, args.scope ?? "conversation")
+  return []
 }
 
 async function loadRunIds(ctx: QueryCtx, runIds: Id<"runs">[]) {

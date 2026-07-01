@@ -29,19 +29,17 @@ test("permissioned tool schemas with optional fields share omission guidance", (
 
 test("run search exposes optional filters without bespoke sentinel guidance", () => {
   const schema = getToolInputSchema("search_runs")
+  const variants = readVariants(schema)
 
   expect(schema).toMatchObject({
     description: expect.stringContaining(optionalFieldGuidance),
-    properties: {
-      cursor: {
-        description: "Opaque cursor from a previous search_runs response.",
-      },
-      runIds: { description: "Known run IDs to resolve directly." },
-      since: {
-        description:
-          "Only runs created at or after this positive epoch millisecond.",
-      },
-    },
+  })
+  expect(variants.map(readMode)).toEqual(["search", "ids", "children", "tree"])
+  expect(variants.every((variant) => hasRequired(variant, "mode"))).toBe(true)
+  expect(properties(variants[0]).runIds).toBeUndefined()
+  expect(properties(variants[1]).query).toBeUndefined()
+  expect(properties(variants[1]).runIds).toMatchObject({
+    description: "Known run IDs returned by search_runs.",
   })
   expect(schema?.required).toBeUndefined()
 })
@@ -55,4 +53,26 @@ function hasSchema(entry: {
   tool: string
 }): entry is ToolSchemaEntry {
   return entry.schema !== undefined
+}
+
+function readVariants(schema: Record<string, unknown> | undefined) {
+  return Array.isArray(schema?.oneOf) ? schema.oneOf.filter(isRecord) : []
+}
+
+function readMode(schema: Record<string, unknown>) {
+  const mode = properties(schema).mode
+
+  return isRecord(mode) && Array.isArray(mode.enum) ? mode.enum[0] : undefined
+}
+
+function hasRequired(schema: Record<string, unknown>, key: string) {
+  return Array.isArray(schema.required) && schema.required.includes(key)
+}
+
+function properties(schema: Record<string, unknown>) {
+  return isRecord(schema.properties) ? schema.properties : {}
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
