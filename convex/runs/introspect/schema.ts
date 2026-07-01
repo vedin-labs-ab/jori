@@ -7,6 +7,13 @@ export const runScope = v.union(
   v.literal("all")
 )
 
+export const runSearchMode = v.union(
+  v.literal("search"),
+  v.literal("ids"),
+  v.literal("children"),
+  v.literal("tree")
+)
+
 export const runSource = v.union(
   v.literal("slack"),
   v.literal("github"),
@@ -24,6 +31,7 @@ export const activityFilter = v.union(
 )
 
 export const searchRunsArgs = {
+  mode: runSearchMode,
   query: v.optional(v.string()),
   scope: v.optional(runScope),
   status: v.optional(runStatus),
