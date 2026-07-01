@@ -106,7 +106,7 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
   return {
     _creationTime: 0,
     _id: id<"runs">("run"),
-    audienceScope: "tenant",
+    scope: "tenant",
     cause: { type: "manual" },
     createdAt: 0,
     snapshot: { context: [], source: { type: "manual" }, title: "Run" },

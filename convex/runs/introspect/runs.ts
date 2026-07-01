@@ -108,24 +108,21 @@ function isTenantScope(
   current: Doc<"runs">,
   scope: "conversation" | "tenant" | "all"
 ) {
-  return (
-    scope === "tenant" ||
-    (scope === "all" && current.audienceScope === "tenant")
-  )
+  return scope === "tenant" || (scope === "all" && current.scope === "tenant")
 }
 
 async function queryTenantRuns(ctx: QueryCtx, current: Doc<"runs">) {
   return await ctx.db
     .query("runs")
-    .withIndex("by_tenant_and_audience_scope_and_created_at", (query) =>
-      query.eq("tenantId", current.tenantId).eq("audienceScope", "tenant")
+    .withIndex("by_tenant_and_scope_and_created_at", (query) =>
+      query.eq("tenantId", current.tenantId).eq("scope", "tenant")
     )
     .order("desc")
     .take(runScanLimit)
 }
 
 async function queryPrivateRuns(ctx: QueryCtx, current: Doc<"runs">) {
-  if (current.audienceScope === "conversation") {
+  if (current.scope === "conversation") {
     return await queryConversationRuns(ctx, current)
   }
 

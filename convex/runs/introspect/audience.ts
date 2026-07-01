@@ -3,7 +3,7 @@ import { type MutationCtx } from "../../_generated/server"
 import { isUserScopedIntegration } from "../../shared/integrations"
 
 export type RunAudience = {
-  audienceScope: NonNullable<Doc<"runs">["audienceScope"]>
+  scope: NonNullable<Doc<"runs">["scope"]>
   conversationId?: Id<"conversations">
 }
 
@@ -43,7 +43,7 @@ export async function resolveRunAudience(
     return automationAudience(args.origin.automation)
   }
 
-  return { audienceScope: "person" }
+  return { scope: "person" }
 }
 
 async function resolveParentAudience(
@@ -61,7 +61,7 @@ async function resolveParentAudience(
   }
 
   return {
-    audienceScope: parent.audienceScope ?? "person",
+    scope: parent.scope ?? "person",
     conversationId: parent.conversationId,
   }
 }
@@ -70,18 +70,18 @@ function conversationAudience(origin: ConversationOrigin): RunAudience {
   const conversationId = origin.conversation._id
 
   if (origin.conversation.visibility === "public") {
-    return { audienceScope: "tenant", conversationId }
+    return { scope: "tenant", conversationId }
   }
 
   if (isUserScopedIntegration(origin.integration.integration)) {
-    return { audienceScope: "person", conversationId }
+    return { scope: "person", conversationId }
   }
 
-  return { audienceScope: "conversation", conversationId }
+  return { scope: "conversation", conversationId }
 }
 
 function automationAudience(automation: Doc<"automations">): RunAudience {
   return (automation.visibility ?? "private") === "public"
-    ? { audienceScope: "tenant" }
-    : { audienceScope: "person" }
+    ? { scope: "tenant" }
+    : { scope: "person" }
 }

@@ -213,7 +213,7 @@ function run(): Doc<"runs"> {
   return {
     _creationTime: 0,
     _id: id<"runs">("run"),
-    audienceScope: "person",
+    scope: "person",
     cause: { type: "manual" },
     createdAt: 0,
     snapshot: {

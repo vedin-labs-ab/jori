@@ -1,17 +1,17 @@
 import { type Doc } from "../../_generated/dataModel"
 
 export function canSee(current: Doc<"runs">, candidate: Doc<"runs">) {
-  const audienceScope = candidate.audienceScope ?? "person"
+  const scope = candidate.scope ?? "person"
 
   if (candidate.tenantId !== current.tenantId) {
     return false
   }
 
-  if (audienceScope === "tenant") {
+  if (scope === "tenant") {
     return true
   }
 
-  if (audienceScope === "conversation") {
+  if (scope === "conversation") {
     return (
       candidate.conversationId !== undefined &&
       candidate.conversationId === current.conversationId
