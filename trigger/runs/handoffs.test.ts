@@ -74,7 +74,9 @@ test("keeps a pending handoff as a wait without progress", async () => {
   expect(result.progressed).toBe(false)
   expect(result.handoffProgressed).toBe(false)
   expect(result.messageProgressed).toBe(false)
-  expect(result.pending).toEqual([{ expiresAt: 1000, kind: "approval" }])
+  expect(result.pending).toEqual([
+    { expiresAt: 1000, id: "approval_1", kind: "approval" },
+  ])
 })
 
 test("keeps a pending offer as a wait without progress", async () => {
@@ -88,7 +90,9 @@ test("keeps a pending offer as a wait without progress", async () => {
   expect(result.progressed).toBe(false)
   expect(result.handoffProgressed).toBe(false)
   expect(result.messageProgressed).toBe(false)
-  expect(result.pending).toEqual([{ expiresAt: 2000, kind: "offer" }])
+  expect(result.pending).toEqual([
+    { expiresAt: 2000, id: "offer_1", kind: "offer" },
+  ])
 })
 
 test("refreshes runtime tools when an integration offer connects", async () => {
@@ -120,6 +124,10 @@ function createRuntime(options: {
       loadRunHandoffs: vi.fn(async () => ({
         approvals: options.approvals ?? [],
         offers: options.offers ?? [],
+      })),
+      loadRunHandoffSubjects: vi.fn(async () => ({
+        approvals: [],
+        offers: [],
       })),
       markApprovalConsumed: vi.fn(),
       markOfferConsumed: vi.fn(),

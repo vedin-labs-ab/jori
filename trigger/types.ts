@@ -201,9 +201,17 @@ export type RuntimeEventInput = {
 
 export type WaiterWakeReason = "resolved" | "message" | "cancelled" | "expired"
 
+export type HandoffSubject =
+  | { kind: "approval"; id: ConvexId<"approvals"> }
+  | { kind: "offer"; id: ConvexId<"integrationOffers"> }
+
+export type WaiterSubject =
+  | HandoffSubject
+  | { kind: "message"; id: ConvexId<"messages"> }
+
 export type WaiterWake = {
   reason: WaiterWakeReason
-  subject?: unknown
+  subject?: WaiterSubject
 }
 
 export type ApprovalHandoff = {

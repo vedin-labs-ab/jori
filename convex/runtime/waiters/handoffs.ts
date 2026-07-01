@@ -1,9 +1,15 @@
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../../_generated/server"
 import { requireWorkerSecret } from "../shared"
 
 const scanLimit = 200
+const handoffSubject = v.union(
+  v.object({ kind: v.literal("approval"), id: v.id("approvals") }),
+  v.object({ kind: v.literal("offer"), id: v.id("integrationOffers") })
+)
+
+type HandoffSubject = Infer<typeof handoffSubject>
 
 export const load = query({
   args: {
@@ -37,6 +43,19 @@ export const consumeApproval = mutation({
     }
 
     return null
+  },
+})
+
+export const loadSubjects = query({
+  args: {
+    secret: v.string(),
+    subjects: v.array(handoffSubject),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<unknown> => {
+    requireWorkerSecret(args.secret)
+
+    return await loadSubjectHandoffs(ctx, args.subjects)
   },
 })
 
@@ -75,6 +94,29 @@ async function loadOfferHandoffs(ctx: QueryCtx, runId: Id<"runs">) {
     .take(scanLimit)
 
   return offers.filter(isUnconsumed).map(toOfferHandoff)
+}
+
+async function loadSubjectHandoffs(ctx: QueryCtx, subjects: HandoffSubject[]) {
+  const approvals = []
+  const offers = []
+
+  for (const subject of subjects) {
+    if (subject.kind === "approval") {
+      const approval = await ctx.db.get(subject.id)
+
+      if (approval !== null && isUnconsumed(approval)) {
+        approvals.push(toApprovalHandoff(approval))
+      }
+    } else {
+      const offer = await ctx.db.get(subject.id)
+
+      if (offer !== null && isUnconsumed(offer)) {
+        offers.push(toOfferHandoff(offer))
+      }
+    }
+  }
+
+  return { approvals, offers }
 }
 
 function isUnconsumed(record: { consumedAt?: number }) {

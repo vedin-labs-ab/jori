@@ -4,6 +4,7 @@ import { type ModelMessage } from "../model/types"
 import { markVisibleCommunication, type ToolRuntime } from "../tool"
 import {
   type ApprovalHandoff,
+  type HandoffSubject,
   type OfferHandoff,
   type RunHandoffs,
 } from "../types"
@@ -11,7 +12,7 @@ import { recordApprovalResolved, recordOfferResolved } from "./activity"
 import { appendSessionMessages } from "./messages"
 
 export type HandoffKind = "approval" | "offer"
-export type HandoffDeadline = { expiresAt: number; kind: HandoffKind }
+export type HandoffDeadline = HandoffSubject & { expiresAt: number }
 
 export type ReconcileResult = {
   handoffProgressed: boolean
@@ -22,11 +23,13 @@ export type ReconcileResult = {
 
 export async function reconcileHandoffs(
   runtime: ToolRuntime,
-  messages: ModelMessage[]
+  messages: ModelMessage[],
+  subjects: HandoffSubject[] = []
 ): Promise<ReconcileResult> {
-  const handoffs = await runtime.convex.loadRunHandoffs({
-    runId: runtime.context.run.id,
-  })
+  const handoffs = mergeHandoffs(
+    await loadSubjectHandoffs(runtime, subjects),
+    await runtime.convex.loadRunHandoffs({ runId: runtime.context.run.id })
+  )
   let handoffProgressed = false
 
   for (const approval of handoffs.approvals) {
@@ -153,13 +156,55 @@ function pendingDeadlines(handoffs: RunHandoffs): HandoffDeadline[] {
     .filter((approval) => approval.status === "pending")
     .map((approval) => ({
       expiresAt: approval.expiresAt,
+      id: approval.id,
       kind: "approval" as const,
     }))
   const offers = handoffs.offers
     .filter((offer) => offer.status === "pending" || offer.status === "claimed")
-    .map((offer) => ({ expiresAt: offer.expiresAt, kind: "offer" as const }))
+    .map((offer) => ({
+      expiresAt: offer.expiresAt,
+      id: offer.id,
+      kind: "offer" as const,
+    }))
 
   return [...approvals, ...offers]
+}
+
+async function loadSubjectHandoffs(
+  runtime: ToolRuntime,
+  subjects: HandoffSubject[]
+) {
+  return subjects.length === 0
+    ? emptyHandoffs()
+    : await runtime.convex.loadRunHandoffSubjects({ subjects })
+}
+
+function mergeHandoffs(primary: RunHandoffs, secondary: RunHandoffs) {
+  return {
+    approvals: mergeById(primary.approvals, secondary.approvals),
+    offers: mergeById(primary.offers, secondary.offers),
+  }
+}
+
+function mergeById<Item extends { id: string }>(
+  primary: Item[],
+  secondary: Item[]
+) {
+  const seen = new Set<string>()
+  const merged: Item[] = []
+
+  for (const item of [...primary, ...secondary]) {
+    if (!seen.has(item.id)) {
+      seen.add(item.id)
+      merged.push(item)
+    }
+  }
+
+  return merged
+}
+
+function emptyHandoffs(): RunHandoffs {
+  return { approvals: [], offers: [] }
 }
 
 function userNote(content: string): ModelMessage {

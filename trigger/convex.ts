@@ -14,6 +14,7 @@ import {
   type ActiveSurface,
   type AgentRunPayload,
   type ConvexId,
+  type HandoffSubject,
   type JsonObject,
   type RunHandoffs,
   type RuntimeContext,
@@ -82,6 +83,13 @@ export class MiloConvexClient {
     return (await this.client.query(api.runtime.waiters.handoffs.load, {
       runId: args.runId,
       secret: this.secret,
+    })) as RunHandoffs
+  }
+
+  async loadRunHandoffSubjects(args: { subjects: HandoffSubject[] }) {
+    return (await this.client.query(api.runtime.waiters.handoffs.loadSubjects, {
+      secret: this.secret,
+      subjects: args.subjects,
     })) as RunHandoffs
   }
 
