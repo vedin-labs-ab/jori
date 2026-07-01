@@ -37,9 +37,12 @@ test("run search exposes optional filters without bespoke sentinel guidance", ()
   expect(variants.map(readMode)).toEqual(["search", "ids", "children", "tree"])
   expect(variants.every((variant) => hasRequired(variant, "mode"))).toBe(true)
   expect(properties(variants[0]).runIds).toBeUndefined()
+  expect(properties(variants[0]).query).toMatchObject({
+    description: expect.stringContaining("Case-insensitive substring"),
+  })
   expect(properties(variants[1]).query).toBeUndefined()
   expect(properties(variants[1]).runIds).toMatchObject({
-    description: "Known run IDs returned by search_runs.",
+    description: expect.stringContaining("current Run ID"),
   })
   expect(schema?.required).toBeUndefined()
 })

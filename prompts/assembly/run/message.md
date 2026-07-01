@@ -1,5 +1,6 @@
 # Run
 
+Run ID: {{run.id}}
 Run started at: {{time.utc}}.
 
 {% if surface.active %}
