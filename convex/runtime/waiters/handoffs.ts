@@ -74,9 +74,7 @@ async function loadOfferHandoffs(ctx: QueryCtx, runId: Id<"runs">) {
     .withIndex("by_run_and_status", (query) => query.eq("runId", runId))
     .take(scanLimit)
 
-  return offers
-    .filter((offer) => offer.awaited === true && isUnconsumed(offer))
-    .map(toOfferHandoff)
+  return offers.filter(isUnconsumed).map(toOfferHandoff)
 }
 
 function isUnconsumed(record: { consumedAt?: number }) {

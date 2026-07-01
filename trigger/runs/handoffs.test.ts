@@ -18,7 +18,12 @@ test("executes an approved handoff once and injects the result", async () => {
     approvalId: "approval_1",
     runId: "run_1",
   })
-  expect(result).toEqual({ progressed: true, pending: [] })
+  expect(result).toEqual({
+    handoffProgressed: true,
+    messageProgressed: false,
+    pending: [],
+    progressed: true,
+  })
   expect(messages.at(-1)?.content).toContain("notion_create_page")
   expect(messages.at(-1)?.content).toContain("posted")
 })
@@ -67,10 +72,26 @@ test("keeps a pending handoff as a wait without progress", async () => {
 
   expect(runtime.convex.executeApproval).not.toHaveBeenCalled()
   expect(result.progressed).toBe(false)
+  expect(result.handoffProgressed).toBe(false)
+  expect(result.messageProgressed).toBe(false)
   expect(result.pending).toEqual([{ expiresAt: 1000, kind: "approval" }])
 })
 
-test("refreshes runtime tools when an awaited offer connects", async () => {
+test("keeps a pending offer as a wait without progress", async () => {
+  const runtime = createRuntime({
+    offers: [offerHandoff("pending")],
+  })
+  const messages: ModelMessage[] = []
+
+  const result = await reconcileHandoffs(runtime, messages)
+
+  expect(result.progressed).toBe(false)
+  expect(result.handoffProgressed).toBe(false)
+  expect(result.messageProgressed).toBe(false)
+  expect(result.pending).toEqual([{ expiresAt: 2000, kind: "offer" }])
+})
+
+test("refreshes runtime tools when an integration offer connects", async () => {
   const runtime = createRuntime({
     offers: [offerHandoff("connected")],
   })
@@ -138,7 +159,7 @@ function approvalHandoff(status: "approved" | "denied" | "failed" | "pending") {
   }
 }
 
-function offerHandoff(status: "connected") {
+function offerHandoff(status: "connected" | "pending") {
   return {
     id: id<"integrationOffers">("offer_1"),
     integration: "notion",

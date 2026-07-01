@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { toolFinalDescription } from "../../../contracts/runtime"
 import { activeSurfaceTools } from "./tools"
 
 test("exposes reply and reaction active surface tools", () => {
@@ -23,6 +24,7 @@ test("exposes Linear comment targeting only on the Linear active surface", () =>
         type: "string",
       },
       final: {
+        description: toolFinalDescription,
         type: "boolean",
       },
       text: {
@@ -41,7 +43,7 @@ test("uses surface-specific reaction target schemas", () => {
   expect(tool("slack", "add_reaction")?.inputSchema).toMatchObject({
     required: ["reaction", "target"],
     properties: {
-      final: { type: "boolean" },
+      final: { description: toolFinalDescription, type: "boolean" },
       reaction: { type: "string" },
       target: {
         required: ["messageTs"],

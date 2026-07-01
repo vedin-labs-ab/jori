@@ -122,14 +122,19 @@ async function settleYield(
   content?: string
 ): Promise<YieldOutcome> {
   for (;;) {
-    const { progressed, pending } = await reconcileHandoffs(runtime, messages)
-
-    if (progressed) {
-      return "continue"
-    }
+    const { messageProgressed, pending, progressed } = await reconcileHandoffs(
+      runtime,
+      messages
+    )
 
     if (pending.length === 0) {
-      return finalizeYield(messages, runtime.context, kind, content)
+      return progressed
+        ? "continue"
+        : finalizeYield(messages, runtime.context, kind, content)
+    }
+
+    if (messageProgressed) {
+      return "continue"
     }
 
     const wake = await parkRun(runtime, pending)
@@ -208,7 +213,7 @@ function visibleCommunicationTools(tools: RuntimeContext["tools"]) {
 }
 
 function visibleCommunicationInstruction(tools: string[]) {
-  return `Send any needed visible communication with ${toolList(tools)}. If that communication is the final useful action, set \`final: true\`; otherwise call \`finish_run\` when no useful work remains.`
+  return `Send any needed visible communication with ${toolList(tools)}. If that communication is the final useful action, set the root \`final\` field to \`true\`; otherwise call \`finish_run\` when no useful work remains.`
 }
 
 function toolList(tools: string[]) {

@@ -14,6 +14,8 @@ export type HandoffKind = "approval" | "offer"
 export type HandoffDeadline = { expiresAt: number; kind: HandoffKind }
 
 export type ReconcileResult = {
+  handoffProgressed: boolean
+  messageProgressed: boolean
   progressed: boolean
   pending: HandoffDeadline[]
 }
@@ -25,25 +27,29 @@ export async function reconcileHandoffs(
   const handoffs = await runtime.convex.loadRunHandoffs({
     runId: runtime.context.run.id,
   })
-  let progressed = false
+  let handoffProgressed = false
 
   for (const approval of handoffs.approvals) {
     if (await reconcileApproval(runtime, messages, approval)) {
-      progressed = true
+      handoffProgressed = true
     }
   }
 
   for (const offer of handoffs.offers) {
     if (await reconcileOffer(runtime, messages, offer)) {
-      progressed = true
+      handoffProgressed = true
     }
   }
 
-  if (await appendSessionMessages(runtime, messages)) {
-    progressed = true
-  }
+  const messageProgressed = await appendSessionMessages(runtime, messages)
+  const progressed = handoffProgressed || messageProgressed
 
-  return { progressed, pending: pendingDeadlines(handoffs) }
+  return {
+    handoffProgressed,
+    messageProgressed,
+    progressed,
+    pending: pendingDeadlines(handoffs),
+  }
 }
 
 export function hasResolvedHandoffs(handoffs: RunHandoffs) {

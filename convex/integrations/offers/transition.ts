@@ -209,7 +209,7 @@ function isSettled(offer: Doc<"integrationOffers">) {
 }
 
 async function wakeOfferRun(ctx: MutationCtx, offer: Doc<"integrationOffers">) {
-  if (offer.runId === undefined || offer.awaited !== true) {
+  if (offer.runId === undefined) {
     return
   }
 

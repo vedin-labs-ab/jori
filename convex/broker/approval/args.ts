@@ -24,7 +24,7 @@ export function parsePromptedToolApproval(args: {
     throw new Error(approvalSummaryValidationError(args.tool))
   }
 
-  const { approval: _approval, ...toolArgs } = args.args
+  const { approval: _approval, final: _final, ...toolArgs } = args.args
 
   return {
     surface: args.surface,

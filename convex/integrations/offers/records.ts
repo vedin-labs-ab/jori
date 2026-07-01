@@ -55,7 +55,6 @@ export const create = internalMutation({
     integration: integrationValidator,
     summary: v.string(),
     source: integrationOfferSource,
-    awaited: v.optional(v.boolean()),
   },
   returns: v.object({
     integrationOfferId: v.id("integrationOffers"),
@@ -77,7 +76,6 @@ export const create = internalMutation({
       summary: args.summary,
       source: args.source,
       runId: args.source.runId,
-      awaited: args.awaited,
       expiresAt,
       createdAt: now,
       updatedAt: now,
@@ -108,7 +106,7 @@ async function supersedePriorOffers(
   ctx: MutationCtx,
   args: { offer: Doc<"integrationOffers">; now: number }
 ) {
-  if (args.offer.awaited !== true || args.offer.runId === undefined) {
+  if (args.offer.runId === undefined) {
     return
   }
 
@@ -135,7 +133,6 @@ function canSupersede(
 ) {
   return (
     offer._id !== replacement._id &&
-    offer.awaited === true &&
     offer.integration === replacement.integration &&
     (offer.status === "pending" || offer.status === "claimed")
   )

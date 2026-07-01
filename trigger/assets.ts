@@ -32,7 +32,12 @@ export async function prepareMiloToolInput(
   const artifact = await runtime.sandbox.buildArtifact(
     requiredString(input.workspacePath, "workspacePath")
   )
-  const { approval: _approval, workspacePath: _workspacePath, ...rest } = input
+  const {
+    approval: _approval,
+    final: _final,
+    workspacePath: _workspacePath,
+    ...rest
+  } = input
 
   return {
     ...rest,
