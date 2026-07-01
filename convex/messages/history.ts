@@ -30,10 +30,7 @@ export async function recentConversation(
   message: Doc<"messages">,
   integration: Doc<"integrations">
 ): Promise<RecentConversation> {
-  const messages =
-    message.conversationId === undefined
-      ? [message]
-      : await recentMessages(ctx, message)
+  const messages = await recentMessages(ctx, message)
   const reactions = await reactionSummariesForMessages(ctx, messages)
   const entries = messages.map((entry) =>
     messageEntry(entry, integration, reactions.get(entry._id))
@@ -74,19 +71,15 @@ export function mergeRecentConversation(entries: ConversationEntry[]) {
 }
 
 async function recentMessages(ctx: QueryCtx, message: Doc<"messages">) {
-  const conversationId = message.conversationId
-
-  if (conversationId === undefined) {
-    return [message]
-  }
-
   return await ctx.db
     .query("messages")
-    .withIndex("by_conversation", (query) =>
-      query
-        .eq("tenantId", message.tenantId)
-        .eq("integrationId", message.integrationId)
-        .eq("conversationId", conversationId)
+    .withIndex(
+      "by_tenant_and_integration_and_conversation_and_created_at",
+      (query) =>
+        query
+          .eq("tenantId", message.tenantId)
+          .eq("integrationId", message.integrationId)
+          .eq("conversationId", message.conversationId)
     )
     .order("desc")
     .take(recentConversationLimit + 1)

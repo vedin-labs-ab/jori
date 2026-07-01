@@ -118,6 +118,7 @@ function message(
     type: "message.channels",
     externalId: "slack:message",
     mentioned: false,
+    conversationId: "conversation",
     text,
     data,
     createdAt: 0,

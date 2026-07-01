@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { isUserScopedIntegration } from "../../shared/integrations"
+import { conversationAudience } from "../../conversations/scope"
 
 export type RunAudience = {
   scope: NonNullable<Doc<"runs">["scope"]>
@@ -64,20 +64,6 @@ async function resolveParentAudience(
     scope: parent.scope ?? "person",
     conversationId: parent.conversationId,
   }
-}
-
-function conversationAudience(origin: ConversationOrigin): RunAudience {
-  const conversationId = origin.conversation._id
-
-  if (origin.conversation.visibility === "public") {
-    return { scope: "tenant", conversationId }
-  }
-
-  if (isUserScopedIntegration(origin.integration.integration)) {
-    return { scope: "person", conversationId }
-  }
-
-  return { scope: "conversation", conversationId }
 }
 
 function automationAudience(automation: Doc<"automations">): RunAudience {

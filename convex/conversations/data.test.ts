@@ -160,6 +160,7 @@ function message(text: string, data?: unknown) {
     type: "message.channels",
     externalId: "slack:message",
     mentioned: false,
+    conversationId: "conversation",
     text,
     data,
     createdAt: 900,
