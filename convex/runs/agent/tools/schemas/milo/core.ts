@@ -10,8 +10,6 @@ import {
 const runStatusEnum = ["queued", "running", "completed", "failed", "stopped"]
 const runScopeEnum = ["conversation", "tenant", "all"]
 const runSourceEnum = ["slack", "github", "linear", "automation"]
-const omitUnusedOptionalArgs =
-  "Omit optional fields when unused; do not pass empty strings, 0, empty arrays, or placeholders to mean absent."
 const activityFilterEnum = [
   "tool",
   "model",
@@ -27,54 +25,44 @@ export const coreMiloToolInputSchemas = {
   }),
   load_skill: loadSkillInputSchema(),
   search_runs: objectSchema({
-    description: `Find visible prior runs. ${omitUnusedOptionalArgs}`,
+    description: "Find visible prior runs.",
     properties: {
       query: stringProperty(
-        "Substring matched against title, task, and context labels. Omit when not searching by text."
+        "Substring matched against title, task, and context labels."
       ),
       scope: {
         type: "string",
         enum: runScopeEnum,
         description:
-          "Relevance scope within enforced visibility. Omit for conversation scope; use tenant or all deliberately.",
+          "Relevance scope within enforced visibility. Defaults to conversation; use tenant or all deliberately.",
       },
       status: {
         type: "string",
         enum: runStatusEnum,
-        description: "Run status filter. Omit when not filtering by status.",
+        description: "Run status filter.",
       },
       source: {
         type: "string",
         enum: runSourceEnum,
-        description: "Source filter. Omit when not filtering by source.",
+        description: "Source filter.",
       },
       since: numberProperty(
-        "Only runs created at or after this epoch millisecond. Omit instead of passing 0 when not filtering by start time."
+        "Only runs created at or after this positive epoch millisecond."
       ),
       until: numberProperty(
-        "Only runs created at or before this epoch millisecond. Omit instead of passing 0 when not filtering by end time."
+        "Only runs created at or before this positive epoch millisecond."
       ),
-      rootId: stringProperty(
-        "Root run ID for delegation-tree navigation. Omit unless you have a real run ID."
-      ),
-      parentId: stringProperty(
-        "Parent run ID for direct child navigation. Omit unless you have a real run ID."
-      ),
-      runIds: stringArrayProperty(
-        "Known run IDs to resolve directly. Omit instead of passing an empty array."
-      ),
+      rootId: stringProperty("Root run ID for delegation-tree navigation."),
+      parentId: stringProperty("Parent run ID for direct child navigation."),
+      runIds: stringArrayProperty("Known run IDs to resolve directly."),
       cursor: stringProperty(
-        "Opaque cursor from a previous search_runs response. Omit on the first page."
+        "Opaque cursor from a previous search_runs response."
       ),
-      limit: numberProperty(
-        "Maximum runs to return. Omit to use the default.",
-        1,
-        50
-      ),
+      limit: numberProperty("Maximum runs to return. Defaults to 15.", 1, 50),
     },
   }),
   search_run_activity: objectSchema({
-    description: `Inspect one visible prior run. ${omitUnusedOptionalArgs}`,
+    description: "Inspect one visible prior run.",
     required: ["runId"],
     properties: {
       runId: stringProperty("Run ID returned by search_runs."),
@@ -87,10 +75,10 @@ export const coreMiloToolInputSchemas = {
         },
       },
       cursor: stringProperty(
-        "Opaque cursor from a previous search_run_activity response. Omit on the first page."
+        "Opaque cursor from a previous search_run_activity response."
       ),
       limit: numberProperty(
-        "Maximum activity items to return. Omit to use the default.",
+        "Maximum activity items to return. Defaults to 20.",
         1,
         50
       ),

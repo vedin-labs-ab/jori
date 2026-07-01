@@ -1,8 +1,14 @@
 import { isArtifactPublishTool } from "../../contracts/artifact-publish"
 import { type JsonObject } from "../../contracts/json"
-import { getToolInputSchema } from "../runs/agent/tools/schemas"
-
-type JsonSchema = Record<string, unknown>
+import {
+  getToolInputSchema,
+  isJsonSchema,
+  type JsonSchema,
+  readNumber,
+  readSchemaMap,
+  readString,
+  readStringArray,
+} from "../runs/agent/tools/schemas"
 
 export function hasBrokerToolInputSchema(tool: string) {
   return getToolInputSchema(tool) !== undefined
@@ -263,36 +269,6 @@ function validateString(value: unknown, schema: JsonSchema, path: string) {
       throw new Error(`${path} must be a valid URI`)
     }
   }
-}
-
-function readSchemaMap(value: unknown) {
-  if (!isJsonSchema(value)) {
-    return {}
-  }
-
-  return Object.fromEntries(
-    Object.entries(value)
-      .filter((entry): entry is [string, JsonSchema] => isJsonSchema(entry[1]))
-      .map(([key, schema]) => [key, schema])
-  )
-}
-
-function readStringArray(value: unknown) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : []
-}
-
-function readString(value: unknown) {
-  return typeof value === "string" ? value : undefined
-}
-
-function readNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
-function isJsonSchema(value: unknown): value is JsonSchema {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
 function isJsonObject(value: unknown): value is JsonObject {

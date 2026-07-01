@@ -1,3 +1,4 @@
+import { withOptionalFieldGuidance } from "./common"
 import { githubToolInputSchemas } from "./github"
 import { googleToolInputSchemas } from "./google"
 import { linearToolInputSchemas } from "./linear"
@@ -7,7 +8,18 @@ import { miloToolInputSchemas } from "./milo/index"
 import { notionToolInputSchemas } from "./notion"
 import { slackToolInputSchemas } from "./slack"
 
-export { emptyObjectSchema } from "./common"
+export type { JsonSchema, SchemaMap } from "./common"
+export {
+  emptyObjectSchema,
+  isJsonSchema,
+  optionalFieldGuidance,
+  readNumber,
+  readSchemaMap,
+  readString,
+  readStringArray,
+  schemaHasOptionalFields,
+  withOptionalFieldGuidance,
+} from "./common"
 
 const toolInputSchemas = {
   ...githubToolInputSchemas,
@@ -20,7 +32,9 @@ const toolInputSchemas = {
 }
 
 export function getToolInputSchema(tool: string) {
-  return toolInputSchemas[tool as keyof typeof toolInputSchemas]
+  const schema = toolInputSchemas[tool as keyof typeof toolInputSchemas]
+
+  return schema === undefined ? undefined : withOptionalFieldGuidance(schema)
 }
 
 export function getRuntimeToolInputSchema(
@@ -30,7 +44,7 @@ export function getRuntimeToolInputSchema(
   }
 ) {
   if (tool === "load_skill") {
-    return loadSkillInputSchema(args.skillNames)
+    return withOptionalFieldGuidance(loadSkillInputSchema(args.skillNames))
   }
 
   return getToolInputSchema(tool)

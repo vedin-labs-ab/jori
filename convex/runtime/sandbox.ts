@@ -3,19 +3,21 @@ import {
   codingToolDefinitions,
 } from "../../contracts/coding"
 import { type ToolAccess } from "../../contracts/permissions"
+import { withOptionalFieldGuidance } from "../runs/agent/tools/schemas"
 import { type RunToolSnapshotTool } from "../runs/agent/tools/snapshot"
 
 export const sandboxTools = [
   ...codingToolDefinitions.map((tool) => ({
     ...tool,
     access: codingToolAccess(tool.name),
+    inputSchema: withOptionalFieldGuidance(tool.inputSchema),
     route: "sandbox" as const,
   })),
   {
     access: "write" as const,
     name: "start_agent",
     description: "Start a Milo agent run for a delegated task.",
-    inputSchema: {
+    inputSchema: withOptionalFieldGuidance({
       type: "object",
       additionalProperties: false,
       required: ["task"],
@@ -23,7 +25,7 @@ export const sandboxTools = [
         task: { type: "string" },
         title: { type: "string" },
       },
-    },
+    }),
     route: "agent",
   },
 ] as const

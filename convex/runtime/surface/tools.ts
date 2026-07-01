@@ -1,6 +1,7 @@
 import { type JsonObject } from "../../../contracts/json"
 import { finalProperty, toolFinalDescription } from "../../../contracts/runtime"
 import { type MessageIntegration } from "../../runs/agent/input"
+import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import { type RunToolSnapshotTool } from "../../runs/agent/tools/snapshot"
 
 export type ActiveSurfaceTool = {
@@ -32,7 +33,7 @@ function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
   return {
     access: "write",
     description: `Send a visible reply or update to the active requester surface. Milo routes it to the current requester context by default. ${toolFinalDescription} On Linear, set commentId only when intentionally replying under a specific visible comment.`,
-    inputSchema: sendReplySchema(surface),
+    inputSchema: withOptionalFieldGuidance(sendReplySchema(surface)),
     name: "send_reply",
     route: "surface",
   }
@@ -42,7 +43,7 @@ function addReactionTool(surface: MessageIntegration): ActiveSurfaceTool {
   return {
     access: "write",
     description: `Add a visible reaction on the active requester surface. ${toolFinalDescription}`,
-    inputSchema: addReactionSchema(surface),
+    inputSchema: withOptionalFieldGuidance(addReactionSchema(surface)),
     name: "add_reaction",
     route: "surface",
   }
