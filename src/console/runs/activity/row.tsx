@@ -1,5 +1,21 @@
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import { ProviderLogo } from "../../shared/logo/provider"
+
+export function ActivitySurfaceDescription({
+  label,
+  surface,
+}: {
+  label: string
+  surface: string | undefined
+}) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      <ProviderLogo className="size-4" surface={surface} />
+      <span className="min-w-0 truncate">{label}</span>
+    </span>
+  )
+}
 
 export function ActivityMetadataLine({
   children,

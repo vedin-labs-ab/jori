@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { getToolLabel } from "../../approvals/slack/labels"
 import { agentTitle, approvalTitle, offerTitle, waiterReason } from "./format"
 import {
   type ActivityData,
@@ -29,6 +30,8 @@ function projectApproval(approval: Doc<"approvals">): ActivityItem {
     durationMs: endedAt - approval.createdAt,
     endedAt,
     startedAt: approval.createdAt,
+    surface: approval.surface,
+    toolLabel: getToolLabel(approval.tool),
   }
 }
 
