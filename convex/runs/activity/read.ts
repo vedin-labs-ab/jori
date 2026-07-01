@@ -6,7 +6,13 @@ export type ToolResult =
   | { kind: "boolean" }
   | { kind: "null" }
   | { kind: "array"; size: number }
-  | { kind: "object"; size: number }
+  | {
+      hasMore?: boolean
+      itemCount?: number
+      itemKey?: string
+      kind: "object"
+      size: number
+    }
 
 export type ModelUsage = {
   durationMs: number
@@ -124,8 +130,9 @@ function readResultByKind(
 ): ToolResult | undefined {
   switch (kind) {
     case "array":
-    case "object":
       return resultSize(kind, result)
+    case "object":
+      return objectResult(result)
     case "boolean":
     case "null":
       return { kind }
@@ -139,12 +146,28 @@ function readResultByKind(
 }
 
 function resultSize(
-  kind: "array" | "object",
+  kind: "array",
   result: Record<string, unknown> | undefined
 ) {
   const size = readNumber(result?.size)
 
   return size === undefined ? undefined : { kind, size }
+}
+
+function objectResult(result: Record<string, unknown> | undefined) {
+  const size = readNumber(result?.size)
+
+  if (size === undefined) {
+    return undefined
+  }
+
+  return {
+    kind: "object" as const,
+    size,
+    ...optionalNumber("itemCount", result?.itemCount),
+    ...optionalString("itemKey", result?.itemKey),
+    ...optionalBoolean("hasMore", result?.hasMore),
+  }
 }
 
 function resultPreview(
@@ -189,6 +212,22 @@ function readPreparedTool(value: unknown): ToolLabel[] {
       tool,
     },
   ]
+}
+
+function optionalBoolean(key: "hasMore", value: unknown) {
+  return typeof value === "boolean" ? { [key]: value } : {}
+}
+
+function optionalNumber(key: "itemCount", value: unknown) {
+  const number = readNumber(value)
+
+  return number === undefined ? {} : { [key]: number }
+}
+
+function optionalString(key: "itemKey", value: unknown) {
+  const string = readString(value)
+
+  return string === undefined ? {} : { [key]: string }
 }
 
 function readNumber(value: unknown) {

@@ -276,6 +276,8 @@ import type * as runs_activity_helpers from "../runs/activity/helpers.js";
 import type * as runs_activity_index from "../runs/activity/index.js";
 import type * as runs_activity_load from "../runs/activity/load.js";
 import type * as runs_activity_metadata from "../runs/activity/metadata.js";
+import type * as runs_activity_metadata_labels from "../runs/activity/metadata/labels.js";
+import type * as runs_activity_metadata_runs from "../runs/activity/metadata/runs.js";
 import type * as runs_activity_model from "../runs/activity/model.js";
 import type * as runs_activity_project from "../runs/activity/project.js";
 import type * as runs_activity_read from "../runs/activity/read.js";
@@ -664,6 +666,8 @@ declare const fullApi: ApiFromModules<{
   "runs/activity/index": typeof runs_activity_index;
   "runs/activity/load": typeof runs_activity_load;
   "runs/activity/metadata": typeof runs_activity_metadata;
+  "runs/activity/metadata/labels": typeof runs_activity_metadata_labels;
+  "runs/activity/metadata/runs": typeof runs_activity_metadata_runs;
   "runs/activity/model": typeof runs_activity_model;
   "runs/activity/project": typeof runs_activity_project;
   "runs/activity/read": typeof runs_activity_read;

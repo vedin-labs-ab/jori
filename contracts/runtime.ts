@@ -5,7 +5,12 @@ export const cleanupTaskId = "milo-sandbox-cleanup"
 export const toolFinalDescription =
   "Set true only when this tool call is the final useful action for the run. If active approvals or integration offers remain, the run waits; otherwise it completes after the tool succeeds."
 
-export const runtimeToolMetadataKinds = ["target", "scope", "outcome"] as const
+export const runtimeToolMetadataKinds = [
+  "filter",
+  "outcome",
+  "scope",
+  "target",
+] as const
 
 export type RuntimeToolMetadataKind = (typeof runtimeToolMetadataKinds)[number]
 

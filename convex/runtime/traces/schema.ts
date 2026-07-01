@@ -33,7 +33,13 @@ const result = v.union(
   v.object({ kind: v.literal("boolean") }),
   v.object({ kind: v.literal("null") }),
   v.object({ kind: v.literal("array"), size: v.number() }),
-  v.object({ kind: v.literal("object"), size: v.number() })
+  v.object({
+    kind: v.literal("object"),
+    size: v.number(),
+    itemKey: v.optional(v.string()),
+    itemCount: v.optional(v.number()),
+    hasMore: v.optional(v.boolean()),
+  })
 )
 const usage = v.object({
   durationMs: v.number(),
