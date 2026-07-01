@@ -1,10 +1,11 @@
 import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type ActionCtx, action, internalQuery } from "../../_generated/server"
-import { callGitHubTool } from "../../broker/tools/github"
-import { addLinearReaction } from "../../broker/tools/linear/reactions"
-import { addSlackMessageReaction } from "../../broker/tools/slack"
 import { prepareIntegrationForRuntime } from "../../integrations/runtime"
+import { requireGitHubRuntimeToken } from "../../providers/github/credentials"
+import { addGitHubCommentReaction } from "../../providers/github/delivery/comments"
+import { addLinearReaction } from "../../providers/linear/delivery/reactions"
+import { addSlackMessageReaction } from "../../providers/slack/delivery/messages"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { requiredString } from "../../shared/input"
 import { requireWorkerSecret } from "../shared"
@@ -107,7 +108,7 @@ async function sendReaction(
       })
       return
     case "github":
-      await callGitHubTool(integration, "github_add_comment_reaction", {
+      await addGitHubCommentReaction(requireGitHubRuntimeToken(integration), {
         commentId: address.commentId,
         content: reaction,
         owner: address.owner,

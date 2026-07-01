@@ -1,4 +1,4 @@
-import { isArtifactPublishTool } from "../../contracts/artifact-publish"
+import { isArtifactPublishTool } from "../../contracts/artifacts/publish"
 import { type JsonObject } from "../../contracts/json"
 import { getToolInputSchema, isJsonSchema } from "../runs/agent/tools/schemas"
 import { validateSchemaValue } from "./inputValidation"

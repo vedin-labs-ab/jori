@@ -1,5 +1,5 @@
-import { promptTemplates } from "../prompts/generated"
-import { renderPromptTemplate } from "../prompts/render"
+import { promptTemplates } from "../../prompts/generated"
+import { renderPromptTemplate } from "../../prompts/render"
 import { type Integration } from "../shared/integrations"
 
 export type RuntimeSkill = {

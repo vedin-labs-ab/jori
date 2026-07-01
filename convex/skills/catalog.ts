@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { skills as globalSkillSeed } from "../../prompts/generated"
 import {
   internalMutation,
   internalQuery,
@@ -7,7 +8,6 @@ import {
 } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { ensureCurrentPerson } from "../persons/clerk"
-import { skills as globalSkillSeed } from "../prompts/generated"
 import { integrationValidator } from "../shared/integrations"
 import {
   normalizeSkillInput,

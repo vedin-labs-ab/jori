@@ -5,7 +5,7 @@ import { readSkills } from "./skills.ts"
 const root = process.cwd()
 const skillsDir = path.join(root, "skills")
 const promptsDir = path.join(root, "prompts")
-const outputFile = path.join(root, "convex", "prompts", "generated.ts")
+const outputFile = path.join(root, "prompts", "generated.ts")
 const promptAssemblyPrefix = "assembly/"
 
 const skills = await readSkills(skillsDir)

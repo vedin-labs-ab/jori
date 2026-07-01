@@ -27,6 +27,16 @@ export function requireGitHubCredentials(
   }
 }
 
+export function requireGitHubRuntimeToken(integration: Doc<"integrations">) {
+  const credentials = requireGitHubCredentials(integration)
+
+  if (credentials.tokens?.access === undefined) {
+    throw new Error("Missing GitHub runtime token")
+  }
+
+  return credentials.tokens.access
+}
+
 function readGitHubTokens(credentials: unknown) {
   if (
     typeof credentials !== "object" ||

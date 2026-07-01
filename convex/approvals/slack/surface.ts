@@ -1,5 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
-import { updateSlackMessage } from "../../broker/tools/slack"
+import { updateSlackMessage } from "../../providers/slack/delivery/messages"
 import { getActorDisplayName } from "../../shared/actor"
 import {
   createApprovalCard,

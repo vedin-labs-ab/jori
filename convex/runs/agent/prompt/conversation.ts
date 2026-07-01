@@ -1,6 +1,6 @@
+import { promptTemplates } from "../../../../prompts/generated"
+import { renderPromptTemplate } from "../../../../prompts/render"
 import { messageEntry } from "../../../messages/history"
-import { promptTemplates } from "../../../prompts/generated"
-import { renderPromptTemplate } from "../../../prompts/render"
 import { type AgentRuntimeInput } from "../input"
 
 type MessageInput = Extract<AgentRuntimeInput, { type: "message" }>

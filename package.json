@@ -19,7 +19,7 @@
     "convex:truncate": "node --experimental-strip-types scripts/truncate.ts",
     "preview": "vite preview",
     "skills:sync": "node --experimental-strip-types scripts/env.ts npx convex run skills/catalog:syncGlobalSkills",
-    "prompts:compile": "node scripts/prompts.ts && biome format --write convex/prompts/generated.ts",
+    "prompts:compile": "node scripts/prompts.ts && biome format --write prompts/generated.ts",
     "runtime:check": "node --experimental-strip-types scripts/runtime.ts --check",
     "runtime:generate": "node --experimental-strip-types scripts/runtime.ts",
     "trigger:dev": "node --experimental-strip-types scripts/env.ts trigger dev --env-file .env.local",

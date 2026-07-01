@@ -1,12 +1,12 @@
 "use node"
 
 import { createHash } from "node:crypto"
-import { type Id } from "../../_generated/dataModel"
-import { buildGitTreeSnapshot, gitObjectId } from "./git"
 import {
   isPlatformArtifactSourcePath,
   requiredArtifactSourcePaths,
-} from "./template"
+} from "../../../contracts/artifacts/source"
+import { type Id } from "../../_generated/dataModel"
+import { buildGitTreeSnapshot, gitObjectId } from "./git"
 
 export type ArtifactSourceFile = {
   path: string

@@ -1,5 +1,5 @@
-import { promptTemplates } from "../../../prompts/generated"
-import { renderPromptTemplate } from "../../../prompts/render"
+import { promptTemplates } from "../../../../prompts/generated"
+import { renderPromptTemplate } from "../../../../prompts/render"
 import { listRuntimeSkills, type RuntimeSkill } from "../../../skills/runtime"
 
 export function createSkillInstructions(args: {

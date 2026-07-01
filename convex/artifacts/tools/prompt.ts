@@ -5,13 +5,13 @@ import {
   assertSupportedJsonSchema,
   normalizeJsonSchema,
 } from "../../../contracts/artifacts/schema"
+import { promptTemplates } from "../../../prompts/generated"
+import { renderPromptTemplate } from "../../../prompts/render"
 import {
   type OpenRouterChatInput,
   type OpenRouterChatMessage,
   sendOpenRouterChat,
 } from "../../model"
-import { promptTemplates } from "../../prompts/generated"
-import { renderPromptTemplate } from "../../prompts/render"
 import { requiredString } from "../../shared/input"
 import {
   type ArtifactPromptRequestDiagnostics,

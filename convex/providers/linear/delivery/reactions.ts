@@ -1,11 +1,11 @@
 import { type Doc } from "../../../_generated/dataModel"
-import { requireLinearCredentials } from "../../../providers/linear/credentials"
 import {
   readRecord,
   requiredObject,
   requiredString,
 } from "../../../shared/input"
-import { linearGraphql } from "./client"
+import { requireLinearCredentials } from "../credentials"
+import { linearGraphql } from "../graphql"
 
 type ReactionTargetField = "commentId" | "issueId" | "projectUpdateId"
 type ReactionTargetType = "comment" | "issue" | "projectUpdate"

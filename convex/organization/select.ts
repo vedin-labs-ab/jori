@@ -1,5 +1,5 @@
-import { promptTemplates } from "../prompts/generated"
-import { renderPromptTemplate } from "../prompts/render"
+import { promptTemplates } from "../../prompts/generated"
+import { renderPromptTemplate } from "../../prompts/render"
 import { normalizeLink } from "./crawl"
 import { requestStructured } from "./structured"
 

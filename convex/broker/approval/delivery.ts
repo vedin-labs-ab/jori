@@ -9,9 +9,9 @@ import {
   getSlackMessageTs,
   getSlackThreadTs,
 } from "../../providers/slack/data"
+import { postSlackMessage } from "../../providers/slack/delivery/messages"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { sendSurfaceReply } from "../../runtime/surface/reply"
-import { postSlackMessage } from "../tools/slack"
 
 type ApprovalDeliveryContext = {
   input: AgentRuntimeInput

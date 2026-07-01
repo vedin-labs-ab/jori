@@ -8,13 +8,8 @@ import {
   TriangleAlert,
 } from "lucide-react"
 import { type ReactNode, useEffect, useState } from "react"
-import {
-  Task,
-  TaskContent,
-  TaskItem,
-  TaskTrigger,
-} from "@/components/ai-elements/task"
 import { cn } from "@/lib/utils"
+import { Task, TaskContent, TaskItem, TaskTrigger } from "../shared/task"
 import { createDiscoveryTasks } from "./progress-data"
 import {
   type DiscoveryItemStatus,

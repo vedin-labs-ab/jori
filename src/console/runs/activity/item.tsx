@@ -1,15 +1,15 @@
 import { integrationLabel } from "@contracts/integrations"
 import { ChevronDown, FileText, Search, Send, SmilePlus } from "lucide-react"
 import { type ReactNode, useState } from "react"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 import {
   Task,
   TaskContent,
   TaskItem,
   TaskLabel,
   TaskTrigger,
-} from "@/components/ai-elements/task"
-import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
+} from "../../shared/task"
 import { formatDuration } from "../../shared/time"
 import { ActivityFailureDescription } from "./error"
 import {

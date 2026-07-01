@@ -1,6 +1,14 @@
 import { cruise, type IFlattenedRuleSet } from "dependency-cruiser"
 
-const roots = ["src", "convex", "contracts", "runtime/source", "scripts"]
+const roots = [
+  "src",
+  "convex",
+  "contracts",
+  "runtime/source",
+  "trigger",
+  "prompts",
+  "scripts",
+]
 const excludedPaths = [
   "(^|/)[.]agents(/|$)",
   "(^|/)[.]claude(/|$)",
@@ -31,7 +39,7 @@ const ruleSet = {
         path: "^contracts/",
       },
       to: {
-        path: "^(?:src|convex|runtime|scripts)(?:/|$)",
+        path: "^(?:src|convex|runtime|trigger|prompts|scripts)(?:/|$)",
       },
     },
     {
@@ -43,7 +51,7 @@ const ruleSet = {
         path: "^src/",
       },
       to: {
-        path: "^(?:convex|runtime|scripts)(?:/|$)",
+        path: "^(?:convex|runtime|trigger|prompts|scripts)(?:/|$)",
         pathNot: "^convex/_generated/",
       },
     },
@@ -56,7 +64,7 @@ const ruleSet = {
         path: "^convex/",
       },
       to: {
-        path: "^(?:src|runtime|scripts)(?:/|$)",
+        path: "^(?:src|runtime|trigger|scripts)(?:/|$)",
       },
     },
     {
@@ -68,7 +76,20 @@ const ruleSet = {
         path: "^runtime/source/",
       },
       to: {
-        path: "^(?:src|convex|scripts)(?:/|$)",
+        path: "^(?:src|convex|trigger|prompts|scripts)(?:/|$)",
+      },
+    },
+    {
+      name: "trigger-does-not-import-app-backend-runtime-or-scripts",
+      severity: "error",
+      comment:
+        "Trigger worker code may use contracts, prompts, generated Convex API refs, and generated runtime assets, not app, backend, runtime source, or script internals.",
+      from: {
+        path: "^trigger/",
+      },
+      to: {
+        path: "^(?:src|convex|runtime|scripts)(?:/|$)",
+        pathNot: "^(?:convex/_generated/|convex/runtime/_generated/)",
       },
     },
     {

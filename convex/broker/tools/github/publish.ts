@@ -1,3 +1,4 @@
+import { summarizePullRequest } from "../../../providers/github/delivery/format"
 import {
   optionalString,
   readRecord,
@@ -5,7 +6,6 @@ import {
   requiredString,
 } from "../../../shared/input"
 import { githubJsonObject, repositoryPath } from "./client"
-import { summarizePullRequest } from "./format"
 import {
   commitSourceChangesToBranch,
   createBranchWithSourceChanges,

@@ -1,5 +1,5 @@
-import { promptTemplates } from "../../convex/prompts/generated"
-import { renderPromptTemplate } from "../../convex/prompts/render"
+import { promptTemplates } from "../../prompts/generated"
+import { renderPromptTemplate } from "../../prompts/render"
 import { type ModelMessage } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import { type RuntimeInteraction, type RuntimeMessage } from "../types"

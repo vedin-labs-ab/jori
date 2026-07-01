@@ -1,9 +1,5 @@
 import { type RunAsset } from "../../../assets/read"
-import {
-  requiredSlackResultString,
-  slackFormApi,
-  slackJsonApi,
-} from "../../../providers/slack/api"
+import { requiredSlackResultString, slackFormApi, slackJsonApi } from "../api"
 
 export async function postSlackFiles(
   token: string,

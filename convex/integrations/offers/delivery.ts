@@ -2,12 +2,12 @@ import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { type ApprovalBrokerContext } from "../../broker/approval"
-import { postSlackMessage } from "../../broker/tools/slack"
 import {
   getSlackChannelId,
   getSlackMessageTs,
   getSlackThreadTs,
 } from "../../providers/slack/data"
+import { postSlackMessage } from "../../providers/slack/delivery/messages"
 import { type Integration } from "../../shared/integrations"
 import { createSlackIntegrationOfferMessage } from "./slack"
 

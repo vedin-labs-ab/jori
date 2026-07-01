@@ -1,13 +1,17 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { callGitHubTool } from "../../broker/tools/github"
-import { postLinearComment } from "../../broker/tools/linear/comments"
+import { prepareIntegrationForRuntime } from "../../integrations/runtime"
+import { type ReplyAddress } from "../../messages/surface"
+import { requireGitHubRuntimeToken } from "../../providers/github/credentials"
+import {
+  addIssueComment,
+  replyToPullRequestReviewComment,
+} from "../../providers/github/delivery/comments"
+import { postLinearComment } from "../../providers/linear/delivery/comments"
 import {
   postSlackMessage,
   type SlackBlock,
-} from "../../broker/tools/slack/index"
-import { prepareIntegrationForRuntime } from "../../integrations/runtime"
-import { type ReplyAddress } from "../../messages/surface"
+} from "../../providers/slack/delivery/messages"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 
 export async function sendSurfaceReply(
@@ -56,7 +60,7 @@ async function sendGitHubReply(
   text: string
 ) {
   if (address.kind === "issue") {
-    await callGitHubTool(integration, "github_add_issue_comment", {
+    await addIssueComment(requireGitHubRuntimeToken(integration), {
       owner: address.owner,
       repo: address.repo,
       issueNumber: address.issueNumber,
@@ -65,9 +69,8 @@ async function sendGitHubReply(
     return
   }
 
-  await callGitHubTool(
-    integration,
-    "github_reply_to_pull_request_review_comment",
+  await replyToPullRequestReviewComment(
+    requireGitHubRuntimeToken(integration),
     {
       owner: address.owner,
       repo: address.repo,

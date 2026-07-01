@@ -1,7 +1,7 @@
 import { type Doc } from "../../../_generated/dataModel"
-import { requireLinearCredentials } from "../../../providers/linear/credentials"
 import { readRecord, requiredString } from "../../../shared/input"
-import { linearGraphql } from "./client"
+import { requireLinearCredentials } from "../credentials"
+import { linearGraphql } from "../graphql"
 
 export type LinearCommentTarget =
   | {

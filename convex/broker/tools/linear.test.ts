@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../../_generated/dataModel"
+import { postLinearComment } from "../../providers/linear/delivery/comments"
 import { callLinearTool } from "./linear"
-import { postLinearComment } from "./linear/comments"
 
 const originalFetch = globalThis.fetch
 

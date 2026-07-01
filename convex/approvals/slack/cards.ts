@@ -1,5 +1,5 @@
-import { type SlackBlock } from "../../broker/tools/slack"
 import { createSlackCard } from "../../providers/slack/card"
+import { type SlackBlock } from "../../providers/slack/delivery/messages"
 
 export {
   formatSlackTime,

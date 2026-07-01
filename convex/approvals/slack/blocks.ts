@@ -1,4 +1,4 @@
-import { type SlackBlock } from "../../broker/tools/slack"
+import { type SlackBlock } from "../../providers/slack/delivery/messages"
 import { type ToolSurface } from "../../shared/integrations"
 import {
   createApprovalCard,
