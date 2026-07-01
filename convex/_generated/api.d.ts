@@ -338,6 +338,7 @@ import type * as runs_display_schedule from "../runs/display/schedule.js";
 import type * as runs_introspect_access from "../runs/introspect/access.js";
 import type * as runs_introspect_audience from "../runs/introspect/audience.js";
 import type * as runs_introspect_filters from "../runs/introspect/filters.js";
+import type * as runs_introspect_ids from "../runs/introspect/ids.js";
 import type * as runs_introspect_mcp from "../runs/introspect/mcp.js";
 import type * as runs_introspect_page from "../runs/introspect/page.js";
 import type * as runs_introspect_project from "../runs/introspect/project.js";
@@ -723,6 +724,7 @@ declare const fullApi: ApiFromModules<{
   "runs/introspect/access": typeof runs_introspect_access;
   "runs/introspect/audience": typeof runs_introspect_audience;
   "runs/introspect/filters": typeof runs_introspect_filters;
+  "runs/introspect/ids": typeof runs_introspect_ids;
   "runs/introspect/mcp": typeof runs_introspect_mcp;
   "runs/introspect/page": typeof runs_introspect_page;
   "runs/introspect/project": typeof runs_introspect_project;

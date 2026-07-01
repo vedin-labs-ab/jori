@@ -14,10 +14,10 @@ type RunContext = {
 type SearchRunsArgs = {
   cursor?: string
   limit?: number
-  parentId?: Id<"runs">
+  parentId?: string
   query?: string
-  rootId?: Id<"runs">
-  runIds?: Id<"runs">[]
+  rootId?: string
+  runIds?: string[]
   scope?: "conversation" | "tenant" | "all"
   since?: number
   source?: "slack" | "github" | "linear" | "automation"
@@ -29,7 +29,7 @@ type SearchRunActivityArgs = {
   cursor?: string
   filter?: ("agent" | "approval" | "asset" | "error" | "model" | "tool")[]
   limit?: number
-  runId: Id<"runs">
+  runId: string
 }
 
 const runIntrospectionTools = new Set(["search_runs", "search_run_activity"])

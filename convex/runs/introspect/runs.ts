@@ -1,12 +1,13 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
+import { normalizeRunId, normalizeRunIds } from "./ids"
 
 const runScanLimit = 300
 
 export type SearchRunArgs = {
-  parentId?: Id<"runs">
-  rootId?: Id<"runs">
-  runIds?: Id<"runs">[]
+  parentId?: string
+  rootId?: string
+  runIds?: string[]
   scope?: "conversation" | "tenant" | "all"
 }
 
@@ -15,16 +16,30 @@ export async function loadCandidateRuns(
   current: Doc<"runs">,
   args: SearchRunArgs
 ) {
-  if (args.runIds !== undefined) {
-    return await loadRunIds(ctx, args.runIds)
+  const runIds = normalizeRunIds(ctx, args.runIds)
+
+  if (runIds !== undefined) {
+    return await loadRunIds(ctx, runIds)
   }
 
-  if (args.parentId !== undefined) {
-    return await queryByParent(ctx, args.parentId)
+  const parentId = normalizeRunId(ctx, args.parentId)
+
+  if (parentId === null) {
+    return []
   }
 
-  if (args.rootId !== undefined) {
-    return await queryByRoot(ctx, args.rootId)
+  if (parentId !== undefined) {
+    return await queryByParent(ctx, parentId)
+  }
+
+  const rootId = normalizeRunId(ctx, args.rootId)
+
+  if (rootId === null) {
+    return []
+  }
+
+  if (rootId !== undefined) {
+    return await queryByRoot(ctx, rootId)
   }
 
   return await queryByScope(ctx, current, args.scope ?? "conversation")
