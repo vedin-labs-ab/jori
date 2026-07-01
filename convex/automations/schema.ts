@@ -66,11 +66,17 @@ export const automationType = v.union(
   v.literal("event")
 )
 
+export const automationVisibility = v.union(
+  v.literal("public"),
+  v.literal("private")
+)
+
 export const automations = defineTable({
   tenantId: v.string(),
   artifactId: v.optional(v.id("artifacts")),
   name: v.string(),
   instructions: v.string(),
+  visibility: v.optional(automationVisibility),
   type: automationType,
   access,
   trigger,

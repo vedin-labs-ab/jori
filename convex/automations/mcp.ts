@@ -13,6 +13,7 @@ type AddAutomationArgs = {
   artifactId?: Id<"artifacts">
   name: string
   instructions: string
+  visibility?: "public" | "private"
   access: AutomationAccessInput
   type: AutomationType
   trigger: AutomationTriggerInput
@@ -33,6 +34,7 @@ type UpdateAutomationArgs = {
   artifactId?: Id<"artifacts">
   name?: string
   instructions?: string
+  visibility?: "public" | "private"
   access?: AutomationAccessInput
   type?: AutomationType
   trigger?: AutomationTriggerInput

@@ -88,13 +88,17 @@ export const sessionTarget = internalQuery({
       return null
     }
 
-    const watch = await ctx.db.get(session.watchId)
-
-    if (watch === null) {
+    if (session.conversationId === undefined) {
       return null
     }
 
-    const integration = await ctx.db.get(watch.integrationId)
+    const conversation = await ctx.db.get(session.conversationId)
+
+    if (conversation === null) {
+      return null
+    }
+
+    const integration = await ctx.db.get(conversation.integrationId)
 
     if (
       integration?.integration !== "slack" ||
@@ -103,14 +107,17 @@ export const sessionTarget = internalQuery({
       return null
     }
 
-    const channelId = await conversationChannelId(ctx, { integration, watch })
+    const channelId = await conversationChannelId(ctx, {
+      integration,
+      conversation,
+    })
 
     return channelId === null
       ? null
       : {
           channelId,
           integration,
-          threadTs: watch.externalId,
+          threadTs: conversation.externalId,
         }
   },
 })
@@ -119,16 +126,16 @@ async function conversationChannelId(
   ctx: QueryCtx,
   args: {
     integration: Doc<"integrations">
-    watch: Doc<"watches">
+    conversation: Doc<"conversations">
   }
 ) {
   const message = await ctx.db
     .query("messages")
     .withIndex("by_conversation", (query) =>
       query
-        .eq("tenantId", args.watch.tenantId)
+        .eq("tenantId", args.conversation.tenantId)
         .eq("integrationId", args.integration._id)
-        .eq("conversationId", args.watch.externalId)
+        .eq("conversationId", args.conversation.externalId)
     )
     .order("desc")
     .first()

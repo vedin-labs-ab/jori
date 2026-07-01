@@ -73,6 +73,12 @@ export const runStatus = v.union(
   v.literal("stopped")
 )
 
+export const audienceScope = v.union(
+  v.literal("tenant"),
+  v.literal("conversation"),
+  v.literal("person")
+)
+
 export const toolSnapshot = v.object({
   groups: v.array(
     v.object({
@@ -97,6 +103,8 @@ export const runs = defineTable({
   automationId: v.optional(v.id("automations")),
   parentId: v.optional(v.id("runs")),
   rootId: v.optional(v.id("runs")),
+  audienceScope: v.optional(audienceScope),
+  conversationId: v.optional(v.id("conversations")),
   cause: runCause,
   instructions: v.optional(v.string()),
   snapshot: runSnapshot,
@@ -112,3 +120,14 @@ export const runs = defineTable({
   .index("by_automation", ["automationId"])
   .index("by_parent", ["parentId"])
   .index("by_root", ["rootId"])
+  .index("by_conversation_and_created_at", ["conversationId", "createdAt"])
+  .index("by_tenant_and_audience_scope_and_created_at", [
+    "tenantId",
+    "audienceScope",
+    "createdAt",
+  ])
+  .index("by_tenant_and_created_by_and_created_at", [
+    "tenantId",
+    "createdBy",
+    "createdAt",
+  ])

@@ -1,12 +1,17 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Id } from "../_generated/dataModel"
 import {
   internalMutation,
   internalQuery,
   type MutationCtx,
   mutation,
-  type QueryCtx,
 } from "../_generated/server"
+import {
+  findActiveSandbox,
+  findSandboxByExternalId,
+  findSessionByRun,
+  isTerminalRun,
+} from "./sandbox_lookup"
 import { requireWorkerSecret } from "./shared"
 
 const idleSandboxLeaseMs = 5 * 60 * 1000
@@ -126,7 +131,8 @@ export async function upsertSandbox(ctx: MutationCtx, args: SandboxRun) {
   }
 
   const now = Date.now()
-  const watchId = (await findSessionByRun(ctx, args.runId))?.watchId
+  const conversationId = (await findSessionByRun(ctx, args.runId))
+    ?.conversationId
   const patch = {
     error: undefined,
     expiresAt: undefined,
@@ -134,7 +140,7 @@ export async function upsertSandbox(ctx: MutationCtx, args: SandboxRun) {
     status: "active" as const,
     tenantId: run.tenantId,
     updatedAt: now,
-    watchId,
+    conversationId,
   }
   const existing = await findSandboxByExternalId(ctx, args.externalId)
 
@@ -156,7 +162,7 @@ export async function releaseIdleSandbox(ctx: MutationCtx, args: SandboxRun) {
     existing === null ||
     existing.runId !== args.runId ||
     existing.status !== "active" ||
-    existing.watchId === undefined
+    existing.conversationId === undefined
   ) {
     return null
   }
@@ -210,14 +216,18 @@ export async function claimReusableSandbox(
   const run = await ctx.db.get(runId)
   const session = await findSessionByRun(ctx, runId)
 
-  if (run === null || session === null || isTerminalRun(run)) {
+  if (
+    run === null ||
+    session?.conversationId === undefined ||
+    isTerminalRun(run)
+  ) {
     return null
   }
 
   const reusable = await findReusableSandbox(ctx, {
     now: Date.now(),
     tenantId: run.tenantId,
-    watchId: session.watchId,
+    conversationId: session.conversationId,
   })
 
   if (reusable === null) {
@@ -235,57 +245,25 @@ export async function claimReusableSandbox(
   return { externalId: reusable.externalId }
 }
 
-export async function findActiveSandbox(
-  ctx: MutationCtx | QueryCtx,
-  runId: Id<"runs">
-): Promise<Doc<"sandboxes"> | null> {
-  return await ctx.db
-    .query("sandboxes")
-    .withIndex("by_run_and_status", (query) =>
-      query.eq("runId", runId).eq("status", "active")
-    )
-    .order("desc")
-    .first()
-}
-
 async function findReusableSandbox(
   ctx: MutationCtx,
   args: {
     now: number
     tenantId: string
-    watchId: Id<"watches">
+    conversationId: Id<"conversations">
   }
 ) {
   return await ctx.db
     .query("sandboxes")
-    .withIndex("by_tenant_and_watch_and_status_and_expires_at", (query) =>
-      query
-        .eq("tenantId", args.tenantId)
-        .eq("watchId", args.watchId)
-        .eq("status", "idle")
-        .gt("expiresAt", args.now)
+    .withIndex(
+      "by_tenant_and_conversation_and_status_and_expires_at",
+      (query) =>
+        query
+          .eq("tenantId", args.tenantId)
+          .eq("conversationId", args.conversationId)
+          .eq("status", "idle")
+          .gt("expiresAt", args.now)
     )
     .order("desc")
     .first()
-}
-
-async function findSandboxByExternalId(
-  ctx: MutationCtx | QueryCtx,
-  externalId: string
-) {
-  return await ctx.db
-    .query("sandboxes")
-    .withIndex("by_external_id", (query) => query.eq("externalId", externalId))
-    .first()
-}
-
-async function findSessionByRun(ctx: MutationCtx, runId: Id<"runs">) {
-  return await ctx.db
-    .query("sessions")
-    .withIndex("by_run", (query) => query.eq("runId", runId))
-    .first()
-}
-
-function isTerminalRun(run: Doc<"runs">) {
-  return ["completed", "failed", "stopped"].includes(run.status)
 }

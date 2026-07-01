@@ -8,33 +8,36 @@ const expectedCursor = {
   reaction: { createdAt: 1000, updatedAt: 1000 },
 }
 
-test("starts new watch message runs as mentions", async () => {
+test("starts new conversation message runs as mentions", async () => {
   const ctx = fakeMutationCtx()
   const result = await startMessageRun(ctx, runArgs())
 
   expect(result.status).toBe("started")
   expect(inserted(ctx, "runs")).toEqual([
     expect.objectContaining({
+      audienceScope: "tenant",
       cause: { type: "message", messageId: "message", kind: "mention" },
+      conversationId: "conversations-1",
     }),
   ])
-  expect(inserted(ctx, "watches")).toEqual([
+  expect(inserted(ctx, "conversations")).toEqual([
     expect.objectContaining({
       externalId: "conversation",
+      visibility: "public",
     }),
   ])
   expect(inserted(ctx, "sessions")).toEqual([
     expect.objectContaining({
-      watchId: "watches-2",
+      conversationId: "conversations-1",
       cursor: expectedCursor,
-      runId: "runs-1",
+      runId: "runs-2",
     }),
   ])
   expect(inserted(ctx, "outbox")).toEqual([
     expect.objectContaining({
-      key: "run:runs-1",
+      key: "run:runs-2",
       operation: expect.objectContaining({
-        runId: "runs-1",
+        runId: "runs-2",
         type: "run.start",
       }),
       status: "pending",
@@ -42,16 +45,16 @@ test("starts new watch message runs as mentions", async () => {
   ])
 })
 
-test("continues active watch sessions without starting another run", async () => {
-  const watch = watchDoc()
+test("continues active conversation sessions without starting another run", async () => {
+  const conversation = conversationDoc()
   const ctx = fakeMutationCtx([
-    ["watches", watch],
-    ...activeSessionSeed(watch, "active-run", "running"),
+    ["conversations", conversation],
+    ...activeSessionSeed(conversation, "active-run", "running"),
   ])
 
   const result = await startMessageRun(ctx, {
     ...runArgs({ message: message("Steer this.") }),
-    watch,
+    conversation,
   })
 
   expect(result).toMatchObject({
@@ -63,15 +66,15 @@ test("continues active watch sessions without starting another run", async () =>
 })
 
 test("starts reply runs when the previous session is terminal", async () => {
-  const watch = watchDoc()
+  const conversation = conversationDoc()
   const ctx = fakeMutationCtx([
-    ["watches", watch],
-    ...activeSessionSeed(watch, "old-run", "completed"),
+    ["conversations", conversation],
+    ...activeSessionSeed(conversation, "old-run", "completed"),
   ])
 
   const result = await startMessageRun(ctx, {
     ...runArgs({ message: message("Following up.") }),
-    watch,
+    conversation,
   })
 
   expect(result.status).toBe("started")
@@ -89,13 +92,13 @@ test("starts reply runs when the previous session is terminal", async () => {
   })
 })
 
-test("starts existing watches without sessions as mentions", async () => {
-  const watch = watchDoc()
-  const ctx = fakeMutationCtx([["watches", watch]])
+test("starts existing conversations without sessions as mentions", async () => {
+  const conversation = conversationDoc()
+  const ctx = fakeMutationCtx([["conversations", conversation]])
 
   const result = await startMessageRun(ctx, {
     ...runArgs({ message: message("First routed task.") }),
-    watch,
+    conversation,
   })
 
   expect(result.status).toBe("started")
@@ -106,13 +109,14 @@ test("starts existing watches without sessions as mentions", async () => {
   ])
 })
 
-function watchDoc(): Doc<"watches"> {
+function conversationDoc(): Doc<"conversations"> {
   return {
-    _id: id<"watches">("watch-doc"),
+    _id: id<"conversations">("conversation-doc"),
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
     externalId: "conversation",
+    visibility: "public",
   }
 }
 
@@ -120,7 +124,7 @@ type StartArgs = Parameters<typeof startMessageRun>[1]
 
 function runArgs(overrides: Partial<StartArgs> = {}): StartArgs {
   return {
-    watch: null,
+    conversation: null,
     integration: integration(),
     message: message("Please help."),
     createdBy: "person" as Id<"persons">,
@@ -163,7 +167,7 @@ function message(text: string, data?: unknown) {
 }
 
 function activeSessionSeed(
-  watch: Doc<"watches">,
+  conversation: Doc<"conversations">,
   runId: string,
   status: "completed" | "running"
 ): Seed[] {
@@ -173,7 +177,7 @@ function activeSessionSeed(
       {
         _id: id<"sessions">("session"),
         _creationTime: 0,
-        watchId: watch._id,
+        conversationId: conversation._id,
         runId: id<"runs">(runId),
         updatedAt: 0,
       },

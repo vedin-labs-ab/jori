@@ -9,7 +9,7 @@ test("resolves the cancellation actor from a user message in the run conversatio
   const ctx = cancellationCtx({
     message: message({ actor }),
     session: session(),
-    watch: watch(),
+    conversation: conversation(),
   })
 
   await expect(
@@ -25,7 +25,7 @@ test("rejects cancellation messages outside the run conversation", async () => {
   const ctx = cancellationCtx({
     message: message({ conversationId: "other-conversation" }),
     session: session(),
-    watch: watch(),
+    conversation: conversation(),
   })
 
   await expect(
@@ -41,7 +41,7 @@ test("rejects non-user cancellation messages", async () => {
   const ctx = cancellationCtx({
     message: message({ actor: { externalId: "UBOT", kind: "self" } }),
     session: session(),
-    watch: watch(),
+    conversation: conversation(),
   })
 
   await expect(
@@ -56,7 +56,7 @@ test("rejects non-user cancellation messages", async () => {
 function cancellationCtx(args: {
   message: Doc<"messages"> | null
   session: Doc<"sessions"> | null
-  watch: Doc<"watches"> | null
+  conversation: Doc<"conversations"> | null
 }) {
   return {
     db: {
@@ -65,8 +65,8 @@ function cancellationCtx(args: {
           return args.message
         }
 
-        if (recordId === "watch") {
-          return args.watch
+        if (recordId === "conversation") {
+          return args.conversation
         }
 
         return null
@@ -102,19 +102,20 @@ function session(): Doc<"sessions"> {
   return {
     _id: id<"sessions">("session"),
     _creationTime: 0,
-    watchId: id<"watches">("watch"),
+    conversationId: id<"conversations">("conversation"),
     runId: id<"runs">("run"),
     updatedAt: 0,
   }
 }
 
-function watch(): Doc<"watches"> {
+function conversation(): Doc<"conversations"> {
   return {
-    _id: id<"watches">("watch"),
+    _id: id<"conversations">("conversation"),
     _creationTime: 0,
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
     externalId: "conversation",
+    visibility: "public",
   }
 }
 

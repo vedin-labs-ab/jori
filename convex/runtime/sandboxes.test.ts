@@ -8,10 +8,10 @@ import {
   upsertSandbox,
 } from "./sandboxes"
 
-test("releases and claims idle sandboxes by watch", async () => {
+test("releases and claims idle sandboxes by conversation", async () => {
   const ctx = fakeMutationCtx([
     ["runs", run("run-1", "running")],
-    ["sessions", session("session-1", "run-1", "watch-1")],
+    ["sessions", session("session-1", "run-1", "conversation-1")],
   ])
 
   await upsertSandbox(ctx, {
@@ -23,7 +23,7 @@ test("releases and claims idle sandboxes by watch", async () => {
     externalId: "sandbox-external",
     runId: "run-1",
     status: "active",
-    watchId: "watch-1",
+    conversationId: "conversation-1",
   })
 
   const lease = await releaseIdleSandbox(ctx, {
@@ -34,11 +34,11 @@ test("releases and claims idle sandboxes by watch", async () => {
   expect(lease?.expiresAt).toBeGreaterThan(Date.now())
   expect(row(ctx, "sandbox-1")).toMatchObject({
     status: "idle",
-    watchId: "watch-1",
+    conversationId: "conversation-1",
   })
 
   ctx.rows.set("run-2", run("run-2", "running"))
-  ctx.rows.set("session-2", session("session-2", "run-2", "watch-1"))
+  ctx.rows.set("session-2", session("session-2", "run-2", "conversation-1"))
 
   await expect(claimReusableSandbox(ctx, id<"runs">("run-2"))).resolves.toEqual(
     { externalId: "sandbox-external" }
@@ -169,13 +169,13 @@ function run(idValue: string, status: "completed" | "running") {
   }
 }
 
-function session(idValue: string, runId: string, watchId: string) {
+function session(idValue: string, runId: string, conversationId: string) {
   return {
     _id: id<"sessions">(idValue),
     _creationTime: 0,
     runId: id<"runs">(runId),
     updatedAt: 0,
-    watchId: id<"watches">(watchId),
+    conversationId: id<"conversations">(conversationId),
   }
 }
 
@@ -187,7 +187,7 @@ function sandbox(overrides: Record<string, unknown>) {
     externalId: "sandbox-external",
     createdAt: 0,
     updatedAt: 0,
-    watchId: id<"watches">("watch-1"),
+    conversationId: id<"conversations">("conversation-1"),
     ...overrides,
   }
 }

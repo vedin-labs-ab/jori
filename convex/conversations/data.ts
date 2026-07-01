@@ -1,15 +1,15 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { conversationVisibility } from "../messages/surface"
+import { resolveRunAudience } from "../runs/introspect/audience"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { queueRun } from "../runtime/outbox"
 import { wakeRun } from "../runtime/waiters/data"
 import { findSession, isReusableSession, startSession } from "../sessions/data"
-
-const waiterWakeGraceMs = 5 * 60 * 1000
-const runActivityGraceMs = 2 * 60 * 60 * 1000
+import { isFreshRunWithoutWaiter } from "./fresh"
 
 type StartMessageRunArgs = {
-  watch: Doc<"watches"> | null
+  conversation: Doc<"conversations"> | null
   integration: Doc<"integrations">
   message: Doc<"messages">
   createdBy: Id<"persons"> | undefined
@@ -18,7 +18,7 @@ type StartMessageRunArgs = {
   replaceActiveSession?: boolean
 }
 
-export async function findWatch(
+export async function findConversation(
   ctx: MutationCtx,
   args: {
     tenantId: string
@@ -33,7 +33,7 @@ export async function findWatch(
   const externalId = args.externalId
 
   return await ctx.db
-    .query("watches")
+    .query("conversations")
     .withIndex("by_tenant_and_integration_and_external", (query) =>
       query
         .eq("tenantId", args.tenantId)
@@ -43,41 +43,67 @@ export async function findWatch(
     .first()
 }
 
-export async function ensureWatch(
+export async function ensureConversation(
   ctx: MutationCtx,
   args: {
-    tenantId: string
-    integrationId: Id<"integrations">
     externalId: string | undefined
+    integration: Doc<"integrations">
+    message: Doc<"messages">
   }
 ) {
-  const watch = await findWatch(ctx, args)
-
-  if (watch !== null || args.externalId === undefined) {
-    return watch
-  }
-
-  const watchId = await ctx.db.insert("watches", {
-    tenantId: args.tenantId,
-    integrationId: args.integrationId,
+  const conversation = await findConversation(ctx, {
+    tenantId: args.integration.tenantId,
+    integrationId: args.integration._id,
     externalId: args.externalId,
   })
 
-  return await ctx.db.get(watchId)
+  if (conversation !== null || args.externalId === undefined) {
+    return conversation
+  }
+
+  return await insertConversation(ctx, {
+    externalId: args.externalId,
+    integration: args.integration,
+    message: args.message,
+  })
+}
+
+async function insertConversation(
+  ctx: MutationCtx,
+  args: {
+    externalId: string
+    integration: Doc<"integrations">
+    message: Doc<"messages">
+  }
+) {
+  const conversationId = await ctx.db.insert("conversations", {
+    tenantId: args.integration.tenantId,
+    integrationId: args.integration._id,
+    externalId: args.externalId,
+    visibility: conversationVisibility(args.message, args.integration),
+  })
+  const conversation = await ctx.db.get(conversationId)
+
+  if (conversation === null) {
+    throw new Error("Conversation insert failed.")
+  }
+
+  return conversation
 }
 
 export async function startMessageRun(
   ctx: MutationCtx,
   args: StartMessageRunArgs
 ) {
-  const watch = args.watch
-  const session = watch === null ? null : await findSession(ctx, watch._id)
+  const conversation = args.conversation
+  const session =
+    conversation === null ? null : await findSession(ctx, conversation._id)
   const activeSession =
     session === null || args.replaceActiveSession === true
       ? null
       : await isReusableSession(ctx, session)
 
-  if (watch !== null && activeSession !== null) {
+  if (conversation !== null && activeSession !== null) {
     if (activeSession.runId !== undefined) {
       const woken = await wakeRun(ctx, {
         runId: activeSession.runId,
@@ -97,7 +123,7 @@ export async function startMessageRun(
       status: "continued" as const,
       messageId: args.message._id,
       sessionId: activeSession._id,
-      watchId: watch._id,
+      conversationId: conversation._id,
       ...(activeSession.runId === undefined
         ? {}
         : { runId: activeSession.runId }),
@@ -113,19 +139,17 @@ async function startNewMessageRun(
   session: Doc<"sessions"> | null
 ) {
   const kind = session === null ? "mention" : "reply"
-  const runId = await insertRun(ctx, { ...args, kind })
-
-  const watchId =
-    args.watch === null
-      ? await ctx.db.insert("watches", {
-          tenantId: args.integration.tenantId,
-          integrationId: args.integration._id,
-          externalId: args.externalId,
-        })
-      : args.watch._id
+  const conversation =
+    args.conversation ??
+    (await insertConversation(ctx, {
+      externalId: args.externalId,
+      integration: args.integration,
+      message: args.message,
+    }))
+  const runId = await insertRun(ctx, { ...args, conversation, kind })
 
   const sessionId = await startSession(ctx, {
-    watchId,
+    conversationId: conversation._id,
     message: args.message,
     runId,
     now: args.now,
@@ -138,81 +162,8 @@ async function startNewMessageRun(
     messageId: args.message._id,
     runId,
     sessionId,
-    watchId,
+    conversationId: conversation._id,
   }
-}
-
-async function isFreshRunWithoutWaiter(
-  ctx: MutationCtx,
-  runId: Id<"runs">,
-  now: number
-) {
-  const run = await ctx.db.get(runId)
-
-  if (run === null || isTerminalRun(run)) {
-    return false
-  }
-
-  const latestActivity = await latestRunActivity(ctx, run)
-  const latestInactiveWaiter = await latestInactiveWaiterUpdate(ctx, runId)
-
-  if (isUnresumedWaiterWake(latestActivity, latestInactiveWaiter, now)) {
-    return false
-  }
-
-  return now - latestActivity <= runActivityGraceMs
-}
-
-async function latestRunActivity(ctx: MutationCtx, run: Doc<"runs">) {
-  const trace = await ctx.db
-    .query("traces")
-    .withIndex("by_run_and_timestamp", (query) => query.eq("runId", run._id))
-    .order("desc")
-    .first()
-
-  return Math.max(run.createdAt, trace?.timestamp ?? 0)
-}
-
-async function latestInactiveWaiterUpdate(ctx: MutationCtx, runId: Id<"runs">) {
-  const updates = await Promise.all(
-    (["cancelled", "expired", "woken"] as const).map(async (status) => {
-      const waiter = await ctx.db
-        .query("waiters")
-        .withIndex("by_run_and_status", (query) =>
-          query.eq("runId", runId).eq("status", status)
-        )
-        .order("desc")
-        .first()
-
-      return waiter?.updatedAt
-    })
-  )
-
-  const values = updates.filter(
-    (updatedAt): updatedAt is number => updatedAt !== undefined
-  )
-
-  return values.length === 0 ? 0 : Math.max(...values)
-}
-
-function isUnresumedWaiterWake(
-  latestActivity: number,
-  latestInactiveWaiter: number,
-  now: number
-) {
-  return (
-    latestInactiveWaiter > 0 &&
-    latestActivity <= latestInactiveWaiter &&
-    now - latestInactiveWaiter > waiterWakeGraceMs
-  )
-}
-
-function isTerminalRun(run: Doc<"runs">) {
-  return (
-    run.status === "completed" ||
-    run.status === "failed" ||
-    run.status === "stopped"
-  )
 }
 
 async function insertRun(
@@ -220,6 +171,7 @@ async function insertRun(
   args: {
     integration: Doc<"integrations">
     message: Doc<"messages">
+    conversation: Doc<"conversations">
     createdBy: Id<"persons"> | undefined
     now: number
     kind: "mention" | "reply"
@@ -237,6 +189,15 @@ async function insertRun(
       kind: args.kind,
       message: args.message,
     }),
+    ...(await resolveRunAudience(ctx, {
+      origin: {
+        conversation: {
+          conversation: args.conversation,
+          integration: args.integration,
+        },
+      },
+      run: { createdBy: args.createdBy },
+    })),
     status: "queued",
     createdBy: args.createdBy,
     createdAt: args.now,

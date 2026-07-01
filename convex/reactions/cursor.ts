@@ -23,9 +23,13 @@ export async function readPendingReactions(
   session: Doc<"sessions">,
   limit = defaultReactionDrainLimit
 ) {
-  const watch = await ctx.db.get(session.watchId)
+  if (session.conversationId === undefined) {
+    return { hasMore: false, reactions: [] }
+  }
 
-  if (watch === null) {
+  const conversation = await ctx.db.get(session.conversationId)
+
+  if (conversation === null) {
     return { hasMore: false, reactions: [] }
   }
 
@@ -33,7 +37,7 @@ export async function readPendingReactions(
   const candidates = await queryConversationReactions(ctx, {
     limit: maxPendingReactionReadLimit + 1,
     session,
-    watch,
+    conversation,
   })
   const scanned = candidates.slice(0, maxPendingReactionReadLimit)
 
@@ -124,7 +128,7 @@ async function queryConversationReactions(
   args: {
     limit: number
     session: Doc<"sessions">
-    watch: Doc<"watches">
+    conversation: Doc<"conversations">
   }
 ) {
   return await ctx.db
@@ -133,9 +137,9 @@ async function queryConversationReactions(
       "by_tenant_and_integration_and_target_conversation_and_updated",
       (query) => {
         const scoped = query
-          .eq("tenantId", args.watch.tenantId)
-          .eq("integrationId", args.watch.integrationId)
-          .eq("target.conversationId", args.watch.externalId)
+          .eq("tenantId", args.conversation.tenantId)
+          .eq("integrationId", args.conversation.integrationId)
+          .eq("target.conversationId", args.conversation.externalId)
 
         const cursor = args.session.cursor?.reaction
 

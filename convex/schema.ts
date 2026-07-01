@@ -15,6 +15,7 @@ import {
 import { assets } from "./assets/schema"
 import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
+import { conversations } from "./conversations/schema"
 import { events } from "./events/schema"
 import { identities } from "./identity/schema"
 import { integrationOffers } from "./integrations/offers/schema"
@@ -35,7 +36,6 @@ import { waiters } from "./runtime/waiters/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
 import { transitions } from "./transitions"
-import { watches } from "./watches/schema"
 
 export default defineSchema({
   skills,
@@ -52,7 +52,7 @@ export default defineSchema({
   subscriptions,
   events,
   runs,
-  watches,
+  conversations,
   sessions,
   approvals,
   transitions,

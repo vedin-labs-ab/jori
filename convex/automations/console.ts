@@ -23,7 +23,13 @@ import {
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
-import { accessInput, automationType, status, triggerInput } from "./schema"
+import {
+  accessInput,
+  automationType,
+  automationVisibility,
+  status,
+  triggerInput,
+} from "./schema"
 
 export const list = query({
   args: {
@@ -86,6 +92,7 @@ export const create = mutation({
     tenantId: v.string(),
     name: v.string(),
     instructions: v.string(),
+    visibility: v.optional(automationVisibility),
     access: accessInput,
     type: automationType,
     trigger: triggerInput,
@@ -107,6 +114,7 @@ export const update = mutation({
     automationId: v.id("automations"),
     name: v.string(),
     instructions: v.string(),
+    visibility: v.optional(automationVisibility),
     access: accessInput,
     type: v.optional(automationType),
     trigger: v.optional(triggerInput),
@@ -163,6 +171,7 @@ async function toConsoleAutomation(
     id: automation._id,
     name: automation.name,
     instructions: automation.instructions,
+    visibility: automation.visibility ?? "private",
     type: automation.type,
     status: automation.status,
     trigger: await projectTriggerForConsole(ctx, automation),

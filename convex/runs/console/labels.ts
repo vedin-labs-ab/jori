@@ -1,13 +1,17 @@
+import { type Doc } from "../../_generated/dataModel"
 import { toolSurfaceLabel } from "../../shared/integrations"
-import { type getRunContext } from "./context"
 
-type RunContext = Awaited<ReturnType<typeof getRunContext>>
+type RunLabelContext = {
+  automation?: Doc<"automations"> | null
+  message?: Doc<"messages"> | null
+  run: Doc<"runs">
+}
 
-export function runTitle(context: RunContext) {
+export function runTitle(context: RunLabelContext) {
   return context.run.snapshot.title
 }
 
-export function runTask(context: RunContext) {
+export function runTask(context: RunLabelContext) {
   return (
     context.run.instructions ??
     context.message?.text ??
@@ -16,7 +20,7 @@ export function runTask(context: RunContext) {
   )
 }
 
-export function triggerLabel(context: RunContext) {
+export function triggerLabel(context: RunLabelContext) {
   const surface = context.run.snapshot.source.surface
 
   if (context.run.cause.type === "message") {

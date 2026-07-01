@@ -13,6 +13,10 @@ import {
   isCancelIntegrationOfferTool,
   isIntegrationOfferTool,
 } from "../integrations/offers/mcp"
+import {
+  callRunIntrospectionTool,
+  isRunIntrospectionTool,
+} from "../runs/introspect/mcp"
 import { callMiloSkillTool, isMiloSkillTool } from "../skills/mcp"
 import { type ApprovalBrokerContext } from "./approval"
 import { callWebTool } from "./tools/web"
@@ -51,6 +55,10 @@ export async function callMiloTool(
 
   if (isMiloSkillTool(request.tool)) {
     return await callMiloSkillTool(ctx, run, request)
+  }
+
+  if (isRunIntrospectionTool(request.tool)) {
+    return await callRunIntrospectionTool(ctx, run, request)
   }
 
   return await callMiloAutomationTool(ctx, toMiloContext(run), request)
