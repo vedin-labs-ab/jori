@@ -5,12 +5,11 @@ import {
   type ModelToolCall,
 } from "../model/types"
 import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
-import { type RuntimeContext } from "../types"
+import { type HandoffSubject, type RuntimeContext } from "../types"
 import { recordRunEvent } from "./events"
-import { reconcileHandoffs } from "./handoffs"
+import { pendingHandoffSubjects, reconcileHandoffs } from "./handoffs"
 import { appendSessionMessages } from "./messages"
 import { completeModelStep } from "./model"
-import { handoffSubjects } from "./pending"
 import { appendStopRepair } from "./repair"
 import { parkRun } from "./waiter"
 
@@ -123,7 +122,7 @@ async function settleYield(
   kind: YieldKind,
   content?: string
 ): Promise<YieldOutcome> {
-  let refreshSubjects = handoffSubjects([])
+  let refreshSubjects: HandoffSubject[] = []
 
   for (;;) {
     const { messageProgressed, pending, progressed } = await reconcileHandoffs(
@@ -149,7 +148,7 @@ async function settleYield(
       return "aborted"
     }
 
-    refreshSubjects = handoffSubjects(pending)
+    refreshSubjects = pendingHandoffSubjects(pending)
   }
 }
 
