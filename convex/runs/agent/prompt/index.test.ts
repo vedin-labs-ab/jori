@@ -265,13 +265,17 @@ function expectRunBefore(prompt: string, section: string) {
   expect(prompt.indexOf("Active surface:")).toBeLessThan(
     prompt.indexOf(section)
   )
+  expect(prompt.indexOf("Run ID:")).toBeLessThan(
+    prompt.indexOf("Run started at:")
+  )
   expect(prompt.indexOf("Run started at:")).toBeLessThan(
     prompt.indexOf(section)
   )
 }
 
 function expectSingleRun(prompt: string) {
-  expect(prompt).toContain("# Run\n\nRun started at:")
+  expect(prompt).toContain("# Run\n\nRun ID: run\nRun started at:")
+  expect(prompt.match(/Run ID:/g)).toHaveLength(1)
   expect(prompt.match(/Run started at:/g)).toHaveLength(1)
 }
 

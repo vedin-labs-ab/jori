@@ -25,7 +25,7 @@ export function assemblePrompt(
   const communication = createCommunicationInstructions(input, runtimeSkills, {
     activeSurface: activeSurface !== null,
   })
-  const run = createRunInstructions(activeSurface)
+  const run = createRunInstructions(input.run._id, activeSurface)
   const promptedTools = options.promptedTools ?? []
   const skills = createSkillInstructions({
     omittedNames: omittedSkillNames(communication),
@@ -104,8 +104,14 @@ function createOrganizationInstructions(input: AgentRuntimeInput) {
   }).trim()
 }
 
-function createRunInstructions(activeSurface: PromptActiveSurface | null) {
+function createRunInstructions(
+  runId: AgentRuntimeInput["run"]["_id"],
+  activeSurface: PromptActiveSurface | null
+) {
   return renderPromptTemplate(promptTemplates["run/message"], {
+    run: {
+      id: runId,
+    },
     surface: {
       active: activeSurface !== null,
       label:

@@ -11,7 +11,8 @@ describe("automation trigger prompts", () => {
     const prompt = assemblePrompt(automationRuntimeInput())
 
     expect(prompt).toContain("An automation triggered this run.")
-    expect(prompt).toContain("# Run\n\nRun started at:")
+    expect(prompt).toContain("# Run\n\nRun ID: run\nRun started at:")
+    expect(prompt.match(/Run ID:/g)).toHaveLength(1)
     expect(prompt).not.toContain("Active surface:")
     expect(prompt.match(/Run started at:/g)).toHaveLength(1)
     expect(prompt).not.toContain("Integration access:")

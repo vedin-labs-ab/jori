@@ -26,7 +26,7 @@ export const runMiloToolInputSchemas = {
 function searchRunsInputSchema(): JsonSchema {
   return {
     description:
-      "Find visible prior runs. Choose exactly one mode for the lookup intent.",
+      "Find visible runs. Choose exactly one mode for the lookup intent.",
     oneOf: [
       searchModeSchema(),
       idsModeSchema(),
@@ -54,7 +54,9 @@ function idsModeSchema() {
     properties: {
       mode: modeProperty("ids", "Resolve known run IDs directly."),
       runIds: {
-        ...stringArrayProperty("Known run IDs returned by search_runs."),
+        ...stringArrayProperty(
+          "Known run IDs returned by search_runs, or the current Run ID from system context."
+        ),
         maxItems: 50,
         minItems: 1,
       },
@@ -105,7 +107,7 @@ function scopeProperty() {
 function filterProperties() {
   return {
     query: stringProperty(
-      "Substring matched against title, task, and context labels."
+      "Case-insensitive substring filter over title, task, trigger, and context labels. Not regex, fuzzy, or semantic search."
     ),
     status: {
       type: "string",
@@ -137,10 +139,12 @@ function pageProperties() {
 
 function searchRunActivityInputSchema() {
   return objectSchema({
-    description: "Inspect one visible prior run.",
+    description: "Inspect one visible run.",
     required: ["runId"],
     properties: {
-      runId: stringProperty("Run ID returned by search_runs."),
+      runId: stringProperty(
+        "Run ID returned by search_runs, or the current Run ID from system context."
+      ),
       filter: {
         type: "array",
         description: "Optional activity kinds to include.",
