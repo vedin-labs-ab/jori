@@ -10,7 +10,8 @@ import {
   tool,
 } from "ai"
 import { requireOpenRouterRuntimeConfig } from "./config"
-import { beginExecutionMessage, readToolInput } from "./shared"
+import { ingestReasoning } from "./reasoning"
+import { beginExecutionMessage, nullableText, readToolInput } from "./shared"
 import {
   type ModelMessage,
   type ModelResponse,
@@ -57,7 +58,7 @@ export class OpenRouterModelRuntime implements ModelRuntime {
     })
     const toolCalls = response.toolCalls.flatMap(readToolCall)
     const output = nullableText(response.text)
-    const reasoning = readReasoningText(response)
+    const reasoning = ingestReasoning(this.config.model, response.reasoningText)
     const usage = readModelUsage(response)
 
     if (toolCalls.length === 0) {
@@ -195,12 +196,4 @@ function readToolCall(toolCall: {
       name: toolCall.toolName,
     },
   ]
-}
-
-function readReasoningText(response: { reasoningText?: unknown }) {
-  return nullableText(response.reasoningText)
-}
-
-function nullableText(value: unknown) {
-  return typeof value === "string" && value.trim() !== "" ? value : null
 }

@@ -20,6 +20,8 @@ export type ModelUsage = {
   toolCalls: number
 }
 
+const modelReasoningCharacterLimit = 1500
+
 export function readPreparedTools(data: unknown) {
   const record = asRecord(data)
   const tools = asRecord(record?.tools)
@@ -59,6 +61,14 @@ export function readModelUsage(data: unknown): ModelUsage | undefined {
     totalTokens: readNumber(usage.totalTokens) ?? 0,
     toolCalls: readNumber(usage.toolCalls) ?? 0,
   }
+}
+
+export function readModelReasoning(data: unknown) {
+  const reasoning = readString(asRecord(data)?.reasoning)
+
+  return reasoning === undefined
+    ? undefined
+    : reasoning.slice(0, modelReasoningCharacterLimit)
 }
 
 export function readToolAccess(data: unknown): ToolLabel["access"] | undefined {

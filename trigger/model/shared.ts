@@ -9,3 +9,7 @@ export function readToolInput(value: unknown) {
 
   return toJsonObject(value)
 }
+
+export function nullableText(value: unknown) {
+  return typeof value === "string" && value.trim() !== "" ? value : null
+}

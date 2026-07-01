@@ -34,7 +34,7 @@ export const miloToolPermissionRows = [
     "search_run_activity",
     "Search run activity",
     "Inspect activity from a visible Milo run.",
-    "Inspect one visible run after search_runs, or inspect the active run with the current Run ID from context. Use filters and pagination instead of enumerating everything. Prior-run reasoning and raw tool payloads are not available; cite the inspected runId.",
+    "Inspect one visible run after search_runs, or inspect the active run with the current Run ID from context. Use filters and pagination instead of enumerating everything. Summarized model reasoning may be available on model activity items as incomplete intent context, not a verbatim transcript. Raw tool payloads are not available; cite the inspected runId.",
     "read",
   ],
   [
