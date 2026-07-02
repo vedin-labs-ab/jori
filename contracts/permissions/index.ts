@@ -9,10 +9,18 @@ export const permissionModes = [
   "prompted",
   "blocked",
 ] as const
+export const toolPermissionRoutes = [
+  "broker",
+  "sandbox",
+  "agent",
+  "run",
+  "surface",
+] as const
 export const toolAccessLevels = ["read", "write"] as const
 
 export type PermissionMode = (typeof permissionModes)[number]
 export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
+export type ToolPermissionRoute = (typeof toolPermissionRoutes)[number]
 export type ToolAccess = (typeof toolAccessLevels)[number]
 export type ToolPermission = {
   tool: string
@@ -22,6 +30,7 @@ export type ToolPermission = {
   description: string
   /** Agent-facing: the tool description the model reads when choosing to call. */
   usage: string
+  route: ToolPermissionRoute
   access: ToolAccess
   defaultMode: PermissionMode
 }
@@ -45,10 +54,11 @@ export type ToolPermissionRow = readonly [
   usage: string,
   access: ToolAccess,
   defaultMode?: PermissionMode,
+  route?: ToolPermissionRoute,
 ]
 
 export const toolPermissions = toolPermissionRows.map(
-  ([surface, tool, label, description, usage, access, defaultMode]) => ({
+  ([surface, tool, label, description, usage, access, defaultMode, route]) => ({
     surface,
     tool,
     label,
@@ -56,6 +66,7 @@ export const toolPermissions = toolPermissionRows.map(
     usage,
     access,
     defaultMode: defaultMode ?? "allowed",
+    route: route ?? "broker",
   })
 ) satisfies ToolPermission[]
 
@@ -67,8 +78,17 @@ export function getToolPermission(tool: string) {
   return toolPermissionsByName.get(tool)
 }
 
-export function getToolPermissionsBySurface(surface: ToolSurface) {
-  return toolPermissions.filter((permission) => permission.surface === surface)
+export function getToolPermissionsBySurface(
+  surface: ToolSurface,
+  options: {
+    routes?: readonly ToolPermissionRoute[]
+  } = {}
+) {
+  return toolPermissions.filter(
+    (permission) =>
+      permission.surface === surface &&
+      matchesPermissionRoute(permission, options.routes)
+  )
 }
 
 export function resolveToolModes(overrides: PermissionOverride[]) {
@@ -121,4 +141,11 @@ export function isModeAllowed(
   _mode: ConfigurablePermissionMode
 ) {
   return permission.defaultMode !== "required"
+}
+
+function matchesPermissionRoute(
+  permission: ToolPermission,
+  routes: readonly ToolPermissionRoute[] | undefined
+) {
+  return routes === undefined || routes.includes(permission.route)
 }

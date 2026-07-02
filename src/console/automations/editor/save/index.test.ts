@@ -153,6 +153,7 @@ function toolPermission(
     label: "Tool",
     mode: overrides.mode ?? "allowed",
     overrideMode: null,
+    route: "broker" as const,
     surface: overrides.surface ?? "github",
     tool: overrides.tool ?? "github_get_issue",
   }

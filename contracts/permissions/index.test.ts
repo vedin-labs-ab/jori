@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+import { codingToolNames } from "../coding"
 import { integrations, toolSurfaces } from "../integrations"
 import { toolPermissions } from "."
 
@@ -23,7 +24,15 @@ const requiredCommunicationTools = new Set<string>(
   requiredCommunicationToolNames
 )
 
-describe("permission catalog", () => {
+const requiredNativeToolNames = [
+  "finish_run",
+  "send_reply",
+  "add_reaction",
+  ...codingToolNames,
+  "start_agent",
+] as const
+
+describe("permission catalog shape", () => {
   test("attaches permissions to tool surfaces, not broad providers", () => {
     const knownSurfaces = new Set<string>(toolSurfaces)
     const permissionSurfaces = new Set<string>(
@@ -46,6 +55,35 @@ describe("permission catalog", () => {
     }
   })
 
+  test("keeps user-facing descriptions free of internal guidance", () => {
+    const leakedDescriptions = toolPermissions
+      .filter((permission) =>
+        /\/home\/user|<repo>|workspace-relative|args without|cwd|MCP|sandbox/i.test(
+          permission.description
+        )
+      )
+      .map((permission) => permission.tool)
+
+    expect(leakedDescriptions).toEqual([])
+  })
+
+  test("requires native runtime tools", () => {
+    const permissionsByTool = new Map(
+      toolPermissions.map((permission) => [permission.tool, permission])
+    )
+
+    for (const tool of requiredNativeToolNames) {
+      expect(permissionsByTool.get(tool)).toEqual(
+        expect.objectContaining({
+          defaultMode: "required",
+          surface: "milo",
+        })
+      )
+    }
+  })
+})
+
+describe("permission catalog defaults", () => {
   test("defaults integration tools by communication policy", () => {
     const integrationSurfaces = new Set<string>(integrations)
 

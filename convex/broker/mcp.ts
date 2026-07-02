@@ -199,6 +199,10 @@ function authorizeTool(
     throw new Error(`Unknown ${request.surface} tool: ${request.tool}`)
   }
 
+  if (permission.route !== "broker") {
+    throw new Error(`Unknown ${request.surface} tool: ${request.tool}`)
+  }
+
   const mode = resolveToolMode(context.toolModes, request.tool)
 
   const executionType = toolExecutionType(context.input.type)

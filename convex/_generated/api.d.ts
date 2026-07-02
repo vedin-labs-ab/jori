@@ -365,6 +365,7 @@ import type * as runtime_lifecycle_snapshot from "../runtime/lifecycle/snapshot.
 import type * as runtime_lifecycle_tools from "../runtime/lifecycle/tools.js";
 import type * as runtime_outbox from "../runtime/outbox.js";
 import type * as runtime_permissions_index from "../runtime/permissions/index.js";
+import type * as runtime_permissions_native from "../runtime/permissions/native.js";
 import type * as runtime_permissions_tools from "../runtime/permissions/tools.js";
 import type * as runtime_sandbox from "../runtime/sandbox.js";
 import type * as runtime_sandbox_lookup from "../runtime/sandbox_lookup.js";
@@ -761,6 +762,7 @@ declare const fullApi: ApiFromModules<{
   "runtime/lifecycle/tools": typeof runtime_lifecycle_tools;
   "runtime/outbox": typeof runtime_outbox;
   "runtime/permissions/index": typeof runtime_permissions_index;
+  "runtime/permissions/native": typeof runtime_permissions_native;
   "runtime/permissions/tools": typeof runtime_permissions_tools;
   "runtime/sandbox": typeof runtime_sandbox;
   "runtime/sandbox_lookup": typeof runtime_sandbox_lookup;

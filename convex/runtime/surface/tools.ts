@@ -3,6 +3,7 @@ import { finalProperty } from "../../../contracts/runtime"
 import { type MessageIntegration } from "../../runs/agent/input"
 import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import { type RunToolSnapshotTool } from "../../runs/agent/tools/snapshot"
+import { nativeToolSnapshot, nativeToolUsage } from "../permissions/native"
 
 export type ActiveSurfaceTool = {
   access: "write"
@@ -21,19 +22,19 @@ export function activeSurfaceTools(
 export function activeSurfaceToolSnapshot(
   tools: ActiveSurfaceTool[]
 ): RunToolSnapshotTool[] {
-  return tools.map((tool) => ({
-    access: tool.access,
-    description: tool.description,
-    label: activeSurfaceToolLabel(tool.name),
-    tool: tool.name,
-  }))
+  return tools.map((tool) =>
+    nativeToolSnapshot({
+      access: tool.access,
+      route: tool.route,
+      tool: tool.name,
+    })
+  )
 }
 
 function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
   return {
     access: "write",
-    description:
-      "Send a visible reply or update to the active requester surface. Milo routes it to the current requester context by default.",
+    description: nativeToolUsage("send_reply", "surface"),
     inputSchema: withOptionalFieldGuidance(sendReplySchema(surface)),
     name: "send_reply",
     route: "surface",
@@ -43,7 +44,7 @@ function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
 function addReactionTool(surface: MessageIntegration): ActiveSurfaceTool {
   return {
     access: "write",
-    description: "Add a visible reaction on the active requester surface.",
+    description: nativeToolUsage("add_reaction", "surface"),
     inputSchema: withOptionalFieldGuidance(addReactionSchema(surface)),
     name: "add_reaction",
     route: "surface",
@@ -202,8 +203,4 @@ function githubReactionTarget(): JsonObject {
       },
     },
   }
-}
-
-function activeSurfaceToolLabel(name: ActiveSurfaceTool["name"]) {
-  return name === "send_reply" ? "Send reply" : "Add reaction"
 }

@@ -53,7 +53,7 @@ function runCapabilityGroups(context: ApprovalBrokerContext) {
   const surfaces = runSurfaces(context.input)
 
   return surfaces.flatMap((surface) => {
-    const tools = getToolPermissionsBySurface(surface)
+    const tools = getBrokerPermissions(surface)
       .filter((permission) => isRunPermission(context, permission))
       .map((permission) => capabilityTool(permission, context.toolModes))
 
@@ -75,7 +75,7 @@ function connectedCapabilityGroups(context: ApprovalBrokerContext) {
       {
         ...capabilityGroup(
           surface,
-          getToolPermissionsBySurface(surface).map((permission) =>
+          getBrokerPermissions(surface).map((permission) =>
             capabilityTool(permission, context.toolModes)
           )
         ),
@@ -93,7 +93,7 @@ function availableCapabilityGroup(
   return {
     ...capabilityGroup(
       surface,
-      getToolPermissionsBySurface(surface).map((permission) =>
+      getBrokerPermissions(surface).map((permission) =>
         capabilityTool(permission, toolModes)
       )
     ),
@@ -118,7 +118,7 @@ function capabilityTool(
 ): CapabilityTool {
   return {
     access: permission.access,
-    description: permission.usage,
+    description: permission.description,
     label: permission.label,
     mode: resolveToolMode(toolModes, permission.tool),
     tool: permission.tool,
@@ -175,6 +175,10 @@ function runSurfaces(input: AgentRuntimeInput) {
   }
 
   return surfaces
+}
+
+function getBrokerPermissions(surface: ToolSurface) {
+  return getToolPermissionsBySurface(surface, { routes: ["broker"] })
 }
 
 function connectedSurfaceSet(

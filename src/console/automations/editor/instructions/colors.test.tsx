@@ -87,6 +87,7 @@ describe("automation instructions blocked marker colors", () => {
           label: "Read issue",
           mode: "blocked",
           overrideMode: "blocked",
+          route: "broker",
           surface: "github",
           tool: "github_get_issue",
         },

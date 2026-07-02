@@ -73,6 +73,7 @@ export function toolPermission(
     label,
     mode,
     overrideMode: null,
+    route: "broker",
     surface,
     tool,
   }
