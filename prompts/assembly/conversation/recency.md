@@ -1,7 +1,6 @@
 # Recent Activity
 
-The requester also has recent Milo context elsewhere. Use it only when it helps
-interpret this request; do not mention this block directly unless relevant.
+Use this privacy-scoped recent context as requester memory to interpret the request and preserve continuity. Mention it only when directly relevant.
 
 {% for item in recency.items %}
 - {{item.summarizedAt}} | {{item.surface}}{% if item.identifiers %} | identifiers=[{{item.identifiers}}]{% endif %} | summary updated {{item.age}}
