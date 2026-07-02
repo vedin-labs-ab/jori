@@ -23,9 +23,5 @@ export function createCommunicationInstructions(
     integration: input.messageIntegration,
     profile: "agent-final-reply",
     skills,
-    tools: {
-      add_reaction: true,
-      send_reply: true,
-    },
   })
 }

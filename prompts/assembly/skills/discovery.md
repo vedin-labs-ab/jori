@@ -1,6 +1,5 @@
 # Skills
 
-Use `load_skill` to load full instructions for an available skill when needed.
+Load full instructions with `load_skill` before doing work a skill covers:
 
-Available skills:
 {{skills.available}}

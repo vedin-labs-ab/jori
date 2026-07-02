@@ -1,4 +1,3 @@
-import { toolFinalDescription } from "../runtime"
 import { type ToolPermissionRow } from "./index"
 
 export const miloToolPermissionRows = [
@@ -42,7 +41,7 @@ export const miloToolPermissionRows = [
     "offer_integration",
     "Offer integration",
     "Offer to connect an integration so Milo can use it.",
-    `Offer an integration the run needs and surface it in the active conversation. Include a concise summary for the offer card. ${toolFinalDescription}`,
+    "Offer an integration the run needs and surface it in the active conversation. Include a concise summary for the offer card.",
     "write",
     "required",
   ],

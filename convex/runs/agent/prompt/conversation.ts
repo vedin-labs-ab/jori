@@ -14,7 +14,7 @@ export function createMessageConversationValues(input: MessageInput) {
   return {
     body:
       entries.length === 0
-        ? "- None"
+        ? null
         : entries.map(formatMessageEntry).join("\n\n"),
     current: formatMessageEntry(messageEntry(input.message, input.integration)),
     summary: formatConversationSummary(input),

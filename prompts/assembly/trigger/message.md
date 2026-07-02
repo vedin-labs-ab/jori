@@ -2,21 +2,18 @@
 
 A {{message.integration}} message triggered this run.
 
-Target:
-
 {% if message.surface == "github" %}
 {% include "target/github" %}
 {% endif %}
 {% if message.surface == "linear" %}
 {% include "target/linear" %}
 {% endif %}
-{% if message.surface == "slack" %}
-{% include "target/slack" %}
-{% endif %}
 
+{% if message.conversation %}
 Recent messages{% if message.conversationSummary %} {{message.conversationSummary}}{% endif %}:
 
 {{message.conversation}}
+{% endif %}
 
 Current message:
 

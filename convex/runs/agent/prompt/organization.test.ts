@@ -27,8 +27,8 @@ test("renders organization facts before the run section", () => {
   expect(prompt).toContain("- https://milo.dev")
   expect(prompt).not.toContain("Website:")
   expect(prompt).not.toContain("Products:")
-  expect(prompt.indexOf("# Approvals")).toBeLessThan(
-    prompt.indexOf("# Organization")
+  expect(prompt.indexOf("# Organization")).toBeLessThan(
+    prompt.indexOf("# Voice")
   )
   expect(prompt.indexOf("# Organization")).toBeLessThan(prompt.indexOf("# Run"))
   expectNoSyntheticBlankLines(prompt)

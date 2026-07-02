@@ -157,6 +157,7 @@ function isCandidateConversation(
     conversation._id !== options.currentConversationId &&
     !options.seen.has(conversation._id) &&
     conversation.summary !== undefined &&
+    conversation.summary.trim() !== "" &&
     conversation.summarizedAt !== undefined
   )
 }

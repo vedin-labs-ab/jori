@@ -1,5 +1,9 @@
 {% include "parts/identity" %}
 
+{%- if agent.organization %}
+{{agent.organization}}
+{% endif %}
+
 # Voice
 
 {% include "parts/voice" %}
@@ -15,10 +19,6 @@
 # Output
 
 {% include "parts/output" %}
-
-# Finish
-
-{% include "parts/finish" %}
 
 {% if agent.skills %}
 {{agent.skills}}
@@ -36,9 +36,9 @@
 {{agent.approvals}}
 {% endif %}
 
-{%- if agent.organization %}
-{{agent.organization}}
-{% endif %}
+# Finish
+
+{% include "parts/finish" %}
 
 {%- if agent.recency %}
 {{agent.recency}}

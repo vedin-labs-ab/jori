@@ -189,7 +189,6 @@ function createMessageValues(
       github: target.github,
       integration: getIntegrationLabel(input.messageIntegration),
       linear: target.linear,
-      slack: target.slack,
       surface: input.messageIntegration,
     },
   }

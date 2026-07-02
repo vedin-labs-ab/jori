@@ -7,7 +7,7 @@ export const approvalWaitTimeout = `${approvalTtlSeconds}s`
 export const approvalSummaryMaxLength = 500
 
 const approvalSummaryDescription =
-  "Concise user-facing sentence stating the exact action and key details needed to judge the approval."
+  "One concise user-facing sentence stating the exact action and the key details needed to judge it, such as destination, parent, title, recipient, account, or permissions."
 
 export function withApprovalSchema(schema: Record<string, unknown> = {}) {
   const properties = readObject(schema.properties)

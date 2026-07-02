@@ -15,4 +15,5 @@ New messages:
 {{conversation.messages}}
 
 Return one compact paragraph under 120 words. If there are active open loops,
-include them.
+include them. If nothing durable has been established yet — greetings and
+incidental chatter only — return an empty summary instead of saying so.
