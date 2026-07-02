@@ -7,7 +7,7 @@ import {
 } from "../_generated/server"
 import { messageText } from "../messages/surface"
 import { getActorDisplayName } from "../shared/actor"
-import { summaryMessageLimit } from "./limits"
+import { summaryOverlapMessageLimit, summarySourceMessageLimit } from "./limits"
 
 export type SummaryMessage = {
   actor: string
@@ -23,6 +23,15 @@ export type PendingSummary = {
   priorSummary: string | null
   readAt: number
 }
+
+type MessageRange =
+  | {
+      type: "after" | "before"
+      createdAt: number
+    }
+  | {
+      type: "all"
+    }
 
 export const pending = internalQuery({
   args: { conversationId: v.id("conversations") },
@@ -43,7 +52,7 @@ export const pending = internalQuery({
 
     return {
       conversationId: conversation._id,
-      messages: await pendingMessages(ctx, conversation, integration),
+      messages: await loadSummaryMessages(ctx, conversation, integration),
       priorSummary: conversation.summary ?? null,
       readAt,
     }
@@ -84,12 +93,76 @@ export const clear = internalMutation({
   },
 })
 
-async function pendingMessages(
+export async function loadSummaryMessages(
   ctx: QueryCtx,
   conversation: Doc<"conversations">,
   integration: Doc<"integrations">
 ) {
-  const messages = await ctx.db
+  const rows = await sourceMessageRows(ctx, conversation)
+
+  return rows.reverse().flatMap((message) => {
+    const entry = summaryMessage(message, integration)
+
+    return entry === null ? [] : [entry]
+  })
+}
+
+async function sourceMessageRows(
+  ctx: QueryCtx,
+  conversation: Doc<"conversations">
+) {
+  const latest = await conversationMessages(ctx, conversation, {
+    limit: summarySourceMessageLimit + 1,
+    range: { type: "all" },
+  })
+
+  return latest.length <= summarySourceMessageLimit
+    ? latest
+    : await incrementalMessageRows(ctx, conversation)
+}
+
+async function incrementalMessageRows(
+  ctx: QueryCtx,
+  conversation: Doc<"conversations">
+) {
+  const summarizedAt = conversation.summarizedAt
+
+  if (summarizedAt === undefined) {
+    return await conversationMessages(ctx, conversation, {
+      limit: summarySourceMessageLimit,
+      range: { type: "all" },
+    })
+  }
+
+  const newer = await conversationMessages(ctx, conversation, {
+    limit: summarySourceMessageLimit,
+    range: { createdAt: summarizedAt, type: "after" },
+  })
+  const overlapLimit = Math.min(
+    summarySourceMessageLimit - newer.length,
+    summaryOverlapMessageLimit
+  )
+
+  return overlapLimit <= 0
+    ? newer
+    : [
+        ...newer,
+        ...(await conversationMessages(ctx, conversation, {
+          limit: overlapLimit,
+          range: { createdAt: summarizedAt, type: "before" },
+        })),
+      ]
+}
+
+async function conversationMessages(
+  ctx: QueryCtx,
+  conversation: Doc<"conversations">,
+  options: {
+    limit: number
+    range: MessageRange
+  }
+) {
+  return await ctx.db
     .query("messages")
     .withIndex(
       "by_tenant_and_integration_and_conversation_and_created_at",
@@ -99,19 +172,19 @@ async function pendingMessages(
           .eq("integrationId", conversation.integrationId)
           .eq("conversationId", conversation.externalId)
 
-        return conversation.summarizedAt === undefined
-          ? scoped
-          : scoped.gt("createdAt", conversation.summarizedAt)
+        if (options.range.type === "after") {
+          return scoped.gt("createdAt", options.range.createdAt)
+        }
+
+        if (options.range.type === "before") {
+          return scoped.lt("createdAt", options.range.createdAt)
+        }
+
+        return scoped
       }
     )
     .order("desc")
-    .take(summaryMessageLimit)
-
-  return messages.reverse().flatMap((message) => {
-    const entry = summaryMessage(message, integration)
-
-    return entry === null ? [] : [entry]
-  })
+    .take(options.limit)
 }
 
 function summaryMessage(
