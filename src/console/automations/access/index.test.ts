@@ -204,6 +204,7 @@ function toolPermission(
     label: tool,
     mode,
     overrideMode: null,
+    route: "broker",
     surface,
     tool,
   }

@@ -25,15 +25,17 @@ export function getSurfaceToolDefinitions(
 ) {
   const executionType = input.executionType ?? "message"
 
-  return getToolPermissionsBySurface(surface).map((permission) => ({
-    name: permission.tool,
-    description: permission.usage,
-    inputSchema:
-      executionType === "message" &&
-      resolveToolMode(input.toolModes, permission.tool) === "prompted"
-        ? withOptionalFieldGuidance(
-            withApprovalSchema(getToolInputSchema(permission.tool))
-          )
-        : (getToolInputSchema(permission.tool) ?? emptyObjectSchema()),
-  })) satisfies McpToolDefinition[]
+  return getToolPermissionsBySurface(surface, { routes: ["broker"] }).map(
+    (permission) => ({
+      name: permission.tool,
+      description: permission.usage,
+      inputSchema:
+        executionType === "message" &&
+        resolveToolMode(input.toolModes, permission.tool) === "prompted"
+          ? withOptionalFieldGuidance(
+              withApprovalSchema(getToolInputSchema(permission.tool))
+            )
+          : (getToolInputSchema(permission.tool) ?? emptyObjectSchema()),
+    })
+  ) satisfies McpToolDefinition[]
 }

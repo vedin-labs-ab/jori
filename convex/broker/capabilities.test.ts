@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import { type Doc, type Id } from "../_generated/dataModel"
+import { getToolPermission } from "../permissions/catalog"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { integration } from "../runs/agent/tools/fixtures"
 import { type ApprovalBrokerContext } from "./approval"
@@ -34,6 +35,23 @@ test("separates run tools from connected and available capabilities", () => {
       .find((group) => group.surface === "github")
       ?.tools.find((tool) => tool.tool === "github_add_issue_comment")?.mode
   ).toBe("blocked")
+})
+
+test("uses user-facing descriptions in capability listings", () => {
+  const capabilities = listCapabilities(
+    context({
+      connectedIntegrations: [integration("github")],
+      input: messageInput([integration("github")]),
+      toolModes: new Map(),
+    })
+  )
+  const cloneTool = capabilities.run
+    .find((group) => group.surface === "github")
+    ?.tools.find((tool) => tool.tool === "github_clone_repository")
+  const permission = getToolPermission("github_clone_repository")
+
+  expect(cloneTool?.description).toBe(permission?.description)
+  expect(cloneTool?.description).not.toContain("/home/user")
 })
 
 test("limits automation run tools to selected unattended access", () => {

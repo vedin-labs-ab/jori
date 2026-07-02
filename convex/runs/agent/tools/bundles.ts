@@ -17,7 +17,7 @@ export function createRuntimeToolCapability(
     label: toolSurfaceLabel(surface),
     tools: permissions.map((permission) => ({
       access: permission.access,
-      description: permission.usage,
+      description: permission.description,
       label: permission.label,
       ...(resolveToolMode(toolModes, permission.tool) === "prompted"
         ? { requiresApproval: true }

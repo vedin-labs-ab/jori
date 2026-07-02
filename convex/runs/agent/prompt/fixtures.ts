@@ -226,6 +226,7 @@ export function promptedTool(): ToolPermission {
     description: "Create a Notion page or database record.",
     usage:
       "Create a Notion page or database record. Confirm the parent and properties before creating.",
+    route: "broker",
     access: "write",
     defaultMode: "prompted",
   }

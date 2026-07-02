@@ -14,7 +14,7 @@ export function getEnabledToolPermissions(
   const selectedToolSet =
     selectedTools === undefined ? null : new Set(selectedTools)
 
-  return getToolPermissionsBySurface(surface).filter(
+  return getToolPermissionsBySurface(surface, { routes: ["broker"] }).filter(
     (permission) =>
       (selectedToolSet === null || selectedToolSet.has(permission.tool)) &&
       canUseToolPermission({ executionType, permission, toolModes })

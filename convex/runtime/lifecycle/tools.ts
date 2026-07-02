@@ -1,6 +1,7 @@
 import { type JsonObject } from "../../../contracts/json"
 import { type ToolAccess } from "../../../contracts/permissions"
 import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
+import { nativeToolUsage } from "../permissions/native"
 
 export type RunLifecycleTool = {
   access: ToolAccess
@@ -14,8 +15,7 @@ export function runLifecycleTools(): RunLifecycleTool[] {
   return [
     {
       access: "write",
-      description:
-        "Finish this agentic run. If this run has an active requester surface and no visible communication was sent, include reason explaining why none is warranted. The reason is internal and is not shown to the requester.",
+      description: nativeToolUsage("finish_run", "run"),
       inputSchema: withOptionalFieldGuidance(finishRunSchema()),
       name: "finish_run",
       route: "run",
