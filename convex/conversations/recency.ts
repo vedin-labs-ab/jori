@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
+import { messageIdentifiers } from "../messages/identifiers"
 import {
   recencyConversationLimit,
   recencyMessageLimit,
@@ -14,6 +15,7 @@ import {
 export type RecentActivity = {
   ageMs: number
   conversationId: Id<"conversations">
+  identifiers: string[]
   integration: Doc<"messages">["integration"]
   summarizedAt: number
   summary: string
@@ -134,6 +136,7 @@ async function recentActivityForMessage(
   return {
     ageMs: Math.max(0, options.now - conversation.summarizedAt),
     conversationId: conversation._id,
+    identifiers: recentActivityIdentifiers(conversation, message),
     integration: message.integration,
     summarizedAt: conversation.summarizedAt,
     summary: conversation.summary,
@@ -195,6 +198,30 @@ async function resolveCurrentConversationId(
 
   return (await findMessageConversation(ctx, args.message))?._id
 }
+
+function recentActivityIdentifiers(
+  conversation: Doc<"conversations">,
+  message: Doc<"messages">
+) {
+  return [
+    `internal:conversation:${conversation._id}`,
+    ...messageIdentifiers(message).filter(isConversationIdentifier),
+  ]
+}
+
+function isConversationIdentifier(identifier: string) {
+  return !messageLevelIdentifierPrefixes.some((prefix) =>
+    identifier.startsWith(prefix)
+  )
+}
+
+const messageLevelIdentifierPrefixes = [
+  "internal:message:",
+  "github:comment:",
+  "linear:comment:",
+  "linear:thread:",
+  "slack:message:",
+]
 
 async function cachedIntegration(
   ctx: QueryCtx,

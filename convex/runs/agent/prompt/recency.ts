@@ -11,6 +11,8 @@ import { type AgentRuntimeInput } from "../input"
 
 type PromptRecentActivity = {
   age: string
+  identifiers: string | null
+  summarizedAt: string
   summary: string
   surface: string
 }
@@ -51,9 +53,15 @@ function renderRecentActivity(items: PromptRecentActivity[]) {
 function formatPromptItem(entry: RecentActivity): PromptRecentActivity {
   return {
     age: formatAge(entry.ageMs),
+    identifiers: formatIdentifiers(entry.identifiers),
+    summarizedAt: new Date(entry.summarizedAt).toISOString(),
     summary: truncate(normalizeSummary(entry.summary)),
     surface: integrationLabels[entry.integration],
   }
+}
+
+function formatIdentifiers(identifiers: string[]) {
+  return identifiers.length === 0 ? null : identifiers.join(", ")
 }
 
 function normalizeSummary(summary: string) {
