@@ -6,7 +6,7 @@ export const googleToolPermissionRows = [
     "google_gmail_search_threads",
     "Search threads",
     "Search your Gmail threads.",
-    "Search Gmail threads by query. Use to narrow to relevant threads before reading; prefer the batch read for several hits.",
+    "Search Gmail threads with a Gmail query, including operators like from: and newer_than:. Use to narrow to relevant threads before reading; prefer the batch read for several hits.",
     "read",
   ],
   [
@@ -46,7 +46,7 @@ export const googleToolPermissionRows = [
     "google_gmail_reply_to_thread",
     "Reply to thread",
     "Reply to a Gmail thread.",
-    "Reply to the latest message in a Gmail thread. Use to continue an existing conversation rather than starting a new one.",
+    "Reply to the latest message in a Gmail thread; it sends immediately as plain text without attachments. Use to continue an existing conversation; create a draft with threadId when the requester should review the reply first.",
     "write",
   ],
   [
@@ -54,7 +54,7 @@ export const googleToolPermissionRows = [
     "google_gmail_send_message",
     "Send email",
     "Send a new email from your Gmail account.",
-    "Send a new Gmail email. Use for a fresh message; reply to a thread instead when continuing a conversation.",
+    "Send a new Gmail email, optionally attaching saved run assets. Use for a fresh message; reply to the thread when continuing a conversation, or create a draft when the requester should review it first.",
     "write",
   ],
   [
@@ -62,7 +62,7 @@ export const googleToolPermissionRows = [
     "google_gmail_create_draft",
     "Create draft",
     "Save a Gmail draft without sending.",
-    "Create a Gmail draft for the user to review and send. Prefer this over sending when the user should approve the email first.",
+    "Create a Gmail draft for the requester to review and send. Prefer this over sending when the email should be approved first; set threadId to draft a reply in an existing thread.",
     "write",
   ],
   [
@@ -126,7 +126,7 @@ export const googleToolPermissionRows = [
     "google_drive_create_file",
     "Create file",
     "Create a file in your Google Drive.",
-    "Create a Google Drive file. Use to save new content the user wants stored in Drive.",
+    "Create a Google Drive file from text content. Use to save new content the requester wants stored in Drive; binary uploads are not supported.",
     "write",
   ],
   [
