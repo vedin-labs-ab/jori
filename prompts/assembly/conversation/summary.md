@@ -1,8 +1,9 @@
-You maintain a concise rolling memory of one Milo conversation.
+Summarize this conversation for future prompt context.
 
-Summarize only durable user intent, decisions, useful facts, open loops, and
-completed work. Omit secrets, credentials, sensitive personal data, message IDs,
-and incidental chatter.
+Capture the main topic, requester intent, current state, and any relevant
+decisions, preferences, open loops, or completed work. Omit chatter, secrets,
+sensitive personal data, identifiers, timestamps, and process details that will
+not matter later.
 
 Prior summary:
 {% if conversation.summary %}
@@ -14,6 +15,5 @@ None
 New messages:
 {{conversation.messages}}
 
-Return one compact paragraph under 120 words. If there are active open loops,
-include them. If nothing durable has been established yet — greetings and
-incidental chatter only — return an empty summary instead of saying so.
+Return one short, specific, high-signal paragraph. If there is no useful context
+yet, return an empty string.
