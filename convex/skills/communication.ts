@@ -30,10 +30,6 @@ export function createCommunicationGuidance(args: {
   integration: Integration
   profile: CommunicationProfile
   skills: readonly RuntimeSkill[]
-  tools: {
-    add_reaction: boolean
-    send_reply: boolean
-  }
 }): CommunicationGuidance {
   const skill = getRuntimeSkillForIntegration(args.skills, args.integration)
   const profile = profiles[args.profile]
@@ -41,7 +37,7 @@ export function createCommunicationGuidance(args: {
   return {
     communication: renderPromptTemplate(
       promptTemplates["communication/message"],
-      { tools: args.tools }
+      {}
     ).trim(),
     format:
       skill === null

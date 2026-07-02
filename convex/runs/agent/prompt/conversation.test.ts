@@ -32,12 +32,14 @@ test("renders recent conversation context without duplicating the trigger", () =
   expect(prompt).toContain("Current message:")
 })
 
-test("keeps explicit empty recent messages context", () => {
+test("omits the recent messages block without prior conversation", () => {
   const prompt = assemblePrompt(
     runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
   )
 
-  expect(prompt).toContain("Recent messages:\n\n- None")
+  expect(prompt).not.toContain("Recent messages")
+  expect(prompt).not.toContain("- None")
+  expect(prompt).toContain("Current message:")
 })
 
 test("renders an omitted history note when recent context is truncated", () => {

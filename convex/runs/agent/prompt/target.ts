@@ -17,7 +17,6 @@ export function createMessageTargetValues(
   return {
     github: integration === "github" ? getGitHubTargetValues(data) : null,
     linear: integration === "linear" ? getLinearTargetValues(data) : null,
-    slack: integration === "slack" ? getSlackTargetValues(data) : null,
   }
 }
 

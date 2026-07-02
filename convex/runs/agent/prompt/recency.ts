@@ -65,7 +65,14 @@ function truncate(summary: string) {
     return summary
   }
 
-  return `${summary.slice(0, recencySummaryCharacterLimit - 3).trimEnd()}...`
+  const slice = summary.slice(0, recencySummaryCharacterLimit - 3)
+  const lastSpace = slice.lastIndexOf(" ")
+  const wordBoundary =
+    lastSpace > recencySummaryCharacterLimit / 2
+      ? slice.slice(0, lastSpace)
+      : slice
+
+  return `${wordBoundary.trimEnd()}...`
 }
 
 function formatAge(ageMs: number) {

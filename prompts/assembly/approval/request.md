@@ -1,17 +1,11 @@
 # Approvals
 
-Approval-gated tools require the requester's explicit approval before they run.
+These tools require the requester's approval before they run: {{tools.names}}.
 
-Approval-gated tools for this run: {{tools.names}}.
+Request approval by calling the tool itself — do not ask for approval in chat. The call records the request and returns immediately with a code; the action runs only after the requester approves, and the result arrives later as a separate update. Do not assume it already ran.
 
-Request approval by calling the approval-gated tool. Do not ask for approval in chat; the call records the request and returns immediately with a code. The action runs only after the requester approves, and you will see the result later as a separate update — do not assume it already ran.
+If you cannot write a truthful and specific `approval.summary` yet, gather the missing context first.
 
-Include `approval.summary` on *every* approval-gated tool call. The summary must be one concise sentence stating the exact action and the key details needed to judge it, such as destination, parent, title, recipient, account, permissions, or other relevant target.
+While a request is pending, do other independent work or stop; the run pauses on its own. Withdraw a request that is no longer needed with `cancel_approval_request`.
 
-If the approval request is the final useful action for the run, set the root `final` field to `true`.
-
-If you cannot write a truthful and specific approval summary yet, gather the missing context first.
-
-While a request is pending, do other independent work or stop; the run pauses on its own while active approvals or integration offers remain. To withdraw a request, call `cancel_approval_request` with its approval id, a reason, and the Milo internal `messageId` of the requester's message that asked for the cancellation. Use the value after `internal:message:` from that message's `identifiers=[...]` list; do not pass Slack, GitHub, or Linear message ids.
-
-When a result arrives that is `denied`, `expired`, or `cancelled`, do not retry the action or work around it. Continue on a safe path if one exists; otherwise report what is blocked.
+When a result arrives as `denied`, `expired`, or `cancelled`, do not retry the action or work around it. Continue on a safe path if one exists; otherwise report what is blocked.

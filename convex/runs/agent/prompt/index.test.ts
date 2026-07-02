@@ -39,18 +39,14 @@ const messageTriggerCases = [
       url: "https://linear.app/acme/issue/ISSUE-1/ship-target-context#comment-id",
     },
     "Linear",
-    ["- Issue ID: issue-id", "- Comment ID: comment-id"],
-  ],
-  [
-    "slack",
-    { channel: { id: "C123" }, ts: "123.456" },
-    "Slack",
     [
-      "- Channel ID: C123",
-      "- Message timestamp: 123.456",
-      "- Thread timestamp: 123.456",
+      "- Issue key: ISSUE-1",
+      "- Issue title: Ship target context",
+      "- Issue URL: https://linear.app/acme/issue/ISSUE-1/ship-target-context",
+      "- Comment URL: https://linear.app/acme/issue/ISSUE-1/ship-target-context#comment-id",
     ],
   ],
+  ["slack", { channel: { id: "C123" }, ts: "123.456" }, "Slack", []],
 ] as const
 
 describe("runtime prompts", () => {
@@ -65,12 +61,14 @@ describe("runtime prompts", () => {
     expect(prompt).toContain(`Active surface: \`${toolSurfaceLabel}\``)
     expectRunBefore(prompt, "# Trigger")
 
-    for (const line of targetLines) {
-      expect(prompt).toContain(line)
+    if (targetLines.length === 0) {
+      expect(prompt).not.toContain("Target:")
+    } else {
+      expect(prompt).toContain("Target:")
+      expect(prompt).toContain(targetLines.join("\n"))
     }
 
-    expect(prompt).toContain(targetLines.join("\n"))
-    expect(prompt).toContain("Recent messages:")
+    expect(prompt).not.toContain("Recent messages")
     expect(prompt).toContain("Current message:")
     expect(prompt).not.toContain("\nHistory:\n")
     expect(prompt).not.toContain("{{message.target}}")
@@ -100,17 +98,7 @@ describe("runtime prompts", () => {
     expect(prompt).not.toContain("<@UBOT> what tools do u have?")
   })
 
-  test("uses Slack message timestamp as the default reply thread", () => {
-    const prompt = assemblePrompt(
-      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
-    )
-
-    expect(prompt).toContain("- Thread timestamp: 123.456")
-    expect(prompt).not.toContain("- Thread timestamp: undefined")
-    expect(prompt).not.toContain("- Reply thread timestamp:")
-  })
-
-  test("uses Slack thread timestamp when the trigger is already threaded", () => {
+  test("keeps Slack thread routing in message identifiers, not a target block", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", {
         channel: { id: "C123" },
@@ -119,8 +107,9 @@ describe("runtime prompts", () => {
       })
     )
 
-    expect(prompt).toContain("- Message timestamp: 123.456")
-    expect(prompt).toContain("- Thread timestamp: 123.000")
+    expect(prompt).toContain("slack:message:123.456")
+    expect(prompt).toContain("slack:thread:123.000")
+    expect(prompt).not.toContain("Target:")
   })
 })
 
@@ -148,7 +137,6 @@ describe("runtime delivery prompts", () => {
     )
 
     expect(prompt).toContain("Send a short heads-up with `send_reply`")
-    expect(prompt).toContain("Make updates useful, not ceremonial")
     expect(prompt).toContain("After the heads-up, stay quiet")
     expect(prompt).toContain(
       "I’ll find the Notion parent first, then ask for approval"
@@ -169,12 +157,10 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Finish")
-    expect(prompt).toContain("Finish the run when no useful work remains")
-    expect(prompt).toContain("Use `finish_run` to complete the run")
     expect(prompt).toContain(
-      "include an internal `reason` explaining why none was warranted"
+      "Finish the run when no useful work remains: prefer setting `final: true` on the last useful tool call that supports it, and call `finish_run` otherwise."
     )
-    expect(prompt).toContain("set the root `final` field to `true`")
+    expect(prompt).not.toContain("final useful action")
     expectNoSyntheticBlankLines(prompt)
   })
 
@@ -187,7 +173,7 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain("use the lightest action that delivers it")
     expect(prompt).toContain("Use `send_reply`")
     expect(prompt).toContain("# Finish")
-    expect(prompt).toContain("set the root `final` field to `true`")
+    expect(prompt).toContain("prefer setting `final: true`")
   })
 
   test("omits automatic final delivery instructions", () => {
@@ -209,9 +195,9 @@ describe("output contract prompts", () => {
 
     expect(prompt).toContain("# Output")
     expect(prompt).toContain(
-      "Everything that reaches the requester or any system happens through a tool call"
+      "Only tool calls reach the requester or any system"
     )
-    expect(prompt).toContain("outside a tool call reach no one")
+    expect(prompt).toContain("words outside a tool call are discarded")
   })
 })
 
@@ -224,10 +210,10 @@ describe("approval request prompts", () => {
 
     expect(prompt).toContain("# Approvals")
     expect(prompt).toContain("`notion_create_page`")
-    expect(prompt).toContain("Include `approval.summary`")
-    expect(prompt).toContain("key details needed to judge it")
+    expect(prompt).toContain("require the requester's approval before they run")
+    expect(prompt).toContain("truthful and specific `approval.summary`")
     expect(prompt).not.toContain("approval.handoff")
-    expect(prompt).toContain("Do not ask for approval in chat")
+    expect(prompt).toContain("do not ask for approval in chat")
     expect(prompt).toContain("the run pauses on its own")
     expect(prompt).toContain("`denied`, `expired`, or `cancelled`")
     expect(prompt.indexOf("# Communication")).toBeLessThan(

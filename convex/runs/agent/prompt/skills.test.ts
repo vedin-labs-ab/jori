@@ -8,7 +8,7 @@ describe("runtime skill prompts", () => {
     const prompt = assemblePrompt(githubInput(), { skills: runtimeSkills() })
 
     expect(prompt).toContain("# Skills")
-    expect(prompt).toContain("Use `load_skill`")
+    expect(prompt).toContain("Load full instructions with `load_skill`")
     expect(prompt).toContain(
       "`artifact-creator`: Create or update Milo artifacts"
     )
@@ -29,14 +29,13 @@ describe("runtime skill prompts", () => {
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("use the lightest action that delivers it")
-    expect(prompt).toContain("outside a tool call reach no one")
+    expect(prompt).toContain("words outside a tool call are discarded")
     expect(prompt).toContain("plain closure usually get no response")
     expect(prompt).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Format")
     expect(prompt).toContain("# Skills")
-    expect(prompt).toContain("Available skills:")
-    expect(prompt).toContain("Use `load_skill`")
+    expect(prompt).toContain("Load full instructions with `load_skill`")
     expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).not.toContain("`slack`: Format Slack replies")
     expect(prompt.indexOf("# Communication")).toBeLessThan(
