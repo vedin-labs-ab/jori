@@ -134,5 +134,5 @@ function summaryMessage(
 }
 
 function normalizeSummary(value: string) {
-  return value.replace(/\s+/g, " ").trim().slice(0, 2000)
+  return value.replace(/\s+/g, " ").trim()
 }
