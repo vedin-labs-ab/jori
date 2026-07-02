@@ -1,5 +1,6 @@
 import {
   getToolPermission,
+  isUserVisibleToolPermission,
   type ToolAccess,
   type ToolPermissionRoute,
 } from "../../../contracts/permissions"
@@ -24,6 +25,16 @@ export function nativeToolSnapshot(args: {
     label: permission.label,
     tool: permission.tool,
   }
+}
+
+export function visibleNativeToolSnapshot(args: {
+  access: ToolAccess
+  route: NativeToolRoute
+  tool: string
+}): RunToolSnapshotTool | undefined {
+  return isUserVisibleToolPermission(args.tool)
+    ? nativeToolSnapshot(args)
+    : undefined
 }
 
 function nativeToolPermission(tool: string, route: NativeToolRoute) {

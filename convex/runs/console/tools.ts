@@ -1,4 +1,8 @@
 import {
+  getToolPermission,
+  isUserVisibleToolPermission,
+} from "../../permissions/catalog"
+import {
   consolidateMiloToolGroups,
   type RunToolSnapshot,
 } from "../agent/tools/snapshot"
@@ -6,6 +10,7 @@ import {
   compactDetails,
   detail,
   type ExecutionDetailGroup,
+  type ExecutionDetailTool,
 } from "../display/detail"
 
 export function toolDetails(snapshot: RunToolSnapshot | undefined) {
@@ -25,15 +30,7 @@ export function toolDetails(snapshot: RunToolSnapshot | undefined) {
 
 function toolsDetail(groups: RunToolSnapshot["groups"]) {
   const detailGroups = consolidateMiloToolGroups(groups)
-    .map((group) =>
-      group.tools.length === 0
-        ? undefined
-        : ({
-            type: group.surface,
-            label: group.label,
-            tools: group.tools,
-          } satisfies ExecutionDetailGroup)
-    )
+    .map(displayGroup)
     .filter(isPresent)
 
   if (detailGroups.length === 0) {
@@ -44,6 +41,53 @@ function toolsDetail(groups: RunToolSnapshot["groups"]) {
     groups: detailGroups,
     label: detailGroups.map(toolGroupLabel).join(" · "),
   }
+}
+
+function displayGroup(
+  group: RunToolSnapshot["groups"][number]
+): ExecutionDetailGroup | undefined {
+  const tools = group.tools.map(displayTool).filter(isPresent)
+
+  return tools.length === 0
+    ? undefined
+    : {
+        type: group.surface,
+        label: group.label,
+        tools,
+      }
+}
+
+function displayTool(
+  tool: ExecutionDetailTool
+): ExecutionDetailTool | undefined {
+  if (!isUserVisibleToolPermission(tool.tool)) {
+    return undefined
+  }
+
+  const permission = getToolPermission(tool.tool)
+
+  return permission === undefined
+    ? {
+        ...tool,
+        description: safeDescription(tool.description),
+      }
+    : {
+        ...tool,
+        description: permission.description,
+        label: permission.label,
+      }
+}
+
+function safeDescription(description: string) {
+  return leaksInternalGuidance(description)
+    ? "Tool available to this run."
+    : description
+}
+
+function leaksInternalGuidance(description: string) {
+  return /\/home\/user|<repo>|workspace-relative|args without|cwd|MCP|sandbox/i.test(
+    description
+  )
 }
 
 function toolGroupLabel(group: ExecutionDetailGroup) {

@@ -200,7 +200,6 @@ function toolPermission(
   return {
     access,
     description: tool,
-    usage: `Use ${tool}.`,
     label: tool,
     mode,
     overrideMode: null,

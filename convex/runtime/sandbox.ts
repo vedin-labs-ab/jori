@@ -5,7 +5,10 @@ import {
 import { type ToolAccess } from "../../contracts/permissions"
 import { withOptionalFieldGuidance } from "../runs/agent/tools/schemas"
 import { type RunToolSnapshotTool } from "../runs/agent/tools/snapshot"
-import { nativeToolSnapshot, nativeToolUsage } from "./permissions/native"
+import {
+  nativeToolUsage,
+  visibleNativeToolSnapshot,
+} from "./permissions/native"
 
 export const sandboxTools = [
   ...codingToolDefinitions.map((tool) => ({
@@ -45,11 +48,13 @@ function codingToolAccess(name: CodingToolName): ToolAccess {
 }
 
 export function sandboxToolSnapshot(): RunToolSnapshotTool[] {
-  return sandboxTools.map((tool) => ({
-    ...nativeToolSnapshot({
+  return sandboxTools.flatMap((tool) => {
+    const snapshot = visibleNativeToolSnapshot({
       access: tool.access,
       route: tool.route,
       tool: tool.name,
-    }),
-  }))
+    })
+
+    return snapshot === undefined ? [] : [snapshot]
+  })
 }

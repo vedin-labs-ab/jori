@@ -3,7 +3,10 @@ import { finalProperty } from "../../../contracts/runtime"
 import { type MessageIntegration } from "../../runs/agent/input"
 import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import { type RunToolSnapshotTool } from "../../runs/agent/tools/snapshot"
-import { nativeToolSnapshot, nativeToolUsage } from "../permissions/native"
+import {
+  nativeToolUsage,
+  visibleNativeToolSnapshot,
+} from "../permissions/native"
 
 export type ActiveSurfaceTool = {
   access: "write"
@@ -22,13 +25,15 @@ export function activeSurfaceTools(
 export function activeSurfaceToolSnapshot(
   tools: ActiveSurfaceTool[]
 ): RunToolSnapshotTool[] {
-  return tools.map((tool) =>
-    nativeToolSnapshot({
+  return tools.flatMap((tool) => {
+    const snapshot = visibleNativeToolSnapshot({
       access: tool.access,
       route: tool.route,
       tool: tool.name,
     })
-  )
+
+    return snapshot === undefined ? [] : [snapshot]
+  })
 }
 
 function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {

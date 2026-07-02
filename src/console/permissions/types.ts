@@ -1,4 +1,4 @@
-import { type ResolvedToolPermission } from "@contracts/permissions"
+import { type UserVisibleToolPermission } from "@contracts/permissions"
 
 export type {
   ConfigurablePermissionMode,
@@ -7,4 +7,4 @@ export type {
   ToolSurface,
 } from "@contracts/permissions"
 
-export type ToolPermission = ResolvedToolPermission
+export type ToolPermission = UserVisibleToolPermission

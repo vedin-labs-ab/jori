@@ -1,7 +1,11 @@
 import { describe, expect, test } from "vitest"
 import { codingToolNames } from "../coding"
 import { integrations, toolSurfaces } from "../integrations"
-import { toolPermissions } from "."
+import {
+  internalRequiredToolNames,
+  isUserVisibleToolPermission,
+  toolPermissions,
+} from "."
 
 const requiredCommunicationToolNames = [
   "conversations_add_message",
@@ -80,6 +84,15 @@ describe("permission catalog shape", () => {
         })
       )
     }
+  })
+
+  test("marks only internal required tools as hidden from users", () => {
+    for (const tool of internalRequiredToolNames) {
+      expect(isUserVisibleToolPermission(tool)).toBe(false)
+    }
+
+    expect(isUserVisibleToolPermission("git")).toBe(true)
+    expect(isUserVisibleToolPermission("start_agent")).toBe(true)
   })
 })
 

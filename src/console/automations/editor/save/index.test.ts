@@ -149,7 +149,6 @@ function toolPermission(
   return {
     access: overrides.access ?? "read",
     description: "Tool",
-    usage: "Use tool.",
     label: "Tool",
     mode: overrides.mode ?? "allowed",
     overrideMode: null,

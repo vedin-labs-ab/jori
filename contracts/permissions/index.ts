@@ -16,11 +16,18 @@ export const toolPermissionRoutes = [
   "run",
   "surface",
 ] as const
+export const internalRequiredToolNames = [
+  "finish_run",
+  "send_reply",
+  "add_reaction",
+] as const
 export const toolAccessLevels = ["read", "write"] as const
 
 export type PermissionMode = (typeof permissionModes)[number]
 export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
 export type ToolPermissionRoute = (typeof toolPermissionRoutes)[number]
+export type InternalRequiredToolName =
+  (typeof internalRequiredToolNames)[number]
 export type ToolAccess = (typeof toolAccessLevels)[number]
 export type ToolPermission = {
   tool: string
@@ -40,6 +47,7 @@ export type ResolvedToolPermission = Omit<ToolPermission, "defaultMode"> & {
   mode: PermissionMode
   overrideMode: ConfigurablePermissionMode | null
 }
+export type UserVisibleToolPermission = Omit<ResolvedToolPermission, "usage">
 
 export type PermissionOverride = {
   tool: string
@@ -73,9 +81,14 @@ export const toolPermissions = toolPermissionRows.map(
 const toolPermissionsByName = new Map(
   toolPermissions.map((permission) => [permission.tool, permission])
 )
+const internalRequiredTools = new Set<string>(internalRequiredToolNames)
 
 export function getToolPermission(tool: string) {
   return toolPermissionsByName.get(tool)
+}
+
+export function isUserVisibleToolPermission(tool: string) {
+  return !internalRequiredTools.has(tool)
 }
 
 export function getToolPermissionsBySurface(
