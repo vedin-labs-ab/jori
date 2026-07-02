@@ -146,7 +146,10 @@ function createRuntime(options: {
         surface: "slack",
         target: null,
       },
-      prompt: "system",
+      prompt: {
+        context: "context",
+        instructions: "system",
+      },
       run: {
         id: id<"runs">("run_1"),
         rootId: null,

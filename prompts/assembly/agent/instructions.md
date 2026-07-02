@@ -1,9 +1,5 @@
 {% include "parts/identity" %}
 
-{%- if agent.organization %}
-{{agent.organization}}
-{% endif %}
-
 # Voice
 
 {% include "parts/voice" %}
@@ -39,11 +35,3 @@
 # Finish
 
 {% include "parts/finish" %}
-
-{%- if agent.recency %}
-{{agent.recency}}
-{% endif %}
-
-{{agent.run}}
-
-{{agent.trigger}}

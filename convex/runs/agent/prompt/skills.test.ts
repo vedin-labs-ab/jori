@@ -5,7 +5,9 @@ import { runtimeSkill, runtimeSkills } from "./skill_fixtures"
 
 describe("runtime skill prompts", () => {
   test("lists loadable skills without loading unrelated skill bodies", () => {
-    const prompt = assemblePrompt(githubInput(), { skills: runtimeSkills() })
+    const prompt = assemblePrompt(githubInput(), {
+      skills: runtimeSkills(),
+    }).instructions
 
     expect(prompt).toContain("# Skills")
     expect(prompt).toContain("Load full instructions with `load_skill`")
@@ -22,16 +24,17 @@ describe("runtime skill prompts", () => {
   })
 
   test("eagerly loads Slack guidance for Slack final replies", () => {
-    const prompt = assemblePrompt(
+    const runtimePrompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
       { skills: runtimeSkills() }
     )
+    const prompt = runtimePrompt.instructions
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("use the lightest action that delivers it")
     expect(prompt).toContain("words outside a tool call are discarded")
     expect(prompt).toContain("plain closure usually get no response")
-    expect(prompt).toContain("Active surface: `Slack`")
+    expect(runtimePrompt.context).toContain("Active surface: `Slack`")
     expect(prompt).not.toContain("Current surface:")
     expect(prompt).toContain("# Format")
     expect(prompt).toContain("# Skills")
@@ -69,7 +72,7 @@ describe("tenant runtime skill prompts", () => {
           body: "# Tenant Playbook\n\nPrefer tenant-specific guidance.",
         }),
       ]),
-    })
+    }).instructions
 
     expect(prompt).toContain(
       "`tenant-playbook`: Follow the tenant operating playbook."

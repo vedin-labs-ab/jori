@@ -24,12 +24,14 @@ export function formatEvent(
   event: AutomationEvent,
   integration: string | undefined
 ) {
-  return formatTargetLines([
+  const metadata = formatTargetLines([
     targetLine("Type", event.type),
     targetLine("Integration", formatIntegrationLabel(integration)),
     ...getIntegrationTargetLines(integration, event.data),
-    targetLine("Text", event.text),
   ])
+  const text = formatEventText(event.text)
+
+  return text === null ? metadata : `${metadata}\n${text}`
 }
 
 export function targetLine(
@@ -57,6 +59,14 @@ function formatIntegrationLabel(integration: string | undefined) {
   return isKnownIntegration(integration)
     ? integrationLabels[integration]
     : integration
+}
+
+function formatEventText(text: string | undefined) {
+  if (text === undefined || text.trim() === "") {
+    return null
+  }
+
+  return ["Text:", "```text", text, "```"].join("\n")
 }
 
 function getIntegrationTargetLines(

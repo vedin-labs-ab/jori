@@ -1,0 +1,180 @@
+import { promptTemplates } from "../../../../prompts/generated"
+import { renderPromptTemplate } from "../../../../prompts/render"
+import { createPromptTime } from "../../../../prompts/time"
+import { integrationLabels } from "../../../automations/integrations"
+import { replyAddress } from "../../../messages/surface"
+import { type AgentRuntimeInput, type MessageIntegration } from "../input"
+import { createMessageConversationValues } from "./conversation"
+import { createRecentActivityInstructions } from "./recency"
+import { createMessageTargetValues, formatEvent } from "./target"
+
+export type PromptActiveSurface = {
+  surface: MessageIntegration
+}
+
+export function createContextValues(
+  input: AgentRuntimeInput,
+  activeSurface: PromptActiveSurface | null
+): {
+  organization: string | null
+  recency: string | null
+  run: string
+  trigger: string
+} {
+  return {
+    organization: optionalPromptBlock(createOrganizationInstructions(input)),
+    recency: optionalPromptBlock(createRecentActivityInstructions(input)),
+    run: createRunInstructions(input.run._id, activeSurface),
+    trigger: promptBlock(createTriggerPart(input)),
+  }
+}
+
+export function defaultActiveSurface(
+  input: AgentRuntimeInput
+): PromptActiveSurface | null {
+  return input.type === "message" && replyAddress(input.message) !== null
+    ? { surface: input.messageIntegration }
+    : null
+}
+
+function createOrganizationInstructions(input: AgentRuntimeInput) {
+  const facts = input.organization
+
+  if (!facts?.name) {
+    return ""
+  }
+
+  return renderPromptTemplate(promptTemplates["organization/message"], {
+    organization: {
+      name: facts.name,
+      summary: facts.summary ?? null,
+      aliases: facts.aliases.length === 0 ? null : facts.aliases.join(", "),
+      domains: facts.domains.length === 0 ? null : facts.domains,
+    },
+  }).trim()
+}
+
+function createRunInstructions(
+  runId: AgentRuntimeInput["run"]["_id"],
+  activeSurface: PromptActiveSurface | null
+) {
+  return renderPromptTemplate(promptTemplates["run/message"], {
+    run: {
+      id: runId,
+    },
+    surface: {
+      active: activeSurface !== null,
+      label:
+        activeSurface === null
+          ? null
+          : getIntegrationLabel(activeSurface.surface),
+    },
+    time: { utc: createPromptTime() },
+  }).trim()
+}
+
+function createTriggerPart(input: AgentRuntimeInput) {
+  if (input.type === "automation") {
+    return renderPromptTemplate(
+      promptTemplates["trigger/automation"],
+      createAutomationValues(input)
+    )
+  }
+
+  if (input.type === "instruction") {
+    return renderPromptTemplate(
+      promptTemplates["trigger/instruction"],
+      createInstructionValues(input)
+    )
+  }
+
+  return renderPromptTemplate(
+    promptTemplates["trigger/message"],
+    createMessageValues(input)
+  )
+}
+
+function createInstructionValues(
+  input: Extract<AgentRuntimeInput, { type: "instruction" }>
+) {
+  return {
+    instruction: {
+      text: input.instructions,
+    },
+  }
+}
+
+function createMessageValues(
+  input: Extract<AgentRuntimeInput, { type: "message" }>
+) {
+  const target = createMessageTargetValues(
+    input.messageIntegration,
+    input.message.data
+  )
+  const conversation = createMessageConversationValues(input)
+
+  return {
+    message: {
+      conversation: conversation.body,
+      conversationSummary: conversation.summary,
+      current: conversation.current,
+      github: target.github,
+      integration: getIntegrationLabel(input.messageIntegration),
+      linear: target.linear,
+      surface: input.messageIntegration,
+    },
+  }
+}
+
+function createAutomationValues(
+  input: Extract<AgentRuntimeInput, { type: "automation" }>
+) {
+  return {
+    automation: {
+      id: input.automation._id,
+      name: input.automation.name,
+      instructions: input.automation.instructions,
+      trigger: formatAutomationTrigger(input),
+    },
+    event:
+      input.event === null
+        ? null
+        : {
+            details: formatEvent(input.event, input.integration?.integration),
+          },
+  }
+}
+
+function formatAutomationTrigger(
+  input: Extract<AgentRuntimeInput, { type: "automation" }>
+) {
+  const cause = input.run.cause
+
+  if (cause.type === "time") {
+    return `Time at ${new Date(cause.scheduledAt).toISOString()}`
+  }
+
+  if (cause.type === "event") {
+    return "Integration event"
+  }
+
+  if (cause.type === "manual") {
+    return "Manual"
+  }
+
+  return "Unknown"
+}
+
+function getIntegrationLabel(integration: MessageIntegration) {
+  return integrationLabels[integration]
+}
+
+function promptBlock(value: string) {
+  return value.trim()
+}
+
+function optionalPromptBlock(value: string) {
+  const block = promptBlock(value)
+
+  return block === "" ? null : block
+}

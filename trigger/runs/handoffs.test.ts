@@ -105,7 +105,10 @@ test("refreshes runtime tools when an integration offer connects", async () => {
   const runtime = createRuntime({
     offers: [offerHandoff("connected")],
   })
-  const messages: ModelMessage[] = [{ content: "system", role: "system" }]
+  const messages: ModelMessage[] = [
+    { content: "system", role: "system" },
+    { content: "context", role: "user" },
+  ]
 
   const result = await reconcileHandoffs(runtime, messages)
 
@@ -114,7 +117,14 @@ test("refreshes runtime tools when an integration offer connects", async () => {
     integrationOfferId: "offer_1",
   })
   expect(runtime.context.tools).toEqual([refreshedTool()])
-  expect(messages[0]).toEqual({ content: "refreshed", role: "system" })
+  expect(messages[0]).toEqual({
+    content: "refreshed instructions",
+    role: "system",
+  })
+  expect(messages[1]).toEqual({
+    content: "refreshed context",
+    role: "user",
+  })
   expect(result.progressed).toBe(true)
 })
 
@@ -139,14 +149,20 @@ function createRuntime(options: {
       markOfferConsumed: vi.fn(),
       recordEvent: vi.fn(),
       reloadContext: vi.fn(async () => ({
-        prompt: "refreshed",
+        prompt: {
+          context: "refreshed context",
+          instructions: "refreshed instructions",
+        },
         tools: [refreshedTool()],
         activeSurface: null,
       })),
     } as unknown as ToolRuntime["convex"],
     context: {
       activeSurface: null,
-      prompt: "system",
+      prompt: {
+        context: "context",
+        instructions: "system",
+      },
       run: {
         id: id<"runs">("run_1"),
         rootId: null,

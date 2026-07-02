@@ -82,7 +82,10 @@ function createRuntime(
     } as unknown as ToolRuntime["convex"],
     context: {
       activeSurface: activeSurfaceState(options),
-      prompt: "system",
+      prompt: {
+        context: "context",
+        instructions: "system",
+      },
       run: {
         id: id<"runs">("run_1"),
         rootId: null,

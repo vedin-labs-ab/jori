@@ -162,7 +162,10 @@ function createRuntime(options: {
         surface: options.surface ?? "linear",
         target: null,
       },
-      prompt: "system",
+      prompt: {
+        context: "context",
+        instructions: "system",
+      },
       run: {
         id: id<"runs">("run_1"),
         rootId: null,

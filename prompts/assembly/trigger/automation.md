@@ -6,7 +6,11 @@ Automation:
 - ID: {{automation.id}}
 - Name: {{automation.name}}
 - Trigger: {{automation.trigger}}
-- Instructions: {{automation.instructions}}
+
+Instructions:
+```text
+{{automation.instructions}}
+```
 
 {% if event %}
 Event:

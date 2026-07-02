@@ -21,6 +21,7 @@ import {
   type RuntimeEventInput,
   type RuntimeInteraction,
   type RuntimeMessage,
+  type RuntimePrompt,
   type RuntimeTool,
   type SurfaceReactionTarget,
 } from "./types"
@@ -136,7 +137,7 @@ export class MiloConvexClient {
       runId: args.runId,
       secret: this.secret,
     })) as {
-      prompt: string
+      prompt: RuntimePrompt
       tools: RuntimeTool[]
       activeSurface: ActiveSurface | null
     }
