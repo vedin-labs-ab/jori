@@ -11,10 +11,13 @@ import {
   type ConfigurablePermissionMode,
   getToolPermission,
   isModeAllowed,
+  isUserVisibleToolPermission,
   type PermissionMode,
   resolveToolMode,
   resolveToolModes,
+  type ToolPermission,
   toolPermissions,
+  type UserVisibleToolPermission,
 } from "./catalog"
 import { listPermissionOverrides } from "./read"
 
@@ -37,11 +40,15 @@ export const list = query({
       overrides.map((override) => [override.tool, override.mode])
     )
 
-    return toolPermissions.map((permission) => ({
-      ...permission,
-      mode: resolveToolMode(modes, permission.tool),
-      overrideMode: overridesByTool.get(permission.tool) ?? null,
-    }))
+    return toolPermissions
+      .filter((permission) => isUserVisibleToolPermission(permission.tool))
+      .map((permission) =>
+        userVisiblePermission({
+          mode: resolveToolMode(modes, permission.tool),
+          overrideMode: overridesByTool.get(permission.tool) ?? null,
+          permission,
+        })
+      )
   },
 })
 
@@ -111,6 +118,20 @@ async function getOverride(ctx: MutationCtx, tenantId: string, tool: string) {
       query.eq("tenantId", tenantId).eq("tool", tool)
     )
     .unique()
+}
+
+function userVisiblePermission(args: {
+  mode: PermissionMode
+  overrideMode: ConfigurablePermissionMode | null
+  permission: ToolPermission
+}): UserVisibleToolPermission {
+  const { usage: _usage, ...permission } = args.permission
+
+  return {
+    ...permission,
+    mode: args.mode,
+    overrideMode: args.overrideMode,
+  }
 }
 
 export type { ConfigurablePermissionMode, PermissionMode }

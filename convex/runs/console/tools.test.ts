@@ -1,26 +1,11 @@
 import { expect, test } from "vitest"
+import { getToolPermission } from "../../permissions/catalog"
 import { toolDetails } from "./tools"
 
 test("omits empty access counts from tool labels", () => {
-  const miloTool = {
-    access: "write" as const,
-    description:
-      "Create a task that starts on a time or provider event trigger.",
-    label: "Add automation",
-    tool: "add_automation",
-  }
-  const readTool = {
-    access: "read" as const,
-    description: "Read GitHub issues.",
-    label: "Read issue",
-    tool: "github_get_issue",
-  }
-  const writeTool = {
-    access: "write" as const,
-    description: "Post a Slack message.",
-    label: "Send message",
-    tool: "conversations_add_message",
-  }
+  const miloTool = catalogTool("add_automation", "write")
+  const readTool = catalogTool("github_get_issue", "read")
+  const writeTool = catalogTool("conversations_add_message", "write")
 
   expect(
     toolDetails({
@@ -69,13 +54,9 @@ test("omits empty access counts from tool labels", () => {
 test("combines native Milo groups in tool labels", () => {
   const runTool = testTool("finish_run", "Finish run", "write")
   const activeSurfaceTool = testTool("send_reply", "Send reply", "write")
-  const miloTool = testTool("list_tools", "List tools", "read")
-  const workspaceTool = testTool("read", "Read", "read")
-  const slackTool = testTool(
-    "conversations_add_message",
-    "Send message",
-    "write"
-  )
+  const miloTool = catalogTool("search_runs", "read")
+  const workspaceTool = catalogTool("read", "read")
+  const slackTool = catalogTool("conversations_add_message", "write")
 
   expect(
     toolDetails({
@@ -94,12 +75,12 @@ test("combines native Milo groups in tool labels", () => {
     })
   ).toContainEqual({
     type: "tools",
-    label: "Milo · Read 2 · Write 2 · Slack · Write 1",
+    label: "Milo · Read 2 · Slack · Write 1",
     groups: [
       {
         type: "milo",
         label: "Milo",
-        tools: [runTool, activeSurfaceTool, miloTool, workspaceTool],
+        tools: [miloTool, workspaceTool],
       },
       {
         type: "slack",
@@ -110,11 +91,65 @@ test("combines native Milo groups in tool labels", () => {
   })
 })
 
-function testTool(tool: string, label: string, access: "read" | "write") {
+test("replaces persisted agent-facing tool descriptions", () => {
+  const globTool = testTool(
+    "glob",
+    "Glob",
+    "read",
+    "Find files under /home/user/workspace by glob pattern with bounded results."
+  )
+  const gitTool = testTool(
+    "git",
+    "Git",
+    "read",
+    "Preferred tool for read-only Git inspection after a repository is cloned into /home/user/workspace/<repo>. Use cwd for the repo directory, and use args without the leading git executable."
+  )
+
+  expect(
+    toolDetails({
+      groups: [
+        { surface: "milo", label: "Workspace", tools: [globTool, gitTool] },
+      ],
+      webSearch: true,
+    })
+  ).toContainEqual({
+    type: "tools",
+    label: "Milo · Read 2",
+    groups: [
+      {
+        type: "milo",
+        label: "Milo",
+        tools: [catalogTool("glob", "read"), catalogTool("git", "read")],
+      },
+    ],
+  })
+})
+
+function testTool(
+  tool: string,
+  label: string,
+  access: "read" | "write",
+  description = `${label} description.`
+) {
   return {
     access,
-    description: `${label} description.`,
+    description,
     label,
+    tool,
+  }
+}
+
+function catalogTool(tool: string, access: "read" | "write") {
+  const permission = getToolPermission(tool)
+
+  if (permission === undefined) {
+    throw new Error(`Missing permission: ${tool}`)
+  }
+
+  return {
+    access,
+    description: permission.description,
+    label: permission.label,
     tool,
   }
 }

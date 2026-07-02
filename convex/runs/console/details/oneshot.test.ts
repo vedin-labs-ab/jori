@@ -1,6 +1,7 @@
 import { expect, test } from "vitest"
 import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
+import { getToolPermission } from "../../../permissions/catalog"
 import { oneShotDisplay } from "../display"
 import { summarizeRun } from "../summaries"
 
@@ -33,7 +34,7 @@ test("includes one-shot automation access details", async () => {
         {
           type: "slack",
           label: "Slack",
-          tools: slackTools(),
+          tools: slackDisplayTools(),
         },
       ],
     },
@@ -139,14 +140,14 @@ function slackToolSnapshot(webSearch: boolean) {
       {
         surface: "slack",
         label: "Slack",
-        tools: slackTools(),
+        tools: slackSnapshotTools(),
       },
     ],
     webSearch,
   }
 }
 
-function slackTools() {
+function slackSnapshotTools() {
   return [
     {
       access: "write" as const,
@@ -161,6 +162,28 @@ function slackTools() {
       tool: "conversations_history",
     },
   ]
+}
+
+function slackDisplayTools() {
+  return [
+    catalogTool("conversations_add_message", "write"),
+    catalogTool("conversations_history", "read"),
+  ]
+}
+
+function catalogTool(tool: string, access: "read" | "write") {
+  const permission = getToolPermission(tool)
+
+  if (permission === undefined) {
+    throw new Error(`Missing permission: ${tool}`)
+  }
+
+  return {
+    access,
+    description: permission.description,
+    label: permission.label,
+    tool,
+  }
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {

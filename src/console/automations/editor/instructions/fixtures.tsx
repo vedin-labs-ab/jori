@@ -69,7 +69,6 @@ export function toolPermission(
   return {
     access,
     description: label,
-    usage: `Use ${tool}.`,
     label,
     mode,
     overrideMode: null,

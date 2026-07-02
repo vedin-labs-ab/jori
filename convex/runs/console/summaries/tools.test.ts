@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
+import { getToolPermission } from "../../../permissions/catalog"
 import { eventAutomationDisplay, messageDisplay } from "../display"
 import { summarizeRun } from "../summaries"
 
@@ -158,7 +159,7 @@ function slackToolSnapshot(
       {
         surface: "slack",
         label: "Slack",
-        tools: slackTools(approvalAccess),
+        tools: slackSnapshotTools(approvalAccess),
       },
     ],
     webSearch,
@@ -173,7 +174,7 @@ function slackToolsDetail(approvalAccess?: "read" | "write") {
       {
         type: "slack",
         label: "Slack",
-        tools: slackTools(approvalAccess),
+        tools: slackDisplayTools(approvalAccess),
       },
     ],
   }
@@ -186,7 +187,7 @@ function webSearchDetail(label: "Allowed" | "Blocked") {
   }
 }
 
-function slackTools(approvalAccess?: "read" | "write") {
+function slackSnapshotTools(approvalAccess?: "read" | "write") {
   return [
     {
       access: "write" as const,
@@ -203,6 +204,33 @@ function slackTools(approvalAccess?: "read" | "write") {
       tool: "conversations_history",
     },
   ]
+}
+
+function slackDisplayTools(approvalAccess?: "read" | "write") {
+  return [
+    catalogTool("conversations_add_message", "write", approvalAccess),
+    catalogTool("conversations_history", "read", approvalAccess),
+  ]
+}
+
+function catalogTool(
+  tool: string,
+  access: "read" | "write",
+  approvalAccess?: "read" | "write"
+) {
+  const permission = getToolPermission(tool)
+
+  if (permission === undefined) {
+    throw new Error(`Missing permission: ${tool}`)
+  }
+
+  return {
+    access,
+    description: permission.description,
+    label: permission.label,
+    ...(approvalAccess === access ? { requiresApproval: true } : {}),
+    tool,
+  }
 }
 
 function fakeQueryCtx(docs: Record<string, unknown>) {

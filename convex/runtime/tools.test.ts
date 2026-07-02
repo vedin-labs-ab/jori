@@ -49,12 +49,20 @@ test("native runtime tools use catalog usage for agents and descriptions for use
     ...activeSurfaceToolSnapshot(activeSurfaceTools("slack")),
     ...sandboxToolSnapshot(),
   ]
+  const snapshotTools = snapshots.map((snapshot) => snapshot.tool)
 
   for (const snapshot of snapshots) {
     expect(snapshot.description).toBe(
       requirePermission(snapshot.tool).description
     )
   }
+
+  expect(snapshotTools).not.toContain("finish_run")
+  expect(snapshotTools).not.toContain("send_reply")
+  expect(snapshotTools).not.toContain("add_reaction")
+  expect(snapshotTools).toEqual(
+    expect.arrayContaining(["read", "grep", "glob", "git"])
+  )
 })
 
 function schemaDescription(schema: Record<string, unknown>) {
