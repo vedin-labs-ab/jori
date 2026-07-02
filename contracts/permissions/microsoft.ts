@@ -22,7 +22,7 @@ export const microsoftToolPermissionRows = [
     "microsoft_email_send_message",
     "Send email",
     "Send a new email from your Outlook account.",
-    "Send a new Outlook email. Use for a fresh message; create a draft instead when the user should review first.",
+    "Send a new Outlook email, optionally attaching saved run assets. Use for a fresh message; create a draft instead when the requester should review it first.",
     "write",
   ],
   [
@@ -30,7 +30,7 @@ export const microsoftToolPermissionRows = [
     "microsoft_email_create_draft",
     "Create draft",
     "Save an Outlook draft without sending.",
-    "Create an Outlook draft for the user to review and send. Prefer this over sending when approval is wanted first.",
+    "Create an Outlook draft for the requester to review and send. Prefer this over sending when the email should be approved first.",
     "write",
   ],
   [

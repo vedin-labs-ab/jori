@@ -6,7 +6,7 @@ export const linearToolPermissionRows = [
     "linear_search_issues",
     "Search issues",
     "Search Linear issues.",
-    "Search Linear issues by query. Use to find issues before reading them.",
+    "Search Linear issues by identifier like ENG-123, or by text matched against titles, descriptions, and comments. Use to find the right issue before reading it in full.",
     "read",
   ],
   [
@@ -30,7 +30,7 @@ export const linearToolPermissionRows = [
     "linear_add_comment",
     "Add comment",
     "Comment on a Linear issue.",
-    "Add a comment to a Linear issue. Confirm the target issue before posting.",
+    "Comment on a Linear issue, or reply under an existing comment to stay in-thread. Confirm the target before posting.",
     "write",
     "required",
   ],
