@@ -11,7 +11,7 @@ import {
 } from "ai"
 import { requireOpenRouterRuntimeConfig } from "./config"
 import { ingestReasoning } from "./reasoning"
-import { beginExecutionMessage, nullableText, readToolInput } from "./shared"
+import { nullableText, readToolInput } from "./shared"
 import {
   type ModelMessage,
   type ModelResponse,
@@ -105,13 +105,6 @@ function toAiPrompt(messages: ModelMessage[]) {
     } else {
       promptMessages.push(message)
     }
-  }
-
-  if (promptMessages.length === 0) {
-    promptMessages.push({
-      content: beginExecutionMessage,
-      role: "user",
-    })
   }
 
   return {

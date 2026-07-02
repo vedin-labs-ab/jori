@@ -149,9 +149,20 @@ async function refreshRuntimeContext(
 
   runtime.context.tools = reloaded.tools
   runtime.context.activeSurface = reloaded.activeSurface
+  runtime.context.prompt = reloaded.prompt
 
   if (messages.length > 0 && messages[0].role === "system") {
-    messages[0] = { content: reloaded.prompt, role: "system" }
+    messages[0] = {
+      content: reloaded.prompt.instructions,
+      role: "system",
+    }
+  }
+
+  if (messages.length > 1 && messages[1].role === "user") {
+    messages[1] = {
+      content: reloaded.prompt.context,
+      role: "user",
+    }
   }
 }
 

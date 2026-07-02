@@ -31,8 +31,12 @@ export async function runAgentLoop(args: {
 }) {
   const messages: ModelMessage[] = [
     {
-      content: args.runtime.context.prompt,
+      content: args.runtime.context.prompt.instructions,
       role: "system",
+    },
+    {
+      content: args.runtime.context.prompt.context,
+      role: "user",
     },
   ]
 

@@ -9,7 +9,7 @@ test("renders recent activity with surface and summary age", () => {
 
   input.recency = [recentActivity({ summary })]
 
-  const prompt = assemblePrompt(input)
+  const prompt = assemblePrompt(input).context
 
   expect(prompt).toContain("# Recent Activity")
   expect(prompt).toContain(
@@ -34,7 +34,7 @@ test("renders recent activity summaries without character truncation", () => {
 
   input.recency = [recentActivity({ summary })]
 
-  const prompt = assemblePrompt(input)
+  const prompt = assemblePrompt(input).context
 
   expect(prompt).toContain(summary)
   expect(prompt).toContain("summary-token-359")

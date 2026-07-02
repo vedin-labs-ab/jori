@@ -6,7 +6,7 @@ describe("finish guidance", () => {
   test("prefers final tool calls for message runs", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
-    )
+    ).instructions
 
     expect(prompt).toContain("prefer setting `final: true`")
     expect(prompt).not.toContain("offer_integration")
@@ -17,7 +17,7 @@ describe("finish guidance", () => {
   })
 
   test("uses plain finish_run guidance for automation runs", () => {
-    const prompt = assemblePrompt(automationRuntimeInput())
+    const prompt = assemblePrompt(automationRuntimeInput()).instructions
 
     expect(prompt).toContain(
       "Finish the run when no useful work remains by calling `finish_run`."

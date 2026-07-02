@@ -4,7 +4,7 @@ import { assemblePrompt } from "."
 
 describe("GitHub automation prompts", () => {
   test("renders review comment target context", () => {
-    const prompt = assemblePrompt(githubAutomationRuntimeInput())
+    const prompt = assemblePrompt(githubAutomationRuntimeInput()).context
 
     expect(prompt).toContain("- Type: pull_request.review_comment.edited")
     expect(prompt).toContain("- Integration: GitHub")
@@ -13,7 +13,7 @@ describe("GitHub automation prompts", () => {
     expect(prompt).toContain("- Comment ID: 456")
     expect(prompt).toContain("- Comment kind: pull_request_review")
     expect(prompt).toContain("- Review thread comment ID: 123")
-    expect(prompt).toContain("- Text: This is a great change.")
+    expect(prompt).toContain("Text:\n```text\nThis is a great change.\n```")
   })
 })
 

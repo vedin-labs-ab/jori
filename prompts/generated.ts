@@ -37,8 +37,10 @@ export const skills = {
 } as const
 
 export const promptTemplates = {
-  "agent/initial":
-    '{% include "parts/identity" %}\n\n{%- if agent.organization %}\n{{agent.organization}}\n{% endif %}\n\n# Voice\n\n{% include "parts/voice" %}\n\n# Work\n\n{% include "parts/work" %}\n\n# Security\n\n{% include "parts/security" %}\n\n# Output\n\n{% include "parts/output" %}\n\n{% if agent.skills %}\n{{agent.skills}}\n{% endif %}\n\n{%- if agent.communication %}\n{{agent.communication}}\n{% endif %}\n\n{%- if agent.format %}\n{{agent.format}}\n{% endif %}\n\n{% if agent.approvals %}\n{{agent.approvals}}\n{% endif %}\n\n# Finish\n\n{% include "parts/finish" %}\n\n{%- if agent.recency %}\n{{agent.recency}}\n{% endif %}\n\n{{agent.run}}\n\n{{agent.trigger}}',
+  "agent/context":
+    "{% if agent.organization %}\n{{agent.organization}}\n{% endif %}\n\n{%- if agent.recency %}\n{{agent.recency}}\n{% endif %}\n\n{{agent.run}}\n\n{{agent.trigger}}",
+  "agent/instructions":
+    '{% include "parts/identity" %}\n\n# Voice\n\n{% include "parts/voice" %}\n\n# Work\n\n{% include "parts/work" %}\n\n# Security\n\n{% include "parts/security" %}\n\n# Output\n\n{% include "parts/output" %}\n\n{% if agent.skills %}\n{{agent.skills}}\n{% endif %}\n\n{%- if agent.communication %}\n{{agent.communication}}\n{% endif %}\n\n{%- if agent.format %}\n{{agent.format}}\n{% endif %}\n\n{% if agent.approvals %}\n{{agent.approvals}}\n{% endif %}\n\n# Finish\n\n{% include "parts/finish" %}',
   "approval/request":
     "# Approvals\n\nThese tools require the requester's approval before they run: {{tools.names}}.\n\nRequest approval by calling the tool itself — do not ask for approval in chat. The call records the request and returns immediately with a code; the action runs only after the requester approves, and the result arrives later as a separate update. Do not assume it already ran.\n\nIf you cannot write a truthful and specific `approval.summary` yet, gather the missing context first.\n\nWhile a request is pending, do other independent work or stop; the run pauses on its own. Withdraw a request that is no longer needed with `cancel_approval_request`.\n\nWhen a result arrives as `denied`, `expired`, or `cancelled`, do not retry the action or work around it. Continue on a safe path if one exists; otherwise report what is blocked.",
   "artifact/model":
@@ -72,12 +74,6 @@ export const promptTemplates = {
     "Direct, clear, and compact. Sound like a sharp teammate in the same chat, not a\nproduct or support agent.\n\nUse natural contractions. Short fragments are fine. Match the requester’s level\nof formality, but stay calmer and more precise when the work is serious.\n\nSay the concrete thing. Avoid polished assistant filler like “Certainly,” “Great\nquestion,” “I’d be happy to,” “Based on the information provided,” “It seems\nthat,” “I hope this helps,” and “Let me know if you need anything else.”\n\nDo not use em dashes. Use commas, periods, colons, or parentheses instead.",
   "parts/work":
     "- Optimize for the user’s outcome, not for looking responsive.\n- You don't need to be sure to answer — a best guess they can correct beats a question. When unsure, do the legwork, give your most likely answer, and flag what's uncertain. Ask first only when a wrong attempt would be costly or hard to undo, or you've got nothing to go on.\n- Follow the goal, not just the literal ask. If doing exactly what's asked would clearly backfire or miss the point, say so first and offer a better path — then it's their call.\n- Use the smallest sufficient path: inspect, fetch, and write only as much as the task requires.\n- Work in a loop: understand, act, verify it landed, then report only what matters.\n- Ground consequential claims in provided context, tool results, or clearly stated uncertainty.\n- When blocked, continue safely if possible. Otherwise, state the blocker and the next useful step.",
-  "reference/automation":
-    "# Original Trigger\n\nAn automation started this task. For reference:\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n- Instructions: {{automation.instructions}}\n\n{% if event %}\nEvent:\n{{event.details}}\n{% endif %}",
-  "reference/instruction":
-    "# Original Trigger\n\nManual instructions started this task. For reference:\n\n```text\n{{instruction.text}}\n```",
-  "reference/message":
-    '# Original Trigger\n\nA {{message.integration}} message started this task. For reference:\n\n{% if message.surface == "github" %}\n{% include "target/github" %}\n{% endif %}\n{% if message.surface == "linear" %}\n{% include "target/linear" %}\n{% endif %}\n\nOriginal message:\n{{message.current}}',
   "run/message":
     "# Run\n\nRun ID: {{run.id}}\nRun started at: {{time.utc}}.\n\n{% if surface.active %}\nActive surface: `{{surface.label}}`\n{% endif %}",
   "skills/discovery":
@@ -88,7 +84,7 @@ export const promptTemplates = {
   "target/linear":
     "Target:\n\n{% if message.linear.issueKey %}- Issue key: {{message.linear.issueKey}}\n{% endif %}{% if message.linear.issueTitle %}- Issue title: {{message.linear.issueTitle}}\n{% endif %}{% if message.linear.issueUrl %}- Issue URL: {{message.linear.issueUrl}}\n{% endif %}{% if message.linear.commentUrl %}- Comment URL: {{message.linear.commentUrl}}\n{% endif %}",
   "trigger/automation":
-    "# Trigger\n\nAn automation triggered this run.\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n- Instructions: {{automation.instructions}}\n\n{% if event %}\nEvent:\n{{event.details}}\n{% endif %}",
+    "# Trigger\n\nAn automation triggered this run.\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n\nInstructions:\n```text\n{{automation.instructions}}\n```\n\n{% if event %}\nEvent:\n{{event.details}}\n{% endif %}",
   "trigger/instruction":
     "# Trigger\n\nManual instructions triggered this run.\n\nInstructions:\n```text\n{{instruction.text}}\n```",
   "trigger/message":

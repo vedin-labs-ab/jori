@@ -15,23 +15,24 @@ test("renders organization facts before the run section", () => {
     },
     { promptedTools: [promptedTool()] }
   )
+  const context = prompt.context
 
-  expect(prompt).toContain("# Organization")
-  expect(prompt).toContain("Name: Milo Labs")
-  expect(prompt).toContain(
+  expect(context).toContain("# Organization")
+  expect(context).toContain("Name: Milo Labs")
+  expect(context).toContain(
     "Summary: Builds agent workspaces for engineering teams."
   )
-  expect(prompt).toContain("Also known as: Milo, Milo AI")
-  expect(prompt).toContain("Websites:")
-  expect(prompt).toContain("- https://milo.example")
-  expect(prompt).toContain("- https://milo.dev")
-  expect(prompt).not.toContain("Website:")
-  expect(prompt).not.toContain("Products:")
-  expect(prompt.indexOf("# Organization")).toBeLessThan(
-    prompt.indexOf("# Voice")
+  expect(context).toContain("Also known as: Milo, Milo AI")
+  expect(context).toContain("Websites:")
+  expect(context).toContain("- https://milo.example")
+  expect(context).toContain("- https://milo.dev")
+  expect(context).not.toContain("Website:")
+  expect(context).not.toContain("Products:")
+  expect(context.indexOf("# Organization")).toBeLessThan(
+    context.indexOf("# Run")
   )
-  expect(prompt.indexOf("# Organization")).toBeLessThan(prompt.indexOf("# Run"))
-  expectNoSyntheticBlankLines(prompt)
+  expect(prompt.instructions).not.toContain("# Organization")
+  expectNoSyntheticBlankLines(context)
 })
 
 test("omits the website section without websites", () => {
@@ -42,7 +43,7 @@ test("omits the website section without websites", () => {
       aliases: [],
       domains: [],
     },
-  })
+  }).context
 
   expect(prompt).toContain("# Organization")
   expect(prompt).toContain("Name: Milo Labs")
@@ -55,10 +56,12 @@ test("omits the organization section without facts", () => {
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
     organization: null,
   })
+  const context = prompt.context
 
-  expect(prompt).not.toContain("# Organization")
-  expect(prompt.indexOf("# Finish")).toBeLessThan(prompt.indexOf("# Run"))
-  expectNoSyntheticBlankLines(prompt)
+  expect(context).not.toContain("# Organization")
+  expect(context).toMatch(/^# Run\n\nRun ID: run\nRun started at:/)
+  expect(prompt.instructions).not.toContain("# Organization")
+  expectNoSyntheticBlankLines(context)
 })
 
 function expectNoSyntheticBlankLines(prompt: string) {

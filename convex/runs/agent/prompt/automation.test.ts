@@ -9,26 +9,35 @@ import {
 describe("automation trigger prompts", () => {
   test("omits empty automation context", () => {
     const prompt = assemblePrompt(automationRuntimeInput())
+    const context = prompt.context
+    const instructions = prompt.instructions
 
-    expect(prompt).toContain("An automation triggered this run.")
-    expect(prompt).toContain("# Run\n\nRun ID: run\nRun started at:")
-    expect(prompt.match(/Run ID:/g)).toHaveLength(1)
-    expect(prompt).not.toContain("Active surface:")
-    expect(prompt.match(/Run started at:/g)).toHaveLength(1)
-    expect(prompt).not.toContain("Integration access:")
-    expect(prompt).not.toContain("- Web search:")
-    expect(prompt).not.toContain("\nEvent:\n")
-    expect(prompt).not.toContain("- None")
-    expect(prompt.indexOf("# Finish")).toBeLessThan(prompt.indexOf("# Trigger"))
-    expect(prompt).toContain("no useful work remains by calling `finish_run`")
-    expect(prompt).not.toContain("final: true")
-    expect(prompt).not.toContain("# Communication")
-    expect(prompt).not.toContain("send_reply")
-    expectNoSyntheticBlankLines(prompt)
+    expect(context).toContain("An automation triggered this run.")
+    expect(context).toContain("# Run\n\nRun ID: run\nRun started at:")
+    expect(context.match(/Run ID:/g)).toHaveLength(1)
+    expect(context).not.toContain("Active surface:")
+    expect(context.match(/Run started at:/g)).toHaveLength(1)
+    expect(context).not.toContain("Integration access:")
+    expect(context).not.toContain("- Web search:")
+    expect(context).not.toContain("\nEvent:\n")
+    expect(context).not.toContain("- None")
+    expect(context).toContain(
+      "Instructions:\n```text\nPost the daily digest.\n```"
+    )
+    expect(instructions).toContain(
+      "no useful work remains by calling `finish_run`"
+    )
+    expect(instructions).not.toContain("final: true")
+    expect(instructions).not.toContain("# Communication")
+    expect(instructions).not.toContain("send_reply")
+    expectNoSyntheticBlankLines(context)
+    expectNoSyntheticBlankLines(instructions)
   })
+})
 
+describe("automation event prompts", () => {
   test("renders integration target context for Linear events", () => {
-    const prompt = assemblePrompt(linearAutomationRuntimeInput())
+    const prompt = assemblePrompt(linearAutomationRuntimeInput()).context
 
     expect(prompt).toContain("\nEvent:\n")
     expect(prompt).not.toContain("Integration access:")
@@ -45,12 +54,12 @@ describe("automation trigger prompts", () => {
       "- Comment URL: https://linear.app/acme/issue/VED-1/get-familiar#comment-id"
     )
     expect(prompt).toContain(
-      "- Text: i wonder if this is worth spending time on"
+      "Text:\n```text\ni wonder if this is worth spending time on\n```"
     )
   })
 
   test("renders integration target context for Notion events", () => {
-    const prompt = assemblePrompt(notionAutomationRuntimeInput())
+    const prompt = assemblePrompt(notionAutomationRuntimeInput()).context
 
     expect(prompt).toContain("\nEvent:\n")
     expect(prompt).toContain("- Type: comment.created")

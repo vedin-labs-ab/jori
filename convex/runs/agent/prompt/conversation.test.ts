@@ -11,7 +11,7 @@ type MessageInput = Extract<
 type ConversationEntry = MessageInput["conversation"]["entries"][number]
 
 test("renders recent conversation context without duplicating the trigger", () => {
-  const prompt = assemblePrompt(messageInputWithConversation())
+  const prompt = assemblePrompt(messageInputWithConversation()).context
 
   expect(prompt).toContain("Recent messages:")
   expect(prompt).not.toContain("Recent conversation:")
@@ -35,7 +35,7 @@ test("renders recent conversation context without duplicating the trigger", () =
 test("omits the recent messages block without prior conversation", () => {
   const prompt = assemblePrompt(
     runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
-  )
+  ).context
 
   expect(prompt).not.toContain("Recent messages")
   expect(prompt).not.toContain("- None")
@@ -43,7 +43,7 @@ test("omits the recent messages block without prior conversation", () => {
 })
 
 test("renders an omitted history note when recent context is truncated", () => {
-  const prompt = assemblePrompt(messageInputWithTruncatedConversation())
+  const prompt = assemblePrompt(messageInputWithTruncatedConversation()).context
 
   expect(prompt).toContain("Recent messages (older messages omitted):")
   expect(prompt).toContain("Previous message 1")

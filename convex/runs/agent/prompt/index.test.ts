@@ -53,7 +53,7 @@ describe("runtime prompts", () => {
   test.each(
     messageTriggerCases
   )("renders %s message trigger target", (provider, data, toolSurfaceLabel, targetLines) => {
-    const prompt = assemblePrompt(runtimeInput(provider, data))
+    const prompt = assemblePrompt(runtimeInput(provider, data)).context
 
     expect(prompt).toContain(
       `A ${toolSurfaceLabel} message triggered this run.`
@@ -89,7 +89,7 @@ describe("runtime prompts", () => {
 
     input.message.text = "<@UBOT> what tools do u have?"
 
-    const prompt = assemblePrompt(input)
+    const prompt = assemblePrompt(input).context
 
     expect(prompt).toContain(
       "- 1970-01-01T00:00:01.000Z | person | Albin Vedin | identifiers=[internal:message:message, slack:channel:C123, slack:message:123.456, slack:thread:123.456] | actor_ids=[slack:user:UACTOR]"
@@ -105,7 +105,7 @@ describe("runtime prompts", () => {
         thread: { ts: "123.000" },
         ts: "123.456",
       })
-    )
+    ).context
 
     expect(prompt).toContain("slack:message:123.456")
     expect(prompt).toContain("slack:thread:123.000")
@@ -120,7 +120,7 @@ describe("runtime Linear prompt metadata", () => {
         commentId: "comment-id",
         issueId: "issue-id",
       })
-    )
+    ).context
 
     expect(prompt).toContain(
       "- 1970-01-01T00:00:01.000Z | person | Albin Vedin | identifiers=[internal:message:message, linear:issue:issue-id, linear:comment:comment-id] | actor_ids=[linear:user:UACTOR]"
@@ -134,40 +134,42 @@ describe("runtime delivery prompts", () => {
   test("renders start update guidance", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
-    )
+    ).instructions
 
-    expect(prompt).toContain("Send a short heads-up with `send_reply`")
-    expect(prompt).toContain("After the heads-up, stay quiet")
+    expect(prompt).toContain("send one short `send_reply`")
+    expect(prompt).toContain("After the first visible update, stay quiet")
     expect(prompt).toContain(
-      "I’ll find the Notion parent first, then ask for approval"
+      "I’ll find the Notion parent first, then ask before I create anything"
     )
     expect(prompt).toContain("Looking up Emma now")
     expect(prompt).toContain("Bad:")
-    expect(prompt).toContain("On it — I’ll keep you posted")
+    expect(prompt).toContain("On it, I’ll keep you posted")
   })
 
   test("renders Slack communication and completion sections", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     )
+    const instructions = prompt.instructions
 
-    expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("use the lightest action that delivers it")
-    expect(prompt).toContain("Use `send_reply`")
-    expect(prompt).toContain("Active surface: `Slack`")
-    expect(prompt).not.toContain("Current surface:")
-    expect(prompt).toContain("# Finish")
-    expect(prompt).toContain(
+    expect(instructions).toContain("# Communication")
+    expect(instructions).toContain("use the lightest action that delivers it")
+    expect(instructions).toContain("Use `send_reply`")
+    expect(prompt.context).toContain("Active surface: `Slack`")
+    expect(instructions).not.toContain("Current surface:")
+    expect(instructions).toContain("# Finish")
+    expect(instructions).toContain(
       "Finish the run when no useful work remains: prefer setting `final: true` on the last useful tool call that supports it, and call `finish_run` otherwise."
     )
-    expect(prompt).not.toContain("final useful action")
-    expectNoSyntheticBlankLines(prompt)
+    expect(instructions).not.toContain("final useful action")
+    expectInstructionsOrder(instructions)
+    expectNoSyntheticBlankLines(instructions)
   })
 
   test.each(
     messageTriggerCases
   )("renders generic communication guidance for %s message runs", (provider, data) => {
-    const prompt = assemblePrompt(runtimeInput(provider, data))
+    const prompt = assemblePrompt(runtimeInput(provider, data)).instructions
 
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("use the lightest action that delivers it")
@@ -177,7 +179,7 @@ describe("runtime delivery prompts", () => {
   })
 
   test("omits automatic final delivery instructions", () => {
-    const prompt = assemblePrompt(githubMessageInput())
+    const prompt = assemblePrompt(githubMessageInput()).instructions
 
     expect(prompt).not.toMatch(/Milo will .*post it/)
     expect(prompt).not.toContain("Use GitHub write tools only")
@@ -191,7 +193,7 @@ describe("output contract prompts", () => {
   test("renders the channel contract section", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
-    )
+    ).instructions
 
     expect(prompt).toContain("# Output")
     expect(prompt).toContain(
@@ -206,7 +208,7 @@ describe("approval request prompts", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
       { promptedTools: [promptedTool()], skills: runtimeSkills() }
-    )
+    ).instructions
 
     expect(prompt).toContain("# Approvals")
     expect(prompt).toContain("`notion_create_page`")
@@ -226,7 +228,7 @@ describe("approval request prompts", () => {
   test("omits the approvals section without prompted tools", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
-    )
+    ).instructions
 
     expect(prompt).not.toContain("# Approvals")
   })
@@ -242,11 +244,6 @@ function githubMessageInput() {
 
 function expectRunBefore(prompt: string, section: string) {
   expectSingleRun(prompt)
-  expect(prompt.indexOf("# Voice")).toBeLessThan(prompt.indexOf("# Work"))
-  expect(prompt.indexOf("# Work")).toBeLessThan(prompt.indexOf("# Security"))
-  expect(prompt.indexOf("# Security")).toBeLessThan(prompt.indexOf("# Output"))
-  expect(prompt.indexOf("# Output")).toBeLessThan(prompt.indexOf("# Finish"))
-  expect(prompt.indexOf("# Finish")).toBeLessThan(prompt.indexOf("# Run"))
   expect(prompt.indexOf("# Run")).toBeLessThan(prompt.indexOf(section))
   expect(prompt.indexOf("Active surface:")).toBeLessThan(
     prompt.indexOf(section)
@@ -263,6 +260,15 @@ function expectSingleRun(prompt: string) {
   expect(prompt).toContain("# Run\n\nRun ID: run\nRun started at:")
   expect(prompt.match(/Run ID:/g)).toHaveLength(1)
   expect(prompt.match(/Run started at:/g)).toHaveLength(1)
+}
+
+function expectInstructionsOrder(prompt: string) {
+  expect(prompt.indexOf("# Voice")).toBeLessThan(prompt.indexOf("# Work"))
+  expect(prompt.indexOf("# Work")).toBeLessThan(prompt.indexOf("# Security"))
+  expect(prompt.indexOf("# Security")).toBeLessThan(prompt.indexOf("# Output"))
+  expect(prompt.indexOf("# Output")).toBeLessThan(prompt.indexOf("# Finish"))
+  expect(prompt).not.toContain("# Run")
+  expect(prompt).not.toContain("# Trigger")
 }
 
 function expectNoSyntheticBlankLines(prompt: string) {

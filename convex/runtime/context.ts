@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { type RuntimePrompt } from "../../contracts/runtime"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
@@ -183,7 +184,7 @@ function runtimeResponse(args: {
   input: AgentRuntimeInput
   lifecycleTools: ReturnType<typeof runLifecycleTools>
   permissions: RuntimePermissions
-  prompt: string
+  prompt: RuntimePrompt
   run: LoadedRun
   sandbox: LoadedSandbox
   session: LoadedSession

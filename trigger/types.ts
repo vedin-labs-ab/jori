@@ -2,6 +2,7 @@ import { type GenericId } from "convex/values"
 import { type ToolSurface } from "../contracts/integrations"
 import { type JsonObject, type JsonValue } from "../contracts/json"
 import { type ToolAccess } from "../contracts/permissions"
+import { type RuntimePrompt } from "../contracts/runtime"
 
 export type {
   JsonArray,
@@ -12,6 +13,7 @@ export type {
 export {
   agentTaskId,
   cleanupTaskId,
+  type RuntimePrompt,
   type RuntimeToolMetadataItem,
   type SurfaceReactionTarget,
 } from "../contracts/runtime"
@@ -129,7 +131,7 @@ export type RuntimeTool = {
 
 export type RuntimeContext = {
   activeSurface: ActiveSurface | null
-  prompt: string
+  prompt: RuntimePrompt
   run: {
     id: ConvexId<"runs">
     rootId: ConvexId<"runs"> | null

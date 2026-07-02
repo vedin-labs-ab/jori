@@ -12,6 +12,11 @@ export const runtimeToolMetadataKinds = [
   "target",
 ] as const
 
+export type RuntimePrompt = {
+  context: string
+  instructions: string
+}
+
 export type RuntimeToolMetadataKind = (typeof runtimeToolMetadataKinds)[number]
 
 export type RuntimeToolMetadataItem = {
