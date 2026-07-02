@@ -14,7 +14,7 @@ test("renders recent activity with surface and summary age", () => {
   expect(prompt).toContain("# Recent Activity")
   expect(prompt).toContain(
     [
-      "- 1970-01-01T00:00:01.000Z | GitHub | identifiers=[internal:conversation:other-conversation, github:repository:acme/app, github:issue:acme/app#42] | summary updated 10 minutes ago",
+      "- GitHub | identifiers=[internal:conversation:other-conversation, github:repository:acme/app, github:issue:acme/app#42] | summary updated 10 minutes ago",
       "```text",
       summary,
       "```",
