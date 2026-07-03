@@ -1,5 +1,9 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
+import {
+  requireProviderIntegration,
+  saveOAuthCredentials,
+} from "../credentials"
 import { buildInstallState } from "../install"
 import { createSignedLinearState } from "./signing"
 
@@ -102,26 +106,19 @@ export const updateOAuthCredentials = internalMutation({
     scope: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const integration = await ctx.db.get(args.integrationId)
+    await requireProviderIntegration(ctx, {
+      integrationId: args.integrationId,
+      provider: "linear",
+      label: "Linear",
+    })
 
-    if (integration === null || integration.integration !== "linear") {
-      throw new Error("Linear integration not found")
-    }
-
-    const credentials = {
+    return await saveOAuthCredentials(ctx, args.integrationId, {
       tokens: {
         access: args.accessToken,
         refresh: args.refreshToken,
       },
       expiresAt: args.expiresAt,
       scope: args.scope,
-    }
-
-    await ctx.db.patch(args.integrationId, {
-      credentials,
-      updatedAt: Date.now(),
     })
-
-    return credentials
   },
 })
