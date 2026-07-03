@@ -20,15 +20,13 @@ import { api } from "../../../../convex/_generated/api"
 import { ContextSectionTitle } from "../section"
 import { WorkstreamCard } from "./card"
 import { WorkstreamDetail } from "./detail"
-import { MergeDialog } from "./merge"
-import { RenameDialog } from "./rename"
 import { type Workstream, type Workstreams } from "./types"
 
 type StatusFilter = "active" | "closed" | "rejected"
 
 const filterLabels: Record<StatusFilter, string> = {
   active: "Active",
-  closed: "Closed",
+  closed: "Archived",
   rejected: "Not workstreams",
 }
 
@@ -38,16 +36,8 @@ export function ContextWorkstreams({ tenantId }: { tenantId: string }) {
   const result = useQuery(api.deduction.console.queries.list, { tenantId })
   const [filter, setFilter] = useState<StatusFilter>("active")
   const [openId, setOpenId] = useState<Workstream["id"] | null>(null)
-  const [editing, setEditing] = useState<Workstream | null>(null)
-  const [merging, setMerging] = useState<Workstream | null>(null)
   const workstreams = result?.workstreams ?? []
   const open = workstreams.find((row) => row.id === openId) ?? null
-
-  const dialogs = (workstream: Workstream) => ({
-    onOpen: () => setOpenId(workstream.id),
-    onEdit: () => setEditing(workstream),
-    onMerge: () => setMerging(workstream),
-  })
 
   return (
     <div className="flex flex-col gap-4">
@@ -74,26 +64,13 @@ export function ContextWorkstreams({ tenantId }: { tenantId: string }) {
         <FilteredWorkstreams
           filter={filter}
           workstreams={workstreams}
-          dialogs={dialogs}
+          onOpen={(workstream) => setOpenId(workstream.id)}
         />
       )}
       <WorkstreamDetail
         tenantId={tenantId}
         workstream={open}
         onClose={() => setOpenId(null)}
-        onEdit={() => setEditing(open)}
-        onMerge={() => setMerging(open)}
-      />
-      <RenameDialog
-        tenantId={tenantId}
-        workstream={editing}
-        onClose={() => setEditing(null)}
-      />
-      <MergeDialog
-        tenantId={tenantId}
-        workstream={merging}
-        workstreams={workstreams}
-        onClose={() => setMerging(null)}
       />
     </div>
   )
@@ -102,15 +79,11 @@ export function ContextWorkstreams({ tenantId }: { tenantId: string }) {
 function FilteredWorkstreams({
   filter,
   workstreams,
-  dialogs,
+  onOpen,
 }: {
   filter: StatusFilter
   workstreams: Workstreams
-  dialogs: (workstream: Workstream) => {
-    onOpen: () => void
-    onEdit: () => void
-    onMerge: () => void
-  }
+  onOpen: (workstream: Workstream) => void
 }) {
   const section = (rows: Workstreams) => (
     <ul className="flex flex-col gap-2">
@@ -118,7 +91,7 @@ function FilteredWorkstreams({
         <li key={workstream.id}>
           <WorkstreamCard
             workstream={workstream}
-            onOpen={dialogs(workstream).onOpen}
+            onOpen={() => onOpen(workstream)}
           />
         </li>
       ))}
