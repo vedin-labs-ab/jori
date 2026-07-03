@@ -17,7 +17,7 @@ export const nativeToolPermissionRows = [
     "send_reply",
     "Send reply",
     "Reply where the request came from.",
-    "Send a visible reply or update to the active requester surface. Milo routes it to the current requester context by default.",
+    "Send a visible reply or update to the active requester surface, written like a teammate in the channel, not a status report. Milo routes it to the current requester context by default.",
     "write",
     "required",
     "surface",
