@@ -24,6 +24,8 @@ export const disconnect = action({
     tenantId: v.string(),
   },
   handler: async (ctx, args): Promise<Id<"integrations"> | null> => {
+    await requireTenantAccess(ctx, args.tenantId)
+
     const target: DisconnectTarget | null = await ctx.runQuery(
       internal.integrations.disconnect.getDisconnectTarget,
       args

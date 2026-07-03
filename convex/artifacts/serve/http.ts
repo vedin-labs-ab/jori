@@ -19,30 +19,16 @@ const renderPrefix = "/artifacts/render/"
 const assetPrefix = "/artifacts/assets/"
 const staticAssetPrefix = "/assets/"
 
-export async function handleArtifactRenderRequest(
-  ctx: ActionCtx,
-  request: Request
-) {
+export async function handleArtifactRenderRequest(request: Request) {
   const artifactId = parseArtifactId(request.url)
 
   if (artifactId === null) {
     return jsonError("Artifact not found", 404)
   }
 
-  const artifact = await ctx.runQuery(
-    internal.artifacts.queries.getArtifactForRender,
-    {
-      artifactId,
-    }
-  )
-
-  if (artifact === null) {
-    return jsonError("Artifact not found", 404)
-  }
-
   const framePolicy = readArtifactFramePolicy()
 
-  return new Response(renderArtifactShell(artifact, framePolicy), {
+  return new Response(renderArtifactShell(artifactId, framePolicy), {
     headers: {
       "content-type": "text/html; charset=utf-8",
       "content-security-policy": createArtifactRenderCsp(framePolicy),

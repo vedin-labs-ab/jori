@@ -1,9 +1,9 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { action } from "../_generated/server"
+import { requireTenantAccess } from "./access"
 import { readVerifiedClerkEmails } from "./clerkProfile"
 import {
-  readClerkOrganizationId,
   readClerkUserEmail,
   readClerkUserName,
   requireClerkUserId,
@@ -14,23 +14,8 @@ export const syncCurrentUser = action({
     tenantId: v.string(),
   },
   handler: async (ctx, args): Promise<{ synced: number }> => {
-    const identity = await ctx.auth.getUserIdentity()
-
-    if (identity === null) {
-      throw new Error("Unauthorized")
-    }
-
+    const identity = await requireTenantAccess(ctx, args.tenantId)
     const userId = requireClerkUserId(identity)
-    const identityTenantId = readClerkOrganizationId(identity)
-
-    if (identityTenantId === undefined) {
-      throw new Error("Missing active Clerk organization")
-    }
-
-    if (identityTenantId !== args.tenantId) {
-      throw new Error("Active Clerk organization does not match tenant")
-    }
-
     const profile = await fetchClerkUser(userId)
     const emails = readVerifiedClerkEmails(profile)
 

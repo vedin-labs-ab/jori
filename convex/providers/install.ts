@@ -2,6 +2,7 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, type MutationCtx } from "../_generated/server"
 import { ensureCurrentPerson } from "../persons/clerk"
+import { requireAppReturnUrl } from "../shared/app"
 import { type Integration } from "../shared/integrations"
 import { createSignedGitHubState } from "./github/signing"
 import { googleIntegrationConfigs } from "./google/config"
@@ -31,7 +32,7 @@ export async function buildInstallState(
   return {
     tenantId: args.tenantId,
     createdBy: await ensureCurrentPerson(ctx, args.tenantId),
-    returnUrl: args.returnUrl,
+    returnUrl: requireAppReturnUrl(args.returnUrl),
     createdAt: Date.now(),
     ...(args.integrationOfferId === undefined
       ? {}

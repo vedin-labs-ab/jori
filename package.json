@@ -7,10 +7,11 @@
   "scripts": {
     "dev": "vite",
     "build": "pnpm runtime:check && pnpm prompts:compile && pnpm check:typecheck && vite build",
-    "check": "pnpm runtime:check && pnpm prompts:compile && pnpm check:structure && pnpm check:dependencies && pnpm check:drift && pnpm check:biome && pnpm check:typecheck",
+    "check": "pnpm runtime:check && pnpm prompts:compile && pnpm check:structure && pnpm check:dependencies && pnpm check:entrypoints && pnpm check:drift && pnpm check:biome && pnpm check:typecheck",
     "check:biome": "biome ci --error-on-warnings .",
     "check:dependencies": "node --experimental-strip-types scripts/dependencies.ts",
     "check:drift": "node --experimental-strip-types scripts/drift.ts",
+    "check:entrypoints": "node --experimental-strip-types scripts/entrypoints.ts",
     "check:fix": "biome check --write .",
     "check:structure": "node --experimental-strip-types scripts/structure.ts",
     "check:typecheck": "tsc --noEmit",

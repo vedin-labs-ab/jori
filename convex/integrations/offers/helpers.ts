@@ -1,7 +1,7 @@
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { linkIdentityToPerson } from "../../persons/links"
-import { readAppOrigin } from "../../shared/app"
+import { requireAppOrigin } from "../../shared/app"
 import { type IntegrationOfferSource } from "./schema"
 import { surfaceIdentityProvider } from "./source"
 import { hashIntegrationOfferToken } from "./tokens"
@@ -86,16 +86,4 @@ function normalizeOfferReturnUrl(
   url.hash = ""
 
   return url.toString()
-}
-
-function requireAppOrigin() {
-  const origin = readAppOrigin()
-
-  if (origin === undefined) {
-    throw new Error(
-      "MILO_APP_URL must be configured to create integration offers."
-    )
-  }
-
-  return origin
 }

@@ -1,7 +1,6 @@
 import { v } from "convex/values"
-import { type QueryCtx, query } from "../_generated/server"
-import { type GoogleIntegration } from "../providers/google/config"
-import { type MicrosoftIntegration } from "../providers/microsoft/config"
+import { type Doc } from "../_generated/dataModel"
+import { query } from "../_generated/server"
 import { getMicrosoftTenantName } from "../providers/microsoft/data"
 import { getNotionBotId } from "../providers/notion/data"
 import { getTenantIntegration, getUserIntegration } from "./data"
@@ -57,24 +56,26 @@ export const getMicrosoftEmailStatus = query({
   args: {
     tenantId: v.string(),
   },
-  handler: async (ctx, args) => {
-    return await getMicrosoftUserStatus(ctx, {
-      integration: "microsoftEmail",
-      tenantId: args.tenantId,
-    })
-  },
+  handler: async (ctx, args) =>
+    formatMicrosoftUserStatus(
+      await getUserIntegration(ctx, {
+        integration: "microsoftEmail",
+        tenantId: args.tenantId,
+      })
+    ),
 })
 
 export const getMicrosoftCalendarStatus = query({
   args: {
     tenantId: v.string(),
   },
-  handler: async (ctx, args) => {
-    return await getMicrosoftUserStatus(ctx, {
-      integration: "microsoftCalendar",
-      tenantId: args.tenantId,
-    })
-  },
+  handler: async (ctx, args) =>
+    formatMicrosoftUserStatus(
+      await getUserIntegration(ctx, {
+        integration: "microsoftCalendar",
+        tenantId: args.tenantId,
+      })
+    ),
 })
 
 export const getGitHubStatus = query({
@@ -131,24 +132,26 @@ export const getGmailStatus = query({
   args: {
     tenantId: v.string(),
   },
-  handler: async (ctx, args) => {
-    return await getGoogleUserStatus(ctx, {
-      integration: "gmail",
-      tenantId: args.tenantId,
-    })
-  },
+  handler: async (ctx, args) =>
+    formatGoogleUserStatus(
+      await getUserIntegration(ctx, {
+        integration: "gmail",
+        tenantId: args.tenantId,
+      })
+    ),
 })
 
 export const getGoogleCalendarStatus = query({
   args: {
     tenantId: v.string(),
   },
-  handler: async (ctx, args) => {
-    return await getGoogleUserStatus(ctx, {
-      integration: "googleCalendar",
-      tenantId: args.tenantId,
-    })
-  },
+  handler: async (ctx, args) =>
+    formatGoogleUserStatus(
+      await getUserIntegration(ctx, {
+        integration: "googleCalendar",
+        tenantId: args.tenantId,
+      })
+    ),
 })
 
 export const getGoogleDriveStatus = query({
@@ -177,15 +180,7 @@ export const getGoogleDriveStatus = query({
   },
 })
 
-async function getGoogleUserStatus(
-  ctx: QueryCtx,
-  args: {
-    integration: GoogleIntegration
-    tenantId: string
-  }
-) {
-  const integration = await getUserIntegration(ctx, args)
-
+function formatGoogleUserStatus(integration: Doc<"integrations"> | null) {
   if (integration === null) {
     return null
   }
@@ -201,15 +196,7 @@ async function getGoogleUserStatus(
   }
 }
 
-async function getMicrosoftUserStatus(
-  ctx: QueryCtx,
-  args: {
-    integration: MicrosoftIntegration
-    tenantId: string
-  }
-) {
-  const integration = await getUserIntegration(ctx, args)
-
+function formatMicrosoftUserStatus(integration: Doc<"integrations"> | null) {
   if (integration === null) {
     return null
   }

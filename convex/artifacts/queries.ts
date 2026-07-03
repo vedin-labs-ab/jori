@@ -149,29 +149,6 @@ export const getAsset = internalQuery({
   },
 })
 
-export const getArtifactForRender = internalQuery({
-  args: {
-    artifactId: v.id("artifacts"),
-  },
-  handler: async (ctx, args) => {
-    const artifact = await ctx.db.get(args.artifactId)
-
-    if (
-      artifact === null ||
-      artifact.archivedAt !== undefined ||
-      artifact.versionId === undefined
-    ) {
-      return null
-    }
-
-    return {
-      artifactId: artifact._id,
-      title: artifact.title,
-      versionId: artifact.versionId,
-    }
-  },
-})
-
 async function collectSourceFiles(
   ctx: QueryCtx,
   treeId: string,
