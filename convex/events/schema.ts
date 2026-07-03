@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { actorValidator } from "../shared/actor"
 
-export const eventMatchValue = v.union(v.string(), v.number())
+const eventMatchValue = v.union(v.string(), v.number())
 export const eventMatch = v.record(v.string(), eventMatchValue)
 
 const slackData = v.object({

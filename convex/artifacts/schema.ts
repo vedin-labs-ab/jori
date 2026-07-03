@@ -6,24 +6,24 @@ export const artifactAccess = v.union(
   v.literal("organization")
 )
 
-export const artifactMode = v.union(
+const artifactMode = v.union(
   v.literal("directory"),
   v.literal("file"),
   v.literal("executable"),
   v.literal("symlink")
 )
 
-export const artifactHashAlgorithm = v.union(
+const artifactHashAlgorithm = v.union(
   v.literal("sha1"),
   v.literal("sha256")
 )
 
-export const artifactStateScope = v.union(
+const artifactStateScope = v.union(
   v.literal("personal"),
   v.literal("shared")
 )
 
-export const artifactContractStateEntry = v.object({
+const artifactContractStateEntry = v.object({
   name: v.string(),
   key: v.string(),
   scope: artifactStateScope,

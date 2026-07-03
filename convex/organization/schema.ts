@@ -5,7 +5,7 @@ import { actorValidator } from "../shared/actor"
 // The durable identity facts about an organization. This single shape is reused
 // three ways: the live (approved) columns on the profile, the pending draft, and
 // the model's structured-output contract during discovery.
-export const factsFields = {
+const factsFields = {
   name: v.optional(v.string()),
   aliases: v.array(v.string()),
   domains: v.array(v.string()),
@@ -56,7 +56,7 @@ export const discoveryStepKind = v.union(
   v.literal("summary")
 )
 
-export const discoveryStep = v.object({
+const discoveryStep = v.object({
   activeAt: v.optional(v.number()),
   completedAt: v.optional(v.number()),
   error: v.optional(v.string()),
@@ -68,7 +68,7 @@ export const discoveryStep = v.object({
   url: v.optional(v.string()),
 })
 
-export const discoveryStatus = v.union(
+const discoveryStatus = v.union(
   v.literal("running"),
   v.literal("completed")
 )

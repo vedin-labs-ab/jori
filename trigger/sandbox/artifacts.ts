@@ -12,7 +12,7 @@ import {
 import { runtimeAssets } from "../../convex/runtime/_generated/assets"
 import { type SandboxWriteFile } from "./types"
 
-export { sandboxArtifactRuntime, sandboxInternalRoot, sandboxWorkspace }
+export { sandboxArtifactRuntime, sandboxWorkspace }
 
 const artifactBuilderConfigPath = `${sandboxArtifactRuntime}/.milo/artifact-builder.json`
 export const artifactTemplatePath = `${sandboxInternalRoot}/artifacts/template`

@@ -23,7 +23,7 @@ export const linkMethod = v.union(
 
 export type LinkMethod = Infer<typeof linkMethod>
 
-export const identityLink = v.object({
+const identityLink = v.object({
   method: linkMethod,
   linkedAt: v.number(),
   evidence: v.optional(v.string()),

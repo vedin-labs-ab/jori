@@ -3,7 +3,7 @@ import { vi } from "vitest"
 import { type ToolPermission } from "../../../permissions/types"
 import { AutomationInstructionsField } from "."
 
-export const instructionToolPermissions = [
+const instructionToolPermissions = [
   toolPermission("github", "github_get_issue", "Read issue", "read"),
   toolPermission(
     "github",

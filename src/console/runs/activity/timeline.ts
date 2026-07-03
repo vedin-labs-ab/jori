@@ -5,8 +5,6 @@ import {
 } from "./tool-summary"
 import { type ActivityItem } from "./types"
 
-export type ActivityToolGroupKind = ActivityToolKind
-
 export type ActivityTimelineEntry =
   | {
       id: string
@@ -22,7 +20,7 @@ export type ActivityTimelineEntry =
       startedAt: number
       status: ActivityItem["status"]
       title: string
-      toolKind: ActivityToolGroupKind
+      toolKind: ActivityToolKind
       type: "tool-group"
     }
 
@@ -83,10 +81,7 @@ function toolGroupStatus(items: ActivityItem[]) {
   return items.some((item) => item.status === "failed") ? "failed" : "completed"
 }
 
-function toolGroupTitle(
-  items: ActivityItem[],
-  toolKind: ActivityToolGroupKind
-) {
+function toolGroupTitle(items: ActivityItem[], toolKind: ActivityToolKind) {
   const isRunning = items.some((item) => item.status === "running")
 
   switch (toolKind) {
@@ -109,7 +104,7 @@ function toolGroupTitle(
 
 function toolGroupDescription(
   items: ActivityItem[],
-  toolKind: ActivityToolGroupKind
+  toolKind: ActivityToolKind
 ) {
   const failed = items.filter((item) => item.status === "failed").length
   const completed = items.filter((item) => item.status === "completed").length

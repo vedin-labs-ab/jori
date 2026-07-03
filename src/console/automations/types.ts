@@ -28,7 +28,7 @@ export const repeatOptions = [
 ] as const
 
 export type RepeatMode = (typeof repeatOptions)[number]["value"]
-export type AutomationTriggerType = "cron" | "once" | "event"
+type AutomationTriggerType = "cron" | "once" | "event"
 
 export type AutomationFormValues = {
   name: string

@@ -1,10 +1,9 @@
 import { type JsonObject } from "./json"
 import { finalProperty } from "./runtime"
 
-export const approvalTtlSeconds = 30 * 60
+const approvalTtlSeconds = 30 * 60
 export const approvalTtlMs = approvalTtlSeconds * 1000
-export const approvalWaitTimeout = `${approvalTtlSeconds}s`
-export const approvalSummaryMaxLength = 500
+const approvalSummaryMaxLength = 500
 
 const approvalSummaryDescription =
   "One concise user-facing sentence stating the exact action and the key details needed to judge it, such as destination, parent, title, recipient, account, or permissions. If you cannot state these truthfully yet, gather the missing context before requesting approval."

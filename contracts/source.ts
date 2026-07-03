@@ -36,7 +36,7 @@ export function normalizeSourceChanges(value: unknown): SourceChanges {
   }
 }
 
-export function normalizeSourcePath(value: unknown) {
+function normalizeSourcePath(value: unknown) {
   if (typeof value !== "string") {
     throw new Error("source path must be a string")
   }

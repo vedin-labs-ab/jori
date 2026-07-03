@@ -1,27 +1,27 @@
 import { type ObjectType, v } from "convex/values"
 import { runStatus } from "../schema"
 
-export const runScope = v.union(
+const runScope = v.union(
   v.literal("conversation"),
   v.literal("tenant"),
   v.literal("all")
 )
 
-export const runSearchMode = v.union(
+const runSearchMode = v.union(
   v.literal("search"),
   v.literal("ids"),
   v.literal("children"),
   v.literal("tree")
 )
 
-export const runSource = v.union(
+const runSource = v.union(
   v.literal("slack"),
   v.literal("github"),
   v.literal("linear"),
   v.literal("automation")
 )
 
-export const activityFilter = v.union(
+const activityFilter = v.union(
   v.literal("tool"),
   v.literal("model"),
   v.literal("approval"),

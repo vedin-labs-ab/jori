@@ -22,7 +22,7 @@ export function Skills() {
   )
 }
 
-export function SkillsCard({ tenantId }: { tenantId: string }) {
+function SkillsCard({ tenantId }: { tenantId: string }) {
   const skillList = useQuery(api.skills.catalog.list, { tenantId })
   const editor = useSkillEditor(tenantId)
   const filters = useSkillFilters()

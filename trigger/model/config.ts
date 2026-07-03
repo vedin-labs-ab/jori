@@ -21,7 +21,7 @@ export function requireOpenRouterRuntimeConfig(): OpenRouterRuntimeConfig {
   }
 }
 
-export function readEnvironmentVariable(name: string) {
+function readEnvironmentVariable(name: string) {
   const value = process.env[name]?.trim()
 
   return value === "" ? undefined : value

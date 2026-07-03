@@ -6,7 +6,7 @@ import {
   toolSurfaceValidator,
 } from "../../shared/integrations"
 
-export const integrationOfferStatus = v.union(
+const integrationOfferStatus = v.union(
   v.literal("pending"),
   v.literal("claimed"),
   v.literal("cancelled"),
@@ -15,7 +15,7 @@ export const integrationOfferStatus = v.union(
   v.literal("expired")
 )
 
-export const integrationOfferSourceActor = v.object({
+const integrationOfferSourceActor = v.object({
   externalId: v.string(),
   email: v.optional(v.string()),
   name: v.optional(v.string()),

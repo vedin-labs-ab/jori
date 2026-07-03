@@ -1,4 +1,4 @@
-export const automationSurfaceAccesses = ["read", "write", "both"] as const
+const automationSurfaceAccesses = ["read", "write", "both"] as const
 
 export const automationSurfaceIntegrations = [
   integration("slack", "Slack", ["slack"]),
@@ -40,7 +40,7 @@ export type AutomationSurfaceFormValue = {
   tools: string[]
 }
 
-export function getAutomationSurfaceIntegration(
+function getAutomationSurfaceIntegration(
   integration: AutomationSurfaceIntegration
 ) {
   return automationSurfaceIntegrations.find(

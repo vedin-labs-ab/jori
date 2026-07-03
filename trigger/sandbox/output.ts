@@ -1,4 +1,4 @@
-export const defaultOutputLimit = 20_000
+const defaultOutputLimit = 20_000
 
 export type BoundedText = {
   text: string

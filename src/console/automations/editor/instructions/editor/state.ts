@@ -89,7 +89,7 @@ export function useAutomationInstructionsEditor(
   }
 }
 
-export const editorContentClassName =
+const editorContentClassName =
   "whitespace-pre-wrap break-words text-foreground selection:bg-informational/20"
 
 function useInstructionRefs(props: AutomationInstructionsFieldProps) {

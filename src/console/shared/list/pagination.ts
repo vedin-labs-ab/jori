@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-export const consoleGridPageSize = 12
+const consoleGridPageSize = 12
 
 export function useClientPagination<T>({
   hasFilters,

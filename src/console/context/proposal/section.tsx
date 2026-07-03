@@ -59,7 +59,7 @@ export function SummaryContent({ facts }: { facts: ContextFacts }) {
   )
 }
 
-export function EmptyValue() {
+function EmptyValue() {
   return <p className="text-muted-foreground text-xs/relaxed">None</p>
 }
 

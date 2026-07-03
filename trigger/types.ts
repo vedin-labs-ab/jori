@@ -4,17 +4,11 @@ import { type JsonObject, type JsonValue } from "../contracts/json"
 import { type ToolAccess } from "../contracts/permissions"
 import { type RuntimePrompt } from "../contracts/runtime"
 
-export type {
-  JsonArray,
-  JsonObject,
-  JsonPrimitive,
-  JsonValue,
-} from "../contracts/json"
+export type { JsonObject, JsonValue } from "../contracts/json"
 export {
   agentTaskId,
   cleanupTaskId,
   type RuntimePrompt,
-  type RuntimeToolMetadataItem,
   type SurfaceReactionTarget,
 } from "../contracts/runtime"
 
@@ -36,7 +30,7 @@ export type ActiveSurface = {
   target: string | null
 }
 
-export type RuntimeToolRoute =
+type RuntimeToolRoute =
   | "agent"
   // Distinct from ToolSurface/activeSurface, which names integrations like Slack.
   | "surface"
@@ -73,7 +67,7 @@ export type RuntimeToolProviderTrace = {
   request: string
 } | null
 
-export type RuntimeToolTraceData =
+type RuntimeToolTraceData =
   | { tool: RuntimeToolTraceTool; input: JsonValue | null }
   | {
       tool: RuntimeToolTraceTool
@@ -95,13 +89,13 @@ export type RuntimeModelUsage = {
   toolCalls: number
 }
 
-export type RuntimeModelTraceData = {
+type RuntimeModelTraceData = {
   usage: RuntimeModelUsage
   output: string | null
   reasoning: string | null
 }
 
-export type RuntimeRelationTraceData =
+type RuntimeRelationTraceData =
   | { approval: ConvexId<"approvals"> }
   | { offer: ConvexId<"integrationOffers"> }
   | { asset: ConvexId<"assets"> }
@@ -116,7 +110,7 @@ export type RuntimeEventTraceData =
   | RuntimeRelationTraceData
   | RuntimeToolTraceData
 
-export type RuntimeTraceData = RuntimeEventTraceData | RuntimeRunTraceData
+type RuntimeTraceData = RuntimeEventTraceData | RuntimeRunTraceData
 
 export type RuntimeTool = {
   access: ToolAccess
@@ -207,13 +201,13 @@ export type RuntimeEventInput = {
   type: RuntimeEventType
 }
 
-export type WaiterWakeReason = "resolved" | "message" | "cancelled" | "expired"
+type WaiterWakeReason = "resolved" | "message" | "cancelled" | "expired"
 
 export type HandoffSubject =
   | { kind: "approval"; id: ConvexId<"approvals"> }
   | { kind: "offer"; id: ConvexId<"integrationOffers"> }
 
-export type WaiterSubject =
+type WaiterSubject =
   | HandoffSubject
   | { kind: "message"; id: ConvexId<"messages"> }
 

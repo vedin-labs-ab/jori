@@ -4,18 +4,11 @@ import { api } from "../../../convex/_generated/api"
 import { readErrorMessage } from "../shared/error"
 import {
   type ConfigurablePermissionMode,
-  type PermissionMode,
-  type ToolAccess,
   type ToolPermission,
   type ToolSurface,
 } from "./types"
 
-export type {
-  ConfigurablePermissionMode,
-  PermissionMode,
-  ToolAccess,
-  ToolSurface,
-}
+export type { ToolSurface }
 
 type PermissionUpdateError = {
   tool: string

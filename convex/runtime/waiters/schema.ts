@@ -14,7 +14,7 @@ export const waiterSubject = v.union(
   v.object({ kind: v.literal("message"), id: v.id("messages") })
 )
 
-export const waiterStatus = v.union(
+const waiterStatus = v.union(
   v.literal("waiting"),
   v.literal("woken"),
   v.literal("cancelled"),

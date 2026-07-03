@@ -15,7 +15,7 @@ export type OrganizationSources = FunctionReturnType<
 
 export type ContextSource = NonNullable<OrganizationSources>[number]
 
-export type DiscoveryRun = NonNullable<OrganizationDiscovery>
+type DiscoveryRun = NonNullable<OrganizationDiscovery>
 export type DiscoveryStep = DiscoveryRun["steps"][number]
 
 export type DiscoveryItemStatus = "active" | "completed" | "failed" | "queued"

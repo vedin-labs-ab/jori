@@ -7,7 +7,7 @@ export const approvalDecision = v.union(
   v.literal("approved"),
   v.literal("denied")
 )
-export const approvalStatus = v.union(
+const approvalStatus = v.union(
   v.literal("pending"),
   v.literal("approved"),
   v.literal("denied"),
