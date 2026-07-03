@@ -1,11 +1,8 @@
 import { v } from "convex/values"
-import {
-  internalQuery,
-  type MutationCtx,
-  type QueryCtx,
-} from "../_generated/server"
+import { internalQuery } from "../_generated/server"
 import { normalizeEmail } from "../persons/email"
 import { type linkIdentityToPerson } from "../persons/links"
+import { type QueryLikeCtx } from "../shared/context"
 import { identityProvider } from "./schema"
 
 export type ProviderActorProfile = {
@@ -19,7 +16,7 @@ const providerActorProfile = v.object({
 })
 
 export async function resolveProviderActorProfile(
-  ctx: QueryCtx | MutationCtx,
+  ctx: QueryLikeCtx,
   args: {
     tenantId: string
     provider: Parameters<typeof linkIdentityToPerson>[1]["provider"]

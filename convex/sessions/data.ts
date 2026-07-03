@@ -1,11 +1,8 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
-import {
-  internalQuery,
-  type MutationCtx,
-  type QueryCtx,
-} from "../_generated/server"
+import { internalQuery, type MutationCtx } from "../_generated/server"
 import { isTerminalRunStatus } from "../runs/schema"
+import { type QueryLikeCtx } from "../shared/context"
 import {
   collectPendingBatch,
   defaultDrainLimit,
@@ -14,8 +11,6 @@ import {
 } from "./cursor"
 import { initialCursor } from "./cursors"
 import { initialRecency } from "./recency"
-
-type QueryLikeCtx = MutationCtx | QueryCtx
 
 export async function isReusableSession(
   ctx: MutationCtx,

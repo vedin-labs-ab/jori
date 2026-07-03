@@ -1,5 +1,5 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { type QueryLikeCtx } from "../shared/context"
 import {
   type Integration,
   integrationLabels,
@@ -7,8 +7,6 @@ import {
 } from "../shared/integrations"
 
 export { integrationLabels } from "../shared/integrations"
-
-type QueryLikeCtx = MutationCtx | QueryCtx
 
 export async function findEventIntegration(
   ctx: QueryLikeCtx,

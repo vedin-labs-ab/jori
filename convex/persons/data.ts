@@ -1,9 +1,8 @@
 import { type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { type MutationCtx } from "../_generated/server"
+import { type QueryLikeCtx } from "../shared/context"
 
 const canonicalDepthLimit = 16
-
-type PersonCtx = MutationCtx | QueryCtx
 
 export async function createPerson(
   ctx: MutationCtx,
@@ -19,7 +18,7 @@ export async function createPerson(
 }
 
 export async function canonicalPersonId(
-  ctx: PersonCtx,
+  ctx: QueryLikeCtx,
   personId: Id<"persons">
 ): Promise<Id<"persons">> {
   let current = personId

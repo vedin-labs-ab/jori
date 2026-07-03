@@ -1,12 +1,10 @@
 import { type Doc } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { getActorDisplayName, getActorExternalId } from "../shared/actor"
+import { type QueryLikeCtx } from "../shared/context"
 
 export const defaultReactionDrainLimit = 20
 export const maxReactionDrainLimit = 50
 export const maxPendingReactionReadLimit = maxReactionDrainLimit + 1
-
-type QueryLikeCtx = MutationCtx | QueryCtx
 
 type ReactionCursor = NonNullable<
   NonNullable<Doc<"sessions">["cursor"]>["reaction"]

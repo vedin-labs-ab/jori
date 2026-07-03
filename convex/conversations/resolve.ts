@@ -1,7 +1,5 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
-
-type ConversationCtx = QueryCtx | MutationCtx
+import { type QueryLikeCtx } from "../shared/context"
 
 type ConversationKey = {
   externalId: string
@@ -15,7 +13,7 @@ type ConversationMessage = Pick<
 >
 
 export async function findConversation(
-  ctx: ConversationCtx,
+  ctx: QueryLikeCtx,
   args: ConversationKey
 ) {
   return await ctx.db
@@ -30,7 +28,7 @@ export async function findConversation(
 }
 
 export async function findMessageConversation(
-  ctx: ConversationCtx,
+  ctx: QueryLikeCtx,
   message: ConversationMessage
 ) {
   return await findConversation(ctx, {

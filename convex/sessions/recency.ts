@@ -1,11 +1,10 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { loadRecentActivity } from "../conversations/recency/load"
 import { renderPersonContext } from "../conversations/recency/render"
 import { canonicalPersonId } from "../persons/data"
 import { getActorDisplayName } from "../shared/actor"
+import { type QueryLikeCtx } from "../shared/context"
 
-type QueryLikeCtx = MutationCtx | QueryCtx
 type SessionRecency = NonNullable<Doc<"sessions">["recency"]>
 
 export type RecencyEmission = {

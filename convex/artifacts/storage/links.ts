@@ -1,8 +1,9 @@
 import { type Id } from "../../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../../_generated/server"
+import { type MutationCtx } from "../../_generated/server"
+import { type QueryLikeCtx } from "../../shared/context"
 
 export async function getTenantArtifact(
-  ctx: QueryCtx | MutationCtx,
+  ctx: QueryLikeCtx,
   args: {
     tenantId: string
     artifactId: Id<"artifacts">

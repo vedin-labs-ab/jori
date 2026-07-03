@@ -3,10 +3,10 @@ import {
   internalMutation,
   internalQuery,
   type MutationCtx,
-  type QueryCtx,
   query,
 } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
+import { type QueryLikeCtx } from "../shared/context"
 import { type organizationSourceSnapshot } from "./schema"
 
 export type SourceSnapshot = Infer<typeof organizationSourceSnapshot>
@@ -101,7 +101,7 @@ export async function replaceApprovedSources(
 }
 
 export async function readApprovedSources(
-  ctx: QueryCtx | MutationCtx,
+  ctx: QueryLikeCtx,
   tenantId: string
 ): Promise<SourceSnapshot[]> {
   return (await readByTenant(ctx, tenantId)).map(toSnapshot)
@@ -158,18 +158,14 @@ async function demoteOtherPrimaries(
   }
 }
 
-async function readByTenant(ctx: QueryCtx | MutationCtx, tenantId: string) {
+async function readByTenant(ctx: QueryLikeCtx, tenantId: string) {
   return await ctx.db
     .query("organizationSources")
     .withIndex("by_tenant_and_url", (q) => q.eq("tenantId", tenantId))
     .take(maxSourcesPerTenant)
 }
 
-async function readByUrl(
-  ctx: QueryCtx | MutationCtx,
-  tenantId: string,
-  url: string
-) {
+async function readByUrl(ctx: QueryLikeCtx, tenantId: string, url: string) {
   return await ctx.db
     .query("organizationSources")
     .withIndex("by_tenant_and_url", (q) =>

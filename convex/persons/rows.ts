@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { type MutationCtx } from "../_generated/server"
 import { type IdentityProvider, type LinkMethod } from "../identity/schema"
+import { type QueryLikeCtx } from "../shared/context"
 import { normalizeEmail } from "./email"
 
 const methodRank = {
@@ -10,11 +11,10 @@ const methodRank = {
   manual: 3,
 } satisfies Record<LinkMethod, number>
 
-type PersonCtx = MutationCtx | QueryCtx
 export type IdentityProfile = { email?: string; name?: string }
 
 export async function findIdentity(
-  ctx: PersonCtx,
+  ctx: QueryLikeCtx,
   args: {
     tenantId: string
     provider: IdentityProvider

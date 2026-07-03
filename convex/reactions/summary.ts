@@ -1,13 +1,11 @@
 import { type Doc } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { messageReactionTargetKey } from "../messages/identifiers"
 import { type Actor } from "../shared/actor"
+import { type QueryLikeCtx } from "../shared/context"
 
 const maxReactionsPerTarget = 200
 const maxReactionGroups = 3
 const maxActorNames = 2
-
-type QueryLikeCtx = MutationCtx | QueryCtx
 
 type ActiveReaction = {
   actor?: string
