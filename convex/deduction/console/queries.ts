@@ -3,7 +3,6 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx, query } from "../../_generated/server"
 import { checkTenantAccess } from "../../identity/access"
 import { type Integration } from "../../shared/integrations"
-import { hasConfirmSupport } from "../rules"
 import { loadSupport } from "../support"
 import { eventKindLabel, statusLabels } from "./labels"
 
@@ -49,7 +48,6 @@ export const get = query({
     return {
       ...(await listRow(ctx, belief)),
       aliases: belief.aliases,
-      support: await supportSummary(ctx, belief._id),
       sightings: await recentSightings(ctx, belief._id),
       history: await recentHistory(ctx, belief._id),
     }
@@ -70,23 +68,20 @@ async function currentBeliefs(ctx: QueryCtx, tenantId: string) {
 }
 
 async function listRow(ctx: QueryCtx, row: Doc<"beliefs">) {
-  const support = await supportSummary(ctx, row._id)
-
   return {
     id: row._id,
     name: row.name,
     status: row.status,
     statusLabel: statusLabels[row.status],
     brief: row.brief,
-    sources: support.sources,
+    sources: await sourceKeys(ctx, row._id),
     seenAt: row.seenAt,
     locked: row.lockedBy !== undefined,
   }
 }
 
-// The distinct tools the evidence spans, plus whether that support alone
-// would clear the confirmation threshold.
-async function supportSummary(ctx: QueryCtx, beliefId: Id<"beliefs">) {
+// The distinct tools the evidence spans, for the source chips.
+async function sourceKeys(ctx: QueryCtx, beliefId: Id<"beliefs">) {
   const records = await loadSupport(ctx, beliefId)
   const keys = new Map<string, Integration | null>()
 
@@ -99,10 +94,7 @@ async function supportSummary(ctx: QueryCtx, beliefId: Id<"beliefs">) {
     }
   }
 
-  return {
-    sources: [...new Set([...keys.values()].filter((key) => key !== null))],
-    meetsThreshold: hasConfirmSupport(records),
-  }
+  return [...new Set([...keys.values()].filter((key) => key !== null))]
 }
 
 async function integrationKey(ctx: QueryCtx, integrationId: string) {
