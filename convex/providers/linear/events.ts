@@ -1,3 +1,5 @@
+import { readRecord, readString } from "../../shared/input"
+
 export type LinearWebhookPayload = {
   action?: string
   type?: string
@@ -184,20 +186,8 @@ function readActor(
   }
 }
 
-function readRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {}
-}
-
 function readRecordValue(data: Record<string, unknown>, key: string) {
   return readRecord(data[key])
-}
-
-function readString(data: Record<string, unknown>, key: string) {
-  const value = data[key]
-
-  return typeof value === "string" && value !== "" ? value : undefined
 }
 
 function isRelevantLinearEvent(type: string, action: string | undefined) {

@@ -1,4 +1,11 @@
 import { type Actor } from "../../shared/actor"
+import {
+  readArray,
+  readNumber,
+  readRecord,
+  readString,
+  readValue,
+} from "../../shared/input"
 
 type NotionEntity = {
   id: string
@@ -204,30 +211,4 @@ function readTimestamp(record: Record<string, unknown>) {
   const milliseconds = Date.parse(timestamp)
 
   return Number.isFinite(milliseconds) ? milliseconds : undefined
-}
-
-function readRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {}
-}
-
-function readArray(value: unknown) {
-  return Array.isArray(value) ? value : []
-}
-
-function readValue(record: Record<string, unknown>, key: string) {
-  return record[key]
-}
-
-function readString(record: Record<string, unknown>, key: string) {
-  const value = readValue(record, key)
-
-  return typeof value === "string" && value !== "" ? value : undefined
-}
-
-function readNumber(record: Record<string, unknown>, key: string) {
-  const value = readValue(record, key)
-
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }
