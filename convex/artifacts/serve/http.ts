@@ -2,6 +2,7 @@ import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { runtimeAssets } from "../../runtime/_generated/assets"
+import { base64DecodeBytes } from "../../shared/encoding"
 import { jsonError, unauthorizedResponse } from "../../shared/http"
 import { callArtifactTool } from "../tools/broker"
 import {
@@ -147,7 +148,7 @@ export async function handleArtifactStaticAssetRequest(request: Request) {
   }
 
   return new Response(
-    base64Bytes(runtimeAssets.artifact.fonts.geistLatinWoff2),
+    base64DecodeBytes(runtimeAssets.artifact.fonts.geistLatinWoff2),
     {
       headers: {
         "cache-control": "public, max-age=31536000, immutable",
@@ -210,10 +211,6 @@ function parseAssetPath(url: string) {
     versionId: decodeURIComponent(versionId) as Id<"artifactVersions">,
     path: pathSegments.join("/"),
   }
-}
-
-function base64Bytes(value: string) {
-  return Uint8Array.from(atob(value), (character) => character.charCodeAt(0))
 }
 
 function isToolRequest(value: unknown): value is {

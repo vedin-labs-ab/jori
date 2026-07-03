@@ -1,3 +1,4 @@
+import { base64UrlDecodeBytes } from "../../shared/encoding"
 import { fetchFormToken, requireProviderEnv } from "../oauth"
 import { microsoftGraphUrl, microsoftOAuthTokenUrl } from "./config"
 
@@ -128,12 +129,9 @@ function readJwtStringClaim(token: string, claim: string) {
   }
 
   try {
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/")
-    const padded = normalized.padEnd(
-      normalized.length + ((4 - (normalized.length % 4)) % 4),
-      "="
-    )
-    const decoded = JSON.parse(atob(padded)) as Record<string, unknown>
+    const decoded = JSON.parse(
+      new TextDecoder().decode(base64UrlDecodeBytes(payload))
+    ) as Record<string, unknown>
     const value = decoded[claim]
 
     return typeof value === "string" ? value : undefined
