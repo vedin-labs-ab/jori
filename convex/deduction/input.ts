@@ -165,11 +165,11 @@ async function loadConversations(
     .map((row) => readWindowConversation(row))
 }
 
-// The one privacy gate on judge input: only public conversations with a
-// non-empty summary are readable.
+// The one privacy gate on judge input: only tenant-scoped conversations with
+// a non-empty summary are readable.
 export function isReadableConversation(row: Doc<"conversations">) {
   return (
-    row.visibility === "public" &&
+    row.scope === "tenant" &&
     row.summary !== undefined &&
     row.summary !== "" &&
     row.summarizedAt !== undefined

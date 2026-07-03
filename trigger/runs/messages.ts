@@ -57,6 +57,13 @@ export async function appendSessionMessages(
 
     hasMore = drained.hasMore
 
+    // Person context precedes the batch so a new speaker's bundle lands
+    // before their first message.
+    for (const content of drained.contexts ?? []) {
+      messages.push({ content, role: "user" })
+      appended = true
+    }
+
     for (const item of sessionItems(drained)) {
       if (item.type === "message") {
         updateActiveSurfaceTarget(runtime, item.message)

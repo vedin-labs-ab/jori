@@ -19,5 +19,6 @@ None
 Conversation messages:
 {{conversation.messages}}
 
-Return one short, specific, high-signal paragraph. If there is no useful context
-yet, return an empty string.
+Return one dense, specific paragraph of 2-4 sentences (roughly 60-100 words);
+go longer only when the conversation genuinely warrants it. If there is no
+useful context yet, return an empty string.

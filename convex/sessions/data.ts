@@ -1,27 +1,19 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
-  internalMutation,
   internalQuery,
   type MutationCtx,
   type QueryCtx,
 } from "../_generated/server"
-import {
-  defaultReactionDrainLimit,
-  formatRuntimeReaction,
-  readPendingReactions,
-} from "../reactions/cursor"
-import { reactionSummariesForMessages } from "../reactions/summary"
 import { isTerminalRunStatus } from "../runs/schema"
 import {
   collectPendingBatch,
   defaultDrainLimit,
-  formatRuntimeMessage,
   maxPendingReadLimit,
-  normalizeLimit,
   type PendingBatch,
 } from "./cursor"
-import { cursorWithMessage, cursorWithReaction, initialCursor } from "./cursors"
+import { initialCursor } from "./cursors"
+import { initialRecency } from "./recency"
 
 type QueryLikeCtx = MutationCtx | QueryCtx
 
@@ -59,6 +51,7 @@ export async function startSession(
   const existing = await findSession(ctx, args.conversationId)
   const patch = {
     cursor: initialCursor(args.message, args.now),
+    recency: initialRecency(args.message),
     runId: args.runId,
     updatedAt: args.now,
   }
@@ -95,7 +88,7 @@ export async function readPendingMessages(
   return batch.messages
 }
 
-async function readPendingBatch(
+export async function readPendingBatch(
   ctx: QueryLikeCtx,
   session: Doc<"sessions">,
   limit = defaultDrainLimit
@@ -139,79 +132,6 @@ export const getByRun = internalQuery({
   },
 })
 
-export const drainMessages = internalMutation({
-  args: {
-    limit: v.optional(v.number()),
-    sessionId: v.id("sessions"),
-  },
-  returns: v.any(),
-  handler: async (ctx, args) => {
-    const session = await ctx.db.get(args.sessionId)
-
-    if (session?.runId === undefined) {
-      return { hasMore: false, interactions: [], messages: [] }
-    }
-
-    const limit = normalizeLimit(args.limit)
-    const batch = await readPendingBatch(ctx, session, limit)
-    const reactions = await readPendingReactions(
-      ctx,
-      session,
-      args.limit ?? defaultReactionDrainLimit
-    )
-    const cursor = nextSessionCursor(session.cursor, {
-      message: batch.cursor,
-      reaction: reactions.cursor,
-    })
-
-    if (cursor !== undefined) {
-      await ctx.db.patch(session._id, {
-        cursor,
-        updatedAt: Date.now(),
-      })
-    }
-
-    return {
-      hasMore: batch.hasMore || reactions.hasMore,
-      interactions: reactions.reactions.map(formatRuntimeReaction),
-      messages: await formatRuntimeMessages(ctx, batch.messages, session),
-    }
-  },
-})
-
-async function formatRuntimeMessages(
-  ctx: QueryLikeCtx,
-  messages: Doc<"messages">[],
-  session: Doc<"sessions">
-) {
-  const result: ReturnType<typeof formatRuntimeMessage>[] = []
-  const integration = await getSessionIntegration(ctx, session)
-  const reactions = await reactionSummariesForMessages(ctx, messages)
-
-  for (const message of messages) {
-    result.push(
-      formatRuntimeMessage(message, integration, reactions.get(message._id))
-    )
-  }
-
-  return result
-}
-
-async function getSessionIntegration(
-  ctx: QueryLikeCtx,
-  session: Doc<"sessions">
-) {
-  if (session.conversationId === undefined) {
-    return null
-  }
-
-  const conversation = await ctx.db.get(session.conversationId)
-
-  return conversation === null
-    ? null
-    : await ctx.db.get(conversation.integrationId)
-}
-
 export async function findSession(
   ctx: QueryLikeCtx,
   conversationId: Id<"conversations">
@@ -247,24 +167,4 @@ async function queryConversationMessages(
     })
     .order("asc")
     .take(args.limit)
-}
-
-function nextSessionCursor(
-  cursor: Doc<"sessions">["cursor"],
-  updates: {
-    message?: Doc<"messages">
-    reaction?: Doc<"reactions">
-  }
-) {
-  let next = cursor
-
-  if (updates.message !== undefined) {
-    next = cursorWithMessage(next, updates.message)
-  }
-
-  if (updates.reaction !== undefined) {
-    next = cursorWithReaction(next, updates.reaction)
-  }
-
-  return next === cursor ? undefined : next
 }

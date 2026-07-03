@@ -1,39 +1,30 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { isUserScopedIntegration } from "../shared/integrations"
-
-export type RunScope = NonNullable<Doc<"runs">["scope"]>
+import { type AudienceScope } from "../shared/audience"
 
 export type ConversationAudience = {
   conversationId: Id<"conversations">
-  scope: RunScope
+  scope: AudienceScope
 }
 
-export function conversationAudience(args: {
+export function conversationAudience(
   conversation: Doc<"conversations">
-  integration: Doc<"integrations">
-}): ConversationAudience {
+): ConversationAudience {
   return {
-    conversationId: args.conversation._id,
-    scope: conversationAudienceScope(args),
+    conversationId: conversation._id,
+    scope: conversation.scope,
   }
 }
 
-export function conversationAudienceScope(args: {
-  conversation: Doc<"conversations">
-  integration: Doc<"integrations">
-}): RunScope {
-  if (args.conversation.visibility === "public") {
-    return "tenant"
-  }
-
-  return isUserScopedIntegration(args.integration.integration)
-    ? "person"
-    : "conversation"
-}
-
+// The one inclusion gate for recent-activity context: tenant-wide
+// conversations are always shareable; anything narrower may only surface in a
+// run that is scoped to the very person being contextualized.
 export function canIncludeRecentConversation(args: {
-  candidateScope: RunScope
-  currentScope: RunScope | undefined
+  candidateScope: AudienceScope
+  currentScope: AudienceScope | undefined
+  personal: boolean
 }) {
-  return args.candidateScope === "tenant" || args.currentScope === "person"
+  return (
+    args.candidateScope === "tenant" ||
+    (args.currentScope === "person" && args.personal)
+  )
 }

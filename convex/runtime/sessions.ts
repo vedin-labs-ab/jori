@@ -35,7 +35,7 @@ export const drain = mutation({
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
 
-    return await ctx.runMutation(internal.sessions.data.drainMessages, {
+    return await ctx.runMutation(internal.sessions.drain.messages, {
       limit: args.limit,
       sessionId: args.sessionId,
     })

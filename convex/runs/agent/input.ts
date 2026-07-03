@@ -1,5 +1,4 @@
 import { type Doc } from "../../_generated/dataModel"
-import { type RecentActivity } from "../../conversations/recency"
 import { type WorkstreamContext } from "../../deduction/roster"
 import { type RecentConversation } from "../../messages/history"
 import { type OrganizationFacts } from "../../organization/facts"
@@ -15,7 +14,6 @@ export type MessageRuntimeInput = {
   integrations: RuntimeIntegration[]
   message: Doc<"messages">
   conversation: RecentConversation
-  recency: RecentActivity[]
   organization: OrganizationFacts | null
   workstreams: WorkstreamContext[] | null
 }

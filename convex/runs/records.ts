@@ -2,7 +2,6 @@ import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
-import { loadRecentActivity } from "../conversations/recency"
 import { readWorkstreamRoster } from "../deduction/roster"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { recentConversation } from "../messages/history"
@@ -11,7 +10,6 @@ import { readApprovedFacts } from "../organization/profile"
 export const getInputByRun = internalQuery({
   args: {
     runId: v.id("runs"),
-    now: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const run = await ctx.db.get(args.runId)
@@ -21,10 +19,7 @@ export const getInputByRun = internalQuery({
     }
 
     if (run.cause.type === "message") {
-      return await getMessageInput(ctx, {
-        now: args.now ?? run.createdAt,
-        run,
-      })
+      return await getMessageInput(ctx, { run })
     }
 
     if (run.automationId !== undefined) {
@@ -38,7 +33,6 @@ export const getInputByRun = internalQuery({
 async function getMessageInput(
   ctx: QueryCtx,
   args: {
-    now: number
     run: Doc<"runs">
   }
 ) {
@@ -76,11 +70,6 @@ async function getMessageInput(
     integration,
     integrations,
     conversation: await recentConversation(ctx, message, integration),
-    recency: await loadRecentActivity(ctx, {
-      message,
-      now: args.now,
-      run: args.run,
-    }),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }

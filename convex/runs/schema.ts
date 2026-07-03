@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { actorValidator } from "../shared/actor"
+import { audienceScopeValidator } from "../shared/audience"
 import { toolSurfaceValidator } from "../shared/integrations"
 
 const runSnapshotContextType = v.union(
@@ -77,12 +78,6 @@ export function isTerminalRunStatus(status: Infer<typeof runStatus>) {
   return status === "completed" || status === "failed" || status === "stopped"
 }
 
-const runVisibilityScope = v.union(
-  v.literal("tenant"),
-  v.literal("conversation"),
-  v.literal("person")
-)
-
 export const toolSnapshot = v.object({
   groups: v.array(
     v.object({
@@ -107,7 +102,7 @@ export const runs = defineTable({
   automationId: v.optional(v.id("automations")),
   parentId: v.optional(v.id("runs")),
   rootId: v.optional(v.id("runs")),
-  scope: v.optional(runVisibilityScope),
+  scope: v.optional(audienceScopeValidator),
   conversationId: v.optional(v.id("conversations")),
   cause: runCause,
   instructions: v.optional(v.string()),

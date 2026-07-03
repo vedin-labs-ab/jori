@@ -65,6 +65,30 @@ test("updates the active surface target from drained messages", async () => {
   expect(runtime.context.activeSurface?.target).toBe("linear:thread:comment-id")
 })
 
+test("appends person context before drained batch items", async () => {
+  const runtime = {
+    convex: {
+      drainSessionMessages: vi.fn(async () => ({
+        contexts: ["# Recent activity — Albin"],
+        hasMore: false,
+        messages: [runtimeMessage({ source: "person" })],
+      })),
+    },
+    context: {
+      activeSurface: null,
+      session: { id: id<"sessions">("session") },
+    },
+  } as unknown as ToolRuntime
+  const messages: Array<{ content: string; role: "user" }> = []
+
+  await expect(appendSessionMessages(runtime, messages)).resolves.toBe(true)
+  expect(messages[0]).toEqual({
+    content: "# Recent activity — Albin",
+    role: "user",
+  })
+  expect(messages).toHaveLength(2)
+})
+
 function id<TableName extends string>(value: string) {
   return value as ConvexId<TableName>
 }

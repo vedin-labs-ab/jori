@@ -155,7 +155,7 @@ function conversation(
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
     externalId: "conversation",
-    visibility: "public",
+    scope: "tenant",
     ...overrides,
   }
 }

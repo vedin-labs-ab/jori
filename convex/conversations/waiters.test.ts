@@ -51,7 +51,7 @@ function conversation(): Doc<"conversations"> {
     externalId: "conversation",
     integrationId: id<"integrations">("integration"),
     tenantId: "tenant",
-    visibility: "public",
+    scope: "tenant",
   }
 }
 

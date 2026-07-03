@@ -180,8 +180,9 @@ export class MiloConvexClient {
       secret: this.secret,
       sessionId: args.sessionId,
     })) as {
+      contexts?: string[]
       hasMore: boolean
-      interactions: RuntimeInteraction[]
+      interactions?: RuntimeInteraction[]
       messages: RuntimeMessage[]
     }
   }
