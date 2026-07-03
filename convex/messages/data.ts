@@ -3,7 +3,6 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { resolveActor } from "../persons/resolve"
 import { type Actor, actorValidator } from "../shared/actor"
-import { type Integration } from "../shared/integrations"
 import { messageDataReactionTargetKey } from "./identifiers"
 
 export const messageIntegrationValidator = v.union(
@@ -35,24 +34,6 @@ export type ObservedMessage = {
   text?: string
   observedAt?: number
   data?: unknown
-}
-
-export async function findActiveIntegration(
-  ctx: MutationCtx,
-  args: { accountId: string; integration: Integration }
-) {
-  const integration = await ctx.db
-    .query("integrations")
-    .withIndex("by_integration_and_external", (query) =>
-      query.eq("integration", args.integration).eq("externalId", args.accountId)
-    )
-    .first()
-
-  if (integration === null || integration.status !== "active") {
-    return null
-  }
-
-  return integration
 }
 
 export async function activeMessageIntegration(

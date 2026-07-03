@@ -11,6 +11,7 @@ import {
   type ReactionSnapshotPlan,
   type ReactionSnapshotTarget,
 } from "../../reactions/data"
+import { activeSessionIntegration } from "../../sessions/integration"
 import { createIntegrationActor } from "../../shared/actor"
 import { readRecord } from "../../shared/input"
 import { githubJsonArray } from "./api"
@@ -51,30 +52,16 @@ export const sessionTargets = internalQuery({
   },
   returns: v.any(),
   handler: async (ctx, args): Promise<GitHubReactionSyncPlan | null> => {
-    const session = await ctx.db.get(args.sessionId)
+    const linked = await activeSessionIntegration(ctx, {
+      sessionId: args.sessionId,
+      integration: "github",
+    })
 
-    if (session?.runId === undefined) {
+    if (linked === null) {
       return null
     }
 
-    if (session.conversationId === undefined) {
-      return null
-    }
-
-    const conversation = await ctx.db.get(session.conversationId)
-
-    if (conversation === null) {
-      return null
-    }
-
-    const integration = await ctx.db.get(conversation.integrationId)
-
-    if (
-      integration?.integration !== "github" ||
-      integration.status !== "active"
-    ) {
-      return null
-    }
+    const { conversation, integration } = linked
 
     const messages = await recentConversationMessages(ctx, {
       integration,

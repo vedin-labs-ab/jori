@@ -11,6 +11,7 @@ import {
   type ReactionSnapshotPlan,
   type ReactionSnapshotTarget,
 } from "../../../reactions/data"
+import { activeSessionIntegration } from "../../../sessions/integration"
 import {
   type Actor,
   type ActorAlias,
@@ -82,30 +83,16 @@ export const sessionTarget = internalQuery({
   },
   returns: v.any(),
   handler: async (ctx, args): Promise<SlackReactionSyncPlan | null> => {
-    const session = await ctx.db.get(args.sessionId)
+    const linked = await activeSessionIntegration(ctx, {
+      sessionId: args.sessionId,
+      integration: "slack",
+    })
 
-    if (session?.runId === undefined) {
+    if (linked === null) {
       return null
     }
 
-    if (session.conversationId === undefined) {
-      return null
-    }
-
-    const conversation = await ctx.db.get(session.conversationId)
-
-    if (conversation === null) {
-      return null
-    }
-
-    const integration = await ctx.db.get(conversation.integrationId)
-
-    if (
-      integration?.integration !== "slack" ||
-      integration.status !== "active"
-    ) {
-      return null
-    }
+    const { conversation, integration } = linked
 
     const channelId = await conversationChannelId(ctx, {
       integration,

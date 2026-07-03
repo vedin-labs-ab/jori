@@ -86,7 +86,7 @@ function displayHostname(hostname: string) {
   return normalizeHostname(hostname).replace(/^www[.]/, "")
 }
 
-function isPublicHostname(hostname: string) {
+export function isPublicHostname(hostname: string) {
   const normalized = normalizeHostname(hostname)
 
   return (
@@ -98,7 +98,7 @@ function isPublicHostname(hostname: string) {
   )
 }
 
-function normalizeHostname(hostname: string) {
+export function normalizeHostname(hostname: string) {
   return hostname
     .toLowerCase()
     .replace(/^\[(.*)\]$/, "$1")

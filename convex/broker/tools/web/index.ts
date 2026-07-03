@@ -1,9 +1,10 @@
-import Exa, {
+import {
   type ContentsOptions,
   ExaError,
   type RegularSearchOptions,
   type SearchResponse,
 } from "exa-js"
+import { createExaClient, withTimeout } from "../../../shared/exa"
 import { normalizeWebFetchInput, normalizeWebSearchInput } from "./input"
 import { normalizeWebResponse } from "./output"
 
@@ -93,43 +94,6 @@ async function runWebTool(
     return await operation()
   } catch (error) {
     throw new Error(formatWebToolError(tool, error))
-  }
-}
-
-function createExaClient() {
-  return new Exa(requireExaApiKey())
-}
-
-function requireExaApiKey() {
-  const apiKey = process.env.EXA_API_KEY?.trim()
-
-  if (apiKey === undefined || apiKey === "") {
-    throw new Error("Missing EXA_API_KEY")
-  }
-
-  return apiKey
-}
-
-async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  label: string
-) {
-  let timeout: ReturnType<typeof setTimeout> | undefined
-
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_resolve, reject) => {
-        timeout = setTimeout(() => {
-          reject(new Error(`${label} timed out after ${timeoutMs}ms`))
-        }, timeoutMs)
-      }),
-    ])
-  } finally {
-    if (timeout !== undefined) {
-      clearTimeout(timeout)
-    }
   }
 }
 

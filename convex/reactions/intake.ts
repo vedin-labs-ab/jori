@@ -1,10 +1,10 @@
 import { v } from "convex/values"
 import { internalMutation } from "../_generated/server"
+import { findActiveIntegrationByExternalId } from "../integrations/data"
 import { resolveActor } from "../persons/resolve"
 import { actorValidator } from "../shared/actor"
 import { reconcileTargetReactions, recordReactionEvent } from "./apply"
 import {
-  findActiveReactionIntegration,
   type ReactionIntegration,
   type ReactionSnapshotItem,
   type ReactionTarget,
@@ -28,8 +28,8 @@ export const record = internalMutation({
     observedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const integration = await findActiveReactionIntegration(ctx, {
-      accountId: args.accountId,
+    const integration = await findActiveIntegrationByExternalId(ctx, {
+      externalId: args.accountId,
       integration: args.integration,
     })
 
@@ -70,8 +70,8 @@ export const sync = internalMutation({
     ),
   },
   handler: async (ctx, args) => {
-    const integration = await findActiveReactionIntegration(ctx, {
-      accountId: args.accountId,
+    const integration = await findActiveIntegrationByExternalId(ctx, {
+      externalId: args.accountId,
       integration: args.integration,
     })
 
@@ -102,7 +102,7 @@ async function resolveReactionActors(
   args: {
     actor?: ReactionSnapshotItem["actor"]
     integration: NonNullable<
-      Awaited<ReturnType<typeof findActiveReactionIntegration>>
+      Awaited<ReturnType<typeof findActiveIntegrationByExternalId>>
     >
     provider: ReactionIntegration
     reactions?: ReactionSnapshotItem[]

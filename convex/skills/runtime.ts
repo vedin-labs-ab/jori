@@ -1,6 +1,7 @@
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { type Integration } from "../shared/integrations"
+import { sortSkills } from "./data"
 
 export type RuntimeSkill = {
   associatedIntegrations: readonly Integration[]
@@ -15,7 +16,7 @@ export type RuntimeSkill = {
 }
 
 export function listRuntimeSkills(skills: readonly RuntimeSkill[]) {
-  return sortRuntimeSkills(resolveRuntimeSkillNames(skills))
+  return sortSkills(resolveRuntimeSkillNames(skills))
 }
 
 export function runtimeSkillNames(skills: readonly RuntimeSkill[]) {
@@ -34,7 +35,7 @@ export function getRuntimeSkillForIntegration(
   skills: readonly RuntimeSkill[],
   integration: Integration
 ) {
-  const candidates = sortRuntimeSkills([...skills]).filter((skill) =>
+  const candidates = sortSkills([...skills]).filter((skill) =>
     runtimeSkillAssociatedIntegrations(skill).some(
       (candidate) => candidate === integration
     )
@@ -93,20 +94,6 @@ function isTenantCommunicationSkill(skill: RuntimeSkill) {
 
 function isCommunicationSkill(skill: RuntimeSkill) {
   return skill.communication !== undefined
-}
-
-function sortRuntimeSkills(skills: RuntimeSkill[]) {
-  return [...skills].sort((left, right) => {
-    if (left.tenantId === null && right.tenantId !== null) {
-      return -1
-    }
-
-    if (left.tenantId !== null && right.tenantId === null) {
-      return 1
-    }
-
-    return left.name.localeCompare(right.name)
-  })
 }
 
 function formatSkillTitle(name: string) {

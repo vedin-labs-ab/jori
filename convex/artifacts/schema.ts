@@ -13,15 +13,9 @@ const artifactMode = v.union(
   v.literal("symlink")
 )
 
-const artifactHashAlgorithm = v.union(
-  v.literal("sha1"),
-  v.literal("sha256")
-)
+const artifactHashAlgorithm = v.union(v.literal("sha1"), v.literal("sha256"))
 
-const artifactStateScope = v.union(
-  v.literal("personal"),
-  v.literal("shared")
-)
+const artifactStateScope = v.union(v.literal("personal"), v.literal("shared"))
 
 const artifactContractStateEntry = v.object({
   name: v.string(),

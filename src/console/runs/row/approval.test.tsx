@@ -1,11 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, beforeAll, expect, test, vi } from "vitest"
-import {
-  makeApproval,
-  makeExecution,
-  renderExecutionRow,
-} from "../fixtures"
+import { makeApproval, makeExecution, renderExecutionRow } from "../fixtures"
 import { type ExecutionApproval } from "../types"
 
 vi.mock("convex/react", () => ({

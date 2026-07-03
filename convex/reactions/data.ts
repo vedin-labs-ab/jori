@@ -41,27 +41,6 @@ export type ReactionSnapshotPlan = {
   targets: ReactionSnapshotTarget[]
 }
 
-export async function findActiveReactionIntegration(
-  ctx: MutationCtx,
-  args: {
-    accountId: string
-    integration: ReactionIntegration
-  }
-) {
-  const integration = await ctx.db
-    .query("integrations")
-    .withIndex("by_integration_and_external", (query) =>
-      query.eq("integration", args.integration).eq("externalId", args.accountId)
-    )
-    .first()
-
-  if (integration === null || integration.status !== "active") {
-    return null
-  }
-
-  return integration
-}
-
 export async function enrichReactionTarget(
   ctx: MutationCtx,
   args: {

@@ -1,4 +1,5 @@
 import path from "node:path"
+import { optionalString, requiredString } from "../input"
 import { sandboxWorkspace } from "../sandbox/artifacts"
 import { type ToolRuntime } from "../tool"
 import { type JsonObject } from "../types"
@@ -107,20 +108,6 @@ function sanitizeFileName(value: string) {
     .slice(0, 80)
 
   return clean === "" ? "image" : clean
-}
-
-function requiredString(value: unknown, name: string) {
-  if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`${name} is required`)
-  }
-
-  return value.trim()
-}
-
-function optionalString(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

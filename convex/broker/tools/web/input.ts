@@ -1,3 +1,7 @@
+import {
+  isPublicHostname,
+  normalizeHostname,
+} from "../../../../contracts/website"
 import { boundedNumber, requiredString } from "../../../shared/input"
 
 const defaultFetchCharacters = 8000
@@ -133,71 +137,7 @@ function parseUrl(value: string, name: string) {
 }
 
 function requirePublicHostname(hostname: string, name: string) {
-  if (
-    hostname === "localhost" ||
-    hostname.endsWith(".localhost") ||
-    hostname.endsWith(".local") ||
-    (!hostname.includes(".") && !hostname.includes(":")) ||
-    isPrivateIp(hostname)
-  ) {
+  if (!isPublicHostname(hostname)) {
     throw new Error(`${name} must target a public host`)
   }
-}
-
-function normalizeHostname(hostname: string) {
-  return hostname
-    .toLowerCase()
-    .replace(/^\[(.*)\]$/, "$1")
-    .replace(/[.]$/, "")
-}
-
-function isPrivateIp(hostname: string) {
-  if (hostname.includes(":")) {
-    return isPrivateIpv6(hostname)
-  }
-
-  return isPrivateIpv4(hostname)
-}
-
-function isPrivateIpv4(hostname: string) {
-  if (!/^\d{1,3}(?:[.]\d{1,3}){3}$/.test(hostname)) {
-    return false
-  }
-
-  const parts = hostname.split(".").map(Number)
-
-  if (parts.some((part) => part < 0 || part > 255)) {
-    throw new Error("url must be a valid public host")
-  }
-
-  const [first, second] = parts
-
-  return (
-    first === 0 ||
-    first === 10 ||
-    first === 127 ||
-    first >= 224 ||
-    (first === 100 && second >= 64 && second <= 127) ||
-    (first === 169 && second === 254) ||
-    (first === 172 && second >= 16 && second <= 31) ||
-    (first === 192 && second === 168) ||
-    (first === 198 && (second === 18 || second === 19))
-  )
-}
-
-function isPrivateIpv6(hostname: string) {
-  return (
-    hostname === "::" ||
-    hostname === "::1" ||
-    hostname.startsWith("fc") ||
-    hostname.startsWith("fd") ||
-    /^fe[89ab]/.test(hostname) ||
-    isPrivateMappedIpv4(hostname)
-  )
-}
-
-function isPrivateMappedIpv4(hostname: string) {
-  const mapped = hostname.match(/^::ffff:(\d{1,3}(?:[.]\d{1,3}){3})$/)
-
-  return mapped === null ? false : isPrivateIpv4(mapped[1])
 }
