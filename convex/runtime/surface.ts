@@ -18,6 +18,7 @@ import {
 } from "../runs/agent/input"
 import { optionalString, requiredString } from "../shared/input"
 import { requireWorkerSecret } from "./shared"
+import { requireMessageSurfaceInput } from "./surface/input"
 import { optionalSlackBlocks, sendSurfaceReply } from "./surface/reply"
 import { type ActiveSurfaceTool, activeSurfaceTools } from "./surface/tools"
 
@@ -101,17 +102,10 @@ export const sendReply = action({
   handler: async (ctx, args) => {
     requireWorkerSecret(args.secret)
 
-    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
+    const input = await requireMessageSurfaceInput(ctx, {
       runId: args.runId,
-    })) as AgentRuntimeInput | null
-
-    if (input === null || input.type !== "message") {
-      throw new Error("Run has no active reply surface.")
-    }
-
-    if (input.integration.status !== "active") {
-      throw new Error("Active reply integration is not active.")
-    }
+      surface: "reply",
+    })
 
     const target = normalizeReplyTarget(args.target)
     const address = replyAddress(input.message, target)
