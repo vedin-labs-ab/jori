@@ -1,6 +1,5 @@
 import { type ToolSurface } from "../contracts/integrations"
 import { readFinal } from "../contracts/runtime"
-import { encodeToolResult } from "../contracts/transport"
 import {
   materializeSandboxResult,
   prepareMiloToolInput,
@@ -18,6 +17,8 @@ import { executeCodingTool } from "./sandbox/coding"
 import { prepareProviderToolInput } from "./sandbox/source"
 import { type SandboxRuntime } from "./sandbox/types"
 import { executeActiveSurfaceTool } from "./surface"
+import { toolErrorResult, toolResult, toToolContent } from "./tool/results"
+import { findTool, requireSurface, shouldFinishConvexTool } from "./tool/select"
 import { recordToolEvent, toolTraceDetails } from "./trace"
 import { type JsonObject, type RuntimeContext, type RuntimeTool } from "./types"
 
@@ -32,18 +33,54 @@ export type ToolRuntime = {
   sandbox: SandboxRuntime
 }
 
-export async function executeToolCall(args: {
+export async function executeToolCall(
+  args: ToolCallArgs
+): Promise<ToolCallResult> {
+  const tool = findTool(args.runtime.context.tools, args.call.name)
+  // Recorded concurrently with the tool execution and joined before the
+  // outcome trace, so the started trace always lands first and a failed
+  // trace write still aborts the attempt.
+  const startedPending = recordToolEvent(eventArgs(args), tool, "tool.started")
+  const outcome = await runTool(args, tool)
+
+  await startedPending
+
+  return outcome.ok
+    ? await recordToolSuccess(args, tool, outcome.result)
+    : await recordToolFailure(args, tool, outcome.details)
+}
+
+type ToolCallArgs = {
   attempt: number
   call: ModelToolCall
   runtime: ToolRuntime
   sequence: number
-}): Promise<ToolCallResult> {
-  const tool = findTool(args.runtime.context.tools, args.call.name)
+}
 
-  await recordToolEvent(eventArgs(args), tool, "tool.started")
+type ToolCallOutcome =
+  | { ok: true; result: Awaited<ReturnType<typeof executeTool>> }
+  | { ok: false; details: ReturnType<typeof errorDetails> }
 
+async function runTool(
+  args: ToolCallArgs,
+  tool: RuntimeTool
+): Promise<ToolCallOutcome> {
   try {
-    const result = await executeTool(args.runtime, tool, args.call)
+    return {
+      ok: true,
+      result: await executeTool(args.runtime, tool, args.call),
+    }
+  } catch (error) {
+    return { ok: false, details: errorDetails(error) }
+  }
+}
+
+async function recordToolSuccess(
+  args: ToolCallArgs,
+  tool: RuntimeTool,
+  result: Awaited<ReturnType<typeof executeTool>>
+): Promise<ToolCallResult> {
+  try {
     await recordToolResultActivity({
       convex: args.runtime.convex,
       context: args.runtime.context,
@@ -63,14 +100,20 @@ export async function executeToolCall(args: {
       finished: result.finished,
     }
   } catch (error) {
-    const details = errorDetails(error)
+    return await recordToolFailure(args, tool, errorDetails(error))
+  }
+}
 
-    await recordToolEvent(eventArgs(args), tool, "tool.failed", details)
+async function recordToolFailure(
+  args: ToolCallArgs,
+  tool: RuntimeTool,
+  details: ReturnType<typeof errorDetails>
+): Promise<ToolCallResult> {
+  await recordToolEvent(eventArgs(args), tool, "tool.failed", details)
 
-    return {
-      content: toToolContent(toolErrorResult(details.error)),
-      finished: false,
-    }
+  return {
+    content: toToolContent(toolErrorResult(details.error)),
+    finished: false,
   }
 }
 
@@ -211,24 +254,6 @@ async function executeAgentTool(runtime: ToolRuntime, input: JsonObject) {
   })
 }
 
-function findTool(tools: RuntimeTool[], name: string) {
-  const tool = tools.find((candidate) => candidate.name === name)
-
-  if (tool === undefined) {
-    throw new Error(`Unknown runtime tool: ${name}`)
-  }
-
-  return tool
-}
-
-function requireSurface(tool: RuntimeTool): ToolSurface {
-  if (tool.surface === undefined) {
-    throw new Error(`Tool has no Convex surface: ${tool.name}`)
-  }
-
-  return tool.surface
-}
-
 function eventArgs(args: {
   attempt: number
   call: ModelToolCall
@@ -241,26 +266,5 @@ function eventArgs(args: {
     convex: args.runtime.convex,
     context: args.runtime.context,
     sequence: args.sequence,
-  }
-}
-
-function toolResult(value: unknown, finished = false) {
-  return { finished, value }
-}
-
-function shouldFinishConvexTool(toolName: string, input: JsonObject) {
-  return toolName === "offer_integration" && readFinal(input)
-}
-
-function toToolContent(result: unknown) {
-  return encodeToolResult(result)
-}
-
-function toolErrorResult(message: string): JsonObject {
-  return {
-    error: {
-      message,
-    },
-    status: "error",
   }
 }

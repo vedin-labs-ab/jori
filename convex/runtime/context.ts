@@ -30,25 +30,32 @@ export const load = action({
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
 
-    const session = await loadRunSession(ctx, args.runId)
-
-    const [input, run] = (await Promise.all([
-      ctx.runQuery(internal.runs.records.getInputByRun, {
-        runId: args.runId,
-      }),
+    const [session, run] = (await Promise.all([
+      ctx.runQuery(internal.sessions.data.getByRun, { runId: args.runId }),
       ctx.runQuery(internal.runs.records.get, { runId: args.runId }),
-    ])) as [
-      AgentRuntimeInput | null,
-      {
-        _id: Id<"runs">
-        status: "completed" | "failed" | "queued" | "running" | "stopped"
-      } | null,
-    ]
-    if (input === null || run === null) {
+    ])) as [LoadedSession, LoadedRun | null]
+
+    if (run === null) {
       throw new Error("Runtime context not found.")
     }
 
-    const skills = await loadRuntimeSkills(ctx, input.run.tenantId)
+    // The reaction sync must finish before the input read below so the
+    // prompt renders current reactions; skills don't depend on it.
+    const [skills] = await Promise.all([
+      loadRuntimeSkills(ctx, run.tenantId),
+      session === null
+        ? Promise.resolve()
+        : syncSessionReactions(ctx, session._id),
+    ])
+
+    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
+      runId: args.runId,
+    })) as AgentRuntimeInput | null
+
+    if (input === null) {
+      throw new Error("Runtime context not found.")
+    }
+
     const skillNames = runtimeSkillNames(skills)
     const [sandbox, permissions, activeSurface] = await Promise.all([
       loadSandboxReference(ctx, { runId: args.runId, status: run.status }),
@@ -121,6 +128,7 @@ type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
 type LoadedRun = {
   _id: Id<"runs">
   status: "completed" | "failed" | "queued" | "running" | "stopped"
+  tenantId: string
 }
 
 async function loadRunSession(ctx: ActionCtx, runId: Id<"runs">) {
