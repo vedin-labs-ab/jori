@@ -2,7 +2,7 @@ import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { wakeRun } from "../runtime/waiters/data"
 import { type Actor } from "../shared/actor"
-import { recordTransition } from "../transitions"
+import { type ApprovalTransitionType, recordTransition } from "../transitions"
 
 type ApprovalPatch = Partial<Omit<Doc<"approvals">, "_creationTime" | "_id">>
 type ApprovalDelivery = NonNullable<Doc<"approvals">["delivery"]>
@@ -47,29 +47,16 @@ export async function markApprovalDecided(
     now: number
   }
 ) {
-  if (approval.status !== "pending") {
-    return approval
-  }
-
-  await cancelApprovalFunction(ctx, approval)
-  const updated = await patchAndRead(ctx, approval._id, {
-    status: args.decision,
-    decidedBy: args.decidedBy,
-    decidedAt: args.now,
-    functionId: undefined,
+  return await settleApproval(ctx, approval, {
+    cancelFunction: true,
+    patch: {
+      status: args.decision,
+      decidedBy: args.decidedBy,
+      decidedAt: args.now,
+    },
+    syncSurface: true,
+    type: args.decision,
   })
-
-  if (updated !== null) {
-    await recordTransition(ctx, {
-      tenantId: updated.tenantId,
-      subject: { kind: "approval", id: updated._id },
-      syncSurface: true,
-      type: args.decision,
-    })
-    await wakeApprovalRun(ctx, updated)
-  }
-
-  return updated
 }
 
 export async function markApprovalCancelled(
@@ -81,56 +68,29 @@ export async function markApprovalCancelled(
     reason: string
   }
 ) {
-  if (approval.status !== "pending") {
-    return approval
-  }
-
-  await cancelApprovalFunction(ctx, approval)
-  const updated = await patchAndRead(ctx, approval._id, {
-    status: "cancelled",
-    cancelReason: args.reason,
-    cancelledBy: args.cancelledBy,
-    cancelledAt: args.now,
-    functionId: undefined,
+  return await settleApproval(ctx, approval, {
+    cancelFunction: true,
+    patch: {
+      status: "cancelled",
+      cancelReason: args.reason,
+      cancelledBy: args.cancelledBy,
+      cancelledAt: args.now,
+    },
+    syncSurface: true,
+    type: "cancelled",
   })
-
-  if (updated !== null) {
-    await recordTransition(ctx, {
-      tenantId: updated.tenantId,
-      subject: { kind: "approval", id: updated._id },
-      syncSurface: true,
-      type: "cancelled",
-    })
-    await wakeApprovalRun(ctx, updated)
-  }
-
-  return updated
 }
 
 export async function markApprovalExpired(
   ctx: MutationCtx,
   approval: Doc<"approvals">
 ) {
-  if (approval.status !== "pending") {
-    return approval
-  }
-
-  const updated = await patchAndRead(ctx, approval._id, {
-    status: "expired",
-    functionId: undefined,
+  return await settleApproval(ctx, approval, {
+    cancelFunction: false,
+    patch: { status: "expired" },
+    syncSurface: true,
+    type: "expired",
   })
-
-  if (updated !== null) {
-    await recordTransition(ctx, {
-      tenantId: updated.tenantId,
-      subject: { kind: "approval", id: updated._id },
-      syncSurface: true,
-      type: "expired",
-    })
-    await wakeApprovalRun(ctx, updated)
-  }
-
-  return updated
 }
 
 export async function markApprovalFailed(
@@ -138,22 +98,44 @@ export async function markApprovalFailed(
   approval: Doc<"approvals">,
   failure: ApprovalDeliveryFailure
 ) {
+  return await settleApproval(ctx, approval, {
+    cancelFunction: true,
+    patch: { deliveryFailure: failure, status: "failed" },
+    type: "failed",
+  })
+}
+
+// Settling always clears functionId: the pending expiry timer is either
+// cancelled here or has already fired.
+async function settleApproval(
+  ctx: MutationCtx,
+  approval: Doc<"approvals">,
+  args: {
+    cancelFunction: boolean
+    patch: ApprovalPatch
+    syncSurface?: boolean
+    type: ApprovalTransitionType
+  }
+) {
   if (approval.status !== "pending") {
     return approval
   }
 
-  await cancelApprovalFunction(ctx, approval)
+  if (args.cancelFunction) {
+    await cancelApprovalFunction(ctx, approval)
+  }
+
   const updated = await patchAndRead(ctx, approval._id, {
-    deliveryFailure: failure,
+    ...args.patch,
     functionId: undefined,
-    status: "failed",
   })
 
   if (updated !== null) {
     await recordTransition(ctx, {
       tenantId: updated.tenantId,
       subject: { kind: "approval", id: updated._id },
-      type: "failed",
+      syncSurface: args.syncSurface,
+      type: args.type,
     })
     await wakeApprovalRun(ctx, updated)
   }
