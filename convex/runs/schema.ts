@@ -1,5 +1,5 @@
 import { defineTable } from "convex/server"
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import { actorValidator } from "../shared/actor"
 import { toolSurfaceValidator } from "../shared/integrations"
 
@@ -72,6 +72,10 @@ export const runStatus = v.union(
   v.literal("failed"),
   v.literal("stopped")
 )
+
+export function isTerminalRunStatus(status: Infer<typeof runStatus>) {
+  return status === "completed" || status === "failed" || status === "stopped"
+}
 
 const runVisibilityScope = v.union(
   v.literal("tenant"),

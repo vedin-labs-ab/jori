@@ -7,7 +7,7 @@ import { type AgentRuntimeInput } from "../runs/agent/input"
 import { assemblePrompt } from "../runs/agent/prompt"
 import { getPromptedTools, toolExecutionType } from "../runs/agent/tools/policy"
 import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
-import { toolSnapshot } from "../runs/schema"
+import { isTerminalRunStatus, toolSnapshot } from "../runs/schema"
 import { type RuntimeSkill, runtimeSkillNames } from "../skills/runtime"
 import { runLifecycleTools } from "./lifecycle"
 import {
@@ -231,7 +231,7 @@ async function loadSandboxReference(
     status: Doc<"runs">["status"]
   }
 ) {
-  if (isTerminalStatus(args.status)) {
+  if (isTerminalRunStatus(args.status)) {
     return (await ctx.runQuery(internal.runtime.sandboxes.retainedByRun, {
       runId: args.runId,
     })) as { externalId: string } | null
@@ -240,10 +240,6 @@ async function loadSandboxReference(
   return (await ctx.runMutation(internal.runtime.sandboxes.claimForRun, {
     runId: args.runId,
   })) as { externalId: string } | null
-}
-
-function isTerminalStatus(status: Doc<"runs">["status"]) {
-  return status === "completed" || status === "failed" || status === "stopped"
 }
 
 export const prepareRun = internalMutation({

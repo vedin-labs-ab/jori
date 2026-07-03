@@ -1,6 +1,13 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { type RunFilter, runMatchesFilter } from "./filters"
+import { isTerminalRunStatus } from "../schema"
+import {
+  normalizeQuery,
+  parseCursor,
+  type RunFilter,
+  runMatchesFilter,
+  summaryMatchesSearch,
+} from "./filters"
 import { summarizeRun } from "./summaries"
 
 type RunSummary = Awaited<ReturnType<typeof summarizeRun>>
@@ -31,7 +38,7 @@ export async function pagePendingApprovals(
   })) {
     const summary = await summarizeRun(ctx, run, approval)
 
-    if (!matchesSearch(summary, normalizedQuery)) {
+    if (!summaryMatchesSearch(summary, normalizedQuery)) {
       continue
     }
 
@@ -79,7 +86,7 @@ export async function countPendingApprovals(
 
     const summary = await summarizeRun(ctx, run, approval)
 
-    if (matchesSearch(summary, args.normalizedQuery)) {
+    if (summaryMatchesSearch(summary, args.normalizedQuery)) {
       count += 1
     }
   }
@@ -108,7 +115,11 @@ async function* pendingApprovalRuns(
 
     const run = await ctx.db.get(approval.runId)
 
-    if (run === null || run.tenantId !== args.tenantId || isTerminalRun(run)) {
+    if (
+      run === null ||
+      run.tenantId !== args.tenantId ||
+      isTerminalRunStatus(run.status)
+    ) {
       continue
     }
 
@@ -129,34 +140,6 @@ function pendingApprovalQuery(ctx: QueryCtx, tenantId: string, now: number) {
     .order("asc")
 }
 
-function parseCursor(cursor: string | null) {
-  if (cursor === null) {
-    return 0
-  }
-
-  const parsed = Number.parseInt(cursor, 10)
-
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
-}
-
-function normalizeQuery(query: string) {
-  return query.trim().toLowerCase()
-}
-
-function matchesSearch(summary: RunSummary, normalizedQuery: string) {
-  return (
-    normalizedQuery === "" || summary.searchableText.includes(normalizedQuery)
-  )
-}
-
 function isPendingApproval(approval: Doc<"approvals">, now: number) {
   return approval.status === "pending" && approval.expiresAt > now
-}
-
-function isTerminalRun(run: Doc<"runs">) {
-  return (
-    run.status === "completed" ||
-    run.status === "failed" ||
-    run.status === "stopped"
-  )
 }

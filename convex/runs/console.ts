@@ -6,8 +6,11 @@ import {
   type ApprovalFilter,
   approvalFilterValidator,
   approvalMatchesFilter,
+  normalizeQuery,
+  parseCursor,
   runFilterValidator,
   runMatchesFilter,
+  summaryMatchesSearch,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
 import { summarizeRun } from "./console/summaries"
@@ -146,20 +149,6 @@ async function countRuns(ctx: QueryCtx, tenantId: string) {
   return count
 }
 
-function parseCursor(cursor: string | null) {
-  if (cursor === null) {
-    return 0
-  }
-
-  const parsed = Number.parseInt(cursor, 10)
-
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
-}
-
-function normalizeQuery(query: string) {
-  return query.trim().toLowerCase()
-}
-
 function needsSummary(filter: ApprovalFilter, normalizedQuery: string) {
   return filter !== "any" || normalizedQuery !== ""
 }
@@ -173,9 +162,7 @@ function matchesSummary(
     return false
   }
 
-  return (
-    normalizedQuery === "" || summary.searchableText.includes(normalizedQuery)
-  )
+  return summaryMatchesSearch(summary, normalizedQuery)
 }
 
 function matchesApprovalFilter(summary: RunSummary, filter: ApprovalFilter) {

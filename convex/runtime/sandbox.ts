@@ -3,7 +3,7 @@ import {
   codingToolDefinitions,
 } from "../../contracts/coding"
 import { type ToolAccess } from "../../contracts/permissions"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { withOptionalFieldGuidance } from "../runs/agent/tools/schemas"
 import { nativeToolUsage } from "./permissions/native"
@@ -72,8 +72,4 @@ export async function findSessionByRun(ctx: MutationCtx, runId: Id<"runs">) {
     .query("sessions")
     .withIndex("by_run", (query) => query.eq("runId", runId))
     .first()
-}
-
-export function isTerminalRun(run: Doc<"runs">) {
-  return ["completed", "failed", "stopped"].includes(run.status)
 }

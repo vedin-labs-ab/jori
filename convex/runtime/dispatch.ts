@@ -6,6 +6,7 @@ import { agentTaskId, cleanupTaskId } from "../../contracts/runtime"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
+import { isTerminalRunStatus } from "../runs/schema"
 import { formatRuntimeError } from "./shared"
 
 const batchSize = 5
@@ -70,7 +71,7 @@ async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
     runId: operation.runId,
   })) as Doc<"runs"> | null
 
-  if (run === null || isTerminalRun(run)) {
+  if (run === null || isTerminalRunStatus(run.status)) {
     return undefined
   }
 
@@ -90,14 +91,6 @@ async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
   )
 
   return handle.id
-}
-
-function isTerminalRun(run: Doc<"runs">) {
-  return (
-    run.status === "completed" ||
-    run.status === "failed" ||
-    run.status === "stopped"
-  )
 }
 
 async function wakeWaiter(

@@ -12,6 +12,7 @@ import {
   readPendingReactions,
 } from "../reactions/cursor"
 import { reactionSummariesForMessages } from "../reactions/summary"
+import { isTerminalRunStatus } from "../runs/schema"
 import {
   collectPendingBatch,
   defaultDrainLimit,
@@ -43,7 +44,7 @@ export async function isReusableSession(
 
   const run = await ctx.db.get(session.runId)
 
-  return run === null || isTerminalStatus(run.status) ? null : session
+  return run === null || isTerminalRunStatus(run.status) ? null : session
 }
 
 export async function startSession(
@@ -246,10 +247,6 @@ async function queryConversationMessages(
     })
     .order("asc")
     .take(args.limit)
-}
-
-function isTerminalStatus(status: Doc<"runs">["status"]) {
-  return status === "completed" || status === "failed" || status === "stopped"
 }
 
 function nextSessionCursor(
