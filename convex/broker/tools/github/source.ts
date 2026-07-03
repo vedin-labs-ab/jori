@@ -3,6 +3,7 @@ import {
   type SourceChanges,
   type SourceFileChange,
 } from "../../../../contracts/source"
+import { readRecord } from "../../../shared/input"
 import { githubJsonObject, repositoryPath } from "./client"
 
 export type GitHubSourceCommit = {
@@ -36,13 +37,11 @@ export async function commitSourceChangesToBranch(
     )
   }
 
-  const parent = await readCommit(token, args.owner, args.repo, ref.sha)
   const commit = await createSourceCommit(token, {
     changes: args.changes,
     message: args.message,
     owner: args.owner,
     parentSha: ref.sha,
-    parentTreeSha: parent.treeSha,
     repo: args.repo,
   })
 
@@ -76,13 +75,11 @@ export async function createBranchWithSourceChanges(
   const base = normalizeBranchName(args.base, "base")
   const branch = normalizeBranchName(args.branch, "branch")
   const ref = await readBranchRef(token, args.owner, args.repo, base)
-  const parent = await readCommit(token, args.owner, args.repo, ref.sha)
   const commit = await createSourceCommit(token, {
     changes: args.changes,
     message: args.message,
     owner: args.owner,
     parentSha: ref.sha,
-    parentTreeSha: parent.treeSha,
     repo: args.repo,
   })
 
@@ -136,10 +133,10 @@ async function createSourceCommit(
     message: string
     owner: string
     parentSha: string
-    parentTreeSha: string
     repo: string
   }
 ): Promise<GitHubSourceCommit> {
+  const parent = await readCommit(token, args.owner, args.repo, args.parentSha)
   const tree = await githubJsonObject(
     token,
     `${repositoryPath(args.owner, args.repo)}/git/trees`,
@@ -147,7 +144,7 @@ async function createSourceCommit(
     {
       method: "POST",
       body: {
-        base_tree: args.parentTreeSha,
+        base_tree: parent.treeSha,
         tree: args.changes.files.map(treeEntry),
       },
     }
@@ -234,10 +231,4 @@ function readSha(value: unknown, name: string) {
   }
 
   return value
-}
-
-function readRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {}
 }
