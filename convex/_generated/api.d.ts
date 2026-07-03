@@ -127,6 +127,7 @@ import type * as conversations_scope from "../conversations/scope.js";
 import type * as conversations_summarize from "../conversations/summarize.js";
 import type * as conversations_summary from "../conversations/summary.js";
 import type * as crons from "../crons.js";
+import type * as deduction_anchors from "../deduction/anchors.js";
 import type * as deduction_apply from "../deduction/apply.js";
 import type * as deduction_console from "../deduction/console.js";
 import type * as deduction_input from "../deduction/input.js";
@@ -538,6 +539,7 @@ declare const fullApi: ApiFromModules<{
   "conversations/summarize": typeof conversations_summarize;
   "conversations/summary": typeof conversations_summary;
   crons: typeof crons;
+  "deduction/anchors": typeof deduction_anchors;
   "deduction/apply": typeof deduction_apply;
   "deduction/console": typeof deduction_console;
   "deduction/input": typeof deduction_input;
