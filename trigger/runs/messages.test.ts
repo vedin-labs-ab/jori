@@ -139,25 +139,33 @@ function runtimeInteraction(
   }
 }
 
-const promptWithOrganization = {
+const fullPrompt = {
   context: "context",
   instructions: "instructions",
   organization: "organization",
+  person: "person",
 }
-const promptWithoutOrganization = {
+const barePrompt = {
   context: "context",
   instructions: "instructions",
   organization: null,
+  person: null,
 }
 
-test("builds the prompt prefix with and without an organization message", () => {
-  expect(promptMessages(promptWithoutOrganization)).toEqual([
+test("builds the prompt prefix from the present context messages in order", () => {
+  expect(promptMessages(barePrompt)).toEqual([
     { content: "instructions", role: "system" },
     { content: "context", role: "user" },
   ])
-  expect(promptMessages(promptWithOrganization)).toEqual([
+  expect(promptMessages(fullPrompt)).toEqual([
     { content: "instructions", role: "system" },
     { content: "organization", role: "user" },
+    { content: "person", role: "user" },
+    { content: "context", role: "user" },
+  ])
+  expect(promptMessages({ ...barePrompt, person: "person" })).toEqual([
+    { content: "instructions", role: "system" },
+    { content: "person", role: "user" },
     { content: "context", role: "user" },
   ])
 })
@@ -168,16 +176,18 @@ test("replaces the prompt prefix in place across all shapes", () => {
     context: "new context",
     instructions: "new instructions",
     organization: "new organization",
+    person: "new person",
   }
 
-  const grew = [...promptMessages(promptWithoutOrganization), history]
-  replacePromptMessages(grew, promptWithoutOrganization, next)
+  const grew = [...promptMessages(barePrompt), history]
+  replacePromptMessages(grew, barePrompt, next)
   expect(grew).toEqual([...promptMessages(next), history])
 
-  const shrank = [...promptMessages(promptWithOrganization), history]
-  replacePromptMessages(shrank, promptWithOrganization, {
+  const shrank = [...promptMessages(fullPrompt), history]
+  replacePromptMessages(shrank, fullPrompt, {
     ...next,
     organization: null,
+    person: null,
   })
   expect(shrank).toEqual([
     { content: "new instructions", role: "system" },
@@ -186,6 +196,6 @@ test("replaces the prompt prefix in place across all shapes", () => {
   ])
 
   const malformed = [history]
-  replacePromptMessages(malformed, promptWithoutOrganization, next)
+  replacePromptMessages(malformed, barePrompt, next)
   expect(malformed).toEqual([history])
 })

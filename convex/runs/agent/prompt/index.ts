@@ -18,6 +18,7 @@ export function assemblePrompt(
   input: AgentRuntimeInput,
   options: {
     activeSurface?: PromptActiveSurface | null
+    person?: string | null
     promptedTools?: ToolPermission[]
     skills?: readonly RuntimeSkill[]
   } = {}
@@ -60,6 +61,7 @@ export function assemblePrompt(
     }),
     instructions,
     organization: optionalPromptBlock(createOrganizationMessage(input)),
+    person: options.person ?? null,
   }
 }
 

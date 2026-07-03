@@ -16,6 +16,7 @@ export type RuntimePrompt = {
   context: string
   instructions: string
   organization: string | null
+  person: string | null
 }
 
 type RuntimeToolMetadataKind = (typeof runtimeToolMetadataKinds)[number]

@@ -11,7 +11,10 @@ export type LoadedRun = {
   tenantId: string
 }
 export type LoadedSandbox = { externalId: string } | null
-export type LoadedSession = { _id: Id<"sessions"> } | null
+export type LoadedSession = {
+  _id: Id<"sessions">
+  recency?: { requester?: string }
+} | null
 
 export async function loadRunSession(ctx: ActionCtx, runId: Id<"runs">) {
   const session = (await ctx.runQuery(internal.sessions.data.getByRun, {

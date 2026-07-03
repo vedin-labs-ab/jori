@@ -73,6 +73,7 @@ function createRuntime(): ToolRuntime {
         context: "context",
         instructions: "system",
         organization: null,
+        person: null,
       },
       run: {
         id: id<"runs">("run_1"),
