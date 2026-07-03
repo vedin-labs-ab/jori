@@ -45,6 +45,14 @@ export function toolSurfaceList(groups: CapabilityGroup[]) {
   return groups.map((group) => group.type)
 }
 
+export function accessLabel(access: ArtifactSummary["access"]) {
+  return access === "organization" ? "Organization" : "Personal"
+}
+
+export function toolCountLabel(count: number) {
+  return count === 1 ? "1 tool" : `${count} tools`
+}
+
 export function automationCountLabel(count: number) {
   return count === 1 ? "1 automation" : `${count} automations`
 }

@@ -1,4 +1,4 @@
-import { ShieldCheckIcon } from "lucide-react"
+import { AlertCircleIcon, ShieldCheckIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -123,5 +123,25 @@ function AutomationSurfaceToolsFooter() {
         </Button>
       </DialogClose>
     </DialogFooter>
+  )
+}
+
+export type AutomationSurfaceWithTools = AutomationSurfaceFormValue & {
+  tools: string[]
+}
+
+export function MissingToolPermissionsMessage({
+  toolSurfaceLabel,
+}: {
+  toolSurfaceLabel: string
+}) {
+  return (
+    <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-destructive text-xs">
+      <AlertCircleIcon className="mt-0.5 size-3.5 shrink-0" />
+      <p>
+        Some {toolSurfaceLabel} tools are no longer allowed for this
+        integration. Update this automation before saving.
+      </p>
+    </div>
   )
 }

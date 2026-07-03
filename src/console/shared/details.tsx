@@ -20,6 +20,7 @@ export const codeBlockContentClassName = "max-h-[250px] overflow-y-auto"
 const codeBlockBodyClassName =
   "max-h-[250px] overflow-y-auto px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed"
 
+export const codeBlockFrameClassName = "h-[250px]"
 export type DetailIcon = ElementType<{ className?: string }>
 
 export function ErrorDetail({ value }: { value: string }) {
@@ -166,6 +167,26 @@ export function DetailLink({
       <span className="min-w-0 truncate">{children}</span>
       <ArrowUpRight className="size-3 shrink-0 text-muted-foreground transition-colors group-hover/detail-link:text-foreground" />
     </a>
+  )
+}
+
+export function StatusDetail({
+  icon: Icon,
+  iconClassName = "text-muted-foreground",
+  label,
+  value,
+}: {
+  icon: DetailIcon
+  iconClassName?: string
+  label: string
+  value: string
+}) {
+  return (
+    <DetailRow icon={Icon} iconClassName={iconClassName} label={label}>
+      <div className="min-w-0 rounded-md bg-muted px-2.5 py-2 text-muted-foreground text-xs">
+        {value}
+      </div>
+    </DetailRow>
   )
 }
 

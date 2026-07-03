@@ -22,3 +22,7 @@ const providerLogos: Record<string, string> = {
 export function providerLogoPath(surface: string | undefined) {
   return surface === undefined ? undefined : providerLogos[surface]
 }
+
+export function hasProviderLogo(surface: string) {
+  return providerLogos[surface] !== undefined
+}
