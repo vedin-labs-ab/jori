@@ -83,3 +83,89 @@ test("ignores unhandled events, actions, and incomplete payloads", () => {
     })
   ).toBeNull()
 })
+
+const pushBase = {
+  ...base,
+  repository: { full_name: "acme/app", default_branch: "main" },
+  ref: "refs/heads/main",
+}
+
+test("reads default-branch pushes with subjects and touched areas", () => {
+  const event = getGitHubLifecycleEvent({
+    event: "push",
+    deliveryId: "d10",
+    payload: {
+      ...pushBase,
+      commits: [
+        {
+          message: "Add pass loop\n\nDetails here.",
+          added: ["convex/deduction/pass.ts"],
+          modified: ["convex/crons.ts"],
+        },
+        { message: "Fix sweep registry", modified: ["prompts/charter.md"] },
+      ],
+    },
+  })
+
+  expect(event).toMatchObject({
+    accountId: "77",
+    key: "github:lifecycle:d10",
+    type: "commits.pushed",
+    text: "2 commits pushed to main in acme/app (convex, prompts): Add pass loop; Fix sweep registry",
+    data: { repository: { fullName: "acme/app" } },
+  })
+})
+
+test("caps subjects, keeps the full count, and uses singular phrasing", () => {
+  const many = getGitHubLifecycleEvent({
+    event: "push",
+    deliveryId: "d11",
+    payload: {
+      ...pushBase,
+      commits: [
+        { message: "One" },
+        { message: "Two" },
+        { message: "Three" },
+        { message: "Four" },
+      ],
+    },
+  })
+  const single = getGitHubLifecycleEvent({
+    event: "push",
+    deliveryId: "d12",
+    payload: { ...pushBase, commits: [{ message: "Only" }] },
+  })
+
+  expect(many?.text).toBe(
+    "4 commits pushed to main in acme/app: One; Two; Three"
+  )
+  expect(single?.text).toBe("1 commit pushed to main in acme/app: Only")
+})
+
+test("ignores feature branches, deletions, and empty pushes", () => {
+  expect(
+    getGitHubLifecycleEvent({
+      event: "push",
+      deliveryId: "d13",
+      payload: {
+        ...pushBase,
+        ref: "refs/heads/feature/cutover",
+        commits: [{ message: "WIP" }],
+      },
+    })
+  ).toBeNull()
+  expect(
+    getGitHubLifecycleEvent({
+      event: "push",
+      deliveryId: "d14",
+      payload: { ...pushBase, deleted: true, commits: [{ message: "x" }] },
+    })
+  ).toBeNull()
+  expect(
+    getGitHubLifecycleEvent({
+      event: "push",
+      deliveryId: "d15",
+      payload: { ...pushBase, commits: [] },
+    })
+  ).toBeNull()
+})

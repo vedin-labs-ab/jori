@@ -1,6 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import {
+  commitLifecycleEvent,
   issueLifecycleEvent,
   pullRequestLifecycleEvent,
 } from "../../automations/names"
@@ -19,8 +20,15 @@ export type GitHubLifecycleEvent = {
 type LifecyclePayload = {
   action?: string
   installation?: { id?: number }
-  repository?: { full_name?: string; html_url?: string }
+  repository?: {
+    full_name?: string
+    html_url?: string
+    default_branch?: string
+  }
   sender?: { id?: number; login?: string; type?: string }
+  ref?: string
+  deleted?: boolean
+  commits?: PushCommit[]
   issue?: { number?: number; title?: string; html_url?: string }
   pull_request?: {
     number?: number
@@ -30,8 +38,15 @@ type LifecyclePayload = {
   }
 }
 
-// Issue and pull request lifecycle changes, recorded as events for deduction.
-// Comments stay on the message path; this reader only handles state changes.
+type PushCommit = {
+  message?: string
+  added?: string[]
+  removed?: string[]
+  modified?: string[]
+}
+
+// Issue, pull request, and default-branch push changes, recorded as events
+// for deduction. Comments stay on the message path.
 export function getGitHubLifecycleEvent(args: {
   event: string | null
   payload: LifecyclePayload
@@ -53,7 +68,9 @@ export function getGitHubLifecycleEvent(args: {
       ? readIssueChange(args.payload, repository)
       : args.event === "pull_request"
         ? readPullRequestChange(args.payload, repository)
-        : null
+        : args.event === "push"
+          ? readPushChange(args.payload, repository)
+          : null
 
   if (change === null) {
     return null
@@ -122,6 +139,64 @@ function readPullRequestChange(payload: LifecyclePayload, repository: string) {
       },
     },
   }
+}
+
+// Direct pushes to the default branch are landed work; feature branches stay
+// out until a pull request lands them. One event per push, never per commit.
+function readPushChange(payload: LifecyclePayload, repository: string) {
+  const branch = payload.repository?.default_branch
+  const commits = payload.commits ?? []
+
+  if (
+    branch === undefined ||
+    payload.ref !== `refs/heads/${branch}` ||
+    payload.deleted === true ||
+    commits.length === 0
+  ) {
+    return null
+  }
+
+  const count = commits.length === 1 ? "1 commit" : `${commits.length} commits`
+  const areas = touchedAreas(commits)
+  const where = areas.length === 0 ? "" : ` (${areas.join(", ")})`
+  const summary = commitSubjects(commits)
+
+  return {
+    type: commitLifecycleEvent.pushed,
+    text: `${count} pushed to ${branch} in ${repository}${where}${summary === "" ? "" : `: ${summary}`}`,
+    data: { repository: { fullName: repository } },
+  }
+}
+
+const maxCommitSubjects = 3
+const maxTouchedAreas = 4
+
+function commitSubjects(commits: PushCommit[]) {
+  return commits
+    .slice(0, maxCommitSubjects)
+    .map((commit) => commit.message?.split("\n")[0] ?? "")
+    .filter((subject) => subject !== "")
+    .join("; ")
+}
+
+// Top-level path segments give the judge a cheap hint at which part of the
+// codebase the work touches.
+function touchedAreas(commits: PushCommit[]) {
+  const areas = new Set<string>()
+
+  for (const commit of commits) {
+    const paths = [
+      ...(commit.added ?? []),
+      ...(commit.removed ?? []),
+      ...(commit.modified ?? []),
+    ]
+
+    for (const path of paths) {
+      areas.add(path.split("/")[0] ?? path)
+    }
+  }
+
+  return [...areas].sort().slice(0, maxTouchedAreas)
 }
 
 function readLifecycleAction<Events extends Record<string, string>>(
