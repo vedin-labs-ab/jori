@@ -7,6 +7,7 @@ import {
   stringArrayProperty,
   stringProperty,
 } from "./common"
+import { emailMessageSchema } from "./email"
 
 export const googleToolInputSchemas = {
   google_gmail_search_threads: objectSchema({
@@ -26,7 +27,7 @@ export const googleToolInputSchemas = {
       threadId: stringProperty("Gmail thread ID."),
     },
   }),
-  google_gmail_send_message: gmailMessageSchema(),
+  google_gmail_send_message: emailMessageSchema(),
   google_gmail_create_draft: gmailDraftSchema(),
   google_calendar_list_events: objectSchema({
     properties: {
@@ -109,25 +110,6 @@ export const googleToolInputSchemas = {
     name: stringProperty("New file name."),
   }),
 } satisfies SchemaMap
-
-function gmailMessageSchema() {
-  return objectSchema({
-    required: ["to", "subject", "body"],
-    properties: {
-      assets: runAssetsProperty(),
-      bcc: stringArrayProperty("BCC recipient email addresses."),
-      body: stringProperty("Message body."),
-      bodyType: {
-        type: "string",
-        enum: ["Text", "HTML"],
-        description: "Defaults to Text.",
-      },
-      cc: stringArrayProperty("CC recipient email addresses."),
-      subject: stringProperty("Message subject."),
-      to: stringArrayProperty("Recipient email addresses."),
-    },
-  })
-}
 
 function gmailDraftSchema() {
   return objectSchema({

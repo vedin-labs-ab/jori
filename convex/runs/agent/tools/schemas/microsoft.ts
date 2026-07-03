@@ -2,11 +2,10 @@ import { calendarEventProperty } from "./calendar"
 import {
   numberProperty,
   objectSchema,
-  runAssetsProperty,
   type SchemaMap,
-  stringArrayProperty,
   stringProperty,
 } from "./common"
+import { emailMessageSchema } from "./email"
 
 export const microsoftToolInputSchemas = {
   microsoft_email_search_messages: objectSchema({
@@ -22,10 +21,10 @@ export const microsoftToolInputSchemas = {
       messageId: stringProperty("Outlook message ID."),
     },
   }),
-  microsoft_email_send_message: microsoftMessageSchema({
+  microsoft_email_send_message: emailMessageSchema({
     saveToSentItems: { type: "boolean" },
   }),
-  microsoft_email_create_draft: microsoftMessageSchema(),
+  microsoft_email_create_draft: emailMessageSchema(),
   microsoft_email_update_message: objectSchema({
     required: ["messageId", "message"],
     properties: {
@@ -56,26 +55,6 @@ export const microsoftToolInputSchemas = {
     { eventId: stringProperty("Microsoft Graph event ID.") }
   ),
 } satisfies SchemaMap
-
-function microsoftMessageSchema(properties: Record<string, unknown> = {}) {
-  return objectSchema({
-    required: ["to", "subject", "body"],
-    properties: {
-      assets: runAssetsProperty(),
-      bcc: stringArrayProperty("BCC recipient email addresses."),
-      body: stringProperty("Message body."),
-      bodyType: {
-        type: "string",
-        enum: ["Text", "HTML"],
-        description: "Defaults to Text.",
-      },
-      cc: stringArrayProperty("CC recipient email addresses."),
-      subject: stringProperty("Message subject."),
-      to: stringArrayProperty("Recipient email addresses."),
-      ...properties,
-    },
-  })
-}
 
 function microsoftMessagePatchProperty() {
   return {
