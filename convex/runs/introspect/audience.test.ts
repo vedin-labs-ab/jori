@@ -8,12 +8,7 @@ test("resolves conversation and automation audiences", async () => {
 
   await expect(
     resolveRunAudience(ctx, {
-      origin: {
-        conversation: {
-          conversation: conversation("public"),
-          integration: integration("slack"),
-        },
-      },
+      origin: { conversation: conversation("tenant") },
       run: {},
     })
   ).resolves.toEqual({
@@ -22,16 +17,11 @@ test("resolves conversation and automation audiences", async () => {
   })
   await expect(
     resolveRunAudience(ctx, {
-      origin: {
-        conversation: {
-          conversation: conversation("private"),
-          integration: integration("slack"),
-        },
-      },
+      origin: { conversation: conversation("person") },
       run: {},
     })
   ).resolves.toEqual({
-    scope: "conversation",
+    scope: "person",
     conversationId: id<"conversations">("conversation"),
   })
   await expect(
@@ -43,33 +33,15 @@ test("resolves conversation and automation audiences", async () => {
 })
 
 function conversation(
-  visibility: Doc<"conversations">["visibility"]
+  scope: Doc<"conversations">["scope"]
 ): Doc<"conversations"> {
   return {
     _creationTime: 0,
     _id: id<"conversations">("conversation"),
     externalId: "external",
     integrationId: id<"integrations">("integration"),
+    scope,
     tenantId: "tenant",
-    visibility,
-  }
-}
-
-function integration(
-  provider: Doc<"integrations">["integration"]
-): Doc<"integrations"> {
-  return {
-    _creationTime: 0,
-    _id: id<"integrations">("integration"),
-    createdAt: 0,
-    createdBy: id<"persons">("person"),
-    credentials: {},
-    externalId: "external",
-    integration: provider,
-    scope: "tenant",
-    status: "active",
-    tenantId: "tenant",
-    updatedAt: 0,
   }
 }
 
@@ -90,12 +62,8 @@ function automation(): Doc<"automations"> {
   }
 }
 
-function id<
-  TableName extends
-    | "automations"
-    | "conversations"
-    | "integrations"
-    | "persons",
->(value: string) {
+function id<TableName extends "automations" | "conversations" | "integrations">(
+  value: string
+) {
   return value as Id<TableName>
 }

@@ -23,7 +23,7 @@ test("starts new conversation message runs as mentions", async () => {
   expect(inserted(ctx, "conversations")).toEqual([
     expect.objectContaining({
       externalId: "conversation",
-      visibility: "public",
+      scope: "tenant",
     }),
   ])
   expect(inserted(ctx, "sessions")).toEqual([
@@ -116,7 +116,7 @@ function conversationDoc(): Doc<"conversations"> {
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
     externalId: "conversation",
-    visibility: "public",
+    scope: "tenant",
   }
 }
 

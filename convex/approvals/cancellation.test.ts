@@ -115,7 +115,7 @@ function conversation(): Doc<"conversations"> {
     tenantId: "tenant",
     integrationId: id<"integrations">("integration"),
     externalId: "conversation",
-    visibility: "public",
+    scope: "tenant",
   }
 }
 

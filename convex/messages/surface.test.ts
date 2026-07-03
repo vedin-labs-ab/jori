@@ -7,7 +7,7 @@ import {
   messageReplyTargetIdentifier,
 } from "./identifiers"
 import {
-  conversationVisibility,
+  conversationScope,
   messageAudience,
   messageText,
   replyAddress,
@@ -147,32 +147,44 @@ describe("message surface audience", () => {
   })
 })
 
-describe("conversation visibility", () => {
-  test("classifies public and private surfaces", () => {
+describe("conversation scope", () => {
+  test("classifies audience scope per surface", () => {
     expect(
-      conversationVisibility(
+      conversationScope(
         message({ type: "message.channels" }),
         integration({ integration: "slack" })
       )
-    ).toBe("public")
+    ).toBe("tenant")
     expect(
-      conversationVisibility(
+      conversationScope(
         message({ type: "message.groups" }),
         integration({ integration: "slack" })
       )
-    ).toBe("private")
+    ).toBe("conversation")
     expect(
-      conversationVisibility(
+      conversationScope(
+        message({ type: "message.mpim" }),
+        integration({ integration: "slack" })
+      )
+    ).toBe("conversation")
+    expect(
+      conversationScope(
+        message({ type: "message.im" }),
+        integration({ integration: "slack" })
+      )
+    ).toBe("person")
+    expect(
+      conversationScope(
         message({ integration: "github" }),
         integration({ integration: "github" })
       )
-    ).toBe("public")
+    ).toBe("tenant")
     expect(
-      conversationVisibility(
+      conversationScope(
         message({ integration: "gmail" }),
         integration({ integration: "gmail" })
       )
-    ).toBe("private")
+    ).toBe("person")
   })
 })
 

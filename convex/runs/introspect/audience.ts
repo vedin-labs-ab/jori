@@ -1,9 +1,10 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { conversationAudience } from "../../conversations/scope"
+import { type AudienceScope } from "../../shared/audience"
 
 export type RunAudience = {
-  scope: NonNullable<Doc<"runs">["scope"]>
+  scope: AudienceScope
   conversationId?: Id<"conversations">
 }
 
@@ -12,14 +13,9 @@ type RunAudienceInput = {
   parentId?: Id<"runs">
 }
 
-type ConversationOrigin = {
-  conversation: Doc<"conversations">
-  integration: Doc<"integrations">
-}
-
 type RunOrigin = {
   automation?: Doc<"automations">
-  conversation?: ConversationOrigin
+  conversation?: Doc<"conversations">
 }
 
 export async function resolveRunAudience(

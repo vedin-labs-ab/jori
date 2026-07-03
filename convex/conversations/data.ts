@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { conversationVisibility } from "../messages/surface"
+import { conversationScope } from "../messages/surface"
 import { resolveRunAudience } from "../runs/introspect/audience"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { queueRun } from "../runtime/outbox"
@@ -56,7 +56,7 @@ async function insertConversation(
     tenantId: args.integration.tenantId,
     integrationId: args.integration._id,
     externalId: args.externalId,
-    visibility: conversationVisibility(args.message, args.integration),
+    scope: conversationScope(args.message, args.integration),
   })
   const conversation = await ctx.db.get(conversationId)
 
@@ -166,12 +166,7 @@ async function insertRun(
       message: args.message,
     }),
     ...(await resolveRunAudience(ctx, {
-      origin: {
-        conversation: {
-          conversation: args.conversation,
-          integration: args.integration,
-        },
-      },
+      origin: { conversation: args.conversation },
       run: { createdBy: args.createdBy },
     })),
     status: "queued",

@@ -32,7 +32,7 @@ describe("deduction input", () => {
 
     expect(isReadableConversation(conversation)).toBe(true)
     expect(
-      isReadableConversation({ ...conversation, visibility: "private" })
+      isReadableConversation({ ...conversation, scope: "conversation" })
     ).toBe(false)
     expect(
       isReadableConversation({ ...conversation, summary: undefined })
@@ -82,7 +82,7 @@ function conversationDoc(
     tenantId: "tenant",
     integrationId: "integration-1",
     externalId: "C123",
-    visibility: "public",
+    scope: "tenant",
     summary: "#payments: cutover slipping to Jul 20",
     summarizedAt: 5_000,
     ...overrides,

@@ -1,0 +1,189 @@
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { type QueryCtx } from "../../_generated/server"
+import { messageIdentifiers } from "../../messages/identifiers"
+import { type AudienceScope } from "../../shared/audience"
+import {
+  recencyConversationLimit,
+  recencyMessageLimit,
+  recencyWindowMs,
+} from "../limits"
+import { findMessageConversation } from "../resolve"
+import { canIncludeRecentConversation } from "../scope"
+
+export type RecencyRun = {
+  conversationId: Id<"conversations"> | undefined
+  personId: Id<"persons"> | undefined
+  scope: AudienceScope | undefined
+}
+
+export type RecencySummary = {
+  kind: "summary"
+  ageMs: number
+  conversationId: Id<"conversations">
+  identifiers: string[]
+  integration: Doc<"messages">["integration"]
+  summary: string
+}
+
+export type RecencyReference = {
+  kind: "reference"
+  conversationId: Id<"conversations">
+  identifiers: string[]
+  integration: Doc<"messages">["integration"]
+}
+
+export type RecencyEntry = RecencyReference | RecencySummary
+
+// Loads privacy-scoped recent-conversation context for one person within the
+// current run. Both personId and run.personId must be canonical person ids.
+// Conversations listed in args.seen were already summarized earlier in this
+// run and come back as references instead of repeated summaries.
+export async function loadRecentActivity(
+  ctx: QueryCtx,
+  args: {
+    now: number
+    personId: Id<"persons">
+    run: RecencyRun
+    seen: Id<"conversations">[]
+    tenantId: string
+  }
+): Promise<RecencyEntry[]> {
+  const messages = await recentPersonMessages(ctx, args)
+  const seen = new Set(args.seen)
+  const visited = new Set<Id<"conversations">>()
+  const personal = args.personId === args.run.personId
+  const entries: RecencyEntry[] = []
+  let summaries = 0
+
+  for (const message of messages) {
+    const conversation = await findMessageConversation(ctx, message)
+
+    if (!isCandidate(conversation, args, visited)) {
+      continue
+    }
+
+    visited.add(conversation._id)
+
+    const includable = canIncludeRecentConversation({
+      candidateScope: conversation.scope,
+      currentScope: args.run.scope,
+      personal,
+    })
+
+    if (!includable) {
+      continue
+    }
+
+    if (seen.has(conversation._id)) {
+      entries.push(referenceEntry(conversation, message))
+      continue
+    }
+
+    if (summaries < recencyConversationLimit && hasSummary(conversation)) {
+      entries.push(summaryEntry(conversation, message, args.now))
+      summaries += 1
+    }
+  }
+
+  return entries
+}
+
+function isCandidate(
+  conversation: Doc<"conversations"> | null,
+  args: { run: RecencyRun; tenantId: string },
+  visited: Set<Id<"conversations">>
+): conversation is Doc<"conversations"> {
+  return (
+    conversation !== null &&
+    conversation.tenantId === args.tenantId &&
+    conversation._id !== args.run.conversationId &&
+    !visited.has(conversation._id)
+  )
+}
+
+function hasSummary(
+  conversation: Doc<"conversations">
+): conversation is Doc<"conversations"> & {
+  summarizedAt: number
+  summary: string
+} {
+  return (
+    conversation.summary !== undefined &&
+    conversation.summary.trim() !== "" &&
+    conversation.summarizedAt !== undefined
+  )
+}
+
+function summaryEntry(
+  conversation: Doc<"conversations"> & {
+    summarizedAt: number
+    summary: string
+  },
+  message: Doc<"messages">,
+  now: number
+): RecencySummary {
+  return {
+    kind: "summary",
+    ageMs: Math.max(0, now - conversation.summarizedAt),
+    conversationId: conversation._id,
+    identifiers: recencyIdentifiers(conversation, message),
+    integration: message.integration,
+    summary: conversation.summary,
+  }
+}
+
+function referenceEntry(
+  conversation: Doc<"conversations">,
+  message: Doc<"messages">
+): RecencyReference {
+  return {
+    kind: "reference",
+    conversationId: conversation._id,
+    identifiers: recencyIdentifiers(conversation, message),
+    integration: message.integration,
+  }
+}
+
+async function recentPersonMessages(
+  ctx: QueryCtx,
+  args: {
+    now: number
+    personId: Id<"persons">
+    tenantId: string
+  }
+) {
+  return await ctx.db
+    .query("messages")
+    .withIndex("by_tenant_and_person_and_created_at", (query) =>
+      query
+        .eq("tenantId", args.tenantId)
+        .eq("personId", args.personId)
+        .gte("createdAt", args.now - recencyWindowMs)
+    )
+    .order("desc")
+    .take(recencyMessageLimit)
+}
+
+function recencyIdentifiers(
+  conversation: Doc<"conversations">,
+  message: Doc<"messages">
+) {
+  return [
+    `internal:conversation:${conversation._id}`,
+    ...messageIdentifiers(message).filter(isConversationIdentifier),
+  ]
+}
+
+function isConversationIdentifier(identifier: string) {
+  return !messageLevelIdentifierPrefixes.some((prefix) =>
+    identifier.startsWith(prefix)
+  )
+}
+
+const messageLevelIdentifierPrefixes = [
+  "internal:message:",
+  "github:comment:",
+  "linear:comment:",
+  "linear:thread:",
+  "slack:message:",
+]

@@ -5,7 +5,6 @@ import { integrationLabels } from "../../../automations/integrations"
 import { replyAddress } from "../../../messages/surface"
 import { type AgentRuntimeInput, type MessageIntegration } from "../input"
 import { createMessageConversationValues } from "./conversation"
-import { createRecentActivityInstructions } from "./recency"
 import { createMessageTargetValues, formatEvent } from "./target"
 
 export type PromptActiveSurface = {
@@ -17,13 +16,11 @@ export function createContextValues(
   activeSurface: PromptActiveSurface | null
 ): {
   organization: string | null
-  recency: string | null
   run: string
   trigger: string
 } {
   return {
     organization: optionalPromptBlock(createOrganizationInstructions(input)),
-    recency: optionalPromptBlock(createRecentActivityInstructions(input)),
     run: createRunInstructions(input.run._id, activeSurface),
     trigger: promptBlock(createTriggerPart(input)),
   }

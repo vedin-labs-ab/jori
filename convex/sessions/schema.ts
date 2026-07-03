@@ -21,6 +21,13 @@ export const sessions = defineTable({
       reaction: v.optional(reactionSubcursor),
     })
   ),
+  recency: v.optional(
+    v.object({
+      due: v.array(v.id("persons")),
+      done: v.array(v.id("persons")),
+      seen: v.array(v.id("conversations")),
+    })
+  ),
   updatedAt: v.number(),
 })
   .index("by_conversation", ["conversationId"])
