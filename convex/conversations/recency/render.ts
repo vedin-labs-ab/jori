@@ -3,12 +3,12 @@ import { renderPromptTemplate } from "../../../prompts/render"
 import { integrationLabels } from "../../shared/integrations"
 import { type RecencyEntry } from "./load"
 
-export function renderRecentActivity(args: {
+export function renderPersonContext(args: {
   entries: RecencyEntry[]
   name: string
 }) {
-  return renderPromptTemplate(promptTemplates["agent/session/recency"], {
-    recency: {
+  return renderPromptTemplate(promptTemplates["agent/session/person"], {
+    person: {
       items: args.entries.map(recencyItem),
       name: args.name,
     },

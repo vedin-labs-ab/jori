@@ -11,7 +11,8 @@ test("emits the trigger person's bundle on first drain and records state", async
   )
 
   expect(emission?.contexts).toHaveLength(1)
-  expect(emission?.contexts[0]).toContain("# Recent activity — Albin")
+  expect(emission?.contexts[0]).toContain("# Person context")
+  expect(emission?.contexts[0]).toContain("Name: Albin")
   expect(emission?.contexts[0]).toContain("Albin wants a cartoon avatar.")
   expect(emission?.recency).toEqual({
     due: [],
@@ -72,7 +73,7 @@ test("names a batch sender's bundle from their message actor", async () => {
   ])
 
   expect(emission?.contexts).toHaveLength(1)
-  expect(emission?.contexts[0]).toContain("# Recent activity — Sam")
+  expect(emission?.contexts[0]).toContain("Name: Sam")
   expect(emission?.recency.done).toEqual([id<"persons">("other")])
 })
 
