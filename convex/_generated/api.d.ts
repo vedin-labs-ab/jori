@@ -325,6 +325,7 @@ import type * as runs_agent_tools_resolve from "../runs/agent/tools/resolve.js";
 import type * as runs_agent_tools_schemas_artifacts from "../runs/agent/tools/schemas/artifacts.js";
 import type * as runs_agent_tools_schemas_calendar from "../runs/agent/tools/schemas/calendar.js";
 import type * as runs_agent_tools_schemas_common from "../runs/agent/tools/schemas/common.js";
+import type * as runs_agent_tools_schemas_email from "../runs/agent/tools/schemas/email.js";
 import type * as runs_agent_tools_schemas_github from "../runs/agent/tools/schemas/github.js";
 import type * as runs_agent_tools_schemas_google from "../runs/agent/tools/schemas/google.js";
 import type * as runs_agent_tools_schemas_index from "../runs/agent/tools/schemas/index.js";
@@ -736,6 +737,7 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/artifacts": typeof runs_agent_tools_schemas_artifacts;
   "runs/agent/tools/schemas/calendar": typeof runs_agent_tools_schemas_calendar;
   "runs/agent/tools/schemas/common": typeof runs_agent_tools_schemas_common;
+  "runs/agent/tools/schemas/email": typeof runs_agent_tools_schemas_email;
   "runs/agent/tools/schemas/github": typeof runs_agent_tools_schemas_github;
   "runs/agent/tools/schemas/google": typeof runs_agent_tools_schemas_google;
   "runs/agent/tools/schemas/index": typeof runs_agent_tools_schemas_index;
