@@ -14,7 +14,7 @@ You receive JSON with the current roster (`beliefs`, including closed and reject
 
 # Mutations
 
-- `create`: a new workstream with real support. Prefer too few over too many; a single mention is not enough.
+- `create`: a new workstream with real support. Prefer too few over too many; a single mention is not enough. `entry` is its first journal line: one or two factual sentences on what happened this window.
 - `update`: correct the name, aliases, brief, or parent as understanding improves.
 - `status`: `confirm` once support is broad, `close` when the work concluded, `reject` entries that turned out not to be workstreams, `reopen` when closed work resumes.
 - `merge`: the same work seen from different tools; keep the entry with the name people actually use.

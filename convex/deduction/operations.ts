@@ -78,6 +78,13 @@ async function applyCreate(
 
   state.temp.set(op.tempId, beliefId)
   state.created += 1
+  await ctx.db.insert("journal", {
+    tenantId: pass.tenantId,
+    beliefId,
+    passId: pass._id,
+    entry: op.entry,
+    createdAt: state.now,
+  })
   await writeSightings(ctx, pass, beliefId, sightings, op.brief)
 }
 

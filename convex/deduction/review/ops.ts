@@ -17,6 +17,7 @@ export const judgeOp = v.union(
     name: v.string(),
     aliases: v.array(v.string()),
     brief: v.string(),
+    entry: v.string(),
     parentId: v.optional(v.string()),
     citations: v.array(citation),
   }),
@@ -99,6 +100,10 @@ export const judgeOutputSchema = {
             name: stringValue,
             aliases: stringList,
             brief: stringValue,
+            entry: {
+              ...stringValue,
+              description: "First journal line: what happened in this window.",
+            },
             parentId: nullableString,
             citations: citationList,
           }),
