@@ -150,7 +150,7 @@ function useExecutionPageData({
 
   return {
     normalizedQuery,
-    rows: (runs.results ?? []) as ExecutionItem[],
+    rows: runs.results ?? [],
     runs,
     stats,
   }

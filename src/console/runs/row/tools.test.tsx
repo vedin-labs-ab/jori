@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, beforeAll, expect, test, vi } from "vitest"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { type ExecutionItem } from "../types"
-import { ExecutionRow } from "./index"
+import { makeExecution, renderExecutionRow } from "../fixtures"
 
 vi.mock("convex/react", () => ({
   useQuery: () => ({ items: [], status: "loaded" }),
@@ -22,15 +20,7 @@ afterEach(() => {
 })
 
 test("marks approval-required tools in message run details", async () => {
-  render(
-    <TooltipProvider>
-      <ExecutionRow
-        execution={executionWithApprovalTool()}
-        now={1700000001000}
-        tenantId="tenant"
-      />
-    </TooltipProvider>
-  )
+  renderExecutionRow(executionWithApprovalTool())
 
   fireEvent.click(screen.getByRole("button", { name: /create a notion page/i }))
 
@@ -54,15 +44,7 @@ test("marks approval-required tools in message run details", async () => {
 })
 
 test("omits empty access counts in message run details", async () => {
-  render(
-    <TooltipProvider>
-      <ExecutionRow
-        execution={executionWithSingleAccessToolGroups()}
-        now={1700000001000}
-        tenantId="tenant"
-      />
-    </TooltipProvider>
-  )
+  renderExecutionRow(executionWithSingleAccessToolGroups())
 
   fireEvent.click(screen.getByRole("button", { name: /review tool access/i }))
 
@@ -79,15 +61,7 @@ test("omits empty access counts in message run details", async () => {
 })
 
 test("renders singular label for one tool in message run details", async () => {
-  render(
-    <TooltipProvider>
-      <ExecutionRow
-        execution={executionWithSingleTool()}
-        now={1700000001000}
-        tenantId="tenant"
-      />
-    </TooltipProvider>
-  )
+  renderExecutionRow(executionWithSingleTool())
 
   fireEvent.click(screen.getByRole("button", { name: /read a github issue/i }))
 
@@ -98,11 +72,8 @@ test("renders singular label for one tool in message run details", async () => {
   expect(screen.queryByText("1")).toBeNull()
 })
 
-function executionWithApprovalTool(): ExecutionItem {
-  return {
-    approval: null,
-    approvals: [],
-    createdAt: 1700000000000,
+function executionWithApprovalTool() {
+  return makeExecution({
     details: [
       {
         type: "tools",
@@ -116,28 +87,15 @@ function executionWithApprovalTool(): ExecutionItem {
         ],
       },
     ],
-    durationMs: 1000,
-    endedAt: 1700000001000,
-    id: "execution",
-    offer: null,
-    offers: [],
-    searchableText: "",
-    source: {
-      type: "message",
-      surface: "slack",
-    },
-    status: "completed",
+    source: { type: "message", surface: "slack" },
     task: "Create a Notion page.",
     title: "Create a Notion page.",
     trigger: "Slack message",
-  }
+  })
 }
 
-function executionWithSingleTool(): ExecutionItem {
-  return {
-    approval: null,
-    approvals: [],
-    createdAt: 1700000000000,
+function executionWithSingleTool() {
+  return makeExecution({
     details: [
       {
         type: "tools",
@@ -146,40 +104,20 @@ function executionWithSingleTool(): ExecutionItem {
           {
             type: "github",
             label: "GitHub",
-            tools: [
-              {
-                access: "read" as const,
-                description: "Read GitHub issues.",
-                label: "Read issue",
-                tool: "github_get_issue",
-              },
-            ],
+            tools: [readIssueTool()],
           },
         ],
       },
     ],
-    durationMs: 1000,
-    endedAt: 1700000001000,
-    id: "execution",
-    offer: null,
-    offers: [],
-    searchableText: "",
-    source: {
-      type: "message",
-      surface: "github",
-    },
-    status: "completed",
+    source: { type: "message", surface: "github" },
     task: "Read a GitHub issue.",
     title: "Read a GitHub issue.",
     trigger: "GitHub issue",
-  }
+  })
 }
 
-function executionWithSingleAccessToolGroups(): ExecutionItem {
-  return {
-    approval: null,
-    approvals: [],
-    createdAt: 1700000000000,
+function executionWithSingleAccessToolGroups() {
+  return makeExecution({
     details: [
       {
         type: "tools",
@@ -188,14 +126,7 @@ function executionWithSingleAccessToolGroups(): ExecutionItem {
           {
             type: "github",
             label: "GitHub",
-            tools: [
-              {
-                access: "read" as const,
-                description: "Read GitHub issues.",
-                label: "Read issue",
-                tool: "github_get_issue",
-              },
-            ],
+            tools: [readIssueTool()],
           },
           {
             type: "slack",
@@ -212,20 +143,19 @@ function executionWithSingleAccessToolGroups(): ExecutionItem {
         ],
       },
     ],
-    durationMs: 1000,
-    endedAt: 1700000001000,
-    id: "execution",
-    offer: null,
-    offers: [],
-    searchableText: "",
-    source: {
-      type: "message",
-      surface: "slack",
-    },
-    status: "completed",
+    source: { type: "message", surface: "slack" },
     task: "Review tool access.",
     title: "Review tool access.",
     trigger: "Slack message",
+  })
+}
+
+function readIssueTool() {
+  return {
+    access: "read" as const,
+    description: "Read GitHub issues.",
+    label: "Read issue",
+    tool: "github_get_issue",
   }
 }
 

@@ -1,5 +1,5 @@
-import { type Doc } from "../../_generated/dataModel"
-import { getNextCronRunAt } from "./cron"
+import { getNextCronRunAt } from "../../contracts/automations/schedule/cron"
+import { type Doc } from "../_generated/dataModel"
 
 export type TimeTriggerInput =
   | { type: "once"; at: string }

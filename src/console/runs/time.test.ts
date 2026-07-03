@@ -1,25 +1,19 @@
 import { describe, expect, test } from "vitest"
+import { makeApproval, makeExecution, makeOffer } from "./fixtures"
 import { displayNowForRun, runClockInterval } from "./time"
 import { type ExecutionItem } from "./types"
 
-const baseRun: ExecutionItem = {
-  approval: null,
-  approvals: [],
+const baseRun = makeExecution({
   createdAt: 1700000000123,
-  details: [],
   durationMs: 1200,
   endedAt: 1700000001323,
-  id: "run-1",
-  offer: null,
-  offers: [],
+  id: "run-1" as ExecutionItem["id"],
   searchableText: "completed run",
   source: { type: "manual" },
-  status: "completed",
   task: "Completed run",
   title: "Completed run",
   trigger: "Manual",
-  waiter: null,
-}
+})
 
 describe("run clock timing", () => {
   test("uses a minute interval for settled runs", () => {
@@ -36,18 +30,14 @@ describe("run clock timing", () => {
   })
 
   test("uses a second interval while a pending approval is live", () => {
-    const approval = {
+    const approval = makeApproval({
       decidedAt: undefined,
-      delivery: undefined,
       expiresAt: 1700000066000,
-      id: "approval-1",
-      surface: "slack",
-      source: undefined,
-      state: "pending" as const,
+      state: "pending",
       summary: "Approve this run",
       tool: "slack.postMessage",
       toolLabel: "Post Slack message",
-    }
+    })
 
     expect(
       runClockInterval(
@@ -71,7 +61,7 @@ describe("run clock timing", () => {
             ...baseRun,
             waiter: {
               expiresAt: 1700001800000,
-              id: "waiter-1",
+              id: "waiter-1" as NonNullable<ExecutionItem["waiter"]>["id"],
               state: "waiting",
             },
           },
@@ -87,15 +77,11 @@ describe("run clock timing", () => {
 })
 
 test("uses a second interval while a pending offer is live", () => {
-  const offer = {
+  const offer = makeOffer({
     expiresAt: 1700000066000,
-    id: "offer-1",
-    integration: "notion" as const,
-    integrationLabel: "Notion",
-    state: "pending" as const,
     summary: "Connect Notion so Milo can continue.",
     updatedAt: 1700000000000,
-  }
+  })
 
   expect(
     runClockInterval(

@@ -1,7 +1,9 @@
+import { classifyCron as classifyCronExpression } from "@contracts/automations/schedule/classify"
 import {
   getNextCronRunAt,
   validateCronExpression,
 } from "@contracts/automations/schedule/cron"
+import { ordinal } from "@contracts/automations/schedule/labels"
 import { readErrorMessage } from "../shared/error"
 import { type AutomationFormValues, emptyAutomationForm } from "./types"
 
@@ -43,38 +45,23 @@ export function classifyCron(cron: string | undefined): CronParts {
   }
 
   const custom: CronParts = { ...defaultParts, cron: trimmed, repeat: "custom" }
-  const fields = trimmed.split(/\s+/)
+  const classified = classifyCronExpression(trimmed)
 
-  if (fields.length !== 5) {
+  if (classified === null) {
     return custom
   }
 
-  const [minute, hour, dayOfMonth, month, dayOfWeek] = fields
-  const time = readTime(minute, hour)
-
-  if (time === null || month !== "*") {
-    return custom
+  return {
+    ...custom,
+    repeat: classified.repeat,
+    time: classified.time,
+    ...(classified.dayOfWeek === undefined
+      ? {}
+      : { weekday: classified.dayOfWeek }),
+    ...(classified.dayOfMonth === undefined
+      ? {}
+      : { monthDay: classified.dayOfMonth }),
   }
-
-  if (dayOfMonth === "*" && dayOfWeek === "*") {
-    return { ...custom, repeat: "daily", time }
-  }
-
-  if (dayOfMonth === "*" && dayOfWeek === "1-5") {
-    return { ...custom, repeat: "weekdays", time }
-  }
-
-  const weekday = readWeekday(dayOfWeek)
-
-  if (dayOfMonth === "*" && weekday !== null) {
-    return { ...custom, repeat: "weekly", time, weekday }
-  }
-
-  if (dayOfWeek === "*" && isMonthDay(dayOfMonth)) {
-    return { ...custom, monthDay: dayOfMonth, repeat: "monthly", time }
-  }
-
-  return custom
 }
 
 export function composeCron(parts: CronParts) {
@@ -151,21 +138,6 @@ export function getCrontabGuruUrl(cron: string) {
     : `https://crontab.guru/#${encodeURI(expression)}`
 }
 
-function readTime(minute: string, hour: string) {
-  if (!(isInteger(minute) && isInteger(hour))) {
-    return null
-  }
-
-  const minuteValue = Number(minute)
-  const hourValue = Number(hour)
-
-  if (minuteValue > 59 || hourValue > 23) {
-    return null
-  }
-
-  return `${pad(hourValue)}:${pad(minuteValue)}`
-}
-
 function parseTime(time: string) {
   const match = /^(\d{2}):(\d{2})$/.exec(time)
 
@@ -174,46 +146,4 @@ function parseTime(time: string) {
   }
 
   return { hour: Number(match[1]), minute: Number(match[2]) }
-}
-
-function readWeekday(dayOfWeek: string) {
-  if (!isInteger(dayOfWeek) || Number(dayOfWeek) > 7) {
-    return null
-  }
-
-  return dayOfWeek === "7" ? "0" : dayOfWeek
-}
-
-function isMonthDay(dayOfMonth: string) {
-  if (!isInteger(dayOfMonth)) {
-    return false
-  }
-
-  const value = Number(dayOfMonth)
-
-  return value >= 1 && value <= 31
-}
-
-function isInteger(value: string) {
-  return /^\d{1,2}$/.test(value)
-}
-
-function pad(value: number) {
-  return String(value).padStart(2, "0")
-}
-
-function ordinal(value: number) {
-  const remainder = value % 10
-  const suffix =
-    value >= 11 && value <= 13
-      ? "th"
-      : remainder === 1
-        ? "st"
-        : remainder === 2
-          ? "nd"
-          : remainder === 3
-            ? "rd"
-            : "th"
-
-  return `${value}${suffix}`
 }

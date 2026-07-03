@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, beforeAll, describe, expect, test, vi } from "vitest"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { type ExecutionItem } from "../types"
-import { ExecutionRow } from "./index"
+import {
+  makeApproval,
+  makeExecution,
+  renderExecutionRow,
+  slackTools,
+} from "../fixtures"
 
 vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),
@@ -25,7 +28,7 @@ afterEach(() => {
 describe("execution row task details", () => {
   test("renders the execution task", async () => {
     renderExecutionRow(
-      execution({
+      makeExecution({
         task: "Summarize the Notion launch plan.",
         title: "Notion test",
       })
@@ -42,7 +45,7 @@ describe("execution row task details", () => {
 
   test("does not render the title as the task", async () => {
     renderExecutionRow(
-      execution({
+      makeExecution({
         task: "Use the Notion page context to update the team.",
         title: "Notion test",
       })
@@ -64,7 +67,7 @@ describe("execution row task details", () => {
 describe("execution row message details", () => {
   test("renders message run task source without duplicate message detail", async () => {
     renderExecutionRow(
-      execution({
+      makeExecution({
         task: "Please summarize this thread.",
         title: "Please summarize this thread.",
         source: {
@@ -116,22 +119,14 @@ describe("execution row message details", () => {
 describe("execution row approval details", () => {
   test("does not render the approval request source link", async () => {
     renderExecutionRow(
-      execution({
-        approval: {
-          decidedAt: 1700000001000,
-          expiresAt: 1700001800000,
-          id: "approval",
-          surface: "slack",
+      makeExecution({
+        approval: makeApproval({
           source: {
             label: "Request message",
-            surface: "slack",
+            integration: "slack",
             url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123",
           },
-          state: "approved",
-          summary: "Send the requested Slack update.",
-          tool: "conversations_add_message",
-          toolLabel: "Send Slack message",
-        },
+        }),
         task: "Send a Slack update.",
         title: "Approval test",
       })
@@ -150,7 +145,7 @@ describe("execution row approval details", () => {
 describe("execution row linked details", () => {
   test("renders execution details with links", async () => {
     renderExecutionRow(
-      execution({
+      makeExecution({
         task: "Review the issue comment.",
         title: "GitHub test",
         details: [
@@ -197,7 +192,7 @@ describe("execution row linked details", () => {
 describe("execution row pull request details", () => {
   test("renders pull request details as a plain linked fact", async () => {
     renderExecutionRow(
-      execution({
+      makeExecution({
         task: "Review the pull request comment.",
         title: "GitHub PR test",
         details: [
@@ -227,56 +222,3 @@ describe("execution row pull request details", () => {
   })
 })
 
-function renderExecutionRow(item: ExecutionItem) {
-  return render(
-    <TooltipProvider>
-      <ExecutionRow execution={item} now={1700000001000} tenantId="tenant" />
-    </TooltipProvider>
-  )
-}
-
-function execution(
-  overrides: Pick<ExecutionItem, "task" | "title"> &
-    Partial<Pick<ExecutionItem, "approval" | "details" | "offer" | "source">>
-): ExecutionItem {
-  const approval = overrides.approval ?? null
-  const offer = overrides.offer ?? null
-
-  return {
-    approval,
-    approvals: approval === null ? [] : [approval],
-    createdAt: 1700000000000,
-    details: overrides.details ?? [],
-    durationMs: 1000,
-    endedAt: 1700000001000,
-    id: "execution",
-    offer,
-    offers: offer === null ? [] : [offer],
-    searchableText: "",
-    source: overrides.source ?? {
-      type: "automation",
-      surface: "slack",
-    },
-    status: "completed",
-    task: overrides.task,
-    title: overrides.title,
-    trigger: "Slack event",
-  }
-}
-
-function slackTools() {
-  return [
-    {
-      access: "write" as const,
-      description: "Post a Slack message.",
-      label: "Send message",
-      tool: "conversations_add_message",
-    },
-    {
-      access: "read" as const,
-      description: "Read Slack channel messages.",
-      label: "Read channel history",
-      tool: "conversations_history",
-    },
-  ]
-}

@@ -1,4 +1,5 @@
-import { type Integration } from "@contracts/integrations"
+import { type FunctionReturnType } from "convex/server"
+import { api } from "../../../convex/_generated/api"
 
 export const pageSize = 25
 
@@ -25,141 +26,20 @@ export const approvalFilterLabels = Object.fromEntries(
 
 export type RunFilter = (typeof runFilterOptions)[number]["value"]
 export type ApprovalFilter = (typeof approvalFilterOptions)[number]["value"]
-export type ExecutionStatus =
-  | "queued"
-  | "running"
-  | "completed"
-  | "failed"
-  | "stopped"
-export type ApprovalState =
-  | "pending"
-  | "approved"
-  | "denied"
-  | "cancelled"
-  | "expired"
-  | "failed"
-export type OfferState =
-  | "pending"
-  | "claimed"
-  | "cancelled"
-  | "connected"
-  | "expired"
-  | "failed"
 
-export type SourceDatum = {
-  type: string
-  label: string
-  url?: string
-}
+export type ExecutionItem = FunctionReturnType<
+  typeof api.runs.console.page
+>["page"][number]
 
-export type ExecutionSource = {
-  type: "automation" | "event" | "manual" | "message"
-  event?: SourceDatum
-  kind?: SourceDatum
-  surface?: string
-  stop?: {
-    actor: SourceDatum
-  }
-  url?: string
-}
-
-export type ExecutionDetailType =
-  | "calendar_event"
-  | "channel"
-  | "comment"
-  | "decision"
-  | "email"
-  | "file"
-  | "folder"
-  | "issue"
-  | "message"
-  | "next"
-  | "page"
-  | "project"
-  | "pull_request"
-  | "repository"
-  | "schedule"
-  | "sender"
-  | "status"
-  | "stopped"
-  | "subject"
-  | "tools"
-  | "web_search"
-
-export type ExecutionDetailGroup = {
-  type: string
-  label: string
-  tools: ExecutionDetailTool[]
-}
-
-export type ExecutionDetailTool = {
-  access: "read" | "write"
-  description: string
-  label: string
-  requiresApproval?: boolean
-  tool: string
-}
-
-export type ExecutionDetail = {
-  type: ExecutionDetailType
-  label: string
-  url?: string
-  timestamp?: number
-  groups?: ExecutionDetailGroup[]
-}
-
-export type ExecutionApproval = {
-  id: string
-  state: ApprovalState
-  tool: string
-  toolLabel: string
-  summary: string
-  surface: string
-  expiresAt: number
-  decidedAt?: number
-  delivery?: string
-  source?: {
-    label: string
-    surface?: string
-    url?: string
-  }
-}
-
-export type ExecutionOffer = {
-  id: string
-  state: OfferState
-  integration: Integration
-  integrationLabel: string
-  summary: string
-  expiresAt: number
-  updatedAt: number
-  delivery?: string
-  result?: {
-    error?: string
-    reason?: string
-  }
-}
-
-export type ExecutionItem = {
-  id: string
-  status: ExecutionStatus
-  title: string
-  source: ExecutionSource
-  task: string
-  trigger: string
-  createdAt: number
-  details: ExecutionDetail[]
-  endedAt?: number
-  durationMs?: number
-  error?: string
-  approval: ExecutionApproval | null
-  approvals: ExecutionApproval[]
-  offer: ExecutionOffer | null
-  offers: ExecutionOffer[]
-  waiter?: {
-    id: string
-    state: "waiting"
-    expiresAt: number
-  } | null
-  searchableText: string
-}
+export type ExecutionStatus = ExecutionItem["status"]
+export type ExecutionSource = ExecutionItem["source"]
+export type SourceDatum = NonNullable<ExecutionSource["kind"]>
+export type ExecutionDetail = ExecutionItem["details"][number]
+export type ExecutionDetailType = ExecutionDetail["type"]
+export type ExecutionDetailTool = NonNullable<
+  ExecutionDetail["groups"]
+>[number]["tools"][number]
+export type ExecutionApproval = ExecutionItem["approvals"][number]
+export type ApprovalState = ExecutionApproval["state"]
+export type ExecutionOffer = ExecutionItem["offers"][number]
+export type OfferState = ExecutionOffer["state"]
