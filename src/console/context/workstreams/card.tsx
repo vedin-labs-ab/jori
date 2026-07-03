@@ -6,7 +6,8 @@ import { IntegrationLogo } from "../../shared/logo/integration"
 import { relativeTime } from "../../shared/time"
 import { statusVariants, type Workstream } from "./types"
 
-// The whole card opens the detail sheet; every correction lives there.
+// The whole card opens the detail sheet; every correction lives there. The
+// chevron keeps its own column as the disclosure affordance.
 export function WorkstreamCard({
   workstream,
   onOpen,
@@ -19,33 +20,43 @@ export function WorkstreamCard({
       <button
         type="button"
         onClick={onOpen}
-        className="flex w-full flex-col gap-2 p-4 text-left"
+        className="flex w-full items-center gap-3 p-4 text-left"
       >
-        <div className="flex w-full items-center gap-2">
-          <span className="font-medium text-sm">{workstream.name}</span>
-          <Badge variant={statusVariants[workstream.status]}>
-            {workstream.statusLabel}
-          </Badge>
-          {workstream.locked ? (
-            <Lock
-              aria-label="Protected"
-              className="size-3 text-muted-foreground"
-            />
-          ) : null}
-          <ChevronRight className="ml-auto size-4 shrink-0 text-muted-foreground" />
-        </div>
-        <p className="text-muted-foreground text-sm">{workstream.brief}</p>
-        <div className="flex w-full flex-wrap items-center gap-2">
-          {workstream.sources.map((source) => (
-            <Badge key={source} variant="outline">
-              <IntegrationLogo decorative integration={source} />
-              {integrationLabel(source)}
+        <div className="flex min-w-0 grow flex-col gap-2">
+          <div className="flex w-full items-center gap-2">
+            <span className="truncate font-medium text-sm">
+              {workstream.name}
+            </span>
+            <Badge variant={statusVariants[workstream.status]}>
+              {workstream.statusLabel}
             </Badge>
-          ))}
-          <span className="ml-auto text-muted-foreground text-xs">
-            seen {relativeTime(workstream.seenAt, Date.now())}
-          </span>
+            {workstream.locked ? (
+              <Lock
+                aria-label="Protected"
+                className="size-3 shrink-0 text-muted-foreground"
+              />
+            ) : null}
+          </div>
+          <p className="line-clamp-2 text-muted-foreground text-sm">
+            {workstream.brief}
+          </p>
+          <div className="flex w-full flex-wrap items-center gap-2">
+            {workstream.sources.map((source) => (
+              <Badge key={source} variant="outline">
+                <IntegrationLogo
+                  className="size-3"
+                  decorative
+                  integration={source}
+                />
+                {integrationLabel(source)}
+              </Badge>
+            ))}
+            <span className="ml-auto text-muted-foreground text-xs">
+              seen {relativeTime(workstream.seenAt, Date.now())}
+            </span>
+          </div>
         </div>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
       </button>
     </Card>
   )
