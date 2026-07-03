@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
 import { getActorDisplayName } from "../shared/actor"
+import { eventAnchor } from "./anchors"
 import {
   maxWindowConversations,
   maxWindowEvents,
@@ -26,6 +27,7 @@ export type RosterEntry = {
   status: BeliefStatus
   brief: string
   parentId?: Id<"beliefs">
+  anchors: string[]
   seenAt: number
   locked: boolean
   journal: string[]
@@ -37,6 +39,7 @@ export type WindowEvent = {
   type: string
   text?: string
   actor?: string
+  anchor?: string
   observedAt: number
 }
 
@@ -97,6 +100,7 @@ async function readRosterEntry(
     status: row.status,
     brief: row.brief,
     parentId: row.parentId,
+    anchors: row.anchors ?? [],
     seenAt: row.seenAt,
     locked: row.lockedBy !== undefined,
     journal: entries.map((entry) => journalLine(entry)),
@@ -136,6 +140,7 @@ export function readWindowEvent(row: Doc<"events">): WindowEvent {
     type: row.type,
     text: row.text,
     actor: getActorDisplayName(row.actor),
+    anchor: eventAnchor(row),
     observedAt: row.observedAt ?? row._creationTime,
   }
 }

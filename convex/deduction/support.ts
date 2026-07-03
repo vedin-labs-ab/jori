@@ -1,5 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { eventAnchor } from "./anchors"
+import { maxBeliefAnchors } from "./limits"
 import { type Sighting, type SourceRecord } from "./rules"
 
 // Resolve a wire id to a live belief of the pass's tenant and kind: temp ids
@@ -36,7 +38,15 @@ export async function writeSightings(
   sightings: Sighting[],
   fallbackWhy: string
 ) {
+  const anchors = new Set<string>()
+
   for (const sighting of sightings) {
+    const anchor = await sightingAnchor(ctx, sighting)
+
+    if (anchor !== undefined) {
+      anchors.add(anchor)
+    }
+
     await ctx.db.insert("evidence", {
       tenantId: pass.tenantId,
       beliefId,
@@ -47,7 +57,17 @@ export async function writeSightings(
     })
   }
 
-  await bumpSeenAt(ctx, beliefId, sightings)
+  await bumpBelief(ctx, beliefId, sightings, anchors)
+}
+
+async function sightingAnchor(ctx: MutationCtx, sighting: Sighting) {
+  if (!("event" in sighting.citation)) {
+    return undefined
+  }
+
+  const event = await ctx.db.get(sighting.citation.event as Id<"events">)
+
+  return event === null ? undefined : eventAnchor(event)
 }
 
 function toReference(sighting: Sighting) {
@@ -65,21 +85,31 @@ function toReference(sighting: Sighting) {
   }
 }
 
-async function bumpSeenAt(
+async function bumpBelief(
   ctx: MutationCtx,
   beliefId: Id<"beliefs">,
-  sightings: Sighting[]
+  sightings: Sighting[],
+  anchors: Set<string>
 ) {
   if (sightings.length === 0) {
     return
   }
 
   const belief = await ctx.db.get(beliefId)
-  const latest = Math.max(...sightings.map((sighting) => sighting.observedAt))
 
-  if (belief !== null && latest > belief.seenAt) {
-    await ctx.db.patch(beliefId, { seenAt: latest })
+  if (belief === null) {
+    return
   }
+
+  const latest = Math.max(...sightings.map((sighting) => sighting.observedAt))
+  const merged = [...new Set([...(belief.anchors ?? []), ...anchors])]
+    .sort()
+    .slice(0, maxBeliefAnchors)
+
+  await ctx.db.patch(beliefId, {
+    seenAt: Math.max(belief.seenAt, latest),
+    anchors: merged,
+  })
 }
 
 // Confirmation thresholds count all accumulated support: existing evidence

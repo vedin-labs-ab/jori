@@ -69,6 +69,7 @@ async function applyCreate(
     name: op.name,
     aliases: op.aliases,
     status: "proposed",
+    anchors: [],
     brief: op.brief,
     parentId: parent?._id,
     seenAt: maxObservedAt(sightings),

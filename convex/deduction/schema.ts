@@ -27,6 +27,9 @@ const beliefFields = {
   status: beliefStatus,
   supersededBy: v.optional(v.id("beliefs")),
   lockedBy: v.optional(actorValidator),
+  // Container tokens accumulated from cited evidence (see anchors.ts);
+  // applier-derived, never judge-supplied. Optional only for pre-anchor rows.
+  anchors: v.optional(v.array(v.string())),
   seenAt: v.number(), // latest supporting sighting; applier-derived, never judge-supplied
   createdAt: v.number(),
   updatedAt: v.number(),
