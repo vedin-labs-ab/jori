@@ -7,7 +7,7 @@ import {
   normalizeAutomationEventMatch,
 } from "../events"
 import { resolveEventIntegration } from "../integrations"
-import { getTimeTrigger, getTimeTriggerAt } from "../schedule/timing"
+import { getTimeTrigger, getTimeTriggerAt } from "../timing"
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
 
 export async function resolveTrigger(

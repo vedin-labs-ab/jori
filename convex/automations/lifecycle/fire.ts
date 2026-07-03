@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { getTimeTriggerAt } from "../schedule/timing"
+import { getTimeTriggerAt } from "../timing"
 import { createAutomationRun } from "./run"
 import { scheduleNextCronAutomation } from "./trigger"
 

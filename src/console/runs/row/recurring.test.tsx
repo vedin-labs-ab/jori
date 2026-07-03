@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, beforeAll, expect, test, vi } from "vitest"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { type ExecutionItem } from "../types"
-import { ExecutionRow } from "./index"
+import { makeExecution, renderExecutionRow, slackTools } from "../fixtures"
 
 vi.mock("convex/react", () => ({
   useQuery: () => ({ items: [], status: "loaded" }),
@@ -23,7 +21,8 @@ afterEach(() => {
 
 test("renders recurring automation details", async () => {
   renderExecutionRow(
-    execution({
+    makeExecution({
+      trigger: "Time automation",
       task: "Generate a team image.",
       title: "Daily image",
       source: {
@@ -69,53 +68,3 @@ test("renders recurring automation details", async () => {
   expect(screen.getByText("Web search")).toBeDefined()
   expect(screen.getByText("Allowed")).toBeDefined()
 })
-
-function renderExecutionRow(item: ExecutionItem) {
-  return render(
-    <TooltipProvider>
-      <ExecutionRow execution={item} now={1700000001000} tenantId="tenant" />
-    </TooltipProvider>
-  )
-}
-
-function execution(
-  overrides: Pick<ExecutionItem, "task" | "title"> &
-    Partial<Pick<ExecutionItem, "details" | "source">>
-): ExecutionItem {
-  return {
-    approval: null,
-    approvals: [],
-    createdAt: 1700000000000,
-    details: overrides.details ?? [],
-    durationMs: 1000,
-    endedAt: 1700000001000,
-    id: "execution",
-    offer: null,
-    offers: [],
-    searchableText: "",
-    source: overrides.source ?? {
-      type: "automation",
-    },
-    status: "completed",
-    task: overrides.task,
-    title: overrides.title,
-    trigger: "Time automation",
-  }
-}
-
-function slackTools() {
-  return [
-    {
-      access: "write" as const,
-      description: "Post a Slack message.",
-      label: "Send message",
-      tool: "conversations_add_message",
-    },
-    {
-      access: "read" as const,
-      description: "Read Slack channel messages.",
-      label: "Read channel history",
-      tool: "conversations_history",
-    },
-  ]
-}

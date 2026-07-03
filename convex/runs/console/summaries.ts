@@ -47,9 +47,9 @@ export async function summarizeRun(
     endedAt: run.endedAt,
     durationMs: getDuration(run),
     error: run.error,
-    approval: approvals[0] ?? null,
+    approval: approvals.at(0) ?? null,
     approvals,
-    offer: offers[0] ?? null,
+    offer: offers.at(0) ?? null,
     offers,
     waiter:
       context.activeWaiter === null
