@@ -9,17 +9,16 @@ import { getPromptedTools, toolExecutionType } from "../runs/agent/tools/policy"
 import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
 import { toolSnapshot } from "../runs/schema"
 import { type RuntimeSkill, runtimeSkillNames } from "../skills/runtime"
-import { runLifecycleToolSnapshot } from "./lifecycle/snapshot"
-import { runLifecycleTools } from "./lifecycle/tools"
+import { runLifecycleTools } from "./lifecycle"
 import {
   type RuntimePermissions,
   runtimePermissions,
 } from "./permissions/index"
-import { sandboxToolSnapshot, sandboxTools } from "./sandbox"
+import { visibleNativeToolSnapshots } from "./permissions/native"
+import { sandboxTools } from "./sandbox"
 import { syncSessionReactions } from "./sessions"
 import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
-import { activeSurfaceToolSnapshot } from "./surface/tools"
 import { recordTrace } from "./traces/data"
 
 export const load = action({
@@ -170,10 +169,10 @@ function runtimeToolSnapshot(
   permissions: RuntimePermissions
 ) {
   return createRunToolSnapshot({
-    activeSurfaceTools: activeSurfaceToolSnapshot(activeSurface.tools),
+    activeSurfaceTools: visibleNativeToolSnapshots(activeSurface.tools),
     capabilities: permissions.capabilities,
-    lifecycleTools: runLifecycleToolSnapshot(lifecycleTools),
-    sandboxTools: sandboxToolSnapshot(),
+    lifecycleTools: visibleNativeToolSnapshots(lifecycleTools),
+    sandboxTools: visibleNativeToolSnapshots(sandboxTools),
     webSearch: input.type !== "automation" || input.automation.access.web,
   })
 }

@@ -11,7 +11,7 @@ import {
   findSandboxByExternalId,
   findSessionByRun,
   isTerminalRun,
-} from "./sandbox_lookup"
+} from "./sandbox"
 import { requireWorkerSecret } from "./shared"
 
 const idleSandboxLeaseMs = 5 * 60 * 1000

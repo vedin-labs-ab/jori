@@ -3,12 +3,10 @@ import {
   codingToolDefinitions,
 } from "../../contracts/coding"
 import { type ToolAccess } from "../../contracts/permissions"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { withOptionalFieldGuidance } from "../runs/agent/tools/schemas"
-import { type RunToolSnapshotTool } from "../runs/agent/tools/snapshot"
-import {
-  nativeToolUsage,
-  visibleNativeToolSnapshot,
-} from "./permissions/native"
+import { nativeToolUsage } from "./permissions/native"
 
 export const sandboxTools = [
   ...codingToolDefinitions.map((tool) => ({
@@ -47,14 +45,35 @@ function codingToolAccess(name: CodingToolName): ToolAccess {
   }
 }
 
-export function sandboxToolSnapshot(): RunToolSnapshotTool[] {
-  return sandboxTools.flatMap((tool) => {
-    const snapshot = visibleNativeToolSnapshot({
-      access: tool.access,
-      route: tool.route,
-      tool: tool.name,
-    })
+type QueryLikeCtx = MutationCtx | QueryCtx
 
-    return snapshot === undefined ? [] : [snapshot]
-  })
+export async function findActiveSandbox(ctx: QueryLikeCtx, runId: Id<"runs">) {
+  return await ctx.db
+    .query("sandboxes")
+    .withIndex("by_run_and_status", (query) =>
+      query.eq("runId", runId).eq("status", "active")
+    )
+    .order("desc")
+    .first()
+}
+
+export async function findSandboxByExternalId(
+  ctx: QueryLikeCtx,
+  externalId: string
+) {
+  return await ctx.db
+    .query("sandboxes")
+    .withIndex("by_external_id", (query) => query.eq("externalId", externalId))
+    .first()
+}
+
+export async function findSessionByRun(ctx: MutationCtx, runId: Id<"runs">) {
+  return await ctx.db
+    .query("sessions")
+    .withIndex("by_run", (query) => query.eq("runId", runId))
+    .first()
+}
+
+export function isTerminalRun(run: Doc<"runs">) {
+  return ["completed", "failed", "stopped"].includes(run.status)
 }

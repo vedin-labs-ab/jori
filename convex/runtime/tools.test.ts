@@ -4,10 +4,10 @@ import {
   optionalFieldGuidance,
   schemaHasOptionalFields,
 } from "../runs/agent/tools/schemas"
-import { runLifecycleToolSnapshot } from "./lifecycle/snapshot"
-import { runLifecycleTools } from "./lifecycle/tools"
-import { sandboxToolSnapshot, sandboxTools } from "./sandbox"
-import { activeSurfaceToolSnapshot, activeSurfaceTools } from "./surface/tools"
+import { runLifecycleTools } from "./lifecycle"
+import { visibleNativeToolSnapshots } from "./permissions/native"
+import { sandboxTools } from "./sandbox"
+import { activeSurfaceTools } from "./surface/tools"
 
 test("runtime tool schemas with optional fields share omission guidance", () => {
   const tools = [
@@ -45,9 +45,9 @@ test("native runtime tools use catalog usage for agents and descriptions for use
   }
 
   const snapshots = [
-    ...runLifecycleToolSnapshot(runLifecycleTools()),
-    ...activeSurfaceToolSnapshot(activeSurfaceTools("slack")),
-    ...sandboxToolSnapshot(),
+    ...visibleNativeToolSnapshots(runLifecycleTools()),
+    ...visibleNativeToolSnapshots(activeSurfaceTools("slack")),
+    ...visibleNativeToolSnapshots(sandboxTools),
   ]
   const snapshotTools = snapshots.map((snapshot) => snapshot.tool)
 

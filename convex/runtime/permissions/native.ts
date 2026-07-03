@@ -37,6 +37,24 @@ export function visibleNativeToolSnapshot(args: {
     : undefined
 }
 
+export function visibleNativeToolSnapshots(
+  tools: readonly {
+    access: ToolAccess
+    name: string
+    route: NativeToolRoute
+  }[]
+): RunToolSnapshotTool[] {
+  return tools.flatMap((tool) => {
+    const snapshot = visibleNativeToolSnapshot({
+      access: tool.access,
+      route: tool.route,
+      tool: tool.name,
+    })
+
+    return snapshot === undefined ? [] : [snapshot]
+  })
+}
+
 function nativeToolPermission(tool: string, route: NativeToolRoute) {
   const permission = getToolPermission(tool)
 
