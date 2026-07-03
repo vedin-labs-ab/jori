@@ -46,3 +46,24 @@ export function isLinearIssueCommentEvent(event: string) {
     event === issueCommentEvent.created || event === issueCommentEvent.edited
   )
 }
+
+// Lifecycle events feed deduction; providers keep their native verbs.
+
+export const issueLifecycleEvent = {
+  opened: "issue.opened",
+  closed: "issue.closed",
+  reopened: "issue.reopened",
+} as const
+
+export const pullRequestLifecycleEvent = {
+  opened: "pull_request.opened",
+  closed: "pull_request.closed",
+  merged: "pull_request.merged",
+  reopened: "pull_request.reopened",
+} as const
+
+export const linearIssueLifecycleEvent = {
+  created: "issue.created",
+  stateChanged: "issue.state_changed",
+  removed: "issue.removed",
+} as const

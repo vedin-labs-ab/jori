@@ -5,6 +5,7 @@ import { ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
 import { ContextProfile } from "./profile"
 import { type OrganizationSources } from "./types"
+import { ContextWorkstreams } from "./workstreams"
 
 export function OrganizationContext() {
   return (
@@ -25,6 +26,7 @@ function ContextView({ tenantId }: { tenantId: string }) {
       <Tabs defaultValue="organization" className="gap-4">
         <TabsList className="w-fit !h-7">
           <TabsTrigger value="organization">Organization</TabsTrigger>
+          <TabsTrigger value="workstreams">Workstreams</TabsTrigger>
           <TabsTrigger disabled value="layers">
             Layers
           </TabsTrigger>
@@ -37,6 +39,9 @@ function ContextView({ tenantId }: { tenantId: string }) {
             profile={profile}
             sources={sources}
           />
+        </TabsContent>
+        <TabsContent value="workstreams">
+          <ContextWorkstreams tenantId={tenantId} />
         </TabsContent>
       </Tabs>
     </ConsolePageLayout>

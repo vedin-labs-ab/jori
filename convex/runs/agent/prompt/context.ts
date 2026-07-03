@@ -44,12 +44,15 @@ function createOrganizationInstructions(input: AgentRuntimeInput) {
     return ""
   }
 
+  const workstreams = input.workstreams ?? []
+
   return renderPromptTemplate(promptTemplates["organization/message"], {
     organization: {
       name: facts.name,
       summary: facts.summary ?? null,
       aliases: facts.aliases.length === 0 ? null : facts.aliases.join(", "),
       domains: facts.domains.length === 0 ? null : facts.domains,
+      workstreams: workstreams.length === 0 ? null : workstreams,
     },
   }).trim()
 }

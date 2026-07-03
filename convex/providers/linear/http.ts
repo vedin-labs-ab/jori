@@ -8,6 +8,7 @@ import {
   unauthorizedResponse,
 } from "../http"
 import { completeIntegrationOffer, failIntegrationOffer } from "../install"
+import { recordLinearLifecycleEvent } from "../lifecycle/linear"
 import {
   handleLinearApprovalDecision,
   isLinearApprovalDecision,
@@ -156,7 +157,14 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
 
   if (reaction !== null) {
     await recordLinearReaction(ctx, reaction)
+
+    return Response.json({ ok: true })
   }
+
+  await recordLinearLifecycleEvent(ctx, {
+    payload,
+    deliveryId: request.headers.get("linear-delivery"),
+  })
 
   return Response.json({ ok: true })
 }

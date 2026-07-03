@@ -35,6 +35,40 @@ test("renders organization facts before the run section", () => {
   expectNoSyntheticBlankLines(context)
 })
 
+test("renders deduced workstreams inside the organization section", () => {
+  const prompt = assemblePrompt({
+    ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
+    organization: {
+      name: "Milo Labs",
+      aliases: [],
+      domains: [],
+    },
+    workstreams: [
+      { name: "Payments revamp", brief: "Rebuilding the payments flow." },
+      { name: "SOC 2 push", brief: "Compliance work toward the audit." },
+    ],
+  } as unknown as Parameters<typeof assemblePrompt>[0]).context
+
+  expect(prompt).toContain(
+    "Active workstreams, deduced from recent activity across connected tools:"
+  )
+  expect(prompt).toContain("- Payments revamp: Rebuilding the payments flow.")
+  expect(prompt).toContain("- SOC 2 push: Compliance work toward the audit.")
+  expectNoSyntheticBlankLines(prompt)
+})
+
+test("omits the workstreams block without a roster", () => {
+  const prompt = assemblePrompt({
+    ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
+    organization: { name: "Milo Labs", aliases: [], domains: [] },
+    workstreams: [],
+  } as unknown as Parameters<typeof assemblePrompt>[0]).context
+
+  expect(prompt).toContain("# Organization")
+  expect(prompt).not.toContain("Active workstreams")
+  expectNoSyntheticBlankLines(prompt)
+})
+
 test("omits the website section without websites", () => {
   const prompt = assemblePrompt({
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
