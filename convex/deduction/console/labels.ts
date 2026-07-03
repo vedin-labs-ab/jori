@@ -6,7 +6,7 @@ import { type BeliefStatus } from "../schema"
 export const statusLabels: Record<BeliefStatus, string> = {
   proposed: "Suggested",
   confirmed: "Confirmed",
-  closed: "Closed",
+  closed: "Archived",
   rejected: "Not a workstream",
 }
 

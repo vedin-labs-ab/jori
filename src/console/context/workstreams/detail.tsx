@@ -31,14 +31,10 @@ export function WorkstreamDetail({
   tenantId,
   workstream,
   onClose,
-  onEdit,
-  onMerge,
 }: {
   tenantId: string
   workstream: Workstream | null
   onClose: () => void
-  onEdit: () => void
-  onMerge: () => void
 }) {
   return (
     <Sheet
@@ -51,12 +47,7 @@ export function WorkstreamDetail({
     >
       <SheetContent className="flex w-full flex-col gap-0 sm:max-w-lg">
         {workstream === null ? null : (
-          <DetailBody
-            tenantId={tenantId}
-            workstream={workstream}
-            onEdit={onEdit}
-            onMerge={onMerge}
-          />
+          <DetailBody tenantId={tenantId} workstream={workstream} />
         )}
       </SheetContent>
     </Sheet>
@@ -66,13 +57,9 @@ export function WorkstreamDetail({
 function DetailBody({
   tenantId,
   workstream,
-  onEdit,
-  onMerge,
 }: {
   tenantId: string
   workstream: Workstream
-  onEdit: () => void
-  onMerge: () => void
 }) {
   const detail = useQuery(api.deduction.console.queries.get, {
     tenantId,
@@ -92,7 +79,7 @@ function DetailBody({
         {workstream.locked ? (
           <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
             <Lock className="size-3 shrink-0" />
-            Protected: you edited this, so Milo won't rewrite it.
+            Protected: Milo won't rewrite this workstream.
           </p>
         ) : null}
       </SheetHeader>
@@ -152,12 +139,7 @@ function DetailBody({
         )}
       </div>
       <SheetFooter className="border-t">
-        <WorkstreamActions
-          tenantId={tenantId}
-          workstream={workstream}
-          onEdit={onEdit}
-          onMerge={onMerge}
-        />
+        <WorkstreamActions tenantId={tenantId} workstream={workstream} />
       </SheetFooter>
     </>
   )
