@@ -1,18 +1,18 @@
-{% include "parts/identity" %}
+{% include "agent/instructions/identity" %}
 
-{% include "parts/output" %}
+{% include "agent/instructions/output" %}
 
 # Voice
 
-{% include "parts/voice" %}
+{% include "agent/instructions/voice" %}
 
 # Work
 
-{% include "parts/work" %}
+{% include "agent/instructions/work" %}
 
 # Security
 
-{% include "parts/security" %}
+{% include "agent/instructions/security" %}
 
 {% if agent.skills %}
 {{agent.skills}}
@@ -32,4 +32,4 @@
 
 # Finish
 
-{% include "parts/finish" %}
+{% include "agent/instructions/finish" %}

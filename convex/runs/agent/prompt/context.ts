@@ -48,7 +48,7 @@ function createOrganizationInstructions(input: AgentRuntimeInput) {
   const aliases = facts?.aliases ?? []
   const domains = facts?.domains ?? []
 
-  return renderPromptTemplate(promptTemplates["organization/message"], {
+  return renderPromptTemplate(promptTemplates["agent/context/organization"], {
     organization: {
       name: facts?.name ?? null,
       summary: facts?.summary ?? null,
@@ -63,7 +63,7 @@ function createRunInstructions(
   runId: AgentRuntimeInput["run"]["_id"],
   activeSurface: PromptActiveSurface | null
 ) {
-  return renderPromptTemplate(promptTemplates["run/message"], {
+  return renderPromptTemplate(promptTemplates["agent/context/run"], {
     run: {
       id: runId,
     },
@@ -81,20 +81,20 @@ function createRunInstructions(
 function createTriggerPart(input: AgentRuntimeInput) {
   if (input.type === "automation") {
     return renderPromptTemplate(
-      promptTemplates["trigger/automation"],
+      promptTemplates["agent/context/trigger/automation"],
       createAutomationValues(input)
     )
   }
 
   if (input.type === "instruction") {
     return renderPromptTemplate(
-      promptTemplates["trigger/instruction"],
+      promptTemplates["agent/context/trigger/instruction"],
       createInstructionValues(input)
     )
   }
 
   return renderPromptTemplate(
-    promptTemplates["trigger/message"],
+    promptTemplates["agent/context/trigger/message"],
     createMessageValues(input)
   )
 }

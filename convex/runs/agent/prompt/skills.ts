@@ -12,7 +12,7 @@ export function createSkillInstructions(args: {
     return ""
   }
 
-  return renderPromptTemplate(promptTemplates["skills/discovery"], {
+  return renderPromptTemplate(promptTemplates["agent/instructions/skills"], {
     skills: {
       available: formatAvailableSkills(available),
     },

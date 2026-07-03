@@ -66,7 +66,7 @@ function summaryMessages(input: PendingSummary): OpenRouterChatMessage[] {
   return [
     {
       role: "user",
-      content: renderPromptTemplate(promptTemplates["conversation/summary"], {
+      content: renderPromptTemplate(promptTemplates["conversations/summary"], {
         conversation: {
           messages: input.messages.map(formatMessage).join("\n\n"),
           summary: input.priorSummary,

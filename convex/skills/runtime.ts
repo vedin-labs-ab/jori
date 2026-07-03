@@ -1,5 +1,3 @@
-import { promptTemplates } from "../../prompts/generated"
-import { renderPromptTemplate } from "../../prompts/render"
 import { type Integration } from "../shared/integrations"
 import { sortSkills } from "./data"
 
@@ -54,19 +52,6 @@ export function runtimeSkillAssociatedIntegrations(skill: RuntimeSkill) {
   return skill.associatedIntegrations
 }
 
-export function formatRuntimeSkill(skill: RuntimeSkill) {
-  return renderPromptTemplate(promptTemplates["skills/loaded"], {
-    skill: {
-      body: skill.body,
-      title: formatRuntimeSkillTitle(skill),
-    },
-  })
-}
-
-export function formatRuntimeSkillTitle(skill: RuntimeSkill) {
-  return formatSkillTitle(skill.name)
-}
-
 function resolveRuntimeSkillNames(skills: readonly RuntimeSkill[]) {
   const result = new Map<string, RuntimeSkill>()
 
@@ -94,11 +79,4 @@ function isTenantCommunicationSkill(skill: RuntimeSkill) {
 
 function isCommunicationSkill(skill: RuntimeSkill) {
   return skill.communication !== undefined
-}
-
-function formatSkillTitle(name: string) {
-  return name
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ")
 }

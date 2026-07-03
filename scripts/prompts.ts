@@ -6,7 +6,6 @@ const root = process.cwd()
 const skillsDir = path.join(root, "skills")
 const promptsDir = path.join(root, "prompts")
 const outputFile = path.join(root, "prompts", "generated.ts")
-const promptAssemblyPrefix = "assembly/"
 
 const skills = await readSkills(skillsDir)
 const promptTemplates = await readPromptTemplates(promptsDir)
@@ -33,7 +32,7 @@ async function readPromptTemplates(
   return sortObject(
     Object.fromEntries(
       Object.entries(sources).map(([id, source]) => [
-        promptTemplateId(id),
+        id,
         formatPromptTemplate(source),
       ])
     )
@@ -68,20 +67,6 @@ async function readPromptSources(
   }
 
   return sortObject(result)
-}
-
-function promptTemplateId(id: string) {
-  if (!id.startsWith(promptAssemblyPrefix)) {
-    return id
-  }
-
-  const assemblyId = id.slice(promptAssemblyPrefix.length)
-
-  if (assemblyId !== "") {
-    return assemblyId
-  }
-
-  throw new Error(`Invalid prompt assembly file: ${id}`)
 }
 
 function validatePromptId(id: string) {

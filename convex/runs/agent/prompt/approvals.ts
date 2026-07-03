@@ -7,7 +7,7 @@ export function createApprovalInstructions(promptedTools: ToolPermission[]) {
     return ""
   }
 
-  return renderPromptTemplate(promptTemplates["approval/request"], {
+  return renderPromptTemplate(promptTemplates["agent/instructions/approval"], {
     tools: {
       names: promptedTools.map((tool) => `\`${tool.tool}\``).join(", "),
     },
