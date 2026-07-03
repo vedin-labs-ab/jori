@@ -136,14 +136,16 @@ describe("runtime delivery prompts", () => {
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     ).instructions
 
-    expect(prompt).toContain("send one short `send_reply`")
-    expect(prompt).toContain("After the first visible update, stay quiet")
     expect(prompt).toContain(
-      "I’ll find the Notion parent first, then ask before I create anything"
+      "send one `send_reply` before the first non-communication tool call"
     )
-    expect(prompt).toContain("Looking up Emma now")
-    expect(prompt).toContain("Bad:")
-    expect(prompt).toContain("On it, I’ll keep you posted")
+    expect(prompt).toContain("After that first signal, stay quiet")
+    expect(prompt).toContain(
+      "A heads-up that could sit unchanged under any other task says nothing."
+    )
+    expect(prompt).not.toContain("Good:")
+    expect(prompt).not.toContain("Bad:")
+    expect(prompt).not.toContain("keep you posted")
   })
 
   test("renders Slack communication and completion sections", () => {
@@ -190,16 +192,19 @@ describe("runtime delivery prompts", () => {
 })
 
 describe("output contract prompts", () => {
-  test("renders the channel contract section", () => {
+  test("renders the channel contract in the opening", () => {
     const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
     ).instructions
 
-    expect(prompt).toContain("# Output")
+    expect(prompt).not.toContain("# Output")
     expect(prompt).toContain(
       "Only tool calls reach the requester or any system"
     )
     expect(prompt).toContain("words outside a tool call are discarded")
+    expect(
+      prompt.indexOf("words outside a tool call are discarded")
+    ).toBeLessThan(prompt.indexOf("# Voice"))
   })
 })
 
@@ -213,7 +218,7 @@ describe("approval request prompts", () => {
     expect(prompt).toContain("# Approvals")
     expect(prompt).toContain("`notion_create_page`")
     expect(prompt).toContain("require the requester's approval before they run")
-    expect(prompt).toContain("truthful and specific `approval.summary`")
+    expect(prompt).not.toContain("`approval.summary`")
     expect(prompt).not.toContain("approval.handoff")
     expect(prompt).toContain("do not ask for approval in chat")
     expect(prompt).toContain("the run pauses on its own")
@@ -265,8 +270,8 @@ function expectSingleRun(prompt: string) {
 function expectInstructionsOrder(prompt: string) {
   expect(prompt.indexOf("# Voice")).toBeLessThan(prompt.indexOf("# Work"))
   expect(prompt.indexOf("# Work")).toBeLessThan(prompt.indexOf("# Security"))
-  expect(prompt.indexOf("# Security")).toBeLessThan(prompt.indexOf("# Output"))
-  expect(prompt.indexOf("# Output")).toBeLessThan(prompt.indexOf("# Finish"))
+  expect(prompt.indexOf("# Security")).toBeLessThan(prompt.indexOf("# Finish"))
+  expect(prompt).not.toContain("# Output")
   expect(prompt).not.toContain("# Run")
   expect(prompt).not.toContain("# Trigger")
 }
