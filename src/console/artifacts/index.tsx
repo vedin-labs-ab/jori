@@ -1,8 +1,9 @@
 import { useQuery } from "convex/react"
-import { useCallback, useDeferredValue, useEffect, useState } from "react"
+import { useCallback, useDeferredValue, useState } from "react"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useClientPagination } from "../shared/list/pagination"
+import { useNow } from "../shared/time"
 import { useArtifactDeletion } from "./deletion"
 import {
   type ArtifactFilter,
@@ -24,7 +25,7 @@ function ArtifactListView({ tenantId }: { tenantId: string }) {
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<ArtifactFilter>("active")
   const deletion = useArtifactDeletion(tenantId)
-  const now = useNow()
+  const now = useNow(60_000)
   const deferredQuery = useDeferredValue(query)
   const artifactList = useQuery(api.artifacts.console.list, {
     tenantId,
@@ -104,16 +105,4 @@ function useResettingArtifactToolbar({
   )
 
   return { setFilter: setFilterAndReset, setQuery: setQueryAndReset }
-}
-
-function useNow() {
-  const [now, setNow] = useState(() => Date.now())
-
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 60_000)
-
-    return () => window.clearInterval(interval)
-  }, [])
-
-  return now
 }

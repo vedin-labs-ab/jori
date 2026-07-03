@@ -1,18 +1,17 @@
-import { Search } from "lucide-react"
 import { memo, useCallback, useDeferredValue, useEffect, useState } from "react"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
+  ConsoleFilterToggle,
   ConsolePageLayout,
   ConsoleScrollableGrid,
   ConsoleToolbar,
   ConsoleToolbarActions,
+  ConsoleToolbarSearch,
 } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { ExecutionRow } from "../row"
@@ -96,23 +95,11 @@ const ExecutionFilters = memo(function ExecutionFilters({
 }) {
   return (
     <ConsoleToolbar>
-      <ToggleGroup
-        className="flex-wrap justify-start"
-        onValueChange={(value) => {
-          if (value !== "") {
-            setRunFilter(value as RunFilter)
-          }
-        }}
-        type="single"
+      <ConsoleFilterToggle
+        onValueChange={setRunFilter}
+        options={runFilterOptions}
         value={runFilter}
-        variant="outline"
-      >
-        {runFilterOptions.map((option) => (
-          <ToggleGroupItem key={option.value} value={option.value}>
-            {option.label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+      />
       <ConsoleToolbarActions>
         <Select
           onValueChange={(value) => setApprovalFilter(value as ApprovalFilter)}
@@ -137,16 +124,12 @@ const ExecutionFilters = memo(function ExecutionFilters({
             ))}
           </SelectContent>
         </Select>
-        <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
-          <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
-          <Input
-            aria-label="Search runs"
-            className="pr-2 pl-8"
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search runs..."
-            value={query}
-          />
-        </div>
+        <ConsoleToolbarSearch
+          label="Search runs"
+          onValueChange={setQuery}
+          placeholder="Search runs..."
+          value={query}
+        />
       </ConsoleToolbarActions>
     </ConsoleToolbar>
   )

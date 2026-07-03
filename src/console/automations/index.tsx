@@ -1,5 +1,5 @@
 import { useQuery } from "convex/react"
-import { Plus, Search } from "lucide-react"
+import { Plus } from "lucide-react"
 import {
   lazy,
   Suspense,
@@ -10,18 +10,19 @@ import {
 } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useToolPermissions } from "../permissions/controller"
 import {
+  ConsoleFilterToggle,
   ConsolePageLayout,
   ConsoleToolbar,
   ConsoleToolbarActions,
+  ConsoleToolbarSearch,
 } from "../shared/layout"
 import { ConsoleListPager } from "../shared/list/pager"
 import { useClientPagination } from "../shared/list/pagination"
+import { useNow } from "../shared/time"
 import { automationPolicyKey } from "./access/policy"
 import { type AutomationEditor, useAutomationEditor } from "./editor"
 import { filterAutomationsByView, hasAutomationFilters } from "./filter"
@@ -65,7 +66,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
   })
   const permissions = useToolPermissions(tenantId)
   const editor = useAutomationEditor(tenantId, permissions.permissions)
-  const now = useNow()
+  const now = useNow(30_000)
   const isDialogMounted = useAutomationDialogMount(editor.isFormOpen)
   const { hasFilters, pagination } = useAutomationPagination({
     automationList,
@@ -236,34 +237,17 @@ function AutomationFilters({
 
   return (
     <ConsoleToolbar>
-      <ToggleGroup
-        className="flex-wrap justify-start"
-        onValueChange={(value) => {
-          if (value !== "") {
-            setFilter(value as AutomationFilter)
-          }
-        }}
-        type="single"
+      <ConsoleFilterToggle
+        onValueChange={setFilter}
+        options={automationFilterOptions}
         value={filter}
-        variant="outline"
-      >
-        {automationFilterOptions.map((option) => (
-          <ToggleGroupItem key={option.value} value={option.value}>
-            {option.label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+      />
       <ConsoleToolbarActions>
-        <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
-          <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
-          <Input
-            aria-label="Search automations"
-            className="pr-2 pl-8"
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search automations"
-            value={query}
-          />
-        </div>
+        <ConsoleToolbarSearch
+          label="Search automations"
+          onValueChange={setQuery}
+          value={query}
+        />
         <Button
           onClick={() => {
             preloadDialog()
@@ -279,16 +263,4 @@ function AutomationFilters({
       </ConsoleToolbarActions>
     </ConsoleToolbar>
   )
-}
-
-function useNow() {
-  const [now, setNow] = useState(() => Date.now())
-
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 30_000)
-
-    return () => window.clearInterval(interval)
-  }, [])
-
-  return now
 }
