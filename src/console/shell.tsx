@@ -336,6 +336,7 @@ function UserAvatar({
 
 function getPageTitle(pathname: string) {
   return (
-    consoleNavigation.find((item) => item.to === pathname)?.label ?? "Console"
+    consoleNavigation.find((item) => isNavigationActive(pathname, item.to))
+      ?.label ?? "Console"
   )
 }
