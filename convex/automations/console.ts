@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import {
   type MutationCtx,
   mutation,
@@ -8,12 +8,9 @@ import {
 } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
-import {
-  type Integration,
-  isUserScopedIntegration,
-} from "../shared/integrations"
 import { projectAccessForConsole } from "./access"
 import { automationEventCatalog } from "./events"
+import { findEventIntegration } from "./integrations"
 import {
   createAutomation,
   maxSearchResults,
@@ -76,11 +73,14 @@ export const eventIntegrations = query({
       integrations: await Promise.all(
         automationEventCatalog.map(async (definition) => ({
           integration: definition.integration,
-          connected: await hasActiveIntegration(ctx, {
-            integration: definition.integration,
-            ownerId,
-            tenantId: args.tenantId,
-          }),
+          connected:
+            (
+              await findEventIntegration(ctx, {
+                integration: definition.integration,
+                ownerId,
+                tenantId: args.tenantId,
+              })
+            )?.status === "active",
         }))
       ),
     }
@@ -199,34 +199,4 @@ async function projectTriggerForConsole(
     event: trigger.event,
     match: trigger.match,
   }
-}
-
-async function hasActiveIntegration(
-  ctx: QueryCtx,
-  args: {
-    integration: Integration
-    ownerId: Id<"persons">
-    tenantId: string
-  }
-) {
-  const integration = isUserScopedIntegration(args.integration)
-    ? await ctx.db
-        .query("integrations")
-        .withIndex("by_tenant_and_integration_and_owner", (query) =>
-          query
-            .eq("tenantId", args.tenantId)
-            .eq("integration", args.integration)
-            .eq("ownerId", args.ownerId)
-        )
-        .first()
-    : await ctx.db
-        .query("integrations")
-        .withIndex("by_tenant_and_integration", (query) =>
-          query
-            .eq("tenantId", args.tenantId)
-            .eq("integration", args.integration)
-        )
-        .first()
-
-  return integration?.status === "active"
 }

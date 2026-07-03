@@ -10,6 +10,34 @@ export { integrationLabels } from "../shared/integrations"
 
 type QueryLikeCtx = MutationCtx | QueryCtx
 
+export async function findEventIntegration(
+  ctx: QueryLikeCtx,
+  args: {
+    integration: Integration
+    ownerId: Id<"persons"> | undefined
+    tenantId: string
+  }
+) {
+  if (isUserScopedIntegration(args.integration) && args.ownerId !== undefined) {
+    return await ctx.db
+      .query("integrations")
+      .withIndex("by_tenant_and_integration_and_owner", (query) =>
+        query
+          .eq("tenantId", args.tenantId)
+          .eq("integration", args.integration)
+          .eq("ownerId", args.ownerId)
+      )
+      .first()
+  }
+
+  return await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_and_integration", (query) =>
+      query.eq("tenantId", args.tenantId).eq("integration", args.integration)
+    )
+    .first()
+}
+
 export async function resolveEventIntegration(
   ctx: QueryLikeCtx,
   args: {
@@ -17,37 +45,12 @@ export async function resolveEventIntegration(
     createdBy: Id<"persons"> | undefined
     tenantId: string
   }
-) {
-  return await resolveIntegration(ctx, args)
-}
-
-async function resolveIntegration(
-  ctx: QueryLikeCtx,
-  args: {
-    integration: Integration
-    createdBy: Id<"persons"> | undefined
-    tenantId: string
-  }
 ): Promise<Doc<"integrations">> {
-  const integration =
-    isUserScopedIntegration(args.integration) && args.createdBy !== undefined
-      ? await ctx.db
-          .query("integrations")
-          .withIndex("by_tenant_and_integration_and_owner", (query) =>
-            query
-              .eq("tenantId", args.tenantId)
-              .eq("integration", args.integration)
-              .eq("ownerId", args.createdBy)
-          )
-          .first()
-      : await ctx.db
-          .query("integrations")
-          .withIndex("by_tenant_and_integration", (query) =>
-            query
-              .eq("tenantId", args.tenantId)
-              .eq("integration", args.integration)
-          )
-          .first()
+  const integration = await findEventIntegration(ctx, {
+    integration: args.integration,
+    ownerId: args.createdBy,
+    tenantId: args.tenantId,
+  })
 
   if (integration === null || integration.status !== "active") {
     throw new Error(`${integrationLabels[args.integration]} is not connected.`)
