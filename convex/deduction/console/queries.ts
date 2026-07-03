@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx, query } from "../../_generated/server"
 import { checkTenantAccess } from "../../identity/access"
-import { integrationLabels } from "../../shared/integrations"
+import { type Integration } from "../../shared/integrations"
 import { hasConfirmSupport } from "../rules"
 import { loadSupport } from "../support"
 import { eventKindLabel, statusLabels } from "./labels"
@@ -88,30 +88,28 @@ async function listRow(ctx: QueryCtx, row: Doc<"beliefs">) {
 // would clear the confirmation threshold.
 async function supportSummary(ctx: QueryCtx, beliefId: Id<"beliefs">) {
   const records = await loadSupport(ctx, beliefId)
-  const labels = new Map<string, string>()
+  const keys = new Map<string, Integration | null>()
 
   for (const record of records) {
-    if (!labels.has(record.integrationId)) {
-      labels.set(
+    if (!keys.has(record.integrationId)) {
+      keys.set(
         record.integrationId,
-        await integrationLabel(ctx, record.integrationId)
+        await integrationKey(ctx, record.integrationId)
       )
     }
   }
 
   return {
-    sources: [...new Set(labels.values())],
+    sources: [...new Set([...keys.values()].filter((key) => key !== null))],
     meetsThreshold: hasConfirmSupport(records),
   }
 }
 
-async function integrationLabel(ctx: QueryCtx, integrationId: string) {
+async function integrationKey(ctx: QueryCtx, integrationId: string) {
   const id = ctx.db.normalizeId("integrations", integrationId)
   const integration = id === null ? null : await ctx.db.get(id)
 
-  return integration === null
-    ? "Removed tool"
-    : integrationLabels[integration.integration]
+  return integration === null ? null : integration.integration
 }
 
 async function recentSightings(ctx: QueryCtx, beliefId: Id<"beliefs">) {
@@ -134,7 +132,7 @@ async function sightingRow(ctx: QueryCtx, row: Doc<"evidence">) {
 
     return {
       ...base,
-      source: await integrationLabel(ctx, conversation?.integrationId ?? ""),
+      integration: await integrationKey(ctx, conversation?.integrationId ?? ""),
       kind: "Conversation",
       url: undefined,
     }
@@ -144,7 +142,7 @@ async function sightingRow(ctx: QueryCtx, row: Doc<"evidence">) {
 
   return {
     ...base,
-    source: await integrationLabel(ctx, event?.integrationId ?? ""),
+    integration: await integrationKey(ctx, event?.integrationId ?? ""),
     kind: eventKindLabel(event?.type ?? ""),
     url: event === null ? undefined : eventUrl(event.data),
   }

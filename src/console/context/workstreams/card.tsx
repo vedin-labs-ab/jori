@@ -1,46 +1,28 @@
-import { type useQuery } from "convex/react"
-import { Lock } from "lucide-react"
-import { type ReactNode } from "react"
+import { integrationLabel } from "@contracts/integrations"
+import { ChevronRight, Lock } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { type api } from "../../../../convex/_generated/api"
+import { Card } from "@/components/ui/card"
+import { IntegrationLogo } from "../../shared/logo/integration"
 import { relativeTime } from "../../shared/time"
+import { statusVariants, type Workstream } from "./types"
 
-export type Workstreams = NonNullable<
-  ReturnType<typeof useQuery<typeof api.deduction.console.queries.list>>
->["workstreams"]
-export type Workstream = Workstreams[number]
-
-const statusVariants: Record<
-  Workstream["status"],
-  "default" | "secondary" | "outline"
-> = {
-  proposed: "default",
-  confirmed: "secondary",
-  closed: "outline",
-  rejected: "outline",
-}
-
+// The whole card opens the detail sheet; every correction lives there.
 export function WorkstreamCard({
   workstream,
   onOpen,
-  actions,
 }: {
   workstream: Workstream
   onOpen: () => void
-  actions?: ReactNode
 }) {
   return (
-    <Card className="py-4">
-      <CardContent className="flex flex-col gap-2 px-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            className="font-medium text-sm hover:underline"
-            onClick={onOpen}
-          >
-            {workstream.name}
-          </button>
+    <Card className="py-0 transition-colors hover:bg-muted/50">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex w-full flex-col gap-2 p-4 text-left"
+      >
+        <div className="flex w-full items-center gap-2">
+          <span className="font-medium text-sm">{workstream.name}</span>
           <Badge variant={statusVariants[workstream.status]}>
             {workstream.statusLabel}
           </Badge>
@@ -50,22 +32,21 @@ export function WorkstreamCard({
               className="size-3 text-muted-foreground"
             />
           ) : null}
+          <ChevronRight className="ml-auto size-4 shrink-0 text-muted-foreground" />
         </div>
         <p className="text-muted-foreground text-sm">{workstream.brief}</p>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2">
           {workstream.sources.map((source) => (
             <Badge key={source} variant="outline">
-              {source}
+              <IntegrationLogo decorative integration={source} />
+              {integrationLabel(source)}
             </Badge>
           ))}
-          <span className="text-muted-foreground text-xs">
+          <span className="ml-auto text-muted-foreground text-xs">
             seen {relativeTime(workstream.seenAt, Date.now())}
           </span>
-          {actions === undefined ? null : (
-            <div className="ml-auto">{actions}</div>
-          )}
         </div>
-      </CardContent>
+      </button>
     </Card>
   )
 }

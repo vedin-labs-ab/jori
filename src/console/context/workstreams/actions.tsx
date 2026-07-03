@@ -1,7 +1,7 @@
 import { useMutation } from "convex/react"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
-import { type Workstream } from "./card"
+import { type Workstream } from "./types"
 
 // One action vocabulary for cards and the detail dialog. Adoption decisions
 // come first; edit and merge are always available while a workstream is live.
@@ -40,13 +40,11 @@ const labels: Record<WorkstreamAction, string> = {
 export function WorkstreamActions({
   tenantId,
   workstream,
-  only,
   onEdit,
   onMerge,
 }: {
   tenantId: string
   workstream: Workstream
-  only?: WorkstreamAction[]
   onEdit: () => void
   onMerge: () => void
 }) {
@@ -65,9 +63,7 @@ export function WorkstreamActions({
     edit: onEdit,
     merge: onMerge,
   }
-  const actions = actionsFor(workstream.status).filter(
-    (action) => only === undefined || only.includes(action)
-  )
+  const actions = actionsFor(workstream.status)
 
   return (
     <div className="flex flex-wrap items-center gap-2">

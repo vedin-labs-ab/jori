@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { api } from "../../../../convex/_generated/api"
-import { type Workstream } from "./card"
+import { type Workstream } from "./types"
 
 export function RenameDialog({
   tenantId,

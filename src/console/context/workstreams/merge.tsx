@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { api } from "../../../../convex/_generated/api"
-import { type Workstream, type Workstreams } from "./card"
+import { type Workstream, type Workstreams } from "./types"
 
 // Folds this workstream into the chosen one; its history stays on the
 // tombstone and the target carries the work forward.
