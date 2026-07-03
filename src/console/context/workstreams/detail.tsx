@@ -1,6 +1,6 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
 import { useQuery } from "convex/react"
-import { ExternalLink, ShieldCheck } from "lucide-react"
+import { ExternalLink, Lock, ShieldCheck } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -83,10 +83,13 @@ function DetailBody({
         </SheetTitle>
         <SheetDescription>
           Seen {relativeTime(workstream.seenAt, Date.now())}
-          {workstream.locked
-            ? " · Protected: you edited this, so Milo won't rewrite it."
-            : ""}
         </SheetDescription>
+        {workstream.locked ? (
+          <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <Lock className="size-3 shrink-0" />
+            Protected: you edited this, so Milo won't rewrite it.
+          </p>
+        ) : null}
       </SheetHeader>
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
         {detail === undefined ? (
@@ -145,10 +148,6 @@ function DetailBody({
           onEdit={onEdit}
           onMerge={onMerge}
         />
-        <p className="text-muted-foreground text-xs">
-          Confirmed workstreams help Milo answer with your organization's
-          context.
-        </p>
       </SheetFooter>
     </>
   )
