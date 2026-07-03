@@ -1,8 +1,13 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
 import { useQuery } from "convex/react"
-import { ExternalLink, Lock, ShieldCheck } from "lucide-react"
+import { ChevronDown, ExternalLink, Lock } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   Sheet,
   SheetContent,
@@ -100,19 +105,35 @@ function DetailBody({
           </p>
         ) : (
           <>
-            {workstream.status === "proposed" ? (
-              <SupportNote support={detail.support} />
-            ) : null}
             <Section title="Brief">
               <p className="text-sm">{detail.brief}</p>
             </Section>
-            <Section title="Sources" count={detail.sightings.length}>
-              <ul className="flex flex-col divide-y rounded-md border">
-                {detail.sightings.map((sighting) => (
-                  <Sighting key={sighting.id} sighting={sighting} />
-                ))}
-              </ul>
-            </Section>
+            {detail.aliases.length === 0 ? null : (
+              <Section title="Also known as">
+                <div className="flex flex-wrap gap-2">
+                  {detail.aliases.map((alias) => (
+                    <Badge key={alias} variant="outline">
+                      {alias}
+                    </Badge>
+                  ))}
+                </div>
+              </Section>
+            )}
+            <Collapsible>
+              <CollapsibleTrigger className="group flex w-full items-center justify-between">
+                <ContextSectionTitle count={detail.sightings.length}>
+                  Sources
+                </ContextSectionTitle>
+                <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-1.5">
+                <ul className="flex flex-col divide-y rounded-md border">
+                  {detail.sightings.map((sighting) => (
+                    <Sighting key={sighting.id} sighting={sighting} />
+                  ))}
+                </ul>
+              </CollapsibleContent>
+            </Collapsible>
             {detail.history.length === 0 ? null : (
               <Section title="History">
                 <Timeline>
@@ -125,17 +146,6 @@ function DetailBody({
                     </TimelineItem>
                   ))}
                 </Timeline>
-              </Section>
-            )}
-            {detail.aliases.length === 0 ? null : (
-              <Section title="Also known as">
-                <div className="flex flex-wrap gap-2">
-                  {detail.aliases.map((alias) => (
-                    <Badge key={alias} variant="outline">
-                      {alias}
-                    </Badge>
-                  ))}
-                </div>
               </Section>
             )}
           </>
@@ -167,25 +177,6 @@ function Section({
       <ContextSectionTitle count={count}>{title}</ContextSectionTitle>
       {children}
     </section>
-  )
-}
-
-function SupportNote({
-  support,
-}: {
-  support: { sources: Integration[]; meetsThreshold: boolean }
-}) {
-  const sources = support.sources.map(integrationLabel).join(" and ")
-
-  return (
-    <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-3 text-sm">
-      <ShieldCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-      <p>
-        {support.meetsThreshold
-          ? `Support spans ${sources}. Milo can confirm this on its next review, or you can confirm it now.`
-          : `Seen in ${sources} so far. Milo suggests confirming once support spans multiple tools or several days.`}
-      </p>
-    </div>
   )
 }
 

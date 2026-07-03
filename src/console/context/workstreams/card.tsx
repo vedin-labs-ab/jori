@@ -23,19 +23,24 @@ export function WorkstreamCard({
         className="flex w-full items-center gap-3 p-4 text-left"
       >
         <div className="flex min-w-0 grow flex-col gap-2">
-          <div className="flex w-full items-center gap-2">
-            <span className="truncate font-medium text-sm">
-              {workstream.name}
+          <div className="flex flex-col gap-0.5">
+            <div className="flex w-full items-center gap-2">
+              <span className="truncate font-medium text-sm">
+                {workstream.name}
+              </span>
+              <Badge variant={statusVariants[workstream.status]}>
+                {workstream.statusLabel}
+              </Badge>
+              {workstream.locked ? (
+                <Lock
+                  aria-label="Protected"
+                  className="size-3 shrink-0 text-muted-foreground"
+                />
+              ) : null}
+            </div>
+            <span className="text-muted-foreground text-xs">
+              seen {relativeTime(workstream.seenAt, Date.now())}
             </span>
-            <Badge variant={statusVariants[workstream.status]}>
-              {workstream.statusLabel}
-            </Badge>
-            {workstream.locked ? (
-              <Lock
-                aria-label="Protected"
-                className="size-3 shrink-0 text-muted-foreground"
-              />
-            ) : null}
           </div>
           <p className="line-clamp-2 text-muted-foreground text-sm">
             {workstream.brief}
@@ -51,9 +56,6 @@ export function WorkstreamCard({
                 {integrationLabel(source)}
               </Badge>
             ))}
-            <span className="ml-auto text-muted-foreground text-xs">
-              seen {relativeTime(workstream.seenAt, Date.now())}
-            </span>
           </div>
         </div>
         <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
