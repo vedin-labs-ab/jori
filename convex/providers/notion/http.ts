@@ -2,11 +2,12 @@ import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { normalizeEventData } from "../../events/payload"
 import {
-  readCallbackState,
+  oauthAuthorizeRedirect,
+  readOAuthCallback,
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
-import { completeIntegrationOffer, failIntegrationOffer } from "../install"
+import { completeIntegrationOffer, failOfferAndRedirect } from "../install"
 import { notionOAuthAuthorizeUrl, notionOAuthCallbackPath } from "./config"
 import { readNotionAutomationEvents } from "./events"
 import {
@@ -18,24 +19,15 @@ import { enrichNotionEventData } from "./pages"
 import { parseSignedNotionState, verifyNotionWebhookRequest } from "./signing"
 
 export async function handleNotionInstall(request: Request) {
-  const requestUrl = new URL(request.url)
-  const state = requestUrl.searchParams.get("state")
-
-  if (state === null) {
-    return new Response("Missing state", { status: 400 })
-  }
-
-  const notionUrl = new URL(notionOAuthAuthorizeUrl)
-  notionUrl.searchParams.set("client_id", requireNotionClientId())
-  notionUrl.searchParams.set("response_type", "code")
-  notionUrl.searchParams.set("owner", "user")
-  notionUrl.searchParams.set("state", state)
-  notionUrl.searchParams.set(
-    "redirect_uri",
-    `${requestUrl.origin}${notionOAuthCallbackPath}`
-  )
-
-  return Response.redirect(notionUrl.toString(), 302)
+  return oauthAuthorizeRedirect(request, {
+    authorizeUrl: notionOAuthAuthorizeUrl,
+    callbackPath: notionOAuthCallbackPath,
+    clientId: requireNotionClientId(),
+    params: {
+      response_type: "code",
+      owner: "user",
+    },
+  })
 }
 
 export async function handleNotionOAuthCallback(
@@ -43,41 +35,34 @@ export async function handleNotionOAuthCallback(
   request: Request
 ) {
   const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get("code")
   const stateValue = requestUrl.searchParams.get("state")
-  const error = requestUrl.searchParams.get("error")
 
-  if (error !== null && stateValue !== null) {
+  if (requestUrl.searchParams.get("error") !== null && stateValue !== null) {
     return await redirectFromCallbackState(stateValue, "error")
   }
 
-  if (code === null || stateValue === null) {
-    return new Response("Missing OAuth callback parameters", { status: 400 })
-  }
-
-  const parsed = await readCallbackState({
-    value: stateValue,
+  const callback = await readOAuthCallback(request, {
     parse: parseSignedNotionState,
     label: "Notion OAuth",
   })
 
-  if (!parsed.ok) {
-    return parsed.response
+  if (!callback.ok) {
+    return callback.response
   }
 
-  const state = parsed.state
+  const { code, state } = callback
   const tokenResult = await exchangeNotionAuthorizationCode({
     code,
     redirectUri: `${requestUrl.origin}${notionOAuthCallbackPath}`,
   })
 
   if ("error" in tokenResult) {
-    await failIntegrationOffer(ctx, {
-      integrationOfferId: state.integrationOfferId,
+    return await failOfferAndRedirect(ctx, {
+      callbackParam: "notion",
       error: "Notion OAuth token exchange failed.",
+      integrationOfferId: state.integrationOfferId,
+      returnUrl: state.returnUrl,
     })
-
-    return redirectWithStatus(state.returnUrl, "notion", "error")
   }
 
   const integrationId = await ctx.runMutation(

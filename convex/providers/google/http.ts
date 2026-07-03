@@ -1,7 +1,11 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { readCallbackState, redirectWithStatus } from "../http"
-import { completeIntegrationOffer, failIntegrationOffer } from "../install"
+import {
+  oauthAuthorizeRedirect,
+  readOAuthCallback,
+  redirectWithStatus,
+} from "../http"
+import { completeIntegrationOffer, failOfferAndRedirect } from "../install"
 import {
   type GoogleIntegration,
   googleIntegrationConfigs,
@@ -19,26 +23,18 @@ export async function handleGoogleInstall(
   integration: GoogleIntegration
 ) {
   const surface = googleIntegrationConfigs[integration]
-  const requestUrl = new URL(request.url)
-  const state = requestUrl.searchParams.get("state")
 
-  if (state === null) {
-    return new Response("Missing state", { status: 400 })
-  }
-
-  const googleUrl = new URL(googleOAuthAuthorizeUrl)
-  googleUrl.searchParams.set("client_id", requireGoogleClientId())
-  googleUrl.searchParams.set("response_type", "code")
-  googleUrl.searchParams.set("scope", surface.scopes.join(" "))
-  googleUrl.searchParams.set("state", state)
-  googleUrl.searchParams.set("access_type", "offline")
-  googleUrl.searchParams.set("prompt", "consent")
-  googleUrl.searchParams.set(
-    "redirect_uri",
-    `${requestUrl.origin}${surface.callbackPath}`
-  )
-
-  return Response.redirect(googleUrl.toString(), 302)
+  return oauthAuthorizeRedirect(request, {
+    authorizeUrl: googleOAuthAuthorizeUrl,
+    callbackPath: surface.callbackPath,
+    clientId: requireGoogleClientId(),
+    params: {
+      response_type: "code",
+      scope: surface.scopes.join(" "),
+      access_type: "offline",
+      prompt: "consent",
+    },
+  })
 }
 
 export async function handleGoogleOAuthCallback(
@@ -46,25 +42,16 @@ export async function handleGoogleOAuthCallback(
   request: Request,
   expectedIntegration?: GoogleIntegration
 ) {
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get("code")
-  const stateValue = requestUrl.searchParams.get("state")
-
-  if (code === null || stateValue === null) {
-    return new Response("Missing OAuth callback parameters", { status: 400 })
-  }
-
-  const parsed = await readCallbackState({
-    value: stateValue,
+  const callback = await readOAuthCallback(request, {
     parse: parseSignedGoogleState,
     label: "Google Workspace OAuth",
   })
 
-  if (!parsed.ok) {
-    return parsed.response
+  if (!callback.ok) {
+    return callback.response
   }
 
-  const state = parsed.state
+  const { code, requestUrl, state } = callback
 
   if (
     expectedIntegration !== undefined &&
@@ -118,7 +105,7 @@ export async function handleGoogleOAuthCallback(
     })
   }
 
-  return redirectWithGoogleStatus(state.returnUrl, integration, "connected")
+  return redirectWithStatus(state.returnUrl, surface.callbackParam, "connected")
 }
 
 async function recordGoogleInstallation(
@@ -155,7 +142,7 @@ async function recordGoogleInstallation(
   })
 }
 
-async function redirectWithGoogleInstallError(
+function redirectWithGoogleInstallError(
   ctx: ActionCtx,
   args: {
     state: GoogleInstallState
@@ -163,26 +150,10 @@ async function redirectWithGoogleInstallError(
     error: string
   }
 ) {
-  await failIntegrationOffer(ctx, {
-    integrationOfferId: args.state.integrationOfferId,
+  return failOfferAndRedirect(ctx, {
+    callbackParam: googleIntegrationConfigs[args.integration].callbackParam,
     error: args.error,
+    integrationOfferId: args.state.integrationOfferId,
+    returnUrl: args.state.returnUrl,
   })
-
-  return redirectWithGoogleStatus(
-    args.state.returnUrl,
-    args.integration,
-    "error"
-  )
-}
-
-function redirectWithGoogleStatus(
-  returnUrl: string,
-  integration: GoogleIntegration,
-  status: "connected" | "error"
-) {
-  return redirectWithStatus(
-    returnUrl,
-    googleIntegrationConfigs[integration].callbackParam,
-    status
-  )
 }

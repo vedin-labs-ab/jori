@@ -8,11 +8,12 @@ import {
 import { handleSlackIntegrationOfferInteraction } from "../../integrations/offers/interaction"
 import { createIntegrationActor } from "../../shared/actor"
 import {
-  readCallbackState,
+  oauthAuthorizeRedirect,
+  readOAuthCallback,
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
-import { completeIntegrationOffer, failIntegrationOffer } from "../install"
+import { completeIntegrationOffer, failOfferAndRedirect } from "../install"
 import {
   slackBotScopes,
   slackInstallUserScopes,
@@ -26,49 +27,31 @@ import { exchangeSlackAuthorizationCode, requireSlackClientId } from "./oauth"
 import { parseSignedSlackState, verifySlackRequest } from "./signing"
 
 export async function handleSlackInstall(request: Request) {
-  const requestUrl = new URL(request.url)
-  const state = requestUrl.searchParams.get("state")
-
-  if (state === null) {
-    return new Response("Missing state", { status: 400 })
-  }
-
-  const slackUrl = new URL(slackOAuthAuthorizeUrl)
-  slackUrl.searchParams.set("client_id", requireSlackClientId())
-  slackUrl.searchParams.set("scope", slackBotScopes.join(","))
-  slackUrl.searchParams.set("user_scope", slackInstallUserScopes.join(","))
-  slackUrl.searchParams.set("state", state)
-  slackUrl.searchParams.set(
-    "redirect_uri",
-    `${requestUrl.origin}${slackOAuthCallbackPath}`
-  )
-
-  return Response.redirect(slackUrl.toString(), 302)
+  return oauthAuthorizeRedirect(request, {
+    authorizeUrl: slackOAuthAuthorizeUrl,
+    callbackPath: slackOAuthCallbackPath,
+    clientId: requireSlackClientId(),
+    params: {
+      scope: slackBotScopes.join(","),
+      user_scope: slackInstallUserScopes.join(","),
+    },
+  })
 }
 
 export async function handleSlackOAuthCallback(
   ctx: ActionCtx,
   request: Request
 ) {
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get("code")
-  const stateValue = requestUrl.searchParams.get("state")
-
-  if (code === null || stateValue === null) {
-    return new Response("Missing OAuth callback parameters", { status: 400 })
-  }
-
-  const parsed = await readCallbackState({
-    value: stateValue,
+  const callback = await readOAuthCallback(request, {
     parse: parseSignedSlackState,
     label: "Slack OAuth",
   })
 
-  if (!parsed.ok) {
-    return parsed.response
+  if (!callback.ok) {
+    return callback.response
   }
 
-  const state = parsed.state
+  const { code, requestUrl, state } = callback
   const tokenResult = await exchangeSlackAuthorizationCode({
     code,
     redirectUri: `${requestUrl.origin}${slackOAuthCallbackPath}`,
@@ -88,12 +71,12 @@ export async function handleSlackOAuthCallback(
     botToken === undefined ||
     userToken === undefined
   ) {
-    await failIntegrationOffer(ctx, {
-      integrationOfferId: state.integrationOfferId,
+    return await failOfferAndRedirect(ctx, {
+      callbackParam: "slack",
       error: "Slack OAuth did not return required bot and user tokens.",
+      integrationOfferId: state.integrationOfferId,
+      returnUrl: state.returnUrl,
     })
-
-    return redirectWithStatus(state.returnUrl, "slack", "error")
   }
 
   const integrationId = await ctx.runMutation(

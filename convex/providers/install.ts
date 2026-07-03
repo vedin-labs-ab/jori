@@ -7,6 +7,7 @@ import { type Integration } from "../shared/integrations"
 import { createSignedGitHubState } from "./github/signing"
 import { googleIntegrationConfigs } from "./google/config"
 import { createSignedGoogleState } from "./google/signing"
+import { redirectWithStatus } from "./http"
 import { createSignedLinearState } from "./linear/signing"
 import { microsoftIntegrationConfigs } from "./microsoft/config"
 import { createSignedMicrosoftState } from "./microsoft/signing"
@@ -116,4 +117,21 @@ export async function failIntegrationOffer(
   }
 
   await ctx.runMutation(internal.integrations.offers.updates.complete, args)
+}
+
+export async function failOfferAndRedirect(
+  ctx: ActionCtx,
+  args: {
+    callbackParam: string
+    error: string
+    integrationOfferId?: Id<"integrationOffers">
+    returnUrl: string
+  }
+) {
+  await failIntegrationOffer(ctx, {
+    integrationOfferId: args.integrationOfferId,
+    error: args.error,
+  })
+
+  return redirectWithStatus(args.returnUrl, args.callbackParam, "error")
 }
