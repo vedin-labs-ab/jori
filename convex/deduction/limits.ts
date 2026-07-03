@@ -1,6 +1,7 @@
 const dayMs = 24 * 60 * 60 * 1000
 
-export const passCadenceMs = dayMs
+// Slightly under the hourly cron so timing drift never skips a beat.
+export const passCadenceMs = 55 * 60 * 1000
 export const bootstrapWindowMs = 45 * dayMs
 export const bootstrapChunkMs = 7 * dayMs
 export const bootstrapMaxChunksPerSweep = 8
