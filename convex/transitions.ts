@@ -58,9 +58,11 @@ type TransitionInputBase = {
   syncSurface?: boolean
 }
 
+export type ApprovalTransitionType = Infer<typeof approvalTransitionType>
+
 type ApprovalTransitionInput = TransitionInputBase & {
   subject: Infer<typeof approvalSubject>
-  type: Infer<typeof approvalTransitionType>
+  type: ApprovalTransitionType
 }
 type IntegrationOfferTransitionInput = TransitionInputBase & {
   subject: Infer<typeof integrationOfferSubject>
