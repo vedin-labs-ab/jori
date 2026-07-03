@@ -1,21 +1,25 @@
 import { v } from "convex/values"
-import { type RuntimePrompt } from "../../contracts/runtime"
-import { internal } from "../_generated/api"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { type ActionCtx, action, internalMutation } from "../_generated/server"
+import { api, internal } from "../_generated/api"
+import { action, internalMutation } from "../_generated/server"
 import { type AgentRuntimeInput } from "../runs/agent/input"
-import { assemblePrompt } from "../runs/agent/prompt"
-import { getPromptedTools, toolExecutionType } from "../runs/agent/tools/policy"
-import { createRunToolSnapshot } from "../runs/agent/tools/snapshot"
 import { isTerminalRunStatus, toolSnapshot } from "../runs/schema"
-import { type RuntimeSkill, runtimeSkillNames } from "../skills/runtime"
-import { runLifecycleTools } from "./lifecycle"
+import { drainSession } from "../sessions/drain"
+import { runtimeSkillNames } from "../skills/runtime"
 import {
-  type RuntimePermissions,
-  runtimePermissions,
-} from "./permissions/index"
-import { visibleNativeToolSnapshots } from "./permissions/native"
-import { sandboxTools } from "./sandbox"
+  type LoadedRun,
+  type LoadedSession,
+  loadRunSession,
+  loadRuntimeSkills,
+  loadSandboxReference,
+} from "./context/loaders"
+import {
+  buildRuntimePrompt,
+  runtimeResponse,
+  runtimeToolSnapshot,
+  runtimeTools,
+} from "./context/response"
+import { runLifecycleTools } from "./lifecycle"
+import { runtimePermissions } from "./permissions/index"
 import { syncSessionReactions } from "./sessions"
 import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
@@ -23,6 +27,7 @@ import { recordTrace } from "./traces/data"
 
 export const load = action({
   args: {
+    attempt: v.number(),
     runId: v.id("runs"),
     secret: v.string(),
   },
@@ -57,16 +62,22 @@ export const load = action({
     }
 
     const skillNames = runtimeSkillNames(skills)
-    const [sandbox, permissions, activeSurface] = await Promise.all([
+    const [sandbox, permissions, activeSurface, handoffs] = await Promise.all([
       loadSandboxReference(ctx, { runId: args.runId, status: run.status }),
       runtimePermissions(ctx, input, skillNames),
       loadActiveSurface(ctx, input, args.runId),
+      ctx.runQuery(api.runtime.waiters.handoffs.load, {
+        runId: args.runId,
+        secret: args.secret,
+      }),
     ])
     const lifecycleTools = runLifecycleTools()
     const prompt = buildRuntimePrompt(input, activeSurface, permissions, skills)
 
-    await ctx.runMutation(internal.runtime.context.prepareRun, {
+    const drained = await ctx.runMutation(internal.runtime.context.prepareRun, {
+      attempt: args.attempt,
       runId: args.runId,
+      ...(session === null ? {} : { sessionId: session._id }),
       tools: runtimeToolSnapshot(
         input,
         activeSurface,
@@ -77,6 +88,8 @@ export const load = action({
 
     return runtimeResponse({
       activeSurface,
+      drained,
+      handoffs,
       input,
       lifecycleTools,
       permissions,
@@ -124,136 +137,18 @@ export const reload = action({
   },
 })
 
-type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
-type LoadedRun = {
-  _id: Id<"runs">
-  status: "completed" | "failed" | "queued" | "running" | "stopped"
-  tenantId: string
-}
-
-async function loadRunSession(ctx: ActionCtx, runId: Id<"runs">) {
-  const session = (await ctx.runQuery(internal.sessions.data.getByRun, {
-    runId,
-  })) as LoadedSession
-
-  if (session !== null) {
-    await syncSessionReactions(ctx, session._id)
-  }
-
-  return session
-}
-
-function buildRuntimePrompt(
-  input: AgentRuntimeInput,
-  activeSurface: LoadedActiveSurface,
-  permissions: RuntimePermissions,
-  skills: RuntimeSkill[]
-) {
-  return assemblePrompt(input, {
-    activeSurface: activeSurface.state,
-    promptedTools: getPromptedTools({
-      executionType: toolExecutionType(input.type),
-      permissions: permissions.all,
-      toolModes: permissions.toolModes,
-    }),
-    skills,
-  })
-}
-
-async function loadRuntimeSkills(ctx: ActionCtx, tenantId: string) {
-  return (await ctx.runQuery(internal.skills.catalog.listForRuntime, {
-    tenantId,
-  })) as RuntimeSkill[]
-}
-type LoadedSandbox = { externalId: string } | null
-type LoadedSession = { _id: Id<"sessions"> } | null
-
-function runtimeToolSnapshot(
-  input: AgentRuntimeInput,
-  activeSurface: LoadedActiveSurface,
-  lifecycleTools: ReturnType<typeof runLifecycleTools>,
-  permissions: RuntimePermissions
-) {
-  return createRunToolSnapshot({
-    activeSurfaceTools: visibleNativeToolSnapshots(activeSurface.tools),
-    capabilities: permissions.capabilities,
-    lifecycleTools: visibleNativeToolSnapshots(lifecycleTools),
-    sandboxTools: visibleNativeToolSnapshots(sandboxTools),
-    webSearch: input.type !== "automation" || input.automation.access.web,
-  })
-}
-
-function runtimeResponse(args: {
-  activeSurface: LoadedActiveSurface
-  input: AgentRuntimeInput
-  lifecycleTools: ReturnType<typeof runLifecycleTools>
-  permissions: RuntimePermissions
-  prompt: RuntimePrompt
-  run: LoadedRun
-  sandbox: LoadedSandbox
-  session: LoadedSession
-}) {
-  return {
-    prompt: args.prompt,
-    run: {
-      id: args.input.run._id,
-      rootId: args.input.run.rootId ?? null,
-      sandboxId: args.sandbox?.externalId ?? null,
-      status: args.run.status,
-      tenantId: args.input.run.tenantId,
-    },
-    session:
-      args.session === null
-        ? null
-        : {
-            id: args.session._id,
-          },
-    activeSurface: args.activeSurface.state,
-    tools: runtimeTools(
-      args.lifecycleTools,
-      args.activeSurface,
-      args.permissions
-    ),
-  }
-}
-
-function runtimeTools(
-  lifecycleTools: ReturnType<typeof runLifecycleTools>,
-  activeSurface: LoadedActiveSurface,
-  permissions: RuntimePermissions
-) {
-  return [
-    ...lifecycleTools,
-    ...activeSurface.tools,
-    ...permissions.tools,
-    ...sandboxTools,
-  ]
-}
-
-async function loadSandboxReference(
-  ctx: ActionCtx,
-  args: {
-    runId: Id<"runs">
-    status: Doc<"runs">["status"]
-  }
-) {
-  if (isTerminalRunStatus(args.status)) {
-    return (await ctx.runQuery(internal.runtime.sandboxes.retainedByRun, {
-      runId: args.runId,
-    })) as { externalId: string } | null
-  }
-
-  return (await ctx.runMutation(internal.runtime.sandboxes.claimForRun, {
-    runId: args.runId,
-  })) as { externalId: string } | null
-}
-
+// Prepares the run in one transaction: the prepared and started traces, the
+// status flip to running, and the initial session drain land together so the
+// worker starts its loop with zero extra round trips and a failed prepare
+// consumes nothing.
 export const prepareRun = internalMutation({
   args: {
+    attempt: v.number(),
     runId: v.id("runs"),
+    sessionId: v.optional(v.id("sessions")),
     tools: toolSnapshot,
   },
-  returns: v.null(),
+  returns: v.any(),
   handler: async (ctx, args) => {
     const run = await ctx.db.get(args.runId)
 
@@ -270,6 +165,24 @@ export const prepareRun = internalMutation({
       },
     })
 
-    return null
+    if (isTerminalRunStatus(run.status)) {
+      return null
+    }
+
+    await recordTrace(ctx, {
+      attempt: args.attempt,
+      key: `${args.runId}:0:run.started:attempt-${args.attempt}`,
+      run,
+      sequence: 0,
+      type: "run.started",
+    })
+
+    if (run.status === "queued") {
+      await ctx.db.patch(args.runId, { status: "running" })
+    }
+
+    return args.sessionId === undefined
+      ? null
+      : await drainSession(ctx, { sessionId: args.sessionId })
   },
 })

@@ -94,6 +94,9 @@ function createModel(responses: QueuedModelResponse[]) {
 }
 
 function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
+  // The context load bundles the first handoff snapshot; later reconciles
+  // fetch the rest.
+  const bundled = handoffs.shift() ?? emptyHandoffs()
   const loadRunHandoffs = vi.fn(async () => {
     return handoffs.shift() ?? emptyHandoffs()
   })
@@ -111,6 +114,8 @@ function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
     },
     context: {
       activeSurface: null,
+      drained: null,
+      handoffs: bundled,
       prompt: {
         context: "context",
         instructions: "system",

@@ -28,10 +28,31 @@ export async function reconcileHandoffs(
   messages: ModelMessage[],
   subjects: HandoffSubject[] = []
 ): Promise<ReconcileResult> {
-  const handoffs = mergeHandoffs(
-    await loadSubjectHandoffs(runtime, subjects),
-    await runtime.convex.loadRunHandoffs({ runId: runtime.context.run.id })
+  const [subjectHandoffs, runHandoffs] = await Promise.all([
+    loadSubjectHandoffs(runtime, subjects),
+    runtime.convex.loadRunHandoffs({ runId: runtime.context.run.id }),
+  ])
+  const applied = await applyHandoffs(
+    runtime,
+    messages,
+    mergeHandoffs(subjectHandoffs, runHandoffs)
   )
+  const messageProgressed = await appendSessionMessages(runtime, messages)
+
+  return {
+    ...applied,
+    messageProgressed,
+    progressed: applied.handoffProgressed || messageProgressed,
+  }
+}
+
+// Applies already-loaded handoffs without fetching or draining; run entry
+// uses this with the handoffs bundled into the runtime context load.
+export async function applyHandoffs(
+  runtime: ToolRuntime,
+  messages: ModelMessage[],
+  handoffs: RunHandoffs
+) {
   let handoffProgressed = false
 
   for (const approval of handoffs.approvals) {
@@ -46,13 +67,8 @@ export async function reconcileHandoffs(
     }
   }
 
-  const messageProgressed = await appendSessionMessages(runtime, messages)
-  const progressed = handoffProgressed || messageProgressed
-
   return {
     handoffProgressed,
-    messageProgressed,
-    progressed,
     pending: pendingHandoffs(handoffs),
   }
 }

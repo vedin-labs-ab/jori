@@ -26,7 +26,11 @@ export const miloAgentRun = task({
   },
   run: async (payload: AgentRunPayload, { ctx }) => {
     const convex = new MiloConvexClient()
-    const context = await convex.loadRun(payload)
+    const attempt = ctx.attempt.number
+    // Loading the run also records the started trace, flips the run to
+    // running, and drains the first session batch, so the loop starts with
+    // no further round trips.
+    const context = await convex.loadRun(payload, attempt)
     const sandbox = new E2BSandboxRuntime(
       convex,
       context.run.id,
@@ -40,10 +44,6 @@ export const miloAgentRun = task({
         status: "skipped",
       }
     }
-
-    const attempt = ctx.attempt.number
-
-    await recordRunEvent(convex, context, "run.started", 0, attempt)
 
     try {
       const output = await runAgentLoop({

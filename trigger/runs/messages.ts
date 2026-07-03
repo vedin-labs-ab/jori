@@ -3,6 +3,7 @@ import { renderPromptTemplate } from "../../prompts/render"
 import { type ModelMessage } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import {
+  type DrainedSessionBatch,
   type RuntimeInteraction,
   type RuntimeMessage,
   type RuntimePrompt,
@@ -94,27 +95,64 @@ export async function appendSessionMessages(
 
     hasMore = drained.hasMore
 
-    // Person context precedes the batch so a new speaker's bundle lands
-    // before their first message.
-    for (const content of drained.contexts ?? []) {
-      messages.push({ content, role: "user" })
+    if (appendDrainedBatch(runtime, messages, drained)) {
       appended = true
     }
+  }
 
-    for (const item of sessionItems(drained)) {
-      if (item.type === "message") {
-        updateActiveSurfaceTarget(runtime, item.message)
-      }
+  return appended
+}
 
-      messages.push({
-        content:
-          item.type === "message"
-            ? formatSessionMessage(item.message)
-            : formatSessionInteraction(item.interaction),
-        role: "user",
-      })
-      appended = true
+// Appends the batch the runtime context load already drained, then keeps
+// draining only when that batch was cut short.
+export async function seedSessionMessages(
+  runtime: ToolRuntime,
+  messages: ModelMessage[]
+) {
+  const drained = runtime.context.drained
+
+  if (drained === null) {
+    return false
+  }
+
+  const appended = appendDrainedBatch(runtime, messages, drained)
+
+  if (!drained.hasMore) {
+    return appended
+  }
+
+  const more = await appendSessionMessages(runtime, messages)
+
+  return appended || more
+}
+
+function appendDrainedBatch(
+  runtime: ToolRuntime,
+  messages: ModelMessage[],
+  drained: DrainedSessionBatch
+) {
+  let appended = false
+
+  // Person context precedes the batch so a new speaker's bundle lands
+  // before their first message.
+  for (const content of drained.contexts ?? []) {
+    messages.push({ content, role: "user" })
+    appended = true
+  }
+
+  for (const item of sessionItems(drained)) {
+    if (item.type === "message") {
+      updateActiveSurfaceTarget(runtime, item.message)
     }
+
+    messages.push({
+      content:
+        item.type === "message"
+          ? formatSessionMessage(item.message)
+          : formatSessionInteraction(item.interaction),
+      role: "user",
+    })
+    appended = true
   }
 
   return appended

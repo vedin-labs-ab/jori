@@ -14,13 +14,12 @@ import {
   type ActiveSurface,
   type AgentRunPayload,
   type ConvexId,
+  type DrainedSessionBatch,
   type HandoffSubject,
   type JsonObject,
   type RunHandoffs,
   type RuntimeContext,
   type RuntimeEventInput,
-  type RuntimeInteraction,
-  type RuntimeMessage,
   type RuntimePrompt,
   type RuntimeTool,
   type SurfaceReactionTarget,
@@ -30,8 +29,9 @@ export class MiloConvexClient {
   private readonly client = new ConvexHttpClient(requireConvexUrl())
   private readonly secret = requireWorkerSecret()
 
-  async loadRun(payload: AgentRunPayload) {
+  async loadRun(payload: AgentRunPayload, attempt: number) {
     return (await this.client.action(api.runtime.context.load, {
+      attempt,
       runId: payload.runId,
       secret: this.secret,
     })) as RuntimeContext
@@ -174,12 +174,7 @@ export class MiloConvexClient {
       limit: args.limit,
       secret: this.secret,
       sessionId: args.sessionId,
-    })) as {
-      contexts?: string[]
-      hasMore: boolean
-      interactions?: RuntimeInteraction[]
-      messages: RuntimeMessage[]
-    }
+    })) as DrainedSessionBatch
   }
 
   async requestApproval(args: {

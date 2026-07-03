@@ -201,6 +201,8 @@ function createRuntime(
         surface: "slack",
         target: null,
       },
+      drained: null,
+      handoffs: { approvals: [], offers: [] },
       prompt: {
         context: "context",
         instructions: "system",
