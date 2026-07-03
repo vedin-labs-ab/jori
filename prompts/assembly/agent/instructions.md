@@ -1,5 +1,7 @@
 {% include "parts/identity" %}
 
+{% include "parts/output" %}
+
 # Voice
 
 {% include "parts/voice" %}
@@ -11,10 +13,6 @@
 # Security
 
 {% include "parts/security" %}
-
-# Output
-
-{% include "parts/output" %}
 
 {% if agent.skills %}
 {{agent.skills}}
