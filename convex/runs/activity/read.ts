@@ -1,30 +1,12 @@
+import {
+  type RuntimeModelUsage,
+  type RuntimeValueSummary,
+} from "../../../contracts/runtime"
+import { isRecord, readNumber, readString } from "./helpers"
 import { type ToolLabel } from "./types"
 
-export type ToolResult =
-  | { kind: "string"; preview: string; length: number }
-  | { kind: "number"; preview: string }
-  | { kind: "boolean" }
-  | { kind: "null" }
-  | { kind: "array"; size: number }
-  | {
-      hasMore?: boolean
-      itemCount?: number
-      itemKey?: string
-      kind: "object"
-      size: number
-    }
-
-export type ModelUsage = {
-  durationMs: number
-  inputTokens: number
-  inputCacheReadTokens: number
-  inputCacheWriteTokens: number
-  inputUncachedTokens: number
-  outputTokens: number
-  reasoningTokens: number
-  totalTokens: number
-  toolCalls: number
-}
+export type ToolResult = RuntimeValueSummary
+export type ModelUsage = RuntimeModelUsage
 
 const modelReasoningCharacterLimit = 1500
 
@@ -230,20 +212,6 @@ function optionalString(key: "itemKey", value: unknown) {
   return string === undefined ? {} : { [key]: string }
 }
 
-function readNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
-function readString(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
-}
-
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   return isRecord(value) ? value : undefined
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }

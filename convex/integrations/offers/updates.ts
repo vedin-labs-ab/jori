@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { internalMutation } from "../../_generated/server"
-import { integrationOfferDelivery } from "./schema"
+import { messageDeliveryValidator } from "../../shared/integrations"
 import {
   markIntegrationOfferConnected,
   markIntegrationOfferFailed,
@@ -48,7 +48,7 @@ export const complete = internalMutation({
 export const recordDelivery = internalMutation({
   args: {
     integrationOfferId: v.id("integrationOffers"),
-    delivery: integrationOfferDelivery,
+    delivery: messageDeliveryValidator,
   },
   returns: v.null(),
   handler: async (ctx, args) => {

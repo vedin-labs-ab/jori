@@ -2,13 +2,19 @@ import { type GenericId } from "convex/values"
 import { type ToolSurface } from "../contracts/integrations"
 import { type JsonObject, type JsonValue } from "../contracts/json"
 import { type ToolAccess } from "../contracts/permissions"
-import { type RuntimePrompt } from "../contracts/runtime"
+import {
+  type RuntimeModelUsage,
+  type RuntimePrompt,
+  type RuntimeValueSummary,
+} from "../contracts/runtime"
 
 export type { JsonObject, JsonValue } from "../contracts/json"
 export {
   agentTaskId,
   cleanupTaskId,
+  type RuntimeModelUsage,
   type RuntimePrompt,
+  type RuntimeValueSummary,
   type SurfaceReactionTarget,
 } from "../contracts/runtime"
 
@@ -38,20 +44,6 @@ type RuntimeToolRoute =
   | "run"
   | "sandbox"
 
-export type RuntimeValueSummary =
-  | { kind: "string"; preview: string; length: number }
-  | { kind: "number"; preview: string }
-  | { kind: "boolean" }
-  | { kind: "null" }
-  | { kind: "array"; size: number }
-  | {
-      hasMore?: boolean
-      itemCount?: number
-      itemKey?: string
-      kind: "object"
-      size: number
-    }
-
 export type RuntimeErrorTraceData = {
   error: string
 }
@@ -76,18 +68,6 @@ type RuntimeToolTraceData =
     }
   | { tool: RuntimeToolTraceTool; input: JsonValue | null; error: string }
   | { tool: RuntimeToolTraceTool }
-
-export type RuntimeModelUsage = {
-  durationMs: number
-  inputTokens: number
-  inputCacheReadTokens: number
-  inputCacheWriteTokens: number
-  inputUncachedTokens: number
-  outputTokens: number
-  reasoningTokens: number
-  totalTokens: number
-  toolCalls: number
-}
 
 type RuntimeModelTraceData = {
   usage: RuntimeModelUsage

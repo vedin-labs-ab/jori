@@ -1,7 +1,10 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { actorValidator } from "../shared/actor"
-import { toolSurfaceValidator } from "../shared/integrations"
+import {
+  messageDeliveryValidator,
+  toolSurfaceValidator,
+} from "../shared/integrations"
 
 export const approvalDecision = v.union(
   v.literal("approved"),
@@ -14,17 +17,6 @@ const approvalStatus = v.union(
   v.literal("cancelled"),
   v.literal("expired"),
   v.literal("failed")
-)
-export const approvalDelivery = v.union(
-  v.object({
-    integration: v.literal("slack"),
-    integrationId: v.id("integrations"),
-    data: v.object({
-      channelId: v.string(),
-      messageTs: v.string(),
-      threadTs: v.optional(v.string()),
-    }),
-  })
 )
 export const approvalDeliveryFailure = v.object({
   failedAt: v.number(),
@@ -49,7 +41,7 @@ export const approvals = defineTable({
   createdAt: v.number(),
   expiresAt: v.number(),
   functionId: v.optional(v.id("_scheduled_functions")),
-  delivery: v.optional(approvalDelivery),
+  delivery: v.optional(messageDeliveryValidator),
   deliveryFailure: v.optional(approvalDeliveryFailure),
   cancelledAt: v.optional(v.number()),
   decidedAt: v.optional(v.number()),
