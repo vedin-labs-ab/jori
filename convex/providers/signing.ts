@@ -1,7 +1,7 @@
+import { base64UrlDecodeBytes, base64UrlEncode } from "../shared/encoding"
+
 export async function createSignedState<State>(secret: string, state: State) {
-  const payload = base64UrlEncode(
-    new TextEncoder().encode(JSON.stringify(state))
-  )
+  const payload = base64UrlEncode(JSON.stringify(state))
   const signature = await hmacSha256Hex(secret, payload)
 
   return `${payload}.${signature}`
@@ -24,7 +24,9 @@ export async function parseSignedState<State>(args: {
     throw new Error(`Invalid ${args.errorLabel} state signature`)
   }
 
-  return JSON.parse(new TextDecoder().decode(base64UrlDecode(payload))) as State
+  return JSON.parse(
+    new TextDecoder().decode(base64UrlDecodeBytes(payload))
+  ) as State
 }
 
 export async function hmacSha256Hex(secret: string, value: string) {
@@ -58,33 +60,4 @@ export function timingSafeEqual(left: string, right: string) {
   }
 
   return difference === 0
-}
-
-function base64UrlEncode(bytes: Uint8Array) {
-  let binary = ""
-
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte)
-  }
-
-  return btoa(binary)
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replace(/=+$/, "")
-}
-
-function base64UrlDecode(value: string) {
-  const base64 = value.replaceAll("-", "+").replaceAll("_", "/")
-  const padded = base64.padEnd(
-    base64.length + ((4 - (base64.length % 4)) % 4),
-    "="
-  )
-  const binary = atob(padded)
-  const bytes = new Uint8Array(binary.length)
-
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index)
-  }
-
-  return bytes
 }

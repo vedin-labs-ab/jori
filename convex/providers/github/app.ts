@@ -1,4 +1,9 @@
 import {
+  base64DecodeBytes,
+  base64UrlEncode,
+  base64UrlEncodeBytes,
+} from "../../shared/encoding"
+import {
   githubApiUrl,
   requireGitHubAppId,
   requireGitHubPrivateKey,
@@ -112,6 +117,10 @@ async function createGitHubAppJwt() {
   return `${input}.${base64UrlEncodeBytes(signature)}`
 }
 
+function base64UrlEncodeJson(value: unknown) {
+  return base64UrlEncode(JSON.stringify(value))
+}
+
 async function signRs256(input: string) {
   const key = await crypto.subtle.importKey(
     "pkcs8",
@@ -133,7 +142,7 @@ async function signRs256(input: string) {
 function readPkcs8PrivateKeyBytes(value: string) {
   const pem = normalizePrivateKey(value)
   const body = pem.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "")
-  const keyBytes = base64ToBytes(body)
+  const keyBytes = base64DecodeBytes(body)
 
   if (pem.includes("-----BEGIN RSA PRIVATE KEY-----")) {
     return wrapPkcs1PrivateKey(keyBytes)
@@ -153,38 +162,10 @@ function normalizePrivateKey(value: string) {
 
 function decodeBase64Text(value: string) {
   try {
-    return new TextDecoder().decode(base64ToBytes(value))
+    return new TextDecoder().decode(base64DecodeBytes(value))
   } catch {
     return ""
   }
-}
-
-function base64UrlEncodeJson(value: unknown) {
-  return base64UrlEncodeBytes(new TextEncoder().encode(JSON.stringify(value)))
-}
-
-function base64UrlEncodeBytes(bytes: Uint8Array) {
-  let binary = ""
-
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte)
-  }
-
-  return btoa(binary)
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replace(/=+$/, "")
-}
-
-function base64ToBytes(value: string) {
-  const binary = atob(value)
-  const bytes = new Uint8Array(binary.length)
-
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index)
-  }
-
-  return bytes
 }
 
 function wrapPkcs1PrivateKey(pkcs1: Uint8Array) {
