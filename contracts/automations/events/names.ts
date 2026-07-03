@@ -62,6 +62,10 @@ export const pullRequestLifecycleEvent = {
   reopened: "pull_request.reopened",
 } as const
 
+export const commitLifecycleEvent = {
+  pushed: "commits.pushed",
+} as const
+
 export const linearIssueLifecycleEvent = {
   created: "issue.created",
   stateChanged: "issue.state_changed",
