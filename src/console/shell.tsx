@@ -71,6 +71,10 @@ const consoleNavigation = [
   { icon: Layers, label: "Context", to: "/context" },
 ] as const
 
+function isNavigationActive(pathname: string, to: string) {
+  return pathname === to || pathname.startsWith(`${to}/`)
+}
+
 export function PublicConsoleFrame({
   chromeContent,
   children,
@@ -182,7 +186,7 @@ function ConsoleSidebar({ pathname }: { pathname: string }) {
                 <SidebarMenuItem key={item.to}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.to}
+                    isActive={isNavigationActive(pathname, item.to)}
                     tooltip={item.label}
                   >
                     <Link to={item.to}>

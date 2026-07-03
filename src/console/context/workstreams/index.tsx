@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
+import { ContextPage } from ".."
 import { ContextSectionTitle } from "../section"
 import { WorkstreamCard } from "./card"
 import { WorkstreamDetail } from "./detail"
@@ -32,7 +33,15 @@ const filterLabels: Record<StatusFilter, string> = {
 
 // Milo's deduced picture of the org's active work: suggestions to review on
 // top, the confirmed roster below. Corrections teach the judge.
-export function ContextWorkstreams({ tenantId }: { tenantId: string }) {
+export function ContextWorkstreams() {
+  return (
+    <ContextPage tab="workstreams">
+      {(tenantId) => <WorkstreamsView tenantId={tenantId} />}
+    </ContextPage>
+  )
+}
+
+function WorkstreamsView({ tenantId }: { tenantId: string }) {
   const result = useQuery(api.deduction.console.queries.list, { tenantId })
   const [filter, setFilter] = useState<StatusFilter>("active")
   const [openId, setOpenId] = useState<Workstream["id"] | null>(null)
