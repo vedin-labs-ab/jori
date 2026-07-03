@@ -125,7 +125,7 @@ function promptMessages(
   return [
     {
       role: "system",
-      content: renderPromptTemplate(promptTemplates["artifact/model"], {
+      content: renderPromptTemplate(promptTemplates["artifacts/model"], {
         artifact: {
           instruction: input.instruction,
         },

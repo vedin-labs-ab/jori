@@ -42,7 +42,7 @@ describe("renderPromptTemplate", () => {
 
   test("renders includes from the prompt registry", () => {
     expect(
-      renderPromptTemplate('{% include "parts/identity" %}', {})
+      renderPromptTemplate('{% include "agent/instructions/identity" %}', {})
     ).toContain("You are Milo")
   })
 

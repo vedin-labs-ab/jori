@@ -36,7 +36,7 @@ export function createCommunicationGuidance(args: {
 
   return {
     communication: renderPromptTemplate(
-      promptTemplates["communication/message"],
+      promptTemplates["agent/instructions/communication"],
       {}
     ).trim(),
     format:
@@ -72,7 +72,7 @@ function createFormatBlock(
 
   return parts.length === 0
     ? ""
-    : renderPromptTemplate(promptTemplates["format/message"], {
+    : renderPromptTemplate(promptTemplates["agent/instructions/format"], {
         format: {
           parts: parts.join("\n\n"),
         },

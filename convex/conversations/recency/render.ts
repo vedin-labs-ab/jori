@@ -7,7 +7,7 @@ export function renderRecentActivity(args: {
   entries: RecencyEntry[]
   name: string
 }) {
-  return renderPromptTemplate(promptTemplates["conversation/recency"], {
+  return renderPromptTemplate(promptTemplates["agent/session/recency"], {
     recency: {
       items: args.entries.map(recencyItem),
       name: args.name,

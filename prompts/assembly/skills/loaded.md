@@ -1,3 +1,0 @@
-## {{skill.title}}
-
-{{skill.body}}

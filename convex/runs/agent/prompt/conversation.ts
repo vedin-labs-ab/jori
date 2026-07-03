@@ -28,7 +28,7 @@ function formatConversationSummary(input: MessageInput) {
 function formatMessageEntry(entry: PromptMessageEntry) {
   const observed = entry.observedAt ?? entry.createdAt
 
-  return renderPromptTemplate(promptTemplates["conversation/message"], {
+  return renderPromptTemplate(promptTemplates["agent/session/message"], {
     message: {
       actor: entry.actor ?? "unknown",
       actorIds: formatEntryIds(entry.actorIds),

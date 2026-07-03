@@ -7,7 +7,7 @@ import { type RuntimeInteraction, type RuntimeMessage } from "../types"
 export function formatSessionMessage(message: RuntimeMessage) {
   const observed = message.observedAt ?? message.createdAt
 
-  return renderPromptTemplate(promptTemplates["conversation/message"], {
+  return renderPromptTemplate(promptTemplates["agent/session/message"], {
     message: {
       actor: message.actor ?? "unknown",
       actorIds: message.actorIds.join(", "),
@@ -23,7 +23,7 @@ export function formatSessionMessage(message: RuntimeMessage) {
 export function formatSessionInteraction(interaction: RuntimeInteraction) {
   const observed = interaction.observedAt ?? interaction.createdAt
 
-  return renderPromptTemplate(promptTemplates["conversation/reaction"], {
+  return renderPromptTemplate(promptTemplates["agent/session/reaction"], {
     reaction: {
       actor: interaction.actor ?? "unknown",
       actorIds: interaction.actorIds.join(", "),

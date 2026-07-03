@@ -3,10 +3,10 @@
 A {{message.integration}} message triggered this run.
 
 {% if message.surface == "github" %}
-{% include "target/github" %}
+{% include "agent/context/trigger/github" %}
 {% endif %}
 {% if message.surface == "linear" %}
-{% include "target/linear" %}
+{% include "agent/context/trigger/linear" %}
 {% endif %}
 
 {% if message.conversation %}
