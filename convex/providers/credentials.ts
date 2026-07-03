@@ -1,4 +1,7 @@
-import { type Doc } from "../_generated/dataModel"
+import { providerForIntegration } from "../../contracts/integrations"
+import { type Provider } from "../../contracts/providers"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { type MutationCtx } from "../_generated/server"
 
 type CredentialField = "number" | "string"
 type CredentialShape = Record<string, CredentialField>
@@ -144,4 +147,39 @@ export function readRefreshToken(credentials: unknown) {
   }
 
   return undefined
+}
+
+export async function requireProviderIntegration(
+  ctx: MutationCtx,
+  args: {
+    integrationId: Id<"integrations">
+    provider: Provider
+    label: string
+  }
+) {
+  const integration = await ctx.db.get(args.integrationId)
+
+  if (
+    integration === null ||
+    providerForIntegration(integration.integration) !== args.provider
+  ) {
+    throw new Error(`${args.label} integration not found`)
+  }
+
+  return integration
+}
+
+export async function saveOAuthCredentials<
+  Credentials extends Record<string, unknown>,
+>(
+  ctx: MutationCtx,
+  integrationId: Id<"integrations">,
+  credentials: Credentials
+) {
+  await ctx.db.patch(integrationId, {
+    credentials,
+    updatedAt: Date.now(),
+  })
+
+  return credentials
 }

@@ -2,7 +2,11 @@ import { v } from "convex/values"
 import { type Id } from "../../_generated/dataModel"
 import { internalMutation, mutation } from "../../_generated/server"
 import { linkSetupIdentity } from "../../persons/install"
-import { readRefreshToken } from "../credentials"
+import {
+  readRefreshToken,
+  requireProviderIntegration,
+  saveOAuthCredentials,
+} from "../credentials"
 import { createSignedInstallState } from "../install"
 import { type GoogleIntegration } from "./config"
 import {
@@ -160,38 +164,25 @@ export const updateOAuthCredentials = internalMutation({
     scope: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const integration = await ctx.db.get(args.integrationId)
-
-    if (
-      integration === null ||
-      (integration.integration !== "gmail" &&
-        integration.integration !== "googleCalendar" &&
-        integration.integration !== "googleDrive")
-    ) {
-      throw new Error("Google Workspace integration not found")
-    }
-
-    const existingRefreshToken = readRefreshToken(integration.credentials)
-    const refreshToken = args.refreshToken ?? existingRefreshToken
+    const integration = await requireProviderIntegration(ctx, {
+      integrationId: args.integrationId,
+      provider: "google",
+      label: "Google Workspace",
+    })
+    const refreshToken =
+      args.refreshToken ?? readRefreshToken(integration.credentials)
 
     if (refreshToken === undefined) {
       throw new Error("Google Workspace refresh token not found")
     }
 
-    const credentials = {
+    return await saveOAuthCredentials(ctx, args.integrationId, {
       tokens: {
         access: args.accessToken,
         refresh: refreshToken,
       },
       expiresAt: args.expiresAt,
       scope: args.scope,
-    }
-
-    await ctx.db.patch(args.integrationId, {
-      credentials,
-      updatedAt: Date.now(),
     })
-
-    return credentials
   },
 })

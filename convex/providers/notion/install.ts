@@ -4,6 +4,10 @@ import {
   linkSetupIdentity,
   setupIdentityValidator,
 } from "../../persons/install"
+import {
+  requireProviderIntegration,
+  saveOAuthCredentials,
+} from "../credentials"
 import { buildInstallState } from "../install"
 import { createSignedNotionState } from "./signing"
 
@@ -105,24 +109,17 @@ export const updateOAuthCredentials = internalMutation({
     refreshToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const integration = await ctx.db.get(args.integrationId)
+    await requireProviderIntegration(ctx, {
+      integrationId: args.integrationId,
+      provider: "notion",
+      label: "Notion",
+    })
 
-    if (integration === null || integration.integration !== "notion") {
-      throw new Error("Notion integration not found")
-    }
-
-    const credentials = {
+    return await saveOAuthCredentials(ctx, args.integrationId, {
       tokens: {
         access: args.accessToken,
         refresh: args.refreshToken,
       },
-    }
-
-    await ctx.db.patch(args.integrationId, {
-      credentials,
-      updatedAt: Date.now(),
     })
-
-    return credentials
   },
 })

@@ -6,7 +6,11 @@ import {
   mutation,
 } from "../../_generated/server"
 import { linkSetupIdentity } from "../../persons/install"
-import { readRefreshToken } from "../credentials"
+import {
+  readRefreshToken,
+  requireProviderIntegration,
+  saveOAuthCredentials,
+} from "../credentials"
 import { createSignedInstallState } from "../install"
 import { type MicrosoftIntegration } from "./config"
 import { getMicrosoftIdentityEmail } from "./identity"
@@ -180,18 +184,13 @@ export const updateOAuthCredentials = internalMutation({
     scope: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const integration = await ctx.db.get(args.integrationId)
-
-    if (
-      integration === null ||
-      (integration.integration !== "microsoftCalendar" &&
-        integration.integration !== "microsoftEmail")
-    ) {
-      throw new Error("Microsoft integration not found")
-    }
-
-    const existingRefreshToken = readRefreshToken(integration.credentials)
-    const refreshToken = args.refreshToken ?? existingRefreshToken
+    const integration = await requireProviderIntegration(ctx, {
+      integrationId: args.integrationId,
+      provider: "microsoft",
+      label: "Microsoft",
+    })
+    const refreshToken =
+      args.refreshToken ?? readRefreshToken(integration.credentials)
     const tenantId = readTenantId(integration.credentials)
 
     if (refreshToken === undefined) {
@@ -202,7 +201,7 @@ export const updateOAuthCredentials = internalMutation({
       throw new Error("Microsoft tenant ID not found")
     }
 
-    const credentials = {
+    return await saveOAuthCredentials(ctx, args.integrationId, {
       tokens: {
         access: args.accessToken,
         refresh: refreshToken,
@@ -210,14 +209,7 @@ export const updateOAuthCredentials = internalMutation({
       expiresAt: args.expiresAt,
       scope: args.scope,
       tenantId,
-    }
-
-    await ctx.db.patch(args.integrationId, {
-      credentials,
-      updatedAt: Date.now(),
     })
-
-    return credentials
   },
 })
 
