@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { api } from "../../../../convex/_generated/api"
-import { type Workstream } from "./index"
+import { type Workstream } from "./card"
 
 export function RenameDialog({
   tenantId,
@@ -56,7 +56,7 @@ function RenameForm({
   workstream: Workstream
   onClose: () => void
 }) {
-  const rename = useMutation(api.deduction.console.rename)
+  const rename = useMutation(api.deduction.console.corrections.rename)
   const [name, setName] = useState(workstream.name)
   const [brief, setBrief] = useState(workstream.brief)
 

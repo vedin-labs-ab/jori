@@ -1,5 +1,5 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
+import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { eventAnchor } from "./anchors"
 import { maxBeliefAnchors } from "./limits"
 import { type Sighting, type SourceRecord } from "./rules"
@@ -115,7 +115,7 @@ async function bumpBelief(
 // Confirmation thresholds count all accumulated support: existing evidence
 // resolved back to its integration, plus this op's new sightings.
 export async function loadSupport(
-  ctx: MutationCtx,
+  ctx: QueryCtx,
   beliefId: Id<"beliefs">
 ): Promise<SourceRecord[]> {
   const rows = await ctx.db

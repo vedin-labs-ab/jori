@@ -1,138 +1,197 @@
-import { useMutation, useQuery } from "convex/react"
-import { Lock, MoreHorizontal } from "lucide-react"
+import { useQuery } from "convex/react"
+import { Layers } from "lucide-react"
 import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
-import { relativeTime } from "../../shared/time"
 import { ContextSectionTitle } from "../section"
+import { WorkstreamActions } from "./actions"
+import { type Workstream, WorkstreamCard, type Workstreams } from "./card"
+import { WorkstreamDetail } from "./detail"
+import { MergeDialog } from "./merge"
 import { RenameDialog } from "./rename"
 
-type Workstreams = NonNullable<
-  ReturnType<typeof useQuery<typeof api.deduction.console.list>>
->["workstreams"]
-export type Workstream = Workstreams[number]
+type StatusFilter = "active" | "closed" | "rejected"
 
-// Milo's deduced picture of the org's active work. Read-only rows with light
-// corrections; a corrected workstream is locked against the judge.
+const filterLabels: Record<StatusFilter, string> = {
+  active: "Active",
+  closed: "Closed",
+  rejected: "Not workstreams",
+}
+
+// Milo's deduced picture of the org's active work: suggestions to review on
+// top, the confirmed roster below. Corrections teach the judge.
 export function ContextWorkstreams({ tenantId }: { tenantId: string }) {
-  const result = useQuery(api.deduction.console.list, { tenantId })
-  const [renaming, setRenaming] = useState<Workstream | null>(null)
+  const result = useQuery(api.deduction.console.queries.list, { tenantId })
+  const [filter, setFilter] = useState<StatusFilter>("active")
+  const [openId, setOpenId] = useState<Workstream["id"] | null>(null)
+  const [editing, setEditing] = useState<Workstream | null>(null)
+  const [merging, setMerging] = useState<Workstream | null>(null)
   const workstreams = result?.workstreams ?? []
+  const open = workstreams.find((row) => row.id === openId) ?? null
+
+  const dialogs = (workstream: Workstream) => ({
+    onOpen: () => setOpenId(workstream.id),
+    onEdit: () => setEditing(workstream),
+    onMerge: () => setMerging(workstream),
+  })
 
   return (
-    <div className="flex flex-col gap-3">
-      <ContextSectionTitle count={workstreams.length}>
-        Workstreams
-      </ContextSectionTitle>
-      {workstreams.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          Nothing deduced yet. Milo reviews activity daily and lists the bodies
-          of work it finds here.
-        </p>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-2">
+        <Select
+          value={filter}
+          onValueChange={(value) => setFilter(value as StatusFilter)}
+        >
+          <SelectTrigger size="sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(filterLabels).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {result === undefined ? (
+        <Skeleton className="h-28 w-full" />
       ) : (
-        <ul className="flex flex-col divide-y rounded-md border">
-          {workstreams.map((workstream) => (
-            <WorkstreamRow
-              key={workstream.id}
-              tenantId={tenantId}
-              workstream={workstream}
-              onRename={() => setRenaming(workstream)}
-            />
-          ))}
-        </ul>
+        <FilteredWorkstreams
+          tenantId={tenantId}
+          filter={filter}
+          workstreams={workstreams}
+          dialogs={dialogs}
+        />
       )}
+      <WorkstreamDetail
+        tenantId={tenantId}
+        workstream={open}
+        onClose={() => setOpenId(null)}
+        onEdit={() => setEditing(open)}
+        onMerge={() => setMerging(open)}
+      />
       <RenameDialog
         tenantId={tenantId}
-        workstream={renaming}
-        onClose={() => setRenaming(null)}
+        workstream={editing}
+        onClose={() => setEditing(null)}
+      />
+      <MergeDialog
+        tenantId={tenantId}
+        workstream={merging}
+        workstreams={workstreams}
+        onClose={() => setMerging(null)}
       />
     </div>
   )
 }
 
-function WorkstreamRow({
+function FilteredWorkstreams({
   tenantId,
-  workstream,
-  onRename,
+  filter,
+  workstreams,
+  dialogs,
 }: {
   tenantId: string
-  workstream: Workstream
-  onRename: () => void
+  filter: StatusFilter
+  workstreams: Workstreams
+  dialogs: (workstream: Workstream) => {
+    onOpen: () => void
+    onEdit: () => void
+    onMerge: () => void
+  }
 }) {
-  const latest = workstream.journal[0]
+  const section = (rows: Workstreams, quickActions: boolean) => (
+    <ul className="flex flex-col gap-2">
+      {rows.map((workstream) => (
+        <li key={workstream.id}>
+          <WorkstreamCard
+            workstream={workstream}
+            onOpen={dialogs(workstream).onOpen}
+            actions={
+              quickActions ? (
+                <WorkstreamActions
+                  tenantId={tenantId}
+                  workstream={workstream}
+                  only={["confirm", "reject"]}
+                  onEdit={dialogs(workstream).onEdit}
+                  onMerge={dialogs(workstream).onMerge}
+                />
+              ) : undefined
+            }
+          />
+        </li>
+      ))}
+    </ul>
+  )
+
+  if (filter !== "active") {
+    const rows = workstreams.filter((row) => row.status === filter)
+
+    return rows.length === 0 ? (
+      <WorkstreamsEmpty
+        description={`Nothing ${filterLabels[filter].toLowerCase()} yet.`}
+      />
+    ) : (
+      section(rows, false)
+    )
+  }
+
+  const suggested = workstreams.filter((row) => row.status === "proposed")
+  const confirmed = workstreams.filter((row) => row.status === "confirmed")
+
+  if (suggested.length === 0 && confirmed.length === 0) {
+    return (
+      <WorkstreamsEmpty description="Milo reviews activity across your connected tools every hour; suggested workstreams appear here." />
+    )
+  }
 
   return (
-    <li className="flex flex-col gap-1 p-3">
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm">{workstream.name}</span>
-        <Badge variant="outline">{workstream.status}</Badge>
-        {workstream.locked ? (
-          <Lock aria-label="Locked" className="size-3 text-muted-foreground" />
-        ) : null}
-        <span className="ml-auto text-muted-foreground text-xs">
-          seen {relativeTime(workstream.seenAt, Date.now())} ·{" "}
-          {workstream.evidenceCount} sightings
-        </span>
-        <WorkstreamActions
-          tenantId={tenantId}
-          workstream={workstream}
-          onRename={onRename}
-        />
-      </div>
-      <p className="text-muted-foreground text-sm">{workstream.brief}</p>
-      {latest === undefined ? null : (
-        <p className="text-muted-foreground/70 text-xs">{latest.entry}</p>
+    <div className="flex flex-col gap-4">
+      {suggested.length === 0 ? null : (
+        <section className="flex flex-col gap-2">
+          <ContextSectionTitle count={suggested.length}>
+            Needs review
+          </ContextSectionTitle>
+          {section(suggested, true)}
+        </section>
       )}
-    </li>
+      {confirmed.length === 0 ? null : (
+        <section className="flex flex-col gap-2">
+          <ContextSectionTitle count={confirmed.length}>
+            Confirmed
+          </ContextSectionTitle>
+          {section(confirmed, false)}
+        </section>
+      )}
+    </div>
   )
 }
 
-function WorkstreamActions({
-  tenantId,
-  workstream,
-  onRename,
-}: {
-  tenantId: string
-  workstream: Workstream
-  onRename: () => void
-}) {
-  const close = useMutation(api.deduction.console.close)
-  const setLock = useMutation(api.deduction.console.setLock)
-
+function WorkstreamsEmpty({ description }: { description: string }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button aria-label="Workstream actions" size="icon-sm" variant="ghost">
-          <MoreHorizontal className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onRename}>Rename…</DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() =>
-            setLock({
-              tenantId,
-              workstreamId: workstream.id,
-              locked: !workstream.locked,
-            })
-          }
-        >
-          {workstream.locked ? "Unlock" : "Lock"}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          disabled={workstream.status === "closed"}
-          onClick={() => close({ tenantId, workstreamId: workstream.id })}
-        >
-          Close
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Layers />
+        </EmptyMedia>
+        <EmptyTitle>No workstreams</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   )
 }
