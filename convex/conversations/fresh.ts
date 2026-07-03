@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { isTerminalRunStatus } from "../runs/schema"
 
 const waiterWakeGraceMs = 5 * 60 * 1000
 const runActivityGraceMs = 2 * 60 * 60 * 1000
@@ -11,7 +12,7 @@ export async function isFreshRunWithoutWaiter(
 ) {
   const run = await ctx.db.get(runId)
 
-  if (run === null || isTerminalRun(run)) {
+  if (run === null || isTerminalRunStatus(run.status)) {
     return false
   }
 
@@ -66,13 +67,5 @@ function isUnresumedWaiterWake(
     latestInactiveWaiter > 0 &&
     latestActivity <= latestInactiveWaiter &&
     now - latestInactiveWaiter > waiterWakeGraceMs
-  )
-}
-
-function isTerminalRun(run: Doc<"runs">) {
-  return (
-    run.status === "completed" ||
-    run.status === "failed" ||
-    run.status === "stopped"
   )
 }

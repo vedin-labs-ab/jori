@@ -3,6 +3,7 @@ import { approvalTtlMs } from "../../contracts/approvals"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { isTerminalRunStatus } from "../runs/schema"
 import { actorValidator } from "../shared/actor"
 import {
   messageDeliveryValidator,
@@ -140,7 +141,7 @@ export const decide = internalMutation({
 
     const run = await ctx.db.get(approval.runId)
 
-    if (run === null || isTerminalRun(run)) {
+    if (run === null || isTerminalRunStatus(run.status)) {
       return { status: "closed" as const, approval }
     }
 
@@ -256,12 +257,4 @@ function settledStatus(approval: Doc<"approvals">) {
   }
 
   return "decided" as const
-}
-
-function isTerminalRun(run: Doc<"runs">) {
-  return (
-    run.status === "completed" ||
-    run.status === "failed" ||
-    run.status === "stopped"
-  )
 }

@@ -6,11 +6,11 @@ import {
   type MutationCtx,
   mutation,
 } from "../_generated/server"
+import { isTerminalRunStatus } from "../runs/schema"
 import {
   findActiveSandbox,
   findSandboxByExternalId,
   findSessionByRun,
-  isTerminalRun,
 } from "./sandbox"
 import { requireWorkerSecret } from "./shared"
 
@@ -219,7 +219,7 @@ export async function claimReusableSandbox(
   if (
     run === null ||
     session?.conversationId === undefined ||
-    isTerminalRun(run)
+    isTerminalRunStatus(run.status)
   ) {
     return null
   }

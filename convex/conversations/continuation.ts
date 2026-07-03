@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type MessageIntegration, resolveMessageOwner } from "../messages/data"
+import { isTerminalRunStatus } from "../runs/schema"
 import { maxPendingReadLimit } from "../sessions/cursor"
 import { readPendingMessages, stopSession } from "../sessions/data"
 import { isPersonActor } from "../shared/actor"
@@ -145,9 +146,5 @@ async function isTerminalSession(ctx: MutationCtx, session: Doc<"sessions">) {
 
   const run = await ctx.db.get(runId)
 
-  return run !== null && isTerminalStatus(run.status)
-}
-
-function isTerminalStatus(status: Doc<"runs">["status"]) {
-  return status === "completed" || status === "failed" || status === "stopped"
+  return run !== null && isTerminalRunStatus(run.status)
 }
