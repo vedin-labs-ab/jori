@@ -14,10 +14,6 @@ export type ToolPermissionInput = {
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
-export function enabledToolsEnv(permissions: ToolPermission[]) {
-  return permissions.map((permission) => permission.tool).join(",")
-}
-
 export function getPromptedTools(input: ToolPermissionInput) {
   if (input.executionType === "automation") {
     return []

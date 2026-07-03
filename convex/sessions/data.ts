@@ -17,15 +17,6 @@ import { initialRecency } from "./recency"
 
 type QueryLikeCtx = MutationCtx | QueryCtx
 
-export async function findReusableSession(
-  ctx: MutationCtx,
-  conversationId: Id<"conversations">
-) {
-  const session = await findSession(ctx, conversationId)
-
-  return session === null ? null : await isReusableSession(ctx, session)
-}
-
 export async function isReusableSession(
   ctx: MutationCtx,
   session: Doc<"sessions">

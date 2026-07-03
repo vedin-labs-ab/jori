@@ -121,9 +121,3 @@ export function snippet(value: string | undefined) {
 export function commentLabel(commentId: string | undefined) {
   return commentId === undefined ? undefined : `Comment ${commentId}`
 }
-
-export function compactText(parts: Array<string | undefined>) {
-  const present = parts.filter((part) => part !== undefined && part !== "")
-
-  return present.length === 0 ? undefined : present.join(" ")
-}

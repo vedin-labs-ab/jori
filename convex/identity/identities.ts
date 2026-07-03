@@ -1,13 +1,12 @@
 import { v } from "convex/values"
 import {
-  internalMutation,
   internalQuery,
   type MutationCtx,
   type QueryCtx,
 } from "../_generated/server"
 import { normalizeEmail } from "../persons/email"
-import { linkIdentityToPerson } from "../persons/links"
-import { identityProvider, linkMethod } from "./schema"
+import { type linkIdentityToPerson } from "../persons/links"
+import { identityProvider } from "./schema"
 
 export type ProviderActorProfile = {
   email?: string
@@ -49,22 +48,6 @@ export const resolveProviderActorProfileRecord = internalQuery({
   returns: v.union(providerActorProfile, v.null()),
   handler: async (ctx, args) => {
     return (await resolveProviderActorProfile(ctx, args)) ?? null
-  },
-})
-
-export const linkProviderIdentity = internalMutation({
-  args: {
-    tenantId: v.string(),
-    personId: v.id("persons"),
-    provider: identityProvider,
-    externalId: v.string(),
-    method: linkMethod,
-    email: v.optional(v.string()),
-    name: v.optional(v.string()),
-  },
-  returns: v.id("persons"),
-  handler: async (ctx, args) => {
-    return await linkIdentityToPerson(ctx, args)
   },
 })
 

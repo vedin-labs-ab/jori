@@ -42,16 +42,3 @@ export async function canonicalPersonId(
 
   return current
 }
-
-export async function canonicalPersonIds(
-  ctx: PersonCtx,
-  personIds: Id<"persons">[]
-) {
-  const canonicalIds = new Set<Id<"persons">>()
-
-  for (const personId of personIds) {
-    canonicalIds.add(await canonicalPersonId(ctx, personId))
-  }
-
-  return [...canonicalIds]
-}

@@ -83,22 +83,6 @@ export const getForTenant = internalQuery({
   },
 })
 
-export const getForRun = internalQuery({
-  args: {
-    assetId: v.id("assets"),
-    runId: v.id("runs"),
-  },
-  handler: async (ctx, args) => {
-    const asset = await ctx.db.get(args.assetId)
-
-    if (asset === null || asset.runId !== args.runId) {
-      return null
-    }
-
-    return asset
-  },
-})
-
 function normalizeLimit(value: number | undefined) {
   if (value === undefined || !Number.isFinite(value)) {
     return 25

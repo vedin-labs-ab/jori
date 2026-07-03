@@ -71,13 +71,6 @@ export async function exchangeNotionAuthorizationCode(args: {
   })
 }
 
-export async function refreshNotionAccessToken(refreshToken: string) {
-  return await notionOAuthToken({
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-  })
-}
-
 async function notionOAuthToken(body: Record<string, string>) {
   const response = await fetch(notionOAuthTokenUrl, {
     method: "POST",
