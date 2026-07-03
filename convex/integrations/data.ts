@@ -1,10 +1,9 @@
 import { type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { type QueryCtx } from "../_generated/server"
 import { checkTenantAccess } from "../identity/access"
 import { resolveCurrentPerson } from "../persons/clerk"
+import { type QueryLikeCtx } from "../shared/context"
 import { type Integration } from "../shared/integrations"
-
-type QueryLikeCtx = QueryCtx | MutationCtx
 
 export async function findActiveIntegrationByExternalId(
   ctx: QueryLikeCtx,

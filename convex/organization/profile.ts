@@ -5,13 +5,13 @@ import {
   internalQuery,
   type MutationCtx,
   mutation,
-  type QueryCtx,
   query,
 } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
 import { readClerkUserEmail, readClerkUserName } from "../identity/users"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { createPersonActor } from "../shared/actor"
+import { type QueryLikeCtx } from "../shared/context"
 import { factsEqual, type OrganizationFacts } from "./facts"
 import { organizationFacts, organizationSourceSnapshot } from "./schema"
 import {
@@ -181,7 +181,7 @@ function websiteKey(value: string | undefined) {
 }
 
 export async function readApprovedFacts(
-  ctx: QueryCtx | MutationCtx,
+  ctx: QueryLikeCtx,
   tenantId: string
 ): Promise<OrganizationFacts | null> {
   const profile = await readProfile(ctx, tenantId)
@@ -189,7 +189,7 @@ export async function readApprovedFacts(
   return profile === null ? null : toFacts(profile)
 }
 
-async function readProfile(ctx: QueryCtx | MutationCtx, tenantId: string) {
+async function readProfile(ctx: QueryLikeCtx, tenantId: string) {
   return await ctx.db
     .query("organizationProfile")
     .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))

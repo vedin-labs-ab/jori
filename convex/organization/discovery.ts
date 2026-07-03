@@ -1,12 +1,8 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
-import {
-  internalMutation,
-  type MutationCtx,
-  type QueryCtx,
-  query,
-} from "../_generated/server"
+import { internalMutation, type MutationCtx, query } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
+import { type QueryLikeCtx } from "../shared/context"
 import { discoveryStepKind } from "./schema"
 
 const maxSteps = 40
@@ -214,7 +210,7 @@ function appendError(errors: string[], error: string | undefined) {
   return [...errors, error]
 }
 
-async function readDiscovery(ctx: QueryCtx | MutationCtx, tenantId: string) {
+async function readDiscovery(ctx: QueryLikeCtx, tenantId: string) {
   return await ctx.db
     .query("organizationDiscovery")
     .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))

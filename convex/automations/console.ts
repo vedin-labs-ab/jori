@@ -1,13 +1,9 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
-import {
-  type MutationCtx,
-  mutation,
-  type QueryCtx,
-  query,
-} from "../_generated/server"
+import { mutation, query } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
+import { type QueryLikeCtx } from "../shared/context"
 import { projectAccessForConsole } from "./access"
 import { automationEventCatalog } from "./events"
 import { findEventIntegration } from "./integrations"
@@ -164,7 +160,7 @@ export const remove = mutation({
 })
 
 async function toConsoleAutomation(
-  ctx: MutationCtx | QueryCtx,
+  ctx: QueryLikeCtx,
   automation: Doc<"automations">
 ) {
   return {
@@ -183,7 +179,7 @@ async function toConsoleAutomation(
 }
 
 async function projectTriggerForConsole(
-  ctx: MutationCtx | QueryCtx,
+  ctx: QueryLikeCtx,
   automation: Doc<"automations">
 ) {
   const trigger = automation.trigger

@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { type MutationCtx } from "../_generated/server"
 import { type IdentityProvider, type LinkMethod } from "../identity/schema"
+import { type QueryLikeCtx } from "../shared/context"
 import { canonicalPersonId, createPerson } from "./data"
 import { normalizeEmail } from "./email"
 import { convergeEmail } from "./matching"
@@ -13,8 +14,6 @@ import {
   normalizeProfile,
   patchIdentity,
 } from "./rows"
-
-type PersonCtx = MutationCtx | QueryCtx
 
 export async function resolveIdentity(
   ctx: MutationCtx,
@@ -93,7 +92,7 @@ export async function linkIdentityToPerson(
 }
 
 export async function resolvePersonByIdentity(
-  ctx: PersonCtx,
+  ctx: QueryLikeCtx,
   args: {
     tenantId: string
     provider: IdentityProvider

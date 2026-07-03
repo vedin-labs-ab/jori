@@ -1,6 +1,5 @@
 import { type Infer } from "convex/values"
 import { type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import {
   getToolPermission,
   isUnattendedToolMode,
@@ -9,6 +8,7 @@ import {
   resolveToolModes,
 } from "../permissions/catalog"
 import { listPermissionOverrides } from "../permissions/read"
+import { type QueryLikeCtx } from "../shared/context"
 import { type Integration } from "../shared/integrations"
 import { integrationLabels, resolveEventIntegration } from "./integrations"
 import { type access, type accessInput } from "./schema"
@@ -16,7 +16,6 @@ import { type access, type accessInput } from "./schema"
 export type AutomationAccess = Infer<typeof access>
 export type AutomationAccessInput = Infer<typeof accessInput>
 export type AccessLevel = "none" | "read" | "write" | "both"
-type QueryLikeCtx = MutationCtx | QueryCtx
 
 export async function resolveAccessInput(
   ctx: QueryLikeCtx,

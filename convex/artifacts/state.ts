@@ -4,16 +4,14 @@ import {
   internalMutation,
   internalQuery,
   type MutationCtx,
-  type QueryCtx,
 } from "../_generated/server"
+import { type QueryLikeCtx } from "../shared/context"
 import { canAccessArtifact } from "./access"
 import {
   type ArtifactContractStateEntry,
   assertContractStateValue,
   resolveStateContract,
 } from "./contract"
-
-type StateCtx = MutationCtx | QueryCtx
 
 const stateWrite = v.union(
   v.object({
@@ -177,7 +175,7 @@ async function updateStateDocument(
 }
 
 async function requireStateArtifact(
-  ctx: StateCtx,
+  ctx: QueryLikeCtx,
   args: {
     tenantId: string
     artifactId: Doc<"artifacts">["_id"]
@@ -198,7 +196,7 @@ async function requireStateArtifact(
 }
 
 async function findStateDocument(
-  ctx: StateCtx,
+  ctx: QueryLikeCtx,
   args: {
     artifactId: Doc<"artifacts">["_id"]
     entry: ArtifactContractStateEntry

@@ -4,8 +4,9 @@ import {
 } from "../../contracts/coding"
 import { type ToolAccess } from "../../contracts/permissions"
 import { type Id } from "../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { type MutationCtx } from "../_generated/server"
 import { withOptionalFieldGuidance } from "../runs/agent/tools/schemas"
+import { type QueryLikeCtx } from "../shared/context"
 import { nativeToolUsage } from "./permissions/native"
 
 export const sandboxTools = [
@@ -44,8 +45,6 @@ function codingToolAccess(name: CodingToolName): ToolAccess {
       return "write"
   }
 }
-
-type QueryLikeCtx = MutationCtx | QueryCtx
 
 export async function findActiveSandbox(ctx: QueryLikeCtx, runId: Id<"runs">) {
   return await ctx.db

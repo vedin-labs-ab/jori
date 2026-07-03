@@ -1,22 +1,17 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
-import {
-  internalMutation,
-  type MutationCtx,
-  type QueryCtx,
-} from "../_generated/server"
+import { internalMutation, type MutationCtx } from "../_generated/server"
 import {
   defaultReactionDrainLimit,
   formatRuntimeReaction,
   readPendingReactions,
 } from "../reactions/cursor"
 import { reactionSummariesForMessages } from "../reactions/summary"
+import { type QueryLikeCtx } from "../shared/context"
 import { formatRuntimeMessage, normalizeLimit } from "./cursor"
 import { cursorWithMessage, cursorWithReaction } from "./cursors"
 import { readPendingBatch } from "./data"
 import { emitRecencyContexts, type RecencyEmission } from "./recency"
-
-type QueryLikeCtx = MutationCtx | QueryCtx
 
 export const messages = internalMutation({
   args: {

@@ -1,6 +1,4 @@
-import { type MutationCtx, type QueryCtx } from "../_generated/server"
-
-type QueryLikeCtx = QueryCtx | MutationCtx
+import { type QueryLikeCtx } from "../shared/context"
 
 export async function listPermissionOverrides(
   ctx: QueryLikeCtx,
