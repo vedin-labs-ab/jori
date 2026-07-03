@@ -5,20 +5,13 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
+import { assetFields } from "./schema"
 
 const maxAssetSearchResults = 100
 const maxAssetsScanned = 500
 
 export const record = internalMutation({
-  args: {
-    tenantId: v.string(),
-    runId: v.id("runs"),
-    storageId: v.id("_storage"),
-    name: v.string(),
-    mimeType: v.string(),
-    size: v.number(),
-    description: v.optional(v.string()),
-  },
+  args: assetFields,
   handler: async (ctx, args) => {
     return await ctx.db.insert("assets", {
       ...args,

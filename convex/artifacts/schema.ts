@@ -153,7 +153,8 @@ export const artifactState = defineTable({
   ])
   .index("by_artifact_and_scope_and_key", ["artifactId", "scope", "key"])
 
-export const artifactCaches = defineTable({
+// Identifies one cache entry; shared by the cache read/write args and lookup.
+export const artifactCacheKeyFields = {
   tenantId: v.string(),
   artifactId: v.id("artifacts"),
   versionId: v.id("artifactVersions"),
@@ -162,6 +163,10 @@ export const artifactCaches = defineTable({
   tool: v.string(),
   integrationId: v.optional(v.id("integrations")),
   cacheKey: v.string(),
+}
+
+export const artifactCaches = defineTable({
+  ...artifactCacheKeyFields,
   value: v.any(),
   expiresAt: v.number(),
   createdAt: v.number(),

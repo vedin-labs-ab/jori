@@ -2,18 +2,7 @@ import { type ObjectType, v } from "convex/values"
 import { stableJson } from "../../../contracts/artifacts/json"
 import { type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
-
-// Identifies one cache entry; shared by the read/write args and the lookup.
-const cacheKeyFields = {
-  tenantId: v.string(),
-  artifactId: v.id("artifacts"),
-  versionId: v.id("artifactVersions"),
-  personId: v.id("persons"),
-  surface: v.string(),
-  tool: v.string(),
-  integrationId: v.optional(v.id("integrations")),
-  cacheKey: v.string(),
-}
+import { artifactCacheKeyFields } from "../schema"
 
 const minCacheTtlMs = 15 * 60 * 1000
 const maxCacheTtlMs = 60 * 60 * 1000
@@ -38,7 +27,7 @@ export type ArtifactToolCacheKeyInput = {
 
 export const read = internalMutation({
   args: {
-    ...cacheKeyFields,
+    ...artifactCacheKeyFields,
     now: v.number(),
   },
   handler: async (ctx, args) => {
@@ -63,7 +52,7 @@ export const read = internalMutation({
 
 export const write = internalMutation({
   args: {
-    ...cacheKeyFields,
+    ...artifactCacheKeyFields,
     value: v.any(),
     ttlMs: v.number(),
     now: v.number(),
@@ -170,7 +159,7 @@ export function canStoreArtifactToolCacheValue(value: unknown) {
 
 async function findCacheDocument(
   ctx: MutationCtx,
-  args: ObjectType<typeof cacheKeyFields>
+  args: ObjectType<typeof artifactCacheKeyFields>
 ) {
   const document = await ctx.db
     .query("artifactCaches")
