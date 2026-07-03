@@ -1,16 +1,35 @@
 export function base64Decode(value: string) {
-  const normalized = value.replace(/\s/g, "")
-  const binary = atob(normalized)
-  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0))
+  return new TextDecoder().decode(base64DecodeBytes(value.replace(/\s/g, "")))
+}
 
-  return new TextDecoder().decode(bytes)
+export function base64DecodeBytes(value: string) {
+  const binary = atob(value)
+  const bytes = new Uint8Array(binary.length)
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index)
+  }
+
+  return bytes
+}
+
+export function base64UrlDecodeBytes(value: string) {
+  const base64 = value.replaceAll("-", "+").replaceAll("_", "/")
+
+  return base64DecodeBytes(
+    base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=")
+  )
 }
 
 export function base64UrlEncode(value: string) {
-  const bytes = new TextEncoder().encode(value)
-  const base64 = base64EncodeBytes(bytes)
+  return base64UrlEncodeBytes(new TextEncoder().encode(value))
+}
 
-  return base64.replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "")
+export function base64UrlEncodeBytes(bytes: Uint8Array) {
+  return base64EncodeBytes(bytes)
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "")
 }
 
 export function base64Encode(value: string) {

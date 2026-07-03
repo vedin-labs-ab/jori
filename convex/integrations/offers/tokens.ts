@@ -1,11 +1,11 @@
-import { base64EncodeBytes } from "../../shared/encoding"
+import { base64UrlEncodeBytes } from "../../shared/encoding"
 
 export function createIntegrationOfferToken() {
   const bytes = new Uint8Array(32)
 
   crypto.getRandomValues(bytes)
 
-  return base64Url(base64EncodeBytes(bytes))
+  return base64UrlEncodeBytes(bytes)
 }
 
 export async function hashIntegrationOfferToken(token: string) {
@@ -17,8 +17,4 @@ export async function hashIntegrationOfferToken(token: string) {
   return Array.from(new Uint8Array(digest))
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("")
-}
-
-function base64Url(value: string) {
-  return value.replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "")
 }
