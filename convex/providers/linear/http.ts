@@ -3,11 +3,12 @@ import { type ActionCtx } from "../../_generated/server"
 import { linearIssueCommentEvent } from "../../automations/names"
 import { createIntegrationActor } from "../../shared/actor"
 import {
-  readCallbackState,
+  oauthAuthorizeRedirect,
+  readOAuthCallback,
   redirectWithStatus,
   unauthorizedResponse,
 } from "../http"
-import { completeIntegrationOffer, failIntegrationOffer } from "../install"
+import { completeIntegrationOffer, failOfferAndRedirect } from "../install"
 import { recordLinearLifecycleEvent } from "../lifecycle/linear"
 import {
   handleLinearApprovalDecision,
@@ -33,62 +34,44 @@ import {
 import { parseSignedLinearState, verifyLinearRequest } from "./signing"
 
 export async function handleLinearInstall(request: Request) {
-  const requestUrl = new URL(request.url)
-  const state = requestUrl.searchParams.get("state")
-
-  if (state === null) {
-    return new Response("Missing state", { status: 400 })
-  }
-
-  const linearUrl = new URL(linearOAuthAuthorizeUrl)
-  linearUrl.searchParams.set("client_id", requireLinearClientId())
-  linearUrl.searchParams.set("response_type", "code")
-  linearUrl.searchParams.set("scope", linearOAuthScopes.join(","))
-  linearUrl.searchParams.set("state", state)
-  linearUrl.searchParams.set("actor", "app")
-  linearUrl.searchParams.set(
-    "redirect_uri",
-    `${requestUrl.origin}${linearOAuthCallbackPath}`
-  )
-
-  return Response.redirect(linearUrl.toString(), 302)
+  return oauthAuthorizeRedirect(request, {
+    authorizeUrl: linearOAuthAuthorizeUrl,
+    callbackPath: linearOAuthCallbackPath,
+    clientId: requireLinearClientId(),
+    params: {
+      response_type: "code",
+      scope: linearOAuthScopes.join(","),
+      actor: "app",
+    },
+  })
 }
 
 export async function handleLinearOAuthCallback(
   ctx: ActionCtx,
   request: Request
 ) {
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get("code")
-  const stateValue = requestUrl.searchParams.get("state")
-
-  if (code === null || stateValue === null) {
-    return new Response("Missing OAuth callback parameters", { status: 400 })
-  }
-
-  const parsed = await readCallbackState({
-    value: stateValue,
+  const callback = await readOAuthCallback(request, {
     parse: parseSignedLinearState,
     label: "Linear OAuth",
   })
 
-  if (!parsed.ok) {
-    return parsed.response
+  if (!callback.ok) {
+    return callback.response
   }
 
-  const state = parsed.state
+  const { code, requestUrl, state } = callback
   const tokenResult = await exchangeLinearAuthorizationCode({
     code,
     redirectUri: `${requestUrl.origin}${linearOAuthCallbackPath}`,
   })
 
   if ("error" in tokenResult) {
-    await failIntegrationOffer(ctx, {
-      integrationOfferId: state.integrationOfferId,
+    return await failOfferAndRedirect(ctx, {
+      callbackParam: "linear",
       error: "Linear OAuth token exchange failed.",
+      integrationOfferId: state.integrationOfferId,
+      returnUrl: state.returnUrl,
     })
-
-    return redirectWithStatus(state.returnUrl, "linear", "error")
   }
 
   let profile: Awaited<ReturnType<typeof fetchLinearInstallationProfile>>
@@ -96,12 +79,12 @@ export async function handleLinearOAuthCallback(
   try {
     profile = await fetchLinearInstallationProfile(tokenResult.access_token)
   } catch {
-    await failIntegrationOffer(ctx, {
-      integrationOfferId: state.integrationOfferId,
+    return await failOfferAndRedirect(ctx, {
+      callbackParam: "linear",
       error: "Linear installation profile could not be loaded.",
+      integrationOfferId: state.integrationOfferId,
+      returnUrl: state.returnUrl,
     })
-
-    return redirectWithStatus(state.returnUrl, "linear", "error")
   }
 
   const integrationId = await ctx.runMutation(

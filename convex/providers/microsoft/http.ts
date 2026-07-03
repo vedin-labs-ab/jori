@@ -1,7 +1,11 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { readCallbackState, redirectWithStatus } from "../http"
-import { completeIntegrationOffer, failIntegrationOffer } from "../install"
+import {
+  oauthAuthorizeRedirect,
+  readOAuthCallback,
+  redirectWithStatus,
+} from "../http"
+import { completeIntegrationOffer, failOfferAndRedirect } from "../install"
 import {
   type MicrosoftIntegration,
   microsoftIntegrationConfigs,
@@ -22,25 +26,17 @@ export async function handleMicrosoftInstall(
   integration: MicrosoftIntegration
 ) {
   const surface = microsoftIntegrationConfigs[integration]
-  const requestUrl = new URL(request.url)
-  const state = requestUrl.searchParams.get("state")
 
-  if (state === null) {
-    return new Response("Missing state", { status: 400 })
-  }
-
-  const microsoftUrl = new URL(microsoftOAuthAuthorizeUrl("organizations"))
-  microsoftUrl.searchParams.set("client_id", requireMicrosoftClientId())
-  microsoftUrl.searchParams.set("response_type", "code")
-  microsoftUrl.searchParams.set("scope", surface.scopes.join(" "))
-  microsoftUrl.searchParams.set("state", state)
-  microsoftUrl.searchParams.set("prompt", "consent")
-  microsoftUrl.searchParams.set(
-    "redirect_uri",
-    `${requestUrl.origin}${surface.callbackPath}`
-  )
-
-  return Response.redirect(microsoftUrl.toString(), 302)
+  return oauthAuthorizeRedirect(request, {
+    authorizeUrl: microsoftOAuthAuthorizeUrl("organizations"),
+    callbackPath: surface.callbackPath,
+    clientId: requireMicrosoftClientId(),
+    params: {
+      response_type: "code",
+      scope: surface.scopes.join(" "),
+      prompt: "consent",
+    },
+  })
 }
 
 export async function handleMicrosoftOAuthCallback(
@@ -49,25 +45,16 @@ export async function handleMicrosoftOAuthCallback(
   integration: MicrosoftIntegration
 ) {
   const surface = microsoftIntegrationConfigs[integration]
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get("code")
-  const stateValue = requestUrl.searchParams.get("state")
-
-  if (code === null || stateValue === null) {
-    return new Response("Missing OAuth callback parameters", { status: 400 })
-  }
-
-  const parsed = await readCallbackState({
-    value: stateValue,
+  const callback = await readOAuthCallback(request, {
     parse: parseSignedMicrosoftState,
     label: "Microsoft OAuth",
   })
 
-  if (!parsed.ok) {
-    return parsed.response
+  if (!callback.ok) {
+    return callback.response
   }
 
-  const state = parsed.state
+  const { code, requestUrl, state } = callback
 
   if (state.integration !== integration) {
     return new Response("Mismatched Microsoft OAuth state", { status: 400 })
@@ -115,7 +102,7 @@ export async function handleMicrosoftOAuthCallback(
     })
   }
 
-  return redirectWithMicrosoftStatus(state.returnUrl, integration, "connected")
+  return redirectWithStatus(state.returnUrl, surface.callbackParam, "connected")
 }
 
 async function recordMicrosoftInstallation(
@@ -153,7 +140,7 @@ async function recordMicrosoftInstallation(
   })
 }
 
-async function redirectWithMicrosoftInstallError(
+function redirectWithMicrosoftInstallError(
   ctx: ActionCtx,
   args: {
     state: MicrosoftInstallState
@@ -161,26 +148,10 @@ async function redirectWithMicrosoftInstallError(
     error: string
   }
 ) {
-  await failIntegrationOffer(ctx, {
-    integrationOfferId: args.state.integrationOfferId,
+  return failOfferAndRedirect(ctx, {
+    callbackParam: microsoftIntegrationConfigs[args.integration].callbackParam,
     error: args.error,
+    integrationOfferId: args.state.integrationOfferId,
+    returnUrl: args.state.returnUrl,
   })
-
-  return redirectWithMicrosoftStatus(
-    args.state.returnUrl,
-    args.integration,
-    "error"
-  )
-}
-
-function redirectWithMicrosoftStatus(
-  returnUrl: string,
-  integration: MicrosoftIntegration,
-  status: "connected" | "error"
-) {
-  return redirectWithStatus(
-    returnUrl,
-    microsoftIntegrationConfigs[integration].callbackParam,
-    status
-  )
 }
