@@ -35,6 +35,21 @@ test("renders organization facts before the run section", () => {
   expectNoSyntheticBlankLines(context)
 })
 
+test("renders the roster even without approved organization facts", () => {
+  const prompt = assemblePrompt({
+    ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
+    organization: null,
+    workstreams: [
+      { name: "Payments revamp", brief: "Rebuilding the payments flow." },
+    ],
+  } as unknown as Parameters<typeof assemblePrompt>[0]).context
+
+  expect(prompt).toContain("# Organization")
+  expect(prompt).not.toContain("Name:")
+  expect(prompt).toContain("- Payments revamp: Rebuilding the payments flow.")
+  expectNoSyntheticBlankLines(prompt)
+})
+
 test("renders deduced workstreams inside the organization section", () => {
   const prompt = assemblePrompt({
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),

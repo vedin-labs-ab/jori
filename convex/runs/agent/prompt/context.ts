@@ -37,21 +37,26 @@ export function defaultActiveSurface(
     : null
 }
 
+// The section renders when anything is known: approved facts, deduced
+// workstreams, or both. A tenant that skipped onboarding still gets its
+// roster.
 function createOrganizationInstructions(input: AgentRuntimeInput) {
   const facts = input.organization
+  const workstreams = input.workstreams ?? []
 
-  if (!facts?.name) {
+  if (!facts?.name && workstreams.length === 0) {
     return ""
   }
 
-  const workstreams = input.workstreams ?? []
+  const aliases = facts?.aliases ?? []
+  const domains = facts?.domains ?? []
 
   return renderPromptTemplate(promptTemplates["organization/message"], {
     organization: {
-      name: facts.name,
-      summary: facts.summary ?? null,
-      aliases: facts.aliases.length === 0 ? null : facts.aliases.join(", "),
-      domains: facts.domains.length === 0 ? null : facts.domains,
+      name: facts?.name ?? null,
+      summary: facts?.summary ?? null,
+      aliases: aliases.length === 0 ? null : aliases.join(", "),
+      domains: domains.length === 0 ? null : domains,
       workstreams: workstreams.length === 0 ? null : workstreams,
     },
   }).trim()

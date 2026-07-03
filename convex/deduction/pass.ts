@@ -24,15 +24,14 @@ export const sweep = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now()
-    const tenants = await ctx.db.query("organizationProfile").take(sweepBatch)
 
-    for (const tenant of tenants) {
+    for (const tenantId of await activeTenants(ctx)) {
       for (const kind of beliefKinds) {
-        const latest = await latestPass(ctx, tenant.tenantId, kind)
+        const latest = await latestPass(ctx, tenantId, kind)
 
         if (isPassDue(now, latest ?? undefined)) {
           await ctx.scheduler.runAfter(0, internal.deduction.pass.run, {
-            tenantId: tenant.tenantId,
+            tenantId,
             kind,
           })
         }
@@ -40,6 +39,20 @@ export const sweep = internalMutation({
     }
   },
 })
+
+// The tenant registry is "tenants with at least one active integration": a
+// tenant without sources has nothing to review. Full scan is fine at current
+// integration counts; revisit with a dedicated index if that changes.
+async function activeTenants(ctx: MutationCtx) {
+  const integrations = await ctx.db.query("integrations").collect()
+  const tenants = new Set(
+    integrations
+      .filter((integration) => integration.status === "active")
+      .map((integration) => integration.tenantId)
+  )
+
+  return [...tenants].slice(0, sweepBatch)
+}
 
 // One judged review per window: open, assemble, judge, apply. Loops windows
 // so a bootstrap catches up to now within a single sweep.
