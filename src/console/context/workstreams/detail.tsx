@@ -1,6 +1,6 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
 import { useQuery } from "convex/react"
-import { ChevronDown, ExternalLink, Lock } from "lucide-react"
+import { ChevronDown, Lock } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
+import { SeparatorDot } from "../../shared/dot"
 import { IntegrationLogo } from "../../shared/logo/integration"
 import { relativeTime } from "../../shared/time"
 import { Timeline, TimelineItem } from "../../shared/timeline"
@@ -191,7 +192,7 @@ type SightingRow = {
 function Sighting({ sighting }: { sighting: SightingRow }) {
   const content = (
     <>
-      <div className="flex w-full items-center gap-2">
+      <div className="flex w-full min-w-0 items-center gap-2">
         {sighting.integration === null ? null : (
           <IntegrationLogo decorative integration={sighting.integration} />
         )}
@@ -200,15 +201,17 @@ function Sighting({ sighting }: { sighting: SightingRow }) {
             ? "Removed tool"
             : integrationLabel(sighting.integration)}
         </span>
-        <span className="text-muted-foreground text-xs">{sighting.kind}</span>
-        <span className="ml-auto text-muted-foreground text-xs">
+        <SeparatorDot className="shrink-0 text-muted-foreground/60" />
+        <span className="min-w-0 truncate text-muted-foreground text-xs">
+          {sighting.kind}
+        </span>
+        <span className="ml-auto shrink-0 text-muted-foreground text-xs">
           {relativeTime(sighting.observedAt, Date.now())}
         </span>
-        {sighting.url === undefined ? null : (
-          <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />
-        )}
       </div>
-      <p className="text-muted-foreground text-sm">{sighting.why}</p>
+      <p className="line-clamp-2 text-muted-foreground text-sm">
+        {sighting.why}
+      </p>
     </>
   )
 
