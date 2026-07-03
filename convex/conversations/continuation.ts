@@ -1,7 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type MessageIntegration, resolveMessageOwner } from "../messages/data"
-import { isTerminalRunStatus } from "../runs/schema"
 import { maxPendingReadLimit } from "../sessions/cursor"
 import { readPendingMessages, stopSession } from "../sessions/data"
 import { isPersonActor } from "../shared/actor"
@@ -20,27 +19,6 @@ export async function continuePendingConversationRun(
     .first()
 
   if (session === null || session.runId !== args.runId) {
-    return
-  }
-
-  await continueSession(ctx, session, args.now)
-}
-
-export async function continueTerminalConversationSession(
-  ctx: MutationCtx,
-  args: {
-    conversationId: Id<"conversations">
-    now: number
-  }
-) {
-  const session = await ctx.db
-    .query("sessions")
-    .withIndex("by_conversation", (query) =>
-      query.eq("conversationId", args.conversationId)
-    )
-    .first()
-
-  if (session === null || !(await isTerminalSession(ctx, session))) {
     return
   }
 
@@ -135,16 +113,4 @@ function isMessageIntegration(
     integration === "linear" ||
     integration === "slack"
   )
-}
-
-async function isTerminalSession(ctx: MutationCtx, session: Doc<"sessions">) {
-  const runId = session.runId
-
-  if (runId === undefined) {
-    return false
-  }
-
-  const run = await ctx.db.get(runId)
-
-  return run !== null && isTerminalRunStatus(run.status)
 }

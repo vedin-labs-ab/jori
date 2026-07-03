@@ -2,12 +2,8 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
-import { type Actor, actorValidator } from "../shared/actor"
-import {
-  type Integration,
-  integrationLabel,
-  integrationValidator,
-} from "../shared/integrations"
+import { type Actor } from "../shared/actor"
+import { type Integration, integrationLabel } from "../shared/integrations"
 import { type ApprovalDecisionResult, approvalDecisionMessage } from "./result"
 
 export type ApprovalDecision = "approved" | "denied"
@@ -28,19 +24,6 @@ export type TextApprovalDecisionArgs = {
   text?: string
 }
 
-export const handleTextDecision = internalAction({
-  args: {
-    accountId: v.string(),
-    actor: v.optional(actorValidator),
-    integration: integrationValidator,
-    code: v.string(),
-    decision: v.union(v.literal("approved"), v.literal("denied")),
-  },
-  handler: async (ctx, args) => {
-    return await decideApprovalByAccount(ctx, args)
-  },
-})
-
 export const expireApproval = internalAction({
   args: {
     approvalId: v.id("approvals"),
@@ -51,10 +34,6 @@ export const expireApproval = internalAction({
     })
   },
 })
-
-export function isApprovalDecisionText(text: string | undefined) {
-  return parseApprovalDecisionText(text) !== null
-}
 
 export function isPersonApprovalDecisionText(args: {
   actorKind?: Actor["kind"]

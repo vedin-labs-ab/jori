@@ -26,8 +26,6 @@ export const toolAccessLevels = ["read", "write"] as const
 export type PermissionMode = (typeof permissionModes)[number]
 export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
 export type ToolPermissionRoute = (typeof toolPermissionRoutes)[number]
-export type InternalRequiredToolName =
-  (typeof internalRequiredToolNames)[number]
 export type ToolAccess = (typeof toolAccessLevels)[number]
 export type ToolPermission = {
   tool: string

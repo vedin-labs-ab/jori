@@ -1,12 +1,5 @@
 import { type Doc, type Id } from "../../../_generated/dataModel"
 
-export function runtimeMilo() {
-  return {
-    convexSiteUrl: "https://convex.example",
-    executionToken: "execution-token",
-  }
-}
-
 export function integration(integration: string): Doc<"integrations"> {
   return {
     _id: `${integration}-integration`,
@@ -36,32 +29,6 @@ function isUserScopedIntegration(integration: string) {
     integration === "microsoftEmail" ||
     integration === "microsoftCalendar"
   )
-}
-
-export function readProperties(schema: unknown) {
-  if (
-    typeof schema !== "object" ||
-    schema === null ||
-    !("properties" in schema)
-  ) {
-    return {}
-  }
-
-  const properties = schema.properties
-
-  return typeof properties === "object" && properties !== null ? properties : {}
-}
-
-export function readRequired(schema: unknown) {
-  if (
-    typeof schema !== "object" ||
-    schema === null ||
-    !("required" in schema)
-  ) {
-    return []
-  }
-
-  return Array.isArray(schema.required) ? schema.required : []
 }
 
 function credentials(integration: string) {

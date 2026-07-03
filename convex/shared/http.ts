@@ -38,10 +38,6 @@ export async function fetchJsonObject(
   return toJsonObject(await fetchJson(url, options))
 }
 
-export function jsonErrorResponse(message: string, status: number) {
-  return Response.json({ error: message }, { status })
-}
-
 export function formatProviderError(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback
 }

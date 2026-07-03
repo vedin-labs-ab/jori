@@ -1,14 +1,5 @@
 type ProviderDataPath = [string, ...string[]]
 
-export function readProviderDataArray(
-  data: unknown,
-  ...path: ProviderDataPath
-) {
-  const value = readProviderDataValue(data, path)
-
-  return Array.isArray(value) ? value : []
-}
-
 export function readProviderDataString(
   data: unknown,
   ...path: ProviderDataPath

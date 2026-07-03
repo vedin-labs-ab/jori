@@ -32,10 +32,6 @@ export function base64UrlEncodeBytes(bytes: Uint8Array) {
     .replaceAll("=", "")
 }
 
-export function base64Encode(value: string) {
-  return base64EncodeBytes(new TextEncoder().encode(value))
-}
-
 export function base64EncodeBytes(bytes: Uint8Array) {
   let binary = ""
   const chunkSize = 0x8000

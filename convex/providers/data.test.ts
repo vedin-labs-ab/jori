@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { readProviderDataArray, readProviderDataString } from "./data"
+import { readProviderDataString } from "./data"
 
 describe("provider data readers", () => {
   test("reads nested strings", () => {
@@ -18,12 +18,5 @@ describe("provider data readers", () => {
       undefined
     )
     expect(readProviderDataString(data, "owner", "user")).toBe(undefined)
-  })
-
-  test("reads arrays", () => {
-    const mentions = [{ mentionText: "@milo" }]
-
-    expect(readProviderDataArray({ mentions }, "mentions")).toBe(mentions)
-    expect(readProviderDataArray({ mentions: "none" }, "mentions")).toEqual([])
   })
 })

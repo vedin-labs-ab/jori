@@ -11,7 +11,6 @@ import {
   getActorExternalId,
   withActorKind,
 } from "../shared/actor"
-import { type Integration } from "../shared/integrations"
 
 export type ReactionAction = "added" | "removed"
 export type ReactionIntegration = "github" | "linear" | "slack"
@@ -78,16 +77,6 @@ export function reactionActorKey(actor: Actor | undefined) {
     getActorEmail(actor) ??
     getActorDisplayName(actor) ??
     "unknown"
-  )
-}
-
-export function isReactionIntegration(
-  integration: Integration
-): integration is ReactionIntegration {
-  return (
-    integration === "github" ||
-    integration === "linear" ||
-    integration === "slack"
   )
 }
 

@@ -1,6 +1,5 @@
 export const githubApiUrl = "https://api.github.com"
 export const githubAppInstallBaseUrl = "https://github.com/apps"
-export const githubInstallCallbackPath = "/github/install/callback"
 
 export function requireGitHubAppSlug() {
   const slug = process.env.GITHUB_APP_SLUG
