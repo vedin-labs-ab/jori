@@ -1,6 +1,5 @@
-import { githubApiUrl } from "../../providers/github/config"
+import { githubJsonObject } from "../../providers/github/api"
 import { requireGitHubCredentials } from "../../providers/github/credentials"
-import { fetchJsonObject } from "../../shared/http"
 import {
   compactDescription,
   maxOptions,
@@ -19,7 +18,7 @@ import {
 export async function searchGitHubRepositories(args: OptionLoaderArgs) {
   const token = requireGitHubToken(args.integration)
   const normalizedQuery = normalizeQuery(args.query)
-  const result = await githubJson(token, "/installation/repositories", {
+  const result = await githubJsonObject(token, "/installation/repositories", {
     per_page: 100,
   })
 
@@ -48,7 +47,7 @@ async function searchGitHubIssueLike(
 ) {
   const token = requireGitHubToken(args.integration)
   const repo = requireMatch(args.match, "repo", "repository")
-  const result = await githubJson(token, "/search/issues", {
+  const result = await githubJsonObject(token, "/search/issues", {
     q: [normalizeQuery(args.query), `repo:${repo}`, `is:${kind}`]
       .filter(Boolean)
       .join(" "),
@@ -78,29 +77,6 @@ function requireGitHubToken(integration: OptionLoaderArgs["integration"]) {
   }
 
   return credentials.tokens.access
-}
-
-async function githubJson(
-  token: string,
-  path: string,
-  query: Record<string, unknown> = {}
-) {
-  const url = new URL(githubApiUrl + path)
-
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) {
-      url.searchParams.set(key, String(value))
-    }
-  }
-
-  return await fetchJsonObject(url.toString(), {
-    method: "GET",
-    headers: {
-      authorization: `Bearer ${token}`,
-      accept: "application/vnd.github+json",
-      "x-github-api-version": "2022-11-28",
-    },
-  })
 }
 
 function githubRepositoryDescription(repository: Record<string, unknown>) {

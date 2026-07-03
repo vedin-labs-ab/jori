@@ -1,5 +1,5 @@
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
-import { fetchJsonObject } from "../../shared/http"
+import { microsoftGraphJsonObject } from "../../providers/microsoft/graph"
 import {
   maxOptions,
   normalizeQuery,
@@ -50,21 +50,8 @@ async function microsoftGraph(
   query: Record<string, unknown> = {}
 ) {
   const credentials = requireMicrosoftCredentials(args.integration)
-  const url = new URL(`https://graph.microsoft.com/v1.0${path}`)
 
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) {
-      url.searchParams.set(key, String(value))
-    }
-  }
-
-  return await fetchJsonObject(url.toString(), {
-    method: "GET",
-    headers: {
-      authorization: `Bearer ${credentials.tokens.access}`,
-      "content-type": "application/json",
-    },
-  })
+  return await microsoftGraphJsonObject(credentials.tokens.access, path, query)
 }
 
 function microsoftFolderDescription(folder: Record<string, unknown>) {

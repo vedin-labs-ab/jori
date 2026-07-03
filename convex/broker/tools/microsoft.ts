@@ -1,8 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type AssetContext, readRunAssets } from "../../assets/read"
 import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
+import { microsoftGraphJson } from "../../providers/microsoft/graph"
 import { base64EncodeBytes } from "../../shared/encoding"
-import { fetchJson } from "../../shared/http"
 import {
   boundedNumber,
   optionalString,
@@ -51,7 +51,7 @@ async function callMicrosoftEmailTool(
   }
 
   if (tool === "microsoft_email_get_message") {
-    return await microsoftGraph(
+    return await microsoftGraphJson(
       token,
       `/me/messages/${encodeURIComponent(requiredString(args.messageId, "messageId"))}`
     )
@@ -62,7 +62,7 @@ async function callMicrosoftEmailTool(
       maxBytes: 3 * 1024 * 1024,
     })
 
-    await microsoftGraph(token, "/me/sendMail", {
+    await microsoftGraphJson(token, "/me/sendMail", {
       method: "POST",
       body: {
         message: buildMicrosoftMessage(args, assets),
@@ -77,14 +77,14 @@ async function callMicrosoftEmailTool(
       maxBytes: 3 * 1024 * 1024,
     })
 
-    return await microsoftGraph(token, "/me/messages", {
+    return await microsoftGraphJson(token, "/me/messages", {
       method: "POST",
       body: buildMicrosoftMessage(args, assets),
     })
   }
 
   if (tool === "microsoft_email_update_message") {
-    return await microsoftGraph(
+    return await microsoftGraphJson(
       token,
       `/me/messages/${encodeURIComponent(requiredString(args.messageId, "messageId"))}`,
       {
@@ -107,14 +107,14 @@ async function callMicrosoftCalendarTool(
   }
 
   if (tool === "microsoft_calendar_get_event") {
-    return await microsoftGraph(
+    return await microsoftGraphJson(
       token,
       `/me/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`
     )
   }
 
   if (tool === "microsoft_calendar_create_event") {
-    return await microsoftGraph(token, "/me/events", {
+    return await microsoftGraphJson(token, "/me/events", {
       method: "POST",
       query: microsoftSendUpdatesQuery(args),
       body: requiredObject(args.event, "event"),
@@ -122,7 +122,7 @@ async function callMicrosoftCalendarTool(
   }
 
   if (tool === "microsoft_calendar_update_event") {
-    return await microsoftGraph(
+    return await microsoftGraphJson(
       token,
       `/me/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`,
       {
@@ -153,7 +153,7 @@ async function searchMessages(token: string, args: Record<string, unknown>) {
     query.$search = `"${search.replace(/"/g, '\\"')}"`
   }
 
-  return await microsoftGraph(token, path, { query })
+  return await microsoftGraphJson(token, path, { query })
 }
 
 async function listEvents(token: string, args: Record<string, unknown>) {
@@ -165,10 +165,10 @@ async function listEvents(token: string, args: Record<string, unknown>) {
   }
 
   if (timeMin === undefined && timeMax === undefined) {
-    return await microsoftGraph(token, "/me/events", { query })
+    return await microsoftGraphJson(token, "/me/events", { query })
   }
 
-  return await microsoftGraph(token, "/me/calendarView", {
+  return await microsoftGraphJson(token, "/me/calendarView", {
     query: {
       ...query,
       startDateTime: timeMin ?? new Date().toISOString(),
@@ -176,34 +176,6 @@ async function listEvents(token: string, args: Record<string, unknown>) {
         timeMax ??
         new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     },
-  })
-}
-
-async function microsoftGraph(
-  token: string,
-  path: string,
-  options: {
-    method?: string
-    query?: Record<string, unknown>
-    body?: unknown
-  } = {}
-) {
-  const url = new URL(`https://graph.microsoft.com/v1.0${path}`)
-
-  for (const [key, value] of Object.entries(options.query ?? {})) {
-    if (value !== undefined) {
-      url.searchParams.set(key, String(value))
-    }
-  }
-
-  return await fetchJson(url.toString(), {
-    method: options.method ?? "GET",
-    headers: {
-      authorization: `Bearer ${token}`,
-      "content-type": "application/json",
-    },
-    body: options.body,
-    emptyResponse: null,
   })
 }
 
