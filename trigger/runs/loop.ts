@@ -7,8 +7,16 @@ import {
 import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
 import { type HandoffSubject, type RuntimeContext } from "../types"
 import { recordRunEvent } from "./events"
-import { pendingHandoffSubjects, reconcileHandoffs } from "./handoffs"
-import { appendSessionMessages, promptMessages } from "./messages"
+import {
+  applyHandoffs,
+  pendingHandoffSubjects,
+  reconcileHandoffs,
+} from "./handoffs"
+import {
+  appendSessionMessages,
+  promptMessages,
+  seedSessionMessages,
+} from "./messages"
 import { completeModelStep } from "./model"
 import { appendStopRepair } from "./repair"
 import { parkRun } from "./waiter"
@@ -31,10 +39,17 @@ export async function runAgentLoop(args: {
 }) {
   const messages: ModelMessage[] = promptMessages(args.runtime.context.prompt)
 
-  await reconcileHandoffs(args.runtime, messages)
+  // The context load already fetched the handoffs and drained the first
+  // session batch, so a fresh run reaches the model with no extra reads.
+  await applyHandoffs(args.runtime, messages, args.runtime.context.handoffs)
+  await seedSessionMessages(args.runtime, messages)
+
+  let drainPending = false
 
   for (let step = 1; step <= maxModelSteps; step += 1) {
-    await appendSessionMessages(args.runtime, messages)
+    if (drainPending) {
+      await appendSessionMessages(args.runtime, messages)
+    }
 
     const tools = modelTools(args.runtime.context.tools)
     const response = await completeModelStep({
@@ -46,22 +61,37 @@ export async function runAgentLoop(args: {
       step,
       tools,
     })
-    const outcome =
+    const result =
       response.type === "stop"
-        ? await settleYield(args.runtime, messages, "stop", response.content)
+        ? settled(
+            await settleYield(args.runtime, messages, "stop", response.content)
+          )
         : await runModelToolStep(args, messages, response, step)
 
-    if (outcome === "finished") {
+    if (result.outcome === "finished") {
       return completedOutput()
     }
 
-    if (outcome === "aborted") {
+    if (result.outcome === "aborted") {
       return stoppedOutput()
     }
+
+    drainPending = result.drainPending
   }
 
   await failRun(args.runtime, args.attempt)
   return { message: "", status: "failed" }
+}
+
+type StepResult = {
+  drainPending: boolean
+  outcome: YieldOutcome
+}
+
+// Yield settlement drains messages as part of reconciling, so the next step
+// starts fresh; a plain tool step leaves the drain to the next iteration.
+function settled(outcome: YieldOutcome): StepResult {
+  return { drainPending: false, outcome }
 }
 
 async function runModelToolStep(
@@ -69,7 +99,7 @@ async function runModelToolStep(
   messages: ModelMessage[],
   response: Extract<ModelResponse, { type: "tool_calls" }>,
   step: number
-): Promise<YieldOutcome> {
+): Promise<StepResult> {
   reportUndeliveredText(args.runtime, response, step)
   messages.push({
     content: response.content,
@@ -82,7 +112,7 @@ async function runModelToolStep(
   })
 
   if (!tools.finished) {
-    return "continue"
+    return { drainPending: true, outcome: "continue" }
   }
 
   const outcome = await settleYield(args.runtime, messages, "finish")
@@ -91,7 +121,7 @@ async function runModelToolStep(
     await completeRun(args.runtime, tools.sequence + 1, args.attempt)
   }
 
-  return outcome
+  return settled(outcome)
 }
 
 function reportUndeliveredText(

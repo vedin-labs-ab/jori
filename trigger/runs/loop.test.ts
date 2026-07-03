@@ -190,6 +190,8 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
     },
     context: {
       activeSurface: null,
+      drained: null,
+      handoffs: { approvals: [], offers: [] },
       prompt: {
         context: "context",
         instructions: "system",

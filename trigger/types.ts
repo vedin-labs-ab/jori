@@ -105,6 +105,8 @@ export type RuntimeTool = {
 
 export type RuntimeContext = {
   activeSurface: ActiveSurface | null
+  drained: DrainedSessionBatch | null
+  handoffs: RunHandoffs
   prompt: RuntimePrompt
   run: {
     id: ConvexId<"runs">
@@ -117,6 +119,13 @@ export type RuntimeContext = {
     id: ConvexId<"sessions">
   } | null
   tools: RuntimeTool[]
+}
+
+export type DrainedSessionBatch = {
+  contexts?: string[]
+  hasMore: boolean
+  interactions?: RuntimeInteraction[]
+  messages: RuntimeMessage[]
 }
 
 export type RuntimeMessage = {

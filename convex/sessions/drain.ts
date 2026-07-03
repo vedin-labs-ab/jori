@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
   type MutationCtx,
@@ -25,35 +25,45 @@ export const messages = internalMutation({
   },
   returns: v.any(),
   handler: async (ctx, args) => {
-    const session = await ctx.db.get(args.sessionId)
-
-    if (session?.runId === undefined) {
-      return { contexts: [], hasMore: false, interactions: [], messages: [] }
-    }
-
-    const limit = normalizeLimit(args.limit)
-    const batch = await readPendingBatch(ctx, session, limit)
-    const reactions = await readPendingReactions(
-      ctx,
-      session,
-      args.limit ?? defaultReactionDrainLimit
-    )
-    const emission = await emitRecencyContexts(ctx, session, batch.messages)
-    const cursor = nextSessionCursor(session.cursor, {
-      message: batch.cursor,
-      reaction: reactions.cursor,
-    })
-
-    await patchSession(ctx, session, cursor, emission)
-
-    return {
-      contexts: emission === null ? [] : emission.contexts,
-      hasMore: batch.hasMore || reactions.hasMore,
-      interactions: reactions.reactions.map(formatRuntimeReaction),
-      messages: await formatRuntimeMessages(ctx, batch.messages, session),
-    }
+    return await drainSession(ctx, args)
   },
 })
+
+export async function drainSession(
+  ctx: MutationCtx,
+  args: {
+    limit?: number
+    sessionId: Id<"sessions">
+  }
+) {
+  const session = await ctx.db.get(args.sessionId)
+
+  if (session?.runId === undefined) {
+    return { contexts: [], hasMore: false, interactions: [], messages: [] }
+  }
+
+  const limit = normalizeLimit(args.limit)
+  const batch = await readPendingBatch(ctx, session, limit)
+  const reactions = await readPendingReactions(
+    ctx,
+    session,
+    args.limit ?? defaultReactionDrainLimit
+  )
+  const emission = await emitRecencyContexts(ctx, session, batch.messages)
+  const cursor = nextSessionCursor(session.cursor, {
+    message: batch.cursor,
+    reaction: reactions.cursor,
+  })
+
+  await patchSession(ctx, session, cursor, emission)
+
+  return {
+    contexts: emission === null ? [] : emission.contexts,
+    hasMore: batch.hasMore || reactions.hasMore,
+    interactions: reactions.reactions.map(formatRuntimeReaction),
+    messages: await formatRuntimeMessages(ctx, batch.messages, session),
+  }
+}
 
 async function patchSession(
   ctx: MutationCtx,

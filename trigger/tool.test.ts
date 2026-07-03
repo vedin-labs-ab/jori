@@ -161,6 +161,8 @@ function createRuntime(
     } as unknown as ToolRuntime["convex"],
     context: {
       activeSurface: options.activeSurface ?? null,
+      drained: null,
+      handoffs: { approvals: [], offers: [] },
       prompt: {
         context: "context",
         instructions: "system",
