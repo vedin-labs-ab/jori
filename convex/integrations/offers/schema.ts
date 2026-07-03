@@ -3,6 +3,7 @@ import { type Infer, v } from "convex/values"
 import { actorValidator } from "../../shared/actor"
 import {
   integrationValidator,
+  messageDeliveryValidator,
   toolSurfaceValidator,
 } from "../../shared/integrations"
 
@@ -29,18 +30,6 @@ export const integrationOfferSource = v.object({
   runId: v.optional(v.id("runs")),
 })
 
-export const integrationOfferDelivery = v.union(
-  v.object({
-    integration: v.literal("slack"),
-    integrationId: v.id("integrations"),
-    data: v.object({
-      channelId: v.string(),
-      messageTs: v.string(),
-      threadTs: v.optional(v.string()),
-    }),
-  })
-)
-
 export type IntegrationOfferSource = Infer<typeof integrationOfferSource>
 
 export const integrationOffers = defineTable({
@@ -51,7 +40,7 @@ export const integrationOffers = defineTable({
   summary: v.optional(v.string()),
   source: integrationOfferSource,
   runId: v.optional(v.id("runs")),
-  delivery: v.optional(integrationOfferDelivery),
+  delivery: v.optional(messageDeliveryValidator),
   claim: v.optional(
     v.object({
       personId: v.id("persons"),

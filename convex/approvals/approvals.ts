@@ -4,14 +4,13 @@ import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { actorValidator } from "../shared/actor"
-import { toolSurfaceValidator } from "../shared/integrations"
+import {
+  messageDeliveryValidator,
+  toolSurfaceValidator,
+} from "../shared/integrations"
 import { resolveCancellationActor } from "./cancellation"
 import { resolveApprovalActor } from "./lifecycle"
-import {
-  approvalDecision,
-  approvalDelivery,
-  approvalDeliveryFailure,
-} from "./schema"
+import { approvalDecision, approvalDeliveryFailure } from "./schema"
 import {
   markApprovalCancelled,
   markApprovalDecided,
@@ -83,7 +82,7 @@ export const create = internalMutation({
 export const recordDelivery = internalMutation({
   args: {
     approvalId: v.id("approvals"),
-    delivery: approvalDelivery,
+    delivery: messageDeliveryValidator,
   },
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)

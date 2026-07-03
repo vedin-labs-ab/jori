@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { integrations, toolSurfaces } from "../../contracts/integrations"
 
 export {
   type Integration,
@@ -16,26 +17,23 @@ export {
 } from "../../contracts/integrations"
 
 export const integrationValidator = v.union(
-  v.literal("slack"),
-  v.literal("linear"),
-  v.literal("github"),
-  v.literal("gmail"),
-  v.literal("googleCalendar"),
-  v.literal("googleDrive"),
-  v.literal("notion"),
-  v.literal("microsoftEmail"),
-  v.literal("microsoftCalendar")
+  ...integrations.map((integration) => v.literal(integration))
 )
 
 export const toolSurfaceValidator = v.union(
-  v.literal("milo"),
-  v.literal("slack"),
-  v.literal("linear"),
-  v.literal("github"),
-  v.literal("gmail"),
-  v.literal("googleCalendar"),
-  v.literal("googleDrive"),
-  v.literal("notion"),
-  v.literal("microsoftEmail"),
-  v.literal("microsoftCalendar")
+  ...toolSurfaces.map((surface) => v.literal(surface))
+)
+
+// Where a surface message (approval prompt, integration offer) was delivered,
+// so later status changes can update that message in place.
+export const messageDeliveryValidator = v.union(
+  v.object({
+    integration: v.literal("slack"),
+    integrationId: v.id("integrations"),
+    data: v.object({
+      channelId: v.string(),
+      messageTs: v.string(),
+      threadTs: v.optional(v.string()),
+    }),
+  })
 )
