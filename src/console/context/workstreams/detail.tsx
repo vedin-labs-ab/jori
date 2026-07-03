@@ -1,19 +1,24 @@
+import { type Integration, integrationLabel } from "@contracts/integrations"
 import { useQuery } from "convex/react"
 import { ExternalLink, ShieldCheck } from "lucide-react"
+import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
+import { IntegrationLogo } from "../../shared/logo/integration"
 import { relativeTime } from "../../shared/time"
+import { Timeline, TimelineItem } from "../../shared/timeline"
 import { ContextSectionTitle } from "../section"
 import { WorkstreamActions } from "./actions"
-import { type Workstream } from "./card"
+import { statusVariants, type Workstream } from "./types"
 
 export function WorkstreamDetail({
   tenantId,
@@ -29,7 +34,7 @@ export function WorkstreamDetail({
   onMerge: () => void
 }) {
   return (
-    <Dialog
+    <Sheet
       open={workstream !== null}
       onOpenChange={(open) => {
         if (!open) {
@@ -37,7 +42,7 @@ export function WorkstreamDetail({
         }
       }}
     >
-      <DialogContent className="sm:max-w-xl">
+      <SheetContent className="flex w-full flex-col gap-0 sm:max-w-lg">
         {workstream === null ? null : (
           <DetailBody
             tenantId={tenantId}
@@ -46,8 +51,8 @@ export function WorkstreamDetail({
             onMerge={onMerge}
           />
         )}
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -68,95 +73,110 @@ function DetailBody({
   })
 
   return (
-    <div className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle className="flex flex-wrap items-center gap-2">
+    <>
+      <SheetHeader>
+        <SheetTitle className="flex flex-wrap items-center gap-2">
           {workstream.name}
-          <Badge variant="secondary">{workstream.statusLabel}</Badge>
-        </DialogTitle>
-        <DialogDescription>
+          <Badge variant={statusVariants[workstream.status]}>
+            {workstream.statusLabel}
+          </Badge>
+        </SheetTitle>
+        <SheetDescription>
           Seen {relativeTime(workstream.seenAt, Date.now())}
           {workstream.locked
             ? " · Protected: you edited this, so Milo won't rewrite it."
             : ""}
-        </DialogDescription>
-      </DialogHeader>
-      {detail === undefined ? (
-        <Skeleton className="h-40 w-full" />
-      ) : detail === null ? (
-        <p className="text-muted-foreground text-sm">
-          This workstream is no longer available.
-        </p>
-      ) : (
-        <>
-          {workstream.status === "proposed" ? (
-            <SupportNote support={detail.support} />
-          ) : null}
-          <section className="flex flex-col gap-1.5">
-            <ContextSectionTitle>Brief</ContextSectionTitle>
-            <p className="text-sm">{detail.brief}</p>
-          </section>
-          <section className="flex flex-col gap-1.5">
-            <ContextSectionTitle count={detail.sightings.length}>
-              Sources
-            </ContextSectionTitle>
-            <ul className="flex flex-col divide-y rounded-md border">
-              {detail.sightings.map((sighting) => (
-                <Sighting key={sighting.id} sighting={sighting} />
-              ))}
-            </ul>
-          </section>
-          {detail.history.length === 0 ? null : (
-            <section className="flex flex-col gap-1.5">
-              <ContextSectionTitle>History</ContextSectionTitle>
-              <ul className="flex flex-col gap-2">
-                {detail.history.map((entry) => (
-                  <li key={entry.id} className="text-sm">
-                    <span className="text-muted-foreground text-xs">
-                      {relativeTime(entry.createdAt, Date.now())}
-                    </span>
-                    <p>{entry.entry}</p>
-                  </li>
+        </SheetDescription>
+      </SheetHeader>
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
+        {detail === undefined ? (
+          <Skeleton className="h-40 w-full" />
+        ) : detail === null ? (
+          <p className="text-muted-foreground text-sm">
+            This workstream is no longer available.
+          </p>
+        ) : (
+          <>
+            {workstream.status === "proposed" ? (
+              <SupportNote support={detail.support} />
+            ) : null}
+            <Section title="Brief">
+              <p className="text-sm">{detail.brief}</p>
+            </Section>
+            <Section title="Sources" count={detail.sightings.length}>
+              <ul className="flex flex-col divide-y rounded-md border">
+                {detail.sightings.map((sighting) => (
+                  <Sighting key={sighting.id} sighting={sighting} />
                 ))}
               </ul>
-            </section>
-          )}
-          {detail.aliases.length === 0 ? null : (
-            <section className="flex flex-col gap-1.5">
-              <ContextSectionTitle>Also known as</ContextSectionTitle>
-              <div className="flex flex-wrap gap-2">
-                {detail.aliases.map((alias) => (
-                  <Badge key={alias} variant="outline">
-                    {alias}
-                  </Badge>
-                ))}
-              </div>
-            </section>
-          )}
-          <div className="flex flex-col gap-2 border-t pt-3">
-            <WorkstreamActions
-              tenantId={tenantId}
-              workstream={workstream}
-              onEdit={onEdit}
-              onMerge={onMerge}
-            />
-            <p className="text-muted-foreground text-xs">
-              Confirmed workstreams help Milo answer with your organization's
-              context.
-            </p>
-          </div>
-        </>
-      )}
-    </div>
+            </Section>
+            {detail.history.length === 0 ? null : (
+              <Section title="History">
+                <Timeline>
+                  {detail.history.map((entry) => (
+                    <TimelineItem
+                      key={entry.id}
+                      time={relativeTime(entry.createdAt, Date.now())}
+                    >
+                      {entry.entry}
+                    </TimelineItem>
+                  ))}
+                </Timeline>
+              </Section>
+            )}
+            {detail.aliases.length === 0 ? null : (
+              <Section title="Also known as">
+                <div className="flex flex-wrap gap-2">
+                  {detail.aliases.map((alias) => (
+                    <Badge key={alias} variant="outline">
+                      {alias}
+                    </Badge>
+                  ))}
+                </div>
+              </Section>
+            )}
+          </>
+        )}
+      </div>
+      <SheetFooter className="border-t">
+        <WorkstreamActions
+          tenantId={tenantId}
+          workstream={workstream}
+          onEdit={onEdit}
+          onMerge={onMerge}
+        />
+        <p className="text-muted-foreground text-xs">
+          Confirmed workstreams help Milo answer with your organization's
+          context.
+        </p>
+      </SheetFooter>
+    </>
+  )
+}
+
+function Section({
+  title,
+  count,
+  children,
+}: {
+  title: string
+  count?: number
+  children: ReactNode
+}) {
+  return (
+    <section className="flex flex-col gap-1.5">
+      <ContextSectionTitle count={count}>{title}</ContextSectionTitle>
+      {children}
+    </section>
   )
 }
 
 function SupportNote({
   support,
 }: {
-  support: { sources: string[]; meetsThreshold: boolean }
+  support: { sources: Integration[]; meetsThreshold: boolean }
 }) {
-  const sources = support.sources.join(" and ")
+  const sources = support.sources.map(integrationLabel).join(" and ")
 
   return (
     <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-3 text-sm">
@@ -170,38 +190,53 @@ function SupportNote({
   )
 }
 
-function Sighting({
-  sighting,
-}: {
-  sighting: {
-    source: string
-    kind: string
-    why: string
-    observedAt: number
-    url?: string
-  }
-}) {
-  return (
-    <li className="flex flex-col gap-0.5 p-3">
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm">{sighting.source}</span>
+type SightingRow = {
+  integration: Integration | null
+  kind: string
+  why: string
+  observedAt: number
+  url?: string
+}
+
+// The whole row links out to the cited artifact when the source has one.
+function Sighting({ sighting }: { sighting: SightingRow }) {
+  const content = (
+    <>
+      <div className="flex w-full items-center gap-2">
+        {sighting.integration === null ? null : (
+          <IntegrationLogo decorative integration={sighting.integration} />
+        )}
+        <span className="font-medium text-sm">
+          {sighting.integration === null
+            ? "Removed tool"
+            : integrationLabel(sighting.integration)}
+        </span>
         <span className="text-muted-foreground text-xs">{sighting.kind}</span>
         <span className="ml-auto text-muted-foreground text-xs">
           {relativeTime(sighting.observedAt, Date.now())}
         </span>
         {sighting.url === undefined ? null : (
-          <a
-            href={sighting.url}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Open source"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ExternalLink className="size-3.5" />
-          </a>
+          <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />
         )}
       </div>
       <p className="text-muted-foreground text-sm">{sighting.why}</p>
+    </>
+  )
+
+  if (sighting.url === undefined) {
+    return <li className="flex flex-col gap-0.5 p-3">{content}</li>
+  }
+
+  return (
+    <li>
+      <a
+        href={sighting.url}
+        target="_blank"
+        rel="noreferrer"
+        className="flex flex-col gap-0.5 p-3 transition-colors hover:bg-muted/50"
+      >
+        {content}
+      </a>
     </li>
   )
 }

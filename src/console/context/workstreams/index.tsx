@@ -18,11 +18,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
 import { ContextSectionTitle } from "../section"
-import { WorkstreamActions } from "./actions"
-import { type Workstream, WorkstreamCard, type Workstreams } from "./card"
+import { WorkstreamCard } from "./card"
 import { WorkstreamDetail } from "./detail"
 import { MergeDialog } from "./merge"
 import { RenameDialog } from "./rename"
+import { type Workstream, type Workstreams } from "./types"
 
 type StatusFilter = "active" | "closed" | "rejected"
 
@@ -72,7 +72,6 @@ export function ContextWorkstreams({ tenantId }: { tenantId: string }) {
         <Skeleton className="h-28 w-full" />
       ) : (
         <FilteredWorkstreams
-          tenantId={tenantId}
           filter={filter}
           workstreams={workstreams}
           dialogs={dialogs}
@@ -101,12 +100,10 @@ export function ContextWorkstreams({ tenantId }: { tenantId: string }) {
 }
 
 function FilteredWorkstreams({
-  tenantId,
   filter,
   workstreams,
   dialogs,
 }: {
-  tenantId: string
   filter: StatusFilter
   workstreams: Workstreams
   dialogs: (workstream: Workstream) => {
@@ -115,24 +112,13 @@ function FilteredWorkstreams({
     onMerge: () => void
   }
 }) {
-  const section = (rows: Workstreams, quickActions: boolean) => (
+  const section = (rows: Workstreams) => (
     <ul className="flex flex-col gap-2">
       {rows.map((workstream) => (
         <li key={workstream.id}>
           <WorkstreamCard
             workstream={workstream}
             onOpen={dialogs(workstream).onOpen}
-            actions={
-              quickActions ? (
-                <WorkstreamActions
-                  tenantId={tenantId}
-                  workstream={workstream}
-                  only={["confirm", "reject"]}
-                  onEdit={dialogs(workstream).onEdit}
-                  onMerge={dialogs(workstream).onMerge}
-                />
-              ) : undefined
-            }
           />
         </li>
       ))}
@@ -147,7 +133,7 @@ function FilteredWorkstreams({
         description={`Nothing ${filterLabels[filter].toLowerCase()} yet.`}
       />
     ) : (
-      section(rows, false)
+      section(rows)
     )
   }
 
@@ -167,7 +153,7 @@ function FilteredWorkstreams({
           <ContextSectionTitle count={suggested.length}>
             Needs review
           </ContextSectionTitle>
-          {section(suggested, true)}
+          {section(suggested)}
         </section>
       )}
       {confirmed.length === 0 ? null : (
@@ -175,7 +161,7 @@ function FilteredWorkstreams({
           <ContextSectionTitle count={confirmed.length}>
             Confirmed
           </ContextSectionTitle>
-          {section(confirmed, false)}
+          {section(confirmed)}
         </section>
       )}
     </div>
