@@ -1,7 +1,7 @@
-import { type JsonObject } from "../../../contracts/json"
-import { type ToolAccess } from "../../../contracts/permissions"
-import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
-import { nativeToolUsage } from "../permissions/native"
+import { type JsonObject } from "../../contracts/json"
+import { type ToolAccess } from "../../contracts/permissions"
+import { withOptionalFieldGuidance } from "../runs/agent/tools/schemas"
+import { nativeToolUsage } from "./permissions/native"
 
 export type RunLifecycleTool = {
   access: ToolAccess
