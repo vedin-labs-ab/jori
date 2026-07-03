@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { loadRecentActivity } from "../conversations/recency/load"
-import { renderRecentActivity } from "../conversations/recency/render"
+import { renderPersonContext } from "../conversations/recency/render"
 import { canonicalPersonId } from "../persons/data"
 import { getActorDisplayName } from "../shared/actor"
 
@@ -81,7 +81,7 @@ async function collectContexts(
     if (entries.length > 0) {
       const name = await personName(ctx, person, args.run)
 
-      contexts.push(renderRecentActivity({ entries, name }))
+      contexts.push(renderPersonContext({ entries, name }))
       appendSeenSummaries(seen, entries)
     }
 
