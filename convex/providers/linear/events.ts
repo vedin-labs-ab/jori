@@ -12,6 +12,7 @@ export type LinearWebhookPayload = {
   data?: LinearComment
   notification?: unknown
   organizationId?: string
+  updatedFrom?: Record<string, unknown>
   url?: string
   webhookId?: string
   webhookTimestamp?: number

@@ -67,3 +67,9 @@ export const linearIssueLifecycleEvent = {
   stateChanged: "issue.state_changed",
   removed: "issue.removed",
 } as const
+
+export const linearProjectLifecycleEvent = {
+  created: "project.created",
+  stateChanged: "project.state_changed",
+  removed: "project.removed",
+} as const
