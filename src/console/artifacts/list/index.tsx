@@ -1,12 +1,11 @@
-import { Search } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Input } from "@/components/ui/input"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
+  ConsoleFilterToggle,
   ConsolePageLayout,
   ConsoleScrollableList,
   ConsoleToolbar,
   ConsoleToolbarActions,
+  ConsoleToolbarSearch,
 } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { type useClientPagination } from "../../shared/list/pagination"
@@ -109,34 +108,17 @@ function ArtifactToolbar({
 }: ArtifactToolbarProps) {
   return (
     <ConsoleToolbar>
-      <ToggleGroup
-        className="flex-wrap justify-start"
-        onValueChange={(value) => {
-          if (value !== "") {
-            onFilterChange(value as ArtifactFilter)
-          }
-        }}
-        type="single"
+      <ConsoleFilterToggle
+        onValueChange={onFilterChange}
+        options={artifactFilterOptions}
         value={filter}
-        variant="outline"
-      >
-        {artifactFilterOptions.map((option) => (
-          <ToggleGroupItem key={option.value} value={option.value}>
-            {option.label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+      />
       <ConsoleToolbarActions>
-        <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
-          <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
-          <Input
-            aria-label="Search artifacts"
-            className="pr-2 pl-8"
-            onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Search artifacts"
-            value={query}
-          />
-        </div>
+        <ConsoleToolbarSearch
+          label="Search artifacts"
+          onValueChange={onQueryChange}
+          value={query}
+        />
       </ConsoleToolbarActions>
     </ConsoleToolbar>
   )
