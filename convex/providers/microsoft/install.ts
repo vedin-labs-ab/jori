@@ -7,10 +7,9 @@ import {
 } from "../../_generated/server"
 import { linkSetupIdentity } from "../../persons/install"
 import { readRefreshToken } from "../credentials"
-import { buildInstallState } from "../install"
+import { createSignedInstallState } from "../install"
 import { type MicrosoftIntegration } from "./config"
 import { getMicrosoftIdentityEmail } from "./identity"
-import { createSignedMicrosoftState } from "./signing"
 
 const microsoftIntegration = v.union(
   v.literal("microsoftCalendar"),
@@ -23,7 +22,7 @@ export const createMicrosoftEmailInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    return await createInstallState(ctx, "microsoftEmail", args)
+    return await createSignedInstallState(ctx, "microsoftEmail", args)
   },
 })
 
@@ -33,7 +32,7 @@ export const createMicrosoftCalendarInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    return await createInstallState(ctx, "microsoftCalendar", args)
+    return await createSignedInstallState(ctx, "microsoftCalendar", args)
   },
 })
 
@@ -221,20 +220,6 @@ export const updateOAuthCredentials = internalMutation({
     return credentials
   },
 })
-
-async function createInstallState(
-  ctx: MutationCtx,
-  integration: MicrosoftIntegration,
-  args: {
-    tenantId: string
-    returnUrl: string
-  }
-) {
-  return await createSignedMicrosoftState({
-    integration,
-    ...(await buildInstallState(ctx, args)),
-  })
-}
 
 function readTenantId(credentials: unknown) {
   if (

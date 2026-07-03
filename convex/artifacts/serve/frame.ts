@@ -36,15 +36,15 @@ export function readArtifactFramePolicy(
   }
 }
 
+// The shell is served without authentication, so it must stay free of
+// artifact data. Everything beyond the artifact id loads through the
+// session-token-authorized tool and asset endpoints.
 export function renderArtifactShell(
-  artifact: {
-    artifactId: Id<"artifacts">
-    title: string
-  },
+  artifactId: Id<"artifacts">,
   policy: ArtifactFramePolicy
 ) {
   return runtimeAssets.artifact.shell.html
-    .replace("__MILO_ARTIFACT_TITLE__", escapeHtml(artifact.title))
+    .replace("__MILO_ARTIFACT_TITLE__", "Artifact")
     .replace(
       "/* __MILO_ARTIFACT_STYLE__ */",
       runtimeAssets.artifact.shell.style
@@ -52,7 +52,7 @@ export function renderArtifactShell(
     .replace(
       "__MILO_ARTIFACT_CONFIG__",
       escapeScriptJson({
-        artifactId: artifact.artifactId,
+        artifactId,
         parentOrigins: policy.parentOrigins,
       })
     )
@@ -93,23 +93,6 @@ function normalizeOrigin(value: string) {
 
 function frameOriginError(value: string) {
   return `${frameAncestorsEnv} must contain origins only, received ${JSON.stringify(value)}.`
-}
-
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (character) => {
-    switch (character) {
-      case "&":
-        return "&amp;"
-      case "<":
-        return "&lt;"
-      case ">":
-        return "&gt;"
-      case '"':
-        return "&quot;"
-      default:
-        return "&#39;"
-    }
-  })
 }
 
 function escapeScriptJson(value: unknown) {

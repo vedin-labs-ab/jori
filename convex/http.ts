@@ -89,9 +89,7 @@ http.route({
 http.route({
   pathPrefix: "/artifacts/render/",
   method: "GET",
-  handler: httpAction((ctx, request) =>
-    handleArtifactRenderRequest(ctx, request)
-  ),
+  handler: httpAction((_ctx, request) => handleArtifactRenderRequest(request)),
 })
 
 http.route({

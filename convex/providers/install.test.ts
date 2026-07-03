@@ -1,9 +1,17 @@
-import { describe, expect, test } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { buildInstallState } from "./install"
 
 describe("buildInstallState", () => {
+  beforeEach(() => {
+    vi.stubEnv("MILO_APP_URL", "https://app.example")
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   test("returns the signed state fields for a tenant member", async () => {
     const ctx = createCtx({ subject: "user_1", org: "tenant_1" })
     const state = await buildInstallState(ctx, {
@@ -39,6 +47,28 @@ describe("buildInstallState", () => {
         returnUrl: "https://app.example/integrations",
       })
     ).rejects.toThrow("another organization")
+  })
+
+  test("rejects a return URL outside the Milo app origin", async () => {
+    const ctx = createCtx({ subject: "user_1", org: "tenant_1" })
+
+    await expect(
+      buildInstallState(ctx, {
+        tenantId: "tenant_1",
+        returnUrl: "https://evil.example/integrations",
+      })
+    ).rejects.toThrow("Return URL must point to the Milo app.")
+  })
+
+  test("rejects a relative return URL", async () => {
+    const ctx = createCtx({ subject: "user_1", org: "tenant_1" })
+
+    await expect(
+      buildInstallState(ctx, {
+        tenantId: "tenant_1",
+        returnUrl: "/integrations",
+      })
+    ).rejects.toThrow("Return URL must be absolute.")
   })
 })
 

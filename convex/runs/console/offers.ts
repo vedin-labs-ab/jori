@@ -38,6 +38,8 @@ export const claim = mutation({
   },
   returns: integrationOfferClaimResult,
   handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+
     const offer = await requireConsoleOffer(ctx, args)
 
     return await claimIntegrationOffer(ctx, {
@@ -51,6 +53,8 @@ export const cancel = mutation({
   args: consoleOfferArgs,
   returns: cancelResult,
   handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+
     const offer = await findConsoleOffer(ctx, args)
 
     if (offer === null) {
@@ -110,9 +114,8 @@ async function requireConsoleOffer(ctx: MutationCtx, args: ConsoleOfferArgs) {
   return offer
 }
 
+// Callers must authorize tenant access before looking up the offer.
 async function findConsoleOffer(ctx: MutationCtx, args: ConsoleOfferArgs) {
-  await requireTenantAccess(ctx, args.tenantId)
-
   const offer = await ctx.db.get(args.integrationOfferId)
 
   return offer?.tenantId === args.tenantId && offer.runId === args.runId

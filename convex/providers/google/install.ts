@@ -1,19 +1,14 @@
 import { v } from "convex/values"
 import { type Id } from "../../_generated/dataModel"
-import {
-  internalMutation,
-  type MutationCtx,
-  mutation,
-} from "../../_generated/server"
+import { internalMutation, mutation } from "../../_generated/server"
 import { linkSetupIdentity } from "../../persons/install"
 import { readRefreshToken } from "../credentials"
-import { buildInstallState } from "../install"
+import { createSignedInstallState } from "../install"
 import { type GoogleIntegration } from "./config"
 import {
   findExistingGoogleIntegration,
   getGoogleIntegrationScope,
 } from "./scope"
-import { createSignedGoogleState } from "./signing"
 
 const googleIntegration = v.union(
   v.literal("gmail"),
@@ -27,7 +22,7 @@ export const createGmailInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    return await createInstallState(ctx, "gmail", args)
+    return await createSignedInstallState(ctx, "gmail", args)
   },
 })
 
@@ -37,7 +32,7 @@ export const createGoogleCalendarInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    return await createInstallState(ctx, "googleCalendar", args)
+    return await createSignedInstallState(ctx, "googleCalendar", args)
   },
 })
 
@@ -47,7 +42,7 @@ export const createGoogleDriveInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    return await createInstallState(ctx, "googleDrive", args)
+    return await createSignedInstallState(ctx, "googleDrive", args)
   },
 })
 
@@ -200,17 +195,3 @@ export const updateOAuthCredentials = internalMutation({
     return credentials
   },
 })
-
-async function createInstallState(
-  ctx: MutationCtx,
-  integration: GoogleIntegration,
-  args: {
-    tenantId: string
-    returnUrl: string
-  }
-) {
-  return await createSignedGoogleState({
-    integration,
-    ...(await buildInstallState(ctx, args)),
-  })
-}
