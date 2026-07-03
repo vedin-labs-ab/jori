@@ -27,9 +27,6 @@ function ContextView({ tenantId }: { tenantId: string }) {
         <TabsList className="w-fit !h-7">
           <TabsTrigger value="organization">Organization</TabsTrigger>
           <TabsTrigger value="workstreams">Workstreams</TabsTrigger>
-          <TabsTrigger disabled value="layers">
-            Layers
-          </TabsTrigger>
         </TabsList>
         <TabsContent value="organization">
           <ContextProfile

@@ -23,7 +23,8 @@ import { relativeTime } from "../../shared/time"
 import { Timeline, TimelineItem } from "../../shared/timeline"
 import { ContextSectionTitle } from "../section"
 import { WorkstreamActions } from "./actions"
-import { statusVariants, type Workstream } from "./types"
+import { WorkstreamStatusCue } from "./status"
+import { type Workstream } from "./types"
 
 export function WorkstreamDetail({
   tenantId,
@@ -82,9 +83,7 @@ function DetailBody({
       <SheetHeader>
         <SheetTitle className="flex flex-wrap items-center gap-2">
           {workstream.name}
-          <Badge variant={statusVariants[workstream.status]}>
-            {workstream.statusLabel}
-          </Badge>
+          <WorkstreamStatusCue workstream={workstream} />
         </SheetTitle>
         <SheetDescription>
           Seen {relativeTime(workstream.seenAt, Date.now())}
