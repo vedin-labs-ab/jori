@@ -18,7 +18,7 @@ import { judgePass } from "./review/judge"
 import { isPassDue, isStaleRunning, nextPassWindow } from "./schedule"
 import { type BeliefKind, beliefKind, beliefKinds } from "./schema"
 
-// Daily heartbeat: hands every tenant that is due a review to the run action,
+// Hourly heartbeat: hands every tenant that is due a review to the run action,
 // one per kind. Mirrors the organization source sweep.
 export const sweep = internalMutation({
   args: {},
