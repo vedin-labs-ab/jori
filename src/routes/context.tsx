@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { OrganizationContext } from "@/console/context"
+import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/context")({
-  component: OrganizationContext,
+  component: Outlet,
 })
