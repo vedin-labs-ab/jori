@@ -208,6 +208,7 @@ function createRuntime(options: {
       prompt: {
         context: "context",
         instructions: "system",
+        organization: null,
       },
       run: {
         id: id<"runs">("run_1"),

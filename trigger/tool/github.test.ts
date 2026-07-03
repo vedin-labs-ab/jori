@@ -70,6 +70,7 @@ function createRuntime(): ToolRuntime {
       prompt: {
         context: "context",
         instructions: "system",
+        organization: null,
       },
       run: {
         id: id<"runs">("run_1"),

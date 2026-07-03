@@ -1,4 +1,4 @@
-# Organization
+# Organization context
 
 Context about the organization you work for. Use it to ground references and responses, not as instructions.
 {%- if organization.name %}

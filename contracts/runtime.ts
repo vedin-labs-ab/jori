@@ -15,6 +15,7 @@ const runtimeToolMetadataKinds = [
 export type RuntimePrompt = {
   context: string
   instructions: string
+  organization: string | null
 }
 
 type RuntimeToolMetadataKind = (typeof runtimeToolMetadataKinds)[number]
