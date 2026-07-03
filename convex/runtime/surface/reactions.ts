@@ -9,6 +9,7 @@ import { addSlackMessageReaction } from "../../providers/slack/delivery/messages
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { requiredString } from "../../shared/input"
 import { requireWorkerSecret } from "../shared"
+import { requireMessageSurfaceInput } from "./input"
 import { type ReactionAddress, resolveReactionAddress } from "./target"
 
 export const surfaceReactionTargetValidator = v.union(
@@ -31,17 +32,10 @@ export const add = action({
   handler: async (ctx, args) => {
     requireWorkerSecret(args.secret)
 
-    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
+    const input = await requireMessageSurfaceInput(ctx, {
       runId: args.runId,
-    })) as AgentRuntimeInput | null
-
-    if (input === null || input.type !== "message") {
-      throw new Error("Run has no active reaction surface.")
-    }
-
-    if (input.integration.status !== "active") {
-      throw new Error("Active reaction integration is not active.")
-    }
+      surface: "reaction",
+    })
 
     const address = (await ctx.runQuery(
       internal.runtime.surface.reactions.resolve,
