@@ -8,7 +8,7 @@ import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
 import { type HandoffSubject, type RuntimeContext } from "../types"
 import { recordRunEvent } from "./events"
 import { pendingHandoffSubjects, reconcileHandoffs } from "./handoffs"
-import { appendSessionMessages } from "./messages"
+import { appendSessionMessages, promptMessages } from "./messages"
 import { completeModelStep } from "./model"
 import { appendStopRepair } from "./repair"
 import { parkRun } from "./waiter"
@@ -29,16 +29,7 @@ export async function runAgentLoop(args: {
   model: ModelRuntime
   runtime: ToolRuntime
 }) {
-  const messages: ModelMessage[] = [
-    {
-      content: args.runtime.context.prompt.instructions,
-      role: "system",
-    },
-    {
-      content: args.runtime.context.prompt.context,
-      role: "user",
-    },
-  ]
+  const messages: ModelMessage[] = promptMessages(args.runtime.context.prompt)
 
   await reconcileHandoffs(args.runtime, messages)
 

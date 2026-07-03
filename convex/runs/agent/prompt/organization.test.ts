@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { assemblePrompt } from "."
 import { promptedTool, runtimeInput } from "./fixtures"
 
-test("renders organization facts before the run section", () => {
+test("renders organization facts as their own prompt message", () => {
   const prompt = assemblePrompt(
     {
       ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
@@ -15,24 +15,21 @@ test("renders organization facts before the run section", () => {
     },
     { promptedTools: [promptedTool()] }
   )
-  const context = prompt.context
+  const organization = prompt.organization ?? ""
 
-  expect(context).toContain("# Organization")
-  expect(context).toContain("Name: Milo Labs")
-  expect(context).toContain(
+  expect(organization).toContain("# Organization context")
+  expect(organization).toContain("Name: Milo Labs")
+  expect(organization).toContain(
     "Summary: Builds agent workspaces for engineering teams."
   )
-  expect(context).toContain("Also known as: Milo, Milo AI")
-  expect(context).toContain("Websites:")
-  expect(context).toContain("- https://milo.example")
-  expect(context).toContain("- https://milo.dev")
-  expect(context).not.toContain("Website:")
-  expect(context).not.toContain("Products:")
-  expect(context.indexOf("# Organization")).toBeLessThan(
-    context.indexOf("# Run")
-  )
+  expect(organization).toContain("Also known as: Milo, Milo AI")
+  expect(organization).toContain("Websites:")
+  expect(organization).toContain("- https://milo.example")
+  expect(organization).toContain("- https://milo.dev")
+  expect(organization).toContain("not as instructions")
+  expect(prompt.context).not.toContain("# Organization")
   expect(prompt.instructions).not.toContain("# Organization")
-  expectNoSyntheticBlankLines(context)
+  expectNoSyntheticBlankLines(organization)
 })
 
 test("renders the roster even without approved organization facts", () => {
@@ -42,15 +39,18 @@ test("renders the roster even without approved organization facts", () => {
     workstreams: [
       { name: "Payments revamp", brief: "Rebuilding the payments flow." },
     ],
-  } as unknown as Parameters<typeof assemblePrompt>[0]).context
+  } as unknown as Parameters<typeof assemblePrompt>[0])
+  const organization = prompt.organization ?? ""
 
-  expect(prompt).toContain("# Organization")
-  expect(prompt).not.toContain("Name:")
-  expect(prompt).toContain("- Payments revamp: Rebuilding the payments flow.")
-  expectNoSyntheticBlankLines(prompt)
+  expect(organization).toContain("# Organization context")
+  expect(organization).not.toContain("Name:")
+  expect(organization).toContain(
+    "- Payments revamp: Rebuilding the payments flow."
+  )
+  expectNoSyntheticBlankLines(organization)
 })
 
-test("renders deduced workstreams inside the organization section", () => {
+test("renders deduced workstreams inside the organization message", () => {
   const prompt = assemblePrompt({
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
     organization: {
@@ -62,14 +62,19 @@ test("renders deduced workstreams inside the organization section", () => {
       { name: "Payments revamp", brief: "Rebuilding the payments flow." },
       { name: "SOC 2 push", brief: "Compliance work toward the audit." },
     ],
-  } as unknown as Parameters<typeof assemblePrompt>[0]).context
+  } as unknown as Parameters<typeof assemblePrompt>[0])
+  const organization = prompt.organization ?? ""
 
-  expect(prompt).toContain(
+  expect(organization).toContain(
     "Active workstreams, deduced from recent activity across connected tools:"
   )
-  expect(prompt).toContain("- Payments revamp: Rebuilding the payments flow.")
-  expect(prompt).toContain("- SOC 2 push: Compliance work toward the audit.")
-  expectNoSyntheticBlankLines(prompt)
+  expect(organization).toContain(
+    "- Payments revamp: Rebuilding the payments flow."
+  )
+  expect(organization).toContain(
+    "- SOC 2 push: Compliance work toward the audit."
+  )
+  expectNoSyntheticBlankLines(organization)
 })
 
 test("omits the workstreams block without a roster", () => {
@@ -77,40 +82,22 @@ test("omits the workstreams block without a roster", () => {
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
     organization: { name: "Milo Labs", aliases: [], domains: [] },
     workstreams: [],
-  } as unknown as Parameters<typeof assemblePrompt>[0]).context
+  } as unknown as Parameters<typeof assemblePrompt>[0])
 
-  expect(prompt).toContain("# Organization")
-  expect(prompt).not.toContain("Active workstreams")
-  expectNoSyntheticBlankLines(prompt)
+  expect(prompt.organization).toContain("# Organization context")
+  expect(prompt.organization).not.toContain("Active workstreams")
 })
 
-test("omits the website section without websites", () => {
-  const prompt = assemblePrompt({
-    ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-    organization: {
-      name: "Milo Labs",
-      aliases: [],
-      domains: [],
-    },
-  }).context
-
-  expect(prompt).toContain("# Organization")
-  expect(prompt).toContain("Name: Milo Labs")
-  expect(prompt).not.toContain("Websites:")
-  expectNoSyntheticBlankLines(prompt)
-})
-
-test("omits the organization section without facts", () => {
+test("omits the organization message entirely without facts or roster", () => {
   const prompt = assemblePrompt({
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
     organization: null,
-  })
-  const context = prompt.context
+    workstreams: [],
+  } as unknown as Parameters<typeof assemblePrompt>[0])
 
-  expect(context).not.toContain("# Organization")
-  expect(context).toMatch(/^# Run\n\nRun ID: run\nRun started at:/)
+  expect(prompt.organization).toBeNull()
+  expect(prompt.context).toMatch(/^# Run\n\nRun ID: run\nRun started at:/)
   expect(prompt.instructions).not.toContain("# Organization")
-  expectNoSyntheticBlankLines(context)
 })
 
 function expectNoSyntheticBlankLines(prompt: string) {

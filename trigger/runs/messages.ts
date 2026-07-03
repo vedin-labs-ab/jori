@@ -2,7 +2,44 @@ import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { type ModelMessage } from "../model/types"
 import { type ToolRuntime } from "../tool"
-import { type RuntimeInteraction, type RuntimeMessage } from "../types"
+import {
+  type RuntimeInteraction,
+  type RuntimeMessage,
+  type RuntimePrompt,
+} from "../types"
+
+// The prompt prefix every run starts with: instructions as the system
+// message, then the organization context (when the tenant has any) and the
+// run context as user messages. Everything after the prefix is history.
+export function promptMessages(prompt: RuntimePrompt): ModelMessage[] {
+  const organization: ModelMessage[] =
+    prompt.organization === null
+      ? []
+      : [{ content: prompt.organization, role: "user" }]
+
+  return [
+    { content: prompt.instructions, role: "system" },
+    ...organization,
+    { content: prompt.context, role: "user" },
+  ]
+}
+
+// Replaces the prompt prefix in place when the runtime context reloads,
+// preserving the history that follows. The previous prompt says how long the
+// prefix currently is; the next prompt says what it becomes.
+export function replacePromptMessages(
+  messages: ModelMessage[],
+  previous: RuntimePrompt,
+  next: RuntimePrompt
+) {
+  const length = promptMessages(previous).length
+
+  if (messages.length < length || messages[0]?.role !== "system") {
+    return
+  }
+
+  messages.splice(0, length, ...promptMessages(next))
+}
 
 export function formatSessionMessage(message: RuntimeMessage) {
   const observed = message.observedAt ?? message.createdAt

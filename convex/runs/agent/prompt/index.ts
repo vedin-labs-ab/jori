@@ -11,6 +11,7 @@ import {
   defaultActiveSurface,
   type PromptActiveSurface,
 } from "./context"
+import { createOrganizationMessage } from "./organization"
 import { createSkillInstructions } from "./skills"
 
 export function assemblePrompt(
@@ -58,6 +59,7 @@ export function assemblePrompt(
       agent: context,
     }),
     instructions,
+    organization: optionalPromptBlock(createOrganizationMessage(input)),
   }
 }
 

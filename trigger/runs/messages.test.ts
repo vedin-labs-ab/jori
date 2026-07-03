@@ -9,6 +9,8 @@ import {
   appendSessionMessages,
   formatSessionInteraction,
   formatSessionMessage,
+  promptMessages,
+  replacePromptMessages,
 } from "./messages"
 
 test("formats drained messages like conversation messages", () => {
@@ -136,3 +138,54 @@ function runtimeInteraction(
     ...overrides,
   }
 }
+
+const promptWithOrganization = {
+  context: "context",
+  instructions: "instructions",
+  organization: "organization",
+}
+const promptWithoutOrganization = {
+  context: "context",
+  instructions: "instructions",
+  organization: null,
+}
+
+test("builds the prompt prefix with and without an organization message", () => {
+  expect(promptMessages(promptWithoutOrganization)).toEqual([
+    { content: "instructions", role: "system" },
+    { content: "context", role: "user" },
+  ])
+  expect(promptMessages(promptWithOrganization)).toEqual([
+    { content: "instructions", role: "system" },
+    { content: "organization", role: "user" },
+    { content: "context", role: "user" },
+  ])
+})
+
+test("replaces the prompt prefix in place across all shapes", () => {
+  const history = { content: "history", role: "user" as const }
+  const next = {
+    context: "new context",
+    instructions: "new instructions",
+    organization: "new organization",
+  }
+
+  const grew = [...promptMessages(promptWithoutOrganization), history]
+  replacePromptMessages(grew, promptWithoutOrganization, next)
+  expect(grew).toEqual([...promptMessages(next), history])
+
+  const shrank = [...promptMessages(promptWithOrganization), history]
+  replacePromptMessages(shrank, promptWithOrganization, {
+    ...next,
+    organization: null,
+  })
+  expect(shrank).toEqual([
+    { content: "new instructions", role: "system" },
+    { content: "new context", role: "user" },
+    history,
+  ])
+
+  const malformed = [history]
+  replacePromptMessages(malformed, promptWithoutOrganization, next)
+  expect(malformed).toEqual([history])
+})

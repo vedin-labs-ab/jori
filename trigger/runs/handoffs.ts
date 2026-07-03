@@ -9,7 +9,7 @@ import {
   type RunHandoffs,
 } from "../types"
 import { recordApprovalResolved, recordOfferResolved } from "./activity"
-import { appendSessionMessages } from "./messages"
+import { appendSessionMessages, replacePromptMessages } from "./messages"
 
 export type PendingHandoff = {
   expiresAt: number
@@ -147,23 +147,13 @@ async function refreshRuntimeContext(
     runId: runtime.context.run.id,
   })
 
+  const previous = runtime.context.prompt
+
   runtime.context.tools = reloaded.tools
   runtime.context.activeSurface = reloaded.activeSurface
   runtime.context.prompt = reloaded.prompt
 
-  if (messages.length > 0 && messages[0].role === "system") {
-    messages[0] = {
-      content: reloaded.prompt.instructions,
-      role: "system",
-    }
-  }
-
-  if (messages.length > 1 && messages[1].role === "user") {
-    messages[1] = {
-      content: reloaded.prompt.context,
-      role: "user",
-    }
-  }
+  replacePromptMessages(messages, previous, reloaded.prompt)
 }
 
 function pendingHandoffs(handoffs: RunHandoffs): PendingHandoff[] {

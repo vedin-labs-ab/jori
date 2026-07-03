@@ -152,6 +152,7 @@ function createRuntime(options: {
         prompt: {
           context: "refreshed context",
           instructions: "refreshed instructions",
+          organization: null,
         },
         tools: [refreshedTool()],
         activeSurface: null,
@@ -162,6 +163,7 @@ function createRuntime(options: {
       prompt: {
         context: "context",
         instructions: "system",
+        organization: null,
       },
       run: {
         id: id<"runs">("run_1"),

@@ -15,12 +15,10 @@ export function createContextValues(
   input: AgentRuntimeInput,
   activeSurface: PromptActiveSurface | null
 ): {
-  organization: string | null
   run: string
   trigger: string
 } {
   return {
-    organization: optionalPromptBlock(createOrganizationInstructions(input)),
     run: createRunInstructions(input.run._id, activeSurface),
     trigger: promptBlock(createTriggerPart(input)),
   }
@@ -32,31 +30,6 @@ export function defaultActiveSurface(
   return input.type === "message" && replyAddress(input.message) !== null
     ? { surface: input.messageIntegration }
     : null
-}
-
-// The section renders when anything is known: approved facts, deduced
-// workstreams, or both. A tenant that skipped onboarding still gets its
-// roster.
-function createOrganizationInstructions(input: AgentRuntimeInput) {
-  const facts = input.organization
-  const workstreams = input.workstreams ?? []
-
-  if (!facts?.name && workstreams.length === 0) {
-    return ""
-  }
-
-  const aliases = facts?.aliases ?? []
-  const domains = facts?.domains ?? []
-
-  return renderPromptTemplate(promptTemplates["agent/context/organization"], {
-    organization: {
-      name: facts?.name ?? null,
-      summary: facts?.summary ?? null,
-      aliases: aliases.length === 0 ? null : aliases.join(", "),
-      domains: domains.length === 0 ? null : domains,
-      workstreams: workstreams.length === 0 ? null : workstreams,
-    },
-  }).trim()
 }
 
 function createRunInstructions(
@@ -176,10 +149,4 @@ function getIntegrationLabel(integration: MessageIntegration) {
 
 function promptBlock(value: string) {
   return value.trim()
-}
-
-function optionalPromptBlock(value: string) {
-  const block = promptBlock(value)
-
-  return block === "" ? null : block
 }
