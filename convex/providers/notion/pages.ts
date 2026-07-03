@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { readArray, readRecord } from "../../shared/input"
+import { readArray, readRecord, readString } from "../../shared/input"
 import { notionJson } from "./api"
 import { requireNotionCredentials } from "./credentials"
 
@@ -101,10 +101,4 @@ function notionRichTextPlainText(value: unknown) {
   const text = readRecord(value).plain_text
 
   return typeof text === "string" ? text : ""
-}
-
-function readString(record: Record<string, unknown>, key: string) {
-  const value = record[key]
-
-  return typeof value === "string" && value !== "" ? value : undefined
 }

@@ -12,6 +12,7 @@ import {
 import { postSlackMessage } from "../../providers/slack/delivery/messages"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { sendSurfaceReply } from "../../runtime/surface/reply"
+import { readString } from "../../shared/input"
 
 type ApprovalDeliveryContext = {
   input: AgentRuntimeInput
@@ -199,14 +200,4 @@ function deliveryOperation(context: ApprovalDeliveryContext) {
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
-}
-
-function readString(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null || !(key in data)) {
-    return undefined
-  }
-
-  const value = data[key as keyof typeof data]
-
-  return typeof value === "string" && value !== "" ? value : undefined
 }

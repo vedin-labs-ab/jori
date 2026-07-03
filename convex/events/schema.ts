@@ -117,9 +117,7 @@ const notionData = v.object({
 
 export const eventData = v.union(slackData, githubData, linearData, notionData)
 
-export const events = defineTable({
-  tenantId: v.string(),
-  integrationId: v.id("integrations"),
+export const eventFields = {
   key: v.string(),
   type: v.string(),
   match: v.optional(eventMatch),
@@ -127,6 +125,12 @@ export const events = defineTable({
   text: v.optional(v.string()),
   data: v.optional(eventData),
   observedAt: v.optional(v.number()),
+}
+
+export const events = defineTable({
+  tenantId: v.string(),
+  integrationId: v.id("integrations"),
+  ...eventFields,
 })
   .index("by_integration_and_key", ["integrationId", "key"])
   .index("by_tenant", ["tenantId"])

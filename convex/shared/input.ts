@@ -99,3 +99,21 @@ export function readRecord(value: unknown): Record<string, unknown> {
 export function readArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : []
 }
+
+export function readValue(data: unknown, key: string) {
+  return typeof data === "object" && data !== null
+    ? (data as Record<string, unknown>)[key]
+    : undefined
+}
+
+export function readString(data: unknown, key: string) {
+  const value = readValue(data, key)
+
+  return typeof value === "string" && value !== "" ? value : undefined
+}
+
+export function readNumber(data: unknown, key: string) {
+  const value = readValue(data, key)
+
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined
+}

@@ -4,6 +4,7 @@ import {
   internalMutation,
   internalQuery,
   mutation,
+  type QueryCtx,
   query,
 } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
@@ -41,20 +42,11 @@ export const list = query({
       }
     }
 
-    const [globalSkills, tenantSkills] = await Promise.all([
-      ctx.db
-        .query("skills")
-        .withIndex("by_tenant", (index) => index.eq("tenantId", null))
-        .collect(),
-      ctx.db
-        .query("skills")
-        .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
-        .collect(),
-    ])
+    const skills = await loadSortedSkills(ctx, args.tenantId)
 
     return {
       status: "ready" as const,
-      skills: sortSkills([...globalSkills, ...tenantSkills]).map((skill) => ({
+      skills: skills.map((skill) => ({
         _id: skill._id,
         tenantId: skill.tenantId,
         name: skill.name,
@@ -162,18 +154,9 @@ export const listForRuntime = internalQuery({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    const [globalSkills, tenantSkills] = await Promise.all([
-      ctx.db
-        .query("skills")
-        .withIndex("by_tenant", (index) => index.eq("tenantId", null))
-        .collect(),
-      ctx.db
-        .query("skills")
-        .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
-        .collect(),
-    ])
+    const skills = await loadSortedSkills(ctx, args.tenantId)
 
-    return sortSkills([...globalSkills, ...tenantSkills]).map((skill) => ({
+    return skills.map((skill) => ({
       id: skill._id,
       tenantId: skill.tenantId,
       name: skill.name,
@@ -187,6 +170,21 @@ export const listForRuntime = internalQuery({
     }))
   },
 })
+
+async function loadSortedSkills(ctx: QueryCtx, tenantId: string) {
+  const [globalSkills, tenantSkills] = await Promise.all([
+    ctx.db
+      .query("skills")
+      .withIndex("by_tenant", (index) => index.eq("tenantId", null))
+      .collect(),
+    ctx.db
+      .query("skills")
+      .withIndex("by_tenant", (index) => index.eq("tenantId", tenantId))
+      .collect(),
+  ])
+
+  return sortSkills([...globalSkills, ...tenantSkills])
+}
 
 export const syncGlobalSkills = internalMutation({
   args: {},

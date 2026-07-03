@@ -16,21 +16,26 @@ import {
   treeValidator,
 } from "./storage/validators"
 
+// The published version payload shared by the create and update paths.
+const publishFields = {
+  contract: artifactContract,
+  treeId: v.string(),
+  trees: v.array(treeValidator),
+  blobs: v.array(storedBlobValidator),
+  assets: v.array(assetValidator),
+  entrypoint: v.string(),
+  sdk: v.string(),
+  message: v.optional(v.string()),
+  capabilities: v.array(capabilityInputValidator),
+}
+
 export const publishCreated = internalMutation({
   args: {
     tenantId: v.string(),
     ownerId: v.id("persons"),
     title: v.string(),
     access: artifactAccess,
-    contract: artifactContract,
-    treeId: v.string(),
-    trees: v.array(treeValidator),
-    blobs: v.array(storedBlobValidator),
-    assets: v.array(assetValidator),
-    entrypoint: v.string(),
-    sdk: v.string(),
-    message: v.optional(v.string()),
-    capabilities: v.array(capabilityInputValidator),
+    ...publishFields,
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -70,15 +75,7 @@ export const publishUpdated = internalMutation({
     updatedBy: v.id("persons"),
     title: v.optional(v.string()),
     access: v.optional(artifactAccess),
-    contract: artifactContract,
-    treeId: v.string(),
-    trees: v.array(treeValidator),
-    blobs: v.array(storedBlobValidator),
-    assets: v.array(assetValidator),
-    entrypoint: v.string(),
-    sdk: v.string(),
-    message: v.optional(v.string()),
-    capabilities: v.array(capabilityInputValidator),
+    ...publishFields,
   },
   handler: async (ctx, args) => {
     const artifact = await getTenantArtifact(ctx, args)

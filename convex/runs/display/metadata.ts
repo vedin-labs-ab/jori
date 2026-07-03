@@ -1,3 +1,4 @@
+import { readNumber, readString, readValue } from "../../shared/input"
 import { type Integration } from "../../shared/integrations"
 
 export type SourceMetadataItem = {
@@ -217,26 +218,6 @@ function readObject(data: unknown, key: string) {
   return typeof value === "object" && value !== null ? value : undefined
 }
 
-function readNumber(data: unknown, key: string) {
-  const value = readValue(data, key)
-
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
-function readString(data: unknown, key: string) {
-  const value = readValue(data, key)
-
-  return typeof value === "string" && value !== "" ? value : undefined
-}
-
 function readBoolean(data: unknown, key: string) {
   return readValue(data, key) === true
-}
-
-function readValue(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  return (data as Record<string, unknown>)[key]
 }

@@ -8,6 +8,7 @@ import {
   getSlackThreadTs,
 } from "../../providers/slack/data"
 import { postSlackMessage } from "../../providers/slack/delivery/messages"
+import { readString } from "../../shared/input"
 import { type Integration } from "../../shared/integrations"
 import { createSlackIntegrationOfferMessage } from "./slack"
 
@@ -112,14 +113,4 @@ function getSlackTarget(context: ApprovalBrokerContext) {
       getSlackThreadTs(context.input.message.data) ??
       getSlackMessageTs(context.input.message.data),
   }
-}
-
-function readString(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null || !(key in data)) {
-    return undefined
-  }
-
-  const value = data[key as keyof typeof data]
-
-  return typeof value === "string" && value !== "" ? value : undefined
 }
