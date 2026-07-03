@@ -1,7 +1,7 @@
 import { type ContextFacts, type ContextSource } from "../types"
 import { websiteItems } from "../url"
 
-export type ProposalSectionKey = "aliases" | "sources" | "summary" | "websites"
+type ProposalSectionKey = "aliases" | "sources" | "summary" | "websites"
 
 export type ProposalSectionStatus = "changed" | "unchanged"
 
@@ -10,7 +10,7 @@ export type ProposalSectionStatuses = Record<
   ProposalSectionStatus
 >
 
-export const emptyFacts: ContextFacts = {
+const emptyFacts: ContextFacts = {
   aliases: [],
   domains: [],
   name: undefined,

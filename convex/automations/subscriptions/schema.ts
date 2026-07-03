@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { eventMatch } from "../../events/schema"
 
-export const subscriptionStatus = v.union(
+const subscriptionStatus = v.union(
   v.literal("active"),
   v.literal("paused"),
   v.literal("failed")

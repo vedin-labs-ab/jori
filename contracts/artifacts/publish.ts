@@ -5,10 +5,7 @@
  * longer matches the model-facing schema, the broker skips schema validation
  * for these tools and the publish action validates the built payload instead.
  */
-export const artifactPublishTools = [
-  "create_artifact",
-  "update_artifact",
-] as const
+const artifactPublishTools = ["create_artifact", "update_artifact"] as const
 
 export type ArtifactPublishTool = (typeof artifactPublishTools)[number]
 

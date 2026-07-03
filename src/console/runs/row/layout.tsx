@@ -27,16 +27,6 @@ export function RunRowFrame({
   )
 }
 
-export function RunRowList({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
-  return <div className={cn("grid gap-3", className)}>{children}</div>
-}
-
 export function RunRowHeader({
   action,
   children,

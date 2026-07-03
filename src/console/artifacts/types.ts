@@ -10,7 +10,7 @@ export type ArtifactSummary = Extract<
   { status: "ready" }
 >["artifacts"][number]
 
-export type ArtifactDetailResult = NonNullable<
+type ArtifactDetailResult = NonNullable<
   ReturnType<typeof useQuery<typeof api.artifacts.console.get>>
 >
 

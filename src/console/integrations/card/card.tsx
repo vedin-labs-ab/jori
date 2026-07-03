@@ -13,7 +13,6 @@ import { useIntegrationDisconnect } from "../disconnect/controller"
 import { type CreateInstallState, useIntegrationInstall } from "./install"
 
 export type IntegrationCardStatus = "active" | "paused" | undefined
-export type { SurfaceLogo } from "../../shared/surface"
 
 export type IntegrationCardConfig = {
   action: string

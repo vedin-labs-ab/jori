@@ -1,5 +1,5 @@
-export type JsonPrimitive = boolean | null | number | string
-export type JsonArray = JsonValue[]
+type JsonPrimitive = boolean | null | number | string
+type JsonArray = JsonValue[]
 export type JsonObject = {
   [key: string]: JsonValue
 }
@@ -45,7 +45,7 @@ export function toJsonObject(value: unknown): JsonObject {
   )
 }
 
-export function toJsonArray(value: unknown): JsonArray {
+function toJsonArray(value: unknown): JsonArray {
   if (!Array.isArray(value)) {
     throw new Error("Expected a JSON array")
   }

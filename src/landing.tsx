@@ -46,7 +46,7 @@ export function Landing() {
   )
 }
 
-export function HeaderActions() {
+function HeaderActions() {
   const { isLoaded, isSignedIn } = useAuth()
 
   return (

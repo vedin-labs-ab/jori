@@ -11,7 +11,7 @@ import { isAutomationSurfacePolicyBlocked } from "../../access/policy"
 import { type AutomationInstructionsFieldProps } from "./types"
 
 export const automationSurfaceNodeName = "automationSurface"
-export const automationSurfacePolicyStates = ["allowed", "blocked"] as const
+const automationSurfacePolicyStates = ["allowed", "blocked"] as const
 export type AutomationSurfacePolicyState =
   (typeof automationSurfacePolicyStates)[number]
 

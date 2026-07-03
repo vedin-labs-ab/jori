@@ -1,24 +1,14 @@
 import { mergeAttributes, Node } from "@tiptap/core"
 import { ReactNodeViewRenderer } from "@tiptap/react"
-import {
-  type AutomationSurfaceIntegration,
-  getAutomationSurfaceLabel,
-} from "../../../access"
+import { getAutomationSurfaceLabel } from "../../../access"
 import { type AutomationPolicyPermissions } from "../../../access/policy"
 import { AutomationSurfaceNodeView } from "../access/node"
 import {
-  type AutomationSurfacePolicyState,
   automationSurfaceNodeName,
   parseAutomationSurfaceIntegration,
   parseAutomationSurfacePolicy,
   parseAutomationSurfaceToolsAttribute,
 } from "../document"
-
-export type AutomationSurfaceNodeAttrs = {
-  policy: AutomationSurfacePolicyState
-  integration: AutomationSurfaceIntegration
-  tools: string[]
-}
 
 export type AutomationSurfaceExtensionOptions = {
   getPermissions: () => AutomationPolicyPermissions

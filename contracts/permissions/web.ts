@@ -1,4 +1,4 @@
-export const webToolNames = ["web_search", "web_fetch"] as const
+const webToolNames = ["web_search", "web_fetch"] as const
 
 export type WebToolName = (typeof webToolNames)[number]
 

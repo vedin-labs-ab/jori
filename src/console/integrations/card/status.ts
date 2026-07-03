@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-export const integrationCallbackIntegrations = [
+const integrationCallbackIntegrations = [
   "gmail",
   "github",
   "googleCalendar",

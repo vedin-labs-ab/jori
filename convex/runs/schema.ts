@@ -23,7 +23,7 @@ const runSnapshotContextType = v.union(
   v.literal("subject")
 )
 
-export const runSnapshotContext = v.object({
+const runSnapshotContext = v.object({
   type: runSnapshotContextType,
   label: v.string(),
   url: v.optional(v.string()),
@@ -45,7 +45,7 @@ export const runSnapshot = v.object({
   context: v.array(runSnapshotContext),
 })
 
-export const runCause = v.union(
+const runCause = v.union(
   v.object({
     type: v.literal("time"),
     scheduledAt: v.number(),
@@ -73,7 +73,7 @@ export const runStatus = v.union(
   v.literal("stopped")
 )
 
-export const runVisibilityScope = v.union(
+const runVisibilityScope = v.union(
   v.literal("tenant"),
   v.literal("conversation"),
   v.literal("person")

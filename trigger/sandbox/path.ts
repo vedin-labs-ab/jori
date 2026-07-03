@@ -22,10 +22,7 @@ export function sandboxClonePath(args: {
   return sandboxPath(args.value)
 }
 
-export function sandboxPath(
-  value: string,
-  options: { allowRoot?: boolean } = {}
-) {
+function sandboxPath(value: string, options: { allowRoot?: boolean } = {}) {
   const filePath = resolveSandboxPath(value)
   const relative = path.posix.relative(sandboxWorkspace, filePath)
 

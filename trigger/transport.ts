@@ -25,7 +25,7 @@ export function requireConvexUrl() {
   return requireEnv("CONVEX_URL", "VITE_CONVEX_URL")
 }
 
-export function requireConvexSiteUrl() {
+function requireConvexSiteUrl() {
   return requireEnv("CONVEX_SITE_URL", "VITE_CONVEX_SITE_URL")
 }
 

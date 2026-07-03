@@ -22,7 +22,7 @@ type RuntimeToolFailedDetails = {
   error: string
 }
 
-export function providerTrace(result: unknown): RuntimeToolProviderTrace {
+function providerTrace(result: unknown): RuntimeToolProviderTrace {
   if (
     typeof result !== "object" ||
     result === null ||

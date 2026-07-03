@@ -51,7 +51,7 @@ export function removeEventMatch({
   return nextValues
 }
 
-export function eventMatchDependents(
+function eventMatchDependents(
   parameters: readonly AutomationEventParameter[],
   changedKey: string,
   resetKeys: (

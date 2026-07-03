@@ -37,7 +37,7 @@ export const triggerInput = v.union(
   })
 )
 
-export const trigger = v.union(
+const trigger = v.union(
   v.object({
     at: v.number(),
     functionId: v.optional(v.id("_scheduled_functions")),

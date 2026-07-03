@@ -14,7 +14,7 @@ export function runtimeEvent(args: RuntimeEventInput) {
   }
 }
 
-export function traceKey(args: {
+function traceKey(args: {
   attempt?: number
   callId?: string
   keyId?: string
