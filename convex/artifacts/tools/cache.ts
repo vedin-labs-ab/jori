@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { stableJson } from "../../../contracts/artifacts/json"
 import { type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 
@@ -224,24 +225,4 @@ function clampCacheTtlMs(value: number | undefined) {
 
 function readOptionalNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
-function stableJson(value: unknown): string {
-  if (value === null || typeof value !== "object") {
-    return JSON.stringify(value) ?? "null"
-  }
-
-  if (Array.isArray(value)) {
-    return `[${value.map(stableJson).join(",")}]`
-  }
-
-  const entries = Object.entries(value)
-    .filter((entry) => entry[1] !== undefined)
-    .sort(([left], [right]) => left.localeCompare(right))
-
-  return `{${entries
-    .map(
-      ([key, entryValue]) => `${JSON.stringify(key)}:${stableJson(entryValue)}`
-    )
-    .join(",")}}`
 }

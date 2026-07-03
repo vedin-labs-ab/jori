@@ -1,5 +1,6 @@
 import path from "node:path"
 import { isArtifactPublishTool } from "../contracts/artifacts/publish"
+import { optionalString, requiredString } from "./input"
 import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId, type JsonObject } from "./types"
@@ -110,20 +111,6 @@ function sandboxFilePath(value: string) {
   }
 
   return filePath
-}
-
-function requiredString(value: unknown, name: string) {
-  if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`${name} is required`)
-  }
-
-  return value.trim()
-}
-
-function optionalString(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
 }
 
 function inferMimeType(filePath: string) {

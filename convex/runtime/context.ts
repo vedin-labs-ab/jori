@@ -31,13 +31,7 @@ export const load = action({
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
 
-    const session = (await ctx.runQuery(internal.sessions.data.getByRun, {
-      runId: args.runId,
-    })) as LoadedSession
-
-    if (session !== null) {
-      await syncSessionReactions(ctx, session._id)
-    }
+    const session = await loadRunSession(ctx, args.runId)
 
     const [input, run] = (await Promise.all([
       ctx.runQuery(internal.runs.records.getInputByRun, {
@@ -64,16 +58,7 @@ export const load = action({
       loadActiveSurface(ctx, input, args.runId),
     ])
     const lifecycleTools = runLifecycleTools()
-    const promptedTools = getPromptedTools({
-      executionType: toolExecutionType(input.type),
-      permissions: permissions.all,
-      toolModes: permissions.toolModes,
-    })
-    const prompt = assemblePrompt(input, {
-      activeSurface: activeSurface.state,
-      promptedTools,
-      skills,
-    })
+    const prompt = buildRuntimePrompt(input, activeSurface, permissions, skills)
 
     await ctx.runMutation(internal.runtime.context.prepareRun, {
       runId: args.runId,
@@ -107,13 +92,7 @@ export const reload = action({
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
 
-    const session = (await ctx.runQuery(internal.sessions.data.getByRun, {
-      runId: args.runId,
-    })) as LoadedSession
-
-    if (session !== null) {
-      await syncSessionReactions(ctx, session._id)
-    }
+    await loadRunSession(ctx, args.runId)
 
     const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
       runId: args.runId,
@@ -132,18 +111,9 @@ export const reload = action({
     )
     const activeSurface = await loadActiveSurface(ctx, input, args.runId)
     const lifecycleTools = runLifecycleTools()
-    const promptedTools = getPromptedTools({
-      executionType: toolExecutionType(input.type),
-      permissions: permissions.all,
-      toolModes: permissions.toolModes,
-    })
 
     return {
-      prompt: assemblePrompt(input, {
-        activeSurface: activeSurface.state,
-        promptedTools,
-        skills,
-      }),
+      prompt: buildRuntimePrompt(input, activeSurface, permissions, skills),
       activeSurface: activeSurface.state,
       tools: runtimeTools(lifecycleTools, activeSurface, permissions),
     }
@@ -154,6 +124,35 @@ type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
 type LoadedRun = {
   _id: Id<"runs">
   status: "completed" | "failed" | "queued" | "running" | "stopped"
+}
+
+async function loadRunSession(ctx: ActionCtx, runId: Id<"runs">) {
+  const session = (await ctx.runQuery(internal.sessions.data.getByRun, {
+    runId,
+  })) as LoadedSession
+
+  if (session !== null) {
+    await syncSessionReactions(ctx, session._id)
+  }
+
+  return session
+}
+
+function buildRuntimePrompt(
+  input: AgentRuntimeInput,
+  activeSurface: LoadedActiveSurface,
+  permissions: RuntimePermissions,
+  skills: RuntimeSkill[]
+) {
+  return assemblePrompt(input, {
+    activeSurface: activeSurface.state,
+    promptedTools: getPromptedTools({
+      executionType: toolExecutionType(input.type),
+      permissions: permissions.all,
+      toolModes: permissions.toolModes,
+    }),
+    skills,
+  })
 }
 
 async function loadRuntimeSkills(ctx: ActionCtx, tenantId: string) {

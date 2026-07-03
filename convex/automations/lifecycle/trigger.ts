@@ -7,8 +7,8 @@ import {
   normalizeAutomationEventMatch,
 } from "../events"
 import { resolveEventIntegration } from "../integrations"
-import { getTimeTrigger, getTimeTriggerAt } from "../timing"
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
+import { getTimeTrigger, getTimeTriggerAt } from "../timing"
 
 export async function resolveTrigger(
   ctx: MutationCtx,

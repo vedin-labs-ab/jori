@@ -68,10 +68,7 @@ const discoveryStep = v.object({
   url: v.optional(v.string()),
 })
 
-const discoveryStatus = v.union(
-  v.literal("running"),
-  v.literal("completed")
-)
+const discoveryStatus = v.union(v.literal("running"), v.literal("completed"))
 
 // High-churn progress for the latest discovery run, kept separate from the
 // stable profile so live updates never contend with the hot read path. One row

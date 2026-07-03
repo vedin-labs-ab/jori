@@ -221,4 +221,3 @@ describe("execution row pull request details", () => {
     expect(pullRequestLink.parentElement?.className).not.toContain("py-1.5")
   })
 })
-

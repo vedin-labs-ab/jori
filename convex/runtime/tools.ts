@@ -7,9 +7,8 @@ import {
   type ApprovalBrokerContext,
   createPromptedToolApproval,
 } from "../broker/approval"
+import { loadRunBrokerContext } from "../broker/auth"
 import { callBrokerTool, executeApprovedTool } from "../broker/mcp"
-import { prepareIntegrationForRuntime } from "../integrations/runtime"
-import { resolveToolModes } from "../permissions/catalog"
 import { type ToolSurface, toolSurfaceValidator } from "../shared/integrations"
 import { requireWorkerSecret } from "./shared"
 
@@ -142,38 +141,11 @@ async function loadBrokerContext(
     throw new Error("Run not found.")
   }
 
-  const input = await ctx.runQuery(internal.runs.records.getInputByRun, {
-    runId: run._id,
-  })
+  const context = await loadRunBrokerContext(ctx, run)
 
-  if (input === null) {
+  if (context === null) {
     throw new Error("Run input not found.")
   }
 
-  const overrides = await ctx.runQuery(
-    internal.permissions.tools.listForRuntime,
-    {
-      tenantId: run.tenantId,
-    }
-  )
-  const connectedIntegrations = await ctx.runQuery(
-    internal.integrations.lookup.listActiveForRuntime,
-    {
-      tenantId: run.tenantId,
-      ownerId: run.createdBy,
-    }
-  )
-  const integrations: Doc<"integrations">[] = []
-
-  for (const integration of input.integrations) {
-    integrations.push(await prepareIntegrationForRuntime(ctx, { integration }))
-  }
-
-  return {
-    connectedIntegrations,
-    input,
-    integrations,
-    run,
-    toolModes: resolveToolModes(overrides),
-  }
+  return context
 }

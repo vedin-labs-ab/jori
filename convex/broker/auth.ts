@@ -29,17 +29,13 @@ export async function authenticateBrokerRequest(
     })
     .catch(() => null)
 
-  return run?.status === "running" ? await loadBrokerContext(ctx, run) : null
+  return run?.status === "running" ? await loadRunBrokerContext(ctx, run) : null
 }
 
-async function loadBrokerContext(
+export async function loadRunBrokerContext(
   ctx: ActionCtx,
-  run: Doc<"runs"> | null
+  run: Doc<"runs">
 ): Promise<BrokerContext | null> {
-  if (run === null) {
-    return null
-  }
-
   const input = await ctx.runQuery(internal.runs.records.getInputByRun, {
     runId: run._id,
   })

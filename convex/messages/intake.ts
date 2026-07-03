@@ -4,6 +4,7 @@ import { internalMutation, type MutationCtx } from "../_generated/server"
 import { ensureConversation, startMessageRun } from "../conversations/data"
 import { findConversation } from "../conversations/resolve"
 import { scheduleConversationSummary } from "../conversations/schedule"
+import { findActiveIntegrationByExternalId } from "../integrations/data"
 import { resolveActor } from "../persons/resolve"
 import { isGitHubSelfActor } from "../providers/github/data"
 import { getLinearBotId } from "../providers/linear/data"
@@ -14,7 +15,6 @@ import {
   withActorKind,
 } from "../shared/actor"
 import {
-  findActiveIntegration,
   findMessageByExternalId,
   insertMessage,
   messageIntegrationValidator,
@@ -31,9 +31,9 @@ export const record = internalMutation({
     ...observedMessageArgs,
   },
   handler: async (ctx, args) => {
-    const integration = await findActiveIntegration(ctx, {
+    const integration = await findActiveIntegrationByExternalId(ctx, {
       integration: args.integration,
-      accountId: args.accountId,
+      externalId: args.accountId,
     })
 
     if (integration === null) {

@@ -6,6 +6,29 @@ import { type Integration } from "../shared/integrations"
 
 type QueryLikeCtx = QueryCtx | MutationCtx
 
+export async function findActiveIntegrationByExternalId(
+  ctx: QueryLikeCtx,
+  args: {
+    externalId: string
+    integration: Integration
+  }
+) {
+  const integration = await ctx.db
+    .query("integrations")
+    .withIndex("by_integration_and_external", (query) =>
+      query
+        .eq("integration", args.integration)
+        .eq("externalId", args.externalId)
+    )
+    .first()
+
+  if (integration === null || integration.status !== "active") {
+    return null
+  }
+
+  return integration
+}
+
 export async function getTenantIntegration(
   ctx: QueryLikeCtx,
   args: {

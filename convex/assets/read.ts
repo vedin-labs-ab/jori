@@ -1,6 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
+import { optionalString, requiredString } from "../shared/input"
 
 export type RunAsset = {
   assetId: Id<"assets">
@@ -94,20 +95,6 @@ function readAssetInputs(value: unknown) {
       mimeType: optionalString(input.mimeType),
     }
   })
-}
-
-function requiredString(value: unknown, name: string) {
-  if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`${name} is required`)
-  }
-
-  return value.trim()
-}
-
-function optionalString(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
 }
 
 function formatBytes(bytes: number) {
