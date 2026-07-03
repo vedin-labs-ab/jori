@@ -119,7 +119,9 @@ export const events = defineTable({
   text: v.optional(v.string()),
   data: v.optional(eventData),
   observedAt: v.optional(v.number()),
-}).index("by_integration_and_key", ["integrationId", "key"])
+})
+  .index("by_integration_and_key", ["integrationId", "key"])
+  .index("by_tenant", ["tenantId"])
 
 export type EventData = Infer<typeof eventData>
 export type EventMatch = Infer<typeof eventMatch>

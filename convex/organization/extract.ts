@@ -1,7 +1,7 @@
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
+import { requestStructured } from "../model/structured"
 import { emptyFacts, type OrganizationFacts } from "./facts"
-import { requestStructured } from "./structured"
 
 const maxOutputTokens = 1200
 const maxListItems = 12
@@ -27,6 +27,7 @@ export async function extractFacts(
   input: ExtractionInput
 ): Promise<OrganizationFacts> {
   const value = await requestStructured({
+    model: "openai/gpt-5.5",
     schemaName: "organization_facts",
     schema: factsSchema,
     system: renderPromptTemplate(promptTemplates["organization/discovery"], {}),

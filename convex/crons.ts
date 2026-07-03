@@ -13,4 +13,13 @@ crons.interval(
   {}
 )
 
+// Daily heartbeat for deduction: reviews each tenant's activity window and
+// updates the belief roster, one pass per kind.
+crons.interval(
+  "deduction pass sweep",
+  { hours: 24 },
+  internal.deduction.pass.sweep,
+  {}
+)
+
 export default crons

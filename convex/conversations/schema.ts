@@ -10,8 +10,10 @@ export const conversations = defineTable({
   summarizedAt: v.optional(v.number()),
   functionId: v.optional(v.id("_scheduled_functions")),
   summarizeAt: v.optional(v.number()),
-}).index("by_tenant_and_integration_and_external", [
-  "tenantId",
-  "integrationId",
-  "externalId",
-])
+})
+  .index("by_tenant_and_integration_and_external", [
+    "tenantId",
+    "integrationId",
+    "externalId",
+  ])
+  .index("by_tenant_and_summarized_at", ["tenantId", "summarizedAt"])

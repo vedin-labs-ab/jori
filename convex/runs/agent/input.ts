@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type RecentActivity } from "../../conversations/recency"
+import { type WorkstreamContext } from "../../deduction/roster"
 import { type RecentConversation } from "../../messages/history"
 import { type OrganizationFacts } from "../../organization/facts"
 
@@ -16,6 +17,7 @@ export type MessageRuntimeInput = {
   conversation: RecentConversation
   recency: RecentActivity[]
   organization: OrganizationFacts | null
+  workstreams: WorkstreamContext[] | null
 }
 
 export type AutomationRuntimeInput = {
@@ -26,6 +28,7 @@ export type AutomationRuntimeInput = {
   automation: Doc<"automations">
   event: Doc<"events"> | null
   organization: OrganizationFacts | null
+  workstreams: WorkstreamContext[] | null
 }
 
 export type InstructionRuntimeInput = {
@@ -34,6 +37,7 @@ export type InstructionRuntimeInput = {
   integrations: RuntimeIntegration[]
   instructions: string
   organization: OrganizationFacts | null
+  workstreams: WorkstreamContext[] | null
 }
 
 export type AgentRuntimeInput =

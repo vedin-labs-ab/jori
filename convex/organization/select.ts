@@ -1,7 +1,7 @@
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
+import { requestStructured } from "../model/structured"
 import { normalizeLink } from "./crawl"
-import { requestStructured } from "./structured"
 
 const maxCandidatesConsidered = 40
 const maxSelectionTokens = 600
@@ -28,6 +28,8 @@ export async function selectLinks(options: {
 
   const considered = options.candidates.slice(0, maxCandidatesConsidered)
   const value = await requestStructured({
+    model: "openai/gpt-5.5",
+    reasoning: "low",
     schemaName: "selected_links",
     schema: selectionSchema,
     system: renderPromptTemplate(promptTemplates["organization/selection"], {}),

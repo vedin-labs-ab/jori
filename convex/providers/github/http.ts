@@ -11,6 +11,7 @@ import {
   unauthorizedResponse,
 } from "../http"
 import { completeIntegrationOffer, failIntegrationOffer } from "../install"
+import { recordGitHubLifecycleEvent } from "../lifecycle/github"
 import {
   fetchGitHubInstallationProfile,
   type GitHubInstallationProfile,
@@ -102,13 +103,16 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
   }
 
   const payload = JSON.parse(body) as GitHubWebhookPayload
-  const message = getGitHubMessage({
+  const webhook = {
     event: request.headers.get("x-github-event"),
     payload,
     deliveryId: request.headers.get("x-github-delivery"),
-  })
+  }
+  const message = getGitHubMessage(webhook)
 
   if (message === null) {
+    await recordGitHubLifecycleEvent(ctx, webhook)
+
     return Response.json({ ok: true })
   }
 

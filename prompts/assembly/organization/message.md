@@ -16,3 +16,10 @@ Websites:
 - {{domain}}
 {%- endfor %}
 {%- endif %}
+{%- if organization.workstreams %}
+
+Active workstreams, deduced from recent activity across connected tools:
+{%- for workstream in organization.workstreams %}
+- {{workstream.name}}: {{workstream.brief}}
+{%- endfor %}
+{%- endif %}

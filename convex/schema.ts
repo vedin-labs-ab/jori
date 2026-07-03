@@ -16,6 +16,7 @@ import { assets } from "./assets/schema"
 import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
 import { conversations } from "./conversations/schema"
+import { beliefs, evidence, journal, passes } from "./deduction/schema"
 import { events } from "./events/schema"
 import { identities } from "./identity/schema"
 import { integrationOffers } from "./integrations/offers/schema"
@@ -53,6 +54,10 @@ export default defineSchema({
   events,
   runs,
   conversations,
+  beliefs,
+  evidence,
+  journal,
+  passes,
   sessions,
   approvals,
   transitions,

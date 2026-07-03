@@ -3,6 +3,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
 import { hasIntegrationTools } from "../automations/access"
 import { loadRecentActivity } from "../conversations/recency"
+import { readWorkstreamRoster } from "../deduction/roster"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { recentConversation } from "../messages/history"
 import { readApprovedFacts } from "../organization/profile"
@@ -81,6 +82,7 @@ async function getMessageInput(
       run: args.run,
     }),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
+    workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }
 
@@ -138,6 +140,7 @@ async function getAutomationInput(
       hasIntegrationTools(automation.access, integration._id)
     ),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
+    workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }
 
@@ -163,6 +166,7 @@ async function getInstructionInput(
       args.run.createdBy
     ),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
+    workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }
 

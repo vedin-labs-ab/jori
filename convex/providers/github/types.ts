@@ -43,6 +43,7 @@ export type GitHubPullRequest = {
   number?: number
   title?: string
   body?: string
+  merged?: boolean
   html_url?: string
   head?: {
     ref?: string
