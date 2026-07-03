@@ -10,6 +10,7 @@ test("reads create and update ops and strips nulls", () => {
         name: "Payments revamp",
         aliases: ["payments v2"],
         brief: "Rebuilding the payments flow.",
+        entry: "Project kicked off with the first PR merged.",
         parentId: null,
         citations: [{ event: "e1", conversation: null, why: "PR merged" }],
       },
@@ -33,6 +34,7 @@ test("reads create and update ops and strips nulls", () => {
       name: "Payments revamp",
       aliases: ["payments v2"],
       brief: "Rebuilding the payments flow.",
+      entry: "Project kicked off with the first PR merged.",
       citations: [{ event: "e1", why: "PR merged" }],
     },
     {
@@ -66,13 +68,14 @@ test("counts malformed ops instead of throwing", () => {
     mutations: [
       { op: "teleport", beliefId: "b1" },
       { op: "create", tempId: "", name: "x", brief: "y", citations: [] },
+      { op: "create", tempId: "t", name: "x", brief: "y", citations: [] },
       { op: "status", beliefId: "b1", to: "promote", citations: [] },
       "not an object",
       { op: "journal", beliefId: "b1", entry: "ok", citations: [] },
     ],
   })
 
-  expect(invalid).toBe(4)
+  expect(invalid).toBe(5)
   expect(ops).toHaveLength(1)
 })
 

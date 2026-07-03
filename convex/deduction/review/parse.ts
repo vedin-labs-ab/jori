@@ -49,8 +49,14 @@ function readCreate(item: Record<string, unknown>): JudgeOp | null {
   const tempId = readString(item.tempId)
   const name = readString(item.name)
   const brief = readString(item.brief)
+  const entry = readString(item.entry)
 
-  if (tempId === undefined || name === undefined || brief === undefined) {
+  if (
+    tempId === undefined ||
+    name === undefined ||
+    brief === undefined ||
+    entry === undefined
+  ) {
     return null
   }
 
@@ -60,6 +66,7 @@ function readCreate(item: Record<string, unknown>): JudgeOp | null {
     name,
     aliases: readStringList(item.aliases) ?? [],
     brief,
+    entry,
     parentId: readString(item.parentId),
     citations: readCitations(item.citations),
   }

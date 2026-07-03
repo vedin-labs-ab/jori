@@ -154,6 +154,7 @@ function op(kind: JudgeOp["op"]): JudgeOp {
         name: "n",
         aliases: [],
         brief: "b",
+        entry: "e",
         citations: [],
       }
     case "update":

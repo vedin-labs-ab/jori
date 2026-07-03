@@ -15,5 +15,6 @@ describe("workstream charter", () => {
     expect(charter).toContain("do not re-propose rejected entries")
     expect(charter).toContain("organization's own vocabulary")
     expect(charter).toContain("Prefer too few over too many")
+    expect(charter).toContain("`entry` is its first journal line")
   })
 })
