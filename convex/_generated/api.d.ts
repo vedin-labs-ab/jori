@@ -378,6 +378,8 @@ import type * as runs_snapshot from "../runs/snapshot.js";
 import type * as runtime__generated_assets from "../runtime/_generated/assets.js";
 import type * as runtime_agents from "../runtime/agents.js";
 import type * as runtime_context from "../runtime/context.js";
+import type * as runtime_context_loaders from "../runtime/context/loaders.js";
+import type * as runtime_context_response from "../runtime/context/response.js";
 import type * as runtime_dispatch from "../runtime/dispatch.js";
 import type * as runtime_lifecycle from "../runtime/lifecycle.js";
 import type * as runtime_outbox from "../runtime/outbox.js";
@@ -796,6 +798,8 @@ declare const fullApi: ApiFromModules<{
   "runtime/_generated/assets": typeof runtime__generated_assets;
   "runtime/agents": typeof runtime_agents;
   "runtime/context": typeof runtime_context;
+  "runtime/context/loaders": typeof runtime_context_loaders;
+  "runtime/context/response": typeof runtime_context_response;
   "runtime/dispatch": typeof runtime_dispatch;
   "runtime/lifecycle": typeof runtime_lifecycle;
   "runtime/outbox": typeof runtime_outbox;
