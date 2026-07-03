@@ -1,3 +1,4 @@
+import { readNumber, readString, readValue } from "../shared/input"
 import {
   type EventData,
   type GitHubEventData,
@@ -193,18 +194,6 @@ function readObject(data: unknown, key: string) {
   return typeof value === "object" && value !== null ? value : undefined
 }
 
-function readString(data: unknown, key: string) {
-  const value = readValue(data, key)
-
-  return typeof value === "string" && value !== "" ? value : undefined
-}
-
-function readNumber(data: unknown, key: string) {
-  const value = readValue(data, key)
-
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
 function readBoolean(data: unknown, key: string) {
   const value = readValue(data, key)
 
@@ -213,12 +202,4 @@ function readBoolean(data: unknown, key: string) {
 
 function readNestedString(data: unknown, key: string, nestedKey: string) {
   return readString(readObject(data, key), nestedKey)
-}
-
-function readValue(data: unknown, key: string) {
-  if (typeof data !== "object" || data === null) {
-    return undefined
-  }
-
-  return (data as Record<string, unknown>)[key]
 }

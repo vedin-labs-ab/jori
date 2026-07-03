@@ -3,7 +3,7 @@ import {
   type ReactionSnapshotTarget,
 } from "../../../reactions/data"
 import { createIntegrationActor } from "../../../shared/actor"
-import { readRecord } from "../../../shared/input"
+import { readRecord, readString } from "../../../shared/input"
 import { slackQueryApi } from "../api"
 import { type SlackReactionSyncPlan } from "./session"
 
@@ -77,12 +77,6 @@ function slackReactionItems(value: unknown) {
   }
 
   return items
-}
-
-function readString(data: Record<string, unknown>, key: string) {
-  const value = data[key]
-
-  return typeof value === "string" && value !== "" ? value : undefined
 }
 
 function readStringArray(value: unknown) {

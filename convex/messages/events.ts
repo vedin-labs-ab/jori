@@ -12,6 +12,7 @@ import { normalizeEventData } from "../events/payload"
 import { type EventData, type EventMatch } from "../events/schema"
 import { getSlackChannelId } from "../providers/slack/data"
 import { type Actor } from "../shared/actor"
+import { readNumber, readRecord, readString, readValue } from "../shared/input"
 
 type AutomationEventMessage = {
   externalId: string
@@ -203,24 +204,6 @@ function optionalMatch(key: string, value: string | undefined) {
   return value === undefined ? {} : { [key]: value }
 }
 
-function readRecord(value: unknown) {
-  return typeof value === "object" && value !== null
-    ? (value as Record<string, unknown>)
-    : {}
-}
-
-function readString(data: Record<string, unknown>, key: string) {
-  const value = data[key]
-
-  return typeof value === "string" && value !== "" ? value : undefined
-}
-
-function readNumber(data: Record<string, unknown>, key: string) {
-  const value = data[key]
-
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
 function readBoolean(data: Record<string, unknown>, key: string) {
   return data[key] === true
 }
@@ -230,11 +213,5 @@ function readNestedString(
   key: string,
   nestedKey: string
 ) {
-  const nested = data[key]
-
-  if (typeof nested !== "object" || nested === null) {
-    return undefined
-  }
-
-  return readString(nested as Record<string, unknown>, nestedKey)
+  return readString(readValue(data, key), nestedKey)
 }

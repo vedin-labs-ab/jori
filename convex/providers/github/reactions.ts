@@ -13,7 +13,7 @@ import {
 } from "../../reactions/data"
 import { activeSessionIntegration } from "../../sessions/integration"
 import { createIntegrationActor } from "../../shared/actor"
-import { readRecord } from "../../shared/input"
+import { readRecord, readString } from "../../shared/input"
 import { githubJsonArray } from "./api"
 import { createGitHubInstallationToken } from "./app"
 import { requireGitHubCredentials } from "./credentials"
@@ -216,12 +216,7 @@ function normalizeLimit(limit: number | undefined) {
   return Math.min(Math.max(1, Math.trunc(limit)), maxTargetLimit)
 }
 
-function readString(data: Record<string, unknown>, key: string) {
-  const value = data[key]
-
-  return typeof value === "string" && value !== "" ? value : undefined
-}
-
+// Truncates because GitHub numeric ids must be whole numbers.
 function readNumber(data: Record<string, unknown>, key: string) {
   const value = data[key]
 

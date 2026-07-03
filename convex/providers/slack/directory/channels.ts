@@ -1,6 +1,7 @@
 import { internal } from "../../../_generated/api"
 import { type Doc } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
+import { readRecord, readString } from "../../../shared/input"
 import { slackQueryApi } from "../api"
 import { requireSlackCredentials } from "../credentials"
 import { getSlackChannelId } from "../data"
@@ -64,16 +65,4 @@ export async function fetchSlackChannelContext(
   } catch {
     return undefined
   }
-}
-
-function readRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null
-    ? (value as Record<string, unknown>)
-    : {}
-}
-
-function readString(record: Record<string, unknown>, key: string) {
-  const value = record[key]
-
-  return typeof value === "string" && value !== "" ? value : undefined
 }
