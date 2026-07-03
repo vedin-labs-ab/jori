@@ -16,6 +16,7 @@ export type RecencyEmission = {
 type DuePerson = {
   name: string | null
   personId: Id<"persons">
+  seeded: boolean
 }
 
 export function initialRecency(message: Doc<"messages">): SessionRecency {
@@ -26,9 +27,10 @@ export function initialRecency(message: Doc<"messages">): SessionRecency {
   }
 }
 
-// Emits one person-context bundle per not-yet-contextualized speaker: the
-// person who triggered the run (seeded as due at session start) plus every
-// sender in the drained batch. Returns null when nobody new is due.
+// Renders one person-context bundle per not-yet-contextualized speaker. The
+// requester's bundle (seeded as due at session start) lands in the stored
+// recency state so the prompt can serve it retry-stably; batch senders emit
+// as drained contexts. Returns null when nobody new is due.
 export async function emitRecencyContexts(
   ctx: QueryLikeCtx,
   session: Doc<"sessions">,
@@ -64,6 +66,7 @@ async function collectContexts(
   const contexts: string[] = []
   const done = [...args.state.done]
   const seen = [...args.state.seen]
+  let requester = args.state.requester
 
   for (const person of args.due) {
     const entries = await loadRecentActivity(ctx, {
@@ -78,17 +81,35 @@ async function collectContexts(
       tenantId: args.run.tenantId,
     })
 
-    if (entries.length > 0) {
-      const name = await personName(ctx, person, args.run)
+    done.push(person.personId)
 
-      contexts.push(renderPersonContext({ entries, name }))
-      appendSeenSummaries(seen, entries)
+    if (entries.length === 0) {
+      continue
     }
 
-    done.push(person.personId)
+    const rendered = renderPersonContext({
+      entries,
+      name: await personName(ctx, person, args.run),
+    })
+
+    if (person.seeded) {
+      requester = rendered
+    } else {
+      contexts.push(rendered)
+    }
+
+    appendSeenSummaries(seen, entries)
   }
 
-  return { contexts, recency: { due: [], done, seen } }
+  return {
+    contexts,
+    recency: {
+      due: [],
+      done,
+      seen,
+      ...(requester === undefined ? {} : { requester }),
+    },
+  }
 }
 
 async function duePersons(
@@ -107,7 +128,7 @@ async function duePersons(
     }
 
     done.add(personId)
-    due.push({ name: candidate.name, personId })
+    due.push({ name: candidate.name, personId, seeded: candidate.seeded })
   }
 
   return due
@@ -118,7 +139,7 @@ function candidatePersons(
   batch: Doc<"messages">[]
 ): DuePerson[] {
   return [
-    ...state.due.map((personId) => ({ name: null, personId })),
+    ...state.due.map((personId) => ({ name: null, personId, seeded: true })),
     ...batch.flatMap((message) =>
       message.personId === undefined
         ? []
@@ -126,6 +147,7 @@ function candidatePersons(
             {
               name: getActorDisplayName(message.actor) ?? null,
               personId: message.personId,
+              seeded: false,
             },
           ]
     ),

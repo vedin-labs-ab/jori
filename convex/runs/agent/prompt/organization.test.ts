@@ -100,6 +100,17 @@ test("omits the organization message entirely without facts or roster", () => {
   expect(prompt.instructions).not.toContain("# Organization")
 })
 
+test("passes the pre-rendered requester person context through", () => {
+  const input = runtimeInput("slack", {
+    channel: { id: "C123" },
+    ts: "123.456",
+  })
+  const person = "# Person context\n\nName: Albin"
+
+  expect(assemblePrompt(input, { person }).person).toBe(person)
+  expect(assemblePrompt(input).person).toBeNull()
+})
+
 function expectNoSyntheticBlankLines(prompt: string) {
   expect(prompt).not.toMatch(/\n{3,}/)
 }

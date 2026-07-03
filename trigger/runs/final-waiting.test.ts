@@ -155,6 +155,7 @@ function createRuntime(options: {
         context: "context",
         instructions: "system",
         organization: null,
+        person: null,
       },
       run: {
         id: id<"runs">("run_1"),

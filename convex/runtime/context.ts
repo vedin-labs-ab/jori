@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { api, internal } from "../_generated/api"
-import { action, internalMutation } from "../_generated/server"
+import { type Id } from "../_generated/dataModel"
+import { type ActionCtx, action, internalMutation } from "../_generated/server"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { isTerminalRunStatus, toolSnapshot } from "../runs/schema"
 import { drainSession } from "../sessions/drain"
@@ -24,6 +25,28 @@ import { syncSessionReactions } from "./sessions"
 import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
 import { recordTrace } from "./traces/data"
+
+type PreparedRun = {
+  drained: unknown
+  person: string | null
+}
+
+async function prepareWorkerRun(
+  ctx: ActionCtx,
+  args: {
+    attempt: number
+    runId: Id<"runs">
+    session: LoadedSession
+    tools: ReturnType<typeof runtimeToolSnapshot>
+  }
+) {
+  return (await ctx.runMutation(internal.runtime.context.prepareRun, {
+    attempt: args.attempt,
+    runId: args.runId,
+    ...(args.session === null ? {} : { sessionId: args.session._id }),
+    tools: args.tools,
+  })) as PreparedRun | null
+}
 
 export const load = action({
   args: {
@@ -72,12 +95,11 @@ export const load = action({
       }),
     ])
     const lifecycleTools = runLifecycleTools()
-    const prompt = buildRuntimePrompt(input, activeSurface, permissions, skills)
 
-    const drained = await ctx.runMutation(internal.runtime.context.prepareRun, {
+    const prepared = await prepareWorkerRun(ctx, {
       attempt: args.attempt,
       runId: args.runId,
-      ...(session === null ? {} : { sessionId: session._id }),
+      session,
       tools: runtimeToolSnapshot(
         input,
         activeSurface,
@@ -88,12 +110,14 @@ export const load = action({
 
     return runtimeResponse({
       activeSurface,
-      drained,
+      drained: prepared?.drained ?? null,
       handoffs,
       input,
       lifecycleTools,
       permissions,
-      prompt,
+      prompt: buildRuntimePrompt(input, activeSurface, permissions, skills, {
+        person: prepared?.person ?? null,
+      }),
       run,
       sandbox,
       session,
@@ -110,7 +134,7 @@ export const reload = action({
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
 
-    await loadRunSession(ctx, args.runId)
+    const session = await loadRunSession(ctx, args.runId)
 
     const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
       runId: args.runId,
@@ -130,7 +154,9 @@ export const reload = action({
     const lifecycleTools = runLifecycleTools()
 
     return {
-      prompt: buildRuntimePrompt(input, activeSurface, permissions, skills),
+      prompt: buildRuntimePrompt(input, activeSurface, permissions, skills, {
+        person: session?.recency?.requester ?? null,
+      }),
       activeSurface: activeSurface.state,
       tools: runtimeTools(lifecycleTools, activeSurface, permissions),
     }
@@ -140,7 +166,9 @@ export const reload = action({
 // Prepares the run in one transaction: the prepared and started traces, the
 // status flip to running, and the initial session drain land together so the
 // worker starts its loop with zero extra round trips and a failed prepare
-// consumes nothing.
+// consumes nothing. Alongside the drained batch it returns the requester's
+// stored person context — rendered by this drain on the first attempt,
+// re-served from the session on retries — for the prompt prefix.
 export const prepareRun = internalMutation({
   args: {
     attempt: v.number(),
@@ -181,8 +209,13 @@ export const prepareRun = internalMutation({
       await ctx.db.patch(args.runId, { status: "running" })
     }
 
-    return args.sessionId === undefined
-      ? null
-      : await drainSession(ctx, { sessionId: args.sessionId })
+    if (args.sessionId === undefined) {
+      return { drained: null, person: null }
+    }
+
+    const drained = await drainSession(ctx, { sessionId: args.sessionId })
+    const session = await ctx.db.get(args.sessionId)
+
+    return { drained, person: session?.recency?.requester ?? null }
   },
 })

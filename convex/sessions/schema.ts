@@ -26,6 +26,7 @@ export const sessions = defineTable({
       due: v.array(v.id("persons")),
       done: v.array(v.id("persons")),
       seen: v.array(v.id("conversations")),
+      requester: v.optional(v.string()),
     })
   ),
   updatedAt: v.number(),

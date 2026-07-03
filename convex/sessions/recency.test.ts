@@ -3,18 +3,18 @@ import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { emitRecencyContexts } from "./recency"
 
-test("emits the trigger person's bundle on first drain and records state", async () => {
+test("stores the trigger person's bundle as the requester context", async () => {
   const emission = await emitRecencyContexts(
     fakeCtx(baseSeed()),
     session({ due: [id<"persons">("person")] }),
     []
   )
 
-  expect(emission?.contexts).toHaveLength(1)
-  expect(emission?.contexts[0]).toContain("# Person context")
-  expect(emission?.contexts[0]).toContain("Name: Albin")
-  expect(emission?.contexts[0]).toContain("Albin wants a cartoon avatar.")
-  expect(emission?.recency).toEqual({
+  expect(emission?.contexts).toEqual([])
+  expect(emission?.recency.requester).toContain("# Person context")
+  expect(emission?.recency.requester).toContain("Name: Albin")
+  expect(emission?.recency.requester).toContain("Albin wants a cartoon avatar.")
+  expect(emission?.recency).toMatchObject({
     due: [],
     done: [id<"persons">("person")],
     seen: [id<"conversations">("c1")],
@@ -59,7 +59,7 @@ test("marks a batch sender done even when nothing is loadable", async () => {
   ])
 })
 
-test("names a batch sender's bundle from their message actor", async () => {
+test("emits a batch sender as context and keeps the stored requester", async () => {
   const seed = [
     ...baseSeed(),
     [
@@ -68,13 +68,22 @@ test("names a batch sender's bundle from their message actor", async () => {
     ],
     ["conversations", conversation({ id: "c2", thread: "t2" })],
   ] satisfies Seed[]
-  const emission = await emitRecencyContexts(fakeCtx(seed), session({}), [
-    message({ id: "m2", name: "Sam", personId: "other", thread: "t2" }),
-  ])
+  const emission = await emitRecencyContexts(
+    fakeCtx(seed),
+    session({
+      done: [id<"persons">("person")],
+      requester: "stored requester context",
+    }),
+    [message({ id: "m2", name: "Sam", personId: "other", thread: "t2" })]
+  )
 
   expect(emission?.contexts).toHaveLength(1)
   expect(emission?.contexts[0]).toContain("Name: Sam")
-  expect(emission?.recency.done).toEqual([id<"persons">("other")])
+  expect(emission?.recency.requester).toBe("stored requester context")
+  expect(emission?.recency.done).toEqual([
+    id<"persons">("person"),
+    id<"persons">("other"),
+  ])
 })
 
 function baseSeed(): Seed[] {

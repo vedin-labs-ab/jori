@@ -7,7 +7,11 @@ import { type QueuedModelResponse, queuedModelResponses } from "./test-model"
 
 test("active surface stops are repaired back to finish_run", async () => {
   const runtime = createRuntime({
-    tools: [sendReplyTool(), addReactionTool(), finishRunTool()],
+    tools: [
+      runtimeTool("send_reply", "surface"),
+      runtimeTool("add_reaction", "surface"),
+      runtimeTool("finish_run", "run"),
+    ],
   })
   const model = createModel([
     { content: "", type: "stop" },
@@ -58,7 +62,11 @@ test("active surface stops are repaired back to finish_run", async () => {
 test("active surface repair uses send_reply even with provider reactions", async () => {
   const runtime = createRuntime({
     surface: "github",
-    tools: [sendReplyTool(), githubCommentReactionTool(), finishRunTool()],
+    tools: [
+      runtimeTool("send_reply", "surface"),
+      runtimeTool("github_add_comment_reaction", "convex", "github"),
+      runtimeTool("finish_run", "run"),
+    ],
   })
   const model = createModel([
     { content: "", type: "stop" },
@@ -104,7 +112,12 @@ test("active surface repair uses send_reply even with provider reactions", async
 })
 
 test("active surface replies complete only after finish_run", async () => {
-  const runtime = createRuntime({ tools: [sendReplyTool(), finishRunTool()] })
+  const runtime = createRuntime({
+    tools: [
+      runtimeTool("send_reply", "surface"),
+      runtimeTool("finish_run", "run"),
+    ],
+  })
   const model = createModel([
     { content: "Here is the answer.", type: "stop" },
     {
@@ -140,7 +153,12 @@ test("active surface replies complete only after finish_run", async () => {
 })
 
 test("active surface final replies complete without finish_run", async () => {
-  const runtime = createRuntime({ tools: [sendReplyTool(), finishRunTool()] })
+  const runtime = createRuntime({
+    tools: [
+      runtimeTool("send_reply", "surface"),
+      runtimeTool("finish_run", "run"),
+    ],
+  })
   const model = createModel([
     {
       content: null,
@@ -211,6 +229,7 @@ function createRuntime(options: {
         context: "context",
         instructions: "system",
         organization: null,
+        person: null,
       },
       run: {
         id: id<"runs">("run_1"),
@@ -226,44 +245,18 @@ function createRuntime(options: {
   } as unknown as ToolRuntime
 }
 
-function githubCommentReactionTool(): RuntimeTool {
+function runtimeTool(
+  name: string,
+  route: RuntimeTool["route"],
+  surface?: RuntimeTool["surface"]
+): RuntimeTool {
   return {
     access: "write",
-    description: "Add GitHub comment reaction.",
+    description: `${name} tool`,
     inputSchema: {},
-    name: "github_add_comment_reaction",
-    route: "convex",
-    surface: "github",
-  }
-}
-
-function sendReplyTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Send reply.",
-    inputSchema: {},
-    name: "send_reply",
-    route: "surface",
-  }
-}
-
-function addReactionTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Add reaction.",
-    inputSchema: {},
-    name: "add_reaction",
-    route: "surface",
-  }
-}
-
-function finishRunTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Finish run.",
-    inputSchema: {},
-    name: "finish_run",
-    route: "run",
+    name,
+    route,
+    ...(surface === undefined ? {} : { surface }),
   }
 }
 

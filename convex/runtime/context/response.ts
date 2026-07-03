@@ -26,10 +26,12 @@ export function buildRuntimePrompt(
   input: AgentRuntimeInput,
   activeSurface: LoadedActiveSurface,
   permissions: RuntimePermissions,
-  skills: RuntimeSkill[]
+  skills: RuntimeSkill[],
+  options: { person: string | null }
 ) {
   return assemblePrompt(input, {
     activeSurface: activeSurface.state,
+    person: options.person,
     promptedTools: getPromptedTools({
       executionType: toolExecutionType(input.type),
       permissions: permissions.all,
