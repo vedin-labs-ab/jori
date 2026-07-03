@@ -178,9 +178,11 @@ async function triggerTask(
   return (await callTriggerApi(
     `/api/v1/tasks/${encodeURIComponent(taskId)}/trigger`,
     {
-      payload: JSON.stringify(args.payload),
+      // The SDK superjson-encodes object payloads; for plain JSON values
+      // that framing is exactly {"json": <value>}.
+      payload: JSON.stringify({ json: args.payload }),
       options: {
-        payloadType: "application/json",
+        payloadType: "application/super+json",
         idempotencyKey: await sha256Hex(args.idempotencyKey),
         idempotencyKeyOptions: { key: args.idempotencyKey, scope: "run" },
         tags: args.tags,
