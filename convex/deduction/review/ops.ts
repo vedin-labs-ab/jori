@@ -112,7 +112,10 @@ export const judgeOutputSchema = {
           }),
           opSchema("status", {
             beliefId: stringValue,
-            to: { enum: ["confirm", "close", "reject", "reopen"] },
+            to: {
+              type: "string",
+              enum: ["confirm", "close", "reject", "reopen"],
+            },
             citations: citationList,
           }),
           opSchema("merge", {
@@ -131,11 +134,13 @@ export const judgeOutputSchema = {
   },
 }
 
+// Strict-mode providers require a `type` key on every schema node, so the
+// discriminator is a single-value enum rather than a bare const.
 function opSchema(op: string, properties: Record<string, unknown>) {
   return {
     type: "object",
     additionalProperties: false,
     required: ["op", ...Object.keys(properties)],
-    properties: { op: { const: op }, ...properties },
+    properties: { op: { type: "string", enum: [op] }, ...properties },
   }
 }
