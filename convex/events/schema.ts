@@ -62,9 +62,10 @@ const githubData = v.object({
   ),
 })
 
+// Linear events anchor on an issue or a project; at least one id is present.
 const linearData = v.object({
   action: v.optional(v.string()),
-  issueId: v.string(),
+  issueId: v.optional(v.string()),
   issueIdentifier: v.optional(v.string()),
   teamId: v.optional(v.string()),
   projectId: v.optional(v.string()),
@@ -73,6 +74,13 @@ const linearData = v.object({
       id: v.optional(v.string()),
       identifier: v.optional(v.string()),
       title: v.optional(v.string()),
+      url: v.optional(v.string()),
+    })
+  ),
+  project: v.optional(
+    v.object({
+      id: v.optional(v.string()),
+      name: v.optional(v.string()),
       url: v.optional(v.string()),
     })
   ),
@@ -125,3 +133,8 @@ export const events = defineTable({
 
 export type EventData = Infer<typeof eventData>
 export type EventMatch = Infer<typeof eventMatch>
+
+export type SlackEventData = Infer<typeof slackData>
+export type GitHubEventData = Infer<typeof githubData>
+export type LinearEventData = Infer<typeof linearData>
+export type NotionEventData = Infer<typeof notionData>

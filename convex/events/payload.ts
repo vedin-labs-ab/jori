@@ -1,9 +1,10 @@
-import { type EventData } from "./schema"
-
-type SlackEventData = Extract<EventData, { channel: { id: string } }>
-type GitHubEventData = Extract<EventData, { repository: { fullName: string } }>
-type LinearEventData = Extract<EventData, { issueId: string }>
-type NotionEventData = Extract<EventData, { notionEventId: string }>
+import {
+  type EventData,
+  type GitHubEventData,
+  type LinearEventData,
+  type NotionEventData,
+  type SlackEventData,
+} from "./schema"
 
 export function normalizeEventData(data: unknown): EventData | undefined {
   return (
@@ -88,11 +89,14 @@ function githubData(data: unknown): GitHubEventData | undefined {
   }) as GitHubEventData
 }
 
+// Linear events anchor on an issue or a project; at least one id is present.
 function linearData(data: unknown): LinearEventData | undefined {
   const issue = readObject(data, "issue")
+  const project = readObject(data, "project")
   const issueId = readString(data, "issueId")
+  const projectId = readString(data, "projectId")
 
-  if (issueId === undefined) {
+  if (issueId === undefined && projectId === undefined) {
     return undefined
   }
 
@@ -101,12 +105,17 @@ function linearData(data: unknown): LinearEventData | undefined {
     issueId,
     issueIdentifier: readString(data, "issueIdentifier"),
     teamId: readString(data, "teamId"),
-    projectId: readString(data, "projectId"),
+    projectId,
     issue: optionalObject({
       id: readString(issue, "id"),
       identifier: readString(issue, "identifier"),
       title: readString(issue, "title"),
       url: readString(issue, "url"),
+    }),
+    project: optionalObject({
+      id: readString(project, "id"),
+      name: readString(project, "name"),
+      url: readString(project, "url"),
     }),
     commentId: readString(data, "commentId"),
     url: readString(data, "url"),
