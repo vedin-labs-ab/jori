@@ -1,7 +1,9 @@
 Summarize this conversation for future prompt context.
 
 Capture the main topic, requester intent, current state, and any relevant
-decisions, preferences, open loops, or completed work. Omit chatter, secrets,
+decisions, preferences, open loops, or completed work. Keep the names of
+projects, initiatives, and other bodies of work exactly as participants use
+them. Omit chatter, secrets,
 sensitive personal data, identifiers, timestamps, and process details that will
 not matter later.
 

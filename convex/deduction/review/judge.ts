@@ -45,6 +45,7 @@ export function toJudgePayload(input: PassInput) {
       status: entry.status,
       brief: entry.brief,
       parentId: entry.parentId,
+      anchors: entry.anchors,
       seenAt: iso(entry.seenAt),
       locked: entry.locked,
       journal: entry.journal,
@@ -54,6 +55,7 @@ export function toJudgePayload(input: PassInput) {
       type: event.type,
       text: event.text,
       actor: event.actor,
+      anchor: event.anchor,
       observedAt: iso(event.observedAt),
     })),
     conversations: input.conversations.map((conversation) => ({

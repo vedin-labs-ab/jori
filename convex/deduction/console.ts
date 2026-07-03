@@ -62,6 +62,7 @@ async function readWorkstreamRow(ctx: QueryCtx, row: Doc<"beliefs">) {
     aliases: row.aliases,
     status: row.status,
     brief: row.brief,
+    anchors: row.anchors ?? [],
     seenAt: row.seenAt,
     locked: row.lockedBy !== undefined,
     evidenceCount: evidence.length,

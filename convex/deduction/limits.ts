@@ -13,6 +13,7 @@ export const minPassWindowMs = 5 * 60 * 1000
 export const minSupportSources = 2
 export const minSupportDaySpan = 5 * dayMs
 
+export const maxBeliefAnchors = 12
 export const rosterJournalTail = 3
 export const rosterRecencyMs = 14 * dayMs
 
