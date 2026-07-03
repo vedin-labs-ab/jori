@@ -170,12 +170,7 @@ export class MiloConvexClient {
     limit?: number
     sessionId: ConvexId<"sessions">
   }) {
-    await this.client.action(api.runtime.sessions.syncReactions, {
-      secret: this.secret,
-      sessionId: args.sessionId,
-    })
-
-    return (await this.client.mutation(api.runtime.sessions.drain, {
+    return (await this.client.action(api.runtime.sessions.drain, {
       limit: args.limit,
       secret: this.secret,
       sessionId: args.sessionId,

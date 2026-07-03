@@ -1,6 +1,3 @@
-"use node"
-
-import { configure, runs, tasks, wait } from "@trigger.dev/sdk"
 import { v } from "convex/values"
 import { agentTaskId, cleanupTaskId } from "../../contracts/runtime"
 import { internal } from "../_generated/api"
@@ -11,6 +8,10 @@ import { formatRuntimeError } from "./shared"
 
 const batchSize = 5
 const maxAgentDurationSeconds = 60 * 60 * 2
+// Wire format of the trigger.dev REST API called below (endpoints, payload
+// packaging, idempotency key hashing) mirrors @trigger.dev/sdk@4.4.6; this
+// action calls it directly so dispatch stays on the fast V8 runtime.
+const triggerApiVersion = "2025-07-16"
 
 export const drain = internalAction({
   args: {},
@@ -75,20 +76,12 @@ async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
     return undefined
   }
 
-  configureTrigger()
-
-  const handle = await tasks.trigger(
-    agentTaskId,
-    {
-      runId: operation.runId,
-    },
-    {
-      idempotencyKey: item.key,
-      maxDuration: maxAgentDurationSeconds,
-      tags: runtimeTags(item),
-      ttl: "14d",
-    }
-  )
+  const handle = await triggerTask(agentTaskId, {
+    payload: { runId: operation.runId },
+    idempotencyKey: item.key,
+    tags: runtimeTags(item),
+    ttl: "14d",
+  })
 
   return handle.id
 }
@@ -105,12 +98,17 @@ async function wakeWaiter(
     return undefined
   }
 
-  configureTrigger()
-
-  await wait.completeToken(waiter.waitpointId, {
-    reason: operation.reason,
-    ...(operation.subject === undefined ? {} : { subject: operation.subject }),
-  })
+  await callTriggerApi(
+    `/api/v1/waitpoints/tokens/${waiter.waitpointId}/complete`,
+    {
+      data: {
+        reason: operation.reason,
+        ...(operation.subject === undefined
+          ? {}
+          : { subject: operation.subject }),
+      },
+    }
+  )
 
   return undefined
 }
@@ -137,10 +135,8 @@ async function cancelRun(ctx: DispatchCtx, item: Doc<"outbox">) {
     return undefined
   }
 
-  configureTrigger()
-
   if (run?.workerId !== undefined) {
-    await runs.cancel(run.workerId)
+    await callTriggerApi(`/api/v2/runs/${run.workerId}/cancel`)
   }
 
   if (sandbox !== null) {
@@ -157,19 +153,74 @@ async function triggerSandboxCleanup(item: Doc<"outbox">, sandboxId: string) {
     return
   }
 
-  await tasks.trigger(
-    cleanupTaskId,
-    {
+  await triggerTask(cleanupTaskId, {
+    payload: {
       runId: operation.runId,
       sandboxId,
     },
+    idempotencyKey: `${item.key}:sandbox:${sandboxId}`,
+    tags: runtimeTags(item),
+    ttl: "1h",
+    maxDurationSeconds: 300,
+  })
+}
+
+async function triggerTask(
+  taskId: string,
+  args: {
+    payload: Record<string, unknown>
+    idempotencyKey: string
+    tags: string[]
+    ttl: string
+    maxDurationSeconds?: number
+  }
+) {
+  return (await callTriggerApi(
+    `/api/v1/tasks/${encodeURIComponent(taskId)}/trigger`,
     {
-      idempotencyKey: `${item.key}:sandbox:${sandboxId}`,
-      maxDuration: 300,
-      tags: runtimeTags(item),
-      ttl: "1h",
+      payload: JSON.stringify(args.payload),
+      options: {
+        payloadType: "application/json",
+        idempotencyKey: await sha256Hex(args.idempotencyKey),
+        idempotencyKeyOptions: { key: args.idempotencyKey, scope: "run" },
+        tags: args.tags,
+        ttl: args.ttl,
+        maxDuration: args.maxDurationSeconds ?? maxAgentDurationSeconds,
+      },
     }
+  )) as { id: string }
+}
+
+async function callTriggerApi(path: string, body?: Record<string, unknown>) {
+  const baseUrl = process.env.TRIGGER_API_URL ?? "https://api.trigger.dev"
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${requireTriggerSecretKey()}`,
+      "Content-Type": "application/json",
+      "x-trigger-api-version": triggerApiVersion,
+    },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  })
+
+  if (!response.ok) {
+    throw new Error(
+      `Trigger API ${path} failed (${response.status}): ${await response.text()}`
+    )
+  }
+
+  return (await response.json()) as unknown
+}
+
+async function sha256Hex(value: string) {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value)
   )
+
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("")
 }
 
 function runtimeTags(item: Doc<"outbox">) {
@@ -180,12 +231,12 @@ function shortTag(value: string) {
   return value.length <= 56 ? value : value.slice(0, 56)
 }
 
-function configureTrigger() {
+function requireTriggerSecretKey() {
   const secretKey = process.env.TRIGGER_DEV_API_KEY?.trim()
 
   if (secretKey === undefined || secretKey === "") {
     throw new Error("Missing TRIGGER_DEV_API_KEY")
   }
 
-  configure({ secretKey })
+  return secretKey
 }

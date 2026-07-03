@@ -19,29 +19,29 @@ export async function completeModelStep(args: {
 }) {
   const sequence = modelSequence(args.step)
   const startedAt = Date.now()
+  // Recorded concurrently with the model call and joined before the outcome
+  // trace, so the started trace always lands first and a failed trace write
+  // still aborts the attempt.
+  const startedPending = recordActivityEvent(
+    args.runtime.convex,
+    args.runtime.context,
+    {
+      attempt: args.attempt,
+      sequence,
+      type: "model.started",
+    }
+  )
 
-  await recordActivityEvent(args.runtime.convex, args.runtime.context, {
-    attempt: args.attempt,
-    sequence,
-    type: "model.started",
-  })
+  let response: Awaited<ReturnType<ModelRuntime["complete"]>>
 
   try {
-    const response = await args.model.complete({
+    response = await args.model.complete({
       firstTurn: args.firstTurn,
       messages: args.messages,
       tools: args.tools,
     })
-
-    await recordModelCompleted(args.runtime, {
-      attempt: args.attempt,
-      durationMs: Date.now() - startedAt,
-      response,
-      sequence,
-    })
-
-    return response
   } catch (error) {
+    await startedPending.catch(() => undefined)
     await recordActivityEvent(args.runtime.convex, args.runtime.context, {
       attempt: args.attempt,
       data: { error: formatError(error) },
@@ -50,6 +50,16 @@ export async function completeModelStep(args: {
     })
     throw error
   }
+
+  await startedPending
+  await recordModelCompleted(args.runtime, {
+    attempt: args.attempt,
+    durationMs: Date.now() - startedAt,
+    response,
+    sequence,
+  })
+
+  return response
 }
 
 function recordModelCompleted(

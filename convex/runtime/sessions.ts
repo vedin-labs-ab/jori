@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
-import { type ActionCtx, action, mutation } from "../_generated/server"
+import { type ActionCtx, action } from "../_generated/server"
 import { githubReactionSnapshots } from "../providers/github/reactions"
 import { slackReactionSnapshots } from "../providers/slack/reactions/session"
 import { type ReactionSnapshotPlan } from "../reactions/data"
@@ -25,7 +25,7 @@ const reactionSnapshotSources: ReactionSnapshotSource[] = [
   slackReactionSnapshots,
 ]
 
-export const drain = mutation({
+export const drain = action({
   args: {
     limit: v.optional(v.number()),
     secret: v.string(),
@@ -35,31 +35,15 @@ export const drain = mutation({
   handler: async (ctx, args): Promise<unknown> => {
     requireWorkerSecret(args.secret)
 
+    // Reactions must be synced before the drain reads so fresh reactions are
+    // part of the drained batch; doing both here keeps the worker round trip
+    // to one call.
+    await syncSessionReactions(ctx, args.sessionId)
+
     return await ctx.runMutation(internal.sessions.drain.messages, {
       limit: args.limit,
       sessionId: args.sessionId,
     })
-  },
-})
-
-export const syncReactions = action({
-  args: {
-    secret: v.string(),
-    sessionId: v.id("sessions"),
-  },
-  returns: v.object({
-    recorded: v.number(),
-    status: v.union(
-      v.literal("failed"),
-      v.literal("skipped"),
-      v.literal("synced")
-    ),
-    targets: v.number(),
-  }),
-  handler: async (ctx, args): Promise<ReactionSyncResult> => {
-    requireWorkerSecret(args.secret)
-
-    return await syncSessionReactions(ctx, args.sessionId)
   },
 })
 
