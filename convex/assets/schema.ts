@@ -1,7 +1,8 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
-export const assets = defineTable({
+// One recorded sandbox output file; shared by the record mutation args.
+export const assetFields = {
   tenantId: v.string(),
   runId: v.id("runs"),
   storageId: v.id("_storage"),
@@ -9,6 +10,10 @@ export const assets = defineTable({
   mimeType: v.string(),
   size: v.number(),
   description: v.optional(v.string()),
+}
+
+export const assets = defineTable({
+  ...assetFields,
   createdAt: v.number(),
 })
   .index("by_run", ["runId"])
