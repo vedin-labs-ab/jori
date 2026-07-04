@@ -81,6 +81,10 @@ function readTemplateFiles() {
 
 function addArtifactPlatformFiles(files: Record<string, string>) {
   for (const filePath of listFiles(path.join(appSourceRoot, "components/ui"))) {
+    if (filePath.endsWith(".test.ts") || filePath.endsWith(".test.tsx")) {
+      continue
+    }
+
     const relativePath = normalizePath(path.relative(appSourceRoot, filePath))
     files[`src/${relativePath}`] = fs.readFileSync(filePath, "utf8")
   }
