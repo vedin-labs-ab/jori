@@ -1,29 +1,111 @@
-import { Clock } from "lucide-react"
-import { type ReactNode } from "react"
+import { ChevronDown, Clock } from "lucide-react"
+import { type ReactNode, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { ExpandableText } from "@/components/ui/expandable-text"
+import { cn } from "@/lib/utils"
+import { absoluteTime, relativeTime } from "./time"
 
-// Compact vertical timeline: a muted marker column with a connecting line, a
-// small time label, and free-form content per entry. Opinionated on look,
-// agnostic about what an entry is.
-export function Timeline({ children }: { children: ReactNode }) {
-  return <ol className="flex flex-col">{children}</ol>
+export type TimelineEntry = {
+  id: string
+  at: number
+  content: ReactNode
 }
 
-export function TimelineItem({
-  time,
-  children,
+// Standardized vertical timeline: circled clock markers on a connecting
+// line, relative timestamps, clamped entry bodies, and built-in paging.
+export function Timeline({
+  entries,
+  now,
+  initialCount = 3,
+  step = 5,
+  maxLines = 2,
 }: {
-  time: string
-  children: ReactNode
+  entries: TimelineEntry[]
+  now: number
+  initialCount?: number
+  step?: number
+  maxLines?: number
+}) {
+  const [visibleCount, setVisibleCount] = useState(initialCount)
+  const visible = entries.slice(0, visibleCount)
+  const hiddenCount = entries.length - visible.length
+
+  return (
+    <div className="flex flex-col gap-1">
+      <ol className="flex flex-col">
+        {visible.map((entry, index) => (
+          <TimelineRow
+            key={entry.id}
+            continues={index < visible.length - 1 || hiddenCount > 0}
+            entry={entry}
+            maxLines={maxLines}
+            now={now}
+          />
+        ))}
+      </ol>
+      {entries.length > initialCount ? (
+        <Button
+          className="-ml-2 w-fit text-muted-foreground hover:text-foreground"
+          onClick={() =>
+            setVisibleCount(
+              hiddenCount > 0
+                ? Math.min(visibleCount + step, entries.length)
+                : initialCount
+            )
+          }
+          size="sm"
+          type="button"
+          variant="link"
+        >
+          {hiddenCount > 0
+            ? `Show ${Math.min(step, hiddenCount)} more`
+            : "Show less"}
+          <ChevronDown
+            className={cn(
+              "transition-transform",
+              hiddenCount === 0 && "rotate-180"
+            )}
+          />
+        </Button>
+      ) : null}
+    </div>
+  )
+}
+
+function TimelineRow({
+  continues,
+  entry,
+  maxLines,
+  now,
+}: {
+  continues: boolean
+  entry: TimelineEntry
+  maxLines: number
+  now: number
 }) {
   return (
-    <li className="group flex gap-3">
+    <li className="flex gap-3">
       <div className="flex flex-col items-center">
-        <Clock className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
-        <div className="my-1 w-px grow bg-border group-last:hidden" />
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full border text-muted-foreground">
+          <Clock aria-hidden className="size-3" />
+        </span>
+        {continues ? <span className="mt-1 w-px grow bg-border" /> : null}
       </div>
-      <div className="flex flex-col gap-0.5 pb-4 group-last:pb-0">
-        <span className="text-muted-foreground text-xs">{time}</span>
-        <div className="text-sm">{children}</div>
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col gap-1",
+          continues && "pb-4"
+        )}
+      >
+        <span
+          className="flex h-6 items-center text-muted-foreground text-xs"
+          title={absoluteTime(entry.at)}
+        >
+          {relativeTime(entry.at, now)}
+        </span>
+        <div className="text-sm">
+          <ExpandableText maxLines={maxLines}>{entry.content}</ExpandableText>
+        </div>
       </div>
     </li>
   )

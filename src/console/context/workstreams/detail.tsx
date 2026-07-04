@@ -21,7 +21,7 @@ import { api } from "../../../../convex/_generated/api"
 import { SeparatorDot } from "../../shared/dot"
 import { IntegrationLogo } from "../../shared/logo/integration"
 import { relativeTime } from "../../shared/time"
-import { Timeline, TimelineItem } from "../../shared/timeline"
+import { Timeline } from "../../shared/timeline"
 import { ContextSectionTitle } from "../section"
 import { WorkstreamActions } from "./actions"
 import { WorkstreamStatusCue } from "./status"
@@ -106,34 +106,28 @@ function DetailBody({
                 </div>
               </Section>
             )}
-            <Collapsible>
-              <CollapsibleTrigger className="group flex w-full items-center justify-between">
-                <ContextSectionTitle count={detail.sightings.length}>
-                  Sources
-                </ContextSectionTitle>
-                <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-1.5">
-                <ul className="flex flex-col divide-y rounded-md border">
-                  {detail.sightings.map((sighting) => (
-                    <Sighting key={sighting.id} sighting={sighting} />
-                  ))}
-                </ul>
-              </CollapsibleContent>
-            </Collapsible>
+            <CollapsibleSection count={detail.sightings.length} title="Sources">
+              <ul className="flex flex-col divide-y rounded-md border">
+                {detail.sightings.map((sighting) => (
+                  <Sighting key={sighting.id} sighting={sighting} />
+                ))}
+              </ul>
+            </CollapsibleSection>
             {detail.history.length === 0 ? null : (
-              <Section title="History">
-                <Timeline>
-                  {detail.history.map((entry) => (
-                    <TimelineItem
-                      key={entry.id}
-                      time={relativeTime(entry.createdAt, Date.now())}
-                    >
-                      {entry.entry}
-                    </TimelineItem>
-                  ))}
-                </Timeline>
-              </Section>
+              <CollapsibleSection
+                count={detail.history.length}
+                defaultOpen
+                title="History"
+              >
+                <Timeline
+                  entries={detail.history.map((entry) => ({
+                    id: entry.id,
+                    at: entry.createdAt,
+                    content: entry.entry,
+                  }))}
+                  now={Date.now()}
+                />
+              </CollapsibleSection>
             )}
           </>
         )}
@@ -159,6 +153,28 @@ function Section({
       <ContextSectionTitle count={count}>{title}</ContextSectionTitle>
       {children}
     </section>
+  )
+}
+
+function CollapsibleSection({
+  title,
+  count,
+  defaultOpen = false,
+  children,
+}: {
+  title: string
+  count: number
+  defaultOpen?: boolean
+  children: ReactNode
+}) {
+  return (
+    <Collapsible defaultOpen={defaultOpen}>
+      <CollapsibleTrigger className="group flex w-full items-center justify-between">
+        <ContextSectionTitle count={count}>{title}</ContextSectionTitle>
+        <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-1.5">{children}</CollapsibleContent>
+    </Collapsible>
   )
 }
 
