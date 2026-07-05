@@ -105,6 +105,7 @@ probe(
 
     expect(bodies.length).toBeGreaterThanOrEqual(2)
     expect(creates.length).toBeGreaterThanOrEqual(1)
+    expect(creates.every((op) => !/^[a-z]/.test(op.name))).toBe(true)
     expect(
       creates.every((op) =>
         op.citations.some((citation) => "effort" in citation)

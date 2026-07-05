@@ -211,6 +211,7 @@ import type * as persons_install from "../persons/install.js";
 import type * as persons_links from "../persons/links.js";
 import type * as persons_matching from "../persons/matching.js";
 import type * as persons_merge from "../persons/merge.js";
+import type * as persons_names from "../persons/names.js";
 import type * as persons_resolve from "../persons/resolve.js";
 import type * as persons_rows from "../persons/rows.js";
 import type * as providers_catalog from "../providers/catalog.js";
@@ -641,6 +642,7 @@ declare const fullApi: ApiFromModules<{
   "persons/links": typeof persons_links;
   "persons/matching": typeof persons_matching;
   "persons/merge": typeof persons_merge;
+  "persons/names": typeof persons_names;
   "persons/resolve": typeof persons_resolve;
   "persons/rows": typeof persons_rows;
   "providers/catalog": typeof providers_catalog;

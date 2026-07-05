@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { getActorDisplayName } from "../../shared/actor"
+import { actorIdentityProvider } from "../../identity/schema"
+import { canonicalActorName } from "../../persons/names"
 import { type Integration } from "../../shared/integrations"
 import { eventAnchor } from "../anchors"
 import {
@@ -58,9 +59,10 @@ function toReference(sighting: Sighting) {
   }
 }
 
-// What an effort absorbs from cited sources: anchors and actors from events,
-// the integration kind from events and conversations alike. Resolved once at
-// write time so reads never walk evidence.
+// What an effort absorbs from cited sources: anchors from events, the
+// integration kind from events and conversations alike, and actors resolved
+// to canonical person names so one person never appears under two handles.
+// Resolved once at write time so reads never walk evidence.
 export async function collectFacets(ctx: MutationCtx, sightings: Sighting[]) {
   const anchors = new Set<string>()
   const actors = new Set<string>()
@@ -84,7 +86,12 @@ export async function collectFacets(ctx: MutationCtx, sightings: Sighting[]) {
     }
 
     const anchor = eventAnchor(cited.event)
-    const actor = getActorDisplayName(cited.event.actor)
+    const actor = await canonicalActorName(ctx, {
+      tenantId: cited.event.tenantId,
+      provider:
+        source === undefined ? undefined : actorIdentityProvider(source),
+      actor: cited.event.actor,
+    })
 
     if (anchor !== undefined) {
       anchors.add(anchor)
@@ -235,7 +242,7 @@ export async function stampEffortRows(
 
   const entries = await ctx.db
     .query("journal")
-    .withIndex("by_effort_and_created_at", (index) =>
+    .withIndex("by_effort_and_observed_at", (index) =>
       index.eq("effortId", effortId)
     )
     .collect()

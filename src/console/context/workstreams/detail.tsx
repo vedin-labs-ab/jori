@@ -145,7 +145,7 @@ function DetailBody({
                   <Timeline
                     entries={history.results.map((entry) => ({
                       id: entry.id,
-                      at: entry.createdAt,
+                      at: entry.observedAt,
                       content: entry.entry,
                     }))}
                     now={Date.now()}

@@ -128,19 +128,22 @@ export const evidence = defineTable({
 
 // Dated narrative per effort, append-only. A workstream's timeline is a view
 // over its assigned efforts' journals, so narrative moves with membership.
+// observedAt is the narrated date, derived from the entry's cited evidence;
+// createdAt is bookkeeping. Bootstrap writes week-old activity in one pass,
+// so the two legitimately diverge.
 export const journal = defineTable({
   tenantId: v.string(),
   effortId: v.id("efforts"),
   passId: v.id("passes"),
   entry: v.string(),
+  observedAt: v.number(),
   createdAt: v.number(),
   // Same read-model stamp as evidence: the owning workstream at write or
   // last membership change.
   workstreamId: v.optional(v.id("beliefs")),
 })
-  .index("by_effort_and_created_at", ["effortId", "createdAt"])
-  .index("by_tenant_and_created_at", ["tenantId", "createdAt"])
-  .index("by_workstream_and_created_at", ["workstreamId", "createdAt"])
+  .index("by_effort_and_observed_at", ["effortId", "observedAt"])
+  .index("by_workstream_and_observed_at", ["workstreamId", "observedAt"])
 
 export const passStatus = v.union(
   v.literal("running"),
@@ -170,6 +173,11 @@ export const passes = defineTable({
       assigned: v.number(),
       discarded: v.number(), // judge mutations the applier refused
     })
+  ),
+  // The judge mutations the applier refused, kept for charter tuning; the
+  // stats counter also covers parse failures these rows can't describe.
+  discards: v.optional(
+    v.array(v.object({ op: v.string(), reason: v.string() }))
   ),
   error: v.optional(v.string()),
   startedAt: v.number(),

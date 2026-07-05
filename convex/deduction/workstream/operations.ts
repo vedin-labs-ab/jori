@@ -9,6 +9,7 @@ import {
   statusAfterTransition,
 } from "../engine/rules"
 import { moveEffort, writeEvidence } from "../engine/sightings"
+import { discard } from "../engine/wire"
 import { adoptCitedEfforts, type WorkstreamApplyState } from "./members"
 import { type WorkstreamOp } from "./ops"
 
@@ -71,7 +72,7 @@ export async function applyUpdate(
   )
 
   if (belief === null || belief.lockedBy !== undefined) {
-    state.counts.discarded += 1
+    discard(state, op.op, "unknown or locked workstream")
 
     return
   }
@@ -124,7 +125,7 @@ export async function applyStatus(
     belief.lockedBy !== undefined ||
     !legalStatusTransition(belief.status, op.to)
   ) {
-    state.counts.discarded += 1
+    discard(state, op.op, `illegal ${op.to} transition`)
 
     return
   }
@@ -133,7 +134,7 @@ export async function applyStatus(
     op.to === "confirm" &&
     !hasConfirmSupport(await loadBeliefSupport(ctx, belief._id))
   ) {
-    state.counts.discarded += 1
+    discard(state, op.op, "insufficient confirm support")
 
     return
   }
@@ -187,7 +188,7 @@ export async function applyMerge(
     belief._id === into._id ||
     belief.lockedBy !== undefined
   ) {
-    state.counts.discarded += 1
+    discard(state, op.op, "unknown, locked, or self merge target")
 
     return
   }
