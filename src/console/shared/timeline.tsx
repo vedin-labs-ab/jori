@@ -45,7 +45,7 @@ export function Timeline({
       </ol>
       {entries.length > initialCount ? (
         <Button
-          className="-ml-2 w-fit text-muted-foreground hover:text-foreground"
+          className="-ml-2 w-fit"
           onClick={() =>
             setVisibleCount(
               hiddenCount > 0
