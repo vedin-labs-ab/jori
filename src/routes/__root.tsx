@@ -155,8 +155,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {/* Mounted before the app so it subscribes before mount effects toast. */}
-        <Toaster />
+        {/*
+          Mounted before the app so it subscribes before mount effects toast.
+          The theme is pinned because the app renders light-only: without a
+          next-themes provider the component falls back to the OS scheme,
+          which paints dark-theme text on our light toasts. Remove the pin
+          when a ThemeProvider owns the html.dark class.
+        */}
+        <Toaster theme="light" />
         <ClerkProvider appearance={{ theme: shadcn }}>
           <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
             <FullscreenLoadingProvider>
