@@ -62,7 +62,7 @@ function TimelineRow({
         <span className="flex size-6 shrink-0 items-center justify-center rounded-full border text-muted-foreground">
           <Clock aria-hidden className="size-3" />
         </span>
-        {continues ? <span className="mt-1 w-px grow bg-border" /> : null}
+        {continues ? <span className="w-px grow bg-border" /> : null}
       </div>
       <div
         className={cn(
