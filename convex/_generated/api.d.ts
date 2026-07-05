@@ -137,6 +137,7 @@ import type * as deduction_effort_input from "../deduction/effort/input.js";
 import type * as deduction_effort_operations from "../deduction/effort/operations.js";
 import type * as deduction_effort_ops from "../deduction/effort/ops.js";
 import type * as deduction_effort_parse from "../deduction/effort/parse.js";
+import type * as deduction_engine_derive from "../deduction/engine/derive.js";
 import type * as deduction_engine_judge from "../deduction/engine/judge.js";
 import type * as deduction_engine_pass from "../deduction/engine/pass.js";
 import type * as deduction_engine_resolve from "../deduction/engine/resolve.js";
@@ -568,6 +569,7 @@ declare const fullApi: ApiFromModules<{
   "deduction/effort/operations": typeof deduction_effort_operations;
   "deduction/effort/ops": typeof deduction_effort_ops;
   "deduction/effort/parse": typeof deduction_effort_parse;
+  "deduction/engine/derive": typeof deduction_engine_derive;
   "deduction/engine/judge": typeof deduction_engine_judge;
   "deduction/engine/pass": typeof deduction_engine_pass;
   "deduction/engine/resolve": typeof deduction_engine_resolve;

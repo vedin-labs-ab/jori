@@ -102,7 +102,7 @@ function effortContext(
   return {
     name: "Effort",
     summary: "An effort.",
-    anchors: ["github:acme/app"],
+    anchors: ["github:repository:acme/app"],
     actors: ["dana"],
     seenAt: Date.UTC(2026, 6, 4),
     journal: [],
@@ -117,7 +117,7 @@ function windowEvent(
   return {
     type: "commits.pushed",
     actor: "dana",
-    anchor: "github:acme/app",
+    anchor: "github:repository:acme/app",
     observedAt: Date.UTC(2026, 6, 5, 11, 30),
     ...overrides,
     id: overrides.id as Id<"events">,

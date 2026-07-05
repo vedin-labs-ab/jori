@@ -99,7 +99,7 @@ export async function readEffortContext(
     name: row.name,
     summary: row.summary,
     anchors: row.anchors,
-    actors: row.actors,
+    actors: row.actors.map((actor) => actor.name),
     seenAt: row.seenAt,
     journal: entries.map((entry) => journalLine(entry)),
   }

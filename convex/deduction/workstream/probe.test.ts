@@ -30,7 +30,7 @@ probe(
             id: "b1",
             name: "Payments revamp",
             brief: "Rebuild of the payments flow.",
-            anchors: ["linear-project:p1"],
+            anchors: ["linear:project:p1"],
             members: ["Cutover checklist"],
           }),
         ],
@@ -39,7 +39,7 @@ probe(
             id: "f1",
             name: "Payments v2 cutover",
             summary: "Cutting merchants over to the payments v2 flow.",
-            anchors: ["linear-project:p1"],
+            anchors: ["linear:project:p1"],
           }),
         ],
       })
@@ -62,7 +62,7 @@ probe(
       name: "Platform work",
       brief:
         "Platform work covering the payments rebuild and the onboarding redesign.",
-      anchors: ["github:acme/app"],
+      anchors: ["github:repository:acme/app"],
       members: [
         "Payments v2 cutover",
         "Refund reconciliation",
@@ -168,7 +168,7 @@ function effortEntry(
   return {
     name: "Effort",
     summary: "An effort.",
-    anchors: ["github:acme/app"],
+    anchors: ["github:repository:acme/app"],
     actors: ["dana"],
     seenAt: Date.UTC(2026, 6, 5, 11, 30),
     journal: [],
