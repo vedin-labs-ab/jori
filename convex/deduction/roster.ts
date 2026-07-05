@@ -1,12 +1,16 @@
 import { type QueryCtx } from "../_generated/server"
-import { rosterRecencyMs } from "./limits"
+import { maxRosterEntries, rosterRecencyMs } from "./limits"
 
 // The slice of the roster that grounds runs: confirmed workstreams with a
-// recent sighting, projected to what a prompt needs. Proposed beliefs never
-// reach runs; that is the point of the status.
+// sighting inside the rolling window, newest sighting first, capped. Proposed
+// beliefs never reach runs; that is the point of the status. Timestamps ride
+// along so the prompt can render ages: createdAt is when Milo started
+// tracking the workstream, not when the work began.
 export type WorkstreamContext = {
   name: string
   brief: string
+  createdAt: number
+  seenAt: number
 }
 
 export async function readWorkstreamRoster(
@@ -29,5 +33,12 @@ export async function readWorkstreamRoster(
       (row) =>
         row.supersededBy === undefined && now - row.seenAt <= rosterRecencyMs
     )
-    .map((row) => ({ name: row.name, brief: row.brief }))
+    .sort((left, right) => right.seenAt - left.seenAt)
+    .slice(0, maxRosterEntries)
+    .map((row) => ({
+      name: row.name,
+      brief: row.brief,
+      createdAt: row.createdAt,
+      seenAt: row.seenAt,
+    }))
 }

@@ -16,7 +16,14 @@ export const minSupportDaySpan = 5 * dayMs
 
 export const maxBeliefAnchors = 12
 export const rosterJournalTail = 3
-export const rosterRecencyMs = 14 * dayMs
+
+// The roster slice runs carry: confirmed workstreams seen inside the rolling
+// window, newest first, capped. Workstreams active within `rosterActiveMs`
+// render in full; the rest shrink to a single line. Anything older is the
+// deeper memory system's job, not the always-on prompt's.
+export const rosterRecencyMs = 365 * dayMs
+export const rosterActiveMs = 30 * dayMs
+export const maxRosterEntries = 40
 
 // Volume guards on judge input: shape volume down, never meaning up. When a
 // window overflows, the newest records win and the rest wait for later passes.

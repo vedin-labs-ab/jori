@@ -15,8 +15,15 @@ test("organization and person context share one message grammar", () => {
     assemblePrompt({
       ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
       organization: { name: "Milo Labs", aliases: [], domains: [] },
-      workstreams: [{ name: "Payments revamp", brief: "Payments work." }],
-    } as unknown as Parameters<typeof assemblePrompt>[0]).organization ?? ""
+      workstreams: [
+        {
+          name: "Payments revamp",
+          brief: "Payments work.",
+          createdAt: Date.UTC(2026, 3, 10),
+          seenAt: Date.now() - 60_000,
+        },
+      ],
+    }).organization ?? ""
   const person = renderPersonContext({
     entries: [
       {
