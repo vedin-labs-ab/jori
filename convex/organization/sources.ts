@@ -7,7 +7,7 @@ import {
 } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
 import { type QueryLikeCtx } from "../shared/context"
-import { type organizationSourceSnapshot } from "./schema"
+import { organizationSourceSnapshot } from "./schema"
 
 export type SourceSnapshot = Infer<typeof organizationSourceSnapshot>
 
@@ -15,64 +15,53 @@ const dayMs = 24 * 60 * 60 * 1000
 const processedIntervalMs = 14 * dayMs
 const maxSourcesPerTenant = 50
 
-// Registers (or refreshes) the entrypoint URL the crawler starts from and marks
-// it due immediately so the next discovery run picks it up.
-export const seed = internalMutation({
-  args: { tenantId: v.string(), url: v.string() },
-  handler: async (ctx, args) => {
-    await demoteOtherPrimaries(ctx, args.tenantId, args.url)
-    const existing = await readByUrl(ctx, args.tenantId, args.url)
-
-    if (existing !== null) {
-      await ctx.db.patch(existing._id, { primary: true, checkAt: Date.now() })
-
-      return
-    }
-
-    await ctx.db.insert("organizationSources", {
-      tenantId: args.tenantId,
-      url: args.url,
-      primary: true,
-      checkAt: Date.now(),
-    })
-  },
-})
-
-// Records the baseline fingerprint for a page during a draft run and relaxes its
-// next check by two weeks (the "processed" cadence).
-export const upsert = internalMutation({
+// Records the fingerprints of the pages a draft just processed, so the watcher
+// only re-triggers on content the pipeline has not seen yet. Patches known
+// pages, registers newly crawled ones up to the tenant cap, moves the primary
+// flag to the draft's entrypoint, and relaxes each next check by two weeks.
+export const baseline = internalMutation({
   args: {
     tenantId: v.string(),
-    url: v.string(),
-    hash: v.string(),
-    primary: v.boolean(),
+    sources: v.array(organizationSourceSnapshot),
   },
   handler: async (ctx, args) => {
-    if (args.primary) {
-      await demoteOtherPrimaries(ctx, args.tenantId, args.url)
-    }
-
-    const existing = await readByUrl(ctx, args.tenantId, args.url)
+    const existing = await readByTenant(ctx, args.tenantId)
+    const pages = uniqueSnapshots(args.sources).filter(hasHash)
+    const primaryUrl = pages.find((page) => page.primary)?.url
     const checkAt = Date.now() + processedIntervalMs
+    let capacity = maxSourcesPerTenant - existing.length
 
-    if (existing === null) {
-      await ctx.db.insert("organizationSources", {
-        tenantId: args.tenantId,
-        url: args.url,
-        primary: args.primary,
-        hash: args.hash,
-        checkAt,
-      })
-
-      return
+    for (const row of existing) {
+      if (primaryUrl !== undefined && row.primary && row.url !== primaryUrl) {
+        await ctx.db.patch(row._id, { primary: false })
+      }
     }
 
-    await ctx.db.patch(existing._id, {
-      hash: args.hash,
-      checkAt,
-      primary: existing.primary || args.primary,
-      ...(existing.hash === args.hash ? {} : { changedAt: Date.now() }),
-    })
+    for (const page of pages) {
+      const row = existing.find((entry) => entry.url === page.url)
+
+      if (row !== undefined) {
+        await ctx.db.patch(row._id, {
+          hash: page.hash,
+          checkAt,
+          primary: page.primary,
+          ...(row.hash === page.hash ? {} : { changedAt: Date.now() }),
+        })
+
+        continue
+      }
+
+      if (capacity > 0) {
+        capacity -= 1
+        await ctx.db.insert("organizationSources", {
+          tenantId: args.tenantId,
+          url: page.url,
+          primary: page.primary,
+          hash: page.hash,
+          checkAt,
+        })
+      }
+    }
   },
 })
 
@@ -107,6 +96,10 @@ export async function readApprovedSources(
   return (await readByTenant(ctx, tenantId)).map(toSnapshot)
 }
 
+// Equality covers the reviewable identity of the source set — urls and the
+// primary flag, the same view the console diff shows. Hashes are freshness
+// bookkeeping, so a re-crawl that changes only fingerprints never counts as
+// a proposable change.
 export function sourcesEqual(left: SourceSnapshot[], right: SourceSnapshot[]) {
   return serializeSnapshots(left) === serializeSnapshots(right)
 }
@@ -144,20 +137,6 @@ function compareSources(
   return left.url.localeCompare(right.url)
 }
 
-async function demoteOtherPrimaries(
-  ctx: MutationCtx,
-  tenantId: string,
-  primaryUrl: string
-) {
-  const sources = await readByTenant(ctx, tenantId)
-
-  for (const source of sources) {
-    if (source.primary && source.url !== primaryUrl) {
-      await ctx.db.patch(source._id, { primary: false })
-    }
-  }
-}
-
 async function readByTenant(ctx: QueryLikeCtx, tenantId: string) {
   return await ctx.db
     .query("organizationSources")
@@ -165,13 +144,10 @@ async function readByTenant(ctx: QueryLikeCtx, tenantId: string) {
     .take(maxSourcesPerTenant)
 }
 
-async function readByUrl(ctx: QueryLikeCtx, tenantId: string, url: string) {
-  return await ctx.db
-    .query("organizationSources")
-    .withIndex("by_tenant_and_url", (q) =>
-      q.eq("tenantId", tenantId).eq("url", url)
-    )
-    .unique()
+function hasHash(
+  source: SourceSnapshot
+): source is SourceSnapshot & { hash: string } {
+  return source.hash !== undefined
 }
 
 function toSnapshot(source: {
@@ -208,7 +184,6 @@ function serializeSnapshots(sources: SourceSnapshot[]) {
   return JSON.stringify(
     uniqueSnapshots(sources)
       .map((source) => ({
-        hash: source.hash ?? null,
         primary: source.primary,
         url: normalizeUrl(source.url),
       }))

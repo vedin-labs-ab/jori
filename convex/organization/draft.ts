@@ -91,28 +91,26 @@ async function proposeDraft(
   pages: CrawledPage[],
   draft: DraftResult
 ) {
+  const sources = pages.map(toSource)
+
   try {
-    await writeDraft(ctx, tenantId, primaryUrl, pages, draft.facts)
+    await ctx.runMutation(internal.organization.profile.propose, {
+      tenantId,
+      facts: draft.facts,
+      sources,
+      website: primaryUrl,
+    })
+    // Re-baseline the watcher's fingerprints only after the draft landed; on
+    // failure the stale hashes make a later sweep retry the whole draft.
+    await ctx.runMutation(internal.organization.sources.baseline, {
+      tenantId,
+      sources,
+    })
     await completeStep(ctx, tenantId, draft.stepId)
   } catch (error) {
     await completeStep(ctx, tenantId, draft.stepId, messageFrom(error))
     throw error
   }
-}
-
-async function writeDraft(
-  ctx: ActionCtx,
-  tenantId: string,
-  primaryUrl: string,
-  pages: CrawledPage[],
-  facts: OrganizationFacts
-) {
-  await ctx.runMutation(internal.organization.profile.propose, {
-    tenantId,
-    facts,
-    sources: pages.map(toSource),
-    website: primaryUrl,
-  })
 }
 
 async function crawl(
@@ -123,20 +121,7 @@ async function crawl(
 ) {
   const stepId = await startStep(ctx, tenantId, "page", label, url)
 
-  try {
-    const page = await crawlPage(url)
-
-    if (page !== null) {
-      await completeStep(ctx, tenantId, stepId)
-      return page
-    }
-  } catch {
-    // Page failures are recorded here; callers decide whether to keep going.
-  }
-
-  await completeStep(ctx, tenantId, stepId, `Could not read ${shortPath(url)}`)
-
-  return null
+  return await crawlStep(ctx, tenantId, stepId, url)
 }
 
 async function queueCrawls(ctx: ActionCtx, tenantId: string, urls: string[]) {
@@ -164,23 +149,29 @@ async function crawlQueued(
 ) {
   await activateStep(ctx, tenantId, queued.stepId)
 
+  return await crawlStep(ctx, tenantId, queued.stepId, queued.url)
+}
+
+// Fetches one page for an open step and completes the step either way; page
+// failures are recorded on the step, and callers decide whether to keep going.
+async function crawlStep(
+  ctx: ActionCtx,
+  tenantId: string,
+  stepId: string,
+  url: string
+) {
   try {
-    const page = await crawlPage(queued.url)
+    const page = await crawlPage(url)
 
     if (page !== null) {
-      await completeStep(ctx, tenantId, queued.stepId)
+      await completeStep(ctx, tenantId, stepId)
       return page
     }
   } catch {
-    // Page failures are recorded here; callers decide whether to keep going.
+    // Fall through to record the failure on the step.
   }
 
-  await completeStep(
-    ctx,
-    tenantId,
-    queued.stepId,
-    `Could not read ${shortPath(queued.url)}`
-  )
+  await completeStep(ctx, tenantId, stepId, `Could not read ${shortPath(url)}`)
 
   return null
 }
