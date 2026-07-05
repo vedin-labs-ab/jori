@@ -5,7 +5,6 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { messageText } from "../messages/surface"
 import { getActorDisplayName } from "../shared/actor"
 import { summaryOverlapMessageLimit, summarySourceMessageLimit } from "./limits"
 
@@ -52,7 +51,7 @@ export const pending = internalQuery({
 
     return {
       conversationId: conversation._id,
-      messages: await loadSummaryMessages(ctx, conversation, integration),
+      messages: await loadSummaryMessages(ctx, conversation),
       priorSummary: conversation.summary ?? null,
       readAt,
     }
@@ -95,13 +94,12 @@ export const clear = internalMutation({
 
 export async function loadSummaryMessages(
   ctx: QueryCtx,
-  conversation: Doc<"conversations">,
-  integration: Doc<"integrations">
+  conversation: Doc<"conversations">
 ) {
   const rows = await sourceMessageRows(ctx, conversation)
 
   return rows.reverse().flatMap((message) => {
-    const entry = summaryMessage(message, integration)
+    const entry = summaryMessage(message)
 
     return entry === null ? [] : [entry]
   })
@@ -187,11 +185,8 @@ async function conversationMessages(
     .take(options.limit)
 }
 
-function summaryMessage(
-  message: Doc<"messages">,
-  integration: Doc<"integrations">
-): SummaryMessage | null {
-  const text = messageText(message, integration).trim()
+function summaryMessage(message: Doc<"messages">): SummaryMessage | null {
+  const text = (message.text ?? "").trim()
 
   if (text === "") {
     return null

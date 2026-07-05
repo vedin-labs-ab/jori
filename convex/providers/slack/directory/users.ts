@@ -1,5 +1,7 @@
 import { internal } from "../../../_generated/api"
+import { type Doc } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
+import { requireSlackCredentials } from "../credentials"
 
 export type SlackActorProfile = {
   email?: string
@@ -28,35 +30,112 @@ export async function getSlackActorProfile(
     return undefined
   }
 
+  return await resolveSlackUserProfile(ctx, {
+    tenantId: target.tenantId,
+    token: async () =>
+      (await ctx.runQuery(internal.providers.slack.install.getUserToken, {
+        accountId: args.accountId,
+      })) ?? undefined,
+    userId: args.actorId,
+  })
+}
+
+export async function resolveSlackUserNames(
+  ctx: ActionCtx,
+  args: {
+    integration: Doc<"integrations">
+    userIds: string[]
+  }
+): Promise<Map<string, string>> {
+  const names = new Map<string, string>()
+  const userIds = [...new Set(args.userIds)]
+
+  if (userIds.length === 0) {
+    return names
+  }
+
+  const token = slackUserToken(args.integration)
+
+  await Promise.all(
+    userIds.map(async (userId) => {
+      const profile = await resolveSlackUserProfile(ctx, {
+        tenantId: args.integration.tenantId,
+        token: async () => token,
+        userId,
+      })
+
+      if (profile?.name !== undefined) {
+        names.set(userId, profile.name)
+      }
+    })
+  )
+
+  return names
+}
+
+async function resolveSlackUserProfile(
+  ctx: ActionCtx,
+  args: {
+    tenantId: string
+    token: () => Promise<string | undefined>
+    userId: string
+  }
+): Promise<SlackActorProfile | undefined> {
   const cached = await ctx.runQuery(
     internal.identity.identities.resolveProviderActorProfileRecord,
     {
-      tenantId: target.tenantId,
+      tenantId: args.tenantId,
       provider: "slack",
-      externalId: args.actorId,
+      externalId: args.userId,
     }
   )
 
-  if (cached !== null) {
+  if (cached !== null && cached.name !== undefined) {
     return cached
   }
 
-  const userToken = await ctx.runQuery(
-    internal.providers.slack.install.getUserToken,
-    {
-      accountId: args.accountId,
-    }
-  )
+  const token = await args.token()
 
-  if (userToken === null) {
-    return undefined
+  if (token === undefined) {
+    return cached ?? undefined
   }
 
+  const profile = await fetchSlackUserProfile(token, args.userId)
+
+  if (profile === undefined) {
+    return cached ?? undefined
+  }
+
+  try {
+    await cacheSlackActorProfile(ctx, {
+      actorId: args.userId,
+      profile,
+      tenantId: args.tenantId,
+    })
+  } catch {
+    // Profile caching must not make the calling interaction fail.
+  }
+
+  return profile
+}
+
+function slackUserToken(integration: Doc<"integrations">) {
+  try {
+    return requireSlackCredentials(integration).user
+  } catch {
+    return undefined
+  }
+}
+
+async function fetchSlackUserProfile(
+  token: string,
+  userId: string
+): Promise<SlackActorProfile | undefined> {
   const slackUrl = new URL("https://slack.com/api/users.info")
-  slackUrl.searchParams.set("user", args.actorId)
+  slackUrl.searchParams.set("user", userId)
 
   const response = await fetch(slackUrl, {
-    headers: { authorization: `Bearer ${userToken}` },
+    headers: { authorization: `Bearer ${token}` },
   })
   const body = (await response.json().catch(() => null)) as SlackUserInfo | null
 
@@ -66,21 +145,9 @@ export async function getSlackActorProfile(
 
   const profile = readSlackProfile(body.user)
 
-  if (profile.email === undefined && profile.name === undefined) {
-    return undefined
-  }
-
-  try {
-    await cacheSlackActorProfile(ctx, {
-      actorId: args.actorId,
-      profile,
-      tenantId: target.tenantId,
-    })
-  } catch {
-    // Profile caching must not make the approval interaction fail.
-  }
-
-  return profile
+  return profile.email === undefined && profile.name === undefined
+    ? undefined
+    : profile
 }
 
 type SlackUserInfo =

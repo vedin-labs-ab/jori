@@ -1,3 +1,4 @@
+import { withUnicodeEmoji } from "../../../contracts/emoji"
 import { readRecord, readString } from "../../shared/input"
 
 export type LinearWebhookPayload = {
@@ -147,7 +148,7 @@ function getLinearCommentMessage(
         : ("person" as const),
     actorName: payload.actor?.name,
     conversationId: issueId,
-    text: data.body,
+    text: humanReadableCommentText(data.body),
     observedAt: getObservedAt(payload, data.createdAt),
     data: {
       action: payload.action,
@@ -225,4 +226,9 @@ function getObservedAt(
   const value = Date.parse(timestamp)
 
   return Number.isFinite(value) ? value : undefined
+}
+
+// Linear mentions are already readable names; only shortcodes need work.
+function humanReadableCommentText(body: string | undefined) {
+  return body === undefined ? undefined : withUnicodeEmoji(body)
 }

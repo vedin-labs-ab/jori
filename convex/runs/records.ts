@@ -69,7 +69,7 @@ async function getMessageInput(
     message,
     integration,
     integrations,
-    conversation: await recentConversation(ctx, message, integration),
+    conversation: await recentConversation(ctx, message),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }

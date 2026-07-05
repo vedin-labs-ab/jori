@@ -4,7 +4,6 @@ import {
   messageIdentifiers,
   messageReplyTargetIdentifier,
 } from "../messages/identifiers"
-import { messageText } from "../messages/surface"
 import { getActorDisplayName } from "../shared/actor"
 
 export const defaultDrainLimit = 20
@@ -64,7 +63,6 @@ export function collectPendingBatch(
 
 export function formatRuntimeMessage(
   message: Doc<"messages">,
-  integration: Doc<"integrations"> | null,
   reactions?: string
 ) {
   return {
@@ -80,10 +78,7 @@ export function formatRuntimeMessage(
     reactions: reactions ?? null,
     replyTarget: messageReplyTargetIdentifier(message),
     source: message.actor?.kind ?? "unknown",
-    text:
-      integration === null
-        ? (message.text ?? "")
-        : messageText(message, integration),
+    text: message.text ?? "",
     type: message.type,
   }
 }

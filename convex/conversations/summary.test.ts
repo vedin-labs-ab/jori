@@ -7,8 +7,7 @@ import { loadSummaryMessages } from "./summary"
 test("loads all source messages for small conversations", async () => {
   const messages = await loadSummaryMessages(
     fakeQueryCtx(messageRange(1, summarySourceMessageLimit)),
-    conversation(),
-    integration()
+    conversation()
   )
 
   expect(texts(messages)).toEqual(messageNumbers(1, summarySourceMessageLimit))
@@ -17,8 +16,7 @@ test("loads all source messages for small conversations", async () => {
 test("loads overlap and new messages for large conversations", async () => {
   const messages = await loadSummaryMessages(
     fakeQueryCtx(messageRange(1, 120)),
-    conversation({ summarizedAt: 100.5 }),
-    integration()
+    conversation({ summarizedAt: 100.5 })
   )
 
   expect(texts(messages)).toEqual(messageNumbers(76, 120))
@@ -28,8 +26,7 @@ test("loads overlap and new messages for large conversations", async () => {
 test("prioritizes new messages over overlap within the source limit", async () => {
   const messages = await loadSummaryMessages(
     fakeQueryCtx(messageRange(1, 150)),
-    conversation({ summarizedAt: 60.5 }),
-    integration()
+    conversation({ summarizedAt: 60.5 })
   )
 
   expect(messages).toHaveLength(summarySourceMessageLimit)
@@ -157,22 +154,6 @@ function conversation(
     externalId: "conversation",
     scope: "tenant",
     ...overrides,
-  }
-}
-
-function integration(): Doc<"integrations"> {
-  return {
-    _id: id<"integrations">("integration"),
-    _creationTime: 0,
-    tenantId: "tenant",
-    integration: "slack",
-    scope: "tenant",
-    externalId: "team",
-    credentials: {},
-    status: "active",
-    createdBy: id<"persons">("person"),
-    createdAt: 0,
-    updatedAt: 0,
   }
 }
 

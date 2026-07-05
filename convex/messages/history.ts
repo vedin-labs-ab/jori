@@ -3,7 +3,6 @@ import { type QueryCtx } from "../_generated/server"
 import { reactionSummariesForMessages } from "../reactions/summary"
 import { type ActorKind, getActorDisplayName } from "../shared/actor"
 import { messageActorIds, messageIdentifiers } from "./identifiers"
-import { messageText } from "./surface"
 
 const recentConversationLimit = 16
 
@@ -27,13 +26,12 @@ export type RecentConversation = {
 
 export async function recentConversation(
   ctx: QueryCtx,
-  message: Doc<"messages">,
-  integration: Doc<"integrations">
+  message: Doc<"messages">
 ): Promise<RecentConversation> {
   const messages = await recentMessages(ctx, message)
   const reactions = await reactionSummariesForMessages(ctx, messages)
   const entries = messages.map((entry) =>
-    messageEntry(entry, integration, reactions.get(entry._id))
+    messageEntry(entry, reactions.get(entry._id))
   )
 
   return {
@@ -44,7 +42,6 @@ export async function recentConversation(
 
 export function messageEntry(
   message: Doc<"messages">,
-  integration: Doc<"integrations">,
   reactions?: string
 ): ConversationEntry {
   return {
@@ -56,7 +53,7 @@ export function messageEntry(
     observedAt: message.observedAt ?? null,
     reactions: reactions ?? null,
     source: message.actor?.kind ?? "unknown",
-    text: messageText(message, integration),
+    text: message.text ?? "",
     type: message.type,
   }
 }

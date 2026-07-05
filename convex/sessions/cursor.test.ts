@@ -70,15 +70,14 @@ test("advances the cursor when only self messages are pending", () => {
   expect(batch.cursor?._id).toBe("approval")
 })
 
-test("formats runtime messages with normalized text and Slack identifiers", () => {
+test("formats runtime messages with stored text and Slack identifiers", () => {
   expect(
     formatRuntimeMessage(
-      message("next", 3, "<@UBOT> follow-up", {
+      message("next", 3, "@Milo follow-up", {
         actor: { externalId: "U123", kind: "person", name: "Albin" },
         data: { ts: "123.456" },
         mentioned: true,
-      }),
-      integration({ data: { botUserId: "UBOT" } })
+      })
     )
   ).toMatchObject({
     actor: "Albin",
@@ -128,13 +127,6 @@ function message(
     createdAt: storedAt,
     ...overrides,
   }
-}
-
-function integration(overrides: Partial<Doc<"integrations">>) {
-  return {
-    data: {},
-    ...overrides,
-  } as Doc<"integrations">
 }
 
 function id<TableName extends keyof DataModel>(value: string) {
