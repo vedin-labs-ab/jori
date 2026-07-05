@@ -30,7 +30,7 @@ export async function applyCreate(
     summary: op.summary,
     seenAt: maxObservedAt(sightings),
     anchors: [],
-    actors: [],
+    personIds: [],
     sources: [],
     createdAt: state.now,
     updatedAt: state.now,

@@ -36,8 +36,9 @@ export const passWindow = v.object({ start: v.number(), end: v.number() })
 //
 // Essence (judge- and membership-owned): name, summary, workstreamId.
 // Cache (derived from this effort's evidence by engine/derive.refreshEffort,
-// never written elsewhere): seenAt, anchors, actors, sources. Actors keep
-// the person key when the graph resolves one, so they re-resolve on refresh.
+// never written elsewhere): seenAt, anchors, personIds, sources. Only
+// graph-resolved people are kept — display names live in identities and
+// resolve at read time, so person merges heal on the next refresh.
 export const efforts = defineTable({
   tenantId: v.string(),
   name: v.string(),
@@ -46,9 +47,7 @@ export const efforts = defineTable({
   supersededBy: v.optional(v.id("efforts")),
   seenAt: v.number(),
   anchors: v.array(v.string()),
-  actors: v.array(
-    v.object({ name: v.string(), personId: v.optional(v.id("persons")) })
-  ),
+  personIds: v.array(v.id("persons")),
   sources: v.array(integrationValidator),
   createdAt: v.number(),
   updatedAt: v.number(),
