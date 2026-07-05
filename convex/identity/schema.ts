@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
+import { type Integration } from "../shared/integrations"
 
 export const identityProvider = v.union(
   v.literal("clerk"),
@@ -13,6 +14,23 @@ export const identityProvider = v.union(
 )
 
 export type IdentityProvider = Infer<typeof identityProvider>
+
+// The identity provider an integration's observed actors belong to;
+// undefined for integrations whose actors are not person-shaped.
+export function actorIdentityProvider(
+  integration: Integration
+): IdentityProvider | undefined {
+  if (
+    integration === "github" ||
+    integration === "linear" ||
+    integration === "notion" ||
+    integration === "slack"
+  ) {
+    return integration
+  }
+
+  return undefined
+}
 
 export const linkMethod = v.union(
   v.literal("observed"),

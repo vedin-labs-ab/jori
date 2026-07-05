@@ -88,7 +88,7 @@ export async function readEffortContext(
 ): Promise<EffortContext> {
   const entries = await ctx.db
     .query("journal")
-    .withIndex("by_effort_and_created_at", (index) =>
+    .withIndex("by_effort_and_observed_at", (index) =>
       index.eq("effortId", row._id)
     )
     .order("desc")

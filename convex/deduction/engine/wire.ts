@@ -40,7 +40,8 @@ function toMap(rows: AllowedRow[] | undefined) {
 
 // Every stage reports the same counters; a stage that never performs an op
 // simply leaves its counter at zero. Discards start at the parse failures
-// the action already counted.
+// the action already counted — those rows can't be described, so only
+// applier refusals land in the recorded list.
 export function statCounts(args: {
   context: number
   activity: number
@@ -55,6 +56,30 @@ export function statCounts(args: {
     closed: 0,
     assigned: 0,
     discarded: args.invalid,
+  }
+}
+
+const maxRecordedDiscards = 20
+
+export type ApplyTracking = {
+  counts: ReturnType<typeof statCounts>
+  discards: { op: string; reason: string }[]
+}
+
+export function createTracking(args: {
+  context: number
+  activity: number
+  invalid: number
+}): ApplyTracking {
+  return { counts: statCounts(args), discards: [] }
+}
+
+// Refuse one judge op: count it, and keep what and why for charter tuning.
+export function discard(tracking: ApplyTracking, op: string, reason: string) {
+  tracking.counts.discarded += 1
+
+  if (tracking.discards.length < maxRecordedDiscards) {
+    tracking.discards.push({ op, reason })
   }
 }
 

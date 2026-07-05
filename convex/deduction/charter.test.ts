@@ -25,6 +25,7 @@ describe("effort charter", () => {
     expect(charter).toContain("using only ids present in the input")
     expect(charter).toContain("Every mutation needs at least one citation")
     expect(charter).toContain("organization's own vocabulary")
+    expect(charter).toContain("capitalized like a project label")
     expect(charter).toContain("Never rewrite history")
   })
 })
@@ -53,6 +54,7 @@ describe("workstream charter", () => {
     expect(charter).toContain("do not re-propose rejected entries")
     expect(charter).toContain("using only ids present in the input")
     expect(charter).toContain("organization's own vocabulary")
+    expect(charter).toContain("capitalized like a project label")
   })
 })
 
@@ -70,6 +72,7 @@ describe("consolidation charter", () => {
     expect(charter).toContain("too broad: split it")
     expect(charter).toContain("carve up an overgrown workstream's members")
     expect(charter).toContain("Do not narrate activity")
+    expect(charter).toContain("capitalized like a project label")
     expect(charter).toContain("Restraint over churn")
     expect(charter).toContain("do not re-propose rejected entries")
     expect(charter).toContain("using only ids present in the input")

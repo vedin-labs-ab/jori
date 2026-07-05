@@ -127,7 +127,7 @@ export function iso(timestamp: number) {
 }
 
 export function journalLine(
-  entry: Pick<Doc<"journal">, "createdAt" | "entry">
+  entry: Pick<Doc<"journal">, "observedAt" | "entry">
 ) {
-  return `${iso(entry.createdAt).slice(0, 10)}: ${entry.entry}`
+  return `${iso(entry.observedAt).slice(0, 10)}: ${entry.entry}`
 }

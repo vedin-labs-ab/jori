@@ -29,6 +29,7 @@ First fill `bodiesOfWork`: from the efforts alone — their names, summaries, jo
 
 - Do not narrate activity: the incremental reviews own the day-to-day record. Every mutation here should change structure or wording, not add history.
 - Cite evidence using only ids present in the input. `create` and `update` need at least one citation. A claim you cannot cite does not happen.
+- Name workstreams in the organization's own vocabulary, written as titles and capitalized like a project label.
 - Restraint over churn: prefer the smallest set of mutations that makes the roster honest, and leave good-enough names alone.
 - Respect the roster: do not re-propose rejected entries and do not rename or change entries marked locked.
 - Never infer beyond the evidence or fill gaps from prior knowledge. Write in English.

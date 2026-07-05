@@ -4,8 +4,9 @@ import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { resolveCitations, sortOps } from "../engine/rules"
 import {
   allowedSource,
+  createTracking,
+  discard,
   requireRunningPass,
-  statCounts,
   toAllowedMaps,
 } from "../engine/wire"
 import {
@@ -43,7 +44,7 @@ export const apply = internalMutation({
       allowed: toAllowedMaps(args.allowed),
       temp: new Map(),
       now: Date.now(),
-      counts: statCounts(args),
+      ...createTracking(args),
     }
 
     for (const op of sortOps(args.ops)) {
@@ -54,6 +55,7 @@ export const apply = internalMutation({
       status: "completed",
       endedAt: Date.now(),
       stats: state.counts,
+      ...(state.discards.length === 0 ? {} : { discards: state.discards }),
     })
   },
 })
@@ -66,8 +68,14 @@ async function applyOp(
 ) {
   const sightings = resolveCitations(op.citations, state.allowed)
 
-  if (sightings === null || sightings.length === 0) {
-    state.counts.discarded += 1
+  if (sightings === null) {
+    discard(state, op.op, "citation outside the pass input")
+
+    return
+  }
+
+  if (sightings.length === 0) {
+    discard(state, op.op, "missing citations")
 
     return
   }

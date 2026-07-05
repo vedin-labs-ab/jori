@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { startEventAutomations } from "../automations/lifecycle"
-import { type IdentityProvider } from "../identity/schema"
+import { actorIdentityProvider } from "../identity/schema"
 import { resolveActor } from "../persons/resolve"
 import { normalizeEventData } from "./payload"
 import { type EventMatch } from "./schema"
@@ -67,19 +67,4 @@ export async function recordEvent(
     eventId,
     runIds: await startEventAutomations(ctx, { event, now }),
   }
-}
-
-function actorIdentityProvider(
-  integration: Doc<"integrations">["integration"]
-): IdentityProvider | undefined {
-  if (
-    integration === "github" ||
-    integration === "linear" ||
-    integration === "notion" ||
-    integration === "slack"
-  ) {
-    return integration
-  }
-
-  return undefined
 }

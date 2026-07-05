@@ -2,7 +2,12 @@ import { v } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { resolveCitations, sortOps } from "../engine/rules"
-import { allowedSource, requireRunningPass, statCounts } from "../engine/wire"
+import {
+  allowedSource,
+  createTracking,
+  discard,
+  requireRunningPass,
+} from "../engine/wire"
 import { applyAssign, type WorkstreamApplyState } from "./members"
 import { applyCreate, applyMerge, applyStatus, applyUpdate } from "./operations"
 import { type WorkstreamOp, workstreamOp } from "./ops"
@@ -35,7 +40,7 @@ export const apply = internalMutation({
       },
       temp: new Map(),
       now: Date.now(),
-      counts: statCounts(args),
+      ...createTracking(args),
     }
 
     for (const op of sortOps(args.ops)) {
@@ -46,6 +51,7 @@ export const apply = internalMutation({
       status: "completed",
       endedAt: Date.now(),
       stats: state.counts,
+      ...(state.discards.length === 0 ? {} : { discards: state.discards }),
     })
   },
 })
@@ -63,8 +69,14 @@ async function applyOp(
   const sightings = resolveCitations(op.citations, state.allowed)
   const needsCitations = op.op === "create" || op.op === "update"
 
-  if (sightings === null || (needsCitations && sightings.length === 0)) {
-    state.counts.discarded += 1
+  if (sightings === null) {
+    discard(state, op.op, "citation outside the pass input")
+
+    return
+  }
+
+  if (needsCitations && sightings.length === 0) {
+    discard(state, op.op, "missing citations")
 
     return
   }

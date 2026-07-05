@@ -113,7 +113,7 @@ export const history = query({
       page: result.page.map((row) => ({
         id: row._id,
         entry: row.entry,
-        createdAt: row.createdAt,
+        observedAt: row.observedAt,
       })),
     }
   },
@@ -173,7 +173,7 @@ function sightingsRange(ctx: QueryCtx, beliefId: Id<"beliefs">) {
 function historyRange(ctx: QueryCtx, beliefId: Id<"beliefs">) {
   return ctx.db
     .query("journal")
-    .withIndex("by_workstream_and_created_at", (index) =>
+    .withIndex("by_workstream_and_observed_at", (index) =>
       index.eq("workstreamId", beliefId)
     )
 }

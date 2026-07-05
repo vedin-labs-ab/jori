@@ -3,14 +3,13 @@ import { type MutationCtx } from "../../_generated/server"
 import { resolveBelief, resolveEffort } from "../engine/resolve"
 import { type AllowedSources, type Sighting } from "../engine/rules"
 import { moveEffort, writeEvidence } from "../engine/sightings"
-import { type statCounts } from "../engine/wire"
+import { type ApplyTracking, discard } from "../engine/wire"
 import { type WorkstreamOp } from "./ops"
 
-export type WorkstreamApplyState = {
+export type WorkstreamApplyState = ApplyTracking & {
   allowed: AllowedSources
   temp: Map<string, Id<"beliefs">>
   now: number
-  counts: ReturnType<typeof statCounts>
 }
 
 // Citing an effort in a create claims membership: every cited effort is
@@ -63,7 +62,7 @@ export async function applyAssign(
   )
 
   if (effort === null || belief === null) {
-    state.counts.discarded += 1
+    discard(state, op.op, "unknown effort or workstream")
 
     return
   }

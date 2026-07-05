@@ -7,14 +7,13 @@ import {
   type Sighting,
 } from "../engine/rules"
 import { bumpEffort, moveEffort, writeEvidence } from "../engine/sightings"
-import { type statCounts } from "../engine/wire"
+import { type ApplyTracking, discard } from "../engine/wire"
 import { type EffortOp } from "./ops"
 
-export type EffortApplyState = {
+export type EffortApplyState = ApplyTracking & {
   allowed: AllowedSources
   temp: Map<string, Id<"efforts">>
   now: number
-  counts: ReturnType<typeof statCounts>
 }
 
 export async function applyCreate(
@@ -43,6 +42,7 @@ export async function applyCreate(
     effortId,
     passId: pass._id,
     entry: op.entry,
+    observedAt: maxObservedAt(sightings),
     createdAt: state.now,
   })
   await recordSightings(ctx, pass, effortId, sightings, op.summary, state.now)
@@ -63,7 +63,7 @@ export async function applyUpdate(
   )
 
   if (effort === null) {
-    state.counts.discarded += 1
+    discard(state, op.op, "unknown effort")
 
     return
   }
@@ -99,7 +99,7 @@ export async function applyJournal(
   )
 
   if (effort === null) {
-    state.counts.discarded += 1
+    discard(state, op.op, "unknown effort")
 
     return
   }
@@ -109,6 +109,7 @@ export async function applyJournal(
     effortId: effort._id,
     passId: pass._id,
     entry: op.entry,
+    observedAt: maxObservedAt(sightings),
     createdAt: state.now,
     workstreamId: effort.workstreamId,
   })
@@ -135,7 +136,7 @@ export async function applyMerge(
   const into = await resolveEffort(ctx, pass.tenantId, state.temp, op.into)
 
   if (effort === null || into === null || effort._id === into._id) {
-    state.counts.discarded += 1
+    discard(state, op.op, "unknown or self merge target")
 
     return
   }
@@ -167,7 +168,7 @@ async function repointEffortRows(
 ) {
   const entries = await ctx.db
     .query("journal")
-    .withIndex("by_effort_and_created_at", (index) =>
+    .withIndex("by_effort_and_observed_at", (index) =>
       index.eq("effortId", from)
     )
     .collect()

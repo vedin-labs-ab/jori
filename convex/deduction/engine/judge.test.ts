@@ -45,7 +45,7 @@ describe("citation reading", () => {
 describe("payload formatting", () => {
   test("renders journal lines with ISO dates", () => {
     expect(
-      journalLine({ createdAt: Date.UTC(2026, 5, 23), entry: "Shipped it." })
+      journalLine({ observedAt: Date.UTC(2026, 5, 23), entry: "Shipped it." })
     ).toBe("2026-06-23: Shipped it.")
   })
 
