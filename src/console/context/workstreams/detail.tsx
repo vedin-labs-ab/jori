@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
 import { SeparatorDot } from "../../shared/dot"
 import { IntegrationLogo } from "../../shared/logo/integration"
+import { Paged } from "../../shared/paging"
 import { relativeTime } from "../../shared/time"
 import { Timeline } from "../../shared/timeline"
 import { ContextSectionTitle } from "../section"
@@ -107,18 +108,18 @@ function DetailBody({
               </Section>
             )}
             <CollapsibleSection count={detail.sightings.length} title="Sources">
-              <ul className="flex flex-col divide-y rounded-md border">
-                {detail.sightings.map((sighting) => (
-                  <Sighting key={sighting.id} sighting={sighting} />
-                ))}
-              </ul>
+              <Paged items={detail.sightings}>
+                {(visible) => (
+                  <ul className="flex flex-col divide-y rounded-md border">
+                    {visible.map((sighting) => (
+                      <Sighting key={sighting.id} sighting={sighting} />
+                    ))}
+                  </ul>
+                )}
+              </Paged>
             </CollapsibleSection>
             {detail.history.length === 0 ? null : (
-              <CollapsibleSection
-                count={detail.history.length}
-                defaultOpen
-                title="History"
-              >
+              <CollapsibleSection count={detail.history.length} title="History">
                 <Timeline
                   entries={detail.history.map((entry) => ({
                     id: entry.id,
@@ -159,16 +160,14 @@ function Section({
 function CollapsibleSection({
   title,
   count,
-  defaultOpen = false,
   children,
 }: {
   title: string
   count: number
-  defaultOpen?: boolean
   children: ReactNode
 }) {
   return (
-    <Collapsible defaultOpen={defaultOpen}>
+    <Collapsible>
       <CollapsibleTrigger className="group flex w-full items-center justify-between">
         <ContextSectionTitle count={count}>{title}</ContextSectionTitle>
         <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
