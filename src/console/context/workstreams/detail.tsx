@@ -8,6 +8,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { ExpandableText } from "@/components/ui/expandable-text"
 import {
   Sheet,
   SheetContent,
@@ -185,47 +186,46 @@ type SightingRow = {
   url?: string
 }
 
-// The whole row links out to the cited artifact when the source has one.
+// The header row links out to the cited artifact when the source has one;
+// the description stays outside the link so it can expand in place.
 function Sighting({ sighting }: { sighting: SightingRow }) {
-  const content = (
+  const header = (
     <>
-      <div className="flex w-full min-w-0 items-center gap-2">
-        {sighting.integration === null ? null : (
-          <IntegrationLogo decorative integration={sighting.integration} />
-        )}
-        <span className="font-medium text-sm">
-          {sighting.integration === null
-            ? "Removed tool"
-            : integrationLabel(sighting.integration)}
-        </span>
-        <SeparatorDot className="shrink-0 text-muted-foreground/60" />
-        <span className="min-w-0 truncate text-muted-foreground text-xs">
-          {sighting.kind}
-        </span>
-        <span className="ml-auto shrink-0 text-muted-foreground text-xs">
-          {relativeTime(sighting.observedAt, Date.now())}
-        </span>
-      </div>
-      <p className="line-clamp-2 text-muted-foreground text-sm">
-        {sighting.why}
-      </p>
+      {sighting.integration === null ? null : (
+        <IntegrationLogo decorative integration={sighting.integration} />
+      )}
+      <span className="font-medium text-sm">
+        {sighting.integration === null
+          ? "Removed tool"
+          : integrationLabel(sighting.integration)}
+      </span>
+      <SeparatorDot className="shrink-0 text-muted-foreground/60" />
+      <span className="min-w-0 truncate text-muted-foreground text-xs">
+        {sighting.kind}
+      </span>
+      <span className="ml-auto shrink-0 text-muted-foreground text-xs">
+        {relativeTime(sighting.observedAt, Date.now())}
+      </span>
     </>
   )
 
-  if (sighting.url === undefined) {
-    return <li className="flex flex-col gap-0.5 p-3">{content}</li>
-  }
-
   return (
-    <li>
-      <a
-        href={sighting.url}
-        target="_blank"
-        rel="noreferrer"
-        className="flex flex-col gap-0.5 p-3 transition-colors hover:bg-muted/50"
-      >
-        {content}
-      </a>
+    <li className="flex flex-col gap-0.5 p-3">
+      {sighting.url === undefined ? (
+        <div className="flex min-w-0 items-center gap-2">{header}</div>
+      ) : (
+        <a
+          href={sighting.url}
+          target="_blank"
+          rel="noreferrer"
+          className="-mx-1.5 -my-1 flex min-w-0 items-center gap-2 rounded-sm px-1.5 py-1 transition-colors hover:bg-muted/50"
+        >
+          {header}
+        </a>
+      )}
+      <div className="text-muted-foreground text-sm">
+        <ExpandableText maxLines={2}>{sighting.why}</ExpandableText>
+      </div>
     </li>
   )
 }
