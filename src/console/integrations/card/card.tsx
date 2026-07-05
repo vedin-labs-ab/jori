@@ -1,5 +1,4 @@
 import { ArrowUpRight, ExternalLink, Loader2 } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { IntegrationPermissions } from "../../permissions"
@@ -58,7 +57,6 @@ export function IntegrationCard({
     title: config.label,
   })
   const isConnected = status?.status === "active"
-  const error = install.error ?? disconnect.error
 
   return (
     <IntegrationSurface
@@ -94,17 +92,12 @@ export function IntegrationCard({
       status={<IntegrationStatusLine headline={headline} status={status} />}
       title={config.label}
     >
-      {error === undefined && !isConnected ? undefined : (
-        <>
-          <IntegrationError error={error} />
-          {isConnected ? (
-            <IntegrationPermissions
-              controller={permissions}
-              surface={config.integration}
-            />
-          ) : null}
-        </>
-      )}
+      {isConnected ? (
+        <IntegrationPermissions
+          controller={permissions}
+          surface={config.integration}
+        />
+      ) : undefined}
     </IntegrationSurface>
   )
 }
@@ -174,17 +167,4 @@ function getStatusDotClassName(status: IntegrationStatus | undefined) {
   }
 
   return "bg-muted-foreground/40"
-}
-
-function IntegrationError({ error }: { error: string | undefined }) {
-  if (error === undefined) {
-    return null
-  }
-
-  return (
-    <Alert variant="destructive">
-      <AlertTitle>Integration error</AlertTitle>
-      <AlertDescription>{error}</AlertDescription>
-    </Alert>
-  )
 }

@@ -8,7 +8,7 @@ const linearConfig = {
   action: "Connect Linear",
   connectedDetail:
     "Milo responds to mentions, reads issue context, and comments on issues.",
-  connectError: "Could not start the Linear integration.",
+  connectError: "Couldn't start the Linear integration.",
   emptyDetail:
     "Connect Linear so Milo can respond to mentions and comment on issues.",
   installPath: "/linear/install",

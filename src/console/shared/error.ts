@@ -1,3 +1,9 @@
+import { toast } from "sonner"
+
+export function showErrorToast(error: unknown, fallback: string) {
+  toast.error(readErrorMessage(error, fallback))
+}
+
 export function readErrorMessage(error: unknown, fallback: string) {
   if (!(error instanceof Error)) {
     return fallback

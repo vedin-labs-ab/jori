@@ -7,7 +7,7 @@ export const Route = createFileRoute("/integrations/offers/$token")({
     const { token } = Route.useParams()
 
     return (
-      <ConsolePage chrome="none" chromeContent={null}>
+      <ConsolePage chrome="none">
         {() => <IntegrationOffer token={token} />}
       </ConsolePage>
     )

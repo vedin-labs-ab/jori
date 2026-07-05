@@ -1,5 +1,4 @@
 import { Loader2 } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,8 +12,6 @@ import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
 import { createAutomationDialogActions } from "../actions"
 import {
-  isAutomationInstructionsError,
-  isAutomationNameError,
   readAutomationInstructionsError,
   readAutomationNameError,
 } from "../errors"
@@ -58,11 +55,6 @@ export function AutomationDialog({
     values.instructions
   )
   const nameError = readAutomationNameError(error, values.name)
-  const shouldShowFormError =
-    error !== undefined &&
-    instructionsError === undefined &&
-    !isAutomationNameError(error) &&
-    !isAutomationInstructionsError(error)
 
   return (
     <Dialog
@@ -110,13 +102,6 @@ export function AutomationDialog({
             values={values}
           />
         </div>
-
-        {shouldShowFormError ? (
-          <Alert variant="destructive">
-            <AlertTitle>Could not save automation</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
 
         <DialogFooter>
           <Button type="button" onClick={onSave} disabled={isSaving}>

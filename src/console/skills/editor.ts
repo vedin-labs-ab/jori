@@ -1,7 +1,7 @@
 import { type ReactMutation, useMutation } from "convex/react"
 import { useState } from "react"
 import { api } from "../../../convex/_generated/api"
-import { readErrorMessage } from "../shared/error"
+import { showErrorToast } from "../shared/error"
 import { emptySkillForm, type Skill, type SkillFormValues } from "./types"
 
 export type SkillEditor = ReturnType<typeof useSkillEditor>
@@ -25,10 +25,8 @@ function useSkillForm(
   const [formSkill, setFormSkill] = useState<Skill>()
   const [formValues, setFormValues] = useState<SkillFormValues>(emptySkillForm)
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [formError, setFormError] = useState<string>()
 
   function openForm(skill: Skill | undefined) {
-    setFormError(undefined)
     setFormSkill(skill)
     setFormValues(skill ?? emptySkillForm)
     setIsFormOpen(true)
@@ -36,7 +34,6 @@ function useSkillForm(
 
   async function saveSkill() {
     setPendingSkillId(formSkill?._id ?? "new")
-    setFormError(undefined)
     try {
       await persistSkill({
         createSkill,
@@ -47,14 +44,13 @@ function useSkillForm(
       })
       setIsFormOpen(false)
     } catch (saveError) {
-      setFormError(readErrorMessage(saveError, "Could not save skill."))
+      showErrorToast(saveError, "Couldn't save the skill.")
     } finally {
       setPendingSkillId(undefined)
     }
   }
 
   return {
-    formError,
     formSkill,
     formValues,
     isFormOpen,
@@ -92,19 +88,17 @@ function useSkillDeletion(
   setPendingSkillId: (skillId: string | undefined) => void
 ) {
   const removeSkill = useMutation(api.skills.catalog.remove)
-  const [deleteError, setDeleteError] = useState<string>()
 
   async function deleteSkill(skill: Skill) {
     setPendingSkillId(skill._id)
-    setDeleteError(undefined)
     try {
       await removeSkill({ tenantId, skillId: skill._id })
     } catch (removeError) {
-      setDeleteError(readErrorMessage(removeError, "Could not delete skill."))
+      showErrorToast(removeError, "Couldn't delete the skill.")
     } finally {
       setPendingSkillId(undefined)
     }
   }
 
-  return { deleteError, deleteSkill }
+  return { deleteSkill }
 }

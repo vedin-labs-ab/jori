@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { readErrorMessage } from "../../shared/error"
+import { toast } from "sonner"
+import { showErrorToast } from "../../shared/error"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 const integrationReturnPath = "/integrations"
@@ -21,15 +22,13 @@ export function useIntegrationInstall({
   tenantId: string
 }) {
   const [isConnecting, setIsConnecting] = useState(false)
-  const [error, setError] = useState<string>()
 
   async function connect() {
     if (!convexSiteUrl) {
-      setError("Missing VITE_CONVEX_SITE_URL.")
+      toast.error("Missing VITE_CONVEX_SITE_URL.")
       return
     }
 
-    setError(undefined)
     setIsConnecting(true)
 
     try {
@@ -42,9 +41,9 @@ export function useIntegrationInstall({
       window.location.assign(installUrl.toString())
     } catch (installError) {
       setIsConnecting(false)
-      setError(readErrorMessage(installError, connectError))
+      showErrorToast(installError, connectError)
     }
   }
 
-  return { connect, error, isConnecting }
+  return { connect, isConnecting }
 }

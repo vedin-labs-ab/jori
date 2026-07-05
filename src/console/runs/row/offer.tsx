@@ -12,7 +12,7 @@ import {
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
-import { readErrorMessage } from "../../shared/error"
+import { showErrorToast } from "../../shared/error"
 import { IntegrationLogo } from "../../shared/logo/integration"
 import { absoluteTime, formatDuration } from "../../shared/time"
 import { useRunRequestCarousel } from "../request/carousel"
@@ -98,11 +98,9 @@ function OfferActions({
   const claim = useMutation(api.runs.console.offers.claim)
   const cancel = useMutation(api.runs.console.offers.cancel)
   const [pendingAction, setPendingAction] = useState<OfferAction>()
-  const [error, setError] = useState<string>()
 
   async function submit(action: OfferAction) {
     setPendingAction(action)
-    setError(undefined)
 
     try {
       if (action === "cancel") {
@@ -115,46 +113,41 @@ function OfferActions({
         await connectOffer(claim, offer, runId, tenantId)
       }
     } catch (caught) {
-      setError(readErrorMessage(caught, "Could not update integration offer."))
+      showErrorToast(caught, "Couldn't update the integration offer.")
     } finally {
       setPendingAction(undefined)
     }
   }
 
   return (
-    <div className="grid gap-2">
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button
-          disabled={pendingAction !== undefined}
-          onClick={() => void submit("cancel")}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          {pendingAction === "cancel" ? (
-            <Loader2 className="animate-spin" data-icon="inline-start" />
-          ) : (
-            <X data-icon="inline-start" />
-          )}
-          Cancel
-        </Button>
-        <Button
-          disabled={pendingAction !== undefined}
-          onClick={() => void submit("connect")}
-          size="sm"
-          type="button"
-        >
-          {pendingAction === "connect" ? (
-            <Loader2 className="animate-spin" data-icon="inline-start" />
-          ) : (
-            <ExternalLink data-icon="inline-start" />
-          )}
-          Connect
-        </Button>
-      </div>
-      {error !== undefined ? (
-        <p className="text-destructive text-xs">{error}</p>
-      ) : null}
+    <div className="flex flex-wrap justify-end gap-2">
+      <Button
+        disabled={pendingAction !== undefined}
+        onClick={() => void submit("cancel")}
+        size="sm"
+        type="button"
+        variant="outline"
+      >
+        {pendingAction === "cancel" ? (
+          <Loader2 className="animate-spin" data-icon="inline-start" />
+        ) : (
+          <X data-icon="inline-start" />
+        )}
+        Cancel
+      </Button>
+      <Button
+        disabled={pendingAction !== undefined}
+        onClick={() => void submit("connect")}
+        size="sm"
+        type="button"
+      >
+        {pendingAction === "connect" ? (
+          <Loader2 className="animate-spin" data-icon="inline-start" />
+        ) : (
+          <ExternalLink data-icon="inline-start" />
+        )}
+        Connect
+      </Button>
     </div>
   )
 }
@@ -187,7 +180,7 @@ async function connectOffer(
     tab.close()
     throw caught instanceof Error
       ? caught
-      : new Error("Could not open integration offer.")
+      : new Error("Couldn't open the integration offer.")
   }
 }
 
@@ -202,7 +195,7 @@ function openConnectTab() {
   const tab = window.open("about:blank", "_blank")
 
   if (tab === null) {
-    throw new Error("Could not open integration offer.")
+    throw new Error("Couldn't open the integration offer.")
   }
 
   tab.opener = null

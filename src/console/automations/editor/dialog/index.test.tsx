@@ -18,10 +18,9 @@ describe("automation dialog name validation", () => {
     expect(input.getAttribute("aria-invalid")).toBe("true")
     expect(input.getAttribute("aria-describedby")).toBe("automation-name-error")
     expect(screen.getByRole("alert").textContent).toBe("Name is required.")
-    expect(screen.queryByText("Could not save automation")).toBeNull()
   })
 
-  test("keeps unrelated save errors in the form alert", () => {
+  test("never renders non-field save errors inline", () => {
     renderAutomationDialog({
       error: "Could not reach the server.",
       values: { ...emptyAutomationForm, name: "Release summary" },
@@ -30,8 +29,7 @@ describe("automation dialog name validation", () => {
     expect(
       screen.getByLabelText("Name").getAttribute("aria-invalid")
     ).toBeNull()
-    expect(screen.getByText("Could not save automation")).toBeDefined()
-    expect(screen.getByText("Could not reach the server.")).toBeDefined()
+    expect(screen.queryByText("Could not reach the server.")).toBeNull()
   })
 
   test("hides stale name-required errors after a name is present", () => {
@@ -44,7 +42,6 @@ describe("automation dialog name validation", () => {
       screen.getByLabelText("Name").getAttribute("aria-invalid")
     ).toBeNull()
     expect(screen.queryByText("Name is required.")).toBeNull()
-    expect(screen.queryByText("Could not save automation")).toBeNull()
   })
 })
 
@@ -73,7 +70,6 @@ describe("automation dialog instructions validation", () => {
     expect(screen.getByRole("alert").textContent).toBe(
       "Instructions are required."
     )
-    expect(screen.queryByText("Could not save automation")).toBeNull()
   })
 
   test("hides stale required-instructions errors after instructions are present", async () => {
@@ -91,7 +87,6 @@ describe("automation dialog instructions validation", () => {
     expect(textbox.getAttribute("aria-invalid")).toBeNull()
     expect(textbox.getAttribute("aria-describedby")).toBeNull()
     expect(screen.queryByText("Instructions are required.")).toBeNull()
-    expect(screen.queryByText("Could not save automation")).toBeNull()
   })
 })
 

@@ -8,7 +8,7 @@ const emailConfig = {
   action: "Connect Outlook",
   connectedDetail:
     "Connected for you only. Milo can read, draft, and send your mail when you ask.",
-  connectError: "Could not start the Outlook integration.",
+  connectError: "Couldn't start the Outlook integration.",
   emptyDetail:
     "Connect your Outlook account. This connects only you, not the whole organization.",
   installPath: "/microsoft-email/install",
@@ -25,7 +25,7 @@ const calendarConfig = {
   action: "Connect Calendar",
   connectedDetail:
     "Connected for you only. Milo can read, create, and update your events when you ask.",
-  connectError: "Could not start the Microsoft Calendar integration.",
+  connectError: "Couldn't start the Microsoft Calendar integration.",
   emptyDetail:
     "Connect your Microsoft Calendar. This connects only you, not the whole organization.",
   installPath: "/microsoft-calendar/install",

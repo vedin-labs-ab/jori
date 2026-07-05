@@ -66,7 +66,7 @@ export function searchEventOptions({
       .catch(() => {
         if (!isCancelled) {
           setOptions([])
-          setMessage("Could not load options. Try again.")
+          setMessage("Couldn't load options. Try again.")
         }
       })
       .finally(() => {

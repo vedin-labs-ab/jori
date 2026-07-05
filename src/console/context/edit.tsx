@@ -4,7 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { parseWebsiteAddress } from "../../../contracts/website"
 import { api } from "../../../convex/_generated/api"
 import { type OrganizationDiscovery } from "./types"
-import { websiteDomainKey } from "./url"
+import { reportWebsiteStartError, websiteDomainKey } from "./url"
 import { DiscoveryWorkingStep, WebsiteDiscoveryStep } from "./website"
 
 type OrganizationEditDialogProps = {
@@ -51,7 +51,7 @@ export function OrganizationEditDialog({
       await discover({ tenantId, website: normalizedWebsite })
       setStep("working")
     } catch (caught) {
-      setError(discoveryStartError(caught))
+      reportWebsiteStartError(caught, setError)
       setPendingStartedAt(null)
     } finally {
       setSubmitting(false)
@@ -152,15 +152,4 @@ function visibleDiscovery(
   }
 
   return undefined
-}
-
-function discoveryStartError(caught: unknown) {
-  if (
-    caught instanceof Error &&
-    caught.message.includes("website must target a public website")
-  ) {
-    return "Enter a public website, like example.com."
-  }
-
-  return "Couldn't start extraction."
 }

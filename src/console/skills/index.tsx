@@ -1,5 +1,6 @@
 import { useQuery } from "convex/react"
 import { useCallback, useMemo, useState } from "react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
@@ -8,7 +9,6 @@ import { useClientPagination } from "../shared/list/pagination"
 import { SkillDialog } from "./dialog"
 import { type SkillEditor, useSkillEditor } from "./editor"
 import { filterSkills, filterSkillsByView } from "./helpers"
-import { SkillStatusAlerts } from "./list/alerts"
 import { SkillContent } from "./list/content"
 import { SkillsToolbar } from "./list/toolbar"
 import { type Skill, type SkillFilterView } from "./types"
@@ -123,25 +123,29 @@ function SkillListBody({
   visibleCount: number
   view: SkillFilterView
 }) {
+  if (skillList?.status === "unauthorized") {
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Skill access unavailable</AlertTitle>
+        <AlertDescription>{skillList.message}</AlertDescription>
+      </Alert>
+    )
+  }
+
   return (
     <>
-      <SkillStatusAlerts deleteError={editor.deleteError} result={skillList} />
-      {skillList?.status !== "unauthorized" ? (
-        <>
-          <SkillContent
-            filteredCount={visibleCount}
-            skills={pagination.visibleRows}
-            isLoading={skillList === undefined}
-            onDelete={editor.deleteSkill}
-            onEdit={editor.openEditForm}
-            onView={onViewSkillChange}
-            pendingSkillId={editor.pendingSkillId}
-            searchTerm={searchTerm}
-            view={view}
-          />
-          <ConsoleListPager pagination={pagination} />
-        </>
-      ) : null}
+      <SkillContent
+        filteredCount={visibleCount}
+        skills={pagination.visibleRows}
+        isLoading={skillList === undefined}
+        onDelete={editor.deleteSkill}
+        onEdit={editor.openEditForm}
+        onView={onViewSkillChange}
+        pendingSkillId={editor.pendingSkillId}
+        searchTerm={searchTerm}
+        view={view}
+      />
+      <ConsoleListPager pagination={pagination} />
     </>
   )
 }
@@ -181,7 +185,6 @@ function SkillDialogs({
   return (
     <>
       <SkillDialog
-        error={editor.formError}
         isOpen={editor.isFormOpen}
         isSaving={editor.pendingSkillId === (editor.formSkill?._id ?? "new")}
         onOpenChange={editor.setIsFormOpen}

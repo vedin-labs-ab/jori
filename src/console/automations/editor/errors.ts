@@ -46,3 +46,7 @@ export function isAutomationInstructionsError(error: string | undefined) {
     readAutomationInstructionMarkerError(error) !== undefined
   )
 }
+
+export function isAutomationFieldError(error: string | undefined) {
+  return isAutomationNameError(error) || isAutomationInstructionsError(error)
+}

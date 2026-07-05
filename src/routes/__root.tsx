@@ -7,6 +7,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { ConvexProviderWithClerk } from "convex/react-clerk"
 import { AlertTriangle, SearchX } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { FullscreenLoadingProvider } from "@/console/shared/loading"
 import { convex } from "@/shared/convex"
@@ -154,6 +155,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        {/* Mounted before the app so it subscribes before mount effects toast. */}
+        <Toaster />
         <ClerkProvider appearance={{ theme: shadcn }}>
           <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
             <FullscreenLoadingProvider>

@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { api } from "../../../../convex/_generated/api"
+import { showErrorToast } from "../../shared/error"
 import {
   type ContextFacts,
   type ContextProposal,
@@ -109,6 +110,8 @@ function ProposalDialog({
     try {
       await approve({ tenantId })
       onClose()
+    } catch (approveError) {
+      showErrorToast(approveError, "Couldn't approve the update.")
     } finally {
       setPendingAction(null)
     }
@@ -120,6 +123,8 @@ function ProposalDialog({
     try {
       await dismiss({ tenantId })
       onClose()
+    } catch (dismissError) {
+      showErrorToast(dismissError, "Couldn't discard the proposal.")
     } finally {
       setPendingAction(null)
     }

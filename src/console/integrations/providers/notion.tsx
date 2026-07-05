@@ -8,7 +8,7 @@ const notionConfig = {
   action: "Connect Notion",
   connectedDetail:
     "Milo can search shared content, read and update pages, and add comments.",
-  connectError: "Could not start the Notion integration.",
+  connectError: "Couldn't start the Notion integration.",
   emptyDetail:
     "Connect Notion so Milo can work with the pages and databases you share.",
   installPath: "/notion/install",

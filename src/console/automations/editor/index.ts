@@ -1,9 +1,11 @@
 import { type ReactMutation, useMutation } from "convex/react"
 import { useState } from "react"
+import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
-import { readErrorMessage } from "../../shared/error"
+import { readErrorMessage, showErrorToast } from "../../shared/error"
 import { type AutomationPolicyPermissions } from "../access/policy"
 import { type Automation, type AutomationFormValues } from "../types"
+import { isAutomationFieldError } from "./errors"
 import {
   automationFormValues,
   createAutomationArgs,
@@ -58,7 +60,13 @@ function useAutomationForm(
       })
       setIsFormOpen(false)
     } catch (error) {
-      setFormError(readErrorMessage(error, "Could not save automation."))
+      const message = readErrorMessage(error, "Couldn't save the automation.")
+
+      if (isAutomationFieldError(message)) {
+        setFormError(message)
+      } else {
+        toast.error(message)
+      }
     } finally {
       setIsSaving(false)
     }
@@ -118,21 +126,19 @@ async function persistAutomation({
 function useAutomationDeletion(tenantId: string) {
   const remove = useMutation(api.automations.console.remove)
   const [deletingAutomationId, setDeletingAutomationId] = useState<string>()
-  const [deleteError, setDeleteError] = useState<string>()
 
   async function deleteAutomation(automation: Automation) {
     setDeletingAutomationId(automation.id)
-    setDeleteError(undefined)
     try {
       await remove({ tenantId, automationId: automation.id })
     } catch (error) {
-      setDeleteError(readErrorMessage(error, "Could not delete automation."))
+      showErrorToast(error, "Couldn't delete the automation.")
     } finally {
       setDeletingAutomationId(undefined)
     }
   }
 
-  return { deleteError, deleteAutomation, deletingAutomationId }
+  return { deleteAutomation, deletingAutomationId }
 }
 
 function useAutomationControl(tenantId: string) {
@@ -140,12 +146,11 @@ function useAutomationControl(tenantId: string) {
   const resume = useMutation(api.automations.console.resume)
   const [controllingAutomationId, setControllingAutomationId] =
     useState<string>()
-  const [controlError, setControlError] = useState<string>()
 
   async function pauseAutomation(automation: Automation) {
     await controlAutomation({
       automation,
-      fallback: "Could not pause automation.",
+      fallback: "Couldn't pause the automation.",
       mutation: pause,
     })
   }
@@ -153,7 +158,7 @@ function useAutomationControl(tenantId: string) {
   async function resumeAutomation(automation: Automation) {
     await controlAutomation({
       automation,
-      fallback: "Could not resume automation.",
+      fallback: "Couldn't resume the automation.",
       mutation: resume,
     })
   }
@@ -171,18 +176,16 @@ function useAutomationControl(tenantId: string) {
     }) => Promise<unknown>
   }) {
     setControllingAutomationId(automation.id)
-    setControlError(undefined)
     try {
       await mutation({ tenantId, automationId: automation.id })
     } catch (error) {
-      setControlError(readErrorMessage(error, fallback))
+      showErrorToast(error, fallback)
     } finally {
       setControllingAutomationId(undefined)
     }
   }
 
   return {
-    controlError,
     controllingAutomationId,
     pauseAutomation,
     resumeAutomation,

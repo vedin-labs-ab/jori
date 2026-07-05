@@ -105,10 +105,6 @@ function PermissionContent({
 
   return (
     <div className="grid gap-6">
-      <SurfacePermissionError
-        error={controller.error}
-        permissions={permissions}
-      />
       <PermissionGroup
         access="read"
         onUpdate={controller.updatePermission}
@@ -207,27 +203,5 @@ function PermissionGroup({
         ))}
       </div>
     </div>
-  )
-}
-
-function SurfacePermissionError({
-  error,
-  permissions,
-}: {
-  error: ToolPermissionController["error"]
-  permissions: ToolPermission[]
-}) {
-  if (
-    error === undefined ||
-    !permissions.some((permission) => permission.tool === error.tool)
-  ) {
-    return null
-  }
-
-  return (
-    <Alert variant="destructive">
-      <AlertTitle>Permission update failed</AlertTitle>
-      <AlertDescription>{error.message}</AlertDescription>
-    </Alert>
   )
 }

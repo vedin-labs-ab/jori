@@ -2,6 +2,7 @@ import { useAction, useQuery } from "convex/react"
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { api } from "../../../convex/_generated/api"
+import { reportWebsiteStartError } from "../context/url"
 import { WebsiteStep, WelcomeStep, WorkingStep } from "./steps"
 
 type Step = "welcome" | "website" | "working"
@@ -36,7 +37,7 @@ export function OnboardingModal({
       await complete({ tenantId, website: website.trim() })
       setStep("working")
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Couldn't start.")
+      reportWebsiteStartError(caught, setError)
     } finally {
       setIsSubmitting(false)
     }

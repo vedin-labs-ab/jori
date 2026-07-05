@@ -4,6 +4,7 @@ import { AlertCircle, Check, Clock3, Loader2, UserPen, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
+import { showErrorToast } from "../../shared/error"
 import { ProviderLogo } from "../../shared/logo/provider"
 import { absoluteTime, formatDuration } from "../../shared/time"
 import { useRunRequestCarousel } from "../request/carousel"
@@ -66,11 +67,9 @@ function ApprovalActions({
   const decide = useAction(api.approvals.console.decide)
   const [pendingDecision, setPendingDecision] =
     useState<ApprovalDecisionArgs["decision"]>()
-  const [error, setError] = useState<string>()
 
   const submit = async (decision: ApprovalDecisionArgs["decision"]) => {
     setPendingDecision(decision)
-    setError(undefined)
 
     try {
       await decide({
@@ -79,49 +78,42 @@ function ApprovalActions({
         tenantId,
       })
     } catch (caught) {
-      setError(
-        caught instanceof Error ? caught.message : "Could not update approval."
-      )
+      showErrorToast(caught, "Couldn't update the approval.")
     } finally {
       setPendingDecision(undefined)
     }
   }
 
   return (
-    <div className="grid gap-2">
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button
-          disabled={pendingDecision !== undefined}
-          onClick={() => void submit("denied")}
-          size="sm"
-          type="button"
-          variant="outline"
-          className="text-destructive hover:text-destructive"
-        >
-          {pendingDecision === "denied" ? (
-            <Loader2 className="animate-spin" data-icon="inline-start" />
-          ) : (
-            <X data-icon="inline-start" />
-          )}
-          Deny
-        </Button>
-        <Button
-          disabled={pendingDecision !== undefined}
-          onClick={() => void submit("approved")}
-          size="sm"
-          type="button"
-        >
-          {pendingDecision === "approved" ? (
-            <Loader2 className="animate-spin" data-icon="inline-start" />
-          ) : (
-            <Check data-icon="inline-start" />
-          )}
-          Approve
-        </Button>
-      </div>
-      {error !== undefined ? (
-        <p className="text-destructive text-xs">{error}</p>
-      ) : null}
+    <div className="flex flex-wrap justify-end gap-2">
+      <Button
+        disabled={pendingDecision !== undefined}
+        onClick={() => void submit("denied")}
+        size="sm"
+        type="button"
+        variant="outline"
+        className="text-destructive hover:text-destructive"
+      >
+        {pendingDecision === "denied" ? (
+          <Loader2 className="animate-spin" data-icon="inline-start" />
+        ) : (
+          <X data-icon="inline-start" />
+        )}
+        Deny
+      </Button>
+      <Button
+        disabled={pendingDecision !== undefined}
+        onClick={() => void submit("approved")}
+        size="sm"
+        type="button"
+      >
+        {pendingDecision === "approved" ? (
+          <Loader2 className="animate-spin" data-icon="inline-start" />
+        ) : (
+          <Check data-icon="inline-start" />
+        )}
+        Approve
+      </Button>
     </div>
   )
 }
