@@ -23,6 +23,7 @@ const tableRegistry: Record<TableName, true> = {
   runs: true,
   conversations: true,
   beliefs: true,
+  efforts: true,
   evidence: true,
   journal: true,
   passes: true,

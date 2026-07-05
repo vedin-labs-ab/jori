@@ -1,21 +1,32 @@
-import { minSupportDaySpan, minSupportSources } from "./limits"
-import { type Citation, type JudgeOp } from "./review/ops"
-import { type BeliefStatus } from "./schema"
+import { type Infer, v } from "convex/values"
+import { minSupportDaySpan, minSupportSources } from "../limits"
+import { type BeliefStatus } from "../schema"
 
-// Deterministic guardrails around the judge: the judge proposes, these rules
+// Deterministic guardrails around the judges: a judge proposes, these rules
 // dispose. Everything here is pure so every branch stays unit-tested.
 
-export type SourceRecord = { observedAt: number; integrationId: string }
+// A citation names exactly one source from the pass's own input. Which kinds
+// are citable depends on the stage: effort passes cite events and
+// conversations, belief passes cite efforts.
+export const citation = v.union(
+  v.object({ event: v.string(), why: v.optional(v.string()) }),
+  v.object({ conversation: v.string(), why: v.optional(v.string()) }),
+  v.object({ effort: v.string(), why: v.optional(v.string()) })
+)
+export type Citation = Infer<typeof citation>
+
+export type SourceRecord = { observedAt: number; integrationId?: string }
 
 export type AllowedSources = {
   events: Map<string, SourceRecord>
   conversations: Map<string, SourceRecord>
+  efforts: Map<string, SourceRecord>
 }
 
 export type Sighting = {
   citation: Citation
   observedAt: number
-  integrationId: string
+  integrationId?: string
 }
 
 // Every citation must reference the pass's own input; one unknown id
@@ -27,10 +38,7 @@ export function resolveCitations(
   const sightings: Sighting[] = []
 
   for (const citation of citations) {
-    const record =
-      "event" in citation
-        ? allowed.events.get(citation.event)
-        : allowed.conversations.get(citation.conversation)
+    const record = allowedRecord(citation, allowed)
 
     if (record === undefined) {
       return null
@@ -42,10 +50,16 @@ export function resolveCitations(
   return sightings
 }
 
-// Assertions about work need support; status and merge may ride on evidence
-// already accumulated.
-export function requiresCitations(op: JudgeOp) {
-  return op.op === "create" || op.op === "update" || op.op === "journal"
+function allowedRecord(citation: Citation, allowed: AllowedSources) {
+  if ("event" in citation) {
+    return allowed.events.get(citation.event)
+  }
+
+  if ("conversation" in citation) {
+    return allowed.conversations.get(citation.conversation)
+  }
+
+  return allowed.efforts.get(citation.effort)
 }
 
 const statusTransitions: Record<string, BeliefStatus[]> = {
@@ -72,10 +86,12 @@ export function statusAfterTransition(
   return to === "close" ? "closed" : "rejected"
 }
 
+export type SupportRecord = { observedAt: number; integrationId: string }
+
 // Promotion needs support from at least minSupportSources integrations, or
 // sightings spanning minSupportDaySpan. The judge's intent alone never
 // confirms a belief.
-export function hasConfirmSupport(support: SourceRecord[]) {
+export function hasConfirmSupport(support: SupportRecord[]) {
   const integrations = new Set(support.map((record) => record.integrationId))
 
   if (integrations.size >= minSupportSources) {
@@ -93,16 +109,24 @@ export function hasConfirmSupport(support: SourceRecord[]) {
 
 // Creates resolve first so later ops can reference their temp ids; order is
 // otherwise preserved.
-export function sortOps(ops: JudgeOp[]) {
+export function sortOps<Op extends { op: string }>(ops: Op[]) {
   return [
     ...ops.filter((op) => op.op === "create"),
     ...ops.filter((op) => op.op !== "create"),
   ]
 }
 
-export function maxObservedAt(sightings: Sighting[]) {
+export function maxObservedAt(sightings: { observedAt: number }[]) {
   return sightings.reduce(
     (latest, sighting) => Math.max(latest, sighting.observedAt),
     0
   )
+}
+
+export function mergeTokens(
+  current: string[],
+  added: Iterable<string>,
+  cap: number
+) {
+  return [...new Set([...current, ...added])].sort().slice(0, cap)
 }

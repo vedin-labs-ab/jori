@@ -1,12 +1,11 @@
 import { describe, expect, test } from "vitest"
-import { minSupportDaySpan } from "./limits"
-import { type JudgeOp } from "./review/ops"
+import { minSupportDaySpan } from "../limits"
 import {
   type AllowedSources,
   hasConfirmSupport,
   legalStatusTransition,
   maxObservedAt,
-  requiresCitations,
+  mergeTokens,
   resolveCitations,
   sortOps,
   statusAfterTransition,
@@ -17,23 +16,24 @@ const allowed: AllowedSources = {
   conversations: new Map([
     ["c1", { observedAt: 200, integrationId: "linear" }],
   ]),
+  efforts: new Map([["f1", { observedAt: 300 }]]),
 }
 
 describe("citation resolution", () => {
   test("resolves citations against the pass input set", () => {
     expect(
-      resolveCitations([{ event: "e1" }, { conversation: "c1" }], allowed)
+      resolveCitations(
+        [{ event: "e1" }, { conversation: "c1" }, { effort: "f1" }],
+        allowed
+      )
     ).toEqual([
-      {
-        citation: { event: "e1" },
-        observedAt: 100,
-        integrationId: "slack",
-      },
+      { citation: { event: "e1" }, observedAt: 100, integrationId: "slack" },
       {
         citation: { conversation: "c1" },
         observedAt: 200,
         integrationId: "linear",
       },
+      { citation: { effort: "f1" }, observedAt: 300, integrationId: undefined },
     ])
   })
 
@@ -42,20 +42,11 @@ describe("citation resolution", () => {
       resolveCitations([{ event: "e1" }, { event: "hallucinated" }], allowed)
     ).toBeNull()
     expect(resolveCitations([{ conversation: "e1" }], allowed)).toBeNull()
+    expect(resolveCitations([{ effort: "e1" }], allowed)).toBeNull()
   })
 
   test("empty citations resolve to an empty list", () => {
     expect(resolveCitations([], allowed)).toEqual([])
-  })
-})
-
-describe("citation requirements", () => {
-  test("assertions need citations; status and merge may not", () => {
-    expect(requiresCitations(op("create"))).toBe(true)
-    expect(requiresCitations(op("update"))).toBe(true)
-    expect(requiresCitations(op("journal"))).toBe(true)
-    expect(requiresCitations(op("status"))).toBe(false)
-    expect(requiresCitations(op("merge"))).toBe(false)
   })
 })
 
@@ -116,11 +107,11 @@ describe("confirmation support", () => {
 describe("op ordering", () => {
   test("creates resolve first, order otherwise preserved", () => {
     const ops = [
-      op("journal"),
-      op("create"),
-      op("merge"),
-      op("create"),
-      op("status"),
+      { op: "journal" },
+      { op: "create" },
+      { op: "merge" },
+      { op: "create" },
+      { op: "status" },
     ]
 
     expect(sortOps(ops).map((entry) => entry.op)).toEqual([
@@ -133,37 +124,14 @@ describe("op ordering", () => {
   })
 })
 
-describe("sighting timestamps", () => {
+describe("sighting timestamps and rollups", () => {
   test("maxObservedAt over sightings", () => {
-    expect(
-      maxObservedAt([
-        { citation: { event: "e1" }, observedAt: 5, integrationId: "s" },
-        { citation: { event: "e2" }, observedAt: 9, integrationId: "s" },
-      ])
-    ).toBe(9)
+    expect(maxObservedAt([{ observedAt: 5 }, { observedAt: 9 }])).toBe(9)
     expect(maxObservedAt([])).toBe(0)
   })
-})
 
-function op(kind: JudgeOp["op"]): JudgeOp {
-  switch (kind) {
-    case "create":
-      return {
-        op: "create",
-        tempId: "t",
-        name: "n",
-        aliases: [],
-        brief: "b",
-        entry: "e",
-        citations: [],
-      }
-    case "update":
-      return { op: "update", beliefId: "b1", citations: [] }
-    case "status":
-      return { op: "status", beliefId: "b1", to: "confirm", citations: [] }
-    case "merge":
-      return { op: "merge", beliefId: "b1", into: "b2", citations: [] }
-    case "journal":
-      return { op: "journal", beliefId: "b1", entry: "e", citations: [] }
-  }
-}
+  test("mergeTokens unions, sorts, and caps", () => {
+    expect(mergeTokens(["b", "a"], ["c", "a"], 8)).toEqual(["a", "b", "c"])
+    expect(mergeTokens(["b", "a"], ["c"], 2)).toEqual(["a", "b"])
+  })
+})

@@ -1,13 +1,13 @@
 import { describe, expect, test } from "vitest"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc } from "../../_generated/dataModel"
 import {
   isReadableConversation,
-  journalLine,
   readWindowConversation,
   readWindowEvent,
+  toAllowed,
 } from "./input"
 
-describe("deduction input", () => {
+describe("effort input", () => {
   test("maps events with actor names and observedAt fallback", () => {
     const event = eventDoc({
       text: "PR merged: routing cutover",
@@ -53,11 +53,32 @@ describe("deduction input", () => {
       summarizedAt: 5_000,
     })
   })
+})
 
-  test("renders journal lines with ISO dates", () => {
+describe("effort allowed set", () => {
+  test("serializes the allowed set for the applier", () => {
+    const event = readWindowEvent(eventDoc({}))
+    const conversation = readWindowConversation(conversationDoc({}))
+
     expect(
-      journalLine({ createdAt: Date.UTC(2026, 5, 23), entry: "Shipped it." })
-    ).toBe("2026-06-23: Shipped it.")
+      toAllowed({
+        window: { start: 0, end: 1 },
+        efforts: [],
+        events: [event],
+        conversations: [conversation],
+      })
+    ).toEqual({
+      events: [
+        { id: event.id, observedAt: 1_000, integrationId: "integration-1" },
+      ],
+      conversations: [
+        {
+          id: conversation.id,
+          observedAt: 5_000,
+          integrationId: "integration-1",
+        },
+      ],
+    })
   })
 })
 
