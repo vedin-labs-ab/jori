@@ -21,6 +21,6 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["./**/*"],
+  "include": ["./**/*", "../contracts/**/*.d.ts"],
   "exclude": ["./_generated"]
 }

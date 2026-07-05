@@ -77,7 +77,7 @@ describe("runtime prompts", () => {
     )
   })
 
-  test("renders Slack trigger text with actor metadata and readable Milo mention", () => {
+  test("renders Slack trigger text with actor metadata", () => {
     const input = runtimeInput("slack", {
       channel: { id: "C123" },
       ts: "123.456",
@@ -87,7 +87,8 @@ describe("runtime prompts", () => {
       throw new Error("Expected message input.")
     }
 
-    input.message.text = "<@UBOT> what tools do u have?"
+    // Message text is humanized at the provider edge before it is stored.
+    input.message.text = "@Milo what tools do u have?"
 
     const prompt = assemblePrompt(input).context
 
@@ -95,7 +96,6 @@ describe("runtime prompts", () => {
       "- 1970-01-01T00:00:01.000Z | person | Albin Vedin | identifiers=[internal:message:message, slack:channel:C123, slack:message:123.456, slack:thread:123.456] | actor_ids=[slack:user:UACTOR]"
     )
     expect(prompt).toContain("@Milo what tools do u have?")
-    expect(prompt).not.toContain("<@UBOT> what tools do u have?")
   })
 
   test("keeps Slack thread routing in message identifiers, not a target block", () => {

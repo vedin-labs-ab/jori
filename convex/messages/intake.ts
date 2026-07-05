@@ -109,16 +109,14 @@ function observedMessage(
   }
 }
 
+// Slack mention detection happens at the provider edge, where the raw
+// payload still carries mention tokens; recorded text is human-readable.
 function normalizeMentioned(
   message: ObservedMessage,
   integration: Doc<"integrations">
 ) {
   if (message.mentioned === true) {
     return true
-  }
-
-  if (integration.integration === "slack") {
-    return slackMentionsMilo(message.text, integration)
   }
 
   if (
@@ -129,15 +127,6 @@ function normalizeMentioned(
   }
 
   return false
-}
-
-function slackMentionsMilo(
-  text: string | undefined,
-  integration: Doc<"integrations">
-) {
-  const botUserId = getSlackBotUserId(integration.data)
-
-  return botUserId !== undefined && (text ?? "").includes(`<@${botUserId}>`)
 }
 
 function mentionsMilo(text: string | undefined) {

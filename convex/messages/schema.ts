@@ -14,6 +14,8 @@ export const messages = defineTable({
   personId: v.optional(v.id("persons")),
   conversationId: v.string(),
   targetKey: v.optional(v.string()),
+  // Human-readable text: provider edges resolve mention/link tokens and
+  // emoji shortcodes before intake, so consumers never parse surface syntax.
   text: v.optional(v.string()),
   data: v.optional(v.any()),
   observedAt: v.optional(v.number()),

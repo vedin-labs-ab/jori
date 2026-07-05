@@ -1,5 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
-import { getSlackBotUserId, getSlackChannelType } from "../providers/slack/data"
+import { getSlackChannelType } from "../providers/slack/data"
 import { type AudienceScope } from "../shared/audience"
 import { isUserScopedIntegration } from "../shared/integrations"
 
@@ -18,19 +18,6 @@ export type MessageAudience = {
   isAddressed: boolean
   isDirect: boolean
   isMentioned: boolean
-}
-
-export function messageText(
-  message: Doc<"messages">,
-  integration: Doc<"integrations">
-) {
-  const text = message.text ?? ""
-
-  if (message.integration === "slack") {
-    return slackMessageText(text, integration)
-  }
-
-  return text
 }
 
 export function messageAudience(
@@ -103,20 +90,4 @@ function slackConversationScope(message: Doc<"messages">): AudienceScope {
   }
 
   return channelType === "im" ? "person" : "conversation"
-}
-
-function slackMessageText(text: string, integration: Doc<"integrations">) {
-  const botUserId = getSlackBotUserId(integration.data)
-
-  return botUserId === undefined
-    ? text
-    : text.replace(slackUserMentionPattern(botUserId), "@Milo")
-}
-
-function slackUserMentionPattern(userId: string) {
-  return new RegExp(`<@${escapeRegExp(userId)}(?:\\|[^>]+)?>`, "g")
-}
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }

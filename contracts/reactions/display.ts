@@ -1,14 +1,4 @@
-import { get as emojiForName, has as hasEmoji } from "node-emoji"
-
-const reactionAliases: Record<string, string> = {
-  "+1": "👍",
-  "-1": "👎",
-  hooray: "🎉",
-  laugh: "😄",
-  thumbs_up: "👍",
-  thumbsdown: "👎",
-  thumbsup: "👍",
-}
+import { emojiForName, isEmojiText } from "../emoji"
 
 export function reactionDisplayLabel(value: string | undefined) {
   if (value === undefined) {
@@ -21,12 +11,13 @@ export function reactionDisplayLabel(value: string | undefined) {
     return undefined
   }
 
-  const name = raw.replace(/^:+|:+$/g, "").toLowerCase()
-  const alias = reactionAliases[name]
+  const emoji = emojiForName(raw)
 
-  if (alias !== undefined) {
-    return alias
+  if (emoji !== undefined) {
+    return emoji
   }
 
-  return emojiForName(name) ?? (hasEmoji(raw) ? raw : `:${name}:`)
+  const name = raw.replace(/^:+|:+$/g, "").toLowerCase()
+
+  return isEmojiText(raw) ? raw : `:${name}:`
 }

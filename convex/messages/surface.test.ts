@@ -6,36 +6,7 @@ import {
   messageMatchesReplyTargetIdentifier,
   messageReplyTargetIdentifier,
 } from "./identifiers"
-import {
-  conversationScope,
-  messageAudience,
-  messageText,
-  replyAddress,
-} from "./surface"
-
-describe("message surface text", () => {
-  test("replaces Milo's Slack mention with a readable name", () => {
-    expect(
-      messageText(
-        message({
-          text: "<@U0B96KZ7WJG> hello <@UOTHER>",
-        }),
-        integration({ data: { botUserId: "U0B96KZ7WJG" } })
-      )
-    ).toBe("@Milo hello <@UOTHER>")
-  })
-
-  test("handles Slack mention labels", () => {
-    expect(
-      messageText(
-        message({
-          text: "<@U0B96KZ7WJG|milo> hello",
-        }),
-        integration({ data: { botUserId: "U0B96KZ7WJG" } })
-      )
-    ).toBe("@Milo hello")
-  })
-})
+import { conversationScope, messageAudience, replyAddress } from "./surface"
 
 describe("Slack message identifiers", () => {
   test("exposes Slack actor and message identifiers when available", () => {

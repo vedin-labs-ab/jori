@@ -1,3 +1,4 @@
+import { withUnicodeEmoji } from "../../../contracts/emoji"
 import {
   type GitHubComment,
   type GitHubPullRequest,
@@ -69,7 +70,7 @@ function getIssueCommentMessage(
     actorKind: getSenderKind(payload),
     actorName: payload.sender?.login,
     conversationId: `${repository.fullName}#${issue.number}`,
-    text: comment.body,
+    text: humanReadableCommentText(comment.body),
     observedAt: getObservedAt(comment.updated_at ?? comment.created_at),
     data: {
       action: payload.action,
@@ -132,7 +133,7 @@ function getPullRequestReviewCommentMessage(
     actorKind: getSenderKind(payload),
     actorName: payload.sender?.login,
     conversationId: `${repository.fullName}#${pullRequest.number}`,
-    text: comment.body,
+    text: humanReadableCommentText(comment.body),
     observedAt: getObservedAt(comment.updated_at ?? comment.created_at),
     data: {
       action: payload.action,
@@ -233,4 +234,9 @@ function getObservedAt(timestamp: string | undefined) {
   const value = Date.parse(timestamp)
 
   return Number.isFinite(value) ? value : undefined
+}
+
+// GitHub mentions are already readable logins; only shortcodes need work.
+function humanReadableCommentText(body: string | undefined) {
+  return body === undefined ? undefined : withUnicodeEmoji(body)
 }

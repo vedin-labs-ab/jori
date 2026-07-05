@@ -1,4 +1,3 @@
-import { reactionDisplayLabel } from "@contracts/reactions"
 import {
   forwardRef,
   type RefObject,
@@ -115,12 +114,7 @@ function reactionMetadata(title: string, items: ToolMetadataItems) {
     return items
   }
 
-  const targets = items
-    .filter((item) => item.kind === "target")
-    .map((item) => ({
-      ...item,
-      text: reactionDisplayLabel(item.text) ?? item.text,
-    }))
+  const targets = items.filter((item) => item.kind === "target")
 
   return targets.length > 0
     ? targets

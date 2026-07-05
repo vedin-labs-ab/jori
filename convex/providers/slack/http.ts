@@ -1,12 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { isPersonApprovalDecisionText } from "../../approvals/runtime"
-import {
-  handleSlackApprovalDecision,
-  handleSlackApprovalInteraction,
-} from "../../approvals/slack"
+import { handleSlackApprovalInteraction } from "../../approvals/slack"
 import { handleSlackIntegrationOfferInteraction } from "../../integrations/offers/interaction"
-import { createIntegrationActor } from "../../shared/actor"
 import {
   oauthAuthorizeRedirect,
   readOAuthCallback,
@@ -20,9 +15,8 @@ import {
   slackOAuthAuthorizeUrl,
   slackOAuthCallbackPath,
 } from "./config"
-import { enrichSlackMessageData } from "./directory/channels"
-import { getSlackActorProfile } from "./directory/users"
-import { getSlackMessage, type SlackEventPayload } from "./events"
+import { getSlackMessage, type SlackEventPayload } from "./ingress/events"
+import { handleSlackMessageEvent } from "./ingress/messages"
 import { exchangeSlackAuthorizationCode, requireSlackClientId } from "./oauth"
 import { parseSignedSlackState, verifySlackRequest } from "./signing"
 
@@ -133,69 +127,6 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
 
   return Response.json({ ok: true })
 }
-
-async function handleSlackMessageEvent(ctx: ActionCtx, message: SlackMessage) {
-  if (
-    isPersonApprovalDecisionText({
-      actorKind: message.actorKind,
-      text: message.text,
-    })
-  ) {
-    const actorProfile = await getSlackActorProfile(ctx, {
-      accountId: message.accountId,
-      actorId: message.actorId,
-    })
-
-    if (
-      await handleSlackApprovalDecision(ctx, {
-        accountId: message.accountId,
-        actorId: message.actorId,
-        actorEmail: actorProfile?.email,
-        actorName: actorProfile?.name,
-        text: message.text,
-        data: message.data,
-      })
-    ) {
-      return Response.json({ ok: true })
-    }
-  }
-
-  const [actorProfile, data] = await Promise.all([
-    message.actorKind === "person"
-      ? getSlackActorProfile(ctx, {
-          accountId: message.accountId,
-          actorId: message.actorId,
-        })
-      : undefined,
-    enrichSlackMessageData(ctx, {
-      accountId: message.accountId,
-      data: message.data,
-    }),
-  ])
-
-  await ctx.runMutation(internal.messages.intake.record, {
-    accountId: message.accountId,
-    integration: "slack",
-    type: message.type,
-    externalId: message.externalId,
-    mentioned: message.mentioned,
-    actor: createIntegrationActor({
-      externalId: message.actorId,
-      aliases: message.actorAliases,
-      kind: message.actorKind,
-      email: actorProfile?.email,
-      name: actorProfile?.name,
-    }),
-    conversationId: message.conversationId,
-    text: message.text,
-    observedAt: message.observedAt,
-    data,
-  })
-
-  return Response.json({ ok: true })
-}
-
-type SlackMessage = NonNullable<ReturnType<typeof getSlackMessage>>
 
 export async function handleSlackInteractions(
   ctx: ActionCtx,

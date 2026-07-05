@@ -56,7 +56,7 @@ export async function drainSession(
     contexts: emission === null ? [] : emission.contexts,
     hasMore: batch.hasMore || reactions.hasMore,
     interactions: reactions.reactions.map(formatRuntimeReaction),
-    messages: await formatRuntimeMessages(ctx, batch.messages, session),
+    messages: await formatRuntimeMessages(ctx, batch.messages),
   }
 }
 
@@ -79,35 +79,13 @@ async function patchSession(
 
 async function formatRuntimeMessages(
   ctx: QueryLikeCtx,
-  messages: Doc<"messages">[],
-  session: Doc<"sessions">
+  messages: Doc<"messages">[]
 ) {
-  const result: ReturnType<typeof formatRuntimeMessage>[] = []
-  const integration = await getSessionIntegration(ctx, session)
   const reactions = await reactionSummariesForMessages(ctx, messages)
 
-  for (const message of messages) {
-    result.push(
-      formatRuntimeMessage(message, integration, reactions.get(message._id))
-    )
-  }
-
-  return result
-}
-
-async function getSessionIntegration(
-  ctx: QueryLikeCtx,
-  session: Doc<"sessions">
-) {
-  if (session.conversationId === undefined) {
-    return null
-  }
-
-  const conversation = await ctx.db.get(session.conversationId)
-
-  return conversation === null
-    ? null
-    : await ctx.db.get(conversation.integrationId)
+  return messages.map((message) =>
+    formatRuntimeMessage(message, reactions.get(message._id))
+  )
 }
 
 function nextSessionCursor(
