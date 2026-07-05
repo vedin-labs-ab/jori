@@ -22,6 +22,13 @@ Websites:
 
 Active workstreams, deduced from recent activity across connected tools:
 {%- for workstream in organization.workstreams %}
-- {{workstream.name}}: {{workstream.brief}}
+- {{workstream.name}} ({{workstream.timeline}}): {{workstream.brief}}
+{%- endfor %}
+{%- endif %}
+{%- if organization.quiet %}
+
+Quiet workstreams, still open but without recent activity:
+{%- for workstream in organization.quiet %}
+- {{workstream.name}} ({{workstream.timeline}})
 {%- endfor %}
 {%- endif %}
