@@ -1,8 +1,8 @@
-import { ChevronDown, Clock } from "lucide-react"
-import { type ReactNode, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Clock } from "lucide-react"
+import { type ReactNode } from "react"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import { cn } from "@/lib/utils"
+import { Paged } from "./paging"
 import { absoluteTime, relativeTime } from "./time"
 
 export type TimelineEntry = {
@@ -26,49 +26,22 @@ export function Timeline({
   step?: number
   maxLines?: number
 }) {
-  const [visibleCount, setVisibleCount] = useState(initialCount)
-  const visible = entries.slice(0, visibleCount)
-  const hiddenCount = entries.length - visible.length
-
   return (
-    <div className="flex flex-col gap-1">
-      <ol className="flex flex-col">
-        {visible.map((entry, index) => (
-          <TimelineRow
-            key={entry.id}
-            continues={index < visible.length - 1 || hiddenCount > 0}
-            entry={entry}
-            maxLines={maxLines}
-            now={now}
-          />
-        ))}
-      </ol>
-      {entries.length > initialCount ? (
-        <Button
-          className="-ml-2 w-fit"
-          onClick={() =>
-            setVisibleCount(
-              hiddenCount > 0
-                ? Math.min(visibleCount + step, entries.length)
-                : initialCount
-            )
-          }
-          size="sm"
-          type="button"
-          variant="link"
-        >
-          {hiddenCount > 0
-            ? `Show ${Math.min(step, hiddenCount)} more`
-            : "Show less"}
-          <ChevronDown
-            className={cn(
-              "transition-transform",
-              hiddenCount === 0 && "rotate-180"
-            )}
-          />
-        </Button>
-      ) : null}
-    </div>
+    <Paged initialCount={initialCount} items={entries} step={step}>
+      {(visible, hiddenCount) => (
+        <ol className="flex flex-col">
+          {visible.map((entry, index) => (
+            <TimelineRow
+              key={entry.id}
+              continues={index < visible.length - 1 || hiddenCount > 0}
+              entry={entry}
+              maxLines={maxLines}
+              now={now}
+            />
+          ))}
+        </ol>
+      )}
+    </Paged>
   )
 }
 
