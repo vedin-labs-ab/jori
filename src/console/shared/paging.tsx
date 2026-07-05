@@ -51,3 +51,45 @@ export function Paged<Item>({
     </div>
   )
 }
+
+// The server-paginated sibling of Paged: the list grows through a Convex
+// paginated query, so the control only ever loads more. `total` keeps the
+// "Show N more" label honest between pages.
+export function PagedRemote({
+  loaded,
+  total,
+  canLoadMore,
+  isLoading,
+  step = 5,
+  onLoadMore,
+  children,
+}: {
+  loaded: number
+  total: number
+  canLoadMore: boolean
+  isLoading: boolean
+  step?: number
+  onLoadMore: (count: number) => void
+  children: ReactNode
+}) {
+  const hiddenCount = Math.max(total - loaded, canLoadMore ? 1 : 0)
+
+  return (
+    <div className="flex flex-col gap-1">
+      {children}
+      {canLoadMore || isLoading ? (
+        <Button
+          className="-ml-2 w-fit"
+          disabled={isLoading}
+          onClick={() => onLoadMore(step)}
+          size="sm"
+          type="button"
+          variant="link"
+        >
+          {`Show ${Math.min(step, hiddenCount)} more`}
+          <ChevronDown />
+        </Button>
+      ) : null}
+    </div>
+  )
+}

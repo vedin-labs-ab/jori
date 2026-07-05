@@ -2,7 +2,7 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { resolveBelief, resolveEffort } from "../engine/resolve"
 import { type AllowedSources, type Sighting } from "../engine/rules"
-import { absorbIntoBelief, writeEvidence } from "../engine/sightings"
+import { moveEffort, writeEvidence } from "../engine/sightings"
 import { type statCounts } from "../engine/wire"
 import { type WorkstreamOp } from "./ops"
 
@@ -13,29 +13,10 @@ export type WorkstreamApplyState = {
   counts: ReturnType<typeof statCounts>
 }
 
-// Membership is the structural primitive of this stage: assigning an effort
-// moves its evidence and narrative with it, and rolls its freshness and
-// anchors up into the workstream.
-export async function assignEffort(
-  ctx: MutationCtx,
-  state: WorkstreamApplyState,
-  effort: Doc<"efforts">,
-  beliefId: Id<"beliefs">
-) {
-  await ctx.db.patch(effort._id, {
-    workstreamId: beliefId,
-    updatedAt: state.now,
-  })
-  await absorbIntoBelief(ctx, beliefId, {
-    seenAt: effort.seenAt,
-    anchors: effort.anchors,
-    now: state.now,
-  })
-}
-
 // Citing an effort in a create claims membership: every cited effort is
 // assigned to the new workstream, so a split is just creates whose citations
-// carve up the old one's members.
+// carve up the old one's members. Membership itself is the engine's
+// moveEffort primitive, shared with console corrections.
 export async function adoptCitedEfforts(
   ctx: MutationCtx,
   tenantId: string,
@@ -56,7 +37,7 @@ export async function adoptCitedEfforts(
     )
 
     if (effort !== null) {
-      await assignEffort(ctx, state, effort, beliefId)
+      await moveEffort(ctx, effort, beliefId, state.now)
     }
   }
 }
@@ -87,7 +68,7 @@ export async function applyAssign(
     return
   }
 
-  await assignEffort(ctx, state, effort, belief._id)
+  await moveEffort(ctx, effort, belief._id, state.now)
   state.counts.assigned += 1
   await writeEvidence(
     ctx,

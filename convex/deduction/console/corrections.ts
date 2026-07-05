@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx, mutation } from "../../_generated/server"
 import { requireTenantAccess } from "../../identity/access"
-import { absorbIntoBelief } from "../engine/sightings"
+import { moveEffort } from "../engine/sightings"
 import { type BeliefStatus } from "../schema"
 
 // Console corrections are the only write path into beliefs besides the pass
@@ -32,14 +32,7 @@ export const assign = mutation({
       throw new Error("Effort not found.")
     }
 
-    const now = Date.now()
-
-    await ctx.db.patch(effort._id, { workstreamId: belief._id, updatedAt: now })
-    await absorbIntoBelief(ctx, belief._id, {
-      seenAt: effort.seenAt,
-      anchors: effort.anchors,
-      now,
-    })
+    await moveEffort(ctx, effort, belief._id, Date.now())
   },
 })
 
