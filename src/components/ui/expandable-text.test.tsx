@@ -36,33 +36,64 @@ test("shows the control only when the clamped text overflows", () => {
 
   render(<ExpandableText maxLines={2}>{longText}</ExpandableText>)
 
-  const control = screen.getByRole("button", { name: "Show more" })
+  const control = screen.getByRole("button", { name: "show more" })
 
   expect(control.getAttribute("aria-expanded")).toBe("false")
 })
 
-test("expands and collapses through the same control", () => {
+test("expands from a click anywhere on the collapsed text", () => {
   mockOverflowingContent()
 
   render(<ExpandableText maxLines={2}>{longText}</ExpandableText>)
 
-  const control = screen.getByRole("button", { name: "Show more" })
-  fireEvent.click(control)
+  fireEvent.click(screen.getByText(longText))
+
+  const control = screen.getByRole("button", { name: "Show less" })
 
   expect(control.getAttribute("aria-expanded")).toBe("true")
-  expect(control.textContent).toBe("Show less")
+})
+
+test("ignores text clicks while the user is selecting", () => {
+  mockOverflowingContent()
+  vi.spyOn(window, "getSelection").mockReturnValue({
+    isCollapsed: false,
+  } as Selection)
+
+  render(<ExpandableText maxLines={2}>{longText}</ExpandableText>)
+
+  fireEvent.click(screen.getByText(longText))
+
+  const control = screen.getByRole("button", { name: "show more" })
+
+  expect(control.getAttribute("aria-expanded")).toBe("false")
+})
+
+test("collapses only through the control once expanded", () => {
+  mockOverflowingContent()
+
+  render(<ExpandableText maxLines={2}>{longText}</ExpandableText>)
+
+  fireEvent.click(screen.getByText(longText))
+  fireEvent.click(screen.getByText(longText))
+
+  const control = screen.getByRole("button", { name: "Show less" })
+
+  expect(control.getAttribute("aria-expanded")).toBe("true")
 
   fireEvent.click(control)
 
-  expect(control.getAttribute("aria-expanded")).toBe("false")
-  expect(control.textContent).toBe("Show more")
+  expect(
+    screen.getByRole("button", { name: "show more" }).getAttribute(
+      "aria-expanded"
+    )
+  ).toBe("false")
 })
 
 test("supports defaultExpanded and custom labels", () => {
   mockOverflowingContent()
 
   render(
-    <ExpandableText defaultExpanded lessLabel="Collapse" moreLabel="Expand">
+    <ExpandableText defaultExpanded lessLabel="Collapse" moreLabel="expand">
       {longText}
     </ExpandableText>
   )
@@ -73,5 +104,5 @@ test("supports defaultExpanded and custom labels", () => {
 
   fireEvent.click(control)
 
-  expect(screen.getByRole("button", { name: "Expand" })).toBeDefined()
+  expect(screen.getByRole("button", { name: "expand" })).toBeDefined()
 })

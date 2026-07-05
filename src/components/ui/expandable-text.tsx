@@ -2,7 +2,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-const fadeWidthPx = 48
+const fadeRampPx = 64
+const fadeOverlapPx = 10
 
 type ExpandableTextProps = {
   children: React.ReactNode
@@ -14,9 +15,11 @@ type ExpandableTextProps = {
 }
 
 /**
- * Clamps its children to `maxLines` and shows a "Show more" control only when
- * the text actually overflows. While collapsed, the control sits at the end
- * of the last visible line behind a mask fade, so it works on any background.
+ * Clamps its children to `maxLines` and becomes clickable to expand only
+ * when the text actually overflows. While collapsed the last line fades out
+ * and an inline "… show more" cue appears on hover, focus, or coarse
+ * pointers; expanded text collapses through a "Show less" control below the
+ * paragraph.
  */
 function ExpandableText({
   children,
@@ -24,16 +27,35 @@ function ExpandableText({
   defaultExpanded = false,
   lessLabel = "Show less",
   maxLines = 3,
-  moreLabel = "Show more",
+  moreLabel = "show more",
 }: ExpandableTextProps) {
   const contentId = React.useId()
   const [expanded, setExpanded] = React.useState(defaultExpanded)
   const { contentRef, controlRef, controlWidth, truncated } =
     useClampOverflow(expanded)
+  const interactive = !expanded && truncated
+
+  const expandFromText = () => {
+    if (window.getSelection()?.isCollapsed === false) {
+      return
+    }
+    setExpanded(true)
+  }
 
   return (
-    <div className={cn("relative", className)} data-slot="expandable-text">
+    <div
+      className={cn(
+        "group/expandable relative",
+        interactive && "cursor-pointer",
+        className
+      )}
+      data-slot="expandable-text"
+      onClick={interactive ? expandFromText : undefined}
+    >
       <div
+        className={cn(
+          interactive && "transition-opacity group-hover/expandable:opacity-80"
+        )}
         data-slot="expandable-text-content"
         id={contentId}
         ref={contentRef}
@@ -50,19 +72,30 @@ function ExpandableText({
           aria-controls={contentId}
           aria-expanded={expanded}
           className={cn(
-            "cursor-pointer rounded-sm p-2 font-medium text-muted-foreground",
-            "underline-offset-2 outline-none transition-colors select-none",
-            "hover:text-foreground hover:underline",
-            "focus-visible:text-foreground focus-visible:underline",
+            "cursor-pointer rounded-sm p-2 text-primary outline-none",
+            "transition select-none hover:text-primary/80",
             "focus-visible:ring-2 focus-visible:ring-ring/30",
-            expanded ? "-mx-2 -mb-2 -mt-1" : "absolute right-0 bottom-0 -m-2"
+            expanded
+              ? "-mx-2 -mb-2 -mt-1"
+              : cn(
+                  "absolute right-0 bottom-0 -m-2 opacity-0",
+                  "group-hover/expandable:opacity-100",
+                  "focus-visible:opacity-100 pointer-coarse:opacity-100"
+                )
           )}
           data-slot="expandable-text-trigger"
           onClick={() => setExpanded((value) => !value)}
           ref={controlRef}
           type="button"
         >
-          {expanded ? lessLabel : moreLabel}
+          {expanded ? (
+            lessLabel
+          ) : (
+            <>
+              <span aria-hidden>… </span>
+              {moreLabel}
+            </>
+          )}
         </button>
       ) : null}
     </div>
@@ -120,14 +153,16 @@ function collapsedStyle(
   }
 
   // Two mask layers: full opacity above the last visible line, then a fade
-  // into the control across the end of that line.
-  const fadeEnd = fadeCutoff + fadeWidthPx
+  // that runs into the control's padding so the text ends close to the "…"
+  // cue instead of leaving a hard gap.
+  const fadeStart = Math.max(fadeCutoff - fadeOverlapPx, 0)
+  const fadeEnd = fadeStart + fadeRampPx
 
   return {
     ...clamp,
     maskImage: [
       "linear-gradient(#000, #000)",
-      `linear-gradient(to left, transparent ${fadeCutoff}px, #000 ${fadeEnd}px)`,
+      `linear-gradient(to left, transparent ${fadeStart}px, #000 ${fadeEnd}px)`,
     ].join(", "),
     maskPosition: "top, bottom",
     maskRepeat: "no-repeat",
