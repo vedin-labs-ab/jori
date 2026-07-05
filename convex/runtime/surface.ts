@@ -20,6 +20,7 @@ import { optionalString, requiredString } from "../shared/input"
 import { requireWorkerSecret } from "./shared"
 import { requireMessageSurfaceInput } from "./surface/input"
 import { optionalSlackBlocks, sendSurfaceReply } from "./surface/reply"
+import { findVisibleMessage } from "./surface/target"
 import { type ActiveSurfaceTool, activeSurfaceTools } from "./surface/tools"
 
 type ActiveSurfaceState = {
@@ -82,9 +83,15 @@ export const canUseReplyTarget = internalQuery({
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId)
 
-    return message === null
-      ? false
-      : await isVisibleConversationIdentifier(ctx, message, args.target)
+    if (message === null) {
+      return false
+    }
+
+    const match = await findVisibleMessage(ctx, message, (candidate) =>
+      messageMatchesReplyTargetIdentifier(candidate, args.target)
+    )
+
+    return match !== null
   },
 })
 
@@ -134,35 +141,6 @@ export const sendReply = action({
     return { status: "sent" as const }
   },
 })
-
-async function isVisibleConversationIdentifier(
-  ctx: QueryCtx,
-  message: Doc<"messages">,
-  target: string
-) {
-  if (messageMatchesReplyTargetIdentifier(message, target)) {
-    return true
-  }
-
-  if (message.conversationId === undefined) {
-    return false
-  }
-
-  const messages = await ctx.db
-    .query("messages")
-    .withIndex("by_conversation", (query) =>
-      query
-        .eq("tenantId", message.tenantId)
-        .eq("integrationId", message.integrationId)
-        .eq("conversationId", message.conversationId)
-    )
-    .order("desc")
-    .take(100)
-
-  return messages.some((candidate) =>
-    messageMatchesReplyTargetIdentifier(candidate, target)
-  )
-}
 
 function normalizeReplyTarget(value: unknown) {
   const target = optionalString(value)

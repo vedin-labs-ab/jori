@@ -132,7 +132,9 @@ async function resolveGitHubAddress(
     : githubAddressForMessage(match, target.commentId)
 }
 
-async function findVisibleMessage(
+// A message is addressable when it is the run's own message or sits within
+// the last 100 messages of the same conversation.
+export async function findVisibleMessage(
   ctx: QueryCtx,
   message: Doc<"messages">,
   predicate: (message: Doc<"messages">) => boolean
