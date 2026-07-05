@@ -1,15 +1,20 @@
 import { createHash } from "node:crypto"
 import {
-  config,
+  artifactSourceHashInput,
   maxArtifactFileBytes,
   maxArtifactFiles,
   maxArtifactTreeBytes,
-} from "./config.ts"
+  normalizeArtifactSourcePath,
+  rejectForbiddenSourceAccess,
+} from "../../../../contracts/artifacts/source.ts"
+import { config } from "./config.ts"
 import { isPlatformSourcePath } from "./platform.ts"
 import {
   type ArtifactSourceFile,
   type NormalizedArtifactSourceFile,
 } from "./types.ts"
+
+export { rejectForbiddenSourceAccess } from "../../../../contracts/artifacts/source.ts"
 
 export function normalizeArtifactSource(
   source: unknown
@@ -47,48 +52,9 @@ export function normalizeArtifactSource(
   return sortedFiles
 }
 
-export function rejectForbiddenSourceAccess(
-  files: NormalizedArtifactSourceFile[]
-) {
-  const forbiddenPatterns = [
-    /\bconvex\/react\b/,
-    /\b@clerk\b/,
-    /\bprocess\.env\b/,
-    /\bfetch\s*\(/,
-    /\bXMLHttpRequest\b/,
-    /\bWebSocket\b/,
-    /\blocalStorage\b/,
-    /\bsessionStorage\b/,
-  ]
-
-  for (const file of files) {
-    if (!/\.(ts|tsx|js|jsx)$/.test(file.path)) {
-      continue
-    }
-
-    const match = forbiddenPatterns.find((pattern) =>
-      pattern.test(file.content)
-    )
-
-    if (match !== undefined) {
-      throw new Error(
-        `Artifact source file ${file.path} uses a forbidden platform API. Use the Milo SDK instead.`
-      )
-    }
-  }
-}
-
 export function hashArtifactSource(files: NormalizedArtifactSourceFile[]) {
   return createHash("sha256")
-    .update(
-      JSON.stringify(
-        files.map((file) => ({
-          path: file.path,
-          content: file.content,
-          executable: file.executable,
-        }))
-      )
-    )
+    .update(artifactSourceHashInput(files))
     .digest("hex")
 }
 
@@ -138,31 +104,7 @@ function normalizeSourcePath(value: unknown) {
     throw new Error("Artifact source path must be a string.")
   }
 
-  const normalized = value.trim().replaceAll("\\", "/")
-
-  if (normalized === "") {
-    throw new Error("Artifact source paths cannot be empty.")
-  }
-
-  if (normalized.startsWith("/") || normalized.endsWith("/")) {
-    throw new Error(`Artifact source path must be relative: ${value}`)
-  }
-
-  const segments = normalized.split("/")
-
-  if (segments.some(isForbiddenPathSegment)) {
-    throw new Error(`Artifact source path is not allowed: ${value}`)
-  }
-
-  if (segments.some((segment) => segment === "node_modules")) {
-    throw new Error("Artifact source cannot include node_modules.")
-  }
-
-  if (segments[0] === "dist") {
-    throw new Error("Artifact source cannot include build output.")
-  }
-
-  const filePath = segments.join("/")
+  const filePath = normalizeArtifactSourcePath(value)
 
   if (isPlatformSourcePath(filePath)) {
     throw new Error(
@@ -171,13 +113,4 @@ function normalizeSourcePath(value: unknown) {
   }
 
   return filePath
-}
-
-function isForbiddenPathSegment(segment: string) {
-  return (
-    segment === "" ||
-    segment === "." ||
-    segment === ".." ||
-    segment.includes("\0")
-  )
 }

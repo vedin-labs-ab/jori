@@ -5,9 +5,6 @@ import { type BuilderConfig } from "./types.ts"
 export const workspace =
   process.env.MILO_WORKSPACE ?? "/home/user/.milo/artifacts/runtime"
 export const nodeModulesPath = path.join(workspace, "node_modules")
-export const maxArtifactFiles = 120
-export const maxArtifactFileBytes = 512 * 1024
-export const maxArtifactTreeBytes = 2 * 1024 * 1024
 export const maxCommandBuffer = 1024 * 1024 * 4
 export const commandTimeoutMs = 120_000
 export const maxDiagnosticChars = 12_000

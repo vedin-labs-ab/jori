@@ -1,6 +1,7 @@
 import fs from "node:fs/promises"
 import path from "node:path"
-import { config, maxArtifactFileBytes } from "./config.ts"
+import { maxArtifactFileBytes } from "../../../../contracts/artifacts/source.ts"
+import { config } from "./config.ts"
 import { isPlatformSourcePath } from "./platform.ts"
 import {
   type ArtifactSourceFile,
