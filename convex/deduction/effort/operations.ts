@@ -1,12 +1,13 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { refreshEffort } from "../engine/derive"
 import { resolveEffort } from "../engine/resolve"
 import {
   type AllowedSources,
   maxObservedAt,
   type Sighting,
 } from "../engine/rules"
-import { bumpEffort, moveEffort, writeEvidence } from "../engine/sightings"
+import { moveEffort, writeEvidence } from "../engine/sightings"
 import { type ApplyTracking, discard } from "../engine/wire"
 import { type EffortOp } from "./ops"
 
@@ -27,10 +28,10 @@ export async function applyCreate(
     tenantId: pass.tenantId,
     name: op.name,
     summary: op.summary,
+    seenAt: maxObservedAt(sightings),
     anchors: [],
     actors: [],
     sources: [],
-    seenAt: maxObservedAt(sightings),
     createdAt: state.now,
     updatedAt: state.now,
   })
@@ -158,6 +159,7 @@ export async function applyMerge(
   })
   state.counts.merged += 1
   await recordSightings(ctx, pass, into._id, sightings, into.summary, state.now)
+  await refreshEffort(ctx, into._id)
 }
 
 async function repointEffortRows(
@@ -203,6 +205,8 @@ async function repointEffortRows(
   }
 }
 
+// Write the citations, mark the effort changed for the next workstream
+// window, and let the derive layer recompute every cached column.
 async function recordSightings(
   ctx: MutationCtx,
   pass: Doc<"passes">,
@@ -213,7 +217,7 @@ async function recordSightings(
 ) {
   const effort = await ctx.db.get(effortId)
 
-  if (effort === null) {
+  if (effort === null || sightings.length === 0) {
     return
   }
 
@@ -225,5 +229,6 @@ async function recordSightings(
     fallbackWhy,
     effort.workstreamId
   )
-  await bumpEffort(ctx, effort, sightings, now)
+  await ctx.db.patch(effortId, { updatedAt: now })
+  await refreshEffort(ctx, effortId)
 }

@@ -15,20 +15,20 @@ export function eventAnchor(
   }
 
   if ("repository" in data) {
-    return `github:${data.repository.fullName}`
+    return `github:repository:${data.repository.fullName}`
   }
 
   if ("channel" in data) {
-    return `slack-channel:${data.channel.id}`
+    return `slack:channel:${data.channel.id}`
   }
 
   if ("notionEventId" in data) {
     const page = data.parent?.id ?? data.page?.id
 
-    return page === undefined ? undefined : `notion-page:${page}`
+    return page === undefined ? undefined : `notion:page:${page}`
   }
 
   return data.projectId === undefined
     ? undefined
-    : `linear-project:${data.projectId}`
+    : `linear:project:${data.projectId}`
 }

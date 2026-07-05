@@ -4,9 +4,9 @@ import { eventAnchor } from "./anchors"
 
 test("derives one container token per source", () => {
   expect(anchor({ repository: { fullName: "acme/app" } })).toBe(
-    "github:acme/app"
+    "github:repository:acme/app"
   )
-  expect(anchor({ channel: { id: "C123" } })).toBe("slack-channel:C123")
+  expect(anchor({ channel: { id: "C123" } })).toBe("slack:channel:C123")
   expect(
     anchor({
       notionEventId: "n1",
@@ -15,8 +15,8 @@ test("derives one container token per source", () => {
       entity: { id: "e1", type: "page" },
       parent: { id: "parent-1", type: "page" },
     })
-  ).toBe("notion-page:parent-1")
-  expect(anchor({ issueId: "i1", projectId: "p1" })).toBe("linear-project:p1")
+  ).toBe("notion:page:parent-1")
+  expect(anchor({ issueId: "i1", projectId: "p1" })).toBe("linear:project:p1")
 })
 
 test("yields nothing without a workstream-relevant container", () => {

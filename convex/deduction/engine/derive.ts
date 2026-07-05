@@ -1,0 +1,170 @@
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { type MutationCtx } from "../../_generated/server"
+import { actorIdentityProvider } from "../../identity/schema"
+import { canonicalActor } from "../../persons/names"
+import { type Integration } from "../../shared/integrations"
+import { eventAnchor } from "../anchors"
+import {
+  maxBeliefAnchors,
+  maxEffortActors,
+  maxEffortAnchors,
+  maxRollupSources,
+} from "../limits"
+import { mergeTokens } from "./rules"
+
+// The single writer for every derived column. Efforts derive from their
+// evidence, beliefs from their member efforts; both are recomputed from
+// scratch on any change, so the caches cannot drift and heal themselves
+// (person merges, moved members) on the next touch. Essence columns and
+// updatedAt are never written here.
+
+export async function refreshEffort(ctx: MutationCtx, effortId: Id<"efforts">) {
+  const effort = await ctx.db.get(effortId)
+
+  if (effort === null) {
+    return
+  }
+
+  const rows = await ctx.db
+    .query("evidence")
+    .withIndex("by_subject_effort_id", (index) =>
+      index.eq("subject.effortId", effortId)
+    )
+    .collect()
+  const facets = await collectFacets(ctx, rows)
+  const seenAt = rows.reduce(
+    (latest, row) => Math.max(latest, row.observedAt),
+    effort.createdAt
+  )
+
+  await ctx.db.patch(effortId, {
+    seenAt,
+    anchors: mergeTokens([], facets.anchors, maxEffortAnchors),
+    actors: dedupeActors(facets.actors),
+    sources: mergeTokens([], facets.sources, maxRollupSources) as Integration[],
+  })
+
+  if (effort.workstreamId !== undefined) {
+    await refreshBelief(ctx, effort.workstreamId)
+  }
+}
+
+export async function refreshBelief(ctx: MutationCtx, beliefId: Id<"beliefs">) {
+  const belief = await ctx.db.get(beliefId)
+
+  if (belief === null) {
+    return
+  }
+
+  const members = await ctx.db
+    .query("efforts")
+    .withIndex("by_workstream", (index) => index.eq("workstreamId", beliefId))
+    .collect()
+  const current = members.filter((member) => member.supersededBy === undefined)
+
+  await ctx.db.patch(beliefId, {
+    seenAt: current.reduce(
+      (latest, member) => Math.max(latest, member.seenAt),
+      belief.createdAt
+    ),
+    anchors: mergeTokens(
+      [],
+      current.flatMap((member) => member.anchors),
+      maxBeliefAnchors
+    ),
+    sources: mergeTokens(
+      [],
+      current.flatMap((member) => member.sources),
+      maxRollupSources
+    ) as Integration[],
+  })
+}
+
+type EffortActor = { name: string; personId?: Id<"persons"> }
+
+// What an effort's evidence yields: anchors from events, the integration
+// kind from events and conversations alike, and actors resolved through the
+// person graph — the same actor model events carry, kept re-resolvable via
+// personId instead of collapsed to a display string.
+async function collectFacets(ctx: MutationCtx, rows: Doc<"evidence">[]) {
+  const anchors = new Set<string>()
+  const sources = new Set<Integration>()
+  const actors: EffortActor[] = []
+
+  for (const row of rows) {
+    const cited = await loadCitedRecord(ctx, row)
+
+    if (cited === null) {
+      continue
+    }
+
+    const source = await integrationKind(ctx, cited.integrationId)
+
+    if (source !== undefined) {
+      sources.add(source)
+    }
+
+    if (cited.event === undefined) {
+      continue
+    }
+
+    const anchor = eventAnchor(cited.event)
+    const actor = await canonicalActor(ctx, {
+      tenantId: cited.event.tenantId,
+      provider:
+        source === undefined ? undefined : actorIdentityProvider(source),
+      actor: cited.event.actor,
+    })
+
+    if (anchor !== undefined) {
+      anchors.add(anchor)
+    }
+
+    if (actor !== undefined) {
+      actors.push(actor)
+    }
+  }
+
+  return { anchors, sources, actors }
+}
+
+function dedupeActors(actors: EffortActor[]) {
+  const seen = new Map<string, EffortActor>()
+
+  for (const actor of actors) {
+    const key = actor.personId ?? actor.name
+
+    if (!seen.has(key)) {
+      seen.set(key, actor)
+    }
+  }
+
+  return [...seen.values()].slice(0, maxEffortActors)
+}
+
+async function loadCitedRecord(ctx: MutationCtx, row: Doc<"evidence">) {
+  if (row.reference.kind === "event") {
+    const event = await ctx.db.get(row.reference.eventId)
+
+    return event === null ? null : { event, integrationId: event.integrationId }
+  }
+
+  if (row.reference.kind === "conversation") {
+    const conversation = await ctx.db.get(row.reference.conversationId)
+
+    return conversation === null
+      ? null
+      : { event: undefined, integrationId: conversation.integrationId }
+  }
+
+  return null
+}
+
+async function integrationKind(
+  ctx: MutationCtx,
+  integrationId: Id<"integrations">
+): Promise<Integration | undefined> {
+  const integration = await ctx.db.get(integrationId)
+
+  return integration?.integration
+}

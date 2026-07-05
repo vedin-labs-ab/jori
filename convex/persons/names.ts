@@ -1,3 +1,4 @@
+import { type Id } from "../_generated/dataModel"
 import { type IdentityProvider } from "../identity/schema"
 import { type Actor, getActorDisplayName } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
@@ -14,19 +15,20 @@ const namePreference: IdentityProvider[] = [
   "email",
 ]
 
-// The canonical display name for an observed actor: resolve the identity the
-// ingest path already recorded, follow person merges, and pick the best name
-// across the person's identities. Falls back to the actor's own display name
-// when nothing resolves. Read-only by design — observation never creates
-// identities here.
-export async function canonicalActorName(
+// The canonical actor for an observed one: resolve the identity the ingest
+// path already recorded, follow person merges, and pick the best name across
+// the person's identities. The personId rides along so derived data keeps a
+// re-resolvable key rather than a collapsed display string; both fall back
+// to the actor's own display name when nothing resolves. Read-only by
+// design — observation never creates identities here.
+export async function canonicalActor(
   ctx: QueryLikeCtx,
   args: {
     tenantId: string
     provider: IdentityProvider | undefined
     actor: Actor | undefined
   }
-): Promise<string | undefined> {
+): Promise<{ name: string; personId?: Id<"persons"> } | undefined> {
   const fallback = getActorDisplayName(args.actor)
   const actor = args.actor
 
@@ -36,7 +38,7 @@ export async function canonicalActorName(
     args.provider === undefined ||
     !("externalId" in actor)
   ) {
-    return fallback
+    return fallback === undefined ? undefined : { name: fallback }
   }
 
   const identity = await findIdentity(ctx, {
@@ -46,7 +48,7 @@ export async function canonicalActorName(
   })
 
   if (identity === null) {
-    return fallback
+    return fallback === undefined ? undefined : { name: fallback }
   }
 
   const personId = await canonicalPersonId(ctx, identity.personId)
@@ -61,9 +63,11 @@ export async function canonicalActorName(
     )?.name
 
     if (name !== undefined) {
-      return name
+      return { name, personId }
     }
   }
 
-  return fallback
+  return fallback === undefined
+    ? { name: actor.externalId, personId }
+    : { name: fallback, personId }
 }

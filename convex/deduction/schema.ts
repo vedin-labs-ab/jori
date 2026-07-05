@@ -32,18 +32,24 @@ export const passWindow = v.object({ start: v.number(), end: v.number() })
 
 // The kind-neutral middle layer: small, concrete units of work clustered from
 // raw activity. Membership in a workstream is a mutable assignment, never a
-// birth property; that is what keeps restructuring cheap. seenAt, anchors,
-// and actors are applier-derived from cited evidence, never judge-supplied.
+// birth property; that is what keeps restructuring cheap.
+//
+// Essence (judge- and membership-owned): name, summary, workstreamId.
+// Cache (derived from this effort's evidence by engine/derive.refreshEffort,
+// never written elsewhere): seenAt, anchors, actors, sources. Actors keep
+// the person key when the graph resolves one, so they re-resolve on refresh.
 export const efforts = defineTable({
   tenantId: v.string(),
   name: v.string(),
   summary: v.string(),
-  anchors: v.array(v.string()),
-  actors: v.array(v.string()),
-  sources: v.array(integrationValidator),
   workstreamId: v.optional(v.id("beliefs")),
   supersededBy: v.optional(v.id("efforts")),
   seenAt: v.number(),
+  anchors: v.array(v.string()),
+  actors: v.array(
+    v.object({ name: v.string(), personId: v.optional(v.id("persons")) })
+  ),
+  sources: v.array(integrationValidator),
   createdAt: v.number(),
   updatedAt: v.number(),
 })
@@ -60,12 +66,13 @@ const beliefFields = {
   status: beliefStatus,
   supersededBy: v.optional(v.id("beliefs")),
   lockedBy: v.optional(actorValidator),
-  // Rollups of assigned efforts' anchors and source integrations;
-  // applier-derived, never judge-supplied. Sources power the console chips
-  // without an evidence walk.
+  // Cache (derived from member efforts by engine/derive.refreshBelief, never
+  // written elsewhere): seenAt keeps the roster read one row per belief on
+  // the run hot path, anchors ground judge matching, sources power the
+  // console chips. updatedAt tracks essence writes only.
+  seenAt: v.number(),
   anchors: v.optional(v.array(v.string())),
   sources: v.optional(v.array(integrationValidator)),
-  seenAt: v.number(), // latest supporting sighting; applier-derived
   createdAt: v.number(),
   updatedAt: v.number(),
 }
