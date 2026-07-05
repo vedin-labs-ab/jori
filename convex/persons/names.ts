@@ -1,6 +1,6 @@
 import { type Id } from "../_generated/dataModel"
 import { type IdentityProvider } from "../identity/schema"
-import { type Actor, getActorDisplayName } from "../shared/actor"
+import { type Actor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 import { canonicalPersonId } from "./data"
 import { findIdentity } from "./rows"
@@ -15,21 +15,17 @@ const namePreference: IdentityProvider[] = [
   "email",
 ]
 
-// The canonical actor for an observed one: resolve the identity the ingest
-// path already recorded, follow person merges, and pick the best name across
-// the person's identities. The personId rides along so derived data keeps a
-// re-resolvable key rather than a collapsed display string; both fall back
-// to the actor's own display name when nothing resolves. Read-only by
-// design — observation never creates identities here.
-export async function canonicalActor(
+// The canonical person behind an observed actor, or undefined when the graph
+// holds no identity for it (bots, unmapped providers). Read-only by design —
+// observation never creates identities here; the ingest path already did.
+export async function resolvePersonId(
   ctx: QueryLikeCtx,
   args: {
     tenantId: string
     provider: IdentityProvider | undefined
     actor: Actor | undefined
   }
-): Promise<{ name: string; personId?: Id<"persons"> } | undefined> {
-  const fallback = getActorDisplayName(args.actor)
+): Promise<Id<"persons"> | undefined> {
   const actor = args.actor
 
   if (
@@ -38,7 +34,7 @@ export async function canonicalActor(
     args.provider === undefined ||
     !("externalId" in actor)
   ) {
-    return fallback === undefined ? undefined : { name: fallback }
+    return undefined
   }
 
   const identity = await findIdentity(ctx, {
@@ -47,11 +43,18 @@ export async function canonicalActor(
     externalId: actor.externalId,
   })
 
-  if (identity === null) {
-    return fallback === undefined ? undefined : { name: fallback }
-  }
+  return identity === null
+    ? undefined
+    : await canonicalPersonId(ctx, identity.personId)
+}
 
-  const personId = await canonicalPersonId(ctx, identity.personId)
+// The best display name across a person's identities, preference-ordered,
+// falling back to any named identity. Undefined only for a person with no
+// named identity at all.
+export async function personDisplayName(
+  ctx: QueryLikeCtx,
+  personId: Id<"persons">
+): Promise<string | undefined> {
   const identities = await ctx.db
     .query("identities")
     .withIndex("by_person", (index) => index.eq("personId", personId))
@@ -63,11 +66,9 @@ export async function canonicalActor(
     )?.name
 
     if (name !== undefined) {
-      return { name, personId }
+      return name
     }
   }
 
-  return fallback === undefined
-    ? { name: actor.externalId, personId }
-    : { name: fallback, personId }
+  return identities.find((row) => row.name !== undefined)?.name
 }

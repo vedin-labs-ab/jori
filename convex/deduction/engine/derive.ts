@@ -1,13 +1,13 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { actorIdentityProvider } from "../../identity/schema"
-import { canonicalActor } from "../../persons/names"
+import { resolvePersonId } from "../../persons/names"
 import { type Integration } from "../../shared/integrations"
 import { eventAnchor } from "../anchors"
 import {
   maxBeliefAnchors,
-  maxEffortActors,
   maxEffortAnchors,
+  maxEffortPersons,
   maxRollupSources,
 } from "../limits"
 import { mergeTokens } from "./rules"
@@ -40,7 +40,7 @@ export async function refreshEffort(ctx: MutationCtx, effortId: Id<"efforts">) {
   await ctx.db.patch(effortId, {
     seenAt,
     anchors: mergeTokens([], facets.anchors, maxEffortAnchors),
-    actors: dedupeActors(facets.actors),
+    personIds: [...facets.persons].slice(0, maxEffortPersons),
     sources: mergeTokens([], facets.sources, maxRollupSources) as Integration[],
   })
 
@@ -80,16 +80,14 @@ export async function refreshBelief(ctx: MutationCtx, beliefId: Id<"beliefs">) {
   })
 }
 
-type EffortActor = { name: string; personId?: Id<"persons"> }
-
 // What an effort's evidence yields: anchors from events, the integration
-// kind from events and conversations alike, and actors resolved through the
-// person graph — the same actor model events carry, kept re-resolvable via
-// personId instead of collapsed to a display string.
+// kind from events and conversations alike, and the people behind the
+// activity — only those the person graph actually resolves. Unlinked actors
+// (bots, unmapped providers) carry no lasting signal and are skipped.
 async function collectFacets(ctx: MutationCtx, rows: Doc<"evidence">[]) {
   const anchors = new Set<string>()
   const sources = new Set<Integration>()
-  const actors: EffortActor[] = []
+  const persons = new Set<Id<"persons">>()
 
   for (const row of rows) {
     const cited = await loadCitedRecord(ctx, row)
@@ -109,7 +107,7 @@ async function collectFacets(ctx: MutationCtx, rows: Doc<"evidence">[]) {
     }
 
     const anchor = eventAnchor(cited.event)
-    const actor = await canonicalActor(ctx, {
+    const personId = await resolvePersonId(ctx, {
       tenantId: cited.event.tenantId,
       provider:
         source === undefined ? undefined : actorIdentityProvider(source),
@@ -120,26 +118,12 @@ async function collectFacets(ctx: MutationCtx, rows: Doc<"evidence">[]) {
       anchors.add(anchor)
     }
 
-    if (actor !== undefined) {
-      actors.push(actor)
+    if (personId !== undefined) {
+      persons.add(personId)
     }
   }
 
-  return { anchors, sources, actors }
-}
-
-function dedupeActors(actors: EffortActor[]) {
-  const seen = new Map<string, EffortActor>()
-
-  for (const actor of actors) {
-    const key = actor.personId ?? actor.name
-
-    if (!seen.has(key)) {
-      seen.set(key, actor)
-    }
-  }
-
-  return [...seen.values()].slice(0, maxEffortActors)
+  return { anchors, sources, persons }
 }
 
 async function loadCitedRecord(ctx: MutationCtx, row: Doc<"evidence">) {

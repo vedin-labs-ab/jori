@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../../_generated/server"
+import { personDisplayName } from "../../persons/names"
 import { getActorDisplayName } from "../../shared/actor"
 import { eventAnchor } from "../anchors"
 import { iso, journalLine } from "../engine/judge"
@@ -94,12 +95,16 @@ export async function readEffortContext(
     .order("desc")
     .take(tail)
 
+  const names = await Promise.all(
+    row.personIds.map((personId) => personDisplayName(ctx, personId))
+  )
+
   return {
     id: row._id,
     name: row.name,
     summary: row.summary,
     anchors: row.anchors,
-    actors: row.actors.map((actor) => actor.name),
+    actors: names.filter((name): name is string => name !== undefined),
     seenAt: row.seenAt,
     journal: entries.map((entry) => journalLine(entry)),
   }
