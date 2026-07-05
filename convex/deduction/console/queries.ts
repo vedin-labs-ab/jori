@@ -3,7 +3,7 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx, query } from "../../_generated/server"
 import { checkTenantAccess } from "../../identity/access"
 import { type Integration } from "../../shared/integrations"
-import { loadSupport } from "../support"
+import { loadBeliefSupport } from "../engine/resolve"
 import { eventKindLabel, statusLabels } from "./labels"
 
 const detailLimit = 8
@@ -45,11 +45,19 @@ export const get = query({
       return null
     }
 
+    const members = await memberEfforts(ctx, belief._id)
+
     return {
       ...(await listRow(ctx, belief)),
       aliases: belief.aliases,
-      sightings: await recentSightings(ctx, belief._id),
-      history: await recentHistory(ctx, belief._id),
+      efforts: members.map((member) => ({
+        id: member._id,
+        name: member.name,
+        summary: member.summary,
+        seenAt: member.seenAt,
+      })),
+      sightings: await recentSightings(ctx, members),
+      history: await recentHistory(ctx, members),
     }
   },
 })
@@ -80,9 +88,20 @@ async function listRow(ctx: QueryCtx, row: Doc<"beliefs">) {
   }
 }
 
-// The distinct tools the evidence spans, for the source chips.
+async function memberEfforts(ctx: QueryCtx, beliefId: Id<"beliefs">) {
+  const rows = await ctx.db
+    .query("efforts")
+    .withIndex("by_workstream", (index) => index.eq("workstreamId", beliefId))
+    .collect()
+
+  return rows
+    .filter((row) => row.supersededBy === undefined)
+    .sort((first, second) => second.seenAt - first.seenAt)
+}
+
+// The distinct tools the transitive evidence spans, for the source chips.
 async function sourceKeys(ctx: QueryCtx, beliefId: Id<"beliefs">) {
-  const records = await loadSupport(ctx, beliefId)
+  const records = await loadBeliefSupport(ctx, beliefId)
   const keys = new Map<string, Integration | null>()
 
   for (const record of records) {
@@ -104,11 +123,22 @@ async function integrationKey(ctx: QueryCtx, integrationId: string) {
   return integration === null ? null : integration.integration
 }
 
-async function recentSightings(ctx: QueryCtx, beliefId: Id<"beliefs">) {
-  const rows = await ctx.db
-    .query("evidence")
-    .withIndex("by_belief", (index) => index.eq("beliefId", beliefId))
-    .collect()
+// A workstream's sightings are its member efforts' evidence: the source
+// records behind the work, read transitively.
+async function recentSightings(ctx: QueryCtx, members: Doc<"efforts">[]) {
+  const rows: Doc<"evidence">[] = []
+
+  for (const member of members) {
+    rows.push(
+      ...(await ctx.db
+        .query("evidence")
+        .withIndex("by_subject_effort_id", (index) =>
+          index.eq("subject.effortId", member._id)
+        )
+        .collect())
+    )
+  }
+
   const latest = rows
     .sort((first, second) => second.observedAt - first.observedAt)
     .slice(0, detailLimit)
@@ -128,6 +158,10 @@ async function sightingRow(ctx: QueryCtx, row: Doc<"evidence">) {
       kind: "Conversation",
       url: undefined,
     }
+  }
+
+  if (row.reference.kind === "effort") {
+    return { ...base, integration: null, kind: "Effort", url: undefined }
   }
 
   const event = await ctx.db.get(row.reference.eventId)
@@ -165,18 +199,25 @@ function eventUrl(data: Doc<"events">["data"]): string | undefined {
   return data.url ?? data.issue?.url ?? data.project?.url
 }
 
-async function recentHistory(ctx: QueryCtx, beliefId: Id<"beliefs">) {
-  const rows = await ctx.db
-    .query("journal")
-    .withIndex("by_belief_and_created_at", (index) =>
-      index.eq("beliefId", beliefId)
-    )
-    .order("desc")
-    .take(detailLimit)
+// A workstream's timeline is the merged journals of its member efforts;
+// narrative travels with membership.
+async function recentHistory(ctx: QueryCtx, members: Doc<"efforts">[]) {
+  const rows: Doc<"journal">[] = []
 
-  return rows.map((row) => ({
-    id: row._id,
-    entry: row.entry,
-    createdAt: row.createdAt,
-  }))
+  for (const member of members) {
+    rows.push(
+      ...(await ctx.db
+        .query("journal")
+        .withIndex("by_effort_and_created_at", (index) =>
+          index.eq("effortId", member._id)
+        )
+        .order("desc")
+        .take(detailLimit))
+    )
+  }
+
+  return rows
+    .sort((first, second) => second.createdAt - first.createdAt)
+    .slice(0, detailLimit)
+    .map((row) => ({ id: row._id, entry: row.entry, createdAt: row.createdAt }))
 }

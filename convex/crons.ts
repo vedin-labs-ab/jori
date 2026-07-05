@@ -13,13 +13,14 @@ crons.interval(
   {}
 )
 
-// Hourly heartbeat for deduction: reviews each tenant's activity window and
-// updates the belief roster, one pass per kind. Quiet windows complete
+// Hourly heartbeat for deduction: each tenant's activity window is clustered
+// into efforts, then each belief kind reviews the changed efforts, with a
+// weekly consolidation pass restructuring the roster. Quiet windows complete
 // without a judge call, so frequency only costs when there is activity.
 crons.interval(
   "deduction pass sweep",
   { hours: 1 },
-  internal.deduction.pass.sweep,
+  internal.deduction.engine.pass.sweep,
   {}
 )
 

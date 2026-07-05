@@ -2,13 +2,46 @@ import { v } from "convex/values"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx, mutation } from "../../_generated/server"
 import { requireTenantAccess } from "../../identity/access"
+import { absorbIntoBelief } from "../engine/sightings"
 import { type BeliefStatus } from "../schema"
 
 // Console corrections are the only write path into beliefs besides the pass
 // applier. Adoption decisions move status; archive keeps a concluded
-// workstream in history without leaving it in the active roster.
+// workstream in history without leaving it in the active roster. Assign is
+// the structural pen: moving an effort corrects membership without ever
+// editing derived text, and survives re-derivation.
 
 const target = { tenantId: v.string(), workstreamId: v.id("beliefs") }
+
+export const assign = mutation({
+  args: { ...target, effortId: v.id("efforts") },
+  handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+    const belief = await requireWorkstream(
+      ctx,
+      args.tenantId,
+      args.workstreamId
+    )
+    const effort = await ctx.db.get(args.effortId)
+
+    if (
+      effort === null ||
+      effort.tenantId !== args.tenantId ||
+      effort.supersededBy !== undefined
+    ) {
+      throw new Error("Effort not found.")
+    }
+
+    const now = Date.now()
+
+    await ctx.db.patch(effort._id, { workstreamId: belief._id, updatedAt: now })
+    await absorbIntoBelief(ctx, belief._id, {
+      seenAt: effort.seenAt,
+      anchors: effort.anchors,
+      now,
+    })
+  },
+})
 
 export const confirm = mutation({
   args: target,
