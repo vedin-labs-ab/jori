@@ -38,6 +38,7 @@ export async function judgePass(args: { kind: BeliefKind; input: PassInput }) {
 export function toJudgePayload(input: PassInput) {
   return {
     window: { start: iso(input.window.start), end: iso(input.window.end) },
+    sharedAnchors: sharedAnchors(input.roster),
     beliefs: input.roster.map((entry) => ({
       id: entry.id,
       name: entry.name,
@@ -64,6 +65,24 @@ export function toJudgePayload(input: PassInput) {
       summarizedAt: iso(conversation.summarizedAt),
     })),
   }
+}
+
+// An anchor that already appears on several workstreams identifies none of
+// them alone. The payload names those tokens so the charter can demote them
+// from match-first signals to tie-breakers.
+function sharedAnchors(roster: PassInput["roster"]) {
+  const counts = new Map<string, number>()
+
+  for (const entry of roster) {
+    for (const anchor of new Set(entry.anchors)) {
+      counts.set(anchor, (counts.get(anchor) ?? 0) + 1)
+    }
+  }
+
+  return [...counts]
+    .filter(([, count]) => count > 1)
+    .map(([anchor]) => anchor)
+    .sort()
 }
 
 function iso(timestamp: number) {
