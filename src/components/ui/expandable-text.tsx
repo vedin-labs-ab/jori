@@ -16,10 +16,10 @@ type ExpandableTextProps = {
 
 /**
  * Clamps its children to `maxLines` and becomes clickable to expand only
- * when the text actually overflows. While collapsed the last line fades out
- * and an inline "… show more" cue appears on hover, focus, or coarse
- * pointers; expanded text collapses through a "Show less" control below the
- * paragraph.
+ * when the text actually overflows. While collapsed the last line fades
+ * into an always-visible muted "… show more" cue that warms to the primary
+ * color when the paragraph is hovered; expanded text collapses through a
+ * "Show less" control below the paragraph.
  */
 function ExpandableText({
   children,
@@ -72,15 +72,14 @@ function ExpandableText({
           aria-controls={contentId}
           aria-expanded={expanded}
           className={cn(
-            "cursor-pointer rounded-sm p-2 text-primary outline-none",
-            "transition select-none hover:text-primary/80",
+            "cursor-pointer rounded-sm p-2 text-muted-foreground outline-none",
+            "transition select-none focus-visible:text-primary",
             "focus-visible:ring-2 focus-visible:ring-ring/30",
             expanded
-              ? "-mx-2 -mb-2 -mt-1"
+              ? "-mx-2 -mb-2 -mt-1 hover:text-primary"
               : cn(
-                  "absolute right-0 bottom-0 -m-2 opacity-0",
-                  "group-hover/expandable:opacity-100",
-                  "focus-visible:opacity-100 pointer-coarse:opacity-100"
+                  "absolute right-0 bottom-0 -m-2",
+                  "group-hover/expandable:text-primary"
                 )
           )}
           data-slot="expandable-text-trigger"
