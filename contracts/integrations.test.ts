@@ -14,7 +14,6 @@ describe("integration catalog", () => {
   test("keeps provider boundaries separate from granular integrations", () => {
     expect(providerForIntegration("gmail")).toBe("google")
     expect(providerForIntegration("googleCalendar")).toBe("google")
-    expect(providerForIntegration("googleDrive")).toBe("google")
     expect(providerForIntegration("microsoftEmail")).toBe("microsoft")
     expect(providerForIntegration("microsoftCalendar")).toBe("microsoft")
 
@@ -37,7 +36,6 @@ describe("integration catalog", () => {
     expect(isUserScopedIntegration("microsoftEmail")).toBe(true)
     expect(isUserScopedIntegration("microsoftCalendar")).toBe(true)
 
-    expect(isUserScopedIntegration("googleDrive")).toBe(false)
     expect(isUserScopedIntegration("github")).toBe(false)
     expect(isUserScopedIntegration("slack")).toBe(false)
   })

@@ -34,14 +34,14 @@ test("collapses additional integrations into a tooltip count", async () => {
     "github",
     "slack",
     "googleCalendar",
-    "googleDrive",
+    "notion",
   ])
 
   expect(container.querySelectorAll("img")).toHaveLength(2)
   expect(screen.getByText("4 tools")).toBeDefined()
 
   const count = screen.getByRole("button", {
-    name: "Show 2 more integrations: Google Calendar, Google Drive",
+    name: "Show 2 more integrations: Google Calendar, Notion",
   })
 
   expect(count.textContent).toBe("+2")
@@ -49,7 +49,7 @@ test("collapses additional integrations into a tooltip count", async () => {
   fireEvent.focus(count)
 
   expect(
-    await screen.findAllByText("Google Calendar, Google Drive")
+    await screen.findAllByText("Google Calendar, Notion")
   ).not.toHaveLength(0)
 })
 

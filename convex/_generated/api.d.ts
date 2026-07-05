@@ -101,7 +101,6 @@ import type * as broker_tools_github_index from "../broker/tools/github/index.js
 import type * as broker_tools_github_publish from "../broker/tools/github/publish.js";
 import type * as broker_tools_github_pulls from "../broker/tools/github/pulls.js";
 import type * as broker_tools_github_source from "../broker/tools/github/source.js";
-import type * as broker_tools_google_drive from "../broker/tools/google/drive.js";
 import type * as broker_tools_google_format from "../broker/tools/google/format.js";
 import type * as broker_tools_google_gmail from "../broker/tools/google/gmail.js";
 import type * as broker_tools_google_index from "../broker/tools/google/index.js";
@@ -235,7 +234,6 @@ import type * as providers_github_types from "../providers/github/types.js";
 import type * as providers_google_api from "../providers/google/api.js";
 import type * as providers_google_config from "../providers/google/config.js";
 import type * as providers_google_credentials from "../providers/google/credentials.js";
-import type * as providers_google_drive from "../providers/google/drive.js";
 import type * as providers_google_http from "../providers/google/http.js";
 import type * as providers_google_install from "../providers/google/install.js";
 import type * as providers_google_oauth from "../providers/google/oauth.js";
@@ -533,7 +531,6 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/github/publish": typeof broker_tools_github_publish;
   "broker/tools/github/pulls": typeof broker_tools_github_pulls;
   "broker/tools/github/source": typeof broker_tools_github_source;
-  "broker/tools/google/drive": typeof broker_tools_google_drive;
   "broker/tools/google/format": typeof broker_tools_google_format;
   "broker/tools/google/gmail": typeof broker_tools_google_gmail;
   "broker/tools/google/index": typeof broker_tools_google_index;
@@ -667,7 +664,6 @@ declare const fullApi: ApiFromModules<{
   "providers/google/api": typeof providers_google_api;
   "providers/google/config": typeof providers_google_config;
   "providers/google/credentials": typeof providers_google_credentials;
-  "providers/google/drive": typeof providers_google_drive;
   "providers/google/http": typeof providers_google_http;
   "providers/google/install": typeof providers_google_install;
   "providers/google/oauth": typeof providers_google_oauth;

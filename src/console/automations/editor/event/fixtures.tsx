@@ -19,7 +19,6 @@ const integrations = [
   "github",
   "gmail",
   "googleCalendar",
-  "googleDrive",
   "notion",
   "microsoftEmail",
   "microsoftCalendar",

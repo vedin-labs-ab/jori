@@ -79,29 +79,27 @@ describe("automation instructions marker styling", () => {
 describe("automation instructions marker hover", () => {
   test("keeps integration pane width stable and only swaps the icon affordance", async () => {
     renderInstructionsField({
-      description: "Post to Google Drive.",
-      surfaces: [
-        { integration: "googleDrive", tools: ["google_drive_read_file"] },
-      ],
+      description: "Post to Notion.",
+      surfaces: [{ integration: "notion", tools: ["notion_get_page"] }],
     })
 
     const button = await screen.findByRole("button", {
-      name: "Remove Google Drive",
+      name: "Remove Notion",
     })
     const content = button.closest("[data-automation-remove-content]")
     const icon = button.querySelector("svg")
 
     expect(button.className).not.toContain("transition-[width]")
-    expect(content?.textContent).toBe("Google Drive")
+    expect(content?.textContent).toBe("Notion")
     expect(icon?.className.baseVal).toContain("opacity-55")
     expect(icon?.className.baseVal).toContain("group-hover/x:opacity-100")
 
     fireEvent.mouseEnter(button)
 
-    expect(content?.textContent).toBe("Google Drive")
+    expect(content?.textContent).toBe("Notion")
 
     fireEvent.mouseLeave(button)
 
-    expect(content?.textContent).toBe("Google Drive")
+    expect(content?.textContent).toBe("Notion")
   })
 })

@@ -154,32 +154,6 @@ export const getGoogleCalendarStatus = query({
     ),
 })
 
-export const getGoogleDriveStatus = query({
-  args: {
-    tenantId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const integration = await getTenantIntegration(ctx, {
-      integration: "googleDrive",
-      tenantId: args.tenantId,
-    })
-
-    if (integration === null) {
-      return null
-    }
-
-    return {
-      externalId: integration.externalId,
-      email: integration.email,
-      name: integration.name,
-      avatar: integration.avatar,
-      status: integration.status,
-      createdAt: integration.createdAt,
-      scope: "tenant" as const,
-    }
-  },
-})
-
 function formatGoogleUserStatus(integration: Doc<"integrations"> | null) {
   if (integration === null) {
     return null

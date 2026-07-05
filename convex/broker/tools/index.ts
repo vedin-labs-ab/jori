@@ -42,11 +42,7 @@ export async function callProviderTool(args: {
     return await callGitHubTool(args.integration, args.tool, args.toolArgs)
   }
 
-  if (
-    integration === "gmail" ||
-    integration === "googleCalendar" ||
-    integration === "googleDrive"
-  ) {
+  if (integration === "gmail" || integration === "googleCalendar") {
     return await callGoogleTool(
       args.integration,
       args.tool,

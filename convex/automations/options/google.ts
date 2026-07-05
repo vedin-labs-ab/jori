@@ -1,6 +1,5 @@
 import { googleJson } from "../../providers/google/api"
 import { requireGoogleCredentials } from "../../providers/google/credentials"
-import { driveFilesUrl } from "../../providers/google/drive"
 import {
   compactDescription,
   maxOptions,
@@ -12,8 +11,6 @@ import {
   readRecord,
   requiredOptionString,
 } from "./common"
-
-const driveFolderMimeType = "application/vnd.google-apps.folder"
 
 export async function searchGmailLabels(args: OptionLoaderArgs) {
   const result = await googleJson(
@@ -50,30 +47,6 @@ export async function searchGoogleCalendars(args: OptionLoaderArgs) {
     .filter((option) => optionMatches(option, normalizedQuery))
 }
 
-export async function searchGoogleDriveFiles(
-  args: OptionLoaderArgs,
-  kind: "file" | "folder"
-) {
-  const url = new URL(driveFilesUrl)
-  url.searchParams.set("pageSize", String(maxOptions))
-  url.searchParams.set("fields", "files(id,name,mimeType,modifiedTime,parents)")
-  url.searchParams.set("q", driveSearchQuery(args.query, kind))
-  const result = await googleJson(googleAccessToken(args), url.toString())
-
-  return readArray(result.files).map((file) => {
-    const record = readRecord(file)
-
-    return {
-      value: requiredOptionString(record.id),
-      label: requiredOptionString(record.name),
-      description: compactDescription([
-        optionalOptionString(record.mimeType),
-        optionalOptionString(record.modifiedTime),
-      ]),
-    }
-  })
-}
-
 function googleAccessToken(args: OptionLoaderArgs) {
   return requireGoogleCredentials(args.integration).tokens.access
 }
@@ -83,24 +56,4 @@ function googleCalendarDescription(calendar: Record<string, unknown>) {
     calendar.primary === true ? "Primary" : undefined,
     optionalOptionString(calendar.accessRole),
   ])
-}
-
-function driveSearchQuery(query: string, kind: "file" | "folder") {
-  const clauses = [
-    "trashed=false",
-    kind === "folder"
-      ? `mimeType='${driveFolderMimeType}'`
-      : `mimeType!='${driveFolderMimeType}'`,
-  ]
-  const normalized = query.trim()
-
-  if (normalized !== "") {
-    clauses.push(`name contains '${escapeDriveQuery(normalized)}'`)
-  }
-
-  return clauses.join(" and ")
-}
-
-function escapeDriveQuery(value: string) {
-  return value.replace(/['\\]/g, "\\$&")
 }

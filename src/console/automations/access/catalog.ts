@@ -10,11 +10,6 @@ export const automationSurfaceIntegrations = [
     "googlecalendar",
     "gcal",
   ]),
-  integration("googleDrive", "Google Drive", [
-    "google drive",
-    "googledrive",
-    "drive",
-  ]),
   integration("notion", "Notion", ["notion"]),
   integration("microsoftEmail", "Outlook Mail", [
     "outlook",
@@ -82,10 +77,6 @@ function integration<const Integration extends string>(
 function integrationLogoName(integration: AutomationSurfaceIntegration) {
   if (integration === "googleCalendar") {
     return "google-calendar"
-  }
-
-  if (integration === "googleDrive") {
-    return "google-drive"
   }
 
   if (integration === "microsoftCalendar") {

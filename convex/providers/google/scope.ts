@@ -10,16 +10,6 @@ export async function findExistingGoogleIntegration(
     createdBy: Id<"persons">
   }
 ): Promise<Doc<"integrations"> | null> {
-  if (getGoogleIntegrationScope(args.integration) === "tenant") {
-    return await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_and_integration", (query) =>
-        query.eq("tenantId", args.tenantId).eq("integration", args.integration)
-      )
-      .order("desc")
-      .first()
-  }
-
   return await ctx.db
     .query("integrations")
     .withIndex("by_tenant_and_integration_and_owner", (query) =>
@@ -29,10 +19,4 @@ export async function findExistingGoogleIntegration(
         .eq("ownerId", args.createdBy)
     )
     .first()
-}
-
-export function getGoogleIntegrationScope(
-  integration: GoogleIntegration
-): Doc<"integrations">["scope"] {
-  return integration === "googleDrive" ? "tenant" : "user"
 }

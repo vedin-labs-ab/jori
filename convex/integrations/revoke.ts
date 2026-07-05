@@ -67,7 +67,6 @@ export async function revokeIntegrationAccess(
       return
     case "gmail":
     case "googleCalendar":
-    case "googleDrive":
       await revokeGoogleIntegration(integration)
       return
     case "linear":

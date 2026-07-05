@@ -4,11 +4,7 @@ import { NativePermissionsCard } from "../permissions"
 import { useToolPermissions } from "../permissions/controller"
 import { ConsoleContentGrid } from "../shared/layout"
 import { GitHubIntegration } from "./providers/github"
-import {
-  GmailIntegration,
-  GoogleCalendarIntegration,
-  GoogleDriveIntegration,
-} from "./providers/google"
+import { GmailIntegration, GoogleCalendarIntegration } from "./providers/google"
 import { LinearIntegration } from "./providers/linear"
 import {
   MicrosoftCalendarIntegration,
@@ -40,10 +36,6 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
           <LinearIntegration permissions={permissions} tenantId={tenantId} />
           <GitHubIntegration permissions={permissions} tenantId={tenantId} />
           <NotionIntegration permissions={permissions} tenantId={tenantId} />
-          <GoogleDriveIntegration
-            permissions={permissions}
-            tenantId={tenantId}
-          />
           <NativePermissionsCard controller={permissions} />
         </ConsoleContentGrid>
       </TabsContent>
