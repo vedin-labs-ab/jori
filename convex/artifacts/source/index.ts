@@ -2,7 +2,13 @@
 
 import { createHash } from "node:crypto"
 import {
+  artifactSourceHashInput,
   isPlatformArtifactSourcePath,
+  maxArtifactFileBytes,
+  maxArtifactFiles,
+  maxArtifactTreeBytes,
+  normalizeArtifactSourcePath,
+  rejectForbiddenSourceAccess,
   requiredArtifactSourcePaths,
 } from "../../../contracts/artifacts/source"
 import { type Id } from "../../_generated/dataModel"
@@ -45,10 +51,6 @@ export type StoredArtifactBlob = Pick<
 > & {
   storageId: Id<"_storage">
 }
-
-const maxArtifactFiles = 120
-const maxArtifactFileBytes = 512 * 1024
-const maxArtifactTreeBytes = 2 * 1024 * 1024
 
 export function createArtifactSourceSnapshot(
   source: ArtifactSourceFile[]
@@ -133,90 +135,29 @@ export function normalizeArtifactSource(source: ArtifactSourceFile[]) {
 }
 
 export function normalizeArtifactPath(path: string) {
-  const normalized = path.trim().replaceAll("\\", "/")
+  const normalized = normalizeArtifactSourcePath(path)
 
-  if (normalized === "") {
-    throw new Error("Artifact source paths cannot be empty.")
-  }
-
-  if (normalized.startsWith("/") || normalized.endsWith("/")) {
-    throw new Error(`Artifact source path must be relative: ${path}`)
-  }
-
-  const segments = normalized.split("/")
-
-  if (
-    segments.some(
-      (segment) =>
-        segment === "" ||
-        segment === "." ||
-        segment === ".." ||
-        segment.includes("\0")
-    )
-  ) {
-    throw new Error(`Artifact source path is not allowed: ${path}`)
-  }
-
-  if (segments.some((segment) => segment === "node_modules")) {
-    throw new Error("Artifact source cannot include node_modules.")
-  }
-
-  if (segments[0] === "dist") {
-    throw new Error("Artifact source cannot include build output.")
-  }
-
-  if (isPlatformArtifactSourcePath(segments.join("/"))) {
+  if (isPlatformArtifactSourcePath(normalized)) {
     throw new Error(
-      `Artifact source cannot include platform-owned file: ${segments.join("/")}`
+      `Artifact source cannot include platform-owned file: ${normalized}`
     )
   }
 
-  return segments.join("/")
+  return normalized
 }
 
 export function hashArtifactSource(files: NormalizedArtifactSourceFile[]) {
-  const hash = createHash("sha256")
-
-  hash.update(
-    JSON.stringify(
-      files.map((file) => ({
-        path: file.path,
-        content: file.content,
-        executable: file.mode === "executable",
-      }))
-    )
-  )
-
-  return hash.digest("hex")
-}
-
-function rejectForbiddenSourceAccess(files: NormalizedArtifactSourceFile[]) {
-  const forbiddenPatterns = [
-    /\bconvex\/react\b/,
-    /\b@clerk\b/,
-    /\bprocess\.env\b/,
-    /\bfetch\s*\(/,
-    /\bXMLHttpRequest\b/,
-    /\bWebSocket\b/,
-    /\blocalStorage\b/,
-    /\bsessionStorage\b/,
-  ]
-
-  for (const file of files) {
-    if (!/\.(ts|tsx|js|jsx)$/.test(file.path)) {
-      continue
-    }
-
-    const match = forbiddenPatterns.find((pattern) =>
-      pattern.test(file.content)
-    )
-
-    if (match !== undefined) {
-      throw new Error(
-        `Artifact source file ${file.path} uses a forbidden platform API. Use the Milo SDK instead.`
+  return createHash("sha256")
+    .update(
+      artifactSourceHashInput(
+        files.map((file) => ({
+          path: file.path,
+          content: file.content,
+          executable: file.mode === "executable",
+        }))
       )
-    }
-  }
+    )
+    .digest("hex")
 }
 
 export function inferSourceMimeType(path: string) {
