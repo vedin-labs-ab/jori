@@ -75,7 +75,7 @@ function ExpandableText({
             "cursor-pointer rounded-sm p-2 outline-none transition select-none",
             "focus-visible:ring-2 focus-visible:ring-ring/30",
             expanded
-              ? "-mx-2 -mb-2 -mt-1 text-primary"
+              ? "-mx-2 -mb-2 -mt-1 text-primary underline-offset-4 hover:underline"
               : cn(
                   "absolute right-0 bottom-0 -m-2 text-muted-foreground",
                   "group-hover/expandable:text-primary",
