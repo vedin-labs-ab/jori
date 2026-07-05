@@ -65,7 +65,6 @@ function ArtifactListView({ tenantId }: { tenantId: string }) {
       artifactList={artifactList}
       artifacts={pagination.visibleRows}
       deletingArtifactId={deletion.deletingArtifactId}
-      deleteError={deletion.deleteError}
       filter={filter}
       hasFilters={hasFilters}
       now={now}

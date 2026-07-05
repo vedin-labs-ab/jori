@@ -8,7 +8,7 @@ const gmailConfig = {
   action: "Connect Gmail",
   connectedDetail:
     "Connected for you only. Milo can read and reply to your email when you ask.",
-  connectError: "Could not start the Gmail integration.",
+  connectError: "Couldn't start the Gmail integration.",
   emptyDetail:
     "Connect your Gmail account. This connects only you, not the whole organization.",
   installPath: "/gmail/install",
@@ -25,7 +25,7 @@ const calendarConfig = {
   action: "Connect Calendar",
   connectedDetail:
     "Connected for you only. Milo can read, create, and update your events when you ask.",
-  connectError: "Could not start the Google Calendar integration.",
+  connectError: "Couldn't start the Google Calendar integration.",
   emptyDetail:
     "Connect your Google Calendar. This connects only you, not the whole organization.",
   installPath: "/google-calendar/install",

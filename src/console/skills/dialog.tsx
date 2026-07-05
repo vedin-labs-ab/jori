@@ -4,7 +4,6 @@ import {
   integrations,
 } from "@contracts/integrations"
 import { Info, Loader2 } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Combobox,
@@ -49,7 +48,6 @@ const skillCategoryOptions = [
 ]
 
 export function SkillDialog({
-  error,
   isOpen,
   isSaving,
   onOpenChange,
@@ -58,7 +56,6 @@ export function SkillDialog({
   skill,
   values,
 }: {
-  error: string | undefined
   isOpen: boolean
   isSaving: boolean
   onOpenChange: (isOpen: boolean) => void
@@ -122,13 +119,6 @@ export function SkillDialog({
             value={values.body}
           />
         </div>
-
-        {error === undefined ? null : (
-          <Alert variant="destructive">
-            <AlertTitle>Could not save skill</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         <DialogFooter>
           <Button type="button" onClick={onSave} disabled={isSaving}>

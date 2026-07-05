@@ -8,7 +8,6 @@ import {
   useEffect,
   useState,
 } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
@@ -85,18 +84,6 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
         setFilter={toolbar.setFilter}
         setQuery={toolbar.setQuery}
       />
-      {editor.deleteError === undefined ? null : (
-        <Alert variant="destructive">
-          <AlertTitle>Could not delete automation</AlertTitle>
-          <AlertDescription>{editor.deleteError}</AlertDescription>
-        </Alert>
-      )}
-      {editor.controlError === undefined ? null : (
-        <Alert variant="destructive">
-          <AlertTitle>Could not update automation</AlertTitle>
-          <AlertDescription>{editor.controlError}</AlertDescription>
-        </Alert>
-      )}
       <AutomationContent
         editor={editor}
         hasFilters={hasFilters}

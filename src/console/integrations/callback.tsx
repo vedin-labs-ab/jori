@@ -1,137 +1,139 @@
-import { CheckCircle2 } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import {
-  type IntegrationCallbackIntegration,
-  type IntegrationCallbackStatus,
-  useIntegrationCallbackStatuses,
-} from "./card/status"
+import { useEffect } from "react"
+import { toast } from "sonner"
 
-type VisibleCallbackStatus = Exclude<IntegrationCallbackStatus, null>
-
-const integrationCallbackAlerts = [
-  callbackAlert(
+const integrationCallbackToasts = [
+  callbackToast(
     "slack",
     "connected",
     "Slack connected",
     "Milo can now respond to mentions and search context in your Slack workspace."
   ),
-  callbackAlert(
+  callbackToast(
     "linear",
     "connected",
     "Linear connected",
     "Milo can now respond to mentions and comment on Linear issues."
   ),
-  callbackAlert(
+  callbackToast(
     "microsoftEmail",
     "connected",
     "Outlook Mail connected",
     "Milo can now work with your Outlook mail when you ask."
   ),
-  callbackAlert(
+  callbackToast(
     "microsoftCalendar",
     "connected",
     "Microsoft Calendar connected",
     "Milo can now work with your Microsoft calendar when you ask."
   ),
-  callbackAlert(
+  callbackToast(
     "github",
     "connected",
     "GitHub connected",
     "Milo can now respond to mentions in GitHub issues and pull requests."
   ),
-  callbackAlert(
+  callbackToast(
     "gmail",
     "connected",
     "Gmail connected",
     "Milo can now work with your Gmail when you ask."
   ),
-  callbackAlert(
+  callbackToast(
     "googleCalendar",
     "connected",
     "Google Calendar connected",
     "Milo can now work with your Google Calendar when you ask."
   ),
-  callbackAlert(
+  callbackToast(
+    "notion",
+    "connected",
+    "Notion connected",
+    "Milo can now work with the Notion pages and databases you share."
+  ),
+  callbackToast(
     "slack",
     "error",
     "Slack integration failed",
     "Slack didn't finish connecting. Try again, and check the Slack app's OAuth settings if it keeps failing."
   ),
-  callbackAlert(
+  callbackToast(
     "linear",
     "error",
     "Linear integration failed",
     "Linear didn't finish connecting. Try again, and check the Linear OAuth app settings if it keeps failing."
   ),
-  callbackAlert(
+  callbackToast(
     "microsoftEmail",
     "error",
     "Outlook Mail integration failed",
     "Microsoft didn't finish connecting. Try again, and check the Microsoft app permissions if it keeps failing."
   ),
-  callbackAlert(
+  callbackToast(
     "microsoftCalendar",
     "error",
     "Microsoft Calendar integration failed",
     "Microsoft didn't finish connecting. Try again, and check the Microsoft app permissions if it keeps failing."
   ),
-  callbackAlert(
+  callbackToast(
     "github",
     "error",
     "GitHub integration failed",
     "GitHub didn't finish installing the app. Try again, and check the GitHub App settings if it keeps failing."
   ),
-  callbackAlert(
+  callbackToast(
     "gmail",
     "error",
     "Gmail integration failed",
     "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
   ),
-  callbackAlert(
+  callbackToast(
     "googleCalendar",
     "error",
     "Google Calendar integration failed",
     "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
   ),
+  callbackToast(
+    "notion",
+    "error",
+    "Notion integration failed",
+    "Notion didn't finish connecting. Try again, and check the Notion integration settings if it keeps failing."
+  ),
 ]
 
-function callbackAlert(
-  integration: IntegrationCallbackIntegration,
-  status: VisibleCallbackStatus,
+function callbackToast(
+  integration: string,
+  status: "connected" | "error",
   title: string,
   description: string
 ) {
   return { description, integration, status, title }
 }
 
-export function IntegrationCallbackAlerts() {
-  const statuses = useIntegrationCallbackStatuses()
+export function IntegrationCallbackToasts() {
+  useEffect(showIntegrationCallbackToasts, [])
 
-  return integrationCallbackAlerts.map((alert) => (
-    <CallbackAlert
-      key={`${alert.integration}-${alert.status}`}
-      alert={alert}
-      visibleStatus={statuses[alert.integration]}
-    />
-  ))
+  return null
 }
 
-function CallbackAlert({
-  alert,
-  visibleStatus,
-}: {
-  alert: ReturnType<typeof callbackAlert>
-  visibleStatus: IntegrationCallbackStatus
-}) {
-  if (visibleStatus !== alert.status) {
-    return null
+function showIntegrationCallbackToasts() {
+  const url = new URL(window.location.href)
+  const callbacks = integrationCallbackToasts.filter(
+    (callback) => url.searchParams.get(callback.integration) === callback.status
+  )
+
+  if (callbacks.length === 0) {
+    return
   }
 
-  return (
-    <Alert variant={alert.status === "error" ? "destructive" : undefined}>
-      {alert.status === "connected" ? <CheckCircle2 /> : null}
-      <AlertTitle>{alert.title}</AlertTitle>
-      <AlertDescription>{alert.description}</AlertDescription>
-    </Alert>
-  )
+  for (const callback of callbacks) {
+    const show = callback.status === "connected" ? toast.success : toast.error
+
+    show(callback.title, {
+      description: callback.description,
+      id: `${callback.integration}-${callback.status}`,
+    })
+    url.searchParams.delete(callback.integration)
+  }
+
+  window.history.replaceState(window.history.state, "", url)
 }

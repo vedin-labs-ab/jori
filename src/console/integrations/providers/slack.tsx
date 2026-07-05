@@ -8,7 +8,7 @@ const slackConfig = {
   action: "Connect Slack",
   connectedDetail:
     "Milo responds to mentions, searches conversation context, and replies in threads.",
-  connectError: "Could not start the Slack integration.",
+  connectError: "Couldn't start the Slack integration.",
   emptyDetail:
     "Install the Slack app so Milo can respond to mentions where your team talks.",
   installPath: "/slack/install",

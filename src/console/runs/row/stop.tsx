@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { api } from "../../../../convex/_generated/api"
+import { showErrorToast } from "../../shared/error"
 
 type RunId = FunctionArgs<typeof api.runs.control.stop>["runId"]
 
@@ -32,8 +33,10 @@ export function StopExecution({
   runId: string
   tenantId: string
 }) {
-  const { error, isOpen, isStopping, setOpen, stopExecution } =
-    useStopExecution({ runId, tenantId })
+  const { isOpen, isStopping, setOpen, stopExecution } = useStopExecution({
+    runId,
+    tenantId,
+  })
 
   return (
     <AlertDialog
@@ -70,11 +73,6 @@ export function StopExecution({
             Milo stops working immediately and the run can't resume. The trace
             so far is kept.
           </AlertDialogDescription>
-          {error === undefined ? null : (
-            <p className="text-destructive text-xs/relaxed" role="alert">
-              {error}
-            </p>
-          )}
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isStopping}>Cancel</AlertDialogCancel>
@@ -107,15 +105,7 @@ function useStopExecution({
   const stop = useMutation(api.runs.control.stop)
   const [isOpen, setIsOpen] = useState(false)
   const [isStopping, setIsStopping] = useState(false)
-  const [error, setError] = useState<string>()
   const isStoppingRef = useRef(false)
-
-  const setOpen = (open: boolean) => {
-    setIsOpen(open)
-    if (open) {
-      setError(undefined)
-    }
-  }
 
   const stopExecution = async () => {
     if (isStoppingRef.current) {
@@ -123,7 +113,6 @@ function useStopExecution({
     }
 
     isStoppingRef.current = true
-    setError(undefined)
     setIsStopping(true)
 
     try {
@@ -131,18 +120,14 @@ function useStopExecution({
         runId: runId as RunId,
         tenantId,
       })
-      setIsOpen(false)
     } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "The run could not be stopped."
-      )
+      showErrorToast(caught, "Couldn't stop the run.")
     } finally {
       isStoppingRef.current = false
       setIsStopping(false)
+      setIsOpen(false)
     }
   }
 
-  return { error, isOpen, isStopping, setOpen, stopExecution }
+  return { isOpen, isStopping, setOpen: setIsOpen, stopExecution }
 }

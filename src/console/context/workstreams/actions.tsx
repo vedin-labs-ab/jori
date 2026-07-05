@@ -1,6 +1,7 @@
 import { useMutation } from "convex/react"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
+import { showErrorToast } from "../../shared/error"
 import { type Workstream } from "./types"
 
 // One action vocabulary for the detail dialog. Adoption decisions come first.
@@ -45,12 +46,17 @@ export function WorkstreamActions({
   const reopen = useMutation(api.deduction.console.corrections.reopen)
   const restore = useMutation(api.deduction.console.corrections.restore)
   const target = { tenantId, workstreamId: workstream.id }
+  const runAction = (mutation: (args: typeof target) => Promise<unknown>) => {
+    void mutation(target).catch((error: unknown) => {
+      showErrorToast(error, "Couldn't update the workstream.")
+    })
+  }
   const run: Record<WorkstreamAction, () => void> = {
-    confirm: () => void confirm(target),
-    reject: () => void reject(target),
-    archive: () => void archive(target),
-    reopen: () => void reopen(target),
-    restore: () => void restore(target),
+    confirm: () => runAction(confirm),
+    reject: () => runAction(reject),
+    archive: () => runAction(archive),
+    reopen: () => runAction(reopen),
+    restore: () => runAction(restore),
   }
   const actions = actionsFor(workstream.status)
 

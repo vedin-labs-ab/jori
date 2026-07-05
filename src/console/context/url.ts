@@ -2,6 +2,7 @@ import {
   parseWebsiteAddress,
   type WebsiteAddress,
 } from "../../../contracts/website"
+import { showErrorToast } from "../shared/error"
 import { type ContextFacts } from "./types"
 
 export type WebsiteItem = WebsiteAddress & {
@@ -43,6 +44,30 @@ export function sourceLabel(value: string) {
 
 export function websiteDomainKey(value: string | undefined) {
   return parseWebsiteAddress(value)?.key ?? null
+}
+
+export function reportWebsiteStartError(
+  caught: unknown,
+  setInputError: (error: string | null) => void
+) {
+  const inputError = readWebsiteInputError(caught)
+
+  if (inputError === null) {
+    showErrorToast(caught, "Couldn't start the extraction.")
+  } else {
+    setInputError(inputError)
+  }
+}
+
+function readWebsiteInputError(caught: unknown) {
+  if (
+    caught instanceof Error &&
+    caught.message.includes("website must target a public website")
+  ) {
+    return "Enter a public website, like example.com."
+  }
+
+  return null
 }
 
 function parseUrl(value: string) {

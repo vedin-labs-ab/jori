@@ -38,7 +38,6 @@ export function ArtifactReadyView({
   artifactList,
   artifacts,
   deletingArtifactId,
-  deleteError,
   filter,
   hasFilters,
   now,
@@ -53,7 +52,6 @@ export function ArtifactReadyView({
   artifactList: ArtifactListResult
   artifacts: ArtifactSummary[]
   deletingArtifactId: string | undefined
-  deleteError: string | undefined
   hasFilters: boolean
   now: number
   onDelete: (artifact: ArtifactSummary) => void
@@ -69,7 +67,6 @@ export function ArtifactReadyView({
         onQueryChange={onQueryChange}
         query={query}
       />
-      <ArtifactActionError message={deleteError} />
       <ArtifactListBody
         artifactList={artifactList}
         artifacts={artifacts}
@@ -84,19 +81,6 @@ export function ArtifactReadyView({
         <ConsoleListPager pagination={pagination} />
       ) : null}
     </ConsolePageLayout>
-  )
-}
-
-function ArtifactActionError({ message }: { message: string | undefined }) {
-  if (message === undefined) {
-    return null
-  }
-
-  return (
-    <Alert variant="destructive">
-      <AlertTitle>Could not update artifact</AlertTitle>
-      <AlertDescription>{message}</AlertDescription>
-    </Alert>
   )
 }
 

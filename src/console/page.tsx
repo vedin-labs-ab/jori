@@ -10,7 +10,7 @@ import { type ReactNode, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { api } from "../../convex/_generated/api"
-import { IntegrationCallbackAlerts } from "./integrations/callback"
+import { IntegrationCallbackToasts } from "./integrations/callback"
 import { OnboardingGate } from "./onboarding/gate"
 import { FullscreenSkeletonLoader } from "./shared/loading"
 import { ConsoleShell, PublicConsoleFrame } from "./shell"
@@ -22,12 +22,10 @@ export type ActiveOrganization = NonNullable<
 export function ConsolePage({
   children,
   chrome = "shell",
-  chromeContent = <IntegrationCallbackAlerts />,
   loadingFallback,
 }: {
   children: (organization: ActiveOrganization) => ReactNode
   chrome?: "shell" | "none"
-  chromeContent?: ReactNode
   loadingFallback?: ReactNode
 }) {
   const { isLoaded, isSignedIn } = useAuth()
@@ -38,24 +36,25 @@ export function ConsolePage({
   }
 
   return (
-    <ConsoleContent
-      chrome={chrome}
-      chromeContent={chromeContent}
-      isClerkLoaded={isLoaded}
-      isConvexAuthenticated={isAuthenticated}
-      isConvexAuthLoading={isConvexAuthLoading}
-      isSignedIn={isSignedIn}
-      loadingFallback={loadingFallback}
-    >
-      {children}
-    </ConsoleContent>
+    <>
+      {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
+      <ConsoleContent
+        chrome={chrome}
+        isClerkLoaded={isLoaded}
+        isConvexAuthenticated={isAuthenticated}
+        isConvexAuthLoading={isConvexAuthLoading}
+        isSignedIn={isSignedIn}
+        loadingFallback={loadingFallback}
+      >
+        {children}
+      </ConsoleContent>
+    </>
   )
 }
 
 function ConsoleContent({
   children,
   chrome,
-  chromeContent,
   isClerkLoaded,
   isConvexAuthenticated,
   isConvexAuthLoading,
@@ -64,7 +63,6 @@ function ConsoleContent({
 }: {
   children: (organization: ActiveOrganization) => ReactNode
   chrome: "shell" | "none"
-  chromeContent: ReactNode | undefined
   isClerkLoaded: boolean
   isConvexAuthenticated: boolean
   isConvexAuthLoading: boolean
@@ -77,11 +75,7 @@ function ConsoleContent({
 
   if (!isSignedIn) {
     return (
-      <PublicConsoleFrame
-        chromeContent={chromeContent}
-        isLoaded={isClerkLoaded}
-        isSignedIn={isSignedIn}
-      >
+      <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
         <SignedOutView />
       </PublicConsoleFrame>
     )
@@ -93,11 +87,7 @@ function ConsoleContent({
 
   if (!isConvexAuthenticated) {
     return (
-      <PublicConsoleFrame
-        chromeContent={chromeContent}
-        isLoaded={isClerkLoaded}
-        isSignedIn={isSignedIn}
-      >
+      <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
         <Alert variant="destructive">
           <AlertTitle>Couldn't verify your session</AlertTitle>
           <AlertDescription>
@@ -109,11 +99,7 @@ function ConsoleContent({
   }
 
   return (
-    <SignedInView
-      chrome={chrome}
-      chromeContent={chromeContent}
-      loadingFallback={loadingFallback}
-    >
+    <SignedInView chrome={chrome} loadingFallback={loadingFallback}>
       {children}
     </SignedInView>
   )
@@ -144,12 +130,10 @@ function SignedOutView() {
 function SignedInView({
   children,
   chrome,
-  chromeContent,
   loadingFallback,
 }: {
   children: (organization: ActiveOrganization) => ReactNode
   chrome: "shell" | "none"
-  chromeContent: ReactNode | undefined
   loadingFallback: ReactNode | undefined
 }) {
   const { isLoaded, organization } = useOrganization()
@@ -160,11 +144,7 @@ function SignedInView({
 
   if (organization === undefined || organization === null) {
     return (
-      <PublicConsoleFrame
-        chromeContent={chromeContent}
-        isLoaded={isLoaded}
-        isSignedIn
-      >
+      <PublicConsoleFrame isLoaded={isLoaded} isSignedIn>
         <section className="grid max-w-xl gap-4">
           <div className="grid gap-1">
             <h1 className="text-2xl font-medium tracking-normal">
@@ -189,11 +169,7 @@ function SignedInView({
     </>
   )
 
-  return chrome === "shell" ? (
-    <ConsoleShell chromeContent={chromeContent}>{content}</ConsoleShell>
-  ) : (
-    content
-  )
+  return chrome === "shell" ? <ConsoleShell>{content}</ConsoleShell> : content
 }
 
 function ClerkIdentitySync({ tenantId }: { tenantId: string }) {

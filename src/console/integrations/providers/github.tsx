@@ -8,7 +8,7 @@ const githubConfig = {
   action: "Connect GitHub",
   connectedDetail:
     "Milo responds to mentions, reads the connected repositories, and replies in issue and pull request threads.",
-  connectError: "Could not start the GitHub integration.",
+  connectError: "Couldn't start the GitHub integration.",
   emptyDetail:
     "Install the GitHub App so Milo can respond to mentions in issues and pull requests.",
   installPath: "/github/install",
