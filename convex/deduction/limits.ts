@@ -27,6 +27,7 @@ export const maxConsolidationEfforts = 200
 export const maxEffortAnchors = 8
 export const maxEffortActors = 8
 export const maxBeliefAnchors = 12
+export const maxRollupSources = 8
 export const effortJournalTail = 2
 export const consolidationJournalTail = 12
 export const maxMemberEffortNames = 8

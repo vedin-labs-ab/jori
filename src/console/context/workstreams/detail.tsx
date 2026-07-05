@@ -1,5 +1,5 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
-import { useQuery } from "convex/react"
+import { usePaginatedQuery, useQuery } from "convex/react"
 import { ChevronDown, Lock } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
 import { SeparatorDot } from "../../shared/dot"
 import { IntegrationLogo } from "../../shared/logo/integration"
-import { Paged } from "../../shared/paging"
+import { PagedRemote } from "../../shared/paging"
 import { relativeTime } from "../../shared/time"
 import { Timeline } from "../../shared/timeline"
 import { ContextSectionTitle } from "../section"
@@ -63,10 +63,20 @@ function DetailBody({
   tenantId: string
   workstream: Workstream
 }) {
-  const detail = useQuery(api.deduction.console.queries.get, {
-    tenantId,
-    workstreamId: workstream.id,
-  })
+  const args = { tenantId, workstreamId: workstream.id }
+  const detail = useQuery(api.deduction.console.queries.get, args)
+  const sightings = usePaginatedQuery(
+    api.deduction.console.queries.sightings,
+    args,
+    { initialNumItems: 3 }
+  )
+  const history = usePaginatedQuery(
+    api.deduction.console.queries.history,
+    args,
+    {
+      initialNumItems: 3,
+    }
+  )
 
   return (
     <>
@@ -108,27 +118,39 @@ function DetailBody({
                 </div>
               </Section>
             )}
-            <CollapsibleSection count={detail.sightings.length} title="Sources">
-              <Paged items={detail.sightings}>
-                {(visible) => (
-                  <ul className="flex flex-col divide-y rounded-md border">
-                    {visible.map((sighting) => (
-                      <Sighting key={sighting.id} sighting={sighting} />
-                    ))}
-                  </ul>
-                )}
-              </Paged>
+            <CollapsibleSection count={detail.counts.sightings} title="Sources">
+              <PagedRemote
+                canLoadMore={sightings.status === "CanLoadMore"}
+                isLoading={sightings.status === "LoadingMore"}
+                loaded={sightings.results.length}
+                onLoadMore={(count) => sightings.loadMore(count)}
+                total={detail.counts.sightings}
+              >
+                <ul className="flex flex-col divide-y rounded-md border">
+                  {sightings.results.map((sighting) => (
+                    <Sighting key={sighting.id} sighting={sighting} />
+                  ))}
+                </ul>
+              </PagedRemote>
             </CollapsibleSection>
-            {detail.history.length === 0 ? null : (
-              <CollapsibleSection count={detail.history.length} title="History">
-                <Timeline
-                  entries={detail.history.map((entry) => ({
-                    id: entry.id,
-                    at: entry.createdAt,
-                    content: entry.entry,
-                  }))}
-                  now={Date.now()}
-                />
+            {detail.counts.history === 0 ? null : (
+              <CollapsibleSection count={detail.counts.history} title="History">
+                <PagedRemote
+                  canLoadMore={history.status === "CanLoadMore"}
+                  isLoading={history.status === "LoadingMore"}
+                  loaded={history.results.length}
+                  onLoadMore={(count) => history.loadMore(count)}
+                  total={detail.counts.history}
+                >
+                  <Timeline
+                    entries={history.results.map((entry) => ({
+                      id: entry.id,
+                      at: entry.createdAt,
+                      content: entry.entry,
+                    }))}
+                    now={Date.now()}
+                  />
+                </PagedRemote>
               </CollapsibleSection>
             )}
           </>

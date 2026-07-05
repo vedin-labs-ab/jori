@@ -6,7 +6,7 @@ import {
   maxObservedAt,
   type Sighting,
 } from "../engine/rules"
-import { bumpEffort, writeEvidence } from "../engine/sightings"
+import { bumpEffort, moveEffort, writeEvidence } from "../engine/sightings"
 import { type statCounts } from "../engine/wire"
 import { type EffortOp } from "./ops"
 
@@ -30,6 +30,7 @@ export async function applyCreate(
     summary: op.summary,
     anchors: [],
     actors: [],
+    sources: [],
     seenAt: maxObservedAt(sightings),
     createdAt: state.now,
     updatedAt: state.now,
@@ -109,6 +110,7 @@ export async function applyJournal(
     passId: pass._id,
     entry: op.entry,
     createdAt: state.now,
+    workstreamId: effort.workstreamId,
   })
   state.counts.updated += 1
   await recordSightings(ctx, pass, effort._id, sightings, op.entry, state.now)
@@ -138,11 +140,16 @@ export async function applyMerge(
     return
   }
 
-  await repointEffortRows(ctx, effort._id, into._id)
-
   if (into.workstreamId === undefined && effort.workstreamId !== undefined) {
-    await ctx.db.patch(into._id, { workstreamId: effort.workstreamId })
+    await moveEffort(ctx, into, effort.workstreamId, state.now)
   }
+
+  await repointEffortRows(
+    ctx,
+    effort._id,
+    into._id,
+    into.workstreamId ?? effort.workstreamId
+  )
 
   await ctx.db.patch(effort._id, {
     supersededBy: into._id,
@@ -155,7 +162,8 @@ export async function applyMerge(
 async function repointEffortRows(
   ctx: MutationCtx,
   from: Id<"efforts">,
-  to: Id<"efforts">
+  to: Id<"efforts">,
+  workstreamId: Id<"beliefs"> | undefined
 ) {
   const entries = await ctx.db
     .query("journal")
@@ -165,7 +173,7 @@ async function repointEffortRows(
     .collect()
 
   for (const entry of entries) {
-    await ctx.db.patch(entry._id, { effortId: to })
+    await ctx.db.patch(entry._id, { effortId: to, workstreamId })
   }
 
   const subjects = await ctx.db
@@ -176,7 +184,10 @@ async function repointEffortRows(
     .collect()
 
   for (const row of subjects) {
-    await ctx.db.patch(row._id, { subject: { kind: "effort", effortId: to } })
+    await ctx.db.patch(row._id, {
+      subject: { kind: "effort", effortId: to },
+      workstreamId,
+    })
   }
 
   const references = await ctx.db
@@ -199,16 +210,19 @@ async function recordSightings(
   fallbackWhy: string,
   now: number
 ) {
+  const effort = await ctx.db.get(effortId)
+
+  if (effort === null) {
+    return
+  }
+
   await writeEvidence(
     ctx,
     pass,
     { kind: "effort", effortId },
     sightings,
-    fallbackWhy
+    fallbackWhy,
+    effort.workstreamId
   )
-  const effort = await ctx.db.get(effortId)
-
-  if (effort !== null) {
-    await bumpEffort(ctx, effort, sightings, now)
-  }
+  await bumpEffort(ctx, effort, sightings, now)
 }

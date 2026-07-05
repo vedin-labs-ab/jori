@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { actorValidator } from "../shared/actor"
+import { integrationValidator } from "../shared/integrations"
 
 // Kinds the pipeline can deduce. Keep the array, the validator, and the
 // beliefs union members in sync; schema.test.ts pins the equivalence.
@@ -39,6 +40,7 @@ export const efforts = defineTable({
   summary: v.string(),
   anchors: v.array(v.string()),
   actors: v.array(v.string()),
+  sources: v.array(integrationValidator),
   workstreamId: v.optional(v.id("beliefs")),
   supersededBy: v.optional(v.id("efforts")),
   seenAt: v.number(),
@@ -58,8 +60,11 @@ const beliefFields = {
   status: beliefStatus,
   supersededBy: v.optional(v.id("beliefs")),
   lockedBy: v.optional(actorValidator),
-  // Rollup of assigned efforts' anchors; applier-derived, never judge-supplied.
+  // Rollups of assigned efforts' anchors and source integrations;
+  // applier-derived, never judge-supplied. Sources power the console chips
+  // without an evidence walk.
   anchors: v.optional(v.array(v.string())),
+  sources: v.optional(v.array(integrationValidator)),
   seenAt: v.number(), // latest supporting sighting; applier-derived
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -111,10 +116,15 @@ export const evidence = defineTable({
   reference: evidenceReference,
   why: v.string(),
   observedAt: v.number(),
+  // Read-model stamp on effort-subject rows: the owning workstream, kept in
+  // step with membership so the console pages one index range per
+  // workstream. Belief-subject rows carry no stamp.
+  workstreamId: v.optional(v.id("beliefs")),
 })
   .index("by_subject_belief_id", ["subject.beliefId"])
   .index("by_subject_effort_id", ["subject.effortId"])
   .index("by_reference_effort_id", ["reference.effortId"])
+  .index("by_workstream_and_observed_at", ["workstreamId", "observedAt"])
 
 // Dated narrative per effort, append-only. A workstream's timeline is a view
 // over its assigned efforts' journals, so narrative moves with membership.
@@ -124,9 +134,13 @@ export const journal = defineTable({
   passId: v.id("passes"),
   entry: v.string(),
   createdAt: v.number(),
+  // Same read-model stamp as evidence: the owning workstream at write or
+  // last membership change.
+  workstreamId: v.optional(v.id("beliefs")),
 })
   .index("by_effort_and_created_at", ["effortId", "createdAt"])
   .index("by_tenant_and_created_at", ["tenantId", "createdAt"])
+  .index("by_workstream_and_created_at", ["workstreamId", "createdAt"])
 
 export const passStatus = v.union(
   v.literal("running"),

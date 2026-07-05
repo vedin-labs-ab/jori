@@ -8,12 +8,8 @@ import {
   type Sighting,
   statusAfterTransition,
 } from "../engine/rules"
-import { writeEvidence } from "../engine/sightings"
-import {
-  adoptCitedEfforts,
-  assignEffort,
-  type WorkstreamApplyState,
-} from "./members"
+import { moveEffort, writeEvidence } from "../engine/sightings"
+import { adoptCitedEfforts, type WorkstreamApplyState } from "./members"
 import { type WorkstreamOp } from "./ops"
 
 export async function applyCreate(
@@ -202,7 +198,7 @@ export async function applyMerge(
     .collect()
 
   for (const member of members) {
-    await assignEffort(ctx, state, member, into._id)
+    await moveEffort(ctx, member, into._id, state.now)
   }
 
   await ctx.db.patch(belief._id, {
