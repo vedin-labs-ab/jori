@@ -2,8 +2,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-const fadeRampPx = 64
-const fadeOverlapPx = 10
+const fadeRampPx = 56
+const fadeOverlapPx = 13
 
 type ExpandableTextProps = {
   children: React.ReactNode
@@ -72,14 +72,14 @@ function ExpandableText({
           aria-controls={contentId}
           aria-expanded={expanded}
           className={cn(
-            "cursor-pointer rounded-sm p-2 text-muted-foreground outline-none",
-            "transition select-none focus-visible:text-primary",
+            "cursor-pointer rounded-sm p-2 outline-none transition select-none",
             "focus-visible:ring-2 focus-visible:ring-ring/30",
             expanded
-              ? "-mx-2 -mb-2 -mt-1 hover:text-primary"
+              ? "-mx-2 -mb-2 -mt-1 text-primary"
               : cn(
-                  "absolute right-0 bottom-0 -m-2",
-                  "group-hover/expandable:text-primary"
+                  "absolute right-0 bottom-0 -m-2 text-muted-foreground",
+                  "group-hover/expandable:text-primary",
+                  "focus-visible:text-primary"
                 )
           )}
           data-slot="expandable-text-trigger"
