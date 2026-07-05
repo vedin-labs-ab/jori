@@ -9,15 +9,11 @@ import {
 } from "../credentials"
 import { createSignedInstallState } from "../install"
 import { type GoogleIntegration } from "./config"
-import {
-  findExistingGoogleIntegration,
-  getGoogleIntegrationScope,
-} from "./scope"
+import { findExistingGoogleIntegration } from "./scope"
 
 const googleIntegration = v.union(
   v.literal("gmail"),
-  v.literal("googleCalendar"),
-  v.literal("googleDrive")
+  v.literal("googleCalendar")
 )
 
 export const createGmailInstallState = mutation({
@@ -37,16 +33,6 @@ export const createGoogleCalendarInstallState = mutation({
   },
   handler: async (ctx, args) => {
     return await createSignedInstallState(ctx, "googleCalendar", args)
-  },
-})
-
-export const createGoogleDriveInstallState = mutation({
-  args: {
-    tenantId: v.string(),
-    returnUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await createSignedInstallState(ctx, "googleDrive", args)
   },
 })
 
@@ -139,11 +125,8 @@ function createGoogleIntegrationValues(
   return {
     tenantId: args.tenantId,
     integration: args.integration,
-    scope: getGoogleIntegrationScope(args.integration),
-    ownerId:
-      getGoogleIntegrationScope(args.integration) === "user"
-        ? args.createdBy
-        : undefined,
+    scope: "user" as const,
+    ownerId: args.createdBy,
     externalId: args.profile.id,
     name: args.profile.name,
     email: args.profile.email,

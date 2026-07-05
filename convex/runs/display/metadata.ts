@@ -39,10 +39,6 @@ export function createSourceMetadata(args: {
     return calendarMetadata(args.data)
   }
 
-  if (args.integration === "googleDrive") {
-    return driveMetadata(args.data)
-  }
-
   return []
 }
 
@@ -174,19 +170,6 @@ function calendarMetadata(data: unknown) {
         readString(data, "eventName") ??
         readString(data, "summary")
     ),
-  ])
-}
-
-function driveMetadata(data: unknown) {
-  const folder = readObject(data, "folder")
-  const file = readObject(data, "file")
-
-  return compactItems([
-    item(
-      "folder",
-      readString(folder, "name") ?? readString(data, "folderName")
-    ),
-    item("file", readString(file, "name") ?? readString(data, "fileName")),
   ])
 }
 

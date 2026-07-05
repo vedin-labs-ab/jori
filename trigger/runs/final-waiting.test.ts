@@ -70,10 +70,10 @@ test("final visible actions think after one of several offers resolves", async (
 function offerHandoffSequence(): RunHandoffs[] {
   return [
     emptyHandoffs(),
-    { approvals: [], offers: [githubOffer("pending"), driveOffer()] },
-    { approvals: [], offers: [driveOffer()] },
-    { approvals: [], offers: [driveOffer()] },
-    { approvals: [], offers: [driveOffer()] },
+    { approvals: [], offers: [githubOffer("pending"), notionOffer()] },
+    { approvals: [], offers: [notionOffer()] },
+    { approvals: [], offers: [notionOffer()] },
+    { approvals: [], offers: [notionOffer()] },
     emptyHandoffs(),
   ]
 }
@@ -81,7 +81,7 @@ function offerHandoffSequence(): RunHandoffs[] {
 function resolvedOfferSubjects(): RunHandoffs {
   return {
     approvals: [],
-    offers: [githubOffer("cancelled"), driveOffer()],
+    offers: [githubOffer("cancelled"), notionOffer()],
   }
 }
 
@@ -179,8 +179,8 @@ function githubOffer(status: "cancelled" | "pending") {
   return offerHandoff("offer_github", "github", status, 1000)
 }
 
-function driveOffer() {
-  return offerHandoff("offer_drive", "googleDrive", "pending", 2000)
+function notionOffer() {
+  return offerHandoff("offer_notion", "notion", "pending", 2000)
 }
 
 function offerHandoff(

@@ -63,7 +63,6 @@ export async function createSignedInstallState(
       return await createSignedNotionState(state)
     case "gmail":
     case "googleCalendar":
-    case "googleDrive":
       return await createSignedGoogleState({ integration, ...state })
     case "microsoftEmail":
     case "microsoftCalendar":
@@ -83,7 +82,6 @@ export function installPathForIntegration(integration: Integration) {
       return "/notion/install"
     case "gmail":
     case "googleCalendar":
-    case "googleDrive":
       return googleIntegrationConfigs[integration].installPath
     case "microsoftEmail":
     case "microsoftCalendar":

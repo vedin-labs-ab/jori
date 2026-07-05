@@ -4,7 +4,6 @@ const integrationCallbackIntegrations = [
   "gmail",
   "github",
   "googleCalendar",
-  "googleDrive",
   "linear",
   "microsoftCalendar",
   "microsoftEmail",

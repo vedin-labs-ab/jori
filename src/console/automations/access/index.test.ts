@@ -15,17 +15,17 @@ describe("automation integration marker parsing", () => {
   test("recognizes case-insensitive aliases in mention markers", () => {
     expect(
       findAutomationSurfaceMentions(
-        "Review @github, write a doc in @google drive, then email via @outlook."
+        "Review @github, book time in @google calendar, then email via @outlook."
       )
-    ).toEqual(["github", "googleDrive", "microsoftEmail"])
+    ).toEqual(["github", "googleCalendar", "microsoftEmail"])
   })
 
   test("recognizes bare integration names as markers", () => {
     expect(
       findAutomationSurfaceMentions(
-        "Review github, write a doc in google drive, then email via outlook."
+        "Review github, book time in google calendar, then email via outlook."
       )
-    ).toEqual(["github", "googleDrive", "microsoftEmail"])
+    ).toEqual(["github", "googleCalendar", "microsoftEmail"])
   })
 
   test("normalizes recognized markers to canonical labels", () => {
@@ -116,9 +116,7 @@ describe("automation integration marker autocomplete", () => {
 
     expect(
       getAutomationSurfaceSuggestions("go").map((item) => item.integration)
-    ).toEqual(
-      expect.arrayContaining(["gmail", "googleCalendar", "googleDrive"])
-    )
+    ).toEqual(expect.arrayContaining(["gmail", "googleCalendar"]))
   })
 
   test("replaces the active marker with a canonical mention", () => {

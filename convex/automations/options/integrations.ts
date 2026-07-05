@@ -9,11 +9,7 @@ import {
   searchGitHubPullRequests,
   searchGitHubRepositories,
 } from "./github"
-import {
-  searchGmailLabels,
-  searchGoogleCalendars,
-  searchGoogleDriveFiles,
-} from "./google"
+import { searchGmailLabels, searchGoogleCalendars } from "./google"
 import {
   searchLinearIssues,
   searchLinearProjects,
@@ -103,12 +99,6 @@ async function loadIntegrationOptions(args: {
   if (args.source === "microsoftCalendar.calendars") {
     return await searchMicrosoftCalendars(loaderArgs)
   }
-  if (args.source === "googleDrive.files") {
-    return await searchGoogleDriveFiles(loaderArgs, "file")
-  }
-  if (args.source === "googleDrive.folders") {
-    return await searchGoogleDriveFiles(loaderArgs, "folder")
-  }
   if (args.source === "notion.pages") {
     return await searchNotionObjects(loaderArgs)
   }
@@ -140,10 +130,6 @@ function optionUnavailableMessage(source: AutomationEventOptionSource) {
       "Could not load Google calendars. Check the Google Calendar connection and try again.",
     "microsoftCalendar.calendars":
       "Could not load Microsoft calendars. Check the Microsoft Calendar connection and try again.",
-    "googleDrive.files":
-      "Could not load Google Drive files. Check the Google Drive connection and try again.",
-    "googleDrive.folders":
-      "Could not load Google Drive folders. Check the Google Drive connection and try again.",
     "notion.pages":
       "Could not load Notion pages. Check the Notion connection and try again.",
   }

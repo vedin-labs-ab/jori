@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
 import { IntegrationCard, type IntegrationCardConfig } from "../card/card"
-import { getAccountHeadline, getWorkspaceHeadline } from "../card/headline"
+import { getAccountHeadline } from "../card/headline"
 
 const gmailConfig = {
   action: "Connect Gmail",
@@ -38,23 +38,6 @@ const calendarConfig = {
   integration: "googleCalendar",
 } satisfies IntegrationCardConfig
 
-const driveConfig = {
-  action: "Connect Drive",
-  connectedDetail:
-    "Shared with your organization. Milo can search, read, create, and update files when you ask.",
-  connectError: "Could not start the Google Drive integration.",
-  emptyDetail:
-    "Connect Google Drive for your organization. Any run can use it when you ask.",
-  installPath: "/google-drive/install",
-  label: "Google Drive",
-  loading: "Connecting Drive",
-  logo: {
-    alt: "Google Drive logo",
-    src: "https://svgl.app/library/drive.svg",
-  },
-  integration: "googleDrive",
-} satisfies IntegrationCardConfig
-
 export function GmailIntegration({
   permissions,
   tenantId,
@@ -74,38 +57,6 @@ export function GmailIntegration({
       config={gmailConfig}
       createInstallState={createInstallState}
       headline={getAccountHeadline(status, gmailConfig.label)}
-      permissions={permissions}
-      status={status}
-      tenantId={tenantId}
-    />
-  )
-}
-
-export function GoogleDriveIntegration({
-  permissions,
-  tenantId,
-}: {
-  permissions: ToolPermissionController
-  tenantId: string
-}) {
-  const createInstallState = useMutation(
-    api.providers.google.install.createGoogleDriveInstallState
-  )
-  const status = useQuery(api.integrations.status.getGoogleDriveStatus, {
-    tenantId,
-  })
-
-  return (
-    <IntegrationCard
-      config={driveConfig}
-      createInstallState={createInstallState}
-      headline={getWorkspaceHeadline(
-        status,
-        driveConfig.label,
-        "No Drive connected",
-        status?.name,
-        status?.email
-      )}
       permissions={permissions}
       status={status}
       tenantId={tenantId}

@@ -175,19 +175,3 @@ test("uses event name for calendar events", () => {
     })
   ).toEqual([{ type: "event", label: "Design review" }])
 })
-
-test("uses folder and file for Google Drive events", () => {
-  expect(
-    createSourceMetadata({
-      integration: "googleDrive",
-      event: "folder.file.created",
-      data: {
-        folder: { name: "Finance" },
-        file: { name: "invoice.pdf" },
-      },
-    })
-  ).toEqual([
-    { type: "folder", label: "Finance" },
-    { type: "file", label: "invoice.pdf" },
-  ])
-})

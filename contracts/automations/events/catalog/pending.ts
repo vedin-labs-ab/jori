@@ -4,7 +4,6 @@ import {
   numberParameter,
   optionParameter,
   pendingEvent,
-  textParameter,
 } from "./builders"
 import { type AutomationEventParameter } from "./types"
 
@@ -125,35 +124,6 @@ export const pendingAutomationEventCatalog = [
           max: 1440,
           step: 1,
           description: "Minutes before the event starts.",
-        }),
-      ],
-    }),
-  ]),
-  integration("googleDrive", [
-    pendingEvent("file.updated", {
-      label: "File updated",
-      description: "Runs when the selected Google Drive file changes.",
-      message:
-        "Google Drive event-triggered automations need Drive change subscriptions before they can run.",
-      parameters: [
-        optionParameter("file", "File", "Search Drive files", {
-          required: true,
-          source: "googleDrive.files",
-        }),
-      ],
-    }),
-    pendingEvent("folder.file.created", {
-      label: "File added to folder",
-      description: "Runs when a file is created in the selected Drive folder.",
-      message:
-        "Google Drive folder automations need Drive change subscriptions before they can run.",
-      parameters: [
-        optionParameter("folder", "Folder", "Search Drive folders", {
-          required: true,
-          source: "googleDrive.folders",
-        }),
-        textParameter("mimeType", "MIME type", "application/pdf", {
-          description: "Narrows runs to files of this MIME type.",
         }),
       ],
     }),

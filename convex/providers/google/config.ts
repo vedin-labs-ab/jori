@@ -8,7 +8,7 @@ export const googleOAuthCallbackPath = "/google/oauth/callback"
 
 const googleIdentityScopes = ["openid", "email", "profile"]
 
-export type GoogleIntegration = "gmail" | "googleCalendar" | "googleDrive"
+export type GoogleIntegration = "gmail" | "googleCalendar"
 
 export type GoogleIntegrationConfig = {
   callbackParam: GoogleIntegration
@@ -40,12 +40,5 @@ export const googleIntegrationConfigs = {
       ...googleIdentityScopes,
       "https://www.googleapis.com/auth/calendar.events",
     ],
-  },
-  googleDrive: {
-    callbackParam: "googleDrive",
-    callbackPath: googleOAuthCallbackPath,
-    installPath: "/google-drive/install",
-    integration: "googleDrive",
-    scopes: [...googleIdentityScopes, "https://www.googleapis.com/auth/drive"],
   },
 } satisfies Record<GoogleIntegration, GoogleIntegrationConfig>

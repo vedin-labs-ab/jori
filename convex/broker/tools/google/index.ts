@@ -8,7 +8,6 @@ import {
   setOptionalSearchParam,
 } from "../../../shared/input"
 import { type ProviderToolContext } from "../context"
-import { callGoogleDriveTool } from "./drive"
 import { getCalendarId } from "./format"
 import { callGmailTool } from "./gmail"
 
@@ -32,10 +31,6 @@ export async function callGoogleTool(
 
   if (tool.startsWith("google_calendar_")) {
     return await callGoogleCalendarTool(credentials.tokens.access, tool, args)
-  }
-
-  if (tool.startsWith("google_drive_")) {
-    return await callGoogleDriveTool(credentials.tokens.access, tool, args)
   }
 
   throw new Error(`Unknown Google tool: ${tool}`)

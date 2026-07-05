@@ -102,17 +102,15 @@ test("renders cancelled updates without offer actions", () => {
       name: "Albin Vedin",
     },
     expiresAt: 1_700_000_000_000,
-    integration: "googleDrive",
+    integration: "notion",
     status: "cancelled",
-    summary: "Google Drive is needed before I can read files.",
+    summary: "Notion is needed before I can read pages.",
     updatedAt: 1_699_999_000_000,
   })
   const card = message.blocks[0] as Record<string, unknown>
   const subtext = card.subtext as { text: string }
 
-  expect(message.text).toContain(
-    "Google Drive integration offer cancelled by Albin"
-  )
+  expect(message.text).toContain("Notion integration offer cancelled by Albin")
   expect(card).not.toHaveProperty("actions")
   expect(card.slack_icon).toEqual({ type: "icon", name: "archive" })
   expect(card.title).toMatchObject({
@@ -121,7 +119,7 @@ test("renders cancelled updates without offer actions", () => {
   })
   expect(card.subtitle).toMatchObject({
     type: "mrkdwn",
-    text: "Connect Google Drive",
+    text: "Connect Notion",
   })
   expect(subtext.text).toContain("Cancelled at <!date^1699999000^{time}|")
   expect(subtext.text).not.toContain("Ask Milo")
@@ -131,16 +129,16 @@ test("renders cancelled updates without offer actions", () => {
 test("renders terminal integration offer timestamps as footnotes", () => {
   const failed = createSlackIntegrationOfferMessage({
     expiresAt: 1_700_000_000_000,
-    integration: "googleDrive",
+    integration: "notion",
     status: "failed",
-    summary: "Google Drive is needed before I can read files.",
+    summary: "Notion is needed before I can read pages.",
     updatedAt: 1_699_999_000_000,
   }).blocks[0] as Record<string, unknown>
   const expired = createSlackIntegrationOfferMessage({
     expiresAt: 1_700_000_000_000,
-    integration: "googleDrive",
+    integration: "notion",
     status: "expired",
-    summary: "Google Drive is needed before I can read files.",
+    summary: "Notion is needed before I can read pages.",
   }).blocks[0] as Record<string, unknown>
 
   expect(JSON.stringify(failed.subtext)).toContain(

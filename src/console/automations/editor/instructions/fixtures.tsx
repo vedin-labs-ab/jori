@@ -13,13 +13,8 @@ const instructionToolPermissions = [
   ),
   toolPermission("slack", "conversations_history", "Read history", "read"),
   toolPermission("slack", "conversations_add_message", "Send message", "write"),
-  toolPermission("googleDrive", "google_drive_read_file", "Read file", "read"),
-  toolPermission(
-    "googleDrive",
-    "google_drive_create_file",
-    "Create file",
-    "write"
-  ),
+  toolPermission("notion", "notion_get_page", "Read page", "read"),
+  toolPermission("notion", "notion_create_page", "Create page", "write"),
 ] satisfies ToolPermission[]
 
 export function renderInstructionsField({

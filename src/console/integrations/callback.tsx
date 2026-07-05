@@ -52,12 +52,6 @@ const integrationCallbackAlerts = [
     "Milo can now work with your Google Calendar when you ask."
   ),
   callbackAlert(
-    "googleDrive",
-    "connected",
-    "Google Drive connected",
-    "Milo can now work with your organization's shared Drive when a run needs it."
-  ),
-  callbackAlert(
     "slack",
     "error",
     "Slack integration failed",
@@ -97,12 +91,6 @@ const integrationCallbackAlerts = [
     "googleCalendar",
     "error",
     "Google Calendar integration failed",
-    "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
-  ),
-  callbackAlert(
-    "googleDrive",
-    "error",
-    "Google Drive integration failed",
     "Google didn't finish connecting. Try again, and check the Google OAuth app settings if it keeps failing."
   ),
 ]

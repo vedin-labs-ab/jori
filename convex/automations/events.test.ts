@@ -50,10 +50,10 @@ describe("automation event catalog match", () => {
   test("keeps pending event-triggered automations explicit", () => {
     expect(() =>
       assertAutomationEventIsAvailable(
-        requireEvent("googleDrive", "file.updated")
+        requireEvent("gmail", "message.received")
       )
     ).toThrow(
-      "Google Drive event-triggered automations need Drive change subscriptions before they can run."
+      "Gmail event-triggered automations need mailbox subscriptions before they can run."
     )
   })
 

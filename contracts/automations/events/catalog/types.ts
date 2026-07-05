@@ -12,8 +12,6 @@ export const automationEventOptionSources = [
   "microsoftEmail.folders",
   "googleCalendar.calendars",
   "microsoftCalendar.calendars",
-  "googleDrive.files",
-  "googleDrive.folders",
   "notion.pages",
 ] as const
 
