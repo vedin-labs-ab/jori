@@ -1,6 +1,5 @@
-import { type Integration, integrationLabel } from "@contracts/integrations"
 import { usePaginatedQuery, useQuery } from "convex/react"
-import { ChevronDown, Lock } from "lucide-react"
+import { ChevronRight, Lock } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -8,7 +7,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { ExpandableText } from "@/components/ui/expandable-text"
 import {
   Sheet,
   SheetContent,
@@ -19,14 +17,13 @@ import {
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
-import { SeparatorDot } from "../../shared/dot"
-import { IntegrationLogo } from "../../shared/logo/integration"
-import { PagedRemote } from "../../shared/paging"
-import { relativeTime } from "../../shared/time"
-import { Timeline } from "../../shared/timeline"
+import { Paged, PagedRemote } from "../../shared/paging"
+import { relativeTime, useNow } from "../../shared/time"
 import { ContextSectionTitle } from "../section"
 import { WorkstreamActions } from "./actions"
+import { Sighting } from "./sighting"
 import { WorkstreamStatusCue } from "./status"
+import { WorkstreamTimeline } from "./timeline"
 import { type Workstream } from "./types"
 
 export function WorkstreamDetail({
@@ -65,18 +62,8 @@ function DetailBody({
 }) {
   const args = { tenantId, workstreamId: workstream.id }
   const detail = useQuery(api.deduction.console.queries.get, args)
-  const sightings = usePaginatedQuery(
-    api.deduction.console.queries.sightings,
-    args,
-    { initialNumItems: 3 }
-  )
-  const history = usePaginatedQuery(
-    api.deduction.console.queries.history,
-    args,
-    {
-      initialNumItems: 3,
-    }
-  )
+  const timeline = useQuery(api.deduction.console.queries.timeline, args)
+  const now = useNow(30_000)
 
   return (
     <>
@@ -86,7 +73,7 @@ function DetailBody({
           <WorkstreamStatusCue workstream={workstream} />
         </SheetTitle>
         <SheetDescription>
-          Seen {relativeTime(workstream.seenAt, Date.now())}
+          Seen {relativeTime(workstream.seenAt, now)}
         </SheetDescription>
         {workstream.locked ? (
           <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
@@ -96,70 +83,144 @@ function DetailBody({
         ) : null}
       </SheetHeader>
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
-        {detail === undefined ? (
+        {detail === undefined || timeline === undefined ? (
           <Skeleton className="h-40 w-full" />
         ) : detail === null ? (
           <p className="text-muted-foreground text-sm">
             This workstream is no longer available.
           </p>
         ) : (
-          <>
-            <Section title="Brief">
-              <p className="text-sm">{detail.brief}</p>
-            </Section>
-            {detail.aliases.length === 0 ? null : (
-              <Section title="Also known as">
-                <div className="flex flex-wrap gap-2">
-                  {detail.aliases.map((alias) => (
-                    <Badge key={alias} variant="outline">
-                      {alias}
-                    </Badge>
-                  ))}
-                </div>
-              </Section>
-            )}
-            <CollapsibleSection count={detail.counts.sightings} title="Sources">
-              <PagedRemote
-                canLoadMore={sightings.status === "CanLoadMore"}
-                isLoading={sightings.status === "LoadingMore"}
-                loaded={sightings.results.length}
-                onLoadMore={(count) => sightings.loadMore(count)}
-                total={detail.counts.sightings}
-              >
-                <ul className="flex flex-col divide-y rounded-md border">
-                  {sightings.results.map((sighting) => (
-                    <Sighting key={sighting.id} sighting={sighting} />
-                  ))}
-                </ul>
-              </PagedRemote>
-            </CollapsibleSection>
-            {detail.counts.history === 0 ? null : (
-              <CollapsibleSection count={detail.counts.history} title="History">
-                <PagedRemote
-                  canLoadMore={history.status === "CanLoadMore"}
-                  isLoading={history.status === "LoadingMore"}
-                  loaded={history.results.length}
-                  onLoadMore={(count) => history.loadMore(count)}
-                  total={detail.counts.history}
-                >
-                  <Timeline
-                    entries={history.results.map((entry) => ({
-                      id: entry.id,
-                      at: entry.observedAt,
-                      content: entry.entry,
-                    }))}
-                    now={Date.now()}
-                  />
-                </PagedRemote>
-              </CollapsibleSection>
-            )}
-          </>
+          <DetailSections
+            detail={detail}
+            now={now}
+            tenantId={tenantId}
+            timeline={timeline}
+          />
         )}
       </div>
       <SheetFooter className="border-t">
         <WorkstreamActions tenantId={tenantId} workstream={workstream} />
       </SheetFooter>
     </>
+  )
+}
+
+type Detail = NonNullable<
+  ReturnType<typeof useQuery<typeof api.deduction.console.queries.get>>
+>
+type TimelineItems = NonNullable<
+  ReturnType<typeof useQuery<typeof api.deduction.console.queries.timeline>>
+>
+
+function DetailSections({
+  detail,
+  timeline,
+  tenantId,
+  now,
+}: {
+  detail: Detail
+  timeline: TimelineItems
+  tenantId: string
+  now: number
+}) {
+  return (
+    <>
+      <Section title="Brief">
+        <p className="text-sm">{detail.brief}</p>
+      </Section>
+      {detail.aliases.length === 0 ? null : (
+        <Section title="Also known as">
+          <div className="flex flex-wrap gap-2">
+            {detail.aliases.map((alias) => (
+              <Badge key={alias} variant="outline">
+                {alias}
+              </Badge>
+            ))}
+          </div>
+        </Section>
+      )}
+      {detail.efforts.length === 0 ? null : (
+        <Section count={detail.efforts.length} title="Efforts">
+          <Paged initialCount={4} items={detail.efforts}>
+            {(visible) => (
+              <ul className="flex flex-col divide-y rounded-md border">
+                {visible.map((effort) => (
+                  <li className="flex flex-col gap-0.5 p-3" key={effort.id}>
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="min-w-0 truncate font-medium text-sm">
+                        {effort.name}
+                      </span>
+                      <span className="ml-auto shrink-0 text-muted-foreground text-xs">
+                        {relativeTime(effort.seenAt, now)}
+                      </span>
+                    </span>
+                    <span className="truncate text-muted-foreground text-sm">
+                      {effort.summary}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Paged>
+        </Section>
+      )}
+      {timeline.length === 0 ? null : (
+        <Section count={timeline.length} title="Timeline">
+          <WorkstreamTimeline items={timeline} now={now} tenantId={tenantId} />
+        </Section>
+      )}
+      <AllSources
+        count={detail.counts.sightings}
+        tenantId={tenantId}
+        workstreamId={detail.id}
+      />
+    </>
+  )
+}
+
+// The audit view: every source sighting behind the workstream, tucked behind
+// one disclosure. Day-to-day verification lives on the timeline entries.
+function AllSources({
+  tenantId,
+  workstreamId,
+  count,
+}: {
+  tenantId: string
+  workstreamId: Detail["id"]
+  count: number
+}) {
+  const sightings = usePaginatedQuery(
+    api.deduction.console.queries.sightings,
+    { tenantId, workstreamId },
+    { initialNumItems: 5 }
+  )
+
+  if (count === 0) {
+    return null
+  }
+
+  return (
+    <Collapsible>
+      <CollapsibleTrigger className="group flex w-full items-center justify-between">
+        <ContextSectionTitle count={count}>All sources</ContextSectionTitle>
+        <ChevronRight className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-90" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-1.5">
+        <PagedRemote
+          canLoadMore={sightings.status === "CanLoadMore"}
+          isLoading={sightings.status === "LoadingMore"}
+          loaded={sightings.results.length}
+          onLoadMore={(loadCount) => sightings.loadMore(loadCount)}
+          total={count}
+        >
+          <ul className="flex flex-col divide-y rounded-md border">
+            {sightings.results.map((sighting) => (
+              <Sighting key={sighting.id} sighting={sighting} />
+            ))}
+          </ul>
+        </PagedRemote>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
 
@@ -177,77 +238,5 @@ function Section({
       <ContextSectionTitle count={count}>{title}</ContextSectionTitle>
       {children}
     </section>
-  )
-}
-
-function CollapsibleSection({
-  title,
-  count,
-  children,
-}: {
-  title: string
-  count: number
-  children: ReactNode
-}) {
-  return (
-    <Collapsible>
-      <CollapsibleTrigger className="group flex w-full items-center justify-between">
-        <ContextSectionTitle count={count}>{title}</ContextSectionTitle>
-        <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="pt-1.5">{children}</CollapsibleContent>
-    </Collapsible>
-  )
-}
-
-type SightingRow = {
-  integration: Integration | null
-  kind: string
-  why: string
-  observedAt: number
-  url?: string
-}
-
-// The header row links out to the cited artifact when the source has one;
-// the description stays outside the link so it can expand in place.
-function Sighting({ sighting }: { sighting: SightingRow }) {
-  const header = (
-    <>
-      {sighting.integration === null ? null : (
-        <IntegrationLogo decorative integration={sighting.integration} />
-      )}
-      <span className="font-medium text-sm">
-        {sighting.integration === null
-          ? "Removed tool"
-          : integrationLabel(sighting.integration)}
-      </span>
-      <SeparatorDot className="shrink-0 text-muted-foreground/60" />
-      <span className="min-w-0 truncate text-muted-foreground text-xs">
-        {sighting.kind}
-      </span>
-      <span className="ml-auto shrink-0 text-muted-foreground text-xs">
-        {relativeTime(sighting.observedAt, Date.now())}
-      </span>
-    </>
-  )
-
-  return (
-    <li className="flex flex-col gap-0.5 p-3">
-      {sighting.url === undefined ? (
-        <div className="flex min-w-0 items-center gap-2">{header}</div>
-      ) : (
-        <a
-          href={sighting.url}
-          target="_blank"
-          rel="noreferrer"
-          className="-mx-1.5 -my-1 flex min-w-0 items-center gap-2 rounded-sm px-1.5 py-1 transition-colors hover:bg-muted/50"
-        >
-          {header}
-        </a>
-      )}
-      <div className="text-muted-foreground text-sm">
-        <ExpandableText maxLines={2}>{sighting.why}</ExpandableText>
-      </div>
-    </li>
   )
 }
