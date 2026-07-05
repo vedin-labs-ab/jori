@@ -10,8 +10,11 @@ import { eventKindLabel, statusLabels } from "./labels"
 // range each — no evidence walks at read time.
 
 // Counting caps a single index range; real totals at these volumes. Swap for
-// denormalized counters if a workstream ever nears the cap.
+// denormalized counters if a workstream ever nears the cap. The timeline is
+// similarly bounded: past the cap, the oldest narrative is the deep-memory
+// system's job, not the console's.
 const countLimit = 1000
+const timelineLimit = 500
 
 export const list = query({
   args: { tenantId: v.string() },
@@ -53,10 +56,7 @@ export const get = query({
       ...listRow(belief),
       aliases: belief.aliases,
       efforts: await memberEfforts(ctx, belief._id),
-      counts: {
-        sightings: await countRange(sightingsRange(ctx, belief._id)),
-        history: await countRange(historyRange(ctx, belief._id)),
-      },
+      counts: { sightings: await countRange(sightingsRange(ctx, belief._id)) },
     }
   },
 })
@@ -88,36 +88,94 @@ export const sightings = query({
   },
 })
 
-// One page of the workstream's timeline, newest first: the journals of its
-// member efforts, read through the same stamp.
-export const history = query({
-  args: {
-    tenantId: v.string(),
-    workstreamId: v.id("beliefs"),
-    paginationOpts: paginationOptsValidator,
-  },
+// The workstream's full narrative timeline, newest first: the journals of
+// its member efforts, read through the same stamp. Bounded rather than
+// paginated — the journal is curated and rate-limited by the charter, so a
+// year of an active workstream stays in the hundreds; temporal grouping in
+// the console is the progressive disclosure.
+export const timeline = query({
+  args: { tenantId: v.string(), workstreamId: v.id("beliefs") },
   handler: async (ctx, args) => {
     const access = await checkTenantAccess(ctx, args.tenantId)
     const belief = access.ok ? await loadWorkstream(ctx, args) : null
 
     if (belief === null) {
-      return emptyPage()
+      return []
     }
 
-    const result = await historyRange(ctx, belief._id)
+    const names = new Map(
+      (await memberEfforts(ctx, belief._id)).map((row) => [row.id, row.name])
+    )
+    const receipts = await receiptCounts(ctx, belief._id)
+    const rows = await historyRange(ctx, belief._id)
       .order("desc")
-      .paginate(args.paginationOpts)
+      .take(timelineLimit)
 
-    return {
-      ...result,
-      page: result.page.map((row) => ({
-        id: row._id,
-        entry: row.entry,
-        observedAt: row.observedAt,
-      })),
-    }
+    return rows.map((row) => ({
+      id: row._id,
+      entry: row.entry,
+      observedAt: row.observedAt,
+      effortId: row.effortId,
+      effort: names.get(row.effortId) ?? "",
+      passId: row.passId,
+      receipts: receipts.get(`${row.effortId}:${row.passId}`) ?? 0,
+    }))
   },
 })
+
+// One timeline entry's receipts: the evidence written by the same pass for
+// the same effort — the citations behind the claim.
+export const receipts = query({
+  args: {
+    tenantId: v.string(),
+    effortId: v.id("efforts"),
+    passId: v.id("passes"),
+  },
+  handler: async (ctx, args) => {
+    const access = await checkTenantAccess(ctx, args.tenantId)
+    const effort = access.ok ? await ctx.db.get(args.effortId) : null
+
+    if (effort === null || effort.tenantId !== args.tenantId) {
+      return []
+    }
+
+    const rows = await ctx.db
+      .query("evidence")
+      .withIndex("by_subject_effort_id", (index) =>
+        index.eq("subject.effortId", args.effortId)
+      )
+      .collect()
+    const cited = rows
+      .filter((row) => row.passId === args.passId)
+      .sort((first, second) => second.observedAt - first.observedAt)
+
+    return Promise.all(cited.map((row) => sightingRow(ctx, row)))
+  },
+})
+
+// Exact per-entry receipt counts from one stamped index range: evidence and
+// journal rows written by the same pass for the same effort belong together.
+async function receiptCounts(ctx: QueryCtx, beliefId: Id<"beliefs">) {
+  const rows = await ctx.db
+    .query("evidence")
+    .withIndex("by_workstream_and_observed_at", (index) =>
+      index.eq("workstreamId", beliefId)
+    )
+    .take(countLimit)
+  const counts = new Map<string, number>()
+
+  for (const row of rows) {
+    if (row.subject.kind !== "effort") {
+      continue
+    }
+
+    const key = `${row.subject.effortId}:${row.passId}`
+
+    counts.set(key, (counts.get(key) ?? 0) + 1)
+  }
+
+  return counts
+}
 
 function listRow(row: Doc<"beliefs">) {
   return {

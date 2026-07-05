@@ -2,59 +2,27 @@ import { Clock } from "lucide-react"
 import { type ReactNode } from "react"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import { cn } from "@/lib/utils"
-import { Paged } from "./paging"
 import { absoluteTime, relativeTime } from "./time"
 
-export type TimelineEntry = {
-  id: string
-  at: number
-  content: ReactNode
-}
-
-// Standardized vertical timeline: circled clock markers on a connecting
-// line, relative timestamps, clamped entry bodies, and built-in paging.
-export function Timeline({
-  entries,
+// Standardized vertical timeline row: a circled clock marker on a connecting
+// line, an optional label beside the relative timestamp, a clamped body, and
+// an optional details block below the clamp (receipts, attachments).
+export function TimelineRow({
+  at,
   now,
-  initialCount = 3,
-  step = 5,
+  continues,
+  label,
+  children,
+  details,
   maxLines = 2,
 }: {
-  entries: TimelineEntry[]
+  at: number
   now: number
-  initialCount?: number
-  step?: number
-  maxLines?: number
-}) {
-  return (
-    <Paged initialCount={initialCount} items={entries} step={step}>
-      {(visible, hiddenCount) => (
-        <ol className="flex flex-col">
-          {visible.map((entry, index) => (
-            <TimelineRow
-              key={entry.id}
-              continues={index < visible.length - 1 || hiddenCount > 0}
-              entry={entry}
-              maxLines={maxLines}
-              now={now}
-            />
-          ))}
-        </ol>
-      )}
-    </Paged>
-  )
-}
-
-function TimelineRow({
-  continues,
-  entry,
-  maxLines,
-  now,
-}: {
   continues: boolean
-  entry: TimelineEntry
-  maxLines: number
-  now: number
+  label?: ReactNode
+  children: ReactNode
+  details?: ReactNode
+  maxLines?: number
 }) {
   return (
     <li className="flex gap-3">
@@ -70,15 +38,19 @@ function TimelineRow({
           continues && "pb-4"
         )}
       >
-        <span
-          className="flex h-6 items-center text-muted-foreground text-xs"
-          title={absoluteTime(entry.at)}
-        >
-          {relativeTime(entry.at, now)}
+        <span className="flex h-6 min-w-0 items-center gap-2">
+          {label}
+          <span
+            className="shrink-0 text-muted-foreground text-xs"
+            title={absoluteTime(at)}
+          >
+            {relativeTime(at, now)}
+          </span>
         </span>
         <div className="text-sm">
-          <ExpandableText maxLines={maxLines}>{entry.content}</ExpandableText>
+          <ExpandableText maxLines={maxLines}>{children}</ExpandableText>
         </div>
+        {details}
       </div>
     </li>
   )
