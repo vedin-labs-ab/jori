@@ -1,3 +1,4 @@
+import { isSkillCategory } from "../../contracts/skills"
 import { type MutationCtx } from "../_generated/server"
 import { type Integration, integrations } from "../shared/integrations"
 
@@ -8,7 +9,6 @@ type SkillCommunication = {
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const skillCommunicationPartNamePattern = /^[a-z]+$/
 const skillNameMaxLength = 64
-const skillCategoryMaxLength = 64
 const skillDescriptionMaxLength = 320
 const skillBodyMaxLength = 24_000
 const integrationNames = new Set<string>(integrations)
@@ -36,8 +36,8 @@ export function normalizeSkillInput(input: {
     )
   }
 
-  if (category.length === 0 || category.length > skillCategoryMaxLength) {
-    throw new Error("Skill category must be 1–64 characters.")
+  if (!isSkillCategory(category)) {
+    throw new Error("Skill category is not supported.")
   }
 
   if (

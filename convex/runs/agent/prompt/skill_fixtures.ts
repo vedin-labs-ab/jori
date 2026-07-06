@@ -30,7 +30,7 @@ export function runtimeSkills(
     }),
     runtimeSkill({
       name: "slack",
-      category: "Communication",
+      category: "communication",
       description: "Format Slack replies.",
       associatedIntegrations: ["slack"],
       communication: {
@@ -56,7 +56,7 @@ export function runtimeSkill(
 ): RuntimeSkill {
   return {
     tenantId: null,
-    category: "Milo",
+    category: "creation",
     associatedIntegrations: [],
     ...skill,
   }

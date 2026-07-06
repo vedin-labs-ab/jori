@@ -15,6 +15,7 @@ import {
   requireUniqueTenantSkillName,
   sortSkills,
 } from "./data"
+import { skillCategoryValidator } from "./schema"
 
 type SeedSkill = {
   associatedIntegrations?: readonly string[]
@@ -51,7 +52,7 @@ export const list = query({
         tenantId: skill.tenantId,
         name: skill.name,
         description: skill.description,
-        category: skill.category ?? "General",
+        category: skill.category,
         associatedIntegrations: skill.associatedIntegrations ?? [],
         body: skill.body,
         createdAt: skill.createdAt,
@@ -67,7 +68,7 @@ export const create = mutation({
   args: {
     tenantId: v.string(),
     name: v.string(),
-    category: v.string(),
+    category: skillCategoryValidator,
     associatedIntegrations: v.array(integrationValidator),
     description: v.string(),
     body: v.string(),
@@ -100,7 +101,7 @@ export const update = mutation({
     tenantId: v.string(),
     skillId: v.id("skills"),
     name: v.string(),
-    category: v.string(),
+    category: skillCategoryValidator,
     associatedIntegrations: v.array(integrationValidator),
     description: v.string(),
     body: v.string(),
@@ -160,7 +161,7 @@ export const listForRuntime = internalQuery({
       id: skill._id,
       tenantId: skill.tenantId,
       name: skill.name,
-      category: skill.category ?? "General",
+      category: skill.category,
       associatedIntegrations: skill.associatedIntegrations ?? [],
       description: skill.description,
       ...(skill.communication === undefined
