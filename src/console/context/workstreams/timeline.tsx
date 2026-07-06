@@ -146,8 +146,9 @@ function EntryRow({
   )
 }
 
-// Each meta chunk keeps its separator and stays unbreakable, so narrow
-// screens wrap between chunks instead of mid-phrase.
+// Each meta chunk keeps its separator and stays unbreakable. On narrow
+// screens the receipt count moves to its own line under the providers and
+// timestamp, so nothing wraps mid-phrase and lines never start with a dot.
 function EntryMeta({ item, now }: { item: TimelineItem; now: number }) {
   const hasLogos = item.integrations.length > 0
   const hasReceipts = item.receipts > 0
@@ -158,9 +159,9 @@ function EntryMeta({ item, now }: { item: TimelineItem; now: number }) {
         <IntegrationLogoStack integrations={item.integrations} />
       ) : null}
       {hasReceipts ? (
-        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+        <span className="inline-flex items-center gap-1.5 whitespace-nowrap max-sm:order-last max-sm:w-full">
           {hasLogos ? (
-            <SeparatorDot className="text-muted-foreground/60" />
+            <SeparatorDot className="text-muted-foreground/60 max-sm:hidden" />
           ) : null}
           {item.receipts === 1 ? "1 receipt" : `${item.receipts} receipts`}
         </span>
@@ -169,8 +170,10 @@ function EntryMeta({ item, now }: { item: TimelineItem; now: number }) {
         className="inline-flex items-center gap-1.5 whitespace-nowrap"
         title={absoluteTime(item.observedAt)}
       >
-        {hasLogos || hasReceipts ? (
+        {hasLogos ? (
           <SeparatorDot className="text-muted-foreground/60" />
+        ) : hasReceipts ? (
+          <SeparatorDot className="text-muted-foreground/60 max-sm:hidden" />
         ) : null}
         {relativeTime(item.observedAt, now)}
       </span>

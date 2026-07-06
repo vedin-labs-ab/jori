@@ -1,7 +1,6 @@
 import { useQuery } from "convex/react"
 import { Lock } from "lucide-react"
 import { type ReactNode } from "react"
-import { Badge } from "@/components/ui/badge"
 import {
   Sheet,
   SheetContent,
@@ -11,6 +10,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { api } from "../../../../convex/_generated/api"
 import { IntegrationChips } from "../../shared/logo/integration"
 import { relativeTime, useNow } from "../../shared/time"
@@ -63,7 +67,12 @@ function DetailBody({
     <>
       <SheetHeader>
         <SheetTitle className="flex flex-wrap items-center gap-2">
-          {workstream.name}
+          <WorkstreamTitle
+            aliases={
+              detail === undefined || detail === null ? [] : detail.aliases
+            }
+            name={workstream.name}
+          />
           <WorkstreamStatusCue workstream={workstream} />
         </SheetTitle>
         <SheetDescription>
@@ -100,6 +109,31 @@ function DetailBody({
   )
 }
 
+// Aliases live behind the title: a dotted underline cues that hovering the
+// name reveals what else the workstream has been called.
+function WorkstreamTitle({
+  name,
+  aliases,
+}: {
+  name: string
+  aliases: string[]
+}) {
+  if (aliases.length === 0) {
+    return name
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="cursor-default underline decoration-dotted decoration-muted-foreground/50 underline-offset-4">
+          {name}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>Also known as {aliases.join(", ")}</TooltipContent>
+    </Tooltip>
+  )
+}
+
 type Detail = NonNullable<
   ReturnType<typeof useQuery<typeof api.deduction.console.queries.get>>
 >
@@ -123,17 +157,6 @@ function DetailSections({
       <Section title="Brief">
         <p className="text-sm">{detail.brief}</p>
       </Section>
-      {detail.aliases.length === 0 ? null : (
-        <Section title="Also known as">
-          <div className="flex flex-wrap gap-2">
-            {detail.aliases.map((alias) => (
-              <Badge key={alias} variant="outline">
-                {alias}
-              </Badge>
-            ))}
-          </div>
-        </Section>
-      )}
       {timeline.length === 0 ? null : (
         <Section title="Timeline">
           <WorkstreamTimeline items={timeline} now={now} tenantId={tenantId} />
