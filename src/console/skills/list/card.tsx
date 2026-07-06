@@ -1,9 +1,10 @@
+import { skillCategoryLabel } from "@contracts/skills"
 import { BookOpenText, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { IntegrationLogoStack } from "../../shared/logo/integration"
 import { relativeTime } from "../../shared/time"
-import { getSkillIcon } from "../metadata"
+import { skillCategoryIcons } from "../metadata"
 import { type Skill } from "../types"
 import { SkillManagementMenu } from "./menu"
 
@@ -23,7 +24,7 @@ export function SkillCard({
   skill: Skill
 }) {
   const isGlobal = skill.scope === "global"
-  const Icon = getSkillIcon(skill.category)
+  const Icon = skillCategoryIcons[skill.category]
 
   return (
     <Card className="min-h-56 gap-0 py-0 ring-inset">
@@ -79,9 +80,9 @@ function SkillIcon({ icon: Icon, skill }: { icon: LucideIcon; skill: Skill }) {
   return (
     <div
       className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted text-foreground"
-      title={skill.category}
+      title={skillCategoryLabel(skill.category)}
     >
-      <span className="sr-only">{skill.category}</span>
+      <span className="sr-only">{skillCategoryLabel(skill.category)}</span>
       <Icon className="size-5" />
     </div>
   )

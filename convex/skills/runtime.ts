@@ -1,10 +1,11 @@
+import { type SkillCategory } from "../../contracts/skills"
 import { type Integration } from "../shared/integrations"
 import { sortSkills } from "./data"
 
 export type RuntimeSkill = {
   associatedIntegrations: readonly Integration[]
   body: string
-  category: string
+  category: SkillCategory
   communication?: {
     parts: Readonly<Record<string, string>>
   }

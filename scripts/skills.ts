@@ -1,10 +1,11 @@
 import { readdir, readFile } from "node:fs/promises"
 import path from "node:path"
+import { isSkillCategory, type SkillCategory } from "../contracts/skills.ts"
 
 export type Skill = {
   associatedIntegrations?: string[]
   body: string
-  category: string
+  category: SkillCategory
   communication?: {
     parts: Record<string, string>
   }
@@ -14,14 +15,16 @@ export type Skill = {
 
 type ParsedSkill = {
   associatedIntegrations?: string[]
-  category: string
+  category: SkillCategory
   description: string
   name: string
   overview: string
 }
 
 type Frontmatter = Partial<
-  Pick<Skill, "associatedIntegrations" | "category" | "name" | "description">
+  Pick<Skill, "associatedIntegrations" | "name" | "description"> & {
+    category: string
+  }
 >
 
 const communicationDirectoryName = "communication"
@@ -116,6 +119,12 @@ function parseSkill(content: string, filePath: string): ParsedSkill {
     metadata.category === undefined
   ) {
     throw new Error(`${filePath} must define name, description, and category`)
+  }
+
+  if (!isSkillCategory(metadata.category)) {
+    throw new Error(
+      `${filePath} has an unsupported category: ${metadata.category}`
+    )
   }
 
   return {

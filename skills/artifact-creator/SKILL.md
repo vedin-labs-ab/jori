@@ -1,7 +1,7 @@
 ---
 name: artifact-creator
 description: Create or update Milo artifacts from the platform template. Use for building persistent React artifact UIs that run in Milo's iframe sandbox, use the Milo SDK, request narrow tool capabilities, validate locally, and publish through create_artifact or update_artifact.
-category: Milo
+category: creation
 ---
 
 # Artifact Creator

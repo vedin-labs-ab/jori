@@ -1,7 +1,7 @@
 ---
 name: frontend-design
 description: Design good UI for any surface Milo renders — artifacts, served HTML assets, dashboards, tools, forms, empty states. Use when creating, revising, simplifying, or evaluating layout, visual hierarchy, required states, copy, and interaction. Outcome-first product design, not platform mechanics.
-category: Milo
+category: creation
 ---
 
 # Frontend Design

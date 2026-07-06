@@ -3,6 +3,12 @@ import {
   integrationLabel,
   integrations,
 } from "@contracts/integrations"
+import {
+  isSkillCategory,
+  type SkillCategory,
+  skillCategories,
+  skillCategoryLabel,
+} from "@contracts/skills"
 import { Info, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,7 +18,6 @@ import {
   ComboboxChipsInput,
   ComboboxContent,
   ComboboxEmpty,
-  ComboboxInput,
   ComboboxItem,
   ComboboxList,
   ComboboxValue,
@@ -28,24 +33,22 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { IntegrationLogo } from "../shared/logo/integration"
-import { getSkillIcon } from "./metadata"
+import { skillCategoryIcons } from "./metadata"
 import { type Skill, type SkillFormValues } from "./types"
 
 type SkillTextFieldName = Exclude<
   keyof SkillFormValues,
-  "associatedIntegrations"
+  "associatedIntegrations" | "category"
 >
-
-const skillCategoryOptions = [
-  "Communication",
-  "Engineering",
-  "Writing",
-  "Research",
-  "Documents",
-  "General",
-]
 
 export function SkillDialog({
   isOpen,
@@ -100,7 +103,7 @@ export function SkillDialog({
               value={values.name}
             />
             <SkillCategoryField
-              onChange={(value) => updateValue("category", value)}
+              onChange={(category) => onValuesChange({ ...values, category })}
               value={values.category}
             />
           </div>
@@ -135,49 +138,42 @@ function SkillCategoryField({
   onChange,
   value,
 }: {
-  onChange: (value: string) => void
-  value: string
+  onChange: (value: SkillCategory) => void
+  value: SkillCategory
 }) {
   return (
     <div className="grid gap-2">
       <Label htmlFor="skill-category">Category</Label>
-      <Combobox
-        autoHighlight
-        inputValue={value}
-        items={skillCategoryOptions}
-        onInputValueChange={onChange}
-        onValueChange={(category) => onChange(category ?? "")}
-        value={skillCategoryOptions.includes(value) ? value : null}
+      <Select
+        onValueChange={(category) => {
+          if (isSkillCategory(category)) {
+            onChange(category)
+          }
+        }}
+        value={value}
       >
-        <ComboboxInput
-          className="w-full"
-          id="skill-category"
-          placeholder="Select or type a category"
-          required
-          showClear={value !== ""}
-        />
-        <ComboboxContent>
-          <ComboboxEmpty>No categories found.</ComboboxEmpty>
-          <ComboboxList>
-            {(category: string) => (
-              <ComboboxItem key={category} value={category}>
-                <SkillCategoryOption category={category} />
-              </ComboboxItem>
-            )}
-          </ComboboxList>
-        </ComboboxContent>
-      </Combobox>
+        <SelectTrigger className="w-full" id="skill-category">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {skillCategories.map((category) => (
+            <SelectItem key={category} value={category}>
+              <SkillCategoryOption category={category} />
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 }
 
-function SkillCategoryOption({ category }: { category: string }) {
-  const Icon = getSkillIcon(category)
+function SkillCategoryOption({ category }: { category: SkillCategory }) {
+  const Icon = skillCategoryIcons[category]
 
   return (
     <>
       <Icon aria-hidden="true" className="size-3.5 text-muted-foreground" />
-      <span>{category}</span>
+      <span>{skillCategoryLabel(category)}</span>
     </>
   )
 }
