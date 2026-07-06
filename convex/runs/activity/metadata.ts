@@ -1,3 +1,4 @@
+import { isRecord } from "../../../contracts/json"
 import { reactionDisplayLabel } from "../../../contracts/reactions"
 import {
   arrayLength,
@@ -7,7 +8,6 @@ import {
   displayUrl,
   domainScope,
   fileTarget,
-  isRecord,
   issueOrPullTarget,
   item,
   noun,

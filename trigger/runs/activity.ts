@@ -1,3 +1,4 @@
+import { isRecord } from "../../contracts/json"
 import { type MiloConvexClient } from "../convex"
 import {
   type ApprovalHandoff,
@@ -150,8 +151,4 @@ function readString(value: unknown) {
   return typeof value === "string" && value.trim() !== ""
     ? value.trim()
     : undefined
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }

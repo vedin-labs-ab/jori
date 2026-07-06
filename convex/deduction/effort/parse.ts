@@ -1,4 +1,5 @@
-import { isRecord, readCitations, readOps, readString } from "../engine/judge"
+import { isRecord } from "../../../contracts/json"
+import { readCitations, readOps, readString } from "../engine/judge"
 import { type EffortOp } from "./ops"
 
 // Narrated dates are metadata (`observedAt`), never entry prose. Models

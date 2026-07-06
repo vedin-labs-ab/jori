@@ -1,4 +1,5 @@
 import path from "node:path"
+import { isRecord } from "../../contracts/json"
 import { optionalString, requiredString } from "../input"
 import { sandboxWorkspace } from "../sandbox/artifacts"
 import { type ToolRuntime } from "../tool"
@@ -108,8 +109,4 @@ function sanitizeFileName(value: string) {
     .slice(0, 80)
 
   return clean === "" ? "image" : clean
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }

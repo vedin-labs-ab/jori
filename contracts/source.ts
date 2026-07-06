@@ -1,3 +1,4 @@
+import { isRecord } from "./json"
 export const maxSourceChangeFiles = 100
 export const maxSourceChangeFileBytes = 256 * 1024
 export const maxSourceChangeTreeBytes = 900 * 1024
@@ -163,8 +164,4 @@ function textBytes(value: string) {
 
 function isForbiddenPathSegment(segment: string) {
   return segment === "" || segment === "." || segment === ".."
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }

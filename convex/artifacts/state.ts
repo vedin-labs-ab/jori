@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { isRecord } from "../../contracts/json"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
@@ -251,8 +252,4 @@ function normalizeListLimit(limit: number | undefined) {
   }
 
   return Math.max(1, Math.min(100, Math.trunc(limit)))
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }

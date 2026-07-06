@@ -1,8 +1,9 @@
+import { isRecord } from "../../../contracts/json"
 import {
   type RuntimeModelUsage,
   type RuntimeValueSummary,
 } from "../../../contracts/runtime"
-import { isRecord, readNumber, readString } from "./helpers"
+import { readNumber, readString } from "./helpers"
 import { type ToolLabel } from "./types"
 
 export type ToolResult = RuntimeValueSummary

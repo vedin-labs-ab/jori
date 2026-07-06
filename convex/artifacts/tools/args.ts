@@ -1,3 +1,4 @@
+import { isRecord } from "../../../contracts/json"
 import { type Id } from "../../_generated/dataModel"
 import {
   optionalString,
@@ -85,8 +86,4 @@ function normalizeBuildAsset(asset: unknown) {
       "build.assets.contentBase64"
     ),
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
