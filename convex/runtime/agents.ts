@@ -2,8 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { action, internalMutation } from "../_generated/server"
-import { resolveRunAudience } from "../runs/introspect/audience"
-import { createInstructionRunSnapshot } from "../runs/snapshot"
+import { createInstructionRun } from "../runs/instruction"
 import { requireWorkerSecret } from "./shared"
 
 export const create = action({
@@ -43,32 +42,14 @@ export const insert = internalMutation({
       throw new Error("Parent run not found.")
     }
 
-    const runId = await ctx.db.insert("runs", {
-      tenantId: parent.tenantId,
-      parentId: parent._id,
-      rootId: parent.rootId ?? parent._id,
-      cause: {
-        type: "manual",
-        personId: parent.createdBy,
-      },
-      ...createInstructionRunSnapshot({
+    return {
+      runId: await createInstructionRun(ctx, {
+        tenantId: parent.tenantId,
         instructions: args.task,
-        parent,
         title: args.title,
+        parent,
+        createdBy: parent.createdBy,
       }),
-      ...(await resolveRunAudience(ctx, {
-        run: {
-          createdBy: parent.createdBy,
-          parentId: parent._id,
-        },
-      })),
-      status: "queued",
-      createdBy: parent.createdBy,
-      createdAt: Date.now(),
-    })
-
-    await ctx.runMutation(internal.runtime.outbox.ensureQueued, { runId })
-
-    return { runId }
+    }
   },
 })

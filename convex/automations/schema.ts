@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { eventMatch } from "../events/schema"
-import { integrationValidator } from "../shared/integrations"
+import { accessValidator, integrationValidator } from "../shared/integrations"
 
 export const accessInput = v.object({
   integrations: v.array(
@@ -13,15 +13,7 @@ export const accessInput = v.object({
   web: v.boolean(),
 })
 
-export const access = v.object({
-  integrations: v.array(
-    v.object({
-      id: v.id("integrations"),
-      tools: v.array(v.string()),
-    })
-  ),
-  web: v.boolean(),
-})
+export const access = accessValidator
 
 export const triggerInput = v.union(
   v.object({

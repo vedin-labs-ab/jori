@@ -1,4 +1,4 @@
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import {
   integrations,
   messageIntegrations,
@@ -48,3 +48,38 @@ export const messageDeliveryValidator = v.union(
     }),
   })
 )
+
+/**
+ * A resolved tool contract: which tools a run may use per integration, and
+ * whether web tools are available. Automations always carry one; runs
+ * without an automation may carry their own, and omitting it grants the
+ * full tool surface.
+ */
+export const accessValidator = v.object({
+  integrations: v.array(
+    v.object({
+      id: v.id("integrations"),
+      tools: v.array(v.string()),
+    })
+  ),
+  web: v.boolean(),
+})
+
+export type Access = Infer<typeof accessValidator>
+
+export function getIntegrationTools(
+  access: Access,
+  integrationId: Access["integrations"][number]["id"]
+) {
+  return (
+    access.integrations.find((integration) => integration.id === integrationId)
+      ?.tools ?? []
+  )
+}
+
+export function hasIntegrationTools(
+  access: Access,
+  integrationId: Access["integrations"][number]["id"]
+) {
+  return getIntegrationTools(access, integrationId).length > 0
+}

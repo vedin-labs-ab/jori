@@ -1,13 +1,15 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
-import { hasIntegrationTools } from "../automations/access"
 import { readWorkstreamRoster } from "../deduction/roster"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { recentConversation } from "../messages/history"
 import { readApprovedFacts } from "../organization/profile"
 import { readPlaceContext } from "../places/context"
-import { isMessageIntegration } from "../shared/integrations"
+import {
+  hasIntegrationTools,
+  isMessageIntegration,
+} from "../shared/integrations"
 
 export const getInputByRun = internalQuery({
   args: {
@@ -138,15 +140,24 @@ async function getInstructionInput(
     return null
   }
 
+  const access = args.run.access
+  const integrations = await listActiveIntegrations(
+    ctx,
+    args.run.tenantId,
+    args.run.createdBy
+  )
+
   return {
     type: "instruction" as const,
     run: args.run,
     instructions,
-    integrations: await listActiveIntegrations(
-      ctx,
-      args.run.tenantId,
-      args.run.createdBy
-    ),
+    ...(access === undefined ? {} : { access }),
+    integrations:
+      access === undefined
+        ? integrations
+        : integrations.filter((integration) =>
+            hasIntegrationTools(access, integration._id)
+          ),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }

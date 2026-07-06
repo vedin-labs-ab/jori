@@ -3,7 +3,7 @@ import { type WorkstreamContext } from "../../deduction/roster"
 import { type RecentConversation } from "../../messages/history"
 import { type OrganizationFacts } from "../../organization/facts"
 import { type PlaceContext } from "../../places/context"
-import { type MessageIntegration } from "../../shared/integrations"
+import { type Access, type MessageIntegration } from "../../shared/integrations"
 
 export type RuntimeIntegration = Doc<"integrations">
 
@@ -36,6 +36,7 @@ export type InstructionRuntimeInput = {
   run: Doc<"runs">
   integrations: RuntimeIntegration[]
   instructions: string
+  access?: Access
   organization: OrganizationFacts | null
   workstreams: WorkstreamContext[] | null
 }
