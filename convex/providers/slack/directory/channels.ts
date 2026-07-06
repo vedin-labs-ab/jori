@@ -4,9 +4,12 @@ import { slackQueryApi } from "../api"
 import { requireSlackCredentials } from "../credentials"
 import { getSlackChannelId } from "../data"
 
+// Visibility is present only for real channels; DMs and group DMs carry
+// none, which is what keeps them out of the places layer downstream.
 type SlackChannelContext = {
   id: string
   name: string
+  visibility?: "private" | "public"
 }
 
 export async function enrichSlackMessageData(args: {
@@ -66,8 +69,23 @@ export async function fetchSlackChannelContext(
     const channel = readRecord(result?.channel)
     const name = readString(channel, "name")
 
-    return name === undefined ? undefined : { id: channelId, name }
+    if (name === undefined) {
+      return undefined
+    }
+
+    return { id: channelId, name, ...channelVisibility(channel) }
   } catch {
     return undefined
+  }
+}
+
+function channelVisibility(channel: Record<string, unknown>) {
+  if (channel.is_im === true || channel.is_mpim === true) {
+    return {}
+  }
+
+  return {
+    visibility:
+      channel.is_private === true ? ("private" as const) : ("public" as const),
   }
 }

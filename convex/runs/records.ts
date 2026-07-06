@@ -6,6 +6,7 @@ import { readWorkstreamRoster } from "../deduction/roster"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { recentConversation } from "../messages/history"
 import { readApprovedFacts } from "../organization/profile"
+import { readPlaceContext } from "../places/context"
 
 export const getInputByRun = internalQuery({
   args: {
@@ -71,6 +72,7 @@ async function getMessageInput(
     integrations,
     conversation: await recentConversation(ctx, message),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
+    place: await readPlaceContext(ctx, message),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }

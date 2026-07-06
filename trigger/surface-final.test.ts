@@ -127,6 +127,7 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
         context: "context",
         instructions: "system",
         organization: null,
+        place: null,
         person: null,
       },
       run: {

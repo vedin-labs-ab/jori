@@ -143,12 +143,14 @@ const fullPrompt = {
   context: "context",
   instructions: "instructions",
   organization: "organization",
+  place: "place",
   person: "person",
 }
 const barePrompt = {
   context: "context",
   instructions: "instructions",
   organization: null,
+  place: null,
   person: null,
 }
 
@@ -160,6 +162,7 @@ test("builds the prompt prefix from the present context messages in order", () =
   expect(promptMessages(fullPrompt)).toEqual([
     { content: "instructions", role: "system" },
     { content: "organization", role: "user" },
+    { content: "place", role: "user" },
     { content: "person", role: "user" },
     { content: "context", role: "user" },
   ])
@@ -176,6 +179,7 @@ test("replaces the prompt prefix in place across all shapes", () => {
     context: "new context",
     instructions: "new instructions",
     organization: "new organization",
+    place: "new place",
     person: "new person",
   }
 
@@ -187,6 +191,7 @@ test("replaces the prompt prefix in place across all shapes", () => {
   replacePromptMessages(shrank, fullPrompt, {
     ...next,
     organization: null,
+    place: null,
     person: null,
   })
   expect(shrank).toEqual([

@@ -1,31 +1,20 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { nextDebounceSchedule } from "../shared/debounce"
 import { summaryDebounceMs, summaryMaxDelayMs } from "./limits"
-
-export type SummarySchedule = {
-  runAt: number
-  summarizeAt: number
-}
-
-export function nextSummarySchedule(
-  now: number,
-  summarizeAt: number | undefined
-): SummarySchedule {
-  const ceiling = summarizeAt ?? now + summaryMaxDelayMs
-
-  return {
-    runAt: Math.min(now + summaryDebounceMs, ceiling),
-    summarizeAt: ceiling,
-  }
-}
 
 export async function scheduleConversationSummary(
   ctx: MutationCtx,
   conversation: Doc<"conversations">,
   now: number
 ) {
-  const schedule = nextSummarySchedule(now, conversation.summarizeAt)
+  const schedule = nextDebounceSchedule({
+    now,
+    ceilingAt: conversation.summarizeAt,
+    debounceMs: summaryDebounceMs,
+    maxDelayMs: summaryMaxDelayMs,
+  })
 
   if (conversation.functionId !== undefined) {
     await ctx.scheduler.cancel(conversation.functionId)
@@ -39,6 +28,6 @@ export async function scheduleConversationSummary(
 
   await ctx.db.patch(conversation._id, {
     functionId,
-    summarizeAt: schedule.summarizeAt,
+    summarizeAt: schedule.ceilingAt,
   })
 }

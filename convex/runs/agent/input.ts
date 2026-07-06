@@ -2,6 +2,7 @@ import { type Doc } from "../../_generated/dataModel"
 import { type WorkstreamContext } from "../../deduction/roster"
 import { type RecentConversation } from "../../messages/history"
 import { type OrganizationFacts } from "../../organization/facts"
+import { type PlaceContext } from "../../places/context"
 
 export type MessageIntegration = "github" | "linear" | "slack"
 export type RuntimeIntegration = Doc<"integrations">
@@ -15,6 +16,7 @@ export type MessageRuntimeInput = {
   message: Doc<"messages">
   conversation: RecentConversation
   organization: OrganizationFacts | null
+  place: PlaceContext | null
   workstreams: WorkstreamContext[] | null
 }
 
