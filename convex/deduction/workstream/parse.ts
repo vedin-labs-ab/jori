@@ -1,5 +1,5 @@
+import { isRecord } from "../../../contracts/json"
 import {
-  isRecord,
   readCitations,
   readOps,
   readString,

@@ -83,6 +83,13 @@ function finiteJsonNumber(value: number) {
   return value
 }
 
+// Shape guard for reading fields off unknown data. Accepts any non-array
+// object; isPlainObject below additionally rejects class instances, which
+// JSON conversion requires.
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false

@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer"
+import { isRecord } from "../../contracts/json"
 import {
   type OpenRouterRuntimeConfig,
   requireOpenRouterRuntimeConfig,
@@ -161,8 +162,4 @@ function readArray(value: unknown) {
 
 function readRecord(value: unknown) {
   return isRecord(value) ? value : undefined
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }

@@ -1,5 +1,6 @@
 import path from "node:path"
 import { isArtifactPublishTool } from "../contracts/artifacts/publish"
+import { isRecord } from "../contracts/json"
 import { optionalString, requiredString } from "./input"
 import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
@@ -166,10 +167,6 @@ function githubRepositoryClone(value: unknown) {
     ref: typeof clone.ref === "string" ? clone.ref : undefined,
     repo: clone.repo,
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
 export function assetUploadError(value: unknown) {

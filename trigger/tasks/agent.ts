@@ -1,7 +1,7 @@
 import { task } from "@trigger.dev/sdk/v3"
 import { MiloConvexClient } from "../convex"
 import { errorDetails } from "../events"
-import { createModelRuntime } from "../model/runtime"
+import { OpenRouterModelRuntime } from "../model/openrouter"
 import { recordRunEvent } from "../runs/events"
 import { runAgentLoop } from "../runs/loop"
 import { releaseSandbox } from "../runs/sandbox"
@@ -48,7 +48,7 @@ export const miloAgentRun = task({
     try {
       const output = await runAgentLoop({
         attempt,
-        model: createModelRuntime(),
+        model: new OpenRouterModelRuntime(),
         runtime: { convex, context, sandbox },
       })
       await releaseSandbox({ context, sandbox })

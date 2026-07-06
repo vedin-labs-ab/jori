@@ -1,3 +1,4 @@
+import { isRecord } from "../contracts/json"
 import { type ConvexId } from "./types"
 
 export type GitHubCloneCredentials = {
@@ -61,8 +62,4 @@ function readString(value: unknown, name: string) {
   }
 
   return value
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }

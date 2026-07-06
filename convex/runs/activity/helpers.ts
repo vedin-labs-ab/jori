@@ -1,3 +1,4 @@
+import { isRecord } from "../../../contracts/json"
 import { type ActivityMetadataItem } from "./types"
 
 type MetadataKind = ActivityMetadataItem["kind"]
@@ -152,10 +153,6 @@ export function countText(count: number | undefined, singular: string) {
   }
 
   return count === 1 ? `1 ${singular}` : `${count} ${singular}s`
-}
-
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
 function cleanText(value: string | undefined) {
