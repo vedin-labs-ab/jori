@@ -12,6 +12,7 @@ import { SeparatorDot } from "../../shared/dot"
 import { IntegrationLogoStack } from "../../shared/logo/integration"
 import { Paged } from "../../shared/paging"
 import { absoluteTime, relativeTime } from "../../shared/time"
+import { ContextSectionTitle } from "../section"
 import { groupByDay, type TimelineDay } from "./grouping"
 import { Receipt } from "./receipt"
 
@@ -40,6 +41,7 @@ export function WorkstreamTimeline({
             <DaySection
               continues={index < days.length - 1 || hiddenCount > 0}
               day={day}
+              first={index === 0}
               key={day.key}
               now={now}
               tenantId={tenantId}
@@ -55,20 +57,32 @@ function DaySection({
   day,
   tenantId,
   now,
+  first,
   continues,
 }: {
   day: TimelineDay<TimelineItem>
   tenantId: string
   now: number
+  first: boolean
   continues: boolean
 }) {
+  const today = day.key === new Date(now).toDateString()
+
   return (
     <section className="flex gap-3">
       <h4 className="w-14 shrink-0 pt-3 text-right font-medium text-muted-foreground text-xs">
         {day.label}
       </h4>
+      {/* The spacer above the dot doubles as the incoming rail segment, so
+          the line stays unbroken from section to section. */}
       <div aria-hidden className="flex flex-col items-center">
-        <span className="mt-4 size-2 shrink-0 rounded-full bg-muted-foreground/40" />
+        <span className={cn("h-4 w-px shrink-0", !first && "bg-border")} />
+        <span
+          className={cn(
+            "size-2 shrink-0 rounded-full",
+            today ? "bg-primary" : "bg-muted-foreground/40"
+          )}
+        />
         {continues ? <span className="w-px grow bg-border" /> : null}
       </div>
       <ol
@@ -97,32 +111,14 @@ function EntryRow({
   return (
     <li>
       <Collapsible>
-        <CollapsibleTrigger className="group flex w-full items-center gap-2 p-3">
-          <span className="min-w-0 truncate text-left font-medium text-sm">
-            {item.effort === "" ? "Update" : item.effort}
-          </span>
-          <span className="ml-auto flex shrink-0 items-center gap-1.5 text-muted-foreground text-xs">
-            {item.integrations.length === 0 ? null : (
-              <>
-                <IntegrationLogoStack integrations={item.integrations} />
-                <SeparatorDot className="text-muted-foreground/60" />
-              </>
-            )}
-            {item.receipts === 0 ? null : (
-              <>
-                <span>
-                  {item.receipts === 1
-                    ? "1 receipt"
-                    : `${item.receipts} receipts`}
-                </span>
-                <SeparatorDot className="text-muted-foreground/60" />
-              </>
-            )}
-            <span title={absoluteTime(item.observedAt)}>
-              {relativeTime(item.observedAt, now)}
+        <CollapsibleTrigger className="group flex w-full items-center gap-3 p-3">
+          <span className="flex min-w-0 flex-1 flex-col gap-1 text-left">
+            <span className="truncate font-medium text-sm">
+              {item.effort === "" ? "Update" : item.effort}
             </span>
-            <ChevronDown className="size-4 transition-transform group-data-[state=open]:rotate-180" />
+            <EntryMeta item={item} now={now} />
           </span>
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
         </CollapsibleTrigger>
         <CollapsibleContent className="flex flex-col gap-3 px-3 pb-3">
           <p className="text-sm">{item.entry}</p>
@@ -132,6 +128,30 @@ function EntryRow({
         </CollapsibleContent>
       </Collapsible>
     </li>
+  )
+}
+
+function EntryMeta({ item, now }: { item: TimelineItem; now: number }) {
+  return (
+    <span className="flex items-center gap-1.5 text-muted-foreground text-xs">
+      {item.integrations.length === 0 ? null : (
+        <>
+          <IntegrationLogoStack integrations={item.integrations} />
+          <SeparatorDot className="text-muted-foreground/60" />
+        </>
+      )}
+      {item.receipts === 0 ? null : (
+        <>
+          <span>
+            {item.receipts === 1 ? "1 receipt" : `${item.receipts} receipts`}
+          </span>
+          <SeparatorDot className="text-muted-foreground/60" />
+        </>
+      )}
+      <span title={absoluteTime(item.observedAt)}>
+        {relativeTime(item.observedAt, now)}
+      </span>
+    </span>
   )
 }
 
@@ -152,7 +172,7 @@ function EntryReceipts({
 
   return (
     <div className="flex flex-col gap-1">
-      <h5 className="font-medium text-muted-foreground text-xs">Receipts</h5>
+      <ContextSectionTitle count={item.receipts}>Receipts</ContextSectionTitle>
       {receipts === undefined ? (
         <Skeleton className="h-12 w-full" />
       ) : (
