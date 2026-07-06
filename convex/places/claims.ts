@@ -41,24 +41,35 @@ export function applyProfileReview(args: {
   windowSize: number
   now: number
 }): PlaceClaim[] {
-  const missable = args.windowSize >= profileWindowMissMinimum
+  // A window too small to age a claim is also too small to assert one:
+  // below the minimum it neither accrues misses nor lands additions.
+  const windowSpeaks = args.windowSize >= profileWindowMissMinimum
   const kept = args.claims.flatMap((claim, index) => {
     const next = reviewedClaim(
       claim,
       args.review.reviews[index],
-      missable,
+      windowSpeaks,
       args.now
     )
 
     return next === null ? [] : [next]
   })
-  const added = args.review.additions.flatMap((addition) => {
-    const text = addition.text.trim()
+  const added = windowSpeaks
+    ? args.review.additions.flatMap((addition) => {
+        const text = addition.text.trim()
 
-    return text === ""
-      ? []
-      : [{ section: addition.section, text, confirmedAt: args.now, misses: 0 }]
-  })
+        return text === ""
+          ? []
+          : [
+              {
+                section: addition.section,
+                text,
+                confirmedAt: args.now,
+                misses: 0,
+              },
+            ]
+      })
+    : []
 
   return capClaims([...kept, ...added])
 }
@@ -66,7 +77,7 @@ export function applyProfileReview(args: {
 function reviewedClaim(
   claim: PlaceClaim,
   review: ClaimReview | undefined,
-  missable: boolean,
+  windowSpeaks: boolean,
   now: number
 ): PlaceClaim | null {
   const verdict = review?.verdict ?? "unmentioned"
@@ -76,7 +87,7 @@ function reviewedClaim(
   }
 
   if (verdict === "unmentioned") {
-    const misses = claim.misses + (missable ? 1 : 0)
+    const misses = claim.misses + (windowSpeaks ? 1 : 0)
 
     return misses >= profileMissLimit ? null : { ...claim, misses }
   }
