@@ -291,6 +291,7 @@ import type * as providers_slack_card from "../providers/slack/card.js";
 import type * as providers_slack_config from "../providers/slack/config.js";
 import type * as providers_slack_credentials from "../providers/slack/credentials.js";
 import type * as providers_slack_data from "../providers/slack/data.js";
+import type * as providers_slack_delivery_cards from "../providers/slack/delivery/cards.js";
 import type * as providers_slack_delivery_messages from "../providers/slack/delivery/messages.js";
 import type * as providers_slack_delivery_upload from "../providers/slack/delivery/upload.js";
 import type * as providers_slack_directory_channels from "../providers/slack/directory/channels.js";
@@ -732,6 +733,7 @@ declare const fullApi: ApiFromModules<{
   "providers/slack/config": typeof providers_slack_config;
   "providers/slack/credentials": typeof providers_slack_credentials;
   "providers/slack/data": typeof providers_slack_data;
+  "providers/slack/delivery/cards": typeof providers_slack_delivery_cards;
   "providers/slack/delivery/messages": typeof providers_slack_delivery_messages;
   "providers/slack/delivery/upload": typeof providers_slack_delivery_upload;
   "providers/slack/directory/channels": typeof providers_slack_directory_channels;
