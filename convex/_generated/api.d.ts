@@ -215,6 +215,7 @@ import type * as persons_names from "../persons/names.js";
 import type * as persons_resolve from "../persons/resolve.js";
 import type * as persons_rows from "../persons/rows.js";
 import type * as places_claims from "../places/claims.js";
+import type * as places_console from "../places/console.js";
 import type * as places_context from "../places/context.js";
 import type * as places_data from "../places/data.js";
 import type * as places_limits from "../places/limits.js";
@@ -657,6 +658,7 @@ declare const fullApi: ApiFromModules<{
   "persons/resolve": typeof persons_resolve;
   "persons/rows": typeof persons_rows;
   "places/claims": typeof places_claims;
+  "places/console": typeof places_console;
   "places/context": typeof places_context;
   "places/data": typeof places_data;
   "places/limits": typeof places_limits;

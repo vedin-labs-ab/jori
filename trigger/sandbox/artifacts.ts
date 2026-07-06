@@ -8,7 +8,7 @@ import {
   sandboxArtifactRuntime,
   sandboxInternalRoot,
   sandboxWorkspace,
-} from "../../contracts/sandbox"
+} from "../../contracts/runtime"
 import { runtimeAssets } from "../../convex/runtime/_generated/assets"
 import { type SandboxWriteFile } from "./types"
 
