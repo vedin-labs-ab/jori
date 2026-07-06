@@ -1,8 +1,4 @@
-import {
-  placeKinds,
-  placeSectionLabels,
-  placeSections,
-} from "@contracts/places"
+import { placeSectionLabels, placeSections } from "@contracts/places"
 import { Badge } from "@/components/ui/badge"
 import {
   Sheet,
@@ -50,7 +46,6 @@ export function PlaceDetail({
 
 function DetailBody({ place }: { place: Place }) {
   const now = useNow(30_000)
-  const noun = placeKinds[place.integration].noun
 
   return (
     <>
@@ -58,21 +53,17 @@ function DetailBody({ place }: { place: Place }) {
         <SheetTitle>
           <PlaceName place={place} />
         </SheetTitle>
-        <SheetDescription>
-          What Milo knows about how this {noun} works
-          {place.profiledAt === null
-            ? ""
-            : ` · updated ${relativeTime(place.profiledAt, now)}`}
-        </SheetDescription>
+        {place.profiledAt === null ? null : (
+          <SheetDescription>
+            Updated {relativeTime(place.profiledAt, now)}
+          </SheetDescription>
+        )}
         <IntegrationChips integrations={[place.integration]} />
       </SheetHeader>
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
         {placeSections.map((section) => (
           <ClaimSection key={section} place={place} section={section} />
         ))}
-        <p className="mt-auto border-t pt-3 text-muted-foreground/70 text-xs">
-          Norms fade when {noun} activity stops confirming them, then drop off.
-        </p>
       </div>
     </>
   )
@@ -94,21 +85,23 @@ function ClaimSection({
   return (
     <div className="flex flex-col gap-1.5">
       <ContextSectionTitle>{placeSectionLabels[section]}</ContextSectionTitle>
-      {claims.map((claim) => (
-        <Claim key={claim.text} claim={claim} />
-      ))}
+      <div className="flex flex-col gap-1.5 rounded-md bg-muted px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed">
+        {claims.map((claim) => (
+          <Claim key={claim.text} claim={claim} />
+        ))}
+      </div>
     </div>
   )
 }
 
 function Claim({ claim }: { claim: Place["claims"][number] }) {
   if (!claim.fading) {
-    return <p className="text-sm">{claim.text}</p>
+    return <p className="whitespace-pre-wrap break-words">{claim.text}</p>
   }
 
   return (
-    <p className="flex items-start gap-2 text-muted-foreground text-sm">
-      <span>{claim.text}</span>
+    <p className="flex items-start justify-between gap-2 text-muted-foreground">
+      <span className="whitespace-pre-wrap break-words">{claim.text}</span>
       <Tooltip>
         <TooltipTrigger asChild>
           <Badge className="text-muted-foreground" variant="outline">

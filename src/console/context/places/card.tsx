@@ -2,12 +2,10 @@ import { placeDisplayName } from "@contracts/places"
 import { ChevronRight, Lock } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { IntegrationChips } from "../../shared/logo/integration"
-import { relativeTime, useNow } from "../../shared/time"
 import { type Place } from "./types"
 
 // Same three-row anatomy as workstream cards: name, one-line preview,
-// sources. The pulse line keeps the index glanceable; everything else waits
-// in the detail sheet.
+// sources. Everything else waits in the detail sheet.
 export function PlaceCard({
   place,
   onOpen,
@@ -15,8 +13,6 @@ export function PlaceCard({
   place: Place
   onOpen: () => void
 }) {
-  const now = useNow(30_000)
-
   return (
     <Card className="py-0 transition-colors hover:bg-muted/50">
       <button
@@ -29,16 +25,7 @@ export function PlaceCard({
           <p className="line-clamp-2 text-muted-foreground text-sm">
             {placePreview(place)}
           </p>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <IntegrationChips integrations={[place.integration]} />
-            <span className="text-muted-foreground/70 text-xs tabular-nums">
-              {place.claims.length}{" "}
-              {place.claims.length === 1 ? "norm" : "norms"}
-              {place.profiledAt === null
-                ? ""
-                : ` · updated ${relativeTime(place.profiledAt, now)}`}
-            </span>
-          </div>
+          <IntegrationChips integrations={[place.integration]} />
         </div>
         <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
       </button>
