@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { placeKinds } from "../../contracts/places"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
@@ -23,6 +24,9 @@ export type ProfileMessage = {
 export type PendingProfile = {
   placeId: Id<"places">
   name: string
+  // Surface-native noun ("channel", "repository", "team") so the profiler
+  // judges "true of most places of this kind" against the right baseline.
+  kind: string
   claims: PlaceClaim[]
   messages: ProfileMessage[]
   // Watermark for the commit: createdAt of the newest message in the window.
@@ -38,22 +42,39 @@ export const pending = internalQuery({
       return null
     }
 
+    const kind = await placeKindNoun(ctx, place)
     const rows = await windowRows(ctx, place)
     const newest = rows.at(-1)
 
-    if (newest === undefined) {
+    if (kind === null || newest === undefined) {
       return null
     }
 
     return {
       placeId: place._id,
       name: place.name,
+      kind,
       claims: place.claims,
       messages: await profileMessages(ctx, rows),
       profiledAt: newest.createdAt,
     }
   },
 })
+
+async function placeKindNoun(ctx: QueryCtx, place: Doc<"places">) {
+  const integration = await ctx.db.get(place.integrationId)
+
+  if (integration === null) {
+    return null
+  }
+
+  const kind =
+    integration.integration in placeKinds
+      ? placeKinds[integration.integration as keyof typeof placeKinds]
+      : undefined
+
+  return kind?.noun ?? null
+}
 
 export const commit = internalMutation({
   args: {

@@ -43,7 +43,9 @@ export const run = internalAction({
 async function requestReview(pending: PendingProfile) {
   return await requestStructured({
     model: profileModel,
-    reasoning: "low",
+    // Calibrated judgment against explicit bars, closer to the deduction
+    // judge (high) than to the conversation summarizer (low).
+    reasoning: "medium",
     schemaName: "place_profile_review",
     schema: profileReviewSchema,
     system: renderPromptTemplate(promptTemplates["places/profile"], {}),
@@ -54,7 +56,7 @@ async function requestReview(pending: PendingProfile) {
 
 function reviewPayload(pending: PendingProfile) {
   return {
-    place: { name: pending.name },
+    place: { name: pending.name, kind: pending.kind },
     claims: pending.claims.map((claim, index) => ({
       index: index + 1,
       section: claim.section,

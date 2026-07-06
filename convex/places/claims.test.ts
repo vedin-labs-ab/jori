@@ -52,23 +52,25 @@ test("contradicted claims drop immediately", () => {
   expect(next.map((entry) => entry.text)).toEqual(["stays"])
 })
 
-test("unmentioned claims age only in windows large enough to speak", () => {
+test("small windows neither age claims nor land additions", () => {
   const claims = [claim("quiet")]
+  const additions = [{ section: "rhythm" as PlaceSection, text: "new norm" }]
 
   const small = applyProfileReview({
     claims,
-    review: review(),
+    review: review({ additions }),
     windowSize: profileWindowMissMinimum - 1,
     now,
   })
   const large = applyProfileReview({
     claims,
-    review: review(),
+    review: review({ additions }),
     windowSize: profileWindowMissMinimum,
     now,
   })
 
-  expect(small[0]?.misses).toBe(0)
+  expect(small).toEqual([claim("quiet")])
+  expect(large.map((entry) => entry.text)).toEqual(["quiet", "new norm"])
   expect(large[0]?.misses).toBe(1)
 })
 
@@ -100,7 +102,7 @@ test("additions land trimmed and blank additions are ignored", () => {
         { section: "people" as PlaceSection, text: "   " },
       ],
     }),
-    windowSize: 0,
+    windowSize: profileWindowMissMinimum,
     now,
   })
 
