@@ -11,9 +11,9 @@ import {
   getActorExternalId,
   withActorKind,
 } from "../shared/actor"
+import { type MessageIntegration } from "../shared/integrations"
 
 export type ReactionAction = "added" | "removed"
-export type ReactionIntegration = "github" | "linear" | "slack"
 
 export type ReactionTarget = {
   key: string
@@ -36,7 +36,7 @@ export type ReactionSnapshotTarget = {
 
 export type ReactionSnapshotPlan = {
   accountId: string
-  integration: ReactionIntegration
+  integration: MessageIntegration
   targets: ReactionSnapshotTarget[]
 }
 

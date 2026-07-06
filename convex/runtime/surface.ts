@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { isSurfaceCommunicationTool } from "../../contracts/runtime"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
@@ -12,11 +13,9 @@ import {
   messageReplyTargetIdentifier,
 } from "../messages/identifiers"
 import { replyAddress } from "../messages/targets"
-import {
-  type AgentRuntimeInput,
-  type MessageIntegration,
-} from "../runs/agent/input"
+import { type AgentRuntimeInput } from "../runs/agent/input"
 import { optionalString, requiredString } from "../shared/input"
+import { type MessageIntegration } from "../shared/integrations"
 import { requireWorkerSecret } from "./shared"
 import { requireMessageSurfaceInput } from "./surface/input"
 import { optionalSlackBlocks, sendSurfaceReply } from "./surface/reply"
@@ -170,9 +169,5 @@ function isCompletedCommunicationTrace(trace: Doc<"traces">) {
     return false
   }
 
-  return isVisibleCommunicationTool(trace.data.tool.name)
-}
-
-function isVisibleCommunicationTool(name: unknown) {
-  return name === "send_reply" || name === "add_reaction"
+  return isSurfaceCommunicationTool(trace.data.tool.name)
 }

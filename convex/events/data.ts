@@ -53,7 +53,7 @@ export async function recordEvent(
     match: args.match,
     actor: args.actor,
     text: args.text,
-    data: normalizeEventData(args.data),
+    data: normalizeEventData(args.integration.integration, args.data),
     observedAt: args.observedAt,
   })
   const event = await ctx.db.get(eventId)

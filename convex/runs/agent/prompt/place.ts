@@ -2,7 +2,8 @@ import { promptTemplates } from "../../../../prompts/generated"
 import { renderPromptTemplate } from "../../../../prompts/render"
 import { type PlaceContext } from "../../../places/context"
 import { type PlaceSection, placeSections } from "../../../places/schema"
-import { type AgentRuntimeInput, type MessageIntegration } from "../input"
+import { type MessageIntegration } from "../../../shared/integrations"
+import { type AgentRuntimeInput } from "../input"
 
 // The place message: claims about the durable container the triggering
 // message landed in, delivered as data alongside the run prompt. The layer

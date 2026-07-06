@@ -5,14 +5,11 @@ import { createSlackApprovalRequest } from "../../approvals/slack/blocks"
 import { replyAddress } from "../../messages/surface"
 import { type ToolSurface } from "../../permissions/catalog"
 import {
-  getSlackChannelId,
-  getSlackMessageTs,
-  getSlackThreadTs,
-} from "../../providers/slack/data"
-import { postSlackMessage } from "../../providers/slack/delivery/messages"
+  postSlackCard,
+  slackCardTarget,
+} from "../../providers/slack/delivery/cards"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { sendSurfaceReply } from "../../runtime/surface/reply"
-import { readString } from "../../shared/input"
 
 type ApprovalDeliveryContext = {
   input: AgentRuntimeInput
@@ -84,31 +81,19 @@ async function deliverSlackApproval(
   args: ApprovalDeliveryArgs & { delivery: SlackApprovalDelivery }
 ) {
   const message = createSlackApprovalRequest(args)
-  const response = await postSlackMessage(args.delivery.integration, {
-    channel: args.delivery.channelId,
-    thread_ts: args.delivery.threadTs,
-    text: message.text,
-    blocks: message.blocks,
-  })
-  const messageTs = readString(response, "ts")
-
-  if (messageTs === undefined) {
-    throw new Error("Slack approval message response is missing ts")
-  }
+  const { delivery } = await postSlackCard(
+    args.delivery.integration,
+    args.delivery,
+    {
+      blocks: message.blocks,
+      label: "approval message",
+      text: message.text,
+    }
+  )
 
   await ctx.runMutation(internal.approvals.approvals.recordDelivery, {
     approvalId: args.approvalId,
-    delivery: {
-      integration: "slack",
-      integrationId: args.delivery.integration._id,
-      data: {
-        channelId: readString(response, "channel") ?? args.delivery.channelId,
-        messageTs,
-        ...(args.delivery.threadTs === undefined
-          ? {}
-          : { threadTs: args.delivery.threadTs }),
-      },
-    },
+    delivery,
   })
 }
 
@@ -167,18 +152,7 @@ function getSlackTarget(input: AgentRuntimeInput) {
     return null
   }
 
-  const channelId = getSlackChannelId(input.message.data)
-
-  if (channelId === undefined) {
-    return null
-  }
-
-  return {
-    channelId,
-    threadTs:
-      getSlackThreadTs(input.message.data) ??
-      getSlackMessageTs(input.message.data),
-  }
+  return slackCardTarget(input.message.data)
 }
 
 function deliverySurface(

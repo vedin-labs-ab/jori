@@ -3,24 +3,18 @@ import { internalMutation } from "../_generated/server"
 import { findActiveIntegrationByExternalId } from "../integrations/data"
 import { resolveActor } from "../persons/resolve"
 import { actorValidator } from "../shared/actor"
-import { reconcileTargetReactions, recordReactionEvent } from "./apply"
 import {
-  type ReactionIntegration,
-  type ReactionSnapshotItem,
-  type ReactionTarget,
-} from "./data"
+  type MessageIntegration,
+  messageIntegrationValidator,
+} from "../shared/integrations"
+import { reconcileTargetReactions, recordReactionEvent } from "./apply"
+import { type ReactionSnapshotItem, type ReactionTarget } from "./data"
 import { reactionAction, reactionTarget } from "./schema"
-
-const reactionIntegration = v.union(
-  v.literal("github"),
-  v.literal("linear"),
-  v.literal("slack")
-)
 
 export const record = internalMutation({
   args: {
     accountId: v.string(),
-    integration: reactionIntegration,
+    integration: messageIntegrationValidator,
     action: reactionAction,
     reaction: v.string(),
     actor: v.optional(actorValidator),
@@ -59,7 +53,7 @@ export const record = internalMutation({
 export const sync = internalMutation({
   args: {
     accountId: v.string(),
-    integration: reactionIntegration,
+    integration: messageIntegrationValidator,
     target: reactionTarget,
     reactions: v.array(
       v.object({
@@ -104,7 +98,7 @@ async function resolveReactionActors(
     integration: NonNullable<
       Awaited<ReturnType<typeof findActiveIntegrationByExternalId>>
     >
-    provider: ReactionIntegration
+    provider: MessageIntegration
     reactions?: ReactionSnapshotItem[]
     target: ReactionTarget
   }

@@ -3,7 +3,7 @@ import {
   readDataObject,
   readDataString,
 } from "../../shared/data"
-import { type MessageIntegration } from "./input"
+import { type MessageIntegration } from "../../shared/integrations"
 import { type RuntimeTarget } from "./tools"
 
 export function requireMessageTarget(

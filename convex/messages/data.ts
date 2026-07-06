@@ -3,15 +3,8 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveActor } from "../persons/resolve"
 import { type Actor, actorValidator } from "../shared/actor"
+import { type MessageIntegration } from "../shared/integrations"
 import { messageDataReactionTargetKey } from "./identifiers"
-
-export const messageIntegrationValidator = v.union(
-  v.literal("github"),
-  v.literal("linear"),
-  v.literal("slack")
-)
-
-export type MessageIntegration = "github" | "linear" | "slack"
 
 export const observedMessageArgs = {
   accountId: v.string(),

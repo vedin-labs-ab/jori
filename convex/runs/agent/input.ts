@@ -3,8 +3,8 @@ import { type WorkstreamContext } from "../../deduction/roster"
 import { type RecentConversation } from "../../messages/history"
 import { type OrganizationFacts } from "../../organization/facts"
 import { type PlaceContext } from "../../places/context"
+import { type MessageIntegration } from "../../shared/integrations"
 
-export type MessageIntegration = "github" | "linear" | "slack"
 export type RuntimeIntegration = Doc<"integrations">
 
 export type MessageRuntimeInput = {

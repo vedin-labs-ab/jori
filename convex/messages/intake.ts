@@ -21,10 +21,12 @@ import {
   withActorKind,
 } from "../shared/actor"
 import {
-  findMessageByExternalId,
-  insertMessage,
   type MessageIntegration,
   messageIntegrationValidator,
+} from "../shared/integrations"
+import {
+  findMessageByExternalId,
+  insertMessage,
   type ObservedMessage,
   observedMessageArgs,
 } from "./data"

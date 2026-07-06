@@ -1,9 +1,10 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { type MessageIntegration, resolveMessageOwner } from "../messages/data"
+import { resolveMessageOwner } from "../messages/data"
 import { maxPendingReadLimit } from "../sessions/cursor"
 import { readPendingMessages, stopSession } from "../sessions/data"
 import { isPersonActor } from "../shared/actor"
+import { isMessageIntegration } from "../shared/integrations"
 import { startMessageRun } from "./data"
 
 export async function continuePendingConversationRun(
@@ -103,14 +104,4 @@ function hasText(message: Doc<"messages">) {
   const text = message.text?.trim()
 
   return text !== undefined && text !== ""
-}
-
-function isMessageIntegration(
-  integration: Doc<"messages">["integration"]
-): integration is MessageIntegration {
-  return (
-    integration === "github" ||
-    integration === "linear" ||
-    integration === "slack"
-  )
 }

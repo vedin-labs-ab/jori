@@ -7,6 +7,7 @@ import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { recentConversation } from "../messages/history"
 import { readApprovedFacts } from "../organization/profile"
 import { readPlaceContext } from "../places/context"
+import { isMessageIntegration } from "../shared/integrations"
 
 export const getInputByRun = internalQuery({
   args: {
@@ -75,16 +76,6 @@ async function getMessageInput(
     place: await readPlaceContext(ctx, message),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
-}
-
-function isMessageIntegration(
-  integration: string
-): integration is "github" | "linear" | "slack" {
-  return (
-    integration === "github" ||
-    integration === "linear" ||
-    integration === "slack"
-  )
 }
 
 async function getAutomationInput(
