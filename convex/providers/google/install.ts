@@ -7,7 +7,7 @@ import {
   requireProviderIntegration,
   saveOAuthCredentials,
 } from "../credentials"
-import { createSignedInstallState } from "../install"
+import { createSignedInstallState, upsertIntegration } from "../install"
 import { type GoogleIntegration } from "./config"
 import { findExistingGoogleIntegration } from "./scope"
 
@@ -71,19 +71,11 @@ export const recordOAuthInstallation = internalMutation({
       expiresAt: args.expiresAt,
       scope: args.scope,
     }
-    const values = createGoogleIntegrationValues(args, credentials, now)
-
-    const integrationId =
-      existing === null
-        ? await ctx.db.insert("integrations", {
-            ...values,
-            createdAt: now,
-          })
-        : existing._id
-
-    if (existing !== null) {
-      await ctx.db.patch(existing._id, { ...values, data: undefined })
-    }
+    const integrationId = await upsertIntegration(
+      ctx,
+      existing,
+      createGoogleIntegrationValues(args, credentials, now)
+    )
 
     await linkSetupIdentity(ctx, {
       tenantId: args.tenantId,
@@ -135,6 +127,8 @@ function createGoogleIntegrationValues(
     status: "active" as const,
     createdBy: args.createdBy,
     updatedAt: now,
+    // Google rows carry no provider data; clear any stale value on reinstall.
+    data: undefined,
   }
 }
 

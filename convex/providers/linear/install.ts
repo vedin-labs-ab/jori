@@ -1,10 +1,11 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
+import { findIntegrationByExternalId } from "../../integrations/data"
 import {
   requireProviderIntegration,
   saveOAuthCredentials,
 } from "../credentials"
-import { buildInstallState } from "../install"
+import { buildInstallState, upsertIntegration } from "../install"
 import { createSignedLinearState } from "./signing"
 
 export const createInstallState = mutation({
@@ -36,59 +37,32 @@ export const recordOAuthInstallation = internalMutation({
     }),
   },
   handler: async (ctx, args) => {
-    const now = Date.now()
-    const existing = await ctx.db
-      .query("integrations")
-      .withIndex("by_integration_and_external", (query) =>
-        query
-          .eq("integration", "linear")
-          .eq("externalId", args.profile.organization.id)
-      )
-      .first()
+    const existing = await findIntegrationByExternalId(ctx, {
+      integration: "linear",
+      externalId: args.profile.organization.id,
+    })
 
-    const credentials = {
-      tokens: {
-        access: args.accessToken,
-        refresh: args.refreshToken,
-      },
-      expiresAt: args.expiresAt,
-      scope: args.scope,
-    }
-    const data = {
-      botId: args.profile.botId,
-    }
-    const url = getLinearUrl(args.profile.organization.urlKey)
-
-    if (existing !== null) {
-      await ctx.db.patch(existing._id, {
-        tenantId: args.tenantId,
-        scope: "tenant",
-        externalId: args.profile.organization.id,
-        name: args.profile.organization.name,
-        url,
-        credentials,
-        status: "active",
-        createdBy: args.createdBy,
-        updatedAt: now,
-        data,
-      })
-
-      return existing._id
-    }
-
-    return await ctx.db.insert("integrations", {
+    return await upsertIntegration(ctx, existing, {
       tenantId: args.tenantId,
       integration: "linear",
       scope: "tenant",
       externalId: args.profile.organization.id,
       name: args.profile.organization.name,
-      url,
-      credentials,
+      url: getLinearUrl(args.profile.organization.urlKey),
+      credentials: {
+        tokens: {
+          access: args.accessToken,
+          refresh: args.refreshToken,
+        },
+        expiresAt: args.expiresAt,
+        scope: args.scope,
+      },
       status: "active",
       createdBy: args.createdBy,
-      createdAt: now,
-      updatedAt: now,
-      data,
+      updatedAt: Date.now(),
+      data: {
+        botId: args.profile.botId,
+      },
     })
   },
 })
