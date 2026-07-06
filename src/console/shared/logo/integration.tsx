@@ -1,5 +1,6 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
 import { type ReactNode } from "react"
+import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
   TooltipContent,
@@ -9,6 +10,33 @@ import { cn } from "@/lib/utils"
 import { providerLogoPath } from "./path"
 
 type IntegrationLogoSize = "sm" | "md"
+
+// Labeled outline chips, one per integration: the standard way a record
+// wears its source rollup (workstream cards, detail headers).
+export function IntegrationChips({
+  integrations,
+}: {
+  integrations: readonly Integration[]
+}) {
+  if (integrations.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {integrations.map((integration) => (
+        <Badge key={integration} variant="outline">
+          <IntegrationLogo
+            className="size-3"
+            decorative
+            integration={integration}
+          />
+          {integrationLabel(integration)}
+        </Badge>
+      ))}
+    </div>
+  )
+}
 
 export function IntegrationLogo({
   className,

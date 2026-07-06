@@ -80,38 +80,38 @@ export async function refreshBelief(ctx: MutationCtx, beliefId: Id<"beliefs">) {
   })
 }
 
-// What an effort's evidence yields: anchors from events, the integration
-// kind from events and conversations alike, and the people behind the
-// activity — only those the person graph actually resolves. Unlinked actors
-// (bots, unmapped providers) carry no lasting signal and are skipped.
+// What an effort's evidence yields: integrations from the write-time stamp,
+// anchors from events, and the people behind the activity — only those the
+// person graph actually resolves. Unlinked actors (bots, unmapped providers)
+// carry no lasting signal and are skipped.
 async function collectFacets(ctx: MutationCtx, rows: Doc<"evidence">[]) {
   const anchors = new Set<string>()
   const sources = new Set<Integration>()
   const persons = new Set<Id<"persons">>()
 
   for (const row of rows) {
-    const cited = await loadCitedRecord(ctx, row)
+    if (row.integration !== undefined) {
+      sources.add(row.integration)
+    }
 
-    if (cited === null) {
+    if (row.reference.kind !== "event") {
       continue
     }
 
-    const source = await integrationKind(ctx, cited.integrationId)
+    const event = await ctx.db.get(row.reference.eventId)
 
-    if (source !== undefined) {
-      sources.add(source)
-    }
-
-    if (cited.event === undefined) {
+    if (event === null) {
       continue
     }
 
-    const anchor = eventAnchor(cited.event)
+    const anchor = eventAnchor(event)
     const personId = await resolvePersonId(ctx, {
-      tenantId: cited.event.tenantId,
+      tenantId: event.tenantId,
       provider:
-        source === undefined ? undefined : actorIdentityProvider(source),
-      actor: cited.event.actor,
+        row.integration === undefined
+          ? undefined
+          : actorIdentityProvider(row.integration),
+      actor: event.actor,
     })
 
     if (anchor !== undefined) {
@@ -124,31 +124,4 @@ async function collectFacets(ctx: MutationCtx, rows: Doc<"evidence">[]) {
   }
 
   return { anchors, sources, persons }
-}
-
-async function loadCitedRecord(ctx: MutationCtx, row: Doc<"evidence">) {
-  if (row.reference.kind === "event") {
-    const event = await ctx.db.get(row.reference.eventId)
-
-    return event === null ? null : { event, integrationId: event.integrationId }
-  }
-
-  if (row.reference.kind === "conversation") {
-    const conversation = await ctx.db.get(row.reference.conversationId)
-
-    return conversation === null
-      ? null
-      : { event: undefined, integrationId: conversation.integrationId }
-  }
-
-  return null
-}
-
-async function integrationKind(
-  ctx: MutationCtx,
-  integrationId: Id<"integrations">
-): Promise<Integration | undefined> {
-  const integration = await ctx.db.get(integrationId)
-
-  return integration?.integration
 }

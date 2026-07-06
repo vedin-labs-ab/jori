@@ -1,19 +1,19 @@
-import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx, query } from "../../_generated/server"
 import { checkTenantAccess } from "../../identity/access"
+import { type Integration } from "../../shared/integrations"
 import { eventKindLabel, statusLabels } from "./labels"
 
 // Console reads follow the write-time read model: source chips come from the
-// belief's `sources` rollup, and the expanded lists page one stamped index
-// range each — no evidence walks at read time.
+// belief's `sources` rollup, per-entry providers from the evidence rows'
+// `integration` stamp — no reference walks at read time.
 
-// Counting caps a single index range; real totals at these volumes. Swap for
+// Rollups cap a single index range; real totals at these volumes. Swap for
 // denormalized counters if a workstream ever nears the cap. The timeline is
 // similarly bounded: past the cap, the oldest narrative is the deep-memory
 // system's job, not the console's.
-const countLimit = 1000
+const rollupLimit = 1000
 const timelineLimit = 500
 
 export const list = query({
@@ -48,51 +48,17 @@ export const get = query({
     const access = await checkTenantAccess(ctx, args.tenantId)
     const belief = access.ok ? await loadWorkstream(ctx, args) : null
 
-    if (belief === null) {
-      return null
-    }
-
-    return {
-      ...listRow(belief),
-      aliases: belief.aliases,
-      efforts: await memberEfforts(ctx, belief._id),
-      counts: { sightings: await countRange(sightingsRange(ctx, belief._id)) },
-    }
+    return belief === null
+      ? null
+      : { ...listRow(belief), aliases: belief.aliases }
   },
 })
 
-// One page of the workstream's source sightings, newest first: the evidence
-// of its member efforts, read through the membership stamp.
-export const sightings = query({
-  args: {
-    tenantId: v.string(),
-    workstreamId: v.id("beliefs"),
-    paginationOpts: paginationOptsValidator,
-  },
-  handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
-    const belief = access.ok ? await loadWorkstream(ctx, args) : null
-
-    if (belief === null) {
-      return emptyPage()
-    }
-
-    const result = await sightingsRange(ctx, belief._id)
-      .order("desc")
-      .paginate(args.paginationOpts)
-
-    return {
-      ...result,
-      page: await Promise.all(result.page.map((row) => sightingRow(ctx, row))),
-    }
-  },
-})
-
-// The workstream's full narrative timeline, newest first: the journals of
-// its member efforts, read through the same stamp. Bounded rather than
-// paginated — the journal is curated and rate-limited by the charter, so a
-// year of an active workstream stays in the hundreds; temporal grouping in
-// the console is the progressive disclosure.
+// The workstream's timeline, newest first: the journals of its member
+// efforts, read through the membership stamp and joined with per-entry
+// receipt rollups. Bounded rather than paginated — the journal is curated
+// and rate-limited by the charter, so a year of an active workstream stays
+// in the hundreds; paging in the console is the progressive disclosure.
 export const timeline = query({
   args: { tenantId: v.string(), workstreamId: v.id("beliefs") },
   handler: async (ctx, args) => {
@@ -103,23 +69,30 @@ export const timeline = query({
       return []
     }
 
-    const names = new Map(
-      (await memberEfforts(ctx, belief._id)).map((row) => [row.id, row.name])
-    )
-    const receipts = await receiptCounts(ctx, belief._id)
-    const rows = await historyRange(ctx, belief._id)
+    const names = await effortNames(ctx, belief._id)
+    const rollups = await receiptRollups(ctx, belief._id)
+    const rows = await ctx.db
+      .query("journal")
+      .withIndex("by_workstream_and_observed_at", (index) =>
+        index.eq("workstreamId", belief._id)
+      )
       .order("desc")
       .take(timelineLimit)
 
-    return rows.map((row) => ({
-      id: row._id,
-      entry: row.entry,
-      observedAt: row.observedAt,
-      effortId: row.effortId,
-      effort: names.get(row.effortId) ?? "",
-      passId: row.passId,
-      receipts: receipts.get(`${row.effortId}:${row.passId}`) ?? 0,
-    }))
+    return rows.map((row) => {
+      const rollup = rollups.get(`${row.effortId}:${row.passId}`)
+
+      return {
+        id: row._id,
+        entry: row.entry,
+        observedAt: row.observedAt,
+        effortId: row.effortId,
+        effort: names.get(row.effortId) ?? "",
+        passId: row.passId,
+        receipts: rollup?.count ?? 0,
+        integrations: rollup?.integrations ?? [],
+      }
+    })
   },
 })
 
@@ -149,20 +122,25 @@ export const receipts = query({
       .filter((row) => row.passId === args.passId)
       .sort((first, second) => second.observedAt - first.observedAt)
 
-    return Promise.all(cited.map((row) => sightingRow(ctx, row)))
+    return Promise.all(cited.map((row) => receiptRow(ctx, row)))
   },
 })
 
-// Exact per-entry receipt counts from one stamped index range: evidence and
-// journal rows written by the same pass for the same effort belong together.
-async function receiptCounts(ctx: QueryCtx, beliefId: Id<"beliefs">) {
+// Per-entry receipt rollups from one stamped index range, newest first so
+// each entry's providers order by recency: evidence and journal rows written
+// by the same pass for the same effort belong together.
+async function receiptRollups(ctx: QueryCtx, beliefId: Id<"beliefs">) {
   const rows = await ctx.db
     .query("evidence")
     .withIndex("by_workstream_and_observed_at", (index) =>
       index.eq("workstreamId", beliefId)
     )
-    .take(countLimit)
-  const counts = new Map<string, number>()
+    .order("desc")
+    .take(rollupLimit)
+  const rollups = new Map<
+    string,
+    { count: number; integrations: Integration[] }
+  >()
 
   for (const row of rows) {
     if (row.subject.kind !== "effort") {
@@ -170,11 +148,32 @@ async function receiptCounts(ctx: QueryCtx, beliefId: Id<"beliefs">) {
     }
 
     const key = `${row.subject.effortId}:${row.passId}`
+    const rollup = rollups.get(key) ?? { count: 0, integrations: [] }
 
-    counts.set(key, (counts.get(key) ?? 0) + 1)
+    rollup.count += 1
+
+    if (
+      row.integration !== undefined &&
+      !rollup.integrations.includes(row.integration)
+    ) {
+      rollup.integrations.push(row.integration)
+    }
+
+    rollups.set(key, rollup)
   }
 
-  return counts
+  return rollups
+}
+
+// Journal rows keep citing superseded efforts, so name resolution reads the
+// whole membership, replaced rows included.
+async function effortNames(ctx: QueryCtx, beliefId: Id<"beliefs">) {
+  const rows = await ctx.db
+    .query("efforts")
+    .withIndex("by_workstream", (index) => index.eq("workstreamId", beliefId))
+    .collect()
+
+  return new Map(rows.map((row) => [row._id, row.name]))
 }
 
 function listRow(row: Doc<"beliefs">) {
@@ -203,85 +202,29 @@ async function loadWorkstream(
     : null
 }
 
-async function memberEfforts(ctx: QueryCtx, beliefId: Id<"beliefs">) {
-  const rows = await ctx.db
-    .query("efforts")
-    .withIndex("by_workstream", (index) => index.eq("workstreamId", beliefId))
-    .collect()
-
-  return rows
-    .filter((row) => row.supersededBy === undefined)
-    .sort((first, second) => second.seenAt - first.seenAt)
-    .map((row) => ({
-      id: row._id,
-      name: row.name,
-      summary: row.summary,
-      seenAt: row.seenAt,
-    }))
-}
-
-function sightingsRange(ctx: QueryCtx, beliefId: Id<"beliefs">) {
-  return ctx.db
-    .query("evidence")
-    .withIndex("by_workstream_and_observed_at", (index) =>
-      index.eq("workstreamId", beliefId)
-    )
-}
-
-function historyRange(ctx: QueryCtx, beliefId: Id<"beliefs">) {
-  return ctx.db
-    .query("journal")
-    .withIndex("by_workstream_and_observed_at", (index) =>
-      index.eq("workstreamId", beliefId)
-    )
-}
-
-async function countRange(range: {
-  take(count: number): Promise<{ length: number }>
-}) {
-  return (await range.take(countLimit)).length
-}
-
-function emptyPage() {
-  return { page: [], isDone: true, continueCursor: "" }
-}
-
-async function sightingRow(ctx: QueryCtx, row: Doc<"evidence">) {
-  const base = { id: row._id, why: row.why, observedAt: row.observedAt }
+async function receiptRow(ctx: QueryCtx, row: Doc<"evidence">) {
+  const base = {
+    id: row._id,
+    why: row.why,
+    observedAt: row.observedAt,
+    integration: row.integration ?? null,
+  }
 
   if (row.reference.kind === "conversation") {
-    const conversation = await ctx.db.get(row.reference.conversationId)
-
-    return {
-      ...base,
-      integration: await integrationKey(ctx, conversation?.integrationId),
-      kind: "Conversation",
-      url: undefined,
-    }
+    return { ...base, kind: "Conversation", url: undefined }
   }
 
   if (row.reference.kind === "effort") {
-    return { ...base, integration: null, kind: "Effort", url: undefined }
+    return { ...base, kind: "Effort", url: undefined }
   }
 
   const event = await ctx.db.get(row.reference.eventId)
 
   return {
     ...base,
-    integration: await integrationKey(ctx, event?.integrationId),
     kind: eventKindLabel(event?.type ?? ""),
     url: event === null ? undefined : eventUrl(event.data),
   }
-}
-
-async function integrationKey(
-  ctx: QueryCtx,
-  integrationId: Id<"integrations"> | undefined
-) {
-  const integration =
-    integrationId === undefined ? null : await ctx.db.get(integrationId)
-
-  return integration === null ? null : integration.integration
 }
 
 function eventUrl(data: Doc<"events">["data"]): string | undefined {

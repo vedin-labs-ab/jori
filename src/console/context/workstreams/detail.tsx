@@ -1,12 +1,7 @@
-import { usePaginatedQuery, useQuery } from "convex/react"
-import { ChevronRight, Lock } from "lucide-react"
+import { useQuery } from "convex/react"
+import { Lock } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
 import {
   Sheet,
   SheetContent,
@@ -17,11 +12,10 @@ import {
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
-import { Paged, PagedRemote } from "../../shared/paging"
+import { IntegrationChips } from "../../shared/logo/integration"
 import { relativeTime, useNow } from "../../shared/time"
 import { ContextSectionTitle } from "../section"
 import { WorkstreamActions } from "./actions"
-import { Sighting } from "./sighting"
 import { WorkstreamStatusCue } from "./status"
 import { WorkstreamTimeline } from "./timeline"
 import { type Workstream } from "./types"
@@ -44,7 +38,7 @@ export function WorkstreamDetail({
         }
       }}
     >
-      <SheetContent className="flex w-full flex-col gap-0 sm:max-w-lg">
+      <SheetContent className="flex w-full flex-col gap-0 data-[side=right]:sm:max-w-lg">
         {workstream === null ? null : (
           <DetailBody tenantId={tenantId} workstream={workstream} />
         )}
@@ -75,6 +69,7 @@ function DetailBody({
         <SheetDescription>
           Seen {relativeTime(workstream.seenAt, now)}
         </SheetDescription>
+        <IntegrationChips integrations={workstream.sources} />
         {workstream.locked ? (
           <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
             <Lock className="size-3 shrink-0" />
@@ -139,88 +134,12 @@ function DetailSections({
           </div>
         </Section>
       )}
-      {detail.efforts.length === 0 ? null : (
-        <Section count={detail.efforts.length} title="Efforts">
-          <Paged initialCount={4} items={detail.efforts}>
-            {(visible) => (
-              <ul className="flex flex-col divide-y rounded-md border">
-                {visible.map((effort) => (
-                  <li className="flex flex-col gap-0.5 p-3" key={effort.id}>
-                    <span className="flex min-w-0 items-center gap-2">
-                      <span className="min-w-0 truncate font-medium text-sm">
-                        {effort.name}
-                      </span>
-                      <span className="ml-auto shrink-0 text-muted-foreground text-xs">
-                        {relativeTime(effort.seenAt, now)}
-                      </span>
-                    </span>
-                    <span className="truncate text-muted-foreground text-sm">
-                      {effort.summary}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Paged>
-        </Section>
-      )}
       {timeline.length === 0 ? null : (
         <Section count={timeline.length} title="Timeline">
           <WorkstreamTimeline items={timeline} now={now} tenantId={tenantId} />
         </Section>
       )}
-      <AllSources
-        count={detail.counts.sightings}
-        tenantId={tenantId}
-        workstreamId={detail.id}
-      />
     </>
-  )
-}
-
-// The audit view: every source sighting behind the workstream, tucked behind
-// one disclosure. Day-to-day verification lives on the timeline entries.
-function AllSources({
-  tenantId,
-  workstreamId,
-  count,
-}: {
-  tenantId: string
-  workstreamId: Detail["id"]
-  count: number
-}) {
-  const sightings = usePaginatedQuery(
-    api.deduction.console.queries.sightings,
-    { tenantId, workstreamId },
-    { initialNumItems: 5 }
-  )
-
-  if (count === 0) {
-    return null
-  }
-
-  return (
-    <Collapsible>
-      <CollapsibleTrigger className="group flex w-full items-center justify-between">
-        <ContextSectionTitle count={count}>All sources</ContextSectionTitle>
-        <ChevronRight className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-90" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="pt-1.5">
-        <PagedRemote
-          canLoadMore={sightings.status === "CanLoadMore"}
-          isLoading={sightings.status === "LoadingMore"}
-          loaded={sightings.results.length}
-          onLoadMore={(loadCount) => sightings.loadMore(loadCount)}
-          total={count}
-        >
-          <ul className="flex flex-col divide-y rounded-md border">
-            {sightings.results.map((sighting) => (
-              <Sighting key={sighting.id} sighting={sighting} />
-            ))}
-          </ul>
-        </PagedRemote>
-      </CollapsibleContent>
-    </Collapsible>
   )
 }
 

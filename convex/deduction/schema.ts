@@ -122,6 +122,10 @@ export const evidence = defineTable({
   reference: evidenceReference,
   why: v.string(),
   observedAt: v.number(),
+  // Write-time stamp of the cited record's integration, so console rollups
+  // and derived source caches never dereference the reference at read time.
+  // Absent when the citation has none (effort references).
+  integration: v.optional(integrationValidator),
   // Read-model stamp on effort-subject rows: the owning workstream, kept in
   // step with membership so the console pages one index range per
   // workstream. Belief-subject rows carry no stamp.
