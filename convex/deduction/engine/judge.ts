@@ -80,6 +80,27 @@ export function opSchema(op: string, properties: Record<string, unknown>) {
 // entries rare; anything that still fails is counted, never thrown, so one
 // bad mutation can't sink a pass.
 
+export function readOps<Op>(
+  value: Record<string, unknown>,
+  readOp: (item: unknown) => Op | null
+): { ops: Op[]; invalid: number } {
+  const mutations = Array.isArray(value.mutations) ? value.mutations : []
+  const ops: Op[] = []
+  let invalid = 0
+
+  for (const item of mutations) {
+    const op = readOp(item)
+
+    if (op === null) {
+      invalid += 1
+    } else {
+      ops.push(op)
+    }
+  }
+
+  return { ops, invalid }
+}
+
 export function readString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() !== "" ? value : undefined
 }
