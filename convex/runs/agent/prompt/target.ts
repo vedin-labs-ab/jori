@@ -4,7 +4,8 @@ import {
   readDataObject,
   readDataString,
 } from "../../../shared/data"
-import { type AgentRuntimeInput, type MessageIntegration } from "../input"
+import { type MessageIntegration } from "../../../shared/integrations"
+import { type AgentRuntimeInput } from "../input"
 
 type AutomationEvent = NonNullable<
   Extract<AgentRuntimeInput, { type: "automation" }>["event"]

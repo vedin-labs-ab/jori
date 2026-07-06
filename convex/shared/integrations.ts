@@ -1,5 +1,9 @@
 import { v } from "convex/values"
-import { integrations, toolSurfaces } from "../../contracts/integrations"
+import {
+  integrations,
+  messageIntegrations,
+  toolSurfaces,
+} from "../../contracts/integrations"
 
 export {
   type Integration,
@@ -8,8 +12,11 @@ export {
   integrationProviders,
   integrations,
   isGoogleIntegration,
+  isMessageIntegration,
   isMicrosoftIntegration,
   isUserScopedIntegration,
+  type MessageIntegration,
+  messageIntegrations,
   providerForIntegration,
   type ToolSurface,
   toolSurfaceLabel,
@@ -22,6 +29,10 @@ export const integrationValidator = v.union(
 
 export const toolSurfaceValidator = v.union(
   ...toolSurfaces.map((surface) => v.literal(surface))
+)
+
+export const messageIntegrationValidator = v.union(
+  ...messageIntegrations.map((integration) => v.literal(integration))
 )
 
 // Where a surface message (approval prompt, integration offer) was delivered,

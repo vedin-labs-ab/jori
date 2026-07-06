@@ -3,12 +3,9 @@ import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { type ApprovalBrokerContext } from "../../broker/approval"
 import {
-  getSlackChannelId,
-  getSlackMessageTs,
-  getSlackThreadTs,
-} from "../../providers/slack/data"
-import { postSlackMessage } from "../../providers/slack/delivery/messages"
-import { readString } from "../../shared/input"
+  postSlackCard,
+  slackCardTarget,
+} from "../../providers/slack/delivery/cards"
 import { type Integration } from "../../shared/integrations"
 import { createSlackIntegrationOfferMessage } from "./slack"
 
@@ -52,31 +49,19 @@ async function tryDeliverSlackIntegrationOffer(
       url: args.url,
     })
 
-    const response = await postSlackMessage(target.integration, {
-      channel: target.channelId,
-      thread_ts: target.threadTs,
-      text: message.text,
-      blocks: message.blocks,
-    })
-    const messageTs = readString(response, "ts")
-
-    if (messageTs === undefined) {
-      throw new Error("Slack integration offer response is missing ts")
-    }
+    const { delivery, messageTs } = await postSlackCard(
+      target.integration,
+      target,
+      {
+        blocks: message.blocks,
+        label: "integration offer",
+        text: message.text,
+      }
+    )
 
     await ctx.runMutation(internal.integrations.offers.updates.recordDelivery, {
       integrationOfferId: args.integrationOfferId,
-      delivery: {
-        integration: "slack",
-        integrationId: target.integration._id,
-        data: {
-          channelId: readString(response, "channel") ?? target.channelId,
-          messageTs,
-          ...(target.threadTs === undefined
-            ? {}
-            : { threadTs: target.threadTs }),
-        },
-      },
+      delivery,
     })
 
     return {
@@ -100,17 +85,9 @@ function getSlackTarget(context: ApprovalBrokerContext) {
     return null
   }
 
-  const channelId = getSlackChannelId(context.input.message.data)
+  const target = slackCardTarget(context.input.message.data)
 
-  if (channelId === undefined) {
-    return null
-  }
-
-  return {
-    integration: context.input.integration,
-    channelId,
-    threadTs:
-      getSlackThreadTs(context.input.message.data) ??
-      getSlackMessageTs(context.input.message.data),
-  }
+  return target === null
+    ? null
+    : { integration: context.input.integration, ...target }
 }

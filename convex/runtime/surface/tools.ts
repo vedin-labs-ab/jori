@@ -1,7 +1,7 @@
 import { type JsonObject } from "../../../contracts/json"
 import { finalProperty } from "../../../contracts/runtime"
-import { type MessageIntegration } from "../../runs/agent/input"
 import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
+import { type MessageIntegration } from "../../shared/integrations"
 import { nativeToolUsage } from "../permissions/native"
 
 export type ActiveSurfaceTool = {

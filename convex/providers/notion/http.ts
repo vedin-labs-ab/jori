@@ -111,6 +111,7 @@ export async function handleNotionEvents(ctx: ActionCtx, request: Request) {
 
   for (const event of readNotionAutomationEvents(payload)) {
     const data = normalizeEventData(
+      "notion",
       await enrichNotionEventData(ctx, {
         data: event.data,
         pageId: event.pageId,

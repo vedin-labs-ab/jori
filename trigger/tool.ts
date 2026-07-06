@@ -1,11 +1,10 @@
 import { type ToolSurface } from "../contracts/integrations"
-import { readFinal } from "../contracts/runtime"
+import { isVisibleCommunicationTool, readFinal } from "../contracts/runtime"
 import {
   materializeSandboxResult,
   prepareMiloToolInput,
   saveSandboxAsset,
 } from "./assets"
-import { isVisibleCommunicationTool } from "./communication"
 import { type MiloConvexClient } from "./convex"
 import { errorDetails } from "./events"
 import { generateImageAsset } from "./images/index"

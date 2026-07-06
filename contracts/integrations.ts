@@ -13,8 +13,19 @@ export const integrations = [
 
 export const toolSurfaces = ["milo", ...integrations] as const
 
+// Integrations that carry conversations: they record messages and reactions
+// and can host an active run surface.
+export const messageIntegrations = ["github", "linear", "slack"] as const
+
 export type Integration = (typeof integrations)[number]
 export type ToolSurface = (typeof toolSurfaces)[number]
+export type MessageIntegration = (typeof messageIntegrations)[number]
+
+export function isMessageIntegration(
+  value: string
+): value is MessageIntegration {
+  return messageIntegrations.some((integration) => integration === value)
+}
 
 export const integrationProviders = {
   slack: "slack",

@@ -1,3 +1,4 @@
+import { type Integration } from "../../contracts/integrations"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import {
@@ -82,7 +83,7 @@ function readSlackAutomationEvents(message: AutomationEventMessage) {
   }
 
   return [
-    baseEvent(message, {
+    baseEvent("slack", message, {
       type: "message.created",
       match: { channel: channelId },
     }),
@@ -119,7 +120,7 @@ function readGitHubIssueCommentEvent(
 
   if (readBoolean(data, "isPullRequest")) {
     return [
-      baseEvent(message, {
+      baseEvent("github", message, {
         type: pullRequestCommentEvent[action],
         match: {
           repo,
@@ -130,7 +131,7 @@ function readGitHubIssueCommentEvent(
   }
 
   return [
-    baseEvent(message, {
+    baseEvent("github", message, {
       type: issueCommentEvent[action],
       match: {
         repo,
@@ -153,7 +154,7 @@ function readGitHubPullRequestReviewCommentEvent(
   }
 
   return [
-    baseEvent(message, {
+    baseEvent("github", message, {
       type: pullRequestReviewCommentEvent[action],
       match: {
         repo,
@@ -174,7 +175,7 @@ function readLinearAutomationEvents(message: AutomationEventMessage) {
   }
 
   return [
-    baseEvent(message, {
+    baseEvent("linear", message, {
       type: issueCommentEvent[action],
       match: {
         issue: issueId,
@@ -186,6 +187,7 @@ function readLinearAutomationEvents(message: AutomationEventMessage) {
 }
 
 function baseEvent(
+  integration: Integration,
   message: AutomationEventMessage,
   event: Pick<AutomationEventRecord, "match" | "type">
 ): AutomationEventRecord {
@@ -195,7 +197,7 @@ function baseEvent(
     match: event.match,
     actor: message.actor,
     text: message.text,
-    data: normalizeEventData(message.data),
+    data: normalizeEventData(integration, message.data),
     observedAt: message.observedAt,
   }
 }

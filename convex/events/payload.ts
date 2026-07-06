@@ -1,3 +1,4 @@
+import { type Integration } from "../../contracts/integrations"
 import { readNumber, readString, readValue } from "../shared/input"
 import {
   type EventData,
@@ -7,10 +8,22 @@ import {
   type SlackEventData,
 } from "./schema"
 
-export function normalizeEventData(data: unknown): EventData | undefined {
-  return (
-    slackData(data) ?? notionData(data) ?? githubData(data) ?? linearData(data)
-  )
+export function normalizeEventData(
+  integration: Integration,
+  data: unknown
+): EventData | undefined {
+  switch (integration) {
+    case "slack":
+      return slackData(data)
+    case "github":
+      return githubData(data)
+    case "linear":
+      return linearData(data)
+    case "notion":
+      return notionData(data)
+    default:
+      return undefined
+  }
 }
 
 function slackData(data: unknown): SlackEventData | undefined {
@@ -38,13 +51,8 @@ function githubData(data: unknown): GitHubEventData | undefined {
   const comment = readObject(data, "comment")
   const issue = readObject(data, "issue")
   const pullRequest = readObject(data, "pullRequest")
-  const hasGitHubShape =
-    fullName !== undefined ||
-    readNumber(data, "issueNumber") !== undefined ||
-    readNumber(data, "pullNumber") !== undefined ||
-    readString(comment, "kind")?.startsWith("pull_request") === true
 
-  if (!hasGitHubShape || fullName === undefined) {
+  if (fullName === undefined) {
     return undefined
   }
 
