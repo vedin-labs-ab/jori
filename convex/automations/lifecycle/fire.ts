@@ -40,7 +40,6 @@ export async function fireAutomation(
         ...automation.trigger,
         functionId: undefined,
       },
-      firedAt: now,
       updatedAt: now,
     })
 
@@ -59,7 +58,6 @@ export async function fireAutomation(
 
   await ctx.db.patch(automation._id, {
     trigger,
-    firedAt: now,
     updatedAt: now,
   })
 
@@ -99,10 +97,6 @@ export async function startEventAutomations(
         now: args.now,
       })
     )
-    await ctx.db.patch(automation._id, {
-      firedAt: args.now,
-      updatedAt: args.now,
-    })
   }
 
   return runIds

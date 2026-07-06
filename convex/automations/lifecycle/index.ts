@@ -1,5 +1,6 @@
 export { pauseAutomation, resumeAutomation } from "./control"
 export { fireAutomation, startEventAutomations } from "./fire"
 export { getRequiredAutomation, getTenantAutomation } from "./read"
+export { createAutomationRun } from "./run"
 export { maxSearchResults, searchAutomations } from "./search"
 export { createAutomation, removeAutomation, updateAutomation } from "./write"
