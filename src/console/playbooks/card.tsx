@@ -1,5 +1,5 @@
+import { type Integration } from "@contracts/integrations"
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
-import { describePlaybookSchedule } from "@contracts/playbooks/schedule"
 import { Link } from "@tanstack/react-router"
 import {
   ArrowUpRight,
@@ -7,14 +7,13 @@ import {
   CalendarRange,
   CalendarSearch,
   ChevronDown,
-  Clock,
-  Globe,
   type LucideIcon,
   MailCheck,
   NotebookTabs,
   Play,
   Sunrise,
 } from "lucide-react"
+import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -33,10 +32,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
-import { SurfaceLogo } from "../automations/access/logo"
-import { type PlaybookActions } from "./enable"
+import { type PlaybookActionKind, type PlaybookActions } from "./enable"
+import { PlaybookMeta } from "./meta"
 import {
-  displayProviders,
+  type PlaybookEnablePlan,
   type PlaybookListRow,
   planPlaybookEnable,
 } from "./state"
@@ -80,35 +79,6 @@ export function PlaybookCard({
   )
 }
 
-function PlaybookMeta({
-  definition,
-  row,
-}: {
-  definition: PlaybookDefinition
-  row: PlaybookListRow | undefined
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
-      <span className="flex items-center gap-1.5">
-        <Clock className="size-3.5" />
-        {describePlaybookSchedule(definition.schedule)}
-      </span>
-      <span className="flex items-center gap-1.5">
-        {(row?.slots ?? []).flatMap(displayProviders).map((provider) => (
-          <SurfaceLogo
-            key={provider.integration}
-            className={provider.connected ? undefined : "opacity-40"}
-            integration={provider.integration}
-          />
-        ))}
-        {definition.web ? (
-          <Globe aria-label="Uses web research" className="size-3.5" />
-        ) : null}
-      </span>
-    </div>
-  )
-}
-
 function PlaybookAction({
   actions,
   definition,
@@ -132,28 +102,7 @@ function PlaybookAction({
     )
   }
 
-  return (
-    <EnableButton
-      actions={actions}
-      definition={definition}
-      pending={actions.pendingKey === definition.key}
-      slots={row.slots}
-    />
-  )
-}
-
-function EnableButton({
-  actions,
-  definition,
-  pending,
-  slots,
-}: {
-  actions: PlaybookActions
-  definition: PlaybookDefinition
-  pending: boolean
-  slots: PlaybookListRow["slots"]
-}) {
-  const plan = planPlaybookEnable(slots)
+  const plan = planPlaybookEnable(row.slots)
 
   if (plan.kind === "connect") {
     return (
@@ -165,14 +114,64 @@ function EnableButton({
     )
   }
 
+  const pendingKind =
+    actions.pending?.key === definition.key ? actions.pending.kind : undefined
+
+  return (
+    <div className="grid w-full grid-cols-2 gap-2">
+      <PlanButton
+        disabled={pendingKind !== undefined}
+        icon={<Play />}
+        label="Try once"
+        onSelect={(choices) => void actions.trial(definition, choices)}
+        pending={pendingKind === "trial"}
+        plan={plan}
+        variant="outline"
+      />
+      <PlanButton
+        disabled={pendingKind !== undefined}
+        label="Enable"
+        onSelect={(choices) => void actions.enable(definition, choices)}
+        pending={pendingKind === "enable"}
+        plan={plan}
+        variant="default"
+      />
+    </div>
+  )
+}
+
+/** Runs `onSelect` directly, or via a provider menu when a choice remains. */
+function PlanButton({
+  disabled,
+  icon,
+  label,
+  onSelect,
+  pending,
+  plan,
+  variant,
+}: {
+  disabled: boolean
+  icon?: ReactNode
+  label: string
+  onSelect: (choices: Record<string, Integration>) => void
+  pending: boolean
+  plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>
+  variant: "default" | "outline"
+}) {
+  const content = (
+    <>
+      {pending ? <Spinner /> : icon} {label}
+    </>
+  )
+
   if (plan.kind === "enable") {
     return (
       <Button
-        className="w-full"
-        disabled={pending}
-        onClick={() => void actions.enable(definition, plan.choices)}
+        disabled={disabled}
+        onClick={() => onSelect(plan.choices)}
+        variant={variant}
       >
-        {pending ? <Spinner /> : null} Enable
+        {content}
       </Button>
     )
   }
@@ -180,15 +179,15 @@ function EnableButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="w-full" disabled={pending}>
-          {pending ? <Spinner /> : null} Enable <ChevronDown />
+        <Button disabled={disabled} variant={variant}>
+          {content} <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="center">
         {plan.options.map((option) => (
           <DropdownMenuItem
             key={option.label}
-            onClick={() => void actions.enable(definition, option.choices)}
+            onClick={() => onSelect(option.choices)}
           >
             Use {option.label}
           </DropdownMenuItem>
@@ -208,7 +207,8 @@ function EnabledControls({
   enabled: NonNullable<PlaybookListRow["enabled"]>
 }) {
   const active = enabled.status === "active"
-  const pending = actions.pendingKey === definition.key
+  const pendingKind: PlaybookActionKind | undefined =
+    actions.pending?.key === definition.key ? actions.pending.kind : undefined
 
   return (
     <div className="flex w-full items-center justify-between gap-2">
@@ -216,7 +216,7 @@ function EnabledControls({
         <Switch
           aria-label={`${definition.title} enabled`}
           checked={active}
-          disabled={pending}
+          disabled={pendingKind !== undefined}
           onCheckedChange={(checked) =>
             void actions.setPaused(definition, enabled.automationId, !checked)
           }
@@ -228,13 +228,13 @@ function EnabledControls({
       <div className="flex items-center">
         {active ? (
           <Button
-            disabled={pending}
+            disabled={pendingKind !== undefined}
             onClick={() =>
               void actions.runNow(definition, enabled.automationId)
             }
             variant="ghost"
           >
-            {pending ? <Spinner /> : <Play />} Run now
+            {pendingKind === "run" ? <Spinner /> : <Play />} Run now
           </Button>
         ) : null}
         <Button asChild size="icon" title="View automation" variant="ghost">

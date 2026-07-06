@@ -30,10 +30,6 @@ function PlaybookCatalog({ tenantId }: { tenantId: string }) {
 
   return (
     <ConsolePageLayout>
-      <p className="text-sm text-muted-foreground">
-        Ready-made ways to put Milo to work. Enable one and it runs right away —
-        each becomes an automation you can tune anytime.
-      </p>
       <div className="grid gap-4 md:grid-cols-2">
         {playbookCatalog.map((definition) => (
           <PlaybookCard
