@@ -133,7 +133,9 @@ function EntryRow({
             </span>
             <EntryMeta item={item} now={now} />
           </span>
-          <ChevronDown className="size-4 shrink-0 text-muted-foreground transition group-hover:text-foreground group-data-[state=open]:rotate-180" />
+          {/* The chevron appears on hover, focus, or while expanded; opacity
+              keeps the layout stable either way. */}
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[state=open]:rotate-180 group-data-[state=open]:opacity-100" />
         </CollapsibleTrigger>
         <CollapsibleContent className="flex flex-col gap-2.5 border-t bg-muted/30 p-2.5">
           <p className="text-sm">{item.entry}</p>
