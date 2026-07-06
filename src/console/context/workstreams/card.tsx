@@ -1,8 +1,6 @@
-import { integrationLabel } from "@contracts/integrations"
 import { ChevronRight, Lock } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { IntegrationLogo } from "../../shared/logo/integration"
+import { IntegrationChips } from "../../shared/logo/integration"
 import { WorkstreamStatusCue } from "./status"
 import { type Workstream } from "./types"
 
@@ -38,18 +36,7 @@ export function WorkstreamCard({
           <p className="line-clamp-2 text-muted-foreground text-sm">
             {workstream.brief}
           </p>
-          <div className="flex w-full flex-wrap items-center gap-2">
-            {workstream.sources.map((source) => (
-              <Badge key={source} variant="outline">
-                <IntegrationLogo
-                  className="size-3"
-                  decorative
-                  integration={source}
-                />
-                {integrationLabel(source)}
-              </Badge>
-            ))}
-          </div>
+          <IntegrationChips integrations={workstream.sources} />
         </div>
         <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
       </button>

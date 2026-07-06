@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type Integration } from "../../shared/integrations"
 import { type EvidenceSubject } from "../schema"
 import { refreshBelief } from "./derive"
 import { type Sighting } from "./rules"
@@ -17,16 +18,45 @@ export async function writeEvidence(
   workstreamId?: Id<"beliefs">
 ) {
   for (const sighting of sightings) {
+    const reference = toReference(sighting)
+
     await ctx.db.insert("evidence", {
       tenantId: pass.tenantId,
       subject,
       passId: pass._id,
-      reference: toReference(sighting),
+      reference,
       why: sighting.citation.why ?? fallbackWhy,
       observedAt: sighting.observedAt,
+      integration: await citedIntegration(ctx, reference),
       workstreamId,
     })
   }
+}
+
+type EvidenceReference = ReturnType<typeof toReference>
+
+// The integration behind a citation, resolved once at write time so reads
+// never walk the reference chain. Effort references carry none.
+export async function citedIntegration(
+  ctx: MutationCtx,
+  reference: EvidenceReference
+): Promise<Integration | undefined> {
+  if (reference.kind === "effort") {
+    return undefined
+  }
+
+  const cited =
+    reference.kind === "event"
+      ? await ctx.db.get(reference.eventId)
+      : await ctx.db.get(reference.conversationId)
+
+  if (cited?.integrationId === undefined) {
+    return undefined
+  }
+
+  const integration = await ctx.db.get(cited.integrationId)
+
+  return integration?.integration
 }
 
 function toReference(sighting: Sighting) {

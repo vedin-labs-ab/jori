@@ -1,60 +1,37 @@
 import { describe, expect, test } from "vitest"
-import { groupTimeline } from "./grouping"
+import { groupByDay } from "./grouping"
 
 const dayMs = 24 * 60 * 60 * 1000
-// A fixed Monday noon keeps day and week boundaries deterministic.
+// A fixed Monday noon keeps day boundaries deterministic.
 const now = new Date(2026, 6, 6, 12, 0, 0).getTime()
 
-function item(agoDays: number, effort = "Shared Timeline") {
-  return { observedAt: now - agoDays * dayMs, effort }
+function item(agoDays: number) {
+  return { observedAt: now - agoDays * dayMs }
 }
 
-describe("timeline grouping", () => {
-  test("tiers by age: open days, collapsed weeks, collapsed months", () => {
-    const sections = groupTimeline([item(0), item(1), item(10), item(45)], now)
+describe("timeline day grouping", () => {
+  test("labels today and yesterday by name, older days by date", () => {
+    const days = groupByDay([item(0), item(1), item(3)], now)
 
-    expect(sections.map((section) => section.tier)).toEqual([
-      "day",
-      "day",
-      "week",
-      "month",
+    expect(days.map((day) => day.label)).toEqual([
+      "Today",
+      "Yesterday",
+      "Jul 3",
     ])
-    expect(sections[0]?.label).toBe("Today")
-    expect(sections[1]?.label).toBe("Yesterday")
-    expect(sections[2]?.label).toMatch(/^Week of /)
   })
 
-  test("consecutive entries share a section and count in the meta", () => {
-    const sections = groupTimeline(
-      [
-        item(10, "Shared Timeline"),
-        item(11, "Workstreams Tab"),
-        item(12, "Workstreams Tab"),
-      ],
-      now
-    )
+  test("consecutive same-day entries share a group in order", () => {
+    const first = { observedAt: now - 1000 }
+    const second = { observedAt: now - 2000 }
+    const days = groupByDay([first, second, item(2)], now)
 
-    expect(sections).toHaveLength(1)
-    expect(sections[0]?.items).toHaveLength(3)
-    expect(sections[0]?.meta).toBe(
-      "3 updates · Shared Timeline, Workstreams Tab"
-    )
+    expect(days).toHaveLength(2)
+    expect(days[0]?.items).toEqual([first, second])
   })
 
-  test("meta caps the effort list and day sections carry none", () => {
-    const sections = groupTimeline(
-      [item(0), item(40, "A"), item(41, "B"), item(42, "C")],
-      now
-    )
+  test("days outside the current year carry the year", () => {
+    const days = groupByDay([item(220)], now)
 
-    expect(sections[0]?.meta).toBe("")
-    expect(sections[1]?.meta).toBe("3 updates · A, B…")
-  })
-
-  test("months outside the current year carry the year", () => {
-    const sections = groupTimeline([item(220)], now)
-
-    expect(sections[0]?.tier).toBe("month")
-    expect(sections[0]?.label).toMatch(/2025$/)
+    expect(days[0]?.label).toMatch(/2025$/)
   })
 })
