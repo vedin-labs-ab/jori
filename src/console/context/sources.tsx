@@ -1,9 +1,8 @@
-import { ChevronDown, FileText, Globe2 } from "lucide-react"
-import { useState } from "react"
+import { FileText, Globe2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
+import { Paged } from "../shared/paging"
 import { ContextSectionTitle } from "./section"
 import { type ContextFacts, type ContextSource } from "./types"
 import { sourceLabel, type WebsiteItem, websiteItems } from "./url"
@@ -81,8 +80,6 @@ export function SourcesContent({
 }: {
   sources: ContextSource[] | undefined
 }) {
-  const [expanded, setExpanded] = useState(false)
-
   if (sources === undefined) {
     return <Skeleton className="h-28 w-full rounded-lg" />
   }
@@ -91,33 +88,20 @@ export function SourcesContent({
     return null
   }
 
-  const visibleSources = expanded
-    ? sources
-    : sources.slice(0, visibleSourceCount)
-  const hiddenCount = sources.length - visibleSources.length
-
   return (
-    <>
-      <ul className="grid gap-1">
-        {visibleSources.map((source) => (
-          <SourceRow key={source.url} source={source} />
-        ))}
-      </ul>
-      {hiddenCount > 0 || expanded ? (
-        <Button
-          className="w-fit justify-self-start text-muted-foreground hover:text-foreground"
-          onClick={() => setExpanded((value) => !value)}
-          size="sm"
-          type="button"
-          variant="link"
-        >
-          {expanded ? "Show less" : `+${hiddenCount} more`}
-          <ChevronDown
-            className={cn("transition-transform", expanded && "rotate-180")}
-          />
-        </Button>
-      ) : null}
-    </>
+    <Paged
+      initialCount={visibleSourceCount}
+      items={sources}
+      step={sources.length}
+    >
+      {(visible) => (
+        <ul className="grid gap-1">
+          {visible.map((source) => (
+            <SourceRow key={source.url} source={source} />
+          ))}
+        </ul>
+      )}
+    </Paged>
   )
 }
 

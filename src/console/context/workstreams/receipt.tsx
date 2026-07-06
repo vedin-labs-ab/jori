@@ -1,5 +1,4 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
-import { ExternalLink } from "lucide-react"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import { SeparatorDot } from "../../shared/dot"
 import { flushRowClassName } from "../../shared/flush"
@@ -48,13 +47,9 @@ export function Receipt({ receipt }: { receipt: ReceiptRow }) {
           href={receipt.url}
           target="_blank"
           rel="noreferrer"
-          className={flushRowClassName("-my-1 min-w-0 gap-2 py-1")}
+          className={flushRowClassName("-my-1 min-w-0 gap-2 py-1 font-normal")}
         >
           {header}
-          <ExternalLink
-            aria-hidden
-            className="size-3 shrink-0 text-muted-foreground"
-          />
         </a>
       )}
       <div className="text-muted-foreground text-sm">
