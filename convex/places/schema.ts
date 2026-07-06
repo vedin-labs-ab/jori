@@ -1,24 +1,15 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
+import { type PlaceSection, placeSections } from "../../contracts/places"
 
 // Sections a place profile is organized by: what the place is for, who is
 // active there, how people write, how work recurs, and what Milo is asked to
-// do. Keep the array and the validator in sync.
-export const placeSections = [
-  "purpose",
-  "people",
-  "language",
-  "rhythm",
-  "milo",
-] as const
+// do. The canonical order lives in contracts so the prompt renderer and the
+// console share it; the validator is derived, never restated.
+export { type PlaceSection, placeSections }
 export const placeSection = v.union(
-  v.literal("purpose"),
-  v.literal("people"),
-  v.literal("language"),
-  v.literal("rhythm"),
-  v.literal("milo")
+  ...placeSections.map((section) => v.literal(section))
 )
-export type PlaceSection = Infer<typeof placeSection>
 
 // One durable norm of the place. The model judges claims against each
 // message window; the lifecycle fields are code-owned: confirmedAt records

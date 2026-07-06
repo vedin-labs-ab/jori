@@ -6,7 +6,7 @@ import {
   sandboxArtifactRuntime,
   sandboxInternalRoot,
   sandboxWorkspace,
-} from "../contracts/sandbox.ts"
+} from "../contracts/runtime.ts"
 import { runtimeAssets } from "../convex/runtime/_generated/assets.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")

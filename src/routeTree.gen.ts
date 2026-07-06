@@ -22,6 +22,7 @@ import { Route as IntegrationsIndexRouteImport } from './routes/integrations/ind
 import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ArtifactsIndexRouteImport } from './routes/artifacts/index'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
+import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ArtifactsArtifactIdIndexRouteImport } from './routes/artifacts/$artifactId/index'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
 
@@ -90,6 +91,11 @@ const ContextWorkstreamsRoute = ContextWorkstreamsRouteImport.update({
   path: '/workstreams',
   getParentRoute: () => ContextRoute,
 } as any)
+const ContextPlacesRoute = ContextPlacesRouteImport.update({
+  id: '/places',
+  path: '/places',
+  getParentRoute: () => ContextRoute,
+} as any)
 const ArtifactsArtifactIdIndexRoute =
   ArtifactsArtifactIdIndexRouteImport.update({
     id: '/$artifactId/',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/playbooks': typeof PlaybooksRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
+  '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
   '/context/': typeof ContextIndexRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/playbooks': typeof PlaybooksRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
+  '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/artifacts': typeof ArtifactsIndexRoute
   '/context': typeof ContextIndexRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/playbooks': typeof PlaybooksRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
+  '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
   '/context/': typeof ContextIndexRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/playbooks'
     | '/runs'
     | '/skills'
+    | '/context/places'
     | '/context/workstreams'
     | '/artifacts/'
     | '/context/'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/playbooks'
     | '/runs'
     | '/skills'
+    | '/context/places'
     | '/context/workstreams'
     | '/artifacts'
     | '/context'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/playbooks'
     | '/runs'
     | '/skills'
+    | '/context/places'
     | '/context/workstreams'
     | '/artifacts/'
     | '/context/'
@@ -307,6 +319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContextWorkstreamsRouteImport
       parentRoute: typeof ContextRoute
     }
+    '/context/places': {
+      id: '/context/places'
+      path: '/places'
+      fullPath: '/context/places'
+      preLoaderRoute: typeof ContextPlacesRouteImport
+      parentRoute: typeof ContextRoute
+    }
     '/artifacts/$artifactId/': {
       id: '/artifacts/$artifactId/'
       path: '/$artifactId'
@@ -339,11 +358,13 @@ const ArtifactsRouteWithChildren = ArtifactsRoute._addFileChildren(
 )
 
 interface ContextRouteChildren {
+  ContextPlacesRoute: typeof ContextPlacesRoute
   ContextWorkstreamsRoute: typeof ContextWorkstreamsRoute
   ContextIndexRoute: typeof ContextIndexRoute
 }
 
 const ContextRouteChildren: ContextRouteChildren = {
+  ContextPlacesRoute: ContextPlacesRoute,
   ContextWorkstreamsRoute: ContextWorkstreamsRoute,
   ContextIndexRoute: ContextIndexRoute,
 }

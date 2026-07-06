@@ -3,6 +3,10 @@ import { type JsonObject } from "./json"
 
 export const agentTaskId = "milo-agent-run"
 export const cleanupTaskId = "milo-sandbox-cleanup"
+
+export const sandboxWorkspace = "/home/user/workspace"
+export const sandboxInternalRoot = "/home/user/.milo"
+export const sandboxArtifactRuntime = `${sandboxInternalRoot}/artifacts/runtime`
 export const toolFinalDescription =
   "Set true only when this tool call is the final useful action for the run. If active approvals or integration offers remain, the run waits; otherwise it completes after the tool succeeds."
 
