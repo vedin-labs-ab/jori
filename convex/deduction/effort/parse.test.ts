@@ -69,3 +69,38 @@ describe("effort op reading", () => {
     expect(readEffortOps({})).toEqual({ ops: [], invalid: 0 })
   })
 })
+
+describe("entry date stripping", () => {
+  test("strips leading date prefixes from entries", () => {
+    const { ops, invalid } = readEffortOps({
+      mutations: [
+        {
+          op: "journal",
+          effortId: "f1",
+          entry: "2026-07-03: Shipped the cutover.",
+          citations: [],
+        },
+        {
+          op: "journal",
+          effortId: "f1",
+          entry: "2026-07-04 to 2026-07-05: Iterated on review feedback.",
+          citations: [],
+        },
+        {
+          op: "journal",
+          effortId: "f1",
+          entry: "Deadline moved to 2026-08-01 after review.",
+          citations: [],
+        },
+        { op: "journal", effortId: "f1", entry: "2026-07-03:", citations: [] },
+      ],
+    })
+
+    expect(ops.map((op) => "entry" in op && op.entry)).toEqual([
+      "Shipped the cutover.",
+      "Iterated on review feedback.",
+      "Deadline moved to 2026-08-01 after review.",
+    ])
+    expect(invalid).toBe(1)
+  })
+})

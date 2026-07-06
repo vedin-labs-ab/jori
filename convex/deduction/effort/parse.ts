@@ -1,6 +1,19 @@
 import { isRecord, readCitations, readString } from "../engine/judge"
 import { type EffortOp } from "./ops"
 
+// Narrated dates are metadata (`observedAt`), never entry prose. Models
+// drift toward date-prefixed entries when history shows dated lines, so a
+// leading date or date range is stripped at the wire, whatever the charter
+// says.
+const entryDatePrefix =
+  /^\s*\d{4}-\d{2}-\d{2}(?:\s*(?:to|through|[–—-])\s*\d{4}-\d{2}-\d{2})?\s*[:–—-]\s*/
+
+export function readEntry(value: unknown) {
+  const entry = readString(value)?.replace(entryDatePrefix, "")
+
+  return entry === undefined || entry === "" ? undefined : entry
+}
+
 // Defensive read of the judge's JSON into typed ops; anything malformed is
 // counted, never thrown, so one bad mutation can't sink a pass.
 export function readEffortOps(value: Record<string, unknown>): {
@@ -51,7 +64,7 @@ function readCreate(item: Record<string, unknown>): EffortOp | null {
   const tempId = readString(item.tempId)
   const name = readString(item.name)
   const summary = readString(item.summary)
-  const entry = readString(item.entry)
+  const entry = readEntry(item.entry)
 
   if (
     tempId === undefined ||
@@ -90,7 +103,7 @@ function readUpdate(item: Record<string, unknown>): EffortOp | null {
 
 function readJournal(item: Record<string, unknown>): EffortOp | null {
   const effortId = readString(item.effortId)
-  const entry = readString(item.entry)
+  const entry = readEntry(item.entry)
 
   if (effortId === undefined || entry === undefined) {
     return null

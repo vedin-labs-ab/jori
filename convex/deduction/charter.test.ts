@@ -27,6 +27,7 @@ describe("effort charter", () => {
     expect(charter).toContain("organization's own vocabulary")
     expect(charter).toContain("capitalized like a project label")
     expect(charter).toContain("Never rewrite history")
+    expect(charter).toContain("Never open an entry with a date")
   })
 })
 

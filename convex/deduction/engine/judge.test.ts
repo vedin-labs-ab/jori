@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { citationListSchema, iso, journalLine, readCitations } from "./judge"
+import { citationListSchema, iso, journalRecord, readCitations } from "./judge"
 
 describe("citation wire schema", () => {
   test("lists exactly the citable kinds plus why", () => {
@@ -43,10 +43,10 @@ describe("citation reading", () => {
 })
 
 describe("payload formatting", () => {
-  test("renders journal lines with ISO dates", () => {
+  test("renders journal records with the date beside the text", () => {
     expect(
-      journalLine({ observedAt: Date.UTC(2026, 5, 23), entry: "Shipped it." })
-    ).toBe("2026-06-23: Shipped it.")
+      journalRecord({ observedAt: Date.UTC(2026, 5, 23), entry: "Shipped it." })
+    ).toEqual({ on: "2026-06-23", entry: "Shipped it." })
   })
 
   test("iso renders UTC timestamps", () => {

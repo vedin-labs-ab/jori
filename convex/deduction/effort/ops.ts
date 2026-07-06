@@ -59,7 +59,8 @@ export const effortOutputSchema = {
             summary: stringValue,
             entry: {
               ...stringValue,
-              description: "First journal line: what happened in this window.",
+              description:
+                "First journal line: what happened in this window. Plain prose; never open with a date — dates are metadata the system attaches.",
             },
             citations,
           }),
@@ -71,7 +72,11 @@ export const effortOutputSchema = {
           }),
           opSchema("journal", {
             effortId: stringValue,
-            entry: stringValue,
+            entry: {
+              ...stringValue,
+              description:
+                "What happened in this window. Plain prose; never open with a date — dates are metadata the system attaches.",
+            },
             citations,
           }),
           opSchema("merge", {

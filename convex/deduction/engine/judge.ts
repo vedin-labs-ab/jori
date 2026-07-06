@@ -126,8 +126,13 @@ export function iso(timestamp: number) {
   return new Date(timestamp).toISOString()
 }
 
-export function journalLine(
+// A prior journal entry as the judge sees it. The narrated date rides
+// beside the text, never inside it: date-prefixed example lines teach the
+// model to date its own entries, and dates are metadata here.
+export type JournalRecord = { on: string; entry: string }
+
+export function journalRecord(
   entry: Pick<Doc<"journal">, "observedAt" | "entry">
-) {
-  return `${iso(entry.observedAt).slice(0, 10)}: ${entry.entry}`
+): JournalRecord {
+  return { on: iso(entry.observedAt).slice(0, 10), entry: entry.entry }
 }
