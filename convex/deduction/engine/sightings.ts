@@ -85,6 +85,11 @@ function toReference(sighting: Sighting) {
 // corrections — goes through here, so the read-model stamps on its evidence
 // and journal never drift from the assignment, and both the old and new
 // workstream caches are refreshed.
+//
+// A move to the current workstream writes nothing. Window passes select
+// efforts by updatedAt, so a review's own writes must never re-qualify an
+// unchanged effort for the next window — bumping updatedAt here is what once
+// kept an idle tenant's judge running every hour.
 export async function moveEffort(
   ctx: MutationCtx,
   effort: Doc<"efforts">,
@@ -93,11 +98,15 @@ export async function moveEffort(
 ) {
   const previous = effort.workstreamId
 
+  if (previous === beliefId) {
+    return
+  }
+
   await ctx.db.patch(effort._id, { workstreamId: beliefId, updatedAt: now })
   await stampEffortRows(ctx, effort._id, beliefId)
   await refreshBelief(ctx, beliefId)
 
-  if (previous !== undefined && previous !== beliefId) {
+  if (previous !== undefined) {
     await refreshBelief(ctx, previous)
   }
 }

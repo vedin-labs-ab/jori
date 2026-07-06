@@ -21,12 +21,16 @@ import {
 // Everything one workstream pass shows the judge. Window scope reviews the
 // efforts that changed inside the window; full scope (consolidation) reviews
 // the whole active effort layer for restructuring. Efforts are the only
-// citable sources at this stage.
+// citable sources at this stage. `changed` counts the efforts the window
+// actually touched — every structural change moves an effort through
+// moveEffort, so a zero here means the review has nothing to react to and
+// the judge is never called.
 export type WorkstreamPassInput = {
   window: { start: number; end: number }
   scope: PassScope
   roster: RosterEntry[]
   efforts: EffortEntry[]
+  changed: number
 }
 
 export type RosterEntry = {
@@ -56,11 +60,18 @@ export type EffortEntry = {
 export const assemble = internalQuery({
   args: { tenantId: v.string(), scope: passScope, window: passWindow },
   handler: async (ctx, args): Promise<WorkstreamPassInput> => {
+    const efforts = await loadEfforts(ctx, args)
+    const changed =
+      args.scope === "window"
+        ? efforts.length
+        : (await windowEfforts(ctx, args.tenantId, args.window)).length
+
     return {
       window: args.window,
       scope: args.scope,
       roster: await loadRoster(ctx, args.tenantId),
-      efforts: await loadEfforts(ctx, args),
+      efforts,
+      changed,
     }
   },
 })

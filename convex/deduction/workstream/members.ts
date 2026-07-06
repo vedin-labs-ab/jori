@@ -67,6 +67,15 @@ export async function applyAssign(
     return
   }
 
+  // Re-affirming the current assignment adds no information: no membership
+  // write, no repeat sighting. Discarded so the charter tuning loop sees the
+  // judge proposing no-ops.
+  if (effort.workstreamId === belief._id) {
+    discard(state, op.op, "effort already assigned")
+
+    return
+  }
+
   await moveEffort(ctx, effort, belief._id, state.now)
   state.counts.assigned += 1
   await writeEvidence(
