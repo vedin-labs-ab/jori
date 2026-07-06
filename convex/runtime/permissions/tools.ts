@@ -1,7 +1,6 @@
 import { withApprovalSchema } from "../../../contracts/approvals"
 import { isWebTool } from "../../../contracts/permissions/web"
 import { type Id } from "../../_generated/dataModel"
-import { getIntegrationTools } from "../../automations/access"
 import {
   type PermissionMode,
   resolveToolMode,
@@ -16,6 +15,7 @@ import {
   getRuntimeToolInputSchema,
   withOptionalFieldGuidance,
 } from "../../runs/agent/tools/schemas"
+import { getIntegrationTools } from "../../shared/integrations"
 
 export function permissionGroups(
   input: AgentRuntimeInput,
@@ -87,7 +87,9 @@ function filterWebPermissions(
   input: AgentRuntimeInput,
   permissions: ToolPermission[]
 ) {
-  if (input.type !== "automation" || input.automation.access.web) {
+  const access = inputAccess(input)
+
+  if (access === undefined || access.web) {
     return permissions
   }
 
@@ -98,7 +100,18 @@ function selectedTools(
   input: AgentRuntimeInput,
   integrationId: Id<"integrations">
 ) {
-  return input.type === "automation"
-    ? getIntegrationTools(input.automation.access, integrationId)
-    : undefined
+  const access = inputAccess(input)
+
+  return access === undefined
+    ? undefined
+    : getIntegrationTools(access, integrationId)
+}
+
+/** The run's tool contract; undefined grants the full tool surface. */
+function inputAccess(input: AgentRuntimeInput) {
+  if (input.type === "automation") {
+    return input.automation.access
+  }
+
+  return input.type === "instruction" ? input.access : undefined
 }

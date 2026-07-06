@@ -9,7 +9,7 @@ import {
 } from "../permissions/catalog"
 import { listPermissionOverrides } from "../permissions/read"
 import { type QueryLikeCtx } from "../shared/context"
-import { type Integration } from "../shared/integrations"
+import { getIntegrationTools, type Integration } from "../shared/integrations"
 import { integrationLabels, resolveEventIntegration } from "./integrations"
 import { type access, type accessInput } from "./schema"
 
@@ -123,23 +123,6 @@ export function getIntegrationAccess(
   integrationId: Id<"integrations">
 ): AccessLevel {
   return getToolAccess(getIntegrationTools(access, integrationId))
-}
-
-export function getIntegrationTools(
-  access: AutomationAccess,
-  integrationId: Id<"integrations">
-) {
-  return (
-    access.integrations.find((integration) => integration.id === integrationId)
-      ?.tools ?? []
-  )
-}
-
-export function hasIntegrationTools(
-  access: AutomationAccess,
-  integrationId: Id<"integrations">
-) {
-  return getIntegrationTools(access, integrationId).length > 0
 }
 
 export function canUseAutomationTool(

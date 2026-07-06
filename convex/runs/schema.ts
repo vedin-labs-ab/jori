@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { actorValidator } from "../shared/actor"
 import { audienceScopeValidator } from "../shared/audience"
-import { toolSurfaceValidator } from "../shared/integrations"
+import { accessValidator, toolSurfaceValidator } from "../shared/integrations"
 
 const runSnapshotContextType = v.union(
   v.literal("calendar_event"),
@@ -106,6 +106,12 @@ export const runs = defineTable({
   conversationId: v.optional(v.id("conversations")),
   cause: runCause,
   instructions: v.optional(v.string()),
+  /**
+   * Tool contract for runs without an automation; omitted, the run gets the
+   * caller's full tool surface. Automation runs derive access from their
+   * automation instead.
+   */
+  access: v.optional(accessValidator),
   snapshot: runSnapshot,
   status: runStatus,
   workerId: v.optional(v.string()),

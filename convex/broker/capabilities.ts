@@ -1,5 +1,4 @@
 import { isWebTool } from "../../contracts/permissions/web"
-import { getIntegrationTools } from "../automations/access"
 import {
   getToolPermissionsBySurface,
   type PermissionMode,
@@ -14,6 +13,7 @@ import {
   toolExecutionType,
 } from "../runs/agent/tools/policy"
 import {
+  getIntegrationTools,
   integrations as integrationCatalog,
   toolSurfaceLabel,
 } from "../shared/integrations"

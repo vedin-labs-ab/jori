@@ -386,6 +386,7 @@ import type * as runs_display_index from "../runs/display/index.js";
 import type * as runs_display_metadata from "../runs/display/metadata.js";
 import type * as runs_display_origin from "../runs/display/origin.js";
 import type * as runs_display_schedule from "../runs/display/schedule.js";
+import type * as runs_instruction from "../runs/instruction.js";
 import type * as runs_introspect_access from "../runs/introspect/access.js";
 import type * as runs_introspect_audience from "../runs/introspect/audience.js";
 import type * as runs_introspect_filters from "../runs/introspect/filters.js";
@@ -832,6 +833,7 @@ declare const fullApi: ApiFromModules<{
   "runs/display/metadata": typeof runs_display_metadata;
   "runs/display/origin": typeof runs_display_origin;
   "runs/display/schedule": typeof runs_display_schedule;
+  "runs/instruction": typeof runs_instruction;
   "runs/introspect/access": typeof runs_introspect_access;
   "runs/introspect/audience": typeof runs_introspect_audience;
   "runs/introspect/filters": typeof runs_introspect_filters;

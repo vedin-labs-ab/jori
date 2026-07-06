@@ -1,33 +1,27 @@
 import { type MutationCtx } from "../_generated/server"
-import { resolveRunAudience } from "../runs/introspect/audience"
-import { createInstructionRunSnapshot } from "../runs/snapshot"
-import { queueRun } from "../runtime/outbox"
+import { resolveAccessInput } from "../automations/access"
+import { createInstructionRun } from "../runs/instruction"
 import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./enable"
 
 /**
  * A one-time taste of a playbook before enabling it: the rendered
- * instructions run once as a plain instruction run, so no automation row is
- * created and nothing recurs.
+ * instructions run once as an instruction run carrying the playbook's tool
+ * contract, so no automation row is created and nothing recurs.
  */
 export async function trialPlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
   const plan = await resolvePlaybookPlan(ctx, args)
 
-  const runId = await ctx.db.insert("runs", {
+  const runId = await createInstructionRun(ctx, {
     tenantId: args.tenantId,
-    cause: { type: "manual", personId: args.createdBy },
-    ...createInstructionRunSnapshot({
-      instructions: plan.instructions,
-      title: plan.definition.title,
+    instructions: plan.instructions,
+    title: plan.definition.title,
+    access: await resolveAccessInput(ctx, {
+      access: plan.access,
+      createdBy: args.createdBy,
+      tenantId: args.tenantId,
     }),
-    ...(await resolveRunAudience(ctx, {
-      run: { createdBy: args.createdBy },
-    })),
-    status: "queued",
     createdBy: args.createdBy,
-    createdAt: Date.now(),
   })
-
-  await queueRun(ctx, runId)
 
   return { runId }
 }
