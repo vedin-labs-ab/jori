@@ -28,6 +28,10 @@ export async function createAutomationRun(
     createdAt: args.now,
   })
 
+  await ctx.db.patch(args.automation._id, {
+    firedAt: args.now,
+    updatedAt: args.now,
+  })
   await queueRun(ctx, runId)
 
   return runId

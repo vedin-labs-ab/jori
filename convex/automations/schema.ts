@@ -74,6 +74,8 @@ export const automationVisibility = v.union(
 export const automations = defineTable({
   tenantId: v.string(),
   artifactId: v.optional(v.id("artifacts")),
+  /** Catalog key of the playbook this automation was instantiated from. */
+  playbook: v.optional(v.string()),
   name: v.string(),
   instructions: v.string(),
   visibility: v.optional(automationVisibility),

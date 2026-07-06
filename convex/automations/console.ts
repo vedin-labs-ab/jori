@@ -9,6 +9,8 @@ import { automationEventCatalog } from "./events"
 import { findEventIntegration } from "./integrations"
 import {
   createAutomation,
+  createAutomationRun,
+  getTenantAutomation,
   maxSearchResults,
   pauseAutomation,
   removeAutomation,
@@ -156,6 +158,33 @@ export const remove = mutation({
     await removeAutomation(ctx, args)
 
     return null
+  },
+})
+
+export const run = mutation({
+  args: {
+    tenantId: v.string(),
+    automationId: v.id("automations"),
+  },
+  handler: async (ctx, args) => {
+    const personId = await ensureCurrentPerson(ctx, args.tenantId)
+    const automation = await getTenantAutomation(
+      ctx,
+      args.tenantId,
+      args.automationId
+    )
+
+    if (automation.type === "event") {
+      throw new Error("Event automations run when their event arrives.")
+    }
+
+    const runId = await createAutomationRun(ctx, {
+      automation,
+      cause: { type: "manual", personId },
+      now: Date.now(),
+    })
+
+    return { runId }
   },
 })
 

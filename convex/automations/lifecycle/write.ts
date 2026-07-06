@@ -30,6 +30,7 @@ export async function createAutomation(
   args: {
     tenantId: string
     artifactId?: Id<"artifacts">
+    playbook?: string
     name: string
     instructions: string
     visibility?: Doc<"automations">["visibility"]
@@ -52,6 +53,7 @@ export async function createAutomation(
   const automationId = await ctx.db.insert("automations", {
     tenantId: args.tenantId,
     artifactId: args.artifactId,
+    playbook: args.playbook,
     name: normalizeRequiredText(args.name, "name"),
     instructions: normalizeRequiredText(args.instructions, "instructions"),
     visibility: normalizeVisibility(args.visibility),
