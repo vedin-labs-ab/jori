@@ -58,6 +58,7 @@ export type GitHubPullRequest = {
 export type GitHubComment = {
   id?: number
   node_id?: string
+  author_association?: string
   body?: string
   html_url?: string
   url?: string

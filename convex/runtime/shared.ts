@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "../shared/crypto"
+
 const maxErrorLength = 2000
 
 export function requireWorkerSecret(secret: string) {
@@ -7,7 +9,7 @@ export function requireWorkerSecret(secret: string) {
     throw new Error("Missing MILO_WORKER_SECRET")
   }
 
-  if (secret !== expected) {
+  if (!timingSafeEqual(secret, expected)) {
     throw new Error("Invalid Milo worker secret")
   }
 }

@@ -3,6 +3,7 @@ import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { resolveToolModes } from "../permissions/catalog"
+import { timingSafeEqual } from "../shared/crypto"
 import { type ApprovalBrokerContext } from "./approval"
 
 type BrokerContext = ApprovalBrokerContext
@@ -75,5 +76,9 @@ export async function loadRunBrokerContext(
 function isWorkerSecret(secret: string) {
   const expected = process.env.MILO_WORKER_SECRET?.trim()
 
-  return expected !== undefined && expected !== "" && secret === expected
+  return (
+    expected !== undefined &&
+    expected !== "" &&
+    timingSafeEqual(secret, expected)
+  )
 }

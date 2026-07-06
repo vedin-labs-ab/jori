@@ -131,6 +131,7 @@ export async function handleGitHubMessageEvent(
   const actor = createGitHubActor(message)
 
   if (
+    message.actorCanDecideApprovals &&
     isPersonApprovalDecisionText({
       actorKind: message.actorKind,
       text: message.text,

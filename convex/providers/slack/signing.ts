@@ -1,10 +1,6 @@
 import { type Id } from "../../_generated/dataModel"
-import {
-  createSignedState,
-  hmacSha256Hex,
-  parseSignedState,
-  timingSafeEqual,
-} from "../signing"
+import { timingSafeEqual } from "../../shared/crypto"
+import { createSignedState, hmacSha256Hex, parseSignedState } from "../signing"
 
 const slackSigningSecret = process.env.SLACK_SIGNING_SECRET
 
