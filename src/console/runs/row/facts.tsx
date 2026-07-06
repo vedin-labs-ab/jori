@@ -17,9 +17,9 @@ import {
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import { CopyButton } from "../../shared/copy"
 import {
   CodeBlockBody,
-  CopyButton,
   DetailFrame,
   type DetailIcon,
   DetailLink,
