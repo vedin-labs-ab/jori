@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
+import { findIntegrationByExternalId } from "../../integrations/data"
 import {
   linkSetupIdentity,
   setupIdentityValidator,
@@ -8,7 +9,7 @@ import {
   requireProviderIntegration,
   saveOAuthCredentials,
 } from "../credentials"
-import { buildInstallState } from "../install"
+import { buildInstallState, upsertIntegration } from "../install"
 import { createSignedNotionState } from "./signing"
 
 export const createInstallState = mutation({
@@ -37,59 +38,31 @@ export const recordOAuthInstallation = internalMutation({
     setupIdentity: v.optional(setupIdentityValidator),
   },
   handler: async (ctx, args) => {
-    const now = Date.now()
-    const existing = await ctx.db
-      .query("integrations")
-      .withIndex("by_integration_and_external", (query) =>
-        query
-          .eq("integration", "notion")
-          .eq("externalId", args.profile.workspaceId)
-      )
-      .first()
-
-    const credentials = {
-      tokens: {
-        access: args.accessToken,
-        refresh: args.refreshToken,
+    const existing = await findIntegrationByExternalId(ctx, {
+      integration: "notion",
+      externalId: args.profile.workspaceId,
+    })
+    const integrationId = await upsertIntegration(ctx, existing, {
+      tenantId: args.tenantId,
+      integration: "notion",
+      scope: "tenant",
+      externalId: args.profile.workspaceId,
+      name: args.profile.workspaceName,
+      avatar: args.profile.workspaceIcon,
+      credentials: {
+        tokens: {
+          access: args.accessToken,
+          refresh: args.refreshToken,
+        },
       },
-    }
-    const data = {
-      botId: args.profile.botId,
-      duplicatedTemplateId: args.profile.duplicatedTemplateId,
-    }
-
-    const integrationId =
-      existing === null
-        ? await ctx.db.insert("integrations", {
-            tenantId: args.tenantId,
-            integration: "notion",
-            scope: "tenant",
-            externalId: args.profile.workspaceId,
-            name: args.profile.workspaceName,
-            avatar: args.profile.workspaceIcon,
-            credentials,
-            status: "active",
-            createdBy: args.createdBy,
-            createdAt: now,
-            updatedAt: now,
-            data,
-          })
-        : existing._id
-
-    if (existing !== null) {
-      await ctx.db.patch(existing._id, {
-        tenantId: args.tenantId,
-        scope: "tenant",
-        externalId: args.profile.workspaceId,
-        name: args.profile.workspaceName,
-        avatar: args.profile.workspaceIcon,
-        credentials,
-        status: "active",
-        createdBy: args.createdBy,
-        updatedAt: now,
-        data,
-      })
-    }
+      status: "active",
+      createdBy: args.createdBy,
+      updatedAt: Date.now(),
+      data: {
+        botId: args.profile.botId,
+        duplicatedTemplateId: args.profile.duplicatedTemplateId,
+      },
+    })
 
     await linkSetupIdentity(ctx, {
       tenantId: args.tenantId,

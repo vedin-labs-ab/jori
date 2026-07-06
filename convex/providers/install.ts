@@ -1,5 +1,6 @@
+import { type WithoutSystemFields } from "convex/server"
 import { internal } from "../_generated/api"
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx, type MutationCtx } from "../_generated/server"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { requireAppReturnUrl } from "../shared/app"
@@ -87,6 +88,31 @@ export function installPathForIntegration(integration: Integration) {
     case "microsoftCalendar":
       return microsoftIntegrationConfigs[integration].installPath
   }
+}
+
+type IntegrationValues = Omit<
+  WithoutSystemFields<Doc<"integrations">>,
+  "createdAt"
+>
+
+// Every provider install lands through here: a reinstall revives the
+// matching row — reset to active with fresh credentials and ownership,
+// whatever state it was in — instead of stacking a new one.
+export async function upsertIntegration(
+  ctx: MutationCtx,
+  existing: Doc<"integrations"> | null,
+  values: IntegrationValues
+): Promise<Id<"integrations">> {
+  if (existing !== null) {
+    await ctx.db.patch(existing._id, values)
+
+    return existing._id
+  }
+
+  return await ctx.db.insert("integrations", {
+    ...values,
+    createdAt: values.updatedAt,
+  })
 }
 
 export async function completeIntegrationOffer(

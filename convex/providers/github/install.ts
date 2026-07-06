@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
-import { buildInstallState } from "../install"
+import { findIntegrationByExternalId } from "../../integrations/data"
+import { buildInstallState, upsertIntegration } from "../install"
 import { requireGitHubCredentials } from "./credentials"
 import { githubIntegrationData } from "./data"
 import { createSignedGitHubState } from "./signing"
@@ -34,37 +35,12 @@ export const recordInstallation = internalMutation({
     }),
   },
   handler: async (ctx, args) => {
-    const now = Date.now()
-    const existing = await ctx.db
-      .query("integrations")
-      .withIndex("by_integration_and_external", (query) =>
-        query.eq("integration", "github").eq("externalId", args.installationId)
-      )
-      .first()
+    const existing = await findIntegrationByExternalId(ctx, {
+      integration: "github",
+      externalId: args.installationId,
+    })
 
-    const credentials = {
-      installationId: args.installationId,
-    }
-
-    if (existing !== null) {
-      await ctx.db.patch(existing._id, {
-        tenantId: args.tenantId,
-        scope: "tenant",
-        externalId: args.installationId,
-        name: args.profile.account?.login,
-        url: args.profile.account?.html_url ?? args.profile.html_url,
-        avatar: args.profile.account?.avatar_url,
-        credentials,
-        status: "active",
-        createdBy: args.createdBy,
-        updatedAt: now,
-        data: githubIntegrationData(args.profile),
-      })
-
-      return existing._id
-    }
-
-    return await ctx.db.insert("integrations", {
+    return await upsertIntegration(ctx, existing, {
       tenantId: args.tenantId,
       integration: "github",
       scope: "tenant",
@@ -72,11 +48,12 @@ export const recordInstallation = internalMutation({
       name: args.profile.account?.login,
       url: args.profile.account?.html_url ?? args.profile.html_url,
       avatar: args.profile.account?.avatar_url,
-      credentials,
+      credentials: {
+        installationId: args.installationId,
+      },
       status: "active",
       createdBy: args.createdBy,
-      createdAt: now,
-      updatedAt: now,
+      updatedAt: Date.now(),
       data: githubIntegrationData(args.profile),
     })
   },

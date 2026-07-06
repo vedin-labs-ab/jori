@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { type Id } from "../../_generated/dataModel"
 import {
   internalMutation,
   type MutationCtx,
@@ -11,7 +11,7 @@ import {
   requireProviderIntegration,
   saveOAuthCredentials,
 } from "../credentials"
-import { createSignedInstallState } from "../install"
+import { createSignedInstallState, upsertIntegration } from "../install"
 import { type MicrosoftIntegration } from "./config"
 import { getMicrosoftIdentityEmail } from "./identity"
 
@@ -65,15 +65,7 @@ export const recordOAuthInstallation = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    const existing = await ctx.db
-      .query("integrations")
-      .withIndex("by_tenant_and_integration_and_owner", (query) =>
-        query
-          .eq("tenantId", args.tenantId)
-          .eq("integration", args.integration)
-          .eq("ownerId", args.createdBy)
-      )
-      .first()
+    const existing = await findExistingMicrosoftIntegration(ctx, args)
 
     const existingRefreshToken = readRefreshToken(existing?.credentials)
     const refreshToken = args.refreshToken ?? existingRefreshToken
@@ -92,20 +84,21 @@ export const recordOAuthInstallation = internalMutation({
       tenantId: args.microsoftTenantId,
     }
     const email = getMicrosoftIdentityEmail(args.profile)
-    const data = {
-      tenantName: args.profile.tenant.displayName,
-    }
-    const integrationId = await upsertMicrosoftIntegration(ctx, {
-      existing,
-      now,
+    const integrationId = await upsertIntegration(ctx, existing, {
       tenantId: args.tenantId,
       integration: args.integration,
+      scope: "user",
       ownerId: args.createdBy,
       externalId: args.profile.user.id,
       name: args.profile.user.displayName,
       email,
       credentials,
-      data,
+      status: "active",
+      createdBy: args.createdBy,
+      updatedAt: now,
+      data: {
+        tenantName: args.profile.tenant.displayName,
+      },
     })
 
     await linkSetupIdentity(ctx, {
@@ -123,56 +116,23 @@ export const recordOAuthInstallation = internalMutation({
   },
 })
 
-async function upsertMicrosoftIntegration(
+async function findExistingMicrosoftIntegration(
   ctx: MutationCtx,
   args: {
-    existing: Doc<"integrations"> | null
-    now: number
     tenantId: string
     integration: MicrosoftIntegration
-    ownerId: Id<"persons">
-    externalId: string
-    name: string | undefined
-    email: string | undefined
-    credentials: {
-      tokens: {
-        access: string
-        refresh: string
-      }
-      expiresAt: number
-      scope: string | undefined
-      tenantId: string
-    }
-    data: {
-      tenantName: string | undefined
-    }
+    createdBy: Id<"persons">
   }
-): Promise<Id<"integrations">> {
-  const values = {
-    tenantId: args.tenantId,
-    integration: args.integration,
-    scope: "user" as const,
-    ownerId: args.ownerId,
-    externalId: args.externalId,
-    name: args.name,
-    email: args.email,
-    credentials: args.credentials,
-    status: "active" as const,
-    createdBy: args.ownerId,
-    updatedAt: args.now,
-    data: args.data,
-  }
-
-  if (args.existing !== null) {
-    await ctx.db.patch(args.existing._id, values)
-
-    return args.existing._id
-  }
-
-  return await ctx.db.insert("integrations", {
-    ...values,
-    createdAt: args.now,
-  })
+) {
+  return await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_and_integration_and_owner", (query) =>
+      query
+        .eq("tenantId", args.tenantId)
+        .eq("integration", args.integration)
+        .eq("ownerId", args.createdBy)
+    )
+    .first()
 }
 
 export const updateOAuthCredentials = internalMutation({

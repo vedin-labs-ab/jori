@@ -3,13 +3,16 @@ import {
   internalMutation,
   internalQuery,
   mutation,
-  type QueryCtx,
 } from "../../_generated/server"
+import {
+  findActiveIntegrationByExternalId,
+  findIntegrationByExternalId,
+} from "../../integrations/data"
 import {
   linkSetupIdentity,
   setupIdentityValidator,
 } from "../../persons/install"
-import { buildInstallState } from "../install"
+import { buildInstallState, upsertIntegration } from "../install"
 import { createSignedSlackState } from "./signing"
 
 export const createInstallState = mutation({
@@ -28,7 +31,10 @@ export const getUserToken = internalQuery({
   },
   returns: v.union(v.string(), v.null()),
   handler: async (ctx, args) => {
-    const integration = await findActiveSlackIntegration(ctx, args.accountId)
+    const integration = await findActiveIntegrationByExternalId(ctx, {
+      integration: "slack",
+      externalId: args.accountId,
+    })
 
     return readSlackUserToken(integration?.credentials) ?? null
   },
@@ -45,7 +51,10 @@ export const getProfileLookupTarget = internalQuery({
     v.null()
   ),
   handler: async (ctx, args) => {
-    const integration = await findActiveSlackIntegration(ctx, args.accountId)
+    const integration = await findActiveIntegrationByExternalId(ctx, {
+      integration: "slack",
+      externalId: args.accountId,
+    })
 
     return integration === null ? null : { tenantId: integration.tenantId }
   },
@@ -68,57 +77,31 @@ export const recordOAuthInstallation = internalMutation({
     setupIdentity: v.optional(setupIdentityValidator),
   },
   handler: async (ctx, args) => {
-    const now = Date.now()
-    const existing = await ctx.db
-      .query("integrations")
-      .withIndex("by_integration_and_external", (query) =>
-        query.eq("integration", "slack").eq("externalId", args.accountId)
-      )
-      .first()
-
-    const credentials = {
-      bot: args.botToken,
-      user: args.userToken,
-    }
-
-    const data = {
-      scopes: {
-        bot: args.botScopes,
-        user: args.userScopes,
+    const existing = await findIntegrationByExternalId(ctx, {
+      integration: "slack",
+      externalId: args.accountId,
+    })
+    const integrationId = await upsertIntegration(ctx, existing, {
+      tenantId: args.tenantId,
+      integration: "slack",
+      scope: "tenant",
+      externalId: args.accountId,
+      name: args.team.name,
+      credentials: {
+        bot: args.botToken,
+        user: args.userToken,
       },
-      botUserId: args.botUserId,
-    }
-
-    const integrationId =
-      existing === null
-        ? await ctx.db.insert("integrations", {
-            tenantId: args.tenantId,
-            integration: "slack",
-            scope: "tenant",
-            externalId: args.accountId,
-            name: args.team.name,
-            credentials,
-            status: "active",
-            createdBy: args.createdBy,
-            createdAt: now,
-            updatedAt: now,
-            data,
-          })
-        : existing._id
-
-    if (existing !== null) {
-      await ctx.db.patch(existing._id, {
-        tenantId: args.tenantId,
-        scope: "tenant",
-        externalId: args.accountId,
-        name: args.team.name,
-        credentials,
-        status: "active",
-        createdBy: args.createdBy,
-        updatedAt: now,
-        data,
-      })
-    }
+      status: "active",
+      createdBy: args.createdBy,
+      updatedAt: Date.now(),
+      data: {
+        scopes: {
+          bot: args.botScopes,
+          user: args.userScopes,
+        },
+        botUserId: args.botUserId,
+      },
+    })
 
     await linkSetupIdentity(ctx, {
       tenantId: args.tenantId,
@@ -130,17 +113,6 @@ export const recordOAuthInstallation = internalMutation({
     return integrationId
   },
 })
-
-async function findActiveSlackIntegration(ctx: QueryCtx, accountId: string) {
-  const integration = await ctx.db
-    .query("integrations")
-    .withIndex("by_integration_and_external", (query) =>
-      query.eq("integration", "slack").eq("externalId", accountId)
-    )
-    .first()
-
-  return integration?.status === "active" ? integration : null
-}
 
 function readSlackUserToken(credentials: unknown) {
   if (

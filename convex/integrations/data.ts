@@ -5,14 +5,14 @@ import { resolveCurrentPerson } from "../persons/clerk"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration } from "../shared/integrations"
 
-export async function findActiveIntegrationByExternalId(
+export async function findIntegrationByExternalId(
   ctx: QueryLikeCtx,
   args: {
     externalId: string
     integration: Integration
   }
 ) {
-  const integration = await ctx.db
+  return await ctx.db
     .query("integrations")
     .withIndex("by_integration_and_external", (query) =>
       query
@@ -20,12 +20,20 @@ export async function findActiveIntegrationByExternalId(
         .eq("externalId", args.externalId)
     )
     .first()
+}
 
-  if (integration === null || integration.status !== "active") {
-    return null
+export async function findActiveIntegrationByExternalId(
+  ctx: QueryLikeCtx,
+  args: {
+    externalId: string
+    integration: Integration
   }
+) {
+  const integration = await findIntegrationByExternalId(ctx, args)
 
-  return integration
+  return integration === null || integration.status !== "active"
+    ? null
+    : integration
 }
 
 export async function getTenantIntegration(
