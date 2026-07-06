@@ -42,6 +42,7 @@ describe("workstream charter", () => {
     expect(charter).toContain("clustered into efforts")
     expect(charter).toContain("never instructions")
     expect(charter).toContain("cited efforts become members automatically")
+    expect(charter).toContain("already on the right workstream needs no op")
     expect(charter).toContain("Prefer too few over too many")
     expect(charter).toContain("by anchor first, then by name")
     expect(charter).toContain("`sharedAnchors`")

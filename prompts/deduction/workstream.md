@@ -15,7 +15,7 @@ You receive JSON with the current roster (`workstreams`, including closed and re
 
 # Mutations
 
-- `assign`: attach an effort to the workstream it belongs to, with one line on why. Assign every effort you can place, including corrections when an effort sits on the wrong workstream; leave an effort unassigned rather than force a fit.
+- `assign`: attach an effort to the workstream it belongs to, with one line on why. Assign new, unassigned, and misplaced efforts; an effort already on the right workstream needs no op. Leave an effort unassigned rather than force a fit.
 - `create`: a new workstream with real support, citing the efforts that constitute it — cited efforts become members automatically. Prefer too few over too many; one effort is not enough.
 - `update`: correct the name, aliases, brief, or parent as understanding improves. Briefs describe the work as it stands.
 - `status`: `confirm` once support looks broad — promotion is verified mechanically, so propose it and move on; `close` when the work concluded; `reject` entries that turned out not to be workstreams; `reopen` when closed work resumes.

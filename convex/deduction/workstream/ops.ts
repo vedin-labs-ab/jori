@@ -93,7 +93,11 @@ const mutationSchemas = [
     citations,
   }),
   opSchema("assign", {
-    effortId: stringValue,
+    effortId: {
+      ...stringValue,
+      description:
+        "Effort to attach. Skip efforts already on the right workstream.",
+    },
     beliefId: stringValue,
     why: {
       ...nullableString,

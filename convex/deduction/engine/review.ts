@@ -81,7 +81,7 @@ async function reviewWorkstreamWindow(
     { tenantId, scope: opened.scope, window: opened.window }
   )
   const { ops, invalid } =
-    input.efforts.length === 0
+    input.changed === 0
       ? { ops: [], invalid: 0 }
       : readWorkstreamOps(
           await requestJudge({

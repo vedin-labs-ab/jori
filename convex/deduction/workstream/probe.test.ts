@@ -138,6 +138,7 @@ function passInput(
     scope: "window",
     roster: [],
     efforts: [],
+    changed: 0,
     ...overrides,
   }
 }
