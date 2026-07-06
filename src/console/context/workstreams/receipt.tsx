@@ -39,7 +39,7 @@ export function Receipt({ receipt }: { receipt: ReceiptRow }) {
   )
 
   return (
-    <li className="flex flex-col gap-0.5 py-2.5">
+    <li className="flex flex-col gap-0.5 py-2.5 last:pb-0">
       {receipt.url === undefined ? (
         <div className="flex min-w-0 items-center gap-2">{header}</div>
       ) : (

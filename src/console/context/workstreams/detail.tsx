@@ -135,7 +135,7 @@ function DetailSections({
         </Section>
       )}
       {timeline.length === 0 ? null : (
-        <Section count={timeline.length} title="Timeline">
+        <Section title="Timeline">
           <WorkstreamTimeline items={timeline} now={now} tenantId={tenantId} />
         </Section>
       )}
@@ -143,18 +143,10 @@ function DetailSections({
   )
 }
 
-function Section({
-  title,
-  count,
-  children,
-}: {
-  title: string
-  count?: number
-  children: ReactNode
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-1.5">
-      <ContextSectionTitle count={count}>{title}</ContextSectionTitle>
+      <ContextSectionTitle>{title}</ContextSectionTitle>
       {children}
     </section>
   )
