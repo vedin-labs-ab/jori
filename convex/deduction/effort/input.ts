@@ -4,7 +4,7 @@ import { internalQuery, type QueryCtx } from "../../_generated/server"
 import { personDisplayName } from "../../persons/names"
 import { getActorDisplayName } from "../../shared/actor"
 import { eventAnchor } from "../anchors"
-import { iso, journalLine } from "../engine/judge"
+import { iso, type JournalRecord, journalRecord } from "../engine/judge"
 import {
   effortActiveMs,
   effortJournalTail,
@@ -33,7 +33,7 @@ export type EffortContext = {
   anchors: string[]
   actors: string[]
   seenAt: number
-  journal: string[]
+  journal: JournalRecord[]
 }
 
 export type WindowEvent = {
@@ -106,7 +106,7 @@ export async function readEffortContext(
     anchors: row.anchors,
     actors: names.filter((name): name is string => name !== undefined),
     seenAt: row.seenAt,
-    journal: entries.map((entry) => journalLine(entry)),
+    journal: entries.map((entry) => journalRecord(entry)),
   }
 }
 

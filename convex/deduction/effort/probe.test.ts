@@ -55,7 +55,9 @@ probe(
             id: "f1",
             name: "SSO login",
             summary: "Adding single sign-on to the app login flow.",
-            journal: ["2026-07-04: Added the SSO login callback."],
+            journal: [
+              { on: "2026-07-04", entry: "Added the SSO login callback." },
+            ],
           }),
         ],
         events: [

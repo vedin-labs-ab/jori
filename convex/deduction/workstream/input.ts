@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../../_generated/server"
 import { readEffortContext } from "../effort/input"
-import { iso } from "../engine/judge"
+import { iso, type JournalRecord } from "../engine/judge"
 import {
   consolidationJournalTail,
   effortActiveMs,
@@ -50,7 +50,7 @@ export type EffortEntry = {
   actors: string[]
   seenAt: number
   workstreamId?: Id<"beliefs">
-  journal: string[]
+  journal: JournalRecord[]
 }
 
 export const assemble = internalQuery({
