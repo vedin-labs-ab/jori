@@ -81,7 +81,7 @@ function DaySection({
       <div className={cn("min-w-0 flex-1 self-start", continues && "mb-4")}>
         <Paged initialCount={2} items={day.items}>
           {(visible) => (
-            <ol className="flex flex-col divide-y rounded-md border">
+            <ol className="flex flex-col divide-y overflow-hidden rounded-md border">
               {visible.map((item) => (
                 <EntryRow
                   item={item}
@@ -126,16 +126,16 @@ function EntryRow({
   return (
     <li>
       <Collapsible>
-        <CollapsibleTrigger className="group flex w-full items-center gap-3 p-3">
+        <CollapsibleTrigger className="group flex w-full items-center gap-3 p-2.5">
           <span className="flex min-w-0 flex-1 flex-col gap-1 text-left">
             <span className="truncate font-medium text-sm">
               {item.effort === "" ? "Update" : item.effort}
             </span>
             <EntryMeta item={item} now={now} />
           </span>
-          <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground transition group-hover:text-foreground group-data-[state=open]:rotate-180" />
         </CollapsibleTrigger>
-        <CollapsibleContent className="flex flex-col gap-3 px-3 pb-3">
+        <CollapsibleContent className="flex flex-col gap-2.5 border-t bg-muted/30 p-2.5">
           <p className="text-sm">{item.entry}</p>
           {item.receipts === 0 ? null : (
             <EntryReceipts item={item} tenantId={tenantId} />

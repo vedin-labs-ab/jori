@@ -1,10 +1,9 @@
 import { ChevronDown } from "lucide-react"
 import { type ReactNode, useState } from "react"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-// Renders a capped slice of a list with a standardized "Show N more" /
-// "Show less" control underneath once the list exceeds the initial count.
+// Renders a capped slice of a list with the standardized disclosure control
+// underneath once the list exceeds the initial count.
 export function Paged<Item>({
   items,
   initialCount = 3,
@@ -24,8 +23,12 @@ export function Paged<Item>({
     <div className="flex flex-col gap-1">
       {children(visible, hiddenCount)}
       {items.length > initialCount ? (
-        <Button
-          className="-ml-2 w-fit"
+        <PagingButton
+          label={
+            hiddenCount > 0
+              ? `Show ${Math.min(step, hiddenCount)} more`
+              : "Show less"
+          }
           onClick={() =>
             setVisibleCount(
               hiddenCount > 0
@@ -33,63 +36,35 @@ export function Paged<Item>({
                 : initialCount
             )
           }
-          size="sm"
-          type="button"
-          variant="link"
-        >
-          {hiddenCount > 0
-            ? `Show ${Math.min(step, hiddenCount)} more`
-            : "Show less"}
-          <ChevronDown
-            className={cn(
-              "transition-transform",
-              hiddenCount === 0 && "rotate-180"
-            )}
-          />
-        </Button>
+          rotated={hiddenCount === 0}
+        />
       ) : null}
     </div>
   )
 }
 
-// The server-paginated sibling of Paged: the list grows through a Convex
-// paginated query, so the control only ever loads more. `total` keeps the
-// "Show N more" label honest between pages.
-export function PagedRemote({
-  loaded,
-  total,
-  canLoadMore,
-  isLoading,
-  step = 5,
-  onLoadMore,
-  children,
+// The one disclosure control for paged lists: a flush primary text button
+// that dims on hover instead of underlining, echoing the expandable-text
+// "Show less" cue.
+function PagingButton({
+  label,
+  onClick,
+  rotated,
 }: {
-  loaded: number
-  total: number
-  canLoadMore: boolean
-  isLoading: boolean
-  step?: number
-  onLoadMore: (count: number) => void
-  children: ReactNode
+  label: string
+  onClick: () => void
+  rotated: boolean
 }) {
-  const hiddenCount = Math.max(total - loaded, canLoadMore ? 1 : 0)
-
   return (
-    <div className="flex flex-col gap-1">
-      {children}
-      {canLoadMore || isLoading ? (
-        <Button
-          className="-ml-2 w-fit"
-          disabled={isLoading}
-          onClick={() => onLoadMore(step)}
-          size="sm"
-          type="button"
-          variant="link"
-        >
-          {`Show ${Math.min(step, hiddenCount)} more`}
-          <ChevronDown />
-        </Button>
-      ) : null}
-    </div>
+    <button
+      className="flex w-fit cursor-pointer select-none items-center gap-1 rounded-sm py-0.5 font-medium text-primary text-xs outline-none transition hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-ring/30"
+      onClick={onClick}
+      type="button"
+    >
+      {label}
+      <ChevronDown
+        className={cn("size-4 transition-transform", rotated && "rotate-180")}
+      />
+    </button>
   )
 }
