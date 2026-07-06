@@ -226,17 +226,13 @@ function EnabledControls({
         </span>
       </div>
       <div className="flex items-center">
-        {active ? (
-          <Button
-            disabled={pendingKind !== undefined}
-            onClick={() =>
-              void actions.runNow(definition, enabled.automationId)
-            }
-            variant="ghost"
-          >
-            {pendingKind === "run" ? <Spinner /> : <Play />} Run now
-          </Button>
-        ) : null}
+        <Button
+          disabled={pendingKind !== undefined}
+          onClick={() => void actions.runNow(definition, enabled.automationId)}
+          variant="ghost"
+        >
+          {pendingKind === "run" ? <Spinner /> : <Play />} Run now
+        </Button>
         <Button asChild size="icon" title="View automation" variant="ghost">
           <Link to="/automations">
             <ArrowUpRight />
