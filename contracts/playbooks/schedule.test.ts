@@ -5,14 +5,14 @@ import { describePlaybookSchedule, playbookCron } from "./schedule"
 describe("playbook schedules", () => {
   test("describes schedules in local terms", () => {
     expect(describePlaybookSchedule({ repeat: "daily", time: "08:00" })).toBe(
-      "Daily at 08:00"
+      "Every day at 08:00"
     )
     expect(
       describePlaybookSchedule({ repeat: "weekdays", time: "07:30" })
-    ).toBe("Weekdays at 07:30")
+    ).toBe("Every weekday at 07:30")
     expect(
       describePlaybookSchedule({ repeat: "weekly", weekday: 5, time: "16:00" })
-    ).toBe("Fridays at 16:00")
+    ).toBe("Every Friday at 16:00")
   })
 
   test("converts local times to UTC cron", () => {

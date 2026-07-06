@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { playbookCatalog } from "../../contracts/playbooks/catalog"
-import { mutation, query } from "../_generated/server"
+import { type MutationCtx, mutation, query } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import {
   readClerkUserEmail,
@@ -9,12 +9,21 @@ import {
 } from "../identity/users"
 import { ensureClerkPerson } from "../persons/clerk"
 import { resolvePersonByIdentity } from "../persons/links"
-import { integrationValidator } from "../shared/integrations"
+import { type Integration, integrationValidator } from "../shared/integrations"
 import {
   enablePlaybook,
+  type PlaybookPlanArgs,
   readPlaybookAutomations,
   readPlaybookSlots,
 } from "./enable"
+import { trialPlaybook } from "./trial"
+
+const planArgs = {
+  tenantId: v.string(),
+  playbook: v.string(),
+  // Keyed by playbook capability; slot resolution ignores unknown keys.
+  choices: v.optional(v.record(v.string(), integrationValidator)),
+}
 
 export const list = query({
   args: {
@@ -64,37 +73,62 @@ export const list = query({
 
 export const enable = mutation({
   args: {
-    tenantId: v.string(),
-    playbook: v.string(),
+    ...planArgs,
     utcOffsetMinutes: v.number(),
-    // Keyed by playbook capability; slot resolution ignores unknown keys.
-    choices: v.optional(v.record(v.string(), integrationValidator)),
   },
   handler: async (ctx, args) => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
-    const email = readClerkUserEmail(identity)
-
-    if (email === undefined) {
-      throw new Error(
-        "Your account needs an email address before playbooks can email you."
-      )
-    }
-
-    const name = readClerkUserName(identity)
-    const createdBy = await ensureClerkPerson(ctx, {
-      tenantId: args.tenantId,
-      clerkSubject: requireClerkUserId(identity),
-      email,
-      name,
-    })
+    const plan = await resolveCallerPlanArgs(ctx, identity, args)
 
     return await enablePlaybook(ctx, {
-      tenantId: args.tenantId,
-      key: args.playbook,
+      ...plan,
       utcOffsetMinutes: args.utcOffsetMinutes,
-      choices: args.choices ?? {},
-      createdBy,
-      recipient: { email, name },
     })
   },
 })
+
+export const trial = mutation({
+  args: planArgs,
+  handler: async (ctx, args) => {
+    const identity = await requireTenantAccess(ctx, args.tenantId)
+
+    return await trialPlaybook(
+      ctx,
+      await resolveCallerPlanArgs(ctx, identity, args)
+    )
+  },
+})
+
+async function resolveCallerPlanArgs(
+  ctx: MutationCtx,
+  identity: { email?: string; name?: string; subject?: string },
+  args: {
+    tenantId: string
+    playbook: string
+    choices?: Record<string, Integration>
+  }
+): Promise<PlaybookPlanArgs> {
+  const email = readClerkUserEmail(identity)
+
+  if (email === undefined) {
+    throw new Error(
+      "Your account needs an email address before playbooks can email you."
+    )
+  }
+
+  const name = readClerkUserName(identity)
+  const createdBy = await ensureClerkPerson(ctx, {
+    tenantId: args.tenantId,
+    clerkSubject: requireClerkUserId(identity),
+    email,
+    name,
+  })
+
+  return {
+    tenantId: args.tenantId,
+    key: args.playbook,
+    choices: args.choices ?? {},
+    createdBy,
+    recipient: { email, name },
+  }
+}

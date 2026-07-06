@@ -225,6 +225,7 @@ import type * as places_schedule from "../places/schedule.js";
 import type * as places_window from "../places/window.js";
 import type * as playbooks_console from "../playbooks/console.js";
 import type * as playbooks_enable from "../playbooks/enable.js";
+import type * as playbooks_trial from "../playbooks/trial.js";
 import type * as providers_catalog from "../providers/catalog.js";
 import type * as providers_credentials from "../providers/credentials.js";
 import type * as providers_data from "../providers/data.js";
@@ -670,6 +671,7 @@ declare const fullApi: ApiFromModules<{
   "places/window": typeof places_window;
   "playbooks/console": typeof playbooks_console;
   "playbooks/enable": typeof playbooks_enable;
+  "playbooks/trial": typeof playbooks_trial;
   "providers/catalog": typeof providers_catalog;
   "providers/credentials": typeof providers_credentials;
   "providers/data": typeof providers_data;

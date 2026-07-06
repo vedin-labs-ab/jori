@@ -12,7 +12,7 @@ import { playbookCron } from "../../contracts/playbooks/schedule"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { findEventIntegration } from "../automations/integrations"
-import { createAutomation, createAutomationRun } from "../automations/lifecycle"
+import { createAutomation } from "../automations/lifecycle"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration, integrationLabels } from "../shared/integrations"
 
@@ -21,21 +21,20 @@ export type PlaybookSlotState = {
   connected: Integration[]
 }
 
-export async function enablePlaybook(
-  ctx: MutationCtx,
-  args: {
-    tenantId: string
-    key: string
-    utcOffsetMinutes: number
-    choices: Partial<Record<PlaybookCapability, Integration>>
-    createdBy: Id<"persons">
-    recipient: { email: string; name?: string }
-  }
+export type PlaybookPlanArgs = {
+  tenantId: string
+  key: string
+  choices: Partial<Record<PlaybookCapability, Integration>>
+  createdBy: Id<"persons">
+  recipient: { email: string; name?: string }
+}
+
+/** Resolve a playbook's slots to the caller's providers and render it. */
+export async function resolvePlaybookPlan(
+  ctx: QueryLikeCtx,
+  args: PlaybookPlanArgs
 ) {
   const definition = getPlaybook(args.key)
-
-  await requireNotEnabled(ctx, args.tenantId, definition)
-
   const slots = await readPlaybookSlots(ctx, {
     definition,
     ownerId: args.createdBy,
@@ -45,10 +44,9 @@ export async function enablePlaybook(
     slot,
     integration: resolveProvider(slots[index], args.choices[slot.capability]),
   }))
-  const automation = await createAutomation(ctx, {
-    tenantId: args.tenantId,
-    playbook: definition.key,
-    name: definition.title,
+
+  return {
+    definition,
     instructions: definition.instructions({
       providers: resolvedProviderLabels(resolved),
       recipient: args.recipient,
@@ -60,24 +58,36 @@ export async function enablePlaybook(
       })),
       web: definition.web,
     },
+  }
+}
+
+export async function enablePlaybook(
+  ctx: MutationCtx,
+  args: PlaybookPlanArgs & {
+    utcOffsetMinutes: number
+  }
+) {
+  const plan = await resolvePlaybookPlan(ctx, args)
+
+  await requireNotEnabled(ctx, args.tenantId, plan.definition)
+
+  const automation = await createAutomation(ctx, {
+    tenantId: args.tenantId,
+    playbook: plan.definition.key,
+    name: plan.definition.title,
+    instructions: plan.instructions,
+    access: plan.access,
     type: "cron",
     trigger: {
       expression: playbookCron(
-        definition.schedule,
+        plan.definition.schedule,
         normalizeUtcOffset(args.utcOffsetMinutes)
       ),
     },
     createdBy: args.createdBy,
   })
 
-  // The first run fires immediately so enabling proves its value right away.
-  const runId = await createAutomationRun(ctx, {
-    automation,
-    cause: { type: "manual", personId: args.createdBy },
-    now: Date.now(),
-  })
-
-  return { automationId: automation._id, runId }
+  return { automationId: automation._id }
 }
 
 export async function readPlaybookSlots(

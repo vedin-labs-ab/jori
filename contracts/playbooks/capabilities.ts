@@ -29,6 +29,30 @@ export type PlaybookSlot = {
   }
 }[PlaybookCapability]
 
+export const playbookIntentLabels = {
+  email: {
+    read: "Read email",
+    draft: "Draft replies",
+    send: "Send email",
+  },
+  calendar: {
+    read: "Read calendar",
+  },
+} satisfies {
+  [Capability in PlaybookCapability]: Record<
+    CapabilityIntents[Capability],
+    string
+  >
+}
+
+export function playbookSlotIntentLabels(slot: PlaybookSlot): string[] {
+  if (slot.capability === "email") {
+    return slot.intents.map((intent) => playbookIntentLabels.email[intent])
+  }
+
+  return slot.intents.map((intent) => playbookIntentLabels.calendar[intent])
+}
+
 // Same-capability providers expose differently named and differently shaped
 // tool sets, so intents map to explicit tool lists instead of renames.
 const intentTools: Record<string, Record<string, readonly string[]>> = {

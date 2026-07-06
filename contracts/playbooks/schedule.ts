@@ -17,14 +17,14 @@ const minutesPerDay = 24 * 60
 
 export function describePlaybookSchedule(schedule: PlaybookSchedule) {
   if (schedule.repeat === "daily") {
-    return `Daily at ${schedule.time}`
+    return `Every day at ${schedule.time}`
   }
 
   if (schedule.repeat === "weekdays") {
-    return `Weekdays at ${schedule.time}`
+    return `Every weekday at ${schedule.time}`
   }
 
-  return `${weekdayNames[schedule.weekday]}s at ${schedule.time}`
+  return `Every ${weekdayNames[schedule.weekday]} at ${schedule.time}`
 }
 
 /**

@@ -5,6 +5,7 @@ import {
 } from "@contracts/integrations"
 import {
   type PlaybookCapability,
+  type PlaybookSlot,
   playbookCapabilityProviders,
 } from "@contracts/playbooks/capabilities"
 import { type FunctionReturnType } from "convex/server"
@@ -47,13 +48,17 @@ export function planPlaybookEnable(
     : { kind: "choose", options }
 }
 
-/** Providers to show on the card: connected ones, or all candidates dimmed. */
-export function displayProviders(slot: PlaybookSlotState) {
-  if (slot.connected.length > 0) {
-    return slot.connected.map((integration) => ({
-      integration,
-      connected: true,
-    }))
+/** Providers to show for a slot: connected ones, or all candidates dimmed. */
+export function slotDisplayProviders(
+  slot: PlaybookSlot,
+  row: PlaybookListRow | undefined
+) {
+  const connected =
+    row?.slots.find((state) => state.capability === slot.capability)
+      ?.connected ?? []
+
+  if (connected.length > 0) {
+    return connected.map((integration) => ({ integration, connected: true }))
   }
 
   return playbookCapabilityProviders[slot.capability].map((integration) => ({
