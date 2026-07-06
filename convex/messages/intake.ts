@@ -6,6 +6,12 @@ import { findConversation } from "../conversations/resolve"
 import { scheduleConversationSummary } from "../conversations/schedule"
 import { findActiveIntegrationByExternalId } from "../integrations/data"
 import { resolveActor } from "../persons/resolve"
+import {
+  ensurePlace,
+  type ObservedPlace,
+  observedPlaceValidator,
+} from "../places/data"
+import { schedulePlaceProfile } from "../places/schedule"
 import { isGitHubSelfActor } from "../providers/github/data"
 import { getLinearBotId } from "../providers/linear/data"
 import { getSlackBotUserId } from "../providers/slack/data"
@@ -17,6 +23,7 @@ import {
 import {
   findMessageByExternalId,
   insertMessage,
+  type MessageIntegration,
   messageIntegrationValidator,
   type ObservedMessage,
   observedMessageArgs,
@@ -28,6 +35,7 @@ export const record = internalMutation({
   args: {
     integration: messageIntegrationValidator,
     mode: v.optional(v.union(v.literal("record"), v.literal("record_and_run"))),
+    place: v.optional(observedPlaceValidator),
     ...observedMessageArgs,
   },
   handler: async (ctx, args) => {
@@ -49,19 +57,17 @@ export const record = internalMutation({
       }
     }
 
-    const observed = observedMessage(args, integration)
-    const createdBy = await resolveActor(ctx, {
-      tenantId: integration.tenantId,
-      provider: args.integration,
-      actor: observed.actor,
-    })
-    const message = await insertMessage(ctx, {
-      integration,
-      message: observed,
-      personId: createdBy,
-    })
+    const { createdBy, message, observed, place } = await insertObservedMessage(
+      ctx,
+      args,
+      integration
+    )
     const now = Date.now()
     const mode = args.mode ?? "record_and_run"
+
+    if (place !== null) {
+      await schedulePlaceProfile(ctx, place, now)
+    }
 
     if (mode === "record") {
       return { status: "recorded" as const, messageId: message._id }
@@ -97,6 +103,36 @@ export const record = internalMutation({
     }
   },
 })
+
+// Records the message with its provider-normalized place (when it landed in
+// one) resolved to a stamped row, so every downstream read is one index hop.
+async function insertObservedMessage(
+  ctx: MutationCtx,
+  args: ObservedMessage & {
+    integration: MessageIntegration
+    place?: ObservedPlace
+  },
+  integration: Doc<"integrations">
+) {
+  const observed = observedMessage(args, integration)
+  const createdBy = await resolveActor(ctx, {
+    tenantId: integration.tenantId,
+    provider: args.integration,
+    actor: observed.actor,
+  })
+  const place =
+    args.place === undefined
+      ? null
+      : await ensurePlace(ctx, { integration, place: args.place })
+  const message = await insertMessage(ctx, {
+    integration,
+    message: observed,
+    personId: createdBy,
+    placeId: place?._id,
+  })
+
+  return { createdBy, message, observed, place }
+}
 
 function observedMessage(
   message: ObservedMessage,

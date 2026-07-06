@@ -3,7 +3,9 @@ import { type Doc } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
 import { isPersonApprovalDecisionText } from "../../../approvals/runtime"
 import { handleSlackApprovalDecision } from "../../../approvals/slack"
+import { type ObservedPlace } from "../../../places/data"
 import { createIntegrationActor } from "../../../shared/actor"
+import { readRecord, readString } from "../../../shared/input"
 import { getSlackBotUserId } from "../data"
 import {
   enrichSlackMessageData,
@@ -57,12 +59,35 @@ export async function handleSlackMessageEvent(
       name: actorProfile?.name,
     }),
     conversationId: message.conversationId,
+    place: slackMessagePlace(data),
     text: surface.text,
     observedAt: message.observedAt,
     data,
   })
 
   return Response.json({ ok: true })
+}
+
+// A Slack message's place is its channel; directory enrichment settles
+// visibility from the channel flags and leaves DMs without one, so they
+// never become places.
+function slackMessagePlace(data: unknown): ObservedPlace | undefined {
+  const channel = readRecord(readRecord(data).channel)
+  const externalId = readString(channel, "id")
+  const visibility = readString(channel, "visibility")
+
+  if (
+    externalId === undefined ||
+    (visibility !== "public" && visibility !== "private")
+  ) {
+    return undefined
+  }
+
+  return {
+    externalId,
+    name: readString(channel, "name") ?? externalId,
+    visibility,
+  }
 }
 
 async function handledAsApprovalDecision(

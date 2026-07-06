@@ -13,6 +13,7 @@ const tableRegistry: Record<TableName, true> = {
   integrations: true,
   integrationOffers: true,
   messages: true,
+  places: true,
   organizationProfile: true,
   organizationSources: true,
   organizationDiscovery: true,

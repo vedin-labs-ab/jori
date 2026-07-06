@@ -194,6 +194,7 @@ export function runtimeInput(
     integration: promptIntegration(integration),
     integrations: [promptIntegration(integration)],
     conversation: { entries: [], hasMoreMessages: false },
+    place: null,
     message: {
       _id: "message",
       _creationTime: 0,

@@ -29,6 +29,7 @@ import {
 } from "./organization/schema"
 import { permissions } from "./permissions/schema"
 import { persons } from "./persons/schema"
+import { places } from "./places/schema"
 import { reactions } from "./reactions/schema"
 import { runs } from "./runs/schema"
 import { outbox, sandboxes } from "./runtime/schema"
@@ -46,6 +47,7 @@ export default defineSchema({
   integrations,
   integrationOffers,
   messages,
+  places,
   organizationProfile,
   organizationSources,
   organizationDiscovery,

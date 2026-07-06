@@ -52,6 +52,7 @@ export async function insertMessage(
     integration: Doc<"integrations">
     message: ObservedMessage
     personId: Id<"persons"> | undefined
+    placeId: Id<"places"> | undefined
   }
 ): Promise<Doc<"messages">> {
   const now = Date.now()
@@ -65,6 +66,7 @@ export async function insertMessage(
     actor: input.message.actor,
     personId: input.personId,
     conversationId: input.message.conversationId,
+    placeId: input.placeId,
     targetKey: messageDataReactionTargetKey(
       input.integration.integration,
       input.message.data

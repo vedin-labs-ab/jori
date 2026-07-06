@@ -131,6 +131,7 @@ function messageInput(integrations: Doc<"integrations">[]): AgentRuntimeInput {
     integration: source ?? integration("slack"),
     integrations,
     organization: null,
+    place: null,
     workstreams: null,
   }
 }

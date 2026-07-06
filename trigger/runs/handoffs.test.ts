@@ -153,6 +153,7 @@ function createRuntime(options: {
           context: "refreshed context",
           instructions: "refreshed instructions",
           organization: null,
+          place: null,
           person: null,
         },
         tools: [refreshedTool()],
@@ -167,6 +168,7 @@ function createRuntime(options: {
         context: "context",
         instructions: "system",
         organization: null,
+        place: null,
         person: null,
       },
       run: {

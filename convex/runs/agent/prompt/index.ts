@@ -12,6 +12,7 @@ import {
   type PromptActiveSurface,
 } from "./context"
 import { createOrganizationMessage } from "./organization"
+import { createPlaceMessage } from "./place"
 import { createSkillInstructions } from "./skills"
 
 export function assemblePrompt(
@@ -61,6 +62,7 @@ export function assemblePrompt(
     }),
     instructions,
     organization: optionalPromptBlock(createOrganizationMessage(input)),
+    place: optionalPromptBlock(createPlaceMessage(input)),
     person: options.person ?? null,
   }
 }

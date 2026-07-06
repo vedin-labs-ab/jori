@@ -10,11 +10,11 @@ import {
 } from "../types"
 
 // The prompt prefix every run starts with: instructions as the system
-// message, then the organization and requester person contexts (when
-// present) and the run context as user messages. Everything after the
-// prefix is history.
+// message, then the organization, place, and requester person contexts
+// (when present) and the run context as user messages, broad to narrow.
+// Everything after the prefix is history.
 export function promptMessages(prompt: RuntimePrompt): ModelMessage[] {
-  const contexts = [prompt.organization, prompt.person].filter(
+  const contexts = [prompt.organization, prompt.place, prompt.person].filter(
     (content): content is string => content !== null
   )
 

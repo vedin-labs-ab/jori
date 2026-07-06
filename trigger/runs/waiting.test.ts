@@ -120,6 +120,7 @@ function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
         context: "context",
         instructions: "system",
         organization: null,
+        place: null,
         person: null,
       },
       run: {
