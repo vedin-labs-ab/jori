@@ -4,6 +4,7 @@ import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { resolveCitations, sortOps } from "../engine/rules"
 import {
   allowedSource,
+  completePass,
   createTracking,
   discard,
   requireRunningPass,
@@ -51,12 +52,7 @@ export const apply = internalMutation({
       await applyOp(ctx, pass, state, op)
     }
 
-    await ctx.db.patch(args.passId, {
-      status: "completed",
-      endedAt: Date.now(),
-      stats: state.counts,
-      ...(state.discards.length === 0 ? {} : { discards: state.discards }),
-    })
+    await completePass(ctx, args.passId, state)
   },
 })
 

@@ -93,3 +93,16 @@ export async function requireRunningPass(
 
   return pass !== null && pass.status === "running" ? pass : null
 }
+
+export async function completePass(
+  ctx: MutationCtx,
+  passId: Id<"passes">,
+  tracking: ApplyTracking
+) {
+  await ctx.db.patch(passId, {
+    status: "completed",
+    endedAt: Date.now(),
+    stats: tracking.counts,
+    ...(tracking.discards.length === 0 ? {} : { discards: tracking.discards }),
+  })
+}

@@ -1,4 +1,4 @@
-import { isRecord, readCitations, readString } from "../engine/judge"
+import { isRecord, readCitations, readOps, readString } from "../engine/judge"
 import { type EffortOp } from "./ops"
 
 // Narrated dates are metadata (`observedAt`), never entry prose. Models
@@ -14,27 +14,8 @@ export function readEntry(value: unknown) {
   return entry === undefined || entry === "" ? undefined : entry
 }
 
-// Defensive read of the judge's JSON into typed ops; anything malformed is
-// counted, never thrown, so one bad mutation can't sink a pass.
-export function readEffortOps(value: Record<string, unknown>): {
-  ops: EffortOp[]
-  invalid: number
-} {
-  const mutations = Array.isArray(value.mutations) ? value.mutations : []
-  const ops: EffortOp[] = []
-  let invalid = 0
-
-  for (const item of mutations) {
-    const op = readOp(item)
-
-    if (op === null) {
-      invalid += 1
-    } else {
-      ops.push(op)
-    }
-  }
-
-  return { ops, invalid }
+export function readEffortOps(value: Record<string, unknown>) {
+  return readOps(value, readOp)
 }
 
 function readOp(item: unknown): EffortOp | null {
