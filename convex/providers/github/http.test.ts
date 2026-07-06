@@ -42,6 +42,24 @@ test("records GitHub approval commands without starting a message run", async ()
   })
 })
 
+test("ignores approval commands from commenters outside the repository audience", async () => {
+  const ctx = actionCtx()
+
+  await handleGitHubMessageEvent(
+    ctx,
+    githubMessage({ body: "approve abc12345", authorAssociation: "NONE" })
+  )
+
+  expect(ctx.runMutation).toHaveBeenCalledTimes(1)
+  expect(ctx.runMutation.mock.calls[0]?.[1]).toMatchObject({
+    accountId: "123",
+    integration: "github",
+    text: "approve abc12345",
+  })
+  expect(ctx.runMutation.mock.calls[0]?.[1]).not.toHaveProperty("mode")
+  expect(ctx.runQuery).not.toHaveBeenCalled()
+})
+
 test("records ordinary GitHub comments with normal run intake", async () => {
   const ctx = actionCtx()
 
@@ -59,11 +77,14 @@ test("records ordinary GitHub comments with normal run intake", async () => {
 
 type GitHubMessage = Parameters<typeof handleGitHubMessageEvent>[1]
 
-function githubMessage(args: { body: string }): GitHubMessage {
+function githubMessage(args: {
+  body: string
+  authorAssociation?: string
+}): GitHubMessage {
   const message = getGitHubMessage({
     deliveryId: "delivery",
     event: "issue_comment",
-    payload: githubPayload(args.body),
+    payload: githubPayload(args.body, args.authorAssociation ?? "MEMBER"),
   })
 
   if (message === null) {
@@ -73,10 +94,14 @@ function githubMessage(args: { body: string }): GitHubMessage {
   return message
 }
 
-function githubPayload(body: string): GitHubWebhookPayload {
+function githubPayload(
+  body: string,
+  authorAssociation: string
+): GitHubWebhookPayload {
   return {
     action: "created",
     comment: {
+      author_association: authorAssociation,
       body,
       created_at: "2026-06-26T11:07:51Z",
       html_url:
