@@ -2,6 +2,7 @@ import { type Integration, integrationLabel } from "@contracts/integrations"
 import { ExternalLink } from "lucide-react"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import { SeparatorDot } from "../../shared/dot"
+import { flushRowClassName } from "../../shared/flush"
 import { IntegrationLogo } from "../../shared/logo/integration"
 import { relativeTime } from "../../shared/time"
 
@@ -47,7 +48,7 @@ export function Receipt({ receipt }: { receipt: ReceiptRow }) {
           href={receipt.url}
           target="_blank"
           rel="noreferrer"
-          className="-mx-1.5 -my-1 flex min-w-0 items-center gap-2 rounded-sm px-1.5 py-1 transition-colors hover:bg-muted/50"
+          className={flushRowClassName("-my-1 min-w-0 gap-2 py-1")}
         >
           {header}
           <ExternalLink

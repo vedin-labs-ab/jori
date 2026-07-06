@@ -66,8 +66,6 @@ function DaySection({
   first: boolean
   continues: boolean
 }) {
-  const today = day.key === new Date(now).toDateString()
-
   return (
     <section className="flex gap-3">
       <h4 className="w-14 shrink-0 pt-3 text-right font-medium text-muted-foreground text-xs">
@@ -77,25 +75,42 @@ function DaySection({
           the line stays unbroken from section to section. */}
       <div aria-hidden className="flex flex-col items-center">
         <span className={cn("h-4 w-px shrink-0", !first && "bg-border")} />
-        <span
-          className={cn(
-            "size-2 shrink-0 rounded-full",
-            today ? "bg-primary" : "bg-muted-foreground/40"
-          )}
-        />
+        <TimelineDot live={day.key === new Date(now).toDateString()} />
         {continues ? <span className="w-px grow bg-border" /> : null}
       </div>
-      <ol
-        className={cn(
-          "flex min-w-0 flex-1 flex-col divide-y self-start rounded-md border",
-          continues && "mb-4"
-        )}
-      >
-        {day.items.map((item) => (
-          <EntryRow item={item} key={item.id} now={now} tenantId={tenantId} />
-        ))}
-      </ol>
+      <div className={cn("min-w-0 flex-1 self-start", continues && "mb-4")}>
+        <Paged initialCount={2} items={day.items}>
+          {(visible) => (
+            <ol className="flex flex-col divide-y rounded-md border">
+              {visible.map((item) => (
+                <EntryRow
+                  item={item}
+                  key={item.id}
+                  now={now}
+                  tenantId={tenantId}
+                />
+              ))}
+            </ol>
+          )}
+        </Paged>
+      </div>
     </section>
+  )
+}
+
+// The live dot pulses while the day is still recording; past days sit still.
+function TimelineDot({ live }: { live: boolean }) {
+  if (!live) {
+    return (
+      <span className="size-2 shrink-0 rounded-full bg-muted-foreground/40" />
+    )
+  }
+
+  return (
+    <span className="relative flex size-2 shrink-0">
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60 motion-reduce:animate-none" />
+      <span className="relative inline-flex size-2 rounded-full bg-primary" />
+    </span>
   )
 }
 
@@ -131,24 +146,32 @@ function EntryRow({
   )
 }
 
+// Each meta chunk keeps its separator and stays unbreakable, so narrow
+// screens wrap between chunks instead of mid-phrase.
 function EntryMeta({ item, now }: { item: TimelineItem; now: number }) {
+  const hasLogos = item.integrations.length > 0
+  const hasReceipts = item.receipts > 0
+
   return (
-    <span className="flex items-center gap-1.5 text-muted-foreground text-xs">
-      {item.integrations.length === 0 ? null : (
-        <>
-          <IntegrationLogoStack integrations={item.integrations} />
+    <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-muted-foreground text-xs">
+      {hasLogos ? (
+        <IntegrationLogoStack integrations={item.integrations} />
+      ) : null}
+      {hasReceipts ? (
+        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+          {hasLogos ? (
+            <SeparatorDot className="text-muted-foreground/60" />
+          ) : null}
+          {item.receipts === 1 ? "1 receipt" : `${item.receipts} receipts`}
+        </span>
+      ) : null}
+      <span
+        className="inline-flex items-center gap-1.5 whitespace-nowrap"
+        title={absoluteTime(item.observedAt)}
+      >
+        {hasLogos || hasReceipts ? (
           <SeparatorDot className="text-muted-foreground/60" />
-        </>
-      )}
-      {item.receipts === 0 ? null : (
-        <>
-          <span>
-            {item.receipts === 1 ? "1 receipt" : `${item.receipts} receipts`}
-          </span>
-          <SeparatorDot className="text-muted-foreground/60" />
-        </>
-      )}
-      <span title={absoluteTime(item.observedAt)}>
+        ) : null}
         {relativeTime(item.observedAt, now)}
       </span>
     </span>
@@ -176,11 +199,15 @@ function EntryReceipts({
       {receipts === undefined ? (
         <Skeleton className="h-12 w-full" />
       ) : (
-        <ul className="flex flex-col divide-y">
-          {receipts.map((receipt) => (
-            <Receipt key={receipt.id} receipt={receipt} />
-          ))}
-        </ul>
+        <Paged initialCount={2} items={receipts}>
+          {(visible) => (
+            <ul className="flex flex-col divide-y">
+              {visible.map((receipt) => (
+                <Receipt key={receipt.id} receipt={receipt} />
+              ))}
+            </ul>
+          )}
+        </Paged>
       )}
     </div>
   )
