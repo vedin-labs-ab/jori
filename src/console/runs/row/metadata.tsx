@@ -1,11 +1,13 @@
 import {
   CalendarDays,
+  Check,
   CircleDotDashed,
   File,
   Folder,
   GitPullRequestArrow,
   type LucideIcon,
   Mail,
+  Pause,
   Repeat2,
   Square,
   UserRound,
@@ -123,7 +125,12 @@ function SenderDatum({ detail }: MetadataProps) {
 }
 
 function StatusDatum({ detail }: MetadataProps) {
-  return <IconDatum detail={detail} icon={Square} />
+  return (
+    <IconDatum
+      detail={detail}
+      icon={detail.label === "Paused" ? Pause : Check}
+    />
+  )
 }
 
 function SubjectDatum({ detail }: MetadataProps) {
