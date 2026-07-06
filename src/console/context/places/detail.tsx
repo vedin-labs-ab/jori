@@ -12,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { CopyableCodeBlock } from "../../shared/copy"
 import { IntegrationChips } from "../../shared/logo/integration"
 import { relativeTime, useNow } from "../../shared/time"
 import { ContextSectionTitle } from "../section"
@@ -85,22 +86,31 @@ function ClaimSection({
   return (
     <div className="flex flex-col gap-1.5">
       <ContextSectionTitle>{placeSectionLabels[section]}</ContextSectionTitle>
-      <div className="flex flex-col gap-1.5 rounded-md bg-muted px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed">
-        {claims.map((claim) => (
-          <Claim key={claim.text} claim={claim} />
-        ))}
-      </div>
+      <CopyableCodeBlock
+        label={placeSectionLabels[section]}
+        value={claims.map((claim) => claim.text).join("\n")}
+      >
+        <span className="flex flex-col gap-1.5">
+          {claims.map((claim) => (
+            <Claim key={claim.text} claim={claim} />
+          ))}
+        </span>
+      </CopyableCodeBlock>
     </div>
   )
 }
 
 function Claim({ claim }: { claim: Place["claims"][number] }) {
   if (!claim.fading) {
-    return <p className="whitespace-pre-wrap break-words">{claim.text}</p>
+    return (
+      <span className="block whitespace-pre-wrap break-words">
+        {claim.text}
+      </span>
+    )
   }
 
   return (
-    <p className="flex items-start justify-between gap-2 text-muted-foreground">
+    <span className="flex items-start justify-between gap-2 text-muted-foreground">
       <span className="whitespace-pre-wrap break-words">{claim.text}</span>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -112,6 +122,6 @@ function Claim({ claim }: { claim: Place["claims"][number] }) {
           Not re-observed in recent activity; drops off unless confirmed.
         </TooltipContent>
       </Tooltip>
-    </p>
+    </span>
   )
 }
