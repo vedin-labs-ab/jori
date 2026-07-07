@@ -1,23 +1,18 @@
 import { expect, test } from "vitest"
+import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { summarizeRun } from "../summaries"
 
 // A "Run now" / "Try once" run carries the automation's schedule + status in
 // its snapshot, but it was triggered by hand, not by the schedule.
-test("a manual run drops the schedule and names who triggered it", async () => {
+test("a manual run drops the schedule and reads 'you' for the viewer", async () => {
   const run = manualRun("albin")
-  const summary = await summarizeRun(
-    fakeCtx({
-      run,
-      identities: [{ personId: "albin", provider: "slack", name: "Albin" }],
-    }),
-    run
-  )
+  const summary = await summarizeRun(fakeCtx({ run }), run, asPerson("albin"))
 
   expect(summary.source).toEqual({
     type: "automation",
     surface: "milo",
-    trigger: { actor: { type: "user", label: "Albin" } },
+    trigger: { actor: { type: "user", label: "you" } },
   })
   expect(
     summary.details.some(
@@ -26,12 +21,32 @@ test("a manual run drops the schedule and names who triggered it", async () => {
   ).toBe(false)
 })
 
-test("falls back to a bare label when the triggerer has no name", async () => {
+test("names the triggerer on a teammate's run", async () => {
+  const run = manualRun("teammate")
+  const summary = await summarizeRun(
+    fakeCtx({
+      run,
+      identities: [{ personId: "teammate", provider: "slack", name: "Bob" }],
+    }),
+    run,
+    asPerson("albin")
+  )
+
+  expect(summary.source.trigger).toEqual({
+    actor: { type: "user", label: "Bob" },
+  })
+})
+
+test("falls back to a bare label when a teammate has no name", async () => {
   const run = manualRun("ghost")
-  const summary = await summarizeRun(fakeCtx({ run }), run)
+  const summary = await summarizeRun(fakeCtx({ run }), run, asPerson("albin"))
 
   expect(summary.source.trigger).toEqual({})
 })
+
+function asPerson(id: string) {
+  return id as Id<"persons">
+}
 
 function manualRun(personId: string) {
   return {

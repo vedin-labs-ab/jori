@@ -1,5 +1,5 @@
 import { type Scope } from "../../../contracts/permissions/scope"
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
 import { personDisplayName } from "../../persons/names"
@@ -13,13 +13,14 @@ import { isManualTrigger, runSource, sourceSearchText } from "./source"
 export async function summarizeRun(
   ctx: QueryCtx,
   run: Doc<"runs">,
+  viewerPersonId?: Id<"persons">,
   requestedApproval?: Doc<"approvals">
 ) {
   const context = await getRunContext(ctx, run, requestedApproval)
   const title = runTitle(context)
   const task = runTask(context)
   const stoppedByLabel = getActorDisplayName(run.stoppedBy)
-  const triggeredByLabel = await manualTriggerLabel(ctx, run)
+  const triggeredByLabel = await manualTriggerLabel(ctx, run, viewerPersonId)
   const source = runSource(context, stoppedByLabel, triggeredByLabel)
   const detailSummary = runDetailSummary({
     approval: context.requestedApproval,
@@ -80,16 +81,22 @@ function getDuration(run: Doc<"runs">) {
   return Math.max(0, run.endedAt - run.createdAt)
 }
 
-// The person who hand-triggered the run, so every manual run says who ran it.
-// Undefined only for a triggerer with no named identity.
-async function manualTriggerLabel(ctx: QueryCtx, run: Doc<"runs">) {
+// Who hand-triggered the run: "you" for the viewer's own runs, otherwise the
+// triggerer's name. Undefined only for someone else with no named identity.
+async function manualTriggerLabel(
+  ctx: QueryCtx,
+  run: Doc<"runs">,
+  viewerPersonId: Id<"persons"> | undefined
+) {
   const personId = run.cause.type === "manual" ? run.cause.personId : undefined
 
   if (!isManualTrigger(run) || personId === undefined) {
     return undefined
   }
 
-  return await personDisplayName(ctx, personId)
+  return personId === viewerPersonId
+    ? "you"
+    : await personDisplayName(ctx, personId)
 }
 
 function searchableText(
