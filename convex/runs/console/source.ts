@@ -1,3 +1,4 @@
+import { type Doc } from "../../_generated/dataModel"
 import {
   getAutomationEventDefinition,
   isAutomationEventIntegration,
@@ -18,19 +19,40 @@ export type RunSource = {
   event?: SourceDatum
   kind?: SourceDatum
   surface?: ToolSurface
+  trigger?: {
+    actor?: SourceDatum
+  }
   stop?: {
     actor: SourceDatum
   }
   url?: string
 }
 
+/**
+ * A run a person kicked off by hand ("Try once" / "Run now"), as opposed to a
+ * scheduled, event, or agent-spawned run. Its schedule and status describe the
+ * automation, not this run, so the projection drops them.
+ */
+export function isManualTrigger(run: Doc<"runs">) {
+  return run.cause.type === "manual" && run.parentId === undefined
+}
+
 export function runSource(
   context: RunContext,
-  stoppedBy: string | undefined
+  stoppedBy: string | undefined,
+  triggeredBy: string | undefined
 ): RunSource {
   const source: RunSource = {
     ...context.run.snapshot.source,
     ...sourceContext(context),
+  }
+
+  if (isManualTrigger(context.run)) {
+    source.surface = "milo"
+    source.trigger =
+      triggeredBy === undefined
+        ? {}
+        : { actor: { type: "user", label: triggeredBy } }
   }
 
   if (stoppedBy !== undefined) {
@@ -49,6 +71,8 @@ export function sourceSearchText(source: RunSource) {
     source.event?.label,
     source.surface,
     source.url,
+    source.trigger === undefined ? undefined : "manually triggered",
+    source.trigger?.actor?.label,
     source.stop?.actor.label,
   ]
     .filter(Boolean)

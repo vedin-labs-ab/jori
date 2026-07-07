@@ -1,4 +1,5 @@
 import { toolSurfaceLabel } from "@contracts/integrations"
+import { Play } from "lucide-react"
 import { type ReactNode } from "react"
 import { SeparatorDot } from "../../shared/dot"
 import { ProviderLogo } from "../../shared/logo/provider"
@@ -67,6 +68,12 @@ function sourceItems(
       )
     ),
     ...optionalItem(
+      "trigger",
+      source.trigger === undefined ? undefined : (
+        <TriggerDatum actor={source.trigger.actor} />
+      )
+    ),
+    ...optionalItem(
       "kind",
       source.kind === undefined ? undefined : (
         <SourceTypeDatum datum={source.kind} />
@@ -116,6 +123,23 @@ function ProviderDatum({ surface }: { surface: string }) {
       <ProviderLogo surface={surface} />
       <span className="truncate font-medium text-foreground">
         {toolSurfaceLabel(surface)}
+      </span>
+    </span>
+  )
+}
+
+function TriggerDatum({ actor }: { actor?: SourceDatum }) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1">
+      <Play className="size-3 shrink-0 text-muted-foreground/70" />
+      <span className="truncate">
+        Manually triggered
+        {actor === undefined ? null : (
+          <>
+            {" by "}
+            <span className="font-medium text-foreground">{actor.label}</span>
+          </>
+        )}
       </span>
     </span>
   )

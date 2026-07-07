@@ -1,24 +1,27 @@
 import { type Scope } from "../../../contracts/permissions/scope"
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
+import { personDisplayName } from "../../persons/names"
 import { getActorDisplayName } from "../../shared/actor"
 import { getRunContext } from "./context"
 import { runDetailSummary } from "./details"
 import { runTask, runTitle, triggerLabel } from "./labels"
 import { summarizeRunOffer } from "./offers"
-import { runSource, sourceSearchText } from "./source"
+import { isManualTrigger, runSource, sourceSearchText } from "./source"
 
 export async function summarizeRun(
   ctx: QueryCtx,
   run: Doc<"runs">,
+  viewerPersonId?: Id<"persons">,
   requestedApproval?: Doc<"approvals">
 ) {
   const context = await getRunContext(ctx, run, requestedApproval)
   const title = runTitle(context)
   const task = runTask(context)
   const stoppedByLabel = getActorDisplayName(run.stoppedBy)
-  const source = runSource(context, stoppedByLabel)
+  const triggeredByLabel = await manualTriggerLabel(ctx, run, viewerPersonId)
+  const source = runSource(context, stoppedByLabel, triggeredByLabel)
   const detailSummary = runDetailSummary({
     approval: context.requestedApproval,
     run: context.run,
@@ -76,6 +79,24 @@ function getDuration(run: Doc<"runs">) {
   }
 
   return Math.max(0, run.endedAt - run.createdAt)
+}
+
+// The person who hand-triggered the run, unless that's the viewer (whose own
+// runs read simply "Manually triggered").
+async function manualTriggerLabel(
+  ctx: QueryCtx,
+  run: Doc<"runs">,
+  viewerPersonId: Id<"persons"> | undefined
+) {
+  const personId = run.cause.type === "manual" ? run.cause.personId : undefined
+
+  if (!isManualTrigger(run) || personId === undefined) {
+    return undefined
+  }
+
+  return personId === viewerPersonId
+    ? undefined
+    : await personDisplayName(ctx, personId)
 }
 
 function searchableText(

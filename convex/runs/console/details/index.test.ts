@@ -31,6 +31,7 @@ test("includes approved decision actor details", async () => {
       run,
     }),
     run,
+    undefined,
     {
       _id: "approval",
       _creationTime: 0,
@@ -47,7 +48,7 @@ test("includes approved decision actor details", async () => {
       createdAt: 0,
       expiresAt: 1000,
       decidedAt: 500,
-    } as Parameters<typeof summarizeRun>[2]
+    } as Parameters<typeof summarizeRun>[3]
   )
 
   expect(summary.details).toContainEqual({

@@ -1,6 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { getActorDisplayName } from "../../shared/actor"
 import { detail, uniqueDetails } from "../display/detail"
+import { isManualTrigger } from "./source"
 import { toolDetails } from "./tools"
 
 export function runDetailSummary(input: {
@@ -9,7 +10,11 @@ export function runDetailSummary(input: {
   stoppedBy: string | undefined
   tools: Parameters<typeof toolDetails>[0]
 }) {
-  const snapshotContext = input.run.snapshot.context
+  // A manual run's snapshot context is the automation's schedule/status, which
+  // says nothing about this hand-triggered run.
+  const snapshotContext = isManualTrigger(input.run)
+    ? []
+    : input.run.snapshot.context
 
   return {
     details: uniqueDetails([
