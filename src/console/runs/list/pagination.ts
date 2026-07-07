@@ -8,6 +8,7 @@ import {
   useState,
 } from "react"
 import { api } from "../../../../convex/_generated/api"
+import { type ScopeFilter } from "../../shared/list/scope"
 import {
   type ApprovalFilter,
   type ExecutionItem,
@@ -19,6 +20,7 @@ export function useExecutionPagination(
   tenantId: string,
   runFilter: RunFilter,
   approvalFilter: ApprovalFilter,
+  scopeFilter: ScopeFilter,
   query: string
 ) {
   const [pageIndex, setPageIndex] = useState(0)
@@ -27,15 +29,12 @@ export function useExecutionPagination(
     approvalFilter,
     query,
     runFilter,
+    scopeFilter,
     tenantId,
   })
-  const filteredTotal = stats?.filteredCount ?? rows.length
-  const totalCount = stats?.totalCount ?? filteredTotal
-  const pageCount = Math.max(1, Math.ceil(filteredTotal / pageSize))
-  const visibleRows = pageRows(rows, pageIndex)
-  const canUseNextLoadedPage = rows.length > (pageIndex + 1) * pageSize
-  const canLoadMore = runs.status === "CanLoadMore"
-  const isLoadingMore = runs.status === "LoadingMore"
+  const paging = derivePaging({ pageIndex, rows, stats, status: runs.status })
+  const { canLoadMore, canUseNextLoadedPage, isLoadingMore, visibleRows } =
+    paging
   const { next, previous, reset } = usePageNavigation({
     advanceAfterLoad,
     canLoadMore,
@@ -44,7 +43,7 @@ export function useExecutionPagination(
     setPageIndex,
   })
 
-  usePageBounds(pageIndex, pageCount, setPageIndex)
+  usePageBounds(pageIndex, paging.pageCount, setPageIndex)
   useAdvanceAfterLoad({
     advanceAfterLoad,
     filteredRowCount: rows.length,
@@ -53,16 +52,16 @@ export function useExecutionPagination(
     setPageIndex,
   })
 
-  const hasFilters = hasActiveFilters({
-    approvalFilter,
-    normalizedQuery,
-    runFilter,
-  })
+  const hasFilters =
+    runFilter !== "all" ||
+    approvalFilter !== "any" ||
+    scopeFilter !== "all" ||
+    normalizedQuery !== ""
   const footerLabel = formatFooterLabel({
-    filteredTotal,
+    filteredTotal: paging.filteredTotal,
     hasFilters,
     pageIndex,
-    totalCount,
+    totalCount: paging.totalCount,
     visibleCount: visibleRows.length,
   })
 
@@ -82,6 +81,30 @@ export function useExecutionPagination(
 }
 
 export type ExecutionPagination = ReturnType<typeof useExecutionPagination>
+
+function derivePaging({
+  pageIndex,
+  rows,
+  stats,
+  status,
+}: {
+  pageIndex: number
+  rows: ExecutionItem[]
+  stats: { filteredCount: number; totalCount: number } | undefined
+  status: string
+}) {
+  const filteredTotal = stats?.filteredCount ?? rows.length
+
+  return {
+    canLoadMore: status === "CanLoadMore",
+    canUseNextLoadedPage: rows.length > (pageIndex + 1) * pageSize,
+    filteredTotal,
+    isLoadingMore: status === "LoadingMore",
+    pageCount: Math.max(1, Math.ceil(filteredTotal / pageSize)),
+    totalCount: stats?.totalCount ?? filteredTotal,
+    visibleRows: pageRows(rows, pageIndex),
+  }
+}
 
 function usePageNavigation({
   advanceAfterLoad,
@@ -126,11 +149,13 @@ function useExecutionPageData({
   approvalFilter,
   query,
   runFilter,
+  scopeFilter,
   tenantId,
 }: {
   approvalFilter: ApprovalFilter
   query: string
   runFilter: RunFilter
+  scopeFilter: ScopeFilter
   tenantId: string
 }) {
   const normalizedQuery = query.trim().toLowerCase()
@@ -139,9 +164,10 @@ function useExecutionPageData({
       approvalFilter,
       query: normalizedQuery,
       runFilter,
+      scopeFilter,
       tenantId,
     }),
-    [approvalFilter, normalizedQuery, runFilter, tenantId]
+    [approvalFilter, normalizedQuery, runFilter, scopeFilter, tenantId]
   )
   const runs = usePaginatedQuery(api.runs.console.page, queryArgs, {
     initialNumItems: pageSize,
@@ -158,20 +184,6 @@ function useExecutionPageData({
 
 function pageRows(rows: ExecutionItem[], pageIndex: number) {
   return rows.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)
-}
-
-function hasActiveFilters({
-  approvalFilter,
-  normalizedQuery,
-  runFilter,
-}: {
-  approvalFilter: ApprovalFilter
-  normalizedQuery: string
-  runFilter: RunFilter
-}) {
-  return (
-    runFilter !== "all" || approvalFilter !== "any" || normalizedQuery !== ""
-  )
 }
 
 function formatFooterLabel({

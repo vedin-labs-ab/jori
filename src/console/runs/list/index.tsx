@@ -6,6 +6,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select"
 import {
+  ConsoleFilterGroup,
   ConsoleFilterToggle,
   ConsolePageLayout,
   ConsoleScrollableGrid,
@@ -14,6 +15,7 @@ import {
   ConsoleToolbarSearch,
 } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
+import { type ScopeFilter, scopeFilterOptions } from "../../shared/list/scope"
 import { ExecutionRow } from "../row"
 import { displayNowForRun, runClockInterval } from "../time"
 import {
@@ -30,37 +32,26 @@ import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 export function RunsList({ tenantId }: { tenantId: string }) {
   const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
   const [runFilter, setRunFilter] = useState<RunFilter>("all")
+  const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all")
   const [query, setQuery] = useState("")
   const deferredApprovalFilter = useDeferredValue(approvalFilter)
   const deferredRunFilter = useDeferredValue(runFilter)
+  const deferredScopeFilter = useDeferredValue(scopeFilter)
   const deferredQuery = useDeferredValue(query)
   const pagination = useExecutionPagination(
     tenantId,
     deferredRunFilter,
     deferredApprovalFilter,
+    deferredScopeFilter,
     deferredQuery
   )
-  const setApprovalFilterAndReset = useCallback(
-    (value: ApprovalFilter) => {
-      setApprovalFilter(value)
-      pagination.reset()
-    },
-    [pagination.reset]
+  const setApprovalFilterAndReset = useResetting(
+    setApprovalFilter,
+    pagination.reset
   )
-  const setRunFilterAndReset = useCallback(
-    (value: RunFilter) => {
-      setRunFilter(value)
-      pagination.reset()
-    },
-    [pagination.reset]
-  )
-  const setQueryAndReset = useCallback(
-    (value: string) => {
-      setQuery(value)
-      pagination.reset()
-    },
-    [pagination.reset]
-  )
+  const setRunFilterAndReset = useResetting(setRunFilter, pagination.reset)
+  const setScopeFilterAndReset = useResetting(setScopeFilter, pagination.reset)
+  const setQueryAndReset = useResetting(setQuery, pagination.reset)
 
   return (
     <ConsolePageLayout>
@@ -68,9 +59,11 @@ export function RunsList({ tenantId }: { tenantId: string }) {
         approvalFilter={approvalFilter}
         query={query}
         runFilter={runFilter}
+        scopeFilter={scopeFilter}
         setApprovalFilter={setApprovalFilterAndReset}
         setQuery={setQueryAndReset}
         setRunFilter={setRunFilterAndReset}
+        setScopeFilter={setScopeFilterAndReset}
       />
       <ExecutionRows pagination={pagination} tenantId={tenantId} />
       <ConsoleListPager pagination={pagination} />
@@ -78,28 +71,52 @@ export function RunsList({ tenantId }: { tenantId: string }) {
   )
 }
 
+/** Wraps a setter so changing the filter also resets pagination. */
+function useResetting<Value>(set: (value: Value) => void, reset: () => void) {
+  return useCallback(
+    (value: Value) => {
+      set(value)
+      reset()
+    },
+    [set, reset]
+  )
+}
+
 const ExecutionFilters = memo(function ExecutionFilters({
   approvalFilter,
   query,
   runFilter,
+  scopeFilter,
   setApprovalFilter,
   setQuery,
   setRunFilter,
+  setScopeFilter,
 }: {
   approvalFilter: ApprovalFilter
   query: string
   runFilter: RunFilter
+  scopeFilter: ScopeFilter
   setApprovalFilter: (filter: ApprovalFilter) => void
   setQuery: (query: string) => void
   setRunFilter: (filter: RunFilter) => void
+  setScopeFilter: (filter: ScopeFilter) => void
 }) {
   return (
     <ConsoleToolbar>
-      <ConsoleFilterToggle
-        onValueChange={setRunFilter}
-        options={runFilterOptions}
-        value={runFilter}
-      />
+      <ConsoleFilterGroup>
+        <ConsoleFilterToggle
+          label="Status"
+          onValueChange={setRunFilter}
+          options={runFilterOptions}
+          value={runFilter}
+        />
+        <ConsoleFilterToggle
+          label="Sharing"
+          onValueChange={setScopeFilter}
+          options={scopeFilterOptions}
+          value={scopeFilter}
+        />
+      </ConsoleFilterGroup>
       <ConsoleToolbarActions>
         <Select
           onValueChange={(value) => setApprovalFilter(value as ApprovalFilter)}
