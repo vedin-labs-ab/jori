@@ -4,4 +4,6 @@ Search my {{providers.email}} for threads from the past two weeks that are waiti
 
 For each thread waiting on me, create a draft reply in my {{providers.email}} so I only need to review and send. Keep drafts short and specific to the thread. Skip threads that already have a draft from an earlier sweep.
 
-Email a summary from my {{providers.email}} to {{recipient}} with the subject "Follow-up sweep" plus today's date: the new drafts with one line each, then the threads where I am owed a reply. If nothing needs following up, skip the email.
+Compose a summary: the new drafts with one line each, then the threads where I am owed a reply. If nothing needs following up, there is nothing to report.
+
+{{delivery}}

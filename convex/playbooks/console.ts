@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { playbookCatalog } from "../../contracts/playbooks/catalog"
+import { type DeliveryChoice } from "../../contracts/playbooks/delivery"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import {
@@ -11,6 +12,8 @@ import { ensureClerkPerson } from "../persons/clerk"
 import { resolvePersonByIdentity } from "../persons/links"
 import { type Integration, integrationValidator } from "../shared/integrations"
 import {
+  availableDelivery,
+  connectedIntegrations,
   enablePlaybook,
   type PlaybookPlanArgs,
   readPlaybookAutomations,
@@ -18,11 +21,23 @@ import {
 } from "./enable"
 import { trialPlaybook } from "./trial"
 
+// The validator mirrors DeliveryChoice; resolveCallerPlanArgs assigns the
+// inferred args into that type, so drift is a compile error there.
+const destinationValidator = v.union(
+  v.object({ kind: v.literal("email") }),
+  v.object({
+    kind: v.literal("slack"),
+    channelId: v.string(),
+    channelName: v.string(),
+  })
+)
+
 const planArgs = {
   tenantId: v.string(),
   playbook: v.string(),
   // Keyed by playbook capability; slot resolution ignores unknown keys.
   choices: v.optional(v.record(v.string(), integrationValidator)),
+  destination: v.optional(destinationValidator),
 }
 
 export const list = query({
@@ -45,6 +60,10 @@ export const list = query({
       provider: "clerk",
       externalId: requireClerkUserId(access.identity),
     })
+    const connected = await connectedIntegrations(ctx, {
+      ownerId,
+      tenantId: args.tenantId,
+    })
     const enabled = await readPlaybookAutomations(ctx, {
       ownerId,
       tenantId: args.tenantId,
@@ -52,31 +71,26 @@ export const list = query({
 
     return {
       status: "ready" as const,
-      playbooks: await Promise.all(
-        playbookCatalog.map(async (definition) => {
-          const automation = enabled.get(definition.key)
+      playbooks: playbookCatalog.map((definition) => {
+        const automation = enabled.get(definition.key)
 
-          return {
-            key: definition.key,
-            slots: await readPlaybookSlots(ctx, {
-              definition,
-              ownerId,
-              tenantId: args.tenantId,
-            }),
-            enabled:
-              automation === undefined
-                ? null
-                : {
-                    automationId: automation._id,
-                    status: automation.status,
-                    nextRunAt:
-                      "nextAt" in automation.trigger
-                        ? automation.trigger.nextAt
-                        : undefined,
-                  },
-          }
-        })
-      ),
+        return {
+          key: definition.key,
+          slots: readPlaybookSlots(definition, connected),
+          delivery: availableDelivery(definition, connected),
+          enabled:
+            automation === undefined
+              ? null
+              : {
+                  automationId: automation._id,
+                  status: automation.status,
+                  nextRunAt:
+                    "nextAt" in automation.trigger
+                      ? automation.trigger.nextAt
+                      : undefined,
+                },
+        }
+      }),
     }
   },
 })
@@ -116,6 +130,7 @@ async function resolveCallerPlanArgs(
     tenantId: string
     playbook: string
     choices?: Record<string, Integration>
+    destination?: DeliveryChoice
   }
 ): Promise<PlaybookPlanArgs> {
   const email = readClerkUserEmail(identity)
@@ -138,6 +153,7 @@ async function resolveCallerPlanArgs(
     tenantId: args.tenantId,
     key: args.playbook,
     choices: args.choices ?? {},
+    destination: args.destination ?? { kind: "email" },
     createdBy,
     recipient: { email, name },
   }

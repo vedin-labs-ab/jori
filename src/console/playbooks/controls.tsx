@@ -12,17 +12,26 @@ export function PlaybookControls({
   actions,
   definition,
   row,
+  tenantId,
 }: {
   actions: PlaybookActions
   definition: PlaybookDefinition
   row: PlaybookListRow | undefined
+  tenantId: string
 }) {
   if (row === undefined) {
     return <Skeleton className="h-7 w-full" />
   }
 
   if (row.enabled === null) {
-    return <SetupControls actions={actions} definition={definition} row={row} />
+    return (
+      <SetupControls
+        actions={actions}
+        definition={definition}
+        row={row}
+        tenantId={tenantId}
+      />
+    )
   }
 
   return (

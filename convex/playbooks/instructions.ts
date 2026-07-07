@@ -1,8 +1,10 @@
 import { type PlaybookCapability } from "../../contracts/playbooks/capabilities"
+import {
+  type DeliveryDestination,
+  deliveryInstruction,
+} from "../../contracts/playbooks/delivery"
 import { type PromptTemplateId, promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
-
-export type PlaybookRecipient = { email: string; name?: string }
 
 const instructionTemplates: Record<string, PromptTemplateId> = {
   "follow-up-sweep": "playbooks/sweep",
@@ -11,11 +13,13 @@ const instructionTemplates: Record<string, PromptTemplateId> = {
   "week-in-review": "playbooks/review",
 }
 
-/** Render a playbook's instruction template with resolved provider labels. */
+/** Render a playbook's template with resolved input providers and a destination. */
 export function renderPlaybookInstructions(args: {
   key: string
   providers: Record<PlaybookCapability, string>
-  recipient: PlaybookRecipient
+  destination: DeliveryDestination
+  subject: string
+  noun: string
 }): string {
   const templateId = instructionTemplates[args.key]
 
@@ -25,12 +29,10 @@ export function renderPlaybookInstructions(args: {
 
   return renderPromptTemplate(promptTemplates[templateId], {
     providers: args.providers,
-    recipient: recipientLine(args.recipient),
+    delivery: deliveryInstruction({
+      destination: args.destination,
+      subject: args.subject,
+      noun: args.noun,
+    }),
   })
-}
-
-function recipientLine(recipient: PlaybookRecipient) {
-  return recipient.name === undefined
-    ? recipient.email
-    : `${recipient.name} <${recipient.email}>`
 }

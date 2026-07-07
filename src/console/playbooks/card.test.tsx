@@ -6,7 +6,7 @@ import {
   createRouter,
   RouterContextProvider,
 } from "@tanstack/react-router"
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { PlaybookCard } from "./card"
@@ -43,30 +43,12 @@ test("paused card shows paused state and no next run", () => {
   expect(screen.queryByText(/Next in/)).toBeNull()
 })
 
-test("disabled card offers try-once and enable without a switch", () => {
+test("disabled card offers a single enable entry without a switch", () => {
   renderCard(disabledRow())
 
-  expect(screen.getByRole("button", { name: /try once/i })).toBeDefined()
   expect(screen.getByRole("button", { name: "Enable" })).toBeDefined()
+  expect(screen.queryByRole("button", { name: /try once/i })).toBeNull()
   expect(screen.queryByRole("switch")).toBeNull()
-})
-
-test("try-once asks for confirmation before starting the run", () => {
-  const actions = stubActions()
-
-  renderCard(disabledRow(), actions)
-  fireEvent.click(screen.getByRole("button", { name: /try once/i }))
-
-  expect(actions.trial).not.toHaveBeenCalled()
-  expect(screen.getByRole("alertdialog")).toBeDefined()
-  expect(screen.getByText("Run Morning brief once?")).toBeDefined()
-
-  fireEvent.click(screen.getByRole("button", { name: "Run once" }))
-
-  expect(actions.trial).toHaveBeenCalledWith(morningBrief, {
-    calendar: "googleCalendar",
-    email: "gmail",
-  })
 })
 
 function renderCard(row: PlaybookListRow, actions = stubActions()) {
@@ -78,7 +60,12 @@ function renderCard(row: PlaybookListRow, actions = stubActions()) {
   return render(
     <RouterContextProvider router={router}>
       <TooltipProvider>
-        <PlaybookCard actions={actions} definition={morningBrief} row={row} />
+        <PlaybookCard
+          actions={actions}
+          definition={morningBrief}
+          row={row}
+          tenantId="tenant"
+        />
       </TooltipProvider>
     </RouterContextProvider>
   )
@@ -110,6 +97,7 @@ function enabledRow(
       { capability: "email", connected: ["gmail"] },
       { capability: "calendar", connected: ["googleCalendar"] },
     ],
+    delivery: ["email", "slack"],
     enabled: {
       automationId: "automation-1" as NonNullable<
         PlaybookListRow["enabled"]

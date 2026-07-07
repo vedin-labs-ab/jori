@@ -1,5 +1,6 @@
 import { type Scope } from "../permissions/scope"
 import { type PlaybookSlot } from "./capabilities"
+import { type PlaybookDelivery } from "./delivery"
 import { type PlaybookSchedule } from "./schedule"
 
 export type PlaybookDefinition = {
@@ -10,9 +11,17 @@ export type PlaybookDefinition = {
   /** Personal playbooks enable per member; organization ones per tenant. */
   scope: Scope
   schedule: PlaybookSchedule
+  /** Input capabilities the playbook reads; delivery is separate. */
   slots: readonly PlaybookSlot[]
+  /** Where the output goes, and the default the user can override at enable. */
+  delivery: PlaybookDelivery
   web: boolean
 }
+
+const digestDelivery = {
+  default: "email",
+  allowed: ["email", "slack"],
+} as const satisfies Omit<PlaybookDelivery, "noun">
 
 export const playbookCatalog: readonly PlaybookDefinition[] = [
   {
@@ -23,9 +32,10 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     scope: "personal",
     schedule: { repeat: "weekdays", time: "08:00" },
     slots: [
-      { capability: "email", intents: ["read", "send"] },
+      { capability: "email", intents: ["read"] },
       { capability: "calendar", intents: ["read"] },
     ],
+    delivery: { ...digestDelivery, noun: "brief" },
     web: false,
   },
   {
@@ -36,9 +46,10 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     scope: "personal",
     schedule: { repeat: "weekdays", time: "07:30" },
     slots: [
-      { capability: "email", intents: ["read", "send"] },
+      { capability: "email", intents: ["read"] },
       { capability: "calendar", intents: ["read"] },
     ],
+    delivery: { ...digestDelivery, noun: "prep note" },
     web: true,
   },
   {
@@ -48,7 +59,8 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
       "Nothing slips through: threads waiting on you get reply drafts ready to review, and you get a list of who still owes you an answer.",
     scope: "personal",
     schedule: { repeat: "weekdays", time: "15:30" },
-    slots: [{ capability: "email", intents: ["read", "draft", "send"] }],
+    slots: [{ capability: "email", intents: ["read", "draft"] }],
+    delivery: { ...digestDelivery, noun: "summary" },
     web: false,
   },
   {
@@ -59,9 +71,10 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     scope: "personal",
     schedule: { repeat: "weekly", weekday: 5, time: "16:00" },
     slots: [
-      { capability: "email", intents: ["read", "send"] },
+      { capability: "email", intents: ["read"] },
       { capability: "calendar", intents: ["read"] },
     ],
+    delivery: { ...digestDelivery, noun: "review" },
     web: false,
   },
 ]

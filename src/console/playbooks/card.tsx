@@ -32,10 +32,12 @@ export function PlaybookCard({
   actions,
   definition,
   row,
+  tenantId,
 }: {
   actions: PlaybookActions
   definition: PlaybookDefinition
   row: PlaybookListRow | undefined
+  tenantId: string
 }) {
   const Icon = playbookIcons[definition.key] ?? NotebookTabs
 
@@ -64,7 +66,12 @@ export function PlaybookCard({
         <PlaybookMeta definition={definition} row={row} />
       </CardContent>
       <CardFooter className="mt-auto">
-        <PlaybookControls actions={actions} definition={definition} row={row} />
+        <PlaybookControls
+          actions={actions}
+          definition={definition}
+          row={row}
+          tenantId={tenantId}
+        />
       </CardFooter>
     </Card>
   )

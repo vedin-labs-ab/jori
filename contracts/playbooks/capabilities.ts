@@ -14,7 +14,8 @@ export const playbookCapabilityProviders = {
   calendar: ["googleCalendar", "microsoftCalendar"],
 } satisfies Record<PlaybookCapability, readonly Integration[]>
 
-type EmailIntent = "read" | "draft" | "send"
+// Delivery ("send") is a separate concern, resolved from a DeliveryDestination.
+type EmailIntent = "read" | "draft"
 type CalendarIntent = "read"
 
 type CapabilityIntents = {
@@ -33,7 +34,6 @@ export const playbookIntentLabels = {
   email: {
     read: "Read email",
     draft: "Draft replies",
-    send: "Send email",
   },
   calendar: {
     read: "Read calendar",
@@ -65,12 +65,10 @@ const intentTools: Record<string, Record<string, readonly string[]>> = {
       "google_gmail_get_messages",
     ],
     draft: ["google_gmail_create_draft"],
-    send: ["google_gmail_send_message"],
   },
   microsoftEmail: {
     read: ["microsoft_email_search_messages", "microsoft_email_get_message"],
     draft: ["microsoft_email_create_draft"],
-    send: ["microsoft_email_send_message"],
   },
   googleCalendar: {
     read: ["google_calendar_list_events", "google_calendar_get_event"],

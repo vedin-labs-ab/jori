@@ -1,5 +1,6 @@
 import { type Integration } from "@contracts/integrations"
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
+import { type DeliveryChoice } from "@contracts/playbooks/delivery"
 import { describePlaybookSchedule } from "@contracts/playbooks/schedule"
 import { useNavigate } from "@tanstack/react-router"
 import { useConvex, useMutation } from "convex/react"
@@ -100,7 +101,11 @@ function useCatalogActions(
   const viewRuns = useViewRunsAction()
 
   return {
-    enable: (definition: PlaybookDefinition, choices: PlaybookChoices) =>
+    enable: (
+      definition: PlaybookDefinition,
+      choices: PlaybookChoices,
+      destination: DeliveryChoice
+    ) =>
       pending.wrap(definition.key, "enable", async () => {
         try {
           await enableMutation({
@@ -108,6 +113,7 @@ function useCatalogActions(
             playbook: definition.key,
             utcOffsetMinutes: new Date().getTimezoneOffset(),
             choices,
+            destination,
           })
           toast.success(`${definition.title} is on`, {
             description: `Runs ${lowercaseFirst(
@@ -119,10 +125,19 @@ function useCatalogActions(
         }
       }),
 
-    trial: (definition: PlaybookDefinition, choices: PlaybookChoices) =>
+    trial: (
+      definition: PlaybookDefinition,
+      choices: PlaybookChoices,
+      destination: DeliveryChoice
+    ) =>
       pending.wrap(definition.key, "trial", async () => {
         try {
-          await trialMutation({ tenantId, playbook: definition.key, choices })
+          await trialMutation({
+            tenantId,
+            playbook: definition.key,
+            choices,
+            destination,
+          })
           toast.success(`${definition.title} is running`, {
             description: "One-time run — nothing is enabled.",
             action: viewRuns,
