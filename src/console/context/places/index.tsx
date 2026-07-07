@@ -1,22 +1,16 @@
 import { useQuery } from "convex/react"
-import { Hash } from "lucide-react"
+import { Signpost } from "lucide-react"
 import { useState } from "react"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
+import { ConsoleEmptyState } from "../../shared/list/empty"
 import { ContextPage } from ".."
 import { ContextSectionTitle } from "../section"
 import { PlaceCard, WarmingPlaceCard } from "./card"
 import { PlaceDetail } from "./detail"
 import { type Place, type Places } from "./types"
 
-// Milo's per-place working memory: the channels it works in and what it
+// Milo's per-place working memory: the places it works in and what it
 // believes about how each one operates. Read-only — profiles are distilled
 // from each place's own traffic and correct themselves as it changes.
 export function ContextPlaces() {
@@ -90,17 +84,10 @@ function PlaceGroups({
 
 function PlacesEmpty() {
   return (
-    <Empty className="border border-dashed">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Hash />
-        </EmptyMedia>
-        <EmptyTitle>No places yet</EmptyTitle>
-        <EmptyDescription>
-          Milo learns a channel as it works there. Places appear once it sees
-          activity in one.
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
+    <ConsoleEmptyState
+      description="Milo learns each place it works in. They appear here once it sees activity."
+      icon={Signpost}
+      title="No places yet"
+    />
   )
 }
