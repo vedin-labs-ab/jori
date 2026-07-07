@@ -44,16 +44,19 @@ export function ConsoleToolbarActions({
 }
 
 export function ConsoleFilterToggle<Value extends string>({
+  label,
   onValueChange,
   options,
   value,
 }: {
+  label?: string
   onValueChange: (value: Value) => void
   options: readonly { label: string; value: Value }[]
   value: Value
 }) {
-  return (
+  const toggle = (
     <ToggleGroup
+      aria-label={label}
       className="flex-wrap justify-start"
       onValueChange={(next) => {
         if (next !== "") {
@@ -70,6 +73,32 @@ export function ConsoleFilterToggle<Value extends string>({
         </ToggleGroupItem>
       ))}
     </ToggleGroup>
+  )
+
+  if (label === undefined) {
+    return toggle
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="shrink-0 font-medium text-muted-foreground text-xs">
+        {label}
+      </span>
+      {toggle}
+    </div>
+  )
+}
+
+/** Wraps several labeled filter facets on one toolbar line. */
+export function ConsoleFilterGroup({
+  className,
+  ...props
+}: ComponentProps<"div">) {
+  return (
+    <div
+      className={cn("flex flex-wrap items-center gap-x-4 gap-y-3", className)}
+      {...props}
+    />
   )
 }
 

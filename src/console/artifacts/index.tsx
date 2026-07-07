@@ -3,6 +3,7 @@ import { useCallback, useDeferredValue, useState } from "react"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useClientPagination } from "../shared/list/pagination"
+import { matchesScopeFilter, type ScopeFilter } from "../shared/list/scope"
 import { useNow } from "../shared/time"
 import { useArtifactDeletion } from "./deletion"
 import {
@@ -21,22 +22,53 @@ export function Artifacts() {
   )
 }
 
-function ArtifactListView({ tenantId }: { tenantId: string }) {
-  const [query, setQuery] = useState("")
-  const [filter, setFilter] = useState<ArtifactFilter>("active")
-  const deletion = useArtifactDeletion(tenantId)
-  const now = useNow(60_000)
-  const deferredQuery = useDeferredValue(query)
+function useArtifactRows({
+  filter,
+  query,
+  scope,
+  tenantId,
+}: {
+  filter: ArtifactFilter
+  query: string
+  scope: ScopeFilter
+  tenantId: string
+}) {
   const artifactList = useQuery(api.artifacts.console.list, {
     tenantId,
-    query: deferredQuery,
+    query,
     includeArchived: shouldIncludeArchivedArtifacts(filter),
   })
   const artifacts =
     artifactList?.status === "ready"
-      ? filterArtifactsByView(artifactList.artifacts, filter)
+      ? filterArtifactsByView(artifactList.artifacts, filter).filter(
+          (artifact) => matchesScopeFilter(artifact.access, scope)
+        )
       : []
-  const hasFilters = hasArtifactFilters(deferredQuery, filter)
+  const hasFilters = hasArtifactFilters(query, filter) || scope !== "all"
+
+  return { artifactList, artifacts, hasFilters }
+}
+
+function useArtifactFilters() {
+  const [query, setQuery] = useState("")
+  const [filter, setFilter] = useState<ArtifactFilter>("active")
+  const [scope, setScope] = useState<ScopeFilter>("all")
+
+  return { filter, query, scope, setFilter, setQuery, setScope }
+}
+
+function ArtifactListView({ tenantId }: { tenantId: string }) {
+  const { filter, query, scope, setFilter, setQuery, setScope } =
+    useArtifactFilters()
+  const deletion = useArtifactDeletion(tenantId)
+  const now = useNow(60_000)
+  const deferredQuery = useDeferredValue(query)
+  const { artifactList, artifacts, hasFilters } = useArtifactRows({
+    filter,
+    query: deferredQuery,
+    scope,
+    tenantId,
+  })
   const pagination = useClientPagination({
     hasFilters,
     isReady: artifactList?.status === "ready",
@@ -47,6 +79,7 @@ function ArtifactListView({ tenantId }: { tenantId: string }) {
     reset: pagination.reset,
     setFilter,
     setQuery,
+    setScope,
   })
 
   if (artifactList === undefined) {
@@ -54,8 +87,10 @@ function ArtifactListView({ tenantId }: { tenantId: string }) {
       <ArtifactLoadingView
         filter={filter}
         query={query}
+        scope={scope}
         onFilterChange={toolbar.setFilter}
         onQueryChange={toolbar.setQuery}
+        onScopeChange={toolbar.setScope}
       />
     )
   }
@@ -73,8 +108,10 @@ function ArtifactListView({ tenantId }: { tenantId: string }) {
       pagination={pagination}
       query={query}
       restoringArtifactId={deletion.restoringArtifactId}
+      scope={scope}
       onFilterChange={toolbar.setFilter}
       onQueryChange={toolbar.setQuery}
+      onScopeChange={toolbar.setScope}
     />
   )
 }
@@ -83,10 +120,12 @@ function useResettingArtifactToolbar({
   reset,
   setFilter,
   setQuery,
+  setScope,
 }: {
   reset: () => void
   setFilter: (value: ArtifactFilter) => void
   setQuery: (value: string) => void
+  setScope: (value: ScopeFilter) => void
 }) {
   const setQueryAndReset = useCallback(
     (value: string) => {
@@ -102,6 +141,17 @@ function useResettingArtifactToolbar({
     },
     [reset, setFilter]
   )
+  const setScopeAndReset = useCallback(
+    (value: ScopeFilter) => {
+      setScope(value)
+      reset()
+    },
+    [reset, setScope]
+  )
 
-  return { setFilter: setFilterAndReset, setQuery: setQueryAndReset }
+  return {
+    setFilter: setFilterAndReset,
+    setQuery: setQueryAndReset,
+    setScope: setScopeAndReset,
+  }
 }

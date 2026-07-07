@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
+  ConsoleFilterGroup,
   ConsoleFilterToggle,
   ConsolePageLayout,
   ConsoleScrollableList,
@@ -9,6 +10,7 @@ import {
 } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { type useClientPagination } from "../../shared/list/pagination"
+import { type ScopeFilter, scopeFilterOptions } from "../../shared/list/scope"
 import { type ArtifactFilter, artifactFilterOptions } from "../filter"
 import { type ArtifactListResult, type ArtifactSummary } from "../types"
 import { ArtifactSkeletonList, EmptyArtifacts } from "./empty"
@@ -22,7 +24,9 @@ type ArtifactToolbarProps = {
   filter: ArtifactFilter
   onFilterChange: (value: ArtifactFilter) => void
   onQueryChange: (value: string) => void
+  onScopeChange: (value: ScopeFilter) => void
   query: string
+  scope: ScopeFilter
 }
 
 export function ArtifactLoadingView(props: ArtifactToolbarProps) {
@@ -45,9 +49,11 @@ export function ArtifactReadyView({
   onFilterChange,
   onQueryChange,
   onRestore,
+  onScopeChange,
   pagination,
   query,
   restoringArtifactId,
+  scope,
 }: ArtifactToolbarProps & {
   artifactList: ArtifactListResult
   artifacts: ArtifactSummary[]
@@ -65,7 +71,9 @@ export function ArtifactReadyView({
         filter={filter}
         onFilterChange={onFilterChange}
         onQueryChange={onQueryChange}
+        onScopeChange={onScopeChange}
         query={query}
+        scope={scope}
       />
       <ArtifactListBody
         artifactList={artifactList}
@@ -88,15 +96,26 @@ function ArtifactToolbar({
   filter,
   onFilterChange,
   onQueryChange,
+  onScopeChange,
   query,
+  scope,
 }: ArtifactToolbarProps) {
   return (
     <ConsoleToolbar>
-      <ConsoleFilterToggle
-        onValueChange={onFilterChange}
-        options={artifactFilterOptions}
-        value={filter}
-      />
+      <ConsoleFilterGroup>
+        <ConsoleFilterToggle
+          label="Status"
+          onValueChange={onFilterChange}
+          options={artifactFilterOptions}
+          value={filter}
+        />
+        <ConsoleFilterToggle
+          label="Sharing"
+          onValueChange={onScopeChange}
+          options={scopeFilterOptions}
+          value={scope}
+        />
+      </ConsoleFilterGroup>
       <ConsoleToolbarActions>
         <ConsoleToolbarSearch
           label="Search artifacts"

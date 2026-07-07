@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
+import { scopeValidator } from "../../shared/audience"
 
 export type RunFilter = "all" | "ongoing" | "failed" | "stopped" | "completed"
 
@@ -27,6 +28,10 @@ export const runFilterValidator = v.union(
   v.literal("completed")
 )
 
+export type RunScopeFilter = "all" | "personal" | "organization"
+
+export const scopeFilterValidator = v.union(v.literal("all"), scopeValidator)
+
 export const approvalFilterValidator = v.union(
   v.literal("any"),
   v.literal("pending"),
@@ -51,6 +56,20 @@ export function runVisibleToPerson(
     run.createdBy === undefined ||
     run.createdBy === personId
   )
+}
+
+/** Personal/organization facet over the internal run audience scope. */
+export function runMatchesScopeFilter(
+  run: Doc<"runs">,
+  filter: RunScopeFilter
+) {
+  if (filter === "all") {
+    return true
+  }
+
+  const isOrganization = (run.scope ?? "person") === "tenant"
+
+  return filter === "organization" ? isOrganization : !isOrganization
 }
 
 export function runMatchesFilter(run: Doc<"runs">, filter: RunFilter) {

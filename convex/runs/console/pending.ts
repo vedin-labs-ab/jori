@@ -5,7 +5,9 @@ import {
   normalizeQuery,
   parseCursor,
   type RunFilter,
+  type RunScopeFilter,
   runMatchesFilter,
+  runMatchesScopeFilter,
   runVisibleToPerson,
   summaryMatchesSearch,
 } from "./filters"
@@ -18,6 +20,7 @@ export async function pagePendingApprovals(
   args: {
     personId: Id<"persons"> | undefined
     runFilter: RunFilter
+    scopeFilter: RunScopeFilter
     query: string
     tenantId: string
     paginationOpts: {
@@ -37,6 +40,7 @@ export async function pagePendingApprovals(
     now,
     personId: args.personId,
     runFilter: args.runFilter,
+    scopeFilter: args.scopeFilter,
     tenantId: args.tenantId,
   })) {
     const summary = await summarizeRun(ctx, run, approval)
@@ -72,6 +76,7 @@ export async function countPendingApprovals(
     normalizedQuery: string
     personId: Id<"persons"> | undefined
     runFilter: RunFilter
+    scopeFilter: RunScopeFilter
     tenantId: string
   }
 ) {
@@ -82,6 +87,7 @@ export async function countPendingApprovals(
     now,
     personId: args.personId,
     runFilter: args.runFilter,
+    scopeFilter: args.scopeFilter,
     tenantId: args.tenantId,
   })) {
     if (args.normalizedQuery === "") {
@@ -105,6 +111,7 @@ async function* pendingApprovalRuns(
     now: number
     personId: Id<"persons"> | undefined
     runFilter: RunFilter
+    scopeFilter: RunScopeFilter
     tenantId: string
   }
 ) {
@@ -133,6 +140,7 @@ async function* pendingApprovalRuns(
 
     if (
       runVisibleToPerson(run, args.personId) &&
+      runMatchesScopeFilter(run, args.scopeFilter) &&
       runMatchesFilter(run, args.runFilter)
     ) {
       yield { approval, run }
