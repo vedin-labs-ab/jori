@@ -6,7 +6,7 @@ import {
   createRouter,
   RouterContextProvider,
 } from "@tanstack/react-router"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { PlaybookCard } from "./card"
@@ -27,6 +27,7 @@ test("active card puts the switch in the header and run-now in the footer", () =
   ).toBeDefined()
   expect(screen.getByText("On")).toBeDefined()
   expect(screen.getByRole("button", { name: /run now/i })).toBeDefined()
+  expect(screen.getByRole("button", { name: "Edit" })).toBeDefined()
   expect(screen.getByText(/Next in 2h/)).toBeDefined()
   expect(screen.getByText("Schedule")).toBeDefined()
   expect(screen.getByText("Tools")).toBeDefined()
@@ -50,7 +51,25 @@ test("disabled card offers try-once and enable without a switch", () => {
   expect(screen.queryByRole("switch")).toBeNull()
 })
 
-function renderCard(row: PlaybookListRow) {
+test("try-once asks for confirmation before starting the run", () => {
+  const actions = stubActions()
+
+  renderCard(disabledRow(), actions)
+  fireEvent.click(screen.getByRole("button", { name: /try once/i }))
+
+  expect(actions.trial).not.toHaveBeenCalled()
+  expect(screen.getByRole("alertdialog")).toBeDefined()
+  expect(screen.getByText("Run Morning brief once?")).toBeDefined()
+
+  fireEvent.click(screen.getByRole("button", { name: "Run once" }))
+
+  expect(actions.trial).toHaveBeenCalledWith(morningBrief, {
+    calendar: "googleCalendar",
+    email: "gmail",
+  })
+})
+
+function renderCard(row: PlaybookListRow, actions = stubActions()) {
   const router = createRouter({
     history: createMemoryHistory(),
     routeTree: createRootRoute(),
@@ -59,11 +78,7 @@ function renderCard(row: PlaybookListRow) {
   return render(
     <RouterContextProvider router={router}>
       <TooltipProvider>
-        <PlaybookCard
-          actions={stubActions()}
-          definition={morningBrief}
-          row={row}
-        />
+        <PlaybookCard actions={actions} definition={morningBrief} row={row} />
       </TooltipProvider>
     </RouterContextProvider>
   )
@@ -72,7 +87,9 @@ function renderCard(row: PlaybookListRow) {
 function stubActions(): PlaybookActions {
   return {
     pending: undefined,
+    edit: vi.fn(async () => {}),
     enable: vi.fn(async () => {}),
+    preloadEdit: vi.fn(),
     trial: vi.fn(async () => {}),
     runNow: vi.fn(async () => {}),
     setPaused: vi.fn(async () => {}),
