@@ -1,5 +1,5 @@
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
-import { Eye, Play } from "lucide-react"
+import { ArrowUpRight, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
@@ -91,7 +91,7 @@ function EnabledControls({
         onPointerEnter={actions.preloadEdit}
         variant="outline"
       >
-        {pendingKind === "edit" ? <Spinner /> : <Eye />} View
+        View {pendingKind === "edit" ? <Spinner /> : <ArrowUpRight />}
       </Button>
     </div>
   )
