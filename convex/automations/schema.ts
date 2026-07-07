@@ -66,10 +66,8 @@ export const automations = defineTable({
   playbook: v.optional(v.string()),
   name: v.string(),
   instructions: v.string(),
-  /** Personal: owner-only. Organization: every member. See contracts/scope. */
+  /** Personal: owner-only. Organization: every member. See contracts/permissions/scope. */
   scope: v.optional(scopeValidator),
-  // Legacy field; removed once the scopeFromVisibility migration has run.
-  visibility: v.optional(v.union(v.literal("public"), v.literal("private"))),
   type: automationType,
   access,
   trigger,
