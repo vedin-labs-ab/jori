@@ -43,11 +43,11 @@ export const followUpSweep: PlaybookInstructions = ({
   recipient,
 }) => `Sweep my inbox for follow-ups.
 
-Search my ${providers.email} for threads from the past two weeks where the ball is in my court — direct questions I have not answered or requests waiting on me — and threads where someone has owed me a reply for more than two business days.
+Search my ${providers.email} for threads from the past two weeks that are waiting on me: direct questions I have not answered or requests I have not acted on. Also collect threads where someone has owed me a reply for more than two business days.
 
-For each thread waiting on me, create a draft reply in my ${providers.email} so I only need to review and send. Keep drafts short and specific to the thread.
+For each thread waiting on me, create a draft reply in my ${providers.email} so I only need to review and send. Keep drafts short and specific to the thread. Skip threads that already have a draft from an earlier sweep.
 
-Email a summary from my ${providers.email} to ${recipientLine(recipient)} with the subject "Follow-up sweep": the drafts ready for review with one line each, then the threads where I am owed a reply. If nothing needs following up, skip the email.`
+Email a summary from my ${providers.email} to ${recipientLine(recipient)} with the subject "Follow-up sweep" plus today's date: the new drafts with one line each, then the threads where I am owed a reply. If nothing needs following up, skip the email.`
 
 export const weekInReview: PlaybookInstructions = ({
   providers,
@@ -58,4 +58,4 @@ Calendar: look back over this week's events on my ${providers.calendar} — wher
 
 Inbox: scan this week's threads in my ${providers.email} for what moved — decisions made, commitments given or received, and questions still open.
 
-Email it from my ${providers.email} to ${recipientLine(recipient)} with the subject "Week in review" plus the date, in three short sections: what happened, what is unresolved, and what next week looks like. Keep each section to a handful of lines.`
+Email it from my ${providers.email} to ${recipientLine(recipient)} with the subject "Week in review" plus the date, in three short sections: what happened, what is unresolved, and what next week looks like. Keep each section to a handful of lines. If the week was quiet, say so in a line or two instead of padding.`
