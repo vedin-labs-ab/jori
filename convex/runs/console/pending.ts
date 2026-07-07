@@ -1,4 +1,4 @@
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { isTerminalRunStatus } from "../schema"
 import {
@@ -6,6 +6,7 @@ import {
   parseCursor,
   type RunFilter,
   runMatchesFilter,
+  runVisibleToPerson,
   summaryMatchesSearch,
 } from "./filters"
 import { summarizeRun } from "./summaries"
@@ -15,6 +16,7 @@ type RunSummary = Awaited<ReturnType<typeof summarizeRun>>
 export async function pagePendingApprovals(
   ctx: QueryCtx,
   args: {
+    personId: Id<"persons"> | undefined
     runFilter: RunFilter
     query: string
     tenantId: string
@@ -33,6 +35,7 @@ export async function pagePendingApprovals(
 
   for await (const { approval, run } of pendingApprovalRuns(ctx, {
     now,
+    personId: args.personId,
     runFilter: args.runFilter,
     tenantId: args.tenantId,
   })) {
@@ -67,6 +70,7 @@ export async function countPendingApprovals(
   ctx: QueryCtx,
   args: {
     normalizedQuery: string
+    personId: Id<"persons"> | undefined
     runFilter: RunFilter
     tenantId: string
   }
@@ -76,6 +80,7 @@ export async function countPendingApprovals(
 
   for await (const { approval, run } of pendingApprovalRuns(ctx, {
     now,
+    personId: args.personId,
     runFilter: args.runFilter,
     tenantId: args.tenantId,
   })) {
@@ -98,6 +103,7 @@ async function* pendingApprovalRuns(
   ctx: QueryCtx,
   args: {
     now: number
+    personId: Id<"persons"> | undefined
     runFilter: RunFilter
     tenantId: string
   }
@@ -125,7 +131,10 @@ async function* pendingApprovalRuns(
 
     seenRunIds.add(run._id)
 
-    if (runMatchesFilter(run, args.runFilter)) {
+    if (
+      runVisibleToPerson(run, args.personId) &&
+      runMatchesFilter(run, args.runFilter)
+    ) {
       yield { approval, run }
     }
   }

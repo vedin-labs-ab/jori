@@ -106,7 +106,7 @@ function automation(
     status: "active",
     tenantId: "tenant-id",
     type: "event",
-    visibility: "private",
+    scope: "personal",
     trigger: {
       integrationId,
       event: event ?? "issue.comment.created",

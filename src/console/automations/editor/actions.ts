@@ -1,3 +1,4 @@
+import { type Scope } from "@contracts/permissions/scope"
 import {
   type AutomationSurfaceFormValue,
   syncAutomationSurfaces,
@@ -32,6 +33,9 @@ export function createAutomationDialogActions({
     },
     updateName: (name: string) => {
       onValuesChange({ ...values, name })
+    },
+    updateScope: (scope: Scope) => {
+      onValuesChange({ ...values, scope })
     },
     updateWebSearch: (webSearch: boolean) => {
       writeAutomationWebSearchPreference(webSearch)

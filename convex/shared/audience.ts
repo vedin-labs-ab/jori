@@ -7,3 +7,9 @@ export const audienceScopeValidator = v.union(
   v.literal("conversation"),
   v.literal("person")
 )
+
+/** Convex validator for the shared personal/organization entity scope. */
+export const scopeValidator = v.union(
+  v.literal("personal"),
+  v.literal("organization")
+)

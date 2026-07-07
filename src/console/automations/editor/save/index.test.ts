@@ -42,6 +42,7 @@ describe("automation payload", () => {
       args: {
         name: "Weekly release summary",
         instructions: "Summarize GitHub and post to Slack.",
+        scope: "personal",
         access: {
           integrations: [
             { integration: "github", tools: ["github_get_issue"] },

@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { automationScope } from "../../automations/access"
 import { conversationAudience } from "../../conversations/scope"
 import { type AudienceScope } from "../../shared/audience"
 
@@ -63,7 +64,7 @@ async function resolveParentAudience(
 }
 
 function automationAudience(automation: Doc<"automations">): RunAudience {
-  return (automation.visibility ?? "private") === "public"
+  return automationScope(automation) === "organization"
     ? { scope: "tenant" }
     : { scope: "person" }
 }

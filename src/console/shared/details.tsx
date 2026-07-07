@@ -1,5 +1,7 @@
-import { AlertTriangle, ArrowUpRight } from "lucide-react"
+import { type Scope, scopeLabels } from "@contracts/permissions/scope"
+import { AlertTriangle, ArrowUpRight, Building2 } from "lucide-react"
 import { type ElementType, type ReactNode } from "react"
+import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
   TooltipContent,
@@ -202,5 +204,18 @@ export function RelativeTime({
       </TooltipTrigger>
       <TooltipContent>{absoluteTime(absolute)}</TooltipContent>
     </Tooltip>
+  )
+}
+
+/** Marks organization-scoped entities; personal is the unmarked default. */
+export function ScopeBadge({ scope }: { scope: Scope }) {
+  if (scope !== "organization") {
+    return null
+  }
+
+  return (
+    <Badge className="shrink-0" variant="outline">
+      <Building2 /> {scopeLabels.organization}
+    </Badge>
   )
 }

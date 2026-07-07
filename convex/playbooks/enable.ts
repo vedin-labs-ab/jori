@@ -7,6 +7,7 @@ import {
 import {
   getPlaybook,
   type PlaybookDefinition,
+  playbookCatalog,
 } from "../../contracts/playbooks/catalog"
 import { playbookCron } from "../../contracts/playbooks/schedule"
 import { type Doc, type Id } from "../_generated/dataModel"
@@ -74,13 +75,18 @@ export async function enablePlaybook(
 ) {
   const plan = await resolvePlaybookPlan(ctx, args)
 
-  await requireNotEnabled(ctx, args.tenantId, plan.definition)
+  await requireNotEnabled(ctx, {
+    definition: plan.definition,
+    ownerId: args.createdBy,
+    tenantId: args.tenantId,
+  })
 
   const automation = await createAutomation(ctx, {
     tenantId: args.tenantId,
     playbook: plan.definition.key,
     name: plan.definition.title,
     instructions: plan.instructions,
+    scope: plan.definition.scope,
     access: plan.access,
     type: "cron",
     trigger: {
@@ -111,35 +117,63 @@ export async function readPlaybookSlots(
   )
 }
 
-/** Playbook-instantiated automations per tenant, keyed by playbook key. */
+/**
+ * Playbook automations relevant to the caller, keyed by playbook key:
+ * personal playbooks match only the caller's own enablement, organization
+ * playbooks match the tenant-wide one.
+ */
 export async function readPlaybookAutomations(
   ctx: QueryLikeCtx,
-  tenantId: string
+  args: { ownerId: Id<"persons"> | undefined; tenantId: string }
 ) {
   const automations = await ctx.db
     .query("automations")
-    .withIndex("by_tenant", (index) => index.eq("tenantId", tenantId))
+    .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
     .collect()
   const byKey = new Map<string, Doc<"automations">>()
 
   for (const automation of automations) {
-    if (automation.playbook !== undefined && !byKey.has(automation.playbook)) {
-      byKey.set(automation.playbook, automation)
+    if (
+      automation.playbook === undefined ||
+      byKey.has(automation.playbook) ||
+      !matchesPlaybookOwner(automation, args.ownerId)
+    ) {
+      continue
     }
+
+    byKey.set(automation.playbook, automation)
   }
 
   return byKey
 }
 
+function matchesPlaybookOwner(
+  automation: Doc<"automations">,
+  ownerId: Id<"persons"> | undefined
+) {
+  const definition = playbookCatalog.find(
+    (candidate) => candidate.key === automation.playbook
+  )
+
+  if (definition === undefined || definition.scope === "organization") {
+    return true
+  }
+
+  return automation.createdBy === ownerId
+}
+
 async function requireNotEnabled(
   ctx: QueryLikeCtx,
-  tenantId: string,
-  definition: PlaybookDefinition
+  args: {
+    definition: PlaybookDefinition
+    ownerId: Id<"persons">
+    tenantId: string
+  }
 ) {
-  const enabled = await readPlaybookAutomations(ctx, tenantId)
+  const enabled = await readPlaybookAutomations(ctx, args)
 
-  if (enabled.has(definition.key)) {
-    throw new Error(`${definition.title} is already enabled.`)
+  if (enabled.has(args.definition.key)) {
+    throw new Error(`${args.definition.title} is already enabled.`)
   }
 }
 

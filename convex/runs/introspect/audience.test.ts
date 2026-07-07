@@ -30,6 +30,12 @@ test("resolves conversation and automation audiences", async () => {
       run: {},
     })
   ).resolves.toEqual({ scope: "person" })
+  await expect(
+    resolveRunAudience(ctx, {
+      origin: { automation: automation("organization") },
+      run: {},
+    })
+  ).resolves.toEqual({ scope: "tenant" })
 })
 
 function conversation(
@@ -45,7 +51,9 @@ function conversation(
   }
 }
 
-function automation(): Doc<"automations"> {
+function automation(
+  scope: Doc<"automations">["scope"] = "personal"
+): Doc<"automations"> {
   return {
     _creationTime: 0,
     _id: id<"automations">("automation"),
@@ -58,7 +66,7 @@ function automation(): Doc<"automations"> {
     trigger: { at: 1 },
     type: "once",
     updatedAt: 0,
-    visibility: "private",
+    scope,
   }
 }
 

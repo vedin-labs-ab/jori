@@ -1,10 +1,17 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { mutation, query } from "../_generated/server"
-import { checkTenantAccess, requireTenantAccess } from "../identity/access"
+import { checkTenantAccess } from "../identity/access"
+import { requireClerkUserId } from "../identity/users"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
+import { resolvePersonByIdentity } from "../persons/links"
+import { scopeValidator } from "../shared/audience"
 import { type QueryLikeCtx } from "../shared/context"
-import { projectAccessForConsole } from "./access"
+import {
+  automationScope,
+  canAccessAutomation,
+  projectAccessForConsole,
+} from "./access"
 import { automationEventCatalog } from "./events"
 import { findEventIntegration } from "./integrations"
 import {
@@ -18,13 +25,7 @@ import {
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
-import {
-  accessInput,
-  automationType,
-  automationVisibility,
-  status,
-  triggerInput,
-} from "./schema"
+import { accessInput, automationType, status, triggerInput } from "./schema"
 
 export const list = query({
   args: {
@@ -43,6 +44,11 @@ export const list = query({
       }
     }
 
+    const personId = await resolvePersonByIdentity(ctx, {
+      tenantId: args.tenantId,
+      provider: "clerk",
+      externalId: requireClerkUserId(access.identity),
+    })
     const automations = await searchAutomations(ctx, {
       tenantId: args.tenantId,
       query: args.query,
@@ -54,7 +60,9 @@ export const list = query({
     return {
       status: "ready" as const,
       automations: await Promise.all(
-        automations.map((automation) => toConsoleAutomation(ctx, automation))
+        automations
+          .filter((automation) => canAccessAutomation(automation, personId))
+          .map((automation) => toConsoleAutomation(ctx, automation))
       ),
     }
   },
@@ -66,11 +74,11 @@ export const get = query({
     automationId: v.id("automations"),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.tenantId)
 
     return await toConsoleAutomation(
       ctx,
-      await getTenantAutomation(ctx, args.tenantId, args.automationId)
+      await requireAccessibleAutomation(ctx, args, personId)
     )
   },
 })
@@ -105,7 +113,7 @@ export const create = mutation({
     tenantId: v.string(),
     name: v.string(),
     instructions: v.string(),
-    visibility: v.optional(automationVisibility),
+    scope: v.optional(scopeValidator),
     access: accessInput,
     type: automationType,
     trigger: triggerInput,
@@ -127,13 +135,14 @@ export const update = mutation({
     automationId: v.id("automations"),
     name: v.string(),
     instructions: v.string(),
-    visibility: v.optional(automationVisibility),
+    scope: v.optional(scopeValidator),
     access: accessInput,
     type: v.optional(automationType),
     trigger: v.optional(triggerInput),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    await requireAccessibleAutomation(ctx, args, personId)
 
     return await toConsoleAutomation(ctx, await updateAutomation(ctx, args))
   },
@@ -145,7 +154,8 @@ export const pause = mutation({
     automationId: v.id("automations"),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    await requireAccessibleAutomation(ctx, args, personId)
 
     return await toConsoleAutomation(ctx, await pauseAutomation(ctx, args))
   },
@@ -157,7 +167,8 @@ export const resume = mutation({
     automationId: v.id("automations"),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    await requireAccessibleAutomation(ctx, args, personId)
 
     return await toConsoleAutomation(ctx, await resumeAutomation(ctx, args))
   },
@@ -169,7 +180,8 @@ export const remove = mutation({
     automationId: v.id("automations"),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    await requireAccessibleAutomation(ctx, args, personId)
     await removeAutomation(ctx, args)
 
     return null
@@ -189,6 +201,10 @@ export const run = mutation({
       args.automationId
     )
 
+    if (!canAccessAutomation(automation, personId)) {
+      throw new Error("Automation not found.")
+    }
+
     if (automation.type === "event") {
       throw new Error("Event automations run when their event arrives.")
     }
@@ -203,6 +219,25 @@ export const run = mutation({
   },
 })
 
+/** Ownership rule on top of tenant access: personal automations are owner-only. */
+async function requireAccessibleAutomation(
+  ctx: QueryLikeCtx,
+  args: { tenantId: string; automationId: Doc<"automations">["_id"] },
+  personId: Doc<"persons">["_id"]
+) {
+  const automation = await getTenantAutomation(
+    ctx,
+    args.tenantId,
+    args.automationId
+  )
+
+  if (!canAccessAutomation(automation, personId)) {
+    throw new Error("Automation not found.")
+  }
+
+  return automation
+}
+
 async function toConsoleAutomation(
   ctx: QueryLikeCtx,
   automation: Doc<"automations">
@@ -211,7 +246,7 @@ async function toConsoleAutomation(
     id: automation._id,
     name: automation.name,
     instructions: automation.instructions,
-    visibility: automation.visibility ?? "private",
+    scope: automationScope(automation),
     type: automation.type,
     status: automation.status,
     trigger: await projectTriggerForConsole(ctx, automation),

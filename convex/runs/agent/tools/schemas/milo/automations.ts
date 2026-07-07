@@ -52,11 +52,11 @@ const accessSchema = () => ({
   description: "Integration and web access for each automation run.",
 })
 
-const visibilityProperty = {
+const scopeProperty = {
   type: "string",
-  enum: ["private", "public"],
+  enum: ["personal", "organization"],
   description:
-    "Who can discover runs from this automation. Omit or use private unless the requester explicitly wants tenant-visible run history.",
+    "Who this automation is for. personal: only the requester can see and manage it, and its runs stay theirs. organization: every member can see and manage it, and its runs are visible to the whole organization. Omit to default from the tools: anything touching the requester's own email or calendar stays personal; pure workspace-tool automations become organization.",
 }
 
 const triggerSchema = () => ({
@@ -109,7 +109,7 @@ export const automationMiloToolInputSchemas = {
       instructions: stringProperty(
         "What each run should do, written as instructions for the agent that executes it."
       ),
-      visibility: visibilityProperty,
+      scope: scopeProperty,
       type: {
         type: "string",
         enum: ["once", "cron", "event"],
@@ -146,7 +146,7 @@ export const automationMiloToolInputSchemas = {
       ),
       name: stringProperty("Updated automation name."),
       instructions: stringProperty("Updated run instructions."),
-      visibility: visibilityProperty,
+      scope: scopeProperty,
       type: {
         type: "string",
         enum: ["once", "cron", "event"],
