@@ -1,18 +1,23 @@
 import { expect, test } from "vitest"
-import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { summarizeRun } from "../summaries"
 
 // A "Run now" / "Try once" run carries the automation's schedule + status in
 // its snapshot, but it was triggered by hand, not by the schedule.
-test("a manual run drops the automation schedule and status", async () => {
-  const run = manualRun("person")
-  const summary = await summarizeRun(fakeCtx({ run }), run, asPerson("person"))
+test("a manual run drops the schedule and names who triggered it", async () => {
+  const run = manualRun("albin")
+  const summary = await summarizeRun(
+    fakeCtx({
+      run,
+      identities: [{ personId: "albin", provider: "slack", name: "Albin" }],
+    }),
+    run
+  )
 
   expect(summary.source).toEqual({
     type: "automation",
     surface: "milo",
-    trigger: {},
+    trigger: { actor: { type: "user", label: "Albin" } },
   })
   expect(
     summary.details.some(
@@ -21,20 +26,11 @@ test("a manual run drops the automation schedule and status", async () => {
   ).toBe(false)
 })
 
-test("attributes a teammate's manual run, but not the viewer's own", async () => {
-  const run = manualRun("teammate")
-  const summary = await summarizeRun(
-    fakeCtx({
-      run,
-      identities: [{ personId: "teammate", provider: "slack", name: "Bob" }],
-    }),
-    run,
-    asPerson("viewer")
-  )
+test("falls back to a bare label when the triggerer has no name", async () => {
+  const run = manualRun("ghost")
+  const summary = await summarizeRun(fakeCtx({ run }), run)
 
-  expect(summary.source.trigger).toEqual({
-    actor: { type: "user", label: "Bob" },
-  })
+  expect(summary.source.trigger).toEqual({})
 })
 
 function manualRun(personId: string) {
@@ -87,8 +83,4 @@ function emptyResult() {
     order: () => emptyResult(),
     take: async () => [],
   }
-}
-
-function asPerson(id: string) {
-  return id as Id<"persons">
 }
