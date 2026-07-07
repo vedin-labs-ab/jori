@@ -60,8 +60,7 @@ export function PlaybookControls({
     )
   }
 
-  const pendingKind =
-    actions.pending?.key === definition.key ? actions.pending.kind : undefined
+  const pendingKind = pendingActionKind(actions, definition)
 
   return (
     <div className="grid w-full grid-cols-2 gap-2">
@@ -143,7 +142,8 @@ function PlanButton({
   )
 }
 
-function EnabledControls({
+/** Header on/off switch for an enabled playbook. */
+export function PlaybookSwitch({
   actions,
   definition,
   enabled,
@@ -153,43 +153,65 @@ function EnabledControls({
   enabled: NonNullable<PlaybookListRow["enabled"]>
 }) {
   const active = enabled.status === "active"
-  const pendingKind: PlaybookActionKind | undefined =
-    actions.pending?.key === definition.key ? actions.pending.kind : undefined
+  const pendingKind = pendingActionKind(actions, definition)
+
+  return (
+    <>
+      <span className="text-xs text-muted-foreground">
+        {active ? "On" : "Paused"}
+      </span>
+      <Switch
+        aria-label={`${definition.title} enabled`}
+        checked={active}
+        disabled={pendingKind !== undefined}
+        onCheckedChange={(checked) =>
+          void actions.setPaused(definition, enabled.automationId, !checked)
+        }
+      />
+    </>
+  )
+}
+
+function EnabledControls({
+  actions,
+  definition,
+  enabled,
+}: {
+  actions: PlaybookActions
+  definition: PlaybookDefinition
+  enabled: NonNullable<PlaybookListRow["enabled"]>
+}) {
+  const pendingKind = pendingActionKind(actions, definition)
 
   return (
     <div className="flex w-full items-center justify-between gap-2">
-      <div className="flex items-center gap-2">
-        <Switch
-          aria-label={`${definition.title} enabled`}
-          checked={active}
-          disabled={pendingKind !== undefined}
-          onCheckedChange={(checked) =>
-            void actions.setPaused(definition, enabled.automationId, !checked)
-          }
-        />
-        <span className="text-xs text-muted-foreground">
-          {active ? "On" : "Paused"}
-        </span>
-      </div>
-      <div className="flex items-center">
-        <Button
-          disabled={pendingKind !== undefined}
-          onClick={() => void actions.runNow(definition, enabled.automationId)}
-          variant="ghost"
-        >
-          {pendingKind === "run" ? <Spinner /> : <Play />} Run now
-        </Button>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button asChild size="icon" variant="ghost">
-              <Link aria-label="View automation" to="/automations">
-                <ArrowUpRight />
-              </Link>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>View automation</TooltipContent>
-        </Tooltip>
-      </div>
+      <Button
+        className="-ml-2"
+        disabled={pendingKind !== undefined}
+        onClick={() => void actions.runNow(definition, enabled.automationId)}
+        variant="ghost"
+      >
+        {pendingKind === "run" ? <Spinner /> : <Play />} Run now
+      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button asChild size="icon" variant="ghost">
+            <Link aria-label="View automation" to="/automations">
+              <ArrowUpRight />
+            </Link>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>View automation</TooltipContent>
+      </Tooltip>
     </div>
   )
+}
+
+function pendingActionKind(
+  actions: PlaybookActions,
+  definition: PlaybookDefinition
+): PlaybookActionKind | undefined {
+  return actions.pending?.key === definition.key
+    ? actions.pending.kind
+    : undefined
 }

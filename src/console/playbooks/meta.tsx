@@ -94,9 +94,7 @@ function PlaybookMetaSection({
 }) {
   return (
     <div className="grid gap-1.5 text-xs">
-      <p className="font-medium text-[0.625rem] text-muted-foreground uppercase tracking-wider">
-        {label}
-      </p>
+      <p className="font-medium text-muted-foreground">{label}</p>
       {children}
     </div>
   )
