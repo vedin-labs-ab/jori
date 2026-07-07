@@ -1,5 +1,5 @@
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
-import { Pencil, Play } from "lucide-react"
+import { Eye, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
@@ -78,10 +78,9 @@ function EnabledControls({
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <Button
-        className="-ml-2"
         disabled={pendingKind !== undefined}
         onClick={() => void actions.runNow(definition, enabled.automationId)}
-        variant="ghost"
+        variant="outline"
       >
         {pendingKind === "run" ? <Spinner /> : <Play />} Run now
       </Button>
@@ -90,9 +89,9 @@ function EnabledControls({
         onClick={() => void actions.edit(definition, enabled.automationId)}
         onFocus={actions.preloadEdit}
         onPointerEnter={actions.preloadEdit}
-        variant="ghost"
+        variant="outline"
       >
-        {pendingKind === "edit" ? <Spinner /> : <Pencil />} Edit
+        {pendingKind === "edit" ? <Spinner /> : <Eye />} View
       </Button>
     </div>
   )

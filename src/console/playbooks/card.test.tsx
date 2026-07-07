@@ -27,7 +27,7 @@ test("active card puts the switch in the header and run-now in the footer", () =
   ).toBeDefined()
   expect(screen.getByText("On")).toBeDefined()
   expect(screen.getByRole("button", { name: /run now/i })).toBeDefined()
-  expect(screen.getByRole("button", { name: "Edit" })).toBeDefined()
+  expect(screen.getByRole("button", { name: "View" })).toBeDefined()
   expect(screen.getByText(/Next in 2h/)).toBeDefined()
   expect(screen.getByText("Schedule")).toBeDefined()
   expect(screen.getByText("Tools")).toBeDefined()
