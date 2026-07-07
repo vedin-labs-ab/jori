@@ -2,6 +2,7 @@ import { playbookCatalog } from "@contracts/playbooks/catalog"
 import { useQuery } from "convex/react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../convex/_generated/api"
+import { useAutomationEditorHost } from "../automations/editor/host"
 import { ConsolePage } from "../page"
 import { ConsoleContentGrid, ConsolePageLayout } from "../shared/layout"
 import { PlaybookCard } from "./card"
@@ -17,7 +18,8 @@ export function Playbooks() {
 
 function PlaybookCatalog({ tenantId }: { tenantId: string }) {
   const list = useQuery(api.playbooks.console.list, { tenantId })
-  const actions = usePlaybookActions(tenantId)
+  const editorHost = useAutomationEditorHost(tenantId)
+  const actions = usePlaybookActions(tenantId, editorHost)
 
   if (list?.status === "unauthorized") {
     return (
@@ -40,6 +42,7 @@ function PlaybookCatalog({ tenantId }: { tenantId: string }) {
           />
         ))}
       </ConsoleContentGrid>
+      {editorHost.dialog}
     </ConsolePageLayout>
   )
 }

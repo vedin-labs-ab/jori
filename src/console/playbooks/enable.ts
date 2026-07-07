@@ -2,11 +2,12 @@ import { type Integration } from "@contracts/integrations"
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import { describePlaybookSchedule } from "@contracts/playbooks/schedule"
 import { useNavigate } from "@tanstack/react-router"
-import { useMutation } from "convex/react"
+import { useConvex, useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../convex/_generated/api"
+import { type AutomationEditorHost } from "../automations/editor/host"
 import { showErrorToast } from "../shared/error"
 
 type AutomationId = FunctionArgs<
@@ -15,18 +16,57 @@ type AutomationId = FunctionArgs<
 
 type PlaybookChoices = Record<string, Integration>
 
-export type PlaybookActionKind = "enable" | "trial" | "run" | "pause"
+export type PlaybookActionKind = "enable" | "trial" | "run" | "pause" | "edit"
 
 export type PlaybookActions = ReturnType<typeof usePlaybookActions>
 
-export function usePlaybookActions(tenantId: string) {
+export function usePlaybookActions(
+  tenantId: string,
+  editorHost: AutomationEditorHost
+) {
   const pending = usePendingAction()
 
   return {
     pending: pending.current,
+    preloadEdit: editorHost.preloadDialog,
     ...useCatalogActions(tenantId, pending),
     ...useAutomationActions(tenantId, pending),
+    ...useEditAction(tenantId, pending, editorHost),
   }
+}
+
+/** Opens the shared automation editor with the playbook's automation. */
+function useEditAction(
+  tenantId: string,
+  pending: ReturnType<typeof usePendingAction>,
+  editorHost: AutomationEditorHost
+) {
+  const convex = useConvex()
+
+  return {
+    edit: (definition: PlaybookDefinition, automationId: AutomationId) =>
+      pending.wrap(definition.key, "edit", async () => {
+        editorHost.preloadDialog()
+        try {
+          const automation = await convex.query(api.automations.console.get, {
+            tenantId,
+            automationId,
+          })
+          editorHost.editor.openEditForm(automation)
+        } catch (error) {
+          showErrorToast(error, "Couldn't open the automation.")
+        }
+      }),
+  }
+}
+
+export function pendingActionKind(
+  actions: PlaybookActions,
+  definition: PlaybookDefinition
+): PlaybookActionKind | undefined {
+  return actions.pending?.key === definition.key
+    ? actions.pending.kind
+    : undefined
 }
 
 function usePendingAction() {

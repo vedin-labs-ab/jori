@@ -9,7 +9,6 @@ import {
 } from "lucide-react"
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -47,16 +46,16 @@ export function PlaybookCard({
             <Icon className="size-4" />
           </span>
           <CardTitle>{definition.title}</CardTitle>
+          {row?.enabled ? (
+            <span className="ml-auto flex shrink-0 items-center gap-2">
+              <PlaybookSwitch
+                actions={actions}
+                definition={definition}
+                enabled={row.enabled}
+              />
+            </span>
+          ) : null}
         </div>
-        {row?.enabled ? (
-          <CardAction className="flex h-8 items-center gap-2">
-            <PlaybookSwitch
-              actions={actions}
-              definition={definition}
-              enabled={row.enabled}
-            />
-          </CardAction>
-        ) : null}
         <CardDescription>{definition.description}</CardDescription>
       </CardHeader>
       <CardContent>

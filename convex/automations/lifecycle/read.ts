@@ -1,8 +1,9 @@
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type QueryLikeCtx } from "../../shared/context"
 
 export async function getTenantAutomation(
-  ctx: MutationCtx,
+  ctx: QueryLikeCtx,
   tenantId: string,
   automationId: Id<"automations">
 ) {

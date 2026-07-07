@@ -60,6 +60,21 @@ export const list = query({
   },
 })
 
+export const get = query({
+  args: {
+    tenantId: v.string(),
+    automationId: v.id("automations"),
+  },
+  handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+
+    return await toConsoleAutomation(
+      ctx,
+      await getTenantAutomation(ctx, args.tenantId, args.automationId)
+    )
+  },
+})
+
 export const eventIntegrations = query({
   args: {
     tenantId: v.string(),

@@ -1,17 +1,9 @@
 import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useState,
-} from "react"
+import { useCallback, useDeferredValue, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import { useToolPermissions } from "../permissions/controller"
 import {
   ConsoleFilterToggle,
   ConsolePageLayout,
@@ -22,8 +14,7 @@ import {
 import { ConsoleListPager } from "../shared/list/pager"
 import { useClientPagination } from "../shared/list/pagination"
 import { useNow } from "../shared/time"
-import { automationPolicyKey } from "./access/policy"
-import { type AutomationEditor, useAutomationEditor } from "./editor"
+import { useAutomationEditorHost } from "./editor/host"
 import { filterAutomationsByView, hasAutomationFilters } from "./filter"
 import { AutomationContent } from "./list/content"
 import {
@@ -31,21 +22,6 @@ import {
   type AutomationList,
   automationFilterOptions,
 } from "./types"
-
-let automationDialogModule:
-  | Promise<typeof import("./editor/dialog")>
-  | undefined
-
-function loadAutomationDialog() {
-  automationDialogModule ??= import("./editor/dialog")
-  return automationDialogModule
-}
-
-// The dialog pulls in the TipTap editor, which dwarfs the list view. Loading it
-// lazily keeps the editor out of the route chunk.
-const AutomationDialog = lazy(async () => ({
-  default: (await loadAutomationDialog()).AutomationDialog,
-}))
 
 export function Automations() {
   return (
@@ -63,10 +39,8 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
     query: deferredQuery,
     statusFilter: filters.filter,
   })
-  const permissions = useToolPermissions(tenantId)
-  const editor = useAutomationEditor(tenantId, permissions.permissions)
+  const { dialog, editor, preloadDialog } = useAutomationEditorHost(tenantId)
   const now = useNow(30_000)
-  const isDialogMounted = useAutomationDialogMount(editor.isFormOpen)
   const { hasFilters, pagination } = useAutomationPagination({
     automationList,
     filter: filters.filter,
@@ -79,7 +53,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
       <AutomationFilters
         filter={filters.filter}
         onCreate={editor.openCreateForm}
-        onCreateIntent={loadAutomationDialog}
+        onCreateIntent={preloadDialog}
         query={filters.query}
         setFilter={toolbar.setFilter}
         setQuery={toolbar.setQuery}
@@ -94,12 +68,7 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
       {automationList?.status !== "unauthorized" ? (
         <ConsoleListPager pagination={pagination} />
       ) : null}
-      <AutomationEditorDialog
-        editor={editor}
-        isMounted={isDialogMounted}
-        permissions={permissions.permissions}
-        tenantId={tenantId}
-      />
+      {dialog}
     </ConsolePageLayout>
   )
 }
@@ -157,52 +126,6 @@ function useAutomationPagination({
   return { hasFilters, pagination }
 }
 
-function useAutomationDialogMount(isFormOpen: boolean) {
-  const [hasOpened, setHasOpened] = useState(false)
-
-  useEffect(() => {
-    if (isFormOpen) {
-      setHasOpened(true)
-    }
-  }, [isFormOpen])
-
-  return isFormOpen || hasOpened
-}
-
-function AutomationEditorDialog({
-  editor,
-  isMounted,
-  permissions,
-  tenantId,
-}: {
-  editor: AutomationEditor
-  isMounted: boolean
-  permissions: ReturnType<typeof useToolPermissions>["permissions"]
-  tenantId: string
-}) {
-  if (!isMounted) {
-    return null
-  }
-
-  return (
-    <Suspense fallback={null}>
-      <AutomationDialog
-        error={editor.formError}
-        isOpen={editor.isFormOpen}
-        isSaving={editor.isSaving}
-        onOpenChange={editor.setIsFormOpen}
-        onSave={editor.saveAutomation}
-        onValuesChange={editor.setFormValues}
-        permissions={permissions}
-        policyKey={automationPolicyKey(permissions)}
-        automation={editor.formAutomation}
-        tenantId={tenantId}
-        values={editor.formValues}
-      />
-    </Suspense>
-  )
-}
-
 function AutomationFilters({
   filter,
   onCreate,
@@ -213,7 +136,7 @@ function AutomationFilters({
 }: {
   filter: AutomationFilter
   onCreate: () => void
-  onCreateIntent: () => Promise<unknown>
+  onCreateIntent: () => void
   query: string
   setFilter: (filter: AutomationFilter) => void
   setQuery: (query: string) => void
