@@ -43,6 +43,7 @@ export function SkillsToolbar({
       </ConsoleHeaderActions>
       <ConsoleFilterGroup>
         <ConsoleFilterToggle
+          label="Scope"
           onValueChange={onViewChange}
           options={skillFilterOptions}
           value={view}

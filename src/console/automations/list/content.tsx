@@ -35,7 +35,7 @@ export function AutomationContent({
     )
   }
 
-  if (automationList.automations.length === 0) {
+  if (visibleAutomations.length === 0) {
     return (
       <ConsoleScrollableList className="pb-2 lg:grid-cols-2">
         <li className="lg:col-span-2">

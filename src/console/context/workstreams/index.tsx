@@ -2,13 +2,6 @@ import { useQuery } from "convex/react"
 import { Layers } from "lucide-react"
 import { useState } from "react"
 import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -17,6 +10,8 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
+import { ConsoleFilterField } from "../../shared/layout"
+import { ConsoleEmptyState } from "../../shared/list/empty"
 import { ContextPage } from ".."
 import { ContextSectionTitle } from "../section"
 import { WorkstreamCard } from "./card"
@@ -51,21 +46,23 @@ function WorkstreamsView({ tenantId }: { tenantId: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-2">
-        <Select
-          value={filter}
-          onValueChange={(value) => setFilter(value as StatusFilter)}
-        >
-          <SelectTrigger size="sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(filterLabels).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <ConsoleFilterField label="Status">
+          <Select
+            value={filter}
+            onValueChange={(value) => setFilter(value as StatusFilter)}
+          >
+            <SelectTrigger size="sm" className="w-fit">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(filterLabels).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </ConsoleFilterField>
       </div>
       {result === undefined ? (
         <Skeleton className="h-28 w-full" />
@@ -152,14 +149,10 @@ function FilteredWorkstreams({
 
 function WorkstreamsEmpty({ description }: { description: string }) {
   return (
-    <Empty>
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Layers />
-        </EmptyMedia>
-        <EmptyTitle>No workstreams</EmptyTitle>
-        <EmptyDescription>{description}</EmptyDescription>
-      </EmptyHeader>
-    </Empty>
+    <ConsoleEmptyState
+      description={description}
+      icon={Layers}
+      title="No workstreams"
+    />
   )
 }
