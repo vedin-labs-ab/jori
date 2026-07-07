@@ -1,5 +1,6 @@
 import {
   type PlaybookCapability,
+  type PlaybookSlot,
   playbookCapabilityLabels,
   playbookCapabilityProviders,
   playbookSlotTools,
@@ -9,59 +10,90 @@ import {
   type PlaybookDefinition,
   playbookCatalog,
 } from "../../contracts/playbooks/catalog"
+import {
+  type DeliveryChoice,
+  type DeliveryKind,
+  deliveryKindProviders,
+  destinationIntegration,
+  destinationTools,
+} from "../../contracts/playbooks/delivery"
 import { playbookCron } from "../../contracts/playbooks/schedule"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { findEventIntegration } from "../automations/integrations"
 import { createAutomation } from "../automations/lifecycle"
+import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration, integrationLabels } from "../shared/integrations"
 import {
+  emailInputProvider,
   type PlaybookRecipient,
-  renderPlaybookInstructions,
-} from "./instructions"
+  resolveDestination,
+} from "./destination"
+import { renderPlaybookInstructions } from "./instructions"
+
+export type { PlaybookRecipient } from "./destination"
 
 export type PlaybookSlotState = {
   capability: PlaybookCapability
   connected: Integration[]
 }
 
+type ResolvedSlot = {
+  slot: PlaybookSlot
+  integration: Integration
+}
+
 export type PlaybookPlanArgs = {
   tenantId: string
   key: string
   choices: Partial<Record<PlaybookCapability, Integration>>
+  destination: DeliveryChoice
   createdBy: Id<"persons">
   recipient: PlaybookRecipient
 }
 
-/** Resolve a playbook's slots to the caller's providers and render it. */
+/** Resolve a playbook's input slots and delivery destination, and render it. */
 export async function resolvePlaybookPlan(
   ctx: QueryLikeCtx,
   args: PlaybookPlanArgs
 ) {
   const definition = getPlaybook(args.key)
-  const slots = await readPlaybookSlots(ctx, {
-    definition,
+  const connected = await connectedIntegrations(ctx, {
     ownerId: args.createdBy,
     tenantId: args.tenantId,
   })
-  const resolved = definition.slots.map((slot, index) => ({
+  const slots = readPlaybookSlots(definition, connected)
+  const resolved: ResolvedSlot[] = definition.slots.map((slot, index) => ({
     slot,
     integration: resolveProvider(slots[index], args.choices[slot.capability]),
   }))
+  const destination = resolveDestination(args.destination, {
+    connected,
+    emailProvider: emailInputProvider(resolved),
+    recipient: args.recipient,
+  })
 
   return {
     definition,
+    destination,
     instructions: renderPlaybookInstructions({
       key: definition.key,
       providers: resolvedProviderLabels(resolved),
-      recipient: args.recipient,
+      destination,
+      subject: definition.title,
+      noun: definition.delivery.noun,
     }),
     access: {
-      integrations: resolved.map(({ slot, integration }) => ({
-        integration,
-        tools: playbookSlotTools(slot, integration),
-      })),
+      integrations: [
+        ...resolved.map(({ slot, integration }) => ({
+          integration,
+          tools: playbookSlotTools(slot, integration),
+        })),
+        {
+          integration: destinationIntegration(destination),
+          tools: destinationTools(destination),
+        },
+      ],
       web: definition.web,
     },
   }
@@ -101,19 +133,35 @@ export async function enablePlaybook(
   return { automationId: automation._id }
 }
 
-export async function readPlaybookSlots(
+/** The caller's connected integrations, honouring user-scope ownership. */
+export async function connectedIntegrations(
   ctx: QueryLikeCtx,
-  args: {
-    definition: PlaybookDefinition
-    ownerId: Id<"persons"> | undefined
-    tenantId: string
-  }
-): Promise<PlaybookSlotState[]> {
-  return await Promise.all(
-    args.definition.slots.map(async (slot) => ({
-      capability: slot.capability,
-      connected: await connectedProviders(ctx, slot.capability, args),
-    }))
+  args: { ownerId: Id<"persons"> | undefined; tenantId: string }
+): Promise<Set<Integration>> {
+  const integrations = await listActiveIntegrationsForOwner(ctx, args)
+
+  return new Set(integrations.map((integration) => integration.integration))
+}
+
+export function readPlaybookSlots(
+  definition: PlaybookDefinition,
+  connected: Set<Integration>
+): PlaybookSlotState[] {
+  return definition.slots.map((slot) => ({
+    capability: slot.capability,
+    connected: playbookCapabilityProviders[slot.capability].filter((provider) =>
+      connected.has(provider)
+    ),
+  }))
+}
+
+/** Delivery kinds the caller can pick: allowed by the playbook and connected. */
+export function availableDelivery(
+  definition: PlaybookDefinition,
+  connected: Set<Integration>
+): DeliveryKind[] {
+  return definition.delivery.allowed.filter((kind) =>
+    deliveryKindProviders[kind].some((provider) => connected.has(provider))
   )
 }
 
@@ -177,26 +225,6 @@ async function requireNotEnabled(
   }
 }
 
-async function connectedProviders(
-  ctx: QueryLikeCtx,
-  capability: PlaybookCapability,
-  args: { ownerId: Id<"persons"> | undefined; tenantId: string }
-) {
-  const providers = await Promise.all(
-    playbookCapabilityProviders[capability].map(async (provider) => {
-      const integration = await findEventIntegration(ctx, {
-        integration: provider,
-        ownerId: args.ownerId,
-        tenantId: args.tenantId,
-      })
-
-      return integration?.status === "active" ? provider : undefined
-    })
-  )
-
-  return providers.filter((provider) => provider !== undefined)
-}
-
 function resolveProvider(
   slot: PlaybookSlotState,
   choice: Integration | undefined
@@ -230,12 +258,7 @@ function providerChoices(capability: PlaybookCapability) {
     .join(" or ")
 }
 
-function resolvedProviderLabels(
-  resolved: {
-    slot: { capability: PlaybookCapability }
-    integration: Integration
-  }[]
-) {
+function resolvedProviderLabels(resolved: ResolvedSlot[]) {
   const labels = { ...playbookCapabilityLabels }
 
   for (const { slot, integration } of resolved) {

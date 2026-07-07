@@ -4,4 +4,6 @@ Calendar: look back over this week's events on my {{providers.calendar}} — whe
 
 Inbox: scan this week's threads in my {{providers.email}} for what moved — decisions made, commitments given or received, and questions still open.
 
-Email it from my {{providers.email}} to {{recipient}} with the subject "Week in review" plus the date, in three short sections: what happened, what is unresolved, and what next week looks like. Keep each section to a handful of lines. If the week was quiet, say so in a line or two instead of padding.
+Write it in three short sections: what happened, what is unresolved, and what next week looks like. Keep each section to a handful of lines. If the week was quiet, say so in a line or two instead of padding.
+
+{{delivery}}

@@ -1,17 +1,18 @@
 import { describe, expect, test } from "vitest"
-import { type Integration } from "../integrations"
 import { getToolPermission } from "../permissions"
-import {
-  type PlaybookCapability,
-  playbookCapabilityProviders,
-  playbookSlotTools,
-} from "./capabilities"
+import { playbookCapabilityProviders, playbookSlotTools } from "./capabilities"
 import { playbookCatalog } from "./catalog"
+import {
+  type DeliveryDestination,
+  type DeliveryKind,
+  destinationTools,
+} from "./delivery"
 
-const providerFamilies = [
-  { email: "gmail", calendar: "googleCalendar" },
-  { email: "microsoftEmail", calendar: "microsoftCalendar" },
-] satisfies Record<PlaybookCapability, Integration>[]
+function sampleDestination(kind: DeliveryKind): DeliveryDestination {
+  return kind === "email"
+    ? { kind: "email", integration: "gmail", address: "me@example.com" }
+    : { kind: "slack", channelId: "C1", channelName: "general" }
+}
 
 describe("playbook catalog", () => {
   test("keys are unique and kebab-case", () => {
@@ -46,16 +47,18 @@ describe("playbook catalog", () => {
     }
   })
 
-  test("every playbook grants at least one write tool", () => {
+  test("every allowed delivery grants exactly its write send tools", () => {
     for (const playbook of playbookCatalog) {
-      for (const family of providerFamilies) {
-        const accesses = playbook.slots.flatMap((slot) =>
-          playbookSlotTools(slot, family[slot.capability]).map(
-            (tool) => getToolPermission(tool)?.access
-          )
-        )
+      expect(playbook.delivery.allowed).toContain(playbook.delivery.default)
+      expect(playbook.delivery.noun.length).toBeGreaterThan(0)
 
-        expect(accesses).toContain("write")
+      for (const kind of playbook.delivery.allowed) {
+        const tools = destinationTools(sampleDestination(kind))
+
+        expect(tools.length).toBeGreaterThan(0)
+        for (const tool of tools) {
+          expect(getToolPermission(tool)?.access).toBe("write")
+        }
       }
     }
   })

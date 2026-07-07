@@ -39,6 +39,7 @@ function PlaybookCatalog({ tenantId }: { tenantId: string }) {
             actions={actions}
             definition={definition}
             row={list?.playbooks.find((row) => row.key === definition.key)}
+            tenantId={tenantId}
           />
         ))}
       </ConsoleContentGrid>
