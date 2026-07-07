@@ -3,7 +3,7 @@ import { useQuery } from "convex/react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import { ConsolePageLayout } from "../shared/layout"
+import { ConsoleContentGrid, ConsolePageLayout } from "../shared/layout"
 import { PlaybookCard } from "./card"
 import { usePlaybookActions } from "./enable"
 
@@ -30,7 +30,7 @@ function PlaybookCatalog({ tenantId }: { tenantId: string }) {
 
   return (
     <ConsolePageLayout>
-      <div className="grid gap-4 md:grid-cols-2">
+      <ConsoleContentGrid className="max-w-4xl md:grid-cols-2">
         {playbookCatalog.map((definition) => (
           <PlaybookCard
             key={definition.key}
@@ -39,7 +39,7 @@ function PlaybookCatalog({ tenantId }: { tenantId: string }) {
             row={list?.playbooks.find((row) => row.key === definition.key)}
           />
         ))}
-      </div>
+      </ConsoleContentGrid>
     </ConsolePageLayout>
   )
 }
