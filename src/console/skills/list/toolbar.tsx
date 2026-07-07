@@ -1,10 +1,10 @@
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
+  ConsoleFilterGroup,
   ConsoleFilterToggle,
-  ConsoleToolbar,
-  ConsoleToolbarActions,
-  ConsoleToolbarSearch,
+  ConsoleHeaderActions,
+  ConsoleSearch,
 } from "../../shared/layout"
 import { type SkillFilterView, skillFilterOptions } from "../types"
 
@@ -24,14 +24,9 @@ export function SkillsToolbar({
   view: SkillFilterView
 }) {
   return (
-    <ConsoleToolbar>
-      <ConsoleFilterToggle
-        onValueChange={onViewChange}
-        options={skillFilterOptions}
-        value={view}
-      />
-      <ConsoleToolbarActions>
-        <ConsoleToolbarSearch
+    <>
+      <ConsoleHeaderActions>
+        <ConsoleSearch
           label="Search skills"
           onValueChange={onSearchChange}
           value={searchTerm}
@@ -45,7 +40,14 @@ export function SkillsToolbar({
           <Plus />
           New skill
         </Button>
-      </ConsoleToolbarActions>
-    </ConsoleToolbar>
+      </ConsoleHeaderActions>
+      <ConsoleFilterGroup>
+        <ConsoleFilterToggle
+          onValueChange={onViewChange}
+          options={skillFilterOptions}
+          value={view}
+        />
+      </ConsoleFilterGroup>
+    </>
   )
 }
