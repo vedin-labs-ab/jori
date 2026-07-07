@@ -64,9 +64,7 @@ export const page = query({
         continue
       }
 
-      const summary = shouldMatchSummary
-        ? await summarizeRun(ctx, run, personId)
-        : null
+      const summary = shouldMatchSummary ? await summarizeRun(ctx, run) : null
 
       if (
         summary !== null &&
@@ -85,7 +83,7 @@ export const page = query({
         break
       }
 
-      rows.push(summary ?? (await summarizeRun(ctx, run, personId)))
+      rows.push(summary ?? (await summarizeRun(ctx, run)))
       matchingIndex += 1
     }
 
@@ -150,7 +148,7 @@ export const stats = query({
         continue
       }
 
-      const summary = await summarizeRun(ctx, run, personId)
+      const summary = await summarizeRun(ctx, run)
 
       if (matchesSummary(summary, args.approvalFilter, normalizedQuery)) {
         filteredCount += 1

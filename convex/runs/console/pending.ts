@@ -43,7 +43,7 @@ export async function pagePendingApprovals(
     scopeFilter: args.scopeFilter,
     tenantId: args.tenantId,
   })) {
-    const summary = await summarizeRun(ctx, run, args.personId, approval)
+    const summary = await summarizeRun(ctx, run, approval)
 
     if (!summaryMatchesSearch(summary, normalizedQuery)) {
       continue
@@ -95,7 +95,7 @@ export async function countPendingApprovals(
       continue
     }
 
-    const summary = await summarizeRun(ctx, run, args.personId, approval)
+    const summary = await summarizeRun(ctx, run, approval)
 
     if (summaryMatchesSearch(summary, args.normalizedQuery)) {
       count += 1
