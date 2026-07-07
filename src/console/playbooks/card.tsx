@@ -5,10 +5,8 @@ import {
   type LucideIcon,
   MailCheck,
   NotebookTabs,
-  Pause,
   Sunrise,
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardAction,
@@ -18,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { PlaybookControls } from "./controls"
+import { PlaybookControls, PlaybookSwitch } from "./controls"
 import { type PlaybookActions } from "./enable"
 import { PlaybookMeta } from "./meta"
 import { type PlaybookListRow } from "./state"
@@ -50,11 +48,13 @@ export function PlaybookCard({
           </span>
           <CardTitle>{definition.title}</CardTitle>
         </div>
-        {row?.enabled?.status === "paused" ? (
-          <CardAction>
-            <Badge variant="outline">
-              <Pause /> Paused
-            </Badge>
+        {row?.enabled ? (
+          <CardAction className="flex h-8 items-center gap-2">
+            <PlaybookSwitch
+              actions={actions}
+              definition={definition}
+              enabled={row.enabled}
+            />
           </CardAction>
         ) : null}
         <CardDescription>{definition.description}</CardDescription>
