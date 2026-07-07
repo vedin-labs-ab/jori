@@ -45,7 +45,10 @@ export const list = query({
       provider: "clerk",
       externalId: requireClerkUserId(access.identity),
     })
-    const enabled = await readPlaybookAutomations(ctx, args.tenantId)
+    const enabled = await readPlaybookAutomations(ctx, {
+      ownerId,
+      tenantId: args.tenantId,
+    })
 
     return {
       status: "ready" as const,

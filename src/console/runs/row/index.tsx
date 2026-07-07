@@ -1,7 +1,7 @@
 import { Timer } from "lucide-react"
 import { lazy, memo, Suspense, useCallback, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { RelativeTime } from "../../shared/details"
+import { RelativeTime, ScopeBadge } from "../../shared/details"
 import { formatDuration, relativeTime } from "../../shared/time"
 import { type ExecutionItem } from "../types"
 import {
@@ -103,7 +103,14 @@ export const ExecutionRow = memo(function ExecutionRow({
 
 function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
   return (
-    <RunRowContent title={execution.title}>
+    <RunRowContent
+      title={
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate">{execution.title}</span>
+          <ScopeBadge scope={execution.scope} />
+        </span>
+      }
+    >
       <SourceLine details={execution.details} source={execution.source} />
     </RunRowContent>
   )

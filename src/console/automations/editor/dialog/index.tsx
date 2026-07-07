@@ -18,6 +18,7 @@ import {
 import { AccessFields } from "./access"
 import { AutomationInstructionsSection } from "./instructions"
 import { AutomationNameField } from "./name"
+import { ScopeField } from "./scope"
 import { AutomationTiming } from "./timing"
 
 export function AutomationDialog({
@@ -94,6 +95,10 @@ export function AutomationDialog({
           <AccessFields
             onWebSearchChange={actions.updateWebSearch}
             webSearch={values.webSearch}
+          />
+          <ScopeField
+            onValueChange={actions.updateScope}
+            value={values.scope}
           />
           <AutomationTiming
             tenantId={tenantId}

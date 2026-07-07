@@ -1,3 +1,7 @@
+import {
+  defaultScopeForIntegrations,
+  type Scope,
+} from "../../../contracts/permissions/scope"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { type AutomationAccessInput, resolveAccessInput } from "../access"
@@ -19,7 +23,7 @@ type UpdateAutomationArgs = {
   artifactId?: Id<"artifacts">
   name?: string
   instructions?: string
-  visibility?: Doc<"automations">["visibility"]
+  scope?: Scope
   access?: AutomationAccessInput
   type?: AutomationType
   trigger?: AutomationTriggerInput
@@ -33,7 +37,7 @@ export async function createAutomation(
     playbook?: string
     name: string
     instructions: string
-    visibility?: Doc<"automations">["visibility"]
+    scope?: Scope
     access: AutomationAccessInput
     type: AutomationType
     trigger: AutomationTriggerInput
@@ -56,7 +60,11 @@ export async function createAutomation(
     playbook: args.playbook,
     name: normalizeRequiredText(args.name, "name"),
     instructions: normalizeRequiredText(args.instructions, "instructions"),
-    visibility: normalizeVisibility(args.visibility),
+    scope:
+      args.scope ??
+      defaultScopeForIntegrations(
+        args.access.integrations.map((entry) => entry.integration)
+      ),
     type: args.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,
@@ -127,8 +135,8 @@ async function buildAutomationPatch(
     )
   }
 
-  if (args.visibility !== undefined) {
-    patch.visibility = normalizeVisibility(args.visibility)
+  if (args.scope !== undefined) {
+    patch.scope = args.scope
   }
 
   if (args.artifactId !== undefined) {
@@ -243,12 +251,6 @@ function isSameEventTrigger(
     left.event === right.event &&
     automationEventMatchKey(left.match) === automationEventMatchKey(right.match)
   )
-}
-
-function normalizeVisibility(
-  visibility: Doc<"automations">["visibility"] | undefined
-) {
-  return visibility ?? "private"
 }
 
 async function requireArtifact(

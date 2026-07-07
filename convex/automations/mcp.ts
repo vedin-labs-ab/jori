@@ -1,3 +1,4 @@
+import { type Scope } from "../../contracts/permissions/scope"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
@@ -14,7 +15,7 @@ type AddAutomationArgs = {
   artifactId?: Id<"artifacts">
   name: string
   instructions: string
-  visibility?: "public" | "private"
+  scope?: Scope
   access: AutomationAccessInput
   type: AutomationType
   trigger: AutomationTriggerInput
@@ -35,7 +36,7 @@ type UpdateAutomationArgs = {
   artifactId?: Id<"artifacts">
   name?: string
   instructions?: string
-  visibility?: "public" | "private"
+  scope?: Scope
   access?: AutomationAccessInput
   type?: AutomationType
   trigger?: AutomationTriggerInput
@@ -63,6 +64,7 @@ export async function callMiloAutomationTool(
     return await ctx.runQuery(internal.automations.records.search, {
       ...(args as SearchAutomationsArgs),
       tenantId: execution.tenantId,
+      personId: execution.createdBy,
     })
   }
 
@@ -70,6 +72,7 @@ export async function callMiloAutomationTool(
     return await ctx.runQuery(internal.automations.records.read, {
       ...(args as ReadAutomationArgs),
       tenantId: execution.tenantId,
+      personId: execution.createdBy,
     })
   }
 
@@ -77,6 +80,7 @@ export async function callMiloAutomationTool(
     return await ctx.runMutation(internal.automations.records.update, {
       ...(args as UpdateAutomationArgs),
       tenantId: execution.tenantId,
+      personId: execution.createdBy,
     })
   }
 
@@ -84,6 +88,7 @@ export async function callMiloAutomationTool(
     return await ctx.runMutation(internal.automations.records.remove, {
       ...(args as ReadAutomationArgs),
       tenantId: execution.tenantId,
+      personId: execution.createdBy,
     })
   }
 

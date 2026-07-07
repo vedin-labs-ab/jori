@@ -16,6 +16,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { ScopeBadge } from "../../shared/details"
 import { type Automation } from "../types"
 import { AutomationActions } from "./actions"
 import { DeleteAutomationDialog } from "./delete"
@@ -61,6 +62,7 @@ export function AutomationRow({
                 <h3 className="truncate font-heading text-sm font-medium">
                   {automation.name}
                 </h3>
+                <ScopeBadge scope={automation.scope} />
                 {shouldShowCompletedBadge(automation) ? (
                   <Badge className="shrink-0" variant="outline">
                     Completed

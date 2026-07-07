@@ -1,4 +1,8 @@
 import {
+  defaultScopeForIntegrations,
+  type Scope,
+} from "@contracts/permissions/scope"
+import {
   hasAutomationWriteSurface,
   normalizeAutomationSurfaceMentions,
   syncAutomationSurfaces,
@@ -24,6 +28,7 @@ import {
 type AutomationArgs = {
   name: string
   instructions: string
+  scope: Scope
   access: {
     integrations: Array<{
       integration: AutomationFormValues["surfaces"][number]["integration"]
@@ -42,9 +47,16 @@ export function automationFormValues(
   automation: Automation | undefined
 ): AutomationFormValues {
   if (automation === undefined) {
-    return {
+    const values = {
       ...emptyAutomationForm,
       ...readAutomationPreferences(),
+    }
+
+    return {
+      ...values,
+      scope: defaultScopeForIntegrations(
+        values.surfaces.map((surface) => surface.integration)
+      ),
     }
   }
 
@@ -52,6 +64,7 @@ export function automationFormValues(
     name: automation.name,
     instructions: normalizeAutomationSurfaceMentions(automation.instructions),
     ...triggerFormValues(automation),
+    scope: automation.scope,
     webSearch: automation.access.webSearch,
     surfaces: automation.access.surfaces,
   }
@@ -167,6 +180,7 @@ function buildBaseArgs(
     args: {
       name,
       instructions,
+      scope: values.scope,
       access: {
         integrations: surfaces.map((surface) => ({
           integration: surface.integration,

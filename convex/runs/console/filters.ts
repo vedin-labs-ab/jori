@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 
 export type RunFilter = "all" | "ongoing" | "failed" | "stopped" | "completed"
 
@@ -35,6 +35,23 @@ export const approvalFilterValidator = v.union(
   v.literal("expired"),
   v.literal("none")
 )
+
+/**
+ * The console shows organization runs to everyone; personal and
+ * conversation-scoped runs only to their creator. Ownerless rows stay open.
+ */
+export function runVisibleToPerson(
+  run: Doc<"runs">,
+  personId: Id<"persons"> | undefined
+) {
+  const scope = run.scope ?? "person"
+
+  return (
+    scope === "tenant" ||
+    run.createdBy === undefined ||
+    run.createdBy === personId
+  )
+}
 
 export function runMatchesFilter(run: Doc<"runs">, filter: RunFilter) {
   if (filter === "all") {

@@ -2,6 +2,7 @@ import {
   type AutomationEventIntegration,
   getDefaultAutomationEvent,
 } from "@contracts/automations/events"
+import { type Scope } from "@contracts/permissions/scope"
 import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
 import { type AutomationSurfaceFormValue } from "./access"
@@ -43,6 +44,7 @@ export type AutomationFormValues = {
   eventIntegration: AutomationEventIntegration
   event: string
   eventMatch: Record<string, string>
+  scope: Scope
   webSearch: boolean
   surfaces: AutomationSurfaceFormValue[]
 }
@@ -62,6 +64,7 @@ export const emptyAutomationForm: AutomationFormValues = {
   eventIntegration: "slack",
   event: defaultEvent.value,
   eventMatch: {},
+  scope: "personal",
   webSearch: true,
   surfaces: [],
 }

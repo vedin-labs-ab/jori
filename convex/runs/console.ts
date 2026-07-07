@@ -1,7 +1,10 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
+import { type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
+import { requireClerkUserId } from "../identity/users"
+import { resolvePersonByIdentity } from "../persons/links"
 import {
   type ApprovalFilter,
   approvalFilterValidator,
@@ -10,6 +13,7 @@ import {
   parseCursor,
   runFilterValidator,
   runMatchesFilter,
+  runVisibleToPerson,
   summaryMatchesSearch,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
@@ -26,10 +30,11 @@ export const page = query({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const personId = await resolveConsolePerson(ctx, args.tenantId, identity)
 
     if (args.approvalFilter === "pending") {
-      return await pagePendingApprovals(ctx, args)
+      return await pagePendingApprovals(ctx, { ...args, personId })
     }
 
     const offset = parseCursor(args.paginationOpts.cursor)
@@ -48,7 +53,10 @@ export const page = query({
     )
 
     for await (const run of runs) {
-      if (!runMatchesFilter(run, args.runFilter)) {
+      if (
+        !runVisibleToPerson(run, personId) ||
+        !runMatchesFilter(run, args.runFilter)
+      ) {
         continue
       }
 
@@ -91,7 +99,8 @@ export const stats = query({
     tenantId: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const personId = await resolveConsolePerson(ctx, args.tenantId, identity)
 
     const normalizedQuery = normalizeQuery(args.query)
 
@@ -100,9 +109,10 @@ export const stats = query({
         filteredCount: await countPendingApprovals(ctx, {
           runFilter: args.runFilter,
           normalizedQuery,
+          personId,
           tenantId: args.tenantId,
         }),
-        totalCount: await countRuns(ctx, args.tenantId),
+        totalCount: await countRuns(ctx, args.tenantId, personId),
       }
     }
 
@@ -114,6 +124,10 @@ export const stats = query({
       .order("desc")
 
     for await (const run of runs) {
+      if (!runVisibleToPerson(run, personId)) {
+        continue
+      }
+
       totalCount += 1
 
       if (!runMatchesFilter(run, args.runFilter)) {
@@ -136,17 +150,36 @@ export const stats = query({
   },
 })
 
-async function countRuns(ctx: QueryCtx, tenantId: string) {
+async function countRuns(
+  ctx: QueryCtx,
+  tenantId: string,
+  personId: Id<"persons"> | undefined
+) {
   let count = 0
   const runs = ctx.db
     .query("runs")
     .withIndex("by_tenant", (index) => index.eq("tenantId", tenantId))
 
-  for await (const _run of runs) {
-    count += 1
+  for await (const run of runs) {
+    if (runVisibleToPerson(run, personId)) {
+      count += 1
+    }
   }
 
   return count
+}
+
+/** The caller's person for ownership filtering; guard runs in the handler. */
+async function resolveConsolePerson(
+  ctx: QueryCtx,
+  tenantId: string,
+  identity: Awaited<ReturnType<typeof requireTenantAccess>>
+) {
+  return await resolvePersonByIdentity(ctx, {
+    tenantId,
+    provider: "clerk",
+    externalId: requireClerkUserId(identity),
+  })
 }
 
 function needsSummary(filter: ApprovalFilter, normalizedQuery: string) {

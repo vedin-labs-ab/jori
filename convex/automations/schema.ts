@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { eventMatch } from "../events/schema"
+import { scopeValidator } from "../shared/audience"
 import { accessValidator, integrationValidator } from "../shared/integrations"
 
 export const accessInput = v.object({
@@ -58,11 +59,6 @@ export const automationType = v.union(
   v.literal("event")
 )
 
-export const automationVisibility = v.union(
-  v.literal("public"),
-  v.literal("private")
-)
-
 export const automations = defineTable({
   tenantId: v.string(),
   artifactId: v.optional(v.id("artifacts")),
@@ -70,7 +66,10 @@ export const automations = defineTable({
   playbook: v.optional(v.string()),
   name: v.string(),
   instructions: v.string(),
-  visibility: v.optional(automationVisibility),
+  /** Personal: owner-only. Organization: every member. See contracts/scope. */
+  scope: v.optional(scopeValidator),
+  // Legacy field; removed once the scopeFromVisibility migration has run.
+  visibility: v.optional(v.union(v.literal("public"), v.literal("private"))),
   type: automationType,
   access,
   trigger,

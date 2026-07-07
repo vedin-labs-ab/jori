@@ -1,7 +1,9 @@
 import { describe, expect, test } from "vitest"
+import { defaultScopeForIntegrations } from "../../contracts/permissions/scope"
 import { type Id } from "../_generated/dataModel"
 import {
   type AutomationAccess,
+  canAccessAutomation,
   canUseAutomationTool,
   getIntegrationAccess,
 } from "./access"
@@ -42,3 +44,41 @@ function automationAccess(
     web: true,
   }
 }
+
+describe("automation scope access", () => {
+  const me = "me" as Id<"persons">
+  const other = "other" as Id<"persons">
+
+  test("organization automations are open to every member", () => {
+    expect(
+      canAccessAutomation({ scope: "organization", createdBy: other }, me)
+    ).toBe(true)
+  })
+
+  test("personal automations are owner-only, defaulting to personal", () => {
+    expect(
+      canAccessAutomation({ scope: "personal", createdBy: other }, me)
+    ).toBe(false)
+    expect(canAccessAutomation({ scope: "personal", createdBy: me }, me)).toBe(
+      true
+    )
+    expect(
+      canAccessAutomation({ scope: undefined, createdBy: other }, me)
+    ).toBe(false)
+  })
+
+  test("ownerless rows stay open", () => {
+    expect(
+      canAccessAutomation({ scope: "personal", createdBy: undefined }, me)
+    ).toBe(true)
+  })
+
+  test("scope defaults from the tools in play", () => {
+    expect(defaultScopeForIntegrations([])).toBe("personal")
+    expect(defaultScopeForIntegrations(["gmail"])).toBe("personal")
+    expect(defaultScopeForIntegrations(["github", "slack"])).toBe(
+      "organization"
+    )
+    expect(defaultScopeForIntegrations(["slack", "gmail"])).toBe("personal")
+  })
+})

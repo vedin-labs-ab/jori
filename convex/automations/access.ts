@@ -1,5 +1,6 @@
 import { type Infer } from "convex/values"
-import { type Id } from "../_generated/dataModel"
+import { type Scope } from "../../contracts/permissions/scope"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   getToolPermission,
   isUnattendedToolMode,
@@ -16,6 +17,27 @@ import { type access, type accessInput } from "./schema"
 export type AutomationAccess = Infer<typeof access>
 export type AutomationAccessInput = Infer<typeof accessInput>
 export type AccessLevel = "none" | "read" | "write" | "both"
+
+export function automationScope(
+  automation: Pick<Doc<"automations">, "scope">
+): Scope {
+  return automation.scope ?? "personal"
+}
+
+/**
+ * Organization automations belong to every member; personal ones to their
+ * owner. Ownerless personal rows predate ownership and stay open.
+ */
+export function canAccessAutomation(
+  automation: Pick<Doc<"automations">, "scope" | "createdBy">,
+  personId: Id<"persons"> | undefined
+) {
+  return (
+    automationScope(automation) === "organization" ||
+    automation.createdBy === undefined ||
+    automation.createdBy === personId
+  )
+}
 
 export async function resolveAccessInput(
   ctx: QueryLikeCtx,

@@ -33,6 +33,7 @@ export function makeExecution(
     id: "execution" as ExecutionItem["id"],
     offer,
     offers: offer === null ? [] : [offer],
+    scope: "personal",
     searchableText: "",
     source: { type: "automation", surface: "slack" },
     status: "completed",
