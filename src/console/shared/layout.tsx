@@ -1,5 +1,11 @@
 import { Search } from "lucide-react"
-import { type ComponentProps } from "react"
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  useContext,
+} from "react"
+import { createPortal } from "react-dom"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
@@ -16,30 +22,50 @@ export function ConsolePageLayout({
   )
 }
 
-export function ConsoleToolbar({ className, ...props }: ComponentProps<"div">) {
+// The console header hosts each page's search and create actions, beside the
+// breadcrumb. The shell owns the target element; pages portal into it.
+const HeaderActionsContext = createContext<HTMLElement | null>(null)
+
+export function ConsoleHeaderActionsProvider({
+  children,
+  slot,
+}: {
+  children: ReactNode
+  slot: HTMLElement | null
+}) {
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-3 md:flex-row md:items-center md:justify-between",
-        className
-      )}
-      {...props}
-    />
+    <HeaderActionsContext.Provider value={slot}>
+      {children}
+    </HeaderActionsContext.Provider>
   )
 }
 
-export function ConsoleToolbarActions({
-  className,
-  ...props
-}: ComponentProps<"div">) {
+export function ConsoleHeaderActions({ children }: { children: ReactNode }) {
+  const slot = useContext(HeaderActionsContext)
+
+  return slot === null
+    ? null
+    : createPortal(
+        <div className="flex items-center gap-2">{children}</div>,
+        slot
+      )
+}
+
+/** Pairs a filter control with a muted inline label, shared across facets. */
+export function ConsoleFilterField({
+  children,
+  label,
+}: {
+  children: ReactNode
+  label: string
+}) {
   return (
-    <div
-      className={cn(
-        "flex min-w-0 flex-1 flex-col gap-2 sm:flex-row md:flex-none",
-        className
-      )}
-      {...props}
-    />
+    <div className="flex items-center gap-2">
+      <span className="shrink-0 font-medium text-muted-foreground text-xs">
+        {label}
+      </span>
+      {children}
+    </div>
   )
 }
 
@@ -75,21 +101,14 @@ export function ConsoleFilterToggle<Value extends string>({
     </ToggleGroup>
   )
 
-  if (label === undefined) {
-    return toggle
-  }
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="shrink-0 font-medium text-muted-foreground text-xs">
-        {label}
-      </span>
-      {toggle}
-    </div>
+  return label === undefined ? (
+    toggle
+  ) : (
+    <ConsoleFilterField label={label}>{toggle}</ConsoleFilterField>
   )
 }
 
-/** Wraps several labeled filter facets on one toolbar line. */
+/** Full-width row of in-content filter facets. */
 export function ConsoleFilterGroup({
   className,
   ...props
@@ -102,7 +121,7 @@ export function ConsoleFilterGroup({
   )
 }
 
-export function ConsoleToolbarSearch({
+export function ConsoleSearch({
   label,
   onValueChange,
   placeholder,
@@ -114,7 +133,7 @@ export function ConsoleToolbarSearch({
   value: string
 }) {
   return (
-    <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
+    <div className="relative w-56 lg:w-72">
       <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
       <Input
         aria-label={label}

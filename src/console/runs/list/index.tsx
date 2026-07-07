@@ -6,13 +6,13 @@ import {
   SelectTrigger,
 } from "@/components/ui/select"
 import {
+  ConsoleFilterField,
   ConsoleFilterGroup,
   ConsoleFilterToggle,
+  ConsoleHeaderActions,
   ConsolePageLayout,
   ConsoleScrollableGrid,
-  ConsoleToolbar,
-  ConsoleToolbarActions,
-  ConsoleToolbarSearch,
+  ConsoleSearch,
 } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { type ScopeFilter, scopeFilterOptions } from "../../shared/list/scope"
@@ -102,7 +102,15 @@ const ExecutionFilters = memo(function ExecutionFilters({
   setScopeFilter: (filter: ScopeFilter) => void
 }) {
   return (
-    <ConsoleToolbar>
+    <>
+      <ConsoleHeaderActions>
+        <ConsoleSearch
+          label="Search runs"
+          onValueChange={setQuery}
+          placeholder="Search runs..."
+          value={query}
+        />
+      </ConsoleHeaderActions>
       <ConsoleFilterGroup>
         <ConsoleFilterToggle
           label="Status"
@@ -116,39 +124,32 @@ const ExecutionFilters = memo(function ExecutionFilters({
           options={scopeFilterOptions}
           value={scopeFilter}
         />
-      </ConsoleFilterGroup>
-      <ConsoleToolbarActions>
-        <Select
-          onValueChange={(value) => setApprovalFilter(value as ApprovalFilter)}
-          value={approvalFilter}
-        >
-          <SelectTrigger
-            aria-label="Filter by approval state"
-            className="w-full sm:w-fit"
+        <ConsoleFilterField label="Approval">
+          <Select
+            onValueChange={(value) =>
+              setApprovalFilter(value as ApprovalFilter)
+            }
+            value={approvalFilter}
           >
-            <span className="min-w-0 flex-1 truncate text-left sm:flex-none">
-              Approval:{" "}
+            <SelectTrigger
+              aria-label="Filter by approval state"
+              className="w-fit"
+            >
               <span className="font-medium">
                 {approvalFilterLabels[approvalFilter]}
               </span>
-            </span>
-          </SelectTrigger>
-          <SelectContent align="start" position="popper">
-            {approvalFilterOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <ConsoleToolbarSearch
-          label="Search runs"
-          onValueChange={setQuery}
-          placeholder="Search runs..."
-          value={query}
-        />
-      </ConsoleToolbarActions>
-    </ConsoleToolbar>
+            </SelectTrigger>
+            <SelectContent align="start" position="popper">
+              {approvalFilterOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </ConsoleFilterField>
+      </ConsoleFilterGroup>
+    </>
   )
 })
 

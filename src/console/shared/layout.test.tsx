@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { ConsoleFilterToggle, ConsoleToolbarSearch } from "./layout"
+import { ConsoleFilterToggle, ConsoleSearch } from "./layout"
 
 afterEach(() => {
   cleanup()
@@ -48,7 +48,7 @@ test("toolbar search labels the input and reports typed values", () => {
   const onValueChange = vi.fn()
 
   render(
-    <ConsoleToolbarSearch
+    <ConsoleSearch
       label="Search artifacts"
       onValueChange={onValueChange}
       value=""
@@ -65,7 +65,7 @@ test("toolbar search labels the input and reports typed values", () => {
 
 test("toolbar search can use a placeholder different from its label", () => {
   render(
-    <ConsoleToolbarSearch
+    <ConsoleSearch
       label="Search runs"
       onValueChange={() => {}}
       placeholder="Search runs..."

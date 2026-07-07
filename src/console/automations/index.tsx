@@ -7,10 +7,9 @@ import { ConsolePage } from "../page"
 import {
   ConsoleFilterGroup,
   ConsoleFilterToggle,
+  ConsoleHeaderActions,
   ConsolePageLayout,
-  ConsoleToolbar,
-  ConsoleToolbarActions,
-  ConsoleToolbarSearch,
+  ConsoleSearch,
 } from "../shared/layout"
 import { ConsoleListPager } from "../shared/list/pager"
 import { useClientPagination } from "../shared/list/pagination"
@@ -171,23 +170,9 @@ function AutomationFilters({
   }
 
   return (
-    <ConsoleToolbar>
-      <ConsoleFilterGroup>
-        <ConsoleFilterToggle
-          label="Status"
-          onValueChange={setFilter}
-          options={automationFilterOptions}
-          value={filter}
-        />
-        <ConsoleFilterToggle
-          label="Sharing"
-          onValueChange={setScope}
-          options={scopeFilterOptions}
-          value={scope}
-        />
-      </ConsoleFilterGroup>
-      <ConsoleToolbarActions>
-        <ConsoleToolbarSearch
+    <>
+      <ConsoleHeaderActions>
+        <ConsoleSearch
           label="Search automations"
           onValueChange={setQuery}
           value={query}
@@ -204,7 +189,21 @@ function AutomationFilters({
           <Plus />
           New automation
         </Button>
-      </ConsoleToolbarActions>
-    </ConsoleToolbar>
+      </ConsoleHeaderActions>
+      <ConsoleFilterGroup>
+        <ConsoleFilterToggle
+          label="Status"
+          onValueChange={setFilter}
+          options={automationFilterOptions}
+          value={filter}
+        />
+        <ConsoleFilterToggle
+          label="Sharing"
+          onValueChange={setScope}
+          options={scopeFilterOptions}
+          value={scope}
+        />
+      </ConsoleFilterGroup>
+    </>
   )
 }

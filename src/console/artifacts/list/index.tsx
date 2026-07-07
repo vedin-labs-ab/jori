@@ -2,11 +2,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   ConsoleFilterGroup,
   ConsoleFilterToggle,
+  ConsoleHeaderActions,
   ConsolePageLayout,
   ConsoleScrollableList,
-  ConsoleToolbar,
-  ConsoleToolbarActions,
-  ConsoleToolbarSearch,
+  ConsoleSearch,
 } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { type useClientPagination } from "../../shared/list/pagination"
@@ -101,7 +100,14 @@ function ArtifactToolbar({
   scope,
 }: ArtifactToolbarProps) {
   return (
-    <ConsoleToolbar>
+    <>
+      <ConsoleHeaderActions>
+        <ConsoleSearch
+          label="Search artifacts"
+          onValueChange={onQueryChange}
+          value={query}
+        />
+      </ConsoleHeaderActions>
       <ConsoleFilterGroup>
         <ConsoleFilterToggle
           label="Status"
@@ -116,14 +122,7 @@ function ArtifactToolbar({
           value={scope}
         />
       </ConsoleFilterGroup>
-      <ConsoleToolbarActions>
-        <ConsoleToolbarSearch
-          label="Search artifacts"
-          onValueChange={onQueryChange}
-          value={query}
-        />
-      </ConsoleToolbarActions>
-    </ConsoleToolbar>
+    </>
   )
 }
 
