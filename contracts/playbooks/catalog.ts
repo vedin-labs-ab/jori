@@ -1,11 +1,4 @@
 import { type PlaybookSlot } from "./capabilities"
-import {
-  followUpSweep,
-  meetingPrep,
-  morningBrief,
-  type PlaybookInstructions,
-  weekInReview,
-} from "./instructions"
 import { type PlaybookSchedule } from "./schedule"
 
 export type PlaybookDefinition = {
@@ -16,7 +9,6 @@ export type PlaybookDefinition = {
   schedule: PlaybookSchedule
   slots: readonly PlaybookSlot[]
   web: boolean
-  instructions: PlaybookInstructions
 }
 
 export const playbookCatalog: readonly PlaybookDefinition[] = [
@@ -31,7 +23,6 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
       { capability: "calendar", intents: ["read"] },
     ],
     web: false,
-    instructions: morningBrief,
   },
   {
     key: "meeting-prep",
@@ -44,7 +35,6 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
       { capability: "calendar", intents: ["read"] },
     ],
     web: true,
-    instructions: meetingPrep,
   },
   {
     key: "follow-up-sweep",
@@ -54,7 +44,6 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     schedule: { repeat: "weekdays", time: "15:30" },
     slots: [{ capability: "email", intents: ["read", "draft", "send"] }],
     web: false,
-    instructions: followUpSweep,
   },
   {
     key: "week-in-review",
@@ -67,7 +56,6 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
       { capability: "calendar", intents: ["read"] },
     ],
     web: false,
-    instructions: weekInReview,
   },
 ]
 
