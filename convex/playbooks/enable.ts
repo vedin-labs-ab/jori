@@ -15,6 +15,10 @@ import { findEventIntegration } from "../automations/integrations"
 import { createAutomation } from "../automations/lifecycle"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration, integrationLabels } from "../shared/integrations"
+import {
+  type PlaybookRecipient,
+  renderPlaybookInstructions,
+} from "./instructions"
 
 export type PlaybookSlotState = {
   capability: PlaybookCapability
@@ -26,7 +30,7 @@ export type PlaybookPlanArgs = {
   key: string
   choices: Partial<Record<PlaybookCapability, Integration>>
   createdBy: Id<"persons">
-  recipient: { email: string; name?: string }
+  recipient: PlaybookRecipient
 }
 
 /** Resolve a playbook's slots to the caller's providers and render it. */
@@ -47,7 +51,8 @@ export async function resolvePlaybookPlan(
 
   return {
     definition,
-    instructions: definition.instructions({
+    instructions: renderPlaybookInstructions({
+      key: definition.key,
       providers: resolvedProviderLabels(resolved),
       recipient: args.recipient,
     }),

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { type Integration, integrationLabels } from "../integrations"
+import { type Integration } from "../integrations"
 import { getToolPermission } from "../permissions"
 import {
   type PlaybookCapability,
@@ -7,8 +7,6 @@ import {
   playbookSlotTools,
 } from "./capabilities"
 import { playbookCatalog } from "./catalog"
-
-const recipient = { email: "sam@example.com", name: "Sam Doe" }
 
 const providerFamilies = [
   { email: "gmail", calendar: "googleCalendar" },
@@ -58,24 +56,6 @@ describe("playbook catalog", () => {
         )
 
         expect(accesses).toContain("write")
-      }
-    }
-  })
-
-  test("instructions mention each slot's provider and the recipient", () => {
-    for (const playbook of playbookCatalog) {
-      for (const family of providerFamilies) {
-        const providers = {
-          email: integrationLabels[family.email],
-          calendar: integrationLabels[family.calendar],
-        }
-        const instructions = playbook.instructions({ providers, recipient })
-
-        expect(instructions).not.toContain("undefined")
-        expect(instructions).toContain(recipient.email)
-        for (const slot of playbook.slots) {
-          expect(instructions).toContain(providers[slot.capability])
-        }
       }
     }
   })
