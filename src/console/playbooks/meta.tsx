@@ -1,9 +1,12 @@
+import { type Integration, integrationLabels } from "@contracts/integrations"
 import { playbookSlotIntentLabels } from "@contracts/playbooks/capabilities"
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import { describePlaybookSchedule } from "@contracts/playbooks/schedule"
-import { Globe, Repeat2 } from "lucide-react"
+import { CalendarClock, Globe } from "lucide-react"
 import { type ReactNode } from "react"
 import { SurfaceLogo } from "../automations/access/logo"
+import { absoluteTime, relativeTime } from "../automations/format"
+import { useNow } from "../shared/time"
 import { type PlaybookListRow, slotDisplayProviders } from "./state"
 
 export function PlaybookMeta({
@@ -15,10 +18,11 @@ export function PlaybookMeta({
 }) {
   return (
     <div className="grid gap-3">
-      <PlaybookMetaSection label="Trigger">
+      <PlaybookMetaSection label="Schedule">
         <div className="flex items-center gap-1.5">
-          <Repeat2 className="size-3.5 shrink-0" />
+          <CalendarClock className="size-3.5 shrink-0 text-muted-foreground" />
           <span>{describePlaybookSchedule(definition.schedule)}</span>
+          <NextRun enabled={row?.enabled} />
         </div>
       </PlaybookMetaSection>
       <PlaybookMetaSection label="Tools">
@@ -28,6 +32,7 @@ export function PlaybookMeta({
               {slotDisplayProviders(slot, row).map((provider) => (
                 <SurfaceLogo
                   key={provider.integration}
+                  alt={providerAlt(provider)}
                   className={provider.connected ? undefined : "opacity-40"}
                   integration={provider.integration}
                 />
@@ -40,13 +45,44 @@ export function PlaybookMeta({
         ))}
         {definition.web ? (
           <div className="flex items-center gap-1.5">
-            <Globe className="size-3.5 shrink-0" />
+            <Globe className="size-3.5 shrink-0 text-muted-foreground" />
             <span>Web research</span>
           </div>
         ) : null}
       </PlaybookMetaSection>
     </div>
   )
+}
+
+/** Live "Next in 14h" suffix once the playbook is enabled and active. */
+function NextRun({
+  enabled,
+}: {
+  enabled: PlaybookListRow["enabled"] | undefined
+}) {
+  const now = useNow(60_000)
+
+  if (enabled?.status !== "active" || enabled.nextRunAt === undefined) {
+    return null
+  }
+
+  return (
+    <span
+      className="truncate text-muted-foreground"
+      title={absoluteTime(enabled.nextRunAt)}
+    >
+      · Next {relativeTime(enabled.nextRunAt, now)}
+    </span>
+  )
+}
+
+function providerAlt(provider: {
+  connected: boolean
+  integration: Integration
+}) {
+  const label = integrationLabels[provider.integration]
+
+  return provider.connected ? label : `${label} (not connected)`
 }
 
 function PlaybookMetaSection({
@@ -57,8 +93,10 @@ function PlaybookMetaSection({
   label: string
 }) {
   return (
-    <div className="grid gap-1.5 text-xs text-muted-foreground">
-      <p className="font-medium text-foreground">{label}</p>
+    <div className="grid gap-1.5 text-xs">
+      <p className="font-medium text-[0.625rem] text-muted-foreground uppercase tracking-wider">
+        {label}
+      </p>
       {children}
     </div>
   )

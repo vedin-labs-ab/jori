@@ -63,7 +63,14 @@ export const list = query({
             enabled:
               automation === undefined
                 ? null
-                : { automationId: automation._id, status: automation.status },
+                : {
+                    automationId: automation._id,
+                    status: automation.status,
+                    nextRunAt:
+                      "nextAt" in automation.trigger
+                        ? automation.trigger.nextAt
+                        : undefined,
+                  },
           }
         })
       ),
