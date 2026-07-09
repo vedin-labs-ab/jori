@@ -18,14 +18,14 @@ export function PlaybookMeta({
 }) {
   return (
     <div className="grid gap-3">
-      <PlaybookMetaSection label="Schedule">
+      <PlaybookSection label="Schedule">
         <div className="flex items-center gap-1.5">
           <CalendarClock className="size-3.5 shrink-0 text-muted-foreground" />
           <span>{describePlaybookSchedule(definition.schedule)}</span>
           <NextRun enabled={row?.enabled} />
         </div>
-      </PlaybookMetaSection>
-      <PlaybookMetaSection label="Tools">
+      </PlaybookSection>
+      <PlaybookSection label="Tools">
         {definition.slots.map((slot) => (
           <div className="flex items-center gap-1.5" key={slot.capability}>
             <span className="flex shrink-0 items-center gap-1">
@@ -49,7 +49,7 @@ export function PlaybookMeta({
             <span>Web research</span>
           </div>
         ) : null}
-      </PlaybookMetaSection>
+      </PlaybookSection>
     </div>
   )
 }
@@ -85,7 +85,7 @@ function providerAlt(provider: {
   return provider.connected ? label : `${label} (not connected)`
 }
 
-function PlaybookMetaSection({
+export function PlaybookSection({
   children,
   label,
 }: {

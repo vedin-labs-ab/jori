@@ -9,6 +9,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../convex/_generated/api"
 import { type AutomationEditorHost } from "../automations/editor/host"
+import { automationFormValues } from "../automations/editor/save"
 import { showErrorToast } from "../shared/error"
 
 type AutomationId = FunctionArgs<
@@ -17,7 +18,13 @@ type AutomationId = FunctionArgs<
 
 type PlaybookChoices = Record<string, Integration>
 
-export type PlaybookActionKind = "enable" | "trial" | "run" | "pause" | "edit"
+export type PlaybookActionKind =
+  | "enable"
+  | "trial"
+  | "run"
+  | "pause"
+  | "edit"
+  | "advanced"
 
 export type PlaybookActions = ReturnType<typeof usePlaybookActions>
 
@@ -32,12 +39,12 @@ export function usePlaybookActions(
     preloadEdit: editorHost.preloadDialog,
     ...useCatalogActions(tenantId, pending),
     ...useAutomationActions(tenantId, pending),
-    ...useEditAction(tenantId, pending, editorHost),
+    ...useEditActions(tenantId, pending, editorHost),
   }
 }
 
-/** Opens the shared automation editor with the playbook's automation. */
-function useEditAction(
+/** Opens the shared automation editor from a playbook — existing or draft. */
+function useEditActions(
   tenantId: string,
   pending: ReturnType<typeof usePendingAction>,
   editorHost: AutomationEditorHost
@@ -54,6 +61,27 @@ function useEditAction(
             automationId,
           })
           editorHost.editor.openEditForm(automation)
+        } catch (error) {
+          showErrorToast(error, "Couldn't open the automation.")
+        }
+      }),
+
+    openAdvanced: (
+      definition: PlaybookDefinition,
+      choices: PlaybookChoices,
+      destination: DeliveryChoice
+    ) =>
+      pending.wrap(definition.key, "advanced", async () => {
+        editorHost.preloadDialog()
+        try {
+          const draft = await convex.query(api.playbooks.console.draft, {
+            tenantId,
+            playbook: definition.key,
+            utcOffsetMinutes: new Date().getTimezoneOffset(),
+            choices,
+            destination,
+          })
+          editorHost.editor.openDraftForm(automationFormValues(draft))
         } catch (error) {
           showErrorToast(error, "Couldn't open the automation.")
         }

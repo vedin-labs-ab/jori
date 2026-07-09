@@ -8,9 +8,10 @@ import {
   readClerkUserName,
   requireClerkUserId,
 } from "../identity/users"
-import { ensureClerkPerson } from "../persons/clerk"
+import { ensureClerkPerson, resolveCurrentPerson } from "../persons/clerk"
 import { resolvePersonByIdentity } from "../persons/links"
 import { type Integration, integrationValidator } from "../shared/integrations"
+import { resolvePlaybookDraft } from "./draft"
 import {
   availableDelivery,
   connectedIntegrations,
@@ -123,6 +124,24 @@ export const trial = mutation({
   },
 })
 
+// A non-persisting preview of the automation a playbook would create, for the
+// raw builder. Read-only, so it resolves the caller's existing person.
+export const draft = query({
+  args: {
+    ...planArgs,
+    utcOffsetMinutes: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const createdBy = await resolveCurrentPerson(ctx, args.tenantId)
+
+    return await resolvePlaybookDraft(ctx, {
+      ...planFromArgs(args, createdBy, callerRecipient(identity)),
+      utcOffsetMinutes: args.utcOffsetMinutes,
+    })
+  },
+})
+
 async function resolveCallerPlanArgs(
   ctx: MutationCtx,
   identity: { email?: string; name?: string; subject?: string },
@@ -133,6 +152,41 @@ async function resolveCallerPlanArgs(
     destination?: DeliveryChoice
   }
 ): Promise<PlaybookPlanArgs> {
+  const recipient = callerRecipient(identity)
+  const createdBy = await ensureClerkPerson(ctx, {
+    tenantId: args.tenantId,
+    clerkSubject: requireClerkUserId(identity),
+    email: recipient.email,
+    name: recipient.name,
+  })
+
+  return planFromArgs(args, createdBy, recipient)
+}
+
+function planFromArgs(
+  args: {
+    tenantId: string
+    playbook: string
+    choices?: Record<string, Integration>
+    destination?: DeliveryChoice
+  },
+  createdBy: PlaybookPlanArgs["createdBy"],
+  recipient: PlaybookPlanArgs["recipient"]
+): PlaybookPlanArgs {
+  return {
+    tenantId: args.tenantId,
+    key: args.playbook,
+    choices: args.choices ?? {},
+    destination: args.destination ?? { kind: "email" },
+    createdBy,
+    recipient,
+  }
+}
+
+function callerRecipient(identity: {
+  email?: string
+  name?: string
+}): PlaybookPlanArgs["recipient"] {
   const email = readClerkUserEmail(identity)
 
   if (email === undefined) {
@@ -141,20 +195,5 @@ async function resolveCallerPlanArgs(
     )
   }
 
-  const name = readClerkUserName(identity)
-  const createdBy = await ensureClerkPerson(ctx, {
-    tenantId: args.tenantId,
-    clerkSubject: requireClerkUserId(identity),
-    email,
-    name,
-  })
-
-  return {
-    tenantId: args.tenantId,
-    key: args.playbook,
-    choices: args.choices ?? {},
-    destination: args.destination ?? { kind: "email" },
-    createdBy,
-    recipient: { email, name },
-  }
+  return { email, name: readClerkUserName(identity) }
 }

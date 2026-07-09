@@ -1,12 +1,9 @@
-import { useUser } from "@clerk/tanstack-react-start"
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import {
   type DeliveryChoice,
   type DeliveryKind,
-  deliveryKindLabels,
 } from "@contracts/playbooks/delivery"
-import { describePlaybookSchedule } from "@contracts/playbooks/schedule"
-import { Play } from "lucide-react"
+import { Play, Settings2 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,11 +14,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { type SlackChannel, SlackChannelField } from "./channel"
+import { type SlackChannel } from "./channel"
+import { PlaybookCustomizations } from "./customizations"
 import { type PlaybookActions, pendingActionKind } from "./enable"
+import { PlaybookMeta } from "./meta"
 import { type PlaybookEnablePlan, type PlaybookListRow } from "./state"
 
 /** Confirm-and-customize setup for an unenabled playbook. */
@@ -44,7 +41,7 @@ export function PlaybookSetupDialog({
   tenantId: string
 }) {
   const availableKinds = row.delivery
-  const [familyIndex, setFamilyIndex] = useState(0)
+  const [providerIndex, setProviderIndex] = useState(0)
   const [kind, setKind] = useState<DeliveryKind>(
     availableKinds.includes(definition.delivery.default)
       ? definition.delivery.default
@@ -54,7 +51,7 @@ export function PlaybookSetupDialog({
   const pendingKind = pendingActionKind(actions, definition)
 
   const choices =
-    plan.kind === "choose" ? plan.options[familyIndex].choices : plan.choices
+    plan.kind === "choose" ? plan.options[providerIndex].choices : plan.choices
   const destination = toDestination(kind, channel)
   const canSubmit = destination !== undefined && pendingKind === undefined
 
@@ -74,134 +71,60 @@ export function PlaybookSetupDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Set up {definition.title}</DialogTitle>
-          <DialogDescription>
-            Runs {lowercaseFirst(describePlaybookSchedule(definition.schedule))}
-            . {definition.description}
-          </DialogDescription>
+          <DialogDescription>{definition.description}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4">
-          {plan.kind === "choose" ? (
-            <ProviderField
-              onValueChange={setFamilyIndex}
-              options={plan.options.map((option) => option.label)}
-              value={familyIndex}
-            />
-          ) : null}
-          <DeliveryField
-            availableKinds={availableKinds}
-            channel={channel}
-            kind={kind}
-            onChannelChange={setChannel}
-            onKindChange={setKind}
-            tenantId={tenantId}
+        <div className="grid gap-5">
+          <PlaybookMeta definition={definition} row={row} />
+          <PlaybookCustomizations
+            delivery={{
+              availableKinds,
+              channel,
+              kind,
+              onChannelChange: setChannel,
+              onKindChange: setKind,
+              tenantId,
+            }}
+            onProviderIndexChange={setProviderIndex}
+            plan={plan}
+            providerIndex={providerIndex}
           />
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="sm:justify-between">
           <Button
-            disabled={!canSubmit}
-            onClick={() => submit(actions.trial, false)}
-            variant="outline"
+            disabled={destination === undefined || pendingKind === "advanced"}
+            onClick={() => {
+              if (destination !== undefined) {
+                void actions.openAdvanced(definition, choices, destination)
+                onOpenChange(false)
+              }
+            }}
+            onPointerEnter={actions.preloadEdit}
+            type="button"
+            variant="ghost"
           >
-            {pendingKind === "trial" ? <Spinner /> : <Play />} Try once
+            {pendingKind === "advanced" ? <Spinner /> : <Settings2 />} Advanced
+            settings
           </Button>
-          <Button
-            disabled={!canSubmit}
-            onClick={() => submit(actions.enable, true)}
-          >
-            {pendingKind === "enable" ? <Spinner /> : null} Enable
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              disabled={!canSubmit}
+              onClick={() => submit(actions.trial, false)}
+              variant="outline"
+            >
+              {pendingKind === "trial" ? <Spinner /> : <Play />} Try once
+            </Button>
+            <Button
+              disabled={!canSubmit}
+              onClick={() => submit(actions.enable, true)}
+            >
+              {pendingKind === "enable" ? <Spinner /> : null} Enable
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function DeliveryField({
-  availableKinds,
-  channel,
-  kind,
-  onChannelChange,
-  onKindChange,
-  tenantId,
-}: {
-  availableKinds: DeliveryKind[]
-  channel: SlackChannel | undefined
-  kind: DeliveryKind
-  onChannelChange: (channel: SlackChannel | undefined) => void
-  onKindChange: (kind: DeliveryKind) => void
-  tenantId: string
-}) {
-  const email = useUser().user?.primaryEmailAddress?.emailAddress
-
-  return (
-    <div className="grid gap-2">
-      <Label className="font-normal text-xs">Deliver to</Label>
-      {availableKinds.length > 1 ? (
-        <ToggleGroup
-          className="justify-start"
-          onValueChange={(next) => {
-            if (next !== "") {
-              onKindChange(next as DeliveryKind)
-            }
-          }}
-          type="single"
-          value={kind}
-          variant="outline"
-        >
-          {availableKinds.map((option) => (
-            <ToggleGroupItem key={option} value={option}>
-              {deliveryKindLabels[option]}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      ) : null}
-      {kind === "email" ? (
-        <p className="text-muted-foreground text-xs">
-          Emailed to you{email === undefined ? "" : ` at ${email}`}.
-        </p>
-      ) : (
-        <SlackChannelField
-          onChange={onChannelChange}
-          tenantId={tenantId}
-          value={channel}
-        />
-      )}
-    </div>
-  )
-}
-
-function ProviderField({
-  onValueChange,
-  options,
-  value,
-}: {
-  onValueChange: (index: number) => void
-  options: string[]
-  value: number
-}) {
-  return (
-    <div className="grid gap-2">
-      <Label className="font-normal text-xs">Accounts</Label>
-      <ToggleGroup
-        className="justify-start"
-        onValueChange={(next) => {
-          if (next !== "") {
-            onValueChange(Number(next))
-          }
-        }}
-        type="single"
-        value={String(value)}
-        variant="outline"
-      >
-        {options.map((option, index) => (
-          <ToggleGroupItem key={option} value={String(index)}>
-            {option}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-    </div>
   )
 }
 
@@ -214,8 +137,4 @@ function toDestination(
   }
 
   return channel === undefined ? undefined : { kind: "slack", ...channel }
-}
-
-function lowercaseFirst(text: string) {
-  return text.charAt(0).toLowerCase() + text.slice(1)
 }

@@ -46,6 +46,15 @@ function useAutomationForm(
     setIsFormOpen(true)
   }
 
+  // Prefilled create form (e.g. a playbook opened in the raw builder): no
+  // backing automation, so saving creates a fresh one.
+  function openDraftForm(values: AutomationFormValues) {
+    setFormAutomation(undefined)
+    setFormValues(values)
+    setFormError(undefined)
+    setIsFormOpen(true)
+  }
+
   async function saveAutomation() {
     setFormError(undefined)
     setIsSaving(true)
@@ -79,6 +88,7 @@ function useAutomationForm(
     isFormOpen,
     isSaving,
     openCreateForm: () => openForm(undefined),
+    openDraftForm,
     openEditForm: openForm,
     saveAutomation,
     setFormValues,
