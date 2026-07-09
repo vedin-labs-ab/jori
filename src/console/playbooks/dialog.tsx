@@ -102,7 +102,7 @@ export function PlaybookSetupDialog({
             }}
             onPointerEnter={actions.preloadEdit}
             type="button"
-            variant="ghost"
+            variant="secondary"
           >
             {pendingKind === "advanced" ? <Spinner /> : <Settings2 />} Advanced
             settings

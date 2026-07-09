@@ -3,7 +3,7 @@ import {
   type DeliveryKind,
   deliveryKindLabels,
 } from "@contracts/playbooks/delivery"
-import { type ReactNode } from "react"
+import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { type SlackChannel, SlackChannelField } from "./channel"
 import { PlaybookSection } from "./meta"
@@ -18,25 +18,10 @@ export type DeliveryState = {
   tenantId: string
 }
 
-/** One labeled control; the reusable unit every customization is built from. */
-export function CustomizationField({
-  children,
-  label,
-}: {
-  children: ReactNode
-  label: string
-}) {
-  return (
-    <div className="grid gap-1.5">
-      <p className="text-muted-foreground text-xs">{label}</p>
-      {children}
-    </div>
-  )
-}
-
 /**
- * The "Customizations" section: every knob a playbook exposes at setup.
- * Add a customization by dropping another `CustomizationField` in here.
+ * Every knob a playbook exposes at setup. Each is a `PlaybookSection`, so its
+ * label reads like the Schedule/Tools summary above; a divider sets the two
+ * apart. Add a customization by rendering another section here.
  */
 export function PlaybookCustomizations({
   delivery,
@@ -50,20 +35,23 @@ export function PlaybookCustomizations({
   onProviderIndexChange: (index: number) => void
 }) {
   return (
-    <PlaybookSection label="Customizations">
-      {plan.kind === "choose" ? (
-        <CustomizationField label="Accounts">
-          <OptionToggle
-            onValueChange={onProviderIndexChange}
-            options={plan.options.map((option) => option.label)}
-            value={providerIndex}
-          />
-        </CustomizationField>
-      ) : null}
-      <CustomizationField label="Deliver to">
-        <DeliveryControl {...delivery} />
-      </CustomizationField>
-    </PlaybookSection>
+    <>
+      <Separator />
+      <div className="grid gap-3">
+        {plan.kind === "choose" ? (
+          <PlaybookSection label="Accounts">
+            <OptionToggle
+              onValueChange={onProviderIndexChange}
+              options={plan.options.map((option) => option.label)}
+              value={providerIndex}
+            />
+          </PlaybookSection>
+        ) : null}
+        <PlaybookSection label="Deliver to">
+          <DeliveryControl {...delivery} />
+        </PlaybookSection>
+      </div>
+    </>
   )
 }
 
