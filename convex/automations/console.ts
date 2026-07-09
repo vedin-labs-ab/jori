@@ -238,7 +238,7 @@ async function requireAccessibleAutomation(
   return automation
 }
 
-async function toConsoleAutomation(
+export async function toConsoleAutomation(
   ctx: QueryLikeCtx,
   automation: Doc<"automations">
 ) {
