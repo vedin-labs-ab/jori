@@ -5,6 +5,7 @@ import { mutation, type QueryCtx, query } from "../_generated/server"
 import { checkTenantAccess } from "../identity/access"
 import { getToolPermission } from "../permissions/catalog"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
+import { personDisplayName } from "../persons/names"
 import { canAccessArtifact, searchArtifacts } from "./access"
 
 export const list = query({
@@ -135,17 +136,31 @@ async function summarizeForConsole(ctx: QueryCtx, artifact: Doc<"artifacts">) {
     title: artifact.title,
     access: artifact.access,
     ownerId: artifact.ownerId,
+    ownerName: await personDisplayName(ctx, artifact.ownerId),
     versionId: artifact.versionId,
     contract: artifact.contract,
     createdAt: artifact.createdAt,
     updatedAt: artifact.updatedAt,
     archivedAt: artifact.archivedAt,
+    lastOpenedAt: await lastOpenedAt(ctx, artifact._id),
     versions: versions.map((version) =>
       summarizeVersion(version, artifact.versionId)
     ),
     automations: summarizeAutomations(automations),
     capabilities: summarizeCapabilities(capabilities),
   }
+}
+
+async function lastOpenedAt(ctx: QueryCtx, artifactId: Id<"artifacts">) {
+  const latestSession = await ctx.db
+    .query("artifactSessions")
+    .withIndex("by_artifact_and_seen_at", (index) =>
+      index.eq("artifactId", artifactId)
+    )
+    .order("desc")
+    .first()
+
+  return latestSession?.seenAt
 }
 
 function summarizeVersion(
@@ -171,8 +186,17 @@ function summarizeAutomations(automations: Doc<"automations">[]) {
     name: automation.name,
     status: automation.status,
     firedAt: automation.firedAt,
+    nextAt: automationNextAt(automation),
     updatedAt: automation.updatedAt,
   }))
+}
+
+function automationNextAt(automation: Doc<"automations">) {
+  if ("nextAt" in automation.trigger) {
+    return automation.trigger.nextAt
+  }
+
+  return "at" in automation.trigger ? automation.trigger.at : undefined
 }
 
 function summarizeCapabilities(capabilities: Doc<"artifactTools">[]) {

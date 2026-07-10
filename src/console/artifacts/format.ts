@@ -45,22 +45,26 @@ export function toolSurfaceList(groups: CapabilityGroup[]) {
   return groups.map((group) => group.type)
 }
 
-export function accessLabel(access: ArtifactSummary["access"]) {
-  return access === "organization" ? "Organization" : "Personal"
-}
-
-export function toolCountLabel(count: number) {
-  return count === 1 ? "1 tool" : `${count} tools`
-}
-
 export function automationCountLabel(count: number) {
   return count === 1 ? "1 automation" : `${count} automations`
+}
+
+export function currentVersionMessage(artifact: ArtifactSummary) {
+  return artifact.versions.find((version) => version.isCurrent)?.message
 }
 
 export function automationSummary(
   automation: ArtifactSummary["automations"][number],
   now: number
 ) {
+  if (automation.status !== undefined && automation.status !== "active") {
+    return statusLabel(automation.status)
+  }
+
+  if (automation.nextAt !== undefined && automation.nextAt > now) {
+    return `Next ${relativeTime(automation.nextAt, now)}`
+  }
+
   if (automation.firedAt !== undefined) {
     return `Ran ${relativeTime(automation.firedAt, now)}`
   }
@@ -69,9 +73,7 @@ export function automationSummary(
     return "Monitoring"
   }
 
-  return automation.status === undefined
-    ? "Linked"
-    : statusLabel(automation.status)
+  return "Linked"
 }
 
 function normalizeSurface(value: string | undefined) {
