@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
   internalQuery,
@@ -51,37 +51,33 @@ export const search = internalQuery({
   },
 })
 
+const tenantAssetArgs = {
+  tenantId: v.string(),
+  assetId: v.id("assets"),
+}
+
 export const read = internalQuery({
-  args: {
-    tenantId: v.string(),
-    assetId: v.id("assets"),
-  },
+  args: tenantAssetArgs,
   handler: async (ctx, args) => {
-    const asset = await ctx.db.get(args.assetId)
+    const asset = await getTenantAsset(ctx, args)
 
-    if (asset === null || asset.tenantId !== args.tenantId) {
-      return null
-    }
-
-    return await summarizeAsset(ctx, asset)
+    return asset === null ? null : await summarizeAsset(ctx, asset)
   },
 })
 
 export const getForTenant = internalQuery({
-  args: {
-    tenantId: v.string(),
-    assetId: v.id("assets"),
-  },
-  handler: async (ctx, args) => {
-    const asset = await ctx.db.get(args.assetId)
-
-    if (asset === null || asset.tenantId !== args.tenantId) {
-      return null
-    }
-
-    return asset
-  },
+  args: tenantAssetArgs,
+  handler: async (ctx, args) => await getTenantAsset(ctx, args),
 })
+
+async function getTenantAsset(
+  ctx: QueryCtx,
+  args: { tenantId: string; assetId: Id<"assets"> }
+) {
+  const asset = await ctx.db.get(args.assetId)
+
+  return asset !== null && asset.tenantId === args.tenantId ? asset : null
+}
 
 function normalizeLimit(value: number | undefined) {
   if (value === undefined || !Number.isFinite(value)) {
