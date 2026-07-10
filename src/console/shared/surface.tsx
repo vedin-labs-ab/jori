@@ -32,7 +32,7 @@ export function IntegrationSurface({
   title: string
 }) {
   return (
-    <Card className="gap-0 py-0 md:col-span-2">
+    <Card className="gap-0 py-0">
       <CardHeader className="gap-3 p-4 sm:grid-cols-[1fr_auto] sm:p-5">
         <div className="flex min-w-0 items-start gap-3">
           <IntegrationLogoMark logo={logo} />

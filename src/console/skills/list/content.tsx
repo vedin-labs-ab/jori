@@ -7,6 +7,10 @@ import { SkillCard } from "./card"
 
 const skeletonCards = ["first", "second", "third", "fourth", "fifth", "sixth"]
 
+// Auto-fill tracks add columns as the viewport grows instead of stretching
+// cards, keeping the unbounded console frame usable at any width.
+const skillGrid = "grid-cols-[repeat(auto-fill,minmax(min(20rem,100%),1fr))]"
+
 export function SkillContent({
   filteredCount,
   isLoading,
@@ -30,7 +34,7 @@ export function SkillContent({
 }) {
   if (isLoading) {
     return (
-      <ConsoleScrollableGrid className="md:grid-cols-2 xl:grid-cols-3">
+      <ConsoleScrollableGrid className={skillGrid}>
         <SkillSkeletonList />
       </ConsoleScrollableGrid>
     )
@@ -112,7 +116,7 @@ function SkillEmptyState({
 }) {
   return (
     <ConsoleEmptyState
-      className="md:col-span-2 xl:col-span-3"
+      className="col-span-full"
       description={description}
       icon={BookOpenText}
       title={title}
