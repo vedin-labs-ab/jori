@@ -1,7 +1,12 @@
+import { isRecord } from "../../../contracts/json"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { getSlackActorProfile } from "../../providers/slack/directory/users"
+import {
+  readFirstAction,
+  readNestedString,
+} from "../../providers/slack/ingress/actions"
 import { createIntegrationActor } from "../../shared/actor"
 
 export const integrationOfferOpenActionId = "milo_integration_offer_open"
@@ -42,7 +47,7 @@ export function isSlackIntegrationOfferInteraction(payload: unknown) {
 }
 
 export function parseSlackIntegrationOfferCancelInteraction(payload: unknown) {
-  if (!isObject(payload) || payload.type !== "block_actions") {
+  if (!isRecord(payload) || payload.type !== "block_actions") {
     return null
   }
 
@@ -114,24 +119,6 @@ function readActionIds(payload: unknown) {
   })
 }
 
-function readFirstAction(actions: unknown) {
-  if (!Array.isArray(actions) || actions.length === 0) {
-    return null
-  }
-
-  return isObject(actions[0]) ? actions[0] : null
-}
-
-function readNestedString(value: unknown, key: string) {
-  if (!isObject(value)) {
-    return null
-  }
-
-  const child = value[key]
-
-  return typeof child === "string" && child !== "" ? child : null
-}
-
 function readIntegrationOfferId(value: unknown) {
   if (typeof value !== "string" || value === "") {
     return null
@@ -140,14 +127,10 @@ function readIntegrationOfferId(value: unknown) {
   try {
     const parsed = JSON.parse(value) as unknown
 
-    return isObject(parsed) && typeof parsed.integrationOfferId === "string"
+    return isRecord(parsed) && typeof parsed.integrationOfferId === "string"
       ? (parsed.integrationOfferId as Id<"integrationOffers">)
       : null
   } catch {
     return null
   }
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }

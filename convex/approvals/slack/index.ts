@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { isRecord } from "../../../contracts/json"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../../_generated/server"
@@ -9,6 +10,10 @@ import {
 } from "../../providers/slack/data"
 import { postSlackMessage } from "../../providers/slack/delivery/messages"
 import { getSlackActorProfile } from "../../providers/slack/directory/users"
+import {
+  readFirstAction,
+  readNestedString,
+} from "../../providers/slack/ingress/actions"
 import { actorValidator, createIntegrationActor } from "../../shared/actor"
 import { decideApprovalByAccount, parseApprovalDecisionText } from "../runtime"
 import { type SlackApprovalInteraction } from "./blocks"
@@ -130,7 +135,7 @@ export async function createSlackApprovalActor(
 }
 
 export function parseSlackApprovalInteraction(payload: unknown) {
-  if (!isObject(payload) || payload.type !== "block_actions") {
+  if (!isRecord(payload) || payload.type !== "block_actions") {
     return null
   }
 
@@ -167,16 +172,6 @@ export function parseSlackApprovalInteraction(payload: unknown) {
   } satisfies SlackApprovalInteraction
 }
 
-function readFirstAction(actions: unknown) {
-  if (!Array.isArray(actions) || actions.length === 0) {
-    return null
-  }
-
-  const action = actions[0]
-
-  return isObject(action) ? action : null
-}
-
 function readActionDecision(actionId: unknown) {
   if (actionId === "milo_approval_approve") {
     return "approved" as const
@@ -197,7 +192,7 @@ function readApprovalCode(value: unknown) {
   try {
     const parsed = JSON.parse(value) as unknown
 
-    if (!isObject(parsed) || typeof parsed.code !== "string") {
+    if (!isRecord(parsed) || typeof parsed.code !== "string") {
       return null
     }
 
@@ -224,18 +219,4 @@ async function postSlackDecisionMessage(
     text,
     thread_ts: args.threadTs,
   })
-}
-
-function readNestedString(value: unknown, key: string) {
-  if (!isObject(value)) {
-    return null
-  }
-
-  const child = value[key]
-
-  return typeof child === "string" && child !== "" ? child : null
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
