@@ -172,7 +172,9 @@ function KindMenu({
   }
 
   return (
-    <DropdownMenu>
+    // Non-modal: inside the setup dialog, a modal menu's dismiss layer also
+    // swallows trigger clicks and closes the whole dialog with it.
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button aria-label="Delivery kind" className="px-2" variant="outline">
           <DeliveryIcon kind={kind} />
