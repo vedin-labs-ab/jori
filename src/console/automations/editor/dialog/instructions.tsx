@@ -1,15 +1,9 @@
-import { CircleHelp } from "lucide-react"
 import { Label } from "@/components/ui/label"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type AutomationFormValues } from "../../types"
 import { AutomationInstructionsField } from "../instructions"
 import { automationInstructionMarkerErrors } from "../save/marker"
+import { FieldHelp } from "./help"
 
 export function AutomationInstructionsSection({
   error,
@@ -53,30 +47,11 @@ export function AutomationInstructionsSection({
 
 function InstructionsHelp() {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            aria-label="Instructions help"
-            className="inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-            type="button"
-          >
-            <CircleHelp className="size-3" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent
-          align="center"
-          className="max-w-80 items-start text-left leading-relaxed"
-          side="right"
-        >
-          <div className="grid gap-1">
-            <p>Write the work Milo should do.</p>
-            <p>Mention integrations like GitHub, Slack, Linear, or Gmail.</p>
-            <p>Choose tools from each badge.</p>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <FieldHelp label="Instructions help">
+      <p>Write the work Milo should do.</p>
+      <p>Mention integrations like GitHub, Slack, Linear, or Gmail.</p>
+      <p>Choose tools from each badge.</p>
+    </FieldHelp>
   )
 }
 
