@@ -5,6 +5,7 @@ import { type ReactNode, useCallback } from "react"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { SessionProviders } from "@/shared/providers"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { showErrorToast } from "../shared/error"
@@ -15,16 +16,20 @@ import { type ArtifactDetail } from "./types"
 
 type ArtifactId = ArtifactDetail["artifactId"]
 
+/** The artifact route sits outside the root session stack so share-link
+ *  visitors skip Clerk entirely; the member view brings it back here. */
 export function ArtifactView({ artifactId }: { artifactId: ArtifactId }) {
   return (
-    <ConsolePage chrome="none" loadingFallback={<ArtifactViewLoading />}>
-      {(organization) => (
-        <ArtifactViewContent
-          artifactId={artifactId}
-          tenantId={organization.id}
-        />
-      )}
-    </ConsolePage>
+    <SessionProviders>
+      <ConsolePage chrome="none" loadingFallback={<ArtifactViewLoading />}>
+        {(organization) => (
+          <ArtifactViewContent
+            artifactId={artifactId}
+            tenantId={organization.id}
+          />
+        )}
+      </ConsolePage>
+    </SessionProviders>
   )
 }
 

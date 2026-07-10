@@ -1,10 +1,17 @@
 import { parseShareFragment } from "@contracts/artifacts/share"
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { lazy, Suspense, useEffect, useState } from "react"
 import { ArtifactShareView } from "@/console/artifacts/share"
 import { type ArtifactDetail } from "@/console/artifacts/types"
-import { ArtifactView } from "@/console/artifacts/view"
 import { FullscreenSkeletonLoader } from "@/console/shared/loading"
+
+/** Lazy so share-link visitors never download the member view and its
+ *  console/session graph. */
+const ArtifactView = lazy(() =>
+  import("@/console/artifacts/view").then((module) => ({
+    default: module.ArtifactView,
+  }))
+)
 
 export const Route = createFileRoute("/artifacts/$artifactId/")({
   component: ArtifactRoute,
@@ -23,7 +30,11 @@ function ArtifactRoute() {
   }
 
   return (
-    <ArtifactView artifactId={artifactId as ArtifactDetail["artifactId"]} />
+    <Suspense
+      fallback={<FullscreenSkeletonLoader aria-label="Loading artifact" />}
+    >
+      <ArtifactView artifactId={artifactId as ArtifactDetail["artifactId"]} />
+    </Suspense>
   )
 }
 
