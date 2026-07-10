@@ -149,7 +149,7 @@ export async function decideApprovalByAccount(
   if (target === null) {
     return {
       status: "missing",
-      message: "That approval request no longer exists.",
+      message: approvalDecisionMessage("missing"),
     }
   }
 
@@ -157,7 +157,7 @@ export async function decideApprovalByAccount(
     return {
       status: "missing",
       integration: target.integration,
-      message: "That approval request no longer exists.",
+      message: approvalDecisionMessage("missing"),
     }
   }
 
