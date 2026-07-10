@@ -63,7 +63,7 @@ export function DeliveryField({
               onEditingChange(true)
             }}
             size="sm"
-            variant="outline"
+            variant="ghost"
           >
             <Pencil /> Change
           </Button>
