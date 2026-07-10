@@ -59,13 +59,16 @@ function OrganizationView({ tenantId }: { tenantId: string }) {
   const sources = useQuery(api.organization.sources.list, { tenantId })
 
   return (
-    <ContextProfile
-      tenantId={tenantId}
-      website={readPrimaryWebsite(sources)}
-      discovery={discovery}
-      profile={profile}
-      sources={sources}
-    />
+    // Reading-heavy profile content keeps a document width inside the frame.
+    <div className="max-w-4xl">
+      <ContextProfile
+        tenantId={tenantId}
+        website={readPrimaryWebsite(sources)}
+        discovery={discovery}
+        profile={profile}
+        sources={sources}
+      />
+    </div>
   )
 }
 

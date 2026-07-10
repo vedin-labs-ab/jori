@@ -32,7 +32,7 @@ function PlaybookCatalog({ tenantId }: { tenantId: string }) {
 
   return (
     <ConsolePageLayout>
-      <ConsoleContentGrid className="max-w-4xl md:grid-cols-2">
+      <ConsoleContentGrid className="md:grid-cols-2 xl:grid-cols-3">
         {playbookCatalog.map((definition) => (
           <PlaybookCard
             key={definition.key}

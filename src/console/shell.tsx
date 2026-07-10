@@ -58,8 +58,13 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 import { BrandMark } from "@/shared/brand"
 import { ConsoleHeaderActionsProvider } from "./shared/layout"
+
+// The header and body share this frame so page actions, filters, content, and
+// pagination sit on the same horizontal edges at every viewport width.
+const consoleFrame = "mx-auto w-full max-w-[96rem] px-4 md:px-6"
 
 const consoleNavigation = [
   { icon: LayoutDashboard, label: "Overview", to: "/console" },
@@ -104,26 +109,33 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
     <SidebarProvider className="h-svh overflow-hidden">
       <ConsoleSidebar pathname={pathname} />
       <SidebarInset className="min-h-0">
-        <header className="flex h-16 shrink-0 items-center gap-2 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-vertical:h-4 data-vertical:self-auto"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div
-            ref={setHeaderSlot}
-            className="ml-auto flex items-center gap-2"
-          />
+        <header className="flex h-16 shrink-0 items-center transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+          <div className={cn(consoleFrame, "flex items-center gap-2")}>
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-vertical:h-4 data-vertical:self-auto"
+            />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <div
+              ref={setHeaderSlot}
+              className="ml-auto flex items-center gap-2"
+            />
+          </div>
         </header>
         <ConsoleHeaderActionsProvider slot={headerSlot}>
-          <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col gap-4 overflow-y-auto px-4 pt-1 pb-6 md:px-6">
+          <div
+            className={cn(
+              consoleFrame,
+              "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pt-1 pb-6"
+            )}
+          >
             {children}
           </div>
         </ConsoleHeaderActionsProvider>
