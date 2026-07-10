@@ -1,21 +1,8 @@
-import { useUser } from "@clerk/tanstack-react-start"
-import {
-  type DeliveryKind,
-  deliveryKindLabels,
-} from "@contracts/playbooks/delivery"
+import { type ComponentProps } from "react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { type SlackChannel, SlackChannelField } from "./channel"
+import { DeliveryField } from "./delivery"
 import { PlaybookSection } from "./meta"
 import { type PlaybookEnablePlan } from "./state"
-
-export type DeliveryState = {
-  availableKinds: DeliveryKind[]
-  channel: SlackChannel | undefined
-  kind: DeliveryKind
-  onChannelChange: (channel: SlackChannel | undefined) => void
-  onKindChange: (kind: DeliveryKind) => void
-  tenantId: string
-}
 
 /**
  * Every knob a playbook exposes at setup, each a `PlaybookSection` so it flows
@@ -28,7 +15,7 @@ export function PlaybookCustomizations({
   providerIndex,
   onProviderIndexChange,
 }: {
-  delivery: DeliveryState
+  delivery: ComponentProps<typeof DeliveryField>
   plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>
   providerIndex: number
   onProviderIndexChange: (index: number) => void
@@ -45,55 +32,9 @@ export function PlaybookCustomizations({
         </PlaybookSection>
       ) : null}
       <PlaybookSection label="Deliver to">
-        <DeliveryControl {...delivery} />
+        <DeliveryField {...delivery} />
       </PlaybookSection>
     </>
-  )
-}
-
-function DeliveryControl({
-  availableKinds,
-  channel,
-  kind,
-  onChannelChange,
-  onKindChange,
-  tenantId,
-}: DeliveryState) {
-  const email = useUser().user?.primaryEmailAddress?.emailAddress
-
-  return (
-    <div className="grid gap-2">
-      {availableKinds.length > 1 ? (
-        <ToggleGroup
-          className="justify-start"
-          onValueChange={(next) => {
-            if (next !== "") {
-              onKindChange(next as DeliveryKind)
-            }
-          }}
-          type="single"
-          value={kind}
-          variant="outline"
-        >
-          {availableKinds.map((option) => (
-            <ToggleGroupItem key={option} value={option}>
-              {deliveryKindLabels[option]}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      ) : null}
-      {kind === "email" ? (
-        <p className="text-muted-foreground text-xs">
-          Emailed to you{email === undefined ? "" : ` at ${email}`}.
-        </p>
-      ) : (
-        <SlackChannelField
-          onChange={onChannelChange}
-          tenantId={tenantId}
-          value={channel}
-        />
-      )}
-    </div>
   )
 }
 

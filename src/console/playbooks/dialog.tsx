@@ -15,7 +15,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
-import { type SlackChannel } from "./channel"
 import { PlaybookCustomizations } from "./customizations"
 import { type PlaybookActions, pendingActionKind } from "./enable"
 import { PlaybookMeta } from "./meta"
@@ -41,18 +40,21 @@ export function PlaybookSetupDialog({
   tenantId: string
 }) {
   const availableKinds = row.delivery
-  const [providerIndex, setProviderIndex] = useState(0)
-  const [kind, setKind] = useState<DeliveryKind>(
-    availableKinds.includes(definition.delivery.default)
-      ? definition.delivery.default
-      : (availableKinds[0] ?? "email")
+  const defaultKind: DeliveryKind = availableKinds.includes(
+    definition.delivery.default
   )
-  const [channel, setChannel] = useState<SlackChannel>()
+    ? definition.delivery.default
+    : (availableKinds[0] ?? "email")
+  const [providerIndex, setProviderIndex] = useState(0)
+  // The committed destination; the delivery field only reports saved, valid
+  // choices, so an unsaved edit never blocks (or leaks into) the actions.
+  const [destination, setDestination] = useState<DeliveryChoice | undefined>(
+    defaultKind === "email" ? { kind: "email" } : undefined
+  )
   const pendingKind = pendingActionKind(actions, definition)
 
   const choices =
     plan.kind === "choose" ? plan.options[providerIndex].choices : plan.choices
-  const destination = toDestination(kind, channel)
   const canSubmit = destination !== undefined && pendingKind === undefined
 
   function submit(action: PlaybookActions["enable"], close: boolean) {
@@ -79,11 +81,10 @@ export function PlaybookSetupDialog({
           <PlaybookCustomizations
             delivery={{
               availableKinds,
-              channel,
-              kind,
-              onChannelChange: setChannel,
-              onKindChange: setKind,
+              defaultKind,
+              onChange: setDestination,
               tenantId,
+              value: destination,
             }}
             onProviderIndexChange={setProviderIndex}
             plan={plan}
@@ -126,15 +127,4 @@ export function PlaybookSetupDialog({
       </DialogContent>
     </Dialog>
   )
-}
-
-function toDestination(
-  kind: DeliveryKind,
-  channel: SlackChannel | undefined
-): DeliveryChoice | undefined {
-  if (kind === "email") {
-    return { kind: "email" }
-  }
-
-  return channel === undefined ? undefined : { kind: "slack", ...channel }
 }
