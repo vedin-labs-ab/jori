@@ -1,7 +1,11 @@
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
-import { canAccessArtifact, searchArtifacts, summarizeArtifact } from "./access"
+import {
+  findAccessibleArtifact,
+  searchArtifacts,
+  summarizeArtifact,
+} from "./access"
 import { getTenantArtifact } from "./storage/links"
 
 export const getExistingBlobIds = internalQuery({
@@ -48,13 +52,9 @@ export const readForAgent = internalQuery({
     artifactId: v.id("artifacts"),
   },
   handler: async (ctx, args) => {
-    const artifact = await ctx.db.get(args.artifactId)
+    const artifact = await findAccessibleArtifact(ctx, args)
 
-    if (
-      artifact === null ||
-      artifact.tenantId !== args.tenantId ||
-      !canAccessArtifact(artifact, args.personId)
-    ) {
+    if (artifact === null) {
       return null
     }
 

@@ -7,7 +7,7 @@ import {
   type MutationCtx,
 } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
-import { canAccessArtifact } from "./access"
+import { getAccessibleArtifact } from "./access"
 import {
   type ArtifactContractStateEntry,
   assertContractStateValue,
@@ -35,7 +35,7 @@ export const read = internalQuery({
     contractName: v.string(),
   },
   handler: async (ctx, args) => {
-    const artifact = await requireStateArtifact(ctx, args)
+    const artifact = await getAccessibleArtifact(ctx, args)
     const entry = resolveStateContract(artifact, args.contractName)
 
     if (!isStateEntryVisible(entry, args.grant)) {
@@ -57,7 +57,7 @@ export const list = internalQuery({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const artifact = await requireStateArtifact(ctx, args)
+    const artifact = await getAccessibleArtifact(ctx, args)
     const documents = []
 
     for (const entry of (artifact.contract?.state ?? []).slice(
@@ -98,7 +98,7 @@ export const update = internalMutation({
     write: stateWrite,
   },
   handler: async (ctx, args) => {
-    const artifact = await requireStateArtifact(ctx, args)
+    const artifact = await getAccessibleArtifact(ctx, args)
     const entry = resolveStateContract(artifact, args.contractName)
     const existing = await findStateDocument(ctx, { ...args, entry })
     const currentVersion = existing?.version ?? 0
@@ -194,27 +194,6 @@ async function updateStateDocument(
     { ...existing, value, version, updatedAt },
     entry
   )
-}
-
-async function requireStateArtifact(
-  ctx: QueryLikeCtx,
-  args: {
-    tenantId: string
-    artifactId: Doc<"artifacts">["_id"]
-    personId: Id<"persons">
-  }
-) {
-  const artifact = await ctx.db.get(args.artifactId)
-
-  if (
-    artifact === null ||
-    artifact.tenantId !== args.tenantId ||
-    !canAccessArtifact(artifact, args.personId)
-  ) {
-    throw new Error("Artifact not found.")
-  }
-
-  return artifact
 }
 
 async function findStateDocument(

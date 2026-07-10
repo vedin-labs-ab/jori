@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
+import { type QueryLikeCtx } from "../shared/context"
 
 const artifactSummaryLimit = 100
 
@@ -38,6 +39,46 @@ export function canAccessArtifact(
   personId: Id<"persons">
 ) {
   return artifact.access === "organization" || artifact.ownerId === personId
+}
+
+/** Load an artifact only if it is in the tenant and visible to the person;
+ *  null otherwise, so callers cannot tell missing from inaccessible. */
+export async function findAccessibleArtifact(
+  ctx: QueryLikeCtx,
+  args: {
+    tenantId: string
+    artifactId: Id<"artifacts">
+    personId: Id<"persons">
+  }
+) {
+  const artifact = await ctx.db.get(args.artifactId)
+
+  if (
+    artifact === null ||
+    artifact.tenantId !== args.tenantId ||
+    !canAccessArtifact(artifact, args.personId)
+  ) {
+    return null
+  }
+
+  return artifact
+}
+
+export async function getAccessibleArtifact(
+  ctx: QueryLikeCtx,
+  args: {
+    tenantId: string
+    artifactId: Id<"artifacts">
+    personId: Id<"persons">
+  }
+) {
+  const artifact = await findAccessibleArtifact(ctx, args)
+
+  if (artifact === null) {
+    throw new Error("Artifact not found.")
+  }
+
+  return artifact
 }
 
 export function summarizeArtifact(artifact: Doc<"artifacts">) {

@@ -6,7 +6,7 @@ import { checkTenantAccess } from "../identity/access"
 import { getToolPermission } from "../permissions/catalog"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
 import { personDisplayName } from "../persons/names"
-import { canAccessArtifact, searchArtifacts } from "./access"
+import { findAccessibleArtifact, searchArtifacts } from "./access"
 import { readActiveShare } from "./serve/share"
 
 export const list = query({
@@ -63,13 +63,9 @@ export const get = query({
     }
 
     const personId = await resolveCurrentPerson(ctx, args.tenantId)
-    const artifact = await ctx.db.get(args.artifactId)
+    const artifact = await findAccessibleArtifact(ctx, { ...args, personId })
 
-    if (
-      artifact === null ||
-      artifact.tenantId !== args.tenantId ||
-      !canAccessArtifact(artifact, personId)
-    ) {
+    if (artifact === null) {
       return {
         status: "not_found" as const,
         artifact: null,

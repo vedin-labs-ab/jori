@@ -8,7 +8,7 @@ import {
 } from "../permissions/catalog"
 import { listPermissionOverrides } from "../permissions/read"
 import { isUserScopedIntegration } from "../shared/integrations"
-import { canAccessArtifact } from "./access"
+import { getAccessibleArtifact } from "./access"
 
 export const authorizeTool = internalQuery({
   args: {
@@ -26,14 +26,9 @@ export const authorizeTool = internalQuery({
       throw new Error(`Unknown artifact tool: ${args.tool}`)
     }
 
-    const artifact = await ctx.db.get(args.artifactId)
+    const artifact = await getAccessibleArtifact(ctx, args)
 
-    if (
-      artifact === null ||
-      artifact.tenantId !== args.tenantId ||
-      artifact.archivedAt !== undefined ||
-      !canAccessArtifact(artifact, args.personId)
-    ) {
+    if (artifact.archivedAt !== undefined) {
       throw new Error("Artifact not found.")
     }
 

@@ -10,8 +10,7 @@ import {
 import { type RuntimeEnvironment } from "../../shared/app"
 import { type QueryLikeCtx } from "../../shared/context"
 import { unauthorizedResponse } from "../../shared/http"
-import { canAccessArtifact } from "../access"
-import { getTenantArtifact } from "../storage/links"
+import { canAccessArtifact, getAccessibleArtifact } from "../access"
 import { readArtifactFramePolicy } from "./frame"
 import { artifactSessionDurationMs, createSessionToken } from "./session"
 import { createArtifactSession } from "./sessions"
@@ -109,11 +108,7 @@ export const revoke = internalMutation({
     personId: v.id("persons"),
   },
   handler: async (ctx, args) => {
-    const artifact = await getTenantArtifact(ctx, args)
-
-    if (!canAccessArtifact(artifact, args.personId)) {
-      throw new Error("Artifact not found.")
-    }
+    const artifact = await getAccessibleArtifact(ctx, args)
 
     await removeShares(ctx, artifact._id)
   },
@@ -227,11 +222,7 @@ async function requireShareableArtifact(
     personId: Id<"persons">
   }
 ) {
-  const artifact = await getTenantArtifact(ctx, args)
-
-  if (!canAccessArtifact(artifact, args.personId)) {
-    throw new Error("Artifact not found.")
-  }
+  const artifact = await getAccessibleArtifact(ctx, args)
 
   if (artifact.archivedAt !== undefined) {
     throw new Error("Restore the artifact before sharing it.")
