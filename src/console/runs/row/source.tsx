@@ -1,6 +1,8 @@
 import { toolSurfaceLabel } from "@contracts/integrations"
+import { type Scope } from "@contracts/permissions/scope"
 import { Play } from "lucide-react"
 import { type ReactNode } from "react"
+import { ScopeDatum } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
 import { ProviderLogo } from "../../shared/logo/provider"
 import {
@@ -29,16 +31,14 @@ const sourceMetadataTypes = new Set<ExecutionDetailType>([
 
 export function SourceLine({
   details = [],
+  scope,
   source,
 }: {
   details?: readonly ExecutionDetail[]
+  scope: Scope
   source: ExecutionSource
 }) {
-  const items = sourceItems(source, details)
-
-  if (items.length === 0) {
-    return null
-  }
+  const items = sourceItems(source, details, scope)
 
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-muted-foreground text-xs">
@@ -58,7 +58,8 @@ type SourceItem = {
 
 function sourceItems(
   source: ExecutionSource,
-  details: readonly ExecutionDetail[]
+  details: readonly ExecutionDetail[],
+  scope: Scope
 ): SourceItem[] {
   return [
     ...optionalItem(
@@ -97,6 +98,10 @@ function sourceItems(
         </span>
       )
     ),
+    {
+      content: <ScopeDatum iconClassName="size-3" scope={scope} />,
+      key: "scope",
+    },
   ]
 }
 

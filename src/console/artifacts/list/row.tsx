@@ -1,4 +1,5 @@
 import { type ToolSurface } from "@contracts/integrations"
+import { type Scope } from "@contracts/permissions/scope"
 import { Link } from "@tanstack/react-router"
 import {
   Archive,
@@ -11,7 +12,7 @@ import {
 import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ScopeBadge } from "../../shared/details"
+import { ScopeDatum } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, relativeTime } from "../../shared/time"
 import { ToolCountSummary } from "../../shared/tools/summary"
@@ -120,10 +121,10 @@ function ArtifactSummaryBlock({
     <div className="grid min-w-0 gap-1">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <h3 className="truncate font-medium text-sm">{artifact.title}</h3>
-        <ScopeBadge scope={artifact.access} />
         <PublishBadge artifact={artifact} />
       </div>
       <ArtifactInlineMeta
+        access={artifact.access}
         automationCount={artifact.automations.length}
         capabilityCount={capabilityCount}
         surfaces={surfaces}
@@ -145,12 +146,14 @@ function PublishBadge({ artifact }: { artifact: ArtifactSummary }) {
 }
 
 function ArtifactInlineMeta({
+  access,
   automationCount,
   capabilityCount,
   surfaces,
   now,
   updatedAt,
 }: {
+  access: Scope
   automationCount: number
   capabilityCount: number
   surfaces: ToolSurface[]
@@ -174,6 +177,8 @@ function ArtifactInlineMeta({
       <span title={absoluteTime(updatedAt)}>
         Updated {relativeTime(updatedAt, now)}
       </span>
+      <SeparatorDot className="text-muted-foreground/60" />
+      <ScopeDatum scope={access} />
     </div>
   )
 }
