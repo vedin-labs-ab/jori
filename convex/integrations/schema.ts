@@ -3,10 +3,12 @@ import { v } from "convex/values"
 import { integrationValidator } from "../shared/integrations"
 
 const integrationScope = v.union(v.literal("tenant"), v.literal("user"))
+// Rows are never deleted: disconnect and expiry are status transitions, so
+// automations bound to an integration id heal when it is reconnected.
 const integrationStatus = v.union(
   v.literal("active"),
-  v.literal("expired"),
-  v.literal("paused")
+  v.literal("disconnected"),
+  v.literal("expired")
 )
 
 export const integrations = defineTable({
