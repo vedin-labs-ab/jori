@@ -5,7 +5,7 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { getActorDisplayName } from "../shared/actor"
+import { getActorDisplayName, getActorKind } from "../shared/actor"
 import { summaryOverlapMessageLimit, summarySourceMessageLimit } from "./limits"
 
 export type SummaryMessage = {
@@ -196,7 +196,7 @@ function summaryMessage(message: Doc<"messages">): SummaryMessage | null {
     actor: getActorDisplayName(message.actor) ?? "unknown",
     createdAt: message.createdAt,
     observedAt: message.observedAt ?? null,
-    speaker: message.actor?.kind ?? "unknown",
+    speaker: getActorKind(message.actor),
     text,
   }
 }

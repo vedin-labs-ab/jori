@@ -1,5 +1,9 @@
 import { type Doc } from "../_generated/dataModel"
-import { getActorDisplayName, getActorExternalId } from "../shared/actor"
+import {
+  getActorDisplayName,
+  getActorExternalId,
+  getActorKind,
+} from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 
 export const defaultReactionDrainLimit = 20
@@ -95,7 +99,7 @@ export function formatRuntimeReaction(reaction: Doc<"reactions">) {
     observedAt: observed,
     preview: reaction.target.text ?? null,
     reaction: reaction.reaction,
-    source: reaction.actor?.kind ?? "unknown",
+    source: getActorKind(reaction.actor),
     target: reactionTargetLabel(reaction),
     type: removed ? ("reaction.removed" as const) : ("reaction.added" as const),
   }

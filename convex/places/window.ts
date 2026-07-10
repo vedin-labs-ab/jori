@@ -7,7 +7,7 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 import { reactionSummariesForMessages } from "../reactions/summary"
-import { getActorDisplayName } from "../shared/actor"
+import { getActorDisplayName, getActorKind } from "../shared/actor"
 import { applyProfileReview } from "./claims"
 import { profileWindowMessageLimit } from "./limits"
 import { type PlaceClaim, placeSection } from "./schema"
@@ -166,7 +166,7 @@ async function profileMessages(
         createdAt: message.createdAt,
         observedAt: message.observedAt ?? null,
         reactions: reactions.get(message._id) ?? null,
-        speaker: message.actor?.kind ?? "unknown",
+        speaker: getActorKind(message.actor),
         text,
       },
     ]

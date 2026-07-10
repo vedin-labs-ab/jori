@@ -91,6 +91,11 @@ export function getActorDisplayName(actor: Actor | undefined) {
   return actor.email
 }
 
+/** An absent actor reads as an unknown speaker. */
+export function getActorKind(actor: Actor | undefined) {
+  return actor?.kind ?? "unknown"
+}
+
 export function isPersonActor(actor: Actor | undefined) {
   return actor?.kind === "person"
 }
