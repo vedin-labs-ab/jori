@@ -1,4 +1,4 @@
-import { type JsonObject } from "./json"
+import { isRecord, type JsonObject } from "./json"
 import { finalProperty } from "./runtime"
 
 const approvalTtlSeconds = 30 * 60
@@ -27,7 +27,7 @@ export function withApprovalSchema(schema: Record<string, unknown> = {}) {
 export function readApprovalSummary(input: JsonObject) {
   const approval = input.approval
 
-  if (!isObject(approval)) {
+  if (!isRecord(approval)) {
     return null
   }
 
@@ -69,15 +69,11 @@ function approvalMetadataSchema() {
 }
 
 function readObject(value: unknown) {
-  return isObject(value) ? value : {}
+  return isRecord(value) ? value : {}
 }
 
 function readStringArray(value: unknown) {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : []
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
