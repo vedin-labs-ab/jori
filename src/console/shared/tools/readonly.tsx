@@ -1,6 +1,7 @@
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { countLabel } from "@/lib/count"
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../dot"
 import {
@@ -97,7 +98,7 @@ function ReadonlyToolGroup({
   return (
     <ToolGroupSection
       access={group.access}
-      badge={`${group.tools.length} ${group.tools.length === 1 ? "tool" : "tools"}`}
+      badge={countLabel(group.tools.length, "tool")}
     >
       {group.tools.map((tool) => (
         <ReadonlyToolRow key={tool.tool} tool={tool} />

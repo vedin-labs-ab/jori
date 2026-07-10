@@ -1,3 +1,5 @@
+import { countLabel } from "@/lib/count"
+
 export type ActivityToolKind =
   | "generic"
   | "read"
@@ -33,7 +35,7 @@ export function activityToolKind(items: ToolSummaryItem[]): ActivityToolKind {
 export function activityToolFailureSummary(title: string) {
   return [
     activityToolCount(1, activityToolKindForTitle(title)),
-    countText(1, "error"),
+    countLabel(1, "error"),
   ].join(" · ")
 }
 
@@ -51,11 +53,11 @@ export function activityToolOutcomeSummary({
   const parts = [activityToolCount(total, toolKind)]
 
   if (completed > 0) {
-    parts.push(countText(completed, "result"))
+    parts.push(countLabel(completed, "result"))
   }
 
   if (failed > 0) {
-    parts.push(countText(failed, "error"))
+    parts.push(countLabel(failed, "error"))
   }
 
   return parts.join(" · ")
@@ -93,26 +95,18 @@ export function activityToolKindForTitle(title: string): ActivityToolKind {
 function activityToolCount(count: number, toolKind: ActivityToolKind) {
   switch (toolKind) {
     case "generic":
-      return countText(count, "action")
+      return countLabel(count, "action")
     case "read":
-      return countText(count, "file")
+      return countLabel(count, "file")
     case "reaction":
-      return countText(count, "reaction")
+      return countLabel(count, "reaction")
     case "send":
-      return countText(count, "reply")
+      return countLabel(count, "reply")
     case "web-fetch":
-      return countText(count, "page")
+      return countLabel(count, "page")
     case "web-search":
-      return countText(count, "query")
+      return countLabel(count, "query")
   }
-}
-
-function countText(count: number, singular: string) {
-  return count === 1 ? `1 ${singular}` : `${count} ${pluralize(singular)}`
-}
-
-function pluralize(singular: string) {
-  return singular.endsWith("y") ? `${singular.slice(0, -1)}ies` : `${singular}s`
 }
 
 function titleIncludesAny(title: string, terms: string[]) {

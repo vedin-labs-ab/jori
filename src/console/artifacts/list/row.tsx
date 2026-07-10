@@ -11,14 +11,11 @@ import {
 import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { countLabel } from "@/lib/count"
 import { ScopeDatum } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
 import { ToolCountSummary } from "../../shared/tools/summary"
-import {
-  automationCountLabel,
-  capabilityGroupsFor,
-  toolSurfaceList,
-} from "../format"
+import { capabilityGroupsFor, toolSurfaceList } from "../format"
 import { type ArtifactSummary } from "../types"
 import { ArtifactActions } from "./actions"
 import { ArtifactExpanded } from "./details"
@@ -165,7 +162,7 @@ function ArtifactInlineMeta({
       <SeparatorDot className="text-muted-foreground/60" />
       <Workflow className="size-3.5" />
       <span className="text-foreground">
-        {automationCountLabel(automationCount)}
+        {countLabel(automationCount, "automation")}
       </span>
       {access === undefined ? null : (
         <>

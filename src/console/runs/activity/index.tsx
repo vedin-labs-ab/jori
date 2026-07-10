@@ -2,6 +2,7 @@ import { useQuery } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { Logs } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { countLabel } from "@/lib/count"
 import { api } from "../../../../convex/_generated/api"
 import { DetailRow } from "../../shared/details"
 import { ActivityEmpty, ActivitySkeleton } from "./empty"
@@ -65,5 +66,5 @@ function activityCaption(count: number | undefined) {
     return "Loading"
   }
 
-  return count === 1 ? "1 event" : `${count} events`
+  return countLabel(count, "event")
 }

@@ -6,6 +6,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { Skeleton } from "@/components/ui/skeleton"
+import { countLabel } from "@/lib/count"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
 import { SeparatorDot } from "../../shared/dot"
@@ -165,7 +166,7 @@ function EntryMeta({ item, now }: { item: TimelineItem; now: number }) {
           {hasLogos ? (
             <SeparatorDot className="text-muted-foreground/60 max-sm:hidden" />
           ) : null}
-          {item.receipts === 1 ? "1 receipt" : `${item.receipts} receipts`}
+          {countLabel(item.receipts, "receipt")}
         </span>
       ) : null}
       <span
