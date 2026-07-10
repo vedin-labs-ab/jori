@@ -17,6 +17,17 @@ const ignoredWorkspacePaths = [
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact()],
+  build: {
+    rollupOptions: {
+      output: {
+        // Keep Clerk out of the entry chunk: it is the largest vendor, it
+        // updates independently of app code, and the artifact share viewer
+        // never runs it.
+        manualChunks: (id) =>
+          id.includes("node_modules/@clerk/") ? "clerk" : undefined,
+      },
+    },
+  },
   test: {
     exclude: [...configDefaults.exclude, ...ignoredWorkspacePaths],
   },

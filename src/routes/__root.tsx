@@ -1,16 +1,13 @@
-import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start"
-import { shadcn } from "@clerk/ui/themes"
 import geistLatinWoff2 from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
-import { ConvexProviderWithClerk } from "convex/react-clerk"
 import { AlertTriangle, SearchX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { FullscreenLoadingProvider } from "@/console/shared/loading"
-import { convex } from "@/shared/convex"
+import { RouteSessionProviders } from "@/shared/providers"
 import { RootStateFrame } from "@/shared/state"
 import appCss from "../styles.css?url"
 
@@ -163,13 +160,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           when a ThemeProvider owns the html.dark class.
         */}
         <Toaster theme="light" />
-        <ClerkProvider appearance={{ theme: shadcn }}>
-          <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-            <FullscreenLoadingProvider>
-              <TooltipProvider>{children}</TooltipProvider>
-            </FullscreenLoadingProvider>
-          </ConvexProviderWithClerk>
-        </ClerkProvider>
+        <RouteSessionProviders>
+          <FullscreenLoadingProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </FullscreenLoadingProvider>
+        </RouteSessionProviders>
         <TanStackDevtools
           config={{
             position: "bottom-right",
