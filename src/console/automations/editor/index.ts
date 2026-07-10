@@ -1,5 +1,5 @@
 import { type ReactMutation, useMutation } from "convex/react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
 import { readErrorMessage, showErrorToast } from "../../shared/error"
@@ -38,8 +38,10 @@ function useAutomationForm(
   const [formError, setFormError] = useState<string>()
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const onSaved = useRef<() => void>(undefined)
 
   function openForm(automation: Automation | undefined) {
+    onSaved.current = undefined
     setFormAutomation(automation)
     setFormValues(automationFormValues(automation))
     setFormError(undefined)
@@ -47,8 +49,10 @@ function useAutomationForm(
   }
 
   // Prefilled create form (e.g. a playbook opened in the raw builder): no
-  // backing automation, so saving creates a fresh one.
-  function openDraftForm(values: AutomationFormValues) {
+  // backing automation, so saving creates a fresh one. `onCreated` fires
+  // after that save, letting the opener close its own surface too.
+  function openDraftForm(values: AutomationFormValues, onCreated?: () => void) {
+    onSaved.current = onCreated
     setFormAutomation(undefined)
     setFormValues(values)
     setFormError(undefined)
@@ -68,14 +72,10 @@ function useAutomationForm(
         update,
       })
       setIsFormOpen(false)
+      onSaved.current?.()
+      onSaved.current = undefined
     } catch (error) {
-      const message = readErrorMessage(error, "Couldn't save the automation.")
-
-      if (isAutomationFieldError(message)) {
-        setFormError(message)
-      } else {
-        toast.error(message)
-      }
+      reportSaveError(error, setFormError)
     } finally {
       setIsSaving(false)
     }
@@ -93,6 +93,20 @@ function useAutomationForm(
     saveAutomation,
     setFormValues,
     setIsFormOpen,
+  }
+}
+
+/** Field-level errors land inline on the form; anything else toasts. */
+function reportSaveError(
+  error: unknown,
+  setFormError: (message: string) => void
+) {
+  const message = readErrorMessage(error, "Couldn't save the automation.")
+
+  if (isAutomationFieldError(message)) {
+    setFormError(message)
+  } else {
+    toast.error(message)
   }
 }
 

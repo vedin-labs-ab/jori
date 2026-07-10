@@ -66,12 +66,13 @@ function useEditActions(
         }
       }),
 
-    // Resolves true once the editor is open, so the caller can swap the
-    // dialogs in one motion instead of closing into a modal-less gap.
+    // Stacks the builder on top of the caller's dialog; `onCreated` fires
+    // once an automation is actually created from the draft.
     openAdvanced: (
       definition: PlaybookDefinition,
       choices: PlaybookChoices,
-      destination: DeliveryChoice
+      destination: DeliveryChoice,
+      onCreated: () => void
     ) =>
       pending.wrap(definition.key, "advanced", async () => {
         try {
@@ -85,14 +86,15 @@ function useEditActions(
               destination,
             }),
           ])
-          editorHost.editor.openDraftForm(automationFormValues(draft))
-          // The first editor mount is slow (TipTap); hold the swap until the
-          // dialog is actually visible so there is never a modal-less gap.
+          editorHost.editor.openDraftForm(
+            automationFormValues(draft),
+            onCreated
+          )
+          // The first editor mount is slow (TipTap); hold the caller's
+          // loading state until the builder is actually on screen.
           await editorHost.whenDialogReady()
-          return true
         } catch (error) {
           showErrorToast(error, "Couldn't open the automation.")
-          return false
         }
       }),
   }
@@ -113,14 +115,14 @@ function usePendingAction() {
     kind: PlaybookActionKind
   }>()
 
-  async function wrap<Result>(
+  async function wrap(
     key: string,
     kind: PlaybookActionKind,
-    action: () => Promise<Result>
+    action: () => Promise<void>
   ) {
     setCurrent({ key, kind })
     try {
-      return await action()
+      await action()
     } finally {
       setCurrent(undefined)
     }

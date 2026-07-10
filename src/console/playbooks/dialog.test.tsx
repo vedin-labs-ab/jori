@@ -125,6 +125,23 @@ test("a pending Advanced settings locks every control", () => {
   }
 })
 
+test("advanced settings closes this dialog only after creation", () => {
+  const actions = stubActions()
+  const onOpenChange = vi.fn()
+
+  renderDialog(actions, ["email", "slack"], singlePlan, onOpenChange)
+  fireEvent.click(screen.getByRole("button", { name: /advanced settings/i }))
+
+  // The builder stacks on top: nothing closes when it merely opens.
+  expect(onOpenChange).not.toHaveBeenCalled()
+
+  // Creating an automation from the draft fires the handed-over close.
+  const onCreated = vi.mocked(actions.openAdvanced).mock.calls[0][3]
+  onCreated()
+
+  expect(onOpenChange).toHaveBeenCalledWith(false)
+})
+
 function switchKind(kind: string) {
   fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery kind" }))
   fireEvent.click(screen.getByRole("menuitem", { name: kind }))
@@ -133,13 +150,14 @@ function switchKind(kind: string) {
 function renderDialog(
   actions: PlaybookActions,
   delivery: PlaybookListRow["delivery"],
-  plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>
+  plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>,
+  onOpenChange: (open: boolean) => void = () => {}
 ) {
   return render(
     <PlaybookSetupDialog
       actions={actions}
       definition={morningBrief}
-      onOpenChange={() => {}}
+      onOpenChange={onOpenChange}
       open
       plan={plan}
       row={row(delivery)}
@@ -165,7 +183,7 @@ function stubActions(pending?: PlaybookActions["pending"]): PlaybookActions {
     pending,
     edit: vi.fn(async () => {}),
     enable: vi.fn(async () => {}),
-    openAdvanced: vi.fn(async () => true),
+    openAdvanced: vi.fn(async () => {}),
     preloadEdit: vi.fn(),
     trial: vi.fn(async () => {}),
     runNow: vi.fn(async () => {}),
