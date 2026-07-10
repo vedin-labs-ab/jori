@@ -1,8 +1,10 @@
 import { getAutomationSurfaceLabel } from "./catalog"
 import { findFuzzyAutomationSurfaceIntegration } from "./fuzzy"
 import {
+  canStartBareMention,
   isMentionNameCharacter,
   type MentionMatch,
+  overlaps,
   readAutomationSurfaceMentionMatches,
 } from "./scan"
 
@@ -103,7 +105,7 @@ function readFuzzyBareMatches(
   const matches: MentionMatch[] = []
 
   for (let index = 0; index < text.length; index += 1) {
-    if (!canStartBareToken(text, index)) {
+    if (!canStartBareMention(text, index)) {
       continue
     }
 
@@ -173,16 +175,6 @@ function readMentionToken(text: string, start: number) {
   }
 }
 
-function canStartBareToken(text: string, start: number) {
-  if (!/[a-z0-9]/i.test(text[start])) {
-    return false
-  }
-
-  const previous = text[start - 1]
-
-  return previous !== "@" && !isMentionNameCharacter(previous)
-}
-
 function canNormalizeEnd(
   text: string,
   end: number,
@@ -200,8 +192,4 @@ function toMentionReplacement(match: MentionMatch): MentionReplacement {
     ...match,
     text: getAutomationSurfaceLabel(match.integration),
   }
-}
-
-function overlaps(left: MentionMatch, right: MentionMatch) {
-  return left.start < right.end && right.start < left.end
 }
