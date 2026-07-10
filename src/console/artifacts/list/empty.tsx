@@ -1,18 +1,15 @@
 import { Box } from "lucide-react"
-import { ConsoleEmptyState } from "../../shared/list/empty"
+import { FilterableEmptyState } from "../../shared/list/empty"
 
 const skeletonRows = ["first", "second", "third", "fourth"]
 
 export function EmptyArtifacts({ hasFilters }: { hasFilters: boolean }) {
   return (
-    <ConsoleEmptyState
-      description={
-        hasFilters
-          ? "Adjust the filters or search to widen the results."
-          : "Agent-created apps appear here after they pass validation and publish a version."
-      }
+    <FilterableEmptyState
+      description="Agent-created apps appear here after they pass validation and publish a version."
+      hasFilters={hasFilters}
       icon={Box}
-      title={hasFilters ? "No matching artifacts" : "No artifacts yet"}
+      noun="artifacts"
     />
   )
 }
