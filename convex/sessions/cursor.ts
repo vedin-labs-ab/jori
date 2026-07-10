@@ -4,7 +4,7 @@ import {
   messageIdentifiers,
   messageReplyTargetIdentifier,
 } from "../messages/identifiers"
-import { getActorDisplayName } from "../shared/actor"
+import { getActorDisplayName, getActorKind } from "../shared/actor"
 
 export const defaultDrainLimit = 20
 export const maxDrainLimit = 50
@@ -77,7 +77,7 @@ export function formatRuntimeMessage(
     observedAt: message.observedAt ?? null,
     reactions: reactions ?? null,
     replyTarget: messageReplyTargetIdentifier(message),
-    source: message.actor?.kind ?? "unknown",
+    source: getActorKind(message.actor),
     text: message.text ?? "",
     type: message.type,
   }

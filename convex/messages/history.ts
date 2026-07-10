@@ -1,7 +1,11 @@
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { reactionSummariesForMessages } from "../reactions/summary"
-import { type ActorKind, getActorDisplayName } from "../shared/actor"
+import {
+  type ActorKind,
+  getActorDisplayName,
+  getActorKind,
+} from "../shared/actor"
 import { messageActorIds, messageIdentifiers } from "./identifiers"
 
 const recentConversationLimit = 16
@@ -52,7 +56,7 @@ export function messageEntry(
     identifiers: messageIdentifiers(message),
     observedAt: message.observedAt ?? null,
     reactions: reactions ?? null,
-    source: message.actor?.kind ?? "unknown",
+    source: getActorKind(message.actor),
     text: message.text ?? "",
     type: message.type,
   }
