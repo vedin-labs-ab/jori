@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { playbookCatalog } from "../../contracts/playbooks/catalog"
 import { type DeliveryChoice } from "../../contracts/playbooks/delivery"
 import { type MutationCtx, mutation, query } from "../_generated/server"
+import { listInactiveAccessIntegrations } from "../automations/access"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import {
   readClerkUserEmail,
@@ -72,26 +73,32 @@ export const list = query({
 
     return {
       status: "ready" as const,
-      playbooks: playbookCatalog.map((definition) => {
-        const automation = enabled.get(definition.key)
+      playbooks: await Promise.all(
+        playbookCatalog.map(async (definition) => {
+          const automation = enabled.get(definition.key)
 
-        return {
-          key: definition.key,
-          slots: readPlaybookSlots(definition, connected),
-          delivery: availableDelivery(definition, connected),
-          enabled:
-            automation === undefined
-              ? null
-              : {
-                  automationId: automation._id,
-                  status: automation.status,
-                  nextRunAt:
-                    "nextAt" in automation.trigger
-                      ? automation.trigger.nextAt
-                      : undefined,
-                },
-        }
-      }),
+          return {
+            key: definition.key,
+            slots: readPlaybookSlots(definition, connected),
+            delivery: availableDelivery(definition, connected),
+            enabled:
+              automation === undefined
+                ? null
+                : {
+                    automationId: automation._id,
+                    status: automation.status,
+                    nextRunAt:
+                      "nextAt" in automation.trigger
+                        ? automation.trigger.nextAt
+                        : undefined,
+                    missing: await listInactiveAccessIntegrations(
+                      ctx,
+                      automation.access
+                    ),
+                  },
+          }
+        })
+      ),
     }
   },
 })

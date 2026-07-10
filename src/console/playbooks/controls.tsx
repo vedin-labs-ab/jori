@@ -5,8 +5,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 import { type PlaybookActions, pendingActionKind } from "./enable"
-import { SetupControls } from "./setup"
-import { type PlaybookListRow } from "./state"
+import { ConnectButton, SetupControls } from "./setup"
+import { connectMissingLabel, type PlaybookListRow } from "./state"
 
 export function PlaybookControls({
   actions,
@@ -86,13 +86,17 @@ function EnabledControls({
 
   return (
     <div className="flex w-full items-center justify-between gap-2">
-      <Button
-        disabled={pendingKind !== undefined}
-        onClick={() => void actions.runNow(definition, enabled.automationId)}
-        variant="outline"
-      >
-        {pendingKind === "run" ? <Spinner /> : <Play />} Run now
-      </Button>
+      {enabled.missing.length > 0 ? (
+        <ConnectButton label={connectMissingLabel(enabled.missing)} />
+      ) : (
+        <Button
+          disabled={pendingKind !== undefined}
+          onClick={() => void actions.runNow(definition, enabled.automationId)}
+          variant="outline"
+        >
+          {pendingKind === "run" ? <Spinner /> : <Play />} Run now
+        </Button>
+      )}
       <Button
         disabled={pendingKind !== undefined}
         onClick={() => void actions.edit(definition, enabled.automationId)}
