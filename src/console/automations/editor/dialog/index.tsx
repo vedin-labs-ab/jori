@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react"
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -26,6 +27,7 @@ export function AutomationDialog({
   isOpen,
   isSaving,
   onOpenChange,
+  onReady,
   onSave,
   onValuesChange,
   permissions,
@@ -38,6 +40,8 @@ export function AutomationDialog({
   isOpen: boolean
   isSaving: boolean
   onOpenChange: (isOpen: boolean) => void
+  /** Fires once the lazily loaded dialog has actually mounted. */
+  onReady?: () => void
   onSave: () => void
   onValuesChange: (values: AutomationFormValues) => void
   permissions?: AutomationPolicyPermissions
@@ -46,6 +50,11 @@ export function AutomationDialog({
   tenantId: string
   values: AutomationFormValues
 }) {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fire once on mount
+  useEffect(() => {
+    onReady?.()
+  }, [])
+
   const actions = createAutomationDialogActions({
     onValuesChange,
     permissions,

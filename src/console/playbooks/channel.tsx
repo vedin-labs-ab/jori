@@ -20,10 +20,12 @@ export type SlackChannel = { channelId: string; channelName: string }
 
 /** Slack channel picker, backed by the shared integration option search. */
 export function SlackChannelField({
+  disabled = false,
   onChange,
   tenantId,
   value,
 }: {
+  disabled?: boolean
   onChange: (channel: SlackChannel | undefined) => void
   tenantId: string
   value: SlackChannel | undefined
@@ -67,6 +69,7 @@ export function SlackChannelField({
       <ComboboxInput
         aria-label="Slack channel"
         clearLabel="Clear channel"
+        disabled={disabled}
         placeholder="Search channels…"
         showClear={value !== undefined}
       />

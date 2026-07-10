@@ -11,11 +11,13 @@ import { type PlaybookEnablePlan } from "./state"
  */
 export function PlaybookCustomizations({
   delivery,
+  disabled = false,
   plan,
   providerIndex,
   onProviderIndexChange,
 }: {
   delivery: ComponentProps<typeof DeliveryField>
+  disabled?: boolean
   plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>
   providerIndex: number
   onProviderIndexChange: (index: number) => void
@@ -25,6 +27,7 @@ export function PlaybookCustomizations({
       {plan.kind === "choose" ? (
         <PlaybookSection label="Accounts">
           <OptionToggle
+            disabled={disabled}
             onValueChange={onProviderIndexChange}
             options={plan.options.map((option) => option.label)}
             value={providerIndex}
@@ -32,7 +35,7 @@ export function PlaybookCustomizations({
         </PlaybookSection>
       ) : null}
       <PlaybookSection label="Deliver to">
-        <DeliveryField {...delivery} />
+        <DeliveryField {...delivery} disabled={disabled} />
       </PlaybookSection>
     </>
   )
@@ -40,10 +43,12 @@ export function PlaybookCustomizations({
 
 /** Single-select toggle over string options addressed by index. */
 function OptionToggle({
+  disabled,
   onValueChange,
   options,
   value,
 }: {
+  disabled: boolean
   onValueChange: (index: number) => void
   options: string[]
   value: number
@@ -51,6 +56,7 @@ function OptionToggle({
   return (
     <ToggleGroup
       className="justify-start"
+      disabled={disabled}
       onValueChange={(next) => {
         if (next !== "") {
           onValueChange(Number(next))

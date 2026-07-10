@@ -46,9 +46,10 @@ export function PlaybookSetupDialog({
 
   const choices =
     plan.kind === "choose" ? plan.options[providerIndex].choices : plan.choices
+  // A pending action locks the whole dialog until it settles.
+  const isBusy = pendingKind !== undefined
   // An open edit holds submission: the user saves or cancels first.
-  const canSubmit =
-    destination !== undefined && pendingKind === undefined && !delivery.editing
+  const canSubmit = destination !== undefined && !isBusy && !delivery.editing
 
   function submit(action: PlaybookActions["enable"], close: boolean) {
     if (destination === undefined) {
@@ -61,8 +62,28 @@ export function PlaybookSetupDialog({
     })
   }
 
+  function openAdvanced() {
+    if (destination === undefined) {
+      return
+    }
+    // Keep this dialog up (locked) until the editor is open, then swap —
+    // closing first would leave a modal-less gap while the draft loads.
+    void actions.openAdvanced(definition, choices, destination).then((ok) => {
+      if (ok) {
+        onOpenChange(false)
+      }
+    })
+  }
+
   return (
-    <Dialog onOpenChange={onOpenChange} open={open}>
+    <Dialog
+      onOpenChange={(next) => {
+        if (next || !isBusy) {
+          onOpenChange(next)
+        }
+      }}
+      open={open}
+    >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Set up {definition.title}</DialogTitle>
@@ -73,6 +94,7 @@ export function PlaybookSetupDialog({
           <PlaybookMeta definition={definition} row={row} />
           <PlaybookCustomizations
             delivery={{ ...delivery, tenantId }}
+            disabled={isBusy}
             onProviderIndexChange={setProviderIndex}
             plan={plan}
             providerIndex={providerIndex}
@@ -81,13 +103,8 @@ export function PlaybookSetupDialog({
 
         <DialogFooter className="sm:justify-between">
           <Button
-            disabled={destination === undefined || pendingKind === "advanced"}
-            onClick={() => {
-              if (destination !== undefined) {
-                void actions.openAdvanced(definition, choices, destination)
-                onOpenChange(false)
-              }
-            }}
+            disabled={destination === undefined || isBusy}
+            onClick={openAdvanced}
             onPointerEnter={actions.preloadEdit}
             type="button"
             variant="secondary"
