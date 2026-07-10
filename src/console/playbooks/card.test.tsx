@@ -87,7 +87,7 @@ function stubActions(): PlaybookActions {
     pending: undefined,
     edit: vi.fn(async () => {}),
     enable: vi.fn(async () => {}),
-    openAdvanced: vi.fn(async () => true),
+    openAdvanced: vi.fn(async () => {}),
     preloadEdit: vi.fn(),
     trial: vi.fn(async () => {}),
     runNow: vi.fn(async () => {}),

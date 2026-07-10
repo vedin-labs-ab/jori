@@ -66,13 +66,11 @@ export function PlaybookSetupDialog({
     if (destination === undefined) {
       return
     }
-    // Keep this dialog up (locked) until the editor is open, then swap —
-    // closing first would leave a modal-less gap while the draft loads.
-    void actions.openAdvanced(definition, choices, destination).then((ok) => {
-      if (ok) {
-        onOpenChange(false)
-      }
-    })
+    // The builder stacks on top; this dialog stays beneath as the way back
+    // and only closes once an automation is actually created from it.
+    void actions.openAdvanced(definition, choices, destination, () =>
+      onOpenChange(false)
+    )
   }
 
   return (
