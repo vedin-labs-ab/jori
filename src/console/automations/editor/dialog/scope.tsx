@@ -1,11 +1,7 @@
 import { type Scope, scopeLabels } from "@contracts/permissions/scope"
 import { Label } from "@/components/ui/label"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-
-const scopeDescriptions: Record<Scope, string> = {
-  personal: "Only you can see and manage it, runs included.",
-  organization: "Everyone in your organization can see and manage it.",
-}
+import { FieldHelp } from "./help"
 
 export function ScopeField({
   onValueChange,
@@ -15,10 +11,16 @@ export function ScopeField({
   value: Scope
 }) {
   return (
-    <div className="grid gap-1.5">
-      <Label className="font-normal text-xs" htmlFor="automation-scope">
-        Sharing
-      </Label>
+    <div className="grid gap-2">
+      <div className="flex items-center gap-1.5">
+        <Label htmlFor="automation-scope">Sharing</Label>
+        <FieldHelp label="Sharing help">
+          <p>Personal: only you can see and manage it, runs included.</p>
+          <p>
+            Organization: everyone in your organization can see and manage it.
+          </p>
+        </FieldHelp>
+      </div>
       <ToggleGroup
         className="justify-start"
         id="automation-scope"
@@ -38,9 +40,6 @@ export function ScopeField({
           {scopeLabels.organization}
         </ToggleGroupItem>
       </ToggleGroup>
-      <p className="text-muted-foreground text-xs">
-        {scopeDescriptions[value]}
-      </p>
     </div>
   )
 }

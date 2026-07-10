@@ -93,6 +93,10 @@ export function AutomationDialog({
             onValueChange={actions.updateName}
             value={values.name}
           />
+          <ScopeField
+            onValueChange={actions.updateScope}
+            value={values.scope}
+          />
           <AutomationInstructionsSection
             error={instructionsError}
             onBlur={actions.normalizeDescription}
@@ -104,10 +108,6 @@ export function AutomationDialog({
           <AccessFields
             onWebSearchChange={actions.updateWebSearch}
             webSearch={values.webSearch}
-          />
-          <ScopeField
-            onValueChange={actions.updateScope}
-            value={values.scope}
           />
           <AutomationTiming
             tenantId={tenantId}
