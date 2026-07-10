@@ -66,24 +66,33 @@ function useEditActions(
         }
       }),
 
+    // Resolves true once the editor is open, so the caller can swap the
+    // dialogs in one motion instead of closing into a modal-less gap.
     openAdvanced: (
       definition: PlaybookDefinition,
       choices: PlaybookChoices,
       destination: DeliveryChoice
     ) =>
       pending.wrap(definition.key, "advanced", async () => {
-        editorHost.preloadDialog()
         try {
-          const draft = await convex.query(api.playbooks.console.draft, {
-            tenantId,
-            playbook: definition.key,
-            utcOffsetMinutes: new Date().getTimezoneOffset(),
-            choices,
-            destination,
-          })
+          const [, draft] = await Promise.all([
+            editorHost.preloadDialog(),
+            convex.query(api.playbooks.console.draft, {
+              tenantId,
+              playbook: definition.key,
+              utcOffsetMinutes: new Date().getTimezoneOffset(),
+              choices,
+              destination,
+            }),
+          ])
           editorHost.editor.openDraftForm(automationFormValues(draft))
+          // The first editor mount is slow (TipTap); hold the swap until the
+          // dialog is actually visible so there is never a modal-less gap.
+          await editorHost.whenDialogReady()
+          return true
         } catch (error) {
           showErrorToast(error, "Couldn't open the automation.")
+          return false
         }
       }),
   }
@@ -104,14 +113,14 @@ function usePendingAction() {
     kind: PlaybookActionKind
   }>()
 
-  async function wrap(
+  async function wrap<Result>(
     key: string,
     kind: PlaybookActionKind,
-    action: () => Promise<void>
+    action: () => Promise<Result>
   ) {
     setCurrent({ key, kind })
     try {
-      await action()
+      return await action()
     } finally {
       setCurrent(undefined)
     }

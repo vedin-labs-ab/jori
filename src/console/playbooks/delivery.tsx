@@ -28,6 +28,7 @@ type DeliveryDraft = { kind: DeliveryKind; channel?: SlackChannel }
 export function DeliveryField({
   availableKinds,
   defaultKind,
+  disabled = false,
   editing,
   onChange,
   onEditingChange,
@@ -36,6 +37,7 @@ export function DeliveryField({
 }: {
   availableKinds: DeliveryKind[]
   defaultKind: DeliveryKind
+  disabled?: boolean
   editing: boolean
   onChange: (choice: DeliveryChoice) => void
   onEditingChange: (editing: boolean) => void
@@ -55,6 +57,7 @@ export function DeliveryField({
         </span>
         {availableKinds.length > 1 ? (
           <Button
+            disabled={disabled}
             onClick={() => {
               setDraft(committedDraft(value, defaultKind))
               onEditingChange(true)
@@ -72,6 +75,7 @@ export function DeliveryField({
   return (
     <DeliveryEditor
       availableKinds={availableKinds}
+      disabled={disabled}
       draft={draft}
       onCancel={value === undefined ? undefined : () => onEditingChange(false)}
       onDraftChange={setDraft}
@@ -92,6 +96,7 @@ export function DeliveryField({
 
 function DeliveryEditor({
   availableKinds,
+  disabled,
   draft,
   onCancel,
   onDraftChange,
@@ -101,6 +106,7 @@ function DeliveryEditor({
   value,
 }: {
   availableKinds: DeliveryKind[]
+  disabled: boolean
   draft: DeliveryDraft
   onCancel: (() => void) | undefined
   onDraftChange: (draft: DeliveryDraft) => void
@@ -116,6 +122,7 @@ function DeliveryEditor({
     <div className="flex min-h-8 items-center justify-between gap-2">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
         <KindMenu
+          disabled={disabled}
           kind={draft.kind}
           kinds={availableKinds}
           onSelect={onSwitchKind}
@@ -125,6 +132,7 @@ function DeliveryEditor({
         ) : (
           <div className="min-w-0 flex-1">
             <SlackChannelField
+              disabled={disabled}
               onChange={(channel) =>
                 onDraftChange({ kind: draft.kind, channel })
               }
@@ -136,14 +144,14 @@ function DeliveryEditor({
       </div>
       <ButtonGroup>
         <Button
-          disabled={onCancel === undefined}
+          disabled={disabled || onCancel === undefined}
           onClick={onCancel}
           variant="outline"
         >
           Cancel
         </Button>
         <Button
-          disabled={!changed}
+          disabled={disabled || !changed}
           onClick={() => {
             if (next !== undefined) {
               onSave(next)
@@ -159,10 +167,12 @@ function DeliveryEditor({
 
 /** The edit-mode icon slot: the kind picker when there is more than one. */
 function KindMenu({
+  disabled,
   kind,
   kinds,
   onSelect,
 }: {
+  disabled: boolean
   kind: DeliveryKind
   kinds: DeliveryKind[]
   onSelect: (kind: DeliveryKind) => void
@@ -176,7 +186,12 @@ function KindMenu({
     // swallows trigger clicks and closes the whole dialog with it.
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button aria-label="Delivery kind" className="px-2" variant="outline">
+        <Button
+          aria-label="Delivery kind"
+          className="px-2"
+          disabled={disabled}
+          variant="outline"
+        >
           <DeliveryIcon kind={kind} />
           <ChevronDown />
         </Button>

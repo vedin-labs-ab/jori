@@ -112,6 +112,19 @@ test("try once shares the chosen destination", () => {
   )
 })
 
+test("a pending Advanced settings locks every control", () => {
+  const actions = stubActions({ key: morningBrief.key, kind: "advanced" })
+
+  renderDialog(actions, ["email", "slack"], singlePlan)
+
+  for (const name of [/change/i, /try once/i, "Enable", /advanced settings/i]) {
+    expect(screen.getByRole("button", { name })).toHaveProperty(
+      "disabled",
+      true
+    )
+  }
+})
+
 function switchKind(kind: string) {
   fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery kind" }))
   fireEvent.click(screen.getByRole("menuitem", { name: kind }))
@@ -147,12 +160,12 @@ function row(delivery: PlaybookListRow["delivery"]): PlaybookListRow {
   }
 }
 
-function stubActions(): PlaybookActions {
+function stubActions(pending?: PlaybookActions["pending"]): PlaybookActions {
   return {
-    pending: undefined,
+    pending,
     edit: vi.fn(async () => {}),
     enable: vi.fn(async () => {}),
-    openAdvanced: vi.fn(async () => {}),
+    openAdvanced: vi.fn(async () => true),
     preloadEdit: vi.fn(),
     trial: vi.fn(async () => {}),
     runNow: vi.fn(async () => {}),
