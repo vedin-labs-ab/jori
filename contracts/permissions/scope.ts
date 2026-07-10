@@ -8,8 +8,6 @@ import { type Integration, isUserScopedIntegration } from "../integrations"
  */
 export type Scope = "personal" | "organization"
 
-export const scopeValues = ["personal", "organization"] as const
-
 export const scopeLabels: Record<Scope, string> = {
   personal: "Personal",
   organization: "Organization",
