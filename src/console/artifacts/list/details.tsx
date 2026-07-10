@@ -91,9 +91,7 @@ function SummaryRow({ artifact }: { artifact: ArtifactSummary }) {
       iconClassName="text-muted-foreground"
       label="Summary"
     >
-      <p className="min-w-0 text-foreground text-xs leading-relaxed">
-        {message}
-      </p>
+      <p className="min-w-0 text-foreground text-xs">{message}</p>
     </DetailRow>
   )
 }
