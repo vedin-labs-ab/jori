@@ -81,6 +81,27 @@ test("limits automation run tools to selected unattended access", () => {
   )
 })
 
+test("hides interactive tools from automation runs", () => {
+  const github = integration("github")
+  const automation = listCapabilities(
+    context({
+      connectedIntegrations: [github],
+      input: automationInput(github, ["github_get_issue"]),
+      toolModes: new Map(),
+    })
+  )
+  const message = listCapabilities(
+    context({
+      connectedIntegrations: [github],
+      input: messageInput([github]),
+      toolModes: new Map(),
+    })
+  )
+
+  expect(miloTools(automation)).not.toContain("offer_integration")
+  expect(miloTools(message)).toContain("offer_integration")
+})
+
 test("hides web tools from automation runs without web access", () => {
   const github = integration("github")
   const blocked = listCapabilities(

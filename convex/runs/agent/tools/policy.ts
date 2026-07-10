@@ -1,5 +1,6 @@
 import {
   canUseToolMode,
+  isInteractiveTool,
   type PermissionMode,
   resolveToolMode,
   type ToolPermission,
@@ -30,6 +31,13 @@ export function canUseToolPermission(input: {
   permission: ToolPermission
   toolModes: ReadonlyMap<string, PermissionMode>
 }) {
+  if (
+    input.executionType === "automation" &&
+    isInteractiveTool(input.permission.tool)
+  ) {
+    return false
+  }
+
   return canUseToolMode(
     resolveToolMode(input.toolModes, input.permission.tool),
     input.executionType

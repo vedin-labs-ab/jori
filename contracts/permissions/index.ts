@@ -21,6 +21,11 @@ export const internalRequiredToolNames = [
   "send_reply",
   "add_reaction",
 ] as const
+/** Tools that need a person in the conversation, so automations never get them. */
+export const interactiveToolNames = [
+  "offer_integration",
+  "cancel_integration_offer",
+] as const
 export const toolAccessLevels = ["read", "write"] as const
 
 export type PermissionMode = (typeof permissionModes)[number]
@@ -80,9 +85,14 @@ const toolPermissionsByName = new Map(
   toolPermissions.map((permission) => [permission.tool, permission])
 )
 const internalRequiredTools = new Set<string>(internalRequiredToolNames)
+const interactiveTools = new Set<string>(interactiveToolNames)
 
 export function getToolPermission(tool: string) {
   return toolPermissionsByName.get(tool)
+}
+
+export function isInteractiveTool(tool: string) {
+  return interactiveTools.has(tool)
 }
 
 export function isUserVisibleToolPermission(tool: string) {

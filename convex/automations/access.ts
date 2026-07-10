@@ -156,11 +156,12 @@ export function canUseAutomationTool(
 }
 
 /**
- * Names of integrations the automation is bound to that are connected but no
- * longer usable (expired credentials, mid-disconnect). Runs drop these bound
- * integrations, so the automation cannot do its work until they are
- * reconnected. References to deleted integrations are omitted, matching
- * projectAccessForConsole.
+ * Names of integrations the automation is bound to that are no longer usable
+ * (disconnected, expired credentials). Runs drop these bound integrations, so
+ * the automation cannot do its work until they are reconnected. Integration
+ * rows survive disconnects, so bound references stay resolvable; automations
+ * created before that guarantee may still hold dangling references, which are
+ * omitted here, matching projectAccessForConsole.
  */
 export async function listInactiveAccessIntegrations(
   ctx: QueryLikeCtx,
