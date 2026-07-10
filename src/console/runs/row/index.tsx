@@ -35,10 +35,12 @@ const ExpandedExecution = lazy(async () => ({
 export const ExecutionRow = memo(function ExecutionRow({
   execution,
   now,
+  showScope,
   tenantId,
 }: {
   execution: ExecutionItem
   now: number
+  showScope: boolean
   tenantId: string
 }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -79,7 +81,7 @@ export const ExecutionRow = memo(function ExecutionRow({
             status={execution.status}
             waiter={execution.waiter ?? null}
           />
-          <ExecutionTitle execution={execution} />
+          <ExecutionTitle execution={execution} showScope={showScope} />
           <ExecutionMeta
             durationMs={durationMs}
             execution={execution}
@@ -101,12 +103,18 @@ export const ExecutionRow = memo(function ExecutionRow({
   )
 })
 
-function ExecutionTitle({ execution }: { execution: ExecutionItem }) {
+function ExecutionTitle({
+  execution,
+  showScope,
+}: {
+  execution: ExecutionItem
+  showScope: boolean
+}) {
   return (
     <RunRowContent title={execution.title}>
       <SourceLine
         details={execution.details}
-        scope={execution.scope}
+        scope={showScope ? execution.scope : undefined}
         source={execution.source}
       />
     </RunRowContent>

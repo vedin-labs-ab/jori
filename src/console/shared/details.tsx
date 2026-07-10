@@ -233,7 +233,7 @@ export function ScopeDatum({
   return (
     <span className="inline-flex shrink-0 items-center gap-1">
       <Icon className={cn("shrink-0", iconClassName)} />
-      {scopeLabels[scope]}
+      <span className="text-foreground">{scopeLabels[scope]}</span>
     </span>
   )
 }
