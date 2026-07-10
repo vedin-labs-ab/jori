@@ -44,7 +44,7 @@ export function WebsitesContent({ websites }: { websites: WebsiteItem[] }) {
           variant="outline"
         >
           <a href={website.href} rel="noreferrer" target="_blank">
-            <Globe2 className="size-3.5 text-muted-foreground" />
+            <Globe2 className="size-3.5" />
             <span>{website.label}</span>
             {website.main ? <Badge variant="secondary">Main</Badge> : null}
           </a>

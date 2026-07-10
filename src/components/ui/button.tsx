@@ -12,11 +12,11 @@ const buttonVariants = cva(
         default:
           "bg-primary text-primary-foreground bg-clip-border hover:bg-primary/80 [--tactile-edge:color-mix(in_oklch,var(--primary),#000_30%)]",
         outline:
-          "border-border hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30 [--tactile-edge:color-mix(in_oklch,var(--border),#000_18%)]",
+          "border-border hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30 [--tactile-edge:color-mix(in_oklch,var(--border),#000_18%)] [&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-muted-foreground",
         secondary:
-          "bg-secondary text-secondary-foreground bg-clip-border hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground [--tactile-edge:color-mix(in_oklch,var(--secondary),#000_12%)]",
+          "bg-secondary text-secondary-foreground bg-clip-border hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground [--tactile-edge:color-mix(in_oklch,var(--secondary),#000_12%)] [&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-muted-foreground",
         ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 [&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-muted-foreground",
         destructive:
           "bg-destructive text-destructive-foreground bg-clip-border hover:bg-destructive/80 [--tactile-edge:color-mix(in_oklch,var(--destructive),#000_30%)]",
         link: "text-primary underline-offset-4 hover:underline",
