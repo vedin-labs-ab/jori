@@ -62,7 +62,6 @@ export function DeliveryField({
               setDraft(committedDraft(value, defaultKind))
               onEditingChange(true)
             }}
-            size="sm"
             variant="ghost"
           >
             <Pencil /> Change
