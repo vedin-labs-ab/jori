@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
+import { countLabel } from "@/lib/count"
 import { DetailRow } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, relativeTime } from "../../shared/time"
@@ -88,7 +89,7 @@ function VersionsFact({
   return (
     <FactLine>
       <span className="font-medium text-foreground">
-        {versionCountLabel(artifact.versions.length)}
+        {countLabel(artifact.versions.length, "version")}
       </span>
       <SeparatorDot className="text-muted-foreground/60" />
       <TimeFact at={currentVersion.createdAt} now={now} prefix="Published" />
@@ -132,10 +133,6 @@ function FactLine({ children }: { children: ReactNode }) {
       {children}
     </div>
   )
-}
-
-function versionCountLabel(count: number) {
-  return count === 1 ? "1 version" : `${count} versions`
 }
 
 function ArtifactToolsValue({ groups }: { groups: CapabilityGroup[] }) {

@@ -6,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { countLabel } from "@/lib/count"
 import { cn } from "@/lib/utils"
 import { MiloLogo } from "@/shared/brand"
 import { providerLogoPath } from "../logo/path"
@@ -47,7 +48,7 @@ export function ToolCountSummary({
   return (
     <span className="flex min-w-0 items-center gap-2 text-foreground">
       <ToolSurfaceLogoStack logoSize={logoSize} surfaces={surfaces} />
-      <span className="truncate">{toolCountLabel(toolCount)}</span>
+      <span className="truncate">{countLabel(toolCount, "tool")}</span>
     </span>
   )
 }
@@ -156,8 +157,4 @@ function WebSearchStatus({ allowed }: { allowed: boolean }) {
       </span>
     </span>
   )
-}
-
-function toolCountLabel(count: number) {
-  return count === 1 ? "1 tool" : `${count} tools`
 }

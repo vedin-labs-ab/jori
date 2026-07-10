@@ -45,10 +45,6 @@ export function toolSurfaceList(groups: CapabilityGroup[]) {
   return groups.map((group) => group.type)
 }
 
-export function automationCountLabel(count: number) {
-  return count === 1 ? "1 automation" : `${count} automations`
-}
-
 export function currentVersionMessage(artifact: ArtifactSummary) {
   return artifact.versions.find((version) => version.isCurrent)?.message
 }
