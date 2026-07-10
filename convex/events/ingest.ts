@@ -1,6 +1,7 @@
 import { type ObjectType, v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { findIntegrationByExternalId } from "../integrations/data"
 import { integrationValidator } from "../shared/integrations"
 import { recordEvent } from "./data"
 import { eventFields } from "./schema"
@@ -27,14 +28,7 @@ export const recordFromProvider = internalMutation({
     ...eventFields,
   },
   handler: async (ctx, args) => {
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_integration_and_external", (query) =>
-        query
-          .eq("integration", args.integration)
-          .eq("externalId", args.externalId)
-      )
-      .first()
+    const integration = await findIntegrationByExternalId(ctx, args)
 
     return await ingest(ctx, integration, args)
   },

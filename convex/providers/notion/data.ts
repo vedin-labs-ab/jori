@@ -1,7 +1,8 @@
 import { v } from "convex/values"
-import { internalMutation, type MutationCtx } from "../../_generated/server"
+import { internalMutation } from "../../_generated/server"
 import { recordEvent } from "../../events/data"
 import { eventData, eventMatch } from "../../events/schema"
+import { findActiveIntegrationByExternalId } from "../../integrations/data"
 import {
   type Actor,
   actorValidator,
@@ -24,7 +25,10 @@ export const recordWebhookEvent = internalMutation({
     observedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const integration = await findActiveNotionIntegration(ctx, args.workspaceId)
+    const integration = await findActiveIntegrationByExternalId(ctx, {
+      externalId: args.workspaceId,
+      integration: "notion",
+    })
 
     if (integration === null) {
       return { status: "missing_integration" as const }
@@ -51,24 +55,6 @@ export const recordWebhookEvent = internalMutation({
     }
   },
 })
-
-async function findActiveNotionIntegration(
-  ctx: MutationCtx,
-  workspaceId: string
-) {
-  const integration = await ctx.db
-    .query("integrations")
-    .withIndex("by_integration_and_external", (query) =>
-      query.eq("integration", "notion").eq("externalId", workspaceId)
-    )
-    .first()
-
-  if (integration === null || integration.status !== "active") {
-    return null
-  }
-
-  return integration
-}
 
 function isNotionBotEvent(actor: Actor | undefined, data: unknown) {
   const actorId = getActorExternalId(actor)

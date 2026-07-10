@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalQuery } from "../../_generated/server"
 import { isLinearIssueCommentEvent } from "../../automations/names"
+import { findActiveIntegrationByExternalId } from "../../integrations/data"
 
 const issueMatch = v.object({
   issue: v.string(),
@@ -25,14 +26,12 @@ export const issueProject = internalQuery({
     match: issueMatch,
   },
   handler: async (ctx, args): Promise<IssueProjectHydrationPlan> => {
-    const integration = await ctx.db
-      .query("integrations")
-      .withIndex("by_integration_and_external", (query) =>
-        query.eq("integration", "linear").eq("externalId", args.accountId)
-      )
-      .first()
+    const integration = await findActiveIntegrationByExternalId(ctx, {
+      externalId: args.accountId,
+      integration: "linear",
+    })
 
-    if (integration === null || integration.status !== "active") {
+    if (integration === null) {
       return { status: "missing_integration" }
     }
 
