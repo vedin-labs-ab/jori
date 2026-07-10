@@ -7,6 +7,12 @@ export const cleanupTaskId = "milo-sandbox-cleanup"
 export const sandboxWorkspace = "/home/user/workspace"
 export const sandboxInternalRoot = "/home/user/.milo"
 export const sandboxArtifactRuntime = `${sandboxInternalRoot}/artifacts/runtime`
+
+// Enforced by the broker upload endpoint and pre-checked in the worker, so
+// the cap and its user-facing copy cannot drift apart.
+const maxAssetMegabytes = 25
+export const maxAssetBytes = maxAssetMegabytes * 1024 * 1024
+export const assetTooLargeError = `Asset exceeds the ${maxAssetMegabytes} MB limit`
 export const toolFinalDescription =
   "Set true only when this tool call is the final useful action for the run. If active approvals or integration offers remain, the run waits; otherwise it completes after the tool succeeds."
 

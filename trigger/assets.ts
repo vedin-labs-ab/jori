@@ -1,12 +1,12 @@
 import path from "node:path"
 import { isArtifactPublishTool } from "../contracts/artifacts/publish"
 import { isRecord } from "../contracts/json"
+import { assetTooLargeError, maxAssetBytes } from "../contracts/runtime"
 import { optionalString, requiredString } from "./input"
 import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId, type JsonObject } from "./types"
 
-const maxAssetBytes = 25 * 1024 * 1024
 const mimeTypesByExtension: Record<string, string> = {
   ".csv": "text/csv",
   ".gif": "image/gif",
@@ -61,7 +61,7 @@ export async function saveSandboxAsset(
   }
 
   if (bytes.byteLength > maxAssetBytes) {
-    throw new Error("Asset exceeds the 25 MB limit")
+    throw new Error(assetTooLargeError)
   }
 
   return await runtime.convex.uploadAsset({

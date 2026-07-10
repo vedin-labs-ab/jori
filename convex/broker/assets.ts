@@ -1,3 +1,4 @@
+import { assetTooLargeError, maxAssetBytes } from "../../contracts/runtime"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
@@ -21,14 +22,13 @@ export async function handleAssetUploadRequest(
 
   const requestUrl = new URL(request.url)
   const bytes = new Uint8Array(await request.arrayBuffer())
-  const maxAssetBytes = 25 * 1024 * 1024
 
   if (bytes.byteLength === 0) {
     return jsonError("Asset is empty", 400)
   }
 
   if (bytes.byteLength > maxAssetBytes) {
-    return jsonError("Asset exceeds the 25 MB limit", 400)
+    return jsonError(assetTooLargeError, 400)
   }
 
   const mimeType = normalizeMimeType(request.headers.get("content-type"))
