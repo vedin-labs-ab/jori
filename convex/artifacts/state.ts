@@ -13,6 +13,7 @@ import {
   assertContractStateValue,
   resolveStateContract,
 } from "./contract"
+import { type ArtifactSessionGrant, artifactSessionGrant } from "./schema"
 
 const stateWrite = v.union(
   v.object({
@@ -30,11 +31,17 @@ export const read = internalQuery({
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
     personId: v.id("persons"),
+    grant: v.optional(artifactSessionGrant),
     contractName: v.string(),
   },
   handler: async (ctx, args) => {
     const artifact = await requireStateArtifact(ctx, args)
     const entry = resolveStateContract(artifact, args.contractName)
+
+    if (!isStateEntryVisible(entry, args.grant)) {
+      return null
+    }
+
     const document = await findStateDocument(ctx, { ...args, entry })
 
     return document === null ? null : summarizeStateDocument(document, entry)
@@ -46,6 +53,7 @@ export const list = internalQuery({
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
     personId: v.id("persons"),
+    grant: v.optional(artifactSessionGrant),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -56,6 +64,10 @@ export const list = internalQuery({
       0,
       normalizeListLimit(args.limit)
     )) {
+      if (!isStateEntryVisible(entry, args.grant)) {
+        continue
+      }
+
       const document = await findStateDocument(ctx, { ...args, entry })
 
       if (document !== null) {
@@ -66,6 +78,15 @@ export const list = internalQuery({
     return documents
   },
 })
+
+/** Share-link viewers see shared-scope state only; personal state stays
+ *  with the members it belongs to. */
+export function isStateEntryVisible(
+  entry: Pick<ArtifactContractStateEntry, "scope">,
+  grant: ArtifactSessionGrant | undefined
+) {
+  return grant !== "share" || entry.scope === "shared"
+}
 
 export const update = internalMutation({
   args: {

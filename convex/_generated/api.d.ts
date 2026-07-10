@@ -38,6 +38,7 @@ import type * as artifacts_serve_frame from "../artifacts/serve/frame.js";
 import type * as artifacts_serve_http from "../artifacts/serve/http.js";
 import type * as artifacts_serve_session from "../artifacts/serve/session.js";
 import type * as artifacts_serve_sessions from "../artifacts/serve/sessions.js";
+import type * as artifacts_serve_share from "../artifacts/serve/share.js";
 import type * as artifacts_serve_urls from "../artifacts/serve/urls.js";
 import type * as artifacts_source_build from "../artifacts/source/build.js";
 import type * as artifacts_source_git from "../artifacts/source/git.js";
@@ -491,6 +492,7 @@ declare const fullApi: ApiFromModules<{
   "artifacts/serve/http": typeof artifacts_serve_http;
   "artifacts/serve/session": typeof artifacts_serve_session;
   "artifacts/serve/sessions": typeof artifacts_serve_sessions;
+  "artifacts/serve/share": typeof artifacts_serve_share;
   "artifacts/serve/urls": typeof artifacts_serve_urls;
   "artifacts/source/build": typeof artifacts_source_build;
   "artifacts/source/git": typeof artifacts_source_git;

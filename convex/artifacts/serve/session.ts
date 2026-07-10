@@ -1,5 +1,7 @@
 import { type Id } from "../../_generated/dataModel"
 
+export const artifactSessionDurationMs = 60 * 60 * 1000
+
 export type ArtifactSessionTokenPayload = {
   artifactId: Id<"artifacts">
   expiresAt: number
@@ -14,6 +16,21 @@ export function createSessionTokenPayload(
   payload: ArtifactSessionTokenPayload
 ) {
   return encodeURIComponent(JSON.stringify(payload))
+}
+
+/** Encode a stored session record as the bearer token the shell presents.
+ *  Maps field by field so callers can pass wider records without leaking
+ *  extra keys into the token. */
+export function createSessionToken(record: ArtifactSessionTokenPayload) {
+  return createSessionTokenPayload({
+    artifactId: record.artifactId,
+    expiresAt: record.expiresAt,
+    secret: record.secret,
+    sessionId: record.sessionId,
+    tenantId: record.tenantId,
+    personId: record.personId,
+    versionId: record.versionId,
+  })
 }
 
 export function readSessionTokenPayload(token: string) {

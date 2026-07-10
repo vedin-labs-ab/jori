@@ -22,6 +22,7 @@ const artifactTools = new Set([
   "read_artifact_state",
   "read_artifact",
   "search_artifacts",
+  "share_artifact",
   "update_artifact_state",
   "update_artifact",
   "delete_artifact",
@@ -60,6 +61,8 @@ export async function callMiloArtifactTool(
       return await readArtifactState(ctx, execution, personId, args)
     case "update_artifact_state":
       return await updateArtifactState(ctx, execution, personId, args)
+    case "share_artifact":
+      return await shareArtifact(ctx, execution.tenantId, personId, args)
     case "delete_artifact":
       return await deleteArtifact(ctx, execution.tenantId, args)
     default:
@@ -189,6 +192,21 @@ async function updateArtifactState(
     contractName: requiredString(args.contractName, "contractName"),
     expectedVersion: normalizeExpectedVersion(args.expectedVersion),
     write: normalizeStateWrite(args),
+  })
+}
+
+async function shareArtifact(
+  ctx: ActionCtx,
+  tenantId: string,
+  personId: Id<"persons">,
+  args: Record<string, unknown>
+) {
+  return await ctx.runMutation(internal.artifacts.serve.share.mint, {
+    tenantId,
+    personId,
+    artifactId: requiredArtifactId(args.artifactId),
+    expiresInHours:
+      typeof args.expiresInHours === "number" ? args.expiresInHours : undefined,
   })
 }
 

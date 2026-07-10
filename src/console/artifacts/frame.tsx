@@ -1,32 +1,35 @@
-import { useAction } from "convex/react"
 import { CheckCircle2, Clock3 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { api } from "../../../convex/_generated/api"
 import { FullscreenSkeletonLoader } from "../shared/loading"
-import { type ArtifactDetail } from "./types"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 const artifactFrameSandbox =
   "allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-type ArtifactId = ArtifactDetail["artifactId"]
-type ArtifactVersionId = ArtifactDetail["versionId"]
+
+export type ArtifactSession = { token: string }
+
+/** How the frame gets a session is the caller's edge: members mint through
+ *  the Clerk-authed action, share links exchange their secret. */
+type MintArtifactSession = () => Promise<ArtifactSession>
 
 export function ArtifactFrame({
-  artifact,
-  tenantId,
+  artifactId,
+  title,
+  mintSession,
   variant = "panel",
 }: {
-  artifact: ArtifactDetail
-  tenantId: string
+  artifactId: string
+  title: string
+  mintSession: MintArtifactSession
   variant?: "panel" | "fullscreen"
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const { error, frameSrc, isReady, postToken } = useArtifactFrameSession({
-    artifact,
+    artifactId,
     iframeRef,
-    tenantId,
+    mintSession,
   })
 
   if (frameSrc === undefined) {
@@ -61,7 +64,7 @@ export function ArtifactFrame({
           ref={iframeRef}
           sandbox={artifactFrameSandbox}
           src={frameSrc}
-          title={artifact.title}
+          title={title}
         />
         {isReady || error !== undefined ? null : (
           <FullscreenSkeletonLoader
@@ -100,26 +103,25 @@ export function ArtifactFrame({
         ref={iframeRef}
         sandbox={artifactFrameSandbox}
         src={frameSrc}
-        title={artifact.title}
+        title={title}
       />
     </section>
   )
 }
 
 function useArtifactFrameSession({
-  artifact,
+  artifactId,
   iframeRef,
-  tenantId,
+  mintSession,
 }: {
-  artifact: ArtifactDetail
+  artifactId: string
   iframeRef: React.RefObject<HTMLIFrameElement | null>
-  tenantId: string
+  mintSession: MintArtifactSession
 }) {
-  const createSession = useAction(api.artifacts.actions.createSession)
   const [session, setSession] = useState<ArtifactSession>()
   const [error, setError] = useState<string>()
   const [isReady, setIsReady] = useState(false)
-  const frameSrc = useArtifactFrameSrc(artifact.artifactId)
+  const frameSrc = useArtifactFrameSrc(artifactId)
   const postToken = useCallback(() => {
     const contentWindow = iframeRef.current?.contentWindow
 
@@ -133,25 +135,14 @@ function useArtifactFrameSession({
     )
   }, [iframeRef, session])
 
-  useCreateArtifactSession({
-    artifact,
-    createSession,
-    setError,
-    setIsReady,
-    setSession,
-    tenantId,
-  })
-  useArtifactFrameMessages({
-    artifactId: artifact.artifactId,
-    setError,
-    setIsReady,
-  })
+  useMintArtifactSession({ mintSession, setError, setIsReady, setSession })
+  useArtifactFrameMessages({ artifactId, setError, setIsReady })
   useEffect(() => postToken(), [postToken])
 
   return { error, frameSrc, isReady, postToken }
 }
 
-function useArtifactFrameSrc(artifactId: ArtifactId) {
+function useArtifactFrameSrc(artifactId: string) {
   return useMemo(() => {
     if (convexSiteUrl === undefined || convexSiteUrl === "") {
       return undefined
@@ -161,29 +152,23 @@ function useArtifactFrameSrc(artifactId: ArtifactId) {
   }, [artifactId])
 }
 
-function useCreateArtifactSession({
-  artifact,
-  createSession,
+function useMintArtifactSession({
+  mintSession,
   setError,
   setIsReady,
   setSession,
-  tenantId,
 }: {
-  artifact: ArtifactDetail
-  createSession: ReturnType<
-    typeof useAction<typeof api.artifacts.actions.createSession>
-  >
+  mintSession: MintArtifactSession
   setError: (error: string | undefined) => void
   setIsReady: (ready: boolean) => void
   setSession: (session: ArtifactSession) => void
-  tenantId: string
 }) {
   useEffect(() => {
     let active = true
 
     setError(undefined)
     setIsReady(false)
-    void createSession({ tenantId, artifactId: artifact.artifactId })
+    void mintSession()
       .then((created) => {
         if (active) {
           setSession(created)
@@ -198,14 +183,7 @@ function useCreateArtifactSession({
     return () => {
       active = false
     }
-  }, [
-    artifact.artifactId,
-    createSession,
-    setError,
-    setIsReady,
-    setSession,
-    tenantId,
-  ])
+  }, [mintSession, setError, setIsReady, setSession])
 }
 
 function useArtifactFrameMessages({
@@ -213,7 +191,7 @@ function useArtifactFrameMessages({
   setError,
   setIsReady,
 }: {
-  artifactId: ArtifactId
+  artifactId: string
   setError: (error: string | undefined) => void
   setIsReady: (ready: boolean) => void
 }) {
@@ -242,12 +220,6 @@ function useArtifactFrameMessages({
 
     return () => window.removeEventListener("message", handleMessage)
   }, [artifactId, setError, setIsReady])
-}
-
-type ArtifactSession = {
-  token: string
-  versionId: ArtifactVersionId
-  expiresAt: number
 }
 
 function readErrorMessage(error: unknown) {

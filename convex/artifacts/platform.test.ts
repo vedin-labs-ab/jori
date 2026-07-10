@@ -38,6 +38,7 @@ describe("artifact platform tools", () => {
           tenantId: "tenant",
           artifactId: "artifact",
           personId: "person" as Id<"persons">,
+          grant: "member",
           contractName: "emailTriageLatest",
         },
       },
@@ -111,5 +112,6 @@ function createPlatformContext(): ArtifactPlatformContext {
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
     personId: "person" as Id<"persons">,
+    grant: "member",
   }
 }

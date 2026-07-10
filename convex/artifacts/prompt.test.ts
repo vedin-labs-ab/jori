@@ -40,6 +40,7 @@ function platformContext(): ArtifactPlatformContext {
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
     personId: "person" as Id<"persons">,
+    grant: "member",
   }
 }
 

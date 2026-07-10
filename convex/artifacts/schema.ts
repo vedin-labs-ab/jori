@@ -1,10 +1,19 @@
 import { defineTable } from "convex/server"
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 
 export const artifactAccess = v.union(
   v.literal("personal"),
   v.literal("organization")
 )
+
+/** What a session may do: members get the full tool surface, share-link
+ *  viewers only read published assets and shared-scope state. */
+export const artifactSessionGrant = v.union(
+  v.literal("member"),
+  v.literal("share")
+)
+
+export type ArtifactSessionGrant = Infer<typeof artifactSessionGrant>
 
 const artifactMode = v.union(
   v.literal("directory"),
@@ -107,6 +116,7 @@ export const artifactSessions = defineTable({
   versionId: v.id("artifactVersions"),
   personId: v.id("persons"),
   access: artifactAccess,
+  grant: artifactSessionGrant,
   status: v.union(v.literal("active"), v.literal("ended")),
   tokenSecret: v.string(),
   tokenExpiresAt: v.number(),
@@ -117,6 +127,16 @@ export const artifactSessions = defineTable({
   .index("by_artifact", ["artifactId"])
   .index("by_artifact_and_seen_at", ["artifactId", "seenAt"])
   .index("by_person_and_artifact", ["personId", "artifactId"])
+
+/** At most one live share per artifact; minting again rotates the secret. */
+export const artifactShares = defineTable({
+  tenantId: v.string(),
+  artifactId: v.id("artifacts"),
+  createdBy: v.id("persons"),
+  secret: v.string(),
+  createdAt: v.number(),
+  expiresAt: v.number(),
+}).index("by_artifact", ["artifactId"])
 
 export const artifactAssets = defineTable({
   tenantId: v.string(),

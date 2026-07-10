@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
-import { artifactConsoleLink } from "./serve/urls"
+import { artifactConsoleLink, artifactShareLink } from "./serve/urls"
 
 describe("artifact console links", () => {
   test("returns a console path without an app origin", () => {
@@ -38,5 +38,26 @@ describe("artifact console links", () => {
         MILO_APP_URL: "https://app.milo.example/console",
       })
     ).toThrow("MILO_APP_URL must be an http(s) origin")
+  })
+})
+
+describe("artifact share links", () => {
+  test("appends the share fragment to the console path", () => {
+    expect(
+      artifactShareLink("artifact_1" as Id<"artifacts">, "s3cret", {})
+    ).toEqual({
+      urlPath: "/artifacts/artifact_1#share=s3cret",
+    })
+  })
+
+  test("appends the share fragment to the full URL", () => {
+    expect(
+      artifactShareLink("artifact_1" as Id<"artifacts">, "s3cret", {
+        MILO_APP_URL: "https://app.milo.example/",
+      })
+    ).toEqual({
+      url: "https://app.milo.example/artifacts/artifact_1#share=s3cret",
+      urlPath: "/artifacts/artifact_1#share=s3cret",
+    })
   })
 })
