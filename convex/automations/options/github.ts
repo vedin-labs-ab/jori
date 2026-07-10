@@ -1,5 +1,5 @@
 import { githubJsonObject } from "../../providers/github/api"
-import { requireGitHubCredentials } from "../../providers/github/credentials"
+import { requireGitHubRuntimeToken } from "../../providers/github/credentials"
 import {
   compactDescription,
   maxOptions,
@@ -16,7 +16,7 @@ import {
 } from "./common"
 
 export async function searchGitHubRepositories(args: OptionLoaderArgs) {
-  const token = requireGitHubToken(args.integration)
+  const token = requireGitHubRuntimeToken(args.integration)
   const normalizedQuery = normalizeQuery(args.query)
   const result = await githubJsonObject(token, "/installation/repositories", {
     per_page: 100,
@@ -45,7 +45,7 @@ async function searchGitHubIssueLike(
   args: OptionLoaderArgs,
   kind: "issue" | "pr"
 ) {
-  const token = requireGitHubToken(args.integration)
+  const token = requireGitHubRuntimeToken(args.integration)
   const repo = requireMatch(args.match, "repo", "repository")
   const result = await githubJsonObject(token, "/search/issues", {
     q: [normalizeQuery(args.query), `repo:${repo}`, `is:${kind}`]
@@ -67,16 +67,6 @@ async function searchGitHubIssueLike(
       ]),
     }
   })
-}
-
-function requireGitHubToken(integration: OptionLoaderArgs["integration"]) {
-  const credentials = requireGitHubCredentials(integration)
-
-  if (credentials.tokens?.access === undefined) {
-    throw new Error("Missing GitHub runtime token")
-  }
-
-  return credentials.tokens.access
 }
 
 function githubRepositoryDescription(repository: Record<string, unknown>) {
