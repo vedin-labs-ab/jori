@@ -1,15 +1,12 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { normalizeSelfActor } from "../messages/actor"
 import { messageReactionTargetIdentifiers } from "../messages/identifiers"
-import { isGitHubSelfActor } from "../providers/github/data"
-import { getLinearBotId } from "../providers/linear/data"
-import { getSlackBotUserId } from "../providers/slack/data"
 import {
   type Actor,
   getActorDisplayName,
   getActorEmail,
   getActorExternalId,
-  withActorKind,
 } from "../shared/actor"
 import { type MessageIntegration } from "../shared/integrations"
 
@@ -58,7 +55,7 @@ export async function enrichReactionTarget(
 
   return {
     ...args.target,
-    actor: normalizeTargetActor(
+    actor: normalizeSelfActor(
       args.target.actor ?? message.actor,
       args.integration
     ),
@@ -101,34 +98,4 @@ function mergeIdentifiers(left: string[], right: string[]) {
   return [...left, ...right].filter(
     (identifier, index, values) => values.indexOf(identifier) === index
   )
-}
-
-function normalizeTargetActor(
-  actor: Actor | undefined,
-  integration: Pick<Doc<"integrations">, "data" | "integration">
-) {
-  if (isGitHubSelfActor(actor, integration)) {
-    return withActorKind(actor, "self")
-  }
-
-  const actorId = getActorExternalId(actor)
-  const selfId = selfActorId(integration)
-
-  return actorId !== undefined && actorId === selfId
-    ? withActorKind(actor, "self")
-    : actor
-}
-
-function selfActorId(
-  integration: Pick<Doc<"integrations">, "data" | "integration">
-) {
-  if (integration.integration === "slack") {
-    return getSlackBotUserId(integration.data)
-  }
-
-  if (integration.integration === "linear") {
-    return getLinearBotId(integration.data)
-  }
-
-  return undefined
 }

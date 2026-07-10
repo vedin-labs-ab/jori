@@ -12,18 +12,12 @@ import {
   observedPlaceValidator,
 } from "../places/data"
 import { schedulePlaceProfile } from "../places/schedule"
-import { isGitHubSelfActor } from "../providers/github/data"
-import { getLinearBotId } from "../providers/linear/data"
-import { getSlackBotUserId } from "../providers/slack/data"
-import {
-  getActorExternalId,
-  isPersonActor,
-  withActorKind,
-} from "../shared/actor"
+import { isPersonActor } from "../shared/actor"
 import {
   type MessageIntegration,
   messageIntegrationValidator,
 } from "../shared/integrations"
+import { normalizeSelfActor } from "./actor"
 import {
   findMessageByExternalId,
   insertMessage,
@@ -143,7 +137,7 @@ function observedMessage(
   return {
     ...message,
     mentioned: normalizeMentioned(message, integration),
-    actor: normalizeActor(message.actor, integration),
+    actor: normalizeSelfActor(message.actor, integration),
   }
 }
 
@@ -169,34 +163,6 @@ function normalizeMentioned(
 
 function mentionsMilo(text: string | undefined) {
   return text !== undefined && /(?:^|\W)@milo(?:$|\W)/i.test(text)
-}
-
-function normalizeActor(
-  actor: ObservedMessage["actor"],
-  integration: Doc<"integrations">
-) {
-  if (isGitHubSelfActor(actor, integration)) {
-    return withActorKind(actor, "self")
-  }
-
-  const actorId = getActorExternalId(actor)
-  const selfId = selfActorId(integration)
-
-  return actorId !== undefined && actorId === selfId
-    ? withActorKind(actor, "self")
-    : actor
-}
-
-function selfActorId(integration: Doc<"integrations">) {
-  if (integration.integration === "linear") {
-    return getLinearBotId(integration.data)
-  }
-
-  if (integration.integration === "slack") {
-    return getSlackBotUserId(integration.data)
-  }
-
-  return undefined
 }
 
 async function messageRunConversation(
