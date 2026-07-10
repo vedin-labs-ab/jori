@@ -1,11 +1,22 @@
-import { Activity, History, UserRound, Workflow, Wrench } from "lucide-react"
+import {
+  Activity,
+  History,
+  Text,
+  UserRound,
+  Workflow,
+  Wrench,
+} from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { DetailRow } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, relativeTime } from "../../shared/time"
 import { ToolGroupsValue } from "../../shared/tools"
-import { automationSummary, type CapabilityGroup } from "../format"
+import {
+  automationSummary,
+  type CapabilityGroup,
+  currentVersionMessage,
+} from "../format"
 import { type ArtifactSummary } from "../types"
 
 export function ArtifactExpanded({
@@ -19,6 +30,7 @@ export function ArtifactExpanded({
 }) {
   return (
     <div>
+      <SummaryRow artifact={artifact} />
       <DetailRow
         icon={Wrench}
         iconClassName="text-muted-foreground"
@@ -63,6 +75,26 @@ export function ArtifactExpanded({
         </FactLine>
       </DetailRow>
     </div>
+  )
+}
+
+function SummaryRow({ artifact }: { artifact: ArtifactSummary }) {
+  const message = currentVersionMessage(artifact)
+
+  if (message === undefined) {
+    return null
+  }
+
+  return (
+    <DetailRow
+      icon={Text}
+      iconClassName="text-muted-foreground"
+      label="Summary"
+    >
+      <p className="min-w-0 text-foreground text-xs leading-relaxed">
+        {message}
+      </p>
+    </DetailRow>
   )
 }
 

@@ -18,7 +18,6 @@ import { ToolCountSummary } from "../../shared/tools/summary"
 import {
   automationCountLabel,
   capabilityGroupsFor,
-  currentVersionMessage,
   toolSurfaceList,
 } from "../format"
 import { type ArtifactSummary } from "../types"
@@ -117,8 +116,6 @@ function ArtifactSummaryBlock({
   surfaces: ToolSurface[]
   now: number
 }) {
-  const message = currentVersionMessage(artifact)
-
   return (
     <div className="grid min-w-0 gap-1">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -126,9 +123,6 @@ function ArtifactSummaryBlock({
         <ScopeBadge scope={artifact.access} />
         <PublishBadge artifact={artifact} />
       </div>
-      {message === undefined ? null : (
-        <p className="truncate text-muted-foreground text-xs">{message}</p>
-      )}
       <ArtifactInlineMeta
         automationCount={artifact.automations.length}
         capabilityCount={capabilityCount}
