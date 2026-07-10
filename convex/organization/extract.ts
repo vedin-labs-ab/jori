@@ -27,7 +27,7 @@ export async function extractFacts(
   input: ExtractionInput
 ): Promise<OrganizationFacts> {
   const value = await requestStructured({
-    model: "openai/gpt-5.5",
+    model: "openai/gpt-5.6-sol",
     schemaName: "organization_facts",
     schema: factsSchema,
     system: renderPromptTemplate(promptTemplates["organization/discovery"], {}),

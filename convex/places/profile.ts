@@ -8,7 +8,7 @@ import { profileOutputTokens } from "./limits"
 import { parseProfileReview, profileReviewSchema } from "./parse"
 import { type PendingProfile } from "./window"
 
-const profileModel = "openai/gpt-5.5"
+const profileModel = "openai/gpt-5.6-sol"
 
 export const run = internalAction({
   args: { placeId: v.id("places") },

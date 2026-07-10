@@ -44,12 +44,12 @@ function platformContext(): ArtifactPlatformContext {
 }
 
 describe("artifact prompt model contract", () => {
-  test("uses GPT-5.5 by default while allowing env overrides", () => {
+  test("uses GPT-5.6 Sol by default while allowing env overrides", () => {
     const originalModel = process.env.OPENROUTER_ARTIFACT_MODEL
 
     try {
       process.env.OPENROUTER_ARTIFACT_MODEL = ""
-      expect(readArtifactModel()).toBe("openai/gpt-5.5")
+      expect(readArtifactModel()).toBe("openai/gpt-5.6-sol")
 
       process.env.OPENROUTER_ARTIFACT_MODEL = "z-ai/glm-5.2"
       expect(readArtifactModel()).toBe("z-ai/glm-5.2")

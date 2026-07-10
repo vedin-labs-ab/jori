@@ -33,7 +33,7 @@ const maxSchemaBytes = 64 * 1024
 const defaultPromptOutputTokens = 1000
 const minPromptOutputTokens = 64
 const maxPromptOutputTokens = 16_000
-const defaultArtifactPromptModel = "openai/gpt-5.5"
+const defaultArtifactPromptModel = "openai/gpt-5.6-sol"
 const artifactReasoningEffort = "medium"
 
 export async function promptModel(

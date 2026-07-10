@@ -28,7 +28,7 @@ export async function selectLinks(options: {
 
   const considered = options.candidates.slice(0, maxCandidatesConsidered)
   const value = await requestStructured({
-    model: "openai/gpt-5.5",
+    model: "openai/gpt-5.6-sol",
     reasoning: "low",
     schemaName: "selected_links",
     schema: selectionSchema,
