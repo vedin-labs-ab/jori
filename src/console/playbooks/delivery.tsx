@@ -138,7 +138,6 @@ function DeliveryEditor({
         <Button
           disabled={onCancel === undefined}
           onClick={onCancel}
-          size="sm"
           variant="outline"
         >
           Cancel
@@ -150,7 +149,6 @@ function DeliveryEditor({
               onSave(next)
             }
           }}
-          size="sm"
         >
           Save
         </Button>
@@ -176,12 +174,7 @@ function KindMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          aria-label="Delivery kind"
-          className="px-2"
-          size="sm"
-          variant="outline"
-        >
+        <Button aria-label="Delivery kind" className="px-2" variant="outline">
           <DeliveryIcon kind={kind} />
           <ChevronDown className="text-muted-foreground" />
         </Button>
