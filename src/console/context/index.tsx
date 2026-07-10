@@ -59,8 +59,8 @@ function OrganizationView({ tenantId }: { tenantId: string }) {
   const sources = useQuery(api.organization.sources.list, { tenantId })
 
   return (
-    // Reading-heavy profile content keeps a document width inside the frame.
-    <div className="max-w-4xl">
+    // Reading-heavy profile content keeps a centered document width.
+    <div className="mx-auto w-full max-w-4xl">
       <ContextProfile
         tenantId={tenantId}
         website={readPrimaryWebsite(sources)}
