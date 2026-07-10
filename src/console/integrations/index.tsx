@@ -31,7 +31,7 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
         <TabsTrigger value="user">Personal</TabsTrigger>
       </TabsList>
       <TabsContent value="tenant" asChild>
-        <ConsoleContentGrid className="md:grid-cols-2">
+        <ConsoleContentGrid>
           <SlackIntegration permissions={permissions} tenantId={tenantId} />
           <LinearIntegration permissions={permissions} tenantId={tenantId} />
           <GitHubIntegration permissions={permissions} tenantId={tenantId} />
@@ -40,7 +40,7 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
         </ConsoleContentGrid>
       </TabsContent>
       <TabsContent value="user" asChild>
-        <ConsoleContentGrid className="md:grid-cols-2">
+        <ConsoleContentGrid>
           <GmailIntegration permissions={permissions} tenantId={tenantId} />
           <GoogleCalendarIntegration
             permissions={permissions}

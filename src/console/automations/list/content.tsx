@@ -5,6 +5,11 @@ import { type AutomationList } from "../types"
 import { AutomationSkeletonList, EmptyAutomations } from "./empty"
 import { AutomationRow } from "./row"
 
+// Auto-fill tracks add columns as the viewport grows instead of stretching
+// cards, keeping the unbounded console frame usable at any width.
+const automationGrid =
+  "grid-cols-[repeat(auto-fill,minmax(min(28rem,100%),1fr))] pb-2"
+
 export function AutomationContent({
   editor,
   hasFilters,
@@ -20,7 +25,7 @@ export function AutomationContent({
 }) {
   if (automationList === undefined) {
     return (
-      <ConsoleScrollableList className="pb-2 lg:grid-cols-2">
+      <ConsoleScrollableList className={automationGrid}>
         <AutomationSkeletonList />
       </ConsoleScrollableList>
     )
@@ -37,8 +42,8 @@ export function AutomationContent({
 
   if (visibleAutomations.length === 0) {
     return (
-      <ConsoleScrollableList className="pb-2 lg:grid-cols-2">
-        <li className="lg:col-span-2">
+      <ConsoleScrollableList className={automationGrid}>
+        <li className="col-span-full">
           <EmptyAutomations hasFilters={hasFilters} />
         </li>
       </ConsoleScrollableList>
