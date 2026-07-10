@@ -100,31 +100,32 @@ export function PlaybookSetupDialog({
         </div>
 
         <DialogFooter className="sm:justify-between">
-          <Button
-            disabled={destination === undefined || isBusy}
-            onClick={openAdvanced}
-            onPointerEnter={actions.preloadEdit}
-            type="button"
-            variant="secondary"
-          >
-            {pendingKind === "advanced" ? <Spinner /> : <Settings2 />} Advanced
-            settings
-          </Button>
+          {/* Utilities on the left; Enable stands alone as the call to action. */}
           <div className="flex items-center gap-2">
+            <Button
+              disabled={destination === undefined || isBusy}
+              onClick={openAdvanced}
+              onPointerEnter={actions.preloadEdit}
+              type="button"
+              variant="secondary"
+            >
+              {pendingKind === "advanced" ? <Spinner /> : <Settings2 />}{" "}
+              Advanced settings
+            </Button>
             <Button
               disabled={!canSubmit}
               onClick={() => submit(actions.trial, false)}
-              variant="outline"
+              variant="secondary"
             >
               {pendingKind === "trial" ? <Spinner /> : <Play />} Try once
             </Button>
-            <Button
-              disabled={!canSubmit}
-              onClick={() => submit(actions.enable, true)}
-            >
-              {pendingKind === "enable" ? <Spinner /> : null} Enable
-            </Button>
           </div>
+          <Button
+            disabled={!canSubmit}
+            onClick={() => submit(actions.enable, true)}
+          >
+            {pendingKind === "enable" ? <Spinner /> : null} Enable
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
