@@ -118,7 +118,7 @@ function matchBareMention(text: string, start: number): MentionMatch | null {
   return null
 }
 
-function canStartBareMention(text: string, start: number) {
+export function canStartBareMention(text: string, start: number) {
   if (!/[a-z0-9]/i.test(text[start])) {
     return false
   }
@@ -132,6 +132,6 @@ function isMentionBoundary(character: string | undefined) {
   return character === undefined || !/[a-z0-9]/.test(character)
 }
 
-function overlaps(left: MentionMatch, right: MentionMatch) {
+export function overlaps(left: MentionMatch, right: MentionMatch) {
   return left.start < right.end && right.start < left.end
 }
