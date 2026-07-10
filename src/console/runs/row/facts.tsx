@@ -131,7 +131,7 @@ function InlineFact({
   const hasValue = !timeOnlyFieldTypes.has(detail.type)
 
   return (
-    <DetailRow icon={icon} iconClassName="text-muted-foreground" label={label}>
+    <DetailRow icon={icon} label={label}>
       <InlineFactContent compact={compactFieldTypes.has(detail.type)}>
         {hasValue ? <FactValue detail={detail} /> : null}
         <InlineFactTime separated={hasValue} time={time} />
@@ -188,11 +188,7 @@ function PayloadFact({
   time: string | undefined
 }) {
   return (
-    <DetailRow
-      icon={detailMeta[detail.type].icon}
-      iconClassName="text-muted-foreground"
-      label={label}
-    >
+    <DetailRow icon={detailMeta[detail.type].icon} label={label}>
       <DetailFrame
         action={<CopyButton label={label} value={detail.label} />}
         header={<PayloadHeader detail={detail} time={time} />}

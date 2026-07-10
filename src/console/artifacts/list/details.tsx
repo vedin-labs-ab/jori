@@ -31,43 +31,23 @@ export function ArtifactExpanded({
   return (
     <div>
       <SummaryRow artifact={artifact} />
-      <DetailRow
-        icon={Wrench}
-        iconClassName="text-muted-foreground"
-        label="Tools"
-      >
+      <DetailRow icon={Wrench} label="Tools">
         <ArtifactToolsValue groups={capabilityGroups} />
       </DetailRow>
-      <DetailRow
-        icon={Workflow}
-        iconClassName="text-muted-foreground"
-        label="Automations"
-      >
+      <DetailRow icon={Workflow} label="Automations">
         <AutomationChips automations={artifact.automations} now={now} />
       </DetailRow>
-      <DetailRow
-        icon={UserRound}
-        iconClassName="text-muted-foreground"
-        label="Owner"
-      >
+      <DetailRow icon={UserRound} label="Owner">
         <FactLine>
           <span className="font-medium text-foreground">
             {artifact.ownerName ?? "Unknown"}
           </span>
         </FactLine>
       </DetailRow>
-      <DetailRow
-        icon={History}
-        iconClassName="text-muted-foreground"
-        label="Versions"
-      >
+      <DetailRow icon={History} label="Versions">
         <VersionsFact artifact={artifact} now={now} />
       </DetailRow>
-      <DetailRow
-        icon={Activity}
-        iconClassName="text-muted-foreground"
-        label="Activity"
-      >
+      <DetailRow icon={Activity} label="Activity">
         <FactLine>
           <TimeFact at={artifact.createdAt} now={now} prefix="Created" />
           <SeparatorDot className="text-muted-foreground/60" />
@@ -86,11 +66,7 @@ function SummaryRow({ artifact }: { artifact: ArtifactSummary }) {
   }
 
   return (
-    <DetailRow
-      icon={Text}
-      iconClassName="text-muted-foreground"
-      label="Summary"
-    >
+    <DetailRow icon={Text} label="Summary">
       <p className="min-w-0 text-foreground text-xs">{message}</p>
     </DetailRow>
   )
