@@ -7,6 +7,17 @@ import { PlaybookSetupDialog } from "./dialog"
 import { type PlaybookActions } from "./enable"
 import { type PlaybookListRow, planPlaybookEnable } from "./state"
 
+/** Link to the integrations page for a playbook that lacks a connection. */
+export function ConnectButton({ label }: { label: string }) {
+  return (
+    <Button asChild className="w-full" variant="outline">
+      <Link to="/integrations">
+        <Cable /> {label}
+      </Link>
+    </Button>
+  )
+}
+
 /** Connect prompt or an Enable button that opens the setup dialog. */
 export function SetupControls({
   actions,
@@ -23,13 +34,7 @@ export function SetupControls({
   const plan = planPlaybookEnable(row.slots)
 
   if (plan.kind === "connect") {
-    return (
-      <Button asChild className="w-full" variant="outline">
-        <Link to="/integrations">
-          <Cable /> {plan.label}
-        </Link>
-      </Button>
-    )
+    return <ConnectButton label={plan.label} />
   }
 
   return (

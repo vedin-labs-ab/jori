@@ -43,6 +43,17 @@ test("paused card shows paused state and no next run", () => {
   expect(screen.queryByText(/Next in/)).toBeNull()
 })
 
+test("enabled card with a lost connection offers reconnect over run-now", () => {
+  renderCard(enabledRow("active", undefined, ["gmail"]))
+
+  expect(screen.getByRole("link", { name: "Connect Gmail" })).toBeDefined()
+  expect(screen.queryByRole("button", { name: /run now/i })).toBeNull()
+  expect(screen.getByRole("button", { name: "View" })).toBeDefined()
+  expect(
+    screen.getByRole("switch", { name: "Morning brief enabled" })
+  ).toBeDefined()
+})
+
 test("disabled card offers a single enable entry without a switch", () => {
   renderCard(disabledRow())
 
@@ -90,7 +101,8 @@ function disabledRow(): PlaybookListRow {
 
 function enabledRow(
   status: "active" | "paused",
-  nextRunAt?: number
+  nextRunAt?: number,
+  missing: NonNullable<PlaybookListRow["enabled"]>["missing"] = []
 ): PlaybookListRow {
   return {
     key: morningBrief.key,
@@ -105,6 +117,7 @@ function enabledRow(
       >["automationId"],
       status,
       nextRunAt,
+      missing,
     },
   }
 }

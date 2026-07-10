@@ -122,3 +122,10 @@ function connectLabel(capability: PlaybookCapability) {
 
   return `Connect ${labels.join(" or ")}`
 }
+
+/** Label for reconnecting the integrations an enabled playbook is bound to. */
+export function connectMissingLabel(missing: Integration[]) {
+  const labels = missing.map((integration) => integrationLabels[integration])
+
+  return `Connect ${labels.join(" and ")}`
+}

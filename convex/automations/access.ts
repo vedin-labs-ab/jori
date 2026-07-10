@@ -155,6 +155,30 @@ export function canUseAutomationTool(
   return getIntegrationTools(access, integrationId).includes(tool)
 }
 
+/**
+ * Names of integrations the automation is bound to that are connected but no
+ * longer usable (expired credentials, mid-disconnect). Runs drop these bound
+ * integrations, so the automation cannot do its work until they are
+ * reconnected. References to deleted integrations are omitted, matching
+ * projectAccessForConsole.
+ */
+export async function listInactiveAccessIntegrations(
+  ctx: QueryLikeCtx,
+  access: AutomationAccess
+): Promise<Integration[]> {
+  const inactive: Integration[] = []
+
+  for (const entry of access.integrations) {
+    const integration = await ctx.db.get(entry.id)
+
+    if (integration !== null && integration.status !== "active") {
+      inactive.push(integration.integration)
+    }
+  }
+
+  return inactive
+}
+
 export async function projectAccessForConsole(
   ctx: QueryLikeCtx,
   access: AutomationAccess
