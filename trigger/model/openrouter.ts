@@ -21,7 +21,7 @@ import {
 } from "./types"
 import { readModelUsage } from "./usage"
 
-const agentModel = "openai/gpt-5.5"
+const agentModel = "openai/gpt-5.6-sol"
 // The first turn produces the start update and is optimized for latency; later
 // turns do the actual work and reason harder. Effort levels are code config.
 const firstTurnReasoningEffort = "low"
