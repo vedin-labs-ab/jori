@@ -1,19 +1,16 @@
 import { CalendarClock } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ConsoleEmptyState } from "../../shared/list/empty"
+import { FilterableEmptyState } from "../../shared/list/empty"
 
 const skeletonRows = ["first", "second", "third"]
 
 export function EmptyAutomations({ hasFilters }: { hasFilters: boolean }) {
   return (
-    <ConsoleEmptyState
-      description={
-        hasFilters
-          ? "Adjust the filters or search to widen the results."
-          : "Create an automation for recurring, one-time, or event-triggered work."
-      }
+    <FilterableEmptyState
+      description="Create an automation for recurring, one-time, or event-triggered work."
+      hasFilters={hasFilters}
       icon={CalendarClock}
-      title={hasFilters ? "No matching automations" : "No automations yet"}
+      noun="automations"
     />
   )
 }
