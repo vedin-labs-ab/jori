@@ -33,7 +33,7 @@ test("defaults to email delivery and enables with that destination", () => {
 
   renderDialog(actions, ["email", "slack"], singlePlan)
 
-  expect(screen.getByText(/Emailed to you at sam@example.com/)).toBeDefined()
+  expect(screen.getByText(/sam@example.com/)).toBeDefined()
 
   fireEvent.click(screen.getByRole("button", { name: "Enable" }))
 
@@ -44,23 +44,45 @@ test("defaults to email delivery and enables with that destination", () => {
   )
 })
 
-test("switching to Slack requires a channel before enabling", () => {
+test("an unsaved Slack edit can't save, yet enabling still uses email", () => {
   const actions = stubActions()
 
   renderDialog(actions, ["email", "slack"], singlePlan)
-  fireEvent.click(screen.getByRole("radio", { name: "Slack" }))
+  startEditing("Slack")
 
-  expect(screen.getByRole("button", { name: "Enable" })).toHaveProperty(
+  expect(screen.getByRole("button", { name: "Save" })).toHaveProperty(
     "disabled",
     true
   )
-  expect(actions.enable).not.toHaveBeenCalled()
+
+  fireEvent.click(screen.getByRole("button", { name: "Enable" }))
+
+  expect(actions.enable).toHaveBeenCalledWith(
+    morningBrief,
+    { email: "gmail", calendar: "googleCalendar" },
+    { kind: "email" }
+  )
+})
+
+test("cancelling an edit returns to the committed destination", () => {
+  const actions = stubActions()
+
+  renderDialog(actions, ["email", "slack"], singlePlan)
+  startEditing("Slack")
+  fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
+
+  expect(screen.getByText(/sam@example.com/)).toBeDefined()
+  expect(screen.queryByRole("button", { name: "Save" })).toBeNull()
 })
 
 test("try once shares the chosen destination", () => {
   const actions = stubActions()
 
   renderDialog(actions, ["email"], singlePlan)
+
+  // A single delivery kind leaves nothing to change.
+  expect(screen.queryByRole("button", { name: /change/i })).toBeNull()
+
   fireEvent.click(screen.getByRole("button", { name: /try once/i }))
 
   expect(actions.trial).toHaveBeenCalledWith(
@@ -69,6 +91,11 @@ test("try once shares the chosen destination", () => {
     { kind: "email" }
   )
 })
+
+function startEditing(kind: string) {
+  fireEvent.pointerDown(screen.getByRole("button", { name: /change/i }))
+  fireEvent.click(screen.getByRole("menuitem", { name: kind }))
+}
 
 function renderDialog(
   actions: PlaybookActions,
