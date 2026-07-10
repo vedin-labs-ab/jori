@@ -165,6 +165,7 @@ import type * as identity_users from "../identity/users.js";
 import type * as integrations_catalog from "../integrations/catalog.js";
 import type * as integrations_data from "../integrations/data.js";
 import type * as integrations_disconnect from "../integrations/disconnect.js";
+import type * as integrations_expire from "../integrations/expire.js";
 import type * as integrations_lookup from "../integrations/lookup.js";
 import type * as integrations_offers_delivery from "../integrations/offers/delivery.js";
 import type * as integrations_offers_helpers from "../integrations/offers/helpers.js";
@@ -615,6 +616,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/catalog": typeof integrations_catalog;
   "integrations/data": typeof integrations_data;
   "integrations/disconnect": typeof integrations_disconnect;
+  "integrations/expire": typeof integrations_expire;
   "integrations/lookup": typeof integrations_lookup;
   "integrations/offers/delivery": typeof integrations_offers_delivery;
   "integrations/offers/helpers": typeof integrations_offers_helpers;

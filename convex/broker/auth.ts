@@ -1,7 +1,6 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { resolveToolModes } from "../permissions/catalog"
 import { timingSafeEqual } from "../shared/crypto"
 import { type ApprovalBrokerContext } from "./approval"
@@ -58,16 +57,9 @@ export async function loadRunBrokerContext(
       ownerId: run.createdBy,
     }
   )
-  const integrations: Doc<"integrations">[] = []
-
-  for (const integration of input.integrations) {
-    integrations.push(await prepareIntegrationForRuntime(ctx, { integration }))
-  }
-
   return {
     connectedIntegrations,
     input,
-    integrations,
     run,
     toolModes: resolveToolModes(permissions),
   }

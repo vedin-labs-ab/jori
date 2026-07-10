@@ -45,3 +45,15 @@ export type AgentRuntimeInput =
   | AutomationRuntimeInput
   | InstructionRuntimeInput
   | MessageRuntimeInput
+
+export function findRunIntegration(
+  input: AgentRuntimeInput,
+  surface: RuntimeIntegration["integration"]
+) {
+  return (
+    input.integrations.find(
+      (integration) =>
+        integration.status === "active" && integration.integration === surface
+    ) ?? null
+  )
+}

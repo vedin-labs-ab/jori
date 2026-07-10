@@ -8,12 +8,14 @@ import {
   postSlackCard,
   slackCardTarget,
 } from "../../providers/slack/delivery/cards"
-import { type AgentRuntimeInput } from "../../runs/agent/input"
+import {
+  type AgentRuntimeInput,
+  findRunIntegration,
+} from "../../runs/agent/input"
 import { sendSurfaceReply } from "../../runtime/surface/reply"
 
 type ApprovalDeliveryContext = {
   input: AgentRuntimeInput
-  integrations: Doc<"integrations">[]
 }
 
 type ApprovalDeliveryArgs = {
@@ -136,11 +138,9 @@ function getSlackApprovalDelivery(
     return null
   }
 
-  const integration = context.integrations.find(
-    (candidate) => candidate.integration === "slack"
-  )
+  const integration = findRunIntegration(context.input, "slack")
 
-  if (integration === undefined) {
+  if (integration === null) {
     return null
   }
 

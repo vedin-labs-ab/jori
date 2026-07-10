@@ -3,7 +3,11 @@ import { v } from "convex/values"
 import { integrationValidator } from "../shared/integrations"
 
 const integrationScope = v.union(v.literal("tenant"), v.literal("user"))
-const integrationStatus = v.union(v.literal("active"), v.literal("paused"))
+const integrationStatus = v.union(
+  v.literal("active"),
+  v.literal("expired"),
+  v.literal("paused")
+)
 
 export const integrations = defineTable({
   tenantId: v.string(),
