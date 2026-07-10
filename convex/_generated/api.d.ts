@@ -402,6 +402,7 @@ import type * as runs_introspect_project from "../runs/introspect/project.js";
 import type * as runs_introspect_query from "../runs/introspect/query.js";
 import type * as runs_introspect_runs from "../runs/introspect/runs.js";
 import type * as runs_records from "../runs/records.js";
+import type * as runs_scope from "../runs/scope.js";
 import type * as runs_snapshot from "../runs/snapshot.js";
 import type * as runtime__generated_assets from "../runtime/_generated/assets.js";
 import type * as runtime_agents from "../runtime/agents.js";
@@ -854,6 +855,7 @@ declare const fullApi: ApiFromModules<{
   "runs/introspect/query": typeof runs_introspect_query;
   "runs/introspect/runs": typeof runs_introspect_runs;
   "runs/records": typeof runs_records;
+  "runs/scope": typeof runs_scope;
   "runs/snapshot": typeof runs_snapshot;
   "runtime/_generated/assets": typeof runtime__generated_assets;
   "runtime/agents": typeof runtime_agents;

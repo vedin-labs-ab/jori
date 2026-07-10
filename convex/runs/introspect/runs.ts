@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
+import { runAudienceScope } from "../scope"
 import { normalizeRunId, normalizeRunIds } from "./ids"
 import { type SearchRunsArgs } from "./schema"
 
@@ -108,7 +109,10 @@ function isTenantScope(
   current: Doc<"runs">,
   scope: "conversation" | "tenant" | "all"
 ) {
-  return scope === "tenant" || (scope === "all" && current.scope === "tenant")
+  return (
+    scope === "tenant" ||
+    (scope === "all" && runAudienceScope(current) === "tenant")
+  )
 }
 
 async function queryTenantRuns(ctx: QueryCtx, current: Doc<"runs">) {
@@ -122,7 +126,7 @@ async function queryTenantRuns(ctx: QueryCtx, current: Doc<"runs">) {
 }
 
 async function queryPrivateRuns(ctx: QueryCtx, current: Doc<"runs">) {
-  if (current.scope === "conversation") {
+  if (runAudienceScope(current) === "conversation") {
     return await queryConversationRuns(ctx, current)
   }
 

@@ -1,7 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
+import { runAudienceScope } from "../scope"
 
 export function canSee(current: Doc<"runs">, candidate: Doc<"runs">) {
-  const scope = candidate.scope ?? "person"
+  const scope = runAudienceScope(candidate)
 
   if (candidate.tenantId !== current.tenantId) {
     return false

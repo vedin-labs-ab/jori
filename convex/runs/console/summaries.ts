@@ -1,9 +1,9 @@
-import { type Scope } from "../../../contracts/permissions/scope"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { summarizeApproval } from "../../approvals/summary"
 import { personDisplayName } from "../../persons/names"
 import { getActorDisplayName } from "../../shared/actor"
+import { runScope } from "../scope"
 import { getRunContext } from "./context"
 import { runDetailSummary } from "./details"
 import { runTask, runTitle, triggerLabel } from "./labels"
@@ -42,7 +42,7 @@ export async function summarizeRun(
   return {
     id: run._id,
     status: run.status,
-    scope: runSummaryScope(run),
+    scope: runScope(run),
     title,
     source,
     task,
@@ -127,9 +127,4 @@ function searchableText(
     .filter(Boolean)
     .join(" ")
     .toLowerCase()
-}
-
-/** Project the internal audience scope onto the shared personal/organization vocabulary. */
-function runSummaryScope(run: Doc<"runs">): Scope {
-  return (run.scope ?? "person") === "tenant" ? "organization" : "personal"
 }
