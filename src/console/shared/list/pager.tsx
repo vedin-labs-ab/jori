@@ -36,8 +36,7 @@ export function ConsoleListPager({
             <PaginationPrevious
               aria-disabled={pagination.pageIndex === 0}
               className={cn(
-                pagination.pageIndex === 0 &&
-                  "pointer-events-none opacity-50 shadow-none"
+                pagination.pageIndex === 0 && "pointer-events-none opacity-50"
               )}
               href="#"
               onClick={(event) => {
