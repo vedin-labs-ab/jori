@@ -2,21 +2,23 @@ import { type ToolSurface } from "@contracts/integrations"
 import { Link } from "@tanstack/react-router"
 import {
   Archive,
-  Building2,
   ChevronsUpDown,
   Clock,
+  Component,
   ExternalLink,
-  User,
   Workflow,
 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ScopeBadge } from "../../shared/details"
+import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, relativeTime } from "../../shared/time"
 import { ToolCountSummary } from "../../shared/tools/summary"
 import {
   automationCountLabel,
   capabilityGroupsFor,
+  currentVersionMessage,
   toolSurfaceList,
 } from "../format"
 import { type ArtifactSummary } from "../types"
@@ -52,7 +54,10 @@ export function ArtifactRow({
             onClick={() => setIsOpen((current) => !current)}
             type="button"
           >
-            <ArtifactIcon access={artifact.access} title={artifact.title} />
+            <ArtifactIcon
+              isArchived={artifact.archivedAt !== undefined}
+              title={artifact.title}
+            />
             <ArtifactSummaryBlock
               artifact={artifact}
               capabilityCount={artifact.capabilities.length}
@@ -70,7 +75,7 @@ export function ArtifactRow({
         </div>
         {isOpen ? (
           <ArtifactExpanded
-            automations={artifact.automations}
+            artifact={artifact}
             capabilityGroups={capabilityGroups}
             now={now}
           />
@@ -81,13 +86,13 @@ export function ArtifactRow({
 }
 
 function ArtifactIcon({
-  access,
+  isArchived,
   title,
 }: {
-  access: ArtifactSummary["access"]
+  isArchived: boolean
   title: string
 }) {
-  const Icon = access === "organization" ? Building2 : User
+  const Icon = isArchived ? Archive : Component
 
   return (
     <span
@@ -112,12 +117,18 @@ function ArtifactSummaryBlock({
   surfaces: ToolSurface[]
   now: number
 }) {
+  const message = currentVersionMessage(artifact)
+
   return (
     <div className="grid min-w-0 gap-1">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <h3 className="truncate font-medium text-sm">{artifact.title}</h3>
+        <ScopeBadge scope={artifact.access} />
         <PublishBadge artifact={artifact} />
       </div>
+      {message === undefined ? null : (
+        <p className="truncate text-muted-foreground text-xs">{message}</p>
+      )}
       <ArtifactInlineMeta
         automationCount={artifact.automations.length}
         capabilityCount={capabilityCount}
@@ -131,12 +142,7 @@ function ArtifactSummaryBlock({
 
 function PublishBadge({ artifact }: { artifact: ArtifactSummary }) {
   if (artifact.archivedAt !== undefined) {
-    return (
-      <Badge variant="secondary">
-        <Archive data-icon="inline-start" />
-        Archived
-      </Badge>
-    )
+    return <Badge variant="secondary">Archived</Badge>
   }
 
   return artifact.versionId === undefined ? (
@@ -164,24 +170,18 @@ function ArtifactInlineMeta({
         surfaces={surfaces}
         toolCount={capabilityCount}
       />
-      <SeparatorDot />
+      <SeparatorDot className="text-muted-foreground/60" />
       <Workflow className="size-3.5" />
-      <MetaValue>{automationCountLabel(automationCount)}</MetaValue>
-      <SeparatorDot />
+      <span className="font-medium text-foreground">
+        {automationCountLabel(automationCount)}
+      </span>
+      <SeparatorDot className="text-muted-foreground/60" />
       <Clock className="size-3.5" />
       <span title={absoluteTime(updatedAt)}>
         Updated {relativeTime(updatedAt, now)}
       </span>
     </div>
   )
-}
-
-function MetaValue({ children }: { children: string }) {
-  return <span className="font-medium text-foreground">{children}</span>
-}
-
-function SeparatorDot() {
-  return <span className="text-muted-foreground/60">•</span>
 }
 
 function ArtifactControls({

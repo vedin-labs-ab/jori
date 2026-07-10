@@ -1,21 +1,4 @@
-export { absoluteTime } from "../shared/time"
-
-export function relativeTime(timestamp: number, now: number) {
-  const isFuture = timestamp > now
-  const seconds = Math.round(Math.abs(timestamp - now) / 1000)
-
-  if (seconds < 60) {
-    return isFuture ? "in under a minute" : "just now"
-  }
-
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-  const amount =
-    minutes < 60 ? `${minutes}m` : hours < 24 ? `${hours}h` : `${days}d`
-
-  return isFuture ? `in ${amount}` : `${amount} ago`
-}
+export { absoluteTime, relativeTime } from "../shared/time"
 
 export function toDatetimeLocal(timestamp: number) {
   const date = new Date(timestamp)

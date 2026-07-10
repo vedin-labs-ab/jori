@@ -35,7 +35,11 @@ export function formatDuration(milliseconds: number) {
 }
 
 export function relativeTime(timestamp: number, now: number) {
-  const seconds = Math.max(0, Math.round((now - timestamp) / 1000))
+  if (timestamp > now) {
+    return futureRelativeTime(timestamp, now)
+  }
+
+  const seconds = Math.round((now - timestamp) / 1000)
 
   if (seconds < 60) {
     return "just now"
@@ -56,6 +60,22 @@ export function relativeTime(timestamp: number, now: number) {
   const days = Math.floor(hours / 24)
 
   return days === 1 ? "Yesterday" : `${days}d ago`
+}
+
+function futureRelativeTime(timestamp: number, now: number) {
+  const seconds = Math.round((timestamp - now) / 1000)
+
+  if (seconds < 60) {
+    return "in under a minute"
+  }
+
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+  const amount =
+    minutes < 60 ? `${minutes}m` : hours < 24 ? `${hours}h` : `${days}d`
+
+  return `in ${amount}`
 }
 
 export function absoluteTime(timestamp: number) {

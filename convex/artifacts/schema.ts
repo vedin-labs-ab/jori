@@ -115,6 +115,7 @@ export const artifactSessions = defineTable({
   expiresAt: v.number(),
 })
   .index("by_artifact", ["artifactId"])
+  .index("by_artifact_and_seen_at", ["artifactId", "seenAt"])
   .index("by_person_and_artifact", ["personId", "artifactId"])
 
 export const artifactAssets = defineTable({
