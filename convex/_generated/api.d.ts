@@ -309,6 +309,7 @@ import type * as providers_slack_directory_channels from "../providers/slack/dir
 import type * as providers_slack_directory_users from "../providers/slack/directory/users.js";
 import type * as providers_slack_format from "../providers/slack/format.js";
 import type * as providers_slack_http from "../providers/slack/http.js";
+import type * as providers_slack_ingress_actions from "../providers/slack/ingress/actions.js";
 import type * as providers_slack_ingress_events from "../providers/slack/ingress/events.js";
 import type * as providers_slack_ingress_messages from "../providers/slack/ingress/messages.js";
 import type * as providers_slack_ingress_text from "../providers/slack/ingress/text.js";
@@ -764,6 +765,7 @@ declare const fullApi: ApiFromModules<{
   "providers/slack/directory/users": typeof providers_slack_directory_users;
   "providers/slack/format": typeof providers_slack_format;
   "providers/slack/http": typeof providers_slack_http;
+  "providers/slack/ingress/actions": typeof providers_slack_ingress_actions;
   "providers/slack/ingress/events": typeof providers_slack_ingress_events;
   "providers/slack/ingress/messages": typeof providers_slack_ingress_messages;
   "providers/slack/ingress/text": typeof providers_slack_ingress_text;
