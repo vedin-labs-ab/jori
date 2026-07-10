@@ -122,7 +122,7 @@ function TimeFact({
 
 function FactLine({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 py-1.5 text-muted-foreground text-xs">
+    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground text-xs">
       {children}
     </div>
   )
@@ -177,9 +177,5 @@ function AutomationChips({
 }
 
 function EmptyDetailValue({ children }: { children: string }) {
-  return (
-    <div className="min-w-0 rounded-md bg-muted px-2.5 py-2 text-muted-foreground text-xs">
-      {children}
-    </div>
-  )
+  return <div className="min-w-0 text-muted-foreground text-xs">{children}</div>
 }
