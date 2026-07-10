@@ -1,11 +1,6 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
-import {
-  handleArtifactAssetRequest,
-  handleArtifactRenderRequest,
-  handleArtifactStaticAssetRequest,
-  handleArtifactToolRequest,
-} from "./artifacts/serve/http"
+import { registerArtifactRoutes } from "./artifacts/serve/routes"
 import { handleAssetUploadRequest } from "./broker/assets"
 import { handleGitHubCloneCredentialsRequest } from "./broker/mcp"
 import {
@@ -78,35 +73,7 @@ http.route({
   handler: httpAction((ctx, request) => handleAssetUploadRequest(ctx, request)),
 })
 
-http.route({
-  pathPrefix: "/assets/",
-  method: "GET",
-  handler: httpAction((_ctx, request) =>
-    handleArtifactStaticAssetRequest(request)
-  ),
-})
-
-http.route({
-  pathPrefix: "/artifacts/render/",
-  method: "GET",
-  handler: httpAction((_ctx, request) => handleArtifactRenderRequest(request)),
-})
-
-http.route({
-  pathPrefix: "/artifacts/assets/",
-  method: "GET",
-  handler: httpAction((ctx, request) =>
-    handleArtifactAssetRequest(ctx, request)
-  ),
-})
-
-http.route({
-  path: "/artifacts/tools",
-  method: "POST",
-  handler: httpAction((ctx, request) =>
-    handleArtifactToolRequest(ctx, request)
-  ),
-})
+registerArtifactRoutes(http)
 
 http.route({
   path: "/github/install",

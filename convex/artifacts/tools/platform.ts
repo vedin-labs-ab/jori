@@ -4,6 +4,7 @@ import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { requiredString } from "../../shared/input"
+import { type ArtifactSessionGrant } from "../schema"
 import {
   normalizeExpectedVersion,
   normalizeListLimit,
@@ -16,6 +17,7 @@ export type ArtifactPlatformContext = {
   artifactId: Id<"artifacts">
   versionId: Id<"artifactVersions">
   personId: Id<"persons">
+  grant: ArtifactSessionGrant
 }
 
 type ArtifactPlatformRequest = {
@@ -36,8 +38,15 @@ const platformTools = new Set([
   "promptModel",
 ])
 
+/** All a share-grant session may call: read published, shared-scope data. */
+const shareGrantTools = new Set(["readState", "listState"])
+
 export function isArtifactPlatformTool(tool: string) {
   return platformTools.has(tool)
+}
+
+export function isShareGrantTool(tool: string) {
+  return shareGrantTools.has(tool)
 }
 
 export function createArtifactPlatformToolCacheArgs(
@@ -82,6 +91,7 @@ async function readState(
 ) {
   return await ctx.runQuery(internal.artifacts.state.read, {
     ...artifactDataContext(context),
+    grant: context.grant,
     contractName: requiredString(args.contractName, "contractName"),
   })
 }
@@ -93,6 +103,7 @@ async function listState(
 ) {
   return await ctx.runQuery(internal.artifacts.state.list, {
     ...artifactDataContext(context),
+    grant: context.grant,
     limit: normalizeListLimit(args.limit),
   })
 }

@@ -1,3 +1,4 @@
+import { shareExpiry } from "../../../../../contracts/artifacts/share"
 import { numberProperty, objectSchema, stringProperty } from "./common"
 
 const artifactToolGrantsSchema = () => ({
@@ -68,6 +69,17 @@ export const artifactToolInputSchemas = {
   read_artifact_state: objectSchema({
     required: ["contractName"],
     properties: artifactStateProperties,
+  }),
+  share_artifact: objectSchema({
+    required: ["artifactId"],
+    properties: {
+      artifactId: stringProperty("Milo artifact ID."),
+      expiresInHours: numberProperty(
+        "How long the link stays valid, in hours. Defaults to 72. Match the content's shelf life: a meeting prep might use 24, a weekly review 168.",
+        shareExpiry.minHours,
+        shareExpiry.maxHours
+      ),
+    },
   }),
   update_artifact: objectSchema({
     required: ["artifactId", "title", "access", "workspacePath"],

@@ -16,6 +16,7 @@ import {
   callArtifactPlatformTool,
   createArtifactPlatformToolCacheArgs,
   isArtifactPlatformTool,
+  isShareGrantTool,
 } from "./platform"
 
 export type ArtifactToolRequest = {
@@ -39,6 +40,10 @@ export async function callArtifactTool(
   context: ArtifactPlatformContext,
   request: ArtifactToolRequest
 ) {
+  if (context.grant === "share" && !isShareGrantTool(request.tool)) {
+    throw new Error("Share links are view-only: this tool is not available.")
+  }
+
   const args = readRecord(request.args)
   const cache = normalizeArtifactToolCacheOptions({
     ttlMs: request.cacheTtlMs,

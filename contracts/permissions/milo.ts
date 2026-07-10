@@ -154,6 +154,14 @@ export const miloToolPermissionRows = [
     "Replace or merge-patch a contract-bound state document for an artifact. Use from an artifact-owned automation, keyed by contractName; writes must match the contract schema.",
     "write",
   ],
+  [
+    "milo",
+    "share_artifact",
+    "Share artifact",
+    "Create a time-limited link that lets anyone view an artifact.",
+    "Mint a view-only link for an artifact that works without signing in to Milo. Use when delivering an artifact to people who may lack Milo access, and include the returned url in your message. Viewers see published assets and shared-scope state only. Sharing again replaces the artifact's previous link.",
+    "write",
+  ],
   // Automations
   [
     "milo",

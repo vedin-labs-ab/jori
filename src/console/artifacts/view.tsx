@@ -1,12 +1,15 @@
 import { Link } from "@tanstack/react-router"
-import { useQuery } from "convex/react"
-import { AlertTriangle, ArrowLeft } from "lucide-react"
-import { type ReactNode } from "react"
+import { useAction, useMutation, useQuery } from "convex/react"
+import { AlertTriangle, ArrowLeft, Link2 } from "lucide-react"
+import { type ReactNode, useCallback } from "react"
+import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
+import { showErrorToast } from "../shared/error"
 import { FullscreenSkeletonLoader } from "../shared/loading"
+import { absoluteTime } from "../shared/time"
 import { ArtifactFrame } from "./frame"
 import { type ArtifactDetail } from "./types"
 
@@ -89,14 +92,59 @@ function PublishedArtifactView({
   artifact: ArtifactDetail
   tenantId: string
 }) {
+  const createSession = useAction(api.artifacts.actions.createSession)
+  const mintSession = useCallback(
+    () => createSession({ tenantId, artifactId: artifact.artifactId }),
+    [artifact.artifactId, createSession, tenantId]
+  )
+
   return (
     <ArtifactFullscreenShell>
+      {artifact.share === null ? null : (
+        <ArtifactShareChip
+          artifactId={artifact.artifactId}
+          share={artifact.share}
+          tenantId={tenantId}
+        />
+      )}
       <ArtifactFrame
-        artifact={artifact}
-        tenantId={tenantId}
+        artifactId={artifact.artifactId}
+        mintSession={mintSession}
+        title={artifact.title}
         variant="fullscreen"
       />
     </ArtifactFullscreenShell>
+  )
+}
+
+function ArtifactShareChip({
+  artifactId,
+  share,
+  tenantId,
+}: {
+  artifactId: ArtifactId
+  share: NonNullable<ArtifactDetail["share"]>
+  tenantId: string
+}) {
+  const revokeShare = useMutation(api.artifacts.console.revokeShare)
+  const revoke = () => {
+    void revokeShare({ tenantId, artifactId })
+      .then(() => toast.success("Share link revoked."))
+      .catch((error: unknown) =>
+        showErrorToast(error, "Could not revoke the share link.")
+      )
+  }
+
+  return (
+    <div className="absolute top-4 right-4 z-30 flex items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 text-sm shadow-sm">
+      <Link2 className="size-4 text-muted-foreground" />
+      <span className="text-muted-foreground">
+        Shared until {absoluteTime(share.expiresAt)}
+      </span>
+      <Button onClick={revoke} size="sm" type="button" variant="ghost">
+        Revoke
+      </Button>
+    </div>
   )
 }
 

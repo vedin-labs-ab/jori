@@ -14,7 +14,7 @@ import {
   type SourceReadResult,
 } from "./publish"
 import { artifactAccess } from "./schema"
-import { createSessionTokenPayload } from "./serve/session"
+import { artifactSessionDurationMs, createSessionToken } from "./serve/session"
 
 const artifactSourceFileValidator = v.object({
   path: v.string(),
@@ -115,7 +115,7 @@ export const createSession = action({
   handler: async (ctx, args): Promise<SessionResult> => {
     const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
     const now = Date.now()
-    const expiresAt = now + 60 * 60 * 1000
+    const expiresAt = now + artifactSessionDurationMs
     const record: Omit<SessionResult, "token"> = await ctx.runMutation(
       internal.artifacts.serve.sessions.createSessionRecord,
       {
@@ -129,18 +129,7 @@ export const createSession = action({
       }
     )
 
-    return {
-      ...record,
-      token: createSessionTokenPayload({
-        sessionId: record.sessionId,
-        tenantId: record.tenantId,
-        personId: record.personId,
-        artifactId: record.artifactId,
-        versionId: record.versionId,
-        secret: record.secret,
-        expiresAt: record.expiresAt,
-      }),
-    }
+    return { ...record, token: createSessionToken(record) }
   },
 })
 

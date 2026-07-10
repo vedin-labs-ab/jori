@@ -94,6 +94,7 @@ async function deleteArtifactLinks(
 ) {
   await deleteByArtifact(ctx, "artifactTools", artifactId)
   await deleteByArtifact(ctx, "artifactSessions", artifactId)
+  await deleteByArtifact(ctx, "artifactShares", artifactId)
   await deleteByArtifact(ctx, "artifactCaches", artifactId)
 }
 
@@ -172,7 +173,11 @@ async function deleteArtifactBlobs(
 
 async function deleteByArtifact(
   ctx: MutationCtx,
-  table: "artifactTools" | "artifactSessions" | "artifactCaches",
+  table:
+    | "artifactTools"
+    | "artifactSessions"
+    | "artifactShares"
+    | "artifactCaches",
   artifactId: Id<"artifacts">
 ) {
   const rows = await ctx.db

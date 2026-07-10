@@ -1,6 +1,8 @@
 import { v } from "convex/values"
-import { internalMutation } from "../../_generated/server"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { canAccessArtifact } from "../access"
+import { type ArtifactSessionGrant } from "../schema"
 import { getTenantArtifact } from "../storage/links"
 
 export const createSessionRecord = internalMutation({
@@ -16,39 +18,62 @@ export const createSessionRecord = internalMutation({
   handler: async (ctx, args) => {
     const artifact = await getTenantArtifact(ctx, args)
 
-    if (!canAccessArtifact(artifact, args.personId)) {
-      throw new Error("Artifact not found.")
-    }
-
-    if (artifact.versionId === undefined) {
-      throw new Error("Artifact has no published version.")
-    }
-
-    const sessionId = await ctx.db.insert("artifactSessions", {
-      tenantId: artifact.tenantId,
-      artifactId: artifact._id,
-      versionId: artifact.versionId,
-      personId: args.personId,
-      access: artifact.access,
-      status: "active",
-      tokenSecret: args.secret,
-      tokenExpiresAt: args.tokenExpiresAt,
-      createdAt: args.now,
-      seenAt: args.now,
-      expiresAt: args.expiresAt,
+    return await createArtifactSession(ctx, {
+      ...args,
+      artifact,
+      grant: "member",
     })
-
-    return {
-      sessionId,
-      tenantId: artifact.tenantId,
-      personId: args.personId,
-      artifactId: artifact._id,
-      versionId: artifact.versionId,
-      secret: args.secret,
-      expiresAt: args.tokenExpiresAt,
-    }
   },
 })
+
+/** Insert one session row — the shared factory for both grant edges. */
+export async function createArtifactSession(
+  ctx: MutationCtx,
+  args: {
+    artifact: Doc<"artifacts">
+    personId: Id<"persons">
+    grant: ArtifactSessionGrant
+    secret: string
+    now: number
+    expiresAt: number
+    tokenExpiresAt: number
+  }
+) {
+  const { artifact } = args
+
+  if (!canAccessArtifact(artifact, args.personId)) {
+    throw new Error("Artifact not found.")
+  }
+
+  if (artifact.versionId === undefined) {
+    throw new Error("Artifact has no published version.")
+  }
+
+  const sessionId = await ctx.db.insert("artifactSessions", {
+    tenantId: artifact.tenantId,
+    artifactId: artifact._id,
+    versionId: artifact.versionId,
+    personId: args.personId,
+    access: artifact.access,
+    grant: args.grant,
+    status: "active",
+    tokenSecret: args.secret,
+    tokenExpiresAt: args.tokenExpiresAt,
+    createdAt: args.now,
+    seenAt: args.now,
+    expiresAt: args.expiresAt,
+  })
+
+  return {
+    sessionId,
+    tenantId: artifact.tenantId,
+    personId: args.personId,
+    artifactId: artifact._id,
+    versionId: artifact.versionId,
+    secret: args.secret,
+    expiresAt: args.tokenExpiresAt,
+  }
+}
 
 export const authorizeSession = internalMutation({
   args: {

@@ -73,6 +73,7 @@ export async function handleArtifactToolRequest(
           artifactId: session.artifactId,
           versionId: session.versionId,
           personId: session.personId,
+          grant: session.grant,
         },
         body
       )

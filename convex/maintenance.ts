@@ -43,6 +43,7 @@ const tableRegistry: Record<TableName, true> = {
   artifactBlobs: true,
   artifactTools: true,
   artifactSessions: true,
+  artifactShares: true,
   artifactAssets: true,
   artifactState: true,
   artifactCaches: true,
