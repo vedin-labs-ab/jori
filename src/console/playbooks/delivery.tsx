@@ -4,7 +4,7 @@ import {
   type DeliveryKind,
   deliveryKindLabels,
 } from "@contracts/playbooks/delivery"
-import { Mail, Pencil } from "lucide-react"
+import { ChevronDown, Mail, Pencil } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -20,75 +20,134 @@ import { type SlackChannel, SlackChannelField } from "./channel"
 type DeliveryDraft = { kind: DeliveryKind; channel?: SlackChannel }
 
 /**
- * The delivery target as a single summary line. "Change" offers the other
- * kinds; picking one flips the line into edit mode, and only a valid draft
- * saved back commits — `value` always holds the last committed choice.
+ * The delivery target as a single summary line. "Change" flips it into edit
+ * mode — kind picker on the icon slot, input inline — and only a valid draft
+ * that differs from the committed `value` can be saved back. The parent owns
+ * the `editing` flag so it can hold submissions while an edit is open.
  */
 export function DeliveryField({
   availableKinds,
   defaultKind,
+  editing,
   onChange,
+  onEditingChange,
   tenantId,
   value,
 }: {
   availableKinds: DeliveryKind[]
   defaultKind: DeliveryKind
+  editing: boolean
   onChange: (choice: DeliveryChoice) => void
+  onEditingChange: (editing: boolean) => void
   tenantId: string
   value: DeliveryChoice | undefined
 }) {
-  const [draft, setDraft] = useState<DeliveryDraft | undefined>(
-    value === undefined ? { kind: defaultKind } : undefined
+  const [draft, setDraft] = useState<DeliveryDraft>(() =>
+    committedDraft(value, defaultKind)
   )
 
-  if (draft === undefined && value !== undefined) {
+  if (!editing && value !== undefined) {
     return (
       <div className="flex min-h-8 items-center justify-between gap-2">
-        <DeliveryTarget choice={value} />
+        <span className="flex min-w-0 items-center gap-1.5">
+          <DeliveryIcon kind={value.kind} />
+          <DeliveryText choice={value} />
+        </span>
         {availableKinds.length > 1 ? (
-          <ChangeMenu
-            kinds={availableKinds}
-            onSelect={(kind) => setDraft({ kind })}
-          />
+          <Button
+            onClick={() => {
+              setDraft(committedDraft(value, defaultKind))
+              onEditingChange(true)
+            }}
+            size="sm"
+            variant="outline"
+          >
+            <Pencil /> Change
+          </Button>
         ) : null}
       </div>
     )
   }
 
-  const active = draft ?? { kind: defaultKind }
-  const next = draftChoice(active)
+  return (
+    <DeliveryEditor
+      availableKinds={availableKinds}
+      draft={draft}
+      onCancel={value === undefined ? undefined : () => onEditingChange(false)}
+      onDraftChange={setDraft}
+      onSave={(choice) => {
+        onChange(choice)
+        onEditingChange(false)
+      }}
+      onSwitchKind={(kind) =>
+        setDraft(
+          kind === value?.kind ? committedDraft(value, defaultKind) : { kind }
+        )
+      }
+      tenantId={tenantId}
+      value={value}
+    />
+  )
+}
+
+function DeliveryEditor({
+  availableKinds,
+  draft,
+  onCancel,
+  onDraftChange,
+  onSave,
+  onSwitchKind,
+  tenantId,
+  value,
+}: {
+  availableKinds: DeliveryKind[]
+  draft: DeliveryDraft
+  onCancel: (() => void) | undefined
+  onDraftChange: (draft: DeliveryDraft) => void
+  onSave: (choice: DeliveryChoice) => void
+  onSwitchKind: (kind: DeliveryKind) => void
+  tenantId: string
+  value: DeliveryChoice | undefined
+}) {
+  const next = draftChoice(draft)
+  const changed = next !== undefined && !sameChoice(next, value)
 
   return (
     <div className="flex min-h-8 items-center justify-between gap-2">
-      {active.kind === "email" ? (
-        <DeliveryTarget choice={{ kind: "email" }} />
-      ) : (
-        <div className="flex flex-1 items-center gap-1.5">
-          <DeliveryIcon kind={active.kind} />
+      <div className="flex min-w-0 flex-1 items-center gap-1.5">
+        <KindMenu
+          kind={draft.kind}
+          kinds={availableKinds}
+          onSelect={onSwitchKind}
+        />
+        {draft.kind === "email" ? (
+          <DeliveryText choice={{ kind: "email" }} />
+        ) : (
           <div className="min-w-0 flex-1">
             <SlackChannelField
-              onChange={(channel) => setDraft({ kind: active.kind, channel })}
+              onChange={(channel) =>
+                onDraftChange({ kind: draft.kind, channel })
+              }
               tenantId={tenantId}
-              value={active.channel}
+              value={draft.channel}
             />
           </div>
-        </div>
-      )}
+        )}
+      </div>
       <ButtonGroup>
         <Button
-          disabled={value === undefined}
-          onClick={() => setDraft(undefined)}
+          disabled={onCancel === undefined}
+          onClick={onCancel}
           size="sm"
           variant="outline"
         >
           Cancel
         </Button>
         <Button
-          disabled={next === undefined}
+          disabled={!changed}
           onClick={() => {
             if (next !== undefined) {
-              onChange(next)
-              setDraft(undefined)
+              onSave(next)
             }
           }}
           size="sm"
@@ -100,16 +159,54 @@ export function DeliveryField({
   )
 }
 
-/** Icon + "Kind · target" summary, shared by display and email edit rows. */
-function DeliveryTarget({ choice }: { choice: DeliveryChoice }) {
+/** The edit-mode icon slot: the kind picker when there is more than one. */
+function KindMenu({
+  kind,
+  kinds,
+  onSelect,
+}: {
+  kind: DeliveryKind
+  kinds: DeliveryKind[]
+  onSelect: (kind: DeliveryKind) => void
+}) {
+  if (kinds.length < 2) {
+    return <DeliveryIcon kind={kind} />
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label="Delivery kind"
+          className="px-2"
+          size="sm"
+          variant="outline"
+        >
+          <DeliveryIcon kind={kind} />
+          <ChevronDown className="text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        {kinds.map((option) => (
+          <DropdownMenuItem key={option} onSelect={() => onSelect(option)}>
+            <DeliveryIcon kind={option} />
+            {deliveryKindLabels[option]}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+/** "Kind · target", the target weighted so it reads as the answer. */
+function DeliveryText({ choice }: { choice: DeliveryChoice }) {
   const email = useUser().user?.primaryEmailAddress?.emailAddress
 
   return (
-    <span className="flex min-w-0 items-center gap-1.5">
-      <DeliveryIcon kind={choice.kind} />
-      <span className="truncate">
-        {deliveryKindLabels[choice.kind]}
-        <span className="text-muted-foreground"> · </span>
+    <span className="truncate">
+      {deliveryKindLabels[choice.kind]}
+      <span className="text-muted-foreground"> · </span>
+      <span className="font-medium">
         {choice.kind === "email" ? (email ?? "you") : `#${choice.channelName}`}
       </span>
     </span>
@@ -124,30 +221,22 @@ function DeliveryIcon({ kind }: { kind: DeliveryKind }) {
   return <SurfaceLogo alt="" integration="slack" />
 }
 
-function ChangeMenu({
-  kinds,
-  onSelect,
-}: {
-  kinds: DeliveryKind[]
-  onSelect: (kind: DeliveryKind) => void
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button size="sm" variant="outline">
-          <Pencil /> Change
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {kinds.map((kind) => (
-          <DropdownMenuItem key={kind} onSelect={() => onSelect(kind)}>
-            <DeliveryIcon kind={kind} />
-            {deliveryKindLabels[kind]}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
+function committedDraft(
+  value: DeliveryChoice | undefined,
+  defaultKind: DeliveryKind
+): DeliveryDraft {
+  if (value === undefined) {
+    return { kind: defaultKind }
+  }
+
+  if (value.kind === "email") {
+    return { kind: "email" }
+  }
+
+  return {
+    kind: "slack",
+    channel: { channelId: value.channelId, channelName: value.channelName },
+  }
 }
 
 function draftChoice(draft: DeliveryDraft): DeliveryChoice | undefined {
@@ -158,4 +247,19 @@ function draftChoice(draft: DeliveryDraft): DeliveryChoice | undefined {
   return draft.channel === undefined
     ? undefined
     : { kind: "slack", ...draft.channel }
+}
+
+function sameChoice(
+  next: DeliveryChoice,
+  committed: DeliveryChoice | undefined
+): boolean {
+  if (committed === undefined) {
+    return false
+  }
+
+  if (next.kind === "email") {
+    return committed.kind === "email"
+  }
+
+  return committed.kind === "slack" && committed.channelId === next.channelId
 }

@@ -39,23 +39,16 @@ export function PlaybookSetupDialog({
   row: PlaybookListRow
   tenantId: string
 }) {
-  const availableKinds = row.delivery
-  const defaultKind: DeliveryKind = availableKinds.includes(
-    definition.delivery.default
-  )
-    ? definition.delivery.default
-    : (availableKinds[0] ?? "email")
   const [providerIndex, setProviderIndex] = useState(0)
-  // The committed destination; the delivery field only reports saved, valid
-  // choices, so an unsaved edit never blocks (or leaks into) the actions.
-  const [destination, setDestination] = useState<DeliveryChoice | undefined>(
-    defaultKind === "email" ? { kind: "email" } : undefined
-  )
+  const delivery = useDeliverySetup(definition, row.delivery)
+  const destination = delivery.value
   const pendingKind = pendingActionKind(actions, definition)
 
   const choices =
     plan.kind === "choose" ? plan.options[providerIndex].choices : plan.choices
-  const canSubmit = destination !== undefined && pendingKind === undefined
+  // An open edit holds submission: the user saves or cancels first.
+  const canSubmit =
+    destination !== undefined && pendingKind === undefined && !delivery.editing
 
   function submit(action: PlaybookActions["enable"], close: boolean) {
     if (destination === undefined) {
@@ -79,13 +72,7 @@ export function PlaybookSetupDialog({
         <div className="grid gap-3">
           <PlaybookMeta definition={definition} row={row} />
           <PlaybookCustomizations
-            delivery={{
-              availableKinds,
-              defaultKind,
-              onChange: setDestination,
-              tenantId,
-              value: destination,
-            }}
+            delivery={{ ...delivery, tenantId }}
             onProviderIndexChange={setProviderIndex}
             plan={plan}
             providerIndex={providerIndex}
@@ -127,4 +114,33 @@ export function PlaybookSetupDialog({
       </DialogContent>
     </Dialog>
   )
+}
+
+/**
+ * Delivery state for the setup dialog: `value` is the committed destination —
+ * the field only reports saved, valid choices, so an unsaved edit never leaks
+ * into the actions — and `editing` flags an open edit.
+ */
+function useDeliverySetup(
+  definition: PlaybookDefinition,
+  availableKinds: DeliveryKind[]
+) {
+  const defaultKind: DeliveryKind = availableKinds.includes(
+    definition.delivery.default
+  )
+    ? definition.delivery.default
+    : (availableKinds[0] ?? "email")
+  const [value, setValue] = useState<DeliveryChoice | undefined>(
+    defaultKind === "email" ? { kind: "email" } : undefined
+  )
+  const [editing, setEditing] = useState(defaultKind !== "email")
+
+  return {
+    availableKinds,
+    defaultKind,
+    editing,
+    onChange: setValue,
+    onEditingChange: setEditing,
+    value,
+  }
 }
