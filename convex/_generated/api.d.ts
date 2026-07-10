@@ -36,6 +36,7 @@ import type * as artifacts_records from "../artifacts/records.js";
 import type * as artifacts_runtime from "../artifacts/runtime.js";
 import type * as artifacts_serve_frame from "../artifacts/serve/frame.js";
 import type * as artifacts_serve_http from "../artifacts/serve/http.js";
+import type * as artifacts_serve_routes from "../artifacts/serve/routes.js";
 import type * as artifacts_serve_session from "../artifacts/serve/session.js";
 import type * as artifacts_serve_sessions from "../artifacts/serve/sessions.js";
 import type * as artifacts_serve_share from "../artifacts/serve/share.js";
@@ -490,6 +491,7 @@ declare const fullApi: ApiFromModules<{
   "artifacts/runtime": typeof artifacts_runtime;
   "artifacts/serve/frame": typeof artifacts_serve_frame;
   "artifacts/serve/http": typeof artifacts_serve_http;
+  "artifacts/serve/routes": typeof artifacts_serve_routes;
   "artifacts/serve/session": typeof artifacts_serve_session;
   "artifacts/serve/sessions": typeof artifacts_serve_sessions;
   "artifacts/serve/share": typeof artifacts_serve_share;
