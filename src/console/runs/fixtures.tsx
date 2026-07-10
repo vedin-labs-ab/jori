@@ -11,7 +11,12 @@ import {
 export function renderExecutionRow(item: ExecutionItem) {
   return render(
     <TooltipProvider>
-      <ExecutionRow execution={item} now={1700000001000} tenantId="tenant" />
+      <ExecutionRow
+        execution={item}
+        now={1700000001000}
+        showScope={true}
+        tenantId="tenant"
+      />
     </TooltipProvider>
   )
 }

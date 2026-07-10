@@ -18,6 +18,18 @@ test("renders only the scope for source without provider context", () => {
   expect(container.textContent).toBe("Personal")
 })
 
+test("renders nothing when the scope is omitted and context is empty", () => {
+  const { container } = render(
+    <SourceLine
+      source={{
+        type: "automation",
+      }}
+    />
+  )
+
+  expect(container.textContent).toBe("")
+})
+
 test("renders the organization scope as the last item", () => {
   const { container } = render(
     <SourceLine

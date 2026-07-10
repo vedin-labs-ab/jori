@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router"
 import {
   Archive,
   ChevronsUpDown,
-  Clock,
   Component,
   ExternalLink,
   Workflow,
@@ -14,7 +13,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScopeDatum } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
-import { absoluteTime, relativeTime } from "../../shared/time"
 import { ToolCountSummary } from "../../shared/tools/summary"
 import {
   automationCountLabel,
@@ -32,6 +30,7 @@ export function ArtifactRow({
   now,
   onDelete,
   onRestore,
+  showScope,
 }: {
   artifact: ArtifactSummary
   isDeleting: boolean
@@ -39,6 +38,7 @@ export function ArtifactRow({
   now: number
   onDelete: (artifact: ArtifactSummary) => void
   onRestore: (artifact: ArtifactSummary) => void
+  showScope: boolean
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const capabilityGroups = useCapabilityGroups(artifact)
@@ -61,8 +61,8 @@ export function ArtifactRow({
             <ArtifactSummaryBlock
               artifact={artifact}
               capabilityCount={artifact.capabilities.length}
+              showScope={showScope}
               surfaces={surfaces}
-              now={now}
             />
           </button>
           <ArtifactControls
@@ -109,13 +109,13 @@ function ArtifactIcon({
 function ArtifactSummaryBlock({
   artifact,
   capabilityCount,
+  showScope,
   surfaces,
-  now,
 }: {
   artifact: ArtifactSummary
   capabilityCount: number
+  showScope: boolean
   surfaces: ToolSurface[]
-  now: number
 }) {
   return (
     <div className="grid min-w-0 gap-1">
@@ -124,12 +124,10 @@ function ArtifactSummaryBlock({
         <PublishBadge artifact={artifact} />
       </div>
       <ArtifactInlineMeta
-        access={artifact.access}
+        access={showScope ? artifact.access : undefined}
         automationCount={artifact.automations.length}
         capabilityCount={capabilityCount}
         surfaces={surfaces}
-        now={now}
-        updatedAt={artifact.updatedAt}
       />
     </div>
   )
@@ -150,15 +148,12 @@ function ArtifactInlineMeta({
   automationCount,
   capabilityCount,
   surfaces,
-  now,
-  updatedAt,
 }: {
-  access: Scope
+  /** Omitted when the list is already filtered to a single scope. */
+  access: Scope | undefined
   automationCount: number
   capabilityCount: number
   surfaces: ToolSurface[]
-  now: number
-  updatedAt: number
 }) {
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground text-xs">
@@ -169,16 +164,15 @@ function ArtifactInlineMeta({
       />
       <SeparatorDot className="text-muted-foreground/60" />
       <Workflow className="size-3.5" />
-      <span className="font-medium text-foreground">
+      <span className="text-foreground">
         {automationCountLabel(automationCount)}
       </span>
-      <SeparatorDot className="text-muted-foreground/60" />
-      <Clock className="size-3.5" />
-      <span title={absoluteTime(updatedAt)}>
-        Updated {relativeTime(updatedAt, now)}
-      </span>
-      <SeparatorDot className="text-muted-foreground/60" />
-      <ScopeDatum scope={access} />
+      {access === undefined ? null : (
+        <>
+          <SeparatorDot className="text-muted-foreground/60" />
+          <ScopeDatum scope={access} />
+        </>
+      )}
     </div>
   )
 }

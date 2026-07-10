@@ -83,6 +83,7 @@ export function ArtifactReadyView({
         onDelete={onDelete}
         onRestore={onRestore}
         restoringArtifactId={restoringArtifactId}
+        showScope={scope === "all"}
       />
       {artifactList.status === "ready" ? (
         <ConsoleListPager pagination={pagination} />
@@ -135,6 +136,7 @@ function ArtifactListBody({
   onDelete,
   onRestore,
   restoringArtifactId,
+  showScope,
 }: {
   artifactList: ArtifactListResult
   artifacts: ArtifactSummary[]
@@ -144,6 +146,7 @@ function ArtifactListBody({
   onDelete: (artifact: ArtifactSummary) => void
   onRestore: (artifact: ArtifactSummary) => void
   restoringArtifactId: string | undefined
+  showScope: boolean
 }) {
   if (artifactList.status === "unauthorized") {
     return (
@@ -175,6 +178,7 @@ function ArtifactListBody({
           now={now}
           onDelete={onDelete}
           onRestore={onRestore}
+          showScope={showScope}
         />
       ))}
     </ConsoleScrollableList>

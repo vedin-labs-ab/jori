@@ -65,7 +65,11 @@ export function RunsList({ tenantId }: { tenantId: string }) {
         setRunFilter={setRunFilterAndReset}
         setScopeFilter={setScopeFilterAndReset}
       />
-      <ExecutionRows pagination={pagination} tenantId={tenantId} />
+      <ExecutionRows
+        pagination={pagination}
+        showScope={deferredScopeFilter === "all"}
+        tenantId={tenantId}
+      />
       <ConsoleListPager pagination={pagination} />
     </ConsolePageLayout>
   )
@@ -155,9 +159,11 @@ const ExecutionFilters = memo(function ExecutionFilters({
 
 function ExecutionRows({
   pagination,
+  showScope,
   tenantId,
 }: {
   pagination: ExecutionPagination
+  showScope: boolean
   tenantId: string
 }) {
   const now = useExecutionClock(pagination.visibleRows)
@@ -177,6 +183,7 @@ function ExecutionRows({
               execution={execution}
               key={execution.id}
               now={displayNowForRun(execution, now)}
+              showScope={showScope}
               tenantId={tenantId}
             />
           ))

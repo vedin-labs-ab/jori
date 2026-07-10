@@ -35,10 +35,15 @@ export function SourceLine({
   source,
 }: {
   details?: readonly ExecutionDetail[]
-  scope: Scope
+  /** Omitted when the list is already filtered to a single scope. */
+  scope?: Scope
   source: ExecutionSource
 }) {
   const items = sourceItems(source, details, scope)
+
+  if (items.length === 0) {
+    return null
+  }
 
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-muted-foreground text-xs">
@@ -59,7 +64,7 @@ type SourceItem = {
 function sourceItems(
   source: ExecutionSource,
   details: readonly ExecutionDetail[],
-  scope: Scope
+  scope: Scope | undefined
 ): SourceItem[] {
   return [
     ...optionalItem(
@@ -98,10 +103,12 @@ function sourceItems(
         </span>
       )
     ),
-    {
-      content: <ScopeDatum iconClassName="size-3" scope={scope} />,
-      key: "scope",
-    },
+    ...optionalItem(
+      "scope",
+      scope === undefined ? undefined : (
+        <ScopeDatum iconClassName="size-3" scope={scope} />
+      )
+    ),
   ]
 }
 
