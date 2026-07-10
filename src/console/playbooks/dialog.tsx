@@ -74,7 +74,7 @@ export function PlaybookSetupDialog({
           <DialogDescription>{definition.description}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-5">
+        <div className="grid gap-3">
           <PlaybookMeta definition={definition} row={row} />
           <PlaybookCustomizations
             delivery={{

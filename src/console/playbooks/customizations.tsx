@@ -3,7 +3,6 @@ import {
   type DeliveryKind,
   deliveryKindLabels,
 } from "@contracts/playbooks/delivery"
-import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { type SlackChannel, SlackChannelField } from "./channel"
 import { PlaybookSection } from "./meta"
@@ -19,9 +18,9 @@ export type DeliveryState = {
 }
 
 /**
- * Every knob a playbook exposes at setup. Each is a `PlaybookSection`, so its
- * label reads like the Schedule/Tools summary above; a divider sets the two
- * apart. Add a customization by rendering another section here.
+ * Every knob a playbook exposes at setup, each a `PlaybookSection` so it flows
+ * inline after the Schedule/Tools summary with a matching label. Add a
+ * customization by rendering another section here.
  */
 export function PlaybookCustomizations({
   delivery,
@@ -36,21 +35,18 @@ export function PlaybookCustomizations({
 }) {
   return (
     <>
-      <Separator />
-      <div className="grid gap-3">
-        {plan.kind === "choose" ? (
-          <PlaybookSection label="Accounts">
-            <OptionToggle
-              onValueChange={onProviderIndexChange}
-              options={plan.options.map((option) => option.label)}
-              value={providerIndex}
-            />
-          </PlaybookSection>
-        ) : null}
-        <PlaybookSection label="Deliver to">
-          <DeliveryControl {...delivery} />
+      {plan.kind === "choose" ? (
+        <PlaybookSection label="Accounts">
+          <OptionToggle
+            onValueChange={onProviderIndexChange}
+            options={plan.options.map((option) => option.label)}
+            value={providerIndex}
+          />
         </PlaybookSection>
-      </div>
+      ) : null}
+      <PlaybookSection label="Deliver to">
+        <DeliveryControl {...delivery} />
+      </PlaybookSection>
     </>
   )
 }
