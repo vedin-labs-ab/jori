@@ -3,6 +3,7 @@ import { isWebTool } from "../../contracts/permissions/web"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { canUseAutomationTool } from "../automations/access"
+import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import {
   canUseToolMode,
   getToolPermission,
@@ -11,6 +12,7 @@ import {
   type ToolPermission,
   type ToolSurface,
 } from "../permissions/catalog"
+import { findRunIntegration } from "../runs/agent/input"
 import { toolExecutionType } from "../runs/agent/tools/policy"
 import {
   formatProviderError,
@@ -159,7 +161,7 @@ async function runProviderTool(
 ) {
   return await callProviderTool({
     ctx,
-    integration,
+    integration: await prepareIntegrationForRuntime(ctx, { integration }),
     run: context.run,
     tool: request.tool,
     toolArgs: normalizeBrokerToolInput(request.tool, request.args),
@@ -238,7 +240,7 @@ async function authorizeSurfaceTool(
     tool: string
   }
 ) {
-  const integration = findSurfaceIntegration(context, request.surface)
+  const integration = findRunIntegration(context.input, request.surface)
 
   if (integration !== null && context.input.type === "automation") {
     const isSelected = canUseAutomationTool(
@@ -255,16 +257,4 @@ async function authorizeSurfaceTool(
   }
 
   return integration
-}
-
-function findSurfaceIntegration(
-  context: BrokerContext,
-  surface: Exclude<ToolSurface, "milo">
-) {
-  return (
-    context.integrations.find(
-      (integration) =>
-        integration.status === "active" && integration.integration === surface
-    ) ?? null
-  )
 }

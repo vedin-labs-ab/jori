@@ -11,7 +11,7 @@ import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"
 import { type CreateInstallState, useIntegrationInstall } from "./install"
 
-export type IntegrationCardStatus = "active" | "paused" | undefined
+export type IntegrationCardStatus = "active" | "expired" | "paused" | undefined
 
 export type IntegrationCardConfig = {
   action: string
@@ -148,6 +148,10 @@ function getStatusLabel(
 
   if (status === null) {
     return "Not connected"
+  }
+
+  if (status.status === "expired") {
+    return "Access expired"
   }
 
   return headline

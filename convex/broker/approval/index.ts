@@ -9,7 +9,10 @@ import {
   resolveToolMode,
   type ToolSurface,
 } from "../../permissions/catalog"
-import { type AgentRuntimeInput } from "../../runs/agent/input"
+import {
+  type AgentRuntimeInput,
+  findRunIntegration,
+} from "../../runs/agent/input"
 import { type Actor, createPersonActor } from "../../shared/actor"
 import { parsePromptedToolApproval } from "./args"
 import { deliverApprovalRequest } from "./delivery"
@@ -17,7 +20,6 @@ import { deliverApprovalRequest } from "./delivery"
 export type ApprovalBrokerContext = {
   connectedIntegrations: Doc<"integrations">[]
   input: AgentRuntimeInput
-  integrations: Doc<"integrations">[]
   run: Doc<"runs">
   toolModes: ReadonlyMap<string, PermissionMode>
 }
@@ -65,7 +67,7 @@ export async function createPromptedToolApproval(
 
   if (
     request.surface !== "milo" &&
-    findSurfaceIntegration(context, request.surface) === null
+    findRunIntegration(context.input, request.surface) === null
   ) {
     throw new Error(`No active ${request.surface} integration is available`)
   }
@@ -98,18 +100,6 @@ export async function createPromptedToolApproval(
     code: approval.code,
     instruction: approvalInstruction(approval.reused),
   }
-}
-
-function findSurfaceIntegration(
-  context: ApprovalBrokerContext,
-  surface: Exclude<ToolSurface, "milo">
-) {
-  return (
-    context.integrations.find(
-      (integration) =>
-        integration.status === "active" && integration.integration === surface
-    ) ?? null
-  )
 }
 
 function createRequestedBy(context: ApprovalBrokerContext): Actor {

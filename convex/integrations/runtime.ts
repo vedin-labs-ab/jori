@@ -13,6 +13,7 @@ import {
 import { requireMicrosoftCredentials } from "../providers/microsoft/credentials"
 import { refreshMicrosoftAccessToken } from "../providers/microsoft/oauth"
 import {
+  integrationLabel,
   isGoogleIntegration,
   isMicrosoftIntegration,
 } from "../shared/integrations"
@@ -92,7 +93,7 @@ async function prepareLinearIntegrationForRuntime(
   const tokenResult = await refreshLinearAccessToken(credentials.tokens.refresh)
 
   if ("error" in tokenResult) {
-    throw tokenRefreshError("Linear", tokenResult)
+    return await failOAuthRefresh(ctx, integration, "Linear", tokenResult)
   }
 
   const refreshedCredentials = await ctx.runMutation(
@@ -122,7 +123,12 @@ async function prepareGoogleIntegrationForRuntime(
   const tokenResult = await refreshGoogleAccessToken(credentials.tokens.refresh)
 
   if ("error" in tokenResult) {
-    throw tokenRefreshError("Google Workspace", tokenResult)
+    return await failOAuthRefresh(
+      ctx,
+      integration,
+      "Google Workspace",
+      tokenResult
+    )
   }
 
   const refreshedCredentials = await ctx.runMutation(
@@ -155,7 +161,7 @@ async function prepareMicrosoftIntegrationForRuntime(
   })
 
   if ("error" in tokenResult) {
-    throw tokenRefreshError("Microsoft", tokenResult)
+    return await failOAuthRefresh(ctx, integration, "Microsoft", tokenResult)
   }
 
   if (tokenResult.refresh_token === undefined) {
@@ -198,6 +204,27 @@ function hasFreshOAuthToken(credentials: { expiresAt: number }) {
 
 function hasFreshTokenExpiration(expiresAt: number) {
   return expiresAt > Date.now() + TOKEN_REFRESH_BUFFER_MS
+}
+
+// OAuth providers signal a permanently dead grant (revoked consent, expired
+// refresh token) with "invalid_grant"; only a full reconnect recovers from it.
+async function failOAuthRefresh(
+  ctx: ActionCtx,
+  integration: RuntimeIntegration,
+  platform: string,
+  result: { error: string; error_description?: string }
+): Promise<never> {
+  if (result.error !== "invalid_grant") {
+    throw tokenRefreshError(platform, result)
+  }
+
+  await ctx.runMutation(internal.integrations.expire.markExpired, {
+    integrationId: integration._id,
+  })
+
+  throw new Error(
+    `${integrationLabel(integration.integration)} access has expired and needs to be reconnected.`
+  )
 }
 
 function tokenRefreshError(

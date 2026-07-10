@@ -113,7 +113,6 @@ function context(args: {
   return {
     connectedIntegrations: args.connectedIntegrations,
     input: args.input,
-    integrations: args.input.integrations,
     run: run(),
     toolModes: args.toolModes,
   }
