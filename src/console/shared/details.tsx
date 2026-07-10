@@ -34,7 +34,7 @@ export function CodeBlockDetail({
   framed = false,
   header,
   icon: Icon,
-  iconClassName = "text-muted-foreground",
+  iconClassName,
   label,
   value,
 }: {
@@ -150,7 +150,7 @@ export function DetailLink({
 
 export function StatusDetail({
   icon: Icon,
-  iconClassName = "text-muted-foreground",
+  iconClassName,
   label,
   value,
 }: {
@@ -171,12 +171,12 @@ export function StatusDetail({
 export function DetailRow({
   children,
   icon: Icon,
-  iconClassName,
+  iconClassName = "text-muted-foreground",
   label,
 }: {
   children: React.ReactNode
   icon: DetailIcon
-  iconClassName: string
+  iconClassName?: string
   label: ReactNode
 }) {
   return (

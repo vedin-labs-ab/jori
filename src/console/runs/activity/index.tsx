@@ -25,11 +25,7 @@ export function RunActivity({
   })
 
   return (
-    <DetailRow
-      icon={Logs}
-      iconClassName="text-muted-foreground"
-      label="Activity"
-    >
+    <DetailRow icon={Logs} label="Activity">
       <ActivityContent activity={activity} now={now} />
     </DetailRow>
   )
