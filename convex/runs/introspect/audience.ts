@@ -3,6 +3,7 @@ import { type MutationCtx } from "../../_generated/server"
 import { automationScope } from "../../automations/access"
 import { conversationAudience } from "../../conversations/scope"
 import { type AudienceScope } from "../../shared/audience"
+import { runAudienceScope } from "../scope"
 
 export type RunAudience = {
   scope: AudienceScope
@@ -58,7 +59,7 @@ async function resolveParentAudience(
   }
 
   return {
-    scope: parent.scope ?? "person",
+    scope: runAudienceScope(parent),
     conversationId: parent.conversationId,
   }
 }

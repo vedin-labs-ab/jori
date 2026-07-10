@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { scopeValidator } from "../../shared/audience"
+import { runAudienceScope, runScope } from "../scope"
 
 export type RunFilter = "all" | "ongoing" | "failed" | "stopped" | "completed"
 
@@ -49,10 +50,8 @@ export function runVisibleToPerson(
   run: Doc<"runs">,
   personId: Id<"persons"> | undefined
 ) {
-  const scope = run.scope ?? "person"
-
   return (
-    scope === "tenant" ||
+    runAudienceScope(run) === "tenant" ||
     run.createdBy === undefined ||
     run.createdBy === personId
   )
@@ -63,13 +62,7 @@ export function runMatchesScopeFilter(
   run: Doc<"runs">,
   filter: RunScopeFilter
 ) {
-  if (filter === "all") {
-    return true
-  }
-
-  const isOrganization = (run.scope ?? "person") === "tenant"
-
-  return filter === "organization" ? isOrganization : !isOrganization
+  return filter === "all" || runScope(run) === filter
 }
 
 export function runMatchesFilter(run: Doc<"runs">, filter: RunFilter) {
