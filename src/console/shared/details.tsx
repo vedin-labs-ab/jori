@@ -1,5 +1,5 @@
 import { type Scope, scopeLabels } from "@contracts/permissions/scope"
-import { AlertTriangle, ArrowUpRight, Building2 } from "lucide-react"
+import { AlertTriangle, ArrowUpRight, Building2, UserRound } from "lucide-react"
 import { type ElementType, type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -217,5 +217,23 @@ export function ScopeBadge({ scope }: { scope: Scope }) {
     <Badge className="shrink-0" variant="outline">
       <Building2 /> {scopeLabels.organization}
     </Badge>
+  )
+}
+
+/** Quiet inline scope marker for list metadata rows; shown for both scopes. */
+export function ScopeDatum({
+  iconClassName = "size-3.5",
+  scope,
+}: {
+  iconClassName?: string
+  scope: Scope
+}) {
+  const Icon = scope === "organization" ? Building2 : UserRound
+
+  return (
+    <span className="inline-flex shrink-0 items-center gap-1">
+      <Icon className={cn("shrink-0", iconClassName)} />
+      {scopeLabels[scope]}
+    </span>
   )
 }

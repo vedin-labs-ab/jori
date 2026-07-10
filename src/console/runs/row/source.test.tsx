@@ -5,21 +5,42 @@ import { SourceLine } from "./source"
 
 afterEach(cleanup)
 
-test("renders nothing for source without provider context", () => {
+test("renders only the scope for source without provider context", () => {
   const { container } = render(
     <SourceLine
+      scope="personal"
       source={{
         type: "automation",
       }}
     />
   )
 
-  expect(container.textContent).toBe("")
+  expect(container.textContent).toBe("Personal")
+})
+
+test("renders the organization scope as the last item", () => {
+  const { container } = render(
+    <SourceLine
+      scope="organization"
+      source={{
+        type: "message",
+        surface: "slack",
+      }}
+    />
+  )
+
+  expect(container.textContent?.endsWith("Organization")).toBe(true)
+  expect(
+    Array.from(container.querySelectorAll("svg")).some((element) =>
+      element.classList.contains("lucide-building-2")
+    )
+  ).toBe(true)
 })
 
 test("renders provider source labels", () => {
   const { container } = render(
     <SourceLine
+      scope="personal"
       source={{
         type: "message",
         surface: "slack",
@@ -34,6 +55,7 @@ test("renders provider source labels", () => {
 test("renders source kind and event labels", () => {
   render(
     <SourceLine
+      scope="personal"
       source={{
         event: {
           label: "Issue comment created",
@@ -55,6 +77,7 @@ test("renders source kind and event labels", () => {
 test("renders Milo source labels", () => {
   const { container } = render(
     <SourceLine
+      scope="personal"
       source={{
         type: "automation",
         surface: "milo",
@@ -69,6 +92,7 @@ test("renders Milo source labels", () => {
 test("renders recurring automation source details", () => {
   const { container } = render(
     <SourceLine
+      scope="personal"
       details={[{ type: "schedule", label: "Daily at 09:00 UTC" }]}
       source={{
         kind: { label: "recurring", type: "recurring" },
@@ -90,6 +114,7 @@ test("renders recurring automation source details", () => {
 test("renders Slack channels as channel chips", () => {
   render(
     <SourceLine
+      scope="personal"
       details={[{ type: "channel", label: "#product" }]}
       source={{
         kind: { label: "mention", type: "mention" },
@@ -110,6 +135,7 @@ test("renders Slack channels as channel chips", () => {
 test("renders GitHub source details compactly", () => {
   render(
     <SourceLine
+      scope="personal"
       details={[
         { type: "repository", label: "vedin-labs/frontier" },
         { type: "pull_request", label: "#42 Add execution metadata" },
@@ -136,6 +162,7 @@ test("renders GitHub source details compactly", () => {
 test("renders stopped actors", () => {
   render(
     <SourceLine
+      scope="personal"
       source={{
         type: "automation",
         stop: {
