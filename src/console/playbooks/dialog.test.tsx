@@ -44,35 +44,55 @@ test("defaults to email delivery and enables with that destination", () => {
   )
 })
 
-test("an unsaved Slack edit can't save, yet enabling still uses email", () => {
+test("an open edit blocks enabling until saved or cancelled", () => {
   const actions = stubActions()
 
   renderDialog(actions, ["email", "slack"], singlePlan)
-  startEditing("Slack")
+  fireEvent.click(screen.getByRole("button", { name: /change/i }))
 
+  expect(screen.getByRole("button", { name: "Enable" })).toHaveProperty(
+    "disabled",
+    true
+  )
+  expect(screen.getByRole("button", { name: /try once/i })).toHaveProperty(
+    "disabled",
+    true
+  )
+
+  fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
+
+  expect(screen.getByText(/sam@example.com/)).toBeDefined()
+  expect(screen.getByRole("button", { name: "Enable" })).toHaveProperty(
+    "disabled",
+    false
+  )
+})
+
+test("save stays disabled until the target actually changes", () => {
+  const actions = stubActions()
+
+  renderDialog(actions, ["email", "slack"], singlePlan)
+  fireEvent.click(screen.getByRole("button", { name: /change/i }))
+
+  // Same target as committed: nothing to save yet.
   expect(screen.getByRole("button", { name: "Save" })).toHaveProperty(
     "disabled",
     true
   )
 
-  fireEvent.click(screen.getByRole("button", { name: "Enable" }))
-
-  expect(actions.enable).toHaveBeenCalledWith(
-    morningBrief,
-    { email: "gmail", calendar: "googleCalendar" },
-    { kind: "email" }
+  switchKind("Slack")
+  // Slack needs a channel before the draft is saveable.
+  expect(screen.getByRole("button", { name: "Save" })).toHaveProperty(
+    "disabled",
+    true
   )
-})
 
-test("cancelling an edit returns to the committed destination", () => {
-  const actions = stubActions()
-
-  renderDialog(actions, ["email", "slack"], singlePlan)
-  startEditing("Slack")
-  fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
-
-  expect(screen.getByText(/sam@example.com/)).toBeDefined()
-  expect(screen.queryByRole("button", { name: "Save" })).toBeNull()
+  switchKind("Email")
+  // Back to the committed target: still nothing to save.
+  expect(screen.getByRole("button", { name: "Save" })).toHaveProperty(
+    "disabled",
+    true
+  )
 })
 
 test("try once shares the chosen destination", () => {
@@ -92,8 +112,8 @@ test("try once shares the chosen destination", () => {
   )
 })
 
-function startEditing(kind: string) {
-  fireEvent.pointerDown(screen.getByRole("button", { name: /change/i }))
+function switchKind(kind: string) {
+  fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery kind" }))
   fireEvent.click(screen.getByRole("menuitem", { name: kind }))
 }
 
