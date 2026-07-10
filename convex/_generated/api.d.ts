@@ -182,6 +182,7 @@ import type * as integrations_revoke from "../integrations/revoke.js";
 import type * as integrations_runtime from "../integrations/runtime.js";
 import type * as integrations_status from "../integrations/status.js";
 import type * as maintenance from "../maintenance.js";
+import type * as messages_actor from "../messages/actor.js";
 import type * as messages_data from "../messages/data.js";
 import type * as messages_events from "../messages/events.js";
 import type * as messages_history from "../messages/history.js";
@@ -633,6 +634,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/runtime": typeof integrations_runtime;
   "integrations/status": typeof integrations_status;
   maintenance: typeof maintenance;
+  "messages/actor": typeof messages_actor;
   "messages/data": typeof messages_data;
   "messages/events": typeof messages_events;
   "messages/history": typeof messages_history;
