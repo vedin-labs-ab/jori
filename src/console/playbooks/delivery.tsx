@@ -178,7 +178,7 @@ function KindMenu({
       <DropdownMenuTrigger asChild>
         <Button aria-label="Delivery kind" className="px-2" variant="outline">
           <DeliveryIcon kind={kind} />
-          <ChevronDown className="text-muted-foreground" />
+          <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
