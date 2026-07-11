@@ -17,6 +17,8 @@ export type PlaybookOptionField =
       kind: "choice"
       choices: ReadonlyArray<{ value: string; label: string }>
       default: string
+      /** Toggle group by default; "select" fits longer choice lists. */
+      control?: "toggle" | "select"
     })
   | (PlaybookOptionBase & { kind: "time"; default: string })
   | (PlaybookOptionBase & {

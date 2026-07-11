@@ -109,22 +109,16 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
         key: "reminders",
         label: "Reminders",
         kind: "choice",
-        default: "on",
+        control: "select",
+        default: "30",
         choices: [
-          { value: "on", label: "Before each meeting" },
           { value: "off", label: "Off" },
+          { value: "15", label: "15 minutes before" },
+          { value: "30", label: "30 minutes before" },
+          { value: "45", label: "45 minutes before" },
+          { value: "60", label: "60 minutes before" },
         ],
         enabledWhen: { key: "mode", value: "digest" },
-      },
-      {
-        key: "remindBefore",
-        label: "Remind before",
-        kind: "minutes",
-        default: 30,
-        min: 5,
-        max: 240,
-        presets: [15, 30, 45, 60],
-        enabledWhen: { key: "reminders", value: "on" },
       },
       {
         key: "sendBefore",
@@ -149,9 +143,9 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     describeCadence: (options) =>
       options.mode === "digest"
         ? `Morning digest at ${options.time}${
-            options.reminders === "on"
-              ? `, reminders ${options.remindBefore} minutes before meetings`
-              : ""
+            options.reminders === "off"
+              ? ""
+              : `, reminders ${options.reminders} minutes before meetings`
           }`
         : `${options.sendBefore} minutes before each external meeting`,
     slots: [
