@@ -15,25 +15,3 @@ export type RuntimeToolCapabilityTool = Pick<
 > & {
   requiresApproval?: boolean
 }
-
-export type RuntimeTarget =
-  | {
-      integration: "github"
-      owner: string
-      repo: string
-      repositoryId?: number
-      issueNumber?: number
-      pullNumber?: number
-      commentId: string
-      commentKind: string
-    }
-  | {
-      integration: "linear"
-      issueId: string
-      commentId?: string
-    }
-  | {
-      integration: "slack"
-      channelId: string
-      threadId?: string
-    }
