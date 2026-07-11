@@ -3,7 +3,7 @@ import { FileText, Globe2, Plus, X } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ButtonGroup } from "@/components/ui/button-group"
+import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
 import {
   InputGroup,
   InputGroupAddon,
@@ -11,7 +11,6 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
 import { Paged } from "../shared/paging"
@@ -86,8 +85,8 @@ export function WebsitesContent({ websites }: { websites: WebsiteItem[] }) {
 
 /**
  * One chip style for every domain: a secondary link button with an optional
- * inverted badge, and an optional remove button rendered as an overlaid
- * sibling so the anchor never nests another interactive element.
+ * inverted badge. A removable chip becomes a button group — link and remove
+ * are separate, full-height targets with a seam between them.
  */
 function WebsiteChip({
   badge,
@@ -101,10 +100,7 @@ function WebsiteChip({
   const chip = (
     <Button
       asChild
-      className={cn(
-        "h-8 justify-start gap-2 px-2.5 text-xs",
-        onRemove === undefined ? "" : "pr-8"
-      )}
+      className="h-8 justify-start gap-2 px-2.5 text-xs"
       size="sm"
       variant="secondary"
     >
@@ -128,17 +124,20 @@ function WebsiteChip({
   }
 
   return (
-    <div className="relative">
+    <ButtonGroup>
       {chip}
-      <button
+      <ButtonGroupSeparator />
+      <Button
         aria-label={`Remove ${website.label}`}
-        className="-translate-y-1/2 absolute top-1/2 right-2 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+        className="h-8 px-2"
         onClick={onRemove}
+        size="sm"
         type="button"
+        variant="secondary"
       >
-        <X className="size-3" />
-      </button>
-    </div>
+        <X className="size-3.5" />
+      </Button>
+    </ButtonGroup>
   )
 }
 
