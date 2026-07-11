@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { type MessageCauseKind } from "../schema"
 
 type RunSnapshot = Doc<"runs">["snapshot"]
 type RunSnapshotInput = Omit<RunSnapshot, "title">
@@ -32,7 +33,7 @@ export function eventAutomationDisplay(input: {
 
 export function messageDisplay(input: {
   context?: RunSnapshot["context"]
-  kind: "mention" | "reply"
+  kind: MessageCauseKind
   surface?: NonNullable<RunSnapshot["source"]["surface"]>
   url?: string
 }): RunSnapshotInput {

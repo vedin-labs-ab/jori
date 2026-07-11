@@ -46,6 +46,10 @@ export const runSnapshot = v.object({
   context: v.array(runSnapshotContext),
 })
 
+const messageCauseKind = v.union(v.literal("mention"), v.literal("reply"))
+
+export type MessageCauseKind = Infer<typeof messageCauseKind>
+
 const runCause = v.union(
   v.object({
     type: v.literal("time"),
@@ -58,7 +62,7 @@ const runCause = v.union(
   v.object({
     type: v.literal("message"),
     messageId: v.id("messages"),
-    kind: v.union(v.literal("mention"), v.literal("reply")),
+    kind: messageCauseKind,
   }),
   v.object({
     type: v.literal("manual"),

@@ -1,6 +1,6 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
-import { type runSnapshot } from "../schema"
+import { type MessageCauseKind, type runSnapshot } from "../schema"
 import {
   compactDetails,
   detail,
@@ -46,7 +46,7 @@ export function automationDisplay(input: {
 
 export function messageDisplay(input: {
   integration: Doc<"integrations">
-  kind: "mention" | "reply"
+  kind: MessageCauseKind
   message: Doc<"messages">
 }): RunSnapshotBody {
   const metadata = createSourceMetadata({
