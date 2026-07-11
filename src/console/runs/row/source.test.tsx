@@ -187,3 +187,40 @@ test("renders stopped actors", () => {
   expect(screen.getByText("Stopped by")).toBeDefined()
   expect(screen.getByText("albin@example.com")).toBeDefined()
 })
+
+test("renders the subtask relation with an emphasized parent title", () => {
+  const { container } = render(
+    <SourceLine
+      scope="personal"
+      source={{
+        type: "manual",
+        surface: "milo",
+        parent: { title: "Meeting prep" },
+      }}
+    />
+  )
+
+  expect(container.textContent).toBe("MiloSubtask of Meeting prepPersonal")
+  expect(screen.getByText("Meeting prep").className).toContain("font-medium")
+  expect(
+    Array.from(container.querySelectorAll("svg")).some((element) =>
+      element.classList.contains("lucide-corner-down-right")
+    )
+  ).toBe(true)
+})
+
+test("renders a bare subtask when the parent title is unknown", () => {
+  render(
+    <SourceLine
+      scope="personal"
+      source={{
+        type: "manual",
+        surface: "milo",
+        parent: {},
+      }}
+    />
+  )
+
+  expect(screen.getByText("Subtask")).toBeDefined()
+  expect(screen.queryByText(/of/)).toBeNull()
+})

@@ -2,6 +2,7 @@ import { expect, test } from "vitest"
 import { type DataModel, type Id } from "../_generated/dataModel"
 import {
   createAutomationRunSnapshot,
+  createInstructionRunSnapshot,
   createMessageRunSnapshot,
 } from "./snapshot"
 
@@ -53,6 +54,21 @@ test("snapshots message source details and source link", () => {
           url: "https://slack.com/app_redirect?channel=C123&team=team",
         },
       ],
+    },
+  })
+})
+
+test("instruction runs describe only themselves", () => {
+  expect(
+    createInstructionRunSnapshot({
+      instructions: "Research the attendees.\nDraft the dossier.",
+    })
+  ).toEqual({
+    instructions: "Research the attendees.\nDraft the dossier.",
+    snapshot: {
+      title: "Research the attendees.",
+      source: { type: "manual" },
+      context: [],
     },
   })
 })

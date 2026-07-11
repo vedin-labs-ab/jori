@@ -8,11 +8,13 @@ export async function getRunContext(
   run: Doc<"runs">,
   requestedApproval: Doc<"approvals"> | undefined
 ) {
-  const [runApprovals, activeWaiter, integrationOffers] = await Promise.all([
-    getRunApprovals(ctx, run),
-    getActiveWaiter(ctx, run),
-    getRunOffers(ctx, run),
-  ])
+  const [runApprovals, activeWaiter, integrationOffers, parent] =
+    await Promise.all([
+      getRunApprovals(ctx, run),
+      getActiveWaiter(ctx, run),
+      getRunOffers(ctx, run),
+      getParentRun(ctx, run),
+    ])
   const runApproval = requestedApproval ?? runApprovals[0] ?? null
   const approvals = prioritizeApprovals(runApprovals, runApproval)
   const message =
@@ -44,10 +46,15 @@ export async function getRunContext(
     integration,
     integrationOffers,
     message,
+    parent,
     prepared: await getPreparedRun(ctx, run),
     requestedApproval: runApproval,
     run,
   }
+}
+
+async function getParentRun(ctx: QueryCtx, run: Doc<"runs">) {
+  return run.parentId === undefined ? null : await ctx.db.get(run.parentId)
 }
 
 async function getRunApprovals(ctx: QueryCtx, run: Doc<"runs">) {

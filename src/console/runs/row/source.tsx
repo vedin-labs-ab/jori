@@ -1,6 +1,6 @@
 import { toolSurfaceLabel } from "@contracts/integrations"
 import { type Scope } from "@contracts/permissions/scope"
-import { Play } from "lucide-react"
+import { CornerDownRight, Play } from "lucide-react"
 import { type ReactNode } from "react"
 import { ScopeDatum } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
@@ -74,6 +74,12 @@ function sourceItems(
       )
     ),
     ...optionalItem(
+      "parent",
+      source.parent === undefined ? undefined : (
+        <SubtaskDatum parent={source.parent} />
+      )
+    ),
+    ...optionalItem(
       "trigger",
       source.trigger === undefined ? undefined : (
         <TriggerDatum actor={source.trigger.actor} />
@@ -135,6 +141,27 @@ function ProviderDatum({ surface }: { surface: string }) {
       <ProviderLogo surface={surface} />
       <span className="truncate font-medium text-foreground">
         {toolSurfaceLabel(surface)}
+      </span>
+    </span>
+  )
+}
+
+function SubtaskDatum({
+  parent,
+}: {
+  parent: NonNullable<ExecutionSource["parent"]>
+}) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1">
+      <CornerDownRight className="size-3 shrink-0 text-muted-foreground/70" />
+      <span className="truncate">
+        Subtask
+        {parent.title === undefined ? null : (
+          <>
+            {" of "}
+            <span className="font-medium text-foreground">{parent.title}</span>
+          </>
+        )}
       </span>
     </span>
   )
