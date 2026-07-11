@@ -8,9 +8,7 @@ import {
   createAutomation,
   fireAutomation,
   getTenantAutomation,
-  pauseAutomation,
   removeAutomation,
-  resumeAutomation,
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
@@ -86,32 +84,6 @@ export const update = internalMutation({
     await requireRecordAccess(ctx, args)
 
     return await updateAutomation(ctx, args)
-  },
-})
-
-export const pause = internalMutation({
-  args: {
-    tenantId: v.string(),
-    personId: v.optional(v.id("persons")),
-    automationId: v.id("automations"),
-  },
-  handler: async (ctx, args) => {
-    await requireRecordAccess(ctx, args)
-
-    return await pauseAutomation(ctx, args)
-  },
-})
-
-export const resume = internalMutation({
-  args: {
-    tenantId: v.string(),
-    personId: v.optional(v.id("persons")),
-    automationId: v.id("automations"),
-  },
-  handler: async (ctx, args) => {
-    await requireRecordAccess(ctx, args)
-
-    return await resumeAutomation(ctx, args)
   },
 })
 

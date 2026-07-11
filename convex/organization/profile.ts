@@ -2,7 +2,6 @@ import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import {
   internalMutation,
-  internalQuery,
   type MutationCtx,
   mutation,
   query,
@@ -28,11 +27,6 @@ export const get = query({
 
     return await readProfile(ctx, args.tenantId)
   },
-})
-
-export const read = internalQuery({
-  args: { tenantId: v.string() },
-  handler: async (ctx, args) => await readProfile(ctx, args.tenantId),
 })
 
 export const approve = mutation({
