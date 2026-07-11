@@ -81,12 +81,12 @@ function WebsiteChip({ website }: { website: WebsiteItem }) {
       asChild
       className="h-8 justify-start gap-2 px-2.5 text-xs"
       size="sm"
-      variant="outline"
+      variant="secondary"
     >
       <a href={website.href} rel="noreferrer" target="_blank">
         <Globe2 className="size-3.5" />
         <span>{website.label}</span>
-        {website.main ? <Badge variant="secondary">Main</Badge> : null}
+        {website.main ? <Badge variant="outline">Main</Badge> : null}
       </a>
     </Button>
   )
@@ -194,7 +194,7 @@ function DeclaredDomainChip({
   }
 
   return (
-    <div className="flex h-8 items-center gap-2 rounded-md border bg-background px-2.5 text-xs shadow-xs">
+    <div className="flex h-8 items-center gap-2 rounded-md bg-secondary px-2.5 text-secondary-foreground text-xs">
       <Globe2 className="size-3.5 text-muted-foreground" />
       <span>{domain}</span>
       <Badge variant="outline">Added</Badge>
