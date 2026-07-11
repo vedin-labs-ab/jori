@@ -126,6 +126,28 @@ describe("meeting prep instructions", () => {
     expect(instructions).not.toContain("Meeting digest")
   })
 
+  test("meeting scope gates attendee composition, not judgment", () => {
+    const both = render("meeting-prep", emailDestination)
+    const external = render("meeting-prep", emailDestination, {
+      meetings: "external",
+    })
+    const internal = render("meeting-prep", emailDestination, {
+      meetings: "internal",
+    })
+
+    expect(both).toContain("external or customer meetings")
+    expect(external).toContain(
+      "Only meetings that include people outside my organization qualify"
+    )
+    expect(internal).toContain(
+      "Only meetings where everyone is part of my organization qualify"
+    )
+    for (const instructions of [both, external, internal]) {
+      expect(instructions).toContain("Skip focus blocks")
+      expect(instructions).toContain("preparation pays off")
+    }
+  })
+
   test("meeting prep summarizes with a link on slack too", () => {
     const instructions = render("meeting-prep", {
       kind: "slack",

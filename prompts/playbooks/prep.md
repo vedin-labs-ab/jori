@@ -13,7 +13,7 @@ Read the "dossiers" state. With one merge patch, drop day keys older than 7 days
 
 ## Choose the meetings
 
-Check my {{providers.calendar}} for events with other attendees{% if options.mode == "digest" %} starting between now and this time tomorrow{% else %} today{% endif %}. Skip focus blocks, all-day events, and holds without participants. Prep is for meetings where preparation pays off — external or customer meetings, and high-stakes internal ones such as reviews or negotiations. Routine internal syncs do not qualify. If nothing qualifies, finish quietly: schedule nothing and send nothing.
+Check my {{providers.calendar}} for events with other attendees{% if options.mode == "digest" %} starting between now and this time tomorrow{% else %} today{% endif %}. Skip focus blocks, all-day events, and holds without participants. {% if options.meetings == "external" %}Only meetings that include people outside my organization qualify. Prep is for the ones where preparation pays off; skip meetings with nothing worth preparing.{% elsif options.meetings == "internal" %}Only meetings where everyone is part of my organization qualify. Prep is for the ones where preparation pays off — reviews, negotiations, decisions — not routine syncs.{% else %}Prep is for meetings where preparation pays off — external or customer meetings, and high-stakes internal ones such as reviews or negotiations. Routine internal syncs do not qualify.{% endif %} If nothing qualifies, finish quietly: schedule nothing and send nothing.
 {% if options.mode == "digest" %}
 
 ## Research every meeting now

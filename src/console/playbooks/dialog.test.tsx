@@ -15,6 +15,17 @@ vi.mock("@clerk/tanstack-react-start", () => ({
 vi.mock("convex/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("convex/react")>()),
   useAction: () => vi.fn(async () => ({ status: "ready", options: [] })),
+  useQuery: () => ({
+    domains: ["acme.com"],
+    declared: { domains: ["acme.io"] },
+  }),
+}))
+
+vi.mock("@tanstack/react-router", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@tanstack/react-router")>()),
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
 }))
 
 afterEach(() => {
@@ -173,6 +184,25 @@ test("closing an option dropdown never closes the dialog", async () => {
 
   expect(onOpenChange).not.toHaveBeenCalledWith(false)
   expect(screen.getByText(/set up meeting prep/i)).toBeDefined()
+})
+
+test("the meetings scope is grounded in the organization's domains", () => {
+  const meetingPrep = playbookCatalog.find(
+    (definition) => definition.key === "meeting-prep"
+  )
+
+  if (meetingPrep === undefined) {
+    throw new Error("Meeting prep definition is missing.")
+  }
+
+  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep)
+
+  expect(
+    screen.getByText(/Internal: anyone at acme\.com or acme\.io/)
+  ).toBeDefined()
+  expect(
+    screen.getByRole("link", { name: "Edit in Context" }).getAttribute("href")
+  ).toBe("/context")
 })
 
 /** Radix Select touches pointer-capture and scroll APIs jsdom lacks. */
