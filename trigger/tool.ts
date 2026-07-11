@@ -8,7 +8,7 @@ import {
 import { type MiloConvexClient } from "./convex"
 import { errorDetails } from "./events"
 import { generateImageAsset } from "./images/index"
-import { optionalString, requiredString } from "./input"
+import { optionalString, optionalStringList, requiredString } from "./input"
 import { type ModelToolCall } from "./model/types"
 import { executeRunTool } from "./run"
 import { recordToolResultActivity } from "./runs/activity"
@@ -250,6 +250,7 @@ async function executeAgentTool(runtime: ToolRuntime, input: JsonObject) {
     parentId: runtime.context.run.id,
     task: requiredString(input.task, "task"),
     title: optionalString(input.title),
+    tools: optionalStringList(input.tools),
   })
 }
 
