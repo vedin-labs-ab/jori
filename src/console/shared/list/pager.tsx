@@ -4,13 +4,11 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationPrevious,
 } from "@/components/ui/pagination"
-import { cn } from "@/lib/utils"
 
 export type ConsolePagerState = {
   canGoNext: boolean
-  footerLabel: string
+  footerLabel: string | undefined
   isLoadingMore?: boolean
   isReady: boolean
   next: () => void
@@ -28,22 +26,23 @@ export function ConsoleListPager({
   }
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-muted-foreground text-xs">{pagination.footerLabel}</p>
-      <Pagination className="mx-0 w-fit justify-start sm:justify-end">
-        <PaginationContent>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      {pagination.footerLabel ? (
+        <p className="text-muted-foreground text-xs">
+          {pagination.footerLabel}
+        </p>
+      ) : null}
+      <Pagination className="mx-0 w-fit justify-start sm:ml-auto sm:justify-end">
+        <PaginationContent className="gap-2">
           <PaginationItem>
-            <PaginationPrevious
-              aria-disabled={pagination.pageIndex === 0}
-              className={cn(
-                pagination.pageIndex === 0 && "pointer-events-none opacity-50"
-              )}
-              href="#"
-              onClick={(event) => {
-                event.preventDefault()
-                pagination.previous()
-              }}
-            />
+            <Button
+              disabled={pagination.pageIndex === 0}
+              onClick={pagination.previous}
+              type="button"
+              variant="outline"
+            >
+              Previous
+            </Button>
           </PaginationItem>
           <PaginationItem>
             <Button

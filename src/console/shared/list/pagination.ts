@@ -76,20 +76,24 @@ function formatFooterLabel({
   totalCount: number
   visibleCount: number
 }) {
-  const rangeStart = visibleCount === 0 ? 0 : pageIndex * pageSize + 1
+  if (visibleCount === 0) {
+    return undefined
+  }
+
+  const rangeStart = pageIndex * pageSize + 1
   const rangeEnd = pageIndex * pageSize + visibleCount
   const filteredLabel = pluralize(filteredTotal, itemLabel)
   const totalLabel = pluralize(totalCount, itemLabel)
 
   if (hasFilters) {
     if (totalCount === filteredTotal) {
-      return `Showing ${rangeStart}-${rangeEnd} of ${filteredTotal} matching ${filteredLabel}`
+      return `Showing ${rangeStart}–${rangeEnd} of ${filteredTotal} matching ${filteredLabel}`
     }
 
-    return `Showing ${rangeStart}-${rangeEnd} of ${filteredTotal} matching ${filteredLabel} (${totalCount} total)`
+    return `Showing ${rangeStart}–${rangeEnd} of ${filteredTotal} matching ${filteredLabel} (${totalCount} total)`
   }
 
-  return `Showing ${rangeStart}-${rangeEnd} of ${totalCount} ${totalLabel}`
+  return `Showing ${rangeStart}–${rangeEnd} of ${totalCount} ${totalLabel}`
 }
 
 function pluralize(
