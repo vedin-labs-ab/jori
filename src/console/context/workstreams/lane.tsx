@@ -201,8 +201,10 @@ export function PulseFooter({ children }: { children: ReactNode }) {
 export function PulseSkeleton() {
   return (
     <PulseShell
-      title={<Skeleton className="h-4 w-14" />}
-      description={<Skeleton className="h-[18px] w-80 max-w-full" />}
+      title={<Skeleton className="w-14 text-transparent">.</Skeleton>}
+      description={
+        <Skeleton className="w-80 max-w-full text-transparent">.</Skeleton>
+      }
       action={<Skeleton className="h-6 w-28" />}
     >
       <CardContent>
@@ -216,9 +218,11 @@ export function PulseSkeleton() {
               <Skeleton className="h-4 w-full" />
             </div>
           ))}
-          <div className="grid h-[21px] grid-cols-[10.5rem_1fr] items-end">
+          <div className="grid grid-cols-[10.5rem_1fr]">
             <span />
-            <Skeleton className="h-3 w-full" />
+            <Skeleton className="mt-1 w-full text-[11px] text-transparent">
+              .
+            </Skeleton>
           </div>
         </div>
       </CardContent>
