@@ -86,7 +86,11 @@ function WebsiteChip({ website }: { website: WebsiteItem }) {
       <a href={website.href} rel="noreferrer" target="_blank">
         <Globe2 className="size-3.5" />
         <span>{website.label}</span>
-        {website.main ? <Badge variant="outline">Main</Badge> : null}
+        {website.main ? (
+          <Badge className="bg-background dark:bg-background" variant="outline">
+            Main
+          </Badge>
+        ) : null}
       </a>
     </Button>
   )
@@ -197,7 +201,9 @@ function DeclaredDomainChip({
     <div className="flex h-8 items-center gap-2 rounded-md bg-secondary px-2.5 text-secondary-foreground text-xs">
       <Globe2 className="size-3.5 text-muted-foreground" />
       <span>{domain}</span>
-      <Badge variant="outline">Added</Badge>
+      <Badge className="bg-background dark:bg-background" variant="outline">
+        Added
+      </Badge>
       <button
         aria-label={`Remove ${domain}`}
         className="-mr-0.5 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
