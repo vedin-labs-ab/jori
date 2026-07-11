@@ -69,6 +69,18 @@ export const assemble = internalQuery({
 // efforts leave the payload, so continuing work spawns a fresh effort
 // instead of reanimating an old one.
 async function loadActiveEfforts(ctx: QueryCtx, tenantId: string) {
+  const rows = await activeEffortRows(ctx, tenantId, maxContextEfforts)
+
+  return Promise.all(rows.map((row) => readEffortContext(ctx, row)))
+}
+
+// The current active effort layer: sighted within the dormancy window and not
+// superseded. Both judges and the console pulse read through this one rule.
+export async function activeEffortRows(
+  ctx: QueryCtx,
+  tenantId: string,
+  limit: number
+) {
   const cutoff = Date.now() - effortActiveMs
   const rows = await ctx.db
     .query("efforts")
@@ -76,10 +88,9 @@ async function loadActiveEfforts(ctx: QueryCtx, tenantId: string) {
       index.eq("tenantId", tenantId).gt("seenAt", cutoff)
     )
     .order("desc")
-    .take(maxContextEfforts)
-  const current = rows.filter((row) => row.supersededBy === undefined)
+    .take(limit)
 
-  return Promise.all(current.map((row) => readEffortContext(ctx, row)))
+  return rows.filter((row) => row.supersededBy === undefined)
 }
 
 export async function readEffortContext(

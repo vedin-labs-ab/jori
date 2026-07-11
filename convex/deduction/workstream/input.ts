@@ -1,11 +1,10 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../../_generated/server"
-import { readEffortContext } from "../effort/input"
+import { activeEffortRows, readEffortContext } from "../effort/input"
 import { iso, type JournalRecord } from "../engine/judge"
 import {
   consolidationJournalTail,
-  effortActiveMs,
   effortJournalTail,
   maxConsolidationEfforts,
   maxContextEfforts,
@@ -130,7 +129,7 @@ async function loadEfforts(
   const rows =
     args.scope === "window"
       ? await windowEfforts(ctx, args.tenantId, args.window)
-      : await activeEfforts(ctx, args.tenantId)
+      : await activeEffortRows(ctx, args.tenantId, maxConsolidationEfforts)
   const tail =
     args.scope === "window" ? effortJournalTail : consolidationJournalTail
   const current = rows.filter((row) => row.supersededBy === undefined)
@@ -158,18 +157,6 @@ async function windowEfforts(
     )
     .order("desc")
     .take(maxContextEfforts)
-}
-
-async function activeEfforts(ctx: QueryCtx, tenantId: string) {
-  const cutoff = Date.now() - effortActiveMs
-
-  return await ctx.db
-    .query("efforts")
-    .withIndex("by_tenant_and_seen_at", (index) =>
-      index.eq("tenantId", tenantId).gt("seenAt", cutoff)
-    )
-    .order("desc")
-    .take(maxConsolidationEfforts)
 }
 
 // The applier validates citations against exactly the efforts this pass

@@ -132,6 +132,7 @@ import type * as crons from "../crons.js";
 import type * as deduction_anchors from "../deduction/anchors.js";
 import type * as deduction_console_corrections from "../deduction/console/corrections.js";
 import type * as deduction_console_labels from "../deduction/console/labels.js";
+import type * as deduction_console_pulse from "../deduction/console/pulse.js";
 import type * as deduction_console_queries from "../deduction/console/queries.js";
 import type * as deduction_effort_apply from "../deduction/effort/apply.js";
 import type * as deduction_effort_input from "../deduction/effort/input.js";
@@ -586,6 +587,7 @@ declare const fullApi: ApiFromModules<{
   "deduction/anchors": typeof deduction_anchors;
   "deduction/console/corrections": typeof deduction_console_corrections;
   "deduction/console/labels": typeof deduction_console_labels;
+  "deduction/console/pulse": typeof deduction_console_pulse;
   "deduction/console/queries": typeof deduction_console_queries;
   "deduction/effort/apply": typeof deduction_effort_apply;
   "deduction/effort/input": typeof deduction_effort_input;

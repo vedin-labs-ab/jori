@@ -6,6 +6,7 @@ import {
   internalAction,
   internalMutation,
   type MutationCtx,
+  type QueryCtx,
 } from "../../_generated/server"
 import {
   bootstrapMaxChunksPerSweep,
@@ -194,8 +195,10 @@ async function latestPass(
     .first()
 }
 
-async function latestCompletedPass(
-  ctx: MutationCtx,
+// Read-only and shared with the console pulse, so cadence math has exactly
+// one source of "the last reviewed window".
+export async function latestCompletedPass(
+  ctx: QueryCtx,
   args: { tenantId: string; stage: PassStage; scope: PassScope }
 ): Promise<Doc<"passes"> | null> {
   return await ctx.db
