@@ -69,7 +69,6 @@ export const artifactVersions = defineTable({
   createdAt: v.number(),
 })
   .index("by_artifact", ["artifactId"])
-  .index("by_tenant_and_artifact", ["tenantId", "artifactId"])
   .index("by_tree", ["treeId"])
 
 export const artifactTrees = defineTable({
@@ -86,7 +85,6 @@ export const artifactEntries = defineTable({
 })
   .index("by_tree", ["treeId"])
   .index("by_entry", ["id"])
-  .index("by_tree_and_name", ["treeId", "name"])
 
 export const artifactBlobs = defineTable({
   id: v.string(),
@@ -126,7 +124,6 @@ export const artifactSessions = defineTable({
 })
   .index("by_artifact", ["artifactId"])
   .index("by_artifact_and_seen_at", ["artifactId", "seenAt"])
-  .index("by_person_and_artifact", ["personId", "artifactId"])
 
 /** At most one live share per artifact; minting again rotates the secret. */
 export const artifactShares = defineTable({
@@ -165,14 +162,12 @@ export const artifactState = defineTable({
   version: v.number(),
   createdAt: v.number(),
   updatedAt: v.number(),
-})
-  .index("by_artifact_and_scope_and_person_and_key", [
-    "artifactId",
-    "scope",
-    "personId",
-    "key",
-  ])
-  .index("by_artifact_and_scope_and_key", ["artifactId", "scope", "key"])
+}).index("by_artifact_and_scope_and_person_and_key", [
+  "artifactId",
+  "scope",
+  "personId",
+  "key",
+])
 
 // Identifies one cache entry; shared by the cache read/write args and lookup.
 export const artifactCacheKeyFields = {

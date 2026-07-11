@@ -6,6 +6,4 @@ export const persons = defineTable({
   supersededBy: v.optional(v.id("persons")),
   createdAt: v.number(),
   updatedAt: v.number(),
-})
-  .index("by_tenant", ["tenantId"])
-  .index("by_superseded_by", ["supersededBy"])
+}).index("by_tenant", ["tenantId"])
