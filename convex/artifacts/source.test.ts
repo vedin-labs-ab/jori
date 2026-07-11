@@ -5,11 +5,7 @@ import {
   createSessionTokenPayload,
   readSessionTokenPayload,
 } from "./serve/session"
-import {
-  createArtifactSourceSnapshot,
-  hashArtifactSource,
-  normalizeArtifactPath,
-} from "./source"
+import { createArtifactSourceSnapshot, hashArtifactSource } from "./source"
 import { validateArtifactBuild } from "./source/build"
 import { gitObjectId } from "./source/git"
 
@@ -89,12 +85,21 @@ describe("artifact source validation", () => {
   })
 
   test("rejects unsafe source paths", () => {
-    expect(() => normalizeArtifactPath("../src/App.tsx")).toThrow(
-      "Artifact source path is not allowed"
-    )
-    expect(() => normalizeArtifactPath("node_modules/react/index.js")).toThrow(
-      "Artifact source cannot include node_modules."
-    )
+    expect(() =>
+      createArtifactSourceSnapshot([
+        ...minimalSource(),
+        { path: "../src/unsafe.ts", content: "export {}\n" },
+      ])
+    ).toThrow("Artifact source path is not allowed")
+    expect(() =>
+      createArtifactSourceSnapshot([
+        ...minimalSource(),
+        {
+          path: "node_modules/react/index.js",
+          content: "export {}\n",
+        },
+      ])
+    ).toThrow("Artifact source cannot include node_modules.")
   })
 })
 

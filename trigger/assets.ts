@@ -1,9 +1,12 @@
 import path from "node:path"
 import { isArtifactPublishTool } from "../contracts/artifacts/publish"
 import { isRecord } from "../contracts/json"
-import { assetTooLargeError, maxAssetBytes } from "../contracts/runtime"
+import {
+  assetTooLargeError,
+  maxAssetBytes,
+  sandboxWorkspace,
+} from "../contracts/runtime"
 import { optionalString, requiredString } from "./input"
-import { sandboxWorkspace } from "./sandbox/artifacts"
 import { type ToolRuntime } from "./tool"
 import { type ConvexId, type JsonObject } from "./types"
 

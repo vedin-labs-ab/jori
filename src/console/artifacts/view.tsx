@@ -22,11 +22,8 @@ export function ArtifactView({ artifactId }: { artifactId: ArtifactId }) {
   return (
     <SessionProviders>
       <ConsolePage chrome="none" loadingFallback={<ArtifactViewLoading />}>
-        {(organization) => (
-          <ArtifactViewContent
-            artifactId={artifactId}
-            tenantId={organization.id}
-          />
+        {(tenantId) => (
+          <ArtifactViewContent artifactId={artifactId} tenantId={tenantId} />
         )}
       </ConsolePage>
     </SessionProviders>

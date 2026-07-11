@@ -10,7 +10,36 @@ import { type RuntimeAssets } from "./types.ts"
 export function validateRuntimeSources(runtimeAssets: RuntimeAssets) {
   validateJsonSources()
   validateArtifactShell(runtimeAssets.artifact.shell.html)
+  validateArtifactBuilder(runtimeAssets.artifact.builder)
   validateArtifactTemplate(runtimeAssets.artifact.template)
+}
+
+function validateArtifactBuilder(builder: Record<string, string>) {
+  const entryPath = "milo-artifact-builder.ts"
+  const entry = builder[entryPath]
+
+  if (entry === undefined) {
+    throw new Error(`Artifact builder is missing ${entryPath}.`)
+  }
+
+  const paths = new Set(Object.keys(builder))
+  const missing = collectImportSpecifiers(entry).filter((specifier) => {
+    if (!specifier.startsWith(".")) {
+      return false
+    }
+
+    const target = path.posix.normalize(
+      path.posix.join(path.posix.dirname(entryPath), specifier)
+    )
+
+    return !paths.has(target)
+  })
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Artifact builder entrypoint imports missing files: ${missing.join(", ")}`
+    )
+  }
 }
 
 function validateJsonSources() {

@@ -11,7 +11,7 @@ import { usePlaybookActions } from "./enable"
 export function Playbooks() {
   return (
     <ConsolePage>
-      {(organization) => <PlaybookCatalog tenantId={organization.id} />}
+      {(tenantId) => <PlaybookCatalog tenantId={tenantId} />}
     </ConsolePage>
   )
 }

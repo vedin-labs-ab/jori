@@ -1,9 +1,8 @@
 import { expect, test, vi } from "vitest"
-import { type ModelRuntime } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type RuntimeTool } from "../types"
 import { runAgentLoop } from "./loop"
-import { type QueuedModelResponse, queuedModelResponses } from "./test-model"
+import { createQueuedModel } from "./test-model"
 
 test.each([
   ["empty content", ""],
@@ -11,7 +10,7 @@ test.each([
   ["literal single-quoted empty string", "''"],
 ])("repairs %s stops back to finish_run", async (_label, content) => {
   const runtime = createRuntime()
-  const model = createModel([
+  const model = createQueuedModel([
     { content, type: "stop" },
     {
       content: null,
@@ -51,7 +50,7 @@ test("repairs a non-empty stop without disabling tools", async () => {
   const runtime = createRuntime({
     tools: [finishRunTool(), slackMessageTool()],
   })
-  const model = createModel([
+  const model = createQueuedModel([
     { content: "I sent the result to Slack.", type: "stop" },
     {
       content: null,
@@ -90,7 +89,7 @@ test("allows tool calls after stop repair", async () => {
   const runtime = createRuntime({
     tools: [finishRunTool(), slackMessageTool()],
   })
-  const model = createModel([
+  const model = createQueuedModel([
     { content: "Posting the answer.", type: "stop" },
     {
       content: null,
@@ -133,7 +132,7 @@ test("marks the run failed when model steps are exhausted", async () => {
   const runtime = createRuntime({
     tools: [finishRunTool(), slackMessageTool()],
   })
-  const model = createModel(
+  const model = createQueuedModel(
     Array.from({ length: 30 }, (_value, index) => ({
       content: null,
       toolCalls: [
@@ -163,22 +162,6 @@ test("marks the run failed when model steps are exhausted", async () => {
     })
   )
 })
-
-function createModel(responses: QueuedModelResponse[]) {
-  const queue = queuedModelResponses(responses)
-
-  return {
-    complete: vi.fn(async () => {
-      const response = queue.shift()
-
-      if (response === undefined) {
-        throw new Error("No model response queued.")
-      }
-
-      return response
-    }),
-  } satisfies ModelRuntime
-}
 
 function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
   return {

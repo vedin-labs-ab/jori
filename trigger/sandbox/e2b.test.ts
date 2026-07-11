@@ -1,6 +1,9 @@
 import { spawnSync } from "node:child_process"
 import { expect, test } from "vitest"
-import { sandboxArtifactRuntime, sandboxWorkspace } from "./artifacts"
+import {
+  sandboxArtifactRuntime,
+  sandboxWorkspace,
+} from "../../contracts/runtime"
 import { workspaceBootstrapCommand } from "./e2b"
 
 test("bootstraps the visible workspace and internal artifact runtime", () => {

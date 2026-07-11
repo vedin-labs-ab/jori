@@ -242,12 +242,12 @@ function extractDesignTokenCss(source: string) {
 }
 
 function rewriteBuilderEntrypointImports(source: string) {
-  return rewriteBuilderSharedImports(
-    source.replaceAll(
-      /from "\.\/([a-z-]+)\.ts"/g,
-      'from "./.milo/builder/$1.ts"'
+  return source
+    .replaceAll(/from "\.\/([a-z-]+)\.ts"/g, 'from "./.milo/builder/$1.ts"')
+    .replaceAll(
+      'from "../../../../contracts/artifacts/',
+      'from "./.milo/builder/contracts/artifacts/'
     )
-  )
 }
 
 function rewriteBuilderSharedImports(source: string) {

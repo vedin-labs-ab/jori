@@ -15,16 +15,12 @@ import { OnboardingGate } from "./onboarding/gate"
 import { FullscreenSkeletonLoader } from "./shared/loading"
 import { ConsoleShell, PublicConsoleFrame } from "./shell"
 
-export type ActiveOrganization = NonNullable<
-  ReturnType<typeof useOrganization>["organization"]
->
-
 export function ConsolePage({
   children,
   chrome = "shell",
   loadingFallback,
 }: {
-  children: (organization: ActiveOrganization) => ReactNode
+  children: (tenantId: string) => ReactNode
   chrome?: "shell" | "none"
   loadingFallback?: ReactNode
 }) {
@@ -59,7 +55,7 @@ function ConsoleContent({
   isSignedIn,
   loadingFallback,
 }: {
-  children: (organization: ActiveOrganization) => ReactNode
+  children: (tenantId: string) => ReactNode
   chrome: "shell" | "none"
   isConvexAuthenticated: boolean
   isConvexAuthLoading: boolean
@@ -125,7 +121,7 @@ function SignedInView({
   chrome,
   loadingFallback,
 }: {
-  children: (organization: ActiveOrganization) => ReactNode
+  children: (tenantId: string) => ReactNode
   chrome: "shell" | "none"
   loadingFallback: ReactNode | undefined
 }) {
@@ -158,7 +154,7 @@ function SignedInView({
     <>
       <ClerkIdentitySync tenantId={organization.id} />
       <OnboardingGate />
-      {children(organization)}
+      {children(organization.id)}
     </>
   )
 

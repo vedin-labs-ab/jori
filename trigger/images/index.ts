@@ -1,7 +1,7 @@
 import path from "node:path"
 import { isRecord } from "../../contracts/json"
+import { sandboxWorkspace } from "../../contracts/runtime"
 import { optionalString, requiredString } from "../input"
-import { sandboxWorkspace } from "../sandbox/artifacts"
 import { type ToolRuntime } from "../tool"
 import { type JsonObject } from "../types"
 import { generateOpenRouterImage } from "./openrouter"

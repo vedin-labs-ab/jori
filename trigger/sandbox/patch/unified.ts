@@ -1,4 +1,4 @@
-import { sandboxWorkspace } from "../artifacts"
+import { sandboxWorkspace } from "../../../contracts/runtime"
 import { boundedText, compactFailure } from "../output"
 import { shellQuote } from "../path"
 import { type SandboxRuntime } from "../types"

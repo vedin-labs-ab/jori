@@ -16,18 +16,11 @@ export type PendingHandoff = {
   subject: HandoffSubject
 }
 
-export type ReconcileResult = {
-  handoffProgressed: boolean
-  messageProgressed: boolean
-  progressed: boolean
-  pending: PendingHandoff[]
-}
-
 export async function reconcileHandoffs(
   runtime: ToolRuntime,
   messages: ModelMessage[],
   subjects: HandoffSubject[] = []
-): Promise<ReconcileResult> {
+) {
   const [subjectHandoffs, runHandoffs] = await Promise.all([
     loadSubjectHandoffs(runtime, subjects),
     runtime.convex.loadRunHandoffs({ runId: runtime.context.run.id }),
@@ -40,9 +33,8 @@ export async function reconcileHandoffs(
   const messageProgressed = await appendSessionMessages(runtime, messages)
 
   return {
-    ...applied,
-    messageProgressed,
-    progressed: applied.handoffProgressed || messageProgressed,
+    pending: applied.pending,
+    progressed: applied.progressed || messageProgressed,
   }
 }
 
@@ -53,23 +45,23 @@ export async function applyHandoffs(
   messages: ModelMessage[],
   handoffs: RunHandoffs
 ) {
-  let handoffProgressed = false
+  let progressed = false
 
   for (const approval of handoffs.approvals) {
     if (await reconcileApproval(runtime, messages, approval)) {
-      handoffProgressed = true
+      progressed = true
     }
   }
 
   for (const offer of handoffs.offers) {
     if (await reconcileOffer(runtime, messages, offer)) {
-      handoffProgressed = true
+      progressed = true
     }
   }
 
   return {
-    handoffProgressed,
     pending: pendingHandoffs(handoffs),
+    progressed,
   }
 }
 

@@ -1,5 +1,7 @@
+import { vi } from "vitest"
 import {
   type ModelResponse,
+  type ModelRuntime,
   type ModelToolCall,
   type ModelUsage,
 } from "../model/types"
@@ -21,7 +23,23 @@ export type QueuedModelResponse =
       usage?: ModelUsage
     }
 
-export function queuedModelResponses(
+export function createQueuedModel(responses: QueuedModelResponse[]) {
+  const queue = queuedModelResponses(responses)
+
+  return {
+    complete: vi.fn<ModelRuntime["complete"]>(async () => {
+      const response = queue.shift()
+
+      if (response === undefined) {
+        throw new Error("No model response queued.")
+      }
+
+      return response
+    }),
+  } satisfies ModelRuntime
+}
+
+function queuedModelResponses(
   responses: QueuedModelResponse[]
 ): ModelResponse[] {
   return responses.map(queuedModelResponse)

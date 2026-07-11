@@ -1,13 +1,11 @@
 import { type JsonObject, toJsonObject } from "../../../contracts/json"
-import { type MiloConvexClient } from "../../convex"
-import { type ConvexId } from "../../types"
 import {
-  artifactBuildCommand,
-  artifactRunnerFile,
-  artifactRuntimeFiles,
   sandboxArtifactRuntime,
   sandboxWorkspace,
-} from "../artifacts"
+} from "../../../contracts/runtime"
+import { type MiloConvexClient } from "../../convex"
+import { type ConvexId } from "../../types"
+import { artifactBuildCommand, artifactRuntimeFiles } from "../artifacts"
 import { compactFailure } from "../output"
 import { sandboxClonePath, shellQuote } from "../path"
 import {
@@ -145,37 +143,21 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   }
 
   private async ensureSandbox() {
-    if (this.sandbox !== undefined) {
-      await this.ensureWorkspace()
-
-      return this.sandbox
+    if (this.sandbox === undefined) {
+      this.sandbox =
+        this.sandboxId === null
+          ? await createSandbox(this.runId)
+          : await connectSandbox(this.sandboxId)
+      this.sandboxId = this.sandbox.sandboxId
+      await this.convex.upsertSandbox({
+        externalId: this.sandbox.sandboxId,
+        runId: this.runId,
+      })
     }
 
-    if (this.sandboxId !== null) {
-      this.sandbox = await connectSandbox(this.sandboxId)
-      await this.persistSandbox()
-      await this.ensureWorkspace()
-
-      return this.sandbox
-    }
-
-    this.sandbox = await createSandbox(this.runId)
-    this.sandboxId = this.sandbox.sandboxId
-    await this.persistSandbox()
     await this.ensureWorkspace()
 
     return this.sandbox
-  }
-
-  private async persistSandbox() {
-    if (this.sandbox === undefined) {
-      return
-    }
-
-    await this.convex.upsertSandbox({
-      externalId: this.sandbox.sandboxId,
-      runId: this.runId,
-    })
   }
 
   private async ensureWorkspace() {
@@ -185,10 +167,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
 
     // Provision the artifact builder and template up front so the agent can copy
     // the template and run local checks before publishing, not only at build time.
-    await writeSandboxFiles(this.sandbox, [
-      ...artifactRuntimeFiles(),
-      artifactRunnerFile(),
-    ])
+    await writeSandboxFiles(this.sandbox, artifactRuntimeFiles())
 
     const result = await runSandboxCommand(this.sandbox, {
       command: workspaceBootstrapCommand(),

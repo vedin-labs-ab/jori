@@ -1,15 +1,7 @@
-export type ArtifactSourceFile = {
-  path: string
-  content: string
-  executable?: boolean
-}
-
-export type NormalizedArtifactSourceFile = {
-  path: string
-  content: string
-  executable: boolean
-  byteSize: number
-}
+export type {
+  ArtifactSourceFile,
+  NormalizedArtifactSourceFile,
+} from "../../../../contracts/artifacts/source.ts"
 
 export type ArtifactBuildAsset = {
   path: string

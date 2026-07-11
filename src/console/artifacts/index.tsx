@@ -17,7 +17,7 @@ import { ArtifactLoadingView, ArtifactReadyView } from "./list"
 export function Artifacts() {
   return (
     <ConsolePage>
-      {(organization) => <ArtifactListView tenantId={organization.id} />}
+      {(tenantId) => <ArtifactListView tenantId={tenantId} />}
     </ConsolePage>
   )
 }

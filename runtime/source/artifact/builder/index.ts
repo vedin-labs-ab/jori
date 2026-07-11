@@ -1,7 +1,15 @@
+import { createHash } from "node:crypto"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+import {
+  type ArtifactSourceFile,
+  artifactSourceHashInput,
+  type NormalizedArtifactSourceFile,
+  normalizeArtifactSourceFiles,
+  rejectForbiddenSourceAccess,
+} from "../../../../contracts/artifacts/source.ts"
 import { readBuildAssets } from "./assets.ts"
 import { formatArtifactSource, runArtifactChecks } from "./command.ts"
 import { config, nodeModulesPath } from "./config.ts"
@@ -14,15 +22,8 @@ import {
   toPublishSource,
   writeSourceFiles,
 } from "./files.ts"
-import {
-  hashArtifactSource,
-  normalizeArtifactSource,
-  rejectForbiddenSourceAccess,
-} from "./source.ts"
-import { type ArtifactSourceFile } from "./types.ts"
-
 export async function buildArtifact(source: unknown) {
-  const files = normalizeArtifactSource(source)
+  const files = normalizeArtifactSourceFiles(source)
   const sourcePaths = files.map((file) => file.path)
   const project = await fs.mkdtemp(path.join(os.tmpdir(), "milo-artifact-"))
 
@@ -53,6 +54,12 @@ export async function checkArtifactWorkspace(workspacePath: string) {
   const source = await readWorkspaceSource(workspacePath)
 
   return await buildArtifact(source)
+}
+
+function hashArtifactSource(files: NormalizedArtifactSourceFile[]) {
+  return createHash("sha256")
+    .update(artifactSourceHashInput(files))
+    .digest("hex")
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

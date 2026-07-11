@@ -1,9 +1,8 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { type ModelRuntime } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type RunHandoffs, type RuntimeTool } from "../types"
 import { runAgentLoop } from "./loop"
-import { type QueuedModelResponse, queuedModelResponses } from "./test-model"
+import { createQueuedModel, type QueuedModelResponse } from "./test-model"
 
 const triggerWait = vi.hoisted(() => ({
   createToken: vi.fn(async () => ({ id: "waitpoint_1" })),
@@ -40,7 +39,7 @@ test("final visible actions think after one of several offers resolves", async (
     handoffs: offerHandoffSequence(),
     subjects: resolvedOfferSubjects(),
   })
-  const model = createModel([
+  const model = createQueuedModel([
     reactionResponse("call_1", "fire"),
     reactionResponse("call_2", "eyes"),
   ])
@@ -104,22 +103,6 @@ function reactionResponse(
     ],
     type: "tool_calls",
   }
-}
-
-function createModel(responses: QueuedModelResponse[]) {
-  const queue = queuedModelResponses(responses)
-
-  return {
-    complete: vi.fn<ModelRuntime["complete"]>(async () => {
-      const response = queue.shift()
-
-      if (response === undefined) {
-        throw new Error("No model response queued.")
-      }
-
-      return response
-    }),
-  } satisfies ModelRuntime
 }
 
 function createRuntime(options: {

@@ -4,9 +4,8 @@ import {
   sandboxWorkspace,
 } from "../../contracts/runtime"
 import { runtimeAssets } from "../../convex/runtime/_generated/assets"
+import { shellQuote } from "./path"
 import { type SandboxWriteFile } from "./types"
-
-export { sandboxArtifactRuntime, sandboxWorkspace }
 
 const artifactBuilderConfigPath = `${sandboxArtifactRuntime}/.milo/artifact-builder.json`
 export const artifactTemplatePath = `${sandboxInternalRoot}/artifacts/template`
@@ -30,6 +29,10 @@ export function artifactRuntimeFiles(): SandboxWriteFile[] {
         path: `${artifactTemplatePath}/${filePath}`,
       })
     ),
+    {
+      content: createArtifactRunnerScript(),
+      path: artifactRunnerPath,
+    },
   ]
 }
 
@@ -44,19 +47,8 @@ export function artifactBuildCommand(workspacePath: string) {
   ].join(" ")
 }
 
-export function artifactRunnerFile(): SandboxWriteFile {
-  return {
-    content: createArtifactRunnerScript(),
-    path: artifactRunnerPath,
-  }
-}
-
 function createArtifactBuilderConfig() {
   return { artifactTemplatePath }
-}
-
-function shellQuote(value: string) {
-  return `'${value.replaceAll("'", "'\\''")}'`
 }
 
 function createArtifactRunnerScript() {

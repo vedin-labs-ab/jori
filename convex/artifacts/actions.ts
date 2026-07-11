@@ -53,56 +53,6 @@ type SessionResult = {
   token: string
 }
 
-export const create = action({
-  args: publishArgs,
-  handler: async (ctx, args): Promise<PublishResult> => {
-    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
-
-    return await publishArtifact(ctx, {
-      ...args,
-      mode: "create",
-      personId,
-    } satisfies PublishArtifactArgs)
-  },
-})
-
-export const update = action({
-  args: {
-    ...publishArgs,
-    artifactId: v.id("artifacts"),
-  },
-  handler: async (ctx, args): Promise<PublishResult> => {
-    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
-
-    return await publishArtifact(ctx, {
-      ...args,
-      mode: "update",
-      personId,
-    } satisfies PublishArtifactArgs)
-  },
-})
-
-export const read = action({
-  args: {
-    tenantId: v.string(),
-    artifactId: v.id("artifacts"),
-    versionId: v.optional(v.id("artifactVersions")),
-  },
-  handler: async (ctx, args): Promise<SourceReadResult> => {
-    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
-    const artifact = await ctx.runQuery(
-      internal.artifacts.queries.readForAgent,
-      {
-        tenantId: args.tenantId,
-        personId,
-        artifactId: args.artifactId,
-      }
-    )
-
-    return artifact === null ? null : await readArtifactSource(ctx, args)
-  },
-})
-
 export const createSession = action({
   args: {
     tenantId: v.string(),

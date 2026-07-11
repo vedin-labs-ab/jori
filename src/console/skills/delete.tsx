@@ -30,21 +30,43 @@ export function DeleteSkill({
           Delete
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete “{skill.name}”?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This permanently deletes the skill. Milo stops applying it to new
-            runs.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={onDelete}>
-            Delete skill
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+      <DeleteSkillDialog
+        isPending={isPending}
+        onDelete={onDelete}
+        skill={skill}
+      />
     </AlertDialog>
+  )
+}
+
+export function DeleteSkillDialog({
+  isPending,
+  onDelete,
+  skill,
+}: {
+  isPending: boolean
+  onDelete: () => void
+  skill: Skill
+}) {
+  return (
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Delete "{skill.name}"?</AlertDialogTitle>
+        <AlertDialogDescription>
+          This permanently deletes the skill. Milo stops applying it to new
+          runs.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+        <AlertDialogAction
+          disabled={isPending}
+          onClick={onDelete}
+          variant="destructive"
+        >
+          Delete skill
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
   )
 }

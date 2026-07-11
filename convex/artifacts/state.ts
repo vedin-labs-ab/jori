@@ -1,4 +1,9 @@
 import { v } from "convex/values"
+import {
+  type ArtifactContractStateEntry,
+  assertContractStateValue,
+  resolveArtifactStateContract,
+} from "../../contracts/artifacts/contract"
 import { isRecord } from "../../contracts/json"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
@@ -8,11 +13,6 @@ import {
 } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
 import { getAccessibleArtifact } from "./access"
-import {
-  type ArtifactContractStateEntry,
-  assertContractStateValue,
-  resolveStateContract,
-} from "./contract"
 import { type ArtifactSessionGrant, artifactSessionGrant } from "./schema"
 
 const stateWrite = v.union(
@@ -36,7 +36,10 @@ export const read = internalQuery({
   },
   handler: async (ctx, args) => {
     const artifact = await getAccessibleArtifact(ctx, args)
-    const entry = resolveStateContract(artifact, args.contractName)
+    const entry = resolveArtifactStateContract(
+      artifact.contract,
+      args.contractName
+    )
 
     if (!isStateEntryVisible(entry, args.grant)) {
       return null
@@ -99,7 +102,10 @@ export const update = internalMutation({
   },
   handler: async (ctx, args) => {
     const artifact = await getAccessibleArtifact(ctx, args)
-    const entry = resolveStateContract(artifact, args.contractName)
+    const entry = resolveArtifactStateContract(
+      artifact.contract,
+      args.contractName
+    )
     const existing = await findStateDocument(ctx, { ...args, entry })
     const currentVersion = existing?.version ?? 0
 

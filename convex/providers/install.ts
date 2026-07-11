@@ -95,6 +95,25 @@ type IntegrationValues = Omit<
   "createdAt"
 >
 
+export async function findUserIntegrationForInstall(
+  ctx: MutationCtx,
+  args: {
+    tenantId: string
+    integration: Integration
+    createdBy: Id<"persons">
+  }
+) {
+  return await ctx.db
+    .query("integrations")
+    .withIndex("by_tenant_and_integration_and_owner", (query) =>
+      query
+        .eq("tenantId", args.tenantId)
+        .eq("integration", args.integration)
+        .eq("ownerId", args.createdBy)
+    )
+    .first()
+}
+
 // Every provider install lands through here: a reinstall revives the
 // matching row — reset to active with fresh credentials and ownership,
 // whatever state it was in — instead of stacking a new one.
