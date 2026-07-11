@@ -7,6 +7,7 @@ import {
   handleArtifactSharePreflight,
   handleArtifactShareRequest,
   shareSessionExpiresAt,
+  sharesToPrune,
 } from "./serve/share"
 import { isStateEntryVisible } from "./state"
 import { callArtifactTool } from "./tools/broker"
@@ -68,6 +69,35 @@ describe("share opening", () => {
     expect(
       shareSessionExpiresAt({ expiresAt: Number.MAX_SAFE_INTEGER }, 9_000)
     ).toBe(9_000 + artifactSessionDurationMs)
+  })
+})
+
+describe("share pruning", () => {
+  test("overlapping live shares are all kept", () => {
+    const live = [
+      share({ createdAt: 1, expiresAt: 5_000 }),
+      share({ createdAt: 2, expiresAt: 9_000 }),
+    ]
+
+    expect(sharesToPrune(live, 1_000)).toEqual([])
+  })
+
+  test("expired shares are pruned", () => {
+    const expired = share({ createdAt: 1, expiresAt: 500 })
+
+    expect(sharesToPrune([expired, share({ expiresAt: 9_000 })], 1_000)).toEqual(
+      [expired]
+    )
+  })
+
+  test("the oldest active shares make room at capacity", () => {
+    const shares = Array.from({ length: 20 }, (_, index) =>
+      share({ createdAt: index, expiresAt: 9_000 })
+    )
+    const pruned = sharesToPrune(shares, 1_000)
+
+    expect(pruned).toHaveLength(1)
+    expect(pruned[0]?.createdAt).toBe(0)
   })
 })
 

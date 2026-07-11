@@ -16,6 +16,11 @@ import { artifactSessionDurationMs, createSessionToken } from "./session"
 import { createArtifactSession } from "./sessions"
 import { artifactShareLink } from "./urls"
 
+/** Bounds concurrent live links per artifact; minting past it retires the
+ *  oldest. Query headroom above it covers not-yet-pruned expired rows. */
+const activeShareLimit = 20
+const shareQueryLimit = 50
+
 export type ArtifactShareSession = {
   token: string
   artifactId: Id<"artifacts">
@@ -24,7 +29,7 @@ export type ArtifactShareSession = {
   title: string
 }
 
-/** Create or rotate the artifact's single share link. */
+/** Create an independent share link; existing links keep their own expiry. */
 export const mint = internalMutation({
   args: {
     tenantId: v.string(),
@@ -38,7 +43,10 @@ export const mint = internalMutation({
     const secret = randomShareSecret()
     const expiresAt = shareExpiresAt(now, args.expiresInHours)
 
-    await removeShares(ctx, artifact._id)
+    for (const stale of sharesToPrune(await listShares(ctx, artifact._id), now)) {
+      await ctx.db.delete(stale._id)
+    }
+
     await ctx.db.insert("artifactShares", {
       tenantId: artifact.tenantId,
       artifactId: artifact._id,
@@ -69,14 +77,18 @@ export const open = internalMutation({
       return null
     }
 
-    const share = await findShare(ctx, artifactId)
     const artifact = await ctx.db.get(artifactId)
 
-    if (
-      share === null ||
-      artifact === null ||
-      !canOpenShare(share, artifact, args)
-    ) {
+    if (artifact === null) {
+      return null
+    }
+
+    const shares = await listShares(ctx, artifactId)
+    const share = shares.find((candidate) =>
+      canOpenShare(candidate, artifact, args)
+    )
+
+    if (share === undefined) {
       return null
     }
 
@@ -137,17 +149,33 @@ export function shareSessionExpiresAt(
   return Math.min(now + artifactSessionDurationMs, share.expiresAt)
 }
 
-export async function readActiveShare(
+export async function readActiveShares(
   ctx: QueryLikeCtx,
   artifactId: Id<"artifacts">
 ) {
-  const share = await findShare(ctx, artifactId)
+  const shares = await listShares(ctx, artifactId)
+  const active = shares.filter((share) => share.expiresAt > Date.now())
 
-  if (share === null || share.expiresAt <= Date.now()) {
+  if (active.length === 0) {
     return null
   }
 
-  return { createdAt: share.createdAt, expiresAt: share.expiresAt }
+  return {
+    count: active.length,
+    latestExpiresAt: Math.max(...active.map((share) => share.expiresAt)),
+  }
+}
+
+/** Expired shares always go; when the active set is at capacity, the oldest
+ *  active shares make room for the one about to be minted. */
+export function sharesToPrune(shares: Doc<"artifactShares">[], now: number) {
+  const expired = shares.filter((share) => share.expiresAt <= now)
+  const active = shares
+    .filter((share) => share.expiresAt > now)
+    .sort((left, right) => left.createdAt - right.createdAt)
+  const overflow = Math.max(0, active.length + 1 - activeShareLimit)
+
+  return [...expired, ...active.slice(0, overflow)]
 }
 
 export async function handleArtifactShareRequest(
@@ -235,20 +263,15 @@ async function requireShareableArtifact(
   return artifact
 }
 
-async function findShare(ctx: QueryLikeCtx, artifactId: Id<"artifacts">) {
+async function listShares(ctx: QueryLikeCtx, artifactId: Id<"artifacts">) {
   return await ctx.db
     .query("artifactShares")
     .withIndex("by_artifact", (index) => index.eq("artifactId", artifactId))
-    .first()
+    .take(shareQueryLimit)
 }
 
 async function removeShares(ctx: MutationCtx, artifactId: Id<"artifacts">) {
-  const shares = await ctx.db
-    .query("artifactShares")
-    .withIndex("by_artifact", (index) => index.eq("artifactId", artifactId))
-    .take(50)
-
-  for (const share of shares) {
+  for (const share of await listShares(ctx, artifactId)) {
     await ctx.db.delete(share._id)
   }
 }
