@@ -80,76 +80,83 @@ export function WorkstreamsPulse({
     return null
   }
 
+  // The @container wrapper severs intrinsic sizing: without it the grid's
+  // fixed tracks propagate their full width through every min-width:auto
+  // flex ancestor (a percentage max-width cannot resolve during intrinsic
+  // sizing), silently widening the whole page. Container-query units can
+  // resolve, so the card caps against real available width instead.
   return (
-    <Card className="w-fit max-w-[min(56rem,100%)] pb-0">
-      <CardHeader>
-        <CardTitle className="self-center">Activity</CardTitle>
-        <CardDescription className="col-span-2">
-          Recent activity across workstreams and unplaced efforts.
-        </CardDescription>
-        <CardAction className="row-span-1">
-          <Select
-            value={String(days)}
-            onValueChange={(value) => setDays(Number(value) as PulseDays)}
-          >
-            <SelectTrigger size="sm" className="w-fit">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {rangeOptions.map((option) => (
-                <SelectItem key={option.value} value={String(option.value)}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardAction>
-      </CardHeader>
-      <CardContent
-        className="overflow-x-auto px-0"
-        onScroll={trackPinned}
-        ref={scrollRef}
-      >
-        <div className="flex w-fit flex-col gap-1 pr-(--card-spacing)">
-          {view.lanes.map((lane) => (
-            <LaneRow
-              key={lane.id ?? "unplaced"}
-              lane={lane}
-              laneGrid={laneGrids[pulse.days]}
-              unplaced={lane.id === null ? pulse.unplaced : 0}
-              onOpen={laneOpener(lane, workstreams, onOpen)}
-            />
-          ))}
-          <div className={laneGrids[pulse.days]}>
-            <span className={stickyLane} />
-            {view.days.map((day) => (
-              <span
-                key={day.key}
-                className={cn(
-                  "whitespace-nowrap pt-1 text-center text-[11px] text-muted-foreground tabular-nums",
-                  day.emphasized && "font-medium text-foreground"
-                )}
-              >
-                {day.label}
-              </span>
+    <div className="@container">
+      <Card className="w-fit max-w-[min(56rem,100cqw)] pb-0">
+        <CardHeader>
+          <CardTitle className="self-center">Activity</CardTitle>
+          <CardDescription className="col-span-2">
+            Recent activity across workstreams and unplaced efforts.
+          </CardDescription>
+          <CardAction className="row-span-1">
+            <Select
+              value={String(days)}
+              onValueChange={(value) => setDays(Number(value) as PulseDays)}
+            >
+              <SelectTrigger size="sm" className="w-fit">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {rangeOptions.map((option) => (
+                  <SelectItem key={option.value} value={String(option.value)}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardAction>
+        </CardHeader>
+        <CardContent
+          className="overflow-x-auto px-0"
+          onScroll={trackPinned}
+          ref={scrollRef}
+        >
+          <div className="flex w-fit flex-col gap-1 pr-(--card-spacing)">
+            {view.lanes.map((lane) => (
+              <LaneRow
+                key={lane.id ?? "unplaced"}
+                lane={lane}
+                laneGrid={laneGrids[pulse.days]}
+                unplaced={lane.id === null ? pulse.unplaced : 0}
+                onOpen={laneOpener(lane, workstreams, onOpen)}
+              />
             ))}
+            <div className={laneGrids[pulse.days]}>
+              <span className={stickyLane} />
+              {view.days.map((day) => (
+                <span
+                  key={day.key}
+                  className={cn(
+                    "whitespace-nowrap pt-1 text-center text-[11px] text-muted-foreground tabular-nums",
+                    day.emphasized && "font-medium text-foreground"
+                  )}
+                >
+                  {day.label}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      </CardContent>
-      <CardFooter className="justify-between gap-6 border-t bg-muted/25 pt-3! pb-3 text-muted-foreground text-xs">
-        <span className="flex items-center gap-1.5">
-          <Clock aria-hidden className="size-3.5 shrink-0" />
-          <ReviewedNote reviewedAt={pulse.reviewedAt} now={pulse.now} />
-        </span>
-        <span className="flex items-center gap-1.5">
-          <CalendarDays aria-hidden className="size-3.5 shrink-0" />
-          <ConsolidationNote
-            consolidationAt={pulse.consolidationAt}
-            now={pulse.now}
-          />
-        </span>
-      </CardFooter>
-    </Card>
+        </CardContent>
+        <CardFooter className="justify-between gap-6 border-t bg-muted/25 pt-3! pb-3 text-muted-foreground text-xs">
+          <span className="flex items-center gap-1.5">
+            <Clock aria-hidden className="size-3.5 shrink-0" />
+            <ReviewedNote reviewedAt={pulse.reviewedAt} now={pulse.now} />
+          </span>
+          <span className="flex items-center gap-1.5">
+            <CalendarDays aria-hidden className="size-3.5 shrink-0" />
+            <ConsolidationNote
+              consolidationAt={pulse.consolidationAt}
+              now={pulse.now}
+            />
+          </span>
+        </CardFooter>
+      </Card>
+    </div>
   )
 }
 
