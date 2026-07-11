@@ -199,7 +199,11 @@ function formatFooterLabel({
   totalCount: number
   visibleCount: number
 }) {
-  const rangeStart = visibleCount === 0 ? 0 : pageIndex * pageSize + 1
+  if (visibleCount === 0) {
+    return undefined
+  }
+
+  const rangeStart = pageIndex * pageSize + 1
   const rangeEnd = pageIndex * pageSize + visibleCount
 
   if (hasFilters) {
