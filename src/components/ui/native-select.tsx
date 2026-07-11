@@ -15,7 +15,7 @@ function NativeSelect({
   return (
     <div
       className={cn(
-        "group/native-select relative w-fit transition-transform active:translate-y-[var(--tactile-depth)] has-[select:disabled]:opacity-50",
+        "group/native-select relative w-fit transition-transform not-has-[select:disabled]:active:translate-y-[var(--tactile-depth)] has-[select:disabled]:opacity-50",
         className
       )}
       data-slot="native-select-wrapper"
