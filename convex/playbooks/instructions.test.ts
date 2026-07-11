@@ -25,6 +25,7 @@ function render(key: string, destination: DeliveryDestination) {
     destination,
     subject: definition?.title ?? key,
     noun: definition?.delivery.noun ?? "output",
+    style: definition?.delivery.style,
   })
 }
 
@@ -42,6 +43,7 @@ describe("playbook instructions", () => {
           destination: emailDestination,
           subject: playbook.title,
           noun: playbook.delivery.noun,
+          style: playbook.delivery.style,
         })
 
         expect(instructions).not.toContain("undefined")
@@ -74,6 +76,29 @@ describe("playbook instructions", () => {
   test("unknown playbook keys are rejected", () => {
     expect(() => render("missing", emailDestination)).toThrow(
       "No instruction template"
+    )
+  })
+
+  test("meeting prep plans one-shot runs that share the dossier", () => {
+    const instructions = render("meeting-prep", emailDestination)
+
+    expect(instructions).toContain("add_automation")
+    expect(instructions).toContain("start minus 45 minutes")
+    expect(instructions).toContain("share_artifact")
+    expect(instructions).toContain(
+      'Email a short summary of the prep note from my Gmail to Sam Doe <sam@example.com> with the subject "Meeting prep"'
+    )
+  })
+
+  test("meeting prep summarizes with a link on slack too", () => {
+    const instructions = render("meeting-prep", {
+      kind: "slack",
+      channelId: "C1",
+      channelName: "standup",
+    })
+
+    expect(instructions).toContain(
+      "Post a short summary of the prep note to #standup via Slack, with the link to the full prep note."
     )
   })
 })

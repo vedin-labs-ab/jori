@@ -43,7 +43,10 @@ export const mint = internalMutation({
     const secret = randomShareSecret()
     const expiresAt = shareExpiresAt(now, args.expiresInHours)
 
-    for (const stale of sharesToPrune(await listShares(ctx, artifact._id), now)) {
+    for (const stale of sharesToPrune(
+      await listShares(ctx, artifact._id),
+      now
+    )) {
       await ctx.db.delete(stale._id)
     }
 

@@ -1,7 +1,7 @@
 import { type Scope } from "../permissions/scope"
 import { type PlaybookSlot } from "./capabilities"
 import { type PlaybookDelivery } from "./delivery"
-import { type PlaybookSchedule } from "./schedule"
+import { describePlaybookSchedule, type PlaybookSchedule } from "./schedule"
 
 export type PlaybookDefinition = {
   key: string
@@ -11,11 +11,19 @@ export type PlaybookDefinition = {
   /** Personal playbooks enable per member; organization ones per tenant. */
   scope: Scope
   schedule: PlaybookSchedule
+  /** User-facing rhythm, for playbooks whose cron line would mislead —
+   *  a planning sweep that delivers at meeting times, for example. */
+  cadence?: string
   /** Input capabilities the playbook reads; delivery is separate. */
   slots: readonly PlaybookSlot[]
   /** Where the output goes, and the default the user can override at enable. */
   delivery: PlaybookDelivery
   web: boolean
+}
+
+/** What the user is promised: the cadence when set, else the schedule. */
+export function describePlaybookCadence(definition: PlaybookDefinition) {
+  return definition.cadence ?? describePlaybookSchedule(definition.schedule)
 }
 
 const digestDelivery = {
@@ -42,14 +50,15 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     key: "meeting-prep",
     title: "Meeting prep",
     description:
-      "Walk into every meeting prepared: who you're meeting, what it's about, and what to have ready — researched and emailed to you each morning.",
+      "Walk into every meeting prepared: who you're meeting, what it's about, and what to have ready — researched and sent to you 45 minutes before each external meeting.",
     scope: "personal",
-    schedule: { repeat: "weekdays", time: "07:30" },
+    schedule: { repeat: "daily", time: "01:00" },
+    cadence: "45 minutes before each external meeting",
     slots: [
       { capability: "email", intents: ["read"] },
       { capability: "calendar", intents: ["read"] },
     ],
-    delivery: { ...digestDelivery, noun: "prep note" },
+    delivery: { ...digestDelivery, noun: "prep note", style: "summary" },
     web: true,
   },
   {

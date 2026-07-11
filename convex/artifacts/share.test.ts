@@ -85,9 +85,9 @@ describe("share pruning", () => {
   test("expired shares are pruned", () => {
     const expired = share({ createdAt: 1, expiresAt: 500 })
 
-    expect(sharesToPrune([expired, share({ expiresAt: 9_000 })], 1_000)).toEqual(
-      [expired]
-    )
+    expect(
+      sharesToPrune([expired, share({ expiresAt: 9_000 })], 1_000)
+    ).toEqual([expired])
   })
 
   test("the oldest active shares make room at capacity", () => {
