@@ -189,6 +189,7 @@ test("a single organization domain is named in the meetings hint", () => {
   organizationProfile = { domains: ["acme.com"] }
 
   renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+  fireEvent.click(screen.getByRole("radio", { name: "Internal" }))
 
   expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
   expect(
@@ -203,25 +204,26 @@ test("multiple organization domains collapse to a count", () => {
   }
 
   renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+  fireEvent.click(screen.getByRole("radio", { name: "Both" }))
 
   expect(screen.getByText(/Internal: 2 domains/)).toBeDefined()
   expect(screen.getByRole("link", { name: "Manage" })).toBeDefined()
 })
 
-test("selecting External hides the internal-domains hint", () => {
+test("the hint is hidden for the default External scope", () => {
   organizationProfile = { domains: ["acme.com"] }
 
   renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
-
-  expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
-
-  fireEvent.click(screen.getByRole("radio", { name: "External" }))
 
   expect(screen.queryByText(/Internal:/)).toBeNull()
 
   fireEvent.click(screen.getByRole("radio", { name: "Internal" }))
 
   expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
+
+  fireEvent.click(screen.getByRole("radio", { name: "External" }))
+
+  expect(screen.queryByText(/Internal:/)).toBeNull()
 })
 
 function meetingPrep() {
