@@ -87,22 +87,34 @@ describe("meeting prep catalog", () => {
     ).toEqual({ repeat: "daily", time: "23:50" })
   })
 
-  test("per-meeting mode keeps the early planning sweep", () => {
+  test("without a digest the planning sweep stays early", () => {
     expect(
-      resolvePlaybookSchedule(meetingPrep, options({ mode: "meeting" }))
+      resolvePlaybookSchedule(meetingPrep, options({ digest: "off" }))
     ).toEqual({ repeat: "daily", time: "01:00" })
   })
 
   test("cadence copy follows the chosen options", () => {
     expect(describePlaybookCadence(meetingPrep, options())).toBe(
-      "Morning digest at 07:30, reminders 45 minutes before meetings"
+      "Morning digest at 07:30, prep 45 minutes before each meeting"
     )
     expect(
-      describePlaybookCadence(meetingPrep, options({ reminders: "off" }))
+      describePlaybookCadence(meetingPrep, options({ before: "off" }))
     ).toBe("Morning digest at 07:30")
     expect(
-      describePlaybookCadence(meetingPrep, options({ mode: "meeting" }))
-    ).toBe("45 minutes before each external meeting")
+      describePlaybookCadence(meetingPrep, options({ digest: "off" }))
+    ).toBe("Prep 45 minutes before each meeting")
+  })
+
+  test("at least one delivery must stay on", () => {
+    expect(
+      meetingPrep.validateOptions?.(options({ digest: "off", before: "off" }))
+    ).toBe("Turn on the morning digest or a pre-meeting send.")
+    expect(meetingPrep.validateOptions?.(options({ digest: "off" }))).toBe(
+      undefined
+    )
+    expect(meetingPrep.validateOptions?.(options({ before: "off" }))).toBe(
+      undefined
+    )
   })
 
   test("browse surfaces get the rhythm, not resolved defaults", () => {

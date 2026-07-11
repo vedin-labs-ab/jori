@@ -1,7 +1,11 @@
 import { type Scope } from "../permissions/scope"
 import { type PlaybookSlot } from "./capabilities"
 import { type PlaybookDelivery } from "./delivery"
-import { type PlaybookOptionField, type PlaybookOptionValues } from "./options"
+import {
+  type PlaybookOptionField,
+  type PlaybookOptionValues,
+  resolvePlaybookOptions,
+} from "./options"
 import {
   describePlaybookSchedule,
   type PlaybookSchedule,
@@ -31,6 +35,9 @@ export type PlaybookDefinition = {
   /** Precise cadence at the point of decision, when the cron line would
    *  mislead — a planning sweep that delivers at meeting times, say. */
   describeCadence?: (options: PlaybookOptionValues) => string
+  /** Reject option combinations no single field can forbid. Setup surfaces
+   *  the message and blocks enabling; the plan resolver enforces it. */
+  validateOptions?: (options: PlaybookOptionValues) => string | undefined
   /** Input capabilities the playbook reads; delivery is separate. */
   slots: readonly PlaybookSlot[]
   /** Where the output goes, and the default the user can override at enable. */
@@ -52,6 +59,21 @@ export function describePlaybookCadence(
     definition.describeCadence?.(values) ??
     describePlaybookSchedule(definition.schedule)
   )
+}
+
+/** Resolve a playbook's options and enforce its cross-field rules. */
+export function resolveValidPlaybookOptions(
+  definition: PlaybookDefinition,
+  values?: PlaybookOptionValues
+) {
+  const options = resolvePlaybookOptions(definition.options, values)
+  const issue = definition.validateOptions?.(options)
+
+  if (issue !== undefined) {
+    throw new Error(issue)
+  }
+
+  return options
 }
 
 /** The cron schedule a playbook runs on, under the given options. */
@@ -106,14 +128,18 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
           { value: "both", label: "Both" },
         ],
       },
+      // The two deliveries are orthogonal: a morning overview and a
+      // per-meeting send, in any combination — validated to keep at least
+      // one on. The pre-meeting one-shot researches when no digest ran and
+      // refreshes when one did, so no mode switch is needed.
       {
-        key: "mode",
-        label: "Delivery",
+        key: "digest",
+        label: "Morning digest",
         kind: "choice",
-        default: "digest",
+        default: "on",
         choices: [
-          { value: "digest", label: "Morning digest" },
-          { value: "meeting", label: "Before each meeting" },
+          { value: "on", label: "On" },
+          { value: "off", label: "Off" },
         ],
       },
       {
@@ -121,51 +147,47 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
         label: "Deliver at",
         kind: "time",
         default: "07:30",
-        enabledWhen: { key: "mode", value: "digest" },
+        enabledWhen: { key: "digest", value: "on" },
       },
       {
-        key: "reminders",
-        label: "Reminders",
+        key: "before",
+        label: "Before each meeting",
         kind: "choice",
         control: "select",
         default: "45",
         choices: [
           { value: "off", label: "Off" },
-          { value: "15", label: "15 minutes before" },
-          { value: "30", label: "30 minutes before" },
-          { value: "45", label: "45 minutes before" },
-          { value: "60", label: "60 minutes before" },
+          { value: "15", label: "15 minutes" },
+          { value: "30", label: "30 minutes" },
+          { value: "45", label: "45 minutes" },
+          { value: "60", label: "60 minutes" },
         ],
-        enabledWhen: { key: "mode", value: "digest" },
-      },
-      {
-        key: "sendBefore",
-        label: "Send before",
-        kind: "minutes",
-        default: 45,
-        min: 10,
-        max: 240,
-        presets: [30, 45, 60, 90],
-        enabledWhen: { key: "mode", value: "meeting" },
       },
     ],
     // The digest sweep starts ahead of the chosen time so per-meeting
-    // research agents finish before the digest goes out.
+    // research agents finish before the digest goes out; without a digest
+    // the sweep just plans the day early.
     resolveSchedule: (options) =>
-      options.mode === "digest"
+      options.digest === "on"
         ? {
             repeat: "daily",
             time: shiftClockTime(String(options.time), -digestPrepMinutes),
           }
         : { repeat: "daily", time: "01:00" },
-    describeCadence: (options) =>
-      options.mode === "digest"
-        ? `Morning digest at ${options.time}${
-            options.reminders === "off"
-              ? ""
-              : `, reminders ${options.reminders} minutes before meetings`
-          }`
-        : `${options.sendBefore} minutes before each external meeting`,
+    describeCadence: (options) => {
+      const digest =
+        options.digest === "on" ? `Morning digest at ${options.time}` : ""
+      const before =
+        options.before === "off"
+          ? ""
+          : `${options.digest === "on" ? "prep" : "Prep"} ${options.before} minutes before each meeting`
+
+      return [digest, before].filter((part) => part !== "").join(", ")
+    },
+    validateOptions: (options) =>
+      options.digest === "off" && options.before === "off"
+        ? "Turn on the morning digest or a pre-meeting send."
+        : undefined,
     slots: [
       { capability: "email", intents: ["read"] },
       { capability: "calendar", intents: ["read"] },

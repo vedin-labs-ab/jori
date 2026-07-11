@@ -10,6 +10,7 @@ import {
   type PlaybookDefinition,
   playbookCatalog,
   resolvePlaybookSchedule,
+  resolveValidPlaybookOptions,
 } from "../../contracts/playbooks/catalog"
 import {
   type DeliveryChoice,
@@ -18,10 +19,7 @@ import {
   destinationIntegration,
   destinationTools,
 } from "../../contracts/playbooks/delivery"
-import {
-  type PlaybookOptionValues,
-  resolvePlaybookOptions,
-} from "../../contracts/playbooks/options"
+import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
 import { playbookCron } from "../../contracts/playbooks/schedule"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
@@ -78,7 +76,7 @@ export async function resolvePlaybookPlan(
     emailProvider: emailInputProvider(resolved),
     recipient: args.recipient,
   })
-  const options = resolvePlaybookOptions(definition.options, args.options)
+  const options = resolveValidPlaybookOptions(definition, args.options)
 
   return {
     definition,

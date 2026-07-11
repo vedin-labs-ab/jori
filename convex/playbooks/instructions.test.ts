@@ -91,41 +91,62 @@ describe("playbook instructions", () => {
 })
 
 describe("meeting prep instructions", () => {
-  test("meeting prep defaults to a digest with agents and reminders", () => {
+  test("meeting prep defaults to a digest with prep sends", () => {
     const instructions = render("meeting-prep", emailDestination)
 
     expect(instructions).toContain("start_agent")
     expect(instructions).toContain("at 07:30 today")
     expect(instructions).toContain('name "Meeting digest"')
     expect(instructions).toContain("start minus 45 minutes")
+    expect(instructions).toContain('name "Prep: "')
     expect(instructions).toContain("share_artifact")
     expect(instructions).toContain(
       'Email a short summary of the prep note from my Gmail to Sam Doe <sam@example.com> with the subject "Meeting prep"'
     )
-    expect(instructions).not.toContain('name "Prep: ')
+    // With a digest run behind it, the prep send refreshes the dossier it
+    // finds and never falls back to prepping inline.
+    expect(instructions).toContain(
+      "If the dossier at days -> <YYYY-MM-DD> -> <event id> is missing"
+    )
+    expect(instructions).not.toContain("do the prep yourself now")
   })
 
-  test("digest reminders switch off cleanly", () => {
+  test("pre-meeting sends switch off cleanly", () => {
     const instructions = render("meeting-prep", emailDestination, {
-      reminders: "off",
+      before: "off",
     })
 
     expect(instructions).toContain('name "Meeting digest"')
-    expect(instructions).not.toContain("Reminder:")
+    expect(instructions).not.toContain('name "Prep: "')
   })
 
-  test("per-meeting mode schedules focused prep runs instead", () => {
+  test("without a digest the prep sends carry the research", () => {
     const instructions = render("meeting-prep", emailDestination, {
-      mode: "meeting",
-      sendBefore: 60,
+      digest: "off",
+      before: "60",
     })
 
     expect(instructions).toContain("start minus 60 minutes")
-    expect(instructions).toContain('"Prep: "')
+    expect(instructions).toContain('name "Prep: "')
+    expect(instructions).toContain("do the prep yourself now")
     expect(instructions).not.toContain("start_agent")
     expect(instructions).not.toContain("Meeting digest")
   })
 
+  test("meeting prep summarizes with a link on slack too", () => {
+    const instructions = render("meeting-prep", {
+      kind: "slack",
+      channelId: "C1",
+      channelName: "standup",
+    })
+
+    expect(instructions).toContain(
+      "Post a short summary of the prep note to #standup via Slack, with the link to the full prep note."
+    )
+  })
+})
+
+describe("meeting prep scope", () => {
   test("meeting scope gates attendee composition, not judgment", () => {
     const external = render("meeting-prep", emailDestination)
     const both = render("meeting-prep", emailDestination, {
@@ -147,17 +168,5 @@ describe("meeting prep instructions", () => {
       expect(instructions).toContain("Skip focus blocks")
       expect(instructions).toContain("preparation pays off")
     }
-  })
-
-  test("meeting prep summarizes with a link on slack too", () => {
-    const instructions = render("meeting-prep", {
-      kind: "slack",
-      channelId: "C1",
-      channelName: "standup",
-    })
-
-    expect(instructions).toContain(
-      "Post a short summary of the prep note to #standup via Slack, with the link to the full prep note."
-    )
   })
 })
