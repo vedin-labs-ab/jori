@@ -51,14 +51,15 @@ export function PlaybookSetupDialog({
   const destination = delivery.value
   const pendingKind = pendingActionKind(actions, definition)
   const { options, optionFields } = useOptionsSetup(definition)
-  const meetingsHint = useMeetingsHint(definition, tenantId, options)
+  const { hints, optionsIssue } = useOptionHints(definition, tenantId, options)
 
   const choices =
     plan.kind === "choose" ? plan.options[providerIndex].choices : plan.choices
-  // A pending action locks the whole dialog until it settles.
+  // A pending action locks the whole dialog until it settles; an open edit
+  // or an invalid option combination also holds submission.
   const isBusy = pendingKind !== undefined
-  // An open edit holds submission: the user saves or cancels first.
-  const canSubmit = destination !== undefined && !isBusy && !delivery.editing
+  const blocked = isBusy || delivery.editing || optionsIssue !== undefined
+  const canSubmit = destination !== undefined && !blocked
 
   function submit(action: PlaybookActions["enable"], close: boolean) {
     if (destination === undefined) {
@@ -106,7 +107,7 @@ export function PlaybookSetupDialog({
             options={
               optionFields === undefined
                 ? undefined
-                : { ...optionFields, hints: { meetings: meetingsHint } }
+                : { ...optionFields, hints }
             }
             plan={plan}
             providerIndex={providerIndex}
@@ -114,7 +115,9 @@ export function PlaybookSetupDialog({
         </div>
 
         <SetupDialogFooter
-          advancedDisabled={destination === undefined || isBusy}
+          advancedDisabled={
+            destination === undefined || isBusy || optionsIssue !== undefined
+          }
           canSubmit={canSubmit}
           onAdvanced={openAdvanced}
           onEnable={() => submit(actions.enable, true)}
@@ -193,6 +196,31 @@ function useOptionsSetup(definition: PlaybookDefinition) {
             onChange: (key: string, value: string | number) =>
               setPicks((current) => ({ ...current, [key]: value })),
           },
+  }
+}
+
+/**
+ * Everything rendered under the option fields: the meetings-scope grounding
+ * caption, and the catalog's cross-field validation message (which also
+ * blocks submission via `optionsIssue`).
+ */
+function useOptionHints(
+  definition: PlaybookDefinition,
+  tenantId: string,
+  options: PlaybookOptionValues
+) {
+  const meetings = useMeetingsHint(definition, tenantId, options)
+  const optionsIssue = definition.validateOptions?.(options)
+
+  return {
+    optionsIssue,
+    hints: {
+      meetings,
+      before:
+        optionsIssue === undefined ? undefined : (
+          <p className="text-destructive">{optionsIssue}</p>
+        ),
+    },
   }
 }
 

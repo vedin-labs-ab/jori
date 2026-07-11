@@ -167,7 +167,7 @@ test("closing an option dropdown never closes the dialog", async () => {
     meetingPrep()
   )
 
-  // The default digest mode shows the "Remind before" minutes select.
+  // The "Before each meeting" select is the dialog's only dropdown.
   fireEvent.click(screen.getByRole("combobox"))
   expect(screen.getByRole("listbox")).toBeDefined()
   // Dismissable layers attach their outside listeners a tick after opening.
@@ -183,6 +183,37 @@ test("closing an option dropdown never closes the dialog", async () => {
 
   expect(onOpenChange).not.toHaveBeenCalledWith(false)
   expect(screen.getByText(/set up meeting prep/i)).toBeDefined()
+})
+
+test("turning off both deliveries blocks enabling", async () => {
+  shimSelectDom()
+
+  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+
+  fireEvent.click(screen.getByRole("radio", { name: "Off" }))
+  fireEvent.click(screen.getByRole("combobox"))
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  fireEvent.click(screen.getByRole("option", { name: "Off" }))
+
+  expect(
+    screen.getByText("Turn on the morning digest or a pre-meeting send.")
+  ).toBeDefined()
+  for (const name of ["Enable", /try once/i, /advanced settings/i]) {
+    expect(screen.getByRole("button", { name })).toHaveProperty(
+      "disabled",
+      true
+    )
+  }
+
+  fireEvent.click(screen.getByRole("radio", { name: "On" }))
+
+  expect(
+    screen.queryByText("Turn on the morning digest or a pre-meeting send.")
+  ).toBeNull()
+  expect(screen.getByRole("button", { name: "Enable" })).toHaveProperty(
+    "disabled",
+    false
+  )
 })
 
 test("a single organization domain is named in the meetings hint", () => {

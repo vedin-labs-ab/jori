@@ -1,4 +1,4 @@
-{% if options.mode == "digest" %}Prepare the day's meeting dossiers and schedule the digest that delivers them.{% else %}Plan today's meeting prep, and schedule a focused prep run before each meeting that deserves one.{% endif %}
+{% if options.digest == "on" %}Prepare the day's meeting dossiers and schedule the digest that delivers them.{% else %}Plan today's meeting prep, and schedule a focused prep run before each meeting that deserves one.{% endif %}
 
 ## The dossier artifact
 
@@ -13,8 +13,8 @@ Read the "dossiers" state. With one merge patch, drop day keys older than 7 days
 
 ## Choose the meetings
 
-Check my {{providers.calendar}} for events with other attendees{% if options.mode == "digest" %} starting between now and this time tomorrow{% else %} today{% endif %}. Skip focus blocks, all-day events, and holds without participants. {% if options.meetings == "external" %}Only meetings that include people outside my organization qualify. Prep is for the ones where preparation pays off; skip meetings with nothing worth preparing.{% elsif options.meetings == "internal" %}Only meetings where everyone is part of my organization qualify. Prep is for the ones where preparation pays off — reviews, negotiations, decisions — not routine syncs.{% else %}Prep is for meetings where preparation pays off — external or customer meetings, and high-stakes internal ones such as reviews or negotiations. Routine internal syncs do not qualify.{% endif %} If nothing qualifies, finish quietly: schedule nothing and send nothing.
-{% if options.mode == "digest" %}
+Check my {{providers.calendar}} for events with other attendees{% if options.digest == "on" %} starting between now and this time tomorrow{% else %} today{% endif %}. Skip focus blocks, all-day events, and holds without participants. {% if options.meetings == "external" %}Only meetings that include people outside my organization qualify. Prep is for the ones where preparation pays off; skip meetings with nothing worth preparing.{% elsif options.meetings == "internal" %}Only meetings where everyone is part of my organization qualify. Prep is for the ones where preparation pays off — reviews, negotiations, decisions — not routine syncs.{% else %}Prep is for meetings where preparation pays off — external or customer meetings, and high-stakes internal ones such as reviews or negotiations. Routine internal syncs do not qualify.{% endif %} If nothing qualifies, finish quietly: schedule nothing and send nothing.
+{% if options.digest == "on" %}
 
 ## Research every meeting now
 
@@ -41,50 +41,30 @@ Create a share link for the artifact with share_artifact, valid for 24 hours: th
 
 {{delivery}}
 """
-{% if options.reminders != "off" %}
-
-## Schedule a reminder per meeting
-
-For each qualifying meeting whose start is more than {{options.reminders}} minutes away, create a one-time automation with add_automation: type "once" at the meeting's start minus {{options.reminders}} minutes as a UTC ISO timestamp, name "Reminder: " plus the meeting title, artifactId set to the dossier artifact, scope "personal", access with the {{providers.calendar}} and {{providers.email}} read tools from this run's own capabilities plus the sending tool, web true, and these instructions with the angle-bracket parts filled in:
-
-"""
-Remind me about the meeting "<title>" at <local time> today (calendar event <event id>, artifact <artifact id>).
-
-Re-read the event on my {{providers.calendar}} first. If it was cancelled or I was removed, stop without sending anything. If it moved, continue with the new time in mind.
-
-Check my {{providers.email}} for anything new from the attendees since the dossier was written; fold anything relevant into the dossier with a merge patch at days -> <YYYY-MM-DD> -> <event id>.
-
-Create a share link for the artifact with share_artifact, valid for 24 hours: that link is the full prep note.
-
-{{delivery}}
-"""
 {% endif %}
-{% else %}
+{% if options.before != "off" %}
 
-## Schedule one prep run per meeting
+## Schedule a prep send per meeting
 
-For each qualifying meeting whose start is more than {{options.sendBefore}} minutes away, create a one-time automation with add_automation:
-
-- type "once", trigger at the meeting's start minus {{options.sendBefore}} minutes as a UTC ISO timestamp, name "Prep: " plus the meeting title.
-- artifactId set to the dossier artifact, scope "personal".
-- access: the {{providers.calendar}} and {{providers.email}} read and search tools from this run's own capabilities, the sending tool the skeleton's last paragraph needs, and web true.
-- instructions: this skeleton with every angle-bracket part filled in:
+For each qualifying meeting whose start is more than {{options.before}} minutes away, create a one-time automation with add_automation: type "once" at the meeting's start minus {{options.before}} minutes as a UTC ISO timestamp, name "Prep: " plus the meeting title, artifactId set to the dossier artifact, scope "personal", access with the {{providers.calendar}} and {{providers.email}} read and search tools from this run's own capabilities plus the sending tool, web true, and these instructions with the angle-bracket parts filled in:
 
 """
 Prepare me for the meeting "<title>" at <local time> today (calendar event <event id>, artifact <artifact id>).
 
-Re-read the event on my {{providers.calendar}} first. If it was cancelled or I was removed, stop without sending anything. If it moved to later today, create a replacement automation like this one at the new start minus {{options.sendBefore}} minutes, then stop. If it moved earlier or already started, continue now.
+Re-read the event on my {{providers.calendar}} first. If it was cancelled or I was removed, stop without sending anything. If it moved to later today, create a replacement automation like this one at the new start minus {{options.before}} minutes, then stop. If it moved earlier or already started, continue now.
 
-Work out who I am meeting and what it is about: research external attendees and their companies on the web, and search my {{providers.email}} for recent threads with the attendees to surface open questions and promised follow-ups.
+If the dossier at days -> <YYYY-MM-DD> -> <event id> is missing, work out who I am meeting and what it is about: research external attendees and their companies on the web, and search my {{providers.email}} for recent threads with the attendees to surface open questions and promised follow-ups. If it exists, check my {{providers.email}} for anything new from the attendees since it was written.
 
-Write the dossier into the artifact's "dossiers" state with a merge patch at days -> <YYYY-MM-DD> -> <event id>, matching the contract's dossier shape.
+Write what you learned into the artifact's "dossiers" state with a merge patch at days -> <YYYY-MM-DD> -> <event id>, matching the contract's dossier shape.
 
 Create a share link for the artifact with share_artifact, valid for 24 hours: that link is the full prep note.
 
 {{delivery}}
 """
+{% if options.digest == "off" %}
 
 ## Meetings too close to schedule
 
-For qualifying meetings starting within {{options.sendBefore}} minutes, or already under way, do the prep yourself now, following the skeleton from the re-read step onward.
+For qualifying meetings starting within {{options.before}} minutes, or already under way, do the prep yourself now, following the skeleton from the re-read step onward.
+{% endif %}
 {% endif %}
