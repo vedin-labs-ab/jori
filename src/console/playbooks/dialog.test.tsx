@@ -164,9 +164,13 @@ test("closing an option dropdown never closes the dialog", async () => {
   await new Promise((resolve) => setTimeout(resolve, 0))
 
   // Dismissing the dropdown by clicking elsewhere closes only the dropdown.
+  // The dialog defers its own outside dismissal to the gesture's click, so
+  // the full pointerdown-then-click sequence is what the regression needs.
   fireEvent.pointerDown(document.body)
-
   expect(screen.queryByRole("listbox")).toBeNull()
+  fireEvent.click(document.body)
+  await new Promise((resolve) => setTimeout(resolve, 0))
+
   expect(onOpenChange).not.toHaveBeenCalledWith(false)
   expect(screen.getByText(/set up meeting prep/i)).toBeDefined()
 })
