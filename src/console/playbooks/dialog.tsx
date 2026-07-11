@@ -51,7 +51,7 @@ export function PlaybookSetupDialog({
   const destination = delivery.value
   const pendingKind = pendingActionKind(actions, definition)
   const { options, optionFields } = useOptionsSetup(definition)
-  const meetingsHint = useMeetingsHint(definition, tenantId)
+  const meetingsHint = useMeetingsHint(definition, tenantId, options)
 
   const choices =
     plan.kind === "choose" ? plan.options[providerIndex].choices : plan.choices
@@ -199,9 +199,14 @@ function useOptionsSetup(definition: PlaybookDefinition) {
 /**
  * Grounds a Meetings scope field in the organization's actual domains so
  * "Internal" is concrete. The dialog only displays — domains are managed on
- * the Context page, which the caption links to.
+ * the Context page, which the caption links to. Hidden while External is
+ * selected: no choice there depends on what "internal" means.
  */
-function useMeetingsHint(definition: PlaybookDefinition, tenantId: string) {
+function useMeetingsHint(
+  definition: PlaybookDefinition,
+  tenantId: string,
+  options: PlaybookOptionValues
+) {
   const hasMeetings =
     definition.options?.some((field) => field.key === "meetings") === true
   const profile = useQuery(
@@ -209,7 +214,7 @@ function useMeetingsHint(definition: PlaybookDefinition, tenantId: string) {
     hasMeetings ? { tenantId } : "skip"
   )
 
-  if (!hasMeetings) {
+  if (!hasMeetings || options.meetings === "external") {
     return undefined
   }
 
