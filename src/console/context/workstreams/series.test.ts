@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest"
+import { expect, test } from "vitest"
 import { buildPulse, pulseDayCount } from "./series"
 
 const now = new Date(2026, 6, 11, 15, 30).getTime()
@@ -12,62 +12,91 @@ const workstreams = [
   { id: "ws2", name: "Context: Organization" },
 ]
 
-describe("buildPulse", () => {
-  test("builds calendar columns ending today", () => {
-    const pulse = buildPulse([], [], now)
+function monthDay(date: Date) {
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+}
 
-    expect(pulse.days).toHaveLength(pulseDayCount)
-    expect(pulse.days.at(-1)?.isToday).toBe(true)
-    expect(pulse.days.at(-1)?.label).toBe("11")
-    expect(pulse.days[0]?.label).toBe(String(11 - (pulseDayCount - 1) + 30))
-    expect(pulse.days.filter((day) => day.isToday)).toHaveLength(1)
-  })
+test("builds calendar columns ending today", () => {
+  const pulse = buildPulse([], [], now)
 
-  test("buckets entries into lanes by current membership", () => {
-    const entries = [
-      { observedAt: daysAgo(0), effort: "Cards", workstreamId: "ws1" },
-      { observedAt: daysAgo(0, 23), effort: "Drive", workstreamId: "ws1" },
-      { observedAt: daysAgo(4), effort: "Places", workstreamId: "ws2" },
-      { observedAt: daysAgo(0), effort: "Playbooks", workstreamId: null },
-    ]
-    const pulse = buildPulse(entries, workstreams, now)
+  expect(pulse.days).toHaveLength(pulseDayCount)
+  expect(pulse.days.at(-1)?.isToday).toBe(true)
+  expect(pulse.days.at(-1)?.label).toBe("Today")
+  expect(pulse.days.at(-1)?.emphasized).toBe(true)
+  expect(pulse.days[0]?.label).toBe(monthDay(new Date(2026, 5, 28)))
+  expect(pulse.days[1]?.label).toBe("")
+  expect(pulse.days[2]?.label).toBe("30")
+  expect(pulse.days[3]?.label).toBe(monthDay(new Date(2026, 6, 1)))
+  expect(pulse.days[3]?.emphasized).toBe(true)
+  expect(pulse.days[4]?.label).toBe("")
+  expect(pulse.days[5]?.label).toBe("3")
+  expect(pulse.days[4]?.emphasized).toBe(false)
+  expect(pulse.days.filter((day) => day.isToday)).toHaveLength(1)
+})
 
-    expect(pulse.lanes.map((lane) => lane.name)).toEqual([
-      "Provider Integrations",
-      "Context: Organization",
-      "Unplaced",
-    ])
-    expect(pulse.lanes[0]?.cells.at(-1)?.count).toBe(2)
-    expect(pulse.lanes[0]?.cells.at(-1)?.efforts).toEqual(["Cards", "Drive"])
-    expect(pulse.lanes[1]?.cells.at(-5)?.count).toBe(1)
-    expect(pulse.lanes[2]?.cells.at(-1)?.efforts).toEqual(["Playbooks"])
-  })
+test("thins wide-window axis labels to anchors and Mondays", () => {
+  const pulse = buildPulse([], [], now, 30)
 
-  test("drops quiet lanes and out-of-window entries", () => {
-    const entries = [
-      {
-        observedAt: daysAgo(pulseDayCount),
-        effort: "Old",
-        workstreamId: "ws1",
-      },
-      { observedAt: daysAgo(1), effort: "Fresh", workstreamId: "ws2" },
-    ]
-    const pulse = buildPulse(entries, workstreams, now)
+  expect(pulse.days).toHaveLength(30)
+  expect(pulse.days[0]?.label).toBe(monthDay(new Date(2026, 5, 12)))
+  expect(pulse.days.at(-1)?.label).toBe("Today")
 
-    expect(pulse.lanes.map((lane) => lane.name)).toEqual([
-      "Context: Organization",
-    ])
-  })
+  const labeled = pulse.days.filter((day) => day.label !== "")
 
-  test("dedupes effort names within a day but counts every entry", () => {
-    const entries = [
-      { observedAt: daysAgo(2, 9), effort: "Cards", workstreamId: "ws1" },
-      { observedAt: daysAgo(2, 17), effort: "Cards", workstreamId: "ws1" },
-    ]
-    const pulse = buildPulse(entries, workstreams, now)
-    const cell = pulse.lanes[0]?.cells.at(-3)
+  for (const day of labeled.slice(1, -1)) {
+    const date = new Date(day.key)
 
-    expect(cell?.count).toBe(2)
-    expect(cell?.efforts).toEqual(["Cards"])
-  })
+    expect(date.getDay() === 1 || date.getDate() === 1).toBe(true)
+  }
+
+  expect(labeled.length).toBeGreaterThan(3)
+  expect(labeled.length).toBeLessThan(10)
+})
+
+test("buckets entries into lanes by current membership", () => {
+  const entries = [
+    { observedAt: daysAgo(0), effort: "Cards", workstreamId: "ws1" },
+    { observedAt: daysAgo(0, 23), effort: "Drive", workstreamId: "ws1" },
+    { observedAt: daysAgo(4), effort: "Places", workstreamId: "ws2" },
+    { observedAt: daysAgo(0), effort: "Playbooks", workstreamId: null },
+  ]
+  const pulse = buildPulse(entries, workstreams, now)
+
+  expect(pulse.lanes.map((lane) => lane.name)).toEqual([
+    "Provider Integrations",
+    "Context: Organization",
+    "Unplaced",
+  ])
+  expect(pulse.lanes[0]?.cells.at(-1)?.count).toBe(2)
+  expect(pulse.lanes[0]?.cells.at(-1)?.efforts).toEqual(["Cards", "Drive"])
+  expect(pulse.lanes[1]?.cells.at(-5)?.count).toBe(1)
+  expect(pulse.lanes[2]?.cells.at(-1)?.efforts).toEqual(["Playbooks"])
+})
+
+test("drops quiet lanes and out-of-window entries", () => {
+  const entries = [
+    {
+      observedAt: daysAgo(pulseDayCount),
+      effort: "Old",
+      workstreamId: "ws1",
+    },
+    { observedAt: daysAgo(1), effort: "Fresh", workstreamId: "ws2" },
+  ]
+  const pulse = buildPulse(entries, workstreams, now)
+
+  expect(pulse.lanes.map((lane) => lane.name)).toEqual([
+    "Context: Organization",
+  ])
+})
+
+test("dedupes effort names within a day but counts every entry", () => {
+  const entries = [
+    { observedAt: daysAgo(2, 9), effort: "Cards", workstreamId: "ws1" },
+    { observedAt: daysAgo(2, 17), effort: "Cards", workstreamId: "ws1" },
+  ]
+  const pulse = buildPulse(entries, workstreams, now)
+  const cell = pulse.lanes[0]?.cells.at(-3)
+
+  expect(cell?.count).toBe(2)
+  expect(cell?.efforts).toEqual(["Cards"])
 })

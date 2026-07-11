@@ -1,6 +1,7 @@
 export type PulseDay = {
   key: string
   label: string
+  emphasized: boolean
   title: string
   isToday: boolean
 }
@@ -38,9 +39,10 @@ export const pulseDayCount = 14
 export function buildPulse(
   entries: PulseEntry[],
   workstreams: { id: string; name: string }[],
-  now: number
+  now: number,
+  dayCount = pulseDayCount
 ): Pulse {
-  const days = pulseDays(now)
+  const days = pulseDays(now, dayCount)
   const lanes = [
     ...workstreams.map(({ id, name }) => buildLane(id, name, entries, days)),
     buildLane(null, "Unplaced", entries, days),
@@ -51,27 +53,69 @@ export function buildPulse(
 
 // Calendar-day columns, oldest first. Date arithmetic goes through the Date
 // constructor so daylight-saving shifts cannot skip or double a column.
-function pulseDays(now: number): PulseDay[] {
+function pulseDays(now: number, dayCount: number): PulseDay[] {
   const today = new Date(now)
-
-  return Array.from({ length: pulseDayCount }, (_, index) => {
+  const days = Array.from({ length: dayCount }, (_, index) => {
     const date = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate() - (pulseDayCount - 1 - index)
+      today.getDate() - (dayCount - 1 - index)
     )
+    const isToday = index === dayCount - 1
 
     return {
       key: date.toDateString(),
-      label: String(date.getDate()),
+      label: axisLabel(date, index, dayCount, isToday),
+      emphasized: isToday || date.getDate() === 1,
       title: date.toLocaleDateString(undefined, {
         weekday: "short",
         month: "short",
         day: "numeric",
       }),
-      isToday: index === pulseDayCount - 1,
+      isToday,
     }
   })
+
+  return days.map((day, index) => {
+    const previous = days[index - 1]
+
+    return previous !== undefined && isWideAnchor(previous.label)
+      ? { ...day, label: /^\d+$/.test(day.label) ? "" : day.label }
+      : day
+  })
+}
+
+// Anchor labels ("Jun 28", "Jul 1") are wider than one column, so the plain
+// number right after one is dropped rather than collided with.
+function isWideAnchor(label: string) {
+  return label.includes(" ")
+}
+
+// Axis copy: today by name, the window start and month starts anchored with
+// their month, bare day numbers between. Past two weeks the numbers thin to
+// Mondays so wide windows stay scannable.
+function axisLabel(
+  date: Date,
+  index: number,
+  dayCount: number,
+  isToday: boolean
+) {
+  if (isToday) {
+    return "Today"
+  }
+
+  if (index === 0 || date.getDate() === 1) {
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  if (dayCount > pulseDayCount && date.getDay() !== 1) {
+    return ""
+  }
+
+  return String(date.getDate())
 }
 
 function buildLane(
