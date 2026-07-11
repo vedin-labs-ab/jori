@@ -1,5 +1,4 @@
 import { useQuery } from "convex/react"
-import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import {
   Tooltip,
@@ -59,18 +58,17 @@ export function WorkstreamsPulse({
   }
 
   return (
-    <Card className="w-full max-w-2xl gap-2 px-4 py-3">
-      <PulseHeader
-        now={pulse.now}
-        reviewedAt={pulse.reviewedAt}
-        consolidationAt={pulse.consolidationAt}
-        unplaced={pulse.unplaced}
-      />
+    <Card className="w-fit max-w-full gap-1.5 px-4 py-3">
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="font-medium text-sm">Activity</span>
+        <span className="text-muted-foreground text-xs">Last 14 days</span>
+      </div>
       <div className="flex flex-col gap-px">
         {lanes.map((lane) => (
           <LaneRow
             key={lane.id ?? "unplaced"}
             lane={lane}
+            unplaced={lane.id === null ? pulse.unplaced : 0}
             onOpen={laneOpener(lane, workstreams, onOpen)}
           />
         ))}
@@ -89,6 +87,10 @@ export function WorkstreamsPulse({
           ))}
         </div>
       </div>
+      <div className="flex items-center justify-between gap-4 text-muted-foreground text-xs">
+        <span>{reviewedLabel(pulse.reviewedAt, pulse.now)}</span>
+        <span>{consolidationLabel(pulse.consolidationAt, pulse.now)}</span>
+      </div>
     </Card>
   )
 }
@@ -103,59 +105,18 @@ function laneOpener(
   return workstream === undefined ? undefined : () => onOpen(workstream)
 }
 
-function PulseHeader({
-  now,
-  reviewedAt,
-  consolidationAt,
-  unplaced,
-}: {
-  now: number
-  reviewedAt: number | null
-  consolidationAt: number | null
-  unplaced: number
-}) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-      <div className="flex items-baseline gap-2">
-        <span className="font-medium text-sm">Activity</span>
-        <span className="text-muted-foreground text-xs">Last 14 days</span>
-      </div>
-      <div className="flex items-center gap-3 text-muted-foreground text-xs">
-        <span>{reviewedLabel(reviewedAt, now)}</span>
-        <span>{consolidationLabel(consolidationAt, now)}</span>
-        {unplaced > 0 ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Badge
-                variant="outline"
-                className="border-informational/50 text-informational"
-              >
-                {unplaced} unplaced
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent>
-              Efforts not yet in a workstream. The weekly review places them or
-              proposes new workstreams.
-            </TooltipContent>
-          </Tooltip>
-        ) : null}
-      </div>
-    </div>
-  )
-}
-
 function LaneRow({
   lane,
+  unplaced,
   onOpen,
 }: {
   lane: PulseLane
+  unplaced: number
   onOpen: (() => void) | undefined
 }) {
   const label =
     onOpen === undefined ? (
-      <span className="truncate pr-3 font-medium text-informational text-xs">
-        {lane.name}
-      </span>
+      <UnplacedLabel count={unplaced} name={lane.name} />
     ) : (
       <button
         type="button"
@@ -173,6 +134,24 @@ function LaneRow({
         <DayCell key={cell.day.key} cell={cell} unplaced={lane.id === null} />
       ))}
     </div>
+  )
+}
+
+// The count lives on the lane label itself: the number of efforts waiting
+// for a workstream sits exactly where their activity renders.
+function UnplacedLabel({ count, name }: { count: number; name: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="truncate pr-3 font-medium text-informational text-xs">
+          {count > 0 ? `${name} (${count})` : name}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-60">
+        {count === 1 ? "1 effort" : `${count} efforts`} not yet in a workstream.
+        The weekly review places them or proposes new workstreams.
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
