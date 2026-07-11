@@ -15,7 +15,21 @@ const ignoredWorkspacePaths = [
 ]
 
 const config = defineConfig({
-  resolve: { tsconfigPaths: true },
+  resolve: {
+    tsconfigPaths: true,
+    // These packages coordinate through module-level state (React context,
+    // Radix dismissable-layer stacks), so every import — nested, prebundled,
+    // or from a stale optimizer graph — must resolve to one instance. Two
+    // copies of the dismissable layer split the dismiss stack: closing a
+    // dropdown then also closes the dialog under it.
+    dedupe: [
+      "react",
+      "react-dom",
+      "radix-ui",
+      "@radix-ui/react-dismissable-layer",
+      "@base-ui/react",
+    ],
+  },
   plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact()],
   build: {
     rollupOptions: {
