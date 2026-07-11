@@ -38,7 +38,12 @@ export type PlaybookDelivery = {
   default: DeliveryKind
   allowed: readonly DeliveryKind[]
   noun: string
+  /** "content" sends the full output in the message (the default);
+   *  "summary" sends a short digest plus a link to the full output. */
+  style?: DeliveryStyle
 }
+
+export type DeliveryStyle = "content" | "summary"
 
 export const deliveryKindLabels = {
   email: "Email",
@@ -73,12 +78,21 @@ export function deliveryInstruction(args: {
   destination: DeliveryDestination
   subject: string
   noun: string
+  style?: DeliveryStyle
 }): string {
   const { destination, noun, subject } = args
+  const summary = args.style === "summary"
+  const closing = "Unless there is nothing to send."
 
   if (destination.kind === "email") {
-    return `Email the ${noun} from my ${integrationLabels[destination.integration]} to ${destination.address} with the subject "${subject}" plus today's date. Unless there is nothing to send.`
+    const route = `from my ${integrationLabels[destination.integration]} to ${destination.address}`
+
+    return summary
+      ? `Email a short summary of the ${noun} ${route} with the subject "${subject}" plus what it covers, and include the link to the full ${noun}. ${closing}`
+      : `Email the ${noun} ${route} with the subject "${subject}" plus today's date. ${closing}`
   }
 
-  return `Post the ${noun} to #${destination.channelName} via Slack. Unless there is nothing to send.`
+  return summary
+    ? `Post a short summary of the ${noun} to #${destination.channelName} via Slack, with the link to the full ${noun}. ${closing}`
+    : `Post the ${noun} to #${destination.channelName} via Slack. ${closing}`
 }

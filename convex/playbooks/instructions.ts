@@ -1,6 +1,7 @@
 import { type PlaybookCapability } from "../../contracts/playbooks/capabilities"
 import {
   type DeliveryDestination,
+  type DeliveryStyle,
   deliveryInstruction,
 } from "../../contracts/playbooks/delivery"
 import { type PromptTemplateId, promptTemplates } from "../../prompts/generated"
@@ -20,6 +21,7 @@ export function renderPlaybookInstructions(args: {
   destination: DeliveryDestination
   subject: string
   noun: string
+  style?: DeliveryStyle
 }): string {
   const templateId = instructionTemplates[args.key]
 
@@ -33,6 +35,7 @@ export function renderPlaybookInstructions(args: {
       destination: args.destination,
       subject: args.subject,
       noun: args.noun,
+      style: args.style,
     }),
   })
 }

@@ -1,7 +1,9 @@
 import { type Integration, integrationLabels } from "@contracts/integrations"
 import { playbookSlotIntentLabels } from "@contracts/playbooks/capabilities"
-import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
-import { describePlaybookSchedule } from "@contracts/playbooks/schedule"
+import {
+  describePlaybookCadence,
+  type PlaybookDefinition,
+} from "@contracts/playbooks/catalog"
 import { CalendarClock, Globe } from "lucide-react"
 import { type ReactNode } from "react"
 import { SurfaceLogo } from "../automations/access/logo"
@@ -21,7 +23,7 @@ export function PlaybookMeta({
       <PlaybookSection label="Schedule">
         <div className="flex items-center gap-1.5">
           <CalendarClock className="size-3.5 shrink-0 text-muted-foreground" />
-          <span>{describePlaybookSchedule(definition.schedule)}</span>
+          <span>{describePlaybookCadence(definition)}</span>
           <NextRun enabled={row?.enabled} />
         </div>
       </PlaybookSection>

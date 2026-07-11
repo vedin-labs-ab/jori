@@ -1,7 +1,9 @@
 import { type Integration } from "@contracts/integrations"
-import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
+import {
+  describePlaybookCadence,
+  type PlaybookDefinition,
+} from "@contracts/playbooks/catalog"
 import { type DeliveryChoice } from "@contracts/playbooks/delivery"
-import { describePlaybookSchedule } from "@contracts/playbooks/schedule"
 import { useNavigate } from "@tanstack/react-router"
 import { useConvex, useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
@@ -156,7 +158,7 @@ function useCatalogActions(
           })
           toast.success(`${definition.title} is on`, {
             description: `Runs ${lowercaseFirst(
-              describePlaybookSchedule(definition.schedule)
+              describePlaybookCadence(definition)
             )}.`,
           })
         } catch (error) {
