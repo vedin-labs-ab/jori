@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { shareExpiresAt } from "../../../contracts/artifacts/share"
+import { isRecord } from "../../../contracts/json"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import {
@@ -238,10 +239,9 @@ function isShareRequest(
   value: unknown
 ): value is { artifactId: string; secret: string } {
   return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as { artifactId?: unknown }).artifactId === "string" &&
-    typeof (value as { secret?: unknown }).secret === "string"
+    isRecord(value) &&
+    typeof value.artifactId === "string" &&
+    typeof value.secret === "string"
   )
 }
 
