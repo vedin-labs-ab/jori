@@ -1,5 +1,4 @@
 import { EditorContent } from "@tiptap/react"
-import { AtSign } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAutomationInstructionsEditor } from "./editor/state"
 import { InstructionSuggestions } from "./suggestion/suggestions"
@@ -36,11 +35,10 @@ export function AutomationInstructionsField(
           data-automation-instructions-frame=""
         >
           <EditorContent className="min-w-0 max-w-full" editor={editor} />
-          <div className="flex min-h-9 items-center gap-2 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
-            <AtSign aria-hidden="true" className="size-3.5 shrink-0" />
-            <span>
-              Type integration names and matching badges appear automatically.
-            </span>
+          <div className="flex min-h-9 items-center gap-3 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
+            <SigilHint sigil="@">integrations</SigilHint>
+            <SigilHint sigil="/">skills</SigilHint>
+            <SigilHint sigil="#">tools</SigilHint>
           </div>
         </div>
         {isEmpty ? (
@@ -65,5 +63,16 @@ export function AutomationInstructionsField(
         </p>
       )}
     </div>
+  )
+}
+
+function SigilHint({ children, sigil }: { children: string; sigil: string }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <kbd className="inline-flex h-4 min-w-4 items-center justify-center rounded-sm border bg-background px-1 font-medium font-mono text-[0.625rem]">
+        {sigil}
+      </kbd>
+      {children}
+    </span>
   )
 }

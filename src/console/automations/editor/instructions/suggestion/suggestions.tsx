@@ -1,5 +1,9 @@
+import { BookOpen, Wrench } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { type AutomationSurfaceIntegration } from "../../../access"
+import {
+  type AutomationMentionSuggestion,
+  type AutomationSurfaceIntegration,
+} from "../../../access"
 import { SurfaceLogo } from "../../../access/logo"
 import { type InstructionSuggestionState } from "./suggest"
 
@@ -11,7 +15,7 @@ export function InstructionSuggestions({
 }: {
   listboxId: string
   onActiveIndexChange: (activeIndex: number) => void
-  onSelect: (integration: AutomationSurfaceIntegration) => void
+  onSelect: (suggestion: AutomationMentionSuggestion) => void
   state: InstructionSuggestionState | null
 }) {
   if (state === null) {
@@ -35,17 +39,47 @@ export function InstructionSuggestions({
               : "hover:bg-muted/70"
           )}
           id={`${listboxId}-${index}`}
-          key={suggestion.integration}
-          onClick={() => onSelect(suggestion.integration)}
+          key={`${suggestion.kind}:${suggestion.id}`}
+          onClick={() => onSelect(suggestion)}
           onMouseDown={(event) => event.preventDefault()}
           onMouseEnter={() => onActiveIndexChange(index)}
           role="option"
           type="button"
         >
-          <SurfaceLogo integration={suggestion.integration} />
-          <span className="font-medium">{suggestion.label}</span>
+          <SuggestionIcon suggestion={suggestion} />
+          <span className="min-w-0 truncate font-medium">
+            {suggestion.label}
+          </span>
+          {suggestion.hint === undefined ? null : (
+            <span className="ml-auto shrink-0 text-muted-foreground">
+              {suggestion.hint}
+            </span>
+          )}
         </button>
       ))}
     </div>
+  )
+}
+
+function SuggestionIcon({
+  suggestion,
+}: {
+  suggestion: AutomationMentionSuggestion
+}) {
+  if (suggestion.kind === "integration") {
+    return (
+      <SurfaceLogo
+        integration={suggestion.id as AutomationSurfaceIntegration}
+      />
+    )
+  }
+
+  const Icon = suggestion.kind === "skill" ? BookOpen : Wrench
+
+  return (
+    <Icon
+      aria-hidden="true"
+      className="size-3.5 shrink-0 text-muted-foreground"
+    />
   )
 }

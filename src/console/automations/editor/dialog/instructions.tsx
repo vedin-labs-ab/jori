@@ -11,6 +11,7 @@ export function AutomationInstructionsSection({
   onValueChange,
   permissions,
   policyKey,
+  skills,
   values,
 }: {
   error: string | undefined
@@ -21,6 +22,7 @@ export function AutomationInstructionsSection({
   ) => void
   permissions?: AutomationPolicyPermissions
   policyKey: string
+  skills: readonly string[]
   values: AutomationFormValues
 }) {
   return (
@@ -36,9 +38,10 @@ export function AutomationInstructionsSection({
         onBlur={onBlur}
         onValueChange={(next) => onValueChange(next.description, next.surfaces)}
         permissions={permissions}
-        placeholder="Summarize GitHub changes and post them to Slack."
+        placeholder="Summarize @GitHub changes and post them to @Slack."
         policyKey={policyKey}
         showAccessError={isAccessMarkerError(error)}
+        skills={skills}
         surfaces={values.surfaces}
       />
     </div>
@@ -49,8 +52,8 @@ function InstructionsHelp() {
   return (
     <FieldHelp label="Instructions help">
       <p>Write the work Milo should do.</p>
-      <p>Mention integrations like GitHub, Slack, Linear, or Gmail.</p>
-      <p>Choose tools from each badge.</p>
+      <p>Mention integrations with @, skills with /, and tools with #.</p>
+      <p>Choose tools from each integration badge.</p>
     </FieldHelp>
   )
 }

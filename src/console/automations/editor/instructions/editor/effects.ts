@@ -1,6 +1,10 @@
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction, useEffect, useRef } from "react"
 import {
+  type AutomationMentionCatalog,
+  type AutomationMentionSources,
+} from "../../../access"
+import {
   automationInstructionKey,
   createAutomationInstructionDocument,
   serializeAutomationInstructionDocument,
@@ -11,38 +15,69 @@ import {
   type InstructionRefs,
 } from "../types"
 
-export function useLatestInstructionRefs({
-  editor,
-  props,
-  refs,
-  suggestion,
-}: {
+/** The per-render sync pair: latest props into refs, external value into
+ *  the editor document. */
+export function useInstructionSync(args: {
+  catalog: AutomationMentionCatalog
   editor: Editor | null
   props: AutomationInstructionsFieldProps
   refs: InstructionRefs
+  setIsEmpty: Dispatch<SetStateAction<boolean>>
+  sources: AutomationMentionSources
+  suggestion: InstructionSuggestionState | null
+  updateSuggestion: (editor: Editor, activeIndex?: number) => void
+}) {
+  useLatestInstructionRefs(args)
+  useExternalInstructionValue({
+    ...args,
+    contentKey: `${args.props.policyKey}|${args.props.skills.join(",")}`,
+  })
+}
+
+function useLatestInstructionRefs({
+  catalog,
+  editor,
+  props,
+  refs,
+  sources,
+  suggestion,
+}: {
+  catalog: AutomationMentionCatalog
+  editor: Editor | null
+  props: AutomationInstructionsFieldProps
+  refs: InstructionRefs
+  sources: AutomationMentionSources
   suggestion: InstructionSuggestionState | null
 }) {
   useEffect(() => {
+    refs.catalog.current = catalog
     refs.editor.current = editor
     refs.onBlur.current = props.onBlur
     refs.onValueChange.current = props.onValueChange
     refs.permissions.current = props.permissions
+    refs.sources.current = sources
     refs.suggestion.current = suggestion
-  }, [editor, props, refs, suggestion])
+  }, [catalog, editor, props, refs, sources, suggestion])
 }
 
-export function useExternalInstructionValue({
+function useExternalInstructionValue({
+  catalog,
+  contentKey,
   editor,
   props,
   setIsEmpty,
   updateSuggestion,
 }: {
+  catalog: AutomationMentionCatalog
+  /** Rebuild marker for inputs the serialized value cannot express — the
+   *  policy snapshot and the mention catalogs. */
+  contentKey: string
   editor: Editor | null
   props: AutomationInstructionsFieldProps
   setIsEmpty: Dispatch<SetStateAction<boolean>>
   updateSuggestion: (editor: Editor, activeIndex?: number) => void
 }) {
-  const renderedPolicyKey = useRef(props.policyKey)
+  const renderedContentKey = useRef(contentKey)
 
   useEffect(() => {
     if (editor === null) {
@@ -53,15 +88,16 @@ export function useExternalInstructionValue({
     const currentValue = serializeAutomationInstructionDocument(
       editor.getJSON()
     )
-    const policyChanged = renderedPolicyKey.current !== props.policyKey
+    const keyChanged = renderedContentKey.current !== contentKey
 
     if (
       automationInstructionKey(nextValue) !==
         automationInstructionKey(currentValue) ||
-      policyChanged
+      keyChanged
     ) {
       editor.commands.setContent(
         createAutomationInstructionDocument({
+          catalog,
           description: props.value,
           permissions: props.permissions,
           surfaces: props.surfaces,
@@ -70,9 +106,9 @@ export function useExternalInstructionValue({
       )
       setIsEmpty(props.value === "")
       updateSuggestion(editor)
-      renderedPolicyKey.current = props.policyKey
+      renderedContentKey.current = contentKey
     }
-  }, [editor, props, setIsEmpty, updateSuggestion])
+  }, [catalog, contentKey, editor, props, setIsEmpty, updateSuggestion])
 }
 
 export function useInstructionAutocompleteA11y({

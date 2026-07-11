@@ -41,7 +41,8 @@ describe("automation payload", () => {
     ).toEqual({
       args: {
         name: "Weekly release summary",
-        instructions: "Summarize GitHub and post to Slack.",
+        // Legacy bare names sigilize on save, so stored text is canonical.
+        instructions: "Summarize @GitHub and post to @Slack.",
         scope: "personal",
         access: {
           integrations: [

@@ -54,7 +54,7 @@ describe("automation instructions marker colors", () => {
     tools,
   }) => {
     const field = renderInstructionsField({
-      description: "Post to GitHub.",
+      description: "Post to @GitHub.",
       surfaces: [{ integration: "github", tools: [...tools] }],
     })
 
@@ -78,7 +78,7 @@ describe("automation instructions marker colors", () => {
 describe("automation instructions blocked marker colors", () => {
   test("uses a blocked palette when policy denies automation access", async () => {
     const field = renderInstructionsField({
-      description: "Post to GitHub.",
+      description: "Post to @GitHub.",
       permissions: [
         {
           access: "read",

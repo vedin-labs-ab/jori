@@ -23,6 +23,7 @@ export function renderInstructionsField({
   permissions = instructionToolPermissions,
   policyKey = "test",
   showAccessError,
+  skills = ["meeting-prep"],
   surfaces,
 }: {
   description: string
@@ -32,6 +33,7 @@ export function renderInstructionsField({
   showAccessError?: Parameters<
     typeof AutomationInstructionsField
   >[0]["showAccessError"]
+  skills?: Parameters<typeof AutomationInstructionsField>[0]["skills"]
   surfaces: Parameters<typeof AutomationInstructionsField>[0]["surfaces"]
 }) {
   const onValueChange = vi.fn()
@@ -46,6 +48,7 @@ export function renderInstructionsField({
       permissions={permissions}
       policyKey={policyKey}
       showAccessError={showAccessError}
+      skills={skills}
       surfaces={surfaces}
       value={description}
     />

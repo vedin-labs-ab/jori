@@ -1,97 +1,135 @@
-import {
-  type AutomationSurfaceIntegration,
-  automationSurfaceIntegrations,
-} from "./catalog"
+import { automationSurfaceIntegrations } from "./catalog"
 
-export type MentionMatch = {
+// Mentions are explicit, sigil-prefixed tokens — `@Gmail`, `/meeting-prep`,
+// `#send_message`. Prose is never scanned for bare names, so an email like
+// person@gmail.com or the word "linear" can never become a mention.
+
+export const automationMentionKinds = ["integration", "skill", "tool"] as const
+export type AutomationMentionKind = (typeof automationMentionKinds)[number]
+
+export const automationMentionSigils = {
+  integration: "@",
+  skill: "/",
+  tool: "#",
+} as const satisfies Record<AutomationMentionKind, string>
+
+export type AutomationMentionEntry = {
+  id: string
+  /** Lowercase spellings accepted after the sigil, longest first. */
+  tokens: readonly string[]
+}
+
+export type AutomationMentionCatalog = Record<
+  AutomationMentionKind,
+  readonly AutomationMentionEntry[]
+>
+
+export type AutomationMention = {
   end: number
-  integration: AutomationSurfaceIntegration
+  id: string
+  kind: AutomationMentionKind
   start: number
 }
 
-const mentionAliases = automationSurfaceIntegrations
-  .flatMap((item) =>
-    [...item.aliases, item.label].map((alias) => ({
-      alias: alias.toLowerCase(),
-      integration: item.integration,
-    }))
-  )
-  .sort((left, right) => right.alias.length - left.alias.length)
+const integrationEntries: AutomationMentionEntry[] =
+  automationSurfaceIntegrations.map((item) => ({
+    id: item.integration,
+    tokens: sortTokens([item.label.toLowerCase(), ...item.aliases]),
+  }))
 
-export function readAutomationSurfaceMentionMatches(text: string) {
-  const matches = [
-    ...readExplicitMentionMatches(text),
-    ...readBareMentionMatches(text),
-  ]
+/** Integrations are static; skills and tools are supplied by the edge that
+ *  has them (the skills query and the resolved tool permissions). */
+export function createAutomationMentionCatalog(
+  input: { skills?: readonly string[]; tools?: readonly string[] } = {}
+): AutomationMentionCatalog {
+  return {
+    integration: integrationEntries,
+    skill: (input.skills ?? []).map((name) => ({
+      id: name,
+      tokens: [name.toLowerCase()],
+    })),
+    tool: (input.tools ?? []).map((tool) => ({
+      id: tool,
+      tokens: [tool.toLowerCase()],
+    })),
+  }
+}
 
-  return matches
-    .filter(
-      (match, index) =>
-        !matches.some(
-          (candidate, candidateIndex) =>
-            candidateIndex < index && overlaps(candidate, match)
-        )
-    )
-    .sort((left, right) => left.start - right.start)
+export const emptyAutomationMentionCatalog = createAutomationMentionCatalog()
+
+export function readAutomationMentions(
+  text: string,
+  catalog: AutomationMentionCatalog
+): AutomationMention[] {
+  const mentions: AutomationMention[] = []
+
+  for (let index = 0; index < text.length; index += 1) {
+    const kind = sigilKind(text[index])
+
+    if (kind === null || !canStartMention(kind, text, index)) {
+      continue
+    }
+
+    const mention = matchMention(text, index, kind, catalog[kind])
+
+    if (mention !== null) {
+      mentions.push(mention)
+      index = mention.end - 1
+    }
+  }
+
+  return mentions
 }
 
 export function isMentionNameCharacter(character: string | undefined) {
   return character !== undefined && /[a-z0-9_-]/i.test(character)
 }
 
-function readExplicitMentionMatches(text: string) {
-  const matches: MentionMatch[] = []
-
-  for (let index = 0; index < text.length; index += 1) {
-    if (text[index] !== "@") {
-      continue
-    }
-
-    const match = matchMention(text, index)
-
-    if (match !== null) {
-      matches.push(match)
-      index = match.end - 1
+export function sigilKind(
+  character: string | undefined
+): AutomationMentionKind | null {
+  for (const kind of automationMentionKinds) {
+    if (automationMentionSigils[kind] === character) {
+      return kind
     }
   }
 
-  return matches
+  return null
 }
 
-function readBareMentionMatches(text: string) {
-  const matches: MentionMatch[] = []
+/** `@` only needs a non-name character before it (emails stay inert);
+ *  `/` and `#` require whitespace so URLs, paths, and headings never fire. */
+export function canStartMention(
+  kind: AutomationMentionKind,
+  text: string,
+  sigilIndex: number
+) {
+  const previous = text[sigilIndex - 1]
 
-  for (let index = 0; index < text.length; index += 1) {
-    if (!canStartBareMention(text, index)) {
-      continue
-    }
-
-    const match = matchBareMention(text, index)
-
-    if (match !== null) {
-      matches.push(match)
-      index = match.end - 1
-    }
+  if (kind === "integration") {
+    return !isMentionNameCharacter(previous)
   }
 
-  return matches
+  return previous === undefined || /\s/.test(previous)
 }
 
-function matchMention(text: string, start: number): MentionMatch | null {
-  const tail = text
-    .slice(start + 1)
-    .toLowerCase()
-    .replace(/\s+/g, " ")
+function matchMention(
+  text: string,
+  sigilIndex: number,
+  kind: AutomationMentionKind,
+  entries: readonly AutomationMentionEntry[]
+): AutomationMention | null {
+  const tail = text.slice(sigilIndex + 1).toLowerCase()
 
-  for (const candidate of mentionAliases) {
-    if (
-      tail.startsWith(candidate.alias) &&
-      isMentionBoundary(tail[candidate.alias.length])
-    ) {
-      return {
-        start,
-        end: start + 1 + candidate.alias.length,
-        integration: candidate.integration,
+  for (const entry of entries) {
+    for (const token of entry.tokens) {
+      if (tail.startsWith(token) && isMentionEnd(tail[token.length])) {
+        return {
+          end: sigilIndex + 1 + token.length,
+          id: entry.id,
+          kind,
+          start: sigilIndex,
+        }
       }
     }
   }
@@ -99,39 +137,12 @@ function matchMention(text: string, start: number): MentionMatch | null {
   return null
 }
 
-function matchBareMention(text: string, start: number): MentionMatch | null {
-  const tail = text.slice(start).toLowerCase()
-
-  for (const candidate of mentionAliases) {
-    if (
-      tail.startsWith(candidate.alias) &&
-      isMentionBoundary(tail[candidate.alias.length])
-    ) {
-      return {
-        start,
-        end: start + candidate.alias.length,
-        integration: candidate.integration,
-      }
-    }
-  }
-
-  return null
+function isMentionEnd(character: string | undefined) {
+  return character === undefined || !/[a-z0-9_]/i.test(character)
 }
 
-export function canStartBareMention(text: string, start: number) {
-  if (!/[a-z0-9]/i.test(text[start])) {
-    return false
-  }
-
-  const previous = text[start - 1]
-
-  return previous !== "@" && !isMentionNameCharacter(previous)
-}
-
-function isMentionBoundary(character: string | undefined) {
-  return character === undefined || !/[a-z0-9]/.test(character)
-}
-
-export function overlaps(left: MentionMatch, right: MentionMatch) {
-  return left.start < right.end && right.start < left.end
+function sortTokens(tokens: readonly string[]) {
+  return [...new Set(tokens)].sort(
+    (left, right) => right.length - left.length || left.localeCompare(right)
+  )
 }

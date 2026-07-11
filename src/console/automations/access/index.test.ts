@@ -1,167 +1,194 @@
 import { describe, expect, test } from "vitest"
 import { type ToolPermission } from "../../permissions/types"
 import {
-  findActiveAutomationSurfaceMention,
+  createAutomationMentionCatalog,
+  findActiveAutomationMention,
   findAutomationSurfaceMentions,
-  getAutomationSurfaceMentionParts,
-  getAutomationSurfaceSuggestions,
-  normalizeAutomationSurfaceMentions,
-  normalizeCompletedAutomationSurfaceMentions,
-  replaceAutomationSurfaceMention,
+  findCompletedAutomationMention,
+  getAutomationMentionSuggestions,
+  readAutomationMentions,
+  sigilizeAutomationMentions,
   syncAutomationSurfaces,
 } from "."
 
-describe("automation integration marker parsing", () => {
-  test("recognizes case-insensitive aliases in mention markers", () => {
+const catalog = createAutomationMentionCatalog({
+  skills: ["meeting-prep", "release-notes"],
+  tools: ["share_artifact", "github_get_issue"],
+})
+
+describe("explicit mention scanning", () => {
+  test("recognizes sigil tokens for all three kinds", () => {
+    expect(
+      readAutomationMentions(
+        "Review @github, run /meeting-prep, then #share_artifact.",
+        catalog
+      )
+    ).toEqual([
+      { end: 14, id: "github", kind: "integration", start: 7 },
+      { end: 33, id: "meeting-prep", kind: "skill", start: 20 },
+      { end: 55, id: "share_artifact", kind: "tool", start: 40 },
+    ])
+  })
+
+  test("matches multi-word aliases case-insensitively", () => {
     expect(
       findAutomationSurfaceMentions(
-        "Review @github, book time in @google calendar, then email via @outlook."
+        "Book time in @google calendar, then email via @Outlook.",
+        catalog
       )
-    ).toEqual(["github", "googleCalendar", "microsoftEmail"])
+    ).toEqual(["googleCalendar", "microsoftEmail"])
   })
 
-  test("recognizes bare integration names as markers", () => {
+  test("never scans bare prose", () => {
     expect(
       findAutomationSurfaceMentions(
-        "Review github, book time in google calendar, then email via outlook."
+        "Review github and email via outlook.",
+        catalog
       )
-    ).toEqual(["github", "googleCalendar", "microsoftEmail"])
+    ).toEqual([])
   })
 
-  test("normalizes recognized markers to canonical labels", () => {
-    expect(
-      normalizeAutomationSurfaceMentions(
-        "Post to @slack and create @notion page"
-      )
-    ).toBe("Post to Slack and create Notion page")
+  test("emails, URLs, paths, and headings stay inert", () => {
+    const text = [
+      "Mail person@gmail.com about https://acme.com/meeting-prep.",
+      "# release-notes",
+      "See docs/meeting-prep and read/write flows.",
+    ].join("\n")
+
+    expect(readAutomationMentions(text, catalog)).toEqual([])
   })
 
-  test("normalizes bare markers to canonical labels", () => {
+  test("skill and tool sigils fire only after whitespace", () => {
     expect(
-      normalizeAutomationSurfaceMentions("Post to slack and create notion page")
-    ).toBe("Post to Slack and create Notion page")
+      readAutomationMentions("Run /meeting-prep and #share_artifact", catalog)
+    ).toHaveLength(2)
+    expect(
+      readAutomationMentions("Run x/meeting-prep and x#share_artifact", catalog)
+    ).toEqual([])
   })
+})
 
-  test("normalizes completed markers as soon as the user types a boundary", () => {
+describe("legacy text sigilization", () => {
+  test("rewrites exact bare names and fuzzy @-typos to sigil tokens", () => {
     expect(
-      normalizeCompletedAutomationSurfaceMentions("Post to @github, then stop")
-    ).toBe("Post to GitHub, then stop")
-
-    expect(
-      normalizeCompletedAutomationSurfaceMentions("Post to github, then stop")
-    ).toBe("Post to GitHub, then stop")
-  })
-
-  test("keeps active marker text untouched until a boundary is typed", () => {
-    expect(normalizeCompletedAutomationSurfaceMentions("Post to @github")).toBe(
-      "Post to @github"
+      sigilizeAutomationMentions("Post to slack and create a notion page")
+    ).toBe("Post to @Slack and create a @Notion page")
+    expect(sigilizeAutomationMentions("Open @githb now")).toBe(
+      "Open @GitHub now"
     )
-    expect(normalizeCompletedAutomationSurfaceMentions("Post to github")).toBe(
-      "Post to github"
+  })
+
+  test("leaves sigil tokens, near-misses, and prose untouched", () => {
+    expect(sigilizeAutomationMentions("Post to @Slack, then stop")).toBe(
+      "Post to @Slack, then stop"
+    )
+    expect(sigilizeAutomationMentions("Mail person@gmail.com about it")).toBe(
+      "Mail person@gmail.com about it"
+    )
+    expect(sigilizeAutomationMentions("Use the linear-time flow")).toBe(
+      "Use the linear-time flow"
     )
   })
 })
 
-describe("automation integration marker fuzzy normalization", () => {
-  test("normalizes close marker typos only when the match is clear", () => {
-    expect(normalizeCompletedAutomationSurfaceMentions("Open @githb ")).toBe(
-      "Open GitHub "
-    )
-    expect(normalizeCompletedAutomationSurfaceMentions("Open @githbu ")).toBe(
-      "Open GitHub "
-    )
-    expect(normalizeCompletedAutomationSurfaceMentions("Use @go ")).toBe(
-      "Use @go "
-    )
-    expect(normalizeCompletedAutomationSurfaceMentions("Open githb ")).toBe(
-      "Open GitHub "
-    )
-    expect(normalizeCompletedAutomationSurfaceMentions("Open githbu ")).toBe(
-      "Open GitHub "
-    )
-    expect(normalizeCompletedAutomationSurfaceMentions("Use git ")).toBe(
-      "Use git "
-    )
-    expect(normalizeCompletedAutomationSurfaceMentions("Open githxx ")).toBe(
-      "Open githxx "
-    )
+describe("completed mention detection", () => {
+  test("finds a finished explicit token at the end of the text", () => {
+    expect(findCompletedAutomationMention("Post to @github", catalog)).toEqual({
+      end: 15,
+      id: "github",
+      kind: "integration",
+      start: 8,
+    })
+    expect(
+      findCompletedAutomationMention("Run /meeting-prep", catalog)
+    ).toEqual({ end: 17, id: "meeting-prep", kind: "skill", start: 4 })
   })
-})
 
-describe("automation integration marker autocomplete", () => {
-  test("finds active marker queries for autocomplete", () => {
-    expect(findActiveAutomationSurfaceMention("Send to @li", 11)).toEqual({
+  test("accepts fuzzy spellings for integrations only", () => {
+    expect(findCompletedAutomationMention("Open @githb", catalog)).toEqual({
       end: 11,
-      kind: "explicit",
+      id: "github",
+      kind: "integration",
+      start: 5,
+    })
+    expect(findCompletedAutomationMention("Open github", catalog)).toBeNull()
+    expect(
+      findCompletedAutomationMention("Run /meeting-prp", catalog)
+    ).toBeNull()
+  })
+})
+
+describe("active mention autocomplete", () => {
+  test("finds the sigil-started query under the cursor per kind", () => {
+    expect(findActiveAutomationMention("Send to @li", 11)).toEqual({
+      end: 11,
+      kind: "integration",
       query: "li",
       start: 8,
     })
-    expect(findActiveAutomationSurfaceMention("Send to @li now", 15)).toBeNull()
-  })
-
-  test("starts bare autocomplete after three characters", () => {
-    expect(findActiveAutomationSurfaceMention("Send gi", 7)).toBeNull()
-    expect(findActiveAutomationSurfaceMention("Send git", 8)).toEqual({
+    expect(findActiveAutomationMention("Run /mee", 8)).toEqual({
       end: 8,
-      kind: "bare",
-      query: "git",
-      start: 5,
+      kind: "skill",
+      query: "mee",
+      start: 4,
+    })
+    expect(findActiveAutomationMention("Use #sha", 8)).toEqual({
+      end: 8,
+      kind: "tool",
+      query: "sha",
+      start: 4,
     })
   })
 
-  test("suggests integrations from prefixes and aliases", () => {
-    expect(
-      getAutomationSurfaceSuggestions("li").map((item) => item.integration)
-    ).toEqual(["linear"])
+  test("never activates inside emails, URLs, or bare words", () => {
+    expect(findActiveAutomationMention("person@gm", 9)).toBeNull()
+    expect(findActiveAutomationMention("https://ac", 10)).toBeNull()
+    expect(findActiveAutomationMention("and/or", 6)).toBeNull()
+    expect(findActiveAutomationMention("Send git", 8)).toBeNull()
+  })
+})
 
-    expect(
-      getAutomationSurfaceSuggestions("go").map((item) => item.integration)
-    ).toEqual(expect.arrayContaining(["gmail", "googleCalendar"]))
+describe("mention suggestions", () => {
+  const sources = {
+    permissions: [
+      toolPermission("github", "github_get_issue", "read", "allowed"),
+      toolPermission("github", "github_delete_issue", "write", "blocked"),
+    ],
+    skills: ["meeting-prep", "release-notes"],
+  }
+
+  test("ranks integrations by prefix and alias", () => {
+    const items = getAutomationMentionSuggestions(
+      { kind: "integration", query: "li" },
+      sources
+    )
+
+    expect(items.map((item) => item.id)).toEqual(["linear"])
   })
 
-  test("replaces the active marker with a canonical mention", () => {
+  test("ranks skills by name and lists all on empty query", () => {
     expect(
-      replaceAutomationSurfaceMention(
-        "Send to @li",
-        { end: 11, kind: "explicit", query: "li", start: 8 },
-        "linear"
-      )
-    ).toEqual({
-      cursor: 15,
-      text: "Send to Linear ",
-    })
-
+      getAutomationMentionSuggestions(
+        { kind: "skill", query: "rel" },
+        sources
+      ).map((item) => item.id)
+    ).toEqual(["release-notes"])
     expect(
-      replaceAutomationSurfaceMention(
-        "Send git",
-        { end: 8, kind: "bare", query: "git", start: 5 },
-        "github"
-      )
-    ).toEqual({
-      cursor: 12,
-      text: "Send GitHub ",
-    })
+      getAutomationMentionSuggestions({ kind: "skill", query: "" }, sources)
+    ).toHaveLength(2)
   })
 
-  test("splits recognized markers for highlighted rendering", () => {
-    expect(getAutomationSurfaceMentionParts("Use github and @Slack.")).toEqual([
-      { text: "Use " },
-      { integration: "github", text: "github" },
-      { text: " and " },
-      { integration: "slack", text: "@Slack" },
-      { text: "." },
-    ])
+  test("offers only selectable tools", () => {
+    expect(
+      getAutomationMentionSuggestions(
+        { kind: "tool", query: "github" },
+        sources
+      ).map((item) => item.id)
+    ).toEqual(["github_get_issue"])
   })
 })
 
 describe("automation integration tool sync", () => {
-  const permissions = [
-    toolPermission("github", "github_get_issue", "read", "allowed"),
-    toolPermission("github", "github_add_issue_comment", "write", "required"),
-    toolPermission("github", "github_close_issue", "write", "prompted"),
-    toolPermission("github", "github_delete_issue", "write", "blocked"),
-  ] satisfies ToolPermission[]
-
   test("preserves selected tools for existing markers", () => {
     expect(
       syncAutomationSurfaces("@GitHub to @Slack", [
@@ -174,7 +201,13 @@ describe("automation integration tool sync", () => {
   })
 
   test("adds new markers with selectable tools", () => {
-    expect(syncAutomationSurfaces("GitHub", [], permissions)).toEqual([
+    const permissions = [
+      toolPermission("github", "github_get_issue", "read", "allowed"),
+      toolPermission("github", "github_add_issue_comment", "write", "required"),
+      toolPermission("github", "github_close_issue", "write", "prompted"),
+    ] satisfies ToolPermission[]
+
+    expect(syncAutomationSurfaces("@GitHub", [], permissions)).toEqual([
       {
         integration: "github",
         tools: ["github_get_issue", "github_add_issue_comment"],
@@ -182,8 +215,9 @@ describe("automation integration tool sync", () => {
     ])
   })
 
-  test("adds new markers without selected tools while permissions load", () => {
-    expect(syncAutomationSurfaces("GitHub", [])).toEqual([
+  test("ignores bare names while permissions load", () => {
+    expect(syncAutomationSurfaces("GitHub", [])).toEqual([])
+    expect(syncAutomationSurfaces("@GitHub", [])).toEqual([
       { integration: "github", tools: [] },
     ])
   })

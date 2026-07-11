@@ -1,3 +1,4 @@
+import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
 import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { api } from "../../../../../convex/_generated/api"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
 import { createAutomationDialogActions } from "../actions"
@@ -60,6 +62,13 @@ export function AutomationDialog({
     permissions,
     values,
   })
+  const skillList = useQuery(api.skills.catalog.list, { tenantId })
+  const skills =
+    skillList !== undefined &&
+    !Array.isArray(skillList) &&
+    skillList.status === "ready"
+      ? skillList.skills.map((skill) => skill.name)
+      : []
   const instructionsError = readAutomationInstructionsError(
     error,
     values.instructions
@@ -103,6 +112,7 @@ export function AutomationDialog({
             onValueChange={actions.updateInstructions}
             permissions={permissions}
             policyKey={policyKey}
+            skills={skills}
             values={values}
           />
           <AccessFields

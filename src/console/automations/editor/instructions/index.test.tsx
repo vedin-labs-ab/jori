@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
+import { emptyAutomationMentionCatalog } from "../../access"
 import {
   createAutomationInstructionDocument,
   serializeAutomationInstructionDocument,
@@ -12,7 +13,8 @@ afterEach(cleanup)
 describe("automation instructions document", () => {
   test("converts parsed integration mentions into inline badge nodes", () => {
     const document = createAutomationInstructionDocument({
-      description: "Review @github and post to slack.",
+      catalog: emptyAutomationMentionCatalog,
+      description: "Review @github and post to @slack.",
       surfaces: [
         { integration: "github", tools: ["github_get_issue"] },
         { integration: "slack", tools: ["conversations_add_message"] },
@@ -20,7 +22,7 @@ describe("automation instructions document", () => {
     })
 
     expect(serializeAutomationInstructionDocument(document)).toEqual({
-      description: "Review GitHub and post to Slack.",
+      description: "Review @GitHub and post to @Slack.",
       surfaces: [
         { integration: "github", tools: ["github_get_issue"] },
         { integration: "slack", tools: ["conversations_add_message"] },
@@ -30,7 +32,8 @@ describe("automation instructions document", () => {
 
   test("defaults new integrations to selectable tools", () => {
     const document = createAutomationInstructionDocument({
-      description: "Send to Slack.",
+      catalog: emptyAutomationMentionCatalog,
+      description: "Send to @Slack.",
       permissions: [
         toolPermission(
           "slack",
@@ -92,7 +95,7 @@ describe("automation instructions field layout", () => {
 
   test("constrains long unbroken text inside the editor", async () => {
     const field = renderInstructionsField({
-      description: "Post to GitHub then qweqweqweqweqweqweqweqweqweqweqweqwe.",
+      description: "Post to @GitHub then qweqweqweqweqweqweqweqweqweqweqweqwe.",
       surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
@@ -107,7 +110,7 @@ describe("automation instructions field layout", () => {
 
   test("keeps text rows stable when badges are present", async () => {
     const field = renderInstructionsField({
-      description: "Post GitHub results to Slack.",
+      description: "Post @GitHub results to @Slack.",
       surfaces: [
         { integration: "github", tools: ["github_get_issue"] },
         { integration: "slack", tools: ["conversations_add_message"] },
@@ -141,7 +144,7 @@ describe("automation instructions field layout", () => {
 describe("automation instructions marker divider", () => {
   test("uses a plain unrounded divider outside shadcn slot styling", async () => {
     const field = renderInstructionsField({
-      description: "Post GitHub results to Slack.",
+      description: "Post @GitHub results to @Slack.",
       surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
@@ -167,9 +170,9 @@ describe("automation instructions field footer", () => {
     })
 
     expect(await screen.findByRole("textbox")).toBeDefined()
-    expect(field.container.textContent).toContain(
-      "Type integration names and matching badges appear automatically."
-    )
+    expect(field.container.textContent).toContain("integrations")
+    expect(field.container.textContent).toContain("skills")
+    expect(field.container.textContent).toContain("tools")
 
     const footer = field.container.querySelector(
       "[data-automation-instructions-frame] > div:last-child"
@@ -201,7 +204,7 @@ describe("automation instructions field", () => {
 
   test("opens tool selection from the inline tool count", async () => {
     const field = renderInstructionsField({
-      description: "Post to GitHub.",
+      description: "Post to @GitHub.",
       surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
@@ -218,7 +221,7 @@ describe("automation instructions field", () => {
 
     await waitFor(() => {
       expect(field.onValueChange).toHaveBeenLastCalledWith({
-        description: "Post to GitHub.",
+        description: "Post to @GitHub.",
         surfaces: [
           {
             integration: "github",
@@ -231,7 +234,7 @@ describe("automation instructions field", () => {
 
   test("removes a marker from its integration icon button", async () => {
     const field = renderInstructionsField({
-      description: "Post to GitHub.",
+      description: "Post to @GitHub.",
       surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
@@ -255,7 +258,7 @@ describe("automation instructions field", () => {
 describe("automation instructions tool dialog", () => {
   test("selects all selectable tools in a tool group", async () => {
     const field = renderInstructionsField({
-      description: "Post to GitHub.",
+      description: "Post to @GitHub.",
       surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
@@ -270,7 +273,7 @@ describe("automation instructions tool dialog", () => {
 
     await waitFor(() => {
       expect(field.onValueChange).toHaveBeenLastCalledWith({
-        description: "Post to GitHub.",
+        description: "Post to @GitHub.",
         surfaces: [
           {
             integration: "github",

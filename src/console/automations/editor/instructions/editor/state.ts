@@ -1,21 +1,26 @@
 import { type Editor, useEditor } from "@tiptap/react"
-import StarterKit from "@tiptap/starter-kit"
 import {
   type Dispatch,
   type SetStateAction,
   useCallback,
   useId,
+  useMemo,
   useRef,
   useState,
 } from "react"
-import { type AutomationSurfaceIntegration } from "../../../access"
+import {
+  type AutomationMentionCatalog,
+  type AutomationMentionSources,
+  type AutomationMentionSuggestion,
+  createAutomationMentionCatalog,
+} from "../../../access"
 import {
   createAutomationInstructionDocument,
   serializeAutomationInstructionDocument,
 } from "../document"
 import {
-  insertSurfaceSuggestion,
-  replaceCompletedSurfaceMention,
+  insertMentionSuggestion,
+  replaceCompletedMention,
 } from "../suggestion/input"
 import { handleSuggestionKey, updateSuggestionIndex } from "../suggestion/keys"
 import {
@@ -27,28 +32,25 @@ import {
   type InstructionRefs,
 } from "../types"
 import {
-  useExternalInstructionValue,
   useInstructionAutocompleteA11y,
+  useInstructionSync,
   useInstructionValidationA11y,
-  useLatestInstructionRefs,
 } from "./effects"
-import { AutomationSurfaceExtension } from "./extension"
+import { createInstructionExtensions } from "./extension"
 
 export function useAutomationInstructionsEditor(
   props: AutomationInstructionsFieldProps
 ) {
-  const refs = useInstructionRefs(props)
+  const { catalog, sources } = useMentionSources(props)
+  const refs = useInstructionRefs(props, catalog, sources)
   const listboxId = useId()
   const [isEmpty, setIsEmpty] = useState(props.value === "")
   const [suggestion, setSuggestion] =
     useState<InstructionSuggestionState | null>(null)
-  const updateSuggestion = useCallback(
-    (editor: Editor, activeIndex = refs.suggestion.current?.activeIndex ?? 0) =>
-      setSuggestion(getInstructionSuggestionState(editor, activeIndex)),
-    [refs.suggestion]
-  )
+  const updateSuggestion = useUpdateSuggestion(refs, setSuggestion)
   const editor = useEditor(
     createEditorOptions({
+      catalog,
       props,
       refs,
       setIsEmpty,
@@ -57,8 +59,16 @@ export function useAutomationInstructionsEditor(
     })
   )
 
-  useLatestInstructionRefs({ editor, props, refs, suggestion })
-  useExternalInstructionValue({ editor, props, setIsEmpty, updateSuggestion })
+  useInstructionSync({
+    catalog,
+    editor,
+    props,
+    refs,
+    setIsEmpty,
+    sources,
+    suggestion,
+    updateSuggestion,
+  })
   useInstructionAutocompleteA11y({ editor, listboxId, suggestion })
   useInstructionValidationA11y({
     editor,
@@ -67,11 +77,11 @@ export function useAutomationInstructionsEditor(
   })
 
   const selectSuggestion = useCallback(
-    (integration: AutomationSurfaceIntegration) =>
-      insertSurfaceSuggestion({
+    (item: AutomationMentionSuggestion) =>
+      insertMentionSuggestion({
         editor,
         permissions: refs.permissions.current,
-        integration,
+        suggestion: item,
         setSuggestion,
         state: suggestion,
       }),
@@ -92,23 +102,63 @@ export function useAutomationInstructionsEditor(
 const editorContentClassName =
   "whitespace-pre-wrap break-words text-foreground selection:bg-informational/20"
 
-function useInstructionRefs(props: AutomationInstructionsFieldProps) {
+function useUpdateSuggestion(
+  refs: InstructionRefs,
+  setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
+) {
+  return useCallback(
+    (editor: Editor, activeIndex = refs.suggestion.current?.activeIndex ?? 0) =>
+      setSuggestion(
+        getInstructionSuggestionState(editor, refs.sources.current, activeIndex)
+      ),
+    [refs, setSuggestion]
+  )
+}
+
+function useMentionSources(props: AutomationInstructionsFieldProps) {
+  const catalog = useMemo(
+    () =>
+      createAutomationMentionCatalog({
+        skills: props.skills,
+        tools: Array.isArray(props.permissions)
+          ? props.permissions.map((permission) => permission.tool)
+          : [],
+      }),
+    [props.skills, props.permissions]
+  )
+  const sources = useMemo(
+    () => ({ permissions: props.permissions, skills: props.skills }),
+    [props.permissions, props.skills]
+  )
+
+  return { catalog, sources }
+}
+
+function useInstructionRefs(
+  props: AutomationInstructionsFieldProps,
+  catalog: AutomationMentionCatalog,
+  sources: AutomationMentionSources
+): InstructionRefs {
   return {
+    catalog: useRef(catalog),
     editor: useRef<Editor | null>(null),
     onBlur: useRef(props.onBlur),
     onValueChange: useRef(props.onValueChange),
     permissions: useRef(props.permissions),
+    sources: useRef(sources),
     suggestion: useRef<InstructionSuggestionState | null>(null),
   }
 }
 
 function createEditorOptions({
+  catalog,
   props,
   refs,
   setIsEmpty,
   setSuggestion,
   updateSuggestion,
 }: {
+  catalog: AutomationMentionCatalog
   props: AutomationInstructionsFieldProps
   refs: InstructionRefs
   setIsEmpty: Dispatch<SetStateAction<boolean>>
@@ -117,6 +167,7 @@ function createEditorOptions({
 }): Parameters<typeof useEditor>[0] {
   return {
     content: createAutomationInstructionDocument({
+      catalog,
       description: props.value,
       permissions: props.permissions,
       surfaces: props.surfaces,
@@ -128,7 +179,7 @@ function createEditorOptions({
       refs,
       setSuggestion,
     }),
-    extensions: createExtensions(refs),
+    extensions: createInstructionExtensions(refs),
     immediatelyRender: false,
     onBlur: () => refs.onBlur.current(),
     onSelectionUpdate: ({ editor }) => updateSuggestion(editor),
@@ -141,31 +192,6 @@ function createEditorOptions({
     },
   }
 }
-
-function createExtensions(refs: InstructionRefs) {
-  return [
-    starterKitExtension,
-    AutomationSurfaceExtension.configure({
-      getPermissions: () => refs.permissions.current,
-    }),
-  ]
-}
-
-const starterKitExtension = StarterKit.configure({
-  blockquote: false,
-  bold: false,
-  bulletList: false,
-  code: false,
-  codeBlock: false,
-  dropcursor: false,
-  gapcursor: false,
-  heading: false,
-  horizontalRule: false,
-  italic: false,
-  listItem: false,
-  orderedList: false,
-  strike: false,
-})
 
 function createEditorProps({
   error,
@@ -207,7 +233,8 @@ function createEditorProps({
       to: number,
       text: string
     ) =>
-      replaceCompletedSurfaceMention({
+      replaceCompletedMention({
+        catalog: refs.catalog.current,
         from,
         permissions: refs.permissions.current,
         text,
