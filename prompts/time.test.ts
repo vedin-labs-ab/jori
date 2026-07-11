@@ -1,5 +1,10 @@
 import { expect, test } from "vitest"
-import { createPromptTime, formatAge, formatMonth } from "./time"
+import {
+  createLocalPromptTime,
+  createPromptTime,
+  formatAge,
+  formatMonth,
+} from "./time"
 
 const minuteMs = 60_000
 const hourMs = 60 * minuteMs
@@ -9,6 +14,18 @@ test("formats the UTC weekday and second-precision timestamp", () => {
   expect(createPromptTime(new Date("2026-06-12T07:30:00.123Z"))).toBe(
     "Friday, 2026-06-12T07:30:00Z"
   )
+})
+
+test("formats local time in an IANA zone with its offset", () => {
+  const now = new Date("2026-07-11T19:16:00Z")
+
+  expect(createLocalPromptTime("Europe/Stockholm", now)).toBe(
+    "Saturday, 2026-07-11 21:16 Europe/Stockholm (GMT+2)"
+  )
+  expect(createLocalPromptTime("America/New_York", now)).toBe(
+    "Saturday, 2026-07-11 15:16 America/New_York (GMT-4)"
+  )
+  expect(createLocalPromptTime("Not/AZone", now)).toBeNull()
 })
 
 test("formats ages across the whole scale", () => {

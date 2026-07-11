@@ -18,6 +18,7 @@ import {
   resolveIdentity,
   resolvePersonByIdentity,
 } from "./links"
+import { updatePersonTimezone } from "./timezone"
 
 const verifiedClerkEmailValidator = v.object({
   externalId: v.string(),
@@ -106,6 +107,7 @@ export const sync = internalMutation({
     email: v.optional(v.string()),
     name: v.optional(v.string()),
     emails: v.array(verifiedClerkEmailValidator),
+    timezone: v.optional(v.string()),
   },
   returns: v.object({
     personId: v.id("persons"),
@@ -113,6 +115,10 @@ export const sync = internalMutation({
   }),
   handler: async (ctx, args) => {
     const personId = await ensureClerkPerson(ctx, args)
+
+    if (args.timezone !== undefined) {
+      await updatePersonTimezone(ctx, personId, args.timezone)
+    }
 
     for (const email of args.emails) {
       await linkVerifiedEmail(ctx, args.tenantId, personId, email.email)

@@ -17,6 +17,8 @@ export type MessageRuntimeInput = {
   conversation: RecentConversation
   organization: OrganizationFacts | null
   place: PlaceContext | null
+  /** The requester's IANA zone, when known; drives the prompt's local time. */
+  timezone: string | null
   workstreams: WorkstreamContext[] | null
 }
 
@@ -28,6 +30,7 @@ export type AutomationRuntimeInput = {
   automation: Doc<"automations">
   event: Doc<"events"> | null
   organization: OrganizationFacts | null
+  timezone: string | null
   workstreams: WorkstreamContext[] | null
 }
 
@@ -38,6 +41,7 @@ export type InstructionRuntimeInput = {
   instructions: string
   access?: Access
   organization: OrganizationFacts | null
+  timezone: string | null
   workstreams: WorkstreamContext[] | null
 }
 
