@@ -6,7 +6,7 @@ import {
 } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import { type RuntimeModelUsage } from "../types"
-import { recordActivityEvent } from "./events"
+import { recordRuntimeEvent } from "./events"
 
 export async function completeModelStep(args: {
   attempt: number
@@ -22,7 +22,7 @@ export async function completeModelStep(args: {
   // Recorded concurrently with the model call and joined before the outcome
   // trace, so the started trace always lands first and a failed trace write
   // still aborts the attempt.
-  const startedPending = recordActivityEvent(
+  const startedPending = recordRuntimeEvent(
     args.runtime.convex,
     args.runtime.context,
     {
@@ -42,7 +42,7 @@ export async function completeModelStep(args: {
     })
   } catch (error) {
     await startedPending.catch(() => undefined)
-    await recordActivityEvent(args.runtime.convex, args.runtime.context, {
+    await recordRuntimeEvent(args.runtime.convex, args.runtime.context, {
       attempt: args.attempt,
       data: { error: formatError(error) },
       sequence,
@@ -71,7 +71,7 @@ function recordModelCompleted(
     sequence: number
   }
 ) {
-  return recordActivityEvent(runtime.convex, runtime.context, {
+  return recordRuntimeEvent(runtime.convex, runtime.context, {
     attempt: args.attempt,
     data: {
       usage: modelUsage(args.response, args.durationMs),

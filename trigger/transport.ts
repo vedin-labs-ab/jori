@@ -1,10 +1,10 @@
+import { isRecord } from "../contracts/json"
 import {
   assetUploadError,
   parseUploadedAsset,
   toArrayBuffer,
   type UploadedAsset,
 } from "./assets"
-import { fetchGitHubCloneCredentials as fetchGitHubCloneCredentialsHttp } from "./github"
 import { type ConvexId } from "./types"
 
 export type UploadAssetArgs = {
@@ -19,6 +19,12 @@ export type GitHubCloneArgs = {
   owner: string
   repo: string
   runId: ConvexId<"runs">
+}
+
+type GitHubCloneCredentials = {
+  remoteUrl: string
+  token: string
+  username: string
 }
 
 export function requireConvexUrl() {
@@ -65,12 +71,26 @@ export async function uploadAsset(
 export async function fetchGitHubCloneCredentials(
   secret: string,
   args: GitHubCloneArgs
-) {
-  return await fetchGitHubCloneCredentialsHttp({
-    ...args,
-    secret,
-    siteUrl: requireConvexSiteUrl(),
-  })
+): Promise<GitHubCloneCredentials> {
+  const response = await fetch(
+    new URL("/milo/github/clone-credentials", requireConvexSiteUrl()),
+    {
+      body: JSON.stringify({ owner: args.owner, repo: args.repo }),
+      headers: {
+        "content-type": "application/json",
+        "x-milo-run-id": args.runId,
+        "x-milo-worker-secret": secret,
+      },
+      method: "POST",
+    }
+  )
+  const result = (await response.json().catch(() => null)) as unknown
+
+  if (!response.ok) {
+    throw new Error(gitHubCloneCredentialsError(result))
+  }
+
+  return parseGitHubCloneCredentials(result)
 }
 
 function requireEnv(name: string, fallback?: string) {
@@ -78,6 +98,32 @@ function requireEnv(name: string, fallback?: string) {
 
   if (value === undefined || value === "") {
     throw new Error(`Missing ${name}`)
+  }
+
+  return value
+}
+
+function gitHubCloneCredentialsError(value: unknown) {
+  return isRecord(value) && typeof value.error === "string"
+    ? value.error
+    : "GitHub clone credentials request failed"
+}
+
+function parseGitHubCloneCredentials(value: unknown) {
+  if (!isRecord(value)) {
+    throw new Error("GitHub clone credentials response is invalid")
+  }
+
+  return {
+    remoteUrl: readCredential(value.remoteUrl, "remoteUrl"),
+    token: readCredential(value.token, "token"),
+    username: readCredential(value.username, "username"),
+  }
+}
+
+function readCredential(value: unknown, name: string) {
+  if (typeof value !== "string" || value === "") {
+    throw new Error(`GitHub clone credentials response is missing ${name}`)
   }
 
   return value

@@ -1,5 +1,7 @@
-import { providerForIntegration } from "../../contracts/integrations"
-import { type Provider } from "../../contracts/providers"
+import {
+  type Provider,
+  providerForIntegration,
+} from "../../contracts/integrations"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 

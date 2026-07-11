@@ -3,19 +3,6 @@ import { toolPermissionRows } from "./data"
 
 export type { ToolSurface } from "../integrations"
 
-export const permissionModes = [
-  "required",
-  "allowed",
-  "prompted",
-  "blocked",
-] as const
-export const toolPermissionRoutes = [
-  "broker",
-  "sandbox",
-  "agent",
-  "run",
-  "surface",
-] as const
 export const internalRequiredToolNames = [
   "finish_run",
   "send_reply",
@@ -26,12 +13,16 @@ export const interactiveToolNames = [
   "offer_integration",
   "cancel_integration_offer",
 ] as const
-export const toolAccessLevels = ["read", "write"] as const
 
-export type PermissionMode = (typeof permissionModes)[number]
+export type PermissionMode = "required" | "allowed" | "prompted" | "blocked"
 export type ConfigurablePermissionMode = Exclude<PermissionMode, "required">
-export type ToolPermissionRoute = (typeof toolPermissionRoutes)[number]
-export type ToolAccess = (typeof toolAccessLevels)[number]
+export type ToolPermissionRoute =
+  | "broker"
+  | "sandbox"
+  | "agent"
+  | "run"
+  | "surface"
+export type ToolAccess = "read" | "write"
 export type ToolPermission = {
   tool: string
   surface: ToolSurface
@@ -45,12 +36,14 @@ export type ToolPermission = {
   defaultMode: PermissionMode
 }
 
-export type ResolvedToolPermission = Omit<ToolPermission, "defaultMode"> & {
+export type UserVisibleToolPermission = Omit<
+  ToolPermission,
+  "defaultMode" | "usage"
+> & {
   defaultMode?: PermissionMode
   mode: PermissionMode
   overrideMode: ConfigurablePermissionMode | null
 }
-export type UserVisibleToolPermission = Omit<ResolvedToolPermission, "usage">
 
 export type PermissionOverride = {
   tool: string
@@ -123,11 +116,7 @@ export function resolveToolModes(overrides: PermissionOverride[]) {
   for (const override of overrides) {
     const permission = getToolPermission(override.tool)
 
-    if (
-      permission !== undefined &&
-      permission.defaultMode !== "required" &&
-      isModeAllowed(permission, override.mode)
-    ) {
+    if (permission !== undefined && isToolPermissionConfigurable(permission)) {
       modes.set(override.tool, override.mode)
     }
   }
@@ -157,10 +146,7 @@ export function isUnattendedToolMode(mode: PermissionMode) {
   return mode === "allowed" || mode === "required"
 }
 
-export function isModeAllowed(
-  permission: ToolPermission,
-  _mode: ConfigurablePermissionMode
-) {
+export function isToolPermissionConfigurable(permission: ToolPermission) {
   return permission.defaultMode !== "required"
 }
 

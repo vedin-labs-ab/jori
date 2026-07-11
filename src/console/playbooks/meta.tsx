@@ -8,8 +8,7 @@ import { type PlaybookOptionValues } from "@contracts/playbooks/options"
 import { CalendarClock, Globe } from "lucide-react"
 import { type ReactNode } from "react"
 import { SurfaceLogo } from "../automations/access/logo"
-import { absoluteTime, relativeTime } from "../automations/format"
-import { useNow } from "../shared/time"
+import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import { type PlaybookListRow, slotDisplayProviders } from "./state"
 
 export function PlaybookMeta({

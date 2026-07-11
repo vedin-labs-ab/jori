@@ -10,7 +10,7 @@ import { ensureCurrentPerson } from "../persons/clerk"
 import {
   type ConfigurablePermissionMode,
   getToolPermission,
-  isModeAllowed,
+  isToolPermissionConfigurable,
   isUserVisibleToolPermission,
   type PermissionMode,
   resolveToolMode,
@@ -67,7 +67,7 @@ export const set = mutation({
       throw new Error("Unknown tool")
     }
 
-    if (!isModeAllowed(permission, args.mode)) {
+    if (!isToolPermissionConfigurable(permission)) {
       throw new Error("This tool permission cannot be changed to that mode")
     }
 

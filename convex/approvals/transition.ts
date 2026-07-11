@@ -30,7 +30,7 @@ export async function recordApprovalDelivery(
     await recordTransition(ctx, {
       tenantId: updated.tenantId,
       subject: { kind: "approval", id: updated._id },
-      syncSurface: hasTerminalSurfaceState(updated),
+      syncSurface: isTerminalApprovalStatus(updated.status),
       type: "delivered",
     })
   }
@@ -172,12 +172,12 @@ async function wakeApprovalRun(ctx: MutationCtx, approval: Doc<"approvals">) {
   })
 }
 
-function hasTerminalSurfaceState(approval: Doc<"approvals">) {
+export function isTerminalApprovalStatus(status: Doc<"approvals">["status"]) {
   return (
-    approval.status === "approved" ||
-    approval.status === "cancelled" ||
-    approval.status === "denied" ||
-    approval.status === "expired" ||
-    approval.status === "failed"
+    status === "approved" ||
+    status === "cancelled" ||
+    status === "denied" ||
+    status === "expired" ||
+    status === "failed"
   )
 }

@@ -1,18 +1,18 @@
 import {
+  type AutomationEventDefinition,
   type AutomationEventMatch,
+  assertAutomationEventIsAvailable,
   getAutomationEventDefinition,
   getDefaultAutomationEvent,
   isAutomationEventIntegration,
+  normalizeAutomationEventMatch,
 } from "@contracts/automations/events"
 import { buildRecurringCron, classifyCron } from "../../cron"
-import { toDatetimeLocal } from "../../format"
 import {
   type Automation,
   type AutomationFormValues,
   emptyAutomationForm,
 } from "../../types"
-import { readAutomationEventMatch } from "../event/rules"
-import { eventMatchFormValues, matchKey } from "./match"
 
 export type TriggerSpec =
   | { at: string }
@@ -155,4 +155,45 @@ export function triggerFormValues(automation: Automation) {
     event: emptyAutomationForm.event,
     eventMatch: {},
   }
+}
+
+function readAutomationEventMatch(
+  definition: AutomationEventDefinition,
+  value: Record<string, string>
+): { value: AutomationEventMatch | undefined } | { error: string } {
+  try {
+    assertAutomationEventIsAvailable(definition)
+    return { value: normalizeAutomationEventMatch(definition, value) }
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Invalid event match.",
+    }
+  }
+}
+
+function eventMatchFormValues(
+  trigger: Extract<Automation["trigger"], { event: string }>
+) {
+  return Object.fromEntries(
+    Object.entries(trigger.match ?? {}).map(([key, value]) => [
+      key,
+      String(value),
+    ])
+  )
+}
+
+function matchKey(match: Record<string, string>) {
+  return JSON.stringify(
+    Object.entries(match)
+      .filter(([, value]) => value.trim() !== "")
+      .sort(([left], [right]) => left.localeCompare(right))
+  )
+}
+
+function toDatetimeLocal(timestamp: number) {
+  const date = new Date(timestamp)
+  const pad = (value: number) => String(value).padStart(2, "0")
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+
+  return `${day}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }

@@ -120,113 +120,97 @@ http.route({
 http.route({
   path: "/slack/install",
   method: "GET",
-  handler: httpAction(async (_ctx, request) => {
-    return await handleSlackInstall(request)
-  }),
+  handler: httpAction((_ctx, request) => handleSlackInstall(request)),
 })
 
 http.route({
   path: "/slack/oauth/callback",
   method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    return await handleSlackOAuthCallback(ctx, request)
-  }),
+  handler: httpAction((ctx, request) => handleSlackOAuthCallback(ctx, request)),
 })
 
 http.route({
   path: "/slack/events",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    return await handleSlackEvents(ctx, request)
-  }),
+  handler: httpAction((ctx, request) => handleSlackEvents(ctx, request)),
 })
 
 http.route({
   path: "/slack/interactions",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    return await handleSlackInteractions(ctx, request)
-  }),
+  handler: httpAction((ctx, request) => handleSlackInteractions(ctx, request)),
 })
 
 http.route({
   path: "/linear/install",
   method: "GET",
-  handler: httpAction(async (_ctx, request) => {
-    return await handleLinearInstall(request)
-  }),
+  handler: httpAction((_ctx, request) => handleLinearInstall(request)),
 })
 
 http.route({
   path: "/linear/oauth/callback",
   method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    return await handleLinearOAuthCallback(ctx, request)
-  }),
+  handler: httpAction((ctx, request) =>
+    handleLinearOAuthCallback(ctx, request)
+  ),
 })
 
 http.route({
   path: "/linear/events",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    return await handleLinearEvents(ctx, request)
-  }),
+  handler: httpAction((ctx, request) => handleLinearEvents(ctx, request)),
 })
 
 http.route({
   path: "/notion/install",
   method: "GET",
-  handler: httpAction(async (_ctx, request) => {
-    return await handleNotionInstall(request)
-  }),
+  handler: httpAction((_ctx, request) => handleNotionInstall(request)),
 })
 
 http.route({
   path: "/notion/oauth/callback",
   method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    return await handleNotionOAuthCallback(ctx, request)
-  }),
+  handler: httpAction((ctx, request) =>
+    handleNotionOAuthCallback(ctx, request)
+  ),
 })
 
 http.route({
   path: "/notion/events",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    return await handleNotionEvents(ctx, request)
-  }),
+  handler: httpAction((ctx, request) => handleNotionEvents(ctx, request)),
 })
 
 http.route({
   path: "/microsoft-email/install",
   method: "GET",
-  handler: httpAction(async (_ctx, request) => {
-    return await handleMicrosoftInstall(request, "microsoftEmail")
-  }),
+  handler: httpAction((_ctx, request) =>
+    handleMicrosoftInstall(request, "microsoftEmail")
+  ),
 })
 
 http.route({
   path: "/microsoft-email/oauth/callback",
   method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    return await handleMicrosoftOAuthCallback(ctx, request, "microsoftEmail")
-  }),
+  handler: httpAction((ctx, request) =>
+    handleMicrosoftOAuthCallback(ctx, request, "microsoftEmail")
+  ),
 })
 
 http.route({
   path: "/microsoft-calendar/install",
   method: "GET",
-  handler: httpAction(async (_ctx, request) => {
-    return await handleMicrosoftInstall(request, "microsoftCalendar")
-  }),
+  handler: httpAction((_ctx, request) =>
+    handleMicrosoftInstall(request, "microsoftCalendar")
+  ),
 })
 
 http.route({
   path: "/microsoft-calendar/oauth/callback",
   method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    return await handleMicrosoftOAuthCallback(ctx, request, "microsoftCalendar")
-  }),
+  handler: httpAction((ctx, request) =>
+    handleMicrosoftOAuthCallback(ctx, request, "microsoftCalendar")
+  ),
 })
 
 export default http

@@ -1,5 +1,3 @@
-import { type Provider } from "./providers"
-
 export const integrations = [
   "slack",
   "linear",
@@ -36,7 +34,9 @@ export const integrationProviders = {
   notion: "notion",
   microsoftEmail: "microsoft",
   microsoftCalendar: "microsoft",
-} satisfies Record<Integration, Provider>
+} as const satisfies Record<Integration, string>
+
+export type Provider = (typeof integrationProviders)[Integration]
 
 export const integrationLabels = {
   slack: "Slack",

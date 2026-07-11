@@ -11,13 +11,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "../../../../../convex/_generated/api"
+import { syncAutomationSurfaces } from "../../access"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
-import { createAutomationDialogActions } from "../actions"
 import {
   readAutomationInstructionsError,
   readAutomationNameError,
 } from "../errors"
+import { writeAutomationWebSearchPreference } from "../preferences"
 import { AccessFields } from "./access"
 import { AutomationInstructionsSection } from "./instructions"
 import { AutomationNameField } from "./name"
@@ -57,11 +58,7 @@ export function AutomationDialog({
     onReady?.()
   }, [])
 
-  const actions = createAutomationDialogActions({
-    onValuesChange,
-    permissions,
-    values,
-  })
+  const actions = createDialogActions(values, permissions, onValuesChange)
   const skillList = useQuery(api.skills.catalog.list, { tenantId })
   const skills =
     skillList !== undefined &&
@@ -108,7 +105,7 @@ export function AutomationDialog({
           />
           <AutomationInstructionsSection
             error={instructionsError}
-            onBlur={actions.normalizeDescription}
+            onBlur={actions.normalizeInstructions}
             onValueChange={actions.updateInstructions}
             permissions={permissions}
             policyKey={policyKey}
@@ -136,4 +133,37 @@ export function AutomationDialog({
       </DialogContent>
     </Dialog>
   )
+}
+
+function createDialogActions(
+  values: AutomationFormValues,
+  permissions: AutomationPolicyPermissions | undefined,
+  onValuesChange: (values: AutomationFormValues) => void
+) {
+  const updateValues = (updates: Partial<AutomationFormValues>) => {
+    onValuesChange({ ...values, ...updates })
+  }
+
+  return {
+    normalizeInstructions: () => {
+      updateValues({
+        surfaces: syncAutomationSurfaces(
+          values.instructions,
+          values.surfaces,
+          permissions
+        ),
+      })
+    },
+    updateInstructions: (
+      instructions: string,
+      surfaces: AutomationFormValues["surfaces"]
+    ) => updateValues({ instructions, surfaces }),
+    updateName: (name: string) => updateValues({ name }),
+    updateScope: (scope: AutomationFormValues["scope"]) =>
+      updateValues({ scope }),
+    updateWebSearch: (webSearch: boolean) => {
+      writeAutomationWebSearchPreference(webSearch)
+      updateValues({ webSearch })
+    },
+  }
 }

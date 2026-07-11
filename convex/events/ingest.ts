@@ -6,18 +6,6 @@ import { integrationValidator } from "../shared/integrations"
 import { recordEvent } from "./data"
 import { eventFields } from "./schema"
 
-export const record = internalMutation({
-  args: {
-    integrationId: v.id("integrations"),
-    ...eventFields,
-  },
-  handler: async (ctx, args) => {
-    const integration = await ctx.db.get(args.integrationId)
-
-    return await ingest(ctx, integration, args)
-  },
-})
-
 // Records an event for the active integration matching a provider account id,
 // for webhook handlers that only know the external account. One shared path so
 // providers never duplicate integration lookup around recordEvent.
