@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { getToolPermission } from "../../../permissions/catalog"
-import { recurringDisplay } from "../fixtures"
+import { emptyQueryResult, recurringDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes recurring automation details", async () => {
@@ -235,14 +235,5 @@ function fakeQuery(table: string, preparedTools: unknown) {
                   },
           }
         : emptyQueryResult(),
-  }
-}
-
-function emptyQueryResult() {
-  return {
-    async *[Symbol.asyncIterator]() {},
-    first: async () => null,
-    order: () => emptyQueryResult(),
-    take: async () => [],
   }
 }

@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { type QueryCtx } from "../../_generated/server"
 import { type MessageCauseKind } from "../schema"
 
 type RunSnapshot = Doc<"runs">["snapshot"]
@@ -72,4 +73,24 @@ export function recurringDisplay(input: {
       ...(input.context ?? []),
     ],
   })
+}
+
+export function fakeQueryCtx(docs: Record<string, unknown>) {
+  return {
+    db: {
+      get: async (id: string) => docs[id] ?? null,
+      query: () => ({
+        withIndex: () => emptyQueryResult(),
+      }),
+    },
+  } as unknown as QueryCtx
+}
+
+export function emptyQueryResult() {
+  return {
+    async *[Symbol.asyncIterator]() {},
+    first: async () => null,
+    order: () => emptyQueryResult(),
+    take: async () => [],
+  }
 }

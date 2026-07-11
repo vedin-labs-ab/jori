@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
-import { messageDisplay } from "../fixtures"
+import { emptyQueryResult, messageDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes the latest integration offer for the run", async () => {
@@ -90,15 +90,6 @@ function fakeIntegrationOffers(docs: Record<string, unknown>) {
     async *[Symbol.asyncIterator]() {
       yield* offers as Record<string, unknown>[]
     },
-    first: async () => null,
-    order: () => emptyQueryResult(),
-    take: async () => [],
-  }
-}
-
-function emptyQueryResult() {
-  return {
-    async *[Symbol.asyncIterator]() {},
     first: async () => null,
     order: () => emptyQueryResult(),
     take: async () => [],

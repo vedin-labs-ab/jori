@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { getToolPermission } from "../../../permissions/catalog"
-import { oneShotDisplay } from "../fixtures"
+import { emptyQueryResult, oneShotDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes one-shot automation access details", async () => {
@@ -211,14 +211,5 @@ function fakeQuery(table: string, preparedTools: unknown) {
                   },
           }
         : emptyQueryResult(),
-  }
-}
-
-function emptyQueryResult() {
-  return {
-    async *[Symbol.asyncIterator]() {},
-    first: async () => null,
-    order: () => emptyQueryResult(),
-    take: async () => [],
   }
 }
