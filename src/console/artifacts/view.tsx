@@ -105,10 +105,10 @@ function PublishedArtifactView({
 
   return (
     <ArtifactFullscreenShell>
-      {artifact.share === null ? null : (
+      {artifact.shares === null ? null : (
         <ArtifactShareChip
           artifactId={artifact.artifactId}
-          share={artifact.share}
+          shares={artifact.shares}
           tenantId={tenantId}
         />
       )}
@@ -124,19 +124,19 @@ function PublishedArtifactView({
 
 function ArtifactShareChip({
   artifactId,
-  share,
+  shares,
   tenantId,
 }: {
   artifactId: ArtifactId
-  share: NonNullable<ArtifactDetail["share"]>
+  shares: NonNullable<ArtifactDetail["shares"]>
   tenantId: string
 }) {
   const revokeShare = useMutation(api.artifacts.console.revokeShare)
   const revoke = () => {
     void revokeShare({ tenantId, artifactId })
-      .then(() => toast.success("Share link revoked."))
+      .then(() => toast.success("Share links revoked."))
       .catch((error: unknown) =>
-        showErrorToast(error, "Could not revoke the share link.")
+        showErrorToast(error, "Could not revoke the share links.")
       )
   }
 
@@ -144,10 +144,11 @@ function ArtifactShareChip({
     <div className="absolute top-4 right-4 z-30 flex items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 text-sm shadow-sm">
       <Link2 className="size-4 text-muted-foreground" />
       <span className="text-muted-foreground">
-        Shared until {absoluteTime(share.expiresAt)}
+        {shares.count === 1 ? "Shared" : `${shares.count} share links`} until{" "}
+        {absoluteTime(shares.latestExpiresAt)}
       </span>
       <Button onClick={revoke} size="sm" type="button" variant="ghost">
-        Revoke
+        {shares.count === 1 ? "Revoke" : "Revoke all"}
       </Button>
     </div>
   )

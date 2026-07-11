@@ -159,7 +159,7 @@ export const miloToolPermissionRows = [
     "share_artifact",
     "Share artifact",
     "Create a time-limited link that lets anyone view an artifact.",
-    "Mint a view-only link for an artifact that works without signing in to Milo. Use when delivering an artifact to people who may lack Milo access, and include the returned url in your message. Viewers see published assets and shared-scope state only. Sharing again replaces the artifact's previous link.",
+    "Mint a view-only link for an artifact that works without signing in to Milo. Use when delivering an artifact to people who may lack Milo access, and include the returned url in your message. Viewers see published assets and shared-scope state only. Each call creates an independent link with its own expiry; earlier links keep working until they expire.",
     "write",
   ],
   // Automations

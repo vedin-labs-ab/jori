@@ -7,7 +7,7 @@ import { getToolPermission } from "../permissions/catalog"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
 import { personDisplayName } from "../persons/names"
 import { findAccessibleArtifact, searchArtifacts } from "./access"
-import { readActiveShare } from "./serve/share"
+import { readActiveShares } from "./serve/share"
 
 export const list = query({
   args: {
@@ -157,7 +157,7 @@ async function summarizeForConsole(ctx: QueryCtx, artifact: Doc<"artifacts">) {
     updatedAt: artifact.updatedAt,
     archivedAt: artifact.archivedAt,
     lastOpenedAt: await lastOpenedAt(ctx, artifact._id),
-    share: await readActiveShare(ctx, artifact._id),
+    shares: await readActiveShares(ctx, artifact._id),
     versions: versions.map((version) =>
       summarizeVersion(version, artifact.versionId)
     ),
