@@ -40,7 +40,6 @@ export function ConsolePage({
       {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
       <ConsoleContent
         chrome={chrome}
-        isClerkLoaded={isLoaded}
         isConvexAuthenticated={isAuthenticated}
         isConvexAuthLoading={isConvexAuthLoading}
         isSignedIn={isSignedIn}
@@ -55,7 +54,6 @@ export function ConsolePage({
 function ConsoleContent({
   children,
   chrome,
-  isClerkLoaded,
   isConvexAuthenticated,
   isConvexAuthLoading,
   isSignedIn,
@@ -63,19 +61,14 @@ function ConsoleContent({
 }: {
   children: (organization: ActiveOrganization) => ReactNode
   chrome: "shell" | "none"
-  isClerkLoaded: boolean
   isConvexAuthenticated: boolean
   isConvexAuthLoading: boolean
   isSignedIn: boolean | undefined
   loadingFallback: ReactNode | undefined
 }) {
-  if (!isClerkLoaded) {
-    return null
-  }
-
   if (!isSignedIn) {
     return (
-      <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
+      <PublicConsoleFrame isSignedIn={false}>
         <SignedOutView />
       </PublicConsoleFrame>
     )
@@ -87,7 +80,7 @@ function ConsoleContent({
 
   if (!isConvexAuthenticated) {
     return (
-      <PublicConsoleFrame isLoaded={isClerkLoaded} isSignedIn={isSignedIn}>
+      <PublicConsoleFrame isSignedIn>
         <Alert variant="destructive">
           <AlertTitle>Couldn't verify your session</AlertTitle>
           <AlertDescription>
@@ -144,7 +137,7 @@ function SignedInView({
 
   if (organization === undefined || organization === null) {
     return (
-      <PublicConsoleFrame isLoaded={isLoaded} isSignedIn>
+      <PublicConsoleFrame isSignedIn>
         <section className="grid max-w-xl gap-4">
           <div className="grid gap-1">
             <h1 className="text-2xl font-medium tracking-normal">

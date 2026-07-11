@@ -1,10 +1,4 @@
 import {
-  artifactEntrypoint,
-  platformArtifactSourcePathPrefixes,
-  platformArtifactSourcePaths,
-  requiredArtifactSourcePaths,
-} from "../../contracts/artifacts/source"
-import {
   sandboxArtifactRuntime,
   sandboxInternalRoot,
   sandboxWorkspace,
@@ -58,13 +52,7 @@ export function artifactRunnerFile(): SandboxWriteFile {
 }
 
 function createArtifactBuilderConfig() {
-  return {
-    artifactEntrypoint,
-    artifactTemplatePath,
-    platformArtifactSourcePathPrefixes,
-    platformArtifactSourcePaths,
-    requiredArtifactSourcePaths,
-  }
+  return { artifactTemplatePath }
 }
 
 function shellQuote(value: string) {

@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { resolveMessageOwner } from "../messages/data"
+import { messageHasText, resolveMessageOwner } from "../messages/data"
 import { maxPendingReadLimit } from "../sessions/cursor"
 import { readPendingMessages, stopSession } from "../sessions/data"
 import { isPersonActor } from "../shared/actor"
@@ -97,11 +97,5 @@ function shouldStartContinuation(message: Doc<"messages">) {
     return false
   }
 
-  return hasText(message)
-}
-
-function hasText(message: Doc<"messages">) {
-  const text = message.text?.trim()
-
-  return text !== undefined && text !== ""
+  return messageHasText(message)
 }

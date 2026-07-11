@@ -15,6 +15,7 @@ import {
 } from "./publish"
 import { artifactAccess } from "./schema"
 import { artifactSessionDurationMs, createSessionToken } from "./serve/session"
+import { capabilityInputValidator } from "./storage/validators"
 
 const artifactSourceFileValidator = v.object({
   path: v.string(),
@@ -29,11 +30,6 @@ const artifactBuildAssetValidator = v.object({
 const artifactBuildValidator = v.object({
   sourceHash: v.string(),
   assets: v.array(artifactBuildAssetValidator),
-})
-const capabilityInputValidator = v.object({
-  tool: v.string(),
-  integrationId: v.optional(v.id("integrations")),
-  versionPinned: v.optional(v.boolean()),
 })
 const publishArgs = {
   tenantId: v.string(),

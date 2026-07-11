@@ -3,6 +3,7 @@ import {
   type RuntimeModelUsage,
   type RuntimeValueSummary,
 } from "../../../contracts/runtime"
+import { type Doc } from "../../_generated/dataModel"
 import { readNumber, readString } from "./helpers"
 import { type ToolLabel } from "./types"
 
@@ -30,6 +31,18 @@ export function readPreparedTools(data: unknown) {
 
 export function readTraceError(data: unknown) {
   return readString(asRecord(data)?.error)
+}
+
+export function readTraceData(trace: Doc<"traces">) {
+  return "data" in trace ? trace.data : undefined
+}
+
+export function traceAttempt(trace: Doc<"traces">) {
+  return "attempt" in trace ? trace.attempt : 0
+}
+
+export function traceSequence(trace: Doc<"traces">) {
+  return "sequence" in trace ? trace.sequence : undefined
 }
 
 export function readModelUsage(data: unknown): ModelUsage | undefined {

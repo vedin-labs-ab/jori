@@ -11,14 +11,6 @@ export function validateRuntimeSources(runtimeAssets: RuntimeAssets) {
   validateJsonSources()
   validateArtifactShell(runtimeAssets.artifact.shell.html)
   validateArtifactTemplate(runtimeAssets.artifact.template)
-  validateTypeScriptSources()
-}
-
-function validateTypeScriptSources() {
-  execFileSync(path.join(root, "node_modules/.bin/tsc"), ["--noEmit"], {
-    cwd: root,
-    stdio: "pipe",
-  })
 }
 
 function validateJsonSources() {

@@ -1,23 +1,22 @@
+import { type Integration, integrationLabel } from "@contracts/integrations"
+import { providerLogoPath } from "../../shared/logo/path"
+
 const automationSurfaceAccesses = ["read", "write", "both"] as const
 
 export const automationSurfaceIntegrations = [
-  integration("slack", "Slack", ["slack"]),
-  integration("linear", "Linear", ["linear"]),
-  integration("github", "GitHub", ["github", "git hub"]),
-  integration("gmail", "Gmail", ["gmail", "google mail"]),
-  integration("googleCalendar", "Google Calendar", [
-    "google calendar",
-    "googlecalendar",
-    "gcal",
-  ]),
-  integration("notion", "Notion", ["notion"]),
-  integration("microsoftEmail", "Outlook Mail", [
+  integration("slack", ["slack"]),
+  integration("linear", ["linear"]),
+  integration("github", ["github", "git hub"]),
+  integration("gmail", ["gmail", "google mail"]),
+  integration("googleCalendar", ["google calendar", "googlecalendar", "gcal"]),
+  integration("notion", ["notion"]),
+  integration("microsoftEmail", [
     "outlook",
     "outlook mail",
     "microsoft email",
     "microsoft mail",
   ]),
-  integration("microsoftCalendar", "Microsoft Calendar", [
+  integration("microsoftCalendar", [
     "microsoft calendar",
     "microsoftcalendar",
     "outlook calendar",
@@ -63,29 +62,12 @@ export function getAutomationSurfaceLabel(
 export function getAutomationSurfaceLogo(
   integration: AutomationSurfaceIntegration
 ) {
-  return `/logos/integrations/${integrationLogoName(integration)}.svg`
+  return providerLogoPath(integration)
 }
 
-function integration<const Integration extends string>(
-  integration: Integration,
-  label: string,
+function integration<const Name extends Integration>(
+  integration: Name,
   aliases: readonly string[]
 ) {
-  return { aliases, integration, label }
-}
-
-function integrationLogoName(integration: AutomationSurfaceIntegration) {
-  if (integration === "googleCalendar") {
-    return "google-calendar"
-  }
-
-  if (integration === "microsoftCalendar") {
-    return "microsoft-calendar"
-  }
-
-  if (integration === "microsoftEmail") {
-    return "microsoft-email"
-  }
-
-  return integration
+  return { aliases, integration, label: integrationLabel(integration) }
 }

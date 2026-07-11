@@ -8,8 +8,7 @@ import {
 } from "@/components/ui/tooltip"
 import { countLabel } from "@/lib/count"
 import { cn } from "@/lib/utils"
-import { MiloLogo } from "@/shared/brand"
-import { providerLogoPath } from "../logo/path"
+import { ProviderLogo } from "../logo/provider"
 
 type ToolSurfaceLogoSize = "sm" | "md"
 
@@ -79,7 +78,14 @@ function ToolSurfaceLogoStack({
     <span className="inline-flex shrink-0 items-center">
       <span className="-space-x-1 inline-flex">
         {visibleSurfaces.map((surface) => (
-          <ToolSurfaceLogo key={surface} size={logoSize} surface={surface} />
+          <ProviderLogo
+            className={cn(
+              "shrink-0 bg-background ring-2 ring-card",
+              logoSizeClassName(logoSize)
+            )}
+            key={surface}
+            surface={surface}
+          />
         ))}
       </span>
       {hiddenSurfaces.length > 0 ? (
@@ -105,36 +111,6 @@ function HiddenSurfaceCount({ surfaces }: { surfaces: ToolSurface[] }) {
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
-  )
-}
-
-function ToolSurfaceLogo({
-  size,
-  surface,
-}: {
-  size: ToolSurfaceLogoSize
-  surface: ToolSurface
-}) {
-  const className = cn(
-    "shrink-0 bg-background ring-2 ring-card",
-    logoSizeClassName(size)
-  )
-
-  if (surface === "milo") {
-    return (
-      <MiloLogo
-        aria-hidden="true"
-        className={className}
-        focusable="false"
-        title=""
-      />
-    )
-  }
-
-  const logo = providerLogoPath(surface)
-
-  return logo === undefined ? null : (
-    <img alt="" className={className} src={logo} />
   )
 }
 

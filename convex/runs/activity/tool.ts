@@ -8,6 +8,9 @@ import {
   readToolInput,
   readToolName,
   readToolResult,
+  readTraceData,
+  traceAttempt,
+  traceSequence,
 } from "./read"
 import {
   type ActivityDetail,
@@ -174,18 +177,6 @@ function toolTraceKey(trace: Doc<"traces">, name: string) {
   )
 }
 
-function readTraceData(trace: Doc<"traces">) {
-  return "data" in trace ? trace.data : undefined
-}
-
 function traceCallId(trace: Doc<"traces">) {
   return "callId" in trace ? trace.callId : undefined
-}
-
-function traceAttempt(trace: Doc<"traces">) {
-  return "attempt" in trace ? trace.attempt : 0
-}
-
-function traceSequence(trace: Doc<"traces">) {
-  return "sequence" in trace ? trace.sequence : undefined
 }

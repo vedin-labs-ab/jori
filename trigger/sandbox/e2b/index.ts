@@ -32,8 +32,6 @@ import {
   toArrayBuffer,
 } from "./support"
 
-const defaultCommandTimeoutMs = 20 * 60 * 1000
-
 export class E2BSandboxRuntime implements SandboxRuntime {
   private sandbox: E2BSandbox | undefined
   private sandboxId: string | null
@@ -108,7 +106,6 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   async buildArtifact(workspacePath: string): Promise<JsonObject> {
     const result = await this.runCommand({
       command: artifactBuildCommand(workspacePath),
-      timeoutMs: defaultCommandTimeoutMs,
     })
 
     if (result.exitCode !== 0) {

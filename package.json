@@ -15,7 +15,7 @@
     "check:fix": "biome check --write .",
     "check:structure": "node --experimental-strip-types scripts/structure.ts",
     "check:typecheck": "tsc --noEmit",
-    "deploy": "pnpm runtime:check && pnpm prompts:compile && node --experimental-strip-types scripts/env.ts npx convex dev --once --configure existing --team vedin-labs --project milo --dev-deployment cloud && pnpm skills:sync",
+    "deploy": "pnpm runtime:check && pnpm prompts:compile && pnpm check:typecheck && node --experimental-strip-types scripts/env.ts npx convex dev --once --configure existing --team vedin-labs --project milo --dev-deployment cloud && pnpm skills:sync",
     "e2b:build": "node --experimental-strip-types scripts/e2b.ts",
     "convex:truncate": "node --experimental-strip-types scripts/truncate.ts",
     "preview": "vite preview",

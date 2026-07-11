@@ -11,9 +11,6 @@ export const maxDiagnosticChars = 12_000
 export const maxDiagnosticLines = 80
 
 export const config = await readBuilderConfig()
-export const platformSourcePaths = new Set(config.platformArtifactSourcePaths)
-export const platformSourcePathPrefixes =
-  config.platformArtifactSourcePathPrefixes
 
 async function readBuilderConfig(): Promise<BuilderConfig> {
   const configPath =
