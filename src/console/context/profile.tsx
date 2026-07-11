@@ -59,6 +59,7 @@ export function ContextProfile({
             </p>
           </div>
           <Button
+            className="h-7 px-2.5 text-xs"
             onClick={() => setEditorOpen(true)}
             size="sm"
             type="button"
