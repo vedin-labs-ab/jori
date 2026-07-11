@@ -17,15 +17,10 @@ import {
   callRunIntrospectionTool,
   isRunIntrospectionTool,
 } from "../runs/introspect/mcp"
-import { readRecord } from "../shared/input"
+import { type MiloToolRequest, readRecord } from "../shared/input"
 import { callMiloSkillTool, isMiloSkillTool } from "../skills/mcp"
 import { type ApprovalBrokerContext } from "./approval"
 import { callWebTool } from "./tools/web"
-
-type MiloToolRequest = {
-  tool: string
-  args?: unknown
-}
 
 export async function callMiloTool(
   ctx: ActionCtx,

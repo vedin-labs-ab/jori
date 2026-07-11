@@ -2,14 +2,9 @@ import { type Scope } from "../../contracts/permissions/scope"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { readRecord } from "../shared/input"
+import { type MiloToolRequest, readRecord } from "../shared/input"
 import { type AutomationAccessInput } from "./access"
 import { type AutomationTriggerInput, type AutomationType } from "./schema"
-
-type MiloMcpRequest = {
-  tool: string
-  args?: unknown
-}
 
 type AddAutomationArgs = {
   artifactId?: Id<"artifacts">
@@ -48,7 +43,7 @@ export async function callMiloAutomationTool(
     tenantId: string
     createdBy?: Id<"persons">
   },
-  request: MiloMcpRequest
+  request: MiloToolRequest
 ) {
   const args = readRecord(request.args)
 

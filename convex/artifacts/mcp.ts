@@ -1,7 +1,12 @@
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { boundedNumber, optionalString, requiredString } from "../shared/input"
+import {
+  boundedNumber,
+  type MiloToolRequest,
+  optionalString,
+  requiredString,
+} from "../shared/input"
 import {
   normalizeAccess,
   normalizeBuild,
@@ -11,11 +16,6 @@ import {
   requiredArtifactId,
 } from "./tools/args"
 import { normalizeExpectedVersion, normalizeStateWrite } from "./tools/input"
-
-type MiloArtifactRequest = {
-  tool: string
-  args?: unknown
-}
 
 const artifactTools = new Set([
   "create_artifact",
@@ -39,7 +39,7 @@ export async function callMiloArtifactTool(
     createdBy?: Id<"persons">
     runId?: Id<"runs">
   },
-  request: MiloArtifactRequest
+  request: MiloToolRequest
 ): Promise<unknown> {
   const args = normalizeToolArgs(request.args)
   const personId = execution.createdBy

@@ -1,16 +1,12 @@
 import { internal } from "../_generated/api"
 import { type ActionCtx } from "../_generated/server"
+import { type MiloToolRequest } from "../shared/input"
 import {
   getRuntimeSkill,
   listRuntimeSkills,
   type RuntimeSkill,
   runtimeSkillAssociatedIntegrations,
 } from "./runtime"
-
-type MiloSkillToolRequest = {
-  args?: unknown
-  tool: string
-}
 
 type MiloSkillRun = {
   tenantId: string
@@ -23,7 +19,7 @@ export function isMiloSkillTool(tool: string) {
 export async function callMiloSkillTool(
   ctx: ActionCtx,
   run: MiloSkillRun,
-  request: MiloSkillToolRequest
+  request: MiloToolRequest
 ) {
   const skills = (await ctx.runQuery(internal.skills.catalog.listForRuntime, {
     tenantId: run.tenantId,
@@ -34,7 +30,7 @@ export async function callMiloSkillTool(
 
 export function loadMiloSkillTool(
   skills: readonly RuntimeSkill[],
-  request: MiloSkillToolRequest
+  request: MiloToolRequest
 ) {
   if (!isMiloSkillTool(request.tool)) {
     throw new Error(`Unknown Milo skill tool: ${request.tool}`)

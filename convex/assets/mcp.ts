@@ -1,12 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { readRecord } from "../shared/input"
-
-type MiloAssetRequest = {
-  tool: string
-  args?: unknown
-}
+import { type MiloToolRequest, readRecord } from "../shared/input"
 
 type SearchAssetsArgs = {
   query?: string
@@ -29,7 +24,7 @@ export async function callMiloAssetTool(
   run: {
     tenantId: string
   },
-  request: MiloAssetRequest
+  request: MiloToolRequest
 ): Promise<unknown> {
   const args = readRecord(request.args)
 

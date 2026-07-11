@@ -1,13 +1,8 @@
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { readRecord } from "../../shared/input"
+import { type MiloToolRequest, readRecord } from "../../shared/input"
 import { type SearchRunActivityArgs, type SearchRunsArgs } from "./schema"
-
-type IntrospectionRequest = {
-  args?: unknown
-  tool: string
-}
 
 type RunContext = {
   _id?: Id<"runs">
@@ -22,7 +17,7 @@ export function isRunIntrospectionTool(tool: string) {
 export async function callRunIntrospectionTool(
   ctx: ActionCtx,
   run: RunContext,
-  request: IntrospectionRequest
+  request: MiloToolRequest
 ) {
   if (run._id === undefined) {
     throw new Error("Run introspection requires a current run.")

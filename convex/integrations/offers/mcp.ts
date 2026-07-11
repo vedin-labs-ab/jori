@@ -2,7 +2,7 @@ import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { type ApprovalBrokerContext } from "../../broker/approval"
-import { requiredString } from "../../shared/input"
+import { type MiloToolRequest, requiredString } from "../../shared/input"
 import {
   type Integration,
   integrationLabel,
@@ -14,11 +14,6 @@ import { integrationOfferSourceFromInput } from "./source"
 const offerTool = "offer_integration"
 const cancelOfferTool = "cancel_integration_offer"
 
-type OfferToolRequest = {
-  tool: string
-  args?: unknown
-}
-
 export function isIntegrationOfferTool(tool: string) {
   return tool === offerTool
 }
@@ -26,7 +21,7 @@ export function isIntegrationOfferTool(tool: string) {
 export async function callIntegrationOfferTool(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
-  request: OfferToolRequest
+  request: MiloToolRequest
 ) {
   if (!isIntegrationOfferTool(request.tool)) {
     throw new Error(`Unknown integration offer tool: ${request.tool}`)
