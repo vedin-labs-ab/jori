@@ -65,7 +65,7 @@ function pulseDays(now: number, dayCount: number): PulseDay[] {
 
     return {
       key: date.toDateString(),
-      label: axisLabel(date, index, dayCount, isToday),
+      label: axisLabel(date, index, isToday),
       emphasized: isToday || date.getDate() === 1,
       title: date.toLocaleDateString(undefined, {
         weekday: "short",
@@ -92,14 +92,8 @@ function isWideAnchor(label: string) {
 }
 
 // Axis copy: today by name, the window start and month starts anchored with
-// their month, bare day numbers between. Past two weeks the numbers thin to
-// Mondays so wide windows stay scannable.
-function axisLabel(
-  date: Date,
-  index: number,
-  dayCount: number,
-  isToday: boolean
-) {
+// their month, bare day numbers everywhere between.
+function axisLabel(date: Date, index: number, isToday: boolean) {
   if (isToday) {
     return "Today"
   }
@@ -109,10 +103,6 @@ function axisLabel(
       month: "short",
       day: "numeric",
     })
-  }
-
-  if (dayCount > pulseDayCount && date.getDay() !== 1) {
-    return ""
   }
 
   return String(date.getDate())
