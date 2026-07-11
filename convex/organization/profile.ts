@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { parseWebsiteAddress } from "../../contracts/website"
 import { type Doc } from "../_generated/dataModel"
 import {
   internalMutation,
@@ -11,12 +12,7 @@ import { readClerkUserEmail, readClerkUserName } from "../identity/users"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
-import {
-  canonicalHost,
-  factsEqual,
-  type OrganizationFacts,
-  unique,
-} from "./facts"
+import { factsEqual, type OrganizationFacts, unique } from "./facts"
 import { organizationFacts, organizationSourceSnapshot } from "./schema"
 import {
   readApprovedSources,
@@ -86,11 +82,13 @@ export const declareDomain = mutation({
   args: { tenantId: v.string(), domain: v.string() },
   handler: async (ctx, args) => {
     await requireTenantAccess(ctx, args.tenantId)
-    const [domain] = canonicalHost(args.domain)
+    const address = parseWebsiteAddress(args.domain)
 
-    if (domain === undefined) {
-      throw new Error("Enter a domain like acme.com.")
+    if (address === null) {
+      throw new Error("domain must target a public website")
     }
+
+    const domain = address.key
 
     const profile = await readProfile(ctx, args.tenantId)
     const domains = unique([...(profile?.declared?.domains ?? []), domain])

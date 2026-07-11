@@ -4,7 +4,11 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { parseWebsiteAddress } from "../../../contracts/website"
 import { api } from "../../../convex/_generated/api"
 import { type OrganizationDiscovery } from "./types"
-import { reportWebsiteStartError, websiteDomainKey } from "./url"
+import {
+  reportWebsiteStartError,
+  websiteDomainKey,
+  websiteInputErrorCopy,
+} from "./url"
 import { DiscoveryWorkingStep, WebsiteDiscoveryStep } from "./website"
 
 type OrganizationEditDialogProps = {
@@ -131,7 +135,7 @@ function websiteValidationError(value: string, current: string | undefined) {
   const next = parseWebsiteAddress(value)
 
   if (next === null) {
-    return "Enter a public website, like example.com."
+    return websiteInputErrorCopy
   }
 
   const currentKey = websiteDomainKey(current)

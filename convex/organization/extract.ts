@@ -1,7 +1,8 @@
+import { parseWebsiteAddress } from "../../contracts/website"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { requestStructured } from "../model/structured"
-import { canonicalHost, emptyFacts, type OrganizationFacts } from "./facts"
+import { emptyFacts, type OrganizationFacts } from "./facts"
 
 const maxOutputTokens = 1200
 const maxListItems = 12
@@ -68,16 +69,19 @@ function readStrings(value: unknown) {
   return [...new Set(items)].slice(0, maxListItems)
 }
 
-// Canonicalize to bare, deduped hostnames so the rendered list is consistent no
-// matter how the model formats a domain ("https://www.acme.com/" -> "acme.com").
+// The shared website contract canonicalizes and validates in one step, so the
+// list stays consistent no matter how the model formats a domain
+// ("https://www.acme.com/" -> "acme.com") and junk hostnames are dropped.
 function readDomains(value: unknown) {
   if (!Array.isArray(value)) {
     return []
   }
 
-  const hosts = value.flatMap((item) =>
-    typeof item === "string" ? canonicalHost(item) : []
-  )
+  const hosts = value.flatMap((item) => {
+    const address = typeof item === "string" ? parseWebsiteAddress(item) : null
+
+    return address === null ? [] : [address.key]
+  })
 
   return [...new Set(hosts)].slice(0, maxListItems)
 }
