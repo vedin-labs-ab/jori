@@ -59,12 +59,14 @@ export function reportWebsiteStartError(
   }
 }
 
-function readWebsiteInputError(caught: unknown) {
+export const websiteInputErrorCopy = "Enter a public website, like example.com."
+
+export function readWebsiteInputError(caught: unknown) {
   if (
     caught instanceof Error &&
-    caught.message.includes("website must target a public website")
+    caught.message.includes("must target a public website")
   ) {
-    return "Enter a public website, like example.com."
+    return websiteInputErrorCopy
   }
 
   return null
