@@ -42,9 +42,13 @@ export function createMessageRunSnapshot(input: {
   }
 }
 
+/**
+ * Instruction runs describe only themselves: a subtask must not claim its
+ * parent's source or context. The console derives the parent relationship
+ * from `parentId` at read time.
+ */
 export function createInstructionRunSnapshot(input: {
   instructions: string
-  parent?: Doc<"runs">
   title?: string
 }): RunSnapshotInput {
   const instructions = normalizeRequiredRunText(
@@ -55,11 +59,11 @@ export function createInstructionRunSnapshot(input: {
   return {
     instructions,
     snapshot: {
-      ...(input.parent?.snapshot ?? manualSnapshot()),
       title: normalizeTitle(input.title, instructions),
-      source: input.parent?.snapshot.source ?? {
+      source: {
         type: "manual",
       },
+      context: [],
     },
   }
 }
@@ -78,16 +82,6 @@ function normalizeTitle(title: string | undefined, instructions: string) {
   const value = title?.trim() || firstLine(instructions)
 
   return value.length > 90 ? `${value.slice(0, 87)}...` : value
-}
-
-function manualSnapshot(): RunSnapshot {
-  return {
-    title: "Manual run",
-    source: {
-      type: "manual",
-    },
-    context: [],
-  }
 }
 
 function normalizeRequiredRunText(text: string, label: string) {

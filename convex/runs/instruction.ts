@@ -32,7 +32,6 @@ export async function createInstructionRun(
     access: args.access,
     ...createInstructionRunSnapshot({
       instructions: args.instructions,
-      parent,
       title: args.title,
     }),
     ...(await resolveRunAudience(ctx, {

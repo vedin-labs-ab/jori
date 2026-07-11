@@ -18,6 +18,9 @@ export type RunSource = {
   type: "automation" | "event" | "manual" | "message"
   event?: SourceDatum
   kind?: SourceDatum
+  parent?: {
+    title?: string
+  }
   surface?: ToolSurface
   trigger?: {
     actor?: SourceDatum
@@ -35,6 +38,11 @@ export type RunSource = {
  */
 export function isManualTrigger(run: Doc<"runs">) {
   return run.cause.type === "manual" && run.parentId === undefined
+}
+
+/** A run Milo spawned from another run to work a delegated subtask. */
+export function isSubtaskRun(run: Doc<"runs">) {
+  return run.parentId !== undefined
 }
 
 export function runSource(
@@ -55,6 +63,12 @@ export function runSource(
         : { actor: { type: "user", label: triggeredBy } }
   }
 
+  if (isSubtaskRun(context.run)) {
+    source.surface = "milo"
+    source.parent =
+      context.parent === null ? {} : { title: context.parent.snapshot.title }
+  }
+
   if (stoppedBy !== undefined) {
     source.stop = { actor: { type: "user", label: stoppedBy } }
   }
@@ -71,6 +85,8 @@ export function sourceSearchText(source: RunSource) {
     source.event?.label,
     source.surface,
     source.url,
+    source.parent === undefined ? undefined : "subtask",
+    source.parent?.title,
     source.trigger === undefined ? undefined : "manually triggered",
     source.trigger?.actor?.label,
     source.stop?.actor.label,
