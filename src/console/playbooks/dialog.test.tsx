@@ -40,7 +40,8 @@ test("defaults to email delivery and enables with that destination", () => {
   expect(actions.enable).toHaveBeenCalledWith(
     morningBrief,
     { email: "gmail", calendar: "googleCalendar" },
-    { kind: "email" }
+    { kind: "email" },
+    {}
   )
 })
 
@@ -108,7 +109,8 @@ test("try once shares the chosen destination", () => {
   expect(actions.trial).toHaveBeenCalledWith(
     morningBrief,
     { email: "gmail", calendar: "googleCalendar" },
-    { kind: "email" }
+    { kind: "email" },
+    {}
   )
 })
 
@@ -142,6 +144,41 @@ test("advanced settings closes this dialog only after creation", () => {
   expect(onOpenChange).toHaveBeenCalledWith(false)
 })
 
+test("closing an option dropdown never closes the dialog", async () => {
+  shimSelectDom()
+  const meetingPrep = playbookCatalog.find(
+    (definition) => definition.key === "meeting-prep"
+  )
+  const onOpenChange = vi.fn()
+
+  if (meetingPrep === undefined) {
+    throw new Error("Meeting prep definition is missing.")
+  }
+
+  renderDialog(stubActions(), ["email"], singlePlan, onOpenChange, meetingPrep)
+
+  // The default digest mode shows the "Remind before" minutes select.
+  fireEvent.click(screen.getByRole("combobox"))
+  expect(screen.getByRole("listbox")).toBeDefined()
+  // Dismissable layers attach their outside listeners a tick after opening.
+  await new Promise((resolve) => setTimeout(resolve, 0))
+
+  // Dismissing the dropdown by clicking elsewhere closes only the dropdown.
+  fireEvent.pointerDown(document.body)
+
+  expect(screen.queryByRole("listbox")).toBeNull()
+  expect(onOpenChange).not.toHaveBeenCalledWith(false)
+  expect(screen.getByText(/set up meeting prep/i)).toBeDefined()
+})
+
+/** Radix Select touches pointer-capture and scroll APIs jsdom lacks. */
+function shimSelectDom() {
+  Element.prototype.hasPointerCapture ??= () => false
+  Element.prototype.setPointerCapture ??= () => {}
+  Element.prototype.releasePointerCapture ??= () => {}
+  Element.prototype.scrollIntoView ??= () => {}
+}
+
 function switchKind(kind: string) {
   fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery kind" }))
   fireEvent.click(screen.getByRole("menuitem", { name: kind }))
@@ -151,12 +188,13 @@ function renderDialog(
   actions: PlaybookActions,
   delivery: PlaybookListRow["delivery"],
   plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>,
-  onOpenChange: (open: boolean) => void = () => {}
+  onOpenChange: (open: boolean) => void = () => {},
+  definition = morningBrief
 ) {
   return render(
     <PlaybookSetupDialog
       actions={actions}
-      definition={morningBrief}
+      definition={definition}
       onOpenChange={onOpenChange}
       open
       plan={plan}
