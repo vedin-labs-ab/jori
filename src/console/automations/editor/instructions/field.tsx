@@ -35,9 +35,11 @@ export function AutomationInstructionsField(
           data-automation-instructions-frame=""
         >
           <EditorContent className="min-w-0 max-w-full" editor={editor} />
-          <div className="flex min-h-9 items-center gap-3 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
+          <div className="flex min-h-9 items-center gap-2 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
             <SigilHint sigil="@">integrations</SigilHint>
+            <span aria-hidden="true">·</span>
             <SigilHint sigil="/">skills</SigilHint>
+            <span aria-hidden="true">·</span>
             <SigilHint sigil="#">tools</SigilHint>
           </div>
         </div>
