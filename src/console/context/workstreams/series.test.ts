@@ -34,23 +34,21 @@ test("builds calendar columns ending today", () => {
   expect(pulse.days.filter((day) => day.isToday)).toHaveLength(1)
 })
 
-test("thins wide-window axis labels to anchors and Mondays", () => {
+test("labels every wide-window day, dropping only post-anchor numbers", () => {
   const pulse = buildPulse([], [], now, 30)
 
   expect(pulse.days).toHaveLength(30)
   expect(pulse.days[0]?.label).toBe(monthDay(new Date(2026, 5, 12)))
+  expect(pulse.days[1]?.label).toBe("")
+  expect(pulse.days[2]?.label).toBe("14")
+  expect(pulse.days[19]?.label).toBe(monthDay(new Date(2026, 6, 1)))
+  expect(pulse.days[20]?.label).toBe("")
+  expect(pulse.days[21]?.label).toBe("3")
   expect(pulse.days.at(-1)?.label).toBe("Today")
 
   const labeled = pulse.days.filter((day) => day.label !== "")
 
-  for (const day of labeled.slice(1, -1)) {
-    const date = new Date(day.key)
-
-    expect(date.getDay() === 1 || date.getDate() === 1).toBe(true)
-  }
-
-  expect(labeled.length).toBeGreaterThan(3)
-  expect(labeled.length).toBeLessThan(10)
+  expect(labeled).toHaveLength(28)
 })
 
 test("buckets entries into lanes by current membership", () => {

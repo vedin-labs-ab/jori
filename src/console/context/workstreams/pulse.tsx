@@ -91,7 +91,7 @@ export function WorkstreamsPulse({
   }
 
   return (
-    <Card className="w-fit max-w-[min(56rem,100%)]">
+    <Card className="w-fit max-w-[min(56rem,100%)] pb-0">
       <CardHeader>
         <CardTitle>Activity</CardTitle>
         <CardDescription>
@@ -142,7 +142,7 @@ export function WorkstreamsPulse({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="justify-between gap-6 border-t text-muted-foreground text-xs">
+      <CardFooter className="justify-between gap-6 border-t bg-muted/25 pt-3! pb-3 text-muted-foreground text-xs">
         <span className="flex items-center gap-1.5">
           <Clock aria-hidden className="size-3.5 shrink-0" />
           <ReviewedNote reviewedAt={pulse.reviewedAt} now={pulse.now} />
