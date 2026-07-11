@@ -18,6 +18,7 @@ export {
   readString,
   readStringArray,
   schemaHasOptionalFields,
+  stringArrayProperty,
   withOptionalFieldGuidance,
 } from "./common"
 

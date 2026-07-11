@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { action, internalMutation } from "../_generated/server"
+import { resolveSubtaskAccess } from "../runs/access"
 import { createInstructionRun } from "../runs/instruction"
 import { requireWorkerSecret } from "./shared"
 
@@ -11,6 +12,7 @@ export const create = action({
     secret: v.string(),
     task: v.string(),
     title: v.optional(v.string()),
+    tools: v.optional(v.array(v.string())),
   },
   returns: v.object({
     runId: v.id("runs"),
@@ -22,6 +24,7 @@ export const create = action({
       parentId: args.parentId,
       task: args.task,
       title: args.title,
+      tools: args.tools,
     })) as { runId: Id<"runs"> }
   },
 })
@@ -31,6 +34,7 @@ export const insert = internalMutation({
     parentId: v.id("runs"),
     task: v.string(),
     title: v.optional(v.string()),
+    tools: v.optional(v.array(v.string())),
   },
   returns: v.object({
     runId: v.id("runs"),
@@ -47,6 +51,10 @@ export const insert = internalMutation({
         tenantId: parent.tenantId,
         instructions: args.task,
         title: args.title,
+        access: await resolveSubtaskAccess(ctx, {
+          parent,
+          tools: args.tools,
+        }),
         parent,
         createdBy: parent.createdBy,
       }),

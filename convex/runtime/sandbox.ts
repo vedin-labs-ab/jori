@@ -5,7 +5,10 @@ import {
 import { type ToolAccess } from "../../contracts/permissions"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { withOptionalFieldGuidance } from "../runs/agent/tools/schemas"
+import {
+  stringArrayProperty,
+  withOptionalFieldGuidance,
+} from "../runs/agent/tools/schemas"
 import { type QueryLikeCtx } from "../shared/context"
 import { nativeToolUsage } from "./permissions/native"
 
@@ -27,6 +30,9 @@ export const sandboxTools = [
       properties: {
         task: { type: "string" },
         title: { type: "string" },
+        tools: stringArrayProperty(
+          "Integration and web tool names the agent may use, exact names from your own tools. Omit to pass on your full access. Grant the smallest set that covers the task; names outside your own access are dropped. Core Milo tools are always included."
+        ),
       },
     }),
     route: "agent",

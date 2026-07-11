@@ -10,6 +10,7 @@ import { type RuntimeSkill } from "../../skills/runtime"
 import { type runLifecycleTools } from "../lifecycle"
 import { type RuntimePermissions } from "../permissions/index"
 import { visibleNativeToolSnapshots } from "../permissions/native"
+import { inputAccess } from "../permissions/tools"
 import { sandboxTools } from "../sandbox"
 import { type loadActiveSurface } from "../surface"
 import {
@@ -52,7 +53,7 @@ export function runtimeToolSnapshot(
     capabilities: permissions.capabilities,
     lifecycleTools: visibleNativeToolSnapshots(lifecycleTools),
     sandboxTools: visibleNativeToolSnapshots(sandboxTools),
-    webSearch: input.type !== "automation" || input.automation.access.web,
+    webSearch: inputAccess(input)?.web ?? true,
   })
 }
 

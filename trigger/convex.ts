@@ -200,12 +200,14 @@ export class MiloConvexClient {
     parentId: ConvexId<"runs">
     task: string
     title?: string
+    tools?: string[]
   }) {
     return await this.client.action(api.runtime.agents.create, {
       parentId: args.parentId,
       secret: this.secret,
       task: args.task,
       title: args.title,
+      tools: args.tools,
     })
   }
 

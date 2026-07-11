@@ -108,7 +108,7 @@ function selectedTools(
 }
 
 /** The run's tool contract; undefined grants the full tool surface. */
-function inputAccess(input: AgentRuntimeInput) {
+export function inputAccess(input: AgentRuntimeInput) {
   if (input.type === "automation") {
     return input.automation.access
   }
