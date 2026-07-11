@@ -1,4 +1,4 @@
-import { Building2, Loader2, Plus } from "lucide-react"
+import { Building2, Loader2, Pencil, Plus } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -170,7 +170,12 @@ function ContextActionContent({
     )
   }
 
-  return "Edit"
+  return (
+    <>
+      <Pencil className="text-muted-foreground" />
+      Edit
+    </>
+  )
 }
 
 function EmptyProfile() {
