@@ -1,3 +1,4 @@
+import { viewFragment } from "@contracts/artifacts/share"
 import { CheckCircle2, Clock3 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -142,13 +143,25 @@ function useArtifactFrameSession({
   return { error, frameSrc, isReady, postToken }
 }
 
+/**
+ * The render URL, forwarding any view params from the console URL's fragment
+ * onto the frame's own fragment: the page is cross-origin and cannot read
+ * our location, and fragments keep the params out of request logs.
+ */
 function useArtifactFrameSrc(artifactId: string) {
   return useMemo(() => {
     if (convexSiteUrl === undefined || convexSiteUrl === "") {
       return undefined
     }
 
-    return new URL(`/artifacts/render/${artifactId}`, convexSiteUrl).toString()
+    const url = new URL(
+      `/artifacts/render/${artifactId}`,
+      convexSiteUrl
+    ).toString()
+    const view =
+      typeof window === "undefined" ? null : viewFragment(window.location.hash)
+
+    return view === null ? url : `${url}#${view}`
   }, [artifactId])
 }
 

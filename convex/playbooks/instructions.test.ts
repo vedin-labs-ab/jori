@@ -109,6 +109,14 @@ describe("meeting prep instructions", () => {
       "If the dossier at days -> <YYYY-MM-DD> -> <event id> is missing"
     )
     expect(instructions).not.toContain("do the prep yourself now")
+    // The digest link opens the day view as-is; each prep send deep-links
+    // its own meeting through the fragment.
+    expect(instructions).toContain(
+      "append &d=<YYYY-MM-DD>&m=<event id> to it: that link is this meeting's prep note"
+    )
+    expect(instructions).toContain(
+      "valid for 24 hours: that link is the full prep note"
+    )
   })
 
   test("pre-meeting sends switch off cleanly", () => {

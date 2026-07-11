@@ -21,6 +21,22 @@ export function parseShareFragment(hash: string) {
   return secret === null || secret === "" ? null : secret
 }
 
+/**
+ * The non-secret fragment params: view state a link addresses inside the
+ * artifact page. The console forwards these onto the frame's own fragment —
+ * the page runs cross-origin and cannot read the console URL.
+ */
+export function viewFragment(hash: string) {
+  const fragment = hash.startsWith("#") ? hash.slice(1) : hash
+  const params = new URLSearchParams(fragment)
+
+  params.delete(shareFragmentKey)
+
+  const view = params.toString()
+
+  return view === "" ? null : view
+}
+
 export function shareExpiresAt(now: number, expiresInHours?: number) {
   return now + clampShareExpiryHours(expiresInHours) * 60 * 60 * 1000
 }
