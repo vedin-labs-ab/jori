@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { OrganizationEditDialog } from "./edit"
 import { FactsBody } from "./facts"
 import { ProposalReview } from "./proposal"
-import { DomainsSection, SourcesSection, WebsitesSection } from "./sources"
+import { SourcesSection, WebsitesSection } from "./sources"
 import {
   hasFacts,
   isFactPresent,
@@ -130,11 +130,9 @@ function ProfileSections({
   return (
     <>
       <WebsitesSection
+        declared={profile?.declared?.domains ?? []}
         domains={facts?.domains ?? []}
         primaryWebsite={website}
-      />
-      <DomainsSection
-        declared={profile?.declared?.domains ?? []}
         tenantId={tenantId}
       />
       {hasSources ? (
