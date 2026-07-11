@@ -64,9 +64,11 @@ export const codingToolDefinitions = [
   {
     name: "apply_patch",
     description:
-      "Apply a unified diff patch to files under /home/user/workspace.",
+      "Apply a patch to files under /home/user/workspace, as a unified diff or a *** Begin Patch envelope.",
     inputSchema: objectSchema(["patch"], {
-      patch: stringSchema("Unified diff patch to apply."),
+      patch: stringSchema(
+        "The patch: a unified diff, or a *** Begin Patch / *** End Patch envelope with Add File, Update File, and Delete File sections."
+      ),
       cwd: stringSchema(
         'Optional workspace directory to apply from, for example "milo". Defaults to /home/user/workspace.'
       ),

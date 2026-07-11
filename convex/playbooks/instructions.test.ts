@@ -95,7 +95,7 @@ describe("meeting prep instructions", () => {
     const instructions = render("meeting-prep", emailDestination)
 
     expect(instructions).toContain("start_agent")
-    expect(instructions).toContain("at 07:30 today")
+    expect(instructions).toContain("at 07:30 my local time today")
     expect(instructions).toContain('name "Meeting digest"')
     expect(instructions).toContain("start minus 45 minutes")
     expect(instructions).toContain('name "Prep: "')
@@ -117,6 +117,12 @@ describe("meeting prep instructions", () => {
     expect(instructions).toContain(
       "valid for 24 hours: that link is the full prep note"
     )
+    // A run after the digest time (Try once, late enablement) sends the
+    // digest instead of silently skipping it, and never babysits agents.
+    expect(instructions).toContain(
+      "If 07:30 has already passed today, schedule nothing and follow the digest instructions yourself"
+    )
+    expect(instructions).toContain("Do not wait for the agents.")
   })
 
   test("pre-meeting sends switch off cleanly", () => {
