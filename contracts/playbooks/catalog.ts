@@ -1,11 +1,7 @@
 import { type Scope } from "../permissions/scope"
 import { type PlaybookSlot } from "./capabilities"
 import { type PlaybookDelivery } from "./delivery"
-import {
-  type PlaybookOptionField,
-  type PlaybookOptionValues,
-  resolvePlaybookOptions,
-} from "./options"
+import { type PlaybookOptionField, type PlaybookOptionValues } from "./options"
 import {
   describePlaybookSchedule,
   type PlaybookSchedule,
@@ -15,10 +11,16 @@ import {
 export type PlaybookDefinition = {
   key: string
   title: string
-  /** Outcome-first card copy: what the user gets, not how it works. */
+  /** Outcome-first card copy: the value the user gets, never cadence
+   *  detail — the rhythm and the setup dialog carry the schedule. */
   description: string
   /** Personal playbooks enable per member; organization ones per tenant. */
   scope: Scope
+  /** Card-level rhythm shown on browse surfaces: what to expect and, when
+   *  the playbook offers modes, that there is a choice ("Morning digest or
+   *  right before each meeting"). No clock times — the setup dialog shows
+   *  the precise cadence for the chosen options. */
+  cadence: string
   schedule: PlaybookSchedule
   /** Setup knobs beyond accounts and delivery; resolved values feed the
    *  instruction template, the schedule, and the cadence copy. */
@@ -26,8 +28,8 @@ export type PlaybookDefinition = {
   /** Derive the cron schedule from the chosen options; defaults to
    *  `schedule` when absent. */
   resolveSchedule?: (options: PlaybookOptionValues) => PlaybookSchedule
-  /** User-facing rhythm when the cron line would mislead — a planning
-   *  sweep that delivers at meeting times, for example. */
+  /** Precise cadence at the point of decision, when the cron line would
+   *  mislead — a planning sweep that delivers at meeting times, say. */
   describeCadence?: (options: PlaybookOptionValues) => string
   /** Input capabilities the playbook reads; delivery is separate. */
   slots: readonly PlaybookSlot[]
@@ -36,15 +38,18 @@ export type PlaybookDefinition = {
   web: boolean
 }
 
-/** What the user is promised, under the given (or default) options. */
+/** What the user is promised: the card rhythm on browse surfaces, or the
+ *  precise cadence once options are in hand at the point of decision. */
 export function describePlaybookCadence(
   definition: PlaybookDefinition,
   values?: PlaybookOptionValues
 ) {
-  const options = values ?? resolvePlaybookOptions(definition.options)
+  if (values === undefined) {
+    return definition.cadence
+  }
 
   return (
-    definition.describeCadence?.(options) ??
+    definition.describeCadence?.(values) ??
     describePlaybookSchedule(definition.schedule)
   )
 }
@@ -70,8 +75,9 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     key: "morning-brief",
     title: "Morning brief",
     description:
-      "Start each day knowing what's ahead: today's meetings and the emails that actually need you, in one email before you sit down.",
+      "Start the day knowing what's ahead: today's meetings and the emails that actually need you, gathered into one brief.",
     scope: "personal",
+    cadence: "Every weekday morning",
     schedule: { repeat: "weekdays", time: "08:00" },
     slots: [
       { capability: "email", intents: ["read"] },
@@ -84,8 +90,9 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     key: "meeting-prep",
     title: "Meeting prep",
     description:
-      "Walk into every meeting prepared: who you're meeting, what it's about, and what to have ready — researched dossiers as a morning digest or right before each meeting.",
+      "Walk into every meeting prepared: who you're meeting, what it's about, and what to have ready — a researched dossier for every meeting that matters.",
     scope: "personal",
+    cadence: "Morning digest or right before each meeting",
     schedule: { repeat: "daily", time: "01:00" },
     options: [
       {
@@ -161,6 +168,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     description:
       "Nothing slips through: threads waiting on you get reply drafts ready to review, and you get a list of who still owes you an answer.",
     scope: "personal",
+    cadence: "Weekday afternoons",
     schedule: { repeat: "weekdays", time: "15:30" },
     slots: [{ capability: "email", intents: ["read", "draft"] }],
     delivery: { ...digestDelivery, noun: "summary" },
@@ -170,8 +178,9 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     key: "week-in-review",
     title: "Week in review",
     description:
-      "Close the week with a clear head: what happened, what's unresolved, and what next week looks like — one email every Friday afternoon.",
+      "Close the week with a clear head: what happened, what's unresolved, and what next week looks like, in one review.",
     scope: "personal",
+    cadence: "Friday afternoons",
     schedule: { repeat: "weekly", weekday: 5, time: "16:00" },
     slots: [
       { capability: "email", intents: ["read"] },
