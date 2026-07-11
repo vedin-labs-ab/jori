@@ -11,13 +11,20 @@ import { readClerkUserEmail, readClerkUserName } from "../identity/users"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
-import { factsEqual, type OrganizationFacts } from "./facts"
+import {
+  canonicalHost,
+  factsEqual,
+  type OrganizationFacts,
+  unique,
+} from "./facts"
 import { organizationFacts, organizationSourceSnapshot } from "./schema"
 import {
   readApprovedSources,
+  readPrimaryWebsite,
   replaceApprovedSources,
   type SourceSnapshot,
   sourcesEqual,
+  websitesEqual,
 } from "./sources"
 
 export const get = query({
@@ -42,7 +49,7 @@ export const approve = mutation({
 
     const now = Date.now()
     await ctx.db.patch(profile._id, {
-      ...toFacts(profile.proposed),
+      ...derivedFacts(profile.proposed),
       proposed: undefined,
       approvedAt: now,
       approvedBy: createPersonActor(personId, {
@@ -75,6 +82,57 @@ export const dismiss = mutation({
   },
 })
 
+export const declareDomain = mutation({
+  args: { tenantId: v.string(), domain: v.string() },
+  handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+    const [domain] = canonicalHost(args.domain)
+
+    if (domain === undefined) {
+      throw new Error("Enter a domain like acme.com.")
+    }
+
+    const profile = await readProfile(ctx, args.tenantId)
+    const domains = unique([...(profile?.declared?.domains ?? []), domain])
+
+    if (profile === null) {
+      await ctx.db.insert("organizationProfile", {
+        tenantId: args.tenantId,
+        aliases: [],
+        domains: [],
+        declared: { domains },
+        updatedAt: Date.now(),
+      })
+
+      return
+    }
+
+    await ctx.db.patch(profile._id, {
+      declared: { domains },
+      updatedAt: Date.now(),
+    })
+  },
+})
+
+export const retractDomain = mutation({
+  args: { tenantId: v.string(), domain: v.string() },
+  handler: async (ctx, args) => {
+    await requireTenantAccess(ctx, args.tenantId)
+    const profile = await readProfile(ctx, args.tenantId)
+    const declared = profile?.declared?.domains ?? []
+    const domains = declared.filter((entry) => entry !== args.domain)
+
+    if (profile === null || domains.length === declared.length) {
+      return
+    }
+
+    await ctx.db.patch(profile._id, {
+      declared: domains.length === 0 ? undefined : { domains },
+      updatedAt: Date.now(),
+    })
+  },
+})
+
 export const propose = internalMutation({
   args: {
     tenantId: v.string(),
@@ -88,7 +146,7 @@ export const propose = internalMutation({
 
     if (
       profile !== null &&
-      factsEqual(toFacts(profile), args.facts) &&
+      factsEqual(derivedFacts(profile), args.facts) &&
       sourcesEqual(approvedSources, args.sources) &&
       websitesEqual(readPrimaryWebsite(approvedSources), args.website)
     ) {
@@ -140,7 +198,10 @@ async function writeProposed(
   await ctx.db.patch(profile._id, { proposed, updatedAt: Date.now() })
 }
 
-function toFacts(source: OrganizationFacts): OrganizationFacts {
+// The pipeline-owned facts: live columns written by approval and compared by
+// the watcher. Must stay blind to `declared` — polluting this would make
+// `propose` see a perpetual diff and re-draft forever.
+export function derivedFacts(source: OrganizationFacts): OrganizationFacts {
   return {
     name: source.name,
     aliases: source.aliases,
@@ -149,28 +210,17 @@ function toFacts(source: OrganizationFacts): OrganizationFacts {
   }
 }
 
-function readPrimaryWebsite(sources: SourceSnapshot[]) {
-  return sources.find((source) => source.primary)?.url
-}
+// What the rest of the product should treat as true: derived facts plus the
+// user's declared domains. The union lives only here, at the consumer edge,
+// so discovery, drafting, and approval never see declared values.
+export function approvedFacts(
+  profile: Doc<"organizationProfile">
+): OrganizationFacts {
+  const facts = derivedFacts(profile)
 
-function websitesEqual(left: string | undefined, right: string) {
-  return websiteKey(left) === websiteKey(right)
-}
-
-function websiteKey(value: string | undefined) {
-  const trimmed = value?.trim()
-
-  if (trimmed === undefined || trimmed === "") {
-    return ""
-  }
-
-  try {
-    const url = new URL(trimmed)
-    const pathname = url.pathname.replace(/\/$/, "")
-
-    return `${url.protocol}//${url.host.toLowerCase()}${pathname}`
-  } catch {
-    return trimmed.toLowerCase().replace(/\/$/, "")
+  return {
+    ...facts,
+    domains: unique([...facts.domains, ...(profile.declared?.domains ?? [])]),
   }
 }
 
@@ -180,7 +230,7 @@ export async function readApprovedFacts(
 ): Promise<OrganizationFacts | null> {
   const profile = await readProfile(ctx, tenantId)
 
-  return profile === null ? null : toFacts(profile)
+  return profile === null ? null : approvedFacts(profile)
 }
 
 async function readProfile(ctx: QueryLikeCtx, tenantId: string) {

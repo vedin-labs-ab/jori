@@ -96,6 +96,17 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     schedule: { repeat: "daily", time: "01:00" },
     options: [
       {
+        key: "meetings",
+        label: "Meetings",
+        kind: "choice",
+        default: "both",
+        choices: [
+          { value: "external", label: "External" },
+          { value: "internal", label: "Internal" },
+          { value: "both", label: "Both" },
+        ],
+      },
+      {
         key: "mode",
         label: "Delivery",
         kind: "choice",

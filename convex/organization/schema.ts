@@ -20,8 +20,12 @@ export const organizationSourceSnapshot = v.object({
   hash: v.optional(v.string()),
 })
 
-// One row per tenant. Top-level fields are live/approved and read on the hot
-// path; `proposed` holds a draft awaiting human approval (absent when none).
+// One row per tenant, three provenance spaces: top-level fields are
+// live/approved and read on the hot path; `proposed` holds a draft awaiting
+// human approval (absent when none); `declared` holds facts the user states
+// directly — user-owned, effective immediately, and never touched by
+// discovery, drafts, or approval. Deliberately narrower than factsFields:
+// each declared field must earn its place with its own merge semantics.
 export const organizationProfile = defineTable({
   tenantId: v.string(),
   ...factsFields,
@@ -33,6 +37,7 @@ export const organizationProfile = defineTable({
       website: v.optional(v.string()),
     })
   ),
+  declared: v.optional(v.object({ domains: v.array(v.string()) })),
   approvedAt: v.optional(v.number()),
   approvedBy: v.optional(actorValidator),
   updatedAt: v.number(),

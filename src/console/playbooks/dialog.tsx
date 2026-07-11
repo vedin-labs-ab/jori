@@ -7,6 +7,8 @@ import {
   type PlaybookOptionValues,
   resolvePlaybookOptions,
 } from "@contracts/playbooks/options"
+import { Link } from "@tanstack/react-router"
+import { useQuery } from "convex/react"
 import { Play, Settings2 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -19,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
+import { api } from "../../../convex/_generated/api"
 import { PlaybookCustomizations } from "./customizations"
 import { type PlaybookActions, pendingActionKind } from "./enable"
 import { PlaybookMeta } from "./meta"
@@ -48,6 +51,7 @@ export function PlaybookSetupDialog({
   const destination = delivery.value
   const pendingKind = pendingActionKind(actions, definition)
   const { options, optionFields } = useOptionsSetup(definition)
+  const meetingsHint = useMeetingsHint(definition, tenantId)
 
   const choices =
     plan.kind === "choose" ? plan.options[providerIndex].choices : plan.choices
@@ -99,42 +103,69 @@ export function PlaybookSetupDialog({
             delivery={{ ...delivery, tenantId }}
             disabled={isBusy}
             onProviderIndexChange={setProviderIndex}
-            options={optionFields}
+            options={
+              optionFields === undefined
+                ? undefined
+                : { ...optionFields, hints: { meetings: meetingsHint } }
+            }
             plan={plan}
             providerIndex={providerIndex}
           />
         </div>
 
-        <DialogFooter className="sm:justify-between">
-          {/* Utilities on the left; Enable stands alone as the call to action. */}
-          <div className="flex items-center gap-2">
-            <Button
-              disabled={destination === undefined || isBusy}
-              onClick={openAdvanced}
-              onPointerEnter={actions.preloadEdit}
-              type="button"
-              variant="secondary"
-            >
-              {pendingKind === "advanced" ? <Spinner /> : <Settings2 />}{" "}
-              Advanced settings
-            </Button>
-            <Button
-              disabled={!canSubmit}
-              onClick={() => submit(actions.trial, false)}
-              variant="secondary"
-            >
-              {pendingKind === "trial" ? <Spinner /> : <Play />} Try once
-            </Button>
-          </div>
-          <Button
-            disabled={!canSubmit}
-            onClick={() => submit(actions.enable, true)}
-          >
-            {pendingKind === "enable" ? <Spinner /> : null} Enable
-          </Button>
-        </DialogFooter>
+        <SetupDialogFooter
+          advancedDisabled={destination === undefined || isBusy}
+          canSubmit={canSubmit}
+          onAdvanced={openAdvanced}
+          onEnable={() => submit(actions.enable, true)}
+          onPreloadEdit={actions.preloadEdit}
+          onTrial={() => submit(actions.trial, false)}
+          pendingKind={pendingKind}
+        />
       </DialogContent>
     </Dialog>
+  )
+}
+
+function SetupDialogFooter({
+  advancedDisabled,
+  canSubmit,
+  onAdvanced,
+  onEnable,
+  onPreloadEdit,
+  onTrial,
+  pendingKind,
+}: {
+  advancedDisabled: boolean
+  canSubmit: boolean
+  onAdvanced: () => void
+  onEnable: () => void
+  onPreloadEdit: () => void
+  onTrial: () => void
+  pendingKind: ReturnType<typeof pendingActionKind>
+}) {
+  return (
+    <DialogFooter className="sm:justify-between">
+      {/* Utilities on the left; Enable stands alone as the call to action. */}
+      <div className="flex items-center gap-2">
+        <Button
+          disabled={advancedDisabled}
+          onClick={onAdvanced}
+          onPointerEnter={onPreloadEdit}
+          type="button"
+          variant="secondary"
+        >
+          {pendingKind === "advanced" ? <Spinner /> : <Settings2 />} Advanced
+          settings
+        </Button>
+        <Button disabled={!canSubmit} onClick={onTrial} variant="secondary">
+          {pendingKind === "trial" ? <Spinner /> : <Play />} Try once
+        </Button>
+      </div>
+      <Button disabled={!canSubmit} onClick={onEnable}>
+        {pendingKind === "enable" ? <Spinner /> : null} Enable
+      </Button>
+    </DialogFooter>
   )
 }
 
@@ -163,6 +194,53 @@ function useOptionsSetup(definition: PlaybookDefinition) {
               setPicks((current) => ({ ...current, [key]: value })),
           },
   }
+}
+
+/**
+ * Grounds a Meetings scope field in the organization's actual domains so
+ * "Internal" is concrete. The dialog only displays — domains are managed on
+ * the Context page, which the caption links to.
+ */
+function useMeetingsHint(definition: PlaybookDefinition, tenantId: string) {
+  const hasMeetings =
+    definition.options?.some((field) => field.key === "meetings") === true
+  const profile = useQuery(
+    api.organization.profile.get,
+    hasMeetings ? { tenantId } : "skip"
+  )
+
+  if (!hasMeetings) {
+    return undefined
+  }
+
+  const domains = [
+    ...new Set([
+      ...(profile?.domains ?? []),
+      ...(profile?.declared?.domains ?? []),
+    ]),
+  ]
+  const hasDomains = domains.length > 0
+
+  return (
+    <p className="text-muted-foreground">
+      {hasDomains
+        ? `Internal: anyone at ${listDomains(domains)}`
+        : "Internal is based on your organization's domains"}
+      {" · "}
+      <Link
+        className="underline underline-offset-2 hover:text-foreground"
+        to="/context"
+      >
+        {hasDomains ? "Edit in Context" : "Set up in Context"}
+      </Link>
+    </p>
+  )
+}
+
+function listDomains(domains: string[]) {
+  return domains.length === 1
+    ? domains[0]
+    : `${domains.slice(0, -1).join(", ")} or ${domains.at(-1)}`
 }
 
 /**

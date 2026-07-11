@@ -3,6 +3,7 @@ import {
   type PlaybookOptionField,
   type PlaybookOptionValues,
 } from "@contracts/playbooks/options"
+import { type ReactNode } from "react"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -14,15 +15,20 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { PlaybookSection } from "./meta"
 
-/** The catalog-declared setup knobs, one section per enabled field. */
+/**
+ * The catalog-declared setup knobs, one section per enabled field. `hints`
+ * lets the dialog ground a field in live data (rendered under its control).
+ */
 export function PlaybookOptionsFields({
   disabled,
   fields,
+  hints,
   onChange,
   values,
 }: {
   disabled: boolean
   fields: readonly PlaybookOptionField[]
+  hints?: Partial<Record<string, ReactNode>>
   onChange: (key: string, value: string | number) => void
   values: PlaybookOptionValues
 }) {
@@ -38,6 +44,7 @@ export function PlaybookOptionsFields({
               onChange={(value) => onChange(field.key, value)}
               value={values[field.key]}
             />
+            {hints?.[field.key]}
           </PlaybookSection>
         ))}
     </>

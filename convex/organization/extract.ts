@@ -1,7 +1,7 @@
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { requestStructured } from "../model/structured"
-import { emptyFacts, type OrganizationFacts } from "./facts"
+import { canonicalHost, emptyFacts, type OrganizationFacts } from "./facts"
 
 const maxOutputTokens = 1200
 const maxListItems = 12
@@ -80,22 +80,4 @@ function readDomains(value: unknown) {
   )
 
   return [...new Set(hosts)].slice(0, maxListItems)
-}
-
-function canonicalHost(value: string): string[] {
-  const trimmed = value.trim()
-
-  if (trimmed === "") {
-    return []
-  }
-
-  try {
-    const url = new URL(
-      trimmed.includes("://") ? trimmed : `https://${trimmed}`
-    )
-
-    return [url.hostname.replace(/^www\./, "").toLowerCase()]
-  } catch {
-    return []
-  }
 }

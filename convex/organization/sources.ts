@@ -194,3 +194,28 @@ function serializeSnapshots(sources: SourceSnapshot[]) {
 function normalizeUrl(url: string) {
   return url.trim().toLowerCase()
 }
+
+export function readPrimaryWebsite(sources: SourceSnapshot[]) {
+  return sources.find((source) => source.primary)?.url
+}
+
+export function websitesEqual(left: string | undefined, right: string) {
+  return websiteKey(left) === websiteKey(right)
+}
+
+function websiteKey(value: string | undefined) {
+  const trimmed = value?.trim()
+
+  if (trimmed === undefined || trimmed === "") {
+    return ""
+  }
+
+  try {
+    const url = new URL(trimmed)
+    const pathname = url.pathname.replace(/\/$/, "")
+
+    return `${url.protocol}//${url.host.toLowerCase()}${pathname}`
+  } catch {
+    return trimmed.toLowerCase().replace(/\/$/, "")
+  }
+}

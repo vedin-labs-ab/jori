@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { OrganizationEditDialog } from "./edit"
 import { FactsBody } from "./facts"
 import { ProposalReview } from "./proposal"
-import { SourcesSection, WebsitesSection } from "./sources"
+import { DomainsSection, SourcesSection, WebsitesSection } from "./sources"
 import {
   hasFacts,
   isFactPresent,
@@ -44,7 +44,6 @@ export function ContextProfile({
   }
 
   const facts = profile === null || !hasFacts(profile) ? null : profile
-  const hasSources = sources === undefined || sources.length > 0
   const extracting = discovery?.status === "running"
   const title =
     facts !== null && isFactPresent(facts.name) ? facts.name : "Organization"
@@ -88,16 +87,13 @@ export function ContextProfile({
           ) : (
             <FactsBody facts={facts} showName={false} />
           )}
-          <WebsitesSection
-            domains={facts?.domains ?? []}
-            primaryWebsite={website}
+          <ProfileSections
+            facts={facts}
+            profile={profile}
+            sources={sources}
+            tenantId={tenantId}
+            website={website}
           />
-          {hasSources ? (
-            <>
-              <Separator />
-              <SourcesSection sources={sources} />
-            </>
-          ) : null}
         </CardContent>
       </Card>
       {editorOpen ? (
@@ -111,6 +107,41 @@ export function ContextProfile({
             setReviewOpen(true)
           }}
         />
+      ) : null}
+    </>
+  )
+}
+
+function ProfileSections({
+  facts,
+  profile,
+  sources,
+  tenantId,
+  website,
+}: {
+  facts: NonNullable<OrganizationProfile> | null
+  profile: OrganizationProfile
+  sources: OrganizationSources | undefined
+  tenantId: string
+  website: string | undefined
+}) {
+  const hasSources = sources === undefined || sources.length > 0
+
+  return (
+    <>
+      <WebsitesSection
+        domains={facts?.domains ?? []}
+        primaryWebsite={website}
+      />
+      <DomainsSection
+        declared={profile?.declared?.domains ?? []}
+        tenantId={tenantId}
+      />
+      {hasSources ? (
+        <>
+          <Separator />
+          <SourcesSection sources={sources} />
+        </>
       ) : null}
     </>
   )
