@@ -23,6 +23,14 @@ const unplacedRamp = [
 ]
 const tooltipEffortLimit = 5
 
+// The label column stays pinned while the day grid scrolls beneath it, so
+// wide windows never cost lane identity. The opaque card background hides
+// the squares passing under, and the card's horizontal inset lives on the
+// pinned cells so nothing shows in the padding strip.
+export const stickyLane =
+  "sticky left-0 z-10 self-stretch bg-card pl-(--card-spacing)"
+const stickyLabel = cn(stickyLane, "flex min-w-0 items-center pr-4 text-sm")
+
 export function LaneRow({
   lane,
   laneGrid,
@@ -41,9 +49,12 @@ export function LaneRow({
       <button
         type="button"
         onClick={onOpen}
-        className="truncate pr-4 text-left text-muted-foreground text-sm transition-colors hover:text-foreground"
+        className={cn(
+          stickyLabel,
+          "text-left text-muted-foreground transition-colors hover:text-foreground"
+        )}
       >
-        {lane.name}
+        <span className="truncate">{lane.name}</span>
       </button>
     )
 
@@ -58,18 +69,18 @@ export function LaneRow({
 }
 
 // The count lives on the lane label itself: the number of efforts waiting
-// for a workstream sits exactly where their activity renders, and the dot
-// keys the lane to its color.
+// for a workstream sits exactly where their activity renders. The dot and
+// count carry the lane's color key; the name reads like every other label.
 function UnplacedLabel({ count, name }: { count: number; name: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="flex min-w-0 items-center gap-1.5 pr-4">
+        <span className={cn(stickyLabel, "gap-1.5")}>
           <span
             aria-hidden
             className="size-1.5 shrink-0 rounded-full bg-informational"
           />
-          <span className="truncate text-informational text-sm">{name}</span>
+          <span className="truncate text-muted-foreground">{name}</span>
           {count > 0 ? (
             <span className="rounded-sm bg-informational/15 px-1 font-medium text-[11px] text-informational tabular-nums">
               {count}

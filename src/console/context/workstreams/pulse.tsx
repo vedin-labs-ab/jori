@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { CalendarDays, Clock } from "lucide-react"
-import { type ReactNode, useEffect, useState } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 import {
   Card,
   CardAction,
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
-import { LaneRow } from "./lane"
+import { LaneRow, stickyLane } from "./lane"
 import { buildPulse, type PulseLane } from "./series"
 import { type Workstream, type Workstreams } from "./types"
 
@@ -38,9 +38,9 @@ const rangeOptions: { value: PulseDays; label: string }[] = [
 // Fixed column pitch keeps the cells contribution-graph dense instead of
 // stretching with the viewport.
 const laneGrids: Record<PulseDays, string> = {
-  14: "grid grid-cols-[10.5rem_repeat(14,22px)] items-center",
-  30: "grid grid-cols-[10.5rem_repeat(30,22px)] items-center",
-  60: "grid grid-cols-[10.5rem_repeat(60,22px)] items-center",
+  14: "grid grid-cols-[11.5rem_repeat(14,22px)] items-center",
+  30: "grid grid-cols-[11.5rem_repeat(30,22px)] items-center",
+  60: "grid grid-cols-[11.5rem_repeat(60,22px)] items-center",
 }
 
 // A compact heatmap of extraction movement: one lane per workstream, a lane
@@ -59,6 +59,8 @@ export function WorkstreamsPulse({
   const [days, setDays] = useState<PulseDays>(14)
   const result = useQuery(api.deduction.console.pulse.read, { tenantId, days })
   const [pulse, setPulse] = useState<PulseData | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const loadedDays = pulse?.days ?? null
 
   // Hold the last loaded window while a new range streams in, so switching
   // ranges never blanks the card.
@@ -67,6 +69,16 @@ export function WorkstreamsPulse({
       setPulse(result)
     }
   }, [result])
+
+  // Wide windows overflow the capped card; today lives at the right edge,
+  // so each loaded window starts scrolled to the end with history behind it.
+  useEffect(() => {
+    const node = scrollRef.current
+
+    if (loadedDays !== null && node !== null) {
+      node.scrollLeft = node.scrollWidth
+    }
+  }, [loadedDays])
 
   if (pulse === null) {
     return null
@@ -79,7 +91,7 @@ export function WorkstreamsPulse({
   }
 
   return (
-    <Card className="w-fit max-w-full">
+    <Card className="w-fit max-w-[min(56rem,100%)]">
       <CardHeader>
         <CardTitle>Activity</CardTitle>
         <CardDescription>
@@ -103,8 +115,8 @@ export function WorkstreamsPulse({
           </Select>
         </CardAction>
       </CardHeader>
-      <CardContent className="overflow-x-auto">
-        <div className="flex w-fit flex-col gap-1">
+      <CardContent className="overflow-x-auto px-0" ref={scrollRef}>
+        <div className="flex w-fit flex-col gap-1 pr-(--card-spacing)">
           {view.lanes.map((lane) => (
             <LaneRow
               key={lane.id ?? "unplaced"}
@@ -115,7 +127,7 @@ export function WorkstreamsPulse({
             />
           ))}
           <div className={laneGrids[pulse.days]}>
-            <span />
+            <span className={stickyLane} />
             {view.days.map((day) => (
               <span
                 key={day.key}
