@@ -1,7 +1,7 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { automationDisplay, messageDisplay } from "./display"
-import { type runSnapshot } from "./schema"
+import { type MessageCauseKind, type runSnapshot } from "./schema"
 
 type RunSnapshot = Infer<typeof runSnapshot>
 
@@ -29,7 +29,7 @@ export function createAutomationRunSnapshot(input: {
 
 export function createMessageRunSnapshot(input: {
   integration: Doc<"integrations">
-  kind: "mention" | "reply"
+  kind: MessageCauseKind
   message: Doc<"messages">
 }): RunSnapshotInput {
   const text = normalizeRequiredRunText(input.message.text ?? "", "Run title")

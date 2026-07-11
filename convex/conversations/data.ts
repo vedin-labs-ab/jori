@@ -2,6 +2,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { conversationScope } from "../messages/surface"
 import { resolveRunAudience } from "../runs/introspect/audience"
+import { type MessageCauseKind } from "../runs/schema"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { queueRun } from "../runtime/outbox"
 import { wakeRun } from "../runtime/waiters/data"
@@ -150,7 +151,7 @@ async function insertRun(
     conversation: Doc<"conversations">
     createdBy: Id<"persons"> | undefined
     now: number
-    kind: "mention" | "reply"
+    kind: MessageCauseKind
   }
 ) {
   return await ctx.db.insert("runs", {
