@@ -142,7 +142,8 @@ function readPullRequestChange(payload: LifecyclePayload, repository: string) {
 }
 
 // Direct pushes to the default branch are landed work; feature branches stay
-// out until a pull request lands them. One event per push, never per commit.
+// out until a pull request lands them. One event per push, never per commit,
+// with every commit subject listed so batch pushes lose no narrative.
 function readPushChange(payload: LifecyclePayload, repository: string) {
   const branch = payload.repository?.default_branch
   const commits = payload.commits ?? []
@@ -159,24 +160,37 @@ function readPushChange(payload: LifecyclePayload, repository: string) {
   const count = commits.length === 1 ? "1 commit" : `${commits.length} commits`
   const areas = touchedAreas(commits)
   const where = areas.length === 0 ? "" : ` (${areas.join(", ")})`
-  const summary = commitSubjects(commits)
+  const header = `${count} pushed to ${branch} in ${repository}${where}`
+  const subjects = commitSubjects(commits)
 
   return {
     type: commitLifecycleEvent.pushed,
-    text: `${count} pushed to ${branch} in ${repository}${where}${summary === "" ? "" : `: ${summary}`}`,
+    text:
+      subjects.length === 0 ? header : [`${header}:`, ...subjects].join("\n"),
     data: { repository: { fullName: repository } },
   }
 }
 
-const maxCommitSubjects = 3
-const maxTouchedAreas = 4
+// A push webhook carries up to 2048 commits, so the payload is the full story
+// at sane push sizes; the subject cap only bounds judge input on pathological
+// pushes.
+const maxCommitSubjects = 50
+const maxTouchedAreas = 8
 
 function commitSubjects(commits: PushCommit[]) {
-  return commits
-    .slice(0, maxCommitSubjects)
+  const subjects = commits
     .map((commit) => commit.message?.split("\n")[0] ?? "")
     .filter((subject) => subject !== "")
-    .join("; ")
+    .map((subject) => `- ${subject}`)
+
+  if (subjects.length <= maxCommitSubjects) {
+    return subjects
+  }
+
+  return [
+    ...subjects.slice(0, maxCommitSubjects),
+    `…and ${subjects.length - maxCommitSubjects} more`,
+  ]
 }
 
 // Top-level path segments give the judge a cheap hint at which part of the

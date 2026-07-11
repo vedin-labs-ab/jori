@@ -111,12 +111,12 @@ test("reads default-branch pushes with subjects and touched areas", () => {
     accountId: "77",
     key: "github:lifecycle:d10",
     type: "commits.pushed",
-    text: "2 commits pushed to main in acme/app (convex, prompts): Add pass loop; Fix sweep registry",
+    text: "2 commits pushed to main in acme/app (convex, prompts):\n- Add pass loop\n- Fix sweep registry",
     data: { repository: { fullName: "acme/app" } },
   })
 })
 
-test("caps subjects, keeps the full count, and uses singular phrasing", () => {
+test("lists every subject and uses singular phrasing", () => {
   const many = getGitHubLifecycleEvent({
     event: "push",
     deliveryId: "d11",
@@ -137,9 +137,28 @@ test("caps subjects, keeps the full count, and uses singular phrasing", () => {
   })
 
   expect(many?.text).toBe(
-    "4 commits pushed to main in acme/app: One; Two; Three"
+    "4 commits pushed to main in acme/app:\n- One\n- Two\n- Three\n- Four"
   )
-  expect(single?.text).toBe("1 commit pushed to main in acme/app: Only")
+  expect(single?.text).toBe("1 commit pushed to main in acme/app:\n- Only")
+})
+
+test("caps pathological pushes and counts the hidden remainder", () => {
+  const event = getGitHubLifecycleEvent({
+    event: "push",
+    deliveryId: "d16",
+    payload: {
+      ...pushBase,
+      commits: Array.from({ length: 53 }, (_, index) => ({
+        message: `Commit ${index + 1}`,
+      })),
+    },
+  })
+  const lines = event?.text.split("\n") ?? []
+
+  expect(lines[0]).toBe("53 commits pushed to main in acme/app:")
+  expect(lines).toHaveLength(52)
+  expect(lines[50]).toBe("- Commit 50")
+  expect(lines.at(-1)).toBe("…and 3 more")
 })
 
 test("ignores feature branches, deletions, and empty pushes", () => {
