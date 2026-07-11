@@ -1,3 +1,4 @@
+import { type ReactNode } from "react"
 import {
   Card,
   CardAction,
@@ -155,46 +156,76 @@ function CellDetail({ cell }: { cell: PulseCell }) {
   )
 }
 
-// Mirrors the default two-week card's box - same shell classes, 476px
-// content, three lane rows, axis, and banded footer - so the card resolves
-// in place instead of shifting the page when data arrives.
-export function PulseSkeleton() {
+// The one card shell both the live pulse and its skeleton render through:
+// the @container wrapper (which severs intrinsic sizing so wide grids never
+// stretch the page), the fit-to-content width cap, and the header slot
+// layout. Sharing it keeps the skeleton's box matched by construction.
+export function PulseShell({
+  title,
+  description,
+  action,
+  children,
+}: {
+  title: ReactNode
+  description: ReactNode
+  action: ReactNode
+  children: ReactNode
+}) {
   return (
     <div className="@container">
       <Card className="w-fit max-w-[min(56rem,100cqw)] pb-0">
         <CardHeader>
-          <CardTitle className="self-center">
-            <Skeleton className="h-4 w-14" />
-          </CardTitle>
+          <CardTitle className="self-center">{title}</CardTitle>
           <CardDescription className="col-span-2">
-            <Skeleton className="h-[18px] w-80 max-w-full" />
+            {description}
           </CardDescription>
-          <CardAction className="row-span-1">
-            <Skeleton className="h-6 w-28" />
-          </CardAction>
+          <CardAction className="row-span-1">{action}</CardAction>
         </CardHeader>
-        <CardContent>
-          <div className="flex w-[29.75rem] max-w-full flex-col gap-1">
-            {[0, 1, 2].map((lane) => (
-              <div
-                key={lane}
-                className="grid h-7 grid-cols-[10.5rem_1fr] items-center"
-              >
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-4 w-full" />
-              </div>
-            ))}
-            <div className="grid h-[21px] grid-cols-[10.5rem_1fr] items-end">
-              <span />
-              <Skeleton className="h-3 w-full" />
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter className="justify-between gap-6 border-t bg-muted/25 pt-3! pb-3">
-          <Skeleton className="h-4 w-44" />
-          <Skeleton className="h-4 w-40" />
-        </CardFooter>
+        {children}
       </Card>
     </div>
+  )
+}
+
+export function PulseFooter({ children }: { children: ReactNode }) {
+  return (
+    <CardFooter className="justify-between gap-6 border-t bg-muted/25 pt-3! pb-3 text-muted-foreground text-xs">
+      {children}
+    </CardFooter>
+  )
+}
+
+// Mirrors the default two-week card's box - the shared shell plus 476px
+// content, three lane rows, axis, and banded footer - so the card resolves
+// in place instead of shifting the page when data arrives.
+export function PulseSkeleton() {
+  return (
+    <PulseShell
+      title={<Skeleton className="h-4 w-14" />}
+      description={<Skeleton className="h-[18px] w-80 max-w-full" />}
+      action={<Skeleton className="h-6 w-28" />}
+    >
+      <CardContent>
+        <div className="flex w-[29.75rem] max-w-full flex-col gap-1">
+          {[0, 1, 2].map((lane) => (
+            <div
+              key={lane}
+              className="grid h-7 grid-cols-[10.5rem_1fr] items-center"
+            >
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          ))}
+          <div className="grid h-[21px] grid-cols-[10.5rem_1fr] items-end">
+            <span />
+            <Skeleton className="h-3 w-full" />
+          </div>
+        </div>
+      </CardContent>
+      <PulseFooter>
+        <Skeleton className="h-4 w-44" />
+        <Skeleton className="h-4 w-40" />
+      </PulseFooter>
+    </PulseShell>
   )
 }
