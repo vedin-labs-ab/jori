@@ -1,6 +1,9 @@
 import { promptTemplates } from "../../../../prompts/generated"
 import { renderPromptTemplate } from "../../../../prompts/render"
-import { createPromptTime } from "../../../../prompts/time"
+import {
+  createLocalPromptTime,
+  createPromptTime,
+} from "../../../../prompts/time"
 import { integrationLabels } from "../../../automations/integrations"
 import { replyAddress } from "../../../messages/surface"
 import { type MessageIntegration } from "../../../shared/integrations"
@@ -20,7 +23,7 @@ export function createContextValues(
   trigger: string
 } {
   return {
-    run: createRunInstructions(input.run._id, activeSurface),
+    run: createRunInstructions(input, activeSurface),
     trigger: promptBlock(createTriggerPart(input)),
   }
 }
@@ -34,12 +37,12 @@ export function defaultActiveSurface(
 }
 
 function createRunInstructions(
-  runId: AgentRuntimeInput["run"]["_id"],
+  input: AgentRuntimeInput,
   activeSurface: PromptActiveSurface | null
 ) {
   return renderPromptTemplate(promptTemplates["agent/context/run"], {
     run: {
-      id: runId,
+      id: input.run._id,
     },
     surface: {
       active: activeSurface !== null,
@@ -48,7 +51,13 @@ function createRunInstructions(
           ? null
           : getIntegrationLabel(activeSurface.surface),
     },
-    time: { utc: createPromptTime() },
+    time: {
+      utc: createPromptTime(),
+      local:
+        typeof input.timezone === "string"
+          ? createLocalPromptTime(input.timezone)
+          : null,
+    },
   }).trim()
 }
 

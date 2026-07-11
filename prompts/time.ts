@@ -30,6 +30,32 @@ export function createPromptTime(now = new Date()) {
   return `${weekday}, ${timestamp}`
 }
 
+/** The same instant in an IANA zone, with the zone and offset spelled out —
+ *  "Friday, 2026-07-11 21:16 Europe/Stockholm (GMT+2)". Null when the zone
+ *  is unknown to the runtime. */
+export function createLocalPromptTime(timeZone: string, now = new Date()) {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      weekday: "long",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+      timeZoneName: "shortOffset",
+    }).formatToParts(now)
+    const value = Object.fromEntries(
+      parts.map((part) => [part.type, part.value])
+    )
+
+    return `${value.weekday}, ${value.year}-${value.month}-${value.day} ${value.hour}:${value.minute} ${timeZone} (${value.timeZoneName})`
+  } catch {
+    return null
+  }
+}
+
 // The one relative-age vocabulary for prompt copy ("2 days ago"), shared by
 // every context message so ages always read the same to the model.
 export function formatAge(ageMs: number) {

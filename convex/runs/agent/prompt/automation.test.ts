@@ -35,6 +35,22 @@ describe("automation trigger prompts", () => {
   })
 })
 
+describe("requester local time", () => {
+  test("renders when the requester's timezone is known, else stays out", () => {
+    const withZone = assemblePrompt({
+      ...automationRuntimeInput(),
+      timezone: "Europe/Stockholm",
+    })
+
+    expect(withZone.context).toMatch(
+      /Requester local time: \w+, \d{4}-\d{2}-\d{2} \d{2}:\d{2} Europe\/Stockholm \(GMT\+\d\)\./
+    )
+    expect(assemblePrompt(automationRuntimeInput()).context).not.toContain(
+      "Requester local time:"
+    )
+  })
+})
+
 describe("automation event prompts", () => {
   test("renders integration target context for Linear events", () => {
     const prompt = assemblePrompt(linearAutomationRuntimeInput()).context

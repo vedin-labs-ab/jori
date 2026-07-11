@@ -12,6 +12,7 @@ import {
 export const syncCurrentUser = action({
   args: {
     tenantId: v.string(),
+    timezone: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<{ synced: number }> => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
@@ -27,6 +28,7 @@ export const syncCurrentUser = action({
         email: readClerkUserEmail(identity),
         name: readClerkUserName(identity),
         emails,
+        timezone: args.timezone,
       }
     )
 

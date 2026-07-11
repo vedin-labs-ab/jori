@@ -5,6 +5,7 @@ import { readWorkstreamRoster } from "../deduction/roster"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { recentConversation } from "../messages/history"
 import { readApprovedFacts } from "../organization/profile"
+import { readPersonTimezone } from "../persons/timezone"
 import { readPlaceContext } from "../places/context"
 import {
   hasIntegrationTools,
@@ -76,6 +77,7 @@ async function getMessageInput(
     conversation: await recentConversation(ctx, message),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
     place: await readPlaceContext(ctx, message),
+    timezone: await readPersonTimezone(ctx, args.run.createdBy),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }
@@ -124,6 +126,7 @@ async function getAutomationInput(
       hasIntegrationTools(automation.access, integration._id)
     ),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
+    timezone: await readPersonTimezone(ctx, automation.createdBy),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }
@@ -159,6 +162,7 @@ async function getInstructionInput(
             hasIntegrationTools(access, integration._id)
           ),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
+    timezone: await readPersonTimezone(ctx, args.run.createdBy),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }

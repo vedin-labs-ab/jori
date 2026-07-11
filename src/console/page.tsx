@@ -176,7 +176,10 @@ function ClerkIdentitySync({ tenantId }: { tenantId: string }) {
   const syncCurrentUser = useAction(api.identity.clerk.syncCurrentUser)
 
   useEffect(() => {
-    void syncCurrentUser({ tenantId }).catch(() => undefined)
+    void syncCurrentUser({
+      tenantId,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    }).catch(() => undefined)
   }, [syncCurrentUser, tenantId])
 
   return null

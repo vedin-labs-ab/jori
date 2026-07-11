@@ -39,7 +39,7 @@ export const skills = {
 export const promptTemplates = {
   "agent/context": "{{agent.run}}\n\n{{agent.trigger}}",
   "agent/context/run":
-    "# Run\n\nRun ID: {{run.id}}\nRun started at: {{time.utc}}.\n\n{% if surface.active %}\nActive surface: `{{surface.label}}`\n{% endif %}",
+    "# Run\n\nRun ID: {{run.id}}\nRun started at: {{time.utc}}.\n{% if time.local %}Requester local time: {{time.local}}.\n{% endif %}\n\n{% if surface.active %}\nActive surface: `{{surface.label}}`\n{% endif %}",
   "agent/context/trigger/automation":
     "# Trigger\n\nAn automation triggered this run.\n\nAutomation:\n- ID: {{automation.id}}\n- Name: {{automation.name}}\n- Trigger: {{automation.trigger}}\n\nInstructions:\n```text\n{{automation.instructions}}\n```\n\n{% if event %}\nEvent:\n{{event.details}}\n{% endif %}",
   "agent/context/trigger/github":
