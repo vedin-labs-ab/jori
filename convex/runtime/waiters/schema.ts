@@ -33,7 +33,4 @@ export const waiters = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
   wokenAt: v.optional(v.number()),
-})
-  .index("by_run_and_status", ["runId", "status"])
-  .index("by_waitpoint", ["waitpointId"])
-  .index("by_session_and_status", ["sessionId", "status"])
+}).index("by_run_and_status", ["runId", "status"])

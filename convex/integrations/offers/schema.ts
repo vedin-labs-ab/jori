@@ -65,8 +65,3 @@ export const integrationOffers = defineTable({
   .index("by_token_hash", ["tokenHash"])
   .index("by_tenant_and_status", ["tenantId", "status"])
   .index("by_run_and_status", ["runId", "status"])
-  .index("by_tenant_and_integration_and_status", [
-    "tenantId",
-    "integration",
-    "status",
-  ])

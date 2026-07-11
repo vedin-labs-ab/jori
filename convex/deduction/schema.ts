@@ -131,7 +131,6 @@ export const evidence = defineTable({
   // workstream. Belief-subject rows carry no stamp.
   workstreamId: v.optional(v.id("beliefs")),
 })
-  .index("by_subject_belief_id", ["subject.beliefId"])
   .index("by_subject_effort_id", ["subject.effortId"])
   .index("by_reference_effort_id", ["reference.effortId"])
   .index("by_workstream_and_observed_at", ["workstreamId", "observedAt"])
