@@ -11,6 +11,7 @@ import { resolveActor } from "../persons/resolve"
 import { type Actor } from "../shared/actor"
 import { type ToolSurface } from "../shared/integrations"
 import { syncSlackApprovalSurface } from "./slack/surface"
+import { isTerminalApprovalStatus } from "./transition"
 
 type ApprovalSurfaceTarget = {
   approval: Doc<"approvals">
@@ -48,7 +49,7 @@ export const getSurfaceTarget = internalQuery({
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)
 
-    if (approval === null || !isSurfaceSyncStatus(approval.status)) {
+    if (approval === null || !isTerminalApprovalStatus(approval.status)) {
       return null
     }
 
@@ -82,16 +83,6 @@ async function syncApprovalSurface(target: ApprovalSurfaceTarget) {
         integration: target.integration,
       })
   }
-}
-
-function isSurfaceSyncStatus(status: Doc<"approvals">["status"]) {
-  return (
-    status === "approved" ||
-    status === "cancelled" ||
-    status === "denied" ||
-    status === "expired" ||
-    status === "failed"
-  )
 }
 
 export async function resolveApprovalActor(

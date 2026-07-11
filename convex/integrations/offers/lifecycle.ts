@@ -12,13 +12,9 @@ import { createSlackIntegrationOfferMessage } from "./slack"
 import {
   markIntegrationOfferCancelled,
   markIntegrationOfferExpired,
+  type TerminalIntegrationOfferStatus,
+  terminalIntegrationOfferStatus,
 } from "./transition"
-
-type TerminalIntegrationOfferStatus =
-  | "cancelled"
-  | "connected"
-  | "expired"
-  | "failed"
 
 export const expire = internalAction({
   args: {
@@ -60,7 +56,7 @@ export const markExpired = internalMutation({
 
     if (
       offer === null ||
-      terminalStatus(offer.status) !== null ||
+      terminalIntegrationOfferStatus(offer.status) !== null ||
       Date.now() < offer.expiresAt
     ) {
       return null
@@ -167,7 +163,7 @@ export const getSurfaceTarget = internalQuery({
       return null
     }
 
-    const status = terminalStatus(offer.status)
+    const status = terminalIntegrationOfferStatus(offer.status)
     const delivery = offer.delivery
 
     if (status === null || delivery === undefined) {
@@ -212,19 +208,4 @@ async function syncSlackSurface(target: {
     text: message.text,
     blocks: message.blocks,
   })
-}
-
-function terminalStatus(
-  status: Doc<"integrationOffers">["status"]
-): TerminalIntegrationOfferStatus | null {
-  if (
-    status === "cancelled" ||
-    status === "connected" ||
-    status === "expired" ||
-    status === "failed"
-  ) {
-    return status
-  }
-
-  return null
 }

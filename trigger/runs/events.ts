@@ -2,51 +2,32 @@ import { type MiloConvexClient } from "../convex"
 import { runtimeEvent } from "../events"
 import {
   type RuntimeContext,
+  type RuntimeEventInput,
   type RuntimeEventTraceData,
   type RuntimeEventType,
   type RuntimeRunTraceData,
 } from "../types"
 
-export async function recordRunEvent(
-  convex: MiloConvexClient,
-  context: RuntimeContext,
-  type: RuntimeEventType,
-  sequence: number,
-  attempt: number,
-  data?: RuntimeRunTraceData
-) {
-  await convex.recordEvent(
-    runtimeEvent({
-      attempt,
-      ...(data === undefined ? {} : { data }),
-      runId: context.run.id,
-      sequence,
-      type,
+type RuntimeEventBase = Omit<RuntimeEventInput, "data" | "runId" | "type">
+type RuntimeEventArgs =
+  | (RuntimeEventBase & {
+      data?: RuntimeRunTraceData
+      type: "run.completed" | "run.failed"
     })
-  )
-}
+  | (RuntimeEventBase & {
+      data?: RuntimeEventTraceData
+      type: Exclude<RuntimeEventType, "run.completed" | "run.failed">
+    })
 
-export async function recordActivityEvent(
+export async function recordRuntimeEvent(
   convex: MiloConvexClient,
   context: RuntimeContext,
-  input: {
-    attempt?: number
-    callId?: string
-    data?: RuntimeEventTraceData
-    keyId?: string
-    sequence: number
-    type: RuntimeEventType
-  }
+  input: RuntimeEventArgs
 ) {
   await convex.recordEvent(
     runtimeEvent({
-      attempt: input.attempt,
-      callId: input.callId,
-      ...(input.data === undefined ? {} : { data: input.data }),
-      keyId: input.keyId,
+      ...input,
       runId: context.run.id,
-      sequence: input.sequence,
-      type: input.type,
     })
   )
 }

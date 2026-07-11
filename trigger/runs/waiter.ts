@@ -1,7 +1,7 @@
 import { wait } from "@trigger.dev/sdk/v3"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type WaiterWake } from "../types"
-import { recordActivityEvent } from "./events"
+import { recordRuntimeEvent } from "./events"
 import { hasResolvedHandoffs, type PendingHandoff } from "./handoffs"
 
 const parkGraceMs = 5000
@@ -71,7 +71,7 @@ async function recordWaiting(
   runtime: ToolRuntime,
   waiterId: ConvexId<"waiters">
 ) {
-  await recordActivityEvent(runtime.convex, runtime.context, {
+  await recordRuntimeEvent(runtime.convex, runtime.context, {
     data: { waiter: waiterId },
     keyId: waiterId,
     sequence: 700_000,
@@ -84,7 +84,7 @@ async function recordResumed(
   waiterId: ConvexId<"waiters">,
   wake: WaiterWake
 ) {
-  await recordActivityEvent(runtime.convex, runtime.context, {
+  await recordRuntimeEvent(runtime.convex, runtime.context, {
     data: { waiter: waiterId },
     keyId: `${waiterId}:${wake.reason}`,
     sequence: 700_001,

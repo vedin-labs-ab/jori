@@ -9,10 +9,6 @@ import {
 } from "./types"
 import { sourceLabel } from "./url"
 
-type StepEntry = {
-  step: ExplorationStep
-}
-
 type ExplorationStep = DiscoveryStep & {
   kind: "page"
   url: string
@@ -40,8 +36,12 @@ function explorationTasks(
 function taskGroups(discovery: NonNullable<OrganizationDiscovery>) {
   const groups = new Map<string, DiscoveryTaskItem[]>()
 
-  for (const entry of explorationEntries(discovery.steps)) {
-    const item = toItem(discovery, entry)
+  for (const step of discovery.steps) {
+    if (!isExplorationStep(step)) {
+      continue
+    }
+
+    const item = toItem(discovery, step)
     const key = domainKey(item.url)
     groups.set(key, [...(groups.get(key) ?? []), item])
   }
@@ -100,32 +100,20 @@ function toSummaryTask(
 
 function toItem(
   discovery: NonNullable<OrganizationDiscovery>,
-  entry: StepEntry
+  step: ExplorationStep
 ): DiscoveryTaskItem {
-  const status = stepStatus(discovery, entry.step)
-  const endedAt = stepEnd(discovery, entry.step, status)
-  const startedAt = stepTime(discovery, entry.step)
+  const status = stepStatus(discovery, step)
+  const endedAt = stepEnd(discovery, step, status)
+  const startedAt = stepTime(discovery, step)
 
   return {
-    key: stepKey(entry.step),
-    label: pageLabel(entry.step.url),
+    key: stepKey(step),
+    label: pageLabel(step.url),
     startedAt,
     status,
-    url: entry.step.url,
+    url: step.url,
     ...(endedAt === undefined ? {} : { endedAt }),
   }
-}
-
-function explorationEntries(steps: DiscoveryStep[]): StepEntry[] {
-  const entries: StepEntry[] = []
-
-  for (const step of steps) {
-    if (isExplorationStep(step)) {
-      entries.push({ step })
-    }
-  }
-
-  return entries
 }
 
 function isExplorationStep(step: DiscoveryStep): step is ExplorationStep {

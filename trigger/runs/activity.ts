@@ -6,9 +6,8 @@ import {
   type OfferHandoff,
   type RuntimeContext,
   type RuntimeEventTraceData,
-  type RuntimeEventType,
 } from "../types"
-import { recordActivityEvent } from "./events"
+import { recordRuntimeEvent } from "./events"
 
 export async function recordToolResultActivity(args: {
   convex: MiloConvexClient
@@ -23,7 +22,7 @@ export async function recordToolResultActivity(args: {
     return
   }
 
-  await recordActivityEvent(args.convex, args.context, {
+  await recordRuntimeEvent(args.convex, args.context, {
     data: event.data,
     keyId: event.keyId,
     sequence: args.sequence,
@@ -35,7 +34,7 @@ export async function recordApprovalResolved(
   runtime: ActivityRuntime,
   approval: ApprovalHandoff
 ) {
-  await recordActivityEvent(runtime.convex, runtime.context, {
+  await recordRuntimeEvent(runtime.convex, runtime.context, {
     data: { approval: approval.id },
     keyId: approval.id,
     sequence: 800_000,
@@ -47,7 +46,7 @@ export async function recordOfferResolved(
   runtime: ActivityRuntime,
   offer: OfferHandoff
 ) {
-  await recordActivityEvent(runtime.convex, runtime.context, {
+  await recordRuntimeEvent(runtime.convex, runtime.context, {
     data: { offer: offer.id },
     keyId: offer.id,
     sequence: 810_000,
@@ -58,7 +57,11 @@ export async function recordOfferResolved(
 type ToolResultEvent = {
   data: RuntimeEventTraceData
   keyId: string
-  type: RuntimeEventType
+  type:
+    | "agent.started"
+    | "approval.requested"
+    | "asset.saved"
+    | "offer.requested"
 }
 
 type ActivityRuntime = {

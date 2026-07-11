@@ -10,6 +10,11 @@ type IntegrationOfferPatch = Partial<
 type IntegrationOfferDelivery = NonNullable<
   Doc<"integrationOffers">["delivery"]
 >
+export type TerminalIntegrationOfferStatus =
+  | "cancelled"
+  | "connected"
+  | "expired"
+  | "failed"
 
 export async function recordIntegrationOfferCreated(
   ctx: MutationCtx,
@@ -30,31 +35,16 @@ export async function markIntegrationOfferConnected(
     now: number
   }
 ) {
-  if (isSettled(offer)) {
-    return
-  }
-
-  await cancelExpiration(ctx, offer)
   const result = {
     ...(offer.claim?.actor === undefined ? {} : { actor: offer.claim.actor }),
     integrationId: args.integrationId,
   }
-  const updated = await patchAndRead(ctx, offer._id, {
-    functionId: undefined,
-    status: "connected",
-    result,
-    updatedAt: args.now,
-  })
 
-  if (updated !== null) {
-    await recordTransition(ctx, {
-      tenantId: updated.tenantId,
-      subject: { kind: "integrationOffer", id: updated._id },
-      syncSurface: true,
-      type: "connected",
-    })
-    await wakeOfferRun(ctx, updated)
-  }
+  await settleIntegrationOffer(ctx, offer, {
+    cancelExpiration: true,
+    patch: { result, updatedAt: args.now },
+    status: "connected",
+  })
 }
 
 export async function markIntegrationOfferCancelled(
@@ -66,28 +56,13 @@ export async function markIntegrationOfferCancelled(
     now: number
   }
 ) {
-  if (isSettled(offer)) {
-    return
-  }
-
-  await cancelExpiration(ctx, offer)
   const result = cancelledResult(args)
-  const updated = await patchAndRead(ctx, offer._id, {
-    functionId: undefined,
-    result,
-    status: "cancelled",
-    updatedAt: args.now,
-  })
 
-  if (updated !== null) {
-    await recordTransition(ctx, {
-      tenantId: updated.tenantId,
-      subject: { kind: "integrationOffer", id: updated._id },
-      syncSurface: true,
-      type: "cancelled",
-    })
-    await wakeOfferRun(ctx, updated)
-  }
+  await settleIntegrationOffer(ctx, offer, {
+    cancelExpiration: true,
+    patch: { result, updatedAt: args.now },
+    status: "cancelled",
+  })
 }
 
 function cancelledResult(args: { actor: Actor | undefined; reason?: string }) {
@@ -109,27 +84,11 @@ export async function markIntegrationOfferFailed(
     now: number
   }
 ) {
-  if (isSettled(offer)) {
-    return
-  }
-
-  await cancelExpiration(ctx, offer)
-  const updated = await patchAndRead(ctx, offer._id, {
-    functionId: undefined,
+  await settleIntegrationOffer(ctx, offer, {
+    cancelExpiration: true,
+    patch: { result: { error: args.error }, updatedAt: args.now },
     status: "failed",
-    result: { error: args.error },
-    updatedAt: args.now,
   })
-
-  if (updated !== null) {
-    await recordTransition(ctx, {
-      tenantId: updated.tenantId,
-      subject: { kind: "integrationOffer", id: updated._id },
-      syncSurface: true,
-      type: "failed",
-    })
-    await wakeOfferRun(ctx, updated)
-  }
 }
 
 export async function markIntegrationOfferExpired(
@@ -137,25 +96,11 @@ export async function markIntegrationOfferExpired(
   offer: Doc<"integrationOffers">,
   now: number
 ) {
-  if (isSettled(offer)) {
-    return
-  }
-
-  const updated = await patchAndRead(ctx, offer._id, {
-    functionId: undefined,
+  await settleIntegrationOffer(ctx, offer, {
+    cancelExpiration: false,
+    patch: { updatedAt: now },
     status: "expired",
-    updatedAt: now,
   })
-
-  if (updated !== null) {
-    await recordTransition(ctx, {
-      tenantId: updated.tenantId,
-      subject: { kind: "integrationOffer", id: updated._id },
-      syncSurface: true,
-      type: "expired",
-    })
-    await wakeOfferRun(ctx, updated)
-  }
 }
 
 export async function recordIntegrationOfferDelivery(
@@ -172,7 +117,7 @@ export async function recordIntegrationOfferDelivery(
     await recordTransition(ctx, {
       tenantId: updated.tenantId,
       subject: { kind: "integrationOffer", id: updated._id },
-      syncSurface: isSettled(updated),
+      syncSurface: terminalIntegrationOfferStatus(updated.status) !== null,
       type: "delivered",
     })
   }
@@ -199,13 +144,49 @@ async function cancelExpiration(
   await ctx.scheduler.cancel(offer.functionId)
 }
 
-function isSettled(offer: Doc<"integrationOffers">) {
-  return (
-    offer.status === "cancelled" ||
-    offer.status === "connected" ||
-    offer.status === "expired" ||
-    offer.status === "failed"
-  )
+async function settleIntegrationOffer(
+  ctx: MutationCtx,
+  offer: Doc<"integrationOffers">,
+  args: {
+    cancelExpiration: boolean
+    patch: IntegrationOfferPatch
+    status: TerminalIntegrationOfferStatus
+  }
+) {
+  if (terminalIntegrationOfferStatus(offer.status) !== null) {
+    return
+  }
+
+  if (args.cancelExpiration) {
+    await cancelExpiration(ctx, offer)
+  }
+
+  const updated = await patchAndRead(ctx, offer._id, {
+    ...args.patch,
+    functionId: undefined,
+    status: args.status,
+  })
+
+  if (updated !== null) {
+    await recordTransition(ctx, {
+      tenantId: updated.tenantId,
+      subject: { kind: "integrationOffer", id: updated._id },
+      syncSurface: true,
+      type: args.status,
+    })
+    await wakeOfferRun(ctx, updated)
+  }
+}
+
+export function terminalIntegrationOfferStatus(
+  status: Doc<"integrationOffers">["status"]
+): TerminalIntegrationOfferStatus | null {
+  return status === "cancelled" ||
+    status === "connected" ||
+    status === "expired" ||
+    status === "failed"
+    ? status
+    : null
 }
 
 async function wakeOfferRun(ctx: MutationCtx, offer: Doc<"integrationOffers">) {

@@ -2,7 +2,7 @@ import { task } from "@trigger.dev/sdk/v3"
 import { MiloConvexClient } from "../convex"
 import { errorDetails } from "../events"
 import { OpenRouterModelRuntime } from "../model/openrouter"
-import { recordRunEvent } from "../runs/events"
+import { recordRuntimeEvent } from "../runs/events"
 import { runAgentLoop } from "../runs/loop"
 import { releaseSandbox } from "../runs/sandbox"
 import { E2BSandboxRuntime } from "../sandbox/e2b"
@@ -75,13 +75,11 @@ async function handleFailure(args: {
     return
   }
 
-  await recordRunEvent(
-    args.convex,
-    args.context,
-    "run.failed",
-    999_999,
-    args.attempt,
-    errorDetails(args.error)
-  )
+  await recordRuntimeEvent(args.convex, args.context, {
+    attempt: args.attempt,
+    data: errorDetails(args.error),
+    sequence: 999_999,
+    type: "run.failed",
+  })
   await args.sandbox.cleanup()
 }

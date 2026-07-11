@@ -7,10 +7,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { absoluteTime, relativeTime } from "../../shared/time"
 import { getAutomationSurfaceLabel } from "../access"
 import { SurfaceLogo } from "../access/logo"
 import { describeCron } from "../cron"
-import { absoluteTime, relativeTime } from "../format"
 import { type Automation } from "../types"
 import { AutomationToolSummary } from "./tools"
 

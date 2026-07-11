@@ -6,7 +6,7 @@ import {
 } from "../model/types"
 import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
 import { type HandoffSubject, type RuntimeContext } from "../types"
-import { recordRunEvent } from "./events"
+import { recordRuntimeEvent } from "./events"
 import {
   applyHandoffs,
   pendingHandoffSubjects,
@@ -229,24 +229,20 @@ async function completeRun(
   sequence: number,
   attempt: number
 ) {
-  await recordRunEvent(
-    runtime.convex,
-    runtime.context,
-    "run.completed",
+  await recordRuntimeEvent(runtime.convex, runtime.context, {
+    attempt,
     sequence,
-    attempt
-  )
+    type: "run.completed",
+  })
 }
 
 async function failRun(runtime: ToolRuntime, attempt: number) {
-  await recordRunEvent(
-    runtime.convex,
-    runtime.context,
-    "run.failed",
-    maxModelSteps * toolSequenceOffset + toolSequenceOffset,
+  await recordRuntimeEvent(runtime.convex, runtime.context, {
     attempt,
-    { error: maxModelStepsError }
-  )
+    data: { error: maxModelStepsError },
+    sequence: maxModelSteps * toolSequenceOffset + toolSequenceOffset,
+    type: "run.failed",
+  })
 }
 
 function completedOutput(): AgentLoopOutput {
