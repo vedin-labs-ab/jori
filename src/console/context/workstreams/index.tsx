@@ -16,6 +16,7 @@ import { ContextPage } from ".."
 import { ContextSectionTitle } from "../section"
 import { WorkstreamCard } from "./card"
 import { WorkstreamDetail } from "./detail"
+import { WorkstreamsPulse } from "./pulse"
 import { type Workstream, type Workstreams } from "./types"
 
 type StatusFilter = "active" | "closed" | "rejected"
@@ -42,9 +43,20 @@ function WorkstreamsView({ tenantId }: { tenantId: string }) {
   const [openId, setOpenId] = useState<Workstream["id"] | null>(null)
   const workstreams = result?.workstreams ?? []
   const open = workstreams.find((row) => row.id === openId) ?? null
+  const openWorkstream = (workstream: Workstream) => setOpenId(workstream.id)
+  const roster = workstreams.filter(
+    (row) => row.status === "confirmed" || row.status === "proposed"
+  )
 
   return (
     <div className="flex flex-col gap-4">
+      {result === undefined ? null : (
+        <WorkstreamsPulse
+          tenantId={tenantId}
+          workstreams={roster}
+          onOpen={openWorkstream}
+        />
+      )}
       <div className="flex items-center justify-between gap-2">
         <ConsoleFilterField label="Status">
           <Select
@@ -70,7 +82,7 @@ function WorkstreamsView({ tenantId }: { tenantId: string }) {
         <FilteredWorkstreams
           filter={filter}
           workstreams={workstreams}
-          onOpen={(workstream) => setOpenId(workstream.id)}
+          onOpen={openWorkstream}
         />
       )}
       <WorkstreamDetail
