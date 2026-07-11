@@ -4,7 +4,12 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
-import { Input } from "@/components/ui/input"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
@@ -88,8 +93,8 @@ function WebsiteChip({ website }: { website: WebsiteItem }) {
 }
 
 /**
- * Ghost "+ Add" that swaps into an inline input group for declaring an email
- * domain whose people count as part of the organization.
+ * "+ Add" button that swaps into an inline input group for declaring an
+ * email domain whose people count as part of the organization.
  */
 function AddDomainControl({ tenantId }: { tenantId: string }) {
   const declareDomain = useMutation(api.organization.profile.declareDomain)
@@ -121,7 +126,7 @@ function AddDomainControl({ tenantId }: { tenantId: string }) {
         onClick={() => setOpen(true)}
         size="sm"
         type="button"
-        variant="ghost"
+        variant="outline"
       >
         <Plus className="size-3.5" /> Add
       </Button>
@@ -136,19 +141,26 @@ function AddDomainControl({ tenantId }: { tenantId: string }) {
       }}
     >
       <ButtonGroup>
-        <Input
-          aria-label="Domain to add"
-          autoFocus
-          className="h-7 w-36 text-xs"
-          onChange={(event) => setValue(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              close()
-            }
-          }}
-          placeholder="acme.com"
-          value={value}
-        />
+        <InputGroup className="w-44">
+          <InputGroupInput
+            aria-label="Domain to add"
+            autoFocus
+            className="text-xs"
+            onChange={(event) => setValue(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                close()
+              }
+            }}
+            placeholder="acme.com"
+            value={value}
+          />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton aria-label="Close" onClick={close} size="icon-xs">
+              <X />
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
         <Button
           className="h-7 px-2.5 text-xs"
           disabled={value.trim() === ""}
@@ -156,7 +168,7 @@ function AddDomainControl({ tenantId }: { tenantId: string }) {
           type="submit"
           variant="outline"
         >
-          Add
+          <Plus className="size-3.5" /> Add
         </Button>
       </ButtonGroup>
     </form>
