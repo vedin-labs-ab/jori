@@ -11,6 +11,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
 import { Paged } from "../shared/paging"
@@ -50,7 +51,11 @@ export function WebsitesSection({
       {count === 0 ? null : (
         <div className="flex flex-wrap gap-1.5">
           {websites.map((website) => (
-            <WebsiteChip key={website.key} website={website} />
+            <WebsiteChip
+              badge={website.main ? "Main" : undefined}
+              key={website.key}
+              website={website}
+            />
           ))}
           {declared.map((domain) => (
             <DeclaredDomainChip
@@ -69,33 +74,71 @@ export function WebsitesContent({ websites }: { websites: WebsiteItem[] }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {websites.map((website) => (
-        <WebsiteChip key={website.key} website={website} />
+        <WebsiteChip
+          badge={website.main ? "Main" : undefined}
+          key={website.key}
+          website={website}
+        />
       ))}
     </div>
   )
 }
 
-function WebsiteChip({ website }: { website: WebsiteItem }) {
-  return (
+/**
+ * One chip style for every domain: a secondary link button with an optional
+ * inverted badge, and an optional remove button rendered as an overlaid
+ * sibling so the anchor never nests another interactive element.
+ */
+function WebsiteChip({
+  badge,
+  onRemove,
+  website,
+}: {
+  badge?: string
+  onRemove?: () => void
+  website: Pick<WebsiteItem, "href" | "label">
+}) {
+  const chip = (
     <Button
       asChild
-      className="h-8 justify-start gap-2 px-2.5 text-xs"
+      className={cn(
+        "h-8 justify-start gap-2 px-2.5 text-xs",
+        onRemove === undefined ? "" : "pr-8"
+      )}
       size="sm"
       variant="secondary"
     >
       <a href={website.href} rel="noreferrer" target="_blank">
         <Globe2 className="size-3.5" />
         <span>{website.label}</span>
-        {website.main ? (
+        {badge === undefined ? null : (
           <Badge
             className="border-transparent bg-background dark:bg-background"
             variant="outline"
           >
-            Main
+            {badge}
           </Badge>
-        ) : null}
+        )}
       </a>
     </Button>
+  )
+
+  if (onRemove === undefined) {
+    return chip
+  }
+
+  return (
+    <div className="relative">
+      {chip}
+      <button
+        aria-label={`Remove ${website.label}`}
+        className="-translate-y-1/2 absolute top-1/2 right-2 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+        onClick={onRemove}
+        type="button"
+      >
+        <X className="size-3" />
+      </button>
+    </div>
   )
 }
 
@@ -182,7 +225,7 @@ function AddDomainControl({ tenantId }: { tenantId: string }) {
   )
 }
 
-/** A user-added domain, styled like the website chips but removable. */
+/** A user-added domain: the same website chip, plus Added badge and remove. */
 function DeclaredDomainChip({
   domain,
   tenantId,
@@ -201,24 +244,11 @@ function DeclaredDomainChip({
   }
 
   return (
-    <div className="flex h-8 items-center gap-2 rounded-md bg-secondary px-2.5 text-secondary-foreground text-xs">
-      <Globe2 className="size-3.5 text-muted-foreground" />
-      <span>{domain}</span>
-      <Badge
-        className="border-transparent bg-background dark:bg-background"
-        variant="outline"
-      >
-        Added
-      </Badge>
-      <button
-        aria-label={`Remove ${domain}`}
-        className="-mr-0.5 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
-        onClick={() => void onRemove()}
-        type="button"
-      >
-        <X className="size-3" />
-      </button>
-    </div>
+    <WebsiteChip
+      badge="Added"
+      onRemove={() => void onRemove()}
+      website={{ href: `https://${domain}`, label: domain }}
+    />
   )
 }
 
