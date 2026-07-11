@@ -59,8 +59,8 @@ export function WorkstreamsPulse({
   const [days, setDays] = useState<PulseDays>(14)
   const result = useQuery(api.deduction.console.pulse.read, { tenantId, days })
   const [pulse, setPulse] = useState<PulseData | null>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
   const loadedDays = pulse?.days ?? null
+  const { scrollRef, trackPinned } = usePinnedToEnd(loadedDays)
 
   // Hold the last loaded window while a new range streams in, so switching
   // ranges never blanks the card.
@@ -69,16 +69,6 @@ export function WorkstreamsPulse({
       setPulse(result)
     }
   }, [result])
-
-  // Wide windows overflow the capped card; today lives at the right edge,
-  // so each loaded window starts scrolled to the end with history behind it.
-  useEffect(() => {
-    const node = scrollRef.current
-
-    if (loadedDays !== null && node !== null) {
-      node.scrollLeft = node.scrollWidth
-    }
-  }, [loadedDays])
 
   if (pulse === null) {
     return null
@@ -93,11 +83,11 @@ export function WorkstreamsPulse({
   return (
     <Card className="w-fit max-w-[min(56rem,100%)] pb-0">
       <CardHeader>
-        <CardTitle>Activity</CardTitle>
-        <CardDescription>
+        <CardTitle className="self-center">Activity</CardTitle>
+        <CardDescription className="col-span-2">
           Recent activity across workstreams and unplaced efforts.
         </CardDescription>
-        <CardAction>
+        <CardAction className="row-span-1">
           <Select
             value={String(days)}
             onValueChange={(value) => setDays(Number(value) as PulseDays)}
@@ -115,7 +105,11 @@ export function WorkstreamsPulse({
           </Select>
         </CardAction>
       </CardHeader>
-      <CardContent className="overflow-x-auto px-0" ref={scrollRef}>
+      <CardContent
+        className="overflow-x-auto px-0"
+        onScroll={trackPinned}
+        ref={scrollRef}
+      >
         <div className="flex w-fit flex-col gap-1 pr-(--card-spacing)">
           {view.lanes.map((lane) => (
             <LaneRow
@@ -157,6 +151,51 @@ export function WorkstreamsPulse({
       </CardFooter>
     </Card>
   )
+}
+
+// Today lives at the right edge, so the view stays pinned to the end: on
+// each loaded window, and again whenever the container or grid resizes
+// (small viewports, window resizing) - unless the reader has deliberately
+// scrolled back into history.
+function usePinnedToEnd(loadedDays: PulseDays | null) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const pinned = useRef(true)
+
+  useEffect(() => {
+    const node = scrollRef.current
+
+    if (loadedDays === null || node === null) {
+      return
+    }
+
+    pinned.current = true
+    node.scrollLeft = node.scrollWidth
+
+    const observer = new ResizeObserver(() => {
+      if (pinned.current) {
+        node.scrollLeft = node.scrollWidth
+      }
+    })
+
+    observer.observe(node)
+
+    if (node.firstElementChild !== null) {
+      observer.observe(node.firstElementChild)
+    }
+
+    return () => observer.disconnect()
+  }, [loadedDays])
+
+  const trackPinned = () => {
+    const node = scrollRef.current
+
+    if (node !== null) {
+      pinned.current =
+        node.scrollLeft >= node.scrollWidth - node.clientWidth - 2
+    }
+  }
+
+  return { scrollRef, trackPinned }
 }
 
 function laneOpener(
