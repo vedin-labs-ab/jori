@@ -1,8 +1,9 @@
 import { useMutation } from "convex/react"
-import { FileText, Globe2, X } from "lucide-react"
+import { FileText, Globe2, Plus, X } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../convex/_generated/api"
@@ -14,25 +15,47 @@ import { sourceLabel, type WebsiteItem, websiteItems } from "./url"
 
 const visibleSourceCount = 3
 
+/**
+ * One row for every domain that defines the organization: discovered website
+ * domains as links, user-added ones as removable "Added" chips, and an
+ * inline add control in the header.
+ */
 export function WebsitesSection({
+  declared,
   domains,
   primaryWebsite,
+  tenantId,
 }: {
+  declared: string[]
   domains: ContextFacts["domains"]
   primaryWebsite: string | undefined
+  tenantId: string
 }) {
   const websites = websiteItems(domains, primaryWebsite)
-
-  if (websites.length === 0) {
-    return null
-  }
+  const count = websites.length + declared.length
 
   return (
     <section className="grid gap-2.5">
-      <ContextSectionTitle count={websites.length}>
+      <ContextSectionTitle
+        action={<AddDomainControl tenantId={tenantId} />}
+        count={count === 0 ? undefined : count}
+      >
         Websites
       </ContextSectionTitle>
-      <WebsitesContent websites={websites} />
+      {count === 0 ? null : (
+        <div className="flex flex-wrap gap-1.5">
+          {websites.map((website) => (
+            <WebsiteChip key={website.key} website={website} />
+          ))}
+          {declared.map((domain) => (
+            <DeclaredDomainChip
+              domain={domain}
+              key={domain}
+              tenantId={tenantId}
+            />
+          ))}
+        </div>
+      )}
     </section>
   )
 }
@@ -41,33 +64,42 @@ export function WebsitesContent({ websites }: { websites: WebsiteItem[] }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {websites.map((website) => (
-        <Button
-          asChild
-          className="h-8 justify-start gap-2 px-2.5 text-xs"
-          key={website.key}
-          size="sm"
-          variant="outline"
-        >
-          <a href={website.href} rel="noreferrer" target="_blank">
-            <Globe2 className="size-3.5" />
-            <span>{website.label}</span>
-            {website.main ? <Badge variant="secondary">Main</Badge> : null}
-          </a>
-        </Button>
+        <WebsiteChip key={website.key} website={website} />
       ))}
     </div>
   )
 }
 
-export function DomainsSection({
-  tenantId,
-  declared,
-}: {
-  tenantId: string
-  declared: string[]
-}) {
+function WebsiteChip({ website }: { website: WebsiteItem }) {
+  return (
+    <Button
+      asChild
+      className="h-8 justify-start gap-2 px-2.5 text-xs"
+      size="sm"
+      variant="outline"
+    >
+      <a href={website.href} rel="noreferrer" target="_blank">
+        <Globe2 className="size-3.5" />
+        <span>{website.label}</span>
+        {website.main ? <Badge variant="secondary">Main</Badge> : null}
+      </a>
+    </Button>
+  )
+}
+
+/**
+ * Ghost "+ Add" that swaps into an inline input group for declaring an email
+ * domain whose people count as part of the organization.
+ */
+function AddDomainControl({ tenantId }: { tenantId: string }) {
   const declareDomain = useMutation(api.organization.profile.declareDomain)
+  const [open, setOpen] = useState(false)
   const [value, setValue] = useState("")
+
+  const close = () => {
+    setOpen(false)
+    setValue("")
+  }
 
   const onAdd = async () => {
     if (value.trim() === "") {
@@ -76,60 +108,62 @@ export function DomainsSection({
 
     try {
       await declareDomain({ tenantId, domain: value })
-      setValue("")
+      close()
     } catch (error) {
       showErrorToast(error, "Could not add that domain.")
     }
   }
 
-  return (
-    <section className="grid gap-2.5">
-      <ContextSectionTitle
-        count={declared.length === 0 ? undefined : declared.length}
+  if (!open) {
+    return (
+      <Button
+        className="h-7 px-2 text-xs"
+        onClick={() => setOpen(true)}
+        size="sm"
+        type="button"
+        variant="ghost"
       >
-        Internal domains
-      </ContextSectionTitle>
-      <p className="text-muted-foreground text-xs/relaxed">
-        Milo counts people at your website domains as part of your organization.
-        Add any other email domains that should count too.
-      </p>
-      <div className="flex flex-wrap items-center gap-1.5">
-        {declared.map((domain) => (
-          <DeclaredDomainChip
-            domain={domain}
-            key={domain}
-            tenantId={tenantId}
-          />
-        ))}
-        <form
-          className="flex items-center gap-1.5"
-          onSubmit={(event) => {
-            event.preventDefault()
-            void onAdd()
+        <Plus className="size-3.5" /> Add
+      </Button>
+    )
+  }
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        void onAdd()
+      }}
+    >
+      <ButtonGroup>
+        <Input
+          aria-label="Domain to add"
+          autoFocus
+          className="h-7 w-36 text-xs"
+          onChange={(event) => setValue(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              close()
+            }
           }}
+          placeholder="acme.com"
+          value={value}
+        />
+        <Button
+          className="h-7 px-2.5 text-xs"
+          disabled={value.trim() === ""}
+          size="sm"
+          type="submit"
+          variant="outline"
         >
-          <Input
-            aria-label="Add an internal domain"
-            className="h-8 w-40 text-xs"
-            onChange={(event) => setValue(event.target.value)}
-            placeholder="acme.com"
-            value={value}
-          />
-          <Button
-            className="h-8 px-2.5 text-xs"
-            disabled={value.trim() === ""}
-            size="sm"
-            type="submit"
-            variant="outline"
-          >
-            Add
-          </Button>
-        </form>
-      </div>
-    </section>
+          Add
+        </Button>
+      </ButtonGroup>
+    </form>
   )
 }
 
+/** A user-added domain, styled like the website chips but removable. */
 function DeclaredDomainChip({
   domain,
   tenantId,
@@ -148,17 +182,19 @@ function DeclaredDomainChip({
   }
 
   return (
-    <Badge className="gap-1 py-1 pr-1 font-normal" variant="secondary">
-      {domain}
+    <div className="flex h-8 items-center gap-2 rounded-md border bg-background px-2.5 text-xs shadow-xs">
+      <Globe2 className="size-3.5 text-muted-foreground" />
+      <span>{domain}</span>
+      <Badge variant="outline">Added</Badge>
       <button
         aria-label={`Remove ${domain}`}
-        className="rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+        className="-mr-0.5 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
         onClick={() => void onRemove()}
         type="button"
       >
         <X className="size-3" />
       </button>
-    </Badge>
+    </div>
   )
 }
 
