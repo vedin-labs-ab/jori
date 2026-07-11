@@ -1,5 +1,4 @@
 import { type CodingToolName, isCodingToolName } from "../../contracts/coding"
-import { validateReadOnlyGitArgs } from "../../contracts/git"
 import { sandboxWorkspace } from "./artifacts"
 import { readWorkspaceFile } from "./files"
 import {
@@ -55,7 +54,6 @@ async function executeKnownCodingTool(args: {
 async function runGit(sandbox: SandboxRuntime, input: Record<string, unknown>) {
   const args = requiredStringArray(input.args, "args")
   const cwd = sandboxWorkspacePath(optionalString(input.cwd))
-  validateReadOnlyGitArgs(args)
 
   const result = await sandbox.runCommand({
     command: gitCommand(cwd, args),

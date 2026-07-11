@@ -15,13 +15,4 @@ export default defineConfig({
     enabled: true,
     maxExecutionsPerProcess: 25,
   },
-  retries: {
-    default: {
-      maxAttempts: 3,
-      minTimeoutInMs: 1_000,
-      maxTimeoutInMs: 60_000,
-      factor: 2,
-      randomize: true,
-    },
-  },
 })

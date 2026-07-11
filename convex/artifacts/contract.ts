@@ -4,8 +4,8 @@ import {
   assertContractStateValue,
   normalizeArtifactContract,
   resolveArtifactStateContract,
-} from "../../../contracts/artifacts/contract"
-import { type Doc } from "../../_generated/dataModel"
+} from "../../contracts/artifacts/contract"
+import { type Doc } from "../_generated/dataModel"
 
 export {
   type ArtifactContract,

@@ -1,14 +1,14 @@
 import { createHash } from "node:crypto"
 import {
   artifactSourceHashInput,
+  isPlatformArtifactSourcePath,
   maxArtifactFileBytes,
   maxArtifactFiles,
   maxArtifactTreeBytes,
   normalizeArtifactSourcePath,
   rejectForbiddenSourceAccess,
+  requiredArtifactSourcePaths,
 } from "../../../../contracts/artifacts/source.ts"
-import { config } from "./config.ts"
-import { isPlatformSourcePath } from "./platform.ts"
 import {
   type ArtifactSourceFile,
   type NormalizedArtifactSourceFile,
@@ -30,7 +30,7 @@ export function normalizeArtifactSource(
   const paths = new Set<string>()
   const files = source.map((file) => normalizeSourceFile(file, paths))
 
-  for (const requiredPath of config.requiredArtifactSourcePaths) {
+  for (const requiredPath of requiredArtifactSourcePaths) {
     if (!paths.has(requiredPath)) {
       throw new Error(`Artifact source is missing ${requiredPath}.`)
     }
@@ -106,7 +106,7 @@ function normalizeSourcePath(value: unknown) {
 
   const filePath = normalizeArtifactSourcePath(value)
 
-  if (isPlatformSourcePath(filePath)) {
+  if (isPlatformArtifactSourcePath(filePath)) {
     throw new Error(
       `Artifact source cannot include platform-owned file: ${filePath}`
     )

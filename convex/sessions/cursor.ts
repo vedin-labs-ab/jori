@@ -1,4 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
+import { messageHasText } from "../messages/data"
 import {
   messageActorIds,
   messageIdentifiers,
@@ -107,12 +108,6 @@ function isAfterSessionCursor(
   return message._creationTime !== cursor.createdAt || seenLastMessage
 }
 
-function hasText(message: Doc<"messages">) {
-  const text = message.text?.trim()
-
-  return text !== undefined && text !== ""
-}
-
 function isRuntimeInputMessage(message: Doc<"messages">) {
-  return hasText(message) && message.actor?.kind !== "self"
+  return messageHasText(message) && message.actor?.kind !== "self"
 }

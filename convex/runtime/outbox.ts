@@ -17,16 +17,6 @@ export async function queueRun(ctx: MutationCtx, runId: Id<"runs">) {
   return await enqueueRun(ctx, run)
 }
 
-export const ensureQueued = internalMutation({
-  args: {
-    runId: v.id("runs"),
-  },
-  returns: v.any(),
-  handler: async (ctx, args) => {
-    return await queueRun(ctx, args.runId)
-  },
-})
-
 export const enqueueCancellation = internalMutation({
   args: {
     runId: v.id("runs"),

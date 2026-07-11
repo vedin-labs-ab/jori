@@ -1,10 +1,8 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
+import { scopeValidator } from "../shared/audience"
 
-export const artifactAccess = v.union(
-  v.literal("personal"),
-  v.literal("organization")
-)
+export const artifactAccess = scopeValidator
 
 /** What a session may do: members get the full tool surface, share-link
  *  viewers only read published assets and shared-scope state. */

@@ -3,7 +3,10 @@ import {
   type ModelUsage,
   readModelReasoning,
   readModelUsage,
+  readTraceData,
   readTraceError,
+  traceAttempt,
+  traceSequence,
 } from "./read"
 import {
   type ActivityDetail,
@@ -132,16 +135,4 @@ function modelTraceKey(trace: Doc<"traces">) {
 
 function isTerminalModelTrace(trace: Doc<"traces">) {
   return trace.type === "model.completed" || trace.type === "model.failed"
-}
-
-function readTraceData(trace: Doc<"traces">) {
-  return "data" in trace ? trace.data : undefined
-}
-
-function traceAttempt(trace: Doc<"traces">) {
-  return "attempt" in trace ? trace.attempt : 0
-}
-
-function traceSequence(trace: Doc<"traces">) {
-  return "sequence" in trace ? trace.sequence : undefined
 }

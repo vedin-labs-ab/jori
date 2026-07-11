@@ -1,11 +1,12 @@
 import fs from "node:fs/promises"
 import path from "node:path"
-import { maxArtifactFileBytes } from "../../../../contracts/artifacts/source.ts"
+import {
+  isPlatformArtifactSourcePath,
+  maxArtifactFileBytes,
+} from "../../../../contracts/artifacts/source.ts"
 import { config } from "./config.ts"
-import { isPlatformSourcePath } from "./platform.ts"
 import {
   type ArtifactSourceFile,
-  type FormattedArtifactSourceFile,
   type NormalizedArtifactSourceFile,
 } from "./types.ts"
 
@@ -67,7 +68,7 @@ export async function readWorkspaceSource(
     .map((filePath) =>
       normalizeAssetPath(path.relative(workspacePath, filePath))
     )
-    .filter((filePath) => !isPlatformSourcePath(filePath))
+    .filter((filePath) => !isPlatformArtifactSourcePath(filePath))
 
   return await Promise.all(
     files.map(async (relativePath) => ({
@@ -80,7 +81,7 @@ export async function readWorkspaceSource(
   )
 }
 
-export function toPublishSource(files: FormattedArtifactSourceFile[]) {
+export function toPublishSource(files: NormalizedArtifactSourceFile[]) {
   return files.map((file) => ({
     path: file.path,
     content: file.content,
@@ -108,7 +109,7 @@ export function normalizeAssetPath(assetPath: string) {
 async function readSourceFile(
   project: string,
   file: NormalizedArtifactSourceFile
-): Promise<FormattedArtifactSourceFile> {
+) {
   const content = await fs.readFile(path.join(project, file.path), "utf8")
   const bytes = Buffer.from(content, "utf8")
 

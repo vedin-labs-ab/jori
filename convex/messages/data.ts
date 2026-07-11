@@ -29,6 +29,12 @@ export type ObservedMessage = {
   data?: unknown
 }
 
+export function messageHasText(message: Doc<"messages">) {
+  const text = message.text?.trim()
+
+  return text !== undefined && text !== ""
+}
+
 export async function findMessageByExternalId(
   ctx: MutationCtx,
   externalId: string

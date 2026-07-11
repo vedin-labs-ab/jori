@@ -21,6 +21,7 @@ import { normalizeSelfActor } from "./actor"
 import {
   findMessageByExternalId,
   insertMessage,
+  messageHasText,
   type ObservedMessage,
   observedMessageArgs,
 } from "./data"
@@ -178,7 +179,7 @@ async function messageRunConversation(
 
   const audience = messageAudience(args.message, args.integration)
 
-  if (!hasText(args.message)) {
+  if (!messageHasText(args.message)) {
     return null
   }
 
@@ -193,10 +194,4 @@ async function messageRunConversation(
         integrationId: args.integration._id,
         externalId: args.message.conversationId,
       })
-}
-
-function hasText(message: Doc<"messages">) {
-  const text = message.text?.trim()
-
-  return text !== undefined && text !== ""
 }

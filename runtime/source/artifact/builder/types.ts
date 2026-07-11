@@ -11,28 +11,10 @@ export type NormalizedArtifactSourceFile = {
   byteSize: number
 }
 
-export type FormattedArtifactSourceFile = NormalizedArtifactSourceFile & {
-  byteSize: number
-}
-
 export type ArtifactBuildAsset = {
   path: string
   mimeType: string
   contentBase64: string
-}
-
-export type ArtifactContractJson = {
-  version: number
-  state: Array<{
-    name: string
-    key: string
-    scope: "personal" | "shared"
-    description?: string
-    schemaName: string
-    schemaVersion: number
-    schemaHash: string
-    schema: Record<string, unknown>
-  }>
 }
 
 export type ArtifactManifest = {
@@ -42,7 +24,4 @@ export type ArtifactManifest = {
 
 export type BuilderConfig = {
   artifactTemplatePath: string
-  platformArtifactSourcePathPrefixes: string[]
-  requiredArtifactSourcePaths: string[]
-  platformArtifactSourcePaths: string[]
 }

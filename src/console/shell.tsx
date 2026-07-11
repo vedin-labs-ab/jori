@@ -83,16 +83,14 @@ function isNavigationActive(pathname: string, to: string) {
 
 export function PublicConsoleFrame({
   children,
-  isLoaded,
   isSignedIn,
 }: {
   children: ReactNode
-  isLoaded: boolean
-  isSignedIn: boolean | undefined
+  isSignedIn: boolean
 }) {
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-5xl flex-col gap-8 px-6 py-8">
-      <PublicConsoleHeader isLoaded={isLoaded} isSignedIn={isSignedIn} />
+      <PublicConsoleHeader isSignedIn={isSignedIn} />
       {children}
     </main>
   )
@@ -147,24 +145,13 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
   )
 }
 
-function PublicConsoleHeader({
-  isLoaded,
-  isSignedIn,
-}: {
-  isLoaded: boolean
-  isSignedIn: boolean | undefined
-}) {
+function PublicConsoleHeader({ isSignedIn }: { isSignedIn: boolean }) {
   return (
     <header className="flex flex-wrap items-center gap-3">
       <BrandMark />
 
       <div className="ml-auto flex items-center gap-2">
-        {!isLoaded ? (
-          <Button variant="outline" size="sm" disabled>
-            Loading
-          </Button>
-        ) : null}
-        {isLoaded && !isSignedIn ? (
+        {!isSignedIn ? (
           <>
             <SignInButton mode="modal">
               <Button variant="outline" size="sm">
@@ -176,7 +163,7 @@ function PublicConsoleHeader({
             </SignUpButton>
           </>
         ) : null}
-        {isLoaded && isSignedIn ? <UserButton /> : null}
+        {isSignedIn ? <UserButton /> : null}
       </div>
     </header>
   )

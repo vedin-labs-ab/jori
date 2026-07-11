@@ -16,7 +16,6 @@ const maxAttempts = 3
 
 export const miloAgentRun = task({
   id: agentTaskId,
-  maxDuration: 7200,
   retry: {
     factor: 2,
     maxAttempts,
