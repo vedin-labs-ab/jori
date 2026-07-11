@@ -122,7 +122,7 @@ function AddDomainControl({ tenantId }: { tenantId: string }) {
   if (!open) {
     return (
       <Button
-        className="h-7 px-2 text-xs"
+        className="h-7 px-2.5 text-xs"
         onClick={() => setOpen(true)}
         size="sm"
         type="button"
