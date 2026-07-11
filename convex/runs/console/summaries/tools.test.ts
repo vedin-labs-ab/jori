@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
 import { getToolPermission } from "../../../permissions/catalog"
-import { eventAutomationDisplay, messageDisplay } from "../display"
+import { eventAutomationDisplay, messageDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("shows stored tools for event automation runs", async () => {

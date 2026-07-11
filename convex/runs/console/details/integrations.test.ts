@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
-import { eventAutomationDisplay } from "../display"
+import { eventAutomationDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes linked GitHub pull request details", async () => {

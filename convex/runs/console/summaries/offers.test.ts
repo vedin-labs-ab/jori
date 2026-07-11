@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
-import { messageDisplay } from "../display"
+import { messageDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes the latest integration offer for the run", async () => {
