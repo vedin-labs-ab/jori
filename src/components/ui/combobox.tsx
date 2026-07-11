@@ -6,6 +6,7 @@ import { Branch as DismissableLayerBranch } from "@radix-ui/react-dismissable-la
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { claimDismissGesture } from "@/components/ui/dismiss"
 import {
   InputGroup,
   InputGroupAddon,
@@ -14,7 +15,26 @@ import {
 } from "@/components/ui/input-group"
 import { ChevronDownIcon, XIcon, CheckIcon } from "lucide-react"
 
-const Combobox = ComboboxPrimitive.Root
+function Combobox<Value, Multiple extends boolean | undefined = false>({
+  onOpenChange,
+  ...props
+}: ComboboxPrimitive.Root.Props<Value, Multiple>) {
+  return (
+    <ComboboxPrimitive.Root
+      {...props}
+      onOpenChange={(open, eventDetails) => {
+        // Closing the popup spends the gesture: the dialog beneath must not
+        // treat the same press as its own outside dismissal. Radix popups
+        // claim through their pointer-down-outside handler; base-ui closes
+        // through this callback instead. See components/ui/dismiss.ts.
+        if (!open) {
+          claimDismissGesture()
+        }
+        onOpenChange?.(open, eventDetails)
+      }}
+    />
+  )
+}
 
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
   return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />
