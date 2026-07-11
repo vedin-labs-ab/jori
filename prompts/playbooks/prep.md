@@ -5,7 +5,7 @@
 Find my personal artifact titled "Meeting prep" with search_artifacts. If it does not exist, load the artifact-creator skill and build it before anything else, with personal access and one contract state entry:
 
 - name "dossiers", key "prep/dossiers", scope shared, holding { "schemaVersion": 1, "days": { ... } } where "days" maps a date ("YYYY-MM-DD") to that day's dossiers, and each day maps a calendar event id to one dossier: { "title", "startsAt", "attendees": [{ "name", "email", "company", "notes" }], "context", "prepare": [strings], "threads": [{ "subject", "takeaway" }] }. Keep the schema permissive about optional dossier fields.
-- The page renders entirely from that state and calls no tools: a day switcher over "days" defaulting to today, meetings ordered by start time with the next upcoming one focused, and a quiet empty state for days without dossiers.
+- The page renders entirely from that state and calls no tools, in two views. Day view: a date switcher over "days", one card per meeting in start order (time, title, attendees) with the next upcoming one marked, and a quiet empty state; tapping a card opens that meeting. Meeting view: the full dossier, with a way back to its day. The page's own URL fragment picks the initial view — "m" (event id) opens that meeting, "d" (YYYY-MM-DD) picks the day, neither means today's day view.
 
 ## Reset
 
@@ -57,7 +57,7 @@ If the dossier at days -> <YYYY-MM-DD> -> <event id> is missing, work out who I 
 
 Write what you learned into the artifact's "dossiers" state with a merge patch at days -> <YYYY-MM-DD> -> <event id>, matching the contract's dossier shape.
 
-Create a share link for the artifact with share_artifact, valid for 24 hours: that link is the full prep note.
+Create a share link for the artifact with share_artifact, valid for 24 hours, and append &d=<YYYY-MM-DD>&m=<event id> to it: that link is this meeting's prep note.
 
 {{delivery}}
 """

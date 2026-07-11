@@ -5,6 +5,7 @@ import {
   shareExpiresAt,
   shareExpiry,
   shareFragment,
+  viewFragment,
 } from "./share"
 
 describe("share fragment", () => {
@@ -25,6 +26,21 @@ describe("share fragment", () => {
     expect(parseShareFragment("#")).toBeNull()
     expect(parseShareFragment("#share=")).toBeNull()
     expect(parseShareFragment("#other=value")).toBeNull()
+  })
+})
+
+describe("view fragment", () => {
+  test("keeps view params and drops the secret", () => {
+    expect(viewFragment("#share=s3cret&d=2026-07-14&m=evt_1")).toBe(
+      "d=2026-07-14&m=evt_1"
+    )
+    expect(viewFragment("d=2026-07-14")).toBe("d=2026-07-14")
+  })
+
+  test("returns null when only the secret or nothing is present", () => {
+    expect(viewFragment("#share=s3cret")).toBeNull()
+    expect(viewFragment("")).toBeNull()
+    expect(viewFragment("#")).toBeNull()
   })
 })
 
