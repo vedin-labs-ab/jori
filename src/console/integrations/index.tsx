@@ -13,6 +13,12 @@ import {
 import { NotionIntegration } from "./providers/notion"
 import { SlackIntegration } from "./providers/slack"
 
+// Integration cards hold permission rows, so the track floor is wider than
+// the playbook grid's: one column on small screens, two on laptops, three or
+// more only on wide monitors.
+const integrationGrid =
+  "grid-cols-[repeat(auto-fill,minmax(min(28rem,100%),1fr))]"
+
 export function Integrations() {
   return (
     <ConsolePage>
@@ -31,7 +37,7 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
         <TabsTrigger value="user">Personal</TabsTrigger>
       </TabsList>
       <TabsContent value="tenant" asChild>
-        <ConsoleContentGrid>
+        <ConsoleContentGrid className={integrationGrid}>
           <SlackIntegration permissions={permissions} tenantId={tenantId} />
           <LinearIntegration permissions={permissions} tenantId={tenantId} />
           <GitHubIntegration permissions={permissions} tenantId={tenantId} />
@@ -40,7 +46,7 @@ function IntegrationTabs({ tenantId }: { tenantId: string }) {
         </ConsoleContentGrid>
       </TabsContent>
       <TabsContent value="user" asChild>
-        <ConsoleContentGrid>
+        <ConsoleContentGrid className={integrationGrid}>
           <GmailIntegration permissions={permissions} tenantId={tenantId} />
           <GoogleCalendarIntegration
             permissions={permissions}
