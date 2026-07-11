@@ -12,7 +12,8 @@ import { RootStateFrame } from "@/shared/state"
 import appCss from "../styles.css?url"
 
 const appTitle = "Milo"
-const appDescription = "AI teammates for company work."
+const appDescription =
+  "An AI teammate inside Slack, your email, and your calendar. Milo preps your day, drafts the follow-ups, asks before it acts, and keeps receipts."
 
 export const Route = createRootRoute({
   errorComponent: RootError,
