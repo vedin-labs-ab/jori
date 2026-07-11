@@ -99,7 +99,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
         key: "meetings",
         label: "Meetings",
         kind: "choice",
-        default: "both",
+        default: "external",
         choices: [
           { value: "external", label: "External" },
           { value: "internal", label: "Internal" },

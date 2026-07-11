@@ -127,15 +127,16 @@ describe("meeting prep instructions", () => {
   })
 
   test("meeting scope gates attendee composition, not judgment", () => {
-    const both = render("meeting-prep", emailDestination)
-    const external = render("meeting-prep", emailDestination, {
-      meetings: "external",
+    const external = render("meeting-prep", emailDestination)
+    const both = render("meeting-prep", emailDestination, {
+      meetings: "both",
     })
     const internal = render("meeting-prep", emailDestination, {
       meetings: "internal",
     })
 
     expect(both).toContain("external or customer meetings")
+    // External is the catalog default, so the bare render pins it.
     expect(external).toContain(
       "Only meetings that include people outside my organization qualify"
     )
