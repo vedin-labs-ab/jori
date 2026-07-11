@@ -53,7 +53,7 @@ export function IntegrationSurface({
         )}
       </CardHeader>
       {children === undefined ? null : (
-        <div className="border-t">
+        <div className="mt-auto border-t">
           <CardContent className="grid gap-4 p-4 sm:p-5">
             {children}
           </CardContent>
