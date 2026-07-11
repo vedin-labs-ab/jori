@@ -1,12 +1,18 @@
 import { describe, expect, test } from "vitest"
 import { getToolPermission } from "../permissions"
 import { playbookCapabilityProviders, playbookSlotTools } from "./capabilities"
-import { playbookCatalog } from "./catalog"
+import {
+  describePlaybookCadence,
+  getPlaybook,
+  playbookCatalog,
+  resolvePlaybookSchedule,
+} from "./catalog"
 import {
   type DeliveryDestination,
   type DeliveryKind,
   destinationTools,
 } from "./delivery"
+import { resolvePlaybookOptions } from "./options"
 
 function sampleDestination(kind: DeliveryKind): DeliveryDestination {
   return kind === "email"
@@ -61,5 +67,41 @@ describe("playbook catalog", () => {
         }
       }
     }
+  })
+})
+
+describe("meeting prep catalog", () => {
+  const meetingPrep = getPlaybook("meeting-prep")
+
+  function options(values: Record<string, string | number> = {}) {
+    return resolvePlaybookOptions(meetingPrep.options, values)
+  }
+
+  test("digest mode runs the sweep ahead of the chosen delivery time", () => {
+    expect(resolvePlaybookSchedule(meetingPrep, options())).toEqual({
+      repeat: "daily",
+      time: "07:15",
+    })
+    expect(
+      resolvePlaybookSchedule(meetingPrep, options({ time: "00:05" }))
+    ).toEqual({ repeat: "daily", time: "23:50" })
+  })
+
+  test("per-meeting mode keeps the early planning sweep", () => {
+    expect(
+      resolvePlaybookSchedule(meetingPrep, options({ mode: "meeting" }))
+    ).toEqual({ repeat: "daily", time: "01:00" })
+  })
+
+  test("cadence copy follows the chosen options", () => {
+    expect(describePlaybookCadence(meetingPrep)).toBe(
+      "Morning digest at 07:30, reminders 30 minutes before meetings"
+    )
+    expect(
+      describePlaybookCadence(meetingPrep, options({ reminders: "off" }))
+    ).toBe("Morning digest at 07:30")
+    expect(
+      describePlaybookCadence(meetingPrep, options({ mode: "meeting" }))
+    ).toBe("45 minutes before each external meeting")
   })
 })
