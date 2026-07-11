@@ -12,13 +12,12 @@ vi.mock("@clerk/tanstack-react-start", () => ({
   }),
 }))
 
+let organizationProfile: Record<string, unknown> = {}
+
 vi.mock("convex/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("convex/react")>()),
   useAction: () => vi.fn(async () => ({ status: "ready", options: [] })),
-  useQuery: () => ({
-    domains: ["acme.com"],
-    declared: { domains: ["acme.io"] },
-  }),
+  useQuery: () => organizationProfile,
 }))
 
 vi.mock("@tanstack/react-router", async (importOriginal) => ({
@@ -30,6 +29,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => ({
 
 afterEach(() => {
   cleanup()
+  organizationProfile = {}
 })
 
 const morningBrief = playbookCatalog[0]
@@ -157,16 +157,15 @@ test("advanced settings closes this dialog only after creation", () => {
 
 test("closing an option dropdown never closes the dialog", async () => {
   shimSelectDom()
-  const meetingPrep = playbookCatalog.find(
-    (definition) => definition.key === "meeting-prep"
-  )
   const onOpenChange = vi.fn()
 
-  if (meetingPrep === undefined) {
-    throw new Error("Meeting prep definition is missing.")
-  }
-
-  renderDialog(stubActions(), ["email"], singlePlan, onOpenChange, meetingPrep)
+  renderDialog(
+    stubActions(),
+    ["email"],
+    singlePlan,
+    onOpenChange,
+    meetingPrep()
+  )
 
   // The default digest mode shows the "Remind before" minutes select.
   fireEvent.click(screen.getByRole("combobox"))
@@ -186,24 +185,40 @@ test("closing an option dropdown never closes the dialog", async () => {
   expect(screen.getByText(/set up meeting prep/i)).toBeDefined()
 })
 
-test("the meetings scope is grounded in the organization's domains", () => {
-  const meetingPrep = playbookCatalog.find(
-    (definition) => definition.key === "meeting-prep"
+test("a single organization domain is named in the meetings hint", () => {
+  organizationProfile = { domains: ["acme.com"] }
+
+  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+
+  expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
+  expect(
+    screen.getByRole("link", { name: "Manage" }).getAttribute("href")
+  ).toBe("/context")
+})
+
+test("multiple organization domains collapse to a count", () => {
+  organizationProfile = {
+    domains: ["acme.com"],
+    declared: { domains: ["acme.io"] },
+  }
+
+  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+
+  expect(screen.getByText(/Internal: 2 domains/)).toBeDefined()
+  expect(screen.getByRole("link", { name: "Manage" })).toBeDefined()
+})
+
+function meetingPrep() {
+  const definition = playbookCatalog.find(
+    (entry) => entry.key === "meeting-prep"
   )
 
-  if (meetingPrep === undefined) {
+  if (definition === undefined) {
     throw new Error("Meeting prep definition is missing.")
   }
 
-  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep)
-
-  expect(
-    screen.getByText(/Internal: anyone at acme\.com or acme\.io/)
-  ).toBeDefined()
-  expect(
-    screen.getByRole("link", { name: "Edit in Context" }).getAttribute("href")
-  ).toBe("/context")
-})
+  return definition
+}
 
 /** Radix Select touches pointer-capture and scroll APIs jsdom lacks. */
 function shimSelectDom() {

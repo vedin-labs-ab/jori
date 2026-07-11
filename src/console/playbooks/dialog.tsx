@@ -223,24 +223,28 @@ function useMeetingsHint(definition: PlaybookDefinition, tenantId: string) {
 
   return (
     <p className="text-muted-foreground">
-      {hasDomains
-        ? `Internal: anyone at ${listDomains(domains)}`
-        : "Internal is based on your organization's domains"}
+      {describeInternal(domains)}
       {" · "}
       <Link
         className="underline underline-offset-2 hover:text-foreground"
         to="/context"
       >
-        {hasDomains ? "Edit in Context" : "Set up in Context"}
+        {hasDomains ? "Manage" : "Set up in Context"}
       </Link>
     </p>
   )
 }
 
-function listDomains(domains: string[]) {
+// Name the single domain while it stays concrete; collapse to a count once a
+// list would get noisy. The Manage link reveals the full list either way.
+function describeInternal(domains: string[]) {
+  if (domains.length === 0) {
+    return "Internal is based on your organization's domains"
+  }
+
   return domains.length === 1
-    ? domains[0]
-    : `${domains.slice(0, -1).join(", ")} or ${domains.at(-1)}`
+    ? `Internal: anyone at ${domains[0]}`
+    : `Internal: ${domains.length} domains`
 }
 
 /**
