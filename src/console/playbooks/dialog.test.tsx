@@ -208,6 +208,22 @@ test("multiple organization domains collapse to a count", () => {
   expect(screen.getByRole("link", { name: "Manage" })).toBeDefined()
 })
 
+test("selecting External hides the internal-domains hint", () => {
+  organizationProfile = { domains: ["acme.com"] }
+
+  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+
+  expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
+
+  fireEvent.click(screen.getByRole("radio", { name: "External" }))
+
+  expect(screen.queryByText(/Internal:/)).toBeNull()
+
+  fireEvent.click(screen.getByRole("radio", { name: "Internal" }))
+
+  expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
+})
+
 function meetingPrep() {
   const definition = playbookCatalog.find(
     (entry) => entry.key === "meeting-prep"
