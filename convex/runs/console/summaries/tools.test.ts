@@ -1,7 +1,11 @@
 import { expect, test } from "vitest"
 import { type QueryCtx } from "../../../_generated/server"
 import { getToolPermission } from "../../../permissions/catalog"
-import { eventAutomationDisplay, messageDisplay } from "../fixtures"
+import {
+  emptyQueryResult,
+  eventAutomationDisplay,
+  messageDisplay,
+} from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("shows stored tools for event automation runs", async () => {
@@ -258,14 +262,5 @@ function fakeQuery(table: string, preparedTools: unknown) {
                   },
           }
         : emptyQueryResult(),
-  }
-}
-
-function emptyQueryResult() {
-  return {
-    async *[Symbol.asyncIterator]() {},
-    first: async () => null,
-    order: () => emptyQueryResult(),
-    take: async () => [],
   }
 }

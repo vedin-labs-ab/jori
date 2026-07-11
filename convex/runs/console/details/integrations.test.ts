@@ -1,7 +1,6 @@
 import { expect, test } from "vitest"
 import { type Id } from "../../../_generated/dataModel"
-import { type QueryCtx } from "../../../_generated/server"
-import { eventAutomationDisplay } from "../fixtures"
+import { eventAutomationDisplay, fakeQueryCtx } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes linked GitHub pull request details", async () => {
@@ -198,24 +197,4 @@ function testRun(
     ...run,
     ...overrides,
   } as Parameters<typeof summarizeRun>[1]
-}
-
-function fakeQueryCtx(docs: Record<string, unknown>) {
-  return {
-    db: {
-      get: async (id: string) => docs[id] ?? null,
-      query: () => ({
-        withIndex: () => emptyQueryResult(),
-      }),
-    },
-  } as unknown as QueryCtx
-}
-
-function emptyQueryResult() {
-  return {
-    async *[Symbol.asyncIterator]() {},
-    first: async () => null,
-    order: () => emptyQueryResult(),
-    take: async () => [],
-  }
 }
