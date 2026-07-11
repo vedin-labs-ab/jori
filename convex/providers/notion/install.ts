@@ -5,10 +5,6 @@ import {
   linkSetupIdentity,
   setupIdentityValidator,
 } from "../../persons/install"
-import {
-  requireProviderIntegration,
-  saveOAuthCredentials,
-} from "../credentials"
 import { buildInstallState, upsertIntegration } from "../install"
 import { createSignedNotionState } from "./signing"
 
@@ -72,27 +68,5 @@ export const recordOAuthInstallation = internalMutation({
     })
 
     return integrationId
-  },
-})
-
-export const updateOAuthCredentials = internalMutation({
-  args: {
-    integrationId: v.id("integrations"),
-    accessToken: v.string(),
-    refreshToken: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    await requireProviderIntegration(ctx, {
-      integrationId: args.integrationId,
-      provider: "notion",
-      label: "Notion",
-    })
-
-    return await saveOAuthCredentials(ctx, args.integrationId, {
-      tokens: {
-        access: args.accessToken,
-        refresh: args.refreshToken,
-      },
-    })
   },
 })

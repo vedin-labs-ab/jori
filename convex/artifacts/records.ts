@@ -110,24 +110,6 @@ export const publishUpdated = internalMutation({
   },
 })
 
-export const archive = internalMutation({
-  args: {
-    tenantId: v.string(),
-    artifactId: v.id("artifacts"),
-  },
-  handler: async (ctx, args) => {
-    const artifact = await getTenantArtifact(ctx, args)
-    const now = Date.now()
-
-    await ctx.db.patch(artifact._id, {
-      archivedAt: now,
-      updatedAt: now,
-    })
-
-    return { artifactId: artifact._id, archived: true as const }
-  },
-})
-
 export const restore = internalMutation({
   args: {
     tenantId: v.string(),
