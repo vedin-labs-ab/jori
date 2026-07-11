@@ -9,7 +9,7 @@ import {
   requiredString,
 } from "./input"
 import { boundedText } from "./output"
-import { applyWorkspacePatch } from "./patch"
+import { applyWorkspacePatch } from "./patch/apply"
 import { sandboxWorkspacePath, shellQuote } from "./path"
 import { gitBashGuard, readOnlyGitCommand } from "./script"
 import { globWorkspace, grepWorkspace } from "./search"

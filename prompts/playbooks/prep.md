@@ -18,19 +18,19 @@ Check my {{providers.calendar}} for events with other attendees{% if options.dig
 
 ## Research every meeting now
 
-You are running shortly before the digest goes out. Give each qualifying meeting its own research agent with start_agent — at most ten; cover any remainder briefly yourself. Each agent's task, with the angle-bracket parts filled in:
+You are running shortly before the digest goes out. Give each qualifying meeting its own research agent with start_agent — at most ten; cover any remainder briefly yourself. Do not wait for the agents. Each agent's task, with the angle-bracket parts filled in:
 
 """
 Research the meeting "<title>" at <local time> on <date> (calendar event <event id>) for my meeting-prep dossier. Only read and write the dossier: send nothing, and change nothing else.
 
-Work out who I am meeting and what it is about: research external attendees and their companies on the web, and search my {{providers.email}} for recent threads with the attendees to surface open questions and promised follow-ups.
+Work out who I am meeting and what it is about: research the attendees other than me and their companies on the web, and search my {{providers.email}} for recent threads with the attendees to surface open questions and promised follow-ups.
 
 Write the dossier into artifact <artifact id>, state entry "dossiers", with a merge patch at days -> <YYYY-MM-DD> -> <event id>, matching the contract's dossier shape.
 """
 
 ## Schedule the digest delivery
 
-Create a one-time automation with add_automation: type "once" at {{options.time}} today as a UTC ISO timestamp, name "Meeting digest", artifactId set to the dossier artifact, scope "personal", access with the sending tool the skeleton's last paragraph needs (check list_capabilities), and these instructions with the angle-bracket parts filled in:
+Create a one-time automation with add_automation: type "once" at {{options.time}} my local time today, converted to a UTC ISO timestamp, name "Meeting digest", artifactId set to the dossier artifact, scope "personal", access with the sending tool the skeleton's last paragraph needs (check list_capabilities), and these instructions with the angle-bracket parts filled in:
 
 """
 Send my meeting digest (artifact <artifact id>).
@@ -41,6 +41,8 @@ Create a share link for the artifact with share_artifact, valid for 24 hours: th
 
 {{delivery}}
 """
+
+If {{options.time}} has already passed today, schedule nothing and follow the digest instructions yourself once the research agents have written their dossiers.
 {% endif %}
 {% if options.before != "off" %}
 

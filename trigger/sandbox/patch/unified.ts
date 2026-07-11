@@ -1,22 +1,13 @@
-import { sandboxWorkspace } from "./artifacts"
-import { optionalString, requiredString } from "./input"
-import { boundedText, compactFailure } from "./output"
-import { sandboxWorkspacePath, shellQuote } from "./path"
-import { type SandboxRuntime } from "./types"
+import { sandboxWorkspace } from "../artifacts"
+import { boundedText, compactFailure } from "../output"
+import { shellQuote } from "../path"
+import { type SandboxRuntime } from "../types"
 
-const maxPatchChars = 500_000
-
-export async function applyWorkspacePatch(
+export async function applyUnifiedPatch(
   sandbox: SandboxRuntime,
-  input: Record<string, unknown>
+  patch: string,
+  cwd: string
 ) {
-  const patch = requiredString(input.patch, "patch")
-  const cwd = sandboxWorkspacePath(optionalString(input.cwd))
-
-  if (patch.length > maxPatchChars) {
-    throw new Error(`Patch exceeds ${maxPatchChars} characters.`)
-  }
-
   const content = patch.endsWith("\n") ? patch : `${patch}\n`
   const patchPath = `/tmp/milo-patch-${Date.now()}.diff`
   await sandbox.writeFiles([{ content, path: patchPath }])
