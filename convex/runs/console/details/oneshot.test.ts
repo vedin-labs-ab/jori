@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { getToolPermission } from "../../../permissions/catalog"
-import { oneShotDisplay } from "../display"
+import { oneShotDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes one-shot automation access details", async () => {

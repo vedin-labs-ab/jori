@@ -5,7 +5,7 @@ import {
   automationDisplay,
   eventAutomationDisplay,
   messageDisplay,
-} from "../display"
+} from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("uses stored automation snapshots when the automation document is unavailable", async () => {

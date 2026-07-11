@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { getToolPermission } from "../../../permissions/catalog"
-import { recurringDisplay } from "../display"
+import { recurringDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes recurring automation details", async () => {
