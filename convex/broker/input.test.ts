@@ -2,8 +2,9 @@ import { expect, test } from "vitest"
 import { toolPermissions } from "../../contracts/permissions"
 import { hasBrokerToolInputSchema, normalizeBrokerToolInput } from "./input"
 
-test("broker input schemas cover every permissioned tool", () => {
+test("broker input schemas cover every broker-routed tool", () => {
   const missing = toolPermissions
+    .filter((permission) => permission.route === "broker")
     .filter((permission) => !hasBrokerToolInputSchema(permission.tool))
     .map((permission) => permission.tool)
 
