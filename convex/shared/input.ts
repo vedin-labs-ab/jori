@@ -1,3 +1,9 @@
+/** A Milo platform tool call as the broker and every domain dispatcher receive it. */
+export type MiloToolRequest = {
+  tool: string
+  args?: unknown
+}
+
 export function requiredString(value: unknown, name: string) {
   if (typeof value !== "string" || value.trim() === "") {
     throw new Error(`${name} is required`)
