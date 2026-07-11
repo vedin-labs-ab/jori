@@ -94,7 +94,7 @@ describe("meeting prep catalog", () => {
   })
 
   test("cadence copy follows the chosen options", () => {
-    expect(describePlaybookCadence(meetingPrep)).toBe(
+    expect(describePlaybookCadence(meetingPrep, options())).toBe(
       "Morning digest at 07:30, reminders 45 minutes before meetings"
     )
     expect(
@@ -103,5 +103,20 @@ describe("meeting prep catalog", () => {
     expect(
       describePlaybookCadence(meetingPrep, options({ mode: "meeting" }))
     ).toBe("45 minutes before each external meeting")
+  })
+
+  test("browse surfaces get the rhythm, not resolved defaults", () => {
+    expect(describePlaybookCadence(meetingPrep)).toBe(
+      "Morning digest or right before each meeting"
+    )
+  })
+})
+
+describe("catalog copy stays cadence-free where the rhythm rules", () => {
+  test("cards never show clock times or counts", () => {
+    for (const playbook of playbookCatalog) {
+      expect(playbook.cadence).not.toMatch(/\d/)
+      expect(playbook.description).not.toMatch(/\d/)
+    }
   })
 })
