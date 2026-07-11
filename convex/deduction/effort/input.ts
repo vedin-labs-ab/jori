@@ -74,18 +74,19 @@ async function loadActiveEfforts(ctx: QueryCtx, tenantId: string) {
   return Promise.all(rows.map((row) => readEffortContext(ctx, row)))
 }
 
-// The current active effort layer: sighted within the dormancy window and not
-// superseded. Both judges and the console pulse read through this one rule.
+// Current efforts, newest sighting first and never superseded. The default
+// cutoff is the dormancy window both judges read through; the console pulse
+// passes its own view range instead.
 export async function activeEffortRows(
   ctx: QueryCtx,
   tenantId: string,
-  limit: number
+  limit: number,
+  sightedSince = Date.now() - effortActiveMs
 ) {
-  const cutoff = Date.now() - effortActiveMs
   const rows = await ctx.db
     .query("efforts")
     .withIndex("by_tenant_and_seen_at", (index) =>
-      index.eq("tenantId", tenantId).gt("seenAt", cutoff)
+      index.eq("tenantId", tenantId).gt("seenAt", sightedSince)
     )
     .order("desc")
     .take(limit)

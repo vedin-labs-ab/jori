@@ -1,41 +1,52 @@
 import { useQuery } from "convex/react"
-import { Card } from "@/components/ui/card"
+import { CalendarDays, Clock } from "lucide-react"
+import { type ReactNode, useEffect, useState } from "react"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
-import { buildPulse, type PulseCell, type PulseLane } from "./series"
+import { LaneRow } from "./lane"
+import { buildPulse, type PulseLane } from "./series"
 import { type Workstream, type Workstreams } from "./types"
 
-// Column count mirrors pulseDayCount; Tailwind needs the literals. Fixed
-// column pitch keeps the cells contribution-graph dense instead of
+type PulseDays = 14 | 30 | 60
+type PulseData = NonNullable<
+  ReturnType<typeof useQuery<typeof api.deduction.console.pulse.read>>
+>
+
+const rangeOptions: { value: PulseDays; label: string }[] = [
+  { value: 14, label: "Last 14 days" },
+  { value: 30, label: "Last 30 days" },
+  { value: 60, label: "Last 60 days" },
+]
+
+// One literal per range; Tailwind cannot compose repeat() counts at runtime.
+// Fixed column pitch keeps the cells contribution-graph dense instead of
 // stretching with the viewport.
-const laneGrid = "grid grid-cols-[8.5rem_repeat(14,18px)] items-center"
+const laneGrids: Record<PulseDays, string> = {
+  14: "grid grid-cols-[10.5rem_repeat(14,22px)] items-center",
+  30: "grid grid-cols-[10.5rem_repeat(30,22px)] items-center",
+  60: "grid grid-cols-[10.5rem_repeat(60,22px)] items-center",
+}
 
-// Contribution-graph intensity steps. Placed activity ramps the brand
-// primary; not-yet-placed activity ramps the informational blue so waiting
-// work reads as pending review, not as a warning.
-const placedRamp = [
-  "bg-primary/35",
-  "bg-primary/60",
-  "bg-primary/80",
-  "bg-primary",
-]
-const unplacedRamp = [
-  "bg-informational/35",
-  "bg-informational/60",
-  "bg-informational/80",
-  "bg-informational",
-]
-const tooltipEffortLimit = 5
-
-// A compact two-week strip of extraction movement: one lane per workstream,
-// a lane for efforts not yet placed, and the review heartbeat. It makes the
-// hourly rhythm and the weekly restructure visible instead of leaving quiet
-// periods looking broken.
+// A compact heatmap of extraction movement: one lane per workstream, a lane
+// for efforts not yet placed, and the review heartbeat. It makes the hourly
+// rhythm and the weekly restructure visible instead of leaving quiet periods
+// looking broken.
 export function WorkstreamsPulse({
   tenantId,
   workstreams,
@@ -45,52 +56,93 @@ export function WorkstreamsPulse({
   workstreams: Workstreams
   onOpen: (workstream: Workstream) => void
 }) {
-  const pulse = useQuery(api.deduction.console.pulse.read, { tenantId })
+  const [days, setDays] = useState<PulseDays>(14)
+  const result = useQuery(api.deduction.console.pulse.read, { tenantId, days })
+  const [pulse, setPulse] = useState<PulseData | null>(null)
 
-  if (pulse === undefined || pulse === null) {
+  // Hold the last loaded window while a new range streams in, so switching
+  // ranges never blanks the card.
+  useEffect(() => {
+    if (result !== undefined && result !== null) {
+      setPulse(result)
+    }
+  }, [result])
+
+  if (pulse === null) {
     return null
   }
 
-  const { days, lanes } = buildPulse(pulse.entries, workstreams, pulse.now)
+  const view = buildPulse(pulse.entries, workstreams, pulse.now, pulse.days)
 
-  if (lanes.length === 0) {
+  if (view.lanes.length === 0) {
     return null
   }
 
   return (
-    <Card className="w-fit max-w-full gap-1.5 px-4 py-3">
-      <div className="flex items-baseline justify-between gap-4">
-        <span className="font-medium text-sm">Activity</span>
-        <span className="text-muted-foreground text-xs">Last 14 days</span>
-      </div>
-      <div className="flex flex-col gap-px">
-        {lanes.map((lane) => (
-          <LaneRow
-            key={lane.id ?? "unplaced"}
-            lane={lane}
-            unplaced={lane.id === null ? pulse.unplaced : 0}
-            onOpen={laneOpener(lane, workstreams, onOpen)}
-          />
-        ))}
-        <div className={laneGrid}>
-          <span />
-          {days.map((day) => (
-            <span
-              key={day.key}
-              className={cn(
-                "pt-0.5 text-center text-[11px] text-muted-foreground tabular-nums",
-                day.isToday && "font-medium text-foreground"
-              )}
-            >
-              {day.label}
-            </span>
+    <Card className="w-fit max-w-full">
+      <CardHeader>
+        <CardTitle>Activity</CardTitle>
+        <CardDescription>
+          Recent activity across workstreams and unplaced efforts.
+        </CardDescription>
+        <CardAction>
+          <Select
+            value={String(days)}
+            onValueChange={(value) => setDays(Number(value) as PulseDays)}
+          >
+            <SelectTrigger size="sm" className="w-fit">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {rangeOptions.map((option) => (
+                <SelectItem key={option.value} value={String(option.value)}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="overflow-x-auto">
+        <div className="flex w-fit flex-col gap-1">
+          {view.lanes.map((lane) => (
+            <LaneRow
+              key={lane.id ?? "unplaced"}
+              lane={lane}
+              laneGrid={laneGrids[pulse.days]}
+              unplaced={lane.id === null ? pulse.unplaced : 0}
+              onOpen={laneOpener(lane, workstreams, onOpen)}
+            />
           ))}
+          <div className={laneGrids[pulse.days]}>
+            <span />
+            {view.days.map((day) => (
+              <span
+                key={day.key}
+                className={cn(
+                  "whitespace-nowrap pt-1 text-center text-[11px] text-muted-foreground tabular-nums",
+                  day.emphasized && "font-medium text-foreground"
+                )}
+              >
+                {day.label}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="flex items-center justify-between gap-4 text-muted-foreground text-xs">
-        <span>{reviewedLabel(pulse.reviewedAt, pulse.now)}</span>
-        <span>{consolidationLabel(pulse.consolidationAt, pulse.now)}</span>
-      </div>
+      </CardContent>
+      <CardFooter className="justify-between gap-6 border-t text-muted-foreground text-xs">
+        <span className="flex items-center gap-1.5">
+          <Clock aria-hidden className="size-3.5 shrink-0" />
+          <ReviewedNote reviewedAt={pulse.reviewedAt} now={pulse.now} />
+        </span>
+        <span className="flex items-center gap-1.5">
+          <CalendarDays aria-hidden className="size-3.5 shrink-0" />
+          <ConsolidationNote
+            consolidationAt={pulse.consolidationAt}
+            now={pulse.now}
+          />
+        </span>
+      </CardFooter>
     </Card>
   )
 }
@@ -105,137 +157,76 @@ function laneOpener(
   return workstream === undefined ? undefined : () => onOpen(workstream)
 }
 
-function LaneRow({
-  lane,
-  unplaced,
-  onOpen,
+function Strong({ children }: { children: ReactNode }) {
+  return <span className="font-medium text-foreground">{children}</span>
+}
+
+function ReviewedNote({
+  reviewedAt,
+  now,
 }: {
-  lane: PulseLane
-  unplaced: number
-  onOpen: (() => void) | undefined
+  reviewedAt: number | null
+  now: number
 }) {
-  const label =
-    onOpen === undefined ? (
-      <UnplacedLabel count={unplaced} name={lane.name} />
-    ) : (
-      <button
-        type="button"
-        onClick={onOpen}
-        className="truncate pr-3 text-left text-muted-foreground text-xs transition-colors hover:text-foreground"
-      >
-        {lane.name}
-      </button>
-    )
-
-  return (
-    <div className={laneGrid}>
-      {label}
-      {lane.cells.map((cell) => (
-        <DayCell key={cell.day.key} cell={cell} unplaced={lane.id === null} />
-      ))}
-    </div>
-  )
-}
-
-// The count lives on the lane label itself: the number of efforts waiting
-// for a workstream sits exactly where their activity renders.
-function UnplacedLabel({ count, name }: { count: number; name: string }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="truncate pr-3 font-medium text-informational text-xs">
-          {count > 0 ? `${name} (${count})` : name}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent className="max-w-60">
-        {count === 1 ? "1 effort" : `${count} efforts`} not yet in a workstream.
-        The weekly review places them or proposes new workstreams.
-      </TooltipContent>
-    </Tooltip>
-  )
-}
-
-function DayCell({ cell, unplaced }: { cell: PulseCell; unplaced: boolean }) {
-  return (
-    <div className="flex h-[18px] items-center justify-center">
-      {cell.count === 0 ? (
-        <span aria-hidden className="size-3 rounded-[3px] bg-border/50" />
-      ) : (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span
-              aria-label={`${cell.count} entries on ${cell.day.title}`}
-              className={cn(
-                "size-3 rounded-[3px]",
-                cellClass(cell.count, unplaced)
-              )}
-              role="img"
-            />
-          </TooltipTrigger>
-          <TooltipContent className="max-w-60">
-            <CellDetail cell={cell} />
-          </TooltipContent>
-        </Tooltip>
-      )}
-    </div>
-  )
-}
-
-function cellClass(count: number, unplaced: boolean) {
-  const step = count >= 6 ? 3 : count >= 4 ? 2 : count >= 2 ? 1 : 0
-
-  return (unplaced ? unplacedRamp : placedRamp)[step]
-}
-
-function CellDetail({ cell }: { cell: PulseCell }) {
-  const hidden = cell.efforts.length - tooltipEffortLimit
-
-  return (
-    <div className="flex flex-col gap-0.5">
-      <span className="font-medium">
-        {cell.day.title} ·{" "}
-        {cell.count === 1 ? "1 entry" : `${cell.count} entries`}
-      </span>
-      {cell.efforts.slice(0, tooltipEffortLimit).map((name) => (
-        <span key={name}>{name}</span>
-      ))}
-      {hidden > 0 ? <span>…and {hidden} more</span> : null}
-    </div>
-  )
-}
-
-function reviewedLabel(reviewedAt: number | null, now: number) {
   if (reviewedAt === null) {
-    return "Not reviewed yet"
+    return <span>Not reviewed yet</span>
   }
 
   const date = new Date(reviewedAt)
-  const sameDay = date.toDateString() === new Date(now).toDateString()
 
-  return `Reviewed ${
-    sameDay
-      ? date.toLocaleTimeString(undefined, {
+  if (date.toDateString() === new Date(now).toDateString()) {
+    return (
+      <span>
+        Reviewed <Strong>today</Strong>,{" "}
+        {date.toLocaleTimeString(undefined, {
           hour: "numeric",
           minute: "2-digit",
-        })
-      : date.toLocaleDateString(undefined, { month: "short", day: "numeric" })
-  }`
+        })}
+      </span>
+    )
+  }
+
+  return (
+    <span>
+      Reviewed{" "}
+      <Strong>
+        {date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+      </Strong>
+    </span>
+  )
 }
 
 const hourMs = 60 * 60 * 1000
 
-function consolidationLabel(consolidationAt: number | null, now: number) {
+function ConsolidationNote({
+  consolidationAt,
+  now,
+}: {
+  consolidationAt: number | null
+  now: number
+}) {
   if (consolidationAt === null) {
-    return "Weekly review pending"
+    return <span>Weekly review pending</span>
   }
 
   const delta = consolidationAt - now
 
   if (delta <= 0) {
-    return "Weekly review due"
+    return (
+      <span>
+        Weekly review <Strong>due</Strong>
+      </span>
+    )
   }
 
-  return delta < 48 * hourMs
-    ? `Weekly review in ${Math.max(1, Math.round(delta / hourMs))}h`
-    : `Weekly review in ${Math.round(delta / (24 * hourMs))}d`
+  const label =
+    delta < 48 * hourMs
+      ? `${Math.max(1, Math.round(delta / hourMs))}h`
+      : `${Math.round(delta / (24 * hourMs))}d`
+
+  return (
+    <span>
+      Weekly review in <Strong>{label}</Strong>
+    </span>
+  )
 }

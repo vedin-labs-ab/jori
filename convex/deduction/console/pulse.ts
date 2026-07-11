@@ -4,7 +4,11 @@ import { type QueryCtx, query } from "../../_generated/server"
 import { checkTenantAccess } from "../../identity/access"
 import { activeEffortRows } from "../effort/input"
 import { latestCompletedPass } from "../engine/pass"
-import { consolidationCadenceMs, maxContextEfforts } from "../limits"
+import {
+  consolidationCadenceMs,
+  effortActiveMs,
+  maxConsolidationEfforts,
+} from "../limits"
 import { beliefKinds } from "../schema"
 
 // The workstreams page's activity strip: recent journal entries tagged with
@@ -12,12 +16,14 @@ import { beliefKinds } from "../schema"
 // heartbeat. Lane labels come from the roster the page already loads, so
 // this stays a pure activity read.
 
-const pulseWindowDays = 14
+const defaultWindowDays = 14
 const dayMs = 24 * 60 * 60 * 1000
-const entriesPerEffort = 30
 
 export const read = query({
-  args: { tenantId: v.string() },
+  args: {
+    tenantId: v.string(),
+    days: v.optional(v.union(v.literal(14), v.literal(30), v.literal(60))),
+  },
   handler: async (ctx, args) => {
     const access = await checkTenantAccess(ctx, args.tenantId)
 
@@ -25,30 +31,42 @@ export const read = query({
       return null
     }
 
+    const days = args.days ?? defaultWindowDays
     const now = Date.now()
+    // Any effort sighted inside the view window may own entries in it, so
+    // the range read reaches past dormancy; the unplaced count stays scoped
+    // to the active layer, matching what the judges still see.
     const efforts = await activeEffortRows(
       ctx,
       args.tenantId,
-      maxContextEfforts
+      maxConsolidationEfforts,
+      now - days * dayMs
     )
+    const activeCutoff = now - effortActiveMs
 
     return {
       now,
-      entries: await windowEntries(ctx, efforts, now - pulseWindowDays * dayMs),
-      unplaced: efforts.filter((row) => row.workstreamId === undefined).length,
+      days,
+      entries: await windowEntries(ctx, efforts, days, now - days * dayMs),
+      unplaced: efforts.filter(
+        (row) => row.workstreamId === undefined && row.seenAt > activeCutoff
+      ).length,
       reviewedAt: await lastReviewedAt(ctx, args.tenantId),
       consolidationAt: await nextConsolidationAt(ctx, args.tenantId),
     }
   },
 })
 
-// Journal entries inside the window, read per active effort so each entry
-// carries live membership rather than the write-time stamp.
+// Journal entries inside the window, read per effort so each entry carries
+// live membership rather than the write-time stamp. The per-effort take
+// scales with the window so long views stay bounded without going blank.
 async function windowEntries(
   ctx: QueryCtx,
   efforts: Doc<"efforts">[],
+  days: number,
   since: number
 ) {
+  const entryLimit = days * 2
   const perEffort = await Promise.all(
     efforts.map(async (effort) => {
       const rows = await ctx.db
@@ -57,7 +75,7 @@ async function windowEntries(
           index.eq("effortId", effort._id).gt("observedAt", since)
         )
         .order("desc")
-        .take(entriesPerEffort)
+        .take(entryLimit)
 
       return rows.map((row) => ({
         observedAt: row.observedAt,
