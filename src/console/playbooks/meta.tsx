@@ -4,6 +4,7 @@ import {
   describePlaybookCadence,
   type PlaybookDefinition,
 } from "@contracts/playbooks/catalog"
+import { type PlaybookOptionValues } from "@contracts/playbooks/options"
 import { CalendarClock, Globe } from "lucide-react"
 import { type ReactNode } from "react"
 import { SurfaceLogo } from "../automations/access/logo"
@@ -13,9 +14,11 @@ import { type PlaybookListRow, slotDisplayProviders } from "./state"
 
 export function PlaybookMeta({
   definition,
+  options,
   row,
 }: {
   definition: PlaybookDefinition
+  options?: PlaybookOptionValues
   row: PlaybookListRow | undefined
 }) {
   return (
@@ -23,7 +26,7 @@ export function PlaybookMeta({
       <PlaybookSection label="Schedule">
         <div className="flex items-center gap-1.5">
           <CalendarClock className="size-3.5 shrink-0 text-muted-foreground" />
-          <span>{describePlaybookCadence(definition)}</span>
+          <span>{describePlaybookCadence(definition, options)}</span>
           <NextRun enabled={row?.enabled} />
         </div>
       </PlaybookSection>

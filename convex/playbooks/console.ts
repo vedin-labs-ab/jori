@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { playbookCatalog } from "../../contracts/playbooks/catalog"
 import { type DeliveryChoice } from "../../contracts/playbooks/delivery"
+import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { listInactiveAccessIntegrations } from "../automations/access"
 import { checkTenantAccess, requireTenantAccess } from "../identity/access"
@@ -40,6 +41,8 @@ const planArgs = {
   // Keyed by playbook capability; slot resolution ignores unknown keys.
   choices: v.optional(v.record(v.string(), integrationValidator)),
   destination: v.optional(destinationValidator),
+  // Keyed by option field; plan resolution validates against the catalog.
+  options: v.optional(v.record(v.string(), v.union(v.string(), v.number()))),
 }
 
 export const list = query({
@@ -157,6 +160,7 @@ async function resolveCallerPlanArgs(
     playbook: string
     choices?: Record<string, Integration>
     destination?: DeliveryChoice
+    options?: PlaybookOptionValues
   }
 ): Promise<PlaybookPlanArgs> {
   const recipient = callerRecipient(identity)
@@ -176,6 +180,7 @@ function planFromArgs(
     playbook: string
     choices?: Record<string, Integration>
     destination?: DeliveryChoice
+    options?: PlaybookOptionValues
   },
   createdBy: PlaybookPlanArgs["createdBy"],
   recipient: PlaybookPlanArgs["recipient"]
@@ -185,6 +190,7 @@ function planFromArgs(
     key: args.playbook,
     choices: args.choices ?? {},
     destination: args.destination ?? { kind: "email" },
+    options: args.options,
     createdBy,
     recipient,
   }

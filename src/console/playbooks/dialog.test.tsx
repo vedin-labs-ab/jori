@@ -136,7 +136,7 @@ test("advanced settings closes this dialog only after creation", () => {
   expect(onOpenChange).not.toHaveBeenCalled()
 
   // Creating an automation from the draft fires the handed-over close.
-  const onCreated = vi.mocked(actions.openAdvanced).mock.calls[0][3]
+  const onCreated = vi.mocked(actions.openAdvanced).mock.calls[0][4]
   onCreated()
 
   expect(onOpenChange).toHaveBeenCalledWith(false)

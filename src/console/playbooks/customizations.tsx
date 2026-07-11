@@ -2,6 +2,7 @@ import { type ComponentProps } from "react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DeliveryField } from "./delivery"
 import { PlaybookSection } from "./meta"
+import { PlaybookOptionsFields } from "./options"
 import { type PlaybookEnablePlan } from "./state"
 
 /**
@@ -12,12 +13,14 @@ import { type PlaybookEnablePlan } from "./state"
 export function PlaybookCustomizations({
   delivery,
   disabled = false,
+  options,
   plan,
   providerIndex,
   onProviderIndexChange,
 }: {
   delivery: ComponentProps<typeof DeliveryField>
   disabled?: boolean
+  options?: Omit<ComponentProps<typeof PlaybookOptionsFields>, "disabled">
   plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>
   providerIndex: number
   onProviderIndexChange: (index: number) => void
@@ -34,6 +37,9 @@ export function PlaybookCustomizations({
           />
         </PlaybookSection>
       ) : null}
+      {options === undefined ? null : (
+        <PlaybookOptionsFields {...options} disabled={disabled} />
+      )}
       <PlaybookSection label="Deliver to">
         <DeliveryField {...delivery} disabled={disabled} />
       </PlaybookSection>
