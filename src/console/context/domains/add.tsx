@@ -138,7 +138,9 @@ function AddDomainForm({
         </Button>
       </ButtonGroup>
       {error === null ? null : (
-        <p className="text-destructive text-xs">{error}</p>
+        /* Zero intrinsic width so the column is sized by the button group
+           alone: the hint starts at the input's left edge and wraps there. */
+        <p className="w-0 min-w-full text-destructive text-xs">{error}</p>
       )}
     </form>
   )
