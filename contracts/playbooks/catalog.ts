@@ -110,7 +110,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
         label: "Reminders",
         kind: "choice",
         control: "select",
-        default: "30",
+        default: "45",
         choices: [
           { value: "off", label: "Off" },
           { value: "15", label: "15 minutes before" },

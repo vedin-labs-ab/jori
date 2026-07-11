@@ -97,7 +97,7 @@ describe("meeting prep instructions", () => {
     expect(instructions).toContain("start_agent")
     expect(instructions).toContain("at 07:30 today")
     expect(instructions).toContain('name "Meeting digest"')
-    expect(instructions).toContain("start minus 30 minutes")
+    expect(instructions).toContain("start minus 45 minutes")
     expect(instructions).toContain("share_artifact")
     expect(instructions).toContain(
       'Email a short summary of the prep note from my Gmail to Sam Doe <sam@example.com> with the subject "Meeting prep"'

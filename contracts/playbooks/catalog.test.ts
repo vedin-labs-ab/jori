@@ -95,7 +95,7 @@ describe("meeting prep catalog", () => {
 
   test("cadence copy follows the chosen options", () => {
     expect(describePlaybookCadence(meetingPrep)).toBe(
-      "Morning digest at 07:30, reminders 30 minutes before meetings"
+      "Morning digest at 07:30, reminders 45 minutes before meetings"
     )
     expect(
       describePlaybookCadence(meetingPrep, options({ reminders: "off" }))
