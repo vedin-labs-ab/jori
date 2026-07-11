@@ -24,8 +24,10 @@ export function PlaybookMeta({
   return (
     <div className="grid gap-3">
       <PlaybookSection label="Schedule">
-        <div className="flex items-center gap-1.5">
-          <CalendarClock className="size-3.5 shrink-0 text-muted-foreground" />
+        {/* Top-aligned so the icon sits on the first line when the cadence
+            wraps; mt-px centers the 14px icon in the 16px line box. */}
+        <div className="flex items-start gap-1.5">
+          <CalendarClock className="mt-px size-3.5 shrink-0 text-muted-foreground" />
           <span>{describePlaybookCadence(definition, options)}</span>
           <NextRun enabled={row?.enabled} />
         </div>
