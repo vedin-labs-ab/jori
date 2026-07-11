@@ -41,11 +41,11 @@ Create a share link for the artifact with share_artifact, valid for 24 hours: th
 
 {{delivery}}
 """
-{% if options.reminders == "on" %}
+{% if options.reminders != "off" %}
 
 ## Schedule a reminder per meeting
 
-For each qualifying meeting whose start is more than {{options.remindBefore}} minutes away, create a one-time automation with add_automation: type "once" at the meeting's start minus {{options.remindBefore}} minutes as a UTC ISO timestamp, name "Reminder: " plus the meeting title, artifactId set to the dossier artifact, scope "personal", access with the {{providers.calendar}} and {{providers.email}} read tools from this run's own capabilities plus the sending tool, web true, and these instructions with the angle-bracket parts filled in:
+For each qualifying meeting whose start is more than {{options.reminders}} minutes away, create a one-time automation with add_automation: type "once" at the meeting's start minus {{options.reminders}} minutes as a UTC ISO timestamp, name "Reminder: " plus the meeting title, artifactId set to the dossier artifact, scope "personal", access with the {{providers.calendar}} and {{providers.email}} read tools from this run's own capabilities plus the sending tool, web true, and these instructions with the angle-bracket parts filled in:
 
 """
 Remind me about the meeting "<title>" at <local time> today (calendar event <event id>, artifact <artifact id>).

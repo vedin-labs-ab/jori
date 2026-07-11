@@ -56,6 +56,17 @@ function OptionControl({
   value: string | number
 }) {
   if (field.kind === "choice") {
+    if (field.control === "select") {
+      return (
+        <OptionSelect
+          disabled={disabled}
+          items={field.choices}
+          onChange={onChange}
+          value={value}
+        />
+      )
+    }
+
     return (
       <ToggleGroup
         className="justify-start"
@@ -95,18 +106,38 @@ function OptionControl({
   }
 
   return (
-    <Select
+    <OptionSelect
       disabled={disabled}
-      onValueChange={(next) => onChange(Number(next))}
-      value={String(value)}
-    >
-      <SelectTrigger className="w-40">
+      items={field.presets.map((preset) => ({
+        value: String(preset),
+        label: `${preset} minutes`,
+      }))}
+      onChange={(next) => onChange(Number(next))}
+      value={value}
+    />
+  )
+}
+
+function OptionSelect({
+  disabled,
+  items,
+  onChange,
+  value,
+}: {
+  disabled: boolean
+  items: ReadonlyArray<{ value: string; label: string }>
+  onChange: (value: string) => void
+  value: string | number
+}) {
+  return (
+    <Select disabled={disabled} onValueChange={onChange} value={String(value)}>
+      <SelectTrigger className="w-44">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {field.presets.map((preset) => (
-          <SelectItem key={preset} value={String(preset)}>
-            {preset} minutes
+        {items.map((item) => (
+          <SelectItem key={item.value} value={item.value}>
+            {item.label}
           </SelectItem>
         ))}
       </SelectContent>
