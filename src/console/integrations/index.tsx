@@ -15,9 +15,10 @@ import { SlackIntegration } from "./providers/slack"
 
 // Integration cards hold permission rows, so the track floor is wider than
 // the playbook grid's: one column on small screens, two on laptops, three or
-// more only on wide monitors.
+// more only on wide monitors. Cards top-align at their natural height so an
+// expanded permissions list doesn't stretch its row neighbors.
 const integrationGrid =
-  "grid-cols-[repeat(auto-fill,minmax(min(28rem,100%),1fr))]"
+  "items-start grid-cols-[repeat(auto-fill,minmax(min(28rem,100%),1fr))]"
 
 export function Integrations() {
   return (
