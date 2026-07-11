@@ -2,6 +2,10 @@ import { describe, expect, test } from "vitest"
 import { type PlaybookCapability } from "../../contracts/playbooks/capabilities"
 import { playbookCatalog } from "../../contracts/playbooks/catalog"
 import { type DeliveryDestination } from "../../contracts/playbooks/delivery"
+import {
+  type PlaybookOptionValues,
+  resolvePlaybookOptions,
+} from "../../contracts/playbooks/options"
 import { type Integration, integrationLabels } from "../shared/integrations"
 import { renderPlaybookInstructions } from "./instructions"
 
@@ -16,7 +20,11 @@ const providerFamilies = [
   { email: "microsoftEmail", calendar: "microsoftCalendar" },
 ] satisfies Record<PlaybookCapability, Integration>[]
 
-function render(key: string, destination: DeliveryDestination) {
+function render(
+  key: string,
+  destination: DeliveryDestination,
+  options: PlaybookOptionValues = {}
+) {
   const definition = playbookCatalog.find((entry) => entry.key === key)
 
   return renderPlaybookInstructions({
@@ -26,6 +34,7 @@ function render(key: string, destination: DeliveryDestination) {
     subject: definition?.title ?? key,
     noun: definition?.delivery.noun ?? "output",
     style: definition?.delivery.style,
+    options: resolvePlaybookOptions(definition?.options, options),
   })
 }
 
@@ -44,6 +53,7 @@ describe("playbook instructions", () => {
           subject: playbook.title,
           noun: playbook.delivery.noun,
           style: playbook.delivery.style,
+          options: resolvePlaybookOptions(playbook.options),
         })
 
         expect(instructions).not.toContain("undefined")
@@ -78,16 +88,42 @@ describe("playbook instructions", () => {
       "No instruction template"
     )
   })
+})
 
-  test("meeting prep plans one-shot runs that share the dossier", () => {
+describe("meeting prep instructions", () => {
+  test("meeting prep defaults to a digest with agents and reminders", () => {
     const instructions = render("meeting-prep", emailDestination)
 
-    expect(instructions).toContain("add_automation")
-    expect(instructions).toContain("start minus 45 minutes")
+    expect(instructions).toContain("start_agent")
+    expect(instructions).toContain("at 07:30 today")
+    expect(instructions).toContain('name "Meeting digest"')
+    expect(instructions).toContain("start minus 30 minutes")
     expect(instructions).toContain("share_artifact")
     expect(instructions).toContain(
       'Email a short summary of the prep note from my Gmail to Sam Doe <sam@example.com> with the subject "Meeting prep"'
     )
+    expect(instructions).not.toContain('name "Prep: ')
+  })
+
+  test("digest reminders switch off cleanly", () => {
+    const instructions = render("meeting-prep", emailDestination, {
+      reminders: "off",
+    })
+
+    expect(instructions).toContain('name "Meeting digest"')
+    expect(instructions).not.toContain("Reminder:")
+  })
+
+  test("per-meeting mode schedules focused prep runs instead", () => {
+    const instructions = render("meeting-prep", emailDestination, {
+      mode: "meeting",
+      sendBefore: 60,
+    })
+
+    expect(instructions).toContain("start minus 60 minutes")
+    expect(instructions).toContain('"Prep: "')
+    expect(instructions).not.toContain("start_agent")
+    expect(instructions).not.toContain("Meeting digest")
   })
 
   test("meeting prep summarizes with a link on slack too", () => {

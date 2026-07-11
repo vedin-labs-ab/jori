@@ -92,3 +92,18 @@ function parseTime(time: string) {
 
   return { hour: Number(match[1]), minute: Number(match[2]) }
 }
+
+/** Shift an HH:MM clock time by whole minutes, wrapping across midnight. */
+export function shiftClockTime(time: string, minutes: number) {
+  const clock = parseTime(time)
+  const total = clock.hour * 60 + clock.minute + minutes
+  const wrapped = ((total % minutesPerDay) + minutesPerDay) % minutesPerDay
+  const hour = Math.floor(wrapped / 60)
+  const minute = wrapped % 60
+
+  return `${padClock(hour)}:${padClock(minute)}`
+}
+
+function padClock(value: number) {
+  return String(value).padStart(2, "0")
+}

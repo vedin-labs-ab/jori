@@ -3,8 +3,12 @@ import {
   type DeliveryChoice,
   type DeliveryKind,
 } from "@contracts/playbooks/delivery"
+import {
+  type PlaybookOptionValues,
+  resolvePlaybookOptions,
+} from "@contracts/playbooks/options"
 import { Play, Settings2 } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -43,6 +47,7 @@ export function PlaybookSetupDialog({
   const delivery = useDeliverySetup(definition, row.delivery)
   const destination = delivery.value
   const pendingKind = pendingActionKind(actions, definition)
+  const { options, optionFields } = useOptionsSetup(definition)
 
   const choices =
     plan.kind === "choose" ? plan.options[providerIndex].choices : plan.choices
@@ -55,7 +60,7 @@ export function PlaybookSetupDialog({
     if (destination === undefined) {
       return
     }
-    void action(definition, choices, destination).then(() => {
+    void action(definition, choices, destination, options).then(() => {
       if (close) {
         onOpenChange(false)
       }
@@ -68,7 +73,7 @@ export function PlaybookSetupDialog({
     }
     // The builder stacks on top; this dialog stays beneath as the way back
     // and only closes once an automation is actually created from it.
-    void actions.openAdvanced(definition, choices, destination, () =>
+    void actions.openAdvanced(definition, choices, destination, options, () =>
       onOpenChange(false)
     )
   }
@@ -89,11 +94,12 @@ export function PlaybookSetupDialog({
         </DialogHeader>
 
         <div className="grid gap-3">
-          <PlaybookMeta definition={definition} row={row} />
+          <PlaybookMeta definition={definition} options={options} row={row} />
           <PlaybookCustomizations
             delivery={{ ...delivery, tenantId }}
             disabled={isBusy}
             onProviderIndexChange={setProviderIndex}
+            options={optionFields}
             plan={plan}
             providerIndex={providerIndex}
           />
@@ -130,6 +136,33 @@ export function PlaybookSetupDialog({
       </DialogContent>
     </Dialog>
   )
+}
+
+/**
+ * Option state for the setup dialog: raw picks overlay the catalog defaults,
+ * and the resolved record drives the fields, the cadence preview, and what
+ * the actions submit.
+ */
+function useOptionsSetup(definition: PlaybookDefinition) {
+  const [picks, setPicks] = useState<PlaybookOptionValues>({})
+  const options = useMemo(
+    () => resolvePlaybookOptions(definition.options, picks),
+    [definition.options, picks]
+  )
+  const fields = definition.options
+
+  return {
+    options,
+    optionFields:
+      fields === undefined
+        ? undefined
+        : {
+            fields,
+            values: options,
+            onChange: (key: string, value: string | number) =>
+              setPicks((current) => ({ ...current, [key]: value })),
+          },
+  }
 }
 
 /**

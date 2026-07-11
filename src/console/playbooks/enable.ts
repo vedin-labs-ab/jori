@@ -4,6 +4,7 @@ import {
   type PlaybookDefinition,
 } from "@contracts/playbooks/catalog"
 import { type DeliveryChoice } from "@contracts/playbooks/delivery"
+import { type PlaybookOptionValues } from "@contracts/playbooks/options"
 import { useNavigate } from "@tanstack/react-router"
 import { useConvex, useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
@@ -74,6 +75,7 @@ function useEditActions(
       definition: PlaybookDefinition,
       choices: PlaybookChoices,
       destination: DeliveryChoice,
+      options: PlaybookOptionValues,
       onCreated: () => void
     ) =>
       pending.wrap(definition.key, "advanced", async () => {
@@ -86,6 +88,7 @@ function useEditActions(
               utcOffsetMinutes: new Date().getTimezoneOffset(),
               choices,
               destination,
+              options,
             }),
           ])
           editorHost.editor.openDraftForm(
@@ -145,7 +148,8 @@ function useCatalogActions(
     enable: (
       definition: PlaybookDefinition,
       choices: PlaybookChoices,
-      destination: DeliveryChoice
+      destination: DeliveryChoice,
+      options: PlaybookOptionValues
     ) =>
       pending.wrap(definition.key, "enable", async () => {
         try {
@@ -155,10 +159,11 @@ function useCatalogActions(
             utcOffsetMinutes: new Date().getTimezoneOffset(),
             choices,
             destination,
+            options,
           })
           toast.success(`${definition.title} is on`, {
             description: `Runs ${lowercaseFirst(
-              describePlaybookCadence(definition)
+              describePlaybookCadence(definition, options)
             )}.`,
           })
         } catch (error) {
@@ -169,7 +174,8 @@ function useCatalogActions(
     trial: (
       definition: PlaybookDefinition,
       choices: PlaybookChoices,
-      destination: DeliveryChoice
+      destination: DeliveryChoice,
+      options: PlaybookOptionValues
     ) =>
       pending.wrap(definition.key, "trial", async () => {
         try {
@@ -178,6 +184,7 @@ function useCatalogActions(
             playbook: definition.key,
             choices,
             destination,
+            options,
           })
           toast.success(`${definition.title} is running`, {
             description: "One-time run — nothing is enabled.",

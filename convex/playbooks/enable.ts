@@ -9,6 +9,7 @@ import {
   getPlaybook,
   type PlaybookDefinition,
   playbookCatalog,
+  resolvePlaybookSchedule,
 } from "../../contracts/playbooks/catalog"
 import {
   type DeliveryChoice,
@@ -17,6 +18,10 @@ import {
   destinationIntegration,
   destinationTools,
 } from "../../contracts/playbooks/delivery"
+import {
+  type PlaybookOptionValues,
+  resolvePlaybookOptions,
+} from "../../contracts/playbooks/options"
 import { playbookCron } from "../../contracts/playbooks/schedule"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
@@ -48,6 +53,7 @@ export type PlaybookPlanArgs = {
   key: string
   choices: Partial<Record<PlaybookCapability, Integration>>
   destination: DeliveryChoice
+  options?: PlaybookOptionValues
   createdBy: Id<"persons">
   recipient: PlaybookRecipient
 }
@@ -72,10 +78,12 @@ export async function resolvePlaybookPlan(
     emailProvider: emailInputProvider(resolved),
     recipient: args.recipient,
   })
+  const options = resolvePlaybookOptions(definition.options, args.options)
 
   return {
     definition,
     destination,
+    options,
     instructions: renderPlaybookInstructions({
       key: definition.key,
       providers: resolvedProviderLabels(resolved),
@@ -83,6 +91,7 @@ export async function resolvePlaybookPlan(
       subject: definition.title,
       noun: definition.delivery.noun,
       style: definition.delivery.style,
+      options,
     }),
     access: {
       integrations: [
@@ -124,7 +133,7 @@ export async function enablePlaybook(
     type: "cron",
     trigger: {
       expression: playbookCron(
-        plan.definition.schedule,
+        resolvePlaybookSchedule(plan.definition, plan.options),
         normalizeUtcOffset(args.utcOffsetMinutes)
       ),
     },
