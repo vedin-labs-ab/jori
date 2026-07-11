@@ -1,5 +1,8 @@
 import { Ban, CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
-import { type getAutomationSurfaceAccess } from "../../../access"
+import {
+  type AutomationMentionKind,
+  type getAutomationSurfaceAccess,
+} from "../../../access"
 
 export function getAutomationSurfaceAccessIcon(
   access: ReturnType<typeof getAutomationSurfaceAccess>,
@@ -28,6 +31,23 @@ export function getAutomationSurfaceToneClassNames(
     ? automationSurfaceToneClassNames.blocked
     : automationSurfaceToneClassNames[access]
 }
+
+/** Skill and tool pills share the integration pills' pastel construction —
+ *  soft tinted surface, saturated icon, foreground text — on their own
+ *  adjacent hues. */
+export const automationReferenceToneClassNames = {
+  skill: {
+    icon: "text-[#B45309]",
+    surface: "border-[#EDD9B9] bg-[#FDFAF2] text-[#1F2937]",
+  },
+  tool: {
+    icon: "text-[#0F766E]",
+    surface: "border-[#B9DDD6] bg-[#F4FBF9] text-[#1F2937]",
+  },
+} satisfies Record<
+  Exclude<AutomationMentionKind, "integration">,
+  { icon: string; surface: string }
+>
 
 const automationSurfaceToneClassNames = {
   "": {
