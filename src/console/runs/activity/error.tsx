@@ -48,7 +48,9 @@ function ActivityErrorAction({
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="gap-0 overflow-hidden bg-muted p-0 sm:max-w-3xl"
+        // Full-bleed: the copy-row divider spans the card, the pre scrolls.
+        bodyClassName="gap-0 p-0"
+        className="bg-muted sm:max-w-3xl"
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">{title}</DialogTitle>
