@@ -1,15 +1,7 @@
 import { useQuery } from "convex/react"
 import { CalendarDays, Clock } from "lucide-react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -19,7 +11,13 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
-import { LaneRow, PulseSkeleton, stickyLane } from "./lane"
+import {
+  LaneRow,
+  PulseFooter,
+  PulseShell,
+  PulseSkeleton,
+  stickyLane,
+} from "./lane"
 import { buildPulse, type PulseLane } from "./series"
 import { type Workstream, type Workstreams } from "./types"
 
@@ -86,77 +84,72 @@ export function WorkstreamsPulse({
   // sizing), silently widening the whole page. Container-query units can
   // resolve, so the card caps against real available width instead.
   return (
-    <div className="@container">
-      <Card className="w-fit max-w-[min(56rem,100cqw)] pb-0">
-        <CardHeader>
-          <CardTitle className="self-center">Activity</CardTitle>
-          <CardDescription className="col-span-2">
-            Recent activity across workstreams and unplaced efforts.
-          </CardDescription>
-          <CardAction className="row-span-1">
-            <Select
-              value={String(days)}
-              onValueChange={(value) => setDays(Number(value) as PulseDays)}
-            >
-              <SelectTrigger size="sm" className="w-fit">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {rangeOptions.map((option) => (
-                  <SelectItem key={option.value} value={String(option.value)}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardAction>
-        </CardHeader>
-        <CardContent
-          className="overflow-x-auto px-0"
-          onScroll={trackPinned}
-          ref={scrollRef}
+    <PulseShell
+      title="Activity"
+      description="Recent activity across workstreams and unplaced efforts."
+      action={
+        <Select
+          value={String(days)}
+          onValueChange={(value) => setDays(Number(value) as PulseDays)}
         >
-          <div className="flex w-fit flex-col gap-1 pr-(--card-spacing)">
-            {view.lanes.map((lane) => (
-              <LaneRow
-                key={lane.id ?? "unplaced"}
-                lane={lane}
-                laneGrid={laneGrids[pulse.days]}
-                unplaced={lane.id === null ? pulse.unplaced : 0}
-                onOpen={laneOpener(lane, workstreams, onOpen)}
-              />
+          <SelectTrigger size="sm" className="w-fit">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {rangeOptions.map((option) => (
+              <SelectItem key={option.value} value={String(option.value)}>
+                {option.label}
+              </SelectItem>
             ))}
-            <div className={laneGrids[pulse.days]}>
-              <span className={stickyLane} />
-              {view.days.map((day) => (
-                <span
-                  key={day.key}
-                  className={cn(
-                    "whitespace-nowrap pt-1 text-center text-[11px] text-muted-foreground tabular-nums",
-                    day.emphasized && "font-medium text-foreground"
-                  )}
-                >
-                  {day.label}
-                </span>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter className="justify-between gap-6 border-t bg-muted/25 pt-3! pb-3 text-muted-foreground text-xs">
-          <span className="flex items-center gap-1.5">
-            <Clock aria-hidden className="size-3.5 shrink-0" />
-            <ReviewedNote reviewedAt={pulse.reviewedAt} now={pulse.now} />
-          </span>
-          <span className="flex items-center gap-1.5">
-            <CalendarDays aria-hidden className="size-3.5 shrink-0" />
-            <ConsolidationNote
-              consolidationAt={pulse.consolidationAt}
-              now={pulse.now}
+          </SelectContent>
+        </Select>
+      }
+    >
+      <CardContent
+        className="overflow-x-auto px-0"
+        onScroll={trackPinned}
+        ref={scrollRef}
+      >
+        <div className="flex w-fit flex-col gap-1 pr-(--card-spacing)">
+          {view.lanes.map((lane) => (
+            <LaneRow
+              key={lane.id ?? "unplaced"}
+              lane={lane}
+              laneGrid={laneGrids[pulse.days]}
+              unplaced={lane.id === null ? pulse.unplaced : 0}
+              onOpen={laneOpener(lane, workstreams, onOpen)}
             />
-          </span>
-        </CardFooter>
-      </Card>
-    </div>
+          ))}
+          <div className={laneGrids[pulse.days]}>
+            <span className={stickyLane} />
+            {view.days.map((day) => (
+              <span
+                key={day.key}
+                className={cn(
+                  "whitespace-nowrap pt-1 text-center text-[11px] text-muted-foreground tabular-nums",
+                  day.emphasized && "font-medium text-foreground"
+                )}
+              >
+                {day.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+      <PulseFooter>
+        <span className="flex items-center gap-1.5">
+          <Clock aria-hidden className="size-3.5 shrink-0" />
+          <ReviewedNote reviewedAt={pulse.reviewedAt} now={pulse.now} />
+        </span>
+        <span className="flex items-center gap-1.5">
+          <CalendarDays aria-hidden className="size-3.5 shrink-0" />
+          <ConsolidationNote
+            consolidationAt={pulse.consolidationAt}
+            now={pulse.now}
+          />
+        </span>
+      </PulseFooter>
+    </PulseShell>
   )
 }
 
