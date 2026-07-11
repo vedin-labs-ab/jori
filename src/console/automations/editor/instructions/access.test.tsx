@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
+import { emptyAutomationMentionCatalog } from "../../access"
 import {
   createAutomationInstructionDocument,
   serializeAutomationInstructionDocument,
@@ -12,7 +13,8 @@ afterEach(cleanup)
 describe("automation instructions shared tool access document", () => {
   test("uses one shared surface for duplicate integration mentions", () => {
     const document = createAutomationInstructionDocument({
-      description: "Read GitHub and update GitHub.",
+      catalog: emptyAutomationMentionCatalog,
+      description: "Read @GitHub and update @GitHub.",
       surfaces: [
         {
           integration: "github",
@@ -22,7 +24,7 @@ describe("automation instructions shared tool access document", () => {
     })
 
     expect(serializeAutomationInstructionDocument(document)).toEqual({
-      description: "Read GitHub and update GitHub.",
+      description: "Read @GitHub and update @GitHub.",
       surfaces: [
         {
           integration: "github",
@@ -41,15 +43,13 @@ describe("automation instructions tool access", () => {
     })
 
     expect(await screen.findByRole("textbox")).toBeDefined()
-    expect(field.container.textContent).toContain(
-      "Type integration names and matching badges appear automatically."
-    )
+    expect(field.container.textContent).toContain("integrations")
     expect(field.container.textContent).not.toContain("read/write")
   })
 
   test("hides the visible count for markers without enabled tools", async () => {
     renderInstructionsField({
-      description: "Post to GitHub.",
+      description: "Post to @GitHub.",
       surfaces: [{ integration: "github", tools: [] }],
     })
 
@@ -62,7 +62,7 @@ describe("automation instructions tool access", () => {
 
   test("keeps duplicate integration badges in sync", async () => {
     const field = renderInstructionsField({
-      description: "Read GitHub and post to GitHub.",
+      description: "Read @GitHub and post to @GitHub.",
       surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
@@ -85,7 +85,7 @@ describe("automation instructions tool access", () => {
         })
       ).toHaveLength(2)
       expect(field.onValueChange).toHaveBeenLastCalledWith({
-        description: "Read GitHub and post to GitHub.",
+        description: "Read @GitHub and post to @GitHub.",
         surfaces: [
           {
             integration: "github",

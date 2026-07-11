@@ -1,9 +1,10 @@
 import { type Editor } from "@tiptap/react"
 import { type CSSProperties } from "react"
 import {
-  type AutomationSurfaceSuggestion,
-  findActiveAutomationSurfaceMention,
-  getAutomationSurfaceSuggestions,
+  type AutomationMentionSources,
+  type AutomationMentionSuggestion,
+  findActiveAutomationMention,
+  getAutomationMentionSuggestions,
 } from "../../../access"
 
 export type InstructionSuggestionState = {
@@ -13,11 +14,12 @@ export type InstructionSuggestionState = {
     to: number
   }
   style: CSSProperties
-  suggestions: AutomationSurfaceSuggestion[]
+  suggestions: AutomationMentionSuggestion[]
 }
 
 export function getInstructionSuggestionState(
   editor: Editor,
+  sources: AutomationMentionSources,
   activeIndex = 0
 ): InstructionSuggestionState | null {
   const { selection } = editor.state
@@ -30,9 +32,9 @@ export function getInstructionSuggestionState(
     0,
     selection.$from.parentOffset,
     "\n",
-    "\uFFFC"
+    "￼"
   )
-  const activeMention = findActiveAutomationSurfaceMention(
+  const activeMention = findActiveAutomationMention(
     textBeforeCursor,
     textBeforeCursor.length
   )
@@ -41,7 +43,7 @@ export function getInstructionSuggestionState(
     return null
   }
 
-  const suggestions = getAutomationSurfaceSuggestions(activeMention.query)
+  const suggestions = getAutomationMentionSuggestions(activeMention, sources)
 
   if (suggestions.length === 0) {
     return null

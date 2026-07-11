@@ -2,69 +2,28 @@ import { type ToolPermission } from "../../permissions/types"
 import {
   type AutomationSurfaceAccess,
   type AutomationSurfaceFormValue,
-  type AutomationSurfaceIntegration,
-  getAutomationSurfaceLabel,
 } from "./catalog"
 import { findAutomationSurfaceMentions } from "./mentions"
-import { readAutomationSurfaceMentionMatches } from "./scan"
+import {
+  type AutomationMentionCatalog,
+  emptyAutomationMentionCatalog,
+} from "./scan"
 import {
   type AutomationToolPermissions,
   getDefaultAutomationSurfaceTools,
 } from "./tools"
 
-export function insertAutomationSurfaceMention(
-  text: string,
-  integration: AutomationSurfaceIntegration
-) {
-  if (findAutomationSurfaceMentions(text).includes(integration)) {
-    return text
-  }
-
-  const marker = getAutomationSurfaceLabel(integration)
-  const separator = text === "" || /\s$/.test(text) ? "" : " "
-
-  return `${text}${separator}${marker}`
-}
-
-export function removeAutomationSurfaceMention(
-  text: string,
-  integration: AutomationSurfaceIntegration
-) {
-  const matches = readAutomationSurfaceMentionMatches(text)
-
-  if (!matches.some((match) => match.integration === integration)) {
-    return text
-  }
-
-  let next = ""
-  let cursor = 0
-
-  for (const match of matches) {
-    next += text.slice(cursor, match.start)
-
-    if (match.integration !== integration) {
-      next += text.slice(match.start, match.end)
-    }
-
-    cursor = match.end
-  }
-
-  return next
-    .concat(text.slice(cursor))
-    .replace(/\s{2,}/g, " ")
-    .trim()
-}
-
 export function syncAutomationSurfaces(
   text: string,
   surfaces: AutomationSurfaceFormValue[],
-  permissions?: AutomationToolPermissions
+  permissions?: AutomationToolPermissions,
+  catalog: AutomationMentionCatalog = emptyAutomationMentionCatalog
 ): AutomationSurfaceFormValue[] {
   const existing = new Map(
     surfaces.map((surface) => [surface.integration, uniqueTools(surface.tools)])
   )
 
-  return findAutomationSurfaceMentions(text).map((integration) => ({
+  return findAutomationSurfaceMentions(text, catalog).map((integration) => ({
     integration,
     tools:
       existing.get(integration) ??

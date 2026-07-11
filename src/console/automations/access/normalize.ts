@@ -1,41 +1,26 @@
-import { getAutomationSurfaceLabel } from "./catalog"
 import { findFuzzyAutomationSurfaceIntegration } from "./fuzzy"
+import { automationMentionText } from "./mentions"
 import {
-  canStartBareMention,
+  type AutomationMention,
+  type AutomationMentionCatalog,
+  emptyAutomationMentionCatalog,
   isMentionNameCharacter,
-  type MentionMatch,
-  overlaps,
-  readAutomationSurfaceMentionMatches,
+  readAutomationMentions,
 } from "./scan"
 
-type NormalizationOptions = {
-  includeEnd: boolean
-}
+// Instructions written before explicit sigils (or typed loosely) carry bare
+// or misspelled integration names. Opening them in the builder rewrites
+// those to canonical `@Label` tokens once, at this edge — scanning at rest
+// stays exact and never touches prose.
 
-type MentionReplacement = MentionMatch & {
-  text: string
-}
+type TokenRange = { end: number; start: number }
+type MentionReplacement = TokenRange & { text: string }
 
-export function normalizeAutomationSurfaceMentions(text: string) {
-  return normalizeSurfaceMentions(text, { includeEnd: true })
-}
-
-export function normalizeCompletedAutomationSurfaceMentions(text: string) {
-  return normalizeSurfaceMentions(text, { includeEnd: false })
-}
-
-export function findCompletedAutomationSurfaceMention(
-  text: string
-): MentionMatch | null {
-  return (
-    readMentionReplacements(text, { includeEnd: true }).find(
-      (replacement) => replacement.end === text.length
-    ) ?? null
-  )
-}
-
-function normalizeSurfaceMentions(text: string, options: NormalizationOptions) {
-  const replacements = readMentionReplacements(text, options)
+export function sigilizeAutomationMentions(
+  text: string,
+  catalog: AutomationMentionCatalog = emptyAutomationMentionCatalog
+) {
+  const replacements = readSigilizeReplacements(text, catalog)
 
   if (replacements.length === 0) {
     return text
@@ -53,43 +38,98 @@ function normalizeSurfaceMentions(text: string, options: NormalizationOptions) {
   return next + text.slice(cursor)
 }
 
-function readMentionReplacements(
+/** A finished explicit token at the very end of the text — what the editor
+ *  converts into a pill the moment a boundary character is typed. Fuzzy
+ *  spellings are accepted for integrations only. */
+export function findCompletedAutomationMention(
   text: string,
-  options: NormalizationOptions
-): MentionReplacement[] {
-  const replacements = readAutomationSurfaceMentionMatches(text)
-    .filter((match) => canNormalizeEnd(text, match.end, options))
-    .map((match) => toMentionReplacement(match))
+  catalog: AutomationMentionCatalog
+): AutomationMention | null {
+  const mentions = readAutomationMentions(text, catalog)
+  const exact = mentions.find((mention) => mention.end === text.length)
 
-  for (const match of readFuzzyMentionMatches(text, options)) {
-    if (!replacements.some((replacement) => overlaps(replacement, match))) {
-      replacements.push(toMentionReplacement(match))
-    }
+  if (exact !== undefined) {
+    return exact
   }
 
-  for (const match of readFuzzyBareMatches(text, options)) {
-    if (!replacements.some((replacement) => overlaps(replacement, match))) {
-      replacements.push(toMentionReplacement(match))
+  return (
+    readFuzzyIntegrationMatches(text, mentions).find(
+      (mention) => mention.end === text.length
+    ) ?? null
+  )
+}
+
+function readSigilizeReplacements(
+  text: string,
+  catalog: AutomationMentionCatalog
+): MentionReplacement[] {
+  const taken: TokenRange[] = [...readAutomationMentions(text, catalog)]
+  const replacements: MentionReplacement[] = []
+  const fuzzyAndBare = [
+    ...readFuzzyIntegrationMatches(text, taken),
+    ...readBareIntegrationMatches(text, taken),
+  ]
+
+  for (const match of fuzzyAndBare) {
+    if (!overlapsAny(match.start, match.end, taken)) {
+      replacements.push(toReplacement(match))
+      taken.push(match)
     }
   }
 
   return replacements.sort((left, right) => left.start - right.start)
 }
 
-function readFuzzyMentionMatches(
+function readFuzzyIntegrationMatches(
   text: string,
-  options: NormalizationOptions
-): MentionMatch[] {
-  const matches: MentionMatch[] = []
+  taken: readonly TokenRange[]
+): AutomationMention[] {
+  const matches: AutomationMention[] = []
 
   for (let index = 0; index < text.length; index += 1) {
-    if (text[index] !== "@") {
+    if (text[index] !== "@" || isMentionNameCharacter(text[index - 1])) {
       continue
     }
 
-    const match = matchFuzzyMention(text, index, options)
+    const token = readWordToken(text, index + 1)
 
-    if (match !== null) {
+    if (token === null || overlapsAny(index, token.end, taken)) {
+      continue
+    }
+
+    const integration = findFuzzyAutomationSurfaceIntegration(token.value)
+
+    if (integration !== null) {
+      matches.push({
+        end: token.end,
+        id: integration,
+        kind: "integration",
+        start: index,
+      })
+      index = token.end - 1
+    }
+  }
+
+  return matches
+}
+
+// Bare names only convert on an exact alias match: fuzzy matching here would
+// rewrite innocent prose ("Mail" is one edit from "gmail").
+function readBareIntegrationMatches(
+  text: string,
+  taken: readonly TokenRange[]
+): AutomationMention[] {
+  const matches: AutomationMention[] = []
+  const entries = emptyAutomationMentionCatalog.integration
+
+  for (let index = 0; index < text.length; index += 1) {
+    if (!canStartBareToken(text, index)) {
+      continue
+    }
+
+    const match = matchBareAlias(text, index, entries)
+
+    if (match !== null && !overlapsAny(match.start, match.end, taken)) {
       matches.push(match)
       index = match.end - 1
     }
@@ -98,98 +138,60 @@ function readFuzzyMentionMatches(
   return matches
 }
 
-function readFuzzyBareMatches(
-  text: string,
-  options: NormalizationOptions
-): MentionMatch[] {
-  const matches: MentionMatch[] = []
-
-  for (let index = 0; index < text.length; index += 1) {
-    if (!canStartBareMention(text, index)) {
-      continue
-    }
-
-    const match = matchFuzzyBare(text, index, options)
-
-    if (match !== null) {
-      matches.push(match)
-      index = match.end - 1
-    }
-  }
-
-  return matches
-}
-
-function matchFuzzyMention(
+function matchBareAlias(
   text: string,
   start: number,
-  options: NormalizationOptions
-): MentionMatch | null {
-  if (start > 0 && isMentionNameCharacter(text[start - 1])) {
-    return null
+  entries: (typeof emptyAutomationMentionCatalog)["integration"]
+): AutomationMention | null {
+  const tail = text.slice(start).toLowerCase()
+
+  for (const entry of entries) {
+    for (const token of entry.tokens) {
+      if (
+        tail.startsWith(token) &&
+        !isMentionNameCharacter(tail[token.length])
+      ) {
+        return {
+          end: start + token.length,
+          id: entry.id,
+          kind: "integration",
+          start,
+        }
+      }
+    }
   }
 
-  const token = readMentionToken(text, start + 1)
-
-  if (token === null || !canNormalizeEnd(text, token.end, options)) {
-    return null
-  }
-
-  const integration = findFuzzyAutomationSurfaceIntegration(token.value)
-
-  return integration === null ? null : { end: token.end, integration, start }
+  return null
 }
 
-function matchFuzzyBare(
-  text: string,
-  start: number,
-  options: NormalizationOptions
-): MentionMatch | null {
-  const token = readMentionToken(text, start)
-
-  if (token === null || !canNormalizeEnd(text, token.end, options)) {
-    return null
+function canStartBareToken(text: string, start: number) {
+  if (!/[a-z0-9]/i.test(text[start])) {
+    return false
   }
 
-  const integration = findFuzzyAutomationSurfaceIntegration(token.value, {
-    allowPrefix: false,
-  })
+  const previous = text[start - 1]
 
-  return integration === null ? null : { end: token.end, integration, start }
+  return previous !== "@" && !isMentionNameCharacter(previous)
 }
 
-function readMentionToken(text: string, start: number) {
+function readWordToken(text: string, start: number) {
   let end = start
 
   while (end < text.length && /[a-z0-9-]/i.test(text[end])) {
     end += 1
   }
 
-  if (end === start) {
-    return null
-  }
-
-  return {
-    end,
-    value: text.slice(start, end),
-  }
+  return end === start ? null : { end, value: text.slice(start, end) }
 }
 
-function canNormalizeEnd(
-  text: string,
-  end: number,
-  options: NormalizationOptions
-) {
-  if (end === text.length) {
-    return options.includeEnd
-  }
-
-  return !isMentionNameCharacter(text[end])
+function overlapsAny(start: number, end: number, taken: readonly TokenRange[]) {
+  return taken.some((range) => start < range.end && range.start < end)
 }
 
-function toMentionReplacement(match: MentionMatch): MentionReplacement {
+function toReplacement(mention: AutomationMention): MentionReplacement {
   return {
-    ...match,
-    text: getAutomationSurfaceLabel(match.integration),
+    end: mention.end,
+    start: mention.start,
+    text: automationMentionText(mention.kind, mention.id),
   }
 }

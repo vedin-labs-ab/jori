@@ -1,8 +1,13 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor } from "@testing-library/react"
-import { afterEach, describe, expect, test } from "vitest"
+import { afterEach, describe, expect, test, vi } from "vitest"
 import { emptyAutomationForm } from "../../types"
 import { AutomationDialog } from "."
+
+vi.mock("convex/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("convex/react")>()),
+  useQuery: () => ({ status: "ready", skills: [] }),
+}))
 
 afterEach(cleanup)
 

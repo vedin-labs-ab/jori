@@ -4,7 +4,7 @@ import {
 } from "@contracts/permissions/scope"
 import {
   hasAutomationWriteSurface,
-  normalizeAutomationSurfaceMentions,
+  sigilizeAutomationMentions,
   syncAutomationSurfaces,
 } from "../../access"
 import {
@@ -62,7 +62,7 @@ export function automationFormValues(
 
   return {
     name: automation.name,
-    instructions: normalizeAutomationSurfaceMentions(automation.instructions),
+    instructions: sigilizeAutomationMentions(automation.instructions),
     ...triggerFormValues(automation),
     scope: automation.scope,
     webSearch: automation.access.webSearch,
@@ -134,9 +134,7 @@ function buildBaseArgs(
   options: AutomationArgsOptions
 ): ArgsResult<AutomationArgs> {
   const name = values.name.trim()
-  const instructions = normalizeAutomationSurfaceMentions(
-    values.instructions.trim()
-  )
+  const instructions = sigilizeAutomationMentions(values.instructions.trim())
   const surfaces = syncAutomationSurfaces(instructions, values.surfaces)
 
   if (name === "") {

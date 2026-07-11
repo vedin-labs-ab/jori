@@ -31,7 +31,7 @@ describe("automation instructions marker validation", () => {
 
   test("targets unselected markers with destructive validation", async () => {
     const field = renderInstructionsField({
-      description: "Post to GitHub.",
+      description: "Post to @GitHub.",
       error: "Choose at least one tool for each mentioned integration.",
       showAccessError: true,
       surfaces: [{ integration: "github", tools: [] }],
@@ -59,7 +59,7 @@ describe("automation instructions marker validation", () => {
 describe("automation instructions marker styling", () => {
   test("uses icon opacity instead of background for badge access hover", async () => {
     renderInstructionsField({
-      description: "Post to GitHub.",
+      description: "Post to @GitHub.",
       surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 
@@ -79,7 +79,7 @@ describe("automation instructions marker styling", () => {
 describe("automation instructions marker hover", () => {
   test("keeps integration pane width stable and only swaps the icon affordance", async () => {
     renderInstructionsField({
-      description: "Post to Notion.",
+      description: "Post to @Notion.",
       surfaces: [{ integration: "notion", tools: ["notion_get_page"] }],
     })
 

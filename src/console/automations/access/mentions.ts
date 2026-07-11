@@ -1,3 +1,4 @@
+import { type ToolPermission } from "../../permissions/types"
 import {
   type AutomationSurfaceIntegration,
   automationSurfaceIntegrations,
@@ -5,114 +6,133 @@ import {
 } from "./catalog"
 import { getIntegrationSuggestionScore, normalizeFuzzyAlias } from "./fuzzy"
 import {
-  isMentionNameCharacter,
-  readAutomationSurfaceMentionMatches,
+  type AutomationMentionCatalog,
+  type AutomationMentionKind,
+  automationMentionSigils,
+  canStartMention,
+  readAutomationMentions,
+  sigilKind,
 } from "./scan"
+import { isAutomationToolSelectable } from "./tools"
 
-export type AutomationSurfaceMentionPart = {
-  integration?: AutomationSurfaceIntegration
-  text: string
-}
+const maxSuggestions = 6
 
-export type AutomationSurfaceSuggestion = {
+export type AutomationMentionSuggestion = {
+  hint?: string
+  id: string
+  kind: AutomationMentionKind
   label: string
-  integration: AutomationSurfaceIntegration
 }
 
-export type ActiveAutomationSurfaceMention = {
+export type AutomationMentionSources = {
+  permissions: ToolPermission[] | null | undefined
+  skills: readonly string[]
+}
+
+export type ActiveAutomationMention = {
   end: number
-  kind: "bare" | "explicit"
+  kind: AutomationMentionKind
   query: string
   start: number
 }
 
+/** The canonical text a mention serializes to inside instructions. */
+export function automationMentionText(kind: AutomationMentionKind, id: string) {
+  const name =
+    kind === "integration"
+      ? getAutomationSurfaceLabel(id as AutomationSurfaceIntegration)
+      : id
+
+  return `${automationMentionSigils[kind]}${name}`
+}
+
 export function findAutomationSurfaceMentions(
-  text: string
+  text: string,
+  catalog: AutomationMentionCatalog
 ): AutomationSurfaceIntegration[] {
   const integrations: AutomationSurfaceIntegration[] = []
-  const seen = new Set<AutomationSurfaceIntegration>()
+  const seen = new Set<string>()
 
-  for (const match of readAutomationSurfaceMentionMatches(text)) {
-    if (!seen.has(match.integration)) {
-      seen.add(match.integration)
-      integrations.push(match.integration)
+  for (const mention of readAutomationMentions(text, catalog)) {
+    if (mention.kind === "integration" && !seen.has(mention.id)) {
+      seen.add(mention.id)
+      integrations.push(mention.id as AutomationSurfaceIntegration)
     }
   }
 
   return integrations
 }
 
-export function findActiveAutomationSurfaceMention(
+/** The sigil-started token the cursor is inside, if any. */
+export function findActiveAutomationMention(
   text: string,
   cursor: number
-): ActiveAutomationSurfaceMention | null {
-  return (
-    findActiveExplicitMention(text, cursor) ??
-    findActiveBareMention(text, cursor)
-  )
-}
-
-function findActiveExplicitMention(
-  text: string,
-  cursor: number
-): ActiveAutomationSurfaceMention | null {
+): ActiveAutomationMention | null {
   if (cursor < 0 || cursor > text.length) {
     return null
   }
 
-  const start = text.lastIndexOf("@", cursor - 1)
+  for (let start = cursor - 1; start >= 0; start -= 1) {
+    const kind = sigilKind(text[start])
 
-  if (start < 0 || (start > 0 && isMentionNameCharacter(text[start - 1]))) {
+    if (kind !== null) {
+      return activeMentionAt(text, cursor, start, kind)
+    }
+
+    if (!/[a-z0-9_-]/i.test(text[start])) {
+      return null
+    }
+  }
+
+  return null
+}
+
+function activeMentionAt(
+  text: string,
+  cursor: number,
+  start: number,
+  kind: AutomationMentionKind
+): ActiveAutomationMention | null {
+  if (!canStartMention(kind, text, start)) {
     return null
   }
 
   const query = text.slice(start + 1, cursor)
 
-  if (query.length > 32 || /[^a-z0-9-]/i.test(query)) {
+  if (query.length > 32 || /[^a-z0-9_-]/i.test(query)) {
     return null
   }
 
-  return { end: cursor, kind: "explicit", query, start }
+  return { end: cursor, kind, query, start }
 }
 
-function findActiveBareMention(
-  text: string,
-  cursor: number
-): ActiveAutomationSurfaceMention | null {
-  if (cursor < 0 || cursor > text.length) {
-    return null
+export function getAutomationMentionSuggestions(
+  active: Pick<ActiveAutomationMention, "kind" | "query">,
+  sources: AutomationMentionSources
+): AutomationMentionSuggestion[] {
+  if (active.kind === "integration") {
+    return getIntegrationSuggestions(active.query)
   }
 
-  let start = cursor
-
-  while (start > 0 && /[a-z0-9-]/i.test(text[start - 1])) {
-    start -= 1
+  if (active.kind === "skill") {
+    return rankByName(
+      active.query,
+      sources.skills.map((name) => ({ id: name, kind: "skill", label: name }))
+    )
   }
 
-  const query = text.slice(start, cursor)
-  const previous = text[start - 1]
-
-  if (
-    query.length < 3 ||
-    previous === "@" ||
-    isMentionNameCharacter(previous) ||
-    getAutomationSurfaceSuggestions(query).length === 0
-  ) {
-    return null
-  }
-
-  return { end: cursor, kind: "bare", query, start }
+  return rankByName(active.query, toolSuggestions(sources.permissions))
 }
 
-export function getAutomationSurfaceSuggestions(
+function getIntegrationSuggestions(
   query: string
-): AutomationSurfaceSuggestion[] {
+): AutomationMentionSuggestion[] {
   const normalizedQuery = normalizeFuzzyAlias(query)
 
   return automationSurfaceIntegrations
     .map((item) => ({
       label: item.label,
-      integration: item.integration,
+      id: item.integration,
       score: getIntegrationSuggestionScore(normalizedQuery, item),
     }))
     .filter((item) => item.score > 0)
@@ -120,54 +140,49 @@ export function getAutomationSurfaceSuggestions(
       (left, right) =>
         right.score - left.score || left.label.localeCompare(right.label)
     )
-    .slice(0, 6)
-    .map(({ label, integration }) => ({ label, integration }))
+    .slice(0, maxSuggestions)
+    .map(({ label, id }) => ({ id, kind: "integration" as const, label }))
 }
 
-export function replaceAutomationSurfaceMention(
-  text: string,
-  mention: ActiveAutomationSurfaceMention,
-  integration: AutomationSurfaceIntegration
-) {
-  const replacement = getAutomationSurfaceLabel(integration)
-  const suffix = text.slice(mention.end)
-  const separator =
-    suffix === "" || isMentionNameCharacter(suffix[0]) ? " " : ""
-  const nextText = `${text.slice(0, mention.start)}${replacement}${separator}${suffix}`
-
-  return {
-    cursor: mention.start + replacement.length + separator.length,
-    text: nextText,
+function toolSuggestions(
+  permissions: AutomationMentionSources["permissions"]
+): AutomationMentionSuggestion[] {
+  if (!Array.isArray(permissions)) {
+    return []
   }
+
+  return permissions
+    .filter((permission) => isAutomationToolSelectable(permission))
+    .map((permission) => ({
+      hint: permission.label,
+      id: permission.tool,
+      kind: "tool" as const,
+      label: permission.tool,
+    }))
 }
 
-export function getAutomationSurfaceMentionParts(
-  text: string
-): AutomationSurfaceMentionPart[] {
-  const matches = readAutomationSurfaceMentionMatches(text)
+/** Prefix matches first, then substring matches, alphabetical within each. */
+function rankByName(
+  query: string,
+  items: AutomationMentionSuggestion[]
+): AutomationMentionSuggestion[] {
+  const normalizedQuery = normalizeFuzzyAlias(query)
+  const scored = items.flatMap((item) => {
+    const name = normalizeFuzzyAlias(item.label)
 
-  if (matches.length === 0) {
-    return [{ text }]
-  }
-
-  const parts: AutomationSurfaceMentionPart[] = []
-  let cursor = 0
-
-  for (const match of matches) {
-    if (match.start > cursor) {
-      parts.push({ text: text.slice(cursor, match.start) })
+    if (normalizedQuery === "" || name.startsWith(normalizedQuery)) {
+      return [{ item, score: 2 }]
     }
 
-    parts.push({
-      integration: match.integration,
-      text: text.slice(match.start, match.end),
-    })
-    cursor = match.end
-  }
+    return name.includes(normalizedQuery) ? [{ item, score: 1 }] : []
+  })
 
-  if (cursor < text.length) {
-    parts.push({ text: text.slice(cursor) })
-  }
-
-  return parts
+  return scored
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        left.item.label.localeCompare(right.item.label)
+    )
+    .slice(0, maxSuggestions)
+    .map((entry) => entry.item)
 }

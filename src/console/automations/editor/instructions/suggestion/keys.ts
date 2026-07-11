@@ -1,7 +1,7 @@
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
 import { type AutomationPolicyPermissions } from "../../../access/policy"
-import { insertSurfaceSuggestion } from "./input"
+import { insertMentionSuggestion } from "./input"
 import { type InstructionSuggestionState } from "./suggest"
 
 export function handleSuggestionKey({
@@ -70,10 +70,10 @@ function insertActiveSuggestion({
   const activeSuggestion = state.suggestions[state.activeIndex]
 
   if (activeSuggestion !== undefined) {
-    insertSurfaceSuggestion({
+    insertMentionSuggestion({
       editor,
       permissions,
-      integration: activeSuggestion.integration,
+      suggestion: activeSuggestion,
       setSuggestion,
       state,
     })
