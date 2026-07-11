@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
-import { LaneRow, stickyLane } from "./lane"
+import { LaneRow, PulseSkeleton, stickyLane } from "./lane"
 import { buildPulse, type PulseLane } from "./series"
 import { type Workstream, type Workstreams } from "./types"
 
@@ -71,7 +71,7 @@ export function WorkstreamsPulse({
   }, [result])
 
   if (pulse === null) {
-    return null
+    return <PulseSkeleton />
   }
 
   const view = buildPulse(pulse.entries, workstreams, pulse.now, pulse.days)

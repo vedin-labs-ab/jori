@@ -16,6 +16,7 @@ import { ContextPage } from ".."
 import { ContextSectionTitle } from "../section"
 import { WorkstreamCard } from "./card"
 import { WorkstreamDetail } from "./detail"
+import { PulseSkeleton } from "./lane"
 import { WorkstreamsPulse } from "./pulse"
 import { type Workstream, type Workstreams } from "./types"
 
@@ -50,7 +51,9 @@ function WorkstreamsView({ tenantId }: { tenantId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {result === undefined ? null : (
+      {result === undefined ? (
+        <PulseSkeleton />
+      ) : (
         <WorkstreamsPulse
           tenantId={tenantId}
           workstreams={roster}

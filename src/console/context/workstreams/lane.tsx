@@ -1,4 +1,14 @@
 import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -141,6 +151,50 @@ function CellDetail({ cell }: { cell: PulseCell }) {
         <span key={name}>{name}</span>
       ))}
       {hidden > 0 ? <span>…and {hidden} more</span> : null}
+    </div>
+  )
+}
+
+// Mirrors the default two-week card's box - same shell classes, 476px
+// content, three lane rows, axis, and banded footer - so the card resolves
+// in place instead of shifting the page when data arrives.
+export function PulseSkeleton() {
+  return (
+    <div className="@container">
+      <Card className="w-fit max-w-[min(56rem,100cqw)] pb-0">
+        <CardHeader>
+          <CardTitle className="self-center">
+            <Skeleton className="h-4 w-14" />
+          </CardTitle>
+          <CardDescription className="col-span-2">
+            <Skeleton className="h-[18px] w-80 max-w-full" />
+          </CardDescription>
+          <CardAction className="row-span-1">
+            <Skeleton className="h-6 w-28" />
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <div className="flex w-[29.75rem] max-w-full flex-col gap-1">
+            {[0, 1, 2].map((lane) => (
+              <div
+                key={lane}
+                className="grid h-7 grid-cols-[10.5rem_1fr] items-center"
+              >
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-full" />
+              </div>
+            ))}
+            <div className="grid h-[21px] grid-cols-[10.5rem_1fr] items-end">
+              <span />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="justify-between gap-6 border-t bg-muted/25 pt-3! pb-3">
+          <Skeleton className="h-4 w-44" />
+          <Skeleton className="h-4 w-40" />
+        </CardFooter>
+      </Card>
     </div>
   )
 }
