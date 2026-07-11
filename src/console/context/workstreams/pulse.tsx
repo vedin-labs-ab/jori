@@ -11,15 +11,32 @@ import { api } from "../../../../convex/_generated/api"
 import { buildPulse, type PulseCell, type PulseLane } from "./series"
 import { type Workstream, type Workstreams } from "./types"
 
-// Column count mirrors pulseDayCount; Tailwind needs the literal.
-const laneGrid =
-  "grid grid-cols-[minmax(7rem,11rem)_repeat(14,minmax(0,1fr))] items-center"
+// Column count mirrors pulseDayCount; Tailwind needs the literals. Fixed
+// column pitch keeps the cells contribution-graph dense instead of
+// stretching with the viewport.
+const laneGrid = "grid grid-cols-[8.5rem_repeat(14,18px)] items-center"
+
+// Contribution-graph intensity steps. Placed activity ramps the brand
+// primary; not-yet-placed activity ramps the informational blue so waiting
+// work reads as pending review, not as a warning.
+const placedRamp = [
+  "bg-primary/35",
+  "bg-primary/60",
+  "bg-primary/80",
+  "bg-primary",
+]
+const unplacedRamp = [
+  "bg-informational/35",
+  "bg-informational/60",
+  "bg-informational/80",
+  "bg-informational",
+]
 const tooltipEffortLimit = 5
 
-// A compact two-week strip of extraction movement: one dot lane per
-// workstream, an amber lane for efforts not yet placed, and the review
-// heartbeat. It makes the hourly rhythm and the weekly restructure visible
-// instead of leaving quiet periods looking broken.
+// A compact two-week strip of extraction movement: one lane per workstream,
+// a lane for efforts not yet placed, and the review heartbeat. It makes the
+// hourly rhythm and the weekly restructure visible instead of leaving quiet
+// periods looking broken.
 export function WorkstreamsPulse({
   tenantId,
   workstreams,
@@ -42,14 +59,14 @@ export function WorkstreamsPulse({
   }
 
   return (
-    <Card className="gap-2.5 px-4 py-3">
+    <Card className="w-full max-w-2xl gap-2 px-4 py-3">
       <PulseHeader
         now={pulse.now}
         reviewedAt={pulse.reviewedAt}
         consolidationAt={pulse.consolidationAt}
         unplaced={pulse.unplaced}
       />
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-px">
         {lanes.map((lane) => (
           <LaneRow
             key={lane.id ?? "unplaced"}
@@ -63,7 +80,7 @@ export function WorkstreamsPulse({
             <span
               key={day.key}
               className={cn(
-                "pt-0.5 text-center text-[11px] text-muted-foreground",
+                "pt-0.5 text-center text-[11px] text-muted-foreground tabular-nums",
                 day.isToday && "font-medium text-foreground"
               )}
             >
@@ -111,7 +128,7 @@ function PulseHeader({
             <TooltipTrigger asChild>
               <Badge
                 variant="outline"
-                className="border-warning/50 text-warning"
+                className="border-informational/50 text-informational"
               >
                 {unplaced} unplaced
               </Badge>
@@ -136,14 +153,14 @@ function LaneRow({
 }) {
   const label =
     onOpen === undefined ? (
-      <span className="truncate pr-2 font-medium text-warning text-xs">
+      <span className="truncate pr-3 font-medium text-informational text-xs">
         {lane.name}
       </span>
     ) : (
       <button
         type="button"
         onClick={onOpen}
-        className="truncate pr-2 text-left text-muted-foreground text-xs transition-colors hover:text-foreground"
+        className="truncate pr-3 text-left text-muted-foreground text-xs transition-colors hover:text-foreground"
       >
         {lane.name}
       </button>
@@ -161,20 +178,18 @@ function LaneRow({
 
 function DayCell({ cell, unplaced }: { cell: PulseCell; unplaced: boolean }) {
   return (
-    <div
-      className={cn(
-        "flex h-6 items-center justify-center",
-        cell.day.isToday && "bg-muted/50"
-      )}
-    >
+    <div className="flex h-[18px] items-center justify-center">
       {cell.count === 0 ? (
-        <span aria-hidden className="size-[3px] rounded-full bg-border" />
+        <span aria-hidden className="size-3 rounded-[3px] bg-border/50" />
       ) : (
         <Tooltip>
           <TooltipTrigger asChild>
             <span
               aria-label={`${cell.count} entries on ${cell.day.title}`}
-              className={dotClass(cell.count, unplaced)}
+              className={cn(
+                "size-3 rounded-[3px]",
+                cellClass(cell.count, unplaced)
+              )}
               role="img"
             />
           </TooltipTrigger>
@@ -185,6 +200,12 @@ function DayCell({ cell, unplaced }: { cell: PulseCell; unplaced: boolean }) {
       )}
     </div>
   )
+}
+
+function cellClass(count: number, unplaced: boolean) {
+  const step = count >= 6 ? 3 : count >= 4 ? 2 : count >= 2 ? 1 : 0
+
+  return (unplaced ? unplacedRamp : placedRamp)[step]
 }
 
 function CellDetail({ cell }: { cell: PulseCell }) {
@@ -201,19 +222,6 @@ function CellDetail({ cell }: { cell: PulseCell }) {
       ))}
       {hidden > 0 ? <span>…and {hidden} more</span> : null}
     </div>
-  )
-}
-
-function dotClass(count: number, unplaced: boolean) {
-  const size = count >= 4 ? "size-2.5" : count >= 2 ? "size-2" : "size-1.5"
-  const strength =
-    count >= 4 ? "opacity-90" : count >= 2 ? "opacity-70" : "opacity-50"
-
-  return cn(
-    "rounded-full",
-    size,
-    strength,
-    unplaced ? "border-2 border-warning bg-transparent" : "bg-foreground"
   )
 }
 
