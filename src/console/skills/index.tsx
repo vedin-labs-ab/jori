@@ -17,7 +17,7 @@ import { SkillViewDialog } from "./view"
 export function Skills() {
   return (
     <ConsolePage>
-      {(organization) => <SkillsCard tenantId={organization.id} />}
+      {(tenantId) => <SkillsCard tenantId={tenantId} />}
     </ConsolePage>
   )
 }

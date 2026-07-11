@@ -1,10 +1,20 @@
 export const artifactEntrypoint = "src/main.tsx"
-export const requiredArtifactSourcePaths = [
-  "src/App.tsx",
-  "src/contract.ts",
-] as const
+const requiredArtifactSourcePaths = ["src/App.tsx", "src/contract.ts"] as const
 
-export const platformArtifactSourcePaths = [
+export type ArtifactSourceFile = {
+  path: string
+  content: string
+  executable?: boolean
+}
+
+export type NormalizedArtifactSourceFile = {
+  path: string
+  content: string
+  executable: boolean
+  byteSize: number
+}
+
+const platformArtifactSourcePaths = [
   "package.json",
   "package-lock.json",
   "pnpm-lock.yaml",
@@ -28,7 +38,7 @@ export const platformArtifactSourcePaths = [
   "src/milo.css",
 ] as const
 
-export const platformArtifactSourcePathPrefixes = [
+const platformArtifactSourcePathPrefixes = [
   "src/components/ui/",
   "src/milo/",
 ] as const
@@ -47,7 +57,100 @@ export const maxArtifactFiles = 120
 export const maxArtifactFileBytes = 512 * 1024
 export const maxArtifactTreeBytes = 2 * 1024 * 1024
 
-export function normalizeArtifactSourcePath(path: string) {
+export function normalizeArtifactSourceFiles(
+  source: unknown
+): NormalizedArtifactSourceFile[] {
+  if (!Array.isArray(source) || source.length === 0) {
+    throw new Error("Artifact source must include files.")
+  }
+
+  if (source.length > maxArtifactFiles) {
+    throw new Error(`Artifacts can include at most ${maxArtifactFiles} files.`)
+  }
+
+  const paths = new Set<string>()
+  const files = source.map((file) => normalizeSourceFile(file, paths))
+
+  for (const requiredPath of requiredArtifactSourcePaths) {
+    if (!paths.has(requiredPath)) {
+      throw new Error(`Artifact source is missing ${requiredPath}.`)
+    }
+  }
+
+  const totalBytes = files.reduce((sum, file) => sum + file.byteSize, 0)
+
+  if (totalBytes > maxArtifactTreeBytes) {
+    throw new Error(
+      `Artifact source exceeds ${maxArtifactTreeBytes} total bytes.`
+    )
+  }
+
+  const sortedFiles = files.sort((left, right) =>
+    left.path.localeCompare(right.path)
+  )
+  rejectForbiddenSourceAccess(sortedFiles)
+
+  return sortedFiles
+}
+
+function normalizeSourceFile(
+  value: unknown,
+  paths: Set<string>
+): NormalizedArtifactSourceFile {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error("Artifact source files must be objects.")
+  }
+
+  const candidate = value as Partial<ArtifactSourceFile>
+  const path = normalizeSourceFilePath(candidate.path)
+
+  if (paths.has(path)) {
+    throw new Error(`Duplicate artifact source path: ${path}`)
+  }
+
+  paths.add(path)
+
+  if (typeof candidate.content !== "string") {
+    throw new Error(`Artifact source file ${path} must be text.`)
+  }
+
+  const byteSize = new TextEncoder().encode(candidate.content).byteLength
+
+  if (byteSize === 0) {
+    throw new Error(`Artifact source file ${path} is empty.`)
+  }
+
+  if (byteSize > maxArtifactFileBytes) {
+    throw new Error(
+      `Artifact source file ${path} exceeds ${maxArtifactFileBytes} bytes.`
+    )
+  }
+
+  return {
+    path,
+    content: candidate.content,
+    executable: candidate.executable === true,
+    byteSize,
+  }
+}
+
+function normalizeSourceFilePath(value: unknown) {
+  if (typeof value !== "string") {
+    throw new Error("Artifact source path must be a string.")
+  }
+
+  const path = normalizeArtifactSourcePath(value)
+
+  if (isPlatformArtifactSourcePath(path)) {
+    throw new Error(
+      `Artifact source cannot include platform-owned file: ${path}`
+    )
+  }
+
+  return path
+}
+
+function normalizeArtifactSourcePath(path: string) {
   const normalized = path.trim().replaceAll("\\", "/")
 
   if (normalized === "") {

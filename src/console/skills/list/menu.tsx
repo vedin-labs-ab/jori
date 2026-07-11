@@ -1,15 +1,6 @@
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { AlertDialog } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -17,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DeleteSkillDialog } from "../delete"
 import { type Skill } from "../types"
 
 export function SkillManagementMenu({
@@ -64,25 +56,11 @@ export function SkillManagementMenu({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete "{skill.name}"?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This permanently deletes the skill. Milo stops applying it to new
-            runs.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            disabled={isPending}
-            onClick={() => onDelete?.(skill)}
-            variant="destructive"
-          >
-            Delete skill
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+      <DeleteSkillDialog
+        isPending={isPending}
+        onDelete={() => onDelete?.(skill)}
+        skill={skill}
+      />
     </AlertDialog>
   )
 }

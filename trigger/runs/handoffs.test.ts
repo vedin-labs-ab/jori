@@ -19,8 +19,6 @@ test("executes an approved handoff once and injects the result", async () => {
     runId: "run_1",
   })
   expect(result).toEqual({
-    handoffProgressed: true,
-    messageProgressed: false,
     pending: [],
     progressed: true,
   })
@@ -72,8 +70,6 @@ test("keeps a pending handoff as a wait without progress", async () => {
 
   expect(runtime.convex.executeApproval).not.toHaveBeenCalled()
   expect(result.progressed).toBe(false)
-  expect(result.handoffProgressed).toBe(false)
-  expect(result.messageProgressed).toBe(false)
   expect(result.pending).toEqual([
     {
       expiresAt: 1000,
@@ -91,8 +87,6 @@ test("keeps a pending offer as a wait without progress", async () => {
   const result = await reconcileHandoffs(runtime, messages)
 
   expect(result.progressed).toBe(false)
-  expect(result.handoffProgressed).toBe(false)
-  expect(result.messageProgressed).toBe(false)
   expect(result.pending).toEqual([
     {
       expiresAt: 2000,

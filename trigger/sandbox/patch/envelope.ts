@@ -1,5 +1,5 @@
 import path from "node:path"
-import { sandboxWorkspace } from "../artifacts"
+import { sandboxWorkspace } from "../../../contracts/runtime"
 import { shellQuote } from "../path"
 import { type SandboxRuntime, type SandboxWriteFile } from "../types"
 import { type Hunk, parseEnvelopePatch } from "./parse"

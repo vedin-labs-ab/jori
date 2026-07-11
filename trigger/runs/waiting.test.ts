@@ -1,9 +1,8 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { type ModelRuntime } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type RunHandoffs, type RuntimeTool } from "../types"
 import { runAgentLoop } from "./loop"
-import { type QueuedModelResponse, queuedModelResponses } from "./test-model"
+import { createQueuedModel } from "./test-model"
 
 const triggerWait = vi.hoisted(() => ({
   createToken: vi.fn(async () => ({ id: "waitpoint_1" })),
@@ -38,7 +37,7 @@ test("thinks after one handoff resolves before parking on another", async () => 
       offers: [offerHandoff("pending")],
     },
   ])
-  const model = createModel([
+  const model = createQueuedModel([
     {
       content: null,
       toolCalls: [{ args: {}, id: "call_1", name: "finish_run" }],
@@ -76,22 +75,6 @@ test("thinks after one handoff resolves before parking on another", async () => 
   )
   expect(triggerWait.forToken).toHaveBeenCalledWith({ id: "waitpoint_1" })
 })
-
-function createModel(responses: QueuedModelResponse[]) {
-  const queue = queuedModelResponses(responses)
-
-  return {
-    complete: vi.fn<ModelRuntime["complete"]>(async () => {
-      const response = queue.shift()
-
-      if (response === undefined) {
-        throw new Error("No model response queued.")
-      }
-
-      return response
-    }),
-  } satisfies ModelRuntime
-}
 
 function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
   // The context load bundles the first handoff snapshot; later reconciles

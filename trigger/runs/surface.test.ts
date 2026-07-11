@@ -1,9 +1,8 @@
 import { expect, test, vi } from "vitest"
-import { type ModelRuntime } from "../model/types"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type RuntimeTool } from "../types"
 import { runAgentLoop } from "./loop"
-import { type QueuedModelResponse, queuedModelResponses } from "./test-model"
+import { createQueuedModel } from "./test-model"
 
 test("active surface stops are repaired back to finish_run", async () => {
   const runtime = createRuntime({
@@ -13,7 +12,7 @@ test("active surface stops are repaired back to finish_run", async () => {
       runtimeTool("finish_run", "run"),
     ],
   })
-  const model = createModel([
+  const model = createQueuedModel([
     { content: "", type: "stop" },
     {
       content: null,
@@ -68,7 +67,7 @@ test("active surface repair uses send_reply even with provider reactions", async
       runtimeTool("finish_run", "run"),
     ],
   })
-  const model = createModel([
+  const model = createQueuedModel([
     { content: "", type: "stop" },
     {
       content: null,
@@ -118,7 +117,7 @@ test("active surface replies complete only after finish_run", async () => {
       runtimeTool("finish_run", "run"),
     ],
   })
-  const model = createModel([
+  const model = createQueuedModel([
     { content: "Here is the answer.", type: "stop" },
     {
       content: null,
@@ -159,7 +158,7 @@ test("active surface final replies complete without finish_run", async () => {
       runtimeTool("finish_run", "run"),
     ],
   })
-  const model = createModel([
+  const model = createQueuedModel([
     {
       content: null,
       toolCalls: [
@@ -188,22 +187,6 @@ test("active surface final replies complete without finish_run", async () => {
     expect.objectContaining({ type: "run.completed" })
   )
 })
-
-function createModel(responses: QueuedModelResponse[]) {
-  const queue = queuedModelResponses(responses)
-
-  return {
-    complete: vi.fn(async () => {
-      const response = queue.shift()
-
-      if (response === undefined) {
-        throw new Error("No model response queued.")
-      }
-
-      return response
-    }),
-  } satisfies ModelRuntime
-}
 
 function createRuntime(options: {
   surface?: "github" | "linear" | "slack"

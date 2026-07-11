@@ -23,7 +23,7 @@ const integrationGrid =
 export function Integrations() {
   return (
     <ConsolePage>
-      {(organization) => <IntegrationTabs tenantId={organization.id} />}
+      {(tenantId) => <IntegrationTabs tenantId={tenantId} />}
     </ConsolePage>
   )
 }

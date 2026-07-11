@@ -1,5 +1,5 @@
 import path from "node:path"
-import { sandboxWorkspace } from "./artifacts"
+import { sandboxWorkspace } from "../../contracts/runtime"
 
 export function sandboxWorkspacePath(value: string | undefined) {
   return value === undefined || value.trim() === ""

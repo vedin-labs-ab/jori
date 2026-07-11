@@ -27,7 +27,6 @@ import type * as approvals_transition from "../approvals/transition.js";
 import type * as artifacts_access from "../artifacts/access.js";
 import type * as artifacts_actions from "../artifacts/actions.js";
 import type * as artifacts_console from "../artifacts/console.js";
-import type * as artifacts_contract from "../artifacts/contract.js";
 import type * as artifacts_mcp from "../artifacts/mcp.js";
 import type * as artifacts_publish from "../artifacts/publish.js";
 import type * as artifacts_queries from "../artifacts/queries.js";
@@ -255,7 +254,6 @@ import type * as providers_google_credentials from "../providers/google/credenti
 import type * as providers_google_http from "../providers/google/http.js";
 import type * as providers_google_install from "../providers/google/install.js";
 import type * as providers_google_oauth from "../providers/google/oauth.js";
-import type * as providers_google_scope from "../providers/google/scope.js";
 import type * as providers_google_signing from "../providers/google/signing.js";
 import type * as providers_http from "../providers/http.js";
 import type * as providers_install from "../providers/install.js";
@@ -481,7 +479,6 @@ declare const fullApi: ApiFromModules<{
   "artifacts/access": typeof artifacts_access;
   "artifacts/actions": typeof artifacts_actions;
   "artifacts/console": typeof artifacts_console;
-  "artifacts/contract": typeof artifacts_contract;
   "artifacts/mcp": typeof artifacts_mcp;
   "artifacts/publish": typeof artifacts_publish;
   "artifacts/queries": typeof artifacts_queries;
@@ -709,7 +706,6 @@ declare const fullApi: ApiFromModules<{
   "providers/google/http": typeof providers_google_http;
   "providers/google/install": typeof providers_google_install;
   "providers/google/oauth": typeof providers_google_oauth;
-  "providers/google/scope": typeof providers_google_scope;
   "providers/google/signing": typeof providers_google_signing;
   "providers/http": typeof providers_http;
   "providers/install": typeof providers_install;

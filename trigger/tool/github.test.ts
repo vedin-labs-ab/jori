@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest"
-import { sandboxWorkspace } from "../sandbox/artifacts"
+import { sandboxWorkspace } from "../../contracts/runtime"
 import { executeToolCall, type ToolRuntime } from "../tool"
 import { type ConvexId } from "../types"
 

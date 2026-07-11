@@ -7,9 +7,12 @@ import {
   requireProviderIntegration,
   saveOAuthCredentials,
 } from "../credentials"
-import { createSignedInstallState, upsertIntegration } from "../install"
+import {
+  createSignedInstallState,
+  findUserIntegrationForInstall,
+  upsertIntegration,
+} from "../install"
 import { type GoogleIntegration } from "./config"
-import { findExistingGoogleIntegration } from "./scope"
 
 const googleIntegration = v.union(
   v.literal("gmail"),
@@ -54,7 +57,7 @@ export const recordOAuthInstallation = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    const existing = await findExistingGoogleIntegration(ctx, args)
+    const existing = await findUserIntegrationForInstall(ctx, args)
 
     const existingRefreshToken = readRefreshToken(existing?.credentials)
     const refreshToken = args.refreshToken ?? existingRefreshToken

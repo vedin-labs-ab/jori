@@ -31,7 +31,7 @@ import {
 export function Automations() {
   return (
     <ConsolePage>
-      {(organization) => <AutomationListView tenantId={organization.id} />}
+      {(tenantId) => <AutomationListView tenantId={tenantId} />}
     </ConsolePage>
   )
 }

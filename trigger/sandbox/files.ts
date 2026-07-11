@@ -1,4 +1,4 @@
-import { sandboxWorkspace } from "./artifacts"
+import { sandboxWorkspace } from "../../contracts/runtime"
 import { boundedInteger, requiredString } from "./input"
 import { runJsonScript } from "./script"
 import { type SandboxRuntime } from "./types"

@@ -27,7 +27,7 @@ export function ContextPage({
 }) {
   return (
     <ConsolePage>
-      {(organization) => (
+      {(tenantId) => (
         <ConsolePageLayout>
           <Tabs value={tab}>
             <TabsList className="w-fit !h-7">
@@ -38,7 +38,7 @@ export function ContextPage({
               ))}
             </TabsList>
           </Tabs>
-          {children(organization.id)}
+          {children(tenantId)}
         </ConsolePageLayout>
       )}
     </ConsolePage>
