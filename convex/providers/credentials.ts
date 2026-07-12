@@ -135,7 +135,21 @@ function isCredentialObject(
   return typeof credentials === "object" && credentials !== null
 }
 
-export function readRefreshToken(credentials: unknown) {
+export function requireRefreshToken(
+  refreshToken: string | undefined,
+  credentials: unknown,
+  errorMessage: string
+) {
+  const resolved = refreshToken ?? readRefreshToken(credentials)
+
+  if (resolved === undefined) {
+    throw new Error(errorMessage)
+  }
+
+  return resolved
+}
+
+function readRefreshToken(credentials: unknown) {
   if (
     typeof credentials === "object" &&
     credentials !== null &&

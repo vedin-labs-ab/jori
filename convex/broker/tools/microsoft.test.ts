@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
+import { createAssetContext } from "../../../test/convex/broker"
 import { type Doc, type Id } from "../../_generated/dataModel"
-import { assetContext } from "./fixtures"
 import { callMicrosoftTool } from "./microsoft"
 
 const originalFetch = globalThis.fetch
@@ -23,7 +23,7 @@ describe("Outlook email tools", () => {
         subject: "File",
         to: ["recipient@example.com"],
       },
-      assetContext()
+      createAssetContext()
     )
 
     expect(result).toBe("sent")

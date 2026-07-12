@@ -27,7 +27,6 @@ import {
   killE2BSandbox,
   normalizeCommandResult,
   runSandboxCommand,
-  toArrayBuffer,
 } from "./support"
 
 export class E2BSandboxRuntime implements SandboxRuntime {
@@ -189,7 +188,7 @@ async function writeSandboxFiles(
     files.map((file) => ({
       data:
         file.content instanceof Uint8Array
-          ? toArrayBuffer(file.content)
+          ? new Uint8Array(file.content).buffer
           : file.content,
       path: file.path,
     }))

@@ -1,10 +1,10 @@
 import { expect, test } from "vitest"
-import { type Id } from "../../../_generated/dataModel"
 import {
   automationDisplay,
   eventAutomationDisplay,
   fakeQueryCtx,
-} from "../fixtures"
+} from "../../../../test/convex/console"
+import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
 test("includes stopped details for stopped runs", async () => {

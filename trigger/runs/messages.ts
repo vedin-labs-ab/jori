@@ -58,7 +58,7 @@ export function formatSessionMessage(message: RuntimeMessage) {
       speaker: message.source,
       text: message.text,
     },
-  }).trim()
+  })
 }
 
 export function formatSessionInteraction(interaction: RuntimeInteraction) {
@@ -75,7 +75,7 @@ export function formatSessionInteraction(interaction: RuntimeInteraction) {
       speaker: interaction.source,
       type: interaction.type,
     },
-  }).trim()
+  })
 }
 
 export async function appendSessionMessages(

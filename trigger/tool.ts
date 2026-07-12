@@ -1,5 +1,6 @@
 import { type ToolSurface } from "../contracts/integrations"
 import { isVisibleCommunicationTool, readFinal } from "../contracts/runtime"
+import { encodeToolResult } from "../contracts/transport"
 import {
   materializeSandboxResult,
   prepareMiloToolInput,
@@ -15,7 +16,7 @@ import { waitForAgents } from "./runs/agents"
 import { executeCodingTool } from "./sandbox/coding"
 import { prepareProviderToolInput } from "./sandbox/source"
 import { executeActiveSurfaceTool } from "./surface"
-import { toolErrorResult, toolResult, toToolContent } from "./tool/results"
+import { toolErrorResult, toolResult } from "./tool/results"
 import { type ToolRuntime } from "./tool/runtime"
 import { findTool, requireSurface, shouldFinishConvexTool } from "./tool/select"
 import { recordToolEvent, toolTraceDetails } from "./trace"
@@ -36,13 +37,19 @@ export async function executeToolCall(
   // outcome trace, so the started trace always lands first and a failed
   // trace write still aborts the attempt.
   const startedPending = recordToolEvent(eventArgs(args), tool, "tool.started")
-  const outcome = await runTool(args, tool)
+  let result: Awaited<ReturnType<typeof executeTool>>
+
+  try {
+    result = await executeTool(args.runtime, tool, args.call)
+  } catch (error) {
+    await startedPending
+
+    return await recordToolFailure(args, tool, errorDetails(error))
+  }
 
   await startedPending
 
-  return outcome.ok
-    ? await recordToolSuccess(args, tool, outcome.result)
-    : await recordToolFailure(args, tool, outcome.details)
+  return await recordToolSuccess(args, tool, result)
 }
 
 type ToolCallArgs = {
@@ -50,24 +57,6 @@ type ToolCallArgs = {
   call: ModelToolCall
   runtime: ToolRuntime
   sequence: number
-}
-
-type ToolCallOutcome =
-  | { ok: true; result: Awaited<ReturnType<typeof executeTool>> }
-  | { ok: false; details: ReturnType<typeof errorDetails> }
-
-async function runTool(
-  args: ToolCallArgs,
-  tool: RuntimeTool
-): Promise<ToolCallOutcome> {
-  try {
-    return {
-      ok: true,
-      result: await executeTool(args.runtime, tool, args.call),
-    }
-  } catch (error) {
-    return { ok: false, details: errorDetails(error) }
-  }
 }
 
 async function recordToolSuccess(
@@ -91,7 +80,7 @@ async function recordToolSuccess(
     )
 
     return {
-      content: toToolContent(result.value),
+      content: encodeToolResult(result.value),
       finished: result.finished,
     }
   } catch (error) {
@@ -107,7 +96,7 @@ async function recordToolFailure(
   await recordToolEvent(eventArgs(args), tool, "tool.failed", details)
 
   return {
-    content: toToolContent(toolErrorResult(details.error)),
+    content: encodeToolResult(toolErrorResult(details.error)),
     finished: false,
   }
 }

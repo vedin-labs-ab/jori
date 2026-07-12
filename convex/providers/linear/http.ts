@@ -2,11 +2,11 @@ import { linearIssueCommentEvent } from "../../../contracts/automations/events/n
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { createIntegrationActor } from "../../shared/actor"
+import { unauthorizedResponse } from "../../shared/http"
 import {
   oauthAuthorizeRedirect,
   readOAuthCallback,
   redirectWithStatus,
-  unauthorizedResponse,
 } from "../http"
 import { completeIntegrationOffer, failOfferAndRedirect } from "../install"
 import { recordLinearLifecycleEvent } from "../lifecycle/linear"

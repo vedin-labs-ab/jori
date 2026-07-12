@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
+import { runtimeInput } from "../../../../test/convex/prompt"
 import { assemblePrompt } from "."
-import { runtimeInput } from "./fixtures"
 
 type MessageInput = Extract<
   Parameters<typeof assemblePrompt>[0],

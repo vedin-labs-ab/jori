@@ -38,7 +38,7 @@ export function createCommunicationGuidance(args: {
     communication: renderPromptTemplate(
       promptTemplates["agent/instructions/communication"],
       {}
-    ).trim(),
+    ),
     format:
       skill === null
         ? ""
@@ -76,7 +76,7 @@ function createFormatBlock(
         format: {
           parts: parts.join("\n\n"),
         },
-      }).trim()
+      })
 }
 
 function formatPart(body?: string) {

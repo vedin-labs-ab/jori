@@ -4,14 +4,14 @@ export function normalizeToolInput(value: unknown): Record<string, unknown> {
     : {}
 }
 
-export function optionalString(value: unknown) {
+export function optionalTrimmedString(value: unknown) {
   return typeof value === "string" && value.trim() !== ""
     ? value.trim()
     : undefined
 }
 
-export function requiredString(value: unknown, name: string) {
-  const text = optionalString(value)
+export function requiredTrimmedString(value: unknown, name: string) {
+  const text = optionalTrimmedString(value)
 
   if (text === undefined) {
     throw new Error(`Missing ${name}`)

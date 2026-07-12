@@ -77,13 +77,6 @@ export async function runSandboxCommand(
   }
 }
 
-export function toArrayBuffer(bytes: Uint8Array) {
-  const copy = new Uint8Array(bytes.byteLength)
-  copy.set(bytes)
-
-  return copy.buffer
-}
-
 function requireSandboxTemplate() {
   return process.env.MILO_E2B_TEMPLATE?.trim() || "milo-codex"
 }

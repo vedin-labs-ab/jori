@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest"
+import {
+  automationRuntimeInput,
+  runtimeInput,
+} from "../../../../test/convex/prompt"
 import { assemblePrompt } from "."
-import { automationRuntimeInput, runtimeInput } from "./fixtures"
 
 describe("finish guidance", () => {
   test("prefers final tool calls for message runs", () => {

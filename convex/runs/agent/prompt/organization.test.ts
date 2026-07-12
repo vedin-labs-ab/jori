@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
+import { promptedTool, runtimeInput } from "../../../../test/convex/prompt"
 import { type WorkstreamContext } from "../../../deduction/roster"
 import { assemblePrompt } from "."
-import { promptedTool, runtimeInput } from "./fixtures"
 
 const dayMs = 24 * 60 * 60 * 1000
 

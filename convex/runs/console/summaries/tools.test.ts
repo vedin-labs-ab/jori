@@ -1,11 +1,11 @@
 import { expect, test } from "vitest"
-import { type QueryCtx } from "../../../_generated/server"
-import { getToolPermission } from "../../../permissions/catalog"
 import {
   emptyQueryResult,
   eventAutomationDisplay,
   messageDisplay,
-} from "../fixtures"
+} from "../../../../test/convex/console"
+import { type QueryCtx } from "../../../_generated/server"
+import { getToolPermission } from "../../../permissions/catalog"
 import { summarizeRun } from "../summaries"
 
 test("shows stored tools for event automation runs", async () => {

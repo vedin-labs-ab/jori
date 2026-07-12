@@ -5,11 +5,8 @@ import {
   isPersonApprovalDecisionText,
 } from "../../approvals/runtime"
 import { type Actor, createIntegrationActor } from "../../shared/actor"
-import {
-  readCallbackState,
-  redirectWithStatus,
-  unauthorizedResponse,
-} from "../http"
+import { unauthorizedResponse } from "../../shared/http"
+import { readCallbackState, redirectWithStatus } from "../http"
 import { completeIntegrationOffer, failIntegrationOffer } from "../install"
 import { recordGitHubLifecycleEvent } from "../lifecycle/github"
 import {

@@ -1,6 +1,9 @@
 import { expect, test } from "vitest"
+import {
+  emptyQueryResult,
+  messageDisplay,
+} from "../../../../test/convex/console"
 import { type QueryCtx } from "../../../_generated/server"
-import { emptyQueryResult, messageDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes the latest integration offer for the run", async () => {

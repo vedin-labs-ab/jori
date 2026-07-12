@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
+import { createAssetContext } from "../../../../test/convex/broker"
 import { type Doc, type Id } from "../../../_generated/dataModel"
-import { assetContext } from "../fixtures"
 import { callGoogleTool } from "."
 
 const originalFetch = globalThis.fetch
@@ -174,7 +174,7 @@ describe("Gmail assets", () => {
         subject: "File",
         to: ["recipient@example.com"],
       },
-      assetContext()
+      createAssetContext()
     )
 
     const raw = readRawMessage(calls[0]?.body)

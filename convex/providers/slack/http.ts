@@ -2,11 +2,11 @@ import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { handleSlackApprovalInteraction } from "../../approvals/slack"
 import { handleSlackIntegrationOfferInteraction } from "../../integrations/offers/interaction"
+import { unauthorizedResponse } from "../../shared/http"
 import {
   oauthAuthorizeRedirect,
   readOAuthCallback,
   redirectWithStatus,
-  unauthorizedResponse,
 } from "../http"
 import { completeIntegrationOffer, failOfferAndRedirect } from "../install"
 import {

@@ -27,7 +27,7 @@ export function createPlaceMessage(input: AgentRuntimeInput) {
       name: placeDisplayName(input.messageIntegration, input.place.name),
       sections: sectionValues(input.place),
     },
-  }).trim()
+  })
 }
 
 function sectionValues(place: PlaceContext) {

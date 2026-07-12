@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
+import { promptedTool, runtimeInput } from "../../../../test/convex/prompt"
 import { type PlaceContext } from "../../../places/context"
 import { assemblePrompt } from "."
-import { promptedTool, runtimeInput } from "./fixtures"
 
 function inputWithPlace(claims: PlaceContext["claims"]) {
   return {

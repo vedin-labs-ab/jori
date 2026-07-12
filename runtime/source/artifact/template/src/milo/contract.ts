@@ -20,6 +20,7 @@ export function defineArtifactContract<
 ): ArtifactContract<{
   [Key in keyof TState]: ArtifactStateRef<TState[Key]["schema"]>
 }> {
+  const version = input.version ?? 1
   const state = Object.fromEntries(
     Object.entries(input.state).map(([name, definition]) => [
       name,
@@ -30,10 +31,10 @@ export function defineArtifactContract<
   }
 
   return {
-    version: input.version ?? 1,
+    version,
     state,
     toJSON: () => ({
-      version: input.version ?? 1,
+      version,
       state: Object.values(state).map((entry) => entry.toJSON()),
     }),
   }
@@ -76,11 +77,12 @@ function createStateRef<TSchema extends z.ZodType>(
   const jsonSchema = toJsonObjectSchema(definition.schema)
   const schemaVersion = definition.schemaVersion ?? 1
   const schemaName = definition.schemaName ?? name
+  const scope = definition.scope ?? "personal"
 
   return {
     name,
     key: definition.key,
-    scope: definition.scope ?? "personal",
+    scope,
     description: definition.description,
     schema: definition.schema,
     schemaHash: stableHash(jsonSchema),
@@ -89,7 +91,7 @@ function createStateRef<TSchema extends z.ZodType>(
     toJSON: (): ArtifactStateContractJson => ({
       name,
       key: definition.key,
-      scope: definition.scope ?? "personal",
+      scope,
       description: definition.description,
       schema: jsonSchema,
       schemaHash: stableHash(jsonSchema),

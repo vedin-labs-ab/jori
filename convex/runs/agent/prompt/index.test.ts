@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
+import { promptedTool, runtimeInput } from "../../../../test/convex/prompt"
+import { runtimeSkills } from "../../../../test/convex/skills"
 import { assemblePrompt } from "."
-import { promptedTool, runtimeInput } from "./fixtures"
-import { runtimeSkills } from "./skill_fixtures"
 
 const messageTriggerCases = [
   [

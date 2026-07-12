@@ -1,6 +1,9 @@
 import { expect, test } from "vitest"
+import {
+  eventAutomationDisplay,
+  fakeQueryCtx,
+} from "../../../../test/convex/console"
 import { type Id } from "../../../_generated/dataModel"
-import { eventAutomationDisplay, fakeQueryCtx } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes linked GitHub pull request details", async () => {

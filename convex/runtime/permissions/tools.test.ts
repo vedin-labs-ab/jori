@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
+import { integration } from "../../../test/convex/tools"
 import { type Doc } from "../../_generated/dataModel"
 import { getToolPermission, resolveToolModes } from "../../permissions/catalog"
 import { type InstructionRuntimeInput } from "../../runs/agent/input"
-import { integration } from "../../runs/agent/tools/fixtures"
 import { optionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import { permissionGroups, toolDescriptor } from "./tools"
 

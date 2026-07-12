@@ -38,7 +38,7 @@ function formatMessageEntry(entry: PromptMessageEntry) {
       speaker: entry.source,
       text: entry.text,
     },
-  }).trim()
+  })
 }
 
 function formatEntryIds(ids: string[]) {

@@ -1,8 +1,11 @@
 import { expect, test } from "vitest"
+import {
+  emptyQueryResult,
+  oneShotDisplay,
+} from "../../../../test/convex/console"
 import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { getToolPermission } from "../../../permissions/catalog"
-import { emptyQueryResult, oneShotDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes one-shot automation access details", async () => {

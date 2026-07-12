@@ -13,10 +13,6 @@ export function redirectWithStatus(
   return Response.redirect(url.toString(), 302)
 }
 
-export function unauthorizedResponse() {
-  return new Response("Unauthorized", { status: 401 })
-}
-
 export function oauthAuthorizeRedirect(
   request: Request,
   args: {

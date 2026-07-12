@@ -1,5 +1,5 @@
 import { sandboxWorkspace } from "../../contracts/runtime"
-import { boundedInteger, requiredString } from "./input"
+import { boundedInteger, requiredTrimmedString } from "./input"
 import { runJsonScript } from "./script"
 import { type SandboxRuntime } from "./types"
 
@@ -9,7 +9,7 @@ export async function readWorkspaceFile(
 ) {
   return await runJsonScript({
     input: {
-      path: requiredString(input.path, "path"),
+      path: requiredTrimmedString(input.path, "path"),
       offset: boundedInteger(input.offset, 1, 1, 1_000_000),
       limit: boundedInteger(input.limit, 200, 1, 2_000),
     },

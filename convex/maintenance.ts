@@ -111,29 +111,6 @@ export const databaseBatch = internalMutation({
   },
 })
 
-export const tracesBatch = internalMutation({
-  args: {
-    limit: v.optional(v.number()),
-  },
-  returns: v.object({
-    deletedCount: v.number(),
-    hasMore: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
-    const limit = normalizeBatchLimit(args.limit)
-    const rows = await takeRows(ctx, "traces", limit)
-
-    for (const row of rows) {
-      await ctx.db.delete(row._id as never)
-    }
-
-    return {
-      deletedCount: rows.length,
-      hasMore: await hasRemainingTableRows(ctx, "traces"),
-    }
-  },
-})
-
 function normalizeBatchLimit(value?: number) {
   if (value === undefined) {
     return defaultBatchLimit

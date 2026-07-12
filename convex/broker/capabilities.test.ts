@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
+import { integration } from "../../test/convex/tools"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { getToolPermission } from "../permissions/catalog"
 import { type AgentRuntimeInput } from "../runs/agent/input"
-import { integration } from "../runs/agent/tools/fixtures"
 import { type ApprovalBrokerContext } from "./approval"
 import { listCapabilities } from "./capabilities"
 
