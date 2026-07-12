@@ -21,6 +21,7 @@ import {
 import { readAdditionalAutomationSurfaces } from "../instructions/document"
 import { writeAutomationWebSearchPreference } from "../preferences"
 import { AccessFields } from "./access"
+import { AutomationContextSection } from "./context"
 import { AutomationInstructionsSection } from "./instructions"
 import { AutomationNameField } from "./name"
 import { ScopeField } from "./scope"
@@ -156,6 +157,7 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         onValueChange={props.actions.updateScope}
         value={props.values.scope}
       />
+      <AutomationContextSection />
       <AutomationInstructionsSection
         error={props.instructionsError}
         onBlur={ignoreBlur}
