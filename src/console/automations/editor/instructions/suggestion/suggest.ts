@@ -6,6 +6,7 @@ import {
   type AutomationMentionSuggestion,
   findActiveAutomationMention,
   getAutomationMentionSuggestions,
+  maxActiveAutomationMentionLength,
 } from "../../../access"
 import { isReferenceInputAllowed } from "./context"
 
@@ -32,8 +33,12 @@ export function getInstructionSuggestionState(
     return null
   }
 
-  const textBeforeCursor = selection.$from.parent.textBetween(
+  const textStart = Math.max(
     0,
+    selection.$from.parentOffset - maxActiveAutomationMentionLength
+  )
+  const textBeforeCursor = selection.$from.parent.textBetween(
+    textStart,
     selection.$from.parentOffset,
     "\n",
     "￼"
@@ -45,7 +50,7 @@ export function getInstructionSuggestionState(
 
   if (
     activeMention === null ||
-    !isReferenceInputAllowed(selection.$from, activeMention.start)
+    !isReferenceInputAllowed(selection.$from, textStart + activeMention.start)
   ) {
     return null
   }

@@ -15,6 +15,9 @@ import {
 import { type AutomationToolAccess, resolveAutomationToolAccess } from "./tools"
 
 const maxSuggestions = 6
+const maxAutomationMentionQueryLength = 32
+export const maxActiveAutomationMentionLength =
+  maxAutomationMentionQueryLength + 2
 
 type AutomationMentionSuggestionBase = {
   label: string
@@ -78,7 +81,9 @@ export function findActiveAutomationMention(
     return null
   }
 
-  for (let start = cursor - 1; start >= 0; start -= 1) {
+  const earliestStart = Math.max(0, cursor - maxActiveAutomationMentionLength)
+
+  for (let start = cursor - 1; start >= earliestStart; start -= 1) {
     const kind = sigilKind(text[start])
 
     if (kind !== null) {
@@ -105,7 +110,10 @@ function activeMentionAt(
 
   const query = text.slice(start + 1, cursor)
 
-  if (query.length > 32 || /[^a-z0-9_-]/i.test(query)) {
+  if (
+    query.length > maxAutomationMentionQueryLength ||
+    /[^a-z0-9_-]/i.test(query)
+  ) {
     return null
   }
 

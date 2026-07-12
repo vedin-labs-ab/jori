@@ -102,6 +102,12 @@ test("round-trips code spans containing pills, backticks, and spaces", () => {
   expect(roundTrip(roundTrip(source))).toBe(roundTrip(source))
 })
 
+test("preserves user text that resembles an internal placeholder", () => {
+  const source = "Keep \uE0000:0\uE001 and use #share_artifact."
+
+  expect(roundTrip(source)).toBe(source)
+})
+
 test("keeps a same-line backtick run as inline code", () => {
   const document = parse("```txt hello```")
   const inlineCode = document.content?.[0]?.content?.[0]

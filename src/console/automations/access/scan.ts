@@ -115,13 +115,16 @@ function matchMention(
   kind: AutomationMentionKind,
   entries: readonly AutomationMentionEntry[]
 ): AutomationMention | null {
-  const tail = text.slice(sigilIndex + 1).toLowerCase()
+  const tokenStart = sigilIndex + 1
 
   for (const entry of entries) {
     for (const token of entry.tokens) {
-      if (tail.startsWith(token) && isMentionEnd(tail[token.length])) {
+      const tokenEnd = tokenStart + token.length
+      const candidate = text.slice(tokenStart, tokenEnd).toLowerCase()
+
+      if (candidate === token && isMentionEnd(text[tokenEnd])) {
         return {
-          end: sigilIndex + 1 + token.length,
+          end: tokenEnd,
           id: entry.id,
           kind,
           start: sigilIndex,

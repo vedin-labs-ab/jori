@@ -7,6 +7,7 @@ import { automationInstructionMarkerErrors } from "../save/marker"
 import { FieldHelp } from "./help"
 
 export function AutomationInstructionsSection({
+  additionalSurfaces,
   error,
   onBlur,
   onWebSearchChange,
@@ -16,6 +17,7 @@ export function AutomationInstructionsSection({
   skills,
   values,
 }: {
+  additionalSurfaces: AutomationFormValues["surfaces"]
   error: string | undefined
   onBlur: () => void
   onWebSearchChange: (enabled: boolean) => void
@@ -35,6 +37,7 @@ export function AutomationInstructionsSection({
         <InstructionsHelp />
       </div>
       <AutomationInstructionsField
+        additionalSurfaces={additionalSurfaces}
         error={error}
         id="automation-description"
         value={values.instructions}

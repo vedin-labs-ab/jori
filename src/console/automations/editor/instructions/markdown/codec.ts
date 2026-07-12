@@ -19,11 +19,10 @@ export function parseInstructionMarkdown(value: string) {
 
 export function serializeInstructionMarkdown(document: JSONContent) {
   const prepared = prepareInstructionSerialization(document)
-  let value = markdown.serialize(prepared.document)
+  const value = markdown.serialize(prepared.document)
 
-  for (const [placeholder, reference] of prepared.references) {
-    value = value.replaceAll(placeholder, reference)
-  }
-
-  return value
+  return value.replace(
+    /\uE000\d+:\d+\uE001/g,
+    (placeholder) => prepared.references.get(placeholder) ?? placeholder
+  )
 }

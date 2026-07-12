@@ -11,6 +11,7 @@ import { type AutomationInstructionsValue } from "./document"
 import { type InstructionSuggestionState } from "./suggestion/suggest"
 
 export type AutomationInstructionsFieldProps = {
+  additionalSurfaces: AutomationSurfaceFormValue[]
   error?: string
   id: string
   onBlur: () => void
