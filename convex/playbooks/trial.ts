@@ -15,6 +15,7 @@ export async function trialPlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
     tenantId: args.tenantId,
     instructions: plan.instructions,
     title: plan.definition.title,
+    artifactId: args.artifactId,
     access: await resolveAccessInput(ctx, {
       access: plan.access,
       createdBy: args.createdBy,

@@ -1,8 +1,8 @@
 import { wait } from "@trigger.dev/sdk/v3"
-import { type ToolRuntime } from "../tool"
-import { type ConvexId, type WaiterWake } from "../types"
+import { type ToolRuntime } from "../tool/runtime"
+import { type ConvexId, type WaiterCondition, type WaiterWake } from "../types"
 import { recordRuntimeEvent } from "./events"
-import { hasResolvedHandoffs, type PendingHandoff } from "./handoffs"
+import { hasResolvedHandoffs, type PendingHandoff } from "./handoff"
 
 const parkGraceMs = 5000
 const minTimeoutSeconds = 5
@@ -11,9 +11,22 @@ export async function parkRun(
   runtime: ToolRuntime,
   pending: PendingHandoff[]
 ): Promise<WaiterWake> {
-  const deadline = earliestDeadline(pending)
+  return await parkWaitpoint(runtime, {
+    deadline: earliestDeadline(pending),
+    resolved: async () => await handoffsResolved(runtime),
+  })
+}
+
+export async function parkWaitpoint(
+  runtime: ToolRuntime,
+  args: {
+    condition?: WaiterCondition
+    deadline: number
+    resolved: () => Promise<boolean>
+  }
+): Promise<WaiterWake> {
   const token = await wait.createToken({
-    timeout: `${timeoutSeconds(deadline)}s`,
+    timeout: `${timeoutSeconds(args.deadline)}s`,
     tags: [runtime.context.run.id],
   })
   const waiterId = await runtime.convex.createWaiter({
@@ -22,12 +35,13 @@ export async function parkRun(
       ? {}
       : { sessionId: runtime.context.session.id }),
     waitpointId: token.id,
-    expiresAt: deadline,
+    expiresAt: args.deadline,
+    ...(args.condition === undefined ? {} : { condition: args.condition }),
   })
 
   await recordWaiting(runtime, waiterId)
 
-  if (await raceResolved(runtime)) {
+  if (await args.resolved()) {
     await runtime.convex.expireWaiter({ waiterId })
     await recordResumed(runtime, waiterId, { reason: "resolved" })
     return { reason: "resolved" }
@@ -46,7 +60,7 @@ export async function parkRun(
   return result.output
 }
 
-async function raceResolved(runtime: ToolRuntime) {
+async function handoffsResolved(runtime: ToolRuntime) {
   const handoffs = await runtime.convex.loadRunHandoffs({
     runId: runtime.context.run.id,
   })

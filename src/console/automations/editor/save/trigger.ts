@@ -16,7 +16,7 @@ import {
 
 export type TriggerSpec =
   | { at: string }
-  | { expression: string }
+  | { expression: string; timezone: string }
   | {
       integration: AutomationFormValues["eventIntegration"]
       event: string
@@ -35,7 +35,10 @@ export function buildAutomationTriggerSpec(
       return built
     }
 
-    return { type: "cron", trigger: { expression: built.cron } }
+    return {
+      type: "cron",
+      trigger: { expression: built.cron, timezone: values.timezone },
+    }
   }
 
   if (values.type === "event") {
@@ -97,7 +100,8 @@ export function hasAutomationTriggerChanged(
       existing.type !== "cron" ||
       !("expression" in existing.trigger) ||
       "error" in built ||
-      built.cron !== existing.trigger.expression
+      built.cron !== existing.trigger.expression ||
+      values.timezone !== existing.trigger.timezone
     )
   }
 
@@ -119,6 +123,7 @@ export function triggerFormValues(automation: Automation) {
     return {
       type: "cron" as const,
       ...classifyCron(trigger.expression),
+      timezone: trigger.timezone,
       runAt: "",
       eventIntegration: emptyAutomationForm.eventIntegration,
       event: emptyAutomationForm.event,
@@ -139,6 +144,7 @@ export function triggerFormValues(automation: Automation) {
     return {
       type: "event" as const,
       ...classifyCron(undefined),
+      timezone: emptyAutomationForm.timezone,
       runAt: "",
       eventIntegration: integration,
       event: definition.value,
@@ -150,6 +156,7 @@ export function triggerFormValues(automation: Automation) {
   return {
     type: "once" as const,
     ...classifyCron(undefined),
+    timezone: emptyAutomationForm.timezone,
     runAt: "at" in trigger ? toDatetimeLocal(trigger.at) : "",
     eventIntegration: emptyAutomationForm.eventIntegration,
     event: emptyAutomationForm.event,

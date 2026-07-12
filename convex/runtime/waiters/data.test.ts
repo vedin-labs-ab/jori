@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { type DataModel, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { wakeRun } from "./data"
+import { wakeParentForTerminalRun, wakeRun } from "./data"
 
 test("wakes waiters with resolved offer subjects", async () => {
   const ctx = fakeMutationCtx([waiter()])
@@ -44,7 +44,39 @@ test("wakes waiters with resolved offer subjects", async () => {
   ])
 })
 
-function waiter(): Seed {
+test("wakes a parent only after every named child is terminal", async () => {
+  const ctx = fakeMutationCtx([
+    waiter({
+      condition: {
+        kind: "runs",
+        runIds: [id<"runs">("run-child-1"), id<"runs">("run-child-2")],
+      },
+      runId: id<"runs">("run-parent"),
+    }),
+    run("run-child-1", "completed"),
+    run("run-child-2", "running"),
+  ])
+
+  await expect(
+    wakeParentForTerminalRun(ctx, id<"runs">("run-child-1"))
+  ).resolves.toBe(false)
+
+  await ctx.db.patch(id<"runs">("run-child-2"), { status: "failed" })
+
+  await expect(
+    wakeParentForTerminalRun(ctx, id<"runs">("run-child-2"))
+  ).resolves.toBe(true)
+  expect(ctx.patches).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: "waiter",
+        patch: expect.objectContaining({ status: "woken" }),
+      }),
+    ])
+  )
+})
+
+function waiter(overrides: Record<string, unknown> = {}): Seed {
   return [
     "waiters",
     {
@@ -57,6 +89,20 @@ function waiter(): Seed {
       tenantId: "tenant",
       updatedAt: 0,
       waitpointId: "waitpoint",
+      ...overrides,
+    },
+  ]
+}
+
+function run(runId: string, status: "completed" | "failed" | "running"): Seed {
+  return [
+    "runs",
+    {
+      _creationTime: 0,
+      _id: id<"runs">(runId),
+      parentId: id<"runs">("run-parent"),
+      status,
+      tenantId: "tenant",
     },
   ]
 }
@@ -80,6 +126,7 @@ function fakeMutationCtx(seed: Seed[]): FakeCtx {
     inserts,
     patches,
     db: {
+      get: async (rowId: string) => rows.get(rowId) ?? null,
       insert: async (table: string, doc: Record<string, unknown>) => {
         const rowId = `${table}-${inserts.length + 1}`
         rows.set(rowId, { _creationTime: 0, _id: rowId, ...doc })

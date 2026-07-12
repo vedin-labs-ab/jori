@@ -55,6 +55,44 @@ test("start_agent rejects a missing title before creating a run", async () => {
   expect(runtime.convex.createAgentRun).not.toHaveBeenCalled()
 })
 
+test("wait_for_agents returns immediately when every child is terminal", async () => {
+  const runtime = createRuntime()
+  runtime.convex.readAgentRuns = vi.fn(async () => [
+    {
+      runId: id<"runs">("run_child"),
+      title: "Research attendees",
+      status: "completed" as const,
+      error: null,
+    },
+  ])
+
+  const result = await executeToolCall({
+    attempt: 1,
+    call: {
+      args: {
+        deadline: "2099-07-12T18:00:00.000Z",
+        runIds: ["run_child"],
+      },
+      id: "call_1",
+      name: "wait_for_agents",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(JSON.parse(result.content)).toEqual({
+    reason: "completed",
+    runs: [
+      {
+        runId: "run_child",
+        title: "Research attendees",
+        status: "completed",
+        error: null,
+      },
+    ],
+  })
+})
+
 function createRuntime(): ToolRuntime {
   return {
     convex: {
@@ -73,6 +111,7 @@ function createRuntime(): ToolRuntime {
         organization: null,
         place: null,
         person: null,
+        requester: null,
       },
       run: {
         id: id<"runs">("run_1"),
@@ -89,6 +128,14 @@ function createRuntime(): ToolRuntime {
           inputSchema: {},
           mode: "required",
           name: "start_agent",
+          route: "agent",
+        },
+        {
+          access: "read",
+          description: "Wait for agents.",
+          inputSchema: {},
+          mode: "required",
+          name: "wait_for_agents",
           route: "agent",
         },
       ],

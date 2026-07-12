@@ -9,12 +9,8 @@ import {
   type RunHandoffs,
 } from "../types"
 import { recordApprovalResolved, recordOfferResolved } from "./activity"
+import { type PendingHandoff } from "./handoff"
 import { appendSessionMessages, replacePromptMessages } from "./messages"
-
-export type PendingHandoff = {
-  expiresAt: number
-  subject: HandoffSubject
-}
 
 export async function reconcileHandoffs(
   runtime: ToolRuntime,
@@ -65,16 +61,7 @@ export async function applyHandoffs(
   }
 }
 
-export function hasResolvedHandoffs(handoffs: RunHandoffs) {
-  return (
-    handoffs.approvals.some((approval) => !isPendingApproval(approval)) ||
-    handoffs.offers.some((offer) => !isPendingOffer(offer))
-  )
-}
-
-export function pendingHandoffSubjects(pending: PendingHandoff[]) {
-  return pending.map((handoff) => handoff.subject)
-}
+export { pendingHandoffSubjects } from "./handoff"
 
 async function reconcileApproval(
   runtime: ToolRuntime,

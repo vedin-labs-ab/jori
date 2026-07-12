@@ -17,6 +17,7 @@ export async function createInstructionRun(
     instructions: string
     title?: string
     access?: Access
+    artifactId?: Id<"artifacts">
     parent?: Doc<"runs">
     createdBy?: Id<"persons">
   }
@@ -25,6 +26,7 @@ export async function createInstructionRun(
 
   const runId = await ctx.db.insert("runs", {
     tenantId: args.tenantId,
+    artifactId: args.artifactId ?? parent?.artifactId,
     ...(parent === undefined
       ? {}
       : { parentId: parent._id, rootId: parent.rootId ?? parent._id }),

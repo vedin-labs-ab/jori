@@ -3,7 +3,7 @@ import { type Doc } from "../_generated/dataModel"
 
 export type TimeTriggerInput =
   | { type: "once"; at: string }
-  | { type: "cron"; expression: string }
+  | { type: "cron"; expression: string; timezone: string }
 
 export type TimeTrigger =
   | Extract<Doc<"automations">["trigger"], { at: number }>
@@ -26,7 +26,8 @@ export function getTimeTrigger(input: TimeTriggerInput, now: number) {
 
   return {
     expression,
-    nextAt: getNextCronRunAt(expression, now),
+    timezone: input.timezone,
+    nextAt: getNextCronRunAt(expression, now, input.timezone),
   }
 }
 

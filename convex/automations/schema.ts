@@ -16,12 +16,19 @@ export const accessInput = v.object({
 
 export const access = accessValidator
 
+export const automationBinding = {
+  key: v.optional(v.string()),
+  playbook: v.optional(v.string()),
+  artifactId: v.optional(v.id("artifacts")),
+}
+
 export const triggerInput = v.union(
   v.object({
     at: v.string(),
   }),
   v.object({
     expression: v.string(),
+    timezone: v.string(),
   }),
   v.object({
     integration: integrationValidator,
@@ -37,6 +44,7 @@ const trigger = v.union(
   }),
   v.object({
     expression: v.string(),
+    timezone: v.string(),
     nextAt: v.number(),
     functionId: v.optional(v.id("_scheduled_functions")),
   }),
@@ -61,9 +69,8 @@ export const automationType = v.union(
 
 export const automations = defineTable({
   tenantId: v.string(),
-  artifactId: v.optional(v.id("artifacts")),
-  /** Catalog key of the playbook this automation was instantiated from. */
-  playbook: v.optional(v.string()),
+  ...automationBinding,
+  keyPartition: v.optional(v.string()),
   name: v.string(),
   instructions: v.string(),
   /** Personal: owner-only. Organization: every member. See contracts/permissions/scope. */
@@ -78,6 +85,11 @@ export const automations = defineTable({
   firedAt: v.optional(v.number()),
 })
   .index("by_tenant", ["tenantId"])
+  .index("by_tenant_and_key_partition_and_key", [
+    "tenantId",
+    "keyPartition",
+    "key",
+  ])
   .index("by_artifact", ["artifactId"])
   .index("by_tenant_status", ["tenantId", "status"])
 

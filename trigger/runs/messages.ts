@@ -14,9 +14,12 @@ import {
 // (when present) and the run context as user messages, broad to narrow.
 // Everything after the prefix is history.
 export function promptMessages(prompt: RuntimePrompt): ModelMessage[] {
-  const contexts = [prompt.organization, prompt.place, prompt.person].filter(
-    (content): content is string => content !== null
-  )
+  const contexts = [
+    prompt.organization,
+    prompt.requester,
+    prompt.place,
+    prompt.person,
+  ].filter((content): content is string => content !== null)
 
   return [
     { content: prompt.instructions, role: "system" },

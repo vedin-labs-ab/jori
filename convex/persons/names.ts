@@ -60,6 +60,12 @@ export async function personDisplayName(
     .withIndex("by_person", (index) => index.eq("personId", personId))
     .collect()
 
+  return preferredPersonName(identities)
+}
+
+export function preferredPersonName(
+  identities: Array<{ name?: string; provider: IdentityProvider }>
+) {
   for (const provider of namePreference) {
     const name = identities.find(
       (row) => row.provider === provider && row.name !== undefined

@@ -10,7 +10,7 @@ import {
 } from "../identity/users"
 import { ensureClerkPerson } from "../persons/clerk"
 import { recordTrace } from "../runtime/traces/data"
-import { wakeRun } from "../runtime/waiters/data"
+import { wakeParentForTerminalRun, wakeRun } from "../runtime/waiters/data"
 import { createPersonActor } from "../shared/actor"
 
 export const stop = mutation({
@@ -53,6 +53,7 @@ export const stop = mutation({
     })
 
     await wakeRun(ctx, { runId: run._id, reason: "cancelled" })
+    await wakeParentForTerminalRun(ctx, run._id)
     await ctx.runMutation(internal.runtime.outbox.enqueueCancellation, {
       runId: run._id,
     })

@@ -15,41 +15,20 @@ describe("playbook schedules", () => {
     ).toBe("Every Friday at 16:00")
   })
 
-  test("converts local times to UTC cron", () => {
-    expect(playbookCron({ repeat: "daily", time: "08:00" }, 0)).toBe(
-      "0 8 * * *"
+  test("keeps schedules in local wall-clock terms", () => {
+    expect(playbookCron({ repeat: "daily", time: "08:00" })).toBe("0 8 * * *")
+    expect(playbookCron({ repeat: "weekdays", time: "00:30" })).toBe(
+      "30 0 * * 1-5"
     )
-    // UTC+2 (offset -120): 08:00 local is 06:00 UTC.
-    expect(playbookCron({ repeat: "weekdays", time: "08:00" }, -120)).toBe(
-      "0 6 * * 1-5"
+    expect(playbookCron({ repeat: "weekly", weekday: 5, time: "16:00" })).toBe(
+      "0 16 * * 5"
     )
-    // UTC-5 (offset 300): 16:00 local is 21:00 UTC.
-    expect(
-      playbookCron({ repeat: "weekly", weekday: 5, time: "16:00" }, 300)
-    ).toBe("0 21 * * 5")
   })
 
-  test("shifts weekdays across midnight boundaries", () => {
-    // UTC+2: 00:30 local weekdays land on 22:30 UTC the previous day.
-    expect(playbookCron({ repeat: "weekdays", time: "00:30" }, -120)).toBe(
-      "30 22 * * 0-4"
-    )
-    // UTC-10: 22:00 local Friday lands on 08:00 UTC Saturday.
-    expect(
-      playbookCron({ repeat: "weekly", weekday: 5, time: "22:00" }, 600)
-    ).toBe("0 8 * * 6")
-    // Sunday shifting back wraps to Saturday.
-    expect(
-      playbookCron({ repeat: "weekly", weekday: 0, time: "01:00" }, -120)
-    ).toBe("0 23 * * 6")
-  })
-
-  test("produces valid cron expressions across offsets", () => {
-    for (const offset of [-840, -120, 0, 300, 720]) {
+  test("produces valid cron expressions", () => {
+    for (const time of ["00:00", "08:00", "23:59"]) {
       expect(() =>
-        validateCronExpression(
-          playbookCron({ repeat: "weekdays", time: "08:00" }, offset)
-        )
+        validateCronExpression(playbookCron({ repeat: "weekdays", time }))
       ).not.toThrow()
     }
   })

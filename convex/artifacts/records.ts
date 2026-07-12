@@ -29,16 +29,40 @@ const publishFields = {
   capabilities: v.array(capabilityInputValidator),
 }
 
+const blueprintField = { blueprint: v.optional(v.string()) }
+
 export const publishCreated = internalMutation({
   args: {
     tenantId: v.string(),
     ownerId: v.id("persons"),
     title: v.string(),
     access: artifactAccess,
+    ...blueprintField,
     ...publishFields,
   },
   handler: async (ctx, args) => {
     const now = Date.now()
+    const blueprintPartition =
+      args.access === "personal" ? `person:${args.ownerId}` : "organization"
+
+    if (args.blueprint !== undefined) {
+      const existing = await ctx.db
+        .query("artifacts")
+        .withIndex("by_tenant_and_blueprint", (index) =>
+          index
+            .eq("tenantId", args.tenantId)
+            .eq("blueprintPartition", blueprintPartition)
+            .eq("blueprint", args.blueprint)
+        )
+        .first()
+
+      if (existing !== null) {
+        throw new Error(
+          `Artifact blueprint already provisioned: ${args.blueprint}`
+        )
+      }
+    }
+
     const artifactId = await ctx.db.insert("artifacts", {
       tenantId: args.tenantId,
       ownerId: args.ownerId,
@@ -47,6 +71,9 @@ export const publishCreated = internalMutation({
       contract: args.contract,
       createdAt: now,
       updatedAt: now,
+      ...(args.blueprint === undefined
+        ? {}
+        : { blueprint: args.blueprint, blueprintPartition }),
     })
     const versionId = await insertVersion(ctx, {
       ...args,

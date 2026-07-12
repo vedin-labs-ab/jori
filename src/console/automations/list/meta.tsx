@@ -120,7 +120,8 @@ function triggerSummary(automation: Automation) {
 
   if (automation.type === "cron" && "expression" in trigger) {
     const detail =
-      describeCron(trigger.expression) ?? `${trigger.expression} UTC`
+      describeCron(trigger.expression, trigger.timezone) ??
+      `${trigger.expression} ${trigger.timezone}`
 
     return {
       detail,

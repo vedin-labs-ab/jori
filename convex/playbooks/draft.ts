@@ -1,8 +1,10 @@
+import { resolvePlaybookSchedule } from "../../contracts/playbooks/catalog"
 import { playbookCron } from "../../contracts/playbooks/schedule"
 import { type Id } from "../_generated/dataModel"
 import { resolveAccessInput } from "../automations/access"
 import { toConsoleAutomation } from "../automations/console"
 import { getTimeTrigger } from "../automations/timing"
+import { requirePersonTimezone } from "../persons/profile/timezone"
 import { type QueryLikeCtx } from "../shared/context"
 import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./enable"
 
@@ -13,7 +15,7 @@ import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./enable"
  */
 export async function resolvePlaybookDraft(
   ctx: QueryLikeCtx,
-  args: PlaybookPlanArgs & { utcOffsetMinutes: number }
+  args: PlaybookPlanArgs
 ) {
   const plan = await resolvePlaybookPlan(ctx, args)
   const access = await resolveAccessInput(ctx, {
@@ -22,10 +24,14 @@ export async function resolvePlaybookDraft(
     tenantId: args.tenantId,
   })
   const now = Date.now()
+  const timezone = await requirePersonTimezone(ctx, args.createdBy)
   const trigger = getTimeTrigger(
     {
       type: "cron",
-      expression: playbookCron(plan.definition.schedule, args.utcOffsetMinutes),
+      expression: playbookCron(
+        resolvePlaybookSchedule(plan.definition, plan.options)
+      ),
+      timezone,
     },
     now
   )
@@ -34,6 +40,9 @@ export async function resolvePlaybookDraft(
     _id: "draft" as Id<"automations">,
     _creationTime: now,
     tenantId: args.tenantId,
+    key: `playbook:${plan.definition.key}`,
+    playbook: plan.definition.key,
+    artifactId: args.artifactId,
     name: plan.definition.title,
     instructions: plan.instructions,
     scope: plan.definition.scope,

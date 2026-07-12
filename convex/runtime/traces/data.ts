@@ -3,6 +3,7 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx, mutation } from "../../_generated/server"
 import { continuePendingConversationRun } from "../../conversations/continuation"
 import { requireWorkerSecret } from "../shared"
+import { wakeParentForTerminalRun } from "../waiters/data"
 import { traceData, traceType } from "./schema"
 
 type TraceData = Infer<typeof traceData>
@@ -46,6 +47,9 @@ export const record = mutation({
     if (created) {
       await patchRunStatus(ctx, args)
       await patchSessionStatus(ctx, args)
+      if (args.type === "run.completed" || args.type === "run.failed") {
+        await wakeParentForTerminalRun(ctx, args.runId)
+      }
     }
 
     return { created }

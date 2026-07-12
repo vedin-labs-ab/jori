@@ -5,31 +5,27 @@ import {
   prepareMiloToolInput,
   saveSandboxAsset,
 } from "./assets"
-import { type MiloConvexClient } from "./convex"
 import { errorDetails } from "./events"
 import { generateImageAsset } from "./images/index"
 import { optionalStringList, requiredString } from "./input"
 import { type ModelToolCall } from "./model/types"
 import { executeRunTool } from "./run"
 import { recordToolResultActivity } from "./runs/activity"
+import { waitForAgents } from "./runs/agents"
 import { executeCodingTool } from "./sandbox/coding"
 import { prepareProviderToolInput } from "./sandbox/source"
-import { type SandboxRuntime } from "./sandbox/types"
 import { executeActiveSurfaceTool } from "./surface"
 import { toolErrorResult, toolResult, toToolContent } from "./tool/results"
+import { type ToolRuntime } from "./tool/runtime"
 import { findTool, requireSurface, shouldFinishConvexTool } from "./tool/select"
 import { recordToolEvent, toolTraceDetails } from "./trace"
-import { type JsonObject, type RuntimeContext, type RuntimeTool } from "./types"
+import { type JsonObject, type RuntimeTool } from "./types"
+
+export type { ToolRuntime } from "./tool/runtime"
 
 export type ToolCallResult = {
   content: string
   finished: boolean
-}
-
-export type ToolRuntime = {
-  convex: MiloConvexClient
-  context: RuntimeContext
-  sandbox: SandboxRuntime
 }
 
 export async function executeToolCall(
@@ -153,7 +149,7 @@ async function executeTool(
         })
       )
     case "agent":
-      return toolResult(await executeAgentTool(runtime, call.args))
+      return toolResult(await executeAgentTool(runtime, call.name, call.args))
   }
 }
 
@@ -245,13 +241,25 @@ async function callConvexTool(
   return await materializeSandboxResult(runtime, result)
 }
 
-async function executeAgentTool(runtime: ToolRuntime, input: JsonObject) {
-  return await runtime.convex.createAgentRun({
-    parentId: runtime.context.run.id,
-    task: requiredString(input.task, "task"),
-    title: requiredString(input.title, "title"),
-    tools: optionalStringList(input.tools),
-  })
+async function executeAgentTool(
+  runtime: ToolRuntime,
+  name: string,
+  input: JsonObject
+) {
+  if (name === "wait_for_agents") {
+    return await waitForAgents(runtime, input)
+  }
+
+  if (name === "start_agent") {
+    return await runtime.convex.createAgentRun({
+      parentId: runtime.context.run.id,
+      task: requiredString(input.task, "task"),
+      title: requiredString(input.title, "title"),
+      tools: optionalStringList(input.tools),
+    })
+  }
+
+  throw new Error(`Unknown agent tool: ${name}`)
 }
 
 function eventArgs(args: {

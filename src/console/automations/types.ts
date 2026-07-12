@@ -32,6 +32,9 @@ export type RepeatMode = (typeof repeatOptions)[number]["value"]
 type AutomationTriggerType = "cron" | "once" | "event"
 
 export type AutomationFormValues = {
+  key?: Automation["key"]
+  playbook?: Automation["playbook"]
+  artifactId?: Automation["artifactId"]
   name: string
   instructions: string
   type: AutomationTriggerType
@@ -40,6 +43,7 @@ export type AutomationFormValues = {
   weekday: string
   monthDay: string
   cron: string
+  timezone: string
   runAt: string
   eventIntegration: AutomationEventIntegration
   event: string
@@ -60,6 +64,7 @@ export const emptyAutomationForm: AutomationFormValues = {
   weekday: "1",
   monthDay: "1",
   cron: "",
+  timezone: "UTC",
   runAt: "",
   eventIntegration: "slack",
   event: defaultEvent.value,

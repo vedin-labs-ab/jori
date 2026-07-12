@@ -1,48 +1,35 @@
 import { v } from "convex/values"
 import { playbookCatalog } from "../../contracts/playbooks/catalog"
-import { type DeliveryChoice } from "../../contracts/playbooks/delivery"
-import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
-import { type MutationCtx, mutation, query } from "../_generated/server"
+import { internalMutation, internalQuery, query } from "../_generated/server"
 import { listInactiveAccessIntegrations } from "../automations/access"
-import { checkTenantAccess, requireTenantAccess } from "../identity/access"
-import {
-  readClerkUserEmail,
-  readClerkUserName,
-  requireClerkUserId,
-} from "../identity/users"
-import { ensureClerkPerson, resolveCurrentPerson } from "../persons/clerk"
+import { checkTenantAccess } from "../identity/access"
+import { requireClerkUserId } from "../identity/users"
 import { resolvePersonByIdentity } from "../persons/links"
-import { type Integration, integrationValidator } from "../shared/integrations"
+import { playbookPlanArgs, playbookPlanFields } from "./caller"
 import { resolvePlaybookDraft } from "./draft"
 import {
   availableDelivery,
   connectedIntegrations,
   enablePlaybook,
-  type PlaybookPlanArgs,
   readPlaybookAutomations,
   readPlaybookSlots,
+  resolvePlaybookPlan,
+  validatePlaybookEnablement,
 } from "./enable"
 import { trialPlaybook } from "./trial"
 
-// The validator mirrors DeliveryChoice; resolveCallerPlanArgs assigns the
-// inferred args into that type, so drift is a compile error there.
-const destinationValidator = v.union(
-  v.object({ kind: v.literal("email") }),
-  v.object({
-    kind: v.literal("slack"),
-    channelId: v.string(),
-    channelName: v.string(),
-  })
-)
+const resolvedPlanFields = {
+  ...playbookPlanFields,
+  createdBy: v.id("persons"),
+  recipient: v.object({
+    email: v.string(),
+    name: v.optional(v.string()),
+  }),
+}
 
-const planArgs = {
-  tenantId: v.string(),
-  playbook: v.string(),
-  // Keyed by playbook capability; slot resolution ignores unknown keys.
-  choices: v.optional(v.record(v.string(), integrationValidator)),
-  destination: v.optional(destinationValidator),
-  // Keyed by option field; plan resolution validates against the catalog.
-  options: v.optional(v.record(v.string(), v.union(v.string(), v.number()))),
+const resolvedArtifactPlanFields = {
+  ...resolvedPlanFields,
+  artifactId: v.optional(v.id("artifacts")),
 }
 
 export const list = query({
@@ -106,107 +93,72 @@ export const list = query({
   },
 })
 
-export const enable = mutation({
+export const enableResolved = internalMutation({
   args: {
-    ...planArgs,
-    utcOffsetMinutes: v.number(),
+    ...playbookPlanFields,
+    createdBy: v.id("persons"),
+    recipient: v.object({
+      email: v.string(),
+      name: v.optional(v.string()),
+    }),
+    artifactId: v.optional(v.id("artifacts")),
   },
-  handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
-    const plan = await resolveCallerPlanArgs(ctx, identity, args)
-
-    return await enablePlaybook(ctx, {
-      ...plan,
-      utcOffsetMinutes: args.utcOffsetMinutes,
-    })
-  },
-})
-
-export const trial = mutation({
-  args: planArgs,
-  handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
-
-    return await trialPlaybook(
+  returns: v.object({ automationId: v.id("automations") }),
+  handler: async (ctx, args) =>
+    await enablePlaybook(
       ctx,
-      await resolveCallerPlanArgs(ctx, identity, args)
-    )
-  },
+      playbookPlanArgs(args, args.createdBy, args.recipient, args.artifactId)
+    ),
 })
 
-// A non-persisting preview of the automation a playbook would create, for the
-// raw builder. Read-only, so it resolves the caller's existing person.
-export const draft = query({
+export const validateResolved = internalQuery({
   args: {
-    ...planArgs,
-    utcOffsetMinutes: v.number(),
+    ...playbookPlanFields,
+    createdBy: v.id("persons"),
+    recipient: v.object({
+      email: v.string(),
+      name: v.optional(v.string()),
+    }),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
-    const createdBy = await resolveCurrentPerson(ctx, args.tenantId)
+    await validatePlaybookEnablement(
+      ctx,
+      playbookPlanArgs(args, args.createdBy, args.recipient)
+    )
 
-    return await resolvePlaybookDraft(ctx, {
-      ...planFromArgs(args, createdBy, callerRecipient(identity)),
-      utcOffsetMinutes: args.utcOffsetMinutes,
-    })
+    return null
   },
 })
 
-async function resolveCallerPlanArgs(
-  ctx: MutationCtx,
-  identity: { email?: string; name?: string; subject?: string },
-  args: {
-    tenantId: string
-    playbook: string
-    choices?: Record<string, Integration>
-    destination?: DeliveryChoice
-    options?: PlaybookOptionValues
-  }
-): Promise<PlaybookPlanArgs> {
-  const recipient = callerRecipient(identity)
-  const createdBy = await ensureClerkPerson(ctx, {
-    tenantId: args.tenantId,
-    clerkSubject: requireClerkUserId(identity),
-    email: recipient.email,
-    name: recipient.name,
-  })
-
-  return planFromArgs(args, createdBy, recipient)
-}
-
-function planFromArgs(
-  args: {
-    tenantId: string
-    playbook: string
-    choices?: Record<string, Integration>
-    destination?: DeliveryChoice
-    options?: PlaybookOptionValues
-  },
-  createdBy: PlaybookPlanArgs["createdBy"],
-  recipient: PlaybookPlanArgs["recipient"]
-): PlaybookPlanArgs {
-  return {
-    tenantId: args.tenantId,
-    key: args.playbook,
-    choices: args.choices ?? {},
-    destination: args.destination ?? { kind: "email" },
-    options: args.options,
-    createdBy,
-    recipient,
-  }
-}
-
-function callerRecipient(identity: {
-  email?: string
-  name?: string
-}): PlaybookPlanArgs["recipient"] {
-  const email = readClerkUserEmail(identity)
-
-  if (email === undefined) {
-    throw new Error(
-      "Your account needs an email address before playbooks can email you."
+export const validatePlanResolved = internalQuery({
+  args: resolvedPlanFields,
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await resolvePlaybookPlan(
+      ctx,
+      playbookPlanArgs(args, args.createdBy, args.recipient)
     )
-  }
 
-  return { email, name: readClerkUserName(identity) }
-}
+    return null
+  },
+})
+
+export const trialResolved = internalMutation({
+  args: resolvedArtifactPlanFields,
+  returns: v.object({ runId: v.id("runs") }),
+  handler: async (ctx, args) =>
+    await trialPlaybook(
+      ctx,
+      playbookPlanArgs(args, args.createdBy, args.recipient, args.artifactId)
+    ),
+})
+
+export const draftResolved = internalQuery({
+  args: resolvedArtifactPlanFields,
+  handler: async (ctx, args) =>
+    await resolvePlaybookDraft(
+      ctx,
+      playbookPlanArgs(args, args.createdBy, args.recipient, args.artifactId)
+    ),
+})

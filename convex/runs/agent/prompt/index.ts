@@ -8,6 +8,7 @@ import { createApprovalInstructions } from "./approvals"
 import { createCommunicationInstructions } from "./communication"
 import {
   createContext,
+  createRequesterMessage,
   defaultActiveSurface,
   type PromptActiveSurface,
 } from "./context"
@@ -60,6 +61,7 @@ export function assemblePrompt(
     context,
     instructions,
     organization: optionalPromptBlock(createOrganizationMessage(input)),
+    requester: optionalPromptBlock(createRequesterMessage(input)),
     place: optionalPromptBlock(createPlaceMessage(input)),
     person: options.person ?? null,
   }

@@ -1,21 +1,19 @@
-import {
-  defaultScopeForIntegrations,
-  type Scope,
-} from "../../../contracts/permissions/scope"
+import { type Scope } from "../../../contracts/permissions/scope"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { type AutomationAccessInput, resolveAccessInput } from "../access"
+import {
+  type AutomationAccessInput,
+  automationScope,
+  resolveAccessInput,
+} from "../access"
 import { automationEventMatchKey } from "../events"
+import { automationKeyPartition, findAutomationByKey } from "../keys"
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
 import { normalizeRequiredText } from "../timing"
+import { requireAutomationArtifact } from "./artifact"
 import { getRequiredAutomation, getTenantAutomation } from "./read"
-import {
-  cancelTrigger,
-  resolveTrigger,
-  scheduleAutomationIfNeeded,
-  scheduleTrigger,
-} from "./trigger"
+import { cancelTrigger, resolveTrigger, scheduleTrigger } from "./trigger"
 
 type UpdateAutomationArgs = {
   tenantId: string
@@ -27,64 +25,6 @@ type UpdateAutomationArgs = {
   access?: AutomationAccessInput
   type?: AutomationType
   trigger?: AutomationTriggerInput
-}
-
-export async function createAutomation(
-  ctx: MutationCtx,
-  args: {
-    tenantId: string
-    artifactId?: Id<"artifacts">
-    playbook?: string
-    name: string
-    instructions: string
-    scope?: Scope
-    access: AutomationAccessInput
-    type: AutomationType
-    trigger: AutomationTriggerInput
-    createdBy?: Id<"persons">
-  }
-) {
-  const now = Date.now()
-  const trigger = await resolveTrigger(ctx, {
-    createdBy: args.createdBy,
-    tenantId: args.tenantId,
-    type: args.type,
-    trigger: args.trigger,
-    now,
-  })
-  await requireArtifact(ctx, args.tenantId, args.artifactId)
-
-  const automationId = await ctx.db.insert("automations", {
-    tenantId: args.tenantId,
-    artifactId: args.artifactId,
-    playbook: args.playbook,
-    name: normalizeRequiredText(args.name, "name"),
-    instructions: normalizeRequiredText(args.instructions, "instructions"),
-    scope:
-      args.scope ??
-      defaultScopeForIntegrations(
-        args.access.integrations.map((entry) => entry.integration)
-      ),
-    type: args.type,
-    access: await resolveAccessInput(ctx, {
-      access: args.access,
-      artifactId: args.artifactId,
-      createdBy: args.createdBy,
-      tenantId: args.tenantId,
-    }),
-    trigger,
-    status: "active",
-    createdBy: args.createdBy,
-    createdAt: now,
-    updatedAt: now,
-  })
-
-  await scheduleAutomationIfNeeded(ctx, automationId, trigger)
-  if (args.type === "event" && "integrationId" in trigger) {
-    await ensureSubscription(ctx, { tenantId: args.tenantId, trigger })
-  }
-
-  return await getRequiredAutomation(ctx, automationId)
 }
 
 export async function updateAutomation(
@@ -137,11 +77,20 @@ async function buildAutomationPatch(
 
   if (args.scope !== undefined) {
     patch.scope = args.scope
+    await updateKeyPartition(ctx, existing, args.scope, patch)
   }
 
   if (args.artifactId !== undefined) {
-    await requireArtifact(ctx, args.tenantId, args.artifactId)
     patch.artifactId = args.artifactId
+  }
+
+  if (args.artifactId !== undefined || args.scope !== undefined) {
+    await requireAutomationArtifact(ctx, {
+      tenantId: args.tenantId,
+      artifactId: args.artifactId ?? existing.artifactId,
+      createdBy: existing.createdBy,
+      scope: args.scope ?? automationScope(existing),
+    })
   }
 
   if (args.access !== undefined) {
@@ -253,18 +202,26 @@ function isSameEventTrigger(
   )
 }
 
-async function requireArtifact(
+async function updateKeyPartition(
   ctx: MutationCtx,
-  tenantId: string,
-  artifactId: Id<"artifacts"> | undefined
+  existing: Doc<"automations">,
+  scope: Scope,
+  patch: Partial<Doc<"automations">>
 ) {
-  if (artifactId === undefined) {
+  if (existing.key === undefined) {
     return
   }
 
-  const artifact = await ctx.db.get(artifactId)
+  const keyPartition = automationKeyPartition(scope, existing.createdBy)
+  const conflict = await findAutomationByKey(ctx, {
+    tenantId: existing.tenantId,
+    key: existing.key,
+    keyPartition,
+  })
 
-  if (artifact === null || artifact.tenantId !== tenantId) {
-    throw new Error("Artifact automation owner is invalid.")
+  if (conflict !== null && conflict._id !== existing._id) {
+    throw new Error("Automation key already exists in the new scope.")
   }
+
+  patch.keyPartition = keyPartition
 }

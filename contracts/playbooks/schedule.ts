@@ -27,19 +27,10 @@ export function describePlaybookSchedule(schedule: PlaybookSchedule) {
   return `Every ${weekdayNames[schedule.weekday]} at ${schedule.time}`
 }
 
-/**
- * Automation cron expressions run in UTC, while playbook schedules are meant
- * to feel local ("weekdays at 08:00" in the enabler's timezone). Convert with
- * the enabler's UTC offset, shifting weekday fields across midnight when the
- * conversion crosses a day boundary.
- */
-export function playbookCron(
-  schedule: PlaybookSchedule,
-  utcOffsetMinutes: number
-) {
+/** Build the local cron expression stored with the requester's IANA zone. */
+export function playbookCron(schedule: PlaybookSchedule) {
   const local = parseTime(schedule.time)
-  const shifted = shiftToUtc(local, utcOffsetMinutes)
-  const time = `${shifted.minute} ${shifted.hour}`
+  const time = `${local.minute} ${local.hour}`
 
   if (schedule.repeat === "daily") {
     return `${time} * * *`
@@ -47,11 +38,7 @@ export function playbookCron(
 
   const localWeekdays =
     schedule.repeat === "weekdays" ? [1, 2, 3, 4, 5] : [schedule.weekday]
-  const utcWeekdays = localWeekdays
-    .map((weekday) => (weekday + shifted.dayShift + 7) % 7)
-    .sort((left, right) => left - right)
-
-  return `${time} * * ${weekdayField(utcWeekdays)}`
+  return `${time} * * ${weekdayField(localWeekdays)}`
 }
 
 /** Contiguous ranges ("1-5") keep the shared cron labels readable. */
@@ -65,22 +52,6 @@ function weekdayField(weekdays: number[]) {
   }
 
   return weekdays.join(",")
-}
-
-function shiftToUtc(
-  local: { hour: number; minute: number },
-  utcOffsetMinutes: number
-) {
-  // Matches Date#getTimezoneOffset semantics: UTC = local + offset.
-  const utcMinutes = local.hour * 60 + local.minute + utcOffsetMinutes
-  const normalized =
-    ((utcMinutes % minutesPerDay) + minutesPerDay) % minutesPerDay
-
-  return {
-    hour: Math.floor(normalized / 60),
-    minute: normalized % 60,
-    dayShift: Math.floor(utcMinutes / minutesPerDay),
-  }
 }
 
 function parseTime(time: string) {

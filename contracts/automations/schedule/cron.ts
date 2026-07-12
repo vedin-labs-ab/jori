@@ -1,3 +1,6 @@
+import { TZDateMini } from "@date-fns/tz"
+import { requireTimezone, utcTimezone } from "../../timezone"
+
 const cronFieldRanges = [
   { min: 0, max: 59 },
   { min: 0, max: 23 },
@@ -20,23 +23,29 @@ export function validateCronExpression(expression: string) {
   parseCronExpression(expression)
 }
 
-export function getNextCronRunAt(expression: string, from: number) {
+export function getNextCronRunAt(
+  expression: string,
+  from: number,
+  timezone = utcTimezone
+) {
   const schedule = parseCronExpression(expression)
+  const zone = requireTimezone(timezone)
   const start = getNextMinute(from)
-  const cursor = getStartOfUtcDay(start)
+  const localStart = new TZDateMini(start, zone)
+  const cursor = localDayCursor(localStart, zone)
 
   const maxSearchDays = 5 * 366
 
   for (let day = 0; day < maxSearchDays; day += 1) {
     if (matchesCalendar(schedule, cursor)) {
-      const runAt = getNextTimeOnDay(schedule, cursor, start)
+      const runAt = getNextTimeOnDay(schedule, cursor, start, zone)
 
       if (runAt !== null) {
         return runAt
       }
     }
 
-    cursor.setUTCDate(cursor.getUTCDate() + 1)
+    cursor.setDate(cursor.getDate() + 1)
   }
 
   throw new Error(
@@ -138,12 +147,12 @@ function parseCronRange(range: string, fieldIndex: number) {
 }
 
 function matchesCalendar(schedule: CronSchedule, date: Date) {
-  if (!schedule.months.has(date.getUTCMonth() + 1)) {
+  if (!schedule.months.has(date.getMonth() + 1)) {
     return false
   }
 
-  const dayOfMonthMatches = schedule.daysOfMonth.has(date.getUTCDate())
-  const dayOfWeekMatches = schedule.daysOfWeek.has(date.getUTCDay())
+  const dayOfMonthMatches = schedule.daysOfMonth.has(date.getDate())
+  const dayOfWeekMatches = schedule.daysOfWeek.has(date.getDay())
 
   if (schedule.unrestrictedDayOfMonth) {
     return dayOfWeekMatches
@@ -193,37 +202,45 @@ function getNextMinute(from: number) {
   return date
 }
 
-function getStartOfUtcDay(date: Date) {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+function localDayCursor(date: Date, timezone: string) {
+  return new TZDateMini(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    12,
+    0,
+    0,
+    0,
+    timezone
   )
 }
 
-function getNextTimeOnDay(schedule: CronSchedule, day: Date, start: Date) {
-  const isStartDay =
-    day.getUTCFullYear() === start.getUTCFullYear() &&
-    day.getUTCMonth() === start.getUTCMonth() &&
-    day.getUTCDate() === start.getUTCDate()
-  const startHour = start.getUTCHours()
-  const startMinute = start.getUTCMinutes()
-
+function getNextTimeOnDay(
+  schedule: CronSchedule,
+  day: Date,
+  start: Date,
+  timezone: string
+) {
   for (const hour of schedule.hours) {
-    if (isStartDay && hour < startHour) {
-      continue
-    }
-
     for (const minute of schedule.minutes) {
-      if (isStartDay && hour === startHour && minute < startMinute) {
-        continue
-      }
-
-      return Date.UTC(
-        day.getUTCFullYear(),
-        day.getUTCMonth(),
-        day.getUTCDate(),
+      const candidate = new TZDateMini(
+        day.getFullYear(),
+        day.getMonth(),
+        day.getDate(),
         hour,
-        minute
+        minute,
+        0,
+        0,
+        timezone
       )
+
+      if (
+        candidate.getHours() === hour &&
+        candidate.getMinutes() === minute &&
+        candidate.getTime() >= start.getTime()
+      ) {
+        return candidate.getTime()
+      }
     }
   }
 

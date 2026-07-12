@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, test } from "vitest"
-import { emptyAutomationForm } from "../../types"
+import { type AutomationFormValues, emptyAutomationForm } from "../../types"
 import { writeAutomationWebSearchPreference } from "../preferences"
 import { automationFormValues, createAutomationArgs } from "."
 import { automationInstructionMarkerErrors } from "./marker"
@@ -21,40 +21,6 @@ describe("automation payload", () => {
 
     expect(automationFormValues(undefined)).toMatchObject({
       webSearch: false,
-    })
-  })
-
-  test("creates automation args with integration access policy", () => {
-    expect(
-      createAutomationArgs(
-        {
-          ...emptyAutomationForm,
-          name: "Weekly release summary",
-          instructions: "Summarize @GitHub and post to @Slack.",
-          surfaces: [
-            { integration: "github", tools: ["github_get_issue"] },
-            { integration: "slack", tools: ["conversations_add_message"] },
-          ],
-        },
-        { permissions: automationPermissions() }
-      )
-    ).toEqual({
-      args: {
-        name: "Weekly release summary",
-        instructions: "Summarize @GitHub and post to @Slack.",
-        scope: "personal",
-        access: {
-          integrations: [
-            { integration: "github", tools: ["github_get_issue"] },
-            { integration: "slack", tools: ["conversations_add_message"] },
-          ],
-          web: true,
-        },
-        type: "cron",
-        trigger: {
-          expression: "0 9 * * *",
-        },
-      },
     })
   })
 
@@ -85,6 +51,44 @@ describe("automation payload", () => {
     ).toEqual({
       error: "Give at least one mentioned integration a write tool.",
     })
+  })
+})
+
+test("creates automation args with access and source bindings", () => {
+  expect(
+    createAutomationArgs(
+      {
+        ...emptyAutomationForm,
+        key: "playbook:meeting-prep",
+        playbook: "meeting-prep",
+        artifactId: "artifact" as AutomationFormValues["artifactId"],
+        name: "Weekly release summary",
+        instructions: "Summarize @GitHub and post to @Slack.",
+        surfaces: [
+          { integration: "github", tools: ["github_get_issue"] },
+          { integration: "slack", tools: ["conversations_add_message"] },
+        ],
+      },
+      { permissions: automationPermissions() }
+    )
+  ).toEqual({
+    args: {
+      name: "Weekly release summary",
+      key: "playbook:meeting-prep",
+      playbook: "meeting-prep",
+      artifactId: "artifact",
+      instructions: "Summarize @GitHub and post to @Slack.",
+      scope: "personal",
+      access: {
+        integrations: [
+          { integration: "github", tools: ["github_get_issue"] },
+          { integration: "slack", tools: ["conversations_add_message"] },
+        ],
+        web: true,
+      },
+      type: "cron",
+      trigger: { expression: "0 9 * * *", timezone: "UTC" },
+    },
   })
 })
 

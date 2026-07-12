@@ -11,7 +11,7 @@ export { describeCron } from "@contracts/automations/schedule/labels"
 
 export type CronParts = Pick<
   AutomationFormValues,
-  "cron" | "monthDay" | "repeat" | "time" | "weekday"
+  "cron" | "monthDay" | "repeat" | "time" | "timezone" | "weekday"
 >
 
 export const weekdayOptions = [
@@ -34,6 +34,7 @@ const defaultParts: CronParts = {
   monthDay: emptyAutomationForm.monthDay,
   repeat: emptyAutomationForm.repeat,
   time: emptyAutomationForm.time,
+  timezone: emptyAutomationForm.timezone,
   weekday: emptyAutomationForm.weekday,
 }
 
@@ -124,7 +125,7 @@ export function previewRecurringRun(
   }
 
   try {
-    return { runAt: getNextCronRunAt(built.cron, now) }
+    return { runAt: getNextCronRunAt(built.cron, now, parts.timezone) }
   } catch (error) {
     return { error: readErrorMessage(error, "No upcoming runs.") }
   }

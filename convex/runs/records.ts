@@ -5,7 +5,8 @@ import { readWorkstreamRoster } from "../deduction/roster"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
 import { recentConversation } from "../messages/history"
 import { readApprovedFacts } from "../organization/profile"
-import { readPersonTimezone } from "../persons/timezone"
+import { readRequesterContext } from "../persons/profile/context"
+import { readPersonTimezone } from "../persons/profile/timezone"
 import { readPlaceContext } from "../places/context"
 import {
   hasIntegrationTools,
@@ -76,6 +77,10 @@ async function getMessageInput(
     integrations,
     conversation: await recentConversation(ctx, message),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
+    requester: await readRequesterContext(ctx, {
+      personId: args.run.createdBy,
+      integrations,
+    }),
     place: await readPlaceContext(ctx, message),
     timezone: await readPersonTimezone(ctx, args.run.createdBy),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
@@ -112,6 +117,10 @@ async function getAutomationInput(
     automation.createdBy
   )
 
+  const grantedIntegrations = integrations.filter((integration) =>
+    hasIntegrationTools(automation.access, integration._id)
+  )
+
   return {
     type: "automation" as const,
     run: args.run,
@@ -122,10 +131,12 @@ async function getAutomationInput(
       integration !== null && integration.tenantId === args.run.tenantId
         ? integration
         : null,
-    integrations: integrations.filter((integration) =>
-      hasIntegrationTools(automation.access, integration._id)
-    ),
+    integrations: grantedIntegrations,
     organization: await readApprovedFacts(ctx, args.run.tenantId),
+    requester: await readRequesterContext(ctx, {
+      personId: automation.createdBy,
+      integrations: grantedIntegrations,
+    }),
     timezone: await readPersonTimezone(ctx, automation.createdBy),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
@@ -150,18 +161,24 @@ async function getInstructionInput(
     args.run.createdBy
   )
 
+  const grantedIntegrations =
+    access === undefined
+      ? integrations
+      : integrations.filter((integration) =>
+          hasIntegrationTools(access, integration._id)
+        )
+
   return {
     type: "instruction" as const,
     run: args.run,
     instructions,
     ...(access === undefined ? {} : { access }),
-    integrations:
-      access === undefined
-        ? integrations
-        : integrations.filter((integration) =>
-            hasIntegrationTools(access, integration._id)
-          ),
+    integrations: grantedIntegrations,
     organization: await readApprovedFacts(ctx, args.run.tenantId),
+    requester: await readRequesterContext(ctx, {
+      personId: args.run.createdBy,
+      integrations: grantedIntegrations,
+    }),
     timezone: await readPersonTimezone(ctx, args.run.createdBy),
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }

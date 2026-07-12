@@ -48,6 +48,7 @@ export type PublishArtifactArgs =
       personId: Id<"persons">
       message?: string
       capabilities?: ArtifactCapabilityInput[]
+      blueprint?: string
     }
   | {
       mode: "update"
@@ -104,6 +105,9 @@ export async function publishArtifact(
       sdk: "milo-artifact-sdk@0",
       message: args.message,
       capabilities: args.capabilities ?? [],
+      ...(args.mode === "create" && args.blueprint !== undefined
+        ? { blueprint: args.blueprint }
+        : {}),
     }
 
     const published =

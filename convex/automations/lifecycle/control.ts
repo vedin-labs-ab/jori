@@ -104,6 +104,7 @@ function clearTriggerFunction(trigger: Doc<"automations">["trigger"]) {
 
   return {
     expression: trigger.expression,
+    timezone: trigger.timezone,
     nextAt: trigger.nextAt,
   }
 }

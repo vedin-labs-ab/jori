@@ -112,7 +112,7 @@ function RepeatDetails({
       <AutomationTimePicker
         className="w-32"
         id="automation-time"
-        label="Time (UTC)"
+        label={`Time (${values.timezone})`}
         onValueChange={(time) => onValuesChange({ ...values, time })}
         value={values.time}
       />
@@ -161,7 +161,7 @@ function CustomCronField({
     <div className="grid gap-2">
       <div className="flex items-center gap-1.5">
         <Label htmlFor="automation-cron">Expression</Label>
-        <CronHelp cron={values.cron} />
+        <CronHelp cron={values.cron} timezone={values.timezone} />
       </div>
       <Input
         className="font-mono"
@@ -176,7 +176,7 @@ function CustomCronField({
   )
 }
 
-function CronHelp({ cron }: { cron: string }) {
+function CronHelp({ cron, timezone }: { cron: string; timezone: string }) {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -195,7 +195,9 @@ function CronHelp({ cron }: { cron: string }) {
           side="right"
         >
           <div className="grid gap-1">
-            <p>Uses five UTC fields: minute, hour, day, month, weekday.</p>
+            <p>
+              Uses five fields in {timezone}: minute, hour, day, month, weekday.
+            </p>
             <a
               className="underline underline-offset-2"
               href={getCrontabGuruUrl(cron)}
