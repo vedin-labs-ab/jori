@@ -110,7 +110,6 @@ function RepeatDetails({
         />
       ) : null}
       <AutomationTimePicker
-        className="w-32"
         id="automation-time"
         onValueChange={(time) => onValuesChange({ ...values, time })}
         timezone={values.timezone}

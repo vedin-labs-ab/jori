@@ -60,7 +60,7 @@ export function AutomationDateTimePicker({
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
+    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_max-content]">
       <div className="grid gap-2">
         <Label htmlFor={`${id}-date`}>Date</Label>
         <Popover>
