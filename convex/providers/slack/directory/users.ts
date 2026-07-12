@@ -1,11 +1,46 @@
 import { internal } from "../../../_generated/api"
 import { type Doc } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
+import { type SlackApiResult } from "../api"
 import { requireSlackCredentials } from "../credentials"
 
 export type SlackActorProfile = {
   email?: string
   name?: string
+}
+
+export type SlackDirectoryUser = {
+  id: string
+  name?: string
+  real_name?: string
+  deleted?: boolean
+  is_bot?: boolean
+  is_app_user?: boolean
+  profile?: {
+    display_name?: string
+    display_name_normalized?: string
+    email?: string
+    real_name?: string
+    real_name_normalized?: string
+  }
+}
+
+export function readSlackDirectoryUsers(result: SlackApiResult) {
+  const members = result?.members
+
+  return Array.isArray(members) ? members.filter(isSlackDirectoryUser) : []
+}
+
+export function slackDirectoryUserProfile(user: SlackDirectoryUser) {
+  return readSlackProfile(user)
+}
+
+function isSlackDirectoryUser(value: unknown): value is SlackDirectoryUser {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).id === "string"
+  )
 }
 
 export async function getSlackActorProfile(
@@ -153,17 +188,7 @@ async function fetchSlackUserProfile(
 type SlackUserInfo =
   | {
       ok: true
-      user?: {
-        name?: string
-        real_name?: string
-        profile?: {
-          display_name?: string
-          display_name_normalized?: string
-          email?: string
-          real_name?: string
-          real_name_normalized?: string
-        }
-      }
+      user?: SlackDirectoryUser
     }
   | {
       ok: false
@@ -171,7 +196,7 @@ type SlackUserInfo =
     }
 
 function readSlackProfile(
-  user: Extract<SlackUserInfo, { ok: true }>["user"]
+  user: SlackDirectoryUser | undefined
 ): SlackActorProfile {
   return {
     email: normalizeSlackProfileString(user?.profile?.email),

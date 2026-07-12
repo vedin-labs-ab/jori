@@ -62,49 +62,28 @@ test("an open edit blocks enabling until saved or cancelled", () => {
   renderDialog(actions, ["email", "slack"], singlePlan)
   fireEvent.click(screen.getByRole("button", { name: /change/i }))
 
-  expect(screen.getByRole("button", { name: "Enable" })).toHaveProperty(
-    "disabled",
-    true
-  )
-  expect(screen.getByRole("button", { name: /try once/i })).toHaveProperty(
-    "disabled",
-    true
-  )
+  expectButtonDisabled("Enable")
+  expectButtonDisabled(/try once/i)
 
   fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
 
   expect(screen.getByText(/sam@example.com/)).toBeDefined()
-  expect(screen.getByRole("button", { name: "Enable" })).toHaveProperty(
-    "disabled",
-    false
-  )
+  expectButtonDisabled("Enable", false)
 })
 
-test("save stays disabled until the target actually changes", () => {
+test("save stays disabled until the target actually changes", async () => {
   const actions = stubActions()
 
   renderDialog(actions, ["email", "slack"], singlePlan)
   fireEvent.click(screen.getByRole("button", { name: /change/i }))
 
-  // Same target as committed: nothing to save yet.
-  expect(screen.getByRole("button", { name: "Save" })).toHaveProperty(
-    "disabled",
-    true
-  )
+  expectButtonDisabled("Save")
 
-  switchKind("Slack")
-  // Slack needs a channel before the draft is saveable.
-  expect(screen.getByRole("button", { name: "Save" })).toHaveProperty(
-    "disabled",
-    true
-  )
+  await switchMode("Channel")
+  expectButtonDisabled("Save")
 
-  switchKind("Email")
-  // Back to the committed target: still nothing to save.
-  expect(screen.getByRole("button", { name: "Save" })).toHaveProperty(
-    "disabled",
-    true
-  )
+  await switchMode("Email")
+  expectButtonDisabled("Save")
 })
 
 test("try once shares the chosen destination", () => {
@@ -112,7 +91,6 @@ test("try once shares the chosen destination", () => {
 
   renderDialog(actions, ["email"], singlePlan)
 
-  // A single delivery kind leaves nothing to change.
   expect(screen.queryByRole("button", { name: /change/i })).toBeNull()
 
   fireEvent.click(screen.getByRole("button", { name: /try once/i }))
@@ -131,10 +109,7 @@ test("a pending Advanced settings locks every control", () => {
   renderDialog(actions, ["email", "slack"], singlePlan)
 
   for (const name of [/change/i, /try once/i, "Enable", /advanced settings/i]) {
-    expect(screen.getByRole("button", { name })).toHaveProperty(
-      "disabled",
-      true
-    )
+    expectButtonDisabled(name)
   }
 })
 
@@ -145,10 +120,8 @@ test("advanced settings closes this dialog only after creation", () => {
   renderDialog(actions, ["email", "slack"], singlePlan, onOpenChange)
   fireEvent.click(screen.getByRole("button", { name: /advanced settings/i }))
 
-  // The builder stacks on top: nothing closes when it merely opens.
   expect(onOpenChange).not.toHaveBeenCalled()
 
-  // Creating an automation from the draft fires the handed-over close.
   const onCreated = vi.mocked(actions.openAdvanced).mock.calls[0][4]
   onCreated()
 
@@ -167,15 +140,10 @@ test("closing an option dropdown never closes the dialog", async () => {
     meetingPrep()
   )
 
-  // The "Before each meeting" select is the dialog's only dropdown.
   fireEvent.click(screen.getByRole("combobox"))
   expect(screen.getByRole("listbox")).toBeDefined()
-  // Dismissable layers attach their outside listeners a tick after opening.
   await new Promise((resolve) => setTimeout(resolve, 0))
 
-  // Dismissing the dropdown by clicking elsewhere closes only the dropdown.
-  // The dialog defers its own outside dismissal to the gesture's click, so
-  // the full pointerdown-then-click sequence is what the regression needs.
   fireEvent.pointerDown(document.body)
   expect(screen.queryByRole("listbox")).toBeNull()
   fireEvent.click(document.body)
@@ -199,10 +167,7 @@ test("turning off both deliveries blocks enabling", async () => {
     screen.getByText("Turn on the morning digest or a pre-meeting send.")
   ).toBeDefined()
   for (const name of ["Enable", /try once/i, /advanced settings/i]) {
-    expect(screen.getByRole("button", { name })).toHaveProperty(
-      "disabled",
-      true
-    )
+    expectButtonDisabled(name)
   }
 
   fireEvent.click(screen.getByRole("radio", { name: "On" }))
@@ -210,10 +175,7 @@ test("turning off both deliveries blocks enabling", async () => {
   expect(
     screen.queryByText("Turn on the morning digest or a pre-meeting send.")
   ).toBeNull()
-  expect(screen.getByRole("button", { name: "Enable" })).toHaveProperty(
-    "disabled",
-    false
-  )
+  expectButtonDisabled("Enable", false)
 })
 
 test("a single organization domain is named in the meetings hint", () => {
@@ -269,6 +231,13 @@ function meetingPrep() {
   return definition
 }
 
+function expectButtonDisabled(name: string | RegExp, disabled = true) {
+  expect(screen.getByRole("button", { name })).toHaveProperty(
+    "disabled",
+    disabled
+  )
+}
+
 /** Radix Select touches pointer-capture and scroll APIs jsdom lacks. */
 function shimSelectDom() {
   Element.prototype.hasPointerCapture ??= () => false
@@ -277,9 +246,19 @@ function shimSelectDom() {
   Element.prototype.scrollIntoView ??= () => {}
 }
 
-function switchKind(kind: string) {
-  fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery kind" }))
-  fireEvent.click(screen.getByRole("menuitem", { name: kind }))
+async function switchMode(mode: "Channel" | "DM" | "Email") {
+  fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery method" }))
+
+  if (mode === "Email") {
+    fireEvent.click(screen.getByRole("menuitem", { name: "Email" }))
+    return
+  }
+
+  const slack = screen.getByRole("menuitem", { name: "Slack" })
+
+  slack.focus()
+  fireEvent.keyDown(slack, { key: "ArrowRight" })
+  fireEvent.click(await screen.findByRole("menuitem", { name: mode }))
 }
 
 function renderDialog(

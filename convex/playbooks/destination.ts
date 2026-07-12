@@ -33,14 +33,26 @@ export function resolveDestination(
   }
 
   if (!ctx.connected.has("slack")) {
-    throw new Error("Connect Slack to deliver to a channel.")
+    throw new Error("Connect Slack to deliver through Slack.")
   }
 
   return {
     kind: "slack",
-    channelId: choice.channelId,
-    channelName: choice.channelName,
+    target: normalizeSlackTarget(choice.target),
   }
+}
+
+function normalizeSlackTarget(
+  target: Extract<DeliveryChoice, { kind: "slack" }>["target"]
+) {
+  const id = target.id.trim()
+  const label = target.label.trim().replace(/\s+/g, " ")
+
+  if (id === "" || /\s/.test(id) || label === "") {
+    throw new Error("Choose a valid Slack destination.")
+  }
+
+  return { ...target, id, label }
 }
 
 /** A playbook delivers by email through the same account it reads from. */

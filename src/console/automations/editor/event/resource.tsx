@@ -1,85 +1,9 @@
-import {
-  type AutomationEventIntegration,
-  type AutomationEventParameter,
-} from "@contracts/automations/events"
-import { useAction } from "convex/react"
-import { Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox"
+import { type AutomationEventParameter } from "@contracts/automations/events"
+import { IntegrationOptionPicker } from "@/console/integrations/picker"
 import { cn } from "@/lib/utils"
-import { api } from "../../../../../convex/_generated/api"
-import { type AutomationEventOption, searchEventOptions } from "./search"
-
-export function EventOptionField({
-  tenantId,
-  integration,
-  parameter,
-  match,
-  disabled,
-  disabledMessage,
-  id,
-  className,
-  value,
-  onValueChange,
-}: EventOptionFieldProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const { isLoading, message, options, setQuery } = useEventOptions({
-    match,
-    disabled,
-    integration,
-    isOpen,
-    parameter,
-    tenantId,
-  })
-  const selectedOption =
-    options.find((option) => option.value === value) ??
-    (value === "" ? null : { label: value, value })
-
-  return (
-    <Combobox
-      autoHighlight
-      filter={null}
-      isItemEqualToValue={(item, selected) => item.value === selected.value}
-      itemToStringLabel={(option) => option.label}
-      itemToStringValue={(option) => option.value}
-      items={options}
-      onInputValueChange={setQuery}
-      onOpenChange={(open) => {
-        setIsOpen(open)
-        if (!open) {
-          setQuery("")
-        }
-      }}
-      onValueChange={(option) => {
-        onValueChange(option?.value ?? "")
-        setQuery("")
-      }}
-      open={isOpen && !disabled}
-      value={selectedOption}
-    >
-      <EventOptionInput
-        className={cn("w-full", className)}
-        disabled={disabled}
-        disabledMessage={disabledMessage}
-        id={id}
-        parameter={parameter}
-        value={value}
-      />
-      <EventOptionContent isLoading={isLoading} message={message} />
-    </Combobox>
-  )
-}
 
 type EventOptionFieldProps = {
   tenantId: string
-  integration: AutomationEventIntegration
   parameter: Extract<AutomationEventParameter, { type: "option" }>
   match: Record<string, string>
   disabled: boolean
@@ -90,154 +14,37 @@ type EventOptionFieldProps = {
   onValueChange: (value: string) => void
 }
 
-function useEventOptions({
-  match,
-  disabled,
-  integration,
-  isOpen,
-  parameter,
+export function EventOptionField({
   tenantId,
-}: Pick<
-  EventOptionFieldProps,
-  "match" | "disabled" | "integration" | "parameter" | "tenantId"
-> & {
-  isOpen: boolean
-}) {
-  const search = useAction(api.automations.options.search)
-  const [query, setQuery] = useState("")
-  const [options, setOptions] = useState<AutomationEventOption[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState<string>()
-
-  useEffect(() => {
-    if (!isOpen || disabled) {
-      return
-    }
-
-    return searchEventOptions({
-      integration,
-      query,
-      parameter,
-      match,
-      search,
-      setIsLoading,
-      setMessage,
-      setOptions,
-      tenantId,
-    })
-  }, [isOpen, disabled, integration, query, parameter, match, search, tenantId])
-
-  return { isLoading, message, options, setQuery }
-}
-
-function EventOptionContent({
-  isLoading,
-  message,
-}: {
-  isLoading: boolean
-  message: string | undefined
-}) {
-  return (
-    <ComboboxContent>
-      <EventOptionState isLoading={isLoading} message={message} />
-      {message === undefined ? (
-        <>
-          {isLoading ? null : <ComboboxEmpty>No options found.</ComboboxEmpty>}
-          <ComboboxList>
-            {(option: AutomationEventOption, index: number) => (
-              <EventOptionItem
-                key={option.value}
-                index={index}
-                option={option}
-              />
-            )}
-          </ComboboxList>
-        </>
-      ) : null}
-    </ComboboxContent>
-  )
-}
-
-function EventOptionInput({
-  className,
+  parameter,
+  match,
   disabled,
   disabledMessage,
   id,
-  parameter,
+  className,
   value,
-}: {
-  className?: string
-  disabled: boolean
-  disabledMessage: string | undefined
-  id: string
-  parameter: Extract<AutomationEventParameter, { type: "option" }>
-  value: string
-}) {
+  onValueChange,
+}: EventOptionFieldProps) {
+  const selected = value === "" ? null : { label: value, value }
+
   return (
-    <ComboboxInput
-      aria-label={parameter.label}
-      className={className}
+    <IntegrationOptionPicker
+      ariaLabel={parameter.label}
+      className={cn("w-full", className)}
       clearLabel={`Clear ${parameter.label}`}
       disabled={disabled}
+      emptyLabel="No options found."
       id={id}
-      placeholder={optionPlaceholder({ disabled, disabledMessage, parameter })}
-      showClear={!disabled && value !== ""}
+      match={match}
+      onChange={(option) => onValueChange(option?.value ?? "")}
+      placeholder={
+        disabled
+          ? (disabledMessage ?? parameter.placeholder)
+          : parameter.placeholder
+      }
+      source={parameter.source}
+      tenantId={tenantId}
+      value={selected}
     />
-  )
-}
-
-function optionPlaceholder({
-  disabled,
-  disabledMessage,
-  parameter,
-}: {
-  disabled: boolean
-  disabledMessage: string | undefined
-  parameter: Extract<AutomationEventParameter, { type: "option" }>
-}) {
-  return disabled
-    ? (disabledMessage ?? parameter.placeholder)
-    : parameter.placeholder
-}
-
-function EventOptionItem({
-  index,
-  option,
-}: {
-  index: number
-  option: AutomationEventOption
-}) {
-  return (
-    <ComboboxItem className="items-start pr-7" index={index} value={option}>
-      <div className="grid min-w-0 gap-0.5">
-        <span className="truncate">{option.label}</span>
-        {option.description === undefined ? null : (
-          <span className="truncate text-muted-foreground">
-            {option.description}
-          </span>
-        )}
-      </div>
-    </ComboboxItem>
-  )
-}
-
-function EventOptionState({
-  isLoading,
-  message,
-}: {
-  isLoading: boolean
-  message: string | undefined
-}) {
-  if (isLoading) {
-    return (
-      <div className="flex items-center gap-2 px-3 py-2 text-muted-foreground text-xs">
-        <Loader2 className="size-3.5 animate-spin" />
-        Loading options
-      </div>
-    )
-  }
-
-  return message === undefined ? null : (
-    <p className="px-3 py-2 text-muted-foreground text-xs">{message}</p>
   )
 }

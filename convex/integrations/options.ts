@@ -1,46 +1,44 @@
 import { v } from "convex/values"
+import {
+  integrationForOptionSource,
+  isIntegrationOptionSource,
+} from "../../contracts/integrations/options"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
-import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { ensureCurrentPersonFromAction } from "../persons/clerk"
 import { integrationValidator } from "../shared/integrations"
 import {
-  integrationUsesAutomationEventOptionSource,
-  isAutomationEventOptionSource,
-} from "./events"
-import { integrationLabels, resolveEventIntegration } from "./integrations"
-import {
-  type AutomationEventOptionSearchResult,
+  type IntegrationOptionSearchResult,
   searchIntegrationOptions,
-} from "./options/integrations"
+} from "./options/load"
+import { integrationLabels, resolveIntegrationForOwner } from "./resolve"
+import { prepareIntegrationForRuntime } from "./runtime"
 
 const matchValidator = v.record(v.string(), v.union(v.string(), v.number()))
 
 export const search = action({
   args: {
     tenantId: v.string(),
-    integration: integrationValidator,
     source: v.string(),
     query: v.string(),
     match: v.optional(matchValidator),
   },
-  handler: async (ctx, args): Promise<AutomationEventOptionSearchResult> => {
+  handler: async (ctx, args): Promise<IntegrationOptionSearchResult> => {
     await requireTenantAccess(ctx, args.tenantId)
 
-    if (
-      !isAutomationEventOptionSource(args.source) ||
-      !integrationUsesAutomationEventOptionSource(args.integration, args.source)
-    ) {
-      throw new Error("Choose a supported event option.")
+    if (!isIntegrationOptionSource(args.source)) {
+      throw new Error("Choose a supported integration option.")
     }
 
+    const sourceIntegration = integrationForOptionSource(args.source)
+
     const lookup: IntegrationLookup = await ctx.runQuery(
-      internal.automations.options.integration,
+      internal.integrations.options.integration,
       {
         tenantId: args.tenantId,
-        integration: args.integration,
+        integration: sourceIntegration,
         createdBy: await ensureCurrentPersonFromAction(ctx, args.tenantId),
       }
     )
@@ -49,12 +47,12 @@ export const search = action({
       return lookup
     }
 
-    const integration = await prepareIntegrationForRuntime(ctx, {
+    const runtimeIntegration = await prepareIntegrationForRuntime(ctx, {
       integration: lookup.integration,
     })
 
     return await searchIntegrationOptions({
-      integration,
+      integration: runtimeIntegration,
       source: args.source,
       query: args.query,
       match: args.match,
@@ -82,16 +80,16 @@ export const integration = internalQuery({
     try {
       return {
         status: "ready",
-        integration: await resolveEventIntegration(ctx, {
+        integration: await resolveIntegrationForOwner(ctx, {
           tenantId: args.tenantId,
           integration: args.integration,
-          createdBy: args.createdBy,
+          ownerId: args.createdBy,
         }),
       }
     } catch {
       return {
         status: "unavailable",
-        message: `Connect ${integrationLabels[args.integration]} before choosing event options.`,
+        message: `Connect ${integrationLabels[args.integration]} before choosing options.`,
       }
     }
   },

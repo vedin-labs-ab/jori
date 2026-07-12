@@ -84,12 +84,23 @@ describe("playbook instructions", () => {
   test("a slack destination posts to the channel instead of emailing", () => {
     const instructions = render("morning-brief", {
       kind: "slack",
-      channelId: "C1",
-      channelName: "standup",
+      target: { kind: "channel", id: "C1", label: "standup" },
     })
 
     expect(instructions).toContain(
-      'Post the brief to the "standup" channel via @Slack'
+      'Post the brief to the "standup" Slack channel using channel ID C1 via @Slack'
+    )
+    expect(instructions).not.toContain("Email")
+  })
+
+  test("a slack DM destination sends to the stable user id", () => {
+    const instructions = render("morning-brief", {
+      kind: "slack",
+      target: { kind: "dm", id: "U1", label: "Sam Doe" },
+    })
+
+    expect(instructions).toContain(
+      "Send the brief to Sam Doe in a Slack DM using user ID U1 via @Slack"
     )
     expect(instructions).not.toContain("Email")
   })
@@ -114,11 +125,12 @@ describe("playbook instruction references", () => {
   test("keeps Slack channels outside the tool namespace", () => {
     const instructions = render("morning-brief", {
       kind: "slack",
-      channelId: "C1",
-      channelName: "share_artifact",
+      target: { kind: "channel", id: "C1", label: "share_artifact" },
     })
 
-    expect(instructions).toContain('to the "share_artifact" channel via @Slack')
+    expect(instructions).toContain(
+      'to the "share_artifact" Slack channel using channel ID C1 via @Slack'
+    )
     expect(instructions).not.toContain("#share_artifact")
   })
 })
@@ -180,12 +192,11 @@ describe("meeting prep instructions", () => {
   test("meeting prep summarizes with a link on slack too", () => {
     const instructions = render("meeting-prep", {
       kind: "slack",
-      channelId: "C1",
-      channelName: "standup",
+      target: { kind: "channel", id: "C1", label: "standup" },
     })
 
     expect(instructions).toContain(
-      'Post a short summary of the prep note to the "standup" channel via @Slack, with the link to the full prep note.'
+      'Post a short summary of the prep note to the "standup" Slack channel using channel ID C1 via @Slack, with the link to the full prep note.'
     )
   })
 })

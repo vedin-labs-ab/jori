@@ -115,7 +115,6 @@ function EventParameterFields({
       <EventScopeFields
         key={`${integration}:${event.value}`}
         tenantId={tenantId}
-        integration={integration}
         event={event}
         onValuesChange={onValuesChange}
         values={values}

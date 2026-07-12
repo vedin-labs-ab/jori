@@ -1,19 +1,17 @@
 import { type Integration } from "../../integrations"
-import { automationEventCatalog, automationEventOptionSources } from "./catalog"
+import { automationEventCatalog } from "./catalog"
 import {
   type AutomationEventDefinition,
   type AutomationEventMatch,
-  type AutomationEventOptionSource,
   type AutomationEventParameter,
 } from "./catalog/types"
 
-export { automationEventCatalog, automationEventOptionSources } from "./catalog"
+export { automationEventCatalog } from "./catalog"
 export type {
   AutomationEventDefinition,
   AutomationEventIntegrationDefinition,
   AutomationEventMatch,
   AutomationEventMatchValue,
-  AutomationEventOptionSource,
   AutomationEventParameter,
 } from "./catalog/types"
 
@@ -63,26 +61,6 @@ export function isAutomationEventIntegration(
   return (
     typeof integration === "string" &&
     automationEventIntegrations.some((candidate) => candidate === integration)
-  )
-}
-
-export function isAutomationEventOptionSource(
-  source: unknown
-): source is AutomationEventOptionSource {
-  return (
-    typeof source === "string" &&
-    automationEventOptionSources.some((candidate) => candidate === source)
-  )
-}
-
-export function integrationUsesAutomationEventOptionSource(
-  integration: Integration,
-  source: AutomationEventOptionSource
-) {
-  return getAutomationEventDefinitions(integration).some((definition) =>
-    (definition.parameters ?? []).some(
-      (parameter) => parameter.type === "option" && parameter.source === source
-    )
   )
 }
 

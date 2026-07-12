@@ -1,8 +1,8 @@
 import { type Integration } from "../../../integrations"
+import { type IntegrationOptionSource } from "../../../integrations/options"
 import {
   type AutomationEventAvailability,
   type AutomationEventDefinition,
-  type AutomationEventOptionSource,
   type AutomationEventParameter,
 } from "./types"
 
@@ -51,7 +51,7 @@ export function optionParameter(
   label: string,
   placeholder: string,
   options: ParameterOptions & {
-    source: AutomationEventOptionSource
+    source: IntegrationOptionSource
     dependsOn?: readonly string[]
   }
 ): AutomationEventParameter {

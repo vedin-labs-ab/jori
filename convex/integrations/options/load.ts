@@ -1,8 +1,8 @@
-import { type Doc } from "../../_generated/dataModel"
 import {
-  type AutomationEventMatch,
-  type AutomationEventOptionSource,
-} from "../events"
+  type IntegrationOptionMatch,
+  type IntegrationOptionSource,
+} from "../../../contracts/integrations/options"
+import { type Doc } from "../../_generated/dataModel"
 import { OptionUnavailable } from "./common"
 import {
   searchGitHubIssues,
@@ -20,9 +20,9 @@ import {
   searchMicrosoftMailFolders,
 } from "./microsoft"
 import { searchNotionObjects } from "./notion"
-import { searchSlackChannels } from "./slack"
+import { searchSlackChannels, searchSlackUsers } from "./slack"
 
-export type AutomationEventOptionSearchResult =
+export type IntegrationOptionSearchResult =
   | {
       status: "ready"
       options: Awaited<ReturnType<typeof loadIntegrationOptions>>
@@ -34,10 +34,10 @@ export type AutomationEventOptionSearchResult =
 
 export async function searchIntegrationOptions(args: {
   integration: Doc<"integrations">
-  source: AutomationEventOptionSource
+  source: IntegrationOptionSource
   query: string
-  match: AutomationEventMatch | undefined
-}): Promise<AutomationEventOptionSearchResult> {
+  match: IntegrationOptionMatch | undefined
+}): Promise<IntegrationOptionSearchResult> {
   try {
     return {
       status: "ready",
@@ -56,9 +56,9 @@ export async function searchIntegrationOptions(args: {
 
 async function loadIntegrationOptions(args: {
   integration: Doc<"integrations">
-  source: AutomationEventOptionSource
+  source: IntegrationOptionSource
   query: string
-  match: AutomationEventMatch | undefined
+  match: IntegrationOptionMatch | undefined
 }) {
   const loaderArgs = {
     integration: args.integration,
@@ -68,6 +68,9 @@ async function loadIntegrationOptions(args: {
 
   if (args.source === "slack.channels") {
     return await searchSlackChannels(loaderArgs)
+  }
+  if (args.source === "slack.users") {
+    return await searchSlackUsers(loaderArgs)
   }
   if (args.source === "github.repositories") {
     return await searchGitHubRepositories(loaderArgs)
@@ -106,10 +109,12 @@ async function loadIntegrationOptions(args: {
   return []
 }
 
-function optionUnavailableMessage(source: AutomationEventOptionSource) {
-  const messages: Record<AutomationEventOptionSource, string> = {
+function optionUnavailableMessage(source: IntegrationOptionSource) {
+  const messages: Record<IntegrationOptionSource, string> = {
     "slack.channels":
       "Could not load Slack channels. Check the Slack connection and try again.",
+    "slack.users":
+      "Could not load Slack people. Check the Slack connection and try again.",
     "github.repositories":
       "Could not load GitHub repositories. Check the GitHub connection and try again.",
     "github.issues":

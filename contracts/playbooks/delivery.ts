@@ -22,15 +22,19 @@ export function isEmailDeliveryProvider(
   )
 }
 
+export type SlackDeliveryTarget =
+  | { kind: "channel"; id: string; label: string }
+  | { kind: "dm"; id: string; label: string }
+
 /** What the user picked; the target self-email needs no explicit address. */
 export type DeliveryChoice =
   | { kind: "email" }
-  | { kind: "slack"; channelId: string; channelName: string }
+  | { kind: "slack"; target: SlackDeliveryTarget }
 
 /** A fully resolved destination: what instructions and tool grants derive from. */
 export type DeliveryDestination =
   | { kind: "email"; integration: EmailDeliveryProvider; address: string }
-  | { kind: "slack"; channelId: string; channelName: string }
+  | { kind: "slack"; target: SlackDeliveryTarget }
 
 /** Per-playbook delivery contract: the default, the offered kinds, and the
  *  noun the instruction uses for the produced output ("brief", "summary"). */
@@ -92,7 +96,19 @@ export function deliveryInstruction(args: {
       : `Email the ${noun} ${route} with the subject "${subject}" plus today's date. ${closing}`
   }
 
+  const target = destination.target
+
+  if (target.kind === "channel") {
+    const route = `to the "${target.label}" Slack channel using channel ID ${target.id} via @Slack`
+
+    return summary
+      ? `Post a short summary of the ${noun} ${route}, with the link to the full ${noun}. ${closing}`
+      : `Post the ${noun} ${route}. ${closing}`
+  }
+
+  const route = `to ${target.label} in a Slack DM using user ID ${target.id} via @Slack`
+
   return summary
-    ? `Post a short summary of the ${noun} to the "${destination.channelName}" channel via @Slack, with the link to the full ${noun}. ${closing}`
-    : `Post the ${noun} to the "${destination.channelName}" channel via @Slack. ${closing}`
+    ? `Send a short summary of the ${noun} ${route}, with the link to the full ${noun}. ${closing}`
+    : `Send the ${noun} ${route}. ${closing}`
 }
