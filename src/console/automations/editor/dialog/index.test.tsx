@@ -93,7 +93,9 @@ describe("automation dialog instructions validation", () => {
     expect(textbox.getAttribute("aria-describedby")).toBeNull()
     expect(screen.queryByText("Instructions are required.")).toBeNull()
   })
+})
 
+describe("automation dialog sharing validation", () => {
   test("shows sharing conflicts immediately without a save error", async () => {
     renderAutomationDialog({
       error: undefined,
@@ -113,8 +115,13 @@ describe("automation dialog instructions validation", () => {
     expect(textbox.getAttribute("aria-invalid")).toBe("true")
     expect(integration).not.toBeNull()
     expect(screen.getByRole("alert").textContent).toBe(
-      "Organization automations can’t use personal integrations. Remove the highlighted access or switch to Personal."
+      "Organization automations can’t use personal integrations. Remove the highlighted integrations or switch to Personal."
     )
+    expect(
+      [...screen.getByRole("alert").querySelectorAll(".font-medium")].map(
+        (element) => element.textContent
+      )
+    ).toEqual(["Organization", "Personal"])
   })
 })
 

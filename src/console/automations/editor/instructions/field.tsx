@@ -1,5 +1,6 @@
 import { EditorContent } from "@tiptap/react"
 import { cn } from "@/lib/utils"
+import { automationScopeConflictMessage } from "../../access"
 import { useAutomationInstructionsEditor } from "./editor/state"
 import { instructionMarkdownClassName } from "./editor/style"
 import { InstructionSuggestions } from "./suggestion/suggestions"
@@ -61,10 +62,26 @@ export function AutomationInstructionsField(
           id={errorId}
           role="alert"
         >
-          {props.error}
+          <InstructionErrorText error={props.error} />
         </p>
       )}
     </div>
+  )
+}
+
+function InstructionErrorText({ error }: { error: string }) {
+  if (error !== automationScopeConflictMessage) {
+    return error
+  }
+
+  return error.split(/(Organization|Personal)/).map((part) =>
+    part === "Organization" || part === "Personal" ? (
+      <span className="font-medium" key={part}>
+        {part}
+      </span>
+    ) : (
+      part
+    )
   )
 }
 

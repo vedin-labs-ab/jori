@@ -212,7 +212,7 @@ function AutomationSurfaceToolsButton({
     <button
       aria-label={label}
       className={cn(
-        "inline-flex h-5 items-center gap-1 px-1 font-medium opacity-70 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
+        "inline-flex items-center gap-1 self-stretch px-1 font-medium opacity-70 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
         iconClassName
       )}
       onClick={(event) => {

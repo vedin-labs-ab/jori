@@ -64,7 +64,7 @@ describe("automation payload", () => {
       })
     ).toEqual({
       error:
-        "Organization automations can’t use personal integrations. Remove the highlighted access or switch to Personal.",
+        "Organization automations can’t use personal integrations. Remove the highlighted integrations or switch to Personal.",
     })
   })
 })
