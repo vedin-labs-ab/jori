@@ -45,6 +45,7 @@ export type AutomationMentionSuggestion =
     })
 
 export type AutomationMentionSources = {
+  integrations?: readonly AutomationSurfaceIntegration[]
   permissions: ToolPermission[] | null | undefined
   skills: readonly string[]
   surfaces?: readonly AutomationSurfaceFormValue[]
@@ -116,7 +117,7 @@ export function getAutomationMentionSuggestions(
   sources: AutomationMentionSources
 ): AutomationMentionSuggestion[] {
   if (active.kind === "integration") {
-    return getIntegrationSuggestions(active.query)
+    return getIntegrationSuggestions(active.query, sources.integrations)
   }
 
   if (active.kind === "skill") {
@@ -130,11 +131,16 @@ export function getAutomationMentionSuggestions(
 }
 
 function getIntegrationSuggestions(
-  query: string
+  query: string,
+  integrations: readonly AutomationSurfaceIntegration[] | undefined
 ): AutomationMentionSuggestion[] {
   const normalizedQuery = normalizeFuzzyAlias(query)
 
   return automationSurfaceIntegrations
+    .filter(
+      (item) =>
+        integrations === undefined || integrations.includes(item.integration)
+    )
     .map((item) => ({
       label: item.label,
       id: item.integration,

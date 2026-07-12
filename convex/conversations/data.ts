@@ -2,6 +2,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { conversationScope } from "../messages/surface"
 import { resolveRunAudience } from "../runs/introspect/audience"
+import { executionPrincipalForPerson } from "../runs/principal"
 import { type MessageCauseKind } from "../runs/schema"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { queueRun } from "../runtime/outbox"
@@ -161,6 +162,7 @@ async function insertRun(
       messageId: args.message._id,
       kind: args.kind,
     },
+    principal: executionPrincipalForPerson(args.createdBy),
     ...createMessageRunSnapshot({
       integration: args.integration,
       kind: args.kind,

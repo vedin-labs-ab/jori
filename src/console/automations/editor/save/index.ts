@@ -1,3 +1,4 @@
+import { isUserScopedIntegration } from "@contracts/integrations"
 import {
   defaultScopeForIntegrations,
   type Scope,
@@ -125,6 +126,7 @@ export function updateAutomationArgs(
   }
 
   if (
+    values.scope === existing.scope &&
     !hasAutomationTriggerChanged(
       values,
       existing,
@@ -172,6 +174,12 @@ function buildBaseArgs(
     return { error: automationInstructionMarkerErrors.incompleteAccess }
   }
 
+  const scopeError = validateScopeAccess(values.scope, surfaces)
+
+  if (scopeError !== undefined) {
+    return { error: scopeError }
+  }
+
   if (Object.hasOwn(options, "permissions")) {
     const policyError = validateAutomationPolicy({
       permissions: options.permissions,
@@ -207,4 +215,14 @@ function buildBaseArgs(
       },
     },
   }
+}
+
+function validateScopeAccess(
+  scope: Scope,
+  surfaces: AutomationFormValues["surfaces"]
+) {
+  return scope === "organization" &&
+    surfaces.some((surface) => isUserScopedIntegration(surface.integration))
+    ? "Personal integrations require Personal sharing."
+    : undefined
 }

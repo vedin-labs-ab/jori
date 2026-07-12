@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react"
-import { expect, test } from "vitest"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { afterEach, expect, test } from "vitest"
 import { AutomationContextSection } from "./context"
 
+afterEach(cleanup)
+
 test("progressively discloses the context supplied to automation runs", () => {
-  render(<AutomationContextSection />)
+  render(<AutomationContextSection scope="personal" />)
 
   const trigger = screen.getByRole("button", { name: "Context" })
 
@@ -24,4 +26,14 @@ test("progressively discloses the context supplied to automation runs", () => {
   expect(screen.getByText("Automation identifiers")).toBeDefined()
   expect(screen.getByText("Associated artifact")).toBeDefined()
   expect(screen.getByText("Context is resolved for each run.")).toBeDefined()
+})
+
+test("omits requester context for organization automations", () => {
+  render(<AutomationContextSection scope="organization" />)
+
+  fireEvent.click(screen.getByRole("button", { name: "Context" }))
+
+  expect(screen.queryByRole("heading", { name: "Requester" })).toBeNull()
+  expect(screen.getByRole("heading", { name: "Organization" })).toBeDefined()
+  expect(screen.getByRole("heading", { name: "Run" })).toBeDefined()
 })

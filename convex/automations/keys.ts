@@ -1,5 +1,8 @@
-import { type Scope } from "../../contracts/permissions/scope"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
+import {
+  type ExecutionPrincipal,
+  executionPrincipalPersonId,
+} from "../runs/principal"
 import { type QueryLikeCtx } from "../shared/context"
 
 const organizationPartition = "organization"
@@ -19,19 +22,18 @@ export function normalizeAutomationKey(value: string | undefined) {
   return key
 }
 
-export function automationKeyPartition(
-  scope: Scope,
-  createdBy: Id<"persons"> | undefined
-) {
-  if (scope === "organization") {
+export function automationKeyPartition(principal: ExecutionPrincipal) {
+  if (principal.kind === "organization") {
     return organizationPartition
   }
 
-  if (createdBy === undefined) {
+  const personId = executionPrincipalPersonId(principal)
+
+  if (personId === undefined) {
     throw new Error("Personal keyed automations require an owner.")
   }
 
-  return `person:${createdBy}`
+  return `person:${personId}`
 }
 
 export async function findAutomationByKey(
@@ -63,6 +65,7 @@ type AutomationDefinition = Pick<
   | "instructions"
   | "name"
   | "playbook"
+  | "principal"
   | "scope"
   | "trigger"
   | "type"
@@ -83,7 +86,8 @@ function definitionKey(definition: AutomationDefinition) {
     instructions: definition.instructions,
     name: definition.name,
     playbook: definition.playbook ?? null,
-    scope: definition.scope ?? "personal",
+    principal: definition.principal,
+    scope: definition.scope,
     trigger: triggerKey(definition.trigger),
     type: definition.type,
   })

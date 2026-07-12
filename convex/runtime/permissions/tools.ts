@@ -7,7 +7,7 @@ import {
   type ToolPermission,
   type ToolSurface,
 } from "../../permissions/catalog"
-import { type AgentRuntimeInput } from "../../runs/agent/input"
+import { type AgentRuntimeInput, inputAccess } from "../../runs/agent/input"
 import { toolExecutionType } from "../../runs/agent/tools/policy"
 import { getEnabledToolPermissions } from "../../runs/agent/tools/resolve"
 import {
@@ -105,13 +105,4 @@ function selectedTools(
   return access === undefined
     ? undefined
     : getIntegrationTools(access, integrationId)
-}
-
-/** The run's tool contract; undefined grants the full tool surface. */
-export function inputAccess(input: AgentRuntimeInput) {
-  if (input.type === "automation") {
-    return input.automation.access
-  }
-
-  return input.type === "instruction" ? input.access : undefined
 }

@@ -57,6 +57,7 @@ export const insert = internalMutation({
         }),
         parent,
         createdBy: parent.createdBy,
+        principal: parent.principal,
       }),
     }
   },

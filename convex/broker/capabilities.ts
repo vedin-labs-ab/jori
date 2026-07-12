@@ -7,7 +7,7 @@ import {
   type ToolPermission,
   type ToolSurface,
 } from "../permissions/catalog"
-import { type AgentRuntimeInput } from "../runs/agent/input"
+import { type AgentRuntimeInput, inputAccess } from "../runs/agent/input"
 import {
   canUseToolPermission,
   toolExecutionType,
@@ -143,12 +143,14 @@ function isSelectedForRun(
   input: AgentRuntimeInput,
   permission: ToolPermission
 ) {
-  if (input.type !== "automation") {
+  const access = inputAccess(input)
+
+  if (access === undefined) {
     return true
   }
 
   if (permission.surface === "milo") {
-    return !isWebTool(permission.tool) || input.automation.access.web
+    return !isWebTool(permission.tool) || access.web
   }
 
   const integration = input.integrations.find(
@@ -157,9 +159,7 @@ function isSelectedForRun(
 
   return (
     integration !== undefined &&
-    getIntegrationTools(input.automation.access, integration._id).includes(
-      permission.tool
-    )
+    getIntegrationTools(access, integration._id).includes(permission.tool)
   )
 }
 

@@ -106,6 +106,7 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
   return {
     _creationTime: 0,
     _id: id<"runs">("run"),
+    principal: { kind: "organization" },
     scope: "tenant",
     cause: { type: "manual" },
     createdAt: 0,

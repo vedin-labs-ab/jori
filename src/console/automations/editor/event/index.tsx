@@ -39,6 +39,7 @@ export function EventFields({
           <Label htmlFor="automation-event-integration">Integration</Label>
           <EventIntegrationField
             tenantId={tenantId}
+            scope={values.scope}
             value={values.eventIntegration}
             onValueChange={(integration) =>
               onIntegrationChange({

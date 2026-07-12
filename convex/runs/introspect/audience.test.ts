@@ -61,6 +61,10 @@ function automation(
     createdAt: 0,
     instructions: "Do it",
     name: "Automation",
+    principal:
+      scope === "organization"
+        ? { kind: "organization" }
+        : { kind: "person", personId: "person" as Id<"persons"> },
     status: "active",
     tenantId: "tenant",
     trigger: { at: 1 },

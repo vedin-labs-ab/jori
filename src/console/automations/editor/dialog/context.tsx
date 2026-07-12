@@ -27,7 +27,16 @@ const contextLayers = [
   },
 ] as const
 
-export function AutomationContextSection() {
+export function AutomationContextSection({
+  scope,
+}: {
+  scope: "personal" | "organization"
+}) {
+  const visibleLayers =
+    scope === "personal"
+      ? contextLayers
+      : contextLayers.filter((layer) => layer.label !== "Requester")
+
   return (
     <Collapsible className="grid gap-2">
       <CollapsibleTrigger asChild>
@@ -41,7 +50,7 @@ export function AutomationContextSection() {
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden rounded-md border">
         <div className="grid gap-3 px-3 py-3 sm:grid-cols-3">
-          {contextLayers.map((layer) => (
+          {visibleLayers.map((layer) => (
             <ContextLayer key={layer.label} {...layer} />
           ))}
         </div>

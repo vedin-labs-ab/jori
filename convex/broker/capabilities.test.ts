@@ -165,13 +165,12 @@ function automationInput(
 ): AgentRuntimeInput {
   return {
     type: "automation",
+    access: {
+      integrations: [{ id: integration._id, tools }],
+      web,
+    },
+    instructions: "Test",
     run: run(),
-    automation: {
-      access: {
-        integrations: [{ id: integration._id, tools }],
-        web,
-      },
-    } as Doc<"automations">,
     event: null,
     integration: null,
     integrations: [integration],

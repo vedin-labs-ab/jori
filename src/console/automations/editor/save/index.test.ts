@@ -52,6 +52,20 @@ describe("automation payload", () => {
       error: "Give at least one mentioned integration a write tool.",
     })
   })
+
+  test("rejects personal integrations for organization automations", () => {
+    expect(
+      createAutomationArgs({
+        ...emptyAutomationForm,
+        name: "Shared inbox digest",
+        instructions: "Summarize @Gmail.",
+        scope: "organization",
+        surfaces: [{ integration: "gmail", tools: ["gmail_search"] }],
+      })
+    ).toEqual({
+      error: "Personal integrations require Personal sharing.",
+    })
+  })
 })
 
 test("creates automation args with access and source bindings", () => {

@@ -114,11 +114,11 @@ test("a full-surface parent grants requested catalog tools of its integrations",
   })
 })
 
-test("fails when the parent automation is gone", async () => {
+test("uses the run snapshot when the parent automation is gone", async () => {
   const parent = automationParent()
 
-  await expect(resolveSubtaskAccess(fakeCtx(), { parent })).rejects.toThrow(
-    "Parent automation not found."
+  await expect(resolveSubtaskAccess(fakeCtx(), { parent })).resolves.toEqual(
+    contract([])
   )
 })
 
@@ -139,7 +139,7 @@ function automationParent(access?: Access) {
   return {
     ...baseParent(),
     automationId: "automation",
-    ...(access === undefined ? {} : { access }),
+    access: access ?? contract([]),
   } as unknown as Doc<"runs">
 }
 
@@ -155,6 +155,7 @@ function baseParent() {
     _id: "parent",
     _creationTime: 0,
     tenantId: "tenant",
+    principal: { kind: "person", personId: "person" },
     cause: { type: "manual", personId: "person" },
     createdBy: "person",
     snapshot: { title: "Parent", source: { type: "manual" }, context: [] },

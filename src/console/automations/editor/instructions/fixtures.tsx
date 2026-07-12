@@ -23,6 +23,7 @@ export function renderInstructionsField({
   permissions = instructionToolPermissions,
   policyKey = "test",
   showAccessError,
+  scope = "personal",
   skills = ["meeting-prep"],
   surfaces,
   webSearch = false,
@@ -34,6 +35,7 @@ export function renderInstructionsField({
   showAccessError?: Parameters<
     typeof AutomationInstructionsField
   >[0]["showAccessError"]
+  scope?: Parameters<typeof AutomationInstructionsField>[0]["scope"]
   skills?: Parameters<typeof AutomationInstructionsField>[0]["skills"]
   surfaces: Parameters<typeof AutomationInstructionsField>[0]["surfaces"]
   webSearch?: boolean
@@ -52,6 +54,7 @@ export function renderInstructionsField({
       permissions={permissions}
       policyKey={policyKey}
       showAccessError={showAccessError}
+      scope={scope}
       skills={skills}
       surfaces={surfaces}
       value={description}

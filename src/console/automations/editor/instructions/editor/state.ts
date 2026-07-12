@@ -1,3 +1,4 @@
+import { isUserScopedIntegration } from "@contracts/integrations"
 import { type Editor, useEditor } from "@tiptap/react"
 import {
   type Dispatch,
@@ -12,6 +13,7 @@ import {
   type AutomationMentionCatalog,
   type AutomationMentionSources,
   type AutomationMentionSuggestion,
+  automationSurfaceIntegrations,
   createAutomationMentionCatalog,
 } from "../../../access"
 import {
@@ -116,24 +118,32 @@ function useUpdateSuggestion(
 }
 
 function useMentionSources(props: AutomationInstructionsFieldProps) {
+  const { availableIntegrations, permissions } = useScopeMentionSources(props)
   const catalog = useMemo(
     () =>
       createAutomationMentionCatalog({
         skills: props.skills,
-        tools: Array.isArray(props.permissions)
-          ? props.permissions.map((permission) => permission.tool)
+        tools: Array.isArray(permissions)
+          ? permissions.map((permission) => permission.tool)
           : [],
       }),
-    [props.skills, props.permissions]
+    [permissions, props.skills]
   )
   const sources = useMemo(
     () => ({
-      permissions: props.permissions,
+      integrations: availableIntegrations,
+      permissions,
       skills: props.skills,
       surfaces: props.surfaces,
       webSearch: props.webSearch,
     }),
-    [props.permissions, props.skills, props.surfaces, props.webSearch]
+    [
+      availableIntegrations,
+      permissions,
+      props.skills,
+      props.surfaces,
+      props.webSearch,
+    ]
   )
   const additionalSurfaces = useMemo(
     () =>
@@ -147,6 +157,30 @@ function useMentionSources(props: AutomationInstructionsFieldProps) {
   )
 
   return { additionalSurfaces, catalog, sources }
+}
+
+function useScopeMentionSources(props: AutomationInstructionsFieldProps) {
+  const availableIntegrations = useMemo(
+    () =>
+      props.scope === "personal"
+        ? undefined
+        : automationSurfaceIntegrations
+            .map((surface) => surface.integration)
+            .filter((integration) => !isUserScopedIntegration(integration)),
+    [props.scope]
+  )
+  const permissions = useMemo(
+    () =>
+      !Array.isArray(props.permissions) || props.scope === "personal"
+        ? props.permissions
+        : props.permissions.filter(
+            (permission) =>
+              permission.surface === "milo" ||
+              !isUserScopedIntegration(permission.surface)
+          ),
+    [props.permissions, props.scope]
+  )
+  return { availableIntegrations, permissions }
 }
 
 function useInstructionRefs(

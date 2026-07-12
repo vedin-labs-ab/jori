@@ -19,6 +19,7 @@ export async function createAutomationRun(
     automationId: args.automation._id,
     artifactId: args.automation.artifactId,
     cause: args.cause,
+    principal: args.automation.principal,
     ...createAutomationRunSnapshot(args),
     ...(await resolveRunAudience(ctx, {
       origin: { automation: args.automation },

@@ -12,7 +12,7 @@ import {
   type ToolPermission,
   type ToolSurface,
 } from "../permissions/catalog"
-import { findRunIntegration } from "../runs/agent/input"
+import { findRunIntegration, inputAccess } from "../runs/agent/input"
 import { toolExecutionType } from "../runs/agent/tools/policy"
 import {
   formatProviderError,
@@ -219,14 +219,10 @@ function authorizeTool(
     throw new Error(`Tool is blocked: ${request.tool}`)
   }
 
-  if (
-    context.input.type === "automation" &&
-    isWebTool(request.tool) &&
-    !context.input.automation.access.web
-  ) {
-    throw new Error(
-      `Tool is not allowed by automation web access: ${request.tool}`
-    )
+  const access = inputAccess(context.input)
+
+  if (access !== undefined && isWebTool(request.tool) && !access.web) {
+    throw new Error(`Tool is not allowed by run web access: ${request.tool}`)
   }
 
   return { mode, permission }
@@ -242,17 +238,17 @@ async function authorizeSurfaceTool(
 ) {
   const integration = findRunIntegration(context.input, request.surface)
 
-  if (integration !== null && context.input.type === "automation") {
+  const access = inputAccess(context.input)
+
+  if (integration !== null && access !== undefined) {
     const isSelected = canUseAutomationTool(
-      context.input.automation.access,
+      access,
       integration._id,
       request.tool
     )
 
     if (!isSelected) {
-      throw new Error(
-        `Tool is not allowed by automation access: ${request.tool}`
-      )
+      throw new Error(`Tool is not allowed by run access: ${request.tool}`)
     }
   }
 

@@ -119,6 +119,7 @@ function run(): Doc<"runs"> {
     _creationTime: 0,
     tenantId: "tenant",
     scope: "tenant",
+    principal: { kind: "person", personId: id<"persons">("person") },
     conversationId: id<"conversations">("current-conversation"),
     cause: {
       type: "message",

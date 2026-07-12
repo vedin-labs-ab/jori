@@ -107,14 +107,6 @@ function createRequestedBy(context: ApprovalBrokerContext): Actor {
     return createPersonActor(context.input.run.createdBy)
   }
 
-  if (context.input.type === "automation") {
-    const createdBy = context.input.automation.createdBy
-
-    if (createdBy !== undefined) {
-      return createPersonActor(createdBy)
-    }
-  }
-
   if (context.input.type === "message") {
     if (context.input.message.actor !== undefined) {
       return context.input.message.actor

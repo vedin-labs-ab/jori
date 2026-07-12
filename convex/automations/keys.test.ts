@@ -10,11 +10,10 @@ test("normalizes keys and scopes their uniqueness", () => {
   const personId = "person" as Id<"persons">
 
   expect(normalizeAutomationKey("  meeting:event  ")).toBe("meeting:event")
-  expect(automationKeyPartition("personal", personId)).toBe("person:person")
-  expect(automationKeyPartition("organization", undefined)).toBe("organization")
-  expect(() => automationKeyPartition("personal", undefined)).toThrow(
-    "require an owner"
+  expect(automationKeyPartition({ kind: "person", personId })).toBe(
+    "person:person"
   )
+  expect(automationKeyPartition({ kind: "organization" })).toBe("organization")
 })
 
 test("idempotency compares semantic definitions", () => {
@@ -54,6 +53,7 @@ function automation() {
     artifactId: "artifact" as Id<"artifacts">,
     instructions: "Prepare the meeting.",
     name: "Prep",
+    principal: { kind: "person", personId: "person" as Id<"persons"> },
     scope: "personal",
     type: "cron",
     trigger: {

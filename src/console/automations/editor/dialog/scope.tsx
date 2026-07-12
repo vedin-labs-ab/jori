@@ -15,9 +15,13 @@ export function ScopeField({
       <div className="flex items-center gap-1.5">
         <Label htmlFor="automation-scope">Sharing</Label>
         <FieldHelp label="Sharing help">
-          <p>Personal: only you can see and manage it, runs included.</p>
           <p>
-            Organization: everyone in your organization can see and manage it.
+            Personal: only you can manage it. Runs use your context and
+            connected accounts.
+          </p>
+          <p>
+            Organization: everyone can manage it. Runs use organization context
+            and shared integrations only.
           </p>
         </FieldHelp>
       </div>

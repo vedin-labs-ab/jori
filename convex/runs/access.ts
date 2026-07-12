@@ -1,6 +1,6 @@
 import { isWebTool } from "../../contracts/permissions/web"
 import { type Doc } from "../_generated/dataModel"
-import { listActiveIntegrationsForOwner } from "../integrations/data"
+import { listActiveIntegrationsForPrincipal } from "../integrations/data"
 import {
   getToolPermissionsBySurface,
   type ToolSurface,
@@ -41,22 +41,12 @@ export async function resolveSubtaskAccess(
   }
 }
 
-/** Automation runs carry their contract on the automation, others on the run. */
+/** Every constrained run carries its immutable contract on the run. */
 async function parentRunAccess(
-  ctx: QueryLikeCtx,
+  _ctx: QueryLikeCtx,
   parent: Doc<"runs">
 ): Promise<Access | undefined> {
-  if (parent.automationId === undefined) {
-    return parent.access
-  }
-
-  const automation = await ctx.db.get(parent.automationId)
-
-  if (automation === null) {
-    throw new Error("Parent automation not found.")
-  }
-
-  return automation.access
+  return parent.access
 }
 
 /**
@@ -73,8 +63,8 @@ async function grantableIntegrations(
     return parentAccess.integrations
   }
 
-  const integrations = await listActiveIntegrationsForOwner(ctx, {
-    ownerId: parent.createdBy,
+  const integrations = await listActiveIntegrationsForPrincipal(ctx, {
+    principal: parent.principal,
     tenantId: parent.tenantId,
   })
 
