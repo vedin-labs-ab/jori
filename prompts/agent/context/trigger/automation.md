@@ -7,11 +7,6 @@ Automation:
 - Name: {{automation.name}}
 - Trigger: {{automation.trigger}}
 
-Instructions:
-```text
-{{automation.instructions}}
-```
-
 {% if event %}
 Event:
 {{event.details}}

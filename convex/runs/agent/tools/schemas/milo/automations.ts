@@ -7,6 +7,9 @@ import {
   stringProperty,
 } from "../common"
 
+const automationInstructionsDescription =
+  "Canonical Markdown instructions for each run. Use @Integration for every integration whose access is granted, /skill for skills, and #tool for tools. Use txt fences for plain-text examples that should keep Milo references active; language-tagged code fences are literal. Keep the explicit access payload aligned with every referenced integration tool."
+
 const eventIntegrationEnum = automationEventCatalog.map(
   (definition) => definition.integration
 )
@@ -106,9 +109,7 @@ export const automationMiloToolInputSchemas = {
         "Optional artifact ID. Use this for artifact-owned automations that write artifact state."
       ),
       name: stringProperty("Short automation name."),
-      instructions: stringProperty(
-        "What each run should do, written as instructions for the agent that executes it."
-      ),
+      instructions: stringProperty(automationInstructionsDescription),
       scope: scopeProperty,
       type: {
         type: "string",
@@ -145,7 +146,7 @@ export const automationMiloToolInputSchemas = {
         "Optional artifact ID. Set this when binding the automation to an artifact."
       ),
       name: stringProperty("Updated automation name."),
-      instructions: stringProperty("Updated run instructions."),
+      instructions: stringProperty(automationInstructionsDescription),
       scope: scopeProperty,
       type: {
         type: "string",

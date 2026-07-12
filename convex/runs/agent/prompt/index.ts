@@ -7,7 +7,7 @@ import { type AgentRuntimeInput } from "../input"
 import { createApprovalInstructions } from "./approvals"
 import { createCommunicationInstructions } from "./communication"
 import {
-  createContextValues,
+  createContext,
   defaultActiveSurface,
   type PromptActiveSurface,
 } from "./context"
@@ -34,7 +34,7 @@ export function assemblePrompt(
     omittedNames: omittedSkillNames(communication),
     skills: runtimeSkills,
   })
-  const context = createContextValues(input, activeSurface)
+  const context = createContext(input, activeSurface)
   const offerIntegration = input.type !== "automation"
 
   const instructions = renderPromptTemplate(
@@ -57,9 +57,7 @@ export function assemblePrompt(
   )
 
   return {
-    context: renderPromptTemplate(promptTemplates["agent/context"], {
-      agent: context,
-    }),
+    context,
     instructions,
     organization: optionalPromptBlock(createOrganizationMessage(input)),
     place: optionalPromptBlock(createPlaceMessage(input)),

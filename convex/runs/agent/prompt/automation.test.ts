@@ -21,9 +21,7 @@ describe("automation trigger prompts", () => {
     expect(context).not.toContain("- Web search:")
     expect(context).not.toContain("\nEvent:\n")
     expect(context).not.toContain("- None")
-    expect(context).toContain(
-      "Instructions:\n```text\nPost the daily digest.\n```"
-    )
+    expect(context).toContain("## Instructions\n\nPost the daily digest.")
     expect(instructions).toContain(
       "no useful work remains by calling `finish_run`"
     )
@@ -32,6 +30,50 @@ describe("automation trigger prompts", () => {
     expect(instructions).not.toContain("send_reply")
     expectNoSyntheticBlankLines(context)
     expectNoSyntheticBlankLines(instructions)
+  })
+})
+
+describe("raw Markdown trigger instructions", () => {
+  test("appends automation instructions as raw Markdown", () => {
+    const input = automationRuntimeInput()
+    const markdown = [
+      "# Prepare the digest",
+      "",
+      "Keep this spacing.",
+      "",
+      "",
+      "```json",
+      '{ "channel": "#general" }',
+      "```",
+    ].join("\n")
+
+    if (input.type !== "automation") {
+      throw new Error("Expected automation input.")
+    }
+
+    input.automation.instructions = markdown
+
+    expect(
+      assemblePrompt(input).context.endsWith(`## Instructions\n\n${markdown}`)
+    ).toBe(true)
+  })
+
+  test("appends manual instructions as raw Markdown", () => {
+    const base = automationRuntimeInput()
+    const markdown = "## Delegate\n\n```txt\nUse #share_artifact.\n```"
+    const input = {
+      type: "instruction" as const,
+      run: base.run,
+      integrations: base.integrations,
+      instructions: markdown,
+      organization: null,
+      timezone: null,
+      workstreams: null,
+    }
+
+    expect(
+      assemblePrompt(input).context.endsWith(`## Instructions\n\n${markdown}`)
+    ).toBe(true)
   })
 })
 

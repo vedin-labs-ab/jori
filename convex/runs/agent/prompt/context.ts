@@ -15,17 +15,14 @@ export type PromptActiveSurface = {
   surface: MessageIntegration
 }
 
-export function createContextValues(
+export function createContext(
   input: AgentRuntimeInput,
   activeSurface: PromptActiveSurface | null
-): {
-  run: string
-  trigger: string
-} {
-  return {
-    run: createRunInstructions(input, activeSurface),
-    trigger: promptBlock(createTriggerPart(input)),
-  }
+) {
+  return [
+    createRunInstructions(input, activeSurface),
+    createTriggerPart(input),
+  ].join("\n\n")
 }
 
 export function defaultActiveSurface(
@@ -63,16 +60,22 @@ function createRunInstructions(
 
 function createTriggerPart(input: AgentRuntimeInput) {
   if (input.type === "automation") {
-    return renderPromptTemplate(
-      promptTemplates["agent/context/trigger/automation"],
-      createAutomationValues(input)
+    return appendInstructions(
+      renderPromptTemplate(
+        promptTemplates["agent/context/trigger/automation"],
+        createAutomationValues(input)
+      ),
+      input.automation.instructions
     )
   }
 
   if (input.type === "instruction") {
-    return renderPromptTemplate(
-      promptTemplates["agent/context/trigger/instruction"],
-      createInstructionValues(input)
+    return appendInstructions(
+      renderPromptTemplate(
+        promptTemplates["agent/context/trigger/instruction"],
+        {}
+      ),
+      input.instructions
     )
   }
 
@@ -80,16 +83,6 @@ function createTriggerPart(input: AgentRuntimeInput) {
     promptTemplates["agent/context/trigger/message"],
     createMessageValues(input)
   )
-}
-
-function createInstructionValues(
-  input: Extract<AgentRuntimeInput, { type: "instruction" }>
-) {
-  return {
-    instruction: {
-      text: input.instructions,
-    },
-  }
 }
 
 function createMessageValues(
@@ -121,7 +114,6 @@ function createAutomationValues(
     automation: {
       id: input.automation._id,
       name: input.automation.name,
-      instructions: input.automation.instructions,
       trigger: formatAutomationTrigger(input),
     },
     event:
@@ -157,6 +149,6 @@ function getIntegrationLabel(integration: MessageIntegration) {
   return integrationLabels[integration]
 }
 
-function promptBlock(value: string) {
-  return value.trim()
+function appendInstructions(context: string, instructions: string) {
+  return `${context}\n\n## Instructions\n\n${instructions.trim()}`
 }

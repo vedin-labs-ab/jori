@@ -97,7 +97,7 @@ export const nativeToolPermissionRows = [
     "start_agent",
     "Start agent",
     "Start another Milo run for delegated work.",
-    "Start a Milo agent run for a delegated task; it works independently with your integration and web tool access unless tools narrows it. Grant the least access that covers the task — the agent can never hold access you lack.",
+    "Start a Milo agent run for a delegated task. Always give it a concise title that identifies the work. It works independently with your integration and web tool access unless tools narrows it. Grant the least access that covers the task — the agent can never hold access you lack.",
     "write",
     "required",
     "agent",
