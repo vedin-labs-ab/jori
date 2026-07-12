@@ -78,6 +78,13 @@ function futureRelativeTime(timestamp: number, now: number) {
   return `in ${amount}`
 }
 
+export function shortDate(timestamp: number) {
+  return new Intl.DateTimeFormat(undefined, {
+    day: "numeric",
+    month: "short",
+  }).format(timestamp)
+}
+
 export function absoluteTime(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
