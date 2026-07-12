@@ -1,14 +1,18 @@
 import { type Editor } from "@tiptap/react"
 import { type CSSProperties } from "react"
 import {
+  type ActiveAutomationMention,
   type AutomationMentionSources,
   type AutomationMentionSuggestion,
   findActiveAutomationMention,
   getAutomationMentionSuggestions,
 } from "../../../access"
+import { isReferenceInputAllowed } from "./context"
 
 export type InstructionSuggestionState = {
+  active: ActiveAutomationMention
   activeIndex: number
+  empty: "empty" | "loading" | "unavailable"
   range: {
     from: number
     to: number
@@ -39,20 +43,24 @@ export function getInstructionSuggestionState(
     textBeforeCursor.length
   )
 
-  if (activeMention === null) {
+  if (
+    activeMention === null ||
+    !isReferenceInputAllowed(selection.$from, activeMention.start)
+  ) {
     return null
   }
 
   const suggestions = getAutomationMentionSuggestions(activeMention, sources)
 
-  if (suggestions.length === 0) {
-    return null
-  }
-
-  const nextActiveIndex = Math.min(activeIndex, suggestions.length - 1)
+  const nextActiveIndex = Math.min(
+    activeIndex,
+    Math.max(suggestions.length - 1, 0)
+  )
 
   return {
+    active: activeMention,
     activeIndex: nextActiveIndex,
+    empty: suggestionEmptyState(activeMention, sources),
     range: {
       from: selection.from - (textBeforeCursor.length - activeMention.start),
       to: selection.from,
@@ -60,6 +68,19 @@ export function getInstructionSuggestionState(
     style: getSuggestionStyle(editor, selection.from),
     suggestions,
   }
+}
+
+function suggestionEmptyState(
+  active: ActiveAutomationMention,
+  sources: AutomationMentionSources
+): InstructionSuggestionState["empty"] {
+  if (active.kind === "tool" && sources.permissions === undefined) {
+    return "loading"
+  }
+
+  return active.kind === "tool" && sources.permissions === null
+    ? "unavailable"
+    : "empty"
 }
 
 function getSuggestionStyle(editor: Editor, position: number): CSSProperties {

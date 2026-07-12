@@ -1,6 +1,7 @@
 import { EditorContent } from "@tiptap/react"
 import { cn } from "@/lib/utils"
 import { useAutomationInstructionsEditor } from "./editor/state"
+import { instructionMarkdownClassName } from "./editor/style"
 import { InstructionSuggestions } from "./suggestion/suggestions"
 import { type AutomationInstructionsFieldProps } from "./types"
 
@@ -24,8 +25,7 @@ export function AutomationInstructionsField(
           aria-invalid={props.error === undefined ? undefined : true}
           className={cn(
             "min-w-0 max-w-full overflow-hidden rounded-md border border-input bg-transparent text-sm shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30 md:text-xs/relaxed",
-            "[&_.tiptap]:min-h-24 [&_.tiptap]:min-w-0 [&_.tiptap]:max-w-full [&_.tiptap]:overflow-x-hidden [&_.tiptap]:px-2 [&_.tiptap]:py-2 [&_.tiptap]:break-words [&_.tiptap]:whitespace-pre-wrap [&_.tiptap]:leading-6 [&_.tiptap]:outline-none [&_.tiptap]:[overflow-wrap:anywhere]",
-            "[&_.tiptap>p]:my-0 [&_.tiptap>p]:min-h-6 [&_.tiptap>p]:max-w-full [&_.tiptap>p]:break-words [&_.tiptap>p]:leading-6 [&_.tiptap>p]:[overflow-wrap:anywhere]",
+            instructionMarkdownClassName,
             props.error !== undefined &&
               "border-destructive ring-2 ring-destructive/20 focus-within:border-destructive focus-within:ring-destructive/20 dark:border-destructive/50 dark:ring-destructive/40 dark:focus-within:border-destructive/50 dark:focus-within:ring-destructive/40",
             props.showAccessError &&
@@ -36,7 +36,7 @@ export function AutomationInstructionsField(
         >
           <EditorContent className="min-w-0 max-w-full" editor={editor} />
           <div className="flex min-h-9 items-center gap-2 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
-            <SigilHint sigil="@">integrations</SigilHint>
+            <SigilHint sigil="@">access</SigilHint>
             <span aria-hidden="true">·</span>
             <SigilHint sigil="/">skills</SigilHint>
             <span aria-hidden="true">·</span>

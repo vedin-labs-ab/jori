@@ -1,22 +1,34 @@
 import { type JSONContent } from "@tiptap/core"
 import {
   type AutomationMentionCatalog,
-  type AutomationMentionKind,
   type AutomationSurfaceFormValue,
   type AutomationSurfaceIntegration,
-  automationMentionText,
-  isAutomationSurfaceIntegration,
-  readAutomationMentions,
-  syncAutomationSurfaces,
 } from "../../access"
-import { isAutomationSurfacePolicyBlocked } from "../../access/policy"
+import {
+  parseInstructionMarkdown,
+  serializeInstructionMarkdown,
+} from "./markdown/codec"
+import {
+  hydrateInstructionReferences,
+  readInstructionSurfaces,
+} from "./markdown/references"
+import {
+  automationSurfaceNodeName,
+  parseAutomationSurfaceTools,
+} from "./markdown/schema"
 import { type AutomationInstructionsFieldProps } from "./types"
 
-export const automationSurfaceNodeName = "automationSurface"
-export const automationReferenceNodeName = "automationReference"
-const automationSurfacePolicyStates = ["allowed", "blocked"] as const
-export type AutomationSurfacePolicyState =
-  (typeof automationSurfacePolicyStates)[number]
+export {
+  type AutomationSurfacePolicyState,
+  automationReferenceNodeName,
+  automationSurfaceNodeName,
+  fencedTextNodeName,
+  parseAutomationReferenceKind,
+  parseAutomationSurfaceIntegration,
+  parseAutomationSurfacePolicy,
+  parseAutomationSurfaceTools,
+  parseAutomationSurfaceToolsAttribute,
+} from "./markdown/schema"
 
 export type AutomationInstructionsValue = {
   description: string
@@ -32,72 +44,21 @@ export function createAutomationInstructionDocument({
   catalog: AutomationMentionCatalog
   permissions?: AutomationInstructionsFieldProps["permissions"]
 }): JSONContent {
-  const toolsByProvider = new Map(
-    syncAutomationSurfaces(description, surfaces, permissions, catalog).map(
-      (surface) => [surface.integration, surface.tools]
-    )
-  )
-  const paragraphs: JSONContent[] = [{ type: "paragraph", content: [] }]
-  let cursor = 0
-
-  for (const mention of readAutomationMentions(description, catalog)) {
-    appendText(paragraphs, description.slice(cursor, mention.start))
-    appendNode(
-      paragraphs,
-      mention.kind === "integration"
-        ? surfaceNode(
-            mention.id as AutomationSurfaceIntegration,
-            toolsByProvider,
-            permissions
-          )
-        : {
-            type: automationReferenceNodeName,
-            attrs: { id: mention.id, kind: mention.kind },
-          }
-    )
-    cursor = mention.end
-  }
-
-  appendText(paragraphs, description.slice(cursor))
-
-  return {
-    type: "doc",
-    content: normalizeParagraphs(paragraphs),
-  }
-}
-
-function surfaceNode(
-  integration: AutomationSurfaceIntegration,
-  toolsByProvider: Map<AutomationSurfaceIntegration, string[]>,
-  permissions: AutomationInstructionsFieldProps["permissions"]
-): JSONContent {
-  const tools = toolsByProvider.get(integration) ?? []
-
-  return {
-    type: automationSurfaceNodeName,
-    attrs: {
-      policy: isAutomationSurfacePolicyBlocked({
-        permissions,
-        surface: { integration, tools },
-      })
-        ? "blocked"
-        : "allowed",
-      integration,
-      tools,
-    },
-  }
+  return hydrateInstructionReferences({
+    catalog,
+    document: parseInstructionMarkdown(description),
+    permissions,
+    surfaces,
+  })
 }
 
 export function serializeAutomationInstructionDocument(
   document: JSONContent
 ): AutomationInstructionsValue {
-  const surfaces: AutomationSurfaceFormValue[] = []
-  const seen = new Set<AutomationSurfaceIntegration>()
-  const description = (document.content ?? [])
-    .map((node) => serializeBlock(node, surfaces, seen))
-    .join("\n")
-
-  return { description, surfaces }
+  return {
+    description: serializeInstructionMarkdown(document),
+    surfaces: readInstructionSurfaces(document),
+  }
 }
 
 export function automationInstructionKey(value: AutomationInstructionsValue) {
@@ -107,36 +68,42 @@ export function automationInstructionKey(value: AutomationInstructionsValue) {
   })
 }
 
-export function parseAutomationSurfaceIntegration(integration: unknown) {
-  return isAutomationSurfaceIntegration(integration) ? integration : null
-}
-
-export function parseAutomationSurfacePolicy(
-  policy: unknown
-): AutomationSurfacePolicyState {
-  return automationSurfacePolicyStates.some((state) => state === policy)
-    ? (policy as AutomationSurfacePolicyState)
-    : "allowed"
-}
-
-export function parseAutomationSurfaceTools(tools: unknown) {
-  return Array.isArray(tools)
-    ? tools.filter((tool): tool is string => typeof tool === "string")
-    : []
-}
-
-export function parseAutomationSurfaceToolsAttribute(tools: unknown) {
-  if (typeof tools === "string") {
-    return tools.split(",").filter((tool) => tool !== "")
+export function readAdditionalAutomationSurfaces({
+  catalog,
+  description,
+  permissions,
+  surfaces,
+}: AutomationInstructionsValue & {
+  catalog: AutomationMentionCatalog
+  permissions?: AutomationInstructionsFieldProps["permissions"]
+}) {
+  if (surfaces.length === 0) {
+    return []
   }
 
-  return parseAutomationSurfaceTools(tools)
+  const document = createAutomationInstructionDocument({
+    catalog,
+    description,
+    permissions,
+    surfaces,
+  })
+  const mentioned = new Set(
+    readInstructionSurfaces(document).map((surface) => surface.integration)
+  )
+
+  return surfaces.filter((surface) => !mentioned.has(surface.integration))
 }
 
-export function parseAutomationReferenceKind(
-  kind: unknown
-): Exclude<AutomationMentionKind, "integration"> | null {
-  return kind === "skill" || kind === "tool" ? kind : null
+export function mergeAutomationSurfaces(
+  mentioned: AutomationSurfaceFormValue[],
+  additional: AutomationSurfaceFormValue[]
+) {
+  const integrations = new Set(mentioned.map((surface) => surface.integration))
+
+  return [
+    ...mentioned,
+    ...additional.filter((surface) => !integrations.has(surface.integration)),
+  ]
 }
 
 export function readAutomationSurfaceToolsForIntegration(
@@ -159,92 +126,4 @@ export function readAutomationSurfaceToolsForIntegration(
   }
 
   return undefined
-}
-
-function appendText(paragraphs: JSONContent[], text: string) {
-  const lines = text.split("\n")
-
-  for (let index = 0; index < lines.length; index += 1) {
-    if (index > 0) {
-      paragraphs.push({ type: "paragraph", content: [] })
-    }
-
-    if (lines[index] !== "") {
-      appendNode(paragraphs, { type: "text", text: lines[index] })
-    }
-  }
-}
-
-function appendNode(paragraphs: JSONContent[], node: JSONContent) {
-  const paragraph = paragraphs.at(-1)
-
-  if (paragraph === undefined) {
-    paragraphs.push({ type: "paragraph", content: [node] })
-    return
-  }
-
-  paragraph.content = [...(paragraph.content ?? []), node]
-}
-
-function normalizeParagraphs(paragraphs: JSONContent[]) {
-  return paragraphs.map((paragraph) =>
-    paragraph.content?.length === 0 ? { type: "paragraph" } : paragraph
-  )
-}
-
-function serializeBlock(
-  node: JSONContent,
-  surfaces: AutomationSurfaceFormValue[],
-  seen: Set<AutomationSurfaceIntegration>
-): string {
-  if (node.type === "text") {
-    return node.text ?? ""
-  }
-
-  if (node.type === "hardBreak") {
-    return "\n"
-  }
-
-  if (node.type === automationSurfaceNodeName) {
-    return serializeSurfaceNode(node, surfaces, seen)
-  }
-
-  if (node.type === automationReferenceNodeName) {
-    return serializeReferenceNode(node)
-  }
-
-  return (node.content ?? [])
-    .map((child) => serializeBlock(child, surfaces, seen))
-    .join("")
-}
-
-function serializeSurfaceNode(
-  node: JSONContent,
-  surfaces: AutomationSurfaceFormValue[],
-  seen: Set<AutomationSurfaceIntegration>
-) {
-  const integration = node.attrs?.integration
-
-  if (!isAutomationSurfaceIntegration(integration)) {
-    return ""
-  }
-
-  if (!seen.has(integration)) {
-    seen.add(integration)
-    surfaces.push({
-      integration,
-      tools: parseAutomationSurfaceTools(node.attrs?.tools),
-    })
-  }
-
-  return automationMentionText("integration", integration)
-}
-
-function serializeReferenceNode(node: JSONContent) {
-  const kind = parseAutomationReferenceKind(node.attrs?.kind)
-  const id = node.attrs?.id
-
-  return kind === null || typeof id !== "string" || id === ""
-    ? ""
-    : automationMentionText(kind, id)
 }

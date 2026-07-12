@@ -2,12 +2,14 @@ import { Label } from "@/components/ui/label"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type AutomationFormValues } from "../../types"
 import { AutomationInstructionsField } from "../instructions"
+import { isAutomationToolReferenceError } from "../save/instructions"
 import { automationInstructionMarkerErrors } from "../save/marker"
 import { FieldHelp } from "./help"
 
 export function AutomationInstructionsSection({
   error,
   onBlur,
+  onWebSearchChange,
   onValueChange,
   permissions,
   policyKey,
@@ -16,6 +18,7 @@ export function AutomationInstructionsSection({
 }: {
   error: string | undefined
   onBlur: () => void
+  onWebSearchChange: (enabled: boolean) => void
   onValueChange: (
     instructions: string,
     surfaces: AutomationFormValues["surfaces"]
@@ -36,6 +39,7 @@ export function AutomationInstructionsSection({
         id="automation-description"
         value={values.instructions}
         onBlur={onBlur}
+        onWebSearchChange={onWebSearchChange}
         onValueChange={(next) => onValueChange(next.description, next.surfaces)}
         permissions={permissions}
         placeholder="Summarize @GitHub changes and post them to @Slack."
@@ -43,6 +47,7 @@ export function AutomationInstructionsSection({
         showAccessError={isAccessMarkerError(error)}
         skills={skills}
         surfaces={values.surfaces}
+        webSearch={values.webSearch}
       />
     </div>
   )
@@ -61,6 +66,7 @@ function InstructionsHelp() {
 function isAccessMarkerError(error: string | undefined) {
   return (
     error === automationInstructionMarkerErrors.incompleteAccess ||
-    error === automationInstructionMarkerErrors.unavailableAccess
+    error === automationInstructionMarkerErrors.unavailableAccess ||
+    isAutomationToolReferenceError(error)
   )
 }

@@ -43,7 +43,7 @@ describe("automation instructions tool access", () => {
     })
 
     expect(await screen.findByRole("textbox")).toBeDefined()
-    expect(field.container.textContent).toContain("integrations")
+    expect(field.container.textContent).toContain("access")
     expect(field.container.textContent).not.toContain("read/write")
   })
 
