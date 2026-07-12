@@ -51,6 +51,7 @@ function listRow(row: Doc<"places">, integration: PlaceIntegration) {
     integration,
     visibility: row.visibility,
     profiledAt: row.profiledAt ?? null,
+    watchingSince: row._creationTime,
     claims: row.claims.map((claim) => ({
       section: claim.section,
       text: claim.text,

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
 import { ConsoleEmptyState } from "../../shared/list/empty"
+import { useNow } from "../../shared/time"
 import { ContextPage } from ".."
 import { ContextSectionTitle } from "../section"
 import { PlaceCard, WarmingPlaceCard } from "./card"
@@ -46,6 +47,7 @@ function PlaceGroups({
   places: Places
   onOpen: (place: Place) => void
 }) {
+  const now = useNow(30_000)
   const profiled = places.filter((place) => place.claims.length > 0)
   const warming = places.filter((place) => place.claims.length === 0)
 
@@ -59,16 +61,22 @@ function PlaceGroups({
         <ul className="flex flex-col gap-2">
           {profiled.map((place) => (
             <li key={place.id}>
-              <PlaceCard place={place} onOpen={() => onOpen(place)} />
+              <PlaceCard now={now} place={place} onOpen={() => onOpen(place)} />
             </li>
           ))}
         </ul>
       )}
       {warming.length === 0 ? null : (
         <div className="flex flex-col gap-2">
-          <ContextSectionTitle count={warming.length}>
-            Warming up
-          </ContextSectionTitle>
+          <div className="flex flex-col gap-1">
+            <ContextSectionTitle count={warming.length}>
+              Warming up
+            </ContextSectionTitle>
+            <p className="text-muted-foreground text-sm">
+              Milo is in these places but hasn't learned their norms yet.
+              Profiles build as conversation happens.
+            </p>
+          </div>
           <ul className="flex flex-col gap-2">
             {warming.map((place) => (
               <li key={place.id}>

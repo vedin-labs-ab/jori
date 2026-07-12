@@ -12,11 +12,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { IntegrationChips } from "@/shared/logo/integration"
 import { CopyableCodeBlock } from "../../shared/copy"
 import { relativeTime, useNow } from "../../shared/time"
 import { ContextSectionTitle } from "../section"
-import { PlaceName } from "./card"
+import { PlaceMeta, PlaceName } from "./card"
 import { type Place } from "./types"
 
 // A faithful render of the context block Milo reads in this place: the same
@@ -59,7 +58,7 @@ function DetailBody({ place }: { place: Place }) {
             Updated {relativeTime(place.profiledAt, now)}
           </SheetDescription>
         )}
-        <IntegrationChips integrations={[place.integration]} />
+        <PlaceMeta place={place} />
       </SheetHeader>
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
         {placeSections.map((section) => (
