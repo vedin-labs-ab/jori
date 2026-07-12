@@ -1,13 +1,9 @@
-import {
-  type JSONContent,
-  mergeAttributes,
-  Node,
-  textblockTypeInputRule,
-} from "@tiptap/core"
+import { type JSONContent, mergeAttributes, Node } from "@tiptap/core"
 import { Code } from "@tiptap/extension-code"
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"
 import json from "highlight.js/lib/languages/json"
 import { createLowlight } from "lowlight"
+import { createCodeBlockShortcuts, createFenceInputRules } from "./block"
 import { fencedTextNodeName } from "./schema"
 
 const plainTextFenceAliases = ["", "txt", "text", "plaintext"] as const
@@ -54,20 +50,14 @@ export const FencedText = Node.create({
   },
 
   addInputRules() {
-    return [
-      textblockTypeInputRule({
-        find: plainTextFenceInputExpression("`"),
-        type: this.type,
-      }),
-      textblockTypeInputRule({
-        find: plainTextFenceInputExpression("~"),
-        type: this.type,
-      }),
-    ]
+    return createFenceInputRules({
+      language: plainTextFenceLanguageExpression(),
+      type: this.type,
+    })
   },
 
   addKeyboardShortcuts() {
-    return { "Mod-Enter": () => this.editor.commands.exitCode() }
+    return createCodeBlockShortcuts(this.editor, this.name)
   },
 })
 
@@ -120,18 +110,11 @@ lowlight.highlightAuto = (value) => ({
 
 export const SafeCodeBlock = CodeBlockLowlight.extend({
   addInputRules() {
-    return [
-      textblockTypeInputRule({
-        find: codeFenceInputExpression("`"),
-        getAttributes: (match) => ({ language: match[1] || null }),
-        type: this.type,
-      }),
-      textblockTypeInputRule({
-        find: codeFenceInputExpression("~"),
-        getAttributes: (match) => ({ language: match[1] || null }),
-        type: this.type,
-      }),
-    ]
+    return createFenceInputRules({
+      getAttributes: (match) => ({ language: match[1] || null }),
+      language: "([a-z0-9_-]+)?",
+      type: this.type,
+    })
   },
 
   parseMarkdown(token, helpers) {
@@ -173,18 +156,10 @@ function isPlainTextFence(token: {
   )
 }
 
-function plainTextFenceInputExpression(marker: "`" | "~") {
+function plainTextFenceLanguageExpression() {
   const languages = plainTextFenceAliases.filter(Boolean).join("|")
 
-  return fenceInputExpression(marker, `(?:${languages})?`)
-}
-
-function codeFenceInputExpression(marker: "`" | "~") {
-  return fenceInputExpression(marker, "([a-z0-9_-]+)?")
-}
-
-function fenceInputExpression(marker: "`" | "~", language: string) {
-  return new RegExp(`^ {0,3}${marker}{3,}${language}[ \\t\\n]$`, "i")
+  return `(?:${languages})?`
 }
 
 function textBlockContent(text: string): JSONContent[] {
