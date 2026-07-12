@@ -4,6 +4,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { cn } from "@/lib/utils"
+import { flushRowClassName } from "../../../shared/flush"
 
 const contextLayers = [
   {
@@ -41,15 +43,22 @@ export function AutomationContextSection({
     <Collapsible className="grid gap-2">
       <CollapsibleTrigger asChild>
         <button
-          className="group flex min-h-5 w-full items-center justify-between gap-3 rounded-sm text-left font-medium text-xs/relaxed leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          className={flushRowClassName(
+            "group min-h-5 justify-between gap-3 rounded-sm text-left text-xs/relaxed leading-none [&[aria-expanded=true]:not(:hover)]:bg-transparent"
+          )}
           type="button"
         >
           <span>Context</span>
-          <ChevronDown className="size-3.5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+          <ChevronDown className="size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 ease-out group-data-[state=open]:rotate-180" />
         </button>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden rounded-md border">
-        <div className="grid gap-3 px-3 py-3 sm:grid-cols-3">
+        <div
+          className={cn(
+            "grid gap-3 px-3 py-3",
+            visibleLayers.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"
+          )}
+        >
           {visibleLayers.map((layer) => (
             <ContextLayer key={layer.label} {...layer} />
           ))}

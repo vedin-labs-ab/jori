@@ -10,6 +10,9 @@ test("progressively discloses the context supplied to automation runs", () => {
 
   const trigger = screen.getByRole("button", { name: "Context" })
 
+  expect(trigger.className).toContain("hover:bg-muted")
+  expect(trigger.className).toContain("hover:px-2")
+  expect(trigger.className).toContain("px-0")
   expect(trigger.getAttribute("aria-expanded")).toBe("false")
   expect(screen.queryByText("Profile")).toBeNull()
   expect(
@@ -21,6 +24,10 @@ test("progressively discloses the context supplied to automation runs", () => {
   for (const layer of ["Requester", "Organization", "Run"]) {
     expect(screen.getByRole("heading", { name: layer })).toBeDefined()
   }
+  expect(
+    screen.getByRole("heading", { name: "Requester" }).parentElement
+      ?.parentElement?.className
+  ).toContain("sm:grid-cols-3")
   expect(screen.getByText("Account identities")).toBeDefined()
   expect(screen.getByText("Run identifiers")).toBeDefined()
   expect(screen.getByText("Automation identifiers")).toBeDefined()
@@ -36,4 +43,8 @@ test("omits requester context for organization automations", () => {
   expect(screen.queryByRole("heading", { name: "Requester" })).toBeNull()
   expect(screen.getByRole("heading", { name: "Organization" })).toBeDefined()
   expect(screen.getByRole("heading", { name: "Run" })).toBeDefined()
+  expect(
+    screen.getByRole("heading", { name: "Organization" }).parentElement
+      ?.parentElement?.className
+  ).toContain("sm:grid-cols-2")
 })
