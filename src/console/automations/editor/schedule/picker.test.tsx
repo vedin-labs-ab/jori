@@ -11,13 +11,19 @@ describe("automation date and time picker", () => {
       <AutomationDateTimePicker
         id="run-at"
         onValueChange={() => undefined}
+        timezone="Europe/Stockholm"
         value="2026-01-15T13:45"
       />
     )
 
-    const timeInput = screen.getByLabelText("Time") as HTMLInputElement
+    const timeInput = screen.getByLabelText(
+      "Time (Europe/Stockholm)"
+    ) as HTMLInputElement
 
     expect(screen.getByLabelText("Date").textContent).toContain("2026")
+    expect(screen.getByText("(Europe/Stockholm)").className).toBe(
+      "font-normal text-muted-foreground"
+    )
     expect(timeInput.value).toBe("13:45")
   })
 
@@ -28,11 +34,12 @@ describe("automation date and time picker", () => {
       <AutomationDateTimePicker
         id="run-at"
         onValueChange={onValueChange}
+        timezone="Europe/Stockholm"
         value="2026-01-15T13:45"
       />
     )
 
-    fireEvent.change(screen.getByLabelText("Time"), {
+    fireEvent.change(screen.getByLabelText("Time (Europe/Stockholm)"), {
       target: { value: "14:30" },
     })
 
@@ -46,11 +53,12 @@ describe("automation date and time picker", () => {
       <AutomationDateTimePicker
         id="run-at"
         onValueChange={onValueChange}
+        timezone="Europe/Stockholm"
         value=""
       />
     )
 
-    fireEvent.change(screen.getByLabelText("Time"), {
+    fireEvent.change(screen.getByLabelText("Time (Europe/Stockholm)"), {
       target: { value: "10:15" },
     })
 

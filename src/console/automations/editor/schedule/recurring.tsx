@@ -112,8 +112,8 @@ function RepeatDetails({
       <AutomationTimePicker
         className="w-32"
         id="automation-time"
-        label={`Time (${values.timezone})`}
         onValueChange={(time) => onValuesChange({ ...values, time })}
+        timezone={values.timezone}
         value={values.time}
       />
     </div>

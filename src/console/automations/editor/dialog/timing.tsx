@@ -50,6 +50,7 @@ export function AutomationTiming({
           <AutomationDateTimePicker
             id="automation-run-at"
             onValueChange={(runAt) => onValuesChange({ ...values, runAt })}
+            timezone={Intl.DateTimeFormat().resolvedOptions().timeZone}
             value={values.runAt}
           />
         </Suspense>
