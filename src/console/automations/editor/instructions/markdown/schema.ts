@@ -13,7 +13,7 @@ export const automationReferenceNodeName = "automationReference"
 export const fencedTextNodeName = "fencedText"
 
 const automationSurfacePolicyStates = ["allowed", "blocked"] as const
-export type AutomationSurfacePolicyState =
+type AutomationSurfacePolicyState =
   (typeof automationSurfacePolicyStates)[number]
 
 export type AutomationSurfaceNodeOptions = {
@@ -159,7 +159,7 @@ export function parseAutomationSurfaceIntegration(integration: unknown) {
   return isAutomationSurfaceIntegration(integration) ? integration : null
 }
 
-export function parseAutomationSurfacePolicy(
+function parseAutomationSurfacePolicy(
   policy: unknown
 ): AutomationSurfacePolicyState {
   return automationSurfacePolicyStates.some((state) => state === policy)
@@ -173,7 +173,7 @@ export function parseAutomationSurfaceTools(tools: unknown) {
     : []
 }
 
-export function parseAutomationSurfaceToolsAttribute(tools: unknown) {
+function parseAutomationSurfaceToolsAttribute(tools: unknown) {
   return typeof tools === "string"
     ? tools.split(",").filter((tool) => tool !== "")
     : parseAutomationSurfaceTools(tools)

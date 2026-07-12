@@ -50,7 +50,7 @@ export function getAutomationSurfaceAccessLabel(
   return access === "read" ? "Read" : "Write"
 }
 
-export function getSelectedAutomationSurfacePermissions(
+function getSelectedAutomationSurfacePermissions(
   surface: AutomationSurfaceFormValue,
   permissions: ToolPermission[]
 ) {

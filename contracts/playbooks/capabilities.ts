@@ -1,6 +1,6 @@
 import { type Integration } from "../integrations"
 
-export const playbookCapabilities = ["email", "calendar"] as const
+const playbookCapabilities = ["email", "calendar"] as const
 
 export type PlaybookCapability = (typeof playbookCapabilities)[number]
 
@@ -30,7 +30,7 @@ export type PlaybookSlot = {
   }
 }[PlaybookCapability]
 
-export const playbookIntentLabels = {
+const playbookIntentLabels = {
   email: {
     read: "Read email",
     draft: "Draft replies",
@@ -78,7 +78,7 @@ const intentTools: Record<string, Record<string, readonly string[]>> = {
   },
 }
 
-export function isPlaybookCapabilityProvider(
+function isPlaybookCapabilityProvider(
   capability: PlaybookCapability,
   integration: Integration
 ) {

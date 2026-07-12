@@ -1,8 +1,8 @@
-import { type Doc } from "../../_generated/dataModel"
 import {
   getAutomationEventDefinition,
   isAutomationEventIntegration,
-} from "../../automations/events"
+} from "../../../contracts/automations/events"
+import { type Doc } from "../../_generated/dataModel"
 import { type ToolSurface } from "../../shared/integrations"
 import { type getRunContext } from "./context"
 

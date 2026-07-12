@@ -1,4 +1,4 @@
-import { automationEventCatalog } from "../../../../../automations/events"
+import { automationEventCatalog } from "../../../../../../contracts/automations/events"
 import { integrations as integrationEnum } from "../../../../../shared/integrations"
 import {
   numberProperty,

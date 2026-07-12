@@ -1,13 +1,7 @@
 import { v } from "convex/values"
 import { type DeliveryChoice } from "../../contracts/playbooks/delivery"
 import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
-import { type MutationCtx } from "../_generated/server"
-import {
-  readClerkUserEmail,
-  readClerkUserName,
-  requireClerkUserId,
-} from "../identity/users"
-import { ensureClerkPerson } from "../persons/clerk"
+import { readClerkUserEmail, readClerkUserName } from "../identity/users"
 import { type Integration, integrationValidator } from "../shared/integrations"
 import { type PlaybookPlanArgs } from "./enable"
 
@@ -44,22 +38,6 @@ export const playbookPlanFields = {
   choices: v.optional(v.record(v.string(), integrationValidator)),
   destination: v.optional(destinationValidator),
   options: v.optional(v.record(v.string(), v.union(v.string(), v.number()))),
-}
-
-export async function resolveCallerPlanArgs(
-  ctx: MutationCtx,
-  identity: { email?: string; name?: string; subject?: string },
-  args: PlaybookCallerArgs
-) {
-  const recipient = callerRecipient(identity)
-  const createdBy = await ensureClerkPerson(ctx, {
-    tenantId: args.tenantId,
-    clerkSubject: requireClerkUserId(identity),
-    email: recipient.email,
-    name: recipient.name,
-  })
-
-  return playbookPlanArgs(args, createdBy, recipient)
 }
 
 export function playbookPlanArgs(

@@ -1,5 +1,3 @@
-import { nullableText } from "./shared"
-
 export type ReasoningDisclosure = "summary" | "raw"
 
 export function reasoningDisclosure(model: string): ReasoningDisclosure {
@@ -16,4 +14,8 @@ export function ingestReasoning(
 
   // Future: summarize raw CoT and store the summary here.
   return null
+}
+
+export function nullableText(value: unknown) {
+  return typeof value === "string" && value.trim() !== "" ? value : null
 }

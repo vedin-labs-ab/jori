@@ -32,7 +32,7 @@ export function actorIdentityProvider(
   return undefined
 }
 
-export const linkMethod = v.union(
+const linkMethod = v.union(
   v.literal("observed"),
   v.literal("oauth"),
   v.literal("email"),

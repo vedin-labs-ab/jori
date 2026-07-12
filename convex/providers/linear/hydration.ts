@@ -1,7 +1,7 @@
 import { v } from "convex/values"
+import { isLinearIssueCommentEvent } from "../../../contracts/automations/events/names"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalQuery } from "../../_generated/server"
-import { isLinearIssueCommentEvent } from "../../automations/names"
 import { findActiveIntegrationByExternalId } from "../../integrations/data"
 
 const issueMatch = v.object({

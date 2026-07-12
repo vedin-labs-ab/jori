@@ -3,22 +3,29 @@ import path from "node:path"
 import { listFiles, normalizeAssetPath } from "./files.ts"
 import { type ArtifactBuildAsset, type ArtifactManifest } from "./types.ts"
 
+const manifestAssetPath = "milo-manifest.json"
+
 export async function readBuildAssets(
   project: string
 ): Promise<ArtifactBuildAsset[]> {
   const dist = path.join(project, "dist")
-  const paths = await listFiles(dist)
+  const paths = (await listFiles(dist)).filter(
+    (assetPath) =>
+      normalizeAssetPath(path.relative(dist, assetPath)) !== manifestAssetPath
+  )
   const assetPaths = paths.map((assetPath) =>
     normalizeAssetPath(path.relative(dist, assetPath))
   )
   const manifest = createRuntimeManifest(assetPaths)
-  const manifestPath = path.join(dist, "milo-manifest.json")
+  const assets: ArtifactBuildAsset[] = [
+    {
+      path: manifestAssetPath,
+      mimeType: inferAssetMimeType(manifestAssetPath),
+      contentBase64: Buffer.from(JSON.stringify(manifest)).toString("base64"),
+    },
+  ]
 
-  await fs.writeFile(manifestPath, JSON.stringify(manifest), "utf8")
-
-  const assets: ArtifactBuildAsset[] = []
-
-  for (const assetPath of await listFiles(dist)) {
+  for (const assetPath of paths) {
     const relativePath = normalizeAssetPath(path.relative(dist, assetPath))
     const bytes = await fs.readFile(assetPath)
 

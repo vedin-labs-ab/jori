@@ -4,7 +4,7 @@ import {
   automationEventParameterResetKeys,
   getAutomationEventDefinition,
   normalizeAutomationEventMatch,
-} from "./events"
+} from "./index"
 
 describe("automation event catalog match", () => {
   test("normalizes required option and optional text match", () => {

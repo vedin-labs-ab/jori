@@ -1,4 +1,4 @@
-export type PulseDay = {
+type PulseDay = {
   key: string
   label: string
   emphasized: boolean

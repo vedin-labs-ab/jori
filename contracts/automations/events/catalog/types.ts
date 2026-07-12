@@ -46,5 +46,5 @@ export type AutomationEventIntegrationDefinition = {
   events: readonly AutomationEventDefinition[]
 }
 
-export type AutomationEventMatchValue = string | number
+type AutomationEventMatchValue = string | number
 export type AutomationEventMatch = Record<string, AutomationEventMatchValue>

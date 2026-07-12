@@ -2,10 +2,9 @@ import { spawnSync } from "node:child_process"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
 import { runtimeAssets } from "../../convex/runtime/_generated/assets.ts"
+import { root } from "./paths.ts"
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const generatedPath = path.join(
   root,
   "convex/playbooks/blueprints/generated.ts"

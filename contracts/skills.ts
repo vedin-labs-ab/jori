@@ -7,7 +7,7 @@ export const skillCategories = [
 
 export type SkillCategory = (typeof skillCategories)[number]
 
-export const skillCategoryLabels = {
+const skillCategoryLabels = {
   communication: "Communication",
   creation: "Creation",
   operations: "Operations",

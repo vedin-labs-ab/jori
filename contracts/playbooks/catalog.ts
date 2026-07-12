@@ -90,7 +90,7 @@ const digestDelivery = {
 } as const satisfies Omit<PlaybookDelivery, "noun">
 
 /** How long before the digest goes out its research agents get to work. */
-export const digestPrepMinutes = 15
+const digestPrepMinutes = 15
 
 export const playbookCatalog: readonly PlaybookDefinition[] = [
   {

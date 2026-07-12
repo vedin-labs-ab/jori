@@ -2,8 +2,8 @@ import { readdir, readFile } from "node:fs/promises"
 import path from "node:path"
 
 type DriftRule = {
-  buildPattern: () => RegExp
   message: string
+  pattern: RegExp
 }
 
 type Violation = {
@@ -23,13 +23,12 @@ const skippedPathParts = new Set([
 ])
 const rules: DriftRule[] = [
   {
-    buildPattern: () => new RegExp(`\\b${["args", "Json"].join("")}\\b`),
     message: "Use inputJson through contracts/transport.ts.",
+    pattern: /\bargsJson\b/,
   },
   {
-    buildPattern: () =>
-      new RegExp(`\\b${["waitpoint", "Token", "Id"].join("")}\\b`),
     message: "Use waitpointId.",
+    pattern: /\bwaitpointTokenId\b/,
   },
 ]
 
@@ -86,7 +85,7 @@ async function checkFile(relativePath: string) {
 
   for (const [index, line] of lines.entries()) {
     for (const rule of rules) {
-      if (rule.buildPattern().test(line)) {
+      if (rule.pattern.test(line)) {
         violations.push({
           line: index + 1,
           message: rule.message,

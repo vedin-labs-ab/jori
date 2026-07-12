@@ -1,9 +1,9 @@
-import { internal } from "../../_generated/api"
-import { type ActionCtx } from "../../_generated/server"
 import {
   linearIssueLifecycleEvent,
   linearProjectLifecycleEvent,
-} from "../../automations/names"
+} from "../../../contracts/automations/events/names"
+import { internal } from "../../_generated/api"
+import { type ActionCtx } from "../../_generated/server"
 import { type EventData } from "../../events/schema"
 import { type Actor, createIntegrationActor } from "../../shared/actor"
 import { type LinearWebhookPayload } from "../linear/events"

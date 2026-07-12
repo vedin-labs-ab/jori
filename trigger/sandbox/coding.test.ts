@@ -167,24 +167,32 @@ test("rejects mutating git commands in the git tool", async () => {
 })
 
 test("guards git writes inside bash commands", async () => {
-  const sandbox = createGitSandbox()
-
   await expect(
     executeCodingTool({
       input: { command: "git status --short && command git checkout -b work" },
-      sandbox,
+      sandbox: createGitSandbox(),
       tool: "bash",
     })
   ).resolves.toMatchObject({
     exitCode: 2,
     stderr: expect.stringContaining("git is read-only in bash"),
   })
+
+  await expect(
+    executeCodingTool({
+      input: { command: "git clone example 2>&1 | tail -20" },
+      sandbox: createLocalSandbox({}),
+      tool: "bash",
+    })
+  ).resolves.toMatchObject({
+    exitCode: 2,
+    stdout: expect.stringContaining("git is read-only in bash"),
+  })
 })
 
 function createLocalSandbox(files: Record<string, string>) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "milo-tools-"))
   roots.push(root)
-  fs.mkdirSync(root, { recursive: true })
 
   for (const [file, content] of Object.entries(files)) {
     const target = path.join(root, file)

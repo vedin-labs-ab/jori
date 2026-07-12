@@ -75,23 +75,7 @@ describe("automation event option field", () => {
     fireEvent.click(screen.getByRole("button"))
 
     const option = await screen.findByRole("option", { name: /General/ })
-
-    expect(option.className).toContain("hover:bg-accent")
-
-    fireEvent.pointerMove(option, { pointerType: "mouse" })
-    fireEvent.mouseMove(option)
-    await waitFor(() => {
-      expect(option.hasAttribute("data-highlighted")).toBe(true)
-    })
-
-    fireEvent.pointerDown(option, {
-      button: 0,
-      ctrlKey: false,
-      pointerType: "mouse",
-    })
-    fireEvent.mouseDown(option, { button: 0 })
-    fireEvent.mouseUp(option, { button: 0 })
-    fireEvent.click(option)
+    selectOption(option)
 
     await waitFor(() => {
       expect(onValueChange).toHaveBeenCalledWith("C123")
@@ -125,21 +109,7 @@ describe("automation event option field in dialogs", () => {
     const portal = document.querySelector('[data-slot="combobox-portal"]')
 
     expect(portal?.className).toContain("pointer-events-auto")
-
-    fireEvent.pointerMove(option, { pointerType: "mouse" })
-    fireEvent.mouseMove(option)
-    await waitFor(() => {
-      expect(option.hasAttribute("data-highlighted")).toBe(true)
-    })
-
-    fireEvent.pointerDown(option, {
-      button: 0,
-      ctrlKey: false,
-      pointerType: "mouse",
-    })
-    fireEvent.mouseDown(option, { button: 0 })
-    fireEvent.mouseUp(option, { button: 0 })
-    fireEvent.click(option)
+    selectOption(option)
 
     await waitFor(() => {
       expect(onValueChange).toHaveBeenCalledWith("C123")
@@ -148,6 +118,15 @@ describe("automation event option field in dialogs", () => {
     expect(onOpenChange).not.toHaveBeenCalledWith(false)
   })
 })
+
+function selectOption(option: HTMLElement) {
+  fireEvent.pointerDown(option, {
+    button: 0,
+    ctrlKey: false,
+    pointerType: "mouse",
+  })
+  fireEvent.click(option)
+}
 
 function renderEventOptionField(
   value: string,

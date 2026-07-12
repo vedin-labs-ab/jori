@@ -9,9 +9,9 @@ import {
   type ToolSet,
   tool,
 } from "ai"
+import { toJsonObject } from "../../contracts/json"
 import { requireOpenRouterRuntimeConfig } from "./config"
-import { ingestReasoning } from "./reasoning"
-import { nullableText, readToolInput } from "./shared"
+import { ingestReasoning, nullableText } from "./reasoning"
 import {
   type ModelMessage,
   type ModelResponse,
@@ -189,4 +189,10 @@ function readToolCall(toolCall: {
       name: toolCall.toolName,
     },
   ]
+}
+
+function readToolInput(value: unknown) {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? toJsonObject(value)
+    : {}
 }

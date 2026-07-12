@@ -6,7 +6,7 @@ import { integrationValidator } from "../shared/integrations"
 // Kinds the pipeline can deduce. Keep the array, the validator, and the
 // beliefs union members in sync; schema.test.ts pins the equivalence.
 export const beliefKinds = ["workstream"] as const
-export const beliefKind = v.union(v.literal("workstream"))
+const beliefKind = v.union(v.literal("workstream"))
 export type BeliefKind = Infer<typeof beliefKind>
 
 // Review stages: the kind-neutral effort review, then one review per belief
@@ -20,7 +20,7 @@ export type PassStage = Infer<typeof passStage>
 export const passScope = v.union(v.literal("window"), v.literal("full"))
 export type PassScope = Infer<typeof passScope>
 
-export const beliefStatus = v.union(
+const beliefStatus = v.union(
   v.literal("proposed"), // judge sees it; runs don't
   v.literal("confirmed"), // in the roster, grounds run context
   v.literal("closed"), // work concluded; kept for history
@@ -95,13 +95,13 @@ export const beliefs = defineTable(
 // Each layer cites only the layer below: effort evidence references events
 // and conversations, belief evidence references efforts. Citations still
 // ground out in source records, transitively.
-export const evidenceSubject = v.union(
+const evidenceSubject = v.union(
   v.object({ kind: v.literal("belief"), beliefId: v.id("beliefs") }),
   v.object({ kind: v.literal("effort"), effortId: v.id("efforts") })
 )
 export type EvidenceSubject = Infer<typeof evidenceSubject>
 
-export const evidenceReference = v.union(
+const evidenceReference = v.union(
   v.object({ kind: v.literal("event"), eventId: v.id("events") }),
   v.object({
     kind: v.literal("conversation"),
@@ -154,7 +154,7 @@ export const journal = defineTable({
   .index("by_effort_and_observed_at", ["effortId", "observedAt"])
   .index("by_workstream_and_observed_at", ["workstreamId", "observedAt"])
 
-export const passStatus = v.union(
+const passStatus = v.union(
   v.literal("running"),
   v.literal("completed"),
   v.literal("failed")
