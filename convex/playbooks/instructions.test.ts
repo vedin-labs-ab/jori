@@ -20,6 +20,15 @@ const providerFamilies = [
   { email: "microsoftEmail", calendar: "microsoftCalendar" },
 ] satisfies Record<PlaybookCapability, Integration>[]
 
+const meetingPrepReferences = [
+  "#start_agent",
+  "#search_artifacts",
+  "/artifact-creator",
+  "#add_automation",
+  "#list_capabilities",
+  "#share_artifact",
+]
+
 function render(
   key: string,
   destination: DeliveryDestination,
@@ -59,7 +68,7 @@ describe("playbook instructions", () => {
         expect(instructions).not.toContain("undefined")
         expect(instructions).toContain(emailDestination.address)
         for (const slot of playbook.slots) {
-          expect(instructions).toContain(providers[slot.capability])
+          expect(instructions).toContain(`@${providers[slot.capability]}`)
         }
       }
     }
@@ -79,7 +88,9 @@ describe("playbook instructions", () => {
       channelName: "standup",
     })
 
-    expect(instructions).toContain("Post the brief to #standup via Slack")
+    expect(instructions).toContain(
+      'Post the brief to the "standup" channel via @Slack'
+    )
     expect(instructions).not.toContain("Email")
   })
 
@@ -90,18 +101,38 @@ describe("playbook instructions", () => {
   })
 })
 
+describe("playbook instruction references", () => {
+  test.each(meetingPrepReferences)("uses the %s reference", (reference) => {
+    const instructions = render("meeting-prep", emailDestination)
+
+    expect(instructions).toContain(reference)
+    expect(instructions.replaceAll(reference, "")).not.toContain(
+      reference.slice(1)
+    )
+  })
+
+  test("keeps Slack channels outside the tool namespace", () => {
+    const instructions = render("morning-brief", {
+      kind: "slack",
+      channelId: "C1",
+      channelName: "share_artifact",
+    })
+
+    expect(instructions).toContain('to the "share_artifact" channel via @Slack')
+    expect(instructions).not.toContain("#share_artifact")
+  })
+})
+
 describe("meeting prep instructions", () => {
   test("meeting prep defaults to a digest with prep sends", () => {
     const instructions = render("meeting-prep", emailDestination)
 
-    expect(instructions).toContain("start_agent")
     expect(instructions).toContain("at 07:30 my local time today")
     expect(instructions).toContain('name "Meeting digest"')
     expect(instructions).toContain("start minus 45 minutes")
     expect(instructions).toContain('name "Prep: "')
-    expect(instructions).toContain("share_artifact")
     expect(instructions).toContain(
-      'Email a short summary of the prep note from my Gmail to Sam Doe <sam@example.com> with the subject "Meeting prep"'
+      'Email a short summary of the prep note from my @Gmail to Sam Doe <sam@example.com> with the subject "Meeting prep"'
     )
     // With a digest run behind it, the prep send refreshes the dossier it
     // finds and never falls back to prepping inline.
@@ -143,7 +174,7 @@ describe("meeting prep instructions", () => {
     expect(instructions).toContain("start minus 60 minutes")
     expect(instructions).toContain('name "Prep: "')
     expect(instructions).toContain("do the prep yourself now")
-    expect(instructions).not.toContain("start_agent")
+    expect(instructions).not.toContain("#start_agent")
     expect(instructions).not.toContain("Meeting digest")
   })
 
@@ -155,7 +186,7 @@ describe("meeting prep instructions", () => {
     })
 
     expect(instructions).toContain(
-      "Post a short summary of the prep note to #standup via Slack, with the link to the full prep note."
+      'Post a short summary of the prep note to the "standup" channel via @Slack, with the link to the full prep note.'
     )
   })
 })
