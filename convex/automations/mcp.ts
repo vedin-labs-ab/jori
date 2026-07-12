@@ -8,6 +8,7 @@ import { type AutomationTriggerInput, type AutomationType } from "./schema"
 
 type AddAutomationArgs = {
   artifactId?: Id<"artifacts">
+  key?: string
   name: string
   instructions: string
   scope?: Scope

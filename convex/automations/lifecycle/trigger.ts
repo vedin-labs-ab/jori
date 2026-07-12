@@ -64,7 +64,11 @@ export async function resolveTrigger(
   }
 
   return getTimeTrigger(
-    { type: "cron", expression: args.trigger.expression },
+    {
+      type: "cron",
+      expression: args.trigger.expression,
+      timezone: args.trigger.timezone,
+    },
     args.now
   )
 }
@@ -94,7 +98,11 @@ export async function scheduleNextCronAutomation(
   }
 
   const trigger = getTimeTrigger(
-    { type: "cron", expression: automation.trigger.expression },
+    {
+      type: "cron",
+      expression: automation.trigger.expression,
+      timezone: automation.trigger.timezone,
+    },
     now
   )
 

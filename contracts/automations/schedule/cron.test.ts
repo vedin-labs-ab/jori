@@ -34,4 +34,40 @@ describe("cron scheduling", () => {
 
     expect(new Date(nextRunAt).toISOString()).toBe("2026-01-01T00:15:00.000Z")
   })
+
+  test("keeps wall-clock time across daylight-saving changes", () => {
+    const nextRunAt = getNextCronRunAt(
+      "0 8 * * *",
+      Date.parse("2026-03-28T07:01:00.000Z"),
+      "Europe/Stockholm"
+    )
+
+    expect(new Date(nextRunAt).toISOString()).toBe("2026-03-29T06:00:00.000Z")
+  })
+
+  test("skips a local time that does not exist", () => {
+    const nextRunAt = getNextCronRunAt(
+      "30 2 * * *",
+      Date.parse("2026-03-28T23:00:00.000Z"),
+      "Europe/Stockholm"
+    )
+
+    expect(new Date(nextRunAt).toISOString()).toBe("2026-03-30T00:30:00.000Z")
+  })
+
+  test("runs a repeated local time once", () => {
+    const first = getNextCronRunAt(
+      "30 2 * * *",
+      Date.parse("2026-10-24T23:00:00.000Z"),
+      "Europe/Stockholm"
+    )
+    const afterFirst = getNextCronRunAt(
+      "30 2 * * *",
+      Date.parse("2026-10-25T00:31:00.000Z"),
+      "Europe/Stockholm"
+    )
+
+    expect(new Date(first).toISOString()).toBe("2026-10-25T00:30:00.000Z")
+    expect(new Date(afterFirst).toISOString()).toBe("2026-10-26T01:30:00.000Z")
+  })
 })

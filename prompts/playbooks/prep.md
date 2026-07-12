@@ -1,72 +1,61 @@
-{% if options.digest == "on" %}Prepare the day's meeting dossiers and schedule the digest that delivers them.{% else %}Plan today's meeting prep, and schedule a focused prep run before each meeting that deserves one.{% endif %}
+Prepare the meetings that merit it. The automation's attached "Meeting prep" artifact is the canonical dossier; use its ID from the trigger context.
 
-## The dossier artifact
+## Select
 
-Find my personal artifact titled "Meeting prep" with #search_artifacts. If it does not exist, load the /artifact-creator skill and build it before anything else, with personal access and one contract state entry:
+Read my @{{providers.calendar}} for meetings with other attendees {% if options.digest == "on" %}from now through this time tomorrow{% else %}today{% endif %}. Exclude all-day events, focus blocks, participant-free holds, and cancelled events. {% if options.meetings == "external" %}Keep meetings with someone outside my organization.{% elsif options.meetings == "internal" %}Keep consequential internal meetings such as decisions, reviews, and negotiations; exclude routine syncs.{% else %}Keep external meetings and consequential internal meetings; exclude routine syncs.{% endif %} If none qualify, finish quietly.
 
-- name "dossiers", key "prep/dossiers", scope shared, holding { "schemaVersion": 1, "days": { ... } } where "days" maps a date ("YYYY-MM-DD") to that day's dossiers, and each day maps a calendar event id to one dossier: { "title", "startsAt", "attendees": [{ "name", "email", "company", "notes" }], "context", "prepare": [strings], "threads": [{ "subject", "takeaway" }] }. Keep the schema permissive about optional dossier fields.
-- The page renders entirely from that state and calls no tools, in two views. Day view: a date switcher over "days", one card per meeting in start order (time, title, attendees) with the next upcoming one marked, and a quiet empty state; tapping a card opens that meeting. Meeting view: the full dossier, with a way back to its day. The page's own URL fragment picks the initial view — "m" (event id) opens that meeting, "d" (YYYY-MM-DD) picks the day, neither means today's day view.
+The requester context identifies me; do not infer my identity. Exclude me when researching attendees.
 
-## Reset
+## Dossiers
 
-Read the "dossiers" state. With one merge patch, drop day keys older than 7 days and make sure today's key exists.
-
-## Choose the meetings
-
-Check my @{{providers.calendar}} for events with other attendees{% if options.digest == "on" %} starting between now and this time tomorrow{% else %} today{% endif %}. Skip focus blocks, all-day events, and holds without participants. {% if options.meetings == "external" %}Only meetings that include people outside my organization qualify. Prep is for the ones where preparation pays off; skip meetings with nothing worth preparing.{% elsif options.meetings == "internal" %}Only meetings where everyone is part of my organization qualify. Prep is for the ones where preparation pays off — reviews, negotiations, decisions — not routine syncs.{% else %}Prep is for meetings where preparation pays off — external or customer meetings, and high-stakes internal ones such as reviews or negotiations. Routine internal syncs do not qualify.{% endif %} If nothing qualifies, finish quietly: schedule nothing and send nothing.
-{% if options.digest == "on" %}
-
-## Research every meeting now
-
-You are running shortly before the digest goes out. Give each qualifying meeting its own research agent with #start_agent — at most ten; cover any remainder briefly yourself. Give each agent a concise title naming its meeting. Do not wait for the agents. Each agent's task, with the angle-bracket parts filled in:
+The artifact state entry is `dossiers`:
 
 ```txt
-Research the meeting `<title>` at `<local time>` on `<date>` (calendar event `<event id>`) for my meeting-prep dossier. Only read and write the dossier: send nothing, and change nothing else.
-
-Work out who I am meeting and what it is about: research the attendees other than me and their companies on the web, and search my @{{providers.email}} for recent threads with the attendees to surface open questions and promised follow-ups.
-
-Write the dossier into artifact `<artifact id>`, state entry "dossiers", with a merge patch at days -> `<YYYY-MM-DD>` -> `<event id>`, matching the contract's dossier shape.
+{
+  "schemaVersion": 1,
+  "days": {
+    "<YYYY-MM-DD>": {
+      "<event id>": {
+        "title": "...",
+        "startsAt": "<UTC ISO>",
+        "preparedAt": "<UTC ISO>",
+        "attendees": [{ "name": "...", "email": "...", "company": "...", "notes": "..." }],
+        "context": "...",
+        "prepare": ["..."],
+        "threads": [{ "subject": "...", "takeaway": "..." }]
+      }
+    }
+  }
+}
 ```
 
-## Schedule the digest delivery
+Use #read_artifact_state and #update_artifact_state. Initialize the state if absent. With merge patches, retain today and the previous seven local dates and remove older day keys.
 
-Create a one-time automation with #add_automation: type "once" at {{options.time}} my local time today, converted to a UTC ISO timestamp, name "Meeting digest", artifactId set to the dossier artifact, scope "personal", access with the sending tool the skeleton's last paragraph needs (check #list_capabilities), and these instructions with the angle-bracket parts filled in:
+Research each meeting from attendee/company web sources and recent @{{providers.email}} threads. Surface purpose, relevant history, open questions, commitments, and what to have ready. Prefer facts over filler.
+
+{% if options.digest == "on" %}Start one #start_agent per meeting, up to ten. Give each agent the artifact ID, event facts, date key, and exact dossier shape; it sets `preparedAt` to the current UTC time when done. Tell it to send nothing and only research and merge its dossier. Narrow `tools` to the email read/search and web tools it needs. Keep every returned run ID.
+
+Call #wait_for_agents once with those run IDs and a deadline of today's {{options.time}} in my timezone, converted to UTC. Continue with completed dossiers when the agents finish or the deadline arrives; never wait beyond it.
+
+Read today's dossiers, then create a 24-hour #share_artifact link. The day view fragment is `#d=<YYYY-MM-DD>`. Send a compact digest in meeting order: time, people, and what to have ready. Note omissions only when a failed or timed-out agent left a qualifying meeting without a dossier.
+
+{{delivery}}
+{% endif %}
+{% if options.before != "off" %}## Before each meeting
+
+For every qualifying meeting starting more than {{options.before}} minutes from now, create one personal one-time #add_automation at start minus {{options.before}} minutes. Use key `meeting-prep:event:<event id>:<start UTC ISO>`, name `Prep: <title>`, attach this artifact, and grant only calendar/email reads, web research, artifact state/share, and the delivery tool. Use these instructions:
 
 ```txt
-Send my meeting digest (artifact `<artifact id>`).
+Prepare the requester for `<title>` at `<local time>` (`<event id>`), using attached artifact `<artifact id>`.
 
-Read the artifact's "dossiers" state for `<YYYY-MM-DD>`. Compose the digest from it: one short section per meeting in start order — when, who, and what to have ready.
+Re-read the event on @{{providers.calendar}}. If cancelled or the requester is no longer attending, finish quietly. If moved later today, create the same keyed automation for the new start and stop. If moved earlier or already started, continue now.
 
-Create a share link for the artifact with #share_artifact, valid for 24 hours: that link is the full prep note.
+Research attendees other than the requester, their companies, and recent @{{providers.email}} threads. If a dossier exists, refresh it with anything newer than `preparedAt`. Merge the complete dossier into `dossiers.days.<YYYY-MM-DD>.<event id>` with a current UTC `preparedAt`.
+
+Create a 24-hour #share_artifact link and append the fragment `#d=<YYYY-MM-DD>&m=<event id>`.
 
 {{delivery}}
 ```
 
-If {{options.time}} has already passed today, schedule nothing and follow the digest instructions yourself once the research agents have written their dossiers.
-{% endif %}
-{% if options.before != "off" %}
-
-## Schedule a prep send per meeting
-
-For each qualifying meeting whose start is more than {{options.before}} minutes away, create a one-time automation with #add_automation: type "once" at the meeting's start minus {{options.before}} minutes as a UTC ISO timestamp, name "Prep: " plus the meeting title, artifactId set to the dossier artifact, scope "personal", access with the @{{providers.calendar}} and @{{providers.email}} read and search tools from this run's own capabilities plus the sending tool, web true, and these instructions with the angle-bracket parts filled in:
-
-```txt
-Prepare me for the meeting `<title>` at `<local time>` today (calendar event `<event id>`, artifact `<artifact id>`).
-
-Re-read the event on my @{{providers.calendar}} first. If it was cancelled or I was removed, stop without sending anything. If it moved to later today, create a replacement automation like this one at the new start minus {{options.before}} minutes, then stop. If it moved earlier or already started, continue now.
-
-If the dossier at days -> `<YYYY-MM-DD>` -> `<event id>` is missing, work out who I am meeting and what it is about: research external attendees and their companies on the web, and search my @{{providers.email}} for recent threads with the attendees to surface open questions and promised follow-ups. If it exists, check my @{{providers.email}} for anything new from the attendees since it was written.
-
-Write what you learned into the artifact's "dossiers" state with a merge patch at days -> `<YYYY-MM-DD>` -> `<event id>`, matching the contract's dossier shape.
-
-Create a share link for the artifact with #share_artifact, valid for 24 hours, and append &d=`<YYYY-MM-DD>`&m=`<event id>` to it: that link is this meeting's prep note.
-
-{{delivery}}
-```
-{% if options.digest == "off" %}
-
-## Meetings too close to schedule
-
-For qualifying meetings starting within {{options.before}} minutes, or already under way, do the prep yourself now, following the skeleton from the re-read step onward.
-{% endif %}
+{% if options.digest == "off" %}Prepare meetings already within {{options.before}} minutes yourself now using the same steps, rather than scheduling them.{% endif %}
 {% endif %}

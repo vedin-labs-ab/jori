@@ -10,14 +10,14 @@ const weekdayLabels: Record<string, string> = {
   "6": "Saturday",
 }
 
-export function describeCron(expression: string | undefined) {
+export function describeCron(expression: string | undefined, timezone = "UTC") {
   const cron = classifyCron(expression)
 
   if (cron === null) {
     return null
   }
 
-  const time = `${cron.time} UTC`
+  const time = `${cron.time} ${timezone}`
 
   if (cron.repeat === "daily") {
     return `Daily at ${time}`

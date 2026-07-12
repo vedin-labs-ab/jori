@@ -105,6 +105,7 @@ function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
         organization: null,
         place: null,
         person: null,
+        requester: null,
       },
       run: {
         id: id<"runs">("run_1"),

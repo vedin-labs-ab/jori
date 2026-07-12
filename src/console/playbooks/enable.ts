@@ -6,7 +6,7 @@ import {
 import { type DeliveryChoice } from "@contracts/playbooks/delivery"
 import { type PlaybookOptionValues } from "@contracts/playbooks/options"
 import { useNavigate } from "@tanstack/react-router"
-import { useConvex, useMutation } from "convex/react"
+import { useAction, useConvex, useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -53,6 +53,7 @@ function useEditActions(
   editorHost: AutomationEditorHost
 ) {
   const convex = useConvex()
+  const draftAction = useAction(api.playbooks.actions.draft)
 
   return {
     edit: (definition: PlaybookDefinition, automationId: AutomationId) =>
@@ -82,10 +83,9 @@ function useEditActions(
         try {
           const [, draft] = await Promise.all([
             editorHost.preloadDialog(),
-            convex.query(api.playbooks.console.draft, {
+            draftAction({
               tenantId,
               playbook: definition.key,
-              utcOffsetMinutes: new Date().getTimezoneOffset(),
               choices,
               destination,
               options,
@@ -140,8 +140,8 @@ function useCatalogActions(
   tenantId: string,
   pending: ReturnType<typeof usePendingAction>
 ) {
-  const enableMutation = useMutation(api.playbooks.console.enable)
-  const trialMutation = useMutation(api.playbooks.console.trial)
+  const enableMutation = useAction(api.playbooks.actions.enable)
+  const trialMutation = useAction(api.playbooks.actions.trial)
   const viewRuns = useViewRunsAction()
 
   return {
@@ -156,7 +156,6 @@ function useCatalogActions(
           await enableMutation({
             tenantId,
             playbook: definition.key,
-            utcOffsetMinutes: new Date().getTimezoneOffset(),
             choices,
             destination,
             options,

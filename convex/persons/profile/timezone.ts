@@ -1,6 +1,7 @@
-import { type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
-import { type QueryLikeCtx } from "../shared/context"
+import { isValidTimezone } from "../../../contracts/timezone"
+import { type Id } from "../../_generated/dataModel"
+import { type MutationCtx } from "../../_generated/server"
+import { type QueryLikeCtx } from "../../shared/context"
 
 /** Store the member's browser-reported IANA zone; garbage is ignored so a
  *  bad client value never breaks the identity sync it rides on. */
@@ -35,12 +36,17 @@ export async function readPersonTimezone(
   return person?.timezone ?? null
 }
 
-export function isValidTimezone(value: string) {
-  try {
-    new Intl.DateTimeFormat("en-US", { timeZone: value })
+export async function requirePersonTimezone(
+  ctx: QueryLikeCtx,
+  personId: Id<"persons">
+) {
+  const timezone = await readPersonTimezone(ctx, personId)
 
-    return true
-  } catch {
-    return false
+  if (timezone === null) {
+    throw new Error("Your timezone is required for recurring automations.")
   }
+
+  return timezone
 }
+
+export { isValidTimezone } from "../../../contracts/timezone"

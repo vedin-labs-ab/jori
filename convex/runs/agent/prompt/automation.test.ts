@@ -67,6 +67,7 @@ describe("raw Markdown trigger instructions", () => {
       integrations: base.integrations,
       instructions: markdown,
       organization: null,
+      requester: null,
       timezone: null,
       workstreams: null,
     }

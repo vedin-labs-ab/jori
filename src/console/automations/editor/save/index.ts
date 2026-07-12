@@ -46,6 +46,7 @@ export function automationFormValues(
   if (automation === undefined) {
     const values = {
       ...emptyAutomationForm,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       ...readAutomationPreferences(),
     }
 
@@ -58,6 +59,9 @@ export function automationFormValues(
   }
 
   return {
+    key: automation.key,
+    playbook: automation.playbook,
+    artifactId: automation.artifactId,
     name: automation.name,
     instructions: automation.instructions,
     ...triggerFormValues(automation),
@@ -72,6 +76,9 @@ export function createAutomationArgs(
   options: AutomationArgsOptions = {}
 ): ArgsResult<
   AutomationArgs & {
+    key?: AutomationFormValues["key"]
+    playbook?: AutomationFormValues["playbook"]
+    artifactId?: AutomationFormValues["artifactId"]
     type: AutomationFormValues["type"]
     trigger: TriggerSpec
   }
@@ -88,7 +95,17 @@ export function createAutomationArgs(
     return trigger
   }
 
-  return { args: { ...base.args, ...trigger } }
+  return {
+    args: {
+      ...base.args,
+      ...trigger,
+      ...(values.key === undefined ? {} : { key: values.key }),
+      ...(values.playbook === undefined ? {} : { playbook: values.playbook }),
+      ...(values.artifactId === undefined
+        ? {}
+        : { artifactId: values.artifactId }),
+    },
+  }
 }
 
 export function updateAutomationArgs(

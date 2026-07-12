@@ -73,11 +73,12 @@ const triggerSchema = () => ({
       },
     }),
     objectSchema({
-      required: ["expression"],
+      required: ["expression", "timezone"],
       properties: {
         expression: stringProperty(
-          "Five-field cron expression interpreted in UTC."
+          "Five-field cron expression interpreted in the supplied timezone."
         ),
+        timezone: stringProperty("IANA timezone for the cron expression."),
       },
     }),
     objectSchema({
@@ -107,6 +108,9 @@ export const automationMiloToolInputSchemas = {
     properties: {
       artifactId: stringProperty(
         "Optional artifact ID. Use this for artifact-owned automations that write artifact state."
+      ),
+      key: stringProperty(
+        "Optional stable idempotency key. Reusing it in the same scope returns the existing equivalent automation and rejects conflicting configuration."
       ),
       name: stringProperty("Short automation name."),
       instructions: stringProperty(automationInstructionsDescription),

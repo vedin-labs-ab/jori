@@ -15,6 +15,30 @@ export type PromptActiveSurface = {
   surface: MessageIntegration
 }
 
+export function createRequesterMessage(input: AgentRuntimeInput) {
+  const requester = input.requester
+
+  if (requester === null || requester === undefined) {
+    return ""
+  }
+
+  return renderPromptTemplate(promptTemplates["agent/requester"], {
+    requester: {
+      name: requester.name ?? null,
+      emails: requester.emails.length === 0 ? null : requester.emails,
+      timezone: requester.timezone ?? null,
+      accounts:
+        requester.accounts.length === 0
+          ? null
+          : requester.accounts.map((account) => ({
+              integration: integrationLabels[account.integration],
+              name: account.name ?? null,
+              email: account.email ?? null,
+            })),
+    },
+  }).trim()
+}
+
 export function createContext(
   input: AgentRuntimeInput,
   activeSurface: PromptActiveSurface | null
@@ -40,6 +64,7 @@ function createRunInstructions(
   return renderPromptTemplate(promptTemplates["agent/context/run"], {
     run: {
       id: input.run._id,
+      artifactId: input.run.artifactId ?? null,
     },
     surface: {
       active: activeSurface !== null,

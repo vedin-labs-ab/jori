@@ -22,20 +22,11 @@ const providerFamilies = [
 
 const meetingPrepReferences = [
   "#start_agent",
-  "#search_artifacts",
-  "/artifact-creator",
+  "#wait_for_agents",
   "#add_automation",
-  "#list_capabilities",
+  "#read_artifact_state",
+  "#update_artifact_state",
   "#share_artifact",
-]
-
-const meetingPrepPlaceholders = [
-  "YYYY-MM-DD",
-  "artifact id",
-  "date",
-  "event id",
-  "local time",
-  "title",
 ]
 
 function render(
@@ -136,16 +127,13 @@ describe("meeting prep Markdown", () => {
   test("uses canonical plain-text fences and Markdown-safe placeholders", () => {
     const instructions = render("meeting-prep", emailDestination)
 
-    expect(instructions.match(/```txt/g)).toHaveLength(3)
+    expect(instructions.match(/```txt/g)).toHaveLength(2)
     expect(instructions).not.toContain('"""')
-    for (const placeholder of meetingPrepPlaceholders) {
-      const inlineCode = `\`<${placeholder}>\``
-
-      expect(instructions).toContain(inlineCode)
-      expect(instructions.replaceAll(inlineCode, "")).not.toContain(
-        `<${placeholder}>`
-      )
-    }
+    expect(instructions).toContain("`<title>`")
+    expect(instructions).toContain("`<local time>`")
+    expect(instructions).toContain("`<event id>`")
+    expect(instructions).toContain("`<artifact id>`")
+    expect(instructions).toContain("`#d=<YYYY-MM-DD>&m=<event id>`")
   })
 })
 
@@ -153,36 +141,18 @@ describe("meeting prep instructions", () => {
   test("meeting prep defaults to a digest with prep sends", () => {
     const instructions = render("meeting-prep", emailDestination)
 
-    expect(instructions).toContain("at 07:30 my local time today")
-    expect(instructions).toContain('name "Meeting digest"')
+    expect(instructions).toContain("deadline of today's 07:30 in my timezone")
+    expect(instructions).toContain("#wait_for_agents")
     expect(instructions).toContain("start minus 45 minutes")
-    expect(instructions).toContain('name "Prep: "')
+    expect(instructions).toContain("name `Prep: <title>`")
     expect(instructions).toContain(
       'Email a short summary of the prep note from my @Gmail to Sam Doe <sam@example.com> with the subject "Meeting prep"'
     )
-    // With a digest run behind it, the prep send refreshes the dossier it
-    // finds and never falls back to prepping inline.
-    expect(instructions).toContain(
-      "If the dossier at days -> `<YYYY-MM-DD>` -> `<event id>` is missing"
-    )
+    expect(instructions).toContain("anything newer than `preparedAt`")
     expect(instructions).not.toContain("do the prep yourself now")
-    // The digest link opens the day view as-is; each prep send deep-links
-    // its own meeting through the fragment.
-    expect(instructions).toContain(
-      "append &d=`<YYYY-MM-DD>`&m=`<event id>` to it: that link is this meeting's prep note"
-    )
-    expect(instructions).toContain(
-      "valid for 24 hours: that link is the full prep note"
-    )
-    // A run after the digest time (Try once, late enablement) sends the
-    // digest instead of silently skipping it, and never babysits agents.
-    expect(instructions).toContain(
-      "If 07:30 has already passed today, schedule nothing and follow the digest instructions yourself"
-    )
-    expect(instructions).toContain("Do not wait for the agents.")
-    expect(instructions).toContain(
-      "Give each agent a concise title naming its meeting."
-    )
+    expect(instructions).toContain("fragment `#d=<YYYY-MM-DD>&m=<event id>`")
+    expect(instructions).toContain("create a 24-hour #share_artifact link")
+    expect(instructions).toContain("Narrow `tools`")
   })
 
   test("pre-meeting sends switch off cleanly", () => {
@@ -190,8 +160,8 @@ describe("meeting prep instructions", () => {
       before: "off",
     })
 
-    expect(instructions).toContain('name "Meeting digest"')
-    expect(instructions).not.toContain('name "Prep: "')
+    expect(instructions).toContain("#wait_for_agents")
+    expect(instructions).not.toContain("name `Prep: <title>`")
   })
 
   test("without a digest the prep sends carry the research", () => {
@@ -201,8 +171,8 @@ describe("meeting prep instructions", () => {
     })
 
     expect(instructions).toContain("start minus 60 minutes")
-    expect(instructions).toContain('name "Prep: "')
-    expect(instructions).toContain("do the prep yourself now")
+    expect(instructions).toContain("name `Prep: <title>`")
+    expect(instructions).toContain("yourself now using the same steps")
     expect(instructions).not.toContain("#start_agent")
     expect(instructions).not.toContain("Meeting digest")
   })
@@ -230,17 +200,18 @@ describe("meeting prep scope", () => {
       meetings: "internal",
     })
 
-    expect(both).toContain("external or customer meetings")
+    expect(both).toContain(
+      "external meetings and consequential internal meetings"
+    )
     // External is the catalog default, so the bare render pins it.
     expect(external).toContain(
-      "Only meetings that include people outside my organization qualify"
+      "Keep meetings with someone outside my organization"
     )
-    expect(internal).toContain(
-      "Only meetings where everyone is part of my organization qualify"
-    )
+    expect(internal).toContain("Keep consequential internal meetings")
     for (const instructions of [both, external, internal]) {
-      expect(instructions).toContain("Skip focus blocks")
-      expect(instructions).toContain("preparation pays off")
+      expect(instructions).toContain("focus blocks")
     }
+    expect(both).toContain("routine syncs")
+    expect(internal).toContain("routine syncs")
   })
 })

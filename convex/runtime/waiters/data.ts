@@ -7,10 +7,16 @@ import {
 } from "../../_generated/server"
 import { enqueueOperation } from "../outbox"
 import { requireWorkerSecret } from "../shared"
-import { type waiterReason, type waiterSubject } from "./schema"
+import {
+  type waiterCondition,
+  waiterCondition as waiterConditionValidator,
+  type waiterReason,
+  type waiterSubject,
+} from "./schema"
 
 type WaiterReason = Infer<typeof waiterReason>
 type WaiterSubject = Infer<typeof waiterSubject>
+type WaiterCondition = Infer<typeof waiterCondition>
 
 export async function wakeRun(
   ctx: MutationCtx,
@@ -26,27 +32,36 @@ export async function wakeRun(
     return false
   }
 
-  const now = Date.now()
+  return await wakeWaiter(ctx, waiter, args)
+}
 
-  await ctx.db.patch(waiter._id, {
-    status: "woken",
-    reason: args.reason,
-    subject: args.subject,
-    wokenAt: now,
-    updatedAt: now,
-  })
-  await enqueueOperation(ctx, {
-    tenantId: waiter.tenantId,
-    key: `waiter:${waiter._id}:wake`,
-    operation: {
-      type: "waiter.wake",
-      waiterId: waiter._id,
-      reason: args.reason,
-      ...(args.subject === undefined ? {} : { subject: args.subject }),
-    },
-  })
+export async function wakeParentForTerminalRun(
+  ctx: MutationCtx,
+  runId: Id<"runs">
+) {
+  const run = await ctx.db.get(runId)
 
-  return true
+  if (run?.parentId === undefined) {
+    return false
+  }
+
+  const waiter = await findActiveWaiter(ctx, run.parentId)
+  const condition = waiter?.condition
+
+  if (
+    waiter === null ||
+    condition === undefined ||
+    condition.kind !== "runs" ||
+    !condition.runIds.includes(runId) ||
+    !(await allRunsTerminal(ctx, condition.runIds))
+  ) {
+    return false
+  }
+
+  return await wakeWaiter(ctx, waiter, {
+    reason: "resolved",
+    subject: { kind: "run", id: runId },
+  })
 }
 
 async function findActiveWaiter(ctx: MutationCtx, runId: Id<"runs">) {
@@ -65,6 +80,7 @@ export const create = mutation({
     sessionId: v.optional(v.id("sessions")),
     waitpointId: v.string(),
     expiresAt: v.number(),
+    condition: v.optional(waiterConditionValidator),
   },
   returns: v.id("waiters"),
   handler: async (ctx, args): Promise<Id<"waiters">> => {
@@ -77,6 +93,7 @@ export const create = mutation({
     }
 
     await cancelStaleWaiters(ctx, args.runId)
+    await validateCondition(ctx, run, args.condition)
 
     const now = Date.now()
 
@@ -87,6 +104,7 @@ export const create = mutation({
       waitpointId: args.waitpointId,
       status: "waiting",
       expiresAt: args.expiresAt,
+      ...(args.condition === undefined ? {} : { condition: args.condition }),
       createdAt: now,
       updatedAt: now,
     })
@@ -139,4 +157,75 @@ async function cancelStaleWaiters(ctx: MutationCtx, runId: Id<"runs">) {
       updatedAt: Date.now(),
     })
   }
+}
+
+async function validateCondition(
+  ctx: MutationCtx,
+  run: { _id: Id<"runs">; tenantId: string },
+  condition: WaiterCondition | undefined
+) {
+  if (condition === undefined) {
+    return
+  }
+
+  if (condition.runIds.length === 0 || condition.runIds.length > 20) {
+    throw new Error("Agent waits require 1-20 child runs.")
+  }
+
+  for (const runId of new Set(condition.runIds)) {
+    const child = await ctx.db.get(runId)
+
+    if (
+      child === null ||
+      child.tenantId !== run.tenantId ||
+      child.parentId !== run._id
+    ) {
+      throw new Error("Agent waits may only target direct child runs.")
+    }
+  }
+}
+
+async function allRunsTerminal(ctx: MutationCtx, runIds: Id<"runs">[]) {
+  for (const runId of runIds) {
+    const run = await ctx.db.get(runId)
+
+    if (
+      run === null ||
+      (run.status !== "completed" &&
+        run.status !== "failed" &&
+        run.status !== "stopped")
+    ) {
+      return false
+    }
+  }
+
+  return true
+}
+
+async function wakeWaiter(
+  ctx: MutationCtx,
+  waiter: NonNullable<Awaited<ReturnType<typeof findActiveWaiter>>>,
+  args: { reason: WaiterReason; subject?: WaiterSubject }
+) {
+  const now = Date.now()
+
+  await ctx.db.patch(waiter._id, {
+    status: "woken",
+    reason: args.reason,
+    subject: args.subject,
+    wokenAt: now,
+    updatedAt: now,
+  })
+  await enqueueOperation(ctx, {
+    tenantId: waiter.tenantId,
+    key: `waiter:${waiter._id}:wake`,
+    operation: {
+      type: "waiter.wake",
+      waiterId: waiter._id,
+      reason: args.reason,
+      ...(args.subject === undefined ? {} : { subject: args.subject }),
+    },
+  })
+
+  return true
 }

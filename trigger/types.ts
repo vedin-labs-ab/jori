@@ -199,10 +199,23 @@ export type HandoffSubject =
 type WaiterSubject =
   | HandoffSubject
   | { kind: "message"; id: ConvexId<"messages"> }
+  | { kind: "run"; id: ConvexId<"runs"> }
+
+export type WaiterCondition = {
+  kind: "runs"
+  runIds: ConvexId<"runs">[]
+}
 
 export type WaiterWake = {
   reason: WaiterWakeReason
   subject?: WaiterSubject
+}
+
+export type AgentRunStatus = {
+  runId: ConvexId<"runs">
+  title: string
+  status: "queued" | "running" | "completed" | "failed" | "stopped"
+  error: string | null
 }
 
 export type ApprovalHandoff = {

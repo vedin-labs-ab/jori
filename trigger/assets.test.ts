@@ -58,6 +58,7 @@ function cloneRuntime(): ToolRuntime {
         organization: null,
         place: null,
         person: null,
+        requester: null,
       },
       run: {
         id: "run_1" as ConvexId<"runs">,

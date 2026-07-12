@@ -170,6 +170,7 @@ function createRuntime(options: {
         organization: null,
         place: null,
         person: null,
+        requester: null,
       },
       run: {
         id: id<"runs">("run_1"),

@@ -50,10 +50,17 @@ export const artifacts = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
   archivedAt: v.optional(v.number()),
+  blueprint: v.optional(v.string()),
+  blueprintPartition: v.optional(v.string()),
 })
   .index("by_tenant", ["tenantId"])
   .index("by_tenant_and_updated_at", ["tenantId", "updatedAt"])
   .index("by_tenant_and_owner", ["tenantId", "ownerId"])
+  .index("by_tenant_and_blueprint", [
+    "tenantId",
+    "blueprintPartition",
+    "blueprint",
+  ])
 
 export const artifactVersions = defineTable({
   tenantId: v.string(),

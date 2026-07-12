@@ -1,0 +1,106 @@
+import { type Scope } from "../../contracts/permissions/scope"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { type QueryLikeCtx } from "../shared/context"
+
+const organizationPartition = "organization"
+const maxKeyLength = 240
+
+export function normalizeAutomationKey(value: string | undefined) {
+  if (value === undefined) {
+    return undefined
+  }
+
+  const key = value.trim()
+
+  if (key === "" || key.length > maxKeyLength) {
+    throw new Error(`Automation key must be 1-${maxKeyLength} characters.`)
+  }
+
+  return key
+}
+
+export function automationKeyPartition(
+  scope: Scope,
+  createdBy: Id<"persons"> | undefined
+) {
+  if (scope === "organization") {
+    return organizationPartition
+  }
+
+  if (createdBy === undefined) {
+    throw new Error("Personal keyed automations require an owner.")
+  }
+
+  return `person:${createdBy}`
+}
+
+export async function findAutomationByKey(
+  ctx: QueryLikeCtx,
+  args: { tenantId: string; keyPartition: string; key: string }
+) {
+  return await ctx.db
+    .query("automations")
+    .withIndex("by_tenant_and_key_partition_and_key", (query) =>
+      query
+        .eq("tenantId", args.tenantId)
+        .eq("keyPartition", args.keyPartition)
+        .eq("key", args.key)
+    )
+    .unique()
+}
+
+export function sameAutomationDefinition(
+  existing: Doc<"automations">,
+  candidate: AutomationDefinition
+) {
+  return definitionKey(existing) === definitionKey(candidate)
+}
+
+type AutomationDefinition = Pick<
+  Doc<"automations">,
+  | "access"
+  | "artifactId"
+  | "instructions"
+  | "name"
+  | "playbook"
+  | "scope"
+  | "trigger"
+  | "type"
+>
+
+function definitionKey(definition: AutomationDefinition) {
+  return JSON.stringify({
+    access: {
+      integrations: [...definition.access.integrations]
+        .map((entry) => ({
+          id: entry.id,
+          tools: [...entry.tools].sort(),
+        }))
+        .sort((left, right) => String(left.id).localeCompare(String(right.id))),
+      web: definition.access.web,
+    },
+    artifactId: definition.artifactId ?? null,
+    instructions: definition.instructions,
+    name: definition.name,
+    playbook: definition.playbook ?? null,
+    scope: definition.scope ?? "personal",
+    trigger: triggerKey(definition.trigger),
+    type: definition.type,
+  })
+}
+
+function triggerKey(trigger: Doc<"automations">["trigger"]) {
+  if ("at" in trigger) {
+    return { at: trigger.at }
+  }
+
+  if ("expression" in trigger) {
+    return { expression: trigger.expression, timezone: trigger.timezone }
+  }
+
+  return {
+    event: trigger.event,
+    integrationId: trigger.integrationId,
+    match: trigger.match ?? null,
+  }
+}

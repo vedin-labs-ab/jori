@@ -25,6 +25,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { createAutomation } from "../automations/lifecycle"
 import { listActiveIntegrationsForOwner } from "../integrations/data"
+import { requirePersonTimezone } from "../persons/profile/timezone"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration, integrationLabels } from "../shared/integrations"
 import {
@@ -54,6 +55,7 @@ export type PlaybookPlanArgs = {
   options?: PlaybookOptionValues
   createdBy: Id<"persons">
   recipient: PlaybookRecipient
+  artifactId?: Id<"artifacts">
 }
 
 /** Resolve a playbook's input slots and delivery destination, and render it. */
@@ -107,13 +109,9 @@ export async function resolvePlaybookPlan(
   }
 }
 
-export async function enablePlaybook(
-  ctx: MutationCtx,
-  args: PlaybookPlanArgs & {
-    utcOffsetMinutes: number
-  }
-) {
+export async function enablePlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
   const plan = await resolvePlaybookPlan(ctx, args)
+  const timezone = await requirePersonTimezone(ctx, args.createdBy)
 
   await requireNotEnabled(ctx, {
     definition: plan.definition,
@@ -124,6 +122,7 @@ export async function enablePlaybook(
   const automation = await createAutomation(ctx, {
     tenantId: args.tenantId,
     playbook: plan.definition.key,
+    key: `playbook:${plan.definition.key}`,
     name: plan.definition.title,
     instructions: plan.instructions,
     scope: plan.definition.scope,
@@ -131,14 +130,29 @@ export async function enablePlaybook(
     type: "cron",
     trigger: {
       expression: playbookCron(
-        resolvePlaybookSchedule(plan.definition, plan.options),
-        normalizeUtcOffset(args.utcOffsetMinutes)
+        resolvePlaybookSchedule(plan.definition, plan.options)
       ),
+      timezone,
     },
     createdBy: args.createdBy,
+    artifactId: args.artifactId,
   })
 
   return { automationId: automation._id }
+}
+
+export async function validatePlaybookEnablement(
+  ctx: QueryLikeCtx,
+  args: PlaybookPlanArgs
+) {
+  const plan = await resolvePlaybookPlan(ctx, args)
+
+  await requirePersonTimezone(ctx, args.createdBy)
+  await requireNotEnabled(ctx, {
+    definition: plan.definition,
+    ownerId: args.createdBy,
+    tenantId: args.tenantId,
+  })
 }
 
 /** The caller's connected integrations, honouring user-scope ownership. */
@@ -274,15 +288,4 @@ function resolvedProviderLabels(resolved: ResolvedSlot[]) {
   }
 
   return labels
-}
-
-function normalizeUtcOffset(utcOffsetMinutes: number) {
-  if (
-    !Number.isInteger(utcOffsetMinutes) ||
-    Math.abs(utcOffsetMinutes) > 16 * 60
-  ) {
-    throw new Error("Invalid timezone offset.")
-  }
-
-  return utcOffsetMinutes
 }

@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
-import { action, internalMutation } from "../_generated/server"
+import { action, internalMutation, query } from "../_generated/server"
 import { resolveSubtaskAccess } from "../runs/access"
 import { createInstructionRun } from "../runs/instruction"
 import { requireWorkerSecret } from "./shared"
@@ -59,5 +59,53 @@ export const insert = internalMutation({
         createdBy: parent.createdBy,
       }),
     }
+  },
+})
+
+export const readChildren = query({
+  args: {
+    parentId: v.id("runs"),
+    runIds: v.array(v.id("runs")),
+    secret: v.string(),
+  },
+  returns: v.array(
+    v.object({
+      runId: v.id("runs"),
+      title: v.string(),
+      status: v.union(
+        v.literal("queued"),
+        v.literal("running"),
+        v.literal("completed"),
+        v.literal("failed"),
+        v.literal("stopped")
+      ),
+      error: v.union(v.string(), v.null()),
+    })
+  ),
+  handler: async (ctx, args) => {
+    requireWorkerSecret(args.secret)
+
+    if (args.runIds.length === 0 || args.runIds.length > 20) {
+      throw new Error("Agent waits require 1-20 child runs.")
+    }
+
+    const children = []
+
+    for (const runId of new Set(args.runIds)) {
+      const run = await ctx.db.get(runId)
+
+      if (run === null || run.parentId !== args.parentId) {
+        throw new Error("Agent waits may only target direct child runs.")
+      }
+
+      children.push({
+        runId: run._id,
+        title: run.snapshot.title,
+        status: run.status,
+        error: run.error ?? null,
+      })
+    }
+
+    return children
   },
 })

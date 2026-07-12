@@ -66,6 +66,7 @@ function instructionInput(overrides: Partial<InstructionRuntimeInput>) {
     instructions: "Do the thing.",
     integrations: [integration("gmail")],
     organization: null,
+    requester: null,
     timezone: null,
     workstreams: null,
     ...overrides,

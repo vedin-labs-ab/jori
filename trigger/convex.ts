@@ -2,6 +2,13 @@ import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../contracts/integrations"
 import { decodeToolResult, encodeToolInput } from "../contracts/transport"
 import { api } from "../convex/_generated/api"
+import { createAgentRun, readAgentRuns } from "./convex/agents"
+import {
+  markSandboxCleaned,
+  releaseSandbox,
+  reserveExpiredSandboxCleanup,
+  upsertSandbox,
+} from "./convex/sandboxes"
 import {
   fetchGitHubCloneCredentials,
   type GitHubCloneArgs,
@@ -23,6 +30,7 @@ import {
   type RuntimePrompt,
   type RuntimeTool,
   type SurfaceReactionTarget,
+  type WaiterCondition,
 } from "./types"
 
 export class MiloConvexClient {
@@ -115,12 +123,14 @@ export class MiloConvexClient {
     sessionId?: ConvexId<"sessions">
     waitpointId: string
     expiresAt: number
+    condition?: WaiterCondition
   }) {
     return (await this.client.mutation(api.runtime.waiters.data.create, {
       runId: args.runId,
       ...(args.sessionId === undefined ? {} : { sessionId: args.sessionId }),
       waitpointId: args.waitpointId,
       expiresAt: args.expiresAt,
+      ...(args.condition === undefined ? {} : { condition: args.condition }),
       secret: this.secret,
     })) as ConvexId<"waiters">
   }
@@ -202,13 +212,14 @@ export class MiloConvexClient {
     title: string
     tools?: string[]
   }) {
-    return await this.client.action(api.runtime.agents.create, {
-      parentId: args.parentId,
-      secret: this.secret,
-      task: args.task,
-      title: args.title,
-      tools: args.tools,
-    })
+    return await createAgentRun(this.client, this.secret, args)
+  }
+
+  async readAgentRuns(args: {
+    parentId: ConvexId<"runs">
+    runIds: ConvexId<"runs">[]
+  }) {
+    return await readAgentRuns(this.client, this.secret, args)
   }
 
   async uploadAsset(args: UploadAssetArgs) {
@@ -220,20 +231,14 @@ export class MiloConvexClient {
   }
 
   async upsertSandbox(args: { externalId: string; runId: ConvexId<"runs"> }) {
-    await this.client.mutation(api.runtime.sandboxes.upsert, {
-      ...args,
-      secret: this.secret,
-    })
+    await upsertSandbox(this.client, this.secret, args)
   }
 
   async releaseSandbox(args: {
     externalId: string
     runId: ConvexId<"runs">
   }): Promise<{ expiresAt: number } | null> {
-    return (await this.client.mutation(api.runtime.sandboxes.release, {
-      ...args,
-      secret: this.secret,
-    })) as { expiresAt: number } | null
+    return await releaseSandbox(this.client, this.secret, args)
   }
 
   async reserveExpiredSandboxCleanup(args: {
@@ -241,27 +246,10 @@ export class MiloConvexClient {
     externalId: string
     runId: ConvexId<"runs">
   }): Promise<boolean> {
-    return (await this.client.mutation(
-      api.runtime.sandboxes.reserveExpiredCleanup,
-      {
-        ...args,
-        secret: this.secret,
-      }
-    )) as boolean
+    return await reserveExpiredSandboxCleanup(this.client, this.secret, args)
   }
 
   async markSandboxCleaned(args: { error?: string; externalId: string }) {
-    const input =
-      args.error === undefined
-        ? { externalId: args.externalId, secret: this.secret }
-        : {
-            error: args.error,
-            externalId: args.externalId,
-            secret: this.secret,
-          }
-
-    await this.client.mutation(api.runtime.sandboxes.markCleaned, {
-      ...input,
-    })
+    await markSandboxCleaned(this.client, this.secret, args)
   }
 }

@@ -25,13 +25,13 @@ import {
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
-import { accessInput, automationType, status, triggerInput } from "./schema"
+import * as automationSchema from "./schema"
 
 export const list = query({
   args: {
     tenantId: v.string(),
     query: v.string(),
-    statusFilter: v.union(v.literal("all"), status),
+    statusFilter: v.union(v.literal("all"), automationSchema.status),
   },
   handler: async (ctx, args) => {
     const access = await checkTenantAccess(ctx, args.tenantId)
@@ -111,12 +111,13 @@ export const eventIntegrations = query({
 export const create = mutation({
   args: {
     tenantId: v.string(),
+    ...automationSchema.automationBinding,
     name: v.string(),
     instructions: v.string(),
     scope: v.optional(scopeValidator),
-    access: accessInput,
-    type: automationType,
-    trigger: triggerInput,
+    access: automationSchema.accessInput,
+    type: automationSchema.automationType,
+    trigger: automationSchema.triggerInput,
   },
   handler: async (ctx, args) => {
     const createdBy = await ensureCurrentPerson(ctx, args.tenantId)
@@ -136,9 +137,9 @@ export const update = mutation({
     name: v.string(),
     instructions: v.string(),
     scope: v.optional(scopeValidator),
-    access: accessInput,
-    type: v.optional(automationType),
-    trigger: v.optional(triggerInput),
+    access: automationSchema.accessInput,
+    type: v.optional(automationSchema.automationType),
+    trigger: v.optional(automationSchema.triggerInput),
   },
   handler: async (ctx, args) => {
     const personId = await resolveCurrentPerson(ctx, args.tenantId)
@@ -244,6 +245,9 @@ export async function toConsoleAutomation(
 ) {
   return {
     id: automation._id,
+    key: automation.key,
+    playbook: automation.playbook,
+    artifactId: automation.artifactId,
     name: automation.name,
     instructions: automation.instructions,
     scope: automationScope(automation),

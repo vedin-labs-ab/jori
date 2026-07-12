@@ -17,6 +17,7 @@ export async function createAutomationRun(
   const runId = await ctx.db.insert("runs", {
     tenantId: args.automation.tenantId,
     automationId: args.automation._id,
+    artifactId: args.automation.artifactId,
     cause: args.cause,
     ...createAutomationRunSnapshot(args),
     ...(await resolveRunAudience(ctx, {

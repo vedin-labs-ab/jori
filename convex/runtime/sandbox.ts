@@ -43,6 +43,27 @@ export const sandboxTools = [
     }),
     route: "agent",
   },
+  {
+    access: "read" as const,
+    name: "wait_for_agents",
+    description: nativeToolUsage("wait_for_agents", "agent"),
+    inputSchema: withOptionalFieldGuidance({
+      type: "object",
+      additionalProperties: false,
+      required: ["deadline", "runIds"],
+      properties: {
+        deadline: {
+          type: "string",
+          description:
+            "Absolute UTC ISO 8601 deadline ending in Z. Waiting ends when every listed agent is done or at this time, whichever comes first.",
+        },
+        runIds: stringArrayProperty(
+          "Run IDs returned by start_agent. Include 1-20 direct child agents."
+        ),
+      },
+    }),
+    route: "agent",
+  },
 ] as const
 
 function codingToolAccess(name: CodingToolName): ToolAccess {

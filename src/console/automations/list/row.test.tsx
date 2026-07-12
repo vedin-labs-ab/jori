@@ -66,7 +66,7 @@ test("pauses active recurring automation from status icon", () => {
     onPause,
     automation: automation({
       type: "cron",
-      trigger: { expression: "0 9 * * *", nextAt: now + day },
+      trigger: { expression: "0 9 * * *", timezone: "UTC", nextAt: now + day },
     }),
   })
 
@@ -79,7 +79,7 @@ test("shows pause action while active cron icon is hovered", () => {
   renderRow({
     automation: automation({
       type: "cron",
-      trigger: { expression: "0 9 * * *", nextAt: now + day },
+      trigger: { expression: "0 9 * * *", timezone: "UTC", nextAt: now + day },
     }),
   })
 
@@ -122,7 +122,7 @@ test("opens the shared delete dialog from the action menu", () => {
   renderRow({
     automation: automation({
       type: "cron",
-      trigger: { expression: "0 9 * * *", nextAt: now + day },
+      trigger: { expression: "0 9 * * *", timezone: "UTC", nextAt: now + day },
     }),
   })
 

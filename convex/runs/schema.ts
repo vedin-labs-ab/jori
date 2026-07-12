@@ -104,6 +104,7 @@ export const toolSnapshot = v.object({
 export const runs = defineTable({
   tenantId: v.string(),
   automationId: v.optional(v.id("automations")),
+  artifactId: v.optional(v.id("artifacts")),
   parentId: v.optional(v.id("runs")),
   rootId: v.optional(v.id("runs")),
   scope: v.optional(audienceScopeValidator),

@@ -18,7 +18,7 @@ import {
   resolveIdentity,
   resolvePersonByIdentity,
 } from "./links"
-import { updatePersonTimezone } from "./timezone"
+import { updatePersonTimezone } from "./profile/timezone"
 
 const verifiedClerkEmailValidator = v.object({
   externalId: v.string(),

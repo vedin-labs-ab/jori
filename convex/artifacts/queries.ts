@@ -30,6 +30,25 @@ export const getExistingBlobIds = internalQuery({
   },
 })
 
+export const findBlueprint = internalQuery({
+  args: {
+    tenantId: v.string(),
+    blueprint: v.string(),
+    partition: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("artifacts")
+      .withIndex("by_tenant_and_blueprint", (index) =>
+        index
+          .eq("tenantId", args.tenantId)
+          .eq("blueprintPartition", args.partition)
+          .eq("blueprint", args.blueprint)
+      )
+      .first()
+  },
+})
+
 export const searchForAgent = internalQuery({
   args: {
     tenantId: v.string(),
@@ -90,11 +109,15 @@ export const getArtifactIdForRun = internalQuery({
   handler: async (ctx, args) => {
     const run = await ctx.db.get(args.runId)
 
-    if (
-      run === null ||
-      run.tenantId !== args.tenantId ||
-      run.automationId === undefined
-    ) {
+    if (run === null || run.tenantId !== args.tenantId) {
+      return null
+    }
+
+    if (run.artifactId !== undefined) {
+      return run.artifactId
+    }
+
+    if (run.automationId === undefined) {
       return null
     }
 

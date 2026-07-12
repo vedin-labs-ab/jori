@@ -102,6 +102,16 @@ export const nativeToolPermissionRows = [
     "required",
     "agent",
   ],
+  [
+    "milo",
+    "wait_for_agents",
+    "Wait for agents",
+    "Pause until delegated agents finish or a deadline is reached.",
+    "Wait for 1-20 direct child agents without consuming compute. Resume when every listed run is terminal or the UTC deadline is reached, whichever comes first.",
+    "read",
+    "required",
+    "agent",
+  ],
 ] satisfies ToolPermissionRow[]
 
 function codingToolUsage(name: CodingToolName) {

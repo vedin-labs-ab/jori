@@ -12,12 +12,17 @@ import {
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
-import { accessInput, automationType, triggerInput } from "./schema"
+import {
+  accessInput,
+  automationBinding,
+  automationType,
+  triggerInput,
+} from "./schema"
 
 export const create = internalMutation({
   args: {
     tenantId: v.string(),
-    artifactId: v.optional(v.id("artifacts")),
+    ...automationBinding,
     name: v.string(),
     instructions: v.string(),
     scope: v.optional(scopeValidator),
