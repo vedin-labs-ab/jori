@@ -48,12 +48,17 @@ function SupportThread() {
         <ThreadMessage author="Priya Nair" initials="PN" time="14:03">
           Harbor House flagged Tuesday's payroll run: tips double-counted at two
           locations. <Mention /> can you pull together what we know?
+          {/* Baseline flow, not flex centering: the digit's ink sits above
+              the baseline while the emoji overflows its em box, so centered
+              boxes still read misaligned. The 1px nudge recenters the pair
+              inside the pill (emoji ink overflows more above than below). */}
           <span
             aria-hidden="true"
-            className="mt-2 flex w-fit items-center gap-1 rounded-full border border-[#1264a3]/30 bg-[#1d9bd1]/10 px-2 py-0.5 text-[#1264a3] text-xs"
+            className="mt-2 inline-block w-fit rounded-full border border-[#1264a3]/30 bg-[#1d9bd1]/10 px-2 py-0.5 text-[#1264a3] text-xs leading-none"
           >
-            <span className="leading-none">👀</span>
-            <span className="tabular-nums leading-none">1</span>
+            <span className="inline-block translate-y-px">
+              👀 <span className="tabular-nums">1</span>
+            </span>
           </span>
         </ThreadMessage>
         <ThreadMessage author="Milo" isMilo time="14:04">
