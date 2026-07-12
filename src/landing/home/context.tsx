@@ -1,4 +1,4 @@
-import { Prop, Section } from "./section"
+import { Prop, Section } from "../section"
 
 export function ContextSection() {
   return (

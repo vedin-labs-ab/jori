@@ -112,7 +112,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     key: "meeting-prep",
     title: "Meeting prep",
     description:
-      "Walk into every meeting prepared: who you're meeting, what it's about, and what to have ready — a researched dossier for every meeting that matters.",
+      "Walk into every meeting prepared. Who you're meeting, what it's about, and what to have ready, in a researched dossier for every meeting that matters.",
     scope: "personal",
     cadence: "Morning digest or right before each meeting",
     schedule: { repeat: "daily", time: "01:00" },

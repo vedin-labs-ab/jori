@@ -1,8 +1,8 @@
 import { ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { GetStarted } from "../cta"
+import { Mention, Reveal } from "../section"
 import { MorningBrief } from "./brief"
-import { GetStarted } from "./cta"
-import { Mention, Reveal } from "./section"
 
 export function Hero() {
   return (
@@ -22,7 +22,7 @@ export function Hero() {
           <p className="mt-6 max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
             Milo works inside Slack, your email, and your calendar. A brief
             before the day starts, a dossier before every meeting, drafts for
-            the threads waiting on you. It asks before it acts, and it keeps
+            the threads waiting on you. You set the rules, and every run keeps
             receipts.
           </p>
         </Reveal>

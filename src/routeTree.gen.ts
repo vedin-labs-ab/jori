@@ -9,8 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrustRouteImport } from './routes/trust'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as RunsRouteImport } from './routes/runs'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PlaybooksRouteImport } from './routes/playbooks'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as ContextRouteImport } from './routes/context'
@@ -26,6 +30,16 @@ import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ArtifactsArtifactIdIndexRouteImport } from './routes/artifacts/$artifactId/index'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
 
+const TrustRoute = TrustRouteImport.update({
+  id: '/trust',
+  path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
   path: '/skills',
@@ -34,6 +48,16 @@ const SkillsRoute = SkillsRouteImport.update({
 const RunsRoute = RunsRouteImport.update({
   id: '/runs',
   path: '/runs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlaybooksRoute = PlaybooksRouteImport.update({
@@ -116,8 +140,12 @@ export interface FileRoutesByFullPath {
   '/context': typeof ContextRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
   '/playbooks': typeof PlaybooksRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
+  '/terms': typeof TermsRoute
+  '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
@@ -131,8 +159,12 @@ export interface FileRoutesByTo {
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/playbooks': typeof PlaybooksRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
+  '/terms': typeof TermsRoute
+  '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/artifacts': typeof ArtifactsIndexRoute
@@ -150,8 +182,12 @@ export interface FileRoutesById {
   '/context': typeof ContextRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
   '/playbooks': typeof PlaybooksRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
   '/skills': typeof SkillsRoute
+  '/terms': typeof TermsRoute
+  '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
@@ -170,8 +206,12 @@ export interface FileRouteTypes {
     | '/context'
     | '/integrations'
     | '/playbooks'
+    | '/pricing'
+    | '/privacy'
     | '/runs'
     | '/skills'
+    | '/terms'
+    | '/trust'
     | '/context/places'
     | '/context/workstreams'
     | '/artifacts/'
@@ -185,8 +225,12 @@ export interface FileRouteTypes {
     | '/automations'
     | '/console'
     | '/playbooks'
+    | '/pricing'
+    | '/privacy'
     | '/runs'
     | '/skills'
+    | '/terms'
+    | '/trust'
     | '/context/places'
     | '/context/workstreams'
     | '/artifacts'
@@ -203,8 +247,12 @@ export interface FileRouteTypes {
     | '/context'
     | '/integrations'
     | '/playbooks'
+    | '/pricing'
+    | '/privacy'
     | '/runs'
     | '/skills'
+    | '/terms'
+    | '/trust'
     | '/context/places'
     | '/context/workstreams'
     | '/artifacts/'
@@ -222,12 +270,30 @@ export interface RootRouteChildren {
   ContextRoute: typeof ContextRouteWithChildren
   IntegrationsRoute: typeof IntegrationsRouteWithChildren
   PlaybooksRoute: typeof PlaybooksRoute
+  PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
   RunsRoute: typeof RunsRoute
   SkillsRoute: typeof SkillsRoute
+  TermsRoute: typeof TermsRoute
+  TrustRoute: typeof TrustRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trust': {
+      id: '/trust'
+      path: '/trust'
+      fullPath: '/trust'
+      preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/skills': {
       id: '/skills'
       path: '/skills'
@@ -240,6 +306,20 @@ declare module '@tanstack/react-router' {
       path: '/runs'
       fullPath: '/runs'
       preLoaderRoute: typeof RunsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/playbooks': {
@@ -394,8 +474,12 @@ const rootRouteChildren: RootRouteChildren = {
   ContextRoute: ContextRouteWithChildren,
   IntegrationsRoute: IntegrationsRouteWithChildren,
   PlaybooksRoute: PlaybooksRoute,
+  PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
   RunsRoute: RunsRoute,
   SkillsRoute: SkillsRoute,
+  TermsRoute: TermsRoute,
+  TrustRoute: TrustRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
