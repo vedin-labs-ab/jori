@@ -1,3 +1,4 @@
+import { toolSurfaces } from "@contracts/integrations"
 import { describe, expect, test } from "vitest"
 import { type ToolPermission } from "../../permissions/types"
 import {
@@ -12,6 +13,16 @@ const catalog = createAutomationMentionCatalog({
   skills: ["meeting-prep", "release-notes"],
   tools: ["share_artifact", "github_get_issue"],
 })
+const expectedToolAccessSuggestions = [
+  {
+    access: { integration: "github", kind: "integration" },
+    id: "github_get_issue",
+    surface: "github",
+  },
+  { access: { kind: "builtIn" }, id: "share_artifact", surface: "milo" },
+  { access: { kind: "builtIn" }, id: "start_agent", surface: "milo" },
+  { access: { kind: "web" }, id: "web_search", surface: "milo" },
+]
 
 describe("explicit mention scanning", () => {
   test("recognizes sigil tokens for all three kinds", () => {
@@ -178,14 +189,23 @@ describe("mention suggestions", () => {
     )
 
     expect(
-      suggestions.map((suggestion) => [suggestion.id, suggestion.access])
-    ).toEqual([
-      ["github_get_issue", { integration: "github", kind: "integration" }],
-      ["share_artifact", { kind: "builtIn" }],
-      ["start_agent", { kind: "builtIn" }],
-      ["web_search", { kind: "web" }],
-    ])
+      suggestions.map(({ access, id, surface }) => ({ access, id, surface }))
+    ).toEqual(expectedToolAccessSuggestions)
   })
+})
+
+test.each(toolSurfaces)("preserves the %s tool provider", (surface) => {
+  const suggestion = getAutomationMentionSuggestions(
+    { kind: "tool", query: "" },
+    {
+      permissions: [
+        toolPermission(surface, `${surface}_tool`, "read", "allowed"),
+      ],
+      skills: [],
+    }
+  )[0]
+
+  expect(suggestion?.surface).toBe(surface)
 })
 
 function toolPermission(

@@ -16,13 +16,33 @@ import { type AutomationToolAccess, resolveAutomationToolAccess } from "./tools"
 
 const maxSuggestions = 6
 
-export type AutomationMentionSuggestion = {
-  access?: AutomationToolAccess
-  disabled?: boolean
-  id: string
-  kind: AutomationMentionKind
+type AutomationMentionSuggestionBase = {
   label: string
 }
+
+type AutomationStaticSuggestion = AutomationMentionSuggestionBase & {
+  access?: never
+  disabled?: never
+}
+
+export type AutomationMentionSuggestion =
+  | (AutomationStaticSuggestion & {
+      id: AutomationSurfaceIntegration
+      kind: "integration"
+      surface: AutomationSurfaceIntegration
+    })
+  | (AutomationStaticSuggestion & {
+      id: string
+      kind: "skill"
+      surface?: never
+    })
+  | (AutomationMentionSuggestionBase & {
+      access: AutomationToolAccess
+      disabled: boolean
+      id: string
+      kind: "tool"
+      surface: ToolPermission["surface"]
+    })
 
 export type AutomationMentionSources = {
   permissions: ToolPermission[] | null | undefined
@@ -126,7 +146,12 @@ function getIntegrationSuggestions(
         right.score - left.score || left.label.localeCompare(right.label)
     )
     .slice(0, maxSuggestions)
-    .map(({ label, id }) => ({ id, kind: "integration" as const, label }))
+    .map(({ label, id }) => ({
+      id,
+      kind: "integration" as const,
+      label,
+      surface: id,
+    }))
 }
 
 function toolSuggestions(
@@ -160,6 +185,7 @@ function toolSuggestion(
     id: permission.tool,
     kind: "tool",
     label: permission.tool,
+    surface: permission.surface,
   }
 }
 

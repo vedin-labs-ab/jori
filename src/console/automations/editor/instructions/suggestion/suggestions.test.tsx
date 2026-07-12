@@ -5,7 +5,7 @@ import { InstructionSuggestions } from "./suggestions"
 
 afterEach(cleanup)
 
-test("uses a full-width muted footer without per-tool access labels", () => {
+test("uses provider logos and a full-width muted footer", () => {
   render(
     <InstructionSuggestions
       listboxId="tool-suggestions"
@@ -20,15 +20,19 @@ test("uses a full-width muted footer without per-tool access labels", () => {
         suggestions: [
           {
             access: { kind: "builtIn" },
+            disabled: false,
             id: "share_artifact",
             kind: "tool",
             label: "share_artifact",
+            surface: "milo",
           },
           {
             access: { integration: "slack", kind: "integration" },
+            disabled: false,
             id: "conversations_add_message",
             kind: "tool",
             label: "conversations_add_message",
+            surface: "slack",
           },
         ],
       }}
@@ -55,6 +59,16 @@ test("uses a full-width muted footer without per-tool access labels", () => {
   expect(footer.classList).toContain("bg-muted/30")
   expect(builtIn.getAttribute("aria-describedby")).toBeNull()
   expect(needsAccess.getAttribute("aria-describedby")).toBe(footer.id)
+  expectProviderLogos(builtIn, needsAccess)
   expect(screen.queryByText("Built in")).toBeNull()
   expect(screen.queryByText("+ Slack access")).toBeNull()
 })
+
+function expectProviderLogos(builtIn: HTMLElement, needsAccess: HTMLElement) {
+  expect(builtIn.querySelector("svg")?.getAttribute("viewBox")).toBe(
+    "6 6 52 52"
+  )
+  expect(needsAccess.querySelector("img")?.getAttribute("src")).toBe(
+    "/logos/integrations/slack.svg"
+  )
+}
