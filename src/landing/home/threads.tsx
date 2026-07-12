@@ -54,7 +54,7 @@ function SupportThread() {
               inside the pill (emoji ink overflows more above than below). */}
           <span
             aria-hidden="true"
-            className="mt-2 inline-block w-fit rounded-full border border-[#1264a3]/30 bg-[#1d9bd1]/10 px-2 py-0.5 text-[#1264a3] text-xs leading-none"
+            className="mt-2 block w-fit rounded-full border border-[#1264a3]/30 bg-[#1d9bd1]/10 px-2 py-0.5 text-[#1264a3] text-xs leading-none"
           >
             <span className="inline-block translate-y-px">
               👀 <span className="tabular-nums">1</span>
