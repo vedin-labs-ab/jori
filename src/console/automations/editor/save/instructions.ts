@@ -9,7 +9,10 @@ import {
 import { readInstructionReferences } from "../instructions/markdown/references"
 
 export function prepareAutomationInstructions(
-  values: Pick<AutomationFormValues, "instructions" | "surfaces" | "webSearch">,
+  values: Pick<
+    AutomationFormValues,
+    "instructions" | "scope" | "surfaces" | "webSearch"
+  >,
   permissions: AutomationPolicyPermissions
 ) {
   const catalog = createAutomationMentionCatalog({
@@ -28,24 +31,26 @@ export function prepareAutomationInstructions(
   const issue = readInstructionReferences(document).find(
     (reference) =>
       reference.kind === "tool" &&
-      automationToolReferenceIssue(
-        reference.id,
+      automationToolReferenceIssue({
         permissions,
-        values.surfaces,
-        values.webSearch
-      ) !== undefined
+        scope: values.scope,
+        surfaces: values.surfaces,
+        tool: reference.id,
+        webSearch: values.webSearch,
+      }) !== undefined
   )
 
   return {
     instructions,
     issue:
       issue?.kind === "tool"
-        ? automationToolReferenceIssue(
-            issue.id,
+        ? automationToolReferenceIssue({
             permissions,
-            values.surfaces,
-            values.webSearch
-          )
+            scope: values.scope,
+            surfaces: values.surfaces,
+            tool: issue.id,
+            webSearch: values.webSearch,
+          })
         : undefined,
   }
 }
@@ -54,6 +59,7 @@ export function isAutomationToolReferenceError(error: string | undefined) {
   return (
     error?.startsWith("Give @") === true ||
     error?.startsWith("Enable web access to use #") === true ||
+    error?.endsWith("requires Personal sharing.") === true ||
     (error?.startsWith("#") === true &&
       error.endsWith("is not available in automations."))
   )

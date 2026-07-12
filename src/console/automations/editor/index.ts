@@ -91,8 +91,18 @@ function useAutomationForm(
     openDraftForm,
     openEditForm: openForm,
     saveAutomation,
-    setFormValues,
+    setFormValues: createFormUpdater(setFormValues, setFormError),
     setIsFormOpen,
+  }
+}
+
+function createFormUpdater(
+  setValues: (values: AutomationFormValues) => void,
+  setError: (error: string | undefined) => void
+) {
+  return (values: AutomationFormValues) => {
+    setError(undefined)
+    setValues(values)
   }
 }
 

@@ -93,6 +93,29 @@ describe("automation dialog instructions validation", () => {
     expect(textbox.getAttribute("aria-describedby")).toBeNull()
     expect(screen.queryByText("Instructions are required.")).toBeNull()
   })
+
+  test("shows sharing conflicts immediately without a save error", async () => {
+    renderAutomationDialog({
+      error: undefined,
+      values: {
+        ...emptyAutomationForm,
+        instructions: "Read @Gmail.",
+        scope: "organization",
+        surfaces: [{ integration: "gmail", tools: ["gmail_search"] }],
+      },
+    })
+
+    const textbox = await findInstructionsTextbox()
+    const integration = document.body.querySelector(
+      '[data-automation-surface-scope="blocked"]'
+    )
+
+    expect(textbox.getAttribute("aria-invalid")).toBe("true")
+    expect(integration).not.toBeNull()
+    expect(screen.getByRole("alert").textContent).toBe(
+      "Organization automations can’t use personal integrations. Remove the highlighted access or switch to Personal."
+    )
+  })
 })
 
 describe("automation dialog context", () => {

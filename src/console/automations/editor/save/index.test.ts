@@ -63,7 +63,8 @@ describe("automation payload", () => {
         surfaces: [{ integration: "gmail", tools: ["gmail_search"] }],
       })
     ).toEqual({
-      error: "Personal integrations require Personal sharing.",
+      error:
+        "Organization automations can’t use personal integrations. Remove the highlighted access or switch to Personal.",
     })
   })
 })

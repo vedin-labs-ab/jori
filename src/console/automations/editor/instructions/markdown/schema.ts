@@ -1,3 +1,4 @@
+import { type Scope } from "@contracts/permissions/scope"
 import { mergeAttributes, Node } from "@tiptap/core"
 import {
   type AutomationMentionKind,
@@ -17,10 +18,12 @@ export type AutomationSurfacePolicyState =
 
 export type AutomationSurfaceNodeOptions = {
   getPermissions: () => AutomationPolicyPermissions
+  getScope: () => Scope
 }
 
 export type AutomationReferenceNodeOptions = {
   getPermissions: () => AutomationPolicyPermissions
+  getScope: () => Scope
   getWebSearch: () => boolean
 }
 
@@ -32,7 +35,7 @@ export const AutomationSurfaceNode = Node.create<AutomationSurfaceNodeOptions>({
   selectable: true,
 
   addOptions() {
-    return { getPermissions: () => undefined }
+    return { getPermissions: () => undefined, getScope: () => "personal" }
   },
 
   addAttributes() {
@@ -110,6 +113,7 @@ export const AutomationReferenceNode =
     addOptions() {
       return {
         getPermissions: () => undefined,
+        getScope: () => "personal",
         getWebSearch: () => false,
       }
     },

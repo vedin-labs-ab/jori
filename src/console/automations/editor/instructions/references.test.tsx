@@ -50,6 +50,46 @@ test("marks a tool reference ready when its exact access exists", async () => {
   ).toBe("ready")
 })
 
+test("marks personal integration and tool references invalid for organization sharing", async () => {
+  const field = renderInstructionsField({
+    description: "Read @Gmail with #gmail_search.",
+    permissions: [
+      {
+        access: "read",
+        description: "Search email",
+        label: "Search email",
+        mode: "allowed",
+        overrideMode: null,
+        route: "broker",
+        surface: "gmail",
+        tool: "gmail_search",
+      },
+    ],
+    scope: "organization",
+    surfaces: [{ integration: "gmail", tools: ["gmail_search"] }],
+  })
+
+  expect(await screen.findByRole("textbox")).toBeDefined()
+
+  const integration = field.container.querySelector(
+    "[data-automation-surface-scope]"
+  )
+  const tool = field.container.querySelector(
+    '[data-automation-reference-kind="tool"]'
+  )
+
+  expect(integration?.getAttribute("data-automation-surface-scope")).toBe(
+    "blocked"
+  )
+  expect(integration?.getAttribute("aria-label")).toContain(
+    "Gmail requires Personal sharing."
+  )
+  expect(tool?.getAttribute("data-automation-reference-access")).toBe(
+    "unresolved"
+  )
+  expect(tool?.getAttribute("title")).toBe("Gmail requires Personal sharing.")
+})
+
 test("keeps a tool reference visible and unresolved after access is removed", async () => {
   const field = renderInstructionsField({
     description: "Post with @Slack using #conversations_add_message.",

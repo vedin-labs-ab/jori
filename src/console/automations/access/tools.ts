@@ -1,4 +1,5 @@
 import { canUseAutomationTool } from "@contracts/permissions"
+import { type Scope } from "@contracts/permissions/scope"
 import { isWebTool } from "@contracts/permissions/web"
 import { type ToolPermission } from "../../permissions/types"
 import {
@@ -7,6 +8,7 @@ import {
   getAutomationSurfaceLabel,
   isAutomationSurfaceIntegration,
 } from "./catalog"
+import { getAutomationSurfaceScopeIssue } from "./scope"
 
 export type AutomationToolPermissions = ToolPermission[] | null | undefined
 export type AutomationToolAccess =
@@ -89,12 +91,19 @@ export function resolveAutomationToolAccess({
     : { kind: "integration", integration: permission.surface }
 }
 
-export function automationToolReferenceIssue(
-  tool: string,
-  permissions: AutomationToolPermissions,
-  surfaces: readonly AutomationSurfaceFormValue[],
+export function automationToolReferenceIssue({
+  permissions,
+  scope,
+  surfaces,
+  tool,
+  webSearch,
+}: {
+  permissions: AutomationToolPermissions
+  scope: Scope
+  surfaces: readonly AutomationSurfaceFormValue[]
+  tool: string
   webSearch: boolean
-) {
+}) {
   if (!Array.isArray(permissions)) {
     return undefined
   }
@@ -103,6 +112,14 @@ export function automationToolReferenceIssue(
 
   if (permission === undefined) {
     return `#${tool} is not an available automation tool.`
+  }
+
+  if (isAutomationSurfaceIntegration(permission.surface)) {
+    const scopeIssue = getAutomationSurfaceScopeIssue(scope, permission.surface)
+
+    if (scopeIssue !== undefined) {
+      return scopeIssue
+    }
   }
 
   const access = resolveAutomationToolAccess({

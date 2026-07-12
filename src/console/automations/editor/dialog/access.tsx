@@ -1,11 +1,14 @@
+import { type Scope } from "@contracts/permissions/scope"
 import { X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
 import {
   type AutomationSurfaceFormValue,
   getAutomationSurfaceLabel,
+  getAutomationSurfaceScopeIssue,
 } from "../../access"
 import { SurfaceLogo } from "../../access/logo"
 import { type AutomationPolicyPermissions } from "../../access/policy"
@@ -17,6 +20,7 @@ export function AccessFields({
   onAdditionalSurfaceRemove,
   onWebSearchChange,
   permissions,
+  scope,
   webSearch,
 }: {
   additionalSurfaces: AutomationSurfaceFormValue[]
@@ -26,6 +30,7 @@ export function AccessFields({
   ) => void
   onWebSearchChange: (webSearch: boolean) => void
   permissions: AutomationPolicyPermissions
+  scope: Scope
   webSearch: boolean
 }) {
   return (
@@ -52,6 +57,7 @@ export function AccessFields({
                 onChange={onAdditionalSurfaceChange}
                 onRemove={onAdditionalSurfaceRemove}
                 permissions={permissions}
+                scope={scope}
                 surface={surface}
               />
             ))}
@@ -66,11 +72,13 @@ function AdditionalSurface({
   onChange,
   onRemove,
   permissions,
+  scope,
   surface,
 }: {
   onChange: (surface: AutomationSurfaceFormValue) => void
   onRemove: (integration: AutomationSurfaceFormValue["integration"]) => void
   permissions: AutomationPolicyPermissions
+  scope: Scope
   surface: AutomationSurfaceFormValue
 }) {
   const [open, setOpen] = useState(false)
@@ -78,12 +86,24 @@ function AdditionalSurface({
   const toolCount = `${surface.tools.length} tool${
     surface.tools.length === 1 ? "" : "s"
   }`
+  const issue = getAutomationSurfaceScopeIssue(scope, surface.integration)
 
   return (
-    <div className="inline-flex">
+    <div
+      className={cn(
+        "inline-flex rounded-md",
+        issue !== undefined && "ring-2 ring-destructive/20"
+      )}
+      title={issue}
+    >
       <Button
+        aria-invalid={issue === undefined ? undefined : true}
         aria-label={`${label} additional access: ${toolCount} enabled. Configure tools.`}
-        className="h-7 gap-1.5 rounded-r-none px-2 text-xs"
+        className={cn(
+          "h-7 gap-1.5 rounded-r-none px-2 text-xs",
+          issue !== undefined &&
+            "border-destructive/60 bg-destructive/5 text-destructive"
+        )}
         onClick={() => setOpen(true)}
         size="sm"
         type="button"
@@ -96,8 +116,13 @@ function AdditionalSurface({
         </span>
       </Button>
       <Button
+        aria-invalid={issue === undefined ? undefined : true}
         aria-label={`Remove additional ${label} access`}
-        className="h-7 w-7 rounded-l-none border-l-0"
+        className={cn(
+          "h-7 w-7 rounded-l-none border-l-0",
+          issue !== undefined &&
+            "border-destructive/60 bg-destructive/5 text-destructive"
+        )}
         onClick={() => onRemove(surface.integration)}
         size="icon"
         type="button"

@@ -1,3 +1,4 @@
+import { automationScopeConflictMessage } from "../access"
 import { isAutomationToolReferenceError } from "./save/instructions"
 import { readAutomationInstructionMarkerError } from "./save/marker"
 
@@ -38,6 +39,10 @@ export function readAutomationInstructionsError(
     return error
   }
 
+  if (error === automationScopeConflictMessage) {
+    return error
+  }
+
   if (!isAutomationInstructionsError(error) || instructions.trim() !== "") {
     return undefined
   }
@@ -49,7 +54,8 @@ export function isAutomationInstructionsError(error: string | undefined) {
   return (
     error === automationInstructionsErrors.required ||
     readAutomationInstructionMarkerError(error) !== undefined ||
-    isAutomationToolReferenceError(error)
+    isAutomationToolReferenceError(error) ||
+    error === automationScopeConflictMessage
   )
 }
 

@@ -1,9 +1,11 @@
-import { isUserScopedIntegration } from "@contracts/integrations"
 import {
   defaultScopeForIntegrations,
   type Scope,
 } from "@contracts/permissions/scope"
-import { hasAutomationWriteSurface } from "../../access"
+import {
+  getAutomationScopeConflict,
+  hasAutomationWriteSurface,
+} from "../../access"
 import {
   type AutomationPolicyPermissions,
   validateAutomationPolicy,
@@ -162,10 +164,6 @@ function buildBaseArgs(
     return { error: "Instructions are required." }
   }
 
-  if (prepared.issue !== undefined) {
-    return { error: prepared.issue }
-  }
-
   if (surfaces.length === 0) {
     return { error: automationInstructionMarkerErrors.noMarkers }
   }
@@ -174,10 +172,14 @@ function buildBaseArgs(
     return { error: automationInstructionMarkerErrors.incompleteAccess }
   }
 
-  const scopeError = validateScopeAccess(values.scope, surfaces)
+  const scopeError = getAutomationScopeConflict(values.scope, surfaces)?.message
 
   if (scopeError !== undefined) {
     return { error: scopeError }
+  }
+
+  if (prepared.issue !== undefined) {
+    return { error: prepared.issue }
   }
 
   if (Object.hasOwn(options, "permissions")) {
@@ -215,14 +217,4 @@ function buildBaseArgs(
       },
     },
   }
-}
-
-function validateScopeAccess(
-  scope: Scope,
-  surfaces: AutomationFormValues["surfaces"]
-) {
-  return scope === "organization" &&
-    surfaces.some((surface) => isUserScopedIntegration(surface.integration))
-    ? "Personal integrations require Personal sharing."
-    : undefined
 }

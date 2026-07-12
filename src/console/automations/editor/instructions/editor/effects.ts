@@ -54,6 +54,7 @@ function useLatestInstructionRefs({
   suggestion: InstructionSuggestionState | null
 }) {
   const renderedWebSearch = useRef(props.webSearch)
+  const renderedScope = useRef(props.scope)
 
   useEffect(() => {
     refs.additionalSurfaces.current = additionalSurfaces
@@ -63,12 +64,18 @@ function useLatestInstructionRefs({
     refs.onWebSearchChange.current = props.onWebSearchChange
     refs.onValueChange.current = props.onValueChange
     refs.permissions.current = props.permissions
+    refs.scope.current = props.scope
     refs.sources.current = sources
     refs.suggestion.current = suggestion
-    if (editor !== null && renderedWebSearch.current !== props.webSearch) {
+    if (
+      editor !== null &&
+      (renderedWebSearch.current !== props.webSearch ||
+        renderedScope.current !== props.scope)
+    ) {
       editor.view.dispatch(editor.state.tr.setMeta("referenceAccess", true))
     }
     renderedWebSearch.current = props.webSearch
+    renderedScope.current = props.scope
   }, [additionalSurfaces, catalog, editor, props, refs, sources, suggestion])
 }
 

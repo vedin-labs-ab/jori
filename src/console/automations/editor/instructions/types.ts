@@ -41,6 +41,7 @@ export type InstructionRefs = {
     AutomationInstructionsFieldProps["onValueChange"]
   >
   permissions: MutableRefObject<AutomationPolicyPermissions>
+  scope: MutableRefObject<AutomationInstructionsFieldProps["scope"]>
   sources: MutableRefObject<AutomationMentionSources>
   suggestion: MutableRefObject<InstructionSuggestionState | null>
 }
