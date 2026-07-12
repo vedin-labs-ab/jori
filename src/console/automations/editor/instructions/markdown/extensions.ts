@@ -11,6 +11,7 @@ import {
   LiteralMarkdownImage,
 } from "./literal"
 import { SafeParagraph } from "./paragraph"
+import { fencedTextNodeName } from "./schema"
 
 export const instructionMarkdownOptions = { gfm: false } as const
 
@@ -32,6 +33,7 @@ export function createInstructionMarkdownExtensions() {
       link: { autolink: false, linkOnPaste: false, openOnClick: false },
       paragraph: false,
       strike: false,
+      trailingNode: { notAfter: ["codeBlock", fencedTextNodeName] },
       underline: false,
     }),
   ]
