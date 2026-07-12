@@ -115,7 +115,7 @@ describe("automation dialog sharing validation", () => {
     expect(textbox.getAttribute("aria-invalid")).toBe("true")
     expect(integration).not.toBeNull()
     expect(screen.getByRole("alert").textContent).toBe(
-      "Organization automations can’t use personal integrations. Remove the highlighted integrations or switch to Personal."
+      "Organization automations can’t use personal access. Remove the highlighted integrations or switch to Personal."
     )
     expect(
       [...screen.getByRole("alert").querySelectorAll(".font-medium")].map(

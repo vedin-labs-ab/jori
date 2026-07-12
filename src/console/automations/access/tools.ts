@@ -114,12 +114,10 @@ export function automationToolReferenceIssue({
     return `#${tool} is not an available automation tool.`
   }
 
-  if (isAutomationSurfaceIntegration(permission.surface)) {
-    const scopeIssue = getAutomationSurfaceScopeIssue(scope, permission.surface)
+  const scopeIssue = automationPermissionScopeIssue(permission, scope)
 
-    if (scopeIssue !== undefined) {
-      return scopeIssue
-    }
+  if (scopeIssue !== undefined) {
+    return scopeIssue
   }
 
   const access = resolveAutomationToolAccess({
@@ -139,4 +137,33 @@ export function automationToolReferenceIssue({
   }
 
   return undefined
+}
+
+export function automationToolScopeIssue({
+  permissions,
+  scope,
+  tool,
+}: {
+  permissions: AutomationToolPermissions
+  scope: Scope
+  tool: string
+}) {
+  if (!Array.isArray(permissions)) {
+    return undefined
+  }
+
+  const permission = permissions.find((item) => item.tool === tool)
+
+  return permission === undefined
+    ? undefined
+    : automationPermissionScopeIssue(permission, scope)
+}
+
+function automationPermissionScopeIssue(
+  permission: ToolPermission,
+  scope: Scope
+) {
+  return isAutomationSurfaceIntegration(permission.surface)
+    ? getAutomationSurfaceScopeIssue(scope, permission.surface)
+    : undefined
 }

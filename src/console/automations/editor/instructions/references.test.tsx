@@ -50,7 +50,7 @@ test("marks a tool reference ready when its exact access exists", async () => {
   ).toBe("ready")
 })
 
-test("marks personal integration and tool references invalid for organization sharing", async () => {
+test("reacts when personal integration and tool references become organization-scoped", async () => {
   const field = renderInstructionsField({
     description: "Read @Gmail with #gmail_search.",
     permissions: [
@@ -65,11 +65,30 @@ test("marks personal integration and tool references invalid for organization sh
         tool: "gmail_search",
       },
     ],
-    scope: "organization",
+    scope: "personal",
     surfaces: [{ integration: "gmail", tools: ["gmail_search"] }],
   })
 
   expect(await screen.findByRole("textbox")).toBeDefined()
+
+  const readyTool = field.container.querySelector(
+    '[data-automation-reference-kind="tool"]'
+  )
+
+  expect(readyTool?.getAttribute("data-automation-reference-access")).toBe(
+    "ready"
+  )
+  expect(readyTool?.querySelector(".lucide-wrench")).not.toBeNull()
+
+  field.rerenderScope("organization")
+
+  await waitFor(() => {
+    expect(
+      field.container
+        .querySelector('[data-automation-reference-kind="tool"]')
+        ?.getAttribute("data-automation-reference-scope")
+    ).toBe("blocked")
+  })
 
   const integration = field.container.querySelector(
     "[data-automation-surface-scope]"
@@ -88,6 +107,9 @@ test("marks personal integration and tool references invalid for organization sh
     "unresolved"
   )
   expect(tool?.getAttribute("title")).toBe("Gmail requires Personal sharing.")
+  expect(tool?.className).toContain("border-destructive/60")
+  expect(tool?.querySelector(".lucide-ban")).not.toBeNull()
+  expect(tool?.querySelector(".lucide-wrench")).toBeNull()
 })
 
 test("keeps a tool reference visible and unresolved after access is removed", async () => {

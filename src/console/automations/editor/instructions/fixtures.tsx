@@ -42,8 +42,7 @@ export function renderInstructionsField({
 }) {
   const onValueChange = vi.fn()
   const onWebSearchChange = vi.fn()
-
-  const view = render(
+  const field = (nextScope = scope) => (
     <AutomationInstructionsField
       error={error}
       id="instructions"
@@ -54,15 +53,21 @@ export function renderInstructionsField({
       permissions={permissions}
       policyKey={policyKey}
       showAccessError={showAccessError}
-      scope={scope}
+      scope={nextScope}
       skills={skills}
       surfaces={surfaces}
       value={description}
       webSearch={webSearch}
     />
   )
+  const view = render(field())
 
-  return { container: view.container, onValueChange, onWebSearchChange }
+  return {
+    container: view.container,
+    onValueChange,
+    onWebSearchChange,
+    rerenderScope: (nextScope: typeof scope) => view.rerender(field(nextScope)),
+  }
 }
 
 export function toolPermission(
