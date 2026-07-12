@@ -46,13 +46,11 @@ export function PlaceCard({
 
 // Places Milo is present in but has no norms for yet: quiet, not clickable,
 // there to show coverage. The section header explains warming once; each
-// card carries only its own facts. The dashed edge is an SVG overlay, not a
-// CSS border: border-style:dashed can't space its dashes, and they pack so
-// tight they read as a solid line.
+// card carries only its own facts. The Card primitive draws its edge with a
+// ring, which can't dash, so this swaps it for a dashed border.
 export function WarmingPlaceCard({ place }: { place: Place }) {
   return (
-    <Card className="relative overflow-visible py-0 shadow-none ring-0">
-      <DashedEdge />
+    <Card className="border border-dashed py-0 shadow-none ring-0">
       <div className="flex w-full items-center gap-3 p-4">
         <div className="flex min-w-0 grow flex-col gap-2">
           <PlaceName muted place={place} />
@@ -98,29 +96,6 @@ export function PlaceMeta({ note, place }: { note?: string; place: Place }) {
       <IntegrationLogo className="size-3.5" integration={place.integration} />
       {note === undefined ? kind : `${kind} · ${note}`}
     </p>
-  )
-}
-
-// A roomy dashed frame that follows the card's radius. currentColor keeps it
-// theme-aware; the 6px dash and 7px gap give the breathing room a CSS dashed
-// border can't. rx matches rounded-lg (--radius, 10px).
-function DashedEdge() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 size-full overflow-visible text-border"
-    >
-      <rect
-        fill="none"
-        height="100%"
-        rx="10"
-        stroke="currentColor"
-        strokeDasharray="6 7"
-        width="100%"
-        x="0"
-        y="0"
-      />
-    </svg>
   )
 }
 
