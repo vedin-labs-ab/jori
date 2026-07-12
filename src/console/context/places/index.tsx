@@ -68,15 +68,12 @@ function PlaceGroups({
       )}
       {warming.length === 0 ? null : (
         <div className="flex flex-col gap-2">
-          <div className="flex flex-col gap-1">
-            <ContextSectionTitle count={warming.length}>
-              Warming up
-            </ContextSectionTitle>
-            <p className="text-muted-foreground text-sm">
-              Milo is in these places but hasn't learned their norms yet.
-              Profiles build as conversation happens.
-            </p>
-          </div>
+          <ContextSectionTitle
+            count={warming.length}
+            hint="Milo is in these places but hasn't learned their norms yet. Profiles build as conversation happens."
+          >
+            Warming up
+          </ContextSectionTitle>
           <ul className="flex flex-col gap-2">
             {warming.map((place) => (
               <li key={place.id}>

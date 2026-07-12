@@ -46,10 +46,11 @@ export function PlaceCard({
 
 // Places Milo is present in but has no norms for yet: quiet, not clickable,
 // there to show coverage. The section header explains warming once; each
-// card carries only its own facts.
+// card carries only its own facts. The Card primitive draws its edge with a
+// ring, which can't dash, so this swaps it for a real dashed border.
 export function WarmingPlaceCard({ place }: { place: Place }) {
   return (
-    <Card className="border-dashed py-0 shadow-none">
+    <Card className="border border-dashed py-0 shadow-none ring-0">
       <div className="flex w-full items-center gap-3 p-4">
         <div className="flex min-w-0 grow flex-col gap-2">
           <PlaceName muted place={place} />
