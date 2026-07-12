@@ -1,6 +1,6 @@
 import { ChevronRight, Lock } from "lucide-react"
 import { Card } from "@/components/ui/card"
-import { IntegrationChips } from "../../shared/logo/integration"
+import { IntegrationChips } from "@/shared/logo/integration"
 import { WorkstreamStatusCue } from "./status"
 import { type Workstream } from "./types"
 

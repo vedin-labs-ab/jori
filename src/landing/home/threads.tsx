@@ -2,7 +2,9 @@ import { FileText } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
+import { IntegrationLogo } from "@/shared/logo/integration"
 import { Mention, Prop, Section } from "../section"
+import { GitHubMention, LinearMention } from "./mentions"
 
 export function Threads() {
   return (
@@ -18,14 +20,9 @@ export function Threads() {
             saying. Ask for a summary, a write-up, a check, a draft: the thread
             is the interface.
           </p>
-          <div className="mt-6 space-y-3">
-            <MiniMention surface="GitHub · copperline/payroll · Issue #491">
-              <Mention /> this test is flaky on CI, can you fix it and open a
-              PR?
-            </MiniMention>
-            <MiniMention surface="Linear · COP-73 · Tip-pooling certification">
-              <Mention /> what's left before this ships?
-            </MiniMention>
+          <div className="mt-6 space-y-4">
+            <GitHubMention />
+            <LinearMention />
           </div>
         </div>
         <SupportThread />
@@ -34,14 +31,16 @@ export function Threads() {
   )
 }
 
+// A Slack thread with Slack's markers: the squircle avatars, bold sender,
+// and the blue tint of a reaction you added.
 function SupportThread() {
   return (
     <Prop
       label={
         <>
+          <IntegrationLogo className="size-3.5" integration="slack" />
           <span className="font-medium text-foreground">#support</span>
           <span>Copperline</span>
-          <span className="ml-auto">Slack</span>
         </>
       }
     >
@@ -51,7 +50,7 @@ function SupportThread() {
           locations. <Mention /> can you pull together what we know?
           <span
             aria-hidden="true"
-            className="mt-2 flex w-fit items-center gap-1 rounded-full border bg-muted/50 px-2 py-0.5 text-xs"
+            className="mt-2 flex w-fit items-center gap-1 rounded-full border border-[#1264a3]/30 bg-[#1d9bd1]/10 px-2 py-0.5 text-[#1264a3] text-xs"
           >
             👀 <span className="tabular-nums">1</span>
           </span>
@@ -93,7 +92,7 @@ function ThreadMessage({
     <div className="flex gap-3">
       <span
         className={cn(
-          "flex size-7 shrink-0 items-center justify-center rounded-md",
+          "flex size-7 shrink-0 items-center justify-center rounded-lg",
           isMilo
             ? undefined
             : "bg-secondary font-medium text-secondary-foreground text-xs"
@@ -103,7 +102,7 @@ function ThreadMessage({
       </span>
       <div className="min-w-0">
         <p className="flex items-baseline gap-2 text-xs">
-          <span className="font-medium text-sm">{author}</span>
+          <span className="font-semibold text-sm">{author}</span>
           {isMilo ? (
             <span className="rounded-sm bg-muted px-1 py-px font-medium text-[10px] text-muted-foreground">
               APP
@@ -113,23 +112,6 @@ function ThreadMessage({
         </p>
         <div className="mt-0.5 text-sm leading-relaxed">{children}</div>
       </div>
-    </div>
-  )
-}
-
-function MiniMention({
-  children,
-  surface,
-}: {
-  children: ReactNode
-  surface: string
-}) {
-  return (
-    <div className="rounded-lg border px-4 py-3">
-      <p className="text-muted-foreground text-xs">{surface}</p>
-      <p className="mt-1.5 flex flex-wrap items-center gap-x-1.5 text-sm">
-        {children}
-      </p>
     </div>
   )
 }

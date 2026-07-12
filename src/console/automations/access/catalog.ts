@@ -1,5 +1,5 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
-import { providerLogoPath } from "../../shared/logo/path"
+import { providerLogoPath } from "@/shared/logo/path"
 
 const automationSurfaceAccesses = ["read", "write", "both"] as const
 

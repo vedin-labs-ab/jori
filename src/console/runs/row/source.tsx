@@ -2,9 +2,9 @@ import { toolSurfaceLabel } from "@contracts/integrations"
 import { type Scope } from "@contracts/permissions/scope"
 import { CornerDownRight, Play } from "lucide-react"
 import { type ReactNode } from "react"
+import { ProviderLogo } from "@/shared/logo/provider"
 import { ScopeDatum } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
-import { ProviderLogo } from "../../shared/logo/provider"
 import {
   type ExecutionDetail,
   type ExecutionDetailType,

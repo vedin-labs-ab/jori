@@ -1,6 +1,7 @@
 import { FileText } from "lucide-react"
 import { type ReactNode } from "react"
 import { buttonVariants } from "@/components/ui/button"
+import { ProviderLogo } from "@/shared/logo/provider"
 import { Prop } from "../section"
 
 /** An ask-first request as the requester sees it: what would run, on whose
@@ -9,17 +10,24 @@ export function ApprovalCard({
   attachment,
   label,
   lines,
+  surface,
   title,
 }: {
   attachment?: string
   label: ReactNode
   lines: readonly string[]
+  surface?: string
   title: string
 }) {
   return (
     <Prop label={label}>
       <div className="px-5 py-4">
-        <p className="font-medium text-sm">{title}</p>
+        <p className="flex items-center gap-2 font-medium text-sm">
+          {surface === undefined ? null : (
+            <ProviderLogo className="size-4" surface={surface} />
+          )}
+          {title}
+        </p>
         <ul className="mt-3 space-y-1.5 text-muted-foreground text-xs">
           {lines.map((line) => (
             <li key={line}>{line}</li>

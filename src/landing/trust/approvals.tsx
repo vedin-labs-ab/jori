@@ -37,6 +37,7 @@ export function ApprovalsSection() {
             "Re: Tuesday's payroll run",
             "Sent from your Gmail",
           ]}
+          surface="gmail"
           title="Email Dan Okafor the payroll fix summary"
         />
       </div>

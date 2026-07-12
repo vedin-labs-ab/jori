@@ -1,7 +1,7 @@
 import { placeDisplayName } from "@contracts/places"
 import { ChevronRight, Lock } from "lucide-react"
 import { Card } from "@/components/ui/card"
-import { IntegrationChips } from "../../shared/logo/integration"
+import { IntegrationChips } from "@/shared/logo/integration"
 import { type Place } from "./types"
 
 // Same three-row anatomy as workstream cards: name, one-line preview,

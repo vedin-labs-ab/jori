@@ -67,7 +67,7 @@ export function Mention() {
 
 export function Chip({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-muted-foreground text-xs">
+    <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-muted-foreground text-xs">
       {children}
     </span>
   )
