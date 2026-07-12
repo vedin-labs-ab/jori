@@ -5,7 +5,6 @@ import {
   useCallback,
   useId,
   useMemo,
-  useRef,
   useState,
 } from "react"
 import {
@@ -20,7 +19,6 @@ import {
   automationInstructionKey,
   createAutomationInstructionDocument,
   mergeAutomationSurfaces,
-  readAdditionalAutomationSurfaces,
   serializeAutomationInstructionDocument,
 } from "../document"
 import { insertMentionSuggestion } from "../suggestion/input"
@@ -44,27 +42,25 @@ import { createEditorProps } from "./props"
 export function useAutomationInstructionsEditor(
   props: AutomationInstructionsFieldProps
 ) {
-  const { additionalSurfaces, catalog, sources } = useMentionSources(props)
-  const refs = useInstructionRefs(props, catalog, sources, additionalSurfaces)
+  const { catalog, sources } = useMentionSources(props)
+  const refs = useInstructionRefs(props, catalog, sources)
   const listboxId = useId()
   const [isEmpty, setIsEmpty] = useState(props.value === "")
   const [suggestion, setSuggestion] =
     useState<InstructionSuggestionState | null>(null)
   const updateSuggestion = useUpdateSuggestion(refs, setSuggestion)
-  const editor = useEditor(
-    createEditorOptions({
-      catalog,
-      props,
-      refs,
-      setIsEmpty,
-      setSuggestion,
-      updateSuggestion,
-    })
-  )
+  const editor = useConfiguredInstructionEditor({
+    catalog,
+    props,
+    refs,
+    setIsEmpty,
+    setSuggestion,
+    updateSuggestion,
+  })
 
   useInstructionSync({
     catalog,
-    additionalSurfaces,
+    additionalSurfaces: props.additionalSurfaces,
     editor,
     props,
     refs,
@@ -102,6 +98,14 @@ export function useAutomationInstructionsEditor(
       updateSuggestionIndex(activeIndex, setSuggestion),
     suggestion,
   }
+}
+
+function useConfiguredInstructionEditor(
+  args: Parameters<typeof createEditorOptions>[0]
+) {
+  const [editorOptions] = useState(() => createEditorOptions(args))
+
+  return useEditor(editorOptions)
 }
 
 function useUpdateSuggestion(
@@ -145,18 +149,7 @@ function useMentionSources(props: AutomationInstructionsFieldProps) {
       props.webSearch,
     ]
   )
-  const additionalSurfaces = useMemo(
-    () =>
-      readAdditionalAutomationSurfaces({
-        catalog,
-        description: props.value,
-        permissions: props.permissions,
-        surfaces: props.surfaces,
-      }),
-    [catalog, props.permissions, props.surfaces, props.value]
-  )
-
-  return { additionalSurfaces, catalog, sources }
+  return { catalog, sources }
 }
 
 function useScopeMentionSources(props: AutomationInstructionsFieldProps) {
@@ -191,22 +184,23 @@ function useScopeMentionSources(props: AutomationInstructionsFieldProps) {
 function useInstructionRefs(
   props: AutomationInstructionsFieldProps,
   catalog: AutomationMentionCatalog,
-  sources: AutomationMentionSources,
-  additionalSurfaces: AutomationInstructionsFieldProps["surfaces"]
+  sources: AutomationMentionSources
 ): InstructionRefs {
-  return {
-    additionalSurfaces: useRef(additionalSurfaces),
-    catalog: useRef(catalog),
-    editor: useRef<Editor | null>(null),
-    emittedValueKey: useRef<string | undefined>(undefined),
-    onBlur: useRef(props.onBlur),
-    onWebSearchChange: useRef(props.onWebSearchChange),
-    onValueChange: useRef(props.onValueChange),
-    permissions: useRef(props.permissions),
-    scope: useRef(props.scope),
-    sources: useRef(sources),
-    suggestion: useRef<InstructionSuggestionState | null>(null),
-  }
+  const [refs] = useState<InstructionRefs>(() => ({
+    additionalSurfaces: { current: props.additionalSurfaces },
+    catalog: { current: catalog },
+    editor: { current: null },
+    emittedValueKey: { current: undefined },
+    onBlur: { current: props.onBlur },
+    onWebSearchChange: { current: props.onWebSearchChange },
+    onValueChange: { current: props.onValueChange },
+    permissions: { current: props.permissions },
+    scope: { current: props.scope },
+    sources: { current: sources },
+    suggestion: { current: null },
+  }))
+
+  return refs
 }
 
 function createEditorOptions({

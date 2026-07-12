@@ -122,6 +122,17 @@ describe("active mention autocomplete", () => {
     expect(findActiveAutomationMention("and/or", 6)).toBeNull()
     expect(findActiveAutomationMention("Send git", 8)).toBeNull()
   })
+
+  test("finds a nearby mention without scanning the preceding paragraph", () => {
+    const text = `${"Earlier context. ".repeat(100)}Use #sha`
+
+    expect(findActiveAutomationMention(text, text.length)).toEqual({
+      end: text.length,
+      kind: "tool",
+      query: "sha",
+      start: text.length - 4,
+    })
+  })
 })
 
 describe("mention suggestions", () => {

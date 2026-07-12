@@ -3,6 +3,7 @@ import {
   type AutomationMentionCatalog,
   type AutomationSurfaceFormValue,
   type AutomationSurfaceIntegration,
+  emptyAutomationMentionCatalog,
 } from "../../access"
 import {
   parseInstructionMarkdown,
@@ -69,29 +70,29 @@ export function automationInstructionKey(value: AutomationInstructionsValue) {
 }
 
 export function readAdditionalAutomationSurfaces({
-  catalog,
   description,
-  permissions,
   surfaces,
-}: AutomationInstructionsValue & {
-  catalog: AutomationMentionCatalog
-  permissions?: AutomationInstructionsFieldProps["permissions"]
-}) {
+}: AutomationInstructionsValue) {
   if (surfaces.length === 0) {
     return []
   }
 
+  const mentioned = readMentionedIntegrations(description)
+
+  return surfaces.filter((surface) => !mentioned.has(surface.integration))
+}
+
+function readMentionedIntegrations(description: string) {
   const document = createAutomationInstructionDocument({
-    catalog,
+    catalog: emptyAutomationMentionCatalog,
     description,
-    permissions,
-    surfaces,
+    surfaces: [],
   })
-  const mentioned = new Set(
+  const integrations = new Set(
     readInstructionSurfaces(document).map((surface) => surface.integration)
   )
 
-  return surfaces.filter((surface) => !mentioned.has(surface.integration))
+  return integrations
 }
 
 export function mergeAutomationSurfaces(

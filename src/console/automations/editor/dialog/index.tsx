@@ -11,10 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "../../../../../convex/_generated/api"
-import {
-  emptyAutomationMentionCatalog,
-  getAutomationScopeConflict,
-} from "../../access"
+import { getAutomationScopeConflict } from "../../access"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
 import {
@@ -66,12 +63,15 @@ export function AutomationDialog({
 
   const actions = createDialogActions(values, onValuesChange)
   const skillList = useQuery(api.skills.catalog.list, { tenantId })
-  const skills =
-    skillList !== undefined &&
-    !Array.isArray(skillList) &&
-    skillList.status === "ready"
-      ? skillList.skills.map((skill) => skill.name)
-      : []
+  const skills = useMemo(
+    () =>
+      skillList !== undefined &&
+      !Array.isArray(skillList) &&
+      skillList.status === "ready"
+        ? skillList.skills.map((skill) => skill.name)
+        : [],
+    [skillList]
+  )
   const scopeConflict = getAutomationScopeConflict(
     values.scope,
     values.surfaces
@@ -83,12 +83,10 @@ export function AutomationDialog({
   const additionalSurfaces = useMemo(
     () =>
       readAdditionalAutomationSurfaces({
-        catalog: emptyAutomationMentionCatalog,
         description: values.instructions,
-        permissions,
         surfaces: values.surfaces,
       }),
-    [permissions, values.instructions, values.surfaces]
+    [values.instructions, values.surfaces]
   )
 
   return (
@@ -165,6 +163,7 @@ function AutomationDialogFields(props: DialogFieldsProps) {
       />
       <AutomationContextSection scope={props.values.scope} />
       <AutomationInstructionsSection
+        additionalSurfaces={props.additionalSurfaces}
         error={props.instructionsError}
         onBlur={ignoreBlur}
         onWebSearchChange={props.actions.updateWebSearch}

@@ -4,6 +4,13 @@ import {
   automationSurfaceIntegrations,
 } from "./catalog"
 
+const normalizedIntegrationAliases = new Map(
+  automationSurfaceIntegrations.map((integration) => [
+    integration.integration,
+    [integration.label, ...integration.aliases].map(normalizeFuzzyAlias),
+  ])
+)
+
 export function normalizeFuzzyAlias(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "")
 }
@@ -110,7 +117,7 @@ function readIntegrationMatchScores(
 }
 
 function readIntegrationAliases(integration: AutomationSurfaceIntegrationMeta) {
-  return [integration.label, ...integration.aliases].map(normalizeFuzzyAlias)
+  return normalizedIntegrationAliases.get(integration.integration) ?? []
 }
 
 function getFuzzySimilarity(left: string, right: string) {

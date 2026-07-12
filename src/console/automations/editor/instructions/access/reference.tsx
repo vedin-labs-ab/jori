@@ -10,7 +10,7 @@ import {
   automationToolScopeIssue,
 } from "../../../access/tools"
 import { parseAutomationReferenceKind } from "../document"
-import { readInstructionSurfaces } from "../markdown/references"
+import { readEditorInstructionSurfaces } from "../editor/snapshot"
 import { type AutomationReferenceNodeOptions } from "../markdown/schema"
 import { AutomationMarkerRemoveButton } from "./remove"
 import { automationReferenceToneClassNames } from "./tone"
@@ -95,7 +95,7 @@ function useReferenceAccess({
     editor,
     selector: ({ editor: currentEditor }) => ({
       scope: options.getScope(),
-      surfaces: readInstructionSurfaces(currentEditor.getJSON()),
+      surfaces: readEditorInstructionSurfaces(currentEditor),
       webSearch: options.getWebSearch(),
     }),
   })
