@@ -52,7 +52,8 @@ function SupportThread() {
             aria-hidden="true"
             className="mt-2 flex w-fit items-center gap-1 rounded-full border border-[#1264a3]/30 bg-[#1d9bd1]/10 px-2 py-0.5 text-[#1264a3] text-xs"
           >
-            👀 <span className="tabular-nums">1</span>
+            <span className="leading-none">👀</span>
+            <span className="tabular-nums leading-none">1</span>
           </span>
         </ThreadMessage>
         <ThreadMessage author="Milo" isMilo time="14:04">
