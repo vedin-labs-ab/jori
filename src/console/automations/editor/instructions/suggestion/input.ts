@@ -108,6 +108,11 @@ export function replaceCompletedMention({
   }
 
   const suggestion = completedSuggestion(match, sources)
+
+  if (suggestion === null) {
+    return false
+  }
+
   const start = from - (textBeforeCursor.length - match.start)
   const marks = view.state.storedMarks ?? view.state.selection.$from.marks()
   const document = view.state.doc.toJSON()
@@ -147,19 +152,32 @@ export function replaceCompletedMention({
 function completedSuggestion(
   mention: Pick<AutomationMention, "id" | "kind">,
   sources: AutomationMentionSources
-): AutomationMentionSuggestion {
+): AutomationMentionSuggestion | null {
   if (mention.kind === "tool") {
-    const suggestion = getAutomationMentionSuggestions(
-      { kind: "tool", query: mention.id },
-      sources
-    ).find((item) => item.id === mention.id)
+    return (
+      getAutomationMentionSuggestions(
+        { kind: "tool", query: mention.id },
+        sources
+      ).find((item) => item.id === mention.id) ?? null
+    )
+  }
 
-    if (suggestion !== undefined) {
-      return suggestion
+  if (mention.kind === "integration") {
+    const integration = mention.id as AutomationSurfaceIntegration
+
+    return {
+      id: integration,
+      kind: "integration",
+      label: mention.id,
+      surface: integration,
     }
   }
 
-  return { id: mention.id, kind: mention.kind, label: mention.id }
+  return {
+    id: mention.id,
+    kind: "skill",
+    label: mention.id,
+  }
 }
 
 function mentionContent(

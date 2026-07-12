@@ -1,10 +1,7 @@
-import { BookOpen, Wrench } from "lucide-react"
+import { BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
-import {
-  type AutomationMentionSuggestion,
-  type AutomationSurfaceIntegration,
-} from "../../../access"
-import { SurfaceLogo } from "../../../access/logo"
+import { ProviderLogo } from "@/shared/logo/provider"
+import { type AutomationMentionSuggestion } from "../../../access"
 import { type InstructionSuggestionState } from "./suggest"
 
 export function InstructionSuggestions({
@@ -123,18 +120,12 @@ function SuggestionIcon({
 }: {
   suggestion: AutomationMentionSuggestion
 }) {
-  if (suggestion.kind === "integration") {
-    return (
-      <SurfaceLogo
-        integration={suggestion.id as AutomationSurfaceIntegration}
-      />
-    )
+  if (suggestion.kind !== "skill") {
+    return <ProviderLogo className="size-3.5" surface={suggestion.surface} />
   }
 
-  const Icon = suggestion.kind === "skill" ? BookOpen : Wrench
-
   return (
-    <Icon
+    <BookOpen
       aria-hidden="true"
       className="size-3.5 shrink-0 text-muted-foreground"
     />
