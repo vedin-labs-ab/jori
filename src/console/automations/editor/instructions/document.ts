@@ -20,15 +20,11 @@ import {
 import { type AutomationInstructionsFieldProps } from "./types"
 
 export {
-  type AutomationSurfacePolicyState,
   automationReferenceNodeName,
   automationSurfaceNodeName,
-  fencedTextNodeName,
   parseAutomationReferenceKind,
   parseAutomationSurfaceIntegration,
-  parseAutomationSurfacePolicy,
   parseAutomationSurfaceTools,
-  parseAutomationSurfaceToolsAttribute,
 } from "./markdown/schema"
 
 export type AutomationInstructionsValue = {

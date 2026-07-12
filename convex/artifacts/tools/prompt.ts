@@ -12,7 +12,7 @@ import {
   type OpenRouterChatMessage,
   sendOpenRouterChat,
 } from "../../model"
-import { requiredString } from "../../shared/input"
+import { optionalString, requiredString } from "../../shared/input"
 import {
   type ArtifactPromptRequestDiagnostics,
   createArtifactPromptDiagnostics,
@@ -199,12 +199,6 @@ function readMaxOutputTokens(args: Record<string, unknown>) {
   }
 
   return hasMaxTokens ? args.maxTokens : undefined
-}
-
-function optionalString(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
 }
 
 function encodedJsonBytes(value: unknown) {

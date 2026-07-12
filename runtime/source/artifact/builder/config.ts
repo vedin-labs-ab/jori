@@ -2,7 +2,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import { type BuilderConfig } from "./types.ts"
 
-export const workspace =
+const workspace =
   process.env.MILO_WORKSPACE ?? "/home/user/.milo/artifacts/runtime"
 export const nodeModulesPath = path.join(workspace, "node_modules")
 export const maxCommandBuffer = 1024 * 1024 * 4

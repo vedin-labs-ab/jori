@@ -37,7 +37,7 @@ export function createInstructionExtensions(refs: InstructionRefs) {
   ]
 }
 
-export const AutomationSurfaceExtension = AutomationSurfaceNode.extend({
+const AutomationSurfaceExtension = AutomationSurfaceNode.extend({
   addNodeView() {
     return ReactNodeViewRenderer(AutomationSurfaceNodeView)
   },

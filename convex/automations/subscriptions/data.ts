@@ -1,6 +1,6 @@
+import { automationEventMatchKey } from "../../../contracts/automations/events"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { automationEventMatchKey } from "../events"
 
 type EventTrigger = Extract<Doc<"automations">["trigger"], { event: string }>
 

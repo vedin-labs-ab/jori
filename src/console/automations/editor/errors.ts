@@ -21,7 +21,7 @@ export function readAutomationNameError(
   return error
 }
 
-export function isAutomationNameError(error: string | undefined) {
+function isAutomationNameError(error: string | undefined) {
   return error === automationNameErrors.required
 }
 
@@ -50,7 +50,7 @@ export function readAutomationInstructionsError(
   return error
 }
 
-export function isAutomationInstructionsError(error: string | undefined) {
+function isAutomationInstructionsError(error: string | undefined) {
   return (
     error === automationInstructionsErrors.required ||
     readAutomationInstructionMarkerError(error) !== undefined ||

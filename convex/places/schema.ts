@@ -16,7 +16,7 @@ export const placeSection = v.union(
 // the last supporting window, misses counts consecutive windows that said
 // nothing either way. Passes only run on traffic, so misses is a
 // traffic-gated clock — quiet weeks age nothing.
-export const placeClaim = v.object({
+const placeClaim = v.object({
   section: placeSection,
   text: v.string(),
   confirmedAt: v.number(),

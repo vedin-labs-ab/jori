@@ -107,7 +107,9 @@ function validateArtifactTemplateDependencies(
   }
 }
 
-function readArtifactPackageDependencies(template: Record<string, string>) {
+export function readArtifactPackageDependencies(
+  template: Record<string, string>
+) {
   const content = template["package.json"]
 
   if (content === undefined) {

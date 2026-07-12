@@ -9,9 +9,7 @@ import {
 export { automationEventCatalog } from "./catalog"
 export type {
   AutomationEventDefinition,
-  AutomationEventIntegrationDefinition,
   AutomationEventMatch,
-  AutomationEventMatchValue,
   AutomationEventParameter,
 } from "./catalog/types"
 
@@ -21,19 +19,17 @@ const pendingIntegrationDelivery =
 export type AutomationEventIntegration =
   (typeof automationEventCatalog)[number]["integration"]
 
-export const automationEventIntegrations = automationEventCatalog.map(
+const automationEventIntegrations = automationEventCatalog.map(
   (definition) => definition.integration
 )
 
-export function getAutomationEventIntegrationDefinition(
-  integration: Integration
-) {
+function getAutomationEventIntegrationDefinition(integration: Integration) {
   return automationEventCatalog.find(
     (definition) => definition.integration === integration
   )
 }
 
-export function getAutomationEventDefinitions(integration: Integration) {
+function getAutomationEventDefinitions(integration: Integration) {
   return getAutomationEventIntegrationDefinition(integration)?.events ?? []
 }
 

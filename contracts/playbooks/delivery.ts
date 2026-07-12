@@ -4,7 +4,7 @@ import { type Integration, integrationLabels } from "../integrations"
 // input capabilities a playbook reads: internals stay generic over the kinds,
 // and per-provider specifics (tool names, phrasing) live only in this module.
 
-export const deliveryKinds = ["email", "slack"] as const
+const deliveryKinds = ["email", "slack"] as const
 export type DeliveryKind = (typeof deliveryKinds)[number]
 
 /** Integrations that can send email. */
@@ -48,11 +48,6 @@ export type PlaybookDelivery = {
 }
 
 export type DeliveryStyle = "content" | "summary"
-
-export const deliveryKindLabels = {
-  email: "Email",
-  slack: "Slack",
-} satisfies Record<DeliveryKind, string>
 
 /** The integrations that satisfy each delivery kind (the connection edge). */
 export const deliveryKindProviders = {

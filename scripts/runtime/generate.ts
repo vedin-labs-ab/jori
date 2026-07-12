@@ -12,7 +12,10 @@ import {
 } from "./paths.ts"
 import { transpileTypeScript } from "./transpile.ts"
 import { type RuntimeAssets } from "./types.ts"
-import { validateRuntimeSources } from "./validate.ts"
+import {
+  readArtifactPackageDependencies,
+  validateRuntimeSources,
+} from "./validate.ts"
 
 type GenerateOptions = {
   checkMode: boolean
@@ -181,11 +184,7 @@ function artifactTemplateOutputPath(sourcePath: string) {
 }
 
 function readArtifactDependencies(template: Record<string, string>) {
-  const packageJson = parsePackageJson(template)
-  const dependencies = {
-    ...packageJson.dependencies,
-    ...packageJson.devDependencies,
-  }
+  const dependencies = readArtifactPackageDependencies(template)
 
   return Object.entries(dependencies)
     .map(([name, version]) => {
@@ -198,19 +197,6 @@ function readArtifactDependencies(template: Record<string, string>) {
       return `${name}@${version}`
     })
     .sort((left, right) => left.localeCompare(right))
-}
-
-function parsePackageJson(template: Record<string, string>) {
-  const content = template["package.json"]
-
-  if (content === undefined) {
-    throw new Error("Artifact template is missing package.json.")
-  }
-
-  return JSON.parse(content) as {
-    dependencies?: Record<string, string>
-    devDependencies?: Record<string, string>
-  }
 }
 
 function isExactPackageVersion(version: string) {

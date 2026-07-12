@@ -1,13 +1,13 @@
-import { type Integration } from "../../contracts/integrations"
-import { type Doc } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
 import {
   githubCommentEventAction,
   issueCommentEvent,
   linearCommentEventAction,
   pullRequestCommentEvent,
   pullRequestReviewCommentEvent,
-} from "../automations/names"
+} from "../../contracts/automations/events/names"
+import { type Integration } from "../../contracts/integrations"
+import { type Doc } from "../_generated/dataModel"
+import { type MutationCtx } from "../_generated/server"
 import { recordEvent } from "../events/data"
 import { normalizeEventData } from "../events/payload"
 import { type EventData, type EventMatch } from "../events/schema"

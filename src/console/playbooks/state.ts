@@ -17,7 +17,7 @@ export type PlaybookListRow = FunctionReturnType<
 
 export type PlaybookSlotState = PlaybookListRow["slots"][number]
 
-export type PlaybookEnableOption = {
+type PlaybookEnableOption = {
   label: string
   choices: Record<string, Integration>
 }

@@ -1,6 +1,6 @@
 import { type Integration } from "."
 
-export const integrationOptionSources = [
+const integrationOptionSources = [
   "slack.channels",
   "slack.users",
   "github.repositories",

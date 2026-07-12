@@ -4,7 +4,7 @@ import { automationSurfaceIntegrations } from "./catalog"
 // `#send_message`. Prose is never scanned for bare names, so an email like
 // person@gmail.com or the word "linear" can never become a mention.
 
-export const automationMentionKinds = ["integration", "skill", "tool"] as const
+const automationMentionKinds = ["integration", "skill", "tool"] as const
 export type AutomationMentionKind = (typeof automationMentionKinds)[number]
 
 export const automationMentionSigils = {
@@ -13,7 +13,7 @@ export const automationMentionSigils = {
   tool: "#",
 } as const satisfies Record<AutomationMentionKind, string>
 
-export type AutomationMentionEntry = {
+type AutomationMentionEntry = {
   id: string
   /** Lowercase spellings accepted after the sigil, longest first. */
   tokens: readonly string[]

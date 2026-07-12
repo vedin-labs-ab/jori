@@ -61,7 +61,6 @@ import type * as assets_read from "../assets/read.js";
 import type * as automations_access from "../automations/access.js";
 import type * as automations_connections from "../automations/connections.js";
 import type * as automations_console from "../automations/console.js";
-import type * as automations_events from "../automations/events.js";
 import type * as automations_keys from "../automations/keys.js";
 import type * as automations_lifecycle_artifact from "../automations/lifecycle/artifact.js";
 import type * as automations_lifecycle_control from "../automations/lifecycle/control.js";
@@ -74,7 +73,6 @@ import type * as automations_lifecycle_search from "../automations/lifecycle/sea
 import type * as automations_lifecycle_trigger from "../automations/lifecycle/trigger.js";
 import type * as automations_lifecycle_write from "../automations/lifecycle/write.js";
 import type * as automations_mcp from "../automations/mcp.js";
-import type * as automations_names from "../automations/names.js";
 import type * as automations_records from "../automations/records.js";
 import type * as automations_subscriptions_data from "../automations/subscriptions/data.js";
 import type * as automations_timing from "../automations/timing.js";
@@ -523,7 +521,6 @@ declare const fullApi: ApiFromModules<{
   "automations/access": typeof automations_access;
   "automations/connections": typeof automations_connections;
   "automations/console": typeof automations_console;
-  "automations/events": typeof automations_events;
   "automations/keys": typeof automations_keys;
   "automations/lifecycle/artifact": typeof automations_lifecycle_artifact;
   "automations/lifecycle/control": typeof automations_lifecycle_control;
@@ -536,7 +533,6 @@ declare const fullApi: ApiFromModules<{
   "automations/lifecycle/trigger": typeof automations_lifecycle_trigger;
   "automations/lifecycle/write": typeof automations_lifecycle_write;
   "automations/mcp": typeof automations_mcp;
-  "automations/names": typeof automations_names;
   "automations/records": typeof automations_records;
   "automations/subscriptions/data": typeof automations_subscriptions_data;
   "automations/timing": typeof automations_timing;

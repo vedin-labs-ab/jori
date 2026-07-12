@@ -1,6 +1,6 @@
+import { linearIssueCommentEvent } from "../../../contracts/automations/events/names"
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { linearIssueCommentEvent } from "../../automations/names"
 import { createIntegrationActor } from "../../shared/actor"
 import {
   oauthAuthorizeRedirect,

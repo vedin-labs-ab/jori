@@ -9,7 +9,7 @@ const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 const artifactFrameSandbox =
   "allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
 
-export type ArtifactSession = { token: string }
+type ArtifactSession = { token: string }
 
 /** How the frame gets a session is the caller's edge: members mint through
  *  the Clerk-authed action, share links exchange their secret. */

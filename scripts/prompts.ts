@@ -19,7 +19,6 @@ await writeFile(
     "export const promptTemplates = ",
     JSON.stringify(promptTemplates, null, 2),
     " as const\n\n",
-    "export type SkillId = keyof typeof skills\n",
     "export type PromptTemplateId = keyof typeof promptTemplates\n",
   ].join("")
 )

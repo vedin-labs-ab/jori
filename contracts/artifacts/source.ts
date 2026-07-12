@@ -55,7 +55,7 @@ export function isPlatformArtifactSourcePath(path: string) {
 
 export const maxArtifactFiles = 120
 export const maxArtifactFileBytes = 512 * 1024
-export const maxArtifactTreeBytes = 2 * 1024 * 1024
+const maxArtifactTreeBytes = 2 * 1024 * 1024
 
 export function normalizeArtifactSourceFiles(
   source: unknown
