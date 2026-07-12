@@ -3,9 +3,12 @@ import {
   NodeViewWrapper,
   useEditorState,
 } from "@tiptap/react"
-import { BookOpen, Wrench } from "lucide-react"
+import { Ban, BookOpen, Wrench } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { automationToolReferenceIssue } from "../../../access/tools"
+import {
+  automationToolReferenceIssue,
+  automationToolScopeIssue,
+} from "../../../access/tools"
 import { parseAutomationReferenceKind } from "../document"
 import { readInstructionSurfaces } from "../markdown/references"
 import { type AutomationReferenceNodeOptions } from "../markdown/schema"
@@ -21,30 +24,20 @@ export function AutomationReferenceNodeView({
 }: NodeViewProps) {
   const kind = parseAutomationReferenceKind(node.attrs.kind)
   const id = typeof node.attrs.id === "string" ? node.attrs.id : null
-  const accessState = useEditorState({
+  const { issue, scopeIssue } = useReferenceAccess({
     editor,
-    selector: ({ editor: currentEditor }) => ({
-      surfaces: readInstructionSurfaces(currentEditor.getJSON()),
-      webSearch: referenceOptions(extension).getWebSearch(),
-    }),
+    extension,
+    id,
+    kind,
   })
 
   if (kind === null || id === null) {
     return null
   }
 
-  const Icon = kind === "skill" ? BookOpen : Wrench
   const tone = automationReferenceToneClassNames[kind]
-  const issue =
-    kind === "tool"
-      ? automationToolReferenceIssue({
-          permissions: referenceOptions(extension).getPermissions(),
-          scope: referenceOptions(extension).getScope(),
-          surfaces: accessState.surfaces,
-          tool: id,
-          webSearch: accessState.webSearch,
-        })
-      : undefined
+  const Icon =
+    kind === "skill" ? BookOpen : scopeIssue === undefined ? Wrench : Ban
 
   return (
     <NodeViewWrapper
@@ -65,16 +58,66 @@ export function AutomationReferenceNodeView({
           issue === undefined ? "ready" : "unresolved"
         }
         data-automation-reference-kind={kind}
+        data-automation-reference-scope={
+          scopeIssue === undefined ? "allowed" : "blocked"
+        }
         title={issue}
       >
         <AutomationMarkerRemoveButton
-          icon={<Icon aria-hidden="true" className={cn("size-3", tone.icon)} />}
+          icon={
+            <Icon
+              aria-hidden="true"
+              className={cn(
+                "size-3",
+                scopeIssue === undefined ? tone.icon : "text-destructive"
+              )}
+            />
+          }
           label={id}
           onRemove={deleteNode}
         />
       </span>
     </NodeViewWrapper>
   )
+}
+
+function useReferenceAccess({
+  editor,
+  extension,
+  id,
+  kind,
+}: Pick<NodeViewProps, "editor" | "extension"> & {
+  id: string | null
+  kind: ReturnType<typeof parseAutomationReferenceKind>
+}) {
+  const options = referenceOptions(extension)
+  const state = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => ({
+      scope: options.getScope(),
+      surfaces: readInstructionSurfaces(currentEditor.getJSON()),
+      webSearch: options.getWebSearch(),
+    }),
+  })
+
+  if (kind !== "tool" || id === null) {
+    return { issue: undefined, scopeIssue: undefined }
+  }
+
+  return {
+    issue: automationToolReferenceIssue({
+      permissions: options.getPermissions(),
+      scope: state.scope,
+      surfaces: state.surfaces,
+      tool: id,
+      webSearch: state.webSearch,
+    }),
+    scopeIssue: automationToolScopeIssue({
+      permissions: options.getPermissions(),
+      scope: state.scope,
+      tool: id,
+    }),
+  }
 }
 
 function referenceOptions(extension: NodeViewProps["extension"]) {
