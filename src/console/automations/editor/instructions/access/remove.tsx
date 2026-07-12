@@ -21,7 +21,7 @@ export function AutomationMarkerRemoveButton({
     >
       <button
         aria-label={`Remove ${label}`}
-        className="group/x grid h-5 w-4 place-items-center outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30"
+        className="group/x grid w-4 place-items-center self-stretch outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30"
         onClick={(event) => {
           event.preventDefault()
           event.stopPropagation()

@@ -7,7 +7,7 @@ import {
 } from "./catalog"
 
 export const automationScopeConflictMessage =
-  "Organization automations can’t use personal integrations. Remove the highlighted access or switch to Personal."
+  "Organization automations can’t use personal integrations. Remove the highlighted integrations or switch to Personal."
 
 export function isAutomationSurfaceAllowedForScope(
   scope: Scope,
