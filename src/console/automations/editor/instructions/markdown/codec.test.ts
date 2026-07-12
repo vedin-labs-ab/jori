@@ -102,6 +102,14 @@ test("round-trips code spans containing pills, backticks, and spaces", () => {
   expect(roundTrip(roundTrip(source))).toBe(roundTrip(source))
 })
 
+test("keeps a same-line backtick run as inline code", () => {
+  const document = parse("```txt hello```")
+  const inlineCode = document.content?.[0]?.content?.[0]
+
+  expect(document.content?.[0]?.type).toBe("paragraph")
+  expect(inlineCode?.marks?.[0]?.type).toBe("code")
+})
+
 test.each([
   "\\# literal",
   "\\- item",

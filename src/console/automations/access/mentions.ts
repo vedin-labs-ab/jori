@@ -12,18 +12,13 @@ import {
   canStartMention,
   sigilKind,
 } from "./scan"
-import {
-  type AutomationToolAccess,
-  automationToolAccessHint,
-  resolveAutomationToolAccess,
-} from "./tools"
+import { type AutomationToolAccess, resolveAutomationToolAccess } from "./tools"
 
 const maxSuggestions = 6
 
 export type AutomationMentionSuggestion = {
   access?: AutomationToolAccess
   disabled?: boolean
-  hint?: string
   id: string
   kind: AutomationMentionKind
   label: string
@@ -162,7 +157,6 @@ function toolSuggestion(
   return {
     access,
     disabled: access.kind === "unavailable",
-    hint: automationToolAccessHint(access),
     id: permission.tool,
     kind: "tool",
     label: permission.tool,
