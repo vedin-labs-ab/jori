@@ -44,7 +44,7 @@ export function AutomationContextSection({
       <CollapsibleTrigger asChild>
         <button
           className={flushRowClassName(
-            "group min-h-5 justify-between gap-3 rounded-sm text-left text-xs/relaxed leading-none [&[aria-expanded=true]:not(:hover)]:bg-transparent"
+            "group min-h-7 justify-between gap-3 rounded-sm py-1.5 text-left text-xs/relaxed leading-none [&[aria-expanded=true]:not(:hover)]:bg-transparent"
           )}
           type="button"
         >
