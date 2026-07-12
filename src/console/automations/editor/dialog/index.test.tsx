@@ -95,6 +95,19 @@ describe("automation dialog instructions validation", () => {
   })
 })
 
+describe("automation dialog context", () => {
+  test("places the context disclosure before instructions", () => {
+    renderAutomationDialog({ error: undefined, values: emptyAutomationForm })
+
+    const context = screen.getByRole("button", { name: "Context" })
+    const instructions = screen.getByText("Instructions")
+
+    expect(context.compareDocumentPosition(instructions)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    )
+  })
+})
+
 describe("automation dialog access controls", () => {
   test("shows web search directly after instructions without an access heading", () => {
     renderAutomationDialog({
