@@ -1,8 +1,8 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
 import { readWorkstreamRoster } from "../deduction/roster"
-import { listActiveIntegrationsForOwner } from "../integrations/data"
+import { listActiveIntegrationsForPrincipal } from "../integrations/data"
 import { recentConversation } from "../messages/history"
 import { readApprovedFacts } from "../organization/profile"
 import { readRequesterContext } from "../persons/profile/context"
@@ -12,6 +12,7 @@ import {
   hasIntegrationTools,
   isMessageIntegration,
 } from "../shared/integrations"
+import { executionPrincipalPersonId } from "./principal"
 
 export const getInputByRun = internalQuery({
   args: {
@@ -62,11 +63,8 @@ async function getMessageInput(
     return null
   }
 
-  const integrations = await listActiveIntegrations(
-    ctx,
-    args.run.tenantId,
-    args.run.createdBy
-  )
+  const integrations = await listActiveIntegrations(ctx, args.run)
+  const personContext = await readPrincipalContext(ctx, args.run, integrations)
 
   return {
     type: "message" as const,
@@ -77,12 +75,9 @@ async function getMessageInput(
     integrations,
     conversation: await recentConversation(ctx, message),
     organization: await readApprovedFacts(ctx, args.run.tenantId),
-    requester: await readRequesterContext(ctx, {
-      personId: args.run.createdBy,
-      integrations,
-    }),
+    requester: personContext.requester,
     place: await readPlaceContext(ctx, message),
-    timezone: await readPersonTimezone(ctx, args.run.createdBy),
+    timezone: personContext.timezone,
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }
@@ -97,12 +92,6 @@ async function getAutomationInput(
     return null
   }
 
-  const automation = await ctx.db.get(args.run.automationId)
-
-  if (automation === null || automation.tenantId !== args.run.tenantId) {
-    return null
-  }
-
   const event =
     args.run.cause.type === "event"
       ? await ctx.db.get(args.run.cause.eventId)
@@ -111,20 +100,32 @@ async function getAutomationInput(
     event === null || event.tenantId !== args.run.tenantId
       ? null
       : await ctx.db.get(event.integrationId)
-  const integrations = await listActiveIntegrations(
-    ctx,
-    automation.tenantId,
-    automation.createdBy
-  )
+  const integrations = await listActiveIntegrations(ctx, args.run)
+  const access = args.run.access
+  const instructions = args.run.instructions?.trim()
+
+  if (
+    access === undefined ||
+    instructions === undefined ||
+    instructions === ""
+  ) {
+    return null
+  }
 
   const grantedIntegrations = integrations.filter((integration) =>
-    hasIntegrationTools(automation.access, integration._id)
+    hasIntegrationTools(access, integration._id)
+  )
+  const personContext = await readPrincipalContext(
+    ctx,
+    args.run,
+    grantedIntegrations
   )
 
   return {
     type: "automation" as const,
+    access,
+    instructions,
     run: args.run,
-    automation,
     event:
       event !== null && event.tenantId === args.run.tenantId ? event : null,
     integration:
@@ -133,11 +134,8 @@ async function getAutomationInput(
         : null,
     integrations: grantedIntegrations,
     organization: await readApprovedFacts(ctx, args.run.tenantId),
-    requester: await readRequesterContext(ctx, {
-      personId: automation.createdBy,
-      integrations: grantedIntegrations,
-    }),
-    timezone: await readPersonTimezone(ctx, automation.createdBy),
+    requester: personContext.requester,
+    timezone: personContext.timezone,
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }
@@ -155,11 +153,7 @@ async function getInstructionInput(
   }
 
   const access = args.run.access
-  const integrations = await listActiveIntegrations(
-    ctx,
-    args.run.tenantId,
-    args.run.createdBy
-  )
+  const integrations = await listActiveIntegrations(ctx, args.run)
 
   const grantedIntegrations =
     access === undefined
@@ -167,6 +161,11 @@ async function getInstructionInput(
       : integrations.filter((integration) =>
           hasIntegrationTools(access, integration._id)
         )
+  const personContext = await readPrincipalContext(
+    ctx,
+    args.run,
+    grantedIntegrations
+  )
 
   return {
     type: "instruction" as const,
@@ -175,11 +174,8 @@ async function getInstructionInput(
     ...(access === undefined ? {} : { access }),
     integrations: grantedIntegrations,
     organization: await readApprovedFacts(ctx, args.run.tenantId),
-    requester: await readRequesterContext(ctx, {
-      personId: args.run.createdBy,
-      integrations: grantedIntegrations,
-    }),
-    timezone: await readPersonTimezone(ctx, args.run.createdBy),
+    requester: personContext.requester,
+    timezone: personContext.timezone,
     workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
   }
 }
@@ -193,13 +189,26 @@ export const get = internalQuery({
   },
 })
 
-async function listActiveIntegrations(
-  ctx: QueryCtx,
-  tenantId: string,
-  ownerId: Id<"persons"> | undefined
-) {
-  return await listActiveIntegrationsForOwner(ctx, {
-    ownerId,
-    tenantId,
+async function listActiveIntegrations(ctx: QueryCtx, run: Doc<"runs">) {
+  return await listActiveIntegrationsForPrincipal(ctx, {
+    principal: run.principal,
+    tenantId: run.tenantId,
   })
+}
+
+async function readPrincipalContext(
+  ctx: QueryCtx,
+  run: Doc<"runs">,
+  integrations: Doc<"integrations">[]
+) {
+  const personId = executionPrincipalPersonId(run.principal)
+
+  if (personId === undefined) {
+    return { requester: null, timezone: null }
+  }
+
+  return {
+    requester: await readRequesterContext(ctx, { personId, integrations }),
+    timezone: await readPersonTimezone(ctx, personId),
+  }
 }

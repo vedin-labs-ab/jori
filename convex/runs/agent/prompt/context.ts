@@ -90,7 +90,7 @@ function createTriggerPart(input: AgentRuntimeInput) {
         promptTemplates["agent/context/trigger/automation"],
         createAutomationValues(input)
       ),
-      input.automation.instructions
+      input.instructions
     )
   }
 
@@ -137,8 +137,8 @@ function createAutomationValues(
 ) {
   return {
     automation: {
-      id: input.automation._id,
-      name: input.automation.name,
+      id: input.run.automationId,
+      name: input.run.snapshot.title,
       trigger: formatAutomationTrigger(input),
     },
     event:

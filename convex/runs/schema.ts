@@ -3,6 +3,7 @@ import { type Infer, v } from "convex/values"
 import { actorValidator } from "../shared/actor"
 import { audienceScopeValidator } from "../shared/audience"
 import { accessValidator, toolSurfaceValidator } from "../shared/integrations"
+import { executionPrincipalValidator } from "./principal"
 
 const runSnapshotContextType = v.union(
   v.literal("calendar_event"),
@@ -110,11 +111,12 @@ export const runs = defineTable({
   scope: v.optional(audienceScopeValidator),
   conversationId: v.optional(v.id("conversations")),
   cause: runCause,
+  principal: executionPrincipalValidator,
   instructions: v.optional(v.string()),
   /**
-   * Tool contract for runs without an automation; omitted, the run gets the
-   * caller's full tool surface. Automation runs derive access from their
-   * automation instead.
+   * Tool contract for this run. Automation and child runs snapshot their
+   * access; unbound interactive runs may omit it to use the principal's full
+   * tool surface.
    */
   access: v.optional(accessValidator),
   snapshot: runSnapshot,

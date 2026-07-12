@@ -1,3 +1,4 @@
+import { type Scope } from "@contracts/permissions/scope"
 import { type Editor } from "@tiptap/react"
 import { type MutableRefObject } from "react"
 import {
@@ -19,6 +20,7 @@ export type AutomationInstructionsFieldProps = {
   permissions?: AutomationPolicyPermissions
   policyKey: string
   showAccessError?: boolean
+  scope: Scope
   /** Tenant skill names, for `/` mentions; empty while loading. */
   skills: readonly string[]
   surfaces: AutomationSurfaceFormValue[]

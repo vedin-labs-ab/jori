@@ -1,6 +1,7 @@
 import { type MutationCtx } from "../_generated/server"
 import { resolveAccessInput } from "../automations/access"
 import { createInstructionRun } from "../runs/instruction"
+import { executionPrincipalForScope } from "../runs/principal"
 import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./enable"
 
 /**
@@ -10,6 +11,10 @@ import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./enable"
  */
 export async function trialPlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
   const plan = await resolvePlaybookPlan(ctx, args)
+  const principal = executionPrincipalForScope(
+    plan.definition.scope,
+    args.createdBy
+  )
 
   const runId = await createInstructionRun(ctx, {
     tenantId: args.tenantId,
@@ -18,10 +23,11 @@ export async function trialPlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
     artifactId: args.artifactId,
     access: await resolveAccessInput(ctx, {
       access: plan.access,
-      createdBy: args.createdBy,
+      principal,
       tenantId: args.tenantId,
     }),
     createdBy: args.createdBy,
+    principal,
   })
 
   return { runId }

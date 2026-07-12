@@ -1,4 +1,5 @@
 import { type AutomationEventIntegration } from "@contracts/automations/events"
+import { type Scope } from "@contracts/permissions/scope"
 import { useQuery } from "convex/react"
 import {
   Select,
@@ -15,14 +16,17 @@ import { type EventIntegrationOption, getIntegrationOptions } from "."
 export function EventIntegrationField({
   onValueChange,
   tenantId,
+  scope,
   value,
 }: {
   onValueChange: (integration: AutomationEventIntegration) => void
   tenantId: string
+  scope: Scope
   value: AutomationEventIntegration
 }) {
-  const connections = useQuery(api.automations.console.eventIntegrations, {
+  const connections = useQuery(api.automations.options.connections.list, {
     tenantId,
+    scope,
   })
   const options = getIntegrationOptions(connections)
 

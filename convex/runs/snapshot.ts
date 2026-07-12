@@ -1,11 +1,13 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
+import { type Access } from "../shared/integrations"
 import { automationDisplay, messageDisplay } from "./display"
 import { type MessageCauseKind, type runSnapshot } from "./schema"
 
 type RunSnapshot = Infer<typeof runSnapshot>
 
 type RunSnapshotInput = {
+  access?: Access
   instructions?: string
   snapshot: RunSnapshot
 }
@@ -16,6 +18,7 @@ export function createAutomationRunSnapshot(input: {
   integration?: Doc<"integrations"> | null
 }): RunSnapshotInput {
   return {
+    access: input.automation.access,
     instructions: normalizeRequiredRunText(
       input.automation.instructions,
       "Run instructions"

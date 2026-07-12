@@ -26,10 +26,11 @@ export type MessageRuntimeInput = {
 
 export type AutomationRuntimeInput = {
   type: "automation"
+  access: Access
+  instructions: string
   run: Doc<"runs">
   integration: RuntimeIntegration | null
   integrations: RuntimeIntegration[]
-  automation: Doc<"automations">
   event: Doc<"events"> | null
   organization: OrganizationFacts | null
   requester: RequesterContext | null
@@ -64,4 +65,8 @@ export function findRunIntegration(
         integration.status === "active" && integration.integration === surface
     ) ?? null
   )
+}
+
+export function inputAccess(input: AgentRuntimeInput): Access | undefined {
+  return input.type === "message" ? undefined : input.access
 }

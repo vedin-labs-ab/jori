@@ -8,11 +8,24 @@ export function automationRuntimeInput(webSearch = true) {
 
   return {
     type: "automation",
+    instructions: "Post the daily digest.",
+    access: {
+      integrations: [
+        { id: github._id, tools: ["github_get_issue"] },
+        { id: slack._id, tools: ["conversations_add_message"] },
+      ],
+      web: webSearch,
+    },
     run: {
       _id: "run",
       _creationTime: 0,
       tenantId: "tenant",
       automationId: "automation",
+      snapshot: {
+        title: "Daily digest",
+        source: { type: "automation" },
+        context: [],
+      },
       cause: {
         type: "time",
         scheduledAt: Date.UTC(2026, 5, 12, 9),
@@ -21,28 +34,6 @@ export function automationRuntimeInput(webSearch = true) {
     },
     integration: null,
     integrations: [github, slack],
-    automation: {
-      _id: "automation",
-      _creationTime: 0,
-      tenantId: "tenant",
-      name: "Daily digest",
-      instructions: "Post the daily digest.",
-      type: "cron",
-      access: {
-        integrations: [
-          { id: github._id, tools: ["github_get_issue"] },
-          { id: slack._id, tools: ["conversations_add_message"] },
-        ],
-        web: webSearch,
-      },
-      trigger: {
-        expression: "0 9 * * *",
-        nextAt: Date.UTC(2026, 5, 13, 9),
-      },
-      status: "active",
-      createdAt: 0,
-      updatedAt: 0,
-    },
     event: null,
   } as unknown as Parameters<typeof assemblePrompt>[0]
 }
@@ -52,36 +43,26 @@ export function linearAutomationRuntimeInput() {
 
   return {
     type: "automation",
+    instructions: "Reply with a short quip.",
+    access: {
+      integrations: [{ id: linear._id, tools: ["linear_add_comment"] }],
+      web: true,
+    },
     run: {
       _id: "run",
       _creationTime: 0,
       tenantId: "tenant",
       automationId: "automation",
+      snapshot: {
+        title: "Linear quip",
+        source: { type: "event", surface: "linear" },
+        context: [],
+      },
       cause: { type: "event", eventId: "event" },
       createdAt: 0,
     },
     integration: linear,
     integrations: [linear],
-    automation: {
-      _id: "automation",
-      _creationTime: 0,
-      tenantId: "tenant",
-      name: "Linear quip",
-      instructions: "Reply with a short quip.",
-      type: "event",
-      access: {
-        integrations: [{ id: linear._id, tools: ["linear_add_comment"] }],
-        web: true,
-      },
-      trigger: {
-        integrationId: linear._id,
-        event: "issue.comment.edited",
-        match: { team: "team-id" },
-      },
-      status: "active",
-      createdAt: 0,
-      updatedAt: 0,
-    },
     event: {
       _id: "event",
       _creationTime: 0,
@@ -110,11 +91,26 @@ export function notionAutomationRuntimeInput() {
 
   return {
     type: "automation",
+    instructions: "Summarize the changed Notion page.",
+    access: {
+      integrations: [
+        {
+          id: notion._id,
+          tools: ["notion_search", "notion_create_page"],
+        },
+      ],
+      web: false,
+    },
     run: {
       _id: "run",
       _creationTime: 0,
       tenantId: "tenant",
       automationId: "automation",
+      snapshot: {
+        title: "Notion follow-up",
+        source: { type: "event", surface: "notion" },
+        context: [],
+      },
       cause: {
         type: "event",
         eventId: "event",
@@ -123,31 +119,6 @@ export function notionAutomationRuntimeInput() {
     },
     integration: notion,
     integrations: [notion],
-    automation: {
-      _id: "automation",
-      _creationTime: 0,
-      tenantId: "tenant",
-      name: "Notion follow-up",
-      instructions: "Summarize the changed Notion page.",
-      type: "event",
-      access: {
-        integrations: [
-          {
-            id: notion._id,
-            tools: ["notion_search", "notion_create_page"],
-          },
-        ],
-        web: false,
-      },
-      trigger: {
-        integrationId: notion._id,
-        event: "comment.created",
-        match: { page: "page-id" },
-      },
-      status: "active",
-      createdAt: 0,
-      updatedAt: 0,
-    },
     event: notionCommentEvent(notion._id),
   } as unknown as Parameters<typeof assemblePrompt>[0]
 }

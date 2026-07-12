@@ -2,6 +2,10 @@ import { type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { checkTenantAccess } from "../identity/access"
 import { resolveCurrentPerson } from "../persons/clerk"
+import {
+  type ExecutionPrincipal,
+  executionPrincipalPersonId,
+} from "../runs/principal"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration } from "../shared/integrations"
 
@@ -126,5 +130,18 @@ export async function listActiveIntegrationsForOwner(
     }
 
     return args.ownerId !== undefined && integration.ownerId === args.ownerId
+  })
+}
+
+export async function listActiveIntegrationsForPrincipal(
+  ctx: QueryLikeCtx,
+  args: {
+    tenantId: string
+    principal: ExecutionPrincipal
+  }
+) {
+  return await listActiveIntegrationsForOwner(ctx, {
+    tenantId: args.tenantId,
+    ownerId: executionPrincipalPersonId(args.principal),
   })
 }

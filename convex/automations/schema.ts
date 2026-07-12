@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { eventMatch } from "../events/schema"
+import { executionPrincipalValidator } from "../runs/principal"
 import { scopeValidator } from "../shared/audience"
 import { accessValidator, integrationValidator } from "../shared/integrations"
 
@@ -74,7 +75,8 @@ export const automations = defineTable({
   name: v.string(),
   instructions: v.string(),
   /** Personal: owner-only. Organization: every member. See contracts/permissions/scope. */
-  scope: v.optional(scopeValidator),
+  scope: scopeValidator,
+  principal: executionPrincipalValidator,
   type: automationType,
   access,
   trigger,

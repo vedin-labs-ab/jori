@@ -157,7 +157,7 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         onValueChange={props.actions.updateScope}
         value={props.values.scope}
       />
-      <AutomationContextSection />
+      <AutomationContextSection scope={props.values.scope} />
       <AutomationInstructionsSection
         error={props.instructionsError}
         onBlur={ignoreBlur}

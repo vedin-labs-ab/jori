@@ -1,11 +1,8 @@
 import { type Scope } from "../../../contracts/permissions/scope"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import {
-  type AutomationAccessInput,
-  automationScope,
-  resolveAccessInput,
-} from "../access"
+import { executionPrincipalForScope } from "../../runs/principal"
+import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import { automationEventMatchKey } from "../events"
 import { automationKeyPartition, findAutomationByKey } from "../keys"
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
@@ -25,6 +22,7 @@ type UpdateAutomationArgs = {
   access?: AutomationAccessInput
   type?: AutomationType
   trigger?: AutomationTriggerInput
+  updatedBy?: Id<"persons">
 }
 
 export async function updateAutomation(
@@ -63,6 +61,10 @@ async function buildAutomationPatch(
   now: number
 ) {
   const patch: Partial<Doc<"automations">> = { updatedAt: now }
+  const principal =
+    args.scope === undefined
+      ? existing.principal
+      : executionPrincipalForScope(args.scope, args.updatedBy)
 
   if (args.name !== undefined) {
     patch.name = normalizeRequiredText(args.name, "name")
@@ -75,10 +77,7 @@ async function buildAutomationPatch(
     )
   }
 
-  if (args.scope !== undefined) {
-    patch.scope = args.scope
-    await updateKeyPartition(ctx, existing, args.scope, patch)
-  }
+  await applyPrincipalPatch(ctx, args, existing, principal, patch)
 
   if (args.artifactId !== undefined) {
     patch.artifactId = args.artifactId
@@ -88,8 +87,7 @@ async function buildAutomationPatch(
     await requireAutomationArtifact(ctx, {
       tenantId: args.tenantId,
       artifactId: args.artifactId ?? existing.artifactId,
-      createdBy: existing.createdBy,
-      scope: args.scope ?? automationScope(existing),
+      principal,
     })
   }
 
@@ -97,7 +95,7 @@ async function buildAutomationPatch(
     patch.access = await resolveAccessInput(ctx, {
       access: args.access,
       artifactId: args.artifactId ?? existing.artifactId,
-      createdBy: existing.createdBy,
+      principal,
       tenantId: existing.tenantId,
     })
   }
@@ -119,12 +117,41 @@ async function buildAutomationPatch(
         existing,
         args.type ?? existing.type,
         args.trigger,
-        now
+        now,
+        principal
       )
     )
   }
 
   return patch
+}
+
+async function applyPrincipalPatch(
+  ctx: MutationCtx,
+  args: UpdateAutomationArgs,
+  existing: Doc<"automations">,
+  principal: Doc<"automations">["principal"],
+  patch: Partial<Doc<"automations">>
+) {
+  if (args.scope === undefined) {
+    return
+  }
+
+  if (args.access === undefined && args.scope !== existing.scope) {
+    throw new Error("Changing sharing requires an updated access contract.")
+  }
+
+  if (
+    args.scope !== existing.scope &&
+    existing.type === "event" &&
+    args.trigger === undefined
+  ) {
+    throw new Error("Changing sharing requires an updated event trigger.")
+  }
+
+  patch.scope = args.scope
+  patch.principal = principal
+  await updateKeyPartition(ctx, existing, principal, patch)
 }
 
 async function buildTriggerPatch(
@@ -133,11 +160,12 @@ async function buildTriggerPatch(
   existing: Doc<"automations">,
   type: AutomationType,
   input: AutomationTriggerInput,
-  now: number
+  now: number,
+  principal: Doc<"automations">["principal"]
 ) {
   await cancelTrigger(ctx, existing.trigger)
   const trigger = await resolveTrigger(ctx, {
-    createdBy: existing.createdBy,
+    principal,
     tenantId: existing.tenantId,
     type,
     trigger: input,
@@ -205,14 +233,14 @@ function isSameEventTrigger(
 async function updateKeyPartition(
   ctx: MutationCtx,
   existing: Doc<"automations">,
-  scope: Scope,
+  principal: Doc<"automations">["principal"],
   patch: Partial<Doc<"automations">>
 ) {
   if (existing.key === undefined) {
     return
   }
 
-  const keyPartition = automationKeyPartition(scope, existing.createdBy)
+  const keyPartition = automationKeyPartition(principal)
   const conflict = await findAutomationByKey(ctx, {
     tenantId: existing.tenantId,
     key: existing.key,

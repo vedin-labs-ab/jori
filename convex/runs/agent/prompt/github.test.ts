@@ -22,36 +22,26 @@ function githubAutomationRuntimeInput() {
 
   return {
     type: "automation",
+    instructions: "Reply with a short quip.",
+    access: {
+      integrations: [{ id: github._id, tools: ["github_add_issue_comment"] }],
+      web: true,
+    },
     run: {
       _id: "run",
       _creationTime: 0,
       tenantId: "tenant",
       automationId: "automation",
+      snapshot: {
+        title: "GitHub quip",
+        source: { type: "event", surface: "github" },
+        context: [],
+      },
       cause: { type: "event", eventId: "event" },
       createdAt: 0,
     },
     integration: github,
     integrations: [github],
-    automation: {
-      _id: "automation",
-      _creationTime: 0,
-      tenantId: "tenant",
-      name: "GitHub quip",
-      instructions: "Reply with a short quip.",
-      type: "event",
-      access: {
-        integrations: [{ id: github._id, tools: ["github_add_issue_comment"] }],
-        web: true,
-      },
-      trigger: {
-        integrationId: github._id,
-        event: "pull_request.review_comment.edited",
-        match: { repo: "acme/app" },
-      },
-      status: "active",
-      createdAt: 0,
-      updatedAt: 0,
-    },
     event: {
       _id: "event",
       _creationTime: 0,

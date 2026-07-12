@@ -1,5 +1,5 @@
 import { type RuntimePrompt } from "../../../contracts/runtime"
-import { type AgentRuntimeInput } from "../../runs/agent/input"
+import { type AgentRuntimeInput, inputAccess } from "../../runs/agent/input"
 import { assemblePrompt } from "../../runs/agent/prompt"
 import {
   getPromptedTools,
@@ -10,7 +10,6 @@ import { type RuntimeSkill } from "../../skills/runtime"
 import { type runLifecycleTools } from "../lifecycle"
 import { type RuntimePermissions } from "../permissions/index"
 import { visibleNativeToolSnapshots } from "../permissions/native"
-import { inputAccess } from "../permissions/tools"
 import { sandboxTools } from "../sandbox"
 import { type loadActiveSurface } from "../surface"
 import {

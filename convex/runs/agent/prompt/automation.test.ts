@@ -51,7 +51,7 @@ describe("raw Markdown trigger instructions", () => {
       throw new Error("Expected automation input.")
     }
 
-    input.automation.instructions = markdown
+    input.instructions = markdown
 
     expect(
       assemblePrompt(input).context.endsWith(`## Instructions\n\n${markdown}`)

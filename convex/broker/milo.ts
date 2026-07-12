@@ -17,6 +17,10 @@ import {
   callRunIntrospectionTool,
   isRunIntrospectionTool,
 } from "../runs/introspect/mcp"
+import {
+  type ExecutionPrincipal,
+  executionPrincipalPersonId,
+} from "../runs/principal"
 import { type MiloToolRequest, readRecord } from "../shared/input"
 import { callMiloSkillTool, isMiloSkillTool } from "../skills/mcp"
 import { type ApprovalBrokerContext } from "./approval"
@@ -96,14 +100,14 @@ function requireBrokerContext(
 
 type MiloRunContext = {
   tenantId: string
-  createdBy?: Id<"persons">
+  principal: ExecutionPrincipal
   _id?: Id<"runs">
 }
 
 function toMiloContext(run: MiloRunContext) {
   return {
     tenantId: run.tenantId,
-    createdBy: run.createdBy,
+    createdBy: executionPrincipalPersonId(run.principal),
     runId: run._id,
   }
 }

@@ -1,5 +1,8 @@
-import { type Scope } from "../../../contracts/permissions/scope"
 import { type Id } from "../../_generated/dataModel"
+import {
+  type ExecutionPrincipal,
+  executionPrincipalPersonId,
+} from "../../runs/principal"
 import { type QueryLikeCtx } from "../../shared/context"
 
 export async function requireAutomationArtifact(
@@ -7,8 +10,7 @@ export async function requireAutomationArtifact(
   args: {
     tenantId: string
     artifactId: Id<"artifacts"> | undefined
-    createdBy: Id<"persons"> | undefined
-    scope: Scope
+    principal: ExecutionPrincipal
   }
 ) {
   if (args.artifactId === undefined) {
@@ -20,8 +22,10 @@ export async function requireAutomationArtifact(
   if (
     artifact === null ||
     artifact.tenantId !== args.tenantId ||
-    (artifact.access === "personal" && artifact.ownerId !== args.createdBy) ||
-    (args.scope === "organization" && artifact.access !== "organization")
+    (artifact.access === "personal" &&
+      artifact.ownerId !== executionPrincipalPersonId(args.principal)) ||
+    (args.principal.kind === "organization" &&
+      artifact.access !== "organization")
   ) {
     throw new Error("Artifact not found.")
   }

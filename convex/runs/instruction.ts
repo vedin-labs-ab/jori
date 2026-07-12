@@ -3,6 +3,10 @@ import { type MutationCtx } from "../_generated/server"
 import { queueRun } from "../runtime/outbox"
 import { type Access } from "../shared/integrations"
 import { resolveRunAudience } from "./introspect/audience"
+import {
+  type ExecutionPrincipal,
+  executionPrincipalForPerson,
+} from "./principal"
 import { createInstructionRunSnapshot } from "./snapshot"
 
 /**
@@ -20,6 +24,7 @@ export async function createInstructionRun(
     artifactId?: Id<"artifacts">
     parent?: Doc<"runs">
     createdBy?: Id<"persons">
+    principal?: ExecutionPrincipal
   }
 ) {
   const parent = args.parent
@@ -31,6 +36,10 @@ export async function createInstructionRun(
       ? {}
       : { parentId: parent._id, rootId: parent.rootId ?? parent._id }),
     cause: { type: "manual", personId: args.createdBy },
+    principal:
+      args.principal ??
+      parent?.principal ??
+      executionPrincipalForPerson(args.createdBy),
     access: args.access,
     ...createInstructionRunSnapshot({
       instructions: args.instructions,

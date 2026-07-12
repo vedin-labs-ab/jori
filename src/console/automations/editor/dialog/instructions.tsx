@@ -45,6 +45,7 @@ export function AutomationInstructionsSection({
         placeholder="Summarize @GitHub changes and post them to @Slack."
         policyKey={policyKey}
         showAccessError={isAccessMarkerError(error)}
+        scope={values.scope}
         skills={skills}
         surfaces={values.surfaces}
         webSearch={values.webSearch}

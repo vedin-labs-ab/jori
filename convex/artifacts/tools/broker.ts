@@ -123,7 +123,7 @@ async function callAuthorizedMiloTool(
     ctx,
     {
       tenantId: context.tenantId,
-      createdBy: context.personId,
+      principal: { kind: "person", personId: context.personId },
     },
     { tool, args }
   )

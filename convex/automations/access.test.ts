@@ -51,25 +51,25 @@ describe("automation scope access", () => {
 
   test("organization automations are open to every member", () => {
     expect(
-      canAccessAutomation({ scope: "organization", createdBy: other }, me)
+      canAccessAutomation(
+        { scope: "organization", principal: { kind: "organization" } },
+        me
+      )
     ).toBe(true)
   })
 
-  test("personal automations are owner-only, defaulting to personal", () => {
+  test("personal automations are principal-owner only", () => {
     expect(
-      canAccessAutomation({ scope: "personal", createdBy: other }, me)
+      canAccessAutomation(
+        { scope: "personal", principal: { kind: "person", personId: other } },
+        me
+      )
     ).toBe(false)
-    expect(canAccessAutomation({ scope: "personal", createdBy: me }, me)).toBe(
-      true
-    )
     expect(
-      canAccessAutomation({ scope: undefined, createdBy: other }, me)
-    ).toBe(false)
-  })
-
-  test("ownerless rows stay open", () => {
-    expect(
-      canAccessAutomation({ scope: "personal", createdBy: undefined }, me)
+      canAccessAutomation(
+        { scope: "personal", principal: { kind: "person", personId: me } },
+        me
+      )
     ).toBe(true)
   })
 

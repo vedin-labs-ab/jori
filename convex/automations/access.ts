@@ -9,9 +9,13 @@ import {
   resolveToolModes,
 } from "../permissions/catalog"
 import { listPermissionOverrides } from "../permissions/read"
+import { type ExecutionPrincipal } from "../runs/principal"
 import { type QueryLikeCtx } from "../shared/context"
 import { getIntegrationTools, type Integration } from "../shared/integrations"
-import { integrationLabels, resolveEventIntegration } from "./integrations"
+import {
+  integrationLabels,
+  resolveIntegrationForPrincipal,
+} from "./integrations"
 import { type access, type accessInput } from "./schema"
 
 export type AutomationAccess = Infer<typeof access>
@@ -21,21 +25,21 @@ export type AccessLevel = "none" | "read" | "write" | "both"
 export function automationScope(
   automation: Pick<Doc<"automations">, "scope">
 ): Scope {
-  return automation.scope ?? "personal"
+  return automation.scope
 }
 
 /**
- * Organization automations belong to every member; personal ones to their
- * owner. Ownerless personal rows predate ownership and stay open.
+ * Organization automations belong to every member; personal ones to the
+ * person named by their execution principal.
  */
 export function canAccessAutomation(
-  automation: Pick<Doc<"automations">, "scope" | "createdBy">,
+  automation: Pick<Doc<"automations">, "scope" | "principal">,
   personId: Id<"persons"> | undefined
 ) {
   return (
     automationScope(automation) === "organization" ||
-    automation.createdBy === undefined ||
-    automation.createdBy === personId
+    (automation.principal.kind === "person" &&
+      automation.principal.personId === personId)
   )
 }
 
@@ -44,7 +48,7 @@ export async function resolveAccessInput(
   args: {
     access: AutomationAccessInput
     artifactId?: Id<"artifacts">
-    createdBy: Id<"persons"> | undefined
+    principal: ExecutionPrincipal
     tenantId: string
   }
 ): Promise<AutomationAccess> {
@@ -60,9 +64,9 @@ export async function resolveAccessInput(
     integrations: await Promise.all(
       integrations.map(async (integration) => ({
         id: (
-          await resolveEventIntegration(ctx, {
-            createdBy: args.createdBy,
+          await resolveIntegrationForPrincipal(ctx, {
             integration: integration.integration,
+            principal: args.principal,
             tenantId: args.tenantId,
           })
         )._id,

@@ -1,19 +1,20 @@
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type ExecutionPrincipal } from "../../runs/principal"
 import {
   assertAutomationEventIsAvailable,
   getAutomationEventDefinition,
   normalizeAutomationEventMatch,
 } from "../events"
-import { resolveEventIntegration } from "../integrations"
+import { resolveIntegrationForPrincipal } from "../integrations"
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { getTimeTrigger, getTimeTriggerAt } from "../timing"
 
 export async function resolveTrigger(
   ctx: MutationCtx,
   args: {
-    createdBy: Id<"persons"> | undefined
+    principal: ExecutionPrincipal
     tenantId: string
     type: AutomationType
     trigger: AutomationTriggerInput
@@ -40,9 +41,9 @@ export async function resolveTrigger(
 
     return {
       integrationId: (
-        await resolveEventIntegration(ctx, {
-          createdBy: args.createdBy,
+        await resolveIntegrationForPrincipal(ctx, {
           integration: args.trigger.integration,
+          principal: args.principal,
           tenantId: args.tenantId,
         })
       )._id,

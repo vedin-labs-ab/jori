@@ -12,8 +12,6 @@ import {
   canAccessAutomation,
   projectAccessForConsole,
 } from "./access"
-import { automationEventCatalog } from "./events"
-import { findEventIntegration } from "./integrations"
 import {
   createAutomation,
   createAutomationRun,
@@ -83,31 +81,6 @@ export const get = query({
   },
 })
 
-export const eventIntegrations = query({
-  args: {
-    tenantId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const ownerId = await resolveCurrentPerson(ctx, args.tenantId)
-
-    return {
-      integrations: await Promise.all(
-        automationEventCatalog.map(async (definition) => ({
-          integration: definition.integration,
-          connected:
-            (
-              await findEventIntegration(ctx, {
-                integration: definition.integration,
-                ownerId,
-                tenantId: args.tenantId,
-              })
-            )?.status === "active",
-        }))
-      ),
-    }
-  },
-})
-
 export const create = mutation({
   args: {
     tenantId: v.string(),
@@ -145,7 +118,10 @@ export const update = mutation({
     const personId = await resolveCurrentPerson(ctx, args.tenantId)
     await requireAccessibleAutomation(ctx, args, personId)
 
-    return await toConsoleAutomation(ctx, await updateAutomation(ctx, args))
+    return await toConsoleAutomation(
+      ctx,
+      await updateAutomation(ctx, { ...args, updatedBy: personId })
+    )
   },
 })
 

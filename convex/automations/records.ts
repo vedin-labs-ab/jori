@@ -88,7 +88,7 @@ export const update = internalMutation({
   handler: async (ctx, args) => {
     await requireRecordAccess(ctx, args)
 
-    return await updateAutomation(ctx, args)
+    return await updateAutomation(ctx, { ...args, updatedBy: args.personId })
   },
 })
 

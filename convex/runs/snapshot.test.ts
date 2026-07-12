@@ -17,6 +17,7 @@ test("stores automation display data directly", () => {
       }),
     })
   ).toEqual({
+    access: { integrations: [], web: false },
     instructions: "Summarize Slack and send the digest.",
     snapshot: {
       title: "Daily digest",
@@ -95,6 +96,7 @@ function automation(
     tenantId: "tenant",
     access: { integrations: [], web: false },
     status: "active",
+    principal: { kind: "person", personId: "person" as Id<"persons"> },
     createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,

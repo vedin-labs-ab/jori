@@ -5,6 +5,7 @@ import { resolveAccessInput } from "../automations/access"
 import { toConsoleAutomation } from "../automations/console"
 import { getTimeTrigger } from "../automations/timing"
 import { requirePersonTimezone } from "../persons/profile/timezone"
+import { executionPrincipalForScope } from "../runs/principal"
 import { type QueryLikeCtx } from "../shared/context"
 import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./enable"
 
@@ -18,9 +19,13 @@ export async function resolvePlaybookDraft(
   args: PlaybookPlanArgs
 ) {
   const plan = await resolvePlaybookPlan(ctx, args)
+  const principal = executionPrincipalForScope(
+    plan.definition.scope,
+    args.createdBy
+  )
   const access = await resolveAccessInput(ctx, {
     access: plan.access,
-    createdBy: args.createdBy,
+    principal,
     tenantId: args.tenantId,
   })
   const now = Date.now()
@@ -46,6 +51,7 @@ export async function resolvePlaybookDraft(
     name: plan.definition.title,
     instructions: plan.instructions,
     scope: plan.definition.scope,
+    principal,
     type: "cron",
     access,
     trigger,

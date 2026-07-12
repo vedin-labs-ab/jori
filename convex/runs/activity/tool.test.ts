@@ -115,6 +115,7 @@ function run(): Doc<"runs"> {
   return {
     _creationTime: 0,
     _id: id<"runs">("run"),
+    principal: { kind: "organization" },
     scope: "person",
     cause: { type: "manual" },
     createdAt: 0,

@@ -103,6 +103,7 @@ function automation(
     createdAt: 0,
     instructions: "Test",
     name: "Test automation",
+    principal: { kind: "person", personId: "person" as Id<"persons"> },
     status: "active",
     tenantId: "tenant-id",
     type: "event",

@@ -2,6 +2,7 @@ import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { resolveToolModes } from "../permissions/catalog"
+import { executionPrincipalPersonId } from "../runs/principal"
 import { timingSafeEqual } from "../shared/crypto"
 import { type ApprovalBrokerContext } from "./approval"
 
@@ -54,7 +55,7 @@ export async function loadRunBrokerContext(
     internal.integrations.lookup.listActiveForRuntime,
     {
       tenantId: run.tenantId,
-      ownerId: run.createdBy,
+      ownerId: executionPrincipalPersonId(run.principal),
     }
   )
   return {

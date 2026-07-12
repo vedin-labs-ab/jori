@@ -4,6 +4,7 @@ import {
 } from "../../../contracts/permissions/scope"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { executionPrincipalForScope } from "../../runs/principal"
 import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import {
   automationKeyPartition,
@@ -71,8 +72,9 @@ async function prepareAutomation(
       args.access.integrations.map((entry) => entry.integration)
     )
   const key = normalizeAutomationKey(args.key)
+  const principal = executionPrincipalForScope(scope, args.createdBy)
   const trigger = await resolveTrigger(ctx, {
-    createdBy: args.createdBy,
+    principal,
     tenantId: args.tenantId,
     type: args.type,
     trigger: args.trigger,
@@ -82,8 +84,7 @@ async function prepareAutomation(
   await requireAutomationArtifact(ctx, {
     tenantId: args.tenantId,
     artifactId: args.artifactId,
-    createdBy: args.createdBy,
-    scope,
+    principal,
   })
 
   return {
@@ -93,15 +94,16 @@ async function prepareAutomation(
     key,
     ...(key === undefined
       ? {}
-      : { keyPartition: automationKeyPartition(scope, args.createdBy) }),
+      : { keyPartition: automationKeyPartition(principal) }),
     name: normalizeRequiredText(args.name, "name"),
     instructions: normalizeRequiredText(args.instructions, "instructions"),
     scope,
+    principal,
     type: args.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,
       artifactId: args.artifactId,
-      createdBy: args.createdBy,
+      principal,
       tenantId: args.tenantId,
     }),
     trigger,
