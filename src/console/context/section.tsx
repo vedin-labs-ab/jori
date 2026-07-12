@@ -1,13 +1,21 @@
+import { Info } from "lucide-react"
 import { type ReactNode } from "react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export function ContextSectionTitle({
   action,
   children,
   count,
+  hint,
 }: {
   action?: ReactNode
   children: string
   count?: number
+  hint?: string
 }) {
   return (
     <div className="flex items-center justify-between gap-3">
@@ -17,6 +25,17 @@ export function ContextSectionTitle({
           <span className="font-normal text-muted-foreground/70 tabular-nums">
             ({count})
           </span>
+        )}
+        {hint === undefined ? null : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info
+                aria-label={`About ${children.toLowerCase()}`}
+                className="size-3 self-center text-muted-foreground/70"
+              />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-64">{hint}</TooltipContent>
+          </Tooltip>
         )}
       </h3>
       {action}
