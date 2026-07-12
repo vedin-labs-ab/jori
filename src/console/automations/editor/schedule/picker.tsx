@@ -16,10 +16,12 @@ const defaultTime = "09:00"
 export function AutomationDateTimePicker({
   id,
   onValueChange,
+  timezone,
   value,
 }: {
   id: string
   onValueChange: (value: string) => void
+  timezone: string
   value: string
 }) {
   const selectedDate = readDatetimeDate(value)
@@ -95,8 +97,8 @@ export function AutomationDateTimePicker({
       </div>
       <AutomationTimePicker
         id={`${id}-time`}
-        label="Time"
         onValueChange={updateTime}
+        timezone={timezone}
         value={timeValue}
       />
     </div>

@@ -5,19 +5,26 @@ import { cn } from "@/lib/utils"
 export function AutomationTimePicker({
   className,
   id,
-  label,
   onValueChange,
+  timezone,
   value,
 }: {
   className?: string
   id: string
-  label: string
   onValueChange: (value: string) => void
+  timezone: string
   value: string
 }) {
   return (
     <div className={cn("grid gap-2", className)}>
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id}>
+        <span>
+          Time{" "}
+          <span className="font-normal text-muted-foreground">
+            ({timezone})
+          </span>
+        </span>
+      </Label>
       <Input
         id={id}
         onChange={(event) => onValueChange(event.target.value)}
