@@ -1,8 +1,19 @@
+import { Link } from "@tanstack/react-router"
 import { type SVGProps } from "react"
 import { cn } from "@/lib/utils"
 
 type MiloLogoProps = SVGProps<SVGSVGElement> & {
   title?: string
+}
+
+/** The brand mark as the way home, for surfaces with nothing else linking
+ *  back to the landing page. */
+export function BrandLink() {
+  return (
+    <Link aria-label="Milo home" className="rounded-md" to="/">
+      <BrandMark />
+    </Link>
+  )
 }
 
 export function BrandMark() {
