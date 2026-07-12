@@ -1,22 +1,5 @@
 import { type Integration } from "../../../integrations"
-
-export const automationEventOptionSources = [
-  "slack.channels",
-  "github.repositories",
-  "github.issues",
-  "github.pullRequests",
-  "linear.teams",
-  "linear.projects",
-  "linear.issues",
-  "gmail.labels",
-  "microsoftEmail.folders",
-  "googleCalendar.calendars",
-  "microsoftCalendar.calendars",
-  "notion.pages",
-] as const
-
-export type AutomationEventOptionSource =
-  (typeof automationEventOptionSources)[number]
+import { type IntegrationOptionSource } from "../../../integrations/options"
 
 type AutomationEventParameterBase = {
   key: string
@@ -40,7 +23,7 @@ export type AutomationEventParameter =
     })
   | (AutomationEventParameterBase & {
       type: "option"
-      source: AutomationEventOptionSource
+      source: IntegrationOptionSource
       /** Match keys required before this option source can load and reset when changed. */
       dependsOn?: readonly string[]
     })

@@ -1,16 +1,13 @@
+import {
+  type IntegrationOption,
+  type IntegrationOptionMatch,
+} from "../../../contracts/integrations/options"
 import { type Doc } from "../../_generated/dataModel"
-import { type AutomationEventMatch } from "../events"
 
 export const maxOptions = 50
 
-export type AutomationEventOption = {
-  value: string
-  label: string
-  description?: string
-}
-
 export function requireMatch(
-  match: AutomationEventMatch | undefined,
+  match: IntegrationOptionMatch | undefined,
   key: string,
   label: string
 ) {
@@ -24,7 +21,7 @@ export function requireMatch(
 }
 
 export function optionalMatch(
-  match: AutomationEventMatch | undefined,
+  match: IntegrationOptionMatch | undefined,
   key: string
 ) {
   const value = match?.[key]
@@ -35,7 +32,7 @@ export function optionalMatch(
 }
 
 export function optionMatches(
-  option: AutomationEventOption,
+  option: IntegrationOption,
   normalizedQuery: string
 ) {
   return (
@@ -103,7 +100,7 @@ export function normalizeQuery(value: string) {
 export type OptionLoaderArgs = {
   integration: Doc<"integrations">
   query: string
-  match: AutomationEventMatch | undefined
+  match: IntegrationOptionMatch | undefined
 }
 
 export class OptionUnavailable extends Error {}

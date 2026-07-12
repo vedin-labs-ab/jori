@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
-import { canPrincipalUseIntegration } from "./integrations"
+import { canPrincipalUseIntegration } from "./resolve"
 
 test("organization principals cannot use personal account integrations", () => {
   const organization = { kind: "organization" } as const

@@ -17,7 +17,10 @@ import { resolvePlaybookOptions } from "./options"
 function sampleDestination(kind: DeliveryKind): DeliveryDestination {
   return kind === "email"
     ? { kind: "email", integration: "gmail", address: "me@example.com" }
-    : { kind: "slack", channelId: "C1", channelName: "general" }
+    : {
+        kind: "slack",
+        target: { kind: "channel", id: "C1", label: "general" },
+      }
 }
 
 describe("playbook catalog", () => {

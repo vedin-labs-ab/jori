@@ -1,13 +1,13 @@
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { resolveIntegrationForPrincipal } from "../../integrations/resolve"
 import { type ExecutionPrincipal } from "../../runs/principal"
 import {
   assertAutomationEventIsAvailable,
   getAutomationEventDefinition,
   normalizeAutomationEventMatch,
 } from "../events"
-import { resolveIntegrationForPrincipal } from "../integrations"
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { getTimeTrigger, getTimeTriggerAt } from "../timing"
 

@@ -17,11 +17,15 @@ export async function postSlackFiles(
   }
 
   return await slackJsonApi(token, "files.completeUploadExternal", {
-    channel_id: args.channel,
+    ...slackFileTarget(args.channel),
     files,
     initial_comment: args.text,
     thread_ts: args.thread_ts,
   })
+}
+
+function slackFileTarget(target: string) {
+  return /^[UW]/.test(target) ? { channels: target } : { channel_id: target }
 }
 
 async function uploadSlackFile(token: string, asset: RunAsset) {

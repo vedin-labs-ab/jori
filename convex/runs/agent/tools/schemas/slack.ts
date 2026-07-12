@@ -19,7 +19,7 @@ export const slackToolInputSchemas = {
   conversations_history: objectSchema({
     required: ["channel"],
     properties: {
-      channel: stringProperty("Slack channel ID."),
+      channel: stringProperty("Slack conversation ID."),
       inclusive: { type: "boolean" },
       latest: stringProperty("Latest Slack timestamp to include."),
       limit: numberProperty("Maximum messages to return.", 1, 100),
@@ -29,7 +29,7 @@ export const slackToolInputSchemas = {
   conversations_replies: objectSchema({
     required: ["channel", "ts"],
     properties: {
-      channel: stringProperty("Slack channel ID."),
+      channel: stringProperty("Slack conversation ID."),
       limit: numberProperty("Maximum replies to return.", 1, 100),
       ts: stringProperty("Parent message timestamp."),
     },
@@ -63,7 +63,7 @@ export const slackToolInputSchemas = {
           "Optional Block Kit blocks for text-only messages. When assets are provided, text is used as the file upload comment.",
         items: { type: "object", additionalProperties: true },
       },
-      channel: stringProperty("Slack channel ID."),
+      channel: stringProperty("Slack conversation or user ID."),
       text: stringProperty("Slack mrkdwn message text."),
       thread_ts: stringProperty("Thread timestamp for a threaded reply."),
     },

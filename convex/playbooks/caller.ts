@@ -23,8 +23,18 @@ const destinationValidator = v.union(
   v.object({ kind: v.literal("email") }),
   v.object({
     kind: v.literal("slack"),
-    channelId: v.string(),
-    channelName: v.string(),
+    target: v.union(
+      v.object({
+        kind: v.literal("channel"),
+        id: v.string(),
+        label: v.string(),
+      }),
+      v.object({
+        kind: v.literal("dm"),
+        id: v.string(),
+        label: v.string(),
+      })
+    ),
   })
 )
 

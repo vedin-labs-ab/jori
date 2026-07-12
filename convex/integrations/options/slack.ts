@@ -1,10 +1,18 @@
+import { type IntegrationOption } from "../../../contracts/integrations/options"
 import { slackQueryApi } from "../../providers/slack/api"
 import { requireSlackCredentials } from "../../providers/slack/credentials"
 import {
-  type AutomationEventOption,
+  readSlackDirectoryUsers,
+  type SlackDirectoryUser,
+  slackDirectoryUserProfile,
+} from "../../providers/slack/directory/users"
+import {
+  compactDescription,
   maxOptions,
   normalizeQuery,
   type OptionLoaderArgs,
+  optionalOptionString,
+  readRecord,
 } from "./common"
 
 const maxSlackPages = 5
@@ -13,7 +21,7 @@ const slackChannelTypes = "public_channel,private_channel"
 export async function searchSlackChannels(args: OptionLoaderArgs) {
   const credentials = requireSlackCredentials(args.integration)
   const normalizedQuery = normalizeQuery(args.query)
-  const options: AutomationEventOption[] = []
+  const options: IntegrationOption[] = []
   let cursor: string | undefined
 
   for (let page = 0; page < maxSlackPages; page += 1) {
@@ -38,6 +46,48 @@ export async function searchSlackChannels(args: OptionLoaderArgs) {
         label: `#${channel.name}`,
         description: slackChannelDescription(channel),
       })
+    }
+
+    cursor = readSlackCursor(result)
+
+    if (cursor === undefined) {
+      return options
+    }
+  }
+
+  return options
+}
+
+export async function searchSlackUsers(args: OptionLoaderArgs) {
+  const credentials = requireSlackCredentials(args.integration)
+  const normalizedQuery = normalizeQuery(args.query)
+  const botUserId = optionalOptionString(
+    readRecord(args.integration.data).botUserId
+  )
+  const options: IntegrationOption[] = []
+  let cursor: string | undefined
+
+  for (let page = 0; page < maxSlackPages; page += 1) {
+    const result = await slackQueryApi(credentials.user, "users.list", {
+      cursor,
+      limit: 200,
+    })
+
+    for (const user of readSlackDirectoryUsers(result)) {
+      if (options.length >= maxOptions) {
+        return options
+      }
+
+      const option = slackUserOption(user, botUserId)
+
+      if (
+        option !== undefined &&
+        normalizeQuery(
+          [option.label, option.description].filter(Boolean).join(" ")
+        ).includes(normalizedQuery)
+      ) {
+        options.push(option)
+      }
     }
 
     cursor = readSlackCursor(result)
@@ -93,4 +143,36 @@ function slackChannelDescription(channel: SlackChannel) {
   }
 
   return `${visibility} - ${channel.num_members} members`
+}
+
+function slackUserOption(
+  user: SlackDirectoryUser,
+  botUserId: string | undefined
+): IntegrationOption | undefined {
+  if (
+    user.deleted === true ||
+    user.is_bot === true ||
+    user.is_app_user === true ||
+    user.id === botUserId ||
+    user.id === "USLACKBOT"
+  ) {
+    return undefined
+  }
+
+  const handle = optionalOptionString(user.name)
+  const profile = slackDirectoryUserProfile(user)
+  const label = profile.name
+
+  if (label === undefined) {
+    return undefined
+  }
+
+  return {
+    value: user.id,
+    label,
+    description: compactDescription([
+      handle === undefined ? undefined : `@${handle}`,
+      profile.email,
+    ]),
+  }
 }

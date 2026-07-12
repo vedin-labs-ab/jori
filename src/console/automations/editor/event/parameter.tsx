@@ -1,13 +1,9 @@
-import {
-  type AutomationEventIntegration,
-  type AutomationEventParameter,
-} from "@contracts/automations/events"
+import { type AutomationEventParameter } from "@contracts/automations/events"
 import { Input } from "@/components/ui/input"
 import { EventOptionField } from "./resource"
 
 export function EventParameterControl({
   tenantId,
-  integration,
   parameter,
   parameters,
   values,
@@ -16,7 +12,6 @@ export function EventParameterControl({
   onValueChange,
 }: {
   tenantId: string
-  integration: AutomationEventIntegration
   parameter: AutomationEventParameter
   parameters: readonly AutomationEventParameter[]
   values: Record<string, string>
@@ -30,7 +25,6 @@ export function EventParameterControl({
     return (
       <EventOptionField
         tenantId={tenantId}
-        integration={integration}
         parameter={parameter}
         match={values}
         disabled={dependencyLabel !== undefined}

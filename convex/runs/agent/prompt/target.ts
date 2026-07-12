@@ -1,4 +1,4 @@
-import { integrationLabels } from "../../../automations/integrations"
+import { integrationLabels } from "../../../integrations/resolve"
 import {
   readDataNumber,
   readDataObject,

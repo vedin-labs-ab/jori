@@ -12,7 +12,7 @@ import {
 
 export { integrationLabels } from "../shared/integrations"
 
-export async function findEventIntegration(
+export async function findIntegrationForOwner(
   ctx: QueryLikeCtx,
   args: {
     integration: Integration
@@ -40,17 +40,17 @@ export async function findEventIntegration(
     .first()
 }
 
-export async function resolveEventIntegration(
+export async function resolveIntegrationForOwner(
   ctx: QueryLikeCtx,
   args: {
     integration: Integration
-    createdBy: Id<"persons"> | undefined
+    ownerId: Id<"persons"> | undefined
     tenantId: string
   }
 ): Promise<Doc<"integrations">> {
-  const integration = await findEventIntegration(ctx, {
+  const integration = await findIntegrationForOwner(ctx, {
     integration: args.integration,
-    ownerId: args.createdBy,
+    ownerId: args.ownerId,
     tenantId: args.tenantId,
   })
 

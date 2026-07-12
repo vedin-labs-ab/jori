@@ -24,7 +24,7 @@ export function EventIntegrationField({
   scope: Scope
   value: AutomationEventIntegration
 }) {
-  const connections = useQuery(api.automations.options.connections.list, {
+  const connections = useQuery(api.automations.connections.list, {
     tenantId,
     scope,
   })

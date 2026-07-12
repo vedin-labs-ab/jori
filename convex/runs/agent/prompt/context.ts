@@ -4,7 +4,7 @@ import {
   createLocalPromptTime,
   createPromptTime,
 } from "../../../../prompts/time"
-import { integrationLabels } from "../../../automations/integrations"
+import { integrationLabels } from "../../../integrations/resolve"
 import { replyAddress } from "../../../messages/surface"
 import { type MessageIntegration } from "../../../shared/integrations"
 import { type AgentRuntimeInput } from "../input"
