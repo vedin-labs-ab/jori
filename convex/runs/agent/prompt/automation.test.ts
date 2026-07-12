@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest"
-import { assemblePrompt } from "."
 import {
   automationRuntimeInput,
   linearAutomationRuntimeInput,
   notionAutomationRuntimeInput,
-} from "./fixtures"
+} from "../../../../test/convex/prompt"
+import { assemblePrompt } from "."
 
 describe("automation trigger prompts", () => {
   test("omits empty automation context", () => {

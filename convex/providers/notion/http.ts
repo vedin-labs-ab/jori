@@ -1,11 +1,11 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { normalizeEventData } from "../../events/payload"
+import { unauthorizedResponse } from "../../shared/http"
 import {
   oauthAuthorizeRedirect,
   readOAuthCallback,
   redirectWithStatus,
-  unauthorizedResponse,
 } from "../http"
 import { completeIntegrationOffer, failOfferAndRedirect } from "../install"
 import { notionOAuthAuthorizeUrl, notionOAuthCallbackPath } from "./config"

@@ -1,6 +1,6 @@
-import { type ToolPermission } from "../../../permissions/catalog"
-import { type assemblePrompt } from "."
-import { promptIntegration } from "./integration"
+import { type ToolPermission } from "../../convex/permissions/catalog"
+import { type assemblePrompt } from "../../convex/runs/agent/prompt"
+import { promptIntegration } from "../../convex/runs/agent/prompt/integration"
 
 export function automationRuntimeInput(webSearch = true) {
   const github = promptIntegration("github")

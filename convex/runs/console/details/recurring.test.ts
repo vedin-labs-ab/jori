@@ -1,8 +1,11 @@
 import { expect, test } from "vitest"
+import {
+  emptyQueryResult,
+  recurringDisplay,
+} from "../../../../test/convex/console"
 import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { getToolPermission } from "../../../permissions/catalog"
-import { emptyQueryResult, recurringDisplay } from "../fixtures"
 import { summarizeRun } from "../summaries"
 
 test("includes recurring automation details", async () => {

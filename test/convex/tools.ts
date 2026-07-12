@@ -1,6 +1,8 @@
-import { type Doc, type Id } from "../../../_generated/dataModel"
+type IntegrationDoc =
+  import("../../convex/_generated/dataModel").Doc<"integrations">
+type PersonId = import("../../convex/_generated/dataModel").Id<"persons">
 
-export function integration(integration: string): Doc<"integrations"> {
+export function integration(integration: string): IntegrationDoc {
   return {
     _id: `${integration}-integration`,
     _creationTime: 0,
@@ -8,7 +10,7 @@ export function integration(integration: string): Doc<"integrations"> {
     integration,
     scope: isUserScopedIntegration(integration) ? "user" : "tenant",
     ownerId: isUserScopedIntegration(integration)
-      ? ("person" as Id<"persons">)
+      ? ("person" as PersonId)
       : undefined,
     externalId: `${integration}-account`,
     email: isUserScopedIntegration(integration)
@@ -16,10 +18,10 @@ export function integration(integration: string): Doc<"integrations"> {
       : undefined,
     credentials: credentials(integration),
     status: "active",
-    createdBy: "person" as Id<"persons">,
+    createdBy: "person" as PersonId,
     createdAt: 0,
     updatedAt: 0,
-  } as Doc<"integrations">
+  } as IntegrationDoc
 }
 
 function isUserScopedIntegration(integration: string) {

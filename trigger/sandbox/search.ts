@@ -1,5 +1,9 @@
 import { sandboxWorkspace } from "../../contracts/runtime"
-import { boundedInteger, optionalString, requiredString } from "./input"
+import {
+  boundedInteger,
+  optionalTrimmedString,
+  requiredTrimmedString,
+} from "./input"
 import { runJsonScript } from "./script"
 import { type SandboxRuntime } from "./types"
 
@@ -10,9 +14,9 @@ export async function grepWorkspace(
   return await runJsonScript({
     input: {
       mode: "grep",
-      pattern: requiredString(input.pattern, "pattern"),
-      path: optionalString(input.path),
-      include: optionalString(input.include),
+      pattern: requiredTrimmedString(input.pattern, "pattern"),
+      path: optionalTrimmedString(input.path),
+      include: optionalTrimmedString(input.include),
       limit: boundedInteger(input.limit, 100, 1, 500),
     },
     sandbox,
@@ -28,8 +32,8 @@ export async function globWorkspace(
   return await runJsonScript({
     input: {
       mode: "glob",
-      pattern: requiredString(input.pattern, "pattern"),
-      path: optionalString(input.path),
+      pattern: requiredTrimmedString(input.pattern, "pattern"),
+      path: optionalTrimmedString(input.path),
       limit: boundedInteger(input.limit, 200, 1, 1_000),
     },
     sandbox,

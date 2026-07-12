@@ -180,13 +180,6 @@ export function assetUploadError(value: unknown) {
   return "Asset upload failed"
 }
 
-export function toArrayBuffer(bytes: Uint8Array) {
-  const copy = new Uint8Array(bytes.byteLength)
-  copy.set(bytes)
-
-  return copy.buffer
-}
-
 function readString(value: unknown, name: string) {
   if (typeof value !== "string") {
     throw new Error(`Asset upload response is missing ${name}.`)

@@ -1,11 +1,11 @@
 import { expect, test } from "vitest"
-import { type Id } from "../../../_generated/dataModel"
 import {
   automationDisplay,
   eventAutomationDisplay,
   fakeQueryCtx,
   messageDisplay,
-} from "../fixtures"
+} from "../../../../test/convex/console"
+import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
 test("uses stored automation snapshots when the automation document is unavailable", async () => {

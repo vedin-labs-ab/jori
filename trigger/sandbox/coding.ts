@@ -4,8 +4,8 @@ import { readWorkspaceFile } from "./files"
 import {
   boundedTimeoutMs,
   normalizeToolInput,
-  optionalString,
-  requiredString,
+  optionalTrimmedString,
+  requiredTrimmedString,
 } from "./input"
 import { boundedText } from "./output"
 import { applyWorkspacePatch } from "./patch/apply"
@@ -53,7 +53,7 @@ async function executeKnownCodingTool(args: {
 
 async function runGit(sandbox: SandboxRuntime, input: Record<string, unknown>) {
   const args = requiredStringArray(input.args, "args")
-  const cwd = sandboxWorkspacePath(optionalString(input.cwd))
+  const cwd = sandboxWorkspacePath(optionalTrimmedString(input.cwd))
 
   const result = await sandbox.runCommand({
     command: gitCommand(cwd, args),
@@ -68,9 +68,9 @@ async function runBash(
   sandbox: SandboxRuntime,
   input: Record<string, unknown>
 ) {
-  const cwd = sandboxWorkspacePath(optionalString(input.cwd))
+  const cwd = sandboxWorkspacePath(optionalTrimmedString(input.cwd))
   const result = await sandbox.runCommand({
-    command: bashCommand(cwd, requiredString(input.command, "command")),
+    command: bashCommand(cwd, requiredTrimmedString(input.command, "command")),
     cwd: sandboxWorkspace,
     timeoutMs: boundedTimeoutMs(input.timeoutMs),
   })

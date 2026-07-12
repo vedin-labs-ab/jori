@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
+import { createAssetContext } from "../../../test/convex/broker"
 import { type Doc, type Id } from "../../_generated/dataModel"
-import { assetContext } from "./fixtures"
 import { callSlackTool } from "./slack"
 
 const originalFetch = globalThis.fetch
@@ -123,7 +123,7 @@ describe("Slack assets", () => {
         text: "Here is the image.",
         thread_ts: "123.456",
       },
-      assetContext()
+      createAssetContext()
     )
 
     expect(result).toEqual({

@@ -1,4 +1,4 @@
-import { optionalString, requiredString } from "../input"
+import { optionalTrimmedString, requiredTrimmedString } from "../input"
 import { sandboxWorkspacePath } from "../path"
 import { type SandboxRuntime } from "../types"
 import { applyEnvelopePatch, isEnvelopePatch } from "./envelope"
@@ -12,8 +12,8 @@ export async function applyWorkspacePatch(
   sandbox: SandboxRuntime,
   input: Record<string, unknown>
 ) {
-  const patch = requiredString(input.patch, "patch")
-  const cwd = sandboxWorkspacePath(optionalString(input.cwd))
+  const patch = requiredTrimmedString(input.patch, "patch")
+  const cwd = sandboxWorkspacePath(optionalTrimmedString(input.cwd))
 
   if (patch.length > maxPatchChars) {
     throw new Error(`Patch exceeds ${maxPatchChars} characters.`)

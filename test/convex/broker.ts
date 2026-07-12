@@ -1,6 +1,6 @@
 import { vi } from "vitest"
 
-export function assetContext() {
+export function createAssetContext() {
   return {
     run: {
       _id: "run-id",

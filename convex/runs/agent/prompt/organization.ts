@@ -30,7 +30,7 @@ export function createOrganizationMessage(input: AgentRuntimeInput) {
       workstreams: roster.active.length === 0 ? null : roster.active,
       quiet: roster.quiet.length === 0 ? null : roster.quiet,
     },
-  }).trim()
+  })
 }
 
 // Recently active workstreams keep their brief; quieter ones shrink to a

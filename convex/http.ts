@@ -12,7 +12,6 @@ import {
   handleGoogleInstall,
   handleGoogleOAuthCallback,
 } from "./providers/google/http"
-import { unauthorizedResponse } from "./providers/http"
 import {
   handleLinearEvents,
   handleLinearInstall,
@@ -33,6 +32,7 @@ import {
   handleSlackInteractions,
   handleSlackOAuthCallback,
 } from "./providers/slack/http"
+import { unauthorizedResponse } from "./shared/http"
 
 const http = httpRouter()
 

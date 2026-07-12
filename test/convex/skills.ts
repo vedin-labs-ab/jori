@@ -1,4 +1,4 @@
-import { type RuntimeSkill } from "../../../skills/runtime"
+import { type RuntimeSkill } from "../../convex/skills/runtime"
 
 const slackTextGuidance =
   "Most replies are a line or two of plain `mrkdwn`. Reach for structure only when it earns its place.\n\n" +

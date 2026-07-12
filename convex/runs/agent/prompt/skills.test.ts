@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
+import { runtimeInput } from "../../../../test/convex/prompt"
+import { runtimeSkill, runtimeSkills } from "../../../../test/convex/skills"
 import { assemblePrompt } from "."
-import { runtimeInput } from "./fixtures"
-import { runtimeSkill, runtimeSkills } from "./skill_fixtures"
 
 describe("runtime skill prompts", () => {
   test("lists loadable skills without loading unrelated skill bodies", () => {

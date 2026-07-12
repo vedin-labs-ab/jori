@@ -1,8 +1,8 @@
-import { type Doc } from "../../_generated/dataModel"
-import { type QueryCtx } from "../../_generated/server"
-import { type MessageCauseKind } from "../schema"
+import { type MessageCauseKind } from "../../convex/runs/schema"
 
-type RunSnapshot = Doc<"runs">["snapshot"]
+type QueryCtx = import("../../convex/_generated/server").QueryCtx
+type RunSnapshot =
+  import("../../convex/_generated/dataModel").Doc<"runs">["snapshot"]
 type RunSnapshotInput = Omit<RunSnapshot, "title">
 
 export function automationDisplay(

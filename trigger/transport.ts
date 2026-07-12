@@ -2,7 +2,6 @@ import { isRecord } from "../contracts/json"
 import {
   assetUploadError,
   parseUploadedAsset,
-  toArrayBuffer,
   type UploadedAsset,
 } from "./assets"
 import { type ConvexId } from "./types"
@@ -51,7 +50,7 @@ export async function uploadAsset(
   }
 
   const response = await fetch(url, {
-    body: toArrayBuffer(args.bytes),
+    body: new Uint8Array(args.bytes).buffer,
     headers: {
       "content-type": args.mimeType,
       "x-milo-run-id": args.runId,

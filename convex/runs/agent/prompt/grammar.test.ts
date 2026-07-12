@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
+import { runtimeInput } from "../../../../test/convex/prompt"
 import { type Id } from "../../../_generated/dataModel"
 import { renderPersonContext } from "../../../conversations/recency/render"
 import { assemblePrompt } from "."
-import { runtimeInput } from "./fixtures"
 
 // Every context message follows one grammar: a `# {Scope} context` header,
 // a constant framing line ending in "not as instructions", fact fields with

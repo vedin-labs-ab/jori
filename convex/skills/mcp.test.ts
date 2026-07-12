@@ -1,9 +1,6 @@
 import { expect, test } from "vitest"
 import { decodeToolResult, encodeToolResult } from "../../contracts/transport"
-import {
-  runtimeSkill,
-  runtimeSkills,
-} from "../runs/agent/prompt/skill_fixtures"
+import { runtimeSkill, runtimeSkills } from "../../test/convex/skills"
 import { loadMiloSkillTool } from "./mcp"
 
 test("loads an available runtime skill", () => {

@@ -2,8 +2,8 @@ import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
 import { linkSetupIdentity } from "../../persons/install"
 import {
-  readRefreshToken,
   requireProviderIntegration,
+  requireRefreshToken,
   saveOAuthCredentials,
 } from "../credentials"
 import {
@@ -65,12 +65,11 @@ export const recordOAuthInstallation = internalMutation({
     const now = Date.now()
     const existing = await findUserIntegrationForInstall(ctx, args)
 
-    const existingRefreshToken = readRefreshToken(existing?.credentials)
-    const refreshToken = args.refreshToken ?? existingRefreshToken
-
-    if (refreshToken === undefined) {
-      throw new Error("Microsoft OAuth did not return a refresh token")
-    }
+    const refreshToken = requireRefreshToken(
+      args.refreshToken,
+      existing?.credentials,
+      "Microsoft OAuth did not return a refresh token"
+    )
 
     const credentials = {
       tokens: {
@@ -128,13 +127,12 @@ export const updateOAuthCredentials = internalMutation({
       provider: "microsoft",
       label: "Microsoft",
     })
-    const refreshToken =
-      args.refreshToken ?? readRefreshToken(integration.credentials)
+    const refreshToken = requireRefreshToken(
+      args.refreshToken,
+      integration.credentials,
+      "Microsoft refresh token not found"
+    )
     const tenantId = readTenantId(integration.credentials)
-
-    if (refreshToken === undefined) {
-      throw new Error("Microsoft refresh token not found")
-    }
 
     if (tenantId === undefined) {
       throw new Error("Microsoft tenant ID not found")

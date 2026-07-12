@@ -1,5 +1,9 @@
 import { expect, test } from "vitest"
-import { automationDisplay, fakeQueryCtx, recurringDisplay } from "../fixtures"
+import {
+  automationDisplay,
+  fakeQueryCtx,
+  recurringDisplay,
+} from "../../../../test/convex/console"
 import { summarizeRun } from "../summaries"
 
 // A subtask runs under Milo on behalf of its parent, so its row leads with

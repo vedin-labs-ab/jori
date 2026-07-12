@@ -13,7 +13,7 @@ export function renderPersonContext(args: {
       items: args.entries.map(recencyItem),
       name: args.name,
     },
-  }).trim()
+  })
 }
 
 function recencyItem(entry: RecencyEntry) {

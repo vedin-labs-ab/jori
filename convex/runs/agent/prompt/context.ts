@@ -36,7 +36,7 @@ export function createRequesterMessage(input: AgentRuntimeInput) {
               email: account.email ?? null,
             })),
     },
-  }).trim()
+  })
 }
 
 export function createContext(
@@ -80,7 +80,7 @@ function createRunInstructions(
           ? createLocalPromptTime(input.timezone)
           : null,
     },
-  }).trim()
+  })
 }
 
 function createTriggerPart(input: AgentRuntimeInput) {
