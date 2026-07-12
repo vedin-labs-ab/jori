@@ -7,17 +7,29 @@ import { type InstructionSuggestionState } from "./suggest"
 export function handleSuggestionKey({
   editor,
   event,
+  onWebAccessChange,
   permissions,
   setSuggestion,
   state,
 }: {
   editor: Editor | null
   event: KeyboardEvent
+  onWebAccessChange: (enabled: boolean) => void
   permissions: AutomationPolicyPermissions
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState | null
 }) {
   if (state === null) {
+    return false
+  }
+
+  if (state.suggestions.length === 0) {
+    if (event.key === "Escape") {
+      event.preventDefault()
+      setSuggestion(null)
+      return true
+    }
+
     return false
   }
 
@@ -36,7 +48,13 @@ export function handleSuggestionKey({
 
   if (event.key === "Enter" || event.key === "Tab") {
     event.preventDefault()
-    insertActiveSuggestion({ editor, permissions, setSuggestion, state })
+    insertActiveSuggestion({
+      editor,
+      onWebAccessChange,
+      permissions,
+      setSuggestion,
+      state,
+    })
     return true
   }
 
@@ -58,11 +76,13 @@ export function updateSuggestionIndex(
 
 function insertActiveSuggestion({
   editor,
+  onWebAccessChange,
   permissions,
   setSuggestion,
   state,
 }: {
   editor: Editor | null
+  onWebAccessChange: (enabled: boolean) => void
   permissions: AutomationPolicyPermissions
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState
@@ -72,6 +92,7 @@ function insertActiveSuggestion({
   if (activeSuggestion !== undefined) {
     insertMentionSuggestion({
       editor,
+      onWebAccessChange,
       permissions,
       suggestion: activeSuggestion,
       setSuggestion,

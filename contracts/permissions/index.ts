@@ -146,6 +146,13 @@ export function isUnattendedToolMode(mode: PermissionMode) {
   return mode === "allowed" || mode === "required"
 }
 
+export function canUseAutomationTool(input: {
+  mode: PermissionMode
+  tool: string
+}) {
+  return !isInteractiveTool(input.tool) && isUnattendedToolMode(input.mode)
+}
+
 export function isToolPermissionConfigurable(permission: ToolPermission) {
   return permission.defaultMode !== "required"
 }

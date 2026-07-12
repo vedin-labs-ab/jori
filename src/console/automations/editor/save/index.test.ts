@@ -30,7 +30,7 @@ describe("automation payload", () => {
         {
           ...emptyAutomationForm,
           name: "Weekly release summary",
-          instructions: "Summarize GitHub and post to Slack.",
+          instructions: "Summarize @GitHub and post to @Slack.",
           surfaces: [
             { integration: "github", tools: ["github_get_issue"] },
             { integration: "slack", tools: ["conversations_add_message"] },
@@ -41,7 +41,6 @@ describe("automation payload", () => {
     ).toEqual({
       args: {
         name: "Weekly release summary",
-        // Legacy bare names sigilize on save, so stored text is canonical.
         instructions: "Summarize @GitHub and post to @Slack.",
         scope: "personal",
         access: {
@@ -89,40 +88,110 @@ describe("automation payload", () => {
   })
 })
 
-describe("automation payload permissions", () => {
-  test("rejects automation access blocked by tool permissions", () => {
-    expect(
-      createAutomationArgs(
-        {
-          ...emptyAutomationForm,
-          name: "Weekly release summary",
-          instructions: "Summarize GitHub and post to Slack.",
-          surfaces: [
-            { integration: "github", tools: ["github_get_issue"] },
-            { integration: "slack", tools: ["conversations_add_message"] },
-          ],
-        },
-        {
-          permissions: [
-            toolPermission({
-              access: "read",
-              mode: "prompted",
-              surface: "github",
-              tool: "github_get_issue",
-            }),
-            toolPermission({
-              access: "write",
-              mode: "allowed",
-              surface: "slack",
-              tool: "conversations_add_message",
-            }),
-          ],
-        }
-      )
-    ).toEqual({
-      error: automationInstructionMarkerErrors.unavailableAccess,
-    })
+test("rejects automation access blocked by tool permissions", () => {
+  expect(
+    createAutomationArgs(
+      {
+        ...emptyAutomationForm,
+        name: "Weekly release summary",
+        instructions: "Summarize GitHub and post to Slack.",
+        surfaces: [
+          { integration: "github", tools: ["github_get_issue"] },
+          { integration: "slack", tools: ["conversations_add_message"] },
+        ],
+      },
+      {
+        permissions: [
+          toolPermission({
+            access: "read",
+            mode: "prompted",
+            surface: "github",
+            tool: "github_get_issue",
+          }),
+          toolPermission({
+            access: "write",
+            mode: "allowed",
+            surface: "slack",
+            tool: "conversations_add_message",
+          }),
+        ],
+      }
+    )
+  ).toEqual({
+    error: automationInstructionMarkerErrors.unavailableAccess,
   })
+})
+
+test("rejects a tool reference without its integration access", () => {
+  expect(
+    createAutomationArgs(
+      {
+        ...emptyAutomationForm,
+        name: "Weekly release summary",
+        instructions:
+          "Read @GitHub and use #github_add_issue_comment for the result.",
+        surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
+      },
+      { permissions: automationPermissions() }
+    )
+  ).toEqual({
+    error: "Give @GitHub access to use #github_add_issue_comment.",
+  })
+})
+
+test("rejects a web tool reference while web access is off", () => {
+  expect(
+    createAutomationArgs(
+      {
+        ...emptyAutomationForm,
+        name: "Weekly release summary",
+        instructions: "Post with @Slack after #web_search.",
+        surfaces: [
+          {
+            integration: "slack",
+            tools: ["conversations_add_message"],
+          },
+        ],
+        webSearch: false,
+      },
+      {
+        permissions: [
+          ...automationPermissions(),
+          toolPermission({
+            access: "read",
+            mode: "allowed",
+            surface: "milo",
+            tool: "web_search",
+          }),
+        ],
+      }
+    )
+  ).toEqual({ error: "Enable web access to use #web_search." })
+})
+
+test("ignores illustrative tool names in programming fences", () => {
+  const result = createAutomationArgs(
+    {
+      ...emptyAutomationForm,
+      name: "Weekly release summary",
+      instructions: [
+        "Post with @Slack.",
+        "",
+        "```json",
+        '{"tool":"#github_get_issue"}',
+        "```",
+      ].join("\n"),
+      surfaces: [
+        {
+          integration: "slack",
+          tools: ["conversations_add_message"],
+        },
+      ],
+    },
+    { permissions: automationPermissions() }
+  )
+
+  expect(result).toHaveProperty("args")
 })
 
 function automationPermissions() {
@@ -131,6 +200,11 @@ function automationPermissions() {
       access: "read",
       surface: "github",
       tool: "github_get_issue",
+    }),
+    toolPermission({
+      access: "write",
+      surface: "github",
+      tool: "github_add_issue_comment",
     }),
     toolPermission({
       access: "write",
@@ -144,7 +218,7 @@ function toolPermission(
   overrides: Partial<{
     access: "read" | "write"
     mode: "required" | "allowed" | "prompted" | "blocked"
-    surface: "github" | "slack"
+    surface: "github" | "milo" | "slack"
     tool: string
   }>
 ) {

@@ -1,3 +1,4 @@
+import { isAutomationToolReferenceError } from "./save/instructions"
 import { readAutomationInstructionMarkerError } from "./save/marker"
 
 const automationNameErrors = {
@@ -33,6 +34,10 @@ export function readAutomationInstructionsError(
     return markerError
   }
 
+  if (isAutomationToolReferenceError(error)) {
+    return error
+  }
+
   if (!isAutomationInstructionsError(error) || instructions.trim() !== "") {
     return undefined
   }
@@ -43,7 +48,8 @@ export function readAutomationInstructionsError(
 export function isAutomationInstructionsError(error: string | undefined) {
   return (
     error === automationInstructionsErrors.required ||
-    readAutomationInstructionMarkerError(error) !== undefined
+    readAutomationInstructionMarkerError(error) !== undefined ||
+    isAutomationToolReferenceError(error)
   )
 }
 

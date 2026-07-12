@@ -1,23 +1,28 @@
 import { type ToolPermission } from "../../permissions/types"
 import {
+  type AutomationSurfaceFormValue,
   type AutomationSurfaceIntegration,
   automationSurfaceIntegrations,
   getAutomationSurfaceLabel,
 } from "./catalog"
 import { getIntegrationSuggestionScore, normalizeFuzzyAlias } from "./fuzzy"
 import {
-  type AutomationMentionCatalog,
   type AutomationMentionKind,
   automationMentionSigils,
   canStartMention,
-  readAutomationMentions,
   sigilKind,
 } from "./scan"
-import { isAutomationToolSelectable } from "./tools"
+import {
+  type AutomationToolAccess,
+  automationToolAccessHint,
+  resolveAutomationToolAccess,
+} from "./tools"
 
 const maxSuggestions = 6
 
 export type AutomationMentionSuggestion = {
+  access?: AutomationToolAccess
+  disabled?: boolean
   hint?: string
   id: string
   kind: AutomationMentionKind
@@ -27,6 +32,8 @@ export type AutomationMentionSuggestion = {
 export type AutomationMentionSources = {
   permissions: ToolPermission[] | null | undefined
   skills: readonly string[]
+  surfaces?: readonly AutomationSurfaceFormValue[]
+  webSearch?: boolean
 }
 
 export type ActiveAutomationMention = {
@@ -44,23 +51,6 @@ export function automationMentionText(kind: AutomationMentionKind, id: string) {
       : id
 
   return `${automationMentionSigils[kind]}${name}`
-}
-
-export function findAutomationSurfaceMentions(
-  text: string,
-  catalog: AutomationMentionCatalog
-): AutomationSurfaceIntegration[] {
-  const integrations: AutomationSurfaceIntegration[] = []
-  const seen = new Set<string>()
-
-  for (const mention of readAutomationMentions(text, catalog)) {
-    if (mention.kind === "integration" && !seen.has(mention.id)) {
-      seen.add(mention.id)
-      integrations.push(mention.id as AutomationSurfaceIntegration)
-    }
-  }
-
-  return integrations
 }
 
 /** The sigil-started token the cursor is inside, if any. */
@@ -121,7 +111,7 @@ export function getAutomationMentionSuggestions(
     )
   }
 
-  return rankByName(active.query, toolSuggestions(sources.permissions))
+  return rankByName(active.query, toolSuggestions(active.query, sources))
 }
 
 function getIntegrationSuggestions(
@@ -145,20 +135,38 @@ function getIntegrationSuggestions(
 }
 
 function toolSuggestions(
-  permissions: AutomationMentionSources["permissions"]
+  query: string,
+  sources: AutomationMentionSources
 ): AutomationMentionSuggestion[] {
+  const { permissions } = sources
+
   if (!Array.isArray(permissions)) {
     return []
   }
 
   return permissions
-    .filter((permission) => isAutomationToolSelectable(permission))
-    .map((permission) => ({
-      hint: permission.label,
-      id: permission.tool,
-      kind: "tool" as const,
-      label: permission.tool,
-    }))
+    .map((permission) => toolSuggestion(permission, sources))
+    .filter((suggestion) => !suggestion.disabled || query !== "")
+}
+
+function toolSuggestion(
+  permission: ToolPermission,
+  sources: AutomationMentionSources
+): AutomationMentionSuggestion {
+  const access = resolveAutomationToolAccess({
+    permission,
+    surfaces: sources.surfaces,
+    webSearch: sources.webSearch,
+  })
+
+  return {
+    access,
+    disabled: access.kind === "unavailable",
+    hint: automationToolAccessHint(access),
+    id: permission.tool,
+    kind: "tool",
+    label: permission.tool,
+  }
 }
 
 /** Prefix matches first, then substring matches, alphabetical within each. */
@@ -181,6 +189,8 @@ function rankByName(
     .sort(
       (left, right) =>
         right.score - left.score ||
+        Number(Boolean(left.item.disabled)) -
+          Number(Boolean(right.item.disabled)) ||
         left.item.label.localeCompare(right.item.label)
     )
     .slice(0, maxSuggestions)

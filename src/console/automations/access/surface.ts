@@ -3,33 +3,6 @@ import {
   type AutomationSurfaceAccess,
   type AutomationSurfaceFormValue,
 } from "./catalog"
-import { findAutomationSurfaceMentions } from "./mentions"
-import {
-  type AutomationMentionCatalog,
-  emptyAutomationMentionCatalog,
-} from "./scan"
-import {
-  type AutomationToolPermissions,
-  getDefaultAutomationSurfaceTools,
-} from "./tools"
-
-export function syncAutomationSurfaces(
-  text: string,
-  surfaces: AutomationSurfaceFormValue[],
-  permissions?: AutomationToolPermissions,
-  catalog: AutomationMentionCatalog = emptyAutomationMentionCatalog
-): AutomationSurfaceFormValue[] {
-  const existing = new Map(
-    surfaces.map((surface) => [surface.integration, uniqueTools(surface.tools)])
-  )
-
-  return findAutomationSurfaceMentions(text, catalog).map((integration) => ({
-    integration,
-    tools:
-      existing.get(integration) ??
-      getDefaultAutomationSurfaceTools(integration, permissions),
-  }))
-}
 
 export function hasAutomationWriteSurface(
   surfaces: AutomationSurfaceFormValue[],
@@ -50,26 +23,13 @@ export function getAutomationSurfaceAccess(
     return surface.tools.length === 0 ? "" : "both"
   }
 
-  let read = false
-  let write = false
-
-  for (const permission of getSelectedAutomationSurfacePermissions(
-    surface,
-    permissions
-  )) {
-    if (permission.access === "read") {
-      read = true
-    }
-
-    if (permission.access === "write") {
-      write = true
-    }
-  }
+  const selected = getSelectedAutomationSurfacePermissions(surface, permissions)
+  const read = selected.some((permission) => permission.access === "read")
+  const write = selected.some((permission) => permission.access === "write")
 
   if (read && write) {
     return "both"
   }
-
   if (read) {
     return "read"
   }
@@ -83,7 +43,6 @@ export function getAutomationSurfaceAccessLabel(
   if (access === "") {
     return "No tools"
   }
-
   if (access === "both") {
     return "Read/write"
   }
@@ -102,8 +61,4 @@ export function getSelectedAutomationSurfacePermissions(
       permission.surface === surface.integration &&
       selectedTools.has(permission.tool)
   )
-}
-
-function uniqueTools(tools: string[]) {
-  return [...new Set(tools)]
 }

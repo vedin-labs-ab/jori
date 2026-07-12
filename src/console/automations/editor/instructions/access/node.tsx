@@ -13,10 +13,7 @@ import {
   type AutomationPolicyPermissions,
   isAutomationSurfacePolicyBlocked,
 } from "../../../access/policy"
-import {
-  automationSurfaceNodeName,
-  parseAutomationSurfaceTools,
-} from "../document"
+import { parseAutomationSurfaceTools } from "../document"
 import { type AutomationSurfaceExtensionOptions } from "../editor/extension"
 import { AutomationSurfaceRemoveButton } from "./remove"
 import {
@@ -24,6 +21,7 @@ import {
   getAutomationSurfaceToneClassNames,
 } from "./tone"
 import { AutomationSurfaceToolsDialog } from "./tools"
+import { setIntegrationTools } from "./update"
 
 export function AutomationSurfaceNodeView(props: NodeViewProps) {
   const integration = isAutomationSurfaceIntegration(
@@ -75,7 +73,7 @@ function AutomationSurfaceNodeContent({
       <AutomationSurfaceToolsDialog
         onOpenChange={setIsToolDialogOpen}
         onToolsChange={(nextTools) =>
-          updateIntegrationSurfaceTools({
+          setIntegrationTools({
             editor,
             integration,
             tools: nextTools,
@@ -88,49 +86,6 @@ function AutomationSurfaceNodeContent({
         tools={tools}
       />
     </NodeViewWrapper>
-  )
-}
-
-function updateIntegrationSurfaceTools({
-  editor,
-  integration,
-  tools,
-}: {
-  editor: NodeViewProps["editor"]
-  integration: AutomationSurfaceFormValue["integration"]
-  tools: string[]
-}) {
-  const transaction = editor.state.tr
-  let changed = false
-
-  editor.state.doc.descendants((node, position) => {
-    if (
-      node.type.name !== automationSurfaceNodeName ||
-      node.attrs.integration !== integration ||
-      haveSameTools(parseAutomationSurfaceTools(node.attrs.tools), tools)
-    ) {
-      return
-    }
-
-    transaction.setNodeMarkup(position, undefined, {
-      ...node.attrs,
-      tools,
-    })
-    changed = true
-  })
-
-  if (changed) {
-    editor.view.dispatch(transaction.scrollIntoView())
-  }
-}
-
-function haveSameTools(left: string[], right: string[]) {
-  const leftTools = new Set(left)
-  const rightTools = new Set(right)
-
-  return (
-    leftTools.size === rightTools.size &&
-    [...leftTools].every((tool) => rightTools.has(tool))
   )
 }
 

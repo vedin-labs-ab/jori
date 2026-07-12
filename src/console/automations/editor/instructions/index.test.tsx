@@ -131,8 +131,8 @@ describe("automation instructions field layout", () => {
     )
 
     expect(editorFrame?.className).toContain("[&_.tiptap]:leading-6")
-    expect(editorFrame?.className).toContain("[&_.tiptap>p]:min-h-6")
-    expect(editorFrame?.className).toContain("[&_.tiptap>p]:leading-6")
+    expect(editorFrame?.className).toContain("[&_.tiptap_p]:min-h-6")
+    expect(editorFrame?.className).toContain("[&_.tiptap_p]:leading-6")
     expect(badgeWrapper?.className).toContain("align-middle")
     expect(buttonGroup?.className).toContain("align-middle")
     expect(buttonGroup?.className).toContain("h-5")
@@ -170,7 +170,7 @@ describe("automation instructions field footer", () => {
     })
 
     expect(await screen.findByRole("textbox")).toBeDefined()
-    expect(field.container.textContent).toContain("integrations")
+    expect(field.container.textContent).toContain("access")
     expect(field.container.textContent).toContain("skills")
     expect(field.container.textContent).toContain("tools")
 

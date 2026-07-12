@@ -3,12 +3,9 @@ import { type ToolPermission } from "../../permissions/types"
 import {
   createAutomationMentionCatalog,
   findActiveAutomationMention,
-  findAutomationSurfaceMentions,
   findCompletedAutomationMention,
   getAutomationMentionSuggestions,
   readAutomationMentions,
-  sigilizeAutomationMentions,
-  syncAutomationSurfaces,
 } from "."
 
 const catalog = createAutomationMentionCatalog({
@@ -30,21 +27,9 @@ describe("explicit mention scanning", () => {
     ])
   })
 
-  test("matches multi-word aliases case-insensitively", () => {
-    expect(
-      findAutomationSurfaceMentions(
-        "Book time in @google calendar, then email via @Outlook.",
-        catalog
-      )
-    ).toEqual(["googleCalendar", "microsoftEmail"])
-  })
-
   test("never scans bare prose", () => {
     expect(
-      findAutomationSurfaceMentions(
-        "Review github and email via outlook.",
-        catalog
-      )
+      readAutomationMentions("Review github and email via outlook.", catalog)
     ).toEqual([])
   })
 
@@ -58,36 +43,16 @@ describe("explicit mention scanning", () => {
     expect(readAutomationMentions(text, catalog)).toEqual([])
   })
 
-  test("skill and tool sigils fire only after whitespace", () => {
+  test("sigils fire only at whitespace boundaries", () => {
     expect(
       readAutomationMentions("Run /meeting-prep and #share_artifact", catalog)
     ).toHaveLength(2)
     expect(
-      readAutomationMentions("Run x/meeting-prep and x#share_artifact", catalog)
+      readAutomationMentions(
+        'Run x/meeting-prep, x#share_artifact, and "@GitHub"',
+        catalog
+      )
     ).toEqual([])
-  })
-})
-
-describe("legacy text sigilization", () => {
-  test("rewrites exact bare names and fuzzy @-typos to sigil tokens", () => {
-    expect(
-      sigilizeAutomationMentions("Post to slack and create a notion page")
-    ).toBe("Post to @Slack and create a @Notion page")
-    expect(sigilizeAutomationMentions("Open @githb now")).toBe(
-      "Open @GitHub now"
-    )
-  })
-
-  test("leaves sigil tokens, near-misses, and prose untouched", () => {
-    expect(sigilizeAutomationMentions("Post to @Slack, then stop")).toBe(
-      "Post to @Slack, then stop"
-    )
-    expect(sigilizeAutomationMentions("Mail person@gmail.com about it")).toBe(
-      "Mail person@gmail.com about it"
-    )
-    expect(sigilizeAutomationMentions("Use the linear-time flow")).toBe(
-      "Use the linear-time flow"
-    )
   })
 })
 
@@ -178,47 +143,47 @@ describe("mention suggestions", () => {
     ).toHaveLength(2)
   })
 
-  test("offers only selectable tools", () => {
+  test("shows unavailable tools only while searching", () => {
+    expect(
+      getAutomationMentionSuggestions(
+        { kind: "tool", query: "" },
+        sources
+      ).some((item) => item.id === "github_delete_issue")
+    ).toBe(false)
+
     expect(
       getAutomationMentionSuggestions(
         { kind: "tool", query: "github" },
         sources
-      ).map((item) => item.id)
-    ).toEqual(["github_get_issue"])
-  })
-})
-
-describe("automation integration tool sync", () => {
-  test("preserves selected tools for existing markers", () => {
-    expect(
-      syncAutomationSurfaces("@GitHub to @Slack", [
-        { integration: "slack", tools: ["conversations_add_message"] },
-      ])
+      ).map((item) => ({ disabled: item.disabled, id: item.id }))
     ).toEqual([
-      { integration: "github", tools: [] },
-      { integration: "slack", tools: ["conversations_add_message"] },
+      { disabled: false, id: "github_get_issue" },
+      { disabled: true, id: "github_delete_issue" },
     ])
   })
 
-  test("adds new markers with selectable tools", () => {
+  test("describes the access a tool selection will add", () => {
     const permissions = [
       toolPermission("github", "github_get_issue", "read", "allowed"),
-      toolPermission("github", "github_add_issue_comment", "write", "required"),
-      toolPermission("github", "github_close_issue", "write", "prompted"),
-    ] satisfies ToolPermission[]
-
-    expect(syncAutomationSurfaces("@GitHub", [], permissions)).toEqual([
+      toolPermission("milo", "web_search", "read", "allowed"),
+      toolPermission("milo", "share_artifact", "write", "allowed"),
       {
-        integration: "github",
-        tools: ["github_get_issue", "github_add_issue_comment"],
+        ...toolPermission("milo", "start_agent", "write", "required"),
+        route: "agent" as const,
       },
-    ])
-  })
+    ]
+    const suggestions = getAutomationMentionSuggestions(
+      { kind: "tool", query: "" },
+      { permissions, skills: [], surfaces: [], webSearch: false }
+    )
 
-  test("ignores bare names while permissions load", () => {
-    expect(syncAutomationSurfaces("GitHub", [])).toEqual([])
-    expect(syncAutomationSurfaces("@GitHub", [])).toEqual([
-      { integration: "github", tools: [] },
+    expect(
+      suggestions.map((suggestion) => [suggestion.id, suggestion.hint])
+    ).toEqual([
+      ["github_get_issue", "+ GitHub access"],
+      ["share_artifact", "Built in"],
+      ["start_agent", "Built in"],
+      ["web_search", "+ Web access"],
     ])
   })
 })

@@ -13,6 +13,7 @@ export type AutomationInstructionsFieldProps = {
   error?: string
   id: string
   onBlur: () => void
+  onWebSearchChange: (enabled: boolean) => void
   onValueChange: (value: AutomationInstructionsValue) => void
   placeholder: string
   permissions?: AutomationPolicyPermissions
@@ -22,12 +23,18 @@ export type AutomationInstructionsFieldProps = {
   skills: readonly string[]
   surfaces: AutomationSurfaceFormValue[]
   value: string
+  webSearch: boolean
 }
 
 export type InstructionRefs = {
+  additionalSurfaces: MutableRefObject<AutomationSurfaceFormValue[]>
   catalog: MutableRefObject<AutomationMentionCatalog>
   editor: MutableRefObject<Editor | null>
+  emittedValueKey: MutableRefObject<string | undefined>
   onBlur: MutableRefObject<AutomationInstructionsFieldProps["onBlur"]>
+  onWebSearchChange: MutableRefObject<
+    AutomationInstructionsFieldProps["onWebSearchChange"]
+  >
   onValueChange: MutableRefObject<
     AutomationInstructionsFieldProps["onValueChange"]
   >

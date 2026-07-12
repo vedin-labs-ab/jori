@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,19 +11,35 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "../../../../../convex/_generated/api"
-import { syncAutomationSurfaces } from "../../access"
+import { emptyAutomationMentionCatalog } from "../../access"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
 import {
   readAutomationInstructionsError,
   readAutomationNameError,
 } from "../errors"
+import { readAdditionalAutomationSurfaces } from "../instructions/document"
 import { writeAutomationWebSearchPreference } from "../preferences"
 import { AccessFields } from "./access"
 import { AutomationInstructionsSection } from "./instructions"
 import { AutomationNameField } from "./name"
 import { ScopeField } from "./scope"
 import { AutomationTiming } from "./timing"
+
+type AutomationDialogProps = {
+  error: string | undefined
+  isOpen: boolean
+  isSaving: boolean
+  onOpenChange: (isOpen: boolean) => void
+  onReady?: () => void
+  onSave: () => void
+  onValuesChange: (values: AutomationFormValues) => void
+  permissions?: AutomationPolicyPermissions
+  policyKey: string
+  automation: Automation | undefined
+  tenantId: string
+  values: AutomationFormValues
+}
 
 export function AutomationDialog({
   error,
@@ -38,27 +54,13 @@ export function AutomationDialog({
   automation,
   tenantId,
   values,
-}: {
-  error: string | undefined
-  isOpen: boolean
-  isSaving: boolean
-  onOpenChange: (isOpen: boolean) => void
-  /** Fires once the lazily loaded dialog has actually mounted. */
-  onReady?: () => void
-  onSave: () => void
-  onValuesChange: (values: AutomationFormValues) => void
-  permissions?: AutomationPolicyPermissions
-  policyKey: string
-  automation: Automation | undefined
-  tenantId: string
-  values: AutomationFormValues
-}) {
+}: AutomationDialogProps) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: fire once on mount
   useEffect(() => {
     onReady?.()
   }, [])
 
-  const actions = createDialogActions(values, permissions, onValuesChange)
+  const actions = createDialogActions(values, onValuesChange)
   const skillList = useQuery(api.skills.catalog.list, { tenantId })
   const skills =
     skillList !== undefined &&
@@ -71,6 +73,16 @@ export function AutomationDialog({
     values.instructions
   )
   const nameError = readAutomationNameError(error, values.name)
+  const additionalSurfaces = useMemo(
+    () =>
+      readAdditionalAutomationSurfaces({
+        catalog: emptyAutomationMentionCatalog,
+        description: values.instructions,
+        permissions,
+        surfaces: values.surfaces,
+      }),
+    [permissions, values.instructions, values.surfaces]
+  )
 
   return (
     <Dialog
@@ -93,36 +105,19 @@ export function AutomationDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4">
-          <AutomationNameField
-            error={nameError}
-            onValueChange={actions.updateName}
-            value={values.name}
-          />
-          <ScopeField
-            onValueChange={actions.updateScope}
-            value={values.scope}
-          />
-          <AutomationInstructionsSection
-            error={instructionsError}
-            onBlur={actions.normalizeInstructions}
-            onValueChange={actions.updateInstructions}
-            permissions={permissions}
-            policyKey={policyKey}
-            skills={skills}
-            values={values}
-          />
-          <AccessFields
-            onWebSearchChange={actions.updateWebSearch}
-            webSearch={values.webSearch}
-          />
-          <AutomationTiming
-            tenantId={tenantId}
-            showRunPreview={automation !== undefined}
-            onValuesChange={onValuesChange}
-            values={values}
-          />
-        </div>
+        <AutomationDialogFields
+          actions={actions}
+          additionalSurfaces={additionalSurfaces}
+          automation={automation}
+          instructionsError={instructionsError}
+          nameError={nameError}
+          onValuesChange={onValuesChange}
+          permissions={permissions}
+          policyKey={policyKey}
+          skills={skills}
+          tenantId={tenantId}
+          values={values}
+        />
 
         <DialogFooter>
           <Button type="button" onClick={onSave} disabled={isSaving}>
@@ -135,9 +130,62 @@ export function AutomationDialog({
   )
 }
 
+type DialogFieldsProps = {
+  actions: ReturnType<typeof createDialogActions>
+  additionalSurfaces: AutomationFormValues["surfaces"]
+  automation: Automation | undefined
+  instructionsError: string | undefined
+  nameError: string | undefined
+  onValuesChange: (values: AutomationFormValues) => void
+  permissions: AutomationPolicyPermissions
+  policyKey: string
+  skills: string[]
+  tenantId: string
+  values: AutomationFormValues
+}
+
+function AutomationDialogFields(props: DialogFieldsProps) {
+  return (
+    <div className="grid gap-4">
+      <AutomationNameField
+        error={props.nameError}
+        onValueChange={props.actions.updateName}
+        value={props.values.name}
+      />
+      <ScopeField
+        onValueChange={props.actions.updateScope}
+        value={props.values.scope}
+      />
+      <AutomationInstructionsSection
+        error={props.instructionsError}
+        onBlur={ignoreBlur}
+        onWebSearchChange={props.actions.updateWebSearch}
+        onValueChange={props.actions.updateInstructions}
+        permissions={props.permissions}
+        policyKey={props.policyKey}
+        skills={props.skills}
+        values={props.values}
+      />
+      <AccessFields
+        additionalSurfaces={props.additionalSurfaces}
+        onAdditionalSurfaceChange={props.actions.updateAdditionalSurface}
+        onAdditionalSurfaceRemove={props.actions.removeAdditionalSurface}
+        onWebSearchChange={props.actions.updateWebSearch}
+        permissions={props.permissions}
+        webSearch={props.values.webSearch}
+      />
+      <AutomationTiming
+        tenantId={props.tenantId}
+        showRunPreview={props.automation !== undefined}
+        onValuesChange={props.onValuesChange}
+        values={props.values}
+      />
+    </div>
+  )
+}
+
 function createDialogActions(
   values: AutomationFormValues,
-  permissions: AutomationPolicyPermissions | undefined,
   onValuesChange: (values: AutomationFormValues) => void
 ) {
   const updateValues = (updates: Partial<AutomationFormValues>) => {
@@ -145,15 +193,24 @@ function createDialogActions(
   }
 
   return {
-    normalizeInstructions: () => {
+    removeAdditionalSurface: (
+      integration: AutomationFormValues["surfaces"][number]["integration"]
+    ) =>
       updateValues({
-        surfaces: syncAutomationSurfaces(
-          values.instructions,
-          values.surfaces,
-          permissions
+        surfaces: values.surfaces.filter(
+          (surface) => surface.integration !== integration
         ),
-      })
-    },
+      }),
+    updateAdditionalSurface: (
+      nextSurface: AutomationFormValues["surfaces"][number]
+    ) =>
+      updateValues({
+        surfaces: values.surfaces.map((surface) =>
+          surface.integration === nextSurface.integration
+            ? nextSurface
+            : surface
+        ),
+      }),
     updateInstructions: (
       instructions: string,
       surfaces: AutomationFormValues["surfaces"]
@@ -166,4 +223,8 @@ function createDialogActions(
       updateValues({ webSearch })
     },
   }
+}
+
+function ignoreBlur() {
+  return undefined
 }

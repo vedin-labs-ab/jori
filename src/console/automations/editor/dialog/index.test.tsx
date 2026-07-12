@@ -118,6 +118,26 @@ describe("automation dialog access controls", () => {
         Node.DOCUMENT_POSITION_PRECEDING
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
   })
+
+  test("shows explicit access that has no matching instruction reference", async () => {
+    renderAutomationDialog({
+      error: undefined,
+      values: {
+        ...emptyAutomationForm,
+        name: "Release summary",
+        instructions: "Summarize the release.",
+        surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
+      },
+    })
+
+    expect(await findInstructionsTextbox()).toBeDefined()
+    expect(screen.getByText("Additional access")).toBeDefined()
+    expect(
+      screen.getByRole("button", {
+        name: "GitHub additional access: 1 tool enabled. Configure tools.",
+      })
+    ).toBeDefined()
+  })
 })
 
 function renderAutomationDialog({

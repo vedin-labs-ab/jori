@@ -25,6 +25,7 @@ export function renderInstructionsField({
   showAccessError,
   skills = ["meeting-prep"],
   surfaces,
+  webSearch = false,
 }: {
   description: string
   error?: Parameters<typeof AutomationInstructionsField>[0]["error"]
@@ -35,14 +36,17 @@ export function renderInstructionsField({
   >[0]["showAccessError"]
   skills?: Parameters<typeof AutomationInstructionsField>[0]["skills"]
   surfaces: Parameters<typeof AutomationInstructionsField>[0]["surfaces"]
+  webSearch?: boolean
 }) {
   const onValueChange = vi.fn()
+  const onWebSearchChange = vi.fn()
 
   const view = render(
     <AutomationInstructionsField
       error={error}
       id="instructions"
       onBlur={vi.fn()}
+      onWebSearchChange={onWebSearchChange}
       onValueChange={onValueChange}
       placeholder="Instructions"
       permissions={permissions}
@@ -51,10 +55,11 @@ export function renderInstructionsField({
       skills={skills}
       surfaces={surfaces}
       value={description}
+      webSearch={webSearch}
     />
   )
 
-  return { container: view.container, onValueChange }
+  return { container: view.container, onValueChange, onWebSearchChange }
 }
 
 export function toolPermission(

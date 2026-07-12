@@ -97,18 +97,14 @@ export function sigilKind(
   return null
 }
 
-/** `@` only needs a non-name character before it (emails stay inert);
- *  `/` and `#` require whitespace so URLs, paths, and headings never fire. */
+/** Mentions start at a text boundary. Requiring whitespace (or the start of
+ * text) keeps quoted examples, emails, URLs, paths, and headings inert. */
 export function canStartMention(
-  kind: AutomationMentionKind,
+  _kind: AutomationMentionKind,
   text: string,
   sigilIndex: number
 ) {
   const previous = text[sigilIndex - 1]
-
-  if (kind === "integration") {
-    return !isMentionNameCharacter(previous)
-  }
 
   return previous === undefined || /\s/.test(previous)
 }

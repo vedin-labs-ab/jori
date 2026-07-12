@@ -7,6 +7,7 @@ import {
 import {
   automationInstructionKey,
   createAutomationInstructionDocument,
+  mergeAutomationSurfaces,
   serializeAutomationInstructionDocument,
 } from "../document"
 import { type InstructionSuggestionState } from "../suggestion/suggest"
@@ -18,6 +19,7 @@ import {
 /** The per-render sync pair: latest props into refs, external value into
  *  the editor document. */
 export function useInstructionSync(args: {
+  additionalSurfaces: AutomationInstructionsFieldProps["surfaces"]
   catalog: AutomationMentionCatalog
   editor: Editor | null
   props: AutomationInstructionsFieldProps
@@ -35,6 +37,7 @@ export function useInstructionSync(args: {
 }
 
 function useLatestInstructionRefs({
+  additionalSurfaces,
   catalog,
   editor,
   props,
@@ -42,6 +45,7 @@ function useLatestInstructionRefs({
   sources,
   suggestion,
 }: {
+  additionalSurfaces: AutomationInstructionsFieldProps["surfaces"]
   catalog: AutomationMentionCatalog
   editor: Editor | null
   props: AutomationInstructionsFieldProps
@@ -49,35 +53,53 @@ function useLatestInstructionRefs({
   sources: AutomationMentionSources
   suggestion: InstructionSuggestionState | null
 }) {
+  const renderedWebSearch = useRef(props.webSearch)
+
   useEffect(() => {
+    refs.additionalSurfaces.current = additionalSurfaces
     refs.catalog.current = catalog
     refs.editor.current = editor
     refs.onBlur.current = props.onBlur
+    refs.onWebSearchChange.current = props.onWebSearchChange
     refs.onValueChange.current = props.onValueChange
     refs.permissions.current = props.permissions
     refs.sources.current = sources
     refs.suggestion.current = suggestion
-  }, [catalog, editor, props, refs, sources, suggestion])
+    if (editor !== null && renderedWebSearch.current !== props.webSearch) {
+      editor.view.dispatch(editor.state.tr.setMeta("referenceAccess", true))
+    }
+    renderedWebSearch.current = props.webSearch
+  }, [additionalSurfaces, catalog, editor, props, refs, sources, suggestion])
 }
 
 function useExternalInstructionValue({
+  additionalSurfaces,
   catalog,
   contentKey,
   editor,
   props,
+  refs,
   setIsEmpty,
   updateSuggestion,
 }: {
+  additionalSurfaces: AutomationInstructionsFieldProps["surfaces"]
   catalog: AutomationMentionCatalog
   /** Rebuild marker for inputs the serialized value cannot express — the
    *  policy snapshot and the mention catalogs. */
   contentKey: string
   editor: Editor | null
   props: AutomationInstructionsFieldProps
+  refs: InstructionRefs
   setIsEmpty: Dispatch<SetStateAction<boolean>>
   updateSuggestion: (editor: Editor, activeIndex?: number) => void
 }) {
   const renderedContentKey = useRef(contentKey)
+  const appliedExternalKey = useRef(
+    automationInstructionKey({
+      description: props.value,
+      surfaces: props.surfaces,
+    })
+  )
 
   useEffect(() => {
     if (editor === null) {
@@ -85,16 +107,28 @@ function useExternalInstructionValue({
     }
 
     const nextValue = { description: props.value, surfaces: props.surfaces }
+    const nextKey = automationInstructionKey(nextValue)
+    const keyChanged = renderedContentKey.current !== contentKey
+
+    if (!keyChanged && appliedExternalKey.current === nextKey) {
+      return
+    }
+
+    if (!keyChanged && refs.emittedValueKey.current === nextKey) {
+      refs.emittedValueKey.current = undefined
+      appliedExternalKey.current = nextKey
+      return
+    }
+
     const currentValue = serializeAutomationInstructionDocument(
       editor.getJSON()
     )
-    const keyChanged = renderedContentKey.current !== contentKey
+    currentValue.surfaces = mergeAutomationSurfaces(
+      currentValue.surfaces,
+      additionalSurfaces
+    )
 
-    if (
-      automationInstructionKey(nextValue) !==
-        automationInstructionKey(currentValue) ||
-      keyChanged
-    ) {
+    if (nextKey !== automationInstructionKey(currentValue) || keyChanged) {
       editor.commands.setContent(
         createAutomationInstructionDocument({
           catalog,
@@ -106,9 +140,20 @@ function useExternalInstructionValue({
       )
       setIsEmpty(props.value === "")
       updateSuggestion(editor)
-      renderedContentKey.current = contentKey
     }
-  }, [catalog, contentKey, editor, props, setIsEmpty, updateSuggestion])
+
+    appliedExternalKey.current = nextKey
+    renderedContentKey.current = contentKey
+  }, [
+    additionalSurfaces,
+    catalog,
+    contentKey,
+    editor,
+    props,
+    refs,
+    setIsEmpty,
+    updateSuggestion,
+  ])
 }
 
 export function useInstructionAutocompleteA11y({
@@ -134,10 +179,14 @@ export function useInstructionAutocompleteA11y({
       return
     }
 
-    element.setAttribute(
-      "aria-activedescendant",
-      `${listboxId}-${suggestion.activeIndex}`
-    )
+    if (suggestion.suggestions.length === 0) {
+      element.removeAttribute("aria-activedescendant")
+    } else {
+      element.setAttribute(
+        "aria-activedescendant",
+        `${listboxId}-${suggestion.activeIndex}`
+      )
+    }
     element.setAttribute("aria-controls", listboxId)
     element.setAttribute("aria-expanded", "true")
   }, [editor, listboxId, suggestion])

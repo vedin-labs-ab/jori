@@ -15,14 +15,14 @@ import {
   createAutomationMentionCatalog,
 } from "../../../access"
 import {
+  automationInstructionKey,
   createAutomationInstructionDocument,
+  mergeAutomationSurfaces,
+  readAdditionalAutomationSurfaces,
   serializeAutomationInstructionDocument,
 } from "../document"
-import {
-  insertMentionSuggestion,
-  replaceCompletedMention,
-} from "../suggestion/input"
-import { handleSuggestionKey, updateSuggestionIndex } from "../suggestion/keys"
+import { insertMentionSuggestion } from "../suggestion/input"
+import { updateSuggestionIndex } from "../suggestion/keys"
 import {
   getInstructionSuggestionState,
   type InstructionSuggestionState,
@@ -37,12 +37,13 @@ import {
   useInstructionValidationA11y,
 } from "./effects"
 import { createInstructionExtensions } from "./extension"
+import { createEditorProps } from "./props"
 
 export function useAutomationInstructionsEditor(
   props: AutomationInstructionsFieldProps
 ) {
-  const { catalog, sources } = useMentionSources(props)
-  const refs = useInstructionRefs(props, catalog, sources)
+  const { additionalSurfaces, catalog, sources } = useMentionSources(props)
+  const refs = useInstructionRefs(props, catalog, sources, additionalSurfaces)
   const listboxId = useId()
   const [isEmpty, setIsEmpty] = useState(props.value === "")
   const [suggestion, setSuggestion] =
@@ -61,6 +62,7 @@ export function useAutomationInstructionsEditor(
 
   useInstructionSync({
     catalog,
+    additionalSurfaces,
     editor,
     props,
     refs,
@@ -80,12 +82,13 @@ export function useAutomationInstructionsEditor(
     (item: AutomationMentionSuggestion) =>
       insertMentionSuggestion({
         editor,
+        onWebAccessChange: refs.onWebSearchChange.current,
         permissions: refs.permissions.current,
         suggestion: item,
         setSuggestion,
         state: suggestion,
       }),
-    [editor, refs.permissions, suggestion]
+    [editor, refs.onWebSearchChange, refs.permissions, suggestion]
   )
 
   return {
@@ -98,9 +101,6 @@ export function useAutomationInstructionsEditor(
     suggestion,
   }
 }
-
-const editorContentClassName =
-  "whitespace-pre-wrap break-words text-foreground selection:bg-informational/20"
 
 function useUpdateSuggestion(
   refs: InstructionRefs,
@@ -127,22 +127,41 @@ function useMentionSources(props: AutomationInstructionsFieldProps) {
     [props.skills, props.permissions]
   )
   const sources = useMemo(
-    () => ({ permissions: props.permissions, skills: props.skills }),
-    [props.permissions, props.skills]
+    () => ({
+      permissions: props.permissions,
+      skills: props.skills,
+      surfaces: props.surfaces,
+      webSearch: props.webSearch,
+    }),
+    [props.permissions, props.skills, props.surfaces, props.webSearch]
+  )
+  const additionalSurfaces = useMemo(
+    () =>
+      readAdditionalAutomationSurfaces({
+        catalog,
+        description: props.value,
+        permissions: props.permissions,
+        surfaces: props.surfaces,
+      }),
+    [catalog, props.permissions, props.surfaces, props.value]
   )
 
-  return { catalog, sources }
+  return { additionalSurfaces, catalog, sources }
 }
 
 function useInstructionRefs(
   props: AutomationInstructionsFieldProps,
   catalog: AutomationMentionCatalog,
-  sources: AutomationMentionSources
+  sources: AutomationMentionSources,
+  additionalSurfaces: AutomationInstructionsFieldProps["surfaces"]
 ): InstructionRefs {
   return {
+    additionalSurfaces: useRef(additionalSurfaces),
     catalog: useRef(catalog),
     editor: useRef<Editor | null>(null),
+    emittedValueKey: useRef<string | undefined>(undefined),
     onBlur: useRef(props.onBlur),
+    onWebSearchChange: useRef(props.onWebSearchChange),
     onValueChange: useRef(props.onValueChange),
     permissions: useRef(props.permissions),
     sources: useRef(sources),
@@ -185,61 +204,16 @@ function createEditorOptions({
     onSelectionUpdate: ({ editor }) => updateSuggestion(editor),
     onUpdate: ({ editor }) => {
       const nextValue = serializeAutomationInstructionDocument(editor.getJSON())
+      nextValue.surfaces = mergeAutomationSurfaces(
+        nextValue.surfaces,
+        refs.additionalSurfaces.current
+      )
+      refs.emittedValueKey.current = automationInstructionKey(nextValue)
 
       setIsEmpty(nextValue.description === "")
       refs.onValueChange.current(nextValue)
       updateSuggestion(editor)
     },
-  }
-}
-
-function createEditorProps({
-  error,
-  errorId,
-  id,
-  refs,
-  setSuggestion,
-}: {
-  error: string | undefined
-  errorId: string
-  id: string
-  refs: InstructionRefs
-  setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
-}) {
-  return {
-    attributes: {
-      "aria-autocomplete": "list",
-      ...(error === undefined
-        ? {}
-        : { "aria-describedby": errorId, "aria-invalid": "true" }),
-      "aria-expanded": "false",
-      "aria-multiline": "true",
-      class: editorContentClassName,
-      id,
-      role: "textbox",
-      spellcheck: "true",
-    },
-    handleKeyDown: (_view: Editor["view"], event: KeyboardEvent) =>
-      handleSuggestionKey({
-        editor: refs.editor.current,
-        event,
-        permissions: refs.permissions.current,
-        setSuggestion,
-        state: refs.suggestion.current,
-      }),
-    handleTextInput: (
-      view: Editor["view"],
-      from: number,
-      to: number,
-      text: string
-    ) =>
-      replaceCompletedMention({
-        catalog: refs.catalog.current,
-        from,
-        permissions: refs.permissions.current,
-        text,
-        to,
-        view,
-      }),
+    shouldRerenderOnTransaction: false,
   }
 }

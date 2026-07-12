@@ -29,6 +29,14 @@ export function InstructionSuggestions({
       role="listbox"
       style={state.style}
     >
+      {state.suggestions.length === 0 ? (
+        <div
+          className="px-2.5 py-2 text-muted-foreground text-xs/relaxed"
+          role="status"
+        >
+          {emptySuggestionMessage(state)}
+        </div>
+      ) : null}
       {state.suggestions.map((suggestion, index) => (
         <button
           aria-selected={index === state.activeIndex}
@@ -36,14 +44,22 @@ export function InstructionSuggestions({
             "flex min-h-7 w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs/relaxed outline-none",
             index === state.activeIndex
               ? "bg-muted text-foreground"
-              : "hover:bg-muted/70"
+              : "hover:bg-muted/70",
+            suggestion.disabled &&
+              "cursor-not-allowed text-muted-foreground opacity-60 hover:bg-transparent"
           )}
+          disabled={suggestion.disabled}
           id={`${listboxId}-${index}`}
           key={`${suggestion.kind}:${suggestion.id}`}
           onClick={() => onSelect(suggestion)}
           onMouseDown={(event) => event.preventDefault()}
           onMouseEnter={() => onActiveIndexChange(index)}
           role="option"
+          title={
+            suggestion.access?.kind === "unavailable"
+              ? suggestion.access.reason
+              : undefined
+          }
           type="button"
         >
           <SuggestionIcon suggestion={suggestion} />
@@ -57,8 +73,40 @@ export function InstructionSuggestions({
           )}
         </button>
       ))}
+      {state.suggestions.some(
+        (suggestion) =>
+          suggestion.access?.kind === "integration" ||
+          suggestion.access?.kind === "web"
+      ) ? (
+        <p className="mt-1 border-t px-2.5 pt-1.5 pb-1 text-muted-foreground text-[0.6875rem]/relaxed">
+          Selecting a tool can add the access it needs.
+        </p>
+      ) : null}
     </div>
   )
+}
+
+function emptySuggestionMessage(state: InstructionSuggestionState) {
+  if (state.active.kind === "tool") {
+    if (state.empty === "loading") {
+      return "Loading automation tools..."
+    }
+    if (state.empty === "unavailable") {
+      return "Automation tools are unavailable right now."
+    }
+
+    return state.active.query === ""
+      ? "No automation tools are available."
+      : "No matching automation tools."
+  }
+
+  if (state.active.kind === "skill") {
+    return state.active.query === ""
+      ? "No skills are available."
+      : "No matching skills."
+  }
+
+  return "No matching integrations."
 }
 
 function SuggestionIcon({

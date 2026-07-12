@@ -2,11 +2,7 @@ import {
   defaultScopeForIntegrations,
   type Scope,
 } from "@contracts/permissions/scope"
-import {
-  hasAutomationWriteSurface,
-  sigilizeAutomationMentions,
-  syncAutomationSurfaces,
-} from "../../access"
+import { hasAutomationWriteSurface } from "../../access"
 import {
   type AutomationPolicyPermissions,
   validateAutomationPolicy,
@@ -17,6 +13,7 @@ import {
   emptyAutomationForm,
 } from "../../types"
 import { readAutomationPreferences } from "../preferences"
+import { prepareAutomationInstructions } from "./instructions"
 import { automationInstructionMarkerErrors } from "./marker"
 import {
   buildAutomationTriggerSpec,
@@ -62,7 +59,7 @@ export function automationFormValues(
 
   return {
     name: automation.name,
-    instructions: sigilizeAutomationMentions(automation.instructions),
+    instructions: automation.instructions,
     ...triggerFormValues(automation),
     scope: automation.scope,
     webSearch: automation.access.webSearch,
@@ -134,8 +131,9 @@ function buildBaseArgs(
   options: AutomationArgsOptions
 ): ArgsResult<AutomationArgs> {
   const name = values.name.trim()
-  const instructions = sigilizeAutomationMentions(values.instructions.trim())
-  const surfaces = syncAutomationSurfaces(instructions, values.surfaces)
+  const prepared = prepareAutomationInstructions(values, options.permissions)
+  const { instructions } = prepared
+  const surfaces = values.surfaces
 
   if (name === "") {
     return { error: "Name is required." }
@@ -143,6 +141,10 @@ function buildBaseArgs(
 
   if (instructions === "") {
     return { error: "Instructions are required." }
+  }
+
+  if (prepared.issue !== undefined) {
+    return { error: prepared.issue }
   }
 
   if (surfaces.length === 0) {
