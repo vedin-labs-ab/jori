@@ -1,7 +1,7 @@
 import { integrationLabels } from "@contracts/integrations"
 import { type ReactNode } from "react"
-import { GetStarted } from "./cta"
-import { Chip, Section } from "./section"
+import { Closing } from "../cta"
+import { Chip, Section } from "../section"
 
 export function Start() {
   return (
@@ -32,7 +32,7 @@ export function Start() {
           </Step>
         </ol>
       </Section>
-      <Closing />
+      <Closing lede="Your first brief can land tomorrow at 08:00." />
     </>
   )
 }
@@ -56,23 +56,5 @@ function Step({
         {children}
       </div>
     </li>
-  )
-}
-
-function Closing() {
-  return (
-    <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:pb-32">
-      <div className="border-t pt-14 md:pt-18">
-        <h2 className="font-medium text-4xl tracking-tight sm:text-5xl">
-          Meet Milo.
-        </h2>
-        <p className="mt-4 max-w-xl text-lg text-muted-foreground leading-relaxed">
-          Your first brief can land tomorrow at 08:00.
-        </p>
-        <div className="mt-8">
-          <GetStarted prominent />
-        </div>
-      </div>
-    </section>
   )
 }

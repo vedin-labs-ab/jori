@@ -2,7 +2,7 @@ import { FileText } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
-import { Mention, Prop, Section } from "./section"
+import { Mention, Prop, Section } from "../section"
 
 export function Threads() {
   return (
@@ -19,8 +19,9 @@ export function Threads() {
             is the interface.
           </p>
           <div className="mt-6 space-y-3">
-            <MiniMention surface="GitHub · copperline/payroll · PR #482">
-              <Mention /> summarize the review threads so far
+            <MiniMention surface="GitHub · copperline/payroll · Issue #491">
+              <Mention /> this test is flaky on CI, can you fix it and open a
+              PR?
             </MiniMention>
             <MiniMention surface="Linear · COP-73 · Tip-pooling certification">
               <Mention /> what's left before this ships?
@@ -67,6 +68,10 @@ function SupportThread() {
           </span>
         </ThreadMessage>
       </div>
+      <p className="border-t bg-muted/30 px-5 py-2.5 text-muted-foreground text-xs">
+        The write-up is a live artifact. Its share link expires, and you can
+        revoke it anytime.
+      </p>
     </Prop>
   )
 }

@@ -1,6 +1,6 @@
 import { type ReactNode } from "react"
 import { BrandIcon } from "@/shared/brand"
-import { Prop } from "./section"
+import { Prop } from "../section"
 
 // The hero artifact: one readable morning brief, exactly what the playbook
 // delivers. All prop content lives in the Copperline fiction.

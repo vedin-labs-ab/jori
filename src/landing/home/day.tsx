@@ -5,7 +5,7 @@ import {
 } from "@contracts/playbooks/catalog"
 import { resolvePlaybookOptions } from "@contracts/playbooks/options"
 import { type PlaybookSchedule } from "@contracts/playbooks/schedule"
-import { Mention, Section } from "./section"
+import { Mention, Section } from "../section"
 
 // Sentence-case nouns for the meta line, keyed to the contracts so a new
 // capability or delivery kind fails the build instead of going unlabeled.
