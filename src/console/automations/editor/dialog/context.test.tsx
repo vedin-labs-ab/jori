@@ -12,7 +12,9 @@ test("progressively discloses the context supplied to automation runs", () => {
 
   expect(trigger.className).toContain("hover:bg-muted")
   expect(trigger.className).toContain("hover:px-2")
+  expect(trigger.className).toContain("min-h-7")
   expect(trigger.className).toContain("px-0")
+  expect(trigger.className).toContain("py-1.5")
   expect(trigger.getAttribute("aria-expanded")).toBe("false")
   expect(screen.queryByText("Profile")).toBeNull()
   expect(
