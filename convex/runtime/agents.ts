@@ -11,7 +11,7 @@ export const create = action({
     parentId: v.id("runs"),
     secret: v.string(),
     task: v.string(),
-    title: v.optional(v.string()),
+    title: v.string(),
     tools: v.optional(v.array(v.string())),
   },
   returns: v.object({
@@ -33,7 +33,7 @@ export const insert = internalMutation({
   args: {
     parentId: v.id("runs"),
     task: v.string(),
-    title: v.optional(v.string()),
+    title: v.string(),
     tools: v.optional(v.array(v.string())),
   },
   returns: v.object({

@@ -28,6 +28,20 @@ test("runtime tool schemas with optional fields share omission guidance", () => 
   expect(missingGuidance).toEqual([])
 })
 
+test("start_agent requires an explicit task title", () => {
+  const startAgent = sandboxTools.find((tool) => tool.name === "start_agent")
+
+  expect(startAgent?.inputSchema).toMatchObject({
+    required: ["task", "title"],
+    properties: {
+      title: {
+        description: expect.stringContaining("Concise title"),
+        type: "string",
+      },
+    },
+  })
+})
+
 test("native runtime tools use catalog usage for agents and descriptions for users", () => {
   const runtimeTools = [
     ...runLifecycleTools(),

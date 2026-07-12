@@ -29,6 +29,15 @@ const meetingPrepReferences = [
   "#share_artifact",
 ]
 
+const meetingPrepPlaceholders = [
+  "YYYY-MM-DD",
+  "artifact id",
+  "date",
+  "event id",
+  "local time",
+  "title",
+]
+
 function render(
   key: string,
   destination: DeliveryDestination,
@@ -123,6 +132,23 @@ describe("playbook instruction references", () => {
   })
 })
 
+describe("meeting prep Markdown", () => {
+  test("uses canonical plain-text fences and Markdown-safe placeholders", () => {
+    const instructions = render("meeting-prep", emailDestination)
+
+    expect(instructions.match(/```txt/g)).toHaveLength(3)
+    expect(instructions).not.toContain('"""')
+    for (const placeholder of meetingPrepPlaceholders) {
+      const inlineCode = `\`<${placeholder}>\``
+
+      expect(instructions).toContain(inlineCode)
+      expect(instructions.replaceAll(inlineCode, "")).not.toContain(
+        `<${placeholder}>`
+      )
+    }
+  })
+})
+
 describe("meeting prep instructions", () => {
   test("meeting prep defaults to a digest with prep sends", () => {
     const instructions = render("meeting-prep", emailDestination)
@@ -137,13 +163,13 @@ describe("meeting prep instructions", () => {
     // With a digest run behind it, the prep send refreshes the dossier it
     // finds and never falls back to prepping inline.
     expect(instructions).toContain(
-      "If the dossier at days -> <YYYY-MM-DD> -> <event id> is missing"
+      "If the dossier at days -> `<YYYY-MM-DD>` -> `<event id>` is missing"
     )
     expect(instructions).not.toContain("do the prep yourself now")
     // The digest link opens the day view as-is; each prep send deep-links
     // its own meeting through the fragment.
     expect(instructions).toContain(
-      "append &d=<YYYY-MM-DD>&m=<event id> to it: that link is this meeting's prep note"
+      "append &d=`<YYYY-MM-DD>`&m=`<event id>` to it: that link is this meeting's prep note"
     )
     expect(instructions).toContain(
       "valid for 24 hours: that link is the full prep note"
@@ -154,6 +180,9 @@ describe("meeting prep instructions", () => {
       "If 07:30 has already passed today, schedule nothing and follow the digest instructions yourself"
     )
     expect(instructions).toContain("Do not wait for the agents.")
+    expect(instructions).toContain(
+      "Give each agent a concise title naming its meeting."
+    )
   })
 
   test("pre-meeting sends switch off cleanly", () => {

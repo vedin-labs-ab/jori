@@ -184,7 +184,7 @@ export const miloToolPermissionRows = [
     "add_automation",
     "Add automation",
     "Set up a task that runs on a schedule or event.",
-    "Create a task that runs once at a set time, on a cron schedule, or on an integration event. Use for recurring or event-driven work; set artifactId only when the automation should write an artifact's state.",
+    "Create a task that runs once at a set time, on a cron schedule, or on an integration event. Write canonical Markdown instructions with @Integration access references, /skill references, #tool references, and txt fences for reference-capable plain text. Keep explicit access aligned with the integration tools the instructions reference. Set artifactId only when the automation should write an artifact's state.",
     "write",
   ],
   [
@@ -192,7 +192,7 @@ export const miloToolPermissionRows = [
     "update_automation",
     "Update automation",
     "Change a Milo automation.",
-    "Change an automation's trigger or instructions. Read it first to preserve settings you are not changing.",
+    "Change an automation's trigger or instructions. Read it first to preserve settings you are not changing. Write canonical Markdown instructions with @Integration access references, /skill references, #tool references, and txt fences for reference-capable plain text. Keep explicit access aligned with the integration tools the instructions reference.",
     "write",
   ],
   [
