@@ -1,5 +1,10 @@
-import { TZDateMini } from "@date-fns/tz"
 import { requireTimezone, utcTimezone } from "../../timezone"
+import {
+  createWallClock,
+  getLocalCalendarDay,
+  resolveLocalMinute,
+  type WallClock,
+} from "./wallclock"
 
 const cronFieldRanges = [
   { min: 0, max: 59 },
@@ -30,22 +35,22 @@ export function getNextCronRunAt(
 ) {
   const schedule = parseCronExpression(expression)
   const zone = requireTimezone(timezone)
+  const clock = createWallClock(zone)
   const start = getNextMinute(from)
-  const localStart = new TZDateMini(start, zone)
-  const cursor = localDayCursor(localStart, zone)
+  const cursor = getLocalCalendarDay(clock, start.getTime())
 
   const maxSearchDays = 5 * 366
 
   for (let day = 0; day < maxSearchDays; day += 1) {
     if (matchesCalendar(schedule, cursor)) {
-      const runAt = getNextTimeOnDay(schedule, cursor, start, zone)
+      const runAt = getNextTimeOnDay(schedule, cursor, start, clock)
 
       if (runAt !== null) {
         return runAt
       }
     }
 
-    cursor.setDate(cursor.getDate() + 1)
+    cursor.setUTCDate(cursor.getUTCDate() + 1)
   }
 
   throw new Error(
@@ -147,12 +152,12 @@ function parseCronRange(range: string, fieldIndex: number) {
 }
 
 function matchesCalendar(schedule: CronSchedule, date: Date) {
-  if (!schedule.months.has(date.getMonth() + 1)) {
+  if (!schedule.months.has(date.getUTCMonth() + 1)) {
     return false
   }
 
-  const dayOfMonthMatches = schedule.daysOfMonth.has(date.getDate())
-  const dayOfWeekMatches = schedule.daysOfWeek.has(date.getDay())
+  const dayOfMonthMatches = schedule.daysOfMonth.has(date.getUTCDate())
+  const dayOfWeekMatches = schedule.daysOfWeek.has(date.getUTCDay())
 
   if (schedule.unrestrictedDayOfMonth) {
     return dayOfWeekMatches
@@ -202,44 +207,18 @@ function getNextMinute(from: number) {
   return date
 }
 
-function localDayCursor(date: Date, timezone: string) {
-  return new TZDateMini(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    12,
-    0,
-    0,
-    0,
-    timezone
-  )
-}
-
 function getNextTimeOnDay(
   schedule: CronSchedule,
   day: Date,
   start: Date,
-  timezone: string
+  clock: WallClock
 ) {
   for (const hour of schedule.hours) {
     for (const minute of schedule.minutes) {
-      const candidate = new TZDateMini(
-        day.getFullYear(),
-        day.getMonth(),
-        day.getDate(),
-        hour,
-        minute,
-        0,
-        0,
-        timezone
-      )
+      const candidate = resolveLocalMinute(clock, day, hour, minute)
 
-      if (
-        candidate.getHours() === hour &&
-        candidate.getMinutes() === minute &&
-        candidate.getTime() >= start.getTime()
-      ) {
-        return candidate.getTime()
+      if (candidate !== null && candidate >= start.getTime()) {
+        return candidate
       }
     }
   }
