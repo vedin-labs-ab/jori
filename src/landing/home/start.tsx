@@ -1,5 +1,6 @@
-import { integrationLabels } from "@contracts/integrations"
+import { integrationLabels, integrations } from "@contracts/integrations"
 import { type ReactNode } from "react"
+import { IntegrationLogo } from "@/shared/logo/integration"
 import { Closing } from "../cta"
 import { Chip, Section } from "../section"
 
@@ -19,8 +20,15 @@ export function Start() {
           </Step>
           <Step index="02" title="Connect your tools">
             <div className="flex flex-wrap gap-1.5">
-              {Object.values(integrationLabels).map((label) => (
-                <Chip key={label}>{label}</Chip>
+              {integrations.map((integration) => (
+                <Chip key={integration}>
+                  <IntegrationLogo
+                    className="size-3"
+                    decorative
+                    integration={integration}
+                  />
+                  {integrationLabels[integration]}
+                </Chip>
               ))}
             </div>
           </Step>

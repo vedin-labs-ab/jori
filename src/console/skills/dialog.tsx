@@ -41,7 +41,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { IntegrationLogo } from "../shared/logo/integration"
+import { IntegrationLogo } from "@/shared/logo/integration"
 import { skillCategoryIcons } from "./metadata"
 import { type Skill, type SkillFormValues } from "./types"
 

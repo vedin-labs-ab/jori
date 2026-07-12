@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/tooltip"
 import { countLabel } from "@/lib/count"
 import { cn } from "@/lib/utils"
-import { ProviderLogo } from "../logo/provider"
+import { ProviderLogo } from "@/shared/logo/provider"
 
 type ToolSurfaceLogoSize = "sm" | "md"
 

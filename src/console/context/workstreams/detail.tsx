@@ -15,8 +15,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { IntegrationChips } from "@/shared/logo/integration"
 import { api } from "../../../../convex/_generated/api"
-import { IntegrationChips } from "../../shared/logo/integration"
 import { relativeTime, useNow } from "../../shared/time"
 import { ContextSectionTitle } from "../section"
 import { WorkstreamActions } from "./actions"

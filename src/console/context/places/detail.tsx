@@ -12,8 +12,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { IntegrationChips } from "@/shared/logo/integration"
 import { CopyableCodeBlock } from "../../shared/copy"
-import { IntegrationChips } from "../../shared/logo/integration"
 import { relativeTime, useNow } from "../../shared/time"
 import { ContextSectionTitle } from "../section"
 import { PlaceName } from "./card"

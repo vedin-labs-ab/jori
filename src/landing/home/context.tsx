@@ -1,3 +1,8 @@
+import { type Integration } from "@contracts/integrations"
+import {
+  IntegrationLogo,
+  IntegrationLogoStack,
+} from "@/shared/logo/integration"
 import { Prop, Section } from "../section"
 
 export function ContextSection() {
@@ -37,35 +42,60 @@ function Workstreams() {
     >
       <div className="divide-y">
         <WorkstreamRow
+          integrations={["slack", "github", "linear"]}
           name="Tip-pooling compliance"
           note="Per-location split shipped. Certification review is the open thread."
           timeline="May 12 to Jul 30"
         />
         <WorkstreamRow
+          integrations={["notion", "gmail"]}
           name="SOC 2 audit"
           note="Evidence collection under way. Access reviews are with Jonas."
           timeline="Jun 1 to Aug 30"
         />
         <WorkstreamRow
+          integrations={["linear"]}
           muted
           name="Onboarding revamp"
           note="Still open, no recent activity."
           timeline="Quiet since Jun 20"
         />
       </div>
-      <p className="border-t bg-muted/30 px-5 py-2.5 text-muted-foreground text-xs">
-        From Slack, GitHub, Linear, Gmail, Calendar, and Notion.
+      <p className="flex items-center gap-2 border-t bg-muted/30 px-5 py-2.5 text-muted-foreground text-xs">
+        From
+        <span className="flex items-center gap-1.5">
+          {sourceIntegrations.map((integration) => (
+            <IntegrationLogo
+              className="size-3.5"
+              integration={integration}
+              key={integration}
+            />
+          ))}
+        </span>
+        and every other tool you connect.
       </p>
     </Prop>
   )
 }
 
+// The six integrations named in the shipped fiction's footer line.
+const sourceIntegrations: readonly Integration[] = [
+  "slack",
+  "github",
+  "linear",
+  "gmail",
+  "googleCalendar",
+  "notion",
+]
+
 function WorkstreamRow({
+  integrations,
   muted = false,
   name,
   note,
   timeline,
 }: {
+  integrations: readonly Integration[]
   muted?: boolean
   name: string
   note: string
@@ -73,8 +103,11 @@ function WorkstreamRow({
 }) {
   return (
     <div className={`px-5 py-3.5 ${muted ? "opacity-60" : ""}`}>
-      <p className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
-        <span className="font-medium text-sm">{name}</span>
+      <p className="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
+        <span className="flex items-center gap-2 font-medium text-sm">
+          {name}
+          <IntegrationLogoStack integrations={integrations} />
+        </span>
         <span className="text-muted-foreground text-xs tabular-nums">
           {timeline}
         </span>
