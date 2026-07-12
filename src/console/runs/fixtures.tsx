@@ -1,5 +1,7 @@
 import { render } from "@testing-library/react"
 import { TooltipProvider } from "@/components/ui/tooltip"
+// Keep row assertions independent of production chunk-loading latency.
+import "./row/expanded"
 import { ExecutionRow } from "./row"
 import {
   type ExecutionApproval,
