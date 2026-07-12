@@ -1,4 +1,3 @@
-import { isUserScopedIntegration } from "@contracts/integrations"
 import { type Editor, useEditor } from "@tiptap/react"
 import {
   type Dispatch,
@@ -15,6 +14,7 @@ import {
   type AutomationMentionSuggestion,
   automationSurfaceIntegrations,
   createAutomationMentionCatalog,
+  isAutomationSurfaceAllowedForScope,
 } from "../../../access"
 import {
   automationInstructionKey,
@@ -123,11 +123,11 @@ function useMentionSources(props: AutomationInstructionsFieldProps) {
     () =>
       createAutomationMentionCatalog({
         skills: props.skills,
-        tools: Array.isArray(permissions)
-          ? permissions.map((permission) => permission.tool)
+        tools: Array.isArray(props.permissions)
+          ? props.permissions.map((permission) => permission.tool)
           : [],
       }),
-    [permissions, props.skills]
+    [props.permissions, props.skills]
   )
   const sources = useMemo(
     () => ({
@@ -166,7 +166,9 @@ function useScopeMentionSources(props: AutomationInstructionsFieldProps) {
         ? undefined
         : automationSurfaceIntegrations
             .map((surface) => surface.integration)
-            .filter((integration) => !isUserScopedIntegration(integration)),
+            .filter((integration) =>
+              isAutomationSurfaceAllowedForScope(props.scope, integration)
+            ),
     [props.scope]
   )
   const permissions = useMemo(
@@ -176,7 +178,10 @@ function useScopeMentionSources(props: AutomationInstructionsFieldProps) {
         : props.permissions.filter(
             (permission) =>
               permission.surface === "milo" ||
-              !isUserScopedIntegration(permission.surface)
+              isAutomationSurfaceAllowedForScope(
+                props.scope,
+                permission.surface
+              )
           ),
     [props.permissions, props.scope]
   )
@@ -198,6 +203,7 @@ function useInstructionRefs(
     onWebSearchChange: useRef(props.onWebSearchChange),
     onValueChange: useRef(props.onValueChange),
     permissions: useRef(props.permissions),
+    scope: useRef(props.scope),
     sources: useRef(sources),
     suggestion: useRef<InstructionSuggestionState | null>(null),
   }

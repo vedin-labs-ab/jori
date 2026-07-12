@@ -23,10 +23,12 @@ export function createInstructionExtensions(refs: InstructionRefs) {
     ...createInstructionMarkdownExtensions(),
     AutomationReferenceExtension.configure({
       getPermissions: () => refs.permissions.current,
+      getScope: () => refs.scope.current,
       getWebSearch: () => refs.sources.current.webSearch ?? false,
     }),
     AutomationSurfaceExtension.configure({
       getPermissions: () => refs.permissions.current,
+      getScope: () => refs.scope.current,
     }),
     Markdown.configure({
       marked: createInstructionMarked(),

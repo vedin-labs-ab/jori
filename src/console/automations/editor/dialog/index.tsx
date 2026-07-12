@@ -11,7 +11,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "../../../../../convex/_generated/api"
-import { emptyAutomationMentionCatalog } from "../../access"
+import {
+  emptyAutomationMentionCatalog,
+  getAutomationScopeConflict,
+} from "../../access"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
 import {
@@ -69,10 +72,13 @@ export function AutomationDialog({
     skillList.status === "ready"
       ? skillList.skills.map((skill) => skill.name)
       : []
-  const instructionsError = readAutomationInstructionsError(
-    error,
-    values.instructions
+  const scopeConflict = getAutomationScopeConflict(
+    values.scope,
+    values.surfaces
   )
+  const instructionsError =
+    scopeConflict?.message ??
+    readAutomationInstructionsError(error, values.instructions)
   const nameError = readAutomationNameError(error, values.name)
   const additionalSurfaces = useMemo(
     () =>
@@ -174,6 +180,7 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         onAdditionalSurfaceRemove={props.actions.removeAdditionalSurface}
         onWebSearchChange={props.actions.updateWebSearch}
         permissions={props.permissions}
+        scope={props.values.scope}
         webSearch={props.values.webSearch}
       />
       <AutomationTiming

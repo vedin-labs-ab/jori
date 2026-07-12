@@ -37,12 +37,13 @@ export function AutomationReferenceNodeView({
   const tone = automationReferenceToneClassNames[kind]
   const issue =
     kind === "tool"
-      ? automationToolReferenceIssue(
-          id,
-          referenceOptions(extension).getPermissions(),
-          accessState.surfaces,
-          accessState.webSearch
-        )
+      ? automationToolReferenceIssue({
+          permissions: referenceOptions(extension).getPermissions(),
+          scope: referenceOptions(extension).getScope(),
+          surfaces: accessState.surfaces,
+          tool: id,
+          webSearch: accessState.webSearch,
+        })
       : undefined
 
   return (
