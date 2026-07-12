@@ -89,23 +89,6 @@ export function resolveAutomationToolAccess({
     : { kind: "integration", integration: permission.surface }
 }
 
-export function automationToolAccessHint(access: AutomationToolAccess) {
-  if (access.kind === "integration") {
-    return `+ ${getAutomationSurfaceLabel(access.integration)} access`
-  }
-  if (access.kind === "web") {
-    return "+ Web access"
-  }
-  if (access.kind === "builtIn") {
-    return "Built in"
-  }
-  if (access.kind === "unavailable") {
-    return "Unavailable"
-  }
-
-  return "Ready"
-}
-
 export function automationToolReferenceIssue(
   tool: string,
   permissions: AutomationToolPermissions,

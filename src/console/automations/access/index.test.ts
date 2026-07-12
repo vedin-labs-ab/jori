@@ -162,7 +162,7 @@ describe("mention suggestions", () => {
     ])
   })
 
-  test("describes the access a tool selection will add", () => {
+  test("classifies the access a tool selection will add", () => {
     const permissions = [
       toolPermission("github", "github_get_issue", "read", "allowed"),
       toolPermission("milo", "web_search", "read", "allowed"),
@@ -178,12 +178,12 @@ describe("mention suggestions", () => {
     )
 
     expect(
-      suggestions.map((suggestion) => [suggestion.id, suggestion.hint])
+      suggestions.map((suggestion) => [suggestion.id, suggestion.access])
     ).toEqual([
-      ["github_get_issue", "+ GitHub access"],
-      ["share_artifact", "Built in"],
-      ["start_agent", "Built in"],
-      ["web_search", "+ Web access"],
+      ["github_get_issue", { integration: "github", kind: "integration" }],
+      ["share_artifact", { kind: "builtIn" }],
+      ["start_agent", { kind: "builtIn" }],
+      ["web_search", { kind: "web" }],
     ])
   })
 })

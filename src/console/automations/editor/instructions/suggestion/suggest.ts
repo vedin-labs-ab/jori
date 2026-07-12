@@ -92,7 +92,8 @@ function getSuggestionStyle(editor: Editor, position: number): CSSProperties {
       return { left: 0, top: "100%" }
     }
 
-    const menuWidth = 256
+    // Match the menu's w-72 class so horizontal clamping stays accurate.
+    const menuWidth = 288
     const left = Math.min(
       Math.max(coords.left - container.left, 0),
       Math.max(container.width - menuWidth, 0)

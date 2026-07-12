@@ -10,7 +10,8 @@ import json from "highlight.js/lib/languages/json"
 import { createLowlight } from "lowlight"
 import { fencedTextNodeName } from "./schema"
 
-const plainTextFenceAliases = new Set(["", "txt", "text", "plaintext"])
+const plainTextFenceAliases = ["", "txt", "text", "plaintext"] as const
+const plainTextFenceAliasSet = new Set<string>(plainTextFenceAliases)
 export const serializedCodeSpanNodeName = "serializedCodeSpan"
 
 export const FencedText = Node.create({
@@ -55,11 +56,11 @@ export const FencedText = Node.create({
   addInputRules() {
     return [
       textblockTypeInputRule({
-        find: /^```(?:txt|text|plaintext)?[\s\n]$/i,
+        find: plainTextFenceInputExpression("`"),
         type: this.type,
       }),
       textblockTypeInputRule({
-        find: /^~~~(?:txt|text|plaintext)?[\s\n]$/i,
+        find: plainTextFenceInputExpression("~"),
         type: this.type,
       }),
     ]
@@ -118,6 +119,21 @@ lowlight.highlightAuto = (value) => ({
 })
 
 export const SafeCodeBlock = CodeBlockLowlight.extend({
+  addInputRules() {
+    return [
+      textblockTypeInputRule({
+        find: codeFenceInputExpression("`"),
+        getAttributes: (match) => ({ language: match[1] || null }),
+        type: this.type,
+      }),
+      textblockTypeInputRule({
+        find: codeFenceInputExpression("~"),
+        getAttributes: (match) => ({ language: match[1] || null }),
+        type: this.type,
+      }),
+    ]
+  },
+
   parseMarkdown(token, helpers) {
     const raw = token.raw ?? ""
     const isFence = /^ {0,3}(?:`{3,}|~{3,})/.test(raw)
@@ -153,8 +169,22 @@ function isPlainTextFence(token: {
   return (
     isFence &&
     token.codeBlockStyle !== "indented" &&
-    plainTextFenceAliases.has(language)
+    plainTextFenceAliasSet.has(language)
   )
+}
+
+function plainTextFenceInputExpression(marker: "`" | "~") {
+  const languages = plainTextFenceAliases.filter(Boolean).join("|")
+
+  return fenceInputExpression(marker, `(?:${languages})?`)
+}
+
+function codeFenceInputExpression(marker: "`" | "~") {
+  return fenceInputExpression(marker, "([a-z0-9_-]+)?")
+}
+
+function fenceInputExpression(marker: "`" | "~", language: string) {
+  return new RegExp(`^ {0,3}${marker}{3,}${language}[ \\t\\n]$`, "i")
 }
 
 function textBlockContent(text: string): JSONContent[] {
