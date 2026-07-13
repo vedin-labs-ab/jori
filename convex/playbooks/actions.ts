@@ -4,7 +4,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
+import { requireTenantAccess } from "../access"
 import { ensureCurrentPersonFromAction } from "../persons/clerk"
 import { provisionPlaybookArtifact } from "./blueprints/provision"
 import {

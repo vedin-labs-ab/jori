@@ -29,7 +29,7 @@ export function LinearIntegration({
   tenantId: string
 }) {
   const createInstallState = useMutation(
-    api.providers.linear.install.createInstallState
+    api.integrations.linear.install.createInstallState
   )
   const status = useQuery(api.integrations.status.getLinearStatus, {
     tenantId,

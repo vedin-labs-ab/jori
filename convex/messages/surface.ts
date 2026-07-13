@@ -1,5 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
-import { getSlackChannelType } from "../providers/slack/data"
+import { getSlackChannelType } from "../integrations/slack/data"
 import { type AudienceScope } from "../shared/audience"
 import { isUserScopedIntegration } from "../shared/integrations"
 

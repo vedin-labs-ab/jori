@@ -7,7 +7,7 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
+import { requireTenantAccess } from "../access"
 import { resolveCurrentPerson } from "../persons/clerk"
 import {
   type Integration,

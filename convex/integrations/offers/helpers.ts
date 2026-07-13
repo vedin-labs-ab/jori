@@ -1,6 +1,6 @@
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { linkIdentityToPerson } from "../../persons/links"
+import { linkIdentityToPerson } from "../../persons/identity/links"
 import { requireAppOrigin } from "../../shared/app"
 import { type IntegrationOfferSource } from "./schema"
 import { surfaceIdentityProvider } from "./source"

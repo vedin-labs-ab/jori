@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type DeliveryChoice } from "../../contracts/playbooks/delivery"
 import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
-import { readClerkUserEmail, readClerkUserName } from "../identity/users"
+import { readClerkUserEmail, readClerkUserName } from "../access/users"
 import { type Integration, integrationValidator } from "../shared/integrations"
 import { type PlaybookPlanArgs } from "./enable"
 import { deliveryChoiceValidator } from "./schema"

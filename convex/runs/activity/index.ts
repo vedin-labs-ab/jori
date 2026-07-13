@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { query } from "../../_generated/server"
-import { requireTenantAccess } from "../../identity/access"
+import { requireTenantAccess } from "../../access"
 import { runVisibleToPerson } from "../console/filters"
 import { resolveConsolePerson } from "../console/person"
 import { loadActivityData } from "./load"

@@ -1,4 +1,4 @@
-import { linearGraphqlUrl } from "../../../providers/linear/config"
+import { linearGraphqlUrl } from "../../../integrations/linear/config"
 import { fetchJsonObject } from "../../../shared/http"
 
 export async function linearGraphql(

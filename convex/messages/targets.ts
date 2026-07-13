@@ -3,7 +3,7 @@ import {
   getSlackChannelId,
   getSlackMessageTs,
   getSlackThreadTs,
-} from "../providers/slack/data"
+} from "../integrations/slack/data"
 import { readDataNumber, readDataObject, readDataString } from "../shared/data"
 
 export type ReplyTargetIdentifier = string

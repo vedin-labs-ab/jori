@@ -1,22 +1,19 @@
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { createGitHubInstallationToken } from "../providers/github/app"
-import { requireGitHubCredentials } from "../providers/github/credentials"
-import { requireGoogleCredentials } from "../providers/google/credentials"
-import { refreshGoogleAccessToken } from "../providers/google/oauth"
-import { requireLinearCredentials } from "../providers/linear/credentials"
-import {
-  getLinearTokenScope,
-  refreshLinearAccessToken,
-} from "../providers/linear/oauth"
-import { requireMicrosoftCredentials } from "../providers/microsoft/credentials"
-import { refreshMicrosoftAccessToken } from "../providers/microsoft/oauth"
 import {
   integrationLabel,
   isGoogleIntegration,
   isMicrosoftIntegration,
 } from "../shared/integrations"
+import { createGitHubInstallationToken } from "./github/app"
+import { requireGitHubCredentials } from "./github/credentials"
+import { requireGoogleCredentials } from "./google/credentials"
+import { refreshGoogleAccessToken } from "./google/oauth"
+import { requireLinearCredentials } from "./linear/credentials"
+import { getLinearTokenScope, refreshLinearAccessToken } from "./linear/oauth"
+import { requireMicrosoftCredentials } from "./microsoft/credentials"
+import { refreshMicrosoftAccessToken } from "./microsoft/oauth"
 
 type RuntimeIntegration = Doc<"integrations">
 
@@ -69,7 +66,7 @@ async function prepareGitHubIntegrationForRuntime(
   }
 
   const refreshedCredentials = await ctx.runMutation(
-    internal.providers.github.install.updateInstallationCredentials,
+    internal.integrations.github.install.updateInstallationCredentials,
     {
       integrationId: integration._id,
       accessToken: tokenResult.token,
@@ -97,7 +94,7 @@ async function prepareLinearIntegrationForRuntime(
   }
 
   const refreshedCredentials = await ctx.runMutation(
-    internal.providers.linear.install.updateOAuthCredentials,
+    internal.integrations.linear.install.updateOAuthCredentials,
     {
       integrationId: integration._id,
       accessToken: tokenResult.access_token,
@@ -132,7 +129,7 @@ async function prepareGoogleIntegrationForRuntime(
   }
 
   const refreshedCredentials = await ctx.runMutation(
-    internal.providers.google.install.updateOAuthCredentials,
+    internal.integrations.google.install.updateOAuthCredentials,
     {
       integrationId: integration._id,
       accessToken: tokenResult.access_token,
@@ -169,7 +166,7 @@ async function prepareMicrosoftIntegrationForRuntime(
   }
 
   const refreshedCredentials = await ctx.runMutation(
-    internal.providers.microsoft.install.updateOAuthCredentials,
+    internal.integrations.microsoft.install.updateOAuthCredentials,
     {
       integrationId: integration._id,
       accessToken: tokenResult.access_token,

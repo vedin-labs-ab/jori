@@ -6,15 +6,15 @@ import {
   type MutationCtx,
   mutation,
 } from "../../_generated/server"
-import { requireTenantAccess } from "../../identity/access"
-import { readClerkUserEmail, readClerkUserName } from "../../identity/users"
+import { requireTenantAccess } from "../../access"
+import { readClerkUserEmail, readClerkUserName } from "../../access/users"
 import { ensureCurrentPerson } from "../../persons/clerk"
+import { createPersonActor } from "../../shared/actor"
+import { integrationValidator } from "../../shared/integrations"
 import {
   createSignedInstallState,
   installPathForIntegration,
-} from "../../providers/install"
-import { createPersonActor } from "../../shared/actor"
-import { integrationValidator } from "../../shared/integrations"
+} from "../connect/install"
 import {
   findIntegrationOfferByToken,
   integrationOfferLocation,

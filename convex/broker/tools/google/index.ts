@@ -1,6 +1,6 @@
 import { type Doc } from "../../../_generated/dataModel"
-import { googleJson } from "../../../providers/google/api"
-import { requireGoogleCredentials } from "../../../providers/google/credentials"
+import { googleJson } from "../../../integrations/google/api"
+import { requireGoogleCredentials } from "../../../integrations/google/credentials"
 import {
   boundedNumber,
   requiredObject,

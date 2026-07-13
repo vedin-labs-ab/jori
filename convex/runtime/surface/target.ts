@@ -4,7 +4,7 @@ import { type QueryCtx } from "../../_generated/server"
 import {
   getSlackChannelId,
   getSlackMessageTs,
-} from "../../providers/slack/data"
+} from "../../integrations/slack/data"
 import { readDataObject, readDataString } from "../../shared/data"
 
 export type ReactionAddress =

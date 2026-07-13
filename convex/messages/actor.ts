@@ -1,7 +1,7 @@
 import { type Doc } from "../_generated/dataModel"
-import { isGitHubSelfActor } from "../providers/github/data"
-import { getLinearBotId } from "../providers/linear/data"
-import { getSlackBotUserId } from "../providers/slack/data"
+import { isGitHubSelfActor } from "../integrations/github/data"
+import { getLinearBotId } from "../integrations/linear/data"
+import { getSlackBotUserId } from "../integrations/slack/data"
 import { type Actor, getActorExternalId, withActorKind } from "../shared/actor"
 
 /** Mark an observed actor as "self" when it is the integration's own bot. */

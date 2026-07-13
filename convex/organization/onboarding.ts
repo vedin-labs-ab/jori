@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { normalizeWebsiteAddress } from "../../contracts/website"
 import { internal } from "../_generated/api"
 import { type ActionCtx, action } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
+import { requireTenantAccess } from "../access"
 
 // Marks onboarding as seen (so the welcome flow never reopens) and, when a
 // website is provided, kicks off discovery for a proposed organization profile.

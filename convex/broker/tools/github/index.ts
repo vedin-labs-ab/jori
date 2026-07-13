@@ -4,13 +4,13 @@ import {
   addGitHubCommentReaction,
   addIssueComment,
   replyToPullRequestReviewComment,
-} from "../../../providers/github/delivery/comments"
+} from "../../../integrations/github/delivery/comments"
 import {
   summarizeComment,
   summarizeIssue,
   summarizePullRequest,
   summarizeRepository,
-} from "../../../providers/github/delivery/format"
+} from "../../../integrations/github/delivery/format"
 import { base64Decode } from "../../../shared/encoding"
 import {
   boundedNumber,

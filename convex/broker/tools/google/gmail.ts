@@ -1,6 +1,6 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { type AssetContext, readRunAssets } from "../../../assets/read"
-import { googleJson } from "../../../providers/google/api"
+import { googleJson } from "../../../integrations/google/api"
 import {
   optionalString,
   optionalStringArray,

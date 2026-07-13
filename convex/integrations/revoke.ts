@@ -1,33 +1,24 @@
 import { type Doc } from "../_generated/dataModel"
-import { deleteGitHubInstallation } from "../providers/github/app"
-import { requireGitHubCredentials } from "../providers/github/credentials"
-import { googleOAuthRevokeUrl } from "../providers/google/config"
-import { requireGoogleCredentials } from "../providers/google/credentials"
-import { linearOAuthRevokeUrl } from "../providers/linear/config"
-import { requireLinearCredentials } from "../providers/linear/credentials"
+import { deleteGitHubInstallation } from "./github/app"
+import { requireGitHubCredentials } from "./github/credentials"
+import { googleOAuthRevokeUrl } from "./google/config"
+import { requireGoogleCredentials } from "./google/credentials"
+import { linearOAuthRevokeUrl } from "./linear/config"
+import { requireLinearCredentials } from "./linear/credentials"
 import {
   requireLinearClientId,
   requireLinearClientSecret,
-} from "../providers/linear/oauth"
-import { requireMicrosoftCredentials } from "../providers/microsoft/credentials"
-import {
-  notionApiVersion,
-  notionOAuthRevokeUrl,
-} from "../providers/notion/config"
-import { requireNotionCredentials } from "../providers/notion/credentials"
+} from "./linear/oauth"
+import { requireMicrosoftCredentials } from "./microsoft/credentials"
+import { notionApiVersion, notionOAuthRevokeUrl } from "./notion/config"
+import { requireNotionCredentials } from "./notion/credentials"
 import {
   requireNotionClientId,
   requireNotionClientSecret,
-} from "../providers/notion/oauth"
-import {
-  slackAppsUninstallUrl,
-  slackAuthRevokeUrl,
-} from "../providers/slack/config"
-import { requireSlackCredentials } from "../providers/slack/credentials"
-import {
-  requireSlackClientId,
-  requireSlackClientSecret,
-} from "../providers/slack/oauth"
+} from "./notion/oauth"
+import { slackAppsUninstallUrl, slackAuthRevokeUrl } from "./slack/config"
+import { requireSlackCredentials } from "./slack/credentials"
+import { requireSlackClientId, requireSlackClientSecret } from "./slack/oauth"
 
 const alreadyRevokedErrors = new Set([
   "invalid_auth",

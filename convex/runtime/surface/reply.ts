@@ -1,17 +1,17 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { prepareIntegrationForRuntime } from "../../integrations/runtime"
-import { type ReplyAddress } from "../../messages/surface"
-import { requireGitHubRuntimeToken } from "../../providers/github/credentials"
+import { requireGitHubRuntimeToken } from "../../integrations/github/credentials"
 import {
   addIssueComment,
   replyToPullRequestReviewComment,
-} from "../../providers/github/delivery/comments"
-import { postLinearComment } from "../../providers/linear/delivery/comments"
+} from "../../integrations/github/delivery/comments"
+import { postLinearComment } from "../../integrations/linear/delivery/comments"
+import { prepareIntegrationForRuntime } from "../../integrations/runtime"
 import {
   postSlackMessage,
   type SlackBlock,
-} from "../../providers/slack/delivery/messages"
+} from "../../integrations/slack/delivery/messages"
+import { type ReplyAddress } from "../../messages/surface"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 
 export async function sendSurfaceReply(

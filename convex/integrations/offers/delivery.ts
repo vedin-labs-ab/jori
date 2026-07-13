@@ -2,11 +2,8 @@ import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { type ApprovalBrokerContext } from "../../broker/approval"
-import {
-  postSlackCard,
-  slackCardTarget,
-} from "../../providers/slack/delivery/cards"
 import { type Integration } from "../../shared/integrations"
+import { postSlackCard, slackCardTarget } from "../slack/delivery/cards"
 import { createSlackIntegrationOfferMessage } from "./slack"
 
 export async function tryDeliverIntegrationOffer(

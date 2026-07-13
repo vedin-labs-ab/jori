@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { type PlaceIntegration, placeKinds } from "../../contracts/places"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
-import { checkTenantAccess } from "../identity/access"
+import { checkTenantAccess } from "../access"
 import { profileMissLimit } from "./limits"
 
 // One read serves the whole tab: claims already live on the place row, so

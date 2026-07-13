@@ -5,7 +5,7 @@ import {
   type MutationCtx,
   query,
 } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
+import { requireTenantAccess } from "../access"
 import { type QueryLikeCtx } from "../shared/context"
 import { organizationSourceSnapshot } from "./schema"
 

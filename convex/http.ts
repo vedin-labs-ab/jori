@@ -7,31 +7,31 @@ import {
   handleGitHubEvents,
   handleGitHubInstall,
   handleGitHubInstallCallback,
-} from "./providers/github/http"
+} from "./integrations/github/ingress/http"
 import {
   handleGoogleInstall,
   handleGoogleOAuthCallback,
-} from "./providers/google/http"
+} from "./integrations/google/http"
 import {
   handleLinearEvents,
   handleLinearInstall,
   handleLinearOAuthCallback,
-} from "./providers/linear/http"
+} from "./integrations/linear/ingress/http"
 import {
   handleMicrosoftInstall,
   handleMicrosoftOAuthCallback,
-} from "./providers/microsoft/http"
+} from "./integrations/microsoft/http"
 import {
   handleNotionEvents,
   handleNotionInstall,
   handleNotionOAuthCallback,
-} from "./providers/notion/http"
+} from "./integrations/notion/http"
 import {
   handleSlackEvents,
   handleSlackInstall,
   handleSlackInteractions,
   handleSlackOAuthCallback,
-} from "./providers/slack/http"
+} from "./integrations/slack/http"
 import { unauthorizedResponse } from "./shared/http"
 
 const http = httpRouter()

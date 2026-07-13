@@ -1,7 +1,7 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { type AssetContext } from "../../../assets/read"
-import { notionJson } from "../../../providers/notion/api"
-import { requireNotionCredentials } from "../../../providers/notion/credentials"
+import { notionJson } from "../../../integrations/notion/api"
+import { requireNotionCredentials } from "../../../integrations/notion/credentials"
 import { optionalString, requiredString } from "../../../shared/input"
 import { uploadNotionFile } from "./upload"
 

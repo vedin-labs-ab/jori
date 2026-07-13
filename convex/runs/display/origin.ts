@@ -1,5 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
-import { slackChannelUrl, slackMessageUrl } from "../../providers/slack/links"
+import {
+  slackChannelUrl,
+  slackMessageUrl,
+} from "../../integrations/slack/links"
 import {
   readDataNumber,
   readDataObject,

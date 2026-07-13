@@ -2,12 +2,12 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { mutation } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
+import { requireTenantAccess } from "../access"
 import {
   readClerkUserEmail,
   readClerkUserName,
   requireClerkUserId,
-} from "../identity/users"
+} from "../access/users"
 import { ensureClerkPerson } from "../persons/clerk"
 import { recordTrace } from "../runtime/traces/data"
 import { wakeParentForTerminalRun, wakeRun } from "../runtime/waiters/data"

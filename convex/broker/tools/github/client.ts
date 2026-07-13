@@ -2,8 +2,8 @@ import {
   githubJson,
   githubJsonObject,
   githubRepositoryPath,
-} from "../../../providers/github/api"
-import { requireGitHubRuntimeToken } from "../../../providers/github/credentials"
+} from "../../../integrations/github/api"
+import { requireGitHubRuntimeToken } from "../../../integrations/github/credentials"
 import { requiredString } from "../../../shared/input"
 
 export { githubJson, githubJsonObject, requireGitHubRuntimeToken }

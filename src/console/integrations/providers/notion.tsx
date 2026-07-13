@@ -29,7 +29,7 @@ export function NotionIntegration({
   tenantId: string
 }) {
   const createInstallState = useMutation(
-    api.providers.notion.install.createInstallState
+    api.integrations.notion.install.createInstallState
   )
   const status = useQuery(api.integrations.status.getNotionStatus, {
     tenantId,

@@ -3,24 +3,24 @@ import {
   type IntegrationOptionSource,
 } from "../../../contracts/integrations/options"
 import { type Doc } from "../../_generated/dataModel"
-import { OptionUnavailable } from "./common"
 import {
   searchGitHubIssues,
   searchGitHubPullRequests,
   searchGitHubRepositories,
-} from "./github"
-import { searchGmailLabels, searchGoogleCalendars } from "./google"
+} from "../github/options"
+import { searchGmailLabels, searchGoogleCalendars } from "../google/options"
 import {
   searchLinearIssues,
   searchLinearProjects,
   searchLinearTeams,
-} from "./linear"
+} from "../linear/options"
 import {
   searchMicrosoftCalendars,
   searchMicrosoftMailFolders,
-} from "./microsoft"
-import { searchNotionObjects } from "./notion"
-import { searchSlackChannels, searchSlackUsers } from "./slack"
+} from "../microsoft/options"
+import { searchNotionObjects } from "../notion/options"
+import { searchSlackChannels, searchSlackUsers } from "../slack/options"
+import { OptionUnavailable } from "./common"
 
 export type IntegrationOptionSearchResult =
   | {

@@ -1,10 +1,10 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { mutation, query } from "../_generated/server"
-import { checkTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
+import { checkTenantAccess } from "../access"
+import { requireClerkUserId } from "../access/users"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
-import { resolvePersonByIdentity } from "../persons/links"
+import { resolvePersonByIdentity } from "../persons/identity/links"
 import { scopeValidator } from "../shared/audience"
 import { type QueryLikeCtx } from "../shared/context"
 import {

@@ -1,12 +1,12 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type AssetContext, readRunAssets } from "../../assets/read"
-import { slackQueryApi } from "../../providers/slack/api"
-import { requireSlackCredentials } from "../../providers/slack/credentials"
+import { slackQueryApi } from "../../integrations/slack/api"
+import { requireSlackCredentials } from "../../integrations/slack/credentials"
 import {
   addSlackMessageReaction,
   postSlackMessage,
   type SlackBlock,
-} from "../../providers/slack/delivery/messages"
+} from "../../integrations/slack/delivery/messages"
 import {
   boundedNumber,
   optionalString,

@@ -11,7 +11,7 @@ import { type MutationCtx } from "../_generated/server"
 import { recordEvent } from "../events/data"
 import { normalizeEventData } from "../events/payload"
 import { type EventData, type EventMatch } from "../events/schema"
-import { getSlackChannelId } from "../providers/slack/data"
+import { getSlackChannelId } from "../integrations/slack/data"
 import { type Actor } from "../shared/actor"
 import { readNumber, readRecord, readString, readValue } from "../shared/input"
 

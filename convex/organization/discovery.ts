@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx, query } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
+import { requireTenantAccess } from "../access"
 import { type QueryLikeCtx } from "../shared/context"
 import { discoveryStepKind } from "./schema"
 

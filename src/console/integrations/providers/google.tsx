@@ -46,7 +46,7 @@ export function GmailIntegration({
   tenantId: string
 }) {
   const createInstallState = useMutation(
-    api.providers.google.install.createGmailInstallState
+    api.integrations.google.install.createGmailInstallState
   )
   const status = useQuery(api.integrations.status.getGmailStatus, {
     tenantId,
@@ -72,7 +72,7 @@ export function GoogleCalendarIntegration({
   tenantId: string
 }) {
   const createInstallState = useMutation(
-    api.providers.google.install.createGoogleCalendarInstallState
+    api.integrations.google.install.createGoogleCalendarInstallState
   )
   const status = useQuery(api.integrations.status.getGoogleCalendarStatus, {
     tenantId,

@@ -46,7 +46,7 @@ export function MicrosoftEmailIntegration({
   tenantId: string
 }) {
   const createInstallState = useMutation(
-    api.providers.microsoft.install.createMicrosoftEmailInstallState
+    api.integrations.microsoft.install.createMicrosoftEmailInstallState
   )
   const status = useQuery(api.integrations.status.getMicrosoftEmailStatus, {
     tenantId,
@@ -72,7 +72,7 @@ export function MicrosoftCalendarIntegration({
   tenantId: string
 }) {
   const createInstallState = useMutation(
-    api.providers.microsoft.install.createMicrosoftCalendarInstallState
+    api.integrations.microsoft.install.createMicrosoftCalendarInstallState
   )
   const status = useQuery(api.integrations.status.getMicrosoftCalendarStatus, {
     tenantId,
