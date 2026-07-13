@@ -1,7 +1,6 @@
 import { useQuery } from "convex/react"
 import { CalendarDays, Clock } from "lucide-react"
-import { type ReactNode, useEffect, useRef, useState } from "react"
-import { CardContent } from "@/components/ui/card"
+import { type ReactNode, useEffect, useState } from "react"
 import {
   Select,
   SelectContent,
@@ -9,17 +8,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { cn } from "@/lib/utils"
-import { api } from "../../../../convex/_generated/api"
-import {
-  LaneRow,
-  PulseFooter,
-  PulseShell,
-  PulseSkeleton,
-  stickyLane,
-} from "./lane"
-import { buildPulse, type PulseLane } from "./series"
-import { type Workstream, type Workstreams } from "./types"
+import { api } from "../../../../../convex/_generated/api"
+import { PulseFooter, PulseShell, PulseSkeleton } from "../lane"
+import { buildPulse } from "../series"
+import { type Workstream, type Workstreams } from "../types"
+import { PulseViewport } from "./viewport"
 
 type PulseDays = 14 | 30 | 60
 type PulseData = NonNullable<
@@ -31,15 +24,6 @@ const rangeOptions: { value: PulseDays; label: string }[] = [
   { value: 30, label: "Last 30 days" },
   { value: 60, label: "Last 60 days" },
 ]
-
-// One literal per range; Tailwind cannot compose repeat() counts at runtime.
-// Fixed column pitch keeps the cells contribution-graph dense instead of
-// stretching with the viewport.
-const laneGrids: Record<PulseDays, string> = {
-  14: "grid grid-cols-[11.5rem_repeat(14,22px)] items-center",
-  30: "grid grid-cols-[11.5rem_repeat(30,22px)] items-center",
-  60: "grid grid-cols-[11.5rem_repeat(60,22px)] items-center",
-}
 
 // A compact heatmap of extraction movement: one lane per workstream, a lane
 // for efforts not yet placed, and the review heartbeat. It makes the hourly
@@ -57,8 +41,6 @@ export function WorkstreamsPulse({
   const [days, setDays] = useState<PulseDays>(14)
   const result = useQuery(api.deduction.console.pulse.read, { tenantId, days })
   const [pulse, setPulse] = useState<PulseData | null>(null)
-  const loadedDays = pulse?.days ?? null
-  const { scrollRef, trackPinned } = usePinnedToEnd(loadedDays)
 
   // Hold the last loaded window while a new range streams in, so switching
   // ranges never blanks the card.
@@ -105,18 +87,15 @@ export function WorkstreamsPulse({
         </Select>
       }
     >
-      <CardContent
-        className="max-h-72 overflow-auto px-0"
-        onScroll={trackPinned}
-        ref={scrollRef}
-      >
-        <PulseLanes
-          onOpen={onOpen}
-          pulse={pulse}
-          view={view}
-          workstreams={workstreams}
-        />
-      </CardContent>
+      <PulseViewport
+        key={pulse.days}
+        dayCount={pulse.days}
+        days={view.days}
+        lanes={view.lanes}
+        onOpen={onOpen}
+        unplaced={pulse.unplaced}
+        workstreams={workstreams}
+      />
       <PulseFooter>
         <span className="flex items-center gap-1.5">
           <Clock aria-hidden className="size-3.5 shrink-0" />
@@ -132,127 +111,6 @@ export function WorkstreamsPulse({
       </PulseFooter>
     </PulseShell>
   )
-}
-
-function PulseLanes({
-  onOpen,
-  pulse,
-  view,
-  workstreams,
-}: {
-  onOpen: (workstream: Workstream) => void
-  pulse: PulseData
-  view: ReturnType<typeof buildPulse>
-  workstreams: Workstreams
-}) {
-  const laneGrid = laneGrids[pulse.days]
-  const workstreamLanes = view.lanes.filter((lane) => lane.id !== null)
-  const unplacedLane = view.lanes.find((lane) => lane.id === null)
-
-  return (
-    <div className="flex w-fit flex-col gap-1 pr-(--card-spacing)">
-      {workstreamLanes.map((lane) => (
-        <LaneRow
-          key={lane.id}
-          lane={lane}
-          laneGrid={laneGrid}
-          unplaced={0}
-          onOpen={laneOpener(lane, workstreams, onOpen)}
-        />
-      ))}
-      <div className="sticky bottom-0 z-20 flex flex-col gap-1 bg-card">
-        {unplacedLane === undefined ? null : (
-          <LaneRow
-            lane={unplacedLane}
-            laneGrid={laneGrid}
-            unplaced={pulse.unplaced}
-            onOpen={undefined}
-          />
-        )}
-        <PulseAxis days={view.days} laneGrid={laneGrid} />
-      </div>
-    </div>
-  )
-}
-
-function PulseAxis({
-  days,
-  laneGrid,
-}: {
-  days: ReturnType<typeof buildPulse>["days"]
-  laneGrid: string
-}) {
-  return (
-    <div className={laneGrid}>
-      <span className={stickyLane} />
-      {days.map((day) => (
-        <span
-          key={day.key}
-          className={cn(
-            "whitespace-nowrap pt-1 text-center text-[11px] text-muted-foreground tabular-nums",
-            day.emphasized && "font-medium text-foreground"
-          )}
-        >
-          {day.label}
-        </span>
-      ))}
-    </div>
-  )
-}
-
-// Today lives at the right edge, so the view stays pinned to the end: on
-// each loaded window, and again whenever the container or grid resizes
-// (small viewports, window resizing) - unless the reader has deliberately
-// scrolled back into history.
-function usePinnedToEnd(loadedDays: PulseDays | null) {
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const pinned = useRef(true)
-
-  useEffect(() => {
-    const node = scrollRef.current
-
-    if (loadedDays === null || node === null) {
-      return
-    }
-
-    pinned.current = true
-    node.scrollLeft = node.scrollWidth
-
-    const observer = new ResizeObserver(() => {
-      if (pinned.current) {
-        node.scrollLeft = node.scrollWidth
-      }
-    })
-
-    observer.observe(node)
-
-    if (node.firstElementChild !== null) {
-      observer.observe(node.firstElementChild)
-    }
-
-    return () => observer.disconnect()
-  }, [loadedDays])
-
-  const trackPinned = () => {
-    const node = scrollRef.current
-
-    if (node !== null) {
-      pinned.current =
-        node.scrollLeft >= node.scrollWidth - node.clientWidth - 2
-    }
-  }
-
-  return { scrollRef, trackPinned }
-}
-
-function laneOpener(
-  lane: PulseLane,
-  workstreams: Workstreams,
-  onOpen: (workstream: Workstream) => void
-) {
-  const workstream = workstreams.find((row) => row.id === lane.id)
-
-  return workstream === undefined ? undefined : () => onOpen(workstream)
 }
 
 function Strong({ children }: { children: ReactNode }) {
