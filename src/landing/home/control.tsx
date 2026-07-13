@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
-import { ApprovalCard } from "../props/approval"
-import { ModeMatrix } from "../props/modes"
-import { ReceiptsTimeline } from "../props/receipts"
+import { ApprovalCard } from "../examples/approval"
+import { ModeMatrix } from "../examples/modes"
+import { ReceiptsTimeline } from "../examples/receipts"
 import { Section } from "../section"
 
 // The approval story is staged on a mention run: scheduled runs never use

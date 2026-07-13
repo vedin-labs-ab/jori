@@ -9,8 +9,8 @@ import { BrandIcon } from "@/shared/brand"
 import {
   DiscoveryWorkingStep,
   WebsiteDiscoveryStep,
-} from "../context/organization/discovery/website"
-import { type OrganizationDiscovery } from "../context/organization/types"
+} from "../discovery/website"
+import { type OrganizationDiscovery } from "../types"
 
 export function WelcomeStep({
   onStart,

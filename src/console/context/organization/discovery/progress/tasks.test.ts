@@ -4,7 +4,7 @@ import {
   createDiscoveryTasks,
   discoveryFailed,
   discoveryReadyForReview,
-} from "./data"
+} from "./tasks"
 
 type Discovery = NonNullable<OrganizationDiscovery>
 type DiscoveryStep = Discovery["steps"][number]

@@ -5,7 +5,7 @@ import {
   playbookOptionFields,
 } from "@contracts/playbooks/options"
 import { type ReactNode } from "react"
-import { PlaybookSection } from "../meta"
+import { PlaybookSection } from "../../meta"
 import { BehaviorList } from "./behavior"
 import { OptionField } from "./control"
 

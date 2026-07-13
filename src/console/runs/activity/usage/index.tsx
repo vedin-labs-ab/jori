@@ -1,5 +1,5 @@
 import { Cpu } from "lucide-react"
-import { type TokenUsage, visibleTokenUsageMetrics } from "./data"
+import { type TokenUsage, visibleTokenUsageMetrics } from "./metrics"
 
 const tokenFormat = new Intl.NumberFormat("en", {
   maximumFractionDigits: 1,

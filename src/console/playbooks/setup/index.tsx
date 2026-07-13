@@ -3,9 +3,9 @@ import { Link } from "@tanstack/react-router"
 import { Cable } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { type PlaybookActions } from "../enable"
+import { type PlaybookListRow, planPlaybookEnable } from "../state"
 import { PlaybookSetupDialog } from "./dialog"
-import { type PlaybookActions } from "./enable"
-import { type PlaybookListRow, planPlaybookEnable } from "./state"
 
 /** Link to the integrations page for a playbook that lacks a connection. */
 export function ConnectButton({ label }: { label: string }) {

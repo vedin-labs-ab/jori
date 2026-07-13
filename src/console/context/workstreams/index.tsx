@@ -11,6 +11,7 @@ import {
   useResettingSetter,
 } from "../../shared/list/pagination"
 import { ContextPage } from ".."
+import { PulseSkeleton } from "./activity/lane"
 import { WorkstreamsPulse } from "./activity/pulse"
 import { WorkstreamCard } from "./card"
 import { WorkstreamDetail } from "./detail"
@@ -20,7 +21,6 @@ import {
   type WorkstreamFilter,
   workstreamFilterOptions,
 } from "./filter"
-import { PulseSkeleton } from "./lane"
 import { type Workstream, type Workstreams } from "./types"
 
 // Milo's deduced picture of the org's work. Corrections teach the judge.

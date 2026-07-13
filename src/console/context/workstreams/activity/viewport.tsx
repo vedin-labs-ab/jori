@@ -1,9 +1,9 @@
 import { type UIEvent, useEffect, useRef } from "react"
 import { CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { LaneRow, stickyLane } from "../lane"
-import { type Pulse, type PulseLane } from "../series"
 import { type Workstream, type Workstreams } from "../types"
+import { LaneRow, stickyLane } from "./lane"
+import { type Pulse, type PulseLane } from "./series"
 
 type PulseDays = 14 | 30 | 60
 

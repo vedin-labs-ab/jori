@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { type OrganizationDiscovery } from "../types"
 import { DiscoveryProgress } from "./progress"
-import { discoveryFailed, discoveryReadyForReview } from "./progress/data"
+import { discoveryFailed, discoveryReadyForReview } from "./progress/tasks"
 
 export function WebsiteDiscoveryStep({
   continueLabel = "Continue",

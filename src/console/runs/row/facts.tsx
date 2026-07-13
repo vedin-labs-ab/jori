@@ -28,8 +28,8 @@ import {
 import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, absoluteUtcTime } from "../../shared/time"
 import { ToolGroupsValue } from "../../shared/tools"
+import { RunSectionLabel } from "../section"
 import { type ExecutionDetail, type ExecutionDetailType } from "../types"
-import { RunSectionLabel } from "./layout"
 import { RepositoryIcon } from "./metadata"
 
 const detailMeta = {

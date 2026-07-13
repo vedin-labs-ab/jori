@@ -7,9 +7,9 @@ import { ProviderLogo } from "@/shared/logo/provider"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import { absoluteTime, formatDuration } from "../../shared/time"
-import { useRunRequestCarousel } from "../request/carousel"
 import { type ExecutionApproval } from "../types"
-import { type RunRequestMeta, RunRequestSection } from "./layout"
+import { useRunRequestCarousel } from "./carousel"
+import { type RunRequestMeta, RunRequestSection } from "./section"
 
 type ApprovalDecisionArgs = FunctionArgs<typeof api.approvals.console.decide>
 

@@ -1,8 +1,8 @@
 import { type ComponentProps } from "react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { PlaybookSection } from "../meta"
+import { type PlaybookEnablePlan } from "../state"
 import { DeliveryField } from "./delivery/field"
-import { PlaybookSection } from "./meta"
-import { type PlaybookEnablePlan } from "./state"
 
 export function PlaybookAccounts({
   disabled = false,

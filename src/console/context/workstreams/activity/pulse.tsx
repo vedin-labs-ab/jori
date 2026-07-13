@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/select"
 import { api } from "../../../../../convex/_generated/api"
 import { ContextTitleCount } from "../../section"
-import { PulseFooter, PulseShell, PulseSkeleton } from "../lane"
-import { buildPulse } from "../series"
 import { type Workstream, type Workstreams } from "../types"
+import { PulseFooter, PulseShell, PulseSkeleton } from "./lane"
+import { buildPulse } from "./series"
 import { PulseViewport } from "./viewport"
 
 type PulseDays = 14 | 30 | 60

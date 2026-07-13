@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type OrganizationDiscovery } from "../../types"
-import { createDiscoveryTasks } from "./data"
+import { createDiscoveryTasks } from "./tasks"
 
 type Discovery = NonNullable<OrganizationDiscovery>
 type DiscoveryStep = Discovery["steps"][number]

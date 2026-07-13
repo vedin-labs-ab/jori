@@ -1,8 +1,8 @@
 import { useAction, useQuery } from "convex/react"
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { api } from "../../../convex/_generated/api"
-import { reportWebsiteStartError } from "../context/organization/discovery/url"
+import { api } from "../../../../../convex/_generated/api"
+import { reportWebsiteStartError } from "../discovery/url"
 import { WebsiteStep, WelcomeStep, WorkingStep } from "./steps"
 
 type Step = "welcome" | "website" | "working"

@@ -7,15 +7,10 @@ import {
 } from "../../permissions/controller"
 import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"
+import { type IntegrationCardStatus } from "./headline"
 import { type CreateInstallState, useIntegrationInstall } from "./install"
 import { IntegrationPermissions } from "./permissions"
 import { IntegrationCardSurface, type SurfaceLogo } from "./surface"
-
-export type IntegrationCardStatus =
-  | "active"
-  | "disconnected"
-  | "expired"
-  | undefined
 
 export type IntegrationCardConfig = {
   action: string

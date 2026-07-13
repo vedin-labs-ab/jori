@@ -32,13 +32,13 @@ vi.mock("convex/react", () => ({
   }),
 }))
 
-vi.mock("./share", () => ({
+vi.mock("@/shared/artifacts/share", () => ({
   ArtifactShareView: ({ artifactId }: { artifactId: string }) => (
     <div>Shared {artifactId}</div>
   ),
 }))
 
-vi.mock("./index", () => ({
+vi.mock("@/console/artifacts/view", () => ({
   ArtifactView: ({ artifactId }: { artifactId: string }) => (
     <div>Member {artifactId}</div>
   ),

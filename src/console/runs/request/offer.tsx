@@ -15,9 +15,9 @@ import { IntegrationLogo } from "@/shared/logo/integration"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import { absoluteTime, formatDuration } from "../../shared/time"
-import { useRunRequestCarousel } from "../request/carousel"
 import { type ExecutionOffer } from "../types"
-import { type RunRequestMeta, RunRequestSection } from "./layout"
+import { useRunRequestCarousel } from "./carousel"
+import { type RunRequestMeta, RunRequestSection } from "./section"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 
