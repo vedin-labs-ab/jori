@@ -1,5 +1,10 @@
 import { readdir } from "node:fs/promises"
 import path from "node:path"
+import {
+  findNamingViolations,
+  formatNamingViolation,
+  type NamingViolation,
+} from "./names"
 
 type FolderCount = {
   count: number
@@ -29,7 +34,6 @@ const sourceExtensions = new Set([
   ".ts",
   ".tsx",
 ])
-
 const skippedDirectories = [
   ".agents",
   ".claude",
@@ -52,6 +56,11 @@ const allowedSingleFileFolders = [
 ]
 
 const counts = await countFolders(root)
+const namingViolations = await findNamingViolations({
+  isSkipped,
+  isSource: isSourceFile,
+  root,
+})
 const limitViolations = counts
   .filter((folder) => folder.count > defaultLimit)
   .sort((left, right) =>
@@ -63,8 +72,14 @@ const singleFileViolations = counts
   .filter(isSingleFileFolder)
   .sort((left, right) => left.relativePath.localeCompare(right.relativePath))
 
-if (limitViolations.length > 0 || singleFileViolations.length > 0) {
-  process.stderr.write(formatViolations(limitViolations, singleFileViolations))
+if (
+  limitViolations.length > 0 ||
+  singleFileViolations.length > 0 ||
+  namingViolations.length > 0
+) {
+  process.stderr.write(
+    formatViolations(limitViolations, singleFileViolations, namingViolations)
+  )
   process.exitCode = 1
 } else {
   process.stdout.write(
@@ -119,6 +134,10 @@ function isCountedSourceFile(fileName: string) {
     return false
   }
 
+  return isSourceFile(fileName)
+}
+
+function isSourceFile(fileName: string) {
   return sourceExtensions.has(path.extname(fileName))
 }
 
@@ -149,7 +168,8 @@ function toRelativePath(directory: string) {
 
 function formatViolations(
   limitViolations: FolderCount[],
-  singleFileViolations: FolderCount[]
+  singleFileViolations: FolderCount[],
+  namingViolations: NamingViolation[]
 ) {
   const lines = [
     "Folder structure check failed.",
@@ -163,6 +183,11 @@ function formatViolations(
       "Single-file folders",
       singleFileViolations,
       formatSingleFileViolation
+    ),
+    ...formatSection(
+      "Compound source names",
+      namingViolations,
+      formatNamingViolation
     ),
     "",
     "Split crowded folders by domain, workflow, or responsibility. Flatten one-file leaf folders until supporting source files exist.",
