@@ -1,11 +1,13 @@
 import {
   AlertCircle,
+  Bookmark,
+  BookmarkCheck,
+  BookmarkX,
   BookOpen,
   Brain,
   Check,
-  CirclePause,
   FileText,
-  GitFork,
+  GitBranch,
   Hourglass,
   type LucideIcon,
   Package,
@@ -30,7 +32,7 @@ import {
 } from "./types"
 
 const kindIcons = {
-  agent: GitFork,
+  agent: GitBranch,
   approval: ShieldCheck,
   asset: Package,
   model: Brain,
@@ -54,7 +56,6 @@ const kindLabels = {
 const toolIcons: Record<string, LucideIcon> = {
   bash: Terminal,
   load_skill: BookOpen,
-  wait_for_agents: CirclePause,
 }
 
 export function ActivityIcon({ item }: { item: ActivityItem }) {
@@ -108,6 +109,10 @@ function itemIcon(item: ActivityItem) {
     return kindIcons[item.kind]
   }
 
+  if (item.tool === "wait_for_agents") {
+    return agentWaitIcon(item)
+  }
+
   const specificIcon =
     item.tool === undefined ? undefined : toolIcons[item.tool]
 
@@ -134,6 +139,32 @@ function itemIcon(item: ActivityItem) {
   }
 
   return Wrench
+}
+
+function agentWaitIcon(item: ActivityItem) {
+  const outcomes = (item.metadata ?? [])
+    .filter((entry) => entry.kind === "outcome")
+    .map((entry) => entry.text)
+
+  if (
+    item.status === "failed" ||
+    item.status === "stopped" ||
+    outcomes.some(isUnsuccessfulAgentOutcome)
+  ) {
+    return BookmarkX
+  }
+
+  if (outcomes.some((outcome) => outcome.endsWith(" ongoing"))) {
+    return Bookmark
+  }
+
+  return outcomes.length > 0 || item.status === "completed"
+    ? BookmarkCheck
+    : Bookmark
+}
+
+function isUnsuccessfulAgentOutcome(outcome: string) {
+  return outcome.endsWith(" failed") || outcome.endsWith(" stopped")
 }
 
 function runIcon(status: ActivityStatus) {

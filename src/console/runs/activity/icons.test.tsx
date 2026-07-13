@@ -23,7 +23,7 @@ afterAll(() => {
   globalThis.ResizeObserver = originalResizeObserver
 })
 
-test("uses a static pause icon while wait_for_agents is parked", () => {
+test("uses a bookmark while wait_for_agents is parked", () => {
   renderActivity({
     durationMs: 200,
     isLive: false,
@@ -35,14 +35,65 @@ test("uses a static pause icon while wait_for_agents is parked", () => {
 
   const icon = screen.getByRole("img", { name: "Tool waiting" })
 
-  expect(
-    icon.querySelector("svg")?.classList.contains("lucide-circle-pause")
-  ).toBe(true)
+  expect(icon.querySelector("svg")?.classList.contains("lucide-bookmark")).toBe(
+    true
+  )
   expect(screen.getByText("Wait for agents").className).not.toContain("shimmer")
   expect(screen.getByText("2 ongoing")).toBeDefined()
 })
 
-test("uses a fork icon for delegated agents", () => {
+test("uses a checked bookmark when every agent succeeded", () => {
+  renderActivity({
+    metadata: [{ kind: "outcome", text: "2 succeeded" }],
+    status: "completed",
+    title: "Wait for agents",
+    tool: "wait_for_agents",
+  })
+
+  const icon = screen.getByRole("img", { name: "Tool done" })
+
+  expect(
+    icon.querySelector("svg")?.classList.contains("lucide-bookmark-check")
+  ).toBe(true)
+})
+
+test("keeps the bookmark after a timeout while agents are ongoing", () => {
+  renderActivity({
+    metadata: [
+      { kind: "outcome", text: "1 ongoing" },
+      { kind: "outcome", text: "1 succeeded" },
+    ],
+    status: "completed",
+    title: "Wait for agents",
+    tool: "wait_for_agents",
+  })
+
+  const icon = screen.getByRole("img", { name: "Tool done" })
+
+  expect(icon.querySelector("svg")?.classList.contains("lucide-bookmark")).toBe(
+    true
+  )
+})
+
+test("uses an x bookmark when any agent was unsuccessful", () => {
+  renderActivity({
+    metadata: [
+      { kind: "outcome", text: "1 succeeded" },
+      { kind: "outcome", text: "1 failed" },
+    ],
+    status: "completed",
+    title: "Wait for agents",
+    tool: "wait_for_agents",
+  })
+
+  const icon = screen.getByRole("img", { name: "Tool done" })
+
+  expect(
+    icon.querySelector("svg")?.classList.contains("lucide-bookmark-x")
+  ).toBe(true)
+})
+
+test("uses a branch icon for delegated agents", () => {
   renderActivity({
     description: "Prepare a meeting dossier",
     kind: "agent",
@@ -52,9 +103,9 @@ test("uses a fork icon for delegated agents", () => {
 
   const icon = screen.getByRole("img", { name: "Agent running" })
 
-  expect(icon.querySelector("svg")?.classList.contains("lucide-git-fork")).toBe(
-    true
-  )
+  expect(
+    icon.querySelector("svg")?.classList.contains("lucide-git-branch")
+  ).toBe(true)
 })
 
 test("uses the shared skill icon for load_skill", () => {
