@@ -4,7 +4,7 @@ import {
   findNamingViolations,
   formatNamingViolation,
   type NamingViolation,
-} from "./names"
+} from "./names.ts"
 
 type FolderCount = {
   count: number
