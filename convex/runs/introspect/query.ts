@@ -71,9 +71,9 @@ export const searchRunActivity = internalQuery({
       return { cursor: null, items: [] }
     }
 
-    const items = projectActivity(await loadActivityData(ctx, target)).filter(
-      (item) => matchesActivityFilter(item, args.filter)
-    )
+    const items = projectActivity(
+      await loadActivityData(ctx, target, current.createdBy)
+    ).filter((item) => matchesActivityFilter(item, args.filter))
     const page = pageItems(items, {
       cursor: args.cursor,
       limit: args.limit,

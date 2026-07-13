@@ -18,13 +18,16 @@ import {
   targetObjectLabel,
 } from "./helpers"
 import { agentWaitMetadata } from "./metadata/agents"
+import { artifactMetadata } from "./metadata/artifacts"
 import { runIntrospectionMetadata } from "./metadata/runs"
 import { type ToolResult } from "./read"
 
 export function toolMetadata(args: {
   agents: Doc<"runs">[]
+  artifactTitles: ReadonlyMap<string, string>
   input: Record<string, unknown> | undefined
   result: ToolResult | undefined
+  runArtifactId: string | undefined
   tool: string
 }) {
   if (args.tool === "send_reply") {
@@ -48,6 +51,7 @@ export function toolMetadata(args: {
   }
 
   return compactMetadata([
+    ...artifactMetadata(args),
     ...reactionMetadata(args.tool, args.input),
     ...inputMetadata(args.tool, args.input),
     ...resultMetadata(args.tool, args.result),
