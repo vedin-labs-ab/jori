@@ -21,11 +21,7 @@ export function ContextSectionTitle({
     <div className="flex items-center justify-between gap-3">
       <h3 className="flex items-baseline gap-1.5 font-medium text-muted-foreground text-xs">
         <span>{children}</span>
-        {count === undefined ? null : (
-          <span className="font-normal text-muted-foreground/70 tabular-nums">
-            ({count})
-          </span>
-        )}
+        {count === undefined ? null : <ContextTitleCount count={count} />}
         {hint === undefined ? null : (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -40,5 +36,13 @@ export function ContextSectionTitle({
       </h3>
       {action}
     </div>
+  )
+}
+
+export function ContextTitleCount({ count }: { count: number }) {
+  return (
+    <span className="font-normal text-muted-foreground/70 tabular-nums">
+      ({count})
+    </span>
   )
 }

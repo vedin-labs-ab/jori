@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { api } from "../../../../../convex/_generated/api"
+import { ContextTitleCount } from "../../section"
 import { PulseFooter, PulseShell, PulseSkeleton } from "../lane"
 import { buildPulse } from "../series"
 import { type Workstream, type Workstreams } from "../types"
@@ -55,6 +56,7 @@ export function WorkstreamsPulse({
   }
 
   const view = buildPulse(pulse.entries, workstreams, pulse.now, pulse.days)
+  const activeCount = view.lanes.filter((lane) => lane.id !== null).length
 
   if (view.lanes.length === 0) {
     return null
@@ -67,7 +69,12 @@ export function WorkstreamsPulse({
   // resolve, so the card caps against real available width instead.
   return (
     <PulseShell
-      title="Activity"
+      title={
+        <span className="flex items-baseline gap-1.5">
+          <span>Activity</span>
+          <ContextTitleCount count={activeCount} />
+        </span>
+      }
       description="Recent activity across workstreams and unplaced efforts."
       action={
         <Select
