@@ -1,35 +1,26 @@
 import { useQuery } from "convex/react"
 import { Layers } from "lucide-react"
-import { useState } from "react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { useCallback, useMemo, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
-import { ConsoleFilterField } from "../../shared/layout"
-import { ConsoleEmptyState } from "../../shared/list/empty"
+import { ConsoleFilterGroup, ConsoleFilterToggle } from "../../shared/layout"
+import { FilterableEmptyState } from "../../shared/list/empty"
+import { ConsoleListPager } from "../../shared/list/pager"
+import { useClientPagination } from "../../shared/list/pagination"
 import { ContextPage } from ".."
-import { ContextSectionTitle } from "../section"
 import { WorkstreamsPulse } from "./activity/pulse"
 import { WorkstreamCard } from "./card"
 import { WorkstreamDetail } from "./detail"
+import {
+  filterWorkstreamsByView,
+  hasWorkstreamFilters,
+  type WorkstreamFilter,
+  workstreamFilterOptions,
+} from "./filter"
 import { PulseSkeleton } from "./lane"
 import { type Workstream, type Workstreams } from "./types"
 
-type StatusFilter = "active" | "closed" | "rejected"
-
-const filterLabels: Record<StatusFilter, string> = {
-  active: "Active",
-  closed: "Archived",
-  rejected: "Not workstreams",
-}
-
-// Milo's deduced picture of the org's active work: suggestions to review on
-// top, the confirmed roster below. Corrections teach the judge.
+// Milo's deduced picture of the org's work. Corrections teach the judge.
 export function ContextWorkstreams() {
   return (
     <ContextPage tab="workstreams">
@@ -40,9 +31,9 @@ export function ContextWorkstreams() {
 
 function WorkstreamsView({ tenantId }: { tenantId: string }) {
   const result = useQuery(api.deduction.console.queries.list, { tenantId })
-  const [filter, setFilter] = useState<StatusFilter>("active")
   const [openId, setOpenId] = useState<Workstream["id"] | null>(null)
   const workstreams = result?.workstreams ?? []
+  const list = useWorkstreamPagination(workstreams, result !== undefined)
   const open = workstreams.find((row) => row.id === openId) ?? null
   const openWorkstream = (workstream: Workstream) => setOpenId(workstream.id)
   const roster = workstreams.filter(
@@ -60,34 +51,19 @@ function WorkstreamsView({ tenantId }: { tenantId: string }) {
           onOpen={openWorkstream}
         />
       )}
-      <div className="flex items-center justify-between gap-2">
-        <ConsoleFilterField label="Status">
-          <Select
-            value={filter}
-            onValueChange={(value) => setFilter(value as StatusFilter)}
-          >
-            <SelectTrigger size="sm" className="w-fit">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(filterLabels).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </ConsoleFilterField>
-      </div>
+      <WorkstreamFilters filter={list.filter} onFilterChange={list.setFilter} />
       {result === undefined ? (
         <Skeleton className="h-28 w-full" />
       ) : (
-        <FilteredWorkstreams
-          filter={filter}
-          workstreams={workstreams}
+        <WorkstreamList
+          hasFilters={list.hasFilters || workstreams.length > 0}
+          workstreams={list.pagination.visibleRows}
           onOpen={openWorkstream}
         />
       )}
+      {list.total > 0 ? (
+        <ConsoleListPager pagination={list.pagination} />
+      ) : null}
       <WorkstreamDetail
         tenantId={tenantId}
         workstream={open}
@@ -97,18 +73,79 @@ function WorkstreamsView({ tenantId }: { tenantId: string }) {
   )
 }
 
-function FilteredWorkstreams({
+function useWorkstreamPagination(workstreams: Workstreams, isReady: boolean) {
+  const [filter, setFilter] = useState<WorkstreamFilter>("active")
+  const filteredWorkstreams = useMemo(
+    () => filterWorkstreamsByView(workstreams, filter),
+    [filter, workstreams]
+  )
+  const hasFilters = hasWorkstreamFilters(filter)
+  const pagination = useClientPagination({
+    hasFilters,
+    isReady,
+    itemLabel: { singular: "workstream", plural: "workstreams" },
+    items: filteredWorkstreams,
+  })
+  const { reset } = pagination
+  const setFilterAndReset = useCallback(
+    (value: WorkstreamFilter) => {
+      setFilter(value)
+      reset()
+    },
+    [reset]
+  )
+
+  return {
+    filter,
+    hasFilters,
+    pagination,
+    setFilter: setFilterAndReset,
+    total: filteredWorkstreams.length,
+  }
+}
+
+function WorkstreamFilters({
   filter,
+  onFilterChange,
+}: {
+  filter: WorkstreamFilter
+  onFilterChange: (value: WorkstreamFilter) => void
+}) {
+  return (
+    <ConsoleFilterGroup>
+      <ConsoleFilterToggle
+        label="Status"
+        onValueChange={onFilterChange}
+        options={workstreamFilterOptions}
+        value={filter}
+      />
+    </ConsoleFilterGroup>
+  )
+}
+
+function WorkstreamList({
+  hasFilters,
   workstreams,
   onOpen,
 }: {
-  filter: StatusFilter
+  hasFilters: boolean
   workstreams: Workstreams
   onOpen: (workstream: Workstream) => void
 }) {
-  const section = (rows: Workstreams) => (
+  if (workstreams.length === 0) {
+    return (
+      <FilterableEmptyState
+        description="Milo reviews activity across your connected tools every hour; suggested workstreams appear here."
+        hasFilters={hasFilters}
+        icon={Layers}
+        noun="workstreams"
+      />
+    )
+  }
+
+  return (
     <ul className="flex flex-col gap-2">
-      {rows.map((workstream) => (
+      {workstreams.map((workstream) => (
         <li key={workstream.id}>
           <WorkstreamCard
             workstream={workstream}
@@ -117,57 +154,5 @@ function FilteredWorkstreams({
         </li>
       ))}
     </ul>
-  )
-
-  if (filter !== "active") {
-    const rows = workstreams.filter((row) => row.status === filter)
-
-    return rows.length === 0 ? (
-      <WorkstreamsEmpty
-        description={`Nothing ${filterLabels[filter].toLowerCase()} yet.`}
-      />
-    ) : (
-      section(rows)
-    )
-  }
-
-  const suggested = workstreams.filter((row) => row.status === "proposed")
-  const confirmed = workstreams.filter((row) => row.status === "confirmed")
-
-  if (suggested.length === 0 && confirmed.length === 0) {
-    return (
-      <WorkstreamsEmpty description="Milo reviews activity across your connected tools every hour; suggested workstreams appear here." />
-    )
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      {suggested.length === 0 ? null : (
-        <section className="flex flex-col gap-2">
-          <ContextSectionTitle count={suggested.length}>
-            Needs review
-          </ContextSectionTitle>
-          {section(suggested)}
-        </section>
-      )}
-      {confirmed.length === 0 ? null : (
-        <section className="flex flex-col gap-2">
-          <ContextSectionTitle count={confirmed.length}>
-            Confirmed
-          </ContextSectionTitle>
-          {section(confirmed)}
-        </section>
-      )}
-    </div>
-  )
-}
-
-function WorkstreamsEmpty({ description }: { description: string }) {
-  return (
-    <ConsoleEmptyState
-      description={description}
-      icon={Layers}
-      title="No workstreams"
-    />
   )
 }
