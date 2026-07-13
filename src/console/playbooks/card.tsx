@@ -18,7 +18,7 @@ import {
 import { ScopeBadge } from "../shared/details"
 import { PlaybookControls, PlaybookSwitch } from "./controls"
 import { type PlaybookActions } from "./enable"
-import { PlaybookMeta } from "./meta"
+import { PlaybookIcon, PlaybookMeta } from "./meta"
 import { type PlaybookListRow } from "./state"
 
 const playbookIcons: Record<string, LucideIcon> = {
@@ -45,9 +45,7 @@ export function PlaybookCard({
     <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-center gap-2.5">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted/40">
-            <Icon className="size-4" />
-          </span>
+          <PlaybookIcon icon={Icon} />
           <CardTitle>{definition.title}</CardTitle>
           <ScopeBadge scope={definition.scope} />
           {row?.enabled ? (

@@ -17,6 +17,7 @@ export function OptionField({
   field,
   hint,
   label = true,
+  muted = false,
   onChange,
   value,
 }: {
@@ -24,6 +25,7 @@ export function OptionField({
   field: PlaybookOptionField
   hint?: ReactNode
   label?: boolean
+  muted?: boolean
   onChange: (value: boolean | number | string) => void
   value: boolean | number | string
 }) {
@@ -31,7 +33,14 @@ export function OptionField({
 
   return (
     <div className="grid gap-2">
-      {label ? <Label htmlFor={id}>{field.label}</Label> : null}
+      {label ? (
+        <Label
+          className={muted ? "text-muted-foreground" : undefined}
+          htmlFor={id}
+        >
+          {field.label}
+        </Label>
+      ) : null}
       <OptionControl
         disabled={disabled}
         field={field}
