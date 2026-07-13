@@ -3,6 +3,7 @@ import {
   codingToolDefinitions,
 } from "../../contracts/coding"
 import { type ToolAccess } from "../../contracts/permissions"
+import { durationUnits } from "../../contracts/runtime"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import {
@@ -50,16 +51,29 @@ export const sandboxTools = [
     inputSchema: withOptionalFieldGuidance({
       type: "object",
       additionalProperties: false,
-      required: ["deadline", "runIds"],
+      required: ["runIds", "timeout"],
       properties: {
-        deadline: {
-          type: "string",
-          description:
-            "Absolute UTC ISO 8601 deadline ending in Z. Waiting ends when every listed agent is done or at this time, whichever comes first.",
-        },
         runIds: stringArrayProperty(
           "Run IDs returned by start_agent. Include 1-20 direct child agents."
         ),
+        timeout: {
+          type: "object",
+          additionalProperties: false,
+          required: ["unit", "value"],
+          properties: {
+            unit: {
+              type: "string",
+              enum: [...durationUnits],
+              description: "Unit for the maximum wait.",
+            },
+            value: {
+              type: "integer",
+              minimum: 1,
+              description:
+                "Positive whole-number wait. The total timeout must be between 5 seconds and 30 days.",
+            },
+          },
+        },
       },
     }),
     route: "agent",

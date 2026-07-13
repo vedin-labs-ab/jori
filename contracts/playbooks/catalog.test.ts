@@ -81,6 +81,7 @@ describe("meeting prep catalog", () => {
   }
 
   test("digest mode runs the sweep ahead of the chosen delivery time", () => {
+    expect(meetingPrep.agentWait).toEqual({ unit: "minutes", value: 15 })
     expect(resolvePlaybookSchedule(meetingPrep, options())).toEqual({
       repeat: "daily",
       time: "07:15",

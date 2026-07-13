@@ -2,6 +2,18 @@ import { beforeEach, expect, test, vi } from "vitest"
 import { executeToolCall, type ToolRuntime } from "../tool"
 import { type ConvexId } from "../types"
 
+const triggerWait = vi.hoisted(() => ({
+  createToken: vi.fn(async () => ({ id: "waitpoint_1" })),
+  forToken: vi.fn(),
+}))
+
+vi.mock("@trigger.dev/sdk/v3", () => ({
+  wait: {
+    createToken: triggerWait.createToken,
+    forToken: triggerWait.forToken,
+  },
+}))
+
 beforeEach(() => {
   vi.clearAllMocks()
 })
@@ -70,8 +82,8 @@ test("wait_for_agents returns immediately when every child is terminal", async (
     attempt: 1,
     call: {
       args: {
-        deadline: "2099-07-12T18:00:00.000Z",
         runIds: ["run_child"],
+        timeout: { unit: "minutes", value: 15 },
       },
       id: "call_1",
       name: "wait_for_agents",
@@ -90,6 +102,73 @@ test("wait_for_agents returns immediately when every child is terminal", async (
         error: null,
       },
     ],
+  })
+})
+
+test("wait_for_agents turns a relative timeout into a waitpoint expiry", async () => {
+  const now = Date.parse("2026-07-13T08:00:00.000Z")
+  const runtime = createRuntime()
+  const running = agentRun("running")
+  const completed = agentRun("completed")
+  runtime.convex.readAgentRuns = vi
+    .fn()
+    .mockResolvedValueOnce([running])
+    .mockResolvedValue([completed])
+  runtime.convex.createWaiter = vi.fn(async () => id<"waiters">("waiter_1"))
+  runtime.convex.expireWaiter = vi.fn()
+  const clock = vi.spyOn(Date, "now").mockReturnValue(now)
+
+  const result = await executeToolCall({
+    attempt: 1,
+    call: {
+      args: {
+        runIds: ["run_child"],
+        timeout: { unit: "minutes", value: 15 },
+      },
+      id: "call_1",
+      name: "wait_for_agents",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  clock.mockRestore()
+  expect(JSON.parse(result.content)).toEqual({
+    reason: "completed",
+    runs: [completed],
+  })
+  expect(runtime.convex.createWaiter).toHaveBeenCalledWith({
+    condition: { kind: "runs", runIds: ["run_child"] },
+    expiresAt: now + 15 * 60 * 1000,
+    runId: "run_1",
+    waitpointId: "waitpoint_1",
+  })
+  expect(runtime.convex.expireWaiter).toHaveBeenCalledWith({
+    waiterId: "waiter_1",
+  })
+  expect(triggerWait.forToken).not.toHaveBeenCalled()
+})
+
+test("wait_for_agents rejects timeouts outside its bounds", async () => {
+  const runtime = createRuntime()
+
+  const result = await executeToolCall({
+    attempt: 1,
+    call: {
+      args: {
+        runIds: ["run_child"],
+        timeout: { unit: "seconds", value: 4 },
+      },
+      id: "call_1",
+      name: "wait_for_agents",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(JSON.parse(result.content)).toEqual({
+    error: { message: "timeout must be between 5 seconds and 30 days." },
+    status: "error",
   })
 })
 
@@ -146,4 +225,13 @@ function createRuntime(): ToolRuntime {
 
 function id<TableName extends string>(value: string) {
   return value as ConvexId<TableName>
+}
+
+function agentRun(status: "completed" | "running") {
+  return {
+    runId: id<"runs">("run_child"),
+    title: "Research attendees",
+    status,
+    error: null,
+  }
 }

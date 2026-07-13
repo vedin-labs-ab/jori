@@ -1,12 +1,19 @@
+import {
+  type Duration,
+  durationMilliseconds,
+  isDurationUnit,
+} from "../../contracts/runtime"
 import { type ToolRuntime } from "../tool/runtime"
 import { type AgentRunStatus, type ConvexId, type JsonObject } from "../types"
 import { parkWaitpoint } from "./waiter"
 
 const maxAgents = 20
+const minTimeoutMs = durationMilliseconds({ unit: "seconds", value: 5 })
+const maxTimeoutMs = durationMilliseconds({ unit: "days", value: 30 })
 
 export async function waitForAgents(runtime: ToolRuntime, input: JsonObject) {
   const runIds = readRunIds(input.runIds)
-  const deadline = readDeadline(input.deadline)
+  const timeoutMs = readTimeoutMilliseconds(input.timeout)
   const readRuns = async () =>
     await runtime.convex.readAgentRuns({
       parentId: runtime.context.run.id,
@@ -19,13 +26,9 @@ export async function waitForAgents(runtime: ToolRuntime, input: JsonObject) {
     return { reason: "completed", runs }
   }
 
-  if (deadline <= Date.now()) {
-    return { reason: "deadline", runs }
-  }
-
   const wake = await parkWaitpoint(runtime, {
     condition: { kind: "runs", runIds },
-    deadline,
+    deadline: Date.now() + timeoutMs,
     resolved: async () => allTerminal(await readRuns()),
   })
 
@@ -36,7 +39,7 @@ export async function waitForAgents(runtime: ToolRuntime, input: JsonObject) {
       allTerminal(runs) || wake.reason === "resolved"
         ? "completed"
         : wake.reason === "expired"
-          ? "deadline"
+          ? "timeout"
           : "interrupted",
     runs,
   }
@@ -63,18 +66,35 @@ function readRunIds(value: unknown) {
   return runIds
 }
 
-function readDeadline(value: unknown) {
-  if (typeof value !== "string" || !value.endsWith("Z")) {
-    throw new Error("deadline must be a UTC ISO 8601 timestamp ending in Z.")
+function readTimeoutMilliseconds(value: unknown) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error("Missing timeout")
   }
 
-  const deadline = Date.parse(value)
+  const timeout = value as Partial<Duration>
 
-  if (!Number.isFinite(deadline)) {
-    throw new Error("deadline must be a valid UTC ISO 8601 timestamp.")
+  if (!isDurationUnit(timeout.unit)) {
+    throw new Error("timeout.unit must be seconds, minutes, hours, or days.")
   }
 
-  return deadline
+  if (
+    typeof timeout.value !== "number" ||
+    !Number.isSafeInteger(timeout.value) ||
+    timeout.value < 1
+  ) {
+    throw new Error("timeout.value must be a positive whole number.")
+  }
+
+  const milliseconds = durationMilliseconds({
+    unit: timeout.unit,
+    value: timeout.value,
+  })
+
+  if (milliseconds < minTimeoutMs || milliseconds > maxTimeoutMs) {
+    throw new Error("timeout must be between 5 seconds and 30 days.")
+  }
+
+  return milliseconds
 }
 
 function allTerminal(runs: AgentRunStatus[]) {

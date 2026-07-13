@@ -44,6 +44,7 @@ function render(
     noun: definition?.delivery.noun ?? "output",
     style: definition?.delivery.style,
     options: resolvePlaybookOptions(definition?.options, options),
+    agentWait: definition?.agentWait,
   })
 }
 
@@ -63,6 +64,7 @@ describe("playbook instructions", () => {
           noun: playbook.delivery.noun,
           style: playbook.delivery.style,
           options: resolvePlaybookOptions(playbook.options),
+          agentWait: playbook.agentWait,
         })
 
         expect(instructions).not.toContain("undefined")
@@ -153,7 +155,8 @@ describe("meeting prep instructions", () => {
   test("meeting prep defaults to a digest with prep sends", () => {
     const instructions = render("meeting-prep", emailDestination)
 
-    expect(instructions).toContain("deadline of today's 07:30 in my timezone")
+    expect(instructions).toContain('timeout: { unit: "minutes", value: 15 }')
+    expect(instructions).not.toContain("deadline")
     expect(instructions).toContain("#wait_for_agents")
     expect(instructions).toContain("start minus 45 minutes")
     expect(instructions).toContain("name `Prep: <title>`")
