@@ -76,7 +76,7 @@ test("closing an option dropdown never closes the dialog", async () => {
 
   renderBriefing(onOpenChange)
 
-  fireEvent.click(screen.getByText("Before each meeting"))
+  fireEvent.click(screen.getByText("Toggle before each meeting"))
   fireEvent.click(screen.getByRole("combobox"))
   expect(screen.getByRole("listbox")).toBeDefined()
   await new Promise((resolve) => setTimeout(resolve, 0))
@@ -107,7 +107,7 @@ test("turning off both deliveries blocks enabling", async () => {
     expectButtonDisabled(name)
   }
 
-  fireEvent.click(screen.getByText("Before each meeting"))
+  fireEvent.click(screen.getByText("Toggle before each meeting"))
 
   expect(screen.queryByText("Choose at least one delivery time.")).toBeNull()
   expectButtonDisabled("Enable", false)

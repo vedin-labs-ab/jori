@@ -11,8 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { cn } from "@/lib/utils"
 
 export function OptionField({
+  className,
   disabled,
   field,
   hint,
@@ -21,6 +23,7 @@ export function OptionField({
   onChange,
   value,
 }: {
+  className?: string
   disabled: boolean
   field: PlaybookOptionField
   hint?: ReactNode
@@ -32,10 +35,13 @@ export function OptionField({
   const id = `playbook-option-${field.key}`
 
   return (
-    <div className="grid gap-2">
+    <div className={cn("grid gap-2", className)}>
       {label ? (
         <Label
-          className={muted ? "text-muted-foreground" : undefined}
+          className={cn(
+            "text-muted-foreground transition-opacity duration-100",
+            muted && "opacity-60"
+          )}
           htmlFor={id}
         >
           {field.label}

@@ -67,28 +67,33 @@ function BehaviorRow({
   const checkboxId = `playbook-behavior-${behavior.key}`
 
   return (
-    <div
-      className={cn(
-        "group/behavior grid gap-3 p-3 transition-colors duration-100",
-        enabledBy !== undefined && !disabled && "hover:bg-muted/40"
+    <div className="relative grid gap-3 p-3">
+      {enabledBy === undefined ? null : (
+        <Label
+          className={cn(
+            "absolute inset-0 z-0 transition-colors duration-100",
+            disabled ? "pointer-events-none" : "hover:bg-muted/40"
+          )}
+          htmlFor={checkboxId}
+        >
+          <span className="sr-only">Toggle {behavior.label.toLowerCase()}</span>
+        </Label>
       )}
-    >
-      <div className="flex items-center gap-3">
-        <BehaviorLabel
-          behavior={behavior}
-          checkboxId={checkboxId}
-          disabled={disabled}
-          icon={Icon}
-          toggleable={enabledBy !== undefined}
-        />
+      <div className="pointer-events-none relative z-10 flex items-center gap-3">
+        <PlaybookIcon icon={Icon} />
+        <div className="grid min-w-0 flex-1 gap-1">
+          <span className="font-medium text-foreground">{behavior.label}</span>
+          {behavior.description === undefined ? null : (
+            <span className="font-normal text-muted-foreground">
+              {behavior.description}
+            </span>
+          )}
+        </div>
         {enabledBy === undefined ? null : (
           <Checkbox
             aria-label={`Include ${behavior.label.toLowerCase()}`}
             checked={enabled}
-            className={cn(
-              "transition-transform duration-100",
-              !disabled && "group-hover/behavior:scale-105"
-            )}
+            className="pointer-events-auto"
             disabled={disabled}
             id={checkboxId}
             onCheckedChange={(checked) =>
@@ -98,12 +103,13 @@ function BehaviorRow({
         )}
       </div>
       {behavior.fields.length === 0 ? null : (
-        <div className="grid gap-3 pl-11 sm:grid-cols-2">
+        <div className="pointer-events-none relative z-10 grid gap-3 pl-11 sm:grid-cols-2">
           {behavior.fields.map((field) => {
             const fieldEnabled = isPlaybookOptionEnabled(field, fields, values)
 
             return (
               <OptionField
+                className="pointer-events-auto"
                 disabled={disabled || !fieldEnabled}
                 field={field}
                 hint={hints?.[field.key]}
@@ -117,47 +123,5 @@ function BehaviorRow({
         </div>
       )}
     </div>
-  )
-}
-
-function BehaviorLabel({
-  behavior,
-  checkboxId,
-  disabled,
-  icon,
-  toggleable,
-}: {
-  behavior: PlaybookBehavior
-  checkboxId: string
-  disabled: boolean
-  icon: LucideIcon
-  toggleable: boolean
-}) {
-  const content = (
-    <>
-      <PlaybookIcon icon={icon} />
-      <span className="grid min-w-0 gap-1">
-        <span className="font-medium text-foreground">{behavior.label}</span>
-        {behavior.description === undefined ? null : (
-          <span className="font-normal text-muted-foreground">
-            {behavior.description}
-          </span>
-        )}
-      </span>
-    </>
-  )
-
-  return toggleable ? (
-    <Label
-      className={cn(
-        "flex min-w-0 flex-1 items-center gap-3",
-        disabled ? "cursor-not-allowed" : "cursor-pointer"
-      )}
-      htmlFor={checkboxId}
-    >
-      {content}
-    </Label>
-  ) : (
-    <div className="flex min-w-0 flex-1 items-center gap-3">{content}</div>
   )
 }
