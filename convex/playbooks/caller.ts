@@ -4,39 +4,21 @@ import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
 import { readClerkUserEmail, readClerkUserName } from "../identity/users"
 import { type Integration, integrationValidator } from "../shared/integrations"
 import { type PlaybookPlanArgs } from "./enable"
+import { deliveryChoiceValidator } from "./schema"
 
 export type PlaybookCallerArgs = {
   tenantId: string
   playbook: string
   choices?: Record<string, Integration>
-  destination?: DeliveryChoice
+  destination: DeliveryChoice
   options?: PlaybookOptionValues
 }
-
-const destinationValidator = v.union(
-  v.object({ kind: v.literal("email") }),
-  v.object({
-    kind: v.literal("slack"),
-    target: v.union(
-      v.object({
-        kind: v.literal("channel"),
-        id: v.string(),
-        label: v.string(),
-      }),
-      v.object({
-        kind: v.literal("dm"),
-        id: v.string(),
-        label: v.string(),
-      })
-    ),
-  })
-)
 
 export const playbookPlanFields = {
   tenantId: v.string(),
   playbook: v.string(),
   choices: v.optional(v.record(v.string(), integrationValidator)),
-  destination: v.optional(destinationValidator),
+  destination: deliveryChoiceValidator,
   options: v.optional(v.record(v.string(), v.union(v.string(), v.number()))),
 }
 
@@ -50,7 +32,7 @@ export function playbookPlanArgs(
     tenantId: args.tenantId,
     key: args.playbook,
     choices: args.choices ?? {},
-    destination: args.destination ?? { kind: "email" },
+    destination: args.destination,
     options: args.options,
     createdBy,
     recipient,
@@ -63,12 +45,10 @@ export function callerRecipient(identity: {
   name?: string
 }): PlaybookPlanArgs["recipient"] {
   const email = readClerkUserEmail(identity)
+  const name = readClerkUserName(identity)
 
-  if (email === undefined) {
-    throw new Error(
-      "Your account needs an email address before playbooks can email you."
-    )
+  return {
+    ...(email === undefined ? {} : { email }),
+    ...(name === undefined ? {} : { name }),
   }
-
-  return { email, name: readClerkUserName(identity) }
 }

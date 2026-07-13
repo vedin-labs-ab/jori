@@ -1,14 +1,14 @@
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import {
   type DeliveryChoice,
-  type DeliveryKind,
+  type DeliverySetup,
 } from "@contracts/playbooks/delivery"
 import {
   type PlaybookOptionValues,
   resolvePlaybookOptions,
 } from "@contracts/playbooks/options"
 import { Link } from "@tanstack/react-router"
-import { useQuery } from "convex/react"
+import { useMutation, useQuery } from "convex/react"
 import { Play, Settings2 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { api } from "../../../convex/_generated/api"
+import { showErrorToast } from "../shared/error"
 import { PlaybookCustomizations } from "./customizations"
 import { type PlaybookActions, pendingActionKind } from "./enable"
 import { PlaybookMeta } from "./meta"
@@ -47,7 +48,7 @@ export function PlaybookSetupDialog({
   tenantId: string
 }) {
   const [providerIndex, setProviderIndex] = useState(0)
-  const delivery = useDeliverySetup(definition, row.delivery)
+  const delivery = useDeliverySetup(row.delivery, tenantId)
   const destination = delivery.value
   const pendingKind = pendingActionKind(actions, definition)
   const { options, optionFields } = useOptionsSetup(definition)
@@ -285,26 +286,25 @@ function describeInternal(domains: string[]) {
  * the field only reports saved, valid choices, so an unsaved edit never leaks
  * into the actions — and `editing` flags an open edit.
  */
-function useDeliverySetup(
-  definition: PlaybookDefinition,
-  availableKinds: DeliveryKind[]
-) {
-  const defaultKind: DeliveryKind = availableKinds.includes(
-    definition.delivery.default
+function useDeliverySetup(setup: DeliverySetup, tenantId: string) {
+  const savePreference = useMutation(
+    api.playbooks.console.saveDeliveryPreference
   )
-    ? definition.delivery.default
-    : (availableKinds[0] ?? "email")
   const [value, setValue] = useState<DeliveryChoice | undefined>(
-    defaultKind === "email" ? { kind: "email" } : undefined
+    setup.recommended
   )
-  const [editing, setEditing] = useState(defaultKind !== "email")
+  const [editing, setEditing] = useState(setup.recommended === undefined)
 
   return {
-    availableKinds,
-    defaultKind,
     editing,
-    onChange: setValue,
+    onChange: (delivery: DeliveryChoice) => {
+      setValue(delivery)
+      void savePreference({ tenantId, delivery }).catch((error) =>
+        showErrorToast(error, "Couldn't save your delivery preference.")
+      )
+    },
     onEditingChange: setEditing,
+    options: setup.options,
     value,
   }
 }

@@ -89,7 +89,6 @@ export function resolvePlaybookSchedule(
 }
 
 const digestDelivery = {
-  default: "email",
   allowed: ["email", "slack"],
 } as const satisfies Omit<PlaybookDelivery, "noun">
 

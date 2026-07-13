@@ -14,8 +14,6 @@ import {
 } from "../../contracts/playbooks/catalog"
 import {
   type DeliveryChoice,
-  type DeliveryKind,
-  deliveryKindProviders,
   destinationIntegration,
   destinationTools,
 } from "../../contracts/playbooks/delivery"
@@ -73,8 +71,9 @@ export async function resolvePlaybookPlan(
     slot,
     integration: resolveProvider(slots[index], args.choices[slot.capability]),
   }))
-  const destination = resolveDestination(args.destination, {
+  const destination = await resolveDestination(ctx, args.destination, {
     connected,
+    createdBy: args.createdBy,
     emailProvider: emailInputProvider(resolved),
     recipient: args.recipient,
   })
@@ -176,16 +175,6 @@ export function readPlaybookSlots(
       connected.has(provider)
     ),
   }))
-}
-
-/** Delivery kinds the caller can pick: allowed by the playbook and connected. */
-export function availableDelivery(
-  definition: PlaybookDefinition,
-  connected: Set<Integration>
-): DeliveryKind[] {
-  return definition.delivery.allowed.filter((kind) =>
-    deliveryKindProviders[kind].some((provider) => connected.has(provider))
-  )
 }
 
 /**

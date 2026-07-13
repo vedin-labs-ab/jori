@@ -31,6 +31,7 @@ import {
 import { permissions } from "./permissions/schema"
 import { persons } from "./persons/schema"
 import { places } from "./places/schema"
+import { playbookPreferences } from "./playbooks/schema"
 import { reactions } from "./reactions/schema"
 import { runs } from "./runs/schema"
 import { outbox, sandboxes } from "./runtime/schema"
@@ -53,6 +54,7 @@ export default defineSchema({
   organizationSources,
   organizationDiscovery,
   automations,
+  playbookPreferences,
   subscriptions,
   events,
   runs,

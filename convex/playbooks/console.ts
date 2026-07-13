@@ -1,14 +1,24 @@
 import { v } from "convex/values"
 import { playbookCatalog } from "../../contracts/playbooks/catalog"
-import { internalMutation, internalQuery, query } from "../_generated/server"
+import {
+  internalMutation,
+  internalQuery,
+  mutation,
+  query,
+} from "../_generated/server"
 import { listInactiveAccessIntegrations } from "../automations/access"
-import { checkTenantAccess } from "../identity/access"
+import { checkTenantAccess, requireTenantAccess } from "../identity/access"
 import { requireClerkUserId } from "../identity/users"
+import { ensureCurrentPerson } from "../persons/clerk"
 import { resolvePersonByIdentity } from "../persons/links"
-import { playbookPlanArgs, playbookPlanFields } from "./caller"
+import { callerRecipient, playbookPlanArgs, playbookPlanFields } from "./caller"
+import {
+  deliverySetup,
+  saveDeliveryPreference as persistDeliveryPreference,
+  readDeliveryContext,
+} from "./delivery"
 import { resolvePlaybookDraft } from "./draft"
 import {
-  availableDelivery,
   connectedIntegrations,
   enablePlaybook,
   readPlaybookAutomations,
@@ -16,15 +26,18 @@ import {
   resolvePlaybookPlan,
   validatePlaybookEnablement,
 } from "./enable"
+import { deliveryChoiceValidator } from "./schema"
 import { trialPlaybook } from "./trial"
+
+const recipientValidator = v.object({
+  email: v.optional(v.string()),
+  name: v.optional(v.string()),
+})
 
 const resolvedPlanFields = {
   ...playbookPlanFields,
   createdBy: v.id("persons"),
-  recipient: v.object({
-    email: v.string(),
-    name: v.optional(v.string()),
-  }),
+  recipient: recipientValidator,
 }
 
 const resolvedArtifactPlanFields = {
@@ -60,6 +73,12 @@ export const list = query({
       ownerId,
       tenantId: args.tenantId,
     })
+    const deliveryContext = await readDeliveryContext(ctx, {
+      connected,
+      ownerId,
+      recipient: callerRecipient(access.identity),
+      tenantId: args.tenantId,
+    })
 
     return {
       status: "ready" as const,
@@ -70,7 +89,7 @@ export const list = query({
           return {
             key: definition.key,
             slots: readPlaybookSlots(definition, connected),
-            delivery: availableDelivery(definition, connected),
+            delivery: deliverySetup(definition, deliveryContext),
             enabled:
               automation === undefined
                 ? null
@@ -93,14 +112,37 @@ export const list = query({
   },
 })
 
+export const saveDeliveryPreference = mutation({
+  args: {
+    tenantId: v.string(),
+    delivery: deliveryChoiceValidator,
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const personId = await ensureCurrentPerson(ctx, args.tenantId)
+    const connected = await connectedIntegrations(ctx, {
+      ownerId: personId,
+      tenantId: args.tenantId,
+    })
+
+    await persistDeliveryPreference(ctx, {
+      connected,
+      delivery: args.delivery,
+      personId,
+      recipient: callerRecipient(identity),
+      tenantId: args.tenantId,
+    })
+
+    return null
+  },
+})
+
 export const enableResolved = internalMutation({
   args: {
     ...playbookPlanFields,
     createdBy: v.id("persons"),
-    recipient: v.object({
-      email: v.string(),
-      name: v.optional(v.string()),
-    }),
+    recipient: recipientValidator,
     artifactId: v.optional(v.id("artifacts")),
   },
   returns: v.object({ automationId: v.id("automations") }),

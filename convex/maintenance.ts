@@ -19,6 +19,7 @@ const tableRegistry: Record<TableName, true> = {
   organizationDiscovery: true,
   reactions: true,
   automations: true,
+  playbookPreferences: true,
   subscriptions: true,
   events: true,
   runs: true,

@@ -58,7 +58,6 @@ describe("playbook catalog", () => {
 
   test("every allowed delivery grants exactly its write send tools", () => {
     for (const playbook of playbookCatalog) {
-      expect(playbook.delivery.allowed).toContain(playbook.delivery.default)
       expect(playbook.delivery.noun.length).toBeGreaterThan(0)
 
       for (const kind of playbook.delivery.allowed) {

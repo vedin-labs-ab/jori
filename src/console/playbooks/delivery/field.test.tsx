@@ -15,9 +15,9 @@ const convexMocks = vi.hoisted(() => ({
     status: "ready" as const,
     options: [
       {
-        value: "U123",
-        label: "Sam Doe",
-        description: "@sam - sam@example.com",
+        value: "C123",
+        label: "#general",
+        description: "Public - 12 members",
       },
     ],
   })),
@@ -46,35 +46,64 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-test("selects a Slack DM recipient and commits its stable user ID", async () => {
+const options = [
+  { mode: "dm", available: true },
+  { mode: "email", available: true },
+  { mode: "channel", available: true },
+] as const
+
+test("selects self Slack DM without choosing another person", async () => {
   const onChange = vi.fn()
 
   render(
     <DeliveryField
-      availableKinds={["email", "slack"]}
-      defaultKind="email"
       editing
       onChange={onChange}
       onEditingChange={vi.fn()}
+      options={[...options]}
       tenantId="tenant"
       value={{ kind: "email" }}
     />
   )
 
-  await selectDeliveryMode("DM")
+  selectDeliveryMode("Slack DM")
+  expect(screen.queryByRole("combobox")).toBeNull()
+  fireEvent.click(screen.getByRole("button", { name: "Save" }))
 
-  const input = screen.getByRole("combobox", { name: "Slack person" })
+  expect(onChange).toHaveBeenCalledWith({
+    kind: "slack",
+    target: { kind: "dm" },
+  })
+})
+
+test("selects a Slack channel and commits its stable channel ID", async () => {
+  const onChange = vi.fn()
+
+  render(
+    <DeliveryField
+      editing
+      onChange={onChange}
+      onEditingChange={vi.fn()}
+      options={[...options]}
+      tenantId="tenant"
+      value={{ kind: "email" }}
+    />
+  )
+
+  selectDeliveryMode("Slack channel")
+
+  const input = screen.getByRole("combobox", { name: "Slack channel" })
   const group = input.closest('[role="group"]')
 
   if (!(group instanceof HTMLElement)) {
-    throw new Error("Slack person field is missing its input group.")
+    throw new Error("Slack channel field is missing its input group.")
   }
 
   fireEvent.click(within(group).getByRole("button"))
-  const option = await screen.findByRole("option", { name: /Sam Doe/ })
+  const option = await screen.findByRole("option", { name: /general/ })
 
   expect(convexMocks.search).toHaveBeenCalledWith(
-    expect.objectContaining({ source: "slack.users" })
+    expect.objectContaining({ source: "slack.channels" })
   )
 
   fireEvent.pointerDown(option, {
@@ -87,15 +116,11 @@ test("selects a Slack DM recipient and commits its stable user ID", async () => 
 
   expect(onChange).toHaveBeenCalledWith({
     kind: "slack",
-    target: { kind: "dm", id: "U123", label: "Sam Doe" },
+    target: { kind: "channel", id: "C123", label: "general" },
   })
 })
 
-async function selectDeliveryMode(mode: "Channel" | "DM") {
+function selectDeliveryMode(mode: "Slack channel" | "Slack DM") {
   fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery method" }))
-  const slack = screen.getByRole("menuitem", { name: "Slack" })
-
-  slack.focus()
-  fireEvent.keyDown(slack, { key: "ArrowRight" })
-  fireEvent.click(await screen.findByRole("menuitem", { name: mode }))
+  fireEvent.click(screen.getByRole("menuitem", { name: mode }))
 }

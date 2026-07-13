@@ -1,37 +1,36 @@
 import { useUser } from "@clerk/tanstack-react-start"
 import {
   type DeliveryChoice,
-  type DeliveryKind,
+  type DeliveryMode,
+  type DeliveryOption,
+  deliveryMode,
   type SlackDeliveryTarget,
 } from "@contracts/playbooks/delivery"
 import { Pencil } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
-import { SlackTargetField } from "../target"
+import { SlackChannelField } from "../target"
 import { DeliveryIcon, DeliveryModeMenu } from "./menu"
-import { type DeliveryMode, deliveryModeCount } from "./model"
 
 type DeliveryDraft = {
   mode: DeliveryMode
   channel?: Extract<SlackDeliveryTarget, { kind: "channel" }>
-  dm?: Extract<SlackDeliveryTarget, { kind: "dm" }>
 }
 
 type DeliveryFieldProps = {
-  availableKinds: DeliveryKind[]
-  defaultKind: DeliveryKind
   disabled?: boolean
   editing: boolean
   onChange: (choice: DeliveryChoice) => void
   onEditingChange: (editing: boolean) => void
+  options: DeliveryOption[]
   tenantId: string
   value: DeliveryChoice | undefined
 }
 
 export function DeliveryField(props: DeliveryFieldProps) {
   const [draft, setDraft] = useState<DeliveryDraft>(() =>
-    committedDraft(props.value, props.defaultKind)
+    committedDraft(props.value, props.options)
   )
 
   if (!props.editing && props.value !== undefined) {
@@ -57,10 +56,9 @@ export function DeliveryField(props: DeliveryFieldProps) {
 }
 
 function DeliverySummary({
-  availableKinds,
-  defaultKind,
   disabled = false,
   onEditingChange,
+  options,
   setDraft,
   value,
 }: DeliveryFieldProps & {
@@ -73,14 +71,14 @@ function DeliverySummary({
   return (
     <div className="flex min-h-8 items-center justify-between gap-2">
       <span className="flex min-w-0 items-center gap-1.5">
-        <DeliveryIcon mode={choiceMode(value)} />
+        <DeliveryIcon mode={deliveryMode(value)} />
         <DeliveryText choice={value} />
       </span>
-      {deliveryModeCount(availableKinds) > 1 ? (
+      {options.length > 1 ? (
         <Button
           disabled={disabled}
           onClick={() => {
-            setDraft(committedDraft(value, defaultKind))
+            setDraft(committedDraft(value, options))
             onEditingChange(true)
           }}
           variant="ghost"
@@ -93,12 +91,12 @@ function DeliverySummary({
 }
 
 function DeliveryEditor({
-  availableKinds,
   disabled = false,
   draft,
   onCancel,
   onDraftChange,
   onSave,
+  options,
   tenantId,
   value,
 }: DeliveryFieldProps & {
@@ -108,31 +106,33 @@ function DeliveryEditor({
   onSave: (choice: DeliveryChoice) => void
 }) {
   const next = draftChoice(draft)
-  const changed = next !== undefined && !sameChoice(next, value)
+  const changed =
+    next !== undefined &&
+    modeAvailable(options, draft.mode) &&
+    !sameChoice(next, value)
 
   return (
     <div className="flex min-h-8 items-center justify-between gap-2">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
         <DeliveryModeMenu
           disabled={disabled}
-          kinds={availableKinds}
           mode={draft.mode}
           onSelect={(mode) => onDraftChange({ ...draft, mode })}
+          options={options}
         />
-        {draft.mode === "email" ? (
-          <DeliveryText choice={{ kind: "email" }} />
-        ) : (
+        {draft.mode === "channel" ? (
           <div className="min-w-0 flex-1">
-            <SlackTargetField
+            <SlackChannelField
               disabled={disabled}
-              kind={draft.mode}
               onChange={(target) =>
-                onDraftChange({ ...draft, [draft.mode]: target })
+                onDraftChange({ ...draft, channel: target })
               }
               tenantId={tenantId}
-              value={draft[draft.mode]}
+              value={draft.channel}
             />
           </div>
+        ) : (
+          <DeliveryText choice={choiceForMode(draft.mode)} />
         )}
       </div>
       <ButtonGroup>
@@ -156,7 +156,7 @@ function DeliveryEditor({
 
 function DeliveryText({ choice }: { choice: DeliveryChoice }) {
   const email = useUser().user?.primaryEmailAddress?.emailAddress
-  const mode = choiceMode(choice)
+  const mode = deliveryMode(choice)
   const target = choice.kind === "slack" ? choice.target : undefined
 
   return (
@@ -172,7 +172,7 @@ function DeliveryText({ choice }: { choice: DeliveryChoice }) {
           ? (email ?? "you")
           : target.kind === "channel"
             ? `#${target.label}`
-            : target.label}
+            : "You"}
       </span>
     </span>
   )
@@ -180,30 +180,45 @@ function DeliveryText({ choice }: { choice: DeliveryChoice }) {
 
 function committedDraft(
   value: DeliveryChoice | undefined,
-  defaultKind: DeliveryKind
+  options: DeliveryOption[]
 ): DeliveryDraft {
-  if (value === undefined || value.kind === "email") {
-    return {
-      mode:
-        value === undefined && defaultKind === "slack" ? "channel" : "email",
-    }
+  if (value === undefined) {
+    return { mode: initialMode(options) }
   }
 
-  return { mode: value.target.kind, [value.target.kind]: value.target }
+  if (value.kind === "email" || value.target.kind === "dm") {
+    return { mode: deliveryMode(value) }
+  }
+
+  return { mode: "channel", channel: value.target }
 }
 
 function draftChoice(draft: DeliveryDraft): DeliveryChoice | undefined {
-  if (draft.mode === "email") {
-    return { kind: "email" }
+  if (draft.mode !== "channel") {
+    return choiceForMode(draft.mode)
   }
 
-  const target = draft[draft.mode]
-
-  return target === undefined ? undefined : { kind: "slack", target }
+  return draft.channel === undefined
+    ? undefined
+    : { kind: "slack", target: draft.channel }
 }
 
-function choiceMode(choice: DeliveryChoice): DeliveryMode {
-  return choice.kind === "email" ? "email" : choice.target.kind
+function choiceForMode(mode: Exclude<DeliveryMode, "channel">): DeliveryChoice {
+  return mode === "email"
+    ? { kind: "email" }
+    : { kind: "slack", target: { kind: "dm" } }
+}
+
+function initialMode(options: DeliveryOption[]): DeliveryMode {
+  return (
+    options.find((option) => option.available)?.mode ??
+    options[0]?.mode ??
+    "email"
+  )
+}
+
+function modeAvailable(options: DeliveryOption[], mode: DeliveryMode) {
+  return options.find((option) => option.mode === mode)?.available === true
 }
 
 function sameChoice(
@@ -218,9 +233,13 @@ function sameChoice(
     return true
   }
 
+  if (next.target.kind === "dm") {
+    return committed.kind === "slack" && committed.target.kind === "dm"
+  }
+
   return (
     committed.kind === "slack" &&
-    next.target.kind === committed.target.kind &&
+    committed.target.kind === "channel" &&
     next.target.id === committed.target.id
   )
 }

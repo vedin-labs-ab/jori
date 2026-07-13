@@ -110,7 +110,14 @@ function enabledRow(
       { capability: "email", connected: ["gmail"] },
       { capability: "calendar", connected: ["googleCalendar"] },
     ],
-    delivery: ["email", "slack"],
+    delivery: {
+      options: [
+        { mode: "dm", available: true },
+        { mode: "email", available: true },
+        { mode: "channel", available: true },
+      ],
+      recommended: { kind: "slack", target: { kind: "dm" } },
+    },
     enabled: {
       automationId: "automation-1" as NonNullable<
         PlaybookListRow["enabled"]
