@@ -131,7 +131,7 @@ export const artifactSessions = defineTable({
   .index("by_artifact_and_seen_at", ["artifactId", "seenAt"])
 
 /** Each share is an independent grant with its own secret and expiry; an
- *  artifact can have several live at once. Revocation clears them all. */
+ *  artifact can have several live at once. */
 export const artifactShares = defineTable({
   tenantId: v.string(),
   artifactId: v.id("artifacts"),
@@ -139,7 +139,10 @@ export const artifactShares = defineTable({
   secret: v.string(),
   createdAt: v.number(),
   expiresAt: v.number(),
-}).index("by_artifact", ["artifactId"])
+})
+  .index("by_artifact", ["artifactId"])
+  .index("by_artifact_and_expires_at", ["artifactId", "expiresAt"])
+  .index("by_artifact_and_secret", ["artifactId", "secret"])
 
 export const artifactAssets = defineTable({
   tenantId: v.string(),
