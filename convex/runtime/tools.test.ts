@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { getToolPermission } from "../permissions/catalog"
+import { getToolPermission } from "../../contracts/permissions"
 import {
   optionalFieldGuidance,
   schemaHasOptionalFields,

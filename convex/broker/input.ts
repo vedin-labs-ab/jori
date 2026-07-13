@@ -3,10 +3,6 @@ import { type JsonObject } from "../../contracts/json"
 import { getToolInputSchema, isJsonSchema } from "../runs/agent/tools/schemas"
 import { validateSchemaValue } from "./inputValidation"
 
-export function hasBrokerToolInputSchema(tool: string) {
-  return getToolInputSchema(tool) !== undefined
-}
-
 export function normalizeMiloToolInput(
   tool: string,
   input: unknown

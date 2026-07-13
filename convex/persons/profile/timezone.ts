@@ -48,5 +48,3 @@ export async function requirePersonTimezone(
 
   return timezone
 }
-
-export { isValidTimezone } from "../../../contracts/timezone"

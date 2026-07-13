@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
+import { getToolPermission } from "../../contracts/permissions"
 import { integration } from "../../test/convex/tools"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { getToolPermission } from "../permissions/catalog"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { type ApprovalBrokerContext } from "./approval"
 import { listCapabilities } from "./capabilities"

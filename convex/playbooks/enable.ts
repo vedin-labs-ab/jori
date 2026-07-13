@@ -33,8 +33,6 @@ import {
 } from "./destination"
 import { renderPlaybookInstructions } from "./instructions"
 
-export type { PlaybookRecipient } from "./destination"
-
 export type PlaybookSlotState = {
   capability: PlaybookCapability
   connected: Integration[]

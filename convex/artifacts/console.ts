@@ -1,11 +1,11 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
+import { getToolPermission } from "../../contracts/permissions"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
 import { listArtifactAutomationRoots } from "../automations/lifecycle/read"
 import { checkTenantAccess } from "../identity/access"
-import { getToolPermission } from "../permissions/catalog"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
 import { personDisplayName } from "../persons/names"
 import {

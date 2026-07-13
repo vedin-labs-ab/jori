@@ -7,8 +7,6 @@ import {
 } from "../../providers/slack/data"
 import { readDataObject, readDataString } from "../../shared/data"
 
-export type { SurfaceReactionTarget } from "../../../contracts/runtime"
-
 export type ReactionAddress =
   | { type: "slack"; channel: string; timestamp: string }
   | {

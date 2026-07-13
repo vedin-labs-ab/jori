@@ -1,12 +1,12 @@
 import { withApprovalSchema } from "../../../contracts/approvals"
-import { isWebTool } from "../../../contracts/permissions/web"
-import { type Id } from "../../_generated/dataModel"
 import {
   type PermissionMode,
   resolveToolMode,
   type ToolPermission,
   type ToolSurface,
-} from "../../permissions/catalog"
+} from "../../../contracts/permissions"
+import { isWebTool } from "../../../contracts/permissions/web"
+import { type Id } from "../../_generated/dataModel"
 import { type AgentRuntimeInput, inputAccess } from "../../runs/agent/input"
 import { toolExecutionType } from "../../runs/agent/tools/policy"
 import { getEnabledToolPermissions } from "../../runs/agent/tools/resolve"

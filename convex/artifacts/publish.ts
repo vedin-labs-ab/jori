@@ -1,17 +1,16 @@
 "use node"
 
 import { normalizeArtifactContract } from "../../contracts/artifacts/contract"
-import { artifactEntrypoint } from "../../contracts/artifacts/source"
+import {
+  type ArtifactSourceFile,
+  artifactEntrypoint,
+} from "../../contracts/artifacts/source"
+import { getToolPermission } from "../../contracts/permissions"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { getToolPermission } from "../permissions/catalog"
 import { type ArtifactConsoleLink, artifactConsoleLink } from "./serve/urls"
-import {
-  type ArtifactSourceFile,
-  createArtifactSourceSnapshot,
-  type StoredArtifactBlob,
-} from "./source"
+import { createArtifactSourceSnapshot, type StoredArtifactBlob } from "./source"
 import {
   type ArtifactBuildInput,
   type BuildAsset,

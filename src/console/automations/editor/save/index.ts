@@ -2,6 +2,7 @@ import {
   defaultScopeForIntegrations,
   type Scope,
 } from "@contracts/permissions/scope"
+import { localTimezone } from "../../../shared/time"
 import {
   getAutomationScopeConflict,
   hasAutomationWriteSurface,
@@ -49,7 +50,7 @@ export function automationFormValues(
   if (automation === undefined) {
     const values = {
       ...emptyAutomationForm,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezone: localTimezone(),
       ...readAutomationPreferences(),
     }
 

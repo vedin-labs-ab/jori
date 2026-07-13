@@ -1,7 +1,10 @@
 import { expect, test } from "vitest"
+import {
+  getToolPermission,
+  resolveToolModes,
+} from "../../../contracts/permissions"
 import { integration } from "../../../test/convex/tools"
 import { type Doc } from "../../_generated/dataModel"
-import { getToolPermission, resolveToolModes } from "../../permissions/catalog"
 import { type InstructionRuntimeInput } from "../../runs/agent/input"
 import { optionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import { permissionGroups, toolDescriptor } from "./tools"

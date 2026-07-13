@@ -1,9 +1,4 @@
 import { type JsonObject } from "../../contracts/json"
-import { isWebTool } from "../../contracts/permissions/web"
-import { type Doc } from "../_generated/dataModel"
-import { type ActionCtx } from "../_generated/server"
-import { canUseAutomationTool } from "../automations/access"
-import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import {
   canUseToolMode,
   getToolPermission,
@@ -11,7 +6,12 @@ import {
   resolveToolMode,
   type ToolPermission,
   type ToolSurface,
-} from "../permissions/catalog"
+} from "../../contracts/permissions"
+import { isWebTool } from "../../contracts/permissions/web"
+import { type Doc } from "../_generated/dataModel"
+import { type ActionCtx } from "../_generated/server"
+import { canUseAutomationTool } from "../automations/access"
+import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { findRunIntegration, inputAccess } from "../runs/agent/input"
 import { toolExecutionType } from "../runs/agent/tools/policy"
 import {

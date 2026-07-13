@@ -1,10 +1,12 @@
-import { integrationLabels } from "../../../integrations/resolve"
 import {
   readDataNumber,
   readDataObject,
   readDataString,
 } from "../../../shared/data"
-import { type MessageIntegration } from "../../../shared/integrations"
+import {
+  integrationLabels,
+  type MessageIntegration,
+} from "../../../shared/integrations"
 import { type AgentRuntimeInput } from "../input"
 
 type AutomationEvent = NonNullable<

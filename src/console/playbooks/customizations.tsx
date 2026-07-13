@@ -1,6 +1,6 @@
 import { type ComponentProps } from "react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { DeliveryField } from "./delivery"
+import { DeliveryField } from "./delivery/field"
 import { PlaybookSection } from "./meta"
 import { type PlaybookEnablePlan } from "./state"
 

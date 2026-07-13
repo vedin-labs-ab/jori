@@ -1,7 +1,7 @@
+import { type ToolPermission } from "../../../../contracts/permissions"
 import { type RuntimePrompt } from "../../../../contracts/runtime"
 import { promptTemplates } from "../../../../prompts/generated"
 import { renderPromptTemplate } from "../../../../prompts/render"
-import { type ToolPermission } from "../../../permissions/catalog"
 import { type RuntimeSkill } from "../../../skills/runtime"
 import { type AgentRuntimeInput } from "../input"
 import { createApprovalInstructions } from "./approvals"

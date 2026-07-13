@@ -1,13 +1,5 @@
 import { v } from "convex/values"
 import {
-  internalQuery,
-  type MutationCtx,
-  mutation,
-  query,
-} from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
-import { ensureCurrentPerson } from "../persons/clerk"
-import {
   type ConfigurablePermissionMode,
   getToolPermission,
   isToolPermissionConfigurable,
@@ -18,7 +10,15 @@ import {
   type ToolPermission,
   toolPermissions,
   type UserVisibleToolPermission,
-} from "./catalog"
+} from "../../contracts/permissions"
+import {
+  internalQuery,
+  type MutationCtx,
+  mutation,
+  query,
+} from "../_generated/server"
+import { requireTenantAccess } from "../identity/access"
+import { ensureCurrentPerson } from "../persons/clerk"
 import { listPermissionOverrides } from "./read"
 
 const permissionModeValidator = v.union(

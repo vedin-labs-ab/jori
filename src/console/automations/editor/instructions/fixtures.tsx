@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react"
 import { vi } from "vitest"
 import { type ToolPermission } from "../../../permissions/types"
-import { AutomationInstructionsField } from "."
 import { readAdditionalAutomationSurfaces } from "./document"
+import { AutomationInstructionsField } from "./field"
 
 const instructionToolPermissions = [
   toolPermission("github", "github_get_issue", "Read issue", "read"),

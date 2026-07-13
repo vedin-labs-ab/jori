@@ -1,4 +1,4 @@
-import { type ToolPermission } from "../../convex/permissions/catalog"
+import { type ToolPermission } from "../../contracts/permissions"
 import { type RuntimeIntegration } from "../../convex/runs/agent/input"
 import { type assemblePrompt } from "../../convex/runs/agent/prompt"
 

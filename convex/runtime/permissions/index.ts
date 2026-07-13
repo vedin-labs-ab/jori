@@ -1,6 +1,6 @@
+import { resolveToolModes } from "../../../contracts/permissions"
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { resolveToolModes } from "../../permissions/catalog"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { createRuntimeToolCapability } from "../../runs/agent/tools/bundles"
 import { permissionGroups, toolDescriptor } from "./tools"

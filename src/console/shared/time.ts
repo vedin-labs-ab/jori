@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react"
 
+export function localTimezone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone
+}
+
 export function useNow(intervalMs: number) {
   const [now, setNow] = useState(() => Date.now())
 
