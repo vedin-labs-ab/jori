@@ -1,11 +1,11 @@
 import { calendarEventProperty } from "./calendar"
+import { emailMessageSchema } from "./email"
 import {
   numberProperty,
   objectSchema,
   type SchemaMap,
   stringProperty,
-} from "./common"
-import { emailMessageSchema } from "./email"
+} from "./fragments/common"
 
 export const microsoftToolInputSchemas = {
   microsoft_email_search_messages: objectSchema({

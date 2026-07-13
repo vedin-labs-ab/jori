@@ -1,4 +1,4 @@
-import { objectSchema, stringProperty } from "../common"
+import { objectSchema, stringProperty } from "../fragments/common"
 
 const nativeIconColors = [
   "gray",

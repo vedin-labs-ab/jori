@@ -1,9 +1,9 @@
 import { v } from "convex/values"
-import { type Id } from "../../_generated/dataModel"
-import { type MutationCtx, mutation } from "../../_generated/server"
-import { requireTenantAccess } from "../../access"
-import { moveEffort } from "../engine/sightings"
-import { type BeliefStatus } from "../schema"
+import { type Id } from "../_generated/dataModel"
+import { type MutationCtx, mutation } from "../_generated/server"
+import { requireTenantAccess } from "../access"
+import { moveEffort } from "../deduction/engine/sightings"
+import { type BeliefStatus } from "../deduction/schema"
 
 // Console corrections are the only write path into beliefs besides the pass
 // applier. Adoption decisions move status; archive keeps a concluded

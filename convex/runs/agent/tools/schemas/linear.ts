@@ -3,7 +3,7 @@ import {
   objectSchema,
   type SchemaMap,
   stringProperty,
-} from "./common"
+} from "./fragments/common"
 
 export const linearToolInputSchemas = {
   linear_search_issues: objectSchema({

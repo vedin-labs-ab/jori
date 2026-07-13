@@ -4,7 +4,7 @@ import {
   objectSchema,
   stringArrayProperty,
   stringProperty,
-} from "../common"
+} from "../fragments/common"
 
 const runStatusEnum = ["queued", "running", "completed", "failed", "stopped"]
 const runScopeEnum = ["conversation", "tenant", "all"]

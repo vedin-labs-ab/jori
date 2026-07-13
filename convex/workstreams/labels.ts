@@ -1,4 +1,4 @@
-import { type BeliefStatus } from "../schema"
+import { type BeliefStatus } from "../deduction/schema"
 
 // User-facing display strings for deduction internals. Internal keys keep
 // their implementation names; only display copy lives here.

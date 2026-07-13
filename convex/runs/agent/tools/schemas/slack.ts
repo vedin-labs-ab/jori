@@ -4,7 +4,7 @@ import {
   runAssetsProperty,
   type SchemaMap,
   stringProperty,
-} from "./common"
+} from "./fragments/common"
 
 export const slackToolInputSchemas = {
   channels_list: objectSchema({

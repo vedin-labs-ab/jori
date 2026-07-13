@@ -1,15 +1,15 @@
 import { v } from "convex/values"
-import { type Doc } from "../../_generated/dataModel"
-import { type QueryCtx, query } from "../../_generated/server"
-import { checkTenantAccess } from "../../access"
-import { activeEffortRows } from "../effort/input"
-import { latestCompletedPass } from "../engine/pass"
+import { type Doc } from "../_generated/dataModel"
+import { type QueryCtx, query } from "../_generated/server"
+import { checkTenantAccess } from "../access"
+import { activeEffortRows } from "../deduction/effort/input"
+import { latestCompletedPass } from "../deduction/engine/pass"
 import {
   consolidationCadenceMs,
   effortActiveMs,
   maxConsolidationEfforts,
-} from "../limits"
-import { beliefKinds } from "../schema"
+} from "../deduction/limits"
+import { beliefKinds } from "../deduction/schema"
 
 // The workstreams page's activity strip: recent journal entries tagged with
 // their effort's current workstream (null = not yet placed), plus the review

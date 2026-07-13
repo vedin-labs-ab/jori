@@ -1,4 +1,4 @@
-import { withOptionalFieldGuidance } from "./common"
+import { withOptionalFieldGuidance } from "./fragments/common"
 import { githubToolInputSchemas } from "./github"
 import { googleToolInputSchemas } from "./google"
 import { linearToolInputSchemas } from "./linear"
@@ -8,7 +8,7 @@ import { miloToolInputSchemas } from "./milo/index"
 import { notionToolInputSchemas } from "./notion"
 import { slackToolInputSchemas } from "./slack"
 
-export type { JsonSchema, SchemaMap } from "./common"
+export type { JsonSchema, SchemaMap } from "./fragments/common"
 export {
   emptyObjectSchema,
   isJsonSchema,
@@ -20,7 +20,7 @@ export {
   schemaHasOptionalFields,
   stringArrayProperty,
   withOptionalFieldGuidance,
-} from "./common"
+} from "./fragments/common"
 
 const toolInputSchemas = {
   ...githubToolInputSchemas,

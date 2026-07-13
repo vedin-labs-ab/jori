@@ -1,8 +1,8 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../../_generated/dataModel"
-import { type QueryCtx, query } from "../../_generated/server"
-import { checkTenantAccess } from "../../access"
-import { type Integration } from "../../shared/integrations"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { type QueryCtx, query } from "../_generated/server"
+import { checkTenantAccess } from "../access"
+import { type Integration } from "../shared/integrations"
 import { eventKindLabel, statusLabels } from "./labels"
 
 // Console reads follow the write-time read model: source chips come from the

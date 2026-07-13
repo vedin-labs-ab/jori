@@ -4,7 +4,7 @@ import {
   objectSchema,
   type SchemaMap,
   stringProperty,
-} from "../common"
+} from "../fragments/common"
 import { notionCoverProperty, notionIconProperty } from "./media"
 
 export const notionToolInputSchemas = {

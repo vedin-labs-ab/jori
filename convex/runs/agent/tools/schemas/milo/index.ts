@@ -1,4 +1,4 @@
-import { artifactToolInputSchemas } from "../artifacts"
+import { artifactToolInputSchemas } from "./artifacts"
 import { automationMiloToolInputSchemas } from "./automations"
 import { coreMiloToolInputSchemas } from "./core"
 

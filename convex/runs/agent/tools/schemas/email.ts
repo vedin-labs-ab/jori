@@ -3,7 +3,7 @@ import {
   runAssetsProperty,
   stringArrayProperty,
   stringProperty,
-} from "./common"
+} from "./fragments/common"
 
 // One email message shape for every mail provider; the schema copy is
 // user-facing, so keep it identical across Gmail and Microsoft tools.

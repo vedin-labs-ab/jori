@@ -97,7 +97,7 @@ async function scheduleSurfaceSync(
     case "integrationOffer":
       await ctx.scheduler.runAfter(
         0,
-        internal.integrations.offers.lifecycle.sync,
+        internal.integrations.slack.offers.surface.sync,
         {
           integrationOfferId: subject.id,
         }
