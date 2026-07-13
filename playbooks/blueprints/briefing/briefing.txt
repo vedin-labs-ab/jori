@@ -25,7 +25,7 @@ export function BriefingView({ meeting, timezone }: { meeting: MeetingBriefing; 
         </div>
         <h2 className="mt-2 text-2xl font-semibold tracking-tight">{meeting.event.title}</h2>
         <p className="mt-2 text-sm text-muted-foreground">{peopleLine(meeting)}</p>
-        <p className="mt-3 text-sm">{meeting.selectedBecause}</p>
+        <p className="mt-3 text-sm">{meeting.whyItMatters}</p>
         <Freshness meeting={meeting} timezone={timezone} />
       </header>
 

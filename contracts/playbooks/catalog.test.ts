@@ -115,6 +115,19 @@ describe("Meeting Briefing configuration", () => {
       { capability: "calendar", intents: ["read"] },
     ])
     expect(meetingBriefing.web).toBe(true)
+
+    const calendarSlot = meetingBriefing.slots.find(
+      (slot) => slot.capability === "calendar"
+    )
+    if (calendarSlot === undefined) {
+      throw new Error("Meeting Briefing calendar slot is missing.")
+    }
+    expect(playbookSlotTools(calendarSlot, "googleCalendar")).toContain(
+      "google_calendar_list_calendars"
+    )
+    expect(playbookSlotTools(calendarSlot, "microsoftCalendar")).toContain(
+      "microsoft_calendar_list_calendars"
+    )
   })
 
   test("delivery copy distinguishes preparation from reminders", () => {

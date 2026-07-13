@@ -67,10 +67,18 @@ export const googleToolPermissionRows = [
   ],
   [
     "googleCalendar",
+    "google_calendar_list_calendars",
+    "List calendars",
+    "List calendars in your Google Calendar account.",
+    "List Google calendars before searching events when work may live outside the primary calendar.",
+    "read",
+  ],
+  [
+    "googleCalendar",
     "google_calendar_list_events",
     "List calendar events",
-    "List events on your Google Calendar.",
-    "List Google Calendar events in a time range. Use to check availability or find an event before reading or changing it.",
+    "List events across your Google calendars.",
+    "List Google Calendar events in a time range across every readable calendar, or pass a calendar ID to target one. Use to check availability or find an event before reading or changing it.",
     "read",
   ],
   [

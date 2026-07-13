@@ -94,6 +94,7 @@ import type * as broker_tools_github_index from "../broker/tools/github/index.js
 import type * as broker_tools_github_publish from "../broker/tools/github/publish.js";
 import type * as broker_tools_github_pulls from "../broker/tools/github/pulls.js";
 import type * as broker_tools_github_source from "../broker/tools/github/source.js";
+import type * as broker_tools_google_calendar from "../broker/tools/google/calendar.js";
 import type * as broker_tools_google_format from "../broker/tools/google/format.js";
 import type * as broker_tools_google_gmail from "../broker/tools/google/gmail.js";
 import type * as broker_tools_google_index from "../broker/tools/google/index.js";
@@ -101,7 +102,8 @@ import type * as broker_tools_google_read from "../broker/tools/google/read.js";
 import type * as broker_tools_index from "../broker/tools/index.js";
 import type * as broker_tools_linear_client from "../broker/tools/linear/client.js";
 import type * as broker_tools_linear_index from "../broker/tools/linear/index.js";
-import type * as broker_tools_microsoft from "../broker/tools/microsoft.js";
+import type * as broker_tools_microsoft_calendar from "../broker/tools/microsoft/calendar.js";
+import type * as broker_tools_microsoft_index from "../broker/tools/microsoft/index.js";
 import type * as broker_tools_notion_index from "../broker/tools/notion/index.js";
 import type * as broker_tools_notion_upload from "../broker/tools/notion/upload.js";
 import type * as broker_tools_slack from "../broker/tools/slack.js";
@@ -174,6 +176,7 @@ import type * as integrations_github_install from "../integrations/github/instal
 import type * as integrations_github_options from "../integrations/github/options.js";
 import type * as integrations_github_signing from "../integrations/github/signing.js";
 import type * as integrations_google_api from "../integrations/google/api.js";
+import type * as integrations_google_calendars from "../integrations/google/calendars.js";
 import type * as integrations_google_config from "../integrations/google/config.js";
 import type * as integrations_google_credentials from "../integrations/google/credentials.js";
 import type * as integrations_google_http from "../integrations/google/http.js";
@@ -198,6 +201,7 @@ import type * as integrations_linear_oauth from "../integrations/linear/oauth.js
 import type * as integrations_linear_options from "../integrations/linear/options.js";
 import type * as integrations_linear_signing from "../integrations/linear/signing.js";
 import type * as integrations_lookup from "../integrations/lookup.js";
+import type * as integrations_microsoft_calendars from "../integrations/microsoft/calendars.js";
 import type * as integrations_microsoft_config from "../integrations/microsoft/config.js";
 import type * as integrations_microsoft_credentials from "../integrations/microsoft/credentials.js";
 import type * as integrations_microsoft_data from "../integrations/microsoft/data.js";
@@ -566,6 +570,7 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/github/publish": typeof broker_tools_github_publish;
   "broker/tools/github/pulls": typeof broker_tools_github_pulls;
   "broker/tools/github/source": typeof broker_tools_github_source;
+  "broker/tools/google/calendar": typeof broker_tools_google_calendar;
   "broker/tools/google/format": typeof broker_tools_google_format;
   "broker/tools/google/gmail": typeof broker_tools_google_gmail;
   "broker/tools/google/index": typeof broker_tools_google_index;
@@ -573,7 +578,8 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/index": typeof broker_tools_index;
   "broker/tools/linear/client": typeof broker_tools_linear_client;
   "broker/tools/linear/index": typeof broker_tools_linear_index;
-  "broker/tools/microsoft": typeof broker_tools_microsoft;
+  "broker/tools/microsoft/calendar": typeof broker_tools_microsoft_calendar;
+  "broker/tools/microsoft/index": typeof broker_tools_microsoft_index;
   "broker/tools/notion/index": typeof broker_tools_notion_index;
   "broker/tools/notion/upload": typeof broker_tools_notion_upload;
   "broker/tools/slack": typeof broker_tools_slack;
@@ -646,6 +652,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/github/options": typeof integrations_github_options;
   "integrations/github/signing": typeof integrations_github_signing;
   "integrations/google/api": typeof integrations_google_api;
+  "integrations/google/calendars": typeof integrations_google_calendars;
   "integrations/google/config": typeof integrations_google_config;
   "integrations/google/credentials": typeof integrations_google_credentials;
   "integrations/google/http": typeof integrations_google_http;
@@ -670,6 +677,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/linear/options": typeof integrations_linear_options;
   "integrations/linear/signing": typeof integrations_linear_signing;
   "integrations/lookup": typeof integrations_lookup;
+  "integrations/microsoft/calendars": typeof integrations_microsoft_calendars;
   "integrations/microsoft/config": typeof integrations_microsoft_config;
   "integrations/microsoft/credentials": typeof integrations_microsoft_credentials;
   "integrations/microsoft/data": typeof integrations_microsoft_data;

@@ -1,8 +1,8 @@
-import { type Doc } from "../../_generated/dataModel"
-import { type AssetContext, readRunAssets } from "../../assets/read"
-import { requireMicrosoftCredentials } from "../../integrations/microsoft/credentials"
-import { microsoftGraphJson } from "../../integrations/microsoft/graph"
-import { base64EncodeBytes } from "../../shared/encoding"
+import { type Doc } from "../../../_generated/dataModel"
+import { type AssetContext, readRunAssets } from "../../../assets/read"
+import { requireMicrosoftCredentials } from "../../../integrations/microsoft/credentials"
+import { microsoftGraphJson } from "../../../integrations/microsoft/graph"
+import { base64EncodeBytes } from "../../../shared/encoding"
 import {
   boundedNumber,
   optionalString,
@@ -10,7 +10,8 @@ import {
   requiredObject,
   requiredString,
   requiredStringArray,
-} from "../../shared/input"
+} from "../../../shared/input"
+import { callMicrosoftCalendarTool } from "./calendar"
 
 export async function callMicrosoftTool(
   integration: Doc<"integrations">,
@@ -49,19 +50,16 @@ async function callMicrosoftEmailTool(
   if (tool === "microsoft_email_search_messages") {
     return await searchMessages(token, args)
   }
-
   if (tool === "microsoft_email_get_message") {
     return await microsoftGraphJson(
       token,
       `/me/messages/${encodeURIComponent(requiredString(args.messageId, "messageId"))}`
     )
   }
-
   if (tool === "microsoft_email_send_message") {
     const assets = await readRunAssets(context, args.assets, {
       maxBytes: 3 * 1024 * 1024,
     })
-
     await microsoftGraphJson(token, "/me/sendMail", {
       method: "POST",
       body: {
@@ -71,69 +69,24 @@ async function callMicrosoftEmailTool(
     })
     return "sent"
   }
-
   if (tool === "microsoft_email_create_draft") {
     const assets = await readRunAssets(context, args.assets, {
       maxBytes: 3 * 1024 * 1024,
     })
-
     return await microsoftGraphJson(token, "/me/messages", {
       method: "POST",
       body: buildMicrosoftMessage(args, assets),
     })
   }
-
   if (tool === "microsoft_email_update_message") {
     return await microsoftGraphJson(
       token,
       `/me/messages/${encodeURIComponent(requiredString(args.messageId, "messageId"))}`,
-      {
-        method: "PATCH",
-        body: requiredObject(args.message, "message"),
-      }
+      { method: "PATCH", body: requiredObject(args.message, "message") }
     )
   }
 
   throw new Error(`Unknown Microsoft Email tool: ${tool}`)
-}
-
-async function callMicrosoftCalendarTool(
-  token: string,
-  tool: string,
-  args: Record<string, unknown>
-) {
-  if (tool === "microsoft_calendar_list_events") {
-    return await listEvents(token, args)
-  }
-
-  if (tool === "microsoft_calendar_get_event") {
-    return await microsoftGraphJson(
-      token,
-      `/me/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`
-    )
-  }
-
-  if (tool === "microsoft_calendar_create_event") {
-    return await microsoftGraphJson(token, "/me/events", {
-      method: "POST",
-      query: microsoftSendUpdatesQuery(args),
-      body: requiredObject(args.event, "event"),
-    })
-  }
-
-  if (tool === "microsoft_calendar_update_event") {
-    return await microsoftGraphJson(
-      token,
-      `/me/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`,
-      {
-        method: "PATCH",
-        query: microsoftSendUpdatesQuery(args),
-        body: requiredObject(args.event, "event"),
-      }
-    )
-  }
-
-  throw new Error(`Unknown Microsoft Calendar tool: ${tool}`)
 }
 
 async function searchMessages(token: string, args: Record<string, unknown>) {
@@ -154,35 +107,6 @@ async function searchMessages(token: string, args: Record<string, unknown>) {
   }
 
   return await microsoftGraphJson(token, path, { query })
-}
-
-async function listEvents(token: string, args: Record<string, unknown>) {
-  const timeMin = optionalString(args.timeMin)
-  const timeMax = optionalString(args.timeMax)
-  const query: Record<string, unknown> = {
-    $top: boundedNumber(args.top, 10, 1, 50),
-    $orderby: "start/dateTime",
-  }
-
-  if (timeMin === undefined && timeMax === undefined) {
-    return await microsoftGraphJson(token, "/me/events", { query })
-  }
-
-  return await microsoftGraphJson(token, "/me/calendarView", {
-    query: {
-      ...query,
-      startDateTime: timeMin ?? new Date().toISOString(),
-      endDateTime:
-        timeMax ??
-        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-  })
-}
-
-function microsoftSendUpdatesQuery(args: Record<string, unknown>) {
-  return args.sendUpdates === "all" || args.sendUpdates === "none"
-    ? { sendUpdates: args.sendUpdates }
-    : {}
 }
 
 function buildMicrosoftMessage(

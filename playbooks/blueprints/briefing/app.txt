@@ -26,6 +26,7 @@ export default function App() {
   const timezone = safeTimezone(state.value?.timezone)
   const emptyFailure = state.error !== null || state.value?.scan.status === "failed"
   const emptyIncomplete = state.value?.scan.status === "partial"
+  const deliveryIssue = latestDeliveryIssue(state.value?.dispatches)
 
   useEffect(() => {
     const readHash = () => setChosenId(readMeetingId())
@@ -45,6 +46,11 @@ export default function App() {
         count={upcomingCount(meetings, now)}
         timezone={timezone}
       />
+      {deliveryIssue === undefined ? null : (
+        <p className="mt-5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+          {deliveryIssue.error ?? "The latest briefing delivery could not be confirmed. Milo will not resend it automatically, to avoid a duplicate."}
+        </p>
+      )}
       {state.error === null || meetings.length === 0 ? null : (
         <p className="mt-5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
           {state.error.message}
@@ -215,6 +221,12 @@ function upcomingCount(meetings: MeetingEntry[], now: number) {
 
 function attendeeLine(meeting: MeetingBriefing) {
   return meeting.event.attendees.map((attendee) => attendee.name ?? attendee.organization).filter(Boolean).join(", ") || "Attendees not listed"
+}
+
+function latestDeliveryIssue(dispatches: Record<string, { status: string; updatedAt: string; error?: string }> | undefined) {
+  return Object.values(dispatches ?? {})
+    .filter((dispatch) => dispatch.status === "failed" || dispatch.status === "unknown")
+    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))[0]
 }
 
 function formatMeetingTime(value: string, timezone: string) {

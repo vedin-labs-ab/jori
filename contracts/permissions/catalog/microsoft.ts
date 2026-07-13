@@ -43,10 +43,18 @@ export const microsoftToolPermissionRows = [
   ],
   [
     "microsoftCalendar",
+    "microsoft_calendar_list_calendars",
+    "List calendars",
+    "List calendars in your Microsoft Calendar account.",
+    "List Microsoft calendars before searching events when work may live outside the default calendar.",
+    "read",
+  ],
+  [
+    "microsoftCalendar",
     "microsoft_calendar_list_events",
     "List calendar events",
-    "List events on your Microsoft Calendar.",
-    "List Microsoft Calendar events in a time range. Use to check availability or find an event before changing it.",
+    "List events across your Microsoft calendars.",
+    "List Microsoft Calendar events in a time range across every readable calendar, or pass a calendar ID to target one. Use to check availability or find an event before changing it.",
     "read",
   ],
   [

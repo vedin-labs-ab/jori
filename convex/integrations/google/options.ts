@@ -10,6 +10,7 @@ import {
   requiredOptionString,
 } from "../options/common"
 import { googleJson } from "./api"
+import { listGoogleCalendars } from "./calendars"
 import { requireGoogleCredentials } from "./credentials"
 
 export async function searchGmailLabels(args: OptionLoaderArgs) {
@@ -31,10 +32,9 @@ export async function searchGmailLabels(args: OptionLoaderArgs) {
 }
 
 export async function searchGoogleCalendars(args: OptionLoaderArgs) {
-  const result = await googleJson(
-    googleAccessToken(args),
-    "https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=50"
-  )
+  const result = await listGoogleCalendars(googleAccessToken(args), {
+    maxResults: 50,
+  })
   const normalizedQuery = normalizeQuery(args.query)
 
   return readArray(result.items)

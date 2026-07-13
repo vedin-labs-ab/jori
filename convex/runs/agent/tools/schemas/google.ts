@@ -29,11 +29,20 @@ export const googleToolInputSchemas = {
   }),
   google_gmail_send_message: emailMessageSchema(),
   google_gmail_create_draft: gmailDraftSchema(),
+  google_calendar_list_calendars: objectSchema({
+    properties: {
+      maxResults: numberProperty("Maximum calendars to return.", 1, 100),
+      pageToken: stringProperty("Google Calendar pagination token."),
+    },
+  }),
   google_calendar_list_events: objectSchema({
     properties: {
-      calendarId: stringProperty("Calendar ID. Defaults to primary."),
-      maxResults: numberProperty("Maximum events to return.", 1, 50),
+      calendarId: stringProperty(
+        "Calendar ID. Omit to scan every readable calendar."
+      ),
+      maxResults: numberProperty("Maximum total events to return.", 1, 250),
       orderBy: { type: "string", enum: ["startTime", "updated"] },
+      pageToken: stringProperty("Google Calendar pagination token."),
       q: stringProperty("Free text event search."),
       singleEvents: { type: "boolean" },
       timeMax: stringProperty("Exclusive upper bound RFC3339 timestamp."),

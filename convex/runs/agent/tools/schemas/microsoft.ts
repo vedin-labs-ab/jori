@@ -32,16 +32,27 @@ export const microsoftToolInputSchemas = {
       messageId: stringProperty("Outlook message or draft ID."),
     },
   }),
+  microsoft_calendar_list_calendars: objectSchema({
+    properties: {
+      top: numberProperty("Maximum calendars to return.", 1, 100),
+    },
+  }),
   microsoft_calendar_list_events: objectSchema({
     properties: {
+      calendarId: stringProperty(
+        "Calendar ID. Omit to scan every readable calendar."
+      ),
       timeMax: stringProperty("Upper bound ISO timestamp."),
       timeMin: stringProperty("Lower bound ISO timestamp."),
-      top: numberProperty("Maximum events to return.", 1, 50),
+      top: numberProperty("Maximum total events to return.", 1, 250),
     },
   }),
   microsoft_calendar_get_event: objectSchema({
     required: ["eventId"],
     properties: {
+      calendarId: stringProperty(
+        "Calendar ID. Defaults to the primary calendar."
+      ),
       eventId: stringProperty("Microsoft Graph event ID."),
     },
   }),
