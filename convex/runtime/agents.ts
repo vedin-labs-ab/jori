@@ -4,7 +4,7 @@ import { type Id } from "../_generated/dataModel"
 import { action, internalMutation, query } from "../_generated/server"
 import { resolveSubtaskAccess } from "../runs/access"
 import { createInstructionRun } from "../runs/instruction"
-import { requireWorkerSecret } from "./shared"
+import { requireWorkerSecret } from "./secret"
 
 export const create = action({
   args: {

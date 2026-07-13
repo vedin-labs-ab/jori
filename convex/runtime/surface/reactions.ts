@@ -8,7 +8,7 @@ import { prepareIntegrationForRuntime } from "../../integrations/runtime"
 import { addSlackMessageReaction } from "../../integrations/slack/delivery/messages"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { requiredString } from "../../shared/input"
-import { requireWorkerSecret } from "../shared"
+import { requireWorkerSecret } from "../secret"
 import { requireMessageSurfaceInput } from "./input"
 import { type ReactionAddress, resolveReactionAddress } from "./target"
 

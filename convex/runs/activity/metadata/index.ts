@@ -1,6 +1,6 @@
-import { isRecord } from "../../../contracts/json"
-import { reactionDisplayLabel } from "../../../contracts/reactions"
-import { type Doc } from "../../_generated/dataModel"
+import { isRecord } from "../../../../contracts/json"
+import { reactionDisplayLabel } from "../../../../contracts/reactions"
+import { type Doc } from "../../../_generated/dataModel"
 import {
   arrayLength,
   channelLabel,
@@ -16,11 +16,11 @@ import {
   readStringArray,
   repositoryLabel,
   targetObjectLabel,
-} from "./helpers"
-import { agentWaitMetadata } from "./metadata/agents"
-import { artifactMetadata } from "./metadata/artifacts"
-import { runIntrospectionMetadata } from "./metadata/runs"
-import { type ToolResult } from "./read"
+} from "../helpers"
+import { type ToolResult } from "../read"
+import { agentWaitMetadata } from "./agents"
+import { artifactMetadata } from "./artifacts"
+import { runIntrospectionMetadata } from "./runs"
 
 export function toolMetadata(args: {
   agents: Doc<"runs">[]

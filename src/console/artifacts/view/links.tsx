@@ -19,11 +19,11 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
-import { api } from "../../../convex/_generated/api"
-import { showErrorToast } from "../shared/error"
-import { absoluteTime, useNow } from "../shared/time"
+import { api } from "../../../../convex/_generated/api"
+import { showErrorToast } from "../../shared/error"
+import { absoluteTime, useNow } from "../../shared/time"
+import { type ArtifactDetail } from "../types"
 import { ArtifactRailLabel, artifactRailButtonClassName } from "./rail"
-import { type ArtifactDetail } from "./types"
 
 const sharePageSize = 8
 

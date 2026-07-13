@@ -2,13 +2,13 @@ import { useAuth, useOrganization } from "@clerk/tanstack-react-start"
 import { useConvexAuth } from "convex/react"
 import { lazy, Suspense } from "react"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
+import { type ArtifactDetail } from "../types"
 import { ArtifactShareView } from "./share"
-import { type ArtifactDetail } from "./types"
 
 /** Lazy so anonymous share-link visitors do not download the member console
  *  graph after the session check establishes that there is no member. */
 const ArtifactView = lazy(() =>
-  import("./view").then((module) => ({ default: module.ArtifactView }))
+  import("./index").then((module) => ({ default: module.ArtifactView }))
 )
 
 export function ArtifactAccess({

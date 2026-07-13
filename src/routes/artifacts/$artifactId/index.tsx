@@ -1,7 +1,7 @@
 import { parseShareFragment } from "@contracts/artifacts/share"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { ArtifactAccess } from "@/console/artifacts/access"
+import { ArtifactAccess } from "@/console/artifacts/view/access"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { SessionProviders } from "@/shared/session"
 

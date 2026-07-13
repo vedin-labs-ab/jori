@@ -29,6 +29,9 @@ const ruleSet = {
       from: {},
       to: {
         circular: true,
+        viaOnly: {
+          dependencyTypesNot: ["type-only", "pre-compilation-only"],
+        },
       },
     },
     {
@@ -168,6 +171,7 @@ const result = await cruise(roots, {
   exclude: excludedPaths,
   outputType: "err-long",
   ruleSet,
+  tsPreCompilationDeps: "specify",
   tsConfig: {
     fileName: "tsconfig.json",
   },

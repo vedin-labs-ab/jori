@@ -1,13 +1,13 @@
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { type ApprovalBrokerContext } from "../../broker/approval"
 import { type MiloToolRequest, requiredString } from "../../shared/input"
 import {
   type Integration,
   integrationLabel,
   integrations,
 } from "../../shared/integrations"
+import { type OfferContext } from "./context"
 import { tryDeliverIntegrationOffer } from "./delivery"
 import { integrationOfferSourceFromInput } from "./source"
 
@@ -20,7 +20,7 @@ export function isIntegrationOfferTool(tool: string) {
 
 export async function callIntegrationOfferTool(
   ctx: ActionCtx,
-  context: ApprovalBrokerContext,
+  context: OfferContext,
   request: MiloToolRequest
 ) {
   if (!isIntegrationOfferTool(request.tool)) {
@@ -151,7 +151,7 @@ function offerCancelResult(status: "cancelled" | "missing" | "settled") {
 }
 
 function findConnectedIntegration(
-  context: ApprovalBrokerContext,
+  context: OfferContext,
   integration: Integration
 ) {
   return (

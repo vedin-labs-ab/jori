@@ -6,7 +6,7 @@ import {
   getWaiter,
 } from "../../runs/execution/waiters/data"
 import { waiterCondition } from "../../runs/execution/waiters/schema"
-import { requireWorkerSecret } from "../shared"
+import { requireWorkerSecret } from "../secret"
 
 export const create = mutation({
   args: {

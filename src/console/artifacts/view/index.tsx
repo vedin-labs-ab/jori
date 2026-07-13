@@ -5,13 +5,13 @@ import { type ReactNode, useCallback, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
-import { api } from "../../../convex/_generated/api"
-import { ConsolePage } from "../page"
+import { api } from "../../../../convex/_generated/api"
+import { ConsolePage } from "../../page"
+import { type ArtifactDetail } from "../types"
 import { memberArtifactUrl } from "./fragment"
 import { ArtifactFrame } from "./frame"
 import { ArtifactLinks } from "./links"
 import { ArtifactRailLabel, artifactRailButtonClassName } from "./rail"
-import { type ArtifactDetail } from "./types"
 
 type ArtifactId = ArtifactDetail["artifactId"]
 

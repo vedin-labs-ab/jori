@@ -7,7 +7,7 @@ import {
 } from "../../contracts/source"
 import { optionalString, requiredString } from "../input"
 import { sandboxClonePath } from "../sandbox/path"
-import { type ToolRuntime } from "../tool"
+import { type ToolRuntime } from "../tool/runtime"
 import { type JsonObject } from "../types"
 
 const sourceChangeTools = new Set([

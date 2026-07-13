@@ -14,6 +14,7 @@ type FolderCount = {
 type FolderScan = FolderCount & {
   hasChildSource: boolean
   hasSource: boolean
+  hasSupportingSource: boolean
 }
 
 type DirectoryEntry = {
@@ -92,6 +93,9 @@ async function countFolders(directory: string): Promise<FolderScan[]> {
   const relativePath = toRelativePath(directory)
   const childScanGroups = await scanChildren(directory, entries)
   const directSourceFileCount = countDirectSourceFiles(entries)
+  const hasSupportingSource =
+    entries.filter((entry) => entry.isFile() && isSourceFile(entry.name))
+      .length > directSourceFileCount
   const hasChildSource = childScanGroups.some((folders) =>
     folders.some((folder) => folder.hasSource)
   )
@@ -102,6 +106,7 @@ async function countFolders(directory: string): Promise<FolderScan[]> {
       count: directSourceFileCount,
       hasChildSource,
       hasSource: true,
+      hasSupportingSource,
       relativePath,
     })
   }
@@ -156,6 +161,7 @@ function isSingleFileFolder(folder: FolderScan) {
   return (
     folder.count === 1 &&
     !folder.hasChildSource &&
+    !folder.hasSupportingSource &&
     !allowedSingleFileFolders.includes(folder.relativePath)
   )
 }

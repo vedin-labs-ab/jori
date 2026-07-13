@@ -1,9 +1,9 @@
 import { expect, test } from "vitest"
-import { type Id } from "../../_generated/dataModel"
+import { type Id } from "../../../_generated/dataModel"
 import {
   isSlackIntegrationOfferInteraction,
   parseSlackIntegrationOfferCancelInteraction,
-} from "./interaction"
+} from "../interaction"
 import { createSlackIntegrationOfferMessage } from "./slack"
 
 test("renders a URL button for the requested integration", () => {

@@ -38,7 +38,7 @@ vi.mock("./share", () => ({
   ),
 }))
 
-vi.mock("./view", () => ({
+vi.mock("./index", () => ({
   ArtifactView: ({ artifactId }: { artifactId: string }) => (
     <div>Member {artifactId}</div>
   ),

@@ -1,8 +1,12 @@
 import { expect, test } from "vitest"
-import { type Doc, type Id, type TableNames } from "../../_generated/dataModel"
-import { projectActivity } from "./project"
-import { type ToolResult } from "./read"
-import { type ActivityData } from "./types"
+import {
+  type Doc,
+  type Id,
+  type TableNames,
+} from "../../../_generated/dataModel"
+import { projectActivity } from "../project"
+import { type ToolResult } from "../read"
+import { type ActivityData } from "../types"
 
 test("projects search run metadata without identifiers", () => {
   const items = projectActivity(
