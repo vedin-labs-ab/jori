@@ -51,6 +51,16 @@ test("labels every wide-window day, dropping only post-anchor numbers", () => {
   expect(labeled).toHaveLength(28)
 })
 
+test("keeps a month boundary instead of an adjacent range start", () => {
+  const julyThirteenth = new Date(2026, 6, 13, 15, 30).getTime()
+  const pulse = buildPulse([], [], julyThirteenth)
+
+  expect(pulse.days[0]?.label).toBe("")
+  expect(pulse.days[1]?.label).toBe(monthDay(new Date(2026, 6, 1)))
+  expect(pulse.days[2]?.label).toBe("")
+  expect(pulse.days[3]?.label).toBe("3")
+})
+
 test("buckets entries into lanes by current membership", () => {
   const entries = [
     { observedAt: daysAgo(0), effort: "Cards", workstreamId: "ws1" },
