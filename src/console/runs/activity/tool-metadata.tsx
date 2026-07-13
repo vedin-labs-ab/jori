@@ -26,17 +26,22 @@ const metadataLabels = {
 } satisfies Record<ToolMetadataItem["kind"], string>
 
 export function ActivityToolMetadata({
+  item,
   items,
-  title,
 }: {
+  item: ActivityItem
   items: ToolMetadataItems
-  title: string
 }) {
+  const { title, tool } = item
   const contentRef = useRef<HTMLSpanElement>(null)
   const isOverflowing = useOverflowingContent(contentRef)
   const metadata = displayMetadata(title, items)
   const content = (
-    <ToolMetadataContent items={metadata.inlineItems} ref={contentRef} />
+    <ToolMetadataContent
+      items={metadata.inlineItems}
+      ref={contentRef}
+      tool={tool}
+    />
   )
 
   if (!isOverflowing) {
@@ -56,7 +61,14 @@ export function ActivityToolMetadata({
               <dt className="text-background/70">
                 {metadataLabels[item.kind]}
               </dt>
-              <dd className="break-words text-background">{item.text}</dd>
+              <dd
+                className={cn(
+                  "break-words text-background",
+                  isCommandMetadata(tool, item) ? "font-mono" : null
+                )}
+              >
+                {item.text}
+              </dd>
             </div>
           ))}
         </dl>
@@ -67,8 +79,8 @@ export function ActivityToolMetadata({
 
 const ToolMetadataContent = forwardRef<
   HTMLSpanElement,
-  { items: ToolMetadataItems }
->(function ToolMetadataContent({ items }, ref) {
+  { items: ToolMetadataItems; tool?: string }
+>(function ToolMetadataContent({ items, tool }, ref) {
   return (
     <span
       className="inline-flex min-w-0 max-w-full items-center overflow-hidden whitespace-nowrap"
@@ -85,14 +97,7 @@ const ToolMetadataContent = forwardRef<
           {index === 0 ? null : (
             <span className="mx-1.5 shrink-0 text-muted-foreground/70">·</span>
           )}
-          <span
-            className={cn(
-              "truncate",
-              isCompactOutcome(item) ? "shrink-0" : "min-w-0"
-            )}
-          >
-            {item.text}
-          </span>
+          <MetadataValue item={item} tool={tool} />
         </span>
       ))}
     </span>
@@ -188,6 +193,36 @@ function firstOutcome(items: ToolMetadataItems, noun: string) {
 
 function isCompactOutcome(item: ToolMetadataItem) {
   return item.kind === "outcome" && item.text.length <= 24
+}
+
+function MetadataValue({
+  item,
+  tool,
+}: {
+  item: ToolMetadataItem
+  tool?: string
+}) {
+  const isCommand = isCommandMetadata(tool, item)
+  const Element = isCommand ? "code" : "span"
+
+  return (
+    <Element
+      className={cn(
+        "truncate",
+        isCommand
+          ? "min-w-0 rounded-sm bg-muted px-1 py-0.5 font-mono text-foreground"
+          : isCompactOutcome(item)
+            ? "shrink-0"
+            : "min-w-0"
+      )}
+    >
+      {item.text}
+    </Element>
+  )
+}
+
+function isCommandMetadata(tool: string | undefined, item: ToolMetadataItem) {
+  return tool === "bash" && item.kind === "target"
 }
 
 function isCountOutcome(text: string, noun: string) {
