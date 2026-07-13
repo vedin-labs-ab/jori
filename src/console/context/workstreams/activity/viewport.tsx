@@ -18,8 +18,14 @@ type PulseViewportProps = {
 
 // Preserve the pinned lane label while fading the scrollable day cells.
 // The shadcn utility still owns the scroll-aware edge values and animation.
-const horizontalFade =
-  "scroll-fade-x [--scroll-fade-mask:linear-gradient(to_right,currentColor_0,currentColor_11.5rem,transparent_11.5rem,currentColor_calc(11.5rem+var(--scroll-fade-s,0px)),currentColor_calc(100%-var(--scroll-fade-e,0px)),transparent_100%)]"
+// Its 96px default exceeds the shortest vertical overflow (28px at 8 lanes),
+// so a 24px reveal makes every edge reach full strength within the first row.
+const scrollFadeReveal = "[--scroll-fade-reveal:24px]"
+const horizontalFade = cn(
+  "scroll-fade-x",
+  scrollFadeReveal,
+  "[--scroll-fade-mask:linear-gradient(to_right,currentColor_0,currentColor_11.5rem,transparent_11.5rem,currentColor_calc(11.5rem+var(--scroll-fade-s,0px)),currentColor_calc(100%-var(--scroll-fade-e,0px)),transparent_100%)]"
+)
 
 const laneGrids: Record<PulseDays, string> = {
   14: "grid grid-cols-[11.5rem_repeat(14,22px)] items-center",
@@ -43,7 +49,12 @@ export function PulseViewport({
 
   return (
     <CardContent className="px-0">
-      <div className="scroll-fade-y max-h-56 overflow-y-auto">
+      <div
+        className={cn(
+          "scroll-fade-y max-h-56 overflow-y-auto",
+          scrollFadeReveal
+        )}
+      >
         <div
           className={cn(horizontalFade, "no-scrollbar overflow-x-auto")}
           onScroll={synchronize}

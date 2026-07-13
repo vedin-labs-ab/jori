@@ -32,6 +32,11 @@ test("fades both axes while keeping the pinned band outside vertical scroll", ()
   expect(vertical).not.toBeNull()
   expect(horizontal).toHaveLength(2)
   expect(vertical?.contains(horizontal[1] ?? null)).toBe(false)
+  expect(vertical?.classList).toContain("[--scroll-fade-reveal:24px]")
+
+  for (const scroller of horizontal) {
+    expect(scroller.classList).toContain("[--scroll-fade-reveal:24px]")
+  }
 })
 
 test("synchronizes horizontal progress between both scroll regions", () => {
