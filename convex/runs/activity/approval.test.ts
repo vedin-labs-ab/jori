@@ -23,6 +23,7 @@ test("projects approvals with surface action metadata", () => {
         tool: "notion_create_page",
       } as Doc<"approvals">,
     ],
+    artifacts: [],
     assets: [],
     offers: [],
     run: {} as Doc<"runs">,

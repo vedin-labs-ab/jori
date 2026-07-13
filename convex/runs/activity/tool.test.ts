@@ -83,13 +83,83 @@ test("does not synthesize descriptions from result shape", () => {
   )
 })
 
+test("labels artifact shares with the title and link lifetime", () => {
+  const artifactId = id<"artifacts">("artifact")
+  const items = projectActivity(
+    data({
+      artifacts: [artifact({ _id: artifactId, title: "Meeting prep" })],
+      traces: [
+        trace({
+          callId: "call-1",
+          data: {
+            input: { artifactId, expiresInHours: 24 },
+            tool: {
+              access: "write",
+              name: "share_artifact",
+              route: "convex",
+            },
+          },
+          timestamp: 10,
+          type: "tool.started",
+        }),
+      ],
+    })
+  )
+
+  expect(items).toContainEqual(
+    expect.objectContaining({
+      metadata: [
+        { kind: "target", text: "Meeting prep" },
+        { kind: "scope", text: "24h link" },
+      ],
+      tool: "share_artifact",
+    })
+  )
+})
+
+test("labels inferred artifact state reads with the title and state entry", () => {
+  const artifactId = id<"artifacts">("artifact")
+  const items = projectActivity(
+    data({
+      artifacts: [artifact({ _id: artifactId, title: "Meeting prep" })],
+      run: run({ artifactId }),
+      traces: [
+        trace({
+          callId: "call-1",
+          data: {
+            input: { contractName: "meetings" },
+            tool: {
+              access: "read",
+              name: "read_artifact_state",
+              route: "convex",
+            },
+          },
+          timestamp: 10,
+          type: "tool.started",
+        }),
+      ],
+    })
+  )
+
+  expect(items).toContainEqual(
+    expect.objectContaining({
+      metadata: [
+        { kind: "target", text: "Meeting prep" },
+        { kind: "scope", text: "meetings" },
+      ],
+      tool: "read_artifact_state",
+    })
+  )
+})
+
 function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],
     approvals: [],
+    artifacts: [],
     assets: [],
     offers: [],
-    run: run(),
+    run: run({}),
     traces: [],
     waiters: [],
     ...overrides,
@@ -111,7 +181,7 @@ function trace(
   } as Doc<"traces">
 }
 
-function run(): Doc<"runs"> {
+function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
   return {
     _creationTime: 0,
     _id: id<"runs">("run"),
@@ -126,7 +196,22 @@ function run(): Doc<"runs"> {
     },
     status: "running",
     tenantId: "tenant",
+    ...overrides,
   } as Doc<"runs">
+}
+
+function artifact(overrides: Partial<Doc<"artifacts">>): Doc<"artifacts"> {
+  return {
+    _creationTime: 0,
+    _id: id<"artifacts">("artifact"),
+    access: "organization",
+    createdAt: 0,
+    ownerId: id<"persons">("person"),
+    tenantId: "tenant",
+    title: "Artifact",
+    updatedAt: 0,
+    ...overrides,
+  }
 }
 
 function id<TableName extends TableNames>(value: string) {

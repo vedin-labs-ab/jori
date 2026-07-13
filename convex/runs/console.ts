@@ -3,8 +3,6 @@ import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
-import { resolvePersonByIdentity } from "../persons/links"
 import {
   type ApprovalFilter,
   approvalFilterValidator,
@@ -19,6 +17,7 @@ import {
   summaryMatchesSearch,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
+import { resolveConsolePerson } from "./console/person"
 import { summarizeRun } from "./console/summaries"
 
 type RunSummary = Awaited<ReturnType<typeof summarizeRun>>
@@ -178,19 +177,6 @@ async function countRuns(
   }
 
   return count
-}
-
-/** The caller's person for ownership filtering; guard runs in the handler. */
-async function resolveConsolePerson(
-  ctx: QueryCtx,
-  tenantId: string,
-  identity: Awaited<ReturnType<typeof requireTenantAccess>>
-) {
-  return await resolvePersonByIdentity(ctx, {
-    tenantId,
-    provider: "clerk",
-    externalId: requireClerkUserId(identity),
-  })
 }
 
 function needsSummary(filter: ApprovalFilter, normalizedQuery: string) {

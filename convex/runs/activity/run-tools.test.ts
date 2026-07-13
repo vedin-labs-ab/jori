@@ -153,6 +153,7 @@ function data(traces: Doc<"traces">[]): ActivityData {
   return {
     agents: [],
     approvals: [],
+    artifacts: [],
     assets: [],
     offers: [],
     run: run(),

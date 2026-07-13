@@ -1,5 +1,8 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
+import { canAccessArtifact } from "../../artifacts/access"
+import { activityArtifactId } from "./metadata/artifacts"
+import { readToolInput, readToolName, readTraceData } from "./read"
 import { type ActivityData } from "./types"
 
 const traceLimit = 500
@@ -7,7 +10,8 @@ const relationLimit = 100
 
 export async function loadActivityData(
   ctx: QueryCtx,
-  run: Doc<"runs">
+  run: Doc<"runs">,
+  personId: Id<"persons"> | undefined
 ): Promise<ActivityData> {
   const [traces, approvals, offers, waiters, agents, assets] =
     await Promise.all([
@@ -18,16 +22,65 @@ export async function loadActivityData(
       loadAgents(ctx, run._id),
       loadAssets(ctx, run._id),
     ])
+  const artifacts = await loadArtifacts(ctx, run, traces, personId)
 
   return {
     agents,
     approvals,
+    artifacts,
     assets,
     offers,
     run,
     traces,
     waiters,
   }
+}
+
+async function loadArtifacts(
+  ctx: QueryCtx,
+  run: Doc<"runs">,
+  traces: Doc<"traces">[],
+  personId: Id<"persons"> | undefined
+) {
+  const ids = referencedArtifactIds(ctx, run, traces)
+  const artifacts = await Promise.all(ids.map((id) => ctx.db.get(id)))
+
+  return artifacts.filter(
+    (artifact): artifact is Doc<"artifacts"> =>
+      artifact !== null &&
+      artifact.tenantId === run.tenantId &&
+      (artifact.access === "organization" ||
+        (personId !== undefined && canAccessArtifact(artifact, personId)))
+  )
+}
+
+function referencedArtifactIds(
+  ctx: QueryCtx,
+  run: Doc<"runs">,
+  traces: Doc<"traces">[]
+) {
+  const ids = new Set<Id<"artifacts">>()
+
+  for (let index = traces.length - 1; index >= 0; index -= 1) {
+    const trace = readTraceData(traces[index])
+    const value = activityArtifactId(
+      readToolName(trace),
+      readToolInput(trace),
+      run.artifactId
+    )
+    const id =
+      value === undefined ? null : ctx.db.normalizeId("artifacts", value)
+
+    if (id !== null) {
+      ids.add(id)
+    }
+
+    if (ids.size >= relationLimit) {
+      break
+    }
+  }
+
+  return [...ids]
 }
 
 async function loadTraces(ctx: QueryCtx, runId: Id<"runs">) {
