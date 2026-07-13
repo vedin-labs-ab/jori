@@ -136,6 +136,19 @@ test("uses a terminal icon for bash", () => {
   )
 })
 
+test("uses the shared link icon for share_artifact", () => {
+  renderActivity({
+    title: "Share artifact",
+    tool: "share_artifact",
+  })
+
+  const icon = screen.getByRole("img", { name: "Tool done" })
+
+  expect(icon.querySelector("svg")?.classList.contains("lucide-link-2")).toBe(
+    true
+  )
+})
+
 function renderActivity(overrides: Partial<ActivityItemType>) {
   render(
     <TooltipProvider>
