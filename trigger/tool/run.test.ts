@@ -1,5 +1,8 @@
 import { expect, test, vi } from "vitest"
-import { type ConvexId, type RuntimeTool } from "../types"
+import {
+  type RuntimeId,
+  type RuntimeTool,
+} from "../../contracts/runtime/worker"
 import { executeToolCall, type ToolRuntime } from "."
 
 test("finish_run requires a reason when an active surface has no communication", async () => {
@@ -130,5 +133,5 @@ function finishRunTool(): RuntimeTool {
 }
 
 function id<TableName extends string>(value: string) {
-  return value as ConvexId<TableName>
+  return value as RuntimeId<TableName>
 }

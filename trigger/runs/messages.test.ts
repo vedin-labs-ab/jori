@@ -1,10 +1,10 @@
 import { expect, test, vi } from "vitest"
-import { type ToolRuntime } from "../tool"
 import {
-  type ConvexId,
+  type RuntimeId,
   type RuntimeInteraction,
   type RuntimeMessage,
-} from "../types"
+} from "../../contracts/runtime/worker"
+import { type ToolRuntime } from "../tool"
 import {
   appendSessionMessages,
   formatSessionInteraction,
@@ -92,7 +92,7 @@ test("appends person context before drained batch items", async () => {
 })
 
 function id<TableName extends string>(value: string) {
-  return value as ConvexId<TableName>
+  return value as RuntimeId<TableName>
 }
 
 function runtimeMessage(

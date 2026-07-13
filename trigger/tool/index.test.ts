@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { type ConvexId } from "../types"
+import { type RuntimeId } from "../../contracts/runtime/worker"
 import { executeToolCall, type ToolRuntime } from "./index"
 
 beforeEach(() => {
@@ -196,7 +196,7 @@ function createRuntime(
 }
 
 function id<TableName extends string>(value: string) {
-  return value as ConvexId<TableName>
+  return value as RuntimeId<TableName>
 }
 
 function promptedToolCall() {

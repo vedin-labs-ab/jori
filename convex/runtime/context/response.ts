@@ -1,4 +1,10 @@
 import { type RuntimePrompt } from "../../../contracts/runtime"
+import {
+  type DrainedSessionBatch,
+  type RunHandoffs,
+  type RuntimeContext,
+  type RuntimeTool,
+} from "../../../contracts/runtime/worker"
 import { type AgentRuntimeInput, inputAccess } from "../../runs/agent/input"
 import { assemblePrompt } from "../../runs/agent/prompt"
 import {
@@ -58,8 +64,8 @@ export function runtimeToolSnapshot(
 
 export function runtimeResponse(args: {
   activeSurface: LoadedActiveSurface
-  drained: unknown
-  handoffs: unknown
+  drained: DrainedSessionBatch | null
+  handoffs: RunHandoffs
   input: AgentRuntimeInput
   lifecycleTools: LifecycleTools
   permissions: RuntimePermissions
@@ -67,7 +73,7 @@ export function runtimeResponse(args: {
   run: LoadedRun
   sandbox: LoadedSandbox
   session: LoadedSession
-}) {
+}): RuntimeContext {
   return {
     prompt: args.prompt,
     run: {
@@ -98,11 +104,15 @@ export function runtimeTools(
   lifecycleTools: LifecycleTools,
   activeSurface: LoadedActiveSurface,
   permissions: RuntimePermissions
-) {
-  return [
+): RuntimeTool[] {
+  const tools = [
     ...lifecycleTools,
     ...activeSurface.tools,
     ...permissions.tools,
     ...sandboxTools,
   ]
+
+  // Schema builders are runtime-neutral JSON but use a deliberately looser
+  // `unknown` index signature. Keep the wire object unchanged at this boundary.
+  return tools as RuntimeTool[]
 }

@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { type DrainedSessionBatch } from "../../contracts/runtime/worker"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action } from "../_generated/server"
@@ -32,7 +33,7 @@ export const drain = action({
     sessionId: v.id("sessions"),
   },
   returns: v.any(),
-  handler: async (ctx, args): Promise<unknown> => {
+  handler: async (ctx, args): Promise<DrainedSessionBatch> => {
     requireWorkerSecret(args.secret)
 
     // Reactions must be synced before the drain reads so fresh reactions are

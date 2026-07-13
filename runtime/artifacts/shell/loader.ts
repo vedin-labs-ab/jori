@@ -3,7 +3,7 @@ import {
   type RawMiloStateListInput,
   type RawMiloStateReadInput,
   type RawMiloStateUpdateInput,
-} from "../template/src/milo/state-types"
+} from "../template/src/milo/state/types"
 import {
   type MiloToolOptions,
   type RawMiloClient,

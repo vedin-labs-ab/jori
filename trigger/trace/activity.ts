@@ -1,12 +1,12 @@
 import { isRecord } from "../../contracts/json"
-import { type RuntimePlatform } from "../platform"
 import {
   type ApprovalHandoff,
-  type ConvexId,
   type OfferHandoff,
   type RuntimeContext,
   type RuntimeEventTraceData,
-} from "../types"
+  type RuntimeId,
+} from "../../contracts/runtime/worker"
+import { type RuntimePlatform } from "../platform"
 import { recordRuntimeEvent } from "./runtime"
 
 export async function recordToolResultActivity(args: {
@@ -95,7 +95,7 @@ function approvalEvent(
   }
 
   return {
-    data: { approval: approvalId as ConvexId<"approvals"> },
+    data: { approval: approvalId as RuntimeId<"approvals"> },
     keyId: approvalId,
     type: "approval.requested",
   }
@@ -111,7 +111,7 @@ function offerEvent(
   }
 
   return {
-    data: { offer: offerId as ConvexId<"integrationOffers"> },
+    data: { offer: offerId as RuntimeId<"integrationOffers"> },
     keyId: offerId,
     type: "offer.requested",
   }
@@ -128,7 +128,7 @@ function agentEvent(
   }
 
   return {
-    data: { child: runId as ConvexId<"runs"> },
+    data: { child: runId as RuntimeId<"runs"> },
     keyId: runId,
     type: "agent.started",
   }
@@ -144,7 +144,7 @@ function assetEvent(
   }
 
   return {
-    data: { asset: assetId as ConvexId<"assets"> },
+    data: { asset: assetId as RuntimeId<"assets"> },
     keyId: assetId,
     type: "asset.saved",
   }

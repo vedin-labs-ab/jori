@@ -1,4 +1,4 @@
-import { type JsonObject } from "../types"
+import { type JsonObject } from "../../contracts/json"
 
 export type ModelMessage =
   | {

@@ -1,4 +1,7 @@
-import { type HandoffSubject, type RunHandoffs } from "../../types"
+import {
+  type HandoffSubject,
+  type RunHandoffs,
+} from "../../../contracts/runtime/worker"
 
 export type PendingHandoff = {
   expiresAt: number

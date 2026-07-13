@@ -1,4 +1,10 @@
-import { type Infer, v } from "convex/values"
+import { v } from "convex/values"
+import {
+  type ApprovalHandoff,
+  type HandoffSubject,
+  type OfferHandoff,
+  type RunHandoffs,
+} from "../../../../contracts/runtime/worker"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../../../_generated/server"
 
@@ -8,11 +14,10 @@ export const handoffSubject = v.union(
   v.object({ kind: v.literal("offer"), id: v.id("integrationOffers") })
 )
 
-type HandoffSubject = Infer<typeof handoffSubject>
-type ApprovalHandoff = ReturnType<typeof toApprovalHandoff>
-type OfferHandoff = ReturnType<typeof toOfferHandoff>
-
-export async function loadRunHandoffs(ctx: QueryCtx, runId: Id<"runs">) {
+export async function loadRunHandoffs(
+  ctx: QueryCtx,
+  runId: Id<"runs">
+): Promise<RunHandoffs> {
   return {
     approvals: await loadApprovalHandoffs(ctx, runId),
     offers: await loadOfferHandoffs(ctx, runId),
@@ -66,7 +71,7 @@ async function loadOfferHandoffs(ctx: QueryCtx, runId: Id<"runs">) {
 export async function loadSubjectHandoffs(
   ctx: QueryCtx,
   subjects: HandoffSubject[]
-) {
+): Promise<RunHandoffs> {
   const approvals: ApprovalHandoff[] = []
   const offers: OfferHandoff[] = []
 
@@ -106,7 +111,7 @@ function toUnconsumedHandoff<Source extends { consumedAt?: number }, Handoff>(
   return record !== null && isUnconsumed(record) ? toHandoff(record) : null
 }
 
-function toApprovalHandoff(approval: Doc<"approvals">) {
+function toApprovalHandoff(approval: Doc<"approvals">): ApprovalHandoff {
   return {
     id: approval._id,
     status: approval.status,
@@ -118,7 +123,7 @@ function toApprovalHandoff(approval: Doc<"approvals">) {
   }
 }
 
-function toOfferHandoff(offer: Doc<"integrationOffers">) {
+function toOfferHandoff(offer: Doc<"integrationOffers">): OfferHandoff {
   return {
     id: offer._id,
     integration: offer.integration,

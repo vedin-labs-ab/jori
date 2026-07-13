@@ -1,6 +1,7 @@
+import { type JsonObject } from "../../contracts/json"
+import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
 import { readFinal } from "../../contracts/runtime/tools"
 import { optionalString, requiredString } from "../input"
-import { type JsonObject, type SurfaceReactionTarget } from "../types"
 import { type ToolRuntime } from "./runtime"
 
 export async function executeActiveSurfaceTool(

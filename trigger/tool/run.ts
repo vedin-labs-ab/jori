@@ -1,5 +1,5 @@
+import { type JsonObject } from "../../contracts/json"
 import { optionalString } from "../input"
-import { type JsonObject } from "../types"
 import { type ToolRuntime } from "./runtime"
 
 export function executeRunTool(

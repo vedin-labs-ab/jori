@@ -1,24 +1,24 @@
 import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../../contracts/integrations"
-import { decodeToolResult, encodeToolInput } from "../../contracts/transport"
-import { api } from "../../convex/_generated/api"
-import { type RuntimePlatform } from "../platform"
+import { type JsonObject } from "../../contracts/json"
+import { type RuntimePrompt } from "../../contracts/runtime/prompt"
+import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
 import {
   type ActiveSurface,
   type AgentRunPayload,
   type AgentRunStatus,
-  type ConvexId,
   type DrainedSessionBatch,
   type HandoffSubject,
-  type JsonObject,
   type RunHandoffs,
   type RuntimeContext,
   type RuntimeEventInput,
-  type RuntimePrompt,
+  type RuntimeId,
   type RuntimeTool,
-  type SurfaceReactionTarget,
   type WaiterCondition,
-} from "../types"
+} from "../../contracts/runtime/worker"
+import { decodeToolResult, encodeToolInput } from "../../contracts/transport"
+import { api } from "../../convex/_generated/api"
+import { type RuntimePlatform } from "../platform"
 import { type UploadAssetArgs, uploadAsset } from "./assets"
 import { requireConvexUrl, requireWorkerSecret } from "./config"
 import { fetchGitHubCloneCredentials, type GitHubCloneArgs } from "./github"
@@ -40,7 +40,7 @@ export class MiloConvexClient implements RuntimePlatform {
     callId?: string
     data?: RuntimeEventInput["data"]
     key: string
-    runId: ConvexId<"runs">
+    runId: RuntimeId<"runs">
     sequence: number
     type: RuntimeEventInput["type"]
   }) {
@@ -52,7 +52,7 @@ export class MiloConvexClient implements RuntimePlatform {
 
   async callTool(args: {
     input: JsonObject
-    runId: ConvexId<"runs">
+    runId: RuntimeId<"runs">
     surface: ToolSurface
     tool: string
   }) {
@@ -68,8 +68,8 @@ export class MiloConvexClient implements RuntimePlatform {
   }
 
   async executeApproval(args: {
-    approvalId: ConvexId<"approvals">
-    runId: ConvexId<"runs">
+    approvalId: RuntimeId<"approvals">
+    runId: RuntimeId<"runs">
   }) {
     return (await this.client.action(api.runtime.tools.executeApproval, {
       approvalId: args.approvalId,
@@ -78,7 +78,7 @@ export class MiloConvexClient implements RuntimePlatform {
     })) as string
   }
 
-  async loadRunHandoffs(args: { runId: ConvexId<"runs"> }) {
+  async loadRunHandoffs(args: { runId: RuntimeId<"runs"> }) {
     return (await this.client.query(api.runtime.waiters.handoffs.load, {
       runId: args.runId,
       secret: this.secret,
@@ -92,7 +92,7 @@ export class MiloConvexClient implements RuntimePlatform {
     })) as RunHandoffs
   }
 
-  async markApprovalConsumed(args: { approvalId: ConvexId<"approvals"> }) {
+  async markApprovalConsumed(args: { approvalId: RuntimeId<"approvals"> }) {
     await this.client.mutation(api.runtime.waiters.handoffs.consumeApproval, {
       approvalId: args.approvalId,
       secret: this.secret,
@@ -100,7 +100,7 @@ export class MiloConvexClient implements RuntimePlatform {
   }
 
   async markOfferConsumed(args: {
-    integrationOfferId: ConvexId<"integrationOffers">
+    integrationOfferId: RuntimeId<"integrationOffers">
   }) {
     await this.client.mutation(api.runtime.waiters.handoffs.consumeOffer, {
       integrationOfferId: args.integrationOfferId,
@@ -109,8 +109,8 @@ export class MiloConvexClient implements RuntimePlatform {
   }
 
   async createWaiter(args: {
-    runId: ConvexId<"runs">
-    sessionId?: ConvexId<"sessions">
+    runId: RuntimeId<"runs">
+    sessionId?: RuntimeId<"sessions">
     waitpointId: string
     expiresAt: number
     condition?: WaiterCondition
@@ -122,17 +122,17 @@ export class MiloConvexClient implements RuntimePlatform {
       expiresAt: args.expiresAt,
       ...(args.condition === undefined ? {} : { condition: args.condition }),
       secret: this.secret,
-    })) as ConvexId<"waiters">
+    })) as RuntimeId<"waiters">
   }
 
-  async expireWaiter(args: { waiterId: ConvexId<"waiters"> }) {
+  async expireWaiter(args: { waiterId: RuntimeId<"waiters"> }) {
     await this.client.mutation(api.runtime.waiters.data.expire, {
       waiterId: args.waiterId,
       secret: this.secret,
     })
   }
 
-  async reloadContext(args: { runId: ConvexId<"runs"> }) {
+  async reloadContext(args: { runId: RuntimeId<"runs"> }) {
     return (await this.client.action(api.runtime.context.reload, {
       runId: args.runId,
       secret: this.secret,
@@ -145,7 +145,7 @@ export class MiloConvexClient implements RuntimePlatform {
 
   async sendReply(args: {
     blocks?: JsonObject[]
-    runId: ConvexId<"runs">
+    runId: RuntimeId<"runs">
     target?: string
     text: string
   }) {
@@ -157,7 +157,7 @@ export class MiloConvexClient implements RuntimePlatform {
 
   async addReaction(args: {
     reaction: string
-    runId: ConvexId<"runs">
+    runId: RuntimeId<"runs">
     target: SurfaceReactionTarget
   }) {
     return await this.client.action(api.runtime.surface.reactions.add, {
@@ -168,7 +168,7 @@ export class MiloConvexClient implements RuntimePlatform {
 
   async drainSessionMessages(args: {
     limit?: number
-    sessionId: ConvexId<"sessions">
+    sessionId: RuntimeId<"sessions">
   }) {
     return (await this.client.action(api.runtime.sessions.drain, {
       limit: args.limit,
@@ -180,7 +180,7 @@ export class MiloConvexClient implements RuntimePlatform {
   async requestApproval(args: {
     input: JsonObject
     replyTarget?: string
-    runId: ConvexId<"runs">
+    runId: RuntimeId<"runs">
     surface: ToolSurface
     tool: string
   }) {
@@ -197,7 +197,7 @@ export class MiloConvexClient implements RuntimePlatform {
   }
 
   async createAgentRun(args: {
-    parentId: ConvexId<"runs">
+    parentId: RuntimeId<"runs">
     task: string
     title: string
     tools?: string[]
@@ -209,8 +209,8 @@ export class MiloConvexClient implements RuntimePlatform {
   }
 
   async readAgentRuns(args: {
-    parentId: ConvexId<"runs">
-    runIds: ConvexId<"runs">[]
+    parentId: RuntimeId<"runs">
+    runIds: RuntimeId<"runs">[]
   }) {
     return (await this.client.query(api.runtime.agents.readChildren, {
       ...args,
@@ -226,7 +226,7 @@ export class MiloConvexClient implements RuntimePlatform {
     return await fetchGitHubCloneCredentials(this.secret, args)
   }
 
-  async upsertSandbox(args: { externalId: string; runId: ConvexId<"runs"> }) {
+  async upsertSandbox(args: { externalId: string; runId: RuntimeId<"runs"> }) {
     await this.client.mutation(api.runtime.sandboxes.upsert, {
       ...args,
       secret: this.secret,
@@ -235,7 +235,7 @@ export class MiloConvexClient implements RuntimePlatform {
 
   async releaseSandbox(args: {
     externalId: string
-    runId: ConvexId<"runs">
+    runId: RuntimeId<"runs">
   }): Promise<{ expiresAt: number } | null> {
     return (await this.client.mutation(api.runtime.sandboxes.release, {
       ...args,
@@ -246,7 +246,7 @@ export class MiloConvexClient implements RuntimePlatform {
   async reserveExpiredSandboxCleanup(args: {
     expiresAt: number
     externalId: string
-    runId: ConvexId<"runs">
+    runId: RuntimeId<"runs">
   }): Promise<boolean> {
     return (await this.client.mutation(
       api.runtime.sandboxes.reserveExpiredCleanup,

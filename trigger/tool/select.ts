@@ -1,6 +1,7 @@
 import { type ToolSurface } from "../../contracts/integrations"
+import { type JsonObject } from "../../contracts/json"
 import { readFinal } from "../../contracts/runtime/tools"
-import { type JsonObject, type RuntimeTool } from "../types"
+import { type RuntimeTool } from "../../contracts/runtime/worker"
 
 export function findTool(tools: RuntimeTool[], name: string) {
   const tool = tools.find((candidate) => candidate.name === name)

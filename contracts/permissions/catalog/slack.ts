@@ -1,0 +1,62 @@
+import { type ToolPermissionRow } from "../types"
+
+export const slackToolPermissionRows = [
+  [
+    "slack",
+    "channels_list",
+    "List channels",
+    "List channels and direct messages in your Slack workspace.",
+    "List Slack conversations: public and private channels, DMs, and group DMs. Use to resolve a conversation id before reading history or posting.",
+    "read",
+  ],
+  [
+    "slack",
+    "conversations_history",
+    "Read channel history",
+    "Read messages in a Slack channel or direct message.",
+    "Read recent top-level messages in a Slack channel or DM. Use to get context before replying or summarizing; thread replies need conversations_replies.",
+    "read",
+  ],
+  [
+    "slack",
+    "conversations_replies",
+    "Read thread replies",
+    "Read replies in a Slack thread.",
+    "Read the messages in a Slack thread. Use to get full thread context before replying.",
+    "read",
+  ],
+  [
+    "slack",
+    "conversations_search_messages",
+    "Search messages",
+    "Search Slack messages.",
+    "Search messages across the Slack workspace, with Slack operators like in:#channel and from:@name. Use when you do not know where something was said, then read the channel or thread for context.",
+    "read",
+  ],
+  [
+    "slack",
+    "users_search",
+    "Search users",
+    "Find people in your Slack workspace.",
+    "Search Slack users by name or handle. Use to resolve a person to a user id before mentioning or messaging them.",
+    "read",
+  ],
+  [
+    "slack",
+    "conversations_add_message",
+    "Send message",
+    "Post a message to Slack.",
+    "Post a message to a Slack channel, DM, or thread, optionally attaching saved run assets. Reply in-thread via thread_ts when continuing a conversation; confirm the destination before sending.",
+    "write",
+    "required",
+  ],
+  [
+    "slack",
+    "slack_add_reaction",
+    "Add reaction",
+    "React to a Slack message with an emoji.",
+    "Add an emoji reaction to a Slack message. Use as a lightweight acknowledgement instead of a worded reply.",
+    "write",
+    "required",
+  ],
+] satisfies ToolPermissionRow[]

@@ -1,3 +1,4 @@
+import { type RuntimeModelUsage } from "../../contracts/runtime/trace"
 import {
   type ModelMessage,
   type ModelRuntime,
@@ -6,7 +7,6 @@ import {
 import { type ToolRuntime } from "../tool"
 import { formatError } from "../trace/events"
 import { recordRuntimeEvent } from "../trace/runtime"
-import { type RuntimeModelUsage } from "../types"
 
 export async function completeModelStep(args: {
   attempt: number

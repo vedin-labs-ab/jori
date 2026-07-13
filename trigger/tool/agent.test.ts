@@ -1,6 +1,6 @@
 import { beforeEach, expect, test, vi } from "vitest"
+import { type RuntimeId } from "../../contracts/runtime/worker"
 import { executeToolCall, type ToolRuntime } from "../tool"
-import { type ConvexId } from "../types"
 
 const triggerWait = vi.hoisted(() => ({
   createToken: vi.fn(async () => ({ id: "waitpoint_1" })),
@@ -235,7 +235,7 @@ function createRuntime(): ToolRuntime {
 }
 
 function id<TableName extends string>(value: string) {
-  return value as ConvexId<TableName>
+  return value as RuntimeId<TableName>
 }
 
 function agentRun(status: "completed" | "running") {

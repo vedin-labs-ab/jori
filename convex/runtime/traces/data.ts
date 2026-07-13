@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { type RuntimeEventRecord } from "../../../contracts/runtime/worker"
 import { mutation } from "../../_generated/server"
 import { recordWorkerTrace } from "../../runs/execution/traces/data"
 import { requireWorkerSecret } from "../secret"
@@ -11,7 +12,6 @@ export const record = mutation({
   }),
   handler: async (ctx, args) => {
     requireWorkerSecret(args.secret)
-
-    return await recordWorkerTrace(ctx, args)
+    return await recordWorkerTrace(ctx, args satisfies RuntimeEventRecord)
   },
 })

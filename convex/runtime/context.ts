@@ -1,4 +1,10 @@
 import { v } from "convex/values"
+import {
+  type DrainedSessionBatch,
+  type RunHandoffs,
+  type RuntimeContext,
+  type RuntimeContextReload,
+} from "../../contracts/runtime/worker"
 import { api, internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
@@ -27,7 +33,7 @@ import { syncSessionReactions } from "./sessions"
 import { loadActiveSurface } from "./surface"
 
 type PreparedRun = {
-  drained: unknown
+  drained: DrainedSessionBatch | null
   person: string | null
 }
 
@@ -48,6 +54,16 @@ async function prepareWorkerRun(
   })) as PreparedRun | null
 }
 
+async function loadWorkerHandoffs(
+  ctx: ActionCtx,
+  args: { runId: Id<"runs">; secret: string }
+) {
+  return (await ctx.runQuery(
+    api.runtime.waiters.handoffs.load,
+    args
+  )) as RunHandoffs
+}
+
 export const load = action({
   args: {
     attempt: v.number(),
@@ -55,7 +71,7 @@ export const load = action({
     secret: v.string(),
   },
   returns: v.any(),
-  handler: async (ctx, args): Promise<unknown> => {
+  handler: async (ctx, args): Promise<RuntimeContext> => {
     requireWorkerSecret(args.secret)
 
     const [session, run] = (await Promise.all([
@@ -89,7 +105,7 @@ export const load = action({
       loadSandboxReference(ctx, { runId: args.runId, status: run.status }),
       runtimePermissions(ctx, input, skillNames),
       loadActiveSurface(ctx, input, args.runId),
-      ctx.runQuery(api.runtime.waiters.handoffs.load, {
+      loadWorkerHandoffs(ctx, {
         runId: args.runId,
         secret: args.secret,
       }),
@@ -131,7 +147,7 @@ export const reload = action({
     secret: v.string(),
   },
   returns: v.any(),
-  handler: async (ctx, args): Promise<unknown> => {
+  handler: async (ctx, args): Promise<RuntimeContextReload> => {
     requireWorkerSecret(args.secret)
 
     const session = await loadRunSession(ctx, args.runId)

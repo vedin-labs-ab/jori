@@ -1,5 +1,6 @@
 import { tasks } from "@trigger.dev/sdk"
-import { cleanupTaskId, type RuntimeContext } from "../types"
+import { cleanupTaskId } from "../../contracts/runtime/tasks"
+import { type RuntimeContext } from "../../contracts/runtime/worker"
 import { type E2BSandboxRuntime } from "./e2b"
 
 const idleSandboxCleanupTtl = "30m"
