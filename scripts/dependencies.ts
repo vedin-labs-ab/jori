@@ -4,7 +4,7 @@ const roots = [
   "src",
   "convex",
   "contracts",
-  "runtime/source",
+  "runtime/artifacts",
   "trigger",
   "prompts",
   "scripts",
@@ -17,7 +17,7 @@ const excludedPaths = [
   "(^|/)node_modules(/|$)",
   "(^|/)dist(/|$)",
   "[.]test[.](?:ts|tsx|js|jsx)$",
-  "^runtime/source/artifact/template(/|$)",
+  "^runtime/artifacts/template(/|$)",
 ].join("|")
 
 const ruleSet = {
@@ -73,7 +73,7 @@ const ruleSet = {
       comment:
         "Runtime source may depend on contracts, not app, Convex, or script code.",
       from: {
-        path: "^runtime/source/",
+        path: "^runtime/artifacts/",
       },
       to: {
         path: "^(?:src|convex|trigger|prompts|scripts)(?:/|$)",
@@ -89,7 +89,7 @@ const ruleSet = {
       },
       to: {
         path: "^(?:src|convex|runtime|scripts)(?:/|$)",
-        pathNot: "^(?:convex/_generated/|convex/runtime/_generated/)",
+        pathNot: "^(?:convex/_generated/|convex/artifacts/_generated/)",
       },
     },
     {

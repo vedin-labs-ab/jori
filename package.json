@@ -23,8 +23,8 @@
     "preview": "vite preview",
     "skills:sync": "node --experimental-strip-types scripts/env.ts npx convex run skills/catalog:syncGlobalSkills",
     "prompts:compile": "node scripts/prompts.ts && biome format --write prompts/generated.ts",
-    "runtime:check": "node --experimental-strip-types scripts/runtime.ts --check",
-    "runtime:generate": "node --experimental-strip-types scripts/runtime.ts",
+    "runtime:check": "node --experimental-strip-types scripts/runtime/index.ts --check",
+    "runtime:generate": "node --experimental-strip-types scripts/runtime/index.ts",
     "trigger:dev": "node --experimental-strip-types scripts/env.ts trigger dev --env-file .env.local",
     "test": "vitest run",
     "check:versions": "node --experimental-strip-types scripts/versions.ts"

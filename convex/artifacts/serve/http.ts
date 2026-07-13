@@ -1,9 +1,9 @@
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { runtimeAssets } from "../../runtime/_generated/assets"
 import { base64DecodeBytes } from "../../shared/encoding"
 import { jsonError, unauthorizedResponse } from "../../shared/http"
+import { runtimeAssets } from "../_generated/assets"
 import { callArtifactTool } from "../tools/broker"
 import {
   createArtifactRenderCsp,

@@ -2,9 +2,9 @@ import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import { afterEach, expect, test, vi } from "vitest"
-import { readBuildAssets } from "../../runtime/source/artifact/builder/assets.ts"
+import { readBuildAssets } from "../../runtime/artifacts/builder/assets.ts"
 
-vi.mock("../../runtime/source/artifact/builder/config.ts", () => ({
+vi.mock("../../runtime/artifacts/builder/config.ts", () => ({
   config: { artifactTemplatePath: "" },
 }))
 

@@ -1,5 +1,5 @@
 import { CommandExitError, type CommandResult, Sandbox } from "e2b"
-import { type MiloConvexClient } from "../../convex"
+import { type RuntimePlatform } from "../../platform"
 import { type ConvexId } from "../../types"
 import { type SandboxCommandInput, type SandboxCommandResult } from "../types"
 
@@ -9,7 +9,7 @@ const defaultCommandTimeoutMs = 20 * 60 * 1000
 const defaultSandboxTimeoutMs = 60 * 60 * 1000
 
 export async function killE2BSandbox(args: {
-  convex: MiloConvexClient
+  convex: RuntimePlatform
   sandboxId: string
 }) {
   await Sandbox.kill(args.sandboxId, { apiKey: requireE2BApiKey() }).catch(

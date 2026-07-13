@@ -11,7 +11,7 @@ const ignoredWorkspacePaths = [
   "**/.tanstack/**",
   "**/dist/**",
   "**/node_modules/**",
-  "**/runtime/source/artifact/template/**",
+  "**/runtime/artifacts/template/**",
 ]
 
 const config = defineConfig({

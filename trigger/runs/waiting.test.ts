@@ -1,8 +1,8 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type RunHandoffs, type RuntimeTool } from "../types"
+import { createQueuedModel } from "./fixture"
 import { runAgentLoop } from "./loop"
-import { createQueuedModel } from "./test-model"
 
 const triggerWait = vi.hoisted(() => ({
   createToken: vi.fn(async () => ({ id: "waitpoint_1" })),

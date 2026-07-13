@@ -3,7 +3,7 @@ import { createHash } from "node:crypto"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
-import { runtimeAssets } from "../../convex/runtime/_generated/assets.ts"
+import { runtimeAssets } from "../../convex/artifacts/_generated/assets.ts"
 import { root } from "./paths.ts"
 
 const generatedPath = path.join(
@@ -27,7 +27,7 @@ export async function compilePlaybookBlueprints(checkMode: boolean) {
     process.env.MILO_ARTIFACT_BUILDER_CONFIG = configPath
 
     const { buildArtifact } = await import(
-      "../../runtime/source/artifact/builder/index.ts"
+      "../../runtime/artifacts/builder/index.ts"
     )
     const briefing = await buildArtifact([
       {
@@ -84,7 +84,7 @@ function runtimeRevision() {
 
 async function readSource(relativePath: string) {
   return await fs.readFile(
-    path.join(root, "contracts/playbooks/blueprints", relativePath),
+    path.join(root, "playbooks/blueprints", relativePath),
     "utf8"
   )
 }

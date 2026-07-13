@@ -6,8 +6,8 @@ import {
   sandboxArtifactRuntime,
   sandboxInternalRoot,
   sandboxWorkspace,
-} from "../contracts/runtime.ts"
-import { runtimeAssets } from "../convex/runtime/_generated/assets.ts"
+} from "../contracts/runtime/sandbox.ts"
+import { runtimeAssets } from "../convex/artifacts/_generated/assets.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")
 const e2bSandboxTemplate = process.env.MILO_E2B_TEMPLATE?.trim() || "milo-codex"

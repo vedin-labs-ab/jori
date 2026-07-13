@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { sandboxWorkspace } from "../../../contracts/runtime"
+import { sandboxWorkspace } from "../../../contracts/runtime/sandbox"
 import { type SandboxRuntime, type SandboxWriteFile } from "../types"
 import { applyWorkspacePatch } from "./apply"
 

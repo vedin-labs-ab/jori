@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest"
 import { type ToolRuntime } from "../tool"
 import { type ConvexId, type RuntimeTool } from "../types"
+import { createQueuedModel } from "./fixture"
 import { runAgentLoop } from "./loop"
-import { createQueuedModel } from "./test-model"
 
 test("active surface stops are repaired back to finish_run", async () => {
   const runtime = createRuntime({

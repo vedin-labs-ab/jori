@@ -2,10 +2,13 @@ import { type JsonObject, toJsonObject } from "../../../contracts/json"
 import {
   sandboxArtifactRuntime,
   sandboxWorkspace,
-} from "../../../contracts/runtime"
-import { type MiloConvexClient } from "../../convex"
+} from "../../../contracts/runtime/sandbox"
+import {
+  artifactBuildCommand,
+  artifactRuntimeFiles,
+} from "../../artifacts/runtime"
+import { type RuntimePlatform } from "../../platform"
 import { type ConvexId } from "../../types"
-import { artifactBuildCommand, artifactRuntimeFiles } from "../artifacts"
 import { compactFailure } from "../output"
 import { sandboxClonePath, shellQuote } from "../path"
 import {
@@ -35,7 +38,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   private workspaceReady = false
 
   constructor(
-    private readonly convex: MiloConvexClient,
+    private readonly convex: RuntimePlatform,
     private readonly runId: ConvexId<"runs">,
     sandboxId: string | null
   ) {
