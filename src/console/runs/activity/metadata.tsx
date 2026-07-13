@@ -9,6 +9,7 @@ import {
   FileText,
   GitBranch,
   Hourglass,
+  Link2,
   type LucideIcon,
   Package,
   Play,
@@ -56,6 +57,7 @@ const kindLabels = {
 const toolIcons: Record<string, LucideIcon> = {
   bash: Terminal,
   load_skill: BookOpen,
+  share_artifact: Link2,
 }
 
 export function ActivityIcon({ item }: { item: ActivityItem }) {
