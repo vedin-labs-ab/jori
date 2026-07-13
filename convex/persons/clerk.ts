@@ -7,17 +7,17 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
+import { requireTenantAccess } from "../access"
 import {
   readClerkUserEmail,
   readClerkUserName,
   requireClerkUserId,
-} from "../identity/users"
+} from "../access/users"
 import {
   linkIdentityToPerson,
   resolveIdentity,
   resolvePersonByIdentity,
-} from "./links"
+} from "./identity/links"
 import { updatePersonTimezone } from "./profile/timezone"
 
 const verifiedClerkEmailValidator = v.object({

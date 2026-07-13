@@ -17,7 +17,7 @@ import {
   mutation,
   query,
 } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
+import { requireTenantAccess } from "../access"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { listPermissionOverrides } from "./read"
 

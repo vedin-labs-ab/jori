@@ -1,7 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type AssetContext, readRunAssets } from "../../assets/read"
-import { requireMicrosoftCredentials } from "../../providers/microsoft/credentials"
-import { microsoftGraphJson } from "../../providers/microsoft/graph"
+import { requireMicrosoftCredentials } from "../../integrations/microsoft/credentials"
+import { microsoftGraphJson } from "../../integrations/microsoft/graph"
 import { base64EncodeBytes } from "../../shared/encoding"
 import {
   boundedNumber,

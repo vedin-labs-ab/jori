@@ -164,7 +164,7 @@ function SignedInView({
 }
 
 function ClerkIdentitySync({ tenantId }: { tenantId: string }) {
-  const syncCurrentUser = useAction(api.identity.clerk.syncCurrentUser)
+  const syncCurrentUser = useAction(api.access.clerk.syncCurrentUser)
 
   useEffect(() => {
     void syncCurrentUser({

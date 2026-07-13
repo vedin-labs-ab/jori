@@ -27,10 +27,10 @@ type OptionsState = {
   options: IntegrationOption[]
 }
 
-type SearchAction = ReactAction<typeof api.integrations.options.search>
+type SearchAction = ReactAction<typeof api.integrations.options.index.search>
 
 export function useIntegrationOptions(args: OptionsArgs) {
-  const search = useAction(api.integrations.options.search)
+  const search = useAction(api.integrations.options.index.search)
   const cache = useRef(new Map<string, IntegrationOption[]>())
   const [query, setQuery] = useState("")
   const [state, setState] = useState<OptionsState>({

@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { startEventAutomations } from "../automations/lifecycle"
-import { actorIdentityProvider } from "../identity/schema"
+import { actorIdentityProvider } from "../persons/identity/schema"
 import { resolveActor } from "../persons/resolve"
 import { normalizeEventData } from "./payload"
 import { type EventMatch } from "./schema"

@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { actorIdentityProvider } from "../../identity/schema"
+import { actorIdentityProvider } from "../../persons/identity/schema"
 import { resolvePersonId } from "../../persons/names"
 import { type Integration } from "../../shared/integrations"
 import { eventAnchor } from "../anchors"

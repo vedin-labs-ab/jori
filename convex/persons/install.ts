@@ -1,8 +1,8 @@
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { type IdentityProvider } from "../identity/schema"
-import { linkIdentityToPerson } from "./links"
+import { linkIdentityToPerson } from "./identity/links"
+import { type IdentityProvider } from "./identity/schema"
 
 export const setupIdentityValidator = v.object({
   externalId: v.string(),

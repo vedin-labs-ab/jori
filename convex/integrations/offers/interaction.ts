@@ -2,12 +2,9 @@ import { isRecord } from "../../../contracts/json"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { getSlackActorProfile } from "../../providers/slack/directory/users"
-import {
-  readFirstAction,
-  readNestedString,
-} from "../../providers/slack/ingress/actions"
 import { createIntegrationActor } from "../../shared/actor"
+import { getSlackActorProfile } from "../slack/directory/users"
+import { readFirstAction, readNestedString } from "../slack/ingress/actions"
 
 export const integrationOfferOpenActionId = "milo_integration_offer_open"
 export const integrationOfferCancelActionId = "milo_integration_offer_cancel"

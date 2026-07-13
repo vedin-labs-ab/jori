@@ -1,9 +1,9 @@
 import { type Id } from "../_generated/dataModel"
-import { type IdentityProvider } from "../identity/schema"
 import { type Actor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 import { canonicalPersonId } from "./data"
-import { findIdentity } from "./rows"
+import { findIdentity } from "./identity/rows"
+import { type IdentityProvider } from "./identity/schema"
 
 // Display-name preference across a person's linked identities: chat and doc
 // directories carry human names, code forges carry handles.

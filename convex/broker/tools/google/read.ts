@@ -1,4 +1,4 @@
-import { googleJson } from "../../../providers/google/api"
+import { googleJson } from "../../../integrations/google/api"
 import {
   boundedNumber,
   requiredString,

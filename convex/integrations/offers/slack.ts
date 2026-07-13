@@ -1,12 +1,12 @@
 import { type Id } from "../../_generated/dataModel"
-import { createSlackCard } from "../../providers/slack/card"
+import { type Actor, getActorDisplayName } from "../../shared/actor"
+import { type Integration, integrationLabel } from "../../shared/integrations"
+import { createSlackCard } from "../slack/card"
 import {
   formatSlackTime,
   toSlackTimestamp,
   truncateSlackText,
-} from "../../providers/slack/format"
-import { type Actor, getActorDisplayName } from "../../shared/actor"
-import { type Integration, integrationLabel } from "../../shared/integrations"
+} from "../slack/format"
 import {
   integrationOfferCancelActionId,
   integrationOfferOpenActionId,

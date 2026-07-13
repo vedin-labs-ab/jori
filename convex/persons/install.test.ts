@@ -1,10 +1,10 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { linkIdentityToPerson } from "./identity/links"
 import { linkSetupIdentity } from "./install"
-import { linkIdentityToPerson } from "./links"
 
-vi.mock("./links", () => ({
+vi.mock("./identity/links", () => ({
   linkIdentityToPerson: vi.fn(async () => "linked_person"),
 }))
 

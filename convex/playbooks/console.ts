@@ -6,11 +6,11 @@ import {
   mutation,
   query,
 } from "../_generated/server"
+import { checkTenantAccess, requireTenantAccess } from "../access"
+import { requireClerkUserId } from "../access/users"
 import { listInactiveAccessIntegrations } from "../automations/access"
-import { checkTenantAccess, requireTenantAccess } from "../identity/access"
-import { requireClerkUserId } from "../identity/users"
 import { ensureCurrentPerson } from "../persons/clerk"
-import { resolvePersonByIdentity } from "../persons/links"
+import { resolvePersonByIdentity } from "../persons/identity/links"
 import { callerRecipient, playbookPlanArgs, playbookPlanFields } from "./caller"
 import {
   deliverySetup,

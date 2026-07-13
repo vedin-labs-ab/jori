@@ -29,7 +29,7 @@ export function SlackIntegration({
   tenantId: string
 }) {
   const createInstallState = useMutation(
-    api.providers.slack.install.createInstallState
+    api.integrations.slack.install.createInstallState
   )
   const status = useQuery(api.integrations.status.getSlackStatus, { tenantId })
 

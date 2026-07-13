@@ -7,7 +7,7 @@ import {
   type QueryCtx,
   query,
 } from "../_generated/server"
-import { checkTenantAccess, requireTenantAccess } from "../identity/access"
+import { checkTenantAccess, requireTenantAccess } from "../access"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { integrationValidator } from "../shared/integrations"
 import {

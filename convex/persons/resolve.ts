@@ -1,10 +1,10 @@
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { type IdentityProvider, identityProvider } from "../identity/schema"
 import { type Actor, actorValidator } from "../shared/actor"
 import { canonicalPersonId } from "./data"
-import { resolveIdentity } from "./links"
+import { resolveIdentity } from "./identity/links"
+import { type IdentityProvider, identityProvider } from "./identity/schema"
 
 export async function resolveActor(
   ctx: MutationCtx,

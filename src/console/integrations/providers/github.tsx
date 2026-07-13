@@ -29,7 +29,7 @@ export function GitHubIntegration({
   tenantId: string
 }) {
   const createInstallState = useMutation(
-    api.providers.github.install.createInstallState
+    api.integrations.github.install.createInstallState
   )
   const status = useQuery(api.integrations.status.getGitHubStatus, {
     tenantId,

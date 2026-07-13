@@ -7,8 +7,8 @@ import {
   mutation,
   query,
 } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
-import { readClerkUserEmail, readClerkUserName } from "../identity/users"
+import { requireTenantAccess } from "../access"
+import { readClerkUserEmail, readClerkUserName } from "../access/users"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"

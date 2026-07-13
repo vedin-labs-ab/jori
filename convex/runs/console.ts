@@ -2,7 +2,7 @@ import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
-import { requireTenantAccess } from "../identity/access"
+import { requireTenantAccess } from "../access"
 import {
   type ApprovalFilter,
   approvalFilterValidator,

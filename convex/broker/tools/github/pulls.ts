@@ -2,7 +2,7 @@ import {
   compactGitHubSummary,
   summarizeComment,
   summarizePullRequest,
-} from "../../../providers/github/delivery/format"
+} from "../../../integrations/github/delivery/format"
 import {
   boundedNumber,
   optionalString,

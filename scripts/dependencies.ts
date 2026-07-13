@@ -93,11 +93,11 @@ const ruleSet = {
       },
     },
     {
-      name: "providers-do-not-import-broker",
+      name: "integrations-do-not-import-broker",
       severity: "error",
-      comment: "Provider API code should be below broker tool adapters.",
+      comment: "Integration adapters should be below broker tool adapters.",
       from: {
-        path: "^convex/providers/",
+        path: "^convex/integrations/",
       },
       to: {
         path: "^convex/broker/",

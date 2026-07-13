@@ -1,10 +1,10 @@
 import { type Doc } from "../_generated/dataModel"
-import { githubActorId } from "../providers/github/data"
+import { githubActorId } from "../integrations/github/data"
 import {
   getSlackChannelId,
   getSlackMessageTs,
   getSlackThreadTs,
-} from "../providers/slack/data"
+} from "../integrations/slack/data"
 import { type ActorKind, getActorExternalId } from "../shared/actor"
 import { readDataObject, readDataString } from "../shared/data"
 

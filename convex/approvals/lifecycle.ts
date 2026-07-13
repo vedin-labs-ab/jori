@@ -6,11 +6,11 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
-import { type IdentityProvider } from "../identity/schema"
+import { syncSlackApprovalSurface } from "../integrations/slack/approvals/surface"
+import { type IdentityProvider } from "../persons/identity/schema"
 import { resolveActor } from "../persons/resolve"
 import { type Actor } from "../shared/actor"
 import { type ToolSurface } from "../shared/integrations"
-import { syncSlackApprovalSurface } from "./slack/surface"
 import { isTerminalApprovalStatus } from "./transition"
 
 type ApprovalSurfaceTarget = {

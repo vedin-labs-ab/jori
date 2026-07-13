@@ -5,8 +5,8 @@ import {
   mutation,
   type QueryCtx,
 } from "../../_generated/server"
-import { requireTenantAccess } from "../../identity/access"
-import { readClerkUserEmail, readClerkUserName } from "../../identity/users"
+import { requireTenantAccess } from "../../access"
+import { readClerkUserEmail, readClerkUserName } from "../../access/users"
 import { normalizeConsoleIntegrationOfferReturnUrl } from "../../integrations/offers/helpers"
 import {
   claimIntegrationOffer,

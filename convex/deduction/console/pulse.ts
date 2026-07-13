@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx, query } from "../../_generated/server"
-import { checkTenantAccess } from "../../identity/access"
+import { checkTenantAccess } from "../../access"
 import { activeEffortRows } from "../effort/input"
 import { latestCompletedPass } from "../engine/pass"
 import {

@@ -1,7 +1,7 @@
 import { type Doc } from "../../../_generated/dataModel"
-import { requireLinearCredentials } from "../../../providers/linear/credentials"
-import { postLinearComment } from "../../../providers/linear/delivery/comments"
-import { addLinearReaction } from "../../../providers/linear/delivery/reactions"
+import { requireLinearCredentials } from "../../../integrations/linear/credentials"
+import { postLinearComment } from "../../../integrations/linear/delivery/comments"
+import { addLinearReaction } from "../../../integrations/linear/delivery/reactions"
 import {
   boundedNumber,
   readArray,

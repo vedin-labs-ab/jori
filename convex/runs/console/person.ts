@@ -1,7 +1,7 @@
 import { type QueryCtx } from "../../_generated/server"
-import { type requireTenantAccess } from "../../identity/access"
-import { requireClerkUserId } from "../../identity/users"
-import { resolvePersonByIdentity } from "../../persons/links"
+import { type requireTenantAccess } from "../../access"
+import { requireClerkUserId } from "../../access/users"
+import { resolvePersonByIdentity } from "../../persons/identity/links"
 
 /** The caller's person for ownership filtering; authenticate in the handler
  * before resolving it here. */

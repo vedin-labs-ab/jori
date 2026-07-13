@@ -1,4 +1,4 @@
-import { summarizePullRequest } from "../../../providers/github/delivery/format"
+import { summarizePullRequest } from "../../../integrations/github/delivery/format"
 import {
   optionalString,
   readRecord,

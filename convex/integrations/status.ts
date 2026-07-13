@@ -1,9 +1,9 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { query } from "../_generated/server"
-import { getMicrosoftTenantName } from "../providers/microsoft/data"
-import { getNotionBotId } from "../providers/notion/data"
 import { getTenantIntegration, getUserIntegration } from "./data"
+import { getMicrosoftTenantName } from "./microsoft/data"
+import { getNotionBotId } from "./notion/data"
 
 export const getSlackStatus = query({
   args: {
