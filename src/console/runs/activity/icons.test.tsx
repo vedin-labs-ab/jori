@@ -23,7 +23,7 @@ afterAll(() => {
   globalThis.ResizeObserver = originalResizeObserver
 })
 
-test("uses a static agent icon while wait_for_agents is parked", () => {
+test("uses a static pause icon while wait_for_agents is parked", () => {
   renderActivity({
     durationMs: 200,
     isLive: false,
@@ -35,9 +35,26 @@ test("uses a static agent icon while wait_for_agents is parked", () => {
 
   const icon = screen.getByRole("img", { name: "Tool waiting" })
 
-  expect(icon.querySelector("svg")?.classList.contains("lucide-bot")).toBe(true)
+  expect(
+    icon.querySelector("svg")?.classList.contains("lucide-circle-pause")
+  ).toBe(true)
   expect(screen.getByText("Wait for agents").className).not.toContain("shimmer")
   expect(screen.getByText("2 ongoing")).toBeDefined()
+})
+
+test("uses a fork icon for delegated agents", () => {
+  renderActivity({
+    description: "Prepare a meeting dossier",
+    kind: "agent",
+    status: "running",
+    title: "Agent running",
+  })
+
+  const icon = screen.getByRole("img", { name: "Agent running" })
+
+  expect(icon.querySelector("svg")?.classList.contains("lucide-git-fork")).toBe(
+    true
+  )
 })
 
 test("uses the shared skill icon for load_skill", () => {

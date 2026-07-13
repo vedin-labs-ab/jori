@@ -1,10 +1,11 @@
 import {
   AlertCircle,
   BookOpen,
-  Bot,
   Brain,
   Check,
+  CirclePause,
   FileText,
+  GitFork,
   Hourglass,
   type LucideIcon,
   Package,
@@ -29,7 +30,7 @@ import {
 } from "./types"
 
 const kindIcons = {
-  agent: Bot,
+  agent: GitFork,
   approval: ShieldCheck,
   asset: Package,
   model: Brain,
@@ -53,7 +54,7 @@ const kindLabels = {
 const toolIcons: Record<string, LucideIcon> = {
   bash: Terminal,
   load_skill: BookOpen,
-  wait_for_agents: Bot,
+  wait_for_agents: CirclePause,
 }
 
 export function ActivityIcon({ item }: { item: ActivityItem }) {
