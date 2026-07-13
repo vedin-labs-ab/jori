@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router"
 import { useAction, useQuery } from "convex/react"
 import { AlertTriangle, ArrowLeft } from "lucide-react"
-import { type ReactNode, useCallback } from "react"
+import { type ReactNode, useCallback, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { SessionProviders } from "@/shared/providers"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { FullscreenSkeletonLoader } from "../shared/loading"
+import { memberArtifactUrl } from "./fragment"
 import { ArtifactFrame } from "./frame"
 import { ArtifactLinks } from "./links"
 import { ArtifactRailLabel, artifactRailButtonClassName } from "./rail"
@@ -15,25 +15,33 @@ import { type ArtifactDetail } from "./types"
 
 type ArtifactId = ArtifactDetail["artifactId"]
 
-/** The artifact route sits outside the root session stack so share-link
- *  visitors skip Clerk entirely; the member view brings it back here. */
-export function ArtifactView({ artifactId }: { artifactId: ArtifactId }) {
+export function ArtifactView({
+  artifactId,
+  fallback,
+}: {
+  artifactId: ArtifactId
+  fallback?: ReactNode
+}) {
   return (
-    <SessionProviders>
-      <ConsolePage chrome="none" loadingFallback={<ArtifactViewLoading />}>
-        {(tenantId) => (
-          <ArtifactViewContent artifactId={artifactId} tenantId={tenantId} />
-        )}
-      </ConsolePage>
-    </SessionProviders>
+    <ConsolePage chrome="none" loadingFallback={<ArtifactViewLoading />}>
+      {(tenantId) => (
+        <ArtifactViewContent
+          artifactId={artifactId}
+          fallback={fallback}
+          tenantId={tenantId}
+        />
+      )}
+    </ConsolePage>
   )
 }
 
 function ArtifactViewContent({
   artifactId,
+  fallback,
   tenantId,
 }: {
   artifactId: ArtifactId
+  fallback: ReactNode | undefined
   tenantId: string
 }) {
   const artifactResult = useQuery(api.artifacts.console.get, {
@@ -46,6 +54,10 @@ function ArtifactViewContent({
   }
 
   if (artifactResult.status === "unauthorized") {
+    if (fallback !== undefined) {
+      return fallback
+    }
+
     return (
       <ArtifactFullscreenShell>
         <Alert variant="destructive">
@@ -60,6 +72,10 @@ function ArtifactViewContent({
     artifactResult.status === "not_found" ||
     artifactResult.artifact === null
   ) {
+    if (fallback !== undefined) {
+      return fallback
+    }
+
     return (
       <ArtifactFullscreenShell>
         <Alert>
@@ -93,6 +109,7 @@ function PublishedArtifactView({
   artifact: ArtifactDetail
   tenantId: string
 }) {
+  useMemberArtifactUrl()
   const createSession = useAction(api.artifacts.actions.createSession)
   const mintSession = useCallback(
     () => createSession({ tenantId, artifactId: artifact.artifactId }),
@@ -110,6 +127,16 @@ function PublishedArtifactView({
       />
     </ArtifactFullscreenShell>
   )
+}
+
+function useMemberArtifactUrl() {
+  useEffect(() => {
+    const url = memberArtifactUrl(window.location)
+
+    if (url !== null) {
+      window.history.replaceState(window.history.state, "", url)
+    }
+  }, [])
 }
 
 function ArtifactFullscreenShell({ children }: { children: ReactNode }) {

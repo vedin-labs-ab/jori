@@ -1,17 +1,9 @@
 import { parseShareFragment } from "@contracts/artifacts/share"
 import { createFileRoute } from "@tanstack/react-router"
-import { lazy, Suspense, useEffect, useState } from "react"
-import { ArtifactShareView } from "@/console/artifacts/share"
-import { type ArtifactDetail } from "@/console/artifacts/types"
+import { useEffect, useState } from "react"
+import { ArtifactAccess } from "@/console/artifacts/access"
 import { FullscreenSkeletonLoader } from "@/console/shared/loading"
-
-/** Lazy so share-link visitors never download the member view and its
- *  console/session graph. */
-const ArtifactView = lazy(() =>
-  import("@/console/artifacts/view").then((module) => ({
-    default: module.ArtifactView,
-  }))
-)
+import { SessionProviders } from "@/shared/providers"
 
 export const Route = createFileRoute("/artifacts/$artifactId/")({
   component: ArtifactRoute,
@@ -25,16 +17,10 @@ function ArtifactRoute() {
     return <FullscreenSkeletonLoader aria-label="Loading artifact" />
   }
 
-  if (secret !== null) {
-    return <ArtifactShareView artifactId={artifactId} secret={secret} />
-  }
-
   return (
-    <Suspense
-      fallback={<FullscreenSkeletonLoader aria-label="Loading artifact" />}
-    >
-      <ArtifactView artifactId={artifactId as ArtifactDetail["artifactId"]} />
-    </Suspense>
+    <SessionProviders>
+      <ArtifactAccess artifactId={artifactId} secret={secret} />
+    </SessionProviders>
   )
 }
 
@@ -44,7 +30,12 @@ function useShareSecret() {
   const [secret, setSecret] = useState<string | null>()
 
   useEffect(() => {
-    setSecret(parseShareFragment(window.location.hash))
+    const update = () => setSecret(parseShareFragment(window.location.hash))
+
+    update()
+    window.addEventListener("hashchange", update)
+
+    return () => window.removeEventListener("hashchange", update)
   }, [])
 
   return secret
