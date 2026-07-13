@@ -12,6 +12,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
@@ -130,15 +136,20 @@ function ShareLinksContent({
 
   if (results.length === 0) {
     return (
-      <div className="border-t px-4 py-8 text-center text-muted-foreground">
-        No share links
-      </div>
+      <Empty className="min-h-42 rounded-none border-t">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Link2 />
+          </EmptyMedia>
+          <EmptyTitle>No share links</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
     )
   }
 
   return (
     <>
-      <div className="divide-y border-t">
+      <div className="min-h-42 divide-y border-t">
         {results.map((share) => (
           <ShareLinkRow
             active={share.expiresAt > now}
@@ -218,7 +229,7 @@ function ShareLinkRow({
 
 function ShareLinksSkeleton() {
   return (
-    <div className="divide-y border-t" role="status">
+    <div className="min-h-42 divide-y border-t" role="status">
       {[0, 1, 2].map((row) => (
         <div className="flex min-h-14 items-center gap-3 px-4 py-2.5" key={row}>
           <Skeleton className="size-4 rounded-sm" />
