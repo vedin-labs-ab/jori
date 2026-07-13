@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { BrandLink } from "@/shared/brand"
+import { BrandLink } from "@/shared/brand/link"
 
 const footerLinks = [
   { label: "Trust", to: "/trust" },

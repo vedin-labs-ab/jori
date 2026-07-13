@@ -1,13 +1,18 @@
 import geistLatinWoff2 from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url"
 import { TanStackDevtools } from "@tanstack/react-devtools"
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
+import {
+  createRootRoute,
+  HeadContent,
+  Scripts,
+  useRouterState,
+} from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { AlertTriangle, SearchX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { FullscreenLoadingProvider } from "@/console/shared/loading"
-import { RouteSessionProviders } from "@/shared/providers"
+import { FullscreenLoadingProvider } from "@/shared/loading"
+import { SessionProviders } from "@/shared/session"
 import { RootStateFrame } from "@/shared/state"
 import appCss from "../styles.css?url"
 
@@ -147,6 +152,18 @@ function readErrorMessage(error: unknown) {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const isArtifactViewer = useRouterState({
+    select: (state) =>
+      state.matches.some(
+        (match) => match.routeId === "/artifacts/$artifactId/"
+      ),
+  })
+  const content = (
+    <FullscreenLoadingProvider>
+      <TooltipProvider>{children}</TooltipProvider>
+    </FullscreenLoadingProvider>
+  )
+
   return (
     <html lang="en">
       <head>
@@ -161,11 +178,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           when a ThemeProvider owns the html.dark class.
         */}
         <Toaster theme="light" />
-        <RouteSessionProviders>
-          <FullscreenLoadingProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-          </FullscreenLoadingProvider>
-        </RouteSessionProviders>
+        {isArtifactViewer ? (
+          content
+        ) : (
+          <SessionProviders>{content}</SessionProviders>
+        )}
         <TanStackDevtools
           config={{
             position: "bottom-right",

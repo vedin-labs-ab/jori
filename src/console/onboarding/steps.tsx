@@ -6,8 +6,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { BrandIcon } from "@/shared/brand"
-import { type OrganizationDiscovery } from "../context/types"
-import { DiscoveryWorkingStep, WebsiteDiscoveryStep } from "../context/website"
+import {
+  DiscoveryWorkingStep,
+  WebsiteDiscoveryStep,
+} from "../context/organization/discovery/website"
+import { type OrganizationDiscovery } from "../context/organization/types"
 
 export function WelcomeStep({
   onStart,

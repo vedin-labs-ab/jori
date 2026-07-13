@@ -1,7 +1,7 @@
 import { AlertTriangle } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { FullscreenSkeletonLoader } from "../shared/loading"
+import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { ArtifactFrame } from "./frame"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL

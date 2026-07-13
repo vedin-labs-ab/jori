@@ -1,7 +1,7 @@
 import { useAuth, useOrganization } from "@clerk/tanstack-react-start"
 import { useConvexAuth } from "convex/react"
 import { lazy, Suspense } from "react"
-import { FullscreenSkeletonLoader } from "../shared/loading"
+import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { ArtifactShareView } from "./share"
 import { type ArtifactDetail } from "./types"
 

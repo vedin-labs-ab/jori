@@ -24,10 +24,10 @@ import {
   TimelineRow,
 } from "./row"
 import { type ActivityTimelineEntry, createActivityTimeline } from "./timeline"
-import { ActivityToolMetadata } from "./tool-metadata"
+import { ActivityToolMetadata } from "./tool/metadata"
 import { type ActivityItem as ActivityItemType } from "./types"
 import { ActivityTokenUsage } from "./usage"
-import { hasVisibleTokenUsage } from "./usage-data"
+import { hasVisibleTokenUsage } from "./usage/data"
 
 export function ActivityTimeline({
   items,

@@ -3,14 +3,14 @@ import {
   toolSurfaceLabel,
   toolSurfaces,
 } from "@contracts/integrations"
-import { type ExecutionDetailTool } from "../runs/types"
 import { relativeTime } from "../shared/time"
+import { type ToolCapability } from "../shared/tools/model"
 import { type ArtifactSummary } from "./types"
 
 export type CapabilityGroup = {
   type: ToolSurface
   label: string
-  tools: ExecutionDetailTool[]
+  tools: ToolCapability[]
 }
 
 const toolSurfaceSet = new Set<string>(toolSurfaces)

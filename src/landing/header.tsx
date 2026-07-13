@@ -1,7 +1,7 @@
 import { SignInButton, UserButton, useAuth } from "@clerk/tanstack-react-start"
 import { Link } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
-import { BrandLink } from "@/shared/brand"
+import { BrandLink } from "@/shared/brand/link"
 import { GetStarted } from "./cta"
 
 export function LandingHeader() {

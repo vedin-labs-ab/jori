@@ -2,8 +2,8 @@ import { parseShareFragment } from "@contracts/artifacts/share"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { ArtifactAccess } from "@/console/artifacts/access"
-import { FullscreenSkeletonLoader } from "@/console/shared/loading"
-import { SessionProviders } from "@/shared/providers"
+import { FullscreenSkeletonLoader } from "@/shared/loading"
+import { SessionProviders } from "@/shared/session"
 
 export const Route = createFileRoute("/artifacts/$artifactId/")({
   component: ArtifactRoute,
