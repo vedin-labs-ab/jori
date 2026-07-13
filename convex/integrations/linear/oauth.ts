@@ -1,5 +1,12 @@
+import { type Doc } from "../../_generated/dataModel"
 import { fetchFormToken, requireProviderEnv } from "../connect/oauth"
-import { linearOAuthTokenUrl } from "./config"
+import {
+  encodeBasicCredentials,
+  expectOAuthRevocationResponse,
+  postForm,
+} from "../revoke/oauth"
+import { linearOAuthRevokeUrl, linearOAuthTokenUrl } from "./config"
+import { requireLinearCredentials } from "./credentials"
 import { linearGraphql } from "./graphql"
 
 export type LinearTokenResponse =
@@ -104,6 +111,27 @@ export function getLinearTokenScope(value: string | string[] | undefined) {
   }
 
   return value
+}
+
+export async function revokeLinearIntegration(
+  integration: Doc<"integrations">
+) {
+  const credentials = requireLinearCredentials(integration)
+  const response = await postForm(
+    linearOAuthRevokeUrl,
+    {
+      token: credentials.tokens.refresh,
+      token_type_hint: "refresh_token",
+    },
+    {
+      authorization: `Basic ${encodeBasicCredentials(
+        requireLinearClientId(),
+        requireLinearClientSecret()
+      )}`,
+    }
+  )
+
+  await expectOAuthRevocationResponse(response, "Linear")
 }
 
 async function requestLinearToken(body: Record<string, string>) {

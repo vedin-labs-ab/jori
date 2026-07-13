@@ -1,7 +1,5 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
-import { internal } from "./_generated/api"
-import { type MutationCtx } from "./_generated/server"
 
 const approvalSubject = v.object({
   kind: v.literal("approval"),
@@ -11,7 +9,10 @@ const integrationOfferSubject = v.object({
   kind: v.literal("integrationOffer"),
   id: v.id("integrationOffers"),
 })
-const transitionSubject = v.union(approvalSubject, integrationOfferSubject)
+export const transitionSubject = v.union(
+  approvalSubject,
+  integrationOfferSubject
+)
 const transitionType = v.union(
   v.literal("created"),
   v.literal("delivered"),
@@ -49,10 +50,13 @@ export const transitions = defineTable({
 
 type TransitionInputBase = {
   tenantId: string
-  syncSurface?: boolean
 }
 
 export type ApprovalTransitionType = Infer<typeof approvalTransitionType>
+export type IntegrationOfferTransitionType = Infer<
+  typeof integrationOfferTransitionType
+>
+export type TransitionSubject = Infer<typeof transitionSubject>
 
 type ApprovalTransitionInput = TransitionInputBase & {
   subject: Infer<typeof approvalSubject>
@@ -60,48 +64,8 @@ type ApprovalTransitionInput = TransitionInputBase & {
 }
 type IntegrationOfferTransitionInput = TransitionInputBase & {
   subject: Infer<typeof integrationOfferSubject>
-  type: Infer<typeof integrationOfferTransitionType>
+  type: IntegrationOfferTransitionType
 }
-type TransitionInput = ApprovalTransitionInput | IntegrationOfferTransitionInput
-
-export async function recordTransition(
-  ctx: MutationCtx,
-  args: TransitionInput
-) {
-  const createdAt = Date.now()
-
-  await ctx.db.insert("transitions", {
-    tenantId: args.tenantId,
-    subject: args.subject,
-    type: args.type,
-    createdAt,
-  })
-
-  if (args.syncSurface === true) {
-    await scheduleSurfaceSync(ctx, args.subject)
-  }
-}
-
-async function scheduleSurfaceSync(
-  ctx: MutationCtx,
-  subject: TransitionInput["subject"]
-) {
-  switch (subject.kind) {
-    case "approval":
-      await ctx.scheduler.runAfter(
-        0,
-        internal.integrations.slack.approvals.surface.sync,
-        { approvalId: subject.id }
-      )
-      return
-    case "integrationOffer":
-      await ctx.scheduler.runAfter(
-        0,
-        internal.integrations.slack.offers.surface.sync,
-        {
-          integrationOfferId: subject.id,
-        }
-      )
-      return
-  }
-}
+export type TransitionInput =
+  | ApprovalTransitionInput
+  | IntegrationOfferTransitionInput

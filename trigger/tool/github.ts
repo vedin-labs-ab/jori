@@ -1,13 +1,13 @@
-import { type JsonObject, toJsonObject } from "../../../contracts/json"
+import { type JsonObject, toJsonObject } from "../../contracts/json"
 import {
   maxSourceChangeFileBytes,
   maxSourceChangeFiles,
   maxSourceChangeTreeBytes,
   normalizeSourceChanges,
-} from "../../../contracts/source"
-import { optionalString, requiredString } from "../../input"
-import { sandboxClonePath } from "../../sandbox/path"
-import { type ToolRuntime } from "../runtime"
+} from "../../contracts/source"
+import { optionalString, requiredString } from "../input"
+import { sandboxClonePath } from "../sandbox/path"
+import { type ToolRuntime } from "./runtime"
 
 const sourceChangeTools = new Set([
   "github_commit_to_pull_request",

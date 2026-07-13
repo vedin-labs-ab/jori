@@ -1,5 +1,12 @@
+import { type Doc } from "../../_generated/dataModel"
 import { fetchFormToken, requireProviderEnv } from "../connect/oauth"
-import { googleOAuthTokenUrl, googleUserInfoUrl } from "./config"
+import { expectOAuthRevocationResponse, postForm } from "../revoke/oauth"
+import {
+  googleOAuthRevokeUrl,
+  googleOAuthTokenUrl,
+  googleUserInfoUrl,
+} from "./config"
+import { requireGoogleCredentials } from "./credentials"
 
 export type GoogleTokenResponse =
   | {
@@ -75,6 +82,17 @@ export async function fetchGoogleInstallationProfile(accessToken: string) {
     name: profile.name,
     picture: profile.picture,
   } satisfies GoogleInstallationProfile
+}
+
+export async function revokeGoogleIntegration(
+  integration: Doc<"integrations">
+) {
+  const credentials = requireGoogleCredentials(integration)
+  const response = await postForm(googleOAuthRevokeUrl, {
+    token: credentials.tokens.refresh,
+  })
+
+  await expectOAuthRevocationResponse(response, "Google")
 }
 
 async function requestGoogleToken(body: Record<string, string>) {

@@ -42,12 +42,18 @@ export async function loadSandboxReference(
   }
 ): Promise<LoadedSandbox> {
   if (isTerminalRunStatus(args.status)) {
-    return (await ctx.runQuery(internal.runtime.sandboxes.retainedByRun, {
-      runId: args.runId,
-    })) as LoadedSandbox
+    return (await ctx.runQuery(
+      internal.runs.execution.sandboxes.records.retainedByRun,
+      {
+        runId: args.runId,
+      }
+    )) as LoadedSandbox
   }
 
-  return (await ctx.runMutation(internal.runtime.sandboxes.claimForRun, {
-    runId: args.runId,
-  })) as LoadedSandbox
+  return (await ctx.runMutation(
+    internal.runs.execution.sandboxes.records.claimForRun,
+    {
+      runId: args.runId,
+    }
+  )) as LoadedSandbox
 }

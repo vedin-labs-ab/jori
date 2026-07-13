@@ -1,5 +1,5 @@
 import { type ContentsOptions } from "exa-js"
-import { createExaClient, withTimeout } from "../shared/exa"
+import { createExaClient, withTimeout } from "../search"
 
 const fetchMaxCharacters = 12_000
 const fetchTimeoutMs = 15_000

@@ -120,6 +120,13 @@ const ruleSet = {
       },
     },
     {
+      name: "transitions-do-not-import-integration-adapters",
+      severity: "error",
+      comment: "Transition persistence stays provider-free.",
+      from: { path: "^convex/transitions/" },
+      to: { path: "^convex/integrations/" },
+    },
+    {
       name: "deduction-does-not-import-workstream-projection",
       severity: "error",
       comment:

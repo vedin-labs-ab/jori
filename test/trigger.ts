@@ -4,7 +4,7 @@ import {
   type ModelRuntime,
   type ModelToolCall,
   type ModelUsage,
-} from "../model/types"
+} from "../trigger/model/types"
 
 export type QueuedModelResponse =
   | {

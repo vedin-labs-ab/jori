@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { IntegrationOffer } from "@/console/integrations/offer"
+import { IntegrationOffer } from "@/console/integrations/offers"
 import { ConsolePage } from "@/console/page"
 
 export const Route = createFileRoute("/integrations/offers/$token")({

@@ -1,5 +1,15 @@
+import { type Doc } from "../../_generated/dataModel"
 import { requireProviderEnv } from "../connect/oauth"
-import { notionApiVersion, notionOAuthTokenUrl } from "./config"
+import {
+  encodeBasicCredentials,
+  expectOAuthRevocationResponse,
+} from "../revoke/oauth"
+import {
+  notionApiVersion,
+  notionOAuthRevokeUrl,
+  notionOAuthTokenUrl,
+} from "./config"
+import { requireNotionCredentials } from "./credentials"
 
 export type NotionTokenResponse =
   | {
@@ -69,6 +79,29 @@ export async function exchangeNotionAuthorizationCode(args: {
     code: args.code,
     redirect_uri: args.redirectUri,
   })
+}
+
+export async function revokeNotionIntegration(
+  integration: Doc<"integrations">
+) {
+  const credentials = requireNotionCredentials(integration)
+  const response = await fetch(notionOAuthRevokeUrl, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      authorization: `Basic ${encodeBasicCredentials(
+        requireNotionClientId(),
+        requireNotionClientSecret()
+      )}`,
+      "content-type": "application/json",
+      "notion-version": notionApiVersion,
+    },
+    body: JSON.stringify({
+      token: credentials.tokens.access,
+    }),
+  })
+
+  await expectOAuthRevocationResponse(response, "Notion")
 }
 
 async function notionOAuthToken(body: Record<string, string>) {

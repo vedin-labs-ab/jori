@@ -3,6 +3,7 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { wakeRun } from "../../runs/execution/waiters/data"
 import { recordTransition } from "../../transitions"
+import { scheduleTransitionSurfaceSync } from "../surface"
 import {
   markIntegrationOfferCancelled,
   markIntegrationOfferConnected,
@@ -14,6 +15,9 @@ import {
 
 vi.mock("../../runs/execution/waiters/data", () => ({ wakeRun: vi.fn() }))
 vi.mock("../../transitions", () => ({ recordTransition: vi.fn() }))
+vi.mock("../surface", () => ({
+  scheduleTransitionSurfaceSync: vi.fn(),
+}))
 
 const now = 100
 const integrationId = "integration" as Id<"integrations">
@@ -84,8 +88,11 @@ test.each(settlements)("settles $status offers once", async (settlement) => {
   expect(recordTransition).toHaveBeenCalledWith(fixture.ctx, {
     tenantId: fixture.offer.tenantId,
     subject: { kind: "integrationOffer", id: fixture.offer._id },
-    syncSurface: true,
     type: settlement.status,
+  })
+  expect(scheduleTransitionSurfaceSync).toHaveBeenCalledWith(fixture.ctx, {
+    kind: "integrationOffer",
+    id: fixture.offer._id,
   })
   expect(wakeRun).toHaveBeenCalledWith(fixture.ctx, {
     reason: "resolved",
@@ -110,6 +117,7 @@ test.each([
   expect(fixture.patch).not.toHaveBeenCalled()
   expect(fixture.cancel).not.toHaveBeenCalled()
   expect(recordTransition).not.toHaveBeenCalled()
+  expect(scheduleTransitionSurfaceSync).not.toHaveBeenCalled()
   expect(wakeRun).not.toHaveBeenCalled()
 })
 

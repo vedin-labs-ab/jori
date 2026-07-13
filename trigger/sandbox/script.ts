@@ -1,5 +1,5 @@
-import { validateReadOnlyGitArgs } from "../../contracts/git"
 import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
+import { validateReadOnlyGitArgs } from "./git"
 import { compactFailure } from "./output"
 import { shellQuote } from "./path"
 import { type SandboxRuntime } from "./types"

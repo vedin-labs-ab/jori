@@ -4,8 +4,8 @@ import {
   type RuntimeId,
   type RuntimeTool,
 } from "../../contracts/runtime/worker"
+import { createQueuedModel } from "../../test/trigger"
 import { type ToolRuntime } from "../tool"
-import { createQueuedModel } from "./fixture"
 import { runAgentLoop } from "./loop"
 
 const triggerWait = vi.hoisted(() => ({

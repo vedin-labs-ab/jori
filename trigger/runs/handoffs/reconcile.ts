@@ -10,7 +10,7 @@ import {
 } from "../../../contracts/transport"
 import { type ModelMessage } from "../../model/types"
 import { markVisibleCommunication, type ToolRuntime } from "../../tool"
-import { materializeSandboxResult } from "../../tool/github/output"
+import { materializeSandboxResult } from "../../tool/results"
 import {
   recordApprovalResolved,
   recordOfferResolved,

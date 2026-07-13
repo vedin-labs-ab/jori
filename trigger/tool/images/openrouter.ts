@@ -3,7 +3,7 @@ import { isRecord } from "../../../contracts/json"
 import {
   type OpenRouterRuntimeConfig,
   requireOpenRouterRuntimeConfig,
-} from "../../model/config"
+} from "../../openrouter"
 
 export type GeneratedImage = {
   bytes: Uint8Array

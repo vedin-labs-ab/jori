@@ -1,5 +1,5 @@
 import { type SlackDeliveryTarget } from "@contracts/playbooks/delivery"
-import { IntegrationOptionPicker } from "@/console/integrations/picker"
+import { IntegrationOptionPicker } from "@/console/integrations/options"
 
 type SlackChannel = Extract<SlackDeliveryTarget, { kind: "channel" }>
 

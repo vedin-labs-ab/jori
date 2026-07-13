@@ -1,10 +1,6 @@
 import { v } from "convex/values"
-import { internalQuery, mutation } from "../../_generated/server"
-import {
-  createWaiter,
-  expireWaiter,
-  getWaiter,
-} from "../../runs/execution/waiters/data"
+import { mutation } from "../../_generated/server"
+import { createWaiter, expireWaiter } from "../../runs/execution/waiters/data"
 import { waiterCondition } from "../../runs/execution/waiters/schema"
 import { requireWorkerSecret } from "../secret"
 
@@ -35,14 +31,5 @@ export const expire = mutation({
     requireWorkerSecret(args.secret)
 
     return await expireWaiter(ctx, args.waiterId)
-  },
-})
-
-export const get = internalQuery({
-  args: {
-    waiterId: v.id("waiters"),
-  },
-  handler: async (ctx, args) => {
-    return await getWaiter(ctx, args.waiterId)
   },
 })

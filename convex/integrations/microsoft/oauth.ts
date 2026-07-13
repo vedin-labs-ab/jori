@@ -1,6 +1,8 @@
+import { type Doc } from "../../_generated/dataModel"
 import { base64UrlDecodeBytes } from "../../shared/encoding"
 import { fetchFormToken, requireProviderEnv } from "../connect/oauth"
 import { microsoftGraphUrl, microsoftOAuthTokenUrl } from "./config"
+import { requireMicrosoftCredentials } from "./credentials"
 
 export type MicrosoftTokenResponse =
   | {
@@ -90,6 +92,10 @@ export async function fetchMicrosoftInstallationProfile(args: {
       id: tenantId,
     },
   } satisfies MicrosoftInstallationProfile
+}
+
+export function revokeMicrosoftIntegration(integration: Doc<"integrations">) {
+  requireMicrosoftCredentials(integration)
 }
 
 async function requestMicrosoftToken(

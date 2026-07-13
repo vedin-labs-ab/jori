@@ -136,7 +136,11 @@ export async function enqueueOperation(
     .first()
 
   if (existing !== null) {
-    await ctx.scheduler.runAfter(0, internal.runtime.dispatch.drain, {})
+    await ctx.scheduler.runAfter(
+      0,
+      internal.runs.execution.outbox.dispatch.drain,
+      {}
+    )
     return existing._id
   }
 
@@ -150,7 +154,11 @@ export async function enqueueOperation(
     updatedAt: now,
   })
 
-  await ctx.scheduler.runAfter(0, internal.runtime.dispatch.drain, {})
+  await ctx.scheduler.runAfter(
+    0,
+    internal.runs.execution.outbox.dispatch.drain,
+    {}
+  )
 
   return outboxId
 }

@@ -1,13 +1,13 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
-import { type MessageCauseKind, type runSnapshot } from "../schema"
 import {
   compactDetails,
   detail,
   type ExecutionDetail,
   type ExecutionDetailType,
   uniqueDetails,
-} from "./detail"
+} from "../detail"
+import { type MessageCauseKind, type runSnapshot } from "../schema"
 import { createSourceMetadata, type SourceMetadataItem } from "./metadata"
 import { originDetails } from "./origin"
 import { cronScheduleLabel } from "./schedule"
@@ -29,7 +29,7 @@ type SourceContextMetadataType =
   | "sender"
   | "subject"
 
-export function automationDisplay(input: {
+export function automationSnapshotBody(input: {
   automation: Doc<"automations">
   event?: Doc<"events"> | null
   integration?: Doc<"integrations"> | null
@@ -44,7 +44,7 @@ export function automationDisplay(input: {
   return timeAutomationDisplay(input.automation)
 }
 
-export function messageDisplay(input: {
+export function messageSnapshotBody(input: {
   integration: Doc<"integrations">
   kind: MessageCauseKind
   message: Doc<"messages">

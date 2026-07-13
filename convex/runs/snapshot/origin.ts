@@ -8,7 +8,7 @@ import {
   readDataObject,
   readDataString,
 } from "../../shared/data"
-import { commentLabel, compactDetails, detail, snippet } from "./detail"
+import { commentLabel, compactDetails, detail, snippet } from "../detail"
 import { githubIssueLikeLabel, issueIdentifierLabel } from "./metadata"
 
 export function originDetails(input: {

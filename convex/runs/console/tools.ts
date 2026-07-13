@@ -11,7 +11,7 @@ import {
   detail,
   type ExecutionDetailGroup,
   type ExecutionDetailTool,
-} from "../display/detail"
+} from "../detail"
 
 export function toolDetails(snapshot: RunToolSnapshot | undefined) {
   if (snapshot === undefined) {

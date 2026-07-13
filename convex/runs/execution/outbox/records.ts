@@ -1,11 +1,11 @@
 import { v } from "convex/values"
-import { internalMutation } from "../_generated/server"
+import { internalMutation } from "../../../_generated/server"
 import {
   claimNext as claimNextOperation,
   enqueueCancellation as enqueueRunCancellation,
   markFailed as markOperationFailed,
   markSent as markOperationSent,
-} from "../runs/execution/outbox/data"
+} from "./data"
 
 export const enqueueCancellation = internalMutation({
   args: {

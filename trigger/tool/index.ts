@@ -13,10 +13,13 @@ import { recordToolEvent, toolTraceDetails } from "../trace/tool"
 import { waitForAgents } from "./agent"
 import { prepareMiloToolInput } from "./artifacts"
 import { saveSandboxAsset } from "./assets"
-import { prepareProviderToolInput } from "./github/input"
-import { materializeSandboxResult } from "./github/output"
+import { prepareProviderToolInput } from "./github"
 import { generateImageAsset } from "./images"
-import { toolErrorResult, toolResult } from "./results"
+import {
+  materializeSandboxResult,
+  toolErrorResult,
+  toolResult,
+} from "./results"
 import { executeRunTool } from "./run"
 import { type ToolRuntime } from "./runtime"
 import { findTool, requireSurface, shouldFinishConvexTool } from "./select"

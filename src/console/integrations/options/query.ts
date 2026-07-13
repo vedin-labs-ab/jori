@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { api } from "../../../convex/_generated/api"
+import { api } from "../../../../convex/_generated/api"
 
 type OptionsArgs = {
   disabled?: boolean
