@@ -139,4 +139,15 @@ describe("permission catalog defaults", () => {
     expect(activityPermission?.usage).toContain("Summarized model reasoning")
     expect(activityPermission?.usage).toContain("not a verbatim transcript")
   })
+
+  test("disambiguates calendar event list tools", () => {
+    for (const tool of [
+      "google_calendar_list_events",
+      "microsoft_calendar_list_events",
+    ]) {
+      expect(
+        toolPermissions.find((permission) => permission.tool === tool)?.label
+      ).toBe("List calendar events")
+    }
+  })
 })
