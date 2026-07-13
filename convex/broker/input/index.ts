@@ -1,7 +1,10 @@
-import { isArtifactPublishTool } from "../../contracts/artifacts/publish"
-import { type JsonObject } from "../../contracts/json"
-import { getToolInputSchema, isJsonSchema } from "../runs/agent/tools/schemas"
-import { validateSchemaValue } from "./inputValidation"
+import { isArtifactPublishTool } from "../../../contracts/artifacts/publish"
+import { type JsonObject } from "../../../contracts/json"
+import {
+  getToolInputSchema,
+  isJsonSchema,
+} from "../../runs/agent/tools/schemas"
+import { validateSchemaValue } from "./validation"
 
 export function normalizeMiloToolInput(
   tool: string,

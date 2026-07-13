@@ -1,10 +1,17 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { ensureConversation, startMessageRun } from "../conversations/data"
-import { findConversation } from "../conversations/resolve"
-import { scheduleConversationSummary } from "../conversations/schedule"
 import { findActiveIntegrationByExternalId } from "../integrations/data"
+import { normalizeSelfActor } from "../messages/actor"
+import {
+  findMessageByExternalId,
+  insertMessage,
+  messageHasText,
+  type ObservedMessage,
+  observedMessageArgs,
+} from "../messages/data"
+import { recordAutomationEvent } from "../messages/events"
+import { messageAudience } from "../messages/surface"
 import { resolveActor } from "../persons/resolve"
 import {
   ensurePlace,
@@ -17,16 +24,9 @@ import {
   type MessageIntegration,
   messageIntegrationValidator,
 } from "../shared/integrations"
-import { normalizeSelfActor } from "./actor"
-import {
-  findMessageByExternalId,
-  insertMessage,
-  messageHasText,
-  type ObservedMessage,
-  observedMessageArgs,
-} from "./data"
-import { recordAutomationEvent } from "./events"
-import { messageAudience } from "./surface"
+import { ensureConversation, startMessageRun } from "./data"
+import { findConversation } from "./resolve"
+import { scheduleConversationSummary } from "./schedule"
 
 export const record = internalMutation({
   args: {

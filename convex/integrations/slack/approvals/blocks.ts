@@ -1,4 +1,5 @@
 import { type ToolSurface } from "../../../shared/integrations"
+import { getToolLabel } from "../../../shared/tools/labels"
 import { type SlackBlock } from "../delivery/messages"
 import {
   createApprovalCard,
@@ -6,7 +7,6 @@ import {
   toSlackTimestamp,
   truncateSlackText,
 } from "./cards"
-import { getToolLabel } from "./labels"
 
 const slackCardBodyLimit = 200
 

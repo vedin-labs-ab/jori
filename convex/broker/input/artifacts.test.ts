@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { normalizeBrokerToolInput, normalizeMiloToolInput } from "./input"
+import { normalizeBrokerToolInput, normalizeMiloToolInput } from "."
 
 test("milo input passes built artifact publish payloads through unvalidated", () => {
   const prepared = {

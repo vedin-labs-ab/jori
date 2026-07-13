@@ -149,7 +149,7 @@ export function getIntegrationAccess(
   access: AutomationAccess,
   integrationId: Id<"integrations">
 ): AccessLevel {
-  return getToolAccess(getIntegrationTools(access, integrationId))
+  return resolveToolAccessLevel(getIntegrationTools(access, integrationId))
 }
 
 export function canUseAutomationTool(
@@ -166,7 +166,7 @@ export function canUseAutomationTool(
  * the automation cannot do its work until they are reconnected. Integration
  * rows survive disconnects, so bound references stay resolvable; automations
  * created before that guarantee may still hold dangling references, which are
- * omitted here, matching projectAccessForConsole.
+ * omitted from display projections as well.
  */
 export async function listInactiveAccessIntegrations(
   ctx: QueryLikeCtx,
@@ -183,40 +183,6 @@ export async function listInactiveAccessIntegrations(
   }
 
   return inactive
-}
-
-export async function projectAccessForConsole(
-  ctx: QueryLikeCtx,
-  access: AutomationAccess
-) {
-  const surfaces: Array<{
-    integration: Integration
-    access: Exclude<AccessLevel, "none">
-    tools: string[]
-  }> = []
-
-  for (const entry of access.integrations) {
-    const integration = await ctx.db.get(entry.id)
-
-    if (integration === null) {
-      continue
-    }
-
-    const level = getToolAccess(entry.tools)
-
-    if (level !== "none") {
-      surfaces.push({
-        integration: integration.integration,
-        access: level,
-        tools: entry.tools,
-      })
-    }
-  }
-
-  return {
-    webSearch: access.web,
-    surfaces: sortSurfaces(surfaces),
-  }
 }
 
 function normalizeAccessIntegrations(
@@ -253,7 +219,7 @@ function uniqueTools(tools: string[]) {
   return [...new Set(tools)]
 }
 
-function getToolAccess(tools: readonly string[]): AccessLevel {
+export function resolveToolAccessLevel(tools: readonly string[]): AccessLevel {
   let read = false
   let write = false
 
@@ -286,16 +252,4 @@ function permissionModeLabel(mode: PermissionMode) {
   }
 
   return mode === "blocked" ? "blocked" : mode
-}
-
-function sortSurfaces<
-  Surface extends {
-    integration: Integration
-  },
->(surfaces: Surface[]) {
-  return [...surfaces].sort((left, right) =>
-    integrationLabels[left.integration].localeCompare(
-      integrationLabels[right.integration]
-    )
-  )
 }

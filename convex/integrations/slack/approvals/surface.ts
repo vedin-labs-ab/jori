@@ -1,5 +1,10 @@
+import { v } from "convex/values"
+import { internal } from "../../../_generated/api"
 import { type Doc } from "../../../_generated/dataModel"
+import { internalAction } from "../../../_generated/server"
+import { type ApprovalSurfaceTarget } from "../../../approvals/surface"
 import { getActorDisplayName } from "../../../shared/actor"
+import { getToolLabel } from "../../../shared/tools/labels"
 import { updateSlackMessage } from "../delivery/messages"
 import {
   createApprovalCard,
@@ -7,7 +12,6 @@ import {
   toSlackTimestamp,
   truncateSlackText,
 } from "./cards"
-import { getToolLabel } from "./labels"
 
 const cardBodyLimit = 200
 
@@ -15,6 +19,30 @@ type SlackApprovalDelivery = Extract<
   NonNullable<Doc<"approvals">["delivery"]>,
   { integration: "slack" }
 >
+
+export const sync = internalAction({
+  args: {
+    approvalId: v.id("approvals"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const target = (await ctx.runQuery(internal.approvals.surface.getTarget, {
+      approvalId: args.approvalId,
+    })) as ApprovalSurfaceTarget | null
+
+    if (target?.delivery.integration !== "slack") {
+      return null
+    }
+
+    await syncSlackApprovalSurface({
+      approval: target.approval,
+      delivery: target.delivery,
+      integration: target.integration,
+    })
+
+    return null
+  },
+})
 
 export async function syncSlackApprovalSurface(args: {
   approval: Doc<"approvals">

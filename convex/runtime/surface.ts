@@ -12,13 +12,13 @@ import {
   messageMatchesReplyTargetIdentifier,
   messageReplyTargetIdentifier,
 } from "../messages/identifiers"
+import { optionalSlackBlocks, sendSurfaceReply } from "../messages/reply"
 import { replyAddress } from "../messages/targets"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { optionalString, requiredString } from "../shared/input"
 import { type MessageIntegration } from "../shared/integrations"
 import { requireWorkerSecret } from "./shared"
 import { requireMessageSurfaceInput } from "./surface/input"
-import { optionalSlackBlocks, sendSurfaceReply } from "./surface/reply"
 import { findVisibleMessage } from "./surface/target"
 import { type ActiveSurfaceTool, activeSurfaceTools } from "./surface/tools"
 

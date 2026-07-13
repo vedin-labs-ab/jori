@@ -1,12 +1,12 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
+import { type DataModel, type Id } from "../../../_generated/dataModel"
+import { type MutationCtx } from "../../../_generated/server"
 import {
   claimReusableSandbox,
   releaseIdleSandbox,
   reserveExpiredSandboxCleanup,
   upsertSandbox,
-} from "./sandboxes"
+} from "./data"
 
 test("releases and claims idle sandboxes by conversation", async () => {
   const ctx = fakeMutationCtx([

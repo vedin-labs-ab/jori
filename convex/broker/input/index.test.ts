@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
-import { toolPermissions } from "../../contracts/permissions"
-import { getToolInputSchema } from "../runs/agent/tools/schemas"
-import { normalizeBrokerToolInput } from "./input"
+import { toolPermissions } from "../../../contracts/permissions"
+import { getToolInputSchema } from "../../runs/agent/tools/schemas"
+import { normalizeBrokerToolInput } from "."
 
 test("broker input schemas cover every broker-routed tool", () => {
   const missing = toolPermissions

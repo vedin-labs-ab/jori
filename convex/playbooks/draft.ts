@@ -2,7 +2,7 @@ import { resolvePlaybookSchedule } from "../../contracts/playbooks/catalog"
 import { playbookCron } from "../../contracts/playbooks/schedule"
 import { type Id } from "../_generated/dataModel"
 import { resolveAccessInput } from "../automations/access"
-import { toConsoleAutomation } from "../automations/console"
+import { toAutomationDisplay } from "../automations/display"
 import { getTimeTrigger } from "../automations/timing"
 import { requirePersonTimezone } from "../persons/profile/timezone"
 import { executionPrincipalForScope } from "../runs/principal"
@@ -41,7 +41,7 @@ export async function resolvePlaybookDraft(
     now
   )
 
-  return await toConsoleAutomation(ctx, {
+  return await toAutomationDisplay(ctx, {
     _id: "draft" as Id<"automations">,
     _creationTime: now,
     tenantId: args.tenantId,

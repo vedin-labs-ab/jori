@@ -1,5 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
-import { getToolLabel } from "../../integrations/slack/approvals/labels"
+import { getToolLabel } from "../../shared/tools/labels"
 import { agentTitle, approvalTitle, offerTitle, waiterReason } from "./format"
 import {
   type ActivityData,

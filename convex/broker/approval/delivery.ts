@@ -7,12 +7,12 @@ import {
   postSlackCard,
   slackCardTarget,
 } from "../../integrations/slack/delivery/cards"
+import { sendSurfaceReply } from "../../messages/reply"
 import { replyAddress } from "../../messages/surface"
 import {
   type AgentRuntimeInput,
   findRunIntegration,
 } from "../../runs/agent/input"
-import { sendSurfaceReply } from "../../runtime/surface/reply"
 
 type ApprovalDeliveryContext = {
   input: AgentRuntimeInput

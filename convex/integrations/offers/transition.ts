@@ -1,6 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { wakeRun } from "../../runtime/waiters/data"
+import { wakeRun } from "../../runs/execution/waiters/data"
 import { type Actor } from "../../shared/actor"
 import { recordTransition } from "../../transitions"
 

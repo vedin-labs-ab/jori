@@ -1,11 +1,11 @@
-import { type Doc } from "../_generated/dataModel"
-import { getToolLabel } from "../integrations/slack/approvals/labels"
+import { type Doc } from "../../_generated/dataModel"
 import {
   getSlackChannelId,
   getSlackMessageTs,
-} from "../integrations/slack/data"
-import { slackMessageUrl } from "../integrations/slack/links"
-import { toolSurfaceLabel } from "../shared/integrations"
+} from "../../integrations/slack/data"
+import { slackMessageUrl } from "../../integrations/slack/links"
+import { toolSurfaceLabel } from "../../shared/integrations"
+import { getToolLabel } from "../../shared/tools/labels"
 
 export function summarizeApproval(args: {
   approval: Doc<"approvals">

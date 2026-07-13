@@ -45,7 +45,7 @@ export async function handleSlackMessageEvent(
     humanizeSlackMessage(ctx, integration, message),
   ])
 
-  await ctx.runMutation(internal.messages.intake.record, {
+  await ctx.runMutation(internal.conversations.intake.record, {
     accountId: message.accountId,
     integration: "slack",
     type: message.type,
