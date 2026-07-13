@@ -1,5 +1,9 @@
-import { shareExpiry } from "../../../../../contracts/artifacts/share"
-import { numberProperty, objectSchema, stringProperty } from "./common"
+import { shareExpiry } from "../../../../../../contracts/artifacts/share"
+import {
+  numberProperty,
+  objectSchema,
+  stringProperty,
+} from "../fragments/common"
 
 const artifactToolGrantsSchema = () => ({
   type: "array",

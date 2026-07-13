@@ -4,12 +4,12 @@ import {
   type SchemaMap,
   stringArrayProperty,
   stringProperty,
-} from "./common"
+} from "./fragments/common"
 import {
   githubCommentReactionSubjectProperty,
   githubReactionContentProperty,
-} from "./reactions"
-import { sourceChangesProperty } from "./source"
+} from "./fragments/reactions"
+import { sourceChangesProperty } from "./fragments/source"
 
 export const githubToolInputSchemas = {
   github_list_repositories: objectSchema({

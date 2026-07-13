@@ -1,4 +1,5 @@
 import { calendarEventProperty } from "./calendar"
+import { emailMessageSchema } from "./email"
 import {
   numberProperty,
   objectSchema,
@@ -6,8 +7,7 @@ import {
   type SchemaMap,
   stringArrayProperty,
   stringProperty,
-} from "./common"
-import { emailMessageSchema } from "./email"
+} from "./fragments/common"
 
 export const googleToolInputSchemas = {
   google_gmail_search_threads: objectSchema({

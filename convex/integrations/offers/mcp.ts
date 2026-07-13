@@ -8,7 +8,7 @@ import {
   integrations,
 } from "../../shared/integrations"
 import { type OfferContext } from "./context"
-import { tryDeliverIntegrationOffer } from "./delivery"
+import { type IntegrationOfferDeliverer } from "./delivery"
 import { integrationOfferSourceFromInput } from "./source"
 
 const offerTool = "offer_integration"
@@ -21,7 +21,8 @@ export function isIntegrationOfferTool(tool: string) {
 export async function callIntegrationOfferTool(
   ctx: ActionCtx,
   context: OfferContext,
-  request: MiloToolRequest
+  request: MiloToolRequest,
+  deliver: IntegrationOfferDeliverer
 ) {
   if (!isIntegrationOfferTool(request.tool)) {
     throw new Error(`Unknown integration offer tool: ${request.tool}`)
@@ -54,7 +55,7 @@ export async function callIntegrationOfferTool(
       source: integrationOfferSourceFromInput(context.input),
     }
   )
-  const delivery = await tryDeliverIntegrationOffer(ctx, context, {
+  const delivery = await deliver(ctx, context, {
     expiresAt: offer.expiresAt,
     integration,
     summary: offerRequest.summary,

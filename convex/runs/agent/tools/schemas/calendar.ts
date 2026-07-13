@@ -1,4 +1,4 @@
-import { objectSchema, stringProperty } from "./common"
+import { objectSchema, stringProperty } from "./fragments/common"
 
 type CalendarEventMode = "create" | "update"
 type CalendarProvider = "google" | "microsoft"

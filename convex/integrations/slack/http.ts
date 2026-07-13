@@ -10,7 +10,6 @@ import {
   completeIntegrationOffer,
   failOfferAndRedirect,
 } from "../connect/install"
-import { handleSlackIntegrationOfferInteraction } from "../offers/interaction"
 import { handleSlackApprovalInteraction } from "./approvals"
 import {
   slackBotScopes,
@@ -21,6 +20,7 @@ import {
 import { getSlackMessage, type SlackEventPayload } from "./ingress/events"
 import { handleSlackMessageEvent } from "./ingress/messages"
 import { exchangeSlackAuthorizationCode, requireSlackClientId } from "./oauth"
+import { handleSlackIntegrationOfferInteraction } from "./offers/interaction"
 import { parseSignedSlackState, verifySlackRequest } from "./signing"
 
 export async function handleSlackInstall(request: Request) {

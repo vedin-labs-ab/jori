@@ -4,16 +4,12 @@ import {
   type Integration,
   integrationLabel,
 } from "../../../shared/integrations"
-import { createSlackCard } from "../../slack/card"
-import {
-  formatSlackTime,
-  toSlackTimestamp,
-  truncateSlackText,
-} from "../../slack/format"
+import { createSlackCard } from "../card"
+import { formatSlackTime, toSlackTimestamp, truncateSlackText } from "../format"
 import {
   integrationOfferCancelActionId,
   integrationOfferOpenActionId,
-} from "../interaction"
+} from "./interaction"
 
 const integrationOfferSummaryLimit = 200
 

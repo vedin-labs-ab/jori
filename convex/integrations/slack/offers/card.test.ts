@@ -1,10 +1,10 @@
 import { expect, test } from "vitest"
 import { type Id } from "../../../_generated/dataModel"
+import { createSlackIntegrationOfferMessage } from "./card"
 import {
   isSlackIntegrationOfferInteraction,
   parseSlackIntegrationOfferCancelInteraction,
-} from "../interaction"
-import { createSlackIntegrationOfferMessage } from "./slack"
+} from "./interaction"
 
 test("renders a URL button for the requested integration", () => {
   const integrationOfferId = "integration-offer" as Id<"integrationOffers">

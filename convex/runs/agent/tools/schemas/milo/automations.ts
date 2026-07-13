@@ -5,7 +5,7 @@ import {
   objectProperty,
   objectSchema,
   stringProperty,
-} from "../common"
+} from "../fragments/common"
 
 const automationInstructionsDescription =
   "Canonical Markdown instructions for each run. Use @Integration for every integration whose access is granted, /skill for skills, and #tool for tools. Use txt fences for plain-text examples that should keep Milo references active; language-tagged code fences are literal. Keep the explicit access payload aligned with every referenced integration tool."

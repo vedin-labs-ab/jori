@@ -13,6 +13,7 @@ import {
   isCancelIntegrationOfferTool,
   isIntegrationOfferTool,
 } from "../integrations/offers/mcp"
+import { tryDeliverSlackIntegrationOffer } from "../integrations/slack/offers/delivery"
 import {
   callRunIntrospectionTool,
   isRunIntrospectionTool,
@@ -78,7 +79,12 @@ async function callBrokerScopedMiloTool(
   request: MiloToolRequest
 ) {
   if (isIntegrationOfferTool(request.tool)) {
-    return await callIntegrationOfferTool(ctx, context, request)
+    return await callIntegrationOfferTool(
+      ctx,
+      context,
+      request,
+      tryDeliverSlackIntegrationOffer
+    )
   }
 
   if (isCancelApprovalTool(request.tool)) {

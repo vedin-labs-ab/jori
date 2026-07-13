@@ -5,7 +5,7 @@ import {
   objectSchema,
   stringArrayProperty,
   stringProperty,
-} from "../common"
+} from "../fragments/common"
 import { runMiloToolInputSchemas } from "./runs"
 
 export const coreMiloToolInputSchemas = {
