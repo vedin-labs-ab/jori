@@ -203,13 +203,13 @@ test("groups consecutive tool calls into an expandable task", () => {
 
   const group = screen.getByRole("button", { name: /ran 2 actions/i })
 
-  expect(group).toBeDefined()
   expect(screen.getByText("2 actions · 2 results")).toBeDefined()
 
   fireEvent.click(group)
 
   expect(screen.getByText("Read file")).toBeDefined()
   expect(screen.getByText("Fetch page")).toBeDefined()
+  expect(document.querySelectorAll('[data-slot="separator"]')).toHaveLength(3)
 })
 
 test("labels same-family tool groups with specific wording", () => {
