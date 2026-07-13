@@ -1,4 +1,5 @@
 import { type ReactNode } from "react"
+import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { ProviderLogo } from "@/shared/logo/provider"
 
@@ -37,6 +38,15 @@ export function ActivityMetadataLine({
         children
       )}
     </span>
+  )
+}
+
+export function ActivityMetadataSeparator() {
+  return (
+    <Separator
+      className="data-vertical:h-4 data-vertical:self-center"
+      orientation="vertical"
+    />
   )
 }
 

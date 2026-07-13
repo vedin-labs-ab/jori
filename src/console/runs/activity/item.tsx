@@ -1,7 +1,6 @@
 import { integrationLabel } from "@contracts/integrations"
 import { ChevronDown, FileText, Search, Send, SmilePlus } from "lucide-react"
 import { type ReactNode, useState } from "react"
-import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import {
   Task,
@@ -20,6 +19,7 @@ import {
 } from "./metadata"
 import {
   ActivityMetadataLine,
+  ActivityMetadataSeparator,
   ActivitySurfaceDescription,
   TimelineRow,
 } from "./row"
@@ -238,7 +238,10 @@ function ToolGroupItem({ item }: { item: ActivityItemType }) {
           {item.title}
         </TaskLabel>
         {description === undefined ? null : (
-          <ActivityMetadataLine>{description}</ActivityMetadataLine>
+          <>
+            <ActivityMetadataSeparator />
+            <ActivityMetadataLine>{description}</ActivityMetadataLine>
+          </>
         )}
       </div>
       <span className="shrink-0 text-muted-foreground tabular-nums">
@@ -277,10 +280,7 @@ function ActivityTaskHeader({
         </TaskLabel>
         {description === undefined ? null : (
           <>
-            <Separator
-              className="data-vertical:h-4 data-vertical:self-center"
-              orientation="vertical"
-            />
+            <ActivityMetadataSeparator />
             <ActivityMetadataLine className="text-xs">
               {description}
             </ActivityMetadataLine>
