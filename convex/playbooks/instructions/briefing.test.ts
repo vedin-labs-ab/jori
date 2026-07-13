@@ -1,8 +1,9 @@
 import { describe, expect, test } from "vitest"
 import { emailDestination, renderPlaybook } from "../fixture"
 
-const renderBriefing = (options: Record<string, string | number> = {}) =>
-  renderPlaybook("meeting-briefing", emailDestination, options)
+const renderBriefing = (
+  options: Record<string, boolean | number | string> = {}
+) => renderPlaybook("meeting-briefing", emailDestination, options)
 
 describe("Meeting Briefing contract", () => {
   test.each([
@@ -148,7 +149,7 @@ describe("Meeting Briefing delivery", () => {
     expect(instructions).toContain(
       "re-read its full event by calendar ID and event ID"
     )
-    expect(instructions).toContain("no digest receipt matching both")
+    expect(instructions).toContain("no morning receipt matching both")
     expect(instructions).toContain(
       "have `preparedForFingerprint` equal to `event.fingerprint`"
     )
@@ -177,7 +178,7 @@ describe("Meeting Briefing delivery", () => {
     )
     expect(instructions).toContain("starting in that window")
     expect(instructions).toContain(
-      "A meeting before today's target belongs to the prior digest"
+      "A meeting before today's target belongs to the prior briefing"
     )
     expect(instructions).toContain("36-hour #share_artifact link")
     expect(instructions).toContain(

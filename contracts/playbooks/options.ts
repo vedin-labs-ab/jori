@@ -1,18 +1,25 @@
-// Playbook options are the typed setup knobs a playbook declares in the
-// catalog: the dialog renders them, enablement validates them, and the
-// resolved values feed the instruction template and the schedule.
+// Playbook setup is a small, declarative layer over raw automations. Sections
+// describe the setup flow, fields hold typed values, and behaviors group the
+// values that together express one user-visible outcome.
 
-export type PlaybookOptionValues = Record<string, string | number>
+export type PlaybookOptionValue = boolean | number | string
+export type PlaybookOptionValues = Record<string, PlaybookOptionValue>
 
 type PlaybookOptionBase = {
   key: string
   label: string
   /** Show and apply this field only while another field holds a value.
    *  Predicates chase enablement transitively through their target. */
-  enabledWhen?: { key: string; value: string }
+  enabledWhen?: { key: string; value: PlaybookOptionValue }
+}
+
+export type PlaybookBooleanOptionField = PlaybookOptionBase & {
+  kind: "boolean"
+  default: boolean
 }
 
 export type PlaybookOptionField =
+  | PlaybookBooleanOptionField
   | (PlaybookOptionBase & {
       kind: "choice"
       choices: ReadonlyArray<{ value: string; label: string }>
@@ -30,15 +37,90 @@ export type PlaybookOptionField =
       presets: readonly number[]
     })
 
+export type PlaybookBehavior = {
+  key: string
+  label: string
+  description?: string
+  enabledBy?: PlaybookBooleanOptionField
+  fields: readonly PlaybookOptionField[]
+}
+
+export type PlaybookSetupSection =
+  | {
+      key: string
+      kind: "fields"
+      label: string
+      fields: readonly PlaybookOptionField[]
+    }
+  | {
+      key: string
+      kind: "behaviors"
+      label: string
+      behaviors: readonly PlaybookBehavior[]
+    }
+
+/** Flatten setup presentation into the canonical option field collection. */
+export function playbookOptionFields(
+  setup: readonly PlaybookSetupSection[] = []
+): PlaybookOptionField[] {
+  const behaviorKeys = new Set<string>()
+  const fields: PlaybookOptionField[] = []
+  const keys = new Set<string>()
+  const sectionKeys = new Set<string>()
+
+  function add(field: PlaybookOptionField) {
+    if (keys.has(field.key)) {
+      throw new Error(`Duplicate playbook option "${field.key}".`)
+    }
+
+    keys.add(field.key)
+    fields.push(field)
+  }
+
+  for (const section of setup) {
+    assertUniqueKey(sectionKeys, section.key, "setup section")
+
+    if (section.kind === "fields") {
+      for (const field of section.fields) {
+        add(field)
+      }
+      continue
+    }
+
+    for (const behavior of section.behaviors) {
+      assertUniqueKey(behaviorKeys, behavior.key, "playbook behavior")
+
+      if (behavior.enabledBy !== undefined) {
+        add(behavior.enabledBy)
+      }
+      for (const field of behavior.fields) {
+        add(field)
+      }
+    }
+  }
+
+  return fields
+}
+
+export function isPlaybookBehaviorEnabled(
+  behavior: PlaybookBehavior,
+  values: PlaybookOptionValues
+) {
+  return (
+    behavior.enabledBy === undefined || values[behavior.enabledBy.key] === true
+  )
+}
+
 /**
  * Defaults for every field, overlaid with the caller's picks where the field
  * is enabled. Disabled fields revert to their defaults, so resolved values
  * always carry every key and templates can reference them unconditionally.
  */
 export function resolvePlaybookOptions(
-  fields: readonly PlaybookOptionField[] = [],
+  setup: readonly PlaybookSetupSection[] = [],
   values: PlaybookOptionValues = {}
 ): PlaybookOptionValues {
+  const fields = playbookOptionFields(setup)
   assertKnownOptionKeys(fields, values)
 
   const merged: PlaybookOptionValues = {}
@@ -79,22 +161,37 @@ export function isPlaybookOptionEnabled(
 
   const target = fields.find((candidate) => candidate.key === when.key)
 
+  if (target === undefined) {
+    throw new Error(`Unknown option dependency "${when.key}".`)
+  }
+
   return (
-    target !== undefined &&
     isPlaybookOptionEnabled(
       target,
       fields,
       values,
       new Set(seen).add(field.key)
-    ) &&
-    values[when.key] === when.value
+    ) && values[when.key] === when.value
   )
+}
+
+function assertUniqueKey(keys: Set<string>, key: string, kind: string) {
+  if (keys.has(key)) {
+    throw new Error(`Duplicate ${kind} "${key}".`)
+  }
+  keys.add(key)
 }
 
 function validOptionValue(
   field: PlaybookOptionField,
-  value: string | number
-): string | number {
+  value: PlaybookOptionValue
+): PlaybookOptionValue {
+  if (field.kind === "boolean") {
+    if (typeof value === "boolean") {
+      return value
+    }
+  }
+
   if (field.kind === "choice") {
     if (field.choices.some((choice) => choice.value === value)) {
       return value
@@ -102,7 +199,10 @@ function validOptionValue(
   }
 
   if (field.kind === "time") {
-    if (typeof value === "string" && /^\d{2}:\d{2}$/.test(value)) {
+    if (
+      typeof value === "string" &&
+      /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
+    ) {
       return value
     }
   }

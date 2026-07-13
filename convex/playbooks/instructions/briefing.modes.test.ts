@@ -1,13 +1,14 @@
 import { describe, expect, test } from "vitest"
 import { emailDestination, renderPlaybook } from "../fixture"
 
-const renderBriefing = (options: Record<string, string | number> = {}) =>
-  renderPlaybook("meeting-briefing", emailDestination, options)
+const renderBriefing = (
+  options: Record<string, boolean | number | string> = {}
+) => renderPlaybook("meeting-briefing", emailDestination, options)
 
 describe("Meeting Briefing modes", () => {
   test("pre-meeting delivery is opt-in and standalone", () => {
     const defaults = renderBriefing()
-    const enabled = renderBriefing({ before: "45" })
+    const enabled = renderBriefing({ beforeMeeting: true })
 
     expect(defaults).not.toContain("Lead time: 45 minutes")
     expect(defaults).not.toContain("meeting-briefing:event:")
@@ -47,14 +48,18 @@ describe("Meeting Briefing modes", () => {
 })
 
 describe("Meeting Briefing options", () => {
-  test("digest-off leaves future research to reminders", () => {
-    const instructions = renderBriefing({ digest: "off", before: "60" })
+  test("morning-off leaves future research to reminders", () => {
+    const instructions = renderBriefing({
+      morning: false,
+      beforeMeeting: true,
+      leadMinutes: "60",
+    })
 
     expect(instructions).toContain(
-      "With digest off, leave other scheduled meetings to their just-in-time automations"
+      "With the morning briefing off, leave other scheduled meetings to their just-in-time automations"
     )
     expect(instructions).toContain("inside its 60-minute window")
-    expect(instructions).not.toContain("digest:<target UTC>")
+    expect(instructions).not.toContain("morning:<target UTC>")
   })
 
   test("meeting scope changes composition", () => {

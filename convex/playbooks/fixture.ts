@@ -27,7 +27,7 @@ export function renderPlaybook(
     subject: definition?.title ?? key,
     noun: definition?.delivery.noun ?? "output",
     style: definition?.delivery.style,
-    options: resolvePlaybookOptions(definition?.options, options),
+    options: resolvePlaybookOptions(definition?.setup, options),
     agentWait: definition?.agentWait,
   })
 }

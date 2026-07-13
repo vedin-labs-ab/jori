@@ -104,7 +104,7 @@ const meeting = z.strictObject({
   briefing: briefing.optional(),
   sources: z.array(source).max(6),
   delivery: z
-    .strictObject({ digest: receipt.optional(), reminder: receipt.optional() })
+    .strictObject({ morning: receipt.optional(), reminder: receipt.optional() })
     .optional(),
 })
 

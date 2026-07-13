@@ -3,14 +3,9 @@ import {
   type DeliveryChoice,
   type DeliverySetup,
 } from "@contracts/playbooks/delivery"
-import {
-  type PlaybookOptionValues,
-  resolvePlaybookOptions,
-} from "@contracts/playbooks/options"
-import { Link } from "@tanstack/react-router"
-import { useMutation, useQuery } from "convex/react"
+import { useMutation } from "convex/react"
 import { Play, Settings2 } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -23,35 +18,19 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
-import { PlaybookCustomizations } from "./customizations"
+import { useOptionHints, useOptionsSetup } from "./configuration/state"
 import { type PlaybookActions, pendingActionKind } from "./enable"
-import { PlaybookMeta } from "./meta"
+import { SetupDialogSections } from "./form"
 import { type PlaybookEnablePlan, type PlaybookListRow } from "./state"
 
 /** Confirm-and-customize setup for an unenabled playbook. */
-export function PlaybookSetupDialog({
-  actions,
-  definition,
-  onOpenChange,
-  open,
-  plan,
-  row,
-  tenantId,
-}: {
-  actions: PlaybookActions
-  definition: PlaybookDefinition
-  onOpenChange: (open: boolean) => void
-  open: boolean
-  // A resolvable plan (never "connect": the card gates on connection first).
-  plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>
-  row: PlaybookListRow
-  tenantId: string
-}) {
+export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
+  const { actions, definition, onOpenChange, open, plan, row, tenantId } = props
   const [providerIndex, setProviderIndex] = useState(0)
   const delivery = useDeliverySetup(row.delivery, tenantId)
   const destination = delivery.value
   const pendingKind = pendingActionKind(actions, definition)
-  const { options, optionFields } = useOptionsSetup(definition)
+  const { options, setupFields } = useOptionsSetup(definition)
   const { hints, optionsIssue } = useOptionHints(definition, tenantId, options)
 
   const choices =
@@ -61,7 +40,82 @@ export function PlaybookSetupDialog({
   const isBusy = pendingKind !== undefined
   const blocked = isBusy || delivery.editing || optionsIssue !== undefined
   const canSubmit = destination !== undefined && !blocked
+  const submit = setupActions({
+    actions,
+    choices,
+    definition,
+    destination,
+    onOpenChange,
+    options,
+  })
 
+  return (
+    <Dialog
+      onOpenChange={(next) => {
+        if (next || !isBusy) {
+          onOpenChange(next)
+        }
+      }}
+      open={open}
+    >
+      <DialogContent className="sm:max-w-xl">
+        <SetupDialogHeader definition={definition} />
+
+        <SetupDialogSections
+          choices={choices}
+          definition={definition}
+          delivery={delivery}
+          hints={hints}
+          isBusy={isBusy}
+          onProviderIndexChange={setProviderIndex}
+          options={options}
+          optionsIssue={optionsIssue}
+          plan={plan}
+          providerIndex={providerIndex}
+          row={row}
+          setupFields={setupFields}
+          tenantId={tenantId}
+        />
+
+        <SetupDialogFooter
+          advancedDisabled={
+            destination === undefined || isBusy || optionsIssue !== undefined
+          }
+          canSubmit={canSubmit}
+          onAdvanced={submit.advanced}
+          onEnable={submit.enable}
+          onPreloadEdit={actions.preloadEdit}
+          onTrial={submit.trial}
+          pendingKind={pendingKind}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+type PlaybookSetupDialogProps = {
+  actions: PlaybookActions
+  definition: PlaybookDefinition
+  onOpenChange: (open: boolean) => void
+  open: boolean
+  // A resolvable plan (never "connect": the card gates on connection first).
+  plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>
+  row: PlaybookListRow
+  tenantId: string
+}
+
+function setupActions({
+  actions,
+  choices,
+  definition,
+  destination,
+  onOpenChange,
+  options,
+}: Pick<PlaybookSetupDialogProps, "actions" | "definition" | "onOpenChange"> & {
+  choices: Parameters<PlaybookActions["enable"]>[1]
+  destination: DeliveryChoice | undefined
+  options: Parameters<PlaybookActions["enable"]>[3]
+}) {
   function submit(action: PlaybookActions["enable"], close: boolean) {
     if (destination === undefined) {
       return
@@ -73,61 +127,29 @@ export function PlaybookSetupDialog({
     })
   }
 
-  function openAdvanced() {
-    if (destination === undefined) {
-      return
-    }
-    // The builder stacks on top; this dialog stays beneath as the way back
-    // and only closes once an automation is actually created from it.
-    void actions.openAdvanced(definition, choices, destination, options, () =>
-      onOpenChange(false)
-    )
+  return {
+    advanced: () => {
+      if (destination !== undefined) {
+        void actions.openAdvanced(
+          definition,
+          choices,
+          destination,
+          options,
+          () => onOpenChange(false)
+        )
+      }
+    },
+    enable: () => submit(actions.enable, true),
+    trial: () => submit(actions.trial, false),
   }
+}
 
+function SetupDialogHeader({ definition }: { definition: PlaybookDefinition }) {
   return (
-    <Dialog
-      onOpenChange={(next) => {
-        if (next || !isBusy) {
-          onOpenChange(next)
-        }
-      }}
-      open={open}
-    >
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Set up {definition.title}</DialogTitle>
-          <DialogDescription>{definition.description}</DialogDescription>
-        </DialogHeader>
-
-        <div className="grid gap-3">
-          <PlaybookMeta definition={definition} options={options} row={row} />
-          <PlaybookCustomizations
-            delivery={{ ...delivery, tenantId }}
-            disabled={isBusy}
-            onProviderIndexChange={setProviderIndex}
-            options={
-              optionFields === undefined
-                ? undefined
-                : { ...optionFields, hints }
-            }
-            plan={plan}
-            providerIndex={providerIndex}
-          />
-        </div>
-
-        <SetupDialogFooter
-          advancedDisabled={
-            destination === undefined || isBusy || optionsIssue !== undefined
-          }
-          canSubmit={canSubmit}
-          onAdvanced={openAdvanced}
-          onEnable={() => submit(actions.enable, true)}
-          onPreloadEdit={actions.preloadEdit}
-          onTrial={() => submit(actions.trial, false)}
-          pendingKind={pendingKind}
-        />
-      </DialogContent>
-    </Dialog>
+    <DialogHeader>
+      <DialogTitle>Set up {definition.title}</DialogTitle>
+      <DialogDescription>{definition.description}</DialogDescription>
+    </DialogHeader>
   )
 }
 
@@ -171,114 +193,6 @@ function SetupDialogFooter({
       </Button>
     </DialogFooter>
   )
-}
-
-/**
- * Option state for the setup dialog: raw picks overlay the catalog defaults,
- * and the resolved record drives the fields, the cadence preview, and what
- * the actions submit.
- */
-function useOptionsSetup(definition: PlaybookDefinition) {
-  const [picks, setPicks] = useState<PlaybookOptionValues>({})
-  const options = useMemo(
-    () => resolvePlaybookOptions(definition.options, picks),
-    [definition.options, picks]
-  )
-  const fields = definition.options
-
-  return {
-    options,
-    optionFields:
-      fields === undefined
-        ? undefined
-        : {
-            fields,
-            values: options,
-            onChange: (key: string, value: string | number) =>
-              setPicks((current) => ({ ...current, [key]: value })),
-          },
-  }
-}
-
-/**
- * Everything rendered under the option fields: the meetings-scope grounding
- * caption, and the catalog's cross-field validation message (which also
- * blocks submission via `optionsIssue`).
- */
-function useOptionHints(
-  definition: PlaybookDefinition,
-  tenantId: string,
-  options: PlaybookOptionValues
-) {
-  const meetings = useMeetingsHint(definition, tenantId, options)
-  const optionsIssue = definition.validateOptions?.(options)
-
-  return {
-    optionsIssue,
-    hints: {
-      meetings,
-      before:
-        optionsIssue === undefined ? undefined : (
-          <p className="text-destructive">{optionsIssue}</p>
-        ),
-    },
-  }
-}
-
-/**
- * Grounds a Meetings scope field in the organization's actual domains so
- * "Internal" is concrete. The dialog only displays — domains are managed on
- * the Context page, which the caption links to. Hidden while External is
- * selected: no choice there depends on what "internal" means.
- */
-function useMeetingsHint(
-  definition: PlaybookDefinition,
-  tenantId: string,
-  options: PlaybookOptionValues
-) {
-  const hasMeetings =
-    definition.options?.some((field) => field.key === "meetings") === true
-  const profile = useQuery(
-    api.organization.profile.get,
-    hasMeetings ? { tenantId } : "skip"
-  )
-
-  if (!hasMeetings || options.meetings === "external") {
-    return undefined
-  }
-
-  const domains = [
-    ...new Set([
-      ...(profile?.domains ?? []),
-      ...(profile?.declared?.domains ?? []),
-    ]),
-  ]
-  const hasDomains = domains.length > 0
-
-  return (
-    <p className="text-muted-foreground">
-      {describeInternal(domains)}
-      {" · "}
-      <Link
-        className="underline underline-offset-2 hover:text-foreground"
-        to="/context"
-      >
-        {hasDomains ? "Manage" : "Set up in Context"}
-      </Link>
-    </p>
-  )
-}
-
-// Name the single domain while it stays concrete; collapse to a count once a
-// list would get noisy. The Manage link reveals the full list either way.
-function describeInternal(domains: string[]) {
-  if (domains.length === 0) {
-    return "Internal is based on your organization's domains"
-  }
-
-  return domains.length === 1
-    ? `Internal: anyone at ${domains[0]}`
-    : `Internal: ${domains.length} domains`
 }
 
 /**

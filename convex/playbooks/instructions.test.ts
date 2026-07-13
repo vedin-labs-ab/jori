@@ -27,7 +27,7 @@ describe("playbook instructions", () => {
           subject: playbook.title,
           noun: playbook.delivery.noun,
           style: playbook.delivery.style,
-          options: resolvePlaybookOptions(playbook.options),
+          options: resolvePlaybookOptions(playbook.setup),
           agentWait: playbook.agentWait,
         })
 

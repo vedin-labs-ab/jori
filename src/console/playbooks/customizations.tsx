@@ -2,52 +2,49 @@ import { type ComponentProps } from "react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DeliveryField } from "./delivery"
 import { PlaybookSection } from "./meta"
-import { PlaybookOptionsFields } from "./options"
 import { type PlaybookEnablePlan } from "./state"
 
-/**
- * Every knob a playbook exposes at setup, each a `PlaybookSection` so it flows
- * inline after the Schedule/Tools summary with a matching label. Add a
- * customization by rendering another section here.
- */
-export function PlaybookCustomizations({
-  delivery,
+export function PlaybookAccounts({
   disabled = false,
-  options,
   plan,
   providerIndex,
   onProviderIndexChange,
 }: {
-  delivery: ComponentProps<typeof DeliveryField>
   disabled?: boolean
-  options?: Omit<ComponentProps<typeof PlaybookOptionsFields>, "disabled">
   plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>
   providerIndex: number
   onProviderIndexChange: (index: number) => void
 }) {
+  if (plan.kind !== "choose") {
+    return null
+  }
+
   return (
-    <>
-      {plan.kind === "choose" ? (
-        <PlaybookSection label="Accounts">
-          <OptionToggle
-            disabled={disabled}
-            onValueChange={onProviderIndexChange}
-            options={plan.options.map((option) => option.label)}
-            value={providerIndex}
-          />
-        </PlaybookSection>
-      ) : null}
-      {options === undefined ? null : (
-        <PlaybookOptionsFields {...options} disabled={disabled} />
-      )}
-      <PlaybookSection label="Deliver to">
-        <DeliveryField {...delivery} disabled={disabled} />
-      </PlaybookSection>
-    </>
+    <PlaybookSection label="Accounts">
+      <OptionToggle
+        disabled={disabled}
+        onValueChange={onProviderIndexChange}
+        options={plan.options.map((option) => option.label)}
+        value={providerIndex}
+      />
+    </PlaybookSection>
   )
 }
 
-/** Single-select toggle over string options addressed by index. */
+export function PlaybookDelivery({
+  delivery,
+  disabled = false,
+}: {
+  delivery: ComponentProps<typeof DeliveryField>
+  disabled?: boolean
+}) {
+  return (
+    <PlaybookSection label="Deliver to">
+      <DeliveryField {...delivery} disabled={disabled} />
+    </PlaybookSection>
+  )
+}
+
 function OptionToggle({
   disabled,
   onValueChange,

@@ -3,8 +3,8 @@ import { type Duration } from "../runtime"
 import { type PlaybookSlot } from "./capabilities"
 import { type PlaybookDelivery } from "./delivery"
 import {
-  type PlaybookOptionField,
   type PlaybookOptionValues,
+  type PlaybookSetupSection,
   resolvePlaybookOptions,
 } from "./options"
 import {
@@ -22,14 +22,13 @@ export type PlaybookDefinition = {
   /** Personal playbooks enable per member; organization ones per tenant. */
   scope: Scope
   /** Card-level rhythm shown on browse surfaces: what to expect and, when
-   *  the playbook offers modes, that there is a choice ("Morning digest or
+   *  the playbook offers modes, that there is a choice ("Morning briefing or
    *  right before each meeting"). No clock times — the setup dialog shows
    *  the precise cadence for the chosen options. */
   cadence: string
   schedule: PlaybookSchedule
-  /** Setup knobs beyond accounts and delivery; resolved values feed the
-   *  instruction template, the schedule, and the cadence copy. */
-  options?: readonly PlaybookOptionField[]
+  /** High-level setup that compiles into the automation. */
+  setup?: readonly PlaybookSetupSection[]
   /** Derive the cron schedule from the chosen options; defaults to
    *  `schedule` when absent. */
   resolveSchedule?: (options: PlaybookOptionValues) => PlaybookSchedule
@@ -70,7 +69,7 @@ export function resolveValidPlaybookOptions(
   definition: PlaybookDefinition,
   values?: PlaybookOptionValues
 ) {
-  const options = resolvePlaybookOptions(definition.options, values)
+  const options = resolvePlaybookOptions(definition.setup, values)
   const issue = definition.validateOptions?.(options)
 
   if (issue !== undefined) {
@@ -121,80 +120,107 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     agentWait: { unit: "minutes", value: meetingBriefingResearchMinutes },
     cadence: "Morning briefing or before each meeting",
     schedule: { repeat: "daily", time: "01:00" },
-    options: [
+    setup: [
       {
         key: "meetings",
+        kind: "fields",
         label: "Meetings",
-        kind: "choice",
-        default: "external",
-        choices: [
-          { value: "external", label: "External" },
-          { value: "internal", label: "Internal" },
-          { value: "both", label: "Both" },
-        ],
-      },
-      // The two deliveries are orthogonal: a morning overview and a
-      // per-meeting send, in any combination — validated to keep at least
-      // one on. The pre-meeting one-shot researches when no digest ran and
-      // refreshes when one did, so no mode switch is needed.
-      {
-        key: "digest",
-        label: "Morning digest",
-        kind: "choice",
-        default: "on",
-        choices: [
-          { value: "on", label: "On" },
-          { value: "off", label: "Off" },
+        fields: [
+          {
+            key: "meetings",
+            label: "Meetings",
+            kind: "choice",
+            default: "external",
+            choices: [
+              { value: "external", label: "External" },
+              { value: "internal", label: "Internal" },
+              { value: "both", label: "Both" },
+            ],
+          },
         ],
       },
       {
-        key: "time",
-        label: "Deliver at",
-        kind: "time",
-        default: "07:30",
-        enabledWhen: { key: "digest", value: "on" },
-      },
-      {
-        key: "before",
-        label: "Before each meeting",
-        kind: "choice",
-        control: "select",
-        default: "off",
-        choices: [
-          { value: "off", label: "Off" },
-          { value: "15", label: "15 minutes" },
-          { value: "30", label: "30 minutes" },
-          { value: "45", label: "45 minutes" },
-          { value: "60", label: "60 minutes" },
+        key: "delivery-timing",
+        kind: "behaviors",
+        label: "Delivery timing",
+        behaviors: [
+          {
+            key: "morning-briefing",
+            label: "Morning briefing",
+            description: "Every day",
+            enabledBy: {
+              key: "morning",
+              label: "Morning briefing",
+              kind: "boolean",
+              default: true,
+            },
+            fields: [
+              {
+                key: "morningTime",
+                label: "Send at",
+                kind: "time",
+                default: "07:30",
+                enabledWhen: { key: "morning", value: true },
+              },
+            ],
+          },
+          {
+            key: "before-meeting",
+            label: "Before each meeting",
+            description: "For selected meetings",
+            enabledBy: {
+              key: "beforeMeeting",
+              label: "Before each meeting",
+              kind: "boolean",
+              default: false,
+            },
+            fields: [
+              {
+                key: "leadMinutes",
+                label: "Send",
+                kind: "choice",
+                control: "select",
+                default: "45",
+                enabledWhen: { key: "beforeMeeting", value: true },
+                choices: [
+                  { value: "15", label: "15 minutes before" },
+                  { value: "30", label: "30 minutes before" },
+                  { value: "45", label: "45 minutes before" },
+                  { value: "60", label: "60 minutes before" },
+                ],
+              },
+            ],
+          },
         ],
       },
     ],
-    // The digest sweep starts ahead of the chosen time so per-meeting
-    // research agents finish before the digest goes out; without a digest
-    // the sweep just plans the day early.
+    // The planning sweep starts early enough for per-meeting researchers to
+    // finish before the morning briefing. Without it, the sweep plans early.
     resolveSchedule: (options) =>
-      options.digest === "on"
+      options.morning === true
         ? {
             repeat: "daily",
             time: shiftClockTime(
-              String(options.time),
+              String(options.morningTime),
               -meetingBriefingScheduleLeadMinutes
             ),
           }
         : { repeat: "daily", time: "01:00" },
     describeCadence: (options) => {
-      const digest =
-        options.digest === "on" ? `Morning digest at ${options.time}` : ""
+      const morning =
+        options.morning === true
+          ? `Morning briefing at ${options.morningTime}`
+          : ""
       const before =
-        options.before === "off"
+        options.beforeMeeting === false
           ? ""
-          : `${options.digest === "on" ? "briefing" : "Briefing"} ${options.before} minutes before each meeting`
+          : `${options.morning === true ? "briefing" : "Briefing"} ${options.leadMinutes} minutes before each meeting`
 
-      return [digest, before].filter((part) => part !== "").join(", ")
+      return [morning, before].filter((part) => part !== "").join(", ")
     },
     validateOptions: (options) =>
-      options.digest === "off" && options.before === "off"
-        ? "Turn on the morning digest or a pre-meeting send."
+      options.morning === false && options.beforeMeeting === false
+        ? "Choose at least one delivery time."
         : undefined,
     slots: [
       { capability: "email", intents: ["read"] },

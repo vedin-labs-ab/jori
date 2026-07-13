@@ -19,7 +19,9 @@ export const playbookPlanFields = {
   playbook: v.string(),
   choices: v.optional(v.record(v.string(), integrationValidator)),
   destination: deliveryChoiceValidator,
-  options: v.optional(v.record(v.string(), v.union(v.string(), v.number()))),
+  options: v.optional(
+    v.record(v.string(), v.union(v.boolean(), v.string(), v.number()))
+  ),
 }
 
 export function playbookPlanArgs(

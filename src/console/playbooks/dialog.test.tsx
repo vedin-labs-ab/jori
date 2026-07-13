@@ -76,6 +76,9 @@ test("closing an option dropdown never closes the dialog", async () => {
 
   renderBriefing(onOpenChange)
 
+  fireEvent.click(
+    screen.getByRole("checkbox", { name: "Include before each meeting" })
+  )
   fireEvent.click(screen.getByRole("combobox"))
   expect(screen.getByRole("listbox")).toBeDefined()
   await new Promise((resolve) => setTimeout(resolve, 0))
@@ -90,27 +93,72 @@ test("closing an option dropdown never closes the dialog", async () => {
 })
 
 test("turning off both deliveries blocks enabling", async () => {
-  shimSelectDom()
-
   renderBriefing()
 
-  fireEvent.click(screen.getByRole("radio", { name: "Off" }))
+  fireEvent.click(
+    screen.getByRole("checkbox", { name: "Include morning briefing" })
+  )
 
-  expect(
-    screen.getByText("Turn on the morning digest or a pre-meeting send.")
-  ).toBeDefined()
+  expect(screen.getByText("Choose at least one delivery time.")).toBeDefined()
   for (const name of ["Enable", /try once/i, /advanced settings/i]) {
     expectButtonDisabled(name)
   }
 
+  fireEvent.click(
+    screen.getByRole("checkbox", { name: "Include before each meeting" })
+  )
+
+  expect(screen.queryByText("Choose at least one delivery time.")).toBeNull()
+  expectButtonDisabled("Enable", false)
+})
+
+test("setup groups meeting scope and delivery behaviors", () => {
+  renderBriefing()
+
+  expect(screen.getByText("Meetings")).toBeDefined()
+  expect(screen.getByRole("group", { name: "Delivery timing" })).toBeDefined()
+  expect(screen.queryByText("Schedule")).toBeNull()
+  expect(screen.getByText("Access")).toBeDefined()
+  expect(
+    screen
+      .getByRole("checkbox", { name: "Include morning briefing" })
+      .getAttribute("aria-checked")
+  ).toBe("true")
+  expect(
+    screen
+      .getByRole("checkbox", { name: "Include before each meeting" })
+      .getAttribute("aria-checked")
+  ).toBe("false")
+  expect(screen.getByLabelText("Send at")).toBeDefined()
+  expect(screen.queryByRole("combobox")).toBeNull()
+})
+
+test("behavior choices reach enable as normalized options", async () => {
+  shimSelectDom()
+  const actions = stubActions()
+
+  renderDialog(
+    actions,
+    deliverySetup(),
+    singlePlan,
+    () => {},
+    meetingBriefing()
+  )
+  fireEvent.click(
+    screen.getByRole("checkbox", { name: "Include before each meeting" })
+  )
   fireEvent.click(screen.getByRole("combobox"))
   await new Promise((resolve) => setTimeout(resolve, 0))
-  fireEvent.click(screen.getByRole("option", { name: "45 minutes" }))
+  fireEvent.click(screen.getByRole("option", { name: "60 minutes before" }))
+  fireEvent.click(screen.getByRole("button", { name: "Enable" }))
 
-  expect(
-    screen.queryByText("Turn on the morning digest or a pre-meeting send.")
-  ).toBeNull()
-  expectButtonDisabled("Enable", false)
+  expect(vi.mocked(actions.enable).mock.calls[0][3]).toEqual({
+    meetings: "external",
+    morning: true,
+    morningTime: "07:30",
+    beforeMeeting: true,
+    leadMinutes: "60",
+  })
 })
 
 test("a single organization domain is named in the meetings hint", () => {
