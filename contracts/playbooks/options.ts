@@ -40,7 +40,7 @@ export type PlaybookOptionField =
 export type PlaybookBehavior = {
   key: string
   label: string
-  description?: string
+  description?: string | ((values: PlaybookOptionValues) => string)
   enabledBy?: PlaybookBooleanOptionField
   fields: readonly PlaybookOptionField[]
 }
@@ -109,6 +109,15 @@ export function isPlaybookBehaviorEnabled(
   return (
     behavior.enabledBy === undefined || values[behavior.enabledBy.key] === true
   )
+}
+
+export function describePlaybookBehavior(
+  behavior: PlaybookBehavior,
+  values: PlaybookOptionValues
+) {
+  return typeof behavior.description === "function"
+    ? behavior.description(values)
+    : behavior.description
 }
 
 /**

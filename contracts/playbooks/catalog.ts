@@ -147,7 +147,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
           {
             key: "morning-briefing",
             label: "Morning briefing",
-            description: "Every day",
+            description: "Relevant meetings in one daily digest",
             enabledBy: {
               key: "morning",
               label: "Morning briefing",
@@ -166,11 +166,14 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
           },
           {
             key: "before-meeting",
-            label: "Before each meeting",
-            description: "For selected meetings",
+            label: "Before meetings",
+            description: (options) =>
+              options.morning === true
+                ? "Resend the prepared dossier as a reminder"
+                : "Prepare and send each dossier just in time",
             enabledBy: {
               key: "beforeMeeting",
-              label: "Before each meeting",
+              label: "Before meetings",
               kind: "boolean",
               default: false,
             },

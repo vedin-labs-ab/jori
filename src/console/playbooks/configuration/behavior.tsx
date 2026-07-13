@@ -1,4 +1,5 @@
 import {
+  describePlaybookBehavior,
   isPlaybookBehaviorEnabled,
   isPlaybookOptionEnabled,
   type PlaybookBehavior,
@@ -65,6 +66,7 @@ function BehaviorRow({
   const enabled = isPlaybookBehaviorEnabled(behavior, values)
   const enabledBy = behavior.enabledBy
   const checkboxId = `playbook-behavior-${behavior.key}`
+  const description = describePlaybookBehavior(behavior, values)
 
   return (
     <div className="relative grid gap-3 p-3">
@@ -83,9 +85,9 @@ function BehaviorRow({
         <PlaybookIcon icon={Icon} />
         <div className="grid min-w-0 flex-1 gap-1">
           <span className="font-medium text-foreground">{behavior.label}</span>
-          {behavior.description === undefined ? null : (
+          {description === undefined ? null : (
             <span className="font-normal text-muted-foreground">
-              {behavior.description}
+              {description}
             </span>
           )}
         </div>
