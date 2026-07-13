@@ -52,7 +52,7 @@ export const microsoftToolPermissionRows = [
   [
     "microsoftCalendar",
     "microsoft_calendar_get_event",
-    "Read event",
+    "Read calendar event",
     "Read a Microsoft Calendar event.",
     "Read one Microsoft Calendar event's details. Use to confirm specifics before updating.",
     "read",
@@ -60,7 +60,7 @@ export const microsoftToolPermissionRows = [
   [
     "microsoftCalendar",
     "microsoft_calendar_create_event",
-    "Create event",
+    "Create calendar event",
     "Add an event to your Microsoft Calendar.",
     "Create a Microsoft Calendar event. Confirm time, attendees, and title before creating.",
     "write",
@@ -68,7 +68,7 @@ export const microsoftToolPermissionRows = [
   [
     "microsoftCalendar",
     "microsoft_calendar_update_event",
-    "Update event",
+    "Update calendar event",
     "Change an event on your Microsoft Calendar.",
     "Update an existing Microsoft Calendar event. Read it first to preserve fields you are not changing.",
     "write",

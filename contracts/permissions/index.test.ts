@@ -140,14 +140,22 @@ describe("permission catalog defaults", () => {
     expect(activityPermission?.usage).toContain("not a verbatim transcript")
   })
 
-  test("disambiguates calendar event list tools", () => {
-    for (const tool of [
-      "google_calendar_list_events",
-      "microsoft_calendar_list_events",
-    ]) {
+  test("disambiguates calendar event tools", () => {
+    const calendarToolLabels = [
+      ["google_calendar_list_events", "List calendar events"],
+      ["google_calendar_get_event", "Read calendar event"],
+      ["google_calendar_create_event", "Create calendar event"],
+      ["google_calendar_update_event", "Update calendar event"],
+      ["microsoft_calendar_list_events", "List calendar events"],
+      ["microsoft_calendar_get_event", "Read calendar event"],
+      ["microsoft_calendar_create_event", "Create calendar event"],
+      ["microsoft_calendar_update_event", "Update calendar event"],
+    ] as const
+
+    for (const [tool, label] of calendarToolLabels) {
       expect(
         toolPermissions.find((permission) => permission.tool === tool)?.label
-      ).toBe("List calendar events")
+      ).toBe(label)
     }
   })
 })

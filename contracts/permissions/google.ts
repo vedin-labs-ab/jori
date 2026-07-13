@@ -76,7 +76,7 @@ export const googleToolPermissionRows = [
   [
     "googleCalendar",
     "google_calendar_get_event",
-    "Read event",
+    "Read calendar event",
     "Read a Google Calendar event.",
     "Read one Google Calendar event's details. Use to confirm specifics before updating or referencing it.",
     "read",
@@ -84,7 +84,7 @@ export const googleToolPermissionRows = [
   [
     "googleCalendar",
     "google_calendar_create_event",
-    "Create event",
+    "Create calendar event",
     "Add an event to your Google Calendar.",
     "Create a Google Calendar event. Confirm time, attendees, and title before creating.",
     "write",
@@ -92,7 +92,7 @@ export const googleToolPermissionRows = [
   [
     "googleCalendar",
     "google_calendar_update_event",
-    "Update event",
+    "Update calendar event",
     "Change an event on your Google Calendar.",
     "Update an existing Google Calendar event. Read it first to preserve fields you are not changing.",
     "write",
