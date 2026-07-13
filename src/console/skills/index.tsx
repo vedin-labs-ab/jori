@@ -1,11 +1,14 @@
 import { useQuery } from "convex/react"
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
 import { ConsoleListPager } from "../shared/list/pager"
-import { useClientPagination } from "../shared/list/pagination"
+import {
+  useClientPagination,
+  useResettingSetter,
+} from "../shared/list/pagination"
 import { SkillDialog } from "./dialog"
 import { type SkillEditor, useSkillEditor } from "./editor"
 import { filterSkills, filterSkillsByView } from "./helpers"
@@ -45,15 +48,19 @@ function SkillsCard({ tenantId }: { tenantId: string }) {
     view: filters.view,
     searchTerm: filters.searchTerm,
   })
-  const toolbar = useResettingSkillFilters(filters, pagination.reset)
+  const setSearchTermAndReset = useResettingSetter(
+    filters.setSearchTerm,
+    pagination.reset
+  )
+  const setViewAndReset = useResettingSetter(filters.setView, pagination.reset)
 
   return (
     <ConsolePageLayout>
       <SkillsToolbar
         isCreateDisabled={!isAccessReady}
         onCreate={editor.openCreateForm}
-        onSearchChange={toolbar.setSearchTerm}
-        onViewChange={toolbar.setView}
+        onSearchChange={setSearchTermAndReset}
+        onViewChange={setViewAndReset}
         searchTerm={filters.searchTerm}
         view={filters.view}
       />
@@ -82,28 +89,6 @@ function useSkillFilters() {
   const [searchTerm, setSearchTerm] = useState("")
 
   return { searchTerm, setSearchTerm, setView, view }
-}
-
-function useResettingSkillFilters(
-  filters: ReturnType<typeof useSkillFilters>,
-  reset: () => void
-) {
-  const setView = useCallback(
-    (value: SkillFilterView) => {
-      filters.setView(value)
-      reset()
-    },
-    [filters.setView, reset]
-  )
-  const setSearchTerm = useCallback(
-    (value: string) => {
-      filters.setSearchTerm(value)
-      reset()
-    },
-    [filters.setSearchTerm, reset]
-  )
-
-  return { setSearchTerm, setView }
 }
 
 function SkillListBody({

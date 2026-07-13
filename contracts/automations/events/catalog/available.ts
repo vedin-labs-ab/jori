@@ -55,6 +55,13 @@ const linearIssueCommentParameters = [
   }),
 ]
 
+const notionPageParameters = [
+  optionParameter("page", "Page", "Search Notion pages", {
+    required: true,
+    source: "notion.pages",
+  }),
+]
+
 function commentEvents(args: {
   values: {
     created: string
@@ -125,23 +132,13 @@ export const availableAutomationEventCatalog = [
       label: "Page updated",
       description:
         "Runs when content or properties change on the selected Notion page.",
-      parameters: [
-        optionParameter("page", "Page", "Search Notion pages", {
-          required: true,
-          source: "notion.pages",
-        }),
-      ],
+      parameters: notionPageParameters,
     }),
     event("comment.created", {
       label: "Comment created",
       description:
         "Runs when a comment is created on the selected Notion page.",
-      parameters: [
-        optionParameter("page", "Page", "Search Notion pages", {
-          required: true,
-          source: "notion.pages",
-        }),
-      ],
+      parameters: notionPageParameters,
     }),
   ]),
 ]

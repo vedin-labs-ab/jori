@@ -8,7 +8,7 @@ import {
 } from "../contracts/runtime"
 import { optionalString, requiredString } from "./input"
 import { type ToolRuntime } from "./tool"
-import { type ConvexId, type JsonObject } from "./types"
+import { type JsonObject } from "./types"
 
 const mimeTypesByExtension: Record<string, string> = {
   ".csv": "text/csv",
@@ -124,28 +124,6 @@ function inferMimeType(filePath: string) {
   )
 }
 
-export type UploadedAsset = {
-  assetId: ConvexId<"assets">
-  mimeType: string
-  name: string
-  size: number
-  url: string | null
-}
-
-export function parseUploadedAsset(value: unknown): UploadedAsset {
-  if (!isRecord(value)) {
-    throw new Error("Asset upload returned an invalid response.")
-  }
-
-  return {
-    assetId: readString(value.assetId, "assetId") as ConvexId<"assets">,
-    mimeType: readString(value.mimeType, "mimeType"),
-    name: readString(value.name, "name"),
-    size: readNumber(value.size, "size"),
-    url: value.url === null ? null : readString(value.url, "url"),
-  }
-}
-
 function githubRepositoryClone(value: unknown) {
   if (!isRecord(value) || !isRecord(value.clone)) {
     return undefined
@@ -170,28 +148,4 @@ function githubRepositoryClone(value: unknown) {
     ref: typeof clone.ref === "string" ? clone.ref : undefined,
     repo: clone.repo,
   }
-}
-
-export function assetUploadError(value: unknown) {
-  if (isRecord(value) && typeof value.error === "string") {
-    return value.error
-  }
-
-  return "Asset upload failed"
-}
-
-function readString(value: unknown, name: string) {
-  if (typeof value !== "string") {
-    throw new Error(`Asset upload response is missing ${name}.`)
-  }
-
-  return value
-}
-
-function readNumber(value: unknown, name: string) {
-  if (typeof value !== "number") {
-    throw new Error(`Asset upload response is missing ${name}.`)
-  }
-
-  return value
 }

@@ -2,6 +2,20 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 
 const consoleGridPageSize = 12
 
+/** Keeps filter changes and pagination resets in one stable callback. */
+export function useResettingSetter<Value>(
+  setValue: (value: Value) => void,
+  reset: () => void
+) {
+  return useCallback(
+    (value: Value) => {
+      setValue(value)
+      reset()
+    },
+    [reset, setValue]
+  )
+}
+
 export function useClientPagination<T>({
   hasFilters,
   isReady,

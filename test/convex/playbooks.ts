@@ -4,7 +4,7 @@ import {
   type PlaybookOptionValues,
   resolvePlaybookOptions,
 } from "../../contracts/playbooks/options"
-import { renderPlaybookInstructions } from "./instructions"
+import { renderPlaybookInstructions } from "../../convex/playbooks/instructions"
 
 export const emailDestination = {
   kind: "email",

@@ -8,7 +8,7 @@ import {
   type JsonValue,
 } from "./json"
 
-export type ToolInputTransport = {
+type ToolInputTransport = {
   inputJson: EncodedJson
 }
 

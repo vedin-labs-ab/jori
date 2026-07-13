@@ -26,7 +26,7 @@ export type SlackDeliveryTarget =
   | { kind: "channel"; id: string; label: string }
   | { kind: "dm" }
 
-export type ResolvedSlackDeliveryTarget =
+type ResolvedSlackDeliveryTarget =
   | Extract<SlackDeliveryTarget, { kind: "channel" }>
   | { kind: "dm"; id: string; label: string }
 
@@ -63,7 +63,7 @@ export function deliveryMode(choice: DeliveryChoice): DeliveryMode {
   return choice.kind === "email" ? "email" : choice.target.kind
 }
 
-export function deliveryKindForMode(mode: DeliveryMode): DeliveryKind {
+function deliveryKindForMode(mode: DeliveryMode): DeliveryKind {
   return mode === "email" ? "email" : "slack"
 }
 
@@ -101,12 +101,6 @@ export function allowsDeliveryMode(
 }
 
 export type DeliveryStyle = "content" | "summary"
-
-/** The integrations that satisfy each delivery kind (the connection edge). */
-export const deliveryKindProviders = {
-  email: emailDeliveryProviders,
-  slack: ["slack"],
-} satisfies Record<DeliveryKind, readonly Integration[]>
 
 // The only per-provider send-tool code; everything else is generic.
 const deliverySendTools = {

@@ -1,9 +1,4 @@
 import { isRecord } from "../contracts/json"
-import {
-  assetUploadError,
-  parseUploadedAsset,
-  type UploadedAsset,
-} from "./assets"
 import { type ConvexId } from "./types"
 
 export type UploadAssetArgs = {
@@ -24,6 +19,14 @@ type GitHubCloneCredentials = {
   remoteUrl: string
   token: string
   username: string
+}
+
+type UploadedAsset = {
+  assetId: ConvexId<"assets">
+  mimeType: string
+  name: string
+  size: number
+  url: string | null
 }
 
 export function requireConvexUrl() {
@@ -97,6 +100,42 @@ function requireEnv(name: string, fallback?: string) {
 
   if (value === undefined || value === "") {
     throw new Error(`Missing ${name}`)
+  }
+
+  return value
+}
+
+function assetUploadError(value: unknown) {
+  return isRecord(value) && typeof value.error === "string"
+    ? value.error
+    : "Asset upload failed"
+}
+
+function parseUploadedAsset(value: unknown): UploadedAsset {
+  if (!isRecord(value)) {
+    throw new Error("Asset upload returned an invalid response.")
+  }
+
+  return {
+    assetId: readUploadValue(value.assetId, "assetId") as ConvexId<"assets">,
+    mimeType: readUploadValue(value.mimeType, "mimeType"),
+    name: readUploadValue(value.name, "name"),
+    size: readUploadSize(value.size),
+    url: value.url === null ? null : readUploadValue(value.url, "url"),
+  }
+}
+
+function readUploadValue(value: unknown, name: string) {
+  if (typeof value !== "string") {
+    throw new Error(`Asset upload response is missing ${name}.`)
+  }
+
+  return value
+}
+
+function readUploadSize(value: unknown) {
+  if (typeof value !== "number") {
+    throw new Error("Asset upload response is missing size.")
   }
 
   return value

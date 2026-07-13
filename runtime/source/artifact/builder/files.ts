@@ -1,14 +1,12 @@
 import fs from "node:fs/promises"
 import path from "node:path"
 import {
+  type ArtifactSourceFile,
   isPlatformArtifactSourcePath,
   maxArtifactFileBytes,
+  type NormalizedArtifactSourceFile,
 } from "../../../../contracts/artifacts/source.ts"
 import { config } from "./config.ts"
-import {
-  type ArtifactSourceFile,
-  type NormalizedArtifactSourceFile,
-} from "./types.ts"
 
 export async function copyPlatformTemplate(project: string) {
   const templateFiles = await listFiles(config.artifactTemplatePath)
