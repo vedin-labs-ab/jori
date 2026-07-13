@@ -92,6 +92,7 @@ export async function resolvePlaybookPlan(
       noun: definition.delivery.noun,
       style: definition.delivery.style,
       options,
+      agentWait: definition.agentWait,
     }),
     access: {
       integrations: [

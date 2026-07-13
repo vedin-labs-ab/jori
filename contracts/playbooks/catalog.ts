@@ -1,4 +1,5 @@
 import { type Scope } from "../permissions/scope"
+import { type Duration } from "../runtime"
 import { type PlaybookSlot } from "./capabilities"
 import { type PlaybookDelivery } from "./delivery"
 import {
@@ -43,6 +44,9 @@ export type PlaybookDefinition = {
   /** Where the output goes, and the default the user can override at enable. */
   delivery: PlaybookDelivery
   web: boolean
+  /** Maximum child-agent research wait for instruction templates that
+   *  delegate work. The runtime measures it from the wait tool call. */
+  agentWait?: Duration
 }
 
 /** What the user is promised: the card rhythm on browse surfaces, or the
@@ -89,8 +93,8 @@ const digestDelivery = {
   allowed: ["email", "slack"],
 } as const satisfies Omit<PlaybookDelivery, "noun">
 
-/** How long before the digest goes out its research agents get to work. */
-const digestPrepMinutes = 15
+/** One research budget drives both the schedule lead and the agent wait. */
+const meetingPrepResearchMinutes = 15
 
 export const playbookCatalog: readonly PlaybookDefinition[] = [
   {
@@ -114,6 +118,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     description:
       "Walk into every meeting prepared. Who you're meeting, what it's about, and what to have ready, in a researched dossier for every meeting that matters.",
     scope: "personal",
+    agentWait: { unit: "minutes", value: meetingPrepResearchMinutes },
     cadence: "Morning digest or right before each meeting",
     schedule: { repeat: "daily", time: "01:00" },
     options: [
@@ -171,7 +176,10 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
       options.digest === "on"
         ? {
             repeat: "daily",
-            time: shiftClockTime(String(options.time), -digestPrepMinutes),
+            time: shiftClockTime(
+              String(options.time),
+              -meetingPrepResearchMinutes
+            ),
           }
         : { repeat: "daily", time: "01:00" },
     describeCadence: (options) => {

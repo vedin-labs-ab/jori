@@ -42,6 +42,26 @@ test("start_agent requires an explicit task title", () => {
   })
 })
 
+test("wait_for_agents requires a bounded relative timeout", () => {
+  const waitForAgents = sandboxTools.find(
+    (tool) => tool.name === "wait_for_agents"
+  )
+
+  expect(waitForAgents?.inputSchema).toMatchObject({
+    required: ["runIds", "timeout"],
+    properties: {
+      timeout: {
+        required: ["unit", "value"],
+        properties: {
+          unit: { enum: ["seconds", "minutes", "hours", "days"] },
+          value: { minimum: 1, type: "integer" },
+        },
+        type: "object",
+      },
+    },
+  })
+})
+
 test("native runtime tools use catalog usage for agents and descriptions for users", () => {
   const runtimeTools = [
     ...runLifecycleTools(),

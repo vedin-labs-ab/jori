@@ -35,9 +35,9 @@ Research each meeting from attendee/company web sources and recent @{{providers.
 
 {% if options.digest == "on" %}Start one #start_agent per meeting, up to ten. Give each agent the artifact ID, event facts, date key, and exact dossier shape; it sets `preparedAt` to the current UTC time when done. Tell it to send nothing and only research and merge its dossier. Narrow `tools` to the email read/search and web tools it needs. Keep every returned run ID.
 
-Call #wait_for_agents once with those run IDs and a deadline of today's {{options.time}} in my timezone, converted to UTC. Continue with completed dossiers when the agents finish or the deadline arrives; never wait beyond it.
+Call #wait_for_agents exactly once with those run IDs and `timeout: { unit: "{{agentWait.unit}}", value: {{agentWait.value}} }`. It resumes when every child is terminal or after the timeout. Then re-read today's dossiers and continue with the results available. Note an omission only when a qualifying meeting still lacks a dossier because its child failed, stopped, or timed out. Do not wait again.
 
-Read today's dossiers, then create a 24-hour #share_artifact link. The day view fragment is `#d=<YYYY-MM-DD>`. Send a compact digest in meeting order: time, people, and what to have ready. Note omissions only when a failed or timed-out agent left a qualifying meeting without a dossier.
+Then create a 24-hour #share_artifact link. The day view fragment is `#d=<YYYY-MM-DD>`. Send a compact digest in meeting order: time, people, and what to have ready.
 
 {{delivery}}
 {% endif %}
