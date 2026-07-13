@@ -8,7 +8,7 @@ import {
   reserveExpiredSandboxCleanup,
   upsertSandbox,
 } from "../runs/execution/sandboxes/data"
-import { requireWorkerSecret } from "./shared"
+import { requireWorkerSecret } from "./secret"
 
 export const upsert = mutation({
   args: {

@@ -1,10 +1,13 @@
 import { describe, expect, test } from "vitest"
-import { type PlaybookCapability } from "../../contracts/playbooks/capabilities"
-import { playbookCatalog } from "../../contracts/playbooks/catalog"
-import { resolvePlaybookOptions } from "../../contracts/playbooks/options"
-import { emailDestination, renderPlaybook } from "../../test/convex/playbooks"
-import { type Integration, integrationLabels } from "../shared/integrations"
-import { renderPlaybookInstructions } from "./instructions"
+import { type PlaybookCapability } from "../../../contracts/playbooks/capabilities"
+import { playbookCatalog } from "../../../contracts/playbooks/catalog"
+import { resolvePlaybookOptions } from "../../../contracts/playbooks/options"
+import {
+  emailDestination,
+  renderPlaybook,
+} from "../../../test/convex/playbooks"
+import { type Integration, integrationLabels } from "../../shared/integrations"
+import { renderPlaybookInstructions } from "./index"
 
 const providerFamilies = [
   { email: "gmail", calendar: "googleCalendar" },

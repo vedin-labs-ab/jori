@@ -5,7 +5,7 @@ import { type ActionCtx, action } from "../_generated/server"
 import { githubReactionSnapshots } from "../integrations/github/ingress/reactions"
 import { slackReactionSnapshots } from "../integrations/slack/reactions/session"
 import { type ReactionSnapshotPlan } from "../reactions/data"
-import { requireWorkerSecret } from "./shared"
+import { requireWorkerSecret } from "./secret"
 
 type ReactionSyncStatus = "failed" | "skipped" | "synced"
 

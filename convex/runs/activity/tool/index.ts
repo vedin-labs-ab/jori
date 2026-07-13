@@ -1,6 +1,6 @@
-import { type Doc, type Id } from "../../_generated/dataModel"
-import { formatToolName, inputDescription, inputDetails } from "./format"
-import { toolMetadata } from "./metadata"
+import { type Doc, type Id } from "../../../_generated/dataModel"
+import { formatToolName, inputDescription, inputDetails } from "../format"
+import { toolMetadata } from "../metadata"
 import {
   readPreparedTools,
   readToolAccess,
@@ -11,13 +11,13 @@ import {
   readTraceData,
   traceAttempt,
   traceSequence,
-} from "./read"
+} from "../read"
 import {
   type ActivityDetail,
   type ActivityItem,
   type ActivityStatus,
   type ToolLabel,
-} from "./types"
+} from "../types"
 
 const hiddenToolNames = new Set(["finish_run", "start_agent"])
 const toolTerminalTypes = new Set(["tool.completed", "tool.failed"])

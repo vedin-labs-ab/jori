@@ -8,7 +8,7 @@ import {
 } from "../../_generated/server"
 import { actorValidator } from "../../shared/actor"
 import { updateSlackMessage } from "../slack/delivery/messages"
-import { createSlackIntegrationOfferMessage } from "./slack"
+import { createSlackIntegrationOfferMessage } from "./surface/slack"
 import {
   markIntegrationOfferCancelled,
   markIntegrationOfferExpired,

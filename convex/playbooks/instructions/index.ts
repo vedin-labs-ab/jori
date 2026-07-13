@@ -1,14 +1,17 @@
-import { type PlaybookCapability } from "../../contracts/playbooks/capabilities"
+import { type PlaybookCapability } from "../../../contracts/playbooks/capabilities"
 import {
   type DeliveryDestination,
   type DeliveryStyle,
   deliveryInstruction,
-} from "../../contracts/playbooks/delivery"
-import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
-import { type Duration } from "../../contracts/runtime"
-import { type PromptTemplateId, promptTemplates } from "../../prompts/generated"
-import { renderPromptTemplate } from "../../prompts/render"
-import { type Integration } from "../shared/integrations"
+} from "../../../contracts/playbooks/delivery"
+import { type PlaybookOptionValues } from "../../../contracts/playbooks/options"
+import { type Duration } from "../../../contracts/runtime"
+import {
+  type PromptTemplateId,
+  promptTemplates,
+} from "../../../prompts/generated"
+import { renderPromptTemplate } from "../../../prompts/render"
+import { type Integration } from "../../shared/integrations"
 
 const instructionTemplates: Record<string, PromptTemplateId> = {
   "follow-up-sweep": "playbooks/sweep",

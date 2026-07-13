@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { mutation } from "../../_generated/server"
 import { recordWorkerTrace } from "../../runs/execution/traces/data"
-import { requireWorkerSecret } from "../shared"
+import { requireWorkerSecret } from "../secret"
 import { workerTraceArgs } from "./input"
 
 export const record = mutation({

@@ -10,7 +10,7 @@ import {
 import { loadRunBrokerContext } from "../broker/auth"
 import { callBrokerTool, executeApprovedTool } from "../broker/mcp"
 import { type ToolSurface, toolSurfaceValidator } from "../shared/integrations"
-import { requireWorkerSecret } from "./shared"
+import { requireWorkerSecret } from "./secret"
 
 type ApprovalClaim =
   | { state: "done"; result: string }

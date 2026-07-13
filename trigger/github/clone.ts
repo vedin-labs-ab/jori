@@ -1,5 +1,5 @@
 import { isRecord } from "../../contracts/json"
-import { type ToolRuntime } from "../tool"
+import { type ToolRuntime } from "../tool/runtime"
 
 export async function materializeSandboxResult(
   runtime: ToolRuntime,

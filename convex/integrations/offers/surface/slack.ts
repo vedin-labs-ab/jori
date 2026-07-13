@@ -1,16 +1,19 @@
-import { type Id } from "../../_generated/dataModel"
-import { type Actor, getActorDisplayName } from "../../shared/actor"
-import { type Integration, integrationLabel } from "../../shared/integrations"
-import { createSlackCard } from "../slack/card"
+import { type Id } from "../../../_generated/dataModel"
+import { type Actor, getActorDisplayName } from "../../../shared/actor"
+import {
+  type Integration,
+  integrationLabel,
+} from "../../../shared/integrations"
+import { createSlackCard } from "../../slack/card"
 import {
   formatSlackTime,
   toSlackTimestamp,
   truncateSlackText,
-} from "../slack/format"
+} from "../../slack/format"
 import {
   integrationOfferCancelActionId,
   integrationOfferOpenActionId,
-} from "./interaction"
+} from "../interaction"
 
 const integrationOfferSummaryLimit = 200
 

@@ -1,7 +1,11 @@
 import { expect, test } from "vitest"
-import { type Doc, type Id, type TableNames } from "../../_generated/dataModel"
-import { projectActivity } from "./project"
-import { type ActivityData } from "./types"
+import {
+  type Doc,
+  type Id,
+  type TableNames,
+} from "../../../_generated/dataModel"
+import { projectActivity } from "../project"
+import { type ActivityData } from "../types"
 
 test("projects compact tool metadata from raw input", () => {
   const items = projectActivity(

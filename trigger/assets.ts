@@ -2,7 +2,7 @@ import path from "node:path"
 import { assetTooLargeError, maxAssetBytes } from "../contracts/runtime/assets"
 import { sandboxWorkspace } from "../contracts/runtime/sandbox"
 import { optionalString, requiredString } from "./input"
-import { type ToolRuntime } from "./tool"
+import { type ToolRuntime } from "./tool/runtime"
 import { type JsonObject } from "./types"
 
 const mimeTypesByExtension: Record<string, string> = {

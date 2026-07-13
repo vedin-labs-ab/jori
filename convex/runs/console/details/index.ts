@@ -1,8 +1,8 @@
-import { type Doc } from "../../_generated/dataModel"
-import { getActorDisplayName } from "../../shared/actor"
-import { detail, uniqueDetails } from "../display/detail"
-import { isManualTrigger, isSubtaskRun } from "./source"
-import { toolDetails } from "./tools"
+import { type Doc } from "../../../_generated/dataModel"
+import { getActorDisplayName } from "../../../shared/actor"
+import { detail, uniqueDetails } from "../../display/detail"
+import { isManualTrigger, isSubtaskRun } from "../source"
+import { toolDetails } from "../tools"
 
 export function runDetailSummary(input: {
   approval: Doc<"approvals"> | null

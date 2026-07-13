@@ -22,8 +22,8 @@ import {
 } from "./context/response"
 import { runLifecycleTools } from "./lifecycle"
 import { runtimePermissions } from "./permissions/index"
+import { requireWorkerSecret } from "./secret"
 import { syncSessionReactions } from "./sessions"
-import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
 
 type PreparedRun = {

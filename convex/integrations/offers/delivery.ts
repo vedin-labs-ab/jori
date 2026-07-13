@@ -1,14 +1,14 @@
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { type ApprovalBrokerContext } from "../../broker/approval"
 import { type Integration } from "../../shared/integrations"
 import { postSlackCard, slackCardTarget } from "../slack/delivery/cards"
-import { createSlackIntegrationOfferMessage } from "./slack"
+import { type OfferContext } from "./context"
+import { createSlackIntegrationOfferMessage } from "./surface/slack"
 
 export async function tryDeliverIntegrationOffer(
   ctx: ActionCtx,
-  context: ApprovalBrokerContext,
+  context: OfferContext,
   args: {
     expiresAt: number
     integration: Integration
@@ -22,7 +22,7 @@ export async function tryDeliverIntegrationOffer(
 
 async function tryDeliverSlackIntegrationOffer(
   ctx: ActionCtx,
-  context: ApprovalBrokerContext,
+  context: OfferContext,
   args: {
     expiresAt: number
     integration: Integration
@@ -73,7 +73,7 @@ async function tryDeliverSlackIntegrationOffer(
   }
 }
 
-function getSlackTarget(context: ApprovalBrokerContext) {
+function getSlackTarget(context: OfferContext) {
   if (context.input.type !== "message") {
     return null
   }

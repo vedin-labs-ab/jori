@@ -7,7 +7,7 @@ import {
   loadRunHandoffs,
   loadSubjectHandoffs,
 } from "../../runs/execution/waiters/handoffs"
-import { requireWorkerSecret } from "../shared"
+import { requireWorkerSecret } from "../secret"
 
 export const load = query({
   args: {
