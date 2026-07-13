@@ -1,13 +1,13 @@
-import { promptTemplates } from "../../prompts/generated"
-import { renderPromptTemplate } from "../../prompts/render"
-import { type ModelMessage } from "../model/types"
-import { type ToolRuntime } from "../tool"
+import { type RuntimePrompt } from "../../contracts/runtime/prompt"
 import {
   type DrainedSessionBatch,
   type RuntimeInteraction,
   type RuntimeMessage,
-  type RuntimePrompt,
-} from "../types"
+} from "../../contracts/runtime/worker"
+import { promptTemplates } from "../../prompts/generated"
+import { renderPromptTemplate } from "../../prompts/render"
+import { type ModelMessage } from "../model/types"
+import { type ToolRuntime } from "../tool"
 
 // The prompt prefix every run starts with: instructions as the system
 // message, then the organization, place, and requester person contexts

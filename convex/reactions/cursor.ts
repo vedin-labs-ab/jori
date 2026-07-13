@@ -1,3 +1,4 @@
+import { type RuntimeInteraction } from "../../contracts/runtime/worker"
 import { type Doc } from "../_generated/dataModel"
 import {
   getActorDisplayName,
@@ -85,7 +86,9 @@ export function collectPendingReactionBatch(
   return { cursor, hasMore, reactions: pending }
 }
 
-export function formatRuntimeReaction(reaction: Doc<"reactions">) {
+export function formatRuntimeReaction(
+  reaction: Doc<"reactions">
+): RuntimeInteraction {
   const removed = reaction.removedAt !== undefined
   const observed =
     (removed ? reaction.removedAt : reaction.observedAt) ?? reaction.updatedAt

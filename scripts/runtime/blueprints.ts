@@ -3,7 +3,7 @@ import { createHash } from "node:crypto"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
-import { runtimeAssets } from "../../convex/artifacts/_generated/assets.ts"
+import { runtimeAssets } from "../../runtime/artifacts/_generated/assets.ts"
 import { root } from "./paths.ts"
 
 const generatedPath = path.join(

@@ -1,5 +1,5 @@
+import { runtimeAssets } from "../../../runtime/artifacts/_generated/assets"
 import { type Id } from "../../_generated/dataModel"
-import { runtimeAssets } from "../_generated/assets"
 
 const frameAncestorsEnv = "MILO_ARTIFACT_FRAME_ANCESTORS"
 

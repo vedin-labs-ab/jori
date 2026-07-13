@@ -3,14 +3,14 @@ import {
   type MiloPromptInput,
   type MiloPromptResult,
   type RawPromptInput,
-} from "./model-types"
+} from "./model/types"
 import {
   type MiloStateClient,
   type MiloStateDocument,
   type RawMiloStateListInput,
   type RawMiloStateReadInput,
   type RawMiloStateUpdateInput,
-} from "./state-types"
+} from "./state/types"
 import { type MiloToolCaller, type ToolMethod } from "./tools"
 
 export type MiloToolOptions = {
@@ -78,7 +78,7 @@ export type {
   MiloPromptResult,
   RawPromptInput,
   RawPromptResult,
-} from "./model-types"
+} from "./model/types"
 export type {
   ArtifactContract,
   ArtifactContractJson,
@@ -99,4 +99,4 @@ export type {
   RawMiloStateListInput,
   RawMiloStateReadInput,
   RawMiloStateUpdateInput,
-} from "./state-types"
+} from "./state/types"

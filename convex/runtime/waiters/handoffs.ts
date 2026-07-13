@@ -1,4 +1,8 @@
 import { v } from "convex/values"
+import {
+  type HandoffSubject,
+  type RunHandoffs,
+} from "../../../contracts/runtime/worker"
 import { mutation, query } from "../../_generated/server"
 import {
   consumeApprovalHandoff,
@@ -15,7 +19,7 @@ export const load = query({
     runId: v.id("runs"),
   },
   returns: v.any(),
-  handler: async (ctx, args): Promise<unknown> => {
+  handler: async (ctx, args): Promise<RunHandoffs> => {
     requireWorkerSecret(args.secret)
 
     return await loadRunHandoffs(ctx, args.runId)
@@ -41,10 +45,12 @@ export const loadSubjects = query({
     subjects: v.array(handoffSubject),
   },
   returns: v.any(),
-  handler: async (ctx, args): Promise<unknown> => {
+  handler: async (ctx, args): Promise<RunHandoffs> => {
     requireWorkerSecret(args.secret)
 
-    return await loadSubjectHandoffs(ctx, args.subjects)
+    const subjects: HandoffSubject[] = args.subjects
+
+    return await loadSubjectHandoffs(ctx, subjects)
   },
 })
 

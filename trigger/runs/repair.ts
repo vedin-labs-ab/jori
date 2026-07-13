@@ -1,5 +1,5 @@
+import { type RuntimeContext } from "../../contracts/runtime/worker"
 import { type ModelMessage } from "../model/types"
-import { type RuntimeContext } from "../types"
 
 export function appendStopRepair(
   messages: ModelMessage[],

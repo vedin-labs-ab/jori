@@ -1,20 +1,20 @@
 import {
-  decodeToolResult,
-  encodeToolResult,
-} from "../../../contracts/transport"
-import { materializeSandboxResult } from "../../github/clone"
-import { type ModelMessage } from "../../model/types"
-import { markVisibleCommunication, type ToolRuntime } from "../../tool"
-import {
-  recordApprovalResolved,
-  recordOfferResolved,
-} from "../../trace/activity"
-import {
   type ApprovalHandoff,
   type HandoffSubject,
   type OfferHandoff,
   type RunHandoffs,
-} from "../../types"
+} from "../../../contracts/runtime/worker"
+import {
+  decodeToolResult,
+  encodeToolResult,
+} from "../../../contracts/transport"
+import { type ModelMessage } from "../../model/types"
+import { markVisibleCommunication, type ToolRuntime } from "../../tool"
+import { materializeSandboxResult } from "../../tool/github/output"
+import {
+  recordApprovalResolved,
+  recordOfferResolved,
+} from "../../trace/activity"
 import { appendSessionMessages, replacePromptMessages } from "../messages"
 import { type PendingHandoff } from "./pending"
 

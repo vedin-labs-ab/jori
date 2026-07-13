@@ -1,3 +1,4 @@
+import { type RuntimeMessage } from "../../contracts/runtime/worker"
 import { type Doc } from "../_generated/dataModel"
 import { messageHasText } from "../messages/data"
 import {
@@ -65,7 +66,7 @@ export function collectPendingBatch(
 export function formatRuntimeMessage(
   message: Doc<"messages">,
   reactions?: string
-) {
+): RuntimeMessage {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
     actorIds: messageActorIds(message),

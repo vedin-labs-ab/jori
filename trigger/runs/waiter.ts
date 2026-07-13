@@ -1,5 +1,5 @@
+import { type WaiterWake } from "../../contracts/runtime/worker"
 import { type ToolRuntime } from "../tool"
-import { type WaiterWake } from "../types"
 import { parkWaitpoint } from "../waiter"
 import { hasResolvedHandoffs, type PendingHandoff } from "./handoffs/pending"
 

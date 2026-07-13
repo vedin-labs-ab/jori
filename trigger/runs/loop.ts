@@ -1,4 +1,8 @@
 import {
+  type HandoffSubject,
+  type RuntimeContext,
+} from "../../contracts/runtime/worker"
+import {
   type ModelMessage,
   type ModelResponse,
   type ModelRuntime,
@@ -6,7 +10,6 @@ import {
 } from "../model/types"
 import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
 import { recordRuntimeEvent } from "../trace/runtime"
-import { type HandoffSubject, type RuntimeContext } from "../types"
 import { pendingHandoffSubjects } from "./handoffs/pending"
 import { applyHandoffs, reconcileHandoffs } from "./handoffs/reconcile"
 import {

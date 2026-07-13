@@ -1,6 +1,6 @@
 import { CommandExitError, type CommandResult, Sandbox } from "e2b"
+import { type RuntimeId } from "../../../contracts/runtime/worker"
 import { type RuntimePlatform } from "../../platform"
-import { type ConvexId } from "../../types"
 import { type SandboxCommandInput, type SandboxCommandResult } from "../types"
 
 export type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
@@ -27,7 +27,7 @@ export async function connectSandbox(sandboxId: string) {
   })
 }
 
-export async function createSandbox(runId: ConvexId<"runs">) {
+export async function createSandbox(runId: RuntimeId<"runs">) {
   return await Sandbox.create(requireSandboxTemplate(), {
     apiKey: requireE2BApiKey(),
     allowInternetAccess: true,

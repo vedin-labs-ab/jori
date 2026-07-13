@@ -1,12 +1,12 @@
 import { isRecord } from "../../contracts/json"
+import { type RuntimeId } from "../../contracts/runtime/worker"
 import { type GitHubCloneCredentials } from "../platform"
-import { type ConvexId } from "../types"
 import { requireConvexSiteUrl } from "./config"
 
 export type GitHubCloneArgs = {
   owner: string
   repo: string
-  runId: ConvexId<"runs">
+  runId: RuntimeId<"runs">
 }
 
 export async function fetchGitHubCloneCredentials(

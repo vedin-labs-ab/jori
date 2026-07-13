@@ -1,9 +1,13 @@
+import { type JsonObject } from "../../contracts/json"
 import {
   type Duration,
   durationMilliseconds,
   isDurationUnit,
 } from "../../contracts/runtime/duration"
-import { type AgentRunStatus, type ConvexId, type JsonObject } from "../types"
+import {
+  type AgentRunStatus,
+  type RuntimeId,
+} from "../../contracts/runtime/worker"
 import { parkWaitpoint } from "../waiter"
 import { type ToolRuntime } from "./runtime"
 
@@ -62,7 +66,7 @@ function readRunIds(value: unknown) {
           typeof runId === "string" && runId.trim() !== ""
       )
     ),
-  ] as ConvexId<"runs">[]
+  ] as RuntimeId<"runs">[]
 
   if (runIds.length === 0 || runIds.length > maxAgents) {
     throw new Error(`Agent waits require 1-${maxAgents} child runs.`)

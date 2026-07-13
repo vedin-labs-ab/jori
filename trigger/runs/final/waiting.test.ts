@@ -1,6 +1,10 @@
 import { beforeEach, expect, test, vi } from "vitest"
+import {
+  type RunHandoffs,
+  type RuntimeId,
+  type RuntimeTool,
+} from "../../../contracts/runtime/worker"
 import { type ToolRuntime } from "../../tool"
-import { type ConvexId, type RunHandoffs, type RuntimeTool } from "../../types"
 import { createQueuedModel, type QueuedModelResponse } from "../fixture"
 import { runAgentLoop } from "../loop"
 
@@ -194,5 +198,5 @@ function addReactionTool(): RuntimeTool {
 }
 
 function id<TableName extends string>(value: string) {
-  return value as ConvexId<TableName>
+  return value as RuntimeId<TableName>
 }

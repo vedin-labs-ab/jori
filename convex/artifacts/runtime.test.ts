@@ -1,7 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
 import { expect, test } from "vitest"
-import { runtimeAssets } from "./_generated/assets"
+import { runtimeAssets } from "../../runtime/artifacts/_generated/assets"
 
 const root = path.resolve(import.meta.dirname, "../..")
 const sourceRoot = path.join(root, "runtime/artifacts")

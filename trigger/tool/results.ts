@@ -1,4 +1,4 @@
-import { type JsonObject } from "../types"
+import { type JsonObject } from "../../contracts/json"
 
 export function toolResult(value: unknown, finished = false) {
   return { finished, value }

@@ -1,12 +1,12 @@
 import { wait } from "@trigger.dev/sdk"
-import { type RuntimePlatform } from "./platform"
-import { recordRuntimeEvent } from "./trace/runtime"
 import {
-  type ConvexId,
   type RuntimeContext,
+  type RuntimeId,
   type WaiterCondition,
   type WaiterWake,
-} from "./types"
+} from "../contracts/runtime/worker"
+import { type RuntimePlatform } from "./platform"
+import { recordRuntimeEvent } from "./trace/runtime"
 
 const parkGraceMs = 5000
 const minTimeoutSeconds = 5
@@ -69,7 +69,7 @@ function timeoutSeconds(deadline: number) {
 
 async function recordWaiting(
   runtime: WaitRuntime,
-  waiterId: ConvexId<"waiters">
+  waiterId: RuntimeId<"waiters">
 ) {
   await recordRuntimeEvent(runtime.convex, runtime.context, {
     data: { waiter: waiterId },
@@ -81,7 +81,7 @@ async function recordWaiting(
 
 async function recordResumed(
   runtime: WaitRuntime,
-  waiterId: ConvexId<"waiters">,
+  waiterId: RuntimeId<"waiters">,
   wake: WaiterWake
 ) {
   await recordRuntimeEvent(runtime.convex, runtime.context, {

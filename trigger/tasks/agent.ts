@@ -1,4 +1,9 @@
 import { task } from "@trigger.dev/sdk"
+import { agentTaskId } from "../../contracts/runtime/tasks"
+import {
+  type AgentRunPayload,
+  type RuntimeContext,
+} from "../../contracts/runtime/worker"
 import { MiloConvexClient } from "../convex"
 import { OpenRouterModelRuntime } from "../model/openrouter"
 import { runAgentLoop } from "../runs/loop"
@@ -6,11 +11,6 @@ import { E2BSandboxRuntime } from "../sandbox/e2b"
 import { releaseSandbox } from "../sandbox/release"
 import { errorDetails } from "../trace/events"
 import { recordRuntimeEvent } from "../trace/runtime"
-import {
-  type AgentRunPayload,
-  agentTaskId,
-  type RuntimeContext,
-} from "../types"
 
 const maxAttempts = 3
 

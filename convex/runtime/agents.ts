@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { type AgentRunStatus } from "../../contracts/runtime/worker"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { action, internalMutation, query } from "../_generated/server"
@@ -83,7 +84,7 @@ export const readChildren = query({
       error: v.union(v.string(), v.null()),
     })
   ),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<AgentRunStatus[]> => {
     requireWorkerSecret(args.secret)
 
     if (args.runIds.length === 0 || args.runIds.length > 20) {

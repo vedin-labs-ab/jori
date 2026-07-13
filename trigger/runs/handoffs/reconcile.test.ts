@@ -1,8 +1,11 @@
 import { expect, test, vi } from "vitest"
+import {
+  type RuntimeId,
+  type RuntimeTool,
+} from "../../../contracts/runtime/worker"
 import { encodeToolResult } from "../../../contracts/transport"
 import { type ModelMessage } from "../../model/types"
 import { type ToolRuntime } from "../../tool"
-import { type ConvexId, type RuntimeTool } from "../../types"
 import { reconcileHandoffs } from "./reconcile"
 
 test("executes an approved handoff once and injects the result", async () => {
@@ -215,5 +218,5 @@ function refreshedTool(): RuntimeTool {
 }
 
 function id<TableName extends string>(value: string) {
-  return value as ConvexId<TableName>
+  return value as RuntimeId<TableName>
 }

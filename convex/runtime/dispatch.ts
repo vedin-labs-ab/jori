@@ -1,5 +1,10 @@
 import { v } from "convex/values"
 import { agentTaskId, cleanupTaskId } from "../../contracts/runtime"
+import {
+  type AgentRunPayload,
+  type SandboxCleanupPayload,
+  type WaiterWake,
+} from "../../contracts/runtime/worker"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
@@ -77,7 +82,7 @@ async function triggerAgentRun(ctx: DispatchCtx, item: Doc<"outbox">) {
   }
 
   const handle = await triggerTask(agentTaskId, {
-    payload: { runId: operation.runId },
+    payload: { runId: operation.runId } satisfies AgentRunPayload,
     idempotencyKey: item.key,
     tags: runtimeTags(item),
     ttl: "14d",
@@ -98,15 +103,15 @@ async function wakeWaiter(
     return undefined
   }
 
+  const wake = {
+    reason: operation.reason,
+    ...(operation.subject === undefined ? {} : { subject: operation.subject }),
+  } satisfies WaiterWake
+
   await callTriggerApi(
     `/api/v1/waitpoints/tokens/${waiter.waitpointId}/complete`,
     {
-      data: {
-        reason: operation.reason,
-        ...(operation.subject === undefined
-          ? {}
-          : { subject: operation.subject }),
-      },
+      data: wake,
     }
   )
 
@@ -157,7 +162,7 @@ async function triggerSandboxCleanup(item: Doc<"outbox">, sandboxId: string) {
     payload: {
       runId: operation.runId,
       sandboxId,
-    },
+    } satisfies SandboxCleanupPayload,
     idempotencyKey: `${item.key}:sandbox:${sandboxId}`,
     tags: runtimeTags(item),
     ttl: "1h",

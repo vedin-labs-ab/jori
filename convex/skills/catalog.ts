@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { skills as globalSkillSeed } from "../../prompts/generated"
+import { skills as globalSkillSeed } from "../../skills/generated"
 import {
   internalMutation,
   internalQuery,

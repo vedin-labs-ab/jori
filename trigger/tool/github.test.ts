@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest"
 import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
+import { type RuntimeId } from "../../contracts/runtime/worker"
 import { executeToolCall, type ToolRuntime } from "../tool"
-import { type ConvexId } from "../types"
 
 test("prompted GitHub commit tools include collected workspace changes", async () => {
   const runtime = createRuntime()
@@ -117,5 +117,5 @@ function createRuntime(): ToolRuntime {
 }
 
 function id<TableName extends string>(value: string) {
-  return value as ConvexId<TableName>
+  return value as RuntimeId<TableName>
 }

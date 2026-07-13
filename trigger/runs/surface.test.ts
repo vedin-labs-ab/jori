@@ -1,6 +1,9 @@
 import { expect, test, vi } from "vitest"
+import {
+  type RuntimeId,
+  type RuntimeTool,
+} from "../../contracts/runtime/worker"
 import { type ToolRuntime } from "../tool"
-import { type ConvexId, type RuntimeTool } from "../types"
 import { createQueuedModel } from "./fixture"
 import { runAgentLoop } from "./loop"
 
@@ -246,5 +249,5 @@ function runtimeTool(
 }
 
 function id<TableName extends string>(value: string) {
-  return value as ConvexId<TableName>
+  return value as RuntimeId<TableName>
 }

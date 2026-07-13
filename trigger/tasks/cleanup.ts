@@ -1,7 +1,8 @@
 import { task } from "@trigger.dev/sdk"
+import { cleanupTaskId } from "../../contracts/runtime/tasks"
+import { type SandboxCleanupPayload } from "../../contracts/runtime/worker"
 import { MiloConvexClient } from "../convex"
 import { killE2BSandbox } from "../sandbox/e2b/support"
-import { cleanupTaskId, type SandboxCleanupPayload } from "../types"
 
 export const miloSandboxCleanup = task({
   id: cleanupTaskId,

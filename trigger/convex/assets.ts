@@ -1,6 +1,6 @@
 import { isRecord } from "../../contracts/json"
+import { type RuntimeId } from "../../contracts/runtime/worker"
 import { type UploadedAsset } from "../platform"
-import { type ConvexId } from "../types"
 import { requireConvexSiteUrl } from "./config"
 
 export type UploadAssetArgs = {
@@ -8,7 +8,7 @@ export type UploadAssetArgs = {
   description?: string
   mimeType: string
   name: string
-  runId: ConvexId<"runs">
+  runId: RuntimeId<"runs">
 }
 
 export async function uploadAsset(
@@ -52,7 +52,7 @@ function parseUploadedAsset(value: unknown): UploadedAsset {
   }
 
   return {
-    assetId: readUploadValue(value.assetId, "assetId") as ConvexId<"assets">,
+    assetId: readUploadValue(value.assetId, "assetId") as RuntimeId<"assets">,
     mimeType: readUploadValue(value.mimeType, "mimeType"),
     name: readUploadValue(value.name, "name"),
     size: readUploadSize(value.size),

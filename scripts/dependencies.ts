@@ -62,12 +62,13 @@ const ruleSet = {
       name: "convex-does-not-import-app-runtime-or-scripts",
       severity: "error",
       comment:
-        "Convex code must stay independent from app, runtime, and tooling code.",
+        "Convex code may consume generated runtime assets, not app, runtime source, Trigger, or tooling code.",
       from: {
         path: "^convex/",
       },
       to: {
         path: "^(?:src|runtime|trigger|scripts)(?:/|$)",
+        pathNot: "^runtime/artifacts/_generated/",
       },
     },
     {
@@ -92,7 +93,7 @@ const ruleSet = {
       },
       to: {
         path: "^(?:src|convex|runtime|scripts)(?:/|$)",
-        pathNot: "^(?:convex/_generated/|convex/artifacts/_generated/)",
+        pathNot: "^(?:convex/_generated/|runtime/artifacts/_generated/)",
       },
     },
     {

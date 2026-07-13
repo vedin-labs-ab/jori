@@ -44,7 +44,6 @@ const skippedDirectories = [
   "dist",
   "node_modules",
   "convex/_generated",
-  "runtime/artifacts/template",
   "src/components/ui",
   "src/routes",
 ]
@@ -132,6 +131,7 @@ function countDirectSourceFiles(entries: DirectoryEntry[]) {
 
 function isCountedSourceFile(fileName: string) {
   if (
+    fileName === "generated.ts" ||
     fileName.endsWith(".test.ts") ||
     fileName.endsWith(".test.tsx") ||
     fileName.endsWith(".d.ts")
@@ -182,7 +182,7 @@ function formatViolations(
     "",
     `Default limit: ${defaultLimit} direct source files per folder.`,
     "Single-file leaf folders should be flattened into a source file.",
-    "Tests, generated files, framework routes, shadcn/ui, and runtime templates are excluded.",
+    "Tests, generated files, framework routes, shadcn/ui, and conventional framework files are excluded.",
     "",
     ...formatSection("Crowded folders", limitViolations, formatLimitViolation),
     ...formatSection(

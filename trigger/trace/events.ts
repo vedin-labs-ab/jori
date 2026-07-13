@@ -1,9 +1,9 @@
 import {
-  type ConvexId,
   type RuntimeErrorTraceData,
   type RuntimeEventInput,
   type RuntimeEventType,
-} from "../types"
+  type RuntimeId,
+} from "../../contracts/runtime/worker"
 
 export function runtimeEvent(args: RuntimeEventInput) {
   const { keyId, ...event } = args
@@ -18,7 +18,7 @@ function traceKey(args: {
   attempt?: number
   callId?: string
   keyId?: string
-  runId: ConvexId<"runs">
+  runId: RuntimeId<"runs">
   sequence: number
   type: RuntimeEventType
 }) {

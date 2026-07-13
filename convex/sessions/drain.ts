@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { type DrainedSessionBatch } from "../../contracts/runtime/worker"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import {
@@ -30,7 +31,7 @@ export async function drainSession(
     limit?: number
     sessionId: Id<"sessions">
   }
-) {
+): Promise<DrainedSessionBatch> {
   const session = await ctx.db.get(args.sessionId)
 
   if (session?.runId === undefined) {
