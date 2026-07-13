@@ -13,7 +13,11 @@ import {
 const maxToolInputBytes = 32 * 1024
 const textEncoder = new TextEncoder()
 
-type ToolEventType = "tool.completed" | "tool.failed" | "tool.started"
+type ToolEventType =
+  | "tool.completed"
+  | "tool.failed"
+  | "tool.started"
+  | "tool.waiting"
 type RuntimeToolCompletedDetails = {
   provider: RuntimeToolProviderTrace
   result: RuntimeValueSummary
@@ -70,6 +74,11 @@ export async function recordToolEvent(
 export async function recordToolEvent(
   args: ToolEventArgs,
   tool: RuntimeTool,
+  type: "tool.waiting"
+): Promise<void>
+export async function recordToolEvent(
+  args: ToolEventArgs,
+  tool: RuntimeTool,
   type: ToolEventType,
   details?: RuntimeToolCompletedDetails | RuntimeToolFailedDetails
 ) {
@@ -114,6 +123,10 @@ function toolTraceData(
 
   if (type === "tool.completed") {
     return { tool, ...completedDetails(details) }
+  }
+
+  if (type === "tool.waiting") {
+    return { tool }
   }
 
   const traceInput = traceToolInput(input)

@@ -56,6 +56,7 @@ export type ActivityItem = {
   reasoning?: string
   startedAt: number
   surface?: ToolSurface
+  tool?: string
   toolLabel?: string
   tokenUsage?: ActivityTokenUsage
 }

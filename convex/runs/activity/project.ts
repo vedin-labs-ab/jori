@@ -4,7 +4,7 @@ import { type ActivityData } from "./types"
 
 export function projectActivity(data: ActivityData) {
   const items = [
-    ...projectTraceActivity(data.traces, data.run),
+    ...projectTraceActivity(data.traces, data.run, data.agents),
     ...projectRelationActivity(data),
   ]
 

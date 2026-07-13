@@ -11,7 +11,11 @@ const maxAgents = 20
 const minTimeoutMs = durationMilliseconds({ unit: "seconds", value: 5 })
 const maxTimeoutMs = durationMilliseconds({ unit: "days", value: 30 })
 
-export async function waitForAgents(runtime: ToolRuntime, input: JsonObject) {
+export async function waitForAgents(
+  runtime: ToolRuntime,
+  input: JsonObject,
+  onParked?: () => Promise<void>
+) {
   const runIds = readRunIds(input.runIds)
   const timeoutMs = readTimeoutMilliseconds(input.timeout)
   const readRuns = async () =>
@@ -29,6 +33,7 @@ export async function waitForAgents(runtime: ToolRuntime, input: JsonObject) {
   const wake = await parkWaitpoint(runtime, {
     condition: { kind: "runs", runIds },
     deadline: Date.now() + timeoutMs,
+    onParked,
     resolved: async () => allTerminal(await readRuns()),
   })
 

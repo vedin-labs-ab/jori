@@ -1,5 +1,6 @@
 import { isRecord } from "../../../contracts/json"
 import { reactionDisplayLabel } from "../../../contracts/reactions"
+import { type Doc } from "../../_generated/dataModel"
 import {
   arrayLength,
   channelLabel,
@@ -16,16 +17,24 @@ import {
   repositoryLabel,
   targetObjectLabel,
 } from "./helpers"
+import { agentWaitMetadata } from "./metadata/agents"
 import { runIntrospectionMetadata } from "./metadata/runs"
 import { type ToolResult } from "./read"
 
 export function toolMetadata(args: {
+  agents: Doc<"runs">[]
   input: Record<string, unknown> | undefined
   result: ToolResult | undefined
   tool: string
 }) {
   if (args.tool === "send_reply") {
     return []
+  }
+
+  const agentMetadata = agentWaitMetadata(args.tool, args.input, args.agents)
+
+  if (agentMetadata.length > 0) {
+    return compactMetadata(agentMetadata)
   }
 
   const runMetadata = runIntrospectionMetadata(
