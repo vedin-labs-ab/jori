@@ -22,6 +22,7 @@ export async function parkWaitpoint(
   args: {
     condition?: WaiterCondition
     deadline: number
+    onParked?: () => Promise<void>
     resolved: () => Promise<boolean>
   }
 ): Promise<WaiterWake> {
@@ -40,6 +41,7 @@ export async function parkWaitpoint(
   })
 
   await recordWaiting(runtime, waiterId)
+  await args.onParked?.()
 
   if (await args.resolved()) {
     await runtime.convex.expireWaiter({ waiterId })

@@ -24,6 +24,7 @@ const toolTerminalTypes = new Set(["tool.completed", "tool.failed"])
 
 export function projectToolTraces(
   traces: Doc<"traces">[],
+  agents: Doc<"runs">[],
   isRunLive: boolean
 ): ActivityItem[] {
   const labels = toolLabels(traces)
@@ -41,18 +42,20 @@ export function projectToolTraces(
   }
 
   return [...groups.values()].map((group) =>
-    projectToolGroup(group, labels, isRunLive)
+    projectToolGroup(group, labels, agents, isRunLive)
   )
 }
 
 function projectToolGroup(
   group: Doc<"traces">[],
   labels: Map<string, ToolLabel>,
+  agents: Doc<"runs">[],
   isRunLive: boolean
 ): ActivityItem {
   const started = group.find((trace) => trace.type === "tool.started")
+  const waiting = group.find((trace) => trace.type === "tool.waiting")
   const terminal = group.find((trace) => toolTerminalTypes.has(trace.type))
-  const trace = terminal ?? started ?? group[0]
+  const trace = terminal ?? waiting ?? started ?? group[0]
   const traceData = readTraceData(trace)
   const startedData = started === undefined ? undefined : readTraceData(started)
   const terminalData =
@@ -61,8 +64,9 @@ function projectToolGroup(
   const label = labels.get(name)
   const status = toolStatus(trace)
   const startedAt = started?.timestamp ?? trace.timestamp
-  const endedAt = terminal?.timestamp
+  const endedAt = (waiting ?? terminal)?.timestamp
   const metadata = toolMetadata({
+    agents,
     input: readToolInput(startedData),
     result: readToolResult(terminalData),
     tool: name,
@@ -81,6 +85,7 @@ function projectToolGroup(
     isLive: status === "running" && isRunLive,
     metadata: metadata.length === 0 ? undefined : metadata,
     startedAt,
+    tool: name,
   }
 }
 
@@ -145,11 +150,19 @@ function toolStatus(trace: Doc<"traces">): ActivityStatus {
     return "failed"
   }
 
+  if (trace.type === "tool.waiting") {
+    return "waiting"
+  }
+
   return trace.type === "tool.completed" ? "completed" : "running"
 }
 
 function groupedToolName(trace: Doc<"traces">) {
-  if (trace.type !== "tool.started" && !toolTerminalTypes.has(trace.type)) {
+  if (
+    trace.type !== "tool.started" &&
+    trace.type !== "tool.waiting" &&
+    !toolTerminalTypes.has(trace.type)
+  ) {
     return undefined
   }
 

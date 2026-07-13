@@ -1,5 +1,6 @@
 import {
   AlertCircle,
+  BookOpen,
   Bot,
   Brain,
   Check,
@@ -47,6 +48,11 @@ const kindLabels = {
   tool: "Tool",
   wait: "Wait",
 } satisfies Record<ActivityKind, string>
+
+const toolIcons: Record<string, LucideIcon> = {
+  load_skill: BookOpen,
+  wait_for_agents: Bot,
+}
 
 export function ActivityIcon({ item }: { item: ActivityItem }) {
   return (
@@ -97,6 +103,13 @@ function itemIcon(item: ActivityItem) {
 
   if (item.kind !== "tool") {
     return kindIcons[item.kind]
+  }
+
+  const specificIcon =
+    item.tool === undefined ? undefined : toolIcons[item.tool]
+
+  if (specificIcon !== undefined) {
+    return specificIcon
   }
 
   const title = item.title.toLowerCase()

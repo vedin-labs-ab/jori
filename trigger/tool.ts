@@ -37,10 +37,14 @@ export async function executeToolCall(
   // outcome trace, so the started trace always lands first and a failed
   // trace write still aborts the attempt.
   const startedPending = recordToolEvent(eventArgs(args), tool, "tool.started")
+  const onParked = async () => {
+    await startedPending
+    await recordToolEvent(eventArgs(args), tool, "tool.waiting")
+  }
   let result: Awaited<ReturnType<typeof executeTool>>
 
   try {
-    result = await executeTool(args.runtime, tool, args.call)
+    result = await executeTool(args.runtime, tool, args.call, onParked)
   } catch (error) {
     await startedPending
 
@@ -114,7 +118,8 @@ export function modelTools(tools: RuntimeTool[]) {
 async function executeTool(
   runtime: ToolRuntime,
   tool: RuntimeTool,
-  call: ModelToolCall
+  call: ModelToolCall,
+  onParked: () => Promise<void>
 ) {
   switch (tool.route) {
     case "surface":
@@ -138,7 +143,9 @@ async function executeTool(
         })
       )
     case "agent":
-      return toolResult(await executeAgentTool(runtime, call.name, call.args))
+      return toolResult(
+        await executeAgentTool(runtime, call.name, call.args, onParked)
+      )
   }
 }
 
@@ -233,10 +240,11 @@ async function callConvexTool(
 async function executeAgentTool(
   runtime: ToolRuntime,
   name: string,
-  input: JsonObject
+  input: JsonObject,
+  onParked: () => Promise<void>
 ) {
   if (name === "wait_for_agents") {
-    return await waitForAgents(runtime, input)
+    return await waitForAgents(runtime, input, onParked)
   }
 
   if (name === "start_agent") {

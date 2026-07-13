@@ -7,7 +7,8 @@ import { type ActivityItem, type ActivityStatus } from "./types"
 
 export function projectTraceActivity(
   traces: Doc<"traces">[],
-  run: Doc<"runs">
+  run: Doc<"runs">,
+  agents: Doc<"runs">[]
 ) {
   const isRunLive =
     isLiveRunStatus(run.status) &&
@@ -16,7 +17,7 @@ export function projectTraceActivity(
   return [
     ...projectRunTraces(traces, run),
     ...projectModelTraces(traces, isRunLive),
-    ...projectToolTraces(traces, isRunLive),
+    ...projectToolTraces(traces, agents, isRunLive),
   ]
 }
 

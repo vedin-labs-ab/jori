@@ -147,6 +147,17 @@ test("wait_for_agents turns a relative timeout into a waitpoint expiry", async (
     waiterId: "waiter_1",
   })
   expect(triggerWait.forToken).not.toHaveBeenCalled()
+  expect(
+    vi
+      .mocked(runtime.convex.recordEvent)
+      .mock.calls.map(([event]) => event.type)
+  ).toEqual([
+    "tool.started",
+    "run.waiting",
+    "tool.waiting",
+    "run.resumed",
+    "tool.completed",
+  ])
 })
 
 test("wait_for_agents rejects timeouts outside its bounds", async () => {
