@@ -152,6 +152,41 @@ test("labels inferred artifact state reads with the title and state entry", () =
   )
 })
 
+test("labels inferred artifact state updates with the title and state entry", () => {
+  const artifactId = id<"artifacts">("artifact")
+  const items = projectActivity(
+    data({
+      artifacts: [artifact({ _id: artifactId, title: "Meeting prep" })],
+      run: run({ artifactId }),
+      traces: [
+        trace({
+          callId: "call-1",
+          data: {
+            input: { contractName: "dossiers", patch: { status: "ready" } },
+            tool: {
+              access: "write",
+              name: "update_artifact_state",
+              route: "convex",
+            },
+          },
+          timestamp: 10,
+          type: "tool.started",
+        }),
+      ],
+    })
+  )
+
+  expect(items).toContainEqual(
+    expect.objectContaining({
+      metadata: [
+        { kind: "target", text: "Meeting prep" },
+        { kind: "scope", text: "dossiers" },
+      ],
+      tool: "update_artifact_state",
+    })
+  )
+})
+
 function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],

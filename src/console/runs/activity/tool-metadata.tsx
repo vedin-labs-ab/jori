@@ -225,7 +225,8 @@ function MetadataValue({
 function isCodeMetadata(tool: string | undefined, item: ToolMetadataItem) {
   return (
     (tool === "bash" && item.kind === "target") ||
-    (tool === "read_artifact_state" && item.kind === "scope")
+    ((tool === "read_artifact_state" || tool === "update_artifact_state") &&
+      item.kind === "scope")
   )
 }
 
