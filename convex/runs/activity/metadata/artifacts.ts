@@ -21,7 +21,7 @@ export function artifactMetadata(args: ArtifactMetadataArgs) {
 
   const artifactTitle = args.artifactTitles.get(artifactId) ?? artifactId
 
-  if (args.tool === "read_artifact_state") {
+  if (isArtifactStateTool(args.tool)) {
     return [
       item("target", artifactTitle),
       item("scope", readString(args.input?.contractName)),
@@ -39,14 +39,18 @@ export function activityArtifactId(
   input: Record<string, unknown> | undefined,
   runArtifactId: string | undefined
 ) {
-  if (tool !== "read_artifact_state" && tool !== "share_artifact") {
+  if (!isArtifactStateTool(tool) && tool !== "share_artifact") {
     return undefined
   }
 
   return (
     readString(input?.artifactId) ??
-    (tool === "read_artifact_state" ? runArtifactId : undefined)
+    (isArtifactStateTool(tool) ? runArtifactId : undefined)
   )
+}
+
+function isArtifactStateTool(tool: string | undefined) {
+  return tool === "read_artifact_state" || tool === "update_artifact_state"
 }
 
 function shareDurationLabel(value: unknown) {
