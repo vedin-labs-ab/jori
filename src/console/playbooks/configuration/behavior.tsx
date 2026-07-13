@@ -109,7 +109,7 @@ function BehaviorRow({
 
             return (
               <OptionField
-                className="pointer-events-auto"
+                controlClassName="pointer-events-auto"
                 disabled={disabled || !fieldEnabled}
                 field={field}
                 hint={hints?.[field.key]}

@@ -14,7 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
 export function OptionField({
-  className,
+  controlClassName,
   disabled,
   field,
   hint,
@@ -23,7 +23,7 @@ export function OptionField({
   onChange,
   value,
 }: {
-  className?: string
+  controlClassName?: string
   disabled: boolean
   field: PlaybookOptionField
   hint?: ReactNode
@@ -35,7 +35,7 @@ export function OptionField({
   const id = `playbook-option-${field.key}`
 
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className="grid gap-2">
       {label ? (
         <Label
           className={cn(
@@ -48,6 +48,7 @@ export function OptionField({
         </Label>
       ) : null}
       <OptionControl
+        className={controlClassName}
         disabled={disabled}
         field={field}
         id={id}
@@ -60,12 +61,14 @@ export function OptionField({
 }
 
 function OptionControl({
+  className,
   disabled,
   field,
   id,
   onChange,
   value,
 }: {
+  className?: string
   disabled: boolean
   field: PlaybookOptionField
   id: string
@@ -77,6 +80,7 @@ function OptionControl({
       <Checkbox
         aria-label={field.label}
         checked={value === true}
+        className={className}
         disabled={disabled}
         id={id}
         onCheckedChange={(checked) => onChange(checked === true)}
@@ -87,6 +91,7 @@ function OptionControl({
   if (field.kind === "choice" && field.control !== "select") {
     return (
       <ChoiceToggle
+        className={className}
         disabled={disabled}
         field={field}
         id={id}
@@ -99,7 +104,7 @@ function OptionControl({
   if (field.kind === "time") {
     return (
       <Input
-        className="w-36"
+        className={cn("w-36", className)}
         disabled={disabled}
         id={id}
         onChange={(event) => {
@@ -115,6 +120,7 @@ function OptionControl({
 
   return (
     <OptionSelect
+      className={className}
       disabled={disabled}
       field={field}
       id={id}
@@ -125,12 +131,14 @@ function OptionControl({
 }
 
 function ChoiceToggle({
+  className,
   disabled,
   field,
   id,
   onChange,
   value,
 }: {
+  className?: string
   disabled: boolean
   field: Extract<PlaybookOptionField, { kind: "choice" }>
   id: string
@@ -153,7 +161,11 @@ function ChoiceToggle({
       variant="outline"
     >
       {field.choices.map((choice) => (
-        <ToggleGroupItem key={choice.value} value={choice.value}>
+        <ToggleGroupItem
+          className={className}
+          key={choice.value}
+          value={choice.value}
+        >
           {choice.label}
         </ToggleGroupItem>
       ))}
@@ -162,12 +174,14 @@ function ChoiceToggle({
 }
 
 function OptionSelect({
+  className,
   disabled,
   field,
   id,
   onChange,
   value,
 }: {
+  className?: string
   disabled: boolean
   field: Extract<PlaybookOptionField, { kind: "choice" | "minutes" }>
   id: string
@@ -190,7 +204,7 @@ function OptionSelect({
       }
       value={String(value)}
     >
-      <SelectTrigger className="w-full sm:w-48" id={id}>
+      <SelectTrigger className={cn("w-full sm:w-48", className)} id={id}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
