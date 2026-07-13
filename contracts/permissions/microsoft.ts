@@ -44,7 +44,7 @@ export const microsoftToolPermissionRows = [
   [
     "microsoftCalendar",
     "microsoft_calendar_list_events",
-    "List events",
+    "List calendar events",
     "List events on your Microsoft Calendar.",
     "List Microsoft Calendar events in a time range. Use to check availability or find an event before changing it.",
     "read",

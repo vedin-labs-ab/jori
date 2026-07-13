@@ -68,7 +68,7 @@ export const googleToolPermissionRows = [
   [
     "googleCalendar",
     "google_calendar_list_events",
-    "List events",
+    "List calendar events",
     "List events on your Google Calendar.",
     "List Google Calendar events in a time range. Use to check availability or find an event before reading or changing it.",
     "read",
