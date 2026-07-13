@@ -106,35 +106,16 @@ export function WorkstreamsPulse({
       }
     >
       <CardContent
-        className="overflow-x-auto px-0"
+        className="max-h-72 overflow-auto px-0"
         onScroll={trackPinned}
         ref={scrollRef}
       >
-        <div className="flex w-fit flex-col gap-1 pr-(--card-spacing)">
-          {view.lanes.map((lane) => (
-            <LaneRow
-              key={lane.id ?? "unplaced"}
-              lane={lane}
-              laneGrid={laneGrids[pulse.days]}
-              unplaced={lane.id === null ? pulse.unplaced : 0}
-              onOpen={laneOpener(lane, workstreams, onOpen)}
-            />
-          ))}
-          <div className={laneGrids[pulse.days]}>
-            <span className={stickyLane} />
-            {view.days.map((day) => (
-              <span
-                key={day.key}
-                className={cn(
-                  "whitespace-nowrap pt-1 text-center text-[11px] text-muted-foreground tabular-nums",
-                  day.emphasized && "font-medium text-foreground"
-                )}
-              >
-                {day.label}
-              </span>
-            ))}
-          </div>
-        </div>
+        <PulseLanes
+          onOpen={onOpen}
+          pulse={pulse}
+          view={view}
+          workstreams={workstreams}
+        />
       </CardContent>
       <PulseFooter>
         <span className="flex items-center gap-1.5">
@@ -150,6 +131,72 @@ export function WorkstreamsPulse({
         </span>
       </PulseFooter>
     </PulseShell>
+  )
+}
+
+function PulseLanes({
+  onOpen,
+  pulse,
+  view,
+  workstreams,
+}: {
+  onOpen: (workstream: Workstream) => void
+  pulse: PulseData
+  view: ReturnType<typeof buildPulse>
+  workstreams: Workstreams
+}) {
+  const laneGrid = laneGrids[pulse.days]
+  const workstreamLanes = view.lanes.filter((lane) => lane.id !== null)
+  const unplacedLane = view.lanes.find((lane) => lane.id === null)
+
+  return (
+    <div className="flex w-fit flex-col gap-1 pr-(--card-spacing)">
+      {workstreamLanes.map((lane) => (
+        <LaneRow
+          key={lane.id}
+          lane={lane}
+          laneGrid={laneGrid}
+          unplaced={0}
+          onOpen={laneOpener(lane, workstreams, onOpen)}
+        />
+      ))}
+      <div className="sticky bottom-0 z-20 flex flex-col gap-1 bg-card">
+        {unplacedLane === undefined ? null : (
+          <LaneRow
+            lane={unplacedLane}
+            laneGrid={laneGrid}
+            unplaced={pulse.unplaced}
+            onOpen={undefined}
+          />
+        )}
+        <PulseAxis days={view.days} laneGrid={laneGrid} />
+      </div>
+    </div>
+  )
+}
+
+function PulseAxis({
+  days,
+  laneGrid,
+}: {
+  days: ReturnType<typeof buildPulse>["days"]
+  laneGrid: string
+}) {
+  return (
+    <div className={laneGrid}>
+      <span className={stickyLane} />
+      {days.map((day) => (
+        <span
+          key={day.key}
+          className={cn(
+            "whitespace-nowrap pt-1 text-center text-[11px] text-muted-foreground tabular-nums",
+            day.emphasized && "font-medium text-foreground"
+          )}
+        >
+          {day.label}
+        </span>
+      ))}
+    </div>
   )
 }
 
