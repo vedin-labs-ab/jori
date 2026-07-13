@@ -1,4 +1,8 @@
-import { type IntegrationCardStatus } from "."
+export type IntegrationCardStatus =
+  | "active"
+  | "disconnected"
+  | "expired"
+  | undefined
 
 export type AccountStatus = {
   externalId: string

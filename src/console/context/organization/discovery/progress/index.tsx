@@ -22,7 +22,7 @@ import {
   type DiscoveryTaskStatus,
   type OrganizationDiscovery,
 } from "../../types"
-import { createDiscoveryTasks } from "./data"
+import { createDiscoveryTasks } from "./tasks"
 
 export function DiscoveryProgress({
   discovery,

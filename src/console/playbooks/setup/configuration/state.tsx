@@ -7,7 +7,7 @@ import {
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { useMemo, useState } from "react"
-import { api } from "../../../../convex/_generated/api"
+import { api } from "../../../../../convex/_generated/api"
 
 /** Resolve the declarative setup defaults and track the user's changes. */
 export function useOptionsSetup(definition: PlaybookDefinition) {

@@ -1,10 +1,10 @@
 import { ErrorDetail } from "../../shared/details"
 import { RunActivity } from "../activity"
+import { ApprovalCallout } from "../request/approval"
+import { OfferCallout } from "../request/offer"
 import { type ExecutionItem } from "../types"
-import { ApprovalCallout } from "./approval"
 import { ExecutionFacts } from "./facts"
 import { RunRowBody } from "./layout"
-import { OfferCallout } from "./offer"
 import { TaskDetail } from "./task"
 
 export function ExpandedExecution({

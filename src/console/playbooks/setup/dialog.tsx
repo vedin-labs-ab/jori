@@ -16,12 +16,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
-import { api } from "../../../convex/_generated/api"
-import { showErrorToast } from "../shared/error"
+import { api } from "../../../../convex/_generated/api"
+import { showErrorToast } from "../../shared/error"
+import { type PlaybookActions, pendingActionKind } from "../enable"
+import { type PlaybookEnablePlan, type PlaybookListRow } from "../state"
 import { useOptionHints, useOptionsSetup } from "./configuration/state"
-import { type PlaybookActions, pendingActionKind } from "./enable"
 import { SetupDialogSections } from "./form"
-import { type PlaybookEnablePlan, type PlaybookListRow } from "./state"
 
 /** Confirm-and-customize setup for an unenabled playbook. */
 export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {

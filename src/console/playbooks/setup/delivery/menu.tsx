@@ -14,7 +14,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SurfaceLogo } from "../../automations/access/logo"
+import { SurfaceLogo } from "../../../automations/access/logo"
 
 export function DeliveryModeMenu({
   disabled,

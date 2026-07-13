@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
-import { type AutomationSurfaceIntegration, getAutomationSurfaceLogo } from "."
+import { providerLogoPath } from "@/shared/logo/path"
+import { type AutomationSurfaceIntegration } from "./catalog"
 
 export function SurfaceLogo({
   alt = "",
@@ -14,7 +15,7 @@ export function SurfaceLogo({
     <img
       alt={alt}
       className={cn("size-3.5 shrink-0", className)}
-      src={getAutomationSurfaceLogo(integration)}
+      src={providerLogoPath(integration)}
     />
   )
 }

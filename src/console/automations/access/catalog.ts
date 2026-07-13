@@ -1,5 +1,4 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
-import { providerLogoPath } from "@/shared/logo/path"
 
 const automationSurfaceAccesses = ["read", "write", "both"] as const
 
@@ -57,12 +56,6 @@ export function getAutomationSurfaceLabel(
   integration: AutomationSurfaceIntegration
 ) {
   return getAutomationSurfaceIntegration(integration)?.label ?? integration
-}
-
-export function getAutomationSurfaceLogo(
-  integration: AutomationSurfaceIntegration
-) {
-  return providerLogoPath(integration)
 }
 
 function integration<const Name extends Integration>(

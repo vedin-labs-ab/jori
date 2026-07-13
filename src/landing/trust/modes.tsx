@@ -1,4 +1,4 @@
-import { ModeMatrix } from "../props/modes"
+import { ModeMatrix } from "../examples/modes"
 import { Section } from "../section"
 
 export function ModesSection() {

@@ -1,14 +1,14 @@
 import { type Integration } from "@contracts/integrations"
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import { type PlaybookOptionValues } from "@contracts/playbooks/options"
+import { PlaybookAccess, PlaybookSchedule } from "../meta"
+import { type PlaybookEnablePlan, type PlaybookListRow } from "../state"
 import { PlaybookConfiguration } from "./configuration"
 import {
   type useOptionHints,
   type useOptionsSetup,
 } from "./configuration/state"
 import { PlaybookAccounts, PlaybookDelivery } from "./customizations"
-import { PlaybookAccess, PlaybookSchedule } from "./meta"
-import { type PlaybookEnablePlan, type PlaybookListRow } from "./state"
 
 export function SetupDialogSections({
   choices,

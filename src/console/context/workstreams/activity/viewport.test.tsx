@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render } from "@testing-library/react"
 import { afterAll, afterEach, beforeAll, expect, test } from "vitest"
-import { buildPulse } from "../series"
+import { buildPulse } from "./series"
 import { PulseViewport } from "./viewport"
 
 const originalResizeObserver = globalThis.ResizeObserver

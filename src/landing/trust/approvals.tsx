@@ -1,5 +1,5 @@
-import { ApprovalCard } from "../props/approval"
-import { ReceiptsTimeline } from "../props/receipts"
+import { ApprovalCard } from "../examples/approval"
+import { ReceiptsTimeline } from "../examples/receipts"
 import { Section } from "../section"
 
 export function ApprovalsSection() {

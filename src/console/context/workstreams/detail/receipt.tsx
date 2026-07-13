@@ -1,9 +1,9 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import { IntegrationLogo } from "@/shared/logo/integration"
-import { SeparatorDot } from "../../shared/dot"
-import { flushRowClassName } from "../../shared/flush"
-import { relativeTime } from "../../shared/time"
+import { SeparatorDot } from "../../../shared/dot"
+import { flushRowClassName } from "../../../shared/flush"
+import { relativeTime } from "../../../shared/time"
 
 export type ReceiptRow = {
   id: string

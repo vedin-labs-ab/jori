@@ -1,8 +1,8 @@
 import { useMutation } from "convex/react"
 import { Button } from "@/components/ui/button"
-import { api } from "../../../../convex/_generated/api"
-import { showErrorToast } from "../../shared/error"
-import { type Workstream } from "./types"
+import { api } from "../../../../../convex/_generated/api"
+import { showErrorToast } from "../../../shared/error"
+import { type Workstream } from "../types"
 
 // One action vocabulary for the detail dialog. Adoption decisions come first.
 export type WorkstreamAction =

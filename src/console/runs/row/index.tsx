@@ -3,6 +3,7 @@ import { lazy, memo, Suspense, useCallback, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RelativeTime } from "../../shared/details"
 import { formatDuration, relativeTime } from "../../shared/time"
+import { ApprovalStatusMeta, OfferStatusMeta } from "../request/status"
 import { type ExecutionItem } from "../types"
 import {
   RunRowBody,
@@ -13,12 +14,7 @@ import {
   RunRowMeta,
 } from "./layout"
 import { SourceLine } from "./source"
-import {
-  ApprovalStatusMeta,
-  MetaPill,
-  OfferStatusMeta,
-  StatusIcon,
-} from "./status"
+import { MetaPill, StatusIcon } from "./status"
 import { StopExecution } from "./stop"
 
 let expandedExecutionModule: Promise<typeof import("./expanded")> | undefined

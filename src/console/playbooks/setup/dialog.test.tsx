@@ -2,9 +2,9 @@
 import { playbookCatalog } from "@contracts/playbooks/catalog"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { type PlaybookActions } from "../enable"
+import { type PlaybookEnablePlan, type PlaybookListRow } from "../state"
 import { PlaybookSetupDialog } from "./dialog"
-import { type PlaybookActions } from "./enable"
-import { type PlaybookEnablePlan, type PlaybookListRow } from "./state"
 
 const convexMocks = vi.hoisted(() => ({
   saveDeliveryPreference: vi.fn(async () => null),

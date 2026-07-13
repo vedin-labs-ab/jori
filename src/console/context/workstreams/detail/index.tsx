@@ -16,13 +16,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { IntegrationChips } from "@/shared/logo/integration"
-import { api } from "../../../../convex/_generated/api"
-import { relativeTime, useNow } from "../../shared/time"
-import { ContextSectionTitle } from "../section"
+import { api } from "../../../../../convex/_generated/api"
+import { relativeTime, useNow } from "../../../shared/time"
+import { ContextSectionTitle } from "../../section"
+import { WorkstreamStatusCue } from "../status"
+import { type Workstream } from "../types"
 import { WorkstreamActions } from "./actions"
-import { WorkstreamStatusCue } from "./status"
 import { WorkstreamTimeline } from "./timeline"
-import { type Workstream } from "./types"
 
 export function WorkstreamDetail({
   tenantId,

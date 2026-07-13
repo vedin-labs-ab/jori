@@ -11,7 +11,7 @@ import {
 } from "../shared/list/pagination"
 import { SkillDialog } from "./dialog"
 import { type SkillEditor, useSkillEditor } from "./editor"
-import { filterSkills, filterSkillsByView } from "./helpers"
+import { filterSkills, filterSkillsByView } from "./filter"
 import { SkillContent } from "./list/content"
 import { SkillsToolbar } from "./list/toolbar"
 import { type Skill, type SkillFilterView } from "./types"
