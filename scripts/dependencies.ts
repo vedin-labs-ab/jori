@@ -108,6 +108,53 @@ const ruleSet = {
       },
     },
     {
+      name: "offer-core-does-not-import-provider-adapters",
+      severity: "error",
+      comment:
+        "Generic integration-offer state should not depend on provider presentation or transport.",
+      from: {
+        path: "^convex/integrations/offers/",
+      },
+      to: {
+        path: "^convex/integrations/(?:github|google|linear|microsoft|notion|slack)/",
+      },
+    },
+    {
+      name: "deduction-does-not-import-workstream-projection",
+      severity: "error",
+      comment:
+        "The product-facing workstream projection may read deduction internals, not the reverse.",
+      from: {
+        path: "^convex/deduction/",
+      },
+      to: {
+        path: "^convex/workstreams/",
+      },
+    },
+    {
+      name: "trigger-core-does-not-import-convex-adapter",
+      severity: "error",
+      comment:
+        "Only task composition may bind Trigger core ports to the Convex adapter.",
+      from: {
+        path: "^trigger/(?!convex(?:/|$)|tasks(?:/|$))",
+      },
+      to: {
+        path: "^trigger/convex/",
+      },
+    },
+    {
+      name: "features-do-not-import-routes",
+      severity: "error",
+      comment: "Framework routes compose product features, never the reverse.",
+      from: {
+        path: "^src/(?:components|console|hooks|landing|lib|shared)(?:/|$)",
+      },
+      to: {
+        path: "^src/routes/",
+      },
+    },
+    {
       name: "console-shared-is-feature-free",
       severity: "error",
       comment: "Console shared UI must not depend on console feature domains.",

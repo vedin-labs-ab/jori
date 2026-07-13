@@ -33,7 +33,7 @@ export function ContextWorkstreams() {
 }
 
 function WorkstreamsView({ tenantId }: { tenantId: string }) {
-  const result = useQuery(api.deduction.console.queries.list, { tenantId })
+  const result = useQuery(api.workstreams.queries.list, { tenantId })
   const [openId, setOpenId] = useState<Workstream["id"] | null>(null)
   const workstreams = result?.workstreams ?? []
   const list = useWorkstreamPagination(workstreams, result !== undefined)

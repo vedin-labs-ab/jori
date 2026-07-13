@@ -17,7 +17,7 @@ import { PulseViewport } from "./viewport"
 
 type PulseDays = 14 | 30 | 60
 type PulseData = NonNullable<
-  ReturnType<typeof useQuery<typeof api.deduction.console.pulse.read>>
+  ReturnType<typeof useQuery<typeof api.workstreams.pulse.read>>
 >
 
 const rangeOptions: { value: PulseDays; label: string }[] = [
@@ -40,7 +40,7 @@ export function WorkstreamsPulse({
   onOpen: (workstream: Workstream) => void
 }) {
   const [days, setDays] = useState<PulseDays>(14)
-  const result = useQuery(api.deduction.console.pulse.read, { tenantId, days })
+  const result = useQuery(api.workstreams.pulse.read, { tenantId, days })
   const [pulse, setPulse] = useState<PulseData | null>(null)
 
   // Hold the last loaded window while a new range streams in, so switching

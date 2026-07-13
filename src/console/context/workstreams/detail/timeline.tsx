@@ -18,7 +18,7 @@ import { groupByDay, type TimelineDay } from "./grouping"
 import { Receipt } from "./receipt"
 
 type TimelineItem = NonNullable<
-  ReturnType<typeof useQuery<typeof api.deduction.console.queries.timeline>>
+  ReturnType<typeof useQuery<typeof api.workstreams.queries.timeline>>
 >[number]
 
 // The workstream narrative as an index, not prose: one row per effort
@@ -193,7 +193,7 @@ function EntryReceipts({
   item: TimelineItem
   tenantId: string
 }) {
-  const receipts = useQuery(api.deduction.console.queries.receipts, {
+  const receipts = useQuery(api.workstreams.queries.receipts, {
     tenantId,
     effortId: item.effortId,
     passId: item.passId,

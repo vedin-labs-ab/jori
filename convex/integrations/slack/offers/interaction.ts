@@ -1,8 +1,10 @@
+import { v } from "convex/values"
 import { isRecord } from "../../../../contracts/json"
 import { internal } from "../../../_generated/api"
 import { type Id } from "../../../_generated/dataModel"
-import { type ActionCtx } from "../../../_generated/server"
-import { createIntegrationActor } from "../../../shared/actor"
+import { type ActionCtx, internalMutation } from "../../../_generated/server"
+import { actorValidator, createIntegrationActor } from "../../../shared/actor"
+import { markIntegrationOfferCancelled } from "../../offers/transition"
 import { getSlackActorProfile } from "../directory/users"
 import { readFirstAction, readNestedString } from "../ingress/actions"
 
@@ -26,18 +28,66 @@ export async function handleSlackIntegrationOfferInteraction(
   if (cancel !== null) {
     const actor = await createSlackIntegrationOfferActor(ctx, cancel)
 
-    await ctx.runMutation(internal.integrations.offers.lifecycle.cancel, {
-      accountId: cancel.accountId,
-      ...(actor === undefined ? {} : { actor }),
-      channelId: cancel.channelId,
-      messageTs: cancel.messageTs,
-      integrationOfferId: cancel.integrationOfferId,
-    })
+    await ctx.runMutation(
+      internal.integrations.slack.offers.interaction.cancel,
+      {
+        accountId: cancel.accountId,
+        ...(actor === undefined ? {} : { actor }),
+        channelId: cancel.channelId,
+        messageTs: cancel.messageTs,
+        integrationOfferId: cancel.integrationOfferId,
+      }
+    )
     return true
   }
 
   return isSlackIntegrationOfferInteraction(payload)
 }
+
+export const cancel = internalMutation({
+  args: {
+    accountId: v.string(),
+    actor: v.optional(actorValidator),
+    channelId: v.string(),
+    messageTs: v.string(),
+    integrationOfferId: v.id("integrationOffers"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const offer = await ctx.db.get(args.integrationOfferId)
+
+    if (offer === null) {
+      return null
+    }
+
+    const delivery = offer.delivery
+
+    if (
+      delivery?.integration !== "slack" ||
+      delivery.data.channelId !== args.channelId ||
+      delivery.data.messageTs !== args.messageTs
+    ) {
+      return null
+    }
+
+    const integration = await ctx.db.get(delivery.integrationId)
+
+    if (
+      integration === null ||
+      integration.integration !== delivery.integration ||
+      integration.externalId !== args.accountId
+    ) {
+      return null
+    }
+
+    await markIntegrationOfferCancelled(ctx, offer, {
+      actor: args.actor,
+      now: Date.now(),
+    })
+
+    return null
+  },
+})
 
 export function isSlackIntegrationOfferInteraction(payload: unknown) {
   return readActionIds(payload).includes(integrationOfferOpenActionId)

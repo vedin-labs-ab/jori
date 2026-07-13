@@ -1,7 +1,6 @@
 import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { internalAction, internalMutation } from "../../_generated/server"
-import { actorValidator } from "../../shared/actor"
 import {
   markIntegrationOfferCancelled,
   markIntegrationOfferExpired,
@@ -35,51 +34,6 @@ export const markExpired = internalMutation({
     }
 
     await markIntegrationOfferExpired(ctx, offer, Date.now())
-
-    return null
-  },
-})
-
-export const cancel = internalMutation({
-  args: {
-    accountId: v.string(),
-    actor: v.optional(actorValidator),
-    channelId: v.string(),
-    messageTs: v.string(),
-    integrationOfferId: v.id("integrationOffers"),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const offer = await ctx.db.get(args.integrationOfferId)
-
-    if (offer === null) {
-      return null
-    }
-
-    const delivery = offer.delivery
-
-    if (
-      delivery?.integration !== "slack" ||
-      delivery.data.channelId !== args.channelId ||
-      delivery.data.messageTs !== args.messageTs
-    ) {
-      return null
-    }
-
-    const integration = await ctx.db.get(delivery.integrationId)
-
-    if (
-      integration === null ||
-      integration.integration !== delivery.integration ||
-      integration.externalId !== args.accountId
-    ) {
-      return null
-    }
-
-    await markIntegrationOfferCancelled(ctx, offer, {
-      actor: args.actor,
-      now: Date.now(),
-    })
 
     return null
   },
