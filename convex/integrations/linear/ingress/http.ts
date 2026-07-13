@@ -164,7 +164,7 @@ async function recordLinearMessage(
   message: LinearMessage,
   mode?: LinearRecordMode
 ) {
-  await ctx.runMutation(internal.messages.intake.record, {
+  await ctx.runMutation(internal.conversations.intake.record, {
     accountId: message.accountId,
     integration: "linear",
     ...(mode === undefined ? {} : { mode }),

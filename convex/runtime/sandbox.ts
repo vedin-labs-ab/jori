@@ -4,13 +4,10 @@ import {
 } from "../../contracts/coding"
 import { type ToolAccess } from "../../contracts/permissions"
 import { durationUnits } from "../../contracts/runtime"
-import { type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
 import {
   stringArrayProperty,
   withOptionalFieldGuidance,
 } from "../runs/agent/tools/schemas"
-import { type QueryLikeCtx } from "../shared/context"
 import { nativeToolUsage } from "./permissions/native"
 
 export const sandboxTools = [
@@ -91,31 +88,4 @@ function codingToolAccess(name: CodingToolName): ToolAccess {
     case "bash":
       return "write"
   }
-}
-
-export async function findActiveSandbox(ctx: QueryLikeCtx, runId: Id<"runs">) {
-  return await ctx.db
-    .query("sandboxes")
-    .withIndex("by_run_and_status", (query) =>
-      query.eq("runId", runId).eq("status", "active")
-    )
-    .order("desc")
-    .first()
-}
-
-export async function findSandboxByExternalId(
-  ctx: QueryLikeCtx,
-  externalId: string
-) {
-  return await ctx.db
-    .query("sandboxes")
-    .withIndex("by_external_id", (query) => query.eq("externalId", externalId))
-    .first()
-}
-
-export async function findSessionByRun(ctx: MutationCtx, runId: Id<"runs">) {
-  return await ctx.db
-    .query("sessions")
-    .withIndex("by_run", (query) => query.eq("runId", runId))
-    .first()
 }

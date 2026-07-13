@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
-import { type Doc, type Id } from "../../_generated/dataModel"
-import { type MutationCtx } from "../../_generated/server"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { type MutationCtx } from "../_generated/server"
 import { resolveRunAudience } from "./audience"
 
 test("resolves conversation and automation audiences", async () => {

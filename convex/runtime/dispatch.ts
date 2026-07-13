@@ -3,8 +3,8 @@ import { agentTaskId, cleanupTaskId } from "../../contracts/runtime"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
+import { formatRuntimeError } from "../runs/execution/outbox/error"
 import { isTerminalRunStatus } from "../runs/schema"
-import { formatRuntimeError } from "./shared"
 
 const batchSize = 5
 const maxAgentDurationSeconds = 60 * 60 * 2

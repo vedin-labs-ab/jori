@@ -7,11 +7,8 @@ import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
 import { resolvePersonByIdentity } from "../persons/identity/links"
 import { scopeValidator } from "../shared/audience"
 import { type QueryLikeCtx } from "../shared/context"
-import {
-  automationScope,
-  canAccessAutomation,
-  projectAccessForConsole,
-} from "./access"
+import { canAccessAutomation } from "./access"
+import { toAutomationDisplay } from "./display"
 import {
   createAutomation,
   createAutomationRun,
@@ -60,7 +57,7 @@ export const list = query({
       automations: await Promise.all(
         automations
           .filter((automation) => canAccessAutomation(automation, personId))
-          .map((automation) => toConsoleAutomation(ctx, automation))
+          .map((automation) => toAutomationDisplay(ctx, automation))
       ),
     }
   },
@@ -74,7 +71,7 @@ export const get = query({
   handler: async (ctx, args) => {
     const personId = await resolveCurrentPerson(ctx, args.tenantId)
 
-    return await toConsoleAutomation(
+    return await toAutomationDisplay(
       ctx,
       await requireAccessibleAutomation(ctx, args, personId)
     )
@@ -99,7 +96,7 @@ export const create = mutation({
       createdBy,
     })
 
-    return await toConsoleAutomation(ctx, automation)
+    return await toAutomationDisplay(ctx, automation)
   },
 })
 
@@ -118,7 +115,7 @@ export const update = mutation({
     const personId = await resolveCurrentPerson(ctx, args.tenantId)
     await requireAccessibleAutomation(ctx, args, personId)
 
-    return await toConsoleAutomation(
+    return await toAutomationDisplay(
       ctx,
       await updateAutomation(ctx, { ...args, updatedBy: personId })
     )
@@ -134,7 +131,7 @@ export const pause = mutation({
     const personId = await resolveCurrentPerson(ctx, args.tenantId)
     await requireAccessibleAutomation(ctx, args, personId)
 
-    return await toConsoleAutomation(ctx, await pauseAutomation(ctx, args))
+    return await toAutomationDisplay(ctx, await pauseAutomation(ctx, args))
   },
 })
 
@@ -147,7 +144,7 @@ export const resume = mutation({
     const personId = await resolveCurrentPerson(ctx, args.tenantId)
     await requireAccessibleAutomation(ctx, args, personId)
 
-    return await toConsoleAutomation(ctx, await resumeAutomation(ctx, args))
+    return await toAutomationDisplay(ctx, await resumeAutomation(ctx, args))
   },
 })
 
@@ -213,45 +210,4 @@ async function requireAccessibleAutomation(
   }
 
   return automation
-}
-
-export async function toConsoleAutomation(
-  ctx: QueryLikeCtx,
-  automation: Doc<"automations">
-) {
-  return {
-    id: automation._id,
-    key: automation.key,
-    playbook: automation.playbook,
-    artifactId: automation.artifactId,
-    name: automation.name,
-    instructions: automation.instructions,
-    scope: automationScope(automation),
-    type: automation.type,
-    status: automation.status,
-    trigger: await projectTriggerForConsole(ctx, automation),
-    access: await projectAccessForConsole(ctx, automation.access),
-    createdAt: automation.createdAt,
-    updatedAt: automation.updatedAt,
-    firedAt: automation.firedAt,
-  }
-}
-
-async function projectTriggerForConsole(
-  ctx: QueryLikeCtx,
-  automation: Doc<"automations">
-) {
-  const trigger = automation.trigger
-
-  if (automation.type !== "event" || !("integrationId" in trigger)) {
-    return trigger
-  }
-
-  const integration = await ctx.db.get(trigger.integrationId)
-
-  return {
-    integration: integration?.integration,
-    event: trigger.event,
-    match: trigger.match,
-  }
 }

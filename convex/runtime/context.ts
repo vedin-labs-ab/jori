@@ -3,6 +3,7 @@ import { api, internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
 import { type AgentRuntimeInput } from "../runs/agent/input"
+import { recordTrace } from "../runs/execution/traces/data"
 import { isTerminalRunStatus, toolSnapshot } from "../runs/schema"
 import { drainSession } from "../sessions/drain"
 import { runtimeSkillNames } from "../skills/runtime"
@@ -24,7 +25,6 @@ import { runtimePermissions } from "./permissions/index"
 import { syncSessionReactions } from "./sessions"
 import { requireWorkerSecret } from "./shared"
 import { loadActiveSurface } from "./surface"
-import { recordTrace } from "./traces/data"
 
 type PreparedRun = {
   drained: unknown

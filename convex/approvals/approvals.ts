@@ -9,8 +9,8 @@ import {
   messageDeliveryValidator,
   toolSurfaceValidator,
 } from "../shared/integrations"
+import { resolveApprovalActor } from "./actors"
 import { resolveCancellationActor } from "./cancellation"
-import { resolveApprovalActor } from "./lifecycle"
 import { approvalDecision, approvalDeliveryFailure } from "./schema"
 import {
   markApprovalCancelled,

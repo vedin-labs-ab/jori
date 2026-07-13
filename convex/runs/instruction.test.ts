@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { queueRun } from "../runtime/outbox"
+import { resolveRunAudience } from "./audience"
+import { queueRun } from "./execution/outbox/data"
 import { createInstructionRun } from "./instruction"
-import { resolveRunAudience } from "./introspect/audience"
 
-vi.mock("../runtime/outbox", () => ({ queueRun: vi.fn() }))
-vi.mock("./introspect/audience", () => ({ resolveRunAudience: vi.fn() }))
+vi.mock("./execution/outbox/data", () => ({ queueRun: vi.fn() }))
+vi.mock("./audience", () => ({ resolveRunAudience: vi.fn() }))
 
 beforeEach(() => {
   vi.mocked(queueRun).mockReset().mockResolvedValue(null)

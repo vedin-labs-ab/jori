@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { toolSnapshot } from "../../runs/schema"
+import { toolSnapshot } from "../../schema"
 
 const base = {
   tenantId: v.string(),

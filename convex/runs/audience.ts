@@ -1,9 +1,9 @@
-import { type Doc, type Id } from "../../_generated/dataModel"
-import { type MutationCtx } from "../../_generated/server"
-import { automationScope } from "../../automations/access"
-import { conversationAudience } from "../../conversations/scope"
-import { type AudienceScope } from "../../shared/audience"
-import { runAudienceScope } from "../scope"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { type MutationCtx } from "../_generated/server"
+import { automationScope } from "../automations/access"
+import { conversationAudience } from "../conversations/scope"
+import { type AudienceScope } from "../shared/audience"
+import { runAudienceScope } from "./scope"
 
 export type RunAudience = {
   scope: AudienceScope

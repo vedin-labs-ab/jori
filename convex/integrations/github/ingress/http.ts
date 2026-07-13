@@ -162,7 +162,7 @@ async function recordGitHubMessage(
     mode?: GitHubRecordMode
   }
 ) {
-  await ctx.runMutation(internal.messages.intake.record, {
+  await ctx.runMutation(internal.conversations.intake.record, {
     accountId: message.accountId,
     integration: "github",
     ...(options.mode === undefined ? {} : { mode: options.mode }),

@@ -1,7 +1,7 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { wakeRun } from "../../runtime/waiters/data"
+import { wakeRun } from "../../runs/execution/waiters/data"
 import { recordTransition } from "../../transitions"
 import {
   markIntegrationOfferCancelled,
@@ -12,7 +12,7 @@ import {
   terminalIntegrationOfferStatus,
 } from "./transition"
 
-vi.mock("../../runtime/waiters/data", () => ({ wakeRun: vi.fn() }))
+vi.mock("../../runs/execution/waiters/data", () => ({ wakeRun: vi.fn() }))
 vi.mock("../../transitions", () => ({ recordTransition: vi.fn() }))
 
 const now = 100

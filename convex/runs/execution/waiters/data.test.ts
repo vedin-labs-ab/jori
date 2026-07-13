@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Id } from "../../_generated/dataModel"
-import { type MutationCtx } from "../../_generated/server"
+import { type DataModel, type Id } from "../../../_generated/dataModel"
+import { type MutationCtx } from "../../../_generated/server"
 import { wakeParentForTerminalRun, wakeRun } from "./data"
 
 test("wakes waiters with resolved offer subjects", async () => {

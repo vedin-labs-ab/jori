@@ -1,4 +1,4 @@
-import { type JsonObject } from "../../contracts/json"
+import { type JsonObject } from "../../../contracts/json"
 import {
   isJsonSchema,
   type JsonSchema,
@@ -6,7 +6,7 @@ import {
   readSchemaMap,
   readString,
   readStringArray,
-} from "../runs/agent/tools/schemas"
+} from "../../runs/agent/tools/schemas"
 
 export function validateSchemaValue(
   value: unknown,

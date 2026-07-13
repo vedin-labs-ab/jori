@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { normalizeBrokerToolInput } from "./input"
+import { normalizeBrokerToolInput } from "."
 
 test("broker input validation accepts Linear reaction targets", () => {
   expect(

@@ -88,9 +88,11 @@ async function scheduleSurfaceSync(
 ) {
   switch (subject.kind) {
     case "approval":
-      await ctx.scheduler.runAfter(0, internal.approvals.lifecycle.sync, {
-        approvalId: subject.id,
-      })
+      await ctx.scheduler.runAfter(
+        0,
+        internal.integrations.slack.approvals.surface.sync,
+        { approvalId: subject.id }
+      )
       return
     case "integrationOffer":
       await ctx.scheduler.runAfter(

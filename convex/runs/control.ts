@@ -9,9 +9,9 @@ import {
   requireClerkUserId,
 } from "../access/users"
 import { ensureClerkPerson } from "../persons/clerk"
-import { recordTrace } from "../runtime/traces/data"
-import { wakeParentForTerminalRun, wakeRun } from "../runtime/waiters/data"
 import { createPersonActor } from "../shared/actor"
+import { recordTrace } from "./execution/traces/data"
+import { wakeParentForTerminalRun, wakeRun } from "./execution/waiters/data"
 
 export const stop = mutation({
   args: {

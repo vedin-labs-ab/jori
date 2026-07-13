@@ -1,13 +1,13 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { type ActivityItem } from "../activity/types"
-import { canSee } from "./access"
-import { pageItems } from "./page"
 import {
   matchesSummaryQuery,
   projectRunSummary,
   type RunSummary,
-} from "./project"
+} from "../display/summary"
+import { canSee } from "./access"
+import { pageItems } from "./page"
 import { uniqueRuns } from "./runs"
 
 type RunFilters = {

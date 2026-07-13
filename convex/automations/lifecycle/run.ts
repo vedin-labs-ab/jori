@@ -1,8 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { resolveRunAudience } from "../../runs/introspect/audience"
+import { resolveRunAudience } from "../../runs/audience"
+import { queueRun } from "../../runs/execution/outbox/data"
 import { createAutomationRunSnapshot } from "../../runs/snapshot"
-import { queueRun } from "../../runtime/outbox"
 
 export async function createAutomationRun(
   ctx: MutationCtx,
