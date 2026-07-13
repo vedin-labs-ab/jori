@@ -30,7 +30,7 @@ test("active card puts the switch in the header and run-now in the footer", () =
   expect(screen.getByRole("button", { name: "View" })).toBeDefined()
   expect(screen.getByText(/Next in 2h/)).toBeDefined()
   expect(screen.getByText("Schedule")).toBeDefined()
-  expect(screen.getByText("Tools")).toBeDefined()
+  expect(screen.getByText("Access")).toBeDefined()
 })
 
 test("paused card shows paused state and no next run", () => {

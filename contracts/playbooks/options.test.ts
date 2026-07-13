@@ -1,113 +1,177 @@
 import { describe, expect, test } from "vitest"
 import {
   isPlaybookOptionEnabled,
-  type PlaybookOptionField,
+  type PlaybookSetupSection,
+  playbookOptionFields,
   resolvePlaybookOptions,
 } from "./options"
 
-const fields: PlaybookOptionField[] = [
+const setup: PlaybookSetupSection[] = [
   {
-    key: "mode",
-    label: "Delivery",
-    kind: "choice",
-    default: "digest",
-    choices: [
-      { value: "digest", label: "Morning digest" },
-      { value: "meeting", label: "Before each meeting" },
+    key: "scope",
+    kind: "fields",
+    label: "Scope",
+    fields: [
+      {
+        key: "scope",
+        label: "Scope",
+        kind: "choice",
+        default: "external",
+        choices: [
+          { value: "external", label: "External" },
+          { value: "all", label: "All" },
+        ],
+      },
     ],
   },
   {
-    key: "time",
-    label: "Deliver at",
-    kind: "time",
-    default: "07:30",
-    enabledWhen: { key: "mode", value: "digest" },
-  },
-  {
-    key: "reminders",
-    label: "Reminders",
-    kind: "choice",
-    default: "on",
-    choices: [
-      { value: "on", label: "On" },
-      { value: "off", label: "Off" },
+    key: "timing",
+    kind: "behaviors",
+    label: "Timing",
+    behaviors: [
+      {
+        key: "morning",
+        label: "Morning briefing",
+        enabledBy: {
+          key: "morning",
+          label: "Morning briefing",
+          kind: "boolean",
+          default: true,
+        },
+        fields: [
+          {
+            key: "morningTime",
+            label: "Send at",
+            kind: "time",
+            default: "07:30",
+            enabledWhen: { key: "morning", value: true },
+          },
+        ],
+      },
+      {
+        key: "reminders",
+        label: "Reminders",
+        enabledBy: {
+          key: "reminders",
+          label: "Reminders",
+          kind: "boolean",
+          default: false,
+        },
+        fields: [
+          {
+            key: "remindBefore",
+            label: "Send",
+            kind: "minutes",
+            default: 30,
+            min: 5,
+            max: 240,
+            presets: [15, 30, 45, 60],
+            enabledWhen: { key: "reminders", value: true },
+          },
+        ],
+      },
     ],
-    enabledWhen: { key: "mode", value: "digest" },
-  },
-  {
-    key: "remindBefore",
-    label: "Remind before",
-    kind: "minutes",
-    default: 30,
-    min: 5,
-    max: 240,
-    presets: [15, 30, 45, 60],
-    enabledWhen: { key: "reminders", value: "on" },
   },
 ]
 
 describe("playbook options", () => {
-  test("defaults fill every key when nothing is provided", () => {
-    expect(resolvePlaybookOptions(fields)).toEqual({
-      mode: "digest",
-      time: "07:30",
-      reminders: "on",
+  test("defaults fill every key", () => {
+    expect(resolvePlaybookOptions(setup)).toEqual({
+      scope: "external",
+      morning: true,
+      morningTime: "07:30",
+      reminders: false,
       remindBefore: 30,
     })
   })
 
-  test("enabled fields take the provided values", () => {
+  test("enabled fields take provided values", () => {
     expect(
-      resolvePlaybookOptions(fields, { time: "08:00", remindBefore: 15 })
-    ).toEqual({
-      mode: "digest",
-      time: "08:00",
-      reminders: "on",
+      resolvePlaybookOptions(setup, {
+        morningTime: "08:00",
+        reminders: true,
+        remindBefore: 15,
+      })
+    ).toMatchObject({
+      morningTime: "08:00",
+      reminders: true,
       remindBefore: 15,
     })
   })
 
   test("disabled fields revert to defaults", () => {
     expect(
-      resolvePlaybookOptions(fields, { mode: "meeting", time: "09:00" })
-    ).toEqual({
-      mode: "meeting",
-      time: "07:30",
-      reminders: "on",
-      remindBefore: 30,
-    })
+      resolvePlaybookOptions(setup, {
+        morning: false,
+        morningTime: "09:00",
+      })
+    ).toMatchObject({ morning: false, morningTime: "07:30" })
   })
 
-  test("enablement chases predicates transitively", () => {
-    const values = resolvePlaybookOptions(fields, {
-      mode: "meeting",
-      remindBefore: 60,
-    })
+  test("enablement follows typed predicates", () => {
+    const fields = playbookOptionFields(setup)
+    const time = fields.find((field) => field.key === "morningTime")
 
-    expect(values.remindBefore).toBe(30)
+    expect(time).toBeDefined()
     expect(
-      isPlaybookOptionEnabled(fields[3], fields, {
-        mode: "meeting",
-        reminders: "on",
-      })
+      time === undefined
+        ? true
+        : isPlaybookOptionEnabled(time, fields, { morning: false })
     ).toBe(false)
   })
+})
 
-  test("rejects invalid values and unknown keys", () => {
-    expect(() => resolvePlaybookOptions(fields, { mode: "weekly" })).toThrow(
-      'Invalid value for playbook option "mode"'
-    )
-    expect(() => resolvePlaybookOptions(fields, { time: "7:30" })).toThrow(
-      'Invalid value for playbook option "time"'
-    )
-    expect(() => resolvePlaybookOptions(fields, { remindBefore: 3 })).toThrow(
-      'Invalid value for playbook option "remindBefore"'
+describe("playbook option validation", () => {
+  test("rejects invalid values, unknown keys, and duplicate fields", () => {
+    expect(() => resolvePlaybookOptions(setup, { morning: "yes" })).toThrow(
+      'Invalid value for playbook option "morning"'
     )
     expect(() =>
-      resolvePlaybookOptions(fields, { remindBefore: 30.5 })
-    ).toThrow('Invalid value for playbook option "remindBefore"')
-    expect(() => resolvePlaybookOptions(fields, { bogus: 1 })).toThrow(
+      resolvePlaybookOptions(setup, { morningTime: "7:30" })
+    ).toThrow('Invalid value for playbook option "morningTime"')
+    expect(() =>
+      resolvePlaybookOptions(setup, { morningTime: "24:00" })
+    ).toThrow('Invalid value for playbook option "morningTime"')
+    expect(() => resolvePlaybookOptions(setup, { remindBefore: 3 })).toThrow(
+      'Invalid value for playbook option "remindBefore"'
+    )
+    expect(() => resolvePlaybookOptions(setup, { remindBefore: 30.5 })).toThrow(
+      'Invalid value for playbook option "remindBefore"'
+    )
+    expect(() => resolvePlaybookOptions(setup, { bogus: 1 })).toThrow(
       'Unknown playbook option "bogus"'
+    )
+    expect(() => playbookOptionFields([...setup, setup[0]])).toThrow(
+      'Duplicate setup section "scope"'
+    )
+    expect(() =>
+      playbookOptionFields([...setup, { ...setup[0], key: "scope-copy" }])
+    ).toThrow('Duplicate playbook option "scope"')
+    expect(() =>
+      playbookOptionFields([...setup, { ...setup[1], key: "timing-copy" }])
+    ).toThrow('Duplicate playbook behavior "morning"')
+  })
+
+  test("rejects dependencies on undeclared options", () => {
+    const invalid: PlaybookSetupSection[] = [
+      {
+        key: "timing",
+        kind: "fields",
+        label: "Timing",
+        fields: [
+          {
+            key: "time",
+            label: "Send at",
+            kind: "time",
+            default: "07:30",
+            enabledWhen: { key: "missing", value: true },
+          },
+        ],
+      },
+    ]
+
+    expect(() => resolvePlaybookOptions(invalid)).toThrow(
+      'Unknown option dependency "missing"'
     )
   })
 })

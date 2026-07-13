@@ -75,8 +75,10 @@ describe("playbook catalog", () => {
 
 const meetingBriefing = getPlaybook("meeting-briefing")
 
-function meetingOptions(values: Record<string, string | number> = {}) {
-  return resolvePlaybookOptions(meetingBriefing.options, values)
+function meetingOptions(
+  values: Record<string, boolean | number | string> = {}
+) {
+  return resolvePlaybookOptions(meetingBriefing.setup, values)
 }
 
 describe("Meeting Briefing configuration", () => {
@@ -84,9 +86,10 @@ describe("Meeting Briefing configuration", () => {
     expect(meetingBriefing.title).toBe("Meeting Briefing")
     expect(meetingOptions()).toMatchObject({
       meetings: "external",
-      digest: "on",
-      time: "07:30",
-      before: "off",
+      morning: true,
+      morningTime: "07:30",
+      beforeMeeting: false,
+      leadMinutes: "45",
     })
     expect(meetingBriefing.agentWait).toEqual({ unit: "minutes", value: 15 })
     expect(meetingBriefing.slots).toEqual([
@@ -104,7 +107,7 @@ describe("Meeting Briefing configuration", () => {
     expect(
       resolvePlaybookSchedule(
         meetingBriefing,
-        meetingOptions({ time: "00:05" })
+        meetingOptions({ morningTime: "00:05" })
       )
     ).toEqual({ repeat: "daily", time: "23:35" })
   })
@@ -116,8 +119,8 @@ describe("Meeting Briefing cadence", () => {
       resolvePlaybookSchedule(
         meetingBriefing,
         meetingOptions({
-          digest: "off",
-          before: "45",
+          morning: false,
+          beforeMeeting: true,
         })
       )
     ).toEqual({ repeat: "daily", time: "01:00" })
@@ -125,17 +128,20 @@ describe("Meeting Briefing cadence", () => {
 
   test("cadence copy follows the chosen options", () => {
     expect(describePlaybookCadence(meetingBriefing, meetingOptions())).toBe(
-      "Morning digest at 07:30"
+      "Morning briefing at 07:30"
     )
     expect(
-      describePlaybookCadence(meetingBriefing, meetingOptions({ before: "45" }))
-    ).toBe("Morning digest at 07:30, briefing 45 minutes before each meeting")
+      describePlaybookCadence(
+        meetingBriefing,
+        meetingOptions({ beforeMeeting: true })
+      )
+    ).toBe("Morning briefing at 07:30, briefing 45 minutes before each meeting")
     expect(
       describePlaybookCadence(
         meetingBriefing,
         meetingOptions({
-          digest: "off",
-          before: "45",
+          morning: false,
+          beforeMeeting: true,
         })
       )
     ).toBe("Briefing 45 minutes before each meeting")
@@ -144,16 +150,18 @@ describe("Meeting Briefing cadence", () => {
   test("at least one delivery must stay on", () => {
     expect(
       meetingBriefing.validateOptions?.(
-        meetingOptions({ digest: "off", before: "off" })
+        meetingOptions({ morning: false, beforeMeeting: false })
       )
-    ).toBe("Turn on the morning digest or a pre-meeting send.")
+    ).toBe("Choose at least one delivery time.")
     expect(
       meetingBriefing.validateOptions?.(
-        meetingOptions({ digest: "off", before: "45" })
+        meetingOptions({ morning: false, beforeMeeting: true })
       )
     ).toBe(undefined)
     expect(
-      meetingBriefing.validateOptions?.(meetingOptions({ before: "off" }))
+      meetingBriefing.validateOptions?.(
+        meetingOptions({ beforeMeeting: false })
+      )
     ).toBe(undefined)
   })
 

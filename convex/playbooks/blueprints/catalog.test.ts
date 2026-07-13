@@ -82,7 +82,7 @@ test("Meeting Briefing bounds shared content and receipts", () => {
     assertMeetingState({
       ...meeting,
       delivery: {
-        digest: {
+        morning: {
           deliveredAt: "2030-01-01T07:30:00.000Z",
           destination: "sam@example.com",
           eventStartsAt: "2030-01-01T08:00:00.000Z",
@@ -179,7 +179,7 @@ function maximalMeeting(index: number) {
     },
     sources: maximalSources(index, timestamp),
     delivery: {
-      digest: {
+      morning: {
         revision: index,
         eventStartsAt: timestamp,
         deliveredAt: timestamp,

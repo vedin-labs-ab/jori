@@ -13,6 +13,21 @@ import { type PlaybookListRow, slotDisplayProviders } from "./state"
 
 export function PlaybookMeta({
   definition,
+  row,
+}: {
+  definition: PlaybookDefinition
+  row: PlaybookListRow | undefined
+}) {
+  return (
+    <div className="grid gap-3">
+      <PlaybookSchedule definition={definition} row={row} />
+      <PlaybookAccess definition={definition} row={row} />
+    </div>
+  )
+}
+
+export function PlaybookSchedule({
+  definition,
   options,
   row,
 }: {
@@ -21,43 +36,64 @@ export function PlaybookMeta({
   row: PlaybookListRow | undefined
 }) {
   return (
-    <div className="grid gap-3">
-      <PlaybookSection label="Schedule">
-        {/* Top-aligned so the icon sits on the first line when the cadence
-            wraps; mt-px centers the 14px icon in the 16px line box. */}
-        <div className="flex items-start gap-1.5">
-          <CalendarClock className="mt-px size-3.5 shrink-0 text-muted-foreground" />
-          <span>{describePlaybookCadence(definition, options)}</span>
-          <NextRun enabled={row?.enabled} />
-        </div>
-      </PlaybookSection>
-      <PlaybookSection label="Tools">
-        {definition.slots.map((slot) => (
-          <div className="flex items-center gap-1.5" key={slot.capability}>
-            <span className="flex shrink-0 items-center gap-1">
-              {slotDisplayProviders(slot, row).map((provider) => (
-                <SurfaceLogo
-                  key={provider.integration}
-                  alt={providerAlt(provider)}
-                  className={provider.connected ? undefined : "opacity-40"}
-                  integration={provider.integration}
-                />
-              ))}
-            </span>
-            <span className="truncate">
-              {playbookSlotIntentLabels(slot).join(" · ")}
-            </span>
-          </div>
-        ))}
-        {definition.web ? (
-          <div className="flex items-center gap-1.5">
-            <Globe className="size-3.5 shrink-0 text-muted-foreground" />
-            <span>Web research</span>
-          </div>
-        ) : null}
-      </PlaybookSection>
-    </div>
+    <PlaybookSection label="Schedule">
+      <div className="flex items-start gap-1.5">
+        <CalendarClock className="mt-px size-3.5 shrink-0 text-muted-foreground" />
+        <span>{describePlaybookCadence(definition, options)}</span>
+        <NextRun enabled={row?.enabled} />
+      </div>
+    </PlaybookSection>
   )
+}
+
+export function PlaybookAccess({
+  choices,
+  definition,
+  row,
+}: {
+  choices?: Record<string, Integration>
+  definition: PlaybookDefinition
+  row: PlaybookListRow | undefined
+}) {
+  return (
+    <PlaybookSection label="Access">
+      {definition.slots.map((slot) => (
+        <div className="flex items-center gap-1.5" key={slot.capability}>
+          <span className="flex shrink-0 items-center gap-1">
+            {displayProviders(slot, row, choices).map((provider) => (
+              <SurfaceLogo
+                key={provider.integration}
+                alt={providerAlt(provider)}
+                className={provider.connected ? undefined : "opacity-40"}
+                integration={provider.integration}
+              />
+            ))}
+          </span>
+          <span className="truncate">
+            {playbookSlotIntentLabels(slot).join(" · ")}
+          </span>
+        </div>
+      ))}
+      {definition.web ? (
+        <div className="flex items-center gap-1.5">
+          <Globe className="size-3.5 shrink-0 text-muted-foreground" />
+          <span>Web research</span>
+        </div>
+      ) : null}
+    </PlaybookSection>
+  )
+}
+
+function displayProviders(
+  slot: PlaybookDefinition["slots"][number],
+  row: PlaybookListRow | undefined,
+  choices: Record<string, Integration> | undefined
+) {
+  const choice = choices?.[slot.capability]
+
+  return choice === undefined
+    ? slotDisplayProviders(slot, row)
+    : [{ integration: choice, connected: true }]
 }
 
 /** Live "Next in 14h" suffix once the playbook is enabled and active. */
