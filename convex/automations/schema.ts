@@ -71,6 +71,9 @@ export const automationType = v.union(
 export const automations = defineTable({
   tenantId: v.string(),
   ...automationBinding,
+  parentId: v.optional(v.id("automations")),
+  configurationVersion: v.optional(v.number()),
+  parentConfigurationVersion: v.optional(v.number()),
   keyPartition: v.optional(v.string()),
   name: v.string(),
   instructions: v.string(),
@@ -93,7 +96,11 @@ export const automations = defineTable({
     "key",
   ])
   .index("by_artifact", ["artifactId"])
+  .index("by_artifact_and_parent", ["artifactId", "parentId"])
+  .index("by_parent", ["parentId"])
   .index("by_tenant_status", ["tenantId", "status"])
+  .index("by_tenant_and_parent", ["tenantId", "parentId"])
+  .index("by_tenant_and_status_and_parent", ["tenantId", "status", "parentId"])
 
 export type AutomationTriggerInput = Infer<typeof triggerInput>
 export type AutomationType = Infer<typeof automationType>

@@ -71,10 +71,33 @@ export function deliveryKindForMode(mode: DeliveryMode): DeliveryKind {
  *  instruction uses for the produced output ("brief", "summary"). */
 export type PlaybookDelivery = {
   allowed: readonly DeliveryKind[]
+  /** Slack destinations this playbook may expose. Both are allowed by default. */
+  slackTargets?: readonly SlackDeliveryTarget["kind"][]
   noun: string
   /** "content" sends the full output in the message (the default);
    *  "summary" sends a short digest plus a link to the full output. */
   style?: DeliveryStyle
+}
+
+export function allowsDeliveryChoice(
+  delivery: PlaybookDelivery,
+  choice: DeliveryChoice
+) {
+  return allowsDeliveryMode(delivery, deliveryMode(choice))
+}
+
+export function allowsDeliveryMode(
+  delivery: PlaybookDelivery,
+  mode: DeliveryMode
+) {
+  if (!delivery.allowed.includes(deliveryKindForMode(mode))) {
+    return false
+  }
+
+  return (
+    mode === "email" ||
+    (delivery.slackTargets ?? ["channel", "dm"]).includes(mode)
+  )
 }
 
 export type DeliveryStyle = "content" | "summary"

@@ -4,7 +4,11 @@ import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { publishArtifact } from "../../artifacts/publish"
-import { playbookBlueprints } from "./generated"
+import {
+  isCurrentPlaybookBlueprint,
+  type PlaybookBlueprint,
+  readPlaybookBlueprint,
+} from "./catalog"
 
 export async function provisionPlaybookArtifact(
   ctx: ActionCtx,
@@ -14,7 +18,7 @@ export async function provisionPlaybookArtifact(
     personId: Id<"persons">
   }
 ) {
-  const blueprint = readBlueprint(args.key)
+  const blueprint = readPlaybookBlueprint(args.key)
 
   if (blueprint === undefined) {
     return undefined
@@ -24,49 +28,66 @@ export async function provisionPlaybookArtifact(
   const existing = await findBlueprint(ctx, args, partition)
 
   if (existing !== null) {
-    if (existing.archivedAt !== undefined) {
+    if (existing.artifact.archivedAt !== undefined) {
       await ctx.runMutation(internal.artifacts.records.restore, {
-        artifactId: existing._id,
+        artifactId: existing.artifact._id,
         tenantId: args.tenantId,
       })
     }
 
-    return existing._id
+    if (!isCurrentPlaybookBlueprint(existing, blueprint)) {
+      await publishBlueprint(ctx, args, blueprint, existing.artifact._id)
+    }
+
+    return existing.artifact._id
   }
 
   try {
-    const published = await publishArtifact(ctx, {
-      mode: "create",
-      tenantId: args.tenantId,
-      personId: args.personId,
-      blueprint: args.key,
-      capabilities: [],
-      access: blueprint.access,
-      title: blueprint.title,
-      contract: blueprint.contract,
-      source: blueprint.source.map((file) => ({ ...file })),
-      build: {
-        sourceHash: blueprint.build.sourceHash,
-        assets: blueprint.build.assets.map((asset) => ({ ...asset })),
-      },
-    })
+    const published = await publishBlueprint(ctx, args, blueprint)
 
     return published.artifactId
   } catch (error) {
     const raced = await findBlueprint(ctx, args, partition)
 
     if (raced !== null) {
-      return raced._id
+      return raced.artifact._id
     }
 
     throw error
   }
 }
 
-function readBlueprint(key: string) {
-  return key in playbookBlueprints
-    ? playbookBlueprints[key as keyof typeof playbookBlueprints]
-    : undefined
+async function publishBlueprint(
+  ctx: ActionCtx,
+  args: { key: string; tenantId: string; personId: Id<"persons"> },
+  blueprint: PlaybookBlueprint,
+  artifactId?: Id<"artifacts">
+) {
+  const common = {
+    tenantId: args.tenantId,
+    personId: args.personId,
+    capabilities: [],
+    access: blueprint.access,
+    title: blueprint.title,
+    contract: blueprint.contract,
+    source: blueprint.source.map((file) => ({ ...file })),
+    build: {
+      sourceHash: blueprint.build.sourceHash,
+      assets: blueprint.build.assets.map((asset) => ({ ...asset })),
+    },
+  }
+
+  return artifactId === undefined
+    ? await publishArtifact(ctx, {
+        ...common,
+        mode: "create",
+        blueprint: args.key,
+      })
+    : await publishArtifact(ctx, {
+        ...common,
+        mode: "update",
+        artifactId,
+      })
 }
 
 async function findBlueprint(

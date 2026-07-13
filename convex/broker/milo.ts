@@ -102,6 +102,9 @@ type MiloRunContext = {
   tenantId: string
   principal: ExecutionPrincipal
   _id?: Id<"runs">
+  automationId?: Id<"automations">
+  automationParentId?: Id<"automations">
+  automationConfigurationVersion?: number
 }
 
 function toMiloContext(run: MiloRunContext) {
@@ -109,6 +112,8 @@ function toMiloContext(run: MiloRunContext) {
     tenantId: run.tenantId,
     createdBy: executionPrincipalPersonId(run.principal),
     runId: run._id,
+    automationId: run.automationParentId ?? run.automationId,
+    automationConfigurationVersion: run.automationConfigurationVersion,
   }
 }
 

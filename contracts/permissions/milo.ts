@@ -167,8 +167,8 @@ export const miloToolPermissionRows = [
     "milo",
     "search_automations",
     "Search automations",
-    "Find existing Milo automations.",
-    "Find Milo automations by name or instruction text. Use to locate one before reading or changing it, and to check for an existing automation before adding a duplicate.",
+    "Find existing user-managed Milo automations.",
+    "Find top-level automations by name or instruction text. Internal scheduled work is omitted. Use to locate an automation before reading or changing it, and to check for an existing automation before adding a duplicate. When you already have an automation ID, use read_automation directly.",
     "read",
   ],
   [

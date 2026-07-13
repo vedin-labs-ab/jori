@@ -18,10 +18,10 @@ test("a subtask names its parent run", async () => {
   expect(summary.source).toEqual({
     type: "manual",
     surface: "milo",
-    parent: { title: "Meeting prep" },
+    parent: { title: "Meeting Briefing" },
   })
   expect(summary.searchableText).toContain("subtask")
-  expect(summary.searchableText).toContain("meeting prep")
+  expect(summary.searchableText).toContain("meeting briefing")
 })
 
 // Rows written before subtask snapshots slimmed down copied the parent's
@@ -39,7 +39,7 @@ test("a subtask drops origin context copied from its parent", async () => {
   )
 
   expect(summary.source.surface).toBe("milo")
-  expect(summary.source.parent).toEqual({ title: "Meeting prep" })
+  expect(summary.source.parent).toEqual({ title: "Meeting Briefing" })
   expect(summary.details.some((detail) => detail.type === "schedule")).toBe(
     false
   )
@@ -79,7 +79,7 @@ function parentRun() {
     tenantId: "tenant",
     cause: { type: "time", scheduledAt: 0 },
     snapshot: {
-      title: "Meeting prep",
+      title: "Meeting Briefing",
       ...recurringDisplay({ schedule: "Weekdays at 06:00 UTC" }),
     },
     status: "completed",

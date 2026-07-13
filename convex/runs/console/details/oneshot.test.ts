@@ -67,6 +67,27 @@ test("marks one-shot automation web search as blocked when disabled", async () =
   })
 })
 
+test("keeps the one-shot label after an owned automation is cleaned up", async () => {
+  const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
+  const run = testRun(
+    {
+      ...oneShotRun(scheduledAt),
+      automationParentId: "parent",
+    },
+    { createdAt: scheduledAt + 1000, endedAt: scheduledAt + 2000 }
+  )
+  const summary = await summarizeRun(
+    fakeQueryCtx({ automation: null, run }),
+    run
+  )
+
+  expect(summary.source).toEqual({
+    kind: { label: "one-shot", type: "one-shot" },
+    type: "automation",
+    surface: "milo",
+  })
+})
+
 function oneShotRun(scheduledAt: number) {
   return {
     _id: "run",

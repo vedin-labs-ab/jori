@@ -16,6 +16,14 @@ test("normalizes keys and scopes their uniqueness", () => {
   expect(automationKeyPartition({ kind: "organization" })).toBe("organization")
 })
 
+test("bounded Meeting Briefing keys fit with long provider identifiers", () => {
+  const meetingKey = `mb:${"a".repeat(32)}`
+  const key = `meeting-briefing:${"p".repeat(64)}:event:${meetingKey}:2030-01-01T08:00:00.000Z`
+
+  expect(normalizeAutomationKey(key)).toBe(key)
+  expect(key.length).toBeLessThan(240)
+})
+
 test("idempotency compares semantic definitions", () => {
   const definition = automation()
   const reordered = {
@@ -35,6 +43,12 @@ test("idempotency compares semantic definitions", () => {
     sameAutomationDefinition(definition, {
       ...definition,
       instructions: "Different work.",
+    })
+  ).toBe(false)
+  expect(
+    sameAutomationDefinition(definition, {
+      ...definition,
+      parentId: "parent" as Id<"automations">,
     })
   ).toBe(false)
 })

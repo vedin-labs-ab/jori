@@ -37,15 +37,20 @@ function queryAutomationRows(
   if (statusFilter !== undefined) {
     return ctx.db
       .query("automations")
-      .withIndex("by_tenant_status", (index) =>
-        index.eq("tenantId", args.tenantId).eq("status", statusFilter)
+      .withIndex("by_tenant_and_status_and_parent", (index) =>
+        index
+          .eq("tenantId", args.tenantId)
+          .eq("status", statusFilter)
+          .eq("parentId", undefined)
       )
       .collect()
   }
 
   return ctx.db
     .query("automations")
-    .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
+    .withIndex("by_tenant_and_parent", (index) =>
+      index.eq("tenantId", args.tenantId).eq("parentId", undefined)
+    )
     .collect()
 }
 

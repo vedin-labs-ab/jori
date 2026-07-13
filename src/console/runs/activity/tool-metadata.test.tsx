@@ -141,7 +141,7 @@ test.each([
       <ActivityItem
         item={activityItem({
           metadata: [
-            { kind: "target", text: "Meeting prep" },
+            { kind: "target", text: "Meeting Briefing" },
             { kind: "scope", text: "dossiers" },
           ],
           title,
@@ -152,7 +152,7 @@ test.each([
     </TooltipProvider>
   )
 
-  const artifactTitle = screen.getByText("Meeting prep")
+  const artifactTitle = screen.getByText("Meeting Briefing")
   const key = screen.getByText("dossiers")
 
   expect(artifactTitle.parentElement?.className).not.toContain("basis-0")

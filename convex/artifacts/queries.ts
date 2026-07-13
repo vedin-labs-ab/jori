@@ -37,7 +37,7 @@ export const findBlueprint = internalQuery({
     partition: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const artifact = await ctx.db
       .query("artifacts")
       .withIndex("by_tenant_and_blueprint", (index) =>
         index
@@ -46,6 +46,17 @@ export const findBlueprint = internalQuery({
           .eq("blueprint", args.blueprint)
       )
       .first()
+
+    if (artifact === null) {
+      return null
+    }
+
+    const version =
+      artifact.versionId === undefined
+        ? null
+        : await ctx.db.get(artifact.versionId)
+
+    return { artifact, treeId: version?.treeId }
   },
 })
 

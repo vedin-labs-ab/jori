@@ -195,13 +195,15 @@ test("renders the subtask relation with an emphasized parent title", () => {
       source={{
         type: "manual",
         surface: "milo",
-        parent: { title: "Meeting prep" },
+        parent: { title: "Meeting Briefing" },
       }}
     />
   )
 
-  expect(container.textContent).toBe("MiloSubtask of Meeting prepPersonal")
-  expect(screen.getByText("Meeting prep").className).toContain("font-medium")
+  expect(container.textContent).toBe("MiloSubtask of Meeting BriefingPersonal")
+  expect(screen.getByText("Meeting Briefing").className).toContain(
+    "font-medium"
+  )
   expect(
     Array.from(container.querySelectorAll("svg")).some((element) =>
       element.classList.contains("lucide-corner-down-right")

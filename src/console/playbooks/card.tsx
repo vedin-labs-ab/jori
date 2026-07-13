@@ -23,7 +23,7 @@ import { type PlaybookListRow } from "./state"
 
 const playbookIcons: Record<string, LucideIcon> = {
   "morning-brief": Sunrise,
-  "meeting-prep": CalendarSearch,
+  "meeting-briefing": CalendarSearch,
   "follow-up-sweep": MailCheck,
   "week-in-review": CalendarRange,
 }

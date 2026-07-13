@@ -38,6 +38,7 @@ export type RawMiloStateUpdateInput = {
 
 export type MiloStateSubscriptionInput = {
   intervalMs?: number
+  onError?: (error: unknown) => void
 }
 
 export type ArtifactStateDefinition<TSchema extends z.ZodType = z.ZodType> = {

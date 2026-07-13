@@ -75,7 +75,7 @@ export const artifactToolInputSchemas = {
     properties: {
       artifactId: stringProperty("Milo artifact ID."),
       expiresInHours: numberProperty(
-        "How long the link stays valid, in hours. Defaults to 72. Match the content's shelf life: a meeting prep might use 24, a weekly review 168.",
+        "How long the link stays valid, in hours. Defaults to 72. Match the content's shelf life: a meeting briefing might use 24, a weekly review 168.",
         shareExpiry.minHours,
         shareExpiry.maxHours
       ),

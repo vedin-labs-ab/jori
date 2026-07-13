@@ -34,7 +34,11 @@ export async function createInstructionRun(
     artifactId: args.artifactId ?? parent?.artifactId,
     ...(parent === undefined
       ? {}
-      : { parentId: parent._id, rootId: parent.rootId ?? parent._id }),
+      : {
+          parentId: parent._id,
+          rootId: parent.rootId ?? parent._id,
+          ...inheritedAutomationExecution(parent),
+        }),
     cause: { type: "manual", personId: args.createdBy },
     principal:
       args.principal ??
@@ -56,4 +60,22 @@ export async function createInstructionRun(
   await queueRun(ctx, runId)
 
   return runId
+}
+
+function inheritedAutomationExecution(parent: Doc<"runs">) {
+  if (parent.automationId === undefined) {
+    return {}
+  }
+
+  return {
+    automationId: parent.automationId,
+    ...(parent.automationParentId === undefined
+      ? {}
+      : { automationParentId: parent.automationParentId }),
+    ...(parent.automationConfigurationVersion === undefined
+      ? {}
+      : {
+          automationConfigurationVersion: parent.automationConfigurationVersion,
+        }),
+  }
 }

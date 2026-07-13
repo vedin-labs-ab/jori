@@ -74,6 +74,7 @@ export async function resolvePlaybookPlan(
   const destination = await resolveDestination(ctx, args.destination, {
     connected,
     createdBy: args.createdBy,
+    delivery: definition.delivery,
     emailProvider: emailInputProvider(resolved),
     recipient: args.recipient,
   })
@@ -86,6 +87,7 @@ export async function resolvePlaybookPlan(
     instructions: renderPlaybookInstructions({
       key: definition.key,
       providers: resolvedProviderLabels(resolved),
+      providerKeys: resolvedProviderKeys(resolved),
       destination,
       subject: definition.title,
       noun: definition.delivery.noun,
@@ -278,4 +280,14 @@ function resolvedProviderLabels(resolved: ResolvedSlot[]) {
   }
 
   return labels
+}
+
+function resolvedProviderKeys(resolved: ResolvedSlot[]) {
+  const providers: Partial<Record<PlaybookCapability, Integration>> = {}
+
+  for (const { slot, integration } of resolved) {
+    providers[slot.capability] = integration
+  }
+
+  return providers
 }

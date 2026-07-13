@@ -1,10 +1,10 @@
 import { type PlaybookDefinition } from "../../contracts/playbooks/catalog"
 import {
+  allowsDeliveryMode,
   type DeliveryChoice,
   type DeliveryMode,
   type DeliveryOption,
   type DeliverySetup,
-  deliveryKindForMode,
   deliveryMode,
   deliveryModes,
   emailDeliveryProviders,
@@ -54,9 +54,7 @@ export function deliverySetup(
   context: DeliveryContext
 ): DeliverySetup {
   const options = deliveryModes
-    .filter((mode) =>
-      definition.delivery.allowed.includes(deliveryKindForMode(mode))
-    )
+    .filter((mode) => allowsDeliveryMode(definition.delivery, mode))
     .map((mode) => deliveryOption(mode, context))
   const recommended = recommendedDelivery(options, context.preference)
 

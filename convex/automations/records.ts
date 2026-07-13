@@ -4,6 +4,7 @@ import { internalMutation, internalQuery } from "../_generated/server"
 import { scopeValidator } from "../shared/audience"
 import { type QueryLikeCtx } from "../shared/context"
 import { canAccessAutomation } from "./access"
+import { canExecuteAutomationRunTools } from "./execution"
 import {
   createAutomation,
   fireAutomation,
@@ -12,6 +13,7 @@ import {
   searchAutomations,
   updateAutomation,
 } from "./lifecycle"
+import { deleteOwnedAutomations } from "./lifecycle/children"
 import {
   accessInput,
   automationBinding,
@@ -23,6 +25,8 @@ export const create = internalMutation({
   args: {
     tenantId: v.string(),
     ...automationBinding,
+    parentId: v.optional(v.id("automations")),
+    expectedParentConfigurationVersion: v.optional(v.number()),
     name: v.string(),
     instructions: v.string(),
     scope: v.optional(scopeValidator),
@@ -72,6 +76,15 @@ export const read = internalQuery({
   },
 })
 
+export const canExecuteRunTools = internalQuery({
+  args: { runId: v.id("runs") },
+  handler: async (ctx, args) => {
+    const run = await ctx.db.get(args.runId)
+
+    return run !== null && (await canExecuteAutomationRunTools(ctx, run))
+  },
+})
+
 export const update = internalMutation({
   args: {
     tenantId: v.string(),
@@ -111,6 +124,12 @@ export const fire = internalMutation({
     expectedAt: v.number(),
   },
   handler: async (ctx, args) => await fireAutomation(ctx, args),
+})
+
+export const cleanupOwned = internalMutation({
+  args: { parentId: v.id("automations") },
+  handler: async (ctx, args) =>
+    await deleteOwnedAutomations(ctx, args.parentId),
 })
 
 async function requireRecordAccess(

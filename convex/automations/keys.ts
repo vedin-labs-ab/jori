@@ -64,6 +64,8 @@ type AutomationDefinition = Pick<
   | "artifactId"
   | "instructions"
   | "name"
+  | "parentId"
+  | "parentConfigurationVersion"
   | "playbook"
   | "principal"
   | "scope"
@@ -85,6 +87,8 @@ function definitionKey(definition: AutomationDefinition) {
     artifactId: definition.artifactId ?? null,
     instructions: definition.instructions,
     name: definition.name,
+    parentId: definition.parentId ?? null,
+    parentConfigurationVersion: definition.parentConfigurationVersion ?? null,
     playbook: definition.playbook ?? null,
     principal: definition.principal,
     scope: definition.scope,

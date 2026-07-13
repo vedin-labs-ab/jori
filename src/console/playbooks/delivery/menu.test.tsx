@@ -46,3 +46,27 @@ test("keeps Slack methods nested and explains unavailable choices", () => {
   fireEvent.click(channel)
   expect(onSelect).toHaveBeenCalledWith("channel")
 })
+
+test("a playbook can offer Slack DM without exposing channels", () => {
+  const onSelect = vi.fn()
+
+  render(
+    <DeliveryModeMenu
+      disabled={false}
+      mode="email"
+      onSelect={onSelect}
+      options={[
+        { mode: "dm", available: true },
+        { mode: "email", available: true },
+      ]}
+    />
+  )
+
+  fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery method" }))
+  const slack = screen.getByRole("menuitem", { name: "Slack" })
+  slack.focus()
+  fireEvent.keyDown(slack, { key: "ArrowRight" })
+  expect(screen.queryByRole("menuitem", { name: "Channel" })).toBeNull()
+  fireEvent.click(screen.getByRole("menuitem", { name: "DM" }))
+  expect(onSelect).toHaveBeenCalledWith("dm")
+})

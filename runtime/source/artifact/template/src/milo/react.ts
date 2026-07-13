@@ -120,7 +120,13 @@ function useSubscribedState<TSchema extends z.ZodType>(
         setError(null)
         setStatus("ready")
       },
-      { intervalMs }
+      {
+        intervalMs,
+        onError: (subscriptionError) => {
+          setError(asError(subscriptionError))
+          setStatus("error")
+        },
+      }
     )
   }, [client, ref, intervalMs, setDocument, setError, setStatus])
 }

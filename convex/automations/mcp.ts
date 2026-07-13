@@ -43,16 +43,24 @@ export async function callMiloAutomationTool(
   execution: {
     tenantId: string
     createdBy?: Id<"persons">
+    automationId?: Id<"automations">
+    automationConfigurationVersion?: number
   },
   request: MiloToolRequest
 ) {
   const args = readRecord(request.args)
 
   if (request.tool === "add_automation") {
+    const input = args as AddAutomationArgs
     return await ctx.runMutation(internal.automations.records.create, {
-      ...(args as AddAutomationArgs),
+      ...input,
       tenantId: execution.tenantId,
       createdBy: execution.createdBy,
+      parentId: input.type === "once" ? execution.automationId : undefined,
+      expectedParentConfigurationVersion:
+        input.type === "once"
+          ? execution.automationConfigurationVersion
+          : undefined,
     })
   }
 

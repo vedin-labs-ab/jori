@@ -37,6 +37,15 @@ export async function loadRunBrokerContext(
   ctx: ActionCtx,
   run: Doc<"runs">
 ): Promise<BrokerContext | null> {
+  const canExecuteTools = await ctx.runQuery(
+    internal.automations.records.canExecuteRunTools,
+    { runId: run._id }
+  )
+
+  if (!canExecuteTools) {
+    return null
+  }
+
   const input = await ctx.runQuery(internal.runs.records.getInputByRun, {
     runId: run._id,
   })

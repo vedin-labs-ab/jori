@@ -43,6 +43,7 @@ export async function purgeArchivedArtifact(
   const deletedBlobIds = await getDeletedBlobIds(ctx, graph, deletedTreeIds)
 
   await deleteArtifactLinks(ctx, artifact._id)
+  await deleteArtifactState(ctx, artifact._id)
   await deleteArtifactAutomations(ctx, artifact)
   await deleteArtifactAssets(ctx, assets)
   await deleteArtifactVersions(ctx, versions)
@@ -57,6 +58,26 @@ export async function purgeArchivedArtifact(
     deletedBlobs: deletedBlobIds.size,
     deletedTrees: deletedTreeIds.size,
     deletedVersions: versions.length,
+  }
+}
+
+export async function deleteArtifactState(
+  ctx: MutationCtx,
+  artifactId: Id<"artifacts">
+) {
+  const rows = await ctx.db
+    .query("artifactState")
+    .withIndex("by_artifact_and_scope_and_person_and_key", (index) =>
+      index.eq("artifactId", artifactId)
+    )
+    .take(purgeLimit + 1)
+
+  if (rows.length > purgeLimit) {
+    throw new Error("Artifact has too many state records to purge safely.")
+  }
+
+  for (const row of rows) {
+    await ctx.db.delete(row._id)
   }
 }
 
@@ -108,10 +129,12 @@ async function deleteArtifactAutomations(
     .take(purgeLimit)
 
   for (const automation of automations) {
-    await removeAutomation(ctx, {
-      tenantId: artifact.tenantId,
-      automationId: automation._id,
-    })
+    if ((await ctx.db.get(automation._id)) !== null) {
+      await removeAutomation(ctx, {
+        tenantId: artifact.tenantId,
+        automationId: automation._id,
+      })
+    }
   }
 }
 

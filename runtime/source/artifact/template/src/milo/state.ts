@@ -7,6 +7,7 @@ import {
   type MiloStatePatch,
   type MiloStatePatchInput,
   type MiloStateReplaceInput,
+  type MiloStateSubscriptionInput,
   type MiloStateWriteOptions,
   type RawMiloClient,
 } from "./types"
@@ -19,7 +20,7 @@ export function createStateClient(raw: RawMiloClient): MiloStateClient {
     patch: (ref, patch, options) => patchState(raw, ref, patch, options),
     update: (ref, input) => updateState(raw, ref, input),
     subscribe: (ref, handler, input = {}) =>
-      subscribeToState(raw, ref, handler, input.intervalMs),
+      subscribeToState(raw, ref, handler, input),
   })
 }
 
@@ -106,25 +107,45 @@ function subscribeToState<TSchema extends z.ZodType>(
   raw: RawMiloClient,
   ref: ArtifactStateRef<TSchema>,
   handler: (document: MiloStateDocument<z.output<TSchema>> | null) => void,
-  intervalMs: number | undefined
+  input: MiloStateSubscriptionInput
 ) {
   let active = true
+  let failed = false
+  let initialized = false
+  let polling = false
   let version: number | undefined
-  const interval = Math.max(1000, intervalMs ?? 5000)
+  const interval = Math.max(1000, input.intervalMs ?? 5000)
   const poll = async () => {
-    const document = await readState(raw, ref)
-    const nextVersion = document?.version
+    if (polling) {
+      return
+    }
 
-    if (active && nextVersion !== version) {
+    polling = true
+    try {
+      const document = await readState(raw, ref)
+      const nextVersion = document?.version
+
+      if (active && (!initialized || failed || nextVersion !== version)) {
+        handler(document)
+      }
+
+      initialized = true
+      failed = false
       version = nextVersion
-      handler(document)
+    } catch (error) {
+      failed = true
+      if (active) {
+        input.onError?.(error)
+      }
+    } finally {
+      polling = false
     }
   }
   const timer = window.setInterval(() => {
-    void poll().catch(() => undefined)
+    void poll()
   }, interval)
 
-  void poll().catch(() => undefined)
+  void poll()
 
   return () => {
     active = false

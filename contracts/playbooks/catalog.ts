@@ -92,8 +92,9 @@ const digestDelivery = {
   allowed: ["email", "slack"],
 } as const satisfies Omit<PlaybookDelivery, "noun">
 
-/** One research budget drives both the schedule lead and the agent wait. */
-const meetingPrepResearchMinutes = 15
+/** The sweep starts early enough to wait for research and still synthesize. */
+const meetingBriefingResearchMinutes = 15
+const meetingBriefingScheduleLeadMinutes = 30
 
 export const playbookCatalog: readonly PlaybookDefinition[] = [
   {
@@ -112,13 +113,13 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
     web: false,
   },
   {
-    key: "meeting-prep",
-    title: "Meeting prep",
+    key: "meeting-briefing",
+    title: "Meeting Briefing",
     description:
-      "Walk into every meeting prepared. Who you're meeting, what it's about, and what to have ready, in a researched dossier for every meeting that matters.",
+      "Walk into important meetings with the context, questions, and decisions that will help you make the most of them.",
     scope: "personal",
-    agentWait: { unit: "minutes", value: meetingPrepResearchMinutes },
-    cadence: "Morning digest or right before each meeting",
+    agentWait: { unit: "minutes", value: meetingBriefingResearchMinutes },
+    cadence: "Morning briefing or before each meeting",
     schedule: { repeat: "daily", time: "01:00" },
     options: [
       {
@@ -158,7 +159,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
         label: "Before each meeting",
         kind: "choice",
         control: "select",
-        default: "45",
+        default: "off",
         choices: [
           { value: "off", label: "Off" },
           { value: "15", label: "15 minutes" },
@@ -177,7 +178,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
             repeat: "daily",
             time: shiftClockTime(
               String(options.time),
-              -meetingPrepResearchMinutes
+              -meetingBriefingScheduleLeadMinutes
             ),
           }
         : { repeat: "daily", time: "01:00" },
@@ -187,7 +188,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
       const before =
         options.before === "off"
           ? ""
-          : `${options.digest === "on" ? "prep" : "Prep"} ${options.before} minutes before each meeting`
+          : `${options.digest === "on" ? "briefing" : "Briefing"} ${options.before} minutes before each meeting`
 
       return [digest, before].filter((part) => part !== "").join(", ")
     },
@@ -199,7 +200,12 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
       { capability: "email", intents: ["read"] },
       { capability: "calendar", intents: ["read"] },
     ],
-    delivery: { ...digestDelivery, noun: "prep note", style: "summary" },
+    delivery: {
+      ...digestDelivery,
+      slackTargets: ["dm"],
+      noun: "briefing",
+      style: "summary",
+    },
     web: true,
   },
   {

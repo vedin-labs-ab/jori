@@ -26,7 +26,7 @@ export function MorningBrief() {
               title="Copperline standup"
             />
             <BriefRow
-              note="Dan Okafor wants year-two pricing before their board meets. Prep note lands at 12:30."
+              note="Dan Okafor wants year-two pricing before their board meets. His briefing lands at 12:30."
               time="13:15"
               title="Harbor House renewal"
             />

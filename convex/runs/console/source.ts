@@ -120,7 +120,8 @@ function sourceKind(context: RunContext) {
     return datum("recurring", "recurring")
   }
 
-  return context.automation?.type === "once"
+  return context.automation?.type === "once" ||
+    context.run.automationParentId !== undefined
     ? datum("one-shot", "one-shot")
     : undefined
 }
