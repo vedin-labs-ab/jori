@@ -1,3 +1,4 @@
+import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
@@ -6,8 +7,11 @@ import { checkTenantAccess } from "../identity/access"
 import { getToolPermission } from "../permissions/catalog"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
 import { personDisplayName } from "../persons/names"
-import { findAccessibleArtifact, searchArtifacts } from "./access"
-import { readActiveShares } from "./serve/share"
+import {
+  findAccessibleArtifact,
+  getAccessibleArtifact,
+  searchArtifacts,
+} from "./access"
 
 export const list = query({
   args: {
@@ -79,6 +83,38 @@ export const get = query({
   },
 })
 
+/** Expiration order is also lifecycle order: every future expiry sorts ahead
+ *  of every past expiry, so one indexed cursor yields active links first. */
+export const pageShares = query({
+  args: {
+    tenantId: v.string(),
+    artifactId: v.id("artifacts"),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+
+    await getAccessibleArtifact(ctx, { ...args, personId })
+
+    const result = await ctx.db
+      .query("artifactShares")
+      .withIndex("by_artifact_and_expires_at", (index) =>
+        index.eq("artifactId", args.artifactId)
+      )
+      .order("desc")
+      .paginate(args.paginationOpts)
+
+    return {
+      ...result,
+      page: result.page.map((share) => ({
+        shareId: share._id,
+        createdAt: share.createdAt,
+        expiresAt: share.expiresAt,
+      })),
+    }
+  },
+})
+
 export const remove = mutation({
   args: {
     tenantId: v.string(),
@@ -117,6 +153,7 @@ export const revokeShare = mutation({
   args: {
     tenantId: v.string(),
     artifactId: v.id("artifacts"),
+    shareId: v.id("artifactShares"),
   },
   handler: async (ctx, args): Promise<null> => {
     const personId = await ensureCurrentPerson(ctx, args.tenantId)
@@ -157,7 +194,6 @@ async function summarizeForConsole(ctx: QueryCtx, artifact: Doc<"artifacts">) {
     updatedAt: artifact.updatedAt,
     archivedAt: artifact.archivedAt,
     lastOpenedAt: await lastOpenedAt(ctx, artifact._id),
-    shares: await readActiveShares(ctx, artifact._id),
     versions: versions.map((version) =>
       summarizeVersion(version, artifact.versionId)
     ),
