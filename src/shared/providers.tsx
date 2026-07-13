@@ -5,9 +5,9 @@ import { ConvexProviderWithClerk } from "convex/react-clerk"
 import { type ReactNode } from "react"
 import { convex } from "@/shared/convex"
 
-/** Clerk and Convex for signed-in surfaces. Mounting this starts the
- *  clerk-js hotload, so surfaces that serve anonymous visitors (the artifact
- *  share viewer) must stay outside it. */
+/** Clerk and Convex for session-aware surfaces. Mounting this starts the
+ *  clerk-js hotload, so routes that can avoid resolving a session stay
+ *  outside it. */
 export function SessionProviders({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider appearance={{ theme: shadcn }}>
@@ -18,9 +18,8 @@ export function SessionProviders({ children }: { children: ReactNode }) {
   )
 }
 
-/** The artifact viewer serves share-link visitors who have no session, so
- *  it stays outside the session stack and its member branch mounts
- *  SessionProviders itself. Every other route gets the stack here. */
+/** The artifact route resolves member access before falling back to a share
+ *  grant, so it owns the session stack. Every other route gets it here. */
 export function RouteSessionProviders({ children }: { children: ReactNode }) {
   const isArtifactViewer = useRouterState({
     select: (state) =>
