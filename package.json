@@ -15,7 +15,7 @@
     "check:drift": "node --experimental-strip-types scripts/drift.ts",
     "check:entrypoints": "node --experimental-strip-types scripts/entrypoints.ts",
     "check:fix": "biome check --write .",
-    "check:structure": "node --experimental-strip-types scripts/structure.ts",
+    "check:structure": "node --experimental-strip-types scripts/structure/index.ts",
     "check:typecheck": "tsc --noEmit",
     "deploy": "pnpm runtime:check && pnpm blueprints:check && pnpm prompts:compile && pnpm check:typecheck && node --experimental-strip-types scripts/env.ts npx convex dev --once --configure existing --team vedin-labs --project milo --dev-deployment cloud && pnpm skills:sync",
     "e2b:build": "node --experimental-strip-types scripts/e2b.ts",

@@ -111,7 +111,19 @@ const ruleSet = {
         path: "^src/console/shared/",
       },
       to: {
-        path: "^src/console/(?:artifacts|automations|integrations|page|permissions|playbooks|runs|shell|skills|tools)(?:/|$)",
+        path: "^src/console/(?!shared(?:/|$))",
+      },
+    },
+    {
+      name: "landing-is-console-free",
+      severity: "error",
+      comment:
+        "Public product UI must not depend on authenticated console code.",
+      from: {
+        path: "^src/landing/",
+      },
+      to: {
+        path: "^src/console/",
       },
     },
     {
