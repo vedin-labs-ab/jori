@@ -64,7 +64,7 @@ export function ActivityToolMetadata({
               <dd
                 className={cn(
                   "break-words text-background",
-                  isCommandMetadata(tool, item) ? "font-mono" : null
+                  isCodeMetadata(tool, item) ? "font-mono" : null
                 )}
               >
                 {item.text}
@@ -90,7 +90,7 @@ const ToolMetadataContent = forwardRef<
         <span
           className={cn(
             "inline-flex min-w-0 items-center",
-            isCompactOutcome(item) ? "shrink-0" : "min-w-0 flex-1 basis-0"
+            isCompactQualifier(item) ? "shrink-0" : null
           )}
           key={metadataKey(item)}
         >
@@ -191,8 +191,8 @@ function firstOutcome(items: ToolMetadataItems, noun: string) {
   )
 }
 
-function isCompactOutcome(item: ToolMetadataItem) {
-  return item.kind === "outcome" && item.text.length <= 24
+function isCompactQualifier(item: ToolMetadataItem) {
+  return item.kind !== "target" && item.text.length <= 24
 }
 
 function MetadataValue({
@@ -202,27 +202,31 @@ function MetadataValue({
   item: ToolMetadataItem
   tool?: string
 }) {
-  const isCommand = isCommandMetadata(tool, item)
-  const Element = isCommand ? "code" : "span"
+  const isCode = isCodeMetadata(tool, item)
+  const Element = isCode ? "code" : "span"
 
   return (
     <Element
       className={cn(
         "truncate",
-        isCommand
+        isCode
           ? "min-w-0 rounded-sm bg-muted px-1 py-0.5 font-mono text-foreground"
-          : isCompactOutcome(item)
+          : isCompactQualifier(item)
             ? "shrink-0"
             : "min-w-0"
       )}
+      data-metadata-value=""
     >
       {item.text}
     </Element>
   )
 }
 
-function isCommandMetadata(tool: string | undefined, item: ToolMetadataItem) {
-  return tool === "bash" && item.kind === "target"
+function isCodeMetadata(tool: string | undefined, item: ToolMetadataItem) {
+  return (
+    (tool === "bash" && item.kind === "target") ||
+    (tool === "read_artifact_state" && item.kind === "scope")
+  )
 }
 
 function isCountOutcome(text: string, noun: string) {
@@ -233,9 +237,7 @@ function useOverflowingContent(ref: RefObject<HTMLElement | null>) {
   const [isOverflowing, setIsOverflowing] = useState(false)
   const updateOverflowState = useCallback(() => {
     const element = ref.current
-    setIsOverflowing(
-      element === null ? false : element.scrollWidth > element.clientWidth + 1
-    )
+    setIsOverflowing(element === null ? false : hasOverflowingContent(element))
   }, [ref])
 
   useEffect(() => {
@@ -269,6 +271,16 @@ function useOverflowingContent(ref: RefObject<HTMLElement | null>) {
   }, [ref, updateOverflowState])
 
   return isOverflowing
+}
+
+function hasOverflowingContent(element: HTMLElement) {
+  if (element.scrollWidth > element.clientWidth + 1) {
+    return true
+  }
+
+  return [
+    ...element.querySelectorAll<HTMLElement>("[data-metadata-value]"),
+  ].some((value) => value.scrollWidth > value.clientWidth + 1)
 }
 
 function metadataKey(item: ToolMetadataItem) {

@@ -82,7 +82,7 @@ test("keeps web search metadata focused on query and result count", () => {
   expect(
     screen.getByText("site:theverge.com OR site:techcrunch.com").parentElement
       ?.className
-  ).toContain("flex-1")
+  ).not.toContain("basis-0")
   expect(screen.getByText("3 results").parentElement?.className).toContain(
     "shrink-0"
   )
@@ -130,6 +130,33 @@ test("renders bash commands as inline code", () => {
   expect(code.tagName).toBe("CODE")
   expect(code.className).toContain("font-mono")
   expect(code.className).toContain("bg-muted")
+})
+
+test("renders artifact state keys as inline code", () => {
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          metadata: [
+            { kind: "target", text: "Meeting prep" },
+            { kind: "scope", text: "dossiers" },
+          ],
+          title: "Read artifact state",
+          tool: "read_artifact_state",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  const title = screen.getByText("Meeting prep")
+  const key = screen.getByText("dossiers")
+
+  expect(title.parentElement?.className).not.toContain("basis-0")
+  expect(key.tagName).toBe("CODE")
+  expect(key.className).toContain("font-mono")
+  expect(key.className).toContain("bg-muted")
+  expect(key.parentElement?.className).toContain("shrink-0")
 })
 
 function activityItem(
