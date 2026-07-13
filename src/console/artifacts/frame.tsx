@@ -3,7 +3,7 @@ import { CheckCircle2, Clock3 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { FullscreenSkeletonLoader } from "../shared/loading"
+import { FullscreenSkeletonLoader } from "@/shared/loading"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 const artifactFrameSandbox =

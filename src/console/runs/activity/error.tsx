@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { CopyButton } from "../../shared/copy"
-import { activityToolFailureSummary } from "./tool-summary"
+import { activityToolFailureSummary } from "./tool/summary"
 
 export function ActivityFailureDescription({
   error,

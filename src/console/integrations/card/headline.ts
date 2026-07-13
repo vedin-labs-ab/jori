@@ -1,4 +1,4 @@
-import { type IntegrationCardStatus } from "./card"
+import { type IntegrationCardStatus } from "."
 
 export type AccountStatus = {
   externalId: string

@@ -7,9 +7,9 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
+import { LoadingMessage } from "@/shared/loading"
 import { SeparatorDot } from "../shared/dot"
 import { flushRowClassName } from "../shared/flush"
-import { LoadingMessage } from "../shared/loading"
 import { type ToolPermissionController } from "./controller"
 import { PermissionRow } from "./row"
 import {

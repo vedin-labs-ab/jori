@@ -9,12 +9,13 @@ import { useAction, useConvexAuth } from "convex/react"
 import { type ReactNode, useEffect } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../convex/_generated/api"
 import { IntegrationCallbackToasts } from "./integrations/callback"
 import { OnboardingGate } from "./onboarding/gate"
-import { FullscreenSkeletonLoader } from "./shared/loading"
 import { localTimezone } from "./shared/time"
-import { ConsoleShell, PublicConsoleFrame } from "./shell"
+import { ConsoleShell } from "./shell"
+import { PublicConsoleFrame } from "./shell/public"
 
 export function ConsolePage({
   children,

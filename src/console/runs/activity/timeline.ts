@@ -2,7 +2,7 @@ import {
   type ActivityToolKind,
   activityToolKind,
   activityToolOutcomeSummary,
-} from "./tool-summary"
+} from "./tool/summary"
 import { type ActivityItem } from "./types"
 
 export type ActivityTimelineEntry =

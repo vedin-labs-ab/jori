@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolPermissionController } from "../../permissions/controller"
-import { IntegrationCard, type IntegrationCardConfig } from "../card/card"
+import { IntegrationCard, type IntegrationCardConfig } from "../card"
 import { getWorkspaceHeadline } from "../card/headline"
 
 const githubConfig = {
