@@ -59,8 +59,8 @@ function DetailBody({
   workstream: Workstream
 }) {
   const args = { tenantId, workstreamId: workstream.id }
-  const detail = useQuery(api.deduction.console.queries.get, args)
-  const timeline = useQuery(api.deduction.console.queries.timeline, args)
+  const detail = useQuery(api.workstreams.queries.get, args)
+  const timeline = useQuery(api.workstreams.queries.timeline, args)
   const now = useNow(30_000)
 
   return (
@@ -135,10 +135,10 @@ function WorkstreamTitle({
 }
 
 type Detail = NonNullable<
-  ReturnType<typeof useQuery<typeof api.deduction.console.queries.get>>
+  ReturnType<typeof useQuery<typeof api.workstreams.queries.get>>
 >
 type TimelineItems = NonNullable<
-  ReturnType<typeof useQuery<typeof api.deduction.console.queries.timeline>>
+  ReturnType<typeof useQuery<typeof api.workstreams.queries.timeline>>
 >
 
 function DetailSections({

@@ -40,11 +40,11 @@ export function WorkstreamActions({
   tenantId: string
   workstream: Workstream
 }) {
-  const confirm = useMutation(api.deduction.console.corrections.confirm)
-  const reject = useMutation(api.deduction.console.corrections.reject)
-  const archive = useMutation(api.deduction.console.corrections.archive)
-  const reopen = useMutation(api.deduction.console.corrections.reopen)
-  const restore = useMutation(api.deduction.console.corrections.restore)
+  const confirm = useMutation(api.workstreams.corrections.confirm)
+  const reject = useMutation(api.workstreams.corrections.reject)
+  const archive = useMutation(api.workstreams.corrections.archive)
+  const reopen = useMutation(api.workstreams.corrections.reopen)
+  const restore = useMutation(api.workstreams.corrections.restore)
   const target = { tenantId, workstreamId: workstream.id }
   const runAction = (mutation: (args: typeof target) => Promise<unknown>) => {
     void mutation(target).catch((error: unknown) => {
