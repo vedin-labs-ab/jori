@@ -1,15 +1,15 @@
 import { v } from "convex/values"
-import { agentTaskId, cleanupTaskId } from "../../contracts/runtime"
+import { agentTaskId, cleanupTaskId } from "../../../../contracts/runtime"
 import {
   type AgentRunPayload,
   type SandboxCleanupPayload,
   type WaiterWake,
-} from "../../contracts/runtime/worker"
-import { internal } from "../_generated/api"
-import { type Doc } from "../_generated/dataModel"
-import { type ActionCtx, internalAction } from "../_generated/server"
-import { formatRuntimeError } from "../runs/execution/outbox/error"
-import { isTerminalRunStatus } from "../runs/schema"
+} from "../../../../contracts/runtime/worker"
+import { internal } from "../../../_generated/api"
+import { type Doc } from "../../../_generated/dataModel"
+import { type ActionCtx, internalAction } from "../../../_generated/server"
+import { isTerminalRunStatus } from "../../schema"
+import { formatRuntimeError } from "./error"
 
 const batchSize = 5
 const maxAgentDurationSeconds = 60 * 60 * 2
@@ -23,9 +23,12 @@ export const drain = internalAction({
   returns: v.null(),
   handler: async (ctx) => {
     for (let index = 0; index < batchSize; index += 1) {
-      const item = (await ctx.runMutation(internal.runtime.outbox.claimNext, {
-        now: Date.now(),
-      })) as Doc<"outbox"> | null
+      const item = (await ctx.runMutation(
+        internal.runs.execution.outbox.records.claimNext,
+        {
+          now: Date.now(),
+        }
+      )) as Doc<"outbox"> | null
 
       if (item === null) {
         return null
@@ -33,19 +36,26 @@ export const drain = internalAction({
 
       try {
         const receiptId = await performOperation(ctx, item)
-        await ctx.runMutation(internal.runtime.outbox.markSent, {
+        await ctx.runMutation(internal.runs.execution.outbox.records.markSent, {
           outboxId: item._id,
           receiptId,
         })
       } catch (error) {
-        await ctx.runMutation(internal.runtime.outbox.markFailed, {
-          outboxId: item._id,
-          error: formatRuntimeError(error),
-        })
+        await ctx.runMutation(
+          internal.runs.execution.outbox.records.markFailed,
+          {
+            outboxId: item._id,
+            error: formatRuntimeError(error),
+          }
+        )
       }
     }
 
-    await ctx.scheduler.runAfter(0, internal.runtime.dispatch.drain, {})
+    await ctx.scheduler.runAfter(
+      0,
+      internal.runs.execution.outbox.dispatch.drain,
+      {}
+    )
 
     return null
   },
@@ -95,9 +105,12 @@ async function wakeWaiter(
   ctx: DispatchCtx,
   operation: Extract<Doc<"outbox">["operation"], { type: "waiter.wake" }>
 ) {
-  const waiter = (await ctx.runQuery(internal.runtime.waiters.data.get, {
-    waiterId: operation.waiterId,
-  })) as Doc<"waiters"> | null
+  const waiter = (await ctx.runQuery(
+    internal.runs.execution.waiters.records.get,
+    {
+      waiterId: operation.waiterId,
+    }
+  )) as Doc<"waiters"> | null
 
   if (waiter === null) {
     return undefined
@@ -130,7 +143,7 @@ async function cancelRun(ctx: DispatchCtx, item: Doc<"outbox">) {
   })) as Doc<"runs"> | null
 
   const sandbox = (await ctx.runQuery(
-    internal.runtime.sandboxes.retainedByRun,
+    internal.runs.execution.sandboxes.records.retainedByRun,
     {
       runId: operation.runId,
     }

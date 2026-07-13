@@ -4,7 +4,7 @@ import {
   type RegularSearchOptions,
   type SearchResponse,
 } from "exa-js"
-import { createExaClient, withTimeout } from "../../../shared/exa"
+import { createExaClient, withTimeout } from "../../../search"
 import { normalizeWebFetchInput, normalizeWebSearchInput } from "./input"
 import { normalizeWebResponse } from "./output"
 

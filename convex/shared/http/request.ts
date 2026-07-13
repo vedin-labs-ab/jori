@@ -3,7 +3,7 @@ import {
   type JsonValue,
   toJsonObject,
   toJsonValue,
-} from "../../contracts/json"
+} from "../../../contracts/json"
 
 export async function fetchJson(
   url: string,
@@ -40,12 +40,4 @@ export async function fetchJsonObject(
 
 export function formatProviderError(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback
-}
-
-export function jsonError(error: string, status: number) {
-  return Response.json({ error }, { status })
-}
-
-export function unauthorizedResponse(headers?: HeadersInit) {
-  return new Response("Unauthorized", { status: 401, headers })
 }

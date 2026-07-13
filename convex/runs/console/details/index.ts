@@ -1,6 +1,6 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { getActorDisplayName } from "../../../shared/actor"
-import { detail, uniqueDetails } from "../../display/detail"
+import { detail, uniqueDetails } from "../../detail"
 import { isManualTrigger, isSubtaskRun } from "../source"
 import { toolDetails } from "../tools"
 

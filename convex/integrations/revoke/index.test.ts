@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { revokeIntegrationAccess } from "./revoke"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { revokeIntegrationAccess } from "."
 
 afterEach(() => {
   vi.unstubAllEnvs()

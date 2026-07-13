@@ -2,7 +2,11 @@ import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { wakeRun } from "../../runs/execution/waiters/data"
 import { type Actor } from "../../shared/actor"
-import { recordTransition } from "../../transitions"
+import {
+  type IntegrationOfferTransitionType,
+  recordTransition,
+} from "../../transitions"
+import { scheduleTransitionSurfaceSync } from "../surface"
 
 type IntegrationOfferPatch = Partial<
   Omit<Doc<"integrationOffers">, "_creationTime" | "_id">
@@ -20,11 +24,7 @@ export async function recordIntegrationOfferCreated(
   ctx: MutationCtx,
   offer: Doc<"integrationOffers">
 ) {
-  await recordTransition(ctx, {
-    tenantId: offer.tenantId,
-    subject: { kind: "integrationOffer", id: offer._id },
-    type: "created",
-  })
+  await recordIntegrationOfferTransition(ctx, offer, "created")
 }
 
 export async function markIntegrationOfferConnected(
@@ -114,12 +114,12 @@ export async function recordIntegrationOfferDelivery(
   })
 
   if (updated !== null) {
-    await recordTransition(ctx, {
-      tenantId: updated.tenantId,
-      subject: { kind: "integrationOffer", id: updated._id },
-      syncSurface: terminalIntegrationOfferStatus(updated.status) !== null,
-      type: "delivered",
-    })
+    await recordIntegrationOfferTransition(
+      ctx,
+      updated,
+      "delivered",
+      terminalIntegrationOfferStatus(updated.status) !== null
+    )
   }
 }
 
@@ -168,13 +168,30 @@ async function settleIntegrationOffer(
   })
 
   if (updated !== null) {
-    await recordTransition(ctx, {
-      tenantId: updated.tenantId,
-      subject: { kind: "integrationOffer", id: updated._id },
-      syncSurface: true,
-      type: args.status,
-    })
+    await recordIntegrationOfferTransition(ctx, updated, args.status, true)
     await wakeOfferRun(ctx, updated)
+  }
+}
+
+async function recordIntegrationOfferTransition(
+  ctx: MutationCtx,
+  offer: Doc<"integrationOffers">,
+  type: IntegrationOfferTransitionType,
+  syncSurface = false
+) {
+  const subject = {
+    kind: "integrationOffer" as const,
+    id: offer._id,
+  }
+
+  await recordTransition(ctx, {
+    tenantId: offer.tenantId,
+    subject,
+    type,
+  })
+
+  if (syncSurface) {
+    await scheduleTransitionSurfaceSync(ctx, subject)
   }
 }
 

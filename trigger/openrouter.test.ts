@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "vitest"
-import { requireOpenRouterRuntimeConfig } from "./config"
+import { requireOpenRouterRuntimeConfig } from "./openrouter"
 
 const environmentNames = [
   "OPENROUTER_API_KEY",

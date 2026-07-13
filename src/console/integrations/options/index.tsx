@@ -13,7 +13,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox"
-import { useIntegrationOptions } from "./options"
+import { useIntegrationOptions } from "./query"
 
 type IntegrationOptionPickerProps = {
   ariaLabel: string

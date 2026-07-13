@@ -1,10 +1,10 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Id } from "../_generated/dataModel"
+import { type DataModel, type Id } from "../../_generated/dataModel"
 import {
   createAutomationRunSnapshot,
   createInstructionRunSnapshot,
   createMessageRunSnapshot,
-} from "./snapshot"
+} from "./index"
 
 test("stores automation display data directly", () => {
   expect(

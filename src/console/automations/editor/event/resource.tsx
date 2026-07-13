@@ -1,5 +1,5 @@
 import { type AutomationEventParameter } from "@contracts/automations/events"
-import { IntegrationOptionPicker } from "@/console/integrations/picker"
+import { IntegrationOptionPicker } from "@/console/integrations/options"
 import { cn } from "@/lib/utils"
 
 type EventOptionFieldProps = {

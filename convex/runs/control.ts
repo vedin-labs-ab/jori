@@ -54,9 +54,12 @@ export const stop = mutation({
 
     await wakeRun(ctx, { runId: run._id, reason: "cancelled" })
     await wakeParentForTerminalRun(ctx, run._id)
-    await ctx.runMutation(internal.runtime.outbox.enqueueCancellation, {
-      runId: run._id,
-    })
+    await ctx.runMutation(
+      internal.runs.execution.outbox.records.enqueueCancellation,
+      {
+        runId: run._id,
+      }
+    )
 
     return null
   },

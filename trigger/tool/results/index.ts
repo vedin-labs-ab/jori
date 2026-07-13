@@ -1,4 +1,6 @@
-import { type JsonObject } from "../../contracts/json"
+import { type JsonObject } from "../../../contracts/json"
+
+export { materializeSandboxResult } from "./materialize"
 
 export function toolResult(value: unknown, finished = false) {
   return { finished, value }

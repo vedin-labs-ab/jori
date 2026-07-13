@@ -5,7 +5,7 @@ import {
   matchesSummaryQuery,
   projectRunSummary,
   type RunSummary,
-} from "../display/summary"
+} from "../view/summary"
 import { canSee } from "./access"
 import { pageItems } from "./page"
 import { uniqueRuns } from "./runs"

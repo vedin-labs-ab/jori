@@ -10,7 +10,7 @@ import {
   tool,
 } from "ai"
 import { toJsonObject } from "../../contracts/json"
-import { requireOpenRouterRuntimeConfig } from "./config"
+import { requireOpenRouterRuntimeConfig } from "../openrouter"
 import { ingestReasoning, nullableText } from "./reasoning"
 import {
   type ModelMessage,

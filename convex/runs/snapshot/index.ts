@@ -1,8 +1,8 @@
 import { type Infer } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
-import { type Access } from "../shared/integrations"
-import { automationDisplay, messageDisplay } from "./display"
-import { type MessageCauseKind, type runSnapshot } from "./schema"
+import { type Doc } from "../../_generated/dataModel"
+import { type Access } from "../../shared/integrations"
+import { type MessageCauseKind, type runSnapshot } from "../schema"
+import { automationSnapshotBody, messageSnapshotBody } from "./source"
 
 type RunSnapshot = Infer<typeof runSnapshot>
 
@@ -25,7 +25,7 @@ export function createAutomationRunSnapshot(input: {
     ),
     snapshot: {
       title: normalizeRequiredRunText(input.automation.name, "Run title"),
-      ...automationDisplay(input),
+      ...automationSnapshotBody(input),
     },
   }
 }
@@ -40,7 +40,7 @@ export function createMessageRunSnapshot(input: {
   return {
     snapshot: {
       title: firstLine(text),
-      ...messageDisplay(input),
+      ...messageSnapshotBody(input),
     },
   }
 }

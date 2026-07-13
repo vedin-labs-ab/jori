@@ -1,3 +1,4 @@
+import { type Doc } from "../../_generated/dataModel"
 import {
   base64DecodeBytes,
   base64UrlEncode,
@@ -8,6 +9,7 @@ import {
   requireGitHubAppId,
   requireGitHubPrivateKey,
 } from "./config"
+import { requireGitHubCredentials } from "./credentials"
 
 export type GitHubInstallationProfile = {
   id: number
@@ -62,6 +64,14 @@ export async function deleteGitHubInstallation(installationId: string) {
     method: "DELETE",
     successStatuses: [202, 404],
   })
+}
+
+export async function revokeGitHubIntegration(
+  integration: Doc<"integrations">
+) {
+  await deleteGitHubInstallation(
+    requireGitHubCredentials(integration).installationId
+  )
 }
 
 async function githubAppRequest<Result>(
