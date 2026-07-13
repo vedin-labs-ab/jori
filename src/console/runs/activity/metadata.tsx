@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   SmilePlus,
   Square,
+  Terminal,
   Timer,
   Wrench,
 } from "lucide-react"
@@ -50,6 +51,7 @@ const kindLabels = {
 } satisfies Record<ActivityKind, string>
 
 const toolIcons: Record<string, LucideIcon> = {
+  bash: Terminal,
   load_skill: BookOpen,
   wait_for_agents: Bot,
 }

@@ -54,6 +54,20 @@ test("uses the shared skill icon for load_skill", () => {
   ).toBe(true)
 })
 
+test("uses a terminal icon for bash", () => {
+  renderActivity({
+    description: "date -u +%Y-%m-%dT%H:%M:%SZ",
+    title: "Run command",
+    tool: "bash",
+  })
+
+  const icon = screen.getByRole("img", { name: "Tool done" })
+
+  expect(icon.querySelector("svg")?.classList.contains("lucide-terminal")).toBe(
+    true
+  )
+})
+
 function renderActivity(overrides: Partial<ActivityItemType>) {
   render(
     <TooltipProvider>

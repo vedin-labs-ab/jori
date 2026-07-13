@@ -141,7 +141,7 @@ function activityDescription(item: ActivityItemType) {
   }
 
   if (item.metadata !== undefined && item.metadata.length > 0) {
-    return <ActivityToolMetadata items={item.metadata} title={item.title} />
+    return <ActivityToolMetadata item={item} items={item.metadata} />
   }
 
   if (item.kind === "tool" && item.title.toLowerCase() === "send reply") {

@@ -109,6 +109,29 @@ test("renders server-provided reaction labels without redundant outcomes", () =>
   expect(screen.queryByText("reaction added")).toBeNull()
 })
 
+test("renders bash commands as inline code", () => {
+  const command = "date -u +%Y-%m-%dT%H:%M:%SZ"
+
+  render(
+    <TooltipProvider>
+      <ActivityItem
+        item={activityItem({
+          metadata: [{ kind: "target", text: command }],
+          title: "Run command",
+          tool: "bash",
+        })}
+        now={1700000002000}
+      />
+    </TooltipProvider>
+  )
+
+  const code = screen.getByText(command)
+
+  expect(code.tagName).toBe("CODE")
+  expect(code.className).toContain("font-mono")
+  expect(code.className).toContain("bg-muted")
+})
+
 function activityItem(
   overrides: Partial<ActivityItemType> = {}
 ): ActivityItemType {
