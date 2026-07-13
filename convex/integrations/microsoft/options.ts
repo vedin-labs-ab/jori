@@ -9,6 +9,7 @@ import {
   readRecord,
   requiredOptionString,
 } from "../options/common"
+import { listMicrosoftCalendars } from "./calendars"
 import { requireMicrosoftCredentials } from "./credentials"
 import { microsoftGraphJsonObject } from "./graph"
 
@@ -29,9 +30,11 @@ export async function searchMicrosoftMailFolders(args: OptionLoaderArgs) {
 }
 
 export async function searchMicrosoftCalendars(args: OptionLoaderArgs) {
-  const result = await microsoftGraph(args, "/me/calendars", {
-    $top: maxOptions,
-  })
+  const credentials = requireMicrosoftCredentials(args.integration)
+  const result = await listMicrosoftCalendars(
+    credentials.tokens.access,
+    maxOptions
+  )
   const normalizedQuery = normalizeQuery(args.query)
 
   return readArray(result.value)

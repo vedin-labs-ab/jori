@@ -10,6 +10,63 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+describe("Microsoft Calendar discovery", () => {
+  test("scans every calendar and follows Graph next links", async () => {
+    const calls = mockMicrosoftFetchByUrl((url) => {
+      if (url.pathname.endsWith("/me/calendars")) {
+        return {
+          value: [
+            { id: "primary", name: "Primary" },
+            { id: "team", name: "Team" },
+          ],
+        }
+      }
+      if (url.pathname.includes("/calendars/primary/calendarView")) {
+        return url.searchParams.has("$skiptoken")
+          ? {
+              value: [
+                { id: "early", start: { dateTime: "2030-01-01T08:00:00Z" } },
+              ],
+            }
+          : {
+              value: [
+                { id: "late", start: { dateTime: "2030-01-01T10:00:00Z" } },
+              ],
+              "@odata.nextLink":
+                "https://graph.microsoft.com/v1.0/me/calendars/primary/calendarView?$skiptoken=next",
+            }
+      }
+
+      return {
+        value: [{ id: "middle", start: { dateTime: "2030-01-01T09:00:00Z" } }],
+      }
+    })
+
+    const result = (await callMicrosoftTool(
+      microsoftCalendarIntegration(),
+      "microsoft_calendar_list_events",
+      {
+        timeMax: "2030-01-02T08:00:00Z",
+        timeMin: "2030-01-01T08:00:00Z",
+        top: 250,
+      }
+    )) as Record<string, unknown>
+
+    expect(result).toMatchObject({
+      calendarsScanned: 2,
+      gaps: [],
+      status: "ready",
+      truncated: false,
+    })
+    expect(result.value).toEqual([
+      expect.objectContaining({ id: "early", calendarId: "primary" }),
+      expect.objectContaining({ id: "middle", calendarId: "team" }),
+      expect.objectContaining({ id: "late", calendarId: "primary" }),
+    ])
+    expect(calls.some((call) => call.url.includes("skiptoken=next"))).toBe(true)
+  })
+})
+
 describe("Outlook email tools", () => {
   test("sends run assets as Graph file attachments", async () => {
     const calls = mockMicrosoftFetch(null)
@@ -61,6 +118,21 @@ function mockMicrosoftFetch(responseBody: unknown) {
   return calls
 }
 
+function mockMicrosoftFetchByUrl(responseBody: (url: URL) => unknown) {
+  const calls: Array<{ body: unknown; url: string }> = []
+
+  globalThis.fetch = vi.fn(async (url, init) => {
+    const requestUrl = new URL(String(url))
+    calls.push({
+      body: typeof init?.body === "string" ? JSON.parse(init.body) : init?.body,
+      url: requestUrl.toString(),
+    })
+    return Response.json(responseBody(requestUrl))
+  })
+
+  return calls
+}
+
 function microsoftEmailIntegration(): Doc<"integrations"> {
   return {
     _id: "microsoft-email-integration",
@@ -80,5 +152,13 @@ function microsoftEmailIntegration(): Doc<"integrations"> {
     createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
+  } as Doc<"integrations">
+}
+
+function microsoftCalendarIntegration(): Doc<"integrations"> {
+  return {
+    ...microsoftEmailIntegration(),
+    _id: "microsoft-calendar-integration",
+    integration: "microsoftCalendar",
   } as Doc<"integrations">
 }

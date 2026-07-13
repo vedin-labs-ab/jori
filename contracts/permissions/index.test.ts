@@ -142,10 +142,12 @@ describe("permission catalog defaults", () => {
 
   test("disambiguates calendar event tools", () => {
     const calendarToolLabels = [
+      ["google_calendar_list_calendars", "List calendars"],
       ["google_calendar_list_events", "List calendar events"],
       ["google_calendar_get_event", "Read calendar event"],
       ["google_calendar_create_event", "Create calendar event"],
       ["google_calendar_update_event", "Update calendar event"],
+      ["microsoft_calendar_list_calendars", "List calendars"],
       ["microsoft_calendar_list_events", "List calendar events"],
       ["microsoft_calendar_get_event", "Read calendar event"],
       ["microsoft_calendar_create_event", "Create calendar event"],

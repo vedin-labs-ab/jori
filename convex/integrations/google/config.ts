@@ -39,6 +39,7 @@ export const googleIntegrationConfigs = {
     scopes: [
       ...googleIdentityScopes,
       "https://www.googleapis.com/auth/calendar.events",
+      "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
     ],
   },
 } satisfies Record<GoogleIntegration, GoogleIntegrationConfig>

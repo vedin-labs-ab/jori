@@ -29,6 +29,20 @@ export async function microsoftGraphJsonObject(
   })
 }
 
+export async function microsoftGraphJsonNext(token: string, nextLink: string) {
+  const url = new URL(nextLink)
+  const graph = new URL(microsoftGraphUrl)
+
+  if (url.origin !== graph.origin || !url.pathname.startsWith(graph.pathname)) {
+    throw new Error("Invalid Microsoft Graph pagination URL")
+  }
+
+  return await fetchJson(url.toString(), {
+    method: "GET",
+    headers: microsoftGraphHeaders(token),
+  })
+}
+
 function microsoftGraphHeaders(token: string) {
   return {
     authorization: `Bearer ${token}`,

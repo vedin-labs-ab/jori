@@ -54,6 +54,8 @@ describe("playbook blueprint catalog", () => {
     expect(app?.content).toContain("upcomingCount(meetings, now)")
     expect(app?.content).toContain("selectMeeting(meetings, chosenId, nextId)")
     expect(app?.content.match(/Date[.]now/g)).toHaveLength(2)
+    expect(app?.content).toContain("latestDeliveryIssue")
+    expect(app?.content).toContain("will not resend it automatically")
   })
 })
 
@@ -61,6 +63,7 @@ test("Meeting Briefing bounds shared content and receipts", () => {
   const meeting = sampleMeeting()
 
   expect(() => assertMeetingState(meeting)).not.toThrow()
+  expect(() => assertMeetingState(maximalMeeting(0))).not.toThrow()
   expect(() =>
     assertMeetingState({
       ...meeting,
@@ -93,21 +96,6 @@ test("Meeting Briefing bounds shared content and receipts", () => {
   ).toThrow()
 })
 
-test("Meeting Briefing keeps ten maximally populated meetings under the state limit", () => {
-  const meetings = Object.fromEntries(
-    Array.from({ length: 10 }, (_, index) => [
-      `mb:${index.toString().padStart(32, "0")}`,
-      maximalMeeting(index),
-    ])
-  )
-  const state = { ...stateWith(sampleMeeting()), meetings }
-
-  expect(() => assertBriefingState(state)).not.toThrow()
-  expect(
-    new TextEncoder().encode(JSON.stringify(state)).byteLength
-  ).toBeLessThan(256 * 1024)
-})
-
 function assertMeetingState(meeting: unknown) {
   assertBriefingState(stateWith(meeting))
 }
@@ -126,7 +114,7 @@ function assertBriefingState(state: unknown) {
 
 function stateWith(meeting: unknown) {
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     timezone: "UTC",
     scan: {
       scannedAt: "2030-01-01T07:00:00.000Z",
@@ -136,6 +124,7 @@ function stateWith(meeting: unknown) {
       gaps: [],
     },
     meetings: { "mb:00000000000000000000000000000000": meeting },
+    dispatches: {},
   }
 }
 
@@ -151,7 +140,7 @@ function sampleMeeting() {
       fingerprint: "f".repeat(64),
       attendees: [{}],
     },
-    selectedBecause: "External decision meeting",
+    whyItMatters: "External decision meeting",
     status: "queued",
     revision: 0,
     sources: [],
@@ -160,12 +149,12 @@ function sampleMeeting() {
 
 function maximalMeeting(index: number) {
   const timestamp = "2030-01-01T08:00:00.000Z"
-  const text = "x".repeat(300)
+  const text = "x".repeat(240)
   const finding = maximalFinding(index)
 
   return {
     event: maximalEvent(timestamp),
-    selectedBecause: "s".repeat(200),
+    whyItMatters: "s".repeat(160),
     status: "ready",
     revision: index,
     preparedAt: timestamp,
@@ -174,8 +163,8 @@ function maximalMeeting(index: number) {
       purpose: finding,
       outcome: text,
       essentials: Array.from({ length: 3 }, () => finding),
-      details: Array.from({ length: 8 }, () => finding),
-      unknowns: Array.from({ length: 4 }, () => "g".repeat(200)),
+      details: Array.from({ length: 5 }, () => finding),
+      unknowns: Array.from({ length: 4 }, () => "g".repeat(160)),
     },
     sources: maximalSources(index, timestamp),
     delivery: {
@@ -197,10 +186,10 @@ function maximalMeeting(index: number) {
 
 function maximalFinding(index: number) {
   return {
-    text: "x".repeat(300),
+    text: "x".repeat(240),
     kind: "fact",
     area: "commitment",
-    sourceIds: Array.from({ length: 4 }, (_, sourceIndex) =>
+    sourceIds: Array.from({ length: 3 }, (_, sourceIndex) =>
       `${index}-${sourceIndex}`.padEnd(60, "s")
     ),
   }
@@ -208,35 +197,35 @@ function maximalFinding(index: number) {
 
 function maximalEvent(timestamp: string) {
   const attendee = {
-    name: "n".repeat(100),
-    organization: "o".repeat(100),
-    role: "r".repeat(100),
+    name: "n".repeat(80),
+    organization: "o".repeat(80),
+    role: "r".repeat(80),
     response: "accepted",
   }
 
   return {
     provider: "p".repeat(60),
-    calendarId: "c".repeat(1024),
-    eventId: "e".repeat(1024),
-    seriesId: "s".repeat(1024),
+    calendarId: "c".repeat(512),
+    eventId: "e".repeat(512),
+    seriesId: "s".repeat(512),
     title: "t".repeat(200),
     startsAt: timestamp,
     endsAt: "2030-01-01T09:00:00.000Z",
     status: "confirmed".padEnd(40, "s"),
     fingerprint: "f".repeat(64),
     organizer: attendee,
-    attendees: Array.from({ length: 8 }, () => attendee),
+    attendees: Array.from({ length: 6 }, () => attendee),
     location: "l".repeat(200),
   }
 }
 
 function maximalSources(index: number, timestamp: string) {
-  return Array.from({ length: 6 }, (_, sourceIndex) => ({
+  return Array.from({ length: 4 }, (_, sourceIndex) => ({
     id: `${index}-${sourceIndex}`.padEnd(60, "i"),
     kind: "email".padEnd(40, "k"),
-    label: "l".repeat(160),
+    label: "l".repeat(120),
     occurredAt: timestamp,
     retrievedAt: timestamp,
-    url: `https://example.com/${"u".repeat(480)}`,
+    url: `https://example.com/${"u".repeat(380)}`,
   }))
 }

@@ -2,18 +2,19 @@ import { z } from "zod"
 import { defineArtifactContract } from "@/milo/contract"
 
 const timestamp = z.iso.datetime()
-const identifier = z.string().max(1024)
+const identifier = z.string().max(512)
 const fingerprint = z.string().regex(/^[0-9a-f]{64}$/)
 const meetingKey = z.string().regex(/^mb:[0-9a-f]{32}$/)
-const label = z.string().max(160)
-const note = z.string().max(300)
-const gap = z.string().max(200)
-const url = z.string().max(500)
+const dispatchKey = z.string().regex(/^md:[0-9a-f]{32}$/)
+const label = z.string().max(120)
+const note = z.string().max(240)
+const gap = z.string().max(160)
+const url = z.string().max(400)
 
 const attendee = z.strictObject({
-  name: z.string().max(100).optional(),
-  organization: z.string().max(100).optional(),
-  role: z.string().max(100).optional(),
+  name: z.string().max(80).optional(),
+  organization: z.string().max(80).optional(),
+  role: z.string().max(80).optional(),
   response: z.enum(["accepted", "tentative", "declined", "unknown"]).optional(),
 })
 
@@ -32,7 +33,7 @@ const evidencePoint = z.strictObject({
     "question",
     "risk",
   ]),
-  sourceIds: z.array(z.string().max(60)).max(4),
+  sourceIds: z.array(z.string().max(60)).min(1).max(3),
 })
 
 const source = z.strictObject({
@@ -50,8 +51,8 @@ const researchAttempt = z.strictObject({
   status: z.enum(["pending", "ready", "partial", "sparse", "failed"]),
   startedAt: timestamp,
   completedAt: timestamp.optional(),
-  findings: z.array(evidencePoint).max(12),
-  sources: z.array(source).max(6),
+  findings: z.array(evidencePoint).max(8),
+  sources: z.array(source).max(4),
   gaps: z.array(gap).max(4),
 })
 
@@ -59,7 +60,7 @@ const briefing = z.strictObject({
   purpose: evidencePoint.optional(),
   outcome: note.optional(),
   essentials: z.array(evidencePoint).max(3),
-  details: z.array(evidencePoint).max(8),
+  details: z.array(evidencePoint).max(5),
   unknowns: z.array(gap).max(4),
 })
 
@@ -68,6 +69,17 @@ const receipt = z.strictObject({
   eventStartsAt: timestamp,
   deliveredAt: timestamp,
   destination: z.enum(["email", "slack-dm"]),
+})
+
+const dispatch = z.strictObject({
+  kind: z.enum(["morning", "reminder", "manual", "failure"]),
+  payloadHash: fingerprint,
+  status: z.enum(["sending", "delivered", "failed", "unknown"]),
+  attemptedAt: timestamp,
+  updatedAt: timestamp,
+  deliveredAt: timestamp.optional(),
+  destination: z.enum(["email", "slack-dm"]),
+  error: gap.optional(),
 })
 
 const event = z.strictObject({
@@ -81,13 +93,13 @@ const event = z.strictObject({
   status: z.string().max(40),
   fingerprint,
   organizer: attendee.optional(),
-  attendees: z.array(attendee).max(8),
+  attendees: z.array(attendee).max(6),
   location: z.string().max(200).optional(),
 })
 
 const meeting = z.strictObject({
   event,
-  selectedBecause: z.string().max(200),
+  whyItMatters: z.string().max(160),
   status: z.enum([
     "queued",
     "researching",
@@ -102,7 +114,7 @@ const meeting = z.strictObject({
   preparedAt: timestamp.optional(),
   preparedForFingerprint: fingerprint.optional(),
   briefing: briefing.optional(),
-  sources: z.array(source).max(6),
+  sources: z.array(source).max(4),
   delivery: z
     .strictObject({ morning: receipt.optional(), reminder: receipt.optional() })
     .optional(),
@@ -112,7 +124,7 @@ export type MeetingBriefing = z.infer<typeof meeting>
 export type BriefingPoint = z.infer<typeof evidencePoint>
 
 export const contract = defineArtifactContract({
-  version: 2,
+  version: 3,
   state: {
     briefings: {
       key: "meeting-briefing/briefings",
@@ -120,19 +132,20 @@ export const contract = defineArtifactContract({
       description:
         "Canonical Meeting Briefing state. Patch one meeting branch at a time and preserve unrelated meetings.",
       schema: z.strictObject({
-        schemaVersion: z.literal(2),
+        schemaVersion: z.literal(3),
         timezone: z.string().max(100),
         scan: z.strictObject({
           scannedAt: timestamp,
           horizonStart: timestamp,
           horizonEnd: timestamp,
           status: z.enum(["ready", "partial", "failed"]),
-          gaps: z.array(gap).max(4),
+          gaps: z.array(gap).max(6),
         }),
         meetings: z.record(meetingKey, meeting),
+        dispatches: z.record(dispatchKey, dispatch),
       }),
       schemaName: "MeetingBriefings",
-      schemaVersion: 2,
+      schemaVersion: 3,
     },
     research: {
       key: "meeting-briefing/research",
@@ -140,11 +153,11 @@ export const contract = defineArtifactContract({
       description:
         "Private, temporary Meeting Briefing research. Clear each attempt after synthesis.",
       schema: z.strictObject({
-        schemaVersion: z.literal(2),
+        schemaVersion: z.literal(3),
         attempts: z.record(meetingKey, researchAttempt),
       }),
       schemaName: "MeetingBriefingResearch",
-      schemaVersion: 2,
+      schemaVersion: 3,
     },
   },
 })

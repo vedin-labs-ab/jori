@@ -71,10 +71,18 @@ const intentTools: Record<string, Record<string, readonly string[]>> = {
     draft: ["microsoft_email_create_draft"],
   },
   googleCalendar: {
-    read: ["google_calendar_list_events", "google_calendar_get_event"],
+    read: [
+      "google_calendar_list_calendars",
+      "google_calendar_list_events",
+      "google_calendar_get_event",
+    ],
   },
   microsoftCalendar: {
-    read: ["microsoft_calendar_list_events", "microsoft_calendar_get_event"],
+    read: [
+      "microsoft_calendar_list_calendars",
+      "microsoft_calendar_list_events",
+      "microsoft_calendar_get_event",
+    ],
   },
 }
 
