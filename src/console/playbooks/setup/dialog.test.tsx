@@ -119,7 +119,7 @@ test("setup groups meeting scope and delivery behaviors", () => {
   expect(screen.getByText("Meetings")).toBeDefined()
   expect(screen.getByRole("group", { name: "Delivery timing" })).toBeDefined()
   expect(screen.queryByText("Schedule")).toBeNull()
-  expect(screen.getByText("Access")).toBeDefined()
+  expect(document.body.textContent).toMatch(/timing.*Deliver to.*Access/i)
   expect(
     screen
       .getByRole("checkbox", { name: "Include morning briefing" })

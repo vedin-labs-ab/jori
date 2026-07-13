@@ -51,6 +51,10 @@ export function SetupDialogSections({
           issue={optionsIssue}
         />
       )}
+      <PlaybookDelivery
+        delivery={{ ...delivery, tenantId }}
+        disabled={isBusy}
+      />
       <PlaybookAccounts
         disabled={isBusy}
         onProviderIndexChange={onProviderIndexChange}
@@ -58,10 +62,6 @@ export function SetupDialogSections({
         providerIndex={providerIndex}
       />
       <PlaybookAccess choices={choices} definition={definition} row={row} />
-      <PlaybookDelivery
-        delivery={{ ...delivery, tenantId }}
-        disabled={isBusy}
-      />
     </div>
   )
 }
