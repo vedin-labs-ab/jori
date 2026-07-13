@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk/v3"
+import { task } from "@trigger.dev/sdk"
 import { MiloConvexClient } from "../convex"
 import { errorDetails } from "../events"
 import { OpenRouterModelRuntime } from "../model/openrouter"

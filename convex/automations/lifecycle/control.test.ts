@@ -1,11 +1,13 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { releaseSubscription } from "../subscriptions/data"
 import { deleteOwnedAutomations } from "./children"
-import { pauseAutomation } from "./control"
+import { pauseAutomation, removeAutomation } from "./control"
 import { getRequiredAutomation, getTenantAutomation } from "./read"
 import { cancelTrigger } from "./trigger"
 
+vi.mock("../subscriptions/data", () => ({ releaseSubscription: vi.fn() }))
 vi.mock("./children", () => ({ deleteOwnedAutomations: vi.fn() }))
 vi.mock("./read", () => ({
   getRequiredAutomation: vi.fn(),
@@ -21,6 +23,7 @@ beforeEach(() => {
   vi.mocked(cancelTrigger).mockReset()
   vi.mocked(getRequiredAutomation).mockReset()
   vi.mocked(getTenantAutomation).mockReset()
+  vi.mocked(releaseSubscription).mockReset()
 })
 
 test("pausing invalidates runs from the prior configuration", async () => {
@@ -46,6 +49,27 @@ test("pausing invalidates runs from the prior configuration", async () => {
   expect(deleteOwnedAutomations).toHaveBeenCalledWith(ctx, automation._id)
 })
 
+test("removing stops the parent before deleting it and its children", async () => {
+  const automation = eventAutomation()
+  const remove = vi.fn(async () => undefined)
+  const ctx = { db: { delete: remove } } as unknown as MutationCtx
+  vi.mocked(getTenantAutomation).mockResolvedValue(automation)
+
+  await removeAutomation(ctx, {
+    tenantId: automation.tenantId,
+    automationId: automation._id,
+  })
+
+  expect(cancelTrigger).toHaveBeenCalledWith(ctx, automation.trigger)
+  expect(releaseSubscription).toHaveBeenCalledWith(ctx, {
+    tenantId: automation.tenantId,
+    trigger: automation.trigger,
+    exceptAutomationId: automation._id,
+  })
+  expect(remove).toHaveBeenCalledWith(automation._id)
+  expect(deleteOwnedAutomations).toHaveBeenCalledWith(ctx, automation._id)
+})
+
 function parentAutomation(): Doc<"automations"> {
   return {
     _id: "parent" as Id<"automations">,
@@ -68,6 +92,27 @@ function parentAutomation(): Doc<"automations"> {
     },
     status: "active",
     createdAt: 0,
+    updatedAt: 0,
+  }
+}
+
+function eventAutomation(): Doc<"automations"> {
+  return {
+    _id: "event" as Id<"automations">,
+    _creationTime: 0,
+    access: { integrations: [], web: false },
+    createdAt: 0,
+    instructions: "Handle the event.",
+    name: "Event automation",
+    principal: { kind: "organization" },
+    scope: "organization",
+    status: "active",
+    tenantId: "tenant",
+    trigger: {
+      integrationId: "integration" as Id<"integrations">,
+      event: "message.created",
+    },
+    type: "event",
     updatedAt: 0,
   }
 }

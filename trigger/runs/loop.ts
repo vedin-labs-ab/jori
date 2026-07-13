@@ -7,11 +7,8 @@ import {
 import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
 import { type HandoffSubject, type RuntimeContext } from "../types"
 import { recordRuntimeEvent } from "./events"
-import {
-  applyHandoffs,
-  pendingHandoffSubjects,
-  reconcileHandoffs,
-} from "./handoffs"
+import { pendingHandoffSubjects } from "./handoff"
+import { applyHandoffs, reconcileHandoffs } from "./handoffs"
 import {
   appendSessionMessages,
   promptMessages,

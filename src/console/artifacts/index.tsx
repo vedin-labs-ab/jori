@@ -1,8 +1,11 @@
 import { useQuery } from "convex/react"
-import { useCallback, useDeferredValue, useState } from "react"
+import { useDeferredValue, useState } from "react"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import { useClientPagination } from "../shared/list/pagination"
+import {
+  useClientPagination,
+  useResettingSetter,
+} from "../shared/list/pagination"
 import { matchesScopeFilter, type ScopeFilter } from "../shared/list/scope"
 import { useNow } from "../shared/time"
 import { useArtifactDeletion } from "./deletion"
@@ -75,12 +78,9 @@ function ArtifactListView({ tenantId }: { tenantId: string }) {
     itemLabel: { singular: "artifact", plural: "artifacts" },
     items: artifacts,
   })
-  const toolbar = useResettingArtifactToolbar({
-    reset: pagination.reset,
-    setFilter,
-    setQuery,
-    setScope,
-  })
+  const setFilterAndReset = useResettingSetter(setFilter, pagination.reset)
+  const setQueryAndReset = useResettingSetter(setQuery, pagination.reset)
+  const setScopeAndReset = useResettingSetter(setScope, pagination.reset)
 
   if (artifactList === undefined) {
     return (
@@ -88,9 +88,9 @@ function ArtifactListView({ tenantId }: { tenantId: string }) {
         filter={filter}
         query={query}
         scope={scope}
-        onFilterChange={toolbar.setFilter}
-        onQueryChange={toolbar.setQuery}
-        onScopeChange={toolbar.setScope}
+        onFilterChange={setFilterAndReset}
+        onQueryChange={setQueryAndReset}
+        onScopeChange={setScopeAndReset}
       />
     )
   }
@@ -109,49 +109,9 @@ function ArtifactListView({ tenantId }: { tenantId: string }) {
       query={query}
       restoringArtifactId={deletion.restoringArtifactId}
       scope={scope}
-      onFilterChange={toolbar.setFilter}
-      onQueryChange={toolbar.setQuery}
-      onScopeChange={toolbar.setScope}
+      onFilterChange={setFilterAndReset}
+      onQueryChange={setQueryAndReset}
+      onScopeChange={setScopeAndReset}
     />
   )
-}
-
-function useResettingArtifactToolbar({
-  reset,
-  setFilter,
-  setQuery,
-  setScope,
-}: {
-  reset: () => void
-  setFilter: (value: ArtifactFilter) => void
-  setQuery: (value: string) => void
-  setScope: (value: ScopeFilter) => void
-}) {
-  const setQueryAndReset = useCallback(
-    (value: string) => {
-      setQuery(value)
-      reset()
-    },
-    [reset, setQuery]
-  )
-  const setFilterAndReset = useCallback(
-    (value: ArtifactFilter) => {
-      setFilter(value)
-      reset()
-    },
-    [reset, setFilter]
-  )
-  const setScopeAndReset = useCallback(
-    (value: ScopeFilter) => {
-      setScope(value)
-      reset()
-    },
-    [reset, setScope]
-  )
-
-  return {
-    setFilter: setFilterAndReset,
-    setQuery: setQueryAndReset,
-    setScope: setScopeAndReset,
-  }
 }

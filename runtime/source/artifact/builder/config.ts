@@ -1,6 +1,9 @@
 import fs from "node:fs/promises"
 import path from "node:path"
-import { type BuilderConfig } from "./types.ts"
+
+type BuilderConfig = {
+  artifactTemplatePath: string
+}
 
 const workspace =
   process.env.MILO_WORKSPACE ?? "/home/user/.milo/artifacts/runtime"

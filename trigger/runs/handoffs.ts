@@ -61,8 +61,6 @@ export async function applyHandoffs(
   }
 }
 
-export { pendingHandoffSubjects } from "./handoff"
-
 async function reconcileApproval(
   runtime: ToolRuntime,
   messages: ModelMessage[],

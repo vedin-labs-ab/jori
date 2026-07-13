@@ -1,4 +1,4 @@
-import { defineConfig } from "@trigger.dev/sdk/v3"
+import { defineConfig } from "@trigger.dev/sdk"
 
 const project = process.env.TRIGGER_PROJECT_REF?.trim()
 

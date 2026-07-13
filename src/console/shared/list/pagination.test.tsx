@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
-import { useClientPagination } from "./pagination"
+import { useClientPagination, useResettingSetter } from "./pagination"
 
 afterEach(cleanup)
 
@@ -44,4 +44,15 @@ test("paginates fifty items through a short final page", () => {
 
   act(result.current.reset)
   expect(result.current.pageIndex).toBe(0)
+})
+
+test("updates a filter before resetting its pagination", () => {
+  const calls: string[] = []
+  const setValue = (value: string) => calls.push(`set:${value}`)
+  const reset = () => calls.push("reset")
+  const { result } = renderHook(() => useResettingSetter(setValue, reset))
+
+  act(() => result.current("archived"))
+
+  expect(calls).toEqual(["set:archived", "reset"])
 })

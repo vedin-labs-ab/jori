@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
-import { useCallback, useDeferredValue, useState } from "react"
+import { useDeferredValue, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
@@ -12,7 +12,10 @@ import {
   ConsoleSearch,
 } from "../shared/layout"
 import { ConsoleListPager } from "../shared/list/pager"
-import { useClientPagination } from "../shared/list/pagination"
+import {
+  useClientPagination,
+  useResettingSetter,
+} from "../shared/list/pagination"
 import {
   matchesScopeFilter,
   type ScopeFilter,
@@ -52,7 +55,18 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
     query: deferredQuery,
     scope: filters.scope,
   })
-  const toolbar = useResettingAutomationFilters(filters, pagination.reset)
+  const setFilterAndReset = useResettingSetter(
+    filters.setFilter,
+    pagination.reset
+  )
+  const setQueryAndReset = useResettingSetter(
+    filters.setQuery,
+    pagination.reset
+  )
+  const setScopeAndReset = useResettingSetter(
+    filters.setScope,
+    pagination.reset
+  )
 
   return (
     <ConsolePageLayout>
@@ -62,9 +76,9 @@ function AutomationListView({ tenantId }: { tenantId: string }) {
         onCreateIntent={preloadDialog}
         query={filters.query}
         scope={filters.scope}
-        setFilter={toolbar.setFilter}
-        setQuery={toolbar.setQuery}
-        setScope={toolbar.setScope}
+        setFilter={setFilterAndReset}
+        setQuery={setQueryAndReset}
+        setScope={setScopeAndReset}
       />
       <AutomationContent
         editor={editor}
@@ -87,35 +101,6 @@ function useAutomationFilters() {
   const [query, setQuery] = useState("")
 
   return { filter, query, scope, setFilter, setQuery, setScope }
-}
-
-function useResettingAutomationFilters(
-  filters: ReturnType<typeof useAutomationFilters>,
-  reset: () => void
-) {
-  const setFilter = useCallback(
-    (value: AutomationFilter) => {
-      filters.setFilter(value)
-      reset()
-    },
-    [filters.setFilter, reset]
-  )
-  const setQuery = useCallback(
-    (value: string) => {
-      filters.setQuery(value)
-      reset()
-    },
-    [filters.setQuery, reset]
-  )
-  const setScope = useCallback(
-    (value: ScopeFilter) => {
-      filters.setScope(value)
-      reset()
-    },
-    [filters.setScope, reset]
-  )
-
-  return { setFilter, setQuery, setScope }
 }
 
 function useAutomationPagination({

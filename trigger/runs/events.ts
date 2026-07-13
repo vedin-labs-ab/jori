@@ -2,16 +2,16 @@ import { type MiloConvexClient } from "../convex"
 import { runtimeEvent } from "../events"
 import {
   type RuntimeContext,
+  type RuntimeErrorTraceData,
   type RuntimeEventInput,
   type RuntimeEventTraceData,
   type RuntimeEventType,
-  type RuntimeRunTraceData,
 } from "../types"
 
 type RuntimeEventBase = Omit<RuntimeEventInput, "data" | "runId" | "type">
 type RuntimeEventArgs =
   | (RuntimeEventBase & {
-      data?: RuntimeRunTraceData
+      data?: RuntimeErrorTraceData
       type: "run.completed" | "run.failed"
     })
   | (RuntimeEventBase & {

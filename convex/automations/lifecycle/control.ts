@@ -28,14 +28,7 @@ export async function pauseAutomation(
     throw new Error("Completed automations cannot be paused.")
   }
 
-  await cancelTrigger(ctx, automation.trigger)
-  if (automation.type === "event" && "integrationId" in automation.trigger) {
-    await releaseSubscription(ctx, {
-      tenantId: automation.tenantId,
-      trigger: automation.trigger,
-      exceptAutomationId: automation._id,
-    })
-  }
+  await stopAutomation(ctx, automation)
 
   const trigger = clearTriggerFunction(automation.trigger)
   await ctx.db.patch(automation._id, {
@@ -92,6 +85,41 @@ export async function resumeAutomation(
   })
 
   return await getRequiredAutomation(ctx, automation._id)
+}
+
+export async function removeAutomation(
+  ctx: MutationCtx,
+  args: {
+    tenantId: string
+    automationId: Id<"automations">
+  }
+) {
+  const automation = await getTenantAutomation(
+    ctx,
+    args.tenantId,
+    args.automationId
+  )
+
+  await stopAutomation(ctx, automation)
+  await ctx.db.delete(automation._id)
+  await deleteOwnedAutomations(ctx, automation._id)
+
+  return { deleted: true, automationId: automation._id }
+}
+
+async function stopAutomation(
+  ctx: MutationCtx,
+  automation: Doc<"automations">
+) {
+  await cancelTrigger(ctx, automation.trigger)
+
+  if (automation.type === "event" && "integrationId" in automation.trigger) {
+    await releaseSubscription(ctx, {
+      tenantId: automation.tenantId,
+      trigger: automation.trigger,
+      exceptAutomationId: automation._id,
+    })
+  }
 }
 
 function requirePausableAutomation(automation: Doc<"automations">) {

@@ -105,10 +105,6 @@ function readBuilderFiles() {
 
   for (const filePath of listFiles(builderRoot)) {
     const sourcePath = normalizePath(path.relative(builderRoot, filePath))
-    if (sourcePath === "types.ts") {
-      continue
-    }
-
     const outputPath =
       sourcePath === "index.ts"
         ? "milo-artifact-builder.ts"

@@ -82,15 +82,11 @@ type RuntimeRelationTraceData =
   | { child: ConvexId<"runs"> }
   | { waiter: ConvexId<"waiters"> }
 
-export type RuntimeRunTraceData = RuntimeErrorTraceData
-
 export type RuntimeEventTraceData =
   | RuntimeErrorTraceData
   | RuntimeModelTraceData
   | RuntimeRelationTraceData
   | RuntimeToolTraceData
-
-type RuntimeTraceData = RuntimeEventTraceData | RuntimeRunTraceData
 
 export type RuntimeTool = {
   access: ToolAccess
@@ -183,7 +179,7 @@ export type RuntimeEventType =
 export type RuntimeEventInput = {
   attempt?: number
   callId?: string
-  data?: RuntimeTraceData
+  data?: RuntimeEventTraceData
   keyId?: string
   runId: ConvexId<"runs">
   sequence: number

@@ -1,4 +1,4 @@
-import { memo, useCallback, useDeferredValue, useEffect, useState } from "react"
+import { memo, useDeferredValue, useEffect, useState } from "react"
 import {
   Select,
   SelectContent,
@@ -15,6 +15,7 @@ import {
   ConsoleSearch,
 } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
+import { useResettingSetter } from "../../shared/list/pagination"
 import { type ScopeFilter, scopeFilterOptions } from "../../shared/list/scope"
 import { ExecutionRow } from "../row"
 import { displayNowForRun, runClockInterval } from "../time"
@@ -45,13 +46,19 @@ export function RunsList({ tenantId }: { tenantId: string }) {
     deferredScopeFilter,
     deferredQuery
   )
-  const setApprovalFilterAndReset = useResetting(
+  const setApprovalFilterAndReset = useResettingSetter(
     setApprovalFilter,
     pagination.reset
   )
-  const setRunFilterAndReset = useResetting(setRunFilter, pagination.reset)
-  const setScopeFilterAndReset = useResetting(setScopeFilter, pagination.reset)
-  const setQueryAndReset = useResetting(setQuery, pagination.reset)
+  const setRunFilterAndReset = useResettingSetter(
+    setRunFilter,
+    pagination.reset
+  )
+  const setScopeFilterAndReset = useResettingSetter(
+    setScopeFilter,
+    pagination.reset
+  )
+  const setQueryAndReset = useResettingSetter(setQuery, pagination.reset)
 
   return (
     <ConsolePageLayout>
@@ -72,17 +79,6 @@ export function RunsList({ tenantId }: { tenantId: string }) {
       />
       <ConsoleListPager pagination={pagination} />
     </ConsolePageLayout>
-  )
-}
-
-/** Wraps a setter so changing the filter also resets pagination. */
-function useResetting<Value>(set: (value: Value) => void, reset: () => void) {
-  return useCallback(
-    (value: Value) => {
-      set(value)
-      reset()
-    },
-    [set, reset]
   )
 }
 

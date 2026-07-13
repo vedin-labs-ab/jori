@@ -7,7 +7,7 @@ const triggerWait = vi.hoisted(() => ({
   forToken: vi.fn(),
 }))
 
-vi.mock("@trigger.dev/sdk/v3", () => ({
+vi.mock("@trigger.dev/sdk", () => ({
   wait: {
     createToken: triggerWait.createToken,
     forToken: triggerWait.forToken,

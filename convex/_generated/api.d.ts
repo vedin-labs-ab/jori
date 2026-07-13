@@ -70,7 +70,6 @@ import type * as automations_lifecycle_create from "../automations/lifecycle/cre
 import type * as automations_lifecycle_fire from "../automations/lifecycle/fire.js";
 import type * as automations_lifecycle_index from "../automations/lifecycle/index.js";
 import type * as automations_lifecycle_read from "../automations/lifecycle/read.js";
-import type * as automations_lifecycle_remove from "../automations/lifecycle/remove.js";
 import type * as automations_lifecycle_run from "../automations/lifecycle/run.js";
 import type * as automations_lifecycle_search from "../automations/lifecycle/search.js";
 import type * as automations_lifecycle_trigger from "../automations/lifecycle/trigger.js";
@@ -241,7 +240,6 @@ import type * as playbooks_delivery from "../playbooks/delivery.js";
 import type * as playbooks_destination from "../playbooks/destination.js";
 import type * as playbooks_draft from "../playbooks/draft.js";
 import type * as playbooks_enable from "../playbooks/enable.js";
-import type * as playbooks_fixture from "../playbooks/fixture.js";
 import type * as playbooks_instructions from "../playbooks/instructions.js";
 import type * as playbooks_trial from "../playbooks/trial.js";
 import type * as providers_credentials from "../providers/credentials.js";
@@ -356,7 +354,6 @@ import type * as runs_agent_prompt_communication from "../runs/agent/prompt/comm
 import type * as runs_agent_prompt_context from "../runs/agent/prompt/context.js";
 import type * as runs_agent_prompt_conversation from "../runs/agent/prompt/conversation.js";
 import type * as runs_agent_prompt_index from "../runs/agent/prompt/index.js";
-import type * as runs_agent_prompt_integration from "../runs/agent/prompt/integration.js";
 import type * as runs_agent_prompt_organization from "../runs/agent/prompt/organization.js";
 import type * as runs_agent_prompt_place from "../runs/agent/prompt/place.js";
 import type * as runs_agent_prompt_skills from "../runs/agent/prompt/skills.js";
@@ -534,7 +531,6 @@ declare const fullApi: ApiFromModules<{
   "automations/lifecycle/fire": typeof automations_lifecycle_fire;
   "automations/lifecycle/index": typeof automations_lifecycle_index;
   "automations/lifecycle/read": typeof automations_lifecycle_read;
-  "automations/lifecycle/remove": typeof automations_lifecycle_remove;
   "automations/lifecycle/run": typeof automations_lifecycle_run;
   "automations/lifecycle/search": typeof automations_lifecycle_search;
   "automations/lifecycle/trigger": typeof automations_lifecycle_trigger;
@@ -705,7 +701,6 @@ declare const fullApi: ApiFromModules<{
   "playbooks/destination": typeof playbooks_destination;
   "playbooks/draft": typeof playbooks_draft;
   "playbooks/enable": typeof playbooks_enable;
-  "playbooks/fixture": typeof playbooks_fixture;
   "playbooks/instructions": typeof playbooks_instructions;
   "playbooks/trial": typeof playbooks_trial;
   "providers/credentials": typeof providers_credentials;
@@ -820,7 +815,6 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/prompt/context": typeof runs_agent_prompt_context;
   "runs/agent/prompt/conversation": typeof runs_agent_prompt_conversation;
   "runs/agent/prompt/index": typeof runs_agent_prompt_index;
-  "runs/agent/prompt/integration": typeof runs_agent_prompt_integration;
   "runs/agent/prompt/organization": typeof runs_agent_prompt_organization;
   "runs/agent/prompt/place": typeof runs_agent_prompt_place;
   "runs/agent/prompt/skills": typeof runs_agent_prompt_skills;

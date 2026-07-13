@@ -1,12 +1,15 @@
 import { useQuery } from "convex/react"
 import { Layers } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
 import { ConsoleFilterGroup, ConsoleFilterToggle } from "../../shared/layout"
 import { FilterableEmptyState } from "../../shared/list/empty"
 import { ConsoleListPager } from "../../shared/list/pager"
-import { useClientPagination } from "../../shared/list/pagination"
+import {
+  useClientPagination,
+  useResettingSetter,
+} from "../../shared/list/pagination"
 import { ContextPage } from ".."
 import { WorkstreamsPulse } from "./activity/pulse"
 import { WorkstreamCard } from "./card"
@@ -86,14 +89,7 @@ function useWorkstreamPagination(workstreams: Workstreams, isReady: boolean) {
     itemLabel: { singular: "workstream", plural: "workstreams" },
     items: filteredWorkstreams,
   })
-  const { reset } = pagination
-  const setFilterAndReset = useCallback(
-    (value: WorkstreamFilter) => {
-      setFilter(value)
-      reset()
-    },
-    [reset]
-  )
+  const setFilterAndReset = useResettingSetter(setFilter, pagination.reset)
 
   return {
     filter,

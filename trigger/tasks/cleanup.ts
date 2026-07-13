@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk/v3"
+import { task } from "@trigger.dev/sdk"
 import { MiloConvexClient } from "../convex"
 import { killE2BSandbox } from "../sandbox/e2b/support"
 import { cleanupTaskId, type SandboxCleanupPayload } from "../types"

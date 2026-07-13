@@ -1,4 +1,4 @@
-import { tasks } from "@trigger.dev/sdk/v3"
+import { tasks } from "@trigger.dev/sdk"
 import { type E2BSandboxRuntime } from "../sandbox/e2b"
 import { cleanupTaskId, type RuntimeContext } from "../types"
 

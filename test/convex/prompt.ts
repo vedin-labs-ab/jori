@@ -1,6 +1,6 @@
 import { type ToolPermission } from "../../convex/permissions/catalog"
+import { type RuntimeIntegration } from "../../convex/runs/agent/input"
 import { type assemblePrompt } from "../../convex/runs/agent/prompt"
-import { promptIntegration } from "../../convex/runs/agent/prompt/integration"
 
 export function automationRuntimeInput(webSearch = true) {
   const github = promptIntegration("github")
@@ -201,4 +201,21 @@ export function promptedTool(): ToolPermission {
     access: "write",
     defaultMode: "prompted",
   }
+}
+
+function promptIntegration(integration: string): RuntimeIntegration {
+  return {
+    _id: `${integration}-integration`,
+    _creationTime: 0,
+    tenantId: "tenant",
+    integration,
+    scope: "tenant",
+    externalId: `${integration}-account`,
+    credentials: {},
+    data: integration === "slack" ? { botUserId: "UBOT" } : {},
+    status: "active",
+    createdBy: "person",
+    createdAt: 0,
+    updatedAt: 0,
+  } as RuntimeIntegration
 }

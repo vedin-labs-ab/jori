@@ -1,4 +1,4 @@
-import { wait } from "@trigger.dev/sdk/v3"
+import { wait } from "@trigger.dev/sdk"
 import { type ToolRuntime } from "../tool/runtime"
 import { type ConvexId, type WaiterCondition, type WaiterWake } from "../types"
 import { recordRuntimeEvent } from "./events"

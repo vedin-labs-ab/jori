@@ -88,10 +88,7 @@ export const pendingAutomationEventCatalog = [
       message:
         "Google Calendar starting-soon automations need scheduled calendar checks before they can run.",
       parameters: [
-        optionParameter("calendar", "Calendar", "Search calendars", {
-          required: true,
-          source: "googleCalendar.calendars",
-        }),
+        ...googleCalendarParameters,
         numberParameter("leadMinutes", "Lead time", "15", {
           required: true,
           min: 1,
@@ -114,10 +111,7 @@ export const pendingAutomationEventCatalog = [
       message:
         "Microsoft Calendar starting-soon automations need scheduled calendar checks before they can run.",
       parameters: [
-        optionParameter("calendar", "Calendar", "Search calendars", {
-          required: true,
-          source: "microsoftCalendar.calendars",
-        }),
+        ...microsoftCalendarParameters,
         numberParameter("leadMinutes", "Lead time", "15", {
           required: true,
           min: 1,

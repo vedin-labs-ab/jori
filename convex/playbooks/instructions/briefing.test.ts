@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest"
-import { emailDestination, renderPlaybook } from "../fixture"
+import {
+  emailDestination,
+  renderPlaybook,
+} from "../../../test/convex/playbooks"
 
 const renderBriefing = (
   options: Record<string, boolean | number | string> = {}

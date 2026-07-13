@@ -1,7 +1,17 @@
 import fs from "node:fs/promises"
 import path from "node:path"
 import { listFiles, normalizeAssetPath } from "./files.ts"
-import { type ArtifactBuildAsset, type ArtifactManifest } from "./types.ts"
+
+type ArtifactBuildAsset = {
+  path: string
+  mimeType: string
+  contentBase64: string
+}
+
+type ArtifactManifest = {
+  entry: string
+  styles: string[]
+}
 
 const manifestAssetPath = "milo-manifest.json"
 

@@ -4,7 +4,6 @@ import os from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import {
-  type ArtifactSourceFile,
   artifactSourceHashInput,
   type NormalizedArtifactSourceFile,
   normalizeArtifactSourceFiles,
@@ -79,5 +78,3 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.exitCode = 1
   }
 }
-
-export type { ArtifactSourceFile }
