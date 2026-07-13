@@ -6,7 +6,7 @@ import { DeliveryModeMenu } from "./menu"
 
 afterEach(cleanup)
 
-test("shows prioritized methods and explains unavailable choices", () => {
+test("keeps Slack methods nested and explains unavailable choices", () => {
   const onSelect = vi.fn()
 
   render(
@@ -27,9 +27,15 @@ test("shows prioritized methods and explains unavailable choices", () => {
   )
 
   fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery method" }))
-  const dm = screen.getByRole("menuitem", { name: /Slack DM/ })
   const email = screen.getByRole("menuitem", { name: "Email" })
-  const channel = screen.getByRole("menuitem", { name: "Slack channel" })
+  const slack = screen.getByRole("menuitem", { name: "Slack" })
+
+  expect(screen.queryByRole("menuitem", { name: /^DM/ })).toBeNull()
+  slack.focus()
+  fireEvent.keyDown(slack, { key: "ArrowRight" })
+
+  const dm = screen.getByRole("menuitem", { name: /^DM/ })
+  const channel = screen.getByRole("menuitem", { name: "Channel" })
 
   expect(channel.querySelector("svg")?.classList).toContain("lucide-hash")
   expect(dm.querySelector("svg")?.classList).toContain("lucide-message-circle")

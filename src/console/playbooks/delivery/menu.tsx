@@ -8,6 +8,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SurfaceLogo } from "../../automations/access/logo"
@@ -41,26 +45,81 @@ export function DeliveryModeMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-56">
-        {options.map((option) => (
-          <DropdownMenuItem
-            className="justify-between gap-4"
-            disabled={!option.available}
-            key={option.mode}
-            onSelect={() => onSelect(option.mode)}
-          >
-            <span className="flex items-center gap-2">
-              <ModeIcon mode={option.mode} />
-              {modeLabel(option.mode)}
-            </span>
-            {option.reason === undefined ? null : (
-              <span className="text-muted-foreground text-xs">
-                {option.reason}
-              </span>
-            )}
-          </DropdownMenuItem>
-        ))}
+        <DeliveryOptions onSelect={onSelect} options={options} />
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+function DeliveryOptions({
+  onSelect,
+  options,
+}: {
+  onSelect: (mode: DeliveryMode) => void
+  options: DeliveryOption[]
+}) {
+  const email = options.find((option) => option.mode === "email")
+  const dm = options.find((option) => option.mode === "dm")
+  const channel = options.find((option) => option.mode === "channel")
+
+  return (
+    <>
+      {email === undefined ? null : (
+        <DeliveryOptionItem label="Email" onSelect={onSelect} option={email} />
+      )}
+      {dm === undefined && channel === undefined ? null : (
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <SurfaceLogo alt="" integration="slack" />
+            Slack
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent className="min-w-56">
+              {dm === undefined ? null : (
+                <DeliveryOptionItem
+                  label="DM"
+                  onSelect={onSelect}
+                  option={dm}
+                />
+              )}
+              {channel === undefined ? null : (
+                <DeliveryOptionItem
+                  label="Channel"
+                  onSelect={onSelect}
+                  option={channel}
+                />
+              )}
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+      )}
+    </>
+  )
+}
+
+function DeliveryOptionItem({
+  label,
+  onSelect,
+  option,
+}: {
+  label: string
+  onSelect: (mode: DeliveryMode) => void
+  option: DeliveryOption
+}) {
+  return (
+    <DropdownMenuItem
+      className="justify-between gap-4"
+      disabled={!option.available}
+      onSelect={() => onSelect(option.mode)}
+    >
+      <span className="flex items-center gap-2">
+        <ModeIcon mode={option.mode} />
+        {label}
+      </span>
+      {option.reason === undefined ? null : (
+        <span className="text-muted-foreground text-xs">{option.reason}</span>
+      )}
+    </DropdownMenuItem>
   )
 }
 
@@ -78,12 +137,4 @@ function ModeIcon({ mode }: { mode: DeliveryMode }) {
   }
 
   return mode === "dm" ? <MessageCircle /> : <Hash />
-}
-
-function modeLabel(mode: DeliveryMode) {
-  if (mode === "email") {
-    return "Email"
-  }
-
-  return mode === "dm" ? "Slack DM" : "Slack channel"
 }

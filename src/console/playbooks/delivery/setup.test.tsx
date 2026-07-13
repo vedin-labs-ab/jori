@@ -137,7 +137,19 @@ function deliverySetup(
 
 function switchMode(mode: "Slack channel" | "Slack DM" | "Email") {
   fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery method" }))
-  fireEvent.click(screen.getByRole("menuitem", { name: mode }))
+  if (mode === "Email") {
+    fireEvent.click(screen.getByRole("menuitem", { name: mode }))
+    return
+  }
+
+  const slack = screen.getByRole("menuitem", { name: "Slack" })
+  slack.focus()
+  fireEvent.keyDown(slack, { key: "ArrowRight" })
+  fireEvent.click(
+    screen.getByRole("menuitem", {
+      name: mode === "Slack DM" ? "DM" : "Channel",
+    })
+  )
 }
 
 function expectButtonDisabled(name: string | RegExp, disabled = true) {

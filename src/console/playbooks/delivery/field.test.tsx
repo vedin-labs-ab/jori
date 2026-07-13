@@ -122,5 +122,12 @@ test("selects a Slack channel and commits its stable channel ID", async () => {
 
 function selectDeliveryMode(mode: "Slack channel" | "Slack DM") {
   fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery method" }))
-  fireEvent.click(screen.getByRole("menuitem", { name: mode }))
+  const slack = screen.getByRole("menuitem", { name: "Slack" })
+  slack.focus()
+  fireEvent.keyDown(slack, { key: "ArrowRight" })
+  fireEvent.click(
+    screen.getByRole("menuitem", {
+      name: mode === "Slack DM" ? "DM" : "Channel",
+    })
+  )
 }
