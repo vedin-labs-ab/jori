@@ -78,15 +78,21 @@ function pulseDays(now: number, dayCount: number): PulseDay[] {
 
   return days.map((day, index) => {
     const previous = days[index - 1]
+    const next = days[index + 1]
+    const followsWideAnchor =
+      previous !== undefined &&
+      isWideAnchor(previous.label) &&
+      /^\d+$/.test(day.label)
+    const precedesWideAnchor =
+      next !== undefined && isWideAnchor(day.label) && isWideAnchor(next.label)
 
-    return previous !== undefined && isWideAnchor(previous.label)
-      ? { ...day, label: /^\d+$/.test(day.label) ? "" : day.label }
-      : day
+    return followsWideAnchor || precedesWideAnchor ? { ...day, label: "" } : day
   })
 }
 
-// Anchor labels ("Jun 28", "Jul 1") are wider than one column, so the plain
-// number right after one is dropped rather than collided with.
+// Anchor labels ("Jun 28", "Jul 1") are wider than one column. A month
+// boundary wins over an adjacent range start, and the plain number after an
+// anchor is dropped rather than collided with.
 function isWideAnchor(label: string) {
   return label.includes(" ")
 }
