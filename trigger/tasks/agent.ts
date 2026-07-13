@@ -1,11 +1,11 @@
 import { task } from "@trigger.dev/sdk"
 import { MiloConvexClient } from "../convex"
-import { errorDetails } from "../events"
 import { OpenRouterModelRuntime } from "../model/openrouter"
-import { recordRuntimeEvent } from "../runs/events"
 import { runAgentLoop } from "../runs/loop"
-import { releaseSandbox } from "../runs/sandbox"
 import { E2BSandboxRuntime } from "../sandbox/e2b"
+import { releaseSandbox } from "../sandbox/release"
+import { errorDetails } from "../trace/events"
+import { recordRuntimeEvent } from "../trace/runtime"
 import {
   type AgentRunPayload,
   agentTaskId,

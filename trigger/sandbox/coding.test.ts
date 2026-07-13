@@ -3,7 +3,7 @@ import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
 import { afterEach, expect, test } from "vitest"
-import { sandboxWorkspace } from "../../contracts/runtime"
+import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { executeCodingTool } from "./coding"
 import { sandboxClonePath } from "./path"
 import {

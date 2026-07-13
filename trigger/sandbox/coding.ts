@@ -1,5 +1,5 @@
 import { type CodingToolName, isCodingToolName } from "../../contracts/coding"
-import { sandboxWorkspace } from "../../contracts/runtime"
+import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { readWorkspaceFile } from "./files"
 import {
   boundedTimeoutMs,

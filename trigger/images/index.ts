@@ -1,6 +1,6 @@
 import path from "node:path"
 import { isRecord } from "../../contracts/json"
-import { sandboxWorkspace } from "../../contracts/runtime"
+import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { optionalString, requiredString } from "../input"
 import { type ToolRuntime } from "../tool"
 import { type JsonObject } from "../types"

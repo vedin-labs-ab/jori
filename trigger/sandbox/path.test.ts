@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { sandboxWorkspace } from "../../contracts/runtime"
+import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { sandboxClonePath, sandboxWorkspacePath } from "./path"
 
 test("uses the repository name as the default clone destination", () => {

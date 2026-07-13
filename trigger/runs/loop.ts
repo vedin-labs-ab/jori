@@ -5,10 +5,10 @@ import {
   type ModelToolCall,
 } from "../model/types"
 import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
+import { recordRuntimeEvent } from "../trace/runtime"
 import { type HandoffSubject, type RuntimeContext } from "../types"
-import { recordRuntimeEvent } from "./events"
-import { pendingHandoffSubjects } from "./handoff"
-import { applyHandoffs, reconcileHandoffs } from "./handoffs"
+import { pendingHandoffSubjects } from "./handoffs/pending"
+import { applyHandoffs, reconcileHandoffs } from "./handoffs/reconcile"
 import {
   appendSessionMessages,
   promptMessages,

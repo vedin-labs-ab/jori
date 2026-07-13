@@ -2,12 +2,12 @@
 
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { z } from "zod"
-import { defineArtifactContract } from "../../runtime/source/artifact/template/src/milo/contract"
-import { createStateClient } from "../../runtime/source/artifact/template/src/milo/state"
+import { defineArtifactContract } from "../../runtime/artifacts/template/src/milo/contract"
+import { createStateClient } from "../../runtime/artifacts/template/src/milo/state"
 import {
   type MiloStateDocument,
   type RawMiloClient,
-} from "../../runtime/source/artifact/template/src/milo/types"
+} from "../../runtime/artifacts/template/src/milo/types"
 
 const ref = defineArtifactContract({
   state: {

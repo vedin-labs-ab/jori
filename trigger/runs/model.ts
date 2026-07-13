@@ -1,12 +1,12 @@
-import { formatError } from "../events"
 import {
   type ModelMessage,
   type ModelRuntime,
   type ModelTool,
 } from "../model/types"
 import { type ToolRuntime } from "../tool"
+import { formatError } from "../trace/events"
+import { recordRuntimeEvent } from "../trace/runtime"
 import { type RuntimeModelUsage } from "../types"
-import { recordRuntimeEvent } from "./events"
 
 export async function completeModelStep(args: {
   attempt: number

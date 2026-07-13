@@ -1,11 +1,6 @@
 import path from "node:path"
-import { isArtifactPublishTool } from "../contracts/artifacts/publish"
-import { isRecord } from "../contracts/json"
-import {
-  assetTooLargeError,
-  maxAssetBytes,
-  sandboxWorkspace,
-} from "../contracts/runtime"
+import { assetTooLargeError, maxAssetBytes } from "../contracts/runtime/assets"
+import { sandboxWorkspace } from "../contracts/runtime/sandbox"
 import { optionalString, requiredString } from "./input"
 import { type ToolRuntime } from "./tool"
 import { type JsonObject } from "./types"
@@ -23,33 +18,6 @@ const mimeTypesByExtension: Record<string, string> = {
   ".png": "image/png",
   ".txt": "text/plain",
   ".webp": "image/webp",
-}
-
-export async function prepareMiloToolInput(
-  runtime: ToolRuntime,
-  tool: string,
-  input: JsonObject
-) {
-  if (!isArtifactPublishTool(tool)) {
-    return input
-  }
-
-  const artifact = await runtime.sandbox.buildArtifact(
-    requiredString(input.workspacePath, "workspacePath")
-  )
-  const {
-    approval: _approval,
-    final: _final,
-    workspacePath: _workspacePath,
-    ...rest
-  } = input
-
-  return {
-    ...rest,
-    build: artifact.build,
-    contract: artifact.contract,
-    source: artifact.source,
-  }
 }
 
 export async function saveSandboxAsset(
@@ -76,30 +44,6 @@ export async function saveSandboxAsset(
   })
 }
 
-export async function materializeSandboxResult(
-  runtime: ToolRuntime,
-  result: unknown
-) {
-  const clone = githubRepositoryClone(result)
-
-  if (clone === undefined) {
-    return result
-  }
-
-  const credentials = await runtime.convex.fetchGitHubCloneCredentials({
-    owner: clone.owner,
-    repo: clone.repo,
-    runId: runtime.context.run.id,
-  })
-
-  return await runtime.sandbox.cloneRepository({
-    ...credentials,
-    directory: clone.directory,
-    ref: clone.ref,
-    repository: `${clone.owner}/${clone.repo}`,
-  })
-}
-
 function sandboxFilePath(value: string) {
   const filePath = path.posix.isAbsolute(value)
     ? path.posix.normalize(value)
@@ -122,30 +66,4 @@ function inferMimeType(filePath: string) {
     mimeTypesByExtension[path.posix.extname(filePath).toLowerCase()] ??
     "application/octet-stream"
   )
-}
-
-function githubRepositoryClone(value: unknown) {
-  if (!isRecord(value) || !isRecord(value.clone)) {
-    return undefined
-  }
-
-  const clone = value.clone
-
-  if (
-    clone.kind !== "github_repository" ||
-    typeof clone.owner !== "string" ||
-    typeof clone.repo !== "string"
-  ) {
-    return undefined
-  }
-
-  return {
-    directory:
-      typeof clone.directory === "string" || clone.directory === null
-        ? clone.directory
-        : undefined,
-    owner: clone.owner,
-    ref: typeof clone.ref === "string" ? clone.ref : undefined,
-    repo: clone.repo,
-  }
 }

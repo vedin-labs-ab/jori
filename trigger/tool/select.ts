@@ -1,5 +1,5 @@
 import { type ToolSurface } from "../../contracts/integrations"
-import { readFinal } from "../../contracts/runtime"
+import { readFinal } from "../../contracts/runtime/tools"
 import { type JsonObject, type RuntimeTool } from "../types"
 
 export function findTool(tools: RuntimeTool[], name: string) {

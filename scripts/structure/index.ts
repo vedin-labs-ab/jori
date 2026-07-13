@@ -43,14 +43,14 @@ const skippedDirectories = [
   "dist",
   "node_modules",
   "convex/_generated",
-  "runtime/source/artifact/template",
+  "runtime/artifacts/template",
   "src/components/ui",
   "src/routes",
 ]
 
 const allowedSingleFileFolders = [
   ".",
-  "runtime/source/artifact/shell",
+  "runtime/artifacts/shell",
   "src/hooks",
   "src/lib",
 ]

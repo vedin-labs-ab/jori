@@ -7,10 +7,10 @@ export const root = path.resolve(
 )
 export const appSourceRoot = path.join(root, "src")
 export const contractsRoot = path.join(root, "contracts")
-export const sourceRoot = path.join(root, "runtime/source")
+export const sourceRoot = path.join(root, "runtime/artifacts")
 export const generatedPath = path.join(
   root,
-  "convex/runtime/_generated/assets.ts"
+  "convex/artifacts/_generated/assets.ts"
 )
 
 export function appSourcePath(relativePath: string) {
