@@ -56,8 +56,8 @@ test("disabled option controls retain the behavior row boundary", () => {
   for (const control of [select, time]) {
     expect(control).toHaveProperty("disabled", true)
     expect(control.getAttribute("class")).not.toContain("pointer-events-auto")
-    expect(control.parentElement?.getAttribute("class")).toContain(
-      "pointer-events-auto"
-    )
+    const boundaryClassName = control.parentElement?.getAttribute("class")
+    expect(boundaryClassName).toContain("pointer-events-auto")
+    expect(boundaryClassName).toContain("cursor-not-allowed")
   }
 })

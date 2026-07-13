@@ -47,7 +47,13 @@ export function OptionField({
           {field.label}
         </Label>
       ) : null}
-      <div className={cn(controlWidth(field), controlClassName)}>
+      <div
+        className={cn(
+          controlWidth(field),
+          disabled && "cursor-not-allowed",
+          controlClassName
+        )}
+      >
         <OptionControl
           disabled={disabled}
           field={field}
