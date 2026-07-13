@@ -76,7 +76,7 @@ test("closing an option dropdown never closes the dialog", async () => {
 
   renderBriefing(onOpenChange)
 
-  fireEvent.click(screen.getByText("Toggle before each meeting"))
+  fireEvent.click(screen.getByText("Toggle before meetings"))
   fireEvent.click(screen.getByRole("combobox"))
   expect(screen.getByRole("listbox")).toBeDefined()
   await new Promise((resolve) => setTimeout(resolve, 0))
@@ -107,7 +107,7 @@ test("turning off both deliveries blocks enabling", async () => {
     expectButtonDisabled(name)
   }
 
-  fireEvent.click(screen.getByText("Toggle before each meeting"))
+  fireEvent.click(screen.getByText("Toggle before meetings"))
 
   expect(screen.queryByText("Choose at least one delivery time.")).toBeNull()
   expectButtonDisabled("Enable", false)
@@ -127,7 +127,7 @@ test("setup groups meeting scope and delivery behaviors", () => {
   ).toBe("true")
   expect(
     screen
-      .getByRole("checkbox", { name: "Include before each meeting" })
+      .getByRole("checkbox", { name: "Include before meetings" })
       .getAttribute("aria-checked")
   ).toBe("false")
   expect(screen.getByLabelText("Send at")).toBeDefined()
@@ -146,7 +146,7 @@ test("behavior choices reach enable as normalized options", async () => {
     meetingBriefing()
   )
   fireEvent.click(
-    screen.getByRole("checkbox", { name: "Include before each meeting" })
+    screen.getByRole("checkbox", { name: "Include before meetings" })
   )
   fireEvent.click(screen.getByRole("combobox"))
   await new Promise((resolve) => setTimeout(resolve, 0))

@@ -9,6 +9,8 @@ afterEach(cleanup)
 const behavior = {
   key: "delivery",
   label: "Delivery",
+  description: (values) =>
+    values.prepared === true ? "Prepared" : "Prepare now",
   enabledBy: {
     key: "delivery",
     label: "Delivery",
@@ -60,4 +62,36 @@ test("disabled option controls retain the behavior row boundary", () => {
     expect(boundaryClassName).toContain("pointer-events-auto")
     expect(boundaryClassName).toContain("cursor-not-allowed")
   }
+})
+
+test("behavior descriptions follow current options", () => {
+  const view = render(
+    <BehaviorList
+      behaviors={[behavior]}
+      disabled={false}
+      fields={[behavior.enabledBy, ...behavior.fields]}
+      onChange={vi.fn()}
+      values={{ delivery: true, prepared: true, send: "now", sendAt: "07:30" }}
+    />
+  )
+
+  expect(screen.getByText("Prepared")).toBeDefined()
+
+  view.rerender(
+    <BehaviorList
+      behaviors={[behavior]}
+      disabled={false}
+      fields={[behavior.enabledBy, ...behavior.fields]}
+      onChange={vi.fn()}
+      values={{
+        delivery: true,
+        prepared: false,
+        send: "now",
+        sendAt: "07:30",
+      }}
+    />
+  )
+
+  expect(screen.queryByText("Prepared")).toBeNull()
+  expect(screen.getByText("Prepare now")).toBeDefined()
 })

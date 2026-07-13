@@ -13,7 +13,11 @@ import {
   type DeliveryKind,
   destinationTools,
 } from "./delivery"
-import { resolvePlaybookOptions } from "./options"
+import {
+  describePlaybookBehavior,
+  type PlaybookBehavior,
+  resolvePlaybookOptions,
+} from "./options"
 
 function sampleDestination(kind: DeliveryKind): DeliveryDestination {
   return kind === "email"
@@ -75,6 +79,20 @@ describe("playbook catalog", () => {
 
 const meetingBriefing = getPlaybook("meeting-briefing")
 
+function meetingBehavior(key: string): PlaybookBehavior {
+  for (const section of meetingBriefing.setup ?? []) {
+    if (section.kind === "behaviors") {
+      const behavior = section.behaviors.find((entry) => entry.key === key)
+
+      if (behavior !== undefined) {
+        return behavior
+      }
+    }
+  }
+
+  throw new Error(`Meeting Briefing behavior "${key}" is missing.`)
+}
+
 function meetingOptions(
   values: Record<string, boolean | number | string> = {}
 ) {
@@ -97,6 +115,22 @@ describe("Meeting Briefing configuration", () => {
       { capability: "calendar", intents: ["read"] },
     ])
     expect(meetingBriefing.web).toBe(true)
+  })
+
+  test("delivery copy distinguishes preparation from reminders", () => {
+    const morning = meetingBehavior("morning-briefing")
+    const before = meetingBehavior("before-meeting")
+
+    expect(describePlaybookBehavior(morning, meetingOptions())).toBe(
+      "Relevant meetings in one daily digest"
+    )
+    expect(before.label).toBe("Before meetings")
+    expect(describePlaybookBehavior(before, meetingOptions())).toBe(
+      "Resend the prepared dossier as a reminder"
+    )
+    expect(
+      describePlaybookBehavior(before, meetingOptions({ morning: false }))
+    ).toBe("Prepare and send each dossier just in time")
   })
 
   test("starts research with margin before the chosen delivery time", () => {
