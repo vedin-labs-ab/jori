@@ -6,9 +6,11 @@ import {
   emailDeliveryProviders,
   isEmailDeliveryProvider,
 } from "../../contracts/playbooks/delivery"
+import { type Id } from "../_generated/dataModel"
+import { type QueryLikeCtx } from "../shared/context"
 import { type Integration } from "../shared/integrations"
 
-export type PlaybookRecipient = { email: string; name?: string }
+export type PlaybookRecipient = { email?: string; name?: string }
 
 type ResolvedSlot = {
   slot: { capability: PlaybookCapability }
@@ -16,34 +18,71 @@ type ResolvedSlot = {
 }
 
 /** Turn the user's pick into a fully specified destination. */
-export function resolveDestination(
+export async function resolveDestination(
+  ctx: QueryLikeCtx,
   choice: DeliveryChoice,
-  ctx: {
+  args: {
     connected: Set<Integration>
+    createdBy: Id<"persons">
     emailProvider: EmailDeliveryProvider | undefined
     recipient: PlaybookRecipient
   }
-): DeliveryDestination {
+): Promise<DeliveryDestination> {
   if (choice.kind === "email") {
     return {
       kind: "email",
-      integration: ctx.emailProvider ?? soleConnectedEmail(ctx.connected),
-      address: recipientLine(ctx.recipient),
+      integration: args.emailProvider ?? soleConnectedEmail(args.connected),
+      address: recipientLine(args.recipient),
     }
   }
 
-  if (!ctx.connected.has("slack")) {
+  if (!args.connected.has("slack")) {
     throw new Error("Connect Slack to deliver through Slack.")
   }
 
+  if (choice.target.kind === "dm") {
+    const target = await readSelfSlackTarget(
+      ctx,
+      args.createdBy,
+      args.recipient.name
+    )
+
+    if (target === undefined) {
+      throw new Error("Link your Slack identity to deliver by Slack DM.")
+    }
+
+    return { kind: "slack", target }
+  }
+
+  return { kind: "slack", target: normalizeSlackChannel(choice.target) }
+}
+
+export async function readSelfSlackTarget(
+  ctx: QueryLikeCtx,
+  personId: Id<"persons">,
+  fallbackName: string | undefined
+) {
+  const identities = await ctx.db
+    .query("identities")
+    .withIndex("by_person", (query) => query.eq("personId", personId))
+    .take(100)
+  const slack = identities.filter((identity) => identity.provider === "slack")
+
+  if (slack.length !== 1) {
+    return undefined
+  }
+
   return {
-    kind: "slack",
-    target: normalizeSlackTarget(choice.target),
+    kind: "dm" as const,
+    id: slack[0].externalId,
+    label: slack[0].name ?? fallbackName ?? "you",
   }
 }
 
-function normalizeSlackTarget(
-  target: Extract<DeliveryChoice, { kind: "slack" }>["target"]
+export function normalizeSlackChannel(
+  target: Extract<DeliveryChoice, { kind: "slack" }>["target"] & {
+    kind: "channel"
+  }
 ) {
   const id = target.id.trim()
   const label = target.label.trim().replace(/\s+/g, " ")
@@ -83,6 +122,12 @@ function soleConnectedEmail(
 }
 
 function recipientLine(recipient: PlaybookRecipient) {
+  if (recipient.email === undefined) {
+    throw new Error(
+      "Your account needs an email address before playbooks can email you."
+    )
+  }
+
   return recipient.name === undefined
     ? recipient.email
     : `${recipient.name} <${recipient.email}>`

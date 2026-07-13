@@ -233,6 +233,7 @@ import type * as playbooks_blueprints_generated from "../playbooks/blueprints/ge
 import type * as playbooks_blueprints_provision from "../playbooks/blueprints/provision.js";
 import type * as playbooks_caller from "../playbooks/caller.js";
 import type * as playbooks_console from "../playbooks/console.js";
+import type * as playbooks_delivery from "../playbooks/delivery.js";
 import type * as playbooks_destination from "../playbooks/destination.js";
 import type * as playbooks_draft from "../playbooks/draft.js";
 import type * as playbooks_enable from "../playbooks/enable.js";
@@ -691,6 +692,7 @@ declare const fullApi: ApiFromModules<{
   "playbooks/blueprints/provision": typeof playbooks_blueprints_provision;
   "playbooks/caller": typeof playbooks_caller;
   "playbooks/console": typeof playbooks_console;
+  "playbooks/delivery": typeof playbooks_delivery;
   "playbooks/destination": typeof playbooks_destination;
   "playbooks/draft": typeof playbooks_draft;
   "playbooks/enable": typeof playbooks_enable;

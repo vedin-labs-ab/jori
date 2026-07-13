@@ -24,6 +24,10 @@ export function isEmailDeliveryProvider(
 
 export type SlackDeliveryTarget =
   | { kind: "channel"; id: string; label: string }
+  | { kind: "dm" }
+
+export type ResolvedSlackDeliveryTarget =
+  | Extract<SlackDeliveryTarget, { kind: "channel" }>
   | { kind: "dm"; id: string; label: string }
 
 /** What the user picked; the target self-email needs no explicit address. */
@@ -34,12 +38,38 @@ export type DeliveryChoice =
 /** A fully resolved destination: what instructions and tool grants derive from. */
 export type DeliveryDestination =
   | { kind: "email"; integration: EmailDeliveryProvider; address: string }
-  | { kind: "slack"; target: SlackDeliveryTarget }
+  | { kind: "slack"; target: ResolvedSlackDeliveryTarget }
 
-/** Per-playbook delivery contract: the default, the offered kinds, and the
- *  noun the instruction uses for the produced output ("brief", "summary"). */
+export type DeliveryMode = "email" | SlackDeliveryTarget["kind"]
+
+export type DeliveryOption = {
+  mode: DeliveryMode
+  available: boolean
+  reason?: string
+}
+
+export type DeliverySetup = {
+  options: DeliveryOption[]
+  recommended?: DeliveryChoice
+}
+
+export const deliveryModes = [
+  "dm",
+  "email",
+  "channel",
+] as const satisfies DeliveryMode[]
+
+export function deliveryMode(choice: DeliveryChoice): DeliveryMode {
+  return choice.kind === "email" ? "email" : choice.target.kind
+}
+
+export function deliveryKindForMode(mode: DeliveryMode): DeliveryKind {
+  return mode === "email" ? "email" : "slack"
+}
+
+/** Per-playbook delivery contract: the offered kinds and the noun the
+ *  instruction uses for the produced output ("brief", "summary"). */
 export type PlaybookDelivery = {
-  default: DeliveryKind
   allowed: readonly DeliveryKind[]
   noun: string
   /** "content" sends the full output in the message (the default);

@@ -1,31 +1,29 @@
-import { type DeliveryKind } from "@contracts/playbooks/delivery"
+import {
+  type DeliveryMode,
+  type DeliveryOption,
+} from "@contracts/playbooks/delivery"
 import { ChevronDown, Hash, Mail, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SurfaceLogo } from "../../automations/access/logo"
-import { type DeliveryMode, deliveryModeCount } from "./model"
 
 export function DeliveryModeMenu({
   disabled,
-  kinds,
   mode,
   onSelect,
+  options,
 }: {
   disabled: boolean
-  kinds: DeliveryKind[]
   mode: DeliveryMode
   onSelect: (mode: DeliveryMode) => void
+  options: DeliveryOption[]
 }) {
-  if (deliveryModeCount(kinds) < 2) {
+  if (options.length < 2) {
     return <DeliveryIcon mode={mode} />
   }
 
@@ -42,29 +40,25 @@ export function DeliveryModeMenu({
           <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {kinds.includes("email") ? (
-          <DropdownMenuItem onSelect={() => onSelect("email")}>
-            <Mail /> Email
+      <DropdownMenuContent align="start" className="min-w-56">
+        {options.map((option) => (
+          <DropdownMenuItem
+            className="justify-between gap-4"
+            disabled={!option.available}
+            key={option.mode}
+            onSelect={() => onSelect(option.mode)}
+          >
+            <span className="flex items-center gap-2">
+              <ModeIcon mode={option.mode} />
+              {modeLabel(option.mode)}
+            </span>
+            {option.reason === undefined ? null : (
+              <span className="text-muted-foreground text-xs">
+                {option.reason}
+              </span>
+            )}
           </DropdownMenuItem>
-        ) : null}
-        {kinds.includes("slack") ? (
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <SurfaceLogo alt="" integration="slack" /> Slack
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem onSelect={() => onSelect("channel")}>
-                  <Hash /> Channel
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => onSelect("dm")}>
-                  <MessageCircle /> DM
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        ) : null}
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -76,4 +70,20 @@ export function DeliveryIcon({ mode }: { mode: DeliveryMode }) {
   ) : (
     <SurfaceLogo alt="" integration="slack" />
   )
+}
+
+function ModeIcon({ mode }: { mode: DeliveryMode }) {
+  if (mode === "email") {
+    return <Mail />
+  }
+
+  return mode === "dm" ? <MessageCircle /> : <Hash />
+}
+
+function modeLabel(mode: DeliveryMode) {
+  if (mode === "email") {
+    return "Email"
+  }
+
+  return mode === "dm" ? "Slack DM" : "Slack channel"
 }

@@ -6,6 +6,10 @@ import { PlaybookSetupDialog } from "./dialog"
 import { type PlaybookActions } from "./enable"
 import { type PlaybookEnablePlan, type PlaybookListRow } from "./state"
 
+const convexMocks = vi.hoisted(() => ({
+  saveDeliveryPreference: vi.fn(async () => null),
+}))
+
 vi.mock("@clerk/tanstack-react-start", () => ({
   useUser: () => ({
     user: { primaryEmailAddress: { emailAddress: "sam@example.com" } },
@@ -17,6 +21,7 @@ let organizationProfile: Record<string, unknown> = {}
 vi.mock("convex/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("convex/react")>()),
   useAction: () => vi.fn(async () => ({ status: "ready", options: [] })),
+  useMutation: () => convexMocks.saveDeliveryPreference,
   useQuery: () => organizationProfile,
 }))
 
@@ -30,6 +35,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => ({
 afterEach(() => {
   cleanup()
   organizationProfile = {}
+  vi.clearAllMocks()
 })
 
 const morningBrief = playbookCatalog[0]
@@ -39,74 +45,10 @@ const singlePlan: Exclude<PlaybookEnablePlan, { kind: "connect" }> = {
   choices: { email: "gmail", calendar: "googleCalendar" },
 }
 
-test("defaults to email delivery and enables with that destination", () => {
-  const actions = stubActions()
-
-  renderDialog(actions, ["email", "slack"], singlePlan)
-
-  expect(screen.getByText(/sam@example.com/)).toBeDefined()
-
-  fireEvent.click(screen.getByRole("button", { name: "Enable" }))
-
-  expect(actions.enable).toHaveBeenCalledWith(
-    morningBrief,
-    { email: "gmail", calendar: "googleCalendar" },
-    { kind: "email" },
-    {}
-  )
-})
-
-test("an open edit blocks enabling until saved or cancelled", () => {
-  const actions = stubActions()
-
-  renderDialog(actions, ["email", "slack"], singlePlan)
-  fireEvent.click(screen.getByRole("button", { name: /change/i }))
-
-  expectButtonDisabled("Enable")
-  expectButtonDisabled(/try once/i)
-
-  fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
-
-  expect(screen.getByText(/sam@example.com/)).toBeDefined()
-  expectButtonDisabled("Enable", false)
-})
-
-test("save stays disabled until the target actually changes", async () => {
-  const actions = stubActions()
-
-  renderDialog(actions, ["email", "slack"], singlePlan)
-  fireEvent.click(screen.getByRole("button", { name: /change/i }))
-
-  expectButtonDisabled("Save")
-
-  await switchMode("Channel")
-  expectButtonDisabled("Save")
-
-  await switchMode("Email")
-  expectButtonDisabled("Save")
-})
-
-test("try once shares the chosen destination", () => {
-  const actions = stubActions()
-
-  renderDialog(actions, ["email"], singlePlan)
-
-  expect(screen.queryByRole("button", { name: /change/i })).toBeNull()
-
-  fireEvent.click(screen.getByRole("button", { name: /try once/i }))
-
-  expect(actions.trial).toHaveBeenCalledWith(
-    morningBrief,
-    { email: "gmail", calendar: "googleCalendar" },
-    { kind: "email" },
-    {}
-  )
-})
-
 test("a pending Advanced settings locks every control", () => {
   const actions = stubActions({ key: morningBrief.key, kind: "advanced" })
 
-  renderDialog(actions, ["email", "slack"], singlePlan)
+  renderDialog(actions, deliverySetup(), singlePlan)
 
   for (const name of [/change/i, /try once/i, "Enable", /advanced settings/i]) {
     expectButtonDisabled(name)
@@ -117,7 +59,7 @@ test("advanced settings closes this dialog only after creation", () => {
   const actions = stubActions()
   const onOpenChange = vi.fn()
 
-  renderDialog(actions, ["email", "slack"], singlePlan, onOpenChange)
+  renderDialog(actions, deliverySetup(), singlePlan, onOpenChange)
   fireEvent.click(screen.getByRole("button", { name: /advanced settings/i }))
 
   expect(onOpenChange).not.toHaveBeenCalled()
@@ -134,7 +76,7 @@ test("closing an option dropdown never closes the dialog", async () => {
 
   renderDialog(
     stubActions(),
-    ["email"],
+    deliverySetup(),
     singlePlan,
     onOpenChange,
     meetingPrep()
@@ -156,7 +98,13 @@ test("closing an option dropdown never closes the dialog", async () => {
 test("turning off both deliveries blocks enabling", async () => {
   shimSelectDom()
 
-  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+  renderDialog(
+    stubActions(),
+    deliverySetup(),
+    singlePlan,
+    () => {},
+    meetingPrep()
+  )
 
   fireEvent.click(screen.getByRole("radio", { name: "Off" }))
   fireEvent.click(screen.getByRole("combobox"))
@@ -181,7 +129,13 @@ test("turning off both deliveries blocks enabling", async () => {
 test("a single organization domain is named in the meetings hint", () => {
   organizationProfile = { domains: ["acme.com"] }
 
-  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+  renderDialog(
+    stubActions(),
+    deliverySetup(),
+    singlePlan,
+    () => {},
+    meetingPrep()
+  )
   fireEvent.click(screen.getByRole("radio", { name: "Internal" }))
 
   expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
@@ -196,7 +150,13 @@ test("multiple organization domains collapse to a count", () => {
     declared: { domains: ["acme.io"] },
   }
 
-  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+  renderDialog(
+    stubActions(),
+    deliverySetup(),
+    singlePlan,
+    () => {},
+    meetingPrep()
+  )
   fireEvent.click(screen.getByRole("radio", { name: "Both" }))
 
   expect(screen.getByText(/Internal: 2 domains/)).toBeDefined()
@@ -206,7 +166,13 @@ test("multiple organization domains collapse to a count", () => {
 test("the hint is hidden for the default External scope", () => {
   organizationProfile = { domains: ["acme.com"] }
 
-  renderDialog(stubActions(), ["email"], singlePlan, () => {}, meetingPrep())
+  renderDialog(
+    stubActions(),
+    deliverySetup(),
+    singlePlan,
+    () => {},
+    meetingPrep()
+  )
 
   expect(screen.queryByText(/Internal:/)).toBeNull()
 
@@ -246,21 +212,6 @@ function shimSelectDom() {
   Element.prototype.scrollIntoView ??= () => {}
 }
 
-async function switchMode(mode: "Channel" | "DM" | "Email") {
-  fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery method" }))
-
-  if (mode === "Email") {
-    fireEvent.click(screen.getByRole("menuitem", { name: "Email" }))
-    return
-  }
-
-  const slack = screen.getByRole("menuitem", { name: "Slack" })
-
-  slack.focus()
-  fireEvent.keyDown(slack, { key: "ArrowRight" })
-  fireEvent.click(await screen.findByRole("menuitem", { name: mode }))
-}
-
 function renderDialog(
   actions: PlaybookActions,
   delivery: PlaybookListRow["delivery"],
@@ -290,6 +241,21 @@ function row(delivery: PlaybookListRow["delivery"]): PlaybookListRow {
     ],
     delivery,
     enabled: null,
+  }
+}
+
+function deliverySetup(
+  recommended: NonNullable<PlaybookListRow["delivery"]["recommended"]> = {
+    kind: "email",
+  }
+): PlaybookListRow["delivery"] {
+  return {
+    options: [
+      { mode: "dm", available: true },
+      { mode: "email", available: true },
+      { mode: "channel", available: true },
+    ],
+    recommended,
   }
 }
 

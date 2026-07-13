@@ -6,30 +6,37 @@ import { DeliveryModeMenu } from "./menu"
 
 afterEach(cleanup)
 
-test("nests channel and DM under Slack with their target icons", async () => {
+test("shows prioritized methods and explains unavailable choices", () => {
   const onSelect = vi.fn()
 
   render(
     <DeliveryModeMenu
       disabled={false}
-      kinds={["email", "slack"]}
       mode="email"
       onSelect={onSelect}
+      options={[
+        {
+          mode: "dm",
+          available: false,
+          reason: "No Slack identity linked",
+        },
+        { mode: "email", available: true },
+        { mode: "channel", available: true },
+      ]}
     />
   )
 
   fireEvent.pointerDown(screen.getByRole("button", { name: "Delivery method" }))
-  const slack = screen.getByRole("menuitem", { name: "Slack" })
-
-  slack.focus()
-  fireEvent.keyDown(slack, { key: "ArrowRight" })
-
-  const channel = await screen.findByRole("menuitem", { name: "Channel" })
-  const dm = screen.getByRole("menuitem", { name: "DM" })
+  const dm = screen.getByRole("menuitem", { name: /Slack DM/ })
+  const email = screen.getByRole("menuitem", { name: "Email" })
+  const channel = screen.getByRole("menuitem", { name: "Slack channel" })
 
   expect(channel.querySelector("svg")?.classList).toContain("lucide-hash")
   expect(dm.querySelector("svg")?.classList).toContain("lucide-message-circle")
+  expect(email.querySelector("svg")?.classList).toContain("lucide-mail")
+  expect(dm.getAttribute("data-disabled")).not.toBeNull()
+  expect(screen.getByText("No Slack identity linked")).toBeDefined()
 
-  fireEvent.click(dm)
-  expect(onSelect).toHaveBeenCalledWith("dm")
+  fireEvent.click(channel)
+  expect(onSelect).toHaveBeenCalledWith("channel")
 })
