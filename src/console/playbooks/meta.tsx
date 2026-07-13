@@ -5,11 +5,19 @@ import {
   type PlaybookDefinition,
 } from "@contracts/playbooks/catalog"
 import { type PlaybookOptionValues } from "@contracts/playbooks/options"
-import { CalendarClock, Globe } from "lucide-react"
+import { CalendarClock, Globe, type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { SurfaceLogo } from "../automations/access/logo"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import { type PlaybookListRow, slotDisplayProviders } from "./state"
+
+export function PlaybookIcon({ icon: Icon }: { icon: LucideIcon }) {
+  return (
+    <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted/40">
+      <Icon className="size-4" />
+    </span>
+  )
+}
 
 export function PlaybookMeta({
   definition,

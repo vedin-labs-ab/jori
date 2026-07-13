@@ -26,37 +26,46 @@ export function PlaybookConfiguration({
 }) {
   const fields = playbookOptionFields(setup)
 
-  return setup.map((section, index) => (
-    <PlaybookSection key={section.key} label={section.label}>
-      {section.kind === "behaviors" ? (
-        <fieldset className="divide-y rounded-md border">
-          <legend className="sr-only">{section.label}</legend>
-          <BehaviorList
-            behaviors={section.behaviors}
+  return setup.map((section, index) => {
+    const invalid = issue !== undefined && index === setup.length - 1
+    const issueId = `playbook-setup-${section.key}-issue`
+
+    return (
+      <PlaybookSection key={section.key} label={section.label}>
+        {section.kind === "behaviors" ? (
+          <fieldset
+            aria-describedby={invalid ? issueId : undefined}
+            aria-invalid={invalid || undefined}
+            className="divide-y overflow-hidden rounded-md border transition-[border-color,box-shadow] duration-100 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
+          >
+            <legend className="sr-only">{section.label}</legend>
+            <BehaviorList
+              behaviors={section.behaviors}
+              disabled={disabled}
+              fields={fields}
+              hints={hints}
+              onChange={onChange}
+              values={values}
+            />
+          </fieldset>
+        ) : (
+          <SectionFields
             disabled={disabled}
             fields={fields}
             hints={hints}
             onChange={onChange}
+            section={section}
             values={values}
           />
-        </fieldset>
-      ) : (
-        <SectionFields
-          disabled={disabled}
-          fields={fields}
-          hints={hints}
-          onChange={onChange}
-          section={section}
-          values={values}
-        />
-      )}
-      {index === setup.length - 1 && issue !== undefined ? (
-        <p className="text-destructive" role="alert">
-          {issue}
-        </p>
-      ) : null}
-    </PlaybookSection>
-  ))
+        )}
+        {invalid ? (
+          <p className="text-destructive" id={issueId} role="alert">
+            {issue}
+          </p>
+        ) : null}
+      </PlaybookSection>
+    )
+  })
 }
 
 function SectionFields({

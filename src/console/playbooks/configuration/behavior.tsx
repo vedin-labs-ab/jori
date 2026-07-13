@@ -9,6 +9,8 @@ import { CalendarClock, Clock3, type LucideIcon, Sunrise } from "lucide-react"
 import { type ReactNode } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
+import { PlaybookIcon } from "../meta"
 import { OptionField } from "./control"
 
 const behaviorIcons: Record<string, LucideIcon> = {
@@ -63,28 +65,30 @@ function BehaviorRow({
   const enabled = isPlaybookBehaviorEnabled(behavior, values)
   const enabledBy = behavior.enabledBy
   const checkboxId = `playbook-behavior-${behavior.key}`
-  const visibleFields = behavior.fields.filter((field) =>
-    isPlaybookOptionEnabled(field, fields, values)
-  )
 
   return (
-    <div className="grid gap-3 p-3">
+    <div
+      className={cn(
+        "group/behavior grid gap-3 p-3 transition-colors duration-100",
+        enabledBy !== undefined && !disabled && "hover:bg-muted/40"
+      )}
+    >
       <div className="flex items-center gap-3">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted/60 text-muted-foreground">
-          <Icon className="size-4" />
-        </span>
-        <Label className="grid min-w-0 flex-1 gap-0.5" htmlFor={checkboxId}>
-          <span className="font-medium text-foreground">{behavior.label}</span>
-          {behavior.description === undefined ? null : (
-            <span className="font-normal text-muted-foreground">
-              {behavior.description}
-            </span>
-          )}
-        </Label>
+        <BehaviorLabel
+          behavior={behavior}
+          checkboxId={checkboxId}
+          disabled={disabled}
+          icon={Icon}
+          toggleable={enabledBy !== undefined}
+        />
         {enabledBy === undefined ? null : (
           <Checkbox
             aria-label={`Include ${behavior.label.toLowerCase()}`}
             checked={enabled}
+            className={cn(
+              "transition-transform duration-100",
+              !disabled && "group-hover/behavior:scale-105"
+            )}
             disabled={disabled}
             id={checkboxId}
             onCheckedChange={(checked) =>
@@ -93,20 +97,67 @@ function BehaviorRow({
           />
         )}
       </div>
-      {visibleFields.length === 0 ? null : (
+      {behavior.fields.length === 0 ? null : (
         <div className="grid gap-3 pl-11 sm:grid-cols-2">
-          {visibleFields.map((field) => (
-            <OptionField
-              disabled={disabled}
-              field={field}
-              hint={hints?.[field.key]}
-              key={field.key}
-              onChange={(value) => onChange(field.key, value)}
-              value={values[field.key]}
-            />
-          ))}
+          {behavior.fields.map((field) => {
+            const fieldEnabled = isPlaybookOptionEnabled(field, fields, values)
+
+            return (
+              <OptionField
+                disabled={disabled || !fieldEnabled}
+                field={field}
+                hint={hints?.[field.key]}
+                key={field.key}
+                muted={!fieldEnabled}
+                onChange={(value) => onChange(field.key, value)}
+                value={values[field.key]}
+              />
+            )
+          })}
         </div>
       )}
     </div>
+  )
+}
+
+function BehaviorLabel({
+  behavior,
+  checkboxId,
+  disabled,
+  icon,
+  toggleable,
+}: {
+  behavior: PlaybookBehavior
+  checkboxId: string
+  disabled: boolean
+  icon: LucideIcon
+  toggleable: boolean
+}) {
+  const content = (
+    <>
+      <PlaybookIcon icon={icon} />
+      <span className="grid min-w-0 gap-1">
+        <span className="font-medium text-foreground">{behavior.label}</span>
+        {behavior.description === undefined ? null : (
+          <span className="font-normal text-muted-foreground">
+            {behavior.description}
+          </span>
+        )}
+      </span>
+    </>
+  )
+
+  return toggleable ? (
+    <Label
+      className={cn(
+        "flex min-w-0 flex-1 items-center gap-3",
+        disabled ? "cursor-not-allowed" : "cursor-pointer"
+      )}
+      htmlFor={checkboxId}
+    >
+      {content}
+    </Label>
+  ) : (
+    <div className="flex min-w-0 flex-1 items-center gap-3">{content}</div>
   )
 }
