@@ -8,6 +8,7 @@ import {
   resolvePlaybookSchedule,
 } from "./catalog"
 import {
+  allowsDeliveryChoice,
   type DeliveryDestination,
   type DeliveryKind,
   destinationTools,
@@ -72,58 +73,117 @@ describe("playbook catalog", () => {
   })
 })
 
-describe("meeting prep catalog", () => {
-  const meetingPrep = getPlaybook("meeting-prep")
+const meetingBriefing = getPlaybook("meeting-briefing")
 
-  function options(values: Record<string, string | number> = {}) {
-    return resolvePlaybookOptions(meetingPrep.options, values)
-  }
+function meetingOptions(values: Record<string, string | number> = {}) {
+  return resolvePlaybookOptions(meetingBriefing.options, values)
+}
 
-  test("digest mode runs the sweep ahead of the chosen delivery time", () => {
-    expect(meetingPrep.agentWait).toEqual({ unit: "minutes", value: 15 })
-    expect(resolvePlaybookSchedule(meetingPrep, options())).toEqual({
-      repeat: "daily",
-      time: "07:15",
+describe("Meeting Briefing configuration", () => {
+  test("has focused defaults and the capabilities research can use", () => {
+    expect(meetingBriefing.title).toBe("Meeting Briefing")
+    expect(meetingOptions()).toMatchObject({
+      meetings: "external",
+      digest: "on",
+      time: "07:30",
+      before: "off",
     })
-    expect(
-      resolvePlaybookSchedule(meetingPrep, options({ time: "00:05" }))
-    ).toEqual({ repeat: "daily", time: "23:50" })
+    expect(meetingBriefing.agentWait).toEqual({ unit: "minutes", value: 15 })
+    expect(meetingBriefing.slots).toEqual([
+      { capability: "email", intents: ["read"] },
+      { capability: "calendar", intents: ["read"] },
+    ])
+    expect(meetingBriefing.web).toBe(true)
   })
 
+  test("starts research with margin before the chosen delivery time", () => {
+    expect(resolvePlaybookSchedule(meetingBriefing, meetingOptions())).toEqual({
+      repeat: "daily",
+      time: "07:00",
+    })
+    expect(
+      resolvePlaybookSchedule(
+        meetingBriefing,
+        meetingOptions({ time: "00:05" })
+      )
+    ).toEqual({ repeat: "daily", time: "23:35" })
+  })
+})
+
+describe("Meeting Briefing cadence", () => {
   test("without a digest the planning sweep stays early", () => {
     expect(
-      resolvePlaybookSchedule(meetingPrep, options({ digest: "off" }))
+      resolvePlaybookSchedule(
+        meetingBriefing,
+        meetingOptions({
+          digest: "off",
+          before: "45",
+        })
+      )
     ).toEqual({ repeat: "daily", time: "01:00" })
   })
 
   test("cadence copy follows the chosen options", () => {
-    expect(describePlaybookCadence(meetingPrep, options())).toBe(
-      "Morning digest at 07:30, prep 45 minutes before each meeting"
+    expect(describePlaybookCadence(meetingBriefing, meetingOptions())).toBe(
+      "Morning digest at 07:30"
     )
     expect(
-      describePlaybookCadence(meetingPrep, options({ before: "off" }))
-    ).toBe("Morning digest at 07:30")
+      describePlaybookCadence(meetingBriefing, meetingOptions({ before: "45" }))
+    ).toBe("Morning digest at 07:30, briefing 45 minutes before each meeting")
     expect(
-      describePlaybookCadence(meetingPrep, options({ digest: "off" }))
-    ).toBe("Prep 45 minutes before each meeting")
+      describePlaybookCadence(
+        meetingBriefing,
+        meetingOptions({
+          digest: "off",
+          before: "45",
+        })
+      )
+    ).toBe("Briefing 45 minutes before each meeting")
   })
 
   test("at least one delivery must stay on", () => {
     expect(
-      meetingPrep.validateOptions?.(options({ digest: "off", before: "off" }))
+      meetingBriefing.validateOptions?.(
+        meetingOptions({ digest: "off", before: "off" })
+      )
     ).toBe("Turn on the morning digest or a pre-meeting send.")
-    expect(meetingPrep.validateOptions?.(options({ digest: "off" }))).toBe(
-      undefined
-    )
-    expect(meetingPrep.validateOptions?.(options({ before: "off" }))).toBe(
-      undefined
-    )
+    expect(
+      meetingBriefing.validateOptions?.(
+        meetingOptions({ digest: "off", before: "45" })
+      )
+    ).toBe(undefined)
+    expect(
+      meetingBriefing.validateOptions?.(meetingOptions({ before: "off" }))
+    ).toBe(undefined)
   })
 
   test("browse surfaces get the rhythm, not resolved defaults", () => {
-    expect(describePlaybookCadence(meetingPrep)).toBe(
-      "Morning digest or right before each meeting"
+    expect(describePlaybookCadence(meetingBriefing)).toBe(
+      "Morning briefing or before each meeting"
     )
+  })
+})
+
+describe("Meeting Briefing delivery", () => {
+  test("offers private destinations but rejects Slack channels", () => {
+    expect(meetingBriefing.delivery).toMatchObject({
+      allowed: ["email", "slack"],
+      slackTargets: ["dm"],
+      noun: "briefing",
+      style: "summary",
+    })
+    expect(
+      allowsDeliveryChoice(meetingBriefing.delivery, {
+        kind: "slack",
+        target: { kind: "dm" },
+      })
+    ).toBe(true)
+    expect(
+      allowsDeliveryChoice(meetingBriefing.delivery, {
+        kind: "slack",
+        target: { kind: "channel", id: "C1", label: "team" },
+      })
+    ).toBe(false)
   })
 })
 

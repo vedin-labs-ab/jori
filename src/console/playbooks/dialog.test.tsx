@@ -74,13 +74,7 @@ test("closing an option dropdown never closes the dialog", async () => {
   shimSelectDom()
   const onOpenChange = vi.fn()
 
-  renderDialog(
-    stubActions(),
-    deliverySetup(),
-    singlePlan,
-    onOpenChange,
-    meetingPrep()
-  )
+  renderBriefing(onOpenChange)
 
   fireEvent.click(screen.getByRole("combobox"))
   expect(screen.getByRole("listbox")).toBeDefined()
@@ -92,24 +86,15 @@ test("closing an option dropdown never closes the dialog", async () => {
   await new Promise((resolve) => setTimeout(resolve, 0))
 
   expect(onOpenChange).not.toHaveBeenCalledWith(false)
-  expect(screen.getByText(/set up meeting prep/i)).toBeDefined()
+  expect(screen.getByText(/set up meeting briefing/i)).toBeDefined()
 })
 
 test("turning off both deliveries blocks enabling", async () => {
   shimSelectDom()
 
-  renderDialog(
-    stubActions(),
-    deliverySetup(),
-    singlePlan,
-    () => {},
-    meetingPrep()
-  )
+  renderBriefing()
 
   fireEvent.click(screen.getByRole("radio", { name: "Off" }))
-  fireEvent.click(screen.getByRole("combobox"))
-  await new Promise((resolve) => setTimeout(resolve, 0))
-  fireEvent.click(screen.getByRole("option", { name: "Off" }))
 
   expect(
     screen.getByText("Turn on the morning digest or a pre-meeting send.")
@@ -118,7 +103,9 @@ test("turning off both deliveries blocks enabling", async () => {
     expectButtonDisabled(name)
   }
 
-  fireEvent.click(screen.getByRole("radio", { name: "On" }))
+  fireEvent.click(screen.getByRole("combobox"))
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  fireEvent.click(screen.getByRole("option", { name: "45 minutes" }))
 
   expect(
     screen.queryByText("Turn on the morning digest or a pre-meeting send.")
@@ -129,13 +116,7 @@ test("turning off both deliveries blocks enabling", async () => {
 test("a single organization domain is named in the meetings hint", () => {
   organizationProfile = { domains: ["acme.com"] }
 
-  renderDialog(
-    stubActions(),
-    deliverySetup(),
-    singlePlan,
-    () => {},
-    meetingPrep()
-  )
+  renderBriefing()
   fireEvent.click(screen.getByRole("radio", { name: "Internal" }))
 
   expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
@@ -150,13 +131,7 @@ test("multiple organization domains collapse to a count", () => {
     declared: { domains: ["acme.io"] },
   }
 
-  renderDialog(
-    stubActions(),
-    deliverySetup(),
-    singlePlan,
-    () => {},
-    meetingPrep()
-  )
+  renderBriefing()
   fireEvent.click(screen.getByRole("radio", { name: "Both" }))
 
   expect(screen.getByText(/Internal: 2 domains/)).toBeDefined()
@@ -166,13 +141,7 @@ test("multiple organization domains collapse to a count", () => {
 test("the hint is hidden for the default External scope", () => {
   organizationProfile = { domains: ["acme.com"] }
 
-  renderDialog(
-    stubActions(),
-    deliverySetup(),
-    singlePlan,
-    () => {},
-    meetingPrep()
-  )
+  renderBriefing()
 
   expect(screen.queryByText(/Internal:/)).toBeNull()
 
@@ -185,16 +154,29 @@ test("the hint is hidden for the default External scope", () => {
   expect(screen.queryByText(/Internal:/)).toBeNull()
 })
 
-function meetingPrep() {
+function meetingBriefing() {
   const definition = playbookCatalog.find(
-    (entry) => entry.key === "meeting-prep"
+    (entry) => entry.key === "meeting-briefing"
   )
 
   if (definition === undefined) {
-    throw new Error("Meeting prep definition is missing.")
+    throw new Error("Meeting Briefing definition is missing.")
   }
 
   return definition
+}
+
+function renderBriefing(onOpenChange: (open: boolean) => void = () => {}) {
+  return renderDialog(
+    stubActions(),
+    deliverySetup({ kind: "email" }, [
+      { mode: "dm", available: true },
+      { mode: "email", available: true },
+    ]),
+    singlePlan,
+    onOpenChange,
+    meetingBriefing()
+  )
 }
 
 function expectButtonDisabled(name: string | RegExp, disabled = true) {
@@ -247,14 +229,15 @@ function row(delivery: PlaybookListRow["delivery"]): PlaybookListRow {
 function deliverySetup(
   recommended: NonNullable<PlaybookListRow["delivery"]["recommended"]> = {
     kind: "email",
-  }
+  },
+  options: PlaybookListRow["delivery"]["options"] = [
+    { mode: "dm", available: true },
+    { mode: "email", available: true },
+    { mode: "channel", available: true },
+  ]
 ): PlaybookListRow["delivery"] {
   return {
-    options: [
-      { mode: "dm", available: true },
-      { mode: "email", available: true },
-      { mode: "channel", available: true },
-    ],
+    options,
     recommended,
   }
 }

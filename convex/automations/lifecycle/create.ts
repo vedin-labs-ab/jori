@@ -16,12 +16,15 @@ import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { ensureSubscription } from "../subscriptions/data"
 import { normalizeRequiredText } from "../timing"
 import { requireAutomationArtifact } from "./artifact"
+import { sameAutomationPrincipal } from "./children"
 import { getRequiredAutomation } from "./read"
 import { resolveTrigger, scheduleAutomationIfNeeded } from "./trigger"
 
 type CreateAutomationArgs = {
   tenantId: string
   artifactId?: Id<"artifacts">
+  parentId?: Id<"automations">
+  expectedParentConfigurationVersion?: number
   playbook?: string
   key?: string
   name: string
@@ -73,6 +76,13 @@ async function prepareAutomation(
     )
   const key = normalizeAutomationKey(args.key)
   const principal = executionPrincipalForScope(scope, args.createdBy)
+  const ownership = await resolveOwnership(ctx, {
+    ownerId: args.parentId,
+    expectedConfigurationVersion: args.expectedParentConfigurationVersion,
+    principal,
+    tenantId: args.tenantId,
+    type: args.type,
+  })
   const trigger = await resolveTrigger(ctx, {
     principal,
     tenantId: args.tenantId,
@@ -90,6 +100,9 @@ async function prepareAutomation(
   return {
     tenantId: args.tenantId,
     artifactId: args.artifactId,
+    parentId: ownership?.parentId,
+    parentConfigurationVersion: ownership?.configurationVersion,
+    configurationVersion: 1,
     playbook: args.playbook,
     key,
     ...(key === undefined
@@ -109,6 +122,58 @@ async function prepareAutomation(
     trigger,
     createdBy: args.createdBy,
   }
+}
+
+async function resolveOwnership(
+  ctx: MutationCtx,
+  args: {
+    ownerId?: Id<"automations">
+    expectedConfigurationVersion?: number
+    principal: ReturnType<typeof executionPrincipalForScope>
+    tenantId: string
+    type: AutomationType
+  }
+) {
+  if (args.ownerId === undefined) {
+    return undefined
+  }
+
+  if (args.type !== "once") {
+    return undefined
+  }
+
+  const owner = await ctx.db.get(args.ownerId)
+  if (owner === null) {
+    throw new Error("Parent automation is no longer available.")
+  }
+
+  const parent =
+    owner.type === "once" && owner.parentId !== undefined
+      ? await ctx.db.get(owner.parentId)
+      : owner.type === "once"
+        ? null
+        : owner
+
+  if (parent === null) {
+    return undefined
+  }
+
+  if (
+    parent.tenantId !== args.tenantId ||
+    parent.status !== "active" ||
+    parent.type === "once" ||
+    !sameAutomationPrincipal(parent.principal, args.principal)
+  ) {
+    throw new Error("Parent automation is no longer active in this scope.")
+  }
+
+  const configurationVersion = parent.configurationVersion ?? 1
+
+  if (args.expectedConfigurationVersion !== configurationVersion) {
+    throw new Error("Parent automation configuration has changed.")
+  }
+
+  return { parentId: parent._id, configurationVersion }
 }
 
 async function keyedAutomation(

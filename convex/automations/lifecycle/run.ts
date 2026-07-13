@@ -17,6 +17,11 @@ export async function createAutomationRun(
   const runId = await ctx.db.insert("runs", {
     tenantId: args.automation.tenantId,
     automationId: args.automation._id,
+    automationParentId: args.automation.parentId,
+    automationConfigurationVersion:
+      args.automation.parentId === undefined
+        ? (args.automation.configurationVersion ?? 1)
+        : (args.automation.parentConfigurationVersion ?? 0),
     artifactId: args.automation.artifactId,
     cause: args.cause,
     principal: args.automation.principal,

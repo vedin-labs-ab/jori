@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { getTimeTriggerAt } from "../timing"
+import { hasInactiveParent } from "./children"
 import { createAutomationRun } from "./run"
 import { scheduleNextCronAutomation } from "./trigger"
 
@@ -24,6 +25,11 @@ export async function fireAutomation(
     return null
   }
 
+  if (await hasInactiveParent(ctx, automation)) {
+    await ctx.db.delete(automation._id)
+    return null
+  }
+
   if (automation.type === "once") {
     const runId = await createAutomationRun(ctx, {
       automation,
@@ -34,14 +40,18 @@ export async function fireAutomation(
       now,
     })
 
-    await ctx.db.patch(automation._id, {
-      status: "completed",
-      trigger: {
-        ...automation.trigger,
-        functionId: undefined,
-      },
-      updatedAt: now,
-    })
+    if (automation.parentId === undefined) {
+      await ctx.db.patch(automation._id, {
+        status: "completed",
+        trigger: {
+          ...automation.trigger,
+          functionId: undefined,
+        },
+        updatedAt: now,
+      })
+    } else {
+      await ctx.db.delete(automation._id)
+    }
 
     return { runId }
   }

@@ -3,6 +3,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
+import { listArtifactAutomationRoots } from "../automations/lifecycle/read"
 import { checkTenantAccess } from "../identity/access"
 import { getToolPermission } from "../permissions/catalog"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
@@ -173,10 +174,7 @@ async function summarizeForConsole(ctx: QueryCtx, artifact: Doc<"artifacts">) {
     .withIndex("by_artifact", (index) => index.eq("artifactId", artifact._id))
     .order("desc")
     .take(20)
-  const automations = await ctx.db
-    .query("automations")
-    .withIndex("by_artifact", (index) => index.eq("artifactId", artifact._id))
-    .take(20)
+  const automations = await listArtifactAutomationRoots(ctx, artifact._id, 20)
   const capabilities = await ctx.db
     .query("artifactTools")
     .withIndex("by_artifact", (index) => index.eq("artifactId", artifact._id))

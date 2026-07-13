@@ -157,10 +157,7 @@ export const validateResolved = internalQuery({
   args: {
     ...playbookPlanFields,
     createdBy: v.id("persons"),
-    recipient: v.object({
-      email: v.string(),
-      name: v.optional(v.string()),
-    }),
+    recipient: recipientValidator,
   },
   returns: v.null(),
   handler: async (ctx, args) => {

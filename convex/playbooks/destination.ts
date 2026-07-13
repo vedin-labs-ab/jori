@@ -1,10 +1,12 @@
 import { type PlaybookCapability } from "../../contracts/playbooks/capabilities"
 import {
+  allowsDeliveryChoice,
   type DeliveryChoice,
   type DeliveryDestination,
   type EmailDeliveryProvider,
   emailDeliveryProviders,
   isEmailDeliveryProvider,
+  type PlaybookDelivery,
 } from "../../contracts/playbooks/delivery"
 import { type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
@@ -24,10 +26,15 @@ export async function resolveDestination(
   args: {
     connected: Set<Integration>
     createdBy: Id<"persons">
+    delivery: PlaybookDelivery
     emailProvider: EmailDeliveryProvider | undefined
     recipient: PlaybookRecipient
   }
 ): Promise<DeliveryDestination> {
+  if (!allowsDeliveryChoice(args.delivery, choice)) {
+    throw new Error("Choose an available delivery destination.")
+  }
+
   if (choice.kind === "email") {
     return {
       kind: "email",

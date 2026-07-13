@@ -74,8 +74,8 @@ test("creates automation args with access and source bindings", () => {
     createAutomationArgs(
       {
         ...emptyAutomationForm,
-        key: "playbook:meeting-prep",
-        playbook: "meeting-prep",
+        key: "playbook:meeting-briefing",
+        playbook: "meeting-briefing",
         artifactId: "artifact" as AutomationFormValues["artifactId"],
         name: "Weekly release summary",
         instructions: "Summarize @GitHub and post to @Slack.",
@@ -89,8 +89,8 @@ test("creates automation args with access and source bindings", () => {
   ).toEqual({
     args: {
       name: "Weekly release summary",
-      key: "playbook:meeting-prep",
-      playbook: "meeting-prep",
+      key: "playbook:meeting-briefing",
+      playbook: "meeting-briefing",
       artifactId: "artifact",
       instructions: "Summarize @GitHub and post to @Slack.",
       scope: "personal",

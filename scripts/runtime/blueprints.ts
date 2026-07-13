@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process"
+import { createHash } from "node:crypto"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
@@ -7,7 +8,7 @@ import { root } from "./paths.ts"
 
 const generatedPath = path.join(
   root,
-  "convex/playbooks/blueprints/generated.ts"
+  "convex/playbooks/blueprints/_generated/blueprints.ts"
 )
 
 export async function compilePlaybookBlueprints(checkMode: boolean) {
@@ -28,22 +29,30 @@ export async function compilePlaybookBlueprints(checkMode: boolean) {
     const { buildArtifact } = await import(
       "../../runtime/source/artifact/builder/index.ts"
     )
-    const prep = await buildArtifact([
+    const briefing = await buildArtifact([
       {
         path: "src/App.tsx",
-        content: await readSource("prep/app.txt"),
+        content: await readSource("briefing/app.txt"),
+      },
+      {
+        path: "src/Briefing.tsx",
+        content: await readSource("briefing/briefing.txt"),
       },
       {
         path: "src/contract.ts",
-        content: await readSource("prep/contract.txt"),
+        content: await readSource("briefing/contract.txt"),
+      },
+      {
+        path: "src/revision.ts",
+        content: `export const artifactRuntimeRevision = "${runtimeRevision()}"\n`,
       },
     ])
     const content = formatGenerated(
       renderGenerated({
-        "meeting-prep": {
+        "meeting-briefing": {
           access: "personal",
-          title: "Meeting prep",
-          ...prep,
+          title: "Meeting Briefing",
+          ...briefing,
         },
       })
     )
@@ -65,6 +74,12 @@ export async function compilePlaybookBlueprints(checkMode: boolean) {
   } finally {
     await fs.rm(runtime, { force: true, recursive: true })
   }
+}
+
+function runtimeRevision() {
+  return createHash("sha256")
+    .update(JSON.stringify(runtimeAssets.artifact.template))
+    .digest("hex")
 }
 
 async function readSource(relativePath: string) {

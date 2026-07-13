@@ -59,7 +59,7 @@ export function Day() {
   )
 }
 
-// The ledger shows when output lands: meeting prep sweeps early but delivers
+// The ledger shows when output lands: Meeting Briefing sweeps early but delivers
 // its digest at the configurable time option.
 function deliveryTime(definition: PlaybookDefinition) {
   const time = resolvePlaybookOptions(definition.options).time

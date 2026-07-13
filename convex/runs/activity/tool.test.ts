@@ -87,7 +87,7 @@ test("labels artifact shares with the title and link lifetime", () => {
   const artifactId = id<"artifacts">("artifact")
   const items = projectActivity(
     data({
-      artifacts: [artifact({ _id: artifactId, title: "Meeting prep" })],
+      artifacts: [artifact({ _id: artifactId, title: "Meeting Briefing" })],
       traces: [
         trace({
           callId: "call-1",
@@ -109,7 +109,7 @@ test("labels artifact shares with the title and link lifetime", () => {
   expect(items).toContainEqual(
     expect.objectContaining({
       metadata: [
-        { kind: "target", text: "Meeting prep" },
+        { kind: "target", text: "Meeting Briefing" },
         { kind: "scope", text: "24h link" },
       ],
       tool: "share_artifact",
@@ -121,7 +121,7 @@ test("labels inferred artifact state reads with the title and state entry", () =
   const artifactId = id<"artifacts">("artifact")
   const items = projectActivity(
     data({
-      artifacts: [artifact({ _id: artifactId, title: "Meeting prep" })],
+      artifacts: [artifact({ _id: artifactId, title: "Meeting Briefing" })],
       run: run({ artifactId }),
       traces: [
         trace({
@@ -144,7 +144,7 @@ test("labels inferred artifact state reads with the title and state entry", () =
   expect(items).toContainEqual(
     expect.objectContaining({
       metadata: [
-        { kind: "target", text: "Meeting prep" },
+        { kind: "target", text: "Meeting Briefing" },
         { kind: "scope", text: "meetings" },
       ],
       tool: "read_artifact_state",
@@ -156,7 +156,7 @@ test("labels inferred artifact state updates with the title and state entry", ()
   const artifactId = id<"artifacts">("artifact")
   const items = projectActivity(
     data({
-      artifacts: [artifact({ _id: artifactId, title: "Meeting prep" })],
+      artifacts: [artifact({ _id: artifactId, title: "Meeting Briefing" })],
       run: run({ artifactId }),
       traces: [
         trace({
@@ -179,7 +179,7 @@ test("labels inferred artifact state updates with the title and state entry", ()
   expect(items).toContainEqual(
     expect.objectContaining({
       metadata: [
-        { kind: "target", text: "Meeting prep" },
+        { kind: "target", text: "Meeting Briefing" },
         { kind: "scope", text: "dossiers" },
       ],
       tool: "update_artifact_state",

@@ -8,10 +8,11 @@ import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
 import { type Duration } from "../../contracts/runtime"
 import { type PromptTemplateId, promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
+import { type Integration } from "../shared/integrations"
 
 const instructionTemplates: Record<string, PromptTemplateId> = {
   "follow-up-sweep": "playbooks/sweep",
-  "meeting-prep": "playbooks/prep",
+  "meeting-briefing": "playbooks/briefing",
   "morning-brief": "playbooks/brief",
   "week-in-review": "playbooks/review",
 }
@@ -20,6 +21,7 @@ const instructionTemplates: Record<string, PromptTemplateId> = {
 export function renderPlaybookInstructions(args: {
   key: string
   providers: Record<PlaybookCapability, string>
+  providerKeys: Partial<Record<PlaybookCapability, Integration>>
   destination: DeliveryDestination
   subject: string
   noun: string
@@ -35,6 +37,7 @@ export function renderPlaybookInstructions(args: {
 
   return renderPromptTemplate(promptTemplates[templateId], {
     providers: args.providers,
+    providerKeys: args.providerKeys,
     options: args.options ?? {},
     agentWait: args.agentWait ?? null,
     delivery: deliveryInstruction({

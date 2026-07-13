@@ -10,7 +10,7 @@ Founders and leads at small software companies (5–50 people) who live in meeti
 
 ## Product Purpose
 
-Milo is an AI teammate that works inside an organization's existing tools: Slack, GitHub, and Linear for conversation; Gmail/Outlook, Google/Microsoft Calendar, and Notion for reading and writing. It runs scheduled playbooks (morning brief, meeting prep, follow-up sweep, week in review), answers mentions in threads, learns the organization's workstreams from real activity, and takes consequential actions only through ask-first approvals with visible run receipts. Success: users start the day already caught up, and trust Milo enough to expand it across the team.
+Milo is an AI teammate that works inside an organization's existing tools: Slack, GitHub, and Linear for conversation; Gmail/Outlook, Google/Microsoft Calendar, and Notion for reading and writing. It runs scheduled playbooks (morning brief, Meeting Briefing, follow-up sweep, week in review), answers mentions in threads, learns the organization's workstreams from real activity, and takes consequential actions only through ask-first approvals with visible run receipts. Success: users start the day already caught up, and trust Milo enough to expand it across the team.
 
 ## Brand Personality
 

@@ -9,6 +9,7 @@ import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
 import { normalizeRequiredText } from "../timing"
 import { requireAutomationArtifact } from "./artifact"
+import { deleteOwnedAutomations, requireValidOwnershipUpdate } from "./children"
 import { getRequiredAutomation, getTenantAutomation } from "./read"
 import { cancelTrigger, resolveTrigger, scheduleTrigger } from "./trigger"
 
@@ -34,8 +35,15 @@ export async function updateAutomation(
     args.tenantId,
     args.automationId
   )
+  await requireValidOwnershipUpdate(ctx, args, existing)
   const now = Date.now()
   const patch = await buildAutomationPatch(ctx, args, existing, now)
+  const invalidatesChildren =
+    existing.parentId === undefined && ownedAutomationsAreStale(existing, patch)
+
+  if (invalidatesChildren) {
+    patch.configurationVersion = (existing.configurationVersion ?? 1) + 1
+  }
 
   await ctx.db.patch(args.automationId, patch)
   if (
@@ -50,8 +58,29 @@ export async function updateAutomation(
       exceptAutomationId: args.automationId,
     })
   }
+  if (invalidatesChildren) {
+    await deleteOwnedAutomations(ctx, existing._id)
+  }
 
   return await getRequiredAutomation(ctx, args.automationId)
+}
+
+export function ownedAutomationsAreStale(
+  existing: Doc<"automations">,
+  patch: Partial<Doc<"automations">>
+) {
+  return (
+    (patch.artifactId !== undefined &&
+      patch.artifactId !== existing.artifactId) ||
+    (patch.instructions !== undefined &&
+      patch.instructions !== existing.instructions) ||
+    (patch.scope !== undefined && patch.scope !== existing.scope) ||
+    (patch.type !== undefined && patch.type !== existing.type) ||
+    (patch.access !== undefined &&
+      JSON.stringify(patch.access) !== JSON.stringify(existing.access)) ||
+    (patch.trigger !== undefined &&
+      !sameTriggerDefinition(existing.trigger, patch.trigger))
+  )
 }
 
 async function buildAutomationPatch(
@@ -191,31 +220,6 @@ async function buildTriggerPatch(
   return { status, trigger: storedTrigger, type }
 }
 
-export async function removeAutomation(
-  ctx: MutationCtx,
-  args: {
-    tenantId: string
-    automationId: Id<"automations">
-  }
-) {
-  const automation = await getTenantAutomation(
-    ctx,
-    args.tenantId,
-    args.automationId
-  )
-
-  await cancelTrigger(ctx, automation.trigger)
-  await ctx.db.delete(args.automationId)
-  if (automation.type === "event" && "integrationId" in automation.trigger) {
-    await releaseSubscription(ctx, {
-      tenantId: automation.tenantId,
-      trigger: automation.trigger,
-    })
-  }
-
-  return { deleted: true, automationId: args.automationId }
-}
-
 function isSameEventTrigger(
   left: Doc<"automations">["trigger"],
   right: Doc<"automations">["trigger"] | undefined
@@ -228,6 +232,26 @@ function isSameEventTrigger(
     left.event === right.event &&
     automationEventMatchKey(left.match) === automationEventMatchKey(right.match)
   )
+}
+
+function sameTriggerDefinition(
+  left: Doc<"automations">["trigger"],
+  right: Doc<"automations">["trigger"]
+) {
+  if ("at" in left || "at" in right) {
+    return "at" in left && "at" in right && left.at === right.at
+  }
+
+  if ("expression" in left || "expression" in right) {
+    return (
+      "expression" in left &&
+      "expression" in right &&
+      left.expression === right.expression &&
+      left.timezone === right.timezone
+    )
+  }
+
+  return isSameEventTrigger(left, right)
 }
 
 async function updateKeyPartition(

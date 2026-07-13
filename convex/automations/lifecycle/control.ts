@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
+import { deleteOwnedAutomations } from "./children"
 import { getRequiredAutomation, getTenantAutomation } from "./read"
 import { cancelTrigger, scheduleNextCronAutomation } from "./trigger"
 
@@ -38,10 +39,12 @@ export async function pauseAutomation(
 
   const trigger = clearTriggerFunction(automation.trigger)
   await ctx.db.patch(automation._id, {
+    configurationVersion: (automation.configurationVersion ?? 1) + 1,
     trigger,
     status: "paused",
     updatedAt: Date.now(),
   })
+  await deleteOwnedAutomations(ctx, automation._id)
 
   return await getRequiredAutomation(ctx, automation._id)
 }

@@ -1,0 +1,194 @@
+import { ChevronDown, ExternalLink } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Separator } from "@/components/ui/separator"
+import type { BriefingPoint, MeetingBriefing } from "./contract"
+
+const groups: Array<{ title: string; areas: BriefingPoint["area"][] }> = [
+  { title: "Agenda and decisions", areas: ["agenda", "decision"] },
+  { title: "History and commitments", areas: ["history", "commitment"] },
+  { title: "People and developments", areas: ["person", "development"] },
+  { title: "Questions and talking points", areas: ["question", "talking-point"] },
+  { title: "Risks", areas: ["risk"] },
+]
+
+export function BriefingView({ meeting, timezone }: { meeting: MeetingBriefing; timezone: string }) {
+  const briefing = meeting.briefing
+  const gaps = briefing?.unknowns ?? []
+
+  return (
+    <article className="p-5 sm:p-7 lg:p-9">
+      <header>
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>{formatDateTime(meeting.event.startsAt, timezone)}</span>
+          <Badge variant={statusVariant(meeting.status)}>{statusLabel(meeting.status)}</Badge>
+        </div>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight">{meeting.event.title}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{peopleLine(meeting)}</p>
+        <p className="mt-3 text-sm">{meeting.selectedBecause}</p>
+        <Freshness meeting={meeting} timezone={timezone} />
+      </header>
+
+      {meeting.status === "cancelled" ? (
+        <div className="mt-8 rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+          This meeting was cancelled or removed from the requester's calendar.
+        </div>
+      ) : briefing === undefined ? (
+        <div className="mt-8 rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+          {emptyMessage(meeting.status)}
+        </div>
+      ) : (
+        <div className="mt-8 grid gap-8">
+          <StatusNotice meeting={meeting} />
+          <Overview meeting={meeting} />
+          {briefing.essentials.length === 0 ? null : (
+            <Section title="What matters most">
+              <PointList meeting={meeting} points={briefing.essentials} />
+            </Section>
+          )}
+          {groups.map((group) => {
+            const points = briefing.details.filter((point) => group.areas.includes(point.area))
+            return points.length === 0 ? null : (
+              <Section key={group.title} title={group.title}>
+                <PointList meeting={meeting} points={points} />
+              </Section>
+            )
+          })}
+          {gaps.length === 0 ? null : (
+            <Section title="Unknowns and gaps">
+              <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+                {gaps.map((gap) => <li key={gap}>{gap}</li>)}
+              </ul>
+            </Section>
+          )}
+          <Sources meeting={meeting} timezone={timezone} />
+        </div>
+      )}
+    </article>
+  )
+}
+
+function Overview({ meeting }: { meeting: MeetingBriefing }) {
+  const briefing = meeting.briefing
+  if (briefing === undefined || (briefing.purpose === undefined && briefing.outcome === undefined)) return null
+
+  return (
+    <div className="grid gap-5 sm:grid-cols-2">
+      {briefing.purpose === undefined ? null : (
+        <div><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Purpose</p><Point meeting={meeting} point={briefing.purpose} /></div>
+      )}
+      {briefing.outcome === undefined ? null : (
+        <div><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Aim for</p><p className="mt-2 text-sm leading-6">{briefing.outcome}</p></div>
+      )}
+    </div>
+  )
+}
+
+function Section({ children, title }: { children: React.ReactNode; title: string }) {
+  return <section><Separator className="mb-5" /><h3 className="mb-3 font-medium">{title}</h3>{children}</section>
+}
+
+function PointList({ meeting, points }: { meeting: MeetingBriefing; points: BriefingPoint[] }) {
+  return <ul className="space-y-3">{points.map((point) => <li className="flex gap-3 text-sm leading-6" key={`${point.area}:${point.kind}:${point.text}`}><span className="mt-2 size-1.5 shrink-0 rounded-full bg-foreground" /><Point meeting={meeting} point={point} /></li>)}</ul>
+}
+
+function Point({ meeting, point }: { meeting: MeetingBriefing; point: BriefingPoint }) {
+  const citations = point.sourceIds.map((id) => meeting.sources.findIndex((source) => source.id === id) + 1).filter((index) => index > 0)
+  return (
+    <p className="mt-2 first:mt-0">
+      {point.text}
+      {point.kind === "fact" ? null : <span className="ml-1 text-xs text-muted-foreground">{point.kind === "inference" ? "Inference" : "Suggestion"}</span>}
+      {citations.length === 0 ? null : <span className="ml-1 text-xs text-muted-foreground">[{citations.join(", ")}]</span>}
+    </p>
+  )
+}
+
+function Sources({ meeting, timezone }: { meeting: MeetingBriefing; timezone: string }) {
+  if (meeting.sources.length === 0) return null
+  return (
+    <Collapsible>
+      <Separator className="mb-4" />
+      <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium">
+        Sources and freshness <Badge variant="outline">{meeting.sources.length}</Badge><ChevronDown className="size-4" />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <ol className="mt-4 space-y-3 text-sm text-muted-foreground">
+          {meeting.sources.map((source, index) => (
+            <SourceItem index={index} key={source.id} source={source} timezone={timezone} />
+          ))}
+        </ol>
+      </CollapsibleContent>
+    </Collapsible>
+  )
+}
+
+function SourceItem({ index, source, timezone }: {
+  index: number
+  source: MeetingBriefing["sources"][number]
+  timezone: string
+}) {
+  const href = safeHttpUrl(source.url)
+  return (
+    <li className="flex gap-2">
+      <span>{index + 1}.</span>
+      <span>
+        {href === undefined ? source.label : <a className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground" href={href} rel="noreferrer" target="_blank">{source.label}<ExternalLink className="size-3" /></a>}
+        <span className="text-xs">
+          {source.occurredAt === undefined ? " · checked " : ` · from ${formatDateTime(source.occurredAt, timezone)} · checked `}
+          {formatDateTime(source.retrievedAt, timezone)}
+        </span>
+      </span>
+    </li>
+  )
+}
+
+function Freshness({ meeting, timezone }: { meeting: MeetingBriefing; timezone: string }) {
+  if (meeting.preparedAt === undefined) return null
+  return <p className="mt-3 text-xs text-muted-foreground">Prepared {formatDateTime(meeting.preparedAt, timezone)} · revision {meeting.revision}</p>
+}
+
+function StatusNotice({ meeting }: { meeting: MeetingBriefing }) {
+  const message = notice(meeting.status)
+  return message === undefined ? null : <p className="mt-5 rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">{message}</p>
+}
+
+function notice(status: MeetingBriefing["status"]) {
+  if (status === "partial") return "Useful context is ready, with some sources or questions still unresolved."
+  if (status === "sparse") return "Only limited reliable context was available. Milo left the gaps visible."
+  if (status === "stale") return "The meeting changed or a refresh failed. Review the preparation time before relying on this briefing."
+  if (status === "failed") return "Research could not produce a reliable briefing."
+  if (status === "cancelled") return "This meeting was cancelled or removed from the requester's calendar."
+  return undefined
+}
+
+function emptyMessage(status: MeetingBriefing["status"]) {
+  if (status === "queued") return "Research is queued for the appropriate preparation window."
+  if (status === "researching") return "Milo is gathering and checking the relevant context."
+  return notice(status) ?? "No reliable preparation is available yet."
+}
+
+function peopleLine(meeting: MeetingBriefing) {
+  return meeting.event.attendees.map((person) => [person.name, person.organization].filter(Boolean).join(" · ")).filter(Boolean).join(", ") || "Attendees not listed"
+}
+
+function statusLabel(status: MeetingBriefing["status"]) {
+  return status === "researching" ? "Researching" : status[0].toUpperCase() + status.slice(1)
+}
+
+function statusVariant(status: MeetingBriefing["status"]) {
+  return status === "failed" || status === "cancelled" ? "destructive" : status === "ready" ? "secondary" : "outline"
+}
+
+function formatDateTime(value: string, timezone: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short", timeZone: timezone }).format(new Date(value))
+}
+
+function safeHttpUrl(value: string | undefined) {
+  if (value === undefined) return undefined
+  try {
+    const url = new URL(value)
+    return url.protocol === "http:" || url.protocol === "https:" ? url.href : undefined
+  } catch {
+    return undefined
+  }
+}
