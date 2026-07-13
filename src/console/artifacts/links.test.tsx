@@ -3,7 +3,15 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { ArtifactLinks } from "./links"
 
-const { revokeShare } = vi.hoisted(() => ({
+const { query, revokeShare } = vi.hoisted(() => ({
+  query: {
+    results: [] as Array<{
+      shareId: string
+      createdAt: number
+      expiresAt: number
+    }>,
+    status: "Exhausted",
+  },
   revokeShare: vi.fn(() => new Promise<null>(() => undefined)),
 }))
 
@@ -11,25 +19,26 @@ vi.mock("convex/react", () => ({
   useMutation: () => revokeShare,
   usePaginatedQuery: () => ({
     loadMore: vi.fn(),
-    results: [
-      {
-        shareId: "active",
-        createdAt: Date.UTC(2026, 6, 12, 8),
-        expiresAt: Date.UTC(2026, 6, 14, 8),
-      },
-      {
-        shareId: "expired",
-        createdAt: Date.UTC(2026, 6, 10, 8),
-        expiresAt: Date.UTC(2026, 6, 12, 8),
-      },
-    ],
-    status: "Exhausted",
+    results: query.results,
+    status: query.status,
   }),
 }))
 
 beforeEach(() => {
   vi.useFakeTimers()
   vi.setSystemTime(Date.UTC(2026, 6, 13, 8))
+  query.results = [
+    {
+      shareId: "active",
+      createdAt: Date.UTC(2026, 6, 12, 8),
+      expiresAt: Date.UTC(2026, 6, 14, 8),
+    },
+    {
+      shareId: "expired",
+      createdAt: Date.UTC(2026, 6, 10, 8),
+      expiresAt: Date.UTC(2026, 6, 12, 8),
+    },
+  ]
 })
 
 afterEach(() => {
@@ -60,4 +69,15 @@ test("revokes only the selected active link", () => {
     shareId: "active",
     tenantId: "tenant",
   })
+})
+
+test("uses the shared empty-state primitive", () => {
+  query.results = []
+  render(<ArtifactLinks artifactId={"artifact" as never} tenantId="tenant" />)
+
+  fireEvent.click(screen.getByRole("button", { name: "Manage share links" }))
+
+  expect(
+    screen.getByText("No share links").closest('[data-slot="empty"]')
+  ).not.toBeNull()
 })
